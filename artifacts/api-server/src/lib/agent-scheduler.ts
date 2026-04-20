@@ -17,6 +17,7 @@ import {
 } from "./terra-covenant-store";
 import { runAtlasCompaction } from "../jobs/atlas-compaction";
 import { logger } from "./logger";
+import { publishGuardianDecisionEvent } from "./guardian-engine";
 
 const BASE_URL = `http://localhost:${process.env["PORT"] || 3000}`;
 
@@ -120,6 +121,7 @@ export async function dispatchCovenantBreaches(): Promise<{
         remedyPeriodDays: m.covenant.remedyPeriodDays,
       };
 
+      const decidedAt = new Date();
       const [inserted] = await db.insert(guardianActionsTable).values({
         requestId,
         agentId: "terra-covenant-monitor",
@@ -137,10 +139,33 @@ export async function dispatchCovenantBreaches(): Promise<{
         redactApplied: false,
         controlViolations: [],
         payload,
-        decidedAt: new Date(),
+        decidedAt,
       }).onConflictDoNothing().returning();
 
       if (inserted) {
+        publishGuardianDecisionEvent({
+          id: inserted.id,
+          requestId,
+          agentId: "terra-covenant-monitor",
+          sessionId: inserted.sessionId,
+          workflowId: null,
+          orgId: null,
+          tier: "supervised",
+          action: "covenant_breach_review",
+          toolId: "covenant-monitor",
+          model: "terra-cognitive-v1",
+          environment: env,
+          decision: "require-approval",
+          matchedRuleId: "terra-covenant-t1",
+          reason,
+          rollbackRequired: false,
+          controlViolations: [],
+          domain: "real-estate",
+          latencyMs: null,
+          traceId: null,
+          traceStatus: null,
+          decidedAt: decidedAt.toISOString(),
+        });
         await db.insert(guardianApprovalRequestsTable).values({
           requestId,
           agentId: "terra-covenant-monitor",

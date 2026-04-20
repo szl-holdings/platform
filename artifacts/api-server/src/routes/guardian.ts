@@ -26,7 +26,8 @@ import {
   type GuardianRule,
   type PolicyTier,
 } from "@workspace/guardian";
-import { getGuardianEngine, syncGuardianPolicies } from "../lib/guardian-engine";
+import { getGuardianEngine, syncGuardianPolicies, publishGuardianDecisionEvent, GUARDIAN_LEDGER_SSE_CHANNEL } from "../lib/guardian-engine";
+import { attachSseClient } from "../lib/sse-server";
 import { getAllEffectiveTiers, invalidateEffectiveTierCache } from "../lib/effective-tiers";
 import {
   defaultToolRegistry,
@@ -1303,6 +1304,41 @@ router.get("/actions", authMiddleware(), requireRole("super_admin", "admin", "op
 // Filters: decision (outcome), domain (from joined trace), agentId,
 // since (ISO), limit (1-200, default 50).
 // ============================================================
+//
+// LIVE LEDGER STREAM (Server-Sent Events)
+// Pushes each newly persisted guardian decision to subscribed
+// operators so the LiveActivityTab no longer has to poll
+// /api/guardian/ledger every 5s. Filtering (decision/domain/window)
+// is enforced client-side — the stream emits the full firehose
+// the caller is permitted to see.
+// ============================================================
+router.get(
+  "/ledger/stream",
+  authMiddleware(),
+  requireRole("super_admin", "admin", "ops", "analyst", "compliance"),
+  (req: Request, res: Response) => {
+    // Mirror the org-scoping enforced by GET /ledger so the live stream
+    // does not leak decisions across tenants. Admin users (no org scope)
+    // subscribe unscoped — they receive every published decision. Non-admin
+    // users are pinned to their org id; deliveries from other orgs (and
+    // org-less system events) are filtered out by publishToSse.
+    const user = req.user;
+    if (isAdminUser(user)) {
+      // Force unscoped subscription so admins always see cross-tenant and
+      // org-less (`adminOnly`) events even if their session carries a
+      // tenantId from tenantScope middleware elsewhere on the app.
+      attachSseClient(req, res, GUARDIAN_LEDGER_SSE_CHANNEL, { tenantId: null });
+      return;
+    }
+    const orgId = userOrgId(user);
+    if (orgId === null) {
+      sendForbidden(res, "No organization membership — cannot access governance records");
+      return;
+    }
+    attachSseClient(req, res, GUARDIAN_LEDGER_SSE_CHANNEL, { tenantId: String(orgId) });
+  },
+);
+
 router.get(
   "/ledger",
   authMiddleware(),
@@ -2302,6 +2338,34 @@ router.post("/guardian/evaluate", authMiddleware(), validateBody(bodyShape({
         controlViolations: result.controlViolations, payload: enrichedPayload,
         decidedAt: new Date(result.decidedAt),
       }).onConflictDoNothing().returning();
+
+      // Push the freshly persisted decision to all live-activity subscribers
+      // so the operator UI updates within ~1s without polling.
+      if (actionRecord) {
+        publishGuardianDecisionEvent({
+          id: actionRecord.id,
+          requestId,
+          agentId: agentId ?? null,
+          sessionId: sessionId ?? null,
+          workflowId: workflowId ?? null,
+          orgId: orgId ?? null,
+          tier: String(tierValue),
+          action,
+          toolId: toolId ?? null,
+          model: model ?? null,
+          environment: environment ?? null,
+          decision: result.outcome,
+          matchedRuleId: result.matchedRuleId ?? null,
+          reason: result.reason,
+          rollbackRequired: result.rollbackRequired,
+          controlViolations: result.controlViolations ?? [],
+          domain: domain ?? null,
+          latencyMs: null,
+          traceId: null,
+          traceStatus: null,
+          decidedAt: new Date(result.decidedAt).toISOString(),
+        });
+      }
 
       if (result.outcome === "require-approval" || result.outcome === "require-dual-approval") {
         const approvalType = result.outcome === "require-dual-approval" ? "dual" : "single";

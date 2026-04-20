@@ -23,6 +23,7 @@ import {
 import { eq, and, or, sql, desc, inArray, isNotNull } from "drizzle-orm";
 import { z } from "zod";
 import { computeApprovalExpiresAt } from "@workspace/guardian";
+import { publishGuardianDecisionEvent } from "../lib/guardian-engine";
 import { ObjectStorageService } from "../lib/objectStorage";
 import {
   searchDistressedProperties,
@@ -1118,6 +1119,9 @@ router.post("/terra/cognitive/covenants/submit-review", cogLimit, validateBody(b
     const trace = reqTraceRef(req);
 
     // Idempotent upsert — onConflictDoNothing prevents duplicate records
+    const decidedAt = new Date();
+    const env = process.env["NODE_ENV"] === "production" ? "production" : "development";
+    const reason = `Covenant breach detected on property ${address ?? propertyId}: ${distressType ?? covenantType}, distress score ${score ?? "N/A"}`;
     const [inserted] = await db.insert(guardianActionsTable).values({
       requestId,
       agentId: "terra-covenant-monitor",
@@ -1127,18 +1131,41 @@ router.post("/terra/cognitive/covenants/submit-review", cogLimit, validateBody(b
       action: "covenant_breach_review",
       toolId: "covenant-monitor",
       model: "terra-cognitive-v1",
-      environment: process.env["NODE_ENV"] === "production" ? "production" : "development",
+      environment: env,
       outcome: "require-approval",
       matchedRuleId: "terra-covenant-t1",
-      reason: `Covenant breach detected on property ${address ?? propertyId}: ${distressType ?? covenantType}, distress score ${score ?? "N/A"}`,
+      reason,
       rollbackRequired: false,
       redactApplied: false,
       controlViolations: [],
       payload: { propertyId, address, distressType, covenantType, score, debtAmount, estimatedValue },
-      decidedAt: new Date(),
+      decidedAt,
     }).onConflictDoNothing().returning();
 
     if (inserted) {
+      publishGuardianDecisionEvent({
+        id: inserted.id,
+        requestId,
+        agentId: "terra-covenant-monitor",
+        sessionId: trace ?? null,
+        workflowId: null,
+        orgId: null,
+        tier: "supervised",
+        action: "covenant_breach_review",
+        toolId: "covenant-monitor",
+        model: "terra-cognitive-v1",
+        environment: env,
+        decision: "require-approval",
+        matchedRuleId: "terra-covenant-t1",
+        reason,
+        rollbackRequired: false,
+        controlViolations: [],
+        domain: "real-estate",
+        latencyMs: null,
+        traceId: null,
+        traceStatus: null,
+        decidedAt: decidedAt.toISOString(),
+      });
       // Create approval request
       await db.insert(guardianApprovalRequestsTable).values({
         requestId,

@@ -1,5 +1,5 @@
 import { useStandardQuery } from "@szl-holdings/api-client-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/api";
@@ -229,7 +229,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 interface LedgerRow {
-  id: number;
+  id: number | null;
   requestId: string;
   agentId: string | null;
   sessionId: string | null;
@@ -310,19 +310,20 @@ function LiveActivityTab(props: {
 }) {
   const { ledgerDecision, setLedgerDecision, ledgerDomain, setLedgerDomain, ledgerWindow, setLedgerWindow } = props;
 
-  // Tick every 5s so the time-window slides with wall-clock time. Without this
-  // a frozen `since` would cause the effective window to widen as time passes
-  // (e.g. a "1h" filter would creep to 1h05m, 1h10m, ...).
-  const [nowBucket, setNowBucket] = useState(() => Math.floor(Date.now() / 5000));
+  // Slide the rendered window with wall-clock time so old rows drop off as
+  // they age past the selected duration. This used to drive a periodic
+  // re-fetch — now it only triggers a re-render of the memoized merge below.
+  const [nowMs, setNowMs] = useState<number>(() => Date.now());
   useEffect(() => {
-    const id = window.setInterval(() => setNowBucket(Math.floor(Date.now() / 5000)), 5000);
+    const id = window.setInterval(() => setNowMs(Date.now()), 30_000);
     return () => window.clearInterval(id);
   }, []);
 
+  // Initial snapshot — fetched once per filter combination. The live stream
+  // (below) keeps it fresh; we no longer poll on an interval.
   const ledgerQuery = useStandardQuery<LedgerResponse>({
-    queryKey: ["guardian", "ledger", ledgerDecision, ledgerDomain, ledgerWindow, nowBucket],
+    queryKey: ["guardian", "ledger", ledgerDecision, ledgerDomain, ledgerWindow],
     queryFn: async () => {
-      // Compute `since` at fetch time so each refetch uses a fresh window edge.
       const sinceIso = new Date(Date.now() - WINDOW_TO_MS[ledgerWindow]).toISOString();
       const params = new URLSearchParams();
       if (ledgerDecision) params.set("decision", ledgerDecision);
@@ -331,11 +332,95 @@ function LiveActivityTab(props: {
       params.set("limit", "100");
       return apiRequest<LedgerResponse>("GET", `/api/ledger?${params.toString()}`);
     },
-    refetchInterval: 5000,
-    staleTime: 2000,
+    staleTime: 60_000,
   });
 
-  const items = ledgerQuery.data?.items ?? [];
+  // Streamed decisions arriving over SSE since the snapshot loaded. We keep
+  // them in a separate buffer so a re-fetch can replace the snapshot without
+  // discarding live arrivals.
+  const [streamed, setStreamed] = useState<LedgerRow[]>([]);
+  const [streamConnected, setStreamConnected] = useState(false);
+  const reconnectAttemptRef = useRef(0);
+
+  // Reset the live buffer whenever the filters change — the snapshot will
+  // re-fetch with the new filter window and live arrivals start from there.
+  useEffect(() => { setStreamed([]); }, [ledgerDecision, ledgerDomain, ledgerWindow]);
+
+  // Open one EventSource for the lifetime of the tab. EventSource handles
+  // reconnect on transient failures automatically; we only manually retry
+  // after explicit error events.
+  useEffect(() => {
+    let es: EventSource | null = null;
+    let cancelled = false;
+
+    const connect = () => {
+      if (cancelled) return;
+      try {
+        es = new EventSource("/api/ledger/stream", { withCredentials: true });
+      } catch {
+        return;
+      }
+      es.addEventListener("connected", () => {
+        reconnectAttemptRef.current = 0;
+        setStreamConnected(true);
+      });
+      es.addEventListener("decision", (ev: MessageEvent) => {
+        try {
+          const envelope = JSON.parse(ev.data) as { data?: LedgerRow } & LedgerRow;
+          // sse-server wraps payloads as { channel, event, data, timestamp }
+          const row = (envelope.data ?? envelope) as LedgerRow;
+          if (!row || typeof row !== "object" || !row.requestId) return;
+          setStreamed((prev) => {
+            // Dedupe by requestId — id is null for engine-recorded events.
+            if (prev.some((r) => r.requestId === row.requestId)) return prev;
+            return [row, ...prev].slice(0, 200);
+          });
+        } catch {
+          /* ignore malformed frame */
+        }
+      });
+      es.onerror = () => {
+        setStreamConnected(false);
+        // EventSource will retry on its own; if it fully closed, reopen with
+        // exponential backoff so a server restart doesn't leave us silent.
+        if (es && es.readyState === EventSource.CLOSED) {
+          es.close();
+          es = null;
+          const attempt = ++reconnectAttemptRef.current;
+          const delay = Math.min(30_000, 1000 * 2 ** Math.min(attempt, 5));
+          window.setTimeout(connect, delay);
+        }
+      };
+    };
+
+    connect();
+    return () => {
+      cancelled = true;
+      if (es) es.close();
+    };
+  }, []);
+
+  // Merge snapshot + live arrivals, then apply the active filters and the
+  // sliding window cutoff. Filters are enforced client-side because the
+  // stream emits the full firehose the caller is permitted to see.
+  const items = useMemo<LedgerRow[]>(() => {
+    const cutoff = nowMs - WINDOW_TO_MS[ledgerWindow];
+    const base = ledgerQuery.data?.items ?? [];
+    const seen = new Set<string>();
+    const out: LedgerRow[] = [];
+    for (const r of [...streamed, ...base]) {
+      if (seen.has(r.requestId)) continue;
+      seen.add(r.requestId);
+      if (ledgerDecision && r.decision !== ledgerDecision) continue;
+      if (ledgerDomain && r.domain !== ledgerDomain) continue;
+      const t = new Date(r.decidedAt).getTime();
+      if (Number.isFinite(t) && t < cutoff) continue;
+      out.push(r);
+    }
+    out.sort((a, b) => new Date(b.decidedAt).getTime() - new Date(a.decidedAt).getTime());
+    return out.slice(0, 100);
+  }, [ledgerQuery.data, streamed, ledgerDecision, ledgerDomain, ledgerWindow, nowMs]);
+
   const domains = ledgerQuery.data?.domains ?? [];
   const decisions = ledgerQuery.data?.decisions ?? ["allow", "require-approval", "require-dual-approval", "block"];
   const counts = useMemo(() => {
@@ -364,8 +449,12 @@ function LiveActivityTab(props: {
           <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, margin: 0 }}>
             Live agent activity — {items.length} decision{items.length === 1 ? "" : "s"} in last {ledgerWindow}
           </p>
-          {ledgerQuery.isFetching && (
-            <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: TEXT_FAINT }}>refreshing…</span>
+          {streamConnected ? (
+            <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: GREEN }}>● streaming</span>
+          ) : ledgerQuery.isFetching ? (
+            <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: TEXT_FAINT }}>loading…</span>
+          ) : (
+            <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: YELLOW }}>● reconnecting…</span>
           )}
         </div>
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
@@ -428,7 +517,7 @@ function LiveActivityTab(props: {
           const decisionColor = DECISION_COLORS[row.decision] ?? TEXT_FAINT;
           return (
             <m.div
-              key={row.id}
+              key={row.requestId}
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.3) }}

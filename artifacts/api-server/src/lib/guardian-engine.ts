@@ -14,6 +14,64 @@ import {
   type GuardianPolicy,
 } from "@szl-holdings/db";
 import { logger } from "./logger";
+import { publishToSse } from "./sse-server";
+
+export const GUARDIAN_LEDGER_SSE_CHANNEL = "guardian:ledger";
+
+/**
+ * Shape of a streamed guardian decision event. Mirrors the row shape returned
+ * by GET /api/guardian/ledger so the front-end timeline can prepend without
+ * extra mapping. Trace fields are nullable because a decision may be persisted
+ * before its trace span closes.
+ */
+export interface StreamedGuardianDecision {
+  id: number | null;
+  requestId: string;
+  agentId: string | null;
+  sessionId: string | null;
+  workflowId: string | null;
+  orgId: number | null;
+  tier: string;
+  action: string;
+  toolId: string | null;
+  model: string | null;
+  environment: string | null;
+  decision: string;
+  matchedRuleId: string | null;
+  reason: string;
+  rollbackRequired: boolean;
+  controlViolations: unknown[];
+  domain: string | null;
+  latencyMs: number | null;
+  traceId: string | null;
+  traceStatus: string | null;
+  decidedAt: string;
+}
+
+/**
+ * Broadcast a freshly persisted guardian decision to every SSE subscriber on
+ * the live-activity channel. Failures are swallowed because streaming must
+ * never break a request.
+ *
+ * Delivery scope mirrors the org-scoping enforced by `GET /api/guardian/ledger`:
+ *   - row.orgId === number → delivered to admin (unscoped) clients AND to
+ *     non-admin clients whose subscription is scoped to that org.
+ *   - row.orgId === null   → delivered to admin (unscoped) clients ONLY.
+ *     This matches `/ledger`, where non-admins never see rows with no org.
+ *
+ * Callers should invoke this immediately after their insert into
+ * guardian_actions so the operator UI sees the new decision in ~real-time
+ * without polling.
+ */
+export function publishGuardianDecisionEvent(row: StreamedGuardianDecision): void {
+  try {
+    const tenantId = row.orgId !== null ? String(row.orgId) : null;
+    const adminOnly = row.orgId === null;
+    publishToSse(GUARDIAN_LEDGER_SSE_CHANNEL, "decision", row, tenantId, { adminOnly });
+  } catch (err) {
+    logger.debug({ err, requestId: row.requestId }, "[guardian-engine] Failed to publish decision event (non-fatal)");
+  }
+}
 
 const engine = new GuardianDecisionEngine();
 let lastSyncedAt = 0;
@@ -193,7 +251,7 @@ export async function recordGuardianAction(params: {
 }): Promise<void> {
   if (!process.env.DATABASE_URL) return;
   try {
-    await db
+    const inserted = await db
       .insert(guardianActionsTable)
       .values({
         requestId: params.request.requestId,
@@ -214,7 +272,38 @@ export async function recordGuardianAction(params: {
         controlViolations: params.controlViolations ?? [],
         payload: params.payload ?? {},
       })
-      .onConflictDoNothing({ target: guardianActionsTable.requestId });
+      .onConflictDoNothing({ target: guardianActionsTable.requestId })
+      .returning({ id: guardianActionsTable.id });
+
+    // Only stream when this call actually persisted a new row. An idempotent
+    // conflict (re-submission of the same requestId) returns no rows here, so
+    // we skip publishing to avoid duplicate/phantom entries on the live feed.
+    if (inserted.length === 0) return;
+    const insertedId = inserted[0]?.id ?? null;
+
+    publishGuardianDecisionEvent({
+      id: insertedId,
+      requestId: params.request.requestId,
+      agentId: params.request.agentId ?? null,
+      sessionId: params.request.sessionId ?? null,
+      workflowId: params.request.workflowId ?? null,
+      orgId: params.orgId ?? null,
+      tier: (params.request.tier ?? "advisory") as string,
+      action: params.request.action,
+      toolId: params.request.toolId ?? null,
+      model: params.request.model ?? null,
+      environment: params.request.environment ?? null,
+      decision: params.result.outcome === "deny" ? "block" : params.result.outcome,
+      matchedRuleId: params.result.matchedRuleId ?? null,
+      reason: params.result.reason,
+      rollbackRequired: false,
+      controlViolations: params.controlViolations ?? [],
+      domain: params.request.domain ?? null,
+      latencyMs: null,
+      traceId: null,
+      traceStatus: null,
+      decidedAt: new Date(params.result.decidedAt ?? Date.now()).toISOString(),
+    });
   } catch (err) {
     logger.debug({ err, requestId: params.request.requestId }, "[guardian-engine] Failed to record action ledger entry (non-fatal)");
   }

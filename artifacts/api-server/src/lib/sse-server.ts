@@ -30,6 +30,26 @@ export function handleSseConnection(req: Request, res: Response): void {
     }
   }
 
+  attachSseClient(req, res, channel);
+}
+
+/**
+ * Attach an already-authenticated request to the SSE registry on a fixed
+ * channel. Used by purpose-built endpoints (e.g. /api/guardian/ledger/stream)
+ * that have already enforced their own auth/role checks via Express
+ * middleware and just need the SSE plumbing.
+ *
+ * `opts.tenantId` overrides the tenant scope used for delivery filtering by
+ * `publishToSse`. Pass `null` (or omit) to leave the client unscoped — those
+ * clients act as "see-all" subscribers (typically admins). Pass a string to
+ * restrict the client to events published with the matching tenant id.
+ */
+export function attachSseClient(
+  req: Request,
+  res: Response,
+  channel: string,
+  opts?: { tenantId?: string | null },
+): void {
   const user = (req as Request & { user?: { id: number; platformRole?: string; tenantId?: string } }).user;
 
   res.setHeader("Content-Type", "text/event-stream");
@@ -40,12 +60,16 @@ export function handleSseConnection(req: Request, res: Response): void {
 
   totalSseConnections++;
   const clientId = `sse-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const tenantOverrideProvided = opts !== undefined && Object.prototype.hasOwnProperty.call(opts, "tenantId");
+  const tenantId = tenantOverrideProvided
+    ? (opts!.tenantId ?? null)
+    : ((user as { tenantId?: string } | undefined)?.tenantId ?? null);
   const client: SseClient = {
     res,
     channel,
     userId: user ? String(user.id) : null,
     platformRole: (user as { platformRole?: string } | undefined)?.platformRole ?? null,
-    tenantId: (user as { tenantId?: string } | undefined)?.tenantId ?? null,
+    tenantId,
     connectedAt: Date.now(),
   };
   sseClients.set(clientId, client);
@@ -90,9 +114,17 @@ export function publishToSse(
   event: string,
   data: unknown,
   tenantId?: string | null,
+  opts?: { adminOnly?: boolean },
 ): void {
+  const adminOnly = opts?.adminOnly === true;
   for (const [clientId, client] of sseClients) {
     if (client.channel !== channel) continue;
+    // Admin-only events: only deliver to clients that are unscoped (admins).
+    // A scoped client (non-admin) MUST NOT receive admin-only events even if
+    // a tenantId was also supplied.
+    if (adminOnly && client.tenantId !== null) continue;
+    // Tenant-scoped delivery: a publish targeted at tenant X must NOT reach a
+    // client scoped to tenant Y. Unscoped clients (admins) still receive it.
     if (tenantId && client.tenantId && client.tenantId !== tenantId) continue;
     if (client.res.writableEnded) {
       sseClients.delete(clientId);
