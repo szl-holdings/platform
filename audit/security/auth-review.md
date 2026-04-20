@@ -236,3 +236,109 @@ Each finding was resolved as follows:
 The original findings register above is preserved as-is for audit
 provenance; the Status column and this section reflect the resolved
 state as of Task 2686.
+
+---
+
+# Auth Review — Phase 9 (Series-A Reset: Security Hardening & Sign-On Consolidation)
+
+**Date:** 2026-04-20
+**Scope:** Full auth surface re-verification across all artifacts; sign-on consolidation; secret hygiene; CI security hardening; bootstrap admin provisioning.
+**Reviewer:** Series A Hardening — Phase 9
+**Reference documents:**
+- `audit/auth/auth-surface-map.md` — complete auth surface inventory
+- `audit/auth/sign-on-consolidation-plan.md` — consolidation target state and verification checklist
+- `audit/security/ci-security-review.md` — CI security posture review
+- `security/secret-audit.md` — secret sweep results
+- `docs/BOOTSTRAP_ADMIN.md` — bootstrap admin provisioning guide
+
+---
+
+## Phase 9 Scope and Findings
+
+### Secret Hygiene
+
+A full-tree secret sweep was performed using `scripts/qa/scan-secrets.js` and `.gitleaks.toml`. Results:
+
+- **0 true positives** — no live credentials committed to the repository.
+- **1 false positive** — `AKIAIOSFODNN7EXAMPLE` in `.gitleaks.toml` (canonical AWS docs example; correctly allowlisted).
+- `.env.example` confirmed placeholder-only — all values are `REPLACE_ME_*`, `YOUR_*_KEY_HERE`, or non-sensitive defaults.
+- Bootstrap admin variables (`BOOTSTRAP_ADMIN_USERNAME`, `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PASSWORD`) confirmed present in Replit Secrets.
+
+See `security/secret-audit.md` for full findings.
+
+### Auth Package Consolidation
+
+`packages/auth-shared` is confirmed as the single source of truth for:
+- Platform role hierarchy (14 roles)
+- Session token generation and cookie helpers
+- CSRF double-submit cookie pattern
+- RBAC predicates (framework-agnostic)
+- Mobile PKCE helpers and `TokenStore` interface
+
+All artifacts consume `auth-shared` — no artifact implements its own divergent session or CSRF logic.
+
+### Sign-On Consolidation Status
+
+| Surface | Status |
+|---------|--------|
+| All web artifacts → `artifacts/api-server` for all auth | Confirmed |
+| `__Host-sid` cookie with correct flags | Confirmed |
+| CSRF double-submit enforced globally | Confirmed |
+| Mobile `expo-secure-store` token storage | Confirmed |
+| Bootstrap admin `stephenlutar` can sign in (web + mobile) | Confirmed via `seed-bootstrap-admin.ts` |
+| `DELETE /api/auth/sessions/current` clears session from DB + cookie | Confirmed (`routes/auth.ts:378`) |
+| Session version invalidation on password change | Confirmed |
+| Refresh token rotation with replay detection | Confirmed |
+| Rate limiting on auth endpoints | Confirmed |
+| MFA TOTP with encrypted secrets | Confirmed |
+
+See `audit/auth/sign-on-consolidation-plan.md` for the complete verification checklist.
+
+### CI Security Hardening
+
+CI hardening was verified across all `.github/workflows/` files:
+
+- All third-party actions pinned to full commit SHAs.
+- `ci-gate` blocks merge until 10 independent quality jobs pass, including secret scan and route security matrix.
+- Gitleaks runs on PR diff, on push to main, and on a daily full-history scheduled scan.
+- CodeQL SAST runs on PR, push, and weekly.
+- `pnpm audit` + GitHub Dependency Review block introduction of new vulnerable packages.
+
+See `audit/security/ci-security-review.md` for details and identified gaps (all low/informational severity).
+
+### Bootstrap Admin
+
+`scripts/seed-bootstrap-admin.ts` is confirmed:
+- Env-driven: reads `BOOTSTRAP_ADMIN_USERNAME`, `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PASSWORD`
+- Idempotent: safe to run multiple times
+- Password hashed with PBKDF2-SHA512, 100k iterations, random 32-byte salt
+- No credential logging: structured JSON log entries include user ID only
+- Assigns `founder_admin` platform role + `super_admin` + `admin` RBAC roles
+
+See `docs/BOOTSTRAP_ADMIN.md` for complete provisioning instructions.
+
+---
+
+## Phase 9 Open Risks
+
+| ID | Severity | Description | Owner |
+|----|----------|-------------|-------|
+| P9-01 | Low | OIDC route (`oidc-auth.ts`) should return 404 when `ISSUER_URL` is not configured, to prevent accidental exposure. | Platform team |
+| P9-02 | Low | `DevAuthProvider` in `lib/auth` should be gated in `failFastOnInvalidConfig()`, not only at runtime, to make the startup safety net explicit. | Platform team |
+| P9-03 | Resolved | `backup.yml`, `uptime-monitor.yml`, and `container-publish.yml` all have explicit `permissions` blocks — verified in Phase 9. See CI-06 in `ci-security-review.md` (marked Resolved). | N/A |
+| P9-04 | Informational | Clerk integration keys in `.env.example` without an active Clerk deployment creates provider ambiguity. Document intent or remove placeholder. | Product |
+| P9-05 | Informational | Argon2id is the OWASP first-choice KDF. PBKDF2-SHA512 at 100k iterations is acceptable but plan a progressive migration for new user registrations. | Platform team |
+
+---
+
+## Manual Configuration Required (Outside Repo)
+
+| Item | Location | Notes |
+|------|----------|-------|
+| Bootstrap admin secrets | Replit Secrets | `BOOTSTRAP_ADMIN_USERNAME`, `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PASSWORD` — confirmed set |
+| `MFA_SECRET_ENCRYPTION_KEY` | Replit Secrets | Required in production; enforced by startup validation |
+| `SESSION_SECRET` | Replit Secrets | Must be rotated from `.env.example` default before production |
+| `CONNECTOR_ENCRYPTION_KEY` | Replit Secrets | AES-256 key for stored OAuth tokens |
+| `INTEGRATION_TEST_TOKEN` | GitHub Secrets | Used by CI integration test runner |
+| GitHub branch protection | GitHub Settings | Require `ci-gate` status check; no force-push; require signed commits |
+| GitHub secret scanning | GitHub Settings | Enable push protection and partner pattern detection |

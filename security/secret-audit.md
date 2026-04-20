@@ -1,3 +1,25 @@
+# Secret Audit — Series-A Reset (Phase 9 Update)
+
+**Last updated:** 2026-04-20 (Phase 9 — Security Hardening & Sign-On Consolidation)
+**Previous version:** Phase A (2026-04-20)
+**Auditor:** Series A Hardening — Phase 9
+**Tool:** `scripts/qa/scan-secrets.js` (internal) + `.gitleaks.toml` policy + manual tree review
+
+## Phase 9 Update Summary
+
+A full-tree secret sweep was re-run as part of the Series-A reset. Results are unchanged from Phase A:
+
+- **0 true positives** — no live credentials committed to the repository.
+- **1 false positive** — `AKIAIOSFODNN7EXAMPLE` in `.gitleaks.toml` (canonical AWS docs example, correctly allowlisted).
+- `.env.example` confirmed placeholder-only across all 482+ lines.
+- All three bootstrap admin secrets (`BOOTSTRAP_ADMIN_USERNAME`, `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PASSWORD`) confirmed provisioned in Replit Secrets.
+- `scripts/seed-bootstrap-admin.ts` confirmed env-driven with no credential logging.
+- Gitleaks PR-diff gate, scheduled full-history scan, and CodeQL all active in CI.
+
+Phase A findings and remediation history are preserved below.
+
+---
+
 # Secret Audit — Phase A
 
 **Date:** 2026-04-20  
