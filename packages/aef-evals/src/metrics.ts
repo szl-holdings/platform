@@ -17,6 +17,15 @@ export interface GoldenQuery {
   relevantChunkIds: string[];
   exactMatchBoostTerms?: string[];
   metadata?: Record<string, unknown>;
+  /**
+   * Number of relevant results expected for this query. Defaults to
+   * `relevantChunkIds.length` when omitted. Set to `0` to mark a query as
+   * adversarial — i.e. the retriever is expected to return no results, and
+   * the smoke harness will report it under `adversarial_precision` instead
+   * of folding it into the positive recall/ndcg/mrr aggregates (where an
+   * empty relevant set artificially scores 1.0).
+   */
+  expectedRelevant?: number;
 }
 
 export interface MetricResult {

@@ -285,12 +285,51 @@ describe("smoke test — all six domains pass with mock corpus", () => {
     }
   }, 30000);
 
-  it("all fixture sets have at least 5 queries each", () => {
+  it("all fixture sets have at least 20 queries each", () => {
     for (const domain of AEF_DOMAIN_PROFILE_DOMAINS) {
       const queries = ALL_GOLDEN_QUERIES[domain];
-      expect(queries.length, `${domain} has fewer than 5 golden queries`).toBeGreaterThanOrEqual(5);
+      expect(queries.length, `${domain} has fewer than 20 golden queries`).toBeGreaterThanOrEqual(20);
     }
   });
+
+  it("every domain includes adversarial queries tagged with expectedRelevant: 0", () => {
+    for (const domain of AEF_DOMAIN_PROFILE_DOMAINS) {
+      const adversarial = ALL_GOLDEN_QUERIES[domain].filter((q) => q.expectedRelevant === 0);
+      expect(
+        adversarial.length,
+        `${domain} has fewer than 2 adversarial queries`,
+      ).toBeGreaterThanOrEqual(2);
+      for (const q of adversarial) {
+        expect(
+          q.relevantChunkIds.length,
+          `${domain} adversarial query ${q.queryId} should have empty relevantChunkIds`,
+        ).toBe(0);
+      }
+    }
+  });
+
+  it("smoke run reports adversarial precision separately and meets threshold", async () => {
+    const report = await runSmoke();
+    for (const result of report.results) {
+      expect(
+        result.adversarialQueryCount,
+        `${result.domain} has no adversarial queries`,
+      ).toBeGreaterThan(0);
+      expect(
+        result.avgAdversarialPrecision,
+        `${result.domain} adversarial precision below 0.66`,
+      ).toBeGreaterThanOrEqual(0.66);
+      expect(result.positiveQueryCount + result.adversarialQueryCount).toBe(result.queryCount);
+    }
+  }, 30000);
+
+  it("smoke run passes tightened thresholds for all domains", async () => {
+    const report = await runSmoke();
+    for (const result of report.results) {
+      expect(result.passed, `${result.domain} failed: ${result.failures.join("; ")}`).toBe(true);
+    }
+    expect(report.allPassed).toBe(true);
+  }, 30000);
 });
 
 describe("legacy runEval runner", () => {
