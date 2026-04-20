@@ -38,6 +38,19 @@ interface GatewayRule {
 
 const GATEWAY_ENDPOINT = process.env["MCP_GATEWAY_ENDPOINT"]
   ?? "https://mcp-gateway.sentra.szl.local/v1/proxy";
+// Only attempt a real upstream round-trip when the operator has explicitly
+// configured an endpoint. Otherwise the placeholder hostname above would
+// cause every allowed/logged call to wait for a DNS/connect timeout in dev,
+// which would poison the recorded latency_ms average.
+const GATEWAY_ENDPOINT_CONFIGURED = process.env["MCP_GATEWAY_ENDPOINT"] !== undefined;
+function parseUpstreamTimeoutMs(raw: string | undefined): number {
+  if (raw === undefined) return 5000;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) return 5000;
+  // Clamp to a sane operator-facing range (50ms .. 60s).
+  return Math.min(60_000, Math.max(50, Math.floor(n)));
+}
+const UPSTREAM_TIMEOUT_MS = parseUpstreamTimeoutMs(process.env["MCP_GATEWAY_UPSTREAM_TIMEOUT_MS"]);
 
 const startedAt = Date.now();
 
@@ -546,14 +559,65 @@ router.post("/mcp-gateway/proxy", async (req: Request, res: Response) => {
       : null;
     const incrementViolation = decision !== "allowed";
 
-    // Capture how long the gateway spent evaluating this call (rule
-    // lookup + policy check) right before persisting, so the Containment
-    // Rules dashboard can surface a real 24h average instead of a
-    // placeholder. All persistence — exposure (if any), gateway event,
-    // and rule counters — runs in a single transaction so we never
-    // return a linkedExposureId or eventId that wasn't actually
-    // committed.
-    const latencyMs = Math.max(0, Math.round(performance.now() - proxyStartedAt));
+    // Capture the policy-evaluation time (rule lookup + allowlist check)
+    // separately from the upstream round trip so the Containment Rules
+    // dashboard can distinguish gateway overhead from real network cost.
+    const evalMs = Math.max(0, Math.round(performance.now() - proxyStartedAt));
+
+    // For passthrough decisions, actually forward the call to the
+    // configured MCP_GATEWAY_ENDPOINT and capture the upstream
+    // round-trip time. Skipped when no endpoint is configured (dev) and
+    // skipped for blocked/quarantined calls — those never leave the
+    // gateway by design.
+    let upstreamMs: number | null = null;
+    let upstreamStatus: number | null = null;
+    let upstreamBody: unknown = null;
+    let upstreamError: string | null = null;
+    const willPassthrough = decision === "allowed" || decision === "logged";
+    if (willPassthrough && GATEWAY_ENDPOINT_CONFIGURED) {
+      const upstreamStart = performance.now();
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), UPSTREAM_TIMEOUT_MS);
+      try {
+        const upstreamRes = await fetch(GATEWAY_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            agentClass,
+            mcpServerId,
+            tool,
+            egressDomain: egressDomain ?? null,
+            payload: body["payload"] ?? null,
+          }),
+          signal: ctrl.signal,
+        });
+        upstreamStatus = upstreamRes.status;
+        const ct = upstreamRes.headers.get("content-type") ?? "";
+        if (ct.includes("application/json")) {
+          upstreamBody = await upstreamRes.json().catch(() => null);
+        } else {
+          upstreamBody = await upstreamRes.text().catch(() => null);
+        }
+      } catch (err) {
+        upstreamError = err instanceof Error ? err.message : String(err);
+        logger.warn(
+          { err, ruleId: rule.id, agentClass, mcpServerId, tool },
+          "[mcp-gateway] upstream forward failed; persisting decision with upstreamError",
+        );
+      } finally {
+        clearTimeout(timer);
+        upstreamMs = Math.max(0, Math.round(performance.now() - upstreamStart));
+      }
+    }
+
+    // latency_ms now reflects the wall-clock time the calling agent
+    // actually waited: policy evaluation plus (when we forwarded) the
+    // upstream round trip. The 24h average on the Containment Rules
+    // dashboard is therefore meaningful for capacity planning. All
+    // persistence — exposure (if any), gateway event, and rule
+    // counters — runs in a single transaction so we never return a
+    // linkedExposureId or eventId that wasn't actually committed.
+    const latencyMs = evalMs + (upstreamMs ?? 0);
     try {
       await db.transaction(async (tx) => {
         if (exposureRow) {
@@ -603,6 +667,18 @@ router.post("/mcp-gateway/proxy", async (req: Request, res: Response) => {
       enforcementMode: rule.enforcementMode,
       linkedExposureId,
       eventId,
+      evalMs,
+      upstreamMs,
+      latencyMs,
+      upstream: passthrough
+        ? {
+            forwarded: GATEWAY_ENDPOINT_CONFIGURED,
+            endpoint: GATEWAY_ENDPOINT_CONFIGURED ? GATEWAY_ENDPOINT : null,
+            status: upstreamStatus,
+            body: upstreamBody,
+            error: upstreamError,
+          }
+        : null,
     });
   } catch (err) {
     return handleRouteError(res, err, "mcp-gateway-proxy");
