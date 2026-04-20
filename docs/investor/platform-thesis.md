@@ -167,4 +167,4 @@ SZL Holdings is building governance infrastructure. The defensibility comes from
 
 ---
 
-*See also: [Product Readiness](product-readiness.md) · [Go-to-Market](go-to-market.md) · [Investor Overview](investor-overview.md) · [Platform Primitives](../../PLATFORM_PRIMITIVES.md) · [Category Positioning](../../CATEGORY_POSITIONING.md)*
+*See also: [Product Readiness](product-readiness.md) · [Go-to-Market](go-to-market.md) · [Investor Overview](investor-overview.md) · [Platform Primitives](../architecture/platform-primitives.md) · [Category Positioning](../sales/category-positioning.md)*

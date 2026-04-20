@@ -4,7 +4,7 @@
 **Path:** `packages/substrate-client/`  
 **CHANGELOG:** [CHANGELOG.md](../../packages/substrate-client/CHANGELOG.md)
 
-**Related:** [mcp-transport.md](./mcp-transport.md) · [architecture.md](./architecture.md)
+**Related:** [mcp-transport.md](./mcp-transport.md) · [architecture.md](../architecture/architecture.md)
 
 ---
 

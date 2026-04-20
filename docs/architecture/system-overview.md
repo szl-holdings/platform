@@ -232,4 +232,4 @@ ATLAS canonical demo paths are seeded for all four domain verticals:
 - **Terra (real_estate):** Property distress stress test — 3-scenario IRR projection
 - **Prism Counsel (general):** Matter pressure & settlement — accelerated settlement path
 
-*See [ATLAS Architecture](architecture/atlas-spatial-runtime.md) for the full system design.*
+*See [ATLAS Architecture](atlas-spatial-runtime.md) for the full system design.*

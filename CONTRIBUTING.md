@@ -1,6 +1,6 @@
 # Contributing to SZL Holdings Platform
 
-> [Platform Repo](https://github.com/szl-holdings/szl-holdings-platform) | [Security](./SECURITY.md) | [Code of Conduct](./CODE_OF_CONDUCT.md) | [Architecture](./ARCHITECTURE.md) | [Contact](https://szlholdings.com)
+> [Platform Repo](https://github.com/szl-holdings/szl-holdings-platform) | [Security](./SECURITY.md) | [Code of Conduct](./CODE_OF_CONDUCT.md) | [Architecture](./docs/architecture/architecture.md) | [Contact](https://szlholdings.com)
 
 The SZL Holdings platform is a **proprietary, founder-led governed decision infrastructure platform**. This repository is a public mirror for evaluation, transparency, and technical review purposes — not an open-source project accepting community contributions.
 
@@ -126,7 +126,7 @@ scripts/            # Build, seed, QA, and automation scripts
 .github/            # CI/CD workflows, issue templates, CODEOWNERS
 ```
 
-For full monorepo conventions, see `ARCHITECTURE.md` and `PRODUCT_SURFACE_MAP.md`.
+For full monorepo conventions, see `docs/architecture/architecture.md` and `docs/product/product-surface-map.md`.
 
 ---
 

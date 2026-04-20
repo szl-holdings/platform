@@ -21,7 +21,7 @@ Every public repo README must include these sections, in this order:
 ### 1. Navigation Bar (top of file)
 
 ```markdown
-→ [Demo](https://szlholdings.com) | [Trust & Security](./SECURITY.md) | [Architecture](./docs/architecture/) | [Docs](./docs/)
+→ [Demo](https://szlholdings.com) | [Trust & Security](../../SECURITY.md) | [Architecture](./docs/architecture/) | [Docs](./docs/)
 ```
 
 Adapt links to what exists in the repo. Do not include links that go nowhere.
@@ -92,7 +92,7 @@ Include specific product demo URL if applicable.
 ```markdown
 ## Security
 
-See [SECURITY.md](./SECURITY.md) for the vulnerability disclosure policy and supported versions.
+See [SECURITY.md](../../SECURITY.md) for the vulnerability disclosure policy and supported versions.
 ```
 
 ### 10. Access & Contribution
@@ -118,7 +118,7 @@ The `szl-holdings-platform` README must exceed the baseline. Required sections:
 ```markdown
 # SZL Holdings Platform
 
-→ [Live Demo](https://szlholdings.com) | [Security](./SECURITY.md) | [Architecture](./docs/architecture/system-overview.md) | [Investor Docs](./docs/investor/) | [Trust Center](./docs/trust/)
+→ [Live Demo](https://szlholdings.com) | [Security](../../SECURITY.md) | [Architecture](../architecture/system-overview.md) | [Investor Docs](./docs/investor/) | [Trust Center](./docs/trust/)
 
 **Enterprise platforms for business observability, AI orchestration, and secure operational intelligence.**
 
@@ -163,9 +163,9 @@ Explicit links to trust center, security docs, investor docs, architecture docs.
 ## Evaluation Path
 
 1. **Live platform:** [szlholdings.com](https://szlholdings.com)
-2. **Architecture:** [System Overview](./docs/architecture/system-overview.md)
+2. **Architecture:** [System Overview](../architecture/system-overview.md)
 3. **Trust surface:** [Trust Center](./docs/trust/)
-4. **Investor materials:** [Platform Thesis](./docs/investor/platform-thesis.md)
+4. **Investor materials:** [Platform Thesis](../investor/platform-thesis.md)
 5. **Enterprise evaluation:** inquiries@szlholdings.com
 ```
 

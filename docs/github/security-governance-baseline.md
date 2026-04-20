@@ -139,15 +139,15 @@ If you are evaluating the platform for enterprise deployment:
 ### Security Issues
 
 Do not report security issues via pull request or public issue.
-See [SECURITY.md](./SECURITY.md) for the responsible disclosure process.
+See [SECURITY.md](../../SECURITY.md) for the responsible disclosure process.
 
 ### Bug Reports
 
-Use the [Bug Report template](.github/ISSUE_TEMPLATE/bug_report.md) to report reproducible defects.
+Use the [Bug Report template](../../.github/ISSUE_TEMPLATE/bug_report.md) to report reproducible defects.
 
 ### Feature Requests
 
-Use the [Feature Request template](.github/ISSUE_TEMPLATE/feature_request.md) for capability suggestions.
+Use the [Feature Request template](../../.github/ISSUE_TEMPLATE/feature_request.md) for capability suggestions.
 
 ## Engineering Standards (For Internal Reference)
 
@@ -206,7 +206,7 @@ assignees: stephenlutar2-hash
 > **STOP:** If this is a security vulnerability, do NOT open a public issue.
 > Email **security@szlholdings.com** instead.
 > 
-> See [SECURITY.md](../SECURITY.md) for the responsible disclosure process.
+> See [SECURITY.md](../../SECURITY.md) for the responsible disclosure process.
 
 ---
 
@@ -250,7 +250,7 @@ All governance files are deployed and enforced in this repository:
 | `ISSUE_TEMPLATE/security_report.md` | ✅ **Deployed** | `/.github/ISSUE_TEMPLATE/security_report.md` | Redirects to email; blocks public vuln disclosure |
 | `ISSUE_TEMPLATE/config.yml` | ✅ **Deployed** | `/.github/ISSUE_TEMPLATE/config.yml` | Template config |
 | Navigation bar (README standard) | ✅ **Applied** | `/README.md` | Demo → Security → Architecture → Investor → Trust |
-| Navigation bar (SECURITY.md) | ✅ **Applied** | `/SECURITY.md` | Platform repo → Architecture → Trust → Contact |
+| Navigation bar (../../SECURITY.md) | ✅ **Applied** | `/SECURITY.md` | Platform repo → Architecture → Trust → Contact |
 | Navigation bar (CONTRIBUTING.md) | ✅ **Applied** | `/CONTRIBUTING.md` | Platform repo → Security → Architecture → Contact |
 
 ### Future Repos — Planned Rollout

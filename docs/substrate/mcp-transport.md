@@ -4,7 +4,7 @@
 **Service:** `services/substrate-mcp-gateway`  
 **Protocol:** [Model Context Protocol 2024-11-05](https://spec.modelcontextprotocol.io/)
 
-**Related:** [sdk.md](./sdk.md) · [architecture.md](./architecture.md) · [MCP_GATEWAY_STRATEGY.md](../../MCP_GATEWAY_STRATEGY.md)
+**Related:** [sdk.md](./sdk.md) · [architecture.md](../architecture/architecture.md) · [MCP_GATEWAY_STRATEGY.md](../architecture/mcp-gateway-strategy.md)
 
 ---
 

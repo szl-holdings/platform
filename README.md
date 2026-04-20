@@ -4,7 +4,7 @@
 
 **Governed decision infrastructure — connecting what is observable to what is executable, with full attribution.**
 
-[Architecture](./architecture.md) · [Platform Primitives](./PLATFORM_PRIMITIVES.md) · [Trust Center](./docs/trust/trust-center.md) · [Security](./SECURITY.md) · [Investor Docs](./docs/investor/platform-thesis.md)
+[Architecture](./docs/architecture/architecture.md) · [Platform Primitives](./docs/architecture/platform-primitives.md) · [Trust Center](./docs/trust/trust-center.md) · [Security](./SECURITY.md) · [Investor Docs](./docs/investor/platform-thesis.md)
 
 ---
 
@@ -19,7 +19,7 @@ New to the codebase? Start here.
 | **[docs/doctrine/szl-doctrine.md](./docs/doctrine/szl-doctrine.md)** | The SZL point of view: four pillars, voice rules, anti-patterns |
 | **[packages/config/](./packages/config/)** | Single source of truth: platform registry, claims, feature flags, env contract |
 | **[docs/APP_STATUS.md](./docs/APP_STATUS.md)** | Authoritative artifact readiness register (GA / Beta / Partial / Archived) |
-| **[docs/known-gaps.md](./docs/known-gaps.md)** | Honest inventory of technical debt and remediation paths |
+| **[docs/operations/known-gaps.md](./docs/operations/known-gaps.md)** | Honest inventory of technical debt and remediation paths |
 | **[docs/platform-facts.md](./docs/platform-facts.md)** | Authoritative platform statistics — generated from `packages/platform-metrics-registry` |
 
 > **Platform facts are auto-generated.** Run `pnpm metrics:generate` to regenerate [`docs/platform-facts.md`](./docs/platform-facts.md) and the registry from the current filesystem state. Run `pnpm metrics:validate` to verify no drift. Never edit `docs/platform-facts.md` directly.
@@ -39,7 +39,7 @@ An AI-assisted operations platform carries a distinct trust burden. The platform
 | Multi-tenancy | All queries scoped by org identifier. Cross-org access returns 404 to prevent information leakage |
 | Decision traceability | Outcome Graph tracks the full chain: signal to recommendation to decision to outcome |
 
-[Trust Center](docs/trust/trust-center.md) · [Security Policy](SECURITY.md) · [Proof and Policy Model](PROOF_AND_POLICY_MODEL.md)
+[Trust Center](docs/trust/trust-center.md) · [Security Policy](SECURITY.md) · [Proof and Policy Model](docs/architecture/proof-and-policy-model.md)
 
 ---
 
@@ -146,7 +146,7 @@ The six platform primitives define what is structurally different from dashboard
 +-----------------------------------------------------------------------+
 ```
 
-See [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full specification of each primitive and [architecture.md](architecture.md) for the service topology.
+See [docs/architecture/platform-primitives.md](docs/architecture/platform-primitives.md) for the full specification of each primitive and [docs/architecture/architecture.md](docs/architecture/architecture.md) for the service topology.
 
 ---
 
@@ -222,7 +222,7 @@ pnpm audit:all          # Run full audit suite (mocks, routes, deps, copy, desig
 pnpm seed               # Seed the local database with demo data
 ```
 
-See [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) for staging and production deployment.
+See [docs/operations/deployment-guide.md](docs/operations/deployment-guide.md) for staging and production deployment.
 
 **Contributing:** See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch workflow, code style, commit format, and PR process. All contributions require a passing CI run and a passing `pnpm readme:check` before merge.
 
@@ -246,21 +246,23 @@ See [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) for staging and production deploy
 
 **Vulnerability disclosure:** See [SECURITY.md](SECURITY.md). Responsible disclosure only.
 
-**Known gaps and tech debt:** Documented honestly in [KNOWN-GAPS.md](KNOWN-GAPS.md).
+**Known gaps and tech debt:** Documented honestly in [docs/operations/known-gaps.md](docs/operations/known-gaps.md).
 
 ### Documentation Index
 
+All documentation has been consolidated into `docs/`. See [docs/INDEX.md](docs/INDEX.md) for the complete index.
+
 | Document | Purpose |
 |----------|---------|
-| [architecture.md](architecture.md) | System architecture: topology, stack, design principles (v4.0, canonical) |
-| [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) | The six core abstractions |
-| [DATA-MODEL.md](DATA-MODEL.md) | Entity-relationship overview of the core database schema |
-| [API-SPEC.md](API-SPEC.md) | API surface: route inventory, auth model, rate limiting |
-| [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) | Role-permission matrix mapped to implementation |
-| [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) | Security controls checklist |
-| [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) | Deployment procedures |
-| [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) | Operational procedures and incident response |
-| [KNOWN-GAPS.md](KNOWN-GAPS.md) | Honest assessment of tech debt and planned improvements |
+| [docs/architecture/architecture.md](docs/architecture/architecture.md) | System architecture: topology, stack, design principles (v4.0, canonical) |
+| [docs/architecture/platform-primitives.md](docs/architecture/platform-primitives.md) | The six core abstractions |
+| [docs/architecture/data-model.md](docs/architecture/data-model.md) | Entity-relationship overview of the core database schema |
+| [docs/architecture/api-spec.md](docs/architecture/api-spec.md) | API surface: route inventory, auth model, rate limiting |
+| [docs/security/access-control-matrix.md](docs/security/access-control-matrix.md) | Role-permission matrix mapped to implementation |
+| [docs/security/security-checklist.md](docs/security/security-checklist.md) | Security controls checklist |
+| [docs/operations/deployment-guide.md](docs/operations/deployment-guide.md) | Deployment procedures |
+| [docs/operations/operations-runbook.md](docs/operations/operations-runbook.md) | Operational procedures and incident response |
+| [docs/operations/known-gaps.md](docs/operations/known-gaps.md) | Honest assessment of tech debt and planned improvements |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
 | [docs/readme-standards.md](docs/readme-standards.md) | README asset and badge standards |
 

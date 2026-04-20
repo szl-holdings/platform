@@ -168,7 +168,7 @@ If any secret is exposed or suspected to be exposed:
 6. **File incident report** — In `docs/internal/incidents/`.
 7. **Assess breach notification obligations** — If customer data may be affected.
 
-See [INCIDENT_RESPONSE.md](../INCIDENT_RESPONSE.md) for the full incident workflow.
+See [INCIDENT_RESPONSE.md](operations/incident-response.md) for the full incident workflow.
 
 ---
 

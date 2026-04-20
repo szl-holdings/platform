@@ -87,4 +87,4 @@ The platform runs on a shared PostgreSQL database with domain-organized schema. 
 
 See [docs/trust-center.md](trust-center.md) for the full security posture, AI governance framework, and audit trail design.
 
-See [docs/architecture.md](architecture.md) for the complete technical architecture, data flow, and service boundaries.
+See [docs/architecture.md](architecture/architecture.md) for the complete technical architecture, data flow, and service boundaries.

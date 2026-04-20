@@ -185,4 +185,4 @@ Retrieval currently synchronous. For scale: async retrieval with streaming respo
 
 ---
 
-*See also: [docs/architecture.md](../../../architecture.md) · [competitive-positioning-brief.md](competitive-positioning-brief.md) · [platform-trust-summary.md](platform-trust-summary.md)*
+*See also: [docs/architecture.md](../../architecture/architecture.md) · [competitive-positioning-brief.md](competitive-positioning-brief.md) · [platform-trust-summary.md](platform-trust-summary.md)*
