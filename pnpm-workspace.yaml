@@ -1,10 +1,7 @@
 packages:
   - apps/*
   - artifacts/*
-  - '!artifacts/aegis'
   - '!artifacts/imperium'
-  - '!artifacts/lyte-command-center'
-  - '!artifacts/prism-counsel'
   - '!artifacts/stephen-site'
   - lib/*
   - lib/integrations/*

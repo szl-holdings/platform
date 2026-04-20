@@ -55,6 +55,8 @@
     }
   },
   "dependencies": {
+    "@workspace/aef-contracts": "workspace:*",
+    "@workspace/aef-sdk": "workspace:*",
     "@workspace/cognitive-observability": "workspace:*",
     "@workspace/guardian": "workspace:*",
     "@workspace/trace-graph": "workspace:*",

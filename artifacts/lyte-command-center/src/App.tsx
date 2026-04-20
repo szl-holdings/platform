@@ -45,6 +45,7 @@ const PressureMapPage = lazy(() => import("@/pages/pressure-map"));
 const ActionDebtPage = lazy(() => import("@/pages/action-debt"));
 const DecisionReplayPage = lazy(() => import("@/pages/decision-replay"));
 const BoardViewPage = lazy(() => import("@/pages/board-view"));
+const AefKnowledgeSearchPage = lazy(() => import("@/pages/aef-knowledge-search"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -377,6 +378,7 @@ function DashboardRoutes() {
         <Route path="/action-debt" component={ActionDebtPage} />
         <Route path="/decision-replay" component={DecisionReplayPage} />
         <Route path="/decision-replay/:id" component={DecisionReplayPage} />
+        <Route path="/aef-search" component={AefKnowledgeSearchPage} />
         {/* Default: redirect to overview */}
         <Route component={OverviewPage} />
       </Switch>

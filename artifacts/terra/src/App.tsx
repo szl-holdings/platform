@@ -40,6 +40,7 @@ if (typeof window !== "undefined") {
 }
 
 const TerraPulse = lazy(() => import("@/pages/pulse"));
+const AefKnowledgeSearchPage = lazy(() => import("@/pages/aef-knowledge-search"));
 const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
 const TerraAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
 const TerraAtlasExecutePage = lazy(() => import("@/pages/atlas-execute"));
@@ -184,6 +185,7 @@ function PrivateRouter() {
         <Route path="/approval-review" component={ApprovalReview} />
         <Route path="/trust-provenance" component={TrustProvenancePage} />
         <Route path="/distress-radar" component={DistressRadar} />
+        <Route path="/aef-search" component={AefKnowledgeSearchPage} />
         <Route path="/neighborhood-momentum/:propertyId" component={NeighborhoodMomentum} />
         <Route path="/neighborhood-momentum" component={NeighborhoodMomentum} />
         <Route path="/seller-motivation/:propertyId" component={SellerMotivation} />

@@ -42,6 +42,7 @@
     "react-dom": "catalog:",
     "tailwindcss": "catalog:",
     "vite": "catalog:",
-    "wouter": "^3.3.5"
+    "wouter": "^3.3.5",
+    "@workspace/aef-sdk": "workspace:*"
   }
 }

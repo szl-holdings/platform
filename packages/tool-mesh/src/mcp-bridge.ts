@@ -22,8 +22,8 @@ export interface McpCallRequest {
 
 export interface McpCallResult {
   content: Array<{ type: "text"; text: string }>;
-  isError?: boolean;
-  traceId?: string;
+  isError?: boolean | undefined;
+  traceId?: string | undefined;
 }
 
 export interface McpServerInfo {

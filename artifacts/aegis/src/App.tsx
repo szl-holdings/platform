@@ -304,6 +304,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: "/legal", label: "Legal Workspace", icon: Scale, comp: L(() => import("./pages/legal-workspace")) },
       { path: "/powerbi", label: "PowerBI Report", icon: BarChart3, comp: L(() => import("./pages/powerbi-report")) },
       { path: "/settings", label: "Settings", icon: SettingsIcon, comp: L(() => import("./pages/settings/unified-settings")) },
+      { path: "/aef-search", label: "AEF Knowledge Search", icon: Database, comp: L(() => import("./pages/aef-knowledge-search")) },
     ],
   },
 ];

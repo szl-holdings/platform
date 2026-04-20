@@ -43,6 +43,7 @@ const BookingCancel = lazy(() => import("@/pages/BookingCancel"));
 const BookingFollowUp = lazy(() => import("@/pages/BookingFollowUp"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const ObservabilityPage = lazy(() => import("@/pages/observability"));
+const AefKnowledgeSearchPage = lazy(() => import("@/pages/aef-knowledge-search"));
 const AdvisoryIntel = lazy(() => import("@/pages/AdvisoryIntel"));
 const AIAdvisory = lazy(() => import("@/pages/ai-advisory"));
 const EngagementIntake = lazy(() => import("@/pages/engagement-intake"));
@@ -169,6 +170,7 @@ function Router() {
         <Route path="/booking/follow-up" component={BookingFollowUp} />
         <Route path="/decision-center" component={DecisionCenterPage} />
         <Route path="/observability" component={ObservabilityPage} />
+        <Route path="/aef-search" component={AefKnowledgeSearchPage} />
         <Route path="/advisory" component={AdvisoryIntel} />
         <Route path="/ai-advisory" component={AIAdvisory} />
         <Route path="/engagements" component={EngagementWorkflow} />

@@ -1,0 +1,54 @@
+{
+  "name": "@workspace/aef-sdk",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Alloy Embedding Fabric — typed SDK client for AEF native API. Provides embed(), rerank(), hybridSearch(), and ingest() with centralized bearer-token + tenant header management, automatic retry with exponential backoff, OpenTelemetry trace propagation, and React hooks for query-bound usage.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./src/client.ts"
+    },
+    "./hooks": {
+      "types": "./dist/hooks.d.ts",
+      "import": "./src/hooks.ts"
+    },
+    "./errors": {
+      "types": "./dist/errors.d.ts",
+      "import": "./src/errors.ts"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "import": "./src/config.ts"
+    }
+  },
+  "dependencies": {
+    "@workspace/aef-contracts": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "5.99.0",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
