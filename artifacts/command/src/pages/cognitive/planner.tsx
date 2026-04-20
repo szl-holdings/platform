@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 
 import { CognitiveLayout } from "./cognitive-layout";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
@@ -467,7 +469,7 @@ function StepDetailPanel({
                 marginBottom: 4,
               }}
             >
-              {audit.decision === "approved" ? "✓ Approved" : "✕ Denied"}
+              {audit.decision === "approved" ? "✓ Approved" : "✕ Rejected"}
             </div>
             <div style={{ fontSize: 10, color: "#64748b" }}>
               by {audit.actorId ?? "operator"}{audit.actorRole ? ` · ${audit.actorRole}` : ""} · {fmtTime(audit.at)}
@@ -536,7 +538,7 @@ function StepDetailPanel({
                   opacity: pending ? 0.6 : 1,
                 }}
               >
-                Deny
+                Reject
               </button>
             </div>
             {decisionError && (
@@ -627,20 +629,29 @@ export default function PlannerStudio() {
   const decisionMutation = useStandardMutation<
     PlanGraph,
     Error,
-    { stepId: string; decision: "approve" | "deny"; note: string }
+    { stepId: string; decision: "approve" | "reject"; note: string }
   >({
     mutationFn: ({ stepId, decision, note }) =>
       fetchJson<PlanGraph>(apiUrl(`/plans/${selectedId}/steps/${stepId}/${decision}`), {
         method: "POST",
         body: JSON.stringify({ note }),
       }),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       setDecisionError(null);
       planQuery.refetch();
       plansQuery.refetch();
+      toast.success(
+        variables.decision === "approve"
+          ? "Step approved"
+          : "Step rejected",
+      );
     },
-    onError: (err) => {
+    onError: (err, variables) => {
       setDecisionError(err.message);
+      toast.error(
+        `Could not ${variables.decision} step`,
+        { description: err.message },
+      );
     },
   });
 
@@ -651,6 +662,7 @@ export default function PlannerStudio() {
       title="Planner Studio"
       subtitle="Inspect plan graphs, compare fallback alternatives, and approve high-risk steps before execution."
     >
+      <Toaster richColors closeButton position="bottom-right" />
       {plansQuery.isLoading && (
         <div style={{ padding: 40, color: "#64748b", fontSize: 13 }}>Loading plans…</div>
       )}
@@ -1046,7 +1058,7 @@ export default function PlannerStudio() {
                       onDeny={(note) =>
                         decisionMutation.mutate({
                           stepId: selectedStep.stepId,
-                          decision: "deny",
+                          decision: "reject",
                           note,
                         })
                       }

@@ -304,6 +304,21 @@ router.post(
   },
 );
 
+// Alias: /reject mirrors /deny. The Planner Studio UI uses /reject to match
+// the operator-facing terminology; /deny is kept for backward compatibility.
+router.post(
+  "/plans/:id/steps/:stepId/reject",
+  authMiddleware(),
+  validateBody(bodyShape({})),
+  async (req, res) => {
+    try {
+      await decideStep(req, res, "denied");
+    } catch (err) {
+      handleRouteError(res, err, "Failed to reject step");
+    }
+  },
+);
+
 router.post(
   "/plans/:id/execute",
   authMiddleware(),

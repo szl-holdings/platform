@@ -145,6 +145,21 @@ describe("plans step approval routes", () => {
     expect(s1.metadata.approvalDecision.decision).toBe("denied");
   });
 
+  it("rejects a gated step via the /reject alias", async () => {
+    await defaultPlanStore.put(makePlan());
+    const app = buildApp();
+
+    const res = await request(app)
+      .post("/api/plans/plan-test-1/steps/s1/reject")
+      .send({ note: "nope" })
+      .expect(200);
+
+    const data = res.body.data ?? res.body;
+    const s1 = data.steps.find((s: { stepId: string }) => s.stepId === "s1");
+    expect(s1.status).toBe("skipped");
+    expect(s1.metadata.approvalDecision.decision).toBe("denied");
+  });
+
   it("rejects approval on a step that is not gated", async () => {
     await defaultPlanStore.put(makePlan());
     const app = buildApp();

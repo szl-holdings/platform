@@ -1,7 +1,10 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { toast } from "sonner";
+import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 
 import { CognitiveLayout } from "./cognitive-layout";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
+import { apiUrl, fetchJson } from "./shared";
 
 const ACCENT = "#8b7ac8";
 
@@ -303,20 +306,150 @@ export default function ReflectionConsole() {
     staleTime: 30_000,
   });
 
-  const reflections = apiReflections ?? SEEDED_REFLECTIONS;
+  const sourceReflections = apiReflections ?? SEEDED_REFLECTIONS;
+
+  // Local mutable copy so optimistic skill / strategy decisions persist in UI
+  // until the next API refresh. Re-syncs when the upstream data changes.
+  const [reflections, setReflections] = useState<Reflection[]>(sourceReflections);
+  useEffect(() => {
+    setReflections(sourceReflections);
+  }, [sourceReflections]);
+
+  type StrategyDecision = "applied" | "deferred";
+  const [strategyDecisions, setStrategyDecisions] = useState<
+    Record<string, StrategyDecision>
+  >({});
+  const strategyKey = (id: string, idx: number) => `${id}::${idx}`;
+
+  const [pendingActions, setPendingActions] = useState<Set<string>>(new Set());
+  const setPending = useCallback((key: string, isPending: boolean) => {
+    setPendingActions((prev) => {
+      const next = new Set(prev);
+      if (isPending) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  }, []);
 
   const [domainFilter, setDomainFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<ReflectionType | "all">("all");
   const [outcomeFilter, setOutcomeFilter] = useState<OutcomeClass | "all">("all");
-  const [selected, setSelected] = useState<Reflection>(SEEDED_REFLECTIONS[0]!);
+  const [selectedId, setSelectedId] = useState<string>(SEEDED_REFLECTIONS[0]!.id);
   const [activeTab, setActiveTab] = useState<"overview" | "skills" | "strategy">("overview");
 
   useEffect(() => {
-    if (reflections.length > 0) {
-      const stillSelected = reflections.find((r) => r.id === selected.id);
-      setSelected(stillSelected ?? reflections[0]!);
+    if (reflections.length > 0 && !reflections.find((r) => r.id === selectedId)) {
+      setSelectedId(reflections[0]!.id);
     }
-  }, [reflections]);
+  }, [reflections, selectedId]);
+
+  const selected =
+    reflections.find((r) => r.id === selectedId) ?? reflections[0] ?? SEEDED_REFLECTIONS[0]!;
+
+  const updateSkillStatus = useCallback(
+    (reflectionId: string, skillName: string, status: CandidateSkillStatus) => {
+      setReflections((prev) =>
+        prev.map((r) =>
+          r.id !== reflectionId
+            ? r
+            : {
+                ...r,
+                candidateSkills: r.candidateSkills.map((s) =>
+                  s.name === skillName ? { ...s, status } : s,
+                ),
+              },
+        ),
+      );
+    },
+    [],
+  );
+
+  const decideSkill = useCallback(
+    async (
+      reflectionId: string,
+      skillName: string,
+      action: "adopt" | "reject",
+    ) => {
+      const key = `skill:${reflectionId}:${skillName}:${action}`;
+      if (pendingActions.has(key)) return;
+      const previous = reflections
+        .find((r) => r.id === reflectionId)
+        ?.candidateSkills.find((s) => s.name === skillName)?.status;
+      const optimistic: CandidateSkillStatus =
+        action === "adopt"
+          ? previous === "proposed"
+            ? "under-review"
+            : "adopted"
+          : "rejected";
+      setPending(key, true);
+      updateSkillStatus(reflectionId, skillName, optimistic);
+      try {
+        await fetchJson(
+          apiUrl(
+            `/reflections/${encodeURIComponent(reflectionId)}/skills/${encodeURIComponent(
+              skillName,
+            )}/${action}`,
+          ),
+          { method: "POST", body: JSON.stringify({}) },
+        );
+        toast.success(
+          action === "adopt"
+            ? optimistic === "adopted"
+              ? `Adopted ${skillName}`
+              : `Skill ${skillName} accepted for review`
+            : `Rejected ${skillName}`,
+        );
+      } catch (err) {
+        if (previous) updateSkillStatus(reflectionId, skillName, previous);
+        const msg = err instanceof Error ? err.message : String(err);
+        toast.error(`Could not ${action} skill`, { description: msg });
+      } finally {
+        setPending(key, false);
+      }
+    },
+    [pendingActions, reflections, setPending, updateSkillStatus],
+  );
+
+  const decideStrategy = useCallback(
+    async (
+      reflectionId: string,
+      index: number,
+      action: "apply" | "defer",
+    ) => {
+      const key = `strategy:${reflectionId}:${index}:${action}`;
+      if (pendingActions.has(key)) return;
+      const k = strategyKey(reflectionId, index);
+      const previous = strategyDecisions[k];
+      const optimistic: StrategyDecision = action === "apply" ? "applied" : "deferred";
+      setPending(key, true);
+      setStrategyDecisions((prev) => ({ ...prev, [k]: optimistic }));
+      try {
+        await fetchJson(
+          apiUrl(
+            `/reflections/${encodeURIComponent(reflectionId)}/strategy/${index}/${action}`,
+          ),
+          { method: "POST", body: JSON.stringify({}) },
+        );
+        toast.success(
+          action === "apply"
+            ? "Strategy update applied"
+            : "Strategy update deferred",
+        );
+      } catch (err) {
+        setStrategyDecisions((prev) => {
+          const next = { ...prev };
+          if (previous) next[k] = previous;
+          else delete next[k];
+          return next;
+        });
+        const msg = err instanceof Error ? err.message : String(err);
+        toast.error(`Could not ${action} strategy update`, { description: msg });
+      } finally {
+        setPending(key, false);
+      }
+    },
+    [pendingActions, setPending, strategyDecisions],
+  );
 
   const domains = ["all", ...Array.from(new Set(reflections.map((r) => r.domain)))];
   const types: Array<ReflectionType | "all"> = ["all", "post-incident", "performance-review", "strategy-update", "skill-discovery", "failure-analysis"];
@@ -336,6 +469,7 @@ export default function ReflectionConsole() {
 
   return (
     <CognitiveLayout title="Reflection Console" subtitle="Agent reflections: what worked, what failed, lessons learned, candidate skills, and strategy updates — each linked to a source trace.">
+        <Toaster richColors closeButton position="bottom-right" />
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
           {[
             { label: "Total Reflections", value: reflections.length, color: ACCENT },
@@ -372,7 +506,7 @@ export default function ReflectionConsole() {
               {filtered.map((ref) => (
                 <div
                   key={ref.id}
-                  onClick={() => { setSelected(ref); setActiveTab("overview"); }}
+                  onClick={() => { setSelectedId(ref.id); setActiveTab("overview"); }}
                   style={{
                     background: selected.id === ref.id ? `${ACCENT}10` : "rgba(255,255,255,0.03)",
                     border: selected.id === ref.id ? `1px solid ${ACCENT}55` : "1px solid rgba(255,255,255,0.07)",
@@ -514,18 +648,56 @@ export default function ReflectionConsole() {
                         <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.6 }}>{skill.description}</div>
                       </div>
                     </div>
-                    {skill.status === "proposed" && (
-                      <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                        <button style={{ background: "#22c55e", color: "#fff", border: "none", borderRadius: 6, padding: "7px 16px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>Accept for Review</button>
-                        <button style={{ background: "rgba(255,255,255,0.05)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 6, padding: "7px 16px", fontSize: 11, cursor: "pointer" }}>Reject</button>
-                      </div>
-                    )}
-                    {skill.status === "under-review" && (
-                      <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                        <button style={{ background: ACCENT, color: "#fff", border: "none", borderRadius: 6, padding: "7px 16px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>Adopt Skill</button>
-                        <button style={{ background: "rgba(255,255,255,0.05)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 6, padding: "7px 16px", fontSize: 11, cursor: "pointer" }}>Reject</button>
-                      </div>
-                    )}
+                    {skill.status === "proposed" && (() => {
+                      const adoptKey = `skill:${selected.id}:${skill.name}:adopt`;
+                      const rejectKey = `skill:${selected.id}:${skill.name}:reject`;
+                      const adoptPending = pendingActions.has(adoptKey);
+                      const rejectPending = pendingActions.has(rejectKey);
+                      const anyPending = adoptPending || rejectPending;
+                      return (
+                        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                          <button
+                            onClick={() => decideSkill(selected.id, skill.name, "adopt")}
+                            disabled={anyPending}
+                            style={{ background: "#22c55e", color: "#fff", border: "none", borderRadius: 6, padding: "7px 16px", fontSize: 11, fontWeight: 600, cursor: anyPending ? "wait" : "pointer", opacity: anyPending ? 0.6 : 1 }}
+                          >
+                            {adoptPending ? "Saving…" : "Accept for Review"}
+                          </button>
+                          <button
+                            onClick={() => decideSkill(selected.id, skill.name, "reject")}
+                            disabled={anyPending}
+                            style={{ background: "rgba(255,255,255,0.05)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 6, padding: "7px 16px", fontSize: 11, cursor: anyPending ? "wait" : "pointer", opacity: anyPending ? 0.6 : 1 }}
+                          >
+                            {rejectPending ? "Saving…" : "Reject"}
+                          </button>
+                        </div>
+                      );
+                    })()}
+                    {skill.status === "under-review" && (() => {
+                      const adoptKey = `skill:${selected.id}:${skill.name}:adopt`;
+                      const rejectKey = `skill:${selected.id}:${skill.name}:reject`;
+                      const adoptPending = pendingActions.has(adoptKey);
+                      const rejectPending = pendingActions.has(rejectKey);
+                      const anyPending = adoptPending || rejectPending;
+                      return (
+                        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                          <button
+                            onClick={() => decideSkill(selected.id, skill.name, "adopt")}
+                            disabled={anyPending}
+                            style={{ background: ACCENT, color: "#fff", border: "none", borderRadius: 6, padding: "7px 16px", fontSize: 11, fontWeight: 600, cursor: anyPending ? "wait" : "pointer", opacity: anyPending ? 0.6 : 1 }}
+                          >
+                            {adoptPending ? "Saving…" : "Adopt Skill"}
+                          </button>
+                          <button
+                            onClick={() => decideSkill(selected.id, skill.name, "reject")}
+                            disabled={anyPending}
+                            style={{ background: "rgba(255,255,255,0.05)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 6, padding: "7px 16px", fontSize: 11, cursor: anyPending ? "wait" : "pointer", opacity: anyPending ? 0.6 : 1 }}
+                          >
+                            {rejectPending ? "Saving…" : "Reject"}
+                          </button>
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
@@ -536,7 +708,14 @@ export default function ReflectionConsole() {
                 {selected.strategyUpdates.length === 0 && (
                   <div style={{ textAlign: "center", color: "#475569", fontSize: 13, padding: "40px 0" }}>No strategy updates for this reflection</div>
                 )}
-                {selected.strategyUpdates.map((update, i) => (
+                {selected.strategyUpdates.map((update, i) => {
+                  const applyKey = `strategy:${selected.id}:${i}:apply`;
+                  const deferKey = `strategy:${selected.id}:${i}:defer`;
+                  const applyPending = pendingActions.has(applyKey);
+                  const deferPending = pendingActions.has(deferKey);
+                  const anyPending = applyPending || deferPending;
+                  const decision = strategyDecisions[strategyKey(selected.id, i)];
+                  return (
                   <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${ACCENT}25`, borderRadius: 10, padding: 18 }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: "#e2e8f0", marginBottom: 14 }}>Strategy Update: {update.area}</div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
@@ -553,12 +732,30 @@ export default function ReflectionConsole() {
                       <div style={{ fontSize: 9, color: ACCENT, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Rationale</div>
                       <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>{update.rationale}</div>
                     </div>
+                    {decision && (
+                      <div style={{ marginTop: 10, fontSize: 10, fontWeight: 700, color: decision === "applied" ? "#22c55e" : "#f59e0b", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                        {decision === "applied" ? "✓ Applied" : "⏸ Deferred"}
+                      </div>
+                    )}
                     <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                      <button style={{ background: ACCENT, color: "#fff", border: "none", borderRadius: 6, padding: "7px 16px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>Apply Update</button>
-                      <button style={{ background: "rgba(255,255,255,0.05)", color: "#64748b", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 6, padding: "7px 16px", fontSize: 11, cursor: "pointer" }}>Defer</button>
+                      <button
+                        onClick={() => decideStrategy(selected.id, i, "apply")}
+                        disabled={anyPending}
+                        style={{ background: ACCENT, color: "#fff", border: "none", borderRadius: 6, padding: "7px 16px", fontSize: 11, fontWeight: 600, cursor: anyPending ? "wait" : "pointer", opacity: anyPending ? 0.6 : 1 }}
+                      >
+                        {applyPending ? "Saving…" : "Apply Update"}
+                      </button>
+                      <button
+                        onClick={() => decideStrategy(selected.id, i, "defer")}
+                        disabled={anyPending}
+                        style={{ background: "rgba(255,255,255,0.05)", color: "#64748b", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 6, padding: "7px 16px", fontSize: 11, cursor: anyPending ? "wait" : "pointer", opacity: anyPending ? 0.6 : 1 }}
+                      >
+                        {deferPending ? "Saving…" : "Defer"}
+                      </button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
