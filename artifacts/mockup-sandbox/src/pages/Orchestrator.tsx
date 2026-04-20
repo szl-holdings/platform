@@ -240,11 +240,26 @@ function ExplainPanel({
 
         {step.output && (
           <div className="bg-nexus-bg rounded-lg p-3">
-            <div className="text-[10px] font-mono text-nexus-green mb-1.5 uppercase tracking-widest">Output</div>
+            <div className="text-[10px] font-mono text-nexus-green mb-1.5 uppercase tracking-widest">Summary</div>
             <p className="text-[10px] text-muted-foreground leading-relaxed">{step.output}</p>
-            {step.durationMs !== undefined && (
-              <div className="text-[9px] font-mono text-muted-foreground/30 mt-2">{step.durationMs}ms</div>
-            )}
+            <div className="flex gap-3 mt-2 text-[9px] font-mono text-muted-foreground/40">
+              {step.durationMs !== undefined && <span>{step.durationMs}ms</span>}
+              {step.httpStatus !== undefined && step.httpStatus > 0 && <span>HTTP {step.httpStatus}</span>}
+              {step.confidence !== undefined && (
+                <span className={step.confidence >= 0.7 ? "text-nexus-green" : step.confidence >= 0.4 ? "text-[#ffb700]" : "text-nexus-red"}>
+                  conf {(step.confidence * 100).toFixed(0)}%
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {step.rawPayload && (
+          <div className="bg-nexus-bg rounded-lg p-3">
+            <div className="text-[10px] font-mono text-nexus-cyan mb-1.5 uppercase tracking-widest">Raw API Payload</div>
+            <pre className="text-[9px] font-mono text-muted-foreground/80 leading-snug whitespace-pre-wrap break-words max-h-64 overflow-y-auto bg-[#060b12] rounded p-2 border border-nexus">
+{step.rawPayload}
+            </pre>
           </div>
         )}
 
@@ -299,8 +314,16 @@ function StepCard({ step, onExplain }: { step: OrchestrationStep; onExplain: (s:
           {step.output}
         </div>
       )}
-      {step.durationMs !== undefined && step.status === "done" && (
-        <div className="text-[9px] font-mono text-muted-foreground/40 mt-1">{step.durationMs}ms</div>
+      {(step.durationMs !== undefined || step.confidence !== undefined || (step.httpStatus !== undefined && step.httpStatus > 0)) && step.status !== "pending" && (
+        <div className="flex gap-2 text-[9px] font-mono text-muted-foreground/40 mt-1">
+          {step.durationMs !== undefined && <span>{step.durationMs}ms</span>}
+          {step.httpStatus !== undefined && step.httpStatus > 0 && <span>HTTP {step.httpStatus}</span>}
+          {step.confidence !== undefined && (
+            <span className={step.confidence >= 0.7 ? "text-nexus-green" : step.confidence >= 0.4 ? "text-[#ffb700]" : "text-nexus-red"}>
+              conf {(step.confidence * 100).toFixed(0)}%
+            </span>
+          )}
+        </div>
       )}
 
       {rl && (

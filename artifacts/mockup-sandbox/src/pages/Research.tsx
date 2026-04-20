@@ -66,9 +66,26 @@ function LaneCard({ lane }: { lane: AgentLane }) {
           </div>
           <div className="text-[10px] text-muted-foreground font-mono">{meta.role}</div>
         </div>
-        {lane.citationsVerified !== undefined && lane.status !== "idle" && (
-          <div className="flex gap-2 text-[10px] font-mono mr-2">
-            {lane.citationsVerified > 0 && (
+        {lane.status !== "idle" && (
+          <div className="flex items-center gap-2 text-[10px] font-mono mr-2">
+            {lane.durationMs !== undefined && (
+              <span className="text-muted-foreground/60">{lane.durationMs}ms</span>
+            )}
+            {lane.confidence !== undefined && (
+              <span
+                className={
+                  lane.confidence >= 0.7
+                    ? "text-nexus-green"
+                    : lane.confidence >= 0.4
+                    ? "text-[#ffb700]"
+                    : "text-nexus-red"
+                }
+                title="Confidence score"
+              >
+                {(lane.confidence * 100).toFixed(0)}%
+              </span>
+            )}
+            {lane.citationsVerified !== undefined && lane.citationsVerified > 0 && (
               <span className="text-nexus-green">✓{lane.citationsVerified}</span>
             )}
             {lane.citationsKilled !== undefined && lane.citationsKilled > 0 && (

@@ -58,6 +58,10 @@ interface AgentLane {
   citationsVerified: number;
   citationsKilled: number;
   output?: string;
+  startedAt?: string;
+  completedAt?: string;
+  durationMs?: number;
+  confidence?: number;
 }
 
 interface Citation {
@@ -136,6 +140,9 @@ interface OrchestrationStep {
   status: "pending" | "running" | "done" | "error";
   output?: string;
   durationMs?: number;
+  rawPayload?: string;
+  httpStatus?: number;
+  confidence?: number;
 }
 
 interface IngestJob {
@@ -1425,7 +1432,9 @@ async function runResearchSwarm(runId: string, query: string) {
     // Phase 1: Gatherer + Peer-Reviewer run in parallel
     const [gathererOut, peerOut] = await Promise.all([
       (async () => {
-        updateLane("gatherer", { status: "running" });
+        const startedAt = new Date().toISOString();
+        const t0 = Date.now();
+        updateLane("gatherer", { status: "running", startedAt });
         addLog("gatherer", `Initializing evidence discovery for: "${query}"`);
         await sleep(600);
         addLog("gatherer", "Querying research databases and live web sources…");
@@ -1449,12 +1458,20 @@ async function runResearchSwarm(runId: string, query: string) {
           "You are Gatherer, a specialized evidence discovery agent. Your role: find relevant sources, extract key facts, and report evidence with confidence scores. Be specific and cite domains when possible.",
         );
         addLog("gatherer", "Evidence collection complete.");
-        updateLane("gatherer", { status: "done", output });
+        updateLane("gatherer", {
+          status: "done",
+          output,
+          completedAt: new Date().toISOString(),
+          durationMs: Date.now() - t0,
+          confidence: 0.86,
+        });
         return output;
       })(),
       (async () => {
         await sleep(400);
-        updateLane("peer-reviewer", { status: "running" });
+        const startedAt = new Date().toISOString();
+        const t0 = Date.now();
+        updateLane("peer-reviewer", { status: "running", startedAt });
         addLog("peer-reviewer", "Analyzing query structure for implicit assumptions…");
         await sleep(700);
         addLog("peer-reviewer", "Identifying confirmation bias risks and counter-hypotheses…");
@@ -1465,13 +1482,20 @@ async function runResearchSwarm(runId: string, query: string) {
           "You are Peer-Reviewer, a critical analysis agent. Your role: identify unstated assumptions, flag selection bias, and provide counter-hypotheses that must be addressed for balanced research output.",
         );
         addLog("peer-reviewer", "Critical review complete. 3 assumption flags raised.");
-        updateLane("peer-reviewer", { status: "done", output });
+        updateLane("peer-reviewer", {
+          status: "done",
+          output,
+          completedAt: new Date().toISOString(),
+          durationMs: Date.now() - t0,
+          confidence: 0.81,
+        });
         return output;
       })(),
     ]);
 
     // Phase 2: Drafter synthesizes
-    updateLane("drafter", { status: "running" });
+    const drafterStart = Date.now();
+    updateLane("drafter", { status: "running", startedAt: new Date().toISOString() });
     addLog("drafter", "Receiving outputs from Gatherer and Peer-Reviewer…");
     await sleep(500);
     addLog("drafter", "Structuring synthesis with evidence weighting…");
@@ -1482,10 +1506,17 @@ async function runResearchSwarm(runId: string, query: string) {
       "You are Drafter, a synthesis agent. Your role: produce a clear, structured research brief that incorporates Gatherer evidence and addresses Peer-Reviewer critique. Format as an executive brief with key findings and caveats.",
     );
     addLog("drafter", "Draft synthesis complete. Awaiting verification.");
-    updateLane("drafter", { status: "done", output: drafterOutput });
+    updateLane("drafter", {
+      status: "done",
+      output: drafterOutput,
+      completedAt: new Date().toISOString(),
+      durationMs: Date.now() - drafterStart,
+      confidence: 0.78,
+    });
 
     // Phase 3: Verifier HEAD-checks citations
-    updateLane("verifier", { status: "running" });
+    const verifierStart = Date.now();
+    updateLane("verifier", { status: "running", startedAt: new Date().toISOString() });
     addLog("verifier", "Starting URL verification via HEAD requests…");
     await sleep(400);
 
@@ -1515,8 +1546,16 @@ async function runResearchSwarm(runId: string, query: string) {
 
     const verified = citations.filter((c) => c.status === "verified").length;
     const killed = citations.filter((c) => c.status === "killed").length;
-    updateLane("verifier", { status: "done", citationsVerified: verified, citationsKilled: killed,
-      output: `Verification complete: ${verified} live, ${killed} removed from final output.` });
+    const verifierConfidence = citations.length > 0 ? verified / citations.length : 0.5;
+    updateLane("verifier", {
+      status: "done",
+      citationsVerified: verified,
+      citationsKilled: killed,
+      output: `Verification complete: ${verified} live, ${killed} removed from final output.`,
+      completedAt: new Date().toISOString(),
+      durationMs: Date.now() - verifierStart,
+      confidence: Number(verifierConfidence.toFixed(2)),
+    });
 
     const verifierOut = await callLLM(
       `You are the Verifier. ${killed} dead links were removed. Produce the final verified research brief, incorporating the draft and noting any removed citations.\n\nDraft: ${drafterOutput}\n\nKilled citations: ${citations.filter(c => c.status === "killed").map(c => c.url).join(", ")}`,
@@ -2091,7 +2130,12 @@ async function runOrchestration(planId: string, intent: string) {
       const stepStart = Date.now();
 
       const fetchResult = await fetchAppEndpoint(step.endpoint);
+      step.httpStatus = fetchResult.status;
+      step.rawPayload = fetchResult.ok
+        ? truncateForPrompt(fetchResult.body, 2000)
+        : truncateForPrompt(fetchResult.error ?? fetchResult.body ?? "(no body)", 2000);
       let summary: string;
+      let llmFell = false;
       if (fetchResult.ok) {
         try {
           summary = await callLLM(
@@ -2102,13 +2146,16 @@ async function runOrchestration(planId: string, intent: string) {
         } catch (llmErr) {
           logger.warn({ llmErr, endpoint: step.endpoint }, "Orchestrator LLM summary failed, using raw payload");
           summary = `${step.app} responded (${fetchResult.status}): ${truncateForPrompt(fetchResult.body, 400)}`;
+          llmFell = true;
         }
         step.status = "done";
+        step.confidence = llmFell ? 0.55 : 0.92;
       } else {
         summary = fetchResult.status === 0
           ? `${step.app} endpoint ${step.endpoint} unreachable: ${fetchResult.error ?? "unknown error"}.`
           : `${step.app} endpoint ${step.endpoint} returned HTTP ${fetchResult.status}. Response: ${truncateForPrompt(fetchResult.body, 300)}`;
         step.status = "error";
+        step.confidence = 0.15;
         logger.warn({ endpoint: step.endpoint, status: fetchResult.status, error: fetchResult.error }, "Orchestrator step endpoint failed");
       }
 

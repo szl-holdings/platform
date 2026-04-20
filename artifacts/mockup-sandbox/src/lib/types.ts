@@ -33,6 +33,10 @@ export interface AgentLane {
   citationsVerified?: number;
   citationsKilled?: number;
   output?: string;
+  startedAt?: string;
+  completedAt?: string;
+  durationMs?: number;
+  confidence?: number;
 }
 
 export interface ResearchRun {
@@ -132,6 +136,9 @@ export interface OrchestrationStep {
   status: "pending" | "running" | "done" | "error";
   output?: string;
   durationMs?: number;
+  rawPayload?: string;
+  httpStatus?: number;
+  confidence?: number;
 }
 
 export interface PlanNode {
