@@ -176,7 +176,7 @@ describe("DomainProfileRegistry", () => {
     }
   });
 
-  it("rotate_profile_version records history and supports rollback", () => {
+  it("rotate_profile_version records history and supports rollback", async () => {
     const reg = new DomainProfileRegistry();
 
     const secondVersion = {
@@ -186,7 +186,7 @@ describe("DomainProfileRegistry", () => {
     };
     reg.registerProfile(secondVersion);
 
-    const pointer = reg.rotate_profile_version({
+    const pointer = await reg.rotate_profile_version({
       tenantId: "test-tenant",
       domain: "lyte_governance_ops",
       targetProfileId: "lyte_governance_ops",
@@ -202,13 +202,13 @@ describe("DomainProfileRegistry", () => {
     expect(active?.version).toBe("1.0.1");
   });
 
-  it("rollback restores the previous version", () => {
+  it("rollback restores the previous version", async () => {
     const reg = new DomainProfileRegistry();
 
     const v2 = { ...vesselsMartitimeRisk, version: "1.0.1", updatedAt: new Date().toISOString() };
     reg.registerProfile(v2);
 
-    reg.rotate_profile_version({
+    await reg.rotate_profile_version({
       tenantId: "rollback-tenant",
       domain: "vessels_maritime_risk",
       targetProfileId: "vessels_maritime_risk",
@@ -216,7 +216,7 @@ describe("DomainProfileRegistry", () => {
       activatedBy: "ci",
     });
 
-    reg.rotate_profile_version({
+    await reg.rotate_profile_version({
       tenantId: "rollback-tenant",
       domain: "vessels_maritime_risk",
       targetProfileId: "vessels_maritime_risk",
@@ -228,19 +228,56 @@ describe("DomainProfileRegistry", () => {
     const active = reg.getActiveProfileForTenant("rollback-tenant", "vessels_maritime_risk");
     expect(active?.version).toBe("1.0.1");
 
-    reg.rollback("rollback-tenant", "vessels_maritime_risk", "ci");
+    await reg.rollback("rollback-tenant", "vessels_maritime_risk", "ci");
     const restored = reg.getActiveProfileForTenant("rollback-tenant", "vessels_maritime_risk");
     expect(restored?.version).toBe("1.0.0");
   });
 
-  it("deprecateProfile prevents rotation to that version", () => {
+  it("persists rotations + rollbacks via a ProfilePointerStore and rehydrates on startup", async () => {
+    const saved = new Map<string, import("./registry.js").TenantProfilePointer>();
+    const store = {
+      async loadAll() {
+        return Array.from(saved.values());
+      },
+      async save(p: import("./registry.js").TenantProfilePointer) {
+        saved.set(`${p.tenantId}::${p.domain}`, p);
+      },
+    };
+
+    const reg = new DomainProfileRegistry();
+    reg.setStore(store);
+    const v2 = { ...vesselsMartitimeRisk, version: "1.0.1", updatedAt: new Date().toISOString() };
+    reg.registerProfile(v2);
+
+    await reg.rotate_profile_version({
+      tenantId: "persist-tenant",
+      domain: "vessels_maritime_risk",
+      targetProfileId: "vessels_maritime_risk",
+      targetVersion: "1.0.1",
+      activatedBy: "ci",
+    });
+
+    expect(saved.size).toBe(1);
+    expect(saved.get("persist-tenant::vessels_maritime_risk")?.activeVersion).toBe("1.0.1");
+
+    // Simulate a server restart: build a fresh registry, wire same store, hydrate.
+    const reg2 = new DomainProfileRegistry();
+    reg2.registerProfile(v2);
+    reg2.setStore(store);
+    const loaded = await reg2.hydrate();
+    expect(loaded).toBe(1);
+    const restored = reg2.getActiveProfileForTenant("persist-tenant", "vessels_maritime_risk");
+    expect(restored?.version).toBe("1.0.1");
+  });
+
+  it("deprecateProfile prevents rotation to that version", async () => {
     const reg = new DomainProfileRegistry();
     reg.deprecateProfile("lyte_governance_ops", "1.0.0");
 
     const deprecated = reg.getProfile("lyte_governance_ops", "1.0.0");
     expect(deprecated?.status).toBe("deprecated");
 
-    expect(() =>
+    await expect(
       reg.rotate_profile_version({
         tenantId: "t1",
         domain: "lyte_governance_ops",
@@ -248,12 +285,12 @@ describe("DomainProfileRegistry", () => {
         targetVersion: "1.0.0",
         activatedBy: "ci",
       }),
-    ).toThrow("deprecated");
+    ).rejects.toThrow("deprecated");
   });
 
-  it("rotate to non-existent profile throws", () => {
+  it("rotate to non-existent profile throws", async () => {
     const reg = new DomainProfileRegistry();
-    expect(() =>
+    await expect(
       reg.rotate_profile_version({
         tenantId: "t1",
         domain: "lyte_governance_ops",
@@ -261,12 +298,12 @@ describe("DomainProfileRegistry", () => {
         targetVersion: "9.9.9",
         activatedBy: "ci",
       }),
-    ).toThrow("not found");
+    ).rejects.toThrow("not found");
   });
 
-  it("rotate_profile_version rejects cross-domain rotation", () => {
+  it("rotate_profile_version rejects cross-domain rotation", async () => {
     const reg = new DomainProfileRegistry();
-    expect(() =>
+    await expect(
       reg.rotate_profile_version({
         tenantId: "t1",
         domain: "vessels_maritime_risk",
@@ -274,7 +311,7 @@ describe("DomainProfileRegistry", () => {
         targetVersion: "1.0.0",
         activatedBy: "ci",
       }),
-    ).toThrow("Domain mismatch");
+    ).rejects.toThrow("Domain mismatch");
   });
 });
 

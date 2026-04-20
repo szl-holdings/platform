@@ -1,4 +1,5 @@
 export * from "./projects";
+export * from "./aef_profiles";
 export * from "./auth";
 export * from "./organizations";
 export * from "./connectors";

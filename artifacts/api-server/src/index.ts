@@ -266,6 +266,12 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     const { initAiEvalsPersistence } = await import("./lib/ai-evals-persistence.js");
     await initAiEvalsPersistence();
 
+    // Step 2b-2b: Wire the AEF DomainProfileRegistry to Postgres so that
+    // tenant-scoped profile rotations (rotate_profile_version / rollback)
+    // survive API server restarts instead of silently resetting to defaults.
+    const { initAefProfileRegistryPersistence } = await import("./lib/aef-profile-store.js");
+    await initAefProfileRegistryPersistence();
+
     // Step 2b-3: Bridge per-product domain events into the global signal
     // mesh so the Fabric page reflects live product activity.
     const { initSignalMeshBridge } = await import("./lib/domain-events/signal-mesh-bridge.js");

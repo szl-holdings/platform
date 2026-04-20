@@ -260,6 +260,16 @@ export interface RotateProfileOptions {
   rotationReason?: string;
 }
 
+/**
+ * Pluggable durable store for tenant pointers. The api-server provides a
+ * Postgres-backed implementation that maps to the `profile_registry_pointers`
+ * table; tests and library consumers can omit this and operate purely in-memory.
+ */
+export interface ProfilePointerStore {
+  loadAll(): Promise<TenantProfilePointer[]>;
+  save(pointer: TenantProfilePointer): Promise<void>;
+}
+
 export interface ProfileRegistrySnapshot {
   profileCount: number;
   domains: AEFDomain[];
@@ -286,11 +296,36 @@ export interface ProfileRegistrySnapshot {
 export class DomainProfileRegistry {
   private readonly profiles = new Map<string, DomainProfile>();
   private readonly tenantPointers = new Map<string, TenantProfilePointer>();
+  private store: ProfilePointerStore | undefined;
 
   constructor(initialProfiles: DomainProfile[] = ALL_DOMAIN_PROFILES) {
     for (const profile of initialProfiles) {
       this.registerProfile(profile);
     }
+  }
+
+  /**
+   * Wire a durable pointer store. After calling this, future calls to
+   * `rotate_profile_version` and `rollback` await `store.save(...)` before
+   * returning, and `hydrate()` will repopulate the in-memory tenant pointer
+   * map from `store.loadAll()`.
+   */
+  setStore(store: ProfilePointerStore): void {
+    this.store = store;
+  }
+
+  /**
+   * Load all persisted tenant pointers into memory. Intended to be called
+   * once during API server startup, after migrations have completed and
+   * after the store has been wired with `setStore`.
+   */
+  async hydrate(): Promise<number> {
+    if (!this.store) return 0;
+    const rows = await this.store.loadAll();
+    for (const row of rows) {
+      this.tenantPointers.set(this.tenantDomainKey(row.tenantId, row.domain), row);
+    }
+    return rows.length;
   }
 
   registerProfile(profile: DomainProfile): void {
@@ -327,7 +362,7 @@ export class DomainProfileRegistry {
     return this.getProfile(pointer.activeProfileId, pointer.activeVersion);
   }
 
-  rotate_profile_version(opts: RotateProfileOptions): TenantProfilePointer {
+  async rotate_profile_version(opts: RotateProfileOptions): Promise<TenantProfilePointer> {
     const { tenantId, domain, targetProfileId, targetVersion, activatedBy, rotationReason } = opts;
 
     const targetProfile = this.getProfile(targetProfileId, targetVersion);
@@ -373,10 +408,13 @@ export class DomainProfileRegistry {
     };
 
     this.tenantPointers.set(pointerKey, newPointer);
+    if (this.store) {
+      await this.store.save(newPointer);
+    }
     return newPointer;
   }
 
-  rollback(tenantId: string, domain: AEFDomain, rolledBackBy: string): TenantProfilePointer {
+  async rollback(tenantId: string, domain: AEFDomain, rolledBackBy: string): Promise<TenantProfilePointer> {
     const pointerKey = this.tenantDomainKey(tenantId, domain);
     const existing = this.tenantPointers.get(pointerKey);
 
@@ -401,6 +439,9 @@ export class DomainProfileRegistry {
 
     this.tenantPointers.set(pointerKey, newPointer);
     void rolledBackBy;
+    if (this.store) {
+      await this.store.save(newPointer);
+    }
     return newPointer;
   }
 
