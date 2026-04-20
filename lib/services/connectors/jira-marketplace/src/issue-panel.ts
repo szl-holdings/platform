@@ -1,13 +1,6 @@
 import ForgeUI, { render, IssuePanel, Text, Tag, SectionMessage, Fragment, useState, useEffect } from "@forge/ui";
 import api from "@forge/api";
-
-const SZL_API_BASE = process.env.SZL_API_BASE ?? "https://api.szlholdings.com";
-const SZL_INTERNAL_TOKEN = process.env.SZL_INTERNAL_TOKEN ?? "";
-
-const szlHeaders = {
-  "Content-Type": "application/json",
-  "x-internal-token": SZL_INTERNAL_TOKEN,
-};
+import { SZL_API_BASE, szlHeaders } from "./env";
 
 interface PrismScore {
   lens: string;
