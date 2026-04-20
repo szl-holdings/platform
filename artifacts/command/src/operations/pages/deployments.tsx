@@ -1,7 +1,8 @@
 import { ApiError } from "@szl-holdings/shared-ui/api-fetch";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useAuth } from "@szl-holdings/replit-auth-web";
 import {
 
   Rocket,
@@ -23,6 +24,10 @@ import {
   Mail,
   ShieldAlert,
   Send,
+  Calendar,
+  Trash2,
+  Plus,
+  Save,
 } from "lucide-react";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
@@ -254,13 +259,42 @@ interface TeamMemberDto {
   platformRole: string | null;
   isActive: boolean;
 }
+type OnCallSource = "override" | "rotation" | "fallback" | "none";
 interface TeamDetailDto {
   team: string;
   members: TeamMemberDto[];
   onCall: TeamMemberDto | null;
+  onCallSource?: OnCallSource;
   escalation: TeamMemberDto | null;
   ownedApps: { slug: string; name: string }[];
   count: number;
+}
+
+interface ScheduleConfigDto {
+  rotationIntervalHours: number;
+  memberOrder: number[];
+  handoffAnchor: string;
+  timezone: string;
+  updatedAt: string | null;
+  updatedBy: number | null;
+}
+interface ScheduleOverrideDto {
+  id: number;
+  userId: number;
+  user: TeamMemberDto | null;
+  kind: "override" | "shift";
+  startAt: string;
+  endAt: string;
+  note: string | null;
+  createdBy: number | null;
+  createdAt: string;
+}
+interface ScheduleResponseDto {
+  team: string;
+  schedule: ScheduleConfigDto | null;
+  overrides: ScheduleOverrideDto[];
+  currentOnCall: TeamMemberDto | null;
+  currentOnCallSource: OnCallSource;
 }
 interface PageResponse {
   paged: boolean;
@@ -595,7 +629,506 @@ function UserProfileDrawer({ userId, onClose }: { userId: number; onClose: () =>
   );
 }
 
+const ADMIN_ROLES_FOR_SCHEDULE = new Set(["admin", "super_admin", "ops"]);
+
+function fmtDateTimeLocal(d: Date): string {
+  // For <input type="datetime-local"> — needs YYYY-MM-DDTHH:mm, no timezone.
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function ScheduleSourceBadge({ source }: { source: OnCallSource }) {
+  if (source === "override") {
+    return (
+      <span
+        className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded ml-1.5"
+        style={{
+          color: "#fcd34d",
+          backgroundColor: "color-mix(in srgb, #fcd34d 14%, transparent)",
+          border: "1px solid color-mix(in srgb, #fcd34d 30%, transparent)",
+        }}
+        title="An override is currently in effect"
+      >
+        override
+      </span>
+    );
+  }
+  if (source === "rotation") {
+    return (
+      <span
+        className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded ml-1.5"
+        style={{
+          color: "#7dd3fc",
+          backgroundColor: "color-mix(in srgb, #7dd3fc 14%, transparent)",
+          border: "1px solid color-mix(in srgb, #7dd3fc 30%, transparent)",
+        }}
+        title="From the configured rotation"
+      >
+        rotation
+      </span>
+    );
+  }
+  if (source === "fallback") {
+    return (
+      <span
+        className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded ml-1.5 opacity-80"
+        style={{
+          color: "var(--color-fg-muted)",
+          border: "1px dashed var(--color-surface-border)",
+        }}
+        title="No schedule configured — using weekly auto-rotation"
+      >
+        auto
+      </span>
+    );
+  }
+  return null;
+}
+
+function ScheduleEditor({
+  team,
+  members,
+  canEdit,
+}: {
+  team: string;
+  members: TeamMemberDto[];
+  canEdit: boolean;
+}) {
+  const queryClient = useQueryClient();
+  const scheduleQuery = useStandardQuery<ScheduleResponseDto>({
+    queryKey: ["team", team, "schedule"],
+    queryFn: () => apiFetch<ScheduleResponseDto>(`/teams/${encodeURIComponent(team)}/schedule`),
+  });
+
+  const [intervalHours, setIntervalHours] = useState<number>(168);
+  const [memberOrder, setMemberOrder] = useState<number[]>([]);
+  const [handoffAnchor, setHandoffAnchor] = useState<string>(fmtDateTimeLocal(new Date()));
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [scheduleStatus, setScheduleStatus] = useState<string | null>(null);
+
+  // Hydrate the editor inputs once a fresh schedule loads.
+  useEffect(() => {
+    const data = scheduleQuery.data;
+    if (!data) return;
+    if (data.schedule) {
+      setIntervalHours(data.schedule.rotationIntervalHours);
+      setMemberOrder(data.schedule.memberOrder);
+      setHandoffAnchor(fmtDateTimeLocal(new Date(data.schedule.handoffAnchor)));
+    } else {
+      setIntervalHours(168);
+      setMemberOrder([]);
+      setHandoffAnchor(fmtDateTimeLocal(new Date()));
+    }
+  }, [scheduleQuery.data]);
+
+  const saveMutation = useStandardMutation({
+    mutationFn: () =>
+      apiFetch<ScheduleResponseDto>(`/teams/${encodeURIComponent(team)}/schedule`, {
+        method: "PUT",
+        body: JSON.stringify({
+          rotationIntervalHours: intervalHours,
+          memberOrder,
+          handoffAnchor: new Date(handoffAnchor).toISOString(),
+          timezone: "UTC",
+        }),
+      }),
+    onSuccess: () => {
+      setScheduleError(null);
+      setScheduleStatus("Schedule saved.");
+      void queryClient.invalidateQueries({ queryKey: ["team", team] });
+      void queryClient.invalidateQueries({ queryKey: ["team", team, "schedule"] });
+    },
+    onError: (err: unknown) => {
+      setScheduleStatus(null);
+      setScheduleError(err instanceof ApiError ? err.message : "Failed to save schedule");
+    },
+  });
+
+  const [overrideUserId, setOverrideUserId] = useState<number | "">("");
+  const now = useMemo(() => new Date(), []);
+  const inOneHour = useMemo(() => new Date(now.getTime() + 60 * 60 * 1000), [now]);
+  const [overrideStart, setOverrideStart] = useState<string>(fmtDateTimeLocal(now));
+  const [overrideEnd, setOverrideEnd] = useState<string>(fmtDateTimeLocal(inOneHour));
+  const [overrideNote, setOverrideNote] = useState<string>("");
+
+  const addOverrideMutation = useStandardMutation({
+    mutationFn: () =>
+      apiFetch<ScheduleResponseDto>(`/teams/${encodeURIComponent(team)}/schedule/overrides`, {
+        method: "POST",
+        body: JSON.stringify({
+          userId: overrideUserId,
+          startAt: new Date(overrideStart).toISOString(),
+          endAt: new Date(overrideEnd).toISOString(),
+          note: overrideNote || undefined,
+        }),
+      }),
+    onSuccess: () => {
+      setScheduleError(null);
+      setScheduleStatus("Override added.");
+      setOverrideNote("");
+      void queryClient.invalidateQueries({ queryKey: ["team", team] });
+      void queryClient.invalidateQueries({ queryKey: ["team", team, "schedule"] });
+    },
+    onError: (err: unknown) => {
+      setScheduleStatus(null);
+      setScheduleError(err instanceof ApiError ? err.message : "Failed to add override");
+    },
+  });
+
+  const deleteOverrideMutation = useStandardMutation({
+    mutationFn: (id: number) =>
+      apiFetch<ScheduleResponseDto>(
+        `/teams/${encodeURIComponent(team)}/schedule/overrides/${id}`,
+        { method: "DELETE" },
+      ),
+    onSuccess: () => {
+      setScheduleError(null);
+      setScheduleStatus("Override removed.");
+      void queryClient.invalidateQueries({ queryKey: ["team", team] });
+      void queryClient.invalidateQueries({ queryKey: ["team", team, "schedule"] });
+    },
+    onError: (err: unknown) => {
+      setScheduleStatus(null);
+      setScheduleError(err instanceof ApiError ? err.message : "Failed to remove override");
+    },
+  });
+
+  const memberById = useMemo(() => new Map(members.map((m) => [m.id, m])), [members]);
+  const orderedMembers = memberOrder.map((id) => memberById.get(id)).filter((m): m is TeamMemberDto => !!m);
+  const unrostered = members.filter((m) => !memberOrder.includes(m.id));
+
+  const moveMember = (id: number, dir: -1 | 1) => {
+    setMemberOrder((prev) => {
+      const i = prev.indexOf(id);
+      if (i < 0) return prev;
+      const j = i + dir;
+      if (j < 0 || j >= prev.length) return prev;
+      const next = [...prev];
+      [next[i], next[j]] = [next[j]!, next[i]!];
+      return next;
+    });
+  };
+
+  return (
+    <section>
+      <div
+        className="text-[10px] font-mono uppercase tracking-wider mb-1.5 flex items-center gap-1.5"
+        style={{ color: "var(--color-fg-muted)" }}
+      >
+        <Calendar className="w-3 h-3" /> On-call schedule
+        {scheduleQuery.data?.currentOnCallSource && (
+          <ScheduleSourceBadge source={scheduleQuery.data.currentOnCallSource} />
+        )}
+      </div>
+
+      {scheduleQuery.isLoading ? (
+        <div className="text-[11px]" style={{ color: "var(--color-fg-muted)" }}>
+          Loading schedule…
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {/* Rotation config */}
+          <div
+            className="rounded-md p-3 flex flex-col gap-2"
+            style={{ border: "1px solid var(--color-surface-border)" }}
+          >
+            <div className="flex items-center gap-2">
+              <label className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--color-fg-muted)" }}>
+                Cadence
+              </label>
+              <select
+                value={intervalHours}
+                onChange={(e) => setIntervalHours(parseInt(e.target.value, 10))}
+                disabled={!canEdit}
+                className="bg-transparent text-[11px] font-mono outline-none rounded px-2 py-1"
+                style={{
+                  color: "var(--color-fg-primary)",
+                  border: "1px solid var(--color-surface-border)",
+                }}
+              >
+                <option value={168}>weekly (168h)</option>
+                <option value={84}>twice-weekly (84h)</option>
+                <option value={24}>daily (24h)</option>
+                <option value={12}>every 12h</option>
+                <option value={8}>every 8h</option>
+                <option value={0}>disabled (use overrides only)</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--color-fg-muted)" }}>
+                Handoff anchor
+              </label>
+              <input
+                type="datetime-local"
+                value={handoffAnchor}
+                onChange={(e) => setHandoffAnchor(e.target.value)}
+                disabled={!canEdit}
+                className="bg-transparent text-[11px] font-mono outline-none rounded px-2 py-1"
+                style={{
+                  color: "var(--color-fg-primary)",
+                  border: "1px solid var(--color-surface-border)",
+                }}
+              />
+            </div>
+
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-wider mb-1" style={{ color: "var(--color-fg-muted)" }}>
+                Rotation order ({orderedMembers.length})
+              </div>
+              {orderedMembers.length === 0 ? (
+                <div className="text-[11px] mb-1" style={{ color: "var(--color-fg-muted)" }}>
+                  No members in rotation. Add some below.
+                </div>
+              ) : (
+                <ol className="flex flex-col gap-1">
+                  {orderedMembers.map((m, i) => (
+                    <li
+                      key={m.id}
+                      className="flex items-center gap-2 px-2 py-1 rounded"
+                      style={{
+                        backgroundColor: "var(--color-bg-elevated)",
+                        border: "1px solid var(--color-surface-border)",
+                      }}
+                    >
+                      <span className="text-[10px] font-mono opacity-60 w-4">{i + 1}.</span>
+                      <span className="text-xs flex-1 truncate">{m.displayName}</span>
+                      {canEdit && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => moveMember(m.id, -1)}
+                            disabled={i === 0}
+                            className="text-[10px] px-1.5 py-0.5 rounded disabled:opacity-30"
+                            style={{ border: "1px solid var(--color-surface-border)", color: "var(--color-fg-muted)" }}
+                            aria-label={`Move ${m.displayName} up`}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveMember(m.id, 1)}
+                            disabled={i === orderedMembers.length - 1}
+                            className="text-[10px] px-1.5 py-0.5 rounded disabled:opacity-30"
+                            style={{ border: "1px solid var(--color-surface-border)", color: "var(--color-fg-muted)" }}
+                            aria-label={`Move ${m.displayName} down`}
+                          >
+                            ↓
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setMemberOrder((prev) => prev.filter((id) => id !== m.id))
+                            }
+                            className="text-[10px] px-1.5 py-0.5 rounded"
+                            style={{ border: "1px solid var(--color-surface-border)", color: "#fca5a5" }}
+                            aria-label={`Remove ${m.displayName} from rotation`}
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              )}
+
+              {canEdit && unrostered.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {unrostered.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setMemberOrder((prev) => [...prev, m.id])}
+                      className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded"
+                      style={{
+                        backgroundColor: "var(--color-bg-elevated)",
+                        border: "1px dashed var(--color-surface-border)",
+                        color: "var(--color-fg-muted)",
+                      }}
+                    >
+                      <Plus className="w-3 h-3" />
+                      {m.displayName}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => saveMutation.mutate()}
+                disabled={saveMutation.isPending}
+                className="self-start mt-1 inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-md disabled:opacity-50"
+                style={{
+                  backgroundColor: "color-mix(in srgb, #7dd3fc 18%, transparent)",
+                  border: "1px solid color-mix(in srgb, #7dd3fc 40%, transparent)",
+                  color: "#7dd3fc",
+                }}
+              >
+                {saveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                Save rotation
+              </button>
+            )}
+          </div>
+
+          {/* Overrides */}
+          <div
+            className="rounded-md p-3 flex flex-col gap-2"
+            style={{ border: "1px solid var(--color-surface-border)" }}
+          >
+            <div className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--color-fg-muted)" }}>
+              Overrides &amp; swaps
+            </div>
+            {(scheduleQuery.data?.overrides ?? []).length === 0 ? (
+              <div className="text-[11px]" style={{ color: "var(--color-fg-muted)" }}>
+                No overrides scheduled.
+              </div>
+            ) : (
+              <ul className="flex flex-col gap-1">
+                {scheduleQuery.data!.overrides.map((o) => {
+                  const start = new Date(o.startAt);
+                  const end = new Date(o.endAt);
+                  const active = start <= now && end > now;
+                  return (
+                    <li
+                      key={o.id}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded text-[11px]"
+                      style={{
+                        backgroundColor: active
+                          ? "color-mix(in srgb, #fcd34d 12%, transparent)"
+                          : "var(--color-bg-elevated)",
+                        border: active
+                          ? "1px solid color-mix(in srgb, #fcd34d 35%, transparent)"
+                          : "1px solid var(--color-surface-border)",
+                      }}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold truncate">
+                          {o.user?.displayName ?? `user#${o.userId}`}
+                          {active && (
+                            <span className="ml-1.5 text-[9px] font-mono uppercase" style={{ color: "#fcd34d" }}>
+                              active
+                            </span>
+                          )}
+                        </div>
+                        <div className="font-mono text-[10px]" style={{ color: "var(--color-fg-muted)" }}>
+                          {formatTime(o.startAt)} → {formatTime(o.endAt)}
+                          {o.note ? ` · ${o.note}` : ""}
+                        </div>
+                      </div>
+                      {canEdit && (
+                        <button
+                          type="button"
+                          onClick={() => deleteOverrideMutation.mutate(o.id)}
+                          disabled={deleteOverrideMutation.isPending}
+                          className="text-[10px] px-1.5 py-0.5 rounded disabled:opacity-50"
+                          style={{ border: "1px solid var(--color-surface-border)", color: "#fca5a5" }}
+                          aria-label="Remove override"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            {canEdit && (
+              <div className="flex flex-col gap-1.5 mt-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <select
+                    value={overrideUserId}
+                    onChange={(e) =>
+                      setOverrideUserId(e.target.value === "" ? "" : parseInt(e.target.value, 10))
+                    }
+                    className="bg-transparent text-[11px] font-mono outline-none rounded px-2 py-1"
+                    style={{
+                      color: "var(--color-fg-primary)",
+                      border: "1px solid var(--color-surface-border)",
+                    }}
+                    aria-label="Override user"
+                  >
+                    <option value="">— pick a user —</option>
+                    {members.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.displayName}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="datetime-local"
+                    value={overrideStart}
+                    onChange={(e) => setOverrideStart(e.target.value)}
+                    className="bg-transparent text-[11px] font-mono outline-none rounded px-2 py-1"
+                    style={{ color: "var(--color-fg-primary)", border: "1px solid var(--color-surface-border)" }}
+                    aria-label="Override start"
+                  />
+                  <span className="text-[10px]" style={{ color: "var(--color-fg-muted)" }}>→</span>
+                  <input
+                    type="datetime-local"
+                    value={overrideEnd}
+                    onChange={(e) => setOverrideEnd(e.target.value)}
+                    className="bg-transparent text-[11px] font-mono outline-none rounded px-2 py-1"
+                    style={{ color: "var(--color-fg-primary)", border: "1px solid var(--color-surface-border)" }}
+                    aria-label="Override end"
+                  />
+                </div>
+                <input
+                  type="text"
+                  value={overrideNote}
+                  onChange={(e) => setOverrideNote(e.target.value)}
+                  placeholder="Optional note (covering for X, holiday, etc.)"
+                  maxLength={500}
+                  className="bg-transparent text-xs outline-none rounded px-2 py-1"
+                  style={{ color: "var(--color-fg-primary)", border: "1px solid var(--color-surface-border)" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => addOverrideMutation.mutate()}
+                  disabled={addOverrideMutation.isPending || overrideUserId === ""}
+                  className="self-start inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-md disabled:opacity-50"
+                  style={{
+                    backgroundColor: "color-mix(in srgb, #fcd34d 18%, transparent)",
+                    border: "1px solid color-mix(in srgb, #fcd34d 40%, transparent)",
+                    color: "#fcd34d",
+                  }}
+                >
+                  {addOverrideMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                  Add override
+                </button>
+              </div>
+            )}
+          </div>
+
+          {scheduleError && (
+            <div className="text-[11px]" style={{ color: "#fca5a5" }}>
+              {scheduleError}
+            </div>
+          )}
+          {scheduleStatus && (
+            <div className="text-[11px]" style={{ color: "#86efac" }}>
+              {scheduleStatus}
+            </div>
+          )}
+          {!canEdit && (
+            <div className="text-[11px]" style={{ color: "var(--color-fg-muted)" }}>
+              Read-only — admin or ops role required to edit the schedule.
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function TeamDetailModal({ team, onClose }: { team: string; onClose: () => void }) {
+  const { user } = useAuth();
+  const userRoles: string[] = (user as { roles?: string[] })?.roles ?? [];
+  const canEditSchedule = userRoles.some((r) => ADMIN_ROLES_FOR_SCHEDULE.has(r));
+
   const [pageMessage, setPageMessage] = useState("");
   const [urgency, setUrgency] = useState<"info" | "warning" | "critical">("warning");
   const [pageError, setPageError] = useState<string | null>(null);
@@ -748,6 +1281,8 @@ function TeamDetailModal({ team, onClose }: { team: string; onClose: () => void 
                   </div>
                 )}
               </section>
+
+              <ScheduleEditor team={team} members={detail.members} canEdit={canEditSchedule} />
 
               {detail.ownedApps.length > 0 && (
                 <section>
