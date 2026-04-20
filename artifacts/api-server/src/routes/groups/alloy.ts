@@ -50,6 +50,9 @@ export function register(router: IRouter): void {
   router.use("/alloy/admin", _readLimiter);
   router.use(lazyMatch("/alloy", () => import("../alloy-governance"), "alloy-governance"));
 
+  // Policy Authoring Studio — LLM-assisted ambiguity resolution.
+  router.use(lazyMatch("/alloy/policies", () => import("../alloy-policy-llm"), "alloy-policy-llm"));
+
   router.use("/alloy/skills", _readLimiter);
   router.use("/alloy/agents", _readLimiter);
   router.use("/alloy/performance", _readLimiter);

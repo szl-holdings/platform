@@ -3,8 +3,11 @@ import {
   Code2, Play, CheckCircle, XCircle, AlertTriangle, Clock, ChevronRight,
   ChevronDown, Plus, Trash2, RotateCcw, Save, History, FlaskConical,
   Eye, GitBranch, Shield, Zap, Info, User, Lock, ArrowRight,
-  CheckSquare, AlertCircle, Sparkles, FileCode, Copy,
+  CheckSquare, AlertCircle, Sparkles, FileCode, Copy, Wand2, Undo2,
 } from "lucide-react";
+
+const API_BASE = (import.meta.env.BASE_URL ?? "/").replace(/\/$/, "");
+const LLM_THRESHOLD = 0.7;
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e", card: "#111722" } as const;
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)", accent: "rgba(212,160,84,0.3)" } as const;
@@ -33,6 +36,35 @@ interface CompiledRule {
   confidence: number;
   warnings: string[];
   priority: number;
+  /** LLM-assist state — present when the operator triggered AI repair. */
+  llmAssisted?: boolean;
+  llmConfidence?: number;
+  llmStatus?: "idle" | "loading" | "applied" | "error";
+  llmError?: string;
+  llmNote?: string;
+  /** Snapshot of the deterministic parse so the operator can revert. */
+  deterministicSnapshot?: Pick<
+    CompiledRule,
+    "effect" | "conditions" | "requiredApproverRole" | "escalateTo" | "reason" | "confidence" | "warnings"
+  >;
+}
+
+interface LLMAssistResponseRule {
+  effect?: PolicyEffect;
+  conditions?: Array<{ field: string; operator: ParsedCondition["operator"]; value: unknown }>;
+  requiredApproverRole?: string;
+  escalateTo?: string;
+  reason?: string;
+  confidence?: number;
+  notes?: string;
+}
+
+interface LLMAssistResponse {
+  sentence: string;
+  result: LLMAssistResponseRule | null;
+  modelUsed: string;
+  llmAvailable: boolean;
+  fallbackReason?: string;
 }
 
 interface CompiledPolicy {
@@ -522,6 +554,155 @@ export default function AlloyPolicyCompilerPage() {
     }, 400);
   }
 
+  function applyLLMResponseToRule(rule: CompiledRule, llm: LLMAssistResponseRule, note?: string): CompiledRule {
+    const snapshot = rule.deterministicSnapshot ?? {
+      effect: rule.effect,
+      conditions: rule.conditions,
+      requiredApproverRole: rule.requiredApproverRole,
+      escalateTo: rule.escalateTo,
+      reason: rule.reason,
+      confidence: rule.confidence,
+      warnings: rule.warnings,
+    };
+    const llmConf =
+      typeof llm.confidence === "number" && Number.isFinite(llm.confidence)
+        ? Math.max(0, Math.min(1, llm.confidence))
+        : undefined;
+    const newConditions: ParsedCondition[] = (llm.conditions && llm.conditions.length > 0)
+      ? llm.conditions.map(c => ({
+          field: c.field,
+          operator: c.operator,
+          value: c.value,
+          label: `${c.field} ${c.operator} ${typeof c.value === "object" ? JSON.stringify(c.value) : String(c.value)}`,
+        }))
+      : rule.conditions;
+    return {
+      ...rule,
+      effect: llm.effect ?? rule.effect,
+      conditions: newConditions,
+      requiredApproverRole: llm.requiredApproverRole ?? rule.requiredApproverRole,
+      escalateTo: llm.escalateTo ?? rule.escalateTo,
+      reason: llm.reason ?? rule.reason,
+      confidence: Math.max(rule.confidence, llmConf ?? 0),
+      llmAssisted: true,
+      llmConfidence: llmConf,
+      llmStatus: "applied",
+      llmError: undefined,
+      llmNote: note ?? llm.notes,
+      deterministicSnapshot: snapshot,
+    };
+  }
+
+  function revertLLMOnRule(rule: CompiledRule): CompiledRule {
+    const snap = rule.deterministicSnapshot;
+    if (!snap) return { ...rule, llmAssisted: false, llmStatus: "idle" };
+    return {
+      ...rule,
+      effect: snap.effect,
+      conditions: snap.conditions,
+      requiredApproverRole: snap.requiredApproverRole,
+      escalateTo: snap.escalateTo,
+      reason: snap.reason,
+      confidence: snap.confidence,
+      warnings: snap.warnings,
+      llmAssisted: false,
+      llmConfidence: undefined,
+      llmStatus: "idle",
+      llmError: undefined,
+      llmNote: undefined,
+      deterministicSnapshot: undefined,
+    };
+  }
+
+  function recomputeOverallConfidence(rules: CompiledRule[]): number {
+    if (rules.length === 0) return 0;
+    return rules.reduce((s, r) => s + r.confidence, 0) / rules.length;
+  }
+
+  async function resolveSingleRuleViaLLM(ruleSnapshot: CompiledRule): Promise<void> {
+    const ruleId = ruleSnapshot.id;
+    // Mark loading via functional update so concurrent rule updates aren't clobbered.
+    setCompiled(prev => prev && {
+      ...prev,
+      rules: prev.rules.map(r => r.id === ruleId ? { ...r, llmStatus: "loading", llmError: undefined } : r),
+    });
+    try {
+      const res = await fetch(`${API_BASE}/api/alloy/policies/llm-assist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sentence: ruleSnapshot.sourceText,
+          deterministic: {
+            effect: ruleSnapshot.effect,
+            confidence: ruleSnapshot.confidence,
+            conditions: ruleSnapshot.conditions.map(c => ({ field: c.field, operator: c.operator, value: c.value })),
+            requiredApproverRole: ruleSnapshot.requiredApproverRole,
+            escalateTo: ruleSnapshot.escalateTo,
+            warnings: ruleSnapshot.warnings,
+          },
+        }),
+      });
+      const body = (await res.json()) as LLMAssistResponse & { error?: string };
+      if (!res.ok) {
+        throw new Error(body.error ?? `HTTP ${res.status}`);
+      }
+      if (!body.result) {
+        const reason = body.fallbackReason ?? "AI assistant returned no usable result.";
+        setCompiled(prev => prev && {
+          ...prev,
+          rules: prev.rules.map(r => r.id === ruleId ? { ...r, llmStatus: "error", llmError: reason } : r),
+        });
+        addAudit(`AI policy assist unavailable for rule "${ruleSnapshot.name.slice(0, 40)}…" — ${reason.slice(0, 80)}`);
+        return;
+      }
+      const llmResult = body.result;
+      setCompiled(prev => {
+        if (!prev) return prev;
+        const updated = prev.rules.map(r => r.id === ruleId ? applyLLMResponseToRule(r, llmResult, llmResult.notes) : r);
+        return { ...prev, rules: updated, overallConfidence: recomputeOverallConfidence(updated) };
+      });
+      addAudit(`AI assistant resolved ambiguous rule "${ruleSnapshot.name.slice(0, 40)}…" via ${body.modelUsed}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setCompiled(prev => prev && {
+        ...prev,
+        rules: prev.rules.map(r => r.id === ruleId ? { ...r, llmStatus: "error", llmError: msg } : r),
+      });
+      addAudit(`AI policy assist failed for rule "${ruleSnapshot.name.slice(0, 40)}…": ${msg.slice(0, 80)}`);
+    }
+  }
+
+  function handleResolveWithAI(ruleId: string) {
+    if (!compiled) return;
+    const rule = compiled.rules.find(r => r.id === ruleId);
+    if (!rule) return;
+    void resolveSingleRuleViaLLM(rule);
+  }
+
+  function handleRevertAI(ruleId: string) {
+    if (!compiled) return;
+    setCompiled(prev => {
+      if (!prev) return prev;
+      const updated = prev.rules.map(r => r.id === ruleId ? revertLLMOnRule(r) : r);
+      return { ...prev, rules: updated, overallConfidence: recomputeOverallConfidence(updated) };
+    });
+    addAudit("Operator reverted AI-assisted rule back to deterministic parse");
+  }
+
+  async function handleResolveAllWithAI() {
+    if (!compiled) return;
+    // Snapshot the ambiguous rule IDs once; resolve in parallel using
+    // functional state updates so each completion merges safely without
+    // clobbering siblings.
+    const ambiguousIds = compiled.rules
+      .filter(r => r.confidence < LLM_THRESHOLD && !r.llmAssisted)
+      .map(r => r.id);
+    const ruleSnapshots = ambiguousIds
+      .map(id => compiled.rules.find(r => r.id === id))
+      .filter((r): r is CompiledRule => Boolean(r));
+    await Promise.all(ruleSnapshots.map(r => resolveSingleRuleViaLLM(r)));
+  }
+
   function handleRollback(version: PolicyVersion) {
     setInput(version.input);
     const result = compileNaturalLanguage(version.input);
@@ -756,6 +937,15 @@ export default function AlloyPolicyCompilerPage() {
                         COMPILED POLICY
                       </div>
                       <div className="flex items-center gap-2">
+                        {compiled.rules.some(r => r.confidence < LLM_THRESHOLD && !r.llmAssisted) && (
+                          <button
+                            onClick={handleResolveAllWithAI}
+                            className="flex items-center gap-1 px-2 py-1 rounded text-[9px] font-semibold"
+                            style={{ color: "#a78bfa", background: "rgba(139,122,200,0.1)", border: "1px solid rgba(139,122,200,0.3)" }}
+                          >
+                            <Wand2 className="w-2.5 h-2.5" /> Resolve {compiled.rules.filter(r => r.confidence < LLM_THRESHOLD && !r.llmAssisted).length} ambiguous with AI
+                          </button>
+                        )}
                         <div className="text-[9px] font-mono" style={{ color: TEXT.tertiary }}>Confidence</div>
                         <div className="w-24">
                           <ConfidenceMeter value={compiled.overallConfidence} />
@@ -805,6 +995,20 @@ export default function AlloyPolicyCompilerPage() {
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-[11px] font-medium truncate" style={{ color: TEXT.primary }}>{rule.name}</span>
                                 <EffectBadge effect={rule.effect} />
+                                {rule.llmAssisted && (
+                                  <span className="inline-flex items-center gap-1 text-[9px] font-mono font-semibold tracking-wider px-1.5 py-0.5 rounded uppercase"
+                                    style={{ color: "#a78bfa", background: "rgba(139,122,200,0.1)", border: "1px solid rgba(139,122,200,0.3)" }}>
+                                    <Wand2 className="w-2.5 h-2.5" />
+                                    AI Assisted
+                                  </span>
+                                )}
+                                {!rule.llmAssisted && rule.confidence < LLM_THRESHOLD && (
+                                  <span className="inline-flex items-center gap-1 text-[9px] font-mono font-semibold tracking-wider px-1.5 py-0.5 rounded uppercase"
+                                    style={{ color: ACCENT, background: `${ACCENT}10`, border: `1px solid ${ACCENT}30` }}>
+                                    <AlertTriangle className="w-2.5 h-2.5" />
+                                    Ambiguous
+                                  </span>
+                                )}
                               </div>
                             </div>
                             <ConfidenceMeter value={rule.confidence} />
@@ -840,6 +1044,71 @@ export default function AlloyPolicyCompilerPage() {
                                   <Info className="w-2.5 h-2.5 mt-0.5 shrink-0" /> {w}
                                 </div>
                               ))}
+                              {(rule.confidence < LLM_THRESHOLD || rule.llmAssisted) && (
+                                <div className="mt-2 rounded p-2"
+                                  style={{ background: "rgba(139,122,200,0.06)", border: "1px solid rgba(139,122,200,0.22)" }}>
+                                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                                    <div className="flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider"
+                                      style={{ color: "#a78bfa" }}>
+                                      <Wand2 className="w-2.5 h-2.5" />
+                                      AI Ambiguity Resolver
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                      {rule.llmAssisted ? (
+                                        <button
+                                          onClick={() => handleRevertAI(rule.id)}
+                                          className="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-semibold"
+                                          style={{ color: TEXT.secondary, background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER.muted}` }}
+                                        >
+                                          <Undo2 className="w-2.5 h-2.5" /> Revert
+                                        </button>
+                                      ) : (
+                                        <button
+                                          onClick={() => handleResolveWithAI(rule.id)}
+                                          disabled={rule.llmStatus === "loading"}
+                                          className="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-semibold disabled:opacity-40"
+                                          style={{ color: "#a78bfa", background: "rgba(139,122,200,0.1)", border: "1px solid rgba(139,122,200,0.3)" }}
+                                        >
+                                          <Sparkles className="w-2.5 h-2.5" />
+                                          {rule.llmStatus === "loading" ? "Resolving…" : "Resolve with AI"}
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {rule.llmAssisted && (
+                                    <div className="flex flex-col gap-1">
+                                      <div className="flex items-center gap-3 text-[9px] font-mono" style={{ color: TEXT.tertiary }}>
+                                        <span>Deterministic: <span style={{ color: TEXT.secondary }}>
+                                          {((rule.deterministicSnapshot?.confidence ?? 0) * 100).toFixed(0)}%
+                                        </span></span>
+                                        {typeof rule.llmConfidence === "number" && (
+                                          <span>LLM: <span style={{ color: "#a78bfa" }}>
+                                            {(rule.llmConfidence * 100).toFixed(0)}%
+                                          </span></span>
+                                        )}
+                                        <span>Merged: <span style={{ color: ACCENT }}>
+                                          {(rule.confidence * 100).toFixed(0)}%
+                                        </span></span>
+                                      </div>
+                                      {rule.llmNote && (
+                                        <div className="text-[9px] font-mono italic" style={{ color: TEXT.tertiary }}>
+                                          AI note: {rule.llmNote}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                  {rule.llmStatus === "error" && rule.llmError && (
+                                    <div className="text-[9px] font-mono" style={{ color: "#ef4444" }}>
+                                      {rule.llmError}
+                                    </div>
+                                  )}
+                                  {!rule.llmAssisted && rule.llmStatus !== "error" && (
+                                    <div className="text-[9px] font-mono" style={{ color: TEXT.tertiary }}>
+                                      Confidence below {(LLM_THRESHOLD * 100).toFixed(0)}%. Use AI to suggest a structured rule; you can confirm or revert.
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>

@@ -11,6 +11,51 @@ export interface CompiledRuleIR {
   priority: number;
   confidence: number;
   warnings: string[];
+  /** True when an LLM was used to merge/repair this rule. */
+  llmAssisted?: boolean;
+  /** Confidence reported by the LLM for the structured parse, if any. */
+  llmConfidence?: number;
+  /** Pre-merge deterministic confidence — kept for transparency. */
+  deterministicConfidence?: number;
+}
+
+/**
+ * Structured output a caller-supplied LLM should return when asked to resolve
+ * an ambiguous policy sentence. All fields are optional; only those present
+ * are merged into the deterministic parse result.
+ */
+export interface LLMAssistResult {
+  effect?: PolicyEffect;
+  conditions?: PolicyCondition[];
+  requiredApproverRole?: string;
+  escalateTo?: string;
+  reason?: string;
+  /** LLM self-reported confidence in [0, 1]. */
+  confidence?: number;
+  /** Optional notes the studio can surface to the operator. */
+  notes?: string;
+}
+
+/**
+ * Caller-supplied async function that asks an LLM to resolve a single
+ * ambiguous sentence. The deterministic parse result is provided so the
+ * model can be prompted to *repair* gaps rather than re-parse from scratch.
+ *
+ * Implementations should return `null` (or throw) if the LLM is unavailable;
+ * the compiler will keep the deterministic result and surface a warning.
+ */
+export type LLMAssistFn = (
+  sentence: string,
+  deterministic: CompiledRuleIR,
+) => Promise<LLMAssistResult | null>;
+
+export interface CompilePolicyOptions {
+  /** Confidence below which an LLM fallback is invoked. Default 0.7. */
+  llmThreshold?: number;
+  /** Existing version number; the new policy version is `existingVersion + 1`. */
+  existingVersion?: number;
+  /** Stable id; auto-generated when omitted. */
+  policyId?: string;
 }
 
 export interface CompiledPolicyIR {
@@ -257,19 +302,128 @@ function splitToSentences(text: string): string[] {
     .filter(s => s.length > 5);
 }
 
+/**
+ * Default ambiguity threshold. Rules whose deterministic confidence falls
+ * below this are eligible for LLM repair.
+ */
+export const DEFAULT_LLM_THRESHOLD = 0.7;
+
+/**
+ * Merge a deterministic rule with an LLM-supplied repair. Only fields the
+ * model actually returned override the deterministic parse — gaps are
+ * preserved. Confidence is taken as the max of the two so a high-quality
+ * model lift is reflected, but never *reduces* a strong deterministic parse.
+ */
+export function mergeWithLLMResult(
+  deterministic: CompiledRuleIR,
+  llm: LLMAssistResult,
+): CompiledRuleIR {
+  const merged: CompiledRuleIR = { ...deterministic };
+  merged.deterministicConfidence = deterministic.confidence;
+  merged.llmAssisted = true;
+  if (typeof llm.confidence === "number" && Number.isFinite(llm.confidence)) {
+    merged.llmConfidence = Math.max(0, Math.min(1, llm.confidence));
+  }
+  if (llm.effect) merged.effect = llm.effect;
+  if (llm.conditions && llm.conditions.length > 0) {
+    // LLM owns the condition set whenever it returns one — the deterministic
+    // pass already produced what it could, and silent merging of two
+    // overlapping condition arrays produces hard-to-read rules.
+    merged.conditions = llm.conditions;
+  }
+  if (llm.requiredApproverRole) merged.requiredApproverRole = llm.requiredApproverRole;
+  if (llm.escalateTo) merged.escalateTo = llm.escalateTo;
+  if (llm.reason) merged.reason = llm.reason;
+  const llmConf = merged.llmConfidence ?? 0;
+  merged.confidence = Math.max(deterministic.confidence, llmConf);
+  if (llm.notes) {
+    merged.warnings = [...merged.warnings, `LLM note: ${llm.notes}`];
+  }
+  return merged;
+}
+
 export function compilePolicy(
   input: string,
   policyId?: string,
   existingVersion?: number
 ): PolicyCompilerResult {
-  const sentences = splitToSentences(input);
-  const parseWarnings: string[] = [];
+  return buildCompilerResult(
+    input,
+    splitToSentences(input).map((s, i) => sentenceToRule(s, i)),
+    { policyId, existingVersion },
+    [],
+  );
+}
 
-  if (sentences.length === 0) {
+/**
+ * Async compile that invokes a caller-supplied LLM for any rule whose
+ * deterministic confidence falls below `llmThreshold` (default 0.7).
+ *
+ * The LLM function is fully optional and dependency-injected — the
+ * policy-engine package itself has no AI runtime dependency, so it stays
+ * deterministic and unit-testable. Callers (e.g. the api-server route that
+ * exposes this to the studio UI) wire in the actual model client.
+ */
+export async function compilePolicyWithLLM(
+  input: string,
+  llmAssist: LLMAssistFn | null | undefined,
+  options: CompilePolicyOptions = {},
+): Promise<PolicyCompilerResult> {
+  const threshold = options.llmThreshold ?? DEFAULT_LLM_THRESHOLD;
+  const sentences = splitToSentences(input);
+  const deterministic = sentences.map((s, i) => sentenceToRule(s, i));
+  const extraWarnings: string[] = [];
+
+  if (!llmAssist) {
+    return buildCompilerResult(input, deterministic, options, extraWarnings);
+  }
+
+  const finalRules: CompiledRuleIR[] = await Promise.all(
+    deterministic.map(async (rule) => {
+      if (rule.confidence >= threshold) return rule;
+      try {
+        const llm = await llmAssist(rule.description, rule);
+        if (!llm) {
+          return {
+            ...rule,
+            warnings: [
+              ...rule.warnings,
+              "LLM fallback returned no result — kept deterministic parse.",
+            ],
+          };
+        }
+        return mergeWithLLMResult(rule, llm);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        return {
+          ...rule,
+          warnings: [...rule.warnings, `LLM fallback failed: ${msg}`],
+        };
+      }
+    }),
+  );
+
+  const llmAssistedCount = finalRules.filter((r) => r.llmAssisted).length;
+  if (llmAssistedCount > 0) {
+    extraWarnings.push(
+      `LLM assistance was used on ${llmAssistedCount} ambiguous rule${llmAssistedCount === 1 ? "" : "s"}. Review and confirm before activating.`,
+    );
+  }
+
+  return buildCompilerResult(input, finalRules, options, extraWarnings);
+}
+
+function buildCompilerResult(
+  input: string,
+  ruleIRs: CompiledRuleIR[],
+  options: CompilePolicyOptions,
+  extraWarnings: string[],
+): PolicyCompilerResult {
+  const parseWarnings: string[] = [...extraWarnings];
+  if (ruleIRs.length === 0) {
     parseWarnings.push("No parseable rules found. Write rules as complete sentences.");
   }
 
-  const ruleIRs = sentences.map((s, i) => sentenceToRule(s, i));
   const domains = extractDomains(input);
   const actions = extractActions(input);
 
@@ -294,8 +448,8 @@ export function compilePolicy(
   };
 
   const now = Date.now();
-  const id = policyId ?? `pol_compiled_${now}`;
-  const version = existingVersion != null ? existingVersion + 1 : 1;
+  const id = options.policyId ?? `pol_compiled_${now}`;
+  const version = options.existingVersion != null ? options.existingVersion + 1 : 1;
 
   const policy: Policy = {
     id,
