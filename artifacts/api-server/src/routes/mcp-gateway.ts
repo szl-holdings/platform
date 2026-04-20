@@ -7,7 +7,7 @@ import {
   agentMeshExposuresTable,
   approvalRequestsTable,
 } from "@szl-holdings/db";
-import { and, count, desc, eq, gte, isNull, sql } from "drizzle-orm";
+import { and, avg, count, desc, eq, gte, isNotNull, isNull, sql } from "drizzle-orm";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 
@@ -244,14 +244,23 @@ export interface GatewayLiveSummary {
 export async function getGatewayLiveSummary(eventLimit = 50): Promise<GatewayLiveSummary> {
   await ensureSeeded();
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const [stats, eventRows] = await Promise.all([
+  const [stats, eventRows, latencyRows] = await Promise.all([
     loadStats(since),
     db
       .select()
       .from(agentMeshGatewayEventsTable)
       .orderBy(desc(agentMeshGatewayEventsTable.occurredAt))
       .limit(eventLimit),
+    db
+      .select({ avg: avg(agentMeshGatewayEventsTable.latencyMs) })
+      .from(agentMeshGatewayEventsTable)
+      .where(and(
+        gte(agentMeshGatewayEventsTable.occurredAt, since),
+        isNotNull(agentMeshGatewayEventsTable.latencyMs),
+      )),
   ]);
+  const avgRaw = latencyRows[0]?.avg;
+  const averageLatencyMs = avgRaw == null ? null : Math.round(Number(avgRaw));
   const events = eventRows.map((r) => ({
     id: r.id,
     ruleId: r.ruleId,
@@ -275,10 +284,10 @@ export async function getGatewayLiveSummary(eventLimit = 50): Promise<GatewayLiv
     quarantinedLast24h: stats.quarantined,
     loggedLast24h: stats.logged,
     allowedLast24h: stats.allowed,
-    // The events table does not record per-call latency yet, so we cannot
-    // surface a real average. Return null so the UI can render a placeholder
-    // instead of a misleading zero.
-    averageLatencyMs: null,
+    // Mean of the latency_ms column over the last 24h, ignoring rows
+    // recorded before the column existed (NULL). Null when no timed
+    // calls have been observed in the window.
+    averageLatencyMs,
     events,
   };
 }
@@ -367,6 +376,7 @@ router.get("/mcp-gateway/events", async (req: Request, res: Response) => {
 });
 
 router.post("/mcp-gateway/proxy", async (req: Request, res: Response) => {
+  const proxyStartedAt = performance.now();
   try {
     await ensureSeeded();
     const body = (req.body ?? {}) as Record<string, unknown>;
@@ -411,9 +421,14 @@ router.post("/mcp-gateway/proxy", async (req: Request, res: Response) => {
       : null;
     const incrementViolation = decision !== "allowed";
 
-    // All persistence — exposure (if any), gateway event, and rule
-    // counters — runs in a single transaction so we never return a
-    // linkedExposureId or eventId that wasn't actually committed.
+    // Capture how long the gateway spent evaluating this call (rule
+    // lookup + policy check) right before persisting, so the Containment
+    // Rules dashboard can surface a real 24h average instead of a
+    // placeholder. All persistence — exposure (if any), gateway event,
+    // and rule counters — runs in a single transaction so we never
+    // return a linkedExposureId or eventId that wasn't actually
+    // committed.
+    const latencyMs = Math.max(0, Math.round(performance.now() - proxyStartedAt));
     try {
       await db.transaction(async (tx) => {
         if (exposureRow) {
@@ -431,6 +446,7 @@ router.post("/mcp-gateway/proxy", async (req: Request, res: Response) => {
           reason: effectiveReason,
           enforcementMode: rule.enforcementMode,
           linkedExposureId: exposureRow ? exposureRow.id : null,
+          latencyMs,
           occurredAt,
         });
         if (incrementViolation) {

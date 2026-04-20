@@ -124,6 +124,7 @@ export const agentMeshGatewayEventsTable = pgTable(
     reason: text("reason").notNull().default(""),
     enforcementMode: text("enforcement_mode").notNull(),
     linkedExposureId: text("linked_exposure_id"),
+    latencyMs: integer("latency_ms"),
     occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
