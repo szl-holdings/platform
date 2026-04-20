@@ -147,6 +147,33 @@ jobs:
             dist: artifacts/szl-holdings/dist/public
             port: 3000
             spec: stephen-site.spec.ts
+          # correlation-deeplinks.spec.ts targets multiple artifacts
+          # (Vessels, Terra, Command + secondary aegis/carlota/prism/lyte).
+          # We bind this matrix entry to the command build because the
+          # cross-platform evidence registry and correlation pages live there;
+          # the spec uses isReachable() / appAvailable guards so the
+          # vessels/terra/aegis/carlota detail-page tests skip cleanly when
+          # those artifacts are not being served on this runner.
+          - app: correlation-deeplinks
+            filter: "@workspace/command"
+            dist: artifacts/command/dist/public
+            port: 3005
+            spec: correlation-deeplinks.spec.ts
+          # decision-theater.spec.ts exercises the nine-stage governed
+          # decision loop embedded at /core in the SZL Holdings build.
+          - app: decision-theater
+            filter: "@workspace/szl-holdings"
+            dist: artifacts/szl-holdings/dist/public
+            port: 3000
+            spec: decision-theater.spec.ts
+          # a11y.spec.ts runs axe-core checks against the SZL Holdings public
+          # routes. A dedicated `a11y` job below also runs this spec; keeping
+          # both surfaces the failure inside the e2e-app matrix view too.
+          - app: a11y
+            filter: "@workspace/szl-holdings"
+            dist: artifacts/szl-holdings/dist/public
+            port: 3000
+            spec: a11y.spec.ts
           # No specs are currently excluded from this matrix.
           # All registered specs use appAvailable guards and call testInfo.skip()
           # when the target path is unavailable — they will not cause false failures.
