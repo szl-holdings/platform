@@ -31,6 +31,7 @@ export const NAMED_JOB_TYPES = {
   HOURLY_GUARDIAN_APPROVAL_EXPIRY: "hourly_guardian_approval_expiry",
   ON_CALL_HANDOFF_NOTIFY: "on_call_handoff_notify",
   STUCK_RUN_NOTIFY: "stuck_run_notify",
+  DAILY_LIVE_SIGNAL_REFRESH: "daily_live_signal_refresh",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -82,6 +83,7 @@ registerEntry({ type: NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, name: "Launch Publish
 registerEntry({ type: NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, name: "Agent Mesh Telemetry Scan", description: "Re-scans local agent runtime config files (Claude Desktop, Cursor, Claude Code, Codex), refreshes the Sentra Mesh Map data, recomputes the resilience index, and fires Sentra alerts whenever the overall index or any sub-index drops materially since the last run. Runs every 15 minutes per scheduled org.", schedule: "hourly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, name: "Stuck Run Notifier", description: "Runs every 5 minutes. Scans platform_workflow_runs for runs that have been in state='running' past the stuck threshold (default 10 minutes since startedAt) and pushes a one-time 'agent run stuck' alert to the run owner via Expo, deep-linking to /(shell)/intelligence/run-review. Idempotent via the alloy_run_failure_notifications dedup table — re-running the sweeper never duplicates an alert.", schedule: "hourly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, name: "On-Call Hand-off Notifier", description: "Runs every minute. Inspects on_call_schedules + on_call_shifts for upcoming hand-off boundaries (rotation slot edges, override start/end). Notifies the next on-call user N minutes before (per schedule.warningMinutes, default 30) and at the moment of hand-off. Idempotent via on_call_handoff_notifications dedup table. Uses dispatchToExternalChannels so email/SMS/Slack work per the recipient's notification_preferences.", schedule: "minutely" as JobScheduleEntry["schedule"], enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, name: "Daily Live Signal Refresh", description: "Rolls timestamps forward on the seeded firestorm_incidents, vessels_alerts, and vessels_events delay rows so the Innovation Layer always shows fresh-looking activity (within the last 24-48h). Also rotates one row per table — closing the oldest open record and re-opening the most-recently-resolved one — to give the feed visible motion across reloads. Idempotent and safe to run repeatedly.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, name: "Guardian Approval Expiry Sweeper", description: "Scans guardian_approval_requests every 5 minutes for pending entries whose expires_at is in the past and flips them to status='expired' so agents waiting on the request can detect the timeout and retry or escalate. Per-tier expiry windows are configured in TIER_CONTROLS (T2=24h, T3=48h, T4=72h; T0/T1/T5 do not auto-expire).", schedule: "hourly", enabled: true });
 
 durableJobQueue.register(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, async (job) => {
@@ -1768,6 +1770,39 @@ durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => 
       lastStatus: "failed",
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "daily_live_signal_refresh: starting");
+  try {
+    const { refreshLiveSignals } = await import("../scripts/refresh-live-signals");
+    const result = await refreshLiveSignals();
+    serverTelemetry.recordBusinessEvent({
+      type: "daily_live_signal_refresh_completed",
+      domain: "innovation-engine",
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: {
+        firestormShifted: result.firestorm.shifted,
+        firestormRotated: result.firestorm.rotated,
+        vesselsAlertsShifted: result.vesselsAlerts.shifted,
+        vesselsAlertsRotated: result.vesselsAlerts.rotated,
+        vesselsDelaysShifted: result.vesselsDelayEvents.shifted,
+        vesselsDelaysRotated: result.vesselsDelayEvents.rotated,
+      },
+    });
+    updateRegistry(NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, ...result }, "daily_live_signal_refresh: complete");
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "daily_live_signal_refresh: fatal");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, {
+      lastStatus: "failed",
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH)?.failCount || 0) + 1,
     });
     throw err;
   }

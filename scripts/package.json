@@ -17,6 +17,7 @@
     "seed:governance": "tsx ./seed-governance.ts",
     "seed:marine-extended": "tsx ./seed-marine-extended.ts",
     "seed:live-signals": "tsx ./seed-live-signals.ts",
+    "refresh:live-signals": "tsx ./refresh-live-signals.ts",
     "seed:agent-os": "tsx ./seed-agent-os.ts",
     "seed:forge": "tsx ./seed-forge.ts",
     "smoke:forge": "tsx ./smoke-forge.ts",
