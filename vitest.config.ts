@@ -153,27 +153,10 @@ export default defineConfig({
       "lib/scene-export/src/__tests__/**/*.test.ts",
       "lib/shared-ui/src/**/*.test.ts",
       "lib/shared-ui/src/**/*.test.tsx",
-      // packages/ontology, packages/constellation have own vitest.config.ts — included via turbo
-      "packages/trace-graph/src/**/*.test.ts",
-      "packages/memory-fabric/src/**/*.test.ts",
-      "packages/tool-mesh/src/**/*.test.ts",
-      "packages/alloy/src/**/*.test.ts",
-      "packages/cognitive-observability/src/**/*.test.ts",
-      "packages/reflection-engine/src/**/*.test.ts",
-      "packages/replay-core/src/**/*.test.ts",
-      "packages/planner/src/**/*.test.ts",
-      "packages/self-model/src/**/*.test.ts",
-      "packages/verifier/src/**/*.test.ts",
-      "packages/skill-library/src/**/*.test.ts",
-      "packages/cognitive-runtime/src/**/*.test.ts",
-      "packages/policy-engine/src/**/*.test.ts",
-      "packages/action-engine/src/**/*.test.ts",
-      "packages/connectors/src/**/*.test.ts",
-      "packages/telemetry-standards/src/**/*.test.ts",
       "scripts/**/*.test.js",
       "scripts/**/*.test.ts",
-      // NOTE: packages/guardian, packages/eval-os, packages/eval-forge have their
-      // own per-package vitest.config.ts and are run by turbo via their test scripts.
+      // NOTE: All packages/* test suites have their own per-package vitest.config.ts
+      // and are run by turbo via their test scripts.
     ],
     exclude: [
       "tests/e2e/**",
