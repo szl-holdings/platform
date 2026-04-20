@@ -33,7 +33,7 @@ Work through this list from top to bottom. The order is priority-sorted.
 
 | # | Action | Where | Instruction | Acceptance Test |
 |---|--------|--------|-------------|-----------------|
-| 9 | ✅ DONE — `INTEGRATION_TEST_TOKEN` removed from source (task #721). Add to GitHub Secrets | GitHub → Settings → Secrets → Actions | Generate `openssl rand -hex 32`; add as `INTEGRATION_TEST_TOKEN` in GitHub Secrets | Integration tests pass in CI; token not visible in source |
+| 9 | ✅ DONE — `INTEGRATION_TEST_TOKEN` removed from source (task #721) and provisioned as both Replit Secret and GitHub Actions Secret (task #1398; wired in `.github/workflows/ci.yml` integration-test job) | — | — | Integration tests pass in CI; token not visible in source |
 | 10 | Add `REPLIT_PROD_DEPLOY_TOKEN` and `REPLIT_PROD_APP_ID` | GitHub → Settings → Secrets → Actions | Generate in Replit deployment settings for the production deployment; paste both into GitHub Secrets | CD pipeline can deploy to production |
 | 11 | Add `REPLIT_STAGING_DEPLOY_TOKEN` and `REPLIT_STAGING_APP_ID` | GitHub → Settings → Secrets → Actions | Generate in Replit deployment settings for staging; paste into GitHub Secrets | CD pipeline can deploy to staging |
 | 12 | Add `EXPO_TOKEN` | EAS Secrets / GitHub Secrets | Log into Expo account → Access Tokens → Create; add as `EXPO_TOKEN` in GitHub Secrets | EAS builds succeed in CI |

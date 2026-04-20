@@ -122,6 +122,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/szl_test
           NODE_ENV: test
           CI: true
+          INTEGRATION_TEST_TOKEN: ${{ secrets.INTEGRATION_TEST_TOKEN }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:

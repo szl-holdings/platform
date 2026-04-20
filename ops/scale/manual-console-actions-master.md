@@ -34,7 +34,7 @@ The discipline: every manual action either (a) gets automated or
 | G2 | Set GitHub Secret `REPLIT_STAGING_APP_ID` | Once | Founder |
 | G3 | Set GitHub Secret `REPLIT_PROD_DEPLOY_TOKEN` | Once + on rotation | Founder |
 | G4 | Set GitHub Secret `REPLIT_PROD_APP_ID` | Once | Founder |
-| G5 | Set GitHub Secret `INTEGRATION_TEST_TOKEN` | Once + on rotation | Founder |
+| G5 | ✅ DONE — `INTEGRATION_TEST_TOKEN` set in GitHub Secrets and Replit Secrets; wired into `.github/workflows/ci.yml` integration-test job (task #1398) | Once + on rotation | Founder |
 | G6 | Tag a release `vX.Y.Z` and push | Per release | Founder |
 | G7 | Archive legacy CI workflow (retain as archival record; disable triggers) | Once — COMPLETED | Engineering |
 | G8 | Update `e2e.yml` matrix to remove archived app specs | Once — COMPLETED | Engineering |
