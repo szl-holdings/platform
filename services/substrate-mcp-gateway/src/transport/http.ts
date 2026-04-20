@@ -171,6 +171,26 @@ export function createHttpTransport(): express.Router {
   router.use(express.json({ limit: "4mb" }));
   router.use(authMiddleware);
 
+  // ── Index (public) ────────────────────────────────────────────────────────
+  // Returning 200 at the router root lets the artifact router probe `/mcp/`
+  // and confirm the service is up before considering the workflow ready.
+
+  router.get("/", (_req, res) => {
+    res.json({
+      service: SERVER_INFO.name,
+      version: SERVER_INFO.version,
+      protocol: SERVER_INFO.protocolVersion,
+      endpoints: {
+        health: "GET /mcp/health",
+        tools: "GET /mcp/tools",
+        resources: "GET /mcp/resources",
+        prompts: "GET /mcp/prompts",
+        jsonrpc: "POST /mcp",
+        sse: "GET /mcp/sse",
+      },
+    });
+  });
+
   // ── Health ────────────────────────────────────────────────────────────────
 
   router.get("/health", (_req, res) => {

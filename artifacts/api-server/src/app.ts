@@ -1,4 +1,5 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
+import nodeHttp from "node:http";
 import * as Sentry from "@sentry/node";
 import cors from "cors";
 import helmet from "helmet";
@@ -196,6 +197,41 @@ app.use(express.urlencoded({
 app.get("/", (_req: Request, res: Response) => {
   res.status(200).send("OK");
 });
+
+// --- Substrate MCP gateway proxy ---------------------------------------------
+// Proxies /mcp/* to the substrate-mcp-gateway sidecar (started by start.sh).
+// Mounted before auth/csrf middleware so MCP traffic uses its own
+// SUBSTRATE_GATEWAY_API_KEY bearer auth rather than the api-server session.
+{
+  const mcpGatewayPort = parseInt(process.env.SUBSTRATE_GATEWAY_PORT ?? "8099", 10);
+  app.use("/mcp", (req: Request, res: Response) => {
+    const proxyReq = nodeHttp.request(
+      {
+        host: "127.0.0.1",
+        port: mcpGatewayPort,
+        method: req.method,
+        path: "/mcp" + (req.url === "/" ? "" : req.url),
+        headers: { ...req.headers, host: `127.0.0.1:${mcpGatewayPort}` },
+      },
+      (proxyRes) => {
+        res.status(proxyRes.statusCode ?? 502);
+        for (const [k, v] of Object.entries(proxyRes.headers)) {
+          if (v !== undefined) res.setHeader(k, v as string | string[]);
+        }
+        proxyRes.pipe(res);
+      },
+    );
+    proxyReq.on("error", (err) => {
+      if (!res.headersSent) {
+        res.status(502).json({ error: "mcp_gateway_unreachable", detail: err.message });
+      } else {
+        res.end();
+      }
+    });
+    req.pipe(proxyReq);
+  });
+}
+// -----------------------------------------------------------------------------
 
 app.use(csrfMiddleware);
 app.use(authMiddleware);

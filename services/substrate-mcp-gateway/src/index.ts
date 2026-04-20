@@ -6,7 +6,7 @@
  *   - stdio transport (for MCP hosts)     → node dist/index.js --stdio
  *
  * Environment variables:
- *   PORT                        — HTTP port (default: 3700)
+ *   SUBSTRATE_GATEWAY_PORT      — HTTP port (default: 3700; falls back to PORT)
  *   SUBSTRATE_GATEWAY_API_KEY   — Bearer token required for write operations
  *   SUBSTRATE_SIGNING_KEY       — 32-byte hex key for evidence bundle HMAC
  *   NODE_ENV                    — production | development
@@ -19,7 +19,10 @@ import { startStdioTransport } from "./transport/stdio.js";
 import { SERVER_INFO } from "./descriptor.js";
 
 const IS_STDIO = process.argv.includes("--stdio");
-const PORT = parseInt(process.env["PORT"] ?? "3700", 10);
+const PORT = parseInt(
+  process.env["SUBSTRATE_GATEWAY_PORT"] ?? process.env["PORT"] ?? "3700",
+  10,
+);
 const IS_PRODUCTION = process.env["NODE_ENV"] === "production";
 
 // Startup check: warn loudly if the workflow registry is empty. Without any
@@ -82,7 +85,7 @@ if (IS_STDIO) {
     });
   });
 
-  const server = app.listen(PORT, () => {
+  const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(
       `[substrate-mcp-gateway] ${SERVER_INFO.name} v${SERVER_INFO.version} ` +
       `listening on port ${PORT}`,

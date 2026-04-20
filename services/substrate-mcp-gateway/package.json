@@ -24,13 +24,13 @@
     "@workspace/approvals-inbox": "workspace:*",
     "@workspace/tool-mesh": "workspace:*",
     "@workspace/cognitive-observability": "workspace:*",
-    "express": "^4.21.0",
+    "express": "^5.0.0",
     "zod": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",
     "@types/node": "catalog:",
-    "@types/express": "^4.17.21",
+    "@types/express": "^5.0.0",
     "tsx": "catalog:"
   }
 }

@@ -518,7 +518,7 @@ export const agentMesh: AgentMeshState = {
   ],
 
   gateway: {
-    endpoint: "https://mcp-gateway.sentra.szl.local/v1/proxy",
+    endpoint: `${typeof window !== "undefined" && window.location?.origin ? window.location.origin : ""}/mcp/`,
     status: "online",
     uptimeSeconds: 86_400 * 7 + 3_600 * 4,
     callsLast24h: 24_318,

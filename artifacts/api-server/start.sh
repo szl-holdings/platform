@@ -69,10 +69,35 @@ if [ "${WATCH_NEXUS:-1}" = "1" ]; then
   ) >"$NEXUS_WATCH_LOG" 2>&1 &
   NEXUS_WATCH_PID=$!
   echo "[api-server start.sh] NEXUS watcher pid=$NEXUS_WATCH_PID"
-  trap 'if [ -n "$NEXUS_WATCH_PID" ] && kill -0 "$NEXUS_WATCH_PID" 2>/dev/null; then kill "$NEXUS_WATCH_PID" 2>/dev/null || true; fi' EXIT INT TERM
 else
   echo "[api-server start.sh] WATCH_NEXUS=0 — skipping NEXUS watcher."
 fi
+# -----------------------------------------------------------------------------
+
+# --- Substrate MCP gateway sidecar -------------------------------------------
+# The substrate MCP gateway runs as a sibling Node process so that the api-server
+# workflow exposes both the main API (on :8080) and the MCP gateway (on :8099).
+# The api-server router proxies /mcp/* to localhost:8099.
+SUBSTRATE_GATEWAY_PORT="${SUBSTRATE_GATEWAY_PORT:-8099}"
+export SUBSTRATE_GATEWAY_PORT
+echo "[api-server start.sh] Launching substrate-mcp-gateway sidecar on port ${SUBSTRATE_GATEWAY_PORT}..."
+(
+  cd /home/runner/workspace/services/substrate-mcp-gateway
+  exec pnpm start 2>&1 | sed -u 's/^/[mcp-gateway] /'
+) &
+GATEWAY_PID=$!
+
+# Combined cleanup trap: kill both the NEXUS watcher (if running) and the
+# substrate MCP gateway sidecar when this script exits.
+cleanup() {
+  if [ -n "$NEXUS_WATCH_PID" ] && kill -0 "$NEXUS_WATCH_PID" 2>/dev/null; then
+    kill "$NEXUS_WATCH_PID" 2>/dev/null || true
+  fi
+  if [ -n "$GATEWAY_PID" ] && kill -0 "$GATEWAY_PID" 2>/dev/null; then
+    kill "$GATEWAY_PID" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT INT TERM
 # -----------------------------------------------------------------------------
 
 exec node --max-old-space-size=1536 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs
