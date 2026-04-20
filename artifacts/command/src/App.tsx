@@ -120,6 +120,7 @@ const CognitivePlanner = lazy(() => import("./pages/cognitive/planner"));
 const CognitiveVerifier = lazy(() => import("./pages/cognitive/verifier"));
 const CognitiveReflection = lazy(() => import("./pages/cognitive/reflection"));
 const SubstrateCommandCenter = lazy(() => import("./pages/substrate").then(m => ({ default: m.SubstrateCommandCenter })));
+const CognitiveConsolesOverview = lazy(() => import("./pages/cognitive/overview"));
 const CognitiveTraces = lazy(() => import("./pages/cognitive/traces"));
 const CognitiveEvals = lazy(() => import("./pages/cognitive/evals"));
 const CognitivePolicies = lazy(() => import("./pages/cognitive/policies"));
@@ -290,6 +291,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: "/cognitive/planner", label: "Planner", group: "Cognitive" },
   { href: "/cognitive/verifier", label: "Verifier", group: "Cognitive" },
   { href: "/cognitive/reflection", label: "Reflection", group: "Cognitive" },
+  { href: "/cognitive/overview", label: "Cognitive Consoles Overview", group: "Cognitive" },
   { href: "/cognitive/traces", label: "Traces", group: "Cognitive" },
   { href: "/cognitive/evals", label: "Evals", group: "Cognitive" },
   { href: "/cognitive/policies", label: "Policies", group: "Cognitive" },
@@ -514,6 +516,7 @@ function AppShell() {
               <Route path="/cognitive/planner" component={() => <CognitivePlanner />} />
               <Route path="/cognitive/verifier" component={() => <CognitiveVerifier />} />
               <Route path="/cognitive/reflection" component={() => <CognitiveReflection />} />
+              <Route path="/cognitive/overview" component={() => <CognitiveConsolesOverview />} />
               <Route path="/cognitive/traces" component={() => <CognitiveTraces />} />
               <Route path="/cognitive/evals" component={() => <CognitiveEvals />} />
               <Route path="/cognitive/policies" component={() => <CognitivePolicies />} />

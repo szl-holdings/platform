@@ -158,6 +158,7 @@ const OPERATIONS_NAV: NavGroup[] = [
   {
     section: "Cognitive Consoles",
     items: [
+      { href: "/cognitive/overview", label: "Consoles Overview", icon: Brain },
       { href: "/cognitive/traces", label: "Trace Replay", icon: Clapperboard },
       { href: "/cognitive/evals", label: "Eval Console", icon: FlaskConical },
       { href: "/cognitive/policies", label: "Policy Console", icon: ShieldCheck },
