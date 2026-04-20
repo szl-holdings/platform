@@ -23,6 +23,46 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 
 ---
 
+## [1.0.0-alpha] — 2026-04-20
+
+First public alpha release. Tagged on the public `szl-holdings/szl-holdings-platform` repo and published to the [Releases page](https://github.com/szl-holdings/szl-holdings-platform/releases/tag/v1.0.0-alpha) as the first shipping-cadence signal for outside reviewers.
+
+### Active Artifact Count
+- **14 registered artifacts** in the monorepo across web, mobile, video, and design surfaces: SZL Holdings dashboard, Aegis (investor pitch deck), Vessels (maritime intelligence), Terra (real estate intelligence), Pulse (executive briefing), Sentra (cyber resilience), Counsel (legal matter command), Carlota Jo Consulting, Unified Command, Lyte Decision Intelligence, NEXUS sandbox, SZL Holdings mobile command, the governed-autonomy demo video, and the API server.
+
+### Platform Primitives
+The six structural primitives that differentiate this platform from dashboards, copilots, and workflow tools:
+
+1. **Outcome Graph** — closed-loop tracking from recommendation to decision to outcome
+2. **Proof Chain** — immutable, verifiable audit trail with provenance on every AI output
+3. **Covenant Policy** — human-in-the-loop enforced at the policy layer; AI cannot bypass it
+4. **Decision Simulation** — probabilistic simulation with confidence intervals before action
+5. **Workflow Engine** — durable multi-step orchestration with agent coordination
+6. **Event Fabric** — cross-domain signal backbone normalizing and correlating events across domain packs
+
+### Key Milestones
+- **Sovereign Execution Substrate Phase 1** (`@szl/substrate`) landed: policy-shaped graph compiler, retry/timeout engine, hash-stable evidence-chained Journal, confidence-budget routing, OpenTelemetry layer, and a Python worker channel
+- **Trust posture** in place on the public repo: pinned-SHA CodeQL, Dependabot (weekly, grouped), Gitleaks scheduled scan, secret-scanning + push protection, branch protection on `main`/`master`, signed `SECURITY.md` and `CONTRIBUTING.md`
+- **Phase D public-readiness audit** shipped (`audit/investor/public-readiness-scorecard.md`) covering thesis, architecture, trust, screenshots, setup, hygiene, releases, leak/clutter, org-profile coherence, and cross-document claim consistency
+- **Cross-document fact base** under `docs/platform-facts.md` (machine-generated; do not hand-edit)
+
+### Known Limitations
+- Stripe revenue activation live for a subset of domain packs only — full rollout in progress
+- Enterprise SSO / SCIM 2.0 provisioning, OpenAPI developer portal, Redis session store, and Sentry error tracking are listed under `## [Unreleased]` and not yet GA
+- Some README screenshots reflect design state and should be re-captured against the live UI once all workflows are running
+- Investor carousel under `demo-assets/` is flagged for migration to a private channel
+
+### Reference
+- Architecture: `docs/architecture/architecture.md`
+- Platform Primitives: `docs/architecture/platform-primitives.md`
+- Trust Center: `docs/trust/trust-center.md`
+- Versioning policy: `docs/releases/versioning-policy.md`
+- Release workflow: `.github/workflows/release.yml`
+
+_This is an alpha prerelease. APIs, schemas, and policy contracts may change before `v1.0.0`._
+
+---
+
 ## Task #2390 — Sovereign Execution Substrate Phase 1 — 2026-04-19
 
 ### Added
