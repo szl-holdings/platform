@@ -2025,7 +2025,8 @@ router.post("/bridge/invoke", perUserWriteSlidingLimiter, validateBody(bodyShape
 
 const APP_CAPABILITIES: Record<string, { name: string; endpoints: string[] }> = {
   aegis: { name: "Aegis — Defense & Intelligence", endpoints: ["/api/agent-mesh/state", "/api/narratives/sentra-ransomware", "/api/infrastructure/status"] },
-  sentra: { name: "Sentra — Cyber Resilience", endpoints: ["/api/agent-mesh/state", "/api/narratives/sentra-ransomware"] },
+  sentra: { name: "Sentra — Cyber Resilience", endpoints: ["/api/firestorm/live/threat-summary", "/api/firestorm/live/asset-risk", "/api/agent-mesh/state"] },
+  firestorm: { name: "Firestorm — Threat Intelligence", endpoints: ["/api/firestorm/live/threat-summary", "/api/firestorm/live/compliance-summary", "/api/firestorm/mitre/coverage"] },
   vessels: { name: "Vessels Maritime Intelligence", endpoints: ["/api/vessels/live/fleet-summary", "/api/vessels/live/ais/combined", "/api/vessels/cognitive/route-anomalies"] },
   terra: { name: "Terra — Real Estate Intelligence", endpoints: ["/api/terra/live/mortgage-rates", "/api/terra/live/hud-fair-market-rents", "/api/terra/portfolio/overview"] },
   pulse: { name: "Pulse — Executive Briefing", endpoints: ["/api/core/health", "/api/core/metrics"] },
@@ -2035,7 +2036,7 @@ const APP_CAPABILITIES: Record<string, { name: string; endpoints: string[] }> = 
   "prism-counsel": { name: "Prism Counsel Legal", endpoints: ["/api/narratives/counsel-deadline", "/api/core/health"] },
   counsel: { name: "Counsel — Legal Matter Command", endpoints: ["/api/narratives/counsel-deadline"] },
   lyte: { name: "Lyte Platform", endpoints: ["/api/core/health", "/api/core/metrics"] },
-  imperium: { name: "Imperium Enterprise", endpoints: ["/api/core/metrics", "/api/agent-mesh/state"] },
+  imperium: { name: "Imperium — Sovereign Cloud", endpoints: ["/api/imperium/cloud/resources", "/api/imperium/cloud/metrics", "/api/imperium/intelligence/briefs"] },
 };
 
 const INTERNAL_API_BASE = `http://127.0.0.1:${process.env["PORT"] ?? "8080"}`;
@@ -2085,11 +2086,14 @@ async function planOrchestration(intent: string): Promise<OrchestrationStep[]> {
     });
   }
 
-  if (intentLower.includes("threat") || intentLower.includes("cyber") || intentLower.includes("attack") || intentLower.includes("aegis") || intentLower.includes("sentra")) {
-    addStep("sentra", "Fetch live agent-mesh state and active narratives");
+  if (intentLower.includes("threat") || intentLower.includes("cyber") || intentLower.includes("attack") || intentLower.includes("aegis") || intentLower.includes("sentra") || intentLower.includes("firestorm")) {
+    addStep("sentra", "Fetch live threat summary and high-risk asset posture");
   }
   if (intentLower.includes("vessel") || intentLower.includes("maritime") || intentLower.includes("ship") || intentLower.includes("fleet")) {
     addStep("vessels", "Pull fleet summary and AIS positions");
+  }
+  if (intentLower.includes("cloud") || intentLower.includes("infrastructure") || intentLower.includes("imperium") || intentLower.includes("sovereign")) {
+    addStep("imperium", "Pull sovereign-cloud resource inventory and live legion metrics");
   }
   if (intentLower.includes("real estate") || intentLower.includes("property") || intentLower.includes("terra") || intentLower.includes("housing")) {
     addStep("terra", "Retrieve mortgage rates and market KPIs");

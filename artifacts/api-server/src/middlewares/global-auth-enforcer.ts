@@ -34,6 +34,22 @@ import { serverTelemetry } from "@szl-holdings/observability";
 import { sendUnauthorized } from "../lib/api-response";
 import { verifyInternalHeader } from "../lib/internal-tokens";
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Express {
+    interface Request {
+      /**
+       * Set by globalAuthEnforcer when a request is allowed through under a
+       * narrow trust condition (rather than session/token auth). Downstream
+       * middlewares can opt to relax their own checks for a specific reason
+       * — e.g. tenantScope skips membership for `"nexus_loopback"` because
+       * the orchestrator is a platform principal.
+       */
+      authBypassReason?: "nexus_loopback";
+    }
+  }
+}
+
 const PUBLIC_EXACT_PATHS = new Set([
   "/api/contact",
   "/api/demo-requests",
@@ -243,6 +259,17 @@ const NEXUS_ORCHESTRATOR_PATH_ALLOWLIST = [
   "/api/terra/live/mortgage-rates",
   "/api/terra/live/hud-fair-market-rents",
   "/api/terra/portfolio/overview",
+  "/api/firestorm/live/threat-summary",
+  "/api/firestorm/live/threats",
+  "/api/firestorm/live/incidents",
+  "/api/firestorm/live/compliance-summary",
+  "/api/firestorm/live/asset-risk",
+  "/api/firestorm/mitre/coverage",
+  "/api/imperium/cloud/resources",
+  "/api/imperium/cloud/metrics",
+  "/api/imperium/cloud/sentinels",
+  "/api/imperium/intelligence/briefs",
+  "/api/imperium/supply-lines/status",
 ];
 
 function isNexusOrchestratorLoopback(req: Request): boolean {
@@ -303,6 +330,21 @@ export function globalAuthEnforcer(
   }
 
   if (isNexusOrchestratorLoopback(req)) {
+    // Authenticate the orchestrator loopback as an internal agent so that
+    // downstream per-route authMiddleware() and group-level tenantScope()
+    // see a valid principal and let the request through. This is the only
+    // way the orchestrator can reach endpoints that apply additional auth
+    // beyond the global enforcer (e.g. /api/firestorm/live/*, /api/imperium/*,
+    // /api/vessels/live/* which are gated by tenantScope at the group mount).
+    req.user = {
+      id: 0,
+      displayName: "Nexus Orchestrator (loopback)",
+      email: null,
+      roles: ["ops"],
+      orgs: [],
+    };
+    req.isInternalAgent = true;
+    req.authBypassReason = "nexus_loopback";
     next();
     return;
   }

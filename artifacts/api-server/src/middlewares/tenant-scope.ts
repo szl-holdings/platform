@@ -99,6 +99,17 @@ export function tenantScope(options: { required?: boolean } = {}) {
         return;
       }
 
+      // NEXUS orchestrator loopback only: globalAuthEnforcer marks
+      // x-nexus-orchestrator GET/HEAD requests from 127.0.0.1 against the
+      // path allowlist with `req.authBypassReason === "nexus_loopback"`.
+      // Skip tenant membership for that narrow trust condition only — do
+      // NOT exempt all internal-agent callers, because scoped service
+      // tokens may belong to specific tenants and must still be checked.
+      if (req.authBypassReason === "nexus_loopback") {
+        next();
+        return;
+      }
+
       if (user.orgs.length === 0 && !req.isInternalAgent) {
         const freshOrgs = await hydrateOrgMemberships(user.id);
         user.orgs = freshOrgs;

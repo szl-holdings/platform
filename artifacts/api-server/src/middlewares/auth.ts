@@ -191,6 +191,15 @@ export function authMiddleware(options: { required?: boolean } = {}) {
 
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // The global enforcer may have already authenticated the request as an
+      // internal agent (e.g. NEXUS orchestrator loopback bypass). Preserve
+      // that principal instead of re-running session lookup, which would
+      // otherwise overwrite req.user with undefined and reject the call.
+      if (req.isInternalAgent && req.user) {
+        next();
+        return;
+      }
+
       const internalCtx = checkInternalToken(req);
       if (internalCtx) {
         req.user = buildInternalAgentUser(internalCtx);
