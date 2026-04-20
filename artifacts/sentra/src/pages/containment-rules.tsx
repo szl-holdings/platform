@@ -3,7 +3,12 @@ import {
   Shield, Plus, AlertTriangle, CheckCircle2, Edit2, Server, Globe,
   Activity, Ban, Lock, Radio, ShieldOff, Clock,
 } from "lucide-react";
-import { agentMesh, useAgentMesh, type EnforcementMode, MESH_AGENT_DISPLAY_NAMES } from "@/data/agent-mesh";
+import {
+  useAgentMesh,
+  useAgentMeshGateway,
+  type EnforcementMode,
+  MESH_AGENT_CLASS_DISPLAY_NAMES,
+} from "@/data/agent-mesh";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 const TIER_STYLES: Record<string, string> = {
@@ -62,10 +67,11 @@ function timeAgo(iso: string): string {
 export default function ContainmentRules() {
   const { state } = useAgentMesh();
   const { containmentRules: liveRules, mcpServers } = state;
-  // Gateway endpoint config and recent gateway events still come from the
-  // operator console seed — those are surfaced via /api/agent-mesh/gateway in
-  // a follow-up; keeping the seed avoids breaking the panel until then.
-  const { gateway, gatewayEvents } = agentMesh;
+  // Live gateway endpoint config + 24h decision counts and the recent
+  // gateway events stream come from /api/agent-mesh/gateway, which reads
+  // straight from the agent_mesh_gateway_events table. Falls back to seed
+  // when the API is unreachable.
+  const { gateway, gatewayEvents, source: gatewaySource } = useAgentMeshGateway();
   const [rules, setRules] = useState(liveRules);
   // Re-sync local rule state whenever the live mesh refreshes.
   useEffect(() => { setRules(liveRules); }, [liveRules]);
@@ -166,7 +172,11 @@ export default function ContainmentRules() {
             </div>
             <div>
               <div className="text-[9px] text-slate-500 font-mono uppercase">Avg latency</div>
-              <div className="text-xl font-display font-bold text-slate-100">{gateway.averageLatencyMs}<span className="text-xs text-slate-500 ml-0.5">ms</span></div>
+              <div className="text-xl font-display font-bold text-slate-100">
+                {gateway.averageLatencyMs == null
+                  ? <span className="text-slate-500">—</span>
+                  : <>{gateway.averageLatencyMs}<span className="text-xs text-slate-500 ml-0.5">ms</span></>}
+              </div>
             </div>
             <div>
               <div className="text-[9px] text-slate-500 font-mono uppercase">Blocked</div>
@@ -400,14 +410,25 @@ export default function ContainmentRules() {
             <div className="text-[10px] text-slate-500 font-mono uppercase">Recent Gateway Decisions</div>
             <p className="text-xs text-slate-400 mt-0.5">Live stream of MCP calls evaluated against active Containment Rules.</p>
           </div>
-          <div className="flex items-center gap-2 text-[10px] font-mono text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            STREAMING
+          <div className={cn(
+            "flex items-center gap-2 text-[10px] font-mono",
+            gatewaySource === "live" ? "text-emerald-400" : "text-amber-400"
+          )}>
+            <span className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              gatewaySource === "live" ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+            )} />
+            {gatewaySource === "live" ? "STREAMING" : "SEED FALLBACK"}
           </div>
         </div>
         <div className="space-y-1.5">
+          {recentEvents.length === 0 && (
+            <div className="text-[11px] font-mono text-slate-500 text-center py-6 border border-slate-800/60 rounded bg-slate-900/40">
+              No gateway decisions recorded yet. Calls routed through the MCP gateway will appear here.
+            </div>
+          )}
           {recentEvents.map(evt => {
-            const decoration = DECISION_STYLES[evt.decision];
+            const decoration = DECISION_STYLES[evt.decision] ?? DECISION_STYLES.allowed!;
             return (
               <div key={evt.id} className="grid grid-cols-12 items-center gap-3 rounded bg-slate-900/40 border border-slate-800/60 px-3 py-2 hover:bg-slate-800/40 transition-colors">
                 <div className="col-span-1 flex items-center gap-2">
@@ -417,7 +438,7 @@ export default function ContainmentRules() {
                   </span>
                 </div>
                 <div className="col-span-3 text-xs text-slate-200 font-mono truncate">
-                  {MESH_AGENT_DISPLAY_NAMES[evt.agentId] ?? evt.agentId}
+                  {MESH_AGENT_CLASS_DISPLAY_NAMES[evt.agentClass] ?? evt.agentClass}
                   <span className="text-slate-600"> → </span>
                   <span className="text-slate-400">{getMcpName(evt.mcpServerId)}</span>
                 </div>

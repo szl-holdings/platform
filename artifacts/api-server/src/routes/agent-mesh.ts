@@ -1,5 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { runMeshScan, loadMeshState } from "../services/agent-mesh-collector";
+import { getGatewayLiveSummary } from "./mcp-gateway";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -32,6 +33,18 @@ router.get("/agent-mesh/index", async (req: Request, res: Response) => {
   } catch (err) {
     logger.warn({ err }, "[agent-mesh] index failed");
     res.status(500).json({ error: "index unavailable" });
+  }
+});
+
+router.get("/agent-mesh/gateway", async (req: Request, res: Response) => {
+  try {
+    const limitRaw = Number(req.query["limit"]);
+    const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 200) : 50;
+    const summary = await getGatewayLiveSummary(limit);
+    res.json(summary);
+  } catch (err) {
+    logger.warn({ err }, "[agent-mesh] gateway summary failed");
+    res.status(500).json({ error: "agent-mesh gateway unavailable" });
   }
 });
 

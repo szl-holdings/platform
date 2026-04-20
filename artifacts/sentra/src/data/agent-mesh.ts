@@ -90,7 +90,7 @@ export interface ContainmentRule {
 export interface GatewayEvent {
   id: string;
   ruleId: string;
-  agentId: string;
+  agentClass: string;
   mcpServerId: string;
   tool: string;
   egressDomain?: string;
@@ -145,7 +145,10 @@ export interface McpGatewayConfig {
   callsLast24h: number;
   blockedLast24h: number;
   quarantinedLast24h: number;
-  averageLatencyMs: number;
+  // The events table does not record per-call latency yet, so the live
+  // payload returns null. The seed value still reports a number for
+  // backwards compatibility with offline previews.
+  averageLatencyMs: number | null;
 }
 
 const now = new Date();
@@ -528,7 +531,7 @@ export const agentMesh: AgentMeshState = {
     {
       id: "gw-evt-001",
       ruleId: "rule-codex-restricted",
-      agentId: "agent-codex-cli",
+      agentClass: "codex-cli",
       mcpServerId: "mcp-unknown-ext",
       tool: "scrape_page",
       egressDomain: "collect.ext-scraper.io",
@@ -541,7 +544,7 @@ export const agentMesh: AgentMeshState = {
     {
       id: "gw-evt-002",
       ruleId: "rule-codex-restricted",
-      agentId: "agent-codex-cli",
+      agentClass: "codex-cli",
       mcpServerId: "mcp-unknown-ext",
       tool: "collect_context",
       egressDomain: "telemetry.scraper-cdn.net",
@@ -554,7 +557,7 @@ export const agentMesh: AgentMeshState = {
     {
       id: "gw-evt-003",
       ruleId: "rule-cursor-elevated",
-      agentId: "agent-cursor-composer",
+      agentClass: "cursor",
       mcpServerId: "mcp-github",
       tool: "delete_repository",
       egressDomain: "api.github.com",
@@ -566,7 +569,7 @@ export const agentMesh: AgentMeshState = {
     {
       id: "gw-evt-004",
       ruleId: "rule-claude-standard",
-      agentId: "agent-claude-main",
+      agentClass: "claude-desktop",
       mcpServerId: "mcp-filesystem",
       tool: "read_file",
       decision: "logged",
@@ -578,7 +581,7 @@ export const agentMesh: AgentMeshState = {
     {
       id: "gw-evt-005",
       ruleId: "rule-cursor-elevated",
-      agentId: "agent-cursor-composer",
+      agentClass: "cursor",
       mcpServerId: "mcp-github",
       tool: "create_pull_request",
       egressDomain: "api.github.com",
@@ -590,7 +593,7 @@ export const agentMesh: AgentMeshState = {
     {
       id: "gw-evt-006",
       ruleId: "rule-codex-restricted",
-      agentId: "agent-codex-cli",
+      agentClass: "codex-cli",
       mcpServerId: "mcp-brave-search",
       tool: "brave_web_search",
       egressDomain: "api.search.brave.com",
@@ -620,6 +623,16 @@ export const MESH_AGENT_DISPLAY_NAMES: Record<string, string> = {
   "agent-cursor-composer": "Cursor Composer",
   "agent-codex-cli": "Codex CLI",
   "agent-claude-code": "Claude Code",
+};
+
+// Gateway events identify the caller by agent class (the same stable key
+// used by containment rules), not by individual runtime/agent id. Map the
+// class back to a human-readable label for the UI.
+export const MESH_AGENT_CLASS_DISPLAY_NAMES: Record<string, string> = {
+  "claude-desktop": "Claude Desktop",
+  "cursor": "Cursor Composer",
+  "codex-cli": "Codex CLI",
+  "claude-code": "Claude Code",
 };
 
 // Live telemetry loader — talks to /api/agent-mesh/state, with the seed
@@ -748,6 +761,110 @@ export function useAgentMesh(): UseAgentMeshResult {
   }, []);
 
   return { state, source, loading, refresh, scannedFiles };
+}
+
+// Live MCP gateway summary loader — talks to /api/agent-mesh/gateway and
+// surfaces the gateway endpoint config plus 24h decision counts and the
+// recent gateway events stream. Falls back to the seed when the API is
+// unreachable so offline previews keep working.
+
+interface ApiGatewaySummary {
+  endpoint: string;
+  status: "online" | "degraded" | "offline";
+  uptimeSeconds: number;
+  callsLast24h: number;
+  blockedLast24h: number;
+  quarantinedLast24h: number;
+  loggedLast24h?: number;
+  allowedLast24h?: number;
+  averageLatencyMs: number | null;
+  events: GatewayEvent[];
+}
+
+export interface UseAgentMeshGatewayResult {
+  gateway: McpGatewayConfig;
+  gatewayEvents: GatewayEvent[];
+  source: "live" | "seed";
+  loading: boolean;
+  refresh: () => Promise<void>;
+}
+
+async function loadAgentMeshGateway(): Promise<{
+  gateway: McpGatewayConfig;
+  gatewayEvents: GatewayEvent[];
+  source: "live" | "seed";
+}> {
+  try {
+    const res = await fetch("/api/agent-mesh/gateway", { credentials: "include" });
+    if (!res.ok) {
+      return { gateway: agentMesh.gateway, gatewayEvents: agentMesh.gatewayEvents, source: "seed" };
+    }
+    const data = (await res.json()) as ApiGatewaySummary;
+    if (!data || typeof data.endpoint !== "string") {
+      return { gateway: agentMesh.gateway, gatewayEvents: agentMesh.gatewayEvents, source: "seed" };
+    }
+    const gateway: McpGatewayConfig = {
+      endpoint: data.endpoint,
+      status: data.status,
+      uptimeSeconds: data.uptimeSeconds ?? 0,
+      callsLast24h: data.callsLast24h ?? 0,
+      blockedLast24h: data.blockedLast24h ?? 0,
+      quarantinedLast24h: data.quarantinedLast24h ?? 0,
+      averageLatencyMs: data.averageLatencyMs ?? null,
+    };
+    return {
+      gateway,
+      gatewayEvents: Array.isArray(data.events) ? data.events : [],
+      source: "live",
+    };
+  } catch {
+    return { gateway: agentMesh.gateway, gatewayEvents: agentMesh.gatewayEvents, source: "seed" };
+  }
+}
+
+const GATEWAY_REFRESH_INTERVAL_MS = 30_000;
+
+export function useAgentMeshGateway(): UseAgentMeshGatewayResult {
+  const [gateway, setGateway] = useState<McpGatewayConfig>(agentMesh.gateway);
+  const [gatewayEvents, setGatewayEvents] = useState<GatewayEvent[]>(agentMesh.gatewayEvents);
+  const [source, setSource] = useState<"live" | "seed">("seed");
+  const [loading, setLoading] = useState<boolean>(true);
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const next = await loadAgentMeshGateway();
+    if (!mounted.current) return;
+    setGateway(next.gateway);
+    setGatewayEvents(next.gatewayEvents);
+    setSource(next.source);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const tick = async () => {
+      const next = await loadAgentMeshGateway();
+      if (cancelled || !mounted.current) return;
+      setGateway(next.gateway);
+      setGatewayEvents(next.gatewayEvents);
+      setSource(next.source);
+      setLoading(false);
+    };
+    void tick();
+    const id = window.setInterval(() => { void tick(); }, GATEWAY_REFRESH_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, []);
+
+  return { gateway, gatewayEvents, source, loading, refresh };
 }
 
 export const DISALLOWED_TERMS = [

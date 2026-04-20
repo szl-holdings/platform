@@ -7,7 +7,7 @@ import {
   agentMeshExposuresTable,
   approvalRequestsTable,
 } from "@szl-holdings/db";
-import { and, count, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, isNull, sql } from "drizzle-orm";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 
@@ -185,20 +185,24 @@ function evaluateRule(rule: GatewayRule, params: {
   return { violation: false, reason: "matches policy" };
 }
 
-async function loadStats(): Promise<{
+async function loadStats(sinceDate?: Date): Promise<{
   calls: number;
   blocked: number;
   quarantined: number;
   logged: number;
   allowed: number;
 }> {
-  const rows = await db
+  const baseQuery = db
     .select({
       decision: agentMeshGatewayEventsTable.decision,
       c: count(),
     })
-    .from(agentMeshGatewayEventsTable)
-    .groupBy(agentMeshGatewayEventsTable.decision);
+    .from(agentMeshGatewayEventsTable);
+  const rows = sinceDate
+    ? await baseQuery
+        .where(gte(agentMeshGatewayEventsTable.occurredAt, sinceDate))
+        .groupBy(agentMeshGatewayEventsTable.decision)
+    : await baseQuery.groupBy(agentMeshGatewayEventsTable.decision);
   const stats = { calls: 0, blocked: 0, quarantined: 0, logged: 0, allowed: 0 };
   for (const r of rows) {
     const c = Number(r.c ?? 0);
@@ -209,6 +213,74 @@ async function loadStats(): Promise<{
     else if (r.decision === "allowed") stats.allowed += c;
   }
   return stats;
+}
+
+export interface GatewayLiveSummary {
+  endpoint: string;
+  status: "online";
+  protocolVersion: string;
+  uptimeSeconds: number;
+  callsLast24h: number;
+  blockedLast24h: number;
+  quarantinedLast24h: number;
+  loggedLast24h: number;
+  allowedLast24h: number;
+  averageLatencyMs: number | null;
+  events: Array<{
+    id: string;
+    ruleId: string;
+    agentClass: string;
+    mcpServerId: string;
+    tool: string;
+    egressDomain?: string;
+    decision: Decision;
+    reason: string;
+    enforcementMode: EnforcementMode;
+    linkedExposureId?: string;
+    occurredAt: string;
+  }>;
+}
+
+export async function getGatewayLiveSummary(eventLimit = 50): Promise<GatewayLiveSummary> {
+  await ensureSeeded();
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const [stats, eventRows] = await Promise.all([
+    loadStats(since),
+    db
+      .select()
+      .from(agentMeshGatewayEventsTable)
+      .orderBy(desc(agentMeshGatewayEventsTable.occurredAt))
+      .limit(eventLimit),
+  ]);
+  const events = eventRows.map((r) => ({
+    id: r.id,
+    ruleId: r.ruleId,
+    agentClass: r.agentClass,
+    mcpServerId: r.mcpServerId,
+    tool: r.tool,
+    egressDomain: r.egressDomain ?? undefined,
+    decision: r.decision as Decision,
+    reason: r.reason,
+    enforcementMode: r.enforcementMode as EnforcementMode,
+    linkedExposureId: r.linkedExposureId ?? undefined,
+    occurredAt: r.occurredAt instanceof Date ? r.occurredAt.toISOString() : String(r.occurredAt),
+  }));
+  return {
+    endpoint: GATEWAY_ENDPOINT,
+    status: "online",
+    protocolVersion: "2024-11-05",
+    uptimeSeconds: Math.floor((Date.now() - startedAt) / 1000),
+    callsLast24h: stats.calls,
+    blockedLast24h: stats.blocked,
+    quarantinedLast24h: stats.quarantined,
+    loggedLast24h: stats.logged,
+    allowedLast24h: stats.allowed,
+    // The events table does not record per-call latency yet, so we cannot
+    // surface a real average. Return null so the UI can render a placeholder
+    // instead of a misleading zero.
+    averageLatencyMs: null,
+    events,
+  };
 }
 
 function buildExposureRow(opts: {
