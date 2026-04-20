@@ -4,8 +4,10 @@ import S02SeriesProblem from "./S02SeriesProblem";
 import S03Category from "./S03Category";
 import S04Product from "./S04Product";
 import S05Demo from "./S05Demo";
+import S08DividerMoat from "./S08DividerMoat";
 import S06Market from "./S06Market";
 import S07SeriesDomains from "./S07SeriesDomains";
+import S13DividerVerdict from "./S13DividerVerdict";
 import S08BusinessModel from "./S08BusinessModel";
 import S09Ask from "./S09Ask";
 
@@ -15,8 +17,10 @@ const SLIDES = [
   S03Category,
   S04Product,
   S05Demo,
+  S08DividerMoat,
   S06Market,
   S07SeriesDomains,
+  S13DividerVerdict,
   S08BusinessModel,
   S09Ask,
 ];

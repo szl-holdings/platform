@@ -32,14 +32,16 @@ import S02SeriesProblem from "./pages/slides/S02SeriesProblem";
 import S03Category from "./pages/slides/S03Category";
 import S04Product from "./pages/slides/S04Product";
 import S05Demo from "./pages/slides/S05Demo";
+import S08DividerMoat from "./pages/slides/S08DividerMoat";
 import S06Market from "./pages/slides/S06Market";
 import S07SeriesDomains from "./pages/slides/S07SeriesDomains";
+import S13DividerVerdict from "./pages/slides/S13DividerVerdict";
 import S08BusinessModel from "./pages/slides/S08BusinessModel";
 import S09Ask from "./pages/slides/S09Ask";
 import AllSlides from "./pages/slides/AllSlides";
 import PresenterMode from "./pages/slides/PresenterMode";
 
-const SLIDES = [S01Cover, S02SeriesProblem, S03Category, S04Product, S05Demo, S06Market, S07SeriesDomains, S08BusinessModel, S09Ask];
+const SLIDES = [S01Cover, S02SeriesProblem, S03Category, S04Product, S05Demo, S08DividerMoat, S06Market, S07SeriesDomains, S13DividerVerdict, S08BusinessModel, S09Ask];
 const TOTAL = SLIDES.length;
 
 const queryClient = new QueryClient({

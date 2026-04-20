@@ -42,30 +42,46 @@
   {
     "id": "sa-0006-4000-8000-000000000006",
     "position": 6,
+    "filepath": "src/pages/slides/S08DividerMoat.tsx",
+    "title": "Part Two — Why This Wins",
+    "description": "Divider into the moat: competitive differentiation, architecture, build evidence",
+    "speakerNotes": "Hold the divider for a full beat. This is the pivot from 'what we built' to 'why nobody else can catch us.'\n\nOne line: 'Part Two — why this wins. Not the demo. The moat.'\n\nThen click straight into the market and competitive matrix."
+  },
+  {
+    "id": "sa-0007-4000-8000-000000000007",
+    "position": 7,
     "filepath": "src/pages/slides/S06Market.tsx",
     "title": "Market: $16.3B to $50.1B",
     "description": "Competitive matrix — five capabilities no named competitor closes",
     "speakerNotes": "Competitive matrix is the meat. Five capabilities across the top: provenance, policy-as-code, simulation, multi-domain, replayability.\n\nDataRobot, Credo, Fiddler, Holistic AI — none ship more than two. We ship all five today.\n\nIf asked about hyperscalers: AWS Bedrock Guardrails and Azure AI Content Safety are filters, not loops. They block bad outputs; they don't account for decisions."
   },
   {
-    "id": "sa-0007-4000-8000-000000000007",
-    "position": 7,
+    "id": "sa-0008-4000-8000-000000000008",
+    "position": 8,
     "filepath": "src/pages/slides/S07SeriesDomains.tsx",
     "title": "Domain Breadth: Six Verticals, One Loop",
     "description": "Aegis, Vessels, Terra, Carlota Jo, Command, SZL Holdings — all governed by the same nine-step loop",
     "speakerNotes": "The defensibility is the loop, not the vertical. We've already shipped six verticals on the same primitives:\n  • Aegis — cyber resilience\n  • Vessels — maritime risk and trading\n  • Terra — real estate intelligence\n  • Carlota Jo — private advisory\n  • Command — unified ops\n  • SZL Holdings — portfolio decisions\n\nMessage: 'Adding a seventh vertical is a configuration job, not a rebuild.'"
   },
   {
-    "id": "sa-0008-4000-8000-000000000008",
-    "position": 8,
+    "id": "sa-0009-4000-8000-000000000009",
+    "position": 9,
+    "filepath": "src/pages/slides/S13DividerVerdict.tsx",
+    "title": "Part Three — The Verdict",
+    "description": "Divider into the close: commercial path, the ask, what we offer",
+    "speakerNotes": "Hold the divider. This is the room's signal that the pitch is closing.\n\nOne line: 'Part Three — the verdict. Commercial path, the ask, and what we offer.'\n\nThen go straight into business model."
+  },
+  {
+    "id": "sa-0010-4000-8000-000000000010",
+    "position": 10,
     "filepath": "src/pages/slides/S08BusinessModel.tsx",
     "title": "Business Model: Platform + Domain Pack",
     "description": "$50K–$500K/year enterprise tier — three-phase commercial path",
     "speakerNotes": "Pricing: platform license + per-domain pack. Enterprise band $50K–$500K ARR, anchored to decision volume and number of domains.\n\nThree-phase commercial motion:\n  1. Pilot (60 days, fixed-fee, one domain)\n  2. Production (annual platform + one pack)\n  3. Expand (additional packs, audit/compliance modules)\n\nGross margin target: 78%. Logo retention target: 95%."
   },
   {
-    "id": "sa-0009-4000-8000-000000000009",
-    "position": 9,
+    "id": "sa-0011-4000-8000-000000000011",
+    "position": 11,
     "filepath": "src/pages/slides/S09Ask.tsx",
     "title": "The Ask",
     "description": "Series A — use of funds, team plan, and the opportunity",
