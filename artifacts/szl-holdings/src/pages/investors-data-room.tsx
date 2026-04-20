@@ -1192,9 +1192,13 @@ export default function InvestorsDataRoomPage() {
           .print-area a { color: #1a4a8a !important; text-decoration: underline !important; }
           .print-area code, .print-area pre { background: #f4f4f4 !important; color: #1a1a1a !important; border: 1px solid #dddddd !important; }
           .print-area pre { page-break-inside: avoid; white-space: pre-wrap !important; word-wrap: break-word !important; }
-          .print-area table { border-collapse: collapse !important; width: 100% !important; page-break-inside: auto; }
+          /* Neutralize the on-screen horizontal scroll wrapper around tables so
+             wide tables can shrink to page width instead of being clipped at the
+             paper edge. */
+          .print-area .overflow-x-auto { overflow: visible !important; max-width: 100% !important; }
+          .print-area table { border-collapse: collapse !important; width: 100% !important; max-width: 100% !important; table-layout: fixed !important; font-size: 9px !important; page-break-inside: auto; }
           .print-area thead { background: #eeeeee !important; }
-          .print-area th, .print-area td { border: 1px solid #cccccc !important; padding: 6px 8px !important; }
+          .print-area th, .print-area td { border: 1px solid #cccccc !important; padding: 4px 6px !important; word-break: break-word !important; overflow-wrap: anywhere !important; white-space: normal !important; vertical-align: top !important; }
           .print-area tr { page-break-inside: avoid; page-break-after: auto; }
           .print-area img, .print-area svg { max-width: 100% !important; }
           .print-only { display: block !important; visibility: visible !important; }
