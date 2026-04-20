@@ -75,11 +75,18 @@ export async function startIntelligenceFeeds(): Promise<void> {
       const upserted: OntologyEntity[] = [];
       const created: OntologyRelationship[] = [];
       const externalIdMap = new Map<string, string>();
+      let entitiesCreated = 0;
+      let entitiesMerged = 0;
 
       for (const entity of entities) {
         try {
           const result = await ontologyEngine.upsertEntity(entity);
           upserted.push(result);
+          if (result.wasCreated) {
+            entitiesCreated++;
+          } else {
+            entitiesMerged++;
+          }
           if (entity.externalId) {
             externalIdMap.set(entity.externalId, result.id);
           }
@@ -115,7 +122,20 @@ export async function startIntelligenceFeeds(): Promise<void> {
         }
       }
 
-      logger.debug({ source, entitiesUpserted: upserted.length, relationshipsCreated: created.length }, "[feeds] Ingestion batch complete");
+      if (upserted.length > 0 || created.length > 0) {
+        logger.info(
+          {
+            source,
+            entitiesUpserted: upserted.length,
+            entitiesCreated,
+            entitiesMerged,
+            relationshipsCreated: created.length,
+          },
+          `[feeds] Upserted ${upserted.length} entities: ${entitiesCreated} created, ${entitiesMerged} merged (source=${source})`,
+        );
+      } else {
+        logger.debug({ source }, "[feeds] Ingestion batch complete (no entities)");
+      }
       return { entitiesUpserted: upserted, relationshipsCreated: created };
     });
 

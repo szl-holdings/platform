@@ -296,11 +296,12 @@ export class OntologyEngine {
     this.cacheExpiry.set(entity.id, Date.now() + this.CACHE_TTL_MS);
   }
 
-  async upsertEntity(entity: Omit<OntologyEntity, "id" | "lastUpdated"> & { externalId?: string }): Promise<OntologyEntity> {
+  async upsertEntity(entity: Omit<OntologyEntity, "id" | "lastUpdated"> & { externalId?: string }): Promise<OntologyEntity & { wasCreated: boolean }> {
     const dbType = entity.type as string;
     const validTypes = ["person", "organization", "asset", "vessel", "port", "workflow", "task", "alert", "case", "incident", "control", "risk_item", "recommendation"];
     const mappedType = validTypes.includes(dbType) ? dbType : "asset";
 
+    const insertedAt = new Date();
     const [row] = await db
       .insert(entitiesTable)
       .values({
@@ -314,6 +315,8 @@ export class OntologyEngine {
           riskScore: entity.riskScore ?? null,
         },
         tags: entity.tags,
+        createdAt: insertedAt,
+        updatedAt: insertedAt,
       })
       .onConflictDoUpdate({
         target: [entitiesTable.name, entitiesTable.sourceApp],
@@ -324,6 +327,12 @@ export class OntologyEngine {
         },
       })
       .returning();
+
+    // Determine outcome: on a fresh INSERT we set createdAt and updatedAt to the
+    // same Date instance, so they match. On an UPDATE via onConflictDoUpdate the
+    // existing createdAt is preserved while updatedAt is set to a new Date, so
+    // they will differ. Compare millisecond timestamps to classify the outcome.
+    const wasCreated = row!.createdAt.getTime() === row!.updatedAt.getTime();
 
     const result: OntologyEntity = {
       id: row!.id,
@@ -337,7 +346,12 @@ export class OntologyEngine {
     };
 
     this.setCache(result);
-    return result;
+
+    console.debug(
+      `[OntologyEngine] upsertEntity ${wasCreated ? "created" : "merged"} ${entity.domain}/${entity.type}:${entity.name} (id=${row!.id})`,
+    );
+
+    return { ...result, wasCreated };
   }
 
   async createRelationship(
