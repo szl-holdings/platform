@@ -1,0 +1,16 @@
+{
+  "name": "@szl-holdings/shared-contracts",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AEEP shared TypeScript contracts — agent roles, workflow types, evidence, policy, retrieval, memory",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "zod": "catalog:"
+  }
+}

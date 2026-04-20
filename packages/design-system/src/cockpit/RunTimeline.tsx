@@ -1,4 +1,5 @@
-import { cn } from "../utils";
+import { cn } from "../utils.js";
+import { color } from "../tokens/index.js";
 
 export type RunSpanStatus = "ok" | "blocked" | "error" | "pending" | "skipped";
 
@@ -25,13 +26,13 @@ export interface RunTimelineProps {
 }
 
 const KIND_COLORS: Record<RunSpan["kind"], string> = {
-  agent:     "#8b7ac8",
-  tool:      "#0ea5e9",
-  model:     "#22c55e",
-  policy:    "#f59e0b",
-  approval:  "#a855f7",
-  retrieval: "#06b6d4",
-  handoff:   "#ef4444",
+  agent:     color.accent.violet,
+  tool:      color.accent.blue,
+  model:     color.accent.green,
+  policy:    color.accent.amber,
+  approval:  color.accent.violet,
+  retrieval: color.accent.teal,
+  handoff:   color.accent.red,
 };
 
 const STATUS_ALPHA: Record<RunSpanStatus, number> = {
@@ -43,9 +44,9 @@ const STATUS_ALPHA: Record<RunSpanStatus, number> = {
 };
 
 const STATUS_OVERRIDE: Partial<Record<RunSpanStatus, string>> = {
-  blocked: "#ef4444",
-  error:   "#ef4444",
-  skipped: "#475569",
+  blocked: color.accent.red,
+  error:   color.accent.red,
+  skipped: color.text.muted,
 };
 
 function fmtMs(ms: number): string {
@@ -70,10 +71,8 @@ export function RunTimeline({
   if (spans.length === 0) {
     return (
       <div
-        className={cn(
-          "rounded-lg border border-[#243040] bg-[#0d1520] px-4 py-6 text-center text-[12px] text-[#4a6070]",
-          className
-        )}
+        className={cn("rounded-lg px-4 py-6 text-center text-xs", className)}
+        style={{ border: `1px solid ${color.border.default}`, background: color.bg.surface, color: color.text.muted }}
       >
         No spans recorded
       </div>
@@ -82,16 +81,15 @@ export function RunTimeline({
 
   return (
     <div
-      className={cn(
-        "rounded-lg border border-[#243040] bg-[#0d1520] overflow-hidden",
-        className
-      )}
+      className={cn("rounded-lg overflow-hidden", className)}
+      style={{ border: `1px solid ${color.border.default}`, background: color.bg.surface }}
     >
       <div className="grid gap-0" style={{ gridTemplateColumns: "130px 1fr 64px 72px" }}>
         {["Span", "Waterfall", "Latency", "Kind"].map((h) => (
           <div
             key={h}
-            className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-[#334155] border-b border-[#1a2535]"
+            className="px-3 py-2 text-xs font-bold uppercase tracking-widest"
+            style={{ color: color.text.muted, borderBottom: `1px solid ${color.border.subtle}` }}
           >
             {h}
           </div>
@@ -110,17 +108,26 @@ export function RunTimeline({
             <li
               key={span.spanId}
               className={cn(
-                "grid border-b border-[#1a2535] last:border-b-0 transition-colors",
-                onSpanClick && "cursor-pointer hover:bg-[#111d2c]",
-                isSelected && "bg-[#111d2c]"
+                "grid transition-colors",
+                onSpanClick && "cursor-pointer",
               )}
-              style={{ gridTemplateColumns: "130px 1fr 64px 72px" }}
+              style={{
+                gridTemplateColumns: "130px 1fr 64px 72px",
+                borderBottom: `1px solid ${color.border.subtle}`,
+                background: isSelected ? color.bg.overlay : "transparent",
+              }}
               onClick={() => onSpanClick?.(span)}
+              onMouseEnter={(e) => {
+                if (!isSelected) (e.currentTarget as HTMLElement).style.background = color.bg.overlay;
+              }}
+              onMouseLeave={(e) => {
+                if (!isSelected) (e.currentTarget as HTMLElement).style.background = "transparent";
+              }}
             >
               <div className="flex items-center px-3 py-2 min-w-0">
                 <span
-                  className="truncate text-[11px] font-medium"
-                  style={{ color: isSelected ? baseColor : "rgba(255,255,255,0.7)" }}
+                  className="truncate text-xs font-medium"
+                  style={{ color: isSelected ? baseColor : color.text.primary }}
                   title={span.name}
                 >
                   {span.name}
@@ -128,7 +135,10 @@ export function RunTimeline({
               </div>
 
               <div className="flex items-center px-2 py-2">
-                <div className="relative w-full h-4 rounded bg-[#0a1118] overflow-hidden">
+                <div
+                  className="relative w-full h-4 rounded overflow-hidden"
+                  style={{ background: color.bg.base }}
+                >
                   <div
                     className="absolute top-0 bottom-0 rounded transition-all"
                     style={{
@@ -140,8 +150,8 @@ export function RunTimeline({
                   />
                   {span.model && (
                     <span
-                      className="absolute left-1 top-0 bottom-0 flex items-center text-[9px] truncate font-mono"
-                      style={{ color: "rgba(255,255,255,0.5)", maxWidth: "80%" }}
+                      className="absolute left-1 top-0 bottom-0 flex items-center text-xs truncate font-mono"
+                      style={{ color: color.text.muted, maxWidth: "80%" }}
                     >
                       {span.model}
                     </span>
@@ -150,21 +160,18 @@ export function RunTimeline({
               </div>
 
               <div className="flex items-center justify-end px-3 py-2">
-                <span
-                  className="text-[11px] font-mono tabular-nums"
-                  style={{ color: baseColor }}
-                >
+                <span className="text-xs font-mono tabular-nums" style={{ color: baseColor }}>
                   {fmtMs(span.latencyMs)}
                 </span>
               </div>
 
               <div className="flex items-center px-2 py-2">
                 <span
-                  className="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                  className="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wider"
                   style={{
                     color: baseColor,
-                    background: `${baseColor}15`,
-                    border: `1px solid ${baseColor}30`,
+                    background: color.bg.overlay,
+                    border: `1px solid ${color.border.default}`,
                   }}
                 >
                   {fmtKind(span.kind)}
@@ -175,9 +182,16 @@ export function RunTimeline({
         })}
       </ol>
 
-      <div className="flex items-center justify-between border-t border-[#1a2535] px-3 py-2">
-        <span className="text-[10px] text-[#334155]">{spans.length} span{spans.length !== 1 ? "s" : ""}</span>
-        <span className="text-[10px] font-mono text-[#475569]">total {fmtMs(maxMs)}</span>
+      <div
+        className="flex items-center justify-between px-3 py-2"
+        style={{ borderTop: `1px solid ${color.border.subtle}` }}
+      >
+        <span className="text-xs" style={{ color: color.text.muted }}>
+          {spans.length} span{spans.length !== 1 ? "s" : ""}
+        </span>
+        <span className="text-xs font-mono" style={{ color: color.text.secondary }}>
+          total {fmtMs(maxMs)}
+        </span>
       </div>
     </div>
   );

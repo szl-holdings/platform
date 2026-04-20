@@ -1,4 +1,5 @@
 import { cn } from "../utils";
+import { v } from "../tokens/vars.js";
 
 export type TimelineEventSeverity = "info" | "warning" | "critical" | "success" | "neutral";
 
@@ -15,22 +16,25 @@ export interface TimelineEvent {
 export interface TimelineLaneProps {
   events: TimelineEvent[];
   className?: string;
-  /** Show relative timestamps instead of absolute */
   relative?: boolean;
-  /** Max number of visible events before scrolling */
   maxVisible?: number;
   onEventClick?: (event: TimelineEvent) => void;
 }
 
-const severityConfig: Record<
-  TimelineEventSeverity,
-  { dot: string; line: string; label: string }
-> = {
-  info:     { dot: "bg-[#00d4ff] shadow-[0_0_6px_rgba(0,212,255,0.6)]", line: "border-[#00d4ff]/20", label: "text-[#00d4ff]" },
-  warning:  { dot: "bg-[#ffb700] shadow-[0_0_6px_rgba(255,183,0,0.6)]", line: "border-[#ffb700]/20", label: "text-[#ffb700]" },
-  critical: { dot: "bg-[#ff4455] shadow-[0_0_6px_rgba(255,68,85,0.6)]",  line: "border-[#ff4455]/20", label: "text-[#ff4455]" },
-  success:  { dot: "bg-[#00e878] shadow-[0_0_6px_rgba(0,232,120,0.6)]", line: "border-[#00e878]/20", label: "text-[#00e878]" },
-  neutral:  { dot: "bg-[#4a6070]", line: "border-[#1a2535]", label: "text-[#4a6070]" },
+const severityDotColor: Record<TimelineEventSeverity, string> = {
+  info:     v.accentBlue,
+  warning:  v.accentAmber,
+  critical: v.accentRed,
+  success:  v.accentGreen,
+  neutral:  v.textMuted,
+};
+
+const severityLabelColor: Record<TimelineEventSeverity, string> = {
+  info:     v.accentBlue,
+  warning:  v.accentAmber,
+  critical: v.accentRed,
+  success:  v.accentGreen,
+  neutral:  v.textMuted,
 };
 
 function formatTs(ts: string | Date, relative: boolean): string {
@@ -59,17 +63,20 @@ export function TimelineLane({
 
   return (
     <div
+      style={maxVisible
+        ? { maxHeight: `${maxVisible * 72 + 24}px`, borderColor: v.borderDefault, backgroundColor: v.bgSurface }
+        : { borderColor: v.borderDefault, backgroundColor: v.bgSurface }}
       className={cn(
-        "rounded-lg border border-[#243040] bg-[#0d1520] px-4 py-3",
+        "rounded-lg border px-4 py-3",
         maxVisible && "overflow-y-auto",
         className
       )}
-      style={maxVisible ? { maxHeight: `${maxVisible * 72 + 24}px` } : undefined}
     >
       <ol className="relative space-y-0">
         {visible.map((event, idx) => {
           const sev = event.severity ?? "neutral";
-          const cfg = severityConfig[sev];
+          const dotColor = severityDotColor[sev];
+          const labelColor = severityLabelColor[sev];
           const isLast = idx === visible.length - 1;
 
           return (
@@ -84,42 +91,40 @@ export function TimelineLane({
             >
               <div className="relative flex flex-col items-center">
                 <div
+                  style={{ backgroundColor: dotColor }}
                   className={cn(
                     "relative z-10 mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full",
-                    cfg.dot,
                     "transition-transform duration-150",
                     onEventClick && "group-hover:scale-125"
                   )}
                 />
                 {!isLast && (
                   <div
-                    className={cn(
-                      "mt-1 w-px flex-1 border-l",
-                      cfg.line
-                    )}
+                    style={{ borderColor: v.borderSubtle }}
+                    className="mt-1 w-px flex-1 border-l"
                   />
                 )}
               </div>
 
               <div className="min-w-0 flex-1 pt-0">
                 <div className="flex items-baseline gap-2 flex-wrap">
-                  <span className="text-xs font-medium text-[#c8d8e8]">{event.label}</span>
+                  <span style={{ color: v.textPrimary }} className="text-xs font-medium">{event.label}</span>
                   {event.actor && (
-                    <span className="text-[10px] text-[#4a6070]">by {event.actor}</span>
+                    <span style={{ color: v.textMuted }} className="text-[10px]">by {event.actor}</span>
                   )}
-                  <span className="ml-auto text-[10px] tabular-nums text-[#4a6070]">
+                  <span style={{ color: v.textMuted }} className="ml-auto text-[10px] tabular-nums">
                     {formatTs(event.timestamp, relative)}
                   </span>
                 </div>
                 {event.description && (
-                  <p className="mt-0.5 text-[11px] text-[#7a99b8]">{event.description}</p>
+                  <p style={{ color: v.textSecondary }} className="mt-0.5 text-[11px]">{event.description}</p>
                 )}
                 {event.meta && Object.keys(event.meta).length > 0 && (
                   <dl className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
-                    {Object.entries(event.meta).map(([k, v]) => (
+                    {Object.entries(event.meta).map(([k, val]) => (
                       <div key={k} className="flex gap-1">
-                        <dt className="text-[10px] text-[#4a6070]">{k}:</dt>
-                        <dd className="text-[10px] font-medium text-[#7a99b8]">{v}</dd>
+                        <dt style={{ color: v.textMuted }} className="text-[10px]">{k}:</dt>
+                        <dd style={{ color: labelColor }} className="text-[10px] font-medium">{val}</dd>
                       </div>
                     ))}
                   </dl>

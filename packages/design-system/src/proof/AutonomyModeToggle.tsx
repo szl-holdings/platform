@@ -1,5 +1,7 @@
 import { Eye, Lightbulb, FileEdit, MessageSquare, Zap } from "lucide-react";
-import { cn } from "../utils";
+import React from "react";
+import { cn } from "../utils.js";
+import { color } from "../tokens/index.js";
 
 export type AutonomyMode =
   | "observe"
@@ -11,10 +13,8 @@ export type AutonomyMode =
 export interface AutonomyModeToggleProps {
   value: AutonomyMode;
   onChange?: (mode: AutonomyMode) => void;
-  /** When true, all modes are disabled (display-only) */
   readOnly?: boolean;
   className?: string;
-  /** compact = icon tabs only, full = with labels */
   variant?: "compact" | "full";
 }
 
@@ -32,7 +32,7 @@ const modes: Array<{
     short: "OBS",
     icon: <Eye className="h-3.5 w-3.5" />,
     description: "Monitors and logs — no output",
-    color: "#4a6070",
+    color: color.text.muted,
   },
   {
     id: "recommend",
@@ -40,7 +40,7 @@ const modes: Array<{
     short: "REC",
     icon: <Lightbulb className="h-3.5 w-3.5" />,
     description: "Surfaces recommendations, requires human action",
-    color: "#7a99b8",
+    color: color.text.secondary,
   },
   {
     id: "draft",
@@ -48,7 +48,7 @@ const modes: Array<{
     short: "DFT",
     icon: <FileEdit className="h-3.5 w-3.5" />,
     description: "Prepares drafts for human review before send",
-    color: "#00d4ff",
+    color: color.accent.blue,
   },
   {
     id: "ask-to-act",
@@ -56,7 +56,7 @@ const modes: Array<{
     short: "ASK",
     icon: <MessageSquare className="h-3.5 w-3.5" />,
     description: "Requests approval before every consequential action",
-    color: "#ffb700",
+    color: color.accent.amber,
   },
   {
     id: "approved-act",
@@ -64,7 +64,7 @@ const modes: Array<{
     short: "ACT",
     icon: <Zap className="h-3.5 w-3.5" />,
     description: "Executes within policy without per-action approval",
-    color: "#00e878",
+    color: color.accent.green,
   },
 ];
 
@@ -79,10 +79,8 @@ export function AutonomyModeToggle({
     <div
       role="radiogroup"
       aria-label="Autonomy mode"
-      className={cn(
-        "inline-flex rounded-lg border border-[#1a2535] bg-[#0d1520] p-0.5 gap-0.5",
-        className
-      )}
+      className={cn("inline-flex rounded-lg p-0.5 gap-0.5", className)}
+      style={{ border: `1px solid ${color.border.subtle}`, background: color.bg.surface }}
     >
       {modes.map((mode) => {
         const active = mode.id === value;
@@ -97,17 +95,14 @@ export function AutonomyModeToggle({
             onClick={() => !readOnly && onChange?.(mode.id)}
             className={cn(
               "relative flex items-center gap-1.5 rounded-md px-2 py-1.5 transition-all duration-150",
-              "text-[11px] font-medium focus:outline-none focus-visible:ring-1 focus-visible:ring-[#00d4ff]/60",
-              active
-                ? "text-[#060b12] shadow-sm"
-                : "text-[#4a6070] hover:text-[#c8d8e8]",
+              "text-xs font-medium focus:outline-none",
               readOnly && !active && "cursor-default opacity-40",
-              !readOnly && !active && "cursor-pointer"
+              !readOnly && !active && "cursor-pointer",
             )}
             style={
               active
-                ? { backgroundColor: mode.color, color: "#060b12" }
-                : {}
+                ? { backgroundColor: mode.color, color: color.text.inverse }
+                : { color: color.text.muted, background: "transparent" }
             }
           >
             {mode.icon}

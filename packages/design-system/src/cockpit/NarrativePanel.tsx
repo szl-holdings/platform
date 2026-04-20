@@ -1,39 +1,42 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Cpu } from "lucide-react";
-import { cn } from "../utils";
+import { cn } from "../utils.js";
+import { color } from "../tokens/index.js";
 
 export interface NarrativeParagraph {
   id: string;
   text: string;
-  /** Optional inline highlight phrase */
   highlights?: string[];
 }
 
 export interface NarrativePanelProps {
-  /** Short one-sentence headline */
   headline: string;
   paragraphs: NarrativeParagraph[];
-  /** "Governed intelligence" attribution — e.g. "Synthesized by Alloy · 3 sources" */
   attribution?: string;
-  /** Collapsible after N paragraphs */
   collapseAfter?: number;
   className?: string;
-  /** Accent color for the headline rule */
   accentColor?: string;
 }
 
 function highlightText(text: string, highlights: string[]): React.ReactNode {
   if (!highlights.length) return text;
-  const pattern = new RegExp(`(${highlights.map((h) => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
+  const pattern = new RegExp(
+    `(${highlights.map((h) => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`,
+    "gi",
+  );
   const parts = text.split(pattern);
   return parts.map((part, i) =>
     highlights.some((h) => h.toLowerCase() === part.toLowerCase()) ? (
-      <mark key={i} className="bg-[#00d4ff]/15 text-[#00d4ff] rounded-sm px-0.5">
+      <mark
+        key={i}
+        className="rounded-sm px-0.5"
+        style={{ background: color.accent.blue + "28", color: color.accent.blue }}
+      >
         {part}
       </mark>
     ) : (
       part
-    )
+    ),
   );
 }
 
@@ -43,7 +46,7 @@ export function NarrativePanel({
   attribution,
   collapseAfter,
   className,
-  accentColor = "#00d4ff",
+  accentColor = color.accent.blue,
 }: NarrativePanelProps) {
   const [expanded, setExpanded] = useState(false);
   const shouldCollapse = collapseAfter !== undefined && paragraphs.length > collapseAfter;
@@ -51,24 +54,19 @@ export function NarrativePanel({
 
   return (
     <div
-      className={cn(
-        "rounded-lg border border-[#243040] bg-[#0d1520] px-4 py-4",
-        className
-      )}
+      className={cn("rounded-lg px-4 py-4", className)}
+      style={{ border: `1px solid ${color.border.default}`, background: color.bg.surface }}
     >
-      <div
-        className="mb-3 border-l-2 pl-3"
-        style={{ borderColor: accentColor }}
-      >
-        <p className="text-sm font-semibold leading-snug text-[#c8d8e8]">{headline}</p>
+      <div className="mb-3 border-l-2 pl-3" style={{ borderColor: accentColor }}>
+        <p className="text-sm font-semibold leading-snug" style={{ color: color.text.primary }}>
+          {headline}
+        </p>
       </div>
 
       <div className="space-y-2.5">
         {visible.map((p) => (
-          <p key={p.id} className="text-[13px] leading-relaxed text-[#7a99b8]">
-            {p.highlights?.length
-              ? highlightText(p.text, p.highlights)
-              : p.text}
+          <p key={p.id} className="text-sm leading-relaxed" style={{ color: color.text.secondary }}>
+            {p.highlights?.length ? highlightText(p.text, p.highlights) : p.text}
           </p>
         ))}
       </div>
@@ -76,12 +74,11 @@ export function NarrativePanel({
       {shouldCollapse && (
         <button
           onClick={() => setExpanded((v) => !v)}
-          className="mt-3 inline-flex items-center gap-1 text-[11px] text-[#4a6070] hover:text-[#c8d8e8] transition-colors"
+          className="mt-3 inline-flex items-center gap-1 text-xs transition-colors"
+          style={{ color: color.text.muted, background: "transparent", border: "none", cursor: "pointer" }}
         >
           {expanded ? (
-            <>
-              <ChevronUp className="h-3 w-3" /> Collapse
-            </>
+            <><ChevronUp className="h-3 w-3" /> Collapse</>
           ) : (
             <>
               <ChevronDown className="h-3 w-3" />
@@ -93,9 +90,9 @@ export function NarrativePanel({
       )}
 
       {attribution && (
-        <div className="mt-4 flex items-center gap-1.5 border-t border-[#1a2535] pt-3">
-          <Cpu className="h-3 w-3 text-[#4a6070]" />
-          <span className="text-[11px] text-[#4a6070]">{attribution}</span>
+        <div className="mt-4 flex items-center gap-1.5 pt-3" style={{ borderTop: `1px solid ${color.border.subtle}` }}>
+          <Cpu className="h-3 w-3" style={{ color: color.text.muted }} />
+          <span className="text-xs" style={{ color: color.text.muted }}>{attribution}</span>
         </div>
       )}
     </div>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { FileText, ExternalLink, ChevronDown } from "lucide-react";
 import { cn } from "../utils";
+import { v } from "../tokens/vars.js";
 
 export interface EvidenceSource {
   id: string;
@@ -14,7 +15,6 @@ export interface EvidenceSource {
 export interface EvidenceBadgeProps {
   sources: EvidenceSource[];
   className?: string;
-  /** When true, shows a condensed icon-only badge */
   compact?: boolean;
 }
 
@@ -37,15 +37,23 @@ export function EvidenceBadge({ sources, className, compact = false }: EvidenceB
   return (
     <div ref={ref} className={cn("relative inline-flex", className)}>
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen((prev) => !prev)}
         aria-label={`${count} evidence source${count !== 1 ? "s" : ""}`}
         aria-expanded={open}
-        className={cn(
-          "inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium",
-          "border border-[#243040] bg-[#111c2a] text-[#7a99b8]",
-          "hover:border-[#00d4ff]/40 hover:text-[#00d4ff] transition-colors duration-150",
-          "focus:outline-none focus-visible:ring-1 focus-visible:ring-[#00d4ff]/60"
-        )}
+        style={{
+          borderColor: v.borderDefault,
+          backgroundColor: v.bgOverlay,
+          color: v.textSecondary,
+        }}
+        className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium border transition-colors duration-150 focus:outline-none focus-visible:ring-1"
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.color = v.accentBlue;
+          (e.currentTarget as HTMLButtonElement).style.borderColor = v.accentBlue;
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.color = v.textSecondary;
+          (e.currentTarget as HTMLButtonElement).style.borderColor = v.borderDefault;
+        }}
       >
         <FileText className="h-3 w-3 shrink-0" />
         {!compact && <span>{count}</span>}
@@ -59,34 +67,33 @@ export function EvidenceBadge({ sources, className, compact = false }: EvidenceB
         <div
           role="dialog"
           aria-label="Evidence sources"
-          className={cn(
-            "absolute left-0 top-full z-50 mt-1.5 w-72",
-            "rounded-lg border border-[#243040] bg-[#0d1520]",
-            "shadow-[0_8px_24px_rgba(0,0,0,0.7)]",
-            "animate-in fade-in slide-in-from-top-1 duration-150"
-          )}
+          style={{
+            borderColor: v.borderDefault,
+            backgroundColor: v.bgSurface,
+          }}
+          className="absolute left-0 top-full z-50 mt-1.5 w-72 rounded-lg border shadow-lg animate-in fade-in slide-in-from-top-1 duration-150"
         >
-          <div className="border-b border-[#1a2535] px-3 py-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#4a6070]">
+          <div style={{ borderColor: v.borderSubtle }} className="border-b px-3 py-2">
+            <p style={{ color: v.textMuted }} className="text-[11px] font-semibold uppercase tracking-wider">
               Evidence — {count} source{count !== 1 ? "s" : ""}
             </p>
           </div>
-          <ul className="max-h-64 overflow-y-auto divide-y divide-[#1a2535]">
+          <ul style={{ borderColor: v.borderSubtle }} className="max-h-64 overflow-y-auto divide-y">
             {sources.map((src) => (
-              <li key={src.id} className="px-3 py-2.5">
+              <li key={src.id} style={{ borderColor: v.borderSubtle }} className="px-3 py-2.5">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-medium text-[#c8d8e8]">{src.label}</p>
+                    <p style={{ color: v.textPrimary }} className="truncate text-xs font-medium">{src.label}</p>
                     {src.type && (
-                      <span className="mt-0.5 inline-block text-[10px] uppercase tracking-wide text-[#4a6070]">
+                      <span style={{ color: v.textMuted }} className="mt-0.5 inline-block text-[10px] uppercase tracking-wide">
                         {src.type}
                       </span>
                     )}
                     {src.excerpt && (
-                      <p className="mt-1 line-clamp-2 text-[11px] text-[#7a99b8]">{src.excerpt}</p>
+                      <p style={{ color: v.textSecondary }} className="mt-1 line-clamp-2 text-[11px]">{src.excerpt}</p>
                     )}
                     {src.timestamp && (
-                      <p className="mt-1 text-[10px] text-[#4a6070]">{src.timestamp}</p>
+                      <p style={{ color: v.textMuted }} className="mt-1 text-[10px]">{src.timestamp}</p>
                     )}
                   </div>
                   {src.url && (
@@ -94,8 +101,11 @@ export function EvidenceBadge({ sources, className, compact = false }: EvidenceB
                       href={src.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="shrink-0 text-[#7a99b8] hover:text-[#00d4ff] transition-colors"
+                      style={{ color: v.textSecondary }}
+                      className="shrink-0 transition-colors"
                       aria-label={`Open ${src.label}`}
+                      onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = v.accentBlue)}
+                      onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = v.textSecondary)}
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
                     </a>

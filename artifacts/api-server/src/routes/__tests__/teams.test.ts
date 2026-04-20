@@ -123,6 +123,9 @@ vi.mock("@szl-holdings/db", () => {
     if (n === "notification_preferences") return store.prefs as unknown as Record<string, unknown>[];
     if (n === "notifications") return store.notifs as unknown as Record<string, unknown>[];
     if (n === "team_pages") return store.teamPages as unknown as Record<string, unknown>[];
+    if (n === "on_call_schedules") return [];
+    if (n === "on_call_shifts") return [];
+    if (n === "audit_logs") return [];
     return [];
   }
 
@@ -178,6 +181,8 @@ vi.mock("@szl-holdings/db", () => {
           };
           store.teamPages.push(row);
           inserted = row;
+        } else if (tableName(table) === "audit_logs") {
+          inserted = null;
         }
         return chain;
       },
@@ -192,6 +197,7 @@ vi.mock("@szl-holdings/db", () => {
 
   const db = {
     select: (_f?: unknown) => ({ from: (t: unknown) => makeSelectChain(t) }),
+    selectDistinct: (_f?: unknown) => ({ from: (t: unknown) => makeSelectChain(t) }),
     insert: (table: unknown) => makeInsertChain(table),
     transaction: async <T,>(fn: (tx: typeof db) => Promise<T>): Promise<T> => fn(db),
   };

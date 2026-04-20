@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@szl-holdings/shared-contracts": ["../shared-contracts/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "../shared-contracts/src/**/*.ts"]
+}

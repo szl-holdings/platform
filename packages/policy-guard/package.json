@@ -1,0 +1,19 @@
+{
+  "name": "@szl-holdings/policy-guard",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AEEP policy-guard — policy rule evaluation, verdict resolution, and approval workflow management",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@szl-holdings/shared-contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "zod": "catalog:"
+  }
+}

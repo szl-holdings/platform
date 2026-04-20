@@ -126,6 +126,7 @@ function makeMemoryEntry(id: string): MemoryEntry {
     key: `key-${id}`,
     value: { v: id },
     summary: `summary-${id}`,
+    domain: "test",
     provenance: { source: "test", method: "agent", createdAt: now },
     freshness: { lastUpdatedAt: now, isStale: false },
     confidence: 0.9,

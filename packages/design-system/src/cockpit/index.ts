@@ -1,29 +1,30 @@
-export { DenseTable } from "./DenseTable";
-export type { DenseTableProps, ColumnDef } from "./DenseTable";
+export { DenseTable } from "./DenseTable.js";
+export type { DenseTableProps, ColumnDef } from "./DenseTable.js";
 
-export { TimelineLane } from "./TimelineLane";
-export type { TimelineLaneProps, TimelineEvent, TimelineEventSeverity } from "./TimelineLane";
+export { TimelineLane } from "./TimelineLane.js";
+export type { TimelineLaneProps, TimelineEventSeverity } from "./TimelineLane.js";
+export type { TimelineEvent as CockpitTimelineEvent } from "./TimelineLane.js";
 
-export { GraphCanvas } from "./GraphCanvas";
-export type { GraphCanvasProps, GraphNode, GraphEdge } from "./GraphCanvas";
+export { GraphCanvas } from "./GraphCanvas.js";
+export type { GraphCanvasProps, GraphNode, GraphEdge } from "./GraphCanvas.js";
 
-export { MapSurface } from "./MapSurface";
-export type { MapSurfaceProps, MapMarker } from "./MapSurface";
+export { MapSurface } from "./MapSurface.js";
+export type { MapSurfaceProps, MapMarker } from "./MapSurface.js";
 
-export { NarrativePanel } from "./NarrativePanel";
-export type { NarrativePanelProps, NarrativeParagraph } from "./NarrativePanel";
+export { NarrativePanel } from "./NarrativePanel.js";
+export type { NarrativePanelProps, NarrativeParagraph } from "./NarrativePanel.js";
 
-export { RunTimeline } from "./RunTimeline";
-export type { RunTimelineProps, RunSpan, RunSpanStatus } from "./RunTimeline";
+export { RunTimeline } from "./RunTimeline.js";
+export type { RunTimelineProps, RunSpan, RunSpanStatus } from "./RunTimeline.js";
 
-export { EvidenceDrawer } from "./EvidenceDrawer";
-export type { EvidenceDrawerProps, EvidenceItem } from "./EvidenceDrawer";
+export { EvidenceDrawer } from "./EvidenceDrawer.js";
+export type { EvidenceDrawerProps, EvidenceItem } from "./EvidenceDrawer.js";
 
-export { RecommendationCard } from "./RecommendationCard";
-export type { RecommendationCardProps } from "./RecommendationCard";
+export { RecommendationCard } from "./RecommendationCard.js";
+export type { RecommendationCardProps } from "./RecommendationCard.js";
 
-export { ApprovalDialog } from "./ApprovalDialog";
-export type { ApprovalDialogProps } from "./ApprovalDialog";
+export { ApprovalDialog } from "./ApprovalDialog.js";
+export type { ApprovalDialogProps } from "./ApprovalDialog.js";
 
-export { AuditRail } from "./AuditRail";
-export type { AuditRailProps, AuditEvent, AuditEventKind } from "./AuditRail";
+export { AuditRail } from "./AuditRail.js";
+export type { AuditRailProps, AuditEvent, AuditEventKind } from "./AuditRail.js";

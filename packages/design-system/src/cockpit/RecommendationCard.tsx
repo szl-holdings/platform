@@ -1,7 +1,8 @@
-import { cn } from "../utils";
-import { ConfidenceMeter } from "../proof/ConfidenceMeter";
-import { PolicyStateChip, type PolicyState } from "../proof/PolicyStateChip";
-import { FreshnessChip } from "../proof/FreshnessChip";
+import { cn } from "../utils.js";
+import { color, productAccent } from "../tokens/index.js";
+import { ConfidenceMeter } from "../proof/ConfidenceMeter.js";
+import { PolicyStateChip, type PolicyState } from "../proof/PolicyStateChip.js";
+import { FreshnessChip } from "../proof/FreshnessChip.js";
 import { ChevronRight, BookOpen } from "lucide-react";
 
 export interface RecommendationCardProps {
@@ -23,12 +24,12 @@ export interface RecommendationCardProps {
 }
 
 const DOMAIN_COLORS: Record<string, string> = {
-  lyte:    "#d4a054",
-  vessels: "#0ea5e9",
-  terra:   "#22c55e",
-  prism:   "#a855f7",
-  aegis:   "#ef4444",
-  carlota: "#f59e0b",
+  lyte:    productAccent.pulse,
+  vessels: productAccent.command,
+  terra:   productAccent.terra,
+  prism:   productAccent.aegis,
+  aegis:   productAccent.aegis,
+  carlota: productAccent.carlota,
 };
 
 export function RecommendationCard({
@@ -48,35 +49,49 @@ export function RecommendationCard({
   accentColor,
   variant = "full",
 }: RecommendationCardProps) {
-  const domainColor = domain ? (DOMAIN_COLORS[domain.toLowerCase()] ?? "#8b7ac8") : accentColor ?? "#8b7ac8";
+  const domainColor = domain
+    ? (DOMAIN_COLORS[domain.toLowerCase()] ?? color.accent.violet)
+    : accentColor ?? color.accent.violet;
 
   return (
     <div
-      className={cn(
-        "group rounded-lg border border-[#1a2535] bg-[#0d1520] transition-all",
-        onInspect && "cursor-pointer hover:border-[#243040] hover:bg-[#111d2c]",
-        className
-      )}
+      className={cn("group rounded-lg transition-all", onInspect && "cursor-pointer", className)}
+      style={{
+        border: `1px solid ${color.border.subtle}`,
+        background: color.bg.surface,
+      }}
       onClick={() => onInspect?.(recommendationId)}
       role={onInspect ? "button" : undefined}
       tabIndex={onInspect ? 0 : undefined}
       onKeyDown={(e) => e.key === "Enter" && onInspect?.(recommendationId)}
+      onMouseEnter={(e) => {
+        if (onInspect) (e.currentTarget as HTMLElement).style.background = color.bg.overlay;
+      }}
+      onMouseLeave={(e) => {
+        if (onInspect) (e.currentTarget as HTMLElement).style.background = color.bg.surface;
+      }}
     >
       <div className="flex items-start gap-3 p-4">
         <div
           className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded"
-          style={{ background: `${domainColor}15`, border: `1px solid ${domainColor}30` }}
+          style={{ background: color.bg.overlay, border: `1px solid ${color.border.default}` }}
         >
           <BookOpen className="h-4 w-4" style={{ color: domainColor }} />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <span className="text-[13px] font-semibold text-white leading-snug">{title}</span>
+            <span className="text-sm font-semibold leading-snug" style={{ color: color.text.primary }}>
+              {title}
+            </span>
             {domain && (
               <span
-                className="shrink-0 rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
-                style={{ color: domainColor, background: `${domainColor}12`, border: `1px solid ${domainColor}25` }}
+                className="shrink-0 rounded px-2 py-0.5 text-xs font-bold uppercase tracking-wider"
+                style={{
+                  color: domainColor,
+                  background: color.bg.overlay,
+                  border: `1px solid ${color.border.default}`,
+                }}
               >
                 {domain}
               </span>
@@ -84,7 +99,9 @@ export function RecommendationCard({
           </div>
 
           {variant === "full" && (
-            <p className="mt-1 text-[12px] leading-relaxed text-[#64748b]">{summary}</p>
+            <p className="mt-1 text-xs leading-relaxed" style={{ color: color.text.secondary }}>
+              {summary}
+            </p>
           )}
 
           <div className="mt-2.5 flex flex-wrap items-center gap-3">
@@ -92,32 +109,39 @@ export function RecommendationCard({
             {policyState && <PolicyStateChip state={policyState} />}
             {generatedAt && <FreshnessChip timestamp={generatedAt} />}
             {evidenceCount !== undefined && (
-              <span className="text-[11px] text-[#334155]">
+              <span className="text-xs" style={{ color: color.text.muted }}>
                 {evidenceCount} evidence source{evidenceCount !== 1 ? "s" : ""}
               </span>
             )}
             {modelId && (
-              <span className="text-[11px] font-mono text-[#334155] truncate max-w-[120px]">{modelId}</span>
+              <span className="text-xs font-mono truncate max-w-[120px]" style={{ color: color.text.muted }}>
+                {modelId}
+              </span>
             )}
           </div>
         </div>
 
         {onInspect && (
-          <ChevronRight
-            className="h-4 w-4 shrink-0 self-center text-[#243040] transition-colors group-hover:text-[#475569]"
-          />
+          <ChevronRight className="h-4 w-4 shrink-0 self-center" style={{ color: color.text.muted }} />
         )}
       </div>
 
       {(onApprove || onReject) && (
         <div
-          className="flex gap-2 border-t border-[#1a2535] px-4 py-3"
+          className="flex gap-2 px-4 py-3"
+          style={{ borderTop: `1px solid ${color.border.subtle}` }}
           onClick={(e) => e.stopPropagation()}
         >
           {onApprove && (
             <button
               onClick={() => onApprove(recommendationId)}
-              className="flex-1 rounded border border-[#22c55e30] bg-[#22c55e0d] py-1.5 text-[11px] font-semibold text-[#22c55e] transition-colors hover:bg-[#22c55e1a]"
+              className="flex-1 rounded py-1.5 text-xs font-semibold transition-colors"
+              style={{
+                border: `1px solid ${color.border.default}`,
+                color: color.accent.green,
+                background: color.bg.overlay,
+                cursor: "pointer",
+              }}
             >
               Approve
             </button>
@@ -125,7 +149,13 @@ export function RecommendationCard({
           {onReject && (
             <button
               onClick={() => onReject(recommendationId)}
-              className="flex-1 rounded border border-[#ef444430] bg-[#ef44440d] py-1.5 text-[11px] font-semibold text-[#ef4444] transition-colors hover:bg-[#ef44441a]"
+              className="flex-1 rounded py-1.5 text-xs font-semibold transition-colors"
+              style={{
+                border: `1px solid ${color.border.default}`,
+                color: color.accent.red,
+                background: color.bg.overlay,
+                cursor: "pointer",
+              }}
             >
               Reject
             </button>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { cn } from "../utils";
+import { v } from "../tokens/vars.js";
 
 export interface ColumnDef<T> {
   key: string;
@@ -63,14 +64,14 @@ export function DenseTable<T>({
     if (!col.sortable) return null;
     if (sortKey !== col.key || sortDir === null)
       return <ChevronsUpDown className="h-3 w-3 opacity-30" />;
-    if (sortDir === "asc") return <ChevronUp className="h-3 w-3 text-[#00d4ff]" />;
-    return <ChevronDown className="h-3 w-3 text-[#00d4ff]" />;
+    if (sortDir === "asc") return <ChevronUp style={{ color: v.accentBlue }} className="h-3 w-3" />;
+    return <ChevronDown style={{ color: v.accentBlue }} className="h-3 w-3" />;
   }
 
   return (
     <div
-      className={cn("rounded-lg border border-[#243040] overflow-hidden", className)}
-      style={{ maxHeight }}
+      style={{ borderColor: v.borderDefault, maxHeight }}
+      className={cn("rounded-lg border overflow-hidden", className)}
     >
       <div className="overflow-auto h-full">
         <table className="w-full border-collapse text-xs">
@@ -78,17 +79,17 @@ export function DenseTable<T>({
             <caption className="sr-only">{caption}</caption>
           )}
           <thead className={cn(stickyHeader && "sticky top-0 z-10")}>
-            <tr className="border-b border-[#243040] bg-[#0d1520]">
+            <tr style={{ borderColor: v.borderDefault, backgroundColor: v.bgSurface }} className="border-b">
               {columns.map((col) => (
                 <th
                   key={col.key}
                   scope="col"
-                  style={{ width: col.width }}
+                  style={{ width: col.width, color: v.textMuted }}
                   className={cn(
-                    "px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[#4a6070]",
+                    "px-3 py-2 text-[10px] font-semibold uppercase tracking-wider",
                     col.align === "center" && "text-center",
                     col.align === "right" && "text-right",
-                    col.sortable && "cursor-pointer select-none hover:text-[#c8d8e8] transition-colors"
+                    col.sortable && "cursor-pointer select-none transition-colors"
                   )}
                   onClick={() => col.sortable && handleSort(col.key)}
                 >
@@ -106,12 +107,13 @@ export function DenseTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#1a2535]">
+          <tbody style={{ borderColor: v.borderSubtle }} className="divide-y">
             {displayed.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-3 py-8 text-center text-[#4a6070]"
+                  style={{ color: v.textMuted }}
+                  className="px-3 py-8 text-center"
                 >
                   {emptyMessage}
                 </td>
@@ -123,14 +125,15 @@ export function DenseTable<T>({
                   onClick={() => onRowClick?.(row)}
                   className={cn(
                     "bg-transparent transition-colors duration-100",
-                    onRowClick && "cursor-pointer hover:bg-[#111c2a]"
+                    onRowClick && "cursor-pointer"
                   )}
                 >
                   {columns.map((col) => (
                     <td
                       key={col.key}
+                      style={{ color: v.textPrimary }}
                       className={cn(
-                        "px-3 py-2 text-[#c8d8e8]",
+                        "px-3 py-2",
                         col.align === "center" && "text-center",
                         col.align === "right" && "text-right",
                         col.mono && "font-mono tabular-nums"

@@ -1,0 +1,19 @@
+{
+  "name": "@szl-holdings/agent-core",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AEEP agent-core — role registry, capability resolver, tool router, and run context factory",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@szl-holdings/shared-contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "zod": "catalog:"
+  }
+}

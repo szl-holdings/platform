@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { cn } from "../utils";
-import { EvidenceBadge, type EvidenceSource } from "./EvidenceBadge";
-import { FreshnessChip } from "./FreshnessChip";
-import { ConfidenceMeter } from "./ConfidenceMeter";
-import { PolicyStateChip, type PolicyState } from "./PolicyStateChip";
-import { AutonomyModeToggle, type AutonomyMode } from "./AutonomyModeToggle";
+import { cn } from "../utils.js";
+import { color, v } from "../tokens/index.js";
+import { EvidenceBadge, type EvidenceSource } from "./EvidenceBadge.js";
+import { FreshnessChip } from "./FreshnessChip.js";
+import { ConfidenceMeter } from "./ConfidenceMeter.js";
+import { PolicyStateChip, type PolicyState } from "./PolicyStateChip.js";
+import { AutonomyModeToggle, type AutonomyMode } from "./AutonomyModeToggle.js";
 
 export interface AutonomyDecision {
   policyState: PolicyState;
@@ -89,7 +90,7 @@ export function ProofEnvelope({
   onAutonomyChange,
   readOnlyAutonomy,
   title,
-  accentColor = "#00d4ff",
+  accentColor = color.accent.blue,
   className,
   domain,
   autonomyEndpoint = DEFAULT_AUTONOMY_ENDPOINT,
@@ -124,25 +125,28 @@ export function ProofEnvelope({
 
   return (
     <div
+      style={{
+        borderColor: v.borderDefault,
+        backgroundColor: v.bgSurface,
+        borderLeftColor: accentColor,
+        borderLeftWidth: 2,
+      }}
       className={cn(
-        "rounded-xl border border-[#243040] bg-[#0d1520]",
-        "shadow-[0_4px_12px_rgba(0,0,0,0.6)]",
-        "overflow-hidden",
+        "rounded-xl border shadow-lg overflow-hidden",
         className
       )}
-      style={{ borderLeftColor: accentColor, borderLeftWidth: 2 }}
       data-autonomy-pending={pending ? "true" : undefined}
       data-autonomy-domain={domain}
     >
       {title && (
-        <div className="border-b border-[#1a2535] px-4 py-2.5">
-          <h3 className="text-sm font-semibold text-[#c8d8e8]">{title}</h3>
+        <div style={{ borderColor: v.borderSubtle }} className="border-b px-4 py-2.5">
+          <h3 style={{ color: v.textPrimary }} className="text-sm font-semibold">{title}</h3>
         </div>
       )}
 
       <div className="px-4 py-3">{children}</div>
 
-      <div className="border-t border-[#1a2535] bg-[#060b12]/50 px-4 py-2.5">
+      <div style={{ borderColor: v.borderSubtle }} className="border-t px-4 py-2.5 bg-black/30">
         <div className="flex flex-wrap items-center gap-3">
           <EvidenceBadge sources={evidence} />
           <FreshnessChip timestamp={timestamp} showAbsolute />
@@ -164,11 +168,12 @@ export function ProofEnvelope({
         </div>
         {liveDecision?.policyReason && (
           <div
-            className="mt-2 text-[11px] leading-snug text-[#7a99b8]"
+            style={{ color: v.textSecondary }}
+            className="mt-2 text-[11px] leading-snug"
             role="status"
             aria-live="polite"
           >
-            <span className="font-semibold uppercase tracking-wide text-[#4a6070]">
+            <span style={{ color: v.textMuted }} className="font-semibold uppercase tracking-wide">
               Alloy:
             </span>{" "}
             {liveDecision.policyReason}

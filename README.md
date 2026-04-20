@@ -20,6 +20,9 @@ New to the codebase? Start here.
 | **[packages/config/](./packages/config/)** | Single source of truth: platform registry, claims, feature flags, env contract |
 | **[docs/APP_STATUS.md](./docs/APP_STATUS.md)** | Authoritative artifact readiness register (GA / Beta / Partial / Archived) |
 | **[docs/known-gaps.md](./docs/known-gaps.md)** | Honest inventory of technical debt and remediation paths |
+| **[docs/platform-facts.md](./docs/platform-facts.md)** | Authoritative platform statistics — generated from `packages/platform-metrics-registry` |
+
+> **Platform facts are auto-generated.** Run `pnpm metrics:generate` to regenerate [`docs/platform-facts.md`](./docs/platform-facts.md) and the registry from the current filesystem state. Run `pnpm metrics:validate` to verify no drift. Never edit `docs/platform-facts.md` directly.
 
 ---
 

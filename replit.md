@@ -78,6 +78,54 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 
 **Reflection Engine:** A structured self-improvement package that scores run quality, classifies failure modes, identifies best-performing routes, and drafts candidate skills.
 
+---
+
+## AEEP — Alloy Execution and Evidence Platform
+
+The monorepo has been evolved into AEEP. The following new packages form the AEEP platform spine:
+
+**Core Packages:**
+- `packages/shared-contracts/` — All typed contracts: 8 agent roles, 10 starter workflows, evidence/policy/retrieval/memory types
+- `packages/agent-core/` — RunContext factory (traceId generation), capability resolver (role × tool permission matrix)
+- `packages/workflow-runtime/` — Run engine, step executor, approval gate state machine
+- `packages/retrieval-core/` — Query planner (strategy inference), RRF reranker, score threshold filter
+- `packages/memory-core/` — InMemoryStore reference implementation (production: swap with Redis adapter)
+- `packages/evidence-ledger/` — Immutable append-only ledger, ProofEnvelope assembly, EvidencePackage compilation
+- `packages/policy-guard/` — Rule evaluation engine, baseline rules (POL-001 through POL-005)
+- `packages/domain-profiles/` — 6 domain profile definitions: Lyte, Vessels, Terra, Aegis, PRISM, Carlota
+- `packages/platform-metrics-registry/` — Typed metric schema, registry, validation
+
+**Design System (AEEP Edition) — `packages/design-system/src/`:**
+- `tokens/` — AEEP enterprise accent palette (no neon), densityConfig, chartPalette, semanticColors
+- `providers/` — DesignSystemProvider (density + screen mode)
+- `hooks/` — useDensity(), useScreenMode()
+- `shell/` — AppShell, SideNav, TopBar, PageHeader, SectionPanel, GlobalCommandPalette, TenantIndicator
+- `layout/` — SplitPane, SideInspector, InspectorTabs
+- `data/` — MetricStat, MetricStatGrid, StatusBadge, FilterBar, DataGrid, TableToolbar
+- `detail/` — DetailDrawer
+- `timeline/` — Timeline, ActivityFeed, AuditTrailList
+- `evidence/` — EvidencePanel
+- `form/` — SearchInput, FormField, Select, SegmentedControl, Stepper
+- `feedback/` — EmptyState, ErrorState, LoadingState
+
+**AEEP Design Constraints:**
+- No neon/glow/oversaturated palette in authenticated product UX
+- Max heading size: 24px (text-2xl) in authenticated surfaces
+- Max motion duration: 200ms
+- All color values must reference tokens (no raw hex in components)
+- Screen modes: executive (KPI-first) | operator (density-first, trace-visible)
+- Evidence-first: all material AI results must surface EvidencePanel
+
+**AEEP Documentation (`docs/`):**
+- `evolve-style-principles.md` — Design constraints and token rules
+- `evolve-component-inventory.md` — Full component catalog
+- `evolve-screen-mapping.md` — 8-nav route → screen pattern mapping
+- `evolve-runtime-architecture.md` — Package topology, request flow, role wiring
+- `evolve-evidence-model.md` — ProofEnvelope, LedgerEntry, EvidencePackage schemas
+- `evolve-policy-model.md` — Policy verdict types, tiers, approval lifecycle
+- `evolve-domain-profiles.md` — Profile structure, namespace config
+- `evolve-integration-summary.md` — All 8 phases summary
+
 **Cognitive Consoles (Command App):** Three read-only inspection surfaces in the Command app provide insights into the system's runtime state: Cognitive Command Center, Self Model Console, and World Model Graph Explorer.
 
 **NEXUS — Unified Agentic AI Layer:** The unified agentic AI orchestration layer, accessible at `/nexus/`, featuring a Parallel Research Swarm, Persistent Memory + Skills Library, Universal Protocol Bridge, and Cross-App Orchestrator.

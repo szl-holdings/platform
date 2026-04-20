@@ -1,0 +1,31 @@
+{
+  "name": "@workspace/alloy-runtime-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AEEP Alloy Runtime API — unified v1 surface for tasks, memory, and workflow execution.",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "node --enable-source-maps dist/server.js",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@szl-holdings/workflow-runtime": "workspace:*",
+    "@szl-holdings/memory-core": "workspace:*",
+    "@szl-holdings/agent-core": "workspace:*",
+    "@szl-holdings/shared-contracts": "workspace:*",
+    "@szl-holdings/evidence-ledger": "workspace:*",
+    "@szl-holdings/policy-guard": "workspace:*",
+    "express": "^4.21.2",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

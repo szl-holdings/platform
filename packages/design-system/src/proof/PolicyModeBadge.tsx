@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Eye, FileText, Hand, Bot, ShieldCheck, ExternalLink } from "lucide-react";
-import { cn } from "../utils";
+import { cn } from "../utils.js";
+import { color } from "../tokens/index.js";
 
 export type PolicyMode =
   | "observe"
@@ -21,71 +22,44 @@ interface ResolveResponse {
 
 const MODE_META: Record<
   PolicyMode,
-  { label: string; color: string; bg: string; border: string; Icon: React.FC<{ className?: string }> }
+  { label: string; modeColor: string; Icon: React.FC<{ className?: string }> }
 > = {
   observe: {
     label: "Observe",
-    color: "#7c8a9a",
-    bg: "rgba(124,138,154,0.10)",
-    border: "rgba(124,138,154,0.35)",
+    modeColor: color.text.secondary,
     Icon: Eye,
   },
   recommend: {
     label: "Recommend",
-    color: "#8b7ac8",
-    bg: "rgba(139,122,200,0.10)",
-    border: "rgba(139,122,200,0.35)",
+    modeColor: color.accent.violet,
     Icon: FileText,
   },
   draft: {
     label: "Draft",
-    color: "#0ea5e9",
-    bg: "rgba(14,165,233,0.10)",
-    border: "rgba(14,165,233,0.35)",
+    modeColor: color.accent.blue,
     Icon: FileText,
   },
   "approval-required": {
     label: "Approval Required",
-    color: "#d4a054",
-    bg: "rgba(212,160,84,0.10)",
-    border: "rgba(212,160,84,0.35)",
+    modeColor: color.accent.amber,
     Icon: Hand,
   },
   "auto-within-guardrails": {
     label: "Auto · Guardrails",
-    color: "#22c55e",
-    bg: "rgba(34,197,94,0.10)",
-    border: "rgba(34,197,94,0.35)",
+    modeColor: color.accent.green,
     Icon: Bot,
   },
 };
 
 export interface PolicyModeBadgeProps {
-  /** Product slug used to scope the policy lookup (e.g. "vessels", "terra"). */
   product: string;
-  /** Optional action type narrowing the lookup scope. */
   actionType?: string;
-  /** Optional workspace narrowing the lookup scope. */
   workspace?: string;
-  /** Extra tailwind classes appended to the badge. */
   className?: string;
-  /**
-   * Visual variant.
-   * - "dark" (default): mode-tinted background, suitable for dark surfaces.
-   * - "light": neutral translucent background; mode color is used for text/border only.
-   */
   variant?: "dark" | "light";
-  /** Optional override for the deep-link target. Defaults to the Unified Command policy manager. */
   deepLinkBase?: string;
 }
 
-/**
- * PolicyModeBadge — shared, governance-aware badge that resolves the current
- * policy mode for a product and links to the Unified Command policy manager.
- *
- * Used across product surfaces (Vessels, Terra, Carlota, …) so that mode
- * metadata, colors, query behavior, and deep-link targets stay in sync.
- */
 export function PolicyModeBadge({
   product,
   actionType,
@@ -105,7 +79,7 @@ export function PolicyModeBadge({
         credentials: "include",
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
+      return res.json() as Promise<ResolveResponse>;
     },
     refetchInterval: 30_000,
     staleTime: 15_000,
@@ -128,13 +102,13 @@ export function PolicyModeBadge({
       href={deepLink}
       title={tooltip}
       className={cn(
-        "group inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-mono font-semibold tracking-wide transition-colors no-underline whitespace-nowrap",
-        className
+        "group inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-mono font-semibold tracking-wide transition-colors no-underline whitespace-nowrap",
+        className,
       )}
       style={{
-        color: meta.color,
-        background: variant === "light" ? "rgba(255,255,255,0.06)" : meta.bg,
-        border: `1px solid ${meta.border}`,
+        color: meta.modeColor,
+        background: variant === "light" ? color.bg.overlay : color.bg.overlay,
+        border: `1px solid ${color.border.default}`,
       }}
       data-testid={`policy-mode-badge-${product}`}
     >

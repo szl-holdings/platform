@@ -94,7 +94,11 @@
     "audit:full:fast": "node --experimental-vm-modules scripts/audit-full.js --skip-install --skip-e2e",
     "audit:full:ci": "node --experimental-vm-modules scripts/audit-full.js --skip-install --skip-e2e",
     "check-boundaries": "tsx scripts/check-package-boundaries.ts",
-    "lint:boundaries": "tsx scripts/check-package-boundaries.ts"
+    "lint:boundaries": "tsx scripts/check-package-boundaries.ts",
+    "metrics:generate": "tsx scripts/generate-platform-metrics.ts",
+    "metrics:validate": "tsx scripts/validate-platform-facts.ts",
+    "metrics:check": "tsx scripts/validate-platform-facts.ts --strict",
+    "design:check-hex": "tsx scripts/check-no-raw-hex.ts"
   },
   "private": true,
   "packageManager": "pnpm@10.26.1",

@@ -1,5 +1,6 @@
-import { cn } from "../utils";
+import { cn } from "../utils.js";
 import { Shield, User, Bot, GitCommit, CheckCircle, XCircle, AlertTriangle, Clock } from "lucide-react";
+import { color } from "../tokens/index.js";
 
 export type AuditEventKind =
   | "approval"
@@ -33,15 +34,15 @@ export interface AuditRailProps {
 }
 
 const KIND_CONFIG: Record<AuditEventKind, { color: string; icon: typeof Shield }> = {
-  "approval":          { color: "#22c55e",  icon: CheckCircle },
-  "rejection":         { color: "#ef4444",  icon: XCircle },
-  "policy-gate":       { color: "#f59e0b",  icon: Shield },
-  "model-invocation":  { color: "#8b7ac8",  icon: Bot },
-  "tool-call":         { color: "#0ea5e9",  icon: GitCommit },
-  "human-handoff":     { color: "#a855f7",  icon: User },
-  "agent-action":      { color: "#d4a054",  icon: Bot },
-  "override":          { color: "#f97316",  icon: AlertTriangle },
-  "system":            { color: "#475569",  icon: Clock },
+  "approval":          { color: color.accent.green,  icon: CheckCircle },
+  "rejection":         { color: color.accent.red,    icon: XCircle },
+  "policy-gate":       { color: color.accent.amber,  icon: Shield },
+  "model-invocation":  { color: color.accent.violet, icon: Bot },
+  "tool-call":         { color: color.accent.blue,   icon: GitCommit },
+  "human-handoff":     { color: color.accent.violet, icon: User },
+  "agent-action":      { color: color.accent.amber,  icon: Bot },
+  "override":          { color: color.accent.amber,  icon: AlertTriangle },
+  "system":            { color: color.text.muted,    icon: Clock },
 };
 
 const ACTOR_TYPE_ICON: Record<AuditEvent["actorType"], typeof Shield> = {
@@ -51,10 +52,10 @@ const ACTOR_TYPE_ICON: Record<AuditEvent["actorType"], typeof Shield> = {
 };
 
 const OUTCOME_COLOR: Record<NonNullable<AuditEvent["outcome"]>, string> = {
-  success: "#22c55e",
-  failure: "#ef4444",
-  blocked: "#f59e0b",
-  pending: "#475569",
+  success: color.accent.green,
+  failure: color.accent.red,
+  blocked: color.accent.amber,
+  pending: color.text.muted,
 };
 
 function relTs(ts: string | Date): string {
@@ -78,25 +79,27 @@ export function AuditRail({
 }: AuditRailProps) {
   return (
     <div
-      className={cn(
-        "rounded-lg border border-[#1a2535] bg-[#0d1520] overflow-hidden",
-        className
-      )}
+      className={cn("rounded-lg overflow-hidden", className)}
+      style={{ border: `1px solid ${color.border.subtle}`, background: color.bg.surface }}
     >
-      <div className="flex items-center justify-between border-b border-[#1a2535] px-4 py-2.5">
+      <div
+        className="flex items-center justify-between px-4 py-2.5"
+        style={{ borderBottom: `1px solid ${color.border.subtle}` }}
+      >
         <div className="flex items-center gap-2">
-          <Shield className="h-3.5 w-3.5 text-[#334155]" />
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#334155]">Audit Rail</span>
+          <Shield className="h-3.5 w-3.5" style={{ color: color.text.muted }} />
+          <span className="text-xs font-bold uppercase tracking-wider" style={{ color: color.text.muted }}>
+            Audit Rail
+          </span>
         </div>
-        <span className="text-[10px] text-[#243040]">{events.length} event{events.length !== 1 ? "s" : ""}</span>
+        <span className="text-xs" style={{ color: color.text.muted }}>
+          {events.length} event{events.length !== 1 ? "s" : ""}
+        </span>
       </div>
 
-      <div
-        className="overflow-y-auto"
-        style={{ maxHeight }}
-      >
+      <div className="overflow-y-auto" style={{ maxHeight }}>
         {events.length === 0 && (
-          <div className="flex items-center justify-center py-12 text-[12px] text-[#334155]">
+          <div className="flex items-center justify-center py-12 text-xs" style={{ color: color.text.muted }}>
             {emptyMessage}
           </div>
         )}
@@ -113,16 +116,15 @@ export function AuditRail({
                 {!isLast && (
                   <div
                     className="absolute left-[13px] top-6 w-px"
-                    style={{ bottom: 0, background: "linear-gradient(to bottom, #1a2535, transparent)" }}
+                    style={{ bottom: 0, background: color.border.subtle }}
                   />
                 )}
 
                 <div
-                  className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border"
+                  className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
                   style={{
-                    background: `${cfg.color}12`,
-                    borderColor: `${cfg.color}30`,
-                    boxShadow: `0 0 8px ${cfg.color}20`,
+                    background: color.bg.overlay,
+                    border: `1px solid ${color.border.default}`,
                   }}
                 >
                   <KindIcon className="h-3 w-3" style={{ color: cfg.color }} />
@@ -131,35 +133,41 @@ export function AuditRail({
                 <div className="flex-1 min-w-0 pt-0.5">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <span className="text-[12px] font-medium text-white">{event.action}</span>
+                      <span className="text-xs font-medium" style={{ color: color.text.primary }}>
+                        {event.action}
+                      </span>
                       {event.outcome && (
                         <span
-                          className="ml-2 inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                          className="ml-2 inline-flex items-center rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wider"
                           style={{
                             color: OUTCOME_COLOR[event.outcome],
-                            background: `${OUTCOME_COLOR[event.outcome]}12`,
-                            border: `1px solid ${OUTCOME_COLOR[event.outcome]}25`,
+                            background: color.bg.overlay,
+                            border: `1px solid ${color.border.default}`,
                           }}
                         >
                           {event.outcome}
                         </span>
                       )}
                     </div>
-                    <span className="shrink-0 text-[10px] text-[#334155]">
+                    <span className="shrink-0 text-xs" style={{ color: color.text.muted }}>
                       {relative ? relTs(event.timestamp) : new Date(event.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
 
                   <div className="mt-0.5 flex items-center gap-1.5">
-                    <ActorIcon className="h-2.5 w-2.5 text-[#334155]" />
-                    <span className="text-[11px] text-[#475569]">{event.actor}</span>
+                    <ActorIcon className="h-2.5 w-2.5" style={{ color: color.text.muted }} />
+                    <span className="text-xs" style={{ color: color.text.secondary }}>{event.actor}</span>
                     {event.traceRef && (
-                      <span className="font-mono text-[9px] text-[#243040]">#{event.traceRef.slice(0, 8)}</span>
+                      <span className="font-mono text-xs" style={{ color: color.text.muted }}>
+                        #{event.traceRef.slice(0, 8)}
+                      </span>
                     )}
                   </div>
 
                   {event.detail && (
-                    <p className="mt-1 text-[11px] leading-relaxed text-[#475569]">{event.detail}</p>
+                    <p className="mt-1 text-xs leading-relaxed" style={{ color: color.text.secondary }}>
+                      {event.detail}
+                    </p>
                   )}
                 </div>
               </li>

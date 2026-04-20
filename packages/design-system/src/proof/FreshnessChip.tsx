@@ -1,15 +1,13 @@
 import { Clock } from "lucide-react";
 import { cn } from "../utils";
+import { v } from "../tokens/vars.js";
 
 export type FreshnessLevel = "fresh" | "aging" | "stale" | "unknown";
 
 export interface FreshnessChipProps {
-  /** ISO 8601 timestamp or Date */
   timestamp: string | Date | null | undefined;
-  /** Override the computed freshness level */
   level?: FreshnessLevel;
   className?: string;
-  /** Show the absolute time in a tooltip */
   showAbsolute?: boolean;
 }
 
@@ -19,8 +17,8 @@ function computeLevel(ts: string | Date | null | undefined): FreshnessLevel {
   if (isNaN(d.getTime())) return "unknown";
   const ageMs = Date.now() - d.getTime();
   const ageH = ageMs / 3_600_000;
-  if (ageH < 1)   return "fresh";
-  if (ageH < 24)  return "aging";
+  if (ageH < 1)  return "fresh";
+  if (ageH < 24) return "aging";
   return "stale";
 }
 
@@ -41,11 +39,18 @@ function relativeLabel(ts: string | Date | null | undefined): string {
   return `${mo}mo ago`;
 }
 
-const levelStyles: Record<FreshnessLevel, string> = {
-  fresh:   "border-[#00e878]/30 text-[#00e878] bg-[#00e878]/8",
-  aging:   "border-[#ffb700]/30 text-[#ffb700] bg-[#ffb700]/8",
-  stale:   "border-[#ff4455]/30 text-[#ff4455] bg-[#ff4455]/8",
-  unknown: "border-[#243040] text-[#4a6070] bg-transparent",
+const levelColor: Record<FreshnessLevel, string> = {
+  fresh:   v.accentGreen,
+  aging:   v.accentAmber,
+  stale:   v.accentRed,
+  unknown: v.textMuted,
+};
+
+const levelBorder: Record<FreshnessLevel, string> = {
+  fresh:   v.accentGreen,
+  aging:   v.accentAmber,
+  stale:   v.accentRed,
+  unknown: v.borderDefault,
 };
 
 export function FreshnessChip({ timestamp, level, className, showAbsolute }: FreshnessChipProps) {
@@ -56,9 +61,9 @@ export function FreshnessChip({ timestamp, level, className, showAbsolute }: Fre
   return (
     <span
       title={showAbsolute && absLabel ? absLabel : undefined}
+      style={{ color: levelColor[resolved], borderColor: levelBorder[resolved] }}
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium",
-        levelStyles[resolved],
+        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium bg-black/5",
         className
       )}
     >

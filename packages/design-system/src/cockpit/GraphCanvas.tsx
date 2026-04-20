@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback, useState } from "react";
-import { cn } from "../utils";
+import { cn } from "../utils.js";
+import { color } from "../tokens/index.js";
 
 export interface GraphNode {
   id: string;
@@ -8,7 +9,6 @@ export interface GraphNode {
   y: number;
   radius?: number;
   color?: string;
-  /** Ring color for emphasis */
   ringColor?: string;
   meta?: Record<string, string>;
 }
@@ -21,7 +21,6 @@ export interface GraphEdge {
   color?: string;
   dashed?: boolean;
   weight?: number;
-  /** Render an arrowhead at the target end. */
   directed?: boolean;
 }
 
@@ -32,16 +31,9 @@ export interface GraphCanvasProps {
   height?: number | string;
   className?: string;
   onNodeClick?: (node: GraphNode) => void;
-  /**
-   * Called continuously while a node is being dragged with normalized
-   * coordinates in [0, 1]. When provided, nodes become draggable.
-   */
   onNodeDrag?: (nodeId: string, x: number, y: number) => void;
-  /** Called once when a drag gesture ends. */
   onNodeDragEnd?: (nodeId: string, x: number, y: number) => void;
-  /** Background color — defaults to the GI surface token */
   background?: string;
-  /** Show node labels */
   showLabels?: boolean;
 }
 
@@ -54,7 +46,7 @@ export function GraphCanvas({
   onNodeClick,
   onNodeDrag,
   onNodeDragEnd,
-  background = "#0d1520",
+  background = color.bg.surface,
   showLabels = true,
 }: GraphCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -89,8 +81,6 @@ export function GraphCanvas({
       const tx = tgt.x * W;
       const ty = tgt.y * H;
 
-      // If directed, stop the line short of the target node so the arrowhead
-      // sits at the node's edge rather than under it.
       const tgtR = (tgt.radius ?? 8) + (tgt.ringColor ? 4 : 0);
       let endX = tx;
       let endY = ty;
@@ -102,7 +92,7 @@ export function GraphCanvas({
         endY = ty - (dy / len) * (tgtR + 2);
       }
 
-      const stroke = edge.color ?? "#243040";
+      const stroke = edge.color ?? color.border.default;
       ctx.beginPath();
       ctx.moveTo(sx, sy);
       ctx.lineTo(endX, endY);
@@ -113,7 +103,6 @@ export function GraphCanvas({
       ctx.stroke();
 
       if (edge.directed) {
-        // Arrowhead — solid triangle, never dashed
         ctx.setLineDash([]);
         const dx = endX - sx;
         const dy = endY - sy;
@@ -139,7 +128,7 @@ export function GraphCanvas({
         const mx = (sx + tx) / 2;
         const my = (sy + ty) / 2;
         ctx.font = "10px 'Inter', system-ui, sans-serif";
-        ctx.fillStyle = "#4a6070";
+        ctx.fillStyle = color.text.muted;
         ctx.textAlign = "center";
         ctx.fillText(edge.label, mx, my - 4);
       }
@@ -150,7 +139,7 @@ export function GraphCanvas({
       const x = node.x * W;
       const y = node.y * H;
       const r = node.radius ?? 8;
-      const fill = node.color ?? "#00d4ff";
+      const fill = node.color ?? color.accent.blue;
 
       if (node.ringColor) {
         ctx.beginPath();
@@ -172,7 +161,7 @@ export function GraphCanvas({
 
       if (showLabels) {
         ctx.font = "11px 'Inter', system-ui, sans-serif";
-        ctx.fillStyle = "#c8d8e8";
+        ctx.fillStyle = color.text.primary;
         ctx.textAlign = "center";
         ctx.fillText(node.label, x, y + r + 14);
       }
@@ -207,7 +196,6 @@ export function GraphCanvas({
   }
 
   function hitTest(mx: number, my: number, W: number, H: number): GraphNode | null {
-    // Iterate in reverse so visually top-most nodes are picked first.
     for (let i = nodes.length - 1; i >= 0; i--) {
       const node = nodes[i]!;
       const nx = node.x * W;
@@ -258,7 +246,6 @@ export function GraphCanvas({
       const ny = Math.max(0.02, Math.min(0.98, my / H));
       onNodeDragEnd?.(drag.id, nx, ny);
     } else if (onNodeClick) {
-      // Treat a no-move mouseup as a click.
       const node = nodes.find((n) => n.id === drag.id);
       if (node) onNodeClick(node);
     }
@@ -290,8 +277,8 @@ export function GraphCanvas({
 
   return (
     <div
-      className={cn("rounded-lg border border-[#243040] overflow-hidden", className)}
-      style={{ width, height }}
+      className={cn("rounded-lg overflow-hidden", className)}
+      style={{ width, height, border: `1px solid ${color.border.default}` }}
     >
       <canvas
         ref={canvasRef}

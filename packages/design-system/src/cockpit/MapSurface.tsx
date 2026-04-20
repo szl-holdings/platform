@@ -1,10 +1,9 @@
-import { cn } from "../utils";
+import { cn } from "../utils.js";
+import { color } from "../tokens/index.js";
 
 export interface MapMarker {
   id: string;
-  /** 0–1 normalized from left edge */
   x: number;
-  /** 0–1 normalized from top edge */
   y: number;
   label: string;
   color?: string;
@@ -14,13 +13,11 @@ export interface MapMarker {
 }
 
 export interface MapSurfaceProps {
-  /** Background image URL for the map — uses a dark grid if omitted */
   imageUrl?: string;
   markers?: MapMarker[];
   className?: string;
   height?: string | number;
   onMarkerClick?: (marker: MapMarker) => void;
-  /** Overlay grid lines */
   showGrid?: boolean;
 }
 
@@ -36,11 +33,8 @@ export function MapSurface({
 }: MapSurfaceProps) {
   return (
     <div
-      className={cn(
-        "relative rounded-lg border border-[#243040] bg-[#0d1520] overflow-hidden",
-        className
-      )}
-      style={{ height }}
+      className={cn("relative rounded-lg overflow-hidden", className)}
+      style={{ height, border: `1px solid ${color.border.default}`, background: color.bg.surface }}
     >
       {imageUrl ? (
         <img
@@ -53,8 +47,7 @@ export function MapSurface({
           <div
             className="absolute inset-0 opacity-20"
             style={{
-              backgroundImage:
-                "linear-gradient(#243040 1px, transparent 1px), linear-gradient(90deg, #243040 1px, transparent 1px)",
+              backgroundImage: `linear-gradient(${color.border.default} 1px, transparent 1px), linear-gradient(90deg, ${color.border.default} 1px, transparent 1px)`,
               backgroundSize: "40px 40px",
             }}
           />
@@ -64,14 +57,13 @@ export function MapSurface({
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background:
-            "radial-gradient(ellipse at center, transparent 40%, rgba(6,11,18,0.7) 100%)",
+          background: `radial-gradient(ellipse at center, transparent 40%, ${color.bg.base}b0 100%)`,
         }}
       />
 
       {markers.map((marker) => {
         const r = sizeMap[marker.size ?? "md"];
-        const fill = marker.color ?? "#00d4ff";
+        const fill = marker.color ?? color.accent.blue;
 
         return (
           <button
@@ -80,10 +72,9 @@ export function MapSurface({
             aria-label={marker.label}
             onClick={() => onMarkerClick?.(marker)}
             className={cn(
-              "absolute -translate-x-1/2 -translate-y-1/2 rounded-full",
-              "border-2 transition-transform duration-150 hover:scale-125",
-              "focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40",
-              onMarkerClick ? "cursor-pointer" : "cursor-default pointer-events-none"
+              "absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2",
+              "transition-transform duration-150 hover:scale-125 focus:outline-none",
+              onMarkerClick ? "cursor-pointer" : "cursor-default pointer-events-none",
             )}
             style={{
               left: `${marker.x * 100}%`,
@@ -115,7 +106,10 @@ export function MapSurface({
             transform: "translateX(-50%)",
           }}
         >
-          <span className="block whitespace-nowrap rounded px-1 py-0.5 text-[10px] font-medium text-[#c8d8e8] bg-[#060b12]/80">
+          <span
+            className="block whitespace-nowrap rounded px-1 py-0.5 text-xs font-medium"
+            style={{ color: color.text.primary, background: color.bg.base + "cc" }}
+          >
             {marker.label}
           </span>
         </div>
