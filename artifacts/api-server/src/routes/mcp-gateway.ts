@@ -10,6 +10,7 @@ import {
 import { and, avg, count, desc, eq, gte, isNotNull, isNull, sql } from "drizzle-orm";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { gatewayEventBus } from "../lib/gateway-event-bus";
 
 const router: IRouter = Router();
 
@@ -657,6 +658,27 @@ router.post("/mcp-gateway/proxy", async (req: Request, res: Response) => {
     }
 
     linkedExposureId = exposureRow ? exposureRow.id : undefined;
+
+    // Notify SSE subscribers so the Containment Rules dashboard can prepend
+    // this event without waiting for the next 30s poll. Fired only after the
+    // transaction above has committed successfully.
+    try {
+      gatewayEventBus.emitEvent({
+        id: eventId,
+        ruleId: rule.id,
+        agentClass,
+        mcpServerId,
+        tool,
+        egressDomain: egressDomain ?? undefined,
+        decision,
+        reason: effectiveReason,
+        enforcementMode: rule.enforcementMode,
+        linkedExposureId,
+        occurredAt: occurredAt.toISOString(),
+      });
+    } catch (err) {
+      logger.warn({ err, eventId }, "[mcp-gateway] failed to publish gateway event to SSE bus");
+    }
 
     const passthrough = decision === "allowed" || decision === "logged";
     return sendSuccess(res, {

@@ -898,7 +898,15 @@ async function loadAgentMeshGateway(filters: GatewayEventFilters): Promise<{
   }
 }
 
-const GATEWAY_REFRESH_INTERVAL_MS = 30_000;
+// Periodic safety-net refresh in case the SSE stream drops or never
+// connects (older browsers, proxies that buffer text/event-stream, etc).
+// The push channel below is the primary update path.
+const GATEWAY_REFRESH_INTERVAL_MS = 60_000;
+const GATEWAY_MAX_EVENTS = 200;
+
+function buildGatewayStreamUrl(filters: GatewayEventFilters): string {
+  return `/api/agent-mesh/gateway/stream${buildGatewayQuery(filters)}`;
+}
 
 export function useAgentMeshGateway(filters: GatewayEventFilters = {}): UseAgentMeshGatewayResult {
   const [gateway, setGateway] = useState<McpGatewayConfig>(agentMesh.gateway);
@@ -942,10 +950,48 @@ export function useAgentMeshGateway(filters: GatewayEventFilters = {}): UseAgent
       setLoading(false);
     };
     void tick();
-    const id = window.setInterval(() => { void tick(); }, GATEWAY_REFRESH_INTERVAL_MS);
+    // Background safety-net poll. The SSE channel below is the primary
+    // path that prepends new events as they happen.
+    const pollId = window.setInterval(() => { void tick(); }, GATEWAY_REFRESH_INTERVAL_MS);
+
+    // Subscribe to the push channel for live gateway events that match
+    // the current filter set. The server only emits events that match
+    // these filters, so we can prepend whatever arrives without re-checking.
+    let es: EventSource | null = null;
+    if (typeof window !== "undefined" && typeof window.EventSource !== "undefined") {
+      try {
+        es = new EventSource(buildGatewayStreamUrl(filtersRef.current));
+        es.addEventListener("gateway-event", (ev: MessageEvent) => {
+          if (cancelled || !mounted.current) return;
+          let parsed: GatewayEvent | null = null;
+          try { parsed = JSON.parse(ev.data) as GatewayEvent; } catch { return; }
+          if (!parsed || !parsed.id) return;
+          setSource("live");
+          setGatewayEvents((prev) => {
+            // Skip duplicates that the safety-net poll may have already
+            // brought in just before the push arrived. Only when the
+            // event is actually new do we bump the count + decision
+            // tiles below — otherwise the totals would drift upward
+            // on every reconnect/race.
+            if (prev.some((e) => e.id === parsed!.id)) return prev;
+            setFilteredEventCount((c) => c + 1);
+            setGateway((g) => {
+              const next = { ...g, callsLast24h: g.callsLast24h + 1 };
+              if (parsed!.decision === "blocked") next.blockedLast24h = g.blockedLast24h + 1;
+              else if (parsed!.decision === "quarantined") next.quarantinedLast24h = g.quarantinedLast24h + 1;
+              return next;
+            });
+            return [parsed!, ...prev].slice(0, GATEWAY_MAX_EVENTS);
+          });
+        });
+      } catch {
+        es = null;
+      }
+    }
     return () => {
       cancelled = true;
-      window.clearInterval(id);
+      window.clearInterval(pollId);
+      if (es) es.close();
     };
   }, [filterKey]);
 

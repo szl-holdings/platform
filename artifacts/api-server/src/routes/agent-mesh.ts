@@ -9,6 +9,7 @@ import {
 } from "./mcp-gateway";
 import { authMiddleware } from "../middlewares/auth";
 import { logger } from "../lib/logger";
+import { gatewayEventBus, type GatewayEventPayload } from "../lib/gateway-event-bus";
 
 const router: IRouter = Router();
 
@@ -80,6 +81,70 @@ router.get("/agent-mesh/gateway", async (req: Request, res: Response) => {
   } catch (err) {
     logger.warn({ err }, "[agent-mesh] gateway summary failed");
     res.status(500).json({ error: "agent-mesh gateway unavailable" });
+  }
+});
+
+router.get("/agent-mesh/gateway/stream", (req: Request, res: Response) => {
+  // SSE push channel for newly persisted gateway events. The Containment
+  // Rules dashboard subscribes here so filtered views update instantly
+  // instead of waiting for the next 30s poll. Optional query params
+  // (decision, agentClass, ruleId) match the /agent-mesh/gateway filters
+  // so each subscriber only receives events relevant to its current view.
+  try {
+    const decisionRaw = readQueryString(req, "decision");
+    const decisionFilter = decisionRaw && VALID_GATEWAY_DECISIONS.has(decisionRaw as GatewayDecisionFilter as never)
+      ? (decisionRaw as GatewayDecisionFilter)
+      : undefined;
+    const agentClassFilter = readQueryString(req, "agentClass");
+    const ruleIdFilter = readQueryString(req, "ruleId");
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache, no-transform");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+    res.flushHeaders?.();
+
+    res.write(`event: connected\ndata: ${JSON.stringify({ ts: Date.now() })}\n\n`);
+
+    const matches = (e: GatewayEventPayload): boolean => {
+      if (decisionFilter && e.decision !== decisionFilter) return false;
+      if (agentClassFilter && e.agentClass !== agentClassFilter) return false;
+      if (ruleIdFilter && e.ruleId !== ruleIdFilter) return false;
+      return true;
+    };
+
+    const unsubscribe = gatewayEventBus.onEvent((e) => {
+      if (res.writableEnded) return;
+      if (!matches(e)) return;
+      try {
+        res.write(`event: gateway-event\ndata: ${JSON.stringify(e)}\n\n`);
+      } catch {
+        /* ignore write errors — close handler will clean up */
+      }
+    });
+
+    const heartbeat = setInterval(() => {
+      if (res.writableEnded) {
+        clearInterval(heartbeat);
+        unsubscribe();
+        return;
+      }
+      res.write(": heartbeat\n\n");
+    }, 25_000);
+
+    const cleanup = () => {
+      clearInterval(heartbeat);
+      unsubscribe();
+    };
+    req.on("close", cleanup);
+    req.on("error", cleanup);
+  } catch (err) {
+    logger.warn({ err }, "[agent-mesh] gateway stream failed to start");
+    if (!res.headersSent) {
+      res.status(500).json({ error: "agent-mesh gateway stream unavailable" });
+    } else {
+      res.end();
+    }
   }
 });
 
