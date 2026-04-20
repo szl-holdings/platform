@@ -1,7 +1,41 @@
 
-import { Activity, AlertTriangle, CheckCircle, Clock, Database, Server, Wifi, Zap, RefreshCw, ShieldCheck, BarChart3 } from "lucide-react";
+import { Activity, AlertTriangle, CheckCircle, Clock, Database, Server, Wifi, Zap, RefreshCw, ShieldCheck, BarChart3, ShieldAlert, ExternalLink } from "lucide-react";
+import { Link } from "wouter";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
+
+interface SecurityAlert {
+  id: number;
+  severity: "critical" | "high" | "medium" | "low" | "info";
+  title: string;
+  body: string;
+  status: string;
+  receivedAt: string;
+  obsRef: "OBS-005" | "OBS-006" | null;
+  category: "tenant-isolation" | "auth-failure" | "other";
+  violationCount: number | null;
+  authFailureRatePerMin: number | null;
+  samplePath: string | null;
+  detailUrl: string;
+}
+
+interface SecurityAlertsResponse {
+  timestamp: string;
+  total: number;
+  items: SecurityAlert[];
+}
+
+function formatRelativeTime(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  if (!isFinite(ms) || ms < 0) return new Date(iso).toLocaleString();
+  const min = Math.floor(ms / 60_000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const d = Math.floor(hr / 24);
+  return `${d}d ago`;
+}
 
 interface HealthCheck {
   status: string;
@@ -111,12 +145,19 @@ export default function AdminDiagnosticsPage() {
     refetchInterval: 30_000,
   });
 
+  const { data: securityAlerts, refetch: refetchSecurity } = useStandardQuery<SecurityAlertsResponse>({
+    queryKey: ["admin-security-alerts"],
+    queryFn: () => apiFetch<SecurityAlertsResponse>("/admin/security-alerts?limit=10"),
+    refetchInterval: 30_000,
+  });
+
   const isLoading = dashLoading || detailedLoading;
   const overallStatus = detailed?.status ?? "unknown";
 
   function handleRefresh() {
     refetchDash();
     refetchDetailed();
+    refetchSecurity();
   }
 
   return (
@@ -313,6 +354,79 @@ export default function AdminDiagnosticsPage() {
               </div>
             </div>
           )}
+
+          <div className="rounded-xl border border-border bg-card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-muted-foreground" />
+                Security Alerts
+                {(securityAlerts?.total ?? 0) > 0 && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded border bg-[#c45a4a]/10 text-[#c45a4a] border-[#c45a4a]/20">
+                    {securityAlerts?.total}
+                  </span>
+                )}
+              </h2>
+              <Link href="/operations/prism/signals" className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1">
+                Open signals feed
+                <ExternalLink className="w-3 h-3" />
+              </Link>
+            </div>
+            <p className="text-[11px] text-muted-foreground mb-3">
+              Recent OBS-005 (tenant isolation) and OBS-006 (auth-failure rate) signals from Lyte Self-Monitor.
+            </p>
+            {(securityAlerts?.items?.length ?? 0) === 0 ? (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+                <CheckCircle className="w-3.5 h-3.5 text-[#6b8f71]" />
+                No recent auth-failure or tenant-isolation alerts.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {securityAlerts?.items.map((alert) => {
+                  const sevColor =
+                    alert.severity === "critical"
+                      ? "bg-[#c45a4a] text-[#c45a4a] border-[#c45a4a]/30 bg-[#c45a4a]/10"
+                      : alert.severity === "high"
+                        ? "bg-[#d4a054] text-[#d4a054] border-[#d4a054]/30 bg-[#d4a054]/10"
+                        : "bg-muted text-muted-foreground border-border";
+                  const refColor = alert.obsRef === "OBS-005" ? "text-[#c45a4a]" : "text-[#d4a054]";
+                  return (
+                    <Link
+                      key={alert.id}
+                      href={alert.detailUrl}
+                      className="flex items-start gap-3 text-xs py-2 px-3 rounded-lg border border-border/60 bg-background/40 hover:bg-muted/40 transition-colors"
+                    >
+                      <span className={`mt-1 shrink-0 w-1.5 h-1.5 rounded-full ${alert.severity === "critical" ? "bg-[#c45a4a]" : alert.severity === "high" ? "bg-[#d4a054]" : "bg-muted-foreground"}`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {alert.obsRef && (
+                            <span className={`text-[10px] font-bold tracking-wide ${refColor}`}>{alert.obsRef}</span>
+                          )}
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wide ${sevColor}`}>
+                            {alert.severity}
+                          </span>
+                          <span className="font-medium text-foreground truncate">{alert.title}</span>
+                        </div>
+                        <div className="mt-1 flex items-center gap-3 text-[10px] text-muted-foreground">
+                          <span>{formatRelativeTime(alert.receivedAt)}</span>
+                          {alert.violationCount != null && (
+                            <span>{alert.violationCount} attempt{alert.violationCount === 1 ? "" : "s"}</span>
+                          )}
+                          {alert.authFailureRatePerMin != null && (
+                            <span>{alert.authFailureRatePerMin.toFixed(1)}/min</span>
+                          )}
+                          {alert.samplePath && (
+                            <span className="font-mono truncate max-w-[260px]">{alert.samplePath}</span>
+                          )}
+                          <span className="capitalize">{alert.status}</span>
+                        </div>
+                      </div>
+                      <ExternalLink className="w-3 h-3 text-muted-foreground shrink-0 mt-1" />
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           {!dashboard?.alerts.active && !dashboard?.jobs.recentFailures?.length && overallStatus === "healthy" && (
             <div className="flex items-center gap-2 p-4 rounded-xl border border-[#6b8f71]/30 bg-[#6b8f71]/5 text-sm text-[#6b8f71]">

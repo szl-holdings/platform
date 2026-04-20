@@ -3,6 +3,7 @@ import {
   db, pool,
   billingPlansTable, subscriptionsTable, invoicesTable, entitlementsTable, usageEventsTable,
   platformJobRunsTable, artifactApprovalsTable,
+  lyteSignalsTable,
 } from "@szl-holdings/db";
 import { seedLyteObservability } from "../../lib/lyte-observability-seed.js";
 import { desc, sql, eq, and, inArray } from "drizzle-orm";
@@ -314,6 +315,66 @@ export function register(router: IRouter): void {
     const failed = results.filter((r) => r.status === "fail").length;
     const errors = results.filter((r) => r.status === "error").length;
     res.json({ timestamp: new Date().toISOString(), overallStatus: errors > 0 ? "error" : failed > 0 ? "incomplete" : "complete", results, summary: { total: results.length, passed, failed, errors } });
+  });
+
+  router.get("/admin/security-alerts", async (req, res) => {
+    const limitParam = parseInt(req.query["limit"] as string ?? "10", 10);
+    const limit = Math.max(1, Math.min(isNaN(limitParam) ? 10 : limitParam, 50));
+    try {
+      const rows = await db
+        .select()
+        .from(lyteSignalsTable)
+        .where(
+          and(
+            eq(lyteSignalsTable.source, "Lyte Self-Monitor"),
+            sql`${lyteSignalsTable.metadata}->>'obsRef' IN ('OBS-005','OBS-006')`,
+          ),
+        )
+        .orderBy(desc(lyteSignalsTable.receivedAt))
+        .limit(limit);
+
+      const items = rows.map((r: any) => {
+        const meta = (r.metadata ?? {}) as Record<string, unknown>;
+        const obsRef = (meta["obsRef"] as string | undefined) ?? null;
+        const sample = Array.isArray(meta["sample"])
+          ? (meta["sample"] as Array<Record<string, unknown>>)
+          : [];
+        const samplePath =
+          (sample[0]?.["path"] as string | undefined) ??
+          (sample[0]?.["route"] as string | undefined) ??
+          null;
+        return {
+          id: r.id,
+          severity: r.severity,
+          title: r.title,
+          body: r.body,
+          status: r.status,
+          receivedAt: r.receivedAt instanceof Date
+            ? r.receivedAt.toISOString()
+            : r.receivedAt,
+          obsRef,
+          category: obsRef === "OBS-005"
+            ? "tenant-isolation"
+            : obsRef === "OBS-006"
+              ? "auth-failure"
+              : "other",
+          violationCount: (meta["violationCount"] as number | undefined) ?? null,
+          authFailureRatePerMin:
+            (meta["authFailureRatePerMin"] as number | undefined) ?? null,
+          samplePath,
+          detailUrl: `/operations/prism/signals?signal=${r.id}`,
+        };
+      });
+
+      res.json({
+        timestamp: new Date().toISOString(),
+        total: items.length,
+        items,
+      });
+    } catch (err) {
+      logger.warn({ err }, "[admin] security-alerts route failed");
+      res.json({ timestamp: new Date().toISOString(), total: 0, items: [] });
+    }
   });
 
   router.get("/admin/billing/settings", async (_req, res) => {
