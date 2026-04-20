@@ -44,12 +44,18 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Upload SBOM artifact
+      - name: Generate vulnerability report from pnpm audit
+        if: always()
+        run: node scripts/qa/generate-vuln-report.js
+
+      - name: Upload SBOM and vulnerability report artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: sbom-${{ github.run_id }}
-          path: security/sbom-latest.json
+          path: |
+            security/sbom-latest.json
+            security/vuln-report.md
           retention-days: 90
 
   secret-scan:
@@ -115,10 +121,44 @@ jobs:
       - name: Verify lockfile is up to date
         run: pnpm install --frozen-lockfile --dry-run
 
+  license-report:
+    name: License Compliance Report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fe52bf0ad0164d2310b5e4d5d7bfec47b67e3f9d # v4.0.0
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate license compliance report
+        run: node scripts/qa/generate-license-report.js
+
+      - name: Upload license report artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: license-report-${{ github.run_id }}
+          path: security/license-report.md
+          retention-days: 90
+
   security-gate:
     name: Security Gate (blocking)
     runs-on: ubuntu-latest
-    needs: [dependency-scan, secret-scan, lockfile-integrity]
+    needs: [dependency-scan, secret-scan, lockfile-integrity, license-report]
     if: always()
     permissions:
       contents: read
@@ -127,11 +167,13 @@ jobs:
         run: |
           if [[ "${{ needs.dependency-scan.result }}" != "success" ]] || \
              [[ "${{ needs.secret-scan.result }}" != "success" ]] || \
-             [[ "${{ needs.lockfile-integrity.result }}" != "success" ]]; then
+             [[ "${{ needs.lockfile-integrity.result }}" != "success" ]] || \
+             [[ "${{ needs.license-report.result }}" != "success" ]]; then
             echo "One or more security checks failed:"
             echo "  dependency-scan: ${{ needs.dependency-scan.result }}"
             echo "  secret-scan: ${{ needs.secret-scan.result }}"
             echo "  lockfile-integrity: ${{ needs.lockfile-integrity.result }}"
+            echo "  license-report: ${{ needs.license-report.result }}"
             exit 1
           fi
           echo "All security checks passed"

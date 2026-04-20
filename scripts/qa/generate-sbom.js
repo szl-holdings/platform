@@ -20,6 +20,7 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "../..");
 const OUTPUT_DIR = join(ROOT, "security");
+const HISTORY_DIR = join(OUTPUT_DIR, "sbom-history");
 
 const NPM_BULK_ADVISORY_URL = "https://registry.npmjs.org/-/npm/v1/security/advisories/bulk";
 const SEVERITY_ORDER = ["critical", "high", "moderate", "low"];
@@ -184,6 +185,7 @@ function buildSbom(packages, advisories) {
 
 async function main() {
   mkdirSync(OUTPUT_DIR, { recursive: true });
+  mkdirSync(HISTORY_DIR, { recursive: true });
 
   console.log("[sbom] Parsing lockfile for package inventory...");
   const packages = parseLockfile();
@@ -199,12 +201,13 @@ async function main() {
   const sbom = buildSbom(packages, advisories);
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const sbomPath = join(OUTPUT_DIR, `sbom-${timestamp}.json`);
+  // Timestamped archive goes to sbom-history/ to keep security/ root clean
+  const sbomPath = join(HISTORY_DIR, `sbom-${timestamp}.json`);
   const latestPath = join(OUTPUT_DIR, "sbom-latest.json");
 
   writeFileSync(sbomPath, JSON.stringify(sbom, null, 2));
   writeFileSync(latestPath, JSON.stringify(sbom, null, 2));
-  console.log(`[sbom] SBOM written to ${sbomPath}`);
+  console.log(`[sbom] SBOM archive written to ${sbomPath}`);
   console.log(`[sbom] Latest SBOM written to ${latestPath}`);
 
   if (flatVulns.length > 0) {
