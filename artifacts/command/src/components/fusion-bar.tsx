@@ -33,6 +33,7 @@ interface FusedResult {
   recommendedActions: string[];
   overallRisk: "critical" | "high" | "medium" | "low" | "nominal";
   confidence: number;
+  liveDataSources?: string[];
 }
 
 interface FusionBarProps {
@@ -77,14 +78,29 @@ function RiskBadge({ risk }: { risk: string }) {
   );
 }
 
-function DomainBadge({ domain }: { domain: string }) {
+function DomainBadge({ domain, live = false }: { domain: string; live?: boolean }) {
   const color = DOMAIN_COLORS[domain] ?? "#6b7280";
   return (
     <span
-      className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded"
+      className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded inline-flex items-center gap-1"
       style={{ color, backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 25%, transparent)` }}
     >
       {domain}
+      {live && (
+        <span
+          className="inline-flex items-center gap-0.5"
+          style={{ color: "#22c55e" }}
+          title={`Real-time data from ${domain} database`}
+          aria-label={`Real-time data from ${domain} database`}
+          data-testid={`live-indicator-${domain}`}
+        >
+          <span
+            className="w-1.5 h-1.5 rounded-full animate-pulse"
+            style={{ backgroundColor: "#22c55e", boxShadow: "0 0 4px #22c55e" }}
+          />
+          Live
+        </span>
+      )}
     </span>
   );
 }
@@ -249,7 +265,7 @@ export function FusionBar({ apiBase = "" }: FusionBarProps) {
 
             <div className="flex flex-wrap gap-1.5">
               {result.domainsQueried.map((d) => (
-                <DomainBadge key={d} domain={d} />
+                <DomainBadge key={d} domain={d} live={result.liveDataSources?.includes(d) ?? false} />
               ))}
             </div>
           </div>
@@ -269,7 +285,7 @@ export function FusionBar({ apiBase = "" }: FusionBarProps) {
                     <div className="text-xs font-bold" style={{ color: "var(--color-fg-primary)" }}>{c.title}</div>
                     <div className="text-[11px] leading-relaxed" style={{ color: "var(--color-fg-muted)" }}>{c.description}</div>
                     <div className="flex items-center gap-2 flex-wrap mt-1">
-                      {c.domains.map((d) => <DomainBadge key={d} domain={d} />)}
+                      {c.domains.map((d) => <DomainBadge key={d} domain={d} live={result.liveDataSources?.includes(d) ?? false} />)}
                       <span className="text-[10px] ml-auto" style={{ color: "var(--color-fg-muted)" }}>
                         {Math.round(c.confidence * 100)}% conf.
                       </span>

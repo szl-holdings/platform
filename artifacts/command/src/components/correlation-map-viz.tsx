@@ -9,6 +9,7 @@ interface GraphNode {
   severity?: "critical" | "high" | "medium" | "low" | "info";
   value?: number;
   description?: string;
+  live?: boolean;
   x?: number;
   y?: number;
   vx?: number;
@@ -376,6 +377,19 @@ export function CorrelationMapViz({ apiBase = "" }: CorrelationMapVizProps) {
                   {isSelected && (
                     <circle r={r + 6} fill="none" stroke={color} strokeWidth={2} strokeDasharray="4 2" opacity={0.7} />
                   )}
+                  {node.live && (
+                    <circle
+                      r={r + 4}
+                      fill="none"
+                      stroke="#22c55e"
+                      strokeWidth={1.5}
+                      opacity={0.85}
+                      data-testid={`live-ring-${node.id}`}
+                    >
+                      <animate attributeName="r" values={`${r + 4};${r + 9};${r + 4}`} dur="1.6s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.85;0.2;0.85" dur="1.6s" repeatCount="indefinite" />
+                    </circle>
+                  )}
                   <circle
                     r={r}
                     fill={`color-mix(in srgb, ${color} ${node.type === "domain" ? 25 : 15}%, #0f1117)`}
@@ -383,6 +397,9 @@ export function CorrelationMapViz({ apiBase = "" }: CorrelationMapVizProps) {
                     strokeWidth={node.type === "domain" ? 2 : 1.5}
                     opacity={isSelected ? 1 : 0.9}
                   />
+                  {node.live && (
+                    <title>Live: real-time data from {node.domain} database</title>
+                  )}
                   {node.type === "signal" && (
                     <circle r={4} fill={color} opacity={0.8} />
                   )}
@@ -409,12 +426,24 @@ export function CorrelationMapViz({ apiBase = "" }: CorrelationMapVizProps) {
             style={{ backgroundColor: "var(--color-bg-elevated)", border: `1px solid ${getNodeColor(selectedNode)}`, zIndex: 20 }}
           >
             <div className="flex items-center justify-between mb-2">
-              <span
-                className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded"
-                style={{ color: getNodeColor(selectedNode), backgroundColor: `color-mix(in srgb, ${getNodeColor(selectedNode)} 12%, transparent)` }}
-              >
-                {selectedNode.type}
-              </span>
+              <div className="flex items-center gap-2">
+                <span
+                  className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded"
+                  style={{ color: getNodeColor(selectedNode), backgroundColor: `color-mix(in srgb, ${getNodeColor(selectedNode)} 12%, transparent)` }}
+                >
+                  {selectedNode.type}
+                </span>
+                {selectedNode.live && (
+                  <span
+                    className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+                    style={{ color: "#22c55e", backgroundColor: "color-mix(in srgb, #22c55e 12%, transparent)", border: "1px solid color-mix(in srgb, #22c55e 30%, transparent)" }}
+                    title={`Real-time data from ${selectedNode.domain} database`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: "#22c55e", boxShadow: "0 0 4px #22c55e" }} />
+                    Live
+                  </span>
+                )}
+              </div>
               <button onClick={() => setSelectedNode(null)} className="text-[10px]" style={{ color: "var(--color-fg-muted)" }}>✕</button>
             </div>
             <div className="text-sm font-bold mb-1" style={{ color: "var(--color-fg-primary)" }}>{selectedNode.label}</div>
