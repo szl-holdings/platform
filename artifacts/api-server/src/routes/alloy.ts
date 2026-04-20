@@ -177,11 +177,7 @@ function transitionRunState(
 
 router.post("/alloy/ingest/signal", authMiddleware(), validateBody(alloyIngestSignalSchema), async (req, res) => {
   try {
-    const payload = req.body;
-    if (!payload.source || !payload.sourceType || !payload.title) {
-      sendBadRequest(res, "source, sourceType, and title are required");
-      return;
-    }
+    const payload = req.body as import("../lib/validation").IngestSignalInput;
     const userOrgIds = getUserOrgIds(req.user);
     const isAdmin = isGlobalAdmin(req.user);
     if (!isAdmin && userOrgIds.length === 0) {
@@ -226,16 +222,8 @@ router.post("/alloy/ingest/batch", authMiddleware(), requireRole("super_admin", 
       res.status(403).json({ success: false, error: "No organization membership — cannot ingest signals", code: "NO_ORG" });
       return;
     }
-    const { signals } = req.body as { signals: unknown[] };
-    if (!Array.isArray(signals) || signals.length === 0) {
-      sendBadRequest(res, "signals array is required and must be non-empty");
-      return;
-    }
-    if (signals.length > 100) {
-      sendBadRequest(res, "Batch size limited to 100 signals");
-      return;
-    }
-    const parsed = signals.map((s: unknown) => {
+    const { signals } = req.body as import("../lib/validation").IngestBatchInput;
+    const parsed = signals.map((s) => {
       const base = insertAlloySignalSchema.parse(s);
       if (!isAdmin && base.orgId != null && !orgIds.includes(base.orgId)) {
         throw Object.assign(new Error("Signal orgId does not match your organization"), { status: 403 });

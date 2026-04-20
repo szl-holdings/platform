@@ -1270,26 +1270,44 @@ export const terraResourceDeleteSchema = tightenedDeleteResourceSchema;
 /** Terra MLS / commercial sync triggers (no body). */
 export const terraSyncTriggerSchema = emptyBodySchema;
 
-/** Alloy: POST /alloy/ingest/signal */
-export const alloyIngestSignalSchema = z.preprocess(
-  (val) => (val == null ? {} : val),
-  z.object({
-    domain: z.string().max(100).optional(),
-    type: z.string().max(100).optional(),
-    severity: z.string().max(50).optional(),
-    payload: z.record(z.unknown()).optional(),
-    metadata: z.record(z.unknown()).optional(),
-  }).passthrough(),
-) as z.ZodType<Record<string, unknown>>;
+/** Alloy signal source-type and severity enums (mirror lib/db alloySignalsTable). */
+const alloySignalSourceTypeEnum = z.enum([
+  "connector",
+  "webhook",
+  "api",
+  "manual",
+  "scheduled",
+  "monitoring",
+]);
+const alloySignalSeverityEnum = z.enum(["critical", "high", "medium", "low", "info"]);
 
-/** Alloy: POST /alloy/ingest/batch */
-export const alloyIngestBatchSchema = z.preprocess(
-  (val) => (val == null ? {} : val),
-  z.object({
-    signals: z.array(z.record(z.unknown())).max(10_000).optional(),
-    items: z.array(z.record(z.unknown())).max(10_000).optional(),
-  }).passthrough(),
-) as z.ZodType<Record<string, unknown>>;
+/**
+ * Strict schema for a single alloy signal ingest payload. Used as middleware
+ * for POST /alloy/ingest/signal and as the item schema for batch ingest.
+ */
+export const ingestSignalSchema = z.object({
+  source: z.string().min(1).max(200),
+  sourceType: alloySignalSourceTypeEnum,
+  title: z.string().min(1).max(500),
+  body: z.string().max(10_000).nullish(),
+  severity: alloySignalSeverityEnum.optional(),
+  orgId: z.number().int().positive().nullish(),
+  workflowId: z.number().int().positive().nullish(),
+  normalizedScore: z.union([z.number(), z.string().regex(/^-?\d+(\.\d+)?$/)]).nullish(),
+  valueAtRisk: z.union([z.number(), z.string().regex(/^-?\d+(\.\d+)?$/)]).nullish(),
+  metadata: z.record(z.unknown()).optional(),
+}).strict();
+export type IngestSignalInput = z.infer<typeof ingestSignalSchema>;
+
+/** Strict schema for POST /alloy/ingest/batch — non-empty array of signals, hard-capped at 100. */
+export const ingestBatchSchema = z.object({
+  signals: z.array(ingestSignalSchema).min(1).max(100),
+}).strict();
+export type IngestBatchInput = z.infer<typeof ingestBatchSchema>;
+
+/** Back-compat aliases (callers historically imported these names). */
+export const alloyIngestSignalSchema = ingestSignalSchema;
+export const alloyIngestBatchSchema = ingestBatchSchema;
 
 /** Alloy workflow create/update/delete. */
 export const alloyWorkflowMutationSchema = z.preprocess(
