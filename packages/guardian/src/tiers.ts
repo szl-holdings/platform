@@ -57,6 +57,17 @@ export interface TierControlSet {
   allowExternalComms: boolean;
   allowedEnvironments: string[];
   allowMemoryWrite: boolean;
+  approvalExpiryHours: number | null;
+}
+
+export function getApprovalExpiryHoursForTier(tier: PolicyTier): number | null {
+  return TIER_CONTROLS[tier]?.approvalExpiryHours ?? null;
+}
+
+export function computeApprovalExpiresAt(tier: PolicyTier, from: Date = new Date()): Date | null {
+  const hours = getApprovalExpiryHoursForTier(tier);
+  if (hours == null || hours <= 0) return null;
+  return new Date(from.getTime() + hours * 60 * 60 * 1000);
 }
 
 export const TIER_CONTROLS: Record<PolicyTier, TierControlSet> = {
@@ -73,6 +84,7 @@ export const TIER_CONTROLS: Record<PolicyTier, TierControlSet> = {
     allowExternalComms: false,
     allowedEnvironments: ["development", "staging", "production"],
     allowMemoryWrite: false,
+    approvalExpiryHours: null,
   },
   "supervised": {
     tier: "supervised",
@@ -87,6 +99,7 @@ export const TIER_CONTROLS: Record<PolicyTier, TierControlSet> = {
     allowExternalComms: false,
     allowedEnvironments: ["development", "staging", "production"],
     allowMemoryWrite: true,
+    approvalExpiryHours: null,
   },
   "operator-approved": {
     tier: "operator-approved",
@@ -101,6 +114,7 @@ export const TIER_CONTROLS: Record<PolicyTier, TierControlSet> = {
     allowExternalComms: false,
     allowedEnvironments: ["staging", "production"],
     allowMemoryWrite: true,
+    approvalExpiryHours: 24,
   },
   "dual-approved": {
     tier: "dual-approved",
@@ -115,6 +129,7 @@ export const TIER_CONTROLS: Record<PolicyTier, TierControlSet> = {
     allowExternalComms: false,
     allowedEnvironments: ["production"],
     allowMemoryWrite: true,
+    approvalExpiryHours: 48,
   },
   "regulated": {
     tier: "regulated",
@@ -129,6 +144,7 @@ export const TIER_CONTROLS: Record<PolicyTier, TierControlSet> = {
     allowExternalComms: false,
     allowedEnvironments: ["production"],
     allowMemoryWrite: false,
+    approvalExpiryHours: 72,
   },
   "sovereign": {
     tier: "sovereign",
@@ -143,5 +159,6 @@ export const TIER_CONTROLS: Record<PolicyTier, TierControlSet> = {
     allowExternalComms: true,
     allowedEnvironments: ["production"],
     allowMemoryWrite: true,
+    approvalExpiryHours: null,
   },
 };

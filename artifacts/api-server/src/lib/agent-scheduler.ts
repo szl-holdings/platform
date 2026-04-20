@@ -9,6 +9,7 @@ import { agentScheduler, agentExecutionRuntime, durableScheduler, seedDefaultSch
 import { createHash } from "crypto";
 import { db, guardianActionsTable, guardianApprovalRequestsTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
+import { computeApprovalExpiresAt } from "@workspace/guardian";
 import {
   evaluateAllCovenants,
   recordCovenantEvaluation,
@@ -153,6 +154,7 @@ export async function dispatchCovenantBreaches(): Promise<{
           requiredApprovers: m.covenant.requiredApprovers ?? ["terra-risk-officer"],
           approvals: [],
           payload,
+          expiresAt: computeApprovalExpiresAt("supervised"),
         }).onConflictDoNothing();
         approvalsCreated += 1;
         logger.info(

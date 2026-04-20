@@ -19,6 +19,7 @@ import {
   TIER_RISK_LEVEL,
   TIER_CONTROLS,
   TIER_NUMBER,
+  computeApprovalExpiresAt,
   type DecisionRequest,
   type GuardianRule,
   type PolicyTier,
@@ -1903,10 +1904,12 @@ router.post("/guardian/evaluate", authMiddleware(), validateBody(jsonObjectBodyS
 
       if (result.outcome === "require-approval" || result.outcome === "require-dual-approval") {
         const approvalType = result.outcome === "require-dual-approval" ? "dual" : "single";
+        const expiresAt = computeApprovalExpiresAt(tierValue as PolicyTier);
         const inserted = await db.insert(guardianApprovalRequestsTable).values({
           requestId, agentId, sessionId, workflowId, orgId,
           tier: tierValue, action, toolId, approvalType, status: "pending",
           requiredApprovers: result.requiredApprovers, approvals: [], payload: enrichedPayload,
+          expiresAt,
         }).onConflictDoNothing().returning({ requestId: guardianApprovalRequestsTable.requestId });
 
         if (inserted.length > 0) {

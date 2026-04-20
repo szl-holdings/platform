@@ -21,6 +21,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, and, or, sql, desc, inArray, isNotNull } from "drizzle-orm";
 import { z } from "zod";
+import { computeApprovalExpiresAt } from "@workspace/guardian";
 import { ObjectStorageService } from "../lib/objectStorage";
 import {
   searchDistressedProperties,
@@ -1143,6 +1144,7 @@ router.post("/terra/cognitive/covenants/submit-review", cogLimit, validateBody(j
         requiredApprovers: ["terra-risk-officer"],
         approvals: [],
         payload: { propertyId, address, distressType, covenantType, score },
+        expiresAt: computeApprovalExpiresAt("supervised"),
       }).onConflictDoNothing();
     }
 
