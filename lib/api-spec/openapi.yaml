@@ -120,6 +120,8 @@ paths:
       responses:
         "200":
           description: Server is ready
+        "429":
+          $ref: "#/components/responses/RateLimited"
         "503":
           description: Server is not ready (degraded)
   /health/detailed:
@@ -135,6 +137,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DetailedHealthStatus"
+        "429":
+          $ref: "#/components/responses/RateLimited"
         "503":
           description: Degraded — one or more dependencies unreachable
   /health/ai:
@@ -7451,6 +7455,10 @@ paths:
                       delivered: { type: boolean }
                       statusCode: { type: integer }
                       error: { type: string }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   /webhooks/deliveries:
     get:
@@ -7516,6 +7524,8 @@ paths:
                           - decision.executed
                           - decision.proved
                           - decision.outcome_recorded
+        "429":
+          $ref: "#/components/responses/RateLimited"
 
   /decisioning/evaluate:
     post:
@@ -7708,6 +7718,8 @@ paths:
                   matters:
                     type: array
                     items: { $ref: "#/components/schemas/CounselMatter" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
     post:
       operationId: counselCreateMatter
       tags: [counsel]
@@ -7859,6 +7871,8 @@ paths:
                   entries:
                     type: array
                     items: { $ref: "#/components/schemas/CounselAuditEntry" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
     post:
       operationId: counselAppendAuditEntry
       tags: [counsel]
