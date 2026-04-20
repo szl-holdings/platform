@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Shield, Play, CheckCircle2, XCircle, Clock, AlertTriangle, Loader, ChevronDown, ChevronUp, Zap } from "lucide-react";
 import { runItems, type RunItem, type RunStatus } from "@/data/seed";
+import { SubstrateWorkflowPanel } from "@/components/SubstrateWorkflowPanel";
 
 const STATUS_CONFIG: Record<RunStatus, { icon: React.ReactNode; color: string; bg: string; border: string; label: string }> = {
   completed: { icon: <CheckCircle2 className="w-3.5 h-3.5" />, color: "text-emerald-400", bg: "bg-emerald-500/8", border: "border-emerald-500/20", label: "COMPLETED" },
@@ -112,6 +113,8 @@ export default function RunConsolePage() {
           <p className="text-xs text-amber-400/50 mt-0.5">Agent execution history — {totalRuns} runs recorded</p>
         </div>
       </div>
+
+      <SubstrateWorkflowPanel />
 
       {/* Summary */}
       <div className="grid grid-cols-4 gap-3">

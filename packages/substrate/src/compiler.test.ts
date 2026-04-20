@@ -283,3 +283,13 @@ export async function runCompilerTests(): Promise<void> {
 if (typeof process !== "undefined" && process.argv[1]?.endsWith("compiler.test.ts")) {
   runCompilerTests().catch(console.error);
 }
+
+// ─── Vitest Integration ───────────────────────────────────────────────────────
+
+import { describe, it } from "vitest";
+
+describe("@szl/substrate Compiler", () => {
+  it("runs all compiler and budget-router unit tests", async () => {
+    await runCompilerTests();
+  });
+});

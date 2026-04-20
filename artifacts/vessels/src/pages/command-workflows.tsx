@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { SubstrateWorkflowPanel } from "@/components/SubstrateWorkflowPanel";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
@@ -358,6 +359,10 @@ export default function CommandWorkflowsPage() {
             </Card>
           );
         })}
+      </div>
+
+      <div className="mt-6">
+        <SubstrateWorkflowPanel />
       </div>
     </div>
   );

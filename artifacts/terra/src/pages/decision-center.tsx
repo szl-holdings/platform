@@ -1,5 +1,6 @@
 import * as React from "react";
 import { DecisionCenter } from "@szl-holdings/shared-ui/DecisionCenter";
+import { SubstrateWorkflowPanel } from "@/components/SubstrateWorkflowPanel";
 import { RunConsole } from "@szl-holdings/shared-ui/RunConsole";
 import { SourceHealthStrip } from "@szl-holdings/shared-ui/SourceHealthStrip";
 import { VARIANT_RECOMMENDATIONS, VARIANT_SOURCE_HEALTH, VARIANT_RUNS, SHARED_EVAL_RESULTS } from "@szl-holdings/shared-ui/os-demo-data";
@@ -9,7 +10,7 @@ import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 const VARIANT = "terra";
 const ACCENT = LANE_ACCENT_HEX.terra.primaryLight;
 
-type Tab = "decisions" | "runs";
+type Tab = "decisions" | "runs" | "substrate";
 
 export default function DecisionCenterPage() {
   const [tab, setTab] = React.useState<Tab>("decisions");
@@ -33,7 +34,7 @@ export default function DecisionCenterPage() {
       <SourceHealthStrip sources={sources} variant={VARIANT} />
 
       <div className="flex gap-1 px-6 pt-4 pb-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-        {(["decisions", "runs"] as Tab[]).map(t => (
+        {(["decisions", "runs", "substrate"] as Tab[]).map(t => (
           <button key={t} type="button" onClick={() => setTab(t)}
             className="px-4 py-2 text-[12px] font-medium capitalize rounded-t transition-colors"
             style={{
@@ -41,7 +42,7 @@ export default function DecisionCenterPage() {
               color: tab === t ? ACCENT : "rgba(255,255,255,0.40)",
               borderBottom: tab === t ? `2px solid ${ACCENT}` : "2px solid transparent",
             }}>
-            {t === "decisions" ? "Decision Center" : "Run Console"}
+            {t === "decisions" ? "Decision Center" : t === "runs" ? "Run Console" : "Substrate"}
           </button>
         ))}
       </div>
@@ -66,6 +67,15 @@ export default function DecisionCenterPage() {
             accentColor={ACCENT}
             className="h-full"
           />
+        )}
+        {tab === "substrate" && (
+          <div className="p-6 max-w-2xl space-y-3 overflow-y-auto h-full">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-100">Substrate Workflows</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Portfolio anomaly and event intelligence — Sovereign Execution Substrate</p>
+            </div>
+            <SubstrateWorkflowPanel />
+          </div>
         )}
       </div>
     </div>

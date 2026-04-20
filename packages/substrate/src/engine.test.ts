@@ -125,13 +125,22 @@ async function testJournalHashStability(): Promise<void> {
   const run2 = await runtime.start(testWorkflow, { query: "stable-test" }, { mode: "dry-run" });
   const bundles2 = await journal.getRunBundles(run2.runId);
 
-  // Find matching stage bundles and verify hash stability
+  // Find matching STAGE bundles and verify input/output hash stability.
+  // The proof-chain design means bundleHash is intentionally unique per run
+  // (it chain-links to a __run__snapshot that contains a startedAt timestamp),
+  // so we verify determinism of inputHash and outputHash — the stable content
+  // addresses for stage inputs and outputs — not the full bundleHash.
+  const PIPELINE_PREFIXES = ["__pipeline__", "__run__"];
   for (const b1 of bundles1) {
+    if (PIPELINE_PREFIXES.some((p) => b1.stageId.startsWith(p))) continue;
     const b2 = bundles2.find((b) => b.stageId === b1.stageId);
     if (!b2) continue;
 
-    if (b1.inputHash === b2.inputHash && b1.bundleHash !== b2.bundleHash) {
-      throw new Error(`Hash unstable for stage '${b1.stageId}' with identical inputs`);
+    if (b1.inputHash !== b2.inputHash) {
+      throw new Error(`inputHash unstable for stage '${b1.stageId}': ${b1.inputHash} vs ${b2.inputHash}`);
+    }
+    if ((b1 as Record<string, unknown>)["outputHash"] !== (b2 as Record<string, unknown>)["outputHash"]) {
+      throw new Error(`outputHash unstable for stage '${b1.stageId}'`);
     }
   }
 
@@ -248,3 +257,13 @@ export async function runEngineTests(): Promise<void> {
 if (typeof process !== "undefined" && process.argv[1]?.endsWith("engine.test.ts")) {
   runEngineTests().catch(console.error);
 }
+
+// ─── Vitest Integration ───────────────────────────────────────────────────────
+
+import { describe, it } from "vitest";
+
+describe("@szl/substrate Engine", () => {
+  it("runs all engine integration tests including Opportunity Audit dry-run", async () => {
+    await runEngineTests();
+  });
+});

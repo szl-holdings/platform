@@ -1,6 +1,6 @@
 {
   "name": "@szl/substrate",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "type": "module",
   "description": "Sovereign Execution Substrate — policy-shaped graphs, evidence-chained transitions, confidence-budget routing, and counterfactual replay for all SZL workflows.",
@@ -41,6 +41,50 @@
       "types": "./dist/workflows/opportunity-audit.d.ts",
       "import": "./src/workflows/opportunity-audit.ts"
     },
+    "./workflows/cross-system-reconciliation": {
+      "types": "./dist/workflows/cross-system-reconciliation.d.ts",
+      "import": "./src/workflows/cross-system-reconciliation.ts"
+    },
+    "./workflows/executive-brief": {
+      "types": "./dist/workflows/executive-brief.d.ts",
+      "import": "./src/workflows/executive-brief.ts"
+    },
+    "./workflows/risk-escalation": {
+      "types": "./dist/workflows/risk-escalation.d.ts",
+      "import": "./src/workflows/risk-escalation.ts"
+    },
+    "./workflows/evidence-based-recommendation": {
+      "types": "./dist/workflows/evidence-based-recommendation.d.ts",
+      "import": "./src/workflows/evidence-based-recommendation.ts"
+    },
+    "./workflows/lyte-operational-drift": {
+      "types": "./dist/workflows/lyte-operational-drift.d.ts",
+      "import": "./src/workflows/lyte-operational-drift.ts"
+    },
+    "./workflows/aegis-threat-triage": {
+      "types": "./dist/workflows/aegis-threat-triage.d.ts",
+      "import": "./src/workflows/aegis-threat-triage.ts"
+    },
+    "./workflows/vessels-voyage-anomaly": {
+      "types": "./dist/workflows/vessels-voyage-anomaly.d.ts",
+      "import": "./src/workflows/vessels-voyage-anomaly.ts"
+    },
+    "./workflows/terra-portfolio-anomaly": {
+      "types": "./dist/workflows/terra-portfolio-anomaly.d.ts",
+      "import": "./src/workflows/terra-portfolio-anomaly.ts"
+    },
+    "./workflows/prism-counsel-evidence-packaging": {
+      "types": "./dist/workflows/prism-counsel-evidence-packaging.d.ts",
+      "import": "./src/workflows/prism-counsel-evidence-packaging.ts"
+    },
+    "./workflows/carlota-jo-task-routing": {
+      "types": "./dist/workflows/carlota-jo-task-routing.d.ts",
+      "import": "./src/workflows/carlota-jo-task-routing.ts"
+    },
+    "./workflows/seeds": {
+      "types": "./dist/workflows/seeds/index.d.ts",
+      "import": "./src/workflows/seeds/index.ts"
+    },
     "./python-worker": {
       "types": "./dist/python-worker.d.ts",
       "import": "./src/python-worker.ts"
@@ -52,7 +96,8 @@
   "scripts": {
     "build": "tsc --build",
     "typecheck": "tsc --noEmit",
-    "cli": "tsx src/cli/bin.ts"
+    "cli": "tsx src/cli/bin.ts",
+    "test": "vitest run src/workflows/phase2.test.ts src/engine.test.ts src/compiler.test.ts"
   },
   "dependencies": {
     "@szl-holdings/policy-engine": "workspace:*",
@@ -68,6 +113,7 @@
   },
   "devDependencies": {
     "typescript": "catalog:",
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "vitest": "catalog:"
   }
 }

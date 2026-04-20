@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { Scale, Eye, Edit, Download, Lock, AlertTriangle, ChevronUp, ChevronDown, Shield, Plus, X } from "lucide-react";
+import { SubstrateWorkflowPanel } from "@/components/SubstrateWorkflowPanel";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCounselAppendAuditEntry, getCounselListMattersQueryKey } from "@szl-holdings/api-client-react";
 import { useMatters } from "@/data/matters";
@@ -301,6 +302,8 @@ export default function AuditTrailPage() {
           </table>
         </div>
       </div>
+
+      <SubstrateWorkflowPanel />
 
       <div className="flex items-start gap-2.5 p-3 rounded-lg text-[11px] text-white/20 border border-white/5" style={{ background: "rgba(255,255,255,0.01)" }}>
         <Shield className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: ACCENT }} />

@@ -12,6 +12,7 @@ import {
   Lightbulb, BookOpen, Minus, ArrowRight, RefreshCw, Zap, Users
 } from "lucide-react";
 import { TradecraftPanel, RelatedCasesPanel, EvidenceIndexPanel } from "@/components/tradecraft-panel";
+import { SubstrateWorkflowPanel } from "@/components/SubstrateWorkflowPanel";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const DECISIONS = [
@@ -495,6 +496,7 @@ export default function DecisionConsole() {
               />
               <RelatedCasesPanel incidentId={String(selectedLive.id)} />
               <EvidenceIndexPanel incidentId={String(selectedLive.id)} />
+              <SubstrateWorkflowPanel />
             </div>
           ) : (
             <div className="space-y-3">
@@ -505,6 +507,7 @@ export default function DecisionConsole() {
               />
               <RelatedCasesPanel caseId={selectedMock.caseRef} />
               <EvidenceIndexPanel caseId={selectedMock.caseRef} />
+              <SubstrateWorkflowPanel />
             </div>
           )}
         </div>

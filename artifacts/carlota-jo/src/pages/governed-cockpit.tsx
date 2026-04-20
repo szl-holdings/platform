@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ProofEnvelope, AutonomyModeToggle, type AutonomyMode, type EvidenceSource, type PolicyState, productAccent } from "@szl-holdings/design-system";
 import { Briefcase, TrendingUp, AlertTriangle, Users } from "lucide-react";
+import { SubstrateWorkflowPanel } from "@/components/SubstrateWorkflowPanel";
 
 const ACCENT = productAccent.carlota;
 
@@ -158,6 +159,10 @@ export default function GovernedCockpit() {
             </div>
           </div>
         </ProofEnvelope>
+
+        <div className="px-1">
+          <SubstrateWorkflowPanel />
+        </div>
       </div>
     </div>
   );

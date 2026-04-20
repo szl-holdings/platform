@@ -203,7 +203,7 @@ export {
 } from "./cli/replay.js";
 export type { ReplayOptions, ReplayResult, ReplayEndpointRequest, ReplayEndpointResponse } from "./cli/replay.js";
 
-// ─── Reference Workflows ──────────────────────────────────────────────────────
+// ─── Reference Workflows — Phase 1 ───────────────────────────────────────────
 export {
   opportunityAuditWorkflow,
   runOpportunityAudit,
@@ -217,6 +217,121 @@ export type {
   RemediationDecision,
 } from "./workflows/opportunity-audit.js";
 
+// ─── Reference Workflows — Phase 2 ───────────────────────────────────────────
+
+export {
+  crossSystemReconciliationWorkflow,
+  runCrossSystemReconciliation,
+} from "./workflows/cross-system-reconciliation.js";
+export type {
+  CrossSystemReconciliationInput,
+  CrossSystemReconciliationResult,
+  ReconciliationDiscrepancy,
+  ReconciliationDecision,
+} from "./workflows/cross-system-reconciliation.js";
+
+export {
+  executiveBriefWorkflow,
+  runExecutiveBrief,
+} from "./workflows/executive-brief.js";
+export type {
+  ExecutiveBriefInput,
+  ExecutiveBriefOutput,
+  BriefSection,
+  ExecutiveBriefResult,
+} from "./workflows/executive-brief.js";
+
+export {
+  riskEscalationWorkflow,
+  runRiskEscalation,
+} from "./workflows/risk-escalation.js";
+export type {
+  RiskEscalationInput,
+  RiskEscalationResult,
+  RiskSignalSummary,
+  RiskEscalationDecision,
+} from "./workflows/risk-escalation.js";
+
+export {
+  evidenceBasedRecommendationWorkflow,
+  runEvidenceBasedRecommendation,
+} from "./workflows/evidence-based-recommendation.js";
+export type {
+  EvidenceBasedRecommendationInput,
+  EvidenceBasedRecommendationResult,
+  EvidenceCitation,
+  RecommendationDecisionPacket,
+} from "./workflows/evidence-based-recommendation.js";
+
+// ─── Vertical Workflow Packs — Phase 2 ───────────────────────────────────────
+
+export {
+  lyteOperationalDriftWorkflow,
+  runLyteOperationalDrift,
+} from "./workflows/lyte-operational-drift.js";
+export type {
+  LyteOperationalDriftInput,
+  LyteOperationalDriftResult,
+  DriftItem,
+  OperationalDriftDecision,
+} from "./workflows/lyte-operational-drift.js";
+
+export {
+  aegisThreatTriageWorkflow,
+  runAegisThreatTriage,
+} from "./workflows/aegis-threat-triage.js";
+export type {
+  AegisThreatTriageInput,
+  AegisThreatTriageResult,
+  TriagedThreat,
+  ThreatTriageDecision,
+} from "./workflows/aegis-threat-triage.js";
+
+export {
+  vesselsVoyageAnomalyWorkflow,
+  runVesselsVoyageAnomaly,
+} from "./workflows/vessels-voyage-anomaly.js";
+export type {
+  VesselsVoyageAnomalyInput,
+  VesselsVoyageAnomalyResult,
+  VoyageAnomaly,
+  VoyageAnomalyDecision,
+} from "./workflows/vessels-voyage-anomaly.js";
+
+export {
+  terraPortfolioAnomalyWorkflow,
+  runTerraPortfolioAnomaly,
+} from "./workflows/terra-portfolio-anomaly.js";
+export type {
+  TerraPortfolioAnomalyInput,
+  TerraPortfolioAnomalyResult,
+  PortfolioAnomaly,
+  PortfolioAnomalyDecision,
+} from "./workflows/terra-portfolio-anomaly.js";
+
+export {
+  prismCounselEvidencePackagingWorkflow,
+  runPrismCounselEvidencePackaging,
+} from "./workflows/prism-counsel-evidence-packaging.js";
+export type {
+  PrismCounselEvidencePackagingInput,
+  PrismCounselEvidencePackagingResult,
+  MatterDeadline,
+  EvidencePackage,
+  PrismCounselDecision,
+} from "./workflows/prism-counsel-evidence-packaging.js";
+
+export {
+  carlotaJoTaskRoutingWorkflow,
+  runCarlotaJoTaskRouting,
+} from "./workflows/carlota-jo-task-routing.js";
+export type {
+  CarlotaJoTaskRoutingInput,
+  CarlotaJoTaskRoutingResult,
+  AdvisorMatch,
+  TaskRoutingDecision,
+} from "./workflows/carlota-jo-task-routing.js";
+
 // ─── Version ──────────────────────────────────────────────────────────────────
-export const SUBSTRATE_VERSION = "0.1.0" as const;
-export const SUBSTRATE_PHASE = 1 as const;
+export const SUBSTRATE_VERSION = "0.2.0" as const;
+export const SUBSTRATE_PHASE = 2 as const;
