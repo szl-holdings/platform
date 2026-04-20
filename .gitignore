@@ -87,6 +87,14 @@ social-content/
 spfx-webparts/
 test-results/
 
+# Large non-code assets — removed from tracking (task #2687); do not re-add
+/deliverables/
+/output/
+/screenshots/
+archive/phase-a/deliverables/
+archive/phase-a/output/
+archive/phase-a/screenshots/
+
 # Mirror validation reports (generated)
 scripts/public-mirror/mirror-report.md
 docs/audit/public-mirror-report.md
