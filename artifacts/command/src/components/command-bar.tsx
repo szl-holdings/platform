@@ -5,9 +5,45 @@ import {
   LayoutDashboard, Activity, CheckSquare, Shield, AlertTriangle,
   Radio, Brain, Heart, Inbox, Users, Workflow, Network,
   Zap, FileText, BarChart3, Globe, Phone, DollarSign,
-  GitBranch, Database, Bot
+  GitBranch, Database, Bot,
+  Building2, Ship, ShieldCheck, Home as HomeIcon, BriefcaseBusiness,
+  Presentation, Smartphone, ExternalLink, LayoutGrid,
+  Scale, Crown, Cpu, Sparkles
 } from "lucide-react";
 import { getDomainColor, getSeverityColor } from "../lib/utils";
+
+interface PlatformApp {
+  href: string;
+  label: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  color: string;
+  external?: boolean;
+  category: "Platform" | "Domain" | "Ecosystem";
+}
+
+const PLATFORM_APPS: PlatformApp[] = [
+  // Core platform surfaces
+  { href: "/command/", label: "Unified Command", description: "Cross-domain ops, intelligence, and governance console", icon: LayoutDashboard, color: "#d4a054", external: true, category: "Platform" },
+  { href: "/szl-holdings/", label: "SZL Holdings Dashboard", description: "Parent-company portfolio, ventures, and investor surface", icon: Building2, color: "#d4a054", external: true, category: "Platform" },
+  { href: "/aegis/", label: "Aegis — Investor Pitch Deck", description: "Investor-facing deck and Series A narrative", icon: Presentation, color: "#c45a4a", external: true, category: "Platform" },
+  { href: "/pulse/", label: "Pulse — Executive Briefing", description: "AI executive briefing and morning digest", icon: Heart, color: "#d4a054", external: true, category: "Platform" },
+  { href: "/sentra/", label: "Sentra — Cyber Resilience", description: "Cyber resilience command and incident orchestration", icon: ShieldCheck, color: "#22c55e", external: true, category: "Platform" },
+  { href: "/szl-demo-video/", label: "SZL Demo Video", description: "Governed Autonomy product demo reel", icon: Sparkles, color: "#a78bfa", external: true, category: "Platform" },
+  // Domain verticals
+  { href: "/vessels/", label: "Vessels", description: "Maritime intelligence, sanctions, and vessel risk", icon: Ship, color: "#4a90b8", external: true, category: "Domain" },
+  { href: "/terra/", label: "Terra", description: "Real estate intelligence — pro-forma, waterfall, leases", icon: HomeIcon, color: "#c8953c", external: true, category: "Domain" },
+  { href: "/counsel/", label: "Counsel — Legal Matter Command", description: "Legal matter command and counsel workflow", icon: Scale, color: "#8b7ac8", external: true, category: "Domain" },
+  { href: "/carlota-jo/", label: "Carlota Jo Consulting", description: "Advisory and consulting intelligence surface", icon: BriefcaseBusiness, color: "#8b7ac8", external: true, category: "Domain" },
+  // Ecosystem (external standalone apps)
+  { href: "/prism-counsel/", label: "PRISM Counsel", description: "AI-assisted legal intelligence, case analytics, and counsel workflow", icon: Scale, color: "#8b7ac8", external: true, category: "Ecosystem" },
+  { href: "/imperium/", label: "IMPERIUM", description: "Infrastructure command — orchestration, governance, perimeter", icon: Crown, color: "#d4a054", external: true, category: "Ecosystem" },
+  { href: "/lyte-command-center/", label: "Lyte Command Center", description: "AIOps observability — autonomous NOC, SLOs, self-healing", icon: Zap, color: "#22c55e", external: true, category: "Ecosystem" },
+  { href: "/stephen-site/", label: "Stephen Site", description: "Personal portfolio and thought-leadership platform", icon: Globe, color: "#0ea5e9", external: true, category: "Ecosystem" },
+  { href: "/cortex-mobile/", label: "CORTEX Mobile", description: "Mobile command — governed decision loop and briefings", icon: Smartphone, color: "#f97316", external: true, category: "Ecosystem" },
+];
+
+export const PLATFORM_APP_COUNT = PLATFORM_APPS.length;
 
 interface SearchResult {
   type: string;
@@ -59,6 +95,8 @@ const QUICK_NAV: QuickNavItem[] = [
 interface CommandBarProps {
   open: boolean;
   onClose: () => void;
+  /** "all" = standard search palette; "apps" = full-screen app switcher */
+  mode?: "all" | "apps";
 }
 
 const BG_ELEVATED = "#10141e";
@@ -68,7 +106,8 @@ const TEXT_SECONDARY = "rgba(255,255,255,0.5)";
 const TEXT_MUTED = "rgba(255,255,255,0.28)";
 const ELECTRIC = "#2dd4bf";
 
-export function CommandBar({ open, onClose }: CommandBarProps) {
+export function CommandBar({ open, onClose, mode = "all" }: CommandBarProps) {
+  const isAppsMode = mode === "apps";
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -116,7 +155,28 @@ export function CommandBar({ open, onClose }: CommandBarProps) {
       )
     : [];
 
-  const totalItems = query.trim() ? [...filteredNav, ...results].length : QUICK_NAV.length;
+  const filteredApps = isAppsMode
+    ? (query.trim()
+        ? PLATFORM_APPS.filter(app =>
+            app.label.toLowerCase().includes(query.toLowerCase()) ||
+            app.description.toLowerCase().includes(query.toLowerCase()) ||
+            app.category.toLowerCase().includes(query.toLowerCase())
+          )
+        : PLATFORM_APPS)
+    : [];
+
+  const openApp = useCallback((app: PlatformApp) => {
+    if (app.external) {
+      window.open(app.href, "_blank", "noopener,noreferrer");
+    } else {
+      navigate(app.href);
+    }
+    onClose();
+  }, [navigate, onClose]);
+
+  const totalItems = isAppsMode
+    ? filteredApps.length
+    : (query.trim() ? [...filteredNav, ...results].length : QUICK_NAV.length);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -126,6 +186,11 @@ export function CommandBar({ open, onClose }: CommandBarProps) {
       if (e.key === "ArrowUp") { e.preventDefault(); setSelected((s) => Math.max(s - 1, 0)); }
       if (e.key === "Enter") {
         e.preventDefault();
+        if (isAppsMode) {
+          const app = filteredApps[selected];
+          if (app) openApp(app);
+          return;
+        }
         if (query.trim()) {
           const allItems = [...filteredNav, ...results];
           const item = allItems[selected];
@@ -141,7 +206,7 @@ export function CommandBar({ open, onClose }: CommandBarProps) {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [open, onClose, results, filteredNav, selected, totalItems, query, navigate]);
+  }, [open, onClose, results, filteredNav, selected, totalItems, query, navigate, isAppsMode, filteredApps, openApp]);
 
   if (!open) return null;
 
@@ -187,7 +252,7 @@ export function CommandBar({ open, onClose }: CommandBarProps) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl mx-4 rounded-xl overflow-hidden shadow-2xl"
+        className={`w-full ${isAppsMode ? "max-w-4xl" : "max-w-2xl"} mx-4 rounded-xl overflow-hidden shadow-2xl`}
         style={{ backgroundColor: BG_ELEVATED, border: `1px solid ${BORDER_SUBTLE}` }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -195,9 +260,11 @@ export function CommandBar({ open, onClose }: CommandBarProps) {
         <div className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: `1px solid ${BORDER_SUBTLE}` }}>
           <div className="flex items-center gap-2 px-1.5 py-0.5 rounded text-[9px] font-mono shrink-0" style={{ background: "rgba(45,212,191,0.08)", border: `1px solid rgba(45,212,191,0.15)`, color: ELECTRIC }}>
             <Command className="w-2.5 h-2.5" />
-            <span>K</span>
+            <span>{isAppsMode ? "J" : "K"}</span>
           </div>
-          {loading ? (
+          {isAppsMode ? (
+            <LayoutGrid className="w-4 h-4 shrink-0" style={{ color: TEXT_MUTED }} />
+          ) : loading ? (
             <Loader2 className="w-4 h-4 animate-spin shrink-0" style={{ color: TEXT_MUTED }} />
           ) : (
             <Search className="w-4 h-4 shrink-0" style={{ color: TEXT_MUTED }} />
@@ -206,10 +273,10 @@ export function CommandBar({ open, onClose }: CommandBarProps) {
             ref={inputRef}
             value={query}
             onChange={(e) => { setQuery(e.target.value); setSelected(0); }}
-            placeholder="Navigate, search signals, alerts, domains..."
+            placeholder={isAppsMode ? "Switch to any platform app — type to filter..." : "Navigate, search signals, alerts, domains..."}
             className="flex-1 bg-transparent outline-none text-sm"
             style={{ color: TEXT_PRIMARY }}
-            aria-label="Command palette search"
+            aria-label={isAppsMode ? "App switcher" : "Command palette search"}
           />
           {query && (
             <button onClick={() => { setQuery(""); setResults([]); }} style={{ color: TEXT_MUTED }} aria-label="Clear search">
@@ -218,9 +285,88 @@ export function CommandBar({ open, onClose }: CommandBarProps) {
           )}
         </div>
 
-        <div className="max-h-[65vh] overflow-y-auto">
+        <div className={isAppsMode ? "max-h-[75vh] overflow-y-auto" : "max-h-[65vh] overflow-y-auto"}>
+          {/* Apps mode: full-screen platform app switcher */}
+          {isAppsMode && (() => {
+            const grouped = filteredApps.reduce<Record<string, PlatformApp[]>>((acc, app) => {
+              if (!acc[app.category]) acc[app.category] = [];
+              acc[app.category].push(app);
+              return acc;
+            }, {});
+            const order: Array<PlatformApp["category"]> = ["Platform", "Domain", "Ecosystem"];
+            const ordered = order.filter((c) => grouped[c]?.length);
+            let appIdx = 0;
+            return (
+              <div className="p-4 flex flex-col gap-5">
+                {filteredApps.length === 0 && (
+                  <div className="px-4 py-12 text-center">
+                    <p className="text-[12px]" style={{ color: TEXT_MUTED }}>No apps match "{query}"</p>
+                  </div>
+                )}
+                {ordered.map((category) => {
+                  const items = grouped[category]!;
+                  return (
+                    <div key={category} className="flex flex-col gap-2">
+                      <div className="px-1 flex items-center gap-2">
+                        <span className="text-[9px] font-medium uppercase tracking-widest" style={{ color: TEXT_MUTED }}>
+                          {category === "Platform" ? "Platform Surfaces" : category === "Domain" ? "Domain Verticals" : "Ecosystem Apps"}
+                        </span>
+                        <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.18)" }}>
+                          {items.length}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {items.map((app) => {
+                          const idx = appIdx++;
+                          const isSelected = selected === idx;
+                          const Icon = app.icon;
+                          return (
+                            <button
+                              key={app.href}
+                              onClick={() => openApp(app)}
+                              onMouseEnter={() => setSelected(idx)}
+                              className="flex items-start gap-3 p-3 rounded-lg text-left transition-colors"
+                              style={{
+                                background: isSelected ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.02)",
+                                border: `1px solid ${isSelected ? "rgba(255,255,255,0.12)" : BORDER_SUBTLE}`,
+                              }}
+                              aria-selected={isSelected}
+                            >
+                              <div
+                                className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                                style={{
+                                  background: `${app.color}14`,
+                                  border: `1px solid ${app.color}30`,
+                                }}
+                              >
+                                <Icon className="w-4 h-4" style={{ color: app.color }} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[12px] font-semibold truncate" style={{ color: TEXT_PRIMARY }}>
+                                    {app.label}
+                                  </span>
+                                  {app.external && (
+                                    <ExternalLink className="w-2.5 h-2.5 shrink-0" style={{ color: TEXT_MUTED }} />
+                                  )}
+                                </div>
+                                <p className="text-[10px] leading-snug mt-0.5 line-clamp-2" style={{ color: TEXT_SECONDARY }}>
+                                  {app.description}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+
           {/* Empty query: show quick nav grouped by section */}
-          {!query.trim() && navSections && (
+          {!isAppsMode && !query.trim() && navSections && (
             <div className="py-1">
               {Object.entries(navSections).map(([section, items]) => (
                 <div key={section}>
@@ -261,7 +407,7 @@ export function CommandBar({ open, onClose }: CommandBarProps) {
           )}
 
           {/* Query: show filtered nav + API results */}
-          {query.trim() && (
+          {!isAppsMode && query.trim() && (
             <div className="py-1">
               {filteredNav.length > 0 && (
                 <div>

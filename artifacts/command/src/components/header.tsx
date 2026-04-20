@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { Activity, Search } from "lucide-react";
+import { Activity, Search, LayoutGrid } from "lucide-react";
 
 interface HeaderProps {
   lastUpdatedAt: number;
   sseConnected?: boolean;
   onSearchOpen?: () => void;
+  onAppSwitcherOpen?: () => void;
 }
 
-export function Header({ lastUpdatedAt, sseConnected = false, onSearchOpen }: HeaderProps) {
+export function Header({ lastUpdatedAt, sseConnected = false, onSearchOpen, onAppSwitcherOpen }: HeaderProps) {
   const [time, setTime] = useState(new Date());
   const [countdown, setCountdown] = useState(30);
 
@@ -46,6 +47,32 @@ export function Header({ lastUpdatedAt, sseConnected = false, onSearchOpen }: He
       </div>
 
       <div className="flex items-center gap-4">
+        {onAppSwitcherOpen && (
+          <button
+            onClick={onAppSwitcherOpen}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors"
+            style={{
+              backgroundColor: "var(--color-surface-base)",
+              border: "1px solid var(--color-surface-border)",
+              color: "var(--color-fg-muted)",
+            }}
+            aria-label="Open app switcher"
+            title="Switch to any platform app (⌘J)"
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Apps</span>
+            <kbd
+              className="hidden sm:inline text-[10px] px-1 rounded"
+              style={{
+                backgroundColor: "var(--color-bg-elevated)",
+                border: "1px solid var(--color-surface-border)",
+                color: "var(--color-fg-muted)",
+              }}
+            >
+              ⌘J
+            </kbd>
+          </button>
+        )}
         {onSearchOpen && (
           <button
             onClick={onSearchOpen}

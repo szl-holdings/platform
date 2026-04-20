@@ -1,6 +1,6 @@
 import { Scale, Crown, Zap, Globe, Cpu, ExternalLink } from "lucide-react";
 
-const ECOSYSTEM_APPS = [
+export const ECOSYSTEM_APPS = [
   {
     href: "/prism-counsel/",
     label: "PRISM Counsel",

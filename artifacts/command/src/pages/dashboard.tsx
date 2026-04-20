@@ -1,5 +1,5 @@
 import { DEMO_BRIEFING_HISTORY } from "@szl-holdings/shared-ui/morning-briefing";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Header } from "../components/header";
 import { EcosystemPulse } from "../components/ecosystem-pulse";
@@ -59,7 +59,26 @@ function SectionNav() {
 export function Dashboard() {
   const { data, dataUpdatedAt, sseConnected } = useEcosystemData();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [appSwitcherOpen, setAppSwitcherOpen] = useState(false);
   const [, navigate] = useLocation();
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const isMod = e.metaKey || e.ctrlKey;
+      if (!isMod) return;
+      if (e.key === "k" || e.key === "K") {
+        e.preventDefault();
+        setAppSwitcherOpen(false);
+        setSearchOpen((v) => !v);
+      } else if (e.key === "j" || e.key === "J") {
+        e.preventDefault();
+        setSearchOpen(false);
+        setAppSwitcherOpen((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   const activation = useActivationState({
     apiBaseUrl: `${BASE}/api`,
@@ -128,9 +147,11 @@ export function Dashboard() {
         lastUpdatedAt={dataUpdatedAt}
         sseConnected={sseConnected}
         onSearchOpen={() => setSearchOpen(true)}
+        onAppSwitcherOpen={() => setAppSwitcherOpen(true)}
       />
 
       <CommandBar open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <CommandBar open={appSwitcherOpen} onClose={() => setAppSwitcherOpen(false)} mode="apps" />
 
       <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto w-full flex flex-col gap-8">
         <div className="flex flex-col gap-3">
