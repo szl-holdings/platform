@@ -20,12 +20,25 @@ import {
 import { productsTable } from "@szl-holdings/db/schema/canonical";
 import { eq, sql } from "drizzle-orm";
 
-async function tableHasData(table: any): Promise<boolean> {
+async function tableHasData(table: any, sectionName: string): Promise<boolean> {
   try {
     const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(table);
     return count > 0;
-  } catch {
-    return false;
+  } catch (err) {
+    console.error(
+      `[seed-platform] ERROR while checking whether table for section "${sectionName}" has data:`,
+      err,
+    );
+    throw err;
+  }
+}
+
+async function runSection<T>(name: string, fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    console.error(`[seed-platform] ERROR in section "${name}":`, err);
+    throw err;
   }
 }
 
@@ -40,40 +53,44 @@ export async function seedPlatformData(): Promise<void> {
   }
   console.log("[seed-platform] Starting platform seed data...");
 
-  const orgsExist = await tableHasData(organizationsTable);
-  const signalsExist = await tableHasData(platformSignalsTable);
-  const vesselsExist = await tableHasData(maritimeVesselsTable);
-  const voyagesExist = await tableHasData(voyagesTable);
-  const exceptionsExist = await tableHasData(maritimeExceptionsTable);
+  const orgsExist = await tableHasData(organizationsTable, "organizations");
+  const signalsExist = await tableHasData(platformSignalsTable, "platform_signals");
+  const vesselsExist = await tableHasData(maritimeVesselsTable, "maritime_vessels");
+  const voyagesExist = await tableHasData(voyagesTable, "voyages");
+  const exceptionsExist = await tableHasData(maritimeExceptionsTable, "maritime_exceptions");
 
   if (orgsExist && signalsExist && vesselsExist && voyagesExist && exceptionsExist) {
     console.log("[seed-platform] Platform data already seeded, skipping...");
     return;
   }
 
-  const [alloyOrg] = await db.insert(organizationsTable).values({
-    name: "Alloy Demo Corp",
-    slug: "alloy-demo",
-    orgType: "platform_customer",
-    status: "active",
-    plan: "enterprise",
-  }).onConflictDoNothing().returning();
+  const { alloyOrg, lyteOrg, vesselsOrg } = await runSection("organizations", async () => {
+    const [alloyOrg] = await db.insert(organizationsTable).values({
+      name: "Alloy Demo Corp",
+      slug: "alloy-demo",
+      orgType: "platform_customer",
+      status: "active",
+      plan: "enterprise",
+    }).onConflictDoNothing().returning();
 
-  const [lyteOrg] = await db.insert(organizationsTable).values({
-    name: "Lyte Command Demo",
-    slug: "lyte-demo",
-    orgType: "platform_customer",
-    status: "active",
-    plan: "professional",
-  }).onConflictDoNothing().returning();
+    const [lyteOrg] = await db.insert(organizationsTable).values({
+      name: "Lyte Command Demo",
+      slug: "lyte-demo",
+      orgType: "platform_customer",
+      status: "active",
+      plan: "professional",
+    }).onConflictDoNothing().returning();
 
-  const [vesselsOrg] = await db.insert(organizationsTable).values({
-    name: "Vessels Maritime Demo",
-    slug: "vessels-demo",
-    orgType: "maritime_operator",
-    status: "active",
-    plan: "enterprise",
-  }).onConflictDoNothing().returning();
+    const [vesselsOrg] = await db.insert(organizationsTable).values({
+      name: "Vessels Maritime Demo",
+      slug: "vessels-demo",
+      orgType: "maritime_operator",
+      status: "active",
+      plan: "enterprise",
+    }).onConflictDoNothing().returning();
+
+    return { alloyOrg, lyteOrg, vesselsOrg };
+  });
 
   async function resolveOrgId(returned: { id: number } | undefined, slug: string): Promise<number> {
     if (returned?.id) return returned.id;
@@ -91,15 +108,15 @@ export async function seedPlatformData(): Promise<void> {
   const seedLyteOrgId = await resolveOrgId(lyteOrg, "lyte-demo");
   const seedVesselsOrgId = await resolveOrgId(vesselsOrg, "vessels-demo");
 
-  await db.insert(productsTable).values([
+  await runSection("products", () => db.insert(productsTable).values([
     { key: "alloy", name: "Alloy", description: "Execution Fabric — signal ingest, workflow orchestration, artifact management", category: "platform" as const, isActive: true },
     { key: "lyte", name: "Lyte Command Center", description: "Business telemetry and ops signal management for MSPs", category: "ops" as const, isActive: true },
     { key: "vessels", name: "Vessels Maritime Intelligence", description: "Maritime fleet monitoring, voyage management, and exception handling", category: "maritime" as const, isActive: true },
     { key: "terra", name: "Terra", description: "Predictive intelligence and business analytics", category: "intelligence" as const, isActive: true },
     { key: "inca", name: "INCA AI Research Command", description: "AI research orchestration and knowledge management", category: "intelligence" as const, isActive: true },
-  ]).onConflictDoNothing(); // productsTable used here
+  ]).onConflictDoNothing());
 
-  await db.insert(featureFlagsTable).values([
+  await runSection("feature_flags", () => db.insert(featureFlagsTable).values([
     { key: "alloy.signal_ingest", name: "Alloy Signal Ingest", description: "Enable signal ingest API for Alloy", isEnabled: true, scope: "product", product: "alloy", rolloutPercentage: 100 },
     { key: "alloy.workflow_engine", name: "Alloy Workflow Engine", description: "Enable workflow CRUD and run management", isEnabled: true, scope: "product", product: "alloy", rolloutPercentage: 100 },
     { key: "alloy.artifact_approval", name: "Alloy Artifact Approval", description: "Enable artifact approve/reject flow", isEnabled: true, scope: "product", product: "alloy", rolloutPercentage: 100 },
@@ -108,7 +125,7 @@ export async function seedPlatformData(): Promise<void> {
     { key: "vessels.voyage_economics", name: "Vessels Voyage Economics", description: "Enable voyage economics computation", isEnabled: true, scope: "product", product: "vessels", rolloutPercentage: 100 },
     { key: "vessels.eta_drift", name: "Vessels ETA Drift", description: "Enable ETA drift calculation and alerts", isEnabled: true, scope: "product", product: "vessels", rolloutPercentage: 100 },
     { key: "platform.executive_views", name: "Executive View Mode", description: "Enable read-only executive dashboard payloads", isEnabled: true, scope: "role", requiredPlatformRole: "executive_viewer", rolloutPercentage: 100 },
-  ]).onConflictDoNothing(); // productsTable used here
+  ]).onConflictDoNothing());
 
   const now = new Date();
   const hourAgo = new Date(now.getTime() - 3600000);
@@ -116,7 +133,7 @@ export async function seedPlatformData(): Promise<void> {
   const weekAgo = new Date(now.getTime() - 7 * 86400000);
 
   if (!signalsExist) {
-  await db.insert(platformSignalsTable).values([
+  await runSection("platform_signals (alloy)", () => db.insert(platformSignalsTable).values([
     {
       orgId: seedOrgId,
       source: "connector:datadog",
@@ -185,9 +202,9 @@ export async function seedPlatformData(): Promise<void> {
       receivedAt: dayAgo,
       processedAt: new Date(dayAgo.getTime() + 14400000),
     },
-  ]).onConflictDoNothing(); // productsTable used here
+  ]).onConflictDoNothing());
 
-  await db.insert(platformSignalsTable).values([
+  await runSection("platform_signals (lyte)", () => db.insert(platformSignalsTable).values([
     {
       orgId: seedLyteOrgId,
       source: "connector:pagerduty",
@@ -228,9 +245,9 @@ export async function seedPlatformData(): Promise<void> {
       receivedAt: new Date(now.getTime() - 5400000),
       processedAt: new Date(now.getTime() - 5100000),
     },
-  ]).onConflictDoNothing(); // productsTable used here
+  ]).onConflictDoNothing());
 
-  await db.insert(actionsTable).values([
+  await runSection("actions", () => db.insert(actionsTable).values([
     {
       orgId: seedOrgId,
       product: "alloy",
@@ -267,9 +284,9 @@ export async function seedPlatformData(): Promise<void> {
       status: "pending",
       priority: "high",
     },
-  ]).onConflictDoNothing(); // productsTable used here
+  ]).onConflictDoNothing());
 
-  const [wf1] = await db.insert(workflowsTable).values({
+  const [wf1] = await runSection("workflows (critical_signal_response)", () => db.insert(workflowsTable).values({
     orgId: seedOrgId,
     product: "alloy",
     name: "Critical Signal Response",
@@ -287,9 +304,9 @@ export async function seedPlatformData(): Promise<void> {
     status: "active",
     runCount: 12,
     lastRunAt: hourAgo,
-  }).returning();
+  }).returning());
 
-  await db.insert(workflowsTable).values([
+  await runSection("workflows (additional)", () => db.insert(workflowsTable).values([
     {
       orgId: seedOrgId,
       product: "alloy",
@@ -323,10 +340,10 @@ export async function seedPlatformData(): Promise<void> {
       status: "active",
       runCount: 47,
     },
-  ]).onConflictDoNothing(); // productsTable used here
+  ]).onConflictDoNothing());
 
   if (wf1) {
-    await db.insert(workflowRunsTable).values([
+    await runSection("workflow_runs", () => db.insert(workflowRunsTable).values([
       {
         orgId: seedOrgId,
         workflowId: wf1.id,
@@ -353,7 +370,7 @@ export async function seedPlatformData(): Promise<void> {
         retryCount: 0,
         maxRetries: 3,
       },
-    ]).onConflictDoNothing(); // productsTable used here
+    ]).onConflictDoNothing());
   }
   } // end if (!signalsExist)
 
@@ -368,7 +385,7 @@ export async function seedPlatformData(): Promise<void> {
     { name: "Colombo Port", locode: "LKCMB", country: "Sri Lanka", region: "South Asia", latitude: "6.9271", longitude: "79.8612", portType: "container" as const, status: "open" as const, avgCongestionDays: "1.1", weeklyCapacityTeu: 28000 },
   ];
 
-  const insertedPorts = await db.insert(portsTable).values(portValues).onConflictDoNothing().returning();
+  const insertedPorts = await runSection("ports", () => db.insert(portsTable).values(portValues).onConflictDoNothing().returning());
 
   const corridorValues = [
     { name: "Strait of Malacca", description: "Key passage between Indian Ocean and Pacific — world's busiest shipping lane", riskLevel: "moderate" as const, distanceNm: "500", avgTransitDays: "1.5", geopoliticalRisk: 45, pirateRisk: 35, weatherRisk: 20, activeConflicts: ["Piracy incidents"] as any },
@@ -379,7 +396,7 @@ export async function seedPlatformData(): Promise<void> {
     { name: "Cape of Good Hope Route", description: "Alternative to Suez — avoiding Red Sea risk", riskLevel: "moderate" as const, distanceNm: "3500", avgTransitDays: "12", geopoliticalRisk: 25, pirateRisk: 30, weatherRisk: 75, activeConflicts: ["Severe weather exposure"] as any },
   ];
 
-  const insertedCorridors = await db.insert(corridorsTable).values(corridorValues).onConflictDoNothing().returning();
+  const insertedCorridors = await runSection("corridors", () => db.insert(corridorsTable).values(corridorValues).onConflictDoNothing().returning());
 
   const vesselValues = [
     {
@@ -470,12 +487,16 @@ export async function seedPlatformData(): Promise<void> {
     },
   ];
 
-  let insertedVessels = await db.insert(maritimeVesselsTable).values(vesselValues).onConflictDoNothing().returning();
+  let insertedVessels = await runSection("maritime_vessels", () =>
+    db.insert(maritimeVesselsTable).values(vesselValues).onConflictDoNothing().returning(),
+  );
   if (insertedVessels.length === 0) {
-    insertedVessels = await db
-      .select()
-      .from(maritimeVesselsTable)
-      .where(eq(maritimeVesselsTable.orgId, seedVesselsOrgId)) as typeof insertedVessels;
+    insertedVessels = await runSection("maritime_vessels (lookup existing)", async () =>
+      (await db
+        .select()
+        .from(maritimeVesselsTable)
+        .where(eq(maritimeVesselsTable.orgId, seedVesselsOrgId))) as typeof insertedVessels,
+    );
   }
 
   if (insertedVessels.length >= 3) {
@@ -489,7 +510,7 @@ export async function seedPlatformData(): Promise<void> {
     const port2 = insertedPorts.find(p => p.locode === "SGSIN");
     const port3 = insertedPorts.find(p => p.locode === "NLRTM");
 
-    await db.insert(voyagesTable).values([
+    await runSection("voyages", () => db.insert(voyagesTable).values([
       {
         orgId: seedVesselsOrgId,
         vesselId: vessel1.id,
@@ -562,9 +583,9 @@ export async function seedPlatformData(): Promise<void> {
         charterRatePerDay: "42000",
         etaDriftHours: "0",
       },
-    ]).onConflictDoNothing(); // productsTable used here
+    ]).onConflictDoNothing());
 
-    await db.insert(maritimeExceptionsTable).values([
+    await runSection("maritime_exceptions", () => db.insert(maritimeExceptionsTable).values([
       {
         orgId: seedVesselsOrgId,
         vesselId: vessel1.id,
@@ -623,11 +644,11 @@ export async function seedPlatformData(): Promise<void> {
         detectedAt: new Date(now.getTime() - 1800000),
         metadata: { nearestNavalAsset: "HMS Richmond — ETA 4h", coastGuardNotified: true } as any,
       },
-    ]).onConflictDoNothing(); // productsTable used here
+    ]).onConflictDoNothing());
   }
   } // end if (seedMaritime)
 
-  await db.insert(readinessItemsTable).values([
+  await runSection("readiness_items", () => db.insert(readinessItemsTable).values([
     {
       orgId: seedOrgId,
       product: "alloy",
@@ -716,7 +737,7 @@ export async function seedPlatformData(): Promise<void> {
       score: "60",
       targetScore: "100",
     },
-  ]).onConflictDoNothing(); // productsTable used here
+  ]).onConflictDoNothing());
 
   console.log("[seed-platform] Platform seed data complete.");
 }
