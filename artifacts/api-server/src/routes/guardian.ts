@@ -72,7 +72,8 @@ async function logToolAuditEvent(params: {
   action: string;
   entityType: string;
   entityId: string | null;
-  newValues?: Record<string, unknown>;
+  oldValues?: Record<string, unknown> | null;
+  newValues?: Record<string, unknown> | null;
   req: Request;
 }) {
   try {
@@ -81,12 +82,13 @@ async function logToolAuditEvent(params: {
       action: params.action,
       entityType: params.entityType,
       entityId: params.entityId ?? undefined,
+      oldValues: params.oldValues ?? null,
       newValues: params.newValues ?? null,
       ipAddress: params.req.ip ?? null,
       userAgent: params.req.get("user-agent") ?? null,
     });
   } catch (err) {
-    logger.error({ err, action: params.action }, "Failed to write tool audit event");
+    logger.error({ err, action: params.action }, "Failed to write audit event");
   }
 }
 
@@ -738,6 +740,49 @@ router.get("/policies/:id", authMiddleware(), async (req: Request, res: Response
   }
 });
 
+router.get("/policies/:id/audit", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst", "compliance"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params["id"] as string, 10);
+    if (isNaN(id)) { sendBadRequest(res, "Invalid policy ID"); return; }
+
+    const [policyRow] = await db.select().from(guardianPoliciesTable).where(eq(guardianPoliciesTable.id, id)).limit(1);
+    if (!policyRow) { sendNotFound(res, "Policy not found"); return; }
+    if (!isAdminUser(req.user)) {
+      const orgId = userOrgId(req.user);
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
+      if (policyRow.orgId !== orgId) { sendNotFound(res, "Policy not found"); return; }
+    }
+
+    const { page, limit } = parsePagination(req.query as Record<string, unknown>);
+    const offset = (page - 1) * limit;
+    const where = and(
+      eq(auditEventsTable.entityType, "guardian_policy"),
+      eq(auditEventsTable.entityId, String(id)),
+    );
+    const [rows, totalRow] = await Promise.all([
+      db.select().from(auditEventsTable).where(where).orderBy(desc(auditEventsTable.createdAt)).limit(limit).offset(offset),
+      db.select({ count: sql<number>`count(*)::int` }).from(auditEventsTable).where(where),
+    ]);
+    const actors = await resolveActorMap(rows.map(r => r.userId));
+    const items = rows.map(r => ({
+      id: r.id,
+      action: r.action,
+      entityType: r.entityType,
+      entityId: r.entityId,
+      actor: actorOrUndefined(r.userId, actors),
+      actorUserId: r.userId ?? undefined,
+      oldValues: r.oldValues ?? null,
+      newValues: r.newValues ?? null,
+      ipAddress: r.ipAddress ?? undefined,
+      userAgent: r.userAgent ?? undefined,
+      createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
+    }));
+    sendSuccess(res, items, 200, { page, limit, total: totalRow[0]?.count ?? 0 });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list policy audit history");
+  }
+});
+
 router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const nowIso = new Date().toISOString();
@@ -760,6 +805,13 @@ router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "
     await syncDecisionEngine();
 
     logger.info({ policyId: inserted.id, tier: inserted.tier, action: inserted.action }, "Policy created");
+    await logToolAuditEvent({
+      action: "policy.create",
+      entityType: "guardian_policy",
+      entityId: String(inserted.id),
+      newValues: policyRowToApi(inserted) as unknown as Record<string, unknown>,
+      req,
+    });
     sendCreated(res, policyRowToApi(inserted));
   } catch (err) {
     handleRouteError(res, err, "Failed to create policy");
@@ -799,6 +851,14 @@ router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admi
     if (!updated) { sendNotFound(res, "Policy not found"); return; }
 
     await syncDecisionEngine();
+    await logToolAuditEvent({
+      action: "policy.update",
+      entityType: "guardian_policy",
+      entityId: String(id),
+      oldValues: policyRowToApi(existing) as unknown as Record<string, unknown>,
+      newValues: policyRowToApi(updated) as unknown as Record<string, unknown>,
+      req,
+    });
     sendSuccess(res, policyRowToApi(updated));
   } catch (err) {
     handleRouteError(res, err, "Failed to update policy");
@@ -809,10 +869,19 @@ router.delete("/policies/:id", validateBody(jsonObjectBodySchema), authMiddlewar
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid policy ID"); return; }
+    const [existing] = await db.select().from(guardianPoliciesTable).where(eq(guardianPoliciesTable.id, id)).limit(1);
+    if (!existing) { sendNotFound(res, "Policy not found"); return; }
     const deleted = await db.delete(guardianPoliciesTable).where(eq(guardianPoliciesTable.id, id)).returning({ id: guardianPoliciesTable.id });
     if (deleted.length === 0) { sendNotFound(res, "Policy not found"); return; }
     await syncDecisionEngine();
     logger.info({ policyId: id }, "Policy deleted");
+    await logToolAuditEvent({
+      action: "policy.delete",
+      entityType: "guardian_policy",
+      entityId: String(id),
+      oldValues: policyRowToApi(existing) as unknown as Record<string, unknown>,
+      req,
+    });
     sendSuccess(res, { deleted: true });
   } catch (err) {
     handleRouteError(res, err, "Failed to delete policy");
@@ -854,6 +923,13 @@ router.post("/policies/:id/assignments", authMiddleware(), requireRole("super_ad
       return;
     }
     logger.info({ policyId, subject: `${inserted.subjectType}:${inserted.subjectId}` }, "Policy assignment created");
+    await logToolAuditEvent({
+      action: "policy.assignment.create",
+      entityType: "guardian_policy_assignment",
+      entityId: String(inserted.id),
+      newValues: assignmentRowToApi(inserted) as unknown as Record<string, unknown>,
+      req,
+    });
     sendCreated(res, assignmentRowToApi(inserted));
   } catch (err) {
     handleRouteError(res, err, "Failed to create policy assignment");
@@ -865,8 +941,16 @@ router.delete("/policies/:id/assignments/:assignmentId", validateBody(jsonObject
     const policyId = parseInt(req.params["id"] as string, 10);
     const assignmentId = parseInt(req.params["assignmentId"] as string, 10);
     if (isNaN(policyId) || isNaN(assignmentId)) { sendBadRequest(res, "Invalid ID"); return; }
+    const [existing] = await db.select().from(guardianPolicyAssignmentsTable).where(and(eq(guardianPolicyAssignmentsTable.id, assignmentId), eq(guardianPolicyAssignmentsTable.policyId, policyId))).limit(1);
     const deleted = await db.delete(guardianPolicyAssignmentsTable).where(and(eq(guardianPolicyAssignmentsTable.id, assignmentId), eq(guardianPolicyAssignmentsTable.policyId, policyId))).returning({ id: guardianPolicyAssignmentsTable.id });
     if (deleted.length === 0) { sendNotFound(res, "Assignment not found"); return; }
+    await logToolAuditEvent({
+      action: "policy.assignment.delete",
+      entityType: "guardian_policy_assignment",
+      entityId: String(assignmentId),
+      oldValues: existing ? (assignmentRowToApi(existing) as unknown as Record<string, unknown>) : null,
+      req,
+    });
     sendSuccess(res, { deleted: true });
   } catch (err) {
     handleRouteError(res, err, "Failed to delete policy assignment");
@@ -941,7 +1025,13 @@ router.post("/tools", authMiddleware(), requireRole("super_admin", "admin"), val
     const manifest = toolRowToManifest(inserted);
     defaultToolRegistry.register(manifest);
     logger.info({ toolId: manifest.id, policyTier: manifest.policyTier }, "Tool registered");
-    await logToolAuditEvent({ action: "tool.register", entityType: "tool", entityId: manifest.id, newValues: { policyTier: manifest.policyTier, version: manifest.version }, req });
+    await logToolAuditEvent({
+      action: "tool.register",
+      entityType: "tool",
+      entityId: manifest.id,
+      newValues: manifest as unknown as Record<string, unknown>,
+      req,
+    });
     sendCreated(res, manifest);
   } catch (err) {
     handleRouteError(res, err, "Failed to register tool");
@@ -983,10 +1073,60 @@ router.patch("/tools/:toolId", authMiddleware(), requireRole("super_admin", "adm
 
     const manifest = toolRowToManifest(updated);
     defaultToolRegistry.register(manifest);
-    await logToolAuditEvent({ action: "tool.update", entityType: "tool", entityId: manifest.id, newValues: { policyTier: manifest.policyTier, version: manifest.version, versionChanged }, req });
+    await logToolAuditEvent({
+      action: "tool.update",
+      entityType: "tool",
+      entityId: manifest.id,
+      oldValues: toolRowToManifest(existing) as unknown as Record<string, unknown>,
+      newValues: { ...(manifest as unknown as Record<string, unknown>), versionChanged },
+      req,
+    });
     sendSuccess(res, manifest);
   } catch (err) {
     handleRouteError(res, err, "Failed to update tool");
+  }
+});
+
+router.get("/tools/:toolId/audit", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst", "compliance"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+  try {
+    const toolId = req.params["toolId"] as string;
+    const [toolRow] = await db.select({ id: toolMeshToolsTable.id }).from(toolMeshToolsTable).where(eq(toolMeshToolsTable.toolId, toolId)).limit(1);
+    if (!toolRow) { sendNotFound(res, "Tool not found"); return; }
+    if (!isAdminUser(req.user)) {
+      const orgId = userOrgId(req.user);
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
+    }
+    const { page, limit } = parsePagination(req.query as Record<string, unknown>);
+    const offset = (page - 1) * limit;
+    const where = and(
+      or(
+        eq(auditEventsTable.entityType, "tool"),
+        eq(auditEventsTable.entityType, "tool_version"),
+        eq(auditEventsTable.entityType, "tool_permission"),
+      ),
+      eq(auditEventsTable.entityId, toolId),
+    );
+    const [rows, totalRow] = await Promise.all([
+      db.select().from(auditEventsTable).where(where).orderBy(desc(auditEventsTable.createdAt)).limit(limit).offset(offset),
+      db.select({ count: sql<number>`count(*)::int` }).from(auditEventsTable).where(where),
+    ]);
+    const actors = await resolveActorMap(rows.map(r => r.userId));
+    const items = rows.map(r => ({
+      id: r.id,
+      action: r.action,
+      entityType: r.entityType,
+      entityId: r.entityId,
+      actor: actorOrUndefined(r.userId, actors),
+      actorUserId: r.userId ?? undefined,
+      oldValues: r.oldValues ?? null,
+      newValues: r.newValues ?? null,
+      ipAddress: r.ipAddress ?? undefined,
+      userAgent: r.userAgent ?? undefined,
+      createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
+    }));
+    sendSuccess(res, items, 200, { page, limit, total: totalRow[0]?.count ?? 0 });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list tool audit history");
   }
 });
 
@@ -1212,6 +1352,13 @@ router.post("/tool-approvals", authMiddleware(), requireRole("super_admin", "adm
     }).returning();
     if (!inserted) { handleRouteError(res, new Error("insert returned no row"), "Failed to create action approval"); return; }
     logger.info({ actionId: inserted.id, toolId, action }, "Action approval request created");
+    await logToolAuditEvent({
+      action: "action.create",
+      entityType: "tool_action_approval",
+      entityId: inserted.requestId,
+      newValues: approvalRowToApi(inserted) as unknown as Record<string, unknown>,
+      req,
+    });
     sendCreated(res, approvalRowToApi(inserted));
   } catch (err) {
     handleRouteError(res, err, "Failed to create action approval");
@@ -1240,6 +1387,14 @@ const approveActionHandler = async (req: Request, res: Response) => {
       payload: updated.payload,
       extra: { toolId: updated.toolId, agentId: updated.agentId, approvalId: updated.id },
     });
+    await logToolAuditEvent({
+      action: "action.approve",
+      entityType: "tool_action_approval",
+      entityId: updated.requestId,
+      oldValues: approvalRowToApi(existing) as unknown as Record<string, unknown>,
+      newValues: approvalRowToApi(updated) as unknown as Record<string, unknown>,
+      req,
+    });
     sendSuccess(res, approvalRowToApi(updated));
   } catch (err) {
     handleRouteError(res, err, "Failed to approve action");
@@ -1267,6 +1422,14 @@ const rejectActionHandler = async (req: Request, res: Response) => {
       decisionReason: reason ?? null,
       payload: updated.payload,
       extra: { toolId: updated.toolId, agentId: updated.agentId, approvalId: updated.id },
+    });
+    await logToolAuditEvent({
+      action: "action.reject",
+      entityType: "tool_action_approval",
+      entityId: updated.requestId,
+      oldValues: approvalRowToApi(existing) as unknown as Record<string, unknown>,
+      newValues: approvalRowToApi(updated) as unknown as Record<string, unknown>,
+      req,
     });
     sendSuccess(res, approvalRowToApi(updated));
   } catch (err) {
