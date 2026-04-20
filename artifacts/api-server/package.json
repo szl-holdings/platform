@@ -20,6 +20,8 @@
     "audit:route-security": "tsx src/scripts/route-security-matrix.ts",
     "audit:route-security:strict": "tsx src/scripts/route-security-matrix.ts --strict",
     "audit:route-security:strict-auth": "tsx src/scripts/route-security-matrix.ts --strict-auth",
+    "audit:openapi-routes": "tsx src/scripts/validate-openapi-routes.ts",
+    "audit:openapi-routes:strict": "tsx src/scripts/validate-openapi-routes.ts --strict-spec-only",
     "test:cognitive-contracts": "tsx src/scripts/smoke-cognitive-contracts.ts",
     "smoke:vessels-cognitive": "tsx src/scripts/smoke-vessels-cognitive.ts",
     "test:terra-cognitive": "tsx src/scripts/smoke-terra-cognitive-api.ts",

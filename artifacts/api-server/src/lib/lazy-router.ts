@@ -31,7 +31,7 @@ export function lazyMount(loader: Loader, label?: string): RequestHandler {
   let cached: RequestHandler | Router | null = null;
   let pending: Promise<RequestHandler | Router> | null = null;
 
-  return function lazyMountHandler(req, res, next) {
+  const handler: RequestHandler = function lazyMountHandler(req, res, next) {
     if (cached) {
       return (cached as RequestHandler)(req, res, next);
     }
@@ -64,6 +64,7 @@ export function lazyMount(loader: Loader, label?: string): RequestHandler {
         next(err);
       });
   };
+  return handler;
 }
 
 /**
@@ -79,7 +80,7 @@ export function lazyRegister(
   let cachedSub: IRouter | null = null;
   let pending: Promise<IRouter> | null = null;
 
-  return function lazyRegisterHandler(req, res, next) {
+  const handler: RequestHandler = function lazyRegisterHandler(req, res, next) {
     if (cachedSub) {
       return (cachedSub as unknown as RequestHandler)(req, res, next);
     }
@@ -109,6 +110,7 @@ export function lazyRegister(
         next(err);
       });
   };
+  return handler;
 }
 
 function pathMatchesPrefix(reqPath: string, prefix: string): boolean {
