@@ -69,6 +69,7 @@
   "dependencies": {
     "@szl-holdings/atlas-core": "workspace:*",
     "@szl-holdings/db": "workspace:*",
+    "@workspace/agents-evals": "workspace:*",
     "@workspace/tool-mesh": "workspace:*",
     "drizzle-orm": "catalog:",
     "zod": "catalog:"

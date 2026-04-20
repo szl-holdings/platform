@@ -100,9 +100,6 @@
       "path": "./packages/trace-graph"
     },
     {
-      "path": "./packages/eval-os"
-    },
-    {
       "path": "./packages/memory-fabric"
     },
     {

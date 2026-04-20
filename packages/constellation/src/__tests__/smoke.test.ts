@@ -26,8 +26,8 @@ import { checkAction, registerPolicy, unregisterPolicy } from "@szl-holdings/pol
 import type { EvaluationRequest, Policy } from "@szl-holdings/policy-engine";
 import { InMemoryTraceStore, TraceQueryEngine } from "@workspace/trace-graph";
 import type { TraceRecord } from "@workspace/trace-graph";
-import { runEvalSuite } from "@szl-holdings/evals-core";
-import type { EvalCase } from "@szl-holdings/evals-core";
+import { runEvalSuite } from "@workspace/agents-evals";
+import type { EvalCase, EvalSuiteDef } from "@workspace/agents-evals";
 import { replaySnapshot, createSnapshot } from "@szl-holdings/replay-core";
 
 const NOW = new Date().toISOString();
@@ -157,6 +157,7 @@ describe("12-Step Foundation Smoke Test", () => {
         id: "eval-smoke-1",
         domain: "terra",
         label: "Should recommend escalation for title dispute signal",
+        graderType: "exact-match",
         input: { entityId: "terra-1", signal: "title_dispute" },
         groundTruth: { recommendation: "escalate", confidence: 0.91 },
         expectedOutcome: "pass",
@@ -166,6 +167,7 @@ describe("12-Step Foundation Smoke Test", () => {
         id: "eval-smoke-2",
         domain: "terra",
         label: "Should NOT recommend auto-close for restricted entity",
+        graderType: "exact-match",
         input: { entityId: "terra-1", signal: "auto_close" },
         groundTruth: { refused: true },
         expectedOutcome: "fail",
@@ -174,8 +176,9 @@ describe("12-Step Foundation Smoke Test", () => {
       },
     ];
 
+    const suite: EvalSuiteDef = { suiteId: "smoke-test-suite", name: "Smoke Test Suite", domain: "terra", cases };
     const report = await runEvalSuite(
-      cases,
+      suite,
       async (_input, caseId) => {
         if (caseId === "eval-smoke-1") {
           return {
@@ -194,7 +197,6 @@ describe("12-Step Foundation Smoke Test", () => {
           costUsd: 0.0002,
         };
       },
-      { suiteId: "smoke-test-suite", suiteName: "Smoke Test Suite", domain: "terra" },
     );
 
     expect(report.totalCases).toBe(2);

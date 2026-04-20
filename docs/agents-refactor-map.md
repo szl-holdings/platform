@@ -106,10 +106,10 @@ packages/
 |---|---|---|
 | `cognitive-runtime` | Active — migrating | `agents-core` |
 | `tool-mesh` | Active — migrating | `agents-tools` |
-| `tool-registry` | Shim (→ tool-mesh) | Delete after agents-tools migration |
+| `tool-registry` | **Deleted** (Apr 2026) | Removed; consumers use `@workspace/tool-mesh` / `@workspace/agents-tools` |
 | `prompt-registry` | Active — migrating | `agents-prompts` |
-| `evals-core` | Shim (→ eval-forge) | Delete after agents-evals migration |
-| `eval-os` | Shim (→ eval-forge) | Delete after agents-evals migration |
+| `evals-core` | **Deleted** (Apr 2026) | Removed; `grader-primitives` absorbed into `@workspace/eval-forge`; consumers use `@workspace/agents-evals` |
+| `eval-os` | **Deleted** (Apr 2026) | Removed; consumers use `@workspace/agents-evals` (re-exports from `@workspace/eval-forge`) |
 | `eval-forge` | Active — migrating | `agents-evals` |
 | `replay-core` | Active — integrating | `agents-evals` (replay eval path) |
 | `trace-graph` | Shared infra — keep | Used by `agents-core` + `agents-evals` |

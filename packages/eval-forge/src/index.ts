@@ -1,5 +1,6 @@
 export * from "./types.js";
 export * from "./metrics.js";
+export * from "./grader-primitives.js";
 export * from "./graders.js";
 export * from "./runtime.js";
 export * from "./nightly-runner.js";

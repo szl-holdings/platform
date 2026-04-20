@@ -1,5 +1,5 @@
 import type { GraderType, EvalCaseResult, EvalCase } from "./types.js";
-import { PASS_THRESHOLD, fieldScore } from "@szl-holdings/evals-core/grader-primitives";
+import { PASS_THRESHOLD, fieldScore } from "./grader-primitives.js";
 
 export type { GraderType };
 

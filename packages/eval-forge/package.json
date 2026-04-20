@@ -21,6 +21,10 @@
       "types": "./dist/graders.d.ts",
       "import": "./src/graders.ts"
     },
+    "./grader-primitives": {
+      "types": "./dist/grader-primitives.d.ts",
+      "import": "./src/grader-primitives.ts"
+    },
     "./runtime": {
       "types": "./dist/runtime.d.ts",
       "import": "./src/runtime.ts"
@@ -51,7 +55,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@szl-holdings/evals-core": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
