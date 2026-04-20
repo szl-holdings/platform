@@ -232,11 +232,36 @@ const DOMAIN_PRODUCTS = [
   },
 ];
 
+function getCsrfTokenFromCookie(): string {
+  if (typeof document === "undefined") return "";
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]!) : "";
+}
+
+async function ensureCsrfToken(): Promise<string> {
+  let token = getCsrfTokenFromCookie();
+  if (token) return token;
+  try {
+    await fetch(`${BASE}/api/csrf-token`, { credentials: "include" });
+  } catch {
+    /* non-fatal — request will surface the missing-token error if needed */
+  }
+  token = getCsrfTokenFromCookie();
+  return token;
+}
+
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const method = (options?.method ?? "GET").toUpperCase();
+  const needsCsrf = method !== "GET" && method !== "HEAD" && method !== "OPTIONS";
+  const csrfToken = needsCsrf ? await ensureCsrfToken() : "";
   const res = await fetch(`${BASE}${path}`, {
     credentials: "include",
-    headers: { Accept: "application/json", ...options?.headers },
     ...options,
+    headers: {
+      Accept: "application/json",
+      ...(needsCsrf && csrfToken ? { "x-csrf-token": csrfToken } : {}),
+      ...options?.headers,
+    },
   });
   if (!res.ok) {
     if (res.status === 401) throw new Error("UNAUTHORIZED");
@@ -603,6 +628,7 @@ function RequestDemoPanel() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -611,6 +637,7 @@ function RequestDemoPanel() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setSubmitError(null);
     try {
       await apiFetch("/api/investors/demo-request", {
         method: "POST",
@@ -618,13 +645,15 @@ function RequestDemoPanel() {
         body: JSON.stringify(form),
       });
       setSubmitted(true);
-    } catch {
-      const subject = encodeURIComponent("Demo Request — SZL Holdings Data Room");
-      const body = encodeURIComponent(
-        `Name: ${form.name}\nEmail: ${form.email}\nCompany: ${form.company}\nRole: ${form.role}\n\n${form.message}`
-      );
-      window.location.href = `mailto:investors@szlholdings.com?subject=${subject}&body=${body}`;
-      setSubmitted(true);
+    } catch (err) {
+      const code = err instanceof Error ? err.message : "ERROR";
+      const friendly =
+        code === "UNAUTHORIZED"
+          ? "Your session has expired. Please refresh the page and try again."
+          : code === "FORBIDDEN" || code === "NDA_REQUIRED"
+          ? "Access required. Please re-accept the NDA and try again."
+          : "We couldn't submit your request. Please try again, or email investors@szlholdings.com directly.";
+      setSubmitError(friendly);
     } finally {
       setSubmitting(false);
     }
@@ -793,6 +822,14 @@ function RequestDemoPanel() {
             </a>
           </p>
         </div>
+        {submitError && (
+          <div
+            role="alert"
+            className="mt-2 rounded-xl border border-[#e07050]/30 bg-[#e07050]/10 px-4 py-3 text-sm text-[#f6b8a4]"
+          >
+            {submitError}
+          </div>
+        )}
       </form>
 
       <div className="mt-10 border-t border-white/[0.05] pt-8">

@@ -814,12 +814,21 @@ const demoRequestSchema = z.object({
   message: z.string().max(2000).optional(),
 });
 
+const INVESTOR_NOTIFY_EMAIL = process.env.SZL_INVESTORS_EMAIL || "investors@szlholdings.com";
+
 router.post("/investors/demo-request", authMiddleware(), validateBody(demoRequestSchema), async (req, res) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ error: "Unauthenticated" });
     return;
   }
+  const name = String(req.body.name).trim();
+  const email = String(req.body.email).trim();
+  const company = String(req.body.company).trim();
+  const role = req.body.role ? String(req.body.role).trim() : null;
+  const message = req.body.message ? String(req.body.message).trim() : null;
+  const subject = `Investor Demo Request — ${company} — ${name}`;
+
   try {
     await db.insert(auditEventsTable).values({
       userId,
@@ -829,16 +838,49 @@ router.post("/investors/demo-request", authMiddleware(), validateBody(demoReques
       ipAddress: hashIp(req.ip ?? null),
       userAgent: req.headers["user-agent"] ?? null,
       newValues: {
-        name: req.body.name,
-        email: req.body.email,
-        company: req.body.company,
-        role: req.body.role ?? null,
-        message: req.body.message ?? null,
+        name,
+        email,
+        company,
+        role,
+        message,
         requestedAt: new Date().toISOString(),
       },
     });
-    logger.info({ email: req.body.email, company: req.body.company }, "Investor demo request received");
+    logger.info({ email, company }, "Investor demo request received");
     res.json({ data: { submitted: true } });
+
+    // Fire-and-forget email notifications: ack to requester + lead alert to investors inbox.
+    setImmediate(async () => {
+      try {
+        await sendEmail({
+          to: email,
+          subject: `We received your demo request — SZL Holdings`,
+          html: buildInquiryAckEmail(name, subject),
+        });
+      } catch (emailErr) {
+        logger.warn({ err: emailErr, email }, "[investors/demo-request] Ack email send failed (non-blocking)");
+      }
+      try {
+        await sendEmail({
+          to: INVESTOR_NOTIFY_EMAIL,
+          subject,
+          html: buildLeadNotificationEmail({
+            name,
+            email,
+            company,
+            subject,
+            message: [
+              role ? `Role: ${role}` : null,
+              message ? `Context: ${message}` : null,
+            ].filter(Boolean).join("\n") || "(no additional context provided)",
+            source: "investor-data-room",
+          }),
+          replyTo: email,
+        });
+      } catch (emailErr) {
+        logger.warn({ err: emailErr, to: INVESTOR_NOTIFY_EMAIL }, "[investors/demo-request] Lead notification email failed (non-blocking)");
+      }
+    });
   } catch (err) {
     logger.error({ err }, "Failed to record investor demo request");
     res.status(500).json({ error: "Failed to submit demo request" });
