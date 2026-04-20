@@ -548,7 +548,22 @@ function SlideDeck() {
         if (!isEmbed) goTo(current + 1);
       }}
     >
-      <Slide />
+      {isEmbed ? (
+        <Slide />
+      ) : (
+        <div
+          key={current}
+          className="szl-slide-anim"
+          data-variant={
+            (Slide as { displayName?: string; name?: string }).displayName?.includes("Divider") ||
+            (Slide as { displayName?: string; name?: string }).name?.includes("Divider")
+              ? "dramatic"
+              : "default"
+          }
+        >
+          <Slide />
+        </div>
+      )}
       {!isEmbed && (
       <div
         style={{
