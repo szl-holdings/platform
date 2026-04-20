@@ -122,6 +122,7 @@ const CognitiveTraces = lazy(() => import("./pages/cognitive/traces"));
 const CognitiveEvals = lazy(() => import("./pages/cognitive/evals"));
 const CognitivePolicies = lazy(() => import("./pages/cognitive/policies"));
 const PolicyApprovalsPage = lazy(() => import("./pages/policy-approvals"));
+const GuardianApprovalsPage = lazy(() => import("./pages/guardian-approvals"));
 const PolicyManagerPage = lazy(() => import("./pages/policy-manager"));
 const GovernanceTiersPage = lazy(() => import("./pages/governance-tiers"));
 const GuardrailConfigsPage = lazy(() => import("./pages/guardrail-configs"));
@@ -213,6 +214,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: "/operations/trust-audit", label: "Trust & Audit", group: "Operations" },
   { href: "/operations/approvals", label: "Approvals Center", group: "Operations" },
   { href: "/operations/policy-approvals", label: "Policy Approvals", group: "Operations" },
+  { href: "/operations/guardian/approvals", label: "Guardian Console", group: "Operations" },
   { href: "/operations/policy-manager", label: "Policy Manager", group: "Operations" },
   { href: "/operations/governance-tiers", label: "Governance Tiers", group: "Operations" },
   { href: "/operations/guardrail-configs", label: "Guardrail Configs", group: "Operations" },
@@ -414,6 +416,8 @@ function AppShell() {
               <Route path="/operations/trust-audit" component={() => <TrustAudit />} />
               <Route path="/operations/approvals" component={() => <ApprovalsCenter />} />
               <Route path="/operations/policy-approvals" component={() => <PolicyApprovalsPage />} />
+              <Route path="/operations/guardian/approvals" component={() => <GuardianApprovalsPage />} />
+              <Route path="/operations/guardian" component={() => <GuardianApprovalsPage />} />
               <Route path="/operations/policy-manager" component={() => <PolicyManagerPage />} />
               <Route path="/operations/governance-tiers" component={() => <GovernanceTiersPage />} />
               <Route path="/operations/guardrail-configs" component={() => <GuardrailConfigsPage />} />
