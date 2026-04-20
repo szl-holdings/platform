@@ -71,6 +71,18 @@ const workflowRunSchema = z.object({
   input: z.record(z.unknown()).optional(),
 });
 
+const patchWorkflowSchema = z.object({
+  name: z.string().min(1).max(500).trim().optional(),
+  description: z.string().max(5000).nullable().optional(),
+  trigger: z.enum(["manual", "signal", "schedule", "webhook", "api"]).optional(),
+  triggerConfig: z.record(z.unknown()).nullable().optional(),
+  steps: z.array(z.record(z.unknown())).max(500).nullable().optional(),
+  outputType: z.enum(["artifact", "notification", "action", "report", "none"]).optional(),
+  requiresApproval: z.boolean().optional(),
+  approverRole: z.string().max(200).nullable().optional(),
+  isActive: z.boolean().optional(),
+}).strict().refine((d) => Object.keys(d).length > 0, { message: "At least one field is required" });
+
 const artifactApproveSchema = z.object({
   notes: z.string().max(5000).trim().optional().nullable(),
 });
@@ -299,14 +311,13 @@ router.post("/alloy/workflows", authMiddleware(), requireRole("super_admin", "op
   }
 });
 
-router.patch("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin", "ops", "analyst"), validateBody(alloyWorkflowMutationSchema), async (req, res) => {
+router.patch("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin", "ops", "analyst"), validateBody(patchWorkflowSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [before] = await db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));
     if (!before) { sendNotFound(res, "Workflow"); return; }
     if (!canAccessOrgResource(req.user, before.orgId)) { sendNotFound(res, "Workflow"); return; }
-    const allowed = ["name", "description", "trigger", "triggerConfig", "steps", "outputType", "requiresApproval", "approverRole", "isActive"];
-    const patch = Object.fromEntries(Object.entries(req.body).filter(([k]) => allowed.includes(k)));
+    const patch = req.body as z.infer<typeof patchWorkflowSchema>;
     const [row] = await db.update(alloyWorkflowsTable).set({ ...patch, updatedAt: new Date() }).where(eq(alloyWorkflowsTable.id, id)).returning();
     await writeAudit({ orgId: row.orgId, userId: req.user?.id, action: "update_workflow", resourceType: "alloy_workflow", resourceId: String(id), before, after: row });
     sendSuccess(res, row);
