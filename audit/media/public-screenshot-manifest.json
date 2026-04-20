@@ -1,8 +1,10 @@
 {
-  "version": "1.1",
+  "version": "1.3",
   "produced": "2026-04-20",
   "phase": "Phase D — Series A Hardening",
   "description": "Curated set of verified public screenshots for use in the main README, org profile, and investor materials.",
+  "regeneratedAt": "2026-04-20T22:14:00Z",
+  "regenerationNotes": "All 6 README curated screenshots regenerated from live app processes. The 5 web captures were taken via scripts/capture-screenshots.sh (Playwright + chromium) against the live artifact dev servers; the mobile capture was taken via Playwright pointing at the Expo Metro web bundle (artifacts/szl-holdings-mobile on localhost:8085). PNG sources live in media/screenshots/<artifact>/ and are resized to JPEG (quality 90) into assets/readme/products/.",
   "curatedScreenshots": [
     {
       "id": "szl-holdings-dashboard",
@@ -12,6 +14,9 @@
       "product": "SZL Holdings Dashboard",
       "status": "active",
       "inReadme": true,
+      "verified": "live-capture",
+      "source": "media/screenshots/szl-holdings/hero.png",
+      "capturedAt": "2026-04-20",
       "notes": "Primary command portal hero — cross-domain executive view"
     },
     {
@@ -22,6 +27,9 @@
       "product": "Aegis",
       "status": "active",
       "inReadme": true,
+      "verified": "live-capture",
+      "source": "media/screenshots/aegis/hero.png",
+      "capturedAt": "2026-04-20",
       "notes": "SOC command surface; enterprise admin and security view; also serves as trust/security visual"
     },
     {
@@ -32,6 +40,9 @@
       "product": "Vessels",
       "status": "active",
       "inReadme": true,
+      "verified": "live-capture",
+      "source": "media/screenshots/vessels/hero.png",
+      "capturedAt": "2026-04-20",
       "notes": "Maritime fleet intelligence; domain pack depth signal"
     },
     {
@@ -42,6 +53,9 @@
       "product": "Terra",
       "status": "active",
       "inReadme": true,
+      "verified": "live-capture",
+      "source": "media/screenshots/terra/hero.png",
+      "capturedAt": "2026-04-20",
       "notes": "Real estate intelligence; deal pipeline and distress signals"
     },
     {
@@ -52,7 +66,10 @@
       "product": "Command Portal",
       "status": "active",
       "inReadme": true,
-      "notes": "Cross-domain real-time aggregation; observability and workflow view"
+      "verified": "live-capture",
+      "source": "media/screenshots/command/dashboard.png",
+      "capturedAt": "2026-04-20",
+      "notes": "Cross-domain real-time aggregation; observability and workflow view. Captured against live API server (artifacts/api-server) so the composite-health, ecosystem command bar, and per-domain alert tiles render."
     },
     {
       "id": "cortex-mobile",
@@ -62,7 +79,10 @@
       "product": "CORTEX",
       "status": "active",
       "inReadme": true,
-      "notes": "iOS/Android unified mobile command; biometric auth, offline sync"
+      "verified": "live-capture",
+      "source": "media/screenshots/szl-holdings-mobile/hero.png",
+      "capturedAt": "2026-04-20",
+      "notes": "iOS/Android unified mobile command; biometric auth, offline sync. Captured at iPhone 13 Pro viewport (390x844 @3x, mobile UA, dark color scheme) against the live Expo Metro web bundle from artifacts/szl-holdings-mobile."
     }
   ],
   "excludedFromReadme": [
@@ -119,8 +139,7 @@
     "observabilityWorkflowView": "command-portal",
     "trustSecurityVisual": "aegis-command",
     "gaps": [
-      "No dedicated trust/proof-chain visual in the curated set — consider adding a Proof Chain or audit trail screenshot if one is generated",
-      "Screenshots not verified as live captures vs. design mockups — recommend regenerating via scripts/capture-screenshots.sh"
+      "No dedicated trust/proof-chain visual in the curated set — consider adding a Proof Chain or audit trail screenshot if one is generated"
     ]
   }
 }

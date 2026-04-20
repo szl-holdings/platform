@@ -102,8 +102,8 @@ const ARTIFACTS = [
     path: '/command/',
     label: 'Unified Command',
     views: [
-      { name: 'hero', suffix: '', delay: 3000 },
-      { name: 'dashboard', suffix: '', delay: 5000 },
+      { name: 'hero', suffix: '', delay: 12000 },
+      { name: 'dashboard', suffix: '', delay: 12000 },
     ],
   },
   {
@@ -169,19 +169,44 @@ for (const artifact of targets) {
       // Allow animations / lazy-loaded content to settle
       await page.waitForTimeout(view.delay ?? 3000);
 
-      // Hide any Replit dev banners or overlays
+      // Dismiss cookie consent banners (decline so we don't track captures)
+      try {
+        const decline = page.getByRole('button', { name: /^(decline|reject|deny)/i }).first();
+        if (await decline.isVisible({ timeout: 500 })) {
+          await decline.click({ timeout: 1000 });
+          await page.waitForTimeout(400);
+        }
+      } catch {}
+
+      // Hide any Replit dev banners, overlays, or known floating chrome
       await page.evaluate(() => {
-        const selectors = [
+        const hide = (el) => { if (el) el.style.display = 'none'; };
+
+        // Known selectors
+        [
           '[data-replit-banner]',
           '#replit-badge',
           '.replit-ui-theme-root > [style*="position: fixed"]',
+        ].forEach((sel) => document.querySelectorAll(sel).forEach(hide));
+
+        // Heuristic: any fixed/sticky bar at the very top whose text mentions
+        // the dev preview disclaimer ("temporary development preview", "Publish your app")
+        const phrases = [
+          'temporary development preview',
+          'Publish your app',
         ];
-        selectors.forEach((sel) => {
-          document.querySelectorAll(sel).forEach((el) => {
-            (el).style.display = 'none';
-          });
-        });
+        const candidates = Array.from(document.querySelectorAll('body *'));
+        for (const el of candidates) {
+          const cs = window.getComputedStyle(el);
+          if (cs.position !== 'fixed' && cs.position !== 'sticky') continue;
+          const top = parseFloat(cs.top || '0');
+          if (Number.isFinite(top) && top > 80) continue;
+          const text = (el.textContent || '').slice(0, 400);
+          if (phrases.some((p) => text.includes(p))) hide(el);
+        }
       });
+
+      await page.waitForTimeout(300);
 
       await page.screenshot({ path: outPath, fullPage: false });
       await page.close();
