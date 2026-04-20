@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearch } from "wouter";
 
 import { Users, AlertTriangle, Server, Shield, RefreshCw, ChevronDown, Activity, Lock, Eye, CheckCircle } from "lucide-react";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
+import { CognitiveBreadcrumbs } from "../components/CognitiveBreadcrumbs";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -32,7 +34,21 @@ const FRESHNESS_COLORS: Record<string, string> = {
 };
 
 export default function IdentityBlastRadius() {
-  const [selectedIdentity, setSelectedIdentity] = useState("j.smith@corp.com");
+  const search = useSearch();
+  const initialId = useMemo(() => {
+    const params = new URLSearchParams(search);
+    return params.get("id") ?? "j.smith@corp.com";
+  }, [search]);
+  const [selectedIdentity, setSelectedIdentity] = useState(initialId);
+
+  useEffect(() => {
+    setSelectedIdentity(initialId);
+  }, [initialId]);
+
+  const identityOptions = useMemo(() => {
+    const known = IDENTITIES.find(i => i.id === selectedIdentity);
+    return known ? IDENTITIES : [{ id: selectedIdentity, label: selectedIdentity }, ...IDENTITIES];
+  }, [selectedIdentity]);
 
   // Live backend route — /firestorm/* path is an active api-server endpoint.
   // Follow-up task #1715 will rename it to /aegis/* once the server migration lands.
@@ -65,6 +81,7 @@ export default function IdentityBlastRadius() {
 
   return (
     <div className="p-6 space-y-6" style={{ maxWidth: 1280, margin: "0 auto" }}>
+      <CognitiveBreadcrumbs accent="#8b5cf6" />
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2" style={{ color: DS.text.primary }}>
@@ -91,7 +108,7 @@ export default function IdentityBlastRadius() {
             className="text-xs font-medium pl-2 pr-6 py-1.5 rounded-lg appearance-none cursor-pointer"
             style={{ background: "rgba(139,92,246,0.1)", color: "#8b5cf6", border: "1px solid rgba(139,92,246,0.25)" }}
           >
-            {IDENTITIES.map(id => <option key={id.id} value={id.id}>{id.label}</option>)}
+            {identityOptions.map(id => <option key={id.id} value={id.id}>{id.label}</option>)}
           </select>
           <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none" style={{ color: "#8b5cf6" }}/>
         </div>

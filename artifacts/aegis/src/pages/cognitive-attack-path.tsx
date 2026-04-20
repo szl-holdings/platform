@@ -1,9 +1,11 @@
 import { useState } from "react";
 
-import { Network, Shield, Users, Server, Lock, AlertTriangle, CheckCircle, XCircle, RefreshCw, ChevronRight, Eye, Activity } from "lucide-react";
+import { Network, Shield, Users, Server, Lock, AlertTriangle, CheckCircle, XCircle, RefreshCw, ChevronRight, Eye, Activity, ArrowUpRight } from "lucide-react";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
+import { useDrilldown } from "../lib/cognitive-nav";
+import { CognitiveBreadcrumbs } from "../components/CognitiveBreadcrumbs";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -38,7 +40,7 @@ interface GraphNode {
 
 interface GraphEdge { from: string; to: string; label: string; weight: number; blocked: boolean; }
 
-function AttackGraphCanvas({ nodes, edges }: { nodes: GraphNode[]; edges: GraphEdge[] }) {
+function AttackGraphCanvas({ nodes, edges, onNodeClick }: { nodes: GraphNode[]; edges: GraphEdge[]; onNodeClick?: (n: GraphNode) => void }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const scale = { x: 800 / 960, y: 440 / 520 };
 
@@ -80,7 +82,8 @@ function AttackGraphCanvas({ nodes, edges }: { nodes: GraphNode[]; edges: GraphE
           const isHovered = hovered === n.id;
           const r = n.type === "actor" ? 22 : n.type === "incident" ? 18 : 16;
           return (
-            <g key={n.id} style={{ cursor: "pointer" }} onMouseEnter={() => setHovered(n.id)} onMouseLeave={() => setHovered(null)}>
+            <g key={n.id} style={{ cursor: "pointer" }} onMouseEnter={() => setHovered(n.id)} onMouseLeave={() => setHovered(null)} onClick={() => onNodeClick?.(n)}>
+              <title>{n.type === "identity" || n.type === "incident" ? `Click to drill into ${n.label}` : n.label}</title>
               {n.compromised && (
                 <circle cx={cx} cy={cy} r={r + 6} fill="none" stroke="#ef4444" strokeWidth="1" opacity="0.25">
                   <animate attributeName="r" values={`${r + 4};${r + 10};${r + 4}`} dur="2s" repeatCount="indefinite"/>
@@ -130,9 +133,22 @@ export default function CognitiveAttackPath() {
   const edges: GraphEdge[] = graph.edges ?? [];
 
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const drilldown = useDrilldown();
+
+  const drillNode = (n: GraphNode) => {
+    if (n.type === "identity") {
+      drilldown(`/identity-blast-radius?id=${encodeURIComponent(n.label)}`, { fromContext: n.label });
+    } else if (n.type === "incident") {
+      const id = n.id.replace(/^incident-/, "");
+      drilldown(`/compliance/incident-proof?id=${encodeURIComponent(id)}`, { fromContext: n.label });
+    } else {
+      setSelectedNode(selectedNode?.id === n.id ? null : n);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6" style={{ maxWidth: 1280, margin: "0 auto" }}>
+      <CognitiveBreadcrumbs accent="#ef4444" />
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2" style={{ color: DS.text.primary }}>
@@ -178,7 +194,7 @@ export default function CognitiveAttackPath() {
           <div className="w-6 h-6 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin"/>
         </div>
       ) : (
-        <AttackGraphCanvas nodes={nodes} edges={edges}/>
+        <AttackGraphCanvas nodes={nodes} edges={edges} onNodeClick={drillNode}/>
       )}
 
       <div className="grid grid-cols-2 gap-4">
@@ -189,7 +205,7 @@ export default function CognitiveAttackPath() {
               const Icon = NODE_ICONS[node.type] ?? Network;
               const color = NODE_COLORS[node.type] ?? "#94a3b8";
               return (
-                <div key={node.id} className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors" style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.12)" }} onClick={() => setSelectedNode(selectedNode?.id === node.id ? null : node)}>
+                <div key={node.id} className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors" style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.12)" }} onClick={() => drillNode(node)}>
                   <div className="w-6 h-6 rounded flex items-center justify-center shrink-0" style={{ background: `${color}18` }}>
                     <Icon className="w-3.5 h-3.5" style={{ color }}/>
                   </div>
@@ -243,7 +259,19 @@ export default function CognitiveAttackPath() {
             <h3 className="text-xs font-semibold uppercase tracking-widest flex items-center gap-2" style={{ color: DS.text.muted }}>
               <Eye className="w-3.5 h-3.5"/> Node Detail — {selectedNode.label}
             </h3>
-            <button onClick={() => setSelectedNode(null)} className="text-[10px]" style={{ color: DS.text.muted }}>✕ Close</button>
+            <div className="flex items-center gap-3">
+              {(selectedNode.type === "identity" || selectedNode.type === "incident") && (
+                <button
+                  onClick={() => drillNode(selectedNode)}
+                  className="flex items-center gap-1 text-[10px] px-2 py-1 rounded transition-colors"
+                  style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}
+                >
+                  Open {selectedNode.type === "identity" ? "Blast Radius" : "Proof Chain"}
+                  <ArrowUpRight className="w-3 h-3"/>
+                </button>
+              )}
+              <button onClick={() => setSelectedNode(null)} className="text-[10px]" style={{ color: DS.text.muted }}>✕ Close</button>
+            </div>
           </div>
           <div className="grid grid-cols-3 gap-4 text-[11px]">
             <div><span style={{ color: DS.text.muted }}>Type: </span><span style={{ color: DS.text.primary }}>{selectedNode.type}</span></div>

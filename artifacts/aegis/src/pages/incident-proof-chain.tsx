@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearch } from "wouter";
 
 import { Link2, Shield, AlertTriangle, Clock, RefreshCw, ChevronDown, Activity, FileText, CheckCircle, Target } from "lucide-react";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
+import { CognitiveBreadcrumbs } from "../components/CognitiveBreadcrumbs";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -46,8 +48,19 @@ function CitationBadge({ cit }: { cit: { id: string; source: string; ref: string
 }
 
 export default function IncidentProofChain() {
-  const [selectedIncidentId, setSelectedIncidentId] = useState<number | null>(null);
+  const search = useSearch();
+  const initialIncidentId = useMemo(() => {
+    const params = new URLSearchParams(search);
+    const raw = params.get("id");
+    const n = raw ? parseInt(raw, 10) : NaN;
+    return Number.isFinite(n) ? n : null;
+  }, [search]);
+  const [selectedIncidentId, setSelectedIncidentId] = useState<number | null>(initialIncidentId);
   const [expandedEvent, setExpandedEvent] = useState<number | null>(null);
+
+  useEffect(() => {
+    setSelectedIncidentId(initialIncidentId);
+  }, [initialIncidentId]);
 
   // Live backend route — /firestorm/* path is an active api-server endpoint.
   // Follow-up task #1715 will rename it to /aegis/* once the server migration lands.
@@ -78,6 +91,7 @@ export default function IncidentProofChain() {
 
   return (
     <div className="p-6 space-y-6" style={{ maxWidth: 1280, margin: "0 auto" }}>
+      <CognitiveBreadcrumbs accent="#3b82f6" />
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2" style={{ color: DS.text.primary }}>

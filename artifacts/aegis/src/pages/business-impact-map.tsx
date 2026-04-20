@@ -1,9 +1,11 @@
 import { useState } from "react";
 
-import { TrendingUp, DollarSign, AlertTriangle, Building2, RefreshCw, Activity, FileText, ChevronDown, ChevronRight, BarChart3, Shield } from "lucide-react";
+import { TrendingUp, DollarSign, AlertTriangle, Building2, RefreshCw, Activity, FileText, ChevronDown, ChevronRight, BarChart3, Shield, ArrowUpRight } from "lucide-react";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
+import { useDrilldown } from "../lib/cognitive-nav";
+import { CognitiveBreadcrumbs } from "../components/CognitiveBreadcrumbs";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -47,6 +49,7 @@ function fmt(n: number | null | undefined) {
 
 export default function BusinessImpactMap() {
   const [expandedIncident, setExpandedIncident] = useState<number | null>(null);
+  const drilldown = useDrilldown();
 
   // Live backend route — /firestorm/* path is an active api-server endpoint.
   // Follow-up task #1715 will rename it to /aegis/* once the server migration lands.
@@ -83,6 +86,7 @@ export default function BusinessImpactMap() {
 
   return (
     <div className="p-6 space-y-6" style={{ maxWidth: 1280, margin: "0 auto" }}>
+      <CognitiveBreadcrumbs accent="#10b981" />
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2" style={{ color: DS.text.primary }}>
@@ -166,11 +170,11 @@ export default function BusinessImpactMap() {
               const isExpanded = expandedIncident === impact.incidentId;
               return (
                 <div key={impact.incidentId} className="rounded-xl overflow-hidden" style={{ background: DS.surface, border: `1px solid ${DS.border}` }}>
-                  <button className="w-full flex items-center gap-4 p-4 text-left hover:bg-white/[0.02] transition-colors" onClick={() => setExpandedIncident(isExpanded ? null : impact.incidentId)}>
+                  <div className="w-full flex items-center gap-4 p-4 hover:bg-white/[0.02] transition-colors">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: sevConf.bg, border: `1px solid ${sevConf.color}30` }}>
                       <AlertTriangle className="w-4 h-4" style={{ color: sevConf.color }}/>
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <button className="flex-1 min-w-0 text-left" onClick={() => setExpandedIncident(isExpanded ? null : impact.incidentId)}>
                       <div className="flex items-center gap-2 mb-0.5">
                         <p className="text-sm font-medium truncate" style={{ color: DS.text.primary }}>{impact.title}</p>
                         <Badge className="text-[9px] shrink-0" style={{ background: sevConf.bg, color: sevConf.color, borderColor: `${sevConf.color}30` }}>{impact.severity}</Badge>
@@ -180,13 +184,24 @@ export default function BusinessImpactMap() {
                         <span>{impact.affectedEntities.length} entities affected</span>
                         <span>{impact.estimatedDowntimeHours}h est. downtime</span>
                       </div>
-                    </div>
+                    </button>
                     <div className="text-right shrink-0">
                       <p className="text-base font-bold text-orange-400">{fmt(impact.estimatedFinancialImpact)}</p>
                       <p className="text-[10px]" style={{ color: DS.text.muted }}>est. impact</p>
                     </div>
-                    {isExpanded ? <ChevronDown className="w-4 h-4 shrink-0" style={{ color: DS.text.muted }}/> : <ChevronRight className="w-4 h-4 shrink-0" style={{ color: DS.text.muted }}/>}
-                  </button>
+                    <button
+                      onClick={() => drilldown(`/compliance/incident-proof?id=${impact.incidentId}`, { fromContext: impact.title })}
+                      className="flex items-center gap-1 text-[10px] px-2 py-1.5 rounded transition-colors shrink-0"
+                      style={{ background: "rgba(59,130,246,0.1)", color: "#3b82f6", border: "1px solid rgba(59,130,246,0.25)" }}
+                      aria-label="Open proof chain"
+                    >
+                      Proof Chain
+                      <ArrowUpRight className="w-3 h-3"/>
+                    </button>
+                    <button onClick={() => setExpandedIncident(isExpanded ? null : impact.incidentId)} aria-label="Toggle details" className="shrink-0">
+                      {isExpanded ? <ChevronDown className="w-4 h-4" style={{ color: DS.text.muted }}/> : <ChevronRight className="w-4 h-4" style={{ color: DS.text.muted }}/>}
+                    </button>
+                  </div>
 
                   {isExpanded && (
                     <div className="px-4 pb-4 space-y-3" style={{ borderTop: `1px solid ${DS.border}` }}>
