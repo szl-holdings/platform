@@ -21,11 +21,12 @@ export async function seedTerraDemo() {
   }
   console.log("[terra-seed] Starting Terra demo data seed...");
 
-  // terra_properties has no natural unique constraint on (address, city) —
-  // only on the (nullable) external_id — so re-running this seed without an
-  // early-return would duplicate every property row. Guard up-front by
-  // checking ALL Terra tables; if any are populated treat the seed as done
-  // and surface partial-state explicitly so it can be diagnosed.
+  // Task #2638 added a unique index on terra_properties (address, city, state)
+  // so the property insert below is now genuinely idempotent via
+  // onConflictDoNothing(). We still keep this all-tables early-return as a
+  // cheap fast-path (skips ~50 inserts on hot reload) and surface partial
+  // state explicitly so reseed regressions on the *other* terra_* tables
+  // remain easy to diagnose.
   const counts = await Promise.all([
     db.select({ c: sql<number>`count(*)::int` }).from(terraBrokeragesTable),
     db.select({ c: sql<number>`count(*)::int` }).from(terraAgentsTable),
@@ -55,7 +56,7 @@ export async function seedTerraDemo() {
   }
   if (propCount > 0 || agentCountExisting > 0 || brokerageCount > 0) {
     console.warn(
-      `[terra-seed] Partial Terra seed state detected (brokerages=${brokerageCount}, agents=${agentCountExisting}, properties=${propCount}, listings=${listingCountExisting}, inquiries=${inquiryCount}, transactions=${txCount}). Aborting to avoid duplicating rows (terra_properties has no natural unique key); please clear terra_* tables to re-seed.`,
+      `[terra-seed] Partial Terra seed state detected (brokerages=${brokerageCount}, agents=${agentCountExisting}, properties=${propCount}, listings=${listingCountExisting}, inquiries=${inquiryCount}, transactions=${txCount}). Aborting to surface partial-state for diagnosis; terra_properties is now protected by a unique key on (address, city, state) so reseeding the property rows is safe, but other terra_* tables (listings/inquiries/transactions) still rely on row counts to gate duplicates -- please clear terra_* tables to re-seed.`,
     );
     return;
   }

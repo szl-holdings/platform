@@ -301,7 +301,15 @@ async function seedProperties(): Promise<{ inserted: number; skipped: number }> 
       skipped++;
       continue;
     }
-    const [property] = await db.insert(terraPropertiesTable).values(seed).returning();
+    // Task #2638: terra_properties has a unique index on (address, city, state)
+    // in addition to external_id, so onConflictDoNothing() makes this insert
+    // idempotent even if a row with the same postal triple was inserted by
+    // another seed path that left external_id NULL.
+    const [property] = await db.insert(terraPropertiesTable).values(seed).onConflictDoNothing().returning();
+    if (!property) {
+      skipped++;
+      continue;
+    }
     inserted++;
     console.log(`  [ok] property ${property.externalId} ${property.address}, ${property.city} (id: ${property.id})`);
   }

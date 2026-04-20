@@ -1,5 +1,5 @@
 import {
-  pgTable, text, serial, timestamp, integer, numeric, boolean, jsonb, index
+  pgTable, text, serial, timestamp, integer, numeric, boolean, jsonb, index, uniqueIndex
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -85,6 +85,11 @@ export const terraPropertiesTable = pgTable("terra_properties", {
   index("terra_property_owner_idx").on(t.ownerName),
   index("terra_property_owner_type_idx").on(t.ownerType),
   index("terra_property_created_idx").on(t.createdAt),
+  // Task #2638: natural-key uniqueness so reseed/import paths can't silently
+  // duplicate listings. external_id is nullable (most seeded rows leave it
+  // unset), so the only practical natural key is the postal triple. Seed and
+  // ingest paths must use ON CONFLICT DO NOTHING so reruns are idempotent.
+  uniqueIndex("terra_property_address_city_state_uniq").on(t.address, t.city, t.state),
 ]);
 
 export const terraListingsTable = pgTable("terra_listings", {
