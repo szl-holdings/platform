@@ -314,6 +314,94 @@ PORT=8091 WORKER_ID=py-worker-2 uvicorn worker.main:app &
 PORT=8092 WORKER_ID=py-worker-3 uvicorn worker.main:app &
 ```
 
-Configure a load-balancer (nginx, Caddy, etc.) to distribute POST /claim
-across the three ports. The TypeScript engine sets
-`SUBSTRATE_PYTHON_WORKER_URL` to the load-balancer address.
+---
+
+## Load-Balancing the Fleet
+
+In production the TypeScript engine **must not** point
+`SUBSTRATE_PYTHON_WORKER_URL` at any single worker — that worker becomes a
+single point of failure and cannot be replaced without downtime. Instead,
+point it at a load-balancer that fronts the fleet and round-robins POST
+`/claim` across all healthy workers.
+
+Three reference configurations are committed in
+`services/substrate-py-workers/deploy/`:
+
+| File | Topology |
+|---|---|
+| `nginx.conf` | Standalone nginx in front of N worker processes |
+| `Caddyfile` | Standalone Caddy with native active health checks against `/ready` |
+| `k8s-service.yaml` | Kubernetes `Service` + `Deployment` with `readinessProbe` driving Endpoints membership |
+
+All three apply the same contract:
+
+1. **Round-robin** POST `/claim` across `py-worker-1..N` (default 3 workers
+   on ports `8090–8092`).
+2. **Active health checks** poll `GET /ready` every 5 s with a 2 s timeout.
+   A worker that returns `503` (draining or at capacity) is removed from
+   rotation immediately.
+3. **Passive health checks** as a fallback: 2 consecutive 5xx responses
+   take a worker offline for 10–30 s.
+4. **Retry on the next upstream** (`proxy_next_upstream` / `lb_try_duration`)
+   so a single worker failure surfaces to the engine as a successful claim
+   on a different worker, not as a hard error.
+5. **Long read timeouts** (120 s) because heavy stages (OCR, geospatial)
+   can take tens of seconds.
+
+### Pointing the engine at the load-balancer
+
+Set `SUBSTRATE_PYTHON_WORKER_URL` to the LB address (port `8080` in the
+bundled configs), **not** to any individual worker:
+
+```bash
+# Local nginx / Caddy
+SUBSTRATE_PYTHON_WORKER_URL=http://substrate-py-lb:8080
+
+# Kubernetes Service DNS
+SUBSTRATE_PYTHON_WORKER_URL=http://substrate-py-workers.default.svc.cluster.local:8080
+```
+
+The TS engine still calls `POST {URL}/claim` exactly as documented in the
+wire protocol — the load-balancer is transparent.
+
+### Startup runbook
+
+1. Start `MIN_WORKERS` (default 3) worker processes/Pods. Each binds its
+   own `PORT` and exposes `/health`, `/ready`, `/claim`, `/metrics`.
+2. Start the load-balancer:
+   - **nginx:** `nginx -c $(pwd)/services/substrate-py-workers/deploy/nginx.conf -g 'daemon off;'`
+   - **Caddy:** `caddy run --config services/substrate-py-workers/deploy/Caddyfile`
+   - **Kubernetes:** `kubectl apply -f services/substrate-py-workers/deploy/k8s-service.yaml`
+3. Verify the LB sees a healthy fleet:
+   ```bash
+   curl http://substrate-py-lb:8080/ready          # → 200
+   curl http://substrate-py-lb:8080/workers        # → fleet view
+   ```
+4. Set `SUBSTRATE_PYTHON_WORKER_URL` on the TypeScript engine and start it.
+
+### Failover behaviour
+
+| Event | What the LB does | What the engine sees |
+|---|---|---|
+| Worker crashes | Connect/read fails → `proxy_next_upstream` retries on next worker; passive check takes the dead worker out of rotation for `fail_timeout` | One successful `stage.result` (transparent) |
+| Worker hits `WORKER_MAX_CONCURRENCY` | `/ready` returns `503` → active health check removes worker from pool until a slot frees up | No degradation — claim lands on a different worker |
+| Rolling deploy / scale-in | Platform sends `SIGTERM` → `ClaimLoop.drain()` → `/ready` returns `503` → LB stops sending new claims; in-flight claims drain for up to `WORKER_DRAIN_TIMEOUT_S` | One successful `stage.result` on the replacement worker; no failed claims |
+| All workers unreachable | LB returns `502` after `proxy_next_upstream_tries` exhausted | In `live` mode the engine fails closed (per `python-worker.ts` policy); in non-live modes it falls back to in-process simulation |
+
+### Replacing a worker without downtime
+
+```bash
+# 1. Bring up the replacement first (k8s rolling update does this automatically).
+PORT=8093 WORKER_ID=py-worker-4 uvicorn worker.main:app &
+
+# 2. Add it to the LB upstream block (or let the k8s Deployment scale up).
+
+# 3. Drain the worker you want to remove. Its /ready will start returning 503
+#    and the LB will stop sending it new claims within one health-check cycle.
+kill -TERM $OLD_WORKER_PID
+
+# 4. Wait for active claims to finish (≤ WORKER_DRAIN_TIMEOUT_S, default 60 s).
+#    The process exits on its own once active_claims == 0.
+```
+
+No engine restart, no env var change, no claim loss.
