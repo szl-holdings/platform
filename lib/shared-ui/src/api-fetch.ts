@@ -3,9 +3,27 @@ import {
   extractServerMessage,
   notifySessionRevoked,
 } from "./session-revocation";
-import { csrfHeaders } from "@szl-holdings/auth-shared/client";
 
 const API_BASE = "/api";
+
+const CSRF_COOKIE_NAME = "csrf_token";
+const CSRF_HEADER_NAME = "x-csrf-token";
+
+function readCsrfTokenFromCookie(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie
+    .split(";")
+    .map((c) => c.trim())
+    .find((c) => c.startsWith(`${CSRF_COOKIE_NAME}=`));
+  if (!match) return null;
+  return decodeURIComponent(match.slice(CSRF_COOKIE_NAME.length + 1));
+}
+
+function csrfHeaders(): Record<string, string> {
+  const token = readCsrfTokenFromCookie();
+  if (!token) return {};
+  return { [CSRF_HEADER_NAME]: token };
+}
 
 export interface PaginationMeta {
   page: number;
