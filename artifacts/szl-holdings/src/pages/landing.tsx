@@ -187,12 +187,12 @@ const ONE_SHELL_PRIMITIVES = [
 ];
 
 const AUDIENCE_PATHS = [
-  { icon: TrendingUp, label: "Executive buyer", desc: "Value prop, ROI frame, and design-partner path.", href: "/platform", accent: "hsl(192,72%,48%)" },
-  { icon: Code2, label: "Technical evaluator", desc: "Architecture, stack, and integration surface.", href: "/architecture", accent: "hsl(215,60%,60%)" },
-  { icon: Shield, label: "Security reviewer", desc: "Controls, AI governance, and audit trail.", href: "/trust", accent: "hsl(340,60%,58%)" },
+  { icon: TrendingUp, label: "Executive buyer", desc: "Value prop, ROI frame, and design-partner path.", href: "/platform", accent: "hsl(192,72%,48%)", briefHref: "/trust/diligence/executive" },
+  { icon: Code2, label: "Technical evaluator", desc: "Architecture, stack, and integration surface.", href: "/architecture", accent: "hsl(215,60%,60%)", briefHref: "/trust/diligence/technical" },
+  { icon: Shield, label: "Security reviewer", desc: "Controls, AI governance, and audit trail.", href: "/trust", accent: "hsl(340,60%,58%)", briefHref: "/trust/diligence/security" },
   { icon: Handshake, label: "Design partner", desc: "Work directly with the founding team.", href: "/design-partner", accent: "hsl(38,72%,58%)" },
-  { icon: BarChart3, label: "Investor", desc: "Market thesis, moat, and data room.", href: "/investor", accent: "hsl(145,60%,50%)" },
-];
+  { icon: BarChart3, label: "Investor", desc: "Market thesis, moat, and data room.", href: "/investor", accent: "hsl(145,60%,50%)", briefHref: "/trust/diligence/investor" },
+] as Array<{ icon: typeof TrendingUp; label: string; desc: string; href: string; accent: string; briefHref?: string }>;
 
 const TICKER_ITEMS = [
   { label: "Signal", color: "#0ea5e9" },
@@ -531,25 +531,50 @@ export default function HomePage() {
                       viewport={{ once: true, amount: 0.2 }}
                       whileHover={{ y: -3, boxShadow: `0 8px 32px hsla(0,0%,0%,0.3), 0 0 0 1px ${path.accent}30`, transition: { duration: 0.15, ease: "easeOut" } }}
                       transition={{ duration: 0.45, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                      style={{
+                        padding: "1.25rem",
+                        borderRadius: "0.75rem",
+                        background: SURFACE,
+                        border: `1px solid ${BORDER}`,
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
                     >
                       <Link
                         href={path.href}
                         onClick={() => analytics.audiencePathClick(path.label, path.href)}
-                        style={{ display: "block", textDecoration: "none" }}
+                        style={{ display: "block", textDecoration: "none", flex: 1 }}
                       >
-                        <div style={{
-                          padding: "1.25rem",
-                          borderRadius: "0.75rem",
-                          background: SURFACE,
-                          border: `1px solid ${BORDER}`,
-                        }}>
-                          <div style={{ width: 32, height: 32, borderRadius: "0.5rem", background: `${path.accent}14`, border: `1px solid ${path.accent}28`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "0.75rem" }}>
-                            <Icon size={15} style={{ color: path.accent }} />
-                          </div>
-                          <p style={{ fontSize: "0.875rem", fontWeight: 600, color: TEXT, margin: "0 0 0.3rem" }}>{path.label}</p>
-                          <p style={{ fontSize: "0.8125rem", lineHeight: 1.5, color: TEXT_SEC, margin: 0 }}>{path.desc}</p>
+                        <div style={{ width: 32, height: 32, borderRadius: "0.5rem", background: `${path.accent}14`, border: `1px solid ${path.accent}28`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "0.75rem" }}>
+                          <Icon size={15} style={{ color: path.accent }} />
                         </div>
+                        <p style={{ fontSize: "0.875rem", fontWeight: 600, color: TEXT, margin: "0 0 0.3rem" }}>{path.label}</p>
+                        <p style={{ fontSize: "0.8125rem", lineHeight: 1.5, color: TEXT_SEC, margin: 0 }}>{path.desc}</p>
                       </Link>
+                      {path.briefHref && (
+                        <Link
+                          href={path.briefHref}
+                          onClick={() => analytics.audiencePathClick(`${path.label} · diligence brief`, path.briefHref!)}
+                          aria-label={`${path.label} — open diligence brief`}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "0.35rem",
+                            marginTop: "0.85rem",
+                            paddingTop: "0.7rem",
+                            borderTop: `1px solid ${BORDER}`,
+                            fontSize: "0.6875rem",
+                            fontWeight: 600,
+                            letterSpacing: "0.08em",
+                            textTransform: "uppercase",
+                            fontFamily: MONO,
+                            color: path.accent,
+                            textDecoration: "none",
+                          }}
+                        >
+                          Diligence brief →
+                        </Link>
+                      )}
                     </m.div>
                   );
                 })}
