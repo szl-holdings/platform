@@ -7,6 +7,7 @@ import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
+import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { RealtimeStatusIndicator } from "@szl-holdings/shared-ui/realtime-status-indicator";
 import { OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui/onboarding";
@@ -873,6 +874,8 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(vesselsCommands);
 
   return (
+    <AppModeProvider>
+    <AppModeBanner />
     <AnalyticsProvider appName="vessels">
     <PrismBusProvider domain="vessels">
     <SandboxModeProvider>
@@ -896,6 +899,7 @@ function App() {
     </PrismBusProvider>
     <CookieBanner privacyUrl="/legal/privacy" />
     </AnalyticsProvider>
+    </AppModeProvider>
   );
 }
 

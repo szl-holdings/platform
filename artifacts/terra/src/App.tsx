@@ -6,6 +6,7 @@ import { SandboxModeProvider, SandboxModeBanner, useSandboxMode } from "@szl-hol
 import { DemoNarrativeSidebar } from "@szl-holdings/shared-ui/demo-narrative-sidebar";
 import { TERRA_DEMO_NARRATIVE } from "@/data/demo-narrative";
 import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
+import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -371,6 +372,8 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(terraCommands);
 
   return (
+    <AppModeProvider>
+    <AppModeBanner />
     <AnalyticsProvider appName="terra">
     <PrismBusProvider domain="terra">
     <SandboxModeProvider>
@@ -387,6 +390,7 @@ function App() {
     </PrismBusProvider>
     <CookieBanner privacyUrl="/legal/privacy" />
     </AnalyticsProvider>
+    </AppModeProvider>
   );
 }
 

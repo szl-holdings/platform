@@ -24,6 +24,7 @@ import {
   type CommandItem,
 } from "@szl-holdings/shared-ui/command-palette";
 import { DemoPersonaProvider, DemoPersonaSwitcher } from "@szl-holdings/shared-ui/demo-persona-switcher";
+import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
 import { PrivateAppGuard } from "@szl-holdings/shared-ui";
 
 import S01Cover from "./pages/slides/S01Cover";
@@ -711,6 +712,8 @@ export default function App() {
   }, [setPreference]);
 
   return (
+    <AppModeProvider>
+    <AppModeBanner />
     <AnalyticsProvider appName="aegis">
       <QueryClientProvider client={queryClient}>
         <DemoPersonaProvider>
@@ -728,5 +731,6 @@ export default function App() {
         </DemoPersonaProvider>
       </QueryClientProvider>
     </AnalyticsProvider>
+    </AppModeProvider>
   );
 }

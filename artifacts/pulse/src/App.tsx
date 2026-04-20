@@ -8,6 +8,7 @@ import {
   createBaselineWebActions,
   type CommandItem,
 } from "@szl-holdings/shared-ui/command-palette";
+import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
 import Constellation from "@/pages/Constellation";
 import Shell from "./components/Shell";
 import TodaysBrief from "./pages/TodaysBrief";
@@ -311,6 +312,8 @@ function PulsePalette() {
 
 export default function App() {
   return (
+    <AppModeProvider>
+    <AppModeBanner />
     <RequireAuth>
       <PulsePalette />
       <Shell>
@@ -333,5 +336,6 @@ export default function App() {
         </Switch>
       </Shell>
     </RequireAuth>
+    </AppModeProvider>
   );
 }

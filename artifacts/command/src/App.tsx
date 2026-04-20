@@ -6,6 +6,7 @@ import { Router as WouterRouter, Switch, Route, useLocation, Redirect } from "wo
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { SandboxModeProvider, SandboxModeBanner } from "@szl-holdings/shared-ui/sandbox-mode";
 import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
+import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
 import { CortexVoice, CortexVoiceTrigger, useCortexVoice } from "@szl-holdings/shared-ui/cortex-voice";
 import { MultiplayerSessionBanner } from "@szl-holdings/shared-ui/multiplayer-session";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
@@ -551,6 +552,8 @@ function AppShell() {
 
 function App() {
   return (
+    <AppModeProvider>
+    <AppModeBanner />
     <AnalyticsProvider appName="command">
       <PrismBusProvider domain="lyte">
         <SandboxModeProvider>
@@ -567,6 +570,7 @@ function App() {
         </SandboxModeProvider>
       </PrismBusProvider>
     </AnalyticsProvider>
+    </AppModeProvider>
   );
 }
 
