@@ -332,6 +332,7 @@ export default function ExportBuilder() {
   const [showHistory, setShowHistory] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [reDownloadItem, setReDownloadItem] = useState<ExportHistoryItem | null>(null);
 
   const { data: exportHistory, isLoading: historyLoading, isError: historyError } = useStandardQuery({
     queryKey: ["export-history-items"],
@@ -437,15 +438,20 @@ export default function ExportBuilder() {
     }
   }
 
-  const handleExport = async () => {
+  const handleExport = async (override?: { domain?: DataDomain }) => {
     if (activeExport) return;
     setExportMsg(null);
     try {
+      const exportDomain = override?.domain ?? domain;
+      const exportConfig = DOMAIN_CONFIGS[exportDomain];
+      const exportColumns = override?.domain
+        ? exportConfig.columns.filter(c => c.default).map(c => c.key)
+        : activeColumns.map(c => c.key);
       const body: Record<string, unknown> = {
-        domain,
+        domain: exportDomain,
         format,
         schedule: filters.schedule || "once",
-        columns: activeColumns.map(c => c.key),
+        columns: exportColumns,
       };
       if (filters.dateFrom) body["dateFrom"] = filters.dateFrom;
       if (filters.dateTo) body["dateTo"] = filters.dateTo;
@@ -1000,14 +1006,12 @@ export default function ExportBuilder() {
                         {/* Action button */}
                         <div className="shrink-0">
                           {item.status === "completed" && !isExpired ? (
-                            <a
-                              href={`${API}/exports/download/${item.downloadToken}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <button
+                              onClick={() => setReDownloadItem(item)}
                               className="px-2.5 py-1 text-[10px] font-medium rounded border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-zinc-100 transition-colors whitespace-nowrap"
                             >
                               Re-download
-                            </a>
+                            </button>
                           ) : item.status === "completed" && isExpired ? (
                             mappedDomain ? (
                               <button
@@ -1031,6 +1035,120 @@ export default function ExportBuilder() {
           </div>
         </div>
       </div>
+
+      {/* Re-download summary modal */}
+      <AnimatePresence>
+        {reDownloadItem && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+            onClick={() => setReDownloadItem(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              transition={{ duration: 0.15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden"
+            >
+              {(() => {
+                const item = reDownloadItem;
+                const mappedDomain: DataDomain | undefined = DATA_SOURCE_TO_DOMAIN[item.dataSource];
+                const domainCfg = mappedDomain ? DOMAIN_CONFIGS[mappedDomain] : undefined;
+                const accentColor = domainCfg?.color ?? "#c2a55a";
+                const expiryDate = item.expiresAt ? new Date(item.expiresAt) : null;
+                const isExpired = expiryDate ? expiryDate < new Date() : false;
+                return (
+                  <>
+                    <div className="px-5 py-4 border-b border-zinc-800 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Export Details</p>
+                        <h2 className="text-sm font-semibold text-zinc-100 truncate">{item.name}</h2>
+                      </div>
+                      <button
+                        onClick={() => setReDownloadItem(null)}
+                        className="text-zinc-500 hover:text-zinc-200 text-lg leading-none shrink-0"
+                        aria-label="Close"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div className="px-5 py-4 space-y-3">
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs">
+                        <div>
+                          <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Data Source</p>
+                          <span
+                            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-medium"
+                            style={{ backgroundColor: `${accentColor}18`, color: accentColor }}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: accentColor }} />
+                            {domainCfg?.label ?? item.dataSource}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Format</p>
+                          <span className="font-mono uppercase text-zinc-200">{item.format}</span>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Row Count</p>
+                          <span className="text-zinc-200">{item.rowCount != null ? item.rowCount.toLocaleString() : "—"}</span>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">File Size</p>
+                          <span className="text-zinc-200">{formatBytes(item.fileSizeBytes)}</span>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Expires</p>
+                          <span className={isExpired ? "text-red-400" : "text-zinc-200"}>
+                            {expiryDate ? expiryDate.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—"}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Triggered By</p>
+                          <span className="text-zinc-200 truncate block">{item.triggeredByEmail ?? "—"}</span>
+                        </div>
+                      </div>
+
+                      <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2.5">
+                        <p className="text-[11px] text-zinc-400 leading-relaxed">
+                          For security, export files aren't kept on our servers. To get a fresh copy, regenerate the export below — it will run with the same data source.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="px-5 py-3 border-t border-zinc-800 flex items-center justify-end gap-2 bg-zinc-950/40">
+                      <button
+                        onClick={() => setReDownloadItem(null)}
+                        className="px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+                      >
+                        Close
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (mappedDomain) {
+                            handleDomainChange(mappedDomain);
+                            setShowHistory(false);
+                          }
+                          setReDownloadItem(null);
+                          if (mappedDomain) handleExport({ domain: mappedDomain });
+                        }}
+                        disabled={!mappedDomain || !!activeExport}
+                        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#c2a55a] text-zinc-900 hover:bg-[#d4b86c] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {activeExport ? "Export in progress…" : "Regenerate Export"}
+                      </button>
+                    </div>
+                  </>
+                );
+              })()}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
