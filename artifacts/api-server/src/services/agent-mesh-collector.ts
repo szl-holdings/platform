@@ -98,6 +98,33 @@ interface ResilienceIndexRow {
   computedAt: string;
 }
 
+export type EnforcementMode = "log-only" | "block" | "quarantine";
+
+interface ContainmentRuleRow {
+  id: string;
+  name: string;
+  agentClass: string;
+  allowedMcpServers: string[];
+  allowedTools: string[];
+  allowedReadPaths: string[];
+  allowedEgressDomains: string[];
+  tier: "critical" | "elevated" | "standard";
+  enforcementMode: EnforcementMode;
+  violationCount: number;
+  lastEvaluatedAt: string;
+}
+
+interface DriftSnapshotRow {
+  id: string;
+  configFile: string;
+  changedAt: string;
+  changedBy: string;
+  policyApproved: boolean;
+  approvedBy: string | null;
+  diff: { removed: string[]; added: string[] };
+  linkedExposureIds: string[];
+}
+
 export interface ScanResult {
   scannedFiles: string[];
   runtimes: RuntimeRow[];
@@ -105,6 +132,8 @@ export interface ScanResult {
   secrets: SecretRow[];
   edges: EdgeRow[];
   exposures: ExposureRow[];
+  containmentRules: ContainmentRuleRow[];
+  driftSnapshots: DriftSnapshotRow[];
   resilienceIndex: ResilienceIndexRow;
   scannedAt: string;
 }
@@ -213,6 +242,34 @@ interface ParseContext {
   edges: EdgeRow[];
   exposures: ExposureRow[];
   scannedFiles: string[];
+  // For each scanned config file, the set of canonical "MCP server" lines it
+  // declares. Used to compute drift across scans (added/removed entries per
+  // file) and to attribute drift back to the originating file.
+  fileMcpLines: Map<string, Set<string>>;
+  // For each scanned config file, additional canonical "permission" lines
+  // (allow/deny entries from runtime permissions blocks). Drift in these
+  // also yields a recorded snapshot.
+  filePermissionLines: Map<string, Set<string>>;
+  // Free-form per-runtime allow/deny derived from explicit `permissions`
+  // blocks in the config. Keyed by runtime id.
+  runtimePermissions: Map<string, { allow: Set<string>; deny: Set<string> }>;
+}
+
+function canonicalMcpLine(name: string, packageRef: string, version: string, env?: Record<string, string>): string {
+  const envKeys = env ? Object.keys(env).sort().join(",") : "";
+  return `${name}: ${packageRef}@${version}${envKeys ? ` [env: ${envKeys}]` : ""}`;
+}
+
+function recordFileMcp(ctx: ParseContext, file: string, line: string): void {
+  let set = ctx.fileMcpLines.get(file);
+  if (!set) { set = new Set(); ctx.fileMcpLines.set(file, set); }
+  set.add(line);
+}
+
+function recordFilePermission(ctx: ParseContext, file: string, line: string): void {
+  let set = ctx.filePermissionLines.get(file);
+  if (!set) { set = new Set(); ctx.filePermissionLines.set(file, set); }
+  set.add(line);
 }
 
 function ensureMcp(ctx: ParseContext, name: string, runtimeId: string, raw: { command?: string; args?: string[]; env?: Record<string, string> }): McpRow {
@@ -241,6 +298,12 @@ function ensureMcp(ctx: ParseContext, name: string, runtimeId: string, raw: { co
     ctx.mcpServers.set(id, row);
   }
   if (!row.runtimeIds.includes(runtimeId)) row.runtimeIds.push(runtimeId);
+  // Track this server as part of the file currently being parsed (last entry
+  // in scannedFiles). This is what powers per-file drift detection.
+  const currentFile = ctx.scannedFiles[ctx.scannedFiles.length - 1];
+  if (currentFile) {
+    recordFileMcp(ctx, currentFile, canonicalMcpLine(name, cleanRef, version, raw.env));
+  }
   if (raw.env) {
     for (const [envKey, envVal] of Object.entries(raw.env)) {
       // Detect domains in env (e.g. ALLOWED_HOSTS or BASE_URL)
@@ -292,6 +355,8 @@ function parseClaudeDesktopConfig(ctx: ParseContext, file: string, contents: str
   if (!runtime.configFiles.includes(file)) runtime.configFiles.push(file);
   ctx.runtimes.set(runtimeId, runtime);
 
+  extractPermissions(ctx, file, runtimeId, json.permissions);
+
   const servers = (json.mcpServers as Record<string, { command?: string; args?: string[]; env?: Record<string, string> }>) ?? {};
   for (const [name, srv] of Object.entries(servers)) {
     const mcp = ensureMcp(ctx, name, runtimeId, srv);
@@ -330,6 +395,17 @@ function parseCursorMcp(ctx: ParseContext, file: string, contents: string): void
   if (!runtime.configFiles.includes(file)) runtime.configFiles.push(file);
   ctx.runtimes.set(runtimeId, runtime);
 
+  // Cursor stores per-server `disabled: true` flags; treat as deny entries.
+  const cursorServers = (json.mcpServers as Record<string, { disabled?: boolean }>) ?? {};
+  for (const [name, srv] of Object.entries(cursorServers)) {
+    if (srv?.disabled) {
+      const perms = ctx.runtimePermissions.get(runtimeId) ?? { allow: new Set<string>(), deny: new Set<string>() };
+      perms.deny.add(`mcp:${name}`);
+      ctx.runtimePermissions.set(runtimeId, perms);
+      recordFilePermission(ctx, file, `deny mcp:${name}`);
+    }
+  }
+
   const servers = (json.mcpServers as Record<string, { command?: string; args?: string[]; env?: Record<string, string> }>) ?? {};
   for (const [name, srv] of Object.entries(servers)) {
     const mcp = ensureMcp(ctx, name, runtimeId, srv);
@@ -349,6 +425,29 @@ function parseCursorMcp(ctx: ParseContext, file: string, contents: string): void
   }
 }
 
+function extractPermissions(ctx: ParseContext, file: string, runtimeId: string, raw: unknown): void {
+  if (!raw || typeof raw !== "object") return;
+  const obj = raw as { allow?: unknown; deny?: unknown };
+  const perms = ctx.runtimePermissions.get(runtimeId) ?? { allow: new Set<string>(), deny: new Set<string>() };
+  if (Array.isArray(obj.allow)) {
+    for (const item of obj.allow) {
+      if (typeof item === "string" && item.length > 0) {
+        perms.allow.add(item);
+        recordFilePermission(ctx, file, `allow ${item}`);
+      }
+    }
+  }
+  if (Array.isArray(obj.deny)) {
+    for (const item of obj.deny) {
+      if (typeof item === "string" && item.length > 0) {
+        perms.deny.add(item);
+        recordFilePermission(ctx, file, `deny ${item}`);
+      }
+    }
+  }
+  ctx.runtimePermissions.set(runtimeId, perms);
+}
+
 function parseClaudeCodeSettings(ctx: ParseContext, file: string, contents: string): void {
   const json = safeParseJson(contents);
   if (!json) return;
@@ -366,6 +465,11 @@ function parseClaudeCodeSettings(ctx: ParseContext, file: string, contents: stri
   };
   if (!runtime.configFiles.includes(file)) runtime.configFiles.push(file);
   ctx.runtimes.set(runtimeId, runtime);
+
+  // Pull explicit allow/deny — Claude Code stores these under
+  // `permissions: { allow: [...], deny: [...] }` and they directly translate
+  // into containment-rule allowed/denied tools.
+  extractPermissions(ctx, file, runtimeId, json.permissions);
 
   const servers = (json.mcpServers as Record<string, { command?: string; args?: string[]; env?: Record<string, string> }>) ?? {};
   for (const [name, srv] of Object.entries(servers)) {
@@ -431,6 +535,8 @@ function parseCodexConfig(ctx: ParseContext, file: string, contents: string): vo
   if (!runtime.configFiles.includes(file)) runtime.configFiles.push(file);
   ctx.runtimes.set(runtimeId, runtime);
 
+  extractPermissions(ctx, file, runtimeId, json.permissions);
+
   const servers = (json.mcpServers as Record<string, { command?: string; args?: string[]; env?: Record<string, string> }>) ?? {};
   for (const [name, srv] of Object.entries(servers)) {
     const mcp = ensureMcp(ctx, name, runtimeId, srv);
@@ -448,6 +554,305 @@ function parseCodexConfig(ctx: ParseContext, file: string, contents: string): vo
       }
     }
   }
+}
+
+// ---------- Containment rule derivation ----------
+
+const RUNTIME_TO_AGENT_CLASS: Record<string, string> = {
+  "rt-claude-desktop": "claude-desktop",
+  "rt-cursor": "cursor",
+  "rt-codex": "codex-cli",
+  "rt-claude-code": "claude-code",
+};
+
+// Stable rule ids that align with the MCP gateway's seed rows so each runtime
+// upserts into a single row instead of producing duplicates next to the
+// gateway-managed defaults.
+const RUNTIME_TO_RULE_ID: Record<string, string> = {
+  "rt-claude-desktop": "rule-claude-standard",
+  "rt-cursor": "rule-cursor-elevated",
+  "rt-codex": "rule-codex-restricted",
+  "rt-claude-code": "rule-claude-code",
+};
+
+const RUNTIME_TO_RULE_NAME: Record<string, string> = {
+  "rt-claude-desktop": "Claude Standard Policy",
+  "rt-cursor": "Cursor Elevated Policy",
+  "rt-codex": "Codex CLI Restricted Policy",
+  "rt-claude-code": "Claude Code Policy",
+};
+
+function tierForRuntime(runtimeId: string, mcps: McpRow[], hasUnverified: boolean, hasQuarantined: boolean): "critical" | "elevated" | "standard" {
+  if (hasQuarantined) return "critical";
+  if (runtimeId === "rt-codex") return mcps.length > 0 ? "elevated" : "standard";
+  if (hasUnverified) return "elevated";
+  return "standard";
+}
+
+function enforcementForTier(tier: "critical" | "elevated" | "standard"): EnforcementMode {
+  if (tier === "critical") return "quarantine";
+  if (tier === "elevated") return "block";
+  return "log-only";
+}
+
+function deriveContainmentRules(ctx: ParseContext, scannedAt: string): ContainmentRuleRow[] {
+  const rules: ContainmentRuleRow[] = [];
+  const allMcps = [...ctx.mcpServers.values()];
+
+  for (const runtime of ctx.runtimes.values()) {
+    const runtimeMcps = allMcps.filter((m) => m.runtimeIds.includes(runtime.id));
+    const perms = ctx.runtimePermissions.get(runtime.id);
+
+    // Split deny entries into MCP-server denies (stored as `mcp:<name>` by
+    // both Cursor's `disabled: true` flag and explicit `permissions.deny`
+    // arrays) and tool-level denies. MCP denies must exclude the
+    // corresponding server from allowedMcpServers — and downstream from
+    // its tools and egress domains — so the rule reflects what is
+    // actually permitted at runtime.
+    const deniedMcpNames = new Set<string>();
+    const toolDenies = new Set<string>();
+    if (perms) {
+      for (const d of perms.deny) {
+        const m = d.match(/^mcp:(.+)$/);
+        const captured = m?.[1];
+        if (captured) deniedMcpNames.add(captured.trim());
+        else toolDenies.add(d);
+      }
+    }
+
+    // Trust-based filtering: never list a quarantined server as allowed,
+    // and drop any server explicitly denied via a runtime deny entry.
+    const allowedMcpServers = runtimeMcps
+      .filter((m) => m.trustState !== "quarantined")
+      .filter((m) => !deniedMcpNames.has(m.name))
+      .map((m) => m.id);
+    const allowedMcpServerSet = new Set(allowedMcpServers);
+
+    // Tools allowed = union of edge tools for this runtime's agents,
+    // intersected/extended by explicit permissions. Edges to a now-denied
+    // MCP server should not contribute their tools to the allowlist.
+    const runtimeAgentIds = new Set(runtime.activeAgentIds);
+    const edgeTools = new Set<string>();
+    const readPaths = new Set<string>();
+    for (const edge of ctx.edges) {
+      if (!runtimeAgentIds.has(edge.agentId)) continue;
+      if (!allowedMcpServerSet.has(edge.mcpServerId)) continue;
+      for (const t of edge.tools) edgeTools.add(t);
+      for (const p of edge.dataReadPaths) readPaths.add(p);
+    }
+    if (perms) {
+      for (const a of perms.allow) {
+        // Permissions like "Bash(npm install)" / "Read(src/**)" — keep raw.
+        edgeTools.add(a);
+      }
+      for (const tool of toolDenies) edgeTools.delete(tool);
+    }
+
+    // Allowed egress: union from servers that are both non-quarantined AND
+    // present in the final allowed MCP set, so a denied server cannot leak
+    // its egress domains into the rule.
+    const egress = new Set<string>();
+    for (const m of runtimeMcps) {
+      if (!allowedMcpServerSet.has(m.id)) continue;
+      for (const d of m.allowedEgressDomains) egress.add(d);
+    }
+
+    const hasUnverified = runtimeMcps.some((m) => m.trustState === "unverified");
+    const hasQuarantined = runtimeMcps.some((m) => m.trustState === "quarantined");
+    const tier = tierForRuntime(runtime.id, runtimeMcps, hasUnverified, hasQuarantined);
+
+    // Violations: count exposures touching any of this runtime's agents
+    // or any of this runtime's MCP servers.
+    const runtimeMcpIds = new Set(runtimeMcps.map((m) => m.id));
+    const violationCount = ctx.exposures.filter((e) =>
+      e.affectedAgentIds.some((a) => runtimeAgentIds.has(a))
+      || e.affectedMcpIds.some((m) => runtimeMcpIds.has(m)),
+    ).length;
+
+    const agentClass = RUNTIME_TO_AGENT_CLASS[runtime.id] ?? runtime.id.replace(/^rt-/, "");
+    rules.push({
+      id: RUNTIME_TO_RULE_ID[runtime.id] ?? `rule-${runtime.id}`,
+      name: RUNTIME_TO_RULE_NAME[runtime.id] ?? `${runtime.name} Policy`,
+      agentClass,
+      allowedMcpServers,
+      allowedTools: [...edgeTools],
+      allowedReadPaths: [...readPaths],
+      allowedEgressDomains: [...egress],
+      tier,
+      enforcementMode: enforcementForTier(tier),
+      violationCount,
+      lastEvaluatedAt: scannedAt,
+    });
+  }
+
+  return rules;
+}
+
+// ---------- Drift detection ----------
+
+interface PreviousFileState {
+  mcpLines: Map<string, Set<string>>;
+  permissionLines: Map<string, Set<string>>;
+}
+
+async function loadPreviousFileState(orgId: number | null): Promise<PreviousFileState> {
+  const out: PreviousFileState = { mcpLines: new Map(), permissionLines: new Map() };
+  try {
+    const [runtimes, mcps, drifts] = await Promise.all([
+      db.execute(sql`SELECT id, config_files FROM agent_mesh_runtimes WHERE org_id IS NOT DISTINCT FROM ${orgId}`),
+      db.execute(sql`SELECT id, name, package_ref, version, runtime_ids FROM agent_mesh_mcp_servers WHERE org_id IS NOT DISTINCT FROM ${orgId}`),
+      // Reconstruct each file's last-known permission line set by replaying
+      // its drift history (added - removed). Without this we cannot detect
+      // permission-only edits between scans because the source-of-truth
+      // tables don't store raw allow/deny lines per file.
+      db.execute(sql`
+        SELECT config_file, diff
+        FROM agent_mesh_drift_snapshots
+        WHERE org_id IS NOT DISTINCT FROM ${orgId}
+        ORDER BY changed_at ASC
+      `),
+    ]);
+    const runtimeFiles = new Map<string, string[]>();
+    for (const r of runtimes.rows as Record<string, unknown>[]) {
+      const id = String(r["id"]);
+      const files = Array.isArray(r["config_files"]) ? (r["config_files"] as string[]) : [];
+      // Only JSON config files participate in MCP-line drift; CLAUDE.md and
+      // other markdown have no MCP server entries.
+      runtimeFiles.set(id, files.filter((f) => !/\.md$/i.test(f)));
+    }
+    for (const m of mcps.rows as Record<string, unknown>[]) {
+      const name = String(m["name"]);
+      const pkg = String(m["package_ref"] ?? name);
+      const version = String(m["version"] ?? "unpinned");
+      const line = canonicalMcpLine(name, pkg, version);
+      const runtimeIds = Array.isArray(m["runtime_ids"]) ? (m["runtime_ids"] as string[]) : [];
+      for (const rid of runtimeIds) {
+        const files = runtimeFiles.get(rid) ?? [];
+        for (const f of files) {
+          let set = out.mcpLines.get(f);
+          if (!set) { set = new Set(); out.mcpLines.set(f, set); }
+          // Strip env-key suffix from current canonical lines for comparison —
+          // previous state cannot reconstruct env keys without more storage.
+          set.add(line);
+        }
+      }
+    }
+    // Replay drift history per file to recover the prior permission line set.
+    for (const d of drifts.rows as Record<string, unknown>[]) {
+      const file = String(d["config_file"]);
+      const diff = (d["diff"] as { added?: string[]; removed?: string[] } | null) ?? {};
+      let set = out.permissionLines.get(file);
+      if (!set) { set = new Set(); out.permissionLines.set(file, set); }
+      for (const line of diff.added ?? []) {
+        if (isPermissionLine(line)) set.add(line);
+      }
+      for (const line of diff.removed ?? []) {
+        if (isPermissionLine(line)) set.delete(line);
+      }
+    }
+  } catch (err) {
+    logger.debug({ err }, "[agent-mesh-collector] loadPreviousFileState failed (treating as first scan)");
+  }
+  return out;
+}
+
+function isPermissionLine(line: string): boolean {
+  return /^(allow |deny )/.test(line);
+}
+
+function stripEnvSuffix(line: string): string {
+  return line.replace(/ \[env: [^\]]*\]$/, "");
+}
+
+function computeDriftSnapshots(
+  ctx: ParseContext,
+  prev: PreviousFileState,
+  scannedAt: string,
+): DriftSnapshotRow[] {
+  const drifts: DriftSnapshotRow[] = [];
+  const seenFiles = new Set<string>([
+    ...ctx.fileMcpLines.keys(),
+    ...ctx.filePermissionLines.keys(),
+    ...prev.mcpLines.keys(),
+    ...prev.permissionLines.keys(),
+  ]);
+
+  for (const file of seenFiles) {
+    if (/\.md$/i.test(file)) continue; // markdown handled via tampering exposures
+    const currentMcpRaw = ctx.fileMcpLines.get(file) ?? new Set<string>();
+    const previousMcpRaw = prev.mcpLines.get(file) ?? new Set<string>();
+    // Compare on env-stripped form so we don't false-positive on env-only churn.
+    const currentMcp = new Set([...currentMcpRaw].map(stripEnvSuffix));
+    const previousMcp = new Set([...previousMcpRaw].map(stripEnvSuffix));
+
+    const currentPerms = ctx.filePermissionLines.get(file) ?? new Set<string>();
+    const previousPerms = prev.permissionLines.get(file) ?? new Set<string>();
+
+    // Combine MCP-line and permission-line diffs into a single per-file
+    // drift entry — operators see one timeline row per changed file even
+    // when the change spans both kinds of edits.
+    const addedMcp = [...currentMcp].filter((l) => !previousMcp.has(l));
+    const removedMcp = [...previousMcp].filter((l) => !currentMcp.has(l));
+    const addedPerm = [...currentPerms].filter((l) => !previousPerms.has(l));
+    const removedPerm = [...previousPerms].filter((l) => !currentPerms.has(l));
+    const added = [...addedMcp, ...addedPerm].sort();
+    const removed = [...removedMcp, ...removedPerm].sort();
+    if (added.length === 0 && removed.length === 0) continue;
+    const previousRaw = new Set([...previousMcpRaw, ...previousPerms]);
+
+    // Link drift to any exposures whose affected MCPs match a name appearing
+    // in the diff lines (mcpName always precedes the colon).
+    const namesInDiff = new Set<string>();
+    for (const line of [...added, ...removed]) {
+      const colon = line.indexOf(":");
+      if (colon > 0) namesInDiff.add(line.slice(0, colon).trim());
+    }
+    const linkedExposureIds: string[] = [];
+    for (const exp of ctx.exposures) {
+      const touches = exp.affectedMcpIds.some((id) => namesInDiff.has(id.replace(/^mcp-/, "")));
+      if (touches) linkedExposureIds.push(exp.id);
+    }
+
+    const idHash = crypto.createHash("sha1").update(`${file}|${scannedAt}`).digest("hex").slice(0, 12);
+    const isFirstScan = previousRaw.size === 0 && removed.length === 0;
+    drifts.push({
+      id: `drift-${idHash}`,
+      configFile: file,
+      changedAt: scannedAt,
+      changedBy: "config-scanner",
+      // First-time discovery is treated as policy-approved (it's the baseline,
+      // not an unauthorised change). Subsequent diffs are unapproved until an
+      // operator approves them.
+      policyApproved: isFirstScan,
+      approvedBy: isFirstScan ? "scan-baseline" : null,
+      diff: { removed, added },
+      linkedExposureIds,
+    });
+  }
+
+  // Markdown-driven drift: when a CLAUDE.md exposure was emitted this scan
+  // and we have a previous baseline for that file (any exposure with an
+  // identical title? not reliable), record the file as drifted with the
+  // exposure linked. Keep it simple: any LLM01 exposure becomes a drift row.
+  for (const exp of ctx.exposures) {
+    if (!exp.owaspCategory.startsWith("LLM01")) continue;
+    const fileMatch = exp.title.match(/in (.+)$/);
+    const file = fileMatch?.[1];
+    if (!file) continue;
+    const idHash = crypto.createHash("sha1").update(`${file}|${scannedAt}|tamper`).digest("hex").slice(0, 12);
+    drifts.push({
+      id: `drift-${idHash}`,
+      configFile: file,
+      changedAt: scannedAt,
+      changedBy: "local-edit",
+      policyApproved: false,
+      approvedBy: null,
+      diff: { removed: [], added: ["<instruction-tampering signal detected — see linked exposure>"] },
+      linkedExposureIds: [exp.id],
+    });
+  }
+
+  return drifts;
 }
 
 // ---------- Resilience computation ----------
@@ -592,7 +997,14 @@ export async function runMeshScan(opts: { extraPaths?: string[]; orgId?: number 
     edges: [],
     exposures: [],
     scannedFiles: [],
+    fileMcpLines: new Map(),
+    filePermissionLines: new Map(),
+    runtimePermissions: new Map(),
   };
+
+  // Snapshot the previous DB state *before* we wipe it, so we can compute
+  // per-file drift (added/removed MCP entries since the last scan).
+  const previousFileState = await loadPreviousFileState(opts.orgId ?? null);
 
   for (const file of candidates) {
     let stats: fs.Stats;
@@ -623,6 +1035,12 @@ export async function runMeshScan(opts: { extraPaths?: string[]; orgId?: number 
   }
 
   const resilienceIndex = computeResilienceIndex(ctx);
+  const scannedAt = new Date().toISOString();
+
+  // Containment rules and drift snapshots are derived AFTER exposures/index
+  // so they can incorporate trust state, quarantines, and tampering signals.
+  const containmentRules = deriveContainmentRules(ctx, scannedAt);
+  const driftSnapshots = computeDriftSnapshots(ctx, previousFileState, scannedAt);
 
   const result: ScanResult = {
     scannedFiles: ctx.scannedFiles,
@@ -631,8 +1049,10 @@ export async function runMeshScan(opts: { extraPaths?: string[]; orgId?: number 
     secrets: [...ctx.secrets.values()],
     edges: ctx.edges,
     exposures: ctx.exposures,
+    containmentRules,
+    driftSnapshots,
     resilienceIndex,
-    scannedAt: new Date().toISOString(),
+    scannedAt,
   };
 
   await persistScan(result, opts.orgId ?? null);
@@ -946,6 +1366,68 @@ async function persistScan(result: ScanResult, orgId: number | null): Promise<vo
       );
     }
 
+    // Containment rules: upsert by id. Update derived fields (allowed*,
+    // tier, violationCount, lastEvaluatedAt) but leave enforcementMode and
+    // pendingModeChange untouched — those are operator-managed via the MCP
+    // gateway routes and surviving across scans is required so a critical
+    // change request stays pending until a Guardian decision is recorded.
+    if (result.containmentRules.length) {
+      for (const rule of result.containmentRules) {
+        await db
+          .insert(agentMeshContainmentRulesTable)
+          .values({
+            id: rule.id,
+            orgId,
+            name: rule.name,
+            agentClass: rule.agentClass,
+            allowedMcpServers: rule.allowedMcpServers,
+            allowedTools: rule.allowedTools,
+            allowedReadPaths: rule.allowedReadPaths,
+            allowedEgressDomains: rule.allowedEgressDomains,
+            tier: rule.tier,
+            enforcementMode: rule.enforcementMode,
+            violationCount: rule.violationCount,
+            lastEvaluatedAt: new Date(rule.lastEvaluatedAt),
+          })
+          .onConflictDoUpdate({
+            target: agentMeshContainmentRulesTable.id,
+            set: {
+              name: rule.name,
+              agentClass: rule.agentClass,
+              allowedMcpServers: rule.allowedMcpServers,
+              allowedTools: rule.allowedTools,
+              allowedReadPaths: rule.allowedReadPaths,
+              allowedEgressDomains: rule.allowedEgressDomains,
+              tier: rule.tier,
+              violationCount: rule.violationCount,
+              lastEvaluatedAt: new Date(rule.lastEvaluatedAt),
+              // Intentionally NOT updating enforcementMode or pendingModeChange.
+            },
+          });
+      }
+    }
+
+    // Drift snapshots: append-only history. Skip insert if a row with the
+    // same id already exists (deterministic id from file + scannedAt).
+    if (result.driftSnapshots.length) {
+      for (const drift of result.driftSnapshots) {
+        await db
+          .insert(agentMeshDriftSnapshotsTable)
+          .values({
+            id: drift.id,
+            orgId,
+            configFile: drift.configFile,
+            changedAt: new Date(drift.changedAt),
+            changedBy: drift.changedBy,
+            policyApproved: drift.policyApproved,
+            approvedBy: drift.approvedBy,
+            diff: drift.diff,
+            linkedExposureIds: drift.linkedExposureIds,
+          })
+          .onConflictDoNothing({ target: agentMeshDriftSnapshotsTable.id });
+      }
+    }
+
     await db.insert(agentMeshResilienceIndexTable).values({
       orgId,
       overall: result.resilienceIndex.overall,
@@ -973,8 +1455,8 @@ export interface MeshState {
   secrets: SecretRow[];
   edges: EdgeRow[];
   exposures: ExposureRow[];
-  containmentRules: unknown[];
-  driftSnapshots: unknown[];
+  containmentRules: ContainmentRuleRow[];
+  driftSnapshots: DriftSnapshotRow[];
   resilienceIndex: ResilienceIndexRow | null;
   source: "live" | "empty";
   scannedFiles: string[];
@@ -1004,8 +1486,8 @@ export async function loadMeshState(orgId: number | null = null): Promise<MeshSt
       secrets: (secrets.rows as Record<string, unknown>[]).map(rowToSecret),
       edges: (edges.rows as Record<string, unknown>[]).map(rowToEdge),
       exposures: (exposures.rows as Record<string, unknown>[]).map(rowToExposure),
-      containmentRules: rules.rows as unknown[],
-      driftSnapshots: drifts.rows as unknown[],
+      containmentRules: (rules.rows as Record<string, unknown>[]).map(rowToContainmentRule),
+      driftSnapshots: (drifts.rows as Record<string, unknown>[]).map(rowToDriftSnapshot),
       resilienceIndex: idx ? {
         overall: idx.overall,
         grade: idx.grade as "A" | "B" | "C" | "D" | "F",
@@ -1104,5 +1586,37 @@ function rowToExposure(r: Record<string, unknown>): ExposureRow {
     proofHash: String(r["proof_hash"] ?? ""),
     status: (r["status"] as ExposureRow["status"]) ?? "open",
     detectedAt: r["detected_at"] instanceof Date ? (r["detected_at"] as Date).toISOString() : String(r["detected_at"]),
+  };
+}
+
+function rowToContainmentRule(r: Record<string, unknown>): ContainmentRuleRow {
+  return {
+    id: String(r["id"]),
+    name: String(r["name"]),
+    agentClass: String(r["agent_class"]),
+    allowedMcpServers: (r["allowed_mcp_servers"] as string[]) ?? [],
+    allowedTools: (r["allowed_tools"] as string[]) ?? [],
+    allowedReadPaths: (r["allowed_read_paths"] as string[]) ?? [],
+    allowedEgressDomains: (r["allowed_egress_domains"] as string[]) ?? [],
+    tier: (r["tier"] as ContainmentRuleRow["tier"]) ?? "standard",
+    enforcementMode: (r["enforcement_mode"] as EnforcementMode) ?? "log-only",
+    violationCount: Number(r["violation_count"] ?? 0),
+    lastEvaluatedAt: r["last_evaluated_at"] instanceof Date
+      ? (r["last_evaluated_at"] as Date).toISOString()
+      : String(r["last_evaluated_at"]),
+  };
+}
+
+function rowToDriftSnapshot(r: Record<string, unknown>): DriftSnapshotRow {
+  const diff = (r["diff"] as { removed?: string[]; added?: string[] } | null) ?? {};
+  return {
+    id: String(r["id"]),
+    configFile: String(r["config_file"]),
+    changedAt: r["changed_at"] instanceof Date ? (r["changed_at"] as Date).toISOString() : String(r["changed_at"]),
+    changedBy: String(r["changed_by"] ?? "unknown"),
+    policyApproved: Boolean(r["policy_approved"]),
+    approvedBy: r["approved_by"] == null ? null : String(r["approved_by"]),
+    diff: { removed: diff.removed ?? [], added: diff.added ?? [] },
+    linkedExposureIds: (r["linked_exposure_ids"] as string[]) ?? [],
   };
 }

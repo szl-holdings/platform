@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { GitBranch, AlertTriangle, CheckCircle2, Clock, FileText, Shield } from "lucide-react";
-import { agentMesh } from "@/data/agent-mesh";
+import { useAgentMesh } from "@/data/agent-mesh";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 export default function MeshDrift() {
   const [expandedId, setExpandedId] = useState<string | null>("drift-004");
-  const { driftSnapshots, exposures } = agentMesh;
+  const { state } = useAgentMesh();
+  const { driftSnapshots, exposures } = state;
 
   const getLinkedExposures = (ids: string[]) =>
     ids.map(id => exposures.find(e => e.id === id)).filter(Boolean);

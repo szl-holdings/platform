@@ -1,9 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Shield, Plus, AlertTriangle, CheckCircle2, Edit2, Server, Globe,
   Activity, Ban, Lock, Radio, ShieldOff, Clock,
 } from "lucide-react";
-import { agentMesh, type EnforcementMode, MESH_AGENT_DISPLAY_NAMES } from "@/data/agent-mesh";
+import { agentMesh, useAgentMesh, type EnforcementMode, MESH_AGENT_DISPLAY_NAMES } from "@/data/agent-mesh";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 const TIER_STYLES: Record<string, string> = {
@@ -60,8 +60,15 @@ function timeAgo(iso: string): string {
 }
 
 export default function ContainmentRules() {
-  const { containmentRules: initialRules, mcpServers, gateway, gatewayEvents } = agentMesh;
-  const [rules, setRules] = useState(initialRules);
+  const { state } = useAgentMesh();
+  const { containmentRules: liveRules, mcpServers } = state;
+  // Gateway endpoint config and recent gateway events still come from the
+  // operator console seed — those are surfaced via /api/agent-mesh/gateway in
+  // a follow-up; keeping the seed avoids breaking the panel until then.
+  const { gateway, gatewayEvents } = agentMesh;
+  const [rules, setRules] = useState(liveRules);
+  // Re-sync local rule state whenever the live mesh refreshes.
+  useEffect(() => { setRules(liveRules); }, [liveRules]);
   const [expandedId, setExpandedId] = useState<string | null>("rule-codex-restricted");
 
   const getMcpName = (id: string) => mcpServers.find(m => m.id === id)?.name ?? id.replace("mcp-", "");

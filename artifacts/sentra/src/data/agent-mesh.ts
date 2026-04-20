@@ -655,6 +655,8 @@ function mergeWithSeed(api: ApiState): AgentMeshState {
     containmentRules: api.containmentRules?.length ? api.containmentRules : agentMesh.containmentRules,
     driftSnapshots: api.driftSnapshots?.length ? api.driftSnapshots : agentMesh.driftSnapshots,
     resilienceIndex: api.resilienceIndex ?? agentMesh.resilienceIndex,
+    gateway: agentMesh.gateway,
+    gatewayEvents: agentMesh.gatewayEvents,
   };
 }
 
