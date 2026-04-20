@@ -28,6 +28,7 @@
     "seed:atlas-twins": "tsx ./seed-atlas-twins.ts",
     "seed:tenant-health": "tsx ./seed-tenant-health-scorecards.ts",
     "seed:deployments": "tsx ./seed-deployments.ts",
+    "seed:bootstrap-admin": "tsx ./seed-bootstrap-admin.ts",
     "generate:demo-briefs": "tsx ./src/generate-demo-brief-pdfs.ts",
     "backfill:memory-domain": "tsx ./backfill-memory-domain.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
