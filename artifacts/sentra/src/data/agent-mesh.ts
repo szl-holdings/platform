@@ -821,31 +821,62 @@ interface ApiGatewaySummary {
   loggedLast24h?: number;
   allowedLast24h?: number;
   averageLatencyMs: number | null;
+  filteredEventCount?: number;
   events: GatewayEvent[];
+}
+
+export type GatewayDecisionFilter = GatewayEvent["decision"];
+
+export interface GatewayEventFilters {
+  decision?: GatewayDecisionFilter;
+  agentClass?: string;
+  ruleId?: string;
 }
 
 export interface UseAgentMeshGatewayResult {
   gateway: McpGatewayConfig;
   gatewayEvents: GatewayEvent[];
+  filteredEventCount: number;
   source: "live" | "seed";
   loading: boolean;
   refresh: () => Promise<void>;
 }
 
-async function loadAgentMeshGateway(): Promise<{
+function buildGatewayQuery(filters: GatewayEventFilters): string {
+  const params = new URLSearchParams();
+  if (filters.decision) params.set("decision", filters.decision);
+  if (filters.agentClass) params.set("agentClass", filters.agentClass);
+  if (filters.ruleId) params.set("ruleId", filters.ruleId);
+  const qs = params.toString();
+  return qs ? `?${qs}` : "";
+}
+
+function applyFiltersToSeed(events: GatewayEvent[], filters: GatewayEventFilters): GatewayEvent[] {
+  return events.filter(e =>
+    (!filters.decision || e.decision === filters.decision) &&
+    (!filters.agentClass || e.agentClass === filters.agentClass) &&
+    (!filters.ruleId || e.ruleId === filters.ruleId)
+  );
+}
+
+async function loadAgentMeshGateway(filters: GatewayEventFilters): Promise<{
   gateway: McpGatewayConfig;
   gatewayEvents: GatewayEvent[];
+  filteredEventCount: number;
   source: "live" | "seed";
 }> {
+  const seedEvents = applyFiltersToSeed(agentMesh.gatewayEvents, filters);
+  const seedFallback = {
+    gateway: agentMesh.gateway,
+    gatewayEvents: seedEvents,
+    filteredEventCount: seedEvents.length,
+    source: "seed" as const,
+  };
   try {
-    const res = await fetch("/api/agent-mesh/gateway", { credentials: "include" });
-    if (!res.ok) {
-      return { gateway: agentMesh.gateway, gatewayEvents: agentMesh.gatewayEvents, source: "seed" };
-    }
+    const res = await fetch(`/api/agent-mesh/gateway${buildGatewayQuery(filters)}`, { credentials: "include" });
+    if (!res.ok) return seedFallback;
     const data = (await res.json()) as ApiGatewaySummary;
-    if (!data || typeof data.endpoint !== "string") {
-      return { gateway: agentMesh.gateway, gatewayEvents: agentMesh.gatewayEvents, source: "seed" };
-    }
+    if (!data || typeof data.endpoint !== "string") return seedFallback;
     const gateway: McpGatewayConfig = {
       endpoint: data.endpoint,
       status: data.status,
@@ -855,24 +886,33 @@ async function loadAgentMeshGateway(): Promise<{
       quarantinedLast24h: data.quarantinedLast24h ?? 0,
       averageLatencyMs: data.averageLatencyMs ?? null,
     };
+    const events = Array.isArray(data.events) ? data.events : [];
     return {
       gateway,
-      gatewayEvents: Array.isArray(data.events) ? data.events : [],
+      gatewayEvents: events,
+      filteredEventCount: typeof data.filteredEventCount === "number" ? data.filteredEventCount : events.length,
       source: "live",
     };
   } catch {
-    return { gateway: agentMesh.gateway, gatewayEvents: agentMesh.gatewayEvents, source: "seed" };
+    return seedFallback;
   }
 }
 
 const GATEWAY_REFRESH_INTERVAL_MS = 30_000;
 
-export function useAgentMeshGateway(): UseAgentMeshGatewayResult {
+export function useAgentMeshGateway(filters: GatewayEventFilters = {}): UseAgentMeshGatewayResult {
   const [gateway, setGateway] = useState<McpGatewayConfig>(agentMesh.gateway);
   const [gatewayEvents, setGatewayEvents] = useState<GatewayEvent[]>(agentMesh.gatewayEvents);
+  const [filteredEventCount, setFilteredEventCount] = useState<number>(agentMesh.gatewayEvents.length);
   const [source, setSource] = useState<"live" | "seed">("seed");
   const [loading, setLoading] = useState<boolean>(true);
   const mounted = useRef(true);
+
+  // Serialize filters so a stable string drives effect/refresh dependencies
+  // even when callers pass a fresh object each render.
+  const filterKey = `${filters.decision ?? ""}|${filters.agentClass ?? ""}|${filters.ruleId ?? ""}`;
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
 
   useEffect(() => {
     mounted.current = true;
@@ -881,10 +921,11 @@ export function useAgentMeshGateway(): UseAgentMeshGatewayResult {
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const next = await loadAgentMeshGateway();
+    const next = await loadAgentMeshGateway(filtersRef.current);
     if (!mounted.current) return;
     setGateway(next.gateway);
     setGatewayEvents(next.gatewayEvents);
+    setFilteredEventCount(next.filteredEventCount);
     setSource(next.source);
     setLoading(false);
   }, []);
@@ -892,10 +933,11 @@ export function useAgentMeshGateway(): UseAgentMeshGatewayResult {
   useEffect(() => {
     let cancelled = false;
     const tick = async () => {
-      const next = await loadAgentMeshGateway();
+      const next = await loadAgentMeshGateway(filtersRef.current);
       if (cancelled || !mounted.current) return;
       setGateway(next.gateway);
       setGatewayEvents(next.gatewayEvents);
+      setFilteredEventCount(next.filteredEventCount);
       setSource(next.source);
       setLoading(false);
     };
@@ -905,9 +947,9 @@ export function useAgentMeshGateway(): UseAgentMeshGatewayResult {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, []);
+  }, [filterKey]);
 
-  return { gateway, gatewayEvents, source, loading, refresh };
+  return { gateway, gatewayEvents, filteredEventCount, source, loading, refresh };
 }
 
 export const DISALLOWED_TERMS = [

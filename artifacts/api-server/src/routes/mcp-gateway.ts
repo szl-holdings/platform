@@ -215,6 +215,12 @@ async function loadStats(sinceDate?: Date): Promise<{
   return stats;
 }
 
+export interface GatewayLiveSummaryFilters {
+  decision?: Decision;
+  agentClass?: string;
+  ruleId?: string;
+}
+
 export interface GatewayLiveSummary {
   endpoint: string;
   status: "online";
@@ -226,6 +232,8 @@ export interface GatewayLiveSummary {
   loggedLast24h: number;
   allowedLast24h: number;
   averageLatencyMs: number | null;
+  filters: GatewayLiveSummaryFilters;
+  filteredEventCount: number;
   events: Array<{
     id: string;
     ruleId: string;
@@ -241,16 +249,30 @@ export interface GatewayLiveSummary {
   }>;
 }
 
-export async function getGatewayLiveSummary(eventLimit = 50): Promise<GatewayLiveSummary> {
+export async function getGatewayLiveSummary(
+  eventLimit = 50,
+  filters: GatewayLiveSummaryFilters = {},
+): Promise<GatewayLiveSummary> {
   await ensureSeeded();
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const [stats, eventRows, latencyRows] = await Promise.all([
+  const filterConditions = [
+    filters.decision ? eq(agentMeshGatewayEventsTable.decision, filters.decision) : undefined,
+    filters.agentClass ? eq(agentMeshGatewayEventsTable.agentClass, filters.agentClass) : undefined,
+    filters.ruleId ? eq(agentMeshGatewayEventsTable.ruleId, filters.ruleId) : undefined,
+  ].filter((c): c is NonNullable<typeof c> => c !== undefined);
+  const whereClause = filterConditions.length > 0 ? and(...filterConditions) : undefined;
+  const eventQuery = db
+    .select()
+    .from(agentMeshGatewayEventsTable)
+    .orderBy(desc(agentMeshGatewayEventsTable.occurredAt))
+    .limit(eventLimit);
+  const countQuery = db
+    .select({ c: count() })
+    .from(agentMeshGatewayEventsTable);
+  const [stats, eventRows, filteredCountRows, latencyRows] = await Promise.all([
     loadStats(since),
-    db
-      .select()
-      .from(agentMeshGatewayEventsTable)
-      .orderBy(desc(agentMeshGatewayEventsTable.occurredAt))
-      .limit(eventLimit),
+    whereClause ? eventQuery.where(whereClause) : eventQuery,
+    whereClause ? countQuery.where(whereClause) : countQuery,
     db
       .select({ avg: avg(agentMeshGatewayEventsTable.latencyMs) })
       .from(agentMeshGatewayEventsTable)
@@ -259,6 +281,7 @@ export async function getGatewayLiveSummary(eventLimit = 50): Promise<GatewayLiv
         isNotNull(agentMeshGatewayEventsTable.latencyMs),
       )),
   ]);
+  const filteredEventCount = Number(filteredCountRows[0]?.c ?? 0);
   const avgRaw = latencyRows[0]?.avg;
   const averageLatencyMs = avgRaw == null ? null : Math.round(Number(avgRaw));
   const events = eventRows.map((r) => ({
@@ -288,6 +311,8 @@ export async function getGatewayLiveSummary(eventLimit = 50): Promise<GatewayLiv
     // recorded before the column existed (NULL). Null when no timed
     // calls have been observed in the window.
     averageLatencyMs,
+    filters,
+    filteredEventCount,
     events,
   };
 }

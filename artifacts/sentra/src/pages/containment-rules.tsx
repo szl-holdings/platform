@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Shield, Plus, AlertTriangle, CheckCircle2, Edit2, Server, Globe,
-  Activity, Ban, Lock, Radio, ShieldOff, Clock,
+  Activity, Ban, Lock, Radio, ShieldOff, Clock, X,
 } from "lucide-react";
 import {
   useAgentMesh,
   useAgentMeshGateway,
   type EnforcementMode,
+  type GatewayDecisionFilter,
   MESH_AGENT_CLASS_DISPLAY_NAMES,
 } from "@/data/agent-mesh";
 import { cn } from "@szl-holdings/shared-ui/utils";
@@ -64,14 +65,27 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
+const DECISION_FILTER_OPTIONS: GatewayDecisionFilter[] = ["blocked", "quarantined", "allowed", "logged"];
+
 export default function ContainmentRules() {
   const { state } = useAgentMesh();
   const { containmentRules: liveRules, mcpServers } = state;
+  // Operator-driven filters for the gateway event stream. These are sent to
+  // /api/agent-mesh/gateway as query params so the count + events both come
+  // back filtered by the server.
+  const [decisionFilter, setDecisionFilter] = useState<GatewayDecisionFilter | undefined>(undefined);
+  const [agentClassFilter, setAgentClassFilter] = useState<string | undefined>(undefined);
+  const [ruleIdFilter, setRuleIdFilter] = useState<string | undefined>(undefined);
+  const gatewayFilters = useMemo(() => ({
+    decision: decisionFilter,
+    agentClass: agentClassFilter,
+    ruleId: ruleIdFilter,
+  }), [decisionFilter, agentClassFilter, ruleIdFilter]);
   // Live gateway endpoint config + 24h decision counts and the recent
   // gateway events stream come from /api/agent-mesh/gateway, which reads
   // straight from the agent_mesh_gateway_events table. Falls back to seed
   // when the API is unreachable.
-  const { gateway, gatewayEvents, source: gatewaySource } = useAgentMeshGateway();
+  const { gateway, gatewayEvents, filteredEventCount, source: gatewaySource } = useAgentMeshGateway(gatewayFilters);
   const [rules, setRules] = useState(liveRules);
   // Re-sync local rule state whenever the live mesh refreshes.
   useEffect(() => { setRules(liveRules); }, [liveRules]);
@@ -115,6 +129,28 @@ export default function ContainmentRules() {
     () => [...gatewayEvents].sort((a, b) => b.occurredAt.localeCompare(a.occurredAt)).slice(0, 8),
     [gatewayEvents]
   );
+
+  // Surface every agent class / rule observed in the loaded events so the
+  // chip set always lines up with what's actually in the stream, rather
+  // than with hard-coded options.
+  const agentClassOptions = useMemo(() => {
+    const seen = new Set<string>();
+    for (const e of gatewayEvents) seen.add(e.agentClass);
+    if (agentClassFilter) seen.add(agentClassFilter);
+    return Array.from(seen).sort();
+  }, [gatewayEvents, agentClassFilter]);
+  const ruleOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const r of rules) map.set(r.id, r.name);
+    if (ruleIdFilter && !map.has(ruleIdFilter)) map.set(ruleIdFilter, ruleIdFilter);
+    return Array.from(map.entries());
+  }, [rules, ruleIdFilter]);
+  const hasActiveFilter = Boolean(decisionFilter || agentClassFilter || ruleIdFilter);
+  const clearFilters = () => {
+    setDecisionFilter(undefined);
+    setAgentClassFilter(undefined);
+    setRuleIdFilter(undefined);
+  };
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -405,9 +441,15 @@ export default function ContainmentRules() {
       </div>
 
       <section className="sentra-panel p-5">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3 gap-4">
           <div>
-            <div className="text-[10px] text-slate-500 font-mono uppercase">Recent Gateway Decisions</div>
+            <div className="text-[10px] text-slate-500 font-mono uppercase flex items-center gap-2">
+              Recent Gateway Decisions
+              <span className="text-slate-300">
+                · {filteredEventCount.toLocaleString()} {hasActiveFilter ? "match" : "event"}{filteredEventCount === 1 ? "" : "es"}
+                {hasActiveFilter ? " (filtered)" : ""}
+              </span>
+            </div>
             <p className="text-xs text-slate-400 mt-0.5">Live stream of MCP calls evaluated against active Containment Rules.</p>
           </div>
           <div className={cn(
@@ -421,6 +463,82 @@ export default function ContainmentRules() {
             {gatewaySource === "live" ? "STREAMING" : "SEED FALLBACK"}
           </div>
         </div>
+
+        <div className="mb-4 space-y-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[9px] font-mono uppercase text-slate-500 mr-1">Decision</span>
+            {DECISION_FILTER_OPTIONS.map(d => {
+              const meta = DECISION_STYLES[d]!;
+              const active = decisionFilter === d;
+              return (
+                <button
+                  key={d}
+                  onClick={() => setDecisionFilter(active ? undefined : d)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono uppercase border transition-colors",
+                    active ? meta.chip : "border-slate-800 text-slate-500 hover:border-slate-700 hover:text-slate-300"
+                  )}
+                >
+                  <span className={cn("w-1.5 h-1.5 rounded-full", meta.dot)} />
+                  {meta.label}
+                </button>
+              );
+            })}
+          </div>
+          {agentClassOptions.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[9px] font-mono uppercase text-slate-500 mr-1">Agent class</span>
+              {agentClassOptions.map(ac => {
+                const active = agentClassFilter === ac;
+                return (
+                  <button
+                    key={ac}
+                    onClick={() => setAgentClassFilter(active ? undefined : ac)}
+                    className={cn(
+                      "px-2 py-0.5 rounded text-[10px] font-mono border transition-colors",
+                      active
+                        ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
+                        : "border-slate-800 text-slate-500 hover:border-slate-700 hover:text-slate-300"
+                    )}
+                  >
+                    {MESH_AGENT_CLASS_DISPLAY_NAMES[ac] ?? ac}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {ruleOptions.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[9px] font-mono uppercase text-slate-500 mr-1">Rule</span>
+              {ruleOptions.map(([id, name]) => {
+                const active = ruleIdFilter === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setRuleIdFilter(active ? undefined : id)}
+                    className={cn(
+                      "px-2 py-0.5 rounded text-[10px] font-mono border transition-colors",
+                      active
+                        ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+                        : "border-slate-800 text-slate-500 hover:border-slate-700 hover:text-slate-300"
+                    )}
+                  >
+                    {name}
+                  </button>
+                );
+              })}
+              {hasActiveFilter && (
+                <button
+                  onClick={clearFilters}
+                  className="ml-1 flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700"
+                >
+                  <X className="w-3 h-3" /> Clear
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="space-y-1.5">
           {recentEvents.length === 0 && (
             <div className="text-[11px] font-mono text-slate-500 text-center py-6 border border-slate-800/60 rounded bg-slate-900/40">

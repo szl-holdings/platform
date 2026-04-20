@@ -2,11 +2,21 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db, agentMeshDriftSnapshotsTable } from "@szl-holdings/db";
 import { and, eq, sql } from "drizzle-orm";
 import { runMeshScan, loadMeshState } from "../services/agent-mesh-collector";
-import { getGatewayLiveSummary } from "./mcp-gateway";
+import { getGatewayLiveSummary, type GatewayLiveSummaryFilters } from "./mcp-gateway";
 import { authMiddleware } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
+
+const VALID_GATEWAY_DECISIONS = new Set(["allowed", "logged", "blocked", "quarantined"] as const);
+type GatewayDecisionFilter = GatewayLiveSummaryFilters["decision"];
+
+function readQueryString(req: Request, key: string): string | undefined {
+  const raw = req.query[key];
+  if (typeof raw !== "string") return undefined;
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
 
 function approverLabelFromUser(
   user: { displayName?: string | null; email?: string | null } | undefined,
@@ -52,7 +62,16 @@ router.get("/agent-mesh/gateway", async (req: Request, res: Response) => {
   try {
     const limitRaw = Number(req.query["limit"]);
     const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 200) : 50;
-    const summary = await getGatewayLiveSummary(limit);
+    const filters: GatewayLiveSummaryFilters = {};
+    const decisionRaw = readQueryString(req, "decision");
+    if (decisionRaw && VALID_GATEWAY_DECISIONS.has(decisionRaw as GatewayDecisionFilter as never)) {
+      filters.decision = decisionRaw as GatewayDecisionFilter;
+    }
+    const agentClass = readQueryString(req, "agentClass");
+    if (agentClass) filters.agentClass = agentClass;
+    const ruleId = readQueryString(req, "ruleId");
+    if (ruleId) filters.ruleId = ruleId;
+    const summary = await getGatewayLiveSummary(limit, filters);
     res.json(summary);
   } catch (err) {
     logger.warn({ err }, "[agent-mesh] gateway summary failed");
