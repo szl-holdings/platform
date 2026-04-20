@@ -59,6 +59,14 @@ const SETTINGS: SettingItem[] = [
     accent: ACCENT,
   },
   {
+    title: "Alert Preferences",
+    description: "Mute approval and run-failure alerts, set quiet hours",
+    route: "/(shell)/settings/alerts",
+    icon: "bell-off",
+    accent: "#ef4444",
+    tag: "NEW",
+  },
+  {
     title: "Time Zone",
     description: "Choose how timestamps are displayed across the app",
     route: "/(shell)/settings/timezone",

@@ -438,9 +438,23 @@ router.post("/approvals/:id/escalate", authMiddleware(), requireRole("super_admi
     if (typeof persistedTarget === "number" && persistedTarget > 0) {
       const approvalTitle = (updated as { title?: string }).title ?? "An approval";
       const approvalId = (updated as { id?: number }).id ?? id;
+      const approvalPriority = (updated as { priority?: string }).priority as
+        | "low"
+        | "medium"
+        | "high"
+        | "critical"
+        | undefined;
+      // Honor the recipient's mobile alert preferences and quiet hours so a
+      // muted user (or one inside their quiet window) is not woken by this
+      // server-initiated push. Critical-priority approvals always break
+      // through quiet hours, matching the client-side rule.
       void import("../lib/expo-push.js")
-        .then(({ sendPushToUser }) =>
-          sendPushToUser(persistedTarget, {
+        .then(async ({ sendPushToUser, isAlertCategoryAllowedForUser }) => {
+          const allowed = await isAlertCategoryAllowedForUser(persistedTarget, "approvals", {
+            severity: approvalPriority,
+          });
+          if (!allowed) return;
+          await sendPushToUser(persistedTarget, {
             title: "Approval Escalated",
             body: `${approvalTitle} requires your immediate review.`,
             data: {
@@ -450,8 +464,8 @@ router.post("/approvals/:id/escalate", authMiddleware(), requireRole("super_admi
             },
             sound: "default",
             channelId: "critical-alerts",
-          }, { appId: "cortex" }),
-        )
+          }, { appId: "cortex" });
+        })
         .catch(() => undefined);
     }
 

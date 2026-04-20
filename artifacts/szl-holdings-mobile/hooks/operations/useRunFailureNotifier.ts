@@ -2,6 +2,11 @@ import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/apiClient";
 import { scheduleLocalAlert } from "@/lib/notifications";
+import {
+  getAlertPreferencesSnapshot,
+  isQuietHoursActive,
+  useAlertPreferences,
+} from "@/hooks/useAlertPreferences";
 
 interface WorkflowRun {
   id: number;
@@ -22,6 +27,9 @@ const STUCK_THRESHOLD_MS = 10 * 60 * 1000;
  * `deepLink` data on the notification payload.
  */
 export function useRunFailureNotifier(): void {
+  // Subscribe so a settings change re-renders this watcher and the
+  // preference snapshot read inside the effect picks up the new value.
+  useAlertPreferences();
   const seenFailedRef = useRef<Set<number>>(new Set());
   const seenStuckRef = useRef<Set<number>>(new Set());
   const initializedRef = useRef(false);
@@ -57,6 +65,13 @@ export function useRunFailureNotifier(): void {
       initializedRef.current = true;
       return;
     }
+
+    const prefs = getAlertPreferencesSnapshot();
+    if (!prefs.alerts_run_failures_enabled) return;
+    // Run failures are not classified as "critical" priority — quiet hours
+    // suppress them entirely. Users who want overnight failure alerts can
+    // disable quiet hours in settings.
+    if (isQuietHoursActive(prefs)) return;
 
     failed.forEach((r) => {
       if (seenFailedRef.current.has(r.id)) return;

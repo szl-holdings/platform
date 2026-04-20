@@ -8,8 +8,9 @@ import {
   pushNotificationHistoryTable,
   pushNotificationPreferencesTable,
   scheduledNotificationsTable,
+  userSettingsTable,
 } from "@szl-holdings/db";
-import { eq, and, inArray, lt, sql } from "drizzle-orm";
+import { eq, and, inArray, lt, sql, isNull } from "drizzle-orm";
 import { logger } from "./logger";
 import type { NotificationTemplate } from "./push-templates";
 
@@ -112,6 +113,157 @@ async function isPreferenceAllowed(userId: number | null, appId: string, categor
   } catch {
     // preference lookup failure is non-fatal; default to allowed
   }
+  return true;
+}
+
+// ─── Mobile alert preference / quiet-hours gate ──────────────────────────────
+//
+// These check the per-user `alerts_*` keys saved by the mobile Alert
+// Preferences screen (see `routes/preferences.ts` and the
+// `useAlertPreferences` hook in szl-holdings-mobile). The mobile notifier
+// hooks already enforce these client-side; this gate makes server-initiated
+// pushes (e.g. approval escalation) honor the same toggles so users who mute
+// an alert category, or who are inside their quiet-hours window, are not
+// woken by a backend-driven push.
+//
+// Categories supported:
+//   "approvals"     → backed by `alerts_approvals_enabled`
+//   "run_failures"  → backed by `alerts_run_failures_enabled`
+//
+// Severity:
+//   "critical" approvals always break through quiet hours, matching the
+//   client-side rule. All other severities (including "high") are suppressed
+//   while quiet hours are active.
+
+export type AlertCategory = "approvals" | "run_failures";
+
+const ALERT_PREF_NAMESPACE = "szl.ui.preferences";
+const HHMM_RE_GATE = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+function parseHHMMToMinutes(s: string | undefined): number | null {
+  if (!s) return null;
+  const m = HHMM_RE_GATE.exec(s);
+  if (!m) return null;
+  return parseInt(m[1] as string, 10) * 60 + parseInt(m[2] as string, 10);
+}
+
+function minutesInZone(now: Date, timeZone: string): number | null {
+  try {
+    const fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    const parts = fmt.formatToParts(now);
+    const hh = parseInt(parts.find((p) => p.type === "hour")?.value ?? "0", 10);
+    const mm = parseInt(parts.find((p) => p.type === "minute")?.value ?? "0", 10);
+    // Intl returns "24" for midnight in some locales — normalise.
+    return ((hh % 24) * 60 + mm) % (24 * 60);
+  } catch {
+    return null;
+  }
+}
+
+interface AlertPrefRow {
+  alerts_approvals_enabled?: boolean;
+  alerts_run_failures_enabled?: boolean;
+  alerts_quiet_hours_enabled?: boolean;
+  alerts_quiet_hours_start?: string;
+  alerts_quiet_hours_end?: string;
+  time_zone?: string | null;
+}
+
+async function loadAlertPreferences(userId: number): Promise<AlertPrefRow> {
+  try {
+    const rows = await db
+      .select({
+        key: userSettingsTable.key,
+        value: userSettingsTable.value,
+        valueType: userSettingsTable.valueType,
+      })
+      .from(userSettingsTable)
+      .where(
+        and(
+          eq(userSettingsTable.userId, userId),
+          isNull(userSettingsTable.orgId),
+          eq(userSettingsTable.namespace, ALERT_PREF_NAMESPACE),
+          inArray(userSettingsTable.key, [
+            "alerts_approvals_enabled",
+            "alerts_run_failures_enabled",
+            "alerts_quiet_hours_enabled",
+            "alerts_quiet_hours_start",
+            "alerts_quiet_hours_end",
+            "time_zone",
+          ])
+        )
+      );
+    const out: AlertPrefRow = {};
+    for (const r of rows) {
+      const raw = r.value as unknown;
+      if (r.valueType === "boolean") {
+        const b = raw === true || raw === "true" || raw === 1 || raw === "1";
+        if (r.key === "alerts_approvals_enabled") out.alerts_approvals_enabled = b;
+        else if (r.key === "alerts_run_failures_enabled") out.alerts_run_failures_enabled = b;
+        else if (r.key === "alerts_quiet_hours_enabled") out.alerts_quiet_hours_enabled = b;
+      } else if (typeof raw === "string") {
+        if (r.key === "alerts_quiet_hours_start") out.alerts_quiet_hours_start = raw;
+        else if (r.key === "alerts_quiet_hours_end") out.alerts_quiet_hours_end = raw;
+        else if (r.key === "time_zone") out.time_zone = raw;
+      } else if (raw === null && r.key === "time_zone") {
+        out.time_zone = null;
+      }
+    }
+    return out;
+  } catch (err) {
+    logger.warn({ err, userId }, "[expo-push] Failed to load alert preferences; defaulting to allowed");
+    return {};
+  }
+}
+
+/**
+ * Returns true when a server-initiated alert in `category` should be
+ * delivered to `userId`. Critical-severity alerts bypass quiet hours.
+ * Defaults to allowed on any lookup failure or unknown category.
+ */
+export async function isAlertCategoryAllowedForUser(
+  userId: number,
+  category: AlertCategory,
+  opts?: { severity?: "low" | "medium" | "high" | "critical"; now?: Date }
+): Promise<boolean> {
+  const prefs = await loadAlertPreferences(userId);
+
+  if (category === "approvals" && prefs.alerts_approvals_enabled === false) return false;
+  if (category === "run_failures" && prefs.alerts_run_failures_enabled === false) return false;
+
+  if (prefs.alerts_quiet_hours_enabled === true) {
+    // Critical approvals always wake the user.
+    const isCritical = opts?.severity === "critical";
+    if (!isCritical) {
+      const start = parseHHMMToMinutes(prefs.alerts_quiet_hours_start) ?? 22 * 60;
+      const end = parseHHMMToMinutes(prefs.alerts_quiet_hours_end) ?? 7 * 60;
+      if (start !== end) {
+        // Server can only evaluate the quiet-hours window in the user's
+        // local time. If we don't have an IANA `time_zone` for the user,
+        // suppressing based on the API server's clock would silence
+        // alerts at the wrong wall-clock hour. The mobile client already
+        // enforces quiet hours in device time, so we err on the side of
+        // delivery here and let the device drop the local follow-up if
+        // it's also inside the window. Category mutes above still apply.
+        const tz = prefs.time_zone ?? null;
+        if (tz) {
+          const minute = minutesInZone(opts?.now ?? new Date(), tz);
+          if (minute !== null) {
+            const inWindow = start < end
+              ? minute >= start && minute < end
+              : minute >= start || minute < end;
+            if (inWindow) return false;
+          }
+        }
+      }
+    }
+  }
+
   return true;
 }
 

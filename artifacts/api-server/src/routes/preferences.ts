@@ -12,6 +12,11 @@
  *   accent_color       (string | null)         — override the workspace accent (#RRGGBB) or null for default
  *   density            ("comfortable"|"compact") — global UI density
  *   time_zone          (string | null)         — IANA time zone for timestamp formatting, null = browser default
+ *   alerts_approvals_enabled    (boolean)      — wake user for escalated approval alerts
+ *   alerts_run_failures_enabled (boolean)      — wake user for failed/stuck agent run alerts
+ *   alerts_quiet_hours_enabled  (boolean)      — suppress non-critical alerts during a window
+ *   alerts_quiet_hours_start    (string)       — quiet-hours start in 24h "HH:MM"
+ *   alerts_quiet_hours_end      (string)       — quiet-hours end   in 24h "HH:MM"
  *
  * UI preferences are stored with orgId = null so they are truly user-global
  * and apply consistently across all workspaces regardless of which org the
@@ -45,6 +50,7 @@ interface KeyDef {
 }
 
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+const HHMM_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 const KEY_DEFS: Record<string, KeyDef> = {
   sidebar_collapsed: {
@@ -85,6 +91,31 @@ const KEY_DEFS: Record<string, KeyDef> = {
         return undefined;
       }
     },
+  },
+  alerts_approvals_enabled: {
+    default: true,
+    valueType: "boolean",
+    validate: (v) => (typeof v === "boolean" ? v : undefined),
+  },
+  alerts_run_failures_enabled: {
+    default: true,
+    valueType: "boolean",
+    validate: (v) => (typeof v === "boolean" ? v : undefined),
+  },
+  alerts_quiet_hours_enabled: {
+    default: false,
+    valueType: "boolean",
+    validate: (v) => (typeof v === "boolean" ? v : undefined),
+  },
+  alerts_quiet_hours_start: {
+    default: "22:00",
+    valueType: "string",
+    validate: (v) => (typeof v === "string" && HHMM_RE.test(v) ? v : undefined),
+  },
+  alerts_quiet_hours_end: {
+    default: "07:00",
+    valueType: "string",
+    validate: (v) => (typeof v === "string" && HHMM_RE.test(v) ? v : undefined),
   },
 };
 

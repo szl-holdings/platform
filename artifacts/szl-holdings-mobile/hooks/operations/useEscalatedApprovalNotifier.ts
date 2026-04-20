@@ -2,6 +2,11 @@ import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/apiClient";
 import { scheduleLocalAlert } from "@/lib/notifications";
+import {
+  getAlertPreferencesSnapshot,
+  isQuietHoursActive,
+  useAlertPreferences,
+} from "@/hooks/useAlertPreferences";
 
 interface Approval {
   id: number;
@@ -18,6 +23,9 @@ interface Approval {
  * fires regardless of active screen.
  */
 export function useEscalatedApprovalNotifier(): void {
+  // Subscribe so a settings change re-renders this watcher and the
+  // preference snapshot read inside the effect picks up the new value.
+  useAlertPreferences();
   const seenRef = useRef<Set<number>>(new Set());
   const initializedRef = useRef(false);
 
@@ -45,11 +53,18 @@ export function useEscalatedApprovalNotifier(): void {
       return;
     }
 
+    const prefs = getAlertPreferencesSnapshot();
+    if (!prefs.alerts_approvals_enabled) return;
+    const quiet = isQuietHoursActive(prefs);
+
     escalations
       .filter((a) => a.priority === "critical" || a.priority === "high")
       .forEach((a) => {
         if (seenRef.current.has(a.id)) return;
         seenRef.current.add(a.id);
+        // Critical approvals always wake the user. Non-critical ones (high)
+        // are suppressed during quiet hours.
+        if (quiet && a.priority !== "critical") return;
         void scheduleLocalAlert({
           title: "Approval escalated",
           body: a.title,
