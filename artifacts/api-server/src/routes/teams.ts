@@ -33,6 +33,7 @@ import {
   teamPagesTable,
   onCallSchedulesTable,
   onCallShiftsTable,
+  auditLogsTable,
   PLATFORM_ROLE_HIERARCHY,
   type PlatformRole,
   type OnCallSchedule,
@@ -887,6 +888,66 @@ router.get(
 
 // ─── Schedule management ───
 
+/**
+ * Append an audit_logs row for a successful on-call schedule mutation
+ * (#2483). The schedule drives who gets paged, so every PUT/POST/DELETE
+ * needs to land in the audit trail an incident reviewer can later query
+ * via /api/core/audit. Failures are non-fatal: we log loudly but do not
+ * roll back the user's mutation if the audit insert blows up.
+ */
+async function writeScheduleAudit(params: {
+  actionType: string;
+  entityType: "on_call_schedule" | "on_call_override";
+  entityId: string;
+  team: string;
+  actorUserId: number;
+  before?: Record<string, unknown> | null;
+  after?: Record<string, unknown> | null;
+  extra?: Record<string, unknown>;
+}): Promise<void> {
+  try {
+    await db.insert(auditLogsTable).values({
+      actionType: params.actionType,
+      entityType: params.entityType,
+      entityId: params.entityId,
+      actorUserId: params.actorUserId,
+      payloadJson: {
+        team: params.team,
+        ...(params.before !== undefined ? { _before: params.before } : {}),
+        ...(params.after !== undefined ? { _after: params.after } : {}),
+        ...(params.extra ?? {}),
+      },
+    });
+  } catch (err) {
+    logger.error(
+      { err, actionType: params.actionType, team: params.team, entityId: params.entityId },
+      "Failed to write on-call schedule audit log",
+    );
+  }
+}
+
+function scheduleSnapshot(s: OnCallSchedule): Record<string, unknown> {
+  return {
+    rotationIntervalHours: s.rotationIntervalHours,
+    memberOrder: s.memberOrder,
+    handoffAnchor: s.handoffAnchor.toISOString(),
+    timezone: s.timezone,
+    warningMinutes: s.warningMinutes,
+    updatedBy: s.updatedBy,
+  };
+}
+
+function shiftSnapshot(s: OnCallShift): Record<string, unknown> {
+  return {
+    userId: s.userId,
+    kind: s.kind,
+    startAt: s.startAt.toISOString(),
+    endAt: s.endAt.toISOString(),
+    note: s.note,
+    createdBy: s.createdBy,
+  };
+}
+
 export interface ScheduleResponse {
   team: string;
   schedule: {
@@ -1065,12 +1126,13 @@ router.put(
 
       const existing = (
         await db
-          .select({ id: onCallSchedulesTable.id })
+          .select()
           .from(onCallSchedulesTable)
           .where(eq(onCallSchedulesTable.team, team))
           .limit(1)
       )[0];
 
+      let auditEntityId: string;
       if (existing) {
         await db
           .update(onCallSchedulesTable)
@@ -1084,22 +1146,45 @@ router.put(
             updatedAt: now,
           })
           .where(eq(onCallSchedulesTable.id, existing.id));
+        auditEntityId = String(existing.id);
       } else {
-        await db.insert(onCallSchedulesTable).values({
-          team,
-          rotationIntervalHours: interval,
-          memberOrder,
-          handoffAnchor,
-          timezone,
-          warningMinutes,
-          updatedBy: actor.id,
-        });
+        const [created] = await db
+          .insert(onCallSchedulesTable)
+          .values({
+            team,
+            rotationIntervalHours: interval,
+            memberOrder,
+            handoffAnchor,
+            timezone,
+            warningMinutes,
+            updatedBy: actor.id,
+          })
+          .returning();
+        auditEntityId = String(created?.id ?? team);
       }
 
       logger.info(
         { team, actorId: actor.id, interval, memberCount: memberOrder.length },
         "On-call schedule updated",
       );
+
+      const after: Record<string, unknown> = {
+        rotationIntervalHours: interval,
+        memberOrder,
+        handoffAnchor: handoffAnchor.toISOString(),
+        timezone,
+        warningMinutes,
+        updatedBy: actor.id,
+      };
+      await writeScheduleAudit({
+        actionType: existing ? "on_call_schedule.updated" : "on_call_schedule.created",
+        entityType: "on_call_schedule",
+        entityId: auditEntityId,
+        team,
+        actorUserId: actor.id,
+        before: existing ? scheduleSnapshot(existing) : null,
+        after,
+      });
 
       const resp = await loadScheduleResponse(team);
       return sendSuccess(res, resp!);
@@ -1183,6 +1268,18 @@ router.post(
         "On-call override created",
       );
 
+      if (created) {
+        await writeScheduleAudit({
+          actionType: "on_call_override.created",
+          entityType: "on_call_override",
+          entityId: String(created.id),
+          team,
+          actorUserId: actor.id,
+          before: null,
+          after: shiftSnapshot(created),
+        });
+      }
+
       const resp = await loadScheduleResponse(team);
       return sendSuccess(res, resp!);
     } catch (err) {
@@ -1219,7 +1316,18 @@ router.delete(
       }
 
       await db.delete(onCallShiftsTable).where(eq(onCallShiftsTable.id, id));
-      logger.info({ team, actorId: req.user!.id, overrideId: id }, "On-call override deleted");
+      const actorId = req.user!.id;
+      logger.info({ team, actorId, overrideId: id }, "On-call override deleted");
+
+      await writeScheduleAudit({
+        actionType: "on_call_override.deleted",
+        entityType: "on_call_override",
+        entityId: String(id),
+        team,
+        actorUserId: actorId,
+        before: shiftSnapshot(existing),
+        after: null,
+      });
 
       const resp = await loadScheduleResponse(team);
       return sendSuccess(res, resp);
