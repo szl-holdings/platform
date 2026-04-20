@@ -132,11 +132,22 @@ const DEFAULT_FILTERS: PersistedFilters = {
   searchQuery: "",
 };
 
+export type SavedConstellationViewVisibility = "private" | "org";
+
 export interface SavedConstellationView {
   id: number;
   domain: string;
   name: string;
   filters: PersistedFilters;
+  visibility: SavedConstellationViewVisibility;
+  /** Server-supplied: true when the requesting user owns the view. */
+  isOwner?: boolean;
+  /** Server-supplied: true when the requesting user can rename/delete it. */
+  canEdit?: boolean;
+  /** Owning org id, populated for visibility="org" views. */
+  orgId?: number | null;
+  /** Human-readable org name shown in the picker for org-shared views. */
+  orgName?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -162,6 +173,26 @@ function normalizeViewFilters(raw: unknown): PersistedFilters {
       ? (v.sinceWindow as SinceWindow)
       : "all",
     searchQuery: typeof v.searchQuery === "string" ? v.searchQuery : "",
+  };
+}
+
+/**
+ * Normalize a saved-view row from the API: coerce filters into the strict
+ * PersistedFilters shape, default `visibility` to "private" for older rows
+ * that pre-date the org-sharing column, and treat owner/canEdit as `true`
+ * when the server didn't supply them so legacy callers keep their controls.
+ */
+function normalizeSavedView(raw: SavedConstellationView): SavedConstellationView {
+  const visibility: SavedConstellationViewVisibility =
+    raw.visibility === "org" ? "org" : "private";
+  return {
+    ...raw,
+    visibility,
+    filters: normalizeViewFilters(raw.filters as unknown),
+    isOwner: raw.isOwner ?? true,
+    canEdit: raw.canEdit ?? true,
+    orgId: raw.orgId ?? null,
+    orgName: raw.orgName ?? null,
   };
 }
 
@@ -644,10 +675,7 @@ export function ConstellationGraph({
       .then((res) => {
         if (cancelled) return;
         const rows = (res as { data?: SavedConstellationView[] }).data ?? (res as SavedConstellationView[]);
-        const normalized = (rows ?? []).map((r) => ({
-          ...r,
-          filters: normalizeViewFilters(r.filters as unknown),
-        }));
+        const normalized = (rows ?? []).map(normalizeSavedView);
         setSavedViews(normalized);
         setSavedViewsAvailable(true);
       })
@@ -699,13 +727,26 @@ export function ConstellationGraph({
   const saveCurrentView = useCallback(async () => {
     if (!domain) return;
     if (typeof window === "undefined") return;
-    const defaultName = activeSavedViewId
-      ? savedViews?.find((v) => v.id === activeSavedViewId)?.name ?? ""
-      : "";
+    const activeView = activeSavedViewId
+      ? savedViews?.find((v) => v.id === activeSavedViewId)
+      : undefined;
+    const defaultName = activeView?.name ?? "";
     const raw = window.prompt("Name this Constellation view", defaultName);
     if (raw === null) return;
     const name = raw.trim();
     if (!name) return;
+    // Two-step prompt so non-mouse / keyboard users (and tests) can decide
+    // visibility without us pulling in a modal stack just for this one flow.
+    // Default to whatever the currently-active view uses, otherwise private.
+    const defaultShared = activeView?.visibility === "org";
+    const shareWithOrg = window.confirm(
+      defaultShared
+        ? "Save as a shared view (visible to your whole org)?\n\nClick OK to keep it shared, or Cancel to save it privately."
+        : "Share this view with your whole organization?\n\nClick OK to share, or Cancel to keep it private.",
+    );
+    const visibility: SavedConstellationViewVisibility = shareWithOrg
+      ? "org"
+      : "private";
     const filters: PersistedFilters = {
       entityTypeFilter,
       activeOnly,
@@ -719,15 +760,12 @@ export function ConstellationGraph({
         `/constellation/views`,
         {
           method: "POST",
-          body: JSON.stringify({ domain, name, filters }),
+          body: JSON.stringify({ domain, name, filters, visibility }),
           retries: 0,
         },
       );
       const row = (res as { data?: SavedConstellationView }).data ?? (res as SavedConstellationView);
-      const normalized: SavedConstellationView = {
-        ...row,
-        filters: normalizeViewFilters(row.filters as unknown),
-      };
+      const normalized = normalizeSavedView(row);
       setSavedViews((prev) => {
         const next = (prev ?? []).filter((v) => v.id !== normalized.id);
         next.push(normalized);
@@ -739,7 +777,9 @@ export function ConstellationGraph({
       const msg =
         err instanceof ApiError && err.status === 409
           ? "A saved view with that name already exists. Pick another."
-          : (err as Error)?.message ?? "Failed to save view";
+          : err instanceof ApiError && err.status === 400
+            ? (err as Error)?.message ?? "Cannot share view: no organization on your account"
+            : (err as Error)?.message ?? "Failed to save view";
       setSavedViewsError(msg);
     } finally {
       setSavedViewsBusy(false);
@@ -769,10 +809,7 @@ export function ConstellationGraph({
           { method: "PATCH", body: JSON.stringify({ name }), retries: 0 },
         );
         const row = (res as { data?: SavedConstellationView }).data ?? (res as SavedConstellationView);
-        const normalized: SavedConstellationView = {
-          ...row,
-          filters: normalizeViewFilters(row.filters as unknown),
-        };
+        const normalized = normalizeSavedView(row);
         setSavedViews((prev) =>
           (prev ?? [])
             .map((v) => (v.id === normalized.id ? normalized : v))
@@ -2146,7 +2183,7 @@ export function ConstellationGraph({
                   background: "rgba(0,0,0,0.25)",
                   color: "#e8edf8",
                   outline: "none",
-                  minWidth: 200,
+                  minWidth: 220,
                 }}
               >
                 <option value="">
@@ -2156,12 +2193,66 @@ export function ConstellationGraph({
                       ? "— No saved views —"
                       : "— Select a view —"}
                 </option>
-                {(savedViews ?? []).map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.name}
-                  </option>
-                ))}
+                {(() => {
+                  const all = savedViews ?? [];
+                  const personal = all.filter((v) => v.visibility !== "org");
+                  const shared = all.filter((v) => v.visibility === "org");
+                  return (
+                    <>
+                      {personal.length > 0 && (
+                        <optgroup label="Personal" data-testid="constellation-saved-views-group-personal">
+                          {personal.map((v) => (
+                            <option key={v.id} value={v.id}>
+                              {v.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {shared.length > 0 && (
+                        <optgroup
+                          label={`Shared with org${shared[0]?.orgName ? ` (${shared[0].orgName})` : ""}`}
+                          data-testid="constellation-saved-views-group-org"
+                        >
+                          {shared.map((v) => (
+                            <option key={v.id} value={v.id}>
+                              {v.isOwner ? `${v.name} (you)` : v.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                    </>
+                  );
+                })()}
               </select>
+              {(() => {
+                const v = activeSavedViewId !== null
+                  ? (savedViews ?? []).find((sv) => sv.id === activeSavedViewId)
+                  : undefined;
+                if (!v) return null;
+                const label =
+                  v.visibility === "org"
+                    ? v.isOwner
+                      ? "Shared by you"
+                      : "Shared with org"
+                    : "Private";
+                return (
+                  <span
+                    data-testid="constellation-saved-views-visibility"
+                    style={{
+                      fontSize: 9,
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                      padding: "2px 6px",
+                      borderRadius: 999,
+                      border: `1px solid ${v.visibility === "org" ? "#22d3ee55" : "rgba(255,255,255,0.15)"}`,
+                      color: v.visibility === "org" ? "#67e8f9" : "#94a3b8",
+                      background: v.visibility === "org" ? "#22d3ee14" : "transparent",
+                    }}
+                  >
+                    {label}
+                  </span>
+                );
+              })()}
               <button
                 type="button"
                 onClick={saveCurrentView}
@@ -2182,7 +2273,8 @@ export function ConstellationGraph({
               >
                 Save view
               </button>
-              {activeSavedViewId !== null && (
+              {activeSavedViewId !== null &&
+                ((savedViews ?? []).find((sv) => sv.id === activeSavedViewId)?.canEdit ?? true) && (
                 <>
                   <button
                     type="button"
