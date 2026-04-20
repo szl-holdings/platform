@@ -2,22 +2,11 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { BookOpen, Search, Sparkles, Loader2, Tag, Star, Clock, FileText, ChevronRight, Filter, Archive, Lightbulb, Target } from "lucide-react";
+import { KNOWLEDGE_VAULT_ITEMS, type KnowledgeVaultItem } from "@/data/operationalData";
 
 const GOLD = "var(--color-gold)";
 
-type KnowledgeItem = {
-  id: string;
-  type: "framework" | "playbook" | "template" | "case-study" | "research";
-  title: string;
-  description: string;
-  tags: string[];
-  industries: string[];
-  engagements: string[];
-  uses: number;
-  rating: number;
-  lastUpdated: string;
-  author: string;
-};
+type KnowledgeItem = KnowledgeVaultItem;
 
 const TYPE_META: Record<KnowledgeItem["type"], { label: string; color: string; icon: typeof BookOpen }> = {
   framework:   { label: "Framework", color: "#7C3AED", icon: Target },
@@ -27,75 +16,8 @@ const TYPE_META: Record<KnowledgeItem["type"], { label: string; color: string; i
   research:    { label: "Research", color: "#DC2626", icon: Lightbulb },
 };
 
-const KNOWLEDGE_ITEMS: KnowledgeItem[] = [
-  {
-    id: "k1", type: "framework", title: "7-Dimension Brand Positioning Matrix",
-    description: "Comprehensive brand positioning analysis covering customer value proposition, competitive differentiation, emotional resonance, price-value perception, channel strategy, and cultural fit. Generates an actionable positioning brief.",
-    tags: ["Brand Strategy", "Positioning", "Consumer Research", "Competitive Analysis"],
-    industries: ["Consumer Goods", "Retail", "Luxury", "FMCG"],
-    engagements: ["Luminary Brands", "Kestrel Brands", "4 others"],
-    uses: 14, rating: 4.8, lastUpdated: "Apr 2026", author: "Carlota Jo",
-  },
-  {
-    id: "k2", type: "playbook", title: "PE Portfolio Value Creation — 100-Day Playbook",
-    description: "Post-acquisition integration playbook covering leadership assessment, quick-win identification, KPI baseline, customer retention strategy, and organisational design. Developed across 4 PE-backed engagements.",
-    tags: ["Private Equity", "M&A", "Integration", "Value Creation", "100-Day"],
-    industries: ["Financial Services", "Private Equity", "Industrial"],
-    engagements: ["Aurelius Private Equity", "Vertex Capital"],
-    uses: 6, rating: 4.9, lastUpdated: "Mar 2026", author: "Sofia Andersson",
-  },
-  {
-    id: "k3", type: "framework", title: "Digital Maturity Assessment Model (DMAM-5)",
-    description: "5-dimension digital maturity scoring across Data & Analytics, Customer Experience, Operations, Culture & Talent, and Technology Infrastructure. Produces benchmarked maturity scores with prioritised improvement roadmap.",
-    tags: ["Digital Transformation", "Maturity Model", "Assessment", "Roadmap"],
-    industries: ["Healthcare", "Financial Services", "Industrial", "Consumer Goods"],
-    engagements: ["Solaris Health Systems", "Luminary Brands", "3 others"],
-    uses: 9, rating: 4.7, lastUpdated: "Feb 2026", author: "Carlota Jo",
-  },
-  {
-    id: "k4", type: "case-study", title: "Healthcare DTC Strategy — Oasis Wellness",
-    description: "End-to-end DTC channel build for a £30M wellness brand entering direct-to-consumer. Covers market entry strategy, digital acquisition, retention architecture, and first-year financial model. IP-protected client version available.",
-    tags: ["DTC", "Healthcare", "Channel Strategy", "Digital Marketing", "Wellness"],
-    industries: ["Consumer Health", "Healthcare"],
-    engagements: ["Oasis Wellness"],
-    uses: 4, rating: 4.6, lastUpdated: "Mar 2026", author: "Carlota Jo",
-  },
-  {
-    id: "k5", type: "template", title: "Executive Strategy Presentation — Master Template",
-    description: "Board-ready strategy presentation template with customisable sections for situation assessment, strategic options, recommended path, implementation roadmap, and financial projections. Includes design guidelines and copy prompts.",
-    tags: ["Presentation", "Executive", "Board", "Strategy", "Template"],
-    industries: ["All"],
-    engagements: ["Multiple"],
-    uses: 28, rating: 4.9, lastUpdated: "Apr 2026", author: "Carlota Jo",
-  },
-  {
-    id: "k6", type: "framework", title: "Stakeholder Influence Mapping — 4-Quadrant Model",
-    description: "Rigorous stakeholder analysis framework mapping power vs. interest to drive engagement strategy. Includes influence pathway analysis, change resistance scoring, and coalition-building tactics. Proven in complex multi-stakeholder environments.",
-    tags: ["Stakeholder Management", "Change Management", "Influence", "Coalition"],
-    industries: ["Healthcare", "Industrial", "Financial Services"],
-    engagements: ["Solaris Health Systems", "Clearfield Manufacturing", "2 others"],
-    uses: 11, rating: 4.8, lastUpdated: "Jan 2026", author: "Kai Okonkwo",
-  },
-  {
-    id: "k7", type: "research", title: "AI in Consulting — Market Intelligence Report 2026",
-    description: "Comprehensive analysis of AI adoption in consulting services: client expectations, competitor positioning, capability gaps, and strategic recommendations for boutique firms. Includes 14 competitor profiles and pricing benchmarks.",
-    tags: ["AI", "Market Research", "Consulting Industry", "Competitive Intelligence"],
-    industries: ["Professional Services", "Consulting"],
-    engagements: ["Internal"],
-    uses: 8, rating: 4.5, lastUpdated: "Mar 2026", author: "Carlota Jo",
-  },
-  {
-    id: "k8", type: "playbook", title: "Change Management Acceleration — Healthcare Settings",
-    description: "Clinical change management methodology designed for healthcare transformation programmes. Covers readiness assessment, clinical champion identification, training cascade, resistance management, and sustainability planning.",
-    tags: ["Change Management", "Healthcare", "Clinical", "EHR", "Acceleration"],
-    industries: ["Healthcare", "Life Sciences", "Public Sector"],
-    engagements: ["Solaris Health Systems"],
-    uses: 3, rating: 4.7, lastUpdated: "Apr 2026", author: "Dr. Priya Rajan",
-  },
-];
-
 type SearchResult = {
-  items: typeof KNOWLEDGE_ITEMS;
+  items: typeof KNOWLEDGE_VAULT_ITEMS;
   reasoning: string;
 };
 
@@ -112,7 +34,7 @@ export default function KnowledgeVault() {
   const [aiResult, setAiResult] = useState<SearchResult | null>(null);
   const [selectedItem, setSelectedItem] = useState<KnowledgeItem | null>(null);
 
-  const filteredItems = KNOWLEDGE_ITEMS.filter(item => {
+  const filteredItems = KNOWLEDGE_VAULT_ITEMS.filter(item => {
     const matchesType = typeFilter === "all" || item.type === typeFilter;
     const matchesSearch = !searchQuery || item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -120,11 +42,11 @@ export default function KnowledgeVault() {
     return matchesType && matchesSearch;
   });
 
-  const matchItemsFromText = (text: string): typeof KNOWLEDGE_ITEMS => {
+  const matchItemsFromText = (text: string): typeof KNOWLEDGE_VAULT_ITEMS => {
     const lower = text.toLowerCase();
-    const matched = KNOWLEDGE_ITEMS.filter(k => lower.includes(k.title.toLowerCase()));
+    const matched = KNOWLEDGE_VAULT_ITEMS.filter(k => lower.includes(k.title.toLowerCase()));
     if (matched.length > 0) return matched;
-    return KNOWLEDGE_ITEMS.filter(k =>
+    return KNOWLEDGE_VAULT_ITEMS.filter(k =>
       k.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())) ||
       k.industries.some(ind => ind.toLowerCase().includes(searchQuery.toLowerCase()))
     ).slice(0, 3);
@@ -134,7 +56,7 @@ export default function KnowledgeVault() {
     if (!searchQuery) return;
     setAiSearching(true);
     try {
-      const prompt = `You are a knowledge management AI for Carlota Jo consulting. The user searched for: "${searchQuery}". Available knowledge items: ${KNOWLEDGE_ITEMS.map(k => `"${k.title}" (${k.type}) - ${k.tags.join(", ")}`).join("; ")}. Identify the 1-3 most relevant items by exact title and explain in 2 sentences why each is relevant to the search query. Include each item's exact title in your response.`;
+      const prompt = `You are a knowledge management AI for Carlota Jo consulting. The user searched for: "${searchQuery}". Available knowledge items: ${KNOWLEDGE_VAULT_ITEMS.map(k => `"${k.title}" (${k.type}) - ${k.tags.join(", ")}`).join("; ")}. Identify the 1-3 most relevant items by exact title and explain in 2 sentences why each is relevant to the search query. Include each item's exact title in your response.`;
       const resp = await fetch("/api/intelligence/ai/advisory", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -144,12 +66,12 @@ export default function KnowledgeVault() {
       const text = data.content || data.choices?.[0]?.message?.content || "";
       setAiResult({ items: matchItemsFromText(text), reasoning: text });
     } catch {
-      const fallbackItems = KNOWLEDGE_ITEMS.filter(k =>
+      const fallbackItems = KNOWLEDGE_VAULT_ITEMS.filter(k =>
         k.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())) ||
         k.title.toLowerCase().includes(searchQuery.toLowerCase())
       ).slice(0, 3);
       setAiResult({
-        items: fallbackItems.length > 0 ? fallbackItems : KNOWLEDGE_ITEMS.slice(0, 3),
+        items: fallbackItems.length > 0 ? fallbackItems : KNOWLEDGE_VAULT_ITEMS.slice(0, 3),
         reasoning: `Based on your search for "${searchQuery}", I've identified the most relevant frameworks and case studies from our knowledge base. These items have been used successfully in similar engagements and contain directly applicable methodologies.`,
       });
     } finally {
@@ -157,7 +79,7 @@ export default function KnowledgeVault() {
     }
   };
 
-  const totalUses = KNOWLEDGE_ITEMS.reduce((s, k) => s + k.uses, 0);
+  const totalUses = KNOWLEDGE_VAULT_ITEMS.reduce((s, k) => s + k.uses, 0);
 
   return (
     <div style={{ minHeight: "100vh", background: "#FAFAF8", paddingTop: 64 }}>
@@ -178,10 +100,10 @@ export default function KnowledgeVault() {
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 16, maxWidth: 700 }}>
               {[
-                { label: "Knowledge Assets", value: KNOWLEDGE_ITEMS.length.toString() },
+                { label: "Knowledge Assets", value: KNOWLEDGE_VAULT_ITEMS.length.toString() },
                 { label: "Total Applications", value: totalUses.toString() },
-                { label: "Frameworks", value: KNOWLEDGE_ITEMS.filter(k => k.type === "framework").length.toString() },
-                { label: "Avg Rating", value: (KNOWLEDGE_ITEMS.reduce((s, k) => s + k.rating, 0) / KNOWLEDGE_ITEMS.length).toFixed(1) + "/5" },
+                { label: "Frameworks", value: KNOWLEDGE_VAULT_ITEMS.filter(k => k.type === "framework").length.toString() },
+                { label: "Avg Rating", value: (KNOWLEDGE_VAULT_ITEMS.reduce((s, k) => s + k.rating, 0) / KNOWLEDGE_VAULT_ITEMS.length).toFixed(1) + "/5" },
               ].map(kpi => (
                 <div key={kpi.label} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "14px 16px" }}>
                   <div style={{ fontSize: 22, fontWeight: 600, color: "#F5F0E8", fontFamily: "'Cormorant Garamond', serif" }}>{kpi.value}</div>

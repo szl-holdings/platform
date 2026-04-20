@@ -2,21 +2,11 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { Network, Search, Sparkles, BookOpen, Loader2, Tag, Clock, ChevronRight, Filter, Database, Link2, TrendingUp, FileText, Users, Zap, Plus, CheckCircle } from "lucide-react";
+import { KNOWLEDGE_GRAPH_NODES, type KnowledgeGraphNode } from "@/data/operationalData";
 
 const GOLD = "var(--color-gold)";
 
-type KnowledgeNode = {
-  id: string;
-  type: "framework" | "engagement" | "insight" | "deliverable" | "client" | "methodology";
-  title: string;
-  description: string;
-  tags: string[];
-  industries: string[];
-  connections: string[];
-  lastUsed: string;
-  useCount: number;
-  impact?: string;
-};
+type KnowledgeNode = KnowledgeGraphNode;
 
 const TYPE_META: Record<KnowledgeNode["type"], { color: string; icon: typeof Network; label: string }> = {
   framework: { color: "#7C3AED", icon: Network, label: "Framework" },
@@ -27,80 +17,6 @@ const TYPE_META: Record<KnowledgeNode["type"], { color: string; icon: typeof Net
   methodology: { color: "#D97706", icon: Zap, label: "Methodology" },
 };
 
-const KNOWLEDGE_NODES: KnowledgeNode[] = [
-  {
-    id: "k1", type: "framework", title: "The Clarity Cascade Framework",
-    description: "A three-stage model for organisational transformation: Diagnostic Immersion → Strategic Crystallisation → Implementation Architecture. Consistently produces 40%+ faster decision velocity.",
-    tags: ["transformation", "org-design", "decision-making"],
-    industries: ["Healthcare", "Financial Services", "Consumer Goods"],
-    connections: ["k5", "k8", "k12"],
-    lastUsed: "Apr 2026", useCount: 14, impact: "Avg 42% improvement in decision velocity",
-  },
-  {
-    id: "k2", type: "framework", title: "Market Permeability Index",
-    description: "Proprietary scoring model that assesses market entry attractiveness across 11 dimensions: competitive density, regulatory friction, distribution access, and 8 more. Cited in 3 published case studies.",
-    tags: ["market-entry", "competitive-analysis", "scoring"],
-    industries: ["Retail", "Healthcare", "Technology", "Consumer Goods"],
-    connections: ["k6", "k9"],
-    lastUsed: "Mar 2026", useCount: 9, impact: "Used in 9 successful market entry strategies",
-  },
-  {
-    id: "k3", type: "engagement", title: "Luminary Brands — Growth Strategy 2026",
-    description: "Full brand repositioning and DTC channel strategy for a £200M consumer goods company. 3 phases over 6 months. Delivered 18% revenue uplift in first 90 days.",
-    tags: ["brand-positioning", "DTC", "growth"],
-    industries: ["Consumer Goods"],
-    connections: ["k1", "k7", "k11"],
-    lastUsed: "Apr 2026", useCount: 0, impact: "£36M incremental revenue identified",
-  },
-  {
-    id: "k4", type: "insight", title: "Healthcare Digital Transformation Patterns",
-    description: "Synthesised learning from 4 healthcare digital transformation engagements. Key finding: implementation failure is 3× more likely when clinical leadership is not co-opted in design phase.",
-    tags: ["healthcare", "digital-transformation", "change-management"],
-    industries: ["Healthcare"],
-    connections: ["k1", "k8"],
-    lastUsed: "Feb 2026", useCount: 6, impact: "Cited in 2 published articles",
-  },
-  {
-    id: "k5", type: "methodology", title: "Rapid Diagnostic Immersion Protocol",
-    description: "A 2-week intensive methodology for rapid organisational assessment: stakeholder mapping, data gathering sprint, hypothesis formation, and prioritisation matrix. Replaces 8-week traditional discovery.",
-    tags: ["diagnostic", "discovery", "stakeholder-mapping"],
-    industries: ["All"],
-    connections: ["k1", "k3"],
-    lastUsed: "Apr 2026", useCount: 21, impact: "75% reduction in discovery phase duration",
-  },
-  {
-    id: "k6", type: "deliverable", title: "Competitive Battlecard Template v3.2",
-    description: "Structured one-page format covering: competitor profile, key offerings, pricing signals, strengths, vulnerabilities, and our positioning response. Used in all competitive strategy engagements.",
-    tags: ["competitive", "battlecard", "positioning"],
-    industries: ["All"],
-    connections: ["k2", "k9"],
-    lastUsed: "Mar 2026", useCount: 18,
-  },
-  {
-    id: "k7", type: "insight", title: "Premium Brand Repositioning Conditions",
-    description: "From 6 brand repositioning engagements: successful repositioning requires executive mandate, 18+ month time horizon, and 15-20% marketing investment uplift. Failure patterns documented.",
-    tags: ["brand", "repositioning", "conditions-for-success"],
-    industries: ["Consumer Goods", "Luxury", "Retail"],
-    connections: ["k3", "k11"],
-    lastUsed: "Apr 2026", useCount: 8, impact: "6/6 repositionings succeeded using these conditions",
-  },
-  {
-    id: "k8", type: "framework", title: "Stakeholder Influence Mapping Matrix",
-    description: "A 2×2 model mapping stakeholder influence vs. alignment, with specific engagement strategies for each quadrant. Essential for change management in complex organisations.",
-    tags: ["stakeholders", "change-management", "influence"],
-    industries: ["Healthcare", "Financial Services", "Public Sector"],
-    connections: ["k4", "k5"],
-    lastUsed: "Jan 2026", useCount: 17,
-  },
-  {
-    id: "k9", type: "engagement", title: "Meridian Capital — Market Entry Advisory",
-    description: "Strategic advisory for entry into private credit market. Applied Market Permeability Index across 6 geographies. Recommended 2-market phased entry with regulatory partnership strategy.",
-    tags: ["financial-services", "market-entry", "regulatory"],
-    industries: ["Financial Services"],
-    connections: ["k2", "k6"],
-    lastUsed: "Dec 2025", useCount: 0, impact: "£150M market opportunity validated",
-  },
-];
 
 const SAMPLE_QUERIES = [
   "What frameworks have we used for digital transformation in healthcare?",
@@ -133,7 +49,7 @@ export default function KnowledgeGraph() {
   const [added, setAdded] = useState(false);
   const [extraNodes, setExtraNodes] = useState<KnowledgeNode[]>([]);
 
-  const allNodes = [...KNOWLEDGE_NODES, ...extraNodes];
+  const allNodes = [...KNOWLEDGE_GRAPH_NODES, ...extraNodes];
   const filteredNodes = filterType === "all" ? allNodes : allNodes.filter(n => n.type === filterType);
 
   const runQuery = async () => {

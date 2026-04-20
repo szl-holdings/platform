@@ -5,113 +5,13 @@ import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Heart, AlertTriangle, TrendingUp, TrendingDown, Minus, Bell, ChevronRight, Sparkles, Loader2, Users } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { CLIENT_HEALTH, type ClientHealthRecord } from "@/data/operationalData";
 
 const GOLD = "var(--color-gold)";
 
-type HealthSignal = {
-  dimension: string;
-  score: number;
-  trend: "up" | "down" | "stable";
-  note: string;
-};
+type ClientHealth = ClientHealthRecord;
 
-type Alert = {
-  id: string;
-  severity: "critical" | "warning" | "info";
-  message: string;
-  action: string;
-  timestamp: string;
-};
-
-type ClientHealth = {
-  id: string;
-  client: string;
-  industry: string;
-  engagementStart: string;
-  healthScore: number;
-  trend: "up" | "down" | "stable";
-  status: "healthy" | "at-risk" | "critical" | "excellent";
-  signals: HealthSignal[];
-  alerts: Alert[];
-  trajectory: { month: string; score: number }[];
-};
-
-const CLIENTS: ClientHealth[] = [
-  {
-    id: "c1",
-    client: "Luminary Brands",
-    industry: "Consumer Goods",
-    engagementStart: "Jan 2026",
-    healthScore: 82,
-    trend: "up",
-    status: "excellent",
-    signals: [
-      { dimension: "Engagement Momentum", score: 88, trend: "up", note: "Strong implementation pace — 4 of 5 workstreams on track" },
-      { dimension: "Outcome Progress", score: 85, trend: "up", note: "Revenue uplift tracking 12% ahead of target at month 3" },
-      { dimension: "Relationship Strength", score: 90, trend: "stable", note: "Executive sponsor highly engaged, weekly check-ins maintained" },
-      { dimension: "Strategic Alignment", score: 78, trend: "up", note: "Board aligned on priorities — minor Q2 pivot required" },
-      { dimension: "Team Adoption", score: 72, trend: "up", note: "Middle management adoption accelerating after Feb training" },
-      { dimension: "Payment Timeliness", score: 95, trend: "stable", note: "All invoices paid within 7 days — no exceptions" },
-    ],
-    alerts: [
-      { id: "a1", severity: "info", message: "Q2 strategy review due in 3 weeks", action: "Schedule review session", timestamp: "Apr 14, 2026" },
-    ],
-    trajectory: [
-      { month: "Oct", score: 58 }, { month: "Nov", score: 64 }, { month: "Dec", score: 68 },
-      { month: "Jan", score: 72 }, { month: "Feb", score: 76 }, { month: "Mar", score: 80 }, { month: "Apr", score: 82 },
-    ],
-  },
-  {
-    id: "c2",
-    client: "Oasis Wellness",
-    industry: "Consumer Health",
-    engagementStart: "Oct 2025",
-    healthScore: 61,
-    trend: "down",
-    status: "at-risk",
-    signals: [
-      { dimension: "Engagement Momentum", score: 55, trend: "down", note: "Implementation pace slowed — resource constraints cited" },
-      { dimension: "Outcome Progress", score: 68, trend: "stable", note: "DTC channel on track but retention KPIs lagging" },
-      { dimension: "Relationship Strength", score: 72, trend: "down", note: "Executive sponsor travel disrupting weekly cadence" },
-      { dimension: "Strategic Alignment", score: 58, trend: "down", note: "Board priorities shifted following new CFO appointment" },
-      { dimension: "Team Adoption", score: 44, trend: "down", note: "Internal change resistance emerging in marketing team" },
-      { dimension: "Payment Timeliness", score: 78, trend: "stable", note: "March invoice 14 days late — first occurrence" },
-    ],
-    alerts: [
-      { id: "a2", severity: "critical", message: "Engagement momentum declining for 2nd consecutive month", action: "Escalate to senior advisor — schedule executive alignment session", timestamp: "Apr 12, 2026" },
-      { id: "a3", severity: "warning", message: "Change resistance risk in marketing org — adoption stalling", action: "Design targeted change management intervention", timestamp: "Apr 10, 2026" },
-      { id: "a4", severity: "warning", message: "CFO alignment gap — strategy may lose internal champion", action: "Request CFO briefing within 2 weeks", timestamp: "Apr 8, 2026" },
-    ],
-    trajectory: [
-      { month: "Oct", score: 74 }, { month: "Nov", score: 78 }, { month: "Dec", score: 75 },
-      { month: "Jan", score: 72 }, { month: "Feb", score: 68 }, { month: "Mar", score: 64 }, { month: "Apr", score: 61 },
-    ],
-  },
-  {
-    id: "c3",
-    client: "Velas Agency",
-    industry: "Professional Services",
-    engagementStart: "Aug 2025",
-    healthScore: 74,
-    trend: "stable",
-    status: "healthy",
-    signals: [
-      { dimension: "Engagement Momentum", score: 76, trend: "stable", note: "Solid execution pace, no blockers identified" },
-      { dimension: "Outcome Progress", score: 78, trend: "up", note: "Referral pipeline initiative exceeding 90-day target" },
-      { dimension: "Relationship Strength", score: 82, trend: "stable", note: "Strong working relationship with founder and COO" },
-      { dimension: "Strategic Alignment", score: 70, trend: "stable", note: "Priorities stable — annual planning cycle approaching" },
-      { dimension: "Team Adoption", score: 65, trend: "up", note: "Junior team adoption improving with new playbook format" },
-      { dimension: "Payment Timeliness", score: 88, trend: "stable", note: "Consistent 10-day payment cycle" },
-    ],
-    alerts: [
-      { id: "a5", severity: "info", message: "Annual planning cycle begins next month — renewal opportunity", action: "Prepare renewal proposal with expanded scope", timestamp: "Apr 14, 2026" },
-    ],
-    trajectory: [
-      { month: "Oct", score: 70 }, { month: "Nov", score: 72 }, { month: "Dec", score: 73 },
-      { month: "Jan", score: 75 }, { month: "Feb", score: 74 }, { month: "Mar", score: 73 }, { month: "Apr", score: 74 },
-    ],
-  },
-];
+const CLIENTS: ClientHealth[] = CLIENT_HEALTH;
 
 const STATUS_CONFIG = {
   excellent: { label: "Excellent", color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200", dot: "bg-emerald-500" },

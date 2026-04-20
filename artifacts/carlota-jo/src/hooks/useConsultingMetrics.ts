@@ -5,6 +5,9 @@ import {
   INVOICES,
   TIME_ENTRIES,
   CAPACITY_ALERTS,
+  CLIENT_HEALTH,
+  KNOWLEDGE_GRAPH_NODES,
+  KNOWLEDGE_VAULT_ITEMS,
 } from "@/data/operationalData";
 
 export type PlatformMetric = {
@@ -89,6 +92,33 @@ export function useConsultingMetrics(): ConsultingMetrics {
       (i) => i.status === "sent" || i.status === "overdue",
     ).reduce((s, i) => s + i.amount, 0);
 
+    // From client-health
+    const clientHealthAvg =
+      CLIENT_HEALTH.length > 0
+        ? Math.round(
+            CLIENT_HEALTH.reduce((s, c) => s + c.healthScore, 0) /
+              CLIENT_HEALTH.length,
+          )
+        : 0;
+    const healthyClients = CLIENT_HEALTH.filter(
+      (c) => c.status === "excellent" || c.status === "healthy",
+    ).length;
+    const clientHealthLabel =
+      clientHealthAvg >= 80
+        ? "Excellent"
+        : clientHealthAvg >= 70
+          ? "Healthy"
+          : clientHealthAvg >= 60
+            ? "At risk"
+            : "Critical";
+
+    // From knowledge-graph + knowledge-vault
+    const knowledgeNodes =
+      KNOWLEDGE_GRAPH_NODES.length + KNOWLEDGE_VAULT_ITEMS.length;
+    const knowledgeFrameworks =
+      KNOWLEDGE_GRAPH_NODES.filter((n) => n.type === "framework").length +
+      KNOWLEDGE_VAULT_ITEMS.filter((k) => k.type === "framework").length;
+
     return {
       raw: {
         activeEngagements,
@@ -125,17 +155,17 @@ export function useConsultingMetrics(): ConsultingMetrics {
         },
         {
           label: "Client Health Avg",
-          value: "84/100",
-          change: "Excellent",
-          up: true,
-          source: "static",
+          value: `${clientHealthAvg}/100`,
+          change: `${clientHealthLabel} · ${healthyClients}/${CLIENT_HEALTH.length} healthy`,
+          up: clientHealthAvg >= 70,
+          source: "live",
         },
         {
           label: "Knowledge Nodes",
-          value: "1,247",
-          change: "+142 this week",
+          value: knowledgeNodes.toLocaleString("en-GB"),
+          change: `${knowledgeFrameworks} frameworks indexed`,
           up: true,
-          source: "static",
+          source: "live",
         },
         {
           label: "Team Utilisation",
