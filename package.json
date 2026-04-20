@@ -12,6 +12,7 @@
     "format": "biome format --write .",
     "format:check": "biome format .",
     "build": "turbo run build",
+    "codegen": "pnpm --filter @szl-holdings/api-spec run codegen",
     "typecheck:libs": "tsc --build",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",

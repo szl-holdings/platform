@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type CreateVentureStatus = (typeof CreateVentureStatus)[keyof typeof CreateVentureStatus];
+export type CreateVentureStatus =
+  (typeof CreateVentureStatus)[keyof typeof CreateVentureStatus];
 
 export const CreateVentureStatus = {
   active: 'active',

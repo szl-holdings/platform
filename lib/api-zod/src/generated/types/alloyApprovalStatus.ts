@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type AlloyApprovalStatus = (typeof AlloyApprovalStatus)[keyof typeof AlloyApprovalStatus];
+export type AlloyApprovalStatus =
+  (typeof AlloyApprovalStatus)[keyof typeof AlloyApprovalStatus];
 
 export const AlloyApprovalStatus = {
   pending: 'pending',

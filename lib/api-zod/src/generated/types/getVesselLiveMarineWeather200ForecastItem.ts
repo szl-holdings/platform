@@ -9,4 +9,6 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type GetVesselLiveMarineWeather200ForecastItem = { [key: string]: unknown };
+export type GetVesselLiveMarineWeather200ForecastItem = {
+  [key: string]: unknown;
+};

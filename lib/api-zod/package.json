@@ -18,6 +18,9 @@
   "dependencies": {
     "zod": "catalog:"
   },
+  "devDependencies": {
+    "@szl-holdings/api-spec": "workspace:*"
+  },
   "scripts": {
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",

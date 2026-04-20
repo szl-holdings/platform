@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type AlloyWorkflowStatus = (typeof AlloyWorkflowStatus)[keyof typeof AlloyWorkflowStatus];
+export type AlloyWorkflowStatus =
+  (typeof AlloyWorkflowStatus)[keyof typeof AlloyWorkflowStatus];
 
 export const AlloyWorkflowStatus = {
   active: 'active',

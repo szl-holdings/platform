@@ -25,6 +25,9 @@
   "dependencies": {
     "@tanstack/react-query": "catalog:"
   },
+  "devDependencies": {
+    "@szl-holdings/api-spec": "workspace:*"
+  },
   "peerDependencies": {
     "react": ">=18"
   }

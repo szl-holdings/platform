@@ -9,4 +9,6 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type EvaluateDecisionSignals200RecommendationsItem = { [key: string]: unknown };
+export type EvaluateDecisionSignals200RecommendationsItem = {
+  [key: string]: unknown;
+};

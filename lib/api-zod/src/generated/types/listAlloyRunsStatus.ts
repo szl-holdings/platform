@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type ListAlloyRunsStatus = (typeof ListAlloyRunsStatus)[keyof typeof ListAlloyRunsStatus];
+export type ListAlloyRunsStatus =
+  (typeof ListAlloyRunsStatus)[keyof typeof ListAlloyRunsStatus];
 
 export const ListAlloyRunsStatus = {
   running: 'running',

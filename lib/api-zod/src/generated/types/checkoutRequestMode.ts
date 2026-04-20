@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type CheckoutRequestMode = (typeof CheckoutRequestMode)[keyof typeof CheckoutRequestMode];
+export type CheckoutRequestMode =
+  (typeof CheckoutRequestMode)[keyof typeof CheckoutRequestMode];
 
 export const CheckoutRequestMode = {
   subscription: 'subscription',

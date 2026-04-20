@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type AlloyRunStepStatus = (typeof AlloyRunStepStatus)[keyof typeof AlloyRunStepStatus];
+export type AlloyRunStepStatus =
+  (typeof AlloyRunStepStatus)[keyof typeof AlloyRunStepStatus];
 
 export const AlloyRunStepStatus = {
   pending: 'pending',

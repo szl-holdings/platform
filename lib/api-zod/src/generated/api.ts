@@ -114,7 +114,14 @@ export const ListDecisionsQueryParams = zod.object({
     .default(listDecisionsQueryLimitDefault),
   offset: zod.coerce.number().default(listDecisionsQueryOffsetDefault),
   status: zod
-    .enum(['proposed', 'pending_approval', 'approved', 'rejected', 'executed', 'expired'])
+    .enum([
+      'proposed',
+      'pending_approval',
+      'approved',
+      'rejected',
+      'executed',
+      'expired',
+    ])
     .optional(),
   riskLevel: zod.enum(['P0', 'P1', 'P2', 'P3', 'P4']).optional(),
 });
@@ -455,7 +462,9 @@ export const ListObservabilityAppsResponseItem = zod.object({
   appName: zod.string().optional(),
   status: zod.enum(['healthy', 'warning', 'degraded', 'unknown']).optional(),
 });
-export const ListObservabilityAppsResponse = zod.array(ListObservabilityAppsResponseItem);
+export const ListObservabilityAppsResponse = zod.array(
+  ListObservabilityAppsResponseItem,
+);
 
 /**
  * Returns full telemetry snapshot for the specified app. Results are cached for 10 seconds.
@@ -710,7 +719,16 @@ export const ListConnectorsResponseItem = zod.object({
   id: zod.number(),
   orgId: zod.number().nullish(),
   name: zod.string(),
-  type: zod.enum(['stripe', 'slack', 'twilio', 'google', 'notion', 'github', 'shopify', 'custom']),
+  type: zod.enum([
+    'stripe',
+    'slack',
+    'twilio',
+    'google',
+    'notion',
+    'github',
+    'shopify',
+    'custom',
+  ]),
   status: zod.enum(['active', 'inactive', 'error', 'pending']),
   isEnabled: zod.boolean().optional(),
   createdAt: zod.date().optional(),
@@ -723,7 +741,16 @@ export const ListConnectorsResponse = zod.array(ListConnectorsResponseItem);
  */
 export const CreateConnectorBody = zod.object({
   name: zod.string(),
-  type: zod.enum(['stripe', 'slack', 'twilio', 'google', 'notion', 'github', 'shopify', 'custom']),
+  type: zod.enum([
+    'stripe',
+    'slack',
+    'twilio',
+    'google',
+    'notion',
+    'github',
+    'shopify',
+    'custom',
+  ]),
   orgId: zod.number().optional(),
   config: zod.object({}).passthrough().optional(),
 });
@@ -739,7 +766,16 @@ export const GetConnectorResponse = zod.object({
   id: zod.number(),
   orgId: zod.number().nullish(),
   name: zod.string(),
-  type: zod.enum(['stripe', 'slack', 'twilio', 'google', 'notion', 'github', 'shopify', 'custom']),
+  type: zod.enum([
+    'stripe',
+    'slack',
+    'twilio',
+    'google',
+    'notion',
+    'github',
+    'shopify',
+    'custom',
+  ]),
   status: zod.enum(['active', 'inactive', 'error', 'pending']),
   isEnabled: zod.boolean().optional(),
   createdAt: zod.date().optional(),
@@ -764,7 +800,16 @@ export const UpdateConnectorResponse = zod.object({
   id: zod.number(),
   orgId: zod.number().nullish(),
   name: zod.string(),
-  type: zod.enum(['stripe', 'slack', 'twilio', 'google', 'notion', 'github', 'shopify', 'custom']),
+  type: zod.enum([
+    'stripe',
+    'slack',
+    'twilio',
+    'google',
+    'notion',
+    'github',
+    'shopify',
+    'custom',
+  ]),
   status: zod.enum(['active', 'inactive', 'error', 'pending']),
   isEnabled: zod.boolean().optional(),
   createdAt: zod.date().optional(),
@@ -796,7 +841,9 @@ export const ListNotificationsResponseItem = zod.object({
   isRead: zod.boolean(),
   createdAt: zod.date().optional(),
 });
-export const ListNotificationsResponse = zod.array(ListNotificationsResponseItem);
+export const ListNotificationsResponse = zod.array(
+  ListNotificationsResponseItem,
+);
 
 /**
  * @summary Create a notification
@@ -881,7 +928,9 @@ export const ListSubscriptionsResponseItem = zod.object({
   status: zod.enum(['active', 'trialing', 'past_due', 'canceled', 'paused']),
   createdAt: zod.date().optional(),
 });
-export const ListSubscriptionsResponse = zod.array(ListSubscriptionsResponseItem);
+export const ListSubscriptionsResponse = zod.array(
+  ListSubscriptionsResponseItem,
+);
 
 /**
  * @summary List invoices
@@ -913,7 +962,9 @@ export const ListStripeProductsResponseItem = zod.object({
     }),
   ),
 });
-export const ListStripeProductsResponse = zod.array(ListStripeProductsResponseItem);
+export const ListStripeProductsResponse = zod.array(
+  ListStripeProductsResponseItem,
+);
 
 /**
  * @summary Create a Stripe Checkout Session
@@ -1002,7 +1053,9 @@ export const ListStripeInvoicesResponseItem = zod.object({
   hostedInvoiceUrl: zod.string().nullish(),
   invoicePdf: zod.string().nullish(),
 });
-export const ListStripeInvoicesResponse = zod.array(ListStripeInvoicesResponseItem);
+export const ListStripeInvoicesResponse = zod.array(
+  ListStripeInvoicesResponseItem,
+);
 
 /**
  * @summary List feature flags
@@ -1029,7 +1082,9 @@ export const CreateFeatureFlagBody = zod.object({
   name: zod.string(),
   description: zod.string().optional(),
   isEnabled: zod.boolean().default(createFeatureFlagBodyIsEnabledDefault),
-  rolloutPercentage: zod.number().default(createFeatureFlagBodyRolloutPercentageDefault),
+  rolloutPercentage: zod
+    .number()
+    .default(createFeatureFlagBodyRolloutPercentageDefault),
 });
 
 /**
@@ -1119,7 +1174,9 @@ export const ListStephenContactsResponseItem = zod.object({
   status: zod.string().optional(),
   createdAt: zod.date().optional(),
 });
-export const ListStephenContactsResponse = zod.array(ListStephenContactsResponseItem);
+export const ListStephenContactsResponse = zod.array(
+  ListStephenContactsResponseItem,
+);
 
 /**
  * @summary Submit a contact form
@@ -1143,7 +1200,9 @@ export const ListStephenTestimonialsResponseItem = zod.object({
   rating: zod.number(),
   isPublished: zod.boolean().optional(),
 });
-export const ListStephenTestimonialsResponse = zod.array(ListStephenTestimonialsResponseItem);
+export const ListStephenTestimonialsResponse = zod.array(
+  ListStephenTestimonialsResponseItem,
+);
 
 /**
  * @summary List case studies
@@ -1158,7 +1217,9 @@ export const ListStephenCaseStudiesResponseItem = zod.object({
   technologies: zod.array(zod.string()).optional(),
   isPublished: zod.boolean().optional(),
 });
-export const ListStephenCaseStudiesResponse = zod.array(ListStephenCaseStudiesResponseItem);
+export const ListStephenCaseStudiesResponse = zod.array(
+  ListStephenCaseStudiesResponseItem,
+);
 
 /**
  * @summary Get Stephen's profile data
@@ -1180,7 +1241,9 @@ export const GetStephenProfileResponse = zod.object({
  * @summary List all content blocks
  */
 export const ListStephenContentBlocksQueryParams = zod.object({
-  type: zod.enum(['achievement', 'about', 'service', 'stat', 'skill']).optional(),
+  type: zod
+    .enum(['achievement', 'about', 'service', 'stat', 'skill'])
+    .optional(),
 });
 
 export const ListStephenContentBlocksResponseItem = zod.object({
@@ -1195,7 +1258,9 @@ export const ListStephenContentBlocksResponseItem = zod.object({
   metadata: zod.object({}).passthrough().nullish(),
   createdAt: zod.date(),
 });
-export const ListStephenContentBlocksResponse = zod.array(ListStephenContentBlocksResponseItem);
+export const ListStephenContentBlocksResponse = zod.array(
+  ListStephenContentBlocksResponseItem,
+);
 
 /**
  * @summary Create a content block
@@ -1371,7 +1436,9 @@ export const ListStephenBookingRequestsResponseItem = zod.object({
   status: zod.enum(['pending', 'confirmed', 'declined', 'completed']),
   createdAt: zod.date(),
 });
-export const ListStephenBookingRequestsResponse = zod.array(ListStephenBookingRequestsResponseItem);
+export const ListStephenBookingRequestsResponse = zod.array(
+  ListStephenBookingRequestsResponseItem,
+);
 
 /**
  * @summary Submit a booking request
@@ -1517,7 +1584,9 @@ export const ListFirestormCampaignsResponseItem = zod.object({
   budget: zod.string().nullish(),
   spent: zod.string().nullish(),
 });
-export const ListFirestormCampaignsResponse = zod.array(ListFirestormCampaignsResponseItem);
+export const ListFirestormCampaignsResponse = zod.array(
+  ListFirestormCampaignsResponseItem,
+);
 
 /**
  * @summary List leads
@@ -1531,7 +1600,9 @@ export const ListFirestormLeadsResponseItem = zod.object({
   score: zod.number().optional(),
   status: zod.string(),
 });
-export const ListFirestormLeadsResponse = zod.array(ListFirestormLeadsResponseItem);
+export const ListFirestormLeadsResponse = zod.array(
+  ListFirestormLeadsResponseItem,
+);
 
 /**
  * @summary List campaign analytics
@@ -1548,7 +1619,9 @@ export const ListFirestormAnalyticsResponseItem = zod.object({
   clicks: zod.number().optional(),
   conversions: zod.number().optional(),
 });
-export const ListFirestormAnalyticsResponse = zod.array(ListFirestormAnalyticsResponseItem);
+export const ListFirestormAnalyticsResponse = zod.array(
+  ListFirestormAnalyticsResponseItem,
+);
 
 /**
  * @summary List products
@@ -1588,7 +1661,9 @@ export const ListDreamscapeProjectsResponseItem = zod.object({
   status: zod.string(),
   mood: zod.string().nullish(),
 });
-export const ListDreamscapeProjectsResponse = zod.array(ListDreamscapeProjectsResponseItem);
+export const ListDreamscapeProjectsResponse = zod.array(
+  ListDreamscapeProjectsResponseItem,
+);
 
 /**
  * @summary List readiness assessments
@@ -1601,7 +1676,9 @@ export const ListReadinessAssessmentsResponseItem = zod.object({
   overallScore: zod.string().nullish(),
   assessorName: zod.string().nullish(),
 });
-export const ListReadinessAssessmentsResponse = zod.array(ListReadinessAssessmentsResponseItem);
+export const ListReadinessAssessmentsResponse = zod.array(
+  ListReadinessAssessmentsResponseItem,
+);
 
 /**
  * Returns a presigned GCS URL for direct upload. The client sends JSON
@@ -1623,7 +1700,9 @@ export const RequestUploadUrlBody = zod.object({
   orgId: zod
     .number()
     .optional()
-    .describe('Org ID for quota enforcement. Required when uploading on behalf of an org.'),
+    .describe(
+      'Org ID for quota enforcement. Required when uploading on behalf of an org.',
+    ),
 });
 
 export const RequestUploadUrlResponse = zod.object({
@@ -1647,7 +1726,9 @@ export const RequestUploadUrlResponse = zod.object({
       orgId: zod
         .number()
         .optional()
-        .describe('Org ID for quota enforcement. Required when uploading on behalf of an org.'),
+        .describe(
+          'Org ID for quota enforcement. Required when uploading on behalf of an org.',
+        ),
     })
     .optional(),
 });
@@ -1786,7 +1867,9 @@ export const ListCommandBillingPlansResponseItem = zod.object({
   features: zod.object({}).passthrough().optional(),
   createdAt: zod.date().optional(),
 });
-export const ListCommandBillingPlansResponse = zod.array(ListCommandBillingPlansResponseItem);
+export const ListCommandBillingPlansResponse = zod.array(
+  ListCommandBillingPlansResponseItem,
+);
 
 /**
  * @summary Subscribe to a Unified Command plan
@@ -1816,7 +1899,9 @@ export const ListTerraBillingPlansResponseItem = zod.object({
   features: zod.object({}).passthrough().optional(),
   createdAt: zod.date().optional(),
 });
-export const ListTerraBillingPlansResponse = zod.array(ListTerraBillingPlansResponseItem);
+export const ListTerraBillingPlansResponse = zod.array(
+  ListTerraBillingPlansResponseItem,
+);
 
 /**
  * @summary Subscribe to a Terra plan
@@ -1867,7 +1952,9 @@ export const cancelSubscriptionBodyCancelAtPeriodEndDefault = true;
 
 export const CancelSubscriptionBody = zod.object({
   subscriptionId: zod.string(),
-  cancelAtPeriodEnd: zod.boolean().default(cancelSubscriptionBodyCancelAtPeriodEndDefault),
+  cancelAtPeriodEnd: zod
+    .boolean()
+    .default(cancelSubscriptionBodyCancelAtPeriodEndDefault),
 });
 
 export const CancelSubscriptionResponse = zod.object({
@@ -1931,23 +2018,34 @@ export const GetTerraReitFilingsResponseItem = zod.object({
   filedAt: zod.date().optional(),
   url: zod.string().optional(),
 });
-export const GetTerraReitFilingsResponse = zod.array(GetTerraReitFilingsResponseItem);
+export const GetTerraReitFilingsResponse = zod.array(
+  GetTerraReitFilingsResponseItem,
+);
 
 /**
  * @summary Get demographic data for real estate analysis
  */
-export const GetTerraDemographicsResponse = zod.record(zod.string(), zod.unknown());
+export const GetTerraDemographicsResponse = zod.record(
+  zod.string(),
+  zod.unknown(),
+);
 
 /**
  * @summary Get property risk assessment data (flood, fire, seismic)
  */
-export const GetTerraPropertyRiskResponse = zod.record(zod.string(), zod.unknown());
+export const GetTerraPropertyRiskResponse = zod.record(
+  zod.string(),
+  zod.unknown(),
+);
 
 /**
  * @summary Get employment outlook for a market area
  */
 export const GetTerraEmploymentOutlookQueryParams = zod.object({
-  metro: zod.coerce.string().optional().describe('Metro area name or CBSA code'),
+  metro: zod.coerce
+    .string()
+    .optional()
+    .describe('Metro area name or CBSA code'),
 });
 
 export const GetTerraEmploymentOutlookResponse = zod.object({
@@ -2063,7 +2161,14 @@ export const GetTerraCommercialPropertiesQueryParams = zod.object({
   city: zod.coerce.string().optional(),
   state: zod.coerce.string().optional(),
   assetClass: zod
-    .enum(['office', 'retail', 'industrial', 'multifamily', 'hospitality', 'mixed-use'])
+    .enum([
+      'office',
+      'retail',
+      'industrial',
+      'multifamily',
+      'hospitality',
+      'mixed-use',
+    ])
     .optional(),
   minSqft: zod.coerce.number().optional(),
   maxSqft: zod.coerce.number().optional(),
@@ -2105,8 +2210,12 @@ export const getTerraCommercialCompsQueryMonthsBackDefault = 12;
 export const GetTerraCommercialCompsQueryParams = zod.object({
   propertyId: zod.coerce.string().optional(),
   address: zod.coerce.string().optional(),
-  radiusMiles: zod.coerce.number().default(getTerraCommercialCompsQueryRadiusMilesDefault),
-  monthsBack: zod.coerce.number().default(getTerraCommercialCompsQueryMonthsBackDefault),
+  radiusMiles: zod.coerce
+    .number()
+    .default(getTerraCommercialCompsQueryRadiusMilesDefault),
+  monthsBack: zod.coerce
+    .number()
+    .default(getTerraCommercialCompsQueryMonthsBackDefault),
 });
 
 export const GetTerraCommercialCompsResponse = zod.object({
@@ -2125,7 +2234,10 @@ export const GetTerraCommercialCompsResponse = zod.object({
 /**
  * @summary Get Terra enterprise feature flags
  */
-export const GetTerraEnterpriseFlagsResponse = zod.record(zod.string(), zod.boolean());
+export const GetTerraEnterpriseFlagsResponse = zod.record(
+  zod.string(),
+  zod.boolean(),
+);
 
 /**
  * @summary List all fleets
@@ -2217,7 +2329,9 @@ export const GetVesselPositionsResponseItem = zod.object({
   source: zod.string().optional(),
   recordedAt: zod.date(),
 });
-export const GetVesselPositionsResponse = zod.array(GetVesselPositionsResponseItem);
+export const GetVesselPositionsResponse = zod.array(
+  GetVesselPositionsResponseItem,
+);
 
 /**
  * @summary Get cargo manifest for a vessel
@@ -2252,7 +2366,9 @@ export const ListAllVesselRoutesResponseItem = zod.object({
   status: zod.enum(['planned', 'active', 'completed', 'cancelled']),
   waypoints: zod.array(zod.object({}).passthrough()).optional(),
 });
-export const ListAllVesselRoutesResponse = zod.array(ListAllVesselRoutesResponseItem);
+export const ListAllVesselRoutesResponse = zod.array(
+  ListAllVesselRoutesResponseItem,
+);
 
 /**
  * @summary Get planned routes for a specific vessel
@@ -2334,7 +2450,9 @@ export const ListVesselAlertRulesResponseItem = zod.object({
   appliesTo: zod.enum(['all', 'fleet', 'vessel']).optional(),
   targetId: zod.number().nullish(),
 });
-export const ListVesselAlertRulesResponse = zod.array(ListVesselAlertRulesResponseItem);
+export const ListVesselAlertRulesResponse = zod.array(
+  ListVesselAlertRulesResponseItem,
+);
 
 /**
  * @summary Create a vessel alert rule
@@ -2420,7 +2538,9 @@ export const GetVesselWeatherSnapshotsResponseItem = zod.object({
   visibilityKm: zod.number().optional(),
   updatedAt: zod.date().optional(),
 });
-export const GetVesselWeatherSnapshotsResponse = zod.array(GetVesselWeatherSnapshotsResponseItem);
+export const GetVesselWeatherSnapshotsResponse = zod.array(
+  GetVesselWeatherSnapshotsResponseItem,
+);
 
 /**
  * @summary List all route simulations
@@ -2438,7 +2558,9 @@ export const ListVesselSimulationsResponseItem = zod.object({
   result: zod.object({}).passthrough().nullish(),
   createdAt: zod.date(),
 });
-export const ListVesselSimulationsResponse = zod.array(ListVesselSimulationsResponseItem);
+export const ListVesselSimulationsResponse = zod.array(
+  ListVesselSimulationsResponseItem,
+);
 
 /**
  * @summary Run a route simulation
@@ -2482,7 +2604,9 @@ export const GetVesselLiveChokepointsResponseItem = zod.object({
   vessels: zod.number().optional(),
   avgDelayHours: zod.number().optional(),
 });
-export const GetVesselLiveChokepointsResponse = zod.array(GetVesselLiveChokepointsResponseItem);
+export const GetVesselLiveChokepointsResponse = zod.array(
+  GetVesselLiveChokepointsResponseItem,
+);
 
 /**
  * @summary Get active geopolitical events affecting maritime routes
@@ -2610,7 +2734,9 @@ export const ListVesselCommandWorkflowsResponseItem = zod.object({
   createdAt: zod.date(),
   completedAt: zod.date().nullish(),
 });
-export const ListVesselCommandWorkflowsResponse = zod.array(ListVesselCommandWorkflowsResponseItem);
+export const ListVesselCommandWorkflowsResponse = zod.array(
+  ListVesselCommandWorkflowsResponseItem,
+);
 
 /**
  * @summary Create a vessel command workflow
@@ -2639,7 +2765,9 @@ export const UpdateVesselCommandWorkflowBody = zod.object({
 export const ingestAlloySignalBodyPriorityDefault = `normal`;
 
 export const IngestAlloySignalBody = zod.object({
-  source: zod.string().describe('Originating system or integration (e.g. terra, vessels, alloy)'),
+  source: zod
+    .string()
+    .describe('Originating system or integration (e.g. terra, vessels, alloy)'),
   domain: zod.string(),
   eventType: zod.string().optional(),
   payload: zod.object({}).passthrough(),
@@ -2662,7 +2790,9 @@ export const IngestAlloySignalBatchBody = zod.object({
       zod.object({
         source: zod
           .string()
-          .describe('Originating system or integration (e.g. terra, vessels, alloy)'),
+          .describe(
+            'Originating system or integration (e.g. terra, vessels, alloy)',
+          ),
         domain: zod.string(),
         eventType: zod.string().optional(),
         payload: zod.object({}).passthrough(),
@@ -2705,7 +2835,13 @@ export const ListAlloySignalsResponse = zod.object({
         eventType: zod.string().nullish(),
         payload: zod.object({}).passthrough(),
         priority: zod.string().optional(),
-        status: zod.enum(['queued', 'processing', 'processed', 'failed', 'ignored']),
+        status: zod.enum([
+          'queued',
+          'processing',
+          'processed',
+          'failed',
+          'ignored',
+        ]),
         workflowId: zod.string().nullish(),
         correlationId: zod.string().nullish(),
         ingestedAt: zod.date(),
@@ -2736,7 +2872,9 @@ export const ListAlloyWorkflowsResponseItem = zod.object({
   createdAt: zod.date(),
   updatedAt: zod.date().optional(),
 });
-export const ListAlloyWorkflowsResponse = zod.array(ListAlloyWorkflowsResponseItem);
+export const ListAlloyWorkflowsResponse = zod.array(
+  ListAlloyWorkflowsResponseItem,
+);
 
 /**
  * @summary Create a new Alloy workflow
@@ -2835,7 +2973,13 @@ export const ListAlloyRunsResponse = zod.object({
       zod.object({
         id: zod.string(),
         workflowId: zod.string(),
-        status: zod.enum(['queued', 'running', 'completed', 'failed', 'cancelled']),
+        status: zod.enum([
+          'queued',
+          'running',
+          'completed',
+          'failed',
+          'cancelled',
+        ]),
         input: zod.object({}).passthrough().nullish(),
         output: zod.object({}).passthrough().nullish(),
         error: zod.string().nullish(),
@@ -2925,7 +3069,9 @@ export const ListAlloyArtifactsResponseItem = zod.object({
   rejectionReason: zod.string().nullish(),
   createdAt: zod.date(),
 });
-export const ListAlloyArtifactsResponse = zod.array(ListAlloyArtifactsResponseItem);
+export const ListAlloyArtifactsResponse = zod.array(
+  ListAlloyArtifactsResponseItem,
+);
 
 /**
  * @summary Get an Alloy artifact by ID
@@ -2983,7 +3129,9 @@ export const ListAlloyAdminFlagsResponseItem = zod.object({
   rolloutPercentage: zod.number(),
   createdAt: zod.date().optional(),
 });
-export const ListAlloyAdminFlagsResponse = zod.array(ListAlloyAdminFlagsResponseItem);
+export const ListAlloyAdminFlagsResponse = zod.array(
+  ListAlloyAdminFlagsResponseItem,
+);
 
 /**
  * @summary Create or update an Alloy admin flag
@@ -2994,7 +3142,9 @@ export const UpsertAlloyAdminFlagBody = zod.object({
   key: zod.string(),
   name: zod.string().optional(),
   isEnabled: zod.boolean(),
-  rolloutPercentage: zod.number().default(upsertAlloyAdminFlagBodyRolloutPercentageDefault),
+  rolloutPercentage: zod
+    .number()
+    .default(upsertAlloyAdminFlagBodyRolloutPercentageDefault),
 });
 
 /**
@@ -3118,7 +3268,14 @@ export const listPlatformDecisionsQueryOffsetDefault = 0;
 
 export const ListPlatformDecisionsQueryParams = zod.object({
   status: zod
-    .enum(['proposed', 'pending_approval', 'approved', 'rejected', 'executed', 'expired'])
+    .enum([
+      'proposed',
+      'pending_approval',
+      'approved',
+      'rejected',
+      'executed',
+      'expired',
+    ])
     .optional(),
   limit: zod.coerce.number().default(listPlatformDecisionsQueryLimitDefault),
   offset: zod.coerce.number().default(listPlatformDecisionsQueryOffsetDefault),
@@ -3249,7 +3406,9 @@ export const GetPlatformDecisionResponse = zod
     rejectedAt: zod.date().nullish(),
     rejectionReason: zod.string().nullish(),
     executedAt: zod.date().nullish(),
-    executionOutcome: zod.enum(['pending', 'executed', 'failed', 'rejected', 'expired']).nullish(),
+    executionOutcome: zod
+      .enum(['pending', 'executed', 'failed', 'rejected', 'expired'])
+      .nullish(),
     rawInput: zod.string().nullish(),
     rawOutput: zod.string().nullish(),
   })
@@ -3431,7 +3590,10 @@ export const GetHoldingsEcosystemHealthResponse = zod.object({
 /**
  * @summary Get high-level ecosystem summary for the holdings dashboard
  */
-export const GetHoldingsEcosystemSummaryResponse = zod.record(zod.string(), zod.unknown());
+export const GetHoldingsEcosystemSummaryResponse = zod.record(
+  zod.string(),
+  zod.unknown(),
+);
 
 /**
  * @summary List all portfolio ventures
@@ -3465,7 +3627,9 @@ export const CreateVentureBody = zod.object({
   description: zod.string().optional(),
   sector: zod.string().optional(),
   stage: zod.string().optional(),
-  status: zod.enum(['active', 'exited', 'acquired', 'wind_down', 'stealth']).optional(),
+  status: zod
+    .enum(['active', 'exited', 'acquired', 'wind_down', 'stealth'])
+    .optional(),
   logoUrl: zod.string().optional(),
   websiteUrl: zod.string().optional(),
   foundedYear: zod.number().optional(),
@@ -3532,7 +3696,9 @@ export const DeleteVentureParams = zod.object({
  */
 export const ListVentureMilestonesQueryParams = zod.object({
   ventureId: zod.coerce.number().optional(),
-  status: zod.enum(['planned', 'in_progress', 'completed', 'missed']).optional(),
+  status: zod
+    .enum(['planned', 'in_progress', 'completed', 'missed'])
+    .optional(),
 });
 
 export const ListVentureMilestonesResponseItem = zod.object({
@@ -3544,7 +3710,9 @@ export const ListVentureMilestonesResponseItem = zod.object({
   completedAt: zod.date().nullish(),
   status: zod.enum(['planned', 'in_progress', 'completed', 'missed']),
 });
-export const ListVentureMilestonesResponse = zod.array(ListVentureMilestonesResponseItem);
+export const ListVentureMilestonesResponse = zod.array(
+  ListVentureMilestonesResponseItem,
+);
 
 /**
  * @summary Create a milestone for a venture
@@ -3554,7 +3722,9 @@ export const CreateVentureMilestoneBody = zod.object({
   title: zod.string(),
   description: zod.string().optional(),
   targetDate: zod.date(),
-  status: zod.enum(['planned', 'in_progress', 'completed', 'missed']).optional(),
+  status: zod
+    .enum(['planned', 'in_progress', 'completed', 'missed'])
+    .optional(),
 });
 
 /**
@@ -3580,7 +3750,9 @@ export const ListVentureMetricsResponseItem = zod.object({
   unit: zod.string().nullish(),
   recordedAt: zod.date(),
 });
-export const ListVentureMetricsResponse = zod.array(ListVentureMetricsResponseItem);
+export const ListVentureMetricsResponse = zod.array(
+  ListVentureMetricsResponseItem,
+);
 
 /**
  * @summary Record a venture metric data point
@@ -3616,7 +3788,9 @@ export const ListVentureLeadershipResponseItem = zod.object({
   avatarUrl: zod.string().nullish(),
   linkedinUrl: zod.string().nullish(),
 });
-export const ListVentureLeadershipResponse = zod.array(ListVentureLeadershipResponseItem);
+export const ListVentureLeadershipResponse = zod.array(
+  ListVentureLeadershipResponseItem,
+);
 
 /**
  * @summary Add a leadership profile to a venture
@@ -3655,7 +3829,9 @@ export const ListHoldingsInquiriesResponseItem = zod.object({
   status: zod.enum(['new', 'in_review', 'responded', 'archived']),
   createdAt: zod.date(),
 });
-export const ListHoldingsInquiriesResponse = zod.array(ListHoldingsInquiriesResponseItem);
+export const ListHoldingsInquiriesResponse = zod.array(
+  ListHoldingsInquiriesResponseItem,
+);
 
 /**
  * @summary Submit a holdings inquiry (public — rate limited)
@@ -3903,7 +4079,9 @@ export const GetAdminExportHistoryResponseItem = zod.object({
   createdAt: zod.date(),
   completedAt: zod.date().nullish(),
 });
-export const GetAdminExportHistoryResponse = zod.array(GetAdminExportHistoryResponseItem);
+export const GetAdminExportHistoryResponse = zod.array(
+  GetAdminExportHistoryResponseItem,
+);
 
 /**
  * @summary Start impersonating a user (admin)
@@ -3951,7 +4129,9 @@ export const ListAdminFeatureFlagsResponseItem = zod.object({
   rolloutPercentage: zod.number(),
   createdAt: zod.date().optional(),
 });
-export const ListAdminFeatureFlagsResponse = zod.array(ListAdminFeatureFlagsResponseItem);
+export const ListAdminFeatureFlagsResponse = zod.array(
+  ListAdminFeatureFlagsResponseItem,
+);
 
 /**
  * @summary Enable or disable a feature flag (admin)
@@ -3984,7 +4164,9 @@ export const ListBuiltInReportTemplatesResponseItem = zod.object({
   isBuiltIn: zod.boolean(),
   createdAt: zod.date().optional(),
 });
-export const ListBuiltInReportTemplatesResponse = zod.array(ListBuiltInReportTemplatesResponseItem);
+export const ListBuiltInReportTemplatesResponse = zod.array(
+  ListBuiltInReportTemplatesResponseItem,
+);
 
 /**
  * @summary Get a built-in report template by key
@@ -4017,7 +4199,9 @@ export const ListReportTemplatesResponseItem = zod.object({
   isBuiltIn: zod.boolean(),
   createdAt: zod.date().optional(),
 });
-export const ListReportTemplatesResponse = zod.array(ListReportTemplatesResponseItem);
+export const ListReportTemplatesResponse = zod.array(
+  ListReportTemplatesResponseItem,
+);
 
 /**
  * @summary Create a report template
@@ -4101,7 +4285,13 @@ export const ListReportsResponse = zod.object({
         id: zod.number(),
         title: zod.string(),
         templateId: zod.number().nullish(),
-        status: zod.enum(['draft', 'under_review', 'approved', 'published', 'archived']),
+        status: zod.enum([
+          'draft',
+          'under_review',
+          'approved',
+          'published',
+          'archived',
+        ]),
         generatedBy: zod.number().nullish(),
         parameters: zod.object({}).passthrough().nullish(),
         pdfUrl: zod.string().nullish(),
@@ -4132,7 +4322,9 @@ export const ListReportSchedulesResponseItem = zod.object({
   nextRunAt: zod.date().optional(),
   recipients: zod.array(zod.string()).optional(),
 });
-export const ListReportSchedulesResponse = zod.array(ListReportSchedulesResponseItem);
+export const ListReportSchedulesResponse = zod.array(
+  ListReportSchedulesResponseItem,
+);
 
 /**
  * @summary Get a report by ID
@@ -4145,7 +4337,13 @@ export const GetReportResponse = zod.object({
   id: zod.number(),
   title: zod.string(),
   templateId: zod.number().nullish(),
-  status: zod.enum(['draft', 'under_review', 'approved', 'published', 'archived']),
+  status: zod.enum([
+    'draft',
+    'under_review',
+    'approved',
+    'published',
+    'archived',
+  ]),
   generatedBy: zod.number().nullish(),
   parameters: zod.object({}).passthrough().nullish(),
   pdfUrl: zod.string().nullish(),
@@ -4173,7 +4371,9 @@ export const ListReportVersionsResponseItem = zod.object({
   createdAt: zod.date().optional(),
   createdBy: zod.string().optional(),
 });
-export const ListReportVersionsResponse = zod.array(ListReportVersionsResponseItem);
+export const ListReportVersionsResponse = zod.array(
+  ListReportVersionsResponseItem,
+);
 
 /**
  * @summary Update a report status
@@ -4183,7 +4383,13 @@ export const UpdateReportStatusParams = zod.object({
 });
 
 export const UpdateReportStatusBody = zod.object({
-  status: zod.enum(['draft', 'under_review', 'approved', 'published', 'archived']),
+  status: zod.enum([
+    'draft',
+    'under_review',
+    'approved',
+    'published',
+    'archived',
+  ]),
 });
 
 /**
@@ -4245,7 +4451,9 @@ export const ListReportDistributionsResponseItem = zod.object({
   sentAt: zod.date().optional(),
   status: zod.string().optional(),
 });
-export const ListReportDistributionsResponse = zod.array(ListReportDistributionsResponseItem);
+export const ListReportDistributionsResponse = zod.array(
+  ListReportDistributionsResponseItem,
+);
 
 /**
  * @summary Export platform audit log to CSV/JSON
@@ -4253,7 +4461,9 @@ export const ListReportDistributionsResponse = zod.array(ListReportDistributions
 export const exportAuditLogBodyFormatDefault = `csv`;
 
 export const ExportAuditLogBody = zod.object({
-  format: zod.enum(['csv', 'json', 'xlsx']).default(exportAuditLogBodyFormatDefault),
+  format: zod
+    .enum(['csv', 'json', 'xlsx'])
+    .default(exportAuditLogBodyFormatDefault),
   from: zod.date().optional(),
   to: zod.date().optional(),
   filters: zod.object({}).passthrough().optional(),
@@ -4266,7 +4476,9 @@ export const ExportAuditLogBody = zod.object({
 export const exportAegisIncidentsBodyFormatDefault = `csv`;
 
 export const ExportAegisIncidentsBody = zod.object({
-  format: zod.enum(['csv', 'json', 'xlsx']).default(exportAegisIncidentsBodyFormatDefault),
+  format: zod
+    .enum(['csv', 'json', 'xlsx'])
+    .default(exportAegisIncidentsBodyFormatDefault),
   from: zod.date().optional(),
   to: zod.date().optional(),
   filters: zod.object({}).passthrough().optional(),
@@ -4279,7 +4491,9 @@ export const ExportAegisIncidentsBody = zod.object({
 export const exportVesselsDataBodyFormatDefault = `csv`;
 
 export const ExportVesselsDataBody = zod.object({
-  format: zod.enum(['csv', 'json', 'xlsx']).default(exportVesselsDataBodyFormatDefault),
+  format: zod
+    .enum(['csv', 'json', 'xlsx'])
+    .default(exportVesselsDataBodyFormatDefault),
   from: zod.date().optional(),
   to: zod.date().optional(),
   filters: zod.object({}).passthrough().optional(),
@@ -4292,7 +4506,9 @@ export const ExportVesselsDataBody = zod.object({
 export const exportTerraDealsBodyFormatDefault = `csv`;
 
 export const ExportTerraDealsBody = zod.object({
-  format: zod.enum(['csv', 'json', 'xlsx']).default(exportTerraDealsBodyFormatDefault),
+  format: zod
+    .enum(['csv', 'json', 'xlsx'])
+    .default(exportTerraDealsBodyFormatDefault),
   from: zod.date().optional(),
   to: zod.date().optional(),
   filters: zod.object({}).passthrough().optional(),
@@ -4305,7 +4521,9 @@ export const ExportTerraDealsBody = zod.object({
 export const exportLyteSignalsBodyFormatDefault = `csv`;
 
 export const ExportLyteSignalsBody = zod.object({
-  format: zod.enum(['csv', 'json', 'xlsx']).default(exportLyteSignalsBodyFormatDefault),
+  format: zod
+    .enum(['csv', 'json', 'xlsx'])
+    .default(exportLyteSignalsBodyFormatDefault),
   from: zod.date().optional(),
   to: zod.date().optional(),
   filters: zod.object({}).passthrough().optional(),
@@ -4318,7 +4536,9 @@ export const ExportLyteSignalsBody = zod.object({
 export const exportMSPTicketsBodyFormatDefault = `csv`;
 
 export const ExportMSPTicketsBody = zod.object({
-  format: zod.enum(['csv', 'json', 'xlsx']).default(exportMSPTicketsBodyFormatDefault),
+  format: zod
+    .enum(['csv', 'json', 'xlsx'])
+    .default(exportMSPTicketsBodyFormatDefault),
   from: zod.date().optional(),
   to: zod.date().optional(),
   filters: zod.object({}).passthrough().optional(),
@@ -4331,7 +4551,9 @@ export const ExportMSPTicketsBody = zod.object({
 export const exportUsageMeteringBodyFormatDefault = `csv`;
 
 export const ExportUsageMeteringBody = zod.object({
-  format: zod.enum(['csv', 'json', 'xlsx']).default(exportUsageMeteringBodyFormatDefault),
+  format: zod
+    .enum(['csv', 'json', 'xlsx'])
+    .default(exportUsageMeteringBodyFormatDefault),
   from: zod.date().optional(),
   to: zod.date().optional(),
   filters: zod.object({}).passthrough().optional(),
@@ -4344,7 +4566,9 @@ export const ExportUsageMeteringBody = zod.object({
 export const exportRevenueEventsBodyFormatDefault = `csv`;
 
 export const ExportRevenueEventsBody = zod.object({
-  format: zod.enum(['csv', 'json', 'xlsx']).default(exportRevenueEventsBodyFormatDefault),
+  format: zod
+    .enum(['csv', 'json', 'xlsx'])
+    .default(exportRevenueEventsBodyFormatDefault),
   from: zod.date().optional(),
   to: zod.date().optional(),
   filters: zod.object({}).passthrough().optional(),
@@ -4385,7 +4609,13 @@ export const ListExportHistoryResponse = zod.object({
         id: zod.number(),
         domain: zod.string(),
         format: zod.enum(['csv', 'json', 'xlsx']),
-        status: zod.enum(['queued', 'running', 'completed', 'failed', 'expired']),
+        status: zod.enum([
+          'queued',
+          'running',
+          'completed',
+          'failed',
+          'expired',
+        ]),
         rowCount: zod.number().nullish(),
         fileSizeBytes: zod.number().nullish(),
         downloadToken: zod.string().nullish(),
@@ -4425,7 +4655,9 @@ export const GetMeshAgentIndexResponseItem = zod.object({
   endpoints: zod.object({}).passthrough().optional(),
   metadata: zod.object({}).passthrough().optional(),
 });
-export const GetMeshAgentIndexResponse = zod.array(GetMeshAgentIndexResponseItem);
+export const GetMeshAgentIndexResponse = zod.array(
+  GetMeshAgentIndexResponseItem,
+);
 
 /**
  * @summary List all registered A2A agent cards
@@ -4535,7 +4767,10 @@ export const listA2ATasksQueryLimitDefault = 50;
 export const listA2ATasksQueryLimitMax = 100;
 
 export const ListA2ATasksQueryParams = zod.object({
-  limit: zod.coerce.number().max(listA2ATasksQueryLimitMax).default(listA2ATasksQueryLimitDefault),
+  limit: zod.coerce
+    .number()
+    .max(listA2ATasksQueryLimitMax)
+    .default(listA2ATasksQueryLimitDefault),
 });
 
 export const ListA2ATasksResponse = zod.object({
@@ -4544,7 +4779,9 @@ export const ListA2ATasksResponse = zod.object({
       zod.object({
         taskId: zod.string().optional(),
         agentId: zod.string().optional(),
-        status: zod.enum(['pending', 'running', 'completed', 'failed']).optional(),
+        status: zod
+          .enum(['pending', 'running', 'completed', 'failed'])
+          .optional(),
         input: zod.object({}).passthrough().optional(),
         output: zod.string().nullish(),
         error: zod.string().nullish(),
@@ -4631,7 +4868,9 @@ export const DiscoverA2AAgentsResponse = zod.object({
         capabilities: zod.array(zod.string()).optional(),
         domain: zod.string().optional(),
         availability: zod.enum(['available', 'busy', 'offline']).optional(),
-        trustLevel: zod.enum(['public', 'internal', 'trusted', 'admin']).optional(),
+        trustLevel: zod
+          .enum(['public', 'internal', 'trusted', 'admin'])
+          .optional(),
         endpoints: zod.object({}).passthrough().optional(),
         metadata: zod.object({}).passthrough().optional(),
       }),
@@ -4852,7 +5091,9 @@ export const CopilotChatBody = zod.object({
   stream: zod
     .boolean()
     .default(copilotChatBodyStreamDefault)
-    .describe('If true, response is streamed as SSE; if false, returned as JSON'),
+    .describe(
+      'If true, response is streamed as SSE; if false, returned as JSON',
+    ),
 });
 
 export const CopilotChatResponse = zod.object({
@@ -4867,7 +5108,10 @@ header on every delivery. Store it securely — it is only returned once.
  * @summary Register a webhook endpoint
  */
 export const RegisterWebhookBody = zod.object({
-  url: zod.string().url().describe('The HTTPS endpoint that will receive webhook deliveries'),
+  url: zod
+    .string()
+    .url()
+    .describe('The HTTPS endpoint that will receive webhook deliveries'),
   eventTypes: zod
     .union([
       zod.enum(['*']),
@@ -4905,7 +5149,10 @@ export const RegisterWebhookBody = zod.object({
     .describe(
       'Event types to subscribe to. Use `\"\*\"` for all events, or an array of specific\nevent type strings such as `[\"decision.created\", \"decision.executed\"]`.\n',
     ),
-  description: zod.string().optional().describe('Human-readable label for this endpoint'),
+  description: zod
+    .string()
+    .optional()
+    .describe('Human-readable label for this endpoint'),
 });
 
 /**
@@ -4937,7 +5184,10 @@ export const ListWebhooksResponse = zod.object({
  * @summary Register a webhook endpoint (verbose path)
  */
 export const RegisterWebhookEndpointBody = zod.object({
-  url: zod.string().url().describe('The HTTPS endpoint that will receive webhook deliveries'),
+  url: zod
+    .string()
+    .url()
+    .describe('The HTTPS endpoint that will receive webhook deliveries'),
   eventTypes: zod
     .union([
       zod.enum(['*']),
@@ -4975,7 +5225,10 @@ export const RegisterWebhookEndpointBody = zod.object({
     .describe(
       'Event types to subscribe to. Use `\"\*\"` for all events, or an array of specific\nevent type strings such as `[\"decision.created\", \"decision.executed\"]`.\n',
     ),
-  description: zod.string().optional().describe('Human-readable label for this endpoint'),
+  description: zod
+    .string()
+    .optional()
+    .describe('Human-readable label for this endpoint'),
 });
 
 /**
@@ -5053,7 +5306,9 @@ export const ListWebhookDeliveriesQueryParams = zod.object({
   eventType: zod.coerce
     .string()
     .optional()
-    .describe('Filter by event type. Supports prefix wildcard, e.g. `decision.\*`'),
+    .describe(
+      'Filter by event type. Supports prefix wildcard, e.g. `decision.\*`',
+    ),
   limit: zod.coerce
     .number()
     .max(listWebhookDeliveriesQueryLimitMax)
@@ -5065,14 +5320,29 @@ export const ListWebhookDeliveriesResponse = zod.object({
   data: zod
     .array(
       zod.object({
-        id: zod.string().describe('Unique delivery attempt identifier (prefix `del_`)'),
+        id: zod
+          .string()
+          .describe('Unique delivery attempt identifier (prefix `del_`)'),
         endpointId: zod.string(),
-        eventType: zod.string().describe('The event type, e.g. `decision.executed`'),
+        eventType: zod
+          .string()
+          .describe('The event type, e.g. `decision.executed`'),
         status: zod.enum(['pending', 'delivered', 'failed']),
-        statusCode: zod.number().optional().describe('HTTP status code from the receiving server'),
-        attempt: zod.number().describe('Delivery attempt number (1 = first, 2+ = retry)'),
-        deliveredAt: zod.number().optional().describe('Unix timestamp of delivery attempt (ms)'),
-        error: zod.string().optional().describe('Error message if delivery failed'),
+        statusCode: zod
+          .number()
+          .optional()
+          .describe('HTTP status code from the receiving server'),
+        attempt: zod
+          .number()
+          .describe('Delivery attempt number (1 = first, 2+ = retry)'),
+        deliveredAt: zod
+          .number()
+          .optional()
+          .describe('Unix timestamp of delivery attempt (ms)'),
+        error: zod
+          .string()
+          .optional()
+          .describe('Error message if delivery failed'),
       }),
     )
     .optional(),
@@ -5102,10 +5372,17 @@ webhook event after evaluation.
 export const EvaluateDecisionSignalsBody = zod.object({
   groups: zod
     .array(
-      zod.object({}).passthrough().describe('Signal group with domain context and business impact'),
+      zod
+        .object({})
+        .passthrough()
+        .describe('Signal group with domain context and business impact'),
     )
     .min(1),
-  weights: zod.object({}).passthrough().optional().describe('Optional custom ranking weights'),
+  weights: zod
+    .object({})
+    .passthrough()
+    .optional()
+    .describe('Optional custom ranking weights'),
 });
 
 export const EvaluateDecisionSignalsResponse = zod.object({
@@ -5129,7 +5406,9 @@ export const ExecuteDecisionWorkflowBody = zod.object({
   workflowId: zod.string(),
   recommendationId: zod.string().optional(),
   isDryRun: zod.boolean().default(executeDecisionWorkflowBodyIsDryRunDefault),
-  isSimulation: zod.boolean().default(executeDecisionWorkflowBodyIsSimulationDefault),
+  isSimulation: zod
+    .boolean()
+    .default(executeDecisionWorkflowBodyIsSimulationDefault),
   approvedBy: zod.string().optional(),
   metadata: zod.object({}).passthrough().optional(),
 });
@@ -5175,9 +5454,19 @@ export const ProveDecisionRunParams = zod.object({
 });
 
 export const ProveDecisionRunBody = zod.object({
-  proofType: zod.enum(['human-verified', 'automated-check', 'audit-trail', 'cryptographic']),
-  proofHash: zod.string().optional().describe('Optional cryptographic hash of proof artifact'),
-  provedBy: zod.string().describe('Identifier of the person or system providing proof'),
+  proofType: zod.enum([
+    'human-verified',
+    'automated-check',
+    'audit-trail',
+    'cryptographic',
+  ]),
+  proofHash: zod
+    .string()
+    .optional()
+    .describe('Optional cryptographic hash of proof artifact'),
+  provedBy: zod
+    .string()
+    .describe('Identifier of the person or system providing proof'),
   notes: zod.string().optional(),
   evidence: zod
     .array(
@@ -5219,8 +5508,12 @@ export const CounselListMattersResponse = zod.object({
             'contract',
           ])
           .optional(),
-        status: zod.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']).optional(),
-        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        status: zod
+          .enum(['active', 'pending', 'closed', 'escalated', 'on-hold'])
+          .optional(),
+        privilegeLevel: zod
+          .enum(['public', 'confidential', 'privileged', 'restricted'])
+          .optional(),
         pressureScore: zod.number().optional(),
         complexityScore: zod.number().optional(),
         openedDate: zod.string().optional(),
@@ -5272,7 +5565,13 @@ export const CounselListMattersResponse = zod.object({
               description: zod.string().optional(),
               dueDate: zod.string().optional(),
               status: zod
-                .enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk'])
+                .enum([
+                  'pending',
+                  'in-progress',
+                  'complete',
+                  'overdue',
+                  'at-risk',
+                ])
                 .optional(),
               assignee: zod.string().optional(),
               dependencies: zod.array(zod.string()).optional(),
@@ -5365,7 +5664,12 @@ export const CounselCreateMatterBody = zod.object({
     'contract',
   ]),
   status: zod.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']),
-  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']),
+  privilegeLevel: zod.enum([
+    'public',
+    'confidential',
+    'privileged',
+    'restricted',
+  ]),
   pressureScore: zod.number(),
   complexityScore: zod.number(),
   openedDate: zod.string(),
@@ -5391,7 +5695,14 @@ export const CounselCreateMatterBody = zod.object({
       id: zod.string().optional(),
       name: zod.string().optional(),
       role: zod
-        .enum(['client', 'opposing-counsel', 'regulator', 'third-party', 'expert', 'co-counsel'])
+        .enum([
+          'client',
+          'opposing-counsel',
+          'regulator',
+          'third-party',
+          'expert',
+          'co-counsel',
+        ])
         .optional(),
       counsel: zod.string().optional(),
       jurisdiction: zod.string().optional(),
@@ -5415,8 +5726,12 @@ export const CounselCreateMatterResponse = zod.object({
       'contract',
     ])
     .optional(),
-  status: zod.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']).optional(),
-  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+  status: zod
+    .enum(['active', 'pending', 'closed', 'escalated', 'on-hold'])
+    .optional(),
+  privilegeLevel: zod
+    .enum(['public', 'confidential', 'privileged', 'restricted'])
+    .optional(),
   pressureScore: zod.number().optional(),
   complexityScore: zod.number().optional(),
   openedDate: zod.string().optional(),
@@ -5435,7 +5750,14 @@ export const CounselCreateMatterResponse = zod.object({
         id: zod.string().optional(),
         name: zod.string().optional(),
         role: zod
-          .enum(['client', 'opposing-counsel', 'regulator', 'third-party', 'expert', 'co-counsel'])
+          .enum([
+            'client',
+            'opposing-counsel',
+            'regulator',
+            'third-party',
+            'expert',
+            'co-counsel',
+          ])
           .optional(),
         counsel: zod.string().optional(),
         jurisdiction: zod.string().optional(),
@@ -5460,10 +5782,14 @@ export const CounselCreateMatterResponse = zod.object({
         title: zod.string().optional(),
         description: zod.string().optional(),
         dueDate: zod.string().optional(),
-        status: zod.enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk']).optional(),
+        status: zod
+          .enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk'])
+          .optional(),
         assignee: zod.string().optional(),
         dependencies: zod.array(zod.string()).optional(),
-        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        privilegeLevel: zod
+          .enum(['public', 'confidential', 'privileged', 'restricted'])
+          .optional(),
         filingRequired: zod.boolean().optional(),
         courtId: zod.string().optional(),
         consequence: zod.string().optional(),
@@ -5516,7 +5842,9 @@ export const CounselCreateMatterResponse = zod.object({
           .optional(),
         title: zod.string().optional(),
         summary: zod.string().optional(),
-        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        privilegeLevel: zod
+          .enum(['public', 'confidential', 'privileged', 'restricted'])
+          .optional(),
         author: zod.string().optional(),
         parties: zod.array(zod.string()).optional(),
         documentRef: zod.string().optional(),
@@ -5550,8 +5878,12 @@ export const CounselGetMatterResponse = zod.object({
       'contract',
     ])
     .optional(),
-  status: zod.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']).optional(),
-  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+  status: zod
+    .enum(['active', 'pending', 'closed', 'escalated', 'on-hold'])
+    .optional(),
+  privilegeLevel: zod
+    .enum(['public', 'confidential', 'privileged', 'restricted'])
+    .optional(),
   pressureScore: zod.number().optional(),
   complexityScore: zod.number().optional(),
   openedDate: zod.string().optional(),
@@ -5570,7 +5902,14 @@ export const CounselGetMatterResponse = zod.object({
         id: zod.string().optional(),
         name: zod.string().optional(),
         role: zod
-          .enum(['client', 'opposing-counsel', 'regulator', 'third-party', 'expert', 'co-counsel'])
+          .enum([
+            'client',
+            'opposing-counsel',
+            'regulator',
+            'third-party',
+            'expert',
+            'co-counsel',
+          ])
           .optional(),
         counsel: zod.string().optional(),
         jurisdiction: zod.string().optional(),
@@ -5595,10 +5934,14 @@ export const CounselGetMatterResponse = zod.object({
         title: zod.string().optional(),
         description: zod.string().optional(),
         dueDate: zod.string().optional(),
-        status: zod.enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk']).optional(),
+        status: zod
+          .enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk'])
+          .optional(),
         assignee: zod.string().optional(),
         dependencies: zod.array(zod.string()).optional(),
-        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        privilegeLevel: zod
+          .enum(['public', 'confidential', 'privileged', 'restricted'])
+          .optional(),
         filingRequired: zod.boolean().optional(),
         courtId: zod.string().optional(),
         consequence: zod.string().optional(),
@@ -5651,7 +5994,9 @@ export const CounselGetMatterResponse = zod.object({
           .optional(),
         title: zod.string().optional(),
         summary: zod.string().optional(),
-        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        privilegeLevel: zod
+          .enum(['public', 'confidential', 'privileged', 'restricted'])
+          .optional(),
         author: zod.string().optional(),
         parties: zod.array(zod.string()).optional(),
         documentRef: zod.string().optional(),
@@ -5684,8 +6029,12 @@ export const CounselUpdateMatterBody = zod.object({
       'contract',
     ])
     .optional(),
-  status: zod.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']).optional(),
-  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+  status: zod
+    .enum(['active', 'pending', 'closed', 'escalated', 'on-hold'])
+    .optional(),
+  privilegeLevel: zod
+    .enum(['public', 'confidential', 'privileged', 'restricted'])
+    .optional(),
   pressureScore: zod.number().optional(),
   complexityScore: zod.number().optional(),
   openedDate: zod.string().optional(),
@@ -5714,7 +6063,14 @@ export const CounselUpdateMatterBody = zod.object({
         id: zod.string().optional(),
         name: zod.string().optional(),
         role: zod
-          .enum(['client', 'opposing-counsel', 'regulator', 'third-party', 'expert', 'co-counsel'])
+          .enum([
+            'client',
+            'opposing-counsel',
+            'regulator',
+            'third-party',
+            'expert',
+            'co-counsel',
+          ])
           .optional(),
         counsel: zod.string().optional(),
         jurisdiction: zod.string().optional(),
@@ -5739,8 +6095,12 @@ export const CounselUpdateMatterResponse = zod.object({
       'contract',
     ])
     .optional(),
-  status: zod.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']).optional(),
-  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+  status: zod
+    .enum(['active', 'pending', 'closed', 'escalated', 'on-hold'])
+    .optional(),
+  privilegeLevel: zod
+    .enum(['public', 'confidential', 'privileged', 'restricted'])
+    .optional(),
   pressureScore: zod.number().optional(),
   complexityScore: zod.number().optional(),
   openedDate: zod.string().optional(),
@@ -5759,7 +6119,14 @@ export const CounselUpdateMatterResponse = zod.object({
         id: zod.string().optional(),
         name: zod.string().optional(),
         role: zod
-          .enum(['client', 'opposing-counsel', 'regulator', 'third-party', 'expert', 'co-counsel'])
+          .enum([
+            'client',
+            'opposing-counsel',
+            'regulator',
+            'third-party',
+            'expert',
+            'co-counsel',
+          ])
           .optional(),
         counsel: zod.string().optional(),
         jurisdiction: zod.string().optional(),
@@ -5784,10 +6151,14 @@ export const CounselUpdateMatterResponse = zod.object({
         title: zod.string().optional(),
         description: zod.string().optional(),
         dueDate: zod.string().optional(),
-        status: zod.enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk']).optional(),
+        status: zod
+          .enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk'])
+          .optional(),
         assignee: zod.string().optional(),
         dependencies: zod.array(zod.string()).optional(),
-        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        privilegeLevel: zod
+          .enum(['public', 'confidential', 'privileged', 'restricted'])
+          .optional(),
         filingRequired: zod.boolean().optional(),
         courtId: zod.string().optional(),
         consequence: zod.string().optional(),
@@ -5840,7 +6211,9 @@ export const CounselUpdateMatterResponse = zod.object({
           .optional(),
         title: zod.string().optional(),
         summary: zod.string().optional(),
-        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        privilegeLevel: zod
+          .enum(['public', 'confidential', 'privileged', 'restricted'])
+          .optional(),
         author: zod.string().optional(),
         parties: zod.array(zod.string()).optional(),
         documentRef: zod.string().optional(),
@@ -5872,7 +6245,9 @@ export const CounselUpdateObligationParams = zod.object({
 
 export const CounselUpdateObligationBody = zod.object({
   matterId: zod.string(),
-  status: zod.enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk']).optional(),
+  status: zod
+    .enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk'])
+    .optional(),
   completedDate: zod.string().optional(),
   assignee: zod.string().optional(),
   dueDate: zod.string().optional(),
@@ -5884,10 +6259,14 @@ export const CounselUpdateObligationResponse = zod.object({
   title: zod.string().optional(),
   description: zod.string().optional(),
   dueDate: zod.string().optional(),
-  status: zod.enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk']).optional(),
+  status: zod
+    .enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk'])
+    .optional(),
   assignee: zod.string().optional(),
   dependencies: zod.array(zod.string()).optional(),
-  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+  privilegeLevel: zod
+    .enum(['public', 'confidential', 'privileged', 'restricted'])
+    .optional(),
   filingRequired: zod.boolean().optional(),
   courtId: zod.string().optional(),
   consequence: zod.string().optional(),
@@ -5979,7 +6358,9 @@ export const CounselListProofChainResponse = zod.object({
           .optional(),
         title: zod.string().optional(),
         summary: zod.string().optional(),
-        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        privilegeLevel: zod
+          .enum(['public', 'confidential', 'privileged', 'restricted'])
+          .optional(),
         author: zod.string().optional(),
         parties: zod.array(zod.string()).optional(),
         documentRef: zod.string().optional(),
@@ -6007,10 +6388,322 @@ export const CounselAppendProofChainEntryBody = zod.object({
   ]),
   title: zod.string(),
   summary: zod.string(),
-  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']),
+  privilegeLevel: zod.enum([
+    'public',
+    'confidential',
+    'privileged',
+    'restricted',
+  ]),
   author: zod.string(),
   parties: zod.array(zod.string()).optional(),
   documentRef: zod.string().optional(),
   hash: zod.string().optional(),
   redacted: zod.boolean().optional(),
 });
+
+/**
+ * Returns a serialized JSON snapshot of an ATLAS scene as an `ExportAdapterResult`.
+Requires operator+ role (`operator`, `ops`, `exec`, `admin`, `super_admin`).
+Gated by the `ENABLE_ATLAS_SPATIAL_RUNTIME` feature flag — returns `503 FEATURE_DISABLED`
+when the flag is off. Rate limited to 60 requests per minute per client.
+
+ * @summary Export an ATLAS scene snapshot
+ */
+export const ExportAtlasSnapshotParams = zod.object({
+  sceneId: zod.coerce
+    .string()
+    .describe('Identifier of the ATLAS scene to snapshot.'),
+});
+
+export const exportAtlasSnapshotQueryDomainDefault = `default`;
+export const exportAtlasSnapshotQueryEntityTypeDefault = `scene`;
+
+export const ExportAtlasSnapshotQueryParams = zod.object({
+  domain: zod.coerce
+    .string()
+    .default(exportAtlasSnapshotQueryDomainDefault)
+    .describe('Domain that owns the scene (e.g. `terra`, `vessels`).'),
+  entityType: zod.coerce
+    .string()
+    .default(exportAtlasSnapshotQueryEntityTypeDefault)
+    .describe('Type of entity the scene represents.'),
+  entityId: zod.coerce
+    .string()
+    .optional()
+    .describe('Entity identifier; defaults to `sceneId` when omitted.'),
+});
+
+export const exportAtlasSnapshotResponseSizeEstimateBytesMin = 0;
+
+export const ExportAtlasSnapshotResponse = zod
+  .object({
+    format: zod
+      .string()
+      .describe(
+        'Output format identifier (e.g. `atlas.scene-snapshot.v1`, `atlas.openusd.v1`).',
+      ),
+    payload: zod
+      .unknown()
+      .describe('Serialized export payload. Shape varies by adapter.'),
+    sizeEstimateBytes: zod
+      .number()
+      .min(exportAtlasSnapshotResponseSizeEstimateBytesMin)
+      .optional()
+      .describe('Estimated payload size in bytes.'),
+    generatedAt: zod
+      .date()
+      .describe('ISO-8601 timestamp when the export was generated.'),
+    adapterVersion: zod
+      .string()
+      .describe('Version string of the adapter that produced the result.'),
+    warnings: zod
+      .array(zod.string())
+      .optional()
+      .describe('Non-fatal warnings emitted during serialization.'),
+  })
+  .describe(
+    'Standard ATLAS export adapter envelope returned directly as the 200 response body\nby all ATLAS export endpoints (no outer wrapper).\n',
+  );
+
+/**
+ * Serializes a branch package (parent scene, hypothesis, delta state, and outcome projections)
+and returns it as an `ExportAdapterResult`. Requires operator+ role.
+Gated by the `ENABLE_ATLAS_SPATIAL_RUNTIME` feature flag — returns `503 FEATURE_DISABLED`
+when the flag is off. Rate limited to 60 requests per minute per client.
+
+ * @summary Export an ATLAS branch package
+ */
+export const exportAtlasBranchPackageBodyDomainDefault = `default`;
+export const exportAtlasBranchPackageBodyOutcomeProjectionsItemProbabilityMin = 0;
+export const exportAtlasBranchPackageBodyOutcomeProjectionsItemProbabilityMax = 1;
+
+export const ExportAtlasBranchPackageBody = zod.object({
+  parentSceneId: zod
+    .string()
+    .describe('ID of the parent scene this branch derives from.'),
+  branchId: zod.string().describe('Unique identifier for this branch.'),
+  branchLabel: zod
+    .string()
+    .optional()
+    .describe('Human-readable label; defaults to `branchId`.'),
+  domain: zod.string().default(exportAtlasBranchPackageBodyDomainDefault),
+  branchedAt: zod
+    .date()
+    .optional()
+    .describe('ISO-8601 timestamp; defaults to now.'),
+  hypothesis: zod
+    .string()
+    .describe('Description of the scenario or hypothesis being explored.'),
+  deltaState: zod
+    .record(zod.string(), zod.unknown())
+    .optional()
+    .describe('Map of state changes relative to the parent scene.'),
+  outcomeProjections: zod
+    .array(
+      zod.object({
+        label: zod.string(),
+        probability: zod
+          .number()
+          .min(exportAtlasBranchPackageBodyOutcomeProjectionsItemProbabilityMin)
+          .max(
+            exportAtlasBranchPackageBodyOutcomeProjectionsItemProbabilityMax,
+          ),
+        impact: zod.string(),
+        metrics: zod.record(zod.string(), zod.number()),
+      }),
+    )
+    .optional(),
+  approvedBy: zod.string().nullish(),
+  correlationId: zod.string().nullish(),
+  metadata: zod.record(zod.string(), zod.unknown()).optional(),
+});
+
+export const exportAtlasBranchPackageResponseSizeEstimateBytesMin = 0;
+
+export const ExportAtlasBranchPackageResponse = zod
+  .object({
+    format: zod
+      .string()
+      .describe(
+        'Output format identifier (e.g. `atlas.scene-snapshot.v1`, `atlas.openusd.v1`).',
+      ),
+    payload: zod
+      .unknown()
+      .describe('Serialized export payload. Shape varies by adapter.'),
+    sizeEstimateBytes: zod
+      .number()
+      .min(exportAtlasBranchPackageResponseSizeEstimateBytesMin)
+      .optional()
+      .describe('Estimated payload size in bytes.'),
+    generatedAt: zod
+      .date()
+      .describe('ISO-8601 timestamp when the export was generated.'),
+    adapterVersion: zod
+      .string()
+      .describe('Version string of the adapter that produced the result.'),
+    warnings: zod
+      .array(zod.string())
+      .optional()
+      .describe('Non-fatal warnings emitted during serialization.'),
+  })
+  .describe(
+    'Standard ATLAS export adapter envelope returned directly as the 200 response body\nby all ATLAS export endpoints (no outer wrapper).\n',
+  );
+
+/**
+ * Serializes a proof bundle (citations, approval chain, confidence score, and provenance)
+and returns it as an `ExportAdapterResult`. Requires operator+ role.
+Gated by the `ENABLE_ATLAS_SPATIAL_RUNTIME` feature flag — returns `503 FEATURE_DISABLED`
+when the flag is off. Rate limited to 60 requests per minute per client.
+
+ * @summary Export an ATLAS proof bundle
+ */
+export const exportAtlasProofBundleBodyContentTypeDefault = `unknown`;
+export const exportAtlasProofBundleBodySourceClassDefault = `unknown`;
+export const exportAtlasProofBundleBodyConfidenceScoreMin = 0;
+export const exportAtlasProofBundleBodyConfidenceScoreMax = 1;
+
+export const exportAtlasProofBundleBodyServiceAttributionDefault = `atlas`;
+
+export const ExportAtlasProofBundleBody = zod.object({
+  bundleId: zod.string(),
+  contentId: zod.string(),
+  contentType: zod
+    .string()
+    .default(exportAtlasProofBundleBodyContentTypeDefault),
+  sourceClass: zod
+    .string()
+    .default(exportAtlasProofBundleBodySourceClassDefault),
+  confidenceScore: zod
+    .number()
+    .min(exportAtlasProofBundleBodyConfidenceScoreMin)
+    .max(exportAtlasProofBundleBodyConfidenceScoreMax),
+  serviceAttribution: zod
+    .string()
+    .default(exportAtlasProofBundleBodyServiceAttributionDefault),
+  modelVersion: zod.string().nullish(),
+  citations: zod
+    .array(
+      zod.object({
+        source: zod.string(),
+        excerpt: zod.string().optional(),
+        url: zod.string().optional(),
+      }),
+    )
+    .optional(),
+  approvalChain: zod
+    .array(
+      zod.object({
+        approverRole: zod.string(),
+        approvedAt: zod.date(),
+        decision: zod.enum(['approved', 'rejected', 'escalated']),
+        rationale: zod.string().optional(),
+      }),
+    )
+    .optional(),
+  generatedAt: zod
+    .date()
+    .optional()
+    .describe('ISO-8601 timestamp; defaults to now.'),
+  correlationId: zod.string().nullish(),
+  metadata: zod.record(zod.string(), zod.unknown()).optional(),
+});
+
+export const exportAtlasProofBundleResponseSizeEstimateBytesMin = 0;
+
+export const ExportAtlasProofBundleResponse = zod
+  .object({
+    format: zod
+      .string()
+      .describe(
+        'Output format identifier (e.g. `atlas.scene-snapshot.v1`, `atlas.openusd.v1`).',
+      ),
+    payload: zod
+      .unknown()
+      .describe('Serialized export payload. Shape varies by adapter.'),
+    sizeEstimateBytes: zod
+      .number()
+      .min(exportAtlasProofBundleResponseSizeEstimateBytesMin)
+      .optional()
+      .describe('Estimated payload size in bytes.'),
+    generatedAt: zod
+      .date()
+      .describe('ISO-8601 timestamp when the export was generated.'),
+    adapterVersion: zod
+      .string()
+      .describe('Version string of the adapter that produced the result.'),
+    warnings: zod
+      .array(zod.string())
+      .optional()
+      .describe('Non-fatal warnings emitted during serialization.'),
+  })
+  .describe(
+    'Standard ATLAS export adapter envelope returned directly as the 200 response body\nby all ATLAS export endpoints (no outer wrapper).\n',
+  );
+
+/**
+ * Builds and serializes an OpenUSD (Universal Scene Description) manifest for the given
+ATLAS scene and returns it as an `ExportAdapterResult`. Requires operator+ role.
+Gated by the `ENABLE_ATLAS_SPATIAL_RUNTIME` feature flag — returns `503 FEATURE_DISABLED`
+when the flag is off. Rate limited to 60 requests per minute per client.
+
+ * @summary Export an OpenUSD manifest for an ATLAS scene
+ */
+export const ExportAtlasOpenUSDManifestParams = zod.object({
+  sceneId: zod.coerce
+    .string()
+    .describe('Identifier of the ATLAS scene to export.'),
+});
+
+export const exportAtlasOpenUSDManifestQueryDomainDefault = `default`;
+export const exportAtlasOpenUSDManifestQueryProofChainIdMin = 0;
+
+export const ExportAtlasOpenUSDManifestQueryParams = zod.object({
+  domain: zod.coerce
+    .string()
+    .default(exportAtlasOpenUSDManifestQueryDomainDefault)
+    .describe('Domain that owns the scene.'),
+  entityId: zod.coerce
+    .string()
+    .optional()
+    .describe('Entity identifier; defaults to `sceneId` when omitted.'),
+  proofChainId: zod.coerce
+    .number()
+    .min(exportAtlasOpenUSDManifestQueryProofChainIdMin)
+    .optional()
+    .describe(
+      'Optional non-negative integer linking the export to a proof chain entry.',
+    ),
+});
+
+export const exportAtlasOpenUSDManifestResponseSizeEstimateBytesMin = 0;
+
+export const ExportAtlasOpenUSDManifestResponse = zod
+  .object({
+    format: zod
+      .string()
+      .describe(
+        'Output format identifier (e.g. `atlas.scene-snapshot.v1`, `atlas.openusd.v1`).',
+      ),
+    payload: zod
+      .unknown()
+      .describe('Serialized export payload. Shape varies by adapter.'),
+    sizeEstimateBytes: zod
+      .number()
+      .min(exportAtlasOpenUSDManifestResponseSizeEstimateBytesMin)
+      .optional()
+      .describe('Estimated payload size in bytes.'),
+    generatedAt: zod
+      .date()
+      .describe('ISO-8601 timestamp when the export was generated.'),
+    adapterVersion: zod
+      .string()
+      .describe('Version string of the adapter that produced the result.'),
+    warnings: zod
+      .array(zod.string())
+      .optional()
+      .describe('Non-fatal warnings emitted during serialization.'),
+  })
+  .describe(
+    'Standard ATLAS export adapter envelope returned directly as the 200 response body\nby all ATLAS export endpoints (no outer wrapper).\n',
+  );

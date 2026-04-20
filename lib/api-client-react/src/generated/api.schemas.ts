@@ -8,6 +8,119 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
 
  * OpenAPI spec version: 0.3.0
  */
+/**
+ * Standard ATLAS export adapter envelope returned directly as the 200 response body
+by all ATLAS export endpoints (no outer wrapper).
+
+ */
+export interface ExportAdapterResult {
+  /** Output format identifier (e.g. `atlas.scene-snapshot.v1`, `atlas.openusd.v1`). */
+  format: string;
+  /** Serialized export payload. Shape varies by adapter. */
+  payload: unknown;
+  /**
+   * Estimated payload size in bytes.
+   * @minimum 0
+   */
+  sizeEstimateBytes?: number;
+  /** ISO-8601 timestamp when the export was generated. */
+  generatedAt: string;
+  /** Version string of the adapter that produced the result. */
+  adapterVersion: string;
+  /** Non-fatal warnings emitted during serialization. */
+  warnings?: string[];
+}
+
+/**
+ * Map of state changes relative to the parent scene.
+ */
+export type AtlasBranchPackageInputDeltaState = { [key: string]: unknown };
+
+export type AtlasBranchPackageInputOutcomeProjectionsItemMetrics = {
+  [key: string]: number;
+};
+
+export type AtlasBranchPackageInputOutcomeProjectionsItem = {
+  label: string;
+  /**
+   * @minimum 0
+   * @maximum 1
+   */
+  probability: number;
+  impact: string;
+  metrics: AtlasBranchPackageInputOutcomeProjectionsItemMetrics;
+};
+
+export type AtlasBranchPackageInputMetadata = { [key: string]: unknown };
+
+export interface AtlasBranchPackageInput {
+  /** ID of the parent scene this branch derives from. */
+  parentSceneId: string;
+  /** Unique identifier for this branch. */
+  branchId: string;
+  /** Human-readable label; defaults to `branchId`. */
+  branchLabel?: string;
+  domain?: string;
+  /** ISO-8601 timestamp; defaults to now. */
+  branchedAt?: string;
+  /** Description of the scenario or hypothesis being explored. */
+  hypothesis: string;
+  /** Map of state changes relative to the parent scene. */
+  deltaState?: AtlasBranchPackageInputDeltaState;
+  outcomeProjections?: AtlasBranchPackageInputOutcomeProjectionsItem[];
+  /** @nullable */
+  approvedBy?: string | null;
+  /** @nullable */
+  correlationId?: string | null;
+  metadata?: AtlasBranchPackageInputMetadata;
+}
+
+export type AtlasProofBundleInputCitationsItem = {
+  source: string;
+  excerpt?: string;
+  url?: string;
+};
+
+export type AtlasProofBundleInputApprovalChainItemDecision =
+  (typeof AtlasProofBundleInputApprovalChainItemDecision)[keyof typeof AtlasProofBundleInputApprovalChainItemDecision];
+
+export const AtlasProofBundleInputApprovalChainItemDecision = {
+  approved: 'approved',
+  rejected: 'rejected',
+  escalated: 'escalated',
+} as const;
+
+export type AtlasProofBundleInputApprovalChainItem = {
+  approverRole: string;
+  approvedAt: string;
+  decision: AtlasProofBundleInputApprovalChainItemDecision;
+  rationale?: string;
+};
+
+export type AtlasProofBundleInputMetadata = { [key: string]: unknown };
+
+export interface AtlasProofBundleInput {
+  bundleId: string;
+  contentId: string;
+  contentType?: string;
+  sourceClass?: string;
+  /**
+   * @minimum 0
+   * @maximum 1
+   */
+  confidenceScore: number;
+  serviceAttribution?: string;
+  /** @nullable */
+  modelVersion?: string | null;
+  citations?: AtlasProofBundleInputCitationsItem[];
+  approvalChain?: AtlasProofBundleInputApprovalChainItem[];
+  /** ISO-8601 timestamp; defaults to now. */
+  generatedAt?: string;
+  /** @nullable */
+  correlationId?: string | null;
+  metadata?: AtlasProofBundleInputMetadata;
+}
+
 export interface UploadUrlRequest {
   /**
    * Original file name.
@@ -75,7 +188,8 @@ export const AlloyDecisionSchemaVersion = {
   '200': '2.0.0',
 } as const;
 
-export type AlloyDecisionStatus = (typeof AlloyDecisionStatus)[keyof typeof AlloyDecisionStatus];
+export type AlloyDecisionStatus =
+  (typeof AlloyDecisionStatus)[keyof typeof AlloyDecisionStatus];
 
 export const AlloyDecisionStatus = {
   proposed: 'proposed',
@@ -179,7 +293,8 @@ export interface Project {
   updatedAt: string;
 }
 
-export type CreateProjectStatus = (typeof CreateProjectStatus)[keyof typeof CreateProjectStatus];
+export type CreateProjectStatus =
+  (typeof CreateProjectStatus)[keyof typeof CreateProjectStatus];
 
 export const CreateProjectStatus = {
   active: 'active',
@@ -195,7 +310,8 @@ export interface CreateProject {
   status?: CreateProjectStatus;
 }
 
-export type UpdateProjectStatus = (typeof UpdateProjectStatus)[keyof typeof UpdateProjectStatus];
+export type UpdateProjectStatus =
+  (typeof UpdateProjectStatus)[keyof typeof UpdateProjectStatus];
 
 export const UpdateProjectStatus = {
   active: 'active',
@@ -284,7 +400,8 @@ export const ConnectorType = {
   custom: 'custom',
 } as const;
 
-export type ConnectorStatus = (typeof ConnectorStatus)[keyof typeof ConnectorStatus];
+export type ConnectorStatus =
+  (typeof ConnectorStatus)[keyof typeof ConnectorStatus];
 
 export const ConnectorStatus = {
   active: 'active',
@@ -305,7 +422,8 @@ export interface Connector {
   updatedAt?: string;
 }
 
-export type CreateConnectorType = (typeof CreateConnectorType)[keyof typeof CreateConnectorType];
+export type CreateConnectorType =
+  (typeof CreateConnectorType)[keyof typeof CreateConnectorType];
 
 export const CreateConnectorType = {
   stripe: 'stripe',
@@ -346,7 +464,8 @@ export interface UpdateConnector {
   isEnabled?: boolean;
 }
 
-export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];
+export type NotificationType =
+  (typeof NotificationType)[keyof typeof NotificationType];
 
 export const NotificationType = {
   info: 'info',
@@ -356,7 +475,8 @@ export const NotificationType = {
   action_required: 'action_required',
 } as const;
 
-export type NotificationChannel = (typeof NotificationChannel)[keyof typeof NotificationChannel];
+export type NotificationChannel =
+  (typeof NotificationChannel)[keyof typeof NotificationChannel];
 
 export const NotificationChannel = {
   in_app: 'in_app',
@@ -447,7 +567,8 @@ export interface BillingPlan {
   createdAt?: string;
 }
 
-export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus];
+export type SubscriptionStatus =
+  (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus];
 
 export const SubscriptionStatus = {
   active: 'active',
@@ -500,7 +621,8 @@ export interface StripeProduct {
   prices: StripeProductPricesItem[];
 }
 
-export type CheckoutRequestMode = (typeof CheckoutRequestMode)[keyof typeof CheckoutRequestMode];
+export type CheckoutRequestMode =
+  (typeof CheckoutRequestMode)[keyof typeof CheckoutRequestMode];
 
 export const CheckoutRequestMode = {
   subscription: 'subscription',
@@ -533,7 +655,9 @@ export type SubscriptionStatusResponseSubscription = {
   cancelAtPeriodEnd?: boolean;
 } | null;
 
-export type SubscriptionStatusResponseAllSubscriptionsItem = { [key: string]: unknown };
+export type SubscriptionStatusResponseAllSubscriptionsItem = {
+  [key: string]: unknown;
+};
 
 export interface SubscriptionStatusResponse {
   subscribed: boolean;
@@ -988,7 +1112,8 @@ export interface DetailedHealthStatus {
   memory?: DetailedHealthStatusMemory;
 }
 
-export type AlertRecordSeverity = (typeof AlertRecordSeverity)[keyof typeof AlertRecordSeverity];
+export type AlertRecordSeverity =
+  (typeof AlertRecordSeverity)[keyof typeof AlertRecordSeverity];
 
 export const AlertRecordSeverity = {
   warning: 'warning',
@@ -1026,7 +1151,8 @@ export interface BusinessEventCounts {
   workflowCompletions: number;
 }
 
-export type MLSListingStatus = (typeof MLSListingStatus)[keyof typeof MLSListingStatus];
+export type MLSListingStatus =
+  (typeof MLSListingStatus)[keyof typeof MLSListingStatus];
 
 export const MLSListingStatus = {
   active: 'active',
@@ -1081,7 +1207,8 @@ export interface CommercialProperty {
   lng?: number | null;
 }
 
-export type VesselFleetStatus = (typeof VesselFleetStatus)[keyof typeof VesselFleetStatus];
+export type VesselFleetStatus =
+  (typeof VesselFleetStatus)[keyof typeof VesselFleetStatus];
 
 export const VesselFleetStatus = {
   active: 'active',
@@ -1156,7 +1283,8 @@ export interface VesselCargo {
   dischargePort?: string | null;
 }
 
-export type VesselRouteStatus = (typeof VesselRouteStatus)[keyof typeof VesselRouteStatus];
+export type VesselRouteStatus =
+  (typeof VesselRouteStatus)[keyof typeof VesselRouteStatus];
 
 export const VesselRouteStatus = {
   planned: 'planned',
@@ -1251,7 +1379,8 @@ export interface CreateVesselAlertRule {
   targetId?: number;
 }
 
-export type VesselAlertSeverity = (typeof VesselAlertSeverity)[keyof typeof VesselAlertSeverity];
+export type VesselAlertSeverity =
+  (typeof VesselAlertSeverity)[keyof typeof VesselAlertSeverity];
 
 export const VesselAlertSeverity = {
   info: 'info',
@@ -1485,7 +1614,8 @@ export interface CopilotChatRequest {
 
 export type AlloySignalPayload = { [key: string]: unknown };
 
-export type AlloySignalStatus = (typeof AlloySignalStatus)[keyof typeof AlloySignalStatus];
+export type AlloySignalStatus =
+  (typeof AlloySignalStatus)[keyof typeof AlloySignalStatus];
 
 export const AlloySignalStatus = {
   queued: 'queued',
@@ -1513,7 +1643,8 @@ export interface AlloySignal {
   processedAt?: string | null;
 }
 
-export type AlloyWorkflowStatus = (typeof AlloyWorkflowStatus)[keyof typeof AlloyWorkflowStatus];
+export type AlloyWorkflowStatus =
+  (typeof AlloyWorkflowStatus)[keyof typeof AlloyWorkflowStatus];
 
 export const AlloyWorkflowStatus = {
   active: 'active',
@@ -1551,7 +1682,8 @@ export interface CreateAlloyWorkflow {
   triggers?: CreateAlloyWorkflowTriggersItem[];
 }
 
-export type AlloyRunStatus = (typeof AlloyRunStatus)[keyof typeof AlloyRunStatus];
+export type AlloyRunStatus =
+  (typeof AlloyRunStatus)[keyof typeof AlloyRunStatus];
 
 export const AlloyRunStatus = {
   queued: 'queued',
@@ -1590,7 +1722,8 @@ export interface AlloyRun {
   createdAt: string;
 }
 
-export type AlloyRunStepStatus = (typeof AlloyRunStepStatus)[keyof typeof AlloyRunStepStatus];
+export type AlloyRunStepStatus =
+  (typeof AlloyRunStepStatus)[keyof typeof AlloyRunStepStatus];
 
 export const AlloyRunStepStatus = {
   pending: 'pending',
@@ -1628,7 +1761,8 @@ export interface AlloyRunStep {
 
 export type AlloyArtifactContent = { [key: string]: unknown };
 
-export type AlloyArtifactStatus = (typeof AlloyArtifactStatus)[keyof typeof AlloyArtifactStatus];
+export type AlloyArtifactStatus =
+  (typeof AlloyArtifactStatus)[keyof typeof AlloyArtifactStatus];
 
 export const AlloyArtifactStatus = {
   pending: 'pending',
@@ -1656,7 +1790,8 @@ export interface AlloyArtifact {
   createdAt: string;
 }
 
-export type AlloyApprovalStatus = (typeof AlloyApprovalStatus)[keyof typeof AlloyApprovalStatus];
+export type AlloyApprovalStatus =
+  (typeof AlloyApprovalStatus)[keyof typeof AlloyApprovalStatus];
 
 export const AlloyApprovalStatus = {
   pending: 'pending',
@@ -1685,7 +1820,8 @@ export interface AlloyApproval {
   createdAt: string;
 }
 
-export type AgentSkillStatus = (typeof AgentSkillStatus)[keyof typeof AgentSkillStatus];
+export type AgentSkillStatus =
+  (typeof AgentSkillStatus)[keyof typeof AgentSkillStatus];
 
 export const AgentSkillStatus = {
   active: 'active',
@@ -1752,7 +1888,8 @@ export interface Venture {
   createdAt: string;
 }
 
-export type CreateVentureStatus = (typeof CreateVentureStatus)[keyof typeof CreateVentureStatus];
+export type CreateVentureStatus =
+  (typeof CreateVentureStatus)[keyof typeof CreateVentureStatus];
 
 export const CreateVentureStatus = {
   active: 'active',
@@ -1819,7 +1956,8 @@ export interface VentureLeader {
   linkedinUrl?: string | null;
 }
 
-export type HoldingsInquiryType = (typeof HoldingsInquiryType)[keyof typeof HoldingsInquiryType];
+export type HoldingsInquiryType =
+  (typeof HoldingsInquiryType)[keyof typeof HoldingsInquiryType];
 
 export const HoldingsInquiryType = {
   investment: 'investment',
@@ -1916,7 +2054,8 @@ export interface Report {
   updatedAt?: string;
 }
 
-export type ExportRequestFormat = (typeof ExportRequestFormat)[keyof typeof ExportRequestFormat];
+export type ExportRequestFormat =
+  (typeof ExportRequestFormat)[keyof typeof ExportRequestFormat];
 
 export const ExportRequestFormat = {
   csv: 'csv',
@@ -1934,7 +2073,8 @@ export interface ExportRequest {
   columns?: string[];
 }
 
-export type ExportJobFormat = (typeof ExportJobFormat)[keyof typeof ExportJobFormat];
+export type ExportJobFormat =
+  (typeof ExportJobFormat)[keyof typeof ExportJobFormat];
 
 export const ExportJobFormat = {
   csv: 'csv',
@@ -1942,7 +2082,8 @@ export const ExportJobFormat = {
   xlsx: 'xlsx',
 } as const;
 
-export type ExportJobStatus = (typeof ExportJobStatus)[keyof typeof ExportJobStatus];
+export type ExportJobStatus =
+  (typeof ExportJobStatus)[keyof typeof ExportJobStatus];
 
 export const ExportJobStatus = {
   queued: 'queued',
@@ -2240,7 +2381,8 @@ export interface DecisionProofRequest {
   evidence?: DecisionProofRequestEvidenceItem[];
 }
 
-export type CounselPartyRole = (typeof CounselPartyRole)[keyof typeof CounselPartyRole];
+export type CounselPartyRole =
+  (typeof CounselPartyRole)[keyof typeof CounselPartyRole];
 
 export const CounselPartyRole = {
   client: 'client',
@@ -2369,7 +2511,8 @@ export interface CounselProofChainEntry {
   redacted?: boolean;
 }
 
-export type CounselMatterType = (typeof CounselMatterType)[keyof typeof CounselMatterType];
+export type CounselMatterType =
+  (typeof CounselMatterType)[keyof typeof CounselMatterType];
 
 export const CounselMatterType = {
   litigation: 'litigation',
@@ -2381,7 +2524,8 @@ export const CounselMatterType = {
   contract: 'contract',
 } as const;
 
-export type CounselMatterStatus = (typeof CounselMatterStatus)[keyof typeof CounselMatterStatus];
+export type CounselMatterStatus =
+  (typeof CounselMatterStatus)[keyof typeof CounselMatterStatus];
 
 export const CounselMatterStatus = {
   active: 'active',
@@ -2650,7 +2794,8 @@ export type ListDecisionsParams = {
   riskLevel?: ListDecisionsRiskLevel;
 };
 
-export type ListDecisionsStatus = (typeof ListDecisionsStatus)[keyof typeof ListDecisionsStatus];
+export type ListDecisionsStatus =
+  (typeof ListDecisionsStatus)[keyof typeof ListDecisionsStatus];
 
 export const ListDecisionsStatus = {
   proposed: 'proposed',
@@ -3239,7 +3384,9 @@ export type GetVesselLiveMarineWeatherParams = {
   region?: string;
 };
 
-export type GetVesselLiveMarineWeather200ForecastItem = { [key: string]: unknown };
+export type GetVesselLiveMarineWeather200ForecastItem = {
+  [key: string]: unknown;
+};
 
 export type GetVesselLiveMarineWeather200 = {
   windSpeedKnots?: number;
@@ -3286,7 +3433,9 @@ export const ListVesselCommandWorkflowsStatus = {
   pending: 'pending',
 } as const;
 
-export type CreateVesselCommandWorkflowBodyParameters = { [key: string]: unknown };
+export type CreateVesselCommandWorkflowBodyParameters = {
+  [key: string]: unknown;
+};
 
 export type CreateVesselCommandWorkflowBody = {
   vesselId: number;
@@ -3390,7 +3539,8 @@ export type ListAlloyRunsParams = {
   offset?: number;
 };
 
-export type ListAlloyRunsStatus = (typeof ListAlloyRunsStatus)[keyof typeof ListAlloyRunsStatus];
+export type ListAlloyRunsStatus =
+  (typeof ListAlloyRunsStatus)[keyof typeof ListAlloyRunsStatus];
 
 export const ListAlloyRunsStatus = {
   running: 'running',
@@ -3561,7 +3711,8 @@ export type ListSkillsParams = {
   limit?: number;
 };
 
-export type ListSkillsStatus = (typeof ListSkillsStatus)[keyof typeof ListSkillsStatus];
+export type ListSkillsStatus =
+  (typeof ListSkillsStatus)[keyof typeof ListSkillsStatus];
 
 export const ListSkillsStatus = {
   active: 'active',
@@ -3752,7 +3903,8 @@ export type SearchHoldingsParams = {
   limit?: number;
 };
 
-export type SearchHoldingsDomain = (typeof SearchHoldingsDomain)[keyof typeof SearchHoldingsDomain];
+export type SearchHoldingsDomain =
+  (typeof SearchHoldingsDomain)[keyof typeof SearchHoldingsDomain];
 
 export const SearchHoldingsDomain = {
   ventures: 'ventures',
@@ -4241,11 +4393,17 @@ export type GetGlobalAgentFeedParams = {
   limit?: number;
 };
 
-export type GetGlobalAgentFeed200GlobalFeedRecentFindingsItem = { [key: string]: unknown };
+export type GetGlobalAgentFeed200GlobalFeedRecentFindingsItem = {
+  [key: string]: unknown;
+};
 
-export type GetGlobalAgentFeed200GlobalFeedCorrelationsItem = { [key: string]: unknown };
+export type GetGlobalAgentFeed200GlobalFeedCorrelationsItem = {
+  [key: string]: unknown;
+};
 
-export type GetGlobalAgentFeed200GlobalFeedRecentEventsItem = { [key: string]: unknown };
+export type GetGlobalAgentFeed200GlobalFeedRecentEventsItem = {
+  [key: string]: unknown;
+};
 
 export type GetGlobalAgentFeed200GlobalFeed = {
   recentFindings?: GetGlobalAgentFeed200GlobalFeedRecentFindingsItem[];
@@ -4379,7 +4537,9 @@ export type EvaluateDecisionSignalsBody = {
   weights?: EvaluateDecisionSignalsBodyWeights;
 };
 
-export type EvaluateDecisionSignals200RecommendationsItem = { [key: string]: unknown };
+export type EvaluateDecisionSignals200RecommendationsItem = {
+  [key: string]: unknown;
+};
 
 export type EvaluateDecisionSignals200 = {
   recommendations?: EvaluateDecisionSignals200RecommendationsItem[];
@@ -4404,7 +4564,9 @@ export type ExecuteDecisionWorkflowBody = {
  */
 export type ExecuteDecisionWorkflow201Run = { [key: string]: unknown };
 
-export type ExecuteDecisionWorkflow201PolicyEvaluation = { [key: string]: unknown };
+export type ExecuteDecisionWorkflow201PolicyEvaluation = {
+  [key: string]: unknown;
+};
 
 export type ExecuteDecisionWorkflow201 = {
   /** Workflow run record */
@@ -4540,4 +4702,83 @@ export type CounselAppendProofChainEntryBody = {
   documentRef?: string;
   hash?: string;
   redacted?: boolean;
+};
+
+export type ExportAtlasSnapshotParams = {
+  /**
+   * Domain that owns the scene (e.g. `terra`, `vessels`).
+   */
+  domain?: string;
+  /**
+   * Type of entity the scene represents.
+   */
+  entityType?: string;
+  /**
+   * Entity identifier; defaults to `sceneId` when omitted.
+   */
+  entityId?: string;
+};
+
+export type ExportAtlasSnapshot503Details = {
+  feature?: string;
+};
+
+export type ExportAtlasSnapshot503 = {
+  error?: string;
+  code?: string;
+  requestId?: string;
+  correlationId?: string;
+  details?: ExportAtlasSnapshot503Details;
+};
+
+export type ExportAtlasBranchPackage503Details = {
+  feature?: string;
+};
+
+export type ExportAtlasBranchPackage503 = {
+  error?: string;
+  code?: string;
+  requestId?: string;
+  correlationId?: string;
+  details?: ExportAtlasBranchPackage503Details;
+};
+
+export type ExportAtlasProofBundle503Details = {
+  feature?: string;
+};
+
+export type ExportAtlasProofBundle503 = {
+  error?: string;
+  code?: string;
+  requestId?: string;
+  correlationId?: string;
+  details?: ExportAtlasProofBundle503Details;
+};
+
+export type ExportAtlasOpenUSDManifestParams = {
+  /**
+   * Domain that owns the scene.
+   */
+  domain?: string;
+  /**
+   * Entity identifier; defaults to `sceneId` when omitted.
+   */
+  entityId?: string;
+  /**
+   * Optional non-negative integer linking the export to a proof chain entry.
+   * @minimum 0
+   */
+  proofChainId?: number;
+};
+
+export type ExportAtlasOpenUSDManifest503Details = {
+  feature?: string;
+};
+
+export type ExportAtlasOpenUSDManifest503 = {
+  error?: string;
+  code?: string;
+  requestId?: string;
+  correlationId?: string;
+  details?: ExportAtlasOpenUSDManifest503Details;
 };

@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type VesselRouteStatus = (typeof VesselRouteStatus)[keyof typeof VesselRouteStatus];
+export type VesselRouteStatus =
+  (typeof VesselRouteStatus)[keyof typeof VesselRouteStatus];
 
 export const VesselRouteStatus = {
   planned: 'planned',

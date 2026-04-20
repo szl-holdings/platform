@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type CreateConnectorType = (typeof CreateConnectorType)[keyof typeof CreateConnectorType];
+export type CreateConnectorType =
+  (typeof CreateConnectorType)[keyof typeof CreateConnectorType];
 
 export const CreateConnectorType = {
   stripe: 'stripe',

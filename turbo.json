@@ -3,12 +3,19 @@
   "ui": "tui",
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "^codegen"],
       "inputs": ["src/**", "tsconfig.json", "tsconfig*.json", "vite.config.*", "build.mjs"],
       "outputs": ["dist/**", "build/**", ".next/**"]
     },
+    "codegen": {
+      "inputs": ["openapi.yaml", "orval.config.ts"],
+      "outputs": [
+        "../api-client-react/src/generated/**",
+        "../api-zod/src/generated/**"
+      ]
+    },
     "typecheck": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "^codegen"],
       "inputs": ["src/**", "tsconfig.json", "tsconfig*.json", "../../tsconfig.base.json"],
       "outputs": []
     },

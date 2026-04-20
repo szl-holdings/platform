@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type CounselMatterType = (typeof CounselMatterType)[keyof typeof CounselMatterType];
+export type CounselMatterType =
+  (typeof CounselMatterType)[keyof typeof CounselMatterType];
 
 export const CounselMatterType = {
   litigation: 'litigation',

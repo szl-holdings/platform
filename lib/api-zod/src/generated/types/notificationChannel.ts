@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type NotificationChannel = (typeof NotificationChannel)[keyof typeof NotificationChannel];
+export type NotificationChannel =
+  (typeof NotificationChannel)[keyof typeof NotificationChannel];
 
 export const NotificationChannel = {
   in_app: 'in_app',

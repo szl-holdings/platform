@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type ExportRequestFormat = (typeof ExportRequestFormat)[keyof typeof ExportRequestFormat];
+export type ExportRequestFormat =
+  (typeof ExportRequestFormat)[keyof typeof ExportRequestFormat];
 
 export const ExportRequestFormat = {
   csv: 'csv',

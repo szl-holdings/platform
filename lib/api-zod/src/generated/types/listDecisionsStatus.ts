@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type ListDecisionsStatus = (typeof ListDecisionsStatus)[keyof typeof ListDecisionsStatus];
+export type ListDecisionsStatus =
+  (typeof ListDecisionsStatus)[keyof typeof ListDecisionsStatus];
 
 export const ListDecisionsStatus = {
   proposed: 'proposed',

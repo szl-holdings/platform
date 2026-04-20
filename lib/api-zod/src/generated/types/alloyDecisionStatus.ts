@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type AlloyDecisionStatus = (typeof AlloyDecisionStatus)[keyof typeof AlloyDecisionStatus];
+export type AlloyDecisionStatus =
+  (typeof AlloyDecisionStatus)[keyof typeof AlloyDecisionStatus];
 
 export const AlloyDecisionStatus = {
   proposed: 'proposed',

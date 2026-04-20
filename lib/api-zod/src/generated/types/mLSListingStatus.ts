@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type MLSListingStatus = (typeof MLSListingStatus)[keyof typeof MLSListingStatus];
+export type MLSListingStatus =
+  (typeof MLSListingStatus)[keyof typeof MLSListingStatus];
 
 export const MLSListingStatus = {
   active: 'active',

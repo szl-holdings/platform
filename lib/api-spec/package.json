@@ -16,6 +16,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
-    "orval": "^8.5.2"
+    "orval": "^8.5.2",
+    "prettier": "^3.8.3"
   }
 }

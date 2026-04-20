@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type VesselFleetStatus = (typeof VesselFleetStatus)[keyof typeof VesselFleetStatus];
+export type VesselFleetStatus =
+  (typeof VesselFleetStatus)[keyof typeof VesselFleetStatus];
 
 export const VesselFleetStatus = {
   active: 'active',

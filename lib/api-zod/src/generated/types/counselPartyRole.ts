@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type CounselPartyRole = (typeof CounselPartyRole)[keyof typeof CounselPartyRole];
+export type CounselPartyRole =
+  (typeof CounselPartyRole)[keyof typeof CounselPartyRole];
 
 export const CounselPartyRole = {
   client: 'client',

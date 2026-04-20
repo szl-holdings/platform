@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type CounselMatterStatus = (typeof CounselMatterStatus)[keyof typeof CounselMatterStatus];
+export type CounselMatterStatus =
+  (typeof CounselMatterStatus)[keyof typeof CounselMatterStatus];
 
 export const CounselMatterStatus = {
   active: 'active',

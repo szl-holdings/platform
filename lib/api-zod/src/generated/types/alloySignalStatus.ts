@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type AlloySignalStatus = (typeof AlloySignalStatus)[keyof typeof AlloySignalStatus];
+export type AlloySignalStatus =
+  (typeof AlloySignalStatus)[keyof typeof AlloySignalStatus];
 
 export const AlloySignalStatus = {
   queued: 'queued',

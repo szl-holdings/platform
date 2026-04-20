@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type SearchHoldingsDomain = (typeof SearchHoldingsDomain)[keyof typeof SearchHoldingsDomain];
+export type SearchHoldingsDomain =
+  (typeof SearchHoldingsDomain)[keyof typeof SearchHoldingsDomain];
 
 export const SearchHoldingsDomain = {
   ventures: 'ventures',

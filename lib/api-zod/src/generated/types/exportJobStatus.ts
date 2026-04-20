@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type ExportJobStatus = (typeof ExportJobStatus)[keyof typeof ExportJobStatus];
+export type ExportJobStatus =
+  (typeof ExportJobStatus)[keyof typeof ExportJobStatus];
 
 export const ExportJobStatus = {
   queued: 'queued',

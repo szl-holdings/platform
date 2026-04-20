@@ -9,7 +9,8 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type VesselAlertSeverity = (typeof VesselAlertSeverity)[keyof typeof VesselAlertSeverity];
+export type VesselAlertSeverity =
+  (typeof VesselAlertSeverity)[keyof typeof VesselAlertSeverity];
 
 export const VesselAlertSeverity = {
   info: 'info',
