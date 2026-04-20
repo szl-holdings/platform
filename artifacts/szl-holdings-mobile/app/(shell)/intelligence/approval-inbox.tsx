@@ -174,15 +174,24 @@ function AuditTrailSection({
 
 function CommentThreadSection({
   approvalId,
+  approvalTitle,
   colors,
   enabled,
+  isOffline,
+  queuedComments,
+  onEnqueueComment,
 }: {
   approvalId: number;
+  approvalTitle: string;
   colors: ReturnType<typeof useColors>;
   enabled: boolean;
+  isOffline: boolean;
+  queuedComments: QueuedComment[];
+  onEnqueueComment: (approvalId: number, approvalTitle: string, body: string) => Promise<void>;
 }) {
   const qc = useQueryClient();
   const [draft, setDraft] = useState("");
+  const [enqueuing, setEnqueuing] = useState(false);
 
   const commentsQuery = useQuery<ApprovalComment[]>({
     queryKey: ["approval-comments", approvalId],
@@ -192,7 +201,7 @@ function CommentThreadSection({
       );
       return Array.isArray(raw) ? raw : ((raw as { data: ApprovalComment[] }).data ?? []);
     },
-    enabled,
+    enabled: enabled && !isOffline,
     staleTime: 15000,
   });
 
@@ -208,10 +217,38 @@ function CommentThreadSection({
       qc.invalidateQueries({ queryKey: ["approval-comments", approvalId] });
       qc.invalidateQueries({ queryKey: ["approval-audit-trail", approvalId] });
     },
-    onError: () => {
-      Alert.alert("Error", "Failed to post comment. Please try again.");
+    onError: async (_err, body) => {
+      // Network failure — fall back to offline queue so the comment isn't lost
+      try {
+        await onEnqueueComment(approvalId, approvalTitle, body as string);
+        setDraft("");
+        Alert.alert(
+          "Comment queued",
+          "Couldn't reach the server, so your comment was saved locally and will sync when connectivity returns."
+        );
+      } catch {
+        Alert.alert("Error", "Failed to post comment. Please try again.");
+      }
     },
   });
+
+  const handleSubmit = async () => {
+    const trimmed = draft.trim();
+    if (!trimmed) return;
+    if (isOffline) {
+      setEnqueuing(true);
+      try {
+        await onEnqueueComment(approvalId, approvalTitle, trimmed);
+        setDraft("");
+      } finally {
+        setEnqueuing(false);
+      }
+      return;
+    }
+    postMutation.mutate(trimmed);
+  };
+
+  const submitting = postMutation.isPending || enqueuing;
 
   if (!enabled) return null;
 
@@ -222,8 +259,10 @@ function CommentThreadSection({
         <ActivityIndicator size="small" color={ACCENT} style={{ marginVertical: 8 }} />
       ) : commentsQuery.isError ? (
         <Text style={[styles.threadEmpty, { color: "#ef4444" }]}>Failed to load comments</Text>
-      ) : (commentsQuery.data ?? []).length === 0 ? (
-        <Text style={[styles.threadEmpty, { color: colors.mutedForeground }]}>No comments yet</Text>
+      ) : (commentsQuery.data ?? []).length === 0 && queuedComments.length === 0 ? (
+        <Text style={[styles.threadEmpty, { color: colors.mutedForeground }]}>
+          {isOffline ? "Offline — server comments unavailable" : "No comments yet"}
+        </Text>
       ) : (
         (commentsQuery.data ?? []).map((c) => (
           <View key={c.id} style={[styles.commentRow, { borderBottomColor: colors.border }]}>
@@ -240,11 +279,26 @@ function CommentThreadSection({
         ))
       )}
 
+      {queuedComments.map((qcm) => (
+        <View key={`queued-${qcm.id}`} style={[styles.commentRow, { borderBottomColor: colors.border }]}>
+          <View style={styles.commentHeader}>
+            <View style={[styles.pill, { backgroundColor: "#f59e0b18", borderColor: "#f59e0b40" }]}>
+              <Feather name="clock" size={9} color="#f59e0b" />
+              <Text style={[styles.pillText, { color: "#f59e0b", marginLeft: 3 }]}>QUEUED</Text>
+            </View>
+            <Text style={[styles.commentTime, { color: colors.mutedForeground }]}>
+              {formatRelative(qcm.queuedAt)}
+            </Text>
+          </View>
+          <Text style={[styles.commentBody, { color: colors.foreground }]}>{qcm.body}</Text>
+        </View>
+      ))}
+
       <View style={styles.commentInputRow}>
         <TextInput
           value={draft}
           onChangeText={setDraft}
-          placeholder="Add a comment…"
+          placeholder={isOffline ? "Add a comment (will sync when online)…" : "Add a comment…"}
           placeholderTextColor={colors.mutedForeground}
           multiline
           style={[
@@ -253,22 +307,18 @@ function CommentThreadSection({
           ]}
         />
         <TouchableOpacity
-          onPress={() => {
-            const trimmed = draft.trim();
-            if (!trimmed) return;
-            postMutation.mutate(trimmed);
-          }}
-          disabled={postMutation.isPending || draft.trim().length === 0}
+          onPress={handleSubmit}
+          disabled={submitting || draft.trim().length === 0}
           style={[
             styles.commentSendBtn,
             { backgroundColor: ACCENT + "18", borderColor: ACCENT + "50" },
-            (postMutation.isPending || draft.trim().length === 0) && { opacity: 0.5 },
+            (submitting || draft.trim().length === 0) && { opacity: 0.5 },
           ]}
         >
-          {postMutation.isPending ? (
+          {submitting ? (
             <ActivityIndicator size="small" color={ACCENT} />
           ) : (
-            <Feather name="send" size={14} color={ACCENT} />
+            <Feather name={isOffline ? "clock" : "send"} size={14} color={ACCENT} />
           )}
         </TouchableOpacity>
       </View>
@@ -282,12 +332,16 @@ function ApprovalCard({
   onReview,
   onEscalate,
   isOffline,
+  queuedComments,
+  onEnqueueComment,
 }: {
   approval: Approval;
   colors: ReturnType<typeof useColors>;
   onReview: (approval: Approval) => void;
   onEscalate: (approval: Approval) => void;
   isOffline: boolean;
+  queuedComments: QueuedComment[];
+  onEnqueueComment: (approvalId: number, approvalTitle: string, body: string) => Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const prioColor = PRIORITY_COLORS[approval.priority] ?? "#6b7280";
@@ -376,7 +430,15 @@ function ApprovalCard({
           )}
 
           <AuditTrailSection approvalId={approval.id} colors={colors} enabled={expanded} />
-          <CommentThreadSection approvalId={approval.id} colors={colors} enabled={expanded} />
+          <CommentThreadSection
+            approvalId={approval.id}
+            approvalTitle={approval.title}
+            colors={colors}
+            enabled={expanded}
+            isOffline={isOffline}
+            queuedComments={queuedComments}
+            onEnqueueComment={onEnqueueComment}
+          />
 
           <View style={styles.actionRow}>
             <TouchableOpacity
@@ -388,11 +450,9 @@ function ApprovalCard({
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => onEscalate(approval)}
-              disabled={isOffline}
               style={[
                 styles.reviewBtn,
                 { backgroundColor: "#a855f718", borderColor: "#a855f750", flex: 1 },
-                isOffline && { opacity: 0.5 },
               ]}
             >
               <Feather name="alert-triangle" size={14} color="#a855f7" />
@@ -411,12 +471,14 @@ function EscalateModal({
   onClose,
   onSubmit,
   isPending,
+  isOffline,
 }: {
   approval: Approval | null;
   visible: boolean;
   onClose: () => void;
   onSubmit: (reason: string) => void;
   isPending: boolean;
+  isOffline: boolean;
 }) {
   const [reason, setReason] = useState("");
 
@@ -445,6 +507,15 @@ function EscalateModal({
               <Feather name="x" size={18} color="#6b7280" />
             </TouchableOpacity>
           </View>
+
+          {isOffline && (
+            <View style={styles.offlineNotice}>
+              <Feather name="wifi-off" size={12} color="#f59e0b" />
+              <Text style={styles.offlineNoticeText}>
+                You're offline — this escalation will be queued and synced when connectivity returns.
+              </Text>
+            </View>
+          )}
 
           {approval && (
             <>
@@ -477,7 +548,9 @@ function EscalateModal({
                 {isPending ? (
                   <ActivityIndicator size="small" color="#a855f7" />
                 ) : (
-                  <Text style={[styles.submitBtnText, { color: "#a855f7" }]}>Submit Escalation</Text>
+                  <Text style={[styles.submitBtnText, { color: "#a855f7" }]}>
+                    {isOffline ? "Queue Escalation" : "Submit Escalation"}
+                  </Text>
                 )}
               </TouchableOpacity>
             </>
@@ -671,6 +744,28 @@ function ReviewModal({
 type StatusFilter = "pending" | "all" | "approved" | "rejected";
 
 const QUEUE_STORAGE_KEY = "cortex:approval-offline-queue";
+const COMMENT_QUEUE_STORAGE_KEY = "cortex:approval-comment-offline-queue";
+const ESCALATION_QUEUE_STORAGE_KEY = "cortex:approval-escalation-offline-queue";
+
+interface QueuedComment {
+  id: string;
+  approvalId: number;
+  approvalTitle: string;
+  body: string;
+  queuedAt: string;
+}
+
+interface QueuedEscalation {
+  id: string;
+  approvalId: number;
+  approvalTitle: string;
+  reason: string;
+  queuedAt: string;
+}
+
+function newId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
 
 async function loadQueuedDecisions(): Promise<QueuedDecision[]> {
   try {
@@ -689,6 +784,40 @@ async function saveQueuedDecisions(items: QueuedDecision[]): Promise<void> {
   } catch {}
 }
 
+async function loadQueuedComments(): Promise<QueuedComment[]> {
+  try {
+    const AsyncStorage = (await import("@react-native-async-storage/async-storage")).default;
+    const raw = await AsyncStorage.getItem(COMMENT_QUEUE_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as QueuedComment[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function saveQueuedComments(items: QueuedComment[]): Promise<void> {
+  try {
+    const AsyncStorage = (await import("@react-native-async-storage/async-storage")).default;
+    await AsyncStorage.setItem(COMMENT_QUEUE_STORAGE_KEY, JSON.stringify(items));
+  } catch {}
+}
+
+async function loadQueuedEscalations(): Promise<QueuedEscalation[]> {
+  try {
+    const AsyncStorage = (await import("@react-native-async-storage/async-storage")).default;
+    const raw = await AsyncStorage.getItem(ESCALATION_QUEUE_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as QueuedEscalation[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function saveQueuedEscalations(items: QueuedEscalation[]): Promise<void> {
+  try {
+    const AsyncStorage = (await import("@react-native-async-storage/async-storage")).default;
+    await AsyncStorage.setItem(ESCALATION_QUEUE_STORAGE_KEY, JSON.stringify(items));
+  } catch {}
+}
+
 export default function ApprovalInboxScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -699,14 +828,22 @@ export default function ApprovalInboxScreen() {
   const [escalateTarget, setEscalateTarget] = useState<Approval | null>(null);
   const [escalateVisible, setEscalateVisible] = useState(false);
   const [offlineQueue, setOfflineQueue] = useState<QueuedDecision[]>([]);
+  const [offlineComments, setOfflineComments] = useState<QueuedComment[]>([]);
+  const [offlineEscalations, setOfflineEscalations] = useState<QueuedEscalation[]>([]);
   const [queueLoaded, setQueueLoaded] = useState(false);
 
   const syncEngine = useSyncEngine();
   const isOffline = !syncEngine.isOnline;
 
   useEffect(() => {
-    loadQueuedDecisions().then((items) => {
-      setOfflineQueue(items);
+    Promise.all([
+      loadQueuedDecisions(),
+      loadQueuedComments(),
+      loadQueuedEscalations(),
+    ]).then(([decisions, comments, escalations]) => {
+      setOfflineQueue(decisions);
+      setOfflineComments(comments);
+      setOfflineEscalations(escalations);
       setQueueLoaded(true);
     });
   }, []);
@@ -718,8 +855,20 @@ export default function ApprovalInboxScreen() {
 
   useEffect(() => {
     if (!queueLoaded) return;
-    if (!isOffline && offlineQueue.length > 0) {
-      flushOfflineQueue();
+    saveQueuedComments(offlineComments);
+  }, [offlineComments, queueLoaded]);
+
+  useEffect(() => {
+    if (!queueLoaded) return;
+    saveQueuedEscalations(offlineEscalations);
+  }, [offlineEscalations, queueLoaded]);
+
+  useEffect(() => {
+    if (!queueLoaded) return;
+    if (!isOffline) {
+      if (offlineQueue.length > 0) flushOfflineQueue();
+      if (offlineComments.length > 0) flushOfflineComments();
+      if (offlineEscalations.length > 0) flushOfflineEscalations();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOffline, queueLoaded]);
@@ -783,8 +932,22 @@ export default function ApprovalInboxScreen() {
       setEscalateTarget(null);
       Alert.alert("Escalated", "This approval has been escalated for senior review.");
     },
-    onError: () => {
-      Alert.alert("Error", "Failed to escalate. Please try again.");
+    onError: async (_err, variables) => {
+      // Network failure (or transient connectivity-detection lag) — fall back
+      // to the offline queue so escalations are never lost. Mirrors the
+      // comment-mutation fallback behavior.
+      const target = escalateTarget;
+      if (target && target.id === variables.id) {
+        await enqueueEscalationOffline(target, variables.reason);
+        setEscalateVisible(false);
+        setEscalateTarget(null);
+        Alert.alert(
+          "Escalation Queued",
+          "Couldn't reach the server, so your escalation was saved locally and will sync when connectivity returns."
+        );
+      } else {
+        Alert.alert("Error", "Failed to escalate. Please try again.");
+      }
     },
   });
 
@@ -825,6 +988,93 @@ export default function ApprovalInboxScreen() {
     }
   }, [qc]);
 
+  const enqueueCommentOffline = useCallback(
+    async (approvalId: number, approvalTitle: string, body: string) => {
+      const entry: QueuedComment = {
+        id: newId(),
+        approvalId,
+        approvalTitle,
+        body,
+        queuedAt: new Date().toISOString(),
+      };
+      setOfflineComments((prev) => [...prev, entry]);
+    },
+    []
+  );
+
+  const enqueueEscalationOffline = useCallback(
+    async (approval: Approval, reason: string) => {
+      const entry: QueuedEscalation = {
+        id: newId(),
+        approvalId: approval.id,
+        approvalTitle: approval.title,
+        reason,
+        queuedAt: new Date().toISOString(),
+      };
+      setOfflineEscalations((prev) => [...prev, entry]);
+    },
+    []
+  );
+
+  const flushOfflineComments = useCallback(async () => {
+    const queue = await loadQueuedComments();
+    if (queue.length === 0) return;
+    const remaining: QueuedComment[] = [];
+    const syncedApprovalIds = new Set<number>();
+    for (const item of queue) {
+      try {
+        await apiFetch(`/api/approvals/${item.approvalId}/comment`, {
+          method: "POST",
+          body: JSON.stringify({ body: item.body }),
+        });
+        syncedApprovalIds.add(item.approvalId);
+      } catch {
+        remaining.push(item);
+      }
+    }
+    setOfflineComments(remaining);
+    syncedApprovalIds.forEach((id) => {
+      qc.invalidateQueries({ queryKey: ["approval-comments", id] });
+      qc.invalidateQueries({ queryKey: ["approval-audit-trail", id] });
+    });
+  }, [qc]);
+
+  const flushOfflineEscalations = useCallback(async () => {
+    const queue = await loadQueuedEscalations();
+    if (queue.length === 0) return;
+    const remaining: QueuedEscalation[] = [];
+    const syncedApprovalIds = new Set<number>();
+    for (const item of queue) {
+      try {
+        await apiFetch(`/api/approvals/${item.approvalId}/escalate`, {
+          method: "POST",
+          body: JSON.stringify({ reason: item.reason }),
+        });
+        syncedApprovalIds.add(item.approvalId);
+      } catch {
+        remaining.push(item);
+      }
+    }
+    setOfflineEscalations(remaining);
+    if (syncedApprovalIds.size > 0) {
+      qc.invalidateQueries({ queryKey: ["cognitive-approvals"] });
+      syncedApprovalIds.forEach((id) => {
+        qc.invalidateQueries({ queryKey: ["approval-audit-trail", id] });
+      });
+    }
+  }, [qc]);
+
+  const reloadAllQueues = useCallback(async () => {
+    const [decisions, comments, escalations] = await Promise.all([
+      loadQueuedDecisions(),
+      loadQueuedComments(),
+      loadQueuedEscalations(),
+    ]);
+    setOfflineQueue(decisions);
+    setOfflineComments(comments);
+    setOfflineEscalations(escalations);
+  }, []);
+
   const retryQueuedItem = useCallback(
     async (item: QueuedDecision) => {
       try {
@@ -860,20 +1110,26 @@ export default function ApprovalInboxScreen() {
   }, []);
 
   const openEscalate = useCallback((approval: Approval) => {
-    if (isOffline) {
-      Alert.alert("Offline", "Escalation requires an internet connection.");
-      return;
-    }
     setEscalateTarget(approval);
     setEscalateVisible(true);
-  }, [isOffline]);
+  }, []);
 
   const handleSubmitEscalation = useCallback(
-    (reason: string) => {
+    async (reason: string) => {
       if (!escalateTarget) return;
+      if (isOffline) {
+        await enqueueEscalationOffline(escalateTarget, reason);
+        setEscalateVisible(false);
+        setEscalateTarget(null);
+        Alert.alert(
+          "Escalation Queued",
+          "You're offline. Your escalation has been saved locally and will sync automatically when connectivity returns."
+        );
+        return;
+      }
       escalateMutation.mutate({ id: escalateTarget.id, reason });
     },
-    [escalateTarget, escalateMutation]
+    [escalateTarget, escalateMutation, isOffline, enqueueEscalationOffline]
   );
 
   const handleSubmitDecision = useCallback(
@@ -916,7 +1172,10 @@ export default function ApprovalInboxScreen() {
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>Approval Inbox</Text>
           <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
             Guardian-routed · {approvals.length} item{approvals.length !== 1 ? "s" : ""}
-            {offlineQueue.length > 0 ? ` · ${offlineQueue.length} queued` : ""}
+            {(() => {
+              const total = offlineQueue.length + offlineComments.length + offlineEscalations.length;
+              return total > 0 ? ` · ${total} queued` : "";
+            })()}
           </Text>
         </View>
         <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
@@ -979,9 +1238,9 @@ export default function ApprovalInboxScreen() {
       >
         <OfflineQueuePanel
           isOffline={isOffline}
-          refreshKey={offlineQueue.length}
+          refreshKey={offlineQueue.length + offlineComments.length + offlineEscalations.length}
           onChanged={() => {
-            loadQueuedDecisions().then(setOfflineQueue);
+            reloadAllQueues();
             qc.invalidateQueries({ queryKey: ["cognitive-approvals"] });
           }}
         />
@@ -1021,6 +1280,8 @@ export default function ApprovalInboxScreen() {
               onReview={openReview}
               onEscalate={openEscalate}
               isOffline={isOffline}
+              queuedComments={offlineComments.filter((c) => c.approvalId === approval.id)}
+              onEnqueueComment={enqueueCommentOffline}
             />
           ))
         )}
@@ -1043,6 +1304,7 @@ export default function ApprovalInboxScreen() {
         onClose={() => { setEscalateVisible(false); setEscalateTarget(null); }}
         onSubmit={handleSubmitEscalation}
         isPending={escalateMutation.isPending}
+        isOffline={isOffline}
       />
     </View>
   );

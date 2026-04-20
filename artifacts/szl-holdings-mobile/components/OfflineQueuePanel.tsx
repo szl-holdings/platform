@@ -13,6 +13,8 @@ const AMBER = "#f59e0b";
 const RED = "#ef4444";
 
 const CORTEX_QUEUE_KEY = "cortex:approval-offline-queue";
+const CORTEX_COMMENT_QUEUE_KEY = "cortex:approval-comment-offline-queue";
+const CORTEX_ESCALATION_QUEUE_KEY = "cortex:approval-escalation-offline-queue";
 const TRADECRAFT_QUEUE_KEY = "defense:tradecraft-offline-queue";
 const SHARED_QUEUE_KEY = "mobile-shared:offline-mutation-queue";
 const SHARED_CONFLICTS_KEY = "mobile-shared:offline-conflicts";
@@ -20,7 +22,7 @@ const SHARED_MAX_RETRIES = 3;
 
 export interface UnifiedQueuedItem {
   id: string;
-  source: "cortex" | "defense" | "shared";
+  source: "cortex" | "cortex-comment" | "cortex-escalation" | "defense" | "shared";
   sourceLabel: string;
   actionType: string;
   targetId: string;
@@ -32,6 +34,22 @@ interface CortexQueued {
   approvalTitle: string;
   decision: "approved" | "rejected" | "revised";
   note: string;
+  queuedAt: string;
+}
+
+interface CortexCommentQueued {
+  id: string;
+  approvalId: number;
+  approvalTitle: string;
+  body: string;
+  queuedAt: string;
+}
+
+interface CortexEscalationQueued {
+  id: string;
+  approvalId: number;
+  approvalTitle: string;
+  reason: string;
   queuedAt: string;
 }
 
@@ -112,8 +130,10 @@ function relative(ts: number): string {
 }
 
 export async function loadAllQueued(): Promise<UnifiedQueuedItem[]> {
-  const [cortex, defense, shared] = await Promise.all([
+  const [cortex, cortexComments, cortexEscalations, defense, shared] = await Promise.all([
     readJson<CortexQueued[]>(CORTEX_QUEUE_KEY, []),
+    readJson<CortexCommentQueued[]>(CORTEX_COMMENT_QUEUE_KEY, []),
+    readJson<CortexEscalationQueued[]>(CORTEX_ESCALATION_QUEUE_KEY, []),
     readJson<DefenseQueued[]>(TRADECRAFT_QUEUE_KEY, []),
     readJson<SharedQueued[]>(SHARED_QUEUE_KEY, []),
   ]);
@@ -128,6 +148,28 @@ export async function loadAllQueued(): Promise<UnifiedQueuedItem[]> {
       actionType: c.decision === "approved" ? "Approve" : c.decision === "rejected" ? "Reject" : "Revise",
       targetId: `#${c.approvalId} · ${c.approvalTitle.slice(0, 32)}`,
       timestamp: new Date(c.queuedAt).getTime() || Date.now(),
+    });
+  }
+
+  for (const c of cortexComments) {
+    items.push({
+      id: `cortex-comment:${c.id}`,
+      source: "cortex-comment",
+      sourceLabel: "CORTEX Comment",
+      actionType: "Comment",
+      targetId: `#${c.approvalId} · ${c.body.slice(0, 32)}`,
+      timestamp: new Date(c.queuedAt).getTime() || Date.now(),
+    });
+  }
+
+  for (const e of cortexEscalations) {
+    items.push({
+      id: `cortex-escalation:${e.id}`,
+      source: "cortex-escalation",
+      sourceLabel: "CORTEX Escalation",
+      actionType: "Escalate",
+      targetId: `#${e.approvalId} · ${e.reason.slice(0, 32)}`,
+      timestamp: new Date(e.queuedAt).getTime() || Date.now(),
     });
   }
 
@@ -186,6 +228,42 @@ async function retryItem(item: UnifiedQueuedItem): Promise<{ ok: boolean; reason
       });
       if (!res.ok) return { ok: false, reason: `Server returned ${res.status}` };
       await writeJson(CORTEX_QUEUE_KEY, queue.filter((q) => q.approvalId !== approvalId));
+      return { ok: true };
+    } catch {
+      return { ok: false, reason: "Network error — still offline?" };
+    }
+  }
+
+  if (item.source === "cortex-comment") {
+    const commentId = item.id.split(":").slice(1).join(":");
+    const queue = await readJson<CortexCommentQueued[]>(CORTEX_COMMENT_QUEUE_KEY, []);
+    const entry = queue.find((q) => q.id === commentId);
+    if (!entry) return { ok: false, reason: "Queued entry not found." };
+    try {
+      const res = await apiFetchRaw(`/api/approvals/${entry.approvalId}/comment`, {
+        method: "POST",
+        body: JSON.stringify({ body: entry.body }),
+      });
+      if (!res.ok) return { ok: false, reason: `Server returned ${res.status}` };
+      await writeJson(CORTEX_COMMENT_QUEUE_KEY, queue.filter((q) => q.id !== commentId));
+      return { ok: true };
+    } catch {
+      return { ok: false, reason: "Network error — still offline?" };
+    }
+  }
+
+  if (item.source === "cortex-escalation") {
+    const escalationId = item.id.split(":").slice(1).join(":");
+    const queue = await readJson<CortexEscalationQueued[]>(CORTEX_ESCALATION_QUEUE_KEY, []);
+    const entry = queue.find((q) => q.id === escalationId);
+    if (!entry) return { ok: false, reason: "Queued entry not found." };
+    try {
+      const res = await apiFetchRaw(`/api/approvals/${entry.approvalId}/escalate`, {
+        method: "POST",
+        body: JSON.stringify({ reason: entry.reason }),
+      });
+      if (!res.ok) return { ok: false, reason: `Server returned ${res.status}` };
+      await writeJson(CORTEX_ESCALATION_QUEUE_KEY, queue.filter((q) => q.id !== escalationId));
       return { ok: true };
     } catch {
       return { ok: false, reason: "Network error — still offline?" };
@@ -326,6 +404,14 @@ async function discardItem(item: UnifiedQueuedItem): Promise<void> {
     const approvalId = Number(item.id.split(":")[1]);
     const queue = await readJson<CortexQueued[]>(CORTEX_QUEUE_KEY, []);
     await writeJson(CORTEX_QUEUE_KEY, queue.filter((q) => q.approvalId !== approvalId));
+  } else if (item.source === "cortex-comment") {
+    const commentId = item.id.split(":").slice(1).join(":");
+    const queue = await readJson<CortexCommentQueued[]>(CORTEX_COMMENT_QUEUE_KEY, []);
+    await writeJson(CORTEX_COMMENT_QUEUE_KEY, queue.filter((q) => q.id !== commentId));
+  } else if (item.source === "cortex-escalation") {
+    const escalationId = item.id.split(":").slice(1).join(":");
+    const queue = await readJson<CortexEscalationQueued[]>(CORTEX_ESCALATION_QUEUE_KEY, []);
+    await writeJson(CORTEX_ESCALATION_QUEUE_KEY, queue.filter((q) => q.id !== escalationId));
   } else if (item.source === "defense") {
     const objectId = item.id.split(":").slice(1).join(":");
     const queue = await readJson<DefenseQueued[]>(TRADECRAFT_QUEUE_KEY, []);
