@@ -4,6 +4,9 @@ import { resolve } from "path";
 export default defineConfig({
   resolve: {
     alias: [
+      { find: "@szl/substrate-client/streaming", replacement: resolve(__dirname, "packages/substrate-client/src/streaming.ts") },
+      { find: "@szl/substrate-client/types", replacement: resolve(__dirname, "packages/substrate-client/src/types.ts") },
+      { find: "@szl/substrate-client", replacement: resolve(__dirname, "packages/substrate-client/src/index.ts") },
       { find: "@workspace/ai-engine/domain-embedding-hooks", replacement: resolve(__dirname, "lib/ai-engine/src/domain-embedding-hooks.ts") },
       { find: "@szl-holdings/ai-engine/domain-embedding-hooks", replacement: resolve(__dirname, "lib/ai-engine/src/domain-embedding-hooks.ts") },
       { find: "@workspace/auth", replacement: resolve(__dirname, "lib/auth/src/index.ts") },

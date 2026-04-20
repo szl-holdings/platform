@@ -118,6 +118,7 @@ const CognitiveMemory = lazy(() => import("./pages/cognitive/memory"));
 const CognitivePlanner = lazy(() => import("./pages/cognitive/planner"));
 const CognitiveVerifier = lazy(() => import("./pages/cognitive/verifier"));
 const CognitiveReflection = lazy(() => import("./pages/cognitive/reflection"));
+const SubstrateCommandCenter = lazy(() => import("./pages/substrate").then(m => ({ default: m.SubstrateCommandCenter })));
 const CognitiveTraces = lazy(() => import("./pages/cognitive/traces"));
 const CognitiveEvals = lazy(() => import("./pages/cognitive/evals"));
 const CognitivePolicies = lazy(() => import("./pages/cognitive/policies"));
@@ -182,9 +183,16 @@ function getMode(location: string): WorkspaceMode {
   return "strategy";
 }
 
+function isSubstrateRoute(location: string): boolean {
+  return location.startsWith("/substrate");
+}
+
 const OPS_ROUTES = ["/alerts", "/team", "/costs", "/changelog", "/sla", "/governance", "/health", "/digest"];
 
 const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> = [
+  { href: "/substrate", label: "Substrate Command Center", group: "Substrate" },
+  { href: "/substrate/approvals", label: "Substrate — Approval Queue", group: "Substrate" },
+  { href: "/substrate/counterfactual", label: "Substrate — Counterfactual Diff", group: "Substrate" },
   { href: "/strategy", label: "Strategy Dashboard", group: "Strategy" },
   { href: "/strategy/executive-briefing", label: "Executive Briefing", group: "Strategy" },
   { href: "/strategy/simulation", label: "Simulation", group: "Strategy" },
@@ -321,6 +329,14 @@ function AppShell() {
     });
     return () => cancelAnimationFrame(raf);
   }, [location]);
+
+  if (isSubstrateRoute(location)) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <SubstrateCommandCenter />
+      </Suspense>
+    );
+  }
 
   if (isMarketing) {
     return (

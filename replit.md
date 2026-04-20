@@ -127,3 +127,21 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 -   **Government Data:** CISA KEV, NVD CVE, MITRE ATT&CK, Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
 -   **Legal Data:** CourtListener REST API
 -   **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
+
+## Substrate Command Center (Task #2394)
+
+A cross-vertical operator UI for the governed decision substrate, added as a dedicated section of the `artifacts/command` (Unified Command) artifact at `/command/substrate/`.
+
+**Route:** `/command/substrate/`
+**Source files:** `artifacts/command/src/pages/substrate/`
+**Documentation:** `docs/substrate/command-center.md`
+
+### Features
+- **Four operator perspectives:** Executive, Operator, Analyst, Approver — one-click switching, persisted in localStorage
+- **Live Trajectory Map** (`/substrate/`): All in-flight runs across every vertical in a live-updating table (5s refresh). KPI row, full filter set (tenant/vertical/status/risk/approval), 9-segment stage progress bars, confidence bars, risk badges
+- **Run Detail View** (`/substrate/runs/:id`): Tabbed view with stage timeline (expandable per-stage I/O, evidence drawers, policy results), OTel trace waterfall, approval history, rollback checkpoints
+- **Counterfactual Diff Viewer** (`/substrate/counterfactual`): Load any run, change model adapter and policy profile, compare decisions stage-by-stage in a side-by-side diff
+- **Unified Approval Queue** (`/substrate/approvals`): All pending decisions across every vertical, with Approve/Reject/Escalate actions, required justification (10-char minimum), urgency indicators, resolved session log
+
+### Data Layer
+Currently simulated from `artifacts/command/src/pages/substrate/mock-data.ts`. Designed to be replaced with `@szl/substrate-client` SDK calls when the substrate Phase 2 SDK ships. The `SubstrateRun` type is structurally compatible with the substrate's typed run model.

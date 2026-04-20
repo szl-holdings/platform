@@ -820,6 +820,9 @@ importers:
       '@szl-holdings/ui-command':
         specifier: workspace:*
         version: link:../../packages/ui-command
+      '@szl/substrate-client':
+        specifier: workspace:*
+        version: link:../../packages/substrate-client
       '@tanstack/query-persist-client-core':
         specifier: ^5.99.0
         version: 5.99.0
