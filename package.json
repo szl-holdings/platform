@@ -81,6 +81,8 @@
     "readiness:gate": "pnpm run brand:check && pnpm run typecheck && pnpm run test && pnpm run qa:routes && pnpm run audit:mocks && pnpm run audit:deps && pnpm run audit:copy && pnpm run smoke:product-mode && pnpm -r --if-present run build",
     "audit:series-a": "pnpm run brand:check && pnpm run typecheck && pnpm run test && pnpm run audit:mocks && pnpm run audit:routes && pnpm run audit:deps && pnpm run audit:copy && pnpm run security:audit && pnpm run smoke:product-mode && pnpm -r --if-present run build",
     "readme:check": "node scripts/validate-readme-assets.js",
+    "readme:portfolio": "node scripts/generate-readme-product-table.js",
+    "readme:portfolio:check": "node scripts/generate-readme-product-table.js --check",
     "docs:generate": "node --experimental-vm-modules scripts/docs/generate-api-catalogue.js",
     "docs:check": "node --experimental-vm-modules scripts/docs/generate-api-catalogue.js --check",
     "docs:sync-check": "node --experimental-vm-modules scripts/docs/check-docs-sync.js",
