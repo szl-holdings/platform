@@ -13,6 +13,7 @@
  */
 
 import express from "express";
+import { listWorkflows } from "@szl/substrate";
 import { createHttpTransport } from "./transport/http.js";
 import { startStdioTransport } from "./transport/stdio.js";
 import { SERVER_INFO } from "./descriptor.js";
@@ -20,6 +21,25 @@ import { SERVER_INFO } from "./descriptor.js";
 const IS_STDIO = process.argv.includes("--stdio");
 const PORT = parseInt(process.env["PORT"] ?? "3700", 10);
 const IS_PRODUCTION = process.env["NODE_ENV"] === "production";
+
+// Startup check: warn loudly if the workflow registry is empty. Without any
+// registerWorkflow() calls in this process, every substrate_submit_run will
+// fail because lookupWorkflow() returns undefined for every workflowId.
+function warnIfRegistryEmpty(log: (msg: string) => void): void {
+  const registered = listWorkflows();
+  if (registered.length === 0) {
+    log(
+      "[substrate-mcp-gateway] WARNING: workflow registry is EMPTY. " +
+      "No workflows have been registered via registerWorkflow(). " +
+      "Every substrate_submit_run call will fail until at least one workflow is registered.",
+    );
+  } else {
+    log(
+      `[substrate-mcp-gateway] Workflow registry: ${registered.length} workflow(s) registered ` +
+      `(${registered.map((w) => w.id).join(", ")})`,
+    );
+  }
+}
 
 // Fail-fast: refuse to start in production without an API key.
 // In development a warning is logged by auth.ts and unauthenticated mode is used.
@@ -32,8 +52,11 @@ if (IS_PRODUCTION && !process.env["SUBSTRATE_GATEWAY_API_KEY"]) {
 }
 
 if (IS_STDIO) {
+  // stdio transport: stderr is the only safe place for diagnostic logs
+  warnIfRegistryEmpty((msg) => console.error(msg));
   startStdioTransport();
 } else {
+  warnIfRegistryEmpty((msg) => console.warn(msg));
   const app = express();
 
   app.disable("x-powered-by");

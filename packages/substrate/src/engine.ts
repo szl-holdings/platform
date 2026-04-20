@@ -55,6 +55,15 @@ export function listWorkflows(): WorkflowDefinition[] {
   return [...workflowRegistry.values()];
 }
 
+/**
+ * Test-only: remove every workflow definition from the in-memory registry.
+ * Used by gateway/runtime tests that need to exercise the "no workflows
+ * registered" failure path. Production code should never call this.
+ */
+export function clearWorkflowRegistry(): void {
+  workflowRegistry.clear();
+}
+
 // ─── Default Stage Executor ───────────────────────────────────────────────────
 //
 // The default executor routes to the registered adapters based on stage type.

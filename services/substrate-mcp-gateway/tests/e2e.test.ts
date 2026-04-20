@@ -29,7 +29,10 @@ import {
   Decide,
   definePolicy,
   defineBudget,
+  listWorkflows,
+  clearWorkflowRegistry,
 } from "@szl/substrate";
+import { handleToolCall } from "../src/handlers.js";
 import {
   clearApprovalInbox,
 } from "@workspace/approvals-inbox";
@@ -387,6 +390,92 @@ test("13. prompts/list and prompts/get work correctly", async () => {
   // Either a structured error (run not found) or a result with NOT_FOUND embedded — both are fine
   const responseHasShape = getResp.error !== undefined || getResp.result !== undefined;
   assert.ok(responseHasShape, "prompts/get must return either a result or structured error");
+});
+
+test("15. submit_run returns structured error when workflowId does not resolve", async () => {
+  // Submit a run with a workflowId that has not been registered.
+  // The gateway must NOT silently fail or return a generic 500 — it must
+  // return a structured isError tool result with a developer-friendly message
+  // and a machine-readable error code.
+  const result = await toolCall("substrate_submit_run", {
+    workflowId: "this-workflow-was-never-registered",
+    input: {},
+    mode: "dry-run",
+  });
+
+  assert.equal(result.isError, true, "Result must be marked as an error");
+  const text = result.content?.[0]?.text ?? "{}";
+  const payload = JSON.parse(text) as {
+    error: string;
+    details?: { code?: string; workflowId?: string; registeredCount?: number; availableWorkflowIds?: string[] };
+  };
+
+  assert.ok(payload.error, "Error message must be present");
+  assert.ok(
+    payload.error.includes("this-workflow-was-never-registered"),
+    "Error message must mention the offending workflowId",
+  );
+  assert.ok(payload.details, "Error must include structured details");
+
+  // Two prior tests register dryRunWorkflow and liveGateWorkflow, so registry
+  // is NOT empty here. The error code must reflect WORKFLOW_NOT_FOUND, and
+  // the available workflow ids must be surfaced for developer feedback.
+  assert.equal(payload.details!.code, "WORKFLOW_NOT_FOUND",
+    `Expected error code WORKFLOW_NOT_FOUND, got: ${payload.details!.code}`);
+  assert.ok(
+    (payload.details!.registeredCount ?? 0) >= 2,
+    "registeredCount must surface the actual registry size",
+  );
+  assert.ok(
+    Array.isArray(payload.details!.availableWorkflowIds) &&
+      payload.details!.availableWorkflowIds!.includes(DRY_RUN_WORKFLOW_ID),
+    "availableWorkflowIds must list registered workflows so callers can self-correct",
+  );
+});
+
+test("16. registry-empty failure path: error and list_workflows surface the empty state", async () => {
+  // The "no workflows registered" branch is the failure path called out in
+  // task #2444. We exercise it by snapshotting the global registry, clearing
+  // it, asserting the gateway behaves correctly, then restoring state so
+  // subsequent tests are unaffected.
+  const snapshot = listWorkflows();
+  clearWorkflowRegistry();
+
+  try {
+    const submitResp = await handleToolCall(
+      "substrate_submit_run",
+      { workflowId: "anything", input: {}, mode: "dry-run" },
+      "test:empty-registry",
+    );
+    assert.equal(submitResp.isError, true, "Empty registry must produce an error");
+    const submitPayload = JSON.parse(submitResp.content[0]!.text) as {
+      error: string;
+      details?: { code?: string; registeredCount?: number };
+    };
+    assert.equal(submitPayload.details?.code, "REGISTRY_EMPTY",
+      "Empty-registry submission must yield a REGISTRY_EMPTY error code");
+    assert.equal(submitPayload.details?.registeredCount, 0,
+      "registeredCount must be 0 when registry is empty");
+    assert.ok(
+      submitPayload.error.toLowerCase().includes("registry is empty"),
+      "Error message must explain that the registry is empty",
+    );
+
+    const listResp = await handleToolCall("substrate_list_workflows", {}, "test:empty-registry");
+    assert.equal(listResp.isError, undefined, "list_workflows must not be an error when empty");
+    const listPayload = JSON.parse(listResp.content[0]!.text) as {
+      count: number;
+      registryEmpty: boolean;
+      warning?: string;
+    };
+    assert.equal(listPayload.count, 0, "list_workflows must report count=0 when empty");
+    assert.equal(listPayload.registryEmpty, true, "list_workflows must flag registryEmpty=true");
+    assert.ok(listPayload.warning, "list_workflows must include a warning when registry is empty");
+  } finally {
+    for (const wf of snapshot) {
+      registerWorkflow(wf);
+    }
+  }
 });
 
 test("14. SSE stream receives run lifecycle events when a run is submitted", async () => {

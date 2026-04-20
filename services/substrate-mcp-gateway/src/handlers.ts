@@ -178,9 +178,24 @@ async function handleSubmitRun(rawParams: unknown, actorId: string): Promise<Too
   const workflow = lookupWorkflow(workflowId);
 
   if (!workflow) {
+    const registered = listWorkflows();
+    if (registered.length === 0) {
+      return err(
+        `Workflow '${workflowId}' cannot be resolved: the workflow registry is empty. ` +
+        "No workflows have been registered in this gateway process via registerWorkflow(). " +
+        "Register at least one workflow before submitting runs.",
+        { code: "REGISTRY_EMPTY", workflowId, registeredCount: 0 },
+      );
+    }
     return err(
       `Workflow '${workflowId}' is not registered. ` +
       "Call substrate_list_workflows to see available workflows.",
+      {
+        code: "WORKFLOW_NOT_FOUND",
+        workflowId,
+        registeredCount: registered.length,
+        availableWorkflowIds: registered.map((w) => w.id),
+      },
     );
   }
 
@@ -514,8 +529,17 @@ function handleListWorkflows(): ToolResult {
 
   return ok({
     count: workflows.length,
+    registryEmpty: workflows.length === 0,
     substrateVersion: SUBSTRATE_VERSION,
     workflows,
+    ...(workflows.length === 0
+      ? {
+          warning:
+            "Workflow registry is empty. No workflows have been registered " +
+            "in this gateway process via registerWorkflow(). substrate_submit_run " +
+            "will fail with a REGISTRY_EMPTY error until at least one workflow is registered.",
+        }
+      : {}),
   });
 }
 
