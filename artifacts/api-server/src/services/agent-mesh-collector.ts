@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import crypto from "crypto";
+import { execFileSync } from "child_process";
 import { db, auditEventsTable } from "@szl-holdings/db";
 import {
   agentMeshRuntimesTable,
@@ -764,11 +765,63 @@ function stripEnvSuffix(line: string): string {
   return line.replace(/ \[env: [^\]]*\]$/, "");
 }
 
+// Resolve the operator who last edited a config file. Tries (in order):
+//   1) `git log -1 --format=%an -- <file>` so version-controlled configs
+//      surface the real author from repo blame.
+//   2) The file owner from `fs.stat` — mapped to a username when it matches
+//      the current process user, otherwise reported as `uid:<n>`.
+// Falls back to "unknown" if nothing resolves. The cache is provided by the
+// caller so it lives only for the duration of a single scan — long-lived
+// collector processes must not reuse stale attribution across scans. We
+// also do NOT cache "unknown" so a transient git/stat failure on one scan
+// can recover on the next.
+export type ChangedByCache = Map<string, string>;
+
+export function resolveChangedBy(file: string, cache: ChangedByCache): string {
+  const cached = cache.get(file);
+  if (cached) return cached;
+  let resolved = "unknown";
+  try {
+    const out = execFileSync(
+      "git",
+      ["log", "-1", "--format=%an", "--", file],
+      {
+        cwd: path.dirname(file),
+        encoding: "utf-8",
+        timeout: 1500,
+        stdio: ["ignore", "pipe", "ignore"],
+      },
+    ).trim();
+    if (out) resolved = out;
+  } catch {
+    // not a git repo, git unavailable, or file untracked
+  }
+  if (resolved === "unknown") {
+    try {
+      const stats = fs.statSync(file);
+      const uid = stats.uid;
+      const current = os.userInfo();
+      if (current.uid === uid && current.username) {
+        resolved = current.username;
+      } else {
+        resolved = `uid:${uid}`;
+      }
+    } catch {
+      // leave as unknown
+    }
+  }
+  if (resolved !== "unknown") cache.set(file, resolved);
+  return resolved;
+}
+
 function computeDriftSnapshots(
   ctx: ParseContext,
   prev: PreviousFileState,
   scannedAt: string,
 ): DriftSnapshotRow[] {
+  // Per-scan cache — never reused across scans, so attribution stays fresh
+  // when file ownership or the latest git author changes between runs.
+  const changedByCache: ChangedByCache = new Map();
   const drifts: DriftSnapshotRow[] = [];
   const seenFiles = new Set<string>([
     ...ctx.fileMcpLines.keys(),
@@ -819,7 +872,7 @@ function computeDriftSnapshots(
       id: `drift-${idHash}`,
       configFile: file,
       changedAt: scannedAt,
-      changedBy: "config-scanner",
+      changedBy: resolveChangedBy(file, changedByCache),
       // First-time discovery is treated as policy-approved (it's the baseline,
       // not an unauthorised change). Subsequent diffs are unapproved until an
       // operator approves them.
@@ -844,7 +897,7 @@ function computeDriftSnapshots(
       id: `drift-${idHash}`,
       configFile: file,
       changedAt: scannedAt,
-      changedBy: "local-edit",
+      changedBy: resolveChangedBy(file, changedByCache),
       policyApproved: false,
       approvedBy: null,
       diff: { removed: [], added: ["<instruction-tampering signal detected — see linked exposure>"] },
