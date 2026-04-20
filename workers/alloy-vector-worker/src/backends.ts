@@ -1,4 +1,4 @@
-export type BackendKind = "local-cpu" | "external-http" | "future-gpu" | "future-azure";
+export type BackendKind = "local-cpu" | "deterministic-cpu" | "external-http" | "future-gpu" | "future-azure";
 
 export interface EmbedInput {
   chunkId: string;
@@ -38,13 +38,18 @@ function deterministicEmbed(text: string, dims: number): number[] {
   return cosineNormalize(v);
 }
 
-export class LocalCpuBackend implements EmbeddingBackend {
-  readonly kind: BackendKind = "local-cpu";
+/**
+ * DeterministicCpuBackend produces stable, hash-derived vectors. The vectors
+ * carry no semantic signal and are intended only for offline tests, dimension
+ * shape checks, and seed data where real embeddings are unavailable.
+ */
+export class DeterministicCpuBackend implements EmbeddingBackend {
+  readonly kind: BackendKind = "deterministic-cpu";
   readonly modelRef: string;
   readonly dimensions: number;
 
   constructor(opts: { modelRef?: string; dimensions?: number } = {}) {
-    this.modelRef = opts.modelRef ?? "aef-embed-cpu-v1";
+    this.modelRef = opts.modelRef ?? "aef-deterministic-cpu-v1";
     this.dimensions = opts.dimensions ?? 768;
   }
 
@@ -64,6 +69,105 @@ export class LocalCpuBackend implements EmbeddingBackend {
         modelRef: this.modelRef,
         tokenCount: Math.ceil(input.text.split(/\s+/).length * 1.3),
         latencyMs: Date.now() - start,
+      };
+    });
+  }
+}
+
+/**
+ * LocalCpuBackend runs a real sentence-transformer ONNX model on the CPU using
+ * onnxruntime-node (via @huggingface/transformers). Defaults to the
+ * `Xenova/all-MiniLM-L6-v2` model which produces L2-normalised 384-dim
+ * embeddings suitable for cosine-similarity retrieval.
+ *
+ * The model is downloaded from the Hugging Face Hub on first use and cached on
+ * disk under `${cacheDir}` (defaults to `~/.cache/huggingface` via the
+ * transformers.js library). All inference runs CPU-only — no GPU dependency.
+ */
+export class LocalCpuBackend implements EmbeddingBackend {
+  readonly kind: BackendKind = "local-cpu";
+  readonly modelRef: string;
+  readonly dimensions: number;
+  private readonly hfModelId: string;
+  private readonly quantized: boolean;
+  private readonly cacheDir: string | undefined;
+  private extractorPromise: Promise<unknown> | null = null;
+
+  constructor(opts: {
+    modelRef?: string;
+    dimensions?: number;
+    hfModelId?: string;
+    quantized?: boolean;
+    cacheDir?: string;
+  } = {}) {
+    this.hfModelId = opts.hfModelId ?? "Xenova/all-MiniLM-L6-v2";
+    this.modelRef = opts.modelRef ?? this.hfModelId;
+    this.dimensions = opts.dimensions ?? 384;
+    this.quantized = opts.quantized ?? true;
+    this.cacheDir = opts.cacheDir;
+  }
+
+  async isAvailable(): Promise<boolean> {
+    try {
+      await this.getExtractor();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private async getExtractor(): Promise<(texts: string[], opts: { pooling: "mean"; normalize: boolean }) => Promise<{ data: Float32Array; dims: number[] }>> {
+    if (!this.extractorPromise) {
+      this.extractorPromise = (async () => {
+        const tf = await import("@huggingface/transformers");
+        const env = (tf as { env: Record<string, unknown> }).env;
+        const cacheDir = this.cacheDir;
+        if (cacheDir) {
+          env["cacheDir"] = cacheDir;
+        }
+        env["allowLocalModels"] = true;
+        env["allowRemoteModels"] = true;
+        const pipeline = (tf as { pipeline: (task: string, model: string, opts?: unknown) => Promise<unknown> }).pipeline;
+        return pipeline("feature-extraction", this.hfModelId, { dtype: this.quantized ? "q8" : "fp32" });
+      })();
+    }
+    const extractor = await this.extractorPromise as unknown as (texts: string[], opts: { pooling: "mean"; normalize: boolean }) => Promise<{ data: Float32Array; dims: number[] }>;
+    return extractor;
+  }
+
+  async embed(inputs: EmbedInput[]): Promise<EmbedOutput[]> {
+    if (inputs.length === 0) return [];
+    const start = Date.now();
+    const extractor = await this.getExtractor();
+
+    const texts = inputs.map((i) => {
+      const prefix = i.inputType === "query" ? "query: " : "passage: ";
+      return prefix + i.text;
+    });
+
+    const tensor = await extractor(texts, { pooling: "mean", normalize: true });
+    const flat = tensor.data;
+    const [batch, dims] = tensor.dims as [number, number];
+    if (batch !== inputs.length) {
+      throw new Error(`LocalCpuBackend: expected ${inputs.length} embeddings, got ${batch}`);
+    }
+    if (dims !== this.dimensions) {
+      throw new Error(`LocalCpuBackend: model returned ${dims}-d vectors but backend was configured for ${this.dimensions}-d`);
+    }
+
+    const elapsed = Date.now() - start;
+    const perItemLatency = Math.max(1, Math.round(elapsed / inputs.length));
+
+    return inputs.map((input, idx) => {
+      const offset = idx * dims;
+      const vector = Array.from(flat.subarray(offset, offset + dims));
+      return {
+        chunkId: input.chunkId,
+        vector,
+        dimensions: dims,
+        modelRef: this.modelRef,
+        tokenCount: Math.ceil(input.text.length / 4),
+        latencyMs: perItemLatency,
       };
     });
   }
@@ -167,6 +271,7 @@ export function createDefaultBackend(): EmbeddingBackend {
 
   if (backendEnv === "future-gpu") return new FutureGpuBackend();
   if (backendEnv === "future-azure") return new FutureAzureBackend();
+  if (backendEnv === "deterministic-cpu") return new DeterministicCpuBackend();
 
   return new LocalCpuBackend();
 }

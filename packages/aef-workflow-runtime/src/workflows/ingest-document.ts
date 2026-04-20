@@ -7,11 +7,14 @@ import {
   VectorDispatchActor,
   IndexVerifierActor,
   ApprovalGateActor,
+  loadDefaultChunkTokenizer,
 } from "../actors.js";
 
 const planner = new IngestionPlannerActor();
 const normalizer = new SourceNormalizerActor();
-const chunkPlanner = new ChunkPlannerActor();
+const chunkPlanner = new ChunkPlannerActor({
+  tokenizerLoader: () => loadDefaultChunkTokenizer(),
+});
 const policyGuard = new PolicyGuardActor();
 const vectorDispatch = new VectorDispatchActor();
 const indexVerifier = new IndexVerifierActor();

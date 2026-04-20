@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Alloy Embedding Fabric \u2014 vector embedding worker. Runs dense (and optional sparse) embedding on CPU using LocalCpuBackend. Supports micro-batching keyed by (profile, backend, modelRef, inputType) with size+time flush, queue-depth metrics, oversize rejection, and backpressure. Adapter seams for ExternalHttpBackend, FutureGpuBackend, FutureAzureBackend.",
+  "description": "Alloy Embedding Fabric — vector embedding worker. Runs dense (and optional sparse) embedding on CPU using LocalCpuBackend. Supports micro-batching keyed by (profile, backend, modelRef, inputType) with size+time flush, queue-depth metrics, oversize rejection, and backpressure. Adapter seams for ExternalHttpBackend, FutureGpuBackend, FutureAzureBackend.",
   "main": "src/index.ts",
   "types": "dist/index.d.ts",
   "dependencies": {
+    "@huggingface/transformers": "^4.1.0",
     "@workspace/aef-contracts": "workspace:*",
     "@workspace/aef-storage-adapters": "workspace:*",
     "express": "^5.0.0",

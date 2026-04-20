@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@workspace/aef-contracts": "workspace:*",
+    "@workspace/alloy-vector-worker": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

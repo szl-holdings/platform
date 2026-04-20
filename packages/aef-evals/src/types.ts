@@ -5,12 +5,23 @@ export interface GoldenQuery {
   notes?: string;
 }
 
+export interface CorpusChunk {
+  chunkId: string;
+  text: string;
+}
+
 export interface GoldenFixtureSet {
   fixtureSetId: string;
   profileId: string;
   domain: string;
   description: string;
   queries: GoldenQuery[];
+  /**
+   * Optional in-memory corpus of {chunkId, text} pairs that adapters can embed
+   * and search to validate retrieval quality with real vectors. Each
+   * relevantChunkId from `queries` should appear here for end-to-end eval.
+   */
+  corpus?: CorpusChunk[];
 }
 
 export interface RetrievalResult {

@@ -113,6 +113,119 @@ describe("WorkflowStateMachine — approval gate", () => {
   });
 });
 
+describe("ChunkPlannerActor", () => {
+  it("falls back to word-based chunking when no tokenizer is injected", async () => {
+    const { ChunkPlannerActor } = await import("./actors.js");
+    const actor = new ChunkPlannerActor();
+    const result = await actor.execute(
+      { workflowId: "wf", tenantId: "t", requestedBy: "u", input: {}, approvalRequired: false },
+      { content: "alpha beta gamma delta epsilon zeta eta theta iota kappa", chunkSize: 3, chunkOverlap: 1 },
+    );
+    expect(result.output["unit"]).toBe("words");
+    expect(result.output["totalChunks"]).toBeGreaterThan(0);
+  });
+
+  it("uses token-based chunking and applies the truncation policy when a tokenizer is injected", async () => {
+    const { ChunkPlannerActor } = await import("./actors.js");
+    const tokenizer = {
+      encode: (text: string) => text.split(/\s+/).map((_, i) => i + 1),
+      decode: (ids: number[]) => ids.map((i) => `t${i}`).join(" "),
+    };
+    const actor = new ChunkPlannerActor({
+      tokenizer,
+      truncationPolicy: { strategy: "truncate", maxTokens: 4 },
+    });
+    const result = await actor.execute(
+      { workflowId: "wf", tenantId: "t", requestedBy: "u", input: {}, approvalRequired: false },
+      { content: "a b c d e f g h i j", chunkSize: 6, chunkOverlap: 1 },
+    );
+    expect(result.output["unit"]).toBe("tokens");
+    const chunks = result.output["chunkPlan"] as Array<{ tokenCount: number }>;
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks.every((c) => c.tokenCount <= 4)).toBe(true);
+  });
+
+  it("validates that chunkOverlap is smaller than chunkSize", async () => {
+    const { ChunkPlannerActor } = await import("./actors.js");
+    const tokenizer = {
+      encode: (text: string) => text.split(/\s+/).map((_, i) => i + 1),
+      decode: (ids: number[]) => ids.map((i) => `t${i}`).join(" "),
+    };
+    const actor = new ChunkPlannerActor({
+      tokenizer,
+      truncationPolicy: { strategy: "truncate", maxTokens: 100 },
+    });
+    await expect(
+      actor.execute(
+        { workflowId: "wf", tenantId: "t", requestedBy: "u", input: {}, approvalRequired: false },
+        { content: "a b c d e f g h i j", chunkSize: 5, chunkOverlap: 6 },
+      ),
+    ).rejects.toThrow(/chunkOverlap/);
+  });
+
+  it("throws when a window exceeds maxTokens and strategy='reject'", async () => {
+    const { ChunkPlannerActor } = await import("./actors.js");
+    const tokenizer = {
+      encode: (text: string) => text.split(/\s+/).map((_, i) => i + 1),
+      decode: (ids: number[]) => ids.map((i) => `t${i}`).join(" "),
+    };
+    const actor = new ChunkPlannerActor({
+      tokenizer,
+      truncationPolicy: { strategy: "reject", maxTokens: 4 },
+    });
+    await expect(
+      actor.execute(
+        { workflowId: "wf", tenantId: "t", requestedBy: "u", input: {}, approvalRequired: false },
+        { content: "a b c d e f g h i j", chunkSize: 8, chunkOverlap: 1 },
+      ),
+    ).rejects.toThrow(/exceeds maxTokens/);
+  });
+
+  it("truncates windows that exceed maxTokens when strategy='truncate'", async () => {
+    const { ChunkPlannerActor } = await import("./actors.js");
+    const tokenizer = {
+      encode: (text: string) => text.split(/\s+/).map((_, i) => i + 1),
+      decode: (ids: number[]) => ids.map((i) => `t${i}`).join(" "),
+    };
+    const actor = new ChunkPlannerActor({
+      tokenizer,
+      truncationPolicy: { strategy: "truncate", maxTokens: 3 },
+    });
+    const result = await actor.execute(
+      { workflowId: "wf", tenantId: "t", requestedBy: "u", input: {}, approvalRequired: false },
+      { content: "a b c d e f g h", chunkSize: 6, chunkOverlap: 1 },
+    );
+    const chunks = result.output["chunkPlan"] as Array<{ tokenCount: number; truncated?: boolean }>;
+    expect(chunks.every((c) => c.tokenCount <= 3)).toBe(true);
+    expect(chunks.some((c) => c.truncated)).toBe(true);
+    expect(result.output["anyTruncated"]).toBe(true);
+  });
+
+  it("ingestDocumentWorkflow runs the chunk-plan step in token mode end-to-end", async () => {
+    const { ingestDocumentWorkflow } = await import("./workflows/ingest-document.js");
+    const ctx = {
+      workflowId: "wf-int",
+      tenantId: "tenant-int",
+      requestedBy: "tester",
+      profileId: "default",
+      input: {
+        sourceId: "doc-1",
+        content: "the quick brown fox jumps over the lazy dog ".repeat(20),
+        contentType: "text/plain",
+        chunkSize: 32,
+        chunkOverlap: 4,
+      },
+      approvalRequired: false,
+    };
+    const planStep = ingestDocumentWorkflow.steps.find((s) => s.stepId === "plan-chunks")!;
+    const result = await planStep.execute(ctx, []);
+    expect(result.output["unit"]).toBe("tokens");
+    expect(Number(result.output["totalChunks"])).toBeGreaterThan(0);
+    const plan = result.output["chunkPlan"] as Array<{ tokenCount: number; unit: string }>;
+    expect(plan.every((c) => c.unit === "tokens")).toBe(true);
+  }, 60_000);
+});
+
 describe("createWorkflowMachine", () => {
   it("creates machines for all five workflow kinds", () => {
     const kinds = [
