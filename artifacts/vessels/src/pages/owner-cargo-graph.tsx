@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { ConstellationGraph } from "@szl-holdings/shared-ui/constellation-graph";
+import { useState, useEffect, useMemo } from "react";
 import { Network, Anchor, Building2, MapPin, Package, AlertTriangle, CheckCircle2, RefreshCw, Shield, Eye, Info, ChevronRight } from "lucide-react";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { OwnerCargoForceGraph } from "../components/owner-cargo-force-graph";
 
 const ACCENT = "#0ea5e9";
 const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
@@ -149,6 +149,37 @@ export default function OwnerCargoGraphPage() {
   const edges = data?.graph.edges ?? [];
   const filtered = typeFilter === "all" ? nodes : nodes.filter(n => n.type === typeFilter);
 
+  // For the interactive graph, when a single type is selected we still want to
+  // keep its 1-hop neighborhood visible so the relationships remain legible.
+  const graphNodes = useMemo(() => {
+    if (typeFilter === "all") return nodes;
+    const focusIds = new Set(filtered.map(n => n.id));
+    const neighborIds = new Set<string>();
+    for (const e of edges) {
+      if (focusIds.has(e.source)) neighborIds.add(e.target);
+      if (focusIds.has(e.target)) neighborIds.add(e.source);
+    }
+    return nodes.filter(n => focusIds.has(n.id) || neighborIds.has(n.id));
+  }, [nodes, edges, filtered, typeFilter]);
+
+  const graphNodeIds = useMemo(() => new Set(graphNodes.map(n => n.id)), [graphNodes]);
+  const visibleEdgeCount = useMemo(
+    () => edges.reduce((acc, e) => acc + (graphNodeIds.has(e.source) && graphNodeIds.has(e.target) ? 1 : 0), 0),
+    [edges, graphNodeIds],
+  );
+
+  // If the active filter excludes the currently-selected node, clear the
+  // selection so the graph doesn't get stuck in a dimmed state with no
+  // incident edges to highlight.
+  useEffect(() => {
+    if (selected && !graphNodeIds.has(selected.id)) setSelected(null);
+  }, [graphNodeIds, selected]);
+
+  const typeColors: Record<string, string> = useMemo(
+    () => Object.fromEntries(Object.entries(TYPE_CONFIG).map(([k, v]) => [k, v.color])),
+    [],
+  );
+
   return (
     <div style={{ padding: "28px 28px 48px", maxWidth: 1400, margin: "0 auto" }}>
       <div className="flex items-start justify-between mb-6">
@@ -197,14 +228,7 @@ export default function OwnerCargoGraphPage() {
         </div>
       )}
 
-      <div className="mb-6 rounded-xl border border-sky-500/10 overflow-hidden" style={{ background: "rgba(10,22,40,0.8)" }}>
-        <div className="px-4 pt-3 pb-1 border-b border-sky-500/10">
-          <span className="text-[10px] uppercase tracking-widest text-sky-400/40 font-medium">CONSTELLATION — Vessels Domain Graph</span>
-        </div>
-        <ConstellationGraph domain="vessels" accentColor={ACCENT} height={420} />
-      </div>
-
-      <div className="flex gap-2 mb-5">
+      <div className="flex gap-2 mb-4">
         {(["all", "vessel", "owner", "charterer", "cargo", "port"] as const).map(t => (
           <button key={t} onClick={() => setTypeFilter(t)}
             className={cn("px-3 py-1.5 rounded-lg text-[11px] border transition-colors capitalize", typeFilter === t ? "bg-sky-500/15 border-sky-500/30 text-sky-300" : "border-sky-500/10 text-sky-400/50 hover:text-sky-300/70")}
@@ -214,16 +238,41 @@ export default function OwnerCargoGraphPage() {
 
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-8">
-          {loading ? (
-            <div className="flex items-center justify-center h-64 text-sky-400/40 text-sm">Loading graph intelligence…</div>
-          ) : (
-            <div className="grid grid-cols-3 gap-2">
+          <div className="rounded-xl border border-sky-500/10 overflow-hidden" style={{ background: "rgba(10,22,40,0.8)" }}>
+            <div className="px-4 py-2 border-b border-sky-500/10 flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-widest text-sky-400/40 font-medium">Interactive Ownership · Cargo · Port Graph</span>
+              <span className="text-[10px] text-sky-400/40">{graphNodes.length} nodes · {visibleEdgeCount} edges</span>
+            </div>
+            {loading ? (
+              <div className="flex items-center justify-center h-64 text-sky-400/40 text-sm">Loading graph intelligence…</div>
+            ) : graphNodes.length === 0 ? (
+              <div className="flex items-center justify-center h-64 text-sky-400/40 text-sm">No entities in this category</div>
+            ) : (
+              <OwnerCargoForceGraph
+                nodes={graphNodes}
+                edges={edges}
+                selectedId={selected?.id ?? null}
+                onSelect={(n) => {
+                  if (!n) { setSelected(null); return; }
+                  // Resolve to the full GraphNode (with provenance, etc.) from the page's data set.
+                  const full = nodes.find(x => x.id === n.id) ?? null;
+                  setSelected(full);
+                }}
+                height={520}
+                typeColors={typeColors}
+              />
+            )}
+          </div>
+
+          <div className="mt-3 rounded-xl border border-sky-500/10 p-3" style={{ background: "rgba(10,22,40,0.6)" }}>
+            <div className="text-[10px] text-sky-400/50 uppercase tracking-wider mb-2">Entities ({filtered.length})</div>
+            <div className="grid grid-cols-3 gap-2 max-h-72 overflow-y-auto pr-1">
               {filtered.map(node => (
                 <NodeCard key={node.id} node={node} selected={selected?.id === node.id} onClick={() => setSelected(selected?.id === node.id ? null : node)} />
               ))}
-              {filtered.length === 0 && <p className="col-span-3 text-sky-400/40 text-sm text-center py-10">No entities in this category</p>}
+              {filtered.length === 0 && <p className="col-span-3 text-sky-400/40 text-xs text-center py-6">No entities in this category</p>}
             </div>
-          )}
+          </div>
         </div>
 
         <div className="col-span-4 space-y-3">
