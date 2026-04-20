@@ -365,8 +365,41 @@ function MonthlyFunnelChart({
   );
 }
 
+interface DataRoomInvestor {
+  identity: string;
+  userEmail: string | null;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  pageViews: number;
+  documentsOpened: number;
+  documentIds: string[];
+  executiveBriefViewed: boolean;
+  executiveBriefPdfDownloaded: boolean;
+  ndaAccepted: boolean;
+  ndaAcceptedAt: string | null;
+  demoRequested: boolean;
+  demoRequestedAt: string | null;
+  totalEvents: number;
+}
+
+interface DataRoomEngagement {
+  summary: {
+    windowDays: number;
+    totalInvestors: number;
+    identifiedInvestors: number;
+    ndaAccepted: number;
+    executiveBriefViewers: number;
+    pdfDownloads: number;
+    demoRequests: number;
+    totalEvents: number;
+  };
+  investors: DataRoomInvestor[];
+}
+
 export default function InvestorAnalytics() {
-  const [tab, setTab] = useState<'metrics' | 'funnel' | 'cohort' | 'diffs'>('metrics');
+  const [tab, setTab] = useState<'metrics' | 'funnel' | 'cohort' | 'diffs' | 'dataRoom'>(
+    'metrics',
+  );
   const [cohortGranularity, setCohortGranularity] = useState<'month' | 'week'>('month');
 
   const { data: metricsRaw, isLoading: mLoading } = useStandardQuery({
@@ -393,6 +426,14 @@ export default function InvestorAnalytics() {
     enabled: tab === 'diffs',
   });
 
+  const { data: dataRoomRaw, isLoading: dataRoomLoading } = useStandardQuery({
+    queryKey: ['investor-data-room-engagement'],
+    queryFn: () => apiFetch('/investor-analytics/data-room-engagement'),
+    enabled: tab === 'dataRoom',
+    refetchInterval: 60_000,
+  });
+  const dataRoom: DataRoomEngagement | undefined = dataRoomRaw?.data;
+
   const metrics = metricsRaw?.data;
   const funnel = funnelRaw?.data;
   const cohort = cohortRaw?.data;
@@ -416,6 +457,7 @@ export default function InvestorAnalytics() {
     { key: 'funnel', label: 'Funnel Analytics' },
     { key: 'cohort', label: 'Cohort Retention' },
     { key: 'diffs', label: 'Change Audit' },
+    { key: 'dataRoom', label: 'Data Room' },
   ] as const;
 
   return (
@@ -929,6 +971,170 @@ export default function InvestorAnalytics() {
                 </div>
               )}
             </div>
+          </>
+        )}
+
+        {/* ── Data Room Engagement Tab ── */}
+        {tab === 'dataRoom' && (
+          <>
+            <SectionHeader
+              title="Investor Data Room Engagement"
+              sub={`Per-investor engagement signal from the past ${dataRoom?.summary?.windowDays ?? 90} days — NDA, document opens, brief views, demo requests`}
+            />
+            {dataRoomLoading ? (
+              <div className="text-center py-20 text-zinc-600">Loading engagement…</div>
+            ) : !dataRoom ? (
+              <div className="text-center py-12 text-zinc-600 text-sm">
+                No engagement data available yet.
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-5">
+                  <MetricCard
+                    label="Investors"
+                    value={fmt(dataRoom.summary.totalInvestors)}
+                    sub={`${dataRoom.summary.identifiedInvestors} identified`}
+                    color={GOLD}
+                  />
+                  <MetricCard
+                    label="NDA Accepted"
+                    value={fmt(dataRoom.summary.ndaAccepted)}
+                    color={EMERALD}
+                  />
+                  <MetricCard
+                    label="Brief Views"
+                    value={fmt(dataRoom.summary.executiveBriefViewers)}
+                    color={BLUE}
+                  />
+                  <MetricCard
+                    label="PDF Downloads"
+                    value={fmt(dataRoom.summary.pdfDownloads)}
+                    color={VIOLET}
+                  />
+                  <MetricCard
+                    label="Demo Requests"
+                    value={fmt(dataRoom.summary.demoRequests)}
+                    color={AMBER}
+                  />
+                  <MetricCard
+                    label="Total Events"
+                    value={fmt(dataRoom.summary.totalEvents)}
+                    color={MUTED}
+                  />
+                </div>
+
+                <div className="bg-[#111318] border border-[#1e2230] rounded-xl p-5">
+                  {dataRoom.investors.length === 0 ? (
+                    <div className="text-center py-12 text-zinc-600 text-sm">
+                      No data room visits captured yet. Events will appear here as
+                      investors view the data room.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="text-xs w-full border-collapse">
+                        <thead>
+                          <tr className="border-b border-[#1e2230]">
+                            {[
+                              'Investor',
+                              'Last Seen',
+                              'Page Views',
+                              'NDA',
+                              'Docs Opened',
+                              'Brief',
+                              'PDF',
+                              'Demo',
+                              'Events',
+                            ].map((h) => (
+                              <th
+                                key={h}
+                                className="text-left text-zinc-500 uppercase tracking-widest pb-2 pr-4 font-normal whitespace-nowrap"
+                              >
+                                {h}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dataRoom.investors.map((inv) => (
+                            <tr
+                              key={inv.identity}
+                              className="border-b border-[#1a1d27] hover:bg-[#131620] transition-colors"
+                            >
+                              <td className="py-2 pr-4 text-zinc-200 font-mono">
+                                {inv.userEmail ?? (
+                                  <span className="text-zinc-500 italic">anonymous</span>
+                                )}
+                              </td>
+                              <td className="py-2 pr-4 text-zinc-500 whitespace-nowrap">
+                                {new Date(inv.lastSeenAt).toLocaleString()}
+                              </td>
+                              <td className="py-2 pr-4 text-zinc-300">{inv.pageViews}</td>
+                              <td className="py-2 pr-4">
+                                {inv.ndaAccepted ? (
+                                  <span
+                                    className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-400"
+                                    title={
+                                      inv.ndaAcceptedAt
+                                        ? new Date(inv.ndaAcceptedAt).toLocaleString()
+                                        : ''
+                                    }
+                                  >
+                                    Yes
+                                  </span>
+                                ) : (
+                                  <span className="text-zinc-600">—</span>
+                                )}
+                              </td>
+                              <td
+                                className="py-2 pr-4 text-zinc-300"
+                                title={inv.documentIds.join(', ')}
+                              >
+                                {inv.documentsOpened}
+                              </td>
+                              <td className="py-2 pr-4">
+                                {inv.executiveBriefViewed ? (
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-500/15 text-blue-400">
+                                    Viewed
+                                  </span>
+                                ) : (
+                                  <span className="text-zinc-600">—</span>
+                                )}
+                              </td>
+                              <td className="py-2 pr-4">
+                                {inv.executiveBriefPdfDownloaded ? (
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-violet-500/15 text-violet-400">
+                                    Yes
+                                  </span>
+                                ) : (
+                                  <span className="text-zinc-600">—</span>
+                                )}
+                              </td>
+                              <td className="py-2 pr-4">
+                                {inv.demoRequested ? (
+                                  <span
+                                    className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-400"
+                                    title={
+                                      inv.demoRequestedAt
+                                        ? new Date(inv.demoRequestedAt).toLocaleString()
+                                        : ''
+                                    }
+                                  >
+                                    Requested
+                                  </span>
+                                ) : (
+                                  <span className="text-zinc-600">—</span>
+                                )}
+                              </td>
+                              <td className="py-2 pr-4 text-zinc-500">{inv.totalEvents}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </>
         )}
       </div>

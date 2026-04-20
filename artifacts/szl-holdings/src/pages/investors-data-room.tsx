@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useAuth } from "@szl-holdings/replit-auth-web";
+import { useAnalytics } from "@szl-holdings/shared-ui/analytics-provider";
 import {
   FileText,
   Lock,
@@ -484,6 +486,8 @@ function MarkdownRenderer({ content }: { content: string }) {
 }
 
 function ExecutiveBriefPanel() {
+  const analytics = useAnalytics();
+  const { user } = useAuth();
   const PULSE_URL = "/pulse/";
   const highlights = [
     "Platform architecture & 9-stage decision loop",
@@ -566,6 +570,12 @@ function ExecutiveBriefPanel() {
             download="SZL-Holdings-Executive-Brief.pdf"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() =>
+              analytics.track("data_room_executive_brief_pdf_downloaded", {
+                userEmail: user?.email ?? null,
+                userId: user?.id ?? null,
+              })
+            }
             className="inline-flex items-center gap-2 rounded-xl border border-[#d4a054]/40 bg-[#d4a054]/10 px-5 py-2.5 text-sm font-semibold text-[#d4a054] hover:bg-[#d4a054]/15 hover:border-[#d4a054]/60 transition"
             title="Download the SZL Holdings Executive Brief as a PDF"
           >
@@ -630,6 +640,8 @@ interface DemoFormState {
 }
 
 function RequestDemoPanel() {
+  const analytics = useAnalytics();
+  const { user } = useAuth();
   const [form, setForm] = useState<DemoFormState>({
     name: "",
     email: "",
@@ -656,6 +668,13 @@ function RequestDemoPanel() {
         body: JSON.stringify(form),
       });
       setSubmitted(true);
+      analytics.track("data_room_demo_request_submitted", {
+        userEmail: user?.email ?? null,
+        userId: user?.id ?? null,
+        requesterEmail: form.email.trim() || null,
+        company: form.company.trim() || null,
+        role: form.role.trim() || null,
+      });
     } catch (err) {
       const code = err instanceof Error ? err.message : "ERROR";
       const friendly =
@@ -665,6 +684,11 @@ function RequestDemoPanel() {
           ? "Access required. Please re-accept the NDA and try again."
           : "We couldn't submit your request. Please try again, or email investors@szlholdings.com directly.";
       setSubmitError(friendly);
+      analytics.track("data_room_demo_request_failed", {
+        userEmail: user?.email ?? null,
+        userId: user?.id ?? null,
+        errorCode: code,
+      });
     } finally {
       setSubmitting(false);
     }
@@ -1139,6 +1163,20 @@ export default function InvestorsDataRoomPage() {
   const [error, setError] = useState<string | null>(null);
   const [accepting, setAccepting] = useState(false);
 
+  const analytics = useAnalytics();
+  const { user } = useAuth();
+  const investorProps = useCallback(
+    (extra?: Record<string, unknown>) => ({
+      userEmail: user?.email ?? null,
+      userId: user?.id ?? null,
+      ...(extra ?? {}),
+    }),
+    [user?.email, user?.id],
+  );
+  const docOpenedRef = useRef<Set<string>>(new Set());
+  const briefViewedRef = useRef(false);
+  const pageViewFiredRef = useRef(false);
+
   const __pageMeta = usePageMeta({
     title: "Data Room — Investor Relations — SZL Holdings",
     description:
@@ -1152,6 +1190,37 @@ export default function InvestorsDataRoomPage() {
       setNdaLoading(false);
     });
   }, []);
+
+  // Page view — once per mount, after NDA is confirmed accepted.
+  useEffect(() => {
+    if (!accepted || pageViewFiredRef.current) return;
+    pageViewFiredRef.current = true;
+    analytics.page("investors_data_room", investorProps());
+  }, [accepted, analytics, investorProps]);
+
+  // Document / brief open events.
+  useEffect(() => {
+    if (!accepted || !activeDocId) return;
+    if (activeDocId === "executive-brief") {
+      if (!briefViewedRef.current) {
+        briefViewedRef.current = true;
+        analytics.track("data_room_executive_brief_viewed", investorProps());
+      }
+    } else if (!isSpecialId(activeDocId)) {
+      if (!docOpenedRef.current.has(activeDocId)) {
+        docOpenedRef.current.add(activeDocId);
+        const doc = DOC_META.find((d) => d.id === activeDocId);
+        analytics.track(
+          "data_room_document_opened",
+          investorProps({
+            docId: activeDocId,
+            docTitle: doc?.title ?? null,
+            docCategory: doc?.category ?? null,
+          }),
+        );
+      }
+    }
+  }, [accepted, activeDocId, analytics, investorProps]);
 
   const loadDoc = useCallback(async (id: string) => {
     if (isSpecialId(id)) return;
@@ -1189,12 +1258,17 @@ export default function InvestorsDataRoomPage() {
     try {
       await recordNdaAcceptance();
       setAccepted(true);
+      analytics.track("data_room_nda_accepted", investorProps());
     } catch {
       setAccepted(true);
+      analytics.track(
+        "data_room_nda_accepted",
+        investorProps({ recordFailed: true }),
+      );
     } finally {
       setAccepting(false);
     }
-  }, []);
+  }, [analytics, investorProps]);
 
   const activeDoc = DOC_META.find((d) => d.id === activeDocId);
 

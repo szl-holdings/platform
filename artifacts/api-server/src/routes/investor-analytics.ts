@@ -47,6 +47,7 @@ import {
   auditEventsTable,
   billingPlansTable,
   db,
+  dosAnalyticsEventsTable,
   invoicesTable,
   organizationsTable,
   pageViewEventsTable,
@@ -772,6 +773,172 @@ router.get(
       sendSuccess(res, { diffs: rows }, 200, { total: count });
     } catch (err) {
       handleRouteError(res, err, 'Failed to load audit diffs');
+    }
+  },
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Investor Data Room Engagement
+//   Aggregates dos_analytics_events emitted by the szl-holdings investor data
+//   room (NDA acceptance, document opens, executive brief views, demo
+//   submissions, PDF downloads) per investor identity (userEmail when known,
+//   otherwise sessionId / "anonymous"). Used by the Investor Analytics
+//   "Data Room" tab to prioritize follow-up.
+// ─────────────────────────────────────────────────────────────────────────────
+
+router.get(
+  '/investor-analytics/data-room-engagement',
+  authMiddleware(),
+  requireRole(...ALLOWED_ROLES),
+  async (_req: Request, res: Response) => {
+    try {
+      const since = new Date();
+      since.setUTCDate(since.getUTCDate() - 90);
+
+      const rows = await db
+        .select({
+          createdAt: dosAnalyticsEventsTable.createdAt,
+          metadata: dosAnalyticsEventsTable.metadata,
+        })
+        .from(dosAnalyticsEventsTable)
+        .where(
+          and(
+            gte(dosAnalyticsEventsTable.createdAt, since),
+            sql`${dosAnalyticsEventsTable.metadata}->>'app' = 'szl-holdings'`,
+            sql`${dosAnalyticsEventsTable.metadata}->>'eventName' LIKE 'data_room_%'
+                OR (${dosAnalyticsEventsTable.metadata}->>'eventName' = 'page_view'
+                    AND ${dosAnalyticsEventsTable.metadata}->>'page' = 'investors_data_room')`,
+          ),
+        )
+        .orderBy(desc(dosAnalyticsEventsTable.createdAt))
+        .limit(5000);
+
+      type Investor = {
+        identity: string;
+        userEmail: string | null;
+        firstSeenAt: string;
+        lastSeenAt: string;
+        pageViews: number;
+        documentsOpened: number;
+        documentIds: string[];
+        executiveBriefViewed: boolean;
+        executiveBriefPdfDownloaded: boolean;
+        ndaAccepted: boolean;
+        ndaAcceptedAt: string | null;
+        demoRequested: boolean;
+        demoRequestedAt: string | null;
+        totalEvents: number;
+      };
+
+      const byInvestor = new Map<string, Investor>();
+      const docsByInvestor = new Map<string, Set<string>>();
+
+      for (const row of rows) {
+        const meta = (row.metadata ?? {}) as Record<string, unknown>;
+        const eventName = String(meta.eventName ?? meta.page ?? 'unknown');
+        const page = typeof meta.page === 'string' ? meta.page : null;
+        const isDataRoomPageView =
+          eventName === 'page_view' && page === 'investors_data_room';
+        if (!eventName.startsWith('data_room_') && !isDataRoomPageView) continue;
+
+        const userEmail =
+          typeof meta.userEmail === 'string' && meta.userEmail.length > 0
+            ? meta.userEmail
+            : null;
+        const identity = userEmail ?? 'anonymous';
+        const createdAtIso = row.createdAt.toISOString();
+
+        let inv = byInvestor.get(identity);
+        if (!inv) {
+          inv = {
+            identity,
+            userEmail,
+            firstSeenAt: createdAtIso,
+            lastSeenAt: createdAtIso,
+            pageViews: 0,
+            documentsOpened: 0,
+            documentIds: [],
+            executiveBriefViewed: false,
+            executiveBriefPdfDownloaded: false,
+            ndaAccepted: false,
+            ndaAcceptedAt: null,
+            demoRequested: false,
+            demoRequestedAt: null,
+            totalEvents: 0,
+          };
+          byInvestor.set(identity, inv);
+          docsByInvestor.set(identity, new Set());
+        }
+
+        // Rows arrive in DESC order, so the first row we see is the newest.
+        if (createdAtIso > inv.lastSeenAt) inv.lastSeenAt = createdAtIso;
+        if (createdAtIso < inv.firstSeenAt) inv.firstSeenAt = createdAtIso;
+        inv.totalEvents += 1;
+
+        if (isDataRoomPageView) {
+          inv.pageViews += 1;
+          continue;
+        }
+
+        switch (eventName) {
+          case 'data_room_nda_accepted': {
+            inv.ndaAccepted = true;
+            if (!inv.ndaAcceptedAt || createdAtIso < inv.ndaAcceptedAt) {
+              inv.ndaAcceptedAt = createdAtIso;
+            }
+            break;
+          }
+          case 'data_room_document_opened': {
+            const docId =
+              typeof meta.docId === 'string' ? meta.docId : null;
+            if (docId) docsByInvestor.get(identity)?.add(docId);
+            break;
+          }
+          case 'data_room_executive_brief_viewed': {
+            inv.executiveBriefViewed = true;
+            break;
+          }
+          case 'data_room_executive_brief_pdf_downloaded': {
+            inv.executiveBriefPdfDownloaded = true;
+            break;
+          }
+          case 'data_room_demo_request_submitted': {
+            inv.demoRequested = true;
+            if (!inv.demoRequestedAt || createdAtIso > inv.demoRequestedAt) {
+              inv.demoRequestedAt = createdAtIso;
+            }
+            break;
+          }
+          default:
+            break;
+        }
+      }
+
+      for (const [identity, docs] of docsByInvestor) {
+        const inv = byInvestor.get(identity);
+        if (!inv) continue;
+        inv.documentsOpened = docs.size;
+        inv.documentIds = Array.from(docs).sort();
+      }
+
+      const investors = Array.from(byInvestor.values()).sort((a, b) =>
+        a.lastSeenAt < b.lastSeenAt ? 1 : a.lastSeenAt > b.lastSeenAt ? -1 : 0,
+      );
+
+      const summary = {
+        windowDays: 90,
+        totalInvestors: investors.length,
+        identifiedInvestors: investors.filter((i) => i.userEmail).length,
+        ndaAccepted: investors.filter((i) => i.ndaAccepted).length,
+        executiveBriefViewers: investors.filter((i) => i.executiveBriefViewed).length,
+        pdfDownloads: investors.filter((i) => i.executiveBriefPdfDownloaded).length,
+        demoRequests: investors.filter((i) => i.demoRequested).length,
+        totalEvents: rows.length,
+      };
+
+      sendSuccess(res, { summary, investors }, 200);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to load data room engagement');
     }
   },
 );
