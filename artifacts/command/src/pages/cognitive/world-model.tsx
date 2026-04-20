@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 import {
 
   Globe, Search, Filter, RefreshCw, ZoomIn, ZoomOut,
-  Info, Clock, ChevronRight, X, Layers, GitBranch,
+  Info, Clock, ChevronRight, X, Layers, GitBranch, Radio,
 } from "lucide-react";
 import { CognitiveLayout } from "./cognitive-layout";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
@@ -25,6 +25,10 @@ interface ConstellationNode {
   provenance: string[];
   description: string;
   lastSeen: string;
+  /** Wall-clock timestamp the node was last observed. Used for live freshness decay. */
+  lastSeenTs?: number;
+  /** Wall-clock timestamp the node first appeared in the live stream. Used to animate it in. */
+  discoveredTs?: number;
   x?: number;
   y?: number;
 }
@@ -38,6 +42,7 @@ interface ConstellationEdge {
   confidence: number;
   strength: number;
   lastActive: string;
+  lastActiveTs?: number;
 }
 
 interface WorldModel {
@@ -184,6 +189,16 @@ export default function WorldModelExplorer() {
     return () => clearTimeout(t);
   }, [searchQuery]);
 
+  const [sseConnected, setSseConnected] = useState(false);
+  /** Nodes/edges added by the live SSE stream, layered on top of the polled snapshot. */
+  const [liveNodes, setLiveNodes] = useState<ConstellationNode[]>([]);
+  const [liveEdges, setLiveEdges] = useState<ConstellationEdge[]>([]);
+  /** Tick counter that bumps every ~2s so freshness bars decay without a full refetch. */
+  const [tick, setTick] = useState(0);
+
+  // When SSE is connected we don't need the slow 60s polling refresh — the
+  // stream is the source of truth. Falling back to polling only when SSE is
+  // unavailable keeps the graph live while degrading gracefully.
   const { data: worldData, refetch, isFetching } = useStandardQuery<WorldModel>({
     queryKey: ["cognitive", "world-model"],
     queryFn: () =>
@@ -191,8 +206,86 @@ export default function WorldModelExplorer() {
         .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
         .catch(() => DEMO_WORLD_MODEL),
     staleTime: 30_000,
-    refetchInterval: 60_000,
+    refetchInterval: sseConnected ? false : 60_000,
   });
+
+  // Local re-render tick so freshness bars decay continuously without forcing
+  // a network refetch.
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => (t + 1) % 1_000_000), 2_000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Subscribe to /api/graph/stream for incremental entity & edge discoveries.
+  // Auto-reconnects on error with a 5s backoff; the SSE indicator in the
+  // toolbar reflects the current connection state.
+  useEffect(() => {
+    let cancelled = false;
+    let es: EventSource | null = null;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const connect = () => {
+      if (cancelled) return;
+      try {
+        es = new EventSource(`${BASE}/api/graph/stream`);
+      } catch {
+        retryTimer = setTimeout(connect, 5_000);
+        return;
+      }
+
+      es.addEventListener("hello", () => {
+        if (!cancelled) setSseConnected(true);
+      });
+      es.onopen = () => {
+        if (!cancelled) setSseConnected(true);
+      };
+
+      es.addEventListener("entity.added", (e) => {
+        if (cancelled) return;
+        try {
+          const node = JSON.parse((e as MessageEvent).data) as ConstellationNode;
+          setLiveNodes((prev) => {
+            if (prev.some((n) => n.id === node.id)) return prev;
+            // Cap live additions to keep the canvas readable; drop the oldest.
+            const next = [...prev, { ...node, lastSeenTs: node.lastSeenTs ?? Date.now(), discoveredTs: node.discoveredTs ?? Date.now() }];
+            return next.length > 12 ? next.slice(next.length - 12) : next;
+          });
+        } catch { /* ignore */ }
+      });
+
+      es.addEventListener("edge.added", (e) => {
+        if (cancelled) return;
+        try {
+          const edge = JSON.parse((e as MessageEvent).data) as ConstellationEdge;
+          setLiveEdges((prev) => {
+            if (prev.some((x) => x.id === edge.id)) return prev;
+            const next = [...prev, { ...edge, lastActiveTs: edge.lastActiveTs ?? Date.now() }];
+            return next.length > 16 ? next.slice(next.length - 16) : next;
+          });
+        } catch { /* ignore */ }
+      });
+
+      es.addEventListener("freshness.tick", () => {
+        if (!cancelled) setTick((t) => (t + 1) % 1_000_000);
+      });
+
+      es.onerror = () => {
+        if (cancelled) return;
+        setSseConnected(false);
+        es?.close();
+        es = null;
+        retryTimer = setTimeout(connect, 5_000);
+      };
+    };
+
+    connect();
+
+    return () => {
+      cancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
+      es?.close();
+    };
+  }, []);
 
   interface SearchResult { nodeIds: string[]; nodes?: ConstellationNode[] }
   const { data: searchData, isFetching: isSearching } = useStandardQuery<SearchResult>({
@@ -205,7 +298,52 @@ export default function WorldModelExplorer() {
     staleTime: 20_000,
   });
 
-  const model = worldData ?? DEMO_WORLD_MODEL;
+  const baseModel = worldData ?? DEMO_WORLD_MODEL;
+
+  // Merge the polled snapshot with live SSE additions. Live nodes only render
+  // when their reference (source/target) is satisfiable — orphan edges are
+  // dropped in the visibility pass below.
+  const model = useMemo<WorldModel>(() => {
+    if (liveNodes.length === 0 && liveEdges.length === 0) return baseModel;
+    const seen = new Set(baseModel.nodes.map((n) => n.id));
+    const newNodes = liveNodes.filter((n) => !seen.has(n.id));
+    const seenEdges = new Set(baseModel.edges.map((e) => e.id));
+    const newEdges = liveEdges.filter((e) => !seenEdges.has(e.id));
+    return {
+      ...baseModel,
+      nodes: [...baseModel.nodes, ...newNodes],
+      edges: [...baseModel.edges, ...newEdges],
+      meta: {
+        ...baseModel.meta,
+        totalNodes: baseModel.meta.totalNodes + newNodes.length,
+        totalEdges: baseModel.meta.totalEdges + newEdges.length,
+        lastRefreshed: sseConnected ? new Date().toISOString() : baseModel.meta.lastRefreshed,
+      },
+    };
+  }, [baseModel, liveNodes, liveEdges, sseConnected]);
+
+  /**
+   * Live freshness: nodes that carry `lastSeenTs` (anything from the SSE
+   * stream, plus existing nodes once we synthesize a baseline) decay smoothly
+   * toward zero over a 10-minute TTL. Snapshot nodes without a timestamp keep
+   * their static `freshness` value.
+   *
+   * The `tick` dependency causes a render every ~2s so the bars visibly slide
+   * down without re-fetching the snapshot.
+   */
+  const FRESHNESS_TTL_MS = 10 * 60 * 1000;
+  // Plain function (not useCallback): the component re-renders every ~2s via
+  // the `tick` state, so each render naturally recomputes the decayed value.
+  const computeLiveFreshness = (n: ConstellationNode): number => {
+    if (n.lastSeenTs == null) return n.freshness;
+    const age = Date.now() - n.lastSeenTs;
+    const decayed = Math.max(0, 1 - age / FRESHNESS_TTL_MS);
+    return Math.min(n.freshness, decayed);
+  };
+  // Reference `tick` so it's tracked as a render dependency for the inline
+  // freshness computations below; the actual value is unused.
+  void tick;
+
 
   const searchMatchIds: Set<string> | null = searchData?.nodeIds
     ? new Set(searchData.nodeIds)
@@ -226,9 +364,10 @@ export default function WorldModelExplorer() {
   const filteredNodes = model.nodes.filter((n) => {
     if (domainFilter !== "all" && n.domain !== domainFilter) return false;
     if (typeFilter !== "all" && n.type !== typeFilter) return false;
-    if (freshnessFilter === "fresh" && n.freshness < 0.8) return false;
-    if (freshnessFilter === "aging" && (n.freshness >= 0.8 || n.freshness < 0.5)) return false;
-    if (freshnessFilter === "stale" && n.freshness >= 0.5) return false;
+    const f = computeLiveFreshness(n);
+    if (freshnessFilter === "fresh" && f < 0.8) return false;
+    if (freshnessFilter === "aging" && (f >= 0.8 || f < 0.5)) return false;
+    if (freshnessFilter === "stale" && f >= 0.5) return false;
     if (confidenceFilter === "high" && n.confidence < 0.85) return false;
     if (confidenceFilter === "medium" && (n.confidence < 0.70 || n.confidence >= 0.85)) return false;
     if (confidenceFilter === "low" && n.confidence >= 0.70) return false;
@@ -260,14 +399,34 @@ export default function WorldModelExplorer() {
 
   const typeShape = (n: ConstellationNode, isSelected: boolean) => {
     const dc = DOMAIN_COLORS[n.domain] ?? ACCENT;
-    const fc = freshnessColor(n.freshness);
+    const liveF = computeLiveFreshness(n);
+    const fc = freshnessColor(liveF);
     const r = n.type === "domain" ? 22 : n.type === "entity" ? 14 : n.type === "concept" ? 17 : 11;
     const strokeW = isSelected ? 2.5 : 1.5;
     const strokeColor = isSelected ? "#fff" : fc;
-    const opacity = n.freshness >= 0.5 ? 1 : 0.55;
+    const opacity = liveF >= 0.5 ? 1 : 0.55;
+
+    // Newly discovered nodes (within the last 4s) get a one-shot fade/scale-in
+    // animation plus a transient pulse ring so they're easy to spot.
+    const ageMs = n.discoveredTs ? Date.now() - n.discoveredTs : Infinity;
+    const isNew = ageMs < 4_000;
+    const animation = isNew ? "wm-node-appear 600ms ease-out both" : undefined;
 
     return (
-      <g style={{ opacity }} data-node="true" onClick={(e) => { e.stopPropagation(); setSelectedNode(isSelected ? null : n); }}>
+      <g
+        style={{ opacity, animation, transformOrigin: "center", transformBox: "fill-box" }}
+        data-node="true"
+        onClick={(e) => { e.stopPropagation(); setSelectedNode(isSelected ? null : n); }}
+      >
+        {isNew && (
+          <circle
+            r={r}
+            fill="none"
+            stroke={dc}
+            strokeWidth={1.5}
+            style={{ animation: "wm-node-pulse 1500ms ease-out 2", transformOrigin: "center", transformBox: "fill-box" }}
+          />
+        )}
         {n.type === "concept" ? (
           <polygon
             points={`0,-${r} ${r * 0.866},${r * 0.5} -${r * 0.866},${r * 0.5}`}
@@ -288,7 +447,7 @@ export default function WorldModelExplorer() {
         >
           {n.label.length > 9 ? n.label.slice(0, 8) + "…" : n.label}
         </text>
-        {n.freshness < 0.5 && (
+        {liveF < 0.5 && (
           <circle r={4} cx={r - 2} cy={-(r - 2)} fill="#ef4444" stroke="#080c14" strokeWidth={1} />
         )}
       </g>
@@ -297,6 +456,26 @@ export default function WorldModelExplorer() {
 
   return (
     <CognitiveLayout>
+      {/* Inline keyframes used by node-appear animations and the existing
+          spinner. Scoped here to keep the page self-contained. */}
+      <style>{`
+        @keyframes wm-node-appear {
+          from { opacity: 0; transform: scale(0.2); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes wm-node-pulse {
+          from { opacity: 0.7; transform: scale(1); }
+          to { opacity: 0; transform: scale(2.4); }
+        }
+        @keyframes wm-live-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+          50% { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
       <div style={{ display: "flex", height: "100%", minHeight: 0 }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
           <div
@@ -370,7 +549,37 @@ export default function WorldModelExplorer() {
               </select>
             </div>
 
-            <div style={{ display: "flex", gap: "0.375rem", marginLeft: "auto" }}>
+            <div style={{ display: "flex", gap: "0.375rem", marginLeft: "auto", alignItems: "center" }}>
+              <div
+                title={sseConnected ? "Live SSE stream connected" : "SSE disconnected — falling back to 60s polling"}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  padding: "2px 8px",
+                  borderRadius: 5,
+                  background: sseConnected ? "rgba(34,197,94,0.08)" : "rgba(120,120,120,0.08)",
+                  border: `1px solid ${sseConnected ? "rgba(34,197,94,0.3)" : "rgba(120,120,120,0.3)"}`,
+                  fontSize: 9,
+                  color: sseConnected ? "#22c55e" : FG_MUT,
+                  fontFamily: "monospace",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  fontWeight: 700,
+                }}
+              >
+                <Radio style={{ width: 9, height: 9 }} />
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: sseConnected ? "#22c55e" : "#6b7280",
+                    animation: sseConnected ? "wm-live-pulse 2s ease-in-out infinite" : undefined,
+                  }}
+                />
+                {sseConnected ? "Live" : "Polling"}
+              </div>
               {model.meta.staleDomains.length > 0 && (
                 <div style={{ display: "flex", alignItems: "center", gap: "4px", padding: "2px 8px", borderRadius: 5, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", fontSize: 9, color: "#ef4444" }}>
                   <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#ef4444", display: "inline-block" }} />
@@ -519,6 +728,9 @@ export default function WorldModelExplorer() {
 
                 <p style={{ fontSize: "10px", color: FG_MUT, margin: "0.75rem 0", lineHeight: 1.6 }}>{selectedNode.description}</p>
 
+                {(() => {
+                  const liveSelF = computeLiveFreshness(selectedNode);
+                  return (
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "0.75rem" }}>
                   <div>
                     <div style={{ fontSize: "8px", textTransform: "uppercase", letterSpacing: "0.07em", color: FG_MUT, marginBottom: "3px" }}>Confidence</div>
@@ -533,18 +745,20 @@ export default function WorldModelExplorer() {
                   </div>
                   <div>
                     <div style={{ fontSize: "8px", textTransform: "uppercase", letterSpacing: "0.07em", color: FG_MUT, marginBottom: "3px" }}>
-                      Freshness · <span style={{ color: freshnessColor(selectedNode.freshness) }}>{freshnessLabel(selectedNode.freshness)}</span>
+                      Freshness · <span style={{ color: freshnessColor(liveSelF) }}>{freshnessLabel(liveSelF)}</span>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <div style={{ flex: 1, height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 2, overflow: "hidden" }}>
-                        <div style={{ width: `${selectedNode.freshness * 100}%`, height: "100%", background: freshnessColor(selectedNode.freshness), borderRadius: 2 }} />
+                        <div style={{ width: `${liveSelF * 100}%`, height: "100%", background: freshnessColor(liveSelF), borderRadius: 2, transition: "width 1.5s linear" }} />
                       </div>
-                      <span style={{ fontSize: "10px", fontWeight: 700, color: freshnessColor(selectedNode.freshness) }}>
-                        {Math.round(selectedNode.freshness * 100)}%
+                      <span style={{ fontSize: "10px", fontWeight: 700, color: freshnessColor(liveSelF) }}>
+                        {Math.round(liveSelF * 100)}%
                       </span>
                     </div>
                   </div>
                 </div>
+                  );
+                })()}
 
                 <div style={{ fontSize: "8px", textTransform: "uppercase", letterSpacing: "0.07em", color: FG_MUT, marginBottom: "0.375rem" }}>
                   <Clock style={{ width: 9, height: 9, display: "inline", marginRight: 3 }} />
@@ -604,15 +818,16 @@ export default function WorldModelExplorer() {
                   {Object.entries(DOMAIN_COLORS).filter(([d]) => d !== "szl-holdings" && d !== "cognitive").map(([domain, color]) => {
                     const domainNode = model.nodes.find((n) => n.type === "domain" && n.domain === domain);
                     if (!domainNode) return null;
+                    const liveDomF = computeLiveFreshness(domainNode);
                     return (
                       <div key={domain} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>
                         <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
                         <span style={{ fontSize: "9px", color: FG, flex: 1, textTransform: "capitalize" }}>{domain}</span>
                         <div style={{ width: 50, height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 2, overflow: "hidden" }}>
-                          <div style={{ width: `${domainNode.freshness * 100}%`, height: "100%", background: freshnessColor(domainNode.freshness), borderRadius: 2 }} />
+                          <div style={{ width: `${liveDomF * 100}%`, height: "100%", background: freshnessColor(liveDomF), borderRadius: 2, transition: "width 1.5s linear" }} />
                         </div>
-                        <span style={{ fontSize: "8px", color: freshnessColor(domainNode.freshness), fontWeight: 700, minWidth: 24, textAlign: "right" }}>
-                          {Math.round(domainNode.freshness * 100)}%
+                        <span style={{ fontSize: "8px", color: freshnessColor(liveDomF), fontWeight: 700, minWidth: 24, textAlign: "right" }}>
+                          {Math.round(liveDomF * 100)}%
                         </span>
                       </div>
                     );

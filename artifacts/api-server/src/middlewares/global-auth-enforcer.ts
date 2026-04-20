@@ -111,6 +111,11 @@ const PUBLIC_EXACT_PATHS = new Set([
   // Mutating routes (approve/reject/request-changes, simulate-policy) are NOT
   // whitelisted here — they enforce auth via requireAuth in the route handler.
   "/api/decisions/cards",
+  // CONSTELLATION World Model live SSE stream — read-only, demo-pool driven
+  // entity/edge updates that drive the live indicator on the World Model
+  // Explorer. The mutating /api/graph/* endpoints are NOT covered here and
+  // continue to enforce auth + tenant scope via routes/groups/graph.ts.
+  "/api/graph/stream",
 ]);
 
 const PUBLIC_PREFIXES = [
