@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { ExternalLink, ChevronDown, ChevronUp, Database, Brain, Lightbulb, AlertCircle } from "lucide-react";
+
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "/pulse";
 
 export interface Citation {
   id: string;
@@ -28,24 +31,119 @@ const SOURCE_TYPE_COLORS: Record<Citation["sourceType"], string> = {
   trace: "#a78bfa",
 };
 
-function CitationBadge({ id, sourceType, domain, confidence, freshness, verified }: Citation) {
+const SOURCE_TYPE_LABELS: Record<Citation["sourceType"], string> = {
+  entity: "Entity",
+  memory: "Memory",
+  reflection: "Reflection",
+  signal: "Signal",
+  trace: "Trace",
+};
+
+function formatFreshness(iso: string): string {
+  const t = Date.parse(iso);
+  if (Number.isNaN(t)) return iso;
+  const diffMs = Date.now() - t;
+  const diffMin = Math.round(diffMs / 60000);
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffH = Math.round(diffMin / 60);
+  if (diffH < 24) return `${diffH}h ago`;
+  const diffD = Math.round(diffH / 24);
+  if (diffD < 30) return `${diffD}d ago`;
+  return new Date(t).toLocaleDateString();
+}
+
+function CitationBadge(props: Citation) {
+  const { id, sourceType, sourceId, domain, confidence, freshness, verified, quote } = props;
+  const [expanded, setExpanded] = useState(false);
   const color = SOURCE_TYPE_COLORS[sourceType] ?? "#888";
-  return (
-    <div style={{
-      display: "inline-flex", alignItems: "center", gap: 4,
-      padding: "2px 7px", borderRadius: 4,
-      background: `${color}12`, border: `1px solid ${color}30`,
-      fontSize: "0.63rem", color, fontFamily: "monospace",
-      verticalAlign: "middle",
-    }}>
+  const isEntity = sourceType === "entity";
+  const isExpandable = !isEntity && Boolean(quote);
+
+  const headerContent = (
+    <>
       {SOURCE_TYPE_ICONS[sourceType]}
-      <span>{id}</span>
+      <span style={{ fontWeight: 600 }}>{SOURCE_TYPE_LABELS[sourceType]}</span>
       {domain && <span style={{ opacity: 0.7 }}>· {domain}</span>}
       {confidence !== undefined && (
         <span style={{ opacity: 0.7 }}>· {(confidence * 100).toFixed(0)}%</span>
       )}
-      {freshness && <span style={{ opacity: 0.6 }}>· {freshness}</span>}
+      {freshness && (
+        <span style={{ opacity: 0.6 }} title={new Date(freshness).toLocaleString()}>
+          · {formatFreshness(freshness)}
+        </span>
+      )}
       {verified && <span style={{ color: "#4eca8b", fontWeight: 700 }}>✓</span>}
+      {isEntity && <ExternalLink size={9} style={{ opacity: 0.5, marginLeft: 2 }} />}
+      {isExpandable && (expanded
+        ? <ChevronUp size={10} style={{ opacity: 0.6, marginLeft: 2 }} />
+        : <ChevronDown size={10} style={{ opacity: 0.6, marginLeft: 2 }} />
+      )}
+    </>
+  );
+
+  const headerStyle: React.CSSProperties = {
+    display: "inline-flex", alignItems: "center", gap: 4,
+    padding: "2px 7px", borderRadius: 4,
+    background: `${color}12`, border: `1px solid ${color}30`,
+    fontSize: "0.63rem", color, fontFamily: "monospace",
+    verticalAlign: "middle", textDecoration: "none",
+    cursor: isEntity || isExpandable ? "pointer" : "default",
+  };
+
+  const quotePreview = quote && (
+    <div style={{
+      marginTop: 4,
+      padding: "5px 8px",
+      borderLeft: `2px solid ${color}55`,
+      background: `${color}08`,
+      borderRadius: "0 4px 4px 0",
+      fontSize: "0.7rem",
+      color: "rgba(255,255,255,0.7)",
+      lineHeight: 1.45,
+      fontStyle: "italic",
+      maxWidth: 460,
+    }}>
+      "{quote}"
+    </div>
+  );
+
+  const wrapper: React.CSSProperties = { display: "inline-flex", flexDirection: "column", gap: 0, maxWidth: "100%" };
+
+  if (isEntity) {
+    const search = new URLSearchParams({ origin: sourceId });
+    if (domain) search.set("domain", domain);
+    const href = `${BASE}/constellation/entities/${sourceId}?${search.toString()}`;
+    return (
+      <div style={wrapper} data-citation-id={id}>
+        <Link href={href} style={headerStyle} title="Open in Constellation">
+          {headerContent}
+        </Link>
+        {quotePreview}
+      </div>
+    );
+  }
+
+  if (isExpandable) {
+    return (
+      <div style={wrapper} data-citation-id={id}>
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          style={{ ...headerStyle, font: "inherit", fontSize: "0.63rem", fontFamily: "monospace" }}
+          aria-expanded={expanded}
+        >
+          {headerContent}
+        </button>
+        {expanded && quotePreview}
+      </div>
+    );
+  }
+
+  return (
+    <div style={wrapper} data-citation-id={id}>
+      <span style={headerStyle}>{headerContent}</span>
+      {quotePreview}
     </div>
   );
 }
@@ -99,7 +197,7 @@ export function CitationPanel({ citations, highlighted = [] }: CitationPanelProp
           </button>
         )}
       </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "flex-start" }}>
         {shown.map((c) => (
           <CitationBadge key={c.id} {...c} />
         ))}

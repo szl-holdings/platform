@@ -325,6 +325,7 @@ export default function App() {
           <Route path={`${BASE}/system`} component={SystemHealth} />
           <Route path={`${BASE}/settings`} component={Settings} />
           <Route path={`${BASE}/constellation`} component={Constellation} />
+          <Route path={`${BASE}/constellation/entities/:id`} component={Constellation} />
           <Route path={`${BASE}/engine`} component={BriefingEngine} />
           <Route path={`${BASE}/decisions`}>{() => <Suspense fallback={null}><DecisionCenterPage /></Suspense>}</Route>
           <Route path={`${BASE}/governed-cockpit`}>{() => <Suspense fallback={null}><GovernedCockpitPage /></Suspense>}</Route>
