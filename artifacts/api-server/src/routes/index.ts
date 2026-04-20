@@ -116,6 +116,9 @@ router.use(lazyMatch("/briefings", () => import("./briefings"), "briefings"));
 router.use(lazyMatch("/drift", () => import("./drift"), "drift"));
 router.use(lazyMatch("/deployments", () => import("./deployments"), "deployments"));
 router.use(lazyMatch("/teams", () => import("./teams"), "teams"));
+// teams.ts also exposes GET /users/:id/pages — the per-user counterpart
+// to /teams/:team/pages (#2469). Same module, separate prefix gate.
+router.use(lazyMatch("/users", () => import("./teams"), "teams-user-pages"));
 router.use(lazyMatch("/domains", () => import("./domains"), "domains"));
 router.use(lazyMatch("/constellation", () => import("./constellation-views"), "constellation-views"));
 router.use(

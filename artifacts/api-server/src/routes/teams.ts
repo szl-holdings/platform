@@ -376,4 +376,208 @@ router.get(
   },
 );
 
+export interface UserPageHistoryEntry extends TeamPageHistoryEntry {
+  /**
+   * Which side of the page the requested user was on for this row.
+   * "received" = they were the on-call recipient,
+   * "sent"     = they were the actor (the pager).
+   */
+  role: "received" | "sent";
+}
+
+/**
+ * Per-user paging history — the user-profile counterpart to
+ * GET /teams/:team/pages (#2469).
+ *
+ * Lets an individual answer "have I been over-paged this week?" without
+ * having to enumerate every team they belong to. Returns the most recent
+ * pages where the user was the recipient by default; pass `?role=actor`
+ * to get pages they fired, or `?role=both` to get either side.
+ *
+ * Capped at the last 25 events (newest first). Drives the user-profile
+ * drawer surfaced from operator consoles (e.g. deployments → DeployerBadge).
+ */
+router.get(
+  "/users/:id/pages",
+  authMiddleware({ required: false }),
+  perUserApiSlidingLimiter,
+  async (req: Request, res: Response) => {
+    try {
+      const idParam = (req.params as { id: string }).id;
+      const userId = Number.parseInt(idParam, 10);
+      if (!Number.isInteger(userId) || userId < 1) {
+        return sendBadRequest(res, "Invalid user id");
+      }
+
+      const roleRaw = typeof req.query["role"] === "string" ? req.query["role"].toLowerCase() : "recipient";
+      const role: "recipient" | "actor" | "both" =
+        roleRaw === "actor" || roleRaw === "both" ? roleRaw : "recipient";
+
+      // Confirm the user exists so a typo'd id 404s instead of returning
+      // an empty list that looks like "no pages yet".
+      const [user] = await db
+        .select({
+          id: usersTable.id,
+          displayName: usersTable.displayName,
+          email: usersTable.email,
+          avatarUrl: usersTable.avatarUrl,
+          team: usersTable.team,
+          platformRole: usersTable.platformRole,
+          isActive: usersTable.isActive,
+        })
+        .from(usersTable)
+        .where(eq(usersTable.id, userId))
+        .limit(1);
+      if (!user) return sendNotFound(res, `User #${userId}`);
+
+      const filter =
+        role === "recipient"
+          ? eq(teamPagesTable.recipientId, userId)
+          : role === "actor"
+          ? eq(teamPagesTable.actorId, userId)
+          : // role === "both" — match either side. Drizzle's `or` would work
+            // but we already have inArray imported; using a small union
+            // query here keeps behavior obvious. We do it as two parallel
+            // queries to avoid pulling in another operator import.
+            null;
+
+      const limit = 25;
+      let pageRows: Array<{
+        id: number;
+        team: string;
+        actorId: number | null;
+        recipientId: number | null;
+        urgency: string;
+        message: string | null;
+        inAppDelivered: boolean;
+        createdAt: Date | string;
+      }>;
+      if (filter) {
+        pageRows = await db
+          .select({
+            id: teamPagesTable.id,
+            team: teamPagesTable.team,
+            actorId: teamPagesTable.actorId,
+            recipientId: teamPagesTable.recipientId,
+            urgency: teamPagesTable.urgency,
+            message: teamPagesTable.message,
+            inAppDelivered: teamPagesTable.inAppDelivered,
+            createdAt: teamPagesTable.createdAt,
+          })
+          .from(teamPagesTable)
+          .where(filter)
+          .orderBy(desc(teamPagesTable.createdAt))
+          .limit(limit);
+      } else {
+        // role === "both" — union via two queries, dedupe (a row can match
+        // both sides only if actor == recipient, which we never insert),
+        // then sort + cap.
+        const [recRows, actRows] = await Promise.all([
+          db
+            .select({
+              id: teamPagesTable.id,
+              team: teamPagesTable.team,
+              actorId: teamPagesTable.actorId,
+              recipientId: teamPagesTable.recipientId,
+              urgency: teamPagesTable.urgency,
+              message: teamPagesTable.message,
+              inAppDelivered: teamPagesTable.inAppDelivered,
+              createdAt: teamPagesTable.createdAt,
+            })
+            .from(teamPagesTable)
+            .where(eq(teamPagesTable.recipientId, userId))
+            .orderBy(desc(teamPagesTable.createdAt))
+            .limit(limit),
+          db
+            .select({
+              id: teamPagesTable.id,
+              team: teamPagesTable.team,
+              actorId: teamPagesTable.actorId,
+              recipientId: teamPagesTable.recipientId,
+              urgency: teamPagesTable.urgency,
+              message: teamPagesTable.message,
+              inAppDelivered: teamPagesTable.inAppDelivered,
+              createdAt: teamPagesTable.createdAt,
+            })
+            .from(teamPagesTable)
+            .where(eq(teamPagesTable.actorId, userId))
+            .orderBy(desc(teamPagesTable.createdAt))
+            .limit(limit),
+        ]);
+        const seen = new Set<number>();
+        pageRows = [...recRows, ...actRows]
+          .filter((r) => {
+            if (seen.has(r.id)) return false;
+            seen.add(r.id);
+            return true;
+          })
+          .sort((a, b) => {
+            const at = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime();
+            const bt = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime();
+            return bt - at;
+          })
+          .slice(0, limit);
+      }
+
+      const otherIds = Array.from(
+        new Set(
+          pageRows
+            .flatMap((r) => [r.actorId, r.recipientId])
+            .filter((n): n is number => n != null && n !== userId),
+        ),
+      );
+      const otherRows = otherIds.length
+        ? await db
+            .select({
+              id: usersTable.id,
+              displayName: usersTable.displayName,
+              email: usersTable.email,
+              avatarUrl: usersTable.avatarUrl,
+            })
+            .from(usersTable)
+            .where(inArray(usersTable.id, otherIds))
+        : [];
+      const userById = new Map<number, { id: number; displayName: string; email: string | null; avatarUrl: string | null }>(
+        otherRows.map((u) => [u.id, u]),
+      );
+      // The requested user resolves to themselves without a second lookup.
+      userById.set(user.id, {
+        id: user.id,
+        displayName: user.displayName,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+      });
+
+      const entries: UserPageHistoryEntry[] = pageRows.map((r) => ({
+        id: r.id,
+        team: r.team,
+        urgency: r.urgency as "info" | "warning" | "critical",
+        message: r.message,
+        inAppDelivered: r.inAppDelivered,
+        createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt),
+        actor: r.actorId != null ? userById.get(r.actorId) ?? null : null,
+        recipient: r.recipientId != null ? userById.get(r.recipientId) ?? null : null,
+        role: r.recipientId === userId ? "received" : "sent",
+      }));
+
+      return sendSuccess(res, {
+        user: {
+          id: user.id,
+          displayName: user.displayName,
+          email: user.email,
+          avatarUrl: user.avatarUrl,
+          team: user.team,
+          platformRole: user.platformRole,
+          isActive: user.isActive,
+        },
+        role,
+        count: entries.length,
+        pages: entries,
+      });
+    } catch (err) {
+      return handleRouteError(res, err, `GET /users/${req.params.id}/pages`);
+    }
+  },
+);
+
 export default router;

@@ -442,3 +442,82 @@ describe("GET /teams/:team/pages", () => {
     expect(r.body.pages).toEqual([]);
   });
 });
+
+describe("GET /users/:id/pages", () => {
+  it("404s for an unknown user id", async () => {
+    const app = await makeApp();
+    const r = await request(app).get("/users/999/pages");
+    expect(r.status).toBe(404);
+  });
+
+  it("400s for a non-numeric id", async () => {
+    const app = await makeApp();
+    const r = await request(app).get("/users/abc/pages");
+    expect(r.status).toBe(400);
+  });
+
+  it("returns pages received by the user by default with role=received", async () => {
+    store.users = [
+      { id: 1, displayName: "Alice", email: "a@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Platform" },
+      { id: 9, displayName: "Ops Caller", email: "ops@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Other" },
+    ];
+    store.teamPages = [
+      { id: 1, team: "Platform", actorId: 9, recipientId: 1, urgency: "critical", message: "Pulse down", inAppDelivered: true, createdAt: new Date("2026-04-19T10:00:00Z") },
+      { id: 2, team: "Platform", actorId: 9, recipientId: 1, urgency: "warning", message: null, inAppDelivered: false, createdAt: new Date("2026-04-20T11:00:00Z") },
+      // Page Alice fired against Ops Caller — should NOT appear when role defaults to recipient
+      { id: 3, team: "Other", actorId: 1, recipientId: 9, urgency: "info", message: "fyi", inAppDelivered: true, createdAt: new Date("2026-04-20T12:00:00Z") },
+    ];
+    const app = await makeApp();
+    const r = await request(app).get("/users/1/pages");
+    expect(r.status).toBe(200);
+    expect(r.body.user.id).toBe(1);
+    expect(r.body.role).toBe("recipient");
+    expect(r.body.count).toBe(2);
+    const ids = r.body.pages.map((p: { id: number }) => p.id).sort();
+    expect(ids).toEqual([1, 2]);
+    for (const p of r.body.pages) {
+      expect(p.role).toBe("received");
+      expect(p.recipient.id).toBe(1);
+    }
+  });
+
+  it("returns pages the user fired when role=actor", async () => {
+    store.users = [
+      { id: 1, displayName: "Alice", email: "a@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Platform" },
+      { id: 9, displayName: "Ops Caller", email: "ops@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Other" },
+    ];
+    store.teamPages = [
+      { id: 1, team: "Platform", actorId: 9, recipientId: 1, urgency: "critical", message: "Pulse down", inAppDelivered: true, createdAt: new Date("2026-04-19T10:00:00Z") },
+      { id: 3, team: "Other", actorId: 1, recipientId: 9, urgency: "info", message: "fyi", inAppDelivered: true, createdAt: new Date("2026-04-20T12:00:00Z") },
+    ];
+    const app = await makeApp();
+    const r = await request(app).get("/users/1/pages?role=actor");
+    expect(r.status).toBe(200);
+    expect(r.body.role).toBe("actor");
+    expect(r.body.count).toBe(1);
+    expect(r.body.pages[0].id).toBe(3);
+    expect(r.body.pages[0].role).toBe("sent");
+    expect(r.body.pages[0].actor.id).toBe(1);
+  });
+
+  it("returns both sides deduped when role=both", async () => {
+    store.users = [
+      { id: 1, displayName: "Alice", email: "a@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Platform" },
+      { id: 9, displayName: "Ops Caller", email: "ops@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Other" },
+    ];
+    store.teamPages = [
+      { id: 1, team: "Platform", actorId: 9, recipientId: 1, urgency: "critical", message: "down", inAppDelivered: true, createdAt: new Date("2026-04-19T10:00:00Z") },
+      { id: 3, team: "Other", actorId: 1, recipientId: 9, urgency: "info", message: "fyi", inAppDelivered: true, createdAt: new Date("2026-04-20T12:00:00Z") },
+    ];
+    const app = await makeApp();
+    const r = await request(app).get("/users/1/pages?role=both");
+    expect(r.status).toBe(200);
+    expect(r.body.role).toBe("both");
+    expect(r.body.count).toBe(2);
+    const byId = new Map<number, { role: string }>(
+      r.body.pages.map((p: { id: number; role: string }) => [p.id, p]),
+    );
+    expect(byId.get(1)!.role).toBe("received");
+    expect(byId.get(3)!.role).toBe("sent");
+  });
+});
