@@ -197,7 +197,23 @@ export interface SubstrateClientOptions {
 // ─── Streaming ────────────────────────────────────────────────────────────────
 
 export interface RunEvent {
-  type: "ready" | "ping" | "run_started" | "stage_complete" | "run_complete" | "run_failed" | "approval_required";
+  type:
+    | "ready"
+    | "ping"
+    | "run_started"
+    | "stage_complete"
+    | "run_complete"
+    | "run_failed"
+    | "approval_required"
+    // Live runtime events streamed from the substrate journal as a workflow
+    // executes (stage-by-stage progress without polling).
+    | "stage:start"
+    | "stage:complete"
+    | "stage:failed"
+    | "run:started"
+    | "run:complete"
+    | "run:failed"
+    | "run:pending-approval";
   timestamp: number;
   runId?: string;
   data?: unknown;

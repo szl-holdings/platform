@@ -119,8 +119,14 @@ export {
   signBundleHash,
   verifyBundleSignature,
   modeLabel,
+  runtimeEventBus,
 } from "./journal.js";
-export type { JournalStore, RunStore } from "./journal.js";
+export type {
+  JournalStore,
+  RunStore,
+  SubstrateRuntimeEvent,
+  SubstrateRuntimeEventType,
+} from "./journal.js";
 
 // ─── Budget Router ────────────────────────────────────────────────────────────
 export {

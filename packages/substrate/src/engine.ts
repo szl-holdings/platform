@@ -28,7 +28,7 @@ import type {
   SideEffectCategory,
 } from "./types.js";
 import { compile } from "./compiler.js";
-import { SubstrateJournal, defaultJournal, defaultRunStore, type RunStore } from "./journal.js";
+import { SubstrateJournal, defaultJournal, defaultRunStore, emitStageStart, type RunStore } from "./journal.js";
 import { routeByBudget, aggregatePipelineConfidence, validateFinalConfidence } from "./budget-router.js";
 import { SubstrateTelemetry } from "./telemetry.js";
 import { modelAdapterRegistry, toolAdapterRegistry, policyAdapterRegistry } from "./adapters.js";
@@ -402,6 +402,7 @@ export class SubstrateRuntime {
         await this.runStore.save(run);
 
         await this.fireHook("before_stage", run, stage);
+        emitStageStart(run, stage);
 
         // ApprovalGate handling — pause in live mode, auto-approve in all others
         if (stage.type === "ApprovalGate") {

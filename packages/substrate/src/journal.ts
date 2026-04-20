@@ -7,6 +7,7 @@
  */
 
 import { createHash, createHmac, randomBytes, randomUUID } from "crypto";
+import { EventEmitter } from "node:events";
 import type {
   EvidenceBundle,
   AnyStage,
@@ -16,6 +17,95 @@ import type {
   StageType,
 } from "./types.js";
 import { EvidenceBundleSchema } from "./types.js";
+
+// ─── Runtime Event Bus ────────────────────────────────────────────────────────
+//
+// Live progress events emitted as a workflow run executes. Subscribers (e.g.
+// the substrate-mcp-gateway SSE transport) can listen for stage:start,
+// stage:complete, run:complete, run:failed, and run:pending-approval events
+// without polling. The bus is in-process; distributed deployments can replace
+// it with a Redis pub/sub.
+
+export type SubstrateRuntimeEventType =
+  | "stage:start"
+  | "stage:complete"
+  | "stage:failed"
+  | "run:started"
+  | "run:complete"
+  | "run:failed"
+  | "run:pending-approval";
+
+export interface SubstrateRuntimeEvent {
+  type: SubstrateRuntimeEventType;
+  runId: string;
+  workflowId: string;
+  stageId?: string;
+  stageType?: StageType;
+  status?: string;
+  confidence?: number;
+  error?: string;
+  timestamp: number;
+}
+
+class RuntimeEventBus extends EventEmitter {
+  private static readonly CHANNEL = "substrate_runtime_event";
+
+  emitRuntimeEvent(event: SubstrateRuntimeEvent): void {
+    this.emit(RuntimeEventBus.CHANNEL, event);
+  }
+
+  subscribe(listener: (event: SubstrateRuntimeEvent) => void): () => void {
+    this.on(RuntimeEventBus.CHANNEL, listener);
+    return () => this.off(RuntimeEventBus.CHANNEL, listener);
+  }
+}
+
+export const runtimeEventBus = new RuntimeEventBus();
+runtimeEventBus.setMaxListeners(512);
+
+function emitStageEvent(opts: {
+  type: "stage:start" | "stage:complete" | "stage:failed";
+  run: PipelineRun;
+  stage: AnyStage;
+  result?: StageResult;
+}): void {
+  const { type, run, stage, result } = opts;
+  runtimeEventBus.emitRuntimeEvent({
+    type,
+    runId: run.runId,
+    workflowId: run.workflowId,
+    stageId: stage.id,
+    stageType: stage.type as StageType,
+    ...(result?.status ? { status: result.status } : {}),
+    ...(result?.confidence !== undefined ? { confidence: result.confidence } : {}),
+    ...(result?.error ? { error: result.error } : {}),
+    timestamp: Date.now(),
+  });
+}
+
+function emitRunEvent(opts: {
+  type: "run:started" | "run:complete" | "run:failed" | "run:pending-approval";
+  run: PipelineRun;
+}): void {
+  const { type, run } = opts;
+  runtimeEventBus.emitRuntimeEvent({
+    type,
+    runId: run.runId,
+    workflowId: run.workflowId,
+    status: run.status,
+    ...(run.finalConfidence !== undefined ? { confidence: run.finalConfidence } : {}),
+    ...(run.error ? { error: run.error } : {}),
+    timestamp: Date.now(),
+  });
+}
+
+/**
+ * Engine-only helper: emit a stage:start event when a stage begins executing.
+ * Called from the runtime before stage execution so SSE clients see progress.
+ */
+export function emitStageStart(run: PipelineRun, stage: AnyStage): void {
+  emitStageEvent({ type: "stage:start", run, stage });
+}
 
 // ─── Signing Key ──────────────────────────────────────────────────────────────
 //
@@ -219,6 +309,15 @@ export class SubstrateJournal {
 
     await this.store.append(bundle);
 
+    // Fan-out a stage:complete (or stage:failed) event so live subscribers
+    // (e.g. the gateway SSE transport) can push progress without polling.
+    emitStageEvent({
+      type: result.status === "failed" || result.status === "timed-out" ? "stage:failed" : "stage:complete",
+      run,
+      stage,
+      result,
+    });
+
     // Link into the proof-chain — errors are logged but not fatal so the
     // journal (primary source) is never blocked by an unavailable proof-chain.
     await this.linkToProofChain(bundle).catch((err: unknown) => {
@@ -273,6 +372,19 @@ export class SubstrateJournal {
     }) as EvidenceBundle;
 
     await this.store.append(bundle);
+
+    // Map pipeline transition events onto runtime event bus subscribers.
+    const evt = opts.event;
+    if (evt === "started") {
+      emitRunEvent({ type: "run:started", run });
+    } else if (evt === "completed" || evt === "dry-run-complete") {
+      emitRunEvent({ type: "run:complete", run });
+    } else if (evt === "failed") {
+      emitRunEvent({ type: "run:failed", run });
+    } else if (evt === "pending-approval") {
+      emitRunEvent({ type: "run:pending-approval", run });
+    }
+
     return bundle;
   }
 

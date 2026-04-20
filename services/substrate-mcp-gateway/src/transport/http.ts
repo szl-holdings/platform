@@ -21,6 +21,7 @@ import {
 import { handleToolCall, handleResourceRead, handlePromptGet } from "../handlers.js";
 import { authMiddleware, resolveAuthContext } from "../auth.js";
 import { runEventBus, type RunLifecycleEvent } from "../run-events.js";
+import { runtimeEventBus, type SubstrateRuntimeEvent } from "@szl/substrate";
 
 // ─── JSON-RPC Helpers ─────────────────────────────────────────────────────────
 
@@ -242,6 +243,15 @@ export function createHttpTransport(): express.Router {
       writeEvent(event.type, event);
     });
 
+    // Subscribe to substrate runtime journal events so SSE clients receive
+    // stage:start, stage:complete, stage:failed, run:complete, and run:failed
+    // pushes as a workflow run progresses (no polling required).
+    const unsubscribeRuntimeEvents = runtimeEventBus.subscribe(
+      (event: SubstrateRuntimeEvent) => {
+        writeEvent(event.type, event);
+      },
+    );
+
     // Keepalive pings every 30s
     const keepalive = setInterval(() => {
       writeEvent("$/ping", { timestamp: Date.now() });
@@ -250,6 +260,7 @@ export function createHttpTransport(): express.Router {
     req.on("close", () => {
       clearInterval(keepalive);
       unsubscribeRunEvents();
+      unsubscribeRuntimeEvents();
       sseClients.delete(id);
     });
   });

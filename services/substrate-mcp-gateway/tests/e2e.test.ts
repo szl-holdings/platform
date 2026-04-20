@@ -564,3 +564,151 @@ test("14. SSE stream receives run lifecycle events when a run is submitted", asy
 
   void sseResolve; // ensure variable is referenced
 });
+
+test("15. SSE stream pushes live stage:start / stage:complete / run:complete events as a run executes", async () => {
+  // While a workflow run is executing, the gateway must forward substrate
+  // journal events to connected SSE clients so agents see stage-by-stage
+  // progress without polling. We connect first, submit a multi-stage run,
+  // and assert the full lifecycle sequence arrives over the open stream.
+  const collectedEvents: Array<{ type: string; data: unknown }> = [];
+  let sseDone = false;
+
+  const sseUrl = new URL(`${baseUrl}/mcp/sse`);
+
+  const ssePromise = new Promise<void>((resolve, reject) => {
+    const sseReq = http.request(
+      { hostname: sseUrl.hostname, port: Number(sseUrl.port), path: sseUrl.pathname,
+        headers: { Authorization: `Bearer ${TEST_API_KEY}`, Accept: "text/event-stream" } },
+      (sseRes) => {
+        let buf = "";
+        sseRes.on("data", (chunk: Buffer) => {
+          buf += chunk.toString();
+          const lines = buf.split("\n");
+          buf = lines.pop() ?? "";
+
+          let currentEventType = "";
+          for (const line of lines) {
+            if (line.startsWith("event: ")) {
+              currentEventType = line.slice(7).trim();
+            } else if (line.startsWith("data: ")) {
+              try {
+                const parsed = JSON.parse(line.slice(6)) as unknown;
+                collectedEvents.push({ type: currentEventType, data: parsed });
+              } catch { /* ignore */ }
+            }
+          }
+
+          // Resolve once we've observed a full lifecycle: start + at least one
+          // stage:start, one stage:complete, and a run:complete event.
+          const hasStageStart = collectedEvents.some((e) => e.type === "stage:start");
+          const hasStageComplete = collectedEvents.some((e) => e.type === "stage:complete");
+          const hasRunComplete = collectedEvents.some((e) => e.type === "run:complete");
+          if (hasStageStart && hasStageComplete && hasRunComplete && !sseDone) {
+            sseDone = true;
+            sseReq.destroy();
+            resolve();
+          }
+        });
+        sseRes.on("error", reject);
+      },
+    );
+    sseReq.on("error", (e) => { if (!sseDone) reject(e); });
+    sseReq.end();
+  });
+
+  // Allow the SSE connection to establish before firing the run.
+  await new Promise<void>((r) => setTimeout(r, 50));
+
+  const submitResp = await toolCall("substrate_submit_run", {
+    workflowId: DRY_RUN_WORKFLOW_ID,
+    input: { streamingTest: true },
+    mode: "dry-run",
+  });
+  const submitted = parseResult<{ runId: string; status: string }>(submitResp);
+
+  const timeout = new Promise<void>((_, reject) =>
+    setTimeout(() => reject(new Error("SSE timeout — full lifecycle not observed within 3s")), 3_000)
+  );
+  await Promise.race([ssePromise, timeout]);
+
+  // Full lifecycle assertions
+  const stageStartEvents = collectedEvents.filter((e) => e.type === "stage:start");
+  const stageCompleteEvents = collectedEvents.filter((e) => e.type === "stage:complete");
+  const runComplete = collectedEvents.find((e) => e.type === "run:complete");
+
+  assert.ok(stageStartEvents.length >= 1, "Expected at least one stage:start event");
+  assert.ok(stageCompleteEvents.length >= 1, "Expected at least one stage:complete event");
+  assert.ok(runComplete, "Expected a run:complete event for the dry-run lifecycle");
+
+  // Each event must carry the runId of our submitted run
+  for (const evt of [...stageStartEvents, ...stageCompleteEvents, runComplete]) {
+    const data = evt.data as Record<string, unknown>;
+    assert.equal(data["runId"], submitted.runId, `Event ${evt.type} must reference the submitted runId`);
+    assert.equal(typeof data["timestamp"], "number", `Event ${evt.type} must include a numeric timestamp`);
+  }
+
+  // Order check: at least one stage:start arrived before its matching stage:complete
+  const firstStartIdx = collectedEvents.findIndex((e) => e.type === "stage:start");
+  const firstCompleteIdx = collectedEvents.findIndex((e) => e.type === "stage:complete");
+  assert.ok(firstStartIdx < firstCompleteIdx, "stage:start must precede stage:complete");
+
+  // run:complete must arrive after the final stage:complete
+  const lastCompleteIdx = collectedEvents.map((e) => e.type).lastIndexOf("stage:complete");
+  const runCompleteIdx = collectedEvents.findIndex((e) => e.type === "run:complete");
+  assert.ok(runCompleteIdx > lastCompleteIdx, "run:complete must arrive after the final stage:complete");
+});
+
+test("16. SubstrateStreaming client surfaces live stage events via onEvent callback", async () => {
+  // The packaged client SDK must be able to consume the same stream and emit
+  // typed events to its onEvent callback, so external agents (Sentra, etc.)
+  // can drive their UIs from the gateway without writing a custom parser.
+  const { SubstrateStreaming } = await import("@szl/substrate-client/streaming");
+
+  const received: Array<{ type: string; runId?: string }> = [];
+  let resolveDone: (() => void) | null = null;
+  const done = new Promise<void>((resolve) => { resolveDone = resolve; });
+
+  const stream = new SubstrateStreaming({
+    sseUrl: `${baseUrl}/mcp/sse`,
+    apiKey: TEST_API_KEY,
+    maxReconnectAttempts: 0,
+    onEvent: (evt) => {
+      const entry: { type: string; runId?: string } = { type: evt.type };
+      if (evt.runId !== undefined) entry.runId = evt.runId;
+      received.push(entry);
+      const hasStart = received.some((e) => e.type === "stage:start");
+      const hasComplete = received.some((e) => e.type === "stage:complete");
+      const hasRunComplete = received.some((e) => e.type === "run:complete");
+      if (hasStart && hasComplete && hasRunComplete && resolveDone) {
+        resolveDone();
+        resolveDone = null;
+      }
+    },
+  });
+
+  void stream.connect();
+
+  // Allow connection establishment, then trigger the run.
+  await new Promise<void>((r) => setTimeout(r, 80));
+  const submitResp = await toolCall("substrate_submit_run", {
+    workflowId: DRY_RUN_WORKFLOW_ID,
+    input: { sdkStreamingTest: true },
+    mode: "dry-run",
+  });
+  const submitted = parseResult<{ runId: string }>(submitResp);
+
+  const timeout = new Promise<void>((_, reject) =>
+    setTimeout(() => reject(new Error("SubstrateStreaming did not surface lifecycle within 3s")), 3_000)
+  );
+
+  try {
+    await Promise.race([done, timeout]);
+  } finally {
+    stream.disconnect();
+  }
+
+  const matching = received.filter((e) => e.runId === submitted.runId);
+  assert.ok(matching.some((e) => e.type === "stage:start"), "Client must surface stage:start");
+  assert.ok(matching.some((e) => e.type === "stage:complete"), "Client must surface stage:complete");
+  assert.ok(matching.some((e) => e.type === "run:complete"), "Client must surface run:complete");
+});
