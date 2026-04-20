@@ -68,6 +68,103 @@ interface PrismSummary {
   lensCount: number;
 }
 
+const now = Date.now();
+
+const DEMO_PRISM_LENSES: PrismScore[] = [
+  {
+    id: 1001, lens: "financial_health", score: 72, previousScore: 68, trend: "up", trendDelta: 4.0,
+    summary: "Cash position improved after Q1 collections; ARR pacing 6% above plan but burn ticked up with new GTM hires.",
+    topSignals: [
+      { title: "$240K invoice batch reconciled — DSO down 4 days", severity: "low", source: "NetSuite" },
+      { title: "Q1 ARR run-rate at $11.8M vs $11.2M commit", severity: "medium", source: "Revenue Intelligence" },
+    ],
+    scoredAt: new Date(now - 1 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 1002, lens: "operational_risk", score: 41, previousScore: 47, trend: "down", trendDelta: -6.0,
+    summary: "Approval queues breaching SLA across 3 functions; 8 orphaned processes lack named owners. Compounding stall risk.",
+    topSignals: [
+      { title: "14 aged approvals past 10-day SLA", severity: "critical", source: "Workflow Engine" },
+      { title: "8 processes with no assigned owner", severity: "high", source: "Ownership Map" },
+      { title: "API p99 latency 4,200ms — 3x SLO", severity: "critical", source: "Monitoring" },
+    ],
+    scoredAt: new Date(now - 1 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 1003, lens: "growth_velocity", score: 58, previousScore: 62, trend: "down", trendDelta: -4.0,
+    summary: "Pipeline coverage slipped to 0.94x for the first time in 5 quarters. Trial cohort conversion down 12 pts.",
+    topSignals: [
+      { title: "Enterprise Q1 pipeline coverage 0.94x", severity: "high", source: "Revenue Intelligence" },
+      { title: "Trial-to-paid conversion 18% (vs 30% baseline)", severity: "medium", source: "Product Analytics" },
+    ],
+    scoredAt: new Date(now - 1 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 1004, lens: "customer_sentiment", score: 64, previousScore: 64, trend: "flat", trendDelta: 0.0,
+    summary: "NPS holding at 42; 3 enterprise accounts showing churn signals. CSAT stable on tier-1 segment.",
+    topSignals: [
+      { title: "3 enterprise accounts flagged churn-risk", severity: "high", source: "Gainsight" },
+      { title: "NPS 42 (target 45)", severity: "medium", source: "Survey Engine" },
+    ],
+    scoredAt: new Date(now - 1 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 1005, lens: "compliance_drift", score: 47, previousScore: 53, trend: "down", trendDelta: -6.0,
+    summary: "2 open SOC 2 audit findings 34 days from re-review. Data retention policy update overdue.",
+    topSignals: [
+      { title: "2 unresolved SOC 2 findings", severity: "critical", source: "Compliance Tracker" },
+      { title: "Data retention policy 18 months past review date", severity: "high", source: "Policy Registry" },
+    ],
+    scoredAt: new Date(now - 1 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 1006, lens: "talent_stability", score: 69, previousScore: 67, trend: "up", trendDelta: 2.0,
+    summary: "Voluntary attrition at 8% annualized. 3 ICs flagged at-risk by Alloy retention model. Engineering backfill open 60 days.",
+    topSignals: [
+      { title: "3 ICs flagged at-risk", severity: "medium", source: "Alloy Retention Model" },
+      { title: "Senior Eng role open 60 days", severity: "medium", source: "Greenhouse" },
+    ],
+    scoredAt: new Date(now - 1 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 1007, lens: "market_position", score: 61, previousScore: 59, trend: "up", trendDelta: 2.0,
+    summary: "Win rate 38% on enterprise (vs 34% prior quarter). 4 deals showed competitive pricing pressure from Vertex.",
+    topSignals: [
+      { title: "Enterprise win rate 38% (+4 pts)", severity: "low", source: "Revenue Intelligence" },
+      { title: "4 deals: pricing pressure from Vertex", severity: "medium", source: "Win/Loss Analysis" },
+    ],
+    scoredAt: new Date(now - 1 * 3600 * 1000).toISOString(),
+  },
+];
+
+const DEMO_PRISM_SUMMARY: PrismSummary = {
+  lenses: DEMO_PRISM_LENSES,
+  compositeScore: Math.round(DEMO_PRISM_LENSES.reduce((a, l) => a + l.score, 0) / DEMO_PRISM_LENSES.length),
+  lensCount: DEMO_PRISM_LENSES.length,
+};
+
+function buildDemoLensHistory(lens: string): PrismScore[] {
+  const base = DEMO_PRISM_LENSES.find(l => l.lens === lens);
+  if (!base) return [];
+  const out: PrismScore[] = [];
+  for (let i = 0; i < 12; i++) {
+    const drift = Math.round((Math.sin(i * 0.7) * 6 + (i % 3 === 0 ? -3 : 2)));
+    const score = Math.max(10, Math.min(95, base.score + (i === 0 ? 0 : drift - i)));
+    out.push({
+      id: base.id * 100 + i,
+      lens,
+      score,
+      previousScore: i === 0 ? base.previousScore : null,
+      trend: i === 0 ? base.trend : "flat",
+      trendDelta: i === 0 ? base.trendDelta : null,
+      topSignals: i === 0 ? base.topSignals : null,
+      summary: i === 0 ? base.summary : null,
+      scoredAt: new Date(now - i * 24 * 3600 * 1000).toISOString(),
+    });
+  }
+  return out;
+}
+
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const TEXT = { primary: "rgba(255,255,255,0.88)", secondary: "rgba(255,255,255,0.55)", tertiary: "rgba(255,255,255,0.28)", muted: "rgba(255,255,255,0.14)" };
 
@@ -211,7 +308,8 @@ function LensDetailPanel({ lens, onClose }: { lens: string; onClose: () => void 
     queryFn: () => apiFetch<PrismScore[]>(`/lyte/prism/scores?lens=${lens}`),
   });
 
-  const scores = Array.isArray(data) ? data : [];
+  const liveScores = Array.isArray(data) ? data : [];
+  const scores = liveScores.length > 0 ? liveScores : buildDemoLensHistory(lens);
   const latest = scores[0];
 
   return (
@@ -339,14 +437,17 @@ function LensDetailPanel({ lens, onClose }: { lens: string; onClose: () => void 
 export default function PrismDashboard() {
   const [drill, setDrill] = useState<string | null>(null);
 
-  const { data, isLoading, isError, refetch } = useStandardQuery({
+  const { data, isLoading, refetch } = useStandardQuery({
     queryKey: ["prism-summary"],
     queryFn: () => apiFetch<PrismSummary>("/lyte/prism/summary"),
     refetchInterval: 60000,
   });
 
-  const lenses = data?.lenses ?? [];
-  const compositeScore = data?.compositeScore ?? 0;
+  const liveScored = (data?.lenses ?? []).filter(Boolean) as PrismScore[];
+  const usingDemo = !isLoading && liveScored.length === 0;
+  const summary: PrismSummary = usingDemo || !data ? DEMO_PRISM_SUMMARY : (data as PrismSummary);
+  const lenses = summary.lenses;
+  const compositeScore = summary.compositeScore;
   const compositeColor = compositeScore >= 70 ? "#6b8f71" : compositeScore >= 50 ? "#d4a054" : "#c45a4a";
 
   const scoredLenses = lenses.filter(Boolean) as PrismScore[];
@@ -388,27 +489,20 @@ export default function PrismDashboard() {
         </div>
       </div>
 
-      {isLoading && (
+      {isLoading && !usingDemo && (
         <div className="flex items-center justify-center py-16">
           <div className="w-6 h-6 border-2 border-[#d4a054] border-t-transparent rounded-full animate-spin" />
         </div>
       )}
 
-      {isError && (
-        <div className="flex items-center gap-3 p-4 rounded-xl border" style={{ borderColor: "rgba(196,90,74,0.2)", background: "rgba(196,90,74,0.06)" }}>
-          <AlertTriangle className="w-4 h-4 text-[#c45a4a]" />
-          <span className="text-sm text-[#c45a4a]">Failed to load PRISM scores. Make sure you have seeded data via the admin seeder.</span>
-          <button onClick={() => refetch()} className="ml-auto text-[10px] text-[#c45a4a]/70 hover:text-[#c45a4a]">Retry</button>
-        </div>
-      )}
-
-      {!isLoading && !isError && scoredLenses.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 gap-4 rounded-xl border" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)" }}>
-          <Zap className="w-10 h-10" style={{ color: "rgba(212,160,84,0.25)" }} />
-          <div className="text-center">
-            <p className="text-sm text-slate-400 mb-1">No PRISM scores yet</p>
-            <p className="text-[11px] text-slate-500">Use the Admin Seeder to populate PRISM data, then return here to see the intelligence model in action.</p>
-          </div>
+      {usingDemo && (
+        <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg border text-[10px]"
+          style={{ borderColor: "rgba(212,160,84,0.18)", background: "rgba(212,160,84,0.04)", color: "#d4a054" }}>
+          <Zap className="w-3 h-3" />
+          <span className="font-mono uppercase tracking-wider">Demo Data</span>
+          <span style={{ color: "rgba(255,255,255,0.45)" }}>
+            Showing synthetic 7-lens scores. Sign in and seed via the admin console to see live PRISM data.
+          </span>
         </div>
       )}
 
