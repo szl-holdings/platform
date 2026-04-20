@@ -503,6 +503,9 @@ importers:
       '@szl-holdings/auth':
         specifier: workspace:*
         version: link:../../lib/auth
+      '@szl-holdings/auth-shared':
+        specifier: workspace:*
+        version: link:../../packages/auth-shared
       '@szl-holdings/business-events':
         specifier: workspace:*
         version: link:../../packages/business-events
@@ -3006,6 +3009,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.0
         version: 1.2.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@szl-holdings/auth-shared':
+        specifier: workspace:*
+        version: link:../../packages/auth-shared
       '@szl-holdings/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
@@ -3490,6 +3496,19 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+
+  packages/auth-shared:
+    dependencies:
+      '@szl-holdings/env':
+        specifier: workspace:*
+        version: link:../env
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   packages/brand-registry:
     devDependencies:

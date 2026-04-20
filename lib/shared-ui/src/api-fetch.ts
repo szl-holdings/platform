@@ -3,6 +3,7 @@ import {
   extractServerMessage,
   notifySessionRevoked,
 } from "./session-revocation";
+import { csrfHeaders } from "@szl-holdings/auth-shared/client";
 
 const API_BASE = "/api";
 
@@ -312,6 +313,10 @@ export async function apiFetch<T>(path: string, options?: ApiFetchOptions): Prom
       };
       if (tokens?.token && !("Authorization" in headers) && !("authorization" in headers)) {
         headers["Authorization"] = `Bearer ${tokens.token}`;
+      } else if (!tokens?.token && !skipAuth) {
+        // Cookie-session fallback: no bearer token means the browser will send
+        // the session cookie, which requires CSRF protection.
+        Object.assign(headers, csrfHeaders());
       }
 
       const res = await fetch(`${API_BASE}${path}`, {

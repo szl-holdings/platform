@@ -13,18 +13,25 @@ import {
   type InternalScope,
   tokenHasScope,
 } from "../lib/internal-tokens";
+import type { OrgMembership as SharedOrgMembership } from "@szl-holdings/auth-shared";
 
-export interface OrgMembership {
-  orgId: number;
-  orgSlug: string;
-  orgName: string;
-  role: "owner" | "admin" | "member" | "viewer";
-}
+/**
+ * OrgMembership is the canonical type from @szl-holdings/auth-shared.
+ * Re-exported here for backward compatibility with the many local imports
+ * across this codebase. New code should import directly from auth-shared.
+ *
+ * @see packages/auth-shared/src/types.ts
+ */
+export type OrgMembership = SharedOrgMembership;
 
 export interface AuthenticatedUser {
   id: number;
   displayName: string;
   email: string | null;
+  /**
+   * Platform roles — same string union as PlatformRole in @szl-holdings/auth-shared
+   * but typed here as RoleName from @szl-holdings/db for drizzle-orm compatibility.
+   */
   roles: RoleName[];
   orgs: OrgMembership[];
 }

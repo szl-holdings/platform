@@ -62,6 +62,7 @@
     "@szl-holdings/atlas-spatial-runtime": "workspace:*",
     "@szl-holdings/audit": "workspace:*",
     "@szl-holdings/auth": "workspace:*",
+    "@szl-holdings/auth-shared": "workspace:*",
     "@szl-holdings/business-events": "workspace:*",
     "@szl-holdings/config": "workspace:*",
     "@szl-holdings/connectors": "workspace:*",
