@@ -5,7 +5,7 @@
 | File | Description |
 |------|-------------|
 | `carousel-slides/slide-01-cover.jpg` through `slide-10-thesis.jpg` | 10 individual 1080×1080px JPG slides |
-| `szl-holdings-investor-carousel.pdf` | Combined 10-page PDF ready for LinkedIn upload |
+| `szl-holdings-investor-carousel.pdf` | Combined 10-page PDF ready for LinkedIn upload — **generated locally only; gitignored and not committed to the public repo (task #2703).** Distribute via a private channel (private repo, encrypted storage, or investor data room). |
 
 ## Regenerating
 

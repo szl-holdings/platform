@@ -121,11 +121,11 @@ The remaining product-named JPGs in `screenshots/` (e.g., `aegis-command.jpg`, `
 |------|---------------|-------|
 | `carousel-slides/` (10 JPGs) | **KEEP-ARCHIVE** | Investor carousel deck; internal use |
 | `screenshots/` (hero images) | **KEEP-ARCHIVE** | Product hero shots for demo use |
-| `szl-holdings-investor-carousel.pdf` | **KEEP-ARCHIVE** | Investor-facing PDF; should not be in a public GitHub repo — flag for review |
+| `szl-holdings-investor-carousel.pdf` | **REMOVED** | ✅ Resolved (task #2703): deleted from the repo and added to `.gitignore`. Distribute via a private channel (private GitHub repo, encrypted storage, or investor data room link). The 10 source slides remain in `demo-assets/carousel-slides/` and the deck can be regenerated with `demo-assets/generate-carousel.mjs` for internal use. |
 | `generate-carousel.mjs` | **KEEP-ARCHIVE** | Generator script; useful internally |
 | Markdown files | **KEEP-ARCHIVE** | LinkedIn post drafts; internal marketing |
 
-> ⚠️ **Flag:** `demo-assets/szl-holdings-investor-carousel.pdf` may contain investor metrics that should not be publicly distributed via GitHub. Recommend moving to a private channel.
+> ✅ **Resolved (task #2703):** `demo-assets/szl-holdings-investor-carousel.pdf` has been removed from the public repo and added to `.gitignore`. Distribute the deck via a private channel rather than the public GitHub surface.
 
 ---
 
