@@ -46,7 +46,7 @@ export function register(router: IRouter): void {
   router.use(lazyMatch("/firestorm", () => import("../firestorm-cognitive"), "firestorm-cognitive"));
 
   router.use(lazyRegisterMatch("/intelligence", () => import("../intelligence"), "intelligence"));
-  router.use(lazyMatch("/inca", () => import("../inca"), "inca"));
+  router.use(lazyMatch("/inca", () => import("../aegis-intel"), "inca"));
 
   router.use("/gov", _readLimiter);
   router.use(lazyMatch("/gov", () => import("../gov-data"), "gov-data"));

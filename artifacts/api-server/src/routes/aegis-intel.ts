@@ -1,4 +1,4 @@
-// Aegis Intelligence routes (file: inca.ts — legacy filename, module now known as Aegis Intelligence)
+// Aegis Intelligence routes (formerly known as INCA — route paths and table names retain the inca prefix for backwards compatibility)
 import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import {

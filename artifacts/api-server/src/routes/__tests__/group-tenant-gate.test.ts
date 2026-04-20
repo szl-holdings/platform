@@ -157,7 +157,7 @@ vi.mock("../firestorm-live", () => ({ default: stubRouter() }));
 vi.mock("../firestorm-command-surfaces", () => ({ default: stubRouter() }));
 vi.mock("../firestorm-cognitive", () => ({ default: stubRouter() }));
 vi.mock("../intelligence", () => ({ register: (_r: unknown) => {}, scheduleIntelligenceRefresh: () => {}, prewarmIntelligenceCache: () => Promise.resolve(), scheduleIntelligenceCachePruning: () => ({} as NodeJS.Timeout) }));
-vi.mock("../inca", () => ({ default: stubRouter() }));
+vi.mock("../aegis-intel", () => ({ default: stubRouter() }));
 vi.mock("../gov-data", () => ({ default: stubRouter() }));
 vi.mock("../readiness", () => ({ default: stubRouter() }));
 vi.mock("../msp-live", () => ({ default: stubRouter() }));
