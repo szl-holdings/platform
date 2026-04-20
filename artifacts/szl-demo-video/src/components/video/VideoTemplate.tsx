@@ -8,7 +8,7 @@ import { Scene4 } from './video_scenes/Scene4';
 import { Scene5 } from './video_scenes/Scene5';
 import { ChapterMarkers } from './ChapterMarkers';
 import type { Chapter } from './ChapterMarkers';
-import { CaptionTrack, FULL_CAPTIONS } from './CaptionTrack';
+import { CaptionTrack, SCENE_CAPTIONS } from './CaptionTrack';
 import { SocialCutSelector, CaptionToggle, SOCIAL_CUT_CONFIGS } from './SocialCutSelector';
 import type { SocialCut } from './SocialCutSelector';
 
@@ -60,7 +60,7 @@ function VideoPlayer({
 
   const sceneIndexMap: Record<string, number> = {};
   Object.keys(FULL_SCENE_DURATIONS).forEach((k, i) => { sceneIndexMap[k] = i; });
-  const currentSceneKey = sceneKeys[currentScene];
+  const currentSceneKey = sceneKeys[currentScene] ?? '';
   const fullSceneIndex = sceneIndexMap[currentSceneKey] ?? 0;
 
   return (
@@ -74,8 +74,9 @@ function VideoPlayer({
       </AnimatePresence>
 
       <CaptionTrack
-        captions={FULL_CAPTIONS}
-        totalElapsedMs={totalElapsedMs}
+        sceneCaptions={SCENE_CAPTIONS}
+        currentSceneKey={currentSceneKey}
+        sceneElapsedMs={sceneElapsedMs}
         visible={captionsVisible}
       />
 

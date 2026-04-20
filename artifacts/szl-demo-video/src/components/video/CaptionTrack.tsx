@@ -7,30 +7,39 @@ export interface Caption {
   speaker?: string;
 }
 
+export type SceneCaptions = Record<string, Caption[]>;
+
 interface CaptionTrackProps {
-  captions: Caption[];
-  totalElapsedMs: number;
+  sceneCaptions: SceneCaptions;
+  currentSceneKey: string;
+  sceneElapsedMs: number;
   visible: boolean;
 }
 
-export function CaptionTrack({ captions, totalElapsedMs, visible }: CaptionTrackProps) {
+export function CaptionTrack({
+  sceneCaptions,
+  currentSceneKey,
+  sceneElapsedMs,
+  visible,
+}: CaptionTrackProps) {
   if (!visible) return null;
 
+  const captions = sceneCaptions[currentSceneKey] ?? [];
   const current = captions.find(
-    (c) => totalElapsedMs >= c.startMs && totalElapsedMs < c.endMs
+    (c) => sceneElapsedMs >= c.startMs && sceneElapsedMs < c.endMs,
   );
 
   return (
-    <div className="absolute bottom-16 left-0 right-0 z-25 flex justify-center px-8 pointer-events-none">
+    <div className="absolute bottom-16 left-0 right-0 z-30 flex justify-center px-8 pointer-events-none">
       <AnimatePresence mode="popLayout">
         {current && (
           <motion.div
-            key={`${current.startMs}-${current.text.slice(0, 10)}`}
+            key={`${currentSceneKey}-${current.startMs}`}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.25 }}
-            className="max-w-2xl text-center"
+            className="max-w-3xl text-center"
           >
             {current.speaker && (
               <div className="text-[9px] font-mono text-white/40 mb-1 uppercase tracking-widest">
@@ -38,12 +47,14 @@ export function CaptionTrack({ captions, totalElapsedMs, visible }: CaptionTrack
               </div>
             )}
             <div
-              className="text-sm font-medium leading-relaxed px-4 py-2 rounded-lg"
+              className="text-base font-medium leading-relaxed px-5 py-2.5 rounded-lg inline-block"
               style={{
-                background: 'rgba(0,0,0,0.72)',
-                backdropFilter: 'blur(8px)',
-                color: 'rgba(255,255,255,0.92)',
-                textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+                background: 'rgba(0,0,0,0.78)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                color: 'rgba(255,255,255,0.95)',
+                textShadow: '0 1px 6px rgba(0,0,0,0.9)',
+                border: '1px solid rgba(255,255,255,0.06)',
               }}
             >
               {current.text}
@@ -55,33 +66,46 @@ export function CaptionTrack({ captions, totalElapsedMs, visible }: CaptionTrack
   );
 }
 
-export const FULL_CAPTIONS: Caption[] = [
-  { startMs: 1000, endMs: 4000, text: "Every autonomous AI system faces the same dilemma:" },
-  { startMs: 4200, endMs: 7500, text: "give agents enough freedom to be useful, or enough control to be safe." },
-  { startMs: 7800, endMs: 11000, text: "SZL Holdings has solved this — with governed autonomy." },
+// Captions are scene-relative (ms from scene start) so they stay aligned
+// across the full demo and every social cut.
+export const SCENE_CAPTIONS: SceneCaptions = {
+  open: [
+    { startMs: 1000, endMs: 4500, text: 'The era of AI without receipts is ending.' },
+    { startMs: 4500, endMs: 9000, text: 'Every action carries a trace ID, source, freshness, and citation.' },
+    { startMs: 9000, endMs: 12000, text: 'Provenance is not optional.' },
+  ],
+  reel: [
+    { startMs: 0, endMs: 2500, text: 'Pulse — executive briefing, principal eyes only.' },
+    { startMs: 2500, endMs: 5000, text: 'Vessels — maritime intelligence with human approval.' },
+    { startMs: 5000, endMs: 7500, text: 'Terra — real estate intelligence across $4.2B+ AUM.' },
+    { startMs: 7500, endMs: 10000, text: 'Aegis — defense and intel, blocked by policy until cleared.' },
+    { startMs: 10000, endMs: 12500, text: 'Carlota Jo — private advisory, judgment-led.' },
+    { startMs: 12500, endMs: 15000, text: 'Sentra — cyber posture under guardian approval.' },
+    { startMs: 15000, endMs: 17500, text: 'Lyte — decision intelligence with confidence scores.' },
+    { startMs: 17500, endMs: 20000, text: 'PRISM Counsel — legal exposure surfaced before crisis.' },
+    { startMs: 20000, endMs: 22500, text: 'Counsel — every obligation tracked, every deadline locked.' },
+    { startMs: 22500, endMs: 25000, text: 'Unified Command — ten surfaces, one governed fabric.' },
+  ],
+  fabric: [
+    { startMs: 500, endMs: 4000, text: 'The Decision Fabric — a governed substrate beneath every surface.' },
+    { startMs: 4000, endMs: 10000, text: 'Constellation, Trace, Guardian, Eval, Memory, Tools.' },
+    { startMs: 10000, endMs: 18000, text: 'Six systems. One explainable runtime.' },
+  ],
+  cortex: [
+    { startMs: 500, endMs: 2000, text: 'CORTEX Mobile — the pocket-cockpit.' },
+    { startMs: 2000, endMs: 3500, text: 'Maritime risk surfaces in real time.' },
+    { startMs: 3500, endMs: 5000, text: 'Cross-domain correlation links exposure across the portfolio.' },
+    { startMs: 5000, endMs: 10000, text: 'Human approval mandatory before consequential action.' },
+  ],
+  close: [
+    { startMs: 1000, endMs: 3000, text: 'SZL Holdings — the Governed Decision Operating System.' },
+    { startMs: 3000, endMs: 5000, text: '"The era of AI-without-receipts is ending."' },
+    { startMs: 5000, endMs: 6500, text: 'Ten surfaces. One governed fabric.' },
+    { startMs: 6500, endMs: 12000, text: 'Stephen Lutar, Founder & CEO — szl.com', speaker: 'SZL Holdings' },
+  ],
+};
 
-  { startMs: 12500, endMs: 16000, text: "Pulse delivers executive intelligence across your entire portfolio." },
-  { startMs: 16200, endMs: 20000, text: "Vessels monitors your fleet in real-time, surfacing risk before it becomes loss." },
-  { startMs: 20200, endMs: 24000, text: "Terra detects distressed assets and turns signals into acquisition briefs." },
-  { startMs: 24200, endMs: 28000, text: "Aegis unifies your security posture from SOC to boardroom." },
-  { startMs: 28200, endMs: 30500, text: "Carlota Jo coordinates your strategic advisory layer." },
-  { startMs: 28400, endMs: 30800, text: "Sentra hardens your cyber perimeter with AI-driven threat correlation." },
-  { startMs: 30900, endMs: 33200, text: "Lyte brings decision intelligence to every governed choice across the portfolio." },
-  { startMs: 33300, endMs: 35400, text: "PRISM Counsel surfaces legal exposure before matters become crises." },
-  { startMs: 35500, endMs: 37000, text: "Counsel tracks every obligation, deadline, and risk in one governed surface." },
-
-  { startMs: 38000, endMs: 42000, text: "The Alloy Fabric is the agentic backbone connecting every surface." },
-  { startMs: 42200, endMs: 46000, text: "Agents collaborate, delegate, and verify — without human bottlenecks." },
-  { startMs: 46200, endMs: 51000, text: "Every action is logged with full reasoning: why it ran, what it chose, what it rejected." },
-  { startMs: 51200, endMs: 55500, text: "The audit trail is immutable. Governance isn't an afterthought — it's the architecture." },
-
-  { startMs: 56500, endMs: 60500, text: "Cortex intelligence learns from every decision across the portfolio." },
-  { startMs: 60700, endMs: 64500, text: "Cross-domain correlations surface what siloed systems miss." },
-  { startMs: 64700, endMs: 66500, text: "Confidence scores, not black boxes." },
-
-  { startMs: 67500, endMs: 71000, text: "This is the future of enterprise AI: decisive, auditable, and governed." },
-  { startMs: 71200, endMs: 74500, text: "Autonomous enough to act. Controlled enough to trust." },
-  { startMs: 74800, endMs: 77000, text: "SZL Holdings — governed autonomy at enterprise scale." },
-];
-
-export const TRANSCRIPT_TEXT = FULL_CAPTIONS.map((c) => c.text).join(' ');
+export const TRANSCRIPT_TEXT = Object.values(SCENE_CAPTIONS)
+  .flat()
+  .map((c) => c.text)
+  .join(' ');
