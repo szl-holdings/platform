@@ -36,6 +36,7 @@ import S06Market from "./pages/slides/S06Market";
 import S07SeriesDomains from "./pages/slides/S07SeriesDomains";
 import S08BusinessModel from "./pages/slides/S08BusinessModel";
 import S09Ask from "./pages/slides/S09Ask";
+import AllSlides from "./pages/slides/AllSlides";
 
 const SLIDES = [S01Cover, S02SeriesProblem, S03Category, S04Product, S05Demo, S06Market, S07SeriesDomains, S08BusinessModel, S09Ask];
 const TOTAL = SLIDES.length;
@@ -549,6 +550,30 @@ function SlideDeck() {
       >
         ← Exit deck
       </Link>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          window.open(`${BASE}/slides/print?print=1`, "_blank", "noopener");
+        }}
+        title="Export deck as PDF (P)"
+        style={{
+          position: "fixed",
+          top: "2vh",
+          right: "2vw",
+          fontFamily: "Inter, sans-serif",
+          fontSize: "11px",
+          color: "rgba(255,255,255,0.7)",
+          padding: "6px 10px",
+          background: "rgba(12,200,217,0.12)",
+          border: "1px solid rgba(12,200,217,0.35)",
+          borderRadius: "6px",
+          zIndex: 100,
+          cursor: "pointer",
+        }}
+      >
+        Export PDF
+      </button>
       <div
         style={{
           position: "fixed",
@@ -603,7 +628,13 @@ function AppShell({
   ];
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(paletteCommands);
 
+  const isPrintAllSlides =
+    location === "/slides/print" || location.startsWith("/slides/print");
   const isSlides = location.startsWith("/slides") || location.startsWith("/slide");
+
+  if (isPrintAllSlides) {
+    return <AllSlides />;
+  }
 
   if (isSlides) {
     return <SlideDeck />;
