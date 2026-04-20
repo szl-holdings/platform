@@ -14,11 +14,13 @@ import { defaultEntityRegistry } from "@workspace/ontology";
 import {
   defaultSkillRegistry,
   defaultSkillRunStore,
-  PostgresSkillRegistry,
-  PostgresSkillRunStore,
   builtinSkills,
   setSkillLibraryLogger,
+  type SkillDefinition,
+  type SkillRun,
 } from "@workspace/skill-library";
+import type { SkillRegistryBackend, SkillRunStoreBackend } from "@workspace/skill-library";
+import { eq, inArray, desc } from "drizzle-orm";
 import { defaultCheckpointStore, PostgresCheckpointStore } from "@workspace/cognitive-runtime";
 import { defaultSelfModelStore } from "@workspace/self-model";
 import { registerEvalRunSink } from "@workspace/eval-forge";
@@ -192,28 +194,161 @@ export async function initDurablePersistence(): Promise<void> {
       const { skillsTable, skillRunsTable } = await import("@szl-holdings/db/schema");
       setSkillLibraryLogger(logger);
 
-      const pgSkillRegistry = new PostgresSkillRegistry({
-        db,
-        skillsTable: skillsTable as any,
-        logger,
+      const skillToRow = (skill: SkillDefinition) => ({
+        skillId: skill.id,
+        version: 1,
+        latestVersion: 1,
+        name: skill.name,
+        description: skill.description,
+        domain: skill.category,
+        capability: skill.category,
+        status: skill.enabled ? ("active" as const) : ("deprecated" as const),
+        inputSchema: { fields: skill.inputFields } as Record<string, unknown>,
+        outputSchema: { expectedOutputs: skill.expectedOutputs } as Record<string, unknown>,
+        implementation: { steps: skill.steps, toolsUsed: skill.toolsUsed } as Record<string, unknown>,
+        triggerConditions: [] as Record<string, unknown>[],
+        tags: skill.tags,
+        isBuiltin: skill.isBuiltin,
+        confidence: 1.0,
+        sensitivityTier: "internal" as const,
+        provenanceSource: "agent",
+        provenanceMethod: "agent" as const,
+        metadata: {
+          objective: skill.objective,
+          successCriteria: skill.successCriteria,
+          failureConditions: skill.failureConditions,
+          performance: skill.performance,
+          version: skill.version,
+        } as Record<string, unknown>,
+        createdAt: new Date(skill.createdAt),
+        updatedAt: new Date(skill.updatedAt),
       });
 
-      const pgSkillRunStore = new PostgresSkillRunStore({
-        db,
-        skillRunsTable: skillRunsTable as any,
-        hydrateLimit: 2000,
+      const rowToSkill = (row: Record<string, unknown>): SkillDefinition => {
+        const meta = (row["metadata"] as Record<string, unknown>) ?? {};
+        const impl = (row["implementation"] as Record<string, unknown>) ?? {};
+        const inSchema = (row["inputSchema"] as Record<string, unknown>) ?? {};
+        const outSchema = (row["outputSchema"] as Record<string, unknown>) ?? {};
+        const created = row["createdAt"];
+        const updated = row["updatedAt"];
+        const toIso = (v: unknown): string => (v instanceof Date ? v.toISOString() : (v as string) ?? new Date().toISOString());
+        return {
+          id: row["skillId"] as string,
+          name: row["name"] as string,
+          description: (row["description"] as string) ?? "",
+          category: (row["domain"] as SkillDefinition["category"]) ?? "analysis",
+          objective: (meta["objective"] as string) ?? "",
+          inputFields: (inSchema["fields"] as string[]) ?? [],
+          steps: (impl["steps"] as SkillDefinition["steps"]) ?? [],
+          toolsUsed: (impl["toolsUsed"] as string[]) ?? [],
+          expectedOutputs: (outSchema["expectedOutputs"] as string[]) ?? [],
+          successCriteria: (meta["successCriteria"] as SkillDefinition["successCriteria"]) ?? [],
+          failureConditions: (meta["failureConditions"] as SkillDefinition["failureConditions"]) ?? [],
+          performance: (meta["performance"] as SkillDefinition["performance"]) ?? {
+            totalRuns: 0, successfulRuns: 0, failedRuns: 0, successRate: 0, avgLatencyMs: 0,
+          },
+          isBuiltin: (row["isBuiltin"] as boolean) ?? false,
+          enabled: (row["status"] as string) !== "deprecated",
+          version: (meta["version"] as string) ?? "1.0.0",
+          tags: (row["tags"] as string[]) ?? [],
+          createdAt: toIso(created),
+          updatedAt: toIso(updated),
+        };
+      };
+
+      const runToRow = (run: SkillRun) => ({
+        skillId: run.skillId,
+        skillVersion: 1,
+        status:
+          run.status === "running"
+            ? ("running" as const)
+            : run.status === "completed"
+              ? ("completed" as const)
+              : ("failed" as const),
+        inputs: run.inputs,
+        outputs: run.outputs ?? null,
+        latencyMs: run.latencyMs ?? null,
+        errorMessage: run.error ?? null,
+        confidence: 1.0,
+        provenanceSource: "agent",
+        provenanceMethod: "agent" as const,
+        metadata: { runId: run.runId, skillName: run.skillName, steps: run.steps } as Record<string, unknown>,
+        startedAt: new Date(run.startedAt),
+        completedAt: run.completedAt ? new Date(run.completedAt) : null,
       });
 
-      const [hydratedSkills, hydratedRuns] = await Promise.all([
-        pgSkillRegistry.hydrate().catch((err) => {
+      const rowToRun = (row: Record<string, unknown>): SkillRun => {
+        const meta = (row["metadata"] as Record<string, unknown>) ?? {};
+        const toTs = (v: unknown): number | undefined => {
+          if (v === null || v === undefined) return undefined;
+          return v instanceof Date ? v.getTime() : Number(v);
+        };
+        return {
+          runId: (meta["runId"] as string) ?? (row["id"] as string),
+          skillId: row["skillId"] as string,
+          skillName: (meta["skillName"] as string) ?? "",
+          status: row["status"] as SkillRun["status"],
+          inputs: (row["inputs"] as Record<string, unknown>) ?? {},
+          outputs: (row["outputs"] as Record<string, unknown>) ?? undefined,
+          steps: (meta["steps"] as SkillRun["steps"]) ?? [],
+          error: (row["errorMessage"] as string | undefined) ?? undefined,
+          startedAt: toTs(row["startedAt"]) ?? Date.now(),
+          completedAt: toTs(row["completedAt"]),
+          latencyMs: (row["latencyMs"] as number | undefined) ?? undefined,
+        };
+      };
+
+      const skillRegistryBackend: SkillRegistryBackend = {
+        async persistSkill(skill) {
+          const row = skillToRow(skill);
+          const existing = await db
+            .select({ id: skillsTable.id })
+            .from(skillsTable)
+            .where(eq(skillsTable.skillId, skill.id))
+            .limit(1);
+          if (existing.length > 0) {
+            await db
+              .update(skillsTable)
+              .set({ ...row, updatedAt: new Date() })
+              .where(eq(skillsTable.skillId, skill.id));
+          } else {
+            await db.insert(skillsTable).values(row);
+          }
+        },
+        async persistSkillUpdate(skillId, patch) {
+          const updates: Record<string, unknown> = { updatedAt: new Date() };
+          if (patch.name !== undefined) updates["name"] = patch.name;
+          if (patch.description !== undefined) updates["description"] = patch.description;
+          if (patch.tags !== undefined) updates["tags"] = patch.tags;
+          if (patch.enabled !== undefined) updates["status"] = patch.enabled ? "active" : "deprecated";
+          await db.update(skillsTable).set(updates).where(eq(skillsTable.skillId, skillId));
+        },
+      };
+
+      const skillRunBackend: SkillRunStoreBackend = {
+        async persistRun(run) {
+          await db.insert(skillRunsTable).values(runToRow(run));
+        },
+      };
+
+      const [skillRows, runRows] = await Promise.all([
+        db.select().from(skillsTable).catch((err) => {
           logger.warn({ err }, "[persistence] Skill registry hydration failed");
-          return [] as import("@workspace/skill-library").SkillDefinition[];
+          return [] as Record<string, unknown>[];
         }),
-        pgSkillRunStore.hydrate().catch((err) => {
-          logger.warn({ err }, "[persistence] Skill run store hydration failed");
-          return [] as import("@workspace/skill-library").SkillRun[];
-        }),
+        db
+          .select()
+          .from(skillRunsTable)
+          .orderBy(desc(skillRunsTable.startedAt))
+          .limit(2000)
+          .catch((err) => {
+            logger.warn({ err }, "[persistence] Skill run store hydration failed");
+            return [] as Record<string, unknown>[];
+          }),
       ]);
+
+      const hydratedSkills = (skillRows as Record<string, unknown>[]).map(rowToSkill);
+      const hydratedRuns = (runRows as Record<string, unknown>[]).map(rowToRun);
 
       for (const skill of hydratedSkills) {
         defaultSkillRegistry.registerSkill(skill);
@@ -222,13 +357,28 @@ export async function initDurablePersistence(): Promise<void> {
         defaultSkillRunStore.saveRun(run);
       }
 
-      defaultSkillRegistry.setBackend(pgSkillRegistry);
-      defaultSkillRunStore.setBackend(pgSkillRunStore);
+      defaultSkillRegistry.setBackend(skillRegistryBackend);
+      defaultSkillRunStore.setBackend(skillRunBackend);
 
-      const seeded = await pgSkillRegistry.seedBuiltins(builtinSkills).catch((err) => {
+      let seeded = 0;
+      try {
+        const builtinIds = builtinSkills.map((s) => s.id);
+        const existingRows =
+          builtinIds.length > 0
+            ? await db
+                .select({ skillId: skillsTable.skillId })
+                .from(skillsTable)
+                .where(inArray(skillsTable.skillId, builtinIds))
+            : [];
+        const existingIds = new Set(existingRows.map((r) => r.skillId as string));
+        const toInsert = builtinSkills.filter((s) => !existingIds.has(s.id));
+        if (toInsert.length > 0) {
+          await db.insert(skillsTable).values(toInsert.map(skillToRow));
+          seeded = toInsert.length;
+        }
+      } catch (err) {
         logger.warn({ err }, "[persistence] Skill builtin seeding failed");
-        return 0;
-      });
+      }
 
       logger.info(
         { hydratedSkills: hydratedSkills.length, hydratedRuns: hydratedRuns.length, seeded },
