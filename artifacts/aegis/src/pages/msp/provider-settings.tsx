@@ -114,6 +114,14 @@ interface AddProviderFormProps {
   loading: boolean;
 }
 
+interface ProbeResult {
+  ok: boolean;
+  reason: "reachable" | "malformed" | "unreachable" | "blocked";
+  status?: number;
+  latencyMs: number;
+  error?: string;
+}
+
 function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
   const [form, setForm] = useState<Record<string, string>>({
     name: "",
@@ -123,17 +131,53 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
   });
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [probeState, setProbeState] = useState<{ status: "idle" | "checking" | "done"; checkedUrl?: string; result?: ProbeResult }>({ status: "idle" });
 
   const selected = PROVIDER_OPTIONS.find(p => p.value === form.provider);
   const authType = selected?.auth ?? "api_key";
   const authFields = getAuthFields(form.provider, authType);
 
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
-  const handleBlur = (k: string) => setTouched(t => ({ ...t, [k]: true }));
+  const set = (k: string, v: string) => {
+    setForm(f => ({ ...f, [k]: v }));
+    if (k === "baseUrl") setProbeState({ status: "idle" });
+  };
+  const handleBlur = (k: string) => {
+    setTouched(t => ({ ...t, [k]: true }));
+    if (k === "baseUrl") {
+      const url = (form.baseUrl ?? "").trim();
+      if (!url || !validateUrl(url)) return;
+      if (probeState.checkedUrl === url) return;
+      void runProbe(url);
+    }
+  };
+
+  const runProbe = async (url: string) => {
+    setProbeState({ status: "checking", checkedUrl: url });
+    try {
+      const result = await apiFetch<ProbeResult>("/msp/rmm/providers/probe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      setProbeState({ status: "done", checkedUrl: url, result });
+    } catch (err) {
+      setProbeState({
+        status: "done",
+        checkedUrl: url,
+        result: { ok: false, reason: "unreachable", latencyMs: 0, error: `Probe failed: ${String(err)}` },
+      });
+    }
+  };
 
   const validationErrors = validateProviderForm(form, authFields);
   const showError = (k: string) => (touched[k] || submitAttempted) ? validationErrors[k] : undefined;
-  const hasErrors = Object.keys(validationErrors).length > 0;
+  const probeBlocking =
+    probeState.status === "done" &&
+    !!probeState.result &&
+    !probeState.result.ok &&
+    probeState.checkedUrl === (form.baseUrl ?? "").trim();
+  const probeChecking = probeState.status === "checking";
+  const hasErrors = Object.keys(validationErrors).length > 0 || probeBlocking || probeChecking;
 
   const handleSave = () => {
     setSubmitAttempted(true);
@@ -211,22 +255,63 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
               {authType === "oauth2" ? "OAuth2 Credentials" : authType === "basic" ? "Basic Auth Credentials" : "API Key"} · <Badge variant="outline" className="text-[10px]">{selected?.label}</Badge>
             </p>
             <div className="space-y-3">
-              {authFields.map(f => (
-                <div key={f.key}>
-                  <label className="text-xs text-muted-foreground block mb-1">
-                    {f.label} <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    value={form[f.key] ?? ""}
-                    onChange={e => set(f.key, e.target.value)}
-                    onBlur={() => handleBlur(f.key)}
-                    placeholder={f.placeholder}
-                    type={f.type}
-                    className={`${inputClass(f.key)} font-mono`}
-                  />
-                  <FieldError msg={showError(f.key)} />
-                </div>
-              ))}
+              {authFields.map(f => {
+                const isBaseUrl = f.key === "baseUrl";
+                const probeForThisUrl =
+                  isBaseUrl && probeState.checkedUrl === (form.baseUrl ?? "").trim()
+                    ? probeState
+                    : null;
+                const probeError =
+                  probeForThisUrl?.status === "done" && probeForThisUrl.result && !probeForThisUrl.result.ok
+                    ? probeForThisUrl.result.error ?? "Host is not reachable"
+                    : undefined;
+                const probeOk =
+                  probeForThisUrl?.status === "done" && probeForThisUrl.result?.ok
+                    ? probeForThisUrl.result
+                    : null;
+                const baseHasProbeError = isBaseUrl && !showError(f.key) && !!probeError;
+                return (
+                  <div key={f.key}>
+                    <label className="text-xs text-muted-foreground block mb-1">
+                      {f.label} <span className="text-red-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        value={form[f.key] ?? ""}
+                        onChange={e => set(f.key, e.target.value)}
+                        onBlur={() => handleBlur(f.key)}
+                        placeholder={f.placeholder}
+                        type={f.type}
+                        className={`${inputClass(f.key)} font-mono ${
+                          baseHasProbeError ? "bg-red-500/5 border-red-500/50" : ""
+                        } ${isBaseUrl ? "pr-9" : ""}`}
+                      />
+                      {isBaseUrl && probeForThisUrl?.status === "checking" && (
+                        <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
+                      )}
+                      {isBaseUrl && probeOk && (
+                        <CheckCircle className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400" />
+                      )}
+                      {isBaseUrl && probeError && (
+                        <XCircle className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400" />
+                      )}
+                    </div>
+                    <FieldError msg={showError(f.key)} />
+                    {isBaseUrl && !showError(f.key) && probeForThisUrl?.status === "checking" && (
+                      <p className="flex items-center gap-1 mt-1 text-[11px] text-muted-foreground">
+                        <Loader2 className="w-3 h-3 shrink-0 animate-spin" /> Checking if host is reachable…
+                      </p>
+                    )}
+                    {isBaseUrl && probeOk && (
+                      <p className="flex items-center gap-1 mt-1 text-[11px] text-emerald-400">
+                        <CheckCircle className="w-3 h-3 shrink-0" /> Host reachable ({probeOk.latencyMs}ms
+                        {probeOk.status ? `, HTTP ${probeOk.status}` : ""})
+                      </p>
+                    )}
+                    {baseHasProbeError && <FieldError msg={probeError} />}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -266,9 +351,11 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
             >
               {loading
                 ? <Loader2 className="w-4 h-4 animate-spin" />
-                : submitAttempted && hasErrors
-                  ? "Fix errors above"
-                  : "Save & Connect"
+                : submitAttempted && probeChecking
+                  ? "Verifying URL…"
+                  : submitAttempted && hasErrors
+                    ? "Fix errors above"
+                    : "Save & Connect"
               }
             </Button>
           </div>

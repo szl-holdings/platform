@@ -96,6 +96,155 @@ router.delete("/rmm/providers/:id", validateBody(bodyShape({})), authWrite, role
   } catch (err) { handleRouteError(res, err, "Failed to delete RMM provider"); }
 });
 
+function isPrivateIPv4(ip: string): boolean {
+  const parts = ip.split(".").map(Number);
+  if (parts.length !== 4 || parts.some(p => isNaN(p) || p < 0 || p > 255)) return false;
+  const [a, b] = parts as [number, number, number, number];
+  if (a === 10) return true;
+  if (a === 127) return true;
+  if (a === 0) return true;
+  if (a === 169 && b === 254) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+  if (a >= 224) return true; // multicast / reserved
+  return false;
+}
+
+function isPrivateIPv6(ip: string): boolean {
+  const lower = ip.toLowerCase();
+  if (lower === "::1" || lower === "::") return true;
+  if (lower.startsWith("fc") || lower.startsWith("fd")) return true; // ULA fc00::/7
+  if (lower.startsWith("fe80")) return true; // link-local
+  if (lower.startsWith("ff")) return true; // multicast
+  if (lower.startsWith("::ffff:")) {
+    const v4 = lower.slice(7);
+    return isPrivateIPv4(v4);
+  }
+  return false;
+}
+
+function isPrivateAddress(addr: string, family: number): boolean {
+  if (family === 4) return isPrivateIPv4(addr);
+  if (family === 6) return isPrivateIPv6(addr);
+  return false;
+}
+
+router.post(
+  "/rmm/providers/probe",
+  authWrite,
+  roleAdmin,
+  validateBody(bodyShape({ url: z.string() })),
+  async (req, res) => {
+    const started = Date.now();
+    const raw = String(req.body?.url ?? "").trim();
+    if (!raw) return sendBadRequest(res, "URL is required");
+
+    let parsed: URL;
+    try {
+      parsed = new URL(raw);
+    } catch {
+      return sendSuccess(res, {
+        ok: false,
+        reason: "malformed",
+        error: "Not a valid URL (expected something like https://app.example.com)",
+        latencyMs: Date.now() - started,
+      });
+    }
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return sendSuccess(res, {
+        ok: false,
+        reason: "malformed",
+        error: "URL must use http:// or https://",
+        latencyMs: Date.now() - started,
+      });
+    }
+
+    const rawHost = parsed.hostname;
+    const host = rawHost.toLowerCase().replace(/^\[|\]$/g, "");
+    const hostBlocked =
+      host === "localhost" ||
+      host === "0.0.0.0" ||
+      host.endsWith(".local") ||
+      host.endsWith(".internal") ||
+      host.endsWith(".localhost");
+    if (hostBlocked) {
+      return sendSuccess(res, {
+        ok: false,
+        reason: "blocked",
+        error: "Host is private or local — provider URLs must be publicly reachable",
+        latencyMs: Date.now() - started,
+      });
+    }
+
+    const { lookup } = await import("dns/promises");
+    let resolved: Array<{ address: string; family: number }>;
+    try {
+      resolved = await lookup(host, { all: true });
+    } catch (err) {
+      const e = err as { code?: string };
+      const error = e?.code === "ENOTFOUND"
+        ? "DNS lookup failed — host does not exist"
+        : "DNS lookup failed";
+      return sendSuccess(res, {
+        ok: false,
+        reason: "unreachable",
+        error,
+        latencyMs: Date.now() - started,
+      });
+    }
+    if (resolved.length === 0) {
+      return sendSuccess(res, {
+        ok: false,
+        reason: "unreachable",
+        error: "DNS lookup returned no addresses",
+        latencyMs: Date.now() - started,
+      });
+    }
+    if (resolved.some(r => isPrivateAddress(r.address, r.family))) {
+      return sendSuccess(res, {
+        ok: false,
+        reason: "blocked",
+        error: "Host resolves to a private or reserved IP — provider URLs must be publicly reachable",
+        latencyMs: Date.now() - started,
+      });
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    try {
+      const fetchOpts: RequestInit = { signal: controller.signal, redirect: "manual" };
+      let response: Response;
+      try {
+        response = await fetch(parsed.toString(), { ...fetchOpts, method: "HEAD" });
+      } catch {
+        response = await fetch(parsed.toString(), { ...fetchOpts, method: "GET" });
+      }
+      const latencyMs = Date.now() - started;
+      sendSuccess(res, {
+        ok: true,
+        reason: "reachable",
+        status: response.status,
+        latencyMs,
+      });
+    } catch (err) {
+      const latencyMs = Date.now() - started;
+      const e = err as { name?: string; cause?: { code?: string }; message?: string };
+      const code = e?.cause?.code;
+      let error = "Host is not reachable";
+      if (e?.name === "AbortError") error = "Request timed out after 5s — host may be unreachable";
+      else if (code === "ENOTFOUND") error = "DNS lookup failed — host does not exist";
+      else if (code === "ECONNREFUSED") error = "Connection refused by host";
+      else if (code === "ETIMEDOUT") error = "Connection timed out";
+      else if (code === "ECONNRESET") error = "Connection reset by host";
+      else if (e?.message) error = e.message;
+      sendSuccess(res, { ok: false, reason: "unreachable", error, latencyMs });
+    } finally {
+      clearTimeout(timeout);
+    }
+  },
+);
+
 router.post("/rmm/providers/:id/test", authWrite, roleAdmin, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
