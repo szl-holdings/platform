@@ -1,10 +1,52 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Users, UserPlus, Mail, Shield, Clock, AlertTriangle, LogOut } from "lucide-react";
+import { Users, UserPlus, Mail, Shield, Clock, AlertTriangle, LogOut, History } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRoute } from "wouter";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
+
+type PageRoleFilter = "recipient" | "actor" | "both";
+
+interface PagingActor {
+  id: number;
+  displayName: string;
+  email: string | null;
+  avatarUrl: string | null;
+}
+interface UserPageEntry {
+  id: number;
+  team: string;
+  urgency: "info" | "warning" | "critical";
+  message: string | null;
+  inAppDelivered: boolean;
+  createdAt: string;
+  actor: PagingActor | null;
+  recipient: PagingActor | null;
+  role: "received" | "sent";
+}
+interface UserPagesResponse {
+  user: { id: number; displayName: string };
+  role: PageRoleFilter;
+  count: number;
+  pages: UserPageEntry[];
+}
+
+const URGENCY_COLOR: Record<UserPageEntry["urgency"], string> = {
+  info: "#7dd3fc",
+  warning: "#f59e0b",
+  critical: "#ef4444",
+};
+
+function formatPageTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const diffSec = Math.round((Date.now() - d.getTime()) / 1000);
+  if (diffSec < 60) return `${diffSec}s ago`;
+  if (diffSec < 3600) return `${Math.round(diffSec / 60)}m ago`;
+  if (diffSec < 86_400) return `${Math.round(diffSec / 3600)}h ago`;
+  return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+}
 
 interface UserInfo {
   id: string;
@@ -57,6 +99,14 @@ export default function AdminUsers() {
       toast.error(message);
       setConfirmingId(null);
     },
+  });
+
+  const [pageRoleFilter, setPageRoleFilter] = useState<PageRoleFilter>("both");
+  const numericFocusId = focusId ? extractNumericId(focusId) : null;
+  const pagesQuery = useStandardQuery<UserPagesResponse>({
+    queryKey: ["admin-user-pages", numericFocusId, pageRoleFilter],
+    queryFn: () => apiFetch(`/users/${numericFocusId}/pages?role=${pageRoleFilter}`),
+    enabled: !!numericFocusId,
   });
 
   const users = data?.users ?? [];
@@ -115,6 +165,112 @@ export default function AdminUsers() {
           User <span className="font-mono">{focusId}</span> not found in the directory.
         </div>
       )}
+
+      {focusedUser && (
+        <div className="rounded-xl border border-border bg-card" data-testid="card-paging-history">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-3 flex-wrap">
+            <div className="text-sm font-semibold flex items-center gap-2">
+              <History className="w-4 h-4 text-primary" />
+              Paging history
+              <span className="text-xs font-normal text-muted-foreground">
+                — {focusedUser.name}
+                {pagesQuery.data?.count != null && (
+                  <span className="opacity-60"> ({pagesQuery.data.count})</span>
+                )}
+              </span>
+            </div>
+            <div className="flex items-center gap-1 rounded-lg border border-border p-0.5 bg-muted/40">
+              {(["recipient", "actor", "both"] as const).map((r) => {
+                const label = r === "recipient" ? "Received" : r === "actor" ? "Sent" : "Both";
+                const active = pageRoleFilter === r;
+                return (
+                  <button
+                    key={r}
+                    onClick={() => setPageRoleFilter(r)}
+                    data-testid={`button-page-role-${r}`}
+                    className={`px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="p-4">
+            {pagesQuery.isLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : pagesQuery.isError ? (
+              <div className="flex items-center gap-2 text-xs text-[#c45a4a]">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Failed to load paging history.
+              </div>
+            ) : !pagesQuery.data || pagesQuery.data.pages.length === 0 ? (
+              <div className="text-xs text-muted-foreground text-center py-4">
+                No pages recorded for this user yet.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                {pagesQuery.data.pages.map((p) => {
+                  const color = URGENCY_COLOR[p.urgency];
+                  const actorName = p.actor?.displayName ?? "unknown actor";
+                  const recipientName = p.recipient?.displayName ?? "unknown recipient";
+                  return (
+                    <div
+                      key={p.id}
+                      className="px-2.5 py-2 rounded-md text-[11px] bg-muted/30"
+                      style={{ borderLeft: `3px solid ${color}` }}
+                      title={new Date(p.createdAt).toLocaleString()}
+                      data-testid={`row-page-${p.id}`}
+                    >
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span
+                          className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
+                          style={{
+                            color,
+                            backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)`,
+                            border: `1px solid color-mix(in srgb, ${color} 35%, transparent)`,
+                          }}
+                        >
+                          {p.urgency}
+                        </span>
+                        <span
+                          className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded text-muted-foreground border border-border"
+                        >
+                          {p.role}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-mono">
+                          {p.team}
+                        </span>
+                        <span className="font-semibold">{actorName}</span>
+                        <span className="text-muted-foreground">→</span>
+                        <span className="font-semibold">{recipientName}</span>
+                        <span className="font-mono ml-auto text-muted-foreground">
+                          {formatPageTime(p.createdAt)}
+                        </span>
+                      </div>
+                      {p.message && (
+                        <div className="mt-1 italic">“{p.message}”</div>
+                      )}
+                      {!p.inAppDelivered && (
+                        <div className="mt-1 text-[10px] font-mono text-muted-foreground">
+                          in-app opt-out — external channels attempted
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="rounded-xl border border-border bg-card">
         <div className="p-4 border-b border-border flex items-center gap-3">
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search users..." className="flex-1 text-sm bg-muted rounded-lg px-3 py-1.5 border border-border focus:outline-none focus:ring-1 focus:ring-primary" />
