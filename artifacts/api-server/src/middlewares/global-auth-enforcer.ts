@@ -25,7 +25,7 @@
  *  - DOS Public API (/api/v1/*)
  *  - API docs (/api/docs*, /api/docs.json)
  *  - CSRF token endpoint (/api/csrf-token)
- *  - Per-service health probes (e.g. /api/prism-counsel/health)
+ *  - Per-service health probes
  */
 
 import { timingSafeEqual } from "crypto";
@@ -70,9 +70,6 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/stream/status",
   "/api/federation/health",
   "/api/federation/agents",
-  "/api/prism-counsel/health",
-  "/api/prism-counsel/readiness",
-  "/api/prism-counsel/privilege/check",
   // Self-healing orchestrator — read-only GET endpoints.
   // Exact-path matches ensure the mutating PATCH /policies/:id/toggle
   // (which requires auth) is NOT covered by these allowlist entries.

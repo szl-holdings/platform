@@ -7,7 +7,6 @@
  *   /aegis/atlas/*        — Aegis security incident signals
  *   /vessels/atlas/*      — Vessels voyage/sanctions/anomaly signals
  *   /terra/atlas/*        — Terra property/ownership/distress signals
- *   /prism-counsel/atlas/*— PRISM Counsel matter/filing/compliance signals
  *   /carlota-jo/atlas/*   — Carlota Jo client/property/vendor signals
  *   /imperium/atlas/*     — IMPERIUM infra/cost/policy/sovereignty signals
  *
@@ -76,11 +75,6 @@ const DOMAIN_CONFIG: Record<string, { label: string; workflowKey: string; signal
     label: "Terra — Real Estate Intelligence",
     workflowKey: "terra-deal-underwriting",
     signalTypes: ["distress-signal", "ownership-change", "price-anomaly", "market-shift", "zoning-change", "tax-delinquency", "lien-detected"],
-  },
-  "prism-counsel": {
-    label: "PRISM Counsel — Legal Intelligence",
-    workflowKey: "prism-matter-execution",
-    signalTypes: ["filing-deadline", "compliance-event", "court-order", "matter-update", "regulatory-notice", "discovery-request"],
   },
   "carlota-jo": {
     label: "Carlota Jo — Concierge Operations",

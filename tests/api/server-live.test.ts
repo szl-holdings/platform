@@ -263,15 +263,7 @@ describe("Live Server — REST endpoints through real CSRF + rate-limiting + aut
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  it("GET /api/prism-counsel/health returns 200 with status: ok", async () => {
-    const router = (await import("../../artifacts/api-server/src/routes/prism-counsel-core")).default;
-    const app = await buildLiveApp([router]);
-    const res = await request(app)
-      .get("/api/prism-counsel/health")
-      .set("x-internal-token", LIVE_TOKEN);
-    expect(res.status).toBe(200);
-    expect(res.body.status).toBe("ok");
-  });
+  // PRISM Counsel routes were removed in Task #2696.
 
   it("GET without valid auth returns 401 — real authMiddleware enforces authentication", async () => {
     const router = (await import("../../artifacts/api-server/src/routes/vessels")).default;

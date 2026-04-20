@@ -485,59 +485,7 @@ describe("DB Integration — Aegis / Firestorm domain", () => {
   });
 });
 
-// ── Domain: PRISM Counsel ─────────────────────────────────────────────────────
-describe("DB Integration — PRISM Counsel domain", () => {
-  let app: express.Express;
-  const cleanupMatterIds: number[] = [];
-
-  beforeAll(async () => {
-    app = buildApp();
-    const router = (await import("../../artifacts/api-server/src/routes/prism-counsel-core")).default;
-    app.use(router);
-  });
-
-  it("GET /prism-counsel/health returns 200 with { status: 'ok' } (no DB)", async () => {
-    const res = await request(app).get("/prism-counsel/health");
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ status: "ok" });
-  });
-
-  it("GET /prism-counsel/matters returns 200 with real DB data (array or paginated)", async () => {
-    const res = await request(app).get("/prism-counsel/matters");
-    expect(res.status).toBe(200);
-    const isArray = Array.isArray(res.body);
-    const hasPagination = Array.isArray(res.body?.data);
-    expect(isArray || hasPagination).toBe(true);
-  });
-
-  it("POST /prism-counsel/matters creates a real DB record and returns 201", async () => {
-    const res = await request(app)
-      .post("/prism-counsel/matters")
-      .send({ title: `IT-Matter-${Date.now()}`, matterType: "advisory", status: "intake" });
-    expect(res.status).toBe(201);
-    expect(res.body).toHaveProperty("id");
-    expect(typeof res.body.id).toBe("number");
-    expect(res.body.matterType).toBe("advisory");
-    cleanupMatterIds.push(res.body.id as number);
-  });
-
-  it("POST /prism-counsel/matters rejects missing required fields with 400", async () => {
-    const res = await request(app)
-      .post("/prism-counsel/matters")
-      .send({ status: "intake" }); // missing title and matterType
-    expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty("error");
-  });
-
-  afterAll(async () => {
-    if (cleanupMatterIds.length > 0) {
-      const { pool } = await import("@szl-holdings/db");
-      for (const id of cleanupMatterIds) {
-        await pool.query("DELETE FROM pc_matters WHERE id = $1", [id]);
-      }
-    }
-  });
-});
+// ── Domain: PRISM Counsel — REMOVED (Task #2696, routes archived) ────────────
 
 // ── Domain: Terra ─────────────────────────────────────────────────────────────
 describe("DB Integration — Terra (Real Estate) domain", () => {

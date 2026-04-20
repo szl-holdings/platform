@@ -14,8 +14,6 @@
  *            not a 500 from undefined data inside the handler.
  *
  * Routes under test:
- *   POST /api/prism-counsel/matters                          (prism-counsel-ops)
- *   POST /api/prism-counsel/ny/matters/:matterId/clocks      (prism-counsel-ny)
  *   POST /api/ml/features/compute                            (ml-pipeline)
  *   POST /api/monte-carlo/simulate                           (monte-carlo)
  */
@@ -162,8 +160,6 @@ vi.mock("../middlewares/auth.js", async () => {
 // ---------------------------------------------------------------------------
 
 const { globalAuthEnforcer } = await import("../middlewares/global-auth-enforcer.js");
-const { default: prismCounselOpsRouter } = await import("../routes/prism-counsel-ops.js");
-const { default: prismCounselNyRouter } = await import("../routes/prism-counsel-ny.js");
 const { default: mlPipelineRouter } = await import("../routes/ml-pipeline.js");
 const { default: monteCarloRouter } = await import("../routes/monte-carlo.js");
 
@@ -213,156 +209,6 @@ function buildAuthBypassApp(router: ExpressRouter, mountPrefix = "") {
   }
   return app;
 }
-
-// ===========================================================================
-// POST /api/prism-counsel/matters
-// ===========================================================================
-
-describe("POST /api/prism-counsel/matters — 401 (unauthenticated, real router)", () => {
-  // Real router mounted under /api/prism-counsel, globalAuthEnforcer guards it
-  const app = buildRouteApp(prismCounselOpsRouter as unknown as ExpressRouter, "/api/prism-counsel");
-
-  it("blocks unauthenticated request with 401", async () => {
-    const res = await request(app)
-      .post("/api/prism-counsel/matters")
-      .send({ title: "Case A", matterType: "litigation" });
-
-    expect(res.status).toBe(401);
-    const body = res.body as { error: string; code: string };
-    expect(body.code).toBe("UNAUTHORIZED");
-    expect(body.error).toBeDefined();
-  });
-});
-
-describe("POST /prism-counsel/matters — 400 (malformed payload, structured Zod details)", () => {
-  const app = buildAuthBypassApp(
-    prismCounselOpsRouter as unknown as ExpressRouter,
-    "/prism-counsel",
-  );
-
-  it("returns 400 with issues array when title is missing", async () => {
-    const res = await request(app)
-      .post("/prism-counsel/matters")
-      .send({ matterType: "litigation" });
-
-    expect(res.status).toBe(400);
-    const body = res.body as ValidationErrorBody;
-    expect(body.error).toMatch(/Validation error/);
-    expect(body.code).toBe("BAD_REQUEST");
-    expect(Array.isArray(body.details?.issues)).toBe(true);
-    const titleIssue = body.details?.issues.find(i => String(i.path[0]) === "title");
-    expect(titleIssue).toBeDefined();
-    expect(titleIssue?.message).toBeDefined();
-  });
-
-  it("returns 400 with issues when matterType is an invalid enum value", async () => {
-    const res = await request(app)
-      .post("/prism-counsel/matters")
-      .send({ title: "Valid Title", matterType: "not-a-real-type" });
-
-    expect(res.status).toBe(400);
-    const body = res.body as ValidationErrorBody;
-    expect(body.details?.issues.some(i => String(i.path[0]) === "matterType")).toBe(true);
-  });
-
-  it("returns 400 for an empty body", async () => {
-    const res = await request(app).post("/prism-counsel/matters").send({});
-
-    expect(res.status).toBe(400);
-    const body = res.body as ValidationErrorBody;
-    expect(Array.isArray(body.details?.issues)).toBe(true);
-    expect((body.details?.issues.length ?? 0) > 0).toBe(true);
-  });
-
-  it("returns 400 when title exceeds maxLength", async () => {
-    const res = await request(app)
-      .post("/prism-counsel/matters")
-      .send({ title: "x".repeat(600), matterType: "litigation" });
-
-    expect(res.status).toBe(400);
-    const body = res.body as ValidationErrorBody;
-    const titleIssue = body.details?.issues.find(i => String(i.path[0]) === "title");
-    expect(titleIssue?.code).toBe("too_big");
-  });
-});
-
-// ===========================================================================
-// POST /api/prism-counsel/ny/matters/:matterId/clocks
-// ===========================================================================
-
-describe("POST /api/prism-counsel/ny/matters/:matterId/clocks — 401 (unauthenticated, real router)", () => {
-  // prismCounselNyRouter uses full paths starting with /prism-counsel/ny/...
-  // mounting at /api maps it to /api/prism-counsel/ny/...
-  const app = buildRouteApp(prismCounselNyRouter as unknown as ExpressRouter, "/api");
-
-  it("blocks unauthenticated request with 401", async () => {
-    const res = await request(app)
-      .post("/api/prism-counsel/ny/matters/1/clocks")
-      .send({
-        clockType: "deadline",
-        startedAt: "2026-01-01T00:00:00Z",
-        deadlineAt: "2026-03-01T00:00:00Z",
-      });
-
-    expect(res.status).toBe(401);
-    expect((res.body as { code: string }).code).toBe("UNAUTHORIZED");
-  });
-});
-
-describe("POST /prism-counsel/ny/matters/:matterId/clocks — 400 (malformed payload, structured Zod details)", () => {
-  const app = buildAuthBypassApp(prismCounselNyRouter as unknown as ExpressRouter);
-
-  it("returns 400 with issues array when clockType is missing", async () => {
-    const res = await request(app)
-      .post("/prism-counsel/ny/matters/1/clocks")
-      .send({ startedAt: "2026-01-01T00:00:00Z", deadlineAt: "2026-03-01T00:00:00Z" });
-
-    expect(res.status).toBe(400);
-    const body = res.body as ValidationErrorBody;
-    expect(body.error).toMatch(/Validation error/);
-    expect(body.code).toBe("BAD_REQUEST");
-    expect(Array.isArray(body.details?.issues)).toBe(true);
-    const clockIssue = body.details?.issues.find(i => String(i.path[0]) === "clockType");
-    expect(clockIssue).toBeDefined();
-  });
-
-  it("returns 400 with issues when startedAt is missing", async () => {
-    const res = await request(app)
-      .post("/prism-counsel/ny/matters/1/clocks")
-      .send({ clockType: "statute-of-limitations", deadlineAt: "2026-03-01T00:00:00Z" });
-
-    expect(res.status).toBe(400);
-    const body = res.body as ValidationErrorBody;
-    expect(body.details?.issues.some(i => String(i.path[0]) === "startedAt")).toBe(true);
-  });
-
-  it("returns 400 for an empty body", async () => {
-    const res = await request(app)
-      .post("/prism-counsel/ny/matters/1/clocks")
-      .send({});
-
-    expect(res.status).toBe(400);
-    const body = res.body as ValidationErrorBody;
-    expect(Array.isArray(body.details?.issues)).toBe(true);
-    expect((body.details?.issues.length ?? 0) > 0).toBe(true);
-  });
-
-  it("returns 400 when notes exceed maxLength", async () => {
-    const res = await request(app)
-      .post("/prism-counsel/ny/matters/1/clocks")
-      .send({
-        clockType: "notice-of-claim",
-        startedAt: "2026-01-01T00:00:00Z",
-        deadlineAt: "2026-03-01T00:00:00Z",
-        notes: "n".repeat(6000),
-      });
-
-    expect(res.status).toBe(400);
-    const body = res.body as ValidationErrorBody;
-    const notesIssue = body.details?.issues.find(i => String(i.path[0]) === "notes");
-    expect(notesIssue?.code).toBe("too_big");
-  });
-});
 
 // ===========================================================================
 // POST /api/ml/features/compute

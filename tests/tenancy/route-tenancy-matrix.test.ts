@@ -58,10 +58,6 @@ const REQUIRED_ENFORCED_STEMS: string[] = [
   "vessels-extended",
   "vessels-platform",
   "terra-property-intel",
-  "prism-counsel-pilot",
-  "prism-counsel-pilot-one",
-  "prism-counsel-review",
-  "prism-counsel-s31",
   "decisions-runtime",
 ];
 

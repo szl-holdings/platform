@@ -273,46 +273,7 @@ describe("Domain: Terra", () => {
   });
 });
 
-// ── Domain: PRISM Counsel ────────────────────────────────────────────────────
-
-describe("Domain: PRISM Counsel", () => {
-  it("GET /prism-counsel/health returns 200 with service identifier", async () => {
-    const app = buildAuthApp();
-    const router = (await import("../../artifacts/api-server/src/routes/prism-counsel-core")).default;
-    app.use(router);
-    const res = await request(app).get("/prism-counsel/health");
-    expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty("status");
-    expect(res.body.status).toBe("ok");
-  });
-
-  it("GET /prism-counsel/matters returns 200 with array for authenticated user", async () => {
-    const app = buildAuthApp();
-    const router = (await import("../../artifacts/api-server/src/routes/prism-counsel-core")).default;
-    app.use(router);
-    const res = await request(app).get("/prism-counsel/matters");
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-  });
-
-  it("GET /prism-counsel/dashboard returns 200 with aggregated fields", async () => {
-    const app = buildAuthApp();
-    const router = (await import("../../artifacts/api-server/src/routes/prism-counsel-core")).default;
-    app.use(router);
-    const res = await request(app).get("/prism-counsel/dashboard");
-    expect(res.status).toBe(200);
-    expect(typeof res.body).toBe("object");
-  });
-
-  it("GET /prism-counsel/approvals returns 200 with array", async () => {
-    const app = buildAuthApp();
-    const router = (await import("../../artifacts/api-server/src/routes/prism-counsel-core")).default;
-    app.use(router);
-    const res = await request(app).get("/prism-counsel/approvals");
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-  });
-});
+// ── Domain: PRISM Counsel routes were removed in Task #2696 ──────────────────
 
 // ── Domain: Aegis / Firestorm ─────────────────────────────────────────────────
 
@@ -570,22 +531,12 @@ describe("Cross-Domain: Response shape contracts", () => {
     expect(Array.isArray(vesselsRes.body)).toBe(true);
   });
 
-  it("PRISM health and Holdings health both return {status: 'ok'}", async () => {
-    const prismApp = buildAuthApp();
-    const prismRouter = (await import("../../artifacts/api-server/src/routes/prism-counsel-core")).default;
-    prismApp.use(prismRouter);
-
+  it("Holdings health returns {status: 'ok'}", async () => {
     const holdingsApp = buildAuthApp();
     const holdingsRouter = (await import("../../artifacts/api-server/src/routes/holdings")).default;
     holdingsApp.use(holdingsRouter);
 
-    const [prismRes, holdingsRes] = await Promise.all([
-      request(prismApp).get("/prism-counsel/health"),
-      request(holdingsApp).get("/holdings/health"),
-    ]);
-
-    expect(prismRes.status).toBe(200);
-    expect(prismRes.body.status).toBe("ok");
+    const holdingsRes = await request(holdingsApp).get("/holdings/health");
 
     expect(holdingsRes.status).toBe(200);
     expect(holdingsRes.body.status).toBe("ok");

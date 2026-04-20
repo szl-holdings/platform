@@ -117,7 +117,7 @@ function buildApp(prefix: string, userFactory: () => ReturnType<typeof makeUser>
 // ---------------------------------------------------------------------------
 
 describe("Tenant isolation — middleware gate on domain route prefix", () => {
-  const DOMAIN_PREFIXES = ["/vessels", "/lyte", "/terra", "/alloy", "/firestorm", "/prism-counsel"];
+  const DOMAIN_PREFIXES = ["/vessels", "/lyte", "/terra", "/alloy", "/firestorm"];
 
   for (const prefix of DOMAIN_PREFIXES) {
     describe(`${prefix}`, () => {

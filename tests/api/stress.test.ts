@@ -261,24 +261,7 @@ describe("Stress — Concurrent GET requests across domain routes", () => {
     console.info(`[stress] GET /holdings/ventures x${STRESS_CONCURRENCY} — p95: ${p95}ms`);
   });
 
-  it(`handles ${STRESS_CONCURRENCY} concurrent GET /prism-counsel/matters requests without errors`, async () => {
-    const app = buildStressApp();
-    const router = (await import("../../artifacts/api-server/src/routes/prism-counsel-core")).default;
-    app.use(router);
-
-    const requests = Array.from({ length: STRESS_CONCURRENCY }, () =>
-      timedRequest(request(app), "/prism-counsel/matters"),
-    );
-    const results = await Promise.all(requests);
-
-    const errors = results.filter((r) => r.status >= 500);
-    const durations = results.map((r) => r.durationMs).sort((a, b) => a - b);
-    const p95 = percentile(durations, 95);
-
-    expect(errors.length).toBe(0);
-    expect(p95).toBeLessThan(MAX_ACCEPTABLE_P95_MS);
-    console.info(`[stress] GET /prism-counsel/matters x${STRESS_CONCURRENCY} — p95: ${p95}ms`);
-  });
+  // PRISM Counsel stress test removed in Task #2696 (routes archived).
 
   it(`handles ${STRESS_CONCURRENCY} concurrent GET /terra/market-intelligence requests without errors`, async () => {
     const app = buildStressApp();
