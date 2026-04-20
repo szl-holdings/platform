@@ -251,6 +251,7 @@ function PrivateRouter() {
         <Route path="/apm" component={ApmInstrumentation} />
         <Route path="/admin/jobs">{() => <AdminRoute component={AdminJobsPage} />}</Route>
         <Route path="/admin/users">{() => <AdminRoute component={AdminUsersPage} />}</Route>
+        <Route path="/admin/users/:id">{() => <AdminRoute component={AdminUsersPage} />}</Route>
         <Route path="/admin/flags">{() => <AdminRoute component={AdminFlagsPage} />}</Route>
         <Route path="/admin/audit">{() => <AdminRoute component={AdminAuditPage} />}</Route>
         <Route path="/admin/overview">{() => <AdminRoute component={AdminOverviewPage} />}</Route>

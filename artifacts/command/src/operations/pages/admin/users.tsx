@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Users, UserPlus, Mail, Shield, Clock, AlertTriangle, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRoute } from "wouter";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
@@ -24,9 +25,12 @@ const roleColors: Record<string, string> = {
 };
 
 export default function AdminUsers() {
+  const [, params] = useRoute<{ id: string }>("/admin/users/:id");
+  const focusId = params?.id ?? null;
   const [search, setSearch] = useState("");
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const focusedRowRef = useRef<HTMLDivElement | null>(null);
   const { data, isLoading, error } = useStandardQuery<{ users: UserInfo[] }>({
     queryKey: ["admin-users"],
     queryFn: () => apiFetch("/admin/users"),
@@ -56,7 +60,19 @@ export default function AdminUsers() {
   });
 
   const users = data?.users ?? [];
+  const matchesFocus = (u: UserInfo): boolean => {
+    if (!focusId) return false;
+    return u.id === focusId || u.id === `usr_${focusId}` || u.id.replace(/^usr_/, "") === focusId;
+  };
   const filtered = search ? users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())) : users;
+  const focusedUser = focusId ? users.find(matchesFocus) ?? null : null;
+  const focusMissing = !!focusId && !isLoading && !focusedUser;
+
+  useEffect(() => {
+    if (focusedRowRef.current) {
+      focusedRowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [focusedUser?.id]);
 
   if (error) return (
     <div className="space-y-4">
@@ -93,6 +109,12 @@ export default function AdminUsers() {
         ))}
       </div>
 
+      {focusMissing && (
+        <div className="rounded-xl border border-[#d4a054]/40 bg-[#d4a054]/10 px-4 py-2 text-xs text-[#d4a054] flex items-center gap-2">
+          <AlertTriangle className="w-3.5 h-3.5" />
+          User <span className="font-mono">{focusId}</span> not found in the directory.
+        </div>
+      )}
       <div className="rounded-xl border border-border bg-card">
         <div className="p-4 border-b border-border flex items-center gap-3">
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search users..." className="flex-1 text-sm bg-muted rounded-lg px-3 py-1.5 border border-border focus:outline-none focus:ring-1 focus:ring-primary" />
@@ -101,8 +123,15 @@ export default function AdminUsers() {
           <div className="flex items-center justify-center py-12"><div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
         ) : (
           <div className="divide-y divide-border">
-            {filtered.map((user) => (
-              <div key={user.id} className="px-4 py-3 flex items-center justify-between gap-4 hover:bg-muted/30 transition-colors">
+            {filtered.map((user) => {
+              const isFocused = matchesFocus(user);
+              return (
+              <div
+                key={user.id}
+                ref={isFocused ? focusedRowRef : undefined}
+                data-testid={isFocused ? "row-focused-user" : undefined}
+                className={`px-4 py-3 flex items-center justify-between gap-4 transition-colors ${isFocused ? "bg-primary/10 ring-1 ring-inset ring-primary/40" : "hover:bg-muted/30"}`}
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-600 to-blue-800 flex items-center justify-center text-xs font-bold text-white">
                     {user.name?.slice(0, 2).toUpperCase() ?? "??"}
@@ -148,7 +177,8 @@ export default function AdminUsers() {
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
             {filtered.length === 0 && <div className="py-8 text-center text-sm text-muted-foreground">No users found</div>}
           </div>
         )}

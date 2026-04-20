@@ -1,5 +1,6 @@
 import { ApiError } from "@szl-holdings/shared-ui/api-fetch";
 import { useMemo, useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useAuth } from "@szl-holdings/replit-auth-web";
@@ -331,25 +332,6 @@ interface TeamPagesResponse {
   pages: TeamPageHistoryEntryDto[];
 }
 
-interface UserPageHistoryEntryDto extends TeamPageHistoryEntryDto {
-  /** "received" = user was on-call recipient, "sent" = user fired the page. */
-  role: "received" | "sent";
-}
-interface UserPagesResponse {
-  user: {
-    id: number;
-    displayName: string;
-    email: string | null;
-    avatarUrl: string | null;
-    team: string | null;
-    platformRole: string | null;
-    isActive: boolean;
-  };
-  role: "recipient" | "actor" | "both";
-  count: number;
-  pages: UserPageHistoryEntryDto[];
-}
-
 const URGENCY_COLOR: Record<TeamPageHistoryEntryDto["urgency"], string> = {
   info: "#7dd3fc",
   warning: "#f59e0b",
@@ -448,186 +430,6 @@ function MemberRow({ m, badge }: { m: TeamMemberDto; badge?: { label: string; co
   );
 }
 
-/**
- * Per-user paging history drawer (#2469). Mirrors the team detail modal but
- * keyed on a user id — opens when an operator clicks a deployer in the
- * deployments console. Lets individuals (and their teammates) confirm
- * whether someone is being over-paged across teams.
- */
-function UserProfileDrawer({ userId, onClose }: { userId: number; onClose: () => void }) {
-  const [role, setRole] = useState<"recipient" | "actor" | "both">("recipient");
-  const query = useStandardQuery<UserPagesResponse>({
-    queryKey: ["user-pages", userId, role],
-    queryFn: () => apiFetch<UserPagesResponse>(`/users/${userId}/pages?role=${role}`),
-  });
-
-  const data = query.data;
-  return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{ backgroundColor: "rgba(8,12,20,0.72)" }}
-      onClick={onClose}
-    >
-      <div
-        className="max-w-lg w-full rounded-xl flex flex-col max-h-[85vh]"
-        style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div
-          className="flex items-center gap-3 px-5 py-4"
-          style={{ borderBottom: "1px solid var(--color-surface-border)" }}
-        >
-          <div
-            className="w-9 h-9 rounded-lg flex items-center justify-center"
-            style={{
-              backgroundColor: "color-mix(in srgb, #cdb8f0 14%, transparent)",
-              border: "1px solid color-mix(in srgb, #cdb8f0 30%, transparent)",
-            }}
-          >
-            <User className="w-4 h-4" style={{ color: "#cdb8f0" }} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: "var(--color-fg-muted)" }}>
-              User Profile
-            </div>
-            <h3 className="text-base font-bold truncate">
-              {data?.user.displayName ?? (query.isLoading ? "Loading…" : `User #${userId}`)}
-            </h3>
-            <div className="text-[11px] font-mono truncate" style={{ color: "var(--color-fg-muted)" }}>
-              {data?.user.email ?? ""}
-              {data?.user.team ? <span className="ml-1.5 opacity-80">· {data.user.team}</span> : null}
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label="Close user profile"
-            className="opacity-70 hover:opacity-100"
-            style={{ color: "var(--color-fg-muted)" }}
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="px-5 pt-3 pb-1 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider">
-          <span style={{ color: "var(--color-fg-muted)" }}>Show:</span>
-          {(["recipient", "actor", "both"] as const).map((opt) => {
-            const active = role === opt;
-            const label = opt === "recipient" ? "Received" : opt === "actor" ? "Sent" : "Both";
-            return (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => setRole(opt)}
-                className="px-2 py-0.5 rounded"
-                style={{
-                  backgroundColor: active ? "color-mix(in srgb, #cdb8f0 18%, transparent)" : "transparent",
-                  border: active
-                    ? "1px solid color-mix(in srgb, #cdb8f0 35%, transparent)"
-                    : "1px solid var(--color-surface-border)",
-                  color: active ? "#cdb8f0" : "var(--color-fg-muted)",
-                }}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-2">
-          <div
-            className="text-[10px] font-mono uppercase tracking-wider mb-1 flex items-center gap-1.5"
-            style={{ color: "var(--color-fg-muted)" }}
-          >
-            <History className="w-3 h-3" /> Paging history
-            {data?.count ? <span className="opacity-60">({data.count})</span> : null}
-          </div>
-          {query.isLoading ? (
-            <div className="text-[11px]" style={{ color: "var(--color-fg-muted)" }}>
-              <Loader2 className="w-3 h-3 animate-spin inline mr-1" /> Loading…
-            </div>
-          ) : query.isError ? (
-            <div className="text-[11px]" style={{ color: "#fca5a5" }}>
-              Failed to load paging history: {(query.error as Error)?.message ?? "Unknown error"}
-            </div>
-          ) : !data || data.pages.length === 0 ? (
-            <div className="text-[11px]" style={{ color: "var(--color-fg-muted)" }}>
-              {role === "recipient"
-                ? "No pages received."
-                : role === "actor"
-                ? "No pages sent."
-                : "No paging activity recorded."}
-            </div>
-          ) : (
-            <div className="flex flex-col gap-1.5">
-              {data.pages.map((p) => {
-                const color = URGENCY_COLOR[p.urgency];
-                const counterpart = p.role === "received" ? p.actor : p.recipient;
-                const counterpartName = counterpart?.displayName ?? "unknown";
-                return (
-                  <div
-                    key={p.id}
-                    className="px-2.5 py-2 rounded-md text-[11px]"
-                    style={{
-                      backgroundColor: "var(--color-bg-elevated)",
-                      border: "1px solid var(--color-surface-border)",
-                      borderLeft: `3px solid ${color}`,
-                    }}
-                    title={new Date(p.createdAt).toLocaleString()}
-                  >
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span
-                        className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
-                        style={{
-                          color,
-                          backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)`,
-                          border: `1px solid color-mix(in srgb, ${color} 35%, transparent)`,
-                        }}
-                      >
-                        {p.urgency}
-                      </span>
-                      <span
-                        className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
-                        style={{
-                          color: "var(--color-fg-muted)",
-                          border: "1px solid var(--color-surface-border)",
-                        }}
-                      >
-                        {p.role === "received" ? "from" : "to"} {counterpartName}
-                      </span>
-                      <span className="opacity-70">· {p.team}</span>
-                      <span
-                        className="font-mono ml-auto"
-                        style={{ color: "var(--color-fg-muted)" }}
-                      >
-                        {formatPageTime(p.createdAt)}
-                      </span>
-                    </div>
-                    {p.message && (
-                      <div
-                        className="mt-1 italic"
-                        style={{ color: "var(--color-fg-secondary, var(--color-fg-primary))" }}
-                      >
-                        “{p.message}”
-                      </div>
-                    )}
-                    {!p.inAppDelivered && p.role === "received" && (
-                      <div
-                        className="mt-1 text-[10px] font-mono"
-                        style={{ color: "var(--color-fg-muted)" }}
-                      >
-                        in-app opt-out — external channels attempted
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const ADMIN_ROLES_FOR_SCHEDULE = new Set(["admin", "super_admin", "ops"]);
 
@@ -1533,7 +1335,8 @@ export default function DeploymentsPage() {
   const [environment, setEnvironment] = useState<DeploymentEnvironment>("production");
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [, setLocation] = useLocation();
+  const openUserProfile = (userId: number) => setLocation(`/admin/users/${userId}`);
   const [deployerFilter, setDeployerFilter] = useState<string>("");
   const [confirmRollback, setConfirmRollback] = useState<{ appId: string; from: string; to?: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -1801,7 +1604,7 @@ export default function DeploymentsPage() {
                               <span className="text-[10px] font-mono" style={{ color: "var(--color-fg-muted)" }}>
                                 {formatTime(d.deployedAt)}
                               </span>
-                              <DeployerBadge record={d} onTeamClick={setSelectedTeam} onUserClick={setSelectedUserId} />
+                              <DeployerBadge record={d} onTeamClick={setSelectedTeam} onUserClick={openUserProfile} />
                             </div>
                           </div>
                           <ChevronRight
@@ -1929,13 +1732,13 @@ export default function DeploymentsPage() {
                                 <DeployerBadge
                                   record={entry}
                                   prefix={isRollback ? "Rolled back by" : "Shipped by"}
-                                  onTeamClick={setSelectedTeam} onUserClick={setSelectedUserId}
+                                  onTeamClick={setSelectedTeam} onUserClick={openUserProfile}
                                 />
                                 {original && original.deployedBy !== entry.deployedBy && (
                                   <DeployerBadge
                                     record={original}
                                     prefix="originally shipped by"
-                                    onTeamClick={setSelectedTeam} onUserClick={setSelectedUserId}
+                                    onTeamClick={setSelectedTeam} onUserClick={openUserProfile}
                                   />
                                 )}
                               </div>
@@ -1980,11 +1783,6 @@ export default function DeploymentsPage() {
       {/* Team detail modal */}
       {selectedTeam && (
         <TeamDetailModal team={selectedTeam} onClose={() => setSelectedTeam(null)} />
-      )}
-
-      {/* Per-user paging history drawer (#2469) */}
-      {selectedUserId != null && (
-        <UserProfileDrawer userId={selectedUserId} onClose={() => setSelectedUserId(null)} />
       )}
 
       {/* Confirm rollback modal */}
