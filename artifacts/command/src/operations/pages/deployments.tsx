@@ -926,7 +926,7 @@ function ScheduleEditor({
   );
 }
 
-function TeamDetailModal({ team, onClose }: { team: string; onClose: () => void }) {
+export function TeamDetailModal({ team, onClose }: { team: string; onClose: () => void }) {
   const { user } = useAuth();
   const userRoles: string[] = (user as { roles?: string[] })?.roles ?? [];
   const canEditSchedule = userRoles.some((r) => ADMIN_ROLES_FOR_SCHEDULE.has(r));

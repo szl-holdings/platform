@@ -255,6 +255,172 @@ async function loadTeam(team: string, now: Date = new Date()): Promise<TeamDetai
   };
 }
 
+export interface TeamScheduleSummary {
+  team: string;
+  memberCount: number;
+  ownedApps: TeamOwnedApp[];
+  currentOnCall: TeamMember | null;
+  currentOnCallSource: OnCallSource;
+  escalation: TeamMember | null;
+  schedule: {
+    rotationIntervalHours: number;
+    memberOrder: number[];
+    handoffAnchor: string;
+    timezone: string;
+  } | null;
+  upcomingHandoffs: Array<{ at: string; userId: number; displayName: string }>;
+  overrides: Array<{
+    id: number;
+    userId: number;
+    displayName: string;
+    startAt: string;
+    endAt: string;
+    note: string | null;
+    kind: "override" | "shift";
+  }>;
+}
+
+/**
+ * Cross-team on-call snapshot — powers the unified on-call center page so
+ * operators can see who's on-call across every team in a single fetch
+ * instead of N×`/teams/:team/schedule` round-trips. Includes the next 7
+ * days of rotation handoffs and any active or upcoming overrides per team
+ * so the UI can render an agenda timeline.
+ *
+ * MUST be registered before `GET /teams/:team` since Express matches
+ * routes in registration order — otherwise `:team` would swallow
+ * "schedules".
+ */
+router.get(
+  "/teams/schedules",
+  authMiddleware({ required: false }),
+  perUserApiSlidingLimiter,
+  async (_req: Request, res: Response) => {
+    try {
+      const now = new Date();
+      const horizonHours = 7 * 24;
+      const horizon = new Date(now.getTime() + horizonHours * 60 * 60 * 1000);
+
+      const [userTeamRows, appTeamRows, scheduleTeamRows] = await Promise.all([
+        db.selectDistinct({ team: usersTable.team }).from(usersTable),
+        db.selectDistinct({ team: appsRegistryTable.ownerTeam }).from(appsRegistryTable),
+        db.selectDistinct({ team: onCallSchedulesTable.team }).from(onCallSchedulesTable),
+      ]);
+
+      const teamSet = new Set<string>();
+      for (const r of userTeamRows) {
+        const t = (r.team ?? "").trim();
+        if (t) teamSet.add(t);
+      }
+      for (const r of appTeamRows) {
+        const t = (r.team ?? "").trim();
+        if (t) teamSet.add(t);
+      }
+      for (const r of scheduleTeamRows) {
+        const t = (r.team ?? "").trim();
+        if (t) teamSet.add(t);
+      }
+      const teams = Array.from(teamSet).sort((a, b) => a.localeCompare(b));
+
+      const summaries = await Promise.all(
+        teams.map(async (team): Promise<TeamScheduleSummary | null> => {
+          const detail = await loadTeam(team, now);
+          if (!detail) return null;
+
+          const [schedule] = await db
+            .select()
+            .from(onCallSchedulesTable)
+            .where(eq(onCallSchedulesTable.team, team))
+            .limit(1);
+
+          const overrideRows = await db
+            .select()
+            .from(onCallShiftsTable)
+            .where(
+              and(
+                eq(onCallShiftsTable.team, team),
+                gte(onCallShiftsTable.endAt, now),
+                lte(onCallShiftsTable.startAt, horizon),
+              ),
+            )
+            .orderBy(asc(onCallShiftsTable.startAt))
+            .limit(50);
+
+          const handoffs: TeamScheduleSummary["upcomingHandoffs"] = [];
+          if (schedule && schedule.memberOrder.length > 0 && schedule.rotationIntervalHours > 0) {
+            const intervalMs = schedule.rotationIntervalHours * 60 * 60 * 1000;
+            const anchorMs = schedule.handoffAnchor.getTime();
+            const elapsed = now.getTime() - anchorMs;
+            const nextSlot = Math.floor(elapsed / intervalMs) + 1;
+            const active = detail.members.filter((m) => m.isActive);
+            const activeById = new Map(active.map((m) => [m.id, m]));
+            const len = schedule.memberOrder.length;
+            // Cap iterations so a misconfigured tiny interval can't spin
+            // forever; 200 slots covers a 7-day window with a 1h rotation.
+            for (let i = 0; i < 200 && handoffs.length < 50; i++) {
+              const slot = nextSlot + i;
+              const at = new Date(anchorMs + slot * intervalMs);
+              if (at.getTime() > horizon.getTime()) break;
+              if (at.getTime() <= now.getTime()) continue;
+              let picked: TeamMember | null = null;
+              for (let step = 0; step < len; step++) {
+                const idx = ((slot + step) % len + len) % len;
+                const id = schedule.memberOrder[idx]!;
+                const m = activeById.get(id);
+                if (m) {
+                  picked = m;
+                  break;
+                }
+              }
+              if (picked) {
+                handoffs.push({ at: at.toISOString(), userId: picked.id, displayName: picked.displayName });
+              }
+            }
+          }
+
+          return {
+            team,
+            memberCount: detail.count,
+            ownedApps: detail.ownedApps,
+            currentOnCall: detail.onCall,
+            currentOnCallSource: detail.onCallSource,
+            escalation: detail.escalation,
+            schedule: schedule
+              ? {
+                  rotationIntervalHours: schedule.rotationIntervalHours,
+                  memberOrder: schedule.memberOrder,
+                  handoffAnchor: schedule.handoffAnchor.toISOString(),
+                  timezone: schedule.timezone,
+                }
+              : null,
+            upcomingHandoffs: handoffs,
+            overrides: overrideRows.map((o) => ({
+              id: o.id,
+              userId: o.userId,
+              displayName:
+                detail.members.find((m) => m.id === o.userId)?.displayName ?? `User #${o.userId}`,
+              startAt: o.startAt.toISOString(),
+              endAt: o.endAt.toISOString(),
+              note: o.note,
+              kind: o.kind as "override" | "shift",
+            })),
+          };
+        }),
+      );
+
+      const filtered = summaries.filter((s): s is TeamScheduleSummary => s !== null);
+      return sendSuccess(res, {
+        generatedAt: now.toISOString(),
+        horizonHours,
+        count: filtered.length,
+        teams: filtered,
+      });
+    } catch (err) {
+      return handleRouteError(res, err, "GET /teams/schedules");
+    }
+  },
+);
+
 router.get(
   "/teams/:team",
   authMiddleware({ required: false }),
