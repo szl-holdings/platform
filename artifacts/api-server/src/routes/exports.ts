@@ -1152,15 +1152,21 @@ router.get("/exports/preview", authMiddleware(), requireRole("admin", "ops", "co
   }
 });
 
-// ─── Export History (admin only) ──────────────────────────────────────────────
+// ─── Export History ───────────────────────────────────────────────────────────
+// Admin and compliance users see the full cross-user history.
+// Ops users (and other export-capable roles) see only their own exports.
 
-router.get("/exports/history", authMiddleware(), requireRole("admin", "compliance"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+router.get("/exports/history", authMiddleware(), requireRole("admin", "compliance", "ops"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const page = Math.max(1, parseInt(req.query["page"] as string ?? "1", 10));
     const limit = Math.min(parseInt(req.query["limit"] as string ?? "50", 10), 200);
     const offset = (page - 1) * limit;
 
-    const result = await listExportHistory({ limit, offset });
+    const userRoles = ((req as Request & { user?: { roles?: string[] } }).user?.roles ?? []) as string[];
+    const seesAllHistory = userRoles.some(r => r === "super_admin" || r === "admin" || r === "compliance");
+    const userIdFilter = seesAllHistory ? null : getUserId(req);
+
+    const result = await listExportHistory({ limit, offset, userId: userIdFilter });
     const now = new Date();
     const enriched = result.exports.map(job => ({
       ...job,

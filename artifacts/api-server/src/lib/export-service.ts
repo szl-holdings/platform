@@ -233,9 +233,10 @@ export async function getExportByToken(token: string) {
   return job ?? null;
 }
 
-export async function listExportHistory(opts: { limit?: number; offset?: number } = {}) {
+export async function listExportHistory(opts: { limit?: number; offset?: number; userId?: number | null } = {}) {
   const limit = Math.min(opts.limit ?? 50, 200);
   const offset = opts.offset ?? 0;
+  const userFilter = opts.userId != null ? eq(exportJobsTable.triggeredByUserId, opts.userId) : undefined;
 
   const rows = await db
     .select({
@@ -260,11 +261,15 @@ export async function listExportHistory(opts: { limit?: number; offset?: number 
     })
     .from(exportJobsTable)
     .leftJoin(usersTable, eq(exportJobsTable.triggeredByUserId, usersTable.id))
+    .where(userFilter)
     .orderBy(desc(exportJobsTable.createdAt))
     .limit(limit)
     .offset(offset);
 
-  const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(exportJobsTable);
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(exportJobsTable)
+    .where(userFilter);
 
   return { exports: rows, total: count };
 }
