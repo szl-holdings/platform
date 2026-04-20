@@ -13,6 +13,7 @@ interface AmbientSignal {
   actionLabel?: string;
   correlatedDomains?: string[];
   signalChainActive?: boolean;
+  live?: boolean;
 }
 
 const DOMAIN_COLORS: Record<string, string> = {
@@ -151,6 +152,7 @@ export function AmbientSignalRanker({ apiBase = "" }: AmbientSignalRankerProps) 
             ...s,
             correlatedDomains: STATIC_SIGNALS.find((st) => st.domain === s.domain)?.correlatedDomains,
             signalChainActive: STATIC_SIGNALS.find((st) => st.domain === s.domain)?.signalChainActive,
+            live: s.live === true,
           }));
           setSignals(enriched.sort((a, b) => b.score - a.score));
         }
@@ -232,6 +234,21 @@ export function AmbientSignalRanker({ apiBase = "" }: AmbientSignalRankerProps) 
                     >
                       {label}
                     </span>
+                    {sig.live && (
+                      <span
+                        className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+                        style={{ color: "#22c55e", backgroundColor: "color-mix(in srgb, #22c55e 12%, transparent)", border: "1px solid color-mix(in srgb, #22c55e 25%, transparent)" }}
+                        title={`Real-time data from ${label} database`}
+                        aria-label={`Real-time data from ${label} database`}
+                        data-testid={`live-indicator-${sig.domain}`}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 rounded-full animate-pulse"
+                          style={{ backgroundColor: "#22c55e", boxShadow: "0 0 4px #22c55e" }}
+                        />
+                        Live
+                      </span>
+                    )}
                     {sig.signalChainActive && (
                       <span
                         className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded flex items-center gap-1"
