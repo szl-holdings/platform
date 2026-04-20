@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db } from "@szl-holdings/db";
 import { supportTicketsTable, supportTicketCommentsTable, supportKnowledgeArticlesTable } from "@szl-holdings/db";
 import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewares/auth";
-import { validateBody, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 import { z } from "zod";
 import { eq, desc, and, inArray, isNull, or, ilike, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";

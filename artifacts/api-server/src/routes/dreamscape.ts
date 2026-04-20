@@ -14,8 +14,9 @@ import { eq, desc, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { z } from "zod";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const createCampaignSchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(2000).optional(),
@@ -113,7 +114,7 @@ router.patch("/dreamscape/campaigns/:id", authMiddleware(), validateBody(updateC
   }
 });
 
-router.delete("/dreamscape/campaigns/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/dreamscape/campaigns/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(dreamscapeCampaignsTable).where(eq(dreamscapeCampaignsTable.id, id)).returning();
@@ -165,7 +166,7 @@ router.patch("/dreamscape/scripts/:id", authMiddleware(), validateBody(updateScr
   }
 });
 
-router.delete("/dreamscape/scripts/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/dreamscape/scripts/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(dreamscapeScriptsTable).where(eq(dreamscapeScriptsTable.id, id)).returning();
@@ -206,7 +207,7 @@ router.patch("/dreamscape/storyboards/:id", authMiddleware(), validateBody(updat
   }
 });
 
-router.delete("/dreamscape/storyboards/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/dreamscape/storyboards/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(dreamscapeStoryboardsTable).where(eq(dreamscapeStoryboardsTable.id, id)).returning();
@@ -236,7 +237,7 @@ router.post("/dreamscape/voice-assets", authMiddleware(), validateBody(createVoi
   }
 });
 
-router.patch("/dreamscape/voice-assets/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/dreamscape/voice-assets/:id", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(dreamscapeVoiceAssetsTable).set(req.body).where(eq(dreamscapeVoiceAssetsTable.id, id)).returning();
@@ -247,7 +248,7 @@ router.patch("/dreamscape/voice-assets/:id", authMiddleware(), validateBody(json
   }
 });
 
-router.delete("/dreamscape/voice-assets/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/dreamscape/voice-assets/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(dreamscapeVoiceAssetsTable).where(eq(dreamscapeVoiceAssetsTable.id, id)).returning();
@@ -277,7 +278,7 @@ router.post("/dreamscape/campaign-assets", authMiddleware(), validateBody(create
   }
 });
 
-router.delete("/dreamscape/campaign-assets/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/dreamscape/campaign-assets/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(dreamscapeCampaignAssetsTable).where(eq(dreamscapeCampaignAssetsTable.id, id)).returning();
@@ -318,7 +319,7 @@ router.patch("/dreamscape/reviews/:id", authMiddleware(), validateBody(updateRev
   }
 });
 
-router.delete("/dreamscape/reviews/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/dreamscape/reviews/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(dreamscapeReviewsTable).where(eq(dreamscapeReviewsTable.id, id)).returning();

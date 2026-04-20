@@ -49,10 +49,12 @@ import {
 import { authMiddleware, denyIfReadOnly, requireRole, parseIdParam, InvalidIdError } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 import { publish, WS_CHANNELS } from "../lib/websocket";
 import { dispatchToExternalChannels } from "./notifications";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router: IRouter = Router();
 
 export interface TeamMember {
@@ -285,7 +287,10 @@ router.post(
   authMiddleware({ required: true }),
   denyIfReadOnly(),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "message": z.unknown().optional(),
+      "urgency": z.unknown().optional(),
+    })),
   async (req: Request, res: Response) => {
     try {
       const team = decodeURIComponent((req.params as { team: string }).team).trim();
@@ -821,7 +826,12 @@ router.put(
   requireRole("admin", "ops"),
   denyIfReadOnly(),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "handoffAnchor": z.unknown().optional(),
+      "memberOrder": z.unknown().optional(),
+      "rotationIntervalHours": z.unknown().optional(),
+      "timezone": z.unknown().optional(),
+    })),
   async (req: Request, res: Response) => {
     try {
       const team = decodeURIComponent((req.params as { team: string }).team).trim();
@@ -923,7 +933,12 @@ router.post(
   requireRole("admin", "ops"),
   denyIfReadOnly(),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "endAt": z.unknown().optional(),
+      "note": z.unknown().optional(),
+      "startAt": z.unknown().optional(),
+      "userId": z.unknown().optional(),
+    })),
   async (req: Request, res: Response) => {
     try {
       const team = decodeURIComponent((req.params as { team: string }).team).trim();

@@ -1,11 +1,13 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { pool } from "@szl-holdings/db";
 import { services } from "@szl-holdings/services";
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import multer from "multer";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
@@ -59,7 +61,10 @@ async function transcribeAudio(buffer: Buffer, mimeType: string): Promise<{ text
   return { text: data.text, duration: data.duration };
 }
 
-router.post("/alloy/voice/transcribe", authMiddleware(), upload.single("audio"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/voice/transcribe", authMiddleware(), upload.single("audio"), validateBody(bodyShape({
+      "convertTo": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const file = (req as Request & { file?: Express.Multer.File }).file;
     const { convertTo, title } = req.body as { convertTo?: string; title?: string };
@@ -154,7 +159,11 @@ router.post("/alloy/voice/transcribe", authMiddleware(), upload.single("audio"),
   }
 });
 
-router.post("/alloy/voice/transcribe-text", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/voice/transcribe-text", authMiddleware(), validateBody(bodyShape({
+      "convertTo": z.unknown().optional(),
+      "text": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { text, convertTo, title } = req.body as { text: string; convertTo?: string; title?: string };
     if (!text) { sendBadRequest(res, "text is required for text-based voice note"); return; }
@@ -226,7 +235,7 @@ router.get("/alloy/voice/notes/:id", authMiddleware(), async (req: Request, res:
   }
 });
 
-router.delete("/alloy/voice/notes/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/alloy/voice/notes/:id", validateBody(bodyShape({})), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id ?? null;
     const result = await pool.query(

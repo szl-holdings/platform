@@ -26,8 +26,9 @@ import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 
 import { logger } from "../lib/logger";
-import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 
 function todayStr(): string {
@@ -235,7 +236,7 @@ router.post(
   "/briefing/generate",
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req, res) => {
     try {
       const orgId = (req.user?.orgs?.[0]?.orgId as number | undefined) ?? null;

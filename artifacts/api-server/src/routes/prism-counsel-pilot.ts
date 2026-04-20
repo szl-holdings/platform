@@ -1,8 +1,9 @@
 import { Router, Request, Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 import { pilotIngestion } from "../services/prism-pilot-ingestion";
 import { pilotChangeTracker } from "../services/prism-pilot-change-tracker";
 import { pilotReview, pilotSignoff } from "../services/prism-pilot-review";
@@ -181,7 +182,7 @@ router.get("/today/brief", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/today/brief/generate", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/today/brief/generate", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const brief = await pilotChangeTracker.generateMorningBrief(getOrgId(req), req.user!.id);
     res.json({ brief });
@@ -199,7 +200,7 @@ router.get("/today/quiet-risks", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/today/detect-risks", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/today/detect-risks", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const newRisks = await pilotChangeTracker.detectQuietRisks(getOrgId(req));
     res.json({ detected: newRisks.length, risks: newRisks });
@@ -218,7 +219,7 @@ router.get("/today/next-actions", validateQuery(listQuerySchema), async (req: Re
   }
 });
 
-router.post("/today/next-actions/:id/complete", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/today/next-actions/:id/complete", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const result = await pilotChangeTracker.completeAction(getOrgId(req), parseInt(req.params.id as string));
     res.json({ action: result[0] });
@@ -363,7 +364,7 @@ router.patch("/reviews/:id/state", validateBody(ReviewStateSchema), async (req: 
   }
 });
 
-router.post("/reviews/:id/submit-signoff", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/reviews/:id/submit-signoff", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const signoff = await pilotReview.submitForSignoff(getOrgId(req), parseInt(req.params.id as string), req.user!.id);
     res.json({ signoff });

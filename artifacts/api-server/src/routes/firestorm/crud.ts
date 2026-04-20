@@ -1,4 +1,5 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import {
@@ -53,7 +54,7 @@ import {
   ingestFirestormAlert,
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 import { firestormCrudLimit, getFirestormTenantId } from "./shared";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 const router = Router();
 
 router.get("/firestorm/scenarios", firestormCrudLimit, authMiddleware(), async (_req, res) => {
@@ -76,7 +77,7 @@ router.get("/firestorm/scenarios/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/firestorm/scenarios", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/firestorm/scenarios", authMiddleware({ required: true }), validateBody(bodyShape({})), async (req, res) => {
   try {
     const data = insertFirestormScenarioSchema.parse(req.body);
     const [scenario] = await db.insert(firestormScenariosTable).values(data).returning();
@@ -87,7 +88,7 @@ router.post("/firestorm/scenarios", authMiddleware({ required: true }), validate
   }
 });
 
-router.put("/firestorm/scenarios/:id", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/firestorm/scenarios/:id", authMiddleware({ required: true }), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const data = insertFirestormScenarioSchema.partial().parse(req.body);
@@ -100,7 +101,7 @@ router.put("/firestorm/scenarios/:id", authMiddleware({ required: true }), valid
   }
 });
 
-router.delete("/firestorm/scenarios/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req, res) => {
+router.delete("/firestorm/scenarios/:id", validateBody(bodyShape({})), authMiddleware({ required: true }), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const [scenario] = await db.delete(firestormScenariosTable).where(eq(firestormScenariosTable.id, id)).returning();
@@ -131,7 +132,7 @@ router.get("/firestorm/assessments/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/firestorm/assessments", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/firestorm/assessments", authMiddleware({ required: true }), validateBody(bodyShape({})), async (req, res) => {
   try {
     const data = insertFirestormAssessmentSchema.parse(req.body);
     const [assessment] = await db.insert(firestormAssessmentsTable).values(data).returning();
@@ -141,7 +142,7 @@ router.post("/firestorm/assessments", authMiddleware({ required: true }), valida
   }
 });
 
-router.put("/firestorm/assessments/:id", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/firestorm/assessments/:id", authMiddleware({ required: true }), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const data = insertFirestormAssessmentSchema.partial().parse(req.body);
@@ -153,7 +154,7 @@ router.put("/firestorm/assessments/:id", authMiddleware({ required: true }), val
   }
 });
 
-router.delete("/firestorm/assessments/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req, res) => {
+router.delete("/firestorm/assessments/:id", validateBody(bodyShape({})), authMiddleware({ required: true }), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const [assessment] = await db.delete(firestormAssessmentsTable).where(eq(firestormAssessmentsTable.id, id)).returning();
@@ -173,7 +174,9 @@ router.get("/firestorm/simulations", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.post("/firestorm/simulations", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/firestorm/simulations", authMiddleware({ required: true }), validateBody(bodyShape({
+      "mode": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const data = insertFirestormSimulationRunSchema.parse(req.body);
     const [run] = await db.insert(firestormSimulationRunsTable).values({
@@ -232,7 +235,13 @@ router.get("/firestorm/findings/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/firestorm/findings", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/firestorm/findings", authMiddleware({ required: true }), validateBody(bodyShape({
+      "dueDate": z.unknown().optional(),
+      "recommendation": z.unknown().optional(),
+      "remediationOwner": z.unknown().optional(),
+      "severity": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const body = { ...req.body };
     if (typeof body.dueDate === "string") body.dueDate = new Date(body.dueDate);
@@ -262,7 +271,7 @@ router.post("/firestorm/findings", authMiddleware({ required: true }), validateB
   }
 });
 
-router.put("/firestorm/findings/:id", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/firestorm/findings/:id", authMiddleware({ required: true }), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const data = insertFirestormFindingSchema.partial().parse(req.body);
@@ -289,7 +298,7 @@ router.get("/firestorm/risk-scores", authMiddleware(), validateQuery(listQuerySc
   }
 });
 
-router.post("/firestorm/risk-scores", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/firestorm/risk-scores", authMiddleware({ required: true }), validateBody(bodyShape({})), async (req, res) => {
   try {
     const data = insertFirestormRiskScoreSchema.parse(req.body);
     const [score] = await db.insert(firestormRiskScoresTable).values(data).returning();

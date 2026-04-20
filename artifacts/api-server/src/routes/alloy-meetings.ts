@@ -1,10 +1,12 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { pool } from "@szl-holdings/db";
 import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -77,7 +79,15 @@ Respond in valid JSON with this exact structure:
   };
 }
 
-router.post("/alloy/meetings/capture", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/meetings/capture", authMiddleware(), validateBody(bodyShape({
+      "attendees": z.unknown().optional(),
+      "durationMinutes": z.unknown().optional(),
+      "meetingDate": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "recordingUrl": z.unknown().optional(),
+      "title": z.unknown().optional(),
+      "transcript": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { title, transcript, recordingUrl, meetingDate, durationMinutes, attendees = [], metadata } = req.body as {
       title: string;
@@ -222,7 +232,12 @@ router.get("/alloy/meetings/:id/follow-up", authMiddleware(), async (req: Reques
   }
 });
 
-router.post("/alloy/meetings/prep", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/meetings/prep", authMiddleware(), validateBody(bodyShape({
+      "attendees": z.unknown().optional(),
+      "scheduledFor": z.unknown().optional(),
+      "title": z.unknown().optional(),
+      "topics": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { title, attendees = [], scheduledFor, topics = [] } = req.body as {
       title: string;
@@ -275,7 +290,11 @@ Be concise and actionable.`;
   }
 });
 
-router.patch("/alloy/meetings/:id/action-items/:itemId", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/alloy/meetings/:id/action-items/:itemId", authMiddleware(), validateBody(bodyShape({
+      "assignee": z.unknown().optional(),
+      "dueDate": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { status, assignee, dueDate } = req.body as { status?: string; assignee?: string; dueDate?: string };
     const updates: string[] = ["updated_at = NOW()"];

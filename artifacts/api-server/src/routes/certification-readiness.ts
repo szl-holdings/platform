@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import {
   db,
   certificationProgramsTable,
@@ -19,7 +20,7 @@ import { eq, desc, sql, and, asc } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendForbidden, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { z } from "zod";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { guardSeedInProduction } from "../lib/seed-guard";
 
 const createProgramSchema = z.object({
@@ -144,7 +145,7 @@ router.patch("/certification/programs/:id", ...auth, validateBody(updateProgramS
   }
 });
 
-router.delete("/certification/programs/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/certification/programs/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(certificationProgramsTable).set({ isActive: false, updatedAt: new Date() }).where(eq(certificationProgramsTable.id, id)).returning();
@@ -181,7 +182,7 @@ router.patch("/certification/requirements/:id", ...auth, validateBody(updateRequ
   }
 });
 
-router.delete("/certification/requirements/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/certification/requirements/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(certificationRequirementsTable).where(eq(certificationRequirementsTable.id, id)).returning();
@@ -214,7 +215,7 @@ router.post("/certification/status", ...auth, validateBody(createCertStatusSchem
   }
 });
 
-router.patch("/certification/status/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/certification/status/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(certificationStatusTable).set({ ...req.body, updatedAt: new Date() }).where(eq(certificationStatusTable.id, id)).returning();
@@ -226,7 +227,7 @@ router.patch("/certification/status/:id", ...auth, validateBody(jsonObjectBodySc
   }
 });
 
-router.delete("/certification/status/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/certification/status/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(certificationStatusTable).where(eq(certificationStatusTable.id, id)).returning();
@@ -273,7 +274,7 @@ router.patch("/certification/tasks/:id", ...auth, validateBody(updateCertTaskSch
   }
 });
 
-router.delete("/certification/tasks/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/certification/tasks/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(certificationTasksTable).where(eq(certificationTasksTable.id, id)).returning();
@@ -296,7 +297,7 @@ router.get("/certification/ownership-scenarios", ...auth, async (req, res) => {
   }
 });
 
-router.post("/certification/ownership-scenarios", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/certification/ownership-scenarios", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(ownershipScenariosTable).values(req.body).returning();
     await logCertAudit("create", "ownership_scenario", row.id, req.body);
@@ -306,7 +307,7 @@ router.post("/certification/ownership-scenarios", ...auth, validateBody(jsonObje
   }
 });
 
-router.patch("/certification/ownership-scenarios/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/certification/ownership-scenarios/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(ownershipScenariosTable).set({ ...req.body, updatedAt: new Date() }).where(eq(ownershipScenariosTable.id, id)).returning();
@@ -318,7 +319,7 @@ router.patch("/certification/ownership-scenarios/:id", ...auth, validateBody(jso
   }
 });
 
-router.delete("/certification/ownership-scenarios/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/certification/ownership-scenarios/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(ownershipScenariosTable).where(eq(ownershipScenariosTable.id, id)).returning();
@@ -341,7 +342,7 @@ router.get("/certification/artifacts", ...auth, async (req, res) => {
   }
 });
 
-router.post("/certification/artifacts", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/certification/artifacts", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(applicationArtifactsTable).values(req.body).returning();
     await logCertAudit("create", "application_artifact", row.id, req.body);
@@ -351,7 +352,7 @@ router.post("/certification/artifacts", ...auth, validateBody(jsonObjectBodySche
   }
 });
 
-router.patch("/certification/artifacts/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/certification/artifacts/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(applicationArtifactsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(applicationArtifactsTable.id, id)).returning();
@@ -363,7 +364,7 @@ router.patch("/certification/artifacts/:id", ...auth, validateBody(jsonObjectBod
   }
 });
 
-router.delete("/certification/artifacts/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/certification/artifacts/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(applicationArtifactsTable).where(eq(applicationArtifactsTable.id, id)).returning();
@@ -388,7 +389,7 @@ router.get("/certification/opportunities", ...auth, validateQuery(listQuerySchem
   }
 });
 
-router.post("/certification/opportunities", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/certification/opportunities", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(opportunityPipelineTable).values(req.body).returning();
     await logCertAudit("create", "opportunity", row.id, req.body);
@@ -398,7 +399,7 @@ router.post("/certification/opportunities", ...auth, validateBody(jsonObjectBody
   }
 });
 
-router.patch("/certification/opportunities/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/certification/opportunities/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(opportunityPipelineTable).set({ ...req.body, updatedAt: new Date() }).where(eq(opportunityPipelineTable.id, id)).returning();
@@ -410,7 +411,7 @@ router.patch("/certification/opportunities/:id", ...auth, validateBody(jsonObjec
   }
 });
 
-router.delete("/certification/opportunities/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/certification/opportunities/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(opportunityPipelineTable).where(eq(opportunityPipelineTable.id, id)).returning();
@@ -433,7 +434,7 @@ router.get("/certification/procurement-contacts", ...auth, async (req, res) => {
   }
 });
 
-router.post("/certification/procurement-contacts", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/certification/procurement-contacts", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(procurementContactsTable).values(req.body).returning();
     await logCertAudit("create", "procurement_contact", row.id, req.body);
@@ -443,7 +444,7 @@ router.post("/certification/procurement-contacts", ...auth, validateBody(jsonObj
   }
 });
 
-router.patch("/certification/procurement-contacts/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/certification/procurement-contacts/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(procurementContactsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(procurementContactsTable.id, id)).returning();
@@ -455,7 +456,7 @@ router.patch("/certification/procurement-contacts/:id", ...auth, validateBody(js
   }
 });
 
-router.delete("/certification/procurement-contacts/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/certification/procurement-contacts/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(procurementContactsTable).where(eq(procurementContactsTable.id, id)).returning();
@@ -478,7 +479,7 @@ router.get("/certification/calendar", ...auth, async (req, res) => {
   }
 });
 
-router.post("/certification/calendar", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/certification/calendar", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(certificationCalendarTable).values(req.body).returning();
     await logCertAudit("create", "cert_calendar_event", row.id, req.body);
@@ -488,7 +489,7 @@ router.post("/certification/calendar", ...auth, validateBody(jsonObjectBodySchem
   }
 });
 
-router.patch("/certification/calendar/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/certification/calendar/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(certificationCalendarTable).set({ ...req.body, updatedAt: new Date() }).where(eq(certificationCalendarTable.id, id)).returning();
@@ -500,7 +501,7 @@ router.patch("/certification/calendar/:id", ...auth, validateBody(jsonObjectBody
   }
 });
 
-router.delete("/certification/calendar/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/certification/calendar/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(certificationCalendarTable).where(eq(certificationCalendarTable.id, id)).returning();
@@ -523,7 +524,7 @@ router.get("/certification/legal-reviews", ...auth, async (req, res) => {
   }
 });
 
-router.post("/certification/legal-reviews", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/certification/legal-reviews", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(legalReviewCheckpointsTable).values(req.body).returning();
     await logCertAudit("create", "legal_review_checkpoint", row.id, req.body);
@@ -533,7 +534,7 @@ router.post("/certification/legal-reviews", ...auth, validateBody(jsonObjectBody
   }
 });
 
-router.patch("/certification/legal-reviews/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/certification/legal-reviews/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(legalReviewCheckpointsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(legalReviewCheckpointsTable.id, id)).returning();
@@ -545,7 +546,7 @@ router.patch("/certification/legal-reviews/:id", ...auth, validateBody(jsonObjec
   }
 });
 
-router.delete("/certification/legal-reviews/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/certification/legal-reviews/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(legalReviewCheckpointsTable).where(eq(legalReviewCheckpointsTable.id, id)).returning();
@@ -568,7 +569,7 @@ router.get("/certification/naics", ...auth, async (req, res) => {
   }
 });
 
-router.post("/certification/naics", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/certification/naics", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(naicsCodeMappingTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -579,7 +580,7 @@ router.post("/certification/naics", ...auth, validateBody(jsonObjectBodySchema),
 
 // ─── SEED CERTIFICATION PROGRAMS ─────────────────────────────────────────────
 
-router.post("/certification/seed", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/certification/seed", ...auth, validateBody(bodyShape({})), async (req, res) => {
   if (guardSeedInProduction(res)) return;
   try {
     const [{ count: existing }] = await db.select({ count: sql<number>`count(*)::int` }).from(certificationProgramsTable);

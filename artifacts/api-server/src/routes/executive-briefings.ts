@@ -41,8 +41,9 @@ import { logger } from "../lib/logger";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { services } from "@szl-holdings/services";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router = Router();
 
 const KNOWN_EXEC_DOMAINS: SupportedDomain[] = ["vessels", "aegis", "terra", "lyte", "prism", "szl-holdings", "consolidated"];
@@ -436,7 +437,7 @@ router.get("/executive/:domain", perUserApiSlidingLimiter, async (req: Request, 
   }
 });
 
-router.post("/executive/generate", validateBody(jsonObjectBodySchema), perUserWriteSlidingLimiter, async (_req: Request, res: Response): Promise<void> => {
+router.post("/executive/generate", validateBody(bodyShape({})), perUserWriteSlidingLimiter, async (_req: Request, res: Response): Promise<void> => {
   try {
     const brief = await generateExecBrief("consolidated", false);
     sendCreated(res, brief);
@@ -445,7 +446,7 @@ router.post("/executive/generate", validateBody(jsonObjectBodySchema), perUserWr
   }
 });
 
-router.post("/executive/generate/:domain", validateBody(jsonObjectBodySchema), perUserWriteSlidingLimiter, async (req: Request, res: Response): Promise<void> => {
+router.post("/executive/generate/:domain", validateBody(bodyShape({})), perUserWriteSlidingLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
     const rawDomain = (req.params.domain ?? "") as string;
     const domain = normalizeDomain(rawDomain);

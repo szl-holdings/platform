@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { randomUUID } from "crypto";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import {
@@ -9,7 +11,7 @@ import {
   handleRouteError,
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, policyModesResolveQuerySchema, policyModesDeleteBodySchema } from "../lib/validation";
+import { validateBody, validateQuery, policyModesResolveQuerySchema, policyModesDeleteBodySchema } from "../lib/validation";
 import {
   defaultPolicyModeRegistry,
   PolicyModeConfigSchema,
@@ -76,7 +78,11 @@ router.get("/policy-modes/:id", authMiddleware(), async (req: Request, res: Resp
   }
 });
 
-router.post("/policy-modes", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/policy-modes", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({
+      "id": z.unknown().optional(),
+      "mode": z.unknown().optional(),
+      "scope": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const body = req.body as Record<string, unknown>;
     const id = (body.id as string | undefined) ?? randomUUID();
@@ -101,7 +107,9 @@ router.post("/policy-modes", authMiddleware(), requireRole("super_admin", "admin
   }
 });
 
-router.patch("/policy-modes/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/policy-modes/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({
+      "mode": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const existing = defaultPolicyModeRegistry.getById(id);
@@ -138,7 +146,21 @@ router.delete("/policy-modes/:id", authMiddleware(), requireRole("super_admin", 
   }
 });
 
-router.post("/policy-modes/evaluate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/policy-modes/evaluate", authMiddleware(), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "actionType": z.unknown().optional(),
+      "confidence": z.unknown().optional(),
+      "entitySensitivity": z.unknown().optional(),
+      "environment": z.unknown().optional(),
+      "evidenceChain": z.unknown().optional(),
+      "freshnessScore": z.unknown().optional(),
+      "product": z.unknown().optional(),
+      "projectedCostUsd": z.unknown().optional(),
+      "projectedImpact": z.unknown().optional(),
+      "projectedRisk": z.unknown().optional(),
+      "subjectRoles": z.unknown().optional(),
+      "workspace": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const body = req.body as {
       action?: string;

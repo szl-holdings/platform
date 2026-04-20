@@ -1,4 +1,5 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import {
@@ -53,7 +54,7 @@ import {
   ingestFirestormAlert,
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 import { firestormLiveLimit, getFsCached, fetchFsText, fetchFsJson, fsCache, ingestWebhookSchema } from "./shared";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../../lib/validation";
 const router = Router();
 
 router.get("/firestorm/live/mitre-attack", firestormLiveLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
@@ -265,7 +266,7 @@ router.get("/firestorm/live/feed-status", firestormLiveLimit, authMiddleware(), 
   } catch (err) { handleRouteError(res, err, "Failed to fetch feed status"); }
 });
 
-router.post("/firestorm/ingest/webhook", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/firestorm/ingest/webhook", authMiddleware({ required: true }), validateBody(bodyShape({})), async (req, res) => {
   try {
     const body = ingestWebhookSchema.parse(req.body ?? {});
     const source = (req.headers["x-firestorm-source"] as string) || body?.source || "webhook";

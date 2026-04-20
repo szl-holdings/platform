@@ -47,9 +47,10 @@ import {
   sendForbidden,
   handleRouteError,
 } from "../../lib/api-response.js";
-import { jsonObjectBodySchema, validateBody } from "../../lib/validation.js";
+import { validateBody } from "../../lib/validation.js";
 import { logger } from "../../lib/logger.js";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const verticalEnum = z.enum(PIPELINE_VERTICALS);
 const stageEnum = z.enum(PIPELINE_STAGES);
 
@@ -186,7 +187,17 @@ export function register(router: IRouter): void {
 
   router.post(
     "/admin/pipeline-deals",
-    validateBody(jsonObjectBodySchema),
+    validateBody(bodyShape({
+      "account": z.unknown().optional(),
+      "champion": z.unknown().optional(),
+      "championTitle": z.unknown().optional(),
+      "fitScore": z.unknown().optional(),
+      "nextStep": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "stage": z.unknown().optional(),
+      "vertical": z.unknown().optional(),
+    })),
     async (req: Request, res: Response) => {
       try {
         const body = createDealSchema.parse(req.body);
@@ -235,7 +246,9 @@ export function register(router: IRouter): void {
 
   router.patch(
     "/admin/pipeline-deals/:id",
-    validateBody(jsonObjectBodySchema),
+    validateBody(bodyShape({
+      "stage": z.unknown().optional(),
+    })),
     async (req: Request, res: Response) => {
       try {
         const { id } = idParamsSchema.parse({ id: req.params.id });

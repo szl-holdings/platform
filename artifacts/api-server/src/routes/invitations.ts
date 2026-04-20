@@ -17,12 +17,13 @@ import { authMiddleware } from "../middlewares/auth";
 import { writeLimiter } from "../middlewares/rate-limiters";
 import { logger } from "../lib/logger";
 import { hashIp } from "@szl-holdings/audit";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { sendError, sendUnauthorized, sendNotFound, sendForbidden, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { sendEmail, buildOrgInviteEmail } from "../lib/email";
 import { createOrgInvitation } from "../lib/invitation-service";
 import type { Request, Response } from "express";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router = Router();
 
 const INVITE_TTL = 7 * 24 * 60 * 60 * 1000;
@@ -210,7 +211,9 @@ router.get("/orgs/accept-invite", validateQuery(listQuerySchema), async (req, re
 router.post(
   "/orgs/accept-invite",
   authMiddleware(),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "token": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const { token } = req.body as { token?: string };
@@ -326,7 +329,7 @@ router.post(
 );
 
 router.delete(
-  "/orgs/:orgSlug/invitations/:invitationId", validateBody(jsonObjectBodySchema),
+  "/orgs/:orgSlug/invitations/:invitationId", validateBody(bodyShape({})),
   authMiddleware(),
   async (req, res) => {
     try {

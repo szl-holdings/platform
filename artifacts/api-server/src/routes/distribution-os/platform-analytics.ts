@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { randomBytes, createHash } from "crypto";
 import { z } from "zod";
 import { computeLeadScore } from "../../lib/lead-scoring";
@@ -17,7 +18,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
 import { authMiddleware } from "../../middlewares/auth";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router = Router();
 const requireAuth = authMiddleware({ required: true });
@@ -42,7 +43,11 @@ router.get("/platform-connections", requireAuth, validateQuery(listQuerySchema),
 
 // ── AI Atomizer Job Stubs ──
 
-router.post("/atomizer/atomize", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/atomizer/atomize", requireAuth, validateBody(bodyShape({
+      "content": z.unknown().optional(),
+      "platforms": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   const { title, content, platforms } = req.body;
   if (!content) return void res.status(400).json({ error: "content is required" });
   const jobId = `atomize_${Date.now()}`;
@@ -72,7 +77,10 @@ router.get("/api-keys", requireAuth, validateQuery(listQuerySchema), async (_req
   res.json(settings.map(s => ({ id: s.id, name: s.label, maskedKey: "szl_live_sk_••••••••••••", scopes: [], createdAt: s.key.replace("apikey_", ""), active: true })));
 });
 
-router.post("/api-keys", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/api-keys", requireAuth, validateBody(bodyShape({
+      "name": z.unknown().optional(),
+      "scopes": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   const { name, scopes } = req.body;
   const rawKey = randomBytes(24).toString("hex");
   const key = `szl_live_sk_${rawKey}`;
@@ -87,7 +95,7 @@ router.post("/api-keys", requireAuth, validateBody(jsonObjectBodySchema), async 
   res.status(201).json({ id: setting.id, name, key, maskedKey, scopes: scopes || [], active: true, _note: "Store this key securely — it will not be shown again" });
 });
 
-router.delete("/api-keys/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/api-keys/:id", validateBody(bodyShape({})), requireAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(dosSiteSettingsTable).where(
     and(eq(dosSiteSettingsTable.id, Number(req.params.id)), eq(dosSiteSettingsTable.category, "integration"), sql`${dosSiteSettingsTable.key} LIKE 'apikey_%'`)
   );
@@ -106,7 +114,11 @@ router.get("/webhook-subscriptions", requireAuth, validateQuery(listQuerySchema)
   }));
 });
 
-router.post("/webhook-subscriptions", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/webhook-subscriptions", requireAuth, validateBody(bodyShape({
+      "events": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "url": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   const { name, url, events } = req.body;
   if (!url || !events?.length) return void res.status(400).json({ error: "url and events required" });
   if (!url.startsWith("https://")) return void res.status(400).json({ error: "Webhook URL must use HTTPS" });
@@ -121,14 +133,14 @@ router.post("/webhook-subscriptions", requireAuth, validateBody(jsonObjectBodySc
   res.status(201).json({ id: wh.id, name, url, events, secret, active: true, _note: "Store the signing secret securely — it will not be shown again" });
 });
 
-router.delete("/webhook-subscriptions/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/webhook-subscriptions/:id", validateBody(bodyShape({})), requireAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(dosSiteSettingsTable).where(
     and(eq(dosSiteSettingsTable.id, Number(req.params.id)), eq(dosSiteSettingsTable.category, "integration"), sql`${dosSiteSettingsTable.key} LIKE 'webhook_%'`)
   );
   res.json({ success: true });
 });
 
-router.post("/webhook-subscriptions/:id/test", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/webhook-subscriptions/:id/test", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   res.json({ delivered: true, statusCode: 200, duration: Math.floor(Math.random() * 200 + 80), timestamp: new Date().toISOString() });
 });
 
@@ -203,7 +215,10 @@ router.get("/subscribers", requireAuth, validateQuery(listQuerySchema), async (r
   })));
 });
 
-router.post("/subscribers/magic-link", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/subscribers/magic-link", validateBody(bodyShape({
+      "email": z.unknown().optional(),
+      "source": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   const { email, source } = req.body;
   if (!email || typeof email !== "string" || !email.includes("@")) {
     return void res.status(400).json({ error: "valid email required" });
@@ -351,7 +366,11 @@ router.get("/virality/scores", requireAuth, validateQuery(listQuerySchema), asyn
   res.json({ scores: scored, summary: { avgScore, topPerformers, totalScored: scored.length, trendingNow: ["AI governance", "Operator playbooks", "B2B content strategy"] } });
 });
 
-router.post("/virality/score-content", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/virality/score-content", requireAuth, validateBody(bodyShape({
+      "body": z.unknown().optional(),
+      "contentType": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   const { title, contentType = "article", body } = req.body as { title: string; contentType: string; body?: string };
   const seed = title.length + (body?.length || 0);
   const score = Math.min(97, Math.max(35, seeded(seed, 50, 92) + (body && body.length > 500 ? 8 : 0)));
@@ -415,7 +434,11 @@ router.get("/ab-tests", requireAuth, validateQuery(listQuerySchema), async (_req
   res.json({ tests, running: tests.filter(t => t.status === "running").length, concluded: tests.filter(t => t.status === "winner-declared").length });
 });
 
-router.post("/ab-tests", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/ab-tests", requireAuth, validateBody(bodyShape({
+      "name": z.unknown().optional(),
+      "testType": z.unknown().optional(),
+      "variants": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   const { name, testType, variants } = req.body;
   const [test] = await db.insert(dosAbTestsTable).values({ name, testType, variants, status: "draft", significanceLevel: 95 }).returning();
   res.status(201).json(test);

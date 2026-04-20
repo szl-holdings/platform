@@ -1,11 +1,13 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { createHmac, timingSafeEqual } from "crypto";
 import { pool } from "@szl-holdings/db";
 import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -58,7 +60,15 @@ function priorityFromScore(score: number): string {
   return "low";
 }
 
-router.post("/alloy/email/ingest", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/email/ingest", validateBody(bodyShape({
+      "bodyHtml": z.unknown().optional(),
+      "bodyText": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "recipientEmail": z.unknown().optional(),
+      "senderEmail": z.unknown().optional(),
+      "senderName": z.unknown().optional(),
+      "subject": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     if (!verifyEmailSignature(req)) {
       res.status(401).json({ error: "Missing or invalid x-alloy-email-signature" });
@@ -173,7 +183,10 @@ router.get("/alloy/email/triage/:id", authMiddleware(), async (req: Request, res
   }
 });
 
-router.post("/alloy/email/triage/:id/draft", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/email/triage/:id/draft", authMiddleware(), validateBody(bodyShape({
+      "includeContext": z.unknown().optional(),
+      "tone": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const emailResult = await pool.query(`SELECT * FROM alloy_email_triage WHERE id = $1`, [req.params.id]);
     if (!emailResult.rows[0]) { sendError(res, "Email not found", 404); return; }
@@ -199,7 +212,10 @@ router.post("/alloy/email/triage/:id/draft", authMiddleware(), validateBody(json
   }
 });
 
-router.post("/alloy/email/triage/:id/route", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/email/triage/:id/route", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateBody(bodyShape({
+      "notes": z.unknown().optional(),
+      "targetWorkflow": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const emailResult = await pool.query(`SELECT * FROM alloy_email_triage WHERE id = $1`, [req.params.id]);
     if (!emailResult.rows[0]) { sendError(res, "Email not found", 404); return; }
@@ -218,7 +234,11 @@ router.post("/alloy/email/triage/:id/route", authMiddleware(), requireRole("ops"
   }
 });
 
-router.patch("/alloy/email/triage/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/alloy/email/triage/:id", authMiddleware(), validateBody(bodyShape({
+      "labels": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { status, priority, labels } = req.body as { status?: string; priority?: string; labels?: string[] };
     const updates: string[] = ["updated_at = NOW()"];
@@ -244,7 +264,14 @@ router.get("/alloy/email/rules", authMiddleware(), requireRole("ops", "admin", "
   }
 });
 
-router.post("/alloy/email/rules", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/email/rules", authMiddleware(), requireRole("admin", "super_admin"), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "actionParams": z.unknown().optional(),
+      "conditions": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { name, description, conditions, action, actionParams, priority = 50 } = req.body as {
       name: string;

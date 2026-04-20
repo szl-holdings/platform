@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
 import { MetricCollector, serverTelemetry, clientTelemetry } from "@szl-holdings/observability";
@@ -7,7 +9,7 @@ import { ALL_CONFIGS, getConfigBySlug } from "@szl-holdings/observability/config
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { db, platformJobRunsTable, artifactApprovalsTable } from "@szl-holdings/db";
 import { sql, eq, and, gt } from "drizzle-orm";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -155,7 +157,16 @@ router.get("/observability", authMiddleware(), (req, res) => {
   });
 });
 
-router.post("/observability/vitals", validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/observability/vitals", validateBody(bodyShape({
+      "appSlug": z.unknown().optional(),
+      "cls": z.unknown().optional(),
+      "fcp": z.unknown().optional(),
+      "fid": z.unknown().optional(),
+      "inp": z.unknown().optional(),
+      "lcp": z.unknown().optional(),
+      "pathname": z.unknown().optional(),
+      "ttfb": z.unknown().optional(),
+    })), (req, res) => {
   const body = req.body;
   if (!body || !body.appSlug) {
     res.status(400).json({ error: "appSlug is required" });
@@ -186,7 +197,13 @@ router.post("/observability/vitals", validateBody(jsonObjectBodySchema), (req, r
   res.status(204).end();
 });
 
-router.post("/observability/client-errors", validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/observability/client-errors", validateBody(bodyShape({
+      "app": z.unknown().optional(),
+      "errorId": z.unknown().optional(),
+      "message": z.unknown().optional(),
+      "timestamp": z.unknown().optional(),
+      "url": z.unknown().optional(),
+    })), (req, res) => {
   const body = req.body;
   if (!body || !body.app) {
     res.status(400).json({ error: "app is required" });
@@ -208,7 +225,13 @@ router.post("/observability/client-errors", validateBody(jsonObjectBodySchema), 
   res.status(204).end();
 });
 
-router.post("/observability/error-feedback", validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/observability/error-feedback", validateBody(bodyShape({
+      "app": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "errorId": z.unknown().optional(),
+      "timestamp": z.unknown().optional(),
+      "url": z.unknown().optional(),
+    })), (req, res) => {
   const body = req.body;
   if (!body || !body.app) {
     res.status(400).json({ error: "app is required" });
@@ -243,7 +266,7 @@ router.get("/observability/alerts", authMiddleware(), requireRole("ops", "admin"
   });
 });
 
-router.post("/observability/alerts/:id/resolve", authMiddleware(), requireRole("ops"), validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/observability/alerts/:id/resolve", authMiddleware(), requireRole("ops"), validateBody(bodyShape({})), (req, res) => {
   const { id } = req.params;
   if (!id || typeof id !== "string") {
     res.status(400).json({ error: "Alert ID is required" });

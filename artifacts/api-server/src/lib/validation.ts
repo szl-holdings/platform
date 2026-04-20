@@ -886,9 +886,12 @@ export const vesselPositionUpdateSchema = z.object({
 });
 
 // ─── Generic "valid JSON object" body validator ───────────────────────────────
-// Used as a minimal baseline for routes with complex/open-ended bodies where a
-// specific schema isn't practical. Ensures the body is a plain object (not an
-// array or primitive) so injected payloads can't bypass the parser.
+// DEPRECATED for production routes: prefer `bodyShape({...})` from
+// `@szl-holdings/contracts/common`, which declares the fields the handler reads
+// while still passing extras through. This symbol is retained only for the
+// security middleware test suite and historical codemod tooling — production
+// routes under `src/routes/` no longer use it as a primary body validator
+// (Task #2429).
 
 export const jsonObjectBodySchema = z.preprocess(
   (val) => (val == null ? {} : val),

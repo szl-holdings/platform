@@ -1,11 +1,13 @@
 import type { IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   db, terraDealsTable, terraSavedOpportunitiesTable, terraDistressPropertiesTable,
   eq, and, desc, sql, inArray,
   sendSuccess, sendBadRequest, handleRouteError, authMiddleware,
   SaveOpportunitySchema,
 } from "./_shared.js";
-import { validateBody, jsonObjectBodySchema } from "../../lib/validation";
+import { validateBody } from "../../lib/validation";
 
 export function register(router: IRouter): void {
   router.get("/terra/opportunities/saved", authMiddleware({ required: false }), async (req, res) => {
@@ -75,7 +77,7 @@ export function register(router: IRouter): void {
     } catch (err) { handleRouteError(res, err, "Failed to fetch saved opportunities"); }
   });
 
-  router.post("/terra/opportunities/save", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+  router.post("/terra/opportunities/save", authMiddleware({ required: true }), validateBody(bodyShape({})), async (req, res) => {
     try {
       const parsed = SaveOpportunitySchema.safeParse(req.body ?? {});
       if (!parsed.success) {

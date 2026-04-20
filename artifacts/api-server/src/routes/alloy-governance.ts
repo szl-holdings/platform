@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import {
   db,
   alloyPoliciesTable,
@@ -30,7 +31,7 @@ import {
   parsePagination,
 } from "../lib/api-response";
 import { z } from "zod";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { logger } from "../lib/logger";
 
 const updatePolicySchema = z.object({
@@ -155,7 +156,9 @@ router.get("/alloy/policies/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/alloy/policies", authMiddleware(), requireRole("admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/policies", authMiddleware(), requireRole("admin"), validateBody(bodyShape({
+      "orgId": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const user = req.user as AuthenticatedUser | undefined;
     if (!user) return sendForbidden(res, "Authentication required");
@@ -245,7 +248,7 @@ router.patch("/alloy/policies/:id", authMiddleware(), requireRole("admin"), vali
   }
 });
 
-router.delete("/alloy/policies/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin"), async (req, res) => {
+router.delete("/alloy/policies/:id", validateBody(bodyShape({})), authMiddleware(), requireRole("admin"), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id as string));
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
@@ -285,7 +288,9 @@ router.delete("/alloy/policies/:id", validateBody(jsonObjectBodySchema), authMid
 });
 
 // Apply a compliance template to a tenant (clone it with orgId set)
-router.post("/alloy/policies/:id/apply", authMiddleware(), requireRole("admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/policies/:id/apply", authMiddleware(), requireRole("admin"), validateBody(bodyShape({
+      "orgId": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id as string));
     if (isNaN(id)) return sendBadRequest(res, "Invalid template policy ID");
@@ -367,7 +372,9 @@ router.get("/alloy/governance/incidents", authMiddleware(), validateQuery(listQu
   }
 });
 
-router.post("/alloy/governance/incidents", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/governance/incidents", authMiddleware(), validateBody(bodyShape({
+      "orgId": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const user = req.user as AuthenticatedUser | undefined;
     if (!user) return sendForbidden(res, "Authentication required");
@@ -400,7 +407,9 @@ router.post("/alloy/governance/incidents", authMiddleware(), validateBody(jsonOb
   }
 });
 
-router.patch("/alloy/governance/incidents/:id/resolve", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/alloy/governance/incidents/:id/resolve", authMiddleware(), validateBody(bodyShape({
+      "resolution": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id as string));
     if (isNaN(id)) return sendBadRequest(res, "Invalid incident ID");
@@ -437,7 +446,16 @@ router.patch("/alloy/governance/incidents/:id/resolve", authMiddleware(), valida
 // ─── Policy Enforcement Hook ─────────────────────────────────────────────────
 // Called by Nuro Mesh / workflow execution to check if a run is allowed
 
-router.post("/alloy/governance/enforce", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/governance/enforce", authMiddleware(), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "agentId": z.unknown().optional(),
+      "callerRoles": z.unknown().optional(),
+      "callerUserId": z.unknown().optional(),
+      "estimatedCostCents": z.unknown().optional(),
+      "model": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "workflowRunId": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const user = req.user as AuthenticatedUser | undefined;
     const { orgId, action, model, agentId, estimatedCostCents, workflowRunId, callerUserId, callerRoles } = req.body;
@@ -577,7 +595,9 @@ router.post("/alloy/governance/enforce", authMiddleware(), validateBody(jsonObje
 
 // ─── Usage Metering ──────────────────────────────────────────────────────────
 
-router.post("/alloy/usage/events", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/usage/events", authMiddleware(), validateBody(bodyShape({
+      "orgId": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const user = req.user as AuthenticatedUser | undefined;
     if (!user && !req.isInternalAgent) return sendForbidden(res, "Authentication required");

@@ -1,4 +1,6 @@
 import { randomUUID } from "node:crypto";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { Router, type IRouter, type Request } from "express";
 import {
   verify,
@@ -16,7 +18,7 @@ import {
   sendNotFound,
   sendBadRequest,
 } from "../lib/api-response";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -61,7 +63,13 @@ function resolveSaveOrgId(req: Request, requested: number | null | undefined): n
   return user.orgs[0]?.orgId ?? null;
 }
 
-router.post("/verifier", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/verifier", authMiddleware(), validateBody(bodyShape({
+      "context": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "output": z.unknown().optional(),
+      "persist": z.unknown().optional(),
+      "target": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const body = req.body as {
       target?: unknown;
@@ -197,7 +205,7 @@ router.get("/verifier/:id", authMiddleware(), async (req, res) => {
 });
 
 router.delete(
-  "/verifier/:id", validateBody(jsonObjectBodySchema),
+  "/verifier/:id", validateBody(bodyShape({})),
   authMiddleware(),
   requireRole("admin", "super_admin"),
   async (req, res) => {

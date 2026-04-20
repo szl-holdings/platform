@@ -1,4 +1,6 @@
 import { Router, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, alloyWorkflowsTable, alloyWorkflowRunsTable, alloyArtifactsTable, alloyDecisions, alloySkills, alloySkillRuns, alloyAuditLogTable } from "@szl-holdings/db";
 import { eq, desc, and, inArray } from "drizzle-orm";
 import { connectorHub } from "@szl-holdings/services";
@@ -6,7 +8,7 @@ import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewa
 import { logger } from "../lib/logger";
 import { AGENT_CONFIGS } from "./domain-agents/configs";
 import { logActivity } from "@szl-holdings/audit";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 const router = Router();
 
@@ -1076,7 +1078,9 @@ router.get("/mcp/health", (_req: Request, res: Response) => {
   });
 });
 
-router.post("/mcp", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/mcp", authMiddleware({ required: false }), validateBody(bodyShape({
+      "map": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const body = req.body;
 

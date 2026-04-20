@@ -1,4 +1,6 @@
 import type { IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   db, terraLeadsTable, terraDealsTable, terraDistressPropertiesTable,
   eq, and, desc, ilike, or, sql,
@@ -8,7 +10,7 @@ import {
   logger, ingestTerraProperty,
 } from "./_shared.js";
 import type { InsertTerraDeal } from "@szl-holdings/db";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../../lib/validation";
 
 export function register(router: IRouter): void {
   router.get("/terra/pipeline/deals", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
@@ -69,7 +71,28 @@ export function register(router: IRouter): void {
     } catch (err) { handleRouteError(res, err, "Failed to fetch deals"); }
   });
 
-  router.post("/terra/pipeline/deals", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+  router.post("/terra/pipeline/deals", authMiddleware({ required: true }), validateBody(bodyShape({
+      "address": z.unknown().optional(),
+      "arv": z.unknown().optional(),
+      "askingPrice": z.unknown().optional(),
+      "borough": z.unknown().optional(),
+      "clientName": z.unknown().optional(),
+      "county": z.unknown().optional(),
+      "distressPropertyExternalId": z.unknown().optional(),
+      "distressPropertyId": z.unknown().optional(),
+      "estimatedCloseDate": z.unknown().optional(),
+      "leadId": z.unknown().optional(),
+      "nextAction": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "ownerName": z.unknown().optional(),
+      "ownerUserId": z.unknown().optional(),
+      "price": z.unknown().optional(),
+      "probability": z.unknown().optional(),
+      "riskLevel": z.unknown().optional(),
+      "stage": z.unknown().optional(),
+      "type": z.unknown().optional(),
+      "zipCode": z.unknown().optional(),
+    })), async (req, res) => {
     try {
       const parsed = CreateDealSchema.safeParse(req.body ?? {});
       if (!parsed.success) {
@@ -160,7 +183,7 @@ export function register(router: IRouter): void {
     } catch (err) { handleRouteError(res, err, "Failed to create deal"); }
   });
 
-  router.patch("/terra/pipeline/deals/:id/stage", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+  router.patch("/terra/pipeline/deals/:id/stage", authMiddleware({ required: true }), validateBody(bodyShape({})), async (req, res) => {
     try {
       const { id } = req.params as Record<string, string>;
       const parsed = UpdateDealStageSchema.safeParse(req.body ?? {});

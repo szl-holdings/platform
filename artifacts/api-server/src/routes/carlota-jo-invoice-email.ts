@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import rateLimit from "express-rate-limit";
 import { sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
@@ -9,7 +11,7 @@ import {
   CARLOTA_ADMIN_EMAIL,
   type CarlotaInvoiceEmailData,
 } from "../lib/email";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -26,7 +28,19 @@ router.post(
   "/booking/invoices/email",
   invoiceEmailLimit,
   authMiddleware(),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "amount": z.unknown().optional(),
+      "ccAdmin": z.unknown().optional(),
+      "clientName": z.unknown().optional(),
+      "currency": z.unknown().optional(),
+      "dueDate": z.unknown().optional(),
+      "engagement": z.unknown().optional(),
+      "invoiceId": z.unknown().optional(),
+      "issuedDate": z.unknown().optional(),
+      "items": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "recipientEmail": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const body = req.body as Partial<CarlotaInvoiceEmailData> & {
         recipientEmail?: string;

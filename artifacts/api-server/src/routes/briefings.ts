@@ -25,8 +25,9 @@ import {
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { logger } from "../lib/logger";
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 router.use(authMiddleware({ required: false }));
 router.use(perUserApiSlidingLimiter);
@@ -155,7 +156,7 @@ router.get("/briefings/:domain", async (req: Request, res: Response) => {
   }
 });
 
-router.put("/briefings/:id/approve", authMiddleware({ required: true }), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/briefings/:id/approve", authMiddleware({ required: true }), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const existing = await db.select().from(pulseBriefingsTable).where(eq(pulseBriefingsTable.id, id)).limit(1);
@@ -174,7 +175,7 @@ router.put("/briefings/:id/approve", authMiddleware({ required: true }), require
   }
 });
 
-router.put("/briefings/:id/archive", authMiddleware({ required: true }), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/briefings/:id/archive", authMiddleware({ required: true }), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const existing = await db.select().from(pulseBriefingsTable).where(eq(pulseBriefingsTable.id, id)).limit(1);
@@ -193,7 +194,7 @@ router.put("/briefings/:id/archive", authMiddleware({ required: true }), require
   }
 });
 
-router.post("/briefings/generate", validateBody(jsonObjectBodySchema), async (_req: Request, res: Response) => {
+router.post("/briefings/generate", validateBody(bodyShape({})), async (_req: Request, res: Response) => {
   try {
     logger.info("Force-generating executive brief");
     const brief = await generateBrief([...KNOWN_DOMAINS]);

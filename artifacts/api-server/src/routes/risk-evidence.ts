@@ -43,8 +43,10 @@ import {
   sendNotFound,
   handleRouteError,
 } from "../lib/api-response";
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const NAMESPACE = "szl.riskEvidence";
 const MAX_RUNS_PER_DOMAIN = 200;
 
@@ -199,7 +201,11 @@ router.get("/risk-evidence/:domain", async (req: Request, res: Response) => {
 
 router.post(
   "/risk-evidence/:domain",
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "domain": z.unknown().optional(),
+      "evidenceId": z.unknown().optional(),
+      "savedAt": z.unknown().optional(),
+    })),
   async (req: Request, res: Response) => {
     try {
       const { domain } = req.params;
@@ -242,7 +248,7 @@ router.post(
   },
 );
 
-router.delete("/risk-evidence/:domain/:evidenceId", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.delete("/risk-evidence/:domain/:evidenceId", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const { domain, evidenceId } = req.params;
     if (!isValidDomain(domain)) {

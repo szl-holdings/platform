@@ -24,10 +24,12 @@ import { connectorHub } from "@szl-holdings/services";
 import { getSignals as getAtlasSignals } from "../lib/atlas-execution-engine";
 import { dbListRuns } from "../lib/decisioning-store";
 import { authMiddleware } from "../middlewares/auth";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 import { sendSuccess, sendBadRequest, sendForbidden, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 /**
  * Production guard: in production environments, unauthenticated requests to the
  * Fabric API receive a 401 so that live operational signals are never exposed
@@ -524,7 +526,10 @@ router.get("/fabric/snapshot", optionalAuth, async (req: Request, res: Response)
  *
  * Body: { approvalId: string, action: "approve" | "dismiss", note?: string }
  */
-router.post("/fabric/approvals/inline-action", optionalAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/fabric/approvals/inline-action", optionalAuth, validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "approvalId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   if (!requireAuthInProduction(req, res)) return;
   try {
     const { approvalId, action } = req.body as {

@@ -47,8 +47,10 @@ import {
   batchEmbedTable,
   scheduleReembeddingOnModelChange,
 } from "@szl-holdings/ai-engine/embedding-pipeline";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router = Router();
 
 // All knowledge routes require authentication. This middleware runs first and sets
@@ -105,7 +107,17 @@ function requireScope(req: Request, res: Response): { tenantId: string | undefin
 
 // ─── Semantic + Hybrid Search ─────────────────────────────────────────────────
 
-router.post("/search", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/search", validateBody(bodyShape({
+      "domains": z.unknown().optional(),
+      "includeGraph": z.unknown().optional(),
+      "limit": z.unknown().optional(),
+      "metadataFilters": z.unknown().optional(),
+      "minScore": z.unknown().optional(),
+      "query": z.unknown().optional(),
+      "sourceTypes": z.unknown().optional(),
+      "textWeight": z.unknown().optional(),
+      "vectorWeight": z.unknown().optional(),
+    })), async (req, res) => {
   const scope = requireScope(req, res);
   if (!scope) return;
   const { tenantId } = scope;
@@ -166,7 +178,13 @@ router.post("/search", validateBody(jsonObjectBodySchema), async (req, res) => {
 
 // ─── RAG Context Builder ──────────────────────────────────────────────────────
 
-router.post("/rag-context", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/rag-context", validateBody(bodyShape({
+      "domain": z.unknown().optional(),
+      "includeGraph": z.unknown().optional(),
+      "limit": z.unknown().optional(),
+      "minScore": z.unknown().optional(),
+      "query": z.unknown().optional(),
+    })), async (req, res) => {
   const scope = requireScope(req, res);
   if (!scope) return;
   const { tenantId } = scope;
@@ -251,7 +269,12 @@ router.get("/graph/:fromId/paths/:toId", validateQuery(listQuerySchema), async (
 
 // ─── Entity Operations ────────────────────────────────────────────────────────
 
-router.post("/entities", requireRole("admin", "ops", "editor"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/entities", requireRole("admin", "ops", "editor"), validateBody(bodyShape({
+      "description": z.unknown().optional(),
+      "domain": z.unknown().optional(),
+      "entityType": z.unknown().optional(),
+      "name": z.unknown().optional(),
+    })), async (req, res) => {
   const scope = requireScope(req, res);
   if (!scope) return;
   const { tenantId } = scope;
@@ -294,7 +317,13 @@ router.post("/entities", requireRole("admin", "ops", "editor"), validateBody(jso
 
 // ─── Relationship Operations ──────────────────────────────────────────────────
 
-router.post("/relationships", requireRole("admin", "ops", "editor"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/relationships", requireRole("admin", "ops", "editor"), validateBody(bodyShape({
+      "fromDomain": z.unknown().optional(),
+      "fromEntityId": z.unknown().optional(),
+      "relationshipType": z.unknown().optional(),
+      "toDomain": z.unknown().optional(),
+      "toEntityId": z.unknown().optional(),
+    })), async (req, res) => {
   const scope = requireScope(req, res);
   if (!scope) return;
   const { tenantId } = scope;
@@ -407,7 +436,13 @@ router.get("/centrality", validateQuery(listQuerySchema), async (req, res) => {
 
 // ─── Entity Similarity Search ─────────────────────────────────────────────────
 
-router.post("/entities/search", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/entities/search", validateBody(bodyShape({
+      "domains": z.unknown().optional(),
+      "entityTypes": z.unknown().optional(),
+      "minScore": z.unknown().optional(),
+      "query": z.unknown().optional(),
+      "topK": z.unknown().optional(),
+    })), async (req, res) => {
   const scope = requireScope(req, res);
   if (!scope) return;
   const { tenantId } = scope;
@@ -433,7 +468,13 @@ router.post("/entities/search", validateBody(jsonObjectBodySchema), async (req, 
 
 // ─── Cross-Domain Links ───────────────────────────────────────────────────────
 
-router.post("/cross-domain", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/cross-domain", validateBody(bodyShape({
+      "domain": z.unknown().optional(),
+      "entityId": z.unknown().optional(),
+      "entityName": z.unknown().optional(),
+      "entityType": z.unknown().optional(),
+      "targetDomains": z.unknown().optional(),
+    })), async (req, res) => {
   const scope = requireScope(req, res);
   if (!scope) return;
   const { tenantId } = scope;
@@ -500,7 +541,10 @@ router.get("/embedding-models", async (req, res) => {
   }
 });
 
-router.post("/embed/generate", requireRole("admin", "ops"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/embed/generate", requireRole("admin", "ops"), validateBody(bodyShape({
+      "modelId": z.unknown().optional(),
+      "text": z.unknown().optional(),
+    })), async (req, res) => {
   const scope = requireScope(req, res);
   if (!scope) return;
   try {
@@ -518,7 +562,14 @@ router.post("/embed/generate", requireRole("admin", "ops"), validateBody(jsonObj
 // They are restricted to admin/ops, which are global (not tenant-scoped) roles in this
 // deployment. If tenant-scoped admin roles are introduced, these endpoints must be
 // further restricted or refactored to accept a tenantId parameter.
-router.post("/embed/schedule", requireRole("admin", "ops"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/embed/schedule", requireRole("admin", "ops"), validateBody(bodyShape({
+      "contentColumn": z.unknown().optional(),
+      "modelId": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "targetColumn": z.unknown().optional(),
+      "targetId": z.unknown().optional(),
+      "targetTable": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { targetTable, targetId, contentColumn, targetColumn, modelId, priority } = req.body as {
       targetTable: string;
@@ -542,7 +593,9 @@ router.post("/embed/schedule", requireRole("admin", "ops"), validateBody(jsonObj
   }
 });
 
-router.post("/embed/process", requireRole("admin", "ops"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/embed/process", requireRole("admin", "ops"), validateBody(bodyShape({
+      "limit": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { limit = 20 } = req.body as { limit?: number };
     const result = await processEmbeddingTasks(limit);
@@ -552,7 +605,14 @@ router.post("/embed/process", requireRole("admin", "ops"), validateBody(jsonObje
   }
 });
 
-router.post("/embed/batch", requireRole("admin", "ops"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/embed/batch", requireRole("admin", "ops"), validateBody(bodyShape({
+      "batchSize": z.unknown().optional(),
+      "contentColumn": z.unknown().optional(),
+      "embeddingColumn": z.unknown().optional(),
+      "idColumn": z.unknown().optional(),
+      "modelId": z.unknown().optional(),
+      "tableName": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { tableName, idColumn = "id", contentColumn = "content", embeddingColumn = "embedding", modelId, batchSize = 50 } = req.body as {
       tableName: string;
@@ -585,7 +645,11 @@ router.post("/embed/batch", requireRole("admin", "ops"), validateBody(jsonObject
 
 // ─── Model-Change Re-Embedding Orchestration ─────────────────────────────────
 
-router.post("/reembed", requireRole("admin", "ops"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/reembed", requireRole("admin", "ops"), validateBody(bodyShape({
+      "priority": z.unknown().optional(),
+      "tables": z.unknown().optional(),
+      "targetModelId": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { targetModelId, priority, tables } = req.body as {
       targetModelId?: string;
@@ -606,7 +670,13 @@ router.post("/reembed", requireRole("admin", "ops"), validateBody(jsonObjectBody
 //   2. Expanding each anchor into a local subgraph (multi-hop traversal)
 //   3. Deduplicating and returning the merged graph with per-anchor scores
 
-router.post("/graph-query", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/graph-query", validateBody(bodyShape({
+      "domains": z.unknown().optional(),
+      "limit": z.unknown().optional(),
+      "maxHops": z.unknown().optional(),
+      "minScore": z.unknown().optional(),
+      "query": z.unknown().optional(),
+    })), async (req, res) => {
   const scope = requireScope(req, res);
   if (!scope) return;
   const { tenantId } = scope;

@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import {
   sendSuccess,
@@ -60,7 +62,7 @@ import {
   type ToolMeshActionApproval,
 } from "@szl-holdings/db";
 import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { sendEmail, hasEmailProviderConfigured } from "../lib/email";
 
 const router: IRouter = Router();
@@ -679,7 +681,13 @@ router.get("/policies/tiers", authMiddleware(), async (req: Request, res: Respon
   }
 });
 
-router.patch("/policies/tiers/:tier", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/policies/tiers/:tier", authMiddleware(), requireRole("super_admin", "admin"), validateBody(bodyShape({
+      "controls": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "enabled": z.unknown().optional(),
+      "riskLevel": z.unknown().optional(),
+      "tierNumber": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const tierName = req.params["tier"] as string;
     const tierParsed = PolicyTierSchema.safeParse(tierName);
@@ -784,7 +792,9 @@ router.get("/policies/:id/audit", authMiddleware(), requireRole("super_admin", "
   }
 });
 
-router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({
+      "id": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const nowIso = new Date().toISOString();
     const parsed = GuardianRuleSchema.safeParse({ ...req.body, id: req.body.id ?? "policy-pending", createdAt: nowIso, updatedAt: nowIso });
@@ -819,7 +829,19 @@ router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "
   }
 });
 
-router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "allowedModels": z.unknown().optional(),
+      "allowedTools": z.unknown().optional(),
+      "conditions": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "enabled": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "owner": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "tags": z.unknown().optional(),
+      "tier": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid policy ID"); return; }
@@ -866,7 +888,7 @@ router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admi
   }
 });
 
-router.delete("/policies/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.delete("/policies/:id", validateBody(bodyShape({})), authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid policy ID"); return; }
@@ -900,7 +922,12 @@ router.get("/policies/:id/assignments", authMiddleware(), requireRole("super_adm
   }
 });
 
-router.post("/policies/:id/assignments", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/policies/:id/assignments", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({
+      "context": z.unknown().optional(),
+      "expiresAt": z.unknown().optional(),
+      "subjectId": z.unknown().optional(),
+      "subjectType": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const policyId = parseInt(req.params["id"] as string, 10);
     if (isNaN(policyId)) { sendBadRequest(res, "Invalid policy ID"); return; }
@@ -937,7 +964,7 @@ router.post("/policies/:id/assignments", authMiddleware(), requireRole("super_ad
   }
 });
 
-router.delete("/policies/:id/assignments/:assignmentId", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.delete("/policies/:id/assignments/:assignmentId", validateBody(bodyShape({})), authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
   try {
     const policyId = parseInt(req.params["id"] as string, 10);
     const assignmentId = parseInt(req.params["assignmentId"] as string, 10);
@@ -996,7 +1023,9 @@ router.get("/tools/:toolId", authMiddleware(), async (req: Request, res: Respons
   }
 });
 
-router.post("/tools", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/tools", authMiddleware(), requireRole("super_admin", "admin"), validateBody(bodyShape({
+      "id": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const nowIso = new Date().toISOString();
     const parsed = ToolManifestSchema.safeParse({ ...req.body, createdAt: nowIso, updatedAt: nowIso });
@@ -1039,7 +1068,7 @@ router.post("/tools", authMiddleware(), requireRole("super_admin", "admin"), val
   }
 });
 
-router.patch("/tools/:toolId", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/tools/:toolId", authMiddleware(), requireRole("super_admin", "admin"), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const toolId = req.params["toolId"] as string;
     const [existing] = await db.select().from(toolMeshToolsTable).where(eq(toolMeshToolsTable.toolId, toolId)).limit(1);
@@ -1143,7 +1172,11 @@ router.get("/tools/:toolId/versions", authMiddleware(), async (req: Request, res
   }
 });
 
-router.post("/tools/:toolId/versions", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/tools/:toolId/versions", authMiddleware(), requireRole("super_admin", "admin"), validateBody(bodyShape({
+      "changelog": z.unknown().optional(),
+      "schemaSnapshot": z.unknown().optional(),
+      "version": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const toolId = req.params["toolId"] as string;
     const body = req.body as { version?: string; changelog?: string; schemaSnapshot?: Record<string, unknown> };
@@ -1174,7 +1207,12 @@ router.get("/tools/:toolId/permissions", authMiddleware(), requireRole("super_ad
   }
 });
 
-router.post("/tools/:toolId/permissions", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/tools/:toolId/permissions", authMiddleware(), requireRole("super_admin", "admin"), validateBody(bodyShape({
+      "expiresAt": z.unknown().optional(),
+      "permission": z.unknown().optional(),
+      "subjectId": z.unknown().optional(),
+      "subjectType": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const toolId = req.params["toolId"] as string;
     const body = req.body as { subjectType?: ToolMeshToolPermission["subjectType"]; subjectId?: string; permission?: ToolMeshToolPermission["permission"]; expiresAt?: string };
@@ -1199,7 +1237,7 @@ router.post("/tools/:toolId/permissions", authMiddleware(), requireRole("super_a
   }
 });
 
-router.delete("/tools/:toolId/permissions/:permissionId", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.delete("/tools/:toolId/permissions/:permissionId", validateBody(bodyShape({})), authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const toolId = req.params["toolId"] as string;
     const permissionId = parseInt(req.params["permissionId"] as string, 10);
@@ -1279,7 +1317,15 @@ router.get("/actions/:id", authMiddleware(), async (req: Request, res: Response)
 // TOOL MESH ACTION APPROVALS (tool invocation approval workflow)
 // ============================================================
 
-router.post("/tool-approvals", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/tool-approvals", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "agentId": z.unknown().optional(),
+      "payload": z.unknown().optional(),
+      "reason": z.unknown().optional(),
+      "sessionId": z.unknown().optional(),
+      "toolId": z.unknown().optional(),
+      "workflowId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { toolId, action, agentId, sessionId, workflowId, payload } = req.body as { toolId?: string; action?: string; agentId?: string; sessionId?: string; workflowId?: string; payload?: Record<string, unknown> };
     if (!toolId || !action) { sendBadRequest(res, "toolId and action are required"); return; }
@@ -1438,13 +1484,13 @@ const rejectActionHandler = async (req: Request, res: Response) => {
   }
 };
 
-router.post("/tool-approvals/:id/approve", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), approveActionHandler);
-router.post("/tool-approvals/:id/reject", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), rejectActionHandler);
+router.post("/tool-approvals/:id/approve", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({})), approveActionHandler);
+router.post("/tool-approvals/:id/reject", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({})), rejectActionHandler);
 
 // Aliases used by the operator UI (policy-approvals page) so the action
 // approval buttons work end-to-end and audit rows are written.
-router.post("/actions/:id/approve", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), approveActionHandler);
-router.post("/actions/:id/reject", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), rejectActionHandler);
+router.post("/actions/:id/approve", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({})), approveActionHandler);
+router.post("/actions/:id/reject", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({})), rejectActionHandler);
 
 // ============================================================
 // GUARDIAN APPROVAL REQUESTS (multi-tier governance approvals)
@@ -1496,7 +1542,10 @@ router.get("/approvals/:requestId", authMiddleware(), requireRole("super_admin",
   }
 });
 
-router.post("/approvals/:requestId/review", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/approvals/:requestId/review", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance", "exec"), validateBody(bodyShape({
+      "decision": z.unknown().optional(),
+      "note": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const requestId = req.params["requestId"] as string;
     const { decision, note } = req.body as { decision?: string; note?: string };
@@ -1752,7 +1801,15 @@ router.get("/rollback-events/:id", authMiddleware(), async (req: Request, res: R
   }
 });
 
-router.post("/rollback-events", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/rollback-events", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({
+      "actionId": z.unknown().optional(),
+      "agentId": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "reason": z.unknown().optional(),
+      "requestId": z.unknown().optional(),
+      "tier": z.unknown().optional(),
+      "triggeredBy": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { actionId, requestId, agentId, tier, triggeredBy, reason, metadata } = req.body as { actionId?: string; requestId?: string; agentId?: string; tier?: string; triggeredBy?: string; reason?: string; metadata?: Record<string, unknown> };
     if (!actionId || !requestId || !tier || !triggeredBy || !reason) { sendBadRequest(res, "actionId, requestId, tier, triggeredBy, and reason are required"); return; }
@@ -1773,7 +1830,9 @@ router.post("/rollback-events", authMiddleware(), requireRole("super_admin", "ad
   }
 });
 
-router.patch("/rollback-events/:id/status", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/rollback-events/:id/status", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid rollback event ID"); return; }
@@ -1807,7 +1866,16 @@ router.patch("/rollback-events/:id/status", authMiddleware(), requireRole("super
 // DECISION ENGINE — decide (legacy) + evaluate (full 6-tier)
 // ============================================================
 
-router.post("/guardian/decide", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/guardian/decide", authMiddleware(), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "agentId": z.unknown().optional(),
+      "context": z.unknown().optional(),
+      "domain": z.unknown().optional(),
+      "requestId": z.unknown().optional(),
+      "sessionId": z.unknown().optional(),
+      "tier": z.unknown().optional(),
+      "workflowId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { requestId, agentId, sessionId, workflowId, action, domain, tier, context } = req.body as Partial<DecisionRequest>;
     if (!requestId || !action) { sendBadRequest(res, "requestId and action are required"); return; }
@@ -1825,7 +1893,22 @@ router.post("/guardian/decide", authMiddleware(), validateBody(jsonObjectBodySch
   }
 });
 
-router.post("/guardian/evaluate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/guardian/evaluate", authMiddleware(), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "actionCount": z.unknown().optional(),
+      "agentId": z.unknown().optional(),
+      "context": z.unknown().optional(),
+      "domain": z.unknown().optional(),
+      "environment": z.unknown().optional(),
+      "isExternalComms": z.unknown().optional(),
+      "memoryScope": z.unknown().optional(),
+      "model": z.unknown().optional(),
+      "requestId": z.unknown().optional(),
+      "sessionId": z.unknown().optional(),
+      "tier": z.unknown().optional(),
+      "toolId": z.unknown().optional(),
+      "workflowId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { requestId, agentId, sessionId, workflowId, action, domain, tier, model, toolId, actionCount, environment, memoryScope, isExternalComms, context } = req.body as Partial<DecisionRequest>;
 
@@ -2011,7 +2094,16 @@ router.get("/guardrail-configs/:id", authMiddleware(), requireRole("super_admin"
   }
 });
 
-router.post("/guardrail-configs", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/guardrail-configs", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({
+      "appliesToTier": z.unknown().optional(),
+      "config": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "enabled": z.unknown().optional(),
+      "enforcement": z.unknown().optional(),
+      "guardrailId": z.unknown().optional(),
+      "guardrailType": z.unknown().optional(),
+      "name": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const body = req.body as { guardrailId?: string; name?: string; description?: string; guardrailType?: GuardrailConfig["guardrailType"]; config?: Record<string, unknown>; appliesToTier?: GuardrailConfig["appliesToTier"]; enforcement?: GuardrailConfig["enforcement"]; enabled?: boolean };
     if (!body.guardrailId || !body.name || !body.guardrailType) { sendBadRequest(res, "guardrailId, name, and guardrailType are required"); return; }
@@ -2036,7 +2128,14 @@ router.post("/guardrail-configs", authMiddleware(), requireRole("super_admin", "
   }
 });
 
-router.patch("/guardrail-configs/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/guardrail-configs/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({
+      "appliesToTier": z.unknown().optional(),
+      "config": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "enabled": z.unknown().optional(),
+      "enforcement": z.unknown().optional(),
+      "name": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid guardrail config ID"); return; }
@@ -2063,7 +2162,7 @@ router.patch("/guardrail-configs/:id", authMiddleware(), requireRole("super_admi
   }
 });
 
-router.delete("/guardrail-configs/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.delete("/guardrail-configs/:id", validateBody(bodyShape({})), authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid guardrail config ID"); return; }

@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, mspDevicesTable, mspClientsTable } from "@szl-holdings/db";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendError, handleRouteError } from "../../lib/api-response";
@@ -7,7 +9,7 @@ import { logger } from "../../lib/logger";
 import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 import { auth, authWrite, roleAdmin, roleOperator, queryConnectors, queryConnectorById, stripSecrets, buildProviderConfig, isProviderSupported, decryptConfig, encryptConfig, SUPPORTED_PROVIDERS } from "./shared";
-import { jsonObjectBodySchema, listQuerySchema, rmmProviderCreateSchema, validateBody, validateQuery } from "../../lib/validation";
+import { listQuerySchema, rmmProviderCreateSchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router: IRouter = Router();
 
@@ -48,7 +50,14 @@ router.post("/rmm/providers", authWrite, roleAdmin, validateBody(rmmProviderCrea
   } catch (err) { handleRouteError(res, err, "Failed to create RMM provider"); }
 });
 
-router.patch("/rmm/providers/:id", authWrite, roleAdmin, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/rmm/providers/:id", authWrite, roleAdmin, validateBody(bodyShape({
+      "config": z.unknown().optional(),
+      "mode": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "syncIntervalMinutes": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -77,7 +86,7 @@ router.patch("/rmm/providers/:id", authWrite, roleAdmin, validateBody(jsonObject
   } catch (err) { handleRouteError(res, err, "Failed to update RMM provider"); }
 });
 
-router.delete("/rmm/providers/:id", validateBody(jsonObjectBodySchema), authWrite, roleAdmin, async (req, res) => {
+router.delete("/rmm/providers/:id", validateBody(bodyShape({})), authWrite, roleAdmin, async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -87,7 +96,7 @@ router.delete("/rmm/providers/:id", validateBody(jsonObjectBodySchema), authWrit
   } catch (err) { handleRouteError(res, err, "Failed to delete RMM provider"); }
 });
 
-router.post("/rmm/providers/:id/test", authWrite, roleAdmin, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/rmm/providers/:id/test", authWrite, roleAdmin, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -106,7 +115,7 @@ router.post("/rmm/providers/:id/test", authWrite, roleAdmin, validateBody(jsonOb
   } catch (err) { handleRouteError(res, err, "Failed to test RMM provider"); }
 });
 
-router.post("/rmm/providers/:id/sync", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/rmm/providers/:id/sync", authWrite, roleOperator, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");

@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { randomUUID, createHash, createSign, createHmac } from "crypto";
 import { logger } from "../../lib/logger";
 import { db, documentsTable, documentVersionsTable, documentCommentsTable, documentTemplatesTable, contentLibraryBlocksTable, signaturesTable, pdfJobsTable, pdfBatchesTable } from "@szl-holdings/db";
@@ -10,7 +12,7 @@ import type { BlockNode } from "../../lib/pdf-renderer-types";
 import { ObjectStorageService, ObjectNotFoundError } from "../../lib/objectStorage";
 import { setObjectAclPolicy } from "../../lib/objectAcl";
 import { getRequestUserId, canAccessDocument, getUserRole, canMutateDocument, getRequestUserEmail } from "./shared";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
 interface AuthUser { id: number; role: string; email?: string; displayName?: string }
 type ExtendedRequest = Request & { user?: AuthUser }
@@ -57,7 +59,16 @@ router.get("/documents", authMiddleware(), validateQuery(listQuerySchema), async
 // NOTE: GET /documents/:id is registered AFTER all literal-segment routes below
 // to prevent Express from matching e.g. /documents/templates as :id = "templates".
 
-router.post("/documents", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/documents", authMiddleware(), validateBody(bodyShape({
+      "appSource": z.unknown().optional(),
+      "contentJson": z.unknown().optional(),
+      "entityId": z.unknown().optional(),
+      "entityType": z.unknown().optional(),
+      "mergeFieldValues": z.unknown().optional(),
+      "templateId": z.unknown().optional(),
+      "title": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { title, type, templateId, contentJson, appSource, entityType, entityId, mergeFieldValues } = req.body as {
       title?: string; type?: string; templateId?: string; contentJson?: object;
@@ -95,7 +106,13 @@ router.post("/documents", authMiddleware(), validateBody(jsonObjectBodySchema), 
   }
 });
 
-router.put("/documents/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/documents/:id", authMiddleware(), validateBody(bodyShape({
+      "changeNote": z.unknown().optional(),
+      "contentJson": z.unknown().optional(),
+      "mergeFieldValues": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid document ID");
@@ -141,7 +158,7 @@ router.put("/documents/:id", authMiddleware(), validateBody(jsonObjectBodySchema
   }
 });
 
-router.delete("/documents/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/documents/:id", validateBody(bodyShape({})), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid document ID");
@@ -188,7 +205,9 @@ router.get("/documents/:id/versions", authMiddleware(), async (req: Request, res
   }
 });
 
-router.post("/documents/:id/restore", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/documents/:id/restore", authMiddleware(), validateBody(bodyShape({
+      "version": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     const version = parseInt(req.body.version, 10);
@@ -227,7 +246,11 @@ router.post("/documents/:id/restore", authMiddleware(), validateBody(jsonObjectB
 
 // ─── Comments ────────────────────────────────────────────────────────────────
 
-router.post("/documents/:id/comments", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/documents/:id/comments", authMiddleware(), validateBody(bodyShape({
+      "authorName": z.unknown().optional(),
+      "content": z.unknown().optional(),
+      "sectionRef": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid document ID");
@@ -260,7 +283,7 @@ router.post("/documents/:id/comments", authMiddleware(), validateBody(jsonObject
   }
 });
 
-router.patch("/documents/comments/:commentId/resolve", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/documents/comments/:commentId/resolve", authMiddleware(), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const commentId = parseInt(req.params.commentId as string, 10);
     const [comment] = await db.select().from(documentCommentsTable).where(eq(documentCommentsTable.id, commentId));

@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { pool, db } from "@szl-holdings/db";
 import { alloyWorkflows, alloyApprovals, alloySignals, alloyActions, notificationPreferencesTable, auditEventsTable } from "@szl-holdings/db";
 import { eq, desc, gte, count, and, sql } from "drizzle-orm";
@@ -7,7 +8,7 @@ import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, handleRouteError, sendBadRequest } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { tenantScope } from "../middlewares/tenant-scope";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 import { z } from "zod";
 
 const router: IRouter = Router();
@@ -232,7 +233,17 @@ ${data.suggestedPriorities.map(p => `${p.rank}. **${p.action}** — ${p.reason}`
   }
 }
 
-router.post("/alloy/digest/generate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/digest/generate", authMiddleware(), validateBody(bodyShape({
+      "deliveryChannels": z.unknown().optional(),
+      "digestDate": z.unknown().optional(),
+      "keyDecisions": z.unknown().optional(),
+      "metrics": z.unknown().optional(),
+      "pendingApprovals": z.unknown().optional(),
+      "roleScope": z.unknown().optional(),
+      "signalsSummary": z.unknown().optional(),
+      "suggestedPriorities": z.unknown().optional(),
+      "workflowSummary": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { roleScope = "executive", digestDate, deliveryChannels = ["in_app"] } = req.body as {
       roleScope?: string;

@@ -22,8 +22,10 @@ import { trajectoryStore } from "@szl-holdings/ai-engine";
 import { behavioralTracer } from "@szl-holdings/ai-engine";
 import { budgetManager, MODEL_PRICING } from "@szl-holdings/ai-engine";
 import { rlMemoryManager } from "@szl-holdings/ai-engine";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router = Router();
 
 router.use(authMiddleware());
@@ -58,7 +60,12 @@ router.get("/nuro-mesh/kernel/verify-integrity", (_req: Request, res: Response) 
   });
 });
 
-router.post("/nuro-mesh/kernel/scope-certificate", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+router.post("/nuro-mesh/kernel/scope-certificate", validateBody(bodyShape({
+      "agentId": z.unknown().optional(),
+      "allowedTools": z.unknown().optional(),
+      "maxRiskLevel": z.unknown().optional(),
+      "ttlMs": z.unknown().optional(),
+    })), (req: Request, res: Response) => {
   const { agentId, allowedTools, maxRiskLevel, ttlMs } = req.body as {
     agentId?: string;
     allowedTools?: string[];
@@ -92,7 +99,10 @@ router.get("/nuro-mesh/flywheel/stats", (_req: Request, res: Response) => {
   res.json(trajectoryStore.getStats());
 });
 
-router.post("/nuro-mesh/flywheel/feedback", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+router.post("/nuro-mesh/flywheel/feedback", validateBody(bodyShape({
+      "score": z.unknown().optional(),
+      "trajectoryId": z.unknown().optional(),
+    })), (req: Request, res: Response) => {
   const { trajectoryId, score } = req.body as { trajectoryId?: string; score?: number };
   if (!trajectoryId || typeof score !== "number") {
     sendBadRequest(res, "trajectoryId and score (number -1 to 1) are required");
@@ -157,7 +167,13 @@ router.get("/nuro-mesh/cost/budget/:workflowId", (req: Request, res: Response) =
   res.json({ workflowId: req.params.workflowId, ...status });
 });
 
-router.post("/nuro-mesh/cost/budget", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+router.post("/nuro-mesh/cost/budget", validateBody(bodyShape({
+      "allowModelDowngrade": z.unknown().optional(),
+      "budgetUsd": z.unknown().optional(),
+      "hardCapThreshold": z.unknown().optional(),
+      "warningThreshold": z.unknown().optional(),
+      "workflowId": z.unknown().optional(),
+    })), (req: Request, res: Response) => {
   const { workflowId, budgetUsd, warningThreshold, hardCapThreshold, allowModelDowngrade } = req.body as {
     workflowId?: string;
     budgetUsd?: number;
@@ -189,7 +205,12 @@ router.get("/nuro-mesh/memory/stats/:agentId", (req: Request, res: Response) => 
   res.json({ agentId: req.params.agentId, ...stats, recentOperations: opLog });
 });
 
-router.post("/nuro-mesh/memory/retrieve", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/nuro-mesh/memory/retrieve", validateBody(bodyShape({
+      "agentId": z.unknown().optional(),
+      "maxResults": z.unknown().optional(),
+      "query": z.unknown().optional(),
+      "tier": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   const { agentId, query, tier, maxResults } = req.body as {
     agentId?: string;
     query?: string;
@@ -211,7 +232,9 @@ router.post("/nuro-mesh/memory/retrieve", validateBody(jsonObjectBodySchema), as
   res.json(result);
 });
 
-router.post("/nuro-mesh/memory/reward", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+router.post("/nuro-mesh/memory/reward", validateBody(bodyShape({
+      "signals": z.unknown().optional(),
+    })), (req: Request, res: Response) => {
   const { signals } = req.body as { signals?: Array<{ memoryId: string; taskSuccess: boolean; userFeedbackScore: number; confidenceDelta: number; latencyImpactMs: number }> };
   if (!signals || !Array.isArray(signals)) {
     sendBadRequest(res, "signals array is required");

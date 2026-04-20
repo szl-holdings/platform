@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import type { Request, Response } from "express";
 import PDFDocument from "pdfkit";
 import { timingSafeEqual, createHash } from "crypto";
@@ -25,7 +27,7 @@ import { sendNotFound, sendUnauthorized, sendBadRequest } from "../lib/api-respo
 import { gatewayInfer } from "../lib/ai-gateway";
 import { logger } from "../lib/logger";
 import { services } from "@szl-holdings/services";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router = Router();
 
@@ -70,7 +72,7 @@ function verifyDemoPin(req: Request, res: Response): boolean {
 if (process.env.NODE_ENV !== "production") {
   // Verify PIN and report valid/invalid — used by the client PIN modal before
   // opening demo mode. The PIN is sent in the request body (never in the URL).
-  router.post("/demo/verify", validateBody(jsonObjectBodySchema), demoRateLimit, (req: Request, res: Response): void => {
+  router.post("/demo/verify", validateBody(bodyShape({})), demoRateLimit, (req: Request, res: Response): void => {
     const pin = req.body?.pin as string | undefined;
     const adminPin = process.env.ADMIN_PIN ?? process.env.VITE_ADMIN_PIN;
     if (!pin || !adminPin) { res.status(401).json({ valid: false }); return; }
@@ -115,7 +117,7 @@ if (process.env.NODE_ENV !== "production") {
     }
   });
 
-  router.post("/demo/export/pdf", validateBody(jsonObjectBodySchema), demoRateLimit, async (req: Request, res: Response): Promise<void> => {
+  router.post("/demo/export/pdf", validateBody(bodyShape({})), demoRateLimit, async (req: Request, res: Response): Promise<void> => {
     if (!verifyDemoPin(req, res)) return;
     const briefingId: string | undefined = (req.body as { briefingId?: string } | undefined)?.briefingId;
     let brief: Briefing | null = null;
@@ -1198,7 +1200,7 @@ router.get("/domain-panel/:domain", validateQuery(listQuerySchema), async (req: 
   });
 });
 
-router.post("/briefings/generate", validateBody(jsonObjectBodySchema), async (_req: Request, res: Response): Promise<void> => {
+router.post("/briefings/generate", validateBody(bodyShape({})), async (_req: Request, res: Response): Promise<void> => {
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10);
 
@@ -1323,7 +1325,13 @@ async function seedDissentsIfEmpty(): Promise<void> {
 }
 void seedDissentsIfEmpty();
 
-router.post("/custom", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/custom", validateBody(bodyShape({
+      "agents": z.unknown().optional(),
+      "domains": z.unknown().optional(),
+      "entity": z.unknown().optional(),
+      "scenario": z.unknown().optional(),
+      "topic": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   const { topic, entity, scenario, domains, agents } = req.body;
   if (!topic) { sendBadRequest(res, "topic is required"); return; }
 
@@ -1373,7 +1381,14 @@ router.get("/dissents", validateQuery(listQuerySchema), async (_req: Request, re
   res.json({ success: true, dissents: rows.map(rowToDissent) });
 });
 
-router.post("/dissents", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/dissents", validateBody(bodyShape({
+      "basis": z.unknown().optional(),
+      "briefingId": z.unknown().optional(),
+      "dissentingView": z.unknown().optional(),
+      "impactIfCorrect": z.unknown().optional(),
+      "sectionId": z.unknown().optional(),
+      "sectionTitle": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   const { briefingId, sectionId, sectionTitle, dissentingView, basis, impactIfCorrect } = req.body;
   if (!sectionTitle || !dissentingView || !basis) {
     sendBadRequest(res, "sectionTitle, dissentingView, and basis are required");
@@ -1396,7 +1411,14 @@ router.post("/dissents", validateBody(jsonObjectBodySchema), async (req: Request
   res.json({ success: true, dissent: rowToDissent(row!), message: "Dissent filed and persisted." });
 });
 
-router.patch("/dissents/:id", validateBody(jsonObjectBodySchema), requireRole("ops", "exec", "admin", "super_admin"), async (req: Request, res: Response): Promise<void> => {
+router.patch("/dissents/:id", validateBody(bodyShape({
+      "basis": z.unknown().optional(),
+      "dissentingView": z.unknown().optional(),
+      "impactIfCorrect": z.unknown().optional(),
+      "resolution": z.unknown().optional(),
+      "resolvedAt": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), requireRole("ops", "exec", "admin", "super_admin"), async (req: Request, res: Response): Promise<void> => {
   const dissentId: string = String(req.params.id ?? "");
   const existing = await db.select().from(pulseDissentsTable).where(eq(pulseDissentsTable.dissentId, dissentId)).limit(1);
   if (existing.length === 0) { sendNotFound(res, "Dissent"); return; }
@@ -1711,7 +1733,7 @@ function renderBriefingPdf(res: Response, brief: Briefing): void {
   doc.end();
 }
 
-router.post("/export/pdf", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/export/pdf", validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const briefingId: string | undefined = req.body?.briefingId;
   const brief = briefingId
     ? await getBriefingById(briefingId)
@@ -1786,7 +1808,7 @@ router.get("/subscriptions", async (req: Request, res: Response): Promise<void> 
   res.json({ success: true, subscriptions: rows.map(rowToSubscription) });
 });
 
-router.post("/subscriptions", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/subscriptions", validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   if (!req.user) { sendUnauthorized(res); return; }
   const email = normalizeEmail(req.body?.email ?? req.user.email);
   if (!email) { sendBadRequest(res, "valid email is required"); return; }
@@ -1831,7 +1853,10 @@ router.post("/subscriptions", validateBody(jsonObjectBodySchema), async (req: Re
   res.json({ success: true, subscription: rowToSubscription(row!), message: "Subscribed to daily Pulse briefing." });
 });
 
-router.patch("/subscriptions/:id", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch("/subscriptions/:id", validateBody(bodyShape({
+      "domains": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   if (!req.user) { sendUnauthorized(res); return; }
   const id = parseInt(String(req.params.id ?? ""), 10);
   if (!Number.isFinite(id)) { sendBadRequest(res, "invalid subscription id"); return; }

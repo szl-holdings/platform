@@ -1,10 +1,12 @@
 import { Router, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { randomUUID } from "crypto";
 import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { sendSuccess, sendError, handleRouteError, sendCreated } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { gatewayInfer } from "../lib/ai-gateway";
 import {
   db,
@@ -1557,7 +1559,9 @@ function sleep(ms: number): Promise<void> {
 
 // ─── Research Routes ──────────────────────────────────────────────────────────
 
-router.post("/research", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/research", perUserWriteSlidingLimiter, validateBody(bodyShape({
+      "query": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { query } = req.body as { query?: string };
     if (!query?.trim()) {
@@ -1669,7 +1673,16 @@ router.get("/memory", validateQuery(listQuerySchema), async (req: Request, res: 
   }
 });
 
-router.post("/memory", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/memory", perUserWriteSlidingLimiter, validateBody(bodyShape({
+      "confidence": z.unknown().optional(),
+      "key": z.unknown().optional(),
+      "pinned": z.unknown().optional(),
+      "source": z.unknown().optional(),
+      "tags": z.unknown().optional(),
+      "tier": z.unknown().optional(),
+      "type": z.unknown().optional(),
+      "value": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const body = req.body as Partial<MemoryItem>;
     if (!body.key?.trim() || !body.value?.trim()) {
@@ -1699,7 +1712,9 @@ router.post("/memory", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySc
   }
 });
 
-router.put("/memory/:id", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/memory/:id", perUserWriteSlidingLimiter, validateBody(bodyShape({
+      "value": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const item = memoryStore.get(req.params.id as string);
     if (!item) { sendError(res, "Memory item not found", 404); return; }
@@ -1717,7 +1732,7 @@ router.put("/memory/:id", perUserWriteSlidingLimiter, validateBody(jsonObjectBod
   }
 });
 
-router.delete("/memory/:id", validateBody(jsonObjectBodySchema), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.delete("/memory/:id", validateBody(bodyShape({})), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
   try {
     if (!memoryStore.has(req.params.id as string)) { sendError(res, "Memory item not found", 404); return; }
     memoryStore.delete(req.params.id as string);
@@ -1751,7 +1766,9 @@ router.get("/skills", validateQuery(listQuerySchema), async (req: Request, res: 
   }
 });
 
-router.post("/skills/:id/toggle", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/skills/:id/toggle", perUserWriteSlidingLimiter, validateBody(bodyShape({
+      "enabled": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const skill = skillStore.get(req.params.id as string);
     if (!skill) { sendError(res, "Skill not found", 404); return; }
@@ -1764,7 +1781,21 @@ router.post("/skills/:id/toggle", perUserWriteSlidingLimiter, validateBody(jsonO
   }
 });
 
-router.post("/skills", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/skills", perUserWriteSlidingLimiter, validateBody(bodyShape({
+  id: z.unknown().optional(),
+  name: z.unknown().optional(),
+  description: z.unknown().optional(),
+  sourceRepo: z.unknown().optional(),
+  sourceUrl: z.unknown().optional(),
+  license: z.unknown().optional(),
+  pattern: z.unknown().optional(),
+  primitiveType: z.unknown().optional(),
+  enabled: z.unknown().optional(),
+  usageCount: z.unknown().optional(),
+  nexusAdaptation: z.unknown().optional(),
+  originalSummary: z.unknown().optional(),
+  tags: z.unknown().optional(),
+})), async (req: Request, res: Response) => {
   try {
     const body = req.body as Partial<Skill>;
     if (!body.name?.trim()) { sendError(res, "name is required", 400); return; }
@@ -1791,7 +1822,7 @@ router.post("/skills", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySc
   }
 });
 
-router.put("/skills/:id", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/skills/:id", perUserWriteSlidingLimiter, validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const skill = skillStore.get(req.params.id as string);
     if (!skill) { sendError(res, "Skill not found", 404); return; }
@@ -1829,7 +1860,15 @@ router.get("/bridge/tools", validateQuery(listQuerySchema), async (req: Request,
   }
 });
 
-router.post("/bridge/tools", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/bridge/tools", perUserWriteSlidingLimiter, validateBody(bodyShape({
+  id: z.unknown().optional(),
+  name: z.unknown().optional(),
+  description: z.unknown().optional(),
+  protocol: z.unknown().optional(),
+  domain: z.unknown().optional(),
+  inputSchema: z.unknown().optional(),
+  tags: z.unknown().optional(),
+})), async (req: Request, res: Response) => {
   try {
     const body = req.body as Partial<ProtocolTool>;
     if (!body.name?.trim() || !body.protocol) {
@@ -1857,7 +1896,7 @@ router.post("/bridge/tools", perUserWriteSlidingLimiter, validateBody(jsonObject
   }
 });
 
-router.put("/bridge/tools/:id", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/bridge/tools/:id", perUserWriteSlidingLimiter, validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const tool = toolStore.get(req.params.id as string);
     if (!tool) { sendError(res, "Tool not found", 404); return; }
@@ -1883,7 +1922,11 @@ router.delete("/bridge/tools/:id", perUserWriteSlidingLimiter, async (req: Reque
   }
 });
 
-router.post("/bridge/invoke", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/bridge/invoke", perUserWriteSlidingLimiter, validateBody(bodyShape({
+  protocol: z.unknown().optional(),
+  toolId: z.unknown().optional(),
+  args: z.unknown().optional(),
+})), async (req: Request, res: Response) => {
   try {
     const { protocol, toolId, args = {} } = req.body as { protocol?: string; toolId?: string; args?: Record<string, unknown> };
     if (!protocol || !toolId) { sendError(res, "protocol and toolId are required", 400); return; }
@@ -2093,7 +2136,9 @@ async function runOrchestration(planId: string, intent: string) {
   }
 }
 
-router.post("/orchestrate", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/orchestrate", perUserWriteSlidingLimiter, validateBody(bodyShape({
+      "intent": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { intent } = req.body as { intent?: string };
     if (!intent?.trim()) { sendError(res, "intent is required", 400); return; }
@@ -2240,7 +2285,9 @@ router.get("/ingest", async (_req: Request, res: Response) => {
   }
 });
 
-router.post("/ingest", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/ingest", perUserWriteSlidingLimiter, validateBody(bodyShape({
+      "repoUrl": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { repoUrl } = req.body as { repoUrl?: string };
     if (!repoUrl?.trim()) { sendError(res, "repoUrl is required", 400); return; }

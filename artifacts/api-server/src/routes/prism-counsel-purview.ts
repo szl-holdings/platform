@@ -13,7 +13,7 @@ import {
 import { eq, and, desc, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { z } from "zod";
-import { validateBody, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const diagnosticsRunSchema = z.object({
   orgId: z.number().int().positive().optional(),

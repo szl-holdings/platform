@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import {
   sendSuccess,
@@ -7,11 +9,24 @@ import {
   sendBadRequest,
   handleRouteError,
 } from "../lib/api-response";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.post("/proof-chain/tag", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/proof-chain/tag", authMiddleware(), validateBody(bodyShape({
+      "confidenceScore": z.unknown().optional(),
+      "contentId": z.unknown().optional(),
+      "contentType": z.unknown().optional(),
+      "inputSources": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "modelId": z.unknown().optional(),
+      "modelLane": z.unknown().optional(),
+      "modelProvider": z.unknown().optional(),
+      "modelVersion": z.unknown().optional(),
+      "parentProofId": z.unknown().optional(),
+      "promptText": z.unknown().optional(),
+      "sourceClass": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const {
       contentId,
@@ -105,7 +120,11 @@ router.get("/proof-chain/by-content/:contentType/:contentId", authMiddleware(), 
   }
 });
 
-router.post("/proof-chain/:id/review", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/proof-chain/:id/review", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance"), validateBody(bodyShape({
+      "exportSafetyState": z.unknown().optional(),
+      "reviewNote": z.unknown().optional(),
+      "reviewState": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid proof ID"); return; }

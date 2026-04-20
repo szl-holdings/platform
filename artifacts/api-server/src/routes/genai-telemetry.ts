@@ -1,7 +1,9 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { genAITelemetry } from "@szl-holdings/observability";
-import {validateBody, genaiSpanSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, genaiSpanSchema, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -143,7 +145,9 @@ router.post(
 router.post(
   "/genai-telemetry/spans/batch",
   authMiddleware({ required: true }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "spans": z.unknown().optional(),
+    })),
   (req, res) => {
     try {
       const { spans } = req.body;

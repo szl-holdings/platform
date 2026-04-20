@@ -27,8 +27,9 @@ import {
   handleRouteError,
 } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 
 const NAMESPACE = "szl.ui.preferences";
@@ -145,7 +146,7 @@ router.get("/preferences", authMiddleware(), async (req: Request, res: Response)
 router.patch(
   "/preferences",
   authMiddleware(),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
       const userId = req.user!.id;

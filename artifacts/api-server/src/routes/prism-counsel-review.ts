@@ -1,8 +1,9 @@
 import { Router, Request, Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 import { db } from "@szl-holdings/db";
 import { eq, and, desc, or, sql, isNull, not, gte } from "drizzle-orm";
 import {
@@ -751,7 +752,7 @@ router.post("/review-desk/items/:id/actions/request-support", validateBody(Suppo
   }
 });
 
-router.post("/review-desk/items/:id/actions/generate-review-packet", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/review-desk/items/:id/actions/generate-review-packet", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
     const actorId = req.user!.id;
@@ -773,7 +774,7 @@ router.post("/review-desk/items/:id/actions/generate-review-packet", validateBod
   }
 });
 
-router.post("/review-desk/items/:id/actions/export-packet", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/review-desk/items/:id/actions/export-packet", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
     const actorId = req.user!.id;

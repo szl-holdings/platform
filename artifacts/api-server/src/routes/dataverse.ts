@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
@@ -13,7 +15,7 @@ import { eq, and } from "drizzle-orm";
 import { services } from "@szl-holdings/services";
 import { getAzureTenantForUser } from "../lib/auth";
 import { decryptSecret } from "../lib/crypto";
-import { anyQuerySchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { anyQuerySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -254,7 +256,15 @@ router.post(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "companyName": z.unknown().optional(),
+      "email": z.unknown().optional(),
+      "emailAddress1": z.unknown().optional(),
+      "estimatedvalue": z.unknown().optional(),
+      "firstName": z.unknown().optional(),
+      "lastName": z.unknown().optional(),
+      "subject": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const body = req.body ?? {};
       if (!body.firstName || !body.lastName) {
@@ -334,7 +344,9 @@ router.patch(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "stageName": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const { opportunityId } = req.params as Record<string, string>;
       const { stageName } = req.body ?? {};
@@ -412,7 +424,14 @@ router.post(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "activityType": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "regardingObjectId": z.unknown().optional(),
+      "regardingObjectType": z.unknown().optional(),
+      "scheduledstart": z.unknown().optional(),
+      "subject": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const body = req.body ?? {};
       if (!body.subject) {
@@ -465,7 +484,11 @@ router.post(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "noteText": z.unknown().optional(),
+      "regardingObjectId": z.unknown().optional(),
+      "regardingObjectType": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const body = req.body ?? {};
       if (!body.noteText || !body.regardingObjectId || !body.regardingObjectType) {
@@ -611,7 +634,7 @@ router.patch(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({})), async (req: Request, res: Response) => {
     try {
       const adapter = services.dataverse;
       const connParams = await buildConnParams(req);
@@ -641,7 +664,7 @@ router.patch(
 );
 
 router.delete(
-  "/contacts/:contactId", validateBody(jsonObjectBodySchema),
+  "/contacts/:contactId", validateBody(bodyShape({})),
   dataverseRateLimit,
   authMiddleware(),
   requireRole("admin"),
@@ -678,7 +701,15 @@ router.post(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "accountId": z.unknown().optional(),
+      "email": z.unknown().optional(),
+      "emailAddress1": z.unknown().optional(),
+      "firstName": z.unknown().optional(),
+      "jobTitle": z.unknown().optional(),
+      "lastName": z.unknown().optional(),
+      "telephone1": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const body = req.body ?? {};
       if (!body.firstName || !body.lastName) {
@@ -752,7 +783,7 @@ router.patch(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({})), async (req: Request, res: Response) => {
     try {
       const adapter = services.dataverse;
       const connParams = await buildConnParams(req);
@@ -782,7 +813,7 @@ router.patch(
 );
 
 router.delete(
-  "/leads/:leadId", validateBody(jsonObjectBodySchema),
+  "/leads/:leadId", validateBody(bodyShape({})),
   dataverseRateLimit,
   authMiddleware(),
   requireRole("admin"),
@@ -853,7 +884,7 @@ router.patch(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({})), async (req: Request, res: Response) => {
     try {
       const adapter = services.dataverse;
       const connParams = await buildConnParams(req);
@@ -883,7 +914,7 @@ router.patch(
 );
 
 router.delete(
-  "/opportunities/:opportunityId", validateBody(jsonObjectBodySchema),
+  "/opportunities/:opportunityId", validateBody(bodyShape({})),
   dataverseRateLimit,
   authMiddleware(),
   requireRole("admin"),
@@ -953,7 +984,9 @@ router.patch(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "activityType": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const body = req.body ?? {};
       const activityType = String(body.activityType ?? req.query.activityType ?? "task");
@@ -986,7 +1019,7 @@ router.patch(
 );
 
 router.delete(
-  "/activities/:activityId", validateBody(jsonObjectBodySchema), validateQuery(anyQuerySchema),
+  "/activities/:activityId", validateBody(bodyShape({})), validateQuery(anyQuerySchema),
   dataverseRateLimit,
   authMiddleware(),
   requireRole("admin"),
@@ -1136,7 +1169,7 @@ router.post(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({})), async (req: Request, res: Response) => {
     try {
       const adapter = services.dataverse;
       const connParams = await buildConnParams(req);
@@ -1203,7 +1236,7 @@ router.post(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({})), async (req: Request, res: Response) => {
     try {
       const adapter = services.dataverse;
       const connParams = await buildConnParams(req);

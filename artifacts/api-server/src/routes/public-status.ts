@@ -1,7 +1,9 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { pool } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -262,7 +264,9 @@ router.get("/uptime-history", async (_req, res) => {
   }
 });
 
-router.post("/status/subscribe", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/status/subscribe", validateBody(bodyShape({
+      "email": z.unknown().optional(),
+    })), async (req, res) => {
   const { email } = req.body as { email?: string };
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     res.status(400).json({ error: "Valid email required" });
@@ -281,7 +285,12 @@ router.post("/status/subscribe", validateBody(jsonObjectBodySchema), async (req,
   }
 });
 
-router.post("/incidents", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/incidents", validateBody(bodyShape({
+      "affected_services": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "severity": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req, res) => {
   const { title, severity, affected_services, description } = req.body as {
     title?: string; severity?: string; affected_services?: string[]; description?: string;
   };
@@ -308,7 +317,10 @@ router.post("/incidents", validateBody(jsonObjectBodySchema), async (req, res) =
   }
 });
 
-router.patch("/incidents/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/incidents/:id", validateBody(bodyShape({
+      "message": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req, res) => {
   const id = parseInt(req.params["id"]!);
   const { status, message } = req.body as { status?: string; message?: string };
   if (!status || !message) {

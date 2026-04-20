@@ -42,8 +42,10 @@ import {
   getDelegationHistory,
   getDelegationStats,
 } from "@szl-holdings/ai-engine/a2a/agent-delegation";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router = Router();
 
 const VALID_AGENT_IDS = new Set(["alloy", "helmsman", "sentinel", "inca", "muse", "beacon", "zeus", "compass"]);
@@ -102,7 +104,7 @@ router.get("/a2a/agents/:agentId/status", (req: Request, res: Response) => {
   }
 });
 
-router.post("/a2a/agents/:agentId/heartbeat", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+router.post("/a2a/agents/:agentId/heartbeat", validateBody(bodyShape({})), (req: Request, res: Response) => {
   try {
     recordHeartbeat(req.params.agentId as string);
     sendSuccess(res, { recorded: true, agentId: req.params.agentId });
@@ -111,7 +113,12 @@ router.post("/a2a/agents/:agentId/heartbeat", validateBody(jsonObjectBodySchema)
   }
 });
 
-router.post("/a2a/agents/:agentId/tasks", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/a2a/agents/:agentId/tasks", validateBody(bodyShape({
+      "callerAgentId": z.unknown().optional(),
+      "callerPlatform": z.unknown().optional(),
+      "input": z.unknown().optional(),
+      "query": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   const agentId = String(req.params.agentId);
   if (!VALID_AGENT_IDS.has(agentId)) {
     res.status(404).json({ error: "Agent not found" });
@@ -228,7 +235,9 @@ router.get("/a2a/agents/:agentId/stream", validateQuery(listQuerySchema), async 
   res.end();
 });
 
-router.post("/a2a/agents/:agentId/rpc", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+router.post("/a2a/agents/:agentId/rpc", validateBody(bodyShape({
+      "jsonrpc": z.unknown().optional(),
+    })), (req: Request, res: Response) => {
   const agentId = String(req.params.agentId);
   const request = req.body as A2AJsonRpcRequest;
 
@@ -263,7 +272,14 @@ router.get("/a2a/discover", validateQuery(listQuerySchema), (req: Request, res: 
   }
 });
 
-router.post("/a2a/delegate", validateBody(jsonObjectBodySchema), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+router.post("/a2a/delegate", validateBody(bodyShape({
+      "context": z.unknown().optional(),
+      "fromAgentId": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "query": z.unknown().optional(),
+      "toAgentId": z.unknown().optional(),
+    })), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { fromAgentId, toAgentId, query, context, priority, orgId } = req.body as {
       fromAgentId: string;
@@ -295,7 +311,13 @@ router.post("/a2a/delegate", validateBody(jsonObjectBodySchema), validateQuery(l
   }
 });
 
-router.post("/a2a/multi-delegate", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/a2a/multi-delegate", validateBody(bodyShape({
+      "context": z.unknown().optional(),
+      "fromAgentId": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "query": z.unknown().optional(),
+      "toAgentIds": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { fromAgentId, toAgentIds, query, context, orgId } = req.body as {
       fromAgentId: string;

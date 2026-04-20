@@ -1,10 +1,11 @@
 import { Router } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { authMiddleware } from "../middlewares/auth";
 import { sendError, sendBadRequest } from "../lib/api-response";
 import { twinRegistry, vesselTwin, propertyTwin, postureTwin } from "@szl-holdings/ai-engine";
 import type { VesselTwinState, PropertyTwinState, PostureTwinState, SimulationScenario } from "@szl-holdings/ai-engine";
 import { z } from "zod";
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 import { guardSeedInProduction } from "../lib/seed-guard";
 
 const twinEntitySchema = z.object({
@@ -98,7 +99,7 @@ router.post("/digital-twins/:twinId/simulate", authMiddleware(), validateBody(si
   }
 });
 
-router.patch("/digital-twins/:twinId", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/digital-twins/:twinId", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const updated = twinRegistry.update(req.params.twinId as string, req.body);
     if (!updated) return sendError(res, "Twin not found", 404);
@@ -108,7 +109,7 @@ router.patch("/digital-twins/:twinId", authMiddleware(), validateBody(jsonObject
   }
 });
 
-router.post("/digital-twins/demo/seed", validateBody(jsonObjectBodySchema), authMiddleware(), async (_req, res) => {
+router.post("/digital-twins/demo/seed", validateBody(bodyShape({})), authMiddleware(), async (_req, res) => {
   if (guardSeedInProduction(res)) return;
   try {
     const vesselState: VesselTwinState = {

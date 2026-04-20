@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   sendSuccess,
   sendCreated,
@@ -18,7 +20,7 @@ import {
   SELF_MODEL_VERSION,
 } from "@workspace/self-model";
 import { PoolSelfModelAdapter } from "../lib/self-model-db-adapter";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 /**
  * Wire the DB adapter into the store on first module import.
@@ -100,7 +102,7 @@ router.post(
   "/self-model",
   authMiddleware(),
   requireRole("admin", "super_admin"),
-  validateBody(jsonObjectBodySchema), async (req, res) => {
+  validateBody(bodyShape({})), async (req, res) => {
     try {
       const parsed = CreateSelfModelSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -126,7 +128,7 @@ router.post(
   "/self-model/run-outcome",
   authMiddleware(),
   requireRole("admin", "super_admin"),
-  validateBody(jsonObjectBodySchema), async (req, res) => {
+  validateBody(bodyShape({})), async (req, res) => {
     try {
       const parsed = RunOutcomeSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -161,7 +163,10 @@ router.post(
   "/self-model/check-threshold",
   authMiddleware(),
   requireRole("admin", "super_admin"),
-  validateBody(jsonObjectBodySchema), async (req, res) => {
+  validateBody(bodyShape({
+      "agentId": z.unknown().optional(),
+      "metric": z.unknown().optional(),
+    })), async (req, res) => {
     try {
       const { agentId, metric } = req.body;
       if (!agentId || !metric) {

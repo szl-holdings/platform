@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import {
   db,
   pcMattersTable,
@@ -17,7 +18,7 @@ import { logger } from "../lib/logger";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { ingestPrismMatter } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 import { z } from "zod";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -376,7 +377,7 @@ router.get("/prism-counsel/approvals", authMiddleware(), validateQuery(listQuery
   }
 });
 
-router.post("/prism-counsel/approvals/:id/approve", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/prism-counsel/approvals/:id/approve", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;
@@ -403,7 +404,7 @@ router.post("/prism-counsel/approvals/:id/approve", authMiddleware(), validateBo
   }
 });
 
-router.post("/prism-counsel/approvals/:id/reject", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/prism-counsel/approvals/:id/reject", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const orgId = requireAuth(req, res);
     if (!orgId) return;

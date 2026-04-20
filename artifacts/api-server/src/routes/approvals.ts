@@ -1,6 +1,8 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
-import { validateBody, approvalCreateSchema, approvalReviewSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, approvalCreateSchema, approvalReviewSchema, validateQuery, listQuerySchema } from "../lib/validation";
 import {
   sendSuccess,
   sendCreated,
@@ -392,7 +394,10 @@ router.post("/approvals/:id/review", authMiddleware(), requireRole("super_admin"
   }
 });
 
-router.post("/approvals/:id/escalate", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/approvals/:id/escalate", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({
+      "escalatedToId": z.unknown().optional(),
+      "reason": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid approval ID"); return; }
@@ -433,7 +438,10 @@ router.post("/approvals/:id/escalate", authMiddleware(), requireRole("super_admi
   }
 });
 
-router.post("/approvals/:id/comment", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/approvals/:id/comment", authMiddleware(), validateBody(bodyShape({
+      "body": z.unknown().optional(),
+      "isInternal": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid approval ID"); return; }
@@ -496,7 +504,11 @@ router.get("/approvals/by-resource/:resourceType/:resourceId", authMiddleware(),
   }
 });
 
-router.post("/audit-log/policy-appeal", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/audit-log/policy-appeal", authMiddleware(), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "justification": z.unknown().optional(),
+      "requestId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { requestId, action, justification } = req.body as {
       requestId?: string;

@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import rateLimit from "express-rate-limit";
 import {
   db,
@@ -18,7 +20,7 @@ import type {
   VesselUsdState,
   RouteSimulationParams,
 } from "@szl-holdings/openusd-export";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -129,7 +131,7 @@ router.post(
   "/vessels/:imo/simulate",
   twinRateLimit,
   authMiddleware({ required: false }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req, res) => {
     try {
       const { imo } = req.params;

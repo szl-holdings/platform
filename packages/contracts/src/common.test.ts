@@ -9,7 +9,52 @@ import {
   orgIdSchema,
   timestampsSchema,
   sortQuerySchema,
+  bodyShape,
+  queryShape,
 } from "./common";
+
+describe("bodyShape", () => {
+  const schema = bodyShape({
+    name: z.string().min(1),
+    count: z.number().int().optional(),
+  });
+
+  it("validates declared fields", () => {
+    const r = schema.parse({ name: "hello", count: 3 });
+    expect(r).toMatchObject({ name: "hello", count: 3 });
+  });
+
+  it("rejects bad types on declared fields", () => {
+    expect(() => schema.parse({ name: "" })).toThrow();
+    expect(() => schema.parse({ name: 123 })).toThrow();
+  });
+
+  it("passes through unknown extra fields", () => {
+    const r = schema.parse({ name: "x", extra: 42, more: { a: 1 } }) as Record<string, unknown>;
+    expect(r["extra"]).toBe(42);
+    expect(r["more"]).toEqual({ a: 1 });
+  });
+
+  it("coerces null/undefined body to empty object so optionals validate", () => {
+    const optional = bodyShape({ value: z.string().optional() });
+    expect(optional.parse(undefined)).toEqual({});
+    expect(optional.parse(null)).toEqual({});
+  });
+});
+
+describe("queryShape", () => {
+  const schema = queryShape({
+    page: z.coerce.number().int().min(1).optional(),
+    q: z.string().max(100).optional(),
+  });
+
+  it("coerces query strings to declared types", () => {
+    const r = schema.parse({ page: "5", q: "search", extra: "kept" }) as Record<string, unknown>;
+    expect(r["page"]).toBe(5);
+    expect(r["q"]).toBe("search");
+    expect(r["extra"]).toBe("kept");
+  });
+});
 
 describe("paginationQuerySchema", () => {
   it("applies defaults when omitted", () => {

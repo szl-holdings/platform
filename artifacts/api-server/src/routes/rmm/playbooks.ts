@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, mspDevicesTable, mspClientsTable } from "@szl-holdings/db";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendError, handleRouteError } from "../../lib/api-response";
@@ -7,7 +9,7 @@ import { logger } from "../../lib/logger";
 import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 import { auth, authWrite, roleAdmin, roleOperator, queryConnectors, queryConnectorById, stripSecrets, buildProviderConfig, isProviderSupported, type PlaybookRow, type HealingExecutionRow } from "./shared";
-import { jsonObjectBodySchema, listQuerySchema, rmmPlaybookCreateSchema, validateBody, validateQuery } from "../../lib/validation";
+import { listQuerySchema, rmmPlaybookCreateSchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router: IRouter = Router();
 
@@ -43,7 +45,15 @@ router.post("/rmm/playbooks", authWrite, roleAdmin, validateBody(rmmPlaybookCrea
   } catch (err) { handleRouteError(res, err, "Failed to create playbook"); }
 });
 
-router.patch("/rmm/playbooks/:id", authWrite, roleAdmin, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/rmm/playbooks/:id", authWrite, roleAdmin, validateBody(bodyShape({
+      "confidenceThreshold": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "detectionRules": z.unknown().optional(),
+      "executionMode": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "remediationActions": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -86,7 +96,7 @@ router.patch("/rmm/playbooks/:id", authWrite, roleAdmin, validateBody(jsonObject
   } catch (err) { handleRouteError(res, err, "Failed to update playbook"); }
 });
 
-router.delete("/rmm/playbooks/:id", validateBody(jsonObjectBodySchema), authWrite, roleAdmin, async (req, res) => {
+router.delete("/rmm/playbooks/:id", validateBody(bodyShape({})), authWrite, roleAdmin, async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -121,7 +131,12 @@ router.get("/rmm/playbooks/executions", auth, validateQuery(listQuerySchema), as
   } catch (err) { handleRouteError(res, err, "Failed to list healing executions"); }
 });
 
-router.post("/rmm/playbooks/:id/execute", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/rmm/playbooks/:id/execute", authWrite, roleOperator, validateBody(bodyShape({
+      "clientId": z.unknown().optional(),
+      "detectionContext": z.unknown().optional(),
+      "deviceId": z.unknown().optional(),
+      "triggeredBy": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -169,7 +184,9 @@ router.post("/rmm/playbooks/:id/execute", authWrite, roleOperator, validateBody(
   } catch (err) { handleRouteError(res, err, "Failed to execute playbook"); }
 });
 
-router.post("/rmm/playbooks/executions/:id/approve", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/rmm/playbooks/executions/:id/approve", authWrite, roleOperator, validateBody(bodyShape({
+      "approvedBy": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -208,7 +225,7 @@ router.post("/rmm/playbooks/executions/:id/approve", authWrite, roleOperator, va
   } catch (err) { handleRouteError(res, err, "Failed to approve execution"); }
 });
 
-router.post("/rmm/playbooks/executions/:id/reject", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/rmm/playbooks/executions/:id/reject", authWrite, roleOperator, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");

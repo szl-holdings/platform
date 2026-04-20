@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { randomUUID, createHash, createSign, createHmac } from "crypto";
 import { logger } from "../../lib/logger";
 import { db, documentsTable, documentVersionsTable, documentCommentsTable, documentTemplatesTable, contentLibraryBlocksTable, signaturesTable, pdfJobsTable, pdfBatchesTable } from "@szl-holdings/db";
@@ -10,7 +12,7 @@ import type { BlockNode } from "../../lib/pdf-renderer-types";
 import { ObjectStorageService, ObjectNotFoundError } from "../../lib/objectStorage";
 import { setObjectAclPolicy } from "../../lib/objectAcl";
 import { getRequestUserId, canAccessDocument, getUserRole, canMutateDocument, getRequestUserEmail } from "./shared";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../../lib/validation";
 
 interface AuthUser { id: number; role: string; email?: string; displayName?: string }
 type ExtendedRequest = Request & { user?: AuthUser }
@@ -24,7 +26,12 @@ const objectStorageService = new ObjectStorageService();
 // Object storage integration can be added by replacing the outputUrl with a
 // presigned URL from S3/GCS/Replit Object Storage.
 
-router.post("/documents/batch-pdf", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/documents/batch-pdf", authMiddleware(), validateBody(bodyShape({
+      "appSource": z.unknown().optional(),
+      "items": z.unknown().optional(),
+      "templateId": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { title, templateId, appSource, items } = req.body as {
       title?: string; templateId?: string; appSource?: string;
@@ -112,7 +119,7 @@ router.get("/documents/batch-pdf", authMiddleware(), validateQuery(listQuerySche
   }
 });
 
-router.post("/documents/batch-pdf/:batchId/cancel", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/documents/batch-pdf/:batchId/cancel", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const { batchId } = req.params as Record<string, string>;
     const [batch] = await db.select().from(pdfBatchesTable).where(eq(pdfBatchesTable.batchId, batchId));
@@ -132,7 +139,7 @@ router.post("/documents/batch-pdf/:batchId/cancel", authMiddleware(), validateBo
   }
 });
 
-router.post("/documents/pdf-jobs/:jobId/retry", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/documents/pdf-jobs/:jobId/retry", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const jobId = parseInt(req.params.jobId as string, 10);
     const [job] = await db.select().from(pdfJobsTable).where(eq(pdfJobsTable.id, jobId));
@@ -758,7 +765,7 @@ async function getDocuSignEmbeddedUrl(params: {
 }
 
 // DocuSign: create envelope and get embedded signing URL for a document
-router.post("/documents/:id/docusign/send", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/documents/:id/docusign/send", authMiddleware(), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const docId = parseInt(req.params.id as string, 10);
     const [doc] = await db.select().from(documentsTable).where(eq(documentsTable.id, docId));
@@ -857,7 +864,7 @@ function verifyDocuSignHmac(body: Buffer | string, signature: string, key: strin
   return expected === signature;
 }
 
-router.post("/documents/docusign/webhook", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/documents/docusign/webhook", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const DOCUSIGN_HMAC_KEY = process.env.DOCUSIGN_CONNECT_HMAC_KEY;
     const signature = req.headers["x-docusign-signature-1"] as string | undefined;
@@ -926,7 +933,7 @@ router.post("/documents/docusign/webhook", validateBody(jsonObjectBodySchema), a
 });
 
 // DocuSign: get embedded signing URL for a specific signer (re-initiate)
-router.post("/documents/:id/docusign/embed/:sigId", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/documents/:id/docusign/embed/:sigId", authMiddleware(), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const docId = parseInt(req.params.id as string, 10);
     const sigId = parseInt(req.params.sigId as string, 10);

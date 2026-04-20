@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { requireRole } from "../../middlewares/auth";
 import { sendSuccess, sendNotFound, sendBadRequest, sendError, handleRouteError } from "../../lib/api-response";
 import { listPipelines, executePipeline, getPipelineConfig, executeComposedPipeline } from "../../lib/intelligence-pipelines";
@@ -6,7 +8,7 @@ import { insertDecision } from "../../lib/alloy-decision-store";
 import { logger } from "../../lib/logger";
 import { randomUUID } from "crypto";
 import { evaluatePolicies, toRiskLevel, makeEvidenceRef } from "./shared";
-import { validateBody, jsonObjectBodySchema } from "../../lib/validation";
+import { validateBody } from "../../lib/validation";
 
 const router = Router();
 
@@ -41,7 +43,11 @@ router.get("/control-tower/act/pipelines/:id", (req: Request, res: Response) => 
   }
 });
 
-router.post("/control-tower/act/pipelines/:id/run", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/control-tower/act/pipelines/:id/run", requireRole("super_admin", "ops", "exec"), validateBody(bodyShape({
+      "agentId": z.unknown().optional(),
+      "input": z.unknown().optional(),
+      "slice": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as Record<string, string>;
     const { input, agentId } = req.body as { input?: string; agentId?: string };
@@ -113,7 +119,11 @@ router.post("/control-tower/act/pipelines/:id/run", requireRole("super_admin", "
   }
 });
 
-router.post("/control-tower/act/compose", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/control-tower/act/compose", requireRole("super_admin", "ops", "exec"), validateBody(bodyShape({
+      "input": z.unknown().optional(),
+      "stages": z.unknown().optional(),
+      "trim": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { stages, input } = req.body as {
       stages: Array<{ id: string; type: string; name: string }>;

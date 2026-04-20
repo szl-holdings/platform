@@ -1,9 +1,11 @@
 import { Router } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth";
 import { sendError, sendBadRequest } from "../lib/api-response";
 import { ontologyEngine } from "@szl-holdings/ai-engine";
 import { graphRAGEngine } from "@szl-holdings/ai-engine";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router = Router();
 
@@ -67,7 +69,7 @@ router.get("/ontology/domain/:domain", authMiddleware(), validateQuery(listQuery
   }
 });
 
-router.post("/ontology/entity", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/ontology/entity", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const { type, name, domain, metadata = {}, tags = [], riskScore, externalId } = req.body;
     if (!type || !name || !domain) return sendBadRequest(res, "type, name, and domain are required");
@@ -78,7 +80,7 @@ router.post("/ontology/entity", authMiddleware(), validateBody(jsonObjectBodySch
   }
 });
 
-router.post("/ontology/relationship", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/ontology/relationship", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const { fromEntityId, toEntityId, type, strength = "moderate", metadata = {} } = req.body;
     if (!fromEntityId || !toEntityId || !type) return sendBadRequest(res, "fromEntityId, toEntityId, and type are required");
@@ -89,7 +91,13 @@ router.post("/ontology/relationship", authMiddleware(), validateBody(jsonObjectB
   }
 });
 
-router.post("/ontology/graph-rag", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/ontology/graph-rag", authMiddleware(), validateBody(bodyShape({
+      "domains": z.unknown().optional(),
+      "maxEntitiesPerHop": z.unknown().optional(),
+      "maxHops": z.unknown().optional(),
+      "query": z.unknown().optional(),
+      "topKChunksPerEntity": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { query, maxHops = 2, maxEntitiesPerHop = 5, topKChunksPerEntity = 3, domains } = req.body;
     if (!query) return sendBadRequest(res, "query is required");

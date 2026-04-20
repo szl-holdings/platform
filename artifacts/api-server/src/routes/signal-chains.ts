@@ -27,8 +27,9 @@ import {
   vesselsEventsTable,
 } from "@szl-holdings/db";
 import { eq, and, desc, count, sql, ne } from "drizzle-orm";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 
 interface SignalChainStep {
@@ -537,7 +538,7 @@ router.post(
   "/signal-chains/:id/trigger",
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req, res) => {
     const chain = chainState.get(req.params.id as string);
     if (!chain) {
@@ -589,7 +590,7 @@ router.post(
 );
 
 router.post(
-  "/signal-chains/evaluate", validateBody(jsonObjectBodySchema),
+  "/signal-chains/evaluate", validateBody(bodyShape({})),
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
   async (_req, res) => {

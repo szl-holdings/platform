@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { randomUUID } from "crypto";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
@@ -27,7 +29,7 @@ import {
   loadRecentRunsFromDb,
 } from "../lib/eval-forge-store";
 import { defaultExecutorFactory, buildDefaultExecutor } from "../lib/eval-executors";
-import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -470,7 +472,10 @@ router.post(
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "suiteId": z.unknown().optional(),
+      "triggeredBy": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const { suiteId, triggeredBy = "api" } = req.body as { suiteId?: string; triggeredBy?: string };
@@ -544,7 +549,13 @@ router.post(
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "baselineRunId": z.unknown().optional(),
+      "model": z.unknown().optional(),
+      "promptId": z.unknown().optional(),
+      "strategy": z.unknown().optional(),
+      "triggeredBy": z.unknown().optional(),
+    })),
   async (req, res) => {
     const suiteId = req.params.suiteId as string;
     const {
@@ -711,7 +722,10 @@ router.post(
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "domain": z.unknown().optional(),
+      "triggeredBy": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const { triggeredBy = "api", domain } = req.body as { triggeredBy?: string; domain?: string };
@@ -772,7 +786,11 @@ router.patch(
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "label": z.unknown().optional(),
+      "labeledBy": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+    })),
   (req, res) => {
     const { scoreId } = req.params;
     const { label, notes, labeledBy } = req.body as {

@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   db,
   meteringEventsTable,
@@ -25,7 +27,7 @@ import { authMiddleware, requireRole, parseIdParam } from "../../middlewares/aut
 import { tenantScope, assertTenantAccess } from "../../middlewares/tenant-scope";
 import { logger } from "../../lib/logger";
 import { periodBounds, computeCharge, recomputeAggregate, checkAndEnforceQuota, meteringRateLimit } from "./shared";
-import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../../lib/validation";
 
 const router: IRouter = Router();
 const ADMIN_ROLES = ["admin", "super_admin", "ops"] as const;
@@ -38,7 +40,19 @@ const READ_ROLES = ["admin", "super_admin", "ops", "analyst"] as const;
 router.post(
   "/metering/events",
   authMiddleware({ required: false }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "dimensions": z.unknown().optional(),
+      "eventType": z.unknown().optional(),
+      "featureKey": z.unknown().optional(),
+      "idempotencyKey": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "occurredAt": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "product": z.unknown().optional(),
+      "quantity": z.unknown().optional(),
+      "unitLabel": z.unknown().optional(),
+      "userId": z.unknown().optional(),
+    })),
   async (req: Request, res: Response) => {
     try {
       const {
@@ -120,7 +134,9 @@ router.post(
 router.post(
   "/metering/events/batch",
   authMiddleware({ required: false }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "events": z.unknown().optional(),
+    })),
   async (req: Request, res: Response) => {
     try {
       const { events } = req.body as {

@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   db,
   lyteSignalsTable,
@@ -26,11 +28,11 @@ import {
   computeBottleneckUrgency,
   computeAccountabilityUrgency,
 } from "./lyte-cognitive-helpers.js";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema, anyQuerySchema, lyteCognitiveInterventionsQuerySchema } from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema, anyQuerySchema, lyteCognitiveInterventionsQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.post("/lyte/cognitive/signal-fusion/run", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lyte/cognitive/signal-fusion/run", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [signals, alerts, escalations, metrics] = await Promise.all([
       db.select().from(lyteSignalsTable).orderBy(desc(lyteSignalsTable.receivedAt)).limit(200),

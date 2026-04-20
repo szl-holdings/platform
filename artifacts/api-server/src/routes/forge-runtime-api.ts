@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   sendSuccess,
   sendCreated,
@@ -11,7 +13,7 @@ import { forgeRuntime, forgeTimeline, forgeEvidenceStore } from "@szl-holdings/f
 import type { ForgeTask, ForgeTaskType, ForgeTenantPolicy } from "@szl-holdings/forge-runtime";
 import type { PrismDomain } from "@szl-holdings/prism-bus";
 import type { ApprovalClass } from "@szl-holdings/forge-runtime";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -24,7 +26,16 @@ router.get("/forge/status", authMiddleware(), async (_req: Request, res: Respons
   }
 });
 
-router.post("/forge/submit", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/forge/submit", authMiddleware(), validateBody(bodyShape({
+      "approvalClass": z.unknown().optional(),
+      "correlationId": z.unknown().optional(),
+      "domain": z.unknown().optional(),
+      "isDryRun": z.unknown().optional(),
+      "label": z.unknown().optional(),
+      "payload": z.unknown().optional(),
+      "sandboxPolicy": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const {
       type,
@@ -131,7 +142,9 @@ router.get("/forge/executions/:executionId", authMiddleware(), async (req: Reque
   }
 });
 
-router.post("/forge/executions/:executionId/approve", authMiddleware(), requireRole("admin", "super_admin", "exec", "compliance", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/forge/executions/:executionId/approve", authMiddleware(), requireRole("admin", "super_admin", "exec", "compliance", "ops"), validateBody(bodyShape({
+      "approvalId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const executionId = req.params.executionId as string;
     const { approvalId } = req.body as { approvalId?: string };
@@ -267,7 +280,16 @@ router.get("/forge/evidence", authMiddleware(), validateQuery(listQuerySchema), 
   }
 });
 
-router.post("/forge/tenant-policy", authMiddleware(), requireRole("admin", "super_admin", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/forge/tenant-policy", authMiddleware(), requireRole("admin", "super_admin", "exec"), validateBody(bodyShape({
+      "allowedDomains": z.unknown().optional(),
+      "allowedTools": z.unknown().optional(),
+      "defaultApprovalClass": z.unknown().optional(),
+      "highRiskActions": z.unknown().optional(),
+      "maxConcurrentExecutions": z.unknown().optional(),
+      "maxCostPerExecutionUsd": z.unknown().optional(),
+      "requiresDryRunFirst": z.unknown().optional(),
+      "tenantId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const {
       tenantId: bodyTenantId,

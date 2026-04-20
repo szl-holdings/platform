@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendError, sendBadRequest } from "../lib/api-response";
 import { JOB_TYPES } from "../lib/job-queue";
@@ -7,7 +9,7 @@ import { PLATFORM_JOB_TYPES } from "../lib/platform-jobs";
 import { logActivity } from "../lib/activity-logger";
 import { durableJobQueue, durableScheduler } from "../lib/durable-init";
 import { type DurableJobStatus } from "@szl-holdings/forge-runtime";
-import { validateBody, jobEnqueueSchema, durableJobEnqueueSchema, jobScheduleEnableSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, jobEnqueueSchema, durableJobEnqueueSchema, jobScheduleEnableSchema, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -153,7 +155,7 @@ router.post("/jobs/enqueue", authMiddleware(), requireRole("ops", "admin"), vali
   }
 });
 
-router.post("/jobs/trigger/:type", authMiddleware(), requireRole("ops"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/jobs/trigger/:type", authMiddleware(), requireRole("ops"), validateBody(bodyShape({})), async (req, res) => {
   const { type } = req.params as Record<string, string>;
   const ON_DEMAND_TYPES = new Set<string>([
     NAMED_JOB_TYPES.WORKFLOW_RETRY_JOB,
@@ -218,7 +220,7 @@ router.get("/jobs/durable/dead-letter", authMiddleware(), requireRole("ops", "ad
   }
 });
 
-router.post("/jobs/durable/dead-letter/:jobId/replay", authMiddleware(), requireRole("ops", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/jobs/durable/dead-letter/:jobId/replay", authMiddleware(), requireRole("ops", "admin"), validateBody(bodyShape({})), async (req, res) => {
   try {
     const jobId = String(req.params["jobId"] ?? "");
     const job = await durableJobQueue.replayDeadLetterJob(jobId);
@@ -230,7 +232,7 @@ router.post("/jobs/durable/dead-letter/:jobId/replay", authMiddleware(), require
   }
 });
 
-router.post("/jobs/durable/:jobId/cancel", authMiddleware(), requireRole("ops", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/jobs/durable/:jobId/cancel", authMiddleware(), requireRole("ops", "admin"), validateBody(bodyShape({})), async (req, res) => {
   try {
     const jobId = String(req.params["jobId"] ?? "");
     const cancelled = await durableJobQueue.cancelJob(jobId);
@@ -290,7 +292,7 @@ router.patch("/jobs/schedules/:name/enable", authMiddleware(), requireRole("ops"
   }
 });
 
-router.post("/jobs/schedules/:name/trigger", authMiddleware(), requireRole("ops", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/jobs/schedules/:name/trigger", authMiddleware(), requireRole("ops", "admin"), validateBody(bodyShape({})), async (req, res) => {
   try {
     const name = String(req.params["name"] ?? "");
     await durableScheduler.triggerNow(name);

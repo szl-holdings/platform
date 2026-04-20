@@ -66,7 +66,7 @@ import {
 } from "@szl-holdings/ai-control-plane";
 import { providerCircuitBreaker } from "../lib/ai-gateway";
 import { logger } from "../lib/logger";
-import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 import {
   traceListQuerySchema,
   traceStatusPatchSchema,
@@ -75,6 +75,8 @@ import {
   traceCapturBodySchema,
 } from "@szl-holdings/contracts/ai";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router: IRouter = Router();
 
 function getOrgId(user?: AuthenticatedUser): number | undefined {
@@ -428,7 +430,7 @@ router.patch(
   "/ai/ops/review-queue/:reviewId/claim",
   authMiddleware({ required: true }),
   requireRole("analyst", "operator", "admin", "super_admin"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req, res) => {
     try {
       const reviewId = String(req.params.reviewId);
@@ -587,7 +589,11 @@ const MAX_FEEDBACK = 5000;
 router.post(
   "/ai/ops/traces/:id/feedback",
   authMiddleware({ required: true }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "comment": z.unknown().optional(),
+      "correction": z.unknown().optional(),
+      "sentiment": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const traceId = String(req.params.id ?? "").trim();

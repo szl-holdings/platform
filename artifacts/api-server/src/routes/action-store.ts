@@ -41,8 +41,9 @@ import {
   sendBadRequest,
   handleRouteError,
 } from "../lib/api-response";
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const NAMESPACE = "szl.actionStore";
 const KEY = "default";
 
@@ -225,7 +226,7 @@ router.get("/action-store/stream", async (req: Request, res: Response) => {
 
 router.patch(
   "/action-store",
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
       const body = req.body as Record<string, unknown>;

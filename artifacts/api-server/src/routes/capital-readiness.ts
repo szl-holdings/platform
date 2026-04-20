@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   db,
   capitalArtifactsTable,
@@ -20,7 +22,7 @@ import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "..
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { JOB_TYPES } from "../lib/job-queue";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 const auth = [authMiddleware(), requireRole("ops", "exec", "admin")];
@@ -69,7 +71,7 @@ router.get("/capital/artifacts", ...auth, validateQuery(listQuerySchema), async 
   }
 });
 
-router.post("/capital/artifacts", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/capital/artifacts", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(capitalArtifactsTable).values(req.body).returning();
     await logCapitalAudit("create", "capital_artifact", row.id, req.body);
@@ -79,7 +81,7 @@ router.post("/capital/artifacts", ...auth, validateBody(jsonObjectBodySchema), a
   }
 });
 
-router.patch("/capital/artifacts/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/capital/artifacts/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(capitalArtifactsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(capitalArtifactsTable.id, id)).returning();
@@ -91,7 +93,7 @@ router.patch("/capital/artifacts/:id", ...auth, validateBody(jsonObjectBodySchem
   }
 });
 
-router.delete("/capital/artifacts/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/capital/artifacts/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(capitalArtifactsTable).where(eq(capitalArtifactsTable.id, id)).returning();
@@ -116,7 +118,7 @@ router.get("/capital/lender-packets", ...auth, validateQuery(listQuerySchema), a
   }
 });
 
-router.post("/capital/lender-packets", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/capital/lender-packets", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(lenderPacketsTable).values(req.body).returning();
     await logCapitalAudit("create", "lender_packet", row.id, req.body);
@@ -138,7 +140,7 @@ router.get("/capital/lender-packets/:id", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/capital/lender-packets/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/capital/lender-packets/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lenderPacketsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lenderPacketsTable.id, id)).returning();
@@ -150,7 +152,7 @@ router.patch("/capital/lender-packets/:id", ...auth, validateBody(jsonObjectBody
   }
 });
 
-router.delete("/capital/lender-packets/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/capital/lender-packets/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lenderPacketsTable).where(eq(lenderPacketsTable.id, id)).returning();
@@ -162,7 +164,10 @@ router.delete("/capital/lender-packets/:id", validateBody(jsonObjectBodySchema),
   }
 });
 
-router.patch("/capital/lender-deliverables/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/capital/lender-deliverables/:id", ...auth, validateBody(bodyShape({
+      "completedAt": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const update = { ...req.body, updatedAt: new Date() };
@@ -182,7 +187,7 @@ router.patch("/capital/lender-deliverables/:id", ...auth, validateBody(jsonObjec
   }
 });
 
-router.delete("/capital/lender-deliverables/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/capital/lender-deliverables/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lenderPacketDeliverables).where(eq(lenderPacketDeliverables.id, id)).returning();
@@ -207,7 +212,7 @@ router.get("/capital/investor-packets", ...auth, validateQuery(listQuerySchema),
   }
 });
 
-router.post("/capital/investor-packets", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/capital/investor-packets", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(investorPacketsTable).values(req.body).returning();
     await logCapitalAudit("create", "investor_packet", row.id, req.body);
@@ -229,7 +234,7 @@ router.get("/capital/investor-packets/:id", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/capital/investor-packets/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/capital/investor-packets/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(investorPacketsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(investorPacketsTable.id, id)).returning();
@@ -241,7 +246,7 @@ router.patch("/capital/investor-packets/:id", ...auth, validateBody(jsonObjectBo
   }
 });
 
-router.delete("/capital/investor-packets/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/capital/investor-packets/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(investorPacketsTable).where(eq(investorPacketsTable.id, id)).returning();
@@ -253,7 +258,10 @@ router.delete("/capital/investor-packets/:id", validateBody(jsonObjectBodySchema
   }
 });
 
-router.patch("/capital/investor-deliverables/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/capital/investor-deliverables/:id", ...auth, validateBody(bodyShape({
+      "completedAt": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const update = { ...req.body, updatedAt: new Date() };
@@ -271,7 +279,7 @@ router.patch("/capital/investor-deliverables/:id", ...auth, validateBody(jsonObj
   }
 });
 
-router.delete("/capital/investor-deliverables/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/capital/investor-deliverables/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(investorPacketDeliverables).where(eq(investorPacketDeliverables.id, id)).returning();
@@ -294,7 +302,7 @@ router.get("/capital/milestones", ...auth, async (req, res) => {
   }
 });
 
-router.post("/capital/milestones", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/capital/milestones", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(fundraisingMilestonesTable).values(req.body).returning();
     await logCapitalAudit("create", "fundraising_milestone", row.id, req.body);
@@ -304,7 +312,10 @@ router.post("/capital/milestones", ...auth, validateBody(jsonObjectBodySchema), 
   }
 });
 
-router.patch("/capital/milestones/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/capital/milestones/:id", ...auth, validateBody(bodyShape({
+      "completedAt": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const update = { ...req.body, updatedAt: new Date() };
@@ -318,7 +329,7 @@ router.patch("/capital/milestones/:id", ...auth, validateBody(jsonObjectBodySche
   }
 });
 
-router.delete("/capital/milestones/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/capital/milestones/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(fundraisingMilestonesTable).where(eq(fundraisingMilestonesTable.id, id)).returning();
@@ -341,7 +352,7 @@ router.get("/capital/financial-models", ...auth, async (req, res) => {
   }
 });
 
-router.post("/capital/financial-models", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/capital/financial-models", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(financialModelsTable).values(req.body).returning();
     await logCapitalAudit("create", "financial_model", row.id, req.body);
@@ -351,7 +362,7 @@ router.post("/capital/financial-models", ...auth, validateBody(jsonObjectBodySch
   }
 });
 
-router.patch("/capital/financial-models/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/capital/financial-models/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(financialModelsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(financialModelsTable.id, id)).returning();
@@ -363,7 +374,7 @@ router.patch("/capital/financial-models/:id", ...auth, validateBody(jsonObjectBo
   }
 });
 
-router.delete("/capital/financial-models/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/capital/financial-models/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(financialModelsTable).where(eq(financialModelsTable.id, id)).returning();
@@ -386,7 +397,7 @@ router.get("/capital/use-of-funds", ...auth, async (req, res) => {
   }
 });
 
-router.post("/capital/use-of-funds", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/capital/use-of-funds", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(useOfFundsVersionsTable).values(req.body).returning();
     await logCapitalAudit("create", "use_of_funds_version", row.id, req.body);
@@ -396,7 +407,7 @@ router.post("/capital/use-of-funds", ...auth, validateBody(jsonObjectBodySchema)
   }
 });
 
-router.patch("/capital/use-of-funds/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/capital/use-of-funds/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(useOfFundsVersionsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(useOfFundsVersionsTable.id, id)).returning();
@@ -408,7 +419,7 @@ router.patch("/capital/use-of-funds/:id", ...auth, validateBody(jsonObjectBodySc
   }
 });
 
-router.delete("/capital/use-of-funds/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/capital/use-of-funds/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(useOfFundsVersionsTable).where(eq(useOfFundsVersionsTable.id, id)).returning();
@@ -443,7 +454,7 @@ router.get("/capital/diligence-checklists/:id", ...auth, async (req, res) => {
   }
 });
 
-router.post("/capital/diligence-checklists", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/capital/diligence-checklists", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(diligenceChecklistsTable).values(req.body).returning();
     await logCapitalAudit("create", "diligence_checklist", row.id, req.body);
@@ -453,7 +464,7 @@ router.post("/capital/diligence-checklists", ...auth, validateBody(jsonObjectBod
   }
 });
 
-router.patch("/capital/diligence-checklists/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/capital/diligence-checklists/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(diligenceChecklistsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(diligenceChecklistsTable.id, id)).returning();
@@ -465,7 +476,7 @@ router.patch("/capital/diligence-checklists/:id", ...auth, validateBody(jsonObje
   }
 });
 
-router.delete("/capital/diligence-checklists/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/capital/diligence-checklists/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(diligenceChecklistsTable).where(eq(diligenceChecklistsTable.id, id)).returning();
@@ -477,7 +488,10 @@ router.delete("/capital/diligence-checklists/:id", validateBody(jsonObjectBodySc
   }
 });
 
-router.patch("/capital/diligence-checklist-items/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/capital/diligence-checklist-items/:id", ...auth, validateBody(bodyShape({
+      "completedAt": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const update = { ...req.body, updatedAt: new Date() };
@@ -495,7 +509,7 @@ router.patch("/capital/diligence-checklist-items/:id", ...auth, validateBody(jso
   }
 });
 
-router.delete("/capital/diligence-checklist-items/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/capital/diligence-checklist-items/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(diligenceChecklistItemsTable).where(eq(diligenceChecklistItemsTable.id, id)).returning();
@@ -518,7 +532,7 @@ router.get("/capital/cap-table", ...auth, async (req, res) => {
   }
 });
 
-router.post("/capital/cap-table", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/capital/cap-table", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(capTablePlaceholdersTable).values(req.body).returning();
     await logCapitalAudit("create", "cap_table_placeholder", row.id, req.body);
@@ -528,7 +542,7 @@ router.post("/capital/cap-table", ...auth, validateBody(jsonObjectBodySchema), a
   }
 });
 
-router.patch("/capital/cap-table/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/capital/cap-table/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(capTablePlaceholdersTable).set({ ...req.body, updatedAt: new Date() }).where(eq(capTablePlaceholdersTable.id, id)).returning();
@@ -540,7 +554,7 @@ router.patch("/capital/cap-table/:id", ...auth, validateBody(jsonObjectBodySchem
   }
 });
 
-router.delete("/capital/cap-table/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
+router.delete("/capital/cap-table/:id", validateBody(bodyShape({})), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.update(capTablePlaceholdersTable).set({ isActive: false, updatedAt: new Date() }).where(eq(capTablePlaceholdersTable.id, id));
@@ -553,7 +567,7 @@ router.delete("/capital/cap-table/:id", validateBody(jsonObjectBodySchema), ...a
 
 // ─── ON-DEMAND PACKET GENERATION ──────────────────────────────────────────────
 
-router.post("/capital/generate-lender-packet/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/capital/generate-lender-packet/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [packet] = await db.select().from(lenderPacketsTable).where(eq(lenderPacketsTable.id, id));
@@ -570,7 +584,7 @@ router.post("/capital/generate-lender-packet/:id", ...auth, validateBody(jsonObj
   }
 });
 
-router.post("/capital/generate-investor-packet/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/capital/generate-investor-packet/:id", ...auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [packet] = await db.select().from(investorPacketsTable).where(eq(investorPacketsTable.id, id));

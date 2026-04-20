@@ -35,8 +35,9 @@ function tenantKey(tenantId: string | null): string {
 import { z } from "zod";
 import { logger } from "../lib/logger";
 import os from "os";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 
 interface CachedThreatItem { severity: string; timestamp?: string; name?: string; title?: string; type?: string; country?: string; description?: string }
@@ -632,7 +633,9 @@ router.get("/search", validateQuery(listQuerySchema), async (req: Request, res: 
  * Records an action as resolved. Uses in-memory store (persists until server restart).
  * Requires an authenticated session — mutation operations must not be open to unauthenticated callers.
  */
-router.post("/actions/:id/resolve", requireAnyAuth(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/actions/:id/resolve", requireAnyAuth(), validateBody(bodyShape({
+      "filter": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     if (!id) {

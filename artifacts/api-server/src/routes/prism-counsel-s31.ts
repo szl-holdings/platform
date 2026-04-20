@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
@@ -13,7 +14,7 @@ import { db } from "@szl-holdings/db";
 import { pcModelLanesTable, pcCostTrackingTable, pcForecastDiffsTable, pcM365SubscriptionsTable, pcM365DeltaCursorsTable } from "@szl-holdings/db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 const router: Router = Router();
 
 router.use(authMiddleware());
@@ -97,7 +98,7 @@ router.get("/model-mesh/stats", validateQuery(listQuerySchema), async (req: Requ
   }
 });
 
-router.post("/model-mesh/route", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/model-mesh/route", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const parsed = ModelRouteSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
@@ -109,7 +110,7 @@ router.post("/model-mesh/route", validateBody(jsonObjectBodySchema), async (req:
   }
 });
 
-router.post("/model-mesh/lanes", requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/model-mesh/lanes", requireRole("super_admin", "admin"), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const parsed = ModelLaneCreateSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
@@ -129,7 +130,7 @@ router.get("/hf-gateway/endpoints", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/hf-gateway/endpoints", requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/hf-gateway/endpoints", requireRole("super_admin", "admin"), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const parsed = HfEndpointCreateSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
@@ -140,7 +141,7 @@ router.post("/hf-gateway/endpoints", requireRole("super_admin", "admin"), valida
   }
 });
 
-router.post("/hf-gateway/execute", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/hf-gateway/execute", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const parsed = HfExecuteSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
@@ -161,7 +162,7 @@ router.get("/worldline/sources", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/worldline/initialize", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/worldline/initialize", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     await worldlineEngine.initializeDefaultSources(getOrgId(req));
     const sources = await worldlineEngine.getSources(getOrgId(req));
@@ -171,7 +172,7 @@ router.post("/worldline/initialize", validateBody(jsonObjectBodySchema), async (
   }
 });
 
-router.post("/worldline/fetch/:sourceId", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/worldline/fetch/:sourceId", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const count = await worldlineEngine.fetchSource(getOrgId(req), parseInt(req.params.sourceId as string));
     res.json({ fetched: count });
@@ -210,7 +211,7 @@ router.get("/pressure-graph/:matterId", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/pressure-graph/:matterId/compute", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/pressure-graph/:matterId/compute", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
     await pressureGraph.computeAllDimensions({ orgId: getOrgId(req), matterId });
@@ -259,7 +260,9 @@ router.get("/proof-chain/:id/verify", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/proof-chain/:id/review", requireRole("super_admin", "admin", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/proof-chain/:id/review", requireRole("super_admin", "admin", "compliance"), validateBody(bodyShape({
+      "state": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const parsed = ProofChainStateSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
@@ -271,7 +274,9 @@ router.post("/proof-chain/:id/review", requireRole("super_admin", "admin", "comp
   }
 });
 
-router.post("/proof-chain/:id/approve", requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/proof-chain/:id/approve", requireRole("super_admin", "admin"), validateBody(bodyShape({
+      "state": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const parsed = ProofChainStateSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
@@ -310,7 +315,9 @@ router.get("/matter-twin/:matterId", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/matter-twin/:matterId/snapshot", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/matter-twin/:matterId/snapshot", validateBody(bodyShape({
+      "type": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const parsed = MatterTwinSnapshotSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
@@ -341,7 +348,7 @@ router.get("/forecast-diff/:matterId", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/copilot/sessions", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/copilot/sessions", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const parsed = CopilotSessionSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }
@@ -362,7 +369,9 @@ router.get("/copilot/sessions", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/copilot/sessions/:sessionId/message", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/copilot/sessions/:sessionId/message", validateBody(bodyShape({
+      "content": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const parsed = CopilotMessageSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid request body", issues: parsed.error.issues }); return; }

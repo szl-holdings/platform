@@ -1,4 +1,5 @@
 import * as oidc from "openid-client";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { z } from "zod";
 import { Router, type IRouter, type Request, type Response } from "express";
 import {
@@ -20,7 +21,7 @@ import {
   isProvisionedTenant,
 } from "../lib/auth";
 import { createSessionWithRefresh } from "../middlewares/session-policy";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -179,7 +180,7 @@ router.get("/logout", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/mobile-auth/token-exchange", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/mobile-auth/token-exchange", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   const parsed = ExchangeMobileAuthorizationCodeBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Missing or invalid required parameters" });
@@ -234,7 +235,7 @@ router.post("/mobile-auth/token-exchange", validateBody(jsonObjectBodySchema), a
   }
 });
 
-router.post("/mobile-auth/logout", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/mobile-auth/logout", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   const token = getSessionToken(req);
   if (token) {
     await deleteOidcSession(token);

@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   defaultTraceStore,
   TraceReplayer,
@@ -8,7 +10,7 @@ import {
 } from "@workspace/trace-graph";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, handleRouteError, sendNotFound, sendBadRequest } from "../lib/api-response";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 // @workspace/replay-core stub — package not yet available
 function replayFromTrace(_opts: Record<string, unknown>): { deterministic: boolean; steps: unknown[] } {
@@ -116,7 +118,10 @@ router.get("/traces/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/traces/:id/replay", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/traces/:id/replay", authMiddleware(), validateBody(bodyShape({
+      "capturedModelOutputs": z.unknown().optional(),
+      "capturedToolOutputs": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const originalTraceId = req.params.id as string;
     const original = defaultTraceStore.get(originalTraceId);
@@ -248,7 +253,12 @@ router.get("/traces/:id/diff/:compareId", authMiddleware(), validateQuery(listQu
   }
 });
 
-router.post("/traces/:id/grade", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/traces/:id/grade", authMiddleware(), validateBody(bodyShape({
+      "gradedBy": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "rubric": z.unknown().optional(),
+      "score": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const trace = defaultTraceStore.get(req.params.id as string);
     if (!trace) {
@@ -286,7 +296,12 @@ router.post("/traces/:id/grade", authMiddleware(), validateBody(jsonObjectBodySc
   }
 });
 
-router.post("/traces/:id/comment", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/traces/:id/comment", authMiddleware(), validateBody(bodyShape({
+      "content": z.unknown().optional(),
+      "operatorId": z.unknown().optional(),
+      "spanId": z.unknown().optional(),
+      "tags": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const trace = defaultTraceStore.get(req.params.id as string);
     if (!trace) {
@@ -320,7 +335,10 @@ router.post("/traces/:id/comment", authMiddleware(), validateBody(jsonObjectBody
   }
 });
 
-router.post("/traces/:id/link-entity", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/traces/:id/link-entity", authMiddleware(), validateBody(bodyShape({
+      "entityId": z.unknown().optional(),
+      "role": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { entityId, role } = req.body as { entityId?: string; role?: string };
     if (!entityId) {
@@ -601,7 +619,7 @@ router.get("/runs/:id", authMiddleware({ required: true }), requireOperator, (re
   }
 });
 
-router.post("/runs/:id/replay", authMiddleware({ required: true }), requireOperator, validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/runs/:id/replay", authMiddleware({ required: true }), requireOperator, validateBody(bodyShape({})), (req, res) => {
   try {
     const original = runStore.get(req.params.id);
     if (!original) {

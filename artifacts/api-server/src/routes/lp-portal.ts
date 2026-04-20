@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   db,
   fundAccreditedInvestorsTable,
@@ -20,7 +22,7 @@ import {
 } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { hashIp } from "@szl-holdings/audit";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -314,7 +316,11 @@ router.get("/lp-portal/lps/:id/activity", optionalAuth, async (req, res) => {
   }
 });
 
-router.post("/lp-portal/lps/:id/activity", optionalAuth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lp-portal/lps/:id/activity", optionalAuth, validateBody(bodyShape({
+      "documentId": z.unknown().optional(),
+      "reportId": z.unknown().optional(),
+      "target": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const lpId = parseIdParam(req.params.id);
     const scope = await resolveScope(req);
@@ -382,7 +388,7 @@ router.get("/lp-portal/lps/:id/messages", optionalAuth, async (req, res) => {
   }
 });
 
-router.post("/lp-portal/lps/:id/messages", optionalAuth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lp-portal/lps/:id/messages", optionalAuth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const lpId = parseIdParam(req.params.id);
     const scope = await resolveScope(req);

@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { z } from "zod";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import multer from "multer";
 import {
   db, sitesTable, pagesTable, sectionsTable, venturesTable, servicesTable,
@@ -426,7 +427,7 @@ router.patch("/cms/pages/:id", requireCmsWrite, validateBody(patchPageSchema), a
   } catch (err) { handleRouteError(res, err, "Failed to update page"); }
 });
 
-router.delete("/cms/pages/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/pages/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(pagesTable).where(eq(pagesTable.id, id));
@@ -462,7 +463,7 @@ router.patch("/cms/sections/:id", requireCmsWrite, validateBody(patchSectionSche
   } catch (err) { handleRouteError(res, err, "Failed to update section"); }
 });
 
-router.delete("/cms/sections/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/sections/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(sectionsTable).where(eq(sectionsTable.id, id));
@@ -503,7 +504,7 @@ router.patch("/cms/ventures/:id", requireCmsWrite, validateBody(patchVentureSche
   } catch (err) { handleRouteError(res, err, "Failed to update venture"); }
 });
 
-router.delete("/cms/ventures/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/ventures/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(venturesTable).where(eq(venturesTable.id, id));
@@ -563,7 +564,7 @@ router.patch("/cms/articles/:id", requireCmsWrite, validateBody(patchArticleSche
   } catch (err) { handleRouteError(res, err, "Failed to update article"); }
 });
 
-router.delete("/cms/articles/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/articles/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(articlesTable).where(eq(articlesTable.id, id));
@@ -617,7 +618,7 @@ router.patch("/cms/case-studies/:id", requireCmsWrite, validateBody(patchCaseStu
   } catch (err) { handleRouteError(res, err, "Failed to update case study"); }
 });
 
-router.delete("/cms/case-studies/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/case-studies/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(caseStudiesTable).where(eq(caseStudiesTable.id, id));
@@ -657,7 +658,7 @@ router.patch("/cms/navigation-items/:id", requireCmsWrite, validateBody(patchNav
   } catch (err) { handleRouteError(res, err, "Failed to update navigation item"); }
 });
 
-router.delete("/cms/navigation-items/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/navigation-items/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(navigationItemsTable).where(eq(navigationItemsTable.id, id));
@@ -693,7 +694,7 @@ router.patch("/cms/testimonials/:id", requireCmsWrite, validateBody(patchTestimo
   } catch (err) { handleRouteError(res, err, "Failed to update testimonial"); }
 });
 
-router.delete("/cms/testimonials/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/testimonials/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(testimonialsTable).where(eq(testimonialsTable.id, id));
@@ -729,7 +730,7 @@ router.patch("/cms/faqs/:id", requireCmsWrite, validateBody(patchFaqSchema), asy
   } catch (err) { handleRouteError(res, err, "Failed to update FAQ"); }
 });
 
-router.delete("/cms/faqs/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/faqs/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(faqsTable).where(eq(faqsTable.id, id));
@@ -765,7 +766,7 @@ router.patch("/cms/ctas/:id", requireCmsWrite, validateBody(patchCtaSchema), asy
   } catch (err) { handleRouteError(res, err, "Failed to update CTA"); }
 });
 
-router.delete("/cms/ctas/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/ctas/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(ctasTable).where(eq(ctasTable.id, id));
@@ -801,7 +802,7 @@ router.patch("/cms/roadmap-items/:id", requireCmsWrite, validateBody(patchRoadma
   } catch (err) { handleRouteError(res, err, "Failed to update roadmap item"); }
 });
 
-router.delete("/cms/roadmap-items/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/roadmap-items/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(roadmapItemsTable).where(eq(roadmapItemsTable.id, id));
@@ -837,7 +838,7 @@ router.patch("/cms/services-items/:id", requireCmsWrite, validateBody(patchServi
   } catch (err) { handleRouteError(res, err, "Failed to update service"); }
 });
 
-router.delete("/cms/services-items/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/services-items/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(servicesTable).where(eq(servicesTable.id, id));
@@ -1009,7 +1010,7 @@ router.post("/cms/site-settings", requireCmsWrite, validateBody(siteSettingSchem
   } catch (err) { handleRouteError(res, err, "Failed to set site setting"); }
 });
 
-router.delete("/cms/site-settings/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/site-settings/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(siteSettingsTable).where(eq(siteSettingsTable.id, id));
@@ -1036,7 +1037,7 @@ router.post("/cms/media-assets", requireCmsWrite, validateBody(createMediaAssetS
   } catch (err) { handleRouteError(res, err, "Failed to create media asset"); }
 });
 
-router.delete("/cms/media-assets/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/media-assets/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(mediaAssetsTable).where(eq(mediaAssetsTable.id, id));
@@ -1092,7 +1093,7 @@ router.post("/cms/redirects", requireCmsWrite, validateBody(createRedirectSchema
   } catch (err) { handleRouteError(res, err, "Failed to create redirect"); }
 });
 
-router.delete("/cms/redirects/:id", validateBody(jsonObjectBodySchema), requireCmsWrite, async (req, res) => {
+router.delete("/cms/redirects/:id", validateBody(bodyShape({})), requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(redirectsTable).where(eq(redirectsTable.id, id));
@@ -1184,7 +1185,7 @@ router.patch("/cms/posts/:id", authMiddleware(), requireRole("admin", "editor"),
   } catch (err) { handleRouteError(res, err, "Failed to update CMS post"); }
 });
 
-router.delete("/cms/posts/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin", "editor"), async (req, res) => {
+router.delete("/cms/posts/:id", validateBody(bodyShape({})), authMiddleware(), requireRole("admin", "editor"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(cmsPostsTable).where(eq(cmsPostsTable.id, id));
@@ -1192,7 +1193,9 @@ router.delete("/cms/posts/:id", validateBody(jsonObjectBodySchema), authMiddlewa
   } catch (err) { handleRouteError(res, err, "Failed to delete CMS post"); }
 });
 
-router.post("/cms/posts/upload-image", authMiddleware(), requireRole("admin", "editor"), imageUpload.single("image"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/cms/posts/upload-image", authMiddleware(), requireRole("admin", "editor"), imageUpload.single("image"), validateBody(bodyShape({
+      "alt": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     if (!req.file) {
       res.status(400).json({ error: "No image file provided" });

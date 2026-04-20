@@ -1,9 +1,11 @@
 import { Router, Request, Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, dosArticlesTable, dosLeadsTable } from "@szl-holdings/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { dosApiKeyAuth } from "../middlewares/dos-api-key-auth";
 import { readLimiter } from "../middlewares/rate-limiters";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router = Router();
 
@@ -55,7 +57,10 @@ router.get("/subscribers", validateQuery(listQuerySchema), async (req: Request, 
   res.json({ data: leads.map(l => ({ id: l.id, email: l.email, source: l.source || "direct", segment: l.stage, joinedAt: l.createdAt })), total: count ?? 0, limit: lim, offset: off });
 });
 
-router.post("/subscribers", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/subscribers", validateBody(bodyShape({
+      "email": z.unknown().optional(),
+      "source": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   const { email, source } = req.body;
   if (!email || typeof email !== "string" || !email.includes("@")) {
     res.status(400).json({ error: "valid email required" });

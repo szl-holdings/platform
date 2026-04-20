@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { randomUUID } from "crypto";
 import { sendSuccess, sendError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
@@ -11,7 +13,7 @@ import {
 } from "@workspace/cognitive-runtime";
 import { defaultMemoryStore } from "@workspace/memory-fabric";
 import { defaultTraceStore } from "@workspace/trace-graph";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router = Router();
 
@@ -33,7 +35,7 @@ router.post(
   "/cognitive-runtime/run",
   authMiddleware(),
   requireRole(...ALLOWED_ROLES),
-  validateBody(jsonObjectBodySchema), async (req, res) => {
+  validateBody(bodyShape({})), async (req, res) => {
     const {
       objective,
       context = {},
@@ -177,7 +179,7 @@ router.post(
   "/cognitive-runtime/resume",
   authMiddleware(),
   requireRole(...ALLOWED_ROLES),
-  validateBody(jsonObjectBodySchema), validateQuery(listQuerySchema), async (req, res) => {
+  validateBody(bodyShape({})), validateQuery(listQuerySchema), async (req, res) => {
     const {
       checkpointRef,
       objective,

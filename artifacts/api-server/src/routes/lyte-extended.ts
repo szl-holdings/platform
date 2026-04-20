@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   db,
   lyteActionsTable,
@@ -28,7 +30,7 @@ import {
 } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { requireFeatureFlag } from "../middlewares/feature-flag";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -54,7 +56,7 @@ async function recordSignalTimeline(params: {
   } catch {}
 }
 
-router.post("/signals/:id/acknowledge", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/signals/:id/acknowledge", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [signal] = await db.select().from(lyteSignalsTable).where(eq(lyteSignalsTable.id, id));
@@ -68,7 +70,9 @@ router.post("/signals/:id/acknowledge", authMiddleware(), validateBody(jsonObjec
   }
 });
 
-router.post("/signals/:id/assign", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/signals/:id/assign", authMiddleware(), validateBody(bodyShape({
+      "assignee": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const { assignee } = req.body;
@@ -86,7 +90,7 @@ router.post("/signals/:id/assign", authMiddleware(), validateBody(jsonObjectBody
   }
 });
 
-router.post("/signals/:id/escalate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/signals/:id/escalate", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [signal] = await db.select().from(lyteSignalsTable).where(eq(lyteSignalsTable.id, id));
@@ -101,7 +105,9 @@ router.post("/signals/:id/escalate", authMiddleware(), validateBody(jsonObjectBo
   }
 });
 
-router.post("/signals/:id/resolve", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/signals/:id/resolve", authMiddleware(), validateBody(bodyShape({
+      "resolution": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [signal] = await db.select().from(lyteSignalsTable).where(eq(lyteSignalsTable.id, id));
@@ -115,7 +121,11 @@ router.post("/signals/:id/resolve", authMiddleware(), validateBody(jsonObjectBod
   }
 });
 
-router.post("/signals/:id/override", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/signals/:id/override", authMiddleware(), validateBody(bodyShape({
+      "severity": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [signal] = await db.select().from(lyteSignalsTable).where(eq(lyteSignalsTable.id, id));
@@ -152,7 +162,11 @@ router.get("/signals/:id/comments", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/signals/:id/comments", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/signals/:id/comments", authMiddleware(), validateBody(bodyShape({
+      "authorName": z.unknown().optional(),
+      "body": z.unknown().optional(),
+      "commentType": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [signal] = await db.select().from(lyteSignalsTable).where(eq(lyteSignalsTable.id, id));
@@ -183,7 +197,7 @@ router.get("/actions", authMiddleware(), validateQuery(listQuerySchema), async (
   }
 });
 
-router.post("/actions", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/actions", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const data = insertLyteActionSchema.parse(req.body);
     const [row] = await db.insert(lyteActionsTable).values(data).returning();
@@ -193,7 +207,7 @@ router.post("/actions", authMiddleware(), validateBody(jsonObjectBodySchema), as
   }
 });
 
-router.patch("/actions/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/actions/:id", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteActionsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteActionsTable.id, id)).returning();
@@ -204,7 +218,7 @@ router.patch("/actions/:id", authMiddleware(), validateBody(jsonObjectBodySchema
   }
 });
 
-router.delete("/actions/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/actions/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteActionsTable).where(eq(lyteActionsTable.id, id)).returning();
@@ -224,7 +238,7 @@ router.get("/saved-views", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/saved-views", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/saved-views", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const data = insertLyteSavedViewSchema.parse(req.body);
     const [row] = await db.insert(lyteSavedViewsTable).values({ ...data, userId: req.user?.id ? String(req.user.id) : null }).returning();
@@ -234,7 +248,7 @@ router.post("/saved-views", authMiddleware(), validateBody(jsonObjectBodySchema)
   }
 });
 
-router.patch("/saved-views/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/saved-views/:id", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteSavedViewsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteSavedViewsTable.id, id)).returning();
@@ -245,7 +259,7 @@ router.patch("/saved-views/:id", authMiddleware(), validateBody(jsonObjectBodySc
   }
 });
 
-router.delete("/saved-views/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/saved-views/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteSavedViewsTable).where(eq(lyteSavedViewsTable.id, id)).returning();
@@ -267,7 +281,7 @@ router.get("/readiness", requireFeatureFlag("lyte_readiness_enabled"), authMiddl
   }
 });
 
-router.post("/readiness", requireFeatureFlag("lyte_readiness_enabled"), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/readiness", requireFeatureFlag("lyte_readiness_enabled"), authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const data = insertLyteReadinessItemSchema.parse(req.body);
     const [row] = await db.insert(lyteReadinessItemsTable).values(data).returning();
@@ -277,7 +291,7 @@ router.post("/readiness", requireFeatureFlag("lyte_readiness_enabled"), authMidd
   }
 });
 
-router.patch("/readiness/:id", requireFeatureFlag("lyte_readiness_enabled"), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/readiness/:id", requireFeatureFlag("lyte_readiness_enabled"), authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const patch = { ...req.body, updatedAt: new Date() };

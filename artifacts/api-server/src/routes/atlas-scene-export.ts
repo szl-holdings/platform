@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import rateLimit from "express-rate-limit";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { isFlagEnabled } from "../lib/platform-flags";
@@ -15,7 +17,7 @@ import { db, auditEventsTable, spatialTwinSnapshotsTable, type SpatialTwinSnapsh
 import { eq, desc } from "drizzle-orm";
 import { logger } from "../lib/logger";
 
-import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
+import { anyQuerySchema, validateBody, validateQuery } from "../lib/validation";
 const router: IRouter = Router();
 
 /**
@@ -195,7 +197,19 @@ router.get(
 );
 
 router.post(
-  "/atlas/branch/export", validateBody(jsonObjectBodySchema),
+  "/atlas/branch/export", validateBody(bodyShape({
+      "approvedBy": z.unknown().optional(),
+      "branchId": z.unknown().optional(),
+      "branchLabel": z.unknown().optional(),
+      "branchedAt": z.unknown().optional(),
+      "correlationId": z.unknown().optional(),
+      "deltaState": z.unknown().optional(),
+      "domain": z.unknown().optional(),
+      "hypothesis": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "outcomeProjections": z.unknown().optional(),
+      "parentSceneId": z.unknown().optional(),
+    })),
   authMiddleware(),
   requireRole("operator", "ops", "exec", "admin", "super_admin"),
   atlasExportRateLimit,
@@ -259,7 +273,20 @@ router.post(
 );
 
 router.post(
-  "/atlas/proof-bundle/export", validateBody(jsonObjectBodySchema),
+  "/atlas/proof-bundle/export", validateBody(bodyShape({
+      "approvalChain": z.unknown().optional(),
+      "bundleId": z.unknown().optional(),
+      "citations": z.unknown().optional(),
+      "confidenceScore": z.unknown().optional(),
+      "contentId": z.unknown().optional(),
+      "contentType": z.unknown().optional(),
+      "correlationId": z.unknown().optional(),
+      "generatedAt": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "modelVersion": z.unknown().optional(),
+      "serviceAttribution": z.unknown().optional(),
+      "sourceClass": z.unknown().optional(),
+    })),
   authMiddleware(),
   requireRole("operator", "ops", "exec", "admin", "super_admin"),
   atlasExportRateLimit,

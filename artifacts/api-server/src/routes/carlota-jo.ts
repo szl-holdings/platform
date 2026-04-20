@@ -1,7 +1,9 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import rateLimit from "express-rate-limit";
 import multer from "multer";
-import { carlotaInquirySchema, carlotaInquiryUpdateSchema, carlotaRadarCompetitorsBodySchema, carlotaRadarCompetitorsQuerySchema, carlotaRadarSignalsQuerySchema, carlotaReservationSchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { carlotaInquirySchema, carlotaInquiryUpdateSchema, carlotaRadarCompetitorsBodySchema, carlotaRadarCompetitorsQuerySchema, carlotaRadarSignalsQuerySchema, carlotaReservationSchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import {
   db,
   carlotaInquiriesTable,
@@ -132,7 +134,7 @@ router.patch("/booking/inquiries/:id", authMiddleware(), validateBody(carlotaInq
   }
 });
 
-router.delete("/booking/inquiries/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/booking/inquiries/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     const [row] = await db.delete(carlotaInquiriesTable).where(eq(carlotaInquiriesTable.id, id)).returning();
@@ -154,7 +156,17 @@ router.get("/booking/reservations", authMiddleware(), validateQuery(listQuerySch
   }
 });
 
-router.post("/booking/reservations", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/booking/reservations", validateBody(bodyShape({
+      "company": z.unknown().optional(),
+      "date": z.unknown().optional(),
+      "email": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "phone": z.unknown().optional(),
+      "service": z.unknown().optional(),
+      "tier": z.unknown().optional(),
+      "time": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { service, tier, date, time, name, email, company, phone, notes } = req.body as {
       service?: string; tier?: string; date?: string; time?: string;
@@ -200,7 +212,7 @@ router.get("/booking/reservations/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/booking/reservations/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/booking/reservations/:id", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     const [row] = await db.update(carlotaReservationsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(carlotaReservationsTable.id, id)).returning();
@@ -211,7 +223,7 @@ router.patch("/booking/reservations/:id", authMiddleware(), validateBody(jsonObj
   }
 });
 
-router.delete("/booking/reservations/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/booking/reservations/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     const [row] = await db.delete(carlotaReservationsTable).where(eq(carlotaReservationsTable.id, id)).returning();
@@ -240,7 +252,12 @@ router.get("/booking/availability", async (_req: Request, res: Response) => {
   });
 });
 
-router.post("/booking/invoices", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/booking/invoices", validateBody(bodyShape({
+      "confirmationId": z.unknown().optional(),
+      "email": z.unknown().optional(),
+      "service": z.unknown().optional(),
+      "tier": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { confirmationId, tier, service, email } = req.body as {
       confirmationId?: string; tier?: string; service?: string; email?: string;
@@ -299,7 +316,7 @@ router.get("/booking/services", validateQuery(listQuerySchema), async (req, res)
   }
 });
 
-router.post("/booking/services", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/booking/services", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(carlotaServicesTable).values(req.body).returning();
     if (row) {
@@ -313,7 +330,7 @@ router.post("/booking/services", authMiddleware(), validateBody(jsonObjectBodySc
   }
 });
 
-router.patch("/booking/services/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/booking/services/:id", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     const [row] = await db.update(carlotaServicesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(carlotaServicesTable.id, id)).returning();
@@ -327,7 +344,7 @@ router.patch("/booking/services/:id", authMiddleware(), validateBody(jsonObjectB
   }
 });
 
-router.delete("/booking/services/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/booking/services/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     const [row] = await db.delete(carlotaServicesTable).where(eq(carlotaServicesTable.id, id)).returning();
@@ -370,7 +387,10 @@ router.get("/portal/documents", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list client documents"); }
 });
 
-router.post("/portal/documents", authMiddleware(), portalUpload.single("file"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/portal/documents", authMiddleware(), portalUpload.single("file"), validateBody(bodyShape({
+      "category": z.unknown().optional(),
+      "visibility": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const [account] = await db.select({ id: clientAccountsTable.id, organizationId: clientAccountsTable.organizationId }).from(clientAccountsTable)
       .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
@@ -423,7 +443,11 @@ router.get("/portal/messages", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list client messages"); }
 });
 
-router.post("/portal/messages", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/portal/messages", authMiddleware(), validateBody(bodyShape({
+      "body": z.unknown().optional(),
+      "bodyRichtext": z.unknown().optional(),
+      "subject": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const [account] = await db.select({ id: clientAccountsTable.id, organizationId: clientAccountsTable.organizationId }).from(clientAccountsTable)
       .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
@@ -1523,7 +1547,14 @@ router.get("/carlota/radar/notification-preferences", authMiddleware(), async (r
   } catch (err) { handleRouteError(res, err, "Failed to fetch radar notification preferences"); }
 });
 
-router.put("/carlota/radar/notification-preferences", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/carlota/radar/notification-preferences", authMiddleware(), validateBody(bodyShape({
+      "competitors": z.unknown().optional(),
+      "email": z.unknown().optional(),
+      "emailEnabled": z.unknown().optional(),
+      "enabled": z.unknown().optional(),
+      "frequency": z.unknown().optional(),
+      "inAppEnabled": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const userId = req.user!.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
@@ -1588,7 +1619,7 @@ router.put("/carlota/radar/notification-preferences", authMiddleware(), validate
   } catch (err) { handleRouteError(res, err, "Failed to update radar notification preferences"); }
 });
 
-router.post("/carlota/radar/notification-preferences/flush-digest", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.post("/carlota/radar/notification-preferences/flush-digest", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const userId = req.user!.id;
     const [prefs] = await db.select().from(carlotaRadarNotifPrefsTable).where(eq(carlotaRadarNotifPrefsTable.userId, userId)).limit(1);
@@ -1691,7 +1722,9 @@ router.get("/carlota/admin/clients/:clientId/advisory-data", authMiddleware(), r
   } catch (err) { handleRouteError(res, err, "Failed to fetch advisory data"); }
 });
 
-router.put("/carlota/admin/clients/:clientId/margin-history", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/carlota/admin/clients/:clientId/margin-history", authMiddleware(), requireRole("super_admin", "admin"), validateBody(bodyShape({
+      "map": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const clientId = req.params.clientId;
     if (!isValidClientId(clientId)) { sendBadRequest(res, "Unknown clientId"); return; }
@@ -1710,7 +1743,14 @@ router.put("/carlota/admin/clients/:clientId/margin-history", authMiddleware(), 
   } catch (err) { handleRouteError(res, err, "Failed to update margin history"); }
 });
 
-router.put("/carlota/admin/clients/:clientId/roi-benchmarks", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/carlota/admin/clients/:clientId/roi-benchmarks", authMiddleware(), requireRole("super_admin", "admin"), validateBody(bodyShape({
+      "avgPaybackMonths": z.unknown().optional(),
+      "avgRateRealisationPct": z.unknown().optional(),
+      "avgRoi": z.unknown().optional(),
+      "blendedMarginPct": z.unknown().optional(),
+      "clientRetentionPct": z.unknown().optional(),
+      "npsScore": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const clientId = req.params.clientId;
     if (!isValidClientId(clientId)) { sendBadRequest(res, "Unknown clientId"); return; }
@@ -1733,7 +1773,9 @@ router.put("/carlota/admin/clients/:clientId/roi-benchmarks", authMiddleware(), 
   } catch (err) { handleRouteError(res, err, "Failed to update ROI benchmarks"); }
 });
 
-router.put("/carlota/admin/clients/:clientId/roi-trend", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/carlota/admin/clients/:clientId/roi-trend", authMiddleware(), requireRole("super_admin", "admin"), validateBody(bodyShape({
+      "map": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const clientId = req.params.clientId;
     if (!isValidClientId(clientId)) { sendBadRequest(res, "Unknown clientId"); return; }
@@ -1752,7 +1794,9 @@ router.put("/carlota/admin/clients/:clientId/roi-trend", authMiddleware(), requi
   } catch (err) { handleRouteError(res, err, "Failed to update ROI trend"); }
 });
 
-router.put("/carlota/admin/clients/:clientId/radar-signals", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/carlota/admin/clients/:clientId/radar-signals", authMiddleware(), requireRole("super_admin", "admin"), validateBody(bodyShape({
+      "map": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const clientId = req.params.clientId;
     if (!isValidClientId(clientId)) { sendBadRequest(res, "Unknown clientId"); return; }
@@ -1781,7 +1825,9 @@ router.put("/carlota/admin/clients/:clientId/radar-signals", authMiddleware(), r
   } catch (err) { handleRouteError(res, err, "Failed to update radar signals"); }
 });
 
-router.put("/carlota/admin/clients/:clientId/competitors", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/carlota/admin/clients/:clientId/competitors", authMiddleware(), requireRole("super_admin", "admin"), validateBody(bodyShape({
+      "map": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const clientId = req.params.clientId;
     if (!isValidClientId(clientId)) { sendBadRequest(res, "Unknown clientId"); return; }
@@ -1806,7 +1852,9 @@ router.put("/carlota/admin/clients/:clientId/competitors", authMiddleware(), req
   } catch (err) { handleRouteError(res, err, "Failed to update competitors"); }
 });
 
-router.put("/carlota/admin/clients/:clientId/market-trend", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/carlota/admin/clients/:clientId/market-trend", authMiddleware(), requireRole("super_admin", "admin"), validateBody(bodyShape({
+      "map": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const clientId = req.params.clientId;
     if (!isValidClientId(clientId)) { sendBadRequest(res, "Unknown clientId"); return; }
@@ -1839,7 +1887,12 @@ async function resolveClientScope(userId: number, orgId: number | null): Promise
 
 // ── Diagnostics (DB-persisted, auth-gated) ─────────────────────────────────────
 
-router.post("/carlota/diagnostics", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/carlota/diagnostics", authMiddleware(), validateBody(bodyShape({
+      "companyName": z.unknown().optional(),
+      "industry": z.unknown().optional(),
+      "report": z.unknown().optional(),
+      "stage": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const body = req.body as DiagnosticRunBody;
     if (!body.companyName || !body.report) {
@@ -1882,7 +1935,12 @@ router.get("/carlota/diagnostics", authMiddleware(), async (req, res) => {
 
 // ── Scenario runs (DB-persisted, auth-gated) ───────────────────────────────────
 
-router.post("/carlota/scenarios", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/carlota/scenarios", authMiddleware(), validateBody(bodyShape({
+      "context": z.unknown().optional(),
+      "details": z.unknown().optional(),
+      "label": z.unknown().optional(),
+      "result": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const body = req.body as ScenarioRunBody;
     if (!body.label || !body.result) {

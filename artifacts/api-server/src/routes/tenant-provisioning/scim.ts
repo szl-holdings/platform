@@ -5,7 +5,7 @@ import crypto from "crypto";
 import { sendSuccess, sendBadRequest, sendNotFound, sendForbidden, sendError, handleRouteError } from "../../lib/api-response";
 import { authMiddleware, requireRole } from "../../middlewares/auth";
 import { logActivity } from "../../lib/activity-logger";
-import { validateBody, scimSyncUsersSchema, tenantCreateSchema, tenantStatusSchema} from "../../lib/validation";
+import { validateBody, scimSyncUsersSchema, tenantCreateSchema, tenantStatusSchema } from "../../lib/validation";
 import { db } from "@szl-holdings/db";
 import {
   azureTenantsTable,

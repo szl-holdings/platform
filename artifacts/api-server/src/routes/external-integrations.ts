@@ -1,10 +1,12 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import crypto from "crypto";
 import { services, type NormalizedSiemEvent } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -160,7 +162,7 @@ router.get("/integrations/status/:adapter", async (req: Request, res: Response) 
   }
 });
 
-router.post("/integrations/status/refresh", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (_req: Request, res: Response) => {
+router.post("/integrations/status/refresh", validateBody(bodyShape({})), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (_req: Request, res: Response) => {
   try {
     const results: Array<{ adapter: string; success: boolean; responseTimeMs: number; error?: string }> = [];
 
@@ -196,7 +198,7 @@ router.post("/integrations/status/refresh", validateBody(jsonObjectBodySchema), 
 });
 
 
-router.post("/webhooks/inbound/jira", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/jira", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const rawBody = extractRawBody(req);
 
@@ -235,7 +237,7 @@ router.post("/webhooks/inbound/jira", validateBody(jsonObjectBodySchema), async 
   }
 });
 
-router.post("/webhooks/inbound/pagerduty", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/pagerduty", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const rawBody = extractRawBody(req);
 
@@ -276,7 +278,10 @@ router.post("/webhooks/inbound/pagerduty", validateBody(jsonObjectBodySchema), a
   }
 });
 
-router.post("/webhooks/inbound/slack/events", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/slack/events", validateBody(bodyShape({
+      "challenge": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const rawBody = extractRawBody(req);
 
@@ -314,7 +319,9 @@ router.post("/webhooks/inbound/slack/events", validateBody(jsonObjectBodySchema)
   }
 });
 
-router.post("/webhooks/inbound/slack/interactions", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/slack/interactions", validateBody(bodyShape({
+      "payload": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const rawBody = extractRawBody(req);
 
@@ -350,7 +357,7 @@ router.post("/webhooks/inbound/slack/interactions", validateBody(jsonObjectBodyS
   }
 });
 
-router.post("/webhooks/inbound/slack/commands", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/slack/commands", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const rawBody = (req as RequestWithRawBody).rawBody?.toString("utf-8")
       ?? (typeof req.body === "string" ? req.body : new URLSearchParams(req.body as Record<string, string>).toString());
@@ -382,7 +389,7 @@ router.post("/webhooks/inbound/slack/commands", validateBody(jsonObjectBodySchem
   }
 });
 
-router.post("/webhooks/inbound/salesforce/cdc", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/salesforce/cdc", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const rawBody = extractRawBody(req);
 
@@ -426,7 +433,7 @@ router.post("/webhooks/inbound/salesforce/cdc", validateBody(jsonObjectBodySchem
   }
 });
 
-router.post("/webhooks/inbound/siem/splunk", validateBody(jsonObjectBodySchema), verifySiemToken, async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/siem/splunk", validateBody(bodyShape({})), verifySiemToken, async (req: Request, res: Response) => {
   try {
     const payload = req.body as Record<string, unknown> | Array<Record<string, unknown>>;
     const result = services.siem.ingestSplunkHec(payload);
@@ -446,7 +453,9 @@ router.post("/webhooks/inbound/siem/splunk", validateBody(jsonObjectBodySchema),
   }
 });
 
-router.post("/webhooks/inbound/siem/sentinel", validateBody(jsonObjectBodySchema), verifySiemToken, async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/siem/sentinel", validateBody(bodyShape({
+      "value": z.unknown().optional(),
+    })), verifySiemToken, async (req: Request, res: Response) => {
   try {
     const payload = req.body as Record<string, unknown>;
     const alerts = (payload["value"] as Array<Record<string, unknown>>) ?? [payload];
@@ -466,7 +475,7 @@ router.post("/webhooks/inbound/siem/sentinel", validateBody(jsonObjectBodySchema
   }
 });
 
-router.post("/webhooks/inbound/siem/cef", validateBody(jsonObjectBodySchema), verifySiemToken, async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/siem/cef", validateBody(bodyShape({})), verifySiemToken, async (req: Request, res: Response) => {
   try {
     const rawBody = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
     const lines = rawBody.split("\n").filter((l) => l.trim());
@@ -486,7 +495,7 @@ router.post("/webhooks/inbound/siem/cef", validateBody(jsonObjectBodySchema), ve
   }
 });
 
-router.post("/webhooks/inbound/siem/syslog", validateBody(jsonObjectBodySchema), verifySiemToken, async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/siem/syslog", validateBody(bodyShape({})), verifySiemToken, async (req: Request, res: Response) => {
   try {
     const rawBody = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
     const lines = rawBody.split("\n").filter((l) => l.trim());
@@ -504,7 +513,7 @@ router.post("/webhooks/inbound/siem/syslog", validateBody(jsonObjectBodySchema),
   }
 });
 
-router.post("/webhooks/inbound/siem/events", validateBody(jsonObjectBodySchema), verifySiemToken, async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/siem/events", validateBody(bodyShape({})), verifySiemToken, async (req: Request, res: Response) => {
   try {
     const payload = req.body as Array<Record<string, unknown>> | Record<string, unknown>;
     const events = Array.isArray(payload) ? payload : [payload];
@@ -580,7 +589,14 @@ router.get("/integrations/pagerduty/oncall", ...opsAuth, validateQuery(listQuery
   }
 });
 
-router.post("/integrations/pagerduty/incidents", ...opsAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/integrations/pagerduty/incidents", ...opsAuth, validateBody(bodyShape({
+      "body": z.unknown().optional(),
+      "escalationPolicyId": z.unknown().optional(),
+      "fromEmail": z.unknown().optional(),
+      "serviceId": z.unknown().optional(),
+      "title": z.unknown().optional(),
+      "urgency": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { title, serviceId, fromEmail, urgency, escalationPolicyId, body } = req.body as {
       title: string;
@@ -719,7 +735,10 @@ router.get("/integrations/jira/oauth/authorize", ...opsAuth, validateQuery(listQ
   }
 });
 
-router.post("/integrations/jira/oauth/callback", ...opsAuth, validateBody(jsonObjectBodySchema), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+router.post("/integrations/jira/oauth/callback", ...opsAuth, validateBody(bodyShape({
+      "code": z.unknown().optional(),
+      "redirect_uri": z.unknown().optional(),
+    })), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { code, redirect_uri: redirectUri } = req.body as { code: string; redirect_uri: string };
     if (!code || !redirectUri) {

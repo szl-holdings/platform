@@ -21,11 +21,22 @@ import { randomUUID } from "crypto";
 import { authMiddleware, isElevatedUser } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendForbidden, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router: IRouter = Router();
 
-router.post("/alloy/cognitive/outcomes", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/cognitive/outcomes", authMiddleware(), validateBody(bodyShape({
+      "agentId": z.unknown().optional(),
+      "decisionId": z.unknown().optional(),
+      "finalAction": z.unknown().optional(),
+      "originalAction": z.unknown().optional(),
+      "originalConfidence": z.unknown().optional(),
+      "outcome": z.unknown().optional(),
+      "overrideReason": z.unknown().optional(),
+      "topic": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const {
       decisionId,
@@ -192,7 +203,7 @@ router.get("/alloy/cognitive/evals/calibrations", authMiddleware(), async (req: 
   }
 });
 
-router.post("/alloy/cognitive/evals/run", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/cognitive/evals/run", authMiddleware(), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     if (!req.user || !isElevatedUser(req.user)) {
       sendForbidden(res, "Manual eval runs require elevated access");

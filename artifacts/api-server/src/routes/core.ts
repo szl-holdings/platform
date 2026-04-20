@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db } from "@szl-holdings/db";
 import {
   recommendationsTable,
@@ -18,7 +20,7 @@ import { sql, desc, gte, eq, count } from "drizzle-orm";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -210,7 +212,7 @@ function scoreEntity(
 router.post(
   "/core/recommendations",
   authMiddleware({ required: true }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req, res) => {
     try {
       const {

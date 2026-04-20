@@ -1,4 +1,5 @@
 import { Router, type IRouter, type RequestHandler, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { randomUUID, createHash } from "crypto";
 import rateLimit from "express-rate-limit";
 import multer from "multer";
@@ -32,7 +33,7 @@ import {
 } from "../lib/terra-covenant-store";
 import { dispatchCovenantBreaches } from "../lib/agent-scheduler";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 import { guardSeedInProduction } from "../lib/seed-guard";
 
 const router: IRouter = Router();
@@ -1054,7 +1055,7 @@ router.get("/terra/cognitive/covenants", cogLimit, auth, async (req, res) => {
 // ─── Run-Now scan (operator-triggered) — re-evaluates all covenants and
 // dispatches guardian approvals for any new breaches.
 
-router.post("/terra/cognitive/covenants/scan", cogLimit, auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/terra/cognitive/covenants/scan", cogLimit, auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const trace = reqTraceRef(req);
     const result = await dispatchCovenantBreaches();
@@ -1070,7 +1071,7 @@ router.post("/terra/cognitive/covenants/scan", cogLimit, auth, validateBody(json
 
 // ─── Seed covenants from distress registry (operator action, idempotent) ──────
 
-router.post("/terra/cognitive/covenants/seed", cogLimit, auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/terra/cognitive/covenants/seed", cogLimit, auth, validateBody(bodyShape({})), async (req, res) => {
   if (guardSeedInProduction(res)) return;
   try {
     const limit = Math.min(Number(req.body?.limit ?? 12), 50);
@@ -1085,7 +1086,15 @@ router.post("/terra/cognitive/covenants/seed", cogLimit, auth, validateBody(json
 // Called by the terra-covenant-monitor scheduler or by operators.
 // Uses deterministic requestId for idempotency — safe to call multiple times.
 
-router.post("/terra/cognitive/covenants/submit-review", cogLimit, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/terra/cognitive/covenants/submit-review", cogLimit, validateBody(bodyShape({
+      "address": z.unknown().optional(),
+      "covenantType": z.unknown().optional(),
+      "debtAmount": z.unknown().optional(),
+      "distressType": z.unknown().optional(),
+      "estimatedValue": z.unknown().optional(),
+      "propertyId": z.unknown().optional(),
+      "score": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     // GAP-016: scoped-token auth via the central registry. Replaces an
     // inline raw-string compare with the constant-time HMAC digest path
@@ -1534,7 +1543,17 @@ function serializeMatter(matter: typeof terraDiligenceMattersTable.$inferSelect,
 }
 
 // POST: create new diligence matter
-router.post("/terra/cognitive/diligence-room/matters", cogLimit, authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/terra/cognitive/diligence-room/matters", cogLimit, authWrite, validateBody(bodyShape({
+      "borough": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "ownerName": z.unknown().optional(),
+      "propertyExternalId": z.unknown().optional(),
+      "propertyId": z.unknown().optional(),
+      "stage": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "targetCloseDate": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const parsed = createMatterSchema.safeParse(req.body);
     if (!parsed.success) return sendError(res, "Invalid matter payload", 400, "VALIDATION_ERROR", parsed.error.flatten());
@@ -1561,7 +1580,20 @@ router.post("/terra/cognitive/diligence-room/matters", cogLimit, authWrite, vali
 });
 
 // POST: attach/upload evidence to a matter (supports multipart file OR JSON with documentUrl)
-router.post("/terra/cognitive/diligence-room/matters/:matterId/evidence", cogLimit, authWrite, diligenceUpload.single("file"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/terra/cognitive/diligence-room/matters/:matterId/evidence", cogLimit, authWrite, diligenceUpload.single("file"), validateBody(bodyShape({
+      "category": z.unknown().optional(),
+      "citations": z.unknown().optional(),
+      "confidence": z.unknown().optional(),
+      "documentMimeType": z.unknown().optional(),
+      "documentName": z.unknown().optional(),
+      "documentSize": z.unknown().optional(),
+      "documentUrl": z.unknown().optional(),
+      "evidenceDate": z.unknown().optional(),
+      "label": z.unknown().optional(),
+      "source": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "summary": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const matterId = req.params.matterId as string;
     const matterRows = await db
@@ -1633,7 +1665,13 @@ router.post("/terra/cognitive/diligence-room/matters/:matterId/evidence", cogLim
 });
 
 // PATCH: update evidence status / confidence / review fields
-router.patch("/terra/cognitive/diligence-room/evidence/:evidenceId", cogLimit, authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/terra/cognitive/diligence-room/evidence/:evidenceId", cogLimit, authWrite, validateBody(bodyShape({
+      "citations": z.unknown().optional(),
+      "confidence": z.unknown().optional(),
+      "reviewedByName": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "summary": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const parsed = patchEvidenceSchema.safeParse(req.body);
     if (!parsed.success) return sendError(res, "Invalid patch payload", 400, "VALIDATION_ERROR", parsed.error.flatten());

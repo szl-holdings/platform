@@ -37,9 +37,10 @@ import {
   sendNoContent, handleRouteError,
 } from "../lib/api-response";
 import { z } from "zod";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { parseIdParam } from "../middlewares/auth";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 
 function strParam(raw: string | string[]): string {
@@ -259,7 +260,18 @@ router.get("/partner/accounts/:id", authMiddleware(), async (req: Request, res: 
   }
 });
 
-router.patch("/partner/accounts/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/partner/accounts/:id", authMiddleware(), validateBody(bodyShape({
+      "approvedAt": z.unknown().optional(),
+      "commissionRate": z.unknown().optional(),
+      "contactEmail": z.unknown().optional(),
+      "contactName": z.unknown().optional(),
+      "maxManagedTenants": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "tier": z.unknown().optional(),
+      "website": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const id = parseIdParam(req.params.id);
     if (isNaN(id)) { sendBadRequest(res, "Invalid partner ID"); return; }
@@ -387,7 +399,10 @@ router.post("/partner/accounts/:id/tenants", authMiddleware(), validateBody(prov
   }
 });
 
-router.post("/partner/accounts/:id/tenants/assign", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/partner/accounts/:id/tenants/assign", authMiddleware(), validateBody(bodyShape({
+      "accessLevel": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const partnerId = parseIdParam(req.params.id);
     if (isNaN(partnerId)) { sendBadRequest(res, "Invalid partner ID"); return; }
@@ -445,7 +460,7 @@ router.post("/partner/accounts/:id/tenants/assign", authMiddleware(), validateBo
   }
 });
 
-router.delete("/partner/accounts/:id/tenants/:orgId", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/partner/accounts/:id/tenants/:orgId", validateBody(bodyShape({})), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const partnerId = parseIdParam(req.params.id);
     const orgId = parseIdParam(req.params.orgId);
@@ -593,7 +608,7 @@ router.put("/orgs/:orgId/branding", authMiddleware(), validateBody(brandingSchem
   }
 });
 
-router.delete("/orgs/:orgId/branding", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/orgs/:orgId/branding", validateBody(bodyShape({})), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
     if (isNaN(orgId)) { sendBadRequest(res, "Invalid org ID"); return; }
@@ -640,7 +655,10 @@ router.get("/orgs/:orgId/custom-domains", authMiddleware(), async (req: Request,
   }
 });
 
-router.post("/orgs/:orgId/custom-domains", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/orgs/:orgId/custom-domains", authMiddleware(), validateBody(bodyShape({
+      "domain": z.unknown().optional(),
+      "verificationMethod": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
     if (isNaN(orgId)) { sendBadRequest(res, "Invalid org ID"); return; }
@@ -710,7 +728,7 @@ router.post("/orgs/:orgId/custom-domains", authMiddleware(), validateBody(jsonOb
   }
 });
 
-router.post("/orgs/:orgId/custom-domains/:domainId/verify", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/orgs/:orgId/custom-domains/:domainId/verify", authMiddleware(), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
     const domainId = parseIdParam(req.params.domainId);
@@ -836,7 +854,7 @@ router.post("/orgs/:orgId/custom-domains/:domainId/verify", authMiddleware(), va
 // Must be called after successful /verify. Only org admins and platform admins
 // may activate. In production this would integrate with an SSL provisioning job.
 
-router.post("/orgs/:orgId/custom-domains/:domainId/activate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/orgs/:orgId/custom-domains/:domainId/activate", authMiddleware(), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
     const domainId = parseIdParam(req.params.domainId);
@@ -885,7 +903,9 @@ router.post("/orgs/:orgId/custom-domains/:domainId/activate", authMiddleware(), 
   }
 });
 
-router.patch("/orgs/:orgId/custom-domains/:domainId", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/orgs/:orgId/custom-domains/:domainId", authMiddleware(), validateBody(bodyShape({
+      "isPrimary": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
     const domainId = parseIdParam(req.params.domainId);
@@ -923,7 +943,7 @@ router.patch("/orgs/:orgId/custom-domains/:domainId", authMiddleware(), validate
   }
 });
 
-router.delete("/orgs/:orgId/custom-domains/:domainId", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/orgs/:orgId/custom-domains/:domainId", validateBody(bodyShape({})), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
     const domainId = parseIdParam(req.params.domainId);

@@ -16,7 +16,7 @@ import { privilegeEngine } from "../services/prism-privilege-engine";
 import { modelRouter } from "../services/prism-model-router";
 import { logger } from "../lib/logger";
 import { z } from "zod";
-import { validateBody, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const docketLinkSchema = z.object({
   docketEntryId: z.string().max(200).optional(),

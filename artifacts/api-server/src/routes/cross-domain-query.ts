@@ -26,8 +26,10 @@ import {
   fundNavRecordsTable,
 } from "@szl-holdings/db";
 import { ne, desc, eq, and } from "drizzle-orm";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router: IRouter = Router();
 
 interface DomainResult {
@@ -484,7 +486,9 @@ router.post(
   "/cross-domain-query",
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "query": z.unknown().optional(),
+    })),
   async (req, res) => {
     const { query } = req.body;
     if (!query || typeof query !== "string" || query.trim().length < 3) {

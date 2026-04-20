@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { createHmac, randomBytes } from "crypto";
 import { pool, db, connectorsTable } from "@szl-holdings/db";
 import { eq, and } from "drizzle-orm";
@@ -6,7 +8,7 @@ import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -146,7 +148,14 @@ router.get("/alloy/integrations/connections", authMiddleware(), requireRole("ops
   }
 });
 
-router.post("/alloy/integrations/connections", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/integrations/connections", authMiddleware(), requireRole("admin", "super_admin"), validateBody(bodyShape({
+      "approvalClass": z.unknown().optional(),
+      "config": z.unknown().optional(),
+      "displayName": z.unknown().optional(),
+      "integrationType": z.unknown().optional(),
+      "scope": z.unknown().optional(),
+      "tenantId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { integrationType, displayName, tenantId, config, scope, approvalClass } = req.body as {
       integrationType: string;
@@ -183,7 +192,12 @@ router.post("/alloy/integrations/connections", authMiddleware(), requireRole("ad
   }
 });
 
-router.patch("/alloy/integrations/connections/:id", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/alloy/integrations/connections/:id", authMiddleware(), requireRole("admin", "super_admin"), validateBody(bodyShape({
+      "config": z.unknown().optional(),
+      "displayName": z.unknown().optional(),
+      "isEnabled": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { status, isEnabled, config, displayName } = req.body as {
       status?: string;
@@ -206,7 +220,7 @@ router.patch("/alloy/integrations/connections/:id", authMiddleware(), requireRol
   }
 });
 
-router.delete("/alloy/integrations/connections/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.delete("/alloy/integrations/connections/:id", validateBody(bodyShape({})), authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
   try {
     await pool.query(`DELETE FROM alloy_integration_connections WHERE id = $1`, [req.params.id]);
     sendSuccess(res, { deleted: true, id: req.params.id });
@@ -215,7 +229,14 @@ router.delete("/alloy/integrations/connections/:id", validateBody(jsonObjectBody
   }
 });
 
-router.post("/alloy/integrations/webhooks/endpoints", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/integrations/webhooks/endpoints", authMiddleware(), requireRole("admin", "super_admin"), validateBody(bodyShape({
+      "allowedEvents": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "targetSkill": z.unknown().optional(),
+      "targetWorkflowType": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { name, description, allowedEvents = ["*"], targetSkill, targetWorkflowType, metadata } = req.body as {
       name: string;
@@ -256,7 +277,10 @@ router.get("/alloy/integrations/webhooks/endpoints", authMiddleware(), requireRo
   }
 });
 
-router.post("/alloy/integrations/webhooks/receive/:endpointId", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/integrations/webhooks/receive/:endpointId", validateBody(bodyShape({
+      "event": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { endpointId } = req.params;
     const endpointResult = await pool.query(`SELECT * FROM alloy_webhook_endpoints WHERE id = $1 AND is_enabled = TRUE`, [endpointId]);
@@ -337,7 +361,7 @@ router.get("/alloy/integrations/events", authMiddleware(), requireRole("ops", "a
   }
 });
 
-router.post("/alloy/integrations/connections/:id/test", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/integrations/connections/:id/test", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const result = await pool.query(`SELECT * FROM alloy_integration_connections WHERE id = $1`, [req.params.id]);
     if (!result.rows[0]) { sendError(res, "Connection not found", 404); return; }

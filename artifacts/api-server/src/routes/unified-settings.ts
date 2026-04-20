@@ -23,8 +23,10 @@ import { eq, and, desc, asc, like, gte, lte } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNoContent, sendNotFound, sendBadRequest, sendForbidden, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { assertTenantAccess } from "../middlewares/tenant-scope";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router: IRouter = Router();
 
 const SUPER_ADMIN_ROLES = ["super_admin"] as const;
@@ -192,7 +194,16 @@ router.post(
   "/settings/platform",
   authMiddleware(),
   requireRole(...SUPER_ADMIN_ROLES),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "category": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "isPublic": z.unknown().optional(),
+      "key": z.unknown().optional(),
+      "label": z.unknown().optional(),
+      "namespace": z.unknown().optional(),
+      "value": z.unknown().optional(),
+      "valueType": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const { namespace, key, value, valueType, label, description, category, isPublic } = req.body as {
         namespace: string;
@@ -301,7 +312,14 @@ router.get(
 router.post(
   "/settings/tenant/:orgId",
   authMiddleware(),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "category": z.unknown().optional(),
+      "key": z.unknown().optional(),
+      "label": z.unknown().optional(),
+      "namespace": z.unknown().optional(),
+      "value": z.unknown().optional(),
+      "valueType": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const orgId = parseIdParam(req.params.orgId);
       if (!assertTenantAdminAccess(req, res, orgId)) return;
@@ -414,7 +432,13 @@ router.get(
 router.post(
   "/settings/user",
   authMiddleware(),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "key": z.unknown().optional(),
+      "namespace": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "value": z.unknown().optional(),
+      "valueType": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const user = req.user!;
       const { namespace, key, value, valueType, orgId: bodyOrgId } = req.body as {
@@ -491,7 +515,7 @@ router.post(
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.delete(
-  "/settings/:tier/:id", validateBody(jsonObjectBodySchema),
+  "/settings/:tier/:id", validateBody(bodyShape({})),
   authMiddleware(),
   async (req: Request, res: Response) => {
     try {

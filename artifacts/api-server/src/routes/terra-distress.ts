@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import multer from "multer";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
@@ -14,7 +16,7 @@ import { ingestCsvBuffer } from "../lib/terra-csv-ingestion";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { NYC_INGESTION_JOB_TYPE } from "../lib/terra-nyc-ingestion";
 import { NYC_EXTENDED_INGESTION_JOB_TYPE, type NycExtendedIngestionJobPayload } from "../lib/terra-nyc-extended-ingestion";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
@@ -227,7 +229,7 @@ router.post(
   authMiddleware({ required: true }),
   requireRole("super_admin", "ops", "analyst", "seller"),
   upload.single("file"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req, res) => {
     try {
       if (!req.file) {
@@ -273,7 +275,9 @@ router.post(
   "/terra/distress/ingest/nyc-open-data",
   authMiddleware({ required: true }),
   requireRole("super_admin", "ops"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "filter": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const ALL_SOURCES: Array<"acris" | "acris_master" | "foreclosure_filings" | "dof_liens" | "hpd_violations"> =
@@ -308,7 +312,9 @@ router.post(
   "/terra/distress/ingest/nyc-extended",
   authMiddleware({ required: true }),
   requireRole("super_admin", "ops"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "filter": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const ALL_SOURCES: NycExtendedIngestionJobPayload["sources"] = [

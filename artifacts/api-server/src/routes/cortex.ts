@@ -40,8 +40,10 @@ import { orchestrate } from "../lib/multi-agent-orchestrator";
 import { fusionCortex } from "@szl-holdings/ai-engine";
 import { ontologyEngine } from "@szl-holdings/ai-engine";
 import { logger } from "../lib/logger";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router: IRouter = Router();
 
 const DOMAIN_ROUTE_KEYWORDS: Record<string, string[]> = {
@@ -102,7 +104,11 @@ router.post(
   "/cortex/query",
   authMiddleware({ required: true }),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "domains": z.unknown().optional(),
+      "query": z.unknown().optional(),
+      "sessionId": z.unknown().optional(),
+    })),
   async (req, res) => {
     const { query, sessionId, domains: requestedDomains } = req.body ?? {};
 
@@ -794,7 +800,10 @@ router.post(
   "/cortex/whatif",
   authMiddleware({ required: true }),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "query": z.unknown().optional(),
+      "scenario": z.unknown().optional(),
+    })),
   async (req, res) => {
     const { query, scenario } = req.body ?? {};
 
@@ -1071,7 +1080,10 @@ router.post(
   "/cortex/quick-actions/:id/action",
   authMiddleware({ required: true }),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "decision": z.unknown().optional(),
+      "note": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const approvalId = parseInt(req.params["id"] as string, 10);
@@ -1198,7 +1210,12 @@ router.post(
   "/cortex/action-drafts/generate",
   authMiddleware({ required: true }),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "affectedDomains": z.unknown().optional(),
+      "alertId": z.unknown().optional(),
+      "alertTitle": z.unknown().optional(),
+      "severity": z.unknown().optional(),
+    })),
   async (req, res) => {
     const { alertId, alertTitle, severity, affectedDomains } = req.body ?? {};
 
@@ -1273,7 +1290,7 @@ router.post(
   "/cortex/action-drafts/:id/approve",
   authMiddleware({ required: true }),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req, res) => {
     try {
       const caller = callerEmail(req as unknown as any);
@@ -1337,7 +1354,7 @@ router.post(
   "/cortex/action-drafts/:id/dismiss",
   authMiddleware({ required: true }),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req, res) => {
     try {
       const caller = callerEmail(req as unknown as any);
@@ -1384,7 +1401,10 @@ router.post(
   "/cortex/entity-graph/snapshot",
   authMiddleware({ required: true }),
   perUserWriteSlidingLimiter,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "domain": z.unknown().optional(),
+      "label": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const orgId = callerOrgId(req as any);
@@ -1585,7 +1605,7 @@ router.get(
 );
 
 router.delete(
-  "/cortex/entity-graph/snapshot/:uuid", validateBody(jsonObjectBodySchema),
+  "/cortex/entity-graph/snapshot/:uuid", validateBody(bodyShape({})),
   authMiddleware({ required: true }),
   perUserWriteSlidingLimiter,
   async (req, res) => {

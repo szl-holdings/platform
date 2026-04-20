@@ -1,10 +1,12 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { prismBus, prismConnectorRegistry } from "@szl-holdings/prism-bus";
 import { PRISM_BUILT_IN_TOOLS, PRISM_DOMAIN_TOOLS } from "@szl-holdings/prism-bus";
 import type { PrismDomain } from "@szl-holdings/prism-bus";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -58,7 +60,15 @@ router.get("/prism-bus/events", authMiddleware(), validateQuery(listQuerySchema)
   }
 });
 
-router.post("/prism-bus/publish", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/prism-bus/publish", authMiddleware(), validateBody(bodyShape({
+      "correlationId": z.unknown().optional(),
+      "domain": z.unknown().optional(),
+      "payload": z.unknown().optional(),
+      "severity": z.unknown().optional(),
+      "sourceId": z.unknown().optional(),
+      "tenantId": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { type, domain, sourceId, payload, severity, correlationId, tenantId } = req.body as {
       type?: string;

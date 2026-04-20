@@ -1,7 +1,9 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { randomUUID } from "crypto";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router = Router();
 
@@ -610,7 +612,11 @@ router.get("/audit-log", validateQuery(listQuerySchema), (req: Request, res: Res
   }
 });
 
-router.post("/audit-log/policy-appeal", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+router.post("/audit-log/policy-appeal", validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "justification": z.unknown().optional(),
+      "requestId": z.unknown().optional(),
+    })), (req: Request, res: Response) => {
   try {
     const { requestId, action, justification } = req.body as {
       requestId?: string;

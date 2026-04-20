@@ -1,10 +1,12 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, activityLogTable } from "@szl-holdings/db";
 import { desc, eq } from "drizzle-orm";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { readLimiter, writeLimiter } from "../middlewares/rate-limiters";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -14,7 +16,19 @@ function isDoctrineAction(action: string): boolean {
   return action.startsWith(DOCTRINE_ACTION_PREFIX);
 }
 
-router.post("/doctrine/events", writeLimiter, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/doctrine/events", writeLimiter, validateBody(bodyShape({
+      "context": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "entitiesInvolved": z.unknown().optional(),
+      "explainability": z.unknown().optional(),
+      "id": z.unknown().optional(),
+      "layer": z.unknown().optional(),
+      "severity": z.unknown().optional(),
+      "sourceApp": z.unknown().optional(),
+      "timestamp": z.unknown().optional(),
+      "title": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const body = req.body;
     if (!body || !body.type || !body.sourceApp || !body.layer || !body.title) {

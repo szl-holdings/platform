@@ -1,10 +1,12 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, pushTokensTable } from "@szl-holdings/db";
 import { eq, and } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendBadRequest, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { Expo } from "expo-server-sdk";
-import { jsonObjectBodySchema, pushTokenRegisterSchema, validateBody } from "../lib/validation";
+import { pushTokenRegisterSchema, validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -78,7 +80,7 @@ router.post("/push-tokens", authMiddleware({ required: false }), validateBody(pu
   }
 });
 
-router.delete("/push-tokens/:token", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/push-tokens/:token", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const { token } = req.params as Record<string, string>;
     const userId = req.user!.id;

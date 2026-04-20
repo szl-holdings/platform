@@ -1,11 +1,12 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { db } from "@szl-holdings/db";
 import crypto from "crypto";
 import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, sendBadRequest, sendNotFound, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { validateExternalUrlSync, validateExternalUrl } from "../lib/ssrf-guard";
 
 function ssrfSafeUrl(url: string): boolean {
@@ -239,7 +240,7 @@ router.get("/webhooks/endpoints", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.post("/webhooks/endpoints", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/webhooks/endpoints", authMiddleware(), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   const parsed = webhookEndpointSchema.safeParse(req.body);
   if (!parsed.success) {
     sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400);
@@ -282,7 +283,7 @@ router.post("/webhooks/endpoints", authMiddleware(), validateBody(jsonObjectBody
   }
 });
 
-router.patch("/webhooks/endpoints/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/webhooks/endpoints/:id", authMiddleware(), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   const parsed = webhookEndpointUpdateSchema.safeParse(req.body);
   if (!parsed.success) {
     sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400);
@@ -314,7 +315,7 @@ router.patch("/webhooks/endpoints/:id", authMiddleware(), validateBody(jsonObjec
   }
 });
 
-router.delete("/webhooks/endpoints/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/webhooks/endpoints/:id", validateBody(bodyShape({})), authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!webhookEndpoints.has(String(req.params.id))) {
       sendNotFound(res, "Webhook endpoint");
@@ -327,7 +328,7 @@ router.delete("/webhooks/endpoints/:id", validateBody(jsonObjectBodySchema), aut
   }
 });
 
-router.post("/webhooks/endpoints/:id/ping", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/webhooks/endpoints/:id/ping", authMiddleware(), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const endpoint = webhookEndpoints.get(String(req.params.id));
     if (!endpoint) {
@@ -393,7 +394,7 @@ router.get("/webhooks/deliveries", authMiddleware(), validateQuery(listQuerySche
   }
 });
 
-router.post("/webhooks", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/webhooks", authMiddleware(), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   const parsed = webhookEndpointSchema.safeParse(req.body);
   if (!parsed.success) {
     sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400);

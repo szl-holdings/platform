@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { randomUUID } from "crypto";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
@@ -6,7 +8,7 @@ import { defaultMemoryStore } from "@workspace/memory-fabric/store";
 import { guardSeedInProduction, isProductionEnvironment } from "../lib/seed-guard";
 import { authMiddleware } from "../middlewares/auth";
 
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -64,7 +66,7 @@ function requireAdminRole(req: Request, res: Response, next: NextFunction): void
 
 router.post(
   "/demo/reset",
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   // Order matters: production guard first (returns 404, never reveals the
   // endpoint exists), then DEMO_MODE gate, then auth + admin check.
   (_req: Request, res: Response, next: NextFunction) => {

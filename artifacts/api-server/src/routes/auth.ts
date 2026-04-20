@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { db, usersTable, sessionsTable, rolesTable, userRolesTable, organizationsTable, orgMembersTable, mfaSecretsTable, toCanonicalRole, type RoleName } from "@szl-holdings/db";
 import { eq, desc, and, inArray } from "drizzle-orm";
 import { randomBytes, pbkdf2Sync, timingSafeEqual, createCipheriv, createDecipheriv } from "crypto";
@@ -18,7 +19,7 @@ import {
   RefreshTokenReplayError,
 } from "../middlewares/session-policy";
 import { z } from "zod";
-import { jsonObjectBodySchema, listQuerySchema, loginPasswordSchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, loginPasswordSchema, validateBody, validateQuery } from "../lib/validation";
 import { generateSecret as otpGenerateSecret, verifySync as otpVerifySync, generateURI as otpGenerateURI } from "otplib";
 import { redisGet, redisSet, redisDel } from "../lib/redis-client.js";
 
@@ -312,7 +313,7 @@ router.get("/auth/me", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/auth/sessions", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/auth/sessions", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const created = await createSessionWithRefresh({
       userId: req.user!.id,
@@ -373,7 +374,7 @@ router.post("/auth/refresh", validateBody(refreshBodySchema), async (req, res) =
   }
 });
 
-router.delete("/auth/sessions/current", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/auth/sessions/current", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith("Bearer ")) {
@@ -409,7 +410,7 @@ router.delete("/auth/sessions/current", validateBody(jsonObjectBodySchema), auth
   }
 });
 
-router.delete("/auth/sessions/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/auth/sessions/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const sessionId = parseIdParam(req.params.id);
     const [session] = await db
@@ -481,7 +482,7 @@ router.get("/auth/users", authMiddleware(), requireRole("ops"), validateQuery(li
   }
 });
 
-router.post("/auth/ws-ticket", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/auth/ws-ticket", validateBody(bodyShape({})), async (req, res) => {
   try {
     let userId: number | undefined;
     let legacyRoles: RoleName[] = [];

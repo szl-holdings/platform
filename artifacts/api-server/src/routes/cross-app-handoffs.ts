@@ -1,9 +1,11 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { sendSuccess, sendCreated, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { prismBus } from "@szl-holdings/prism-bus";
 import type { PrismDomain } from "@szl-holdings/prism-bus";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -152,7 +154,12 @@ router.get("/cross-app/handoffs/stats", authMiddleware(), (_req: Request, res: R
   }
 });
 
-router.post("/cross-app/handoffs/trigger", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/cross-app/handoffs/trigger", authMiddleware(), validateBody(bodyShape({
+      "correlationId": z.unknown().optional(),
+      "payload": z.unknown().optional(),
+      "severity": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { type, payload, correlationId, severity } = req.body as {
       type?: string;
@@ -285,7 +292,11 @@ router.get("/cross-app/recent-items", (req: Request, res: Response) => {
   }
 });
 
-router.post("/cross-app/recent-items", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+router.post("/cross-app/recent-items", validateBody(bodyShape({
+      "appId": z.unknown().optional(),
+      "href": z.unknown().optional(),
+      "id": z.unknown().optional(),
+    })), (req: Request, res: Response) => {
   try {
     const userId = (req.headers["x-user-id"] as string) || "anonymous";
     const item = req.body as Omit<RecentItem, "timestamp">;
@@ -302,7 +313,7 @@ router.post("/cross-app/recent-items", validateBody(jsonObjectBodySchema), (req:
   }
 });
 
-router.delete("/cross-app/recent-items", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+router.delete("/cross-app/recent-items", validateBody(bodyShape({})), (req: Request, res: Response) => {
   try {
     const userId = (req.headers["x-user-id"] as string) || "anonymous";
     recentItemsByUser.delete(userId);

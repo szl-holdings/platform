@@ -1,9 +1,10 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { pool } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { z } from "zod";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { sendEmail, buildAlertFiredEmail, hasEmailProviderConfigured } from "../lib/email";
 // Valid incident status transitions (state machine)
 const INCIDENT_TRANSITIONS: Record<string, string[]> = {
@@ -587,7 +588,7 @@ router.patch("/ops/incidents/:id", validateBody(updateIncidentSchema), async (re
   }
 });
 
-router.delete("/ops/incidents/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.delete("/ops/incidents/:id", validateBody(bodyShape({})), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   try {
     await pool.query(`DELETE FROM platform_incidents WHERE id = $1`, [id]);
@@ -639,7 +640,7 @@ router.post("/ops/alert-rules", validateBody(alertRuleSchema), async (req, res) 
   }
 });
 
-router.patch("/ops/alert-rules/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/ops/alert-rules/:id", validateBody(bodyShape({})), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   const b = req.body as Partial<z.infer<typeof alertRuleSchema>>;
   try {
@@ -665,7 +666,7 @@ router.patch("/ops/alert-rules/:id", validateBody(jsonObjectBodySchema), async (
   }
 });
 
-router.delete("/ops/alert-rules/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.delete("/ops/alert-rules/:id", validateBody(bodyShape({})), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   try {
     await pool.query(`DELETE FROM platform_alert_rules WHERE id = $1`, [id]);
@@ -690,7 +691,7 @@ router.get("/ops/alert-events", validateQuery(listQuerySchema), async (req, res)
   }
 });
 
-router.post("/ops/alert-events/:id/acknowledge", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/ops/alert-events/:id/acknowledge", validateBody(bodyShape({})), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   const user = req.user;
   try {
@@ -810,7 +811,7 @@ export async function runAlertRuleEvaluation(): Promise<{
 }
 
 // Alert rule evaluation against current metrics
-router.post("/ops/alert-rules/evaluate", validateBody(jsonObjectBodySchema), async (_req, res) => {
+router.post("/ops/alert-rules/evaluate", validateBody(bodyShape({})), async (_req, res) => {
   try {
     const result = await runAlertRuleEvaluation();
     res.json({ ok: true, ...result });
@@ -882,7 +883,7 @@ router.post("/ops/runbooks", validateBody(runbookSchema), async (req, res) => {
   }
 });
 
-router.patch("/ops/runbooks/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/ops/runbooks/:id", validateBody(bodyShape({})), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   const b = req.body as Partial<z.infer<typeof runbookSchema>> & { isActive?: boolean };
   try {
@@ -907,7 +908,7 @@ router.patch("/ops/runbooks/:id", validateBody(jsonObjectBodySchema), async (req
   }
 });
 
-router.delete("/ops/runbooks/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.delete("/ops/runbooks/:id", validateBody(bodyShape({})), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   try {
     await pool.query(`DELETE FROM platform_runbooks WHERE id = $1`, [id]);
@@ -963,7 +964,17 @@ router.get("/ops/service-deps", async (_req, res) => {
   }
 });
 
-router.post("/ops/service-deps", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/ops/service-deps", validateBody(bodyShape({
+      "depType": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "isCritical": z.unknown().optional(),
+      "sourceCategory": z.unknown().optional(),
+      "sourceId": z.unknown().optional(),
+      "sourceName": z.unknown().optional(),
+      "targetCategory": z.unknown().optional(),
+      "targetId": z.unknown().optional(),
+      "targetName": z.unknown().optional(),
+    })), async (req, res) => {
   const b = req.body as {
     sourceId: string; sourceName: string; sourceCategory?: string;
     targetId: string; targetName: string; targetCategory?: string;
@@ -985,7 +996,7 @@ router.post("/ops/service-deps", validateBody(jsonObjectBodySchema), async (req,
   }
 });
 
-router.delete("/ops/service-deps/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.delete("/ops/service-deps/:id", validateBody(bodyShape({})), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   try {
     await pool.query(`DELETE FROM platform_service_deps WHERE id = $1`, [id]);

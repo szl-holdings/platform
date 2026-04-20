@@ -1,8 +1,10 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -158,7 +160,24 @@ router.get("/vessels/insurance/quotes", insLimit, authMiddleware({ required: fal
   } catch (err) { handleRouteError(res, err, "Failed to fetch quotes"); }
 });
 
-router.post("/vessels/insurance/quotes", insLimit, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/vessels/insurance/quotes", insLimit, authMiddleware({ required: false }), validateBody(bodyShape({
+      "cargoHazardClass": z.unknown().optional(),
+      "cargoType": z.unknown().optional(),
+      "cargoValueUsd": z.unknown().optional(),
+      "coverageLimitUsd": z.unknown().optional(),
+      "coveragePeriodDays": z.unknown().optional(),
+      "coverageType": z.unknown().optional(),
+      "routeChokepoints": z.unknown().optional(),
+      "vesselAge": z.unknown().optional(),
+      "vesselFlag": z.unknown().optional(),
+      "vesselGrossTonnage": z.unknown().optional(),
+      "vesselImo": z.unknown().optional(),
+      "vesselMmsi": z.unknown().optional(),
+      "vesselName": z.unknown().optional(),
+      "vesselType": z.unknown().optional(),
+      "voyageDestination": z.unknown().optional(),
+      "voyageOrigin": z.unknown().optional(),
+    })), (req, res) => {
   try {
     const {
       vesselMmsi, vesselImo, vesselName, vesselType, vesselAge, vesselGrossTonnage, vesselFlag,
@@ -224,7 +243,7 @@ router.post("/vessels/insurance/quotes", insLimit, authMiddleware({ required: fa
   } catch (err) { handleRouteError(res, err, "Failed to generate quote"); }
 });
 
-router.post("/vessels/insurance/quotes/:id/bind", insLimit, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/vessels/insurance/quotes/:id/bind", insLimit, authMiddleware({ required: false }), validateBody(bodyShape({})), (req, res) => {
   try {
     const id = parseInt(req.params.id as string);
     const allQuotes = [...demoQuotes, ...sessionQuotes];
@@ -289,7 +308,17 @@ router.get("/vessels/insurance/claims", insLimit, authMiddleware({ required: fal
   } catch (err) { handleRouteError(res, err, "Failed to fetch claims"); }
 });
 
-router.post("/vessels/insurance/claims", insLimit, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/vessels/insurance/claims", insLimit, authMiddleware({ required: false }), validateBody(bodyShape({
+      "claimedAmountUsd": z.unknown().optional(),
+      "incidentAt": z.unknown().optional(),
+      "incidentDescription": z.unknown().optional(),
+      "incidentLocation": z.unknown().optional(),
+      "incidentType": z.unknown().optional(),
+      "linkedExceptionId": z.unknown().optional(),
+      "policyId": z.unknown().optional(),
+      "vesselMmsi": z.unknown().optional(),
+      "vesselName": z.unknown().optional(),
+    })), (req, res) => {
   try {
     const { policyId, vesselMmsi, vesselName, incidentType, incidentDescription, incidentAt, incidentLocation, claimedAmountUsd, linkedExceptionId } = req.body;
     if (!policyId || !incidentType || !claimedAmountUsd) {
@@ -328,7 +357,12 @@ router.post("/vessels/insurance/claims", insLimit, authMiddleware({ required: fa
   } catch (err) { handleRouteError(res, err, "Failed to file claim"); }
 });
 
-router.put("/vessels/insurance/claims/:id/status", insLimit, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), (req, res) => {
+router.put("/vessels/insurance/claims/:id/status", insLimit, authMiddleware({ required: false }), validateBody(bodyShape({
+      "adjustorNotes": z.unknown().optional(),
+      "approvedAmountUsd": z.unknown().optional(),
+      "settledAmountUsd": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), (req, res) => {
   try {
     const id = parseInt(req.params.id as string);
     const { status, adjustorNotes, approvedAmountUsd, settledAmountUsd } = req.body;

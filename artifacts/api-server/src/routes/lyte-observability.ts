@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   db,
   lyteSignalsTable,
@@ -14,7 +16,7 @@ import { sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError,
 import { authMiddleware, parseIdParam, denyIfReadOnly } from "../middlewares/auth";
 import { withDbSpan } from "../middlewares/telemetry";
 import crypto from "node:crypto";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -47,7 +49,7 @@ router.get("/lyte/prism/summary", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to get PRISM summary"); }
 });
 
-router.post("/lyte/prism/scores", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lyte/prism/scores", authMiddleware(), denyIfReadOnly(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(lytePrismScoresTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -79,7 +81,7 @@ router.get("/lyte/metrics", authMiddleware(), validateQuery(listQuerySchema), as
   } catch (err) { handleRouteError(res, err, "Failed to get metrics"); }
 });
 
-router.post("/lyte/metrics", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lyte/metrics", authMiddleware(), denyIfReadOnly(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(lyteMetricsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -142,7 +144,7 @@ router.get("/lyte/alerts", authMiddleware(), validateQuery(listQuerySchema), asy
   } catch (err) { handleRouteError(res, err, "Failed to list alerts"); }
 });
 
-router.post("/lyte/alerts", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lyte/alerts", authMiddleware(), denyIfReadOnly(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(lyteAlertsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -162,7 +164,7 @@ router.get("/lyte/alerts/:id", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to get alert"); }
 });
 
-router.patch("/lyte/alerts/:id", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/lyte/alerts/:id", authMiddleware(), denyIfReadOnly(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteAlertsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteAlertsTable.id, id)).returning();
@@ -171,7 +173,7 @@ router.patch("/lyte/alerts/:id", authMiddleware(), denyIfReadOnly(), validateBod
   } catch (err) { handleRouteError(res, err, "Failed to update alert"); }
 });
 
-router.delete("/lyte/alerts/:id", validateBody(jsonObjectBodySchema), authMiddleware(), denyIfReadOnly(), async (req, res) => {
+router.delete("/lyte/alerts/:id", validateBody(bodyShape({})), authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteAlertsTable).where(eq(lyteAlertsTable.id, id)).returning();
@@ -191,7 +193,10 @@ router.get("/lyte/alert-events", authMiddleware(), validateQuery(listQuerySchema
   } catch (err) { handleRouteError(res, err, "Failed to list alert events"); }
 });
 
-router.post("/lyte/alert-events", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lyte/alert-events", authMiddleware(), denyIfReadOnly(), validateBody(bodyShape({
+      "alertId": z.unknown().optional(),
+      "eventType": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const [row] = await db.insert(lyteAlertEventsTable).values(req.body).returning();
     if (req.body.alertId && req.body.eventType === "fired") {
@@ -225,14 +230,16 @@ router.get("/lyte/escalations", authMiddleware(), validateQuery(listQuerySchema)
   } catch (err) { handleRouteError(res, err, "Failed to list escalations"); }
 });
 
-router.post("/lyte/escalations", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lyte/escalations", authMiddleware(), denyIfReadOnly(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(lyteEscalationsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create escalation"); }
 });
 
-router.patch("/lyte/escalations/:id", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/lyte/escalations/:id", authMiddleware(), denyIfReadOnly(), validateBody(bodyShape({
+      "status": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const updates: Record<string, unknown> = { ...req.body, updatedAt: new Date() };
@@ -282,7 +289,13 @@ router.get("/lyte/dashboards", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list dashboards"); }
 });
 
-router.post("/lyte/dashboards", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lyte/dashboards", authMiddleware(), denyIfReadOnly(), validateBody(bodyShape({
+      "description": z.unknown().optional(),
+      "isShared": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "template": z.unknown().optional(),
+      "widgets": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     if (!req.user?.id) { res.status(401).json({ success: false, error: "Not authenticated" }); return; }
     const { name, description, widgets, isShared, template } = req.body;
@@ -330,7 +343,13 @@ router.get("/lyte/dashboards/shared/:token", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to get shared dashboard"); }
 });
 
-router.put("/lyte/dashboards/:id", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/lyte/dashboards/:id", authMiddleware(), denyIfReadOnly(), validateBody(bodyShape({
+      "description": z.unknown().optional(),
+      "isShared": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "template": z.unknown().optional(),
+      "widgets": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(lyteDashboardsTable).where(eq(lyteDashboardsTable.id, id));
@@ -350,7 +369,7 @@ router.put("/lyte/dashboards/:id", authMiddleware(), denyIfReadOnly(), validateB
   } catch (err) { handleRouteError(res, err, "Failed to update dashboard"); }
 });
 
-router.delete("/lyte/dashboards/:id", validateBody(jsonObjectBodySchema), authMiddleware(), denyIfReadOnly(), async (req, res) => {
+router.delete("/lyte/dashboards/:id", validateBody(bodyShape({})), authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(lyteDashboardsTable).where(eq(lyteDashboardsTable.id, id));

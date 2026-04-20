@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import type { Request } from "express";
 import {
   createPlan,
@@ -19,7 +21,7 @@ import {
   sendBadRequest,
   sendForbidden,
 } from "../lib/api-response";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -133,7 +135,11 @@ router.get("/plans/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/plans", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/plans", authMiddleware(), validateBody(bodyShape({
+      "context": z.unknown().optional(),
+      "objective": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const user = requireUser(req);
     if (!user) {
@@ -275,7 +281,7 @@ async function decideStep(
 router.post(
   "/plans/:id/steps/:stepId/approve",
   authMiddleware(),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req, res) => {
     try {
       await decideStep(req, res, "approved");
@@ -288,7 +294,7 @@ router.post(
 router.post(
   "/plans/:id/steps/:stepId/deny",
   authMiddleware(),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req, res) => {
     try {
       await decideStep(req, res, "denied");
@@ -301,7 +307,10 @@ router.post(
 router.post(
   "/plans/:id/execute",
   authMiddleware(),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "approvedStepIds": z.unknown().optional(),
+      "runId": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const user = requireUser(req);
@@ -348,7 +357,7 @@ router.post(
   },
 );
 
-router.post("/plans/:id/replay", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/plans/:id/replay", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const user = requireUser(req);
     if (!user) {

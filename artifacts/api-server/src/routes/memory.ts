@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { randomUUID } from "crypto";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import {
@@ -23,7 +25,7 @@ import {
 } from "@workspace/memory-fabric/behaviors";
 import { MemoryEntrySchema, MemoryTypeSchema } from "@workspace/memory-fabric/types";
 import type { MemoryEntry, MemoryType, SensitivityLevel } from "@workspace/memory-fabric/types";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery, memoryPinBodySchema } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery, memoryPinBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -149,7 +151,24 @@ router.get("/memory/:id", authMiddleware(), async (req: Request, res: Response) 
   }
 });
 
-router.post("/memory", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/memory", authMiddleware(), validateBody(bodyShape({
+      "confidence": z.unknown().optional(),
+      "id": z.unknown().optional(),
+      "key": z.unknown().optional(),
+      "linkedActions": z.unknown().optional(),
+      "linkedEntities": z.unknown().optional(),
+      "linkedTraces": z.unknown().optional(),
+      "memoryType": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "provenance": z.unknown().optional(),
+      "retention": z.unknown().optional(),
+      "scopeId": z.unknown().optional(),
+      "sensitivity": z.unknown().optional(),
+      "summary": z.unknown().optional(),
+      "tags": z.unknown().optional(),
+      "tier": z.unknown().optional(),
+      "value": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const now = new Date().toISOString();
     const body = req.body as Partial<MemoryEntry>;
@@ -201,7 +220,7 @@ router.post("/memory", authMiddleware(), validateBody(jsonObjectBodySchema), asy
   }
 });
 
-router.put("/memory/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/memory/:id", authMiddleware(), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const existing = memoryStore.get(id);
@@ -232,7 +251,7 @@ router.put("/memory/:id", authMiddleware(), validateBody(jsonObjectBodySchema), 
 });
 
 router.delete(
-  "/memory/:id", validateBody(jsonObjectBodySchema),
+  "/memory/:id", validateBody(bodyShape({})),
   authMiddleware(),
   requireRole("admin", "super_admin"),
   async (req: Request, res: Response) => {
@@ -252,7 +271,7 @@ router.delete(
 );
 
 router.post(
-  "/memory/evict-expired", validateBody(jsonObjectBodySchema),
+  "/memory/evict-expired", validateBody(bodyShape({})),
   authMiddleware(),
   requireRole("admin", "super_admin"),
   async (_req: Request, res: Response) => {
@@ -270,7 +289,10 @@ router.post(
   "/memory/behaviors/summarize-episodes",
   authMiddleware(),
   requireRole("admin", "super_admin"),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "minEpisodes": z.unknown().optional(),
+      "scopeId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const { scopeId, minEpisodes } = req.body as { scopeId: string; minEpisodes?: number };
       if (!scopeId) {
@@ -294,7 +316,9 @@ router.post(
   "/memory/behaviors/distill-lessons",
   authMiddleware(),
   requireRole("admin", "super_admin"),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "minFeedback": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const { minFeedback } = req.body as { minFeedback?: number };
       const result = distillLessons(memoryStore, { minFeedback });
@@ -311,7 +335,7 @@ router.post(
 );
 
 router.post(
-  "/memory/behaviors/enforce-retention", validateBody(jsonObjectBodySchema),
+  "/memory/behaviors/enforce-retention", validateBody(bodyShape({})),
   authMiddleware(),
   requireRole("admin", "super_admin"),
   async (_req: Request, res: Response) => {
@@ -329,7 +353,10 @@ router.post(
   "/memory/behaviors/decay-freshness",
   authMiddleware(),
   requireRole("admin", "super_admin"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "halfLifeDays": z.unknown().optional(),
+      "staleThreshold": z.unknown().optional(),
+    })),
   async (req: Request, res: Response) => {
     try {
       const { halfLifeDays, staleThreshold } = req.body as { halfLifeDays?: number; staleThreshold?: number };

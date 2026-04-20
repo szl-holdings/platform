@@ -1,11 +1,12 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { logger } from "../lib/logger";
 import { generateInvestorDocPdf } from "../lib/investor-doc-pdf";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import {
   db,
   holdingsVenturesTable,
@@ -358,7 +359,7 @@ router.patch("/holdings/ventures/:id", authMiddleware(), validateBody(patchVentu
   }
 });
 
-router.delete("/holdings/ventures/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/holdings/ventures/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(holdingsVenturesTable).where(eq(holdingsVenturesTable.id, id)).returning();
@@ -389,7 +390,7 @@ router.post("/holdings/milestones", authMiddleware(), validateBody(createMilesto
   }
 });
 
-router.delete("/holdings/milestones/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/holdings/milestones/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(holdingsMilestonesTable).where(eq(holdingsMilestonesTable.id, id)).returning();
@@ -428,7 +429,7 @@ router.post("/holdings/metrics", authMiddleware(), validateBody(createMetricSche
   }
 });
 
-router.delete("/holdings/metrics/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/holdings/metrics/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(holdingsMetricsTable).where(eq(holdingsMetricsTable.id, id)).returning();
@@ -459,7 +460,7 @@ router.post("/holdings/leadership", authMiddleware(), validateBody(createLeaders
   }
 });
 
-router.delete("/holdings/leadership/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/holdings/leadership/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(holdingsLeadershipTable).where(eq(holdingsLeadershipTable.id, id)).returning();
@@ -539,7 +540,7 @@ router.post("/holdings/inquiries", inquiryRateLimit, validateBody(createInquiryS
   });
 });
 
-router.delete("/holdings/inquiries/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/holdings/inquiries/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(holdingsInquiriesTable).where(eq(holdingsInquiriesTable.id, id)).returning();
@@ -677,7 +678,7 @@ router.get("/investors/nda/status", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/investors/nda/accept", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/investors/nda/accept", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {

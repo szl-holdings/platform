@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import {
   sendSuccess,
@@ -7,11 +9,22 @@ import {
   sendBadRequest,
   handleRouteError,
 } from "../lib/api-response";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.post("/worldline/sources", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/worldline/sources", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({
+      "confidenceBaseline": z.unknown().optional(),
+      "connectionConfig": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "domain": z.unknown().optional(),
+      "freshnessCadence": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "normalizationConfig": z.unknown().optional(),
+      "slug": z.unknown().optional(),
+      "sourceType": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const {
       slug,
@@ -124,7 +137,15 @@ router.get("/worldline/sources/:slug/history", authMiddleware(), validateQuery(l
   }
 });
 
-router.post("/worldline/sources/:slug/fetch", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/worldline/sources/:slug/fetch", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(bodyShape({
+      "confidenceScore": z.unknown().optional(),
+      "errorMessage": z.unknown().optional(),
+      "latencyMs": z.unknown().optional(),
+      "recordsNormalized": z.unknown().optional(),
+      "recordsReceived": z.unknown().optional(),
+      "recordsRejected": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { slug } = req.params as { slug: string };
     const user = req.user;

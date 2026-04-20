@@ -1,9 +1,11 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -167,7 +169,14 @@ router.get("/vessels/trading/orders", tradingLimit, authMiddleware({ required: f
   } catch (err) { handleRouteError(res, err, "Failed to fetch orders"); }
 });
 
-router.post("/vessels/trading/orders", tradingLimit, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/vessels/trading/orders", tradingLimit, authMiddleware({ required: false }), validateBody(bodyShape({
+      "instrumentId": z.unknown().optional(),
+      "limitPrice": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "orderType": z.unknown().optional(),
+      "quantity": z.unknown().optional(),
+      "side": z.unknown().optional(),
+    })), (req, res) => {
   try {
     const { instrumentId, orderType, side, quantity, limitPrice, notes } = req.body;
     if (!instrumentId || !side || !quantity) {
@@ -226,7 +235,7 @@ router.post("/vessels/trading/orders", tradingLimit, authMiddleware({ required: 
   } catch (err) { handleRouteError(res, err, "Failed to submit order"); }
 });
 
-router.delete("/vessels/trading/orders/:id", validateBody(jsonObjectBodySchema), tradingLimit, authMiddleware({ required: false }), (req, res) => {
+router.delete("/vessels/trading/orders/:id", validateBody(bodyShape({})), tradingLimit, authMiddleware({ required: false }), (req, res) => {
   try {
     const id = parseInt(req.params.id as string);
     const idx = sessionOrders.findIndex(o => o.id === id);

@@ -1,4 +1,5 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import rateLimit from "express-rate-limit";
 import { LRUCache } from "lru-cache";
 import { z } from "zod";
@@ -14,7 +15,7 @@ import {
 import { eq, desc, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const programCreateSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),
@@ -48,7 +49,7 @@ router.get("/readiness/programs", authMiddleware(), validateQuery(listQuerySchem
   }
 });
 
-router.post("/readiness/programs", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/readiness/programs", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   const parsed = programCreateSchema.safeParse(req.body);
   if (!parsed.success) { sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400); return; }
   try {
@@ -70,7 +71,7 @@ router.get("/readiness/programs/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/readiness/programs/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/readiness/programs/:id", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   const parsed = programUpdateSchema.safeParse(req.body);
   if (!parsed.success) { sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400); return; }
   try {
@@ -83,7 +84,7 @@ router.patch("/readiness/programs/:id", authMiddleware(), validateBody(jsonObjec
   }
 });
 
-router.delete("/readiness/programs/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/readiness/programs/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(readinessProgramsTable).where(eq(readinessProgramsTable.id, id)).returning();
@@ -104,7 +105,7 @@ router.get("/readiness/programs/:id/dimensions", authMiddleware(), async (req, r
   }
 });
 
-router.post("/readiness/dimensions", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/readiness/dimensions", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(readinessDimensionsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -113,7 +114,7 @@ router.post("/readiness/dimensions", authMiddleware(), validateBody(jsonObjectBo
   }
 });
 
-router.patch("/readiness/dimensions/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/readiness/dimensions/:id", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(readinessDimensionsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(readinessDimensionsTable.id, id)).returning();
@@ -124,7 +125,7 @@ router.patch("/readiness/dimensions/:id", authMiddleware(), validateBody(jsonObj
   }
 });
 
-router.delete("/readiness/dimensions/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/readiness/dimensions/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(readinessDimensionsTable).where(eq(readinessDimensionsTable.id, id)).returning();
@@ -145,7 +146,7 @@ router.get("/readiness/dimensions/:id/scores", authMiddleware(), async (req, res
   }
 });
 
-router.post("/readiness/scores", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/readiness/scores", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(readinessScoreHistoryTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -164,7 +165,7 @@ router.get("/readiness/programs/:id/milestones", authMiddleware(), async (req, r
   }
 });
 
-router.post("/readiness/milestones", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/readiness/milestones", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(readinessMilestonesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -173,7 +174,7 @@ router.post("/readiness/milestones", authMiddleware(), validateBody(jsonObjectBo
   }
 });
 
-router.patch("/readiness/milestones/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/readiness/milestones/:id", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(readinessMilestonesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(readinessMilestonesTable.id, id)).returning();
@@ -184,7 +185,7 @@ router.patch("/readiness/milestones/:id", authMiddleware(), validateBody(jsonObj
   }
 });
 
-router.delete("/readiness/milestones/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/readiness/milestones/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(readinessMilestonesTable).where(eq(readinessMilestonesTable.id, id)).returning();
@@ -205,7 +206,7 @@ router.get("/readiness/programs/:id/risks", authMiddleware(), async (req, res) =
   }
 });
 
-router.post("/readiness/risks", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/readiness/risks", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(readinessRisksTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -214,7 +215,7 @@ router.post("/readiness/risks", authMiddleware(), validateBody(jsonObjectBodySch
   }
 });
 
-router.patch("/readiness/risks/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/readiness/risks/:id", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(readinessRisksTable).set({ ...req.body, updatedAt: new Date() }).where(eq(readinessRisksTable.id, id)).returning();
@@ -225,7 +226,7 @@ router.patch("/readiness/risks/:id", authMiddleware(), validateBody(jsonObjectBo
   }
 });
 
-router.delete("/readiness/risks/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/readiness/risks/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(readinessRisksTable).where(eq(readinessRisksTable.id, id)).returning();
@@ -246,7 +247,7 @@ router.get("/readiness/programs/:id/alerts", authMiddleware(), async (req, res) 
   }
 });
 
-router.post("/readiness/alerts", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/readiness/alerts", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(readinessAlertsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -255,7 +256,7 @@ router.post("/readiness/alerts", authMiddleware(), validateBody(jsonObjectBodySc
   }
 });
 
-router.patch("/readiness/alerts/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/readiness/alerts/:id", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(readinessAlertsTable).set(req.body).where(eq(readinessAlertsTable.id, id)).returning();
@@ -266,7 +267,7 @@ router.patch("/readiness/alerts/:id", authMiddleware(), validateBody(jsonObjectB
   }
 });
 
-router.delete("/readiness/alerts/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/readiness/alerts/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(readinessAlertsTable).where(eq(readinessAlertsTable.id, id)).returning();

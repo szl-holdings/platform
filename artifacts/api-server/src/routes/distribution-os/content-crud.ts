@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { randomBytes, createHash } from "crypto";
 import { z } from "zod";
 import { computeLeadScore } from "../../lib/lead-scoring";
@@ -23,7 +24,7 @@ import {
 import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
 import { authMiddleware } from "../../middlewares/auth";
 import { sendNotFound, sendBadRequest, sendError } from "../../lib/api-response";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router = Router();
 const requireAuth = authMiddleware({ required: true });
@@ -45,14 +46,14 @@ router.get("/articles/slug/:slug", validateQuery(listQuerySchema), async (req: R
   res.json(article);
 });
 
-router.post("/articles", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/articles", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosArticleSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [article] = await db.insert(dosArticlesTable).values(parsed.data).returning();
   res.status(201).json(article);
 });
 
-router.patch("/articles/:id", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch("/articles/:id", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosArticleSchema.partial().safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [article] = await db.update(dosArticlesTable).set({ ...parsed.data, updatedAt: new Date() }).where(eq(dosArticlesTable.id, Number(req.params.id))).returning();
@@ -60,7 +61,7 @@ router.patch("/articles/:id", requireAuth, validateBody(jsonObjectBodySchema), a
   res.json(article);
 });
 
-router.delete("/articles/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/articles/:id", validateBody(bodyShape({})), requireAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(dosArticlesTable).where(eq(dosArticlesTable.id, Number(req.params.id)));
   res.json({ success: true });
 });
@@ -81,14 +82,14 @@ router.get("/newsletters/:id", validateQuery(listQuerySchema), async (req: Reque
   res.json(nl);
 });
 
-router.post("/newsletters", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/newsletters", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosNewsletterSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [nl] = await db.insert(dosNewslettersTable).values(parsed.data).returning();
   res.status(201).json(nl);
 });
 
-router.patch("/newsletters/:id", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch("/newsletters/:id", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosNewsletterSchema.partial().safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [nl] = await db.update(dosNewslettersTable).set({ ...parsed.data, updatedAt: new Date() }).where(eq(dosNewslettersTable.id, Number(req.params.id))).returning();
@@ -96,7 +97,7 @@ router.patch("/newsletters/:id", requireAuth, validateBody(jsonObjectBodySchema)
   res.json(nl);
 });
 
-router.delete("/newsletters/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/newsletters/:id", validateBody(bodyShape({})), requireAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(dosNewslettersTable).where(eq(dosNewslettersTable.id, Number(req.params.id)));
   res.json({ success: true });
 });
@@ -115,7 +116,9 @@ router.get("/carousels/:id", validateQuery(listQuerySchema), async (req: Request
 
 const carouselSlideInputSchema = insertDosCarouselSlideSchema.omit({ projectId: true, slideNumber: true });
 
-router.post("/carousels", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/carousels", requireAuth, validateBody(bodyShape({
+      "slides": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   const { slides, ...projectRaw } = req.body;
   const parsed = insertDosCarouselProjectSchema.safeParse(projectRaw);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
@@ -141,7 +144,7 @@ router.post("/carousels", requireAuth, validateBody(jsonObjectBodySchema), async
   res.status(201).json(c);
 });
 
-router.patch("/carousels/:id", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch("/carousels/:id", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosCarouselProjectSchema.partial().safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [c] = await db.update(dosCarouselProjectsTable).set({ ...parsed.data, updatedAt: new Date() }).where(eq(dosCarouselProjectsTable.id, Number(req.params.id))).returning();
@@ -160,14 +163,14 @@ router.get("/x-posts/:id", validateQuery(listQuerySchema), async (req: Request, 
   res.json(post);
 });
 
-router.post("/x-posts", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/x-posts", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosXPostSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [post] = await db.insert(dosXPostsTable).values(parsed.data).returning();
   res.status(201).json(post);
 });
 
-router.patch("/x-posts/:id", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch("/x-posts/:id", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosXPostSchema.partial().safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [post] = await db.update(dosXPostsTable).set({ ...parsed.data, updatedAt: new Date() }).where(eq(dosXPostsTable.id, Number(req.params.id))).returning();
@@ -175,7 +178,7 @@ router.patch("/x-posts/:id", requireAuth, validateBody(jsonObjectBodySchema), as
   res.json(post);
 });
 
-router.delete("/x-posts/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/x-posts/:id", validateBody(bodyShape({})), requireAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(dosXPostsTable).where(eq(dosXPostsTable.id, Number(req.params.id)));
   res.json({ success: true });
 });
@@ -184,7 +187,9 @@ const xPostQueueSchema = z.object({
   scheduledFor: z.string().datetime().optional(),
 });
 
-router.post("/x-posts/:id/queue", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/x-posts/:id/queue", requireAuth, validateBody(bodyShape({
+      "scheduledFor": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   const parsed = xPostQueueSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [post] = await db.update(dosXPostsTable)
@@ -200,14 +205,14 @@ router.get("/campaigns", requireAuth, validateQuery(listQuerySchema), async (_re
   res.json(campaigns);
 });
 
-router.post("/campaigns", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/campaigns", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosCampaignSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [c] = await db.insert(dosCampaignsTable).values(parsed.data).returning();
   res.status(201).json(c);
 });
 
-router.patch("/campaigns/:id", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch("/campaigns/:id", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosCampaignSchema.partial().safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [c] = await db.update(dosCampaignsTable).set({ ...parsed.data, updatedAt: new Date() }).where(eq(dosCampaignsTable.id, Number(req.params.id))).returning();
@@ -232,7 +237,11 @@ const campaignLinkCreateSchema = z.object({
   notes: z.string().optional(),
 });
 
-router.post("/campaigns/:id/links", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/campaigns/:id/links", requireAuth, validateBody(bodyShape({
+      "name": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "owner": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   const parsed = campaignLinkCreateSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const { source, medium, campaign, content, term, destination } = parsed.data;
@@ -313,7 +322,7 @@ router.get("/leads", requireAuth, validateQuery(listQuerySchema), async (req: Re
   res.json(leads);
 });
 
-router.post("/leads", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/leads", validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = LeadCreateSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const data = parsed.data;
@@ -322,7 +331,7 @@ router.post("/leads", validateBody(jsonObjectBodySchema), async (req: Request, r
   res.status(201).json(lead);
 });
 
-router.patch("/leads/:id", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch("/leads/:id", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = LeadCreateSchema.partial().safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
 
@@ -345,7 +354,7 @@ router.patch("/leads/:id", requireAuth, validateBody(jsonObjectBodySchema), asyn
   res.json(lead);
 });
 
-router.delete("/leads/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/leads/:id", validateBody(bodyShape({})), requireAuth, async (req: Request, res: Response): Promise<void> => {
   const id = Number(req.params.id);
   await db.delete(dosLeadNotesTable).where(eq(dosLeadNotesTable.leadId, id));
   await db.delete(dosLeadsTable).where(eq(dosLeadsTable.id, id));
@@ -357,7 +366,7 @@ router.get("/leads/:id/notes", requireAuth, validateQuery(listQuerySchema), asyn
   res.json(notes);
 });
 
-router.post("/leads/:id/notes", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/leads/:id/notes", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosLeadNoteSchema.safeParse({ ...req.body, leadId: Number(req.params.id) });
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [note] = await db.insert(dosLeadNotesTable).values(parsed.data).returning();
@@ -369,7 +378,7 @@ router.get("/pillars", validateQuery(listQuerySchema), async (_req: Request, res
   res.json(pillars);
 });
 
-router.post("/pillars", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/pillars", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosEditorialPillarSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [p] = await db.insert(dosEditorialPillarsTable).values(parsed.data).returning();
@@ -381,7 +390,7 @@ router.get("/cta-blocks", validateQuery(listQuerySchema), async (_req: Request, 
   res.json(blocks);
 });
 
-router.post("/cta-blocks", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/cta-blocks", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosCtaBlockSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [b] = await db.insert(dosCtaBlocksTable).values(parsed.data).returning();
@@ -393,14 +402,14 @@ router.get("/calendar", validateQuery(listQuerySchema), async (req: Request, res
   res.json(items);
 });
 
-router.post("/calendar", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/calendar", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosContentCalendarItemSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [item] = await db.insert(dosContentCalendarItemsTable).values(parsed.data).returning();
   res.status(201).json(item);
 });
 
-router.patch("/calendar/:id", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch("/calendar/:id", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosContentCalendarItemSchema.partial().safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [item] = await db.update(dosContentCalendarItemsTable).set({ ...parsed.data, updatedAt: new Date() }).where(eq(dosContentCalendarItemsTable.id, Number(req.params.id))).returning();
@@ -413,14 +422,14 @@ router.get("/distribution", validateQuery(listQuerySchema), async (_req: Request
   res.json(targets);
 });
 
-router.post("/distribution", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/distribution", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosDistributionTargetSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [t] = await db.insert(dosDistributionTargetsTable).values(parsed.data).returning();
   res.status(201).json(t);
 });
 
-router.patch("/distribution/:id", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch("/distribution/:id", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosDistributionTargetSchema.partial().safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [t] = await db.update(dosDistributionTargetsTable).set({ ...parsed.data, updatedAt: new Date() }).where(eq(dosDistributionTargetsTable.id, Number(req.params.id))).returning();
@@ -433,14 +442,16 @@ router.get("/settings", requireAuth, validateQuery(listQuerySchema), async (_req
   res.json(settings);
 });
 
-router.post("/settings", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/settings", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = SettingWriteSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [s] = await db.insert(dosSiteSettingsTable).values(parsed.data as typeof dosSiteSettingsTable.$inferInsert).returning();
   res.status(201).json(s);
 });
 
-router.patch("/settings/:key", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch("/settings/:key", requireAuth, validateBody(bodyShape({
+      "value": z.unknown().optional(),
+    })), async (req: Request, res: Response): Promise<void> => {
   const [s] = await db.update(dosSiteSettingsTable).set({ value: req.body.value, updatedAt: new Date() }).where(eq(dosSiteSettingsTable.key, req.params.key as string)).returning();
   if (!s) return void sendNotFound(res, "Setting");
   res.json(s);
@@ -451,13 +462,13 @@ router.get("/integrations", requireAuth, validateQuery(listQuerySchema), async (
   res.json(integrations);
 });
 
-router.post("/integrations/retry/:provider", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/integrations/retry/:provider", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const [i] = await db.update(dosIntegrationStatusTable).set({ status: "disconnected", lastError: null, updatedAt: new Date() }).where(eq(dosIntegrationStatusTable.provider, req.params.provider as string)).returning();
   if (!i) return void sendNotFound(res, "Integration");
   res.json(i);
 });
 
-router.patch("/integrations/:id", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch("/integrations/:id", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosIntegrationStatusSchema.partial().safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [i] = await db.update(dosIntegrationStatusTable).set({ ...parsed.data, updatedAt: new Date() }).where(eq(dosIntegrationStatusTable.id, Number(req.params.id))).returning();
@@ -470,7 +481,7 @@ router.get("/authors", validateQuery(listQuerySchema), async (_req: Request, res
   res.json(authors);
 });
 
-router.post("/authors", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/authors", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosAuthorProfileSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [a] = await db.insert(dosAuthorProfilesTable).values(parsed.data).returning();
@@ -489,14 +500,14 @@ router.get("/linktree/admin", requireAuth, validateQuery(listQuerySchema), async
   res.json(items);
 });
 
-router.post("/linktree", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/linktree", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = LinktreeItemSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [item] = await db.insert(dosLinktreeConfigTable).values(parsed.data).returning();
   res.status(201).json(item);
 });
 
-router.patch("/linktree/:id", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch("/linktree/:id", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = LinktreeItemSchema.partial().safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [item] = await db.update(dosLinktreeConfigTable).set({ ...parsed.data, updatedAt: new Date() }).where(eq(dosLinktreeConfigTable.id, Number(req.params.id))).returning();
@@ -504,7 +515,7 @@ router.patch("/linktree/:id", requireAuth, validateBody(jsonObjectBodySchema), a
   res.json(item);
 });
 
-router.delete("/linktree/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/linktree/:id", validateBody(bodyShape({})), requireAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(dosLinktreeConfigTable).where(eq(dosLinktreeConfigTable.id, Number(req.params.id)));
   res.json({ success: true });
 });
@@ -514,14 +525,14 @@ router.get("/automation-runs", validateQuery(listQuerySchema), async (_req: Requ
   res.json(runs);
 });
 
-router.post("/automation-runs", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/automation-runs", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosAutomationRunSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [run] = await db.insert(dosAutomationRunsTable).values(parsed.data).returning();
   res.status(201).json(run);
 });
 
-router.patch("/automation-runs/:id", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch("/automation-runs/:id", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const parsed = insertDosAutomationRunSchema.partial().safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [run] = await db.update(dosAutomationRunsTable).set(parsed.data).where(eq(dosAutomationRunsTable.id, Number(req.params.id))).returning();
@@ -532,7 +543,7 @@ router.patch("/automation-runs/:id", requireAuth, validateBody(jsonObjectBodySch
 // ─── Automation Job Executors ─────────────────────────────────────────────────
 // These are the server-side job handlers that write real outputs and real metrics.
 
-router.post("/automation-runs/trigger/:jobType", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+router.post("/automation-runs/trigger/:jobType", requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response): Promise<void> => {
   const { jobType } = req.params;
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);

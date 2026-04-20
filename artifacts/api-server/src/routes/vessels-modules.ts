@@ -1,11 +1,13 @@
 import { Router, type IRouter, type Request } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { createHash, createHmac } from "crypto";
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { db, vesselsBillsOfLadingTable, vesselsBolChainEventsTable } from "@szl-holdings/db";
 import { eq, asc, desc, sql } from "drizzle-orm";
 
-import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
+import { anyQuerySchema, validateBody, validateQuery } from "../lib/validation";
 const router: IRouter = Router();
 
 // ─── AIS Track Engine ─────────────────────────────────────────────────────────
@@ -398,7 +400,20 @@ router.get("/vessels/modules/ais-track", validateQuery(anyQuerySchema), authMidd
 // When only user-supplied `distanceNm` is given (no mmsi), `trackSource` = "user-provided".
 //
 // The computed record with deterministic passportHash is persisted in the session store.
-router.post("/vessels/modules/voyages-emissions", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res) => {
+router.post("/vessels/modules/voyages-emissions", validateBody(bodyShape({
+      "arrivedAt": z.unknown().optional(),
+      "departedAt": z.unknown().optional(),
+      "destination": z.unknown().optional(),
+      "distanceNm": z.unknown().optional(),
+      "fuelConsumedMt": z.unknown().optional(),
+      "fuelType": z.unknown().optional(),
+      "grossTonnage": z.unknown().optional(),
+      "imo": z.unknown().optional(),
+      "mmsi": z.unknown().optional(),
+      "origin": z.unknown().optional(),
+      "vesselName": z.unknown().optional(),
+      "voyageId": z.unknown().optional(),
+    })), authMiddleware(), async (req: Request, res) => {
   try {
     const body = req.body as {
       mmsi?: string;          // Triggers AIS track derivation + vessel metadata lookup
@@ -881,7 +896,22 @@ router.get("/vessels/modules/bills-of-lading/:id", authMiddleware(), async (req:
   }
 });
 
-router.post("/vessels/modules/bills-of-lading", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res) => {
+router.post("/vessels/modules/bills-of-lading", validateBody(bodyShape({
+      "cargo": z.unknown().optional(),
+      "consignee": z.unknown().optional(),
+      "destinationPort": z.unknown().optional(),
+      "imo": z.unknown().optional(),
+      "lcAmount": z.unknown().optional(),
+      "lcIssuer": z.unknown().optional(),
+      "lcRef": z.unknown().optional(),
+      "notifyParty": z.unknown().optional(),
+      "originPort": z.unknown().optional(),
+      "quantityMt": z.unknown().optional(),
+      "shipper": z.unknown().optional(),
+      "unit": z.unknown().optional(),
+      "vesselName": z.unknown().optional(),
+      "voyageId": z.unknown().optional(),
+    })), authMiddleware(), async (req: Request, res) => {
   try {
     await ensureBolSeed();
     const { vesselName, imo, voyageId, shipper, consignee, notifyParty, cargo, quantityMt, unit, originPort, destinationPort, lcRef, lcIssuer, lcAmount } = req.body ?? {};
@@ -925,7 +955,10 @@ router.post("/vessels/modules/bills-of-lading", validateBody(jsonObjectBodySchem
 //   changing the consignee. The actor identity and authorization are derived
 //   from the authenticated user (req.user) — clients cannot impersonate
 //   another signer or escalate to compliance endorsement.
-router.post("/vessels/modules/bills-of-lading/:id/transfer", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res) => {
+router.post("/vessels/modules/bills-of-lading/:id/transfer", validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "newConsignee": z.unknown().optional(),
+    })), authMiddleware(), async (req: Request, res) => {
   try {
     await ensureBolSeed();
     const existing = await loadBolById(req.params.id as string);

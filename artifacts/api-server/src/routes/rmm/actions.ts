@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, mspDevicesTable, mspClientsTable } from "@szl-holdings/db";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendError, handleRouteError } from "../../lib/api-response";
@@ -7,7 +9,7 @@ import { logger } from "../../lib/logger";
 import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 import { auth, authWrite, roleAdmin, roleOperator, queryConnectors, queryConnectorById, stripSecrets, buildProviderConfig, isProviderSupported, type RemoteActionRow } from "./shared";
-import { validateBody, rmmActionCreateSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { validateBody, rmmActionCreateSchema, validateQuery, listQuerySchema } from "../../lib/validation";
 
 const router: IRouter = Router();
 
@@ -71,7 +73,9 @@ router.post("/rmm/actions", authWrite, roleOperator, validateBody(rmmActionCreat
   } catch (err) { handleRouteError(res, err, "Failed to create remote action"); }
 });
 
-router.post("/rmm/actions/:id/approve", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/rmm/actions/:id/approve", authWrite, roleOperator, validateBody(bodyShape({
+      "approvedBy": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -97,7 +101,7 @@ router.post("/rmm/actions/:id/approve", authWrite, roleOperator, validateBody(js
   } catch (err) { handleRouteError(res, err, "Failed to approve action"); }
 });
 
-router.post("/rmm/actions/:id/cancel", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/rmm/actions/:id/cancel", authWrite, roleOperator, validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");

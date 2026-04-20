@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { requireRole } from "../../middlewares/auth";
 import { sendSuccess, sendBadRequest, sendNotFound, sendConflict, sendError, handleRouteError } from "../../lib/api-response";
 import { orchestrate, getOrchestratorCapabilities } from "../../lib/multi-agent-orchestrator";
@@ -16,7 +18,7 @@ import {
   makeEvidenceRef,
   buildAgentRegistryWithHealth,
 } from "./shared";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../../lib/validation";
 
 const router = Router();
 
@@ -90,7 +92,12 @@ router.get("/control-tower/decide/journal", requireRole("super_admin", "ops", "e
   }
 });
 
-router.post("/control-tower/decide/orchestrate", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/control-tower/decide/orchestrate", requireRole("super_admin", "ops", "exec"), validateBody(bodyShape({
+      "depth": z.unknown().optional(),
+      "domains": z.unknown().optional(),
+      "query": z.unknown().optional(),
+      "sessionId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { query, domains, depth, sessionId } = req.body as {
       query?: string; domains?: string[];
@@ -215,7 +222,10 @@ router.post("/control-tower/decide/orchestrate", requireRole("super_admin", "ops
   }
 });
 
-router.post("/control-tower/decide/approve/:id", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/control-tower/decide/approve/:id", requireRole("super_admin", "ops", "exec"), validateBody(bodyShape({
+      "approvedBy": z.unknown().optional(),
+      "domains": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as Record<string, string>;
     const { approvedBy, domains } = req.body as { approvedBy?: string; domains?: string[] };
@@ -270,7 +280,9 @@ router.post("/control-tower/decide/approve/:id", requireRole("super_admin", "ops
   }
 });
 
-router.patch("/control-tower/decide/journal/:id", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/control-tower/decide/journal/:id", requireRole("super_admin", "ops", "exec"), validateBody(bodyShape({
+      "outcome": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as Record<string, string>;
     const { outcome } = req.body as { outcome?: "accepted" | "rejected" | "overridden" };

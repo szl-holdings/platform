@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { randomUUID } from "crypto";
 import { logger } from "../lib/logger";
 import { authMiddleware, requireRole } from "../middlewares/auth";
@@ -11,7 +13,7 @@ import type {
   DomainTransactionRecord,
   BatchIngestionResult,
 } from "@szl-holdings/business-events";
-import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -143,7 +145,9 @@ function domainTxToAtlasEvent(record: DomainTransactionRecord): ATLASEvent {
 router.post(
   "/business-events/kpi",
   authMiddleware({ required: false }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "records": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const body = req.body as {
@@ -187,7 +191,9 @@ router.post(
 router.post(
   "/business-events/transactions",
   authMiddleware({ required: false }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "transactions": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const body = req.body as {
@@ -229,7 +235,12 @@ router.post(
 router.post(
   "/business-events/emit",
   authMiddleware({ required: true }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "domain": z.unknown().optional(),
+      "eventClass": z.unknown().optional(),
+      "eventId": z.unknown().optional(),
+      "timestamp": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const event = req.body as Partial<ATLASEvent>;

@@ -1,11 +1,13 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db } from "@szl-holdings/db";
 import { connectorsTable } from "@szl-holdings/db";
 import { eq, and } from "drizzle-orm";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -119,7 +121,7 @@ router.get("/dynamics/opportunities", authMiddleware({ required: false }), async
   }
 });
 
-router.post("/crm/sync/:crmType", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/crm/sync/:crmType", authMiddleware({ required: true }), validateBody(bodyShape({})), async (req, res) => {
   try {
     const { crmType } = req.params as Record<string, string>;
     const validTypes = ["salesforce", "hubspot", "dynamics365", "all"];

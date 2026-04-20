@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, subscriptionsTable, organizationsTable, billingPlansTable, invoicesTable, revenueEventsTable } from "@szl-holdings/db";
 import { eq, desc, count, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError } from "../lib/api-response";
@@ -6,7 +8,7 @@ import { authMiddleware, requireRole } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
 import { requireStripeLive } from "../lib/stripe-gate";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -78,7 +80,14 @@ router.get("/lyte/billing/plans", (_req, res) => {
   sendSuccess(res, plans);
 });
 
-router.post("/lyte/billing/pilot-checkout", validateBody(jsonObjectBodySchema), authMiddleware({ required: false }), requireStripeLive, async (req: Request, res: Response) => {
+router.post("/lyte/billing/pilot-checkout", validateBody(bodyShape({
+      "cancelUrl": z.unknown().optional(),
+      "companyName": z.unknown().optional(),
+      "contactName": z.unknown().optional(),
+      "email": z.unknown().optional(),
+      "planId": z.unknown().optional(),
+      "successUrl": z.unknown().optional(),
+    })), authMiddleware({ required: false }), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { planId, email, companyName, contactName, successUrl, cancelUrl } = req.body as {
       planId?: string;
@@ -154,7 +163,14 @@ router.post("/lyte/billing/pilot-checkout", validateBody(jsonObjectBodySchema), 
   }
 });
 
-router.post("/lyte/billing/create-invoice", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin", "super_admin", "ops"), requireStripeLive, async (req: Request, res: Response) => {
+router.post("/lyte/billing/create-invoice", validateBody(bodyShape({
+      "companyName": z.unknown().optional(),
+      "customerId": z.unknown().optional(),
+      "dueDate": z.unknown().optional(),
+      "email": z.unknown().optional(),
+      "lineItems": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+    })), authMiddleware(), requireRole("admin", "super_admin", "ops"), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { customerId, email, companyName, lineItems, dueDate, notes } = req.body as {
       customerId?: string;
@@ -274,7 +290,13 @@ router.get("/lyte/billing/pilot-metrics", authMiddleware(), requireRole("admin",
   }
 });
 
-router.post("/lyte/billing/webhooks/failed-payment", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/lyte/billing/webhooks/failed-payment", authMiddleware({ required: false }), validateBody(bodyShape({
+      "amount": z.unknown().optional(),
+      "currency": z.unknown().optional(),
+      "customerId": z.unknown().optional(),
+      "invoiceId": z.unknown().optional(),
+      "subscriptionId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { subscriptionId, customerId, invoiceId, amount, currency } = req.body as {
       subscriptionId?: string;

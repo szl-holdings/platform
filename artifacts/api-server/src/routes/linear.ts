@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, platformSettingsTable } from "@szl-holdings/db";
 import { and, eq } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
@@ -10,7 +12,7 @@ import {
   sendError,
   handleRouteError,
 } from "../lib/api-response";
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 import { logger } from "../lib/logger";
 import {
   createLinearIssue,
@@ -138,7 +140,10 @@ router.get("/linear/settings", async (_req: Request, res: Response) => {
 router.put(
   "/linear/settings",
   adminGuard,
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "autoCreateLabels": z.unknown().optional(),
+      "defaultTeamKey": z.unknown().optional(),
+    })),
   async (req: Request, res: Response) => {
     try {
       const body = req.body as { defaultTeamKey?: unknown; autoCreateLabels?: unknown };
@@ -205,7 +210,14 @@ router.get("/linear/teams", async (_req: Request, res: Response) => {
 router.post(
   "/linear/create-ticket",
   authMiddleware({ required: false }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "assigneeName": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "labels": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "teamKey": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })),
   async (req: Request, res: Response) => {
     try {
       if (!isLinearConfigured()) {

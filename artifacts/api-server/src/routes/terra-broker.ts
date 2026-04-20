@@ -1,4 +1,5 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
@@ -13,7 +14,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc, and, or, ilike, sql, asc, gte, lte } from "drizzle-orm";
 import { z } from "zod";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -189,7 +190,7 @@ router.get("/terra/broker/listings", terraRateLimit, auth, validateQuery(listQue
 
 // ─── POST /terra/broker/listings ───────────────────────────────────────────────
 
-router.post("/terra/broker/listings", terraRateLimit, auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/terra/broker/listings", terraRateLimit, auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const parsed = ListingCreateSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid listing data", issues: parsed.error.issues }); return; }
@@ -314,7 +315,7 @@ router.get("/terra/broker/listings/:id", terraRateLimit, auth, async (req, res) 
 
 // ─── PATCH /terra/broker/listings/:id ─────────────────────────────────────────
 
-router.patch("/terra/broker/listings/:id", terraRateLimit, auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/terra/broker/listings/:id", terraRateLimit, auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const idN = Number(req.params.id);
     if (!Number.isInteger(idN) || idN < 1) { res.status(400).json({ error: "Invalid listing id" }); return; }
@@ -336,7 +337,7 @@ router.patch("/terra/broker/listings/:id", terraRateLimit, auth, validateBody(js
 
 // ─── DELETE /terra/broker/listings/:id ────────────────────────────────────────
 
-router.delete("/terra/broker/listings/:id", validateBody(jsonObjectBodySchema), terraRateLimit, auth, async (req, res) => {
+router.delete("/terra/broker/listings/:id", validateBody(bodyShape({})), terraRateLimit, auth, async (req, res) => {
   try {
     const idN = Number(req.params.id);
     if (!Number.isInteger(idN) || idN < 1) { res.status(400).json({ error: "Invalid listing id" }); return; }
@@ -438,7 +439,7 @@ const InquiryCreateSchema = z.object({
   isDemo: z.boolean().default(false),
 });
 
-router.post("/terra/broker/inquiries", terraRateLimit, auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/terra/broker/inquiries", terraRateLimit, auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const parsed = InquiryCreateSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid inquiry data", issues: parsed.error.issues }); return; }
@@ -450,7 +451,7 @@ router.post("/terra/broker/inquiries", terraRateLimit, auth, validateBody(jsonOb
 
 // ─── PATCH /terra/broker/inquiries/:id ────────────────────────────────────────
 
-router.patch("/terra/broker/inquiries/:id", terraRateLimit, auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/terra/broker/inquiries/:id", terraRateLimit, auth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const idN = Number(req.params.id);
     if (!Number.isInteger(idN) || idN < 1) { res.status(400).json({ error: "Invalid inquiry id" }); return; }

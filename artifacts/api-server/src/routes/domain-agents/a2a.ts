@@ -10,8 +10,10 @@ import { delegateTask, getDelegationTask, getDelegationHistory } from "@szl-hold
 import { sendSuccess, sendError } from "../../lib/api-response";
 import { authMiddleware } from "../../middlewares/auth";
 import { logger } from "../../lib/logger";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router = Router();
 
 const a2aRateLimit = rateLimit({
@@ -27,7 +29,24 @@ router.get("/a2a/health", (_req, res) => {
   res.json({ ok: true, protocol: "A2A", version: "1.0.0", timestamp: new Date().toISOString() });
 });
 
-router.post("/a2a/register", a2aRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/a2a/register", a2aRateLimit, authMiddleware(), validateBody(bodyShape({
+      "agentId": z.unknown().optional(),
+      "avgLatencyMs": z.unknown().optional(),
+      "capabilities": z.unknown().optional(),
+      "collaboratesWith": z.unknown().optional(),
+      "costPerCallUsd": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "domain": z.unknown().optional(),
+      "inputSchema": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "outputSchema": z.unknown().optional(),
+      "preferredModel": z.unknown().optional(),
+      "preferredProvider": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "successRate": z.unknown().optional(),
+      "version": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   const body = req.body as {
     agentId?: string;
     name?: string;
@@ -105,7 +124,14 @@ router.get("/a2a/agents/:agentId", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/a2a/discover", a2aRateLimit, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/a2a/discover", a2aRateLimit, validateBody(bodyShape({
+      "capability": z.unknown().optional(),
+      "domain": z.unknown().optional(),
+      "maxResults": z.unknown().optional(),
+      "queryText": z.unknown().optional(),
+      "requestingAgentId": z.unknown().optional(),
+      "requireOnline": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   const body = req.body as {
     requestingAgentId?: string;
     capability?: string;
@@ -142,7 +168,15 @@ router.post("/a2a/discover", a2aRateLimit, validateBody(jsonObjectBodySchema), a
   }
 });
 
-router.post("/a2a/delegate", a2aRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/a2a/delegate", a2aRateLimit, authMiddleware(), validateBody(bodyShape({
+      "context": z.unknown().optional(),
+      "orchestrationId": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "query": z.unknown().optional(),
+      "requestingAgentId": z.unknown().optional(),
+      "targetAgentId": z.unknown().optional(),
+      "timeoutMs": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   const body = req.body as {
     requestingAgentId?: string;
     targetAgentId?: string;
@@ -218,7 +252,12 @@ router.get("/a2a/delegate", validateQuery(listQuerySchema), async (req: Request,
   }
 });
 
-router.post("/a2a/heartbeat", a2aRateLimit, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/a2a/heartbeat", a2aRateLimit, validateBody(bodyShape({
+      "activeTasks": z.unknown().optional(),
+      "agentId": z.unknown().optional(),
+      "load": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   const body = req.body as {
     agentId?: string;
     status?: string;
@@ -245,7 +284,7 @@ router.post("/a2a/heartbeat", a2aRateLimit, validateBody(jsonObjectBodySchema), 
   }
 });
 
-router.post("/a2a/sync", validateBody(jsonObjectBodySchema), authMiddleware(), async (_req: Request, res: Response) => {
+router.post("/a2a/sync", validateBody(bodyShape({})), authMiddleware(), async (_req: Request, res: Response) => {
   try {
     await a2aRegistry.syncFromAgentRegistry();
     const cards = await a2aRegistry.getAllCards();

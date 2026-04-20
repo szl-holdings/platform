@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { z } from "zod";
 import {
   db,
@@ -20,7 +21,7 @@ import {
   handleRouteError,
   parsePagination,
 } from "../lib/api-response";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { logger } from "../lib/logger";
 
 async function writeGovernanceAuditEvent(params: {
@@ -210,7 +211,7 @@ router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admi
   }
 });
 
-router.delete("/policies/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.delete("/policies/:id", validateBody(bodyShape({})), authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");

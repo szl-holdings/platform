@@ -2230,6 +2230,9 @@ importers:
       '@szl-holdings/db':
         specifier: workspace:*
         version: link:../db
+      '@szl-holdings/env':
+        specifier: workspace:*
+        version: link:../../packages/env
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../services
@@ -2338,6 +2341,10 @@ importers:
         version: 25.3.5
 
   lib/auth:
+    dependencies:
+      '@szl-holdings/env':
+        specifier: workspace:*
+        version: link:../../packages/env
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2386,6 +2393,9 @@ importers:
 
   lib/db:
     dependencies:
+      '@szl-holdings/env':
+        specifier: workspace:*
+        version: link:../../packages/env
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.18.0)(pg@8.20.0)
@@ -2448,6 +2458,9 @@ importers:
       '@szl-holdings/db':
         specifier: workspace:*
         version: link:../db
+      '@szl-holdings/env':
+        specifier: workspace:*
+        version: link:../../packages/env
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../observability
@@ -2507,6 +2520,9 @@ importers:
       '@szl-holdings/db':
         specifier: workspace:*
         version: link:../db
+      '@szl-holdings/env':
+        specifier: workspace:*
+        version: link:../../packages/env
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.18.0)(pg@8.20.0)
@@ -2643,6 +2659,9 @@ importers:
       '@szl-holdings/db':
         specifier: workspace:*
         version: link:../db
+      '@szl-holdings/env':
+        specifier: workspace:*
+        version: link:../../packages/env
       posthog-js:
         specifier: ^1.369.1
         version: 1.369.1
@@ -2771,6 +2790,9 @@ importers:
       '@google-cloud/storage':
         specifier: ^7.19.0
         version: 7.19.0
+      '@szl-holdings/env':
+        specifier: workspace:*
+        version: link:../../packages/env
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -3396,6 +3418,9 @@ importers:
       '@szl-holdings/db':
         specifier: workspace:*
         version: link:../../lib/db
+      '@szl-holdings/env':
+        specifier: workspace:*
+        version: link:../env
       '@szl-holdings/evidence-graph':
         specifier: workspace:*
         version: link:../evidence-graph
@@ -3590,6 +3615,9 @@ importers:
 
   packages/observability-core:
     dependencies:
+      '@szl-holdings/env':
+        specifier: workspace:*
+        version: link:../env
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability

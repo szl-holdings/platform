@@ -1,10 +1,11 @@
 import { Router, type IRouter, type Response, type Request } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import rateLimit from "express-rate-limit";
 import type { RequestHandler } from "express";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { z } from "zod";
-import { validateBody, jsonObjectBodySchema} from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 const simulateSchema = z.object({
   scenarioId: z.string().min(1).max(200),
@@ -343,7 +344,11 @@ router.post("/monte-carlo/compare", simulationLimiter, authMiddleware(), validat
   }
 });
 
-router.post("/monte-carlo/calibrate", authMiddleware(), validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/monte-carlo/calibrate", authMiddleware(), validateBody(bodyShape({
+      "historicalData": z.unknown().optional(),
+      "scenarioId": z.unknown().optional(),
+      "simulationJobId": z.unknown().optional(),
+    })), (req, res) => {
   try {
     const { scenarioId, historicalData, simulationJobId } = req.body ?? {};
     if (!scenarioId) { sendBadRequest(res, "scenarioId is required"); return; }
@@ -361,7 +366,12 @@ router.post("/monte-carlo/calibrate", authMiddleware(), validateBody(jsonObjectB
   }
 });
 
-router.post("/monte-carlo/backtest", authMiddleware(), validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/monte-carlo/backtest", authMiddleware(), validateBody(bodyShape({
+      "historicalData": z.unknown().optional(),
+      "outputId": z.unknown().optional(),
+      "scenarioId": z.unknown().optional(),
+      "simulationJobId": z.unknown().optional(),
+    })), (req, res) => {
   try {
     const { scenarioId, historicalData, simulationJobId, outputId } = req.body ?? {};
     if (!scenarioId) { sendBadRequest(res, "scenarioId is required"); return; }
@@ -380,7 +390,7 @@ router.post("/monte-carlo/backtest", authMiddleware(), validateBody(jsonObjectBo
   }
 });
 
-router.post("/monte-carlo/cleanup", authMiddleware(), validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/monte-carlo/cleanup", authMiddleware(), validateBody(bodyShape({})), (req, res) => {
   if (!isAdmin(req)) { res.status(403).json({ error: "Forbidden: admin role required" }); return; }
   try {
     cleanupOldJobs();

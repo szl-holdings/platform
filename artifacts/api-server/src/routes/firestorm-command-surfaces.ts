@@ -38,8 +38,10 @@ import {
 } from "../middlewares/zero-trust";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router: IRouter = Router();
 
 // ─── Shared zero-trust middleware stack ───────────────────────────────────────
@@ -240,7 +242,11 @@ router.post(
   ...ztRead,
   automationGate({ gate: "propose_only", actionClass: "analyst_note" }),
   dataControls({ sensitivity: "CONFIDENTIAL", retention: "IR-90D", exportRestricted: true }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "caseId": z.unknown().optional(),
+      "content": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const { type, content, caseId } = req.body as { type?: string; content?: string; caseId?: number };
@@ -390,7 +396,7 @@ router.post(
   requireStepUp(),
   automationGate({ gate: "approval_required", actionClass: "decision_approval" }),
   dataControls({ sensitivity: "RESTRICTED", retention: "COMPLIANCE-7Y", exportRestricted: true }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req, res) => {
     try {
       const rawId = Array.isArray(req.params["id"]) ? req.params["id"][0] : req.params["id"];
@@ -494,7 +500,11 @@ router.post(
   requireStepUp(),
   automationGate({ gate: "approved_execute", actionClass: "response_execution" }),
   dataControls({ sensitivity: "RESTRICTED", retention: "IR-90D", exportRestricted: true }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "actionType": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "targetId": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const { actionType, targetId, notes } = req.body as {
@@ -555,7 +565,11 @@ router.post(
   requireStepUp(),
   automationGate({ gate: "approval_required", actionClass: "containment" }),
   dataControls({ sensitivity: "RESTRICTED", retention: "COMPLIANCE-7Y", exportRestricted: true }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "assetId": z.unknown().optional(),
+      "containmentType": z.unknown().optional(),
+      "justification": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const { containmentType, assetId, justification } = req.body as {

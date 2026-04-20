@@ -38,8 +38,10 @@ import { generateReportNarrative } from "../lib/report-narrative";
 import { sendEmail, buildScheduledReportEmail } from "../lib/email";
 import { ObjectStorageService } from "../lib/objectStorage";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 interface AuthUser { id: number; role: string; email?: string; displayName?: string }
 type ExtendedRequest = Request & { user?: AuthUser }
 
@@ -202,7 +204,16 @@ router.get("/reports/templates", authMiddleware(), validateQuery(listQuerySchema
   }
 });
 
-router.post("/reports/templates", authMiddleware(), requireRole("admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/reports/templates", authMiddleware(), requireRole("admin", "ops"), validateBody(bodyShape({
+      "blocks": z.unknown().optional(),
+      "brandTheme": z.unknown().optional(),
+      "dataRequirements": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "domain": z.unknown().optional(),
+      "isSchedulable": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "reportType": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const {
       name,
@@ -257,7 +268,13 @@ router.get("/reports/templates/:templateId", authMiddleware(), async (req: Reque
   }
 });
 
-router.patch("/reports/templates/:templateId", authMiddleware(), requireRole("admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/reports/templates/:templateId", authMiddleware(), requireRole("admin", "ops"), validateBody(bodyShape({
+      "blocks": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "isActive": z.unknown().optional(),
+      "isSchedulable": z.unknown().optional(),
+      "name": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { templateId } = req.params as { templateId: string };
     const { name, description, blocks, isActive, isSchedulable } = req.body as {
@@ -280,7 +297,7 @@ router.patch("/reports/templates/:templateId", authMiddleware(), requireRole("ad
 
 // ─── Report Generation ────────────────────────────────────────────────────────
 
-router.post("/reports/generate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/reports/generate", authMiddleware(), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const {
       templateKey,
@@ -483,7 +500,10 @@ router.get("/reports/:reportId/versions", authMiddleware(), async (req: Request,
   }
 });
 
-router.patch("/reports/:reportId/status", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/reports/:reportId/status", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(bodyShape({
+      "notes": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { reportId } = req.params as { reportId: string };
     const { status, notes } = req.body as { status: "draft" | "review" | "approved" | "distributed" | "archived"; notes?: string };
@@ -503,7 +523,9 @@ router.patch("/reports/:reportId/status", authMiddleware(), requireRole("admin",
 
 // ─── Approval Workflow ────────────────────────────────────────────────────────
 
-router.post("/reports/:reportId/request-approval", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/reports/:reportId/request-approval", authMiddleware(), validateBody(bodyShape({
+      "reviewerUserId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { reportId } = req.params as { reportId: string };
     const { reviewerUserId } = req.body as { reviewerUserId?: number };
@@ -524,7 +546,11 @@ router.post("/reports/:reportId/request-approval", authMiddleware(), validateBod
   }
 });
 
-router.post("/reports/:reportId/review", authMiddleware(), requireRole("admin", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/reports/:reportId/review", authMiddleware(), requireRole("admin", "compliance"), validateBody(bodyShape({
+      "annotations": z.unknown().optional(),
+      "comment": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { reportId } = req.params as { reportId: string };
     const { status, comment, annotations } = req.body as {
@@ -560,7 +586,10 @@ router.get("/reports/:reportId/approval", authMiddleware(), async (req: Request,
 
 // ─── Distribution ─────────────────────────────────────────────────────────────
 
-router.post("/reports/:reportId/distribute", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/reports/:reportId/distribute", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(bodyShape({
+      "channel": z.unknown().optional(),
+      "recipients": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { reportId } = req.params as { reportId: string };
     const { recipients, channel = "email" } = req.body as {
@@ -612,7 +641,13 @@ router.get("/reports/:reportId/distributions", authMiddleware(), async (req: Req
 
 // ─── AI Narrative ─────────────────────────────────────────────────────────────
 
-router.post("/reports/narrative", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/reports/narrative", authMiddleware(), validateBody(bodyShape({
+      "data": z.unknown().optional(),
+      "domain": z.unknown().optional(),
+      "reportType": z.unknown().optional(),
+      "sections": z.unknown().optional(),
+      "tone": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const {
       domain,
@@ -663,7 +698,16 @@ router.get("/reports/schedules", authMiddleware(), validateQuery(listQuerySchema
   }
 });
 
-router.post("/reports/schedules", authMiddleware(), requireRole("admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/reports/schedules", authMiddleware(), requireRole("admin", "ops"), validateBody(bodyShape({
+      "autoApprove": z.unknown().optional(),
+      "dataConfig": z.unknown().optional(),
+      "domain": z.unknown().optional(),
+      "frequency": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "recipientEmails": z.unknown().optional(),
+      "templateId": z.unknown().optional(),
+      "templateKey": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const {
       name,
@@ -721,7 +765,7 @@ router.post("/reports/schedules", authMiddleware(), requireRole("admin", "ops"),
 
 // ─── Scheduled Report Runner (internal — admin only) ─────────────────────────
 
-router.post("/reports/schedules/run-due", authMiddleware(), requireRole("admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/reports/schedules/run-due", authMiddleware(), requireRole("admin"), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const schedules = await getSchedulesDue();
     const results: Array<{ scheduleId: string; status: string; reportId?: string; error?: string; emailSent?: number; emailFailed?: number }> = [];
@@ -853,7 +897,9 @@ router.post("/reports/schedules/run-due", authMiddleware(), requireRole("admin")
 
 // ─── Per-Schedule: Toggle active state ───────────────────────────────────────
 
-router.patch("/reports/schedules/:scheduleId", authMiddleware(), requireRole("admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/reports/schedules/:scheduleId", authMiddleware(), requireRole("admin", "ops"), validateBody(bodyShape({
+      "isActive": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const scheduleId = req.params["scheduleId"] as string;
     const { isActive } = req.body as { isActive?: boolean };
@@ -874,7 +920,7 @@ router.patch("/reports/schedules/:scheduleId", authMiddleware(), requireRole("ad
 
 // ─── Per-Schedule: Run immediately ───────────────────────────────────────────
 
-router.post("/reports/schedules/:scheduleId/run", authMiddleware(), requireRole("admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/reports/schedules/:scheduleId/run", authMiddleware(), requireRole("admin", "ops"), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const scheduleId = req.params["scheduleId"] as string;
     const schedule = await getReportScheduleById(scheduleId);

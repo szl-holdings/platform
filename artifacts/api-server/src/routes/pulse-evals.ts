@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import {
   ALL_DATASETS,
@@ -14,7 +16,7 @@ import {
   type EvalSuiteReport,
 } from "@szl-holdings/pulse-evals";
 import { persistEvalBaseline, loadEvalBaselines } from "../lib/replay-store";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 loadEvalBaselines().then(rows => {
   for (const row of rows) {
@@ -71,7 +73,13 @@ router.post(
   "/pulse-evals/run",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "caseIds": z.unknown().optional(),
+      "domains": z.unknown().optional(),
+      "includeRedTeam": z.unknown().optional(),
+      "suiteId": z.unknown().optional(),
+      "suiteName": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const {
@@ -117,7 +125,10 @@ router.post(
   "/pulse-evals/run-red-team",
   authMiddleware({ required: true }),
   requireRole("admin"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "suiteId": z.unknown().optional(),
+      "toLowerCase": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const { suiteId } = req.body;
@@ -169,7 +180,9 @@ router.post(
   "/pulse-evals/compare",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "reports": z.unknown().optional(),
+    })),
   (req, res) => {
     try {
       const { reports } = req.body;
@@ -189,7 +202,9 @@ router.post(
   "/pulse-evals/baseline",
   authMiddleware({ required: true }),
   requireRole("admin"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "report": z.unknown().optional(),
+    })),
   (req, res) => {
     try {
       const { report } = req.body;
@@ -220,7 +235,10 @@ router.post(
   "/pulse-evals/check-regression",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "report": z.unknown().optional(),
+      "thresholdPct": z.unknown().optional(),
+    })),
   (req, res) => {
     try {
       const { report, thresholdPct } = req.body;

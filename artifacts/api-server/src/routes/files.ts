@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, filesTable, assetsTable } from "@szl-holdings/db";
 import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
@@ -9,7 +11,7 @@ import { peekUploadIntent, consumeUploadIntent } from "../lib/uploadIntentStore"
 import { validateFileType } from "../lib/fileTypeAllowlist";
 import { checkOrgStorageQuota } from "../lib/storageQuota";
 import { dispatchVirusScan } from "../lib/virusScan";
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -48,7 +50,11 @@ router.get("/files/:id", authMiddleware(), async (req, res) => {
  *   doesn't burn the one-time intent. The intent is consumed only after all validation passes,
  *   and the consumption result is checked — concurrent or stale finalizations are rejected.
  */
-router.post("/files", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/files", authMiddleware(), validateBody(bodyShape({
+      "category": z.unknown().optional(),
+      "objectPath": z.unknown().optional(),
+      "originalName": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { objectPath, originalName, category } = req.body as {
       objectPath?: string;
@@ -179,7 +185,7 @@ router.post("/files", authMiddleware(), validateBody(jsonObjectBodySchema), asyn
  * DELETE /files/:id
  * Soft-delete (remove record) for a file. Does not delete the GCS object.
  */
-router.delete("/files/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/files/:id", validateBody(bodyShape({})), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const id = parseIdParam(req.params.id);
     const authedUser = (req as Request & { user?: { id: number; role: string } }).user;

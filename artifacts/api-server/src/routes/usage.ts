@@ -20,7 +20,7 @@ import { pool } from "@szl-holdings/db";
 import { eq, and, gte, lte, desc, sql, count, sum } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import { writeLimiter, readLimiter } from "../middlewares/rate-limiters";
-import { validateBody, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 import { sendSuccess, sendNotFound, sendBadRequest, handleRouteError, sendForbidden } from "../lib/api-response";
 import type { Request, Response } from "express";
 

@@ -1,8 +1,9 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { db, pool } from "@szl-holdings/db";
 import { dataRetentionPoliciesTable, dataRetentionAuditLogTable } from "@szl-holdings/db";
 import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewares/auth";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 import { z } from "zod";
 import { eq, desc, and, inArray, isNull } from "drizzle-orm";
 import { logger } from "../lib/logger";
@@ -158,7 +159,7 @@ router.put("/data-retention/policies", validateBody(upsertPolicySchema), async (
   }
 });
 
-router.post("/data-retention/policies/:policyId/run", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/data-retention/policies/:policyId/run", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const user = req.user as AuthenticatedUser;
     const policyId = parseInt(req.params["policyId"] as string);
@@ -391,7 +392,7 @@ router.get("/data-retention/sweep-status", async (req: Request, res: Response) =
   }
 });
 
-router.post("/data-retention/sweep", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/data-retention/sweep", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const user = req.user as AuthenticatedUser;
     if (!user.roles.includes("super_admin")) {

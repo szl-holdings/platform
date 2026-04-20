@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewares/auth";
 import { db, selfHealingPatternsTable, selfHealingRunsTable, alloyAuditLogTable, usersTable } from "@szl-holdings/db";
@@ -7,7 +8,7 @@ import { randomBytes } from "crypto";
 import { z } from "zod";
 import { logger } from "../lib/logger";
 
-import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
+import { anyQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import {
   ensurePatternsSeeded,
   approveRemediation,
@@ -484,7 +485,14 @@ function generatePatternKey(): string {
   return `p-${randomBytes(6).toString("hex")}`;
 }
 
-router.post("/self-healing/policies", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), requireRole("admin"), async (req: Request, res: Response) => {
+router.post("/self-healing/policies", validateBody(bodyShape({
+      "enabled": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "patternKey": z.unknown().optional(),
+      "runbook": z.unknown().optional(),
+      "trigger": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })), authMiddleware({ required: true }), requireRole("admin"), async (req: Request, res: Response) => {
   try {
     await ensureSeeded();
     const parsed = createPatternSchema.safeParse(req.body);
@@ -525,7 +533,13 @@ router.post("/self-healing/policies", validateBody(jsonObjectBodySchema), authMi
   }
 });
 
-router.put("/self-healing/policies/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), requireRole("admin"), async (req: Request, res: Response) => {
+router.put("/self-healing/policies/:id", validateBody(bodyShape({
+      "enabled": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "runbook": z.unknown().optional(),
+      "trigger": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })), authMiddleware({ required: true }), requireRole("admin"), async (req: Request, res: Response) => {
   try {
     await ensureSeeded();
     const { id } = req.params as { id: string };
@@ -570,7 +584,7 @@ router.put("/self-healing/policies/:id", validateBody(jsonObjectBodySchema), aut
   }
 });
 
-router.delete("/self-healing/policies/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), requireRole("admin"), async (req: Request, res: Response) => {
+router.delete("/self-healing/policies/:id", validateBody(bodyShape({})), authMiddleware({ required: true }), requireRole("admin"), async (req: Request, res: Response) => {
   try {
     await ensureSeeded();
     const { id } = req.params as { id: string };
@@ -647,7 +661,7 @@ router.get("/self-healing/policies/:id/history", validateQuery(anyQuerySchema), 
   }
 });
 
-router.patch("/self-healing/policies/:id/toggle", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req: Request, res: Response) => {
+router.patch("/self-healing/policies/:id/toggle", validateBody(bodyShape({})), authMiddleware({ required: true }), async (req: Request, res: Response) => {
   try {
     await ensureSeeded();
     const { id } = req.params as { id: string };
@@ -690,7 +704,9 @@ router.get("/self-healing/runs", validateQuery(anyQuerySchema), authMiddleware({
   }
 });
 
-router.post("/self-healing/runs/:id/approve", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req: Request, res: Response) => {
+router.post("/self-healing/runs/:id/approve", validateBody(bodyShape({
+      "approver": z.unknown().optional(),
+    })), authMiddleware({ required: true }), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const body = (req.body ?? {}) as { approver?: string };
@@ -715,7 +731,9 @@ router.post("/self-healing/runs/:id/approve", validateBody(jsonObjectBodySchema)
   }
 });
 
-router.post("/self-healing/runs/:id/reject", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req: Request, res: Response) => {
+router.post("/self-healing/runs/:id/reject", validateBody(bodyShape({
+      "reason": z.unknown().optional(),
+    })), authMiddleware({ required: true }), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const body = (req.body ?? {}) as { reason?: string };

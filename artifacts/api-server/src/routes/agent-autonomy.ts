@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, sendError } from "../lib/api-response";
 import { logger } from "../lib/logger";
@@ -14,7 +16,7 @@ import {
   getAgentSelfReflectionHistory,
 } from "@szl-holdings/ai-engine/learning/self-improvement";
 import { getKnowledgeStoreStats, autoIngestFromDecisionStore } from "@szl-holdings/ai-engine/rag/knowledge-store";
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 const router = Router();
 
@@ -146,7 +148,7 @@ router.get("/agent-autonomy/connectors", async (_req, res) => {
   }
 });
 
-router.post("/agent-autonomy/connectors/:connectorId/health", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/agent-autonomy/connectors/:connectorId/health", validateBody(bodyShape({})), async (req, res) => {
   try {
     const health = await connectorRegistry.checkHealth(req.params.connectorId!);
     sendSuccess(res, health);
@@ -164,7 +166,7 @@ router.get("/agent-autonomy/rag", async (_req, res) => {
   }
 });
 
-router.post("/agent-autonomy/rag/ingest", validateBody(jsonObjectBodySchema), async (_req, res) => {
+router.post("/agent-autonomy/rag/ingest", validateBody(bodyShape({})), async (_req, res) => {
   try {
     const count = await autoIngestFromDecisionStore();
     sendSuccess(res, { ingested: count, message: `Ingested ${count} decisions into the knowledge store` });

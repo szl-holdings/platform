@@ -1,8 +1,9 @@
 import { Router } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { z } from "zod";
 import { logger } from "../lib/logger";
 
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 const router = Router();
 
 /** Masks PII: keeps domain portion only, e.g. "user@example.com" → "***@example.com" */
@@ -18,7 +19,7 @@ const SubscribeBodySchema = z.object({
 
 const SUBSTACK_PUBLICATION = "szlholdings";
 
-router.post("/newsletter/subscribe", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/newsletter/subscribe", validateBody(bodyShape({})), async (req, res) => {
   const parsed = SubscribeBodySchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ message: parsed.error.issues[0]?.message ?? "Invalid request" });

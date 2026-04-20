@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import {
   db,
   pcMattersTable,
@@ -41,7 +42,7 @@ import {
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { runAllForecasts, runSingleForecast, type ForecastType } from "../lib/ny-forecast-engine";
 import { z } from "zod";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const clockCreateSchema = z.object({
   clockType: z.string().min(1).max(100),
@@ -605,7 +606,7 @@ router.get("/prism-counsel/ny/matters/:matterId/ai-reviews", authMiddleware(), a
   }
 });
 
-router.patch("/prism-counsel/ny/ai-reviews/:id/approve", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/prism-counsel/ny/ai-reviews/:id/approve", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const orgId = getAuthOrgId(req);
     if (!orgId) return sendForbidden(res, "Authentication required");

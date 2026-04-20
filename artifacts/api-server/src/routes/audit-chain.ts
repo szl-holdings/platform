@@ -25,7 +25,7 @@ import {
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { logger } from "../lib/logger";
-import {validateBody, auditChainEventSchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, auditChainEventSchema, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 

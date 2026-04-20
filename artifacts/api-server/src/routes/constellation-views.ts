@@ -23,8 +23,9 @@ import {
 } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 // Scope auth to /constellation paths only — this router is mounted without a path prefix
 // so a bare router.use(auth) would block all requests passing through, not just ours.
@@ -92,7 +93,7 @@ router.get("/constellation/views", validateQuery(listQuerySchema), async (req: R
   }
 });
 
-router.post("/constellation/views", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/constellation/views", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -129,7 +130,10 @@ function parseId(raw: unknown): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-router.patch("/constellation/views/:id", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/constellation/views/:id", validateBody(bodyShape({
+      "filters": z.unknown().optional(),
+      "name": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -179,7 +183,7 @@ router.patch("/constellation/views/:id", validateBody(jsonObjectBodySchema), asy
   }
 });
 
-router.delete("/constellation/views/:id", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.delete("/constellation/views/:id", validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {

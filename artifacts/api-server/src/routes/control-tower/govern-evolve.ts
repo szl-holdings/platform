@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { requireRole } from "../../middlewares/auth";
 import { sendSuccess, sendBadRequest, sendNotFound, handleRouteError } from "../../lib/api-response";
 import {
@@ -26,7 +28,7 @@ import {
   agentPerformanceStore,
   getOrCreatePerf,
 } from "./shared";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../../lib/validation";
 
 const router = Router();
 
@@ -102,7 +104,11 @@ router.get("/control-tower/govern/certificates", requireRole("super_admin", "ops
   }
 });
 
-router.post("/control-tower/govern/evaluate", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+router.post("/control-tower/govern/evaluate", requireRole("super_admin", "ops", "exec"), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "agentId": z.unknown().optional(),
+      "riskLevel": z.unknown().optional(),
+    })), (req: Request, res: Response) => {
   try {
     const { agentId, action, riskLevel } = req.body as {
       agentId?: string; action?: string; riskLevel?: string;
@@ -329,7 +335,11 @@ router.get("/control-tower/evolve/metrics", async (req: Request, res: Response) 
   }
 });
 
-router.post("/control-tower/evolve/propose", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+router.post("/control-tower/evolve/propose", requireRole("super_admin", "ops", "exec"), validateBody(bodyShape({
+      "agentId": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "expectedImprovement": z.unknown().optional(),
+    })), (req: Request, res: Response) => {
   try {
     const { agentId, description, expectedImprovement } = req.body as {
       agentId?: string; description?: string; expectedImprovement?: string;
@@ -360,7 +370,9 @@ router.post("/control-tower/evolve/propose", requireRole("super_admin", "ops", "
   }
 });
 
-router.patch("/control-tower/evolve/propose/:proposalId", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+router.patch("/control-tower/evolve/propose/:proposalId", requireRole("super_admin", "ops", "exec"), validateBody(bodyShape({
+      "status": z.unknown().optional(),
+    })), (req: Request, res: Response) => {
   try {
     const { proposalId } = req.params as Record<string, string>;
     const { status } = req.body as { status?: "applied" | "rejected" };

@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import {
   createReceipt,
@@ -16,14 +18,35 @@ import {
   type ReceiptClass,
   type ReceiptStatus,
 } from "@szl-holdings/receipt-graph";
-import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
 router.post(
   "/receipt-graph/receipts",
   authMiddleware({ required: true }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "assumptions": z.unknown().optional(),
+      "confidenceScore": z.unknown().optional(),
+      "contentId": z.unknown().optional(),
+      "contentType": z.unknown().optional(),
+      "correlationId": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "modelId": z.unknown().optional(),
+      "modelLane": z.unknown().optional(),
+      "modelProvider": z.unknown().optional(),
+      "modelVersion": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "parentReceiptId": z.unknown().optional(),
+      "policyClass": z.unknown().optional(),
+      "promptText": z.unknown().optional(),
+      "receiptClass": z.unknown().optional(),
+      "serviceAttribution": z.unknown().optional(),
+      "traceId": z.unknown().optional(),
+      "whatWasIgnored": z.unknown().optional(),
+      "whatWasSeen": z.unknown().optional(),
+      "whatWasUsed": z.unknown().optional(),
+    })),
   (req, res) => {
     try {
       const {
@@ -165,7 +188,9 @@ router.post(
   "/receipt-graph/receipts/:receiptId/approve",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "approvalNote": z.unknown().optional(),
+    })),
   (req, res) => {
     try {
       const { approvalNote } = req.body;
@@ -190,7 +215,9 @@ router.post(
   "/receipt-graph/receipts/:receiptId/reject",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "approvalNote": z.unknown().optional(),
+    })),
   (req, res) => {
     try {
       const { approvalNote } = req.body;
@@ -215,7 +242,9 @@ router.post(
   "/receipt-graph/receipts/:receiptId/retract",
   authMiddleware({ required: true }),
   requireRole("admin"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "approvalNote": z.unknown().optional(),
+    })),
   (req, res) => {
     try {
       const { approvalNote } = req.body;
@@ -239,7 +268,11 @@ router.post(
 router.post(
   "/receipt-graph/receipts/:receiptId/delta",
   authMiddleware({ required: true }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "after": z.unknown().optional(),
+      "before": z.unknown().optional(),
+      "field": z.unknown().optional(),
+    })),
   (req, res) => {
     try {
       const { field, before, after } = req.body;
@@ -270,7 +303,11 @@ router.post(
   "/receipt-graph/link",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "childId": z.unknown().optional(),
+      "parentId": z.unknown().optional(),
+      "relationship": z.unknown().optional(),
+    })),
   (req, res) => {
     try {
       const { parentId, childId, relationship } = req.body;

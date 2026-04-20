@@ -1,4 +1,6 @@
 import { randomUUID } from "crypto";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { Router, type IRouter, type Request, type Response } from "express";
 import {
   db, auditEventsTable, usersTable,
@@ -18,7 +20,7 @@ import { runExport, getExportByToken, listExportHistory, getExportJobStatus, get
 import type { ExportColumn } from "../lib/export-service";
 import { handleRouteError, sendSuccess, sendError, sendBadRequest, sendNotFound } from "../lib/api-response";
 import { hashIp } from "@szl-holdings/audit";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 interface AuthUser { id: number; role: string; email?: string; displayName?: string }
 type ExtendedRequest = Request & { user?: AuthUser }
@@ -61,7 +63,15 @@ async function checkExportEnabled(res: Response): Promise<boolean> {
 
 // ─── Audit Log Export ────────────────────────────────────────────────────────
 
-router.post("/exports/audit-log", authMiddleware(), requireRole("admin", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/exports/audit-log", authMiddleware(), requireRole("admin", "compliance"), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "columns": z.unknown().optional(),
+      "dateFrom": z.unknown().optional(),
+      "dateTo": z.unknown().optional(),
+      "format": z.unknown().optional(),
+      "schedule": z.unknown().optional(),
+      "search": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
     const {
@@ -159,7 +169,15 @@ router.post("/exports/audit-log", authMiddleware(), requireRole("admin", "compli
 
 // ─── Aegis Incidents (Firestorm Findings) Export ─────────────────────────────
 
-router.post("/exports/aegis-incidents", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/exports/aegis-incidents", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(bodyShape({
+      "columns": z.unknown().optional(),
+      "dateFrom": z.unknown().optional(),
+      "dateTo": z.unknown().optional(),
+      "format": z.unknown().optional(),
+      "schedule": z.unknown().optional(),
+      "search": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
     const { format = "csv", schedule = "once", status, search, dateFrom, dateTo, columns: selectedColumns } = req.body as {
@@ -214,7 +232,15 @@ router.post("/exports/aegis-incidents", authMiddleware(), requireRole("admin", "
 
 // ─── Vessels Fleet Export ─────────────────────────────────────────────────────
 
-router.post("/exports/vessels", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/exports/vessels", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(bodyShape({
+      "columns": z.unknown().optional(),
+      "dateFrom": z.unknown().optional(),
+      "dateTo": z.unknown().optional(),
+      "format": z.unknown().optional(),
+      "schedule": z.unknown().optional(),
+      "search": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
     const { format = "csv", schedule = "once", status, search, dateFrom, dateTo, columns: selectedColumns } = req.body as {
@@ -272,7 +298,15 @@ router.post("/exports/vessels", authMiddleware(), requireRole("admin", "ops", "c
 
 // ─── Terra Deals Export ───────────────────────────────────────────────────────
 
-router.post("/exports/terra-deals", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/exports/terra-deals", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(bodyShape({
+      "columns": z.unknown().optional(),
+      "dateFrom": z.unknown().optional(),
+      "dateTo": z.unknown().optional(),
+      "format": z.unknown().optional(),
+      "schedule": z.unknown().optional(),
+      "search": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
     const { format = "csv", schedule = "once", status, search, dateFrom, dateTo, columns: selectedColumns } = req.body as {
@@ -332,7 +366,15 @@ router.post("/exports/terra-deals", authMiddleware(), requireRole("admin", "ops"
 
 // ─── Lyte Signals Export ──────────────────────────────────────────────────────
 
-router.post("/exports/lyte-signals", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/exports/lyte-signals", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(bodyShape({
+      "columns": z.unknown().optional(),
+      "dateFrom": z.unknown().optional(),
+      "dateTo": z.unknown().optional(),
+      "format": z.unknown().optional(),
+      "schedule": z.unknown().optional(),
+      "search": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
     const { format = "csv", schedule = "once", status, search, dateFrom, dateTo, columns: selectedColumns } = req.body as {
@@ -387,7 +429,15 @@ router.post("/exports/lyte-signals", authMiddleware(), requireRole("admin", "ops
 
 // ─── MSP Tickets Export ───────────────────────────────────────────────────────
 
-router.post("/exports/msp-tickets", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/exports/msp-tickets", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(bodyShape({
+      "columns": z.unknown().optional(),
+      "dateFrom": z.unknown().optional(),
+      "dateTo": z.unknown().optional(),
+      "format": z.unknown().optional(),
+      "schedule": z.unknown().optional(),
+      "search": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
     const { format = "csv", schedule = "once", status, search, dateFrom, dateTo, columns: selectedColumns } = req.body as {
@@ -445,7 +495,14 @@ router.post("/exports/msp-tickets", authMiddleware(), requireRole("admin", "ops"
 
 // ─── Usage Metering Export ───────────────────────────────────────────────────
 
-router.post("/exports/usage-metering", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/exports/usage-metering", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(bodyShape({
+      "columns": z.unknown().optional(),
+      "dateFrom": z.unknown().optional(),
+      "dateTo": z.unknown().optional(),
+      "format": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "schedule": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
     const { format = "csv", schedule = "once", dateFrom, dateTo, orgId, columns: selectedColumns } = req.body as {
@@ -517,7 +574,15 @@ router.post("/exports/usage-metering", authMiddleware(), requireRole("admin", "o
 
 // ─── Revenue Events (Invoices) Export ────────────────────────────────────────
 
-router.post("/exports/revenue-events", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/exports/revenue-events", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(bodyShape({
+      "columns": z.unknown().optional(),
+      "dateFrom": z.unknown().optional(),
+      "dateTo": z.unknown().optional(),
+      "format": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "schedule": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
     const { format = "csv", schedule = "once", dateFrom, dateTo, status, orgId, columns: selectedColumns } = req.body as {
@@ -596,7 +661,18 @@ router.post("/exports/revenue-events", authMiddleware(), requireRole("admin", "o
 // The actual file generation runs in the background. Poll /exports/jobs/:exportId
 // for status, then download via /exports/jobs/:exportId/download when completed.
 
-router.post("/exports/enqueue", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/exports/enqueue", authMiddleware(), requireRole("admin", "ops", "compliance"), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "columns": z.unknown().optional(),
+      "dateFrom": z.unknown().optional(),
+      "dateTo": z.unknown().optional(),
+      "domain": z.unknown().optional(),
+      "format": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "schedule": z.unknown().optional(),
+      "search": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   if (!await checkExportEnabled(res)) return;
   try {
     const {

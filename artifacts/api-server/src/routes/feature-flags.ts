@@ -1,11 +1,13 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, featureFlagsTable, featureFlagOverridesTable, orgMembersTable } from "@szl-holdings/db";
 import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { evaluateFlag, evaluateFlags, isFlagEnabled, PLATFORM_FLAGS, type PlatformFlagKey, type FlagEvaluationContext } from "../lib/platform-flags";
-import { createFeatureFlagSchema, featureFlagEvaluateSchema, featureFlagOverrideSchema, jsonObjectBodySchema, listQuerySchema, updateFeatureFlagSchema, validateBody, validateQuery } from "../lib/validation";
+import { createFeatureFlagSchema, featureFlagEvaluateSchema, featureFlagOverrideSchema, listQuerySchema, updateFeatureFlagSchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -123,7 +125,7 @@ router.patch("/feature-flags/:id", authMiddleware(), requireRole("ops", "admin")
   }
 });
 
-router.delete("/feature-flags/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "admin"), async (req, res) => {
+router.delete("/feature-flags/:id", validateBody(bodyShape({})), authMiddleware(), requireRole("ops", "admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [flag] = await db.delete(featureFlagsTable).where(eq(featureFlagsTable.id, id)).returning();
@@ -170,7 +172,7 @@ router.post("/feature-flags/:id/overrides", authMiddleware(), requireRole("ops",
   }
 });
 
-router.delete("/feature-flags/:id/overrides/:overrideId", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "admin"), async (req, res) => {
+router.delete("/feature-flags/:id/overrides/:overrideId", validateBody(bodyShape({})), authMiddleware(), requireRole("ops", "admin"), async (req, res) => {
   try {
     const flagId = parseIdParam(req.params.id);
     const overrideId = parseIdParam(req.params.overrideId);

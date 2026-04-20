@@ -1,9 +1,11 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { pool } from "@szl-holdings/db";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { openai } from "@szl-holdings/ai-engine/providers/openai";
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -41,7 +43,10 @@ function detectContradictions(claims: string[]): { hasContradiction: boolean; po
   return { hasContradiction: false };
 }
 
-router.post("/alloy/research/spaces", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/research/spaces", authMiddleware({ required: false }), validateBody(bodyShape({
+      "name": z.unknown().optional(),
+      "query": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { name, query } = req.body as { name?: string; query: string };
     if (!query?.trim()) { sendError(res, "Query is required", 400); return; }
@@ -65,7 +70,9 @@ router.get("/alloy/research/spaces", authMiddleware({ required: false }), async 
   } catch (err) { handleRouteError(res, err, "Failed to list research spaces"); }
 });
 
-router.post("/alloy/research/spaces/:id/run", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/research/spaces/:id/run", authMiddleware({ required: false }), validateBody(bodyShape({
+      "gov": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   const { id } = req.params as { id: string };
   try {
     const spaceResult = await pool.query(`SELECT * FROM alloy_research_spaces WHERE id = $1`, [id]);
@@ -175,7 +182,7 @@ router.get("/alloy/research/spaces/:id", authMiddleware({ required: false }), as
   } catch (err) { handleRouteError(res, err, "Failed to get research space"); }
 });
 
-router.delete("/alloy/research/spaces/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.delete("/alloy/research/spaces/:id", validateBody(bodyShape({})), authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     await pool.query(`DELETE FROM alloy_research_spaces WHERE id = $1`, [id]);
@@ -183,7 +190,12 @@ router.delete("/alloy/research/spaces/:id", validateBody(jsonObjectBodySchema), 
   } catch (err) { handleRouteError(res, err, "Failed to delete research space"); }
 });
 
-router.post("/alloy/browser/tasks", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/browser/tasks", authMiddleware({ required: false }), validateBody(bodyShape({
+      "dryRun": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "objective": z.unknown().optional(),
+      "startUrl": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { name, startUrl, objective, dryRun = false } = req.body as {
       name?: string;
@@ -227,7 +239,7 @@ router.get("/alloy/browser/tasks", authMiddleware({ required: false }), async (_
   } catch (err) { handleRouteError(res, err, "Failed to list browser tasks"); }
 });
 
-router.post("/alloy/browser/tasks/:id/execute", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/browser/tasks/:id/execute", authMiddleware({ required: false }), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const taskResult = await pool.query(`SELECT * FROM alloy_browser_tasks WHERE id = $1`, [id]);
@@ -261,7 +273,7 @@ router.post("/alloy/browser/tasks/:id/execute", authMiddleware({ required: false
   } catch (err) { handleRouteError(res, err, "Failed to execute browser task"); }
 });
 
-router.post("/alloy/browser/tasks/:id/pause", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/browser/tasks/:id/pause", authMiddleware({ required: false }), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     await pool.query(`UPDATE alloy_browser_tasks SET status = 'paused' WHERE id = $1 AND status = 'running'`, [id]);
@@ -269,7 +281,7 @@ router.post("/alloy/browser/tasks/:id/pause", authMiddleware({ required: false }
   } catch (err) { handleRouteError(res, err, "Failed to pause task"); }
 });
 
-router.post("/alloy/browser/tasks/:id/resume", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/browser/tasks/:id/resume", authMiddleware({ required: false }), validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     await pool.query(`UPDATE alloy_browser_tasks SET status = 'running' WHERE id = $1 AND status = 'paused'`, [id]);
@@ -284,7 +296,10 @@ router.get("/alloy/browser/allowlist", authMiddleware({ required: false }), asyn
   } catch (err) { handleRouteError(res, err, "Failed to get allowlist"); }
 });
 
-router.post("/alloy/browser/allowlist", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/browser/allowlist", authMiddleware({ required: false }), validateBody(bodyShape({
+      "pattern": z.unknown().optional(),
+      "scope": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { pattern, scope = "read" } = req.body as { pattern: string; scope?: string };
     if (!pattern?.trim()) { sendError(res, "Pattern is required", 400); return; }
@@ -297,7 +312,7 @@ router.post("/alloy/browser/allowlist", authMiddleware({ required: false }), val
   } catch (err) { handleRouteError(res, err, "Failed to add allowlist entry"); }
 });
 
-router.delete("/alloy/browser/allowlist/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.delete("/alloy/browser/allowlist/:id", validateBody(bodyShape({})), authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     await pool.query(`DELETE FROM alloy_url_allowlist WHERE id = $1`, [id]);

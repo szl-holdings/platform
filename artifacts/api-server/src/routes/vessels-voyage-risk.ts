@@ -19,7 +19,7 @@ import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { validateBody, validateQuery, jsonObjectBodySchema, listQuerySchema, voyageRiskScoreRequestSchema, sanctionsRefreshBodySchema, voyageRiskMemoPdfBodySchema } from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema, voyageRiskScoreRequestSchema, sanctionsRefreshBodySchema, voyageRiskMemoPdfBodySchema } from "../lib/validation";
 import { getSanctionsSources, runSanctionsRefresh, getSanctionsStoreSnapshot, startSanctionsRefreshJob } from "../jobs/vessels-sanctions-refresh";
 
 startSanctionsRefreshJob();

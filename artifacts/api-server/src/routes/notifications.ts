@@ -1,10 +1,11 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { db, notificationsTable, notificationPreferencesTable } from "@szl-holdings/db";
 import { eq, desc, and, isNull, count as sqlCount } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { publish, WS_CHANNELS } from "../lib/websocket";
-import { createNotificationSchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { createNotificationSchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { z } from "zod";
 import { logger } from "../lib/logger";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
@@ -125,7 +126,7 @@ router.post("/notifications", authMiddleware(), requireRole("ops"), validateBody
   }
 });
 
-router.patch("/notifications/:id/read", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/notifications/:id/read", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(notificationsTable).where(
@@ -146,7 +147,7 @@ router.patch("/notifications/:id/read", authMiddleware(), validateBody(jsonObjec
   }
 });
 
-router.patch("/notifications/read-all", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/notifications/read-all", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const userId = req.user!.id;
     await db.update(notificationsTable).set({
@@ -162,7 +163,7 @@ router.patch("/notifications/read-all", authMiddleware(), validateBody(jsonObjec
   }
 });
 
-router.delete("/notifications/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/notifications/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(notificationsTable).where(

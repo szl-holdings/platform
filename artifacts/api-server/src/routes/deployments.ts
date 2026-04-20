@@ -38,10 +38,12 @@ import {
 import { authMiddleware, denyIfReadOnly, requireRole } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 import { publish, WS_CHANNELS } from "../lib/websocket";
 import { dispatchToExternalChannels } from "./notifications";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router: IRouter = Router();
 
 /**
@@ -439,7 +441,15 @@ router.get("/deployments/:appId/history", authMiddleware({ required: false }), p
   }
 });
 
-router.post("/deployments", authMiddleware({ required: true }), denyIfReadOnly(), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/deployments", authMiddleware({ required: true }), denyIfReadOnly(), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(bodyShape({
+      "appId": z.unknown().optional(),
+      "appName": z.unknown().optional(),
+      "commitSha": z.unknown().optional(),
+      "environment": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "version": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { appId, appName, version, environment, commitSha, notes, metadata } =
       req.body as Partial<DeploymentRecord>;
@@ -487,7 +497,10 @@ router.post("/deployments", authMiddleware({ required: true }), denyIfReadOnly()
   }
 });
 
-router.post("/deployments/:appId/rollback", authMiddleware({ required: true }), denyIfReadOnly(), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/deployments/:appId/rollback", authMiddleware({ required: true }), denyIfReadOnly(), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(bodyShape({
+      "environment": z.unknown().optional(),
+      "version": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { appId } = req.params as { appId: string };
     const env = (req.body.environment as string) ?? "production";

@@ -25,8 +25,9 @@ import {
 } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 router.use(authMiddleware({ required: false }));
 router.use(perUserApiSlidingLimiter);
@@ -212,7 +213,7 @@ export async function sampleAndPersistDrift(): Promise<DriftSummary> {
   return summary;
 }
 
-router.post("/drift/reset", validateBody(jsonObjectBodySchema), async (_req: Request, res: Response) => {
+router.post("/drift/reset", validateBody(bodyShape({})), async (_req: Request, res: Response) => {
   try {
     await db.delete(driftSnapshotsTable);
     return sendSuccess(res, { reset: true, message: "Drift baseline reset. History cleared." });

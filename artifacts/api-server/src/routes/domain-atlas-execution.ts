@@ -32,7 +32,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth.js";
 import { sendSuccess, sendCreated, sendBadRequest, sendNotFound, sendForbidden, handleRouteError } from "../lib/api-response.js";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation.js";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation.js";
 import { logger } from "../lib/logger.js";
 import {
   initializeAtlasExecutionEngine,
@@ -54,6 +54,7 @@ import {
 } from "../lib/atlas-execution-engine.js";
 import { dbListRuns, dbGetRunById, dbCancelRun, dbApproveRun } from "../lib/decisioning-store.js";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 initializeAtlasExecutionEngine();
 
 const router: IRouter = Router();
@@ -288,7 +289,37 @@ function buildDomainRoutes(domain: string): void {
   });
 
   // ── PATCH /:domain/atlas/signals/:signalId/status ───────────────────────────
-  router.patch(`${prefix}/signals/:signalId/status`, authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  router.patch(`${prefix}/signals/:signalId/status`, authMiddleware(), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "actionClass": z.unknown().optional(),
+      "approvedBy": z.unknown().optional(),
+      "businessImpact": z.unknown().optional(),
+      "capturedBy": z.unknown().optional(),
+      "context": z.unknown().optional(),
+      "evidence": z.unknown().optional(),
+      "hookId": z.unknown().optional(),
+      "immutable": z.unknown().optional(),
+      "isDryRun": z.unknown().optional(),
+      "isSimulation": z.unknown().optional(),
+      "label": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "recommendationId": z.unknown().optional(),
+      "recordedBy": z.unknown().optional(),
+      "resourceAttributes": z.unknown().optional(),
+      "resourceId": z.unknown().optional(),
+      "resourceType": z.unknown().optional(),
+      "signalId": z.unknown().optional(),
+      "signalIds": z.unknown().optional(),
+      "source": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "subjectRoles": z.unknown().optional(),
+      "summary": z.unknown().optional(),
+      "tenantId": z.unknown().optional(),
+      "title": z.unknown().optional(),
+      "value": z.unknown().optional(),
+      "workflowId": z.unknown().optional(),
+      "workflowKey": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const signalId = String(req.params["signalId"]);
       const { status } = req.body as { status?: AtlasSignalRecord["status"] };
@@ -453,7 +484,26 @@ function buildDomainRoutes(domain: string): void {
   });
 
   // ── POST /:domain/atlas/runs/:runId/approve ─────────────────────────────────
-  router.post(`${prefix}/runs/:runId/approve`, validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req: Request, res: Response) => {
+  router.post(`${prefix}/runs/:runId/approve`, validateBody(bodyShape({
+      "businessImpact": z.unknown().optional(),
+      "capturedBy": z.unknown().optional(),
+      "evidence": z.unknown().optional(),
+      "hookId": z.unknown().optional(),
+      "immutable": z.unknown().optional(),
+      "isDryRun": z.unknown().optional(),
+      "isSimulation": z.unknown().optional(),
+      "label": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "recommendationId": z.unknown().optional(),
+      "recordedBy": z.unknown().optional(),
+      "signalId": z.unknown().optional(),
+      "source": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "summary": z.unknown().optional(),
+      "title": z.unknown().optional(),
+      "value": z.unknown().optional(),
+      "workflowId": z.unknown().optional(),
+    })), authMiddleware({ required: true }), async (req: Request, res: Response) => {
     try {
       const { runId } = req.params;
       const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
@@ -507,7 +557,26 @@ function buildDomainRoutes(domain: string): void {
   });
 
   // ── POST /:domain/atlas/runs/:runId/cancel ──────────────────────────────────
-  router.post(`${prefix}/runs/:runId/cancel`, validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req: Request, res: Response) => {
+  router.post(`${prefix}/runs/:runId/cancel`, validateBody(bodyShape({
+      "businessImpact": z.unknown().optional(),
+      "capturedBy": z.unknown().optional(),
+      "evidence": z.unknown().optional(),
+      "hookId": z.unknown().optional(),
+      "immutable": z.unknown().optional(),
+      "isDryRun": z.unknown().optional(),
+      "isSimulation": z.unknown().optional(),
+      "label": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "recommendationId": z.unknown().optional(),
+      "recordedBy": z.unknown().optional(),
+      "signalId": z.unknown().optional(),
+      "source": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "summary": z.unknown().optional(),
+      "title": z.unknown().optional(),
+      "value": z.unknown().optional(),
+      "workflowId": z.unknown().optional(),
+    })), authMiddleware({ required: true }), async (req: Request, res: Response) => {
     try {
       const { runId } = req.params;
       const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
@@ -634,7 +703,11 @@ function buildDomainRoutes(domain: string): void {
   });
 
   // ── POST /:domain/atlas/evaluation-hooks/replay ──────────────────────────────
-  router.post(`${prefix}/evaluation-hooks/replay`, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  router.post(`${prefix}/evaluation-hooks/replay`, authMiddleware({ required: false }), validateBody(bodyShape({
+      "hookId": z.unknown().optional(),
+      "isDryRun": z.unknown().optional(),
+      "isSimulation": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const ctx = resolveTenantContext(req, res);
       if (!ctx) return;

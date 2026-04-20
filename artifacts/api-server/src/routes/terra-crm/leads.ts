@@ -1,4 +1,6 @@
 import type { IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   db, terraLeadsTable, terraDealsTable, terraDistressPropertiesTable,
   eq, and, desc, ilike, or, sql,
@@ -6,7 +8,7 @@ import {
   CreateLeadSchema, UpdateLeadSchema, auditLog, nowStr,
 } from "./_shared.js";
 import type { InsertTerraLead } from "@szl-holdings/db";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../../lib/validation";
 
 export function register(router: IRouter): void {
   router.get("/terra/crm/leads", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
@@ -141,7 +143,29 @@ export function register(router: IRouter): void {
     } catch (err) { handleRouteError(res, err, "Failed to fetch lead"); }
   });
 
-  router.post("/terra/crm/leads", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+  router.post("/terra/crm/leads", authMiddleware({ required: true }), validateBody(bodyShape({
+      "addNote": z.unknown().optional(),
+      "conversionProbability": z.unknown().optional(),
+      "distressPropertyExternalId": z.unknown().optional(),
+      "distressPropertyId": z.unknown().optional(),
+      "email": z.unknown().optional(),
+      "firstName": z.unknown().optional(),
+      "lastContact": z.unknown().optional(),
+      "lastName": z.unknown().optional(),
+      "nextAction": z.unknown().optional(),
+      "nextFollowUp": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "ownerName": z.unknown().optional(),
+      "ownerUserId": z.unknown().optional(),
+      "phone": z.unknown().optional(),
+      "score": z.unknown().optional(),
+      "source": z.unknown().optional(),
+      "stage": z.unknown().optional(),
+      "tags": z.unknown().optional(),
+      "timelineEvent": z.unknown().optional(),
+      "timelineType": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })), async (req, res) => {
     try {
       const parsed = CreateLeadSchema.safeParse(req.body ?? {});
       if (!parsed.success) {
@@ -183,7 +207,17 @@ export function register(router: IRouter): void {
     } catch (err) { handleRouteError(res, err, "Failed to create lead"); }
   });
 
-  router.patch("/terra/crm/leads/:id", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+  router.patch("/terra/crm/leads/:id", authMiddleware({ required: true }), validateBody(bodyShape({
+      "addNote": z.unknown().optional(),
+      "lastContact": z.unknown().optional(),
+      "nextAction": z.unknown().optional(),
+      "nextFollowUp": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "score": z.unknown().optional(),
+      "stage": z.unknown().optional(),
+      "timelineEvent": z.unknown().optional(),
+      "timelineType": z.unknown().optional(),
+    })), async (req, res) => {
     try {
       const { id } = req.params as Record<string, string>;
       const parsed = UpdateLeadSchema.safeParse(req.body ?? {});

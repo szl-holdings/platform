@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { db } from "@szl-holdings/db";
 import {
   complianceSuitabilityTable,
@@ -12,7 +13,7 @@ import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteErro
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { z } from "zod";
 import crypto from "crypto";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -147,7 +148,11 @@ router.get("/compliance/suitability", authMiddleware(), validateQuery(listQueryS
   }
 });
 
-router.post("/compliance/suitability", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/compliance/suitability", authMiddleware({ required: true }), validateBody(bodyShape({
+      "clientProfile": z.unknown().optional(),
+      "conflicts": z.unknown().optional(),
+      "financialSituation": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const parsed = CreateSuitabilitySchema.safeParse(req.body ?? {});
     if (!parsed.success) {
@@ -171,7 +176,11 @@ router.post("/compliance/suitability", authMiddleware({ required: true }), valid
   }
 });
 
-router.patch("/compliance/suitability/:id/review", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/compliance/suitability/:id/review", authMiddleware({ required: true }), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "reviewNotes": z.unknown().optional(),
+      "reviewerId": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { id } = req.params as Record<string, string>;
     const { action, reviewNotes, reviewerId } = req.body as { action: "approve" | "reject"; reviewNotes?: string; reviewerId?: string };
@@ -230,7 +239,15 @@ router.get("/compliance/archival", authMiddleware(), validateQuery(listQuerySche
   }
 });
 
-router.post("/compliance/archival", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/compliance/archival", authMiddleware({ required: true }), validateBody(bodyShape({
+      "communicationType": z.unknown().optional(),
+      "contentRef": z.unknown().optional(),
+      "contentSummary": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "participants": z.unknown().optional(),
+      "retentionPolicy": z.unknown().optional(),
+      "subject": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const parsed = CreateArchivalSchema.safeParse(req.body ?? {});
     if (!parsed.success) {
@@ -305,7 +322,19 @@ router.get("/compliance/supervision", authMiddleware(), validateQuery(listQueryS
   }
 });
 
-router.post("/compliance/supervision", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/compliance/supervision", authMiddleware({ required: true }), validateBody(bodyShape({
+      "assignedToId": z.unknown().optional(),
+      "assignedToName": z.unknown().optional(),
+      "category": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "dueAt": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "relatedEntities": z.unknown().optional(),
+      "riskScore": z.unknown().optional(),
+      "submittedById": z.unknown().optional(),
+      "submittedByName": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const parsed = CreateSupervisionSchema.safeParse(req.body ?? {});
     if (!parsed.success) {
@@ -338,7 +367,12 @@ router.post("/compliance/supervision", authMiddleware({ required: true }), valid
   }
 });
 
-router.patch("/compliance/supervision/:itemId/action", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/compliance/supervision/:itemId/action", authMiddleware({ required: true }), validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "assignedToId": z.unknown().optional(),
+      "assignedToName": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { itemId } = req.params as Record<string, string>;
     const { action, notes, assignedToId, assignedToName } = req.body as {
@@ -421,7 +455,20 @@ router.get("/compliance/calendar", authMiddleware(), validateQuery(listQuerySche
   }
 });
 
-router.post("/compliance/calendar", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/compliance/calendar", authMiddleware({ required: true }), validateBody(bodyShape({
+      "assignedToId": z.unknown().optional(),
+      "assignedToName": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "dueAt": z.unknown().optional(),
+      "eventType": z.unknown().optional(),
+      "filingReference": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "recurrence": z.unknown().optional(),
+      "regulatoryBody": z.unknown().optional(),
+      "reminderAt": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const parsed = CreateCalendarSchema.safeParse(req.body ?? {});
     if (!parsed.success) {

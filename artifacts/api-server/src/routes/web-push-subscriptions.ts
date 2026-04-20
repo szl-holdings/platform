@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, webPushSubscriptionsTable } from "@szl-holdings/db";
 import { eq, and } from "drizzle-orm";
 import {
@@ -11,7 +13,7 @@ import {
 } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { getVapidPublicKey } from "../lib/web-push-sender";
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -24,7 +26,11 @@ router.get("/web-push/vapid-public-key", (_req, res) => {
   sendSuccess(res, { publicKey });
 });
 
-router.post("/web-push/subscriptions", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/web-push/subscriptions", authMiddleware({ required: false }), validateBody(bodyShape({
+      "appId": z.unknown().optional(),
+      "endpoint": z.unknown().optional(),
+      "keys": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { endpoint, keys, appId } = req.body as {
       endpoint?: string;
@@ -87,7 +93,9 @@ router.post("/web-push/subscriptions", authMiddleware({ required: false }), vali
   }
 });
 
-router.delete("/web-push/subscriptions", validateBody(jsonObjectBodySchema), authMiddleware({ required: false }), async (req, res) => {
+router.delete("/web-push/subscriptions", validateBody(bodyShape({
+      "endpoint": z.unknown().optional(),
+    })), authMiddleware({ required: false }), async (req, res) => {
   try {
     const { endpoint } = req.body as { endpoint?: string };
     if (!endpoint || typeof endpoint !== "string") {

@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   db,
   carlotaTimeEntriesTable,
@@ -11,7 +13,7 @@ import {
   sendNotFound,
   handleRouteError,
 } from "../lib/api-response";
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 /* -----------------------------------------------------------------------
  * Carlota Jo — Time tracking & invoice persistence (public, cross-device)
@@ -77,7 +79,20 @@ router.get("/booking/time-entries", async (_req, res) => {
   }
 });
 
-router.post("/booking/time-entries", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/booking/time-entries", validateBody(bodyShape({
+      "approved": z.unknown().optional(),
+      "billable": z.unknown().optional(),
+      "date": z.unknown().optional(),
+      "deliverable": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "engagement": z.unknown().optional(),
+      "hours": z.unknown().optional(),
+      "id": z.unknown().optional(),
+      "invoiceId": z.unknown().optional(),
+      "phase": z.unknown().optional(),
+      "rate": z.unknown().optional(),
+      "rateType": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const b = req.body as Partial<TimeEntryRow> & { hours?: number | string };
     if (
@@ -121,7 +136,19 @@ router.post("/booking/time-entries", validateBody(jsonObjectBodySchema), async (
   }
 });
 
-router.patch("/booking/time-entries/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/booking/time-entries/:id", validateBody(bodyShape({
+      "approved": z.unknown().optional(),
+      "billable": z.unknown().optional(),
+      "date": z.unknown().optional(),
+      "deliverable": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "engagement": z.unknown().optional(),
+      "hours": z.unknown().optional(),
+      "invoiceId": z.unknown().optional(),
+      "phase": z.unknown().optional(),
+      "rate": z.unknown().optional(),
+      "rateType": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = String(req.params.id);
     const b = req.body as Partial<TimeEntryRow> & { hours?: number | string };
@@ -154,7 +181,7 @@ router.patch("/booking/time-entries/:id", validateBody(jsonObjectBodySchema), as
   }
 });
 
-router.delete("/booking/time-entries/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.delete("/booking/time-entries/:id", validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db
       .delete(carlotaTimeEntriesTable)
@@ -182,7 +209,17 @@ router.get("/booking/time-invoices", async (_req, res) => {
   }
 });
 
-router.post("/booking/time-invoices", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/booking/time-invoices", validateBody(bodyShape({
+      "amount": z.unknown().optional(),
+      "client": z.unknown().optional(),
+      "dueDate": z.unknown().optional(),
+      "engagement": z.unknown().optional(),
+      "entryIds": z.unknown().optional(),
+      "id": z.unknown().optional(),
+      "issuedDate": z.unknown().optional(),
+      "items": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const b = req.body as Partial<InvoiceRow> & { amount?: number | string };
     if (
@@ -222,7 +259,17 @@ router.post("/booking/time-invoices", validateBody(jsonObjectBodySchema), async 
   }
 });
 
-router.patch("/booking/time-invoices/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/booking/time-invoices/:id", validateBody(bodyShape({
+      "amount": z.unknown().optional(),
+      "client": z.unknown().optional(),
+      "dueDate": z.unknown().optional(),
+      "engagement": z.unknown().optional(),
+      "entryIds": z.unknown().optional(),
+      "issuedDate": z.unknown().optional(),
+      "items": z.unknown().optional(),
+      "sentAt": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = String(req.params.id);
     const b = req.body as Partial<InvoiceRow> & {
@@ -255,7 +302,7 @@ router.patch("/booking/time-invoices/:id", validateBody(jsonObjectBodySchema), a
   }
 });
 
-router.delete("/booking/time-invoices/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.delete("/booking/time-invoices/:id", validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db
       .delete(carlotaInvoicesTable)
@@ -272,7 +319,11 @@ router.delete("/booking/time-invoices/:id", validateBody(jsonObjectBodySchema), 
 });
 
 // Generate draft invoices from approved billable entries that aren't yet invoiced.
-router.post("/booking/time-invoices/generate", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/booking/time-invoices/generate", validateBody(bodyShape({
+      "dueDate": z.unknown().optional(),
+      "engagementToClient": z.unknown().optional(),
+      "issuedDate": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const body = (req.body ?? {}) as {
       engagementToClient?: Record<string, string>;

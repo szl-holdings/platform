@@ -1,4 +1,6 @@
 import type { IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   db, pool,
   terraLeadsTable, terraDealsTable, terraSavedOpportunitiesTable, terraDistressPropertiesTable,
@@ -6,10 +8,12 @@ import {
   sendSuccess, sendBadRequest, handleRouteError, authMiddleware,
   scoreDistressProperty,
 } from "./_shared.js";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../../lib/validation";
 
 export function register(router: IRouter): void {
-  router.post("/terra/distress/ai-score", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+  router.post("/terra/distress/ai-score", authMiddleware({ required: true }), validateBody(bodyShape({
+      "propertyId": z.unknown().optional(),
+    })), async (req, res) => {
     try {
       const body = req.body ?? {};
       const { propertyId } = body;

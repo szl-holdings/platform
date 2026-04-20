@@ -1,11 +1,13 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { createHmac, timingSafeEqual } from "crypto";
 import { pool } from "@szl-holdings/db";
 import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -99,7 +101,16 @@ function detectSkillFromMessage(text: string): string | null {
   return null;
 }
 
-router.post("/alloy/channels/slack/webhook", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/channels/slack/webhook", validateBody(bodyShape({
+      "challenge": z.unknown().optional(),
+      "channel_id": z.unknown().optional(),
+      "command": z.unknown().optional(),
+      "event": z.unknown().optional(),
+      "text": z.unknown().optional(),
+      "type": z.unknown().optional(),
+      "user_id": z.unknown().optional(),
+      "user_name": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     if (!verifySlackSignature(req)) {
       res.status(401).json({ error: "Invalid Slack signature" });
@@ -213,7 +224,13 @@ router.post("/alloy/channels/slack/webhook", validateBody(jsonObjectBodySchema),
   }
 });
 
-router.post("/alloy/channels/slack/interactive", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/channels/slack/interactive", validateBody(bodyShape({
+      "actions": z.unknown().optional(),
+      "channel": z.unknown().optional(),
+      "response_url": z.unknown().optional(),
+      "type": z.unknown().optional(),
+      "user": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     if (!verifySlackSignature(req)) {
       res.status(401).json({ error: "Invalid Slack signature" });
@@ -316,7 +333,11 @@ router.post("/alloy/channels/slack/interactive", validateBody(jsonObjectBodySche
   }
 });
 
-router.post("/alloy/channels/slack/send", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/channels/slack/send", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateBody(bodyShape({
+      "blocks": z.unknown().optional(),
+      "channel": z.unknown().optional(),
+      "text": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { channel, text, blocks } = req.body as { channel: string; text: string; blocks?: unknown[] };
     if (!channel || !text) {
@@ -339,7 +360,15 @@ router.get("/alloy/channels/config", authMiddleware(), requireRole("ops", "admin
   }
 });
 
-router.post("/alloy/channels/config", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/channels/config", authMiddleware(), requireRole("admin", "super_admin"), validateBody(bodyShape({
+      "allowedSkills": z.unknown().optional(),
+      "approvalClass": z.unknown().optional(),
+      "channelId": z.unknown().optional(),
+      "channelName": z.unknown().optional(),
+      "channelType": z.unknown().optional(),
+      "trustLevel": z.unknown().optional(),
+      "workspaceId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { channelType = "slack", channelId, channelName, workspaceId, trustLevel = "standard", allowedSkills, approvalClass } = req.body as {
       channelType?: string;
@@ -376,7 +405,12 @@ router.post("/alloy/channels/config", authMiddleware(), requireRole("admin", "su
   }
 });
 
-router.patch("/alloy/channels/config/:channelId", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/alloy/channels/config/:channelId", authMiddleware(), requireRole("admin", "super_admin"), validateBody(bodyShape({
+      "allowedSkills": z.unknown().optional(),
+      "approvalClass": z.unknown().optional(),
+      "isEnabled": z.unknown().optional(),
+      "trustLevel": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { channelId } = req.params;
     const { trustLevel, allowedSkills, isEnabled, approvalClass } = req.body as {
@@ -434,7 +468,10 @@ router.get("/alloy/channels/approvals", authMiddleware(), validateQuery(listQuer
   }
 });
 
-router.post("/alloy/channels/approvals/:id/decide", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/alloy/channels/approvals/:id/decide", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateBody(bodyShape({
+      "decision": z.unknown().optional(),
+      "note": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { decision, note } = req.body as { decision: "approved" | "rejected"; note?: string };

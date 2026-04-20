@@ -1,11 +1,13 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, firestormIncidentsTable, firestormAlertsTable, firestormAssetsTable, firestormComplianceControlsTable, firestormFindingsTable } from "@szl-holdings/db";
 import { desc, eq, and, gte, count, sql } from "drizzle-orm";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 import { services } from "@szl-holdings/services";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -181,7 +183,11 @@ router.get("/firestorm/soar/playbooks", authMiddleware(), async (_req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to fetch SOAR playbooks"); }
 });
 
-router.post("/firestorm/soar/execute", authMiddleware({ required: true }), requireRole("analyst", "operator", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/firestorm/soar/execute", authMiddleware({ required: true }), requireRole("analyst", "operator", "admin"), validateBody(bodyShape({
+      "alertId": z.unknown().optional(),
+      "context": z.unknown().optional(),
+      "playbookId": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { playbookId, alertId, context } = req.body;
     if (!playbookId) {
@@ -277,7 +283,10 @@ router.get("/firestorm/stix/objects", authMiddleware(), async (_req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to fetch STIX objects"); }
 });
 
-router.post("/firestorm/stix/export", authMiddleware({ required: true }), requireRole("analyst", "operator", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/firestorm/stix/export", authMiddleware({ required: true }), requireRole("analyst", "operator", "admin"), validateBody(bodyShape({
+      "bundleName": z.unknown().optional(),
+      "objectIds": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { objectIds, bundleName } = req.body;
     logger.info({ objectIds, bundleName, userId: req.user?.id }, "STIX bundle export requested");

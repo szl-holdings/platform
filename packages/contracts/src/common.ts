@@ -61,3 +61,31 @@ export const sortQuerySchema = z.object({
   sortBy: z.string().optional(),
   sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 });
+
+/**
+ * Build a request-body schema for routes whose handler reads a known set of
+ * fields off req.body. The shape declares which fields the handler depends on
+ * (so they appear in the contract) while still accepting unknown extras
+ * (passthrough) for forward compatibility. Null/undefined bodies are coerced
+ * to an empty object so optional fields validate cleanly.
+ *
+ * Use this in place of the deprecated catch-all `jsonObjectBodySchema` so the
+ * route's contract is self-documenting and type-inferable.
+ */
+export function bodyShape<T extends z.ZodRawShape>(shape: T) {
+  return z.preprocess(
+    (val) => (val == null ? {} : val),
+    z.object(shape).passthrough(),
+  ) as z.ZodType<z.infer<z.ZodObject<T>> & Record<string, unknown>>;
+}
+
+/**
+ * Build a query-string schema for routes that read a known set of query
+ * parameters. Like {@link bodyShape}, declared fields participate in the
+ * contract while extras are passed through.
+ */
+export function queryShape<T extends z.ZodRawShape>(shape: T) {
+  return z.object(shape).passthrough() as z.ZodType<
+    z.infer<z.ZodObject<T>> & Record<string, unknown>
+  >;
+}

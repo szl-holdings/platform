@@ -1,4 +1,6 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import rateLimit from "express-rate-limit";
 import crypto from "crypto";
 import { authMiddleware, requireRole } from "../middlewares/auth";
@@ -14,7 +16,7 @@ import {
   handleRouteError,
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -98,7 +100,11 @@ router.get("/integrations/dynamics/entities", authMiddleware(), validateQuery(li
   }
 });
 
-router.post("/integrations/dynamics/sync", authMiddleware(), requireRole("super_admin", "ops"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/integrations/dynamics/sync", authMiddleware(), requireRole("super_admin", "ops"), validateBody(bodyShape({
+      "direction": z.unknown().optional(),
+      "entityTypes": z.unknown().optional(),
+      "leadScoreThreshold": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const enabled = await isFlagEnabled("dynamics365_sync_enabled");
     if (!enabled) {
@@ -147,7 +153,11 @@ router.post("/integrations/dynamics/sync", authMiddleware(), requireRole("super_
 router.post(
   "/integrations/dynamics/webhook",
   dynamicsWebhookLimit,
-  validateBody(jsonObjectBodySchema), async (req, res) => {
+  validateBody(bodyShape({
+      "EntityName": z.unknown().optional(),
+      "MessageName": z.unknown().optional(),
+      "PrimaryEntityId": z.unknown().optional(),
+    })), async (req, res) => {
     try {
       const enabled = await isFlagEnabled("dynamics365_sync_enabled");
       if (!enabled) {
@@ -212,7 +222,12 @@ router.post(
 router.post(
   "/integrations/power-automate/trigger",
   powerAutomateWebhookLimit,
-  validateBody(jsonObjectBodySchema), async (req, res) => {
+  validateBody(bodyShape({
+      "action": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "signalPayload": z.unknown().optional(),
+      "workflowId": z.unknown().optional(),
+    })), async (req, res) => {
     try {
       const enabled = await isFlagEnabled("power_automate_webhook_enabled");
       if (!enabled) {

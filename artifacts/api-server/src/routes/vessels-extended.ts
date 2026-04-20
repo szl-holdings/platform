@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   db,
   voyagesTable,
@@ -35,7 +37,7 @@ import { adminGuard } from "../middlewares/admin-guard";
 import { tenantScope } from "../middlewares/tenant-scope";
 import { logger } from "../lib/logger";
 import { seedVesselsData } from "../lib/seed-vessels";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { guardSeedInProduction } from "../lib/seed-guard";
 
 const router: IRouter = Router();
@@ -635,7 +637,9 @@ router.get("/vessels/exceptions/:id", authMiddleware(), tenantScope(), async (re
   }
 });
 
-router.post("/vessels/exceptions", authMiddleware(), tenantScope(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/exceptions", authMiddleware(), tenantScope(), validateBody(bodyShape({
+      "vesselId": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const data = insertFleetExceptionSchema.parse(req.body);
     // Cross-tenant guard on the parent vessel reference
@@ -650,7 +654,7 @@ router.post("/vessels/exceptions", authMiddleware(), tenantScope(), validateBody
   }
 });
 
-router.post("/vessels/exceptions/:id/acknowledge", authMiddleware(), tenantScope(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/exceptions/:id/acknowledge", authMiddleware(), tenantScope(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [exc] = await db.select().from(fleetExceptionsTable).where(eq(fleetExceptionsTable.id, id));
@@ -671,7 +675,9 @@ router.post("/vessels/exceptions/:id/acknowledge", authMiddleware(), tenantScope
   }
 });
 
-router.post("/vessels/exceptions/:id/resolve", authMiddleware(), tenantScope(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/exceptions/:id/resolve", authMiddleware(), tenantScope(), validateBody(bodyShape({
+      "notes": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [exc] = await db.select().from(fleetExceptionsTable).where(eq(fleetExceptionsTable.id, id));
@@ -694,7 +700,7 @@ router.post("/vessels/exceptions/:id/resolve", authMiddleware(), tenantScope(), 
   }
 });
 
-router.post("/vessels/exceptions/:id/escalate", authMiddleware(), tenantScope(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/exceptions/:id/escalate", authMiddleware(), tenantScope(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [exc] = await db.select().from(fleetExceptionsTable).where(eq(fleetExceptionsTable.id, id));
@@ -1081,7 +1087,7 @@ router.get("/vessels/readiness", authMiddleware(), tenantScope(), async (req, re
 
 // ── Seed endpoint (admin-only) ────────────────────────────────────────────────
 
-router.post("/vessels/seed", validateBody(jsonObjectBodySchema), authMiddleware(), adminGuard, async (_req, res) => {
+router.post("/vessels/seed", validateBody(bodyShape({})), authMiddleware(), adminGuard, async (_req, res) => {
   if (guardSeedInProduction(res)) return;
   try {
     logger.info("Vessels seed triggered by admin");

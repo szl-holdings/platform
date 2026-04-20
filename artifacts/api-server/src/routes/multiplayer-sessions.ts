@@ -29,8 +29,9 @@ import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { publish } from "../lib/websocket";
 import { logger } from "../lib/logger";
-import { commandSessionCreateSchema, jsonObjectBodySchema, listQuerySchema, sessionCommentCreateSchema, validateBody, validateQuery } from "../lib/validation";
+import { commandSessionCreateSchema, listQuerySchema, sessionCommentCreateSchema, validateBody, validateQuery } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 
 router.get(
@@ -138,7 +139,7 @@ router.get(
 );
 
 router.delete(
-  "/sessions/command/:id", validateBody(jsonObjectBodySchema),
+  "/sessions/command/:id", validateBody(bodyShape({})),
   authMiddleware({ required: false }),
   async (req, res) => {
     try {

@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { sendSuccess, sendError } from "../lib/api-response";
 import { knowledgeStore, type KnowledgeDomain } from "../lib/knowledge-store";
 import { agentEventBus } from "../lib/event-bus";
@@ -6,7 +8,7 @@ import { agentScheduler } from "../lib/agent-scheduler";
 import { logger } from "../lib/logger";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router = Router();
 
@@ -34,7 +36,7 @@ router.get("/agent-os/schedules", (_req, res) => {
   });
 });
 
-router.post("/agent-os/run/:agentId", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/agent-os/run/:agentId", authMiddleware(), requireRole("admin", "super_admin"), validateBody(bodyShape({})), async (req, res) => {
   const agentId = Array.isArray(req.params.agentId) ? req.params.agentId[0] : req.params.agentId;
   if (!agentId) {
     sendError(res, "agentId is required", 400);

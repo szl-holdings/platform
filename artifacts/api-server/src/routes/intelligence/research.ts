@@ -1,4 +1,6 @@
 import crypto from "crypto";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import express, { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { LRUCache } from "lru-cache";
@@ -20,11 +22,11 @@ import {
   computeIntelligenceBriefing,
   type ThreatItem, type CveItem, type GeoEvent, type NewsItem,
 } from "./shared";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router = Router();
 
-router.post("/intelligence/ai/threat-briefing", validateBody(jsonObjectBodySchema), aiRateLimit, authMiddleware(), async (_req, res) => {
+router.post("/intelligence/ai/threat-briefing", validateBody(bodyShape({})), aiRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const threats = await getCached("threats", 300000, fetchOtxThreats);
     const topThreats = threats.slice(0, 5);
@@ -44,7 +46,7 @@ router.post("/intelligence/ai/threat-briefing", validateBody(jsonObjectBodySchem
   } catch (err) { handleRouteError(res, err, "Failed to generate threat briefing"); }
 });
 
-router.post("/intelligence/ai/situation-report", validateBody(jsonObjectBodySchema), aiRateLimit, authMiddleware(), async (_req, res) => {
+router.post("/intelligence/ai/situation-report", validateBody(bodyShape({})), aiRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const [threats, cves, news] = await Promise.all([
       getCached("threats", 300000, fetchOtxThreats),
@@ -78,7 +80,9 @@ router.post("/intelligence/ai/situation-report", validateBody(jsonObjectBodySche
   } catch (err) { handleRouteError(res, err, "Failed to generate situation report"); }
 });
 
-router.post("/intelligence/ai/risk-prediction", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/intelligence/ai/risk-prediction", aiRateLimit, authMiddleware(), validateBody(bodyShape({
+      "scenario": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { scenario } = req.body;
     const predictions = [
@@ -103,7 +107,9 @@ router.post("/intelligence/ai/risk-prediction", aiRateLimit, authMiddleware(), v
   } catch (err) { handleRouteError(res, err, "Failed to generate risk prediction"); }
 });
 
-router.post("/intelligence/ai/content-ideas", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/intelligence/ai/content-ideas", aiRateLimit, authMiddleware(), validateBody(bodyShape({
+      "topic": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { topic } = req.body;
     const classification = await services.huggingface.zeroShotClassification(
@@ -544,7 +550,12 @@ const DOMAIN_AGENTS: Record<string, { name: string; systemPrompt: string; model:
   },
 };
 
-router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware(), validateBody(bodyShape({
+      "agentId": z.unknown().optional(),
+      "maxTokens": z.unknown().optional(),
+      "messages": z.unknown().optional(),
+      "stream": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { agentId, messages, maxTokens = 2048, stream = false } = req.body as {
       agentId: string;
@@ -640,7 +651,12 @@ router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware(), vali
   } catch (err) { handleRouteError(res, err, "Domain agent inference failed"); }
 });
 
-router.post("/intelligence/ai/campaign-copy", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/intelligence/ai/campaign-copy", aiRateLimit, authMiddleware(), validateBody(bodyShape({
+      "brand": z.unknown().optional(),
+      "format": z.unknown().optional(),
+      "tone": z.unknown().optional(),
+      "topic": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { topic, tone = "professional", format = "full-campaign", brand } = req.body as {
       topic: string; tone?: string; format?: string; brand?: string;
@@ -697,7 +713,11 @@ Format as structured sections with clear headers.`;
   }
 });
 
-router.post("/intelligence/ai/risk-assessment", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/intelligence/ai/risk-assessment", aiRateLimit, authMiddleware(), validateBody(bodyShape({
+      "context": z.unknown().optional(),
+      "dimension": z.unknown().optional(),
+      "frameworks": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { context, frameworks = ["NIST CSF", "ISO 27001", "SOC 2"], dimension } = req.body as {
       context?: string; frameworks?: string[]; dimension?: string;
@@ -740,7 +760,10 @@ Use precise language with specific control references where applicable.`;
   } catch (err) { handleRouteError(res, err, "Risk assessment failed"); }
 });
 
-router.post("/intelligence/ai/advisory", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/intelligence/ai/advisory", aiRateLimit, authMiddleware(), validateBody(bodyShape({
+      "context": z.unknown().optional(),
+      "messages": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { messages, context } = req.body as {
       messages: Array<{ role: "user" | "assistant"; content: string }>;
@@ -777,7 +800,12 @@ router.post("/intelligence/ai/advisory", aiRateLimit, authMiddleware(), validate
   }
 });
 
-router.post("/intelligence/ai/ticket-triage", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/intelligence/ai/ticket-triage", aiRateLimit, authMiddleware(), validateBody(bodyShape({
+      "category": z.unknown().optional(),
+      "client": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "subject": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { subject, description, client, category } = req.body as {
       subject: string; description?: string; client?: string; category?: string;
@@ -822,7 +850,10 @@ Be concise and action-oriented.`;
   } catch (err) { handleRouteError(res, err, "Ticket triage failed"); }
 });
 
-router.post("/intelligence/ai/readiness-summary", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/intelligence/ai/readiness-summary", aiRateLimit, authMiddleware(), validateBody(bodyShape({
+      "scores": z.unknown().optional(),
+      "topGaps": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { scores, topGaps } = req.body as { scores?: Record<string, number>; topGaps?: string[] };
 
@@ -868,7 +899,12 @@ Use professional board-level language. Be specific about numbers and timelines.`
   }
 });
 
-router.post("/intelligence/ai/dark-vessel-analysis", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/intelligence/ai/dark-vessel-analysis", aiRateLimit, authMiddleware(), validateBody(bodyShape({
+      "aiGapHours": z.unknown().optional(),
+      "behaviorPatterns": z.unknown().optional(),
+      "lastKnownPosition": z.unknown().optional(),
+      "vessel": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { vessel, aiGapHours, behaviorPatterns, lastKnownPosition } = req.body as {
       vessel?: string; aiGapHours?: number; behaviorPatterns?: string[]; lastKnownPosition?: string;
@@ -913,7 +949,12 @@ Use IMCO and OFAC screening terminology.`;
   } catch (err) { handleRouteError(res, err, "Dark vessel analysis failed"); }
 });
 
-router.post("/intelligence/ai/threat-triage", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/intelligence/ai/threat-triage", aiRateLimit, authMiddleware(), validateBody(bodyShape({
+      "affectedSystems": z.unknown().optional(),
+      "cveIds": z.unknown().optional(),
+      "severity": z.unknown().optional(),
+      "threat": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { threat, cveIds, affectedSystems, severity } = req.body as {
       threat?: string; cveIds?: string[]; affectedSystems?: string[]; severity?: string;
@@ -957,7 +998,10 @@ Be precise, tactical, and time-sensitive.`;
   } catch (err) { handleRouteError(res, err, "Threat triage failed"); }
 });
 
-router.post("/intelligence/ai/maritime-intelligence", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/intelligence/ai/maritime-intelligence", aiRateLimit, authMiddleware(), validateBody(bodyShape({
+      "context": z.unknown().optional(),
+      "query": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { query, context } = req.body as { query?: string; context?: string };
     if (!query || typeof query !== "string") { sendError(res, "Query is required and must be a string", 400); return; }

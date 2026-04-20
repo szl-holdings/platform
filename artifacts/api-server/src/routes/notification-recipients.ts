@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, notificationRecipientsTable } from "@szl-holdings/db";
 import { eq, and } from "drizzle-orm";
 import {
@@ -10,7 +12,7 @@ import {
   handleRouteError,
 } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { jsonObjectBodySchema, notificationRecipientCreateSchema, notificationRecipientUpdateSchema, validateBody } from "../lib/validation";
+import { notificationRecipientCreateSchema, notificationRecipientUpdateSchema, validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -108,7 +110,7 @@ router.patch("/notification-recipients/:id", authMiddleware(), requireRole("ops"
   }
 });
 
-router.delete("/notification-recipients/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops"), async (req, res) => {
+router.delete("/notification-recipients/:id", validateBody(bodyShape({})), authMiddleware(), requireRole("ops"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db

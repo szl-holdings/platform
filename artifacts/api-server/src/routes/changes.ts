@@ -1,11 +1,13 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, changeEventsTable, insertChangeEventSchema } from "@szl-holdings/db";
 import { gt, and, eq, lte, desc } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { publish } from "../lib/websocket";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -47,7 +49,13 @@ router.get("/changes", authMiddleware(), validateQuery(listQuerySchema), async (
   }
 });
 
-router.post("/changes", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/changes", authMiddleware(), validateBody(bodyShape({
+      "appSource": z.unknown().optional(),
+      "crdtClock": z.unknown().optional(),
+      "delta": z.unknown().optional(),
+      "entityId": z.unknown().optional(),
+      "entityType": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const body = req.body as Record<string, unknown>;
     const parsed = insertChangeEventSchema.safeParse({

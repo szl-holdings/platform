@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, scheduledNotificationsTable } from "@szl-holdings/db";
 import { eq, and, gte } from "drizzle-orm";
 import { sendSuccess, sendBadRequest, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../lib/api-response";
@@ -6,7 +8,7 @@ import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendPushToUser, sendPushToApp, sendPushBroadcast } from "../lib/expo-push";
 import { buildPushMessage, type NotificationTemplate } from "../lib/push-templates";
 import type { PushMessagePayload } from "../lib/expo-push";
-import { jsonObjectBodySchema, listQuerySchema, pushNotificationScheduleSchema, pushNotificationSendSchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, pushNotificationScheduleSchema, pushNotificationSendSchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -175,7 +177,7 @@ router.get("/push-notifications/scheduled", authMiddleware(), requireRole("ops")
   }
 });
 
-router.delete("/push-notifications/scheduled/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops"), async (req, res) => {
+router.delete("/push-notifications/scheduled/:id", validateBody(bodyShape({})), authMiddleware(), requireRole("ops"), async (req, res) => {
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {

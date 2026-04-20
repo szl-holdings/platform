@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { db, mspDevicesTable, mspClientsTable } from "@szl-holdings/db";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendError, handleRouteError } from "../../lib/api-response";
@@ -7,7 +9,7 @@ import { logger } from "../../lib/logger";
 import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 import { auth, authWrite, roleAdmin, roleOperator, queryConnectors, queryConnectorById, stripSecrets, buildProviderConfig, isProviderSupported, type PlaybookRow } from "./shared";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router: IRouter = Router();
 
@@ -114,7 +116,13 @@ router.get("/rmm/predictions", auth, async (_req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to generate predictions"); }
 });
 
-router.post("/rmm/psa/ticket", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/rmm/psa/ticket", authWrite, roleOperator, validateBody(bodyShape({
+      "connectorId": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "deviceId": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "subject": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { connectorId, subject, description, priority, deviceId } = req.body;
     if (!connectorId || !subject) return sendBadRequest(res, "connectorId and subject are required");
@@ -145,7 +153,10 @@ router.post("/rmm/psa/ticket", authWrite, roleOperator, validateBody(jsonObjectB
   } catch (err) { handleRouteError(res, err, "Failed to create PSA ticket"); }
 });
 
-router.post("/rmm/psa/ticket/:psaTicketId/close", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/rmm/psa/ticket/:psaTicketId/close", authWrite, roleOperator, validateBody(bodyShape({
+      "connectorId": z.unknown().optional(),
+      "note": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const psaTicketId = String(req.params.psaTicketId);
     const { connectorId, note } = req.body;
@@ -184,7 +195,15 @@ router.get("/rmm/org-site-mappings", auth, validateQuery(listQuerySchema), async
   } catch (err) { handleRouteError(res, err, "Failed to list org/site mappings"); }
 });
 
-router.post("/rmm/org-site-mappings", authWrite, roleAdmin, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/rmm/org-site-mappings", authWrite, roleAdmin, validateBody(bodyShape({
+      "connectorId": z.unknown().optional(),
+      "internalClientId": z.unknown().optional(),
+      "providerOrgId": z.unknown().optional(),
+      "providerOrgName": z.unknown().optional(),
+      "providerSiteId": z.unknown().optional(),
+      "providerSiteName": z.unknown().optional(),
+      "syncEnabled": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { connectorId, providerOrgId, providerOrgName, providerSiteId, providerSiteName, internalClientId, syncEnabled } = req.body;
     if (!connectorId || !providerOrgId) return sendBadRequest(res, "connectorId and providerOrgId are required");
@@ -199,7 +218,12 @@ router.post("/rmm/org-site-mappings", authWrite, roleAdmin, validateBody(jsonObj
   } catch (err) { handleRouteError(res, err, "Failed to create org/site mapping"); }
 });
 
-router.patch("/rmm/org-site-mappings/:id", authWrite, roleAdmin, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/rmm/org-site-mappings/:id", authWrite, roleAdmin, validateBody(bodyShape({
+      "internalClientId": z.unknown().optional(),
+      "providerOrgName": z.unknown().optional(),
+      "providerSiteName": z.unknown().optional(),
+      "syncEnabled": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -217,7 +241,7 @@ router.patch("/rmm/org-site-mappings/:id", authWrite, roleAdmin, validateBody(js
   } catch (err) { handleRouteError(res, err, "Failed to update org/site mapping"); }
 });
 
-router.delete("/rmm/org-site-mappings/:id", validateBody(jsonObjectBodySchema), authWrite, roleAdmin, async (req, res) => {
+router.delete("/rmm/org-site-mappings/:id", validateBody(bodyShape({})), authWrite, roleAdmin, async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -226,7 +250,13 @@ router.delete("/rmm/org-site-mappings/:id", validateBody(jsonObjectBodySchema), 
   } catch (err) { handleRouteError(res, err, "Failed to delete org/site mapping"); }
 });
 
-router.post("/rmm/actions/bulk", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/rmm/actions/bulk", authWrite, roleOperator, validateBody(bodyShape({
+      "actionType": z.unknown().optional(),
+      "deviceIds": z.unknown().optional(),
+      "parameters": z.unknown().optional(),
+      "requestedBy": z.unknown().optional(),
+      "target": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { deviceIds, actionType, target, parameters, requestedBy } = req.body;
     if (!Array.isArray(deviceIds) || deviceIds.length === 0) return sendBadRequest(res, "deviceIds array is required");

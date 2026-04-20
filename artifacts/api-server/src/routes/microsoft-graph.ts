@@ -1,9 +1,11 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -130,7 +132,13 @@ router.get("/microsoft/sharepoint/sites", msGraphLimit, authMiddleware({ require
   } catch (err) { handleRouteError(res, err, "Failed to list SharePoint sites"); }
 });
 
-router.post("/microsoft/teams/notify", msGraphLimit, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/microsoft/teams/notify", msGraphLimit, authMiddleware({ required: false }), validateBody(bodyShape({
+      "channelId": z.unknown().optional(),
+      "color": z.unknown().optional(),
+      "text": z.unknown().optional(),
+      "title": z.unknown().optional(),
+      "webHookUrl": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const { text, title, color, channelId, webHookUrl } = req.body;
     if (!text || typeof text !== "string") {

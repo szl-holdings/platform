@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { logger } from "../lib/logger";
 import {
   db,
@@ -20,7 +21,7 @@ import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteErro
 import { authMiddleware, parseIdParam, canAccessOrgRecord } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
 import { isFlagEnabled } from "../lib/platform-flags";
-import { anyQuerySchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { anyQuerySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const VESSEL_TYPES = ["container", "tanker", "bulk", "cargo", "passenger", "ro-ro", "lpg", "lng", "chemical", "other"] as const;
 const VESSEL_STATUSES = ["active", "in_port", "at_sea", "anchored", "maintenance", "decommissioned", "off_hire"] as const;
@@ -530,7 +531,21 @@ router.get("/vessels/platform/vessels/:id", authMiddleware(), tenantScope(), val
   }
 });
 
-router.post("/vessels/platform/vessels", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/platform/vessels", authMiddleware(), validateBody(bodyShape({
+      "callSign": z.unknown().optional(),
+      "flag": z.unknown().optional(),
+      "grossTonnage": z.unknown().optional(),
+      "imo": z.unknown().optional(),
+      "latitude": z.unknown().optional(),
+      "longitude": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "mmsi": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "vesselType": z.unknown().optional(),
+      "yearBuilt": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const commandEnabled = await isFlagEnabled("vessels_command_mode_enabled");
     if (!commandEnabled) {
@@ -567,7 +582,13 @@ router.post("/vessels/platform/vessels", authMiddleware(), validateBody(jsonObje
   }
 });
 
-router.patch("/vessels/platform/vessels/:id", validateQuery(anyQuerySchema), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/vessels/platform/vessels/:id", validateQuery(anyQuerySchema), authMiddleware(), validateBody(bodyShape({
+      "grossTonnage": z.unknown().optional(),
+      "heading": z.unknown().optional(),
+      "latitude": z.unknown().optional(),
+      "longitude": z.unknown().optional(),
+      "speedOverGround": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -650,7 +671,26 @@ router.get("/vessels/platform/voyages/:id", authMiddleware(), tenantScope(), val
   }
 });
 
-router.post("/vessels/platform/voyages", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/platform/voyages", authMiddleware(), validateBody(bodyShape({
+      "cargoDescription": z.unknown().optional(),
+      "cargoTonnage": z.unknown().optional(),
+      "cargoType": z.unknown().optional(),
+      "cargoValueUsd": z.unknown().optional(),
+      "charterRatePerDay": z.unknown().optional(),
+      "corridorId": z.unknown().optional(),
+      "destinationPortId": z.unknown().optional(),
+      "distanceNm": z.unknown().optional(),
+      "estimatedArrivalAt": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "originPortId": z.unknown().optional(),
+      "revenueUsd": z.unknown().optional(),
+      "scheduledArrivalAt": z.unknown().optional(),
+      "scheduledDepartureAt": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "vesselId": z.unknown().optional(),
+      "voyageNumber": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const parsed = CreateVoyageSchema.safeParse(req.body);
     if (!parsed.success) { sendBadRequest(res, "Invalid voyage data", parsed.error.flatten().fieldErrors); return; }
@@ -687,7 +727,26 @@ router.post("/vessels/platform/voyages", authMiddleware(), validateBody(jsonObje
   }
 });
 
-router.patch("/vessels/platform/voyages/:id", validateQuery(anyQuerySchema), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/vessels/platform/voyages/:id", validateQuery(anyQuerySchema), authMiddleware(), validateBody(bodyShape({
+      "actualArrivalAt": z.unknown().optional(),
+      "actualDepartureAt": z.unknown().optional(),
+      "cargoDescription": z.unknown().optional(),
+      "cargoTonnage": z.unknown().optional(),
+      "cargoType": z.unknown().optional(),
+      "cargoValueUsd": z.unknown().optional(),
+      "charterRatePerDay": z.unknown().optional(),
+      "corridorId": z.unknown().optional(),
+      "destinationPortId": z.unknown().optional(),
+      "distanceNm": z.unknown().optional(),
+      "estimatedArrivalAt": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "originPortId": z.unknown().optional(),
+      "revenueUsd": z.unknown().optional(),
+      "scheduledArrivalAt": z.unknown().optional(),
+      "scheduledDepartureAt": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "voyageNumber": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -779,7 +838,7 @@ router.get("/vessels/platform/exceptions/:id", authMiddleware(), tenantScope(), 
   }
 });
 
-router.post("/vessels/platform/exceptions/:id/acknowledge", validateQuery(anyQuerySchema), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/platform/exceptions/:id/acknowledge", validateQuery(anyQuerySchema), authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -803,7 +862,7 @@ router.post("/vessels/platform/exceptions/:id/acknowledge", validateQuery(anyQue
   }
 });
 
-router.post("/vessels/platform/exceptions/:id/assign", validateQuery(anyQuerySchema), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/platform/exceptions/:id/assign", validateQuery(anyQuerySchema), authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -831,7 +890,9 @@ router.post("/vessels/platform/exceptions/:id/assign", validateQuery(anyQuerySch
   }
 });
 
-router.post("/vessels/platform/exceptions/:id/escalate", validateQuery(anyQuerySchema), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/platform/exceptions/:id/escalate", validateQuery(anyQuerySchema), authMiddleware(), validateBody(bodyShape({
+      "reason": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -869,7 +930,9 @@ router.post("/vessels/platform/exceptions/:id/escalate", validateQuery(anyQueryS
   }
 });
 
-router.post("/vessels/platform/exceptions/:id/resolve", validateQuery(anyQuerySchema), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/platform/exceptions/:id/resolve", validateQuery(anyQuerySchema), authMiddleware(), validateBody(bodyShape({
+      "resolution": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -898,7 +961,20 @@ router.post("/vessels/platform/exceptions/:id/resolve", validateQuery(anyQuerySc
   }
 });
 
-router.post("/vessels/platform/exceptions", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/platform/exceptions", authMiddleware(), validateBody(bodyShape({
+      "costImpactUsd": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "etaImpactHours": z.unknown().optional(),
+      "exceptionType": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "severity": z.unknown().optional(),
+      "signalId": z.unknown().optional(),
+      "title": z.unknown().optional(),
+      "valueAtRiskUsd": z.unknown().optional(),
+      "vesselId": z.unknown().optional(),
+      "voyageId": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const parsed = CreateExceptionSchema.safeParse(req.body);
     if (!parsed.success) { sendBadRequest(res, "Invalid exception data", parsed.error.flatten().fieldErrors); return; }
@@ -1038,7 +1114,14 @@ router.get("/vessels/platform/readiness", authMiddleware(), tenantScope(), valid
   }
 });
 
-router.post("/vessels/platform/readiness", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/platform/readiness", authMiddleware(), validateBody(bodyShape({
+      "category": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const parsed = CreateVesselReadinessSchema.safeParse(req.body);
     if (!parsed.success) { sendBadRequest(res, "Invalid readiness data", parsed.error.flatten().fieldErrors); return; }

@@ -38,6 +38,7 @@ import {
   type EnvTier,
 } from "../services/forge";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 
 /**
@@ -70,7 +71,6 @@ function validateBody<T extends z.ZodTypeAny>(schema: T) {
 }
 
 // ─── Schemas ──────────────────────────────────────────────────────────────
-const jsonObjectBodySchema = z.record(z.unknown());
 const envEnum = z.enum(ENV_TIERS);
 const riskEnum = z.enum(["low", "standard", "regulated", "executive"]);
 
@@ -357,7 +357,10 @@ router.get("/forge/drift/summary", async (_req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to compute drift summary"); }
 });
 
-router.post("/forge/drift/evaluate", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/forge/drift/evaluate", validateBody(bodyShape({
+      "agentId": z.unknown().optional(),
+      "envId": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     if (!requireForgeOperator(req, res)) return;
     const { agentId, envId } = req.body as { agentId?: string; envId?: string };

@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import {
   db,
   otIcsAssetsTable,
@@ -15,7 +16,7 @@ import { z } from "zod";
 import { sendSuccess, sendCreated, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { logger } from "../lib/logger";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { guardSeedInProduction } from "../lib/seed-guard";
 
 const router: IRouter = Router();
@@ -50,7 +51,7 @@ router.get("/aegis/ot-ics/assets", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.post("/aegis/ot-ics/assets", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/aegis/ot-ics/assets", authMiddleware({ required: true }), validateBody(bodyShape({})), async (req, res) => {
   try {
     const data = insertOtIcsAssetSchema.parse(req.body);
     const [row] = await db.insert(otIcsAssetsTable).values(data).returning();
@@ -82,7 +83,7 @@ router.get("/aegis/ot-ics/frames", authMiddleware(), validateQuery(listQuerySche
   }
 });
 
-router.post("/aegis/ot-ics/frames", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/aegis/ot-ics/frames", authMiddleware({ required: true }), validateBody(bodyShape({})), async (req, res) => {
   try {
     const data = insertOtIcsDecodedFrameSchema.parse(req.body);
     const [row] = await db.insert(otIcsDecodedFramesTable).values(data).returning();
@@ -108,7 +109,7 @@ router.get("/aegis/ot-ics/conversations", authMiddleware(), validateQuery(listQu
   }
 });
 
-router.post("/aegis/ot-ics/conversations", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/aegis/ot-ics/conversations", authMiddleware({ required: true }), validateBody(bodyShape({})), async (req, res) => {
   try {
     const data = insertOtIcsConversationSchema.parse(req.body);
     const [row] = await db.insert(otIcsConversationsTable).values(data).returning();
@@ -135,7 +136,11 @@ router.get("/aegis/ot-ics/anomaly-scores", authMiddleware(), validateQuery(listQ
   }
 });
 
-router.post("/aegis/ot-ics/anomaly-scores", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/aegis/ot-ics/anomaly-scores", authMiddleware({ required: true }), validateBody(bodyShape({
+      "baselineSnapshot": z.unknown().optional(),
+      "reason": z.unknown().optional(),
+      "score": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const data = insertOtIcsAnomalyScoreSchema.parse(req.body);
     const [row] = await db
@@ -152,7 +157,7 @@ router.post("/aegis/ot-ics/anomaly-scores", authMiddleware({ required: true }), 
   }
 });
 
-router.post("/aegis/ot-ics/baseline/recompute", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (_req, res) => {
+router.post("/aegis/ot-ics/baseline/recompute", validateBody(bodyShape({})), authMiddleware({ required: true }), async (_req, res) => {
   try {
     const result = await recomputeOtIcsBaselines();
     sendSuccess(res, result);
@@ -359,7 +364,7 @@ export async function ensureOtIcsDemoData(): Promise<void> {
   return _seedPromise;
 }
 
-router.post("/aegis/ot-ics/demo/seed", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (_req, res) => {
+router.post("/aegis/ot-ics/demo/seed", validateBody(bodyShape({})), authMiddleware({ required: true }), async (_req, res) => {
   if (guardSeedInProduction(res)) return;
   try {
     await ensureOtIcsDemoData();

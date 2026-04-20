@@ -23,13 +23,14 @@ import { eq, and, gt } from "drizzle-orm";
 import { authMiddleware, isElevatedUser } from "../middlewares/auth";
 import { writeLimiter } from "../middlewares/rate-limiters";
 import { hashIp } from "@szl-holdings/audit";
-import { validateBody, jsonObjectBodySchema} from "../lib/validation";
+import { validateBody } from "../lib/validation";
 import { sendSuccess, sendCreated, sendBadRequest, sendForbidden, sendError, handleRouteError, sendNotFound } from "../lib/api-response";
 import { sendEmail, buildOrgInviteEmail } from "../lib/email";
 import { createOrgInvitation } from "../lib/invitation-service";
 import { logger } from "../lib/logger";
 import type { Request, Response } from "express";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router = Router();
 
 const createOrgSchema = z.object({
@@ -330,7 +331,7 @@ router.post(
   "/onboarding/wizard/:orgSlug/complete",
   writeLimiter,
   authMiddleware(),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
       const orgSlug = req.params["orgSlug"] as string;

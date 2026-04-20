@@ -12,8 +12,9 @@ import {
 import { eq, desc, ilike, or, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
 const router: IRouter = Router();
 
 router.get("/inca/health", (_req, res) => {
@@ -66,7 +67,7 @@ router.get("/inca/projects/:id", async (req, res) => {
   }
 });
 
-router.post("/inca/projects", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/inca/projects", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(incaProjectsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -75,7 +76,7 @@ router.post("/inca/projects", authMiddleware(), validateBody(jsonObjectBodySchem
   }
 });
 
-router.patch("/inca/projects/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/inca/projects/:id", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(incaProjectsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(incaProjectsTable.id, id)).returning();
@@ -86,7 +87,7 @@ router.patch("/inca/projects/:id", authMiddleware(), validateBody(jsonObjectBody
   }
 });
 
-router.delete("/inca/projects/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/inca/projects/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(incaProjectsTable).where(eq(incaProjectsTable.id, id)).returning();
@@ -128,7 +129,7 @@ router.get("/inca/experiments", authMiddleware(), validateQuery(listQuerySchema)
   }
 });
 
-router.post("/inca/experiments", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/inca/experiments", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(incaExperimentsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -137,7 +138,7 @@ router.post("/inca/experiments", authMiddleware(), validateBody(jsonObjectBodySc
   }
 });
 
-router.patch("/inca/experiments/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/inca/experiments/:id", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(incaExperimentsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(incaExperimentsTable.id, id)).returning();
@@ -148,7 +149,7 @@ router.patch("/inca/experiments/:id", authMiddleware(), validateBody(jsonObjectB
   }
 });
 
-router.delete("/inca/experiments/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/inca/experiments/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(incaExperimentsTable).where(eq(incaExperimentsTable.id, id)).returning();
@@ -170,7 +171,7 @@ router.get("/inca/models", validateQuery(listQuerySchema), async (req, res) => {
   }
 });
 
-router.post("/inca/models", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/inca/models", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(incaModelsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -179,7 +180,7 @@ router.post("/inca/models", authMiddleware(), validateBody(jsonObjectBodySchema)
   }
 });
 
-router.patch("/inca/models/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/inca/models/:id", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(incaModelsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(incaModelsTable.id, id)).returning();
@@ -190,7 +191,7 @@ router.patch("/inca/models/:id", authMiddleware(), validateBody(jsonObjectBodySc
   }
 });
 
-router.delete("/inca/models/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/inca/models/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(incaModelsTable).where(eq(incaModelsTable.id, id)).returning();
@@ -212,7 +213,7 @@ router.get("/inca/insights", validateQuery(listQuerySchema), async (req, res) =>
   }
 });
 
-router.post("/inca/insights", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/inca/insights", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db.insert(incaInsightsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -221,7 +222,7 @@ router.post("/inca/insights", authMiddleware(), validateBody(jsonObjectBodySchem
   }
 });
 
-router.delete("/inca/insights/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
+router.delete("/inca/insights/:id", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(incaInsightsTable).where(eq(incaInsightsTable.id, id)).returning();

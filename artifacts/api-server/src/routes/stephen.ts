@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import {
   db,
   stephenSiteContactsTable,
@@ -66,7 +67,7 @@ import {
   buildStephenStatusUpdateEmail,
   STEPHEN_ADMIN_EMAIL,
 } from "../lib/email";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery, stephenBookingRequestsQuerySchema } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery, stephenBookingRequestsQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -79,7 +80,12 @@ router.get("/stephen/contacts", authMiddleware(), requireRole("ops"), async (_re
   }
 });
 
-router.post("/stephen/contacts", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/stephen/contacts", authMiddleware(), validateBody(bodyShape({
+      "company": z.unknown().optional(),
+      "email": z.unknown().optional(),
+      "message": z.unknown().optional(),
+      "name": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { name, email, company, message } = req.body;
     if (!name || typeof name !== "string" || name.trim().length === 0) {
@@ -176,7 +182,16 @@ router.get("/stephen/content-blocks", validateQuery(listQuerySchema), async (req
   }
 });
 
-router.post("/stephen/content-blocks", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/stephen/content-blocks", validateBody(bodyShape({
+      "content": z.unknown().optional(),
+      "date": z.unknown().optional(),
+      "featured": z.unknown().optional(),
+      "icon": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "sortOrder": z.unknown().optional(),
+      "title": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const body = CreateStephenContentBlockBody.parse(req.body);
     const [block] = await db
@@ -198,7 +213,15 @@ router.post("/stephen/content-blocks", validateBody(jsonObjectBodySchema), async
   }
 });
 
-router.patch("/stephen/content-blocks/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/stephen/content-blocks/:id", validateBody(bodyShape({
+      "content": z.unknown().optional(),
+      "date": z.unknown().optional(),
+      "featured": z.unknown().optional(),
+      "icon": z.unknown().optional(),
+      "metadata": z.unknown().optional(),
+      "sortOrder": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { id } = UpdateStephenContentBlockParams.parse({ id: String(req.params.id) });
     const body = UpdateStephenContentBlockBody.parse(req.body);
@@ -226,7 +249,7 @@ router.patch("/stephen/content-blocks/:id", validateBody(jsonObjectBodySchema), 
   }
 });
 
-router.delete("/stephen/content-blocks/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.delete("/stephen/content-blocks/:id", validateBody(bodyShape({})), async (req, res) => {
   try {
     const { id } = DeleteStephenContentBlockParams.parse({ id: String(req.params.id) });
     const [deleted] = await db
@@ -255,7 +278,18 @@ router.get("/stephen/portfolio-case-studies", async (_req, res) => {
   }
 });
 
-router.post("/stephen/portfolio-case-studies", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/stephen/portfolio-case-studies", validateBody(bodyShape({
+      "client": z.unknown().optional(),
+      "content": z.unknown().optional(),
+      "coverImageUrl": z.unknown().optional(),
+      "duration": z.unknown().optional(),
+      "featured": z.unknown().optional(),
+      "outcome": z.unknown().optional(),
+      "slug": z.unknown().optional(),
+      "summary": z.unknown().optional(),
+      "tags": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const body = CreateStephenPortfolioCaseStudyBody.parse(req.body);
     const [study] = await db
@@ -296,7 +330,17 @@ router.get("/stephen/portfolio-case-studies/:slug", async (req, res) => {
   }
 });
 
-router.patch("/stephen/portfolio-case-studies/:slug", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/stephen/portfolio-case-studies/:slug", validateBody(bodyShape({
+      "client": z.unknown().optional(),
+      "content": z.unknown().optional(),
+      "coverImageUrl": z.unknown().optional(),
+      "duration": z.unknown().optional(),
+      "featured": z.unknown().optional(),
+      "outcome": z.unknown().optional(),
+      "summary": z.unknown().optional(),
+      "tags": z.unknown().optional(),
+      "title": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { slug } = UpdateStephenPortfolioCaseStudyParams.parse({ slug: String(String(req.params.slug)) });
     const body = UpdateStephenPortfolioCaseStudyBody.parse(req.body);
@@ -326,7 +370,7 @@ router.patch("/stephen/portfolio-case-studies/:slug", validateBody(jsonObjectBod
   }
 });
 
-router.delete("/stephen/portfolio-case-studies/:slug", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.delete("/stephen/portfolio-case-studies/:slug", validateBody(bodyShape({})), async (req, res) => {
   try {
     const { slug } = DeleteStephenPortfolioCaseStudyParams.parse({ slug: String(String(req.params.slug)) });
     const [deleted] = await db
@@ -376,7 +420,10 @@ router.patch(
   "/stephen/booking-requests/:id",
   authMiddleware(),
   requireRole("ops"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(bodyShape({
+      "note": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })),
   async (req, res) => {
     try {
       const { id } = UpdateBookingRequestParams.parse({ id: req.params.id });
@@ -425,7 +472,15 @@ router.patch(
   },
 );
 
-router.post("/stephen/booking-requests", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/stephen/booking-requests", validateBody(bodyShape({
+      "company": z.unknown().optional(),
+      "email": z.unknown().optional(),
+      "message": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "preferredDate": z.unknown().optional(),
+      "role": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const body = CreateStephenBookingRequestBody.parse(req.body);
     const [request] = await db
@@ -553,7 +608,15 @@ const CreateDesignPartnerIntakeBody = z.object({
   message: z.string().min(1).max(5000),
 });
 
-router.post("/stephen/design-partner-intake", validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/stephen/design-partner-intake", validateBody(bodyShape({
+      "company": z.unknown().optional(),
+      "email": z.unknown().optional(),
+      "message": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "product": z.unknown().optional(),
+      "role": z.unknown().optional(),
+      "useCase": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const body = CreateDesignPartnerIntakeBody.parse(req.body);
 

@@ -38,8 +38,10 @@ import {
   scimSyncLogsTable,
 } from "@szl-holdings/db";
 import { eq, and, or, ilike, desc, sql, inArray, count } from "drizzle-orm";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router = Router();
 
 // ─── SCIM Constants ──────────────────────────────────────────────────────────
@@ -467,7 +469,14 @@ router.get("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Respo
 });
 
 // POST /scim/v2/Users — create/provision user
-router.post("/scim/v2/Users", scimBearerAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/scim/v2/Users", scimBearerAuth, validateBody(bodyShape({
+      "active": z.unknown().optional(),
+      "displayName": z.unknown().optional(),
+      "emails": z.unknown().optional(),
+      "externalId": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "userName": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
     const body = req.body ?? {};
@@ -565,7 +574,14 @@ router.post("/scim/v2/Users", scimBearerAuth, validateBody(jsonObjectBodySchema)
 });
 
 // PUT /scim/v2/Users/:id — full replace
-router.put("/scim/v2/Users/:id", scimBearerAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/scim/v2/Users/:id", scimBearerAuth, validateBody(bodyShape({
+      "active": z.unknown().optional(),
+      "displayName": z.unknown().optional(),
+      "emails": z.unknown().optional(),
+      "externalId": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "userName": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
     const userId = parseInt(String(req.params.id), 10);
@@ -625,7 +641,10 @@ router.put("/scim/v2/Users/:id", scimBearerAuth, validateBody(jsonObjectBodySche
 });
 
 // PATCH /scim/v2/Users/:id — partial update
-router.patch("/scim/v2/Users/:id", scimBearerAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/scim/v2/Users/:id", scimBearerAuth, validateBody(bodyShape({
+      "Operations": z.unknown().optional(),
+      "schemas": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
     const userId = parseInt(String(req.params.id), 10);
@@ -714,7 +733,7 @@ router.patch("/scim/v2/Users/:id", scimBearerAuth, validateBody(jsonObjectBodySc
 });
 
 // DELETE /scim/v2/Users/:id — soft delete (deactivate)
-router.delete("/scim/v2/Users/:id", validateBody(jsonObjectBodySchema), scimBearerAuth, async (req: Request, res: Response) => {
+router.delete("/scim/v2/Users/:id", validateBody(bodyShape({})), scimBearerAuth, async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
     const userId = parseInt(String(req.params.id), 10);
@@ -844,7 +863,11 @@ router.get("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Resp
 });
 
 // POST /scim/v2/Groups
-router.post("/scim/v2/Groups", scimBearerAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/scim/v2/Groups", scimBearerAuth, validateBody(bodyShape({
+      "displayName": z.unknown().optional(),
+      "externalId": z.unknown().optional(),
+      "members": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
     const body = req.body ?? {};
@@ -895,7 +918,11 @@ router.post("/scim/v2/Groups", scimBearerAuth, validateBody(jsonObjectBodySchema
 });
 
 // PUT /scim/v2/Groups/:id
-router.put("/scim/v2/Groups/:id", scimBearerAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/scim/v2/Groups/:id", scimBearerAuth, validateBody(bodyShape({
+      "displayName": z.unknown().optional(),
+      "externalId": z.unknown().optional(),
+      "members": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
     const groupId = parseInt(String(req.params.id), 10);
@@ -961,7 +988,10 @@ router.put("/scim/v2/Groups/:id", scimBearerAuth, validateBody(jsonObjectBodySch
 });
 
 // PATCH /scim/v2/Groups/:id
-router.patch("/scim/v2/Groups/:id", scimBearerAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/scim/v2/Groups/:id", scimBearerAuth, validateBody(bodyShape({
+      "Operations": z.unknown().optional(),
+      "schemas": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
     const groupId = parseInt(String(req.params.id), 10);
@@ -1065,7 +1095,7 @@ router.patch("/scim/v2/Groups/:id", scimBearerAuth, validateBody(jsonObjectBodyS
 });
 
 // DELETE /scim/v2/Groups/:id
-router.delete("/scim/v2/Groups/:id", validateBody(jsonObjectBodySchema), scimBearerAuth, async (req: Request, res: Response) => {
+router.delete("/scim/v2/Groups/:id", validateBody(bodyShape({})), scimBearerAuth, async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
     const groupId = parseInt(String(req.params.id), 10);

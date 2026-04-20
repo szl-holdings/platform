@@ -13,8 +13,10 @@ import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteErro
 import { logger } from "../lib/logger";
 import { authMiddleware } from "../middlewares/auth";
 import { ingestAegisIncident } from "@szl-holdings/ai-engine/domain-embedding-hooks";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 const router: IRouter = Router();
 const auth = authMiddleware({ required: false });
 
@@ -181,7 +183,16 @@ router.get("/msp/tickets/:id", auth, async (req, res) => {
   }
 });
 
-router.post("/msp/tickets", auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/msp/tickets", auth, validateBody(bodyShape({
+      "assigneeId": z.unknown().optional(),
+      "assigneeName": z.unknown().optional(),
+      "category": z.unknown().optional(),
+      "clientId": z.unknown().optional(),
+      "clientName": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "subject": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const { subject, description, clientId, clientName, priority, category, assigneeId, assigneeName } = req.body;
     if (!subject) return sendBadRequest(res, "subject is required");
@@ -222,7 +233,14 @@ router.post("/msp/tickets", auth, validateBody(jsonObjectBodySchema), async (req
   }
 });
 
-router.patch("/msp/tickets/:id", auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/msp/tickets/:id", auth, validateBody(bodyShape({
+      "aiTriage": z.unknown().optional(),
+      "assigneeId": z.unknown().optional(),
+      "assigneeName": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "slaStatus": z.unknown().optional(),
+      "status": z.unknown().optional(),
+    })), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ticket ID");

@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { eq, and } from "drizzle-orm";
 import { services } from "@szl-holdings/services";
@@ -14,7 +16,7 @@ import {
 import { isFlagEnabled } from "../lib/platform-flags";
 import { logger } from "../lib/logger";
 import { deliverWebhookEvent } from "./webhooks";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -145,7 +147,7 @@ router.get("/integrations/salesforce/query", authMiddleware(), requireRole("ops"
   }
 });
 
-router.post("/integrations/salesforce/sync", validateBody(jsonObjectBodySchema), async (req, res, next) => {
+router.post("/integrations/salesforce/sync", validateBody(bodyShape({})), async (req, res, next) => {
   const secretValid = await validateSalesforceWebhookSecret(req);
   if (secretValid) { next(); return; }
   authMiddleware()(req, res, () => requireRole("ops", "super_admin", "admin")(req, res, next));
@@ -189,7 +191,13 @@ router.post("/integrations/salesforce/sync", validateBody(jsonObjectBodySchema),
   }
 });
 
-router.post("/integrations/salesforce/push/task", authMiddleware(), requireRole("ops", "super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/integrations/salesforce/push/task", authMiddleware(), requireRole("ops", "super_admin", "admin"), validateBody(bodyShape({
+      "description": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "status": z.unknown().optional(),
+      "subject": z.unknown().optional(),
+      "whatId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const enabled = await isFlagEnabled("salesforce_sync_enabled");
     if (!enabled) {
@@ -216,7 +224,13 @@ router.post("/integrations/salesforce/push/task", authMiddleware(), requireRole(
   }
 });
 
-router.post("/integrations/salesforce/push/case", authMiddleware(), requireRole("ops", "super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/integrations/salesforce/push/case", authMiddleware(), requireRole("ops", "super_admin", "admin"), validateBody(bodyShape({
+      "accountId": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "origin": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "subject": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const enabled = await isFlagEnabled("salesforce_sync_enabled");
     if (!enabled) {
@@ -243,7 +257,16 @@ router.post("/integrations/salesforce/push/case", authMiddleware(), requireRole(
   }
 });
 
-router.post("/integrations/salesforce/webhook", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/integrations/salesforce/webhook", validateBody(bodyShape({
+      "description": z.unknown().optional(),
+      "eventType": z.unknown().optional(),
+      "id": z.unknown().optional(),
+      "object": z.unknown().optional(),
+      "recordId": z.unknown().optional(),
+      "sObject": z.unknown().optional(),
+      "title": z.unknown().optional(),
+      "type": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const body = req.body as Record<string, unknown>;
     logger.info({ body }, "integrations: Salesforce outbound message received");
@@ -361,7 +384,7 @@ router.get("/integrations/jira/query", authMiddleware(), requireRole("ops", "ana
   }
 });
 
-router.post("/integrations/jira/sync", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "super_admin", "admin"), async (_req, res) => {
+router.post("/integrations/jira/sync", validateBody(bodyShape({})), authMiddleware(), requireRole("ops", "super_admin", "admin"), async (_req, res) => {
   try {
     const enabled = await isFlagEnabled("jira_sync_enabled");
     if (!enabled) {
@@ -402,7 +425,15 @@ router.post("/integrations/jira/sync", validateBody(jsonObjectBodySchema), authM
   }
 });
 
-router.post("/integrations/jira/push/issue", authMiddleware(), requireRole("ops", "super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/integrations/jira/push/issue", authMiddleware(), requireRole("ops", "super_admin", "admin"), validateBody(bodyShape({
+      "description": z.unknown().optional(),
+      "issueType": z.unknown().optional(),
+      "labels": z.unknown().optional(),
+      "priority": z.unknown().optional(),
+      "projectKey": z.unknown().optional(),
+      "source": z.unknown().optional(),
+      "summary": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const enabled = await isFlagEnabled("jira_sync_enabled");
     if (!enabled) {
@@ -433,7 +464,11 @@ router.post("/integrations/jira/push/issue", authMiddleware(), requireRole("ops"
   }
 });
 
-router.post("/integrations/jira/webhook", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/integrations/jira/webhook", validateBody(bodyShape({
+      "changelog": z.unknown().optional(),
+      "issue": z.unknown().optional(),
+      "webhookEvent": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const body = req.body as Record<string, unknown>;
     logger.info({ webhookEvent: body["webhookEvent"], issueKey: (body["issue"] as Record<string, unknown>)?.["key"] }, "integrations: Jira webhook received");
@@ -527,7 +562,7 @@ router.get("/integrations/health", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.post("/integrations/salesforce/ingest-signals", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "super_admin", "admin"), async (_req, res) => {
+router.post("/integrations/salesforce/ingest-signals", validateBody(bodyShape({})), authMiddleware(), requireRole("ops", "super_admin", "admin"), async (_req, res) => {
   try {
     const enabled = await isFlagEnabled("salesforce_sync_enabled");
     if (!enabled) {
@@ -554,7 +589,7 @@ router.post("/integrations/salesforce/ingest-signals", validateBody(jsonObjectBo
   }
 });
 
-router.post("/integrations/jira/ingest-signals", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "super_admin", "admin"), async (_req, res) => {
+router.post("/integrations/jira/ingest-signals", validateBody(bodyShape({})), authMiddleware(), requireRole("ops", "super_admin", "admin"), async (_req, res) => {
   try {
     const enabled = await isFlagEnabled("jira_sync_enabled");
     if (!enabled) {
@@ -856,7 +891,17 @@ router.get("/integrations/atlassian/descriptor", (_req: Request, res: Response) 
   res.redirect(`${baseUrl}/atlassian-connect.json`);
 });
 
-router.put("/integrations/atlassian/tenant", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/integrations/atlassian/tenant", authMiddleware(), validateBody(bodyShape({
+      "baseUrl": z.unknown().optional(),
+      "clientKey": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "key": z.unknown().optional(),
+      "pluginsVersion": z.unknown().optional(),
+      "productType": z.unknown().optional(),
+      "serverVersion": z.unknown().optional(),
+      "serviceEntitlementNumber": z.unknown().optional(),
+      "sharedSecret": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
   try {
     const tenant = req.body as {
       clientKey?: string;
@@ -933,7 +978,7 @@ router.get("/integrations/atlassian/tenant/:clientKey", authMiddleware(), async 
   }
 });
 
-router.delete("/integrations/atlassian/tenant/:clientKey", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/integrations/atlassian/tenant/:clientKey", validateBody(bodyShape({})), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const { clientKey } = req.params;
     await db

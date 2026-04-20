@@ -1,9 +1,10 @@
 import { Router, type IRouter } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
 import { db, commentsTable } from "@szl-holdings/db";
 import { eq, and, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
-import { jsonObjectBodySchema, validateBody, validateParams, validateQuery } from "../lib/validation";
+import { validateBody, validateParams, validateQuery } from "../lib/validation";
 import { z } from "zod";
 
 const router: IRouter = Router();
@@ -155,7 +156,7 @@ router.patch("/comments/:id", authMiddleware({ required: false }), validateParam
   }
 });
 
-router.delete("/comments/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: false }), validateParams(commentIdParamsSchema), async (req, res) => {
+router.delete("/comments/:id", validateBody(bodyShape({})), authMiddleware({ required: false }), validateParams(commentIdParamsSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(commentsTable).where(eq(commentsTable.id, id));

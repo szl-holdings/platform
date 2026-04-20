@@ -1,4 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import {
   db,
   meteringEventsTable,
@@ -25,7 +27,7 @@ import { authMiddleware, requireRole, parseIdParam } from "../../middlewares/aut
 import { tenantScope, assertTenantAccess } from "../../middlewares/tenant-scope";
 import { logger } from "../../lib/logger";
 import { periodBounds, meteringRateLimit, checkAndEnforceQuota } from "./shared";
-import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../../lib/validation";
 
 const router: IRouter = Router();
 const ADMIN_ROLES = ["admin", "super_admin", "ops"] as const;
@@ -224,7 +226,21 @@ router.post(
   "/metering/rate-cards",
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "billingInterval": z.unknown().optional(),
+      "currency": z.unknown().optional(),
+      "description": z.unknown().optional(),
+      "featureKey": z.unknown().optional(),
+      "flatAmount": z.unknown().optional(),
+      "freeUnits": z.unknown().optional(),
+      "name": z.unknown().optional(),
+      "pricingModel": z.unknown().optional(),
+      "product": z.unknown().optional(),
+      "slug": z.unknown().optional(),
+      "tiers": z.unknown().optional(),
+      "unitAmount": z.unknown().optional(),
+      "unitLabel": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const { tiers, ...body } = req.body as {
         name: string;
@@ -282,7 +298,9 @@ router.put(
   "/metering/rate-cards/:id",
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "tiers": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const id = parseIdParam(req.params.id);
       const { tiers, ...updates } = req.body as Record<string, unknown> & {
@@ -316,7 +334,13 @@ router.post(
   "/metering/rate-cards/:id/assign",
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  validateBody(bodyShape({
+      "assignedBy": z.unknown().optional(),
+      "expiresAt": z.unknown().optional(),
+      "featureKey": z.unknown().optional(),
+      "notes": z.unknown().optional(),
+      "orgId": z.unknown().optional(),
+    })), async (req: Request, res: Response) => {
     try {
       const rateCardId = parseIdParam(req.params.id);
       const { orgId, featureKey, expiresAt, notes, assignedBy } = req.body as {

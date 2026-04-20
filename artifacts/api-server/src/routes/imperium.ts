@@ -1,6 +1,8 @@
 import { Router } from "express";
+import { bodyShape } from "@szl-holdings/contracts/common";
+import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { validateBody } from "../lib/validation";
 
 const router = Router();
 
@@ -235,7 +237,11 @@ router.get("/imperium/centurion/profiles", (_req, res) => {
   });
 });
 
-router.post("/imperium/centurion/query", validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/imperium/centurion/query", validateBody(bodyShape({
+      "centurionId": z.unknown().optional(),
+      "clearance": z.unknown().optional(),
+      "query": z.unknown().optional(),
+    })), (req, res) => {
   const { query, centurionId, clearance } = req.body as {
     query?: string;
     centurionId?: string;

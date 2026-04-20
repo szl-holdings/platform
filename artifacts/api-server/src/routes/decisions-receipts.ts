@@ -31,7 +31,7 @@ import {
   sendForbidden,
   handleRouteError,
 } from "../lib/api-response";
-import { validateBody, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema } from "../lib/validation";
 import { logActivity } from "@szl-holdings/audit";
 import { logger } from "../lib/logger";
 
