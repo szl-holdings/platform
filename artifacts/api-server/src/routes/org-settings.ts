@@ -772,7 +772,10 @@ router.post("/user/deactivate", writeLimiter, authMiddleware(), validateBody(bod
 
     logger.info({ userId }, "[user-lifecycle] Account deactivated");
 
-    res.clearCookie("sid");
+    // Clear both the new __Host-sid cookie and the legacy sid cookie
+    // during the FINDING-005 rollout window.
+    res.clearCookie("__Host-sid", { path: "/" });
+    res.clearCookie("sid", { path: "/" });
     sendSuccess(res, { message: "Account deactivated. You have been logged out." });
   } catch (err) {
     handleRouteError(res, err, "Failed to deactivate account");

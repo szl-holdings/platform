@@ -30,7 +30,10 @@ vi.mock("@szl-holdings/audit", () => ({
 }));
 
 vi.mock("../lib/auth", () => ({
-  SESSION_COOKIE: "sid",
+  SESSION_COOKIE: "__Host-sid",
+  LEGACY_SESSION_COOKIE: "sid",
+  readSessionCookie: (req: { cookies?: Record<string, string> }) =>
+    req.cookies?.["__Host-sid"] ?? req.cookies?.["sid"],
   SESSION_TTL: 7 * 24 * 60 * 60 * 1000,
   setSessionCookie: vi.fn(),
 }));

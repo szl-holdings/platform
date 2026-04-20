@@ -7,6 +7,7 @@ import { ROLE_HIERARCHY, isReadOnlyRole, toCanonicalRole } from "@szl-holdings/d
 import { serverTelemetry } from "@szl-holdings/observability";
 import { logger } from "../lib/logger";
 import { getSessionMinCreatedAt } from "./session-policy";
+import { readSessionCookie } from "../lib/auth";
 import {
   verifyInternalHeader,
   type InternalAgentContext,
@@ -223,13 +224,14 @@ export function authMiddleware(options: { required?: boolean } = {}) {
         | "session_pre_secret_rotation"
         | null = null;
 
-      const SESSION_COOKIE = "sid";
       let token: string | undefined;
       const authHeader = req.headers.authorization;
       if (authHeader?.startsWith("Bearer ")) {
         token = authHeader.slice(7);
-      } else if (req.cookies?.[SESSION_COOKIE]) {
-        token = req.cookies[SESSION_COOKIE] as string;
+      } else {
+        // Reads `__Host-sid` first, falling back to the legacy `sid` cookie
+        // for the rollout window (FINDING-005).
+        token = readSessionCookie(req);
       }
       if (token) {
         const resolved = await resolveUserFromToken(token);

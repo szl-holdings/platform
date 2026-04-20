@@ -35,7 +35,9 @@ vi.mock("@szl-holdings/api-zod", () => ({
 vi.mock("../../lib/auth", () => ({
   getSessionToken: () => undefined,
   getSessionUser: vi.fn().mockResolvedValue(null),
-  SESSION_COOKIE: "sid",
+  SESSION_COOKIE: "__Host-sid",
+  LEGACY_SESSION_COOKIE: "sid",
+  readSessionCookie: () => undefined,
 }));
 
 vi.mock("../../lib/logger", () => ({

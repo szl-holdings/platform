@@ -7,8 +7,32 @@ import type { RoleName } from "@szl-holdings/db";
 import { hashIp } from "@szl-holdings/audit";
 
 export const ISSUER_URL = process.env.ISSUER_URL ?? "https://replit.com/oidc";
-export const SESSION_COOKIE = "sid";
+/**
+ * Session cookie name. Uses the `__Host-` prefix (FINDING-005, NCC Group
+ * 2026-04 pen test): browsers refuse to set/send `__Host-` cookies unless
+ * Secure, Path=/, and no Domain attribute are present, which prevents
+ * subdomain cookie injection attacks.
+ *
+ * `LEGACY_SESSION_COOKIE` is the pre-migration name. During the rollout
+ * window, request handlers fall back to reading the legacy cookie so users
+ * with active sessions are not invalidated by the rename. New responses
+ * always set the new name and clear the legacy one.
+ */
+export const SESSION_COOKIE = "__Host-sid";
+export const LEGACY_SESSION_COOKIE = "sid";
 export const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Read the session token from either the new `__Host-sid` cookie or the
+ * legacy `sid` cookie. Prefers the new one when both are present.
+ */
+export function readSessionCookie(req: Request): string | undefined {
+  const fresh = req.cookies?.[SESSION_COOKIE];
+  if (fresh) return fresh as string;
+  const legacy = req.cookies?.[LEGACY_SESSION_COOKIE];
+  if (legacy) return legacy as string;
+  return undefined;
+}
 
 let oidcConfig: client.Configuration | null = null;
 let azureAdConfig: client.Configuration | null = null;
@@ -323,7 +347,7 @@ export async function deleteOidcSession(token: string): Promise<void> {
 }
 
 export function getSessionToken(req: Request): string | undefined {
-  const cookieToken = req.cookies?.[SESSION_COOKIE];
+  const cookieToken = readSessionCookie(req);
   if (cookieToken) return cookieToken;
   const authHeader = req.headers.authorization;
   if (authHeader?.startsWith("Bearer ")) return authHeader.slice(7);
@@ -331,6 +355,10 @@ export function getSessionToken(req: Request): string | undefined {
 }
 
 export function setSessionCookie(res: Response, token: string): void {
+  // The `__Host-` prefix mandates: Secure=true, Path="/", and NO Domain
+  // attribute. The browser will silently reject the cookie if any of
+  // those are violated, so do not change these without re-reading the
+  // RFC 6265bis §4.1.3.2 rules.
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: true,
@@ -338,10 +366,15 @@ export function setSessionCookie(res: Response, token: string): void {
     path: "/",
     maxAge: SESSION_TTL,
   });
+  // Clear any pre-rename cookie so two parallel session cookies don't
+  // linger in the browser. Safe to call unconditionally — clearCookie on
+  // a missing cookie is a no-op in browsers.
+  res.clearCookie(LEGACY_SESSION_COOKIE, { path: "/" });
 }
 
 export function clearSessionCookie(res: Response): void {
   res.clearCookie(SESSION_COOKIE, { path: "/" });
+  res.clearCookie(LEGACY_SESSION_COOKIE, { path: "/" });
 }
 
 export function setOidcCookie(res: Response, name: string, value: string): void {

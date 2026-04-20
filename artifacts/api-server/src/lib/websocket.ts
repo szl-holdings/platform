@@ -4,7 +4,7 @@ import { createHmac, timingSafeEqual, randomBytes } from "crypto";
 import { LRUCache } from "lru-cache";
 import { logger } from "./logger";
 import { db, sessionsTable, usersTable, changeEventsTable } from "@szl-holdings/db";
-import { eq, gt, and } from "drizzle-orm";
+import { eq, gt, and, isNull } from "drizzle-orm";
 import { getOrCreateDoc, pruneRegistry } from "@szl-holdings/crdt-sync";
 
 export interface ChannelMessage {
@@ -28,6 +28,16 @@ interface SubscribedClient {
   rateLimitBucket: { count: number; windowStart: number };
   isSlowConsumer: boolean;
   crdtRooms: Set<string>;
+  // FINDING-010 (NCC Group 2026-04 pen test): re-validate the underlying
+  // session every WS_SESSION_REVALIDATE_INTERVAL_MS. We track the
+  // numeric userId and the user's session_version snapshot at connect
+  // time so the periodic check can detect logout, role changes, and
+  // session revocation. `isInternalAgent` connections (legacy internal
+  // token, userId="0") are exempt — they are not session-backed.
+  numericUserId: number | null;
+  sessionVersionAtConnect: number | null;
+  isInternalAgent: boolean;
+  authenticatedAt: number;
 }
 
 const CRDT_SYNC_CHANNEL = "crdt-sync";
@@ -214,19 +224,60 @@ interface ResolvedAuth {
   platformRole: string | null;
   userId: string | null;
   tenantId: string | null;
+  // Internal-token bypass: not session-backed, exempted from the
+  // periodic session re-validation in FINDING-010.
+  isInternalAgent: boolean;
+  // Snapshot of users.session_version at auth time. Compared on the
+  // periodic re-check to detect role changes / forced logouts.
+  sessionVersion: number | null;
 }
 
 async function resolveToken(token: string): Promise<ResolvedAuth> {
   if (INTERNAL_TOKEN && token === INTERNAL_TOKEN) {
-    return { authorized: true, platformRole: "founder_admin", userId: "0", tenantId: null };
+    return {
+      authorized: true,
+      platformRole: "founder_admin",
+      userId: "0",
+      tenantId: null,
+      isInternalAgent: true,
+      sessionVersion: null,
+    };
   }
   const claims = verifyWsTicket(token);
   if (claims) {
-    return { authorized: true, platformRole: claims.platformRole, userId: claims.userId, tenantId: claims.tenantId };
+    // Ticket auth: snapshot the user's current session_version so the
+    // periodic re-check can detect a force-logout (session_version bump)
+    // even though we don't have a specific session token in the ticket.
+    let sessionVersion: number | null = null;
+    try {
+      const userIdNum = Number.parseInt(claims.userId, 10);
+      if (Number.isFinite(userIdNum) && userIdNum > 0) {
+        const [u] = await db
+          .select({ sessionVersion: usersTable.sessionVersion })
+          .from(usersTable)
+          .where(eq(usersTable.id, userIdNum))
+          .limit(1);
+        if (u) sessionVersion = u.sessionVersion ?? null;
+      }
+    } catch {
+      /* ignore db errors — re-check loop will fail-closed if user vanishes */
+    }
+    return {
+      authorized: true,
+      platformRole: claims.platformRole,
+      userId: claims.userId,
+      tenantId: claims.tenantId,
+      isInternalAgent: false,
+      sessionVersion,
+    };
   }
   try {
     const [row] = await db
-      .select({ userId: sessionsTable.userId, platformRole: usersTable.platformRole })
+      .select({
+        userId: sessionsTable.userId,
+        platformRole: usersTable.platformRole,
+        sessionVersion: usersTable.sessionVersion,
+      })
       .from(sessionsTable)
       .innerJoin(usersTable, eq(usersTable.id, sessionsTable.userId))
       .where(
@@ -236,11 +287,27 @@ async function resolveToken(token: string): Promise<ResolvedAuth> {
         )
       )
       .limit(1);
-    if (row) return { authorized: true, platformRole: row.platformRole ?? null, userId: String(row.userId), tenantId: null };
+    if (row) {
+      return {
+        authorized: true,
+        platformRole: row.platformRole ?? null,
+        userId: String(row.userId),
+        tenantId: null,
+        isInternalAgent: false,
+        sessionVersion: row.sessionVersion ?? null,
+      };
+    }
   } catch {
     /* ignore db errors */
   }
-  return { authorized: false, platformRole: null, userId: null, tenantId: null };
+  return {
+    authorized: false,
+    platformRole: null,
+    userId: null,
+    tenantId: null,
+    isInternalAgent: false,
+    sessionVersion: null,
+  };
 }
 
 function isRoleAllowedForChannel(platformRole: string | null, channel: string): boolean {
@@ -336,6 +403,10 @@ export function initWebSocket(server: Server): void {
       rateLimitBucket: { count: 0, windowStart: Date.now() },
       isSlowConsumer: false,
       crdtRooms: new Set(),
+      numericUserId: null,
+      sessionVersionAtConnect: null,
+      isInternalAgent: false,
+      authenticatedAt: 0,
     };
     clients.set(clientId, client);
 
@@ -377,6 +448,12 @@ export function initWebSocket(server: Server): void {
             client.platformRole = auth.platformRole;
             client.userId = auth.userId;
             client.tenantId = auth.tenantId;
+            client.isInternalAgent = auth.isInternalAgent;
+            client.sessionVersionAtConnect = auth.sessionVersion;
+            client.authenticatedAt = Date.now();
+            const parsedUid = Number.parseInt(auth.userId ?? "", 10);
+            client.numericUserId =
+              Number.isFinite(parsedUid) && parsedUid > 0 ? parsedUid : null;
           }
 
           client.channels.add(msg.channel);
@@ -517,6 +594,11 @@ export function initWebSocket(server: Server): void {
   const HEARTBEAT_INTERVAL_MS = 30_000;
   const STALE_CLIENT_TIMEOUT_MS = 90_000;
   const DRAIN_INTERVAL_MS = 5_000;
+  // FINDING-010: re-validate session-backed WS clients every 15 minutes.
+  // Closes the socket if the user has been deactivated, the
+  // session_version has been bumped (logout / role change), or no
+  // unrevoked, unexpired session remains for the user.
+  const SESSION_REVALIDATE_INTERVAL_MS = 15 * 60 * 1000;
 
   const heartbeatInterval = setInterval(() => {
     const now = Date.now();
@@ -542,10 +624,118 @@ export function initWebSocket(server: Server): void {
     }
   }, DRAIN_INTERVAL_MS);
 
+  const sessionRevalidateInterval = setInterval(() => {
+    void revalidateAuthenticatedClients();
+  }, SESSION_REVALIDATE_INTERVAL_MS);
+
   heartbeatInterval.unref();
   drainInterval.unref();
+  sessionRevalidateInterval.unref();
 
   logger.info("WebSocket server initialized at /ws");
+}
+
+/**
+ * FINDING-010 (NCC Group 2026-04 pen test): re-validate the underlying
+ * session for every authenticated WebSocket client. Closes the socket
+ * with code 4001 ("session revoked") if:
+ *   - the user record is missing or marked inactive,
+ *   - the user's session_version no longer matches the connect-time
+ *     snapshot (force-logout / role change / refresh-token replay), or
+ *   - no unrevoked, unexpired session row remains for the user.
+ *
+ * Internal-token connections are exempt — they are not session-backed.
+ * Exported for unit testing.
+ */
+export async function revalidateAuthenticatedClients(): Promise<void> {
+  const toCheck: Array<{ clientId: string; client: SubscribedClient }> = [];
+  for (const [clientId, client] of clients) {
+    if (client.isInternalAgent) continue;
+    if (client.numericUserId == null) continue;
+    if (client.ws.readyState !== WebSocket.OPEN) continue;
+    toCheck.push({ clientId, client });
+  }
+  if (toCheck.length === 0) return;
+
+  for (const { clientId, client } of toCheck) {
+    try {
+      const userId = client.numericUserId!;
+      const [user] = await db
+        .select({
+          isActive: usersTable.isActive,
+          sessionVersion: usersTable.sessionVersion,
+        })
+        .from(usersTable)
+        .where(eq(usersTable.id, userId))
+        .limit(1);
+
+      let revoked = false;
+      let reason = "";
+
+      if (!user) {
+        revoked = true;
+        reason = "user_missing";
+      } else if (!user.isActive) {
+        revoked = true;
+        reason = "user_inactive";
+      } else if (
+        client.sessionVersionAtConnect != null &&
+        user.sessionVersion != null &&
+        user.sessionVersion !== client.sessionVersionAtConnect
+      ) {
+        revoked = true;
+        reason = "session_version_mismatch";
+      } else {
+        const [activeSession] = await db
+          .select({ id: sessionsTable.id })
+          .from(sessionsTable)
+          .where(
+            and(
+              eq(sessionsTable.userId, userId),
+              gt(sessionsTable.expiresAt, new Date()),
+              isNull(sessionsTable.revokedAt),
+            ),
+          )
+          .limit(1);
+        if (!activeSession) {
+          revoked = true;
+          reason = "no_active_session";
+        }
+      }
+
+      if (revoked) {
+        logger.info(
+          { clientId, userId, reason },
+          "[ws] Closing WebSocket — underlying session revoked",
+        );
+        try {
+          client.ws.send(
+            JSON.stringify({
+              type: "error",
+              code: "session_revoked",
+              message: "Session revoked — please re-authenticate",
+              reason,
+            }),
+          );
+        } catch {
+          /* ignore — closing anyway */
+        }
+        try {
+          client.ws.close(4001, "session_revoked");
+        } catch {
+          /* ignore */
+        }
+        clients.delete(clientId);
+        removePresence(clientId);
+        removeCrdtRooms(clientId);
+      }
+    } catch (err) {
+      logger.warn(
+        { err, clientId },
+        "[ws] Session re-validation failed — leaving client connected (fail-open on db error)",
+      );
+    }
+  }
 }
 
 function removePresenceForChannel(clientId: string, channel: string): void {
