@@ -1,6 +1,6 @@
 # Test Strategy — SZL Holdings Platform
 
-**Last updated:** 2026-04-18  
+**Last updated:** 2026-04-20  
 **Owner:** Engineering / QA Lead  
 **Audience:** VP Engineering, Engineering Leads, QA
 
@@ -77,14 +77,24 @@ Testing at SZL Holdings follows three principles:
 - `tests/e2e/aegis.spec.ts` — Aegis security dashboard
 - `tests/e2e/carlota-jo.spec.ts` — Carlota Jo app
 - `tests/e2e/command.spec.ts` — Command portal
+- `tests/e2e/counsel.spec.ts` — Counsel legal matter command *(added Phase 3)*
 - `tests/e2e/forge.spec.ts` — Forge runtime / Nuro Forge
 - `tests/e2e/imperium.spec.ts` — Imperium
 - `tests/e2e/lyte.spec.ts` — Lyte
 - `tests/e2e/prism-counsel.spec.ts` — PRISM Counsel
+- `tests/e2e/pulse.spec.ts` — Pulse AI executive briefing *(added Phase 3)*
+- `tests/e2e/sentra.spec.ts` — Sentra cyber resilience command *(added Phase 3)*
 - `tests/e2e/stephen-site.spec.ts` — Stephen site
 - `tests/e2e/terra.spec.ts` — Terra
 - `tests/e2e/vessels.spec.ts` — Vessels
 - `tests/e2e/a11y.spec.ts` — Accessibility baseline
+
+**Auth Fixture:**  
+`tests/e2e/fixtures/auth-session.ts` exports an extended `test` object with two preconfigured fixtures:  
+- `authenticatedPage` — page with a mocked viewer session (no real OIDC required)  
+- `adminPage` — page with a mocked admin session
+
+Import this fixture in specs that need an authenticated context instead of re-implementing the mock routing logic.
 
 **Targets:**
 - All artifact homepages load without errors: **100%**
@@ -290,6 +300,85 @@ The `.github/workflows/ci.yml` `ci-gate` job requires:
 - `typecheck` — TypeScript compilation
 
 Any failure in `proof-chain-checks` blocks merge.
+
+---
+
+---
+
+## 10. Phase 3 Modernization — Testing Stack (Added 2026-04-20)
+
+This section documents changes made as part of Phase 3 CI modernization (task #2383).
+
+### 10.1 Per-Package Vitest Configuration
+
+**Previous state:** Three root-level Vitest configs (`vitest.config.ts`, `vitest.components.config.ts`, `vitest.integration.config.ts`) contained all test includes for every package in the monorepo.
+
+**Phase 3 changes:** Packages with their own focused test suites now have per-package `vitest.config.ts` files and `test` scripts. Turbo runs them as isolated tasks with per-package caching.
+
+| Package | Config | Runner | Included in root? |
+|---------|--------|--------|--------------------|
+| `packages/guardian` | `packages/guardian/vitest.config.ts` | `pnpm --filter @workspace/guardian test` | No |
+| `packages/eval-os` | `packages/eval-os/vitest.config.ts` | `pnpm --filter @workspace/eval-os test` | No |
+| `packages/eval-forge` | `packages/eval-forge/vitest.config.ts` | `pnpm --filter @workspace/eval-forge test` | No |
+| `packages/ontology` | `packages/ontology/vitest.config.ts` | `pnpm --filter @workspace/ontology test` | No |
+| `lib/api-client-react` | `lib/api-client-react/vitest.config.ts` | `pnpm --filter @workspace/api-client-react test` | No |
+| `lib/monte-carlo` | `lib/monte-carlo/vitest.config.ts` | `pnpm --filter @workspace/monte-carlo test` | No |
+| `lib/covenant-policy` | `lib/covenant-policy/vitest.config.ts` | Per-package | No |
+| `lib/prism-bus` | `lib/prism-bus/vitest.config.ts` | Per-package | No |
+| `lib/domain-claims` | `lib/domain-claims/vitest.config.ts` | Per-package | No |
+
+The root `vitest.config.ts` remains for packages without their own config (trace-graph, memory-fabric, tool-mesh, alloy, etc.) and for the cross-cutting `tests/unit/` and `tests/api/` directories.
+
+### 10.2 Async Leak Detection
+
+Vitest does not implement Jest's `--detectOpenHandles` directly. Instead, async leak isolation is achieved through three mechanisms:
+
+1. **`pool: "forks"` + `isolate: true`** — all three root Vitest configs now use forks-based process isolation. Each test file runs in a separate worker process; any unclosed handles (timers, sockets, streams) will be terminated when the worker exits, surfacing as an early exit or a timeout rather than silently hanging the full suite.
+
+2. **Explicit `hookTimeout` and `teardownTimeout`** — `afterAll`/`afterEach` hooks now have bounded teardown windows (10 s for unit/components, 15 s for integration). Tests that forget to close a DB connection or a mock server will surface a timeout instead of blocking indefinitely.
+
+3. **Per-package configs inherit isolation settings** — every new per-package `vitest.config.ts` uses `pool: "forks"` + `isolate: true` so the same guarantee applies when running individual packages via turbo.
+
+### 10.3 Playwright Improvements
+
+**Auth fixture strategy** (`tests/e2e/fixtures/auth-session.ts`):  
+Provides `authenticatedPage` and `adminPage` Playwright fixtures. These mock `/api/auth/user` and `/api/auth/my-roles` at the network layer using `page.route()`.
+
+**Why network-route mocking instead of Playwright storage-state files:**  
+Playwright's `storageState` strategy requires completing a real authentication flow to obtain a session cookie, then serialising that cookie to a JSON file (`auth.json`). The SZL Holdings platform uses Replit OIDC — there is no credential pair that a headless browser can use to log in automatically in CI without a live Replit account. Saving a real session token to a file would also create a secret management problem.
+
+The network-route approach achieves the same goal — tests do not repeat login flows per-test, the mock is set up once per fixture invocation, and every spec file that needs an authenticated context imports the shared fixture. This is the same strategy already used by `auth.spec.ts` (the canonical auth spec) and is the correct pattern for SSO-only platforms.
+
+**If a real session flow becomes automatable** (e.g., a test-only local-auth bypass is added to the API server behind a `TEST_AUTH_BYPASS_KEY` env var), the fixture can be upgraded to use Playwright `globalSetup` + `storageState` without changing any spec file imports.
+
+**Smoke spec coverage** — Phase 3 adds three previously missing artifact smoke specs:
+- `tests/e2e/sentra.spec.ts` — Sentra cyber resilience command
+- `tests/e2e/counsel.spec.ts` — Counsel legal matter command
+- `tests/e2e/pulse.spec.ts` — Pulse AI executive briefing
+
+All 11 primary artifact domains now have at least one smoke spec that loads the artifact, asserts a stable element, and includes a failure-path test (unknown route returns non-5xx).
+
+**Turbo wiring** — `test:e2e` is now registered in `turbo.json` with `cache: false` (Playwright runs must not be cached) and correct input/output globs so CI tooling can reference it as a named task.
+
+### 10.4 Python Sidecar — Deferral Decision
+
+**Decision: Python sidecar (`services/ai-python`) is NOT created at this time.**
+
+**Rationale:**
+
+After auditing `services/`, `scripts/`, and the eval packages (`packages/evals-core`, `packages/eval-forge`, `packages/eval-os`):
+
+- All evaluation/ML logic is TypeScript: `eval-forge` provides a complete 10-eval-type, 9-metric-category evaluation framework; `eval-os` provides dataset management, scorers, and CLI tooling. Both are actively maintained TypeScript packages.
+- `packages/evals-core` is explicitly deprecated in favour of `eval-forge` (see its `index.ts` header) and does not contain test files.
+- `scripts/qa/` contains Node.js utility scripts, not Python ML code.
+- The root `pyproject.toml` has only `pillow`, `python-docx`, `requests`, and `requests-oauthlib` — all used for OG card generation and document export utilities, not for ML research or evaluation.
+- No genuine ML-specific research or evaluation code exists that benefits from Python's ecosystem (NumPy, PyTorch, scikit-learn, etc.) over the TypeScript layer.
+
+**If this decision changes:** A Python sidecar at `services/ai-python` should only be created when a specific research/eval use-case requires Python's scientific stack. When created, it must:
+- Expose an HTTP or queue interface only — no imports from TS product code
+- Share request/response contracts via `packages/schemas` (JSON Schema exported from Zod)
+- Use `uv` (already configured in `pyproject.toml`) with a `pyproject.toml` inside `services/ai-python`
+- Include a FastAPI or Flask app with at least one working real eval task as a reference implementation
 
 ---
 

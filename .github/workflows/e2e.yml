@@ -118,6 +118,27 @@ jobs:
             dist: artifacts/prism-counsel/dist/public
             port: 3006
             spec: prism-counsel.spec.ts
+          # Sentra — Cyber Resilience Command is its own standalone artifact.
+          # Built from @workspace/sentra and served on port 3007.
+          - app: sentra
+            filter: "@workspace/sentra"
+            dist: artifacts/sentra/dist/public
+            port: 3007
+            spec: sentra.spec.ts
+          # Counsel — Legal Matter Command is its own standalone artifact.
+          # Built from @workspace/counsel and served on port 3008.
+          - app: counsel
+            filter: "@workspace/counsel"
+            dist: artifacts/counsel/dist/public
+            port: 3008
+            spec: counsel.spec.ts
+          # Pulse — AI Executive Briefing is its own standalone artifact.
+          # Built from @workspace/pulse and served on port 3009.
+          - app: pulse
+            filter: "@workspace/pulse"
+            dist: artifacts/pulse/dist/public
+            port: 3009
+            spec: pulse.spec.ts
           # Stephen Lutar's personal site is embedded in the SZL Holdings app
           # at /stephen.  Runs against the same @workspace/szl-holdings build
           # used by szl-holdings.spec.ts.
@@ -171,6 +192,9 @@ jobs:
           IMPERIUM_BASE_PATH: /
           PRISM_BASE_PATH: /
           STEPHEN_BASE_PATH: /stephen
+          SENTRA_BASE_PATH: /
+          COUNSEL_BASE_PATH: /
+          PULSE_BASE_PATH: /
 
       - name: Upload HTML report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

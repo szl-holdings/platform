@@ -40,6 +40,9 @@ export default defineConfig({
     environment: "node",
     pool: "forks",
     isolate: true,
+    testTimeout: 30000,
+    hookTimeout: 15000,
+    teardownTimeout: 15000,
     include: [
       "tests/api/cross-app-smoke.test.ts",
       "tests/api/openapi-contract.test.ts",
@@ -56,6 +59,5 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text"],
     },
-    testTimeout: 30000,
   },
 });

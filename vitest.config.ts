@@ -142,19 +142,17 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
+    isolate: true,
+    pool: "forks",
     include: [
       "tests/**/*.test.ts",
       "tests/**/*.spec.ts",
       "lib/scene-export/src/__tests__/**/*.test.ts",
       "lib/shared-ui/src/**/*.test.ts",
       "lib/shared-ui/src/**/*.test.tsx",
-      "packages/ontology/src/**/*.test.ts",
-      "packages/constellation/src/**/*.test.ts",
-      "packages/guardian/src/**/*.test.ts",
+      // packages/ontology, packages/constellation have own vitest.config.ts — included via turbo
       "packages/trace-graph/src/**/*.test.ts",
       "packages/memory-fabric/src/**/*.test.ts",
-      "packages/eval-os/src/**/*.test.ts",
-      "packages/eval-forge/src/**/*.test.ts",
       "packages/tool-mesh/src/**/*.test.ts",
       "packages/alloy/src/**/*.test.ts",
       "packages/cognitive-observability/src/**/*.test.ts",
@@ -170,6 +168,8 @@ export default defineConfig({
       "packages/connectors/src/**/*.test.ts",
       "packages/telemetry-standards/src/**/*.test.ts",
       "scripts/**/*.test.js",
+      // NOTE: packages/guardian, packages/eval-os, packages/eval-forge have their
+      // own per-package vitest.config.ts and are run by turbo via their test scripts.
     ],
     exclude: [
       "tests/e2e/**",
@@ -193,5 +193,7 @@ export default defineConfig({
     },
     setupFiles: [],
     testTimeout: 15000,
+    hookTimeout: 10000,
+    teardownTimeout: 10000,
   },
 });

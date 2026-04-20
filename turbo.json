@@ -36,6 +36,11 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "test:e2e": {
+      "cache": false,
+      "inputs": ["tests/e2e/**", "playwright.config.ts"],
+      "outputs": ["playwright-report/**", "test-results/**"]
     }
   }
 }

@@ -35,6 +35,15 @@ Do not make changes to the file `Y`.
 - **`scripts/check-package-boundaries.ts`**: Standalone boundary check script; exits non-zero on violations. Run via `pnpm check-boundaries`. Checks: artifact→artifact cross-imports, lib/packages→artifacts imports.
 - **pnpm `.npmrc`:** Added `public-hoist-pattern[]=zod` to ensure zod is resolvable from source-only workspace packages.
 
+## Platform Modernization Phase 3 — Testing Stack (Task #2383)
+- **Per-package Vitest configs:** `packages/guardian`, `packages/eval-os`, `packages/eval-forge` now have their own `vitest.config.ts` files with `pool: "forks"` + `isolate: true`. Guardian gained a `test` script. These packages are no longer included in the root `vitest.config.ts`; turbo runs them independently with per-package caching.
+- **Async leak detection:** All three root Vitest configs (`vitest.config.ts`, `vitest.components.config.ts`, `vitest.integration.config.ts`) now use `pool: "forks"` + `isolate: true` + explicit `hookTimeout`/`teardownTimeout` bounds (10 s unit/components, 15 s integration). Unclosed handles surface as timeouts instead of silent hangs.
+- **Playwright smoke coverage complete:** Added `tests/e2e/sentra.spec.ts`, `tests/e2e/counsel.spec.ts`, `tests/e2e/pulse.spec.ts` — all 11 primary artifact domains now have at least one smoke spec + failure-path test.
+- **Auth fixture:** `tests/e2e/fixtures/auth-session.ts` exports `authenticatedPage` and `adminPage` Playwright fixtures (network-mock strategy, no real OIDC required). New specs import this instead of re-implementing mock routing.
+- **Turbo:** `test:e2e` registered in `turbo.json` with `cache: false` and correct input/output globs.
+- **Python sidecar deferred:** No `services/ai-python` created. All eval logic is TypeScript (`eval-forge`, `eval-os`). Deferral rationale and creation criteria documented in `TEST_STRATEGY.md §10.4`.
+- **`scripts/qa/*`:** All qa scripts remain operational via existing `pnpm qa:*` named scripts. No migration needed — they are already documented and wired.
+
 ## System Architecture
 The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.js. It employs a micro-frontend architecture for web applications, routed via a shared gateway proxy on port 9090.
 

@@ -26,5 +26,9 @@ export default defineConfig({
     include: ["tests/components/**/*.test.tsx", "tests/components/**/*.spec.tsx", "tests/components/**/*.test.ts"],
     setupFiles: ["tests/utils/setup-dom.ts"],
     testTimeout: 15000,
+    hookTimeout: 10000,
+    teardownTimeout: 10000,
+    isolate: true,
+    pool: "forks",
   },
 });
