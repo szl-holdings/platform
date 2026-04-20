@@ -22,8 +22,11 @@ import {
   terraDistressPropertiesTable,
   kgEntities,
   kgRelationships,
+  pcMattersTable,
+  holdingsVenturesTable,
+  fundNavRecordsTable,
 } from "@szl-holdings/db";
-import { ne, desc, eq, and } from "drizzle-orm";
+import { ne, desc, eq, and, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -89,12 +92,19 @@ interface LiveEntityData {
   vesselDelayTitle: string | null;
   distressCount: number;
   distressRecentAddress: string | null;
+  prismOpenMatters: number;
+  prismLowHealthMatters: number;
+  prismRecentMatterTitle: string | null;
+  holdingsActiveVentures: number;
+  holdingsTotalVentures: number;
+  holdingsSunsetVentures: number;
+  holdingsLatestNavCents: number | null;
   kgEntityNodes: KgEntityRow[];
   kgEdges: KgRelationshipRow[];
 }
 
 async function fetchLiveEntityData(): Promise<LiveEntityData> {
-  const [incidents, alerts, vesselAlerts, vesselDelays, distress, entityRows, edgeRows] = await Promise.all([
+  const [incidents, alerts, vesselAlerts, vesselDelays, distress, matterRows, ventureRows, navRows, entityRows, edgeRows] = await Promise.all([
     db
       .select({ id: firestormIncidentsTable.id, title: firestormIncidentsTable.title, severity: firestormIncidentsTable.severity })
       .from(firestormIncidentsTable)
@@ -128,6 +138,21 @@ async function fetchLiveEntityData(): Promise<LiveEntityData> {
       .from(terraDistressPropertiesTable)
       .where(eq(terraDistressPropertiesTable.isActive, true))
       .limit(20),
+    db
+      .select({ title: pcMattersTable.title, status: pcMattersTable.status, healthScore: pcMattersTable.healthScore })
+      .from(pcMattersTable)
+      .where(sql`${pcMattersTable.status} NOT IN ('closed', 'archived')`)
+      .orderBy(desc(pcMattersTable.updatedAt))
+      .limit(50),
+    db
+      .select({ status: holdingsVenturesTable.status })
+      .from(holdingsVenturesTable)
+      .limit(100),
+    db
+      .select({ totalNavCents: fundNavRecordsTable.totalNavCents })
+      .from(fundNavRecordsTable)
+      .orderBy(desc(fundNavRecordsTable.navDate))
+      .limit(1),
     db
       .select({
         id: kgEntities.id,
@@ -171,6 +196,13 @@ async function fetchLiveEntityData(): Promise<LiveEntityData> {
     vesselDelayTitle: vesselDelays[0]?.title ?? null,
     distressCount: distress.length,
     distressRecentAddress: distress[0]?.address ?? null,
+    prismOpenMatters: matterRows.length,
+    prismLowHealthMatters: matterRows.filter((m) => typeof m.healthScore === "number" && m.healthScore < 60).length,
+    prismRecentMatterTitle: matterRows[0]?.title ?? null,
+    holdingsActiveVentures: ventureRows.filter((v) => v.status === "active" || v.status === "growth").length,
+    holdingsTotalVentures: ventureRows.length,
+    holdingsSunsetVentures: ventureRows.filter((v) => v.status === "sunset").length,
+    holdingsLatestNavCents: navRows[0]?.totalNavCents ?? null,
     kgEntityNodes: entityRows,
     kgEdges: edgeRows,
   };
@@ -197,9 +229,9 @@ function buildGraph(live?: LiveEntityData) {
     { id: "domain-vessels", label: "Vessels", type: "domain", domain: "vessels", value: live ? Math.min(1, 0.3 + live.vesselHighAlertCount * 0.1) : 0.75, description: "Maritime intelligence & fleet tracking" },
     { id: "domain-aegis", label: "Aegis", type: "domain", domain: "aegis", severity: live?.openIncidentCount ? "critical" : "high", value: live ? Math.min(1, 0.5 + live.openIncidentCount * 0.1 + live.criticalAlertCount * 0.05) : 0.91, description: "Cyber security operations" },
     { id: "domain-terra", label: "Terra", type: "domain", domain: "terra", severity: live?.distressCount ? (live.distressCount >= 10 ? "high" : "medium") : "high", value: live ? Math.min(1, 0.3 + live.distressCount * 0.02) : 0.68, description: "Real estate intelligence" },
-    { id: "domain-prism", label: "PRISM", type: "domain", domain: "prism", severity: "high", value: 0.72, description: "Legal & counsel operations" },
+    { id: "domain-prism", label: "PRISM", type: "domain", domain: "prism", severity: live && live.prismLowHealthMatters >= 3 ? "critical" : "high", value: live ? Math.min(1, 0.4 + live.prismOpenMatters * 0.02 + live.prismLowHealthMatters * 0.03) : 0.72, description: live ? `Legal & counsel operations — ${live.prismOpenMatters} open matter(s), ${live.prismLowHealthMatters} low-health` : "Legal & counsel operations" },
     { id: "domain-lyte", label: "Lyte", type: "domain", domain: "lyte", value: 0.35, description: "Infrastructure & observability" },
-    { id: "domain-holdings", label: "Holdings", type: "domain", domain: "szl-holdings", severity: "medium", value: live ? Math.min(1, 0.4 + live.openIncidentCount * 0.05) : 0.62, description: "Portfolio & fund management" },
+    { id: "domain-holdings", label: "Holdings", type: "domain", domain: "szl-holdings", severity: live && live.holdingsSunsetVentures > 0 ? "high" : "medium", value: live ? Math.min(1, 0.4 + live.openIncidentCount * 0.05 + live.holdingsSunsetVentures * 0.05) : 0.62, description: live ? `Portfolio & fund management — ${live.holdingsActiveVentures}/${live.holdingsTotalVentures} active venture(s)${live.holdingsSunsetVentures > 0 ? `, ${live.holdingsSunsetVentures} sunset` : ""}` : "Portfolio & fund management" },
     { id: "domain-carlota", label: "Carlota Jo", type: "domain", domain: "carlota", value: 0.2, description: "Consulting & advisory" },
 
     ...(live?.criticalIncident
@@ -245,10 +277,34 @@ function buildGraph(live?: LiveEntityData) {
       : [{ id: "entity-pudong-props", label: "Pudong Properties", type: "entity" as const, domain: "terra", severity: "high" as const, description: "12 properties with active construction timelines" }]
     ),
 
-    { id: "entity-contracts-mm", label: "8 Maritime Contracts", type: "entity", domain: "prism", severity: "high", description: "Contracts with delivery milestone clauses — force-majeure review" },
+    live && live.prismOpenMatters > 0
+      ? {
+          id: "entity-contracts-mm",
+          label: live.prismRecentMatterTitle
+            ? live.prismRecentMatterTitle.slice(0, 40)
+            : `${live.prismOpenMatters} Active Matter(s)`,
+          type: "entity" as const,
+          domain: "prism",
+          severity: live.prismLowHealthMatters >= 3 ? "critical" as const : "high" as const,
+          description: `${live.prismOpenMatters} open legal matter(s); ${live.prismLowHealthMatters} below health threshold`,
+          live: true,
+        }
+      : { id: "entity-contracts-mm", label: "8 Maritime Contracts", type: "entity" as const, domain: "prism", severity: "high" as const, description: "Contracts with delivery milestone clauses — force-majeure review" },
     { id: "entity-legal-hold", label: "Legal Hold — Cyber", type: "entity", domain: "prism", severity: "critical", description: "23 artifact sets under legal hold" },
     { id: "entity-fund3-lps", label: "Fund III LPs", type: "entity", domain: "szl-holdings", description: "87% LP confidence score — monitoring" },
-    { id: "entity-nav", label: "Portfolio NAV", type: "entity", domain: "szl-holdings", severity: "medium", description: "$2.3B NAV — compound risk scenario active" },
+    live && (live.holdingsLatestNavCents !== null || live.holdingsTotalVentures > 0)
+      ? {
+          id: "entity-nav",
+          label: live.holdingsLatestNavCents !== null
+            ? `Portfolio NAV $${(live.holdingsLatestNavCents / 100 / 1_000_000).toFixed(0)}M`
+            : `${live.holdingsTotalVentures} Ventures Tracked`,
+          type: "entity" as const,
+          domain: "szl-holdings",
+          severity: live.holdingsSunsetVentures > 0 ? "high" as const : "medium" as const,
+          description: `${live.holdingsActiveVentures}/${live.holdingsTotalVentures} active venture(s)${live.holdingsSunsetVentures > 0 ? `; ${live.holdingsSunsetVentures} sunset` : ""}${live.holdingsLatestNavCents !== null ? `; NAV $${(live.holdingsLatestNavCents / 100).toLocaleString("en-US", { maximumFractionDigits: 0 })}` : ""}`,
+          live: true,
+        }
+      : { id: "entity-nav", label: "Portfolio NAV", type: "entity" as const, domain: "szl-holdings", severity: "medium" as const, description: "$2.3B NAV — compound risk scenario active" },
 
     ...(live?.vesselHighAlertCount
       ? [{

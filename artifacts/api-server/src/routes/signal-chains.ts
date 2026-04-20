@@ -25,6 +25,9 @@ import {
   firestormAlertsTable,
   vesselsAlertsTable,
   vesselsEventsTable,
+  pcMattersTable,
+  holdingsVenturesTable,
+  fundNavRecordsTable,
 } from "@szl-holdings/db";
 import { eq, and, desc, count, sql, ne } from "drizzle-orm";
 import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
@@ -82,6 +85,12 @@ interface LiveSignalSnapshot {
   securityOpenIncidents: number;
   securityCriticalAlerts: number;
   marketVolatilityScore: number;
+  prismOpenMatters: number;
+  prismLowHealthMatters: number;
+  prismTrialReady: number;
+  holdingsActiveVentures: number;
+  holdingsSunsetVentures: number;
+  holdingsLatestNavCents: number | null;
   fetchedAt: number;
 }
 
@@ -91,6 +100,9 @@ async function fetchLiveSignalSnapshot(): Promise<LiveSignalSnapshot> {
     vesselDelayRows,
     securityIncidentRows,
     securityAlertRows,
+    matterRows,
+    ventureRows,
+    navRows,
   ] = await Promise.all([
     db
       .select({ severity: vesselsAlertsTable.severity, status: vesselsAlertsTable.status })
@@ -119,6 +131,20 @@ async function fetchLiveSignalSnapshot(): Promise<LiveSignalSnapshot> {
         ne(firestormAlertsTable.status, "dismissed"),
       ))
       .limit(50),
+    db
+      .select({ status: pcMattersTable.status, healthScore: pcMattersTable.healthScore })
+      .from(pcMattersTable)
+      .where(sql`${pcMattersTable.status} NOT IN ('closed', 'archived')`)
+      .limit(100),
+    db
+      .select({ status: holdingsVenturesTable.status })
+      .from(holdingsVenturesTable)
+      .limit(100),
+    db
+      .select({ totalNavCents: fundNavRecordsTable.totalNavCents })
+      .from(fundNavRecordsTable)
+      .orderBy(desc(fundNavRecordsTable.navDate))
+      .limit(1),
   ]);
 
   const vesselActiveAlerts = vesselAlertRows.length;
@@ -144,6 +170,12 @@ async function fetchLiveSignalSnapshot(): Promise<LiveSignalSnapshot> {
     securityOpenIncidents,
     securityCriticalAlerts,
     marketVolatilityScore,
+    prismOpenMatters: matterRows.length,
+    prismLowHealthMatters: matterRows.filter((m) => typeof m.healthScore === "number" && m.healthScore < 60).length,
+    prismTrialReady: matterRows.filter((m) => m.status === "trial" || m.status === "pre_trial").length,
+    holdingsActiveVentures: ventureRows.filter((v) => v.status === "active" || v.status === "growth").length,
+    holdingsSunsetVentures: ventureRows.filter((v) => v.status === "sunset").length,
+    holdingsLatestNavCents: navRows[0]?.totalNavCents ?? null,
     fetchedAt: Date.now(),
   };
 }
@@ -289,27 +321,35 @@ function computeLiveTriggerValue(
   if (chain.id === "security-legal") {
     const critIncidents = snapshot.securityCriticalIncidents;
     const critAlerts = snapshot.securityCriticalAlerts;
+    const lowHealthMatters = snapshot.prismLowHealthMatters;
     if (critIncidents > 0) {
-      const value = Math.min(0.99, 0.8 + critIncidents * 0.05);
-      return { triggerValue: value, triggerReason: `${critIncidents} critical security incident(s) open — threat severity score ${value.toFixed(2)}` };
+      const value = Math.min(0.99, 0.8 + critIncidents * 0.05 + lowHealthMatters * 0.01);
+      return { triggerValue: value, triggerReason: `${critIncidents} critical security incident(s) open + ${snapshot.prismOpenMatters} active legal matter(s) — threat+exposure score ${value.toFixed(2)}` };
     }
     if (critAlerts > 0) {
-      const value = Math.min(0.95, 0.72 + critAlerts * 0.02);
-      return { triggerValue: value, triggerReason: `${critAlerts} critical/high security alert(s) active — threat score ${value.toFixed(2)}` };
+      const value = Math.min(0.95, 0.72 + critAlerts * 0.02 + lowHealthMatters * 0.01);
+      return { triggerValue: value, triggerReason: `${critAlerts} critical/high security alert(s) active; legal docket carrying ${snapshot.prismOpenMatters} matter(s) (${lowHealthMatters} low-health) — score ${value.toFixed(2)}` };
     }
-    return { triggerValue: 0.25, triggerReason: "No critical security incidents detected — posture nominal" };
+    if (lowHealthMatters >= 3) {
+      const value = Math.min(0.85, 0.55 + lowHealthMatters * 0.04);
+      return { triggerValue: value, triggerReason: `${lowHealthMatters} legal matter(s) below health threshold — exposure-driven trigger ${value.toFixed(2)}` };
+    }
+    return { triggerValue: 0.25, triggerReason: `No critical security incidents detected — posture nominal; ${snapshot.prismOpenMatters} legal matter(s) on docket` };
   }
 
   // market-portfolio chain
   const vScore = snapshot.marketVolatilityScore;
-  if (vScore > 0.05) {
-    const value = Math.min(0.95, vScore + 0.40);
+  const sunsetVentures = snapshot.holdingsSunsetVentures;
+  const portfolioPressure = sunsetVentures * 0.08;
+  const compositeScore = vScore + portfolioPressure;
+  if (compositeScore > 0.05) {
+    const value = Math.min(0.95, compositeScore + 0.40);
     return {
       triggerValue: value,
-      triggerReason: `Compound signal pressure: ${snapshot.securityOpenIncidents} open security incident(s) + ${snapshot.vesselActiveAlerts} vessel alert(s) → volatility index ${value.toFixed(2)}`,
+      triggerReason: `Compound signal pressure: ${snapshot.securityOpenIncidents} open security incident(s) + ${snapshot.vesselActiveAlerts} vessel alert(s) + ${sunsetVentures} sunset venture(s) across ${snapshot.holdingsActiveVentures} active → volatility index ${value.toFixed(2)}`,
     };
   }
-  return { triggerValue: 0.15, triggerReason: "No compound signals detected — market conditions nominal" };
+  return { triggerValue: 0.15, triggerReason: `No compound signals detected — market conditions nominal; ${snapshot.holdingsActiveVentures} active venture(s) on portfolio` };
 }
 
 function buildExecutionFromSnapshot(chain: SignalChain, snapshot: LiveSignalSnapshot, manual = false): SignalChainExecution {
@@ -329,8 +369,12 @@ function buildExecutionFromSnapshot(chain: SignalChain, snapshot: LiveSignalSnap
       snapshot.securityCriticalIncidents > 0
         ? `${snapshot.securityCriticalIncidents} critical incident(s) active; ${snapshot.securityOpenIncidents} total open; ${snapshot.securityCriticalAlerts} critical alert(s) raised`
         : "INC-2026-0412: Critical severity, 47 assets affected, confidence 0.91",
-      "Legal hold initiated on 23 artifact sets; SEC disclosure review in progress",
-      "Risk score updated: 72 → 81 (high); board notification triggered",
+      snapshot.prismOpenMatters > 0
+        ? `Legal hold + disclosure review queued against existing docket of ${snapshot.prismOpenMatters} matter(s) (${snapshot.prismLowHealthMatters} low-health, ${snapshot.prismTrialReady} trial-ready)`
+        : "Legal hold initiated on 23 artifact sets; SEC disclosure review in progress",
+      snapshot.holdingsActiveVentures > 0
+        ? `Risk score recomputed across ${snapshot.holdingsActiveVentures} active venture(s)${snapshot.holdingsLatestNavCents !== null ? ` ($${(snapshot.holdingsLatestNavCents / 100).toLocaleString("en-US", { maximumFractionDigits: 0 })} NAV)` : ""}; board notification triggered`
+        : "Risk score updated: 72 → 81 (high); board notification triggered",
     ],
     "market-portfolio": [
       `Composite volatility index at ${triggerValue.toFixed(2)}; primary impact: fixed-income, logistics REITs`,

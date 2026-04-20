@@ -24,8 +24,9 @@ import {
   terraDistressPropertiesTable,
   holdingsVenturesTable,
   fundNavRecordsTable,
+  pcMattersTable,
 } from "@szl-holdings/db";
-import { ne, desc, eq, and } from "drizzle-orm";
+import { ne, desc, eq, and, count, sql } from "drizzle-orm";
 import { validateBody } from "../lib/validation";
 
 import { bodyShape } from "@szl-holdings/contracts/common";
@@ -72,11 +73,20 @@ interface LiveDomainData {
   market: {
     activeVentures: number;
     totalVentures: number;
+    sunsetVentures: number;
     latestNavCents: number | null;
     latestNavDate: string | null;
     grossIrr: string | null;
     netIrr: string | null;
     sectors: string[];
+  };
+  prism: {
+    openMatters: number;
+    totalActive: number;
+    trialReady: number;
+    lowHealthMatters: number;
+    recentMatterTitle?: string;
+    matterTypes: string[];
   };
   fetchedAt: number;
 }
@@ -90,6 +100,7 @@ async function fetchLiveDomainData(): Promise<LiveDomainData> {
     distressRows,
     ventureRows,
     navRows,
+    matterRows,
   ] = await Promise.all([
     db
       .select({ severity: firestormIncidentsTable.severity, title: firestormIncidentsTable.title, createdAt: firestormIncidentsTable.createdAt })
@@ -138,6 +149,18 @@ async function fetchLiveDomainData(): Promise<LiveDomainData> {
       .from(fundNavRecordsTable)
       .orderBy(desc(fundNavRecordsTable.navDate))
       .limit(1),
+    db
+      .select({
+        title: pcMattersTable.title,
+        status: pcMattersTable.status,
+        matterType: pcMattersTable.matterType,
+        healthScore: pcMattersTable.healthScore,
+        updatedAt: pcMattersTable.updatedAt,
+      })
+      .from(pcMattersTable)
+      .where(sql`${pcMattersTable.status} NOT IN ('closed', 'archived')`)
+      .orderBy(desc(pcMattersTable.updatedAt))
+      .limit(50),
   ]);
 
   return {
@@ -160,11 +183,20 @@ async function fetchLiveDomainData(): Promise<LiveDomainData> {
     market: {
       activeVentures: ventureRows.filter((v) => v.status === "active" || v.status === "growth").length,
       totalVentures: ventureRows.length,
+      sunsetVentures: ventureRows.filter((v) => v.status === "sunset").length,
       latestNavCents: navRows[0]?.totalNavCents ?? null,
       latestNavDate: navRows[0]?.navDate ?? null,
       grossIrr: navRows[0]?.grossIrr ?? null,
       netIrr: navRows[0]?.netIrr ?? null,
       sectors: [...new Set(ventureRows.map((v) => v.sector).filter(Boolean) as string[])].slice(0, 5),
+    },
+    prism: {
+      openMatters: matterRows.length,
+      totalActive: matterRows.filter((m) => m.status === "investigation" || m.status === "discovery" || m.status === "pre_trial").length,
+      trialReady: matterRows.filter((m) => m.status === "trial" || m.status === "pre_trial").length,
+      lowHealthMatters: matterRows.filter((m) => typeof m.healthScore === "number" && m.healthScore < 60).length,
+      ...(matterRows[0]?.title ? { recentMatterTitle: matterRows[0].title } : {}),
+      matterTypes: [...new Set(matterRows.map((m) => m.matterType).filter(Boolean) as string[])].slice(0, 5),
     },
     fetchedAt: Date.now(),
   };
@@ -280,7 +312,42 @@ function buildDomainResult(domain: string, query: string, live: LiveDomainData):
         : []
       ),
     ],
+    prism: [
+      ...(live.prism.openMatters > 0
+        ? [{
+            title: live.prism.recentMatterTitle
+              ? `Active Legal Matter: ${live.prism.recentMatterTitle.slice(0, 60)}`
+              : `${live.prism.openMatters} Open Legal Matter(s)`,
+            summary: `${live.prism.openMatters} open matter(s); ${live.prism.totalActive} in active discovery/pre-trial; ${live.prism.trialReady} trial-ready${live.prism.matterTypes.length > 0 ? "; types: " + live.prism.matterTypes.slice(0, 3).join(", ") : ""}`,
+            severity: live.prism.lowHealthMatters >= 3
+              ? "high" as const
+              : live.prism.openMatters >= 10
+                ? "medium" as const
+                : "low" as const,
+            timestamp: Date.now() - 1800000,
+          }]
+        : []
+      ),
+      ...(live.prism.lowHealthMatters > 0
+        ? [{
+            title: `${live.prism.lowHealthMatters} Matter(s) Below Health Threshold`,
+            summary: `${live.prism.lowHealthMatters} matter(s) have a health score below 60 — review recommended for case strategy and resource allocation`,
+            severity: live.prism.lowHealthMatters >= 5 ? "high" as const : "medium" as const,
+            timestamp: Date.now() - 3600000,
+          }]
+        : []
+      ),
+    ],
     "szl-holdings": [
+      ...(live.market.sunsetVentures > 0
+        ? [{
+            title: `Portfolio Risk: ${live.market.sunsetVentures} Venture(s) at Sunset`,
+            summary: `${live.market.sunsetVentures} venture(s) flagged as sunset — wind-down or divestment review pending; ${live.market.activeVentures} active out of ${live.market.totalVentures} total`,
+            severity: live.market.sunsetVentures >= 2 ? "high" as const : "medium" as const,
+            timestamp: Date.now() - 1800000,
+          }]
+        : []
+      ),
       ...(live.market.totalVentures > 0
         ? [{
             title: `Portfolio: ${live.market.totalVentures} Venture(s) Tracked`,
@@ -376,6 +443,9 @@ function buildDomainResult(domain: string, query: string, live: LiveDomainData):
     terra: live.terra.distressCount > 0
       ? `Real estate portfolio shows ${live.terra.distressCount} active distress record(s). Market volatility and supply chain disruption may push additional properties above threshold.`
       : "Real estate portfolio distress indicators are low based on live data.",
+    prism: live.prism.openMatters > 0
+      ? `Legal docket is currently carrying ${live.prism.openMatters} open matter(s) — ${live.prism.totalActive} active (discovery/pre-trial), ${live.prism.trialReady} trial-ready, and ${live.prism.lowHealthMatters} below health threshold. ${live.prism.matterTypes.length > 0 ? "Active matter types: " + live.prism.matterTypes.slice(0, 3).join(", ") + ". " : ""}This load intersects with security incident legal-hold demand and maritime force-majeure reviews.`
+      : "Legal team has no open matters in the live docket — capacity available for downstream cyber and maritime review work.",
     "szl-holdings": (() => {
       const nav = live.market.latestNavCents !== null
         ? `$${(live.market.latestNavCents / 100).toLocaleString("en-US", { maximumFractionDigits: 0 })} NAV on record`
@@ -506,6 +576,7 @@ router.post(
       if (live.aegis.openIncidents > 0 || live.aegis.criticalAlerts > 0) liveDataSources.push("aegis");
       if (live.vessels.activeAlerts > 0 || live.vessels.delayEvents > 0) liveDataSources.push("vessels");
       if (live.terra.distressCount > 0) liveDataSources.push("terra");
+      if (live.prism.openMatters > 0) liveDataSources.push("prism");
       if (live.market.totalVentures > 0 || live.market.latestNavCents !== null) liveDataSources.push("szl-holdings");
       logger.info({ liveDataSources }, "[CrossDomainQuery] Live domain data fetched");
     } catch (err) {
@@ -514,7 +585,8 @@ router.post(
         aegis: { criticalIncidents: 0, openIncidents: 0, criticalAlerts: 0 },
         vessels: { activeAlerts: 0, delayEvents: 0, highAlerts: 0 },
         terra: { distressCount: 0 },
-        market: { activeVentures: 0, totalVentures: 0, latestNavCents: null, latestNavDate: null, grossIrr: null, netIrr: null, sectors: [] },
+        market: { activeVentures: 0, totalVentures: 0, sunsetVentures: 0, latestNavCents: null, latestNavDate: null, grossIrr: null, netIrr: null, sectors: [] },
+        prism: { openMatters: 0, totalActive: 0, trialReady: 0, lowHealthMatters: 0, matterTypes: [] },
         fetchedAt: Date.now(),
       };
     }
