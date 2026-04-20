@@ -286,13 +286,26 @@ export async function escalateApproval(
 export async function addApprovalComment(
   params: AddApprovalCommentParams,
 ): Promise<void> {
-  await db.insert(approvalCommentsTable).values({
+  const [inserted] = await db.insert(approvalCommentsTable).values({
     approvalId: params.approvalId,
     orgId: params.orgId ?? null,
     authorId: params.authorId ?? null,
     authorRole: params.authorRole ?? null,
     body: params.body,
     isInternal: params.isInternal ?? false,
+  }).returning();
+
+  await writeAuditEntry({
+    approvalId: params.approvalId,
+    orgId: params.orgId,
+    actorId: params.authorId,
+    actorRole: params.authorRole,
+    action: "comment",
+    note: params.body,
+    metadata: {
+      commentId: inserted?.id,
+      isInternal: params.isInternal ?? false,
+    },
   });
 }
 
