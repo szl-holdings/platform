@@ -39,10 +39,27 @@ export const teamPagesTable = pgTable(
     message: text("message"),
     /**
      * Whether an in-app notification row was inserted for the recipient.
-     * False when the recipient has opted out of in-app — external channels
-     * may still have been attempted; this flag is only the in-app outcome.
+     * False when the recipient has opted out of in-app, OR when the page
+     * was muted as a duplicate (see `mutedAsDuplicate`). External channels
+     * may still have been attempted in the opt-out case; this flag is only
+     * the in-app outcome.
      */
     inAppDelivered: boolean("in_app_delivered").notNull().default(true),
+    /**
+     * True when this page was suppressed as a duplicate of a recent page
+     * from the same actor → same recipient at the same urgency, within a
+     * short window (~5 minutes). The audit row is still appended so the
+     * full history is preserved, but no new in-app notification is created
+     * and external channels are not re-dispatched.
+     */
+    mutedAsDuplicate: boolean("muted_as_duplicate").notNull().default(false),
+    /**
+     * When `mutedAsDuplicate` is true, the id of the original team_pages
+     * row that this page collapsed into. Nullable for non-duplicates and
+     * for legacy rows. Self-references team_pages.id; preserved with
+     * SET NULL on delete so pruning the original keeps later rows valid.
+     */
+    duplicateOfPageId: integer("duplicate_of_page_id"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({

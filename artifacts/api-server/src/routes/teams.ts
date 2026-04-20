@@ -23,7 +23,7 @@ import {
   PLATFORM_ROLE_HIERARCHY,
   type PlatformRole,
 } from "@szl-holdings/db";
-import { asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray } from "drizzle-orm";
 import {
   sendSuccess,
   sendBadRequest,
@@ -219,47 +219,81 @@ router.post(
         ? `${actorName} paged the ${team} on-call: ${note}`
         : `${actorName} paged the ${team} on-call.`;
 
-      const [pref] = await db
-        .select({
-          userId: notificationPreferencesTable.userId,
-          inAppEnabled: notificationPreferencesTable.inAppEnabled,
-        })
-        .from(notificationPreferencesTable)
-        .where(eq(notificationPreferencesTable.userId, detail.onCall.id))
+      // Duplicate-page suppression (#2468): if this same actor paged this
+      // same recipient at this same urgency within the last DUPE_WINDOW_MS,
+      // collapse it into the original page instead of creating a new in-app
+      // row and re-firing external channels. The audit row is still
+      // appended below (flagged `mutedAsDuplicate`) so the recent-pages
+      // history is complete.
+      const DUPE_WINDOW_MS = 5 * 60 * 1000;
+      const windowStart = new Date(Date.now() - DUPE_WINDOW_MS);
+      const [recentDup] = await db
+        .select({ id: teamPagesTable.id, createdAt: teamPagesTable.createdAt })
+        .from(teamPagesTable)
+        .where(
+          and(
+            eq(teamPagesTable.team, team),
+            eq(teamPagesTable.actorId, actor.id),
+            eq(teamPagesTable.recipientId, detail.onCall.id),
+            eq(teamPagesTable.urgency, urgency),
+            eq(teamPagesTable.mutedAsDuplicate, false),
+            gte(teamPagesTable.createdAt, windowStart),
+          ),
+        )
+        .orderBy(desc(teamPagesTable.createdAt))
         .limit(1);
-      const inAppOn = pref ? pref.inAppEnabled : true;
 
+      const isDuplicate = !!recentDup;
+      let inAppOn = true;
       let notificationId = 0;
-      if (inAppOn) {
-        const [notif] = await db
-          .insert(notificationsTable)
-          .values({
-            userId: detail.onCall.id,
-            type: notifType,
-            channel: "in_app",
-            title,
-            message,
-            actionUrl,
-          })
-          .returning();
-        if (notif) {
-          notificationId = notif.id;
-          publish(WS_CHANNELS.NOTIFICATIONS, "new_notification", notif);
-        }
-      }
 
-      void dispatchToExternalChannels({
-        notificationId,
-        userId: detail.onCall.id,
-        type: notifType,
-        title,
-        message,
-        actionUrl,
-      });
+      if (!isDuplicate) {
+        const [pref] = await db
+          .select({
+            userId: notificationPreferencesTable.userId,
+            inAppEnabled: notificationPreferencesTable.inAppEnabled,
+          })
+          .from(notificationPreferencesTable)
+          .where(eq(notificationPreferencesTable.userId, detail.onCall.id))
+          .limit(1);
+        inAppOn = pref ? pref.inAppEnabled : true;
+
+        if (inAppOn) {
+          const [notif] = await db
+            .insert(notificationsTable)
+            .values({
+              userId: detail.onCall.id,
+              type: notifType,
+              channel: "in_app",
+              title,
+              message,
+              actionUrl,
+            })
+            .returning();
+          if (notif) {
+            notificationId = notif.id;
+            publish(WS_CHANNELS.NOTIFICATIONS, "new_notification", notif);
+          }
+        }
+
+        void dispatchToExternalChannels({
+          notificationId,
+          userId: detail.onCall.id,
+          type: notifType,
+          title,
+          message,
+          actionUrl,
+        });
+      } else {
+        // Muted: do not insert a notification, do not re-dispatch external
+        // channels. inAppDelivered stays false on the audit row.
+        inAppOn = false;
+      }
 
       // Append to the audit history so a third-party operator can see the
       // page later in the team detail modal. Self-paged no-ops (handled
       // above) never reach this point so they never pollute the history.
+      // Muted duplicates ARE recorded (flagged) so noisy pagers stay visible.
       try {
         await db.insert(teamPagesTable).values({
           team,
@@ -268,6 +302,8 @@ router.post(
           urgency,
           message: note ? note : null,
           inAppDelivered: inAppOn,
+          mutedAsDuplicate: isDuplicate,
+          duplicateOfPageId: isDuplicate ? recentDup!.id : null,
         });
       } catch (auditErr) {
         // The page itself succeeded — do not fail the request because the
@@ -279,16 +315,27 @@ router.post(
       }
 
       logger.info(
-        { team, onCallUserId: detail.onCall.id, actorId: actor.id, urgency, inAppDelivered: inAppOn },
-        "Team paged",
+        {
+          team,
+          onCallUserId: detail.onCall.id,
+          actorId: actor.id,
+          urgency,
+          inAppDelivered: inAppOn,
+          mutedAsDuplicate: isDuplicate,
+          duplicateOfPageId: isDuplicate ? recentDup!.id : null,
+        },
+        isDuplicate ? "Team page muted as duplicate" : "Team paged",
       );
 
       return sendSuccess(res, {
-        paged: true,
+        paged: !isDuplicate,
+        reason: isDuplicate ? "muted_duplicate" : undefined,
         team,
         onCall: detail.onCall,
         urgency,
         inAppDelivered: inAppOn,
+        mutedAsDuplicate: isDuplicate,
+        duplicateOfPageId: isDuplicate ? recentDup!.id : null,
       });
     } catch (err) {
       return handleRouteError(res, err, `POST /teams/${req.params.team}/page`);
@@ -302,6 +349,8 @@ export interface TeamPageHistoryEntry {
   urgency: "info" | "warning" | "critical";
   message: string | null;
   inAppDelivered: boolean;
+  mutedAsDuplicate: boolean;
+  duplicateOfPageId: number | null;
   createdAt: string;
   actor: { id: number; displayName: string; email: string | null; avatarUrl: string | null } | null;
   recipient: { id: number; displayName: string; email: string | null; avatarUrl: string | null } | null;
@@ -335,6 +384,8 @@ router.get(
           urgency: teamPagesTable.urgency,
           message: teamPagesTable.message,
           inAppDelivered: teamPagesTable.inAppDelivered,
+          mutedAsDuplicate: teamPagesTable.mutedAsDuplicate,
+          duplicateOfPageId: teamPagesTable.duplicateOfPageId,
           createdAt: teamPagesTable.createdAt,
         })
         .from(teamPagesTable)
@@ -364,6 +415,8 @@ router.get(
         urgency: r.urgency as "info" | "warning" | "critical",
         message: r.message,
         inAppDelivered: r.inAppDelivered,
+        mutedAsDuplicate: r.mutedAsDuplicate,
+        duplicateOfPageId: r.duplicateOfPageId,
         createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt),
         actor: userById.get(r.actorId) ?? null,
         recipient: userById.get(r.recipientId) ?? null,

@@ -33,6 +33,7 @@ interface PrefRow { userId: number; inAppEnabled: boolean }
 interface TeamPageRow {
   id: number; team: string; actorId: number; recipientId: number;
   urgency: string; message: string | null; inAppDelivered: boolean;
+  mutedAsDuplicate: boolean; duplicateOfPageId: number | null;
   createdAt: Date;
 }
 
@@ -51,6 +52,7 @@ vi.mock("drizzle-orm", () => {
   return {
     and: tag("and"), or: tag("or"),
     eq: (col: { _colName?: string }, val: unknown) => ({ _kind: "eq", col: col?._colName, val }),
+    gte: (col: { _colName?: string }, val: unknown) => ({ _kind: "gte", col: col?._colName, val }),
     asc: tag("asc"), desc: tag("desc"),
     inArray: (col: { _colName?: string }, vals: unknown[]) => ({ _kind: "inArray", col: col?._colName, vals }),
     sql: tag("sql"),
@@ -85,6 +87,14 @@ vi.mock("@szl-holdings/db", () => {
       const { col: cn, val } = c as { col: { _colName: string } | string; val: unknown };
       const name = typeof cn === "string" ? cn : cn._colName;
       return row[name] === val;
+    }
+    if (k === "gte") {
+      const { col: cn, val } = c as { col: { _colName: string } | string; val: unknown };
+      const name = typeof cn === "string" ? cn : cn._colName;
+      const rv = row[name];
+      const a = rv instanceof Date ? rv.getTime() : Number(rv);
+      const b = val instanceof Date ? val.getTime() : Number(val);
+      return a >= b;
     }
     if (k === "inArray") {
       const { col: cn, vals } = c as { col: { _colName: string } | string; vals: unknown[] };
@@ -150,6 +160,8 @@ vi.mock("@szl-holdings/db", () => {
             urgency: pv.urgency ?? "warning",
             message: pv.message ?? null,
             inAppDelivered: pv.inAppDelivered ?? true,
+            mutedAsDuplicate: pv.mutedAsDuplicate ?? false,
+            duplicateOfPageId: pv.duplicateOfPageId ?? null,
             createdAt: new Date(),
           };
           store.teamPages.push(row);
@@ -373,6 +385,88 @@ describe("POST /teams/:team/page", () => {
     expect(store.teamPages[0]!.inAppDelivered).toBe(false);
     expect(store.teamPages[0]!.urgency).toBe("info");
     expect(store.teamPages[0]!.message).toBeNull();
+  });
+
+  it("mutes a duplicate page (same actor → recipient → urgency within 5 min) and skips the in-app insert", async () => {
+    authUser = { id: 9, email: "ops@x", displayName: "Ops Caller" };
+    store.users = [
+      { id: 1, displayName: "Alice", email: "a@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Platform" },
+    ];
+    const app = await makeApp();
+
+    // First page goes through normally.
+    const r1 = await request(app)
+      .post("/teams/Platform/page")
+      .send({ message: "Pulse down", urgency: "critical" });
+    expect(r1.status).toBe(200);
+    expect(r1.body.paged).toBe(true);
+    expect(r1.body.mutedAsDuplicate).toBe(false);
+    expect(store.notifs).toHaveLength(1);
+    expect(store.teamPages).toHaveLength(1);
+    expect(store.teamPages[0]!.mutedAsDuplicate).toBe(false);
+
+    // Second identical page within the window collapses.
+    const r2 = await request(app)
+      .post("/teams/Platform/page")
+      .send({ message: "still down", urgency: "critical" });
+    expect(r2.status).toBe(200);
+    expect(r2.body.paged).toBe(false);
+    expect(r2.body.reason).toBe("muted_duplicate");
+    expect(r2.body.mutedAsDuplicate).toBe(true);
+    expect(r2.body.duplicateOfPageId).toBe(store.teamPages[0]!.id);
+    expect(r2.body.inAppDelivered).toBe(false);
+    // No new notification, but the audit row is still appended.
+    expect(store.notifs).toHaveLength(1);
+    expect(store.teamPages).toHaveLength(2);
+    const dup = store.teamPages[1]!;
+    expect(dup.mutedAsDuplicate).toBe(true);
+    expect(dup.duplicateOfPageId).toBe(store.teamPages[0]!.id);
+    expect(dup.inAppDelivered).toBe(false);
+    expect(dup.message).toBe("still down");
+  });
+
+  it("does NOT mute when the urgency differs (warning vs critical from same actor)", async () => {
+    authUser = { id: 9, email: "ops@x", displayName: "Ops Caller" };
+    store.users = [
+      { id: 1, displayName: "Alice", email: "a@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Platform" },
+    ];
+    const app = await makeApp();
+
+    const r1 = await request(app).post("/teams/Platform/page").send({ urgency: "warning" });
+    expect(r1.status).toBe(200);
+    expect(r1.body.paged).toBe(true);
+
+    const r2 = await request(app).post("/teams/Platform/page").send({ urgency: "critical" });
+    expect(r2.status).toBe(200);
+    expect(r2.body.paged).toBe(true);
+    expect(r2.body.mutedAsDuplicate).toBe(false);
+    expect(store.notifs).toHaveLength(2);
+    expect(store.teamPages).toHaveLength(2);
+    expect(store.teamPages.every((p) => !p.mutedAsDuplicate)).toBe(true);
+  });
+
+  it("does NOT mute when the prior page is older than the 5-minute window", async () => {
+    authUser = { id: 9, email: "ops@x", displayName: "Ops Caller" };
+    store.users = [
+      { id: 1, displayName: "Alice", email: "a@x", avatarUrl: null, platformRole: "operator", isActive: true, team: "Platform" },
+    ];
+    // Pre-seed an old page from the same actor → recipient at the same urgency.
+    store.teamPages = [
+      {
+        id: 1, team: "Platform", actorId: 9, recipientId: 1,
+        urgency: "warning", message: "old", inAppDelivered: true,
+        mutedAsDuplicate: false, duplicateOfPageId: null,
+        createdAt: new Date(Date.now() - 10 * 60 * 1000),
+      },
+    ];
+    store.nextTeamPageId = 2;
+
+    const app = await makeApp();
+    const r = await request(app).post("/teams/Platform/page").send({ urgency: "warning" });
+    expect(r.status).toBe(200);
+    expect(r.body.paged).toBe(true);
+    expect(r.body.mutedAsDuplicate).toBe(false);
+    expect(store.notifs).toHaveLength(1);
   });
 
   it("skips in-app insert when recipient has opted out, but still returns paged=true", async () => {

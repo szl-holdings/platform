@@ -269,6 +269,8 @@ interface PageResponse {
   onCall: TeamMemberDto | null;
   urgency?: string;
   inAppDelivered?: boolean;
+  mutedAsDuplicate?: boolean;
+  duplicateOfPageId?: number | null;
 }
 
 interface TeamPageActor {
@@ -283,6 +285,8 @@ interface TeamPageHistoryEntryDto {
   urgency: "info" | "warning" | "critical";
   message: string | null;
   inAppDelivered: boolean;
+  mutedAsDuplicate: boolean;
+  duplicateOfPageId: number | null;
   createdAt: string;
   actor: TeamPageActor | null;
   recipient: TeamPageActor | null;
@@ -617,6 +621,12 @@ function TeamDetailModal({ team, onClose }: { team: string; onClose: () => void 
       setPageError(null);
       if (!data.paged && data.reason === "actor_is_oncall") {
         setPageStatus("You are the on-call — no notification sent to yourself.");
+      } else if (!data.paged && data.reason === "muted_duplicate") {
+        setPageStatus(
+          `Muted as duplicate — you already paged ${data.onCall?.displayName ?? "on-call"} (${urgency}) within the last 5 minutes. The audit row was still recorded.`,
+        );
+        setPageMessage("");
+        void pagesQuery.refetch();
       } else if (data.paged) {
         setPageStatus(
           `Paged ${data.onCall?.displayName ?? "on-call"} (${urgency})${data.inAppDelivered === false ? " — in-app opt-out, external channels still attempted" : ""}.`,
@@ -816,6 +826,23 @@ function TeamDetailModal({ team, onClose }: { team: string; onClose: () => void 
                             >
                               {p.urgency}
                             </span>
+                            {p.mutedAsDuplicate && (
+                              <span
+                                className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
+                                style={{
+                                  color: "var(--color-fg-muted)",
+                                  backgroundColor: "color-mix(in srgb, #94a3b8 14%, transparent)",
+                                  border: "1px dashed color-mix(in srgb, #94a3b8 40%, transparent)",
+                                }}
+                                title={
+                                  p.duplicateOfPageId
+                                    ? `Suppressed — collapsed into page #${p.duplicateOfPageId}`
+                                    : "Suppressed as a duplicate within the 5-minute window"
+                                }
+                              >
+                                muted as duplicate
+                              </span>
+                            )}
                             <span className="font-semibold">{actorName}</span>
                             <span style={{ color: "var(--color-fg-muted)" }}>→</span>
                             <span className="font-semibold">{recipientName}</span>
@@ -834,12 +861,20 @@ function TeamDetailModal({ team, onClose }: { team: string; onClose: () => void 
                               “{p.message}”
                             </div>
                           )}
-                          {!p.inAppDelivered && (
+                          {!p.inAppDelivered && !p.mutedAsDuplicate && (
                             <div
                               className="mt-1 text-[10px] font-mono"
                               style={{ color: "var(--color-fg-muted)" }}
                             >
                               in-app opt-out — external channels attempted
+                            </div>
+                          )}
+                          {p.mutedAsDuplicate && (
+                            <div
+                              className="mt-1 text-[10px] font-mono"
+                              style={{ color: "var(--color-fg-muted)" }}
+                            >
+                              no new in-app row · external channels not re-fired
                             </div>
                           )}
                         </div>
