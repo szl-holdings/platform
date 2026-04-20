@@ -469,9 +469,25 @@ function ExecutiveBriefPanel() {
   ];
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-3xl print-area">
+      {/* Print-only branded header (hidden on screen) */}
+      <div className="print-only mb-6">
+        <div className="flex items-center justify-between border-b-2 border-black pb-3 mb-4">
+          <p className="text-xs font-bold uppercase tracking-[0.22em]">
+            SZL Holdings — Investor Data Room
+          </p>
+          <p className="text-xs uppercase tracking-[0.18em]">Confidential</p>
+        </div>
+        <p className="text-xs uppercase tracking-[0.18em] text-black/60 mb-1">
+          Executive Brief
+        </p>
+        <h1 className="text-2xl font-bold leading-tight mb-1">SZL Holdings — Executive Brief</h1>
+        <p className="text-sm text-black/70">
+          Full platform narrative, investment thesis, and domain product depth
+        </p>
+      </div>
       <div className="mb-8">
-        <div className="flex items-start gap-4 mb-6">
+        <div className="flex items-start gap-4 mb-6 no-print">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#d4a054]/25 bg-[#d4a054]/10">
             <BookOpen className="h-6 w-6 text-[#d4a054]" />
           </div>
@@ -509,7 +525,7 @@ function ExecutiveBriefPanel() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 no-print">
           <a
             href={PULSE_URL}
             target="_blank"
@@ -520,13 +536,15 @@ function ExecutiveBriefPanel() {
             Open Executive Briefing
             <ExternalLink className="h-3.5 w-3.5 opacity-60" />
           </a>
-          <a
-            href="mailto:investors@szlholdings.com?subject=Executive%20Brief%20PDF%20Request"
+          <button
+            type="button"
+            onClick={() => window.print()}
             className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-white/70 hover:text-white hover:border-white/20 transition"
+            title="Export this brief as PDF (uses your browser's print dialog)"
           >
-            <Download className="h-4 w-4" />
-            Request PDF Download
-          </a>
+            <Printer className="h-4 w-4" />
+            Export PDF
+          </button>
         </div>
       </div>
 
