@@ -1,5 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, agentMeshDriftSnapshotsTable } from "@szl-holdings/db";
+import { db, agentMeshDriftSnapshotsTable, auditEventsTable } from "@szl-holdings/db";
 import { and, eq, sql } from "drizzle-orm";
 import { runMeshScan, loadMeshState } from "../services/agent-mesh-collector";
 import {
@@ -242,30 +242,60 @@ router.post(
       const orgId = orgIdFromReq(req);
       const approver = approverLabelFromUser(req.user);
 
-      const result = await db
-        .update(agentMeshDriftSnapshotsTable)
-        .set({ policyApproved: true, approvedBy: approver })
-        .where(
-          and(
-            eq(agentMeshDriftSnapshotsTable.id, id),
-            orgId == null
-              ? sql`${agentMeshDriftSnapshotsTable.orgId} IS NULL`
-              : eq(agentMeshDriftSnapshotsTable.orgId, orgId),
-          ),
-        )
-        .returning({
-          id: agentMeshDriftSnapshotsTable.id,
-          policyApproved: agentMeshDriftSnapshotsTable.policyApproved,
-          approvedBy: agentMeshDriftSnapshotsTable.approvedBy,
-          changedBy: agentMeshDriftSnapshotsTable.changedBy,
-          configFile: agentMeshDriftSnapshotsTable.configFile,
+      // Approve the drift snapshot AND write the central audit_events row
+      // in a single transaction. Compliance requires every approval to
+      // appear in the audit timeline, so if the audit insert fails we roll
+      // back the approval rather than leaving an unaudited approval behind.
+      const userId = typeof req.user?.id === "number" ? req.user.id : null;
+      const txResult = await db.transaction(async (tx) => {
+        const updated = await tx
+          .update(agentMeshDriftSnapshotsTable)
+          .set({ policyApproved: true, approvedBy: approver })
+          .where(
+            and(
+              eq(agentMeshDriftSnapshotsTable.id, id),
+              orgId == null
+                ? sql`${agentMeshDriftSnapshotsTable.orgId} IS NULL`
+                : eq(agentMeshDriftSnapshotsTable.orgId, orgId),
+            ),
+          )
+          .returning({
+            id: agentMeshDriftSnapshotsTable.id,
+            policyApproved: agentMeshDriftSnapshotsTable.policyApproved,
+            approvedBy: agentMeshDriftSnapshotsTable.approvedBy,
+            changedBy: agentMeshDriftSnapshotsTable.changedBy,
+            configFile: agentMeshDriftSnapshotsTable.configFile,
+          });
+
+        const r = updated[0];
+        if (!r) return null;
+
+        await tx.insert(auditEventsTable).values({
+          userId,
+          action: "agent_mesh.drift.approved",
+          entityType: "agent_mesh_drift_snapshot",
+          entityId: r.id,
+          newValues: {
+            driftId: r.id,
+            configFile: r.configFile,
+            approverName: req.user?.displayName ?? null,
+            approverEmail: req.user?.email ?? null,
+            approverLabel: approver,
+            changedBy: r.changedBy,
+            orgId,
+          },
+          ipAddress: req.ip ?? null,
+          userAgent: req.get("user-agent") ?? null,
         });
 
-      const row = result[0];
-      if (!row) {
+        return r;
+      });
+
+      if (!txResult) {
         res.status(404).json({ error: "drift snapshot not found" });
         return;
       }
+      const row = txResult;
 
       logger.info(
         { driftId: id, approvedBy: approver, configFile: row.configFile },
