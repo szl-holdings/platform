@@ -65,6 +65,11 @@ router.use(lazyMatch("/narratives", () => import("./narratives"), "narratives"))
 // Shared action store — public, unauthenticated.
 router.use(lazyMatch("/action-store", () => import("./action-store"), "action-store"));
 
+// Alloy Policy Authoring Studio — public persistence for compiled policies,
+// version history, and per-studio test cases. Demo surface, same model as
+// /api/action-store.
+router.use(lazyMatch("/alloy/policy-compiler", () => import("./alloy-policy-compiler"), "alloy-policy-compiler"));
+
 // Competitive Intel monitor — public Atlas demo surface.
 router.use("/competitive-intel", lazyMount(() => import("./competitive-intel"), "competitive-intel"));
 

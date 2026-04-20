@@ -83,6 +83,11 @@ const PUBLIC_EXACT_PATHS = new Set([
   // and unauthenticated like the rest of those demo surfaces.
   "/api/action-store",
   "/api/action-store/stream",
+  // Alloy Policy Authoring Studio — read-only state endpoint for the demo
+  // surface (lets the studio render its initial state without a session).
+  // Mutating routes (POST/DELETE on /versions, /versions/:id/sign,
+  // /test-cases) are NOT whitelisted and enforce auth via authMiddleware.
+  "/api/alloy/policy-compiler/state",
   // Shared risk evidence store — backs the Save-run-as-evidence button on
   // Terra/Vessels Risk Simulation panels so cited Monte Carlo runs are
   // visible to external reviewers and lender briefings (instead of being

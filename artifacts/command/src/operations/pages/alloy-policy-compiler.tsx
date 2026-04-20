@@ -5,6 +5,65 @@ import {
   Eye, GitBranch, Shield, Zap, Info, User, Lock, ArrowRight,
   CheckSquare, AlertCircle, Sparkles, FileCode, Copy, Wand2, Undo2,
 } from "lucide-react";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+
+const STUDIO_ID = "default";
+
+interface ServerPolicyVersion {
+  externalId: string;
+  studioId: string;
+  versionNumber: number;
+  input: string;
+  policy: CompiledPolicy;
+  author: string;
+  authorId: string;
+  message: string;
+  signers: Array<{ name: string; role: string; signedAt: number }>;
+  savedAt: string;
+}
+
+interface ServerTestCase {
+  externalId: string;
+  studioId: string;
+  name: string;
+  context: Record<string, unknown>;
+  expectedOutcome: TestCase["expectedOutcome"];
+}
+
+interface PolicyCompilerStateResponse {
+  studioId: string;
+  versions: ServerPolicyVersion[];
+  testCases: ServerTestCase[];
+}
+
+interface ApiEnvelope<T> { data?: T }
+
+function fromServerVersion(v: ServerPolicyVersion): PolicyVersion {
+  const savedAtMs = (() => {
+    const ms = Date.parse(v.savedAt);
+    return Number.isFinite(ms) ? ms : Date.now();
+  })();
+  return {
+    id: v.externalId,
+    versionNumber: v.versionNumber,
+    input: v.input,
+    policy: v.policy,
+    author: v.author,
+    authorId: v.authorId,
+    savedAt: savedAtMs,
+    message: v.message,
+    signers: Array.isArray(v.signers) ? v.signers : [],
+  };
+}
+
+function fromServerTestCase(t: ServerTestCase): TestCase {
+  return {
+    id: t.externalId,
+    name: t.name,
+    context: t.context ?? {},
+    expectedOutcome: t.expectedOutcome,
+  };
+}
 
 const API_BASE = (import.meta.env.BASE_URL ?? "/").replace(/\/$/, "");
 const LLM_THRESHOLD = 0.7;
@@ -404,29 +463,6 @@ const PREVIEW_ACTIONS: Omit<PreviewCase, "outcome" | "matchedRule" | "reasoning"
   { id: "p7", actionType: "transfer", description: "Payroll transfer $45,000",              context: { estimatedCostUsd: 45_000,  action: "transfer",  domain: "hr" } },
 ];
 
-const DEFAULT_TEST_CASES: TestCase[] = [
-  { id: "t1", name: "$300k payout — should need approval", context: { estimatedCostUsd: 300_000, action: "payout", domain: "finance" }, expectedOutcome: "approval_required" },
-  { id: "t2", name: "$5k transfer — should be allowed",    context: { estimatedCostUsd: 5_000,   action: "transfer" },                   expectedOutcome: "allowed" },
-  { id: "t3", name: "$600k payout — should be blocked",    context: { estimatedCostUsd: 600_000, action: "payout" },                     expectedOutcome: "blocked" },
-  { id: "t4", name: "deletion — should be audited",        context: { estimatedCostUsd: 0,       action: "deletion" },                   expectedOutcome: "allowed" },
-];
-
-const INITIAL_VERSIONS: PolicyVersion[] = [
-  {
-    id: "v0",
-    versionNumber: 1,
-    input: "Require finance approval for all payments.",
-    policy: compileNaturalLanguage("Require finance approval for all payments."),
-    author: "Sarah Mitchell",
-    authorId: "usr_compliance_sarah",
-    savedAt: Date.now() - 7 * 86400_000,
-    message: "Initial policy draft",
-    signers: [
-      { name: "Sarah Mitchell", role: "compliance_officer", signedAt: Date.now() - 6 * 86400_000 },
-    ],
-  },
-];
-
 function EffectBadge({ effect }: { effect: PolicyEffect }) {
   const cfg = EFFECT_CFG[effect];
   return (
@@ -482,12 +518,12 @@ export default function AlloyPolicyCompilerPage() {
   const [input, setInput] = useState(INITIAL_INPUT);
   const [compiled, setCompiled] = useState<CompiledPolicy | null>(null);
   const [compiling, setCompiling] = useState(false);
-  const [versions, setVersions] = useState<PolicyVersion[]>(INITIAL_VERSIONS);
+  const [versions, setVersions] = useState<PolicyVersion[]>([]);
   const [saveMessage, setSaveMessage] = useState("");
   const [savingVersion, setSavingVersion] = useState(false);
   const [expandedRule, setExpandedRule] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [testCases, setTestCases] = useState<TestCase[]>(DEFAULT_TEST_CASES);
+  const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [testRunning, setTestRunning] = useState(false);
   const [newTestName, setNewTestName] = useState("");
   const [newTestExpected, setNewTestExpected] = useState<TestCase["expectedOutcome"]>("allowed");
@@ -532,26 +568,72 @@ export default function AlloyPolicyCompilerPage() {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [input, handleCompile]);
 
+  // Load persisted versions and test cases on mount.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await apiFetch<ApiEnvelope<PolicyCompilerStateResponse> | PolicyCompilerStateResponse>(
+          `/alloy/policy-compiler/state?studioId=${encodeURIComponent(STUDIO_ID)}`,
+        );
+        const payload = (res as ApiEnvelope<PolicyCompilerStateResponse>).data
+          ?? (res as PolicyCompilerStateResponse);
+        if (cancelled || !payload) return;
+        const loadedVersions = (payload.versions ?? []).map(fromServerVersion);
+        const loadedTestCases = (payload.testCases ?? []).map(fromServerTestCase);
+        setVersions(loadedVersions);
+        setTestCases(loadedTestCases);
+        if (loadedVersions.length > 0) {
+          const latest = loadedVersions[loadedVersions.length - 1]!;
+          setInput(latest.input);
+          setCompiled(latest.policy);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          // Surface to console for debugging; UI still works in transient mode.
+          // eslint-disable-next-line no-console
+          console.error("[policy-compiler] load failed", err);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function handleSaveVersion() {
     if (!compiled) return;
     setSavingVersion(true);
-    setTimeout(() => {
-      const newVersion: PolicyVersion = {
-        id: uid(),
-        versionNumber: (latestVersion?.versionNumber ?? 0) + 1,
-        input,
-        policy: compiled,
-        author: "Sarah Mitchell",
-        authorId: "usr_compliance_sarah",
-        savedAt: Date.now(),
-        message: saveMessage || "Policy update",
-        signers: [],
-      };
-      setVersions(prev => [...prev, newVersion]);
-      setSaveMessage("");
-      setSavingVersion(false);
-      addAudit(`Policy version ${newVersion.versionNumber} saved by Sarah Mitchell`);
-    }, 400);
+    (async () => {
+      try {
+        const res = await apiFetch<ApiEnvelope<ServerPolicyVersion> | ServerPolicyVersion>(
+          `/alloy/policy-compiler/versions`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              studioId: STUDIO_ID,
+              input,
+              policy: compiled,
+              author: "Sarah Mitchell",
+              authorId: "usr_compliance_sarah",
+              message: saveMessage || "Policy update",
+              signers: [],
+            }),
+          },
+        );
+        const payload = (res as ApiEnvelope<ServerPolicyVersion>).data
+          ?? (res as ServerPolicyVersion);
+        const newVersion = fromServerVersion(payload);
+        setVersions(prev => [...prev, newVersion]);
+        setSaveMessage("");
+        addAudit(`Policy version ${newVersion.versionNumber} saved by Sarah Mitchell`);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("[policy-compiler] save version failed", err);
+        addAudit(`Failed to save policy version: ${err instanceof Error ? err.message : "unknown error"}`);
+      } finally {
+        setSavingVersion(false);
+      }
+    })();
   }
 
   function applyLLMResponseToRule(rule: CompiledRule, llm: LLMAssistResponseRule, note?: string): CompiledRule {
@@ -711,12 +793,26 @@ export default function AlloyPolicyCompilerPage() {
   }
 
   function handleSignVersion(versionId: string) {
-    setVersions(prev => prev.map(v =>
-      v.id === versionId
-        ? { ...v, signers: [...v.signers, { name: "Sarah Mitchell", role: "compliance_officer", signedAt: Date.now() }] }
-        : v
-    ));
-    addAudit("Policy version signed by Sarah Mitchell (compliance_officer)");
+    (async () => {
+      try {
+        const res = await apiFetch<ApiEnvelope<ServerPolicyVersion> | ServerPolicyVersion>(
+          `/alloy/policy-compiler/versions/${encodeURIComponent(versionId)}/sign`,
+          {
+            method: "POST",
+            body: JSON.stringify({ name: "Sarah Mitchell", role: "compliance_officer" }),
+          },
+        );
+        const payload = (res as ApiEnvelope<ServerPolicyVersion>).data
+          ?? (res as ServerPolicyVersion);
+        const updated = fromServerVersion(payload);
+        setVersions(prev => prev.map(v => (v.id === versionId ? updated : v)));
+        addAudit("Policy version signed by Sarah Mitchell (compliance_officer)");
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("[policy-compiler] sign version failed", err);
+        addAudit(`Failed to sign policy version: ${err instanceof Error ? err.message : "unknown error"}`);
+      }
+    })();
   }
 
   function runPreview() {
@@ -748,8 +844,8 @@ export default function AlloyPolicyCompilerPage() {
 
   function addTestCase() {
     if (!newTestName.trim()) return;
-    const tc: TestCase = {
-      id: uid(),
+    const payload = {
+      studioId: STUDIO_ID,
       name: newTestName,
       context: {
         action: newTestAction || "payout",
@@ -757,12 +853,42 @@ export default function AlloyPolicyCompilerPage() {
       },
       expectedOutcome: newTestExpected,
     };
-    setTestCases(prev => [...prev, tc]);
     setNewTestName(""); setNewTestAmount(""); setNewTestAction(""); setShowAddTest(false);
+    (async () => {
+      try {
+        const res = await apiFetch<ApiEnvelope<ServerTestCase> | ServerTestCase>(
+          `/alloy/policy-compiler/test-cases`,
+          { method: "POST", body: JSON.stringify(payload) },
+        );
+        const body = (res as ApiEnvelope<ServerTestCase>).data
+          ?? (res as ServerTestCase);
+        const tc = fromServerTestCase(body);
+        setTestCases(prev => [...prev, tc]);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("[policy-compiler] add test case failed", err);
+        addAudit(`Failed to add test case: ${err instanceof Error ? err.message : "unknown error"}`);
+      }
+    })();
   }
 
   function removeTestCase(id: string) {
+    const prevList = testCases;
     setTestCases(prev => prev.filter(t => t.id !== id));
+    (async () => {
+      try {
+        await apiFetch<unknown>(
+          `/alloy/policy-compiler/test-cases/${encodeURIComponent(id)}?studioId=${encodeURIComponent(STUDIO_ID)}`,
+          { method: "DELETE" },
+        );
+      } catch (err) {
+        // Roll back on failure so the UI reflects the actual server state.
+        // eslint-disable-next-line no-console
+        console.error("[policy-compiler] delete test case failed", err);
+        setTestCases(prevList);
+        addAudit(`Failed to remove test case: ${err instanceof Error ? err.message : "unknown error"}`);
+      }
+    })();
   }
 
   const passedTests = testCases.filter(t => t.ran && t.passed).length;
