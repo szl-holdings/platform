@@ -123,6 +123,8 @@ vi.mock("drizzle-orm", () => ({
     { raw: (s: string) => s }
   ),
   gt: (col: unknown, val: unknown) => ({ op: "gt", col, val }),
+  gte: (col: unknown, val: unknown) => ({ op: "gte", col, val }),
+  lte: (col: unknown, val: unknown) => ({ op: "lte", col, val }),
 }));
 
 vi.mock("../../middlewares/auth", () => ({
@@ -182,6 +184,23 @@ vi.mock("../../lib/multi-agent-orchestrator", () => ({
 
 vi.mock("@szl-holdings/observability", () => ({
   serverTelemetry: { recordAuthFailure: vi.fn(), recordRequest: vi.fn() },
+}));
+
+const _runExportCalls: unknown[] = [];
+vi.mock("../../lib/export-service", () => ({
+  runExport: vi.fn(async (opts: { format: "csv" | "pdf"; rows: Record<string, unknown>[] }) => {
+    _runExportCalls.push(opts);
+    const buffer = Buffer.from(opts.format === "pdf" ? "%PDF-1.4 fake" : "id,title\n1,row");
+    return {
+      exportId: "exp-test-uuid",
+      format: opts.format,
+      buffer,
+      rowCount: opts.rows.length,
+      fileSizeBytes: buffer.length,
+      downloadToken: "tok-test",
+      expiresAt: new Date("2099-01-01T00:00:00Z"),
+    };
+  }),
 }));
 
 // ---------------------------------------------------------------------------
@@ -578,6 +597,140 @@ describe("CORTEX action-drafts — multi-tenant security", () => {
       expect(containsInArray(_capturedSelectWheres[0])).toBe(true);
       expect(containsOrgId(_capturedSelectWheres[0], 1)).toBe(true);
       expect(containsOrgId(_capturedSelectWheres[0], 3)).toBe(true);
+    });
+  });
+
+  // =========================================================================
+  // EXPORT endpoint
+  // =========================================================================
+
+  describe("GET /cortex/action-drafts/export", () => {
+    beforeEach(() => {
+      _runExportCalls.length = 0;
+    });
+
+    it("returns a CSV download with attachment headers", async () => {
+      _selectQueue = [[ORG1_DRAFT]];
+
+      const app = await getApp();
+      const res = await request(app).get("/cortex/action-drafts/export");
+
+      expect(res.status).toBe(200);
+      expect(res.headers["content-type"]).toMatch(/text\/csv/);
+      expect(res.headers["content-disposition"]).toMatch(/attachment/);
+      expect(res.headers["content-disposition"]).toMatch(/cortex-action-drafts-/);
+      expect(res.headers["content-disposition"]).toMatch(/\.csv/);
+      expect(res.headers["x-export-id"]).toBe("exp-test-uuid");
+      expect(res.headers["x-row-count"]).toBe("1");
+    });
+
+    it("supports format=pdf and returns application/pdf", async () => {
+      _selectQueue = [[ORG1_DRAFT]];
+
+      const app = await getApp();
+      const res = await request(app).get("/cortex/action-drafts/export?format=pdf");
+
+      expect(res.status).toBe(200);
+      expect(res.headers["content-type"]).toMatch(/application\/pdf/);
+      expect(res.headers["content-disposition"]).toMatch(/\.pdf/);
+    });
+
+    it("rejects unsupported formats with 400", async () => {
+      const app = await getApp();
+      const res = await request(app).get("/cortex/action-drafts/export?format=xlsx");
+
+      expect(res.status).toBe(400);
+    });
+
+    it("rejects invalid status filters with 400", async () => {
+      const app = await getApp();
+      const res = await request(app).get("/cortex/action-drafts/export?status=INJECTED");
+
+      expect(res.status).toBe(400);
+    });
+
+    it("rejects invalid 'from' date strings with 400", async () => {
+      const app = await getApp();
+      const res = await request(app).get("/cortex/action-drafts/export?from=not-a-date");
+
+      expect(res.status).toBe(400);
+    });
+
+    it("rejects invalid 'to' date strings with 400", async () => {
+      const app = await getApp();
+      const res = await request(app).get("/cortex/action-drafts/export?to=garbage");
+
+      expect(res.status).toBe(400);
+    });
+
+    it("applies status, domain, and date range filters in the DB WHERE clause", async () => {
+      _selectQueue = [[ORG1_DRAFT]];
+
+      const app = await getApp();
+      const res = await request(app).get(
+        "/cortex/action-drafts/export?status=approved&domain=vessels&from=2026-01-01T00:00:00Z&to=2026-12-31T00:00:00Z",
+      );
+
+      expect(res.status).toBe(200);
+      expect(_capturedSelectWheres.length).toBe(1);
+      const clause = JSON.stringify(_capturedSelectWheres[0]);
+      expect(clause).toContain("approved");
+      expect(clause).toContain("vessels");
+      // gte / lte appear when date filters are present
+      expect(clause).toMatch(/"gte"|"gt"/);
+      expect(clause).toMatch(/"lte"|"lt"/);
+    });
+
+    it("constrains the query to the caller's orgs (multi-tenant safety)", async () => {
+      _selectQueue = [[ORG1_DRAFT]];
+
+      const app = await getApp();
+      await request(app).get("/cortex/action-drafts/export");
+
+      expect(containsInArray(_capturedSelectWheres[0])).toBe(true);
+      expect(containsOrgId(_capturedSelectWheres[0], 1)).toBe(true);
+    });
+
+    it("deny-by-default: empty result without DB query when user has no orgs", async () => {
+      _currentUser = { ..._currentUser, orgs: [] };
+      _selectQueue = [[ORG1_DRAFT, ORG2_DRAFT]];
+
+      const app = await getApp();
+      const res = await request(app).get("/cortex/action-drafts/export");
+
+      expect(res.status).toBe(200);
+      expect(_capturedSelectWheres).toHaveLength(0);
+      expect(_runExportCalls).toHaveLength(0);
+    });
+
+    it("returns empty result when caller-supplied orgId is outside their memberships", async () => {
+      _selectQueue = [[ORG2_DRAFT]];
+
+      const app = await getApp();
+      const res = await request(app).get("/cortex/action-drafts/export?orgId=999");
+
+      expect(res.status).toBe(200);
+      // No DB query should be issued for an org the caller doesn't belong to
+      expect(_capturedSelectWheres).toHaveLength(0);
+      expect(_runExportCalls).toHaveLength(0);
+    });
+
+    it("records the export to runExport with cortex_action_drafts data source", async () => {
+      _selectQueue = [[ORG1_DRAFT]];
+
+      const app = await getApp();
+      await request(app).get("/cortex/action-drafts/export");
+
+      expect(_runExportCalls).toHaveLength(1);
+      const call = _runExportCalls[0] as { dataSource: string; format: string; rows: unknown[]; columns: Array<{ key: string }> };
+      expect(call.dataSource).toBe("cortex_action_drafts");
+      expect(call.format).toBe("csv");
+      expect(call.rows).toHaveLength(1);
+      const colKeys = call.columns.map((c) => c.key);
+      expect(colKeys).toEqual(expect.arrayContaining([
+        "id", "alertTitle", "domain", "draftType", "title", "recipient",
+        "priority", "status", "approvedBy", "generatedAt",
+      ]));
     });
   });
 });

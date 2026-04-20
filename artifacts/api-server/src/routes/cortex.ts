@@ -14,6 +14,7 @@
  * GET  /cortex/quick-actions       — Pending approval requests formatted for the mobile QuickActionDeck
  * POST /cortex/quick-actions/:id/action — Approve or deny a quick action (delegates to approvals system)
  * GET  /cortex/action-drafts       — List persistent autonomous action drafts awaiting approval
+ * GET  /cortex/action-drafts/export — Export action drafts as CSV/PDF (audit/compliance reports)
  * POST /cortex/action-drafts/generate — Generate drafts from a fusion alert or correlation
  * POST /cortex/action-drafts/:id/approve — Approve an action draft (persisted + governance audit)
  * POST /cortex/action-drafts/:id/dismiss — Dismiss an action draft (persisted)
@@ -26,7 +27,8 @@
 
 import crypto from "crypto";
 import { Router, type IRouter } from "express";
-import { eq, and, desc, sql, inArray, gt } from "drizzle-orm";
+import { eq, and, desc, sql, inArray, gt, gte, lte } from "drizzle-orm";
+import { runExport, type ExportColumn } from "../lib/export-service";
 import {
   db,
   cortexActionDraftsTable,
@@ -1203,6 +1205,157 @@ router.get(
       sendSuccess(res, { drafts: formatted, total: formatted.length, pendingCount });
     } catch (err) {
       handleRouteError(res, err, "CORTEX action drafts list failed");
+    }
+  }
+);
+
+const ACTION_DRAFT_EXPORT_COLUMNS: ExportColumn[] = [
+  { key: "id", label: "Draft ID" },
+  { key: "alertId", label: "Alert ID" },
+  { key: "alertTitle", label: "Alert Title" },
+  { key: "domain", label: "Domain" },
+  { key: "draftType", label: "Draft Type" },
+  { key: "title", label: "Title" },
+  { key: "recipient", label: "Recipient" },
+  { key: "priority", label: "Priority" },
+  { key: "status", label: "Status" },
+  { key: "orgId", label: "Org ID" },
+  { key: "approvedBy", label: "Approved By" },
+  { key: "approvedAt", label: "Approved At" },
+  { key: "dismissedBy", label: "Dismissed By" },
+  { key: "dismissedAt", label: "Dismissed At" },
+  { key: "generatedAt", label: "Generated At" },
+];
+
+router.get(
+  "/cortex/action-drafts/export",
+  authMiddleware({ required: true }),
+  perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
+  async (req, res) => {
+    try {
+      const orgIds = callerOrgIds(req as unknown as any);
+
+      // Deny-by-default: a user with no org memberships has no scope and
+      // therefore cannot export any drafts. Mirrors the list endpoint.
+      if (orgIds.length === 0) {
+        sendSuccess(res, { drafts: [], total: 0 });
+        return;
+      }
+
+      const formatRaw = req.query.format ? String(req.query.format).toLowerCase() : "csv";
+      if (!["csv", "pdf"].includes(formatRaw)) {
+        sendBadRequest(res, "format must be 'csv' or 'pdf'");
+        return;
+      }
+      const format = formatRaw as "csv" | "pdf";
+
+      const statusFilter = req.query.status ? String(req.query.status) : undefined;
+      if (statusFilter && !["pending", "approved", "dismissed"].includes(statusFilter)) {
+        sendBadRequest(res, "status must be one of: pending, approved, dismissed");
+        return;
+      }
+
+      const domainFilter = req.query.domain ? String(req.query.domain) : undefined;
+      const dateFromRaw = req.query.from ?? req.query.dateFrom;
+      const dateToRaw = req.query.to ?? req.query.dateTo;
+      const dateFrom = dateFromRaw ? new Date(String(dateFromRaw)) : undefined;
+      const dateTo = dateToRaw ? new Date(String(dateToRaw)) : undefined;
+      if (dateFrom && Number.isNaN(dateFrom.getTime())) {
+        sendBadRequest(res, "Invalid 'from' date");
+        return;
+      }
+      if (dateTo && Number.isNaN(dateTo.getTime())) {
+        sendBadRequest(res, "Invalid 'to' date");
+        return;
+      }
+
+      // Optional caller-supplied orgId filter, constrained to memberships.
+      let scopedOrgIds = orgIds;
+      const orgIdParam = req.query.orgId ? parseInt(String(req.query.orgId), 10) : undefined;
+      if (orgIdParam != null && !Number.isNaN(orgIdParam)) {
+        if (!orgIds.includes(orgIdParam)) {
+          sendSuccess(res, { drafts: [], total: 0 });
+          return;
+        }
+        scopedOrgIds = [orgIdParam];
+      }
+
+      const whereClauses = [inArray(cortexActionDraftsTable.orgId, scopedOrgIds)];
+      if (statusFilter) {
+        whereClauses.push(eq(cortexActionDraftsTable.status, statusFilter as "pending" | "approved" | "dismissed"));
+      }
+      if (domainFilter) {
+        whereClauses.push(eq(cortexActionDraftsTable.domain, domainFilter));
+      }
+      if (dateFrom) {
+        whereClauses.push(gte(cortexActionDraftsTable.generatedAt, dateFrom));
+      }
+      if (dateTo) {
+        whereClauses.push(lte(cortexActionDraftsTable.generatedAt, dateTo));
+      }
+
+      const drafts = await db
+        .select()
+        .from(cortexActionDraftsTable)
+        .where(and(...whereClauses))
+        .orderBy(desc(cortexActionDraftsTable.generatedAt))
+        .limit(10_000);
+
+      const rows: Record<string, unknown>[] = drafts.map((d) => ({
+        id: d.draftUuid,
+        alertId: d.alertId,
+        alertTitle: d.alertTitle,
+        domain: d.domain,
+        draftType: d.draftType,
+        title: d.title,
+        recipient: d.recipient ?? "",
+        priority: d.priority,
+        status: d.status,
+        orgId: d.orgId ?? "",
+        approvedBy: d.approvedBy ?? "",
+        approvedAt: d.approvedAt?.toISOString() ?? "",
+        dismissedBy: d.dismissedBy ?? "",
+        dismissedAt: d.dismissedAt?.toISOString() ?? "",
+        generatedAt: d.generatedAt?.toISOString() ?? "",
+      }));
+
+      const filterParams = JSON.stringify({
+        status: statusFilter ?? null,
+        domain: domainFilter ?? null,
+        from: dateFrom?.toISOString() ?? null,
+        to: dateTo?.toISOString() ?? null,
+        orgIds: scopedOrgIds,
+      });
+
+      const user = (req as unknown as { user?: { id?: number; email?: string } }).user;
+      const result = await runExport({
+        name: `CORTEX Action Drafts Export — ${new Date().toISOString().slice(0, 10)}`,
+        dataSource: "cortex_action_drafts",
+        format,
+        columns: ACTION_DRAFT_EXPORT_COLUMNS,
+        rows,
+        triggeredByUserId: user?.id ?? null,
+        triggeredByEmail: user?.email ?? null,
+        filterParams,
+        scheduleFrequency: "once",
+      });
+
+      const ext = format === "pdf" ? "pdf" : "csv";
+      const contentType = format === "pdf" ? "application/pdf" : "text/csv; charset=utf-8";
+      res.setHeader("Content-Type", contentType);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="cortex-action-drafts-${result.exportId}.${ext}"`,
+      );
+      res.setHeader("Cache-Control", "no-store");
+      res.setHeader("X-Export-Id", result.exportId);
+      res.setHeader("X-Download-Token", result.downloadToken);
+      res.setHeader("X-Export-Expires", result.expiresAt.toISOString());
+      res.setHeader("X-Row-Count", String(result.rowCount));
+      res.status(200).send(result.buffer);
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX action drafts export failed");
     }
   }
 );
