@@ -115,6 +115,7 @@ router.use(lazyMatch("/evals", () => import("./evals"), "evals"));
 router.use(lazyMatch("/briefings", () => import("./briefings"), "briefings"));
 router.use(lazyMatch("/drift", () => import("./drift"), "drift"));
 router.use(lazyMatch("/deployments", () => import("./deployments"), "deployments"));
+router.use(lazyMatch("/teams", () => import("./teams"), "teams"));
 router.use(lazyMatch("/domains", () => import("./domains"), "domains"));
 router.use(lazyMatch("/constellation", () => import("./constellation-views"), "constellation-views"));
 router.use(
