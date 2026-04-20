@@ -69,6 +69,13 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 
 **Memory Fabric & Alloy Runtime:** Provides a tiered memory layer with provenance, freshness, retention, and sensitivity tracking, and acts as the cognitive runtime and execution control plane for workflows.
 
+**Alloy Embedding Fabric (AEF) — Phase 3 Runtime:** REST API gateway and TypeScript worker layer for semantic embedding, reranking, and hybrid search. Mounted at `/alloy-embedding-api/` via the api-server.
+- `apps/alloy-embedding-api/`: Express 5 gateway — /v1/embed, /v1/rerank, /v1/hybrid-search, /v1/ingest, /v1/index/rebuild, /v1/index/verify, /v1/evals/run, /v1/openai/embeddings, /health, /metrics, /docs. Bearer-token auth, per-tenant rate limiting, Prometheus metrics, OTel tracing, evidence-ledger writes.
+- `workers/alloy-embed-worker/`: MicroBatchQueue, 5 backends (cpu-local, external-http, gpu-stub, azure-stub, dev-hash), pooling (cls/mean/last_token), truncation, WarmPool.
+- `workers/alloy-rerank-worker/`: Cross-encoder HTTP backend + deterministic TF fallback.
+- `services/substrate-py-workers`: Extended with /aef/embed and /aef/rerank (deterministic hash-based; no model download required in dev).
+- `scripts/aef-smoke.ts`: End-to-end smoke test — run with `AEF_API_URL=http://localhost:8080/alloy-embedding-api AEF_API_KEY=<token> tsx scripts/aef-smoke.ts`.
+
 **Reflection Engine:** A structured self-improvement package that scores run quality, classifies failure modes, identifies best-performing routes, and drafts candidate skills.
 
 **Cognitive Consoles (Command App):** Three read-only inspection surfaces in the Command app provide insights into the system's runtime state: Cognitive Command Center, Self Model Console, and World Model Graph Explorer.

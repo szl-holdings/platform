@@ -7,7 +7,7 @@ router = "path"
 
 [[services]]
 name = "api"
-paths = [ "/api/", "/nexus/", "/mcp/" ]
+paths = [ "/api/", "/nexus/", "/mcp/", "/alloy-embedding-api/" ]
 localPort = 8080
 
 [services.development]

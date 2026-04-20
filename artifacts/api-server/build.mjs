@@ -36,6 +36,8 @@ async function buildWorkspacePackageMap() {
   const packageMap = {};
   await scanDirForPackages(path.join(workspaceRoot, "lib"), packageMap);
   await scanDirForPackages(path.join(workspaceRoot, "packages"), packageMap);
+  await scanDirForPackages(path.join(workspaceRoot, "apps"), packageMap);
+  await scanDirForPackages(path.join(workspaceRoot, "workers"), packageMap);
   return packageMap;
 }
 

@@ -1,9 +1,11 @@
 packages:
+  - apps/*
   - artifacts/*
   - lib/*
   - lib/integrations/*
   - packages/*
   - services/*
+  - workers/*
   - scripts
 
 autoInstallPeers: false

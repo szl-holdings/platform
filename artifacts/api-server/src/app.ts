@@ -33,6 +33,7 @@ import { etagMiddleware } from "./middlewares/optimistic-concurrency";
 import { ENV_SPECS } from "./lib/startup-validation";
 import { resolveRuntimeMode } from "@szl-holdings/config";
 import { appModeMiddleware } from "./middlewares/app-mode.js";
+import { createAefRouter } from "@workspace/alloy-embedding-api";
 
 const app: Express = express();
 
@@ -232,6 +233,16 @@ app.get("/", (_req: Request, res: Response) => {
   });
 }
 // -----------------------------------------------------------------------------
+
+// AEF — Alloy Embedding Fabric API
+// Mounted before CSRF/auth because AEF uses its own bearer-token auth.
+// The AEF router is a pure API surface (no cookies/sessions) and safe to
+// exempt from CSRF protection.
+// Mounted at both /alloy-embedding-api (direct curl access) and
+// /api/alloy-embedding-api (Replit preview pane which keeps the /api prefix).
+const _aefRouter = createAefRouter();
+app.use("/alloy-embedding-api", _aefRouter);
+app.use("/api/alloy-embedding-api", _aefRouter);
 
 app.use(csrfMiddleware);
 app.use(authMiddleware);
@@ -565,6 +576,7 @@ app.use("/api", etagMiddleware);
 //   2) `DEMO_MODE=true` env flag (404 otherwise)
 //   3) `authMiddleware({ required: true })` + admin role check (401/403 otherwise)
 app.use("/api", demoResetRouter);
+
 app.use(globalAuthEnforcer);
 app.use("/api", router);
 

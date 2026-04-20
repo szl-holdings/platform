@@ -39,6 +39,7 @@ from .protocol import (
 )
 from .stages import STAGE_REGISTRY
 from .telemetry import stage_span, get_current_span_id
+from .aef_endpoints import aef_router
 
 log = structlog.get_logger(__name__)
 
@@ -63,6 +64,9 @@ app = FastAPI(
     ),
     lifespan=lifespan,
 )
+
+# AEF CPU-dev embed/rerank endpoints (no model download; deterministic hash-based)
+app.include_router(aef_router)
 
 
 # ─── Stage dispatch ───────────────────────────────────────────────────────────
