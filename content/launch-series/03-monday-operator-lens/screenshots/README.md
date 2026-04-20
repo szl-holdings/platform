@@ -18,11 +18,11 @@ The Monday post walks one decision through nine steps. Each step gets a screensh
 ---
 
 ### 02-signal-detection.png
-**Artifact:** Vessels Maritime Intelligence (`/vessels/`)
-**Page:** AIS tracking, fleet command, or dark vessel detection view
+**Artifact:** Vessels Maritime Intelligence (`/vessels/dark-vessel-detection?demo=true`)
+**Page:** Dark Vessel Detection feed
 **Viewport:** 1440 × 900
 **Mode:** Dark mode
-**What to show:** A vessel signal panel highlighting a dark AIS event — gap in transmissions, corridor classification, severity indicator. Step 1: Signal.
+**What to show:** Dark Vessels list (PACIFIC MERIDIAN — Critical 94, CASPIAN PIONEER — High 81, FAR EASTERN PROGRESS — Medium 73) with AIS gap duration, suspicion scores, and STS Transfer / IUU Fishing tabs. Step 1: Signal.
 
 ---
 

@@ -28,31 +28,31 @@ Capture at the specified artifact, page, and viewport. Dark mode where specified
 ---
 
 ### 03-aegis-soc-command.png
-**Artifact:** Aegis — Unified Defense & Intelligence Command (`/aegis/`)
-**Page:** SOC Command or Threat Intelligence view
+**Artifact:** Aegis — Unified Defense & Intelligence Command (`/aegis/agentic-soc`)
+**Page:** Agentic SOC — Autonomous Triage & Response
 **Viewport:** 1440 × 900
 **Mode:** Dark mode
-**What to show:** Security alerts, MITRE ATT&CK panel, or active incident feed.
+**What to show:** Active alert queue (Suspicious PowerShell, Lateral Movement, etc.) and live AI Reasoning Trace for the selected incident.
 **Used in:** Medium body (domain packs section)
 
 ---
 
 ### 04-vessels-fleet-command.png
-**Artifact:** Vessels Maritime Intelligence (`/vessels/`)
-**Page:** Fleet Command or AIS tracking view
+**Artifact:** Vessels Maritime Intelligence (`/vessels/dashboard?demo=true`)
+**Page:** Fleet Command Overview (executive view)
 **Viewport:** 1440 × 900
 **Mode:** Dark mode
-**What to show:** Fleet overview with vessel positions, status indicators, and voyage data.
+**What to show:** Fleet KPI tiles (TOTAL / AT SEA / IN PORT / DELAYED / EXCEPTIONS / UTL / WEATHER) with strategic fleet position and voyage P&L snapshot.
 **Used in:** Medium body (domain packs section)
 
 ---
 
 ### 05-terra-deal-pipeline.png
-**Artifact:** Terra — Real Estate Intelligence (`/terra/`)
-**Page:** Distress pipeline or deal workflow
+**Artifact:** Terra — Real Estate Intelligence (`/terra/pipeline?demo=true`)
+**Page:** Deal Pipeline (Sourcing → Underwriting → Due Diligence → Closing → Closed)
 **Viewport:** 1440 × 900
 **Mode:** Dark mode
-**What to show:** Property pipeline cards or AI underwriting panel.
+**What to show:** Active deal cards across pipeline stages with value/probability — Active Deals: 7, Total Pipeline Value: $319.6M.
 **Used in:** Medium body (domain packs section)
 
 ---
