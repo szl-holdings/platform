@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.tesseract
     pkgs.imagemagick
     pkgs.chromium
     pkgs.libglvnd

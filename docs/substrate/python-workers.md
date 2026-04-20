@@ -74,9 +74,33 @@ select the correct handler from `STAGE_REGISTRY`.
 | `stageKind` (or `stageType`)        | Handler module          | Used by             |
 |--------------------------------------|-------------------------|---------------------|
 | `retrieval`, `retrieve`              | `stages/retrieval.py`   | Lyte, Pulse         |
-| `ocr`, `doc-chunking`, `clause-extraction` | `stages/ocr.py`  | PRISM Counsel       |
+| `ocr`, `doc-chunking`, `clause-extraction` | `stages/ocr.py`  | PRISM Counsel (incl. scanned PDFs via pdfminer / tesseract) |
 | `geospatial`, `geo`, `intersection`, `anomaly-detection` | `stages/geospatial.py` | Vessels, Terra |
 | `eval_grading`, `eval-grading`, `grading`, `scoring` | `stages/eval_grading.py` | Eval Console |
+
+---
+
+### OCR engine selection (PRISM Counsel)
+
+The OCR stage handles three flavors of input on each document:
+
+| Input field | Engine | Notes |
+|---|---|---|
+| `text` or `content` | none (`text`) | Pass-through; no OCR needed |
+| `bytes_b64` with `mimeType: application/pdf` (or `%PDF-` magic) | `pdfminer.six`, then `pdf2image` + `pytesseract` if no text layer | First tries the embedded text layer; for scanned / image-only PDFs falls back to rasterizing each page with poppler (`pdftoppm`) and running tesseract |
+| `bytes_b64` with `mimeType: image/*` (PNG/JPEG/TIFF magic) | `pytesseract` → `tesseract` | Requires the `tesseract` binary; CPU-only |
+| Anything else with `bytes_b64` | placeholder | Emits `[OCR unavailable for binary document <id>]` |
+
+The per-stage output now includes an `ocrEngines` map summarizing how many
+documents each engine handled, e.g. `{ "pdfminer": 1, "text": 2 }`. Each
+emitted chunk also carries an `ocrEngine` tag for downstream evidence.
+
+Image-only / scanned PDFs are supported via `pdf2image` (which shells out to
+`pdftoppm` from poppler) followed by per-page `pytesseract`. The fallback
+runs only when the pdfminer text-layer extractor returns an empty string,
+keeping the fast path fast for born-digital PDFs. If poppler or tesseract is
+missing from the runtime, the stage gracefully degrades to a clearly-marked
+placeholder so the failure mode is visible to operators.
 
 ---
 
@@ -232,7 +256,8 @@ All four stages support the same modes as TypeScript stages:
 Each stage computes a deterministic SHA-256 hash over its key inputs:
 
 - **retrieval** — `{query, topK, minScore}`
-- **ocr** — first 32 chars of each document's text + id
+- **ocr** — `id`, first 32 chars of each document's text, and the SHA-256 of
+  the full `bytes_b64` payload (so distinct binary inputs hash differently)
 - **geospatial** — sorted feature and zone IDs
 - **eval\_grading** — sorted case IDs + scoringFn + passMark
 

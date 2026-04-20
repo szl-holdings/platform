@@ -157,6 +157,130 @@ class TestOCRReplay:
         assert result["dryRun"] is True
         assert result["chunks"] == []
 
+    # --- Real OCR engine tests (scanned / binary PDF support) ---
+
+    # Minimal one-page PDF with a text layer (Tj operator) that says
+    # "Confidential indemnification clause." Used to verify the pdfminer
+    # extraction path for image-based / binary PDF inputs.
+    MINIMAL_PDF_BYTES = (
+        b"%PDF-1.4\n"
+        b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
+        b"2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj\n"
+        b"3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]"
+        b"/Resources<</Font<</F1 5 0 R>>>>/Contents 4 0 R>>endobj\n"
+        b"4 0 obj<</Length 74>>stream\n"
+        b"BT /F1 12 Tf 72 720 Td "
+        b"(Confidential indemnification clause.) Tj ET\n"
+        b"endstream endobj\n"
+        b"5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\n"
+        b"xref\n0 6\n"
+        b"0000000000 65535 f \n"
+        b"0000000009 00000 n \n"
+        b"0000000052 00000 n \n"
+        b"0000000095 00000 n \n"
+        b"0000000186 00000 n \n"
+        b"0000000299 00000 n \n"
+        b"trailer<</Size 6/Root 1 0 R>>\n"
+        b"startxref\n356\n%%EOF\n"
+    )
+
+    @pytest.mark.asyncio
+    async def test_pdf_bytes_extraction_via_pdfminer(self):
+        import base64
+        pdf_b64 = base64.b64encode(self.MINIMAL_PDF_BYTES).decode("ascii")
+        docs = [{
+            "id": "scan-1",
+            "bytes_b64": pdf_b64,
+            "mimeType": "application/pdf",
+        }]
+        claim = _claim("ocr", {"documents": docs, "extractClauses": True}, mode="live")
+        result = await ocr_execute(claim)
+
+        assert result["documentCount"] == 1
+        # pdfminer should recover machine-readable text from the embedded layer
+        assert result["chunkCount"] >= 1
+        joined = " ".join(c["text"] for c in result["chunks"]).lower()
+        assert "confidential" in joined or "indemnification" in joined
+        assert result["ocrEngines"].get("pdfminer", 0) == 1
+        # Clause heuristic should latch onto the recovered text
+        assert any(
+            cl["clauseType"] in ("confidentiality", "indemnification")
+            for cl in result["clauses"]
+        )
+
+    @pytest.mark.asyncio
+    async def test_image_only_pdf_extraction_via_tesseract(self):
+        """Scanned PDF (no embedded text layer) → pdf2image + tesseract."""
+        import base64
+        import io
+        import shutil
+
+        if shutil.which("tesseract") is None or shutil.which("pdftoppm") is None:
+            pytest.skip("tesseract / poppler not installed in this environment")
+
+        try:
+            from PIL import Image, ImageDraw, ImageFont
+            from pdf2image import convert_from_bytes  # noqa: F401  - presence check
+        except Exception:
+            pytest.skip("Pillow / pdf2image not installed")
+
+        # Render the phrase as an image and save it as an image-only PDF — no
+        # text-layer is embedded, so pdfminer will recover nothing and the
+        # tesseract fallback path must run.
+        img = Image.new("RGB", (900, 220), "white")
+        draw = ImageDraw.Draw(img)
+        try:
+            font = ImageFont.truetype(
+                "/nix/store/qy6ag48i2g8h89wvqv470y26hh61v508-replit-runtime-path/share/fonts/truetype/DejaVuSans-Bold.ttf",
+                40,
+            )
+        except Exception:
+            font = ImageFont.load_default()
+        draw.text((20, 80), "CONFIDENTIAL INDEMNIFICATION CLAUSE", fill="black", font=font)
+        buf = io.BytesIO()
+        img.save(buf, "PDF", resolution=200)
+        pdf_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+
+        docs = [{
+            "id": "scan-img-1",
+            "bytes_b64": pdf_b64,
+            "mimeType": "application/pdf",
+        }]
+        claim = _claim("ocr", {"documents": docs, "extractClauses": True}, mode="live")
+        result = await ocr_execute(claim)
+
+        assert result["documentCount"] == 1
+        assert result["chunkCount"] >= 1
+        joined = " ".join(c["text"] for c in result["chunks"]).upper()
+        # Tolerate minor OCR noise — assert at least one of the key tokens recovered
+        assert "CONFIDENTIAL" in joined or "INDEMNIFICATION" in joined or "CLAUSE" in joined
+        # The tesseract fallback must have been the engine that handled this doc
+        assert result["ocrEngines"].get("tesseract", 0) == 1
+        assert result["ocrEngines"].get("none", 0) == 0
+        # Clause heuristic should fire on the OCR'd text
+        assert any(
+            cl["clauseType"] in ("confidentiality", "indemnification")
+            for cl in result["clauses"]
+        )
+        # No placeholder text should appear in any chunk
+        assert all("[OCR unavailable" not in c["text"] for c in result["chunks"])
+
+    @pytest.mark.asyncio
+    async def test_binary_doc_replay_hash_includes_bytes(self):
+        import base64
+        pdf_b64 = base64.b64encode(self.MINIMAL_PDF_BYTES).decode("ascii")
+        docs_a = [{"id": "scan-1", "bytes_b64": pdf_b64, "mimeType": "application/pdf"}]
+        docs_b = [{"id": "scan-1", "bytes_b64": pdf_b64[:-4] + "AAAA", "mimeType": "application/pdf"}]
+        # Different bytes for the same id must produce different hashes
+        assert ocr_hash(docs_a) != ocr_hash(docs_b)
+
+        # Replay with the captured hash must succeed deterministically
+        h = ocr_hash(docs_a)
+        claim = _claim("ocr", {"documents": docs_a}, mode="replay", replay_hash=h)
+        result = await ocr_execute(claim)
+        assert result["contentHash"] == h
+        assert result["mode"] == "replay"
+
 
 # ─── Geospatial ───────────────────────────────────────────────────────────────
 
