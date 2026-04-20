@@ -1093,9 +1093,18 @@ export function ConstellationGraph({
   const [attachSubmitting, setAttachSubmitting] = useState(false);
   const [attachError, setAttachError] = useState<string | null>(null);
   const [attachSuccess, setAttachSuccess] = useState<{
+    id: number;
     caseNumber: string;
     title: string;
   } | null>(null);
+  // Inline follow-up note state for the post-attach success card. Lets the
+  // operator add a triage note without navigating to /aegis/cases.
+  const [followUpOpen, setFollowUpOpen] = useState(false);
+  const [followUpContent, setFollowUpContent] = useState("");
+  const [followUpAssignToMe, setFollowUpAssignToMe] = useState(false);
+  const [followUpSubmitting, setFollowUpSubmitting] = useState(false);
+  const [followUpError, setFollowUpError] = useState<string | null>(null);
+  const [followUpPosted, setFollowUpPosted] = useState(false);
 
   // Cache of enriched cross-domain entities (id -> full node), filled lazily
   const [externalCache, setExternalCache] = useState<Record<string, ConstellationGraphNode>>({});
@@ -1633,7 +1642,16 @@ export function ConstellationGraph({
           },
         }),
       });
-      setAttachSuccess(targetCase ?? { caseNumber: String(targetId), title: "" });
+      setAttachSuccess(
+        targetCase
+          ? { id: targetId as number, caseNumber: targetCase.caseNumber, title: targetCase.title }
+          : { id: targetId as number, caseNumber: String(targetId), title: "" },
+      );
+      setFollowUpOpen(false);
+      setFollowUpContent("");
+      setFollowUpAssignToMe(false);
+      setFollowUpError(null);
+      setFollowUpPosted(false);
       // Refresh case list so the next open shows the new/updated case immediately
       setAttachCases(null);
     } catch (err) {
@@ -1650,6 +1668,38 @@ export function ConstellationGraph({
     attachNewPriority,
     attachCases,
   ]);
+
+  // Post a follow-up note (and optionally self-assign) onto the just-attached
+  // case via the same PATCH /aegis/cases/:id endpoint used by the attach flow.
+  const submitFollowUpNote = useCallback(async () => {
+    if (!attachSuccess) return;
+    const content = followUpContent.trim();
+    if (!content && !followUpAssignToMe) {
+      setFollowUpError("Add a note or check assign-to-me");
+      return;
+    }
+    setFollowUpSubmitting(true);
+    setFollowUpError(null);
+    try {
+      const body: Record<string, unknown> = {};
+      if (content) {
+        body.note = { content, author: "Constellation Operator" };
+      }
+      if (followUpAssignToMe) {
+        body.assignedAnalyst = "Constellation Operator";
+      }
+      await apiFetch(`/aegis/cases/${attachSuccess.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      });
+      setFollowUpPosted(true);
+      setFollowUpContent("");
+    } catch (err) {
+      setFollowUpError((err as Error)?.message ?? "Failed to post note");
+    } finally {
+      setFollowUpSubmitting(false);
+    }
+  }, [attachSuccess, followUpContent, followUpAssignToMe]);
 
   const tracePath = useCallback(
     async (node: ConstellationGraphNode, depth: number) => {
@@ -3479,9 +3529,12 @@ export function ConstellationGraph({
                 {attachSuccess.title && (
                   <div style={{ color: "#cbd5e1" }}>{attachSuccess.title}</div>
                 )}
-                <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
-                  <button
-                    onClick={() => setAttachOpen(false)}
+                <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  <a
+                    href={`/aegis/cases?case=${attachSuccess.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="constellation-attach-open-case"
                     style={{
                       fontSize: 11,
                       padding: "5px 12px",
@@ -3489,17 +3542,43 @@ export function ConstellationGraph({
                       border: `1px solid ${accentColor}60`,
                       background: `${accentColor}20`,
                       color: accentColor,
+                      textDecoration: "none",
                       cursor: "pointer",
                       fontWeight: 600,
                       letterSpacing: "0.04em",
                     }}
                   >
-                    Done
+                    Open case ↗
+                  </a>
+                  <button
+                    onClick={() => {
+                      setFollowUpOpen((v) => !v);
+                      setFollowUpError(null);
+                    }}
+                    data-testid="constellation-attach-followup-toggle"
+                    style={{
+                      fontSize: 11,
+                      padding: "5px 12px",
+                      borderRadius: 4,
+                      border: `1px solid ${accentColor}60`,
+                      background: followUpOpen ? `${accentColor}30` : "transparent",
+                      color: accentColor,
+                      cursor: "pointer",
+                      fontWeight: 600,
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    {followUpOpen ? "Hide follow-up" : "Add follow-up note"}
                   </button>
                   <button
                     onClick={() => {
                       setAttachSuccess(null);
                       setAttachSelectedId(null);
+                      setFollowUpOpen(false);
+                      setFollowUpContent("");
+                      setFollowUpAssignToMe(false);
+                      setFollowUpError(null);
+                      setFollowUpPosted(false);
                     }}
                     style={{
                       fontSize: 11,
@@ -3513,7 +3592,122 @@ export function ConstellationGraph({
                   >
                     Attach to another case
                   </button>
+                  <button
+                    onClick={() => setAttachOpen(false)}
+                    style={{
+                      fontSize: 11,
+                      padding: "5px 12px",
+                      borderRadius: 4,
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      background: "transparent",
+                      color: "#cbd5e1",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Done
+                  </button>
                 </div>
+                {followUpOpen && (
+                  <div
+                    data-testid="constellation-attach-followup-panel"
+                    style={{
+                      marginTop: 12,
+                      padding: 10,
+                      borderRadius: 5,
+                      background: "rgba(15,23,42,0.55)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    <textarea
+                      value={followUpContent}
+                      onChange={(e) => setFollowUpContent(e.target.value)}
+                      placeholder="Add a triage note for this case…"
+                      rows={3}
+                      data-testid="constellation-attach-followup-note"
+                      disabled={followUpSubmitting}
+                      style={{
+                        width: "100%",
+                        boxSizing: "border-box",
+                        padding: 8,
+                        borderRadius: 4,
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        background: "rgba(2,6,23,0.7)",
+                        color: "#e2e8f0",
+                        fontSize: 12,
+                        fontFamily: "inherit",
+                        resize: "vertical",
+                      }}
+                    />
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        marginTop: 8,
+                        color: "#cbd5e1",
+                        fontSize: 11,
+                        cursor: followUpSubmitting ? "default" : "pointer",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={followUpAssignToMe}
+                        onChange={(e) => setFollowUpAssignToMe(e.target.checked)}
+                        data-testid="constellation-attach-followup-assign"
+                        disabled={followUpSubmitting}
+                      />
+                      Assign case to me
+                    </label>
+                    {followUpError && (
+                      <div
+                        data-testid="constellation-attach-followup-error"
+                        style={{ marginTop: 8, color: "#fca5a5", fontSize: 11 }}
+                      >
+                        {followUpError}
+                      </div>
+                    )}
+                    {followUpPosted && !followUpError && (
+                      <div
+                        data-testid="constellation-attach-followup-posted"
+                        style={{ marginTop: 8, color: "#a7f3d0", fontSize: 11 }}
+                      >
+                        ✓ Follow-up posted to {attachSuccess.caseNumber}
+                      </div>
+                    )}
+                    <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
+                      <button
+                        onClick={submitFollowUpNote}
+                        disabled={
+                          followUpSubmitting ||
+                          (!followUpContent.trim() && !followUpAssignToMe)
+                        }
+                        data-testid="constellation-attach-followup-submit"
+                        style={{
+                          fontSize: 11,
+                          padding: "5px 12px",
+                          borderRadius: 4,
+                          border: `1px solid ${accentColor}60`,
+                          background: `${accentColor}30`,
+                          color: accentColor,
+                          cursor:
+                            followUpSubmitting ||
+                            (!followUpContent.trim() && !followUpAssignToMe)
+                              ? "default"
+                              : "pointer",
+                          opacity:
+                            followUpSubmitting ||
+                            (!followUpContent.trim() && !followUpAssignToMe)
+                              ? 0.5
+                              : 1,
+                          fontWeight: 600,
+                          letterSpacing: "0.04em",
+                        }}
+                      >
+                        {followUpSubmitting ? "Posting…" : "Post note"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <>

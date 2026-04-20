@@ -11,7 +11,7 @@ import {
   FileText, Shield, Activity, Plus, Flame, ExternalLink
 } from "lucide-react";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import {
@@ -565,6 +565,36 @@ export default function CasesPage() {
       if (updated) setSelectedCase(updated);
     }
   };
+
+  // Deep-link support: when a tool (e.g. the Constellation attach-to-case
+  // success card) opens /aegis/cases?case=<id>, auto-select that case so the
+  // operator lands directly on its detail panel. We consume the query param
+  // once on first match so closing the panel doesn't immediately re-open it.
+  const [deepLinkConsumed, setDeepLinkConsumed] = useState(false);
+  useEffect(() => {
+    if (deepLinkConsumed || typeof window === "undefined" || cases.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const requested = params.get("case");
+    if (!requested) {
+      setDeepLinkConsumed(true);
+      return;
+    }
+    const id = Number(requested);
+    if (!Number.isFinite(id)) {
+      setDeepLinkConsumed(true);
+      return;
+    }
+    const match = cases.find((c) => c.id === id);
+    if (match) {
+      setSelectedCase(match);
+      setDeepLinkConsumed(true);
+      params.delete("case");
+      const qs = params.toString();
+      const newUrl =
+        window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash;
+      window.history.replaceState(null, "", newUrl);
+    }
+  }, [cases, deepLinkConsumed]);
 
   return (
     <div className="p-5 space-y-5">
