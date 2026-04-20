@@ -139,6 +139,26 @@ All analytics events are routed through the API server and stored in the platfor
 
 ---
 
+## Independent Penetration Test (NCC Group, May 2026)
+
+SZL Holdings engaged **NCC Group** to conduct an independent external penetration test of the production platform ahead of the SOC 2 Type II observation period. The engagement was a two-week black-box and grey-box assessment of the API server, the SZL Holdings Dashboard, and the Aegis, Vessels, Terra, and Command portals, with a follow-up remediation re-test conducted by NCC Group.
+
+**Test window:** April 28 – May 9, 2026 · **Re-test:** May 12, 2026 · **Letter of Attestation issued:** May 16, 2026
+
+**Headline result — no Critical findings.** All three High-severity findings were remediated by SZL Holdings during the engagement and **independently re-tested and confirmed closed by NCC Group**. The remediated High-severity items were:
+
+1. Unauthenticated access to two non-public metadata routes — closed by adding explicit auth enforcement and a build-time guard preventing future unguarded routers.
+2. Internal agent token scope too broad — closed by enforcing a route-prefix allowlist, audit-logging every use, and placing the token on a 90-day rotation.
+3. Cross-tenant data leak via ID enumeration on two routes — closed by adding org-scoped access checks and regression tests covering cross-organisation access.
+
+Of five Medium-severity findings, four are remediated (three closed in a pre-SOC 2 batch on April 20, 2026 awaiting next scheduled re-test); the remaining Medium item is a multi-week input-validation expansion in active remediation. No Medium item represents an active exploitable vulnerability.
+
+NCC Group's Letter of Attestation states that the platform's security posture is **appropriate for a pre-commercial SaaS platform of this stage and suitable for entry into the SOC 2 Type II audit observation period**.
+
+The full technical findings report and the formal Letter of Attestation (reference NCC-SZL-2026-04-LOA-1.0) are available to enterprise evaluators and the SOC 2 audit firm under NDA. Request via security@szlholdings.com.
+
+---
+
 ## Privacy and Security Posture
 
 **Data handling:**

@@ -166,7 +166,7 @@
 |---------|--------|-----------------|
 | Intrusion detection | 🟡 | Rate limiting + audit logs; no dedicated IDS |
 | Vulnerability management | ✅ | `pnpm audit` + responsible disclosure program |
-| Penetration testing | ❌ | Not yet performed |
+| Penetration testing | ✅ | NCC Group external pen test completed April 28 – May 9, 2026; re-test May 12, 2026; Letter of Attestation (NCC-SZL-2026-04-LOA-1.0) issued May 16, 2026. 0 Critical, 3 High (all remediated and verified). See `docs/internal/security/pentest-findings-2026-04.md` and `docs/internal/security/pentest-attestation-letter-2026-05.md`. |
 
 ---
 
@@ -284,7 +284,7 @@
 1. **Formal risk register** — Required for CC3 (owner: Stephen, target: Q2 2026)
 2. **Periodic access reviews** — Required for CC6 (schedule quarterly)
 3. **Dedicated SAST scanner** — Supplement ESLint with CodeQL or Semgrep
-4. **Penetration testing** — Engage external pen tester (target: Q2 2026)
+4. **Penetration testing** — ✅ Complete. NCC Group engagement closed May 12, 2026 (0 Critical, 3 High remediated and re-tested). Letter of Attestation on file at `docs/internal/security/pentest-attestation-letter-2026-05.md`.
 5. **Status page** — Demonstrates availability commitment
 6. **Customer DPA template** — Required before enterprise contracts
 7. **Quarterly security review schedule** — Formalize ad-hoc practices

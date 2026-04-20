@@ -154,6 +154,6 @@ The full technical gap register is maintained at [`docs/known-gaps.md`](../known
 | External uptime monitoring | Configure before first enterprise pilot | Pre-commercial launch |
 | Sentry or equivalent error tracking in production | Add Sentry DSN to production environment | Next quarter |
 | Multi-region failover | Architect after first enterprise contract | Post-initial revenue |
-| Formal penetration test | Pen test completed (NCC Group, May 2026) — 0 Critical, 3 High (all remediated) | Complete — see `docs/internal/security/pentest-findings-2026-04.md` |
+| Formal penetration test | Pen test completed (NCC Group, May 2026) — 0 Critical, 3 High (all remediated and independently re-tested). Formal Letter of Attestation (NCC-SZL-2026-04-LOA-1.0) issued May 16, 2026. | Complete — see `docs/internal/security/pentest-findings-2026-04.md` and the [Letter of Attestation](../internal/security/pentest-attestation-letter-2026-05.md) |
 
 These gaps are honest and documented. None of them represent active vulnerabilities in the current demonstration environment. The full gap register with risk ratings, quantified current state, and remediation paths is maintained at [`docs/known-gaps.md`](../known-gaps.md).
