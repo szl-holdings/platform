@@ -168,6 +168,7 @@ router.post("/memory", authMiddleware(), validateBody(bodyShape({
       "tags": z.unknown().optional(),
       "tier": z.unknown().optional(),
       "value": z.unknown().optional(),
+      "domain": z.unknown().optional(),
     })), async (req: Request, res: Response) => {
   try {
     const now = new Date().toISOString();
@@ -198,8 +199,22 @@ router.post("/memory", authMiddleware(), validateBody(bodyShape({
       linkedActions: body.linkedActions,
       tags: body.tags,
       scopeId: body.scopeId,
+      // No fallback: the executive briefing query relies on every record
+      // carrying an accurate domain tag. Callers must pass `domain` (use
+      // MEMORY_DOMAIN_UNKNOWN explicitly if the memory genuinely spans
+      // domains). Missing/empty values are rejected by MemoryEntrySchema
+      // below.
+      domain: body.domain,
       metadata: body.metadata,
     };
+
+    if (typeof body.domain !== "string" || body.domain.length === 0) {
+      sendBadRequest(
+        res,
+        "Field 'domain' is required on memory writes. Pass MEMORY_DOMAIN_UNKNOWN ('unknown') if the memory genuinely spans domains.",
+      );
+      return;
+    }
 
     const parsed = MemoryEntrySchema.parse(entryInput);
     const withRetention = applyRetentionDefaults(parsed);

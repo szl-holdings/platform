@@ -17,6 +17,50 @@ export const MemoryTierSchema = MemoryTypeSchema;
 
 export const SensitivityLevelSchema = z.enum(["public", "internal", "confidential", "restricted"]);
 
+/**
+ * Canonical fallback domain for memory entries that genuinely don't belong
+ * to any single product domain (e.g. cross-cutting platform telemetry).
+ *
+ * Every memory writer must set `domain` explicitly. Use this constant rather
+ * than passing `""` or omitting the field — `MemoryEntrySchema` rejects empty
+ * strings so the runtime guarantee that "every memory has a domain tag" holds.
+ */
+export const MEMORY_DOMAIN_UNKNOWN = "unknown" as const;
+
+/**
+ * Known product/operational domains that the executive briefing engine and
+ * other domain-scoped queries match against. Writers SHOULD pick one of these
+ * when the memory belongs to a single product. The list is informational —
+ * `domain` is a free-form string so new domains can be added without a code
+ * change here. The runtime check in `MemoryEntrySchema` only requires that
+ * `domain` is a non-empty string.
+ */
+export const KNOWN_MEMORY_DOMAINS = [
+  "vessels",
+  "aegis",
+  "terra",
+  "lyte",
+  "prism",
+  "carlota",
+  "sentra",
+  "szl-holdings",
+  "platform",
+  "consolidated",
+  MEMORY_DOMAIN_UNKNOWN,
+] as const;
+
+export type KnownMemoryDomain = (typeof KNOWN_MEMORY_DOMAINS)[number];
+
+/**
+ * Zod refinement that enforces the "every memory record has a domain tag"
+ * invariant. Exported separately so other writer code paths (e.g. raw
+ * `memoryRecordsTable` inserts that bypass `MemoryEntrySchema`) can call it
+ * without re-implementing the check.
+ */
+export const MemoryDomainSchema = z
+  .string()
+  .min(1, "memory.domain is required — pass MEMORY_DOMAIN_UNKNOWN if truly unscoped");
+
 export const MemoryProvenanceSchema = z.object({
   source: z.string(),
   sourceId: z.string().optional(),
@@ -51,6 +95,14 @@ export const MemoryEntrySchema = z.object({
   linkedActions: z.array(z.string()).default([]),
   tags: z.array(z.string()).default([]),
   scopeId: z.string().optional(),
+  /**
+   * Canonical product/operational domain this memory belongs to. Required —
+   * use `MEMORY_DOMAIN_UNKNOWN` for entries that genuinely span domains. The
+   * memory store mirrors this into `metadata.domain` and `scope_id` on write
+   * so that domain-scoped queries (executive briefings, dashboards) can match
+   * on a single canonical field.
+   */
+  domain: MemoryDomainSchema,
   metadata: z.record(z.unknown()).default({}),
 });
 

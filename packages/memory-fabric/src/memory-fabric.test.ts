@@ -29,6 +29,7 @@ function makeEntry(
     tier,
     key,
     value: "test-value",
+    domain: "test",
     provenance: { source: "test", createdAt: now },
     freshness: { lastUpdatedAt: now },
     ...overrides,
@@ -76,6 +77,7 @@ describe("MemoryEntrySchema — defaults", () => {
       memoryType: "semantic",
       key: "domain-fact",
       value: "The capital is Paris",
+      domain: "test",
       provenance: { source: "test", createdAt: new Date().toISOString() },
       freshness: { lastUpdatedAt: new Date().toISOString() },
     });
@@ -622,6 +624,7 @@ describe("Memory CRUD with provenance", () => {
       tier: "entity",
       key: "customer:c-999",
       value: { name: "Acme Corp" },
+      domain: "test",
       provenance: {
         source: "crm-connector",
         sourceId: "crm-c-999",

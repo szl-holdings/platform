@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { defaultMemoryStore } from "@workspace/memory-fabric";
+import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from "@workspace/memory-fabric";
 import type { MemoryEntry, MemoryStore } from "@workspace/memory-fabric";
 import type { PerceiveInput, PhaseResult } from "../types.js";
 
@@ -64,6 +64,7 @@ export async function perceivePhase(
       linkedActions: [],
       tags: ["perception", eventType, input.sourceDomain ?? "unknown"].filter(Boolean),
       scopeId: opts.scopeId,
+      domain: input.sourceDomain ?? MEMORY_DOMAIN_UNKNOWN,
       metadata: { perceptionId, agentId: opts.agentId },
     };
     memoryStore.put(entry);

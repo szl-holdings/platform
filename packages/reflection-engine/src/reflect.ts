@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { defaultTraceStore } from "@workspace/trace-graph";
-import { defaultMemoryStore } from "@workspace/memory-fabric";
+import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from "@workspace/memory-fabric";
 import type { MemoryEntry } from "@workspace/memory-fabric";
 import { scoreTrace, extractBestRoute } from "./scorer.js";
 import { classifyFailureMode } from "./classifier.js";
@@ -17,6 +17,12 @@ export interface ReflectOptions {
   reflectionStore?: typeof defaultReflectionStore;
   skillLibrary?: CandidateSkillLibrary;
   onSkillDrafted?: (skill: import("./types.js").CandidateSkill) => void;
+  /**
+   * Domain to tag the reflection's memory entries with so executive briefings
+   * and other domain-scoped readers can find them. Defaults to
+   * `MEMORY_DOMAIN_UNKNOWN` when callers don't thread a domain through.
+   */
+  domain?: string;
 }
 
 export class TraceNotFoundError extends Error {
@@ -93,6 +99,7 @@ export async function reflect(
     linkedTraces: [traceId],
     linkedActions: [],
     tags: ["reflection", "lesson", `failure:${failureMode}`],
+    domain: options.domain ?? MEMORY_DOMAIN_UNKNOWN,
     metadata: { qualityScore: score.overall, failureMode },
   };
   memoryStore.put(episodicEntry);
@@ -122,6 +129,7 @@ export async function reflect(
       linkedTraces: [traceId],
       linkedActions: [],
       tags: ["candidate-skill", "draft", candidateSkill.category],
+      domain: options.domain ?? MEMORY_DOMAIN_UNKNOWN,
       metadata: { skillId: candidateSkill.skillId, derivedFromTraceId: traceId },
     };
     memoryStore.put(skillEntry);

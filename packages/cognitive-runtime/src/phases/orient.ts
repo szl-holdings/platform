@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { defaultMemoryStore } from "@workspace/memory-fabric";
+import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from "@workspace/memory-fabric";
 import type { MemoryStore } from "@workspace/memory-fabric";
 import type { PhaseResult, WorldModelUpdate } from "../types.js";
 import type { PerceiveOutput } from "./perceive.js";
@@ -108,6 +108,7 @@ export async function orientPhase(
     linkedTraces: [opts.traceId],
     linkedActions: [],
     tags: ["world-model", "orientation", opts.domain ?? "unknown"].filter(Boolean),
+    domain: opts.domain ?? MEMORY_DOMAIN_UNKNOWN,
     metadata: { orientationId, objective: opts.objective },
   });
 

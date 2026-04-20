@@ -1,7 +1,9 @@
 import { and, desc, eq, type InferInsertModel, inArray, lt, or } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { MEMORY_DOMAIN_UNKNOWN } from "./types.js";
 import type { MemoryEntry, MemoryTier } from "./types.js";
+import { assertMemoryDomain } from "./store.js";
 import type { MemoryStore, MemoryStoreQuery } from "./store.js";
 
 export interface PostgresMemoryStoreLogger {
@@ -56,12 +58,18 @@ interface MemoryRowShape {
 }
 
 function buildRow(entry: MemoryEntry): InferInsertModel<MemoryRecordsTableLike> {
+  // Mirror the canonical domain into both `metadata.domain` and (when the
+  // writer didn't set its own scope) `scope_id = "domain:<d>"`. This keeps
+  // the executive briefing query a single equality check while preserving
+  // any explicit scopeId the writer chose.
+  const metadata = { ...(entry.metadata ?? {}), domain: entry.domain };
+  const scopeId = entry.scopeId ?? `domain:${entry.domain}`;
   const row = {
     externalId: entry.id,
     tier: entry.tier,
     key: entry.key,
     value: entry.value ?? null,
-    scopeId: entry.scopeId ?? null,
+    scopeId,
     confidence: String(entry.confidence ?? 1),
     sensitivity: entry.sensitivity,
     retentionPolicy: entry.retention.policy,
@@ -76,7 +84,7 @@ function buildRow(entry: MemoryEntry): InferInsertModel<MemoryRecordsTableLike> 
     linkedTraces: entry.linkedTraces ?? [],
     linkedActions: entry.linkedActions ?? [],
     tags: entry.tags ?? [],
-    metadata: entry.metadata ?? {},
+    metadata,
     lastAccessedAt: entry.freshness.lastAccessedAt
       ? new Date(entry.freshness.lastAccessedAt)
       : null,
@@ -89,12 +97,24 @@ function rowToEntry(raw: unknown): MemoryEntry | undefined {
   if (!raw || typeof raw !== "object") return undefined;
   const row = raw as Partial<MemoryRowShape>;
   if (typeof row.externalId !== "string") return undefined;
+  // Recover the canonical domain from the mirrored `metadata.domain` column;
+  // hydration must always produce a domain-tagged entry so the in-process
+  // store passes its own `assertMemoryDomain` check on subsequent puts.
+  const metadataDomain =
+    row.metadata && typeof row.metadata === "object"
+      ? (row.metadata as Record<string, unknown>)["domain"]
+      : undefined;
+  const domain =
+    typeof metadataDomain === "string" && metadataDomain.length > 0
+      ? metadataDomain
+      : MEMORY_DOMAIN_UNKNOWN;
   return {
     id: row.externalId,
     tier: row.tier as MemoryTier,
     key: row.key ?? "",
     value: row.value ?? undefined,
     scopeId: row.scopeId ?? undefined,
+    domain,
     confidence:
       typeof row.confidence === "string"
         ? Number(row.confidence)
@@ -162,9 +182,12 @@ export class PostgresMemoryStore implements MemoryStore {
   }
 
   put(entry: MemoryEntry): void {
+    assertMemoryDomain(entry);
     const updated: MemoryEntry = {
       ...entry,
       freshness: { ...entry.freshness, lastUpdatedAt: new Date().toISOString() },
+      // Mirror canonical domain into metadata for direct SQL readers.
+      metadata: { ...(entry.metadata ?? {}), domain: entry.domain },
     };
     const copy: MemoryEntry = JSON.parse(JSON.stringify(updated));
     this.cache.set(entry.id, copy);

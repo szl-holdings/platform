@@ -2,6 +2,26 @@ import type { MemoryEntry, MemoryType } from "./types.js";
 
 type MemoryTier = MemoryType;
 
+/**
+ * Runtime guard called by every MemoryStore.put implementation. Rejects
+ * writes that don't carry a domain tag so the executive briefing engine and
+ * other domain-scoped readers can rely on `entry.domain` (and the mirrored
+ * `metadata.domain`) being populated for every record.
+ *
+ * Throws synchronously with a descriptive error so the offending writer is
+ * easy to find in logs / stack traces — the alternative (silently defaulting
+ * to "unknown") is exactly the inconsistency this enforcement removes.
+ */
+export function assertMemoryDomain(entry: MemoryEntry): void {
+  if (typeof entry.domain !== "string" || entry.domain.length === 0) {
+    throw new Error(
+      `MemoryStore.put: entry ${entry.id} (tier=${entry.tier}, key=${entry.key}) ` +
+        `is missing required 'domain' tag. Pass MEMORY_DOMAIN_UNKNOWN if the ` +
+        `memory genuinely spans domains.`,
+    );
+  }
+}
+
 export interface MemoryStoreQuery {
   tier?: MemoryType;
   key?: string;
@@ -30,6 +50,7 @@ export class InMemoryStore implements MemoryStore {
   private readonly entries = new Map<string, MemoryEntry>();
 
   put(entry: MemoryEntry): void {
+    assertMemoryDomain(entry);
     const updated: MemoryEntry = {
       ...entry,
       memoryType: entry.memoryType ?? entry.tier,
@@ -37,6 +58,9 @@ export class InMemoryStore implements MemoryStore {
         ...entry.freshness,
         lastUpdatedAt: new Date().toISOString(),
       },
+      // Mirror the canonical domain into metadata so consumers that read
+      // `metadata.domain` directly (e.g. raw SQL queries) see the same value.
+      metadata: { ...(entry.metadata ?? {}), domain: entry.domain },
     };
     this.entries.set(entry.id, updated);
   }

@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { defaultSelfModelStore, updateAfterRun } from "@workspace/self-model";
-import { defaultMemoryStore } from "@workspace/memory-fabric";
+import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from "@workspace/memory-fabric";
 import type { SelfModelStore } from "@workspace/self-model";
 import type { MemoryStore, MemoryEntry } from "@workspace/memory-fabric";
 import type { PhaseResult } from "../types.js";
@@ -175,6 +175,7 @@ export async function updateMemoryPhase(
     linkedTraces: [opts.traceId],
     linkedActions: [],
     tags: ["cognitive-run", status, opts.domain ?? "unknown"].filter(Boolean),
+    domain: opts.domain ?? MEMORY_DOMAIN_UNKNOWN,
     metadata: { runId: opts.runId },
   };
   memoryStore.put(episodicEntry);
@@ -213,6 +214,7 @@ export async function updateMemoryPhase(
       linkedTraces: [opts.traceId],
       linkedActions: [],
       tags: ["lesson", "reflection", opts.domain ?? "unknown", reflectOutput.failureMode].filter(Boolean),
+      domain: opts.domain ?? MEMORY_DOMAIN_UNKNOWN,
       metadata: { reflectionId: reflectOutput.reflectionId, runId: opts.runId },
     };
     memoryStore.put(lessonEntry);

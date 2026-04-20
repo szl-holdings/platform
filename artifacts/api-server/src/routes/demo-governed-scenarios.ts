@@ -14,7 +14,9 @@ import type { MemoryEntry } from "@workspace/memory-fabric/types";
 
 const router: IRouter = Router();
 
-function buildMemoryEntry(overrides: Partial<MemoryEntry> & { id?: string; key: string; value: unknown }): MemoryEntry {
+function buildMemoryEntry(
+  overrides: Partial<MemoryEntry> & { id?: string; key: string; value: unknown; domain: string },
+): MemoryEntry {
   const now = new Date().toISOString();
   return {
     id: overrides.id ?? randomUUID(),
@@ -33,6 +35,7 @@ function buildMemoryEntry(overrides: Partial<MemoryEntry> & { id?: string; key: 
     linkedActions: overrides.linkedActions ?? [],
     tags: overrides.tags ?? ["demo", "seeded"],
     scopeId: overrides.scopeId,
+    domain: overrides.domain,
     metadata: overrides.metadata ?? {},
   };
 }
@@ -130,6 +133,7 @@ router.post(
       };
 
       const vesselEntityEntry = buildMemoryEntry({
+        domain: "vessels",
         tier: "entity",
         key: "vessel:mv-albatross:reroute-decision",
         value: {
@@ -151,6 +155,7 @@ router.post(
       });
 
       const vesselWorkingEntry = buildMemoryEntry({
+        domain: "vessels",
         tier: "working",
         key: `run:${vesselEval.evaluationId}:weather-context`,
         value: {
@@ -168,6 +173,7 @@ router.post(
       });
 
       const carlotaEntityEntry = buildMemoryEntry({
+        domain: "carlota",
         tier: "entity",
         key: "vendor:floorworks:reschedule",
         value: {
@@ -189,6 +195,7 @@ router.post(
       });
 
       const lessonEntry = buildMemoryEntry({
+        domain: "carlota",
         tier: "skill",
         key: "pattern:vendor-reschedule:low-cost",
         value: "Vendor reschedule requests with cost < $2000 and confirmed client availability can be auto-executed without operator review.",

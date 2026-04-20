@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { MEMORY_DOMAIN_UNKNOWN } from "./types.js";
 import type { MemoryEntry } from "./types.js";
 import type { MemoryStore } from "./store.js";
 import { isExpired, isLowValue, isProvenPlaybook, markStale } from "./retention.js";
@@ -58,6 +59,7 @@ export function summarizeEpisodes(
     linkedActions: unique(episodes.flatMap((e) => e.linkedActions)),
     tags: ["episodic-summary", ...(scopeId ? [`scope:${scopeId}`] : [])],
     scopeId,
+    domain: dominantDomain(episodes),
     metadata: { collapsedCount: episodes.length, collapsedIds: episodes.map((e) => e.id) },
   };
 
@@ -108,6 +110,7 @@ export function distillLessons(
     linkedTraces: unique(highValueFeedback.flatMap((e) => e.linkedTraces)),
     linkedActions: unique(highValueFeedback.flatMap((e) => e.linkedActions)),
     tags: ["distilled-lesson", "skill"],
+    domain: dominantDomain(highValueFeedback),
     metadata: { sourceIds: highValueFeedback.map((e) => e.id) },
   };
 
@@ -234,11 +237,34 @@ function highestSensitivity(levels: MemoryEntry["sensitivity"][]): MemoryEntry["
     const idx = order.indexOf(lvl);
     if (idx > max) max = idx;
   }
-  return order[max];
+  return order[max] ?? "internal";
 }
 
 function unique<T>(arr: T[]): T[] {
   return [...new Set(arr)];
+}
+
+/**
+ * Pick the most-common `domain` value from a set of source entries so derived
+ * memories (summaries, distilled lessons) inherit the dominant domain rather
+ * than silently defaulting to "unknown".
+ */
+function dominantDomain(entries: MemoryEntry[]): string {
+  const counts = new Map<string, number>();
+  for (const e of entries) {
+    if (typeof e.domain === "string" && e.domain.length > 0) {
+      counts.set(e.domain, (counts.get(e.domain) ?? 0) + 1);
+    }
+  }
+  let best: string = MEMORY_DOMAIN_UNKNOWN;
+  let bestCount = 0;
+  for (const [d, c] of counts) {
+    if (c > bestCount) {
+      best = d;
+      bestCount = c;
+    }
+  }
+  return best;
 }
 
 function average(nums: number[]): number {

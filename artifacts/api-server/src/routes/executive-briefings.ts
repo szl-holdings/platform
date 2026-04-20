@@ -221,31 +221,14 @@ async function fetchRecentMemories(domain: string, entityIds: string[] = []): Pr
 
     const conditions: ReturnType<typeof gte>[] = [gte(memoryRecordsTable.createdAt, since)];
     if (domain !== "consolidated") {
-      // Match memory records that are tied to the domain via any of the live
-      // memory-fabric attribution channels:
-      //   - metadata.domain — ad-hoc tag set by some writers
-      //   - scope_id prefixed with `domain:<domain>` (memory-fabric convention)
-      //   - provenance_source naming the domain agent / pack
-      //   - linked_entities containing one of the world-model entity ids we
-      //     already resolved for this domain (so an "entity"-tier memory about
-      //     a vessel surfaces in the vessels brief without needing tag hygiene)
-      // Bind entity ids as a parameterized text[] for the JSONB `?|` operator
-      // (matches when linked_entities contains any of the ids). Drizzle handles
-      // parameterization — no manual interpolation.
-      const linkedClause = entityIds.length > 0
-        ? sql`${memoryRecordsTable.linkedEntities} ?| ${entityIds}::text[]`
-        : undefined;
-
-      const orParts = [
-        sql`${memoryRecordsTable.metadata}->>'domain' = ${domain}`,
-        sql`${memoryRecordsTable.scopeId} = ${`domain:${domain}`}`,
-        sql`${memoryRecordsTable.scopeId} LIKE ${`domain:${domain}:%`}`,
-        sql`${memoryRecordsTable.provenanceSource} ILIKE ${`%${domain}%`}`,
-      ];
-      if (linkedClause) orParts.push(linkedClause);
-      const domainOr = or(...orParts);
-      if (domainOr) conditions.push(domainOr);
+      // Single canonical equality check on `metadata.domain`. Every writer in
+      // the memory fabric is now required to set `entry.domain`, which the
+      // store mirrors into `metadata.domain` and `scope_id = "domain:<d>"`,
+      // so the previous four-signal OR (metadata + scope_id prefix +
+      // provenance ILIKE + linked_entities) is no longer needed.
+      conditions.push(sql`${memoryRecordsTable.metadata}->>'domain' = ${domain}`);
     }
+    void entityIds;
 
     const rows = await db
       .select()
