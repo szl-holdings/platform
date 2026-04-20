@@ -153,7 +153,7 @@ function pickEscalation(active: TeamMember[], onCall: TeamMember | null): TeamMe
  * Resolve who is on-call right now for a team, honoring overrides and the
  * configured rotation before falling back to the legacy weekly pick.
  */
-async function resolveOnCall(
+export async function resolveOnCall(
   team: string,
   members: TeamMember[],
   now: Date,
@@ -894,6 +894,7 @@ export interface ScheduleResponse {
     memberOrder: number[];
     handoffAnchor: string;
     timezone: string;
+    warningMinutes: number;
     updatedAt: string;
     updatedBy: number;
   } | null;
@@ -949,6 +950,7 @@ async function loadScheduleResponse(team: string, now: Date = new Date()): Promi
           memberOrder: schedule.memberOrder,
           handoffAnchor: schedule.handoffAnchor.toISOString(),
           timezone: schedule.timezone,
+          warningMinutes: schedule.warningMinutes,
           updatedAt: schedule.updatedAt.toISOString(),
           updatedBy: schedule.updatedBy,
         }
@@ -1010,6 +1012,7 @@ router.put(
         memberOrder?: unknown;
         handoffAnchor?: unknown;
         timezone?: unknown;
+        warningMinutes?: unknown;
       };
 
       const intervalRaw = body.rotationIntervalHours;
@@ -1046,6 +1049,17 @@ router.put(
           ? body.timezone.trim()
           : "UTC";
 
+      // #2482: per-schedule warning window. 0 disables the warning, capped
+      // at 24h to keep the scheduler's lookahead bounded.
+      const warningRaw = body.warningMinutes;
+      let warningMinutes = 30;
+      if (warningRaw !== undefined) {
+        if (typeof warningRaw !== "number" || !Number.isFinite(warningRaw) || warningRaw < 0) {
+          return sendBadRequest(res, "warningMinutes must be a non-negative number");
+        }
+        warningMinutes = Math.min(Math.floor(warningRaw), 24 * 60);
+      }
+
       const actor = req.user!;
       const now = new Date();
 
@@ -1065,6 +1079,7 @@ router.put(
             memberOrder,
             handoffAnchor,
             timezone,
+            warningMinutes,
             updatedBy: actor.id,
             updatedAt: now,
           })
@@ -1076,6 +1091,7 @@ router.put(
           memberOrder,
           handoffAnchor,
           timezone,
+          warningMinutes,
           updatedBy: actor.id,
         });
       }

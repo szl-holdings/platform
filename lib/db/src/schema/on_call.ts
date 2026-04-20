@@ -26,6 +26,7 @@ import {
   jsonb,
   index,
   uniqueIndex,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -53,6 +54,12 @@ export const onCallSchedulesTable = pgTable(
     handoffAnchor: timestamp("handoff_anchor", { withTimezone: true }).notNull().defaultNow(),
     /** IANA timezone label for display ("UTC", "America/Los_Angeles", ...). */
     timezone: text("timezone").notNull().default("UTC"),
+    /**
+     * Minutes before a hand-off boundary at which to nudge the next on-call
+     * user. 0 disables the warning entirely (the moment-of-handoff
+     * notification still fires). See task #2482.
+     */
+    warningMinutes: integer("warning_minutes").notNull().default(30),
     updatedBy: integer("updated_by").references(() => usersTable.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -104,3 +111,42 @@ export const insertOnCallShiftSchema = createInsertSchema(onCallShiftsTable).omi
 });
 export type InsertOnCallShift = z.infer<typeof insertOnCallShiftSchema>;
 export type OnCallShift = typeof onCallShiftsTable.$inferSelect;
+
+/**
+ * Dedup ledger for the on-call hand-off scheduler (#2482).
+ *
+ * One row per (team, handoff_at, kind, user_id) combination. The unique
+ * index lets the minutely scheduler insert with `onConflictDoNothing` to
+ * avoid double-notifying on overlapping ticks or after a restart.
+ *
+ * `kind` is one of:
+ *   - `warning` — fired N minutes before the hand-off (per schedule's
+ *     `warningMinutes`).
+ *   - `handoff` — fired at the hand-off moment.
+ */
+export const onCallHandoffNotificationsTable = pgTable(
+  "on_call_handoff_notifications",
+  {
+    id: serial("id").primaryKey(),
+    team: text("team").notNull(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    handoffAt: timestamp("handoff_at", { withTimezone: true }).notNull(),
+    kind: text("kind", { enum: ["warning", "handoff"] }).notNull(),
+    /** notifications.id of the in-app row inserted, if any. */
+    notificationId: integer("notification_id"),
+    inAppDelivered: boolean("in_app_delivered").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    dedupIdx: uniqueIndex("on_call_handoff_notifications_dedup").on(
+      t.team,
+      t.handoffAt,
+      t.kind,
+      t.userId,
+    ),
+  }),
+);
+
+export type OnCallHandoffNotification = typeof onCallHandoffNotificationsTable.$inferSelect;

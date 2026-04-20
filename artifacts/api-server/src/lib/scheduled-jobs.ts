@@ -29,6 +29,7 @@ export const NAMED_JOB_TYPES = {
   LAUNCH_PUBLISH_SCAN: "launch_publish_scan",
   MESH_TELEMETRY_SCAN: "mesh_telemetry_scan",
   HOURLY_GUARDIAN_APPROVAL_EXPIRY: "hourly_guardian_approval_expiry",
+  ON_CALL_HANDOFF_NOTIFY: "on_call_handoff_notify",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -78,6 +79,7 @@ registerEntry({ type: NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, name: "ATLAS Retent
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL, name: "Daily Competitive Intel Poll", description: "Polls product blogs / RSS feeds for the champions tracked in the SZL Competitive Atlas (CrowdStrike, Clio, CoStar, Windward, Palantir, ThoughtSpot, Darktrace) and surfaces new major-feature announcements as Intel Update alerts in the Command Competitive Atlas page with adopt/counter/monitor recommendations.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, name: "Launch Publish Scheduler", description: "Sweeps Distribution OS (dos_articles, dos_carousel_projects, dos_x_posts, dos_content_calendar_items) every 5 minutes for items whose scheduled publish time has arrived but whose status is still ready/approved/queued/scheduled, and triggers the matching Medium / Substack / LinkedIn / X publish helper. Newsletters auto-publish only when pinned to a calendar slot whose scheduledDate has arrived. Successful publishes flip the source row to published and record the external URL; failures are retried with per-item exponential backoff (1 min → 1 hr cap, terminal flip after 5 attempts) and surfaced on the Distribution OS dashboard via dos_automation_runs.", schedule: "minutely" as JobScheduleEntry["schedule"], enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, name: "Agent Mesh Telemetry Scan", description: "Re-scans local agent runtime config files (Claude Desktop, Cursor, Claude Code, Codex), refreshes the Sentra Mesh Map data, recomputes the resilience index, and fires Sentra alerts whenever the overall index or any sub-index drops materially since the last run. Runs every 15 minutes per scheduled org.", schedule: "hourly", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, name: "On-Call Hand-off Notifier", description: "Runs every minute. Inspects on_call_schedules + on_call_shifts for upcoming hand-off boundaries (rotation slot edges, override start/end). Notifies the next on-call user N minutes before (per schedule.warningMinutes, default 30) and at the moment of hand-off. Idempotent via on_call_handoff_notifications dedup table. Uses dispatchToExternalChannels so email/SMS/Slack work per the recipient's notification_preferences.", schedule: "minutely" as JobScheduleEntry["schedule"], enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, name: "Guardian Approval Expiry Sweeper", description: "Scans guardian_approval_requests every 5 minutes for pending entries whose expires_at is in the past and flips them to status='expired' so agents waiting on the request can detect the timeout and retry or escalate. Per-tier expiry windows are configured in TIER_CONTROLS (T2=24h, T3=48h, T4=72h; T0/T1/T5 do not auto-expire).", schedule: "hourly", enabled: true });
 
 durableJobQueue.register(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, async (job) => {
@@ -1256,6 +1258,301 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, async 
       lastStatus: "failed",
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+});
+
+/**
+ * On-call hand-off notifier (#2482).
+ *
+ * Runs every minute. For each configured rotation and each upcoming/just-
+ * passed shift edge, computes the moment of hand-off, resolves who is on-
+ * call AT that moment, and notifies them once at `warningMinutes` before
+ * (the "warning" kind) and once at the moment itself (the "handoff" kind).
+ *
+ * Idempotency is provided by the `on_call_handoff_notifications` unique
+ * index on (team, handoff_at, kind, user_id) — re-running this job in the
+ * same window simply hits the conflict and inserts nothing.
+ */
+durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => {
+  const start = Date.now();
+  let warningsSent = 0;
+  let handoffsSent = 0;
+  let candidatesEvaluated = 0;
+  try {
+    const {
+      db,
+      onCallSchedulesTable,
+      onCallShiftsTable,
+      onCallHandoffNotificationsTable,
+      notificationsTable,
+      notificationPreferencesTable,
+      usersTable,
+    } = await import("@szl-holdings/db");
+    const { and, eq, gte, lte } = await import("drizzle-orm");
+    const { resolveOnCall } = await import("../routes/teams");
+    type TeamMember = import("../routes/teams").TeamMember;
+    const { dispatchToExternalChannels } = await import("../routes/notifications");
+    const { publish, WS_CHANNELS } = await import("./websocket");
+
+    const now = new Date();
+    // Tolerate slight scheduler jitter at both ends of the window.
+    const lookbackMs = 90 * 1000;
+    const HANDOFF_TOLERANCE_MS = 90 * 1000;
+
+    const schedules = await db.select().from(onCallSchedulesTable);
+    if (schedules.length === 0) {
+      updateRegistry(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+      return;
+    }
+
+    // Per-team max warning window so we know how far ahead to look.
+    const maxWarningMin = Math.max(0, ...schedules.map((s) => s.warningMinutes));
+    const lookaheadMs = maxWarningMin * 60 * 1000 + 60 * 1000;
+
+    // Bound the shift query to the wider scan window so we capture both
+    // start and end edges that fall inside it.
+    const shiftWindowStart = new Date(now.getTime() - lookbackMs);
+    const shiftWindowEnd = new Date(now.getTime() + lookaheadMs);
+    const allShifts = await db
+      .select()
+      .from(onCallShiftsTable)
+      .where(
+        and(
+          gte(onCallShiftsTable.endAt, shiftWindowStart),
+          lte(onCallShiftsTable.startAt, shiftWindowEnd),
+        ),
+      );
+
+    // Build candidate hand-off moments per team.
+    const byTeam = new Map<string, { times: number[]; warningMs: number }>();
+
+    for (const s of schedules) {
+      const teamWarningMs = s.warningMinutes * 60 * 1000;
+      const earliest = now.getTime() - lookbackMs;
+      const latest = now.getTime() + teamWarningMs + 60 * 1000;
+      const bucket = byTeam.get(s.team) ?? { times: [], warningMs: teamWarningMs };
+      // Keep the per-team warning window so the kind classifier below uses
+      // this team's preference, not the global max.
+      bucket.warningMs = teamWarningMs;
+
+      // Rotation slot boundaries.
+      if (s.rotationIntervalHours > 0 && s.memberOrder.length > 0) {
+        const interval = s.rotationIntervalHours * 60 * 60 * 1000;
+        const anchor = s.handoffAnchor.getTime();
+        let n = Math.floor((earliest - anchor) / interval);
+        let t = anchor + n * interval;
+        if (t < earliest) {
+          n += 1;
+          t = anchor + n * interval;
+        }
+        // Hard cap on iterations to defend against pathologically small
+        // intervals (interval=1h with a 24h+ warning window would be 24 ticks).
+        let safety = 1000;
+        while (t <= latest && safety-- > 0) {
+          bucket.times.push(t);
+          n += 1;
+          t = anchor + n * interval;
+        }
+      }
+      byTeam.set(s.team, bucket);
+    }
+
+    // Shift start + end edges. Use the matching team's warning window if
+    // configured; otherwise default to 30 minutes so unconfigured teams
+    // still get notified about their explicit overrides.
+    for (const sh of allShifts) {
+      const bucket =
+        byTeam.get(sh.team) ?? { times: [], warningMs: 30 * 60 * 1000 };
+      const startMs = sh.startAt.getTime();
+      const endMs = sh.endAt.getTime();
+      if (
+        startMs >= now.getTime() - lookbackMs &&
+        startMs <= now.getTime() + bucket.warningMs + 60 * 1000
+      ) {
+        bucket.times.push(startMs);
+      }
+      if (
+        endMs >= now.getTime() - lookbackMs &&
+        endMs <= now.getTime() + bucket.warningMs + 60 * 1000
+      ) {
+        bucket.times.push(endMs);
+      }
+      byTeam.set(sh.team, bucket);
+    }
+
+    const appUrl = process.env["APP_URL"] ?? process.env["VITE_APP_URL"] ?? "";
+    const actionUrl = `${appUrl}/command/operations/deployments`;
+
+    for (const [team, { times, warningMs }] of byTeam) {
+      if (times.length === 0) continue;
+
+      // Dedup + sort.
+      const uniqMs = Array.from(new Set(times)).sort((a, b) => a - b);
+
+      // Load team members once per team.
+      const memberRows = await db
+        .select({
+          id: usersTable.id,
+          displayName: usersTable.displayName,
+          email: usersTable.email,
+          avatarUrl: usersTable.avatarUrl,
+          platformRole: usersTable.platformRole,
+          isActive: usersTable.isActive,
+        })
+        .from(usersTable)
+        .where(eq(usersTable.team, team));
+      const members: TeamMember[] = memberRows.map((r) => ({
+        id: r.id,
+        displayName: r.displayName,
+        email: r.email,
+        avatarUrl: r.avatarUrl,
+        platformRole: r.platformRole,
+        isActive: r.isActive,
+      }));
+      if (members.length === 0) continue;
+
+      for (const ms of uniqMs) {
+        candidatesEvaluated += 1;
+        const at = new Date(ms);
+        const before = new Date(ms - 1000);
+        const after = new Date(ms + 1000);
+        const [prev, next] = await Promise.all([
+          resolveOnCall(team, members, before),
+          resolveOnCall(team, members, after),
+        ]);
+        const nextOnCall = next.onCall;
+        if (!nextOnCall) continue;
+        // Skip "no real change" candidates (slot boundary where the same
+        // person stays on-call because the rotation has length 1, etc).
+        if (prev.onCall && prev.onCall.id === nextOnCall.id) continue;
+        // Don't notify inactive recipients — there's nothing they can do.
+        if (!nextOnCall.isActive) continue;
+
+        const diff = ms - now.getTime();
+        // Classify: anything inside ±tolerance of now is the moment-of
+        // hand-off; anything strictly in the future inside the warning
+        // window is a warning.
+        const kinds: Array<"warning" | "handoff"> = [];
+        if (Math.abs(diff) <= HANDOFF_TOLERANCE_MS) {
+          kinds.push("handoff");
+        } else if (diff > 0 && warningMs > 0 && diff <= warningMs) {
+          kinds.push("warning");
+        }
+        if (kinds.length === 0) continue;
+
+        for (const kind of kinds) {
+          // Idempotency: try to claim the (team, handoff_at, kind, user)
+          // slot first. If the conflict fires, someone else already
+          // handled this notification — bail without sending.
+          const claim = await db
+            .insert(onCallHandoffNotificationsTable)
+            .values({
+              team,
+              userId: nextOnCall.id,
+              handoffAt: at,
+              kind,
+              notificationId: null,
+              inAppDelivered: false,
+            })
+            .onConflictDoNothing()
+            .returning({ id: onCallHandoffNotificationsTable.id });
+          if (claim.length === 0) continue;
+
+          const minutesUntil = Math.max(0, Math.round(diff / 60_000));
+          const title =
+            kind === "warning"
+              ? `On-call heads up · ${team} in ${minutesUntil}m`
+              : `You're on-call · ${team}`;
+          const message =
+            kind === "warning"
+              ? `You're up next on the ${team} on-call rotation in about ${minutesUntil} minute${minutesUntil === 1 ? "" : "s"} (hand-off at ${at.toISOString()}).`
+              : `You're now on-call for ${team}. Hand-off effective ${at.toISOString()}.`;
+
+          // Honor the recipient's in-app preference (default on).
+          const [pref] = await db
+            .select({
+              inAppEnabled: notificationPreferencesTable.inAppEnabled,
+            })
+            .from(notificationPreferencesTable)
+            .where(eq(notificationPreferencesTable.userId, nextOnCall.id))
+            .limit(1);
+          const inAppOn = pref ? pref.inAppEnabled : true;
+
+          let notificationId = 0;
+          if (inAppOn) {
+            const [notif] = await db
+              .insert(notificationsTable)
+              .values({
+                userId: nextOnCall.id,
+                type: "info",
+                channel: "in_app",
+                title,
+                message,
+                actionUrl,
+              })
+              .returning();
+            if (notif) {
+              notificationId = notif.id;
+              publish(WS_CHANNELS.NOTIFICATIONS, "new_notification", notif);
+            }
+          }
+
+          // Update the dedup row with the resolved ids for traceability.
+          if (notificationId !== 0 || inAppOn) {
+            await db
+              .update(onCallHandoffNotificationsTable)
+              .set({ notificationId: notificationId || null, inAppDelivered: inAppOn })
+              .where(eq(onCallHandoffNotificationsTable.id, claim[0]!.id));
+          }
+
+          // Fire external channels per the recipient's per-channel prefs.
+          // Awaited for clean error reporting in the per-tick log.
+          try {
+            await dispatchToExternalChannels({
+              notificationId,
+              userId: nextOnCall.id,
+              type: "info",
+              title,
+              message,
+              actionUrl,
+            });
+          } catch (err) {
+            logger.warn({ err, team, userId: nextOnCall.id, kind }, "on_call_handoff_notify: external dispatch enqueue failed");
+          }
+
+          if (kind === "warning") warningsSent += 1;
+          else handoffsSent += 1;
+
+          logger.info(
+            { team, userId: nextOnCall.id, kind, handoffAt: at.toISOString(), inAppDelivered: inAppOn },
+            "on_call_handoff_notify: notification dispatched",
+          );
+        }
+      }
+    }
+
+    serverTelemetry.recordBusinessEvent({
+      type: "on_call_handoff_notify_completed",
+      domain: "platform",
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { warningsSent, handoffsSent, candidatesEvaluated, schedules: schedules.length },
+    });
+    updateRegistry(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    if (warningsSent + handoffsSent > 0) {
+      logger.info(
+        { jobId: job.id, warningsSent, handoffsSent, candidatesEvaluated },
+        "on_call_handoff_notify: complete",
+      );
+    }
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "on_call_handoff_notify: fatal");
+    updateRegistry(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, {
+      lastStatus: "failed",
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY)?.failCount || 0) + 1,
     });
     throw err;
   }
