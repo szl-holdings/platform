@@ -48,7 +48,7 @@ This checklist maps security controls to their actual implementation in the code
 | N1 | Rate limiting on write-heavy and AI endpoints | ✅ Done | `express-rate-limit` applied |
 | N3 | Helmet HTTP security headers | ✅ Done | `app.ts` — `helmet()` applied |
 | X1 | Outbound geocoding uses provider allow-list | ✅ Done | `lib/geocoding.ts` restricted to Mapbox/Google |
-| X3 | Webhook delivery URL SSRF validation | ⚠️ Open | Tracked as **KG020b** |
+| X3 | Webhook delivery URL SSRF validation | ✅ Done | `lib/ssrf-guard.ts` — blocklist (RFC1918, loopback, link-local, cloud metadata) + HTTPS-only + DNS-aware re-check at delivery time + optional `WEBHOOK_DELIVERY_ALLOWLIST` enterprise allowlist. KG020b resolved. |
 
 ---
 
@@ -214,7 +214,7 @@ The following gaps were identified in the Phase 2–3 Architecture, Auth & Tenan
 | KG028 | Sentry / error tracking not in production | P1 | Pre-deploy | 🔴 Hard blocker (LB-003) |
 | KG011 | CodeQL scanning not configured in CI | P1 | ✅ Resolved Apr-2026 | `.github/workflows/codeql.yml` scans JS/TS on every PR and push to main |
 | KG012 | Dependency review not configured in CI | P1 | ✅ Resolved Apr-2026 | `.github/workflows/dependency-review.yml` blocks PRs with high/critical CVEs |
-| KG020b | Webhook delivery URL SSRF validation absent | P1 | Sprint 3 | 🟡 Conditional (LC-004) |
+| KG020b | Webhook delivery URL SSRF validation absent | P1 | ✅ Resolved Apr-2026 | `lib/ssrf-guard.ts` enforced via Zod refinement + DNS-aware async recheck on every delivery; enterprise allowlist via `WEBHOOK_DELIVERY_ALLOWLIST` |
 | KG020c | No virus scanning on uploaded files | P2 | Sprint 4 | 🟢 Not blocking |
 | GAP-002 | No CI/CD automated secret scanning | Med | Sprint 3 | ✅ Resolved Apr-2026 (LC-001) |
 

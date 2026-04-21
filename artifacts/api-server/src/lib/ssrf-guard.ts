@@ -18,6 +18,34 @@ const BLOCKED_HOSTNAMES = new Set(['localhost', 'metadata.google.internal', '169
 
 const ALLOWED_SCHEMES = ['https:'];
 
+/**
+ * Optional explicit allowlist mode for enterprise customers.
+ *
+ * When `WEBHOOK_DELIVERY_ALLOWLIST` is set, webhook delivery URLs must match
+ * one of the comma-separated host suffixes (case-insensitive). For example:
+ *
+ *   WEBHOOK_DELIVERY_ALLOWLIST="hooks.acme.com,events.partner.io"
+ *
+ * Both an exact host match and a suffix match (`.acme.com`) are accepted so
+ * that subdomains under an approved zone are permitted. When unset, only the
+ * default blocklist (private IP ranges, loopback, link-local, cloud metadata)
+ * is enforced.
+ */
+function getDeliveryAllowlist(): string[] {
+  const raw = process.env.WEBHOOK_DELIVERY_ALLOWLIST;
+  if (!raw) return [];
+  return raw
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+export function isAllowlistedHost(hostname: string, allowlist: string[]): boolean {
+  if (allowlist.length === 0) return true;
+  const host = hostname.toLowerCase();
+  return allowlist.some((entry) => host === entry || host.endsWith(`.${entry}`));
+}
+
 export function isPrivateIp(ip: string): boolean {
   return PRIVATE_IP_PATTERNS.some((re) => re.test(ip));
 }
@@ -57,6 +85,14 @@ export function validateExternalUrlSync(
 
   if (parsed.port && !['443', '80', ''].includes(parsed.port)) {
     return { valid: false, reason: `Non-standard port '${parsed.port}' is not permitted` };
+  }
+
+  const allowlist = getDeliveryAllowlist();
+  if (!isAllowlistedHost(parsed.hostname, allowlist)) {
+    return {
+      valid: false,
+      reason: `URL hostname '${parsed.hostname}' is not on the configured webhook delivery allowlist`,
+    };
   }
 
   return { valid: true, url: parsed };
