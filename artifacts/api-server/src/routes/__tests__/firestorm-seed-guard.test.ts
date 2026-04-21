@@ -166,6 +166,12 @@ vi.mock('../../middlewares/optimistic-concurrency', () => ({
   validateIfMatch: (_req: any, _res: any, next: () => void) => next(),
 }));
 
+// Mock the dynamically-imported seed module so the non-prod test can assert
+// the success contract without touching real DB seed code.
+vi.mock('../../scripts/seed-aegis.js', () => ({
+  seedAegis: vi.fn().mockResolvedValue({ inserted: { assets: 0, cases: 0 } }),
+}));
+
 // ---------------------------------------------------------------------------
 // Import the REAL register function (after all mocks are hoisted by Vitest)
 // ---------------------------------------------------------------------------
@@ -222,15 +228,18 @@ describe('firestorm seed endpoint — production route is not registered', () =>
     expect(res.body.code).toBeUndefined();
   });
 
-  it('IS registered in non-production (e.g. NODE_ENV=test) so dev/CI seeding still works', async () => {
+  it('IS registered in non-production (e.g. NODE_ENV=test) and returns the seed success contract', async () => {
     process.env.NODE_ENV = 'test';
     delete (process.env as Record<string, string | undefined>).APP_ENV;
 
     const app = buildApp();
     const res = await request(app).post('/firestorm/seed').send({});
 
-    // The handler is mounted; it will not return 404 (Express not-found).
-    // Whatever the seedAegis dynamic import does, it should NOT be a 404.
-    expect(res.status).not.toBe(404);
+    // The handler is mounted and the (mocked) seedAegis resolves cleanly.
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      message: 'Aegis data seeded successfully',
+      result: { inserted: { assets: 0, cases: 0 } },
+    });
   });
 });

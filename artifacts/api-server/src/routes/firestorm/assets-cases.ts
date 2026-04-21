@@ -643,8 +643,8 @@ function registerSeedRouteIfNonProd(): void {
     authMiddleware({ required: true }),
     async (_req, res) => {
       try {
-        // @ts-expect-error
-        const { seedAegis } = await import('../scripts/seed-aegis.js');
+        // @ts-expect-error - seed-aegis.ts is dynamically imported only in non-prod
+        const { seedAegis } = await import('../../scripts/seed-aegis.js');
         const result = await seedAegis();
         sendSuccess(res, { message: 'Aegis data seeded successfully', result });
       } catch (err) {
