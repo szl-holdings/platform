@@ -20,6 +20,7 @@
     "test:proof-chain": "node scripts/check-proof-chain.js && vitest run --config vitest.config.ts scripts/check-proof-chain.test.js",
     "test:api": "vitest run --config vitest.config.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts --reporter=verbose",
+    "cleanup:test-records": "tsx tests/utils/smoke-test-preflight.ts",
     "test:components": "vitest run --config vitest.components.config.ts",
     "test:watch": "vitest --config vitest.config.ts",
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
