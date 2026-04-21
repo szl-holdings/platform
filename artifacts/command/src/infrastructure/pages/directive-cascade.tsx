@@ -19,6 +19,7 @@ import {
   X,
   Zap,
 } from 'lucide-react';
+import { useLocalStorage } from '@imp/lib/use-local-storage';
 import type React from 'react';
 import { useState } from 'react';
 
@@ -417,7 +418,7 @@ const CLASSIFICATION_CONFIG: Record<Classification, { color: string; bg: string;
 };
 
 export default function DirectiveCascade() {
-  const [directives, setDirectives] = useState<Directive[]>(INITIAL_DIRECTIVES);
+  const [directives, setDirectives] = useLocalStorage<Directive[]>('command:directives', INITIAL_DIRECTIVES);
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<DirectiveStatus | 'ALL'>('ALL');

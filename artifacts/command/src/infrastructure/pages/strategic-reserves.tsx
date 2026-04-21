@@ -8,6 +8,7 @@ import {
 } from '@imp/lib/imperium-data';
 import { cn } from '@imp/lib/utils';
 import { Check, ChevronDown, ChevronUp, Clock, Database, TrendingDown, X } from 'lucide-react';
+import { useLocalStorage } from '@imp/lib/use-local-storage';
 import type React from 'react';
 import { useState } from 'react';
 
@@ -283,8 +284,8 @@ function DrawdownHistoryItem({ request, pool }: { request: DrawdownRequest; pool
 }
 
 export default function StrategicReserves() {
-  const [pools, setPools] = useState<ReservePool[]>(INITIAL_RESERVES);
-  const [drawdowns, setDrawdowns] = useState<DrawdownRequest[]>(INITIAL_DRAWDOWNS);
+  const [pools, setPools] = useLocalStorage<ReservePool[]>('command:reserves', INITIAL_RESERVES);
+  const [drawdowns, setDrawdowns] = useLocalStorage<DrawdownRequest[]>('command:drawdowns', INITIAL_DRAWDOWNS);
   const [drawdownPoolId, setDrawdownPoolId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(true);

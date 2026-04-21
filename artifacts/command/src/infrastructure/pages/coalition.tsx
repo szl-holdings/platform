@@ -19,6 +19,7 @@ import {
   X,
   Zap,
 } from 'lucide-react';
+import { useLocalStorage } from '@imp/lib/use-local-storage';
 import type React from 'react';
 import { useState } from 'react';
 
@@ -415,7 +416,7 @@ function AddPartnerModal({
 }
 
 export default function Coalition() {
-  const [partners, setPartners] = useState<CoalitionPartner[]>(INITIAL_COALITION);
+  const [partners, setPartners] = useLocalStorage<CoalitionPartner[]>('command:coalition', INITIAL_COALITION);
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [filterDomain, setFilterDomain] = useState<string>('ALL');
