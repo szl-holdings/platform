@@ -14,10 +14,11 @@ This policy governs the creation, approval, storage, and retirement of screensho
 
 | Location | Purpose | Access |
 |----------|---------|--------|
-| `docs/assets/screenshots/current/` | All current, approved screenshots | Public (in repo) |
+| `docs/assets/screenshots/current/` | All current, approved screenshots (canonical, including README-facing product screenshots) | Public (in repo) |
 | `docs/assets/screenshots/archive/` | Retired screenshots (never deleted) | Public (in repo, historical) |
-| `assets/readme/products/` | README-facing product screenshots | Public |
 | `assets/readme/` | Architecture and brand assets | Public |
+
+> Note: `assets/readme/products/` is **deprecated** as of Task #2856. All product screenshots now live in `docs/assets/screenshots/current/`. Do not re-introduce the old path.
 
 **Prohibited locations for approved screenshots:**
 - Root directory
@@ -62,6 +63,20 @@ Capture → Review → Approve → Commit to current/ → Use in README/material
                                        Old version moved to archive/
                                        README reference updated
 ```
+
+---
+
+## Capture-Only Behavior
+
+To produce clean captures, the shared cookie-consent banner
+(`lib/shared-ui/src/cookie-banner.tsx`) suppresses itself when the page is
+loaded with a `?screenshot` query parameter. This flag has no effect on
+normal traffic and is intended exclusively for screenshot capture by the
+documentation/marketing pipeline.
+
+Standard usage: `https://<artifact>/?screenshot=1`
+
+Do not use this flag to bypass consent in production analytics or tracking.
 
 ---
 

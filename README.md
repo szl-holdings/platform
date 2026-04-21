@@ -95,21 +95,19 @@ The Command Portal is the cross-domain real-time dashboard aggregating signals f
 
 ### Screens
 
-![SZL Holdings Dashboard](assets/readme/products/szl-holdings-dashboard.jpg)
+![SZL Holdings Dashboard](docs/assets/screenshots/current/szl-holdings-dashboard.jpg)
 
-![Sentra — Cyber Resilience Command](assets/readme/products/sentra-cyber-resilience.jpg)
+![Lyte — PRISM Command](docs/assets/screenshots/current/lyte-prism-command.jpg)
 
-![Counsel — Legal Matter Command](assets/readme/products/counsel-legal-command.jpg)
+![Vessels — Fleet Command](docs/assets/screenshots/current/vessels-fleet-command.jpg)
 
-![Aegis Command](assets/readme/products/aegis-command.jpg)
+![Terra — Deal Pipeline](docs/assets/screenshots/current/terra-deal-pipeline.jpg)
 
-![Vessels Maritime Intelligence](assets/readme/products/vessels-maritime.jpg)
+![Carlota Jo — Client Portal](docs/assets/screenshots/current/carlota-jo-client-portal.jpg)
 
-![Terra Real Estate Intelligence](assets/readme/products/terra-real-estate.jpg)
+![Command Portal — Executive View](docs/assets/screenshots/current/command-portal-executive.jpg)
 
-![Command Portal](assets/readme/products/command-portal.jpg)
-
-![CORTEX — Unified Mobile Command](assets/readme/products/cortex-mobile.jpg)
+![Sentra — SOC Command](docs/assets/screenshots/current/sentra-soc-command.jpg)
 
 ---
 

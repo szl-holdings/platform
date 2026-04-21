@@ -50,7 +50,11 @@ export function CookieBanner({
     return undefined;
   }, [consent]);
 
-  if (!visible || consent !== null) return null;
+  const suppressed =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).has('screenshot');
+
+  if (suppressed || !visible || consent !== null) return null;
 
   return (
     <div
