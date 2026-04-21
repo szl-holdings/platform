@@ -1,5 +1,6 @@
 export * from './compiler.js';
 export * from './evaluator.js';
+export * from './full-evaluation.js';
 export * from './guardrails.js';
 export * from './modes.js';
 export * from './prism-counsel-policies.js';

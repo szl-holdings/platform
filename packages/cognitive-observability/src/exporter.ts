@@ -126,6 +126,12 @@ export class BatchingExporter implements OtelMetricExporter {
         void this.inner.export(metrics);
       }
     }, this.intervalMs);
+    // unref() so this background timer never keeps the Node event loop alive
+    // on its own — important for import-only/test contexts and to ensure
+    // SIGTERM-driven shutdown is not delayed by an outstanding interval.
+    if (typeof this.intervalHandle?.unref === 'function') {
+      this.intervalHandle.unref();
+    }
   }
 
   async export(metrics: CognitiveMetric[]): Promise<void> {

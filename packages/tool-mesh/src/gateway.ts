@@ -1,3 +1,5 @@
+import { piiRedactor, scanForInjection } from '@szl-holdings/ai-control-plane';
+import { evaluateFull, type FullEvaluationRequest } from '@szl-holdings/policy-engine';
 import { globalCollector } from '@workspace/cognitive-observability';
 import type { PolicyTier } from '@workspace/guardian';
 import { GuardianDecisionEngine } from '@workspace/guardian/decision-engine';
@@ -32,6 +34,9 @@ export interface GatewayInvocationResult {
   rateLimitRetryAfterMs?: number;
   fallbackToolId?: string;
   schemaErrors?: string[];
+  /** Non-empty when the tool returned an output that violates its declared outputSchema.
+   * Execution still succeeded — this is a warn-level contract violation. */
+  outputSchemaErrors?: string[];
 }
 
 export interface GatewayInvokeContext {
@@ -102,6 +107,81 @@ export class ToolMeshGateway {
       };
     }
 
+    // Unified guardrail chain (PII scan + policy-engine + guardian).
+    let stringifiedInput = '';
+    try {
+      stringifiedInput = typeof input === 'string' ? input : JSON.stringify(input);
+    } catch {
+      stringifiedInput = '';
+    }
+    const guardianTierForFull =
+      TOOL_TIER_TO_GUARDIAN_TIER[manifest.policyTier] ?? 'supervised';
+    const fullEvalRequest: FullEvaluationRequest = {
+      action: `tool:${toolId}`,
+      subject: { id: context.agentId ?? 'unknown-agent', roles: ['agent'] },
+      resource: { type: 'tool', id: toolId, attributes: { tier: guardianTierForFull } },
+      context: { requestId: context.requestId, sessionId: context.sessionId },
+      ...(manifest.domainTags[0] ? { domain: manifest.domainTags[0] } : {}),
+      ...(stringifiedInput ? { promptText: stringifiedInput } : {}),
+    };
+    const fullEval = evaluateFull(fullEvalRequest, {
+      piiScanner: (text: string) => {
+        const inj = scanForInjection(text);
+        const pii = piiRedactor.redact(text);
+        return {
+          hasPii: !pii.safe,
+          hasInjection: inj.detected,
+          patterns: [...inj.patterns, ...pii.detectedTypes],
+          redacted: pii.redacted,
+        };
+      },
+      guardianCheck: (req: { action: string; domain?: string }) => {
+        const decision = this.guardian.decide({
+          requestId: context.requestId,
+          agentId: context.agentId,
+          sessionId: context.sessionId,
+          workflowId: context.workflowId,
+          action: req.action,
+          domain: req.domain,
+          tier: guardianTierForFull,
+          context: { toolId, input },
+        });
+        return { outcome: decision.outcome, reason: decision.reason };
+      },
+    });
+    // Fail-closed on injection patterns at this boundary.
+    if (fullEval.piiScan?.hasInjection) {
+      globalCollector.recordKnown('tool_error_rate', 1, {
+        toolId,
+        errorType: 'injection_blocked',
+      });
+      return {
+        success: false,
+        error: `Tool invocation blocked — prompt-injection pattern detected in input: ${fullEval.piiScan.patterns[0] ?? 'pattern matched'}`,
+        decisionOutcome: 'deny',
+      };
+    }
+    if (!fullEval.allowed && fullEval.blockedReason) {
+      globalCollector.recordKnown('tool_error_rate', 1, {
+        toolId,
+        errorType: 'guardrail_blocked',
+      });
+      return {
+        success: false,
+        error: `Tool invocation blocked by unified guardrail chain: ${fullEval.blockedReason}`,
+        decisionOutcome: 'deny',
+      };
+    }
+    if (fullEval.requiresApproval || fullEval.requiresDualApproval) {
+      return {
+        success: false,
+        error: 'Tool invocation requires human approval (unified guardrail chain).',
+        decisionOutcome: fullEval.requiresDualApproval
+          ? 'require-dual-approval'
+          : 'require-approval',
+      };
+    }
+
     const rateLimitCheck = this.rateLimiter.check(toolId, manifest.rateLimits);
     if (!rateLimitCheck.allowed) {
       return {
@@ -111,43 +191,12 @@ export class ToolMeshGateway {
       };
     }
 
-    const guardianTier = TOOL_TIER_TO_GUARDIAN_TIER[manifest.policyTier] ?? 'supervised';
-    const decision = this.guardian.decide({
-      requestId: context.requestId,
-      agentId: context.agentId,
-      sessionId: context.sessionId,
-      workflowId: context.workflowId,
-      action: `tool:${toolId}`,
-      domain: manifest.domainTags[0],
-      tier: guardianTier,
-      context: { toolId, input },
-    });
-
-    const needsApproval =
-      manifest.approvalRequired ||
-      decision.outcome === 'require-approval' ||
-      decision.outcome === 'require-dual-approval';
-
-    if (needsApproval) {
-      const reason =
-        decision.outcome === 'require-approval' || decision.outcome === 'require-dual-approval'
-          ? decision.reason
-          : `tool '${toolId}' is approval-gated (approvalRequired=true)`;
+    // Manifest-level approval gate.
+    if (manifest.approvalRequired) {
       return {
         success: false,
-        error: `Tool invocation requires human approval: ${reason}`,
-        decisionOutcome:
-          decision.outcome === 'require-dual-approval'
-            ? 'require-dual-approval'
-            : 'require-approval',
-      };
-    }
-
-    if (decision.outcome === 'deny') {
-      return {
-        success: false,
-        error: `Guardian denied tool invocation: ${decision.reason}`,
-        decisionOutcome: 'deny',
+        error: `Tool invocation requires human approval: tool '${toolId}' is approval-gated (approvalRequired=true)`,
+        decisionOutcome: 'require-approval',
       };
     }
 
@@ -183,6 +232,25 @@ export class ToolMeshGateway {
       const latencyMs = Date.now() - t0;
       this.rateLimiter.decrement(toolId);
 
+      // Output schema validation — warn on violation, do not block execution.
+      // Violations are surfaced in the result and emitted as a metric so
+      // downstream consumers (verifier, memory writer, next step) can detect
+      // that the output may not match the declared contract.
+      let outputSchemaErrors: string[] | undefined;
+      if (manifest.outputSchema) {
+        const outputValidation = validateAgainstSchema(`${toolId}:output`, output, manifest.outputSchema);
+        if (!outputValidation.valid) {
+          outputSchemaErrors = outputValidation.errors;
+          if (manifest.observabilityHooks.emitMetrics) {
+            globalCollector.recordKnown('tool_error_rate', 1, {
+              toolId,
+              toolName: manifest.name,
+              reason: 'output_schema_violation',
+            });
+          }
+        }
+      }
+
       if (emitTrace) {
         this.traceWriter.appendToolCall(traceId, {
           toolId,
@@ -201,7 +269,9 @@ export class ToolMeshGateway {
           toolName: manifest.name,
           domain: manifest.domainTags[0] ?? 'custom',
         });
-        globalCollector.recordKnown('tool_error_rate', 0, { toolId });
+        if (!outputSchemaErrors) {
+          globalCollector.recordKnown('tool_error_rate', 0, { toolId });
+        }
       }
 
       return {
@@ -210,6 +280,7 @@ export class ToolMeshGateway {
         traceId: trace.traceId,
         decisionOutcome: 'allow',
         latencyMs,
+        ...(outputSchemaErrors ? { outputSchemaErrors } : {}),
       };
     } catch (err) {
       const latencyMs = Date.now() - t0;

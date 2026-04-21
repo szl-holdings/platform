@@ -37,6 +37,7 @@ import './lib/terra-nyc-extended-ingestion';
 import { isSeedDataAllowed, resolveRuntimeMode } from '@szl-holdings/config';
 import { otelReady, registerGraphQLHandler } from './app.js';
 import { buildGraphQLMiddleware } from './graphql/index.js';
+import { initCognitiveTelemetry } from './lib/cognitive-telemetry.js';
 import { registerGenAITelemetryBridge } from './lib/genai-telemetry-bridge.js';
 import { pingRedis } from './lib/redis-client.js';
 import { seedAiBudgetPolicies } from './lib/seed-ai-budget';
@@ -76,6 +77,13 @@ failFastOnInvalidConfig();
 initializeAlloyDomainEventSubscriptions();
 
 registerGenAITelemetryBridge();
+
+// Wire the cognitive-observability BatchingExporter so that agent-layer metrics
+// (step traces, latency, cost, error rates, approval wait times) are flushed to
+// the OTEL Collector rather than accumulating in memory.
+const { shutdown: shutdownCognitiveTelemetry } = initCognitiveTelemetry(
+  Number(process.env.COGNITIVE_TELEMETRY_FLUSH_INTERVAL_MS ?? '60000'),
+);
 
 // Must match the V8 --max-old-space-size flag passed in start.sh; otherwise the
 // monitor under/over-reports pressure and floods logs with false criticals.
@@ -334,6 +342,27 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     // Step 2b: Wire Trace Graph and Memory Fabric to Postgres so traces,
     // approvals, audit trails, and agent memory survive restarts.
     await initDurablePersistence();
+
+    // Step 2b-1: Wire the durable Postgres-backed evidence ledger so AUDIT
+    // entries (the canonical chain INGEST→…→AUDIT→DELIVER) survive restarts
+    // and are queryable by trace-id, entity, and workflow-run-id. Without
+    // this swap, defaultEvidenceLedgerStore stays in-memory and AUDIT durability
+    // collapses on every redeploy.
+    try {
+      const { pool } = await import('@szl-holdings/db');
+      const { defaultEvidenceLedgerStore, PostgresEvidenceLedgerStore } = await import(
+        '@szl-holdings/evidence-ledger'
+      );
+      const pgEvidenceStore = new PostgresEvidenceLedgerStore(pool);
+      await pgEvidenceStore.ensureTable();
+      defaultEvidenceLedgerStore.setBackend(pgEvidenceStore);
+      logger.info('[bootstrap] Evidence ledger backend swapped to Postgres (durable)');
+    } catch (err) {
+      logger.warn(
+        { err },
+        '[bootstrap] Evidence ledger Postgres backend wiring failed — falling back to in-memory store. AUDIT entries will not survive restart.',
+      );
+    }
 
     // Step 2b-2: Wire AI evaluation traces and review queue to Postgres so
     // all AI ops data survives server restarts.
@@ -613,6 +642,12 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
       await stopDurablePersistence();
     } catch (err) {
       logger.warn({ err }, 'Error flushing trace/memory persistence');
+    }
+
+    try {
+      await shutdownCognitiveTelemetry();
+    } catch (err) {
+      logger.warn({ err }, 'Error flushing cognitive telemetry metrics');
     }
 
     try {
