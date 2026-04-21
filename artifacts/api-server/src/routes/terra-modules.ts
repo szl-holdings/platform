@@ -1822,4 +1822,256 @@ router.delete(
   },
 );
 
+// ---------------------------------------------------------------------------
+// Mobile-facing endpoints — shaped for the CORTEX mobile Terra modules
+// ---------------------------------------------------------------------------
+
+/**
+ * GET /terra/rent-roll
+ * Groups stored leases by propertyAddress and returns a rent-roll payload
+ * compatible with the mobile Rent Roll screen mapper.
+ */
+router.get('/terra/rent-roll', authRead, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const rows = await db
+      .select()
+      .from(terraLeasesTable)
+      .where(
+        userId != null
+          ? or(eq(terraLeasesTable.ownerUserId, userId), isNull(terraLeasesTable.ownerUserId))
+          : isNull(terraLeasesTable.ownerUserId),
+      )
+      .orderBy(desc(terraLeasesTable.createdAt));
+
+    if (rows.length === 0) {
+      return sendSuccess(res, { properties: [], dataMode: 'empty' });
+    }
+
+    const now = new Date();
+    const EXPIRY_WARNING_DAYS = 180;
+
+    const byAddress = new Map<string, typeof rows>();
+    for (const row of rows) {
+      const key = row.propertyAddress ?? row.documentName ?? 'Unknown Property';
+      if (!byAddress.has(key)) byAddress.set(key, []);
+      byAddress.get(key)!.push(row);
+    }
+
+    const properties = Array.from(byAddress.entries()).map(([address, leases], pi) => {
+      const leaseItems = leases.map((r, li) => {
+        const expiryStr = r.expirationDate ?? '';
+        const expiryDate = expiryStr ? new Date(expiryStr) : null;
+        const daysToExpiry = expiryDate
+          ? Math.floor((expiryDate.getTime() - now.getTime()) / 86_400_000)
+          : null;
+
+        let status: 'active' | 'expiring' | 'month-to-month' | 'vacant' = 'active';
+        if (!expiryStr) {
+          status = 'month-to-month';
+        } else if (daysToExpiry !== null && daysToExpiry <= EXPIRY_WARNING_DAYS && daysToExpiry >= 0) {
+          status = 'expiring';
+        }
+
+        const creditScore = Number(r.rentPerSqft ?? 0) > 40 ? 'A' : Number(r.rentPerSqft ?? 0) > 25 ? 'B' : 'C';
+
+        return {
+          id: r.externalId ?? String(r.id ?? li),
+          tenant: r.tenant,
+          suite: r.premises ?? String(li + 1),
+          sqft: r.sqft ?? 0,
+          monthlyRent: Number(r.baseRent ?? 0),
+          leaseEnd: expiryStr
+            ? new Date(expiryStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+            : 'M-T-M',
+          status,
+          creditScore: creditScore as 'A' | 'B' | 'C' | 'D',
+          paymentHistory: 'good' as const,
+          markToMarketGap: 0,
+        };
+      });
+
+      const occupiedLeases = leaseItems.filter((l) => l.status !== 'vacant');
+      const egi = occupiedLeases.reduce((s, l) => s + l.monthlyRent, 0);
+      const gpr = leaseItems.reduce((s, l) => s + l.monthlyRent, 0);
+
+      return {
+        id: `prop-${pi}`,
+        name: address.split(',')[0]?.trim() ?? address,
+        address,
+        totalUnits: leaseItems.length,
+        occupiedUnits: occupiedLeases.length,
+        grossPotentialRent: gpr,
+        effectiveGrossIncome: egi,
+        vacancyLoss: gpr - egi,
+        leases: leaseItems,
+      };
+    });
+
+    sendSuccess(res, { properties, dataMode: 'live' });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to fetch rent roll');
+  }
+});
+
+/**
+ * GET /terra/construction
+ * Returns construction projects shaped for the mobile Construction Monitor mapper.
+ * Field names are normalised to match what the mobile mapper expects.
+ */
+router.get('/terra/construction', authRead, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const rows = await db
+      .select()
+      .from(terraConstructionProjectsTable)
+      .where(
+        userId != null
+          ? or(
+              eq(terraConstructionProjectsTable.ownerUserId, userId),
+              isNull(terraConstructionProjectsTable.ownerUserId),
+            )
+          : isNull(terraConstructionProjectsTable.ownerUserId),
+      )
+      .orderBy(desc(terraConstructionProjectsTable.createdAt));
+
+    if (rows.length === 0) {
+      return sendSuccess(res, { projects: [], dataMode: 'empty' });
+    }
+
+    const projects = rows.map((r) => {
+      const rawMilestones = (r.milestones as Array<Record<string, unknown>>) ?? [];
+      const rawBudgetLines = (r.budgetLines as Array<Record<string, unknown>>) ?? [];
+
+      const milestones = rawMilestones.map((m, mi) => ({
+        id: String(m.id ?? mi),
+        label: String(m.label ?? m.name ?? 'Milestone'),
+        dueDate: String(m.dueDate ?? m.targetDate ?? m.date ?? ''),
+        completedDate: m.completedDate != null ? String(m.completedDate) : m.actualDate != null ? String(m.actualDate) : undefined,
+        status: (['complete', 'in-progress', 'upcoming', 'delayed'].includes(String(m.status))
+          ? m.status
+          : 'upcoming') as 'complete' | 'in-progress' | 'upcoming' | 'delayed',
+      }));
+
+      const budgetLines = rawBudgetLines.map((b) => ({
+        category: String(b.category ?? 'Other'),
+        budgeted: Number(b.budgeted ?? b.budget ?? 0),
+        spent: Number(b.spent ?? b.actual ?? 0),
+        committed: Number(b.committed ?? 0),
+      }));
+
+      const effectiveCompletion = r.revisedCompletion ?? r.projectedCompletion ?? '';
+
+      return {
+        id: r.externalId ?? String(r.id),
+        name: r.name,
+        address: r.address ?? '',
+        type: r.type ?? '',
+        totalBudget: Number(r.totalBudget ?? 0),
+        spentToDate: Number(r.totalSpent ?? 0),
+        percentComplete: r.overallPct ?? 0,
+        startDate: r.startDate ?? '',
+        targetCompletion: effectiveCompletion,
+        gcName: r.gc ?? '',
+        inspectionStatus: 'pending' as const,
+        flags: [] as string[],
+        milestones,
+        budgetLines,
+        isDemo: r.isDemo,
+      };
+    });
+
+    sendSuccess(res, { projects, dataMode: 'live' });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to fetch construction projects for mobile');
+  }
+});
+
+/**
+ * GET /terra/screening
+ * Returns tenant applications normalised for the mobile Tenant Screening mapper.
+ * Status values and field names are mapped to match the mobile ScreeningApplication type.
+ */
+const terraMobileScreeningHandler = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const rows = await db
+      .select()
+      .from(terraTenantApplicationsTable)
+      .where(
+        userId != null
+          ? or(
+              eq(terraTenantApplicationsTable.ownerUserId, userId),
+              isNull(terraTenantApplicationsTable.ownerUserId),
+            )
+          : isNull(terraTenantApplicationsTable.ownerUserId),
+      )
+      .orderBy(desc(terraTenantApplicationsTable.createdAt));
+
+    if (rows.length === 0) {
+      return sendSuccess(res, { applications: [], dataMode: 'empty' });
+    }
+
+    const statusMap: Record<string, string> = {
+      pending: 'pending',
+      approved: 'approved',
+      conditional: 'in-review',
+      declined: 'denied',
+    };
+
+    const creditGradeFromScore = (score: number): 'A' | 'B' | 'C' | 'D' | 'F' => {
+      if (score >= 720) return 'A';
+      if (score >= 660) return 'B';
+      if (score >= 580) return 'C';
+      if (score >= 500) return 'D';
+      return 'F';
+    };
+
+    const applications = rows.map((r) => {
+      const annualIncome = Number(r.annualIncome ?? 0);
+      const monthlyRent = Number(r.proposedRent ?? 0);
+      const creditScore = r.creditScore ?? 0;
+      const rtiRaw = Number(r.rentToIncomeRatio ?? 0);
+      const rentToIncome = rtiRaw > 1 ? Math.round(rtiRaw) : Math.round(rtiRaw * 100);
+      const targetUnit = r.targetUnit ?? '';
+      const parts = targetUnit.split('|');
+      const propertyName = parts[1]?.trim() ?? '';
+      const unitName = parts[0]?.trim() ?? targetUnit;
+
+      return {
+        id: r.externalId ?? String(r.id),
+        applicantName: r.name,
+        property: propertyName,
+        unit: unitName,
+        submittedDate: r.submittedDate
+          ? new Date(r.submittedDate).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })
+          : r.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        status: (statusMap[r.status] ?? 'pending') as 'approved' | 'pending' | 'in-review' | 'denied' | 'more-info',
+        creditScore,
+        creditGrade: creditGradeFromScore(creditScore),
+        annualIncome,
+        monthlyRent,
+        rentToIncome,
+        backgroundCheck: (r.backgroundClear ? 'clear' : r.backgroundClear === false ? 'flag' : 'pending') as 'clear' | 'flag' | 'pending',
+        evictionHistory: (r.priorEvictions ?? 0) > 0,
+        employmentStatus: (r.incomeVerified ? 'verified' : 'pending') as 'verified' | 'pending' | 'unverified',
+        references: 'pending' as const,
+        notes: r.notes ?? undefined,
+        isDemo: r.isDemo,
+      };
+    });
+
+    sendSuccess(res, { applications, dataMode: 'live' });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to fetch tenant screening applications for mobile');
+  }
+};
+
+router.get('/terra/screening', authRead, terraMobileScreeningHandler);
+router.get('/terra/tenant-screening', authRead, terraMobileScreeningHandler);
+
 export default router;

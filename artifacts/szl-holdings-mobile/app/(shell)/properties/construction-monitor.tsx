@@ -15,10 +15,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
-
-const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
-  : '/api';
+import { apiFetch } from '@/lib/apiClient';
 
 const ACCENT = '#c87941';
 
@@ -282,41 +279,42 @@ function mapApiToProjects(raw: unknown): ConstructionProject[] | null {
   return list.map((p: Record<string, unknown>, idx: number) => ({
     id: String(p.id ?? idx),
     name: String(p.name ?? p.projectName ?? 'Unknown Project'),
-    property: String(p.property ?? ''),
-    status: (['on-track', 'at-risk', 'delayed', 'complete'].includes(String(p.status))
-      ? p.status
-      : 'on-track') as any,
-    startDate: String(p.startDate ?? ''),
-    expectedCompletion: String(p.expectedCompletion ?? p.completionDate ?? ''),
+    address: String(p.address ?? ''),
+    type: String(p.type ?? ''),
     totalBudget: Number(p.totalBudget ?? 0),
-    spentToDate: Number(p.spentToDate ?? p.spent ?? 0),
-    pctComplete: Number(p.pctComplete ?? p.percentComplete ?? 0),
-    inspectionStatus: (['passed', 'scheduled', 'failed', 'pending'].includes(
-      String(p.inspectionStatus),
-    )
+    spentToDate: Number(p.spentToDate ?? p.totalSpent ?? p.spent ?? 0),
+    percentComplete: Number(p.percentComplete ?? p.pctComplete ?? p.overallPct ?? 0),
+    startDate: String(p.startDate ?? ''),
+    targetCompletion: String(p.targetCompletion ?? p.expectedCompletion ?? p.projectedCompletion ?? p.completionDate ?? ''),
+    gcName: String(p.gcName ?? p.gc ?? p.generalContractor ?? ''),
+    inspectionStatus: (['passed', 'scheduled', 'failed', 'pending'].includes(String(p.inspectionStatus))
       ? p.inspectionStatus
       : 'pending') as ConstructionProject['inspectionStatus'],
-    gcName: String(p.gcName ?? p.generalContractor ?? ''),
+    flags: Array.isArray(p.flags) ? (p.flags as string[]) : [],
     milestones: Array.isArray(p.milestones)
       ? (p.milestones as Record<string, unknown>[]).map((m, mi) => ({
           id: String(m.id ?? mi),
           label: String(m.label ?? m.name ?? 'Milestone'),
-          targetDate: String(m.targetDate ?? m.date ?? ''),
-          actualDate: m.actualDate != null ? String(m.actualDate) : undefined,
+          dueDate: String(m.dueDate ?? m.targetDate ?? m.date ?? ''),
+          completedDate: m.completedDate != null
+            ? String(m.completedDate)
+            : m.actualDate != null
+              ? String(m.actualDate)
+              : undefined,
           status: (['complete', 'in-progress', 'upcoming', 'delayed'].includes(String(m.status))
             ? m.status
             : 'upcoming') as Milestone['status'],
         }))
       : [],
     budgetLines: Array.isArray(p.budgetLines)
-      ? (p.budgetLines as Record<string, unknown>[]).map((b, bi) => ({
-          id: String(b.id ?? bi),
+      ? (p.budgetLines as Record<string, unknown>[]).map((b) => ({
           category: String(b.category ?? 'Other'),
-          budgeted: Number(b.budgeted ?? 0),
-          actual: Number(b.actual ?? 0),
+          budgeted: Number(b.budgeted ?? b.budget ?? 0),
+          spent: Number(b.spent ?? b.actual ?? 0),
+          committed: Number(b.committed ?? 0),
         }))
       : [],
-  })) as unknown as ConstructionProject[];
+  }));
 }
 
 export default function ConstructionMonitorScreen() {
@@ -329,18 +327,17 @@ export default function ConstructionMonitorScreen() {
     queryKey: ['terra-construction'],
     queryFn: async () => {
       try {
-        const res = await fetch(API_BASE + '/terra/construction');
-        if (!res.ok) return null;
-        return res.json();
+        return await apiFetch<unknown>('/api/terra/construction');
       } catch {
         return null;
       }
     },
     retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
 
   const displayProjects: ConstructionProject[] = mapApiToProjects(apiData) ?? PROJECTS;
-  const [selectedProject, setSelectedProject] = useState<string>(PROJECTS[0].id);
+  const [selectedProject, setSelectedProject] = useState<string>(displayProjects[0]?.id ?? PROJECTS[0].id);
 
   const project = displayProjects.find((p) => p.id === selectedProject) ?? displayProjects[0];
   const budgetPct = Math.round((project.spentToDate / project.totalBudget) * 100);
@@ -362,7 +359,7 @@ export default function ConstructionMonitorScreen() {
           <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · CONSTRUCTION</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Project Monitor</Text>
         </View>
-        {PROJECTS.reduce((acc, p) => acc + p.flags.length, 0) > 0 && (
+        {displayProjects.reduce((acc, p) => acc + p.flags.length, 0) > 0 && (
           <View
             style={[
               styles.alertBadge,
@@ -370,7 +367,7 @@ export default function ConstructionMonitorScreen() {
             ]}
           >
             <Feather name="flag" size={11} color="#f59e0b" />
-            <Text style={[styles.alertText, { color: '#f59e0b' }]}>2 flags</Text>
+            <Text style={[styles.alertText, { color: '#f59e0b' }]}>{displayProjects.reduce((acc, p) => acc + p.flags.length, 0)} flags</Text>
           </View>
         )}
       </View>

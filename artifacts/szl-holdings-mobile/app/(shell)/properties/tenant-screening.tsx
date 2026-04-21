@@ -8,12 +8,9 @@ import { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
+import { apiFetch } from '@/lib/apiClient';
 
 type FeatherIconName = React.ComponentProps<typeof Feather>['name'];
-
-const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
-  : '/api';
 
 const ACCENT = '#c87941';
 
@@ -299,33 +296,51 @@ function mapApiToApplications(raw: unknown): ScreeningApplication[] | null {
   const r = raw as Record<string, unknown>;
   const list = (r.data as Record<string, unknown>)?.applications ?? r.applications;
   if (!Array.isArray(list) || list.length === 0) return null;
+
+  const normalizeStatus = (s: unknown): ScreeningStatus => {
+    const str = String(s ?? '');
+    const map: Record<string, ScreeningStatus> = {
+      approved: 'approved',
+      pending: 'pending',
+      'in-review': 'in-review',
+      denied: 'denied',
+      'more-info': 'more-info',
+      conditional: 'in-review',
+      declined: 'denied',
+      applied: 'pending',
+      withdrawn: 'denied',
+    };
+    return map[str] ?? 'pending';
+  };
+
   return list.map((a: Record<string, unknown>, idx: number) => ({
     id: String(a.id ?? idx),
-    name: String(a.name ?? a.applicantName ?? 'Applicant'),
+    applicantName: String(a.applicantName ?? a.name ?? 'Applicant'),
     property: String(a.property ?? ''),
-    unit: String(a.unit ?? a.suite ?? ''),
-    appliedDate: String(a.appliedDate ?? a.applicationDate ?? ''),
-    requestedMoveIn: String(a.requestedMoveIn ?? a.moveInDate ?? ''),
-    monthlyIncome: Number(a.monthlyIncome ?? 0),
-    requestedRent: Number(a.requestedRent ?? a.rent ?? 0),
-    status: (['applied', 'in-review', 'approved', 'denied', 'withdrawn'].includes(String(a.status))
-      ? a.status
-      : 'applied') as ScreeningApplication['status'],
+    unit: String(a.unit ?? a.suite ?? a.targetUnit ?? ''),
+    submittedDate: String(a.submittedDate ?? a.appliedDate ?? a.applicationDate ?? ''),
+    status: normalizeStatus(a.status),
     creditScore: Number(a.creditScore ?? 0),
     creditGrade: (['A', 'B', 'C', 'D', 'F'].includes(String(a.creditGrade))
       ? a.creditGrade
       : 'B') as ScreeningApplication['creditGrade'],
-    backgroundCheck: (['clear', 'reviewing', 'flagged'].includes(String(a.backgroundCheck))
+    annualIncome: Number(a.annualIncome ?? (a.monthlyIncome != null ? Number(a.monthlyIncome) * 12 : 0)),
+    monthlyRent: Number(a.monthlyRent ?? a.proposedRent ?? a.requestedRent ?? a.rent ?? 0),
+    rentToIncome: Number(a.rentToIncome ?? a.rentToIncomeRatio ?? 0),
+    backgroundCheck: (['clear', 'flag', 'pending'].includes(String(a.backgroundCheck))
       ? a.backgroundCheck
-      : 'reviewing') as ScreeningApplication['backgroundCheck'],
-    incomeVerification: (['verified', 'pending', 'failed'].includes(String(a.incomeVerification))
-      ? a.incomeVerification
-      : 'pending') as any,
-    rentalHistory: (['excellent', 'good', 'fair', 'poor'].includes(String(a.rentalHistory))
-      ? a.rentalHistory
-      : 'good') as any,
+      : 'pending') as ScreeningApplication['backgroundCheck'],
+    evictionHistory: a.evictionHistory === true || Number(a.priorEvictions ?? 0) > 0,
+    employmentStatus: (['verified', 'pending', 'unverified'].includes(String(a.employmentStatus))
+      ? a.employmentStatus
+      : a.incomeVerified === true
+        ? 'verified'
+        : 'pending') as ScreeningApplication['employmentStatus'],
+    references: (['checked', 'pending', 'failed'].includes(String(a.references))
+      ? a.references
+      : 'pending') as ScreeningApplication['references'],
     notes: a.notes != null ? String(a.notes) : undefined,
-  })) as unknown as ScreeningApplication[];
+  }));
 }
 
 export default function TenantScreeningScreen() {
@@ -339,14 +354,13 @@ export default function TenantScreeningScreen() {
     queryKey: ['terra-tenant-screening'],
     queryFn: async () => {
       try {
-        const res = await fetch(API_BASE + '/terra/screening');
-        if (!res.ok) return null;
-        return res.json();
+        return await apiFetch<unknown>('/api/terra/screening');
       } catch {
         return null;
       }
     },
     retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
 
   const displayApplications: ScreeningApplication[] = mapApiToApplications(apiData) ?? APPLICATIONS;

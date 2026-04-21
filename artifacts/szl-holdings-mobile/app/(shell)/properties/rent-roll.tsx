@@ -7,10 +7,7 @@ import React, { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
-
-const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
-  : '/api';
+import { apiFetch } from '@/lib/apiClient';
 
 const ACCENT = '#c87941';
 
@@ -360,18 +357,17 @@ export default function RentRollScreen() {
     queryKey: ['terra-rent-roll'],
     queryFn: async () => {
       try {
-        const res = await fetch(API_BASE + '/terra/rent-roll');
-        if (!res.ok) return null;
-        return res.json();
+        return await apiFetch<unknown>('/api/terra/rent-roll');
       } catch {
         return null;
       }
     },
     retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
 
   const displayProperties: PropertyRentRoll[] = mapApiToProperties(apiData) ?? PROPERTIES;
-  const [selectedProperty, setSelectedProperty] = useState<string>(PROPERTIES[0].id);
+  const [selectedProperty, setSelectedProperty] = useState<string>(displayProperties[0]?.id ?? PROPERTIES[0].id);
 
   const property = displayProperties.find((p) => p.id === selectedProperty) ?? displayProperties[0];
   const expiringCount = property.leases.filter((l) => l.status === 'expiring').length;
