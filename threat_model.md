@@ -83,7 +83,7 @@ SZL Holdings is a governed decision infrastructure platform delivered as a multi
 - Database flows always carry `org_id`; Drizzle ORM prevents raw SQL interpolation
 - AI provider flows never carry raw customer PII in prompts (contract obligation)
 - Object storage flows use signed URLs with expiry; no public ACL permitted
-- Internal service flows require `ALLOY_INTERNAL_TOKEN`; verified with `crypto.timingSafeEqual` (gap: `adminGuard` path uses `Buffer.equals` — AF-001)
+- Internal service flows require `ALLOY_INTERNAL_TOKEN`; verified with `crypto.timingSafeEqual` on HMAC digests across both `auth.ts::checkInternalToken` and `admin-guard.ts` (AF-001 resolved Apr-2026, Task #2693)
 
 ---
 
@@ -133,7 +133,7 @@ SZL Holdings is a governed decision infrastructure platform delivered as a multi
 - `artifacts/api-server/src/routes/alloy-governance.ts` — AI policy mutation
 - `artifacts/api-server/src/routes/admin/` — Super-admin operations, impersonation
 - `artifacts/api-server/src/routes/mcp.ts` — Agent Gateway tool calls (per-tool RBAC)
-- `artifacts/api-server/src/routes/vessels/` — Tenant isolation gap (AF-003, AF-007 open)
+- `artifacts/api-server/src/routes/vessels.ts` — Tenant isolation enforced via `tenantScope()` + `org_id` filters (AF-003, AF-007 resolved Apr-2026, Task #1048)
 - `artifacts/api-server/src/lib/ai-engine/src/retrieval/alloy-retrieval.ts` — Retrieval engine tenant filtering
 - `artifacts/api-server/src/routes/documents.ts` — File upload and object storage ACL
 
@@ -157,7 +157,7 @@ The platform uses OIDC/PKCE exclusively; no passwords are stored. Session cookie
 
 **Guarantees required:**
 - All protected routes MUST verify a valid session before processing any request.
-- `ALLOY_INTERNAL_TOKEN` MUST be verified with `crypto.timingSafeEqual` on all internal endpoints. The divergent `adminGuard` path (AF-001, uses `Buffer.equals`) is an open P1 gap.
+- `ALLOY_INTERNAL_TOKEN` MUST be verified with `crypto.timingSafeEqual` on all internal endpoints. Both `auth.ts::checkInternalToken` and `admin-guard.ts` route through `verifyInternalHeader()` in `lib/internal-tokens.ts`, which compares HMAC-SHA256 digests with `timingSafeEqual` (AF-001 resolved Apr-2026, Task #2693).
 - Webhook endpoints that receive inbound events from external services MUST verify HMAC signatures.
 - Session cookies MUST NOT be transmitted over non-HTTPS connections. The `secure: true` flag is unconditional.
 
@@ -182,7 +182,7 @@ Every significant mutation generates an audit event in the `audit_log` table, re
 
 ### Information Disclosure
 
-Multi-tenant isolation is the most critical information disclosure surface. Four enforcement layers exist: `org_id` in every DB query, Drizzle ORM scoping, `tenantScope` middleware at the route level, and WebSocket channel prefixing. Known gap: Vessels routes (AF-003, AF-007) are missing tenant scoping at the DB and route level — a P1 open gap.
+Multi-tenant isolation is the most critical information disclosure surface. Four enforcement layers exist: `org_id` in every DB query, Drizzle ORM scoping, `tenantScope` middleware at the route level, and WebSocket channel prefixing. The previously open Vessels gap (AF-003, AF-007) was closed Apr-2026 (Task #1048) — `routes/vessels.ts` now applies `tenantScope()` + `org_id` filters and migration `0076_vessels_org_id.sql` adds the column at the DB level.
 
 **Guarantees required:**
 - Every database query that returns tenant-owned data MUST include a `WHERE org_id = ?` clause. The Drizzle ORM layer MUST enforce this; raw SQL bypasses are prohibited.
@@ -219,8 +219,8 @@ RBAC is enforced by `requireRole` middleware on all admin, operator, and executi
 
 | Gap ID | Description | Severity | Status |
 |--------|-------------|----------|--------|
-| AF-001 | `adminGuard` uses non-timing-safe token comparison | P1 | Open |
-| AF-003 / AF-007 | Vessels routes and DB tables lack tenant scoping | P1 | Open |
+| AF-001 | `adminGuard` uses non-timing-safe token comparison | P1 | ✅ Resolved Apr-2026 (Task #2693) |
+| AF-003 / AF-007 | Vessels routes and DB tables lack tenant scoping | P1 | ✅ Resolved Apr-2026 (Task #1048) |
 | AF-004 | Backup export accepts arbitrary `orgId` without authority check | P2 | Open |
 | AF-008 | `conversations` table missing `org_id` | P2 | Open |
 | AF-012 | Sessions not invalidated on `SESSION_SECRET` rotation | P2 | Open |

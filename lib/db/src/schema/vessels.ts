@@ -1,3 +1,6 @@
+// org_id is the tenant-scope key on these vessels tables. Nullable so existing
+// rows read as platform rows visible only to elevated admins. Backed by
+// migrations 0076 (parent tables) and 0094 (sub-resource tables).
 import {
   boolean,
   index,
@@ -75,6 +78,8 @@ export const vesselsPositionsTable = pgTable(
     vesselId: integer('vessel_id')
       .notNull()
       .references(() => vesselsTable.id, { onDelete: 'cascade' }),
+    // Denormalized tenant key — copied from parent vessels.org_id at insert.
+    orgId: integer('org_id'),
     latitude: numeric('latitude', { precision: 10, scale: 7 }).notNull(),
     longitude: numeric('longitude', { precision: 10, scale: 7 }).notNull(),
     heading: numeric('heading', { precision: 5, scale: 2 }),
@@ -83,42 +88,53 @@ export const vesselsPositionsTable = pgTable(
   },
   (t) => [
     index('vessels_positions_vessel_recorded_idx').on(t.vesselId, sql`${t.recordedAt} DESC`),
+    index('vessels_positions_org_id_idx').on(t.orgId),
   ],
 );
 
-export const vesselsCargoTable = pgTable('vessels_cargo', {
-  id: serial('id').primaryKey(),
-  vesselId: integer('vessel_id')
-    .notNull()
-    .references(() => vesselsTable.id, { onDelete: 'cascade' }),
-  cargoType: text('cargo_type').notNull(),
-  quantity: numeric('quantity', { precision: 12, scale: 2 }),
-  unit: text('unit'),
-  origin: text('origin'),
-  destination: text('destination'),
-  eta: timestamp('eta'),
-  status: text('status', { enum: ['loading', 'in_transit', 'delivered', 'delayed'] })
-    .notNull()
-    .default('loading'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+export const vesselsCargoTable = pgTable(
+  'vessels_cargo',
+  {
+    id: serial('id').primaryKey(),
+    vesselId: integer('vessel_id')
+      .notNull()
+      .references(() => vesselsTable.id, { onDelete: 'cascade' }),
+    orgId: integer('org_id'),
+    cargoType: text('cargo_type').notNull(),
+    quantity: numeric('quantity', { precision: 12, scale: 2 }),
+    unit: text('unit'),
+    origin: text('origin'),
+    destination: text('destination'),
+    eta: timestamp('eta'),
+    status: text('status', { enum: ['loading', 'in_transit', 'delivered', 'delayed'] })
+      .notNull()
+      .default('loading'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [index('vessels_cargo_org_id_idx').on(t.orgId)],
+);
 
-export const vesselsRoutesTable = pgTable('vessels_routes', {
-  id: serial('id').primaryKey(),
-  vesselId: integer('vessel_id')
-    .notNull()
-    .references(() => vesselsTable.id, { onDelete: 'cascade' }),
-  originPort: text('origin_port').notNull(),
-  destinationPort: text('destination_port').notNull(),
-  departureAt: timestamp('departure_at'),
-  arrivalAt: timestamp('arrival_at'),
-  waypoints: jsonb('waypoints'),
-  distanceNm: numeric('distance_nm', { precision: 10, scale: 2 }),
-  status: text('status', { enum: ['planned', 'active', 'completed', 'canceled'] })
-    .notNull()
-    .default('planned'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+export const vesselsRoutesTable = pgTable(
+  'vessels_routes',
+  {
+    id: serial('id').primaryKey(),
+    vesselId: integer('vessel_id')
+      .notNull()
+      .references(() => vesselsTable.id, { onDelete: 'cascade' }),
+    orgId: integer('org_id'),
+    originPort: text('origin_port').notNull(),
+    destinationPort: text('destination_port').notNull(),
+    departureAt: timestamp('departure_at'),
+    arrivalAt: timestamp('arrival_at'),
+    waypoints: jsonb('waypoints'),
+    distanceNm: numeric('distance_nm', { precision: 10, scale: 2 }),
+    status: text('status', { enum: ['planned', 'active', 'completed', 'canceled'] })
+      .notNull()
+      .default('planned'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [index('vessels_routes_org_id_idx').on(t.orgId)],
+);
 
 export const vesselsAlertRulesTable = pgTable('vessels_alert_rules', {
   id: serial('id').primaryKey(),

@@ -189,9 +189,9 @@ The following gaps were identified in the Phase 2–3 Architecture, Auth & Tenan
 
 | Finding ID | Description | Severity | Status |
 |-----------|-------------|----------|--------|
-| AF-001 | `adminGuard` uses `Buffer.equals()` instead of `crypto.timingSafeEqual` for internal token | P1 | ⚠️ Open |
-| AF-003 | `GET /vessels/fleets` and fleet sub-routes return all tenants' fleet data | P1 | ⚠️ Open |
-| AF-007 | `vessels.*` DB tables (fleet, vessel, positions, cargo, routes) missing `org_id` column | P1 | ⚠️ Open |
+| AF-001 | `adminGuard` uses `Buffer.equals()` instead of `crypto.timingSafeEqual` for internal token | P1 | ✅ Resolved Apr-2026 (Task #2693) — `middlewares/admin-guard.ts` delegates to `verifyInternalHeader()` which uses HMAC-SHA256 digest + `crypto.timingSafeEqual` (`lib/internal-tokens.ts:104-116`). Regression test in `__tests__/security-hardening.test.ts` §1. |
+| AF-003 | `GET /vessels/fleets` and fleet sub-routes return all tenants' fleet data | P1 | ✅ Resolved Apr-2026 (Task #1048) — every fleet/vessel/route handler in `routes/vessels.ts` now uses `tenantScope()` + `fleetOrgWhere()`/`vesselOrgWhere()`/`getVesselInOrg()` to filter by `org_id`. |
+| AF-007 | `vessels.*` DB tables (fleet, vessel, positions, cargo, routes) missing `org_id` column | P1 | ✅ Resolved Apr-2026 (Task #1048) — `org_id` column added to `vessels_fleets`, `vessels`, and `vessels_alert_rules` via migration `lib/db/drizzle/0076_vessels_org_id.sql` with backing indexes. |
 | AF-004 | Backup export endpoint accepts arbitrary `orgId` without verifying admin authority | P2 | ⚠️ Open |
 | AF-008 | `conversations` table missing `org_id` — AI chat history not tenant-scoped at DB level | P2 | ⚠️ Open |
 | AF-010 | Sessions not invalidated on role change (up to 30-day exposure window) | P2 | ✅ Resolved Apr-2026 — `revokeUserSessionsOnRoleChange()` in `middlewares/session-policy.ts` deletes all sessions and writes audit event; called on SCIM group changes and new `PUT /admin/users/:userId/roles` endpoint. |
@@ -206,8 +206,8 @@ The following gaps were identified in the Phase 2–3 Architecture, Auth & Tenan
 | Gap ID | Description | Severity | ETA | Launch Impact |
 |--------|-------------|----------|-----|---------------|
 | GAP-001 | Manual rotation of Firebase/Google keys needed | High | Immediate | 🔴 Hard blocker (LB-001) |
-| AF-001 | `adminGuard` non-timing-safe internal token comparison | P1 | Sprint 3 | 🟡 Conditional |
-| AF-003 / AF-007 | Vessels schema + routes lack tenant scoping | P1 | Sprint 3 | 🟡 Conditional |
+| AF-001 | `adminGuard` non-timing-safe internal token comparison | P1 | ✅ Resolved Apr-2026 (Task #2693) | ✅ Cleared |
+| AF-003 / AF-007 | Vessels schema + routes lack tenant scoping | P1 | ✅ Resolved Apr-2026 (Task #1048) | ✅ Cleared |
 | KG009 | OTEL exporter not wired for production | P1 | Pre-deploy | 🔴 Hard blocker (LB-006) |
 | KG026 | MFA not implemented | P1 | Enterprise tier launch | **Formally Accepted Apr-2026.** IdP-level MFA (Replit OIDC / Azure AD) is the current control. Platform-native MFA on roadmap for enterprise tier. Risk accepted with IdP enforcement requirement for enterprise pilots. |
 | KG027 | External uptime monitoring absent | P1 | Pre-deploy | 🔴 Hard blocker (LB-002) |
@@ -218,7 +218,7 @@ The following gaps were identified in the Phase 2–3 Architecture, Auth & Tenan
 | KG020c | No virus scanning on uploaded files | P2 | Sprint 4 | 🟢 Not blocking |
 | GAP-002 | No CI/CD automated secret scanning | Med | Sprint 3 | ✅ Resolved Apr-2026 (LC-001) |
 
-> **All original P0 items are resolved.** DB-level tenant isolation, timing-safe auth (in auth.ts), Zod validation on all high-risk write routes, structured Pino logging in all production paths. Mobile secrets transition to template-based management is complete. The Phase 2–3 audit discovered 3 new P1 gaps (AF-001, AF-003, AF-007) — see AUDIT_FINDINGS_REGISTER.md. See `KNOWN-GAPS.md` for full resolution log.
+> **All original P0 items are resolved.** DB-level tenant isolation, timing-safe auth (in auth.ts and admin-guard.ts), Zod validation on all high-risk write routes, structured Pino logging in all production paths. Mobile secrets transition to template-based management is complete. The 3 P1 gaps from the Phase 2–3 audit (AF-001, AF-003, AF-007) are now all resolved (Tasks #2693 and #1048, Apr-2026) — see AUDIT_FINDINGS_REGISTER.md. See `KNOWN-GAPS.md` for full resolution log.
 
 > **For launch decision:** See [LAUNCH_BLOCKERS.md](../launch/launch-blockers.md) for the definitive list of hard blockers and conditional items. See [GO_NO_GO_CHECKLIST.md](../launch/go-no-go-checklist.md) for the final launch sign-off framework.
 

@@ -45,6 +45,11 @@ import { tenantScope } from '../middlewares/tenant-scope';
 
 const router: IRouter = Router();
 
+// Every handler in this file must go through authMiddleware() + tenantScope()
+// and use the *OrgWhere() / getVesselInOrg() / getOrgVesselIds() helpers below
+// to scope queries by req.tenantOrgId. Writes must stamp org_id from server
+// context and strip any client-supplied orgId.
+
 // ─── Org-scoping helpers ─────────────────────────────────────────────────────
 
 /**
@@ -61,6 +66,21 @@ function vesselOrgWhere(orgId: number | undefined) {
 
 function alertRuleOrgWhere(orgId: number | undefined) {
   return orgId !== undefined ? eq(vesselsAlertRulesTable.orgId, orgId) : undefined;
+}
+
+// Defense-in-depth filters on the denormalized sub-resource org_id columns.
+// The parent-vessel ownership check (getVesselInOrg) is the primary gate;
+// these direct filters protect against future query paths skipping it.
+function positionOrgWhere(orgId: number | undefined) {
+  return orgId !== undefined ? eq(vesselsPositionsTable.orgId, orgId) : undefined;
+}
+
+function cargoOrgWhere(orgId: number | undefined) {
+  return orgId !== undefined ? eq(vesselsCargoTable.orgId, orgId) : undefined;
+}
+
+function routeOrgWhere(orgId: number | undefined) {
+  return orgId !== undefined ? eq(vesselsRoutesTable.orgId, orgId) : undefined;
 }
 
 /**
@@ -479,10 +499,15 @@ router.get('/vessels/:id/positions', authMiddleware(), tenantScope(), async (req
       sendNotFound(res, 'Vessel');
       return;
     }
+    const orgFilter = positionOrgWhere(req.tenantOrgId);
     const positions = await db
       .select()
       .from(vesselsPositionsTable)
-      .where(eq(vesselsPositionsTable.vesselId, id))
+      .where(
+        orgFilter
+          ? and(eq(vesselsPositionsTable.vesselId, id), orgFilter)
+          : eq(vesselsPositionsTable.vesselId, id),
+      )
       .orderBy(desc(vesselsPositionsTable.recordedAt));
     sendSuccess(res, positions);
   } catch (err) {
@@ -500,10 +525,15 @@ router.get('/vessels/:id/cargo', authMiddleware(), tenantScope(), async (req: Re
       sendNotFound(res, 'Vessel');
       return;
     }
+    const orgFilter = cargoOrgWhere(req.tenantOrgId);
     const cargo = await db
       .select()
       .from(vesselsCargoTable)
-      .where(eq(vesselsCargoTable.vesselId, id))
+      .where(
+        orgFilter
+          ? and(eq(vesselsCargoTable.vesselId, id), orgFilter)
+          : eq(vesselsCargoTable.vesselId, id),
+      )
       .orderBy(desc(vesselsCargoTable.createdAt));
     sendSuccess(res, cargo);
   } catch (err) {
@@ -515,19 +545,29 @@ router.get('/vessels/:id/cargo', authMiddleware(), tenantScope(), async (req: Re
 
 router.get('/vessels/routes/all', authMiddleware(), tenantScope(), async (req: Request, res) => {
   try {
-    const orgVesselIds = await getOrgVesselIds(req.tenantOrgId);
-    if (orgVesselIds !== null && orgVesselIds.length === 0) {
-      sendSuccess(res, []);
+    // Combine direct routes.org_id filter with the parent-vessel id-set filter.
+    // Both must hold for tenant-scoped users — defends against future query
+    // paths that forget the parent-vessel join AND any drift between
+    // routes.org_id and parent vessel.org_id.
+    const orgFilter = routeOrgWhere(req.tenantOrgId);
+    if (orgFilter) {
+      const orgVesselIds = await getOrgVesselIds(req.tenantOrgId);
+      if (orgVesselIds === null || orgVesselIds.length === 0) {
+        sendSuccess(res, []);
+        return;
+      }
+      const routes = await db
+        .select()
+        .from(vesselsRoutesTable)
+        .where(and(orgFilter, inArray(vesselsRoutesTable.vesselId, orgVesselIds)))
+        .orderBy(desc(vesselsRoutesTable.createdAt));
+      sendSuccess(res, routes);
       return;
     }
-    const routes =
-      orgVesselIds !== null
-        ? await db
-            .select()
-            .from(vesselsRoutesTable)
-            .where(inArray(vesselsRoutesTable.vesselId, orgVesselIds))
-            .orderBy(desc(vesselsRoutesTable.createdAt))
-        : await db.select().from(vesselsRoutesTable).orderBy(desc(vesselsRoutesTable.createdAt));
+    const routes = await db
+      .select()
+      .from(vesselsRoutesTable)
+      .orderBy(desc(vesselsRoutesTable.createdAt));
     sendSuccess(res, routes);
   } catch (err) {
     handleRouteError(res, err, 'Failed to list routes');
@@ -598,7 +638,11 @@ router.post(
         sendNotFound(res, 'Vessel');
         return;
       }
-      const [route] = await db.insert(vesselsRoutesTable).values(data).returning();
+      // Stamp denormalized org_id from the parent vessel.
+      const [route] = await db
+        .insert(vesselsRoutesTable)
+        .values({ ...data, orgId: vessel.orgId ?? null })
+        .returning();
       sendCreated(res, route);
     } catch (err) {
       handleRouteError(res, err, 'Failed to create route');
@@ -615,10 +659,13 @@ router.put(
   async (req: Request, res) => {
     try {
       const id = parseIdParam(req.params.id);
-      // Strip vesselId — parent ownership must not be reassigned by clients
-      const { vesselId: _discardVesselId, ...data } = insertVesselRouteSchema
-        .partial()
-        .parse(req.body);
+      // Strip vesselId AND orgId — parent ownership and tenant assignment
+      // must not be reassigned by clients.
+      const {
+        vesselId: _discardVesselId,
+        orgId: _discardOrgId,
+        ...data
+      } = insertVesselRouteSchema.partial().parse(req.body);
       const [existing] = await db
         .select()
         .from(vesselsRoutesTable)

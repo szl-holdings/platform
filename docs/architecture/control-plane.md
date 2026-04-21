@@ -78,7 +78,7 @@ x-internal-token: <ALLOY_INTERNAL_TOKEN>
 - Used by server-to-server internal calls (e.g., AlloyChat → admin endpoints)
 - Token must match `ALLOY_INTERNAL_TOKEN` environment variable exactly
 - Token must be at least 32 characters (enforced at startup in `startup-config.ts`)
-- ⚠️ **Known Issue (AF-001):** Token comparison uses `Buffer.equals()` rather than `crypto.timingSafeEqual`. See AUDIT_FINDINGS_REGISTER.md for remediation plan.
+- ✅ **AF-001 Resolved (Apr-2026, Task #2693):** Token comparison goes through `verifyInternalHeader()` → HMAC-SHA256 digest + `crypto.timingSafeEqual` (`lib/internal-tokens.ts:104-116`). Both `auth.ts::checkInternalToken` and `admin-guard.ts` share this constant-time path.
 
 **Path 2: Authenticated Session + Admin Role**
 ```
@@ -179,7 +179,7 @@ Internal service-to-service calls use a shared `ALLOY_INTERNAL_TOKEN` environmen
 
 The internal token bypasses user-facing RBAC but not the audit trail. All internal token requests are logged.
 
-**Current known issue:** `adminGuard` uses `Buffer.equals()` for token comparison; `auth.ts` correctly uses `crypto.timingSafeEqual`. See AF-001 in AUDIT_FINDINGS_REGISTER.md.
+**Status (Apr-2026):** AF-001 resolved (Task #2693). `adminGuard` and `auth.ts::checkInternalToken` both delegate to `verifyInternalHeader()` in `lib/internal-tokens.ts`, which compares HMAC-SHA256 digests with `crypto.timingSafeEqual` — eliminating both the original timing concern and the length side-channel.
 
 ### Service Role Key
 
@@ -212,7 +212,7 @@ The PIN verification adds a second factor to the session-based auth for the CMS 
 | Admin roles database-only (no UI grant) | ✅ | No role assignment endpoint in user-facing product |
 | All admin actions logged | ✅ | Pino structured log + audit trail entries |
 | Impersonation logged with actor identity | ✅ | `routes/admin/users.ts` |
-| Internal token timing-safe compare | ⚠️ Partial | `auth.ts` ✅; `admin-guard.ts` ⚠️ (AF-001) |
+| Internal token timing-safe compare | ✅ | Both `auth.ts` and `admin-guard.ts` use `verifyInternalHeader()` (HMAC + `timingSafeEqual`) — AF-001 resolved Task #2693 |
 | Admin PIN for CMS panel | ✅ | Hashed PIN stored, verified on access |
 | MFA for super_admin sessions | ⚠️ Open | Planned for enterprise tier launch (KG026) |
 | Cross-org export authorization check | ⚠️ Open | AF-004 — orgId not validated for authority |
@@ -246,7 +246,7 @@ Audit logs are written to:
 
 | Risk | Gap ID | Severity | Status |
 |------|--------|----------|--------|
-| `adminGuard` uses non-timing-safe token compare | AF-001 | P1 | ⚠️ Open |
+| `adminGuard` uses non-timing-safe token compare | AF-001 | P1 | ✅ Resolved Apr-2026 (Task #2693) |
 | No MFA for super_admin sessions | KG026 / AF-011 | P1 | ⚠️ Open |
 | Backup export lacks orgId authorization check | AF-004 | P2 | ⚠️ Open |
 | Sessions not revoked on role change | AF-010 | P2 | ⚠️ Open |
@@ -259,7 +259,7 @@ Audit logs are written to:
 
 Before the first enterprise customer goes live, the following control plane hardening items should be completed:
 
-1. **AF-001** — Replace `Buffer.equals()` with `crypto.timingSafeEqual` in `adminGuard`
+1. ~~**AF-001** — Replace `Buffer.equals()` with `crypto.timingSafeEqual` in `adminGuard`~~ ✅ Resolved Apr-2026 (Task #2693)
 2. **KG026 / AF-011** — Implement MFA for `super_admin` / `founder_admin` sessions
 3. **AF-004** — Validate `orgId` authorization on backup export endpoint
 4. **AF-010** — Implement session invalidation on role change

@@ -1,3 +1,7 @@
+// Internal-token verification is delegated to verifyInternalHeader() so the
+// HMAC-digest + crypto.timingSafeEqual path is the single comparator used by
+// admin-guard, auth, and global-auth-enforcer. Do not reintroduce a direct
+// header/secret equality check here.
 import type { RoleName } from '@szl-holdings/db';
 import type { NextFunction, Request, Response } from 'express';
 import { sendError, sendForbidden, sendUnauthorized } from '../lib/api-response';

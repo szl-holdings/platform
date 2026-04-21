@@ -455,9 +455,9 @@ Three new P1 gaps were discovered in the Phase 2–3 architecture and tenancy ha
 
 | ID | Gap | Sprint Target |
 |----|-----|--------------|
-| AF-001 | `adminGuard` middleware uses non-timing-safe `Buffer.equals()` for internal token | Sprint 3 |
-| AF-003 | `GET /vessels/fleets` routes return all tenants' fleet data (missing tenant scope) | Sprint 3 |
-| AF-007 | `vessels.*` DB tables (`vessels_fleets`, `vessels`, positions) missing `org_id` column | Sprint 3 |
+| AF-001 | `adminGuard` middleware uses non-timing-safe `Buffer.equals()` for internal token | ✅ Resolved Apr-2026 (Task #2693) |
+| AF-003 | `GET /vessels/fleets` routes return all tenants' fleet data (missing tenant scope) | ✅ Resolved Apr-2026 (Task #1048) |
+| AF-007 | `vessels.*` DB tables (`vessels_fleets`, `vessels`, positions) missing `org_id` column | ✅ Resolved Apr-2026 (Task #1048) |
 
 ### P1 — High (Open, Tracked) — Previously Identified
 
@@ -489,7 +489,7 @@ Three new P1 gaps were discovered in the Phase 2–3 architecture and tenancy ha
 | KG024 | Large vendor bundle sizes (1–1.7 MB) | Sprint 4 |
 | KG025 | WCAG accessibility not systematically audited | Sprint 4 |
 
-**Diligence assessment:** All original P0 security gaps are resolved. The Phase 2–3 audit added 3 new P1 gaps and 7 new P2 gaps — all tracked with remediation owners and Sprint 3 targets. The five highest-priority items for pre-commercial deployment are: KG009 (OTEL), AF-001 (adminGuard token), AF-003/AF-007 (vessels tenancy), KG011 (SAST), and KG026 (MFA for super_admin). Full findings in [AUDIT_FINDINGS_REGISTER.md](../operations/audit-findings-register.md).
+**Diligence assessment:** All original P0 security gaps are resolved. The 3 P1 gaps from the Phase 2–3 audit (AF-001, AF-003, AF-007) are now all closed (Tasks #2693 and #1048, Apr-2026). The remaining highest-priority items for pre-commercial deployment are: KG009 (OTEL), KG011 (SAST), KG020b (webhook SSRF / SEC-007), and KG026 (MFA for super_admin — formally accepted, IdP-enforced). Full findings in [AUDIT_FINDINGS_REGISTER.md](../operations/audit-findings-register.md).
 
 ---
 
@@ -544,4 +544,4 @@ Three new P1 gaps were discovered in the Phase 2–3 architecture and tenancy ha
 
 ---
 
-*Last verified against source code: 2026-04-17. Full 13-phase audit complete (Phases 0–13). All P0 security gaps resolved. 3 new P1 gaps (AF-001, AF-003, AF-007) and multiple P2 gaps tracked in AUDIT_FINDINGS_REGISTER.md. Phase 10–11 Category Leadership & Diligence review completed. Seven stakeholder lens audit conducted — findings documented in KNOWN-GAPS.md §Phase 10–11 audit note. TD-004 (TRUST_CENTER_INDEX.md model transparency) resolved. Category updated to Governed Decision Infrastructure. INVESTOR_NARRATIVE.md v3.0, MOAT_MAP.md v2.0, CATEGORY_POSITIONING.md v2.1 all current.*
+*Last verified against source code: 2026-04-20. Full 13-phase audit complete (Phases 0–13). All P0 security gaps resolved. The 3 P1 gaps from Phase 2–3 (AF-001, AF-003, AF-007) are now all resolved (Tasks #2693, #1048, Apr-2026); P2 gaps tracked in AUDIT_FINDINGS_REGISTER.md. Phase 10–11 Category Leadership & Diligence review completed. Seven stakeholder lens audit conducted — findings documented in KNOWN-GAPS.md §Phase 10–11 audit note. TD-004 (TRUST_CENTER_INDEX.md model transparency) resolved. Category updated to Governed Decision Infrastructure. INVESTOR_NARRATIVE.md v3.0, MOAT_MAP.md v2.0, CATEGORY_POSITIONING.md v2.1 all current.*

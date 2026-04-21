@@ -332,6 +332,163 @@ describe('tenantScope middleware', () => {
 });
 
 // ---------------------------------------------------------------------------
+// 5b. AF-003 / AF-007 — vessels tenant-scope source assertions
+// ---------------------------------------------------------------------------
+
+describe('AF-003 / AF-007 — vessels routes and schema enforce tenant isolation', () => {
+  it('routes/vessels.ts uses tenantScope() on every router handler', async () => {
+    const { readFileSync } = await import('fs');
+    const { fileURLToPath } = await import('url');
+    const { dirname, resolve } = await import('path');
+    const dir = dirname(fileURLToPath(import.meta.url));
+    const src = readFileSync(resolve(dir, '../routes/vessels.ts'), 'utf8');
+
+    // Imports tenantScope from middlewares
+    expect(src).toMatch(
+      /import\s*\{\s*tenantScope\s*\}\s*from\s*['"]\.\.\/middlewares\/tenant-scope['"]/,
+    );
+
+    // Every router.<method>(...) handler call must include tenantScope().
+    // Use paren balancing to extract each multi-line call.
+    const startRe = /router\.(get|post|put|patch|delete)\s*\(/g;
+    let handlerCount = 0;
+    let m: RegExpExecArray | null;
+    while ((m = startRe.exec(src)) !== null) {
+      let depth = 1;
+      let i = startRe.lastIndex;
+      while (i < src.length && depth > 0) {
+        const c = src[i];
+        if (c === '(') depth++;
+        else if (c === ')') depth--;
+        i++;
+      }
+      const handler = src.slice(m.index, i);
+      handlerCount++;
+      expect(
+        handler.includes('tenantScope()'),
+        `vessels route handler missing tenantScope() at offset ${m.index}:\n${handler.slice(0, 240)}`,
+      ).toBe(true);
+    }
+    expect(handlerCount).toBeGreaterThan(20); // sanity: we have many handlers
+  });
+
+  it('schema/vessels.ts declares org_id on the tenant-owning tables', async () => {
+    const { readFileSync } = await import('fs');
+    const { fileURLToPath } = await import('url');
+    const { dirname, resolve } = await import('path');
+    const dir = dirname(fileURLToPath(import.meta.url));
+    // Resolve up to lib/db/src/schema/vessels.ts via the workspace root
+    const schemaPath = resolve(
+      dir,
+      '../../../../lib/db/src/schema/vessels.ts',
+    );
+    const src = readFileSync(schemaPath, 'utf8');
+
+    // org_id column declared on parent + sub-resource tables:
+    //   vesselsFleetsTable, vesselsTable, vesselsPositionsTable,
+    //   vesselsCargoTable, vesselsRoutesTable, vesselsAlertRulesTable
+    const orgIdMatches = src.match(/orgId:\s*integer\(\s*['"]org_id['"]\s*\)/g) ?? [];
+    expect(orgIdMatches.length).toBeGreaterThanOrEqual(6);
+
+    // Backing indexes — parent and sub-resource tables both
+    expect(src).toMatch(/vessels_org_id_idx/);
+    expect(src).toMatch(/vessels_positions_org_id_idx/);
+    expect(src).toMatch(/vessels_cargo_org_id_idx/);
+    expect(src).toMatch(/vessels_routes_org_id_idx/);
+  });
+
+  it('migrations 0076 (parent tables) + 0094 (sub-resource tables) cover all AF-007 in-scope tables', async () => {
+    const { readFileSync, existsSync } = await import('fs');
+    const { fileURLToPath } = await import('url');
+    const { dirname, resolve } = await import('path');
+    const dir = dirname(fileURLToPath(import.meta.url));
+    const drizzleDir = resolve(dir, '../../../../lib/db/drizzle');
+
+    const phase1Path = resolve(drizzleDir, '0076_vessels_org_id.sql');
+    const phase2Path = resolve(drizzleDir, '0094_vessels_subresource_org_id.sql');
+    expect(existsSync(phase1Path)).toBe(true);
+    expect(existsSync(phase2Path)).toBe(true);
+
+    const phase1 = readFileSync(phase1Path, 'utf8');
+    const phase2 = readFileSync(phase2Path, 'utf8');
+
+    // Phase 1 (immutable, already shipped) — parent / rule tables
+    expect(phase1).toMatch(/ALTER TABLE\s+"vessels_fleets"[\s\S]*org_id/);
+    expect(phase1).toMatch(/ALTER TABLE\s+"vessels"\s+ADD COLUMN[\s\S]*org_id/);
+    expect(phase1).toMatch(/ALTER TABLE\s+"vessels_alert_rules"[\s\S]*org_id/);
+
+    // Phase 2 (forward migration) — sub-resource tables + indexes + backfill
+    expect(phase2).toMatch(/ALTER TABLE\s+"vessels_positions"[\s\S]*org_id/);
+    expect(phase2).toMatch(/ALTER TABLE\s+"vessels_cargo"[\s\S]*org_id/);
+    expect(phase2).toMatch(/ALTER TABLE\s+"vessels_routes"[\s\S]*org_id/);
+    expect(phase2).toMatch(/vessels_positions_org_id_idx/);
+    expect(phase2).toMatch(/vessels_cargo_org_id_idx/);
+    expect(phase2).toMatch(/vessels_routes_org_id_idx/);
+    expect(phase2).toMatch(/UPDATE\s+"vessels_positions"[\s\S]*FROM\s+"vessels"/);
+    expect(phase2).toMatch(/UPDATE\s+"vessels_cargo"[\s\S]*FROM\s+"vessels"/);
+    expect(phase2).toMatch(/UPDATE\s+"vessels_routes"[\s\S]*FROM\s+"vessels"/);
+
+    // Guard against ever re-mutating the shipped 0076 with sub-resource DDL.
+    expect(phase1).not.toMatch(/ALTER TABLE\s+"vessels_positions"/);
+    expect(phase1).not.toMatch(/ALTER TABLE\s+"vessels_cargo"/);
+    expect(phase1).not.toMatch(/ALTER TABLE\s+"vessels_routes"/);
+
+    // Phase 2 migration must be registered in the drizzle journal — otherwise
+    // `drizzle-kit migrate` skips it and the DB hardening never deploys.
+    const journalPath = resolve(drizzleDir, 'meta/_journal.json');
+    expect(existsSync(journalPath)).toBe(true);
+    const journal = JSON.parse(readFileSync(journalPath, 'utf8')) as {
+      entries: Array<{ tag: string }>;
+    };
+    expect(
+      journal.entries.some((e) => e.tag === '0094_vessels_subresource_org_id'),
+    ).toBe(true);
+  });
+
+  it('PUT /vessels/routes/:id strips client-supplied orgId (tenant key is immutable)', async () => {
+    const { readFileSync } = await import('fs');
+    const { fileURLToPath } = await import('url');
+    const { dirname, resolve } = await import('path');
+    const dir = dirname(fileURLToPath(import.meta.url));
+    const src = readFileSync(resolve(dir, '../routes/vessels.ts'), 'utf8');
+
+    // Locate the PUT /vessels/routes/:id handler and confirm orgId is destructured-discarded
+    const putIdx = src.indexOf("router.put(\n  '/vessels/routes/:id'");
+    expect(putIdx).toBeGreaterThan(0);
+    let depth = 1;
+    let i = src.indexOf('(', putIdx) + 1;
+    while (i < src.length && depth > 0) {
+      const c = src[i];
+      if (c === '(') depth++;
+      else if (c === ')') depth--;
+      i++;
+    }
+    const handler = src.slice(putIdx, i);
+    // Must strip both vesselId and orgId from the parsed body
+    expect(handler).toMatch(/orgId:\s*_discardOrgId/);
+    expect(handler).toMatch(/vesselId:\s*_discardVesselId/);
+  });
+
+  it('GET /vessels/routes/all combines org_id filter with parent-vessel id-set', async () => {
+    const { readFileSync } = await import('fs');
+    const { fileURLToPath } = await import('url');
+    const { dirname, resolve } = await import('path');
+    const dir = dirname(fileURLToPath(import.meta.url));
+    const src = readFileSync(resolve(dir, '../routes/vessels.ts'), 'utf8');
+
+    const getIdx = src.indexOf("'/vessels/routes/all'");
+    expect(getIdx).toBeGreaterThan(0);
+    // Look at the next ~2KB for both filter patterns
+    const block = src.slice(getIdx, getIdx + 2000);
+    // Must call routeOrgWhere AND inArray on vesselsRoutesTable.vesselId — both
+    // filters combined under and(...).
+    expect(block).toMatch(/routeOrgWhere\(\s*req\.tenantOrgId\s*\)/);
+    expect(block).toMatch(/inArray\(\s*vesselsRoutesTable\.vesselId/);
+    expect(block).toMatch(/and\(\s*orgFilter,/);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // 6. CONNECTOR_ENCRYPTION_KEY format validation
 // ---------------------------------------------------------------------------
 

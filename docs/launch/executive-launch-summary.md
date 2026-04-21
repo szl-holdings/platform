@@ -232,9 +232,9 @@ For any investor, technical advisor, or new executive joining the team, review d
 
 | Item | Action | Owner | Priority |
 |------|--------|-------|---------|
-| Fix `adminGuard` timing-unsafe comparison (AF-001) | Replace `Buffer.equals()` with `crypto.timingSafeEqual` | Security Lead | P1 — 30 min fix |
+| ~~Fix `adminGuard` timing-unsafe comparison (AF-001)~~ | ✅ Resolved Apr-2026 (Task #2693). `admin-guard.ts` uses `verifyInternalHeader()` → HMAC digest + `crypto.timingSafeEqual`. | Security Lead | ✅ Done |
 | Add SSRF host allowlist on webhook URLs (SEC-007 / KG020b) | Validate webhook delivery URLs against allowlist | Engineering | P1 |
-| Add `org_id` to vessels fleet schema (AF-003 / AF-007) | Migration + route filter update for Vessels tenancy | Engineering | P1 |
+| ~~Add `org_id` to vessels fleet schema (AF-003 / AF-007)~~ | ✅ Resolved Apr-2026 (Task #1048). Migration `0076_vessels_org_id.sql` and `tenantScope()` in `routes/vessels.ts`. | Engineering | ✅ Done |
 | CodeQL SAST workflow (KG011) | Enable `.github/workflows/codeql.yml` | DevOps | P1 — conditional |
 | Automated dependency review (KG012) | Add `dependency-review-action` to PR workflow | DevOps | P1 — conditional |
 | Create `CODEOWNERS` file (KG013) | Map critical paths to review owners | Eng Lead | P1 — 2 hours |
@@ -316,7 +316,7 @@ For any investor, technical advisor, or new executive joining the team, review d
 | Perspective | Highest Concern | Verdict |
 |-------------|----------------|---------|
 | Enterprise Buyer (CISO / Head of Ops) | No `security.txt` published; SOC 2 not yet started | CONDITIONAL PASS — honest disclosure is a trust signal |
-| Security Reviewer (Pen Tester) | AF-001, AF-003/007, SEC-007 (three P1 gaps) | NOT PASS for first enterprise prod deployment — fix in Day-7 sprint |
+| Security Reviewer (Pen Tester) | AF-001 ✅ resolved (Task #2693), AF-003/007 ✅ resolved (Task #1048); SEC-007 (webhook SSRF) still open | Conditional pass — only SEC-007 remains for first enterprise prod deployment |
 | Operator (Day-to-day user, 6 months in) | No onboarding wizard — sparse empty states | CONDITIONAL PASS — must fix before broad rollout |
 | Diligence Reviewer (VC technical partner) | TECHNICAL_DILIGENCE_PACKET.md is complete and honest | PASS — self-disclosure of gaps is a trust-builder |
 | Series A Investor | No signed design partners — biggest pre-Series A risk | NOT PASS for Series A — commercial proof required |

@@ -114,9 +114,9 @@ This register catalogs every finding from all operational audit phases (Phase 0�
 | QUAL-001 | E2E test coverage sparse | P2 | `playwright.config.ts` | Write-path regressions may not be caught | ⚠️ Open — GAP-013 | No | No |
 | QUAL-002 | No Lighthouse performance CI | P2 | CI (duplicate of OPS-006) | Performance regressions uncaught on merge | ⚠️ Open — KG019 | No | No |
 | QUAL-003 | No accessibility audit | P2 | All web artifacts | WCAG compliance unknown — enterprise risk | ⚠️ Open — KG025 | No | No |
-| AF-001 | Auth | P1 | `middlewares/admin-guard.ts` | `adminGuard` non-timing-safe token comparison | ⚠️ Open | No | Conditional |
-| AF-003 | Tenancy | P1 | `routes/vessels.ts` | Vessels fleet routes return all tenants' data | ✅ Resolved (Task #1048) | No | Conditional |
-| AF-007 | Tenancy / DB | P1 | `lib/db/src/schema/vessels.ts` | `vessels.*` tables missing `org_id` | ✅ Resolved (Task #1048) | No | Conditional |
+| AF-001 | Auth | P1 | `middlewares/admin-guard.ts` | `adminGuard` non-timing-safe token comparison | ✅ Resolved (Task #2693) | No | N/A |
+| AF-003 | Tenancy | P1 | `routes/vessels.ts` | Vessels fleet routes return all tenants' data | ✅ Resolved (Task #1048) | No | N/A |
+| AF-007 | Tenancy / DB | P1 | `lib/db/src/schema/vessels.ts` | `vessels.*` tables missing `org_id` | ✅ Resolved (Task #1048 + Task #2693 Phase 2) | No | N/A |
 | AF-004 | Admin / Privileged | P2 | `routes/backup.ts` | Backup export lacks orgId authority check | ✅ Resolved (Task #2694) | No | No |
 | AF-008 | Tenancy / DB | P2 | `lib/db/src/schema/conversations.ts` | `conversations` table missing `org_id` | ⚠️ Open | No | No |
 | AF-010 | Auth / Session | P2 | `lib/auth/` | Sessions not invalidated on role change | ✅ Resolved (Task #1049) | No | No |
@@ -302,7 +302,13 @@ This register catalogs every finding from all operational audit phases (Phase 0�
 
 ## Phase 2–3 Audit Findings (AF-) — Detailed Notes
 
-### AF-001: `adminGuard` Uses Non-Timing-Safe Token Comparison
+### AF-001: `adminGuard` Uses Non-Timing-Safe Token Comparison — ✅ Resolved (Task #2693, 2026-04-20)
+
+**Resolution:** `artifacts/api-server/src/middlewares/admin-guard.ts` no longer performs an in-line `Buffer.equals()` compare. It delegates internal-token verification to `verifyInternalHeader()` in `artifacts/api-server/src/lib/internal-tokens.ts`, which hashes both the candidate and the registered token to fixed 32-byte HMAC-SHA256 digests (`tokenDigest()`) and then calls `crypto.timingSafeEqual()` (internal-tokens.ts:104-116). Hashing first eliminates the length side-channel that a raw `timingSafeEqual` on variable-length tokens would still leak. The same `verifyInternalHeader()` path is used by `middlewares/auth.ts::checkInternalToken`, so admin and non-admin internal-token verification now share one constant-time implementation. Regression test: `artifacts/api-server/src/__tests__/security-hardening.test.ts` §1.
+
+---
+
+#### Original finding
 
 | Field | Value |
 |-------|-------|
@@ -354,9 +360,13 @@ return timingSafeEqual(a, b);
 
 ---
 
-### AF-007: `vessels.*` Tables Missing `org_id` Column — ✅ Resolved (Task #1048, 2026-04-19)
+### AF-007: `vessels.*` Tables Missing `org_id` Column — ✅ Resolved (Task #1048, 2026-04-19; Phase 2 Task #2693, 2026-04-20)
 
-**Resolution:** Schema (`lib/db/src/schema/vessels.ts`) declares `orgId: integer("org_id")` on `vesselsFleetsTable`, `vesselsTable`, and `vesselsAlertRulesTable`. Migration `lib/db/drizzle/0076_vessels_org_id.sql` adds the columns to the live DB (idempotent `ADD COLUMN IF NOT EXISTS`) plus indexes (`vessels_fleets_org_id_idx`, `vessels_org_id_idx`, `vessels_alert_rules_org_id_idx`) and `COMMENT ON COLUMN` documentation. Columns are nullable so existing rows remain visible to elevated admins as platform rows; tenant-scoped users cannot see them by SQL `NULL`-comparison rules. Verified: `information_schema.columns` confirms all three columns present.
+**Resolution Phase 1 (Task #1048):** Schema (`lib/db/src/schema/vessels.ts`) declared `orgId: integer("org_id")` on `vesselsFleetsTable`, `vesselsTable`, and `vesselsAlertRulesTable`. Migration `lib/db/drizzle/0076_vessels_org_id.sql` added the columns to the live DB (idempotent `ADD COLUMN IF NOT EXISTS`) plus indexes (`vessels_fleets_org_id_idx`, `vessels_org_id_idx`, `vessels_alert_rules_org_id_idx`) and `COMMENT ON COLUMN` documentation.
+
+**Resolution Phase 2 (Task #2693):** Extended to the sub-resource tables called out in the original P1 finding scope — `vesselsPositionsTable`, `vesselsCargoTable`, `vesselsRoutesTable`. New forward migration `lib/db/drizzle/0094_vessels_subresource_org_id.sql` (Phase 1 migration `0076` is left immutable) adds `org_id` (nullable) plus matching indexes (`vessels_positions_org_id_idx`, `vessels_cargo_org_id_idx`, `vessels_routes_org_id_idx`) on these three tables, with a backfill `UPDATE … FROM "vessels"` so existing sub-resource rows inherit `org_id` from their parent vessel. Routes (`routes/vessels.ts`) stamp `org_id` on insert from the parent vessel, strip client-supplied `orgId` on update, and apply direct sub-resource org filters (`positionOrgWhere / cargoOrgWhere / routeOrgWhere`) in addition to the parent-ownership check. `GET /vessels/routes/all` requires both `routes.org_id` match AND parent-vessel ownership combined under `and(...)`.
+
+Columns remain nullable so pre-migration rows stay visible to elevated admins as platform rows; tenant-scoped users cannot see `NULL`-org rows by SQL `NULL`-comparison rules. Regression coverage: `artifacts/api-server/src/__tests__/security-hardening.test.ts` §5b asserts every router handler in `routes/vessels.ts` includes `tenantScope()`, the schema declares ≥6 `org_id` columns plus all four sub-resource indexes, and the migration contains `ALTER TABLE` for all six tables plus the backfill `UPDATE` statements.
 
 ---
 
@@ -471,11 +481,11 @@ The original vessels product schema defines `vessels_fleets`, `vessels`, `vessel
 
 Priority order for remediation:
 
-1. **AF-001** — Fix `adminGuard` to use `timingSafeEqual` (30 min)
-2. **AF-003 + AF-007** — Vessel schema tenancy: designate authoritative schema, add `org_id` migration (estimated: 2–3 days)
+1. ~~**AF-001** — Fix `adminGuard` to use `timingSafeEqual`~~ ✅ Resolved (Task #2693, 2026-04-20)
+2. ~~**AF-003 + AF-007** — Vessel schema tenancy: designate authoritative schema, add `org_id` migration~~ ✅ Resolved (Task #1048, 2026-04-19)
 3. **AF-013** — Extract token verification to shared utility (1 hour)
-4. **AF-004** — Validate `orgId` authorization on backup export (1 hour)
-5. **AF-010 + AF-012** — Session invalidation hardening (1–2 days)
+4. ~~**AF-004** — Validate `orgId` authorization on backup export~~ ✅ Resolved (Task #2694, 2026-04-20)
+5. ~~**AF-010 + AF-012** — Session invalidation hardening~~ ✅ Resolved (Task #1049)
 6. **AF-008** — Add `org_id` to `conversations` (1 hour + migration)
 7. **AF-014** — ORM-layer cross-tenant query guard / ESLint rule (2–3 days)
 
@@ -552,10 +562,10 @@ Priority order for remediation:
 - **Finding RT-011:** No `/.well-known/security.txt` endpoint published — an enterprise CISO will look for it. KG-VD1, still open.
 
 **2 — Security Reviewer (Penetration Tester)**
-- **Concern:** Timing-safe comparison in all auth paths? → auth.ts ✅; adminGuard.ts ⚠️ (AF-001, still open).
+- **Concern:** Timing-safe comparison in all auth paths? → auth.ts ✅; adminGuard.ts ✅ (AF-001 resolved Task #2693, 2026-04-20 — `verifyInternalHeader` uses HMAC digest + `timingSafeEqual`).
 - **Concern:** SSRF on webhook URLs? → ⚠️ Open (SEC-007 / KG020b).
-- **Concern:** Cross-tenant vessel data? → ⚠️ Open (AF-003 / AF-007).
-- **Finding RT-012:** These three P1 open gaps are the most likely findings any professional penetration tester would report within the first four hours. All three are documented, scoped, and have remediation paths. None are new findings — they are the known P1 items from Phase 2–3.
+- **Concern:** Cross-tenant vessel data? → ✅ Resolved (AF-003 Task #1048, AF-007 Task #1048 — `tenantScope()` + `org_id` migration `0076_vessels_org_id.sql`).
+- **Finding RT-012:** Of the three P1 gaps a pen tester would historically have flagged within four hours, two (AF-001, AF-003/007) are now closed. Only SEC-007 (SSRF on webhook URLs) remains open — see KG020b.
 
 **3 — Operator (Day-to-day user, 6 months in)**
 - **Concern:** If I change a workflow setting and it fails, what happens? → Workflow Engine has checkpoint/recovery via forge-runtime. Documented.
@@ -606,7 +616,7 @@ Priority order for remediation:
 | RT-009 | P2 | PRISM Counsel deprecation inconsistency across sales vs. demo docs | ⚠️ Open — before legal-buyer demos |
 | RT-010 | P2 | Domain-specific mobile apps listed as "Functional Alpha" — do not exist as artifacts | ✅ Resolved Apr-2026 — TD-006 / DOC-002 |
 | RT-011 | P2 | No `/.well-known/security.txt` published | ⚠️ Open — VD1 |
-| RT-012 | P1 (existing) | Three P1 security gaps remain (AF-001, AF-003/007, SEC-007) — known from Phase 2–3 | ⚠️ Open — Sprint 3 |
+| RT-012 | P1 (existing) | Of three P1 gaps from Phase 2–3, AF-001 and AF-003/007 are now resolved (Tasks #2693, #1048); SEC-007 (SSRF on webhooks) remains open | ⚠️ Partial — SEC-007 only |
 | RT-013 | P1 (existing) | No onboarding wizard — highest-friction operator UX gap | ⚠️ Open — FLOW-001 |
 | RT-014 | INFO | TECHNICAL_DILIGENCE_PACKET.md passes diligence honesty test | INFO — pass |
 | RT-015 | STRATEGIC | No signed design partners — highest pre-Series A risk (non-technical) | ⚠️ Open — founder action |

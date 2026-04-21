@@ -174,7 +174,7 @@ These packages have **no internal dependencies** on other `@szl-holdings/` packa
 
 | Issue | Detail | Status |
 |-------|--------|--------|
-| `vessels.ts` vs `maritime.ts` schema | Two parallel vessel data schemas exist: `lib/db/src/schema/vessels.ts` (original product schema, no `org_id`) and `lib/db/src/schema/maritime.ts` (newer schema with proper `org_id` scoping). Routes using the older schema lack DB-level tenant isolation. | ⚠️ Open (see AUDIT_FINDINGS_REGISTER.md: AF-007) |
+| `vessels.ts` vs `maritime.ts` schema | Two parallel vessel data schemas exist: `lib/db/src/schema/vessels.ts` and `lib/db/src/schema/maritime.ts`. The original `vessels.ts` schema now declares `org_id` on `vessels_fleets`, `vessels`, and `vessels_alert_rules` (migration `0076_vessels_org_id.sql`); routes in `routes/vessels.ts` enforce tenant scoping via `tenantScope()`. | ✅ Resolved Apr-2026 (Task #1048, AF-007) |
 | PRISM framework naming | `PRISM` refers to both the Lyte business observability framework (Pulse/Risk/Intelligence/Signals/Motion) and PRISM Counsel (legal matter management). Confusing in docs and codebase. | ⚠️ Open — tracked as TD-001 in KNOWN-GAPS.md |
 | `authMiddleware.ts` vs `auth.ts` (routes/middlewares) | Two files named similarly: `middlewares/authMiddleware.ts` (session hydrator, global) and `middlewares/auth.ts` (route-level enforcer with `requireRole`). Should be renamed for clarity. | ⚠️ Open — low priority |
 | `lyte-command-center` vs `command` | ARCHITECTURE.md references `lyte-command-center/` but the actual registered artifact is `command/`. | ✅ Noted — docs updated |
@@ -200,7 +200,7 @@ These packages have **no internal dependencies** on other `@szl-holdings/` packa
 |------|--------|----------|
 | `@szl-holdings/db` is a single point of failure | Every package depends on it; schema changes cascade broadly | P1 — mitigated by TypeScript type safety |
 | No `CODEOWNERS` file | Ownership is documented here but not enforced at the git level | P1 — tracked as KG013 in KNOWN-GAPS.md |
-| `vessels.ts` schema lacks `org_id` | Original vessel product schema missing tenant isolation | P1 — tracked as AF-007 in AUDIT_FINDINGS_REGISTER.md |
+| `vessels.ts` schema `org_id` retrofit | Original vessel product schema now includes `org_id` columns + indexes via migration `0076_vessels_org_id.sql` | ✅ Resolved Apr-2026 (Task #1048, AF-007) |
 | `conversations` table lacks `org_id` | AI conversation history not tenant-scoped at DB level | P2 — tracked as AF-008 in AUDIT_FINDINGS_REGISTER.md |
 
 ---
