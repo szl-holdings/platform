@@ -264,6 +264,15 @@ const AXIS_OPTIONS = Object.entries(SENS_AXES).map(([k, v]) => ({
   shortLabel: v.shortLabel,
 }));
 
+const PRESET_PAIRS: { label: string; col: SensAxisKey; row: SensAxisKey }[] = [
+  { label: 'Hard Cost × Cap Rate', col: 'hardCost', row: 'capRate' },
+  { label: 'Rent × Cap Rate', col: 'rent', row: 'capRate' },
+  { label: 'Occupancy × Cap Rate', col: 'occupancy', row: 'capRate' },
+  { label: 'Hard Cost × Financing Rate', col: 'hardCost', row: 'financing' },
+  { label: 'Rent × Occupancy', col: 'rent', row: 'occupancy' },
+  { label: 'Financing Rate × Cap Rate', col: 'financing', row: 'capRate' },
+];
+
 function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
   const [colAxis, setColAxis] = useState<SensAxisKey>('hardCost');
   const [rowAxis, setRowAxis] = useState<SensAxisKey>('capRate');
@@ -293,7 +302,47 @@ function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
         >
           2D Sensitivity → Levered IRR
         </p>
-        <div className="flex items-center gap-2 ml-2 flex-wrap">
+        <div className="flex items-center gap-2 ml-auto flex-wrap">
+          <span className="text-[9px] uppercase tracking-wider" style={{ color: DS.text.muted }}>
+            Quick Pair
+          </span>
+          <select
+            value={`${colAxis}|${rowAxis}`}
+            onChange={(e) => {
+              const [c, r] = e.target.value.split('|') as [SensAxisKey, SensAxisKey];
+              setColAxis(c);
+              setRowAxis(r);
+            }}
+            className="text-[9px] px-2 py-0.5 rounded font-medium"
+            style={{
+              background: `${DS.accent.gold}15`,
+              border: `1px solid ${DS.accent.gold}40`,
+              color: DS.accent.gold,
+              outline: 'none',
+            }}
+          >
+            {PRESET_PAIRS.map((p) => (
+              <option
+                key={`${p.col}|${p.row}`}
+                value={`${p.col}|${p.row}`}
+                style={{ background: '#1a1a2e', color: DS.text.primary }}
+              >
+                {p.label}
+              </option>
+            ))}
+            {!PRESET_PAIRS.some((p) => p.col === colAxis && p.row === rowAxis) && (
+              <option
+                value={`${colAxis}|${rowAxis}`}
+                style={{ background: '#1a1a2e', color: DS.text.primary }}
+              >
+                Custom
+              </option>
+            )}
+          </select>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[9px] uppercase tracking-wider" style={{ color: DS.text.muted }}>
             Cols →
           </span>
@@ -1732,9 +1781,10 @@ export default function ProFormaPage() {
                 Analyzing <span style={{ color: activeScenario.color }}>{activeScenario.name}</span>
               </p>
               <p className="text-[9px] mt-0.5" style={{ color: DS.text.muted }}>
-                Select any two axes — Hard Cost, Cap Rate, Rent/SF, Occupancy, or Financing Rate —
-                to generate a Levered IRR heat map. Use the Cols/Rows pickers inside the panel.
-                Green = strong returns, red = challenged deal. Outlined cell = base case.
+                Use the Quick Pair dropdown to jump to common sweeps (Rent × Cap Rate, Occupancy ×
+                Cap Rate, Hard Cost × Financing Rate, and more), or pick any two axes individually
+                with the Cols/Rows pickers. Green = strong returns, red = challenged deal. Outlined
+                cell = base case.
               </p>
             </div>
           </div>
