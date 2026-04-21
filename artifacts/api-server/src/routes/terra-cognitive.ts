@@ -4,6 +4,7 @@ import {
   db,
   guardianActionsTable,
   guardianApprovalRequestsTable,
+  terraCovenantsTable,
   terraDiligenceEvidenceTable,
   terraDiligenceMattersTable,
   terraDistressPropertiesTable,
@@ -1195,6 +1196,8 @@ router.get('/terra/cognitive/covenants', cogLimit, auth, async (req, res) => {
           label: m.covenant.label ?? m.covenant.covenantType.toUpperCase(),
           threshold: Number(m.covenant.thresholdValue),
           comparator: m.covenant.comparator,
+          requiredApprovers: m.covenant.requiredApprovers,
+          remedyPeriodDays: m.covenant.remedyPeriodDays,
           current: m.measuredValue,
           status: m.status,
           severity: m.status === 'breach' ? 'high' : m.status === 'watch' ? 'medium' : 'none',
@@ -1751,6 +1754,181 @@ router.post(
         err instanceof Error ? err.message : String(err),
       );
       handleRouteError(res, err, 'Failed to submit covenant for review');
+    }
+  },
+);
+
+// ─── Covenant CRUD ────────────────────────────────────────────────────────────
+// Operators can create, edit, and deactivate covenants directly from the UI.
+// All mutations require an authenticated session.
+
+/**
+ * Resolve a covenant lookup condition from a URL parameter.
+ * Accepts: bare numeric PK ("5"), "cov_<pk>" fallback format, or externalId string.
+ */
+function covenantWhereClause(id: string) {
+  const direct = Number(id);
+  if (Number.isFinite(direct) && direct > 0) {
+    return eq(terraCovenantsTable.id, direct);
+  }
+  const covPrefix = /^cov_(\d+)$/.exec(id);
+  if (covPrefix) {
+    return eq(terraCovenantsTable.id, Number(covPrefix[1]));
+  }
+  return eq(terraCovenantsTable.externalId, id);
+}
+
+const covenantCreateSchema = z.object({
+  propertyExternalId: z.string().min(1),
+  propertyAddress: z.string().min(1),
+  borough: z.string().optional(),
+  lender: z.string().min(1),
+  covenantType: z.enum(['dscr', 'ltv', 'occupancy', 'debt_yield']),
+  label: z.string().optional(),
+  thresholdValue: z.number().positive(),
+  comparator: z.enum(['gte', 'lte']),
+  loanAgreementId: z.string().optional(),
+  loanAgreementUrl: z.string().url().optional().or(z.literal('')),
+  requiredApprovers: z.array(z.string()).optional(),
+  remedyPeriodDays: z.number().int().positive().optional(),
+});
+
+const covenantPatchSchema = z.object({
+  lender: z.string().min(1).optional(),
+  label: z.string().optional(),
+  thresholdValue: z.number().positive().optional(),
+  comparator: z.enum(['gte', 'lte']).optional(),
+  loanAgreementId: z.string().optional(),
+  loanAgreementUrl: z.string().url().optional().or(z.literal('')),
+  requiredApprovers: z.array(z.string()).optional(),
+  remedyPeriodDays: z.number().int().positive().optional(),
+  active: z.boolean().optional(),
+});
+
+router.post(
+  '/terra/cognitive/covenants',
+  cogLimit,
+  authMiddleware({ required: true }),
+  validateBody(bodyShape(covenantCreateSchema.shape)),
+  async (req, res) => {
+    try {
+      const parsed = covenantCreateSchema.safeParse(req.body);
+      if (!parsed.success) {
+        sendBadRequest(res, parsed.error.issues.map((i) => i.message).join('; '));
+        return;
+      }
+      const data = parsed.data;
+      const externalId = `cov-op-${randomUUID().slice(0, 8)}`;
+
+      const [inserted] = await db
+        .insert(terraCovenantsTable)
+        .values({
+          externalId,
+          propertyExternalId: data.propertyExternalId,
+          propertyAddress: data.propertyAddress,
+          borough: data.borough ?? null,
+          lender: data.lender,
+          covenantType: data.covenantType,
+          label: data.label ?? null,
+          thresholdValue: String(data.thresholdValue),
+          comparator: data.comparator,
+          loanAgreementId: data.loanAgreementId ?? null,
+          loanAgreementUrl: data.loanAgreementUrl || null,
+          requiredApprovers: data.requiredApprovers ?? ['terra-risk-officer'],
+          remedyPeriodDays: data.remedyPeriodDays ?? 60,
+          active: true,
+          isDemo: false,
+          metadata: { createdBy: 'operator-ui' } as Record<string, unknown>,
+        })
+        .returning();
+
+      sendCreated(res, { covenant: inserted });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create covenant');
+    }
+  },
+);
+
+router.patch(
+  '/terra/cognitive/covenants/:id',
+  cogLimit,
+  authMiddleware({ required: true }),
+  validateBody(bodyShape(covenantPatchSchema.shape)),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const parsed = covenantPatchSchema.safeParse(req.body);
+      if (!parsed.success) {
+        sendBadRequest(res, parsed.error.issues.map((i) => i.message).join('; '));
+        return;
+      }
+
+      const data = parsed.data;
+
+      const existing = await db
+        .select({ id: terraCovenantsTable.id })
+        .from(terraCovenantsTable)
+        .where(covenantWhereClause(id))
+        .limit(1);
+
+      if (!existing[0]) {
+        sendError(res, 404, 'Covenant not found');
+        return;
+      }
+
+      const updates = {
+        updatedAt: new Date(),
+        ...(data.lender !== undefined && { lender: data.lender }),
+        ...(data.label !== undefined && { label: data.label }),
+        ...(data.thresholdValue !== undefined && { thresholdValue: String(data.thresholdValue) }),
+        ...(data.comparator !== undefined && { comparator: data.comparator }),
+        ...(data.loanAgreementId !== undefined && { loanAgreementId: data.loanAgreementId }),
+        ...(data.loanAgreementUrl !== undefined && { loanAgreementUrl: data.loanAgreementUrl || null }),
+        ...(data.requiredApprovers !== undefined && { requiredApprovers: data.requiredApprovers }),
+        ...(data.remedyPeriodDays !== undefined && { remedyPeriodDays: data.remedyPeriodDays }),
+        ...(data.active !== undefined && { active: data.active }),
+      };
+
+      const [updated] = await db
+        .update(terraCovenantsTable)
+        .set(updates)
+        .where(eq(terraCovenantsTable.id, existing[0].id))
+        .returning();
+
+      sendSuccess(res, { covenant: updated });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to update covenant');
+    }
+  },
+);
+
+router.delete(
+  '/terra/cognitive/covenants/:id',
+  cogLimit,
+  authMiddleware({ required: true }),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const existing = await db
+        .select({ id: terraCovenantsTable.id })
+        .from(terraCovenantsTable)
+        .where(covenantWhereClause(id))
+        .limit(1);
+
+      if (!existing[0]) {
+        sendError(res, 404, 'Covenant not found');
+        return;
+      }
+
+      await db
+        .update(terraCovenantsTable)
+        .set({ active: false, updatedAt: new Date() })
+        .where(eq(terraCovenantsTable.id, existing[0].id));
+
+      sendSuccess(res, { deactivated: true, id: existing[0].id });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to deactivate covenant');
     }
   },
 );
