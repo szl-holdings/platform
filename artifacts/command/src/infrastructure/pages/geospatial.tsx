@@ -1,6 +1,6 @@
 import L from 'leaflet';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
@@ -19,7 +19,9 @@ import {
   Clock,
   CloudRain,
   Eye,
+  Filter,
   Globe2,
+  Search,
   Shield,
   ShieldAlert,
   Signal,
@@ -27,6 +29,9 @@ import {
   Wifi,
   X,
 } from 'lucide-react';
+
+const ALL_THREATS: GeoThreat[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'NOMINAL'];
+const ALL_CLASSIFICATIONS: Classification[] = ['OPEN', 'RESTRICTED', 'CONFIDENTIAL', 'SOVEREIGN'];
 
 const LAYER_CONFIG: Record<GeoLayer, { label: string; icon: React.ElementType; color: string }> = {
   SIGINT: { label: 'SIGINT', icon: Signal, color: '#ef4444' },
@@ -243,8 +248,32 @@ export default function GeospatialIntelligence() {
   );
   const [selected, setSelected] = useState<GeoPin | null>(null);
   const [mapReady, setMapReady] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeThreats, setActiveThreats] = useState<Set<GeoThreat>>(new Set(ALL_THREATS));
+  const [activeClassifications, setActiveClassifications] = useState<Set<Classification>>(
+    new Set(ALL_CLASSIFICATIONS),
+  );
 
-  const visiblePins = GEO_PINS.filter((p) => activeLayers.has(p.layer));
+  const visiblePins = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return GEO_PINS.filter((p) => {
+      if (!activeLayers.has(p.layer)) return false;
+      if (!activeThreats.has(p.threat)) return false;
+      if (!activeClassifications.has(p.classification)) return false;
+      if (q) {
+        const matchesLabel = p.label.toLowerCase().includes(q) || p.sublabel.toLowerCase().includes(q);
+        const matchesTag = p.detail.tags.some((t) => t.toLowerCase().includes(q));
+        if (!matchesLabel && !matchesTag) return false;
+      }
+      return true;
+    });
+  }, [activeLayers, activeThreats, activeClassifications, searchQuery]);
+
+  useEffect(() => {
+    if (selected && !visiblePins.some((p) => p.id === selected.id)) {
+      setSelected(null);
+    }
+  }, [visiblePins, selected]);
 
   function toggleLayer(layer: GeoLayer) {
     setActiveLayers((prev) => {
@@ -259,6 +288,45 @@ export default function GeospatialIntelligence() {
       return next;
     });
   }
+
+  function toggleThreat(threat: GeoThreat) {
+    setActiveThreats((prev) => {
+      const next = new Set(prev);
+      if (next.has(threat)) {
+        if (next.size === 1) return prev;
+        next.delete(threat);
+        if (selected?.threat === threat) setSelected(null);
+      } else {
+        next.add(threat);
+      }
+      return next;
+    });
+  }
+
+  function toggleClassification(cls: Classification) {
+    setActiveClassifications((prev) => {
+      const next = new Set(prev);
+      if (next.has(cls)) {
+        if (next.size === 1) return prev;
+        next.delete(cls);
+        if (selected?.classification === cls) setSelected(null);
+      } else {
+        next.add(cls);
+      }
+      return next;
+    });
+  }
+
+  function clearAllFilters() {
+    setSearchQuery('');
+    setActiveThreats(new Set(ALL_THREATS));
+    setActiveClassifications(new Set(ALL_CLASSIFICATIONS));
+  }
+
+  const hasActiveFilters =
+    searchQuery.trim().length > 0 ||
+    activeThreats.size < ALL_THREATS.length ||
+    activeClassifications.size < ALL_CLASSIFICATIONS.length;
 
   const counts = (Object.keys(LAYER_CONFIG) as GeoLayer[]).reduce<Record<GeoLayer, number>>(
     (acc, l) => {
@@ -316,6 +384,103 @@ export default function GeospatialIntelligence() {
         <div className="ml-auto flex items-center gap-1.5 text-[10px] font-mono text-slate-500">
           <Wifi className="w-3 h-3 text-green-400" />
           <span>{visiblePins.length} ACTIVE SIGNALS</span>
+        </div>
+      </div>
+
+      {/* Search & Filter Bar */}
+      <div
+        className="rounded-lg border p-3 space-y-3"
+        style={{
+          background: 'rgba(6,8,16,0.8)',
+          borderColor: 'rgba(201,162,39,0.15)',
+        }}
+      >
+        {/* Search input */}
+        <div className="flex items-center gap-2">
+          <Filter className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'rgba(201,162,39,0.6)' }} />
+          <div
+            className="flex-1 flex items-center gap-2 rounded border px-2.5 py-1.5"
+            style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}
+          >
+            <Search className="w-3 h-3 text-slate-600 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="Search by label or tag…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 bg-transparent text-[11px] text-slate-300 placeholder:text-slate-600 outline-none font-mono"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="p-0.5 rounded hover:bg-white/10 transition-colors"
+              >
+                <X className="w-3 h-3 text-slate-500" />
+              </button>
+            )}
+          </div>
+          {hasActiveFilters && (
+            <button
+              onClick={clearAllFilters}
+              className="flex items-center gap-1 px-2 py-1.5 rounded border text-[9px] font-mono tracking-wider transition-colors hover:bg-white/5"
+              style={{ borderColor: 'rgba(239,68,68,0.3)', color: 'rgba(239,68,68,0.7)' }}
+            >
+              <X className="w-2.5 h-2.5" />
+              RESET
+            </button>
+          )}
+        </div>
+
+        {/* Threat level chips */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-mono text-[9px] tracking-widest text-slate-600 uppercase w-16 flex-shrink-0">
+            Threat
+          </span>
+          {ALL_THREATS.map((threat) => {
+            const cfg = THREAT_CONFIG[threat];
+            const active = activeThreats.has(threat);
+            return (
+              <button
+                key={threat}
+                onClick={() => toggleThreat(threat)}
+                className="flex items-center gap-1 px-2 py-0.5 rounded border text-[9px] font-mono tracking-wider transition-all duration-150"
+                style={{
+                  color: active ? cfg.color : 'rgba(100,116,139,0.5)',
+                  borderColor: active ? `${cfg.color}40` : 'rgba(255,255,255,0.06)',
+                  background: active ? `${cfg.color}10` : 'transparent',
+                  opacity: active ? 1 : 0.45,
+                }}
+              >
+                {threat}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Classification chips */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-mono text-[9px] tracking-widest text-slate-600 uppercase w-16 flex-shrink-0">
+            Class.
+          </span>
+          {ALL_CLASSIFICATIONS.map((cls) => {
+            const color = getClassificationColor(cls);
+            const active = activeClassifications.has(cls);
+            return (
+              <button
+                key={cls}
+                onClick={() => toggleClassification(cls)}
+                className="px-2 py-0.5 rounded border text-[9px] font-mono tracking-wider transition-all duration-150"
+                style={{
+                  color: active ? color : 'rgba(100,116,139,0.5)',
+                  borderColor: active ? `${color}40` : 'rgba(255,255,255,0.06)',
+                  background: active ? `${color}10` : 'transparent',
+                  opacity: active ? 1 : 0.45,
+                }}
+              >
+                {cls}
+              </button>
+            );
+          })}
         </div>
       </div>
 
