@@ -13,6 +13,19 @@ function markSentryInitialized(): void {
   }
 }
 
+function isValidSentryDsn(dsn: string | undefined): dsn is string {
+  if (!dsn) return false;
+  try {
+    const u = new URL(dsn);
+    if (!u.protocol.startsWith('http')) return false;
+    if (!u.username) return false;
+    if (!/sentry\.io|ingest\./i.test(u.hostname)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 interface SentryConfig {
   appSlug: string;
   dsn?: string;
@@ -32,6 +45,14 @@ export function initSentry(config: SentryConfig) {
   const dsn = config.dsn || env.VITE_SENTRY_DSN;
   if (!dsn) {
     console.debug('[Sentry] DSN not configured — error tracking disabled.');
+    setupGlobalHandlers(config.appSlug);
+    return;
+  }
+  if (!isValidSentryDsn(dsn)) {
+    console.info(
+      '[Sentry] DSN appears to be a placeholder — error tracking disabled for',
+      config.appSlug,
+    );
     setupGlobalHandlers(config.appSlug);
     return;
   }

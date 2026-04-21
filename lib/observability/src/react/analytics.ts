@@ -21,6 +21,16 @@ export interface AnalyticsConfig {
   amplitudeKey?: string;
 }
 
+function isValidPostHogKey(k: string | undefined): k is string {
+  if (!k) return false;
+  return /^ph[ckx]_[A-Za-z0-9]{20,}$/.test(k);
+}
+
+function isValidAmplitudeKey(k: string | undefined): k is string {
+  if (!k) return false;
+  return /^[a-f0-9]{32}$/i.test(k);
+}
+
 export function initAnalytics(config: AnalyticsConfig): void {
   if (isAnalyticsInitialized() || typeof window === 'undefined') return;
   markAnalyticsInitialized();
@@ -30,7 +40,12 @@ export function initAnalytics(config: AnalyticsConfig): void {
   const phHost = config.posthogHost || env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com';
   const ampKey = config.amplitudeKey || env.VITE_AMPLITUDE_API_KEY;
 
-  if (phKey) {
+  if (phKey && !isValidPostHogKey(phKey)) {
+    console.info(
+      '[PostHog] VITE_POSTHOG_KEY appears to be a placeholder — product analytics disabled for',
+      config.appSlug,
+    );
+  } else if (isValidPostHogKey(phKey)) {
     posthog.init(phKey, {
       api_host: phHost,
       capture_pageview: true,
@@ -49,7 +64,12 @@ export function initAnalytics(config: AnalyticsConfig): void {
     );
   }
 
-  if (ampKey) {
+  if (ampKey && !isValidAmplitudeKey(ampKey)) {
+    console.info(
+      '[Amplitude] VITE_AMPLITUDE_API_KEY appears to be a placeholder — amplitude disabled for',
+      config.appSlug,
+    );
+  } else if (isValidAmplitudeKey(ampKey)) {
     amplitude.init(ampKey, {
       defaultTracking: {
         pageViews: true,

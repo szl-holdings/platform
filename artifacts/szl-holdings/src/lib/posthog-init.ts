@@ -10,7 +10,8 @@ export function initPostHog(): void {
   const host =
     (import.meta.env.VITE_POSTHOG_HOST as string | undefined) || 'https://us.i.posthog.com';
 
-  if (!key || key === 'phc_YOUR_PROJECT_API_KEY') {
+  const isValidKey = !!key && /^ph[ckx]_[A-Za-z0-9]{20,}$/.test(key);
+  if (!isValidKey) {
     if (import.meta.env.DEV) {
       console.info(
         '[analytics] VITE_POSTHOG_KEY not set — PostHog disabled. Events will only log to console.',
