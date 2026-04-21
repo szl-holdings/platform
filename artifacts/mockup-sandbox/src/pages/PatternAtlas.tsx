@@ -1,6 +1,9 @@
 import {
   AlertCard,
   AnimatedCounter,
+  AutonomyDial,
+  DataStateBadge,
+  DoctrineLayerBadge,
   LoadingSkeleton,
 } from '@szl-holdings/shared-ui';
 import {
@@ -18,17 +21,19 @@ import {
   Info,
   Layers,
   LayoutDashboard,
+  Moon,
   Network,
   Package,
   Palette,
   Search,
   Shield,
+  Sun,
   Table,
   ToggleLeft,
   Workflow,
   Zap,
 } from 'lucide-react';
-import { Component, type ErrorInfo, type ReactNode, useState } from 'react';
+import { Component, type CSSProperties, type ErrorInfo, type ReactNode, useState } from 'react';
 import { sharedUiExports } from 'virtual:shared-ui-manifest';
 import { GENERATED_METADATA } from './patternAtlasMetadata.generated';
 
@@ -81,17 +86,37 @@ const REGISTRY: MetadataRegistry = {
     status: 'stable',
     source: 'lib/shared-ui/src/AutonomyDial.tsx',
     props: [
-      { name: 'value', type: 'number', required: true, description: 'Current autonomy level (0–100)', control: 'number', defaultValue: '40' },
-      { name: 'onChange', type: '(value: number) => void', required: false, description: 'Callback when dial value changes' },
-      { name: 'policyCap', type: 'number', required: false, defaultValue: '100', description: 'Maximum autonomy level allowed by policy', control: 'number' },
+      { name: 'value', type: 'AutonomyMode', required: true, description: 'Current autonomy mode', control: 'select', options: ['suggest', 'approve_each', 'approve_batch', 'auto_with_rollback', 'full_auto'], defaultValue: 'approve_each' },
+      { name: 'onChange', type: '(mode: AutonomyMode) => void', required: false, description: 'Callback when dial value changes' },
+      { name: 'policyCap', type: 'AutonomyMode', required: false, description: 'Maximum autonomy mode allowed by policy', control: 'select', options: ['suggest', 'approve_each', 'approve_batch', 'auto_with_rollback', 'full_auto'], defaultValue: 'auto_with_rollback' },
       { name: 'disabled', type: 'boolean', required: false, defaultValue: 'false', description: 'Disables user interaction', control: 'boolean' },
       { name: 'compact', type: 'boolean', required: false, defaultValue: 'false', description: 'Renders a smaller variant', control: 'boolean' },
     ],
-    usageExample: `import { AutonomyDial } from '@szl-holdings/shared-ui';
+    usageExample: `import { AutonomyDial, type AutonomyMode } from '@szl-holdings/shared-ui';
 
-const [level, setLevel] = useState(40);
+const [mode, setMode] = useState<AutonomyMode>('approve_each');
 
-<AutonomyDial value={level} onChange={setLevel} policyCap={75} />`,
+<AutonomyDial
+  value={mode}
+  onChange={setMode}
+  policyCap="auto_with_rollback"
+/>`,
+    livePreview: (vals) => {
+      const modes = ['suggest', 'approve_each', 'approve_batch', 'auto_with_rollback', 'full_auto'] as const;
+      type AM = typeof modes[number];
+      const value = (modes.includes(vals.value as AM) ? vals.value : 'approve_each') as AM;
+      const policyCap = (modes.includes(vals.policyCap as AM) ? vals.policyCap : 'auto_with_rollback') as AM;
+      return (
+        <div className="p-6 flex justify-center">
+          <AutonomyDial
+            value={value}
+            policyCap={policyCap}
+            disabled={vals.disabled === 'true'}
+            compact={vals.compact === 'true'}
+          />
+        </div>
+      );
+    },
   },
 
   AdminAuditTrail: {
@@ -362,6 +387,41 @@ const [level, setLevel] = useState(40);
     usageExample: `import { DoctrineLayerBadge } from '@szl-holdings/shared-ui';
 
 <DoctrineLayerBadge appId="nexus" variant="compact" />`,
+    livePreview: (vals) => (
+      <div className="p-6 flex justify-center">
+        <DoctrineLayerBadge
+          appId={vals.appId || 'nexus'}
+          variant={(vals.variant as 'compact' | 'full' | 'inline') || 'compact'}
+          showTooltip={vals.showTooltip === 'true'}
+        />
+      </div>
+    ),
+  },
+
+  DataStateBadge: {
+    category: 'Identity',
+    description: 'Compact badge that surfaces the data provenance state (live, demo, simulated, stub, seeded, pilot).',
+    status: 'stable',
+    source: 'lib/shared-ui/src/data-state-badge.tsx',
+    props: [
+      { name: 'state', type: '"live" | "demo" | "simulated" | "stub" | "seeded" | "pilot"', required: true, description: 'Provenance state to display', control: 'select', options: ['live', 'demo', 'simulated', 'stub', 'seeded', 'pilot'], defaultValue: 'live' },
+      { name: 'label', type: 'string', required: false, description: 'Override the default label text', control: 'text' },
+      { name: 'size', type: '"xs" | "sm"', required: false, defaultValue: 'xs', description: 'Badge size variant', control: 'select', options: ['xs', 'sm'] },
+      { name: 'pulse', type: 'boolean', required: false, defaultValue: 'false', description: 'Animate the status dot', control: 'boolean' },
+    ],
+    usageExample: `import { DataStateBadge } from '@szl-holdings/shared-ui';
+
+<DataStateBadge state="live" pulse />`,
+    livePreview: (vals) => (
+      <div className="p-6 flex justify-center">
+        <DataStateBadge
+          state={(vals.state as 'live' | 'demo' | 'simulated' | 'stub' | 'seeded' | 'pilot') || 'live'}
+          {...(vals.label ? { label: vals.label } : {})}
+          size={(vals.size as 'xs' | 'sm') || 'xs'}
+          pulse={vals.pulse === 'true'}
+        />
+      </div>
+    ),
   },
 
   DigitalTwinCard: {
@@ -592,8 +652,88 @@ function PropControl({
   );
 }
 
+const PREVIEW_THEMES = {
+  dark: {
+    label: 'Dark',
+    bg: '#060b12',
+    surface: '#0d1520',
+    border: '#1a2535',
+    text: '#c8d8e8',
+    muted: '#7c8ea4',
+    cssVars: {
+      '--background': '215 50% 4%',
+      '--foreground': '210 40% 90%',
+      '--card': '215 45% 8%',
+      '--card-foreground': '210 40% 90%',
+      '--popover': '215 45% 8%',
+      '--popover-foreground': '210 40% 90%',
+      '--muted': '215 35% 12%',
+      '--muted-foreground': '210 20% 55%',
+      '--border': '215 30% 15%',
+      '--input': '215 30% 15%',
+      '--primary': '195 100% 50%',
+      '--primary-foreground': '215 50% 4%',
+      '--accent': '215 35% 14%',
+      '--accent-foreground': '210 40% 90%',
+    } as Record<string, string>,
+  },
+  light: {
+    label: 'Light',
+    bg: '#f5f7fa',
+    surface: '#ffffff',
+    border: '#e2e8f0',
+    text: '#1e293b',
+    muted: '#64748b',
+    cssVars: {
+      '--background': '210 40% 98%',
+      '--foreground': '215 30% 15%',
+      '--card': '0 0% 100%',
+      '--card-foreground': '215 30% 15%',
+      '--popover': '0 0% 100%',
+      '--popover-foreground': '215 30% 15%',
+      '--muted': '210 30% 94%',
+      '--muted-foreground': '215 20% 40%',
+      '--border': '215 20% 88%',
+      '--input': '215 20% 88%',
+      '--primary': '195 90% 40%',
+      '--primary-foreground': '0 0% 100%',
+      '--accent': '210 30% 94%',
+      '--accent-foreground': '215 30% 15%',
+    } as Record<string, string>,
+  },
+} as const;
+
+type PreviewTheme = keyof typeof PREVIEW_THEMES;
+
+function PreviewSandbox({
+  theme,
+  children,
+}: {
+  theme: PreviewTheme;
+  children: ReactNode;
+}) {
+  const cfg = PREVIEW_THEMES[theme];
+  const sandboxStyle: CSSProperties = {
+    ...(cfg.cssVars as CSSProperties),
+    backgroundColor: cfg.bg,
+    color: cfg.text,
+    colorScheme: theme,
+  };
+  return (
+    <div
+      data-preview-sandbox
+      data-theme={theme}
+      className={theme === 'dark' ? 'dark' : ''}
+      style={sandboxStyle}
+    >
+      {children}
+    </div>
+  );
+}
+
 function ComponentDetail({ entry }: { entry: CatalogEntry }) {
   const { name, meta } = entry;
+  const [previewTheme, setPreviewTheme] = useState<PreviewTheme>('dark');
   const [propValues, setPropValues] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
     for (const p of meta.props) {
@@ -663,21 +803,56 @@ function ComponentDetail({ entry }: { entry: CatalogEntry }) {
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {hasLivePreview && meta.livePreview && (
             <div>
-              <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/50 mb-2.5 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-nexus-green inline-block" />
-                Live Preview
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/50 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-nexus-green inline-block" />
+                  Live Preview
+                </div>
+                <div
+                  role="group"
+                  aria-label="Preview theme"
+                  className="flex items-center gap-0.5 bg-nexus-bg border border-nexus rounded p-0.5"
+                >
+                  {(Object.keys(PREVIEW_THEMES) as PreviewTheme[]).map((t) => {
+                    const Icon = t === 'dark' ? Moon : Sun;
+                    const active = previewTheme === t;
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setPreviewTheme(t)}
+                        aria-pressed={active}
+                        title={`${PREVIEW_THEMES[t].label} preview`}
+                        className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono uppercase tracking-wider transition-colors ${
+                          active
+                            ? 'bg-nexus-cyan/15 text-nexus-cyan'
+                            : 'text-muted-foreground/60 hover:text-foreground'
+                        }`}
+                      >
+                        <Icon className="w-3 h-3" />
+                        {PREVIEW_THEMES[t].label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="rounded-lg border border-nexus-green/20 bg-nexus-bg overflow-hidden">
+              <div className="rounded-lg border border-nexus-green/20 overflow-hidden">
                 <PreviewErrorBoundary
                   fallback={
-                    <div className="flex items-center gap-2 p-4 text-muted-foreground/50 text-xs">
+                    <div className="flex items-center gap-2 p-4 text-muted-foreground/50 text-xs bg-nexus-bg">
                       <Info className="w-3.5 h-3.5 shrink-0" />
                       Live preview unavailable — component requires runtime context.
                     </div>
                   }
                 >
-                  {meta.livePreview(propValues)}
+                  <PreviewSandbox theme={previewTheme}>
+                    {meta.livePreview(propValues)}
+                  </PreviewSandbox>
                 </PreviewErrorBoundary>
+              </div>
+              <div className="mt-1.5 text-[9px] font-mono text-muted-foreground/40 flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-nexus-green/60 inline-block" />
+                Sandboxed preview · design tokens scoped · {PREVIEW_THEMES[previewTheme].label.toLowerCase()} theme
               </div>
             </div>
           )}
