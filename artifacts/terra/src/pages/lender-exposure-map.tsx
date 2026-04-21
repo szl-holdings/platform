@@ -5,10 +5,11 @@ import {
   BarChart3,
   Clock,
   DollarSign,
+  FlaskConical,
+  Info,
   RefreshCw,
   Shield,
   Tag,
-  TrendingUp,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
@@ -60,6 +61,51 @@ function ConfidencePill({ value }: { value: number }) {
   );
 }
 
+function SyntheticBadge() {
+  return (
+    <span
+      className="group relative inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded font-mono cursor-default select-none"
+      style={{ background: '#c8a06018', border: '1px solid #c8a06040', color: '#c8a060' }}
+    >
+      <FlaskConical className="w-2.5 h-2.5 flex-shrink-0" />
+      Synthetic exposure
+      <span
+        className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 w-52 rounded-lg px-2.5 py-2 text-[10px] leading-snug opacity-0 group-hover:opacity-100 transition-opacity z-10"
+        style={{
+          background: '#0e1117',
+          border: '1px solid rgba(200,160,96,0.25)',
+          color: 'rgba(255,255,255,0.7)',
+        }}
+      >
+        <span className="font-semibold" style={{ color: '#c8a060' }}>65% LTV fallback estimate.</span>{' '}
+        No recorded debt or lien amount was found for this pool. Exposure is approximated
+        using 65% of the assessed property value — a conservative senior-mortgage LTV
+        assumption. Treat as indicative only.
+      </span>
+    </span>
+  );
+}
+
+function SourceBadge({ source }: { source: string }) {
+  const label =
+    source === 'constellation'
+      ? 'CONSTELLATION'
+      : source === 'terra-transactions'
+        ? 'Terra Transactions'
+        : source === 'terra-distress-db'
+          ? 'Terra Distress DB'
+          : source;
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[9px] px-2 py-0.5 rounded font-mono"
+      style={{ background: 'rgba(64,133,106,0.08)', border: '1px solid rgba(64,133,106,0.2)', color: 'rgba(64,133,106,0.75)' }}
+    >
+      <Tag className="w-2.5 h-2.5 flex-shrink-0" />
+      {label}
+    </span>
+  );
+}
+
 function fmt(n: number) {
   if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
   if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
@@ -88,7 +134,7 @@ function LenderCard({
       }}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
-        <div>
+        <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold" style={{ color: '#e8edf8' }}>
             {lender.name}
           </div>
@@ -98,6 +144,12 @@ function LenderCard({
           >
             {lender.type.replace('_', ' ')}
           </div>
+          {(lender.isSyntheticExposure || lender.source) && (
+            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+              {lender.isSyntheticExposure && <SyntheticBadge />}
+              {lender.source && <SourceBadge source={lender.source} />}
+            </div>
+          )}
         </div>
         <span
           className="text-xs font-mono px-2 py-0.5 rounded-full flex-shrink-0"
@@ -224,10 +276,10 @@ export default function LenderExposureMapPage() {
                   warn: summary.covenantBreachCount > 0,
                 },
                 {
-                  label: 'Maturities <90d',
-                  value: summary.nearTermMaturities,
-                  icon: Clock,
-                  warn: summary.nearTermMaturities > 0,
+                  label: 'Synthetic Pools',
+                  value: summary.syntheticLenderCount ?? 0,
+                  icon: FlaskConical,
+                  warn: (summary.syntheticLenderCount ?? 0) > 0,
                 },
               ].map((m) => {
                 const color = m.warn ? '#c04a2a' : ACCENT;
@@ -365,8 +417,12 @@ export default function LenderExposureMapPage() {
                     border: `1px solid ${RISK_COLORS[selLender.riskLabel] ?? '#64748b'}30`,
                   }}
                 >
-                  <div className="text-xs font-semibold mb-2" style={{ color: '#e8edf8' }}>
-                    Maturity Detail — {selLender.name}
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <span className="text-xs font-semibold" style={{ color: '#e8edf8' }}>
+                      {selLender.name}
+                    </span>
+                    {selLender.isSyntheticExposure && <SyntheticBadge />}
+                    {selLender.source && <SourceBadge source={selLender.source} />}
                   </div>
                   {[
                     { label: 'Within 90 days', count: selLender.maturities.within90d },
@@ -390,6 +446,44 @@ export default function LenderExposureMapPage() {
                       </span>
                     </div>
                   ))}
+                  {selLender.syntheticExposureEstimate > 0 && (
+                    <div
+                      className="flex justify-between text-xs py-1.5"
+                      style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)' }}
+                    >
+                      <span>Est. exposure (65% LTV)</span>
+                      <span className="font-mono" style={{ color: '#c8a060' }}>
+                        {fmt(selLender.syntheticExposureEstimate)}
+                      </span>
+                    </div>
+                  )}
+                  {selLender.sampleProperties && selLender.sampleProperties.length > 0 && (
+                    <div className="mt-3">
+                      <div
+                        className="text-[10px] font-semibold mb-1.5 uppercase tracking-wider"
+                        style={{ color: 'rgba(255,255,255,0.3)' }}
+                      >
+                        Sample Properties
+                      </div>
+                      {selLender.sampleProperties.map((p: any) => (
+                        <div
+                          key={p.id}
+                          className="flex items-center gap-2 py-1 text-[10px]"
+                          style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                        >
+                          <Info className="w-2.5 h-2.5 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.25)' }} />
+                          <span className="truncate" style={{ color: '#e8edf8' }}>
+                            {p.address}
+                          </span>
+                          {p.borough && (
+                            <span className="ml-auto font-mono flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                              {p.borough}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
