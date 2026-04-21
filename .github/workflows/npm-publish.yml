@@ -1,0 +1,105 @@
+name: Publish npm packages to GitHub Packages
+
+on:
+  release:
+    types: [published]
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  publish:
+    name: Build and publish npm packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fe52bf0ad0164d2310b5e4d5d7bfec47b67e3f9d # v4.0.0
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@szl-holdings'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build all packages
+        run: pnpm run build
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Set version on all publishable packages
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          for pkg in \
+            lib/shared-ui lib/observability lib/config lib/services lib/api-spec \
+            lib/analytics lib/api-client-react lib/api-zod lib/covenant-policy lib/audit \
+            lib/auth lib/data-connectors lib/graphql-client lib/i18n lib/mcp-client \
+            lib/proof-chain lib/replit-auth-web lib/forge-runtime lib/worldline \
+            lib/db lib/ai-engine \
+            lib/integrations-anthropic-ai lib/integrations-gemini-ai lib/integrations-openai-ai-server; do
+            if [ -f "$pkg/package.json" ]; then
+              pnpm --filter "./$pkg" exec npm version "$VERSION" --no-git-tag-version 2>/dev/null || true
+            fi
+          done
+
+      - name: Publish all @szl-holdings packages
+        run: |
+          set -e
+          FAILED_PKGS=""
+          for pkg in \
+            lib/shared-ui lib/observability lib/config lib/services lib/api-spec \
+            lib/analytics lib/api-client-react lib/api-zod lib/covenant-policy lib/audit \
+            lib/auth lib/data-connectors lib/graphql-client lib/i18n lib/mcp-client \
+            lib/proof-chain lib/replit-auth-web lib/forge-runtime lib/worldline \
+            lib/db lib/ai-engine \
+            lib/integrations-anthropic-ai lib/integrations-gemini-ai lib/integrations-openai-ai-server; do
+            if [ -f "$pkg/package.json" ]; then
+              PKG_NAME=$(node -e "console.log(require('./$pkg/package.json').name)")
+              echo "Publishing $PKG_NAME..."
+              if pnpm --filter "./$pkg" publish --no-git-checks --access public; then
+                echo "  OK: $PKG_NAME"
+              else
+                EXIT=$?
+                # 409 / "already exists" is not a failure
+                if pnpm --filter "./$pkg" exec npm view "$PKG_NAME@${{ steps.version.outputs.VERSION }}" version 2>/dev/null | grep -q "${{ steps.version.outputs.VERSION }}"; then
+                  echo "  SKIPPED (already published): $PKG_NAME"
+                else
+                  echo "  FAILED: $PKG_NAME"
+                  FAILED_PKGS="$FAILED_PKGS $PKG_NAME"
+                fi
+              fi
+            fi
+          done
+          if [ -n "$FAILED_PKGS" ]; then
+            echo "The following packages failed to publish:$FAILED_PKGS"
+            exit 1
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## npm Publish Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Version: \`${{ steps.version.outputs.VERSION }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Registry: \`https://npm.pkg.github.com\`" >> $GITHUB_STEP_SUMMARY
+          echo "Scope: \`@szl-holdings\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View packages: https://github.com/orgs/szl-holdings/packages" >> $GITHUB_STEP_SUMMARY
