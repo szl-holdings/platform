@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { sentraTwin } from '@/data/sentra-twin';
+import { DataProvenance } from '@/lib/data-provenance';
 
 const BASELINE_ENTITIES = [
   {
@@ -208,7 +209,10 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 animate-fade-in">
       <header>
-        <h1 className="text-3xl font-display font-bold text-slate-100">Cyber Resilience Command</h1>
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="text-3xl font-display font-bold text-slate-100">Cyber Resilience Command</h1>
+          <DataProvenance source="seed" label="Demo Data" />
+        </div>
         <p className="text-slate-400 mt-1">Operational status and posture overview</p>
       </header>
 

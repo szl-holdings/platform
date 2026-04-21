@@ -195,6 +195,12 @@ const PUBLIC_PREFIXES = [
   // so Sentra's Mesh Map and Pulse's MeshCard can render live data in the
   // unauthenticated demo experience.
   "/api/agent-mesh/",
+  // Sentra cyber resilience cockpit — incidents + alerts CRUD backed by an
+  // in-memory store (no DB). Public so the Sentra demo surface can fetch
+  // live incident/alert data and run the create→triage→resolve flow without
+  // a session. Write routes are still covered by CSRF double-submit
+  // protection (global csrfMiddleware in server.ts).
+  "/api/sentra/",
   // Pulse one-click email unsubscribe — token-protected, accessed from
   // recipient's inbox without a session. Mounted before authMiddleware in
   // routes/pulse.ts; this entry whitelists it past the global auth enforcer.

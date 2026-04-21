@@ -81,6 +81,11 @@ router.use(lazyMatch("/risk-evidence", () => import("./risk-evidence"), "risk-ev
 // destructive side-effects beyond rewriting the per-org telemetry slice).
 router.use(lazyMatch("/agent-mesh", () => import("./agent-mesh"), "agent-mesh"));
 
+// Sentra cyber resilience cockpit — incidents + alerts CRUD. Public demo
+// surface (in-memory store). Write paths carry CSRF double-submit protection
+// via the global csrfMiddleware mounted in server.ts.
+router.use(lazyMatch("/sentra", () => import("./sentra"), "sentra"));
+
 // Lyte legacy surfaces — read-only public GET endpoints backing the 5 legacy
 // decision-intelligence pages. Mounted BEFORE lyte.register so the
 // tenantScope middleware registered at "/lyte" never intercepts these routes.

@@ -8,6 +8,7 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import { Activity, CheckCircle2, FileText, ShieldAlert } from 'lucide-react';
 import { useState } from 'react';
 import { sentraTwin } from '@/data/sentra-twin';
+import { DataProvenance } from '@/lib/data-provenance';
 
 const ACCENT = '#ef4444';
 const DRIFT_EVIDENCE: EvidenceSource[] = [
@@ -43,7 +44,10 @@ export default function ControlDrift() {
   return (
     <div className="space-y-8 animate-fade-in">
       <header>
-        <h1 className="text-3xl font-display font-bold text-slate-100">Control Drift</h1>
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="text-3xl font-display font-bold text-slate-100">Control Drift</h1>
+          <DataProvenance source="seed" label="Demo Data" />
+        </div>
         <p className="text-slate-400 mt-1">
           NIST CSF control family monitoring and drift detection
         </p>

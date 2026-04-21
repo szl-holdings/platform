@@ -7,6 +7,7 @@ import {
 import { FileText, Globe, ShieldAlert, TrendingUp, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { sentraTwin } from '@/data/sentra-twin';
+import { DataProvenance } from '@/lib/data-provenance';
 
 const ACCENT = '#ef4444';
 const EXPOSURE_EVIDENCE: EvidenceSource[] = [
@@ -34,7 +35,10 @@ export default function ExposureBoard() {
   return (
     <div className="space-y-8 animate-fade-in">
       <header>
-        <h1 className="text-3xl font-display font-bold text-slate-100">Exposure Board</h1>
+        <div className="flex items-center gap-3 flex-wrap mb-1">
+          <h1 className="text-3xl font-display font-bold text-slate-100">Exposure Board</h1>
+          <DataProvenance source="seed" label="Demo Data" />
+        </div>
         <p className="text-slate-400 mt-1">
           Financial impact modeling and vulnerability prioritization
         </p>

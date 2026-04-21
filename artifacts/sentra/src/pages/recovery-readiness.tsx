@@ -1,4 +1,5 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
+import { DataProvenance } from '@/lib/data-provenance';
 import { Activity, AlertTriangle, Clock, Database, RotateCcw, ShieldCheck } from 'lucide-react';
 import { sentraTwin } from '@/data/sentra-twin';
 
@@ -7,9 +8,14 @@ export default function RecoveryReadiness() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <header>
-        <h1 className="text-3xl font-display font-bold text-slate-100">Recovery Readiness</h1>
-        <p className="text-slate-400 mt-1">Verification of backup integrity and RTO/RPO targets</p>
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-3xl font-display font-bold text-slate-100">Recovery Readiness</h1>
+            <DataProvenance source="seed" label="Demo Data" />
+          </div>
+          <p className="text-slate-400 mt-1">Verification of backup integrity and RTO/RPO targets</p>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -1,12 +1,18 @@
 import { AlertTriangle, Clock, ExternalLink, Info, ShieldAlert } from 'lucide-react';
+import { DataProvenance } from '@/lib/data-provenance';
 import { sentraTwin } from '@/data/sentra-twin';
 
 export default function ThreatOverview() {
   return (
     <div className="space-y-8 animate-fade-in">
-      <header>
-        <h1 className="text-3xl font-display font-bold text-slate-100">Threat Overview</h1>
-        <p className="text-slate-400 mt-1">Active indicator feed and adversary intelligence</p>
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-3xl font-display font-bold text-slate-100">Threat Overview</h1>
+            <DataProvenance source="seed" label="Demo Data" />
+          </div>
+          <p className="text-slate-400 mt-1">Active indicator feed and adversary intelligence</p>
+        </div>
       </header>
 
       <div className="sentra-panel overflow-hidden">
