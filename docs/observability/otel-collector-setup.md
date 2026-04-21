@@ -102,3 +102,47 @@ Both vars live in Replit Secrets. To rotate:
 1. Update the secret value in the Secrets pane.
 2. Restart `artifacts/command: web`.
 3. (Optional) Revoke the old token at the vendor.
+
+## Staging & production rollout runbook
+
+`VITE_OTEL_ENDPOINT` and `VITE_OTEL_HEADERS` are non-prefixed Replit Secrets,
+so they propagate automatically to every Replit environment in this project
+(development, the hosted preview, the autoscale deployment defined in
+`.replit → [deployment]`). There is **no per-environment override** needed in
+`.replit` — keeping the auth header in `userenv.shared` would commit a secret
+to source control, which is forbidden.
+
+Procedure for a new environment (staging or production):
+
+1. **Create / locate the vendor credential** for that environment. Use a
+   *separate* ingest key per env so a leaked staging token can be rotated
+   independently. Recommended naming: `command-web-staging`,
+   `command-web-prod`.
+2. **Set the two Replit Secrets** in the Secrets pane of the corresponding
+   Repl/deployment:
+   - `VITE_OTEL_ENDPOINT` — the vendor URL from the per-platform table above.
+   - `VITE_OTEL_HEADERS` — `Header=Value[,Header=Value...]`. Never paste the
+     raw token into chat, code, or `.replit`.
+3. **Redeploy** (autoscale picks the new secret on the next cold start) or
+   restart the `artifacts/command: web` workflow for the dev preview. Vite
+   inlines `VITE_*` vars at build time, so a rebuild is required for the
+   change to reach the browser.
+4. **Verify at runtime**:
+   - Open the deployed Command artifact and check the browser console. On a
+     correctly wired environment you should see one log line:
+     ```
+     [telemetry] OTLP exporter wired {"service":"command-web","environment":"production","endpoint":"https://.../v1/traces","authHeaders":["x-honeycomb-team"]}
+     ```
+     If `VITE_OTEL_ENDPOINT` is missing in production you will instead see
+     `[telemetry] VITE_OTEL_ENDPOINT is not set in production — Run Console / Eval Studio spans will be dropped.`
+   - Trigger one Run Console execution. The DevTools Network tab should show a
+     `POST https://<endpoint>/v1/traces` returning `200`/`202`.
+   - In the vendor UI, filter by
+     `service.name = command-web AND deployment.environment.name = production`
+     (or `staging`). The trace should appear within ~5–15 seconds.
+5. **Record the rollout** in the on-call runbook with: env name, vendor,
+   ingest-key creation date, and the first verified trace ID.
+
+Drop-detection: if the `[telemetry] OTLP exporter wired` log line is missing
+from production browser logs after a deploy, treat it as a sev-3 — telemetry
+is silently dark.

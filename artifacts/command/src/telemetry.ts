@@ -71,8 +71,23 @@ export function initTelemetry(opts: TelemetryInitOptions = {}): Tracer {
         scheduledDelayMillis: 1500,
       }),
     );
+    if (typeof console !== 'undefined' && console.info) {
+      console.info(
+        '[telemetry] OTLP exporter wired',
+        JSON.stringify({
+          service: opts.serviceName ?? SERVICE_NAME,
+          environment,
+          endpoint: url,
+          authHeaders: Object.keys(headers),
+        }),
+      );
+    }
   } else if (environment !== 'production') {
     processors.push(new BatchSpanProcessor(new ConsoleSpanExporter()));
+  } else if (typeof console !== 'undefined' && console.warn) {
+    console.warn(
+      '[telemetry] VITE_OTEL_ENDPOINT is not set in production — Run Console / Eval Studio spans will be dropped. See docs/observability/otel-collector-setup.md.',
+    );
   }
 
   const provider = new WebTracerProvider({ resource, spanProcessors: processors });
