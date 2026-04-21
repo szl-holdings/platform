@@ -668,9 +668,9 @@ export async function bootstrap(
     }
 
     try {
-      const { pool } = await import('@szl-holdings/db');
-      await pool.end();
-      logger.info('Database pool closed');
+      const { pool, healthPool } = await import('@szl-holdings/db');
+      await Promise.allSettled([pool.end(), healthPool.end()]);
+      logger.info('Database pools closed');
     } catch (err) {
       logger.warn({ err }, 'Error closing DB pool (may not be configured)');
     }

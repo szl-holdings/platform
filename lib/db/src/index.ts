@@ -29,6 +29,35 @@ export const pool = new Pool({
   statement_timeout: _env.DB_STATEMENT_TIMEOUT_MS,
 });
 
+// ─────────────────────────────────────────────────────────────────────────
+// Dedicated, small pool reserved for liveness/readiness probes.
+//
+// The main pool can be saturated by scheduled-job fan-out or long-running
+// transactions; when that happens, /api/health used to wait
+// `DB_CONNECT_TIMEOUT_MS` (default 90s) for a connection and timed out.
+// Routing health probes to their own pool keeps the probe latency
+// independent of main-pool pressure: the pool is tiny (max 2), idle
+// connections release quickly, and acquisition fails fast (≤1s) so a
+// degraded probe surfaces immediately instead of blocking the request
+// thread for tens of seconds. Because it uses the same DATABASE_URL it
+// only adds 1–2 connections at the Postgres level, well within the
+// per-instance budget.
+// ─────────────────────────────────────────────────────────────────────────
+export const healthPool = new Pool({
+  connectionString: _env.DATABASE_URL,
+  min: 0,
+  max: 2,
+  idleTimeoutMillis: 5_000,
+  connectionTimeoutMillis: 1_000,
+  statement_timeout: 2_000,
+});
+
+healthPool.on("error", (err) => {
+  if (isDev) {
+    console.error("[db] Health pool error:", err.message);
+  }
+});
+
 const _originalPoolQuery = pool.query.bind(pool);
 // @ts-expect-error — overriding overloaded pool.query to intercept all queries for latency instrumentation
 pool.query = async function instrumentedQuery(...args: unknown[]) {

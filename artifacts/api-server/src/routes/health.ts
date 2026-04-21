@@ -1,6 +1,6 @@
 import v8 from 'node:v8';
 import { HealthCheckResponse } from '@szl-holdings/api-zod';
-import { pool } from '@szl-holdings/db';
+import { healthPool, pool } from '@szl-holdings/db';
 import { type IRouter, type NextFunction, type Request, type Response, Router } from 'express';
 import { getBackupHealthStatus } from '../lib/backup-service';
 import { tokenHasScope, verifyInternalHeader } from '../lib/internal-tokens';
@@ -52,7 +52,9 @@ const PLATFORM_APPS = [
 async function checkDatabase(): Promise<{ status: string; latencyMs: number; tables?: number }> {
   const start = Date.now();
   try {
-    const result = await pool.query(
+    // Route through the dedicated healthPool so a saturated main pool
+    // can't make the health endpoint hang waiting for a connection.
+    const result = await healthPool.query(
       "SELECT count(*)::int AS cnt FROM pg_tables WHERE schemaname = 'public'",
     );
     return { status: 'ok', latencyMs: Date.now() - start, tables: result.rows[0]?.cnt ?? 0 };

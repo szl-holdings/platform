@@ -36,10 +36,11 @@ async function probeDatabase(): Promise<ProbeResult> {
 
   const start = Date.now();
   try {
-    const { db } = await import('@szl-holdings/db');
-    const { sql } = await import('drizzle-orm');
+    // Use the dedicated healthPool so a saturated main pool can't stall
+    // the probe — healthPool fails fast (≤1s) on connection acquisition.
+    const { healthPool } = await import('@szl-holdings/db');
     await Promise.race([
-      db.execute(sql`SELECT 1`),
+      healthPool.query('SELECT 1'),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('timeout')), DB_TIMEOUT_MS),
       ),
@@ -70,10 +71,16 @@ async function probeAuth(): Promise<ProbeResult> {
   const start = Date.now();
   try {
     const { randomBytes } = await import('crypto');
-    const { getSessionUser } = await import('./auth.js');
+    const { healthPool } = await import('@szl-holdings/db');
     const probeToken = randomBytes(32).toString('hex');
+    // Replaces the previous `getSessionUser()` call which executed three
+    // sequential queries (sessions → users → user_roles) on the main pool
+    // and held connections during stalls. A single LIMIT 1 lookup against
+    // the dedicated healthPool exercises the same code path (verifies the
+    // session store is reachable and the schema is intact) without ever
+    // contending with main-pool traffic.
     await Promise.race([
-      getSessionUser(probeToken),
+      healthPool.query('SELECT 1 FROM sessions WHERE token = $1 LIMIT 1', [probeToken]),
       new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 3_000)),
     ]);
     const latencyMs = Date.now() - start;
@@ -173,9 +180,28 @@ function isNotConfiguredError(msg: string): boolean {
 async function probeQueue(): Promise<QueueProbeResult> {
   const start = Date.now();
   try {
-    const { durableJobQueue } = await import('@szl-holdings/forge-runtime');
-    const stats = await durableJobQueue.getStats();
-    const depth = stats.pending + stats.running;
+    // Previously called `durableJobQueue.getStats()`, which fans out four
+    // concurrent aggregate queries on the main pool — a heavy operation
+    // for a liveness probe and a contributor to checkout warnings during
+    // peak load. A single grouped count against the dedicated healthPool
+    // gives us the same pending/running depth signal at a fraction of
+    // the cost and without touching the main pool.
+    const { healthPool } = await import('@szl-holdings/db');
+    const result = await Promise.race([
+      healthPool.query<{ status: string; count: string }>(
+        `SELECT status, COUNT(*)::text AS count FROM durable_jobs
+         WHERE status IN ('pending', 'running') GROUP BY status`,
+      ),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 2_000)),
+    ]);
+    let pending = 0;
+    let running = 0;
+    for (const row of result.rows) {
+      const n = parseInt(row.count, 10) || 0;
+      if (row.status === 'pending') pending = n;
+      else if (row.status === 'running') running = n;
+    }
+    const depth = pending + running;
     const latencyMs = Date.now() - start;
     const status: ProbeStatus =
       depth > 50 ? 'degraded' : latencyMs > SLOW_THRESHOLD_MS ? 'degraded' : 'ok';
@@ -183,16 +209,18 @@ async function probeQueue(): Promise<QueueProbeResult> {
       status,
       latencyMs,
       depth,
-      pending: stats.pending,
-      running: stats.running,
-      details: `pending=${stats.pending} running=${stats.running} completed=${stats.completed} failed=${stats.failed}`,
+      pending,
+      running,
+      details: `pending=${pending} running=${running}`,
     };
   } catch (err) {
     const latencyMs = Date.now() - start;
     const msg = err instanceof Error ? err.message : String(err);
-    // Only classify as not_configured when the queue was explicitly never set
-    // up (e.g. missing env vars, no init call). All other failures are errors.
-    const status: ProbeStatus = isNotConfiguredError(msg) ? 'not_configured' : 'error';
+    // Only classify as not_configured when the queue table doesn't exist
+    // (queue infra never initialized). All other failures are errors.
+    const isMissingTable = /durable_jobs.*does not exist|relation .* does not exist/i.test(msg);
+    const status: ProbeStatus =
+      isMissingTable || isNotConfiguredError(msg) ? 'not_configured' : 'error';
     return { status, latencyMs, depth: 0, details: msg.slice(0, 120) };
   }
 }
