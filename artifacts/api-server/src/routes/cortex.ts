@@ -558,6 +558,7 @@ interface WhatIfResult {
   overallRisk: 'critical' | 'high' | 'medium' | 'low';
   confidence: number;
   generatedAt: string;
+  source: 'llm' | 'pattern';
 }
 
 type GraphSnapshotNode = {
@@ -844,6 +845,7 @@ Rules:
       confidence:
         typeof parsed.confidence === 'number' ? Math.min(1, Math.max(0, parsed.confidence)) : 0.78,
       generatedAt: new Date().toISOString(),
+      source: 'llm' as const,
     };
   } catch (err) {
     logger.warn({ err }, '[CORTEX] LLM what-if call failed — falling back to pattern matching');
@@ -903,6 +905,7 @@ const WHATIF_SCENARIOS: Record<string, (event: string) => WhatIfResult> = {
     overallRisk: 'high',
     confidence: 0.82,
     generatedAt: new Date().toISOString(),
+    source: 'pattern' as const,
   }),
   sanctions: (event) => ({
     scenarioId: crypto.randomUUID(),
@@ -955,6 +958,7 @@ const WHATIF_SCENARIOS: Record<string, (event: string) => WhatIfResult> = {
     overallRisk: 'critical',
     confidence: 0.91,
     generatedAt: new Date().toISOString(),
+    source: 'pattern' as const,
   }),
   default: (event) => ({
     scenarioId: crypto.randomUUID(),
@@ -1015,6 +1019,7 @@ const WHATIF_SCENARIOS: Record<string, (event: string) => WhatIfResult> = {
     overallRisk: 'medium',
     confidence: 0.74,
     generatedAt: new Date().toISOString(),
+    source: 'pattern' as const,
   }),
 };
 

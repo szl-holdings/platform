@@ -21,6 +21,7 @@ export interface WhatIfResult {
   overallRisk: 'critical' | 'high' | 'medium' | 'low';
   confidence: number;
   generatedAt: string;
+  source?: 'llm' | 'pattern';
 }
 
 export interface CortexWhatIfProps {
@@ -470,6 +471,40 @@ export function CortexWhatIf({
                   <span style={{ fontSize: 11, color: '#ffffff50' }}>
                     Confidence: {Math.round(result.confidence * 100)}%
                   </span>
+                  {result.source === 'llm' ? (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: 4,
+                        background: '#6366f118',
+                        color: '#818cf8',
+                        border: '1px solid #6366f130',
+                        letterSpacing: '0.06em',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      ✦ AI-Generated
+                    </span>
+                  ) : result.source === 'pattern' ? (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: 4,
+                        background: '#ffffff0a',
+                        color: '#ffffff60',
+                        border: '1px solid #ffffff18',
+                        letterSpacing: '0.06em',
+                      }}
+                    >
+                      ◈ Template
+                    </span>
+                  ) : null}
                 </div>
 
                 <p
@@ -498,6 +533,26 @@ export function CortexWhatIf({
                 <p style={{ margin: 0, fontSize: 13, color: '#ffffffcc', lineHeight: 1.6 }}>
                   {result.summary}
                 </p>
+                {result.source === 'pattern' && (
+                  <p
+                    style={{
+                      margin: '8px 0 0',
+                      fontSize: 11,
+                      color: '#f59e0b99',
+                      lineHeight: 1.5,
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 5,
+                    }}
+                  >
+                    <span style={{ flexShrink: 0 }}>⚠</span>
+                    <span>
+                      AI analysis was temporarily unavailable. This result is based on a
+                      pre-defined scenario template and may not reflect current portfolio
+                      positions.
+                    </span>
+                  </p>
+                )}
               </div>
             </div>
 

@@ -80,6 +80,7 @@ interface WhatIfResult {
   timeHorizon: string;
   overallRisk: 'critical' | 'high' | 'medium' | 'low';
   confidence: number;
+  source?: 'llm' | 'pattern';
 }
 
 const SEV_COLORS: Record<string, string> = {
@@ -921,6 +922,38 @@ export default function CortexIntelligenceScreen() {
                       Overall Risk: {whatIfResult.overallRisk.toUpperCase()}
                     </Text>
                   </View>
+                  {whatIfResult.source === 'llm' && (
+                    <View
+                      style={{
+                        backgroundColor: '#6366f118',
+                        borderColor: '#6366f130',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        paddingHorizontal: 7,
+                        paddingVertical: 2,
+                      }}
+                    >
+                      <Text style={{ fontSize: 10, fontWeight: '700', color: '#818cf8', letterSpacing: 0.5 }}>
+                        ✦ AI-Generated
+                      </Text>
+                    </View>
+                  )}
+                  {whatIfResult.source === 'pattern' && (
+                    <View
+                      style={{
+                        backgroundColor: '#ffffff0a',
+                        borderColor: '#ffffff18',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        paddingHorizontal: 7,
+                        paddingVertical: 2,
+                      }}
+                    >
+                      <Text style={{ fontSize: 10, fontWeight: '700', color: '#ffffff60', letterSpacing: 0.5 }}>
+                        ◈ Template
+                      </Text>
+                    </View>
+                  )}
                   <Text style={[styles.resultMeta2, { color: colors.mutedForeground }]}>
                     Horizon: {whatIfResult.timeHorizon} · Confidence:{' '}
                     {Math.round(whatIfResult.confidence * 100)}%
@@ -929,6 +962,19 @@ export default function CortexIntelligenceScreen() {
                 <Text style={[styles.resultSummary, { color: colors.foreground }]}>
                   {whatIfResult.summary}
                 </Text>
+                {whatIfResult.source === 'pattern' && (
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      color: '#f59e0b99',
+                      marginTop: 6,
+                      lineHeight: 16,
+                    }}
+                  >
+                    ⚠ AI analysis was temporarily unavailable. This result is based on a pre-defined
+                    scenario template and may not reflect current portfolio positions.
+                  </Text>
+                )}
                 <View style={styles.affectedDomains}>
                   {whatIfResult.affectedDomains.map((d) => {
                     const meta = DOMAIN_META[d] ?? { label: d, icon: '◆', color: '#6b7280' };
