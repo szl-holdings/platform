@@ -212,6 +212,19 @@ jobs:
               # Fallback: append before the footer block
               new_content = content.rstrip() + "\n\n" + notes + "\n"
 
+          # Reset the [Unreleased] section to a clean placeholder so it only
+          # reflects work that has NOT yet shipped.  The regex matches everything
+          # between the ## [Unreleased] heading and the next separator (---) or
+          # next versioned heading (## [x.y.z]), replacing it with a one-liner.
+          PLACEHOLDER = "\n\n_Nothing yet — add entries here as work lands._\n\n"
+          new_content = re.sub(
+              r'(?m)^(## \[Unreleased\]).*?(?=\n---|\n## \[)',
+              r'\1' + PLACEHOLDER,
+              new_content,
+              count=1,
+              flags=re.DOTALL,
+          )
+
           with open("CHANGELOG.md", "w") as f:
               f.write(new_content)
 
