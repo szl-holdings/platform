@@ -1,5 +1,11 @@
 # Runbook: Deployment — SZL Holdings Platform
 
+> ⚠️ **STALE — AZURE PATH ARCHIVED**  
+> This runbook describes the deprecated Azure Container Apps deployment path.  
+> **Deployment doctrine changed 2026-04-16: Replit is the sole primary deployment target.**  
+> See `docs/ops/deploy-runbook.md` for the current canonical runbook.  
+> This file is retained for reference only (Azure enterprise integration context).
+
 > Step-by-step deployment procedure for standard production releases.
 
 ---

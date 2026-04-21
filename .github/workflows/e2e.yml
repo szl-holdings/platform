@@ -113,6 +113,10 @@ jobs:
             spec: rbac.spec.ts
           # PRISM Counsel — Legal Command is its own standalone artifact.
           # Built from @workspace/prism-counsel and served on port 3006.
+          # ARCHIVED: @workspace/prism-counsel is deprecated (see artifacts/prism-counsel/ARCHIVED.md).
+          # This matrix entry is kept while the source directory exists; it will be removed
+          # once the directory is fully deleted. The artifact is NOT in the registered artifact
+          # registry. Track: RES-001 in audit/deployment-readiness-report.md.
           - app: prism-counsel
             filter: "@workspace/prism-counsel"
             dist: artifacts/prism-counsel/dist/public
