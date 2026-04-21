@@ -1,9 +1,34 @@
 import { Link } from "wouter";
-import { Building2, ArrowRight, Layers, Shield, Target, TrendingUp, Users, Cpu, GitMerge, Map, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import { Building2, ArrowRight, Layers, Shield, Target, TrendingUp, Users, Cpu, GitMerge, Map, CheckCircle, Clock, AlertTriangle, type LucideIcon } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useCapabilityManifest } from "@/hooks/useCapabilityManifest";
+import { useInvestorContent } from "@/hooks/useInvestorContent";
+
+const ICONS: Record<string, LucideIcon> = {
+  Building2, Layers, Shield, Target, TrendingUp, Users, Cpu, GitMerge, Map,
+};
+
+function resolveIcon(name: unknown, fallback: LucideIcon): LucideIcon {
+  if (typeof name === "function") return name as LucideIcon;
+  if (typeof name === "string" && ICONS[name]) return ICONS[name];
+  return fallback;
+}
+
+type IconRef = LucideIcon | string;
+type PlatformItem = { name: string; role: string; color: string; href: string };
+type WhyNowItem = { icon: IconRef; title: string; body: string };
+type PrimitiveItem = { name: string; desc: string };
+type ClaimItem = { claim: string; manifestStatus: "live" | "working_demo" | "partial"; evidence: string; capId: string };
+
+type OverviewContent = {
+  hero: { eyebrow: string; title: string; lede: string };
+  platformMap: PlatformItem[];
+  whyNow: WhyNowItem[];
+  primitives: PrimitiveItem[];
+  investorClaims: ClaimItem[];
+};
 
 const platformMap = [
   { name: "KORA", role: "Flagship command surface — PRISM framework, signal-to-action loop, five-pillar intelligence", color: "#d4a054", href: "/lyte" },
@@ -82,6 +107,18 @@ const INVESTOR_CLAIMS = [
   },
 ];
 
+const FALLBACK_CONTENT: OverviewContent = {
+  hero: {
+    eyebrow: "Investor Overview",
+    title: "The governed decision operating system.",
+    lede: "SZL Holdings builds the platform layer between signal detection and action execution — enforcing governance, attribution, and outcome tracking on every consequential enterprise decision. The governance is the OS. Domain packs are the applications.",
+  },
+  platformMap,
+  whyNow,
+  primitives,
+  investorClaims: INVESTOR_CLAIMS,
+};
+
 export default function InvestorsOverviewPage() {
   const { totals } = useCapabilityManifest();
 
@@ -90,6 +127,9 @@ export default function InvestorsOverviewPage() {
     description: "SZL Holdings builds the governed decision operating system — the platform layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential enterprise decision.",
     canonical: "https://szlholdings.com/investors/overview",
   });
+
+  const { content, isSeeded } = useInvestorContent<OverviewContent>("overview", FALLBACK_CONTENT);
+  const { hero, platformMap: pMap, whyNow: wn, primitives: prims, investorClaims: claims } = content;
 
   return (
     <>
@@ -100,18 +140,25 @@ export default function InvestorsOverviewPage() {
           {/* Hero */}
           <section className="border-b border-white/10">
             <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054]">
-                <Building2 className="h-3.5 w-3.5" />
-                Investor Overview
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054]">
+                  <Building2 className="h-3.5 w-3.5" />
+                  {hero.eyebrow}
+                </div>
+                {isSeeded ? (
+                  <span
+                    data-testid="investor-content-demo-badge"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    Live DB
+                  </span>
+                ) : null}
               </div>
               <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-                The governed decision operating system.
+                {hero.title}
               </h1>
-              <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-                SZL Holdings builds the platform layer between signal detection and action execution —
-                enforcing governance, attribution, and outcome tracking on every consequential enterprise
-                decision. The governance is the OS. Domain packs are the applications.
-              </p>
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">{hero.lede}</p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/demo" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90">
                   See the live product <ArrowRight className="h-4 w-4" />
@@ -129,13 +176,16 @@ export default function InvestorsOverviewPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Why now</p>
               <h2 className="mt-3 text-2xl font-semibold text-white">Three forces have converged.</h2>
               <div className="mt-8 grid gap-6 md:grid-cols-3">
-                {whyNow.map((item) => (
-                  <div key={item.title} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
-                    <item.icon className="h-5 w-5 text-[#d4a054]" />
-                    <h3 className="mt-4 text-base font-semibold text-white">{item.title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-white/60">{item.body}</p>
-                  </div>
-                ))}
+                {wn.map((item) => {
+                  const Icon = resolveIcon(item.icon, Cpu);
+                  return (
+                    <div key={item.title} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                      <Icon className="h-5 w-5 text-[#d4a054]" />
+                      <h3 className="mt-4 text-base font-semibold text-white">{item.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-white/60">{item.body}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -154,7 +204,7 @@ export default function InvestorsOverviewPage() {
                 category. SZL Holdings is building it from first principles.
               </p>
               <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {primitives.map((p) => (
+                {prims.map((p) => (
                   <div key={p.name} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
                     <div className="text-sm font-semibold text-[#d4a054]">{p.name}</div>
                     <div className="mt-1.5 text-xs leading-5 text-white/55">{p.desc}</div>
@@ -171,7 +221,7 @@ export default function InvestorsOverviewPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Platform map</p>
               <h2 className="mt-3 text-2xl font-semibold text-white">One OS. Six domain packs. Shared governance.</h2>
               <div className="mt-8 space-y-3">
-                {platformMap.map((p) => (
+                {pMap.map((p) => (
                   <Link key={p.name} href={p.href}>
                     <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-6 py-4 transition hover:bg-white/[0.04] cursor-pointer">
                       <div className="flex items-center gap-4">
@@ -266,7 +316,7 @@ export default function InvestorsOverviewPage() {
                 </Link>
               </div>
               <div className="space-y-3">
-                {INVESTOR_CLAIMS.map((item) => {
+                {claims.map((item) => {
                   const isLive = item.manifestStatus === "live";
                   const isDemo = item.manifestStatus === "working_demo";
                   return (

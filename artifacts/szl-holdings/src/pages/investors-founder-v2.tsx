@@ -10,10 +10,35 @@ import {
   CheckCircle2,
   Map,
   FileText,
+  type LucideIcon,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useInvestorContent } from "@/hooks/useInvestorContent";
+
+const ICONS: Record<string, LucideIcon> = {
+  Building2, Code2, Shield, Target, Layers, Zap,
+};
+
+function resolveIcon(name: unknown, fallback: LucideIcon): LucideIcon {
+  if (typeof name === "function") return name as LucideIcon;
+  if (typeof name === "string" && ICONS[name]) return ICONS[name];
+  return fallback;
+}
+
+type IconRef = LucideIcon | string;
+type Principle = { icon: IconRef; color: string; title: string; body: string };
+type FitItem = { label: string; body: string };
+type ProofItem = { title: string; platform: string; color: string; outcome: string };
+
+type FounderContent = {
+  hero: { eyebrow: string; name: string; lede: string };
+  operatingPrinciples: Principle[];
+  founderMarketFit: FitItem[];
+  operatingThesis: string[];
+  proofObjects: ProofItem[];
+};
 
 const operatingPrinciples = [
   {
@@ -112,6 +137,19 @@ const proofObjects = [
   },
 ];
 
+const FALLBACK_CONTENT: FounderContent = {
+  hero: {
+    eyebrow: "Founder & CEO",
+    name: "Stephen Lutar",
+    lede:
+      "Builder, operator, systems thinker. Designing the infrastructure layer for how governed organizations make and audit operational decisions — starting with business observability, and extending through maritime, security, real estate, and advisory.",
+  },
+  operatingPrinciples,
+  founderMarketFit,
+  operatingThesis,
+  proofObjects,
+};
+
 export default function InvestorsFounderPage() {
   const __pageMeta = usePageMeta({
     title: "Founder — Stephen Lutar — SZL Holdings",
@@ -119,6 +157,9 @@ export default function InvestorsFounderPage() {
       "Stephen Lutar — Founder & CEO of SZL Holdings. Builder, operator, systems thinker. Founder-market fit, operating thesis, and proof objects.",
     canonical: "https://szlholdings.com/investors/founder",
   });
+
+  const { content, isSeeded } = useInvestorContent<FounderContent>("founder", FALLBACK_CONTENT);
+  const { hero, operatingPrinciples: principles, founderMarketFit: fit, operatingThesis: thesis, proofObjects: proofs } = content;
 
   return (
     <>
@@ -142,19 +183,26 @@ export default function InvestorsFounderPage() {
                   <span style={{ color: "#070a10", fontWeight: 800, fontSize: "0.9375rem", letterSpacing: "-0.02em" }}>SZL</span>
                 </div>
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054] mb-2">
-                    Founder & CEO
+                  <div className="flex flex-wrap items-center gap-3 mb-2">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054]">
+                      {hero.eyebrow}
+                    </div>
+                    {isSeeded ? (
+                      <span
+                        data-testid="investor-content-demo-badge"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300"
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                        Live DB
+                      </span>
+                    ) : null}
                   </div>
                   <h1 className="max-w-2xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-                    Stephen Lutar
+                    {hero.name}
                   </h1>
                 </div>
               </div>
-              <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
-                Builder, operator, systems thinker. Designing the infrastructure layer for how
-                governed organizations make and audit operational decisions — starting with business
-                observability, and extending through maritime, security, real estate, and advisory.
-              </p>
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">{hero.lede}</p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/investors/data-room"
@@ -183,7 +231,7 @@ export default function InvestorsFounderPage() {
                 Why this founder for this problem at this time.
               </h2>
               <div className="mt-10 grid gap-5 md:grid-cols-2">
-                {founderMarketFit.map((item) => (
+                {fit.map((item) => (
                   <div
                     key={item.label}
                     className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-6"
@@ -208,8 +256,8 @@ export default function InvestorsFounderPage() {
                 Six principles that govern every product decision.
               </h2>
               <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-                {operatingPrinciples.map((principle) => {
-                  const Icon = principle.icon;
+                {principles.map((principle) => {
+                  const Icon = resolveIcon(principle.icon, Code2);
                   return (
                     <div
                       key={principle.title}
@@ -248,7 +296,7 @@ export default function InvestorsFounderPage() {
                   </p>
                 </div>
                 <div className="space-y-3">
-                  {operatingThesis.map((item, i) => (
+                  {thesis.map((item, i) => (
                     <div
                       key={i}
                       className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
@@ -272,7 +320,7 @@ export default function InvestorsFounderPage() {
                 Built systems. Produced outcomes.
               </h2>
               <div className="mt-10 space-y-4">
-                {proofObjects.map((proof) => (
+                {proofs.map((proof) => (
                   <div
                     key={proof.title}
                     className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6"

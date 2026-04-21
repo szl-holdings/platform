@@ -16,142 +16,129 @@ import {
   Server,
   TestTube2,
   Lock,
+  type LucideIcon,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useInvestorContent } from "@/hooks/useInvestorContent";
 
-const statusBaseline = [
-  { platform: "Lyte (Command)", status: "Functional Alpha", note: "Full PRISM framework, signal-to-action loop" },
-  { platform: "FORGE", status: "Functional Alpha", note: "Workflow engine, approval gates, audit trail" },
-  { platform: "CORTEX (Mobile)", status: "Alpha Prep", note: "All workspaces functional, pre-release hardening" },
-  { platform: "PARAGON", status: "Functional Alpha", note: "SOC command, 8 security modules" },
-  { platform: "SEXTANT", status: "Functional Alpha", note: "Fleet, S&P, demurrage, freight, voyage P&L" },
-  { platform: "DOMAINE", status: "Functional Alpha", note: "Distress pipeline, ownership graph, deal workflow" },
-  { platform: "Carlota Jo", status: "Live", note: "Client portal, advisory ops — paying-client capable" },
-  { platform: "Counsel", status: "Integrated", note: "Legal modules integrated into Aegis" },
-  { platform: "IMPERIUM", status: "In Development", note: "Cloud sovereignty — not yet functional" },
-  { platform: "Command Portal", status: "Functional Alpha", note: "8-domain SSE dashboard, executive briefing" },
-];
+const ICONS: Record<string, LucideIcon> = {
+  Map, CheckCircle2, Circle, Clock, Shield, Layers, Building2, Target, Zap, Users,
+  FileCheck2, AlertTriangle, Server, TestTube2, Lock,
+};
 
-const thirtyDayPriorities = [
-  {
-    priority: "P1",
-    label: "Security and Compliance Gates",
-    color: "#c45a4a",
-    icon: Shield,
-    items: [
-      { done: true, label: "P0 security gaps closed", note: "All critical vulnerabilities confirmed resolved as of April 2026" },
-      { done: false, label: "Wire OpenTelemetry exporter (KG009)", note: "Connect OTEL exporter to production APM — hard pre-deploy requirement. Est. 3–5 days." },
-      { done: false, label: "Add CodeQL SAST to CI pipeline (KG011)", note: "Block merges on critical/high severity findings + dependency review gate. Est. 2–3 days." },
-      { done: false, label: "SSRF validation on webhook delivery URLs (KG020b)", note: "Host allowlist validation before webhook delivery. Est. 1–2 days." },
-    ],
-  },
-  {
-    priority: "P2",
-    label: "Design Partner Readiness",
-    color: "#d4a054",
-    icon: Users,
-    items: [
-      { done: false, label: "Demo environment stability", note: "Consistent, non-overlapping seed data across Lyte, Aegis, Vessels, Terra" },
-      { done: false, label: "CODEOWNERS file (KG013)", note: "Code ownership for all major packages — required for enterprise security reviews. Est. 1 day." },
-      { done: false, label: "Environment matrix documentation (KG018)", note: "Document all 80+ environment variables with schema, defaults, status. Est. 2–3 days." },
-    ],
-  },
-  {
-    priority: "P3",
-    label: "Trust Center and Diligence Publication",
-    color: "#6aaa72",
-    icon: FileCheck2,
-    items: [
-      { done: true, label: "TECHNICAL_DILIGENCE_PACKET.md complete", note: "Full technical diligence reference published" },
-      { done: true, label: "INVESTOR_NARRATIVE.md complete", note: "Governed decision operating system thesis — Version 3.0" },
-      { done: true, label: "MOAT_MAP.md complete", note: "Eight structural moats with codebase evidence — Version 2.0" },
-      { done: true, label: "PRODUCT_ROADMAP.md complete", note: "30/90-day priorities documented" },
-      { done: false, label: "Trust center review and link validation", note: "Update TRUST_CENTER_INDEX.md, verify all doc links, set next review date" },
-    ],
-  },
-  {
-    priority: "P4",
-    label: "CORTEX Alpha Release Readiness",
-    color: "#4a90b8",
-    icon: Zap,
-    items: [
-      { done: false, label: "App store submission checklist complete", note: "Privacy policy integration, app store metadata, screenshot packages" },
-      { done: false, label: "Biometric auth QA", note: "End-to-end testing of Face ID / Touch ID flows, offline sync validation" },
-    ],
-  },
-];
+function resolveIcon(name: unknown, fallback: LucideIcon): LucideIcon {
+  if (typeof name === "function") return name as LucideIcon;
+  if (typeof name === "string" && ICONS[name]) return ICONS[name];
+  return fallback;
+}
 
-const ninetyDayMilestones = [
-  {
-    milestone: "M1",
-    label: "First Commercial Deployment",
-    timeframe: "30–60 days",
-    color: "#d4a054",
-    icon: Server,
-    items: [
+type IconRef = LucideIcon | string;
+type StatusRow = { platform: string; status: string; note: string };
+type PriorityItem = { done: boolean; label: string; note: string };
+type PriorityGroup = { priority: string; label: string; color: string; icon: IconRef; items: PriorityItem[] };
+type MilestoneItem = { label: string; note: string };
+type MilestoneGroup = { milestone: string; label: string; timeframe: string; color: string; icon: IconRef; items: MilestoneItem[] };
+type SuccessGroup = { horizon: string; metrics: string[] };
+
+type RoadmapContent = {
+  hero: { eyebrow: string; title: string; lede: string };
+  statusBaseline: StatusRow[];
+  thirtyDayPriorities: PriorityGroup[];
+  ninetyDayMilestones: MilestoneGroup[];
+  successMetrics: SuccessGroup[];
+};
+
+const FALLBACK_CONTENT: RoadmapContent = {
+  hero: {
+    eyebrow: "Product Roadmap — April 2026",
+    title: "30 days to hardened. 90 days to first revenue.",
+    lede:
+      "Pre-commercial priorities only — the work required to take the platform from Functional Alpha to first commercial deployment and initial design partner engagement. Every item is scoped, estimated, and dependency-mapped.",
+  },
+  statusBaseline: [
+    { platform: "Lyte (Command)", status: "Functional Alpha", note: "Full PRISM framework, signal-to-action loop" },
+    { platform: "FORGE", status: "Functional Alpha", note: "Workflow engine, approval gates, audit trail" },
+    { platform: "CORTEX (Mobile)", status: "Alpha Prep", note: "All workspaces functional, pre-release hardening" },
+    { platform: "PARAGON", status: "Functional Alpha", note: "SOC command, 8 security modules" },
+    { platform: "SEXTANT", status: "Functional Alpha", note: "Fleet, S&P, demurrage, freight, voyage P&L" },
+    { platform: "DOMAINE", status: "Functional Alpha", note: "Distress pipeline, ownership graph, deal workflow" },
+    { platform: "Carlota Jo", status: "Live", note: "Client portal, advisory ops — paying-client capable" },
+    { platform: "Counsel", status: "Integrated", note: "Legal modules integrated into Aegis" },
+    { platform: "IMPERIUM", status: "In Development", note: "Cloud sovereignty — not yet functional" },
+    { platform: "Command Portal", status: "Functional Alpha", note: "8-domain SSE dashboard, executive briefing" },
+  ],
+  thirtyDayPriorities: [
+    {
+      priority: "P1", label: "Security and Compliance Gates", color: "#c45a4a", icon: Shield,
+      items: [
+        { done: true, label: "P0 security gaps closed", note: "All critical vulnerabilities confirmed resolved as of April 2026" },
+        { done: false, label: "Wire OpenTelemetry exporter (KG009)", note: "Connect OTEL exporter to production APM — hard pre-deploy requirement. Est. 3–5 days." },
+        { done: false, label: "Add CodeQL SAST to CI pipeline (KG011)", note: "Block merges on critical/high severity findings + dependency review gate. Est. 2–3 days." },
+        { done: false, label: "SSRF validation on webhook delivery URLs (KG020b)", note: "Host allowlist validation before webhook delivery. Est. 1–2 days." },
+      ],
+    },
+    {
+      priority: "P2", label: "Design Partner Readiness", color: "#d4a054", icon: Users,
+      items: [
+        { done: false, label: "Demo environment stability", note: "Consistent, non-overlapping seed data across Lyte, Aegis, Vessels, Terra" },
+        { done: false, label: "CODEOWNERS file (KG013)", note: "Code ownership for all major packages — required for enterprise security reviews. Est. 1 day." },
+        { done: false, label: "Environment matrix documentation (KG018)", note: "Document all 80+ environment variables with schema, defaults, status. Est. 2–3 days." },
+      ],
+    },
+    {
+      priority: "P3", label: "Trust Center and Diligence Publication", color: "#6aaa72", icon: FileCheck2,
+      items: [
+        { done: true, label: "TECHNICAL_DILIGENCE_PACKET.md complete", note: "Full technical diligence reference published" },
+        { done: true, label: "INVESTOR_NARRATIVE.md complete", note: "Governed decision operating system thesis — Version 3.0" },
+        { done: true, label: "MOAT_MAP.md complete", note: "Eight structural moats with codebase evidence — Version 2.0" },
+        { done: true, label: "PRODUCT_ROADMAP.md complete", note: "30/90-day priorities documented" },
+        { done: false, label: "Trust center review and link validation", note: "Update TRUST_CENTER_INDEX.md, verify all doc links, set next review date" },
+      ],
+    },
+    {
+      priority: "P4", label: "CORTEX Alpha Release Readiness", color: "#4a90b8", icon: Zap,
+      items: [
+        { done: false, label: "App store submission checklist complete", note: "Privacy policy integration, app store metadata, screenshot packages" },
+        { done: false, label: "Biometric auth QA", note: "End-to-end testing of Face ID / Touch ID flows, offline sync validation" },
+      ],
+    },
+  ],
+  ninetyDayMilestones: [
+    { milestone: "M1", label: "First Commercial Deployment", timeframe: "30–60 days", color: "#d4a054", icon: Server, items: [
       { label: "Production infrastructure provisioning", note: "Azure Bicep IaC — Key Vault, App Service, PostgreSQL Flexible Server, Redis, CDN, Front Door" },
       { label: "Production secrets rotation", note: "Rotate all credentials to production-grade values in Azure Key Vault. Remove all placeholders." },
       { label: "SLI/SLO definition (KG023)", note: "Wire alerting to OTEL and on-call. Min SLOs: API availability 99.5%, p95 latency < 500ms, error rate < 1%" },
       { label: "Performance baseline (KG024)", note: "Reduce vendor bundle sizes to < 800 KB. Add Lighthouse CI regression guard. Target Core Web Vitals." },
-    ],
-  },
-  {
-    milestone: "M2",
-    label: "Design Partner Onboarding",
-    timeframe: "45–75 days",
-    color: "#8b7ac8",
-    icon: Users,
-    items: [
+    ]},
+    { milestone: "M2", label: "Design Partner Onboarding", timeframe: "45–75 days", color: "#8b7ac8", icon: Users, items: [
       { label: "First 3–6 design partners — one per domain", note: "Maritime (Vessels), security (Aegis), real estate (Terra)" },
       { label: "Partner provisioning workflow", note: "Azure AD tenant setup, SCIM provisioning, role assignment, support rotation" },
       { label: "Domain-specific onboarding content", note: "Demo scripts, operator quick-start guides, trust center briefing deck per domain" },
       { label: "Partner success instrumentation", note: "Log first signal reviewed, first simulation, first approval, first workflow completed" },
-    ],
-  },
-  {
-    milestone: "M3",
-    label: "E2E Test Coverage",
-    timeframe: "60–90 days",
-    color: "#6aaa72",
-    icon: TestTube2,
-    items: [
+    ]},
+    { milestone: "M3", label: "E2E Test Coverage", timeframe: "60–90 days", color: "#6aaa72", icon: TestTube2, items: [
       { label: "Critical path E2E suite", note: "Signal → recommendation → approval → execution → proof recording. Playwright (web) + Detox (mobile)" },
       { label: "API integration tests", note: "POST/mutation coverage for all domain packs. Multi-tenant isolation: no cross-org data leakage." },
       { label: "Regression baseline on main", note: "Passing baseline established. CI gate blocks merges on E2E failures. Weekly regression run." },
-    ],
-  },
-  {
-    milestone: "M4",
-    label: "SOC 2 Type II Readiness Planning",
-    timeframe: "75–90 days",
-    color: "#4a90b8",
-    icon: Lock,
-    items: [
+    ]},
+    { milestone: "M4", label: "SOC 2 Type II Readiness Planning", timeframe: "75–90 days", color: "#4a90b8", icon: Lock, items: [
       { label: "Controls inventory — map to SOC 2 Trust Services Criteria", note: "Identify gaps. Prioritize control implementation based on audit firm feedback." },
       { label: "Audit firm selection", note: "Engage 2–3 SOC 2 firms for scoping. Target audit date: Q4 2026 or Q1 2027." },
       { label: "Evidence collection automation", note: "Wire audit trail for automated evidence generation: access logs, scan results, change management." },
-    ],
-  },
-  {
-    milestone: "M5",
-    label: "IMPERIUM MVP",
-    timeframe: "90 days",
-    color: "#c8953c",
-    icon: Zap,
-    items: [
+    ]},
+    { milestone: "M5", label: "IMPERIUM MVP", timeframe: "90 days", color: "#c8953c", icon: Zap, items: [
       { label: "Core cloud inventory and policy modules", note: "Multi-cloud estate visibility (AWS, Azure, GCP). Policy enforcement dashboard. Cost anomaly detection." },
       { label: "Integration with Command Portal", note: "IMPERIUM signals in 8-domain SSE dashboard. Cross-domain: cloud posture → security posture (Aegis)." },
-    ],
-  },
-];
-
-const successMetrics = [
-  { horizon: "30-day", metrics: ["All P0 security gaps closed (confirmed ✅ April 2026)", "KG009, KG011, KG012 resolved and CI-gated", "Demo environment stable for 5+ consecutive sessions without data reset"] },
-  { horizon: "60-day", metrics: ["First design partner organization provisioned and onboarded", "Production environment live with OTEL connected", "SLI/SLO definitions complete with alerting active"] },
-  { horizon: "90-day", metrics: ["3+ active design partner organizations using the platform weekly", "E2E test suite covering critical path with CI gate", "IMPERIUM MVP functional", "SOC 2 readiness assessment complete"] },
-];
+    ]},
+  ],
+  successMetrics: [
+    { horizon: "30-day", metrics: ["All P0 security gaps closed (confirmed ✅ April 2026)", "KG009, KG011, KG012 resolved and CI-gated", "Demo environment stable for 5+ consecutive sessions without data reset"] },
+    { horizon: "60-day", metrics: ["First design partner organization provisioned and onboarded", "Production environment live with OTEL connected", "SLI/SLO definitions complete with alerting active"] },
+    { horizon: "90-day", metrics: ["3+ active design partner organizations using the platform weekly", "E2E test suite covering critical path with CI gate", "IMPERIUM MVP functional", "SOC 2 readiness assessment complete"] },
+  ],
+};
 
 const statusColor: Record<string, string> = {
   "Functional Alpha": "#d4a054",
@@ -168,6 +155,9 @@ export default function InvestorsRoadmapPage() {
     canonical: "https://szlholdings.com/investors/roadmap",
   });
 
+  const { content, isSeeded } = useInvestorContent<RoadmapContent>("roadmap", FALLBACK_CONTENT);
+  const { hero, statusBaseline, thirtyDayPriorities, ninetyDayMilestones, successMetrics } = content;
+
   return (
     <>
       {__pageMeta}
@@ -177,20 +167,25 @@ export default function InvestorsRoadmapPage() {
           {/* Hero */}
           <section className="border-b border-white/10">
             <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#6aaa72]/20 bg-[#6aaa72]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#6aaa72]">
-                <Map className="h-3.5 w-3.5" />
-                Product Roadmap — April 2026
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#6aaa72]/20 bg-[#6aaa72]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#6aaa72]">
+                  <Map className="h-3.5 w-3.5" />
+                  {hero.eyebrow}
+                </div>
+                {isSeeded ? (
+                  <span
+                    data-testid="investor-content-demo-badge"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    Live DB
+                  </span>
+                ) : null}
               </div>
               <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-                30 days to hardened.
-                <br />
-                90 days to first revenue.
+                {hero.title}
               </h1>
-              <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
-                Pre-commercial priorities only — the work required to take the platform from Functional Alpha
-                to first commercial deployment and initial design partner engagement. Every item is scoped,
-                estimated, and dependency-mapped.
-              </p>
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">{hero.lede}</p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/investors/overview" className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/[0.08]">
                   Company overview
@@ -201,7 +196,7 @@ export default function InvestorsRoadmapPage() {
               </div>
             </div>
           </section>
-  
+
           {/* Status baseline */}
           <section className="border-b border-white/10">
             <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
@@ -230,7 +225,7 @@ export default function InvestorsRoadmapPage() {
               </div>
             </div>
           </section>
-  
+
           {/* 30-day priorities */}
           <section className="border-b border-white/10">
             <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
@@ -239,7 +234,7 @@ export default function InvestorsRoadmapPage() {
               <p className="mt-2 max-w-2xl text-sm text-white/50">Closing the highest-priority gaps before design partner onboarding begins.</p>
               <div className="mt-10 space-y-6">
                 {thirtyDayPriorities.map((group) => {
-                  const Icon = group.icon;
+                  const Icon = resolveIcon(group.icon, Shield);
                   return (
                     <div key={group.priority} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 lg:p-8">
                       <div className="flex flex-wrap items-center gap-3 mb-5">
@@ -272,7 +267,7 @@ export default function InvestorsRoadmapPage() {
               </div>
             </div>
           </section>
-  
+
           {/* 90-day milestones */}
           <section className="border-b border-white/10">
             <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
@@ -281,7 +276,7 @@ export default function InvestorsRoadmapPage() {
               <p className="mt-2 max-w-2xl text-sm text-white/50">The critical path from Functional Alpha to revenue-generating operations.</p>
               <div className="mt-10 space-y-6">
                 {ninetyDayMilestones.map((ms) => {
-                  const Icon = ms.icon;
+                  const Icon = resolveIcon(ms.icon, Server);
                   return (
                     <div key={ms.milestone} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 lg:p-8">
                       <div className="flex flex-wrap items-center gap-4 mb-5">
@@ -312,7 +307,7 @@ export default function InvestorsRoadmapPage() {
               </div>
             </div>
           </section>
-  
+
           {/* Success metrics */}
           <section className="border-b border-white/10">
             <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
@@ -335,7 +330,7 @@ export default function InvestorsRoadmapPage() {
               </div>
             </div>
           </section>
-  
+
           {/* Out of scope */}
           <section className="border-b border-white/10">
             <div className="mx-auto max-w-6xl px-6 py-12 lg:px-8">
@@ -351,7 +346,7 @@ export default function InvestorsRoadmapPage() {
               </div>
             </div>
           </section>
-  
+
           {/* Navigation */}
           <section>
             <div className="mx-auto max-w-6xl px-6 py-14 lg:px-8">

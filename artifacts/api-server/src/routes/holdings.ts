@@ -351,6 +351,57 @@ router.get("/holdings/fundamentals", async (_req, res) => {
   }
 });
 
+const investorContentCache = new Map<string, { data: unknown; at: number }>();
+const INVESTOR_CONTENT_TTL = 60_000;
+const INVESTOR_CONTENT_SLUGS = new Set([
+  "overview",
+  "architecture",
+  "moat",
+  "roadmap",
+  "trust",
+  "founder",
+]);
+
+router.get("/holdings/investor-content", async (req, res) => {
+  try {
+    const slug = String(req.query.slug ?? "").trim().toLowerCase();
+    if (!slug || !INVESTOR_CONTENT_SLUGS.has(slug)) {
+      res.status(400).json({ error: "Invalid or missing slug" });
+      return;
+    }
+    const cached = investorContentCache.get(slug);
+    if (cached && Date.now() - cached.at < INVESTOR_CONTENT_TTL) {
+      res.json(cached.data);
+      return;
+    }
+    const [row] = await db
+      .select()
+      .from(holdingsMetricsTable)
+      .where(
+        and(
+          eq(holdingsMetricsTable.category, "investor-content"),
+          eq(holdingsMetricsTable.label, slug),
+          isNull(holdingsMetricsTable.ventureId),
+        ),
+      )
+      .limit(1);
+    const meta = (row?.metadata ?? {}) as Record<string, unknown>;
+    const content = meta && typeof meta === "object" && meta.content && typeof meta.content === "object"
+      ? (meta.content as Record<string, unknown>)
+      : null;
+    const payload = {
+      checkedAt: new Date().toISOString(),
+      slug,
+      seeded: Boolean(content),
+      content,
+    };
+    investorContentCache.set(slug, { data: payload, at: Date.now() });
+    res.json(payload);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch investor content");
+  }
+});
+
 router.get("/holdings/ventures", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
