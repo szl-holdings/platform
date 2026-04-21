@@ -23,12 +23,16 @@
  *   2. DB schema file count — lib/db/src/schema/ vs DATA-MODEL.md
  *   3. DB table count (pgTable declarations) — lib/db/src/schema/ vs DATA-MODEL.md & ARCHITECTURE.md
  *   4. Product surfaces (artifact dirs)  — artifacts/ vs PRODUCT-SURFACES.md
+ *   5. Total endpoint count (router.* calls) — artifacts/api-server/src/routes/ vs API-SPEC.md
+ *   6. GraphQL type count — artifacts/api-server/src/graphql/ vs API-SPEC.md
  *
  * Tolerance bands (to avoid noise from trivial churn):
  *   Route file count  : ±10  — one-off route additions shouldn't immediately flag
  *   Schema file count : ±5   — tighter because each schema file is a domain boundary
  *   pgTable count     : ±20  — tables grow quickly; flag only meaningful drift
  *   Product surfaces  : exact match on dir names present in both sources
+ *   Endpoint count    : ±500 — endpoint numbers grow fast; flag only large drift
+ *   GraphQL types     : ±30  — type count grows steadily; flag meaningful drift
  *
  * Product-surface note:
  *   PRODUCT-SURFACES.md intentionally lists planned/roadmap surfaces (e.g., mobile
@@ -104,6 +108,8 @@ const TOLERANCE = {
   routeFiles: 10, // flag if stated count differs by more than this many files
   schemaFiles: 5, // tighter — each schema file represents a domain boundary
   pgTables: 20, // tables grow quickly; flag only meaningful drift
+  endpointCount: 500, // endpoint numbers grow fast; flag only large drift
+  graphqlTypes: 30, // type count grows steadily; flag meaningful drift
 };
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -178,6 +184,30 @@ function countPgTables() {
   }
 }
 
+function countEndpoints() {
+  try {
+    const out = execSync(
+      'grep -r "router\\.\\(get\\|post\\|put\\|patch\\|delete\\)" artifacts/api-server/src/routes/ --include="*.ts" | wc -l',
+      { cwd: ROOT, encoding: 'utf8' },
+    );
+    return parseInt(out.trim(), 10);
+  } catch {
+    return null;
+  }
+}
+
+function countGraphqlTypes() {
+  try {
+    const out = execSync(
+      'grep -rE "^\\s*(type|input|enum|interface)\\s+[A-Z][A-Za-z0-9_]*(\\s|\\{)" artifacts/api-server/src/graphql/ --include="*.ts" | wc -l',
+      { cwd: ROOT, encoding: 'utf8' },
+    );
+    return parseInt(out.trim(), 10);
+  } catch {
+    return null;
+  }
+}
+
 // Extract the first integer that follows `label` within ~120 chars.
 // Used to pull stated numbers from markdown text.
 function extractNumber(text, label, flags) {
@@ -200,12 +230,16 @@ const routeFiles = listTsFiles('artifacts/api-server/src/routes');
 const schemaFiles = listTsFiles('lib/db/src/schema');
 const pgTableCount = countPgTables();
 const artifactDirs = listDirs('artifacts');
+const endpointCount = countEndpoints();
+const graphqlTypeCount = countGraphqlTypes();
 
 const live = {
   routeFileCount: routeFiles.length,
   schemaFileCount: schemaFiles.length,
   pgTableCount,
   artifactDirs: artifactDirs.slice().sort(),
+  endpointCount,
+  graphqlTypeCount,
 };
 
 // ─── gather doc-stated facts ──────────────────────────────────────────────────
@@ -218,6 +252,12 @@ let metricsRef = readDoc('docs/metrics-reference.md');
 
 // Route file count: API-SPEC.md table row "Route files | 140+ …"
 const docRouteFileCount = extractNumber(apiSpec, 'Route files\\s*\\|\\s*');
+
+// Total endpoint count: API-SPEC.md table row "Total endpoints | 2,300 …"
+const docEndpointCount = extractNumber(apiSpec, 'Total endpoints\\s*\\|\\s*');
+
+// GraphQL type count: API-SPEC.md table row "GraphQL types | 120 …"
+const docGraphqlTypeCount = extractNumber(apiSpec, 'GraphQL types\\s*\\|\\s*');
 
 // Schema file count: DATA-MODEL.md header "112 schema files"
 const docSchemaFileCount = extractNumber(dataModel, '(\\d+) schema files');
@@ -550,6 +590,70 @@ if (docArtifactRefs.length === 0) {
       '): ' +
       docArtifactRefs.join(', '),
   );
+}
+console.log();
+
+// 5. Total endpoint count
+console.log(
+  '[ Total endpoints \u2014 API-SPEC.md vs router.* calls in artifacts/api-server/src/routes/ ]',
+);
+if (live.endpointCount === null) {
+  warn('Could not count endpoint declarations (grep failed)');
+} else if (docEndpointCount === null) {
+  warn('Could not parse total endpoint count from API-SPEC.md');
+} else {
+  const diff = Math.abs(live.endpointCount - docEndpointCount);
+  if (diff > TOLERANCE.endpointCount) {
+    warn(
+      'Total endpoint count mismatch',
+      'API-SPEC.md states ' +
+        docEndpointCount +
+        ', codebase has ' +
+        live.endpointCount +
+        ' (' +
+        (live.endpointCount > docEndpointCount ? '+' : '') +
+        (live.endpointCount - docEndpointCount) +
+        ')',
+    );
+    info('Update API-SPEC.md total endpoint count to ' + live.endpointCount);
+  } else {
+    pass(
+      'Total endpoint count roughly matches',
+      'doc: ' + docEndpointCount + ', actual: ' + live.endpointCount,
+    );
+  }
+}
+console.log();
+
+// 6. GraphQL type count
+console.log(
+  '[ GraphQL types \u2014 API-SPEC.md vs artifacts/api-server/src/graphql/ ]',
+);
+if (live.graphqlTypeCount === null) {
+  warn('Could not count GraphQL type definitions (grep failed)');
+} else if (docGraphqlTypeCount === null) {
+  warn('Could not parse GraphQL type count from API-SPEC.md');
+} else {
+  const diff = Math.abs(live.graphqlTypeCount - docGraphqlTypeCount);
+  if (diff > TOLERANCE.graphqlTypes) {
+    warn(
+      'GraphQL type count mismatch',
+      'API-SPEC.md states ' +
+        docGraphqlTypeCount +
+        ', codebase has ' +
+        live.graphqlTypeCount +
+        ' (' +
+        (live.graphqlTypeCount > docGraphqlTypeCount ? '+' : '') +
+        (live.graphqlTypeCount - docGraphqlTypeCount) +
+        ')',
+    );
+    info('Update API-SPEC.md GraphQL type count to ' + live.graphqlTypeCount);
+  } else {
+    pass(
+      'GraphQL type count roughly matches',
+      'doc: ' + docGraphqlTypeCount + ', actual: ' + live.graphqlTypeCount,
+    );
+  }
 }
 console.log();
 
