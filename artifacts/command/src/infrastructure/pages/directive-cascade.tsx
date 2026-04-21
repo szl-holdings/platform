@@ -14,6 +14,7 @@ import {
   Pause,
   Plus,
   RefreshCw,
+  Search,
   Send,
   X,
   Zap,
@@ -408,11 +409,35 @@ function NewDirectiveModal({
   );
 }
 
+const CLASSIFICATION_CONFIG: Record<Classification, { color: string; bg: string; border: string }> = {
+  OPEN: { color: '#4ade80', bg: 'rgba(74,222,128,0.08)', border: 'rgba(74,222,128,0.3)' },
+  RESTRICTED: { color: '#fb923c', bg: 'rgba(251,146,60,0.08)', border: 'rgba(251,146,60,0.3)' },
+  CONFIDENTIAL: { color: '#f87171', bg: 'rgba(248,113,113,0.08)', border: 'rgba(248,113,113,0.3)' },
+  SOVEREIGN: { color: '#c9a227', bg: 'rgba(201,162,39,0.08)', border: 'rgba(201,162,39,0.3)' },
+};
+
 export default function DirectiveCascade() {
   const [directives, setDirectives] = useState<Directive[]>(INITIAL_DIRECTIVES);
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const [filter, setFilter] = useState<DirectiveStatus | 'ALL'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<DirectiveStatus | 'ALL'>('ALL');
+  const [classificationFilter, setClassificationFilter] = useState<Classification | 'ALL'>('ALL');
+  const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const allTags = Array.from(new Set(directives.flatMap((d) => d.tags))).sort();
+
+  function toggleTag(tag: string) {
+    setActiveTags((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) {
+        next.delete(tag);
+      } else {
+        next.add(tag);
+      }
+      return next;
+    });
+  }
 
   function showToast(msg: string) {
     setToast(msg);
@@ -444,13 +469,26 @@ export default function DirectiveCascade() {
     showToast('Directive issued successfully');
   }
 
-  const filtered = filter === 'ALL' ? directives : directives.filter((d) => d.status === filter);
+  const query = searchQuery.trim().toLowerCase();
+
+  const filtered = directives.filter((d) => {
+    if (statusFilter !== 'ALL' && d.status !== statusFilter) return false;
+    if (classificationFilter !== 'ALL' && d.classification !== classificationFilter) return false;
+    if (activeTags.size > 0 && !d.tags.some((t) => activeTags.has(t))) return false;
+    if (query && !d.title.toLowerCase().includes(query) && !d.body.toLowerCase().includes(query))
+      return false;
+    return true;
+  });
+
   const counts = {
     ACTIVE: directives.filter((d) => d.status === 'ACTIVE').length,
     CASCADING: directives.filter((d) => d.status === 'CASCADING').length,
     SUSPENDED: directives.filter((d) => d.status === 'SUSPENDED').length,
     ARCHIVED: directives.filter((d) => d.status === 'ARCHIVED').length,
   };
+
+  const hasActiveFilters =
+    statusFilter !== 'ALL' || classificationFilter !== 'ALL' || activeTags.size > 0 || query;
 
   return (
     <div className="space-y-6">
@@ -500,27 +538,135 @@ export default function DirectiveCascade() {
         })}
       </div>
 
-      <div className="flex gap-2 flex-wrap">
-        {(['ALL', 'ACTIVE', 'CASCADING', 'SUSPENDED', 'ARCHIVED'] as const).map((f) => (
+      <div
+        className="imperial-card rounded-lg p-4 space-y-4"
+        style={{ borderColor: 'rgba(255,255,255,0.05)' }}
+      >
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search directives by title or body text..."
+            className="w-full bg-white/3 border border-white/8 rounded px-3 py-2 pl-9 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-white/20 transition-colors font-mono text-[11px] tracking-wide"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-white/5 rounded transition-colors"
+            >
+              <X className="w-3 h-3 text-slate-500" />
+            </button>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-[9px] font-mono tracking-widest text-slate-600 uppercase">Status</div>
+          <div className="flex gap-2 flex-wrap">
+            {(['ALL', 'ACTIVE', 'CASCADING', 'SUSPENDED', 'ARCHIVED'] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setStatusFilter(f)}
+                className={cn(
+                  'px-3 py-1.5 rounded font-mono text-[10px] tracking-widest border transition-all',
+                  statusFilter === f
+                    ? 'border-gold/40 bg-gold/10 text-gold'
+                    : 'border-white/5 text-slate-500 hover:border-white/10',
+                )}
+              >
+                {f === 'ALL' ? `ALL (${directives.length})` : `${f} (${counts[f]})`}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-[9px] font-mono tracking-widest text-slate-600 uppercase">
+            Classification
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setClassificationFilter('ALL')}
+              className={cn(
+                'px-3 py-1.5 rounded font-mono text-[10px] tracking-widest border transition-all',
+                classificationFilter === 'ALL'
+                  ? 'border-gold/40 bg-gold/10 text-gold'
+                  : 'border-white/5 text-slate-500 hover:border-white/10',
+              )}
+            >
+              ALL
+            </button>
+            {(['OPEN', 'RESTRICTED', 'CONFIDENTIAL', 'SOVEREIGN'] as Classification[]).map((c) => {
+              const cfg = CLASSIFICATION_CONFIG[c];
+              const active = classificationFilter === c;
+              return (
+                <button
+                  key={c}
+                  onClick={() => setClassificationFilter(active ? 'ALL' : c)}
+                  className="px-3 py-1.5 rounded font-mono text-[10px] tracking-widest border transition-all"
+                  style={{
+                    color: active ? cfg.color : '#64748b',
+                    background: active ? cfg.bg : 'transparent',
+                    borderColor: active ? cfg.border : 'rgba(255,255,255,0.05)',
+                  }}
+                >
+                  {c}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {allTags.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-[9px] font-mono tracking-widest text-slate-600 uppercase">Tags</div>
+            <div className="flex gap-1.5 flex-wrap">
+              {allTags.map((tag) => {
+                const active = activeTags.has(tag);
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={cn(
+                      'px-2 py-0.5 rounded font-mono text-[10px] border transition-all',
+                      active
+                        ? 'border-blue-500/50 bg-blue-950/50 text-blue-400'
+                        : 'border-white/5 bg-white/2 text-slate-500 hover:border-white/10 hover:text-slate-400',
+                    )}
+                  >
+                    #{tag}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {hasActiveFilters && (
           <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={cn(
-              'px-3 py-1.5 rounded font-mono text-[10px] tracking-widest border transition-all',
-              filter === f
-                ? 'border-gold/40 bg-gold/10 text-gold'
-                : 'border-white/5 text-slate-500 hover:border-white/10',
-            )}
+            onClick={() => {
+              setStatusFilter('ALL');
+              setClassificationFilter('ALL');
+              setActiveTags(new Set());
+              setSearchQuery('');
+            }}
+            className="text-[10px] font-mono text-slate-500 hover:text-slate-300 transition-colors tracking-wider flex items-center gap-1.5"
           >
-            {f === 'ALL' ? `ALL (${directives.length})` : `${f} (${counts[f]})`}
+            <X className="w-3 h-3" /> CLEAR ALL FILTERS
           </button>
-        ))}
+        )}
       </div>
 
       <div className="space-y-3">
         {filtered.length === 0 && (
           <div className="text-center py-12 text-slate-600 text-sm font-mono">
-            NO DIRECTIVES — ISSUE THE FIRST COMMAND
+            {hasActiveFilters ? 'NO DIRECTIVES MATCH CURRENT FILTERS' : 'NO DIRECTIVES — ISSUE THE FIRST COMMAND'}
+          </div>
+        )}
+        {filtered.length > 0 && hasActiveFilters && (
+          <div className="text-[10px] font-mono text-slate-600 tracking-wider">
+            {filtered.length} of {directives.length} directive{directives.length !== 1 ? 's' : ''} shown
           </div>
         )}
         {filtered.map((d) => (
