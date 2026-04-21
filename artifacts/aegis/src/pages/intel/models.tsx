@@ -9,6 +9,7 @@ import {
   ChevronUp,
   Clock,
   Database,
+  Download,
   InboxIcon,
   RefreshCw,
   Shield,
@@ -316,9 +317,53 @@ function ModelRegistryTable({
 
 // ─── Governance Log Section ───────────────────────────────────────────────────
 
+function escapeCSV(val: string | number | null | undefined): string {
+  if (val === null || val === undefined) return '';
+  const str = String(val);
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function exportGovernanceCSV(entries: LogEntry[]) {
+  const header = ['id', 'model', 'action', 'entity_type', 'entity_id', 'actor', 'platform', 'confidence', 'timestamp'];
+  const rows = entries.map((e) => [
+    escapeCSV(e.id),
+    escapeCSV(e.model),
+    escapeCSV(e.action),
+    escapeCSV(e.entityType),
+    escapeCSV(e.entityId),
+    escapeCSV(e.actor),
+    escapeCSV(e.platform),
+    escapeCSV(e.confidence !== null ? Math.round((e.confidence ?? 0) * 100) + '%' : null),
+    escapeCSV(e.timestamp),
+  ].join(','));
+  const csv = [header.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `inference-governance-log-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function GovernanceLog({ entries, isLoading }: { entries: LogEntry[]; isLoading: boolean }) {
   const [expanded, setExpanded] = useState(false);
-  const visible = expanded ? entries : entries.slice(0, 15);
+  const [platformFilter, setPlatformFilter] = useState('all');
+  const [entityFilter, setEntityFilter] = useState('all');
+
+  const platforms = ['all', ...Array.from(new Set(entries.map((e) => e.platform))).sort()];
+  const entityTypes = ['all', ...Array.from(new Set(entries.map((e) => e.entityType))).sort()];
+
+  const filtered = entries.filter((e) => {
+    if (platformFilter !== 'all' && e.platform !== platformFilter) return false;
+    if (entityFilter !== 'all' && e.entityType !== entityFilter) return false;
+    return true;
+  });
+
+  const visible = expanded ? filtered : filtered.slice(0, 15);
 
   return (
     <div className="bg-card/60 border border-border rounded-xl overflow-hidden">
@@ -329,23 +374,81 @@ function GovernanceLog({ entries, isLoading }: { entries: LogEntry[]; isLoading:
             Inference Governance Log
           </h3>
           <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-            {entries.length} events
+            {filtered.length}{filtered.length !== entries.length ? ` / ${entries.length}` : ''} events
           </span>
         </div>
-        {entries.length > 15 && (
-          <button
-            onClick={() => setExpanded((p) => !p)}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {expanded ? (
-              <ChevronUp className="w-3.5 h-3.5" />
-            ) : (
-              <ChevronDown className="w-3.5 h-3.5" />
-            )}
-            {expanded ? 'Collapse' : 'Show all'}
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {entries.length > 0 && (
+            <button
+              onClick={() => exportGovernanceCSV(filtered)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+            >
+              <Download className="w-3 h-3" />
+              Export CSV
+            </button>
+          )}
+          {filtered.length > 15 && (
+            <button
+              onClick={() => setExpanded((p) => !p)}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {expanded ? (
+                <ChevronUp className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5" />
+              )}
+              {expanded ? 'Collapse' : 'Show all'}
+            </button>
+          )}
+        </div>
       </div>
+
+      {entries.length > 0 && (platforms.length > 2 || entityTypes.length > 2) && (
+        <div className="flex flex-wrap gap-3 px-5 py-3 border-b border-border bg-muted/10">
+          {platforms.length > 2 && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Platform</span>
+              <div className="flex gap-1">
+                {platforms.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPlatformFilter(p)}
+                    className={cn(
+                      'px-2.5 py-1 rounded-md text-[11px] font-medium capitalize transition-colors',
+                      platformFilter === p
+                        ? 'bg-primary/15 text-primary'
+                        : 'text-muted-foreground hover:bg-muted/50',
+                    )}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {entityTypes.length > 2 && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Entity</span>
+              <div className="flex gap-1 flex-wrap">
+                {entityTypes.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setEntityFilter(t)}
+                    className={cn(
+                      'px-2.5 py-1 rounded-md text-[11px] font-medium capitalize transition-colors',
+                      entityFilter === t
+                        ? 'bg-primary/15 text-primary'
+                        : 'text-muted-foreground hover:bg-muted/50',
+                    )}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {isLoading ? (
         <div className="p-8 flex items-center justify-center">
@@ -356,6 +459,12 @@ function GovernanceLog({ entries, isLoading }: { entries: LogEntry[]; isLoading:
           icon={InboxIcon}
           title="No inference events yet"
           detail="Events will appear here as Alloy agents run inference calls"
+        />
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          icon={InboxIcon}
+          title="No matching events"
+          detail="Try adjusting the platform or entity type filters"
         />
       ) : (
         <div className="overflow-x-auto">
