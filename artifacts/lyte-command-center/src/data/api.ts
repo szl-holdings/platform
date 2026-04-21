@@ -62,6 +62,93 @@ export function useBoardView() {
   });
 }
 
+export interface WorkflowHealthItem {
+  id: string;
+  name: string;
+  type: string;
+  owner: string;
+  status: 'on_track' | 'at_risk' | 'stalled' | 'blocked' | 'complete';
+  progress: number;
+  stalledDays?: number;
+  blockerCount: number;
+  valueAtRiskUsd?: number;
+  bottleneckStep?: string | null;
+  bottleneckOwner?: string | null;
+  linkedEntityId?: string | null;
+  linkedEntityLabel?: string | null;
+  slaDeadline?: string;
+  slaBreach: boolean;
+  proofRef: string;
+  lastActivity: string;
+  lastReviewedAt?: string;
+  driftDays?: number;
+}
+
+export interface WorkflowHealthSummary {
+  total: number;
+  slaBreaches: number;
+  blocked: number;
+  stalled: number;
+  totalValueAtRiskUsd: number;
+  openDriftItems: number;
+  openDebtItems: number;
+}
+
+export function useWorkflowHealth() {
+  return useQuery({
+    queryKey: ['lyte', 'workflow-health'],
+    queryFn: () =>
+      getJson<{ workflows: WorkflowHealthItem[]; summary: WorkflowHealthSummary }>(
+        '/api/lyte/workflow-health',
+      ),
+    refetchInterval: 60_000,
+  });
+}
+
+export interface EntityGraphNode {
+  id: string;
+  label: string;
+  type: string;
+  status: string;
+  sublabel?: string | null;
+  policyState: string;
+  confidence: number;
+  freshness: string;
+  x: number;
+  y: number;
+  metadata: Record<string, unknown>;
+}
+
+export interface EntityGraphEdge {
+  id: string;
+  sourceId: string;
+  targetId: string;
+  label: string;
+  status: string;
+  strength: string;
+  proofRef?: string | null;
+}
+
+export interface EntityGraphProvenance {
+  source: string;
+  fetchedAt: string;
+  nodeCount: number;
+  edgeCount: number;
+}
+
+export function useEntityGraph() {
+  return useQuery({
+    queryKey: ['lyte', 'entity-graph'],
+    queryFn: () =>
+      getJson<{
+        nodes: EntityGraphNode[];
+        edges: EntityGraphEdge[];
+        provenance: EntityGraphProvenance;
+      }>('/api/lyte/entity-graph'),
+    staleTime: 30_000,
+  });
+}
+
 // ─── agents-* package surfaces ───────────────────────────────────────────────
 // These hooks read from the new /api/agents/* endpoints backed by
 // agents-core/step-log, approvals-inbox, and agents-evals suite builders.

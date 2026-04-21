@@ -3,15 +3,20 @@ import {
   AlertTriangle,
   Brain,
   CheckCircle2,
+  ChevronLeft,
   ChevronRight,
   Clock,
+  Pause,
+  Play,
+  RotateCcw,
   Shield,
+  SkipForward,
   User,
   UserCheck,
   UserCog,
   Zap,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'wouter';
 import { useDecisionReplay } from '@/data/api';
 import {
@@ -64,25 +69,61 @@ const CONNECTOR_COLORS: Record<ReplayEvent['evidenceType'], string> = {
   escalation: 'bg-red-500/30',
 };
 
-function EventNode({ event, isLast }: { event: ReplayEvent; isLast: boolean }) {
+const EVIDENCE_BORDER_COLOR: Record<ReplayEvent['evidenceType'], string> = {
+  alloy: 'rgba(245,158,11,0.4)',
+  human: 'rgba(14,165,233,0.4)',
+  system: 'rgba(167,139,250,0.4)',
+  escalation: 'rgba(239,68,68,0.4)',
+};
+
+const EVIDENCE_TEXT_COLOR: Record<ReplayEvent['evidenceType'], string> = {
+  alloy: '#f59e0b',
+  human: '#38bdf8',
+  system: '#c4b5fd',
+  escalation: '#f87171',
+};
+
+function EventNode({
+  event,
+  isLast,
+  revealed,
+  active,
+}: {
+  event: ReplayEvent;
+  isLast: boolean;
+  revealed: boolean;
+  active: boolean;
+}) {
   const [expanded, setExpanded] = useState(false);
 
+  useEffect(() => {
+    if (active) setExpanded(true);
+  }, [active]);
+
+  if (!revealed) {
+    return (
+      <div className="flex gap-3">
+        <div className="flex flex-col items-center">
+          <div className="w-7 h-7 rounded-full border-2 border-amber-500/10 bg-amber-500/5 flex items-center justify-center shrink-0 z-10">
+            <div className="w-2 h-2 rounded-full bg-amber-500/20" />
+          </div>
+          {!isLast && <div className="w-px flex-1 mt-1 min-h-[24px] bg-amber-500/10" />}
+        </div>
+        <div className="flex-1 pb-5 border rounded-lg p-3 mb-3 border-amber-500/8 bg-amber-500/3">
+          <div className="w-24 h-2 bg-amber-500/10 rounded animate-pulse" />
+          <div className="w-16 h-2 bg-amber-500/8 rounded mt-2 animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex gap-3">
+    <div className={`flex gap-3 transition-all duration-300 ${active ? 'scale-[1.01]' : ''}`}>
       {/* Timeline */}
       <div className="flex flex-col items-center">
         <div
-          className={`w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 z-10 ${EVIDENCE_COLORS[event.evidenceType].replace('bg-', 'bg-').replace('/5', '/15')}`}
-          style={{
-            borderColor:
-              event.evidenceType === 'alloy'
-                ? 'rgba(245,158,11,0.4)'
-                : event.evidenceType === 'human'
-                  ? 'rgba(14,165,233,0.4)'
-                  : event.evidenceType === 'escalation'
-                    ? 'rgba(239,68,68,0.4)'
-                    : 'rgba(167,139,250,0.4)',
-          }}
+          className={`w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 z-10 ${EVIDENCE_COLORS[event.evidenceType].replace('bg-', 'bg-').replace('/5', '/15')} ${active ? 'ring-2 ring-amber-400/40' : ''}`}
+          style={{ borderColor: EVIDENCE_BORDER_COLOR[event.evidenceType] }}
         >
           {EVIDENCE_ICONS[event.evidenceType]}
         </div>
@@ -95,7 +136,7 @@ function EventNode({ event, isLast }: { event: ReplayEvent; isLast: boolean }) {
 
       {/* Content */}
       <div
-        className={`flex-1 pb-5 border rounded-lg p-3 mb-3 cursor-pointer hover:opacity-90 transition-opacity ${EVIDENCE_COLORS[event.evidenceType]}`}
+        className={`flex-1 pb-5 border rounded-lg p-3 mb-3 cursor-pointer hover:opacity-90 transition-all ${EVIDENCE_COLORS[event.evidenceType]} ${active ? 'shadow-lg shadow-amber-500/5' : ''}`}
         onClick={() => setExpanded((v) => !v)}
       >
         <div className="flex items-start justify-between gap-2">
@@ -115,16 +156,7 @@ function EventNode({ event, isLast }: { event: ReplayEvent; isLast: boolean }) {
           </div>
           <span
             className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${EVIDENCE_COLORS[event.evidenceType]} uppercase`}
-            style={{
-              color:
-                event.evidenceType === 'alloy'
-                  ? '#f59e0b'
-                  : event.evidenceType === 'human'
-                    ? '#38bdf8'
-                    : event.evidenceType === 'escalation'
-                      ? '#f87171'
-                      : '#c4b5fd',
-            }}
+            style={{ color: EVIDENCE_TEXT_COLOR[event.evidenceType] }}
           >
             {event.evidenceType}
           </span>
@@ -195,6 +227,8 @@ function ScenarioCard({
   );
 }
 
+const REPLAY_INTERVAL_MS = 1200;
+
 export default function DecisionReplayPage() {
   useEffect(() => {
     void bootstrapInterventions();
@@ -203,16 +237,83 @@ export default function DecisionReplayPage() {
   const params = useParams<{ id?: string }>();
   const { data, isLoading, error } = useDecisionReplay();
   const [activeScenario, setActiveScenario] = useState<ReplayScenario | null>(null);
-  const [activeEvent, setActiveEvent] = useState<string | null>(null);
   const { log: interventionLog } = useInterventions();
+
+  // Replay state
+  const [revealedCount, setRevealedCount] = useState<number | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const totalEvents = activeScenario?.events.length ?? 0;
+  const currentRevealed = revealedCount ?? totalEvents;
 
   useEffect(() => {
     if (!data?.scenarios?.length) return;
     const initial = params.id
       ? (data.scenarios.find((s) => s.id === params.id) ?? data.scenarios[0]!)
       : data.scenarios[0]!;
-    setActiveScenario((prev) => (prev?.id === initial.id ? prev : initial));
+    setActiveScenario((prev) => {
+      if (prev?.id === initial.id) return prev;
+      setRevealedCount(null);
+      setPlaying(false);
+      return initial;
+    });
   }, [data, params.id]);
+
+  function handleScenarioSelect(s: ReplayScenario) {
+    if (s.id === activeScenario?.id) return;
+    setActiveScenario(s);
+    setRevealedCount(null);
+    setPlaying(false);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  }
+
+  function startReplay() {
+    setRevealedCount(0);
+    setPlaying(true);
+  }
+
+  function pauseReplay() {
+    setPlaying(false);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  }
+
+  function stepForward() {
+    setRevealedCount((c) => Math.min((c ?? 0) + 1, totalEvents));
+  }
+
+  function stepBack() {
+    setRevealedCount((c) => Math.max((c ?? 0) - 1, 0));
+  }
+
+  function resetReplay() {
+    setRevealedCount(null);
+    setPlaying(false);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  }
+
+  useEffect(() => {
+    if (playing) {
+      intervalRef.current = setInterval(() => {
+        setRevealedCount((c) => {
+          const next = (c ?? 0) + 1;
+          if (next >= totalEvents) {
+            setPlaying(false);
+            clearInterval(intervalRef.current!);
+            return totalEvents;
+          }
+          return next;
+        });
+      }, REPLAY_INTERVAL_MS);
+    } else {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [playing, totalEvents]);
+
+  const isReplayMode = revealedCount !== null;
 
   if (isLoading) {
     return <div className="p-6 text-xs font-mono text-amber-400/50">Loading decision replay…</div>;
@@ -235,9 +336,13 @@ export default function DecisionReplayPage() {
         <div className="flex items-center gap-2 mb-1">
           <Activity className="w-4 h-4 text-amber-400" />
           <h1 className="text-xl font-display font-bold text-amber-50">Decision Replay</h1>
+          <span className="text-[9px] font-mono text-amber-400/30 bg-amber-500/5 border border-amber-500/15 px-1.5 py-0.5 rounded">
+            REAL TIMELINE · LEDGER ANCHORED
+          </span>
         </div>
         <p className="text-sm text-amber-100/50">
           Reconstruct who knew what, when — with the full proof chain anchored to the Alloy ledger.
+          Use Replay mode to step through events sequentially.
         </p>
       </div>
 
@@ -270,7 +375,7 @@ export default function DecisionReplayPage() {
               key={s.id}
               scenario={s}
               selected={activeScenario.id === s.id}
-              onClick={() => setActiveScenario(s)}
+              onClick={() => handleScenarioSelect(s)}
             />
           ))}
 
@@ -338,7 +443,7 @@ export default function DecisionReplayPage() {
               {[
                 { label: 'Alloy Signals', value: alloyEvents, color: '#f59e0b' },
                 { label: 'Human Actions', value: humanEvents, color: '#38bdf8' },
-                { label: 'Total Events', value: activeScenario.events.length, color: '#a78bfa' },
+                { label: 'Total Events', value: totalEvents, color: '#a78bfa' },
               ].map((m) => (
                 <div key={m.label} className="flex items-center justify-between">
                   <span className="text-[10px] text-amber-400/55">{m.label}</span>
@@ -381,16 +486,108 @@ export default function DecisionReplayPage() {
             </div>
           </div>
 
+          {/* Replay controls */}
+          <div className="cockpit-panel p-3 mb-4 flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              {!isReplayMode ? (
+                <button
+                  onClick={startReplay}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[11px] font-medium hover:bg-amber-500/20 transition-colors"
+                >
+                  <Play className="w-3 h-3" />
+                  Replay
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={stepBack}
+                    disabled={currentRevealed === 0}
+                    className="p-1.5 rounded border border-amber-500/20 text-amber-400/60 hover:text-amber-300 hover:bg-amber-500/8 transition-colors disabled:opacity-30"
+                    aria-label="Step back"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+                  {playing ? (
+                    <button
+                      onClick={pauseReplay}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[11px] font-medium hover:bg-amber-500/20 transition-colors"
+                    >
+                      <Pause className="w-3 h-3" />
+                      Pause
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setPlaying(true)}
+                      disabled={currentRevealed >= totalEvents}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[11px] font-medium hover:bg-amber-500/20 transition-colors disabled:opacity-40"
+                    >
+                      <Play className="w-3 h-3" />
+                      Play
+                    </button>
+                  )}
+                  <button
+                    onClick={stepForward}
+                    disabled={currentRevealed >= totalEvents}
+                    className="p-1.5 rounded border border-amber-500/20 text-amber-400/60 hover:text-amber-300 hover:bg-amber-500/8 transition-colors disabled:opacity-30"
+                    aria-label="Step forward"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => setRevealedCount(totalEvents)}
+                    disabled={currentRevealed >= totalEvents}
+                    className="p-1.5 rounded border border-amber-500/20 text-amber-400/60 hover:text-amber-300 hover:bg-amber-500/8 transition-colors disabled:opacity-30"
+                    aria-label="Skip to end"
+                  >
+                    <SkipForward className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={resetReplay}
+                    className="p-1.5 rounded border border-amber-500/20 text-amber-400/60 hover:text-amber-300 hover:bg-amber-500/8 transition-colors"
+                    aria-label="Reset replay"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {isReplayMode && (
+              <div className="flex-1 flex items-center gap-2">
+                <div className="flex-1 h-1.5 bg-amber-500/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-amber-400/60 rounded-full transition-all duration-300"
+                    style={{ width: `${(currentRevealed / totalEvents) * 100}%` }}
+                  />
+                </div>
+                <span className="text-[10px] font-mono text-amber-400/50 shrink-0">
+                  {currentRevealed}/{totalEvents}
+                </span>
+              </div>
+            )}
+
+            {!isReplayMode && (
+              <p className="text-[10px] text-amber-400/35 font-mono">
+                Step through {totalEvents} events sequentially
+              </p>
+            )}
+          </div>
+
           {/* Timeline */}
           <div className="px-2">
             <p className="text-[10px] font-mono text-amber-400/40 uppercase mb-4">
-              Proof Chain — {activeScenario.events.length} events · Click any event to expand
+              Proof Chain — {totalEvents} events ·{' '}
+              {isReplayMode
+                ? `Step ${currentRevealed} of ${totalEvents}`
+                : 'Click any event to expand'}
             </p>
             {activeScenario.events.map((event, i) => (
               <EventNode
                 key={event.id}
                 event={event}
-                isLast={i === activeScenario.events.length - 1}
+                isLast={i === totalEvents - 1}
+                revealed={!isReplayMode || i < currentRevealed}
+                active={isReplayMode && i === currentRevealed - 1}
               />
             ))}
           </div>

@@ -250,3 +250,21 @@ export function useDecisionRequestChanges() {
     },
   });
 }
+
+export function useDecisionDelegate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      cardId,
+      delegateTo,
+      reason,
+    }: {
+      cardId: string;
+      delegateTo: string;
+      reason?: string;
+    }) => postJson(`/api/decisions/cards/${cardId}/delegate`, { delegateTo, reason }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['decisions'] });
+    },
+  });
+}

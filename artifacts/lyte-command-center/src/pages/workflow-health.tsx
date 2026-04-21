@@ -4,13 +4,14 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  RefreshCw,
   Shield,
   TrendingDown,
   Users,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
-import { type WorkflowItem, workflowItems } from '@/data/seed';
+import { type WorkflowHealthItem, useWorkflowHealth } from '@/data/api';
 
 const STATUS_CONFIG = {
   on_track: {
@@ -70,7 +71,25 @@ function ProgressBar({ value, color }: { value: number; color: string }) {
   );
 }
 
-function WorkflowCard({ wf }: { wf: WorkflowItem }) {
+function DriftDelta({ days }: { days: number }) {
+  if (days === 0)
+    return (
+      <span className="text-[9px] font-mono text-emerald-400/70 bg-emerald-500/8 px-1.5 py-0.5 rounded border border-emerald-500/15">
+        ↑ reviewed today
+      </span>
+    );
+  const color =
+    days > 30 ? 'text-red-400 bg-red-500/8 border-red-500/20' :
+    days > 14 ? 'text-orange-400 bg-orange-500/8 border-orange-500/20' :
+    'text-amber-400 bg-amber-500/8 border-amber-500/15';
+  return (
+    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${color}`}>
+      +{days}d drift
+    </span>
+  );
+}
+
+function WorkflowCard({ wf }: { wf: WorkflowHealthItem }) {
   const [expanded, setExpanded] = useState(false);
   const cfg = STATUS_CONFIG[wf.status];
 
@@ -85,7 +104,7 @@ function WorkflowCard({ wf }: { wf: WorkflowItem }) {
         <div
           className={`w-8 h-8 rounded flex items-center justify-center shrink-0 mt-0.5 ${cfg.bg} border ${cfg.border}`}
         >
-          {wf.status === 'on_track' ? (
+          {wf.status === 'on_track' || wf.status === 'complete' ? (
             <CheckCircle2 className={`w-4 h-4 ${cfg.color}`} />
           ) : wf.status === 'blocked' ? (
             <AlertTriangle className={`w-4 h-4 ${cfg.color}`} />
@@ -99,10 +118,11 @@ function WorkflowCard({ wf }: { wf: WorkflowItem }) {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-sm font-semibold text-amber-100">{wf.name}</p>
-              <div className="flex items-center gap-3 mt-0.5">
+              <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                 <span className="text-[10px] text-amber-400/40 font-mono">
-                  {TYPE_LABELS[wf.type]} · {wf.owner}
+                  {TYPE_LABELS[wf.type] ?? wf.type} · {wf.owner}
                 </span>
+                {typeof wf.driftDays === 'number' && <DriftDelta days={wf.driftDays} />}
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -132,7 +152,7 @@ function WorkflowCard({ wf }: { wf: WorkflowItem }) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {wf.stalledDays !== undefined && (
+            {wf.stalledDays !== undefined && wf.stalledDays > 0 && (
               <div className="flex items-center gap-1 text-[10px] text-orange-400">
                 <Clock className="w-3 h-3" />
                 <span className="font-mono">{wf.stalledDays}d stalled</span>
@@ -144,7 +164,7 @@ function WorkflowCard({ wf }: { wf: WorkflowItem }) {
                 <span className="font-mono">{wf.blockerCount} blockers</span>
               </div>
             )}
-            {wf.valueAtRiskUsd !== undefined && (
+            {wf.valueAtRiskUsd !== undefined && wf.valueAtRiskUsd > 0 && (
               <div className="flex items-center gap-1 text-[10px] text-orange-400">
                 <Zap className="w-3 h-3" />
                 <span className="font-mono">${(wf.valueAtRiskUsd / 1e6).toFixed(1)}M at risk</span>
@@ -167,7 +187,10 @@ function WorkflowCard({ wf }: { wf: WorkflowItem }) {
               <p className="text-[9px] font-mono text-red-400/50 mb-1">BOTTLENECK DETECTED</p>
               <p className="text-xs font-semibold text-amber-100">{wf.bottleneckStep}</p>
               {wf.bottleneckOwner && (
-                <p className="text-[10px] text-amber-100/50 mt-0.5">Owner: {wf.bottleneckOwner}</p>
+                <p className="text-[10px] text-amber-100/50 mt-0.5 flex items-center gap-1">
+                  <Users className="w-3 h-3" />
+                  {wf.bottleneckOwner}
+                </p>
               )}
             </div>
           )}
@@ -187,6 +210,11 @@ function WorkflowCard({ wf }: { wf: WorkflowItem }) {
               {wf.proofRef}
             </span>
           </div>
+          {wf.lastReviewedAt && (
+            <div className="text-[9px] text-amber-400/30 font-mono">
+              Last reviewed: {wf.lastReviewedAt}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -194,91 +222,134 @@ function WorkflowCard({ wf }: { wf: WorkflowItem }) {
 }
 
 export default function WorkflowHealthPage() {
-  const critical = workflowItems.filter((w) => w.status === 'blocked' || w.status === 'stalled');
-  const atRisk = workflowItems.filter((w) => w.status === 'at_risk');
-  const healthy = workflowItems.filter((w) => w.status === 'on_track' || w.status === 'complete');
+  const { data, isLoading, error, refetch } = useWorkflowHealth();
 
-  const totalAtRisk = workflowItems.reduce((sum, w) => sum + (w.valueAtRiskUsd ?? 0), 0);
-  const totalBreachers = workflowItems.filter((w) => w.slaBreach).length;
-  const totalBlockers = workflowItems.reduce((sum, w) => sum + w.blockerCount, 0);
-  const healthScore = Math.round((healthy.length / workflowItems.length) * 100);
+  const workflows = data?.workflows ?? [];
+  const summary = data?.summary;
+
+  const critical = workflows.filter((w) => w.status === 'blocked' || w.status === 'stalled');
+  const atRisk = workflows.filter((w) => w.status === 'at_risk');
+  const healthy = workflows.filter((w) => w.status === 'on_track' || w.status === 'complete');
+
+  const totalAtRisk = summary?.totalValueAtRiskUsd ?? 0;
+  const totalBreachers = summary?.slaBreaches ?? 0;
+  const totalBlockers = workflows.reduce((sum, w) => sum + w.blockerCount, 0);
+  const healthScore =
+    workflows.length > 0 ? Math.round((healthy.length / workflows.length) * 100) : 0;
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-5">
       {/* Header */}
-      <div>
-        <h1 className="text-lg font-semibold text-amber-100 font-display">Workflow Health</h1>
-        <p className="text-xs text-amber-400/50 mt-0.5">
-          Bottleneck detection, value-at-risk, and SLA breach status across all tracked workflows
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-lg font-semibold text-amber-100 font-display">Workflow Health</h1>
+          <p className="text-xs text-amber-400/50 mt-0.5">
+            Bottleneck detection, drift-since-review delta, value-at-risk, and SLA breach status ·{' '}
+            <span className="font-mono">Live API</span>
+          </p>
+        </div>
+        <button
+          onClick={() => refetch()}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/8 border border-amber-500/20 text-amber-400 text-[11px] hover:bg-amber-500/12 transition-colors"
+        >
+          <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
       </div>
 
-      {/* Summary metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="cockpit-panel p-4">
-          <p className="text-[10px] font-mono text-amber-400/40 uppercase mb-1">Health Score</p>
-          <p
-            className={`text-2xl font-mono font-bold ${healthScore >= 70 ? 'text-emerald-400' : healthScore >= 50 ? 'text-amber-400' : 'text-red-400'}`}
-          >
-            {healthScore}%
-          </p>
-          <p className="text-[10px] text-amber-400/40 mt-1">
-            {healthy.length} of {workflowItems.length} on track
-          </p>
-        </div>
-        <div className="cockpit-panel p-4 border border-orange-500/20">
-          <p className="text-[10px] font-mono text-amber-400/40 uppercase mb-1">Value at Risk</p>
-          <p className="text-2xl font-mono font-bold text-orange-400">
-            ${(totalAtRisk / 1e6).toFixed(1)}M
-          </p>
-          <p className="text-[10px] text-amber-400/40 mt-1">across stalled / blocked flows</p>
-        </div>
-        <div className="cockpit-panel p-4 border border-red-500/20">
-          <p className="text-[10px] font-mono text-amber-400/40 uppercase mb-1">SLA Breaches</p>
-          <p className="text-2xl font-mono font-bold text-red-400">{totalBreachers}</p>
-          <p className="text-[10px] text-amber-400/40 mt-1">workflows past deadline</p>
-        </div>
-        <div className="cockpit-panel p-4 border border-red-500/15">
-          <p className="text-[10px] font-mono text-amber-400/40 uppercase mb-1">Active Blockers</p>
-          <p className="text-2xl font-mono font-bold text-red-400">{totalBlockers}</p>
-          <p className="text-[10px] text-amber-400/40 mt-1">bottlenecks across all workflows</p>
-        </div>
-      </div>
-
-      {/* Critical / Blocked */}
-      {critical.length > 0 && (
-        <div className="space-y-3">
-          <p className="text-[9px] font-mono text-red-400/50 uppercase tracking-widest">
-            Blocked / Stalled ({critical.length})
-          </p>
-          {critical.map((wf) => (
-            <WorkflowCard key={wf.id} wf={wf} />
-          ))}
+      {isLoading && (
+        <div className="flex items-center justify-center py-16">
+          <RefreshCw className="w-6 h-6 text-amber-400/30 animate-spin" />
         </div>
       )}
 
-      {/* At Risk */}
-      {atRisk.length > 0 && (
-        <div className="space-y-3">
-          <p className="text-[9px] font-mono text-orange-400/50 uppercase tracking-widest">
-            At Risk ({atRisk.length})
-          </p>
-          {atRisk.map((wf) => (
-            <WorkflowCard key={wf.id} wf={wf} />
-          ))}
+      {error && (
+        <div className="text-center py-8">
+          <AlertTriangle className="w-8 h-8 text-red-400/40 mx-auto mb-2" />
+          <p className="text-sm text-red-400/60">Failed to load workflow health data</p>
+          <p className="text-[10px] text-red-400/40 mt-1">{error.message}</p>
         </div>
       )}
 
-      {/* Healthy */}
-      {healthy.length > 0 && (
-        <div className="space-y-3">
-          <p className="text-[9px] font-mono text-emerald-400/30 uppercase tracking-widest">
-            On Track ({healthy.length})
-          </p>
-          {healthy.map((wf) => (
-            <WorkflowCard key={wf.id} wf={wf} />
-          ))}
-        </div>
+      {!isLoading && !error && (
+        <>
+          {/* Summary metrics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="cockpit-panel p-4">
+              <p className="text-[10px] font-mono text-amber-400/40 uppercase mb-1">Health Score</p>
+              <p
+                className={`text-2xl font-mono font-bold ${healthScore >= 70 ? 'text-emerald-400' : healthScore >= 50 ? 'text-amber-400' : 'text-red-400'}`}
+              >
+                {healthScore}%
+              </p>
+              <p className="text-[10px] text-amber-400/40 mt-1">
+                {healthy.length} of {workflows.length} on track
+              </p>
+            </div>
+            <div className="cockpit-panel p-4 border border-orange-500/20">
+              <p className="text-[10px] font-mono text-amber-400/40 uppercase mb-1">Value at Risk</p>
+              <p className="text-2xl font-mono font-bold text-orange-400">
+                ${(totalAtRisk / 1e6).toFixed(1)}M
+              </p>
+              <p className="text-[10px] text-amber-400/40 mt-1">across stalled / blocked flows</p>
+            </div>
+            <div className="cockpit-panel p-4 border border-red-500/20">
+              <p className="text-[10px] font-mono text-amber-400/40 uppercase mb-1">SLA Breaches</p>
+              <p className="text-2xl font-mono font-bold text-red-400">{totalBreachers}</p>
+              <p className="text-[10px] text-amber-400/40 mt-1">workflows past deadline</p>
+            </div>
+            <div className="cockpit-panel p-4 border border-red-500/15">
+              <p className="text-[10px] font-mono text-amber-400/40 uppercase mb-1">
+                Active Blockers
+              </p>
+              <p className="text-2xl font-mono font-bold text-red-400">{totalBlockers}</p>
+              <p className="text-[10px] text-amber-400/40 mt-1">bottlenecks across all workflows</p>
+            </div>
+          </div>
+
+          {/* Critical / Blocked */}
+          {critical.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-[9px] font-mono text-red-400/50 uppercase tracking-widest">
+                Blocked / Stalled ({critical.length})
+              </p>
+              {critical.map((wf) => (
+                <WorkflowCard key={wf.id} wf={wf} />
+              ))}
+            </div>
+          )}
+
+          {/* At Risk */}
+          {atRisk.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-[9px] font-mono text-orange-400/50 uppercase tracking-widest">
+                At Risk ({atRisk.length})
+              </p>
+              {atRisk.map((wf) => (
+                <WorkflowCard key={wf.id} wf={wf} />
+              ))}
+            </div>
+          )}
+
+          {/* Healthy */}
+          {healthy.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-[9px] font-mono text-emerald-400/30 uppercase tracking-widest">
+                On Track ({healthy.length})
+              </p>
+              {healthy.map((wf) => (
+                <WorkflowCard key={wf.id} wf={wf} />
+              ))}
+            </div>
+          )}
+
+          {workflows.length === 0 && (
+            <div className="text-center py-16">
+              <CheckCircle2 className="w-10 h-10 text-emerald-400/20 mx-auto mb-3" />
+              <p className="text-sm text-amber-400/40">No workflows found</p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

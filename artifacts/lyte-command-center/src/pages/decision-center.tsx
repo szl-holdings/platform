@@ -19,6 +19,7 @@ import {
   Shield,
   Target,
   User,
+  UserPlus,
   XCircle,
   Zap,
 } from 'lucide-react';
@@ -36,6 +37,7 @@ import {
   type Severity,
   useDecision,
   useDecisionApprove,
+  useDecisionDelegate,
   useDecisionReject,
   useDecisionRequestChanges,
   useDecisions,
@@ -573,11 +575,14 @@ function DetailDrawer({ cardId, onClose }: { cardId: string; onClose: () => void
   const [tab, setTab] = useState<DrawerTab>('evidence');
   const [actionNote, setActionNote] = useState('');
   const [actionPending, setActionPending] = useState<string | null>(null);
+  const [showDelegate, setShowDelegate] = useState(false);
+  const [delegateTo, setDelegateTo] = useState('');
 
   const { data, isLoading, error } = useDecision(cardId);
   const approve = useDecisionApprove();
   const reject = useDecisionReject();
   const requestChanges = useDecisionRequestChanges();
+  const delegate = useDecisionDelegate();
 
   const detail = data?.data;
   const card = detail?.card;
@@ -592,6 +597,19 @@ function DetailDrawer({ cardId, onClose }: { cardId: string; onClose: () => void
         await requestChanges.mutateAsync({ cardId, reason: actionNote });
       setActionNote('');
       onClose();
+    } finally {
+      setActionPending(null);
+    }
+  }
+
+  async function handleDelegate() {
+    if (!cardId || !delegateTo.trim()) return;
+    setActionPending('delegate');
+    try {
+      await delegate.mutateAsync({ cardId, delegateTo: delegateTo.trim(), reason: actionNote });
+      setDelegateTo('');
+      setShowDelegate(false);
+      setActionNote('');
     } finally {
       setActionPending(null);
     }
@@ -762,6 +780,35 @@ function DetailDrawer({ cardId, onClose }: { cardId: string; onClose: () => void
               rows={2}
               className="w-full bg-white/3 border border-amber-500/15 rounded-lg px-3 py-2 text-[11px] text-amber-100 placeholder-amber-400/30 resize-none focus:outline-none focus:border-amber-500/40"
             />
+            {/* Delegate inline form */}
+            {showDelegate && (
+              <div className="rounded-lg bg-sky-500/5 border border-sky-500/20 p-3 space-y-2">
+                <p className="text-[9px] font-mono text-sky-400/60 uppercase">Delegate to</p>
+                <input
+                  type="text"
+                  value={delegateTo}
+                  onChange={(e) => setDelegateTo(e.target.value)}
+                  placeholder="Name or email of new owner…"
+                  className="w-full bg-white/3 border border-sky-500/20 rounded px-3 py-1.5 text-[11px] text-amber-100 placeholder-amber-400/30 focus:outline-none focus:border-sky-500/40"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleDelegate}
+                    disabled={!delegateTo.trim() || actionPending !== null}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded bg-sky-500/15 border border-sky-500/30 text-sky-400 text-[11px] font-medium hover:bg-sky-500/20 transition-colors disabled:opacity-40"
+                  >
+                    <UserPlus className="w-3 h-3" />
+                    {actionPending === 'delegate' ? 'Delegating…' : 'Confirm Delegate'}
+                  </button>
+                  <button
+                    onClick={() => { setShowDelegate(false); setDelegateTo(''); }}
+                    className="px-3 py-1.5 rounded bg-white/3 border border-amber-500/15 text-amber-400/60 text-[11px] hover:text-amber-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleAction('approve')}
@@ -786,6 +833,15 @@ function DetailDrawer({ cardId, onClose }: { cardId: string; onClose: () => void
               >
                 <XCircle className="w-3.5 h-3.5" />
                 {actionPending === 'reject' ? 'Rejecting…' : 'Reject'}
+              </button>
+              <button
+                onClick={() => setShowDelegate((v) => !v)}
+                disabled={actionPending !== null}
+                className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border text-[11px] font-medium transition-colors disabled:opacity-40 ${showDelegate ? 'bg-sky-500/15 border-sky-500/30 text-sky-300' : 'bg-sky-500/8 border-sky-500/20 text-sky-400 hover:bg-sky-500/12'}`}
+                title="Delegate to another owner"
+                aria-label="Delegate"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>

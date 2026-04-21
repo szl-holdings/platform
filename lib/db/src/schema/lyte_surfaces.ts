@@ -106,12 +106,42 @@ export const lyteBoardRisksTable = pgTable('lyte_board_risks', {
   orderIdx: integer('order_idx').notNull().default(0),
 });
 
+export const lyteEntityNodesTable = pgTable('lyte_entity_nodes', {
+  id: text('id').primaryKey(),
+  label: text('label').notNull(),
+  type: text('type').notNull(),
+  status: text('status').notNull(),
+  sublabel: text('sublabel'),
+  policyState: text('policy_state').notNull(),
+  confidence: doublePrecision('confidence').notNull().default(1.0),
+  freshness: text('freshness').notNull().default('live'),
+  x: doublePrecision('x').notNull().default(0),
+  y: doublePrecision('y').notNull().default(0),
+  metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+  orderIdx: integer('order_idx').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const lyteEntityEdgesTable = pgTable('lyte_entity_edges', {
+  id: text('id').primaryKey(),
+  sourceId: text('source_id').notNull(),
+  targetId: text('target_id').notNull(),
+  label: text('label').notNull(),
+  status: text('status').notNull().default('active'),
+  strength: text('strength').notNull().default('normal'),
+  proofRef: text('proof_ref'),
+  orderIdx: integer('order_idx').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type LyteDriftItem = typeof lyteDriftItemsTable.$inferSelect;
 export type LytePressureCell = typeof lytePressureCellsTable.$inferSelect;
 export type LyteDebtItem = typeof lyteDebtItemsTable.$inferSelect;
 export type LyteReplayScenario = typeof lyteReplayScenariosTable.$inferSelect;
 export type LyteBoardMetric = typeof lyteBoardMetricsTable.$inferSelect;
 export type LyteBoardRisk = typeof lyteBoardRisksTable.$inferSelect;
+export type LyteEntityNode = typeof lyteEntityNodesTable.$inferSelect;
+export type LyteEntityEdge = typeof lyteEntityEdgesTable.$inferSelect;
 
 // Suppress unused-export lint warning when types module is re-exported wholesale.
 void doublePrecision;

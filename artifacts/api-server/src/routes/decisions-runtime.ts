@@ -554,6 +554,97 @@ router.post(
   },
 );
 
+// ─── POST /decisions/cards/:id/delegate ───────────────────────────────────────
+// Delegates ownership of a card to another person without changing status.
+// Writes a "card.delegated" audit event and updates the owner field.
+
+const delegateSchema = z.object({
+  delegateTo: z.string().min(1),
+  reason: z.string().optional(),
+});
+
+router.post(
+  '/decisions/cards/:id/delegate',
+  requireAuth,
+  async (req: Request, res: Response) => {
+    try {
+      kickoffSeed();
+      const workspaceId = getWorkspaceId(req.user);
+      const { id } = req.params;
+
+      const parsed = delegateSchema.safeParse(req.body ?? {});
+      if (!parsed.success) {
+        return res.status(400).json({ error: 'Invalid body', details: parsed.error.flatten() });
+      }
+      const { delegateTo, reason } = parsed.data;
+
+      const conditions = [eq(decisionsRuntimeTable.workspaceId, workspaceId)];
+      if (/^\d+$/.test(id)) {
+        conditions.push(eq(decisionsRuntimeTable.id, parseInt(id, 10)));
+      } else {
+        conditions.push(eq(decisionsRuntimeTable.cardId, id));
+      }
+
+      const rows = await withQueryTimeout(
+        ddb
+          .select()
+          .from(decisionsRuntimeTable)
+          .where(and(...conditions))
+          .limit(1),
+      );
+      const card = rows[0];
+      if (!card) {
+        return res.status(404).json({ error: 'Decision card not found' });
+      }
+
+      const actorId = getActorId(req.user);
+      const actorDisplay = getActorDisplay(req.user);
+      const eventId = `audit-${card.cardId}-card.delegated-${Date.now()}`;
+
+      await withQueryTimeout(
+        ddb.transaction(async (tx) => {
+          await tx
+            .update(decisionsRuntimeTable)
+            .set({ owner: delegateTo, updatedAt: new Date() })
+            .where(and(...conditions));
+
+          await tx.insert(decisionAuditEventsTable).values({
+            eventId,
+            cardId: card.cardId,
+            workspaceId,
+            eventType: 'card.delegated',
+            actorId,
+            actorType: 'human',
+            actorDisplay,
+            reason: reason
+              ? `Delegated to ${delegateTo}: ${reason}`
+              : `Delegated to ${delegateTo}`,
+            previousStatus: card.status,
+            newStatus: card.status,
+            occurredAt: new Date(),
+          });
+        }),
+      );
+
+      logger.info({ cardId: card.cardId, delegateTo, actorId }, 'Decision card delegated');
+
+      return res.json({
+        success: true,
+        data: {
+          cardId: card.cardId,
+          delegatedTo: delegateTo,
+          eventId,
+          delegatedBy: actorDisplay,
+          delegatedAt: new Date().toISOString(),
+        },
+      });
+    } catch (err) {
+      logger.error({ err }, 'delegate error');
+      return res.status(500).json({ error: 'Failed to delegate card' });
+    }
+  },
+);
+
 // ─── POST /decisions/cards/:id/validate-and-promote ───────────────────────────
 // Runs all six adversarial validation checks against the current card evidence,
 // persists validation records, and promotes to ready-for-review only if all
