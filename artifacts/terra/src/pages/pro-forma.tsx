@@ -1115,6 +1115,7 @@ export default function ProFormaPage() {
                           if (e.key === 'Enter' && renameValue.trim()) {
                             updateProjectMutation.mutate({ id: p.id, projectName: renameValue.trim() });
                             setRenamingId(null);
+                            setShowProjects(false);
                           } else if (e.key === 'Escape') {
                             setRenamingId(null);
                           }
@@ -1142,6 +1143,7 @@ export default function ProFormaPage() {
                             updateProjectMutation.mutate({ id: p.id, projectName: renameValue.trim() });
                           }
                           setRenamingId(null);
+                          setShowProjects(false);
                         } else {
                           setRenamingId(p.id);
                           setRenameValue(p.projectName);
@@ -1157,6 +1159,8 @@ export default function ProFormaPage() {
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteProjectMutation.mutate(p.id);
+                        setShowProjects(false);
+                        setRenamingId(null);
                       }}
                       className="p-1 rounded shrink-0"
                       title="Delete"

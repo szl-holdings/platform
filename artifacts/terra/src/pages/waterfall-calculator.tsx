@@ -673,6 +673,7 @@ export default function WaterfallCalculatorPage() {
                           if (e.key === 'Enter' && renameValue.trim()) {
                             updateStructureMutation.mutate({ id: s.id, name: renameValue.trim() });
                             setRenamingId(null);
+                            setShowStructures(false);
                           } else if (e.key === 'Escape') {
                             setRenamingId(null);
                           }
@@ -700,6 +701,7 @@ export default function WaterfallCalculatorPage() {
                             updateStructureMutation.mutate({ id: s.id, name: renameValue.trim() });
                           }
                           setRenamingId(null);
+                          setShowStructures(false);
                         } else {
                           setRenamingId(s.id);
                           setRenameValue(s.name);
@@ -715,6 +717,8 @@ export default function WaterfallCalculatorPage() {
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteStructureMutation.mutate(s.id);
+                        setShowStructures(false);
+                        setRenamingId(null);
                       }}
                       className="p-1 rounded shrink-0"
                       title="Delete"
