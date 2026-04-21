@@ -32,6 +32,25 @@ export function initTelemetry(opts: TelemetryInitOptions = {}): Tracer {
   const endpoint = opts.endpoint ?? env.VITE_OTEL_ENDPOINT ?? '';
   const environment = opts.environment ?? env.MODE ?? 'development';
 
+  // Optional auth headers for hosted OTLP collectors (Honeycomb, Grafana
+  // Cloud, Datadog, etc.). Format: comma-separated `Header=Value` pairs,
+  // matching the OTel SDK convention for OTEL_EXPORTER_OTLP_HEADERS.
+  // Examples:
+  //   VITE_OTEL_HEADERS="x-honeycomb-team=hcaik_xxx"
+  //   VITE_OTEL_HEADERS="Authorization=Basic <b64>,X-Scope-OrgID=12345"  (Grafana)
+  //   VITE_OTEL_HEADERS="DD-API-KEY=abc123"                              (Datadog)
+  const rawHeaders = (env.VITE_OTEL_HEADERS ?? '').toString().trim();
+  const headers: Record<string, string> = {};
+  if (rawHeaders) {
+    for (const pair of rawHeaders.split(',')) {
+      const idx = pair.indexOf('=');
+      if (idx <= 0) continue;
+      const k = pair.slice(0, idx).trim();
+      const v = pair.slice(idx + 1).trim();
+      if (k && v) headers[k] = v;
+    }
+  }
+
   const resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]: opts.serviceName ?? SERVICE_NAME,
     [ATTR_SERVICE_VERSION]: opts.serviceVersion ?? '0.0.0',
@@ -42,7 +61,10 @@ export function initTelemetry(opts: TelemetryInitOptions = {}): Tracer {
   if (endpoint) {
     const trimmed = endpoint.replace(/\/+$/, '');
     const url = /\/v1\/traces$/.test(trimmed) ? trimmed : trimmed + '/v1/traces';
-    const exporter = new OTLPTraceExporter({ url });
+    const exporter = new OTLPTraceExporter({
+      url,
+      ...(Object.keys(headers).length > 0 ? { headers } : {}),
+    });
     processors.push(
       new BatchSpanProcessor(exporter, {
         maxExportBatchSize: 64,
