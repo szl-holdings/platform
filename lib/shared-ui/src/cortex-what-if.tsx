@@ -232,16 +232,148 @@ function CascadeCard({ cascade, index }: { cascade: WhatIfCascade; index: number
   );
 }
 
-async function defaultQuery(query: string): Promise<WhatIfResult> {
-  const res = await fetch('/api/cortex/whatif', {
+function extractPartialSummary(raw: string): string {
+  const summaryMatch = raw.match(/"summary"\s*:\s*"((?:[^"\\]|\\.)*)(")?/);
+  if (!summaryMatch) return '';
+  const partial = summaryMatch[1] ?? '';
+  return partial.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+}
+
+function parseWhatIfResult(raw: string, query: string): WhatIfResult {
+  const validImpact = (v: unknown): v is 'critical' | 'high' | 'medium' | 'low' =>
+    v === 'critical' || v === 'high' || v === 'medium' || v === 'low';
+
+  const trimmed = raw
+    .trim()
+    .replace(/^```(?:json)?\n?/, '')
+    .replace(/\n?```$/, '');
+
+  const parsed = JSON.parse(trimmed) as {
+    scenarioId?: string;
+    summary?: string;
+    affectedDomains?: string[];
+    cascades?: Array<{
+      domain?: string;
+      impact?: string;
+      description?: string;
+      estimatedExposure?: string;
+      affectedEntities?: string[];
+      mitigationOptions?: string[];
+    }>;
+    timeHorizon?: string;
+    overallRisk?: string;
+    confidence?: number;
+    generatedAt?: string;
+    event?: string;
+  };
+
+  if (!parsed.summary || !Array.isArray(parsed.cascades) || parsed.cascades.length === 0) {
+    throw new Error('Invalid what-if result structure');
+  }
+
+  const cascades: WhatIfCascade[] = parsed.cascades.map((c) => ({
+    domain: String(c.domain ?? 'unknown'),
+    impact: validImpact(c.impact) ? c.impact : 'medium',
+    description: String(c.description ?? ''),
+    estimatedExposure: String(c.estimatedExposure ?? 'Unknown'),
+    affectedEntities: Array.isArray(c.affectedEntities) ? c.affectedEntities.map(String) : [],
+    mitigationOptions: Array.isArray(c.mitigationOptions) ? c.mitigationOptions.map(String) : [],
+  }));
+
+  const overallRisk = validImpact(parsed.overallRisk) ? parsed.overallRisk : 'medium';
+
+  return {
+    scenarioId: parsed.scenarioId ?? String(Math.random()),
+    event: parsed.event ?? query,
+    query,
+    summary: parsed.summary,
+    affectedDomains: Array.isArray(parsed.affectedDomains)
+      ? parsed.affectedDomains
+      : cascades.map((c) => c.domain),
+    cascades,
+    timeHorizon: parsed.timeHorizon ?? '48-96 hours',
+    overallRisk,
+    confidence:
+      typeof parsed.confidence === 'number' ? Math.min(1, Math.max(0, parsed.confidence)) : 0.78,
+    generatedAt: parsed.generatedAt ?? new Date().toISOString(),
+  };
+}
+
+/**
+ * Consumes the SSE stream from POST /cortex/whatif?stream=true.
+ *
+ * SSE protocol the server emits:
+ *   data: {"type":"token","content":"..."}  — one or more raw JSON token chunks
+ *   data: {"type":"error","message":"..."}  — protocol-level error (not a parse failure)
+ *   data: [DONE]                            — stream end; caller should parse accumulated tokens
+ *
+ * The final WhatIfResult is assembled client-side from the accumulated token content.
+ */
+async function defaultQueryStream(
+  query: string,
+  onToken: (text: string) => void,
+): Promise<WhatIfResult> {
+  const res = await fetch('/api/cortex/whatif?stream=true', {
     method: 'POST',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
+    },
     body: JSON.stringify({ query }),
   });
+
   if (!res.ok) throw new Error('Scenario engine unavailable');
-  const data = await res.json();
-  return data.data ?? data;
+  if (!res.body) throw new Error('No response body');
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let lineBuffer = '';
+  let fullContent = '';
+  let protocolError: string | null = null;
+  let done = false;
+
+  while (!done) {
+    const { done: readerDone, value } = await reader.read();
+    if (readerDone) break;
+
+    lineBuffer += decoder.decode(value, { stream: true });
+    const lines = lineBuffer.split('\n');
+    lineBuffer = lines.pop() ?? '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const payload = line.slice(6).trim();
+
+      if (payload === '[DONE]') {
+        done = true;
+        break;
+      }
+
+      let event: { type: string; content?: string; message?: string };
+      try {
+        event = JSON.parse(payload) as { type: string; content?: string; message?: string };
+      } catch {
+        continue;
+      }
+
+      if (event.type === 'error') {
+        protocolError = event.message ?? 'Stream error';
+        done = true;
+        break;
+      }
+
+      if (event.type === 'token' && event.content) {
+        fullContent += event.content;
+        onToken(event.content);
+      }
+    }
+  }
+
+  if (protocolError) throw new Error(protocolError);
+  if (!fullContent) throw new Error('No content received from stream');
+
+  return parseWhatIfResult(fullContent, query);
 }
 
 export function CortexWhatIf({
@@ -253,6 +385,8 @@ export function CortexWhatIf({
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<WhatIfResult | null>(initialResult ?? null);
   const [loading, setLoading] = useState(false);
+  const [streamingRaw, setStreamingRaw] = useState('');
+  const [streamingChunks, setStreamingChunks] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (q?: string) => {
@@ -261,11 +395,22 @@ export function CortexWhatIf({
     setLoading(true);
     setError(null);
     setResult(null);
+    setStreamingRaw('');
+    setStreamingChunks(0);
+
     try {
-      const fn = onQuery ?? defaultQuery;
-      const r = await fn(finalQuery);
-      setResult(r);
-    } catch (err) {
+      if (onQuery) {
+        const r = await onQuery(finalQuery);
+        setResult(r);
+      } else {
+        const r = await defaultQueryStream(finalQuery, (token) => {
+          setStreamingRaw((prev) => prev + token);
+          setStreamingChunks((prev) => prev + 1);
+        });
+        setResult(r);
+        setStreamingRaw('');
+      }
+    } catch {
       setError('CORTEX scenario engine is unavailable. Please try again.');
     } finally {
       setLoading(false);
@@ -273,6 +418,7 @@ export function CortexWhatIf({
   };
 
   const overallRisk = result ? IMPACT_CONFIG[result.overallRisk] : null;
+  const partialSummary = streamingRaw ? extractPartialSummary(streamingRaw) : '';
 
   return (
     <div className={cn(className)} style={{ fontFamily: 'system-ui, sans-serif' }}>
@@ -386,30 +532,90 @@ export function CortexWhatIf({
       {loading && (
         <div
           style={{
-            padding: '40px 0',
-            textAlign: 'center' as const,
             background: '#ffffff04',
             borderRadius: 10,
             border: '1px solid #ffffff10',
+            overflow: 'hidden',
           }}
         >
           <div
             style={{
-              width: 36,
-              height: 36,
-              border: `2px solid ${accentColor}40`,
-              borderTopColor: accentColor,
-              borderRadius: '50%',
-              animation: 'spin 0.8s linear infinite',
-              margin: '0 auto 14px',
+              padding: '14px 16px',
+              borderBottom: '1px solid #ffffff08',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
             }}
-          />
-          <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 600, color: '#ffffff80' }}>
-            CORTEX is tracing cascades…
-          </p>
-          <p style={{ margin: 0, fontSize: 12, color: '#ffffff40' }}>
-            Querying entity graph across all domains
-          </p>
+          >
+            <div
+              style={{
+                width: 20,
+                height: 20,
+                border: `2px solid ${accentColor}40`,
+                borderTopColor: accentColor,
+                borderRadius: '50%',
+                animation: 'spin 0.8s linear infinite',
+                flexShrink: 0,
+              }}
+            />
+            <div>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#ffffff80' }}>
+                CORTEX is tracing cascades…
+              </p>
+              {streamingChunks > 0 && (
+                <p style={{ margin: '2px 0 0', fontSize: 11, color: '#ffffff40' }}>
+                  {streamingChunks} chunks received
+                </p>
+              )}
+            </div>
+          </div>
+
+          {partialSummary && (
+            <div style={{ padding: '12px 16px' }}>
+              <p
+                style={{
+                  margin: '0 0 6px',
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: '#ffffff30',
+                  letterSpacing: '0.07em',
+                  textTransform: 'uppercase' as const,
+                }}
+              >
+                Executive Summary
+              </p>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 13,
+                  color: '#ffffffb0',
+                  lineHeight: 1.6,
+                  fontStyle: 'italic',
+                }}
+              >
+                {partialSummary}
+                <span
+                  style={{
+                    display: 'inline-block',
+                    width: 2,
+                    height: '1em',
+                    background: accentColor,
+                    marginLeft: 2,
+                    verticalAlign: 'text-bottom',
+                    animation: 'blink 1s step-end infinite',
+                  }}
+                />
+              </p>
+            </div>
+          )}
+
+          {!partialSummary && (
+            <div style={{ padding: '20px 16px', textAlign: 'center' as const }}>
+              <p style={{ margin: 0, fontSize: 12, color: '#ffffff40' }}>
+                Querying entity graph across all domains
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -624,7 +830,10 @@ export function CortexWhatIf({
         </div>
       )}
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+      `}</style>
     </div>
   );
 }

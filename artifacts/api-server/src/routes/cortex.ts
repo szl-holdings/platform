@@ -774,31 +774,8 @@ async function buildOrgScopedContext(orgId: number): Promise<string> {
   return context;
 }
 
-async function callWhatIfLLM(
-  query: string,
-  orgId: number | undefined,
-): Promise<WhatIfResult | null> {
-  if (!orgId) {
-    logger.warn('[CORTEX] LLM what-if skipped — orgId unavailable, cannot scope context query');
-    return null;
-  }
-
-  try {
-    // Note: direct provider call to @szl-holdings/ai-engine/providers/openai is used here for
-    // lightweight scenario prompting. If centralized model/prompt governance is required at scale,
-    // this should be routed through FusionCortex orchestration (see lib/ai-engine/src/fusion/).
-    const { openai } = await import('@szl-holdings/ai-engine/providers/openai');
-
-    const orgContext = await buildOrgScopedContext(orgId);
-
-    const contextNodeCount = (orgContext.match(/^\s+•/gm) ?? []).length;
-    const contextHasSnapshot = orgContext.includes('=== ENTITY GRAPH SNAPSHOT');
-    logger.info(
-      { orgId, contextLengthChars: orgContext.length, contextNodeCount, contextHasSnapshot },
-      '[CORTEX] LLM what-if context assembled',
-    );
-
-    const systemPrompt = `You are CORTEX, a cross-domain strategic intelligence engine for SZL Holdings — a diversified holding company operating across Maritime (Vessels), Real Estate (Terra), Legal (PRISM Counsel), Cybersecurity (Aegis/Firestorm), and Portfolio Finance (SZL Holdings).
+function buildWhatIfSystemPrompt(orgContext: string): string {
+  return `You are CORTEX, a cross-domain strategic intelligence engine for SZL Holdings — a diversified holding company operating across Maritime (Vessels), Real Estate (Terra), Legal (PRISM Counsel), Cybersecurity (Aegis/Firestorm), and Portfolio Finance (SZL Holdings).
 
 Your role: Given a hypothetical scenario, trace how it cascades across connected domains using the org-scoped intelligence context provided below. Produce a structured impact analysis specific to the current portfolio positions, recent action drafts, daily intelligence briefings, and active cross-domain alerts for this tenant.
 
@@ -830,75 +807,184 @@ Rules:
 - Exposure values should be realistic dollar amounts or qualitative risk labels
 - Confidence should reflect how directly the scenario maps to known positions (0.7-0.95 range)
 - Be specific and actionable, not generic`;
+}
+
+function parseWhatIfJSON(raw: string, query: string): WhatIfResult | null {
+  const validImpact = (v: unknown): v is 'critical' | 'high' | 'medium' | 'low' =>
+    v === 'critical' || v === 'high' || v === 'medium' || v === 'low';
+
+  const trimmed = raw
+    .trim()
+    .replace(/^```(?:json)?\n?/, '')
+    .replace(/\n?```$/, '');
+
+  const parsed = JSON.parse(trimmed) as {
+    summary?: string;
+    affectedDomains?: string[];
+    cascades?: Array<{
+      domain?: string;
+      impact?: string;
+      description?: string;
+      estimatedExposure?: string;
+      affectedEntities?: string[];
+      mitigationOptions?: string[];
+    }>;
+    timeHorizon?: string;
+    overallRisk?: string;
+    confidence?: number;
+  };
+
+  if (!parsed.summary || !Array.isArray(parsed.cascades) || parsed.cascades.length === 0) {
+    return null;
+  }
+
+  const cascades: WhatIfCascade[] = parsed.cascades.map((c) => ({
+    domain: String(c.domain ?? 'unknown'),
+    impact: validImpact(c.impact) ? c.impact : 'medium',
+    description: String(c.description ?? ''),
+    estimatedExposure: String(c.estimatedExposure ?? 'Unknown'),
+    affectedEntities: Array.isArray(c.affectedEntities) ? c.affectedEntities.map(String) : [],
+    mitigationOptions: Array.isArray(c.mitigationOptions) ? c.mitigationOptions.map(String) : [],
+  }));
+
+  const overallRisk = validImpact(parsed.overallRisk) ? parsed.overallRisk : 'medium';
+
+  return {
+    scenarioId: crypto.randomUUID(),
+    event: query,
+    query,
+    summary: parsed.summary,
+    affectedDomains: Array.isArray(parsed.affectedDomains)
+      ? parsed.affectedDomains
+      : cascades.map((c) => c.domain),
+    cascades,
+    timeHorizon: parsed.timeHorizon ?? '48-96 hours',
+    overallRisk,
+    confidence:
+      typeof parsed.confidence === 'number' ? Math.min(1, Math.max(0, parsed.confidence)) : 0.78,
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+async function callWhatIfLLM(
+  query: string,
+  orgId: number | undefined,
+): Promise<WhatIfResult | null> {
+  if (!orgId) {
+    logger.warn('[CORTEX] LLM what-if skipped — orgId unavailable, cannot scope context query');
+    return null;
+  }
+
+  try {
+    const { openai } = await import('@szl-holdings/ai-engine/providers/openai');
+
+    const orgContext = await buildOrgScopedContext(orgId);
+
+    const contextNodeCount = (orgContext.match(/^\s+•/gm) ?? []).length;
+    const contextHasSnapshot = orgContext.includes('=== ENTITY GRAPH SNAPSHOT');
+    logger.info(
+      { orgId, contextLengthChars: orgContext.length, contextNodeCount, contextHasSnapshot },
+      '[CORTEX] LLM what-if context assembled',
+    );
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-5.2',
       max_completion_tokens: 2048,
       messages: [
-        { role: 'system', content: systemPrompt },
+        { role: 'system', content: buildWhatIfSystemPrompt(orgContext) },
         { role: 'user', content: `Scenario: ${query}` },
       ],
     });
 
     const raw = completion.choices[0]?.message?.content ?? '';
-    const trimmed = raw
-      .trim()
-      .replace(/^```(?:json)?\n?/, '')
-      .replace(/\n?```$/, '');
-
-    const parsed = JSON.parse(trimmed) as {
-      summary?: string;
-      affectedDomains?: string[];
-      cascades?: Array<{
-        domain?: string;
-        impact?: string;
-        description?: string;
-        estimatedExposure?: string;
-        affectedEntities?: string[];
-        mitigationOptions?: string[];
-      }>;
-      timeHorizon?: string;
-      overallRisk?: string;
-      confidence?: number;
-    };
-
-    const validImpact = (v: unknown): v is 'critical' | 'high' | 'medium' | 'low' =>
-      v === 'critical' || v === 'high' || v === 'medium' || v === 'low';
-
-    if (!parsed.summary || !Array.isArray(parsed.cascades) || parsed.cascades.length === 0) {
-      return null;
-    }
-
-    const cascades: WhatIfCascade[] = parsed.cascades.map((c) => ({
-      domain: String(c.domain ?? 'unknown'),
-      impact: validImpact(c.impact) ? c.impact : 'medium',
-      description: String(c.description ?? ''),
-      estimatedExposure: String(c.estimatedExposure ?? 'Unknown'),
-      affectedEntities: Array.isArray(c.affectedEntities) ? c.affectedEntities.map(String) : [],
-      mitigationOptions: Array.isArray(c.mitigationOptions) ? c.mitigationOptions.map(String) : [],
-    }));
-
-    const overallRisk = validImpact(parsed.overallRisk) ? parsed.overallRisk : 'medium';
-
+  const res = parseWhatIfJSON(raw, query);
+  if (res) {
     return {
-      scenarioId: crypto.randomUUID(),
-      event: query,
-      query,
-      summary: parsed.summary,
-      affectedDomains: Array.isArray(parsed.affectedDomains)
-        ? parsed.affectedDomains
-        : cascades.map((c) => c.domain),
-      cascades,
-      timeHorizon: parsed.timeHorizon ?? '48-96 hours',
-      overallRisk,
-      confidence:
-        typeof parsed.confidence === 'number' ? Math.min(1, Math.max(0, parsed.confidence)) : 0.78,
-      generatedAt: new Date().toISOString(),
+      ...res,
       source: 'llm' as const,
     };
+  }
+  return null;
   } catch (err) {
     logger.warn({ err }, '[CORTEX] LLM what-if call failed — falling back to pattern matching');
     return null;
+  }
+}
+
+/**
+ * Streams raw LLM completion tokens to the SSE response, one `token` event per chunk.
+ * The client is responsible for accumulating the tokens and parsing the final JSON.
+ *
+ * SSE protocol:
+ *   data: {"type":"token","content":"..."}   — each completion chunk
+ *   data: {"type":"error","message":"..."}   — LLM or mid-stream failure (terminal)
+ *   data: [DONE]                             — stream complete; client may now parse
+ *
+ * Returns { success, tokensEmitted } so the caller knows whether to fall back and
+ * whether the SSE response has already been written to (prevents appending fallback
+ * JSON to a partial stream, which would corrupt the accumulated token payload).
+ */
+async function callWhatIfLLMStream(
+  query: string,
+  orgId: number | undefined,
+  res: import('express').Response,
+): Promise<{ success: boolean; tokensEmitted: boolean }> {
+  if (!orgId) {
+    logger.warn(
+      '[CORTEX] LLM what-if stream skipped — orgId unavailable, cannot scope context query',
+    );
+    return { success: false, tokensEmitted: false };
+  }
+
+  let tokensEmitted = false;
+
+  try {
+    const { openai } = await import('@szl-holdings/ai-engine/providers/openai');
+
+    const orgContext = await buildOrgScopedContext(orgId);
+
+    const contextNodeCount = (orgContext.match(/^\s+•/gm) ?? []).length;
+    const contextHasSnapshot = orgContext.includes('=== ENTITY GRAPH SNAPSHOT');
+    logger.info(
+      { orgId, contextLengthChars: orgContext.length, contextNodeCount, contextHasSnapshot },
+      '[CORTEX] LLM what-if stream context assembled',
+    );
+
+    const stream = await openai.chat.completions.create({
+      model: 'gpt-5.2',
+      max_completion_tokens: 2048,
+      stream: true,
+      messages: [
+        { role: 'system', content: buildWhatIfSystemPrompt(orgContext) },
+        { role: 'user', content: `Scenario: ${query}` },
+      ],
+    });
+
+    for await (const chunk of stream) {
+      const token = chunk.choices[0]?.delta?.content ?? '';
+      if (token) {
+        tokensEmitted = true;
+        res.write(`data: ${JSON.stringify({ type: 'token', content: token })}\n\n`);
+      }
+    }
+
+    logger.info(
+      { query: query.substring(0, 100), source: 'llm-stream' },
+      '[CORTEX] What-if LLM token stream complete — client will assemble JSON',
+    );
+    res.write('data: [DONE]\n\n');
+    res.end();
+    return { success: true, tokensEmitted };
+  } catch (err) {
+    logger.warn({ err }, '[CORTEX] LLM what-if stream failed');
+    if (tokensEmitted) {
+      res.write(
+        `data: ${JSON.stringify({ type: 'error', message: 'Stream interrupted mid-generation' })}\n\n`,
+      );
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
+    return { success: false, tokensEmitted };
   }
 }
 
@@ -1084,6 +1170,9 @@ router.post(
   ),
   async (req, res) => {
     const { query, scenario } = req.body ?? {};
+    const streamMode =
+      req.query.stream === 'true' ||
+      req.headers.accept?.includes('text/event-stream');
 
     if (!query || typeof query !== 'string' || query.trim().length === 0) {
       sendBadRequest(res, 'query is required');
@@ -1099,8 +1188,44 @@ router.post(
       const orgId = callerOrgId(req as unknown as any);
       const scenarioParam = typeof scenario === 'string' ? scenario : undefined;
       const cacheKey = whatIfCacheKey(query.trim(), orgId, scenarioParam);
-      const cached = whatIfCache.get(cacheKey);
 
+      if (streamMode) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Accel-Buffering', 'no');
+        res.flushHeaders();
+
+        const { success: streamed, tokensEmitted } = await callWhatIfLLMStream(
+          query.trim(),
+          orgId,
+          res,
+        );
+        if (streamed || tokensEmitted) return;
+
+        const lower = query.toLowerCase();
+        let selectedScenario = 'default';
+        if (lower.includes('port') && (lower.includes('clos') || lower.includes('block'))) {
+          selectedScenario = 'port_closure';
+        } else if (lower.includes('sanction') || lower.includes('ofac') || lower.includes('sdn')) {
+          selectedScenario = 'sanctions';
+        } else if (scenario && WHATIF_SCENARIOS[scenario]) {
+          selectedScenario = scenario;
+        }
+
+        const fallbackResult = WHATIF_SCENARIOS[selectedScenario](query.trim());
+        logger.info(
+          { query: query.substring(0, 100), scenario: selectedScenario, source: 'pattern-fallback-stream' },
+          '[CORTEX] What-if scenario streamed via pattern matching fallback',
+        );
+        // Emit the fallback JSON as a single token so the client assembles it the same way
+        res.write(`data: ${JSON.stringify({ type: 'token', content: JSON.stringify(fallbackResult) })}\n\n`);
+        res.write('data: [DONE]\n\n');
+        res.end();
+        return;
+      }
+
+      const cached = whatIfCache.get(cacheKey);
       if (cached) {
         logger.info(
           { query: query.substring(0, 100) },
