@@ -17,6 +17,7 @@ import {
   MessageSquare,
   Network,
   Radar,
+  Search,
   Shield,
   Sparkles,
   Star,
@@ -70,6 +71,7 @@ const OPERATIONS: NavItem[] = [
   { href: '/benchmark-database', label: 'Benchmark Database', icon: BarChart3 },
   { href: '/deliverable-workflow', label: 'Deliverable Workflow', icon: CheckCircle },
   { href: '/profitability-analytics', label: 'Profitability Analytics', icon: TrendingUp },
+  { href: '/aef-search', label: 'AEF Knowledge Search', icon: Search },
 ];
 
 const ATLAS_ITEMS: NavItem[] = [

@@ -209,6 +209,12 @@ const NAV_SECTIONS: SidebarNavSection[] = [
         label: 'Evidence',
         icon: <FileSearch className="w-full h-full" />,
       },
+      {
+        id: 'aef-search',
+        href: '/aef-search',
+        label: 'AEF Knowledge Search',
+        icon: <Search className="w-full h-full" />,
+      },
     ],
   },
   {

@@ -92,6 +92,7 @@ import {
   Network,
   Radio,
   RotateCcw,
+  Search,
   Shield,
   ShieldAlert,
   Ship,
@@ -749,6 +750,12 @@ function VesselsSidebarContent({
           label: 'Intelligence Briefs',
           href: '/intelligence-briefs',
           icon: <Zap className="w-3.5 h-3.5" />,
+        },
+        {
+          id: 'aef-search',
+          label: 'AEF Knowledge Search',
+          href: '/aef-search',
+          icon: <Search className="w-3.5 h-3.5" />,
         },
         {
           id: 'trading-desk',

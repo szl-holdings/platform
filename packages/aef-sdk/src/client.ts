@@ -196,7 +196,7 @@ export class AefClient {
       requestId: request.requestId ?? generateId(),
       tenantId: this.config.tenantId as HybridSearchRequest['tenantId'],
     };
-    const raw = await this.fetchAef<unknown>('/v1/search/hybrid', body, body.requestId);
+    const raw = await this.fetchAef<unknown>('/v1/hybrid-search', body, body.requestId);
     return HybridSearchResponseSchema.parse(raw);
   }
 

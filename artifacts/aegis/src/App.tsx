@@ -304,6 +304,12 @@ const NAV_SECTIONS: NavSection[] = [
         icon: Database,
         comp: L(() => import('./pages/stix-taxii')),
       },
+      {
+        path: '/aef-search',
+        label: 'AEF Knowledge Search',
+        icon: Search,
+        comp: L(() => import('./pages/aef-knowledge-search')),
+      },
     ],
   },
   {

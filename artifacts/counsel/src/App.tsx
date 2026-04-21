@@ -33,6 +33,7 @@ import {
   Menu,
   Network,
   Scale,
+  Search,
   Shield,
   ShieldAlert,
   Zap,
@@ -53,6 +54,7 @@ const DecisionCenterPage = lazy(() => import('./pages/decision-center'));
 const AlertsPage = lazy(() => import('./pages/alerts'));
 const ApprovalsPage = lazy(() => import('./pages/approvals'));
 const TrustProvenancePage = lazy(() => import('./pages/trust-provenance'));
+const AefKnowledgeSearchPage = lazy(() => import('./pages/aef-knowledge-search'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -148,6 +150,18 @@ function CounselSidebarContent({
           label: 'Trust & Provenance',
           href: '/trust',
           icon: <Shield className="w-3.5 h-3.5" />,
+        },
+      ],
+    },
+    {
+      id: 'intelligence',
+      label: 'Intelligence',
+      items: [
+        {
+          id: '/aef-search',
+          label: 'AEF Knowledge Search',
+          href: '/aef-search',
+          icon: <Search className="w-3.5 h-3.5" />,
         },
       ],
     },
@@ -269,6 +283,7 @@ function DashboardRouter() {
         <Route path="/alerts" component={AlertsPage} />
         <Route path="/approvals" component={ApprovalsPage} />
         <Route path="/trust" component={TrustProvenancePage} />
+        <Route path="/aef-search" component={AefKnowledgeSearchPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-violet-400/40">Page not found</p>
@@ -361,6 +376,12 @@ function AppShell() {
       label: 'Trust & Provenance',
       group: 'Navigate',
       action: () => navigate('/trust'),
+    },
+    {
+      id: 'nav-aef-search',
+      label: 'AEF Knowledge Search',
+      group: 'Navigate',
+      action: () => navigate('/aef-search'),
     },
   ];
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(paletteCommands);

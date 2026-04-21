@@ -32,6 +32,7 @@ import {
   Menu,
   Network,
   Radio,
+  Search,
   Shield,
   Terminal,
   Thermometer,
@@ -148,6 +149,11 @@ const NAV_GROUPS: NavGroup[] = [
       },
       { label: 'Run Console', href: '/runs', icon: <Terminal className="w-3.5 h-3.5" /> },
       { label: 'Evidence Explorer', href: '/evidence', icon: <Library className="w-3.5 h-3.5" /> },
+      {
+        label: 'AEF Knowledge Search',
+        href: '/aef-search',
+        icon: <Search className="w-3.5 h-3.5" />,
+      },
     ],
   },
   {

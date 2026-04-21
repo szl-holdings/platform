@@ -1151,6 +1151,12 @@ importers:
       '@tanstack/query-sync-storage-persister':
         specifier: ^5.99.0
         version: 5.99.0
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../../packages/aef-contracts
+      '@workspace/aef-sdk':
+        specifier: workspace:*
+        version: link:../../packages/aef-sdk
     devDependencies:
       '@replit/vite-plugin-cartographer':
         specifier: 'catalog:'

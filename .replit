@@ -86,6 +86,10 @@ X_ACCESS_TOKEN_SECRET = "REPLACE_ME_when_x_developer_account_is_paid"
 SUBSTRATE_GATEWAY_API_KEY = "szl_dev_9b77bf02c5939ec060f07d87ad02542a2561330d0c9ae5fc"
 SUBSTRATE_SIGNING_KEY = "5228884b12bc50c3be1c0f8345d5f5475baf5bc2ccb265d5e9bc02674c04258a"
 SUBSTRATE_GATEWAY_PORT = "8077"
+AEF_GATEWAY_URL = "http://localhost:4200"
+VITE_AEF_GATEWAY_URL = "http://localhost:4200"
+AEF_TENANT_ID = "szl-holdings"
+VITE_AEF_TENANT_ID = "szl-holdings"
 
 [userenv.development]
 ALLOY_INTERNAL_TOKEN = "dev-3e8122992689a527adcf8ba067ccabfae77b81f3e52aa713"
