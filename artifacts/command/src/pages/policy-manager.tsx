@@ -6,6 +6,7 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
+  Clock,
   Eye,
   FileText,
   Hand,
@@ -101,10 +102,22 @@ interface ApiResponse<T> {
   total?: number;
 }
 
+function getCsrfToken(): string | undefined {
+  const match = document.cookie.split(';').find((c) => c.trim().startsWith('csrf_token='));
+  return match ? decodeURIComponent(match.trim().split('=').slice(1).join('=')) : undefined;
+}
+
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const method = (init?.method ?? 'GET').toUpperCase();
+  const isMutating = ['POST', 'PATCH', 'PUT', 'DELETE'].includes(method);
+  const csrf = isMutating ? getCsrfToken() : undefined;
   const res = await fetch(url, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(csrf ? { 'x-csrf-token': csrf } : {}),
+      ...(init?.headers ?? {}),
+    },
     ...init,
   });
   if (!res.ok) {
@@ -491,10 +504,19 @@ function ConfigRow({
   );
 }
 
+interface AuditEntry {
+  id: string;
+  agentId: string;
+  action: string;
+  executionResult: string;
+  timestamp: string;
+}
+
 export default function PolicyManagerPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showAudit, setShowAudit] = useState(false);
   const qc = useQueryClient();
 
   const search = useSearch();
@@ -511,6 +533,14 @@ export default function PolicyManagerPage() {
     queryKey: ['policy-modes'],
     queryFn: () => fetchJson<ApiResponse<PolicyModeConfig[]>>('/api/policy-modes'),
     refetchInterval: 30_000,
+  });
+
+  const auditQ = useStandardQuery<{ entries: AuditEntry[]; total: number; integrity: boolean }>({
+    queryKey: ['policy-modes-audit'],
+    queryFn: () =>
+      fetchJson('/api/control-tower/govern/audit?limit=30'),
+    enabled: showAudit,
+    staleTime: 30_000,
   });
 
   const metaQ = useStandardQuery<{ modes: Array<{ mode: PolicyMode; description: string }> }>({
@@ -630,6 +660,19 @@ export default function PolicyManagerPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAudit((v) => !v)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-mono hover:bg-white/5 transition-all"
+            style={{
+              color: showAudit ? ACCENT : 'rgba(255,255,255,0.5)',
+              border: showAudit
+                ? `1px solid ${ACCENT}40`
+                : '1px solid rgba(255,255,255,0.08)',
+              background: showAudit ? `${ACCENT}0d` : 'transparent',
+            }}
+          >
+            <Clock className="w-3 h-3" /> Audit Trail
+          </button>
           <button
             onClick={() => seedMut.mutate()}
             disabled={seedMut.isPending}
@@ -832,6 +875,106 @@ export default function PolicyManagerPage() {
                 busy={busy}
               />
             ),
+          )}
+        </div>
+      )}
+
+      {showAudit && (
+        <div
+          className="mt-6 rounded border"
+          style={{ borderColor: `${ACCENT}20`, background: `${ACCENT}04` }}
+        >
+          <div
+            className="px-4 py-3 border-b flex items-center gap-2"
+            style={{ borderColor: `${ACCENT}15` }}
+          >
+            <Clock className="w-3.5 h-3.5" style={{ color: ACCENT }} />
+            <span className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>
+              Policy Audit Trail
+            </span>
+            <span className="ml-auto text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              {auditQ.data?.integrity === false ? (
+                <span style={{ color: '#ef4444' }}>⚠ chain integrity check FAILED</span>
+              ) : auditQ.data?.integrity === true ? (
+                <span style={{ color: '#22c55e' }}>✓ chain integrity verified</span>
+              ) : null}
+              {' '}
+              {auditQ.data?.total != null ? `${auditQ.data.total} total entries` : ''}
+            </span>
+            <button
+              onClick={() => auditQ.refetch()}
+              className="ml-2 p-1 rounded hover:bg-white/5"
+            >
+              <RefreshCw
+                className={`w-3 h-3 ${auditQ.isFetching ? 'animate-spin' : ''}`}
+                style={{ color: 'rgba(255,255,255,0.4)' }}
+              />
+            </button>
+          </div>
+
+          {auditQ.isLoading ? (
+            <div className="py-6 text-center text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              Loading audit trail…
+            </div>
+          ) : auditQ.error ? (
+            <div className="py-4 px-4 text-[10px]" style={{ color: '#ef4444' }}>
+              <AlertTriangle className="w-3 h-3 inline mr-1" />
+              {(auditQ.error as Error).message}
+            </div>
+          ) : (auditQ.data?.entries ?? []).length === 0 ? (
+            <div className="py-8 text-center text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              No audit entries yet. Entries are created when policies are evaluated.
+            </div>
+          ) : (
+            <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+              {(auditQ.data?.entries ?? []).map((entry) => (
+                <div key={entry.id} className="px-4 py-2.5 flex items-start gap-3">
+                  <div
+                    className="mt-0.5 w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{
+                      background:
+                        entry.executionResult === 'allowed'
+                          ? '#22c55e'
+                          : entry.executionResult === 'blocked'
+                            ? '#ef4444'
+                            : ACCENT,
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] font-mono font-semibold" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                        {entry.agentId}
+                      </span>
+                      <span className="text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                        {entry.action}
+                      </span>
+                      <span
+                        className="text-[9px] font-bold uppercase px-1 rounded"
+                        style={{
+                          color:
+                            entry.executionResult === 'allowed'
+                              ? '#22c55e'
+                              : entry.executionResult === 'blocked'
+                                ? '#ef4444'
+                                : ACCENT,
+                          background:
+                            entry.executionResult === 'allowed'
+                              ? 'rgba(34,197,94,0.1)'
+                              : entry.executionResult === 'blocked'
+                                ? 'rgba(239,68,68,0.1)'
+                                : `${ACCENT}18`,
+                        }}
+                      >
+                        {entry.executionResult}
+                      </span>
+                    </div>
+                    <div className="text-[9px] mt-0.5 font-mono" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                      {new Date(entry.timestamp).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}

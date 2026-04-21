@@ -7,6 +7,51 @@ export interface OpsBadgeCounts {
   costOverBudget: number | null;
 }
 
+/**
+ * Returns 'loading' while all counts are null (first fetch pending).
+ * 'critical' = alerts AND sla breaches both non-zero.
+ * 'high'     = at least one of alerts / slaBreaches is non-zero.
+ * 'medium'   = governance or cost issues only.
+ * 'none'     = everything zero.
+ */
+export function deriveAlertSeverity(
+  counts: OpsBadgeCounts,
+): 'critical' | 'high' | 'medium' | 'none' | 'loading' {
+  const { alerts, slaBreaches, governancePending, costOverBudget } = counts;
+  if (
+    alerts === null &&
+    slaBreaches === null &&
+    governancePending === null &&
+    costOverBudget === null
+  ) {
+    return 'loading';
+  }
+  if ((alerts ?? 0) > 0 && (slaBreaches ?? 0) > 0) return 'critical';
+  if ((alerts ?? 0) > 0 || (slaBreaches ?? 0) > 0) return 'high';
+  if ((governancePending ?? 0) > 0 || (costOverBudget ?? 0) > 0) return 'medium';
+  return 'none';
+}
+
+/** Sum of all non-null badge counts (null treated as 0). */
+export function totalBadgeCount(counts: OpsBadgeCounts): number {
+  return (
+    (counts.alerts ?? 0) +
+    (counts.slaBreaches ?? 0) +
+    (counts.governancePending ?? 0) +
+    (counts.costOverBudget ?? 0)
+  );
+}
+
+/** True when any count is non-zero. */
+export function hasAnyAlert(counts: OpsBadgeCounts): boolean {
+  return (
+    (counts.alerts ?? 0) > 0 ||
+    (counts.slaBreaches ?? 0) > 0 ||
+    (counts.governancePending ?? 0) > 0 ||
+    (counts.costOverBudget ?? 0) > 0
+  );
+}
+
 const POLL_INTERVAL_MS = 30_000;
 
 let snapshot: OpsBadgeCounts = {

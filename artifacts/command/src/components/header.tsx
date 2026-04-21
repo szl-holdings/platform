@@ -1,5 +1,6 @@
-import { Activity, LayoutGrid, Search } from 'lucide-react';
+import { Activity, GitCompareArrows, LayoutGrid, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Link } from 'wouter';
 
 interface HeaderProps {
   lastUpdatedAt: number;
@@ -103,6 +104,20 @@ export function Header({
             </kbd>
           </button>
         )}
+
+        <Link
+          href="/operations/what-changed"
+          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-all hover:opacity-80"
+          style={{
+            backgroundColor: 'color-mix(in srgb, #8b7ac8 8%, var(--color-surface-base))',
+            border: '1px solid color-mix(in srgb, #8b7ac8 25%, var(--color-surface-border))',
+            color: '#a78bfa',
+          }}
+          title="See what changed since you last viewed"
+        >
+          <GitCompareArrows className="w-3.5 h-3.5" />
+          <span>What Changed</span>
+        </Link>
 
         <div
           className="flex items-center gap-6 text-xs font-mono"

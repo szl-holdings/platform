@@ -6,14 +6,16 @@ import {
   ProofEnvelope,
   productAccent,
 } from '@szl-holdings/design-system';
-import { Activity, AlertTriangle, Command, TrendingUp } from 'lucide-react';
-import React, { useState } from 'react';
+import { Activity, AlertTriangle, Command, Loader2, TrendingUp } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 const ACCENT = productAccent.command;
 
 const FRESH_2M = new Date(Date.now() - 2 * 60_000).toISOString();
 const FRESH_9M = new Date(Date.now() - 9 * 60_000).toISOString();
 const AGING_35M = new Date(Date.now() - 35 * 60_000).toISOString();
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const PORTFOLIO_EVIDENCE: EvidenceSource[] = [
   {
@@ -104,8 +106,119 @@ const APPROVAL_EVIDENCE: EvidenceSource[] = [
   },
 ];
 
+interface LiveCounts {
+  signals: number | null;
+  approvals: number | null;
+  decisions: number | null;
+  domains: number | null;
+  loading: boolean;
+}
+
+function DemoBadge() {
+  return (
+    <span
+      className="text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ml-1"
+      style={{
+        color: 'rgba(255,255,255,0.4)',
+        background: 'rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.12)',
+      }}
+    >
+      demo
+    </span>
+  );
+}
+
+async function safeFetchCount(url: string): Promise<number | null> {
+  try {
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { data?: { count?: number; total?: number }; count?: number; total?: number };
+    const d = body?.data ?? body;
+    return typeof d?.count === 'number'
+      ? d.count
+      : typeof d?.total === 'number'
+        ? d.total
+        : null;
+  } catch {
+    return null;
+  }
+}
+
+function useLiveCounts(): LiveCounts {
+  const [counts, setCounts] = useState<LiveCounts>({
+    signals: null,
+    approvals: null,
+    decisions: null,
+    domains: null,
+    loading: true,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      const [signals, approvals, decisions] = await Promise.all([
+        safeFetchCount(`${BASE}/api/control-tower/sense/signals?limit=1`),
+        safeFetchCount(`${BASE}/api/governance/pending`),
+        safeFetchCount(`${BASE}/api/control-tower/decide/journal?limit=1`),
+      ]);
+      if (!cancelled) {
+        setCounts({
+          signals,
+          approvals,
+          decisions,
+          domains: 5,
+          loading: false,
+        });
+      }
+    }
+    void load();
+    const timer = setInterval(() => void load(), 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, []);
+
+  return counts;
+}
+
 export default function GovernedCockpit() {
   const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('ask-to-act');
+  const counts = useLiveCounts();
+
+  const isDemo = (v: number | null) => v === null;
+
+  const tiles = [
+    {
+      label: 'Active Signals',
+      value: counts.loading ? null : (counts.signals ?? 47),
+      demo: isDemo(counts.signals),
+      icon: Activity,
+      color: ACCENT,
+    },
+    {
+      label: 'Open Approvals',
+      value: counts.loading ? null : (counts.approvals ?? 3),
+      demo: isDemo(counts.approvals),
+      icon: AlertTriangle,
+      color: '#ffb700',
+    },
+    {
+      label: 'Decisions Today',
+      value: counts.loading ? null : (counts.decisions ?? 14),
+      demo: isDemo(counts.decisions),
+      icon: TrendingUp,
+      color: '#00e878',
+    },
+    {
+      label: 'Domains Live',
+      value: counts.loading ? null : (counts.domains ?? 5),
+      demo: true,
+      icon: Command,
+      color: '#7a99b8',
+    },
+  ];
 
   return (
     <div
@@ -155,12 +268,7 @@ export default function GovernedCockpit() {
         </div>
 
         <div className="grid grid-cols-4 gap-4 mb-6">
-          {[
-            { label: 'Active Signals', value: '47', icon: Activity, color: ACCENT },
-            { label: 'Open Approvals', value: '3', icon: AlertTriangle, color: '#ffb700' },
-            { label: 'Decisions Today', value: '14', icon: TrendingUp, color: '#00e878' },
-            { label: 'Domains Live', value: '5', icon: Command, color: '#7a99b8' },
-          ].map(({ label, value, icon: Icon, color }) => (
+          {tiles.map(({ label, value, demo, icon: Icon, color }) => (
             <div
               key={label}
               className="rounded-xl p-4"
@@ -171,9 +279,14 @@ export default function GovernedCockpit() {
                 <span className="text-xs uppercase tracking-wide" style={{ color: '#4a6070' }}>
                   {label}
                 </span>
+                {demo && <DemoBadge />}
               </div>
               <div className="text-2xl font-bold" style={{ color }}>
-                {value}
+                {value === null ? (
+                  <Loader2 className="w-5 h-5 animate-spin" style={{ color }} />
+                ) : (
+                  value
+                )}
               </div>
             </div>
           ))}

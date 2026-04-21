@@ -94,7 +94,7 @@ export const baseDomainData: DomainData[] = [
       73, 72, 71, 70, 71, 72, 70, 69, 71, 72, 71, 70, 71, 72, 70, 69, 71, 72, 71, 70, 71, 72, 71,
       71,
     ],
-    link: '/aegis/',
+    link: '/counsel/',
   },
   {
     id: 'terra',
