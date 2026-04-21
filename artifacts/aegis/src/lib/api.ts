@@ -300,6 +300,10 @@ export const api = {
     scenarios: () => apiFetch<any>('/aegis/digital-twin/scenarios'),
     runScenario: (id: string) =>
       apiFetch<any>(`/aegis/digital-twin/scenarios/${id}/run`, { method: 'POST' }),
+    pauseScenario: (id: string) =>
+      apiFetch<any>(`/aegis/digital-twin/scenarios/${id}/pause`, { method: 'POST' }),
+    resumeScenario: (id: string) =>
+      apiFetch<any>(`/aegis/digital-twin/scenarios/${id}/resume`, { method: 'POST' }),
   },
   deception: {
     honeypots: () => apiFetch<any>('/aegis/deception/honeypots'),

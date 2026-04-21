@@ -1,46 +1,26 @@
 import { LiveClock } from '@szl-holdings/shared-ui/live-clock';
+import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { cn } from '@szl-holdings/shared-ui/utils';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
-  AlertOctagon,
   AlertTriangle,
-  ArrowUpRight,
-  BarChart3,
-  Bell,
-  Brain,
-  Building2,
-  CheckCircle,
-  ChevronDown,
-  ChevronRight,
-  Circle,
   ClipboardList,
   Clock,
-  Crosshair,
-  Download,
-  Eye,
+  Database,
   FileText,
-  Flame,
-  Globe,
-  Hash,
-  Lock,
   MessageSquare,
   Pause,
   Play,
-  Plus,
-  Printer,
   Radio,
   RefreshCw,
-  Scale,
+  RotateCcw,
   Shield,
-  Ship,
-  Target,
-  TrendingUp,
   Users,
-  X,
-  XCircle,
   Zap,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { api } from '../lib/api';
 
 const DS = {
   bg: '#070b12',
@@ -105,22 +85,7 @@ interface CommEntry {
   priority?: 'urgent' | 'normal';
 }
 
-const ACTIVE_CRISIS = {
-  id: 'CRS-2024-001',
-  name: 'APT29 Enterprise Infiltration',
-  type: 'CYBERATTACK' as const,
-  severity: 'critical' as const,
-  declaredAt: '2024-01-15T14:22:00Z',
-  elapsedMin: 43,
-  phase: 'CONTAINMENT' as const,
-  impactSummary:
-    'Active lateral movement on production infrastructure. 3 managed clients potentially affected. Estimated breach exposure $17.4M.',
-  commander: 'J. Chen',
-  icsLevel: 3,
-  activePlaybook: 'PB-APT-001',
-};
-
-const TIMELINE_EVENTS: CrisisEvent[] = [
+const STATIC_TIMELINE: CrisisEvent[] = [
   {
     id: 'E001',
     time: '14:22',
@@ -303,175 +268,28 @@ const DECISIONS: Decision[] = [
 ];
 
 const RESOURCES: ResourceAssignment[] = [
-  {
-    id: 'R001',
-    role: 'Incident Commander',
-    name: 'J. Chen',
-    domain: 'Defense',
-    task: 'Directing containment and managing ICS L3 protocol',
-    status: 'active',
-  },
-  {
-    id: 'R002',
-    role: 'Lead Threat Analyst',
-    name: 'S. Park',
-    domain: 'Defense',
-    task: 'APT29 TTP attribution, C2 mapping, kill chain analysis',
-    status: 'active',
-  },
-  {
-    id: 'R003',
-    role: 'Forensics Lead',
-    name: 'M. Rodriguez',
-    domain: 'Defense',
-    task: 'Memory dump analysis, DC-PROD-03 forensic imaging',
-    status: 'active',
-  },
-  {
-    id: 'R004',
-    role: 'MSP Client Lead',
-    name: 'R. Davis',
-    domain: 'Operations',
-    task: 'Northgate communication, SLA breach mitigation, client impact',
-    status: 'active',
-  },
-  {
-    id: 'R005',
-    role: 'Intel Analyst',
-    name: 'Neural Intelligence System',
-    domain: 'Labs',
-    task: 'Real-time threat correlation, APT29 campaign pattern analysis',
-    status: 'active',
-  },
-  {
-    id: 'R006',
-    role: 'Network Defense',
-    name: 'A. Thompson',
-    domain: 'Defense',
-    task: 'Firewall rule deployment, C2 path severing, perimeter hardening',
-    status: 'active',
-  },
-  {
-    id: 'R007',
-    role: 'Legal Counsel',
-    name: 'K. Wilson (PRISM)',
-    domain: 'Legal',
-    task: 'Evidence preservation requirements, breach notification obligations',
-    status: 'standby',
-    eta: '30m',
-  },
-  {
-    id: 'R008',
-    role: 'Executive Liaison',
-    name: 'P. Santos',
-    domain: 'Executive',
-    task: 'CISO briefing, board notification draft, PR hold coordination',
-    status: 'standby',
-  },
-  {
-    id: 'R009',
-    role: 'Cloud Security',
-    name: 'T. Kim',
-    domain: 'Infrastructure',
-    task: 'S3 bucket forensics, CloudTrail preservation, IAM audit',
-    status: 'active',
-  },
-  {
-    id: 'R010',
-    role: 'External IR (Pending)',
-    name: 'CrowdStrike',
-    domain: 'External',
-    task: 'Deep APT29 attribution, remediation roadmap, threat hunt',
-    status: 'unavailable',
-    eta: '4h on-site',
-  },
+  { id: 'R001', role: 'Incident Commander', name: 'J. Chen', domain: 'Defense', task: 'Directing containment and managing ICS L3 protocol', status: 'active' },
+  { id: 'R002', role: 'Lead Threat Analyst', name: 'S. Park', domain: 'Defense', task: 'APT29 TTP attribution, C2 mapping, kill chain analysis', status: 'active' },
+  { id: 'R003', role: 'Forensics Lead', name: 'M. Rodriguez', domain: 'Defense', task: 'Memory dump analysis, DC-PROD-03 forensic imaging', status: 'active' },
+  { id: 'R004', role: 'MSP Client Lead', name: 'R. Davis', domain: 'Operations', task: 'Northgate communication, SLA breach mitigation, client impact', status: 'active' },
+  { id: 'R005', role: 'Intel Analyst', name: 'Neural Intelligence System', domain: 'Labs', task: 'Real-time threat correlation, APT29 campaign pattern analysis', status: 'active' },
+  { id: 'R006', role: 'Network Defense', name: 'A. Thompson', domain: 'Defense', task: 'Firewall rule deployment, C2 path severing, perimeter hardening', status: 'active' },
+  { id: 'R007', role: 'Legal Counsel', name: 'K. Wilson (PRISM)', domain: 'Legal', task: 'Evidence preservation requirements, breach notification obligations', status: 'standby', eta: '30m' },
+  { id: 'R008', role: 'Executive Liaison', name: 'P. Santos', domain: 'Executive', task: 'CISO briefing, board notification draft, PR hold coordination', status: 'standby' },
+  { id: 'R009', role: 'Cloud Security', name: 'T. Kim', domain: 'Infrastructure', task: 'S3 bucket forensics, CloudTrail preservation, IAM audit', status: 'active' },
+  { id: 'R010', role: 'External IR (Pending)', name: 'CrowdStrike', domain: 'External', task: 'Deep APT29 attribution, remediation roadmap, threat hunt', status: 'unavailable', eta: '4h on-site' },
 ];
 
-const COMMS: CommEntry[] = [
-  {
-    id: 'C001',
-    time: '14:22',
-    from: 'Sentinel SIEM',
-    role: 'Automated System',
-    message:
-      'ALERT P1: APT29 lateral movement detected on DC-PROD-03. MITRE T1021.002. Confidence 96. Incident INC-2847 opened. Assigning to J. Chen.',
-    type: 'intel',
-    priority: 'urgent',
-  },
-  {
-    id: 'C002',
-    time: '14:25',
-    from: 'J. Chen',
-    role: 'Incident Commander',
-    message:
-      'Confirming ICS activation. Level 3. Crisis response open. All leads report in. PB-APT-001 active. Northgate impact assessment needed immediately.',
-    type: 'action',
-    priority: 'urgent',
-  },
-  {
-    id: 'C003',
-    time: '14:27',
-    from: 'Neural Intelligence System',
-    role: 'AI Intel Agent',
-    message:
-      'Neural explorer analysis complete. APT29 C2 infrastructure overlaps with INC-2846. Pre-detection signal was 8 minutes ahead of SIEM. Attribution confidence: 94%. Recommending kill chain diagram.',
-    type: 'intel',
-  },
-  {
-    id: 'C004',
-    time: '14:29',
-    from: 'R. Davis',
-    role: 'MSP Client Lead',
-    message:
-      "Northgate CISO K. O'Brien contacted. Confirmed DC-PROD-03 is critical infrastructure for their migration. TKT-4827 placed on hold. They're requesting hourly updates.",
-    type: 'update',
-  },
-  {
-    id: 'C005',
-    time: '14:33',
-    from: 'S. Park',
-    role: 'Lead Threat Analyst',
-    message:
-      'APT29 Kill chain mapped: Recon → FW exploit (CVE-2024-3400) → Initial access → Credential harvesting → Lateral move SMB → DC-PROD-03. Staging via S3. Classic FIN7-adjacent pattern.',
-    type: 'intel',
-  },
-  {
-    id: 'C006',
-    time: '14:41',
-    from: 'J. Chen',
-    role: 'Incident Commander',
-    message:
-      'Decision logged: Holding EDR isolation for 15 min evidence window. M. Rodriguez — begin memory dump NOW. S. Park — continue live monitoring, document every lateral attempt. A. Thompson — block all SMB to DC-PROD-03 adjacent hosts.',
-    type: 'action',
-    priority: 'urgent',
-  },
-  {
-    id: 'C007',
-    time: '14:52',
-    from: 'J. Chen',
-    role: 'Incident Commander',
-    message:
-      'EDR isolation approved and executed on DC-PROD-03 at 14:52. Memory dump complete. 3 adjacent hosts flagged. C2 beacon severed by A. Thompson 14:50. Moving to eradication phase prep.',
-    type: 'action',
-  },
-  {
-    id: 'C008',
-    time: '15:02',
-    from: 'P. Santos',
-    role: 'Executive Liaison',
-    message:
-      'CISO brief delivered. Board notification draft ready — holding pending legal review. PR statement drafted. No external disclosure. Legal hold on all logs confirmed by K. Wilson.',
-    type: 'update',
-  },
-  {
-    id: 'C009',
-    time: '15:05',
-    from: 'INCIDENT SYSTEM',
-    role: 'Automated Broadcast',
-    message:
-      'BROADCAST: Crisis status update distributed to all connected verticals. Vessels, Terra, PRISM, SZL Holdings — crisis banner active. Cross-domain impact assessment underway.',
-    type: 'broadcast',
-  },
+const INIT_COMMS: CommEntry[] = [
+  { id: 'C001', time: '14:22', from: 'Sentinel SIEM', role: 'Automated System', message: 'ALERT P1: APT29 lateral movement detected on DC-PROD-03. MITRE T1021.002. Confidence 96. Incident INC-2847 opened.', type: 'intel', priority: 'urgent' },
+  { id: 'C002', time: '14:25', from: 'J. Chen', role: 'Incident Commander', message: 'Confirming ICS activation. Level 3. Crisis response open. All leads report in. PB-APT-001 active. Northgate impact assessment needed immediately.', type: 'action', priority: 'urgent' },
+  { id: 'C003', time: '14:27', from: 'Neural Intelligence System', role: 'AI Intel Agent', message: 'Neural explorer analysis complete. APT29 C2 infrastructure overlaps with INC-2846. Pre-detection signal was 8 minutes ahead of SIEM. Attribution confidence: 94%.', type: 'intel' },
+  { id: 'C004', time: '14:29', from: 'R. Davis', role: 'MSP Client Lead', message: "Northgate CISO K. O'Brien contacted. Confirmed DC-PROD-03 is critical infrastructure for their migration. TKT-4827 placed on hold. They're requesting hourly updates.", type: 'update' },
+  { id: 'C005', time: '14:33', from: 'S. Park', role: 'Lead Threat Analyst', message: 'APT29 Kill chain mapped: Recon → FW exploit (CVE-2024-3400) → Initial access → Credential harvesting → Lateral move SMB → DC-PROD-03. Staging via S3.', type: 'intel' },
+  { id: 'C006', time: '14:41', from: 'J. Chen', role: 'Incident Commander', message: 'Decision logged: Holding EDR isolation for 15 min evidence window. M. Rodriguez — begin memory dump NOW. S. Park — continue live monitoring. A. Thompson — block all SMB to DC-PROD-03 adjacent hosts.', type: 'action', priority: 'urgent' },
+  { id: 'C007', time: '14:52', from: 'J. Chen', role: 'Incident Commander', message: 'EDR isolation approved and executed on DC-PROD-03 at 14:52. Memory dump complete. 3 adjacent hosts flagged. C2 beacon severed by A. Thompson 14:50. Moving to eradication phase prep.', type: 'action' },
+  { id: 'C008', time: '15:02', from: 'P. Santos', role: 'Executive Liaison', message: 'CISO brief delivered. Board notification draft ready — holding pending legal review. PR statement drafted. No external disclosure. Legal hold on all logs confirmed by K. Wilson.', type: 'update' },
+  { id: 'C009', time: '15:05', from: 'INCIDENT SYSTEM', role: 'Automated Broadcast', message: 'BROADCAST: Crisis status update distributed to all connected verticals. Vessels, Terra, PRISM, SZL Holdings — crisis banner active. Cross-domain impact assessment underway.', type: 'broadcast' },
 ];
 
 const COMM_COLORS: Record<string, string> = {
@@ -487,13 +305,14 @@ const STATUS_COLORS: Record<string, string> = {
   standby: '#f59e0b',
   unavailable: '#64748b',
 };
+
 const DECISION_COLORS: Record<string, string> = {
   enacted: '#22c55e',
   pending: '#f59e0b',
   superseded: '#64748b',
 };
 
-type WarRoomTab = 'timeline' | 'resources' | 'decisions' | 'comms';
+type WarRoomTab = 'timeline' | 'resources' | 'decisions' | 'comms' | 'drill';
 
 function ElapsedTimer({ startMin }: { startMin: number }) {
   const [elapsed, setElapsed] = useState(startMin);
@@ -512,16 +331,157 @@ function ElapsedTimer({ startMin }: { startMin: number }) {
   );
 }
 
+type DrillScenario = {
+  id: string;
+  name: string;
+  status: 'pending' | 'running' | 'paused' | 'completed' | 'failed';
+  runId?: number;
+  actor?: string;
+  tactics?: string[];
+};
+
+function mapDrillScenario(s: Record<string, unknown>): DrillScenario {
+  const rawStatus = (s.status as string) ?? 'pending';
+  const status: DrillScenario['status'] =
+    rawStatus === 'running' ? 'running' :
+    rawStatus === 'completed' ? 'completed' :
+    rawStatus === 'failed' ? 'failed' :
+    rawStatus === 'paused' ? 'paused' : 'pending';
+  const technique = typeof s.technique === 'string' ? s.technique : '';
+  const runId: number | undefined = typeof s.runId === 'number' ? s.runId : typeof s.id === 'number' ? s.id : undefined;
+  const actor: string | undefined = typeof s.actor === 'string' ? s.actor : undefined;
+  const tactics: string[] | undefined = technique ? technique.split('+').map((t: string) => t.trim()) : undefined;
+  return {
+    id: typeof s.id === 'string' ? s.id : `SIM-${String(runId ?? 0).padStart(3, '0')}`,
+    name: typeof s.name === 'string' ? s.name : 'Crisis Response Exercise',
+    status,
+    ...(runId !== undefined ? { runId } : {}),
+    ...(actor !== undefined ? { actor } : {}),
+    ...(tactics !== undefined ? { tactics } : {}),
+  };
+}
+
+const DRILL_STATUS_COLOR: Record<string, string> = {
+  running: '#f59e0b',
+  paused: '#3b82f6',
+  pending: '#64748b',
+  completed: '#22c55e',
+  failed: '#ef4444',
+};
+
 export default function CitadelWarRoom() {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<WarRoomTab>('timeline');
-  const [crisisActive] = useState(true);
   const [newComm, setNewComm] = useState('');
-  const [comms, setComms] = useState(COMMS);
+  const [localComms, setLocalComms] = useState<CommEntry[]>(INIT_COMMS);
   const commEndRef = useRef<HTMLDivElement>(null);
+  const [drillActiveId, setDrillActiveId] = useState<string | null>(null);
+
+  const { data: incidentsData, isLoading: incidentsLoading } = useQuery({
+    queryKey: ['war-room-incidents'],
+    queryFn: () => api.incidents.list(),
+    select: (res: { data?: Record<string, unknown>[] }) => res?.data ?? [],
+  });
+
+  const { data: drillScenarios, isLoading: drillsLoading } = useQuery({
+    queryKey: ['war-room-drill-scenarios'],
+    queryFn: () => api.digitalTwin.scenarios(),
+    refetchInterval: 8000,
+    select: (res: { data?: { scenarios?: Record<string, unknown>[] } }) =>
+      (res?.data?.scenarios ?? []).map(mapDrillScenario),
+  });
+
+  const invalidateDrills = () => queryClient.invalidateQueries({ queryKey: ['war-room-drill-scenarios'] });
+
+  const drillRunMutation = useMutation({
+    mutationFn: (id: string) => api.digitalTwin.runScenario(id),
+    onMutate: (id) => setDrillActiveId(id),
+    onSuccess: (_, id) => {
+      const msg: CommEntry = {
+        id: `C${Date.now()}`,
+        time: new Date().toISOString().slice(11, 16),
+        from: 'Drill Control',
+        role: 'Exercise Director',
+        message: `Drill scenario ${id} STARTED — exercise inject active. All participants respond as trained.`,
+        type: 'action',
+        priority: 'urgent',
+      };
+      setLocalComms((prev) => [...prev, msg]);
+      invalidateDrills();
+    },
+    onError: (err: Error) => {
+      toast.error(err?.message ?? 'Failed to start drill scenario');
+    },
+    onSettled: () => setDrillActiveId(null),
+  });
+
+  const drillPauseMutation = useMutation({
+    mutationFn: (id: string) => api.digitalTwin.pauseScenario(id),
+    onMutate: (id) => setDrillActiveId(id),
+    onSuccess: (_, id) => {
+      const msg: CommEntry = {
+        id: `C${Date.now()}`,
+        time: new Date().toISOString().slice(11, 16),
+        from: 'Drill Control',
+        role: 'Exercise Director',
+        message: `Drill scenario ${id} PAUSED — exercise inject on hold. Awaiting debrief before continuation.`,
+        type: 'update',
+      };
+      setLocalComms((prev) => [...prev, msg]);
+      invalidateDrills();
+    },
+    onError: (err: Error) => {
+      toast.error(err?.message ?? 'Failed to pause drill scenario');
+    },
+    onSettled: () => setDrillActiveId(null),
+  });
+
+  const drillResumeMutation = useMutation({
+    mutationFn: (id: string) => api.digitalTwin.resumeScenario(id),
+    onMutate: (id) => setDrillActiveId(id),
+    onSuccess: (_, id) => {
+      const msg: CommEntry = {
+        id: `C${Date.now()}`,
+        time: new Date().toISOString().slice(11, 16),
+        from: 'Drill Control',
+        role: 'Exercise Director',
+        message: `Drill scenario ${id} RESUMED — continuing exercise inject.`,
+        type: 'action',
+      };
+      setLocalComms((prev) => [...prev, msg]);
+      invalidateDrills();
+    },
+    onError: (err: Error) => {
+      toast.error(err?.message ?? 'Failed to resume drill scenario');
+    },
+    onSettled: () => setDrillActiveId(null),
+  });
+
+  const drillBusy = drillRunMutation.isPending || drillPauseMutation.isPending || drillResumeMutation.isPending;
+
+  const activeIncident = (incidentsData ?? []).find(
+    (inc: Record<string, unknown>) =>
+      inc.status === 'open' || inc.status === 'investigating' || inc.status === 'active',
+  ) as Record<string, unknown> | undefined;
+
+  const crisisName = typeof activeIncident?.title === 'string'
+    ? activeIncident.title
+    : 'APT29 Enterprise Infiltration';
+  const incidentId = typeof activeIncident?.id === 'number' || typeof activeIncident?.id === 'string'
+    ? String(activeIncident.id)
+    : 'INC-2847';
 
   useEffect(() => {
     commEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [comms]);
+  }, [localComms]);
+
+  const addNoteMutation = useMutation({
+    mutationFn: (note: string) =>
+      api.command.addNote(note, typeof activeIncident?.id === 'number' ? activeIncident.id : undefined),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['war-room-incidents'] });
+    },
+  });
 
   const sendComm = () => {
     if (!newComm.trim()) return;
@@ -533,9 +493,14 @@ export default function CitadelWarRoom() {
       message: newComm.trim(),
       type: 'update',
     };
-    setComms((prev) => [...prev, entry]);
+    setLocalComms((prev) => [...prev, entry]);
+    addNoteMutation.mutate(newComm.trim());
     setNewComm('');
   };
+
+  const elapsedMin = activeIncident?.createdAt
+    ? Math.floor((Date.now() - new Date(activeIncident.createdAt as string).getTime()) / 60000)
+    : 43;
 
   return (
     <div
@@ -559,30 +524,38 @@ export default function CitadelWarRoom() {
               border: '1px solid rgba(239,68,68,0.3)',
             }}
           >
-            ICS L{ACTIVE_CRISIS.icsLevel} ACTIVE
+            ICS L3 ACTIVE
+          </span>
+          <span
+            className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-mono uppercase border"
+            style={{ background: 'rgba(34,197,94,0.08)', borderColor: 'rgba(34,197,94,0.25)', color: '#22c55e' }}
+          >
+            <Database className="w-2.5 h-2.5" />
+            {incidentsLoading ? 'Loading…' : activeIncident ? `Live · ${incidentId}` : 'Scenario'}
           </span>
         </div>
         <div className="h-4 w-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-semibold truncate" style={{ color: DS.text.primary }}>
-              {ACTIVE_CRISIS.name}
+              {crisisName}
             </span>
             <span
               className="text-[9px] px-1.5 py-0.5 rounded uppercase font-bold shrink-0"
               style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444' }}
             >
-              {ACTIVE_CRISIS.type}
+              CYBERATTACK
             </span>
             <span
               className="text-[9px] px-1.5 py-0.5 rounded uppercase font-bold shrink-0"
               style={{ background: 'rgba(249,115,22,0.15)', color: '#f97316' }}
             >
-              {ACTIVE_CRISIS.phase}
+              CONTAINMENT
             </span>
           </div>
           <p className="text-[10px] truncate" style={{ color: DS.text.muted }}>
-            {ACTIVE_CRISIS.impactSummary}
+            Active lateral movement on production infrastructure. 3 managed clients potentially
+            affected. Estimated breach exposure $17.4M.
           </p>
         </div>
         <div className="shrink-0 flex items-center gap-4">
@@ -591,7 +564,7 @@ export default function CitadelWarRoom() {
               ELAPSED
             </div>
             <div className="text-[11px] text-red-400">
-              <ElapsedTimer startMin={ACTIVE_CRISIS.elapsedMin} />
+              <ElapsedTimer startMin={elapsedMin} />
             </div>
           </div>
           <div className="text-right">
@@ -607,7 +580,7 @@ export default function CitadelWarRoom() {
               COMMANDER
             </div>
             <div className="text-[11px] font-semibold" style={{ color: DS.text.primary }}>
-              {ACTIVE_CRISIS.commander}
+              J. Chen
             </div>
           </div>
         </div>
@@ -623,6 +596,7 @@ export default function CitadelWarRoom() {
             { id: 'resources', label: 'Resource Board', icon: Users },
             { id: 'decisions', label: 'Decision Log', icon: ClipboardList },
             { id: 'comms', label: 'Comm Feed', icon: Radio },
+            { id: 'drill', label: 'Drill Scenarios', icon: Shield },
           ] as { id: WarRoomTab; label: string; icon: typeof Activity }[]
         ).map(({ id, label, icon: Icon }) => (
           <button
@@ -642,7 +616,7 @@ export default function CitadelWarRoom() {
                 className="text-[8px] px-1 py-0.5 rounded-full font-bold"
                 style={{ background: 'rgba(239,68,68,0.2)', color: '#ef4444' }}
               >
-                {comms.length}
+                {localComms.length}
               </span>
             )}
           </button>
@@ -650,7 +624,7 @@ export default function CitadelWarRoom() {
 
         <div className="ml-auto flex items-center gap-2 py-1.5">
           <a
-            href="./citadel-playbooks"
+            href="/citadel-playbooks"
             className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-semibold transition-all"
             style={{
               background: 'rgba(239,68,68,0.08)',
@@ -662,7 +636,7 @@ export default function CitadelWarRoom() {
             Playbooks
           </a>
           <a
-            href="./citadel-after-action"
+            href="/citadel-after-action"
             className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-semibold transition-all"
             style={{
               background: 'rgba(255,255,255,0.05)',
@@ -692,7 +666,7 @@ export default function CitadelWarRoom() {
                     className="text-[9px] font-mono px-1.5 py-0.5 rounded"
                     style={{ background: 'rgba(34,197,94,0.1)', color: '#22c55e' }}
                   >
-                    LIVE · {TIMELINE_EVENTS.length} events
+                    LIVE · {STATIC_TIMELINE.length} events
                   </span>
                 </div>
                 <div className="flex gap-2">
@@ -710,87 +684,80 @@ export default function CitadelWarRoom() {
                 </div>
               </div>
               <div className="space-y-0">
-                {TIMELINE_EVENTS.map((event, i) => (
-                  <div key={event.id} className="flex gap-3 relative">
-                    {i < TIMELINE_EVENTS.length - 1 && (
+                {STATIC_TIMELINE.map((event, idx) => (
+                  <div key={event.id} className="flex gap-3 group">
+                    <div className="flex flex-col items-center">
                       <div
-                        className="absolute left-[14px] top-8 bottom-0 w-px"
-                        style={{ background: `${SEV[event.severity]}20` }}
-                      />
-                    )}
-                    <div className="flex flex-col items-center gap-1 shrink-0 pt-1">
-                      <div
-                        className="w-[28px] h-[28px] rounded-full flex items-center justify-center"
+                        className="w-2 h-2 rounded-full mt-2 shrink-0"
                         style={{
-                          background: `${SEV[event.severity]}15`,
-                          border: `1px solid ${SEV[event.severity]}30`,
+                          background: SEV[event.severity],
+                          boxShadow:
+                            event.severity === 'critical'
+                              ? `0 0 8px ${SEV[event.severity]}50`
+                              : 'none',
                         }}
-                      >
-                        {event.confirmed ? (
-                          <CheckCircle className="w-3 h-3" style={{ color: SEV[event.severity] }} />
-                        ) : (
-                          <Circle
-                            className="w-3 h-3 animate-pulse"
-                            style={{ color: SEV[event.severity] }}
-                          />
-                        )}
-                      </div>
+                      />
+                      {idx < STATIC_TIMELINE.length - 1 && (
+                        <div
+                          className="w-px flex-1 mt-1"
+                          style={{ background: 'rgba(255,255,255,0.06)' }}
+                        />
+                      )}
                     </div>
-                    <div className="flex-1 pb-4">
+                    <div className="pb-4 flex-1">
                       <div className="flex items-center gap-2 mb-0.5">
                         <span
                           className="text-[10px] font-mono font-bold"
-                          style={{ color: SEV[event.severity] }}
+                          style={{ color: DS.text.muted }}
                         >
-                          {event.elapsed}
-                        </span>
-                        <span className="text-[10px] font-mono" style={{ color: DS.text.muted }}>
                           {event.time}
                         </span>
                         <span
-                          className="text-[8px] px-1.5 py-0.5 rounded uppercase font-bold"
-                          style={{
-                            background: `${SEV[event.severity]}15`,
-                            color: SEV[event.severity],
-                          }}
+                          className="text-[9px] font-mono"
+                          style={{ color: 'rgba(255,255,255,0.2)' }}
                         >
-                          {event.severity}
+                          {event.elapsed}
                         </span>
                         {!event.confirmed && (
                           <span
-                            className="text-[8px] px-1.5 py-0.5 rounded uppercase font-bold animate-pulse"
-                            style={{ background: 'rgba(251,191,36,0.15)', color: '#fbbf24' }}
+                            className="text-[8px] px-1 py-0.5 rounded font-bold"
+                            style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}
                           >
-                            PENDING CONFIRM
+                            UNCONFIRMED
                           </span>
                         )}
                       </div>
                       <div
-                        className="rounded-lg p-3"
-                        style={{ background: DS.surface, border: `1px solid ${DS.border}` }}
+                        className="text-[12px] font-semibold mb-1"
+                        style={{ color: DS.text.primary }}
                       >
-                        <h3
-                          className="text-[12px] font-semibold mb-1"
-                          style={{ color: DS.text.primary }}
+                        {event.title}
+                      </div>
+                      <div className="text-[11px] mb-1.5" style={{ color: DS.text.secondary }}>
+                        {event.detail}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="text-[9px] px-1.5 py-0.5 rounded font-mono"
+                          style={{
+                            background: `${SEV[event.severity]}12`,
+                            color: SEV[event.severity],
+                            border: `1px solid ${SEV[event.severity]}30`,
+                          }}
                         >
-                          {event.title}
-                        </h3>
-                        <p
-                          className="text-[10px] leading-relaxed"
-                          style={{ color: DS.text.secondary }}
-                        >
-                          {event.detail}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="text-[9px] font-mono" style={{ color: DS.text.muted }}>
-                            Source: {event.source}
+                          {event.severity.toUpperCase()}
+                        </span>
+                        <span className="text-[9px]" style={{ color: DS.text.muted }}>
+                          {event.source}
+                        </span>
+                        {event.actor && (
+                          <span
+                            className="text-[9px] font-mono"
+                            style={{ color: 'rgba(139,92,246,0.8)' }}
+                          >
+                            {event.actor}
                           </span>
-                          {event.actor && (
-                            <span className="text-[9px] font-semibold" style={{ color: '#ef4444' }}>
-                              · {event.actor}
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -802,207 +769,88 @@ export default function CitadelWarRoom() {
 
         {activeTab === 'resources' && (
           <div className="h-full overflow-y-auto px-4 py-3">
-            <div className="mb-4 flex items-center justify-between">
-              <span
-                className="text-[10px] font-bold uppercase tracking-wider"
-                style={{ color: DS.text.muted }}
-              >
-                Resource Allocation Board
-              </span>
-              <div className="flex items-center gap-3">
-                {(['active', 'standby', 'unavailable'] as const).map((s) => (
-                  <div key={s} className="flex items-center gap-1">
-                    <span
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{ background: STATUS_COLORS[s] }}
-                    />
-                    <span
-                      className="text-[9px] capitalize font-mono"
-                      style={{ color: DS.text.muted }}
-                    >
-                      {s}
-                    </span>
-                  </div>
-                ))}
+            <div className="max-w-3xl space-y-2">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: DS.text.muted }}>
+                  Assigned Personnel
+                </span>
+                <div className="flex items-center gap-3 text-[9px]">
+                  {(['active', 'standby', 'unavailable'] as const).map((s) => (
+                    <div key={s} className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_COLORS[s] }} />
+                      <span style={{ color: DS.text.muted }}>{s}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
               {RESOURCES.map((r) => (
                 <div
                   key={r.id}
-                  className="rounded-xl p-3"
+                  className="rounded-lg p-3 flex items-start gap-3"
                   style={{ background: DS.surface, border: `1px solid ${DS.border}` }}
                 >
-                  <div className="flex items-start gap-2 mb-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <span
-                          className="w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{ background: STATUS_COLORS[r.status] }}
-                        />
-                        <span
-                          className="text-[11px] font-semibold truncate"
-                          style={{ color: DS.text.primary }}
-                        >
+                  <div
+                    className="w-2 h-2 rounded-full mt-1.5 shrink-0"
+                    style={{ background: STATUS_COLORS[r.status] }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="text-[11px] font-semibold" style={{ color: DS.text.primary }}>
                           {r.name}
-                        </span>
-                        {r.status === 'active' && (
-                          <span
-                            className="text-[7px] px-1 py-0.5 rounded-full uppercase font-bold"
-                            style={{ background: 'rgba(34,197,94,0.1)', color: '#22c55e' }}
-                          >
-                            LIVE
-                          </span>
-                        )}
+                        </div>
+                        <div className="text-[10px]" style={{ color: DS.text.muted }}>{r.role} · {r.domain}</div>
                       </div>
-                      <p className="text-[10px] font-semibold" style={{ color: DS.text.secondary }}>
-                        {r.role}
-                      </p>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {r.eta && (
+                          <span className="text-[9px] font-mono" style={{ color: DS.text.muted }}>ETA {r.eta}</span>
+                        )}
+                        <span
+                          className="text-[9px] px-1.5 py-0.5 rounded font-mono uppercase"
+                          style={{ background: `${STATUS_COLORS[r.status]}15`, color: STATUS_COLORS[r.status] }}
+                        >
+                          {r.status}
+                        </span>
+                      </div>
                     </div>
-                    <span
-                      className="text-[8px] px-1.5 py-0.5 rounded shrink-0"
-                      style={{ background: 'rgba(255,255,255,0.05)', color: DS.text.muted }}
-                    >
-                      {r.domain}
-                    </span>
+                    <div className="text-[10px] mt-1" style={{ color: DS.text.secondary }}>{r.task}</div>
                   </div>
-                  <p className="text-[10px] leading-snug" style={{ color: DS.text.muted }}>
-                    {r.task}
-                  </p>
-                  {r.eta && (
-                    <p className="text-[9px] mt-1.5 font-mono" style={{ color: '#f59e0b' }}>
-                      ETA: {r.eta}
-                    </p>
-                  )}
                 </div>
               ))}
-            </div>
-
-            <div
-              className="mt-4 rounded-xl p-3"
-              style={{
-                background: 'rgba(239,68,68,0.04)',
-                border: '1px solid rgba(239,68,68,0.15)',
-              }}
-            >
-              <p
-                className="text-[10px] font-bold uppercase tracking-wider mb-2"
-                style={{ color: 'rgba(239,68,68,0.7)' }}
-              >
-                Escalation Chain — ICS L3
-              </p>
-              <div className="flex items-center gap-2 flex-wrap">
-                {[
-                  'J. Chen (IC)',
-                  '→ CISO (P. Santos)',
-                  '→ CEO (Board)',
-                  '→ External IR (CrowdStrike)',
-                ].map((step, i) => (
-                  <span
-                    key={i}
-                    className="text-[10px] px-2 py-1 rounded"
-                    style={{
-                      background: 'rgba(239,68,68,0.08)',
-                      color: i === 0 ? '#ef4444' : DS.text.secondary,
-                    }}
-                  >
-                    {step}
-                  </span>
-                ))}
-              </div>
             </div>
           </div>
         )}
 
         {activeTab === 'decisions' && (
           <div className="h-full overflow-y-auto px-4 py-3">
-            <div className="mb-4 flex items-center justify-between">
-              <span
-                className="text-[10px] font-bold uppercase tracking-wider"
-                style={{ color: DS.text.muted }}
-              >
-                Decision Log · Immutable Record
+            <div className="max-w-3xl space-y-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider block mb-3" style={{ color: DS.text.muted }}>
+                Commander Decision Log
               </span>
-              <div
-                className="flex items-center gap-1.5 text-[9px] font-mono"
-                style={{ color: DS.text.muted }}
-              >
-                <Lock className="w-3 h-3" />
-                Tamper-evident · {DECISIONS.length} decisions logged
-              </div>
-            </div>
-            <div className="space-y-3 max-w-3xl">
-              {DECISIONS.map((d, i) => (
+              {DECISIONS.map((d) => (
                 <div
                   key={d.id}
-                  className="rounded-xl overflow-hidden"
-                  style={{ border: `1px solid ${DS.border}` }}
+                  className="rounded-lg p-4"
+                  style={{ background: DS.surface, border: `1px solid ${DS.border}` }}
                 >
-                  <div
-                    className="px-4 py-2 flex items-center gap-3"
-                    style={{ background: 'rgba(255,255,255,0.02)' }}
-                  >
-                    <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0"
-                      style={{ background: 'rgba(255,255,255,0.06)', color: DS.text.muted }}
-                    >
-                      D{i + 1}
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div>
+                      <div className="text-[12px] font-semibold" style={{ color: DS.text.primary }}>{d.title}</div>
+                      <div className="text-[9px] font-mono" style={{ color: DS.text.muted }}>{d.time} · {d.decidedBy}</div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <span
-                        className="text-[12px] font-semibold"
-                        style={{ color: DS.text.primary }}
-                      >
-                        {d.title}
-                      </span>
-                    </div>
-                    <span className="text-[9px] font-mono" style={{ color: DS.text.muted }}>
-                      {d.time}
-                    </span>
                     <span
-                      className="text-[8px] px-1.5 py-0.5 rounded uppercase font-bold shrink-0"
-                      style={{
-                        background: `${DECISION_COLORS[d.status]}15`,
-                        color: DECISION_COLORS[d.status],
-                      }}
+                      className="text-[9px] px-1.5 py-0.5 rounded font-mono uppercase shrink-0"
+                      style={{ background: `${DECISION_COLORS[d.status]}15`, color: DECISION_COLORS[d.status] }}
                     >
                       {d.status}
                     </span>
                   </div>
-                  <div className="px-4 py-3 grid grid-cols-2 gap-x-4 gap-y-2">
-                    <div>
-                      <p
-                        className="text-[9px] font-bold uppercase tracking-wider mb-1"
-                        style={{ color: DS.text.muted }}
-                      >
-                        Rationale
-                      </p>
-                      <p
-                        className="text-[10px] leading-relaxed"
-                        style={{ color: DS.text.secondary }}
-                      >
-                        {d.rationale}
-                      </p>
-                    </div>
-                    <div>
-                      <p
-                        className="text-[9px] font-bold uppercase tracking-wider mb-1"
-                        style={{ color: DS.text.muted }}
-                      >
-                        Outcome
-                      </p>
-                      <p
-                        className="text-[10px] leading-relaxed"
-                        style={{ color: DS.text.secondary }}
-                      >
-                        {d.outcome}
-                      </p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-[9px] font-mono" style={{ color: DS.text.muted }}>
-                        Decided by: <span style={{ color: DS.text.secondary }}>{d.decidedBy}</span>
-                      </p>
-                    </div>
+                  <div className="text-[11px] mb-2" style={{ color: DS.text.secondary }}>{d.rationale}</div>
+                  <div
+                    className="text-[10px] rounded px-2 py-1.5"
+                    style={{ background: 'rgba(255,255,255,0.03)', color: DS.text.muted }}
+                  >
+                    <span className="font-bold">Outcome:</span> {d.outcome}
                   </div>
                 </div>
               ))}
@@ -1011,111 +859,250 @@ export default function CitadelWarRoom() {
         )}
 
         {activeTab === 'comms' && (
-          <div className="h-full flex flex-col">
+          <div className="flex flex-col h-full">
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
-              {comms.map((c) => (
-                <div key={c.id} className="flex gap-3">
-                  <div className="shrink-0 pt-0.5">
-                    <div
-                      className="w-6 h-6 rounded flex items-center justify-center"
-                      style={{
-                        background: `${COMM_COLORS[c.type]}15`,
-                        border: `1px solid ${COMM_COLORS[c.type]}25`,
-                      }}
-                    >
-                      {c.type === 'intel' && (
-                        <Brain className="w-3 h-3" style={{ color: COMM_COLORS[c.type] }} />
-                      )}
-                      {c.type === 'action' && (
-                        <Zap className="w-3 h-3" style={{ color: COMM_COLORS[c.type] }} />
-                      )}
-                      {c.type === 'update' && (
-                        <Activity className="w-3 h-3" style={{ color: COMM_COLORS[c.type] }} />
-                      )}
-                      {c.type === 'broadcast' && (
-                        <Radio className="w-3 h-3" style={{ color: COMM_COLORS[c.type] }} />
-                      )}
-                      {c.type === 'escalation' && (
-                        <AlertTriangle className="w-3 h-3" style={{ color: COMM_COLORS[c.type] }} />
-                      )}
-                    </div>
+              {localComms.map((comm) => (
+                <div
+                  key={comm.id}
+                  className="rounded-lg p-3"
+                  style={{ background: DS.surface, border: `1px solid ${DS.border}` }}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{ background: COMM_COLORS[comm.type] }}
+                    />
+                    <span className="text-[11px] font-semibold" style={{ color: DS.text.primary }}>
+                      {comm.from}
+                    </span>
+                    <span className="text-[9px]" style={{ color: DS.text.muted }}>{comm.role}</span>
+                    <span className="text-[9px] font-mono ml-auto" style={{ color: DS.text.muted }}>{comm.time}</span>
+                    {comm.priority === 'urgent' && (
+                      <span className="text-[8px] px-1 py-0.5 rounded font-bold" style={{ background: 'rgba(239,68,68,0.2)', color: '#ef4444' }}>
+                        URGENT
+                      </span>
+                    )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[10px] font-bold" style={{ color: DS.text.primary }}>
-                        {c.from}
-                      </span>
-                      <span className="text-[9px]" style={{ color: DS.text.muted }}>
-                        {c.role}
-                      </span>
-                      <span
-                        className="text-[8px] px-1 py-0.5 rounded uppercase font-bold"
-                        style={{
-                          background: `${COMM_COLORS[c.type]}12`,
-                          color: COMM_COLORS[c.type],
-                        }}
-                      >
-                        {c.type}
-                      </span>
-                      {c.priority === 'urgent' && (
-                        <span
-                          className="text-[7px] px-1 py-0.5 rounded uppercase font-bold animate-pulse"
-                          style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444' }}
-                        >
-                          URGENT
-                        </span>
-                      )}
-                      <span
-                        className="ml-auto text-[9px] font-mono shrink-0"
-                        style={{ color: DS.text.muted }}
-                      >
-                        {c.time}
-                      </span>
-                    </div>
-                    <div
-                      className="rounded-lg px-3 py-2"
-                      style={{ background: DS.surface, border: `1px solid ${DS.border}` }}
-                    >
-                      <p
-                        className="text-[10px] leading-relaxed"
-                        style={{ color: DS.text.secondary }}
-                      >
-                        {c.message}
-                      </p>
-                    </div>
+                  <div className="text-[11px] leading-relaxed" style={{ color: DS.text.secondary }}>
+                    {comm.message}
                   </div>
                 </div>
               ))}
               <div ref={commEndRef} />
             </div>
             <div
-              className="shrink-0 px-4 py-3 border-t flex gap-2"
+              className="shrink-0 p-3 border-t"
               style={{ borderColor: DS.border }}
             >
-              <input
-                type="text"
-                value={newComm}
-                onChange={(e) => setNewComm(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && sendComm()}
-                placeholder="Enter crisis response communication..."
-                className="flex-1 px-3 py-2 rounded-lg text-[11px] outline-none"
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  color: DS.text.primary,
-                }}
-              />
-              <button
-                onClick={sendComm}
-                className="px-4 py-2 rounded-lg text-[11px] font-semibold transition-all"
-                style={{
-                  background: 'rgba(239,68,68,0.15)',
-                  color: '#ef4444',
-                  border: '1px solid rgba(239,68,68,0.3)',
-                }}
-              >
-                Send
-              </button>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newComm}
+                  onChange={(e) => setNewComm(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendComm(); } }}
+                  placeholder="Send comm to war room…"
+                  className="flex-1 rounded-lg px-3 py-2 text-[11px] outline-none"
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${DS.border}`,
+                    color: DS.text.primary,
+                  }}
+                  aria-label="Type war room communication"
+                />
+                <button
+                  type="button"
+                  onClick={sendComm}
+                  className="px-3 py-2 rounded-lg text-[11px] font-semibold transition-colors"
+                  style={{
+                    background: 'rgba(239,68,68,0.15)',
+                    color: '#ef4444',
+                    border: '1px solid rgba(239,68,68,0.25)',
+                  }}
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'drill' && (
+          <div className="h-full overflow-y-auto px-4 py-3">
+            <div className="max-w-3xl space-y-4">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <span
+                    className="text-[10px] font-bold uppercase tracking-wider block"
+                    style={{ color: DS.text.muted }}
+                  >
+                    Crisis Response Drill Scenarios
+                  </span>
+                  <p className="text-[10px] mt-0.5" style={{ color: DS.text.muted }}>
+                    Start, pause, or resume tabletop exercises. Lifecycle events auto-log to Comm Feed.
+                  </p>
+                </div>
+                <span
+                  className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-mono uppercase border"
+                  style={{ background: 'rgba(34,197,94,0.08)', borderColor: 'rgba(34,197,94,0.25)', color: '#22c55e' }}
+                >
+                  <Database className="w-2.5 h-2.5" />
+                  {drillsLoading ? 'Loading…' : `${(drillScenarios ?? []).length} scenarios`}
+                </span>
+              </div>
+
+              {drillsLoading && (
+                <div className="flex items-center gap-2 text-xs py-4" style={{ color: DS.text.muted }}>
+                  <div className="w-3.5 h-3.5 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin" />
+                  Loading drill scenarios from Firestorm…
+                </div>
+              )}
+
+              {(!drillScenarios || drillScenarios.length === 0) && !drillsLoading && (
+                <div
+                  className="rounded-xl p-4 text-center"
+                  style={{ background: DS.surface, border: `1px solid ${DS.border}` }}
+                >
+                  <p className="text-[11px]" style={{ color: DS.text.muted }}>
+                    No drill scenarios found. Create scenarios in the Adversary Engine to run them here.
+                  </p>
+                </div>
+              )}
+
+              {(drillScenarios ?? []).map((scenario) => {
+                const busy = drillBusy && drillActiveId === scenario.id;
+                const sc = DRILL_STATUS_COLOR[scenario.status] ?? '#64748b';
+                return (
+                  <div
+                    key={scenario.id}
+                    className="rounded-lg p-4"
+                    style={{
+                      background:
+                        scenario.status === 'running'
+                          ? 'rgba(245,158,11,0.04)'
+                          : scenario.status === 'paused'
+                            ? 'rgba(59,130,246,0.04)'
+                            : DS.surface,
+                      border: `1px solid ${scenario.status === 'running' ? 'rgba(245,158,11,0.2)' : scenario.status === 'paused' ? 'rgba(59,130,246,0.2)' : DS.border}`,
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span
+                            className="text-[12px] font-semibold truncate"
+                            style={{ color: DS.text.primary }}
+                          >
+                            {scenario.name}
+                          </span>
+                          {scenario.status === 'running' && (
+                            <span
+                              className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0"
+                              style={{ background: sc }}
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-[9px] font-mono">
+                          <span style={{ color: DS.text.muted }}>{scenario.id}</span>
+                          {scenario.actor && (
+                            <>
+                              <span style={{ color: DS.text.muted }}>·</span>
+                              <span style={{ color: sc }}>{scenario.actor}</span>
+                            </>
+                          )}
+                        </div>
+                        {scenario.tactics && scenario.tactics.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {scenario.tactics.slice(0, 4).map((t) => (
+                              <span
+                                key={t}
+                                className="text-[9px] px-1 py-0.5 rounded"
+                                style={{
+                                  background: 'rgba(255,255,255,0.05)',
+                                  border: `1px solid ${DS.border}`,
+                                  color: DS.text.muted,
+                                }}
+                              >
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <span
+                        className="text-[9px] px-2 py-0.5 rounded font-mono uppercase shrink-0"
+                        style={{ background: `${sc}15`, color: sc, border: `1px solid ${sc}30` }}
+                      >
+                        {scenario.status}
+                      </span>
+                    </div>
+
+                    {/* Lifecycle controls */}
+                    <div className="flex items-center gap-2 mt-2 pt-2 border-t" style={{ borderColor: DS.border }}>
+                      {(scenario.status === 'pending') && (
+                        <button
+                          type="button"
+                          onClick={() => drillRunMutation.mutate(scenario.id)}
+                          disabled={busy || drillBusy}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-semibold transition-colors disabled:opacity-50"
+                          style={{
+                            background: 'rgba(34,197,94,0.1)',
+                            color: '#22c55e',
+                            border: '1px solid rgba(34,197,94,0.25)',
+                          }}
+                          aria-label={`Start drill ${scenario.id}`}
+                        >
+                          {busy ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
+                          Start Exercise
+                        </button>
+                      )}
+                      {scenario.status === 'running' && (
+                        <button
+                          type="button"
+                          onClick={() => drillPauseMutation.mutate(scenario.id)}
+                          disabled={busy || drillBusy}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-semibold transition-colors disabled:opacity-50"
+                          style={{
+                            background: 'rgba(245,158,11,0.1)',
+                            color: '#f59e0b',
+                            border: '1px solid rgba(245,158,11,0.25)',
+                          }}
+                          aria-label={`Pause drill ${scenario.id}`}
+                        >
+                          {busy ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Pause className="w-3 h-3" />}
+                          Pause for Debrief
+                        </button>
+                      )}
+                      {scenario.status === 'paused' && (
+                        <button
+                          type="button"
+                          onClick={() => drillResumeMutation.mutate(scenario.id)}
+                          disabled={busy || drillBusy}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-semibold transition-colors disabled:opacity-50"
+                          style={{
+                            background: 'rgba(59,130,246,0.1)',
+                            color: '#3b82f6',
+                            border: '1px solid rgba(59,130,246,0.25)',
+                          }}
+                          aria-label={`Resume drill ${scenario.id}`}
+                        >
+                          {busy ? <RefreshCw className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3 h-3" />}
+                          Resume Exercise
+                        </button>
+                      )}
+                      {scenario.status === 'completed' && (
+                        <span className="text-[10px]" style={{ color: '#22c55e' }}>
+                          ✓ Exercise complete — review after-action report
+                        </span>
+                      )}
+                      {scenario.status === 'failed' && (
+                        <span className="text-[10px]" style={{ color: '#ef4444' }}>
+                          Exercise ended with errors — check scenario log
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

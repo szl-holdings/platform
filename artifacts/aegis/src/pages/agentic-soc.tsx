@@ -1,5 +1,6 @@
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { cn } from '@szl-holdings/shared-ui/utils';
+import { useQuery } from '@tanstack/react-query';
 import {
   Activity,
   AlertTriangle,
@@ -9,6 +10,7 @@ import {
   ChevronRight,
   Clock,
   Cpu,
+  Database,
   Eye,
   Network,
   Pause,
@@ -21,6 +23,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
+import { api } from '../lib/api';
 
 const AGENT_STATUSES = [
   'idle',
@@ -122,7 +125,7 @@ const AGENTS: Agent[] = [
   },
 ];
 
-const ALERTS: Alert[] = [
+const FALLBACK_ALERTS: Alert[] = [
   {
     id: 'ALT-9821',
     title: 'Suspicious PowerShell Execution Chain',
@@ -199,17 +202,35 @@ const ALERTS: Alert[] = [
     status: 'new',
     confidence: 0,
   },
-  {
-    id: 'ALT-9814',
-    title: 'Unauthorized Access to PII Database',
-    severity: 'critical',
-    source: 'CASB',
-    asset: 'DB-CRM-PROD',
-    timestamp: '14:05:17',
-    status: 'new',
-    confidence: 0,
-  },
 ];
+
+function mapApiAlert(a: Record<string, unknown>, idx: number): Alert {
+  const sev = (a.severity as string) ?? 'medium';
+  const mappedSev: Alert['severity'] =
+    sev === 'critical' ? 'critical' : sev === 'high' ? 'high' : sev === 'medium' ? 'medium' : 'low';
+  const apiStatus = (a.status as string) ?? 'new';
+  const mappedStatus: Alert['status'] =
+    apiStatus === 'triaging'
+      ? 'triaging'
+      : apiStatus === 'contained'
+        ? 'contained'
+        : apiStatus === 'resolved'
+          ? 'resolved'
+          : apiStatus === 'escalated'
+            ? 'escalated'
+            : 'new';
+
+  return {
+    id: typeof a.id === 'string' ? a.id : `ALT-${a.id ?? idx}`,
+    title: typeof a.title === 'string' ? a.title : `Alert #${a.id ?? idx}`,
+    severity: mappedSev,
+    source: typeof a.source === 'string' ? a.source : 'SIEM',
+    asset: typeof a.asset === 'string' ? a.asset : typeof a.assetId === 'string' ? a.assetId : 'UNKNOWN',
+    timestamp: new Date(typeof a.createdAt === 'string' ? a.createdAt : Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    status: mappedStatus,
+    confidence: typeof a.confidence === 'number' ? a.confidence : undefined,
+  };
+}
 
 const REASONING_TRACE: ReasoningStep[] = [
   {
@@ -296,23 +317,37 @@ const stepTypeIcon: Record<string, typeof Terminal> = {
 };
 
 export default function AgenticSOC() {
-  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(ALERTS[0]);
+  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [autoMode, setAutoMode] = useState(true);
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
+
+  const { data: alertsData, isLoading, isError, refetch } = useQuery({
+    queryKey: ['agentic-soc-alerts'],
+    queryFn: () => api.alerts.list(),
+    refetchInterval: 30000,
+    select: (res: { data?: Record<string, unknown>[] }) => {
+      const raw = res?.data ?? [];
+      return raw.length > 0 ? raw.map(mapApiAlert) : FALLBACK_ALERTS;
+    },
+  });
+
+  const alerts: Alert[] = alertsData ?? FALLBACK_ALERTS;
+  const liveAlerts = alertsData != null && !isError;
+
+  const activeAlert = selectedAlert ?? alerts[0] ?? null;
+
+  const autonomousCount = alerts.filter((a) => !['new', 'escalated'].includes(a.status)).length;
+  const autonomousRate = alerts.length > 0 ? Math.round((autonomousCount / alerts.length) * 100) : 0;
+
   const handleApprove = () => {
     toast.success('Action approved — endpoint isolation executing via EDR API');
   };
-
   const handleReject = () => {
     toast.error('Action rejected — agent will escalate to human analyst');
   };
 
-  const autonomousCount = ALERTS.filter((a) => !['new', 'escalated'].includes(a.status)).length;
-  const autonomousRate = Math.round((autonomousCount / ALERTS.length) * 100);
-
   return (
     <div className="p-6 space-y-6 max-w-full">
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -320,13 +355,32 @@ export default function AgenticSOC() {
             <h1 className="text-lg font-semibold text-white">
               Agentic SOC — Autonomous Triage & Response
             </h1>
+            <span
+              className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-mono uppercase border"
+              style={{
+                background: liveAlerts ? 'rgba(34,197,94,0.08)' : 'rgba(245,158,11,0.08)',
+                borderColor: liveAlerts ? 'rgba(34,197,94,0.25)' : 'rgba(245,158,11,0.25)',
+                color: liveAlerts ? '#22c55e' : '#f59e0b',
+              }}
+            >
+              <Database className="w-2.5 h-2.5" />
+              {isLoading ? 'Loading…' : isError ? 'Fallback data' : `Live DB · ${alerts.length} alerts`}
+            </span>
           </div>
           <p className="text-xs text-zinc-500">
             AI agents autonomously investigate alerts, correlate data sources, and execute response
             playbooks
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="p-1.5 rounded text-zinc-400/40 hover:text-zinc-400 transition-colors"
+            aria-label="Refresh alerts"
+          >
+            <RefreshCw className={cn('w-3.5 h-3.5', isLoading && 'animate-spin')} />
+          </button>
           <button
             onClick={() => {
               setAutoMode(!autoMode);
@@ -352,7 +406,6 @@ export default function AgenticSOC() {
         </div>
       </div>
 
-      {/* Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           {
@@ -371,15 +424,15 @@ export default function AgenticSOC() {
           },
           {
             label: 'Alerts Queue',
-            value: ALERTS.length,
-            sub: `${ALERTS.filter((a) => a.status === 'new').length} unassigned`,
+            value: alerts.length,
+            sub: `${alerts.filter((a) => a.status === 'new').length} unassigned`,
             color: '#ef4444',
             icon: AlertTriangle,
           },
           {
             label: 'Avg Triage Time',
-            value: '52s',
-            sub: 'vs 18min human baseline',
+            value: '1m 12s',
+            sub: 'vs 45m manual baseline',
             color: '#3b82f6',
             icon: Clock,
           },
@@ -398,203 +451,201 @@ export default function AgenticSOC() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        {/* Agent Fleet */}
-        <div className="space-y-2">
-          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-            Agent Fleet
-          </h2>
-          {AGENTS.map((agent) => (
-            <div key={agent.id} className="rounded-xl border border-white/8 bg-white/3 p-3">
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: agent.color }} />
-                    <span className="text-xs font-medium text-white">{agent.name}</span>
-                  </div>
-                  <div className="text-[10px] text-zinc-500 mt-0.5 ml-3.5">{agent.role}</div>
-                </div>
-                <span
-                  className={cn(
-                    'text-[10px] font-medium capitalize',
-                    agentStatusColor[agent.status],
-                  )}
-                >
-                  {agent.status === 'waiting-approval' ? '⏳ Awaiting Approval' : agent.status}
-                </span>
-              </div>
-              {agent.currentTask && (
-                <div className="text-[11px] text-zinc-400 bg-white/5 rounded-lg px-2 py-1.5 mb-2 leading-relaxed">
-                  {agent.currentTask}
-                </div>
-              )}
-              <div className="flex items-center gap-4 text-[10px] text-zinc-500">
-                <span>{agent.alertsHandled} handled</span>
-                <span className="text-emerald-400">{agent.successRate}% success</span>
-                <span>{agent.avgTriage} avg</span>
-              </div>
-            </div>
-          ))}
+      {isError && (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-400 flex items-center gap-2">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+          Live alert feed unavailable — showing scenario data for demo purposes
         </div>
+      )}
 
-        {/* Alert Queue */}
-        <div className="space-y-2">
-          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-            Alert Queue
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div>
+          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+            AI Agents
           </h2>
-          <div className="space-y-1.5">
-            {ALERTS.map((alert) => (
-              <button
-                key={alert.id}
-                onClick={() => setSelectedAlert(alert)}
-                className={cn(
-                  'w-full rounded-xl border p-3 text-left transition-all',
-                  selectedAlert?.id === alert.id
-                    ? 'border-red-500/40 bg-red-500/5'
-                    : 'border-white/8 bg-white/3 hover:bg-white/5',
-                )}
+          <div className="space-y-2">
+            {AGENTS.map((agent) => (
+              <div
+                key={agent.id}
+                className="rounded-xl border border-white/8 bg-white/3 p-3"
               >
-                <div className="flex items-start justify-between gap-2 mb-1.5">
-                  <span className="text-[11px] font-medium text-white leading-snug">
-                    {alert.title}
-                  </span>
-                  <span
-                    className={cn(
-                      'text-[10px] px-1.5 py-0.5 rounded border shrink-0',
-                      severityColor[alert.severity],
-                    )}
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: `${agent.color}15`, border: `1px solid ${agent.color}30` }}
                   >
-                    {alert.severity}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-[10px] text-zinc-500">
-                  <span>{alert.id}</span>
-                  <span>{alert.source}</span>
-                  <span>{alert.asset}</span>
-                  <span className="ml-auto">{alert.timestamp}</span>
-                </div>
-                <div className="mt-1.5 flex items-center gap-2">
-                  <span
-                    className={cn(
-                      'text-[10px] px-1.5 py-0.5 rounded border',
-                      statusColor[alert.status],
+                    <Brain className="w-3.5 h-3.5" style={{ color: agent.color }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[11px] font-semibold text-white">{agent.name}</span>
+                      <span
+                        className={cn('text-[10px] font-medium', agentStatusColor[agent.status])}
+                      >
+                        {agent.status.replace('-', ' ')}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-zinc-500 mb-1.5">{agent.role}</div>
+                    {agent.currentTask && (
+                      <div className="text-[10px] text-zinc-400 leading-relaxed bg-white/3 rounded-md px-2 py-1 mb-1.5">
+                        {agent.currentTask}
+                      </div>
                     )}
-                  >
-                    {alert.status}
-                  </span>
-                  {alert.agentAssigned && (
-                    <span className="text-[10px] text-zinc-500">→ {alert.agentAssigned}</span>
-                  )}
-                  {alert.confidence ? (
-                    <span className="text-[10px] text-emerald-400 ml-auto">
-                      {alert.confidence}% conf
-                    </span>
-                  ) : null}
+                    <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+                      <span>{agent.alertsHandled} handled</span>
+                      <span className="text-emerald-400">{agent.successRate}% success</span>
+                      <span>avg {agent.avgTriage}</span>
+                    </div>
+                  </div>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Reasoning Trace */}
-        <div className="space-y-2">
-          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-            Reasoning Trace — {selectedAlert?.id ?? 'Select Alert'}
+        <div>
+          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+            Alert Queue · {isLoading ? '…' : alerts.length} alerts
           </h2>
-          {selectedAlert && (
-            <div className="rounded-xl border border-white/8 bg-white/3 p-3 mb-3">
-              <div className="text-xs font-medium text-white mb-1">{selectedAlert.title}</div>
-              <div className="flex items-center gap-2 text-[10px] text-zinc-500">
-                <span>{selectedAlert.source}</span>
-                <span>·</span>
-                <span>{selectedAlert.asset}</span>
-              </div>
-            </div>
-          )}
           <div className="space-y-1.5">
-            {REASONING_TRACE.map((step, idx) => {
-              const Icon = stepTypeIcon[step.type] ?? Terminal;
-              const isExpanded = expandedStep === step.id;
-              const isLast = idx === REASONING_TRACE.length - 1;
-              return (
-                <div
-                  key={step.id}
+            {isLoading ? (
+              <div className="flex items-center gap-2 text-xs text-zinc-500 py-4">
+                <div className="w-3.5 h-3.5 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin" />
+                Loading alerts from Firestorm…
+              </div>
+            ) : (
+              alerts.map((alert) => (
+                <button
+                  key={alert.id}
+                  onClick={() => setSelectedAlert(alert)}
                   className={cn(
-                    'rounded-xl border p-3 transition-all',
-                    isLast && step.type === 'execute'
-                      ? 'border-orange-500/40 bg-orange-500/5'
-                      : 'border-white/8 bg-white/3',
+                    'w-full rounded-xl border p-3 text-left transition-all',
+                    activeAlert?.id === alert.id
+                      ? 'border-red-500/30 bg-red-500/5'
+                      : 'border-white/8 bg-white/3 hover:bg-white/5',
                   )}
                 >
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <span className="text-[11px] font-medium text-white leading-snug line-clamp-1">
+                      {alert.title}
+                    </span>
+                    <span
+                      className={cn(
+                        'text-[9px] px-1.5 py-0.5 rounded border shrink-0',
+                        severityColor[alert.severity],
+                      )}
+                    >
+                      {alert.severity}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] text-zinc-500 mb-1.5">
+                    <span>{alert.asset}</span>
+                    <span className="text-zinc-600">·</span>
+                    <span>{alert.source}</span>
+                    <span className="text-zinc-600">·</span>
+                    <span>{alert.timestamp}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn('text-[9px] px-1 py-0.5 rounded border', statusColor[alert.status])}
+                    >
+                      {alert.status}
+                    </span>
+                    {alert.agentAssigned && (
+                      <span className="text-[9px] text-zinc-500">
+                        ⟶ {alert.agentAssigned}
+                      </span>
+                    )}
+                    {alert.confidence != null && alert.confidence > 0 && (
+                      <span className="text-[9px] text-zinc-500 ml-auto">
+                        {alert.confidence}% conf
+                      </span>
+                    )}
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+            AI Reasoning Trace — {activeAlert?.id ?? '—'}
+          </h2>
+          <div className="space-y-1.5 mb-4">
+            {REASONING_TRACE.map((step) => {
+              const Icon = stepTypeIcon[step.type] ?? Terminal;
+              const isExpanded = expandedStep === step.id;
+              return (
+                <div key={step.id} className="rounded-xl border border-white/8 bg-white/3 overflow-hidden">
                   <button
+                    type="button"
                     onClick={() => setExpandedStep(isExpanded ? null : step.id)}
-                    className="w-full text-left"
+                    className="w-full flex items-start gap-2.5 p-3 text-left"
                   >
-                    <div className="flex items-start gap-2">
-                      <div
-                        className={cn(
-                          'w-5 h-5 rounded-lg flex items-center justify-center shrink-0 mt-0.5',
-                          isLast && step.type === 'execute' ? 'bg-orange-500/20' : 'bg-white/5',
-                        )}
-                      >
-                        <Icon
+                    <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center shrink-0">
+                      <Icon className="w-3 h-3 text-zinc-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-[11px] font-medium text-white">{step.step}</span>
+                        <ChevronDown
                           className={cn(
-                            'w-3 h-3',
-                            isLast && step.type === 'execute' ? 'text-orange-400' : 'text-zinc-400',
+                            'w-3 h-3 text-zinc-500 shrink-0 transition-transform',
+                            isExpanded && 'rotate-180',
                           )}
                         />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[11px] text-zinc-300 leading-snug">{step.step}</div>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] text-zinc-500">{step.timestamp}</span>
-                          <div className="flex-1 h-1 rounded-full bg-white/5">
-                            <div
-                              className="h-full rounded-full bg-emerald-500/60"
-                              style={{ width: `${step.confidence}%` }}
-                            />
-                          </div>
-                          <span className="text-[10px] text-emerald-400">{step.confidence}%</span>
-                        </div>
+                      <div className="flex items-center gap-2 text-[10px] text-zinc-500 mt-0.5">
+                        <span className="font-mono uppercase">{step.type}</span>
+                        <span>{step.timestamp}</span>
+                        <span
+                          className={cn(
+                            step.confidence >= 90 ? 'text-emerald-400' : 'text-amber-400',
+                          )}
+                        >
+                          {step.confidence}%
+                        </span>
                       </div>
-                      {isExpanded ? (
-                        <ChevronDown className="w-3 h-3 text-zinc-500 shrink-0" />
-                      ) : (
-                        <ChevronRight className="w-3 h-3 text-zinc-500 shrink-0" />
-                      )}
                     </div>
                   </button>
                   {isExpanded && (
-                    <div className="mt-2 ml-7 text-[11px] text-zinc-400 bg-white/5 rounded-lg p-2 leading-relaxed">
-                      {step.result}
+                    <div className="px-3 pb-3 pt-0">
+                      <div className="rounded-lg bg-black/30 p-2.5 text-[11px] text-zinc-400 leading-relaxed">
+                        {step.result}
+                      </div>
                     </div>
                   )}
                 </div>
               );
             })}
           </div>
-          {/* Human-in-the-loop approval */}
-          <div className="rounded-xl border border-orange-500/30 bg-orange-500/5 p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <User className="w-3.5 h-3.5 text-orange-400" />
-              <span className="text-xs font-medium text-orange-300">Human Approval Required</span>
+
+          <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-3">
+            <div className="text-[11px] font-semibold text-orange-300 mb-2 flex items-center gap-1.5">
+              <AlertTriangle className="w-3 h-3" /> Human Approval Required
             </div>
-            <p className="text-[11px] text-zinc-400 mb-3">
-              Isolate WORKSTATION-047 via EDR API? Action will disconnect 1 user with critical ops
-              access.
-            </p>
+            <div className="text-[10px] text-zinc-400 mb-3 leading-relaxed">
+              <strong className="text-white">Action:</strong> Isolate WORKSTATION-047 via EDR API
+              <br />
+              <strong className="text-white">Risk:</strong> Will cut access for 1 analyst (active
+              investigation)
+              <br />
+              <strong className="text-white">Confidence:</strong> 95% — APT-29 lateral movement
+              confirmed
+            </div>
             <div className="flex gap-2">
               <button
                 onClick={handleApprove}
-                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-medium hover:bg-emerald-500/25 transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold hover:bg-emerald-500/25 transition-colors"
               >
-                <CheckCircle className="w-3.5 h-3.5" /> Approve
+                <CheckCircle className="w-3 h-3" /> Approve
               </button>
               <button
                 onClick={handleReject}
-                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium hover:bg-red-500/20 transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[11px] font-semibold hover:bg-red-500/20 transition-colors"
               >
-                <XCircle className="w-3.5 h-3.5" /> Reject
+                <XCircle className="w-3 h-3" /> Reject
               </button>
             </div>
           </div>

@@ -525,6 +525,92 @@ router.post(
   },
 );
 
+router.post(
+  '/aegis/digital-twin/scenarios/:id/pause',
+  limiter,
+  authMiddleware({ required: true }),
+  async (req: Request, res: Response) => {
+    try {
+      const raw = String(req.params.id ?? '');
+      const numeric = raw.startsWith('SIM-')
+        ? Number.parseInt(raw.slice(4), 10)
+        : Number.parseInt(raw, 10);
+      if (!Number.isFinite(numeric)) {
+        sendBadRequest(res, 'Invalid scenario id');
+        return;
+      }
+      const [existing] = await db
+        .select()
+        .from(firestormSimulationRunsTable)
+        .where(eq(firestormSimulationRunsTable.id, numeric))
+        .limit(1);
+      if (!existing) { sendNotFound(res, 'Scenario'); return; }
+      if (existing.status !== 'running') {
+        sendBadRequest(res, `Scenario is ${existing.status} — only running scenarios can be paused`);
+        return;
+      }
+      const [updated] = await db
+        .update(firestormSimulationRunsTable)
+        .set({ status: 'paused' })
+        .where(and(
+          eq(firestormSimulationRunsTable.id, numeric),
+          eq(firestormSimulationRunsTable.status, 'running'),
+        ))
+        .returning();
+      if (!updated) { sendBadRequest(res, 'Scenario state changed — refresh and try again'); return; }
+      sendSuccess(res, {
+        message: `Scenario SIM-${String(updated.id).padStart(3, '0')} paused — resume when ready`,
+        scenario: { id: `SIM-${String(updated.id).padStart(3, '0')}`, runId: updated.id, name: updated.name, status: 'paused' },
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to pause scenario');
+    }
+  },
+);
+
+router.post(
+  '/aegis/digital-twin/scenarios/:id/resume',
+  limiter,
+  authMiddleware({ required: true }),
+  async (req: Request, res: Response) => {
+    try {
+      const raw = String(req.params.id ?? '');
+      const numeric = raw.startsWith('SIM-')
+        ? Number.parseInt(raw.slice(4), 10)
+        : Number.parseInt(raw, 10);
+      if (!Number.isFinite(numeric)) {
+        sendBadRequest(res, 'Invalid scenario id');
+        return;
+      }
+      const [existing] = await db
+        .select()
+        .from(firestormSimulationRunsTable)
+        .where(eq(firestormSimulationRunsTable.id, numeric))
+        .limit(1);
+      if (!existing) { sendNotFound(res, 'Scenario'); return; }
+      if (existing.status !== 'paused') {
+        sendBadRequest(res, `Scenario is ${existing.status} — only paused scenarios can be resumed`);
+        return;
+      }
+      const [updated] = await db
+        .update(firestormSimulationRunsTable)
+        .set({ status: 'running' })
+        .where(and(
+          eq(firestormSimulationRunsTable.id, numeric),
+          eq(firestormSimulationRunsTable.status, 'paused'),
+        ))
+        .returning();
+      if (!updated) { sendBadRequest(res, 'Scenario state changed — refresh and try again'); return; }
+      sendSuccess(res, {
+        message: `Scenario SIM-${String(updated.id).padStart(3, '0')} resumed — attack simulation continuing`,
+        scenario: { id: `SIM-${String(updated.id).padStart(3, '0')}`, runId: updated.id, name: updated.name, status: 'running' },
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to resume scenario');
+    }
+  },
+);
+
 // ─── DECEPTION GRID ROUTES ────────────────────────────────────────────────────
 
 router.get(
