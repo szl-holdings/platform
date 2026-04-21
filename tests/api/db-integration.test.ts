@@ -458,6 +458,7 @@ describe("DB Integration — Lyte domain", () => {
 // ── Domain: Aegis / Firestorm ─────────────────────────────────────────────────
 describe("DB Integration — Aegis / Firestorm domain", () => {
   let app: express.Express;
+  let tempAssessmentId: number | undefined;
 
   beforeAll(async () => {
     app = buildApp();
@@ -524,6 +525,61 @@ describe("DB Integration — Aegis / Firestorm domain", () => {
     expect(res.body.severity).toBe("medium");
     expect(res.body.status).toBe("detection");
     registerCleanup({ table: "firestormIncidentsTable", id: res.body.id as number });
+  });
+
+  it("POST /firestorm/assessments rejects missing required assessmentType with 400", async () => {
+    const res = await request(app)
+      .post("/firestorm/assessments")
+      .send({ name: "Missing Type Assessment" });
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /firestorm/assessments creates a real DB record and returns 201", async () => {
+    const res = await request(app)
+      .post("/firestorm/assessments")
+      .send({
+        name: `IT-Assessment-${Date.now()}`,
+        assessmentType: "penetration_test",
+        description: "Integration test assessment — please ignore",
+      });
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty("id");
+    expect(typeof res.body.id).toBe("number");
+    expect(res.body.assessmentType).toBe("penetration_test");
+    expect(res.body.status).toBe("draft");
+    tempAssessmentId = res.body.id as number;
+    registerCleanup({ table: "firestormAssessmentsTable", id: tempAssessmentId });
+  });
+
+  it("POST /firestorm/findings rejects missing required title with 400", async () => {
+    const assessmentId = tempAssessmentId ?? 1;
+    const res = await request(app)
+      .post("/firestorm/findings")
+      .send({ assessmentId, severity: "medium" });
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /firestorm/findings creates a real DB record and returns 201", async () => {
+    const assessmentId = tempAssessmentId;
+    if (!assessmentId) {
+      return;
+    }
+    const res = await request(app)
+      .post("/firestorm/findings")
+      .send({
+        assessmentId,
+        title: `IT-Finding-${Date.now()}`,
+        severity: "low",
+        description: "Integration test finding — please ignore",
+      });
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty("id");
+    expect(typeof res.body.id).toBe("number");
+    expect(res.body.severity).toBe("low");
+    expect(res.body.status).toBe("open");
+    registerCleanup({ table: "firestormFindingsTable", id: res.body.id as number });
   });
 
   afterAll(async () => {
