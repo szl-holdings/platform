@@ -117,7 +117,12 @@ function captureStack(): string {
   // trace points at the originating route/handler, not this wrapper file.
   const lines = (err.stack ?? "").split("\n").slice(1);
   return lines
-    .filter((l) => !l.includes("/lib/db/src/index"))
+    .filter(
+      (l) =>
+        !l.includes("/lib/db/src/index") &&
+        !l.includes("instrumentedConnect") &&
+        !l.includes("captureStack"),
+    )
     .slice(0, 12)
     .join("\n");
 }

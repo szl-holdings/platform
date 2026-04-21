@@ -100,7 +100,11 @@ export {
 } from './lib/guardian-engine';
 export { app };
 
-export async function bootstrap(server: http.Server, port: number): Promise<http.RequestListener> {
+export async function bootstrap(
+  server: http.Server,
+  port: number,
+  onMigrationsReady?: (handler: http.RequestListener) => void,
+): Promise<http.RequestListener> {
   await otelReady;
 
   buildGraphQLMiddleware(server)
@@ -332,6 +336,19 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     }
     if (migrationsComplete) {
       logger.info('[bootstrap] All migrations complete');
+    }
+
+    // Schema is durable — open the live handler now so the server can serve
+    // traffic while the rest of the post-migration init proceeds in the
+    // background. Without this, slow optional inits (Guardian engine, durable
+    // queue, seeds, etc.) gate the entire HTTP surface behind a 503 wall.
+    if (onMigrationsReady) {
+      try {
+        onMigrationsReady(app as unknown as http.RequestListener);
+        logger.info('[bootstrap] Live HTTP handler activated — post-migration init continues in background');
+      } catch (err) {
+        logger.warn({ err }, '[bootstrap] onMigrationsReady callback threw (non-fatal)');
+      }
     }
 
     // Step 2: Platform flags and knowledge store depend on schema being ready
@@ -702,7 +719,11 @@ if (!process.env.__FAST_START_SERVER) {
   const server = http.createServer((req, res) => startingHandler(req, res));
   server.listen(port, '0.0.0.0', () => {
     logger.info({ port, host: '0.0.0.0' }, 'Server listening (fast-start)');
-    bootstrap(server, port)
+    bootstrap(server, port, (handler) => {
+      readyHandler = handler;
+      bootstrapDone = true;
+      logger.info({ port }, '[api-server] Live handler activated post-migrations — accepting traffic');
+    })
       .then((handler) => {
         readyHandler = handler;
         bootstrapDone = true;

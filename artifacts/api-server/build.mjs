@@ -249,7 +249,15 @@ server.listen(port, "0.0.0.0", async () => {
   console.log(\`  ➜  Network: http://0.0.0.0:\${port}/\`);
   try {
     const mod = await import("./server.mjs");
-    const handler = await mod.bootstrap(server, port);
+    // OBS-007 mitigation: open the live handler immediately after migrations
+    // (via onMigrationsReady callback) so the HTTP surface is responsive while
+    // the rest of bootstrap (Guardian, durable queue, seeds) continues in
+    // background. Without this, slow optional inits hold every request behind
+    // a 503 wall.
+    const handler = await mod.bootstrap(server, port, (earlyHandler) => {
+      appHandler = earlyHandler;
+      console.log("[api-server] Live handler activated post-migrations on port " + port);
+    });
     appHandler = handler;
     console.log("[api-server] Fully ready on port " + port);
   } catch (err) {

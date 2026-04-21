@@ -59,8 +59,8 @@ export const envSchema = z.object({
   // ── Database ────────────────────────────────────────────────────────────
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required").optional(),
   DB_POOL_MIN: optionalInt("1"),
-  DB_POOL_MAX: optionalInt("20"),
-  DB_CONNECT_TIMEOUT_MS: optionalInt("30000"),
+  DB_POOL_MAX: optionalInt("100"),
+  DB_CONNECT_TIMEOUT_MS: optionalInt("90000"),
   DB_IDLE_TIMEOUT_MS: optionalInt("60000"),
   DB_STATEMENT_TIMEOUT_MS: optionalInt("60000"),
   SLOW_QUERY_THRESHOLD_MS: optionalInt("500"),
