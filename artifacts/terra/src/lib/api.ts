@@ -549,6 +549,7 @@ export const api = {
       propertyType?: string;
       inputs: Record<string, unknown>;
       results?: Record<string, unknown>;
+      isDemo?: boolean;
     }) =>
       apiFetch<{ project: TerraProFormaProject }>('/terra/pro-forma-projects', {
         method: 'POST',
@@ -609,6 +610,7 @@ export const api = {
       description?: string;
       inputs: Record<string, unknown>;
       results?: Record<string, unknown>;
+      isDemo?: boolean;
     }) =>
       apiFetch<{ structure: TerraWaterfallStructure }>('/terra/waterfall-structures', {
         method: 'POST',
