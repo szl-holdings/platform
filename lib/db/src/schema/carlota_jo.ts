@@ -248,3 +248,97 @@ export const carlotaRadarSeenSignalsTable = pgTable(
     byUser: index('carlota_radar_seen_user_idx').on(table.userId),
   }),
 );
+
+// ── Expert Network ─────────────────────────────────────────────────────────────
+
+export const carlotaExpertsTable = pgTable('carlota_experts', {
+  id: serial('id').primaryKey(),
+  organizationId: integer('organization_id'),
+  createdByUserId: integer('created_by_user_id'),
+  name: text('name').notNull(),
+  title: text('title').notNull(),
+  location: text('location').notNull().default(''),
+  tier: text('tier', { enum: ['principal', 'senior', 'specialist', 'associate'] })
+    .notNull()
+    .default('specialist'),
+  skills: jsonb('skills').$type<string[]>().notNull().default([]),
+  industries: jsonb('industries').$type<string[]>().notNull().default([]),
+  languages: jsonb('languages').$type<string[]>().notNull().default([]),
+  availability: text('availability', {
+    enum: ['available', 'limited', 'booked', 'on-engagement'],
+  })
+    .notNull()
+    .default('available'),
+  dayRate: integer('day_rate').notNull().default(0),
+  rating: numeric('rating', { precision: 3, scale: 1 }).notNull().default('5.0'),
+  engagements: integer('engagements').notNull().default(0),
+  bio: text('bio').notNull().default(''),
+  recentWork: text('recent_work'),
+  isSeeded: boolean('is_seeded').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const insertCarlotaExpertSchema = createInsertSchema(carlotaExpertsTable).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCarlotaExpert = z.infer<typeof insertCarlotaExpertSchema>;
+export type CarlotaExpert = typeof carlotaExpertsTable.$inferSelect;
+
+// ── Knowledge Vault ────────────────────────────────────────────────────────────
+
+export const carlotaKnowledgeItemsTable = pgTable('carlota_knowledge_items', {
+  id: serial('id').primaryKey(),
+  organizationId: integer('organization_id'),
+  createdByUserId: integer('created_by_user_id'),
+  type: text('type', {
+    enum: ['framework', 'playbook', 'template', 'case-study', 'research'],
+  })
+    .notNull()
+    .default('framework'),
+  title: text('title').notNull(),
+  description: text('description').notNull().default(''),
+  tags: jsonb('tags').$type<string[]>().notNull().default([]),
+  industries: jsonb('industries').$type<string[]>().notNull().default([]),
+  engagements: jsonb('engagements').$type<string[]>().notNull().default([]),
+  uses: integer('uses').notNull().default(0),
+  rating: numeric('rating', { precision: 3, scale: 1 }).notNull().default('4.5'),
+  lastUpdated: text('last_updated').notNull().default(''),
+  author: text('author').notNull().default('Carlota Jo'),
+  isSeeded: boolean('is_seeded').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const insertCarlotaKnowledgeItemSchema = createInsertSchema(
+  carlotaKnowledgeItemsTable,
+).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertCarlotaKnowledgeItem = z.infer<typeof insertCarlotaKnowledgeItemSchema>;
+export type CarlotaKnowledgeItem = typeof carlotaKnowledgeItemsTable.$inferSelect;
+
+// ── Proposal Drafts ────────────────────────────────────────────────────────────
+
+export const carlotaProposalDraftsTable = pgTable('carlota_proposal_drafts', {
+  id: serial('id').primaryKey(),
+  organizationId: integer('organization_id'),
+  createdByUserId: integer('created_by_user_id'),
+  title: text('title').notNull(),
+  prospectName: text('prospect_name').notNull().default(''),
+  prospectCompany: text('prospect_company').notNull().default(''),
+  template: text('template').notNull().default('standard'),
+  formData: jsonb('form_data').$type<Record<string, string>>().notNull().default({}),
+  generatedProposal: jsonb('generated_proposal'),
+  status: text('status', { enum: ['draft', 'generated', 'sent'] })
+    .notNull()
+    .default('draft'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const insertCarlotaProposalDraftSchema = createInsertSchema(
+  carlotaProposalDraftsTable,
+).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertCarlotaProposalDraft = z.infer<typeof insertCarlotaProposalDraftSchema>;
+export type CarlotaProposalDraft = typeof carlotaProposalDraftsTable.$inferSelect;

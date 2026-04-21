@@ -15,6 +15,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Area,
   AreaChart,
@@ -136,6 +137,7 @@ const sentimentIcon: Record<string, React.ReactNode> = {
 };
 
 export default function ClientIntel() {
+  const { t } = useTranslation();
   usePageMeta({
     title: 'Client Intelligence | Carlota Jo Consulting – Portfolio CRM',
     description:
@@ -165,29 +167,45 @@ export default function ClientIntel() {
               value: '85',
               sub: '+6 pts vs last quarter',
               color: 'text-emerald-400',
+              source: t('clientIntel.sources.nps'),
             },
             {
               label: 'Avg Engagement',
               value: '76.8',
               sub: 'Score out of 100',
               color: 'text-primary',
+              source: t('clientIntel.sources.crm'),
             },
             {
               label: 'At-Risk Clients',
               value: '1',
               sub: 'Require immediate attention',
               color: 'text-red-400',
+              source: t('clientIntel.sources.churn'),
             },
             {
               label: 'Portfolio ARR',
               value: '$268K',
               sub: 'Across 4 active clients',
               color: 'text-foreground',
+              source: t('clientIntel.sources.billing'),
             },
-          ].map(({ label, value, sub, color }) => (
+          ].map(({ label, value, sub, color, source }) => (
             <Card key={label}>
               <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground">{label}</p>
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <span style={{
+                    fontSize: 9,
+                    padding: '1px 6px',
+                    borderRadius: 4,
+                    background: 'rgba(100,90,70,0.08)',
+                    color: '#8C7B5A',
+                    border: '1px solid rgba(100,90,70,0.15)',
+                    fontWeight: 500,
+                    letterSpacing: '0.03em',
+                  }}>{source}</span>
+                </div>
                 <p className={`text-2xl font-bold ${color}`}>{value}</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">{sub}</p>
               </CardContent>

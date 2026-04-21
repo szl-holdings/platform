@@ -12,7 +12,10 @@ import {
   carlotaClientRoiTrendTable,
   carlotaDiagnosticsTable,
   carlotaEngagementsTable,
+  carlotaExpertsTable,
   carlotaInquiriesTable,
+  carlotaKnowledgeItemsTable,
+  carlotaProposalDraftsTable,
   carlotaRadarCompetitorsTable,
   carlotaRadarNotifPrefsTable,
   carlotaRadarSeenSignalsTable,
@@ -27,7 +30,7 @@ import {
 } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
 import { createHash } from 'crypto';
-import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, or, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import multer from 'multer';
@@ -2801,6 +2804,736 @@ router.put(
     }
   },
 );
+
+// ── Expert Network CRUD ────────────────────────────────────────────────────────
+
+const SEED_EXPERTS = [
+  {
+    name: 'Dr. Priya Rajan',
+    title: 'Healthcare Transformation Lead',
+    location: 'London',
+    tier: 'specialist' as const,
+    skills: ['Digital Transformation', 'Clinical Operations', 'EHR Implementation', 'Change Management', 'Process Redesign'],
+    industries: ['Healthcare', 'Life Sciences', 'Public Sector'],
+    languages: ['English', 'Tamil', 'Hindi'],
+    availability: 'available' as const,
+    dayRate: 1800,
+    rating: '4.9',
+    engagements: 11,
+    bio: '15 years in NHS and private healthcare transformation. Led digital strategy for 3 major hospital trusts. EHR implementation expert with deep clinical operations credibility.',
+    recentWork: 'Solaris Health Systems digital roadmap (Q4 2025)',
+    isSeeded: true,
+  },
+  {
+    name: 'James Whitmore',
+    title: 'Brand & Marketing Strategist',
+    location: 'London',
+    tier: 'senior' as const,
+    skills: ['Brand Strategy', 'Consumer Insights', 'DTC Strategy', 'Market Research', 'Pricing'],
+    industries: ['Consumer Goods', 'Retail', 'Luxury', 'FMCG'],
+    languages: ['English', 'French'],
+    availability: 'limited' as const,
+    dayRate: 1400,
+    rating: '4.7',
+    engagements: 8,
+    bio: 'Former VP Strategy at Unilever and brand consultant to 12 FTSE 250 companies. Specialism in premium brand repositioning and DTC channel build.',
+    recentWork: 'Luminary Brands positioning strategy (Jan–Apr 2026)',
+    isSeeded: true,
+  },
+  {
+    name: 'Sofia Andersson',
+    title: 'Financial Services & M&A Advisor',
+    location: 'Stockholm / London',
+    tier: 'principal' as const,
+    skills: ['M&A Advisory', 'Financial Modelling', 'Market Entry', 'Regulatory Strategy', 'Private Equity'],
+    industries: ['Financial Services', 'Private Equity', 'Asset Management'],
+    languages: ['English', 'Swedish', 'German'],
+    availability: 'on-engagement' as const,
+    dayRate: 2200,
+    rating: '5.0',
+    engagements: 16,
+    bio: 'Former Goldman Sachs MD and boutique M&A partner. 20+ years in financial services strategy across Europe and North America. Deep regulatory expertise in FCA-regulated environments.',
+    recentWork: 'Vertex Capital Partners M&A advisory (current)',
+    isSeeded: true,
+  },
+  {
+    name: 'Kai Okonkwo',
+    title: 'Organisational Design & Culture Lead',
+    location: 'London',
+    tier: 'specialist' as const,
+    skills: ['Org Design', 'Culture Transformation', 'HRBP', 'Performance Management', 'Leadership Development'],
+    industries: ['Professional Services', 'Technology', 'Consumer Goods', 'Industrial'],
+    languages: ['English', 'Yoruba', 'French'],
+    availability: 'available' as const,
+    dayRate: 1600,
+    rating: '4.8',
+    engagements: 9,
+    bio: 'OD practitioner with a background in behavioural science. Led org design programmes for 3 PE-backed transformations. Certified coach (ICF PCC). Known for high-engagement facilitation.',
+    recentWork: 'Clearfield Manufacturing org design (Q1 2026)',
+    isSeeded: true,
+  },
+  {
+    name: 'Natasha Bergmann',
+    title: 'Digital Strategy & AI Lead',
+    location: 'Berlin / Remote',
+    tier: 'senior' as const,
+    skills: ['Digital Strategy', 'AI/ML Integration', 'Technology Architecture', 'Innovation', 'Data Strategy'],
+    industries: ['Technology', 'Manufacturing', 'Retail', 'Healthcare'],
+    languages: ['English', 'German'],
+    availability: 'available' as const,
+    dayRate: 1700,
+    rating: '4.6',
+    engagements: 6,
+    bio: 'Former Head of Digital Innovation at Siemens. Pioneer in AI strategy implementation for traditional industries. Fluent in both technical and business language — rare bridge-builder.',
+    isSeeded: true,
+  },
+  {
+    name: 'Marcus Lefevre',
+    title: 'Private Equity & Portfolio Value Creation',
+    location: 'London / Paris',
+    tier: 'specialist' as const,
+    skills: ['PE Value Creation', 'Operational Improvement', 'Portfolio Strategy', '100-Day Planning', 'Commercial Due Diligence'],
+    industries: ['Private Equity', 'Industrial', 'Consumer Goods', 'Business Services'],
+    languages: ['English', 'French'],
+    availability: 'limited' as const,
+    dayRate: 2000,
+    rating: '4.9',
+    engagements: 14,
+    bio: '15 years in private equity operations across KKR, CVC, and mid-market funds. Developed 100-day playbooks for 40+ portfolio company transformations.',
+    recentWork: 'Aurelius PE portfolio strategy series (Mar 2026)',
+    isSeeded: true,
+  },
+  {
+    name: 'Amara Diallo',
+    title: 'Data Analytics & Insights Lead',
+    location: 'London',
+    tier: 'associate' as const,
+    skills: ['Data Analysis', 'Market Research', 'Consumer Insights', 'SQL', 'Tableau', 'Python'],
+    industries: ['Consumer Goods', 'Retail', 'Media', 'Healthcare'],
+    languages: ['English', 'French', 'Wolof'],
+    availability: 'available' as const,
+    dayRate: 750,
+    rating: '4.5',
+    engagements: 4,
+    bio: 'Data analyst with a background in consumer research at Nielsen. Strong quantitative skills combined with ability to translate data into strategic narrative.',
+    isSeeded: true,
+  },
+  {
+    name: 'Richard Chen',
+    title: 'Supply Chain & Operations Expert',
+    location: 'Singapore / London',
+    tier: 'specialist' as const,
+    skills: ['Supply Chain', 'Operations Strategy', 'Lean', 'Manufacturing', 'Logistics'],
+    industries: ['Manufacturing', 'Consumer Goods', 'Retail', 'Logistics'],
+    languages: ['English', 'Mandarin', 'Cantonese'],
+    availability: 'booked' as const,
+    dayRate: 1900,
+    rating: '4.8',
+    engagements: 12,
+    bio: '20 years in global supply chain across McKinsey and in-house roles. Deep expertise in Asia-Pacific supply chain reconfiguration and sustainability-driven operational transformation.',
+    isSeeded: true,
+  },
+];
+
+const SEED_KNOWLEDGE_ITEMS = [
+  {
+    type: 'framework' as const,
+    title: 'Value Creation Framework v3',
+    description: 'Comprehensive framework for identifying and unlocking sustainable value across complex portfolio companies. Covers EBITDA optimisation, revenue growth, and organisational capability building.',
+    tags: ['Private Equity', 'Value Creation', 'EBITDA', 'Portfolio'],
+    industries: ['Private Equity', 'Industrial', 'Consumer Goods'],
+    engagements: ['Aurelius PE Portfolio Review', 'Vertex Capital Advisory'],
+    uses: 34,
+    rating: '4.9',
+    lastUpdated: 'Apr 2026',
+    author: 'Sofia Andersson',
+    isSeeded: true,
+  },
+  {
+    type: 'playbook' as const,
+    title: '100-Day Transformation Playbook',
+    description: 'Structured playbook for post-acquisition integration and transformation leadership. Includes stakeholder mapping, quick-win identification, and communication cadence design.',
+    tags: ['M&A', 'Integration', 'Change Management', '100-Day'],
+    industries: ['Private Equity', 'Consumer Goods', 'Business Services'],
+    engagements: ['Clearfield Manufacturing Org Design', 'Aurelius PE Portfolio Review'],
+    uses: 27,
+    rating: '4.8',
+    lastUpdated: 'Mar 2026',
+    author: 'Marcus Lefevre',
+    isSeeded: true,
+  },
+  {
+    type: 'template' as const,
+    title: 'Digital Maturity Assessment Template',
+    description: 'Structured diagnostic for evaluating organisational digital capability across 8 dimensions. Used to baseline current state and develop targeted transformation roadmaps.',
+    tags: ['Digital Transformation', 'Diagnostic', 'Technology', 'Assessment'],
+    industries: ['Healthcare', 'Manufacturing', 'Retail'],
+    engagements: ['Solaris Health Systems'],
+    uses: 19,
+    rating: '4.7',
+    lastUpdated: 'Feb 2026',
+    author: 'Natasha Bergmann',
+    isSeeded: true,
+  },
+  {
+    type: 'case-study' as const,
+    title: 'DTC Brand Repositioning: Luminary Brands',
+    description: 'Full case study of the Luminary Brands repositioning from mass to premium. Covers strategic insight development, channel strategy shift, and 18-month commercialisation plan.',
+    tags: ['Brand Strategy', 'DTC', 'Consumer Goods', 'Repositioning'],
+    industries: ['Consumer Goods', 'Retail', 'Luxury'],
+    engagements: ['Luminary Brands Engagement'],
+    uses: 12,
+    rating: '4.9',
+    lastUpdated: 'Apr 2026',
+    author: 'James Whitmore',
+    isSeeded: true,
+  },
+  {
+    type: 'research' as const,
+    title: 'AI Integration in Traditional Industries — Research Summary',
+    description: 'Research synthesis on AI adoption patterns across manufacturing, logistics, and retail sectors. Identifies high-impact use cases, adoption barriers, and governance frameworks.',
+    tags: ['AI', 'Digital Strategy', 'Manufacturing', 'Innovation'],
+    industries: ['Manufacturing', 'Logistics', 'Retail'],
+    engagements: [],
+    uses: 22,
+    rating: '4.6',
+    lastUpdated: 'Jan 2026',
+    author: 'Natasha Bergmann',
+    isSeeded: true,
+  },
+  {
+    type: 'framework' as const,
+    title: 'Healthcare Transformation Framework',
+    description: 'End-to-end framework for digital and operational transformation in NHS and private healthcare settings. Includes clinical governance, EHR selection, and staff adoption methodology.',
+    tags: ['Healthcare', 'Digital Transformation', 'NHS', 'EHR'],
+    industries: ['Healthcare', 'Life Sciences', 'Public Sector'],
+    engagements: ['Solaris Health Systems'],
+    uses: 15,
+    rating: '4.9',
+    lastUpdated: 'Q4 2025',
+    author: 'Dr. Priya Rajan',
+    isSeeded: true,
+  },
+];
+
+async function ensureExpertsSeed(): Promise<void> {
+  const count = await db.select({ n: sql<number>`count(*)` }).from(carlotaExpertsTable);
+  if (Number(count[0]?.n ?? 0) === 0) {
+    await db.insert(carlotaExpertsTable).values(SEED_EXPERTS);
+  }
+}
+
+async function ensureKnowledgeSeed(): Promise<void> {
+  const count = await db.select({ n: sql<number>`count(*)` }).from(carlotaKnowledgeItemsTable);
+  if (Number(count[0]?.n ?? 0) === 0) {
+    await db.insert(carlotaKnowledgeItemsTable).values(SEED_KNOWLEDGE_ITEMS);
+  }
+}
+
+// GET /carlota/experts
+router.get('/carlota/experts', authMiddleware(), async (req, res) => {
+  try {
+    await ensureExpertsSeed();
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const tenantFilter = orgId
+      ? or(eq(carlotaExpertsTable.isSeeded, true), eq(carlotaExpertsTable.organizationId, orgId))
+      : or(eq(carlotaExpertsTable.isSeeded, true), eq(carlotaExpertsTable.createdByUserId, userId));
+    const experts = await db
+      .select()
+      .from(carlotaExpertsTable)
+      .where(tenantFilter)
+      .orderBy(desc(carlotaExpertsTable.rating), desc(carlotaExpertsTable.engagements));
+    sendSuccess(res, {
+      experts,
+      count: experts.length,
+      seeded: experts.some((e) => e.isSeeded),
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to fetch experts');
+  }
+});
+
+const expertTierEnum = z.enum(['principal', 'senior', 'specialist', 'associate']);
+const expertAvailEnum = z.enum(['available', 'limited', 'booked', 'on-engagement']);
+const expertWriteSchema = bodyShape({
+  name: z.string().min(1).max(200).optional(),
+  title: z.string().min(1).max(200).optional(),
+  location: z.string().max(200).optional(),
+  bio: z.string().max(2000).optional(),
+  recentWork: z.string().max(500).nullable().optional(),
+  tier: expertTierEnum.optional(),
+  availability: expertAvailEnum.optional(),
+  dayRate: z.coerce.number().min(0).max(100000).optional(),
+  rating: z.coerce.number().min(0).max(5).optional(),
+  engagements: z.coerce.number().int().min(0).optional(),
+  skills: z.array(z.string().max(100)).max(30).optional(),
+  industries: z.array(z.string().max(100)).max(20).optional(),
+  languages: z.array(z.string().max(100)).max(20).optional(),
+});
+
+// POST /carlota/experts
+router.post(
+  '/carlota/experts',
+  authMiddleware(),
+  validateBody(expertWriteSchema),
+  async (req, res) => {
+    try {
+      const body = req.body as z.infer<typeof expertWriteSchema>;
+      if (!body.name || !body.title) {
+        sendBadRequest(res, 'name and title are required');
+        return;
+      }
+      const userId = req.user!.id;
+      const orgId = req.user?.orgs[0]?.orgId ?? null;
+      const [expert] = await db
+        .insert(carlotaExpertsTable)
+        .values({
+          name: body.name,
+          title: body.title,
+          location: body.location ?? '',
+          tier: body.tier ?? 'specialist',
+          skills: body.skills ?? [],
+          industries: body.industries ?? [],
+          languages: body.languages ?? [],
+          availability: body.availability ?? 'available',
+          dayRate: body.dayRate ?? 0,
+          rating: String((body.rating ?? 4.5).toFixed(1)),
+          engagements: body.engagements ?? 0,
+          bio: body.bio ?? '',
+          recentWork: body.recentWork ?? null,
+          organizationId: orgId,
+          createdByUserId: userId,
+          isSeeded: false,
+        })
+        .returning();
+      sendSuccess(res, expert, 201);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create expert');
+    }
+  },
+);
+
+// PUT /carlota/experts/:id
+router.put(
+  '/carlota/experts/:id',
+  authMiddleware(),
+  validateBody(expertWriteSchema),
+  async (req, res) => {
+    try {
+      const id = parseIdParam(req, res);
+      if (id === null) return;
+      const userId = req.user!.id;
+      const orgId = req.user?.orgs[0]?.orgId ?? null;
+      const body = req.body as z.infer<typeof expertWriteSchema>;
+      const [existing] = await db
+        .select()
+        .from(carlotaExpertsTable)
+        .where(eq(carlotaExpertsTable.id, id))
+        .limit(1);
+      if (!existing) {
+        sendNotFound(res, 'Expert not found');
+        return;
+      }
+      if (existing.isSeeded) {
+        sendForbidden(res, 'Seeded records are read-only');
+        return;
+      }
+      if (orgId ? existing.organizationId !== orgId : existing.createdByUserId !== userId) {
+        sendForbidden(res, 'Access denied');
+        return;
+      }
+      const update: Partial<typeof carlotaExpertsTable.$inferInsert> = { updatedAt: new Date() };
+      if (body.name != null) update.name = body.name;
+      if (body.title != null) update.title = body.title;
+      if (body.location != null) update.location = body.location;
+      if (body.bio != null) update.bio = body.bio;
+      if (body.recentWork !== undefined) update.recentWork = body.recentWork;
+      if (body.dayRate != null) update.dayRate = body.dayRate;
+      if (body.rating != null) update.rating = String(body.rating.toFixed(1));
+      if (body.engagements != null) update.engagements = body.engagements;
+      if (body.skills != null) update.skills = body.skills;
+      if (body.industries != null) update.industries = body.industries;
+      if (body.languages != null) update.languages = body.languages;
+      if (body.tier != null) update.tier = body.tier;
+      if (body.availability != null) update.availability = body.availability;
+      const [updated] = await db
+        .update(carlotaExpertsTable)
+        .set(update)
+        .where(eq(carlotaExpertsTable.id, id))
+        .returning();
+      sendSuccess(res, updated);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to update expert');
+    }
+  },
+);
+
+// DELETE /carlota/experts/:id
+router.delete('/carlota/experts/:id', authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req, res);
+    if (id === null) return;
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const [existing] = await db
+      .select()
+      .from(carlotaExpertsTable)
+      .where(eq(carlotaExpertsTable.id, id))
+      .limit(1);
+    if (!existing) {
+      sendNotFound(res, 'Expert not found');
+      return;
+    }
+    if (existing.isSeeded) {
+      sendForbidden(res, 'Seeded records are read-only');
+      return;
+    }
+    if (orgId ? existing.organizationId !== orgId : existing.createdByUserId !== userId) {
+      sendForbidden(res, 'Access denied');
+      return;
+    }
+    await db.delete(carlotaExpertsTable).where(eq(carlotaExpertsTable.id, id));
+    sendSuccess(res, { deleted: true, id });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to delete expert');
+  }
+});
+
+// ── Knowledge Vault CRUD ───────────────────────────────────────────────────────
+
+// GET /carlota/knowledge
+router.get('/carlota/knowledge', authMiddleware(), async (req, res) => {
+  try {
+    await ensureKnowledgeSeed();
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const tenantFilter = orgId
+      ? or(eq(carlotaKnowledgeItemsTable.isSeeded, true), eq(carlotaKnowledgeItemsTable.organizationId, orgId))
+      : or(eq(carlotaKnowledgeItemsTable.isSeeded, true), eq(carlotaKnowledgeItemsTable.createdByUserId, userId));
+    const items = await db
+      .select()
+      .from(carlotaKnowledgeItemsTable)
+      .where(tenantFilter)
+      .orderBy(desc(carlotaKnowledgeItemsTable.uses), desc(carlotaKnowledgeItemsTable.rating));
+    sendSuccess(res, {
+      items,
+      count: items.length,
+      seeded: items.some((i) => i.isSeeded),
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to fetch knowledge items');
+  }
+});
+
+const knowledgeTypeEnum = z.enum(['framework', 'playbook', 'template', 'case-study', 'research']);
+const knowledgeWriteSchema = bodyShape({
+  title: z.string().min(1).max(300).optional(),
+  description: z.string().max(2000).optional(),
+  type: knowledgeTypeEnum.optional(),
+  tags: z.array(z.string().max(100)).max(30).optional(),
+  industries: z.array(z.string().max(100)).max(20).optional(),
+  engagements: z.array(z.string().max(200)).max(20).optional(),
+  uses: z.coerce.number().int().min(0).optional(),
+  rating: z.coerce.number().min(0).max(5).optional(),
+  lastUpdated: z.string().max(50).optional(),
+  author: z.string().max(200).optional(),
+});
+
+// POST /carlota/knowledge
+router.post(
+  '/carlota/knowledge',
+  authMiddleware(),
+  validateBody(knowledgeWriteSchema),
+  async (req, res) => {
+    try {
+      const body = req.body as z.infer<typeof knowledgeWriteSchema>;
+      if (!body.title) {
+        sendBadRequest(res, 'title is required');
+        return;
+      }
+      const userId = req.user!.id;
+      const orgId = req.user?.orgs[0]?.orgId ?? null;
+      const [item] = await db
+        .insert(carlotaKnowledgeItemsTable)
+        .values({
+          title: body.title,
+          description: body.description ?? '',
+          type: body.type ?? 'framework',
+          tags: body.tags ?? [],
+          industries: body.industries ?? [],
+          engagements: body.engagements ?? [],
+          uses: body.uses ?? 0,
+          rating: String((body.rating ?? 4.5).toFixed(1)),
+          lastUpdated: body.lastUpdated ?? new Date().toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
+          author: body.author ?? 'Carlota Jo',
+          organizationId: orgId,
+          createdByUserId: userId,
+          isSeeded: false,
+        })
+        .returning();
+      sendSuccess(res, item, 201);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create knowledge item');
+    }
+  },
+);
+
+// PUT /carlota/knowledge/:id
+router.put(
+  '/carlota/knowledge/:id',
+  authMiddleware(),
+  validateBody(knowledgeWriteSchema),
+  async (req, res) => {
+    try {
+      const id = parseIdParam(req, res);
+      if (id === null) return;
+      const userId = req.user!.id;
+      const orgId = req.user?.orgs[0]?.orgId ?? null;
+      const body = req.body as z.infer<typeof knowledgeWriteSchema>;
+      const [existing] = await db
+        .select()
+        .from(carlotaKnowledgeItemsTable)
+        .where(eq(carlotaKnowledgeItemsTable.id, id))
+        .limit(1);
+      if (!existing) {
+        sendNotFound(res, 'Knowledge item not found');
+        return;
+      }
+      if (existing.isSeeded) {
+        sendForbidden(res, 'Seeded records are read-only');
+        return;
+      }
+      if (orgId ? existing.organizationId !== orgId : existing.createdByUserId !== userId) {
+        sendForbidden(res, 'Access denied');
+        return;
+      }
+      const update: Partial<typeof carlotaKnowledgeItemsTable.$inferInsert> = { updatedAt: new Date() };
+      if (body.title != null) update.title = body.title;
+      if (body.description != null) update.description = body.description;
+      if (body.type != null) update.type = body.type;
+      if (body.tags != null) update.tags = body.tags;
+      if (body.industries != null) update.industries = body.industries;
+      if (body.engagements != null) update.engagements = body.engagements;
+      if (body.uses != null) update.uses = body.uses;
+      if (body.rating != null) update.rating = String(body.rating.toFixed(1));
+      if (body.lastUpdated != null) update.lastUpdated = body.lastUpdated;
+      if (body.author != null) update.author = body.author;
+      const [updated] = await db
+        .update(carlotaKnowledgeItemsTable)
+        .set(update)
+        .where(eq(carlotaKnowledgeItemsTable.id, id))
+        .returning();
+      sendSuccess(res, updated);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to update knowledge item');
+    }
+  },
+);
+
+// DELETE /carlota/knowledge/:id
+router.delete('/carlota/knowledge/:id', authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req, res);
+    if (id === null) return;
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const [existing] = await db
+      .select()
+      .from(carlotaKnowledgeItemsTable)
+      .where(eq(carlotaKnowledgeItemsTable.id, id))
+      .limit(1);
+    if (!existing) {
+      sendNotFound(res, 'Knowledge item not found');
+      return;
+    }
+    if (existing.isSeeded) {
+      sendForbidden(res, 'Seeded records are read-only');
+      return;
+    }
+    if (orgId ? existing.organizationId !== orgId : existing.createdByUserId !== userId) {
+      sendForbidden(res, 'Access denied');
+      return;
+    }
+    await db.delete(carlotaKnowledgeItemsTable).where(eq(carlotaKnowledgeItemsTable.id, id));
+    sendSuccess(res, { deleted: true, id });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to delete knowledge item');
+  }
+});
+
+// ── Proposal Drafts CRUD ───────────────────────────────────────────────────────
+
+// GET /carlota/proposals
+router.get('/carlota/proposals', authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const filter = orgId
+      ? eq(carlotaProposalDraftsTable.organizationId, orgId)
+      : eq(carlotaProposalDraftsTable.createdByUserId, userId);
+    const proposals = await db
+      .select()
+      .from(carlotaProposalDraftsTable)
+      .where(filter)
+      .orderBy(desc(carlotaProposalDraftsTable.updatedAt))
+      .limit(50);
+    sendSuccess(res, { proposals, count: proposals.length });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to fetch proposals');
+  }
+});
+
+const proposalStatusEnum = z.enum(['draft', 'generated', 'sent']);
+const generatedProposalSchema = z.object({
+  prospectName: z.string().max(200),
+  prospectCompany: z.string().max(200),
+  engagementTitle: z.string().max(300),
+  executiveSummary: z.string().max(5000),
+  situationAssessment: z.string().max(5000),
+  scopeOfWork: z.array(z.object({
+    phase: z.string().max(200),
+    deliverables: z.array(z.string().max(300)),
+    duration: z.string().max(100),
+  })).max(20),
+  teamComposition: z.array(z.object({
+    role: z.string().max(200),
+    name: z.string().max(200),
+    responsibility: z.string().max(500),
+  })).max(20),
+  caseStudies: z.array(z.object({
+    client: z.string().max(200),
+    challenge: z.string().max(1000),
+    outcome: z.string().max(1000),
+    relevance: z.string().max(500),
+  })).max(10),
+  investmentStructure: z.array(z.object({
+    option: z.string().max(200),
+    description: z.string().max(1000),
+    fee: z.string().max(100),
+    includes: z.array(z.string().max(300)),
+  })).max(10),
+  timeline: z.string().max(500),
+  nextSteps: z.array(z.string().max(300)).max(20),
+}).passthrough();
+const proposalWriteSchema = bodyShape({
+  title: z.string().min(1).max(300).optional(),
+  prospectName: z.string().max(200).optional(),
+  prospectCompany: z.string().max(200).optional(),
+  template: z.enum(['standard', 'rapid', 'retainer']).optional(),
+  status: proposalStatusEnum.optional(),
+  formData: z.record(z.string(), z.string()).optional(),
+  generatedProposal: generatedProposalSchema.nullable().optional(),
+});
+
+// POST /carlota/proposals
+router.post(
+  '/carlota/proposals',
+  authMiddleware(),
+  validateBody(proposalWriteSchema),
+  async (req, res) => {
+    try {
+      const body = req.body as z.infer<typeof proposalWriteSchema>;
+      if (!body.title) {
+        sendBadRequest(res, 'title is required');
+        return;
+      }
+      const userId = req.user!.id;
+      const orgId = req.user?.orgs[0]?.orgId ?? null;
+      const [proposal] = await db
+        .insert(carlotaProposalDraftsTable)
+        .values({
+          title: body.title,
+          prospectName: body.prospectName ?? '',
+          prospectCompany: body.prospectCompany ?? '',
+          template: body.template ?? 'standard',
+          formData: body.formData ?? {},
+          generatedProposal: body.generatedProposal ?? null,
+          status: body.status ?? 'draft',
+          organizationId: orgId,
+          createdByUserId: userId,
+        })
+        .returning();
+      sendSuccess(res, proposal, 201);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create proposal draft');
+    }
+  },
+);
+
+// PUT /carlota/proposals/:id
+router.put(
+  '/carlota/proposals/:id',
+  authMiddleware(),
+  validateBody(proposalWriteSchema),
+  async (req, res) => {
+    try {
+      const id = parseIdParam(req, res);
+      if (id === null) return;
+      const userId = req.user!.id;
+      const orgId = req.user?.orgs[0]?.orgId ?? null;
+      const body = req.body as z.infer<typeof proposalWriteSchema>;
+      const [existing] = await db
+        .select()
+        .from(carlotaProposalDraftsTable)
+        .where(eq(carlotaProposalDraftsTable.id, id))
+        .limit(1);
+      if (!existing) {
+        sendNotFound(res, 'Proposal not found');
+        return;
+      }
+      if (orgId ? existing.organizationId !== orgId : existing.createdByUserId !== userId) {
+        sendForbidden(res, 'Access denied');
+        return;
+      }
+      const update: Partial<typeof carlotaProposalDraftsTable.$inferInsert> = { updatedAt: new Date() };
+      if (body.title != null) update.title = body.title;
+      if (body.prospectName != null) update.prospectName = body.prospectName;
+      if (body.prospectCompany != null) update.prospectCompany = body.prospectCompany;
+      if (body.template != null) update.template = body.template;
+      if (body.formData != null) update.formData = body.formData;
+      if (body.generatedProposal !== undefined) update.generatedProposal = body.generatedProposal;
+      if (body.status != null) update.status = body.status;
+      const [updated] = await db
+        .update(carlotaProposalDraftsTable)
+        .set(update)
+        .where(eq(carlotaProposalDraftsTable.id, id))
+        .returning();
+      sendSuccess(res, updated);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to update proposal');
+    }
+  },
+);
+
+// DELETE /carlota/proposals/:id
+router.delete('/carlota/proposals/:id', authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req, res);
+    if (id === null) return;
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const [existing] = await db
+      .select()
+      .from(carlotaProposalDraftsTable)
+      .where(eq(carlotaProposalDraftsTable.id, id))
+      .limit(1);
+    if (!existing) {
+      sendNotFound(res, 'Proposal not found');
+      return;
+    }
+    if (orgId ? existing.organizationId !== orgId : existing.createdByUserId !== userId) {
+      sendForbidden(res, 'Access denied');
+      return;
+    }
+    await db.delete(carlotaProposalDraftsTable).where(eq(carlotaProposalDraftsTable.id, id));
+    sendSuccess(res, { deleted: true, id });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to delete proposal');
+  }
+});
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
