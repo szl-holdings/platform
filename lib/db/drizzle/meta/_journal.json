@@ -393,6 +393,48 @@
       "when": 1776634400000,
       "tag": "0068_atlas_tenant_isolation",
       "breakpoints": true
+    },
+    {
+      "idx": 88,
+      "version": "7",
+      "when": 1776727609859,
+      "tag": "0088_missing_index_sweep",
+      "breakpoints": true
+    },
+    {
+      "idx": 89,
+      "version": "7",
+      "when": 1776727610859,
+      "tag": "0089_drop_duplicate_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "7",
+      "when": 1776727611859,
+      "tag": "0090_add_real_estate_ops_role",
+      "breakpoints": true
+    },
+    {
+      "idx": 91,
+      "version": "7",
+      "when": 1776727612859,
+      "tag": "0091_register_szl_saas_layer_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 92,
+      "version": "7",
+      "when": 1776727613859,
+      "tag": "0092_register_crdt_change_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 93,
+      "version": "7",
+      "when": 1776727614859,
+      "tag": "0093_register_multi_channel_notifications",
+      "breakpoints": true
     }
   ]
 }

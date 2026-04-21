@@ -1,32 +1,28 @@
-import { integer, jsonb, pgTable, serial, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { integer, jsonb, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
 import { organizationsTable } from './organizations';
 
-export const azureTenantsTable = pgTable(
-  'azure_tenants',
-  {
-    id: serial('id').primaryKey(),
-    azureTenantId: text('azure_tenant_id').notNull().unique(),
-    displayName: text('display_name').notNull(),
-    domain: text('domain'),
-    status: text('status', { enum: ['pending', 'active', 'suspended'] })
-      .notNull()
-      .default('pending'),
-    adminConsentGranted: text('admin_consent_granted', { enum: ['pending', 'granted', 'revoked'] })
-      .notNull()
-      .default('pending'),
-    organizationId: integer('organization_id').references(() => organizationsTable.id, {
-      onDelete: 'set null',
-    }),
-    config: jsonb('config').default('{}'),
-    provisionedAt: timestamp('provisioned_at'),
-    provisionedByUserId: text('provisioned_by_user_id'),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  },
-  (table) => [uniqueIndex('azure_tenants_tenant_id_idx').on(table.azureTenantId)],
-);
+export const azureTenantsTable = pgTable('azure_tenants', {
+  id: serial('id').primaryKey(),
+  azureTenantId: text('azure_tenant_id').notNull().unique(),
+  displayName: text('display_name').notNull(),
+  domain: text('domain'),
+  status: text('status', { enum: ['pending', 'active', 'suspended'] })
+    .notNull()
+    .default('pending'),
+  adminConsentGranted: text('admin_consent_granted', { enum: ['pending', 'granted', 'revoked'] })
+    .notNull()
+    .default('pending'),
+  organizationId: integer('organization_id').references(() => organizationsTable.id, {
+    onDelete: 'set null',
+  }),
+  config: jsonb('config').default('{}'),
+  provisionedAt: timestamp('provisioned_at'),
+  provisionedByUserId: text('provisioned_by_user_id'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
 
 export const dataverseConnectionsTable = pgTable('dataverse_connections', {
   id: serial('id').primaryKey(),

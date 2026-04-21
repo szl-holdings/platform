@@ -1,5 +1,6 @@
 import {
   boolean,
+  index,
   integer,
   jsonb,
   numeric,
@@ -11,7 +12,9 @@ import {
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod/v4';
 
-export const pcMattersTable = pgTable('pc_matters', {
+export const pcMattersTable = pgTable(
+  'pc_matters',
+  {
   id: serial('id').primaryKey(),
   orgId: integer('org_id').notNull(),
   title: text('title').notNull(),
@@ -66,9 +69,16 @@ export const pcMattersTable = pgTable('pc_matters', {
   updatedBy: integer('updated_by'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+  },
+  (t) => [
+    index('pc_matters_org_id_idx').on(t.orgId),
+    index('pc_matters_status_idx').on(t.status),
+  ],
+);
 
-export const pcPartiesTable = pgTable('pc_parties', {
+export const pcPartiesTable = pgTable(
+  'pc_parties',
+  {
   id: serial('id').primaryKey(),
   matterId: integer('matter_id')
     .notNull()
@@ -93,9 +103,13 @@ export const pcPartiesTable = pgTable('pc_parties', {
   phone: text('phone'),
   notes: text('notes'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+  },
+  (t) => [index('pc_parties_matter_id_idx').on(t.matterId)],
+);
 
-export const pcClaimsTable = pgTable('pc_claims', {
+export const pcClaimsTable = pgTable(
+  'pc_claims',
+  {
   id: serial('id').primaryKey(),
   matterId: integer('matter_id')
     .notNull()
@@ -127,9 +141,13 @@ export const pcClaimsTable = pgTable('pc_claims', {
     .default('open'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+  },
+  (t) => [index('pc_claims_matter_id_idx').on(t.matterId)],
+);
 
-export const pcOffersTable = pgTable('pc_offers', {
+export const pcOffersTable = pgTable(
+  'pc_offers',
+  {
   id: serial('id').primaryKey(),
   matterId: integer('matter_id')
     .notNull()
@@ -144,9 +162,13 @@ export const pcOffersTable = pgTable('pc_offers', {
   offerDate: timestamp('offer_date').notNull().defaultNow(),
   expiresAt: timestamp('expires_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+  },
+  (t) => [index('pc_offers_matter_id_idx').on(t.matterId)],
+);
 
-export const pcMedicalEventsTable = pgTable('pc_medical_events', {
+export const pcMedicalEventsTable = pgTable(
+  'pc_medical_events',
+  {
   id: serial('id').primaryKey(),
   matterId: integer('matter_id')
     .notNull()
@@ -187,9 +209,13 @@ export const pcMedicalEventsTable = pgTable('pc_medical_events', {
   outstandingAmount: numeric('outstanding_amount', { precision: 12, scale: 2 }),
   documentRef: text('document_ref'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+  },
+  (t) => [index('pc_medical_events_matter_id_idx').on(t.matterId)],
+);
 
-export const pcDamagesTable = pgTable('pc_damages', {
+export const pcDamagesTable = pgTable(
+  'pc_damages',
+  {
   id: serial('id').primaryKey(),
   matterId: integer('matter_id')
     .notNull()
@@ -216,7 +242,9 @@ export const pcDamagesTable = pgTable('pc_damages', {
     .default('pending'),
   sourceDocument: text('source_document'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+  },
+  (t) => [index('pc_damages_matter_id_idx').on(t.matterId)],
+);
 
 export const pcLiensTable = pgTable('pc_liens', {
   id: serial('id').primaryKey(),
@@ -247,7 +275,9 @@ export const pcLiensTable = pgTable('pc_liens', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const pcDeadlinesTable = pgTable('pc_deadlines', {
+export const pcDeadlinesTable = pgTable(
+  'pc_deadlines',
+  {
   id: serial('id').primaryKey(),
   matterId: integer('matter_id')
     .notNull()
@@ -284,7 +314,12 @@ export const pcDeadlinesTable = pgTable('pc_deadlines', {
   clockRuleId: integer('clock_rule_id'),
   notes: text('notes'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+  },
+  (t) => [
+    index('pc_deadlines_matter_id_idx').on(t.matterId),
+    index('pc_deadlines_due_date_idx').on(t.dueDate),
+  ],
+);
 
 export const pcDiscoveryTable = pgTable('pc_discovery', {
   id: serial('id').primaryKey(),

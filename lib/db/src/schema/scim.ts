@@ -14,27 +14,23 @@ import { usersTable } from './auth';
 import { azureTenantsTable } from './azure_tenants';
 import { organizationsTable } from './organizations';
 
-export const scimTokensTable = pgTable(
-  'scim_tokens',
-  {
-    id: serial('id').primaryKey(),
-    tenantId: integer('tenant_id')
-      .notNull()
-      .references(() => azureTenantsTable.id, { onDelete: 'cascade' }),
-    tokenHash: text('token_hash').notNull().unique(),
-    tokenPrefix: text('token_prefix').notNull(),
-    label: text('label').notNull().default('default'),
-    isActive: boolean('is_active').notNull().default(true),
-    lastUsedAt: timestamp('last_used_at'),
-    expiresAt: timestamp('expires_at'),
-    createdByUserId: integer('created_by_user_id').references(() => usersTable.id, {
-      onDelete: 'set null',
-    }),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  },
-  (table) => [uniqueIndex('scim_tokens_hash_idx').on(table.tokenHash)],
-);
+export const scimTokensTable = pgTable('scim_tokens', {
+  id: serial('id').primaryKey(),
+  tenantId: integer('tenant_id')
+    .notNull()
+    .references(() => azureTenantsTable.id, { onDelete: 'cascade' }),
+  tokenHash: text('token_hash').notNull().unique(),
+  tokenPrefix: text('token_prefix').notNull(),
+  label: text('label').notNull().default('default'),
+  isActive: boolean('is_active').notNull().default(true),
+  lastUsedAt: timestamp('last_used_at'),
+  expiresAt: timestamp('expires_at'),
+  createdByUserId: integer('created_by_user_id').references(() => usersTable.id, {
+    onDelete: 'set null',
+  }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
 
 export const scimGroupsTable = pgTable(
   'scim_groups',

@@ -1,5 +1,6 @@
 import {
   boolean,
+  index,
   integer,
   pgTable,
   serial,
@@ -28,6 +29,7 @@ export const usersTable = pgTable('users', {
       'ops_manager',
       'sales_delivery_user',
       'maritime_ops_user',
+      'real_estate_ops_user',
       'service_coordinator',
       'pilot_customer_user',
     ],
@@ -91,24 +93,32 @@ export const userRolesTable = pgTable(
   (table) => [uniqueIndex('user_role_unique').on(table.userId, table.roleId)],
 );
 
-export const sessionsTable = pgTable('sessions', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id')
-    .notNull()
-    .references(() => usersTable.id, { onDelete: 'cascade' }),
-  token: text('token').notNull().unique(),
-  expiresAt: timestamp('expires_at').notNull(),
-  ipAddress: text('ip_address'),
-  userAgent: text('user_agent'),
-  sessionVersion: integer('session_version').notNull().default(1),
-  refreshToken: text('refresh_token').unique(),
-  refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
-  refreshTokenUsedAt: timestamp('refresh_token_used_at'),
-  replacedBySessionId: integer('replaced_by_session_id'),
-  revokedAt: timestamp('revoked_at'),
-  revokedReason: text('revoked_reason'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+export const sessionsTable = pgTable(
+  'sessions',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    token: text('token').notNull().unique(),
+    expiresAt: timestamp('expires_at').notNull(),
+    ipAddress: text('ip_address'),
+    userAgent: text('user_agent'),
+    sessionVersion: integer('session_version').notNull().default(1),
+    refreshToken: text('refresh_token').unique(),
+    refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
+    refreshTokenUsedAt: timestamp('refresh_token_used_at'),
+    replacedBySessionId: integer('replaced_by_session_id'),
+    revokedAt: timestamp('revoked_at'),
+    revokedReason: text('revoked_reason'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('sessions_user_id_idx').on(t.userId),
+    index('sessions_expires_at_idx').on(t.expiresAt),
+    index('sessions_revoked_at_idx').on(t.revokedAt),
+  ],
+);
 
 export const insertUserSchema = createInsertSchema(usersTable).omit({
   id: true,
@@ -156,6 +166,7 @@ export type PlatformRole =
   | 'ops_manager'
   | 'sales_delivery_user'
   | 'maritime_ops_user'
+  | 'real_estate_ops_user'
   | 'service_coordinator'
   | 'pilot_customer_user';
 
@@ -169,6 +180,7 @@ export const PLATFORM_ROLES: PlatformRole[] = [
   'ops_manager',
   'sales_delivery_user',
   'maritime_ops_user',
+  'real_estate_ops_user',
   'service_coordinator',
   'pilot_customer_user',
 ];
@@ -181,6 +193,7 @@ export const PLATFORM_ROLE_HIERARCHY: Record<PlatformRole, number> = {
   service_coordinator: 4,
   sales_delivery_user: 4,
   maritime_ops_user: 4,
+  real_estate_ops_user: 4,
   operator: 5,
   ops_manager: 6,
   platform_admin: 8,

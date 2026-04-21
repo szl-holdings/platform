@@ -1,5 +1,6 @@
 import {
   boolean,
+  index,
   integer,
   jsonb,
   numeric,
@@ -8,6 +9,7 @@ import {
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
 import { organizationsTable } from './organizations';
@@ -25,41 +27,56 @@ export const billingPlansTable = pgTable('billing_plans', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const subscriptionsTable = pgTable('subscriptions', {
-  id: serial('id').primaryKey(),
-  orgId: integer('org_id')
-    .notNull()
-    .references(() => organizationsTable.id, { onDelete: 'cascade' }),
-  planId: integer('plan_id')
-    .notNull()
-    .references(() => billingPlansTable.id),
-  status: text('status', { enum: ['active', 'trialing', 'past_due', 'canceled', 'paused'] })
-    .notNull()
-    .default('active'),
-  stripeSubscriptionId: text('stripe_subscription_id'),
-  currentPeriodStart: timestamp('current_period_start'),
-  currentPeriodEnd: timestamp('current_period_end'),
-  canceledAt: timestamp('canceled_at'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+export const subscriptionsTable = pgTable(
+  'subscriptions',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id')
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: 'cascade' }),
+    planId: integer('plan_id')
+      .notNull()
+      .references(() => billingPlansTable.id),
+    status: text('status', { enum: ['active', 'trialing', 'past_due', 'canceled', 'paused'] })
+      .notNull()
+      .default('active'),
+    stripeSubscriptionId: text('stripe_subscription_id'),
+    currentPeriodStart: timestamp('current_period_start'),
+    currentPeriodEnd: timestamp('current_period_end'),
+    canceledAt: timestamp('canceled_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('subscriptions_org_id_idx').on(t.orgId),
+    index('subscriptions_status_idx').on(t.status),
+    index('subscriptions_stripe_id_idx').on(t.stripeSubscriptionId),
+  ],
+);
 
-export const invoicesTable = pgTable('invoices', {
-  id: serial('id').primaryKey(),
-  orgId: integer('org_id')
-    .notNull()
-    .references(() => organizationsTable.id, { onDelete: 'cascade' }),
-  subscriptionId: integer('subscription_id').references(() => subscriptionsTable.id),
-  stripeInvoiceId: text('stripe_invoice_id'),
-  amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
-  currency: text('currency').notNull().default('usd'),
-  status: text('status', { enum: ['draft', 'open', 'paid', 'void', 'uncollectible'] })
-    .notNull()
-    .default('draft'),
-  paidAt: timestamp('paid_at'),
-  dueDate: timestamp('due_date'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+export const invoicesTable = pgTable(
+  'invoices',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id')
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: 'cascade' }),
+    subscriptionId: integer('subscription_id').references(() => subscriptionsTable.id),
+    stripeInvoiceId: text('stripe_invoice_id'),
+    amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
+    currency: text('currency').notNull().default('usd'),
+    status: text('status', { enum: ['draft', 'open', 'paid', 'void', 'uncollectible'] })
+      .notNull()
+      .default('draft'),
+    paidAt: timestamp('paid_at'),
+    dueDate: timestamp('due_date'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('invoices_org_id_idx').on(t.orgId),
+    index('invoices_stripe_id_idx').on(t.stripeInvoiceId),
+  ],
+);
 
 export const entitlementsTable = pgTable('entitlements', {
   id: serial('id').primaryKey(),
@@ -76,16 +93,22 @@ export const entitlementsTable = pgTable('entitlements', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const usageEventsTable = pgTable('usage_events', {
-  id: serial('id').primaryKey(),
-  orgId: integer('org_id')
-    .notNull()
-    .references(() => organizationsTable.id, { onDelete: 'cascade' }),
-  featureKey: text('feature_key').notNull(),
-  quantity: integer('quantity').notNull().default(1),
-  metadata: jsonb('metadata'),
-  recordedAt: timestamp('recorded_at').notNull().defaultNow(),
-});
+export const usageEventsTable = pgTable(
+  'usage_events',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id')
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: 'cascade' }),
+    featureKey: text('feature_key').notNull(),
+    quantity: integer('quantity').notNull().default(1),
+    metadata: jsonb('metadata'),
+    recordedAt: timestamp('recorded_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('usage_events_org_feature_idx').on(t.orgId, t.featureKey, sql`${t.recordedAt} DESC`),
+  ],
+);
 
 export const insertBillingPlanSchema = createInsertSchema(billingPlansTable).omit({
   id: true,

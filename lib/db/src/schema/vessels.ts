@@ -1,5 +1,6 @@
 import {
   boolean,
+  index,
   integer,
   jsonb,
   numeric,
@@ -8,6 +9,7 @@ import {
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
 
@@ -25,51 +27,64 @@ export const vesselsFleetsTable = pgTable('vessels_fleets', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
-export const vesselsTable = pgTable('vessels', {
-  id: serial('id').primaryKey(),
-  orgId: integer('org_id'),
-  fleetId: integer('fleet_id').references(() => vesselsFleetsTable.id, { onDelete: 'set null' }),
-  name: text('name').notNull(),
-  imo: text('imo').unique(),
-  mmsi: text('mmsi'),
-  vesselType: text('vessel_type', {
-    enum: ['cargo', 'tanker', 'container', 'bulk', 'passenger', 'fishing', 'other'],
-  }).notNull(),
-  vesselClass: text('vessel_class', {
-    enum: [
-      'VLCC',
-      'Suezmax',
-      'Aframax',
-      'Capesize',
-      'Panamax',
-      'Supramax',
-      'Handysize',
-      'LNG Carrier',
-    ],
-  }),
-  flag: text('flag'),
-  yearBuilt: integer('year_built'),
-  grossTonnage: numeric('gross_tonnage', { precision: 12, scale: 2 }),
-  status: text('status', {
-    enum: ['active', 'in_port', 'at_sea', 'anchored', 'maintenance', 'decommissioned'],
-  })
-    .notNull()
-    .default('active'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+export const vesselsTable = pgTable(
+  'vessels',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id'),
+    fleetId: integer('fleet_id').references(() => vesselsFleetsTable.id, { onDelete: 'set null' }),
+    name: text('name').notNull(),
+    imo: text('imo').unique(),
+    mmsi: text('mmsi'),
+    vesselType: text('vessel_type', {
+      enum: ['cargo', 'tanker', 'container', 'bulk', 'passenger', 'fishing', 'other'],
+    }).notNull(),
+    vesselClass: text('vessel_class', {
+      enum: [
+        'VLCC',
+        'Suezmax',
+        'Aframax',
+        'Capesize',
+        'Panamax',
+        'Supramax',
+        'Handysize',
+        'LNG Carrier',
+      ],
+    }),
+    flag: text('flag'),
+    yearBuilt: integer('year_built'),
+    grossTonnage: numeric('gross_tonnage', { precision: 12, scale: 2 }),
+    status: text('status', {
+      enum: ['active', 'in_port', 'at_sea', 'anchored', 'maintenance', 'decommissioned'],
+    })
+      .notNull()
+      .default('active'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('vessels_status_idx').on(t.status),
+    index('vessels_org_id_idx').on(t.orgId),
+  ],
+);
 
-export const vesselsPositionsTable = pgTable('vessels_positions', {
-  id: serial('id').primaryKey(),
-  vesselId: integer('vessel_id')
-    .notNull()
-    .references(() => vesselsTable.id, { onDelete: 'cascade' }),
-  latitude: numeric('latitude', { precision: 10, scale: 7 }).notNull(),
-  longitude: numeric('longitude', { precision: 10, scale: 7 }).notNull(),
-  heading: numeric('heading', { precision: 5, scale: 2 }),
-  speed: numeric('speed', { precision: 6, scale: 2 }),
-  recordedAt: timestamp('recorded_at').notNull().defaultNow(),
-});
+export const vesselsPositionsTable = pgTable(
+  'vessels_positions',
+  {
+    id: serial('id').primaryKey(),
+    vesselId: integer('vessel_id')
+      .notNull()
+      .references(() => vesselsTable.id, { onDelete: 'cascade' }),
+    latitude: numeric('latitude', { precision: 10, scale: 7 }).notNull(),
+    longitude: numeric('longitude', { precision: 10, scale: 7 }).notNull(),
+    heading: numeric('heading', { precision: 5, scale: 2 }),
+    speed: numeric('speed', { precision: 6, scale: 2 }),
+    recordedAt: timestamp('recorded_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('vessels_positions_vessel_recorded_idx').on(t.vesselId, sql`${t.recordedAt} DESC`),
+  ],
+);
 
 export const vesselsCargoTable = pgTable('vessels_cargo', {
   id: serial('id').primaryKey(),
@@ -121,20 +136,29 @@ export const vesselsAlertRulesTable = pgTable('vessels_alert_rules', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const vesselsAlertsTable = pgTable('vessels_alerts', {
-  id: serial('id').primaryKey(),
-  ruleId: integer('rule_id').references(() => vesselsAlertRulesTable.id, { onDelete: 'set null' }),
-  vesselId: integer('vessel_id').references(() => vesselsTable.id, { onDelete: 'cascade' }),
-  title: text('title').notNull(),
-  message: text('message').notNull(),
-  severity: text('severity', { enum: ['low', 'medium', 'high', 'critical'] }).notNull(),
-  status: text('status', { enum: ['active', 'acknowledged', 'resolved', 'dismissed'] })
-    .notNull()
-    .default('active'),
-  metadata: jsonb('metadata'),
-  triggeredAt: timestamp('triggered_at').notNull().defaultNow(),
-  resolvedAt: timestamp('resolved_at'),
-});
+export const vesselsAlertsTable = pgTable(
+  'vessels_alerts',
+  {
+    id: serial('id').primaryKey(),
+    ruleId: integer('rule_id').references(() => vesselsAlertRulesTable.id, {
+      onDelete: 'set null',
+    }),
+    vesselId: integer('vessel_id').references(() => vesselsTable.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    message: text('message').notNull(),
+    severity: text('severity', { enum: ['low', 'medium', 'high', 'critical'] }).notNull(),
+    status: text('status', { enum: ['active', 'acknowledged', 'resolved', 'dismissed'] })
+      .notNull()
+      .default('active'),
+    metadata: jsonb('metadata'),
+    triggeredAt: timestamp('triggered_at').notNull().defaultNow(),
+    resolvedAt: timestamp('resolved_at'),
+  },
+  (t) => [
+    index('vessels_alerts_vessel_id_idx').on(t.vesselId),
+    index('vessels_alerts_status_idx').on(t.status),
+  ],
+);
 
 export const vesselsWeatherSnapshotsTable = pgTable('vessels_weather_snapshots', {
   id: serial('id').primaryKey(),
@@ -174,42 +198,49 @@ export const vesselsSimulationsTable = pgTable('vessels_simulations', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const vesselsEventsTable = pgTable('vessels_events', {
-  id: serial('id').primaryKey(),
-  vesselId: integer('vessel_id')
-    .notNull()
-    .references(() => vesselsTable.id, { onDelete: 'cascade' }),
-  eventType: text('event_type', {
-    enum: [
-      'status_change',
-      'route_deviation',
-      'eta_drift',
-      'weather_pressure',
-      'maintenance_watch',
-      'port_congestion',
-      'delay_event',
-      'alert_classification',
-      'ais_dark',
-      'speed_anomaly',
-      'cargo_issue',
-      'sanctions_flag',
-    ],
-  }).notNull(),
-  severity: text('severity', { enum: ['watch', 'warning', 'critical'] })
-    .notNull()
-    .default('watch'),
-  title: text('title').notNull(),
-  description: text('description'),
-  status: text('status', { enum: ['open', 'acknowledged', 'assigned', 'resolved'] })
-    .notNull()
-    .default('open'),
-  assignedTo: text('assigned_to'),
-  consequenceData: jsonb('consequence_data'),
-  acknowledgedAt: timestamp('acknowledged_at'),
-  resolvedAt: timestamp('resolved_at'),
-  occurredAt: timestamp('occurred_at').notNull().defaultNow(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+export const vesselsEventsTable = pgTable(
+  'vessels_events',
+  {
+    id: serial('id').primaryKey(),
+    vesselId: integer('vessel_id')
+      .notNull()
+      .references(() => vesselsTable.id, { onDelete: 'cascade' }),
+    eventType: text('event_type', {
+      enum: [
+        'status_change',
+        'route_deviation',
+        'eta_drift',
+        'weather_pressure',
+        'maintenance_watch',
+        'port_congestion',
+        'delay_event',
+        'alert_classification',
+        'ais_dark',
+        'speed_anomaly',
+        'cargo_issue',
+        'sanctions_flag',
+      ],
+    }).notNull(),
+    severity: text('severity', { enum: ['watch', 'warning', 'critical'] })
+      .notNull()
+      .default('watch'),
+    title: text('title').notNull(),
+    description: text('description'),
+    status: text('status', { enum: ['open', 'acknowledged', 'assigned', 'resolved'] })
+      .notNull()
+      .default('open'),
+    assignedTo: text('assigned_to'),
+    consequenceData: jsonb('consequence_data'),
+    acknowledgedAt: timestamp('acknowledged_at'),
+    resolvedAt: timestamp('resolved_at'),
+    occurredAt: timestamp('occurred_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('vessels_events_vessel_id_occurred_idx').on(t.vesselId, sql`${t.occurredAt} DESC`),
+    index('vessels_events_status_idx').on(t.status),
+  ],
+);
 
 export const vesselsCommandWorkflowsTable = pgTable('vessels_command_workflows', {
   id: serial('id').primaryKey(),

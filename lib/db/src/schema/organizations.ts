@@ -1,4 +1,13 @@
-import { boolean, integer, pgTable, serial, text, timestamp, unique } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  index,
+  integer,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  unique,
+} from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
 import { usersTable } from './auth';
@@ -38,7 +47,11 @@ export const orgMembersTable = pgTable(
       .default('member'),
     joinedAt: timestamp('joined_at').notNull().defaultNow(),
   },
-  (t) => [unique('org_members_org_user_uq').on(t.orgId, t.userId)],
+  (t) => [
+    unique('org_members_org_user_uq').on(t.orgId, t.userId),
+    index('org_members_org_id_idx').on(t.orgId),
+    index('org_members_user_id_idx').on(t.userId),
+  ],
 );
 
 export const organizationMembershipsTable = pgTable('organization_memberships', {
