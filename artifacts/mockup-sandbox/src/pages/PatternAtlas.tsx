@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { Component, type ErrorInfo, type ReactNode, useState } from 'react';
 import { sharedUiExports } from 'virtual:shared-ui-manifest';
+import { GENERATED_METADATA } from './patternAtlasMetadata.generated';
 
 interface PropDef {
   name: string;
@@ -390,14 +391,27 @@ const CATEGORIES = [
   { id: 'Auth', label: 'Auth', icon: Shield },
   { id: 'Controls', label: 'Controls', icon: ToggleLeft },
   { id: 'AI Controls', label: 'AI Controls', icon: Brain },
+  { id: 'Cortex AI', label: 'Cortex AI', icon: Brain },
   { id: 'Analytics', label: 'Analytics', icon: BarChart2 },
   { id: 'Data Display', label: 'Data Display', icon: Table },
+  { id: 'Design System', label: 'Design System', icon: Palette },
+  { id: 'Forms & Drawers', label: 'Forms & Drawers', icon: BookOpen },
   { id: 'Layout', label: 'Layout', icon: LayoutDashboard },
+  { id: 'Surfaces', label: 'Surfaces', icon: Layers },
   { id: 'Feedback', label: 'Feedback', icon: Bell },
   { id: 'Observability', label: 'Observability', icon: Activity },
   { id: 'Visualization', label: 'Visualization', icon: Network },
   { id: 'Monitoring', label: 'Monitoring', icon: Eye },
   { id: 'Identity', label: 'Identity', icon: Layers },
+  { id: 'Pulse', label: 'Pulse', icon: Zap },
+  { id: 'Document Engine', label: 'Document Engine', icon: BookOpen },
+  { id: 'Onboarding', label: 'Onboarding', icon: Workflow },
+  { id: 'Receipt Graph', label: 'Receipt Graph', icon: Database },
+  { id: 'Operational Primitives', label: 'Operational', icon: Workflow },
+  { id: 'Providers', label: 'Providers', icon: Cpu },
+  { id: 'Utility', label: 'Utility', icon: Cpu },
+  { id: 'Ambient', label: 'Ambient', icon: Zap },
+  { id: 'Collaboration', label: 'Collaboration', icon: Network },
   { id: 'Other', label: 'Other', icon: Cpu },
 ];
 
@@ -417,17 +431,90 @@ function buildCatalog(): CatalogEntry[] {
     .filter((e) => e.isComponent)
     .map((e) => e.name);
 
-  return componentNames.map((name) => ({
-    name,
-    meta: REGISTRY[name] ?? {
-      category: 'Other',
-      description: `Shared UI component from lib/shared-ui. See source for full props.`,
-      status: 'stable' as const,
-      source: `lib/shared-ui/src/index.ts`,
-      props: [],
-      usageExample: `import { ${name} } from '@szl-holdings/shared-ui';\n\n<${name} />`,
-    },
-  }));
+  return componentNames.map((name) => {
+    if (REGISTRY[name]) return { name, meta: REGISTRY[name] as ComponentMetadata };
+    const gen = GENERATED_METADATA[name];
+    if (gen) {
+      const requiredProps = gen.props.filter((p) => p.required && p.name !== 'children');
+      const sampleAttrs = requiredProps
+        .slice(0, 3)
+        .map((p) => `  ${p.name}={${defaultValueForType(p.type)}}`)
+        .join('\n');
+      const usage =
+        sampleAttrs.length > 0
+          ? `import { ${name} } from '@szl-holdings/shared-ui';\n\n<${name}\n${sampleAttrs}\n/>`
+          : `import { ${name} } from '@szl-holdings/shared-ui';\n\n<${name} />`;
+      return {
+        name,
+        meta: {
+          category: gen.category,
+          description: descriptionFor(name, gen.category),
+          status: gen.status,
+          source: gen.source,
+          props: gen.props.map((p) => ({
+            name: p.name,
+            type: p.type,
+            required: p.required,
+            description: p.description || `${p.required ? 'Required' : 'Optional'} ${p.name} prop.`,
+          })),
+          usageExample: usage,
+        } satisfies ComponentMetadata,
+      };
+    }
+    return {
+      name,
+      meta: {
+        category: 'Other',
+        description: `Shared UI component from lib/shared-ui. See source for full props.`,
+        status: 'stable' as const,
+        source: `lib/shared-ui/src/index.ts`,
+        props: [],
+        usageExample: `import { ${name} } from '@szl-holdings/shared-ui';\n\n<${name} />`,
+      },
+    };
+  });
+}
+
+function defaultValueForType(type: string): string {
+  const t = type.trim();
+  if (t.startsWith('"') || t.startsWith("'")) return t.split('|')[0]?.trim() ?? '"value"';
+  if (/^(string)\b/.test(t)) return '"value"';
+  if (/^(number)\b/.test(t)) return '0';
+  if (/^(boolean)\b/.test(t)) return 'true';
+  if (/\[\]$/.test(t) || /^Array</.test(t)) return '[]';
+  if (/=>/.test(t) || /^\(/.test(t)) return '() => {}';
+  if (t === 'ReactNode' || t === 'React.ReactNode') return 'null';
+  if (/^Record</.test(t)) return '{}';
+  return '/* TODO */';
+}
+
+function descriptionFor(name: string, category: string): string {
+  const map: Record<string, string> = {
+    'Pulse': `${name} — Pulse module surface from lib/shared-ui/src/pulse. See source for full behavior.`,
+    'Document Engine': `${name} — Document engine surface (templates, signing, batch PDF) from lib/shared-ui/src/document-engine.`,
+    'Onboarding': `${name} — Onboarding flow primitive from lib/shared-ui/src/onboarding.`,
+    'Receipt Graph': `${name} — Provenance / receipt-graph component used to surface evidence and trust signals.`,
+    'Operational Primitives': `${name} — Standardized operational primitive shared across Alloy, Lyte, Terra, Aegis, and Vessels.`,
+    'Cortex AI': `${name} — Cortex AI conversational/agent surface.`,
+    'AI Controls': `${name} — Operator control for AI-driven decisions and simulations.`,
+    'Visualization': `${name} — Data visualization component (graphs, distributions, diagrams).`,
+    'Monitoring': `${name} — Monitoring widget showing live status, freshness, or health signals.`,
+    'Observability': `${name} — Observability surface for audit, runs, evals, and provenance.`,
+    'Feedback': `${name} — Feedback / notification surface used to communicate state changes to operators.`,
+    'Auth': `${name} — Authentication / permission gate.`,
+    'Identity': `${name} — Compact identity badge or pill.`,
+    'Providers': `${name} — Context provider wrapping the app tree.`,
+    'Utility': `${name} — Utility surface (settings, language, contact, etc.).`,
+    'Surfaces': `${name} — Card / panel / drawer surface.`,
+    'Layout': `${name} — Layout primitive (shell, nav, header, footer).`,
+    'Ambient': `${name} — Ambient / energy field component used for atmospheric UI.`,
+    'Collaboration': `${name} — Collaboration surface (presence, multiplayer, CRDT merge).`,
+    'Analytics': `${name} — Analytics chart / dashboard surface.`,
+    'Data Display': `${name} — Data display surface (tables, KPIs, metrics).`,
+    'Design System': `${name} — Design-system primitive from lib/shared-ui/src/design-system.`,
+    'Forms & Drawers': `${name} — Form, drawer, or export surface from the design system.`,
+  };
+  return map[category] ?? `Shared UI component from lib/shared-ui. See source for full props.`;
 }
 
 const CATALOG = buildCatalog();
