@@ -4,9 +4,10 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import type React from 'react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ProvenanceChip, type ProvenanceStatus } from '@/components/ProvenanceChip';
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
@@ -168,6 +169,48 @@ const LEASES: AbstractedLease[] = [
   },
 ];
 
+function normalizeApiLeases(data: unknown): AbstractedLease[] | null {
+  const envelope = data as Record<string, unknown> | null;
+  const arr = Array.isArray(envelope?.leases)
+    ? (envelope!.leases as Record<string, unknown>[])
+    : Array.isArray(data)
+      ? (data as Record<string, unknown>[])
+      : null;
+  if (!arr || arr.length === 0) return null;
+  try {
+    return arr.map((item: Record<string, unknown>, idx: number) => {
+      const flags = Array.isArray(item.flags)
+        ? (item.flags as Record<string, unknown>[])
+        : [];
+      const clauses: LeaseClause[] = flags.map((f, fi) => ({
+        id: `clause-api-${idx}-${fi}`,
+        category: 'rent' as ClauseCategory,
+        title: String(f.field ?? 'Flag'),
+        summary: String(f.issue ?? ''),
+        riskLevel: (
+          f.severity === 'high' ? 'high' : f.severity === 'medium' ? 'medium' : 'low'
+        ) as LeaseClause['riskLevel'],
+      }));
+      return {
+        id: String(item.id ?? `la-api-${idx}`),
+        tenant: String(item.tenant ?? 'Unknown Tenant'),
+        property: String(item.propertyAddress ?? item.premises ?? 'Unknown Property'),
+        suite: String(item.premises ?? ''),
+        executedDate: String(item.extractedAt ?? ''),
+        leaseStart: String(item.commencementDate ?? ''),
+        leaseEnd: String(item.expirationDate ?? ''),
+        monthlyRent: Number(item.baseRent ?? 0),
+        escalation: String(item.escalations ?? ''),
+        securityDeposit: Number(item.securityDeposit ?? 0),
+        aiConfidence: Number(item.confidence ?? 95),
+        clauses,
+      };
+    });
+  } catch {
+    return null;
+  }
+}
+
 const fmt = (n: number) => (n >= 1000 ? `$${(n / 1000).toFixed(0)}K` : `$${n}`);
 
 function ClauseCard({ clause }: { clause: LeaseClause }) {
@@ -217,23 +260,30 @@ export default function LeaseAbstractionScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
-  const [selectedId, setSelectedId] = useState<string>(LEASES[0].id);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  useQuery({
+  const { data: apiData, isFetching } = useQuery({
     queryKey: ['terra-lease-abstraction'],
     queryFn: async () => {
-      try {
-        const res = await fetch(API_BASE + '/terra/lease-abstraction');
-        if (!res.ok) return null;
-        return res.json();
-      } catch {
-        return null;
-      }
+      const res = await fetch(API_BASE + '/terra/leases');
+      if (!res.ok) throw new Error('API error');
+      return res.json();
     },
     retry: 1,
   });
 
-  const lease = LEASES.find((l) => l.id === selectedId) ?? LEASES[0];
+  const liveLeases = useMemo(() => normalizeApiLeases(apiData), [apiData]);
+  const leases = liveLeases ?? LEASES;
+  const isLiveData = liveLeases !== null && liveLeases.length > 0;
+
+  const provenanceStatus: ProvenanceStatus = isFetching
+    ? 'loading'
+    : isLiveData
+      ? 'live'
+      : 'fallback';
+
+  const activeId = selectedId ?? leases[0]?.id;
+  const lease = leases.find((l) => l.id === activeId) ?? leases[0];
   const highRiskCount = lease.clauses.filter((c) => c.riskLevel === 'high').length;
   const criticalDates = lease.clauses.filter((c) => c.criticalDate);
 
@@ -252,17 +302,22 @@ export default function LeaseAbstractionScreen() {
           <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · AI</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Lease Abstraction</Text>
         </View>
-        {highRiskCount > 0 && (
-          <View
-            style={[
-              styles.alertBadge,
-              { backgroundColor: '#ef4444' + '15', borderColor: '#ef4444' + '40' },
-            ]}
-          >
-            <Feather name="alert-triangle" size={11} color="#ef4444" />
-            <Text style={[styles.alertText, { color: '#ef4444' }]}>{highRiskCount} high risk</Text>
-          </View>
-        )}
+        <View style={styles.headerRight}>
+          <ProvenanceChip status={provenanceStatus} />
+          {highRiskCount > 0 && (
+            <View
+              style={[
+                styles.alertBadge,
+                { backgroundColor: '#ef4444' + '15', borderColor: '#ef4444' + '40' },
+              ]}
+            >
+              <Feather name="alert-triangle" size={11} color="#ef4444" />
+              <Text style={[styles.alertText, { color: '#ef4444' }]}>
+                {highRiskCount} high risk
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
 
       <ScrollView
@@ -270,7 +325,7 @@ export default function LeaseAbstractionScreen() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.leaseTabs}
       >
-        {LEASES.map((l) => (
+        {leases.map((l) => (
           <Pressable
             key={l.id}
             onPress={() => {
@@ -280,15 +335,15 @@ export default function LeaseAbstractionScreen() {
             style={[
               styles.leaseTab,
               {
-                borderColor: selectedId === l.id ? ACCENT : colors.border,
-                backgroundColor: selectedId === l.id ? ACCENT + '12' : 'transparent',
+                borderColor: activeId === l.id ? ACCENT : colors.border,
+                backgroundColor: activeId === l.id ? ACCENT + '12' : 'transparent',
               },
             ]}
           >
             <Text
               style={[
                 styles.leaseTabText,
-                { color: selectedId === l.id ? ACCENT : colors.mutedForeground },
+                { color: activeId === l.id ? ACCENT : colors.mutedForeground },
               ]}
             >
               {l.tenant}
@@ -392,6 +447,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 10,
   },
+  headerRight: { alignItems: 'flex-end', gap: 6, marginTop: 12 },
   backBtn: { padding: 4, marginTop: 14 },
   eyebrow: { fontSize: 9, fontFamily: 'Inter_500Medium', letterSpacing: 3, marginBottom: 3 },
   title: { fontSize: 20, fontFamily: 'Inter_600SemiBold', letterSpacing: -0.3 },

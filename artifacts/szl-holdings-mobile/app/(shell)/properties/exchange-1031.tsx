@@ -2,9 +2,10 @@ import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ProvenanceChip, type ProvenanceStatus } from '@/components/ProvenanceChip';
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
@@ -62,6 +63,66 @@ const fmt = (n: number) =>
       ? `$${(n / 1000).toFixed(0)}K`
       : `$${n}`;
 
+function normalizeApiExchanges(data: unknown): Exchange1031[] | null {
+  const envelope = data as Record<string, unknown> | null;
+  const arr = Array.isArray(envelope?.exchanges)
+    ? (envelope!.exchanges as Record<string, unknown>[])
+    : Array.isArray(data)
+      ? (data as Record<string, unknown>[])
+      : null;
+  if (!arr || arr.length === 0) return null;
+  try {
+    const now = Date.now();
+    return arr.map((item: Record<string, unknown>, idx: number) => {
+      const deadlines: ExchangeDeadline[] = [];
+      if (item.identificationDeadline) {
+        const ms = new Date(String(item.identificationDeadline)).getTime();
+        const days = Math.ceil((ms - now) / 86_400_000);
+        deadlines.push({
+          label: '45-Day ID Deadline',
+          date: String(item.identificationDeadline),
+          daysRemaining: Math.max(days, 0),
+          status: days <= 0 ? 'passed' : days <= 7 ? 'critical' : days <= 21 ? 'warning' : 'on-track',
+        });
+      }
+      if (item.exchangeDeadline) {
+        const ms = new Date(String(item.exchangeDeadline)).getTime();
+        const days = Math.ceil((ms - now) / 86_400_000);
+        deadlines.push({
+          label: '180-Day Close Deadline',
+          date: String(item.exchangeDeadline),
+          daysRemaining: Math.max(days, 0),
+          status: days <= 0 ? 'passed' : days <= 14 ? 'critical' : days <= 45 ? 'warning' : 'on-track',
+        });
+      }
+      const rawProps = Array.isArray(item.identifiedProperties)
+        ? (item.identifiedProperties as Record<string, unknown>[])
+        : [];
+      const replacementCandidates: ReplacementCandidate[] = rawProps.map((p, pi) => ({
+        id: String(p.id ?? `rc-api-${idx}-${pi}`),
+        address: String(p.address ?? p.name ?? ''),
+        listPrice: Number(p.listPrice ?? p.list_price ?? p.price ?? 0),
+        capRate: Number(p.capRate ?? p.cap_rate ?? 0),
+        status: (p.status ?? 'identified') as ReplacementCandidate['status'],
+      }));
+      return {
+        id: String(item.id ?? `ex-api-${idx}`),
+        name: String(item.relinquishedProperty ?? 'Exchange'),
+        relinquishedProperty: String(item.relinquishedAddress ?? item.relinquishedProperty ?? ''),
+        salePrice: Number(item.salePrice ?? 0),
+        bootAmount: 0,
+        deferredGain: Number(item.deferredGain ?? 0),
+        qualifiedIntermediary: String(item.qi ?? item.qiContact ?? ''),
+        exchangeDate: String(item.saleDate ?? item.createdAt ?? ''),
+        deadlines,
+        replacementCandidates,
+      };
+    });
+  } catch {
+    return null;
+  }
+}
+
 const EXCHANGES: Exchange1031[] = [
   {
     id: 'ex-1',
@@ -112,21 +173,30 @@ export default function Exchange1031Screen() {
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
 
-  useQuery({
+  const { data: apiData, isFetching: exchFetching } = useQuery({
     queryKey: ['terra-1031-exchange'],
     queryFn: async () => {
-      try {
-        const res = await fetch(API_BASE + '/terra/1031-exchange');
-        if (!res.ok) return null;
-        return res.json();
-      } catch {
-        return null;
-      }
+      const res = await fetch(API_BASE + '/terra/exchanges-1031');
+      if (!res.ok) throw new Error('API error');
+      return res.json();
     },
     retry: 1,
   });
 
-  const exchange = EXCHANGES[0];
+  const liveExchanges = useMemo(() => normalizeApiExchanges(apiData), [apiData]);
+  const exchanges = liveExchanges ?? EXCHANGES;
+  const isLiveData = liveExchanges !== null && liveExchanges.length > 0;
+
+  const provenanceStatus: ProvenanceStatus = exchFetching
+    ? 'loading'
+    : isLiveData
+      ? 'live'
+      : 'fallback';
+
+  const exchange = exchanges[0];
+  const urgentDeadline = exchange.deadlines.find(
+    (d) => d.status === 'critical' || d.status === 'warning'
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -143,14 +213,21 @@ export default function Exchange1031Screen() {
           <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · TAX</Text>
           <Text style={[styles.title, { color: colors.cream }]}>1031 Exchange</Text>
         </View>
-        <View
-          style={[
-            styles.urgentBadge,
-            { backgroundColor: '#fbbf24' + '15', borderColor: '#fbbf24' + '40' },
-          ]}
-        >
-          <Feather name="clock" size={11} color="#fbbf24" />
-          <Text style={[styles.urgentText, { color: '#fbbf24' }]}>12d left</Text>
+        <View style={styles.headerRight}>
+          <ProvenanceChip status={provenanceStatus} />
+          {urgentDeadline && (
+            <View
+              style={[
+                styles.urgentBadge,
+                { backgroundColor: '#fbbf24' + '15', borderColor: '#fbbf24' + '40' },
+              ]}
+            >
+              <Feather name="clock" size={11} color="#fbbf24" />
+              <Text style={[styles.urgentText, { color: '#fbbf24' }]}>
+                {urgentDeadline.daysRemaining}d left
+              </Text>
+            </View>
+          )}
         </View>
       </View>
 
@@ -270,6 +347,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   backBtn: { padding: 4, marginTop: 14 },
+  headerRight: { alignItems: 'flex-end', gap: 6, marginTop: 12 },
   eyebrow: { fontSize: 9, fontFamily: 'Inter_500Medium', letterSpacing: 3, marginBottom: 3 },
   title: { fontSize: 20, fontFamily: 'Inter_600SemiBold', letterSpacing: -0.3 },
   urgentBadge: {
@@ -280,7 +358,6 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 8,
     borderWidth: 1,
-    marginTop: 14,
   },
   urgentText: { fontSize: 10, fontFamily: 'Inter_500Medium' },
   exchangeCard: { borderRadius: 12, borderWidth: 1, padding: 14, marginBottom: 20 },

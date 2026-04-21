@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   type DimensionValue,
   Platform,
@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ProvenanceChip, type ProvenanceStatus } from '@/components/ProvenanceChip';
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
@@ -150,14 +151,67 @@ const MODELS: ProFormaModel[] = [
   },
 ];
 
+function normalizeApiModels(data: unknown): ProFormaModel[] | null {
+  const envelope = data as Record<string, unknown> | null;
+  const arr = Array.isArray(envelope?.projects)
+    ? (envelope!.projects as Record<string, unknown>[])
+    : Array.isArray(data)
+      ? (data as Record<string, unknown>[])
+      : null;
+  if (!arr || arr.length === 0) return null;
+  try {
+    const SCENARIO_COLORS = ['#ef4444', '#34d399', '#60a5fa', '#a78bfa', '#fbbf24'];
+    return arr.map((item: Record<string, unknown>, idx: number) => {
+      const inputs = (item.inputs as Record<string, unknown>) ?? {};
+      const results = (item.results as Record<string, unknown>) ?? {};
+      const rawScenarios = Array.isArray(results.scenarios) ? results.scenarios : [];
+      const scenarios: ProFormaScenario[] = (rawScenarios as Record<string, unknown>[]).map(
+        (s, si) => ({
+          id: String(s.id ?? `s-api-${idx}-${si}`),
+          label: String(s.label ?? s.name ?? `Scenario ${si + 1}`),
+          irr: Number(s.irr ?? 0),
+          equityMultiple: Number(s.equityMultiple ?? s.equity_multiple ?? 1),
+          cashOnCash: Number(s.cashOnCash ?? s.cash_on_cash ?? 0),
+          holdPeriod: Number(s.holdPeriod ?? s.hold_period ?? 5),
+          exitCapRate: Number(s.exitCapRate ?? s.exit_cap_rate ?? 0),
+          color: String(s.color ?? SCENARIO_COLORS[si % SCENARIO_COLORS.length]),
+        })
+      );
+      const rawYearly = Array.isArray(results.yearlyNoi)
+        ? results.yearlyNoi
+        : Array.isArray(results.projections)
+          ? results.projections
+          : [];
+      const yearlyNoi = (rawYearly as Record<string, unknown>[]).map((y, yi) => ({
+        year: Number(y.year ?? yi + 1),
+        noi: Number(y.noi ?? 0),
+        cashFlow: Number(y.cashFlow ?? y.cash_flow ?? 0),
+      }));
+      return {
+        id: String(item.id ?? `pf-api-${idx}`),
+        name: String(item.projectName ?? item.name ?? 'Untitled Model'),
+        property: String(item.propertyType ?? ''),
+        purchasePrice: Number(inputs.purchasePrice ?? inputs.purchase_price ?? 0),
+        equity: Number(inputs.equity ?? inputs.equityAmount ?? 0),
+        leverage: Number(inputs.leverage ?? inputs.ltv ?? 70),
+        closingDate: String(item.updatedAt ?? ''),
+        noi: Number(results.noi ?? inputs.noi ?? 0),
+        capRate: Number(results.capRate ?? results.cap_rate ?? inputs.capRate ?? inputs.cap_rate ?? 0),
+        scenarios,
+        yearlyNoi,
+      };
+    });
+  } catch {
+    return null;
+  }
+}
+
 const fmt = (n: number) =>
   n >= 1_000_000
     ? `$${(n / 1_000_000).toFixed(1)}M`
     : n >= 1000
       ? `$${(n / 1000).toFixed(0)}K`
       : `$${n}`;
-
-const maxNoi = Math.max(...MODELS[0].yearlyNoi.map((y) => y.noi));
 
 function Bar({ value, max, color }: { value: number; max: number; color: string }) {
   const pct = Math.round((value / max) * 100);
@@ -184,25 +238,31 @@ export default function ProFormaScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
-  const [selectedModel, setSelectedModel] = useState<string>(MODELS[0].id);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
-  useQuery({
+  const { data: apiData, isFetching: pfFetching } = useQuery({
     queryKey: ['terra-pro-forma'],
     queryFn: async () => {
-      try {
-        const res = await fetch(API_BASE + '/terra/pro-forma');
-        if (!res.ok) return null;
-        return res.json();
-      } catch {
-        return null;
-      }
+      const res = await fetch(API_BASE + '/terra/pro-forma-projects');
+      if (!res.ok) throw new Error('API error');
+      return res.json();
     },
     retry: 1,
   });
 
-  const model = MODELS.find((m) => m.id === selectedModel) ?? MODELS[0];
-  const baseScenario = model.scenarios.find((s) => s.label === 'Base') ?? model.scenarios[1];
-  const noMax = Math.max(...model.yearlyNoi.map((y) => y.noi));
+  const liveModels = useMemo(() => normalizeApiModels(apiData), [apiData]);
+  const displayModels = liveModels ?? MODELS;
+  const isLiveData = liveModels !== null && liveModels.length > 0;
+
+  const provenanceStatus: ProvenanceStatus = pfFetching
+    ? 'loading'
+    : isLiveData
+      ? 'live'
+      : 'fallback';
+
+  const activeModelId = selectedModel ?? displayModels[0]?.id;
+  const model = displayModels.find((m) => m.id === activeModelId) ?? displayModels[0];
+  const noMax = model.yearlyNoi.length > 0 ? Math.max(...model.yearlyNoi.map((y) => y.noi)) : 1;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -219,6 +279,9 @@ export default function ProFormaScreen() {
           <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · FINANCE</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Pro Forma</Text>
         </View>
+        <View style={{ marginTop: 14 }}>
+          <ProvenanceChip status={provenanceStatus} />
+        </View>
       </View>
 
       <ScrollView
@@ -226,7 +289,7 @@ export default function ProFormaScreen() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.modelTabs}
       >
-        {MODELS.map((m) => (
+        {displayModels.map((m) => (
           <Pressable
             key={m.id}
             onPress={() => {
@@ -236,15 +299,15 @@ export default function ProFormaScreen() {
             style={[
               styles.modelTab,
               {
-                borderColor: selectedModel === m.id ? ACCENT : colors.border,
-                backgroundColor: selectedModel === m.id ? ACCENT + '12' : 'transparent',
+                borderColor: activeModelId === m.id ? ACCENT : colors.border,
+                backgroundColor: activeModelId === m.id ? ACCENT + '12' : 'transparent',
               },
             ]}
           >
             <Text
               style={[
                 styles.modelTabText,
-                { color: selectedModel === m.id ? ACCENT : colors.mutedForeground },
+                { color: activeModelId === m.id ? ACCENT : colors.mutedForeground },
               ]}
             >
               {m.name}

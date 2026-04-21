@@ -2,8 +2,14 @@ import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router, usePathname } from 'expo-router';
 import type React from 'react';
-import { useEffect } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { OfflineQueueLauncher } from '@/components/OfflineQueueLauncher';
 import { useNotificationCountContext } from '@/context/NotificationCountContext';
@@ -54,6 +60,27 @@ const TABS: TabItem[] = [
     icon: 'briefcase',
     accent: '#94a3b8',
     route: '/(shell)/portfolio',
+  },
+  {
+    id: 'properties',
+    label: 'Terra',
+    icon: 'home',
+    accent: '#c87941',
+    route: '/(shell)/properties',
+  },
+  {
+    id: 'operations',
+    label: 'Ops',
+    icon: 'activity',
+    accent: '#22d3ee',
+    route: '/(shell)/operations',
+  },
+  {
+    id: 'advisory',
+    label: 'Advisory',
+    icon: 'users',
+    accent: '#d4b896',
+    route: '/(shell)/advisory',
   },
 ];
 
@@ -110,6 +137,7 @@ export function BottomTabBar() {
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
   const { unreadCount } = useNotificationCountContext();
+  const scrollRef = useRef<ScrollView>(null);
 
   useCortexBadge();
 
@@ -137,127 +165,164 @@ export function BottomTabBar() {
         },
       ]}
     >
-      {TABS.map((tab) => {
-        const isActive = !isSettingsActive && !isCommandDeckActive && activeWorkspace === tab.id;
-        const badge = badges[tab.id] ?? 0;
-        const color = isActive ? tab.accent : colors.mutedForeground;
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabsScrollContent}
+        style={styles.tabsScroll}
+        scrollEventThrottle={16}
+        bounces={false}
+      >
+        {TABS.map((tab) => {
+          const isActive = !isSettingsActive && !isCommandDeckActive && activeWorkspace === tab.id;
+          const badge = badges[tab.id] ?? 0;
+          const color = isActive ? tab.accent : colors.mutedForeground;
 
-        return (
-          <TouchableOpacity
-            key={tab.id}
-            onPress={() => handlePress(tab)}
-            style={styles.tab}
-            activeOpacity={0.7}
-          >
-            <View style={styles.tabInner}>
-              {isActive && (
-                <View style={[styles.activeIndicator, { backgroundColor: tab.accent }]} />
-              )}
-              <View style={styles.iconWrap}>
-                <Feather name={tab.icon} size={20} color={color} />
-                {badge > 0 && (
-                  <View
-                    style={[styles.badge, { backgroundColor: isActive ? tab.accent : '#ef4444' }]}
-                  >
-                    <Text style={styles.badgeText}>{badge > 99 ? '99+' : String(badge)}</Text>
-                  </View>
+          return (
+            <TouchableOpacity
+              key={tab.id}
+              onPress={() => handlePress(tab)}
+              style={styles.tab}
+              activeOpacity={0.7}
+              accessibilityLabel={tab.label}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isActive }}
+            >
+              <View style={styles.tabInner}>
+                {isActive && (
+                  <View style={[styles.activeIndicator, { backgroundColor: tab.accent }]} />
                 )}
-              </View>
-              <Text
-                style={[
-                  styles.label,
-                  {
-                    color,
-                    fontFamily: isActive ? 'Inter_600SemiBold' : 'Inter_400Regular',
-                  },
-                ]}
-              >
-                {tab.label}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        );
-      })}
-
-      <TouchableOpacity
-        onPress={() => router.navigate('/(shell)/quick-actions' as never)}
-        style={styles.tab}
-        activeOpacity={0.7}
-      >
-        <View style={styles.tabInner}>
-          {isCommandDeckActive && (
-            <View style={[styles.activeIndicator, { backgroundColor: '#c9a84c' }]} />
-          )}
-          <View style={styles.iconWrap}>
-            <Feather
-              name="zap"
-              size={20}
-              color={isCommandDeckActive ? '#c9a84c' : colors.mutedForeground}
-            />
-          </View>
-          <Text
-            style={[
-              styles.label,
-              {
-                color: isCommandDeckActive ? '#c9a84c' : colors.mutedForeground,
-                fontFamily: isCommandDeckActive ? 'Inter_600SemiBold' : 'Inter_400Regular',
-              },
-            ]}
-          >
-            Deck
-          </Text>
-        </View>
-      </TouchableOpacity>
-
-      <OfflineQueueLauncher />
-
-      <TouchableOpacity
-        onPress={() => router.navigate('/(shell)/settings' as never)}
-        style={styles.tab}
-        activeOpacity={0.7}
-      >
-        <View style={styles.tabInner}>
-          {isSettingsActive && (
-            <View style={[styles.activeIndicator, { backgroundColor: colors.mutedForeground }]} />
-          )}
-          <View style={styles.iconWrap}>
-            <Feather
-              name="settings"
-              size={20}
-              color={isSettingsActive ? colors.foreground : colors.mutedForeground}
-            />
-            {unreadCount > 0 && (
-              <View style={[styles.badge, { backgroundColor: '#ef4444' }]}>
-                <Text style={styles.badgeText}>
-                  {unreadCount > 99 ? '99+' : String(unreadCount)}
+                <View style={styles.iconWrap}>
+                  <Feather name={tab.icon} size={18} color={color} />
+                  {badge > 0 && (
+                    <View
+                      style={[styles.badge, { backgroundColor: isActive ? tab.accent : '#ef4444' }]}
+                    >
+                      <Text style={styles.badgeText}>{badge > 99 ? '99+' : String(badge)}</Text>
+                    </View>
+                  )}
+                </View>
+                <Text
+                  style={[
+                    styles.label,
+                    {
+                      color,
+                      fontFamily: isActive ? 'Inter_600SemiBold' : 'Inter_400Regular',
+                    },
+                  ]}
+                >
+                  {tab.label}
                 </Text>
               </View>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
+      <View style={styles.utilityRow}>
+        <TouchableOpacity
+          onPress={() => router.navigate('/(shell)/quick-actions' as never)}
+          style={styles.utilityTab}
+          activeOpacity={0.7}
+          accessibilityLabel="Quick Actions Deck"
+          accessibilityRole="button"
+        >
+          <View style={styles.tabInner}>
+            {isCommandDeckActive && (
+              <View style={[styles.activeIndicator, { backgroundColor: '#c9a84c' }]} />
             )}
+            <View style={styles.iconWrap}>
+              <Feather
+                name="zap"
+                size={18}
+                color={isCommandDeckActive ? '#c9a84c' : colors.mutedForeground}
+              />
+            </View>
+            <Text
+              style={[
+                styles.label,
+                {
+                  color: isCommandDeckActive ? '#c9a84c' : colors.mutedForeground,
+                  fontFamily: isCommandDeckActive ? 'Inter_600SemiBold' : 'Inter_400Regular',
+                },
+              ]}
+            >
+              Deck
+            </Text>
           </View>
-          <Text
-            style={[
-              styles.label,
-              {
-                color: isSettingsActive ? colors.foreground : colors.mutedForeground,
-                fontFamily: isSettingsActive ? 'Inter_600SemiBold' : 'Inter_400Regular',
-              },
-            ]}
-          >
-            Settings
-          </Text>
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+
+        <OfflineQueueLauncher />
+
+        <TouchableOpacity
+          onPress={() => router.navigate('/(shell)/settings' as never)}
+          style={styles.utilityTab}
+          activeOpacity={0.7}
+          accessibilityLabel="Settings"
+          accessibilityRole="button"
+        >
+          <View style={styles.tabInner}>
+            {isSettingsActive && (
+              <View style={[styles.activeIndicator, { backgroundColor: colors.mutedForeground }]} />
+            )}
+            <View style={styles.iconWrap}>
+              <Feather
+                name="settings"
+                size={18}
+                color={isSettingsActive ? colors.foreground : colors.mutedForeground}
+              />
+              {unreadCount > 0 && (
+                <View style={[styles.badge, { backgroundColor: '#ef4444' }]}>
+                  <Text style={styles.badgeText}>
+                    {unreadCount > 99 ? '99+' : String(unreadCount)}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <Text
+              style={[
+                styles.label,
+                {
+                  color: isSettingsActive ? colors.foreground : colors.mutedForeground,
+                  fontFamily: isSettingsActive ? 'Inter_600SemiBold' : 'Inter_400Regular',
+                },
+              ]}
+            >
+              Settings
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     borderTopWidth: 1,
-    paddingTop: 8,
+    paddingTop: 6,
+  },
+  tabsScroll: {
+    flexGrow: 0,
+  },
+  tabsScrollContent: {
+    paddingHorizontal: 4,
+    gap: 0,
+  },
+  utilityRow: {
+    flexDirection: 'row',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+    marginTop: 6,
+    paddingTop: 4,
   },
   tab: {
+    minWidth: 64,
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  utilityTab: {
     flex: 1,
     alignItems: 'center',
   },
@@ -268,8 +333,8 @@ const styles = StyleSheet.create({
   },
   activeIndicator: {
     position: 'absolute',
-    top: -9,
-    width: 28,
+    top: -7,
+    width: 24,
     height: 2,
     borderRadius: 1,
   },
@@ -280,20 +345,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -5,
     right: -8,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
-    paddingHorizontal: 3,
+    minWidth: 14,
+    height: 14,
+    borderRadius: 7,
+    paddingHorizontal: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
   badgeText: {
     color: '#fff',
-    fontSize: 9,
+    fontSize: 8,
     fontFamily: 'Inter_600SemiBold',
   },
   label: {
-    fontSize: 10,
-    letterSpacing: 0.3,
+    fontSize: 9,
+    letterSpacing: 0.2,
   },
 });

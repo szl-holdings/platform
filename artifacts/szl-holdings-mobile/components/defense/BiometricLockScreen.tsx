@@ -1,22 +1,57 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as LocalAuthentication from 'expo-local-authentication';
 import React, { useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useBiometric } from '@/context/BiometricContext';
+import { promptBiometric } from '@/context/BiometricLockContext';
 import { useColors } from '@/hooks/useColors';
 
-export function BiometricLockScreen() {
+interface Props {
+  onUnlocked?: () => void;
+}
+
+export function BiometricLockScreen({ onUnlocked }: Props) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { unlock } = useBiometric();
   const [unlocking, setUnlocking] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [failCount, setFailCount] = useState(0);
 
   const handleUnlock = async () => {
     setUnlocking(true);
     setFailed(false);
-    const success = await unlock();
-    if (!success) {
+    const success = await promptBiometric('Authenticate to access the SOC command center');
+    if (success) {
+      onUnlocked?.();
+    } else {
+      setFailed(true);
+      setFailCount((c) => c + 1);
+    }
+    setUnlocking(false);
+  };
+
+  const handlePasscode = async () => {
+    if (Platform.OS === 'web') {
+      onUnlocked?.();
+      return;
+    }
+    setUnlocking(true);
+    setFailed(false);
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Enter device passcode to access the SOC command center',
+      disableDeviceFallback: false,
+      cancelLabel: 'Cancel',
+    });
+    if (result.success) {
+      onUnlocked?.();
+    } else {
       setFailed(true);
     }
     setUnlocking(false);
@@ -66,7 +101,9 @@ export function BiometricLockScreen() {
           >
             <Ionicons name="warning" size={14} color={colors.red} />
             <Text style={[styles.errorText, { color: colors.red, fontFamily: 'Inter_400Regular' }]}>
-              Authentication failed — try again
+              {failCount >= 2
+                ? 'Biometric not recognized. Use your device passcode to continue.'
+                : 'Authentication failed — try again or use passcode.'}
             </Text>
           </View>
         )}
@@ -79,6 +116,8 @@ export function BiometricLockScreen() {
           onPress={handleUnlock}
           disabled={unlocking}
           activeOpacity={0.8}
+          accessibilityLabel="Unlock with biometrics"
+          accessibilityRole="button"
         >
           {unlocking ? (
             <ActivityIndicator color={colors.background} size="small" />
@@ -95,6 +134,31 @@ export function BiometricLockScreen() {
               </Text>
             </>
           )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.passcodeBtn,
+            {
+              borderColor: colors.amberBorder,
+              opacity: unlocking ? 0.5 : 1,
+            },
+          ]}
+          onPress={handlePasscode}
+          disabled={unlocking}
+          activeOpacity={0.8}
+          accessibilityLabel="Use device passcode"
+          accessibilityRole="button"
+        >
+          <Ionicons name="keypad" size={16} color={colors.amber} />
+          <Text
+            style={[
+              styles.passcodeText,
+              { color: colors.amber, fontFamily: 'Inter_400Regular' },
+            ]}
+          >
+            Use Passcode
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.secNote}>
@@ -129,7 +193,7 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 14, lineHeight: 22, textAlign: 'center', marginBottom: 28 },
   errorBanner: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 8,
     padding: 10,
     borderRadius: 8,
@@ -137,7 +201,7 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 16,
   },
-  errorText: { fontSize: 12, flex: 1 },
+  errorText: { fontSize: 12, flex: 1, lineHeight: 17 },
   unlockBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -146,9 +210,21 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 52,
     borderRadius: 12,
-    marginBottom: 16,
+    marginBottom: 10,
   },
   unlockText: { fontSize: 15 },
+  passcodeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    width: '100%',
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 20,
+  },
+  passcodeText: { fontSize: 14 },
   secNote: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   secNoteText: { fontSize: 11 },
 });

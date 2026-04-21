@@ -1,4 +1,6 @@
 import { Feather } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,6 +9,134 @@ import { useColors } from '@/hooks/useColors';
 
 const ACCENT = '#c9a84c';
 const PURPLE = '#8b7ac8';
+const TERRA = '#c87941';
+
+// ── Terra module shortcuts ─────────────────────────────────────────────────────
+
+const TERRA_SHORTCUTS: {
+  id: string;
+  label: string;
+  icon: React.ComponentProps<typeof Feather>['name'];
+  route: string;
+  badge?: string;
+}[] = [
+  { id: 'terra-modules', label: 'All Modules', icon: 'grid', route: '/(shell)/properties' },
+  {
+    id: 'lease-abstraction',
+    label: 'Lease Abstraction',
+    icon: 'clipboard',
+    route: '/(shell)/properties/lease-abstraction',
+    badge: 'AI',
+  },
+  {
+    id: 'pro-forma',
+    label: 'Pro Forma',
+    icon: 'trending-up',
+    route: '/(shell)/properties/pro-forma',
+    badge: 'Pro',
+  },
+  {
+    id: 'exchange-1031',
+    label: '1031 Exchange',
+    icon: 'refresh-cw',
+    route: '/(shell)/properties/exchange-1031',
+    badge: 'Tax',
+  },
+  {
+    id: 'waterfall',
+    label: 'Waterfall',
+    icon: 'dollar-sign',
+    route: '/(shell)/properties/waterfall',
+  },
+  {
+    id: 'rent-roll',
+    label: 'Rent Roll',
+    icon: 'file-text',
+    route: '/(shell)/properties/rent-roll',
+  },
+];
+
+function TerraShortcutsStrip() {
+  return (
+    <View style={terraStyles.wrapper}>
+      <View style={terraStyles.headerRow}>
+        <Feather name="home" size={10} color={TERRA} />
+        <Text style={terraStyles.sectionLabel}>TERRA SHORTCUTS</Text>
+      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={terraStyles.scrollContent}
+      >
+        {TERRA_SHORTCUTS.map((item) => (
+          <TouchableOpacity
+            key={item.id}
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.push(item.route as never);
+            }}
+            style={[
+              terraStyles.shortcutBtn,
+              { backgroundColor: TERRA + '10', borderColor: TERRA + '30' },
+            ]}
+            activeOpacity={0.75}
+            accessibilityLabel={item.label}
+            accessibilityRole="button"
+          >
+            <Feather name={item.icon} size={14} color={TERRA} />
+            <Text style={terraStyles.shortcutLabel}>{item.label}</Text>
+            {item.badge && (
+              <View style={[terraStyles.shortcutBadge, { backgroundColor: TERRA + '25' }]}>
+                <Text style={[terraStyles.shortcutBadgeText, { color: TERRA }]}>{item.badge}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+
+const terraStyles = StyleSheet.create({
+  wrapper: { marginBottom: 4 },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 20,
+    marginBottom: 8,
+  },
+  sectionLabel: {
+    fontSize: 9,
+    fontFamily: 'Inter_600SemiBold',
+    color: TERRA,
+    letterSpacing: 1.5,
+  },
+  scrollContent: { paddingHorizontal: 16, gap: 8 },
+  shortcutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  shortcutLabel: {
+    fontSize: 11,
+    fontFamily: 'Inter_500Medium',
+    color: TERRA,
+  },
+  shortcutBadge: {
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 4,
+  },
+  shortcutBadgeText: {
+    fontSize: 9,
+    fontFamily: 'Inter_600SemiBold',
+  },
+});
 
 // ── Priority signals ───────────────────────────────────────────────────────────
 
@@ -486,6 +616,9 @@ export default function QuickActionsScreen() {
       <View style={{ marginTop: 14 }}>
         <BusinessHealthStrip colors={colors} />
       </View>
+
+      {/* Terra shortcuts */}
+      <TerraShortcutsStrip />
 
       {/* Tab bar */}
       <View

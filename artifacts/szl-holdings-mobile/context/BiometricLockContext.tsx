@@ -1,4 +1,4 @@
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 import React, {
@@ -11,6 +11,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  ActivityIndicator,
   AppState,
   type AppStateStatus,
   Platform,
@@ -47,12 +48,37 @@ export async function promptBiometric(reason: string): Promise<boolean> {
 
 function LockScreen({ onUnlock }: { onUnlock: () => void }) {
   const [unlocking, setUnlocking] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [failCount, setFailCount] = useState(0);
 
   const handleUnlock = useCallback(async () => {
     if (unlocking) return;
     setUnlocking(true);
+    setFailed(false);
     const success = await promptBiometric('Authenticate to access SZL Holdings');
-    if (success) onUnlock();
+    if (success) {
+      onUnlock();
+    } else {
+      setFailed(true);
+      setFailCount((c) => c + 1);
+    }
+    setUnlocking(false);
+  }, [unlocking, onUnlock]);
+
+  const handlePasscode = useCallback(async () => {
+    if (unlocking) return;
+    setUnlocking(true);
+    setFailed(false);
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Enter device passcode to access SZL Holdings',
+      disableDeviceFallback: false,
+      cancelLabel: 'Cancel',
+    });
+    if (result.success) {
+      onUnlock();
+    } else {
+      setFailed(true);
+    }
     setUnlocking(false);
   }, [unlocking, onUnlock]);
 
@@ -68,14 +94,47 @@ function LockScreen({ onUnlock }: { onUnlock: () => void }) {
         </View>
         <Text style={styles.lockTitle}>SZL Holdings</Text>
         <Text style={styles.lockSubtitle}>Authenticate to access your executive dashboard</Text>
+
+        {failed && (
+          <View style={styles.errorBanner}>
+            <Ionicons name="warning" size={13} color="#ef4444" />
+            <Text style={styles.errorText}>
+              {failCount >= 2
+                ? 'Biometric not recognized. Use your passcode to proceed.'
+                : 'Authentication failed — try again or use passcode.'}
+            </Text>
+          </View>
+        )}
+
         <Pressable
           style={[styles.unlockBtn, unlocking && { opacity: 0.6 }]}
           onPress={handleUnlock}
           disabled={unlocking}
+          accessibilityLabel="Authenticate with biometrics"
+          accessibilityRole="button"
         >
-          <Feather name="unlock" size={16} color="#090810" />
-          <Text style={styles.unlockBtnText}>{unlocking ? 'Authenticating…' : 'Authenticate'}</Text>
+          {unlocking ? (
+            <ActivityIndicator color="#090810" size="small" />
+          ) : (
+            <>
+              <Feather name="unlock" size={16} color="#090810" />
+              <Text style={styles.unlockBtnText}>Authenticate</Text>
+            </>
+          )}
         </Pressable>
+
+        {Platform.OS !== 'web' && (
+          <Pressable
+            style={[styles.passcodeBtn, unlocking && { opacity: 0.6 }]}
+            onPress={handlePasscode}
+            disabled={unlocking}
+            accessibilityLabel="Use device passcode"
+            accessibilityRole="button"
+          >
+            <Feather name="hash" size={14} color="rgba(201,168,76,0.7)" />
+            <Text style={styles.passcodeBtnText}>Use Passcode</Text>
+          </Pressable>
+        )}
       </View>
     </View>
   );
@@ -126,6 +185,7 @@ export function BiometricLockProvider({ children }: { children: ReactNode }) {
       const result = await LocalAuthentication.authenticateAsync({
         promptMessage: 'Authenticate to enable biometric lock',
         fallbackLabel: 'Use Passcode',
+        disableDeviceFallback: false,
       });
       if (!result.success) throw new Error('biometric_failed');
       setBiometricEnabled(true);
@@ -137,15 +197,34 @@ export function BiometricLockProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const unlock = useCallback(async (): Promise<boolean> => {
+    if (Platform.OS === 'web') {
+      handleUnlock();
+      return true;
+    }
+    const success = await promptBiometric('Authenticate to access SZL Holdings');
+    if (success) {
+      handleUnlock();
+      return true;
+    }
+    const fallback = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Enter device passcode to access SZL Holdings',
+      disableDeviceFallback: false,
+      cancelLabel: 'Cancel',
+    });
+    if (fallback.success) {
+      handleUnlock();
+      return true;
+    }
+    return false;
+  }, [handleUnlock]);
+
   return (
     <BiometricLockContext.Provider
       value={{
         biometricEnabled,
         setBiometricPreference,
-        unlock: async () => {
-          handleUnlock();
-          return false;
-        },
+        unlock,
       }}
     >
       {children}
@@ -198,8 +277,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 19,
   },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    backgroundColor: 'rgba(239,68,68,0.08)',
+    borderColor: 'rgba(239,68,68,0.25)',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    width: '100%',
+  },
+  errorText: {
+    fontSize: 11,
+    fontFamily: 'Inter_400Regular',
+    color: '#ef4444',
+    flex: 1,
+    lineHeight: 16,
+  },
   unlockBtn: {
-    marginTop: 8,
+    marginTop: 4,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -207,10 +304,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 10,
+    width: '100%',
+    justifyContent: 'center',
   },
   unlockBtnText: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
     color: '#090810',
+  },
+  passcodeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(201,168,76,0.25)',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  passcodeBtnText: {
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    color: 'rgba(201,168,76,0.7)',
   },
 });

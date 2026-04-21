@@ -6,6 +6,7 @@ import { type Href, router } from 'expo-router';
 import type React from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ProvenanceChip, type ProvenanceStatus } from '@/components/ProvenanceChip';
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
@@ -174,26 +175,39 @@ export default function TerraModulesTab() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
-  const bottomPad = Platform.OS === 'web' ? 34 + 84 : 90;
+  const bottomPad = insets.bottom + 16;
 
-  const { data: portfolioSummary } = useQuery({
+  const {
+    data: portfolioSummary,
+    isFetching,
+    isError,
+  } = useQuery({
     queryKey: ['terra-portfolio-summary'],
     queryFn: async () => {
-      try {
-        const res = await fetch(API_BASE + '/terra/portfolio?limit=5');
-        if (!res.ok) return null;
-        return res.json();
-      } catch {
-        return null;
-      }
+      const res = await fetch(API_BASE + '/terra/portfolio?limit=5');
+      if (!res.ok) throw new Error('API error');
+      return res.json();
     },
     retry: 1,
   });
 
+  const provenanceStatus: ProvenanceStatus = isFetching
+    ? 'loading'
+    : isError || !portfolioSummary
+      ? 'fallback'
+      : 'live';
+
   const totalProperties =
-    portfolioSummary?.data?.properties?.length ?? portfolioSummary?.properties?.length ?? 14;
-  const avgOccupancy = '87%';
-  const noi = '$2.1M';
+    portfolioSummary?.data?.properties?.length ??
+    portfolioSummary?.properties?.length ??
+    14;
+  const avgOccupancy =
+    portfolioSummary?.occupancy ?? portfolioSummary?.data?.occupancy ?? '87%';
+  const noi = portfolioSummary?.noi ?? portfolioSummary?.data?.noi ?? '$2.1M';
+  const activeLeases =
+    portfolioSummary?.activeLeases ?? portfolioSummary?.data?.activeLeases ?? 38;
+  const underConstruction =
+    portfolioSummary?.underConstruction ?? portfolioSummary?.data?.underConstruction ?? 3;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -211,10 +225,7 @@ export default function TerraModulesTab() {
             <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · MODULES</Text>
             <Text style={[styles.title, { color: colors.cream }]}>Asset Intelligence</Text>
           </View>
-          <View style={[styles.livePill, { borderColor: '#34d399' + '40' }]}>
-            <View style={[styles.liveDot, { backgroundColor: '#34d399' }]} />
-            <Text style={[styles.liveText, { color: '#34d399' }]}>Live</Text>
-          </View>
+          <ProvenanceChip status={provenanceStatus} />
         </View>
 
         <ScrollView
@@ -223,10 +234,22 @@ export default function TerraModulesTab() {
           contentContainerStyle={styles.metricsRow}
         >
           <MetricPill label="Properties" value={String(totalProperties)} color={ACCENT} />
-          <MetricPill label="Occupancy" value={avgOccupancy} color="#34d399" />
-          <MetricPill label="Portfolio NOI" value={noi} color="#60a5fa" />
-          <MetricPill label="Active Leases" value="38" color="#a855f7" />
-          <MetricPill label="Under Construction" value="3" color="#f59e0b" />
+          <MetricPill
+            label="Occupancy"
+            value={typeof avgOccupancy === 'string' ? avgOccupancy : `${avgOccupancy}%`}
+            color="#34d399"
+          />
+          <MetricPill
+            label="Portfolio NOI"
+            value={typeof noi === 'string' ? noi : `$${(noi / 1_000_000).toFixed(1)}M`}
+            color="#60a5fa"
+          />
+          <MetricPill label="Active Leases" value={String(activeLeases)} color="#a855f7" />
+          <MetricPill
+            label="Under Construction"
+            value={String(underConstruction)}
+            color="#f59e0b"
+          />
         </ScrollView>
 
         <View style={[styles.sectionHeader, { borderBottomColor: colors.border }]}>
@@ -258,17 +281,6 @@ const styles = StyleSheet.create({
   },
   eyebrow: { fontSize: 9, fontFamily: 'Inter_500Medium', letterSpacing: 3, marginBottom: 4 },
   title: { fontSize: 20, fontFamily: 'Inter_600SemiBold', letterSpacing: -0.3 },
-  livePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 100,
-    borderWidth: 1,
-  },
-  liveDot: { width: 6, height: 6, borderRadius: 3 },
-  liveText: { fontSize: 10, fontFamily: 'Inter_500Medium' },
   metricsRow: { paddingHorizontal: 20, gap: 8, marginBottom: 18 },
   metricPill: {
     paddingHorizontal: 14,
