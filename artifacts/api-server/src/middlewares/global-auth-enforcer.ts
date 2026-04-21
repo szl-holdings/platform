@@ -108,6 +108,11 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/lyte/signal-fusion",
   "/api/lyte/governance-domains",
   "/api/lyte/decision-schemas",
+  // Investor Hub company fundamentals — read-only descriptive metrics keyed by
+  // category='fundamentals' in holdings_metrics. Public so the marketing
+  // /investors page can render live values without a session, with a static
+  // fallback baked into the page when the API is unavailable.
+  "/api/holdings/fundamentals",
   // Decision Runtime v1 — list endpoint GET /api/decisions/cards.
   // Per-card GET routes are whitelisted by prefix in PUBLIC_PREFIXES below.
   // Mutating routes (approve/reject/request-changes, simulate-policy) are NOT

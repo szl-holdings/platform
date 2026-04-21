@@ -348,6 +348,53 @@ export async function seedHoldingsFundops() {
 
   console.log(`[seed-holdings-fundops] Seeded metrics`);
 
+  await db.insert(holdingsMetricsTable).values([
+    {
+      ventureId: null,
+      label: 'Stage',
+      value: 'Design-partner / pre-commercial',
+      category: 'fundamentals',
+      metadata: { note: 'Working directly with early teams before scaling' },
+    },
+    {
+      ventureId: null,
+      label: 'Category',
+      value: 'Governed decision infrastructure',
+      category: 'fundamentals',
+      metadata: { note: 'The structural layer between signal detection and action execution' },
+    },
+    {
+      ventureId: null,
+      label: 'Architecture',
+      value: 'Shared spine, vertical packs',
+      category: 'fundamentals',
+      metadata: { note: 'One governed platform, multiple domain-specific products' },
+    },
+    {
+      ventureId: null,
+      label: 'Wedge',
+      value: 'Vessels, Aegis, Terra → platform',
+      category: 'fundamentals',
+      metadata: { note: 'Maritime, security, and real estate entering design-partner phase' },
+    },
+    {
+      ventureId: null,
+      label: 'Expansion logic',
+      value: '9-step loop × 6 domain packs',
+      category: 'fundamentals',
+      metadata: { note: 'Each pack inherits governance, proof chain, and simulation engine' },
+    },
+    {
+      ventureId: null,
+      label: 'Edge',
+      value: 'Demo > pitch > architecture > GitHub',
+      category: 'fundamentals',
+      metadata: { note: 'Live product is the primary proof vehicle' },
+    },
+  ]);
+
+  console.log(`[seed-holdings-fundops] Seeded company fundamentals`);
+
   await db.insert(holdingsLeadershipTable).values([
     {
       name: 'Stephen L.',

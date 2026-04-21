@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -13,6 +14,8 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+
+type Fundamental = { label: string; value: string; note: string };
 
 const hubPages = [
   {
@@ -90,7 +93,7 @@ const hubPages = [
   },
 ];
 
-const fundamentals = [
+const FALLBACK_FUNDAMENTALS: Fundamental[] = [
   {
     label: "Stage",
     value: "Design-partner / pre-commercial",
@@ -130,6 +133,32 @@ export default function InvestorsHubPage() {
       "The full investor surface for SZL Holdings — overview, architecture, moat, roadmap, trust, data room, and founder.",
     canonical: "https://szlholdings.com/investors",
   });
+
+  const [fundamentals, setFundamentals] = useState<Fundamental[]>(FALLBACK_FUNDAMENTALS);
+  const [isSeeded, setIsSeeded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/holdings/fundamentals", {
+          headers: { Accept: "application/json" },
+        });
+        if (!res.ok) return;
+        const data = (await res.json()) as { seeded?: boolean; fundamentals?: Fundamental[] };
+        if (cancelled) return;
+        if (Array.isArray(data.fundamentals) && data.fundamentals.length > 0) {
+          setFundamentals(data.fundamentals);
+          setIsSeeded(Boolean(data.seeded));
+        }
+      } catch {
+        // Keep static fallback values on failure.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <>
@@ -175,9 +204,20 @@ export default function InvestorsHubPage() {
           {/* Fundamentals */}
           <section className="border-b border-white/10">
             <div className="mx-auto max-w-6xl px-6 py-14 lg:px-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-                Company fundamentals
-              </p>
+              <div className="flex items-center gap-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
+                  Company fundamentals
+                </p>
+                {isSeeded ? (
+                  <span
+                    data-testid="fundamentals-demo-badge"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    Demo data
+                  </span>
+                ) : null}
+              </div>
               <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {fundamentals.map((f) => (
                   <div

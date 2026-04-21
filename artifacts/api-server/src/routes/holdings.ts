@@ -27,7 +27,7 @@ import {
   carlotaReservationsTable,
   auditEventsTable,
 } from "@szl-holdings/db";
-import { eq, desc, ilike, or, sql, count, and } from "drizzle-orm";
+import { eq, desc, ilike, or, sql, count, and, isNull, asc } from "drizzle-orm";
 import { hashIp } from "@szl-holdings/audit";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam, requireRole } from "../middlewares/auth";
@@ -314,6 +314,40 @@ router.get("/holdings/venture-health", async (_req, res) => {
     res.json(payload);
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch venture health");
+  }
+});
+
+let fundamentalsCache: { data: unknown; at: number } | null = null;
+const FUNDAMENTALS_TTL = 60_000;
+
+router.get("/holdings/fundamentals", async (_req, res) => {
+  try {
+    if (fundamentalsCache && Date.now() - fundamentalsCache.at < FUNDAMENTALS_TTL) {
+      res.json(fundamentalsCache.data);
+      return;
+    }
+    const rows = await db
+      .select()
+      .from(holdingsMetricsTable)
+      .where(and(eq(holdingsMetricsTable.category, "fundamentals"), isNull(holdingsMetricsTable.ventureId)))
+      .orderBy(asc(holdingsMetricsTable.id));
+    const fundamentals = rows.map((r) => {
+      const meta = (r.metadata ?? {}) as Record<string, unknown>;
+      return {
+        label: r.label,
+        value: r.value,
+        note: typeof meta.note === "string" ? (meta.note as string) : "",
+      };
+    });
+    const payload = {
+      checkedAt: new Date().toISOString(),
+      seeded: fundamentals.length > 0,
+      fundamentals,
+    };
+    fundamentalsCache = { data: payload, at: Date.now() };
+    res.json(payload);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch fundamentals");
   }
 });
 
