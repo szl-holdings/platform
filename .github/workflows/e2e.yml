@@ -174,6 +174,17 @@ jobs:
             dist: artifacts/szl-holdings/dist/public
             port: 3000
             spec: a11y.spec.ts
+          # health-and-404.spec.ts covers two Phase C baselines:
+          #   1. GET /api/health returns 200 (skipped when API server not running)
+          #   2. Unknown routes don't show an error boundary crash
+          # Runs against the SZL Holdings static build; the API health probe
+          # self-skips since no API server is present in the static-serve job.
+          # The live-server assertion is covered by the readiness-gate in ci.yml.
+          - app: health-and-404
+            filter: "@workspace/szl-holdings"
+            dist: artifacts/szl-holdings/dist/public
+            port: 3000
+            spec: health-and-404.spec.ts
           # No specs are currently excluded from this matrix.
           # All registered specs use appAvailable guards and call testInfo.skip()
           # when the target path is unavailable — they will not cause false failures.

@@ -22,7 +22,7 @@ catalogs:
       specifier: 5.99.0
       version: 5.99.0
     '@types/node':
-      specifier: ^25.3.3
+      specifier: 25.3.5
       version: 25.3.5
     '@vitejs/plugin-react':
       specifier: ^5.0.4
@@ -3627,6 +3627,9 @@ importers:
 
   packages/config:
     devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
       typescript:
         specifier: ^5.4.5
         version: 5.9.3
