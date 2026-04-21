@@ -114,17 +114,17 @@ A representative cross-section of the live product surfaces:
 | Domain Pack | Domain | Status |
 |-------------|--------|--------|
 | **Aegis** | Security & Defense — SOC command, SOAR, MITRE ATT&CK | Functional Alpha |
+| **Sentra** | Cyber Resilience — threat posture, resilience scoring, incident readiness | Functional Alpha |
 | **Vessels** | Maritime Intelligence — AIS fleet, sanctions screening, Helmsman agent | Functional Alpha |
 | **Terra** | Real Estate Intelligence — NYC distress pipeline, ownership graph, deal flow | Functional Alpha |
-| **PRISM Counsel** | Legal Matter Command — matter management, AI triage, proof chain audit | Functional Alpha |
-| **Carlota Jo** | Premium Advisory — UHNW advisory, client portal | Live |
-| **IMPERIUM** | Cloud Sovereignty — infrastructure governance and compliance | Functional Alpha |
+| **Counsel** | Legal Matter Command — matter management, AI triage, proof chain audit | Functional Alpha |
+| **Carlota Jo** | Premium Advisory — UHNW advisory, client portal | Public Beta Candidate |
 
 ### Platform Scale Metrics
 
 | Metric | Current Value |
 |--------|--------------|
-| Active artifacts | 11 |
+| Active artifacts | 14 |
 | Database tables | 798 across 131 schema files (per-domain namespaced, all org-scoped) |
 | Shared TypeScript packages | 40 in pnpm monorepo |
 | Platform primitives | 6 (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) |

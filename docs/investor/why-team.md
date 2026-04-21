@@ -1,6 +1,6 @@
 # SZL Holdings — Why This Team
 
-**Date:** Q1 2026
+**Date:** Q2 2026
 
 ---
 
@@ -31,9 +31,9 @@ This is not a team of specialists operating in silos. It is a single founder wit
 
 ## What Has Been Built
 
-The codebase is the most credible proof of the team's capability. As of Q1 2026:
+The codebase is the most credible proof of the team's capability. As of Q2 2026:
 
-- **15 active artifacts** — implemented, documented, and buildable
+- **14 active artifacts** — implemented, documented, and buildable
 - **Full-stack implementation** — React, TypeScript, Express, PostgreSQL, Drizzle ORM, WebSocket, Expo/React Native
 - **Production-grade shared infrastructure** — six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) plus auth, AI engine, design system
 - **6 domain packs** — each with real feature depth (not marketing mockups)

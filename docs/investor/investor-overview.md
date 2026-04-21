@@ -1,7 +1,7 @@
 # SZL Holdings — Investor Overview
 
 **For:** Qualified strategic investors and institutional evaluators  
-**Date:** Q1 2026  
+**Date:** Q2 2026  
 **Contact:** inquiries@szlholdings.com
 
 ---
@@ -47,9 +47,9 @@ The architecture is unique: six platform primitives (Outcome Graph, Proof Chain,
 
 ## What Has Been Built
 
-As of Q1 2026, SZL Holdings has:
+As of Q2 2026, SZL Holdings has:
 
-- **14 registered artifacts** — 11 web surfaces (Lyte, Aegis, Vessels, Terra, Counsel, Carlota Jo, Sentra, Pulse, Command, SZL Holdings corporate, NEXUS sandbox), 1 mobile command (CORTEX/szl-holdings-mobile, Expo/React Native), 1 API server, 1 demo video
+- **14 registered artifacts** — 11 web surfaces (Lyte, Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo, Pulse, Command, SZL Holdings corporate, API server), 1 mobile command (CORTEX/szl-holdings-mobile, Expo/React Native), 1 design sandbox (NEXUS), 1 demo video
 - **Three command surfaces** — Lyte (web operator command), CORTEX (unified mobile command consolidating every domain in a single iOS/Android app), Command Portal (cross-domain ecosystem hub)
 - **Six platform primitives** — Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric — shared by all surfaces
 - **6 domain packs** fully implemented with seeded/demo data and role-aware dashboards (Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo)

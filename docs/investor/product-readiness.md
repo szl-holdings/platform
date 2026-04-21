@@ -49,6 +49,18 @@
 | **Data State** | Seeded workflow data |
 | **What's Needed for GA** | Full production load testing, Redis queue for high-volume workloads |
 
+### Sentra — Cyber Resilience Command
+
+| Dimension | Assessment |
+|-----------|-----------|
+| **Readiness Label** | Functional Alpha |
+| **Core Architecture** | Production-grade |
+| **Feature Completeness** | Threat posture dashboard, resilience scoring, incident readiness tracking, cyber risk signals |
+| **AI Integration** | Risk signal analysis, readiness assessment scoring |
+| **Data State** | Seeded demo data — clearly labeled in UI |
+| **Mobile** | ✅ CORTEX — Unified Mobile Command (Expo/React Native) |
+| **What's Needed for GA** | Live threat intelligence feed, enterprise security integration, commercial billing |
+
 ### Aegis — Unified Defense & Intelligence
 
 ![Aegis — unified Security & Defense command surface](../../assets/readme/products/aegis-command.jpg)
@@ -88,6 +100,18 @@
 | **Data State** | Simulated AIS data — labeled Demo in UI |
 | **Mobile** | ✅ CORTEX — Unified Mobile Command (Expo/React Native) |
 | **What's Needed for GA** | Live AIS data feed subscription, sanctions list API, billing activation |
+
+### Counsel — Legal Matter Command
+
+| Dimension | Assessment |
+|-----------|-----------|
+| **Readiness Label** | Functional Alpha |
+| **Core Architecture** | Production-grade |
+| **Feature Completeness** | Matter management, AI-assisted legal triage, document tracking, proof chain audit trail, role-aware counsel dashboard |
+| **AI Integration** | Matter triage, risk assessment, document analysis signals |
+| **Data State** | Seeded demo data — clearly labeled in UI |
+| **Mobile** | ✅ CORTEX — Unified Mobile Command (Expo/React Native) |
+| **What's Needed for GA** | Law firm or in-house counsel pilot deployment, billing activation, enterprise SSO |
 
 ### Carlota Jo — Private Advisory
 
