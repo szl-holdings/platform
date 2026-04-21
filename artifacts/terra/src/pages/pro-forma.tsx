@@ -26,7 +26,8 @@ import {
   Trash2,
   TrendingUp,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useAuth } from '@szl-holdings/replit-auth-web';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Bar,
   BarChart,
@@ -809,8 +810,45 @@ const INITIAL_SCENARIOS: Scenario[] = [
   { id: 'bull', name: 'Bull Case', color: SCENARIO_COLORS[1], inputs: { ...BULL_INPUTS } },
 ];
 
+const LS_KEY = 'terra:pro-forma-session';
+
+interface PersistedSession {
+  scenarios: Scenario[];
+  activeId: string;
+  userId?: string | null;
+}
+
+function loadFromLocalStorage(): PersistedSession | null {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PersistedSession;
+    if (!Array.isArray(parsed.scenarios) || parsed.scenarios.length === 0 || !parsed.activeId) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function saveToLocalStorage(scenarios: Scenario[], activeId: string, userId: string | null = null) {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({ scenarios, activeId, userId }));
+  } catch {
+    /* quota exceeded or private mode — silently ignore */
+  }
+}
+
+function getInitialState(): { scenarios: Scenario[]; activeId: string } {
+  const saved = loadFromLocalStorage();
+  const scenarios = saved?.scenarios ?? INITIAL_SCENARIOS;
+  const rawActiveId = saved?.activeId ?? 'base';
+  const activeId = scenarios.find((s) => s.id === rawActiveId)?.id ?? scenarios.at(0)?.id ?? 'base';
+  return { scenarios, activeId };
+}
+
 export default function ProFormaPage() {
   const queryClient = useQueryClient();
+  const { isAuthenticated, user } = useAuth();
 
   const { data: savedProjects } = useStandardQuery({
     queryKey: ['terra-pro-forma-projects'],
@@ -847,8 +885,65 @@ export default function ProFormaPage() {
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
 
-  const [scenarios, setScenarios] = useState<Scenario[]>(INITIAL_SCENARIOS);
-  const [activeId, setActiveId] = useState('base');
+  const [scenarios, setScenarios] = useState<Scenario[]>(() => getInitialState().scenarios);
+  const [activeId, setActiveId] = useState<string>(() => getInitialState().activeId);
+
+  const serverSessionLoadStarted = useRef(false);
+  const [serverSessionHydrated, setServerSessionHydrated] = useState(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const userId = user?.id != null ? String(user.id) : null;
+
+  useEffect(() => {
+    saveToLocalStorage(scenarios, activeId, userId);
+  }, [scenarios, activeId, userId]);
+
+  useEffect(() => {
+    if (!isAuthenticated || serverSessionLoadStarted.current) return;
+    serverSessionLoadStarted.current = true;
+    api.proFormaSession
+      .get()
+      .then((data) => {
+        if (data.session) {
+          const sess = data.session as { scenarios?: unknown; activeId?: unknown };
+          if (Array.isArray(sess.scenarios) && sess.scenarios.length > 0) {
+            const restoredScenarios = sess.scenarios as Scenario[];
+            const rawActiveId =
+              typeof sess.activeId === 'string' ? sess.activeId : (restoredScenarios.at(0)?.id ?? 'base');
+            const validActiveId =
+              restoredScenarios.find((s) => s.id === rawActiveId)?.id ??
+              restoredScenarios.at(0)?.id ??
+              'base';
+            setScenarios(restoredScenarios);
+            setActiveId(validActiveId);
+          }
+        } else {
+          const localSession = loadFromLocalStorage();
+          const localUserId = localSession?.userId;
+          if (localUserId && userId && localUserId !== userId) {
+            setScenarios(INITIAL_SCENARIOS);
+            setActiveId(INITIAL_SCENARIOS.at(0)?.id ?? 'base');
+          }
+        }
+      })
+      .catch(() => { /* silent — localStorage state already loaded */ })
+      .finally(() => {
+        setServerSessionHydrated(true);
+      });
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !serverSessionHydrated) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      api.proFormaSession
+        .set({ scenarios, activeId } as unknown as Record<string, unknown>)
+        .catch(() => { /* silent — localStorage is still up to date */ });
+    }, 2000);
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, [scenarios, activeId, isAuthenticated, serverSessionHydrated]);
   const [showInputs, setShowInputs] = useState(true);
   const [showProjects, setShowProjects] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);

@@ -9,7 +9,7 @@ import {
   terraWaterfallStructuresTable,
 } from '@szl-holdings/db';
 import { randomUUID } from 'crypto';
-import { and, desc, eq, isNull, or } from 'drizzle-orm';
+import { and, desc, eq, isNull, ne, or } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import mammoth from 'mammoth';
 import multer from 'multer';
@@ -31,6 +31,8 @@ const router: IRouter = Router();
 
 const authRead = authMiddleware({ required: true });
 const authWrite = authMiddleware({ required: true });
+
+const SESSION_PROJECT_NAME = '__szl_scenario_session__';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -727,10 +729,11 @@ router.delete(
 router.get('/terra/pro-forma-projects', authRead, async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
+    const notSessionRow = ne(terraProFormaProjectsTable.projectName, SESSION_PROJECT_NAME);
     const baseQuery = db.select().from(terraProFormaProjectsTable);
     const rows = await (userId
-      ? baseQuery.where(eq(terraProFormaProjectsTable.ownerUserId, userId))
-      : baseQuery
+      ? baseQuery.where(and(eq(terraProFormaProjectsTable.ownerUserId, userId), notSessionRow))
+      : baseQuery.where(notSessionRow)
     ).orderBy(desc(terraProFormaProjectsTable.updatedAt));
     const projects = rows.map((r) => ({
       id: r.externalId ?? String(r.id),
@@ -810,7 +813,10 @@ router.put(
       if (d.projectName) update.projectName = d.projectName;
       if (d.inputs) update.inputs = d.inputs;
       if (d.results) update.results = d.results;
-      const conditions = [eq(terraProFormaProjectsTable.externalId, req.params.id as string)];
+      const conditions = [
+        eq(terraProFormaProjectsTable.externalId, req.params.id as string),
+        ne(terraProFormaProjectsTable.projectName, SESSION_PROJECT_NAME),
+      ];
       if (req.user?.id) conditions.push(eq(terraProFormaProjectsTable.ownerUserId, req.user.id));
       await db
         .update(terraProFormaProjectsTable)
@@ -829,12 +835,81 @@ router.delete(
   authWrite,
   async (req: Request, res: Response) => {
     try {
-      const conditions = [eq(terraProFormaProjectsTable.externalId, req.params.id as string)];
+      const conditions = [
+        eq(terraProFormaProjectsTable.externalId, req.params.id as string),
+        ne(terraProFormaProjectsTable.projectName, SESSION_PROJECT_NAME),
+      ];
       if (req.user?.id) conditions.push(eq(terraProFormaProjectsTable.ownerUserId, req.user.id));
       await db.delete(terraProFormaProjectsTable).where(and(...conditions));
       sendSuccess(res, { deleted: true });
     } catch (err) {
       handleRouteError(res, err, 'Failed to delete pro forma project');
+    }
+  },
+);
+
+// ---------------------------------------------------------------------------
+// Pro Forma Scenario Session (persist active scenarios for a user)
+// ---------------------------------------------------------------------------
+
+router.get('/terra/pro-forma-session', authRead, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const [row] = await db
+      .select()
+      .from(terraProFormaProjectsTable)
+      .where(
+        and(
+          eq(terraProFormaProjectsTable.projectName, SESSION_PROJECT_NAME),
+          eq(terraProFormaProjectsTable.ownerUserId, userId),
+        ),
+      )
+      .limit(1);
+    if (!row) {
+      return sendSuccess(res, { session: null });
+    }
+    sendSuccess(res, { session: row.inputs });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to load scenario session');
+  }
+});
+
+router.put(
+  '/terra/pro-forma-session',
+  authWrite,
+  validateBody(terraResourceMutationSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      const sessionData = req.body as Record<string, unknown>;
+      const [existing] = await db
+        .select({ id: terraProFormaProjectsTable.id })
+        .from(terraProFormaProjectsTable)
+        .where(
+          and(
+            eq(terraProFormaProjectsTable.projectName, SESSION_PROJECT_NAME),
+            eq(terraProFormaProjectsTable.ownerUserId, userId),
+          ),
+        )
+        .limit(1);
+      if (existing) {
+        await db
+          .update(terraProFormaProjectsTable)
+          .set({ inputs: sessionData, updatedAt: new Date() })
+          .where(eq(terraProFormaProjectsTable.id, existing.id));
+      } else {
+        await db.insert(terraProFormaProjectsTable).values({
+          externalId: randomUUID(),
+          projectName: SESSION_PROJECT_NAME,
+          inputs: sessionData,
+          ownerUserId: userId,
+          ownerName: req.user?.displayName,
+          isDemo: false,
+        });
+      }
+      sendSuccess(res, { saved: true });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to save scenario session');
     }
   },
 );

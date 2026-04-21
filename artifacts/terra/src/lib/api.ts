@@ -533,6 +533,14 @@ export const api = {
     remove: (id: string) =>
       apiFetch<{ deleted: boolean }>(`/terra/leases/${id}`, { method: 'DELETE' }),
   },
+  proFormaSession: {
+    get: () => apiFetch<{ session: Record<string, unknown> | null }>('/terra/pro-forma-session'),
+    set: (data: Record<string, unknown>) =>
+      apiFetch<{ saved: boolean }>('/terra/pro-forma-session', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+  },
   proForma: {
     list: () =>
       apiFetch<{ projects: TerraProFormaProject[]; dataMode: string }>('/terra/pro-forma-projects'),
