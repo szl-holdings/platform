@@ -16,6 +16,9 @@
  * Real:   ws library, WebSocketServer, all platform WS handlers
  */
 
+// Self-contained: DB is mocked; WS server is created in-process on port 0.
+// No DATABASE_URL or running API server required — runs unconditionally in CI.
+
 import http from 'http';
 import type { AddressInfo } from 'net';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';

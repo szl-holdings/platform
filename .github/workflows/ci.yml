@@ -116,13 +116,59 @@ jobs:
         run: pnpm migrate
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/szl_test
+      - name: Build API server
+        run: pnpm --filter @workspace/api-server exec node ./build.mjs
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/szl_test
+          SESSION_SECRET: ci-test-session-secret-not-for-production
+          NODE_ENV: test
+      - name: Start API server in background
+        run: |
+          pnpm --filter @workspace/api-server run start > /tmp/api-server.log 2>&1 &
+          echo $! > /tmp/api-server.pid
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/szl_test
+          SESSION_SECRET: ci-test-session-secret-not-for-production
+          NODE_ENV: test
+          PORT: 5000
+          ALLOY_INTERNAL_TOKEN: ${{ secrets.INTEGRATION_TEST_TOKEN }}
+      - name: Wait for API server to be healthy
+        run: |
+          echo "Waiting for API server on port 5000..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:5000/api/health > /dev/null 2>&1; then
+              echo "API server is up after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "=== API server log (last 50 lines) ==="
+          tail -n 50 /tmp/api-server.log 2>/dev/null || true
+          echo "API server did not become healthy within 30s"
+          exit 1
       - name: Run integration tests
         run: pnpm test:integration
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/szl_test
           NODE_ENV: test
           CI: true
+          PORT: 5000
+          BASE_URL: http://localhost:5000
           INTEGRATION_TEST_TOKEN: ${{ secrets.INTEGRATION_TEST_TOKEN }}
+      - name: Stop API server and dump logs on failure
+        if: always()
+        run: |
+          if [ -f /tmp/api-server.pid ]; then
+            PID=$(cat /tmp/api-server.pid)
+            echo "Sending SIGTERM to API server (PID $PID)..."
+            kill "$PID" 2>/dev/null || true
+            sleep 2
+            kill -0 "$PID" 2>/dev/null && kill -9 "$PID" 2>/dev/null || true
+          fi
+          if [ -f /tmp/api-server.log ]; then
+            echo "=== API server output (last 100 lines) ==="
+            tail -n 100 /tmp/api-server.log
+          fi
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:

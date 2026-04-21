@@ -16,6 +16,51 @@ import { describe, it, expect, afterAll, vi } from "vitest";
 import request from "supertest";
 import express, { type Request, type Response, type NextFunction } from "express";
 
+// ── DB reachability guard ─────────────────────────────────────────────────────
+// Stress tests make real DB queries (fleet inserts, concurrent reads).
+// We probe the actual TCP port of the DB host at module load time so we skip
+// with a clear message rather than crashing on a connection error mid-test.
+// Top-level await is valid in ESM (vitest runs tests as ESM modules).
+const HAS_DB: boolean = await (async (): Promise<boolean> => {
+  const url = process.env["DATABASE_URL"];
+  if (!url) {
+    console.warn(
+      "[stress] DATABASE_URL is not set — skipping stress tests. " +
+        "Set DATABASE_URL (and ensure a database is reachable) to run these tests.",
+    );
+    return false;
+  }
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname || "localhost";
+    const port = parseInt(parsed.port || "5432", 10);
+    const net = await import("net");
+    await new Promise<void>((resolve, reject) => {
+      const socket = new net.Socket();
+      const timer = setTimeout(() => {
+        socket.destroy();
+        reject(new Error("DB TCP probe timed out"));
+      }, 3000);
+      socket.connect(port, host, () => {
+        clearTimeout(timer);
+        socket.destroy();
+        resolve();
+      });
+      socket.on("error", (err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+    });
+    return true;
+  } catch (err) {
+    console.warn(
+      `[stress] Database is not reachable (${String(err)}) — skipping stress tests. ` +
+        "Ensure the database is running and DATABASE_URL points to it.",
+    );
+    return false;
+  }
+})();
+
 // ── Module mocks (external side-effects only) ─────────────────────────────────
 
 vi.mock("../../artifacts/api-server/src/middlewares/auth", () => {
@@ -182,7 +227,7 @@ afterAll(async () => {
 
 // ── Suite 1: Concurrent GET requests across all domain read routes ─────────────
 
-describe("Stress — Concurrent GET requests across domain routes", () => {
+describe.skipIf(!HAS_DB)("Stress — Concurrent GET requests across domain routes", () => {
   it(`handles ${STRESS_CONCURRENCY} concurrent GET /vessels/fleets requests without errors`, async () => {
     const app = buildStressApp();
     const router = (await import("../../artifacts/api-server/src/routes/vessels")).default;
@@ -285,7 +330,7 @@ describe("Stress — Concurrent GET requests across domain routes", () => {
 
 // ── Suite 2: Parallel multi-domain concurrent reads (cross-domain load) ────────
 
-describe("Stress — Cross-domain concurrent load (mixed domain endpoints)", () => {
+describe.skipIf(!HAS_DB)("Stress — Cross-domain concurrent load (mixed domain endpoints)", () => {
   it(`executes ${STRESS_CONCURRENCY} mixed domain reads concurrently without 5xx errors`, async () => {
     const apps: Array<{ app: express.Express; path: string }> = [];
 
@@ -338,7 +383,7 @@ describe("Stress — Cross-domain concurrent load (mixed domain endpoints)", () 
 
 // ── Suite 3: Parallel DB read/write performance ────────────────────────────────
 
-describe("Stress — Parallel DB read/write operations", () => {
+describe.skipIf(!HAS_DB)("Stress — Parallel DB read/write operations", () => {
   it("parallel fleet inserts and reads do not cause DB errors", async () => {
     const writeApp = buildStressApp();
     const readApp = buildStressApp();
@@ -411,7 +456,7 @@ describe("Stress — Parallel DB read/write operations", () => {
 
 // ── Suite 4: Rate-limiter behavior under load ─────────────────────────────────
 
-describe("Stress — Rate-limiter validation", () => {
+describe.skipIf(!HAS_DB)("Stress — Rate-limiter validation", () => {
   it("global rate limiter allows at least 20 requests before throttling", async () => {
     const { globalLimiter } = await import(
       "../../artifacts/api-server/src/middlewares/rate-limiters"
@@ -499,7 +544,7 @@ describe("Stress — Rate-limiter validation", () => {
 
 // ── Suite 5: Sustained load benchmark (p95 latency target) ────────────────────
 
-describe("Stress — Sustained load benchmark", () => {
+describe.skipIf(!HAS_DB)("Stress — Sustained load benchmark", () => {
   it(`${STRESS_ITERATIONS} sequential requests to /vessels/fleets complete with p95 < ${MAX_ACCEPTABLE_P95_MS}ms`, async () => {
     const app = buildStressApp();
     const router = (await import("../../artifacts/api-server/src/routes/vessels")).default;
