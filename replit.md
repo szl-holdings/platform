@@ -151,6 +151,24 @@ The following changes were applied as part of the Series-A one-pass foundation, 
 
 **AEEP – Alloy Execution and Evidence Platform:** The evolved platform spine, incorporating core packages for contracts, agent runtime, workflow execution, retrieval, memory, evidence ledger, and policy enforcement. The AEEP Design System adheres to strict aesthetic and functional constraints, emphasizing evidence-first displays and an enterprise accent palette.
 
+## CI & Quality Gates
+
+### Security Tests (Required Before Deploying)
+A named validation step called **`security-tests`** is registered and must pass before any merge or deployment.
+
+- **Command:** `pnpm --filter @workspace/api-server test`
+- **Coverage:** Runs the full Vitest suite for the API server, including:
+  - `src/__tests__/security-middleware.test.ts` — helmet headers, CORS, rate-limiting, body-size, and sanitisation middleware checks
+  - `src/__tests__/security-routes.test.ts` — authentication, authorization, and injection-guard route tests
+- **Enforcement:** This step is a required check. Failing tests block merges and must be resolved before any production push.
+
+Run the check manually at any time via the Replit validation panel or:
+```
+pnpm --filter @workspace/api-server test
+```
+
+---
+
 ## External Dependencies
 -   **Database:** PostgreSQL 16
 -   **Authentication:** Replit Auth

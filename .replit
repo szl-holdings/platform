@@ -34,6 +34,10 @@ args = "artifacts/counsel: web"
 task = "workflow.run"
 args = "nexus-smoke-e2e"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "security-tests"
+
 [[workflows.workflow]]
 name = "artifacts/lyte-command-center: web"
 author = "agent"
@@ -67,6 +71,17 @@ isValidation = true
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "set -e; pnpm --filter @workspace/mockup-sandbox run build && rm -rf /tmp/served-nexus && mkdir -p /tmp/served-nexus/nexus && cp -r artifacts/mockup-sandbox/dist/public/. /tmp/served-nexus/nexus/ && (cd /tmp/served-nexus && python3 -m http.server 3010 >/tmp/nexus-serve.log 2>&1 &) && sleep 3 && PLAYWRIGHT_BASE_URL=http://localhost:3010 pnpm exec playwright test tests/e2e/nexus-smoke.spec.ts --project=chromium; rc=$?; pkill -f 'http.server 3010' || true; exit $rc"
+
+[[workflows.workflow]]
+name = "security-tests"
+author = "agent"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pnpm --filter @workspace/api-server test"
 
 [agent]
 stack = "PNPM_WORKSPACE"
