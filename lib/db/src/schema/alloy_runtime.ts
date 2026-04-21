@@ -531,3 +531,33 @@ export const insertAlloyRuntimeActionSchema = createInsertSchema(alloyRuntimeAct
 });
 export type InsertAlloyRuntimeAction = z.infer<typeof insertAlloyRuntimeActionSchema>;
 export type AlloyRuntimeAction = typeof alloyRuntimeActionsTable.$inferSelect;
+
+export const inferenceLogTable = pgTable(
+  'inference_log',
+  {
+    id: serial('id').primaryKey(),
+    model: text('model').notNull(),
+    agentId: text('agent_id'),
+    action: text('action').notNull().default('inference'),
+    entityType: text('entity_type').notNull().default('llm-call'),
+    entityId: text('entity_id'),
+    actor: text('actor').notNull().default('system'),
+    platform: text('platform').notNull().default('Internal'),
+    confidence: numeric('confidence', { precision: 5, scale: 4 }),
+    latencyMs: integer('latency_ms'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('inf_log_model_idx').on(t.model),
+    index('inf_log_agent_idx').on(t.agentId),
+    index('inf_log_actor_idx').on(t.actor),
+    index('inf_log_created_idx').on(t.createdAt),
+  ],
+);
+
+export const insertInferenceLogSchema = createInsertSchema(inferenceLogTable).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertInferenceLog = z.infer<typeof insertInferenceLogSchema>;
+export type InferenceLog = typeof inferenceLogTable.$inferSelect;

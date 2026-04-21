@@ -48,6 +48,7 @@ type LogEntry = {
   actor: string;
   platform: string;
   confidence: number | null;
+  latencyMs: number | null;
   timestamp: string;
 };
 
@@ -372,6 +373,9 @@ function GovernanceLog({ entries, isLoading }: { entries: LogEntry[]; isLoading:
                   Confidence
                 </th>
                 <th className="text-right px-4 py-2.5 text-muted-foreground font-medium">
+                  Latency
+                </th>
+                <th className="text-right px-4 py-2.5 text-muted-foreground font-medium">
                   Timestamp
                 </th>
               </tr>
@@ -402,6 +406,9 @@ function GovernanceLog({ entries, isLoading }: { entries: LogEntry[]; isLoading:
                   </td>
                   <td className="px-4 py-2.5 text-center">
                     <ConfidenceBadge value={e.confidence} />
+                  </td>
+                  <td className="px-4 py-2.5 text-right font-mono text-[10px] text-muted-foreground">
+                    {e.latencyMs != null ? `${e.latencyMs}ms` : '—'}
                   </td>
                   <td className="px-4 py-2.5 text-right font-mono text-[10px] text-muted-foreground">
                     {fmt(e.timestamp)}

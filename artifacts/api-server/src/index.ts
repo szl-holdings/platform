@@ -39,6 +39,7 @@ import { otelReady, registerGraphQLHandler } from './app.js';
 import { buildGraphQLMiddleware } from './graphql/index.js';
 import { initCognitiveTelemetry } from './lib/cognitive-telemetry.js';
 import { registerGenAITelemetryBridge } from './lib/genai-telemetry-bridge.js';
+import { registerInferenceLogBridge } from './lib/inference-log-bridge.js';
 import { pingRedis } from './lib/redis-client.js';
 import { seedAiBudgetPolicies } from './lib/seed-ai-budget';
 import { seedConstellationData } from './lib/seed-constellation';
@@ -77,6 +78,7 @@ failFastOnInvalidConfig();
 initializeAlloyDomainEventSubscriptions();
 
 registerGenAITelemetryBridge();
+registerInferenceLogBridge();
 
 // Wire the cognitive-observability BatchingExporter so that agent-layer metrics
 // (step traces, latency, cost, error rates, approval wait times) are flushed to

@@ -10,6 +10,7 @@ import {
   alloyRuntimeAgentVersionsTable,
   auditEventsTable,
   db,
+  inferenceLogTable,
   firestormAlertsTable,
   firestormAnalystNotebookTable,
   firestormAssessmentsTable,
@@ -2035,17 +2036,6 @@ function getSessionContext(req: import('express').Request): {
   };
 }
 
-const INFERENCE_ENTITY_TYPES = new Set([
-  'agent',
-  'inference',
-  'ai-inference',
-  'model-call',
-  'llm-call',
-  'alloy-agent',
-  'alloy-inference',
-  'cortex-inference',
-]);
-
 router.get('/firestorm/ai-governance/registry', authMiddleware(), async (req, res) => {
   try {
     const { orgId, isPrivileged } = getSessionContext(req);
@@ -2142,73 +2132,24 @@ router.get(
         return;
       }
 
-      // audit_events has no orgId column; scope via org-discriminator in newValues.
-      // Events written by Alloy must include orgId in newValues for reliable attribution.
-      const jsonbModelFilter = sql<boolean>`${auditEventsTable.newValues}::jsonb ? 'model'`;
-      const entityTypeFilters = [...INFERENCE_ENTITY_TYPES].map((t) =>
-        eq(auditEventsTable.entityType, t),
-      );
-      const inferenceFilter = or(jsonbModelFilter, ...entityTypeFilters);
-
-      // When org context is present, require newValues->>'orgId' = caller's orgId.
-      // Guard the ::integer cast with a numeric regex to avoid Postgres cast errors
-      // on rows where orgId is absent or non-numeric.
-      const orgScopeFilter =
-        orgId != null
-          ? sql<boolean>`(${auditEventsTable.newValues}->>'orgId' ~ '^[0-9]+$' AND (${auditEventsTable.newValues}->>'orgId')::integer = ${orgId})`
-          : undefined;
-
-      const events = await db
-        .select({
-          id: auditEventsTable.id,
-          action: auditEventsTable.action,
-          entityType: auditEventsTable.entityType,
-          entityId: auditEventsTable.entityId,
-          userId: auditEventsTable.userId,
-          newValues: auditEventsTable.newValues,
-          userAgent: auditEventsTable.userAgent,
-          createdAt: auditEventsTable.createdAt,
-        })
-        .from(auditEventsTable)
-        .where(orgScopeFilter != null ? and(inferenceFilter, orgScopeFilter) : inferenceFilter)
-        .orderBy(desc(auditEventsTable.createdAt))
+      const rows = await db
+        .select()
+        .from(inferenceLogTable)
+        .orderBy(desc(inferenceLogTable.createdAt))
         .limit(limit);
 
-      const log = events
-        .map((e) => {
-          const vals = (e.newValues ?? {}) as any;
-          // Prefer explicit model fields; fall back to "unknown" only for known inference entity types
-          const model = (vals['model'] ??
-            vals['modelId'] ??
-            vals['defaultModel'] ??
-            (INFERENCE_ENTITY_TYPES.has(e.entityType) ? 'unknown' : null)) as string | null;
-          if (!model) return null;
-
-          const confidence = (vals['confidence'] ?? vals['confidenceScore'] ?? null) as
-            | number
-            | null;
-          const actor = e.userId != null ? `user:${e.userId}` : 'system';
-          const platform = e.userAgent
-            ? e.userAgent.includes('Mobile')
-              ? 'Mobile'
-              : e.userAgent.includes('curl')
-                ? 'API'
-                : 'Web'
-            : 'Internal';
-
-          return {
-            id: e.id,
-            model,
-            action: e.action,
-            entityType: e.entityType,
-            entityId: e.entityId,
-            actor,
-            platform,
-            confidence,
-            timestamp: e.createdAt,
-          };
-        })
-        .filter(Boolean);
+      const log = rows.map((r) => ({
+        id: r.id,
+        model: r.model,
+        action: r.action,
+        entityType: r.entityType,
+        entityId: r.entityId,
+        actor: r.actor,
+        platform: r.platform,
+        confidence: r.confidence != null ? Number(r.confidence) : null,
+        latencyMs: r.latencyMs,
+        timestamp: r.createdAt,
+      }));
 
       sendSuccess(res, { log, total: log.length });
     } catch (err) {
