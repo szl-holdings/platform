@@ -29,6 +29,7 @@ import { fileURLToPath } from 'url';
 // Imported-function seeds (export a function; can be called directly)
 import { seedAegis } from './seed-aegis.js';
 import { seedAgentOS } from './seed-agent-os.js';
+import { seedAlloyRuntimeAgents } from './seed-alloy-runtime-agents.js';
 import { seedCarlotaClients } from './seed-carlota-clients.js';
 import { seedConstellationExtended } from './seed-constellation-extended.js';
 import { seedDailyBriefings } from './seed-daily-briefings.js';
@@ -135,6 +136,7 @@ async function main() {
   console.log('── Phase 1: Core Security & Baseline ──');
   results.push(runSeedScript('Ecosystem Baseline', 'seed-ecosystem.ts'));
   results.push(await runSeed('Aegis (Security)', seedAegis));
+  results.push(await runSeed('Alloy Runtime Agents (Aegis Registry)', seedAlloyRuntimeAgents));
 
   // ── Phase 2: Domain Data ─────────────────────────────────────────────────────
   console.log('\n── Phase 2: Domain Data ──');
