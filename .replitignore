@@ -38,3 +38,8 @@ coverage/
 artifacts/stephen-site/
 artifacts/prism-counsel/
 artifacts/firestorm/
+
+# Archived social and media content (not needed in deploy image)
+archive/social/
+archive/media/
+archive/scripts/

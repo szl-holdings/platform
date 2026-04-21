@@ -101,7 +101,8 @@
     "metrics:generate": "tsx scripts/generate-platform-metrics.ts",
     "metrics:validate": "tsx scripts/validate-platform-facts.ts",
     "metrics:check": "tsx scripts/validate-platform-facts.ts --strict",
-    "design:check-hex": "tsx scripts/check-no-raw-hex.ts"
+    "design:check-hex": "tsx scripts/check-no-raw-hex.ts",
+    "audit:source-of-truth": "node scripts/audit/validate-source-of-truth.js"
   },
   "private": true,
   "packageManager": "pnpm@10.26.1",

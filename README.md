@@ -165,6 +165,10 @@ This is a pnpm monorepo. Key locations:
 |------|----------|
 | `artifacts/` | All deployable web and mobile applications |
 | `lib/` | Shared libraries: database client, auth, AI, event bus, UI components |
+| `apps/` | Background applications: embedding API, ingestion orchestrator, runtime API |
+| `services/` | Platform services: Alloy fabric, Lyte metrics, Substrate MCP gateway |
+| `workers/` | Background workers: embedding, ranking, reranking, vector, Python substrate |
+| `packages/` | Domain packages: design system, substrate, agent core, evidence ledger, policy guard |
 | `scripts/` | Seed scripts, QA scripts, deployment utilities |
 | `docs/` | Architecture, trust, investor, and operational documentation |
 | `ops/` | Infrastructure configuration, environment matrix, runbooks |

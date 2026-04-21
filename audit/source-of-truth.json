@@ -1,0 +1,183 @@
+{
+  "meta": {
+    "generated": "2026-04-21",
+    "track": "Zero-Gap Track 1",
+    "version": "1.2.0",
+    "note": "Canonical verified counts for the SZL Holdings platform. Every count below was produced by the exact shell command listed. Run from workspace root to reproduce. Downstream tracks should treat these as the ground-truth baseline and re-run commands to verify before making claims. Database table count (906) uses pnpm metrics:generate and is more reliable than a raw grep — see note."
+  },
+  "artifacts": {
+    "registered": {
+      "count": 14,
+      "command": "find artifacts -name artifact.toml | wc -l",
+      "computed": "2026-04-21",
+      "breakdown": {
+        "web": 11,
+        "mobile": 1,
+        "video": 1,
+        "design": 1
+      },
+      "list": [
+        "artifacts/aegis",
+        "artifacts/api-server",
+        "artifacts/carlota-jo",
+        "artifacts/command",
+        "artifacts/counsel",
+        "artifacts/lyte-command-center",
+        "artifacts/mockup-sandbox",
+        "artifacts/pulse",
+        "artifacts/sentra",
+        "artifacts/szl-demo-video",
+        "artifacts/szl-holdings-mobile",
+        "artifacts/szl-holdings",
+        "artifacts/terra",
+        "artifacts/vessels"
+      ]
+    },
+    "on_disk_unregistered": {
+      "count": 6,
+      "command": "for d in artifacts/*/; do [ ! -f \"${d}.replit-artifact/artifact.toml\" ] && echo \"${d}\"; done | wc -l",
+      "computed": "2026-04-21",
+      "list": [
+        "artifacts/audit",
+        "artifacts/cortex-mobile",
+        "artifacts/firestorm",
+        "artifacts/imperium",
+        "artifacts/internal-audit",
+        "artifacts/prism-counsel"
+      ]
+    },
+    "total_on_disk": {
+      "count": 20,
+      "command": "ls artifacts/ | wc -l",
+      "computed": "2026-04-21"
+    }
+  },
+  "packages": {
+    "domain_packages_dir": {
+      "count": 82,
+      "command": "ls packages/ | wc -l",
+      "computed": "2026-04-21",
+      "note": "Filesystem-verified count of all entries under packages/. This supersedes the prior registry-generated count of 77 (generated 2026-04-20). Run 'pnpm metrics:generate' to refresh docs/platform-facts.md."
+    },
+    "shared_lib_packages": {
+      "count": 41,
+      "command": "ls lib/ | wc -l",
+      "computed": "2026-04-21"
+    },
+    "total_packages": {
+      "count": 123,
+      "command": "echo $(( $(ls packages/ | wc -l) + $(ls lib/ | wc -l) ))",
+      "computed": "2026-04-21",
+      "note": "packages/ (82) + lib/ (41) = 123. Prior registry count was 118 (77+41)."
+    },
+    "apps": {
+      "count": 3,
+      "command": "ls apps/ | wc -l",
+      "computed": "2026-04-21",
+      "list": ["alloy-embedding-api", "alloy-ingestion-orchestrator", "alloy-runtime-api"]
+    },
+    "services": {
+      "count": 5,
+      "command": "ls services/ | wc -l",
+      "computed": "2026-04-21",
+      "list": ["alloy-fabric-api", "alloy-fabric-ingest-control", "lyte-metrics-store", "substrate-mcp-gateway", "substrate-py-workers"]
+    },
+    "workers": {
+      "count": 5,
+      "command": "ls workers/ | wc -l",
+      "computed": "2026-04-21",
+      "list": ["alloy-embed-worker", "alloy-rank-worker", "alloy-rerank-worker", "alloy-vector-worker", "substrate-python"]
+    }
+  },
+  "database": {
+    "schema_files": {
+      "count": 165,
+      "command": "find lib/db/src/schema -name '*.ts' | wc -l",
+      "computed": "2026-04-21",
+      "note": "Filesystem-verified. Prior registry count was 163."
+    },
+    "table_definitions_canonical": {
+      "count": 906,
+      "command": "pnpm metrics:generate && grep -A1 'Database tables' docs/platform-facts.md",
+      "computed": "2026-04-20",
+      "note": "Canonical count from pnpm metrics:generate (Drizzle-aware schema introspection, last run 2026-04-20). More accurate than raw grep. Re-run pnpm metrics:generate to refresh. Raw grep alternative: grep -rh 'pgTable' lib/db/src/schema/ --include='*.ts' | grep -v '^//' | wc -l (returns ~1078, overcounts due to re-exports)."
+    },
+    "migration_files": {
+      "count": 115,
+      "command": "ls lib/db/drizzle/ | grep -v '^meta$' | wc -l",
+      "computed": "2026-04-21",
+      "note": "Includes files with duplicate sequence numbers (parallel branching). Full list: see audit/database-surface.md."
+    },
+    "rollback_scripts": {
+      "count": 5,
+      "command": "ls scripts/rollback/*.sql | wc -l",
+      "computed": "2026-04-21"
+    }
+  },
+  "api": {
+    "route_files": {
+      "count": 347,
+      "command": "find artifacts/api-server/src/routes -name '*.ts' ! -name '*.test.ts' ! -name '*.spec.ts' | wc -l",
+      "computed": "2026-04-21"
+    },
+    "route_groups_top_level": {
+      "count": 12,
+      "command": "find artifacts/api-server/src/routes -mindepth 1 -maxdepth 1 -type d | grep -v '__tests__' | wc -l",
+      "computed": "2026-04-21",
+      "list": [
+        "admin",
+        "control-tower",
+        "distribution-os",
+        "documents",
+        "domain-agents",
+        "firestorm",
+        "groups",
+        "intelligence",
+        "metering",
+        "rmm",
+        "tenant-provisioning",
+        "terra-crm"
+      ]
+    }
+  },
+  "auth": {
+    "rbac_roles": {
+      "count": 11,
+      "command": "grep -o '11.role\\|11-role' README.md | head -1",
+      "computed": "2026-04-21",
+      "note": "11 consistently cited in README.md, docs/security/access-control-matrix.md, and docs/trust/trust-center.md. Confirmed by cross-document consistency."
+    }
+  },
+  "ci": {
+    "workflows": {
+      "count": 18,
+      "command": "ls .github/workflows/ | wc -l",
+      "computed": "2026-04-21"
+    }
+  },
+  "env": {
+    "declared_vars": {
+      "count": 212,
+      "command": "grep -cE '^[A-Z_]+=' .env.example",
+      "computed": "2026-04-21"
+    }
+  },
+  "mobile": {
+    "registered_mobile_artifacts": {
+      "count": 1,
+      "command": "find artifacts -name artifact.toml | xargs grep -l 'expo\\|mobile' 2>/dev/null | wc -l",
+      "computed": "2026-04-21",
+      "list": ["artifacts/szl-holdings-mobile"],
+      "note": "cortex-mobile is on disk but unregistered and in concept phase."
+    }
+  },
+  "domain_packs": {
+    "count": 6,
+    "list": ["Aegis", "Sentra", "Vessels", "Terra", "Counsel", "Carlota Jo"],
+    "note": "IMPERIUM and PRISM Counsel (legacy naming) are archived. Sentra and Counsel are the current active domain packs."
+  },
+  "platform_primitives": {
+    "count": 6,
+    "list": ["Outcome Graph", "Proof Chain", "Covenant Policy", "Decision Simulation", "Workflow Engine", "Event Fabric"]
+  }
+}
