@@ -42,9 +42,14 @@ export function initSentry(config: SentryConfig) {
   markSentryInitialized();
 
   const env = (import.meta as unknown as { env?: Record<string, string> }).env ?? {};
-  const dsn = config.dsn || env.VITE_SENTRY_DSN;
+  const rawDsn = config.dsn || env.VITE_SENTRY_DSN;
+  const dsn = rawDsn && rawDsn.startsWith('https://') ? rawDsn : undefined;
   if (!dsn) {
-    console.debug('[Sentry] DSN not configured — error tracking disabled.');
+    if (rawDsn) {
+      console.debug('[Sentry] DSN looks like a placeholder — error tracking disabled.');
+    } else {
+      console.debug('[Sentry] DSN not configured — error tracking disabled.');
+    }
     setupGlobalHandlers(config.appSlug);
     return;
   }

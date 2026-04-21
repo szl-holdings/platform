@@ -2,6 +2,7 @@ export * from './generated/api';
 export * from './generated/api.schemas';
 export {
   setBaseUrl,
+  getApiBaseUrl,
   setAuthTokenGetter,
   setCsrfTokenGetter,
 } from './custom-fetch';

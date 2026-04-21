@@ -487,7 +487,6 @@ export function SyncEngineProvider({
 
     const setupNetInfo = async () => {
       try {
-        // @ts-expect-error optional peer dep resolved at runtime in Expo apps
         const NetInfo = await import('@react-native-community/netinfo');
 
         netinfoUnsubscribe = NetInfo.default.addEventListener(

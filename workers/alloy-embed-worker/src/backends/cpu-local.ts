@@ -62,7 +62,7 @@ export class CpuLocalEmbeddingBackend implements EmbeddingBackend {
       vectors: data.vectors,
       model: data.model,
       dimensions: data.dimensions,
-      tokenCounts: data.token_counts,
+      ...(data.token_counts !== undefined && { tokenCounts: data.token_counts }),
       backendLatencyMs: Date.now() - start,
     };
   }

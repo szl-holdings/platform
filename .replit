@@ -30,22 +30,6 @@ args = "artifacts/lyte-command-center: web"
 task = "workflow.run"
 args = "artifacts/counsel: web"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "api-test"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "lyte-metrics-store: service"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "lyte-metrics-store-test"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "shared-proxy"
-
 [[workflows.workflow]]
 name = "artifacts/lyte-command-center: web"
 author = "agent"
@@ -68,52 +52,6 @@ args = "bash -c 'cd /home/runner/workspace/artifacts/counsel && exec node_module
 
 [workflows.workflow.metadata]
 outputType = "webview"
-
-[[workflows.workflow]]
-name = "api-test"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "pnpm --filter ./artifacts/api-server test"
-
-[workflows.workflow.metadata]
-isValidation = true
-
-[[workflows.workflow]]
-name = "lyte-metrics-store: service"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/services/lyte-metrics-store && PYTHONPATH=src PORT=8099 exec python -m lyte_metrics_store.main'"
-waitForPort = 8099
-
-[[workflows.workflow]]
-name = "lyte-metrics-store-test"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash -c 'cd /home/runner/workspace/services/lyte-metrics-store && PYTHONPATH=src python -m pytest -q tests/ && cd /home/runner/workspace/services/substrate-py-workers && PYTHONPATH=src python -m pytest -q tests/test_lyte_metrics_store_e2e.py tests/test_retrieval_adapter.py'"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow]]
-name = "shared-proxy"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node /home/runner/workspace/scripts/shared-proxy.mjs"
-waitForPort = 9090
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [agent]
 stack = "PNPM_WORKSPACE"

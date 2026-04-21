@@ -480,7 +480,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: user.displayName ?? undefined,
       });
       setSentryUser({
-        id: user.id,
+        userId: user.id,
         email: user.email ?? undefined,
         username: user.displayName ?? undefined,
       });

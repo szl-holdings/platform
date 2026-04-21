@@ -10,7 +10,7 @@ export interface WarmPoolEntry {
 export class WarmPool {
   private readonly entries = new Map<string, WarmPoolEntry>();
   private readonly backends: EmbeddingBackend[];
-  private pingIntervalId?: ReturnType<typeof setInterval>;
+  private pingIntervalId: ReturnType<typeof setInterval> | undefined = undefined;
 
   constructor(backends: EmbeddingBackend[], keepAliveIntervalMs = 30_000) {
     this.backends = backends;
@@ -37,7 +37,7 @@ export class WarmPool {
             backendId: b.descriptor.backendId,
             lastUsedAt: Date.now(),
             healthy: result.healthy,
-            latencyMs: result.latencyMs,
+            ...(result.latencyMs !== undefined && { latencyMs: result.latencyMs }),
           });
         } catch {
           const existing = this.entries.get(b.descriptor.backendId);

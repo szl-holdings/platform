@@ -89,7 +89,6 @@ export function useApiStatus(): ApiStatusResult {
 
     const setupNetInfo = async () => {
       try {
-        // @ts-expect-error optional peer dep resolved at runtime in Expo apps
         const NetInfo = await import('@react-native-community/netinfo');
 
         netinfoUnsubRef.current = NetInfo.default.addEventListener(
