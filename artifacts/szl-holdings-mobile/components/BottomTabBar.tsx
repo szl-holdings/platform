@@ -86,6 +86,48 @@ const TABS: TabItem[] = [
 
 const HIDDEN_ROUTES = ['/(shell)/notifications', '/(shell)/usage'];
 
+function useOperationsBadge() {
+  const { setBadge } = useWorkspace();
+
+  const summaryQuery = useQuery<{
+    criticalSignalCount?: number;
+    openIncidentCount?: number;
+  }>({
+    queryKey: ['bottom-tab-ops-summary'],
+    queryFn: () =>
+      apiFetch<{ criticalSignalCount?: number; openIncidentCount?: number }>(
+        '/api/lyte/executive-summary',
+      ),
+    refetchInterval: 60000,
+    staleTime: 30000,
+  });
+
+  useEffect(() => {
+    const critical = summaryQuery.data?.criticalSignalCount ?? 0;
+    const incidents = summaryQuery.data?.openIncidentCount ?? 0;
+    setBadge('operations', critical + incidents);
+  }, [summaryQuery.data, setBadge]);
+}
+
+function useAdvisoryBadge() {
+  const { setBadge } = useWorkspace();
+
+  const proposalsQuery = useQuery<{ proposals?: Array<{ status?: string }> }>({
+    queryKey: ['bottom-tab-advisory-proposals'],
+    queryFn: () =>
+      apiFetch<{ proposals?: Array<{ status?: string }> }>('/api/carlota/proposals'),
+    refetchInterval: 60000,
+    staleTime: 30000,
+  });
+
+  useEffect(() => {
+    const drafts = (proposalsQuery.data?.proposals ?? []).filter(
+      (p) => p.status === 'draft',
+    ).length;
+    setBadge('advisory', drafts);
+  }, [proposalsQuery.data, setBadge]);
+}
+
 function useCortexBadge() {
   const { setBadge } = useWorkspace();
 
@@ -140,6 +182,8 @@ export function BottomTabBar() {
   const scrollRef = useRef<ScrollView>(null);
 
   useCortexBadge();
+  useOperationsBadge();
+  useAdvisoryBadge();
 
   if (HIDDEN_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
     return null;
