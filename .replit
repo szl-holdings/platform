@@ -152,3 +152,15 @@ SUBSTRATE_GATEWAY_PORT = "8077"
 [userenv.development]
 ALLOY_INTERNAL_TOKEN = "dev-3e8122992689a527adcf8ba067ccabfae77b81f3e52aa713"
 ADMIN_PIN = "PULSE-DEMO-2026"
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+
+[[ports]]
+localPort = 9090
+externalPort = 3000
+
+[[ports]]
+localPort = 21130
+externalPort = 3001
