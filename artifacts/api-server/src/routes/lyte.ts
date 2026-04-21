@@ -12,8 +12,14 @@ import {
   insertLyteWorkspaceSchema,
   lyteActionsTable,
   lyteCommandCardsTable,
+  lyteDebtItemsTable,
+  lyteDebtScoreHistoryTable,
+  lyteDriftHistoryTable,
+  lyteDriftItemsTable,
   lyteIncidentsTable,
+  lyteInterventionsTable,
   lytePlaybooksTable,
+  lytePressureCellsTable,
   lyteReadinessItemsTable,
   lyteRecommendationsTable,
   lyteSavedViewsTable,
@@ -1205,15 +1211,17 @@ router.get(
 );
 
 // ─── Intervention ledger (claim, resolve, reassign, address) ──────────────────
-// In-memory ledger of operator interventions on Lyte drift / debt items.
-// Persists per process; mirrors the dashboard's local-first intervention store
-// so downstream consumers (Decision Replay, Board View intervention rate) can
-// pull a unified history. Replace with persistent store when DB schema lands.
+// Persistent audit ledger of operator interventions on Lyte drift / debt items.
+// Backed by the lyte_interventions table so the audit trail survives process
+// restarts and is shared across replicas. Mutating an intervention also
+// projects the change onto the underlying lyte_drift_items / lyte_debt_items
+// row so the read-only surfaces (Ownership Drift, Action Debt, Pressure Map,
+// Board View) reflect the new state on their next refresh cycle.
 
-type LyteInterventionType = 'claim' | 'resolve' | 'reassign' | 'address';
-type LyteItemKind = 'drift' | 'debt';
+type LyteInterventionType = 'claim' | 'resolve' | 'reassign' | 'address' | 'acknowledge';
+type LyteItemKind = 'drift' | 'debt' | 'pressure';
 
-interface LyteInterventionRecord {
+interface LyteInterventionDto {
   id: string;
   itemId: string;
   itemKind: LyteItemKind;
@@ -1226,34 +1234,250 @@ interface LyteInterventionRecord {
   timestamp: string;
 }
 
-const interventionLedger: LyteInterventionRecord[] = [];
-let interventionSeq = 0;
+function rowToDto(row: typeof lyteInterventionsTable.$inferSelect): LyteInterventionDto {
+  return {
+    id: row.id,
+    itemId: row.itemId,
+    itemKind: row.itemKind as LyteItemKind,
+    itemTitle: row.itemTitle,
+    type: row.type as LyteInterventionType,
+    actor: row.actor,
+    ...(row.notes !== null ? { notes: row.notes } : {}),
+    ...(row.newOwner !== null ? { newOwner: row.newOwner } : {}),
+    proofRef: row.proofRef,
+    timestamp:
+      row.timestamp instanceof Date ? row.timestamp.toISOString() : String(row.timestamp),
+  };
+}
 
-function nextInterventionProofRef(): string {
-  interventionSeq += 1;
-  return `ALLOY-INT-${String(interventionSeq).padStart(4, '0')}`;
+async function nextInterventionProofRef(): Promise<string> {
+  try {
+    const rows = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(lyteInterventionsTable);
+    const count = rows[0]?.count ?? 0;
+    return `ALLOY-INT-${String(count + 1).padStart(4, '0')}`;
+  } catch {
+    return `ALLOY-INT-${Date.now().toString().slice(-6)}`;
+  }
+}
+
+// Severity bands mirror artifacts/lyte-command-center/src/pages/action-debt.tsx:
+//   score >= 80 critical, >= 60 high, >= 40 medium, < 40 low.
+function debtSeverityFor(score: number): 'critical' | 'high' | 'medium' | 'low' {
+  if (score >= 80) return 'critical';
+  if (score >= 60) return 'high';
+  if (score >= 40) return 'medium';
+  return 'low';
+}
+
+function todayHistoryLabel(now: Date = new Date()): string {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${months[now.getMonth()]} ${now.getDate()}`;
+}
+
+// Drizzle's tx and db share the same query-builder surface. We type helpers
+// against the union so projection/history writes can run inside the
+// surrounding transaction without losing type safety.
+type LyteTxClient = Parameters<Parameters<typeof db.transaction>[0]>[0];
+type LyteDbClient = typeof db | LyteTxClient;
+
+async function refreshDriftHistorySnapshot(client: LyteDbClient): Promise<void> {
+  const rows = await client
+    .select({ count: sql<number>`count(*)::int` })
+    .from(lyteDriftItemsTable)
+    .where(sql`${lyteDriftItemsTable.status} <> 'cleared'`);
+  const count = rows[0]?.count ?? 0;
+  const date = todayHistoryLabel();
+  const existing = await client
+    .select()
+    .from(lyteDriftHistoryTable)
+    .where(eq(lyteDriftHistoryTable.date, date))
+    .limit(1);
+  if (existing[0]) {
+    await client
+      .update(lyteDriftHistoryTable)
+      .set({ count })
+      .where(eq(lyteDriftHistoryTable.id, existing[0].id));
+  } else {
+    const maxRow = await client
+      .select({ max: sql<number>`coalesce(max(${lyteDriftHistoryTable.orderIdx}), -1)::int` })
+      .from(lyteDriftHistoryTable);
+    const orderIdx = (maxRow[0]?.max ?? -1) + 1;
+    await client.insert(lyteDriftHistoryTable).values({ date, count, orderIdx });
+  }
+}
+
+async function refreshDebtScoreHistorySnapshot(client: LyteDbClient): Promise<void> {
+  const rows = await client
+    .select({ score: lyteDebtItemsTable.score })
+    .from(lyteDebtItemsTable)
+    .where(sql`${lyteDebtItemsTable.status} <> 'resolved'`);
+  let critical = 0;
+  let high = 0;
+  let medium = 0;
+  for (const r of rows) {
+    const sev = debtSeverityFor(r.score);
+    if (sev === 'critical') critical += 1;
+    else if (sev === 'high') high += 1;
+    else if (sev === 'medium') medium += 1;
+  }
+  const date = todayHistoryLabel();
+  const existing = await client
+    .select()
+    .from(lyteDebtScoreHistoryTable)
+    .where(eq(lyteDebtScoreHistoryTable.date, date))
+    .limit(1);
+  if (existing[0]) {
+    await client
+      .update(lyteDebtScoreHistoryTable)
+      .set({ critical, high, medium })
+      .where(eq(lyteDebtScoreHistoryTable.id, existing[0].id));
+  } else {
+    const maxRow = await client
+      .select({ max: sql<number>`coalesce(max(${lyteDebtScoreHistoryTable.orderIdx}), -1)::int` })
+      .from(lyteDebtScoreHistoryTable);
+    const orderIdx = (maxRow[0]?.max ?? -1) + 1;
+    await client
+      .insert(lyteDebtScoreHistoryTable)
+      .values({ date, critical, high, medium, orderIdx });
+  }
+}
+
+// Project an intervention onto the underlying drift/debt row and refresh the
+// matching daily history snapshot so Board View metrics shift on next refresh.
+// All writes use the supplied client (transaction or db) so they stay atomic
+// with the audit-row insert. Throws to surface failure to the caller.
+async function projectInterventionToItem(
+  client: LyteDbClient,
+  record: LyteInterventionDto,
+): Promise<void> {
+  if (record.itemKind === 'drift') {
+    if (record.type === 'claim') {
+      await client
+        .update(lyteDriftItemsTable)
+        .set({ owners: [record.actor] })
+        .where(eq(lyteDriftItemsTable.id, record.itemId));
+    } else if (record.type === 'resolve') {
+      await client
+        .update(lyteDriftItemsTable)
+        .set({ status: 'cleared' })
+        .where(eq(lyteDriftItemsTable.id, record.itemId));
+      await refreshDriftHistorySnapshot(client);
+    }
+  } else if (record.itemKind === 'debt') {
+    if (record.type === 'reassign' && record.newOwner) {
+      await client
+        .update(lyteDebtItemsTable)
+        .set({ owner: record.newOwner })
+        .where(eq(lyteDebtItemsTable.id, record.itemId));
+    } else if (record.type === 'address') {
+      await client
+        .update(lyteDebtItemsTable)
+        .set({ status: 'resolved' })
+        .where(eq(lyteDebtItemsTable.id, record.itemId));
+      await refreshDebtScoreHistorySnapshot(client);
+    }
+  } else if (record.itemKind === 'pressure' && record.type === 'acknowledge') {
+    const cell = await findPressureCellByItemId(client, record.itemId);
+    if (cell) {
+      await client
+        .update(lytePressureCellsTable)
+        .set({ acknowledgedBy: record.actor, acknowledgedAt: new Date() })
+        .where(eq(lytePressureCellsTable.id, cell.id));
+    }
+  }
+}
+
+// Pressure cells lack a primary string id in the schema. Operators reference
+// them via a deterministic slug `pressure-<team>-<workflow>` derived from the
+// cell's natural key, mirroring the slugifier used by pressure-map.tsx.
+function pressureSlug(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+async function findPressureCellByItemId(
+  client: LyteDbClient,
+  itemId: string,
+): Promise<{ id: number } | null> {
+  const rows = await client
+    .select({
+      id: lytePressureCellsTable.id,
+      team: lytePressureCellsTable.team,
+      workflow: lytePressureCellsTable.workflow,
+    })
+    .from(lytePressureCellsTable);
+  for (const r of rows as Array<{ id: number; team: string; workflow: string }>) {
+    const slug = `pressure-${pressureSlug(r.team)}-${pressureSlug(r.workflow)}`;
+    if (slug === itemId) return { id: r.id };
+  }
+  return null;
+}
+
+async function targetItemExists(
+  client: LyteDbClient,
+  itemKind: LyteItemKind,
+  itemId: string,
+): Promise<boolean> {
+  if (itemKind === 'drift') {
+    const rows = await client
+      .select({ id: lyteDriftItemsTable.id })
+      .from(lyteDriftItemsTable)
+      .where(eq(lyteDriftItemsTable.id, itemId))
+      .limit(1);
+    return rows.length > 0;
+  }
+  if (itemKind === 'debt') {
+    const rows = await client
+      .select({ id: lyteDebtItemsTable.id })
+      .from(lyteDebtItemsTable)
+      .where(eq(lyteDebtItemsTable.id, itemId))
+      .limit(1);
+    return rows.length > 0;
+  }
+  // pressure
+  const cell = await findPressureCellByItemId(client, itemId);
+  return cell !== null;
+}
+
+// Reject combinations the projection cannot meaningfully handle so they never
+// become silent no-ops in the audit log (e.g., drift+reassign).
+function isValidKindTypePair(itemKind: string, type: string): boolean {
+  if (itemKind === 'drift') return type === 'claim' || type === 'resolve';
+  if (itemKind === 'debt') return type === 'reassign' || type === 'address';
+  if (itemKind === 'pressure') return type === 'acknowledge';
+  return false;
 }
 
 router.get(
   '/lyte/interventions',
   authMiddleware(),
   validateQuery(lyteInterventionsQuerySchema),
-  (req, res) => {
+  async (req, res) => {
     try {
       const { itemKind, itemId, type } = req.query as {
         itemKind?: string;
         itemId?: string;
         type?: string;
       };
-      let rows = interventionLedger.slice();
-      if (itemKind === 'drift' || itemKind === 'debt')
-        rows = rows.filter((r) => r.itemKind === itemKind);
-      if (itemId) rows = rows.filter((r) => r.itemId === itemId);
-      if (type && ['claim', 'resolve', 'reassign', 'address'].includes(type)) {
-        rows = rows.filter((r) => r.type === type);
+      const rows = await db
+        .select()
+        .from(lyteInterventionsTable)
+        .orderBy(desc(lyteInterventionsTable.timestamp));
+      let dtos = rows.map(rowToDto);
+      if (itemKind === 'drift' || itemKind === 'debt' || itemKind === 'pressure')
+        dtos = dtos.filter((r) => r.itemKind === itemKind);
+      if (itemId) dtos = dtos.filter((r) => r.itemId === itemId);
+      if (
+        type &&
+        ['claim', 'resolve', 'reassign', 'address', 'acknowledge'].includes(type)
+      ) {
+        dtos = dtos.filter((r) => r.type === type);
       }
-      rows.sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
-      sendSuccess(res, rows, 200, { total: rows.length });
+      sendSuccess(res, dtos, 200, { total: dtos.length });
     } catch (err) {
       handleRouteError(res, err, 'Failed to list interventions');
     }
@@ -1265,7 +1489,7 @@ router.post(
   authMiddleware({ required: true }),
   denyIfReadOnly(),
   validateBody(lyteInterventionCreateSchema),
-  (req, res) => {
+  async (req, res) => {
     try {
       const body = req.body as z.infer<typeof lyteInterventionCreateSchema>;
 
@@ -1278,20 +1502,87 @@ router.post(
       }
       const actor = req.user.displayName;
 
-      const record: LyteInterventionRecord = {
-        id: `int-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        itemId: body.itemId,
-        itemKind: body.itemKind as LyteItemKind,
-        itemTitle: body.itemTitle,
-        type: body.type as LyteInterventionType,
-        actor,
-        notes: typeof body.notes === 'string' ? body.notes : undefined,
-        newOwner: typeof body.newOwner === 'string' ? body.newOwner.trim() : undefined,
-        proofRef: nextInterventionProofRef(),
-        timestamp: new Date().toISOString(),
-      };
-      interventionLedger.push(record);
-      sendSuccess(res, record, 201);
+      // Reject combinations that the projection cannot meaningfully handle so
+      // they never become silent no-ops in the audit log.
+      if (!isValidKindTypePair(body.itemKind, body.type)) {
+        sendError(
+          res,
+          `Invalid intervention: type "${body.type}" is not allowed for ${body.itemKind} items`,
+          400,
+        );
+        return;
+      }
+
+      const proofRef = await nextInterventionProofRef();
+      const id = `int-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const timestamp = new Date();
+
+      // Insert + projection + history refresh run in a single transaction.
+      // All helpers receive the same tx client so a projection failure rolls
+      // back the audit row and audit log + operational state stay consistent.
+      let notFound = false;
+      const dto: LyteInterventionDto | null = await db.transaction(async (tx) => {
+        const txClient = tx as LyteTxClient;
+        // Verify the referenced drift/debt item exists inside the same tx so
+        // the existence check sees the same snapshot as the writes.
+        const exists = await targetItemExists(
+          txClient,
+          body.itemKind as LyteItemKind,
+          body.itemId,
+        );
+        if (!exists) {
+          notFound = true;
+          return null;
+        }
+
+        const inserted = await tx
+          .insert(lyteInterventionsTable)
+          .values({
+            id,
+            itemId: body.itemId,
+            itemKind: body.itemKind,
+            itemTitle: body.itemTitle,
+            type: body.type,
+            actor,
+            notes: typeof body.notes === 'string' ? body.notes : null,
+            newOwner:
+              typeof body.newOwner === 'string' ? body.newOwner.trim() : null,
+            proofRef,
+            timestamp,
+          })
+          .returning();
+
+        const row = inserted[0];
+        const built: LyteInterventionDto = row
+          ? rowToDto(row)
+          : {
+              id,
+              itemId: body.itemId,
+              itemKind: body.itemKind as LyteItemKind,
+              itemTitle: body.itemTitle,
+              type: body.type as LyteInterventionType,
+              actor,
+              ...(typeof body.notes === 'string' ? { notes: body.notes } : {}),
+              ...(typeof body.newOwner === 'string'
+                ? { newOwner: body.newOwner.trim() }
+                : {}),
+              proofRef,
+              timestamp: timestamp.toISOString(),
+            };
+
+        await projectInterventionToItem(txClient, built);
+        return built;
+      });
+
+      if (notFound || !dto) {
+        sendError(
+          res,
+          `Lyte ${body.itemKind} item ${body.itemId} not found`,
+          404,
+        );
+        return;
+      }
+      sendSuccess(res, dto, 201);
     } catch (err) {
       handleRouteError(res, err, 'Failed to record intervention');
     }

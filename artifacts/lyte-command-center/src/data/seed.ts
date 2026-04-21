@@ -1819,6 +1819,7 @@ export interface DriftItem {
 }
 
 export interface PressureCell {
+  id?: string;
   team: string;
   workflow: string;
   account: string;
@@ -1829,6 +1830,8 @@ export interface PressureCell {
   blocked: number;
   escalated: number;
   score: number;
+  acknowledgedBy?: string | null;
+  acknowledgedAt?: string | null;
 }
 
 export interface DebtItem {

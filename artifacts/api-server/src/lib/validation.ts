@@ -1500,8 +1500,14 @@ export const demoSeedGovernedScenariosBodySchema = optionalEmptyBody(
 );
 
 // lyte: GET /lyte/interventions (query)
-const LYTE_INTERVENTION_TYPES = ["claim", "resolve", "reassign", "address"] as const;
-const LYTE_ITEM_KINDS = ["drift", "debt"] as const;
+const LYTE_INTERVENTION_TYPES = [
+  "claim",
+  "resolve",
+  "reassign",
+  "address",
+  "acknowledge",
+] as const;
+const LYTE_ITEM_KINDS = ["drift", "debt", "pressure"] as const;
 
 export const lyteInterventionsQuerySchema = z.object({
   itemKind: z.enum(LYTE_ITEM_KINDS).optional(),

@@ -61,8 +61,11 @@ router.get('/lyte/pressure-map', noAuth, async (_req, res) => {
       .select()
       .from(lytePressureCellsTable)
       .orderBy(asc(lytePressureCellsTable.orderIdx));
+    const slugify = (v: string) =>
+      v.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     res.json({
       cells: cells.map((c) => ({
+        id: `pressure-${slugify(c.team)}-${slugify(c.workflow)}`,
         team: c.team,
         workflow: c.workflow,
         account: c.account,
@@ -73,6 +76,8 @@ router.get('/lyte/pressure-map', noAuth, async (_req, res) => {
         blocked: c.blocked,
         escalated: c.escalated,
         score: c.score,
+        acknowledgedBy: c.acknowledgedBy ?? null,
+        acknowledgedAt: c.acknowledgedAt ? c.acknowledgedAt.toISOString() : null,
       })),
     });
   } catch (err) {

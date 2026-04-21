@@ -44,6 +44,8 @@ export const lytePressureCellsTable = pgTable('lyte_pressure_cells', {
   escalated: integer('escalated').notNull(),
   score: integer('score').notNull(),
   orderIdx: integer('order_idx').notNull().default(0),
+  acknowledgedBy: text('acknowledged_by'),
+  acknowledgedAt: timestamp('acknowledged_at', { withTimezone: true }),
 });
 
 export const lyteDebtItemsTable = pgTable('lyte_debt_items', {
@@ -133,6 +135,21 @@ export const lyteEntityEdgesTable = pgTable('lyte_entity_edges', {
   orderIdx: integer('order_idx').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const lyteInterventionsTable = pgTable('lyte_interventions', {
+  id: text('id').primaryKey(),
+  itemId: text('item_id').notNull(),
+  itemKind: text('item_kind').notNull(),
+  itemTitle: text('item_title').notNull(),
+  type: text('type').notNull(),
+  actor: text('actor').notNull(),
+  notes: text('notes'),
+  newOwner: text('new_owner'),
+  proofRef: text('proof_ref').notNull(),
+  timestamp: timestamp('timestamp', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type LyteIntervention = typeof lyteInterventionsTable.$inferSelect;
 
 export type LyteDriftItem = typeof lyteDriftItemsTable.$inferSelect;
 export type LytePressureCell = typeof lytePressureCellsTable.$inferSelect;

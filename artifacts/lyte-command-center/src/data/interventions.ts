@@ -1,7 +1,19 @@
 import { useSyncExternalStore } from 'react';
 
-export type InterventionType = 'claim' | 'resolve' | 'reassign' | 'address';
-export type InterventionItemKind = 'drift' | 'debt';
+export type InterventionType =
+  | 'claim'
+  | 'resolve'
+  | 'reassign'
+  | 'address'
+  | 'acknowledge';
+export type InterventionItemKind = 'drift' | 'debt' | 'pressure';
+
+export interface PressureIntervention {
+  acknowledgedBy?: string;
+  acknowledgedAt?: string;
+  acknowledgeProofRef?: string;
+  acknowledgeNote?: string;
+}
 
 export interface Intervention {
   id: string;
@@ -45,6 +57,7 @@ interface State {
   log: Intervention[];
   drift: Record<string, DriftIntervention>;
   debt: Record<string, DebtIntervention>;
+  pressure: Record<string, PressureIntervention>;
   operator: string;
   hydrated: boolean;
   syncing: boolean;
@@ -55,6 +68,7 @@ function load(): State {
     log: [],
     drift: {},
     debt: {},
+    pressure: {},
     operator: DEMO_OPERATOR_FALLBACK,
     hydrated: false,
     syncing: false,
@@ -69,6 +83,7 @@ function load(): State {
       log: Array.isArray(parsed.log) ? parsed.log : [],
       drift: parsed.drift ?? {},
       debt: parsed.debt ?? {},
+      pressure: parsed.pressure ?? {},
       operator: parsed.operator || DEMO_OPERATOR_FALLBACK,
     };
   } catch {
@@ -82,8 +97,11 @@ const listeners = new Set<() => void>();
 function persist() {
   if (!isBrowser) return;
   try {
-    const { log, drift, debt, operator } = state;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ log, drift, debt, operator }));
+    const { log, drift, debt, pressure, operator } = state;
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ log, drift, debt, pressure, operator }),
+    );
   } catch {
     /* ignore quota errors */
   }
@@ -131,6 +149,22 @@ function applyToProjection(record: Intervention, current: State): State {
         },
       };
     }
+  }
+  if (record.itemKind === 'pressure' && record.type === 'acknowledge') {
+    const prev = current.pressure[record.itemId] ?? {};
+    return {
+      ...current,
+      pressure: {
+        ...current.pressure,
+        [record.itemId]: {
+          ...prev,
+          acknowledgedBy: record.actor,
+          acknowledgedAt: record.timestamp,
+          acknowledgeProofRef: record.proofRef,
+          ...(record.notes !== undefined ? { acknowledgeNote: record.notes } : {}),
+        },
+      },
+    };
   }
   if (record.itemKind === 'debt') {
     const prev = current.debt[record.itemId] ?? {};
@@ -283,11 +317,25 @@ export async function addressDebt(item: { id: string; title: string }, evidence:
   });
 }
 
+export async function acknowledgePressure(
+  cell: { id: string; team: string; workflow: string },
+  note?: string,
+) {
+  await recordIntervention({
+    itemId: cell.id,
+    itemKind: 'pressure',
+    itemTitle: `${cell.team} · ${cell.workflow}`,
+    type: 'acknowledge',
+    ...(note && note.trim() ? { notes: note.trim() } : {}),
+  });
+}
+
 export function clearInterventions() {
   setState(() => ({
     log: [],
     drift: {},
     debt: {},
+    pressure: {},
     operator: state.operator,
     hydrated: state.hydrated,
     syncing: false,
@@ -352,6 +400,7 @@ function getServerSnapshot(): State {
     log: [],
     drift: {},
     debt: {},
+    pressure: {},
     operator: DEMO_OPERATOR_FALLBACK,
     hydrated: false,
     syncing: false,

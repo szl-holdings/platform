@@ -1,8 +1,15 @@
-import { Shield, Thermometer } from 'lucide-react';
+import { CheckCircle2, Shield, Thermometer } from 'lucide-react';
 import { useState } from 'react';
 import type { TooltipProps } from 'recharts';
 import { usePressureMap } from '@/data/api';
+import { acknowledgePressure, formatTimestamp, useInterventions } from '@/data/interventions';
 import type { PressureCell } from '@/data/seed';
+
+function pressureCellId(cell: PressureCell): string {
+  if (cell.id) return cell.id;
+  const slug = (v: string) => v.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return `pressure-${slug(cell.team)}-${slug(cell.workflow)}`;
+}
 
 type Dimension = 'team' | 'account' | 'program' | 'sponsor';
 
@@ -77,7 +84,10 @@ export default function PressureMapPage() {
   const [selectedCell, setSelectedCell] = useState<PressureCell | null>(null);
   const [dim, setDim] = useState<Dimension>('team');
   const [filterVal, setFilterVal] = useState<string>('all');
+  const [ackNote, setAckNote] = useState('');
+  const [acking, setAcking] = useState(false);
   const { data, isLoading, error } = usePressureMap();
+  const interventions = useInterventions();
 
   if (isLoading) {
     return <div className="p-6 text-xs font-mono text-amber-400/50">Loading pressure map…</div>;
@@ -231,11 +241,14 @@ export default function PressureMapPage() {
                 cell={cell}
                 dim={dim}
                 selected={
-                  selectedCell?.workflow === cell.workflow && selectedCell?.[dim] === cell[dim]
+                  !!selectedCell && pressureCellId(selectedCell) === pressureCellId(cell)
                 }
-                onClick={() =>
-                  setSelectedCell(selectedCell?.workflow === cell.workflow ? null : cell)
-                }
+                onClick={() => {
+                  const sameId =
+                    selectedCell && pressureCellId(selectedCell) === pressureCellId(cell);
+                  setSelectedCell(sameId ? null : cell);
+                  setAckNote('');
+                }}
               />
             ))}
           </div>
@@ -343,6 +356,86 @@ export default function PressureMapPage() {
                         : `Pressure is within normal operating range.`}
                 </p>
               </div>
+
+              {(() => {
+                const cellId = pressureCellId(selectedCell);
+                const ack = interventions.pressure[cellId];
+                const acknowledgedBy = ack?.acknowledgedBy ?? selectedCell.acknowledgedBy ?? null;
+                const acknowledgedAt = ack?.acknowledgedAt ?? selectedCell.acknowledgedAt ?? null;
+                const proofRef = ack?.acknowledgeProofRef;
+                return (
+                  <div className="pt-3 border-t border-amber-500/10 space-y-2">
+                    <p className="text-[10px] font-mono text-amber-400/40 uppercase">
+                      Operator Action
+                    </p>
+                    {acknowledgedBy ? (
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1.5 text-[11px] text-emerald-300">
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span className="font-mono">Acknowledged</span>
+                        </div>
+                        <p className="text-[10px] text-amber-100/70">
+                          by <span className="text-amber-200">{acknowledgedBy}</span>
+                          {acknowledgedAt ? (
+                            <>
+                              {' · '}
+                              <span className="font-mono text-amber-400/60">
+                                {formatTimestamp(acknowledgedAt)}
+                              </span>
+                            </>
+                          ) : null}
+                        </p>
+                        {ack?.acknowledgeNote ? (
+                          <p className="text-[10px] text-amber-100/60 italic">
+                            “{ack.acknowledgeNote}”
+                          </p>
+                        ) : null}
+                        {proofRef ? (
+                          <span className="proof-badge self-start">
+                            <Shield className="w-2.5 h-2.5" />
+                            {proofRef}
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5">
+                        <textarea
+                          value={ackNote}
+                          onChange={(e) => setAckNote(e.target.value)}
+                          placeholder="Optional context for the audit log…"
+                          rows={2}
+                          className="w-full text-[11px] bg-amber-950/40 border border-amber-500/20 rounded px-2 py-1 text-amber-100 placeholder:text-amber-400/30 focus:outline-none focus:border-amber-400/50"
+                          data-testid="input-pressure-ack-note"
+                        />
+                        <button
+                          type="button"
+                          disabled={acking}
+                          onClick={async () => {
+                            setAcking(true);
+                            try {
+                              await acknowledgePressure(
+                                {
+                                  id: cellId,
+                                  team: selectedCell.team,
+                                  workflow: selectedCell.workflow,
+                                },
+                                ackNote,
+                              );
+                              setAckNote('');
+                            } finally {
+                              setAcking(false);
+                            }
+                          }}
+                          className="w-full px-2.5 py-1 text-[11px] font-mono rounded border border-amber-500/40 bg-amber-500/15 text-amber-200 hover:bg-amber-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                          data-testid="button-acknowledge-pressure"
+                        >
+                          {acking ? 'RECORDING…' : 'ACKNOWLEDGE PRESSURE'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               <div className="proof-badge mt-1 self-start">
                 <Shield className="w-2.5 h-2.5" />
