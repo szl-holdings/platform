@@ -662,3 +662,91 @@ describe('jsonObjectBodySchema', () => {
     expect(res.status).toBe(400);
   });
 });
+
+// ---------------------------------------------------------------------------
+// 6. Oversized request body — 413 Payload Too Large
+// ---------------------------------------------------------------------------
+
+describe('oversized request body', () => {
+  // Mirrors the global error handler in app.ts:
+  //   isHttpError checks err.statusCode, then calls sendError(res, err.message, statusCode, code)
+  //   body-parser sets both err.status and err.statusCode to 413 for oversized bodies
+  function productionStyleErrorHandler(
+    _err: unknown,
+    _req: Request,
+    res: Response,
+    _next: NextFunction,
+  ) {
+    const err = _err as { statusCode?: number; status?: number; message?: string; type?: string };
+    const statusCode = err.statusCode ?? err.status ?? 500;
+    const isServerError = statusCode >= 500;
+    const errorMessage = isServerError ? 'Internal Server Error' : (err.message ?? 'Unknown error');
+    const errorCode = isServerError ? 'INTERNAL_ERROR' : 'CLIENT_ERROR';
+    res.status(statusCode).json({ error: errorMessage, code: errorCode });
+  }
+
+  function buildLimitedApp() {
+    const app = express();
+    app.use(express.json({ limit: '512kb' }));
+    app.use(productionStyleErrorHandler);
+    app.post('/data', (_req, res) => res.json({ ok: true }));
+    return app;
+  }
+
+  it('returns 413 with an error envelope when the JSON body exceeds 512kb', async () => {
+    const oversizedPayload = JSON.stringify({ data: 'x'.repeat(600 * 1024) });
+
+    const res = await request(buildLimitedApp())
+      .post('/data')
+      .set('Content-Type', 'application/json')
+      .send(oversizedPayload);
+
+    expect(res.status).toBe(413);
+    const body = res.body as { error: string; code: string };
+    expect(body.code).toBe('CLIENT_ERROR');
+    expect(typeof body.error).toBe('string');
+    expect(body.error.length).toBeGreaterThan(0);
+  });
+
+  it('returns 413 when the JSON body is exactly over the 512kb limit', async () => {
+    const oversizedPayload = JSON.stringify({ data: 'a'.repeat(513 * 1024) });
+
+    const res = await request(buildLimitedApp())
+      .post('/data')
+      .set('Content-Type', 'application/json')
+      .send(oversizedPayload);
+
+    expect(res.status).toBe(413);
+    expect((res.body as { code: string }).code).toBe('CLIENT_ERROR');
+  });
+
+  it('accepts a JSON body that is within the 512kb limit', async () => {
+    const acceptablePayload = JSON.stringify({ data: 'x'.repeat(100 * 1024) });
+
+    const res = await request(buildLimitedApp())
+      .post('/data')
+      .set('Content-Type', 'application/json')
+      .send(acceptablePayload);
+
+    expect(res.status).toBe(200);
+    expect((res.body as { ok: boolean }).ok).toBe(true);
+  });
+
+  it('returns 413 before Zod validation runs for oversized bodies', async () => {
+    const app = express();
+    app.use(express.json({ limit: '512kb' }));
+    const zodValidationSpy = vi.fn((_req: Request, res: Response) => res.json({ ok: true }));
+    app.use(productionStyleErrorHandler);
+    app.post('/data', zodValidationSpy);
+
+    const oversizedPayload = JSON.stringify({ data: 'x'.repeat(600 * 1024) });
+    const res = await request(app)
+      .post('/data')
+      .set('Content-Type', 'application/json')
+      .send(oversizedPayload);
+
+    expect(res.status).toBe(413);
+    expect((res.body as { code: string }).code).toBe('CLIENT_ERROR');
+    expect(zodValidationSpy).not.toHaveBeenCalled();
+  });
+});

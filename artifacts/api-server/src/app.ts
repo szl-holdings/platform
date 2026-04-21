@@ -217,7 +217,7 @@ app.use(
 app.use(cookieParser());
 app.use(
   express.json({
-    limit: '10mb',
+    limit: '512kb',
     verify: (req: Request, _res, buf) => {
       (req as Request & { rawBody?: Buffer }).rawBody = buf;
     },
@@ -226,7 +226,7 @@ app.use(
 app.use(
   express.urlencoded({
     extended: true,
-    limit: '10mb',
+    limit: '512kb',
     verify: (req: Request, _res, buf) => {
       if (!(req as Request & { rawBody?: Buffer }).rawBody) {
         (req as Request & { rawBody?: Buffer }).rawBody = buf;
