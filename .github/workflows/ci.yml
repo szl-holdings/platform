@@ -244,6 +244,8 @@ jobs:
             ${{ runner.os }}-node-modules-
       - run: pnpm install --frozen-lockfile --prefer-offline
       - name: Check canonical docs are in sync with codebase (advisory)
+        # Run with --fix locally or in a dedicated update job to auto-correct numbers:
+        #   node scripts/docs/check-docs-sync.js --fix
         run: node scripts/docs/check-docs-sync.js
 
   docs-claims-check:

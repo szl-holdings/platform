@@ -6,6 +6,18 @@
  * Compares key facts derived from the codebase against the values stated in
  * the canonical diligence documents. Prints warnings when they diverge.
  *
+ * Usage:
+ *   node scripts/docs/check-docs-sync.js          # warn-only (default)
+ *   node scripts/docs/check-docs-sync.js --fix    # rewrite drifted values in-place
+ *
+ * --fix mode:
+ *   Rewrites all drifted numeric metric values directly in the doc files so
+ *   that a subsequent check run produces zero warnings.  Product-surface lists
+ *   are NOT auto-edited because PRODUCT-SURFACES.md intentionally includes
+ *   planned/roadmap surfaces that have no artifact dir yet.
+ *   docs/metrics-reference.md is also patched for the overlapping metrics
+ *   (schema files, pgTable / database tables).
+ *
  * Checked dimensions:
  *   1. Route file count   — artifacts/api-server/src/routes/ vs API-SPEC.md
  *   2. DB schema file count — lib/db/src/schema/ vs DATA-MODEL.md
@@ -28,6 +40,7 @@
  * CI integration:
  *   The .github/workflows/ci.yml "docs-sync-check" job runs this script with
  *   continue-on-error: true — it is advisory and never blocks the build.
+ *   To auto-fix drift in CI, run: node scripts/docs/check-docs-sync.js --fix
  *   When GITHUB_STEP_SUMMARY is set (i.e. running in GitHub Actions), a Markdown
  *   summary is written to the job summary panel for easy triage.
  *
@@ -35,13 +48,55 @@
  */
 
 import { execSync } from 'child_process';
-import { appendFileSync, readdirSync, readFileSync, statSync } from 'fs';
+import { appendFileSync, existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT = join(__dirname, '..', '..');
+
+const FIX_MODE = process.argv.includes('--fix');
+const HELP_MODE = process.argv.includes('--help') || process.argv.includes('-h');
+
+if (HELP_MODE) {
+  console.log(`
+Usage: node scripts/docs/check-docs-sync.js [--fix] [--help]
+
+Options:
+  (none)   Warn-only mode. Prints warnings when doc metrics drift from codebase
+           reality. Always exits 0 — advisory, never blocks the build.
+
+  --fix    Auto-fix mode. Rewrites drifted numeric values in doc files in-place
+           so that a subsequent check run produces zero numeric warnings.
+           Files patched (when they exist and contain the tracked metric):
+             • API-SPEC.md                  — route file count
+             • DATA-MODEL.md                — schema file count, pgTable count
+             • ARCHITECTURE.md              — table count
+             • docs/metrics-reference.md    — schema files, database tables
+           Product-surface lists in PRODUCT-SURFACES.md are NOT auto-edited
+           because planned/roadmap entries must be reviewed manually.
+           Note: only fixes drift that exceeds tolerance bands (see script header).
+
+  --help   Print this help text and exit.
+
+Standalone auto-update wrapper (alias for --fix):
+  node scripts/docs/update-docs-metrics.js
+
+Tolerance bands (drift below these thresholds is ignored as noise):
+  Route file count  : ±10
+  Schema file count : ±5
+  pgTable count     : ±20
+  Product surfaces  : exact match required
+
+CI integration:
+  The .github/workflows/ci.yml "docs-sync-check" job runs this script in
+  warn-only mode with continue-on-error: true.
+  To auto-correct numbers, run the script with --fix locally or in a
+  dedicated CI update step.
+`);
+  process.exit(0);
+}
 
 // ─── tolerance bands ──────────────────────────────────────────────────────────
 // Adjust these if the codebase grows at a pace that creates too much noise.
@@ -59,6 +114,33 @@ function readDoc(name) {
   } catch {
     return '';
   }
+}
+
+function writeDoc(name, content) {
+  const fullPath = join(ROOT, name);
+  if (!existsSync(fullPath)) return false;
+  try {
+    writeFileSync(fullPath, content, 'utf8');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Replace the first occurrence of `numericPattern` in `content` with `liveValue`.
+ *
+ * `numericPattern` must be a regex string with exactly TWO capture groups:
+ *   - group 1: the text immediately before the number (preserved verbatim)
+ *   - group 2: the text immediately after the number (preserved verbatim)
+ * The number between the two groups is replaced with `liveValue`.
+ *
+ * Example:
+ *   patchNumber(content, '(Route files\\s*\\|\\s*)(\\d[\\d,+]*)(...)', 150)
+ */
+function patchNumber(content, numericPattern, liveValue) {
+  const re = new RegExp(numericPattern, 'i');
+  return content.replace(re, (match, pre, _old, post) => pre + String(liveValue) + post);
 }
 
 function listTsFiles(dir) {
@@ -128,10 +210,11 @@ const live = {
 
 // ─── gather doc-stated facts ──────────────────────────────────────────────────
 
-const apiSpec = readDoc('API-SPEC.md');
-const dataModel = readDoc('DATA-MODEL.md');
-const architecture = readDoc('ARCHITECTURE.md');
+let apiSpec = readDoc('API-SPEC.md');
+let dataModel = readDoc('DATA-MODEL.md');
+let architecture = readDoc('ARCHITECTURE.md');
 const productSurfaces = readDoc('PRODUCT-SURFACES.md');
+let metricsRef = readDoc('docs/metrics-reference.md');
 
 // Route file count: API-SPEC.md table row "Route files | 140+ …"
 const docRouteFileCount = extractNumber(apiSpec, 'Route files\\s*\\|\\s*');
@@ -160,6 +243,7 @@ docArtifactRefs.sort();
 
 let warnings = 0;
 let passes = 0;
+let fixes = 0;
 
 function pass(label, detail) {
   passes++;
@@ -173,15 +257,22 @@ function warn(label, detail) {
   summary('| \u26a0\ufe0f Warn | ' + label + ' | ' + (detail || '') + ' |');
 }
 
+function fixed(label, detail) {
+  fixes++;
+  console.log('  \u270e  ' + label + (detail ? '  \u2014 ' + detail : ''));
+  summary('| \u270e Fix | ' + label + ' | ' + (detail || '') + ' |');
+}
+
 function info(label) {
   console.log('     ' + label);
 }
 
+const modeLabel = FIX_MODE ? ' [--fix]' : '';
 console.log('\n\u2554' + '\u2550'.repeat(62) + '\u2557');
-console.log('\u2551            Canonical Docs Sync Check                        \u2551');
+console.log('\u2551            Canonical Docs Sync Check' + modeLabel + ' '.repeat(24 - modeLabel.length) + '       \u2551');
 console.log('\u255a' + '\u2550'.repeat(62) + '\u255d\n');
 
-summary('## Canonical Docs Sync Check');
+summary('## Canonical Docs Sync Check' + (FIX_MODE ? ' (--fix mode)' : ''));
 summary('');
 summary('| Status | Check | Detail |');
 summary('|--------|-------|--------|');
@@ -193,17 +284,38 @@ if (docRouteFileCount === null) {
 } else {
   const diff = Math.abs(live.routeFileCount - docRouteFileCount);
   if (diff > TOLERANCE.routeFiles) {
-    warn(
-      'Route file count mismatch',
-      'API-SPEC.md states ' +
-        docRouteFileCount +
-        ', codebase has ' +
-        live.routeFileCount +
-        ' (+' +
-        (live.routeFileCount - docRouteFileCount) +
-        ')',
-    );
-    info('Update API-SPEC.md route file count to ' + live.routeFileCount);
+    if (FIX_MODE) {
+      // Pattern: prefix group = "Route files | ", number group = digits/commas, suffix group = rest
+      const patched = patchNumber(
+        apiSpec,
+        '(Route files\\s*\\|\\s*)([\\d,+]+)()',
+        live.routeFileCount,
+      );
+      if (patched !== apiSpec && writeDoc('API-SPEC.md', patched)) {
+        apiSpec = patched;
+        fixed(
+          'Route file count updated in API-SPEC.md',
+          docRouteFileCount + ' \u2192 ' + live.routeFileCount,
+        );
+      } else {
+        warn(
+          'Route file count mismatch (could not auto-fix)',
+          'API-SPEC.md states ' + docRouteFileCount + ', codebase has ' + live.routeFileCount,
+        );
+      }
+    } else {
+      warn(
+        'Route file count mismatch',
+        'API-SPEC.md states ' +
+          docRouteFileCount +
+          ', codebase has ' +
+          live.routeFileCount +
+          ' (+' +
+          (live.routeFileCount - docRouteFileCount) +
+          ')',
+      );
+      info('Run with --fix to update API-SPEC.md route file count to ' + live.routeFileCount);
+    }
   } else {
     pass(
       'Route file count roughly matches',
@@ -220,17 +332,54 @@ if (docSchemaFileCount === null) {
 } else {
   const diff = Math.abs(live.schemaFileCount - docSchemaFileCount);
   if (diff > TOLERANCE.schemaFiles) {
-    warn(
-      'Schema file count mismatch',
-      'DATA-MODEL.md states ' +
-        docSchemaFileCount +
-        ', codebase has ' +
-        live.schemaFileCount +
-        ' (+' +
-        (live.schemaFileCount - docSchemaFileCount) +
-        ')',
-    );
-    info('Update DATA-MODEL.md schema file count to ' + live.schemaFileCount);
+    if (FIX_MODE) {
+      // Pattern: number is BEFORE "schema files"
+      const patched = patchNumber(
+        dataModel,
+        '()(\\d[\\d,]*)( schema files)',
+        live.schemaFileCount,
+      );
+      if (patched !== dataModel && writeDoc('DATA-MODEL.md', patched)) {
+        dataModel = patched;
+        fixed(
+          'Schema file count updated in DATA-MODEL.md',
+          docSchemaFileCount + ' \u2192 ' + live.schemaFileCount,
+        );
+      } else {
+        warn(
+          'Schema file count mismatch (could not auto-fix)',
+          'DATA-MODEL.md states ' + docSchemaFileCount + ', codebase has ' + live.schemaFileCount,
+        );
+      }
+      // Also patch docs/metrics-reference.md if it has the same metric
+      const docMetricsSchemaCount = extractNumber(metricsRef, '\\*\\*Schema files\\*\\*\\s*\\|\\s*');
+      if (docMetricsSchemaCount !== null && docMetricsSchemaCount !== live.schemaFileCount) {
+        const patchedMetrics = patchNumber(
+          metricsRef,
+          '(\\*\\*Schema files\\*\\*\\s*\\|\\s*)([\\d,]+)()',
+          live.schemaFileCount,
+        );
+        if (patchedMetrics !== metricsRef && writeDoc('docs/metrics-reference.md', patchedMetrics)) {
+          metricsRef = patchedMetrics;
+          fixed(
+            'Schema file count updated in docs/metrics-reference.md',
+            docMetricsSchemaCount + ' \u2192 ' + live.schemaFileCount,
+          );
+        }
+      }
+    } else {
+      warn(
+        'Schema file count mismatch',
+        'DATA-MODEL.md states ' +
+          docSchemaFileCount +
+          ', codebase has ' +
+          live.schemaFileCount +
+          ' (+' +
+          (live.schemaFileCount - docSchemaFileCount) +
+          ')',
+      );
+      info('Run with --fix to update DATA-MODEL.md schema file count to ' + live.schemaFileCount);
+    }
   } else {
     pass(
       'Schema file count roughly matches',
@@ -250,21 +399,58 @@ if (live.pgTableCount === null) {
   if (docPgTableCountDataModel !== null) {
     const diff = Math.abs(live.pgTableCount - docPgTableCountDataModel);
     if (diff > TOLERANCE.pgTables) {
-      warn(
-        'Table count mismatch in DATA-MODEL.md',
-        'states ' +
-          docPgTableCountDataModel +
-          ' pgTable declarations, codebase has ' +
-          live.pgTableCount +
-          ' (+' +
-          (live.pgTableCount - docPgTableCountDataModel) +
-          ')',
-      );
-      info(
-        'Update DATA-MODEL.md table counts to reflect ' +
-          live.pgTableCount +
-          ' total pgTable declarations',
-      );
+      if (FIX_MODE) {
+        // Pattern: number is BEFORE "`pgTable` declarations"
+        const patched = patchNumber(
+          dataModel,
+          '()(\\d[\\d,]*)( `pgTable` declarations)',
+          live.pgTableCount,
+        );
+        if (patched !== dataModel && writeDoc('DATA-MODEL.md', patched)) {
+          dataModel = patched;
+          fixed(
+            'pgTable count updated in DATA-MODEL.md',
+            docPgTableCountDataModel + ' \u2192 ' + live.pgTableCount,
+          );
+        } else {
+          warn(
+            'Table count mismatch in DATA-MODEL.md (could not auto-fix)',
+            'states ' + docPgTableCountDataModel + ' pgTable declarations, codebase has ' + live.pgTableCount,
+          );
+        }
+        // Also patch docs/metrics-reference.md "Database tables" row
+        const docMetricsTableCount = extractNumber(metricsRef, '\\*\\*Database tables\\*\\*\\s*\\|\\s*');
+        if (docMetricsTableCount !== null && docMetricsTableCount !== live.pgTableCount) {
+          const patchedMetrics = patchNumber(
+            metricsRef,
+            '(\\*\\*Database tables\\*\\*\\s*\\|\\s*)([\\d,]+)()',
+            live.pgTableCount,
+          );
+          if (patchedMetrics !== metricsRef && writeDoc('docs/metrics-reference.md', patchedMetrics)) {
+            metricsRef = patchedMetrics;
+            fixed(
+              'Database table count updated in docs/metrics-reference.md',
+              docMetricsTableCount + ' \u2192 ' + live.pgTableCount,
+            );
+          }
+        }
+      } else {
+        warn(
+          'Table count mismatch in DATA-MODEL.md',
+          'states ' +
+            docPgTableCountDataModel +
+            ' pgTable declarations, codebase has ' +
+            live.pgTableCount +
+            ' (+' +
+            (live.pgTableCount - docPgTableCountDataModel) +
+            ')',
+        );
+        info(
+          'Run with --fix to update DATA-MODEL.md table counts to reflect ' +
+            live.pgTableCount +
+            ' total pgTable declarations',
+        );
+      }
     } else {
       pass(
         'DATA-MODEL.md table count roughly matches',
@@ -278,17 +464,38 @@ if (live.pgTableCount === null) {
   if (docPgTableCountArch !== null) {
     const diff = Math.abs(live.pgTableCount - docPgTableCountArch);
     if (diff > TOLERANCE.pgTables) {
-      warn(
-        'Table count mismatch in ARCHITECTURE.md',
-        'states ' +
-          docPgTableCountArch +
-          ' tables, codebase has ' +
-          live.pgTableCount +
-          ' (+' +
-          (live.pgTableCount - docPgTableCountArch) +
-          ')',
-      );
-      info('Update ARCHITECTURE.md table count to ' + live.pgTableCount);
+      if (FIX_MODE) {
+        // Pattern: number is BEFORE " tables"
+        const patched = patchNumber(
+          architecture,
+          '()(\\d[\\d,]*)( tables)',
+          live.pgTableCount,
+        );
+        if (patched !== architecture && writeDoc('ARCHITECTURE.md', patched)) {
+          architecture = patched;
+          fixed(
+            'Table count updated in ARCHITECTURE.md',
+            docPgTableCountArch + ' \u2192 ' + live.pgTableCount,
+          );
+        } else {
+          warn(
+            'Table count mismatch in ARCHITECTURE.md (could not auto-fix)',
+            'states ' + docPgTableCountArch + ' tables, codebase has ' + live.pgTableCount,
+          );
+        }
+      } else {
+        warn(
+          'Table count mismatch in ARCHITECTURE.md',
+          'states ' +
+            docPgTableCountArch +
+            ' tables, codebase has ' +
+            live.pgTableCount +
+            ' (+' +
+            (live.pgTableCount - docPgTableCountArch) +
+            ')',
+        );
+        info('Run with --fix to update ARCHITECTURE.md table count to ' + live.pgTableCount);
+      }
     } else {
       pass(
         'ARCHITECTURE.md table count roughly matches',
@@ -304,6 +511,7 @@ console.log();
 // as mobile variants (aegis-mobile, lyte-mobile, etc.). Warnings for those are expected
 // until the surfaces are built. Conversely, new artifact dirs not yet in the doc should
 // be added once the surface is ready for public visibility.
+// --fix does NOT auto-edit product surfaces because planned entries must be preserved.
 console.log('[ Product surfaces \u2014 PRODUCT-SURFACES.md vs artifacts/ directory ]');
 if (docArtifactRefs.length === 0) {
   warn('No artifact references found in PRODUCT-SURFACES.md (no `artifacts/<name>` patterns)');
@@ -317,10 +525,16 @@ if (docArtifactRefs.length === 0) {
       inDocNotCode.join(', '),
     );
     info('If planned: leave as-is. If removed: delete from PRODUCT-SURFACES.md.');
+    if (FIX_MODE) {
+      info('(product-surface list not auto-edited — planned entries must be preserved manually)');
+    }
   }
   if (inCodeNotDoc.length > 0) {
     warn('New artifact dirs not yet mentioned in PRODUCT-SURFACES.md', inCodeNotDoc.join(', '));
     info('Consider adding these surfaces to PRODUCT-SURFACES.md once they are production-ready');
+    if (FIX_MODE) {
+      info('(product-surface list not auto-edited — review new surfaces before publishing)');
+    }
   }
   if (inDocNotCode.length === 0 && inCodeNotDoc.length === 0) {
     pass('All artifact dirs are reflected in PRODUCT-SURFACES.md');
@@ -342,23 +556,43 @@ console.log();
 // ─── summary ──────────────────────────────────────────────────────────────────
 
 console.log('\u2501'.repeat(66));
-console.log('  Result: ' + passes + ' check(s) passed, ' + warnings + ' warning(s) raised');
+const resultParts = [passes + ' check(s) passed', warnings + ' warning(s) raised'];
+if (FIX_MODE) resultParts.push(fixes + ' fix(es) applied');
+console.log('  Result: ' + resultParts.join(', '));
+
+if (FIX_MODE && fixes > 0) {
+  console.log('\n  Doc files have been updated. Re-run without --fix to verify zero warnings.\n');
+}
 if (warnings > 0) {
   console.log('\n  The canonical docs appear to be out of sync with the codebase.');
-  console.log('  Please update the relevant .md files to match current reality.');
+  if (!FIX_MODE) {
+    console.log('  Run with --fix to automatically correct numeric values:');
+    console.log('    node scripts/docs/check-docs-sync.js --fix');
+    console.log('  Product-surface lists must still be reviewed and updated manually.');
+  }
   console.log('  This check is advisory \u2014 it does not fail the build.\n');
 } else {
-  console.log('\n  All checked doc facts are consistent with the codebase.\n');
+  if (FIX_MODE && fixes > 0) {
+    console.log('  All checked doc facts are now consistent with the codebase.\n');
+  } else {
+    console.log('\n  All checked doc facts are consistent with the codebase.\n');
+  }
 }
 
 // Write GitHub Actions step summary when running in CI.
 if (GH_SUMMARY) {
   summary('');
-  summary('**Result:** ' + passes + ' passed, ' + warnings + ' warning(s)');
+  const summaryResult = resultParts.join(', ');
+  summary('**Result:** ' + summaryResult);
   if (warnings > 0) {
     summary('');
     summary('> The canonical docs appear to be out of sync with the codebase.');
-    summary('> Update the relevant `.md` files to resolve warnings. This check is advisory.');
+    if (!FIX_MODE) {
+      summary('> Run `node scripts/docs/check-docs-sync.js --fix` to auto-correct numeric values.');
+      summary('> Product-surface lists must be reviewed and updated manually.');
+    } else {
+      summary('> Update the remaining `.md` files to resolve warnings. This check is advisory.');
+    }
   }
   try {
     appendFileSync(GH_SUMMARY, summaryLines.join('\n') + '\n');
