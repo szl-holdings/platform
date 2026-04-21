@@ -1,6 +1,6 @@
 import L from 'leaflet';
 import type React from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
@@ -22,12 +22,14 @@ import {
   Filter,
   Globe2,
   Navigation,
+  RefreshCw,
   Search,
   Shield,
   ShieldAlert,
   Signal,
   Users,
   Wifi,
+  WifiOff,
   X,
 } from 'lucide-react';
 
@@ -48,6 +50,125 @@ const THREAT_CONFIG: Record<GeoThreat, { color: string; icon: React.ElementType 
   LOW: { color: '#60a5fa', icon: Shield },
   NOMINAL: { color: '#4ade80', icon: CheckCircle },
 };
+
+const POLL_INTERVAL_MS = 30_000;
+const GEO_INTEL_URL = '/api/geo-intel/pins';
+
+type LivePin = GeoPin & { stale?: boolean; updatedAt?: string };
+
+interface FeedState {
+  pins: GeoPin[];
+  status: 'loading' | 'live' | 'error' | 'stale';
+  lastUpdated: Date | null;
+  generation: number;
+  error: string | null;
+}
+
+interface GeoIntelResponse {
+  pins: LivePin[];
+  generation: number;
+  generatedAt: string;
+  nextPollMs: number;
+}
+
+function isValidGeoIntelResponse(data: unknown): data is GeoIntelResponse {
+  if (!data || typeof data !== 'object') return false;
+  const d = data as Record<string, unknown>;
+  if (!Array.isArray(d['pins'])) return false;
+  if (typeof d['generation'] !== 'number') return false;
+  if (typeof d['generatedAt'] !== 'string') return false;
+  for (const pin of d['pins'] as unknown[]) {
+    if (!pin || typeof pin !== 'object') return false;
+    const p = pin as Record<string, unknown>;
+    if (typeof p['id'] !== 'string') return false;
+    if (typeof p['lat'] !== 'number' || typeof p['lng'] !== 'number') return false;
+    if (!['SIGINT', 'INFRASTRUCTURE', 'PERSONNEL', 'WEATHER'].includes(p['layer'] as string)) return false;
+    if (!['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'NOMINAL'].includes(p['threat'] as string)) return false;
+  }
+  return true;
+}
+
+function useGeoIntelFeed(): FeedState {
+  const [state, setState] = useState<FeedState>({
+    pins: GEO_PINS,
+    status: 'loading',
+    lastUpdated: null,
+    generation: 0,
+    error: null,
+  });
+
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(true);
+
+  const fetchPins = useCallback(async () => {
+    try {
+      const res = await fetch(GEO_INTEL_URL, { credentials: 'include' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const raw: unknown = await res.json();
+      if (!isValidGeoIntelResponse(raw)) {
+        throw new Error('geo-intel feed returned unexpected shape');
+      }
+      const data = raw;
+      if (!mountedRef.current) return;
+      const activePins: GeoPin[] = data.pins
+        .filter((p) => !p.stale)
+        .map(({ stale: _s, updatedAt: _u, ...pin }) => pin as GeoPin);
+      setState({
+        pins: activePins,
+        status: 'live',
+        lastUpdated: new Date(),
+        generation: data.generation,
+        error: null,
+      });
+    } catch (err) {
+      if (!mountedRef.current) return;
+      setState((prev) => ({
+        ...prev,
+        status: prev.lastUpdated ? 'stale' : 'error',
+        error: err instanceof Error ? err.message : 'fetch failed',
+      }));
+    }
+  }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+
+    fetchPins();
+
+    const schedule = () => {
+      timerRef.current = setTimeout(() => {
+        fetchPins().then(() => {
+          if (mountedRef.current) schedule();
+        });
+      }, POLL_INTERVAL_MS);
+    };
+    schedule();
+
+    return () => {
+      mountedRef.current = false;
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [fetchPins]);
+
+  return state;
+}
+
+function useRelativeTime(date: Date | null): string {
+  const [label, setLabel] = useState('—');
+  useEffect(() => {
+    if (!date) return;
+    const update = () => {
+      const sec = Math.floor((Date.now() - date.getTime()) / 1000);
+      if (sec < 5) setLabel('just now');
+      else if (sec < 60) setLabel(`${sec}s ago`);
+      else setLabel(`${Math.floor(sec / 60)}m ago`);
+    };
+    update();
+    const id = setInterval(update, 5000);
+    return () => clearInterval(id);
+  }, [date]);
+  return label;
+}
 
 function makePinIcon(layer: GeoLayer, threat: GeoThreat, selected: boolean): L.DivIcon {
   const layerColor = LAYER_CONFIG[layer].color;
@@ -295,7 +416,58 @@ function DetailPanel({
   );
 }
 
+function LiveFeedBadge({
+  status,
+  lastUpdated,
+  generation,
+}: {
+  status: FeedState['status'];
+  lastUpdated: Date | null;
+  generation: number;
+}) {
+  const relTime = useRelativeTime(lastUpdated);
+
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500">
+        <RefreshCw className="w-3 h-3 animate-spin text-slate-500" />
+        <span>CONNECTING…</span>
+      </div>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="flex items-center gap-1.5 text-[10px] font-mono text-red-500">
+        <WifiOff className="w-3 h-3" />
+        <span>FEED OFFLINE</span>
+      </div>
+    );
+  }
+
+  if (status === 'stale') {
+    return (
+      <div className="flex items-center gap-1.5 text-[10px] font-mono text-amber-500">
+        <WifiOff className="w-3 h-3" />
+        <span>STALE · {relTime}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1.5 text-[10px] font-mono text-green-400">
+      <span
+        className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0"
+        style={{ boxShadow: '0 0 6px #4ade80', animation: 'ping 2s cubic-bezier(0,0,0.2,1) infinite' }}
+      />
+      <span>LIVE · GEN {generation} · {relTime}</span>
+    </div>
+  );
+}
+
 export default function GeospatialIntelligence() {
+  const feed = useGeoIntelFeed();
+
   const [activeLayers, setActiveLayers] = useState<Set<GeoLayer>>(
     new Set(['SIGINT', 'INFRASTRUCTURE', 'PERSONNEL', 'WEATHER']),
   );
@@ -308,9 +480,19 @@ export default function GeospatialIntelligence() {
     new Set(ALL_CLASSIFICATIONS),
   );
 
+  useEffect(() => {
+    if (!selected) return;
+    const stillExists = feed.pins.find((p) => p.id === selected.id);
+    if (stillExists) {
+      setSelected(stillExists);
+    } else {
+      setSelected(null);
+    }
+  }, [feed.pins, selected]);
+
   const visiblePins = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return GEO_PINS.filter((p) => {
+    return feed.pins.filter((p) => {
       if (!activeLayers.has(p.layer)) return false;
       if (!activeThreats.has(p.threat)) return false;
       if (!activeClassifications.has(p.classification)) return false;
@@ -321,7 +503,7 @@ export default function GeospatialIntelligence() {
       }
       return true;
     });
-  }, [activeLayers, activeThreats, activeClassifications, searchQuery]);
+  }, [feed.pins, activeLayers, activeThreats, activeClassifications, searchQuery]);
 
   useEffect(() => {
     if (selected && !visiblePins.some((p) => p.id === selected.id)) {
@@ -384,7 +566,7 @@ export default function GeospatialIntelligence() {
 
   const counts = (Object.keys(LAYER_CONFIG) as GeoLayer[]).reduce<Record<GeoLayer, number>>(
     (acc, l) => {
-      acc[l] = GEO_PINS.filter((p) => p.layer === l).length;
+      acc[l] = feed.pins.filter((p) => p.layer === l).length;
       return acc;
     },
     {} as Record<GeoLayer, number>,
@@ -435,9 +617,16 @@ export default function GeospatialIntelligence() {
             );
           },
         )}
-        <div className="ml-auto flex items-center gap-1.5 text-[10px] font-mono text-slate-500">
-          <Wifi className="w-3 h-3 text-green-400" />
-          <span>{visiblePins.length} ACTIVE SIGNALS</span>
+        <div className="ml-auto flex items-center gap-3">
+          <LiveFeedBadge
+            status={feed.status}
+            lastUpdated={feed.lastUpdated}
+            generation={feed.generation}
+          />
+          <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500">
+            <Wifi className="w-3 h-3 text-green-400" />
+            <span>{visiblePins.length} ACTIVE SIGNALS</span>
+          </div>
         </div>
       </div>
 
@@ -594,7 +783,6 @@ export default function GeospatialIntelligence() {
           </div>
           {(Object.entries(THREAT_CONFIG) as [GeoThreat, (typeof THREAT_CONFIG)[GeoThreat]][]).map(
             ([threat, cfg]) => {
-              const Icon = cfg.icon;
               return (
                 <div key={threat} className="flex items-center gap-2">
                   <div
@@ -631,7 +819,7 @@ export default function GeospatialIntelligence() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {(Object.entries(LAYER_CONFIG) as [GeoLayer, (typeof LAYER_CONFIG)[GeoLayer]][]).map(
           ([layer, cfg]) => {
-            const pinsByLayer = GEO_PINS.filter((p) => p.layer === layer);
+            const pinsByLayer = feed.pins.filter((p) => p.layer === layer);
             const highThreat = pinsByLayer.filter(
               (p) => p.threat === 'HIGH' || p.threat === 'CRITICAL',
             ).length;

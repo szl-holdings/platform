@@ -81,6 +81,11 @@ router.use(lazyMatch("/risk-evidence", () => import("./risk-evidence"), "risk-ev
 // destructive side-effects beyond rewriting the per-org telemetry slice).
 router.use(lazyMatch("/agent-mesh", () => import("./agent-mesh"), "agent-mesh"));
 
+// Geospatial intelligence feed — public read-only. Serves live-mutating GeoPin
+// data for the Command Geospatial Intelligence map. Mounted before
+// guardianPolicyCheck so the map loads without auth.
+router.use(lazyMatch("/geo-intel", () => import("./geo-intel"), "geo-intel"));
+
 // Sentra cyber resilience cockpit — incidents + alerts CRUD. Public demo
 // surface (in-memory store). Write paths carry CSRF double-submit protection
 // via the global csrfMiddleware mounted in server.ts.

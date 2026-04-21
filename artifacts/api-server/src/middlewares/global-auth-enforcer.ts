@@ -242,6 +242,10 @@ const PUBLIC_PREFIXES = [
   // SZL demo surface. Mutating routes (POST /memory, POST /orchestrate, etc.)
   // remain protected by CSRF + per-user write rate limiting in the router.
   "/api/nexus/",
+  // Geospatial intelligence feed — read-only GET endpoints returning live-
+  // mutating GeoPin data for the Command Geospatial Intelligence map. Public
+  // so the map loads without a session (same model as /api/agent-mesh/).
+  "/api/geo-intel/",
   // Decision Runtime v1 — per-card GET endpoints (GET /api/decisions/cards/:id).
   // Public so the Decision Center demo works without a session; route handlers
   // apply authMiddleware({ required: false }) and scope to ws-demo-001 for
