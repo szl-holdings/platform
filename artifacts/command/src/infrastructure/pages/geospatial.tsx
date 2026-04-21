@@ -1,6 +1,6 @@
 import L from 'leaflet';
 import type React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
@@ -21,6 +21,7 @@ import {
   Eye,
   Filter,
   Globe2,
+  Navigation,
   Search,
   Shield,
   ShieldAlert,
@@ -92,6 +93,18 @@ function FitBounds({ pins }: { pins: GeoPin[] }) {
   return null;
 }
 
+function FlyToController({ target }: { target: { lat: number; lng: number } | null }) {
+  const map = useMap();
+  const prevTarget = useRef<{ lat: number; lng: number } | null>(null);
+  useEffect(() => {
+    if (!target) return;
+    if (prevTarget.current?.lat === target.lat && prevTarget.current?.lng === target.lng) return;
+    prevTarget.current = target;
+    map.flyTo([target.lat, target.lng], 6, { duration: 1.4, easeLinearity: 0.25 });
+  }, [target, map]);
+  return null;
+}
+
 function PinMarkers({
   pins,
   selected,
@@ -128,10 +141,34 @@ function ClassificationBadge({ cls }: { cls: Classification }) {
   );
 }
 
-function DetailPanel({ pin, onClose }: { pin: GeoPin; onClose: () => void }) {
+function DetailPanel({
+  pin,
+  onClose,
+  onZoomTo,
+}: {
+  pin: GeoPin;
+  onClose: () => void;
+  onZoomTo: () => void;
+}) {
   const layer = LAYER_CONFIG[pin.layer];
   const threat = THREAT_CONFIG[pin.threat];
   const ThreatIcon = threat.icon;
+  const [visible, setVisible] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const t = requestAnimationFrame(() => setVisible(true));
+    return () => {
+      cancelAnimationFrame(t);
+      if (closeTimerRef.current !== null) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
+
+  function handleClose() {
+    setVisible(false);
+    if (closeTimerRef.current !== null) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(onClose, 220);
+  }
 
   return (
     <div
@@ -140,6 +177,9 @@ function DetailPanel({ pin, onClose }: { pin: GeoPin; onClose: () => void }) {
         background: 'rgba(6,8,16,0.96)',
         borderColor: 'rgba(201,162,39,0.25)',
         backdropFilter: 'blur(12px)',
+        transform: visible ? 'translateX(0)' : 'translateX(calc(100% + 1rem))',
+        opacity: visible ? 1 : 0,
+        transition: 'transform 220ms cubic-bezier(0.22,1,0.36,1), opacity 180ms ease',
       }}
     >
       <div
@@ -158,7 +198,7 @@ function DetailPanel({ pin, onClose }: { pin: GeoPin; onClose: () => void }) {
             {pin.layer}
           </span>
         </div>
-        <button onClick={onClose} className="p-1 rounded hover:bg-white/10 transition-colors">
+        <button onClick={handleClose} className="p-1 rounded hover:bg-white/10 transition-colors">
           <X className="w-3.5 h-3.5 text-slate-500" />
         </button>
       </div>
@@ -237,6 +277,19 @@ function DetailPanel({ pin, onClose }: { pin: GeoPin; onClose: () => void }) {
             </span>
           ))}
         </div>
+
+        <button
+          onClick={onZoomTo}
+          className="w-full flex items-center justify-center gap-2 py-2 rounded border text-[10px] font-display tracking-[0.12em] font-semibold uppercase transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+          style={{
+            color: layer.color,
+            borderColor: `${layer.color}40`,
+            background: `${layer.color}12`,
+          }}
+        >
+          <Navigation className="w-3 h-3" />
+          Zoom to Location
+        </button>
       </div>
     </div>
   );
@@ -247,6 +300,7 @@ export default function GeospatialIntelligence() {
     new Set(['SIGINT', 'INFRASTRUCTURE', 'PERSONNEL', 'WEATHER']),
   );
   const [selected, setSelected] = useState<GeoPin | null>(null);
+  const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number } | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeThreats, setActiveThreats] = useState<Set<GeoThreat>>(new Set(ALL_THREATS));
@@ -514,10 +568,18 @@ export default function GeospatialIntelligence() {
           />
           <MapDarkStyle />
           <FitBounds pins={visiblePins} />
+          <FlyToController target={flyTarget} />
           <PinMarkers pins={visiblePins} selected={selected} onSelect={setSelected} />
         </MapContainer>
 
-        {selected && <DetailPanel pin={selected} onClose={() => setSelected(null)} />}
+        {selected && (
+          <DetailPanel
+            key={selected.id}
+            pin={selected}
+            onClose={() => setSelected(null)}
+            onZoomTo={() => setFlyTarget({ lat: selected.lat, lng: selected.lng })}
+          />
+        )}
 
         <div
           className="absolute bottom-4 left-4 z-[1000] rounded border p-3 space-y-1.5"
