@@ -50,7 +50,7 @@ const DECISIONS: BoardItem[] = [
     impact: '$1.2M',
     owner: 'CEO',
     deadline: 'Board deadline T+48h',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     detail:
       'Pricing revision submitted by Ops 31h ago. Board distribution requires executive sign-off. Every hour of delay risks the Q2 go-live window. Approver calendar conflict is the only blocker.',
@@ -64,7 +64,7 @@ const DECISIONS: BoardItem[] = [
     impact: '$650K',
     owner: 'COO',
     deadline: 'Finance reconciliation stalled',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     detail:
       'Two team leads have claimed the same AR account. Payments on hold. A single assignment decision unlocks $650K in reconciliation and resumes cash flow.',
@@ -78,7 +78,7 @@ const DECISIONS: BoardItem[] = [
     impact: '$2.1M',
     owner: 'Finance VP',
     deadline: 'SLA breach at 26h',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     detail:
       'Three vessels are awaiting fuel surcharge approval before re-routing can proceed. The SLA breach window is 4 hours. Finance VP sign-off is required.',
@@ -95,7 +95,7 @@ const RISKS: BoardItem[] = [
     impact: '$2.1M',
     owner: 'Fleet Ops',
     deadline: 'SLA breach imminent',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     detail:
       'Vessel M/V Meridian, Pacific Star, and Coral Wind are all operating outside SLA windows. If no corrective action is taken in the next 4 hours, penalty clauses activate automatically.',
@@ -108,7 +108,7 @@ const RISKS: BoardItem[] = [
     impact: '$1.2M',
     owner: 'Revenue',
     deadline: 'Decision deadline in 17h',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     detail:
       'The Q2 pricing revision was calculated for a specific market window. If executive approval does not come through in the next 17 hours, the market conditions will have shifted and the revision must be recalculated.',
@@ -121,7 +121,7 @@ const RISKS: BoardItem[] = [
     impact: '$320K',
     owner: 'Legal',
     deadline: 'Tenant deadline in 3d',
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     detail:
       'Exhibit B missing from the lease renewal document. If not resolved within 3 days, tenant has the right to void the renewal. A signed exhibit B must be obtained from the property manager.',
@@ -137,7 +137,7 @@ const ASKS: BoardItem[] = [
     impact: '$2.1M at stake',
     owner: 'CFO',
     deadline: 'Need answer in 2h',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     detail:
       'The Finance VP who must approve the fuel surcharge is currently in a calendar conflict. Clarification is needed: who is the designated backup approver for fleet surcharge decisions?',
@@ -150,7 +150,7 @@ const ASKS: BoardItem[] = [
     impact: '$650K',
     owner: 'COO Office',
     deadline: 'Finance reconciliation at risk',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     detail:
       'A single decision from the COO — assigning the AR account to one team — will immediately unblock $650K in payment processing. No other action is needed from leadership.',
@@ -163,7 +163,7 @@ const ASKS: BoardItem[] = [
     impact: '$320K',
     owner: 'Carlota Jo Account',
     deadline: '3d tenant window',
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     detail:
       "The property manager responsible for obtaining Exhibit B has been unresponsive for 48 hours. Authorization is requested to escalate directly to the property management firm's director and, if needed, engage legal to obtain the document.",

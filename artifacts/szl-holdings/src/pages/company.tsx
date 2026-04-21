@@ -14,7 +14,7 @@ const PRODUCT_HIERARCHY = [
     href: "/command",
   },
   {
-    name: "Alloy",
+    name: "FORGE",
     role: "Execution fabric",
     color: "hsl(215,35%,65%)",
     desc: "The governance backbone beneath every surface. Workflow orchestration, approval gates, immutable Proof Chain audit trail, and Monte Carlo risk simulation. Every domain pack runs on Alloy. Every decision is governed, attributed, and traceable.",
@@ -23,10 +23,10 @@ const PRODUCT_HIERARCHY = [
 ];
 
 const EXPANSION_LANES = [
-  { name: "Aegis", domain: "Security & defense", color: "#6b7ec8", status: "Active" },
-  { name: "Vessels", domain: "Maritime intelligence", color: "#4a90b8", status: "Active" },
-  { name: "Terra", domain: "Real estate intelligence", color: "#5fa87a", status: "Active" },
-  { name: "PRISM Counsel", domain: "Legal intelligence", color: "#8b7ac8", status: "Governed extension" },
+  { name: "PARAGON", domain: "Security & defense", color: "#6b7ec8", status: "Active" },
+  { name: "SEXTANT", domain: "Maritime intelligence", color: "#4a90b8", status: "Active" },
+  { name: "DOMAINE", domain: "Real estate intelligence", color: "#5fa87a", status: "Active" },
+  { name: "Counsel", domain: "Legal intelligence", color: "#8b7ac8", status: "Governed extension" },
   { name: "Carlota Jo", domain: "Premium advisory", color: "#c8a05a", status: "Live" },
   { name: "IMPERIUM", domain: "Cloud sovereignty", color: "#c87a4a", status: "Governed extension" },
 ];

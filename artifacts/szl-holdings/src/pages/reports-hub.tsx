@@ -42,11 +42,11 @@ const STATUS_COLORS: Record<ReportStatus, string> = {
 const DOMAIN_LABELS: Record<string, string> = {
   szl_holdings: 'SZL Holdings',
   carlota_jo: 'Carlota Jo',
-  aegis: 'Aegis',
-  terra: 'Terra',
-  vessels: 'Vessels',
-  lyte: 'Lyte',
-  prism: 'PRISM',
+  aegis: 'PARAGON',
+  terra: 'DOMAINE',
+  vessels: 'SEXTANT',
+  lyte: 'KORA',
+  prism: 'PRAXIS',
   general: 'General',
 };
 

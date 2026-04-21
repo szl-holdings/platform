@@ -199,28 +199,28 @@ const DOWNLOADABLE_DOCS: Array<{ id: string; label: string; hint: string }> = [
 const DOMAIN_PRODUCTS = [
   {
     icon: Target,
-    name: "PRISM Counsel",
+    name: "Counsel",
     tagline: "Legal matter observability",
     color: "#d4a054",
-    href: `${BASE}/solutions/prism-counsel`,
+    href: `${BASE}/counsel`,
   },
   {
     icon: Ship,
-    name: "Vessels",
+    name: "SEXTANT",
     tagline: "Maritime intelligence",
     color: "#4a90b8",
     href: `${BASE}/solutions/vessels`,
   },
   {
     icon: ShieldCheck,
-    name: "Aegis",
+    name: "PARAGON",
     tagline: "Security & defense observability",
     color: "#c45a4a",
     href: `${BASE}/solutions/aegis`,
   },
   {
     icon: Home,
-    name: "Terra",
+    name: "DOMAINE",
     tagline: "Real estate intelligence",
     color: "#c8953c",
     href: `${BASE}/solutions/terra`,
@@ -743,7 +743,7 @@ function RequestDemoPanel() {
       <p className="text-sm leading-7 text-white/60 mb-8">
         The SZL Holdings demo covers the full decision workflow — from signal detection through
         recommendation, approval, execution, and audit trail. We'll walk through a live vertical
-        (PRISM Counsel, Vessels, or Aegis) and show the shared Alloy execution layer.
+        (Counsel, Vessels, or Aegis) and show the shared Alloy execution layer.
         Sessions are 30–45 minutes.
       </p>
 

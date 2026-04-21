@@ -465,7 +465,7 @@ The operational pressure to close this gap is not going to decrease. IT team hea
     readTime: 10,
     featured: false,
     flagship: false,
-    tags: ['Business Observability', 'Lyte', 'Operations', 'Enterprise Software'],
+    tags: ['Business Observability', 'KORA', 'Operations', 'Enterprise Software'],
     excerpt:
       "Business observability is not a dashboard. It is not a reporting layer. It is the infrastructure that tells you what is stuck, what is at risk, and what will break — before anyone notices. Here's what that actually means in practice.",
     content: `# What Business Observability Actually Means — And Why It's Not Another Dashboard
@@ -532,7 +532,7 @@ The organizations that resist instrumentation — usually on the grounds that it
     readTime: 12,
     featured: false,
     flagship: false,
-    tags: ['AI Operations', 'Alloy', 'Enterprise AI', 'Governance', 'Workflow Automation'],
+    tags: ['AI Operations', 'FORGE', 'Enterprise AI', 'Governance', 'Workflow Automation'],
     excerpt:
       'The enterprise AI wave has produced a generation of companies with impressive demo capabilities and fragile production deployments. The missing layer is not better models — it is the accountability infrastructure that makes AI-driven decisions auditable, explainable, and recoverable.',
     content: `# AI Operations: The Missing Accountability Layer That Will Define Enterprise AI Success

@@ -9,7 +9,7 @@ const ecosystemNodes = [
   },
   {
     id: 'alloy',
-    name: 'Alloy · ENGINE',
+    name: 'FORGE · ENGINE',
     type: 'engine',
     x: 50,
     y: 15,

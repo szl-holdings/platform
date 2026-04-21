@@ -4,11 +4,11 @@ import type { IRouter } from 'express';
 import { logger } from '../../lib/logger.js';
 
 const PRODUCT_KEYS: { label: string; patterns: string[] }[] = [
-  { label: 'PRISM Counsel', patterns: ['prism', 'counsel', 'legal'] },
-  { label: 'Vessels', patterns: ['vessels', 'vessel', 'maritime'] },
-  { label: 'Terra', patterns: ['terra', 'real-estate', 'realestate'] },
-  { label: 'Aegis', patterns: ['aegis', 'enterprise', 'compliance'] },
-  { label: 'Lyte', patterns: ['lyte', 'decisioning'] },
+  { label: 'Counsel', patterns: ['prism', 'counsel', 'legal'] },
+  { label: 'SEXTANT', patterns: ['vessels', 'vessel', 'maritime'] },
+  { label: 'DOMAINE', patterns: ['terra', 'real-estate', 'realestate'] },
+  { label: 'PARAGON', patterns: ['aegis', 'enterprise', 'compliance'] },
+  { label: 'KORA', patterns: ['lyte', 'decisioning'] },
 ];
 
 function classifyProduct(formKey: string): string {

@@ -190,7 +190,7 @@ export default function S06Market() {
                   textAlign: 'center',
                 }}
               >
-                Palantir
+                Enterprise AI platforms
               </div>
               <div
                 style={{

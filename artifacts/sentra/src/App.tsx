@@ -237,7 +237,7 @@ function SentraSidebarContent({
           </div>
           {expanded && (
             <div className="flex-1 min-w-0">
-              <h1 className="text-sm font-semibold text-red-50 truncate tracking-tight">Sentra</h1>
+              <h1 className="text-sm font-semibold text-red-50 truncate tracking-tight">TENAX</h1>
               <p className="text-[10px] truncate font-mono uppercase tracking-wider text-red-400/40">
                 Cyber Resilience
               </p>
@@ -437,7 +437,7 @@ function AppShell({
     {
       id: 'u1',
       headline: 'CVE-2024-21412: Critical NTLM bypass — 3 assets exposed',
-      surface: 'Sentra',
+      surface: 'TENAX',
       severity: 'critical',
       timestamp: new Date(Date.now() - 12 * 60000).toISOString(),
       href: '/threats',
@@ -445,7 +445,7 @@ function AppShell({
     {
       id: 'u2',
       headline: 'Control drift detected — MFA policy deviation on 4 endpoints',
-      surface: 'Sentra',
+      surface: 'TENAX',
       severity: 'warning',
       timestamp: new Date(Date.now() - 38 * 60000).toISOString(),
       href: '/controls',
@@ -453,7 +453,7 @@ function AppShell({
     {
       id: 'u3',
       headline: 'Resilience score improved: 73 → 81 after patch cycle',
-      surface: 'Sentra',
+      surface: 'TENAX',
       severity: 'info',
       timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
       href: '/dashboard',
@@ -461,7 +461,7 @@ function AppShell({
     {
       id: 'u4',
       headline: 'Incident IC-2409 escalated to P1 — awaiting CISO approval',
-      surface: 'Sentra',
+      surface: 'TENAX',
       severity: 'critical',
       timestamp: new Date(Date.now() - 55 * 60000).toISOString(),
       href: '/incident',
@@ -505,23 +505,23 @@ function AppShell({
       surfaceAccent: '#8b5cf6',
       label: 'Active legal matter: data breach disclosure',
       description:
-        'PRISM Counsel has a linked data-breach matter with a 72h regulatory disclosure deadline.',
+        'Counsel has a linked data-breach matter with a 72h regulatory disclosure deadline.',
       href: '/counsel/dashboard',
       preservedContext: { surface: 'sentra', domain: 'incident' },
     },
     {
       id: 'cl2',
-      surface: 'Lyte',
+      surface: 'KORA',
       surfaceAccent: '#0ea5e9',
       label: '3 pending decisions in Decision Center',
       description:
-        "Lyte's Decision Center has 3 Sentra-sourced recommendations queued for approval.",
+        "KORA's Decision Center has 3 TENAX-sourced recommendations queued for approval.",
       href: '/lyte/decision-center',
       preservedContext: { surface: 'sentra' },
     },
     {
       id: 'cl3',
-      surface: 'Vessels',
+      surface: 'SEXTANT',
       surfaceAccent: '#0ea5e9',
       label: 'Fleet asset under active threat — MV Atlantic Falcon',
       description:
@@ -544,7 +544,7 @@ function AppShell({
       <>
         <EcosystemNav
           currentAppId="sentra"
-          currentAppName="Sentra Cyber Resilience"
+          currentAppName="TENAX Cyber Resilience"
           accentColor={accent}
         />
         <Suspense fallback={<div style={{ height: '100vh', background: '#0a0606' }} />}>
@@ -559,7 +559,7 @@ function AppShell({
     <div className="flex flex-col h-screen" style={{ background: '#060e1a' }}>
       <EcosystemNav
         currentAppId="sentra"
-        currentAppName="Sentra Cyber Resilience"
+        currentAppName="TENAX Cyber Resilience"
         accentColor={accent}
       />
       <SharedDashboardShell
@@ -589,7 +589,7 @@ function AppShell({
               <Menu className="w-4 h-4" />
             </button>
             <span className="text-[10px] font-mono uppercase tracking-wider text-red-400/80">
-              Sentra Cyber Resilience
+              TENAX Cyber Resilience
             </span>
           </div>
         }
@@ -602,16 +602,16 @@ function AppShell({
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         commands={paletteCommands}
-        appName="Sentra"
+        appName="TENAX"
         accentColor={accent}
-        placeholder="Search Sentra — pages, entities, actions..."
+        placeholder="Search TENAX — pages, entities, actions..."
       />
       <SentientLayer
         open={sentientOpen}
         onClose={sentientHide}
         onOpen={sentientShow}
         surfaceId="sentra"
-        surfaceName="Sentra Cyber Resilience"
+        surfaceName="TENAX Cyber Resilience"
         accentColor={accent}
         updates={sentientUpdates}
         actions={sentientActions}

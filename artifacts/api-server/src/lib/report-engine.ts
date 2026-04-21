@@ -1275,7 +1275,7 @@ export const DOMAIN_TEMPLATES: Record<string, ReportTemplate> = {
               detail: 'Business observability. Multi-model AI routing.',
             },
             {
-              name: 'PRISM Counsel',
+              name: 'Counsel',
               status: 'active',
               detail: 'Legal matter command. Compliance tracking.',
             },
@@ -1707,7 +1707,7 @@ export const DOMAIN_TEMPLATES: Record<string, ReportTemplate> = {
       {
         id: 'sig',
         type: 'signature_block',
-        data: { name: 'PRISM Counsel', title: 'Legal Matter Command' },
+        data: { name: 'Counsel', title: 'Legal Matter Command' },
       },
     ],
   },

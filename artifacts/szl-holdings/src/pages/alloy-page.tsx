@@ -15,7 +15,7 @@ const OPERATING_LOOP = [
     phase: "Ingestion",
     step: "01",
     icon: Database,
-    description: "Alloy receives structured signal feeds from all connected packs and integrations — PRISM Counsel, Terra, Vessels, Aegis, Carlota Jo, and external data sources. Every signal enters the pipeline with source attribution, timestamp, and context metadata intact.",
+    description: "Alloy receives structured signal feeds from all connected packs and integrations — Counsel, Terra, Vessels, Aegis, Carlota Jo, and external data sources. Every signal enters the pipeline with source attribution, timestamp, and context metadata intact.",
   },
   {
     phase: "Normalization",
@@ -106,7 +106,7 @@ const CAPABILITIES = [
   {
     icon: RefreshCw,
     title: "Cross-Pack Orchestration",
-    body: "A single Alloy action can span multiple domain packs. An Aegis incident can trigger a Terra diligence hold. A PRISM Counsel approval can gate a Vessels cargo clearance. Alloy orchestrates across the platform.",
+    body: "A single Alloy action can span multiple domain packs. An Aegis incident can trigger a Terra diligence hold. A Counsel approval can gate a Vessels cargo clearance. Alloy orchestrates across the platform.",
   },
   {
     icon: Zap,
@@ -141,11 +141,11 @@ const PIPELINE_STEPS = [
 ];
 
 const EXPANSION_LANES = [
-  { name: "Lyte", desc: "The governed command surface routes signals from all domain packs into Alloy for cross-domain governed action." },
-  { name: "PRISM Counsel", desc: "Legal workflow approvals, settlement decisions, and compliance filings run through Alloy approval gates." },
-  { name: "Terra", desc: "Acquisition decisions, diligence approvals, and LP-ready exports governed through Alloy action chains." },
-  { name: "Vessels", desc: "Rerouting decisions, port notifications, and regulatory filings routed with human approval and full audit record." },
-  { name: "Aegis", desc: "Security incident response, remediation actions, and compliance evidence governed through analyst-gated workflows." },
+  { name: "KORA", desc: "The governed command surface routes signals from all domain packs into Alloy for cross-domain governed action." },
+  { name: "Counsel", desc: "Legal workflow approvals, settlement decisions, and compliance filings run through Alloy approval gates." },
+  { name: "DOMAINE", desc: "Acquisition decisions, diligence approvals, and LP-ready exports governed through Alloy action chains." },
+  { name: "SEXTANT", desc: "Rerouting decisions, port notifications, and regulatory filings routed with human approval and full audit record." },
+  { name: "PARAGON", desc: "Security incident response, remediation actions, and compliance evidence governed through analyst-gated workflows." },
   { name: "Carlota Jo", desc: "Intake authorizations, service milestone confirmations, and delivery approvals structured through Alloy." },
 ];
 

@@ -452,7 +452,7 @@ export async function seedPulse() {
     {
       requestId: 'custom-004',
       topic: 'PRISM Counsel — Q2 demand letter pipeline velocity',
-      entity: 'PRISM Counsel',
+      entity: 'Counsel',
       scenario:
         'Is demand letter generation pace consistent with Q2 settlement targets? What are the bottlenecks?',
       domains: ['lyte'],

@@ -17,7 +17,7 @@ export const TERRA_DEMO_NARRATIVE = {
       step: 'Distress Signal',
       duration: '2 min',
       narrative:
-        'Open the Terra dashboard. Top of the queue: 1847 Flatbush Ave is now under compounded distress — active lis pendens AND a brand-new tax lien. Detected from ACRIS and NYC DOF feeds, not from a broker email.',
+        'Open the DOMAINE dashboard. Top of the queue: 1847 Flatbush Ave is now under compounded distress — active lis pendens AND a brand-new tax lien. Detected from ACRIS and NYC DOF feeds, not from a broker email.',
       showIn: ['dashboard', 'distress-engine', 'distress-radar'],
     },
     {
@@ -38,7 +38,7 @@ export const TERRA_DEMO_NARRATIVE = {
       step: 'Partner Approval',
       duration: '2 min',
       narrative:
-        "Marcus reviews and approves with notes — pull a fresh title abstract, flag the LLC's other properties. Approval routed through Alloy.",
+        "Marcus reviews and approves with notes — pull a fresh title abstract, flag the LLC's other properties. Approval routed through FORGE.",
       showIn: ['approval-review', 'diligence-prep'],
     },
     {

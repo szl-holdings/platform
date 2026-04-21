@@ -331,11 +331,11 @@ const FG_MUT = 'var(--color-fg-muted)';
 
 // ── Domain config ──────────────────────────────────────────────────────────────
 const DOMAINS = {
-  aegis: { name: 'Aegis', color: '#6366f1' },
-  terra: { name: 'Terra', color: '#4d7c0f' },
-  vessels: { name: 'Vessels', color: '#3b82f6' },
-  lyte: { name: 'Lyte', color: '#f59e0b' },
-  prism: { name: 'PRISM', color: '#a855f7' },
+  aegis: { name: 'PARAGON', color: '#6366f1' },
+  terra: { name: 'DOMAINE', color: '#4d7c0f' },
+  vessels: { name: 'SEXTANT', color: '#3b82f6' },
+  lyte: { name: 'KORA', color: '#f59e0b' },
+  prism: { name: 'PRAXIS', color: '#a855f7' },
   carlota: { name: 'Carlota', color: '#c2a55a' },
 } as const;
 type DomainKey = keyof typeof DOMAINS;

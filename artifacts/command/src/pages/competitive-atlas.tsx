@@ -60,7 +60,7 @@ const LANES: Lane[] = [
   {
     id: "cyber",
     name: "Cyber Resilience",
-    artifact: "Sentra",
+    artifact: "TENAX",
     artifactPath: "/sentra/",
     accentColor: "#ef4444",
     icon: Shield,
@@ -132,7 +132,7 @@ const LANES: Lane[] = [
   {
     id: "legal",
     name: "Legal Matter Command",
-    artifact: "PRISM Counsel",
+    artifact: "Counsel",
     artifactPath: "/counsel/",
     accentColor: "#a78bfa",
     icon: Scale,
@@ -204,7 +204,7 @@ const LANES: Lane[] = [
   {
     id: "real-estate",
     name: "Real Estate Intelligence",
-    artifact: "Terra",
+    artifact: "DOMAINE",
     artifactPath: "/terra/",
     accentColor: "#5baa8a",
     icon: Building2,
@@ -276,7 +276,7 @@ const LANES: Lane[] = [
   {
     id: "maritime",
     name: "Maritime Intelligence",
-    artifact: "Vessels",
+    artifact: "SEXTANT",
     artifactPath: "/vessels/",
     accentColor: "#3b82f6",
     icon: Ship,
@@ -348,7 +348,7 @@ const LANES: Lane[] = [
   {
     id: "executive-briefing",
     name: "AI Executive Briefing",
-    artifact: "Pulse",
+    artifact: "LUMINA",
     artifactPath: "/pulse/",
     accentColor: "#c8a84b",
     icon: Brain,
@@ -409,7 +409,7 @@ const LANES: Lane[] = [
   {
     id: "decision-intelligence",
     name: "Decision Intelligence",
-    artifact: "Lyte",
+    artifact: "KORA",
     artifactPath: "/lyte/",
     accentColor: "#c9a85c",
     icon: BarChart3,

@@ -10,7 +10,7 @@ const FIVE_MOVES = [
   {
     icon: <Target className="w-4 h-4 text-amber-300" />,
     title: 'Adversarial validation before promotion',
-    body: "Six structured challenges run against every recommendation before it reaches a human: contradiction, stale-data, missing-evidence, policy-compliance, confidence-floor, and falsification. Cards that don't pass all six never reach the decision queue. Palantir AIP recommends; Lyte challenges before surfacing.",
+    body: "Six structured challenges run against every recommendation before it reaches a human: contradiction, stale-data, missing-evidence, policy-compliance, confidence-floor, and falsification. Cards that don't pass all six never reach the decision queue. Enterprise AI platforms recommend; KORA challenges before surfacing.",
   },
   {
     icon: <Lock className="w-4 h-4 text-amber-300" />,
@@ -20,7 +20,7 @@ const FIVE_MOVES = [
   {
     icon: <Brain className="w-4 h-4 text-amber-300" />,
     title: 'Entity-first ontology',
-    body: 'Every decision card is anchored to a typed entity from the Entity Graph — company, vessel, asset, person, workflow. This produces a navigable evidence graph, not a flat log. Palantir Foundry pioneered entity-first operations; Lyte brings that model to mid-market operators without a six-figure contract.',
+    body: 'Every decision card is anchored to a typed entity from the Entity Graph — company, vessel, asset, person, workflow. This produces a navigable evidence graph, not a flat log. Enterprise AIP platforms pioneered entity-first operations; KORA brings that model to mid-market operators without a six-figure contract.',
   },
   {
     icon: <Eye className="w-4 h-4 text-amber-300" />,
@@ -41,7 +41,7 @@ const COMPETITORS = [
     gap: 'Retrospective observability only — does not govern what is allowed to happen, no evidence graph, no approval workflow.',
   },
   {
-    name: 'Palantir AIP',
+    name: 'Enterprise AI Platform',
     strength: 'Entity-first ontology, policy-gated action types',
     gap: 'Closed platform, government/defense sales motion, no adversarial validation before recommendation promotion.',
   },

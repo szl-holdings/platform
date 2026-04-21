@@ -685,11 +685,11 @@ router.get('/stephen/ecosystem-status', async (_req, res) => {
 
   const platformDefs = [
     { name: 'SZL Holdings', slug: 'szl-holdings', description: 'Parent Company' },
-    { name: 'Alloy', slug: 'alloy', description: 'Execution Fabric' },
-    { name: 'Lyte', slug: 'lyte', description: 'Business Observability' },
-    { name: 'Vessels', slug: 'vessels', description: 'Maritime Intelligence' },
-    { name: 'Aegis', slug: 'aegis', description: 'Defense & Intelligence' },
-    { name: 'Terra', slug: 'terra', description: 'Real Estate Intelligence' },
+    { name: 'FORGE', slug: 'alloy', description: 'Execution Fabric' },
+    { name: 'KORA', slug: 'lyte', description: 'Business Observability' },
+    { name: 'SEXTANT', slug: 'vessels', description: 'Maritime Intelligence' },
+    { name: 'PARAGON', slug: 'aegis', description: 'Defense & Intelligence' },
+    { name: 'DOMAINE', slug: 'terra', description: 'Real Estate Intelligence' },
     { name: 'Carlota Jo', slug: 'carlota-jo', description: 'Private Advisory' },
   ];
 

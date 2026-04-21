@@ -191,7 +191,7 @@ function PanelHead({
 const PRISM_DATA = [
   {
     key: 'P',
-    name: 'Pulse',
+    name: 'LUMINA',
     icon: Heart,
     color: '#d4a054',
     href: '/operations/prism/pulse',
@@ -484,7 +484,7 @@ export default function Dashboard() {
       ).length,
     },
     {
-      label: 'Vessels',
+      label: 'SEXTANT',
       count: signals.filter(
         (s) => s.source.toLowerCase().includes('vessel') && s.status !== 'resolved',
       ).length,
@@ -499,7 +499,7 @@ export default function Dashboard() {
       ).length,
     },
     {
-      label: 'Terra',
+      label: 'DOMAINE',
       count: signals.filter(
         (s) =>
           (s.source.toLowerCase().includes('terra') || s.source.toLowerCase().includes('beacon')) &&

@@ -373,11 +373,11 @@ function SystemHealthStrip({
   }, []);
 
   const statusItems = [
-    { label: 'Alloy', ok: true, accent: 'hsl(214,80%,65%)' },
-    { label: 'Terra', ok: true, accent: 'hsl(88,42%,44%)' },
-    { label: 'Vessels', ok: true, accent: 'hsl(205,85%,55%)' },
-    { label: 'Aegis', ok: true, accent: 'hsl(232,68%,60%)' },
-    { label: 'Lyte', ok: true, accent: 'hsl(190,90%,55%)' },
+    { label: 'FORGE', ok: true, accent: 'hsl(214,80%,65%)' },
+    { label: 'DOMAINE', ok: true, accent: 'hsl(88,42%,44%)' },
+    { label: 'SEXTANT', ok: true, accent: 'hsl(205,85%,55%)' },
+    { label: 'PARAGON', ok: true, accent: 'hsl(232,68%,60%)' },
+    { label: 'KORA', ok: true, accent: 'hsl(190,90%,55%)' },
     { label: 'Carlota Jo', ok: true, accent: 'hsl(38,55%,58%)' },
   ];
 
@@ -1126,7 +1126,7 @@ export default function KpiDashboardPage() {
                   </div>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <PlatformBlock
-                      name="Alloy"
+                      name="FORGE"
                       icon={Layers}
                       accent="hsl(214,80%,65%)"
                       href={platforms!.alloy.href}
@@ -1137,7 +1137,7 @@ export default function KpiDashboardPage() {
                       ]}
                     />
                     <PlatformBlock
-                      name="Terra"
+                      name="DOMAINE"
                       icon={BarChart3}
                       accent="hsl(88,42%,52%)"
                       href={platforms!.terra.href}
@@ -1151,7 +1151,7 @@ export default function KpiDashboardPage() {
                       ]}
                     />
                     <PlatformBlock
-                      name="Vessels"
+                      name="SEXTANT"
                       icon={Ship}
                       accent="hsl(205,85%,55%)"
                       href={platforms!.vessels.href}
@@ -1162,7 +1162,7 @@ export default function KpiDashboardPage() {
                       ]}
                     />
                     <PlatformBlock
-                      name="Aegis"
+                      name="PARAGON"
                       icon={Shield}
                       accent="hsl(232,68%,60%)"
                       href={platforms!.aegis.href}
@@ -1173,7 +1173,7 @@ export default function KpiDashboardPage() {
                       ]}
                     />
                     <PlatformBlock
-                      name="Lyte"
+                      name="KORA"
                       icon={Eye}
                       accent="hsl(190,90%,55%)"
                       href={platforms!.lyte.href}

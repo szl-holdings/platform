@@ -523,7 +523,7 @@ export default function PrismDashboard() {
         <div className="flex justify-end pt-2">
           <MicroFeedbackWidget
             featureId="prism-counsel-lens-scores"
-            featureName="PRISM Counsel Risk & Contract Lens Scores"
+            featureName="Counsel Risk & Contract Lens Scores"
             app="prism"
             compact
             prompt="Were these PRISM scores useful?"

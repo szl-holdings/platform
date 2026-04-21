@@ -23,7 +23,7 @@ export function Scene2() {
 
   const surfaces = [
     {
-      name: 'Pulse',
+      name: 'LUMINA',
       desc: 'EXECUTIVE BRIEFING',
       color: 'var(--color-text-primary)',
       mock: (
@@ -57,7 +57,7 @@ export function Scene2() {
       ),
     },
     {
-      name: 'Vessels',
+      name: 'SEXTANT',
       desc: 'MARITIME INTELLIGENCE',
       color: 'var(--color-vessels)',
       mock: (
@@ -108,7 +108,7 @@ export function Scene2() {
       ),
     },
     {
-      name: 'Terra',
+      name: 'DOMAINE',
       desc: 'REAL ESTATE',
       color: 'var(--color-terra)',
       mock: (
@@ -143,7 +143,7 @@ export function Scene2() {
       ),
     },
     {
-      name: 'Aegis',
+      name: 'PARAGON',
       desc: 'DEFENSE & INTEL',
       color: 'var(--color-aegis)',
       mock: (
@@ -213,7 +213,7 @@ export function Scene2() {
       ),
     },
     {
-      name: 'Sentra',
+      name: 'TENAX',
       desc: 'CYBER POSTURE',
       color: 'var(--color-critical)',
       mock: (
@@ -237,7 +237,7 @@ export function Scene2() {
       ),
     },
     {
-      name: 'Lyte',
+      name: 'KORA',
       desc: 'DECISION INTELLIGENCE',
       color: 'var(--color-lyte-cyan)',
       mock: (
@@ -268,7 +268,7 @@ export function Scene2() {
       ),
     },
     {
-      name: 'PRISM Counsel',
+      name: 'Counsel',
       desc: 'LEGAL COMMAND',
       color: 'hsl(263,52%,55%)',
       mock: (

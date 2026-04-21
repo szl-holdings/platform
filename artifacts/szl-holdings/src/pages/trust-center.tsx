@@ -24,7 +24,7 @@ const sections = [
     content: [
       {
         label: "Observe, Execute, Verify",
-        body: "Lyte + Alloy is built around three layers: signal ingestion (observability), action routing (execution), and outcome confirmation (accountability). Each layer has a defined function and a defined interface. Signals surface at the observability layer and compound into decisions at the execution layer.",
+        body: "KORA + FORGE is built around three layers: signal ingestion (observability), action routing (execution), and outcome confirmation (accountability). Each layer has a defined function and a defined interface. Signals surface at the observability layer and compound into decisions at the execution layer.",
       },
       {
         label: "Explicit state",

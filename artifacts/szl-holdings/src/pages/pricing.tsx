@@ -30,8 +30,8 @@ const ENGAGEMENT_TIMELINE = [
 
 export default function PricingPage() {
   const __pageMeta = usePageMeta({
-    title: "Pilot Program — Lyte + Alloy | SZL Holdings",
-    description: "3-month design partner engagement: Lyte + Alloy instrumented against your operational data. Governed decision intelligence and execution accountability, live in your environment.",
+    title: "Pilot Program — KORA + FORGE | SZL Holdings",
+    description: "3-month design partner engagement: KORA + FORGE instrumented against your operational data. Governed decision intelligence and execution accountability, live in your environment.",
     canonical: "https://szlholdings.com/pricing",
     ogImage: "https://szlholdings.com/og/og-pricing.jpg",
   });
@@ -55,7 +55,7 @@ export default function PricingPage() {
                 Design Partner Program
               </p>
               <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.08, marginBottom: "1.25rem" }}>
-                Lyte + Alloy, live in<br />your environment.
+                KORA + FORGE, live in<br />your environment.
               </h1>
               <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "38rem", marginBottom: "2rem" }}>
                 We run a focused 3-month design partner engagement. Lyte instrumented against your operational data. Alloy routing action. Real signals, real execution, real audit trail — in your environment, against your systems, for your team.
@@ -101,7 +101,7 @@ export default function PricingPage() {
                 </div>
                 <div style={{ flexShrink: 0 }}>
                   <a
-                    href="mailto:inquiries@szlholdings.com?subject=Design Partner Inquiry — Lyte + Alloy"
+                    href="mailto:inquiries@szlholdings.com?subject=Design Partner Inquiry — KORA + FORGE"
                     style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.75rem 1.25rem", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: "hsl(192,80%,55%)", border: "1px solid hsla(192,80%,48%,0.3)", textDecoration: "none", background: "hsla(192,80%,48%,0.08)", transition: "all 0.2s" }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsla(192,80%,48%,0.14)"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsla(192,80%,48%,0.08)"; }}
@@ -173,7 +173,7 @@ export default function PricingPage() {
                   Who this is for
                 </p>
                 <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.08, marginBottom: "1.25rem" }}>
-                  Lyte + Alloy, live in<br />your environment.
+                  KORA + FORGE, live in<br />your environment.
                 </h1>
                 <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "38rem", marginBottom: "2rem" }}>
                   We run a focused 3-month design partner engagement. Lyte instrumented against your operational data. Alloy routing action. Real signals, real execution, real audit trail — in your environment, against your systems, for your team.
@@ -238,7 +238,7 @@ export default function PricingPage() {
                   </div>
                   <div style={{ flexShrink: 0 }}>
                     <a
-                      href="mailto:inquiries@szlholdings.com?subject=Design Partner Inquiry — Lyte + Alloy"
+                      href="mailto:inquiries@szlholdings.com?subject=Design Partner Inquiry — KORA + FORGE"
                       style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.75rem 1.25rem", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: "hsl(192,80%,55%)", border: "1px solid hsla(192,80%,48%,0.3)", textDecoration: "none", background: "hsla(192,80%,48%,0.08)", transition: "all 0.2s" }}
                       onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsla(192,80%,48%,0.14)"; }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsla(192,80%,48%,0.08)"; }}

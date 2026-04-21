@@ -37,7 +37,7 @@ function computeWhatIf(vars: Record<string, number>, iterations: number): Domain
 
   return [
     {
-      domain: 'Vessels',
+      domain: 'SEXTANT',
       icon: '⚓',
       color: '#0ea5e9',
       impactLabel: 'Fuel Cost Delta',
@@ -53,7 +53,7 @@ function computeWhatIf(vars: Record<string, number>, iterations: number): Domain
       affectedEntities: oil !== 0 ? ['MV Poseidon', 'MV Argo', 'MV Triton'] : [],
     },
     {
-      domain: 'Terra',
+      domain: 'DOMAINE',
       icon: '⬢',
       color: '#22c55e',
       impactLabel: 'Portfolio Valuation',
@@ -88,7 +88,7 @@ function computeWhatIf(vars: Record<string, number>, iterations: number): Domain
       affectedEntities: ['Maritime Fund', 'RE Holdings', 'Venture Portfolio'],
     },
     {
-      domain: 'PRISM Counsel',
+      domain: 'Counsel',
       icon: '⚖',
       color: '#a855f7',
       impactLabel: 'Affected Contracts',
@@ -127,7 +127,7 @@ function computeWhatIf(vars: Record<string, number>, iterations: number): Domain
         Math.abs(market) > 15 ? ['Emerging Markets Client', 'PE Strategy Engagement'] : [],
     },
     {
-      domain: 'Aegis',
+      domain: 'PARAGON',
       icon: '🛡',
       color: '#ef4444',
       impactLabel: 'Threat Surface',

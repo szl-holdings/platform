@@ -23,7 +23,7 @@ const TEXT_DIM = 'rgba(255,255,255,0.45)';
 const VENTURES = [
   {
     slug: 'vessels',
-    name: getProduct('vessels')?.name ?? 'Vessels',
+    name: getProduct('vessels')?.name ?? 'SEXTANT',
     tagline: getProduct('vessels')?.tagline ?? 'Maritime Intelligence',
     description:
       'AIS fleet tracking, voyage economics, and sanctions screening covering global shipping routes.',
@@ -37,7 +37,7 @@ const VENTURES = [
   },
   {
     slug: 'aegis',
-    name: getProduct('aegis')?.name ?? 'Aegis',
+    name: getProduct('aegis')?.name ?? 'PARAGON',
     tagline: getProduct('aegis')?.tagline ?? 'Defense & Intelligence',
     description:
       'Unified cybersecurity command converging SOC operations, threat intel, and MSP management.',
@@ -51,7 +51,7 @@ const VENTURES = [
   },
   {
     slug: 'terra',
-    name: getProduct('terra')?.name ?? 'Terra',
+    name: getProduct('terra')?.name ?? 'DOMAINE',
     tagline: getProduct('terra')?.tagline ?? 'Real Estate Intelligence',
     description:
       'Distress-first real estate platform covering all five NYC boroughs with multi-factor scoring.',
@@ -65,7 +65,7 @@ const VENTURES = [
   },
   {
     slug: 'lyte',
-    name: getProduct('lyte')?.name ?? 'Lyte',
+    name: getProduct('lyte')?.name ?? 'KORA',
     tagline: getProduct('lyte')?.tagline ?? 'Business Observability',
     description:
       'AI ops dashboard with multi-model routing, cross-portfolio signal aggregation, and observability.',

@@ -184,7 +184,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
       {
         priority: 'this-week',
         action: 'Commission full beneficial ownership tracing on all shell entities in network',
-        owner: 'PRISM Counsel',
+        owner: 'Counsel',
         entityIds: entityIdArr,
       },
     ];
@@ -272,7 +272,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
           priority: 'today',
           action:
             'Inform PRISM legal team of NEXUS-discovered cross-network co-investment — assess conflict implications',
-          owner: 'PRISM Counsel',
+          owner: 'Counsel',
           entityIds: entityIdArr,
         },
         {
@@ -340,7 +340,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
           priority: 'this-week',
           action:
             'Request PRISM title opinion on identified ownership structures — assess undisclosed conflicts',
-          owner: 'PRISM Counsel',
+          owner: 'Counsel',
           entityIds: entityIdArr,
         },
         {
@@ -475,7 +475,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
         priority: 'today',
         action:
           'Brief PRISM counsel on any NEXUS-discovered conflicts affecting active matters — assess disclosure obligations',
-        owner: 'PRISM Counsel',
+        owner: 'Counsel',
         entityIds: entityIdArr,
       },
       {

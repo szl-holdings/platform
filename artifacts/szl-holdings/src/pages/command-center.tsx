@@ -61,7 +61,7 @@ import { cn } from '@/lib/utils';
 const apps = [
   {
     id: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     subtitle: 'Defense & Intelligence Command',
     category: 'security',
     status: 'live',
@@ -77,7 +77,7 @@ const apps = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     subtitle: 'Property Intelligence — OBSERVE',
     category: 'intelligence',
     status: 'live',
@@ -93,7 +93,7 @@ const apps = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     subtitle: 'Maritime Intelligence',
     category: 'intelligence',
     status: 'live',
@@ -109,7 +109,7 @@ const apps = [
   },
   {
     id: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     subtitle: 'Business Observability',
     category: 'operations',
     status: 'live',
@@ -178,7 +178,7 @@ const kpiStrip = [
 const WATCHLIST_DELTAS = [
   {
     entity: 'MV Adriatic Star',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     change: 'AIS gap 6h20m',
     severity: 'high',
     dir: 'down',
@@ -186,7 +186,7 @@ const WATCHLIST_DELTAS = [
   },
   {
     entity: 'CVE-2025-1337',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     change: 'KEV exploitation confirmed',
     severity: 'critical',
     dir: 'down',
@@ -194,7 +194,7 @@ const WATCHLIST_DELTAS = [
   },
   {
     entity: 'NYC Portfolio Cluster A',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     change: '+2 properties at distress threshold',
     severity: 'medium',
     dir: 'down',
@@ -222,7 +222,7 @@ const PENDING_ACTIONS = [
   {
     id: 'pa1',
     title: 'Isolate auth-svc, api-gw, reporting hosts',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     priority: 'critical',
     due: 'T+2h',
     owner: null,
@@ -230,7 +230,7 @@ const PENDING_ACTIONS = [
   {
     id: 'pa2',
     title: 'OFAC screening — MV Adriatic Star',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     priority: 'high',
     due: 'T+6h',
     owner: 'K. Vasile',
@@ -238,7 +238,7 @@ const PENDING_ACTIONS = [
   {
     id: 'pa3',
     title: 'File HC-2025-0487 — owner unassigned',
-    domain: 'PRISM',
+    domain: 'PRAXIS',
     priority: 'high',
     due: 'T+38h',
     owner: null,
@@ -255,22 +255,22 @@ const PENDING_ACTIONS = [
 
 const CROSS_DOMAIN_CORRELATIONS = [
   {
-    from: 'Aegis',
+    from: 'PARAGON',
     to: 'IMPERIUM',
     type: 'causal',
     label: 'KEV exploit → cloud drift vector',
     strength: 0.87,
   },
   {
-    from: 'Vessels',
-    to: 'Terra',
+    from: 'SEXTANT',
+    to: 'DOMAINE',
     type: 'temporal',
     label: 'Dark vessel ↔ portfolio exposure',
     strength: 0.54,
   },
   {
-    from: 'Alloy',
-    to: 'Aegis',
+    from: 'FORGE',
+    to: 'PARAGON',
     type: 'causal',
     label: 'Approval stall → incident response lag',
     strength: 0.63,
@@ -278,8 +278,8 @@ const CROSS_DOMAIN_CORRELATIONS = [
 ];
 
 const STALE_SOURCES = [
-  { source: 'CoStar Market Data', domain: 'Terra', staleFor: '5h', errorMsg: 'Auth token expired' },
-  { source: 'NVD CVE Feed', domain: 'Aegis', staleFor: '3h', errorMsg: 'Rate limit exceeded' },
+  { source: 'CoStar Market Data', domain: 'DOMAINE', staleFor: '5h', errorMsg: 'Auth token expired' },
+  { source: 'NVD CVE Feed', domain: 'PARAGON', staleFor: '3h', errorMsg: 'Rate limit exceeded' },
 ];
 
 const POSTURE_TREND = [71, 74, 73, 76, 74, 72, 75, 76, 75, 78, 76, 78];

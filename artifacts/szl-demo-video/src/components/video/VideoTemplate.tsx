@@ -21,7 +21,7 @@ import { Scene5 } from './video_scenes/Scene5';
 //  Act II — The Solution  (reel + fabric + cortex, 53s)
 //    reel   (25s): Tour all 10 product surfaces with animated mock UIs
 //    fabric (18s): Decision Fabric — 6 governed primitives as a live graph
-//    cortex (10s): CORTEX Mobile — cross-domain alert chain, human approval
+//    cortex (10s): APEX Mobile — cross-domain alert chain, human approval
 //
 //  Act III — The Brand    (close, 12s)
 //    Brand lockup + tagline + founder CTA. Silence is intentional.

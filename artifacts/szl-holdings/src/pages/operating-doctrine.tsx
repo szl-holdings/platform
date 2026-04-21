@@ -39,7 +39,7 @@ const PILLARS = [
     icon: GitBranch,
     number: "03",
     title: "Staged concentration",
-    body: "Capital, time, and attention are scarce. The company maintains one commercial wedge (Lyte + Alloy) while the remainder of the ecosystem is staged as expansion value — visible but not simultaneously chased.",
+    body: "Capital, time, and attention are scarce. The company maintains one commercial wedge (KORA + FORGE) while the remainder of the ecosystem is staged as expansion value — visible but not simultaneously chased.",
     principle: "One story well-told beats five stories half-told.",
   },
   {
@@ -79,7 +79,7 @@ const PORTFOLIO_COLUMNS = [
     label: "Commercial Wedge",
     color: ACCENT,
     items: [
-      { name: "Lyte", desc: "Governed decision command layer" },
+      { name: "KORA", desc: "Governed decision command layer" },
       { name: "Alloy Engine", desc: "Execution and orchestration fabric" },
     ],
   },
@@ -87,10 +87,10 @@ const PORTFOLIO_COLUMNS = [
     label: "Expansion Lanes",
     color: "#7ba3d4",
     items: [
-      { name: "Aegis", desc: "Security & incident command" },
-      { name: "Vessels", desc: "Maritime intelligence platform" },
-      { name: "Terra", desc: "Real estate intelligence platform" },
-      { name: "PRISM Counsel", desc: "Legal observability (early stage)" },
+      { name: "PARAGON", desc: "Security & incident command" },
+      { name: "SEXTANT", desc: "Maritime intelligence platform" },
+      { name: "DOMAINE", desc: "Real estate intelligence platform" },
+      { name: "Counsel", desc: "Legal observability (early stage)" },
     ],
   },
   {

@@ -62,7 +62,7 @@ const METRICS = [
 export default function TrustOperationsPage() {
   const __pageMeta = usePageMeta({
     title: "Operations — Trust Center · SZL Holdings",
-    description: "Operational model, admin visibility, incident management, external data policy, and supportability for Lyte + Alloy.",
+    description: "Operational model, admin visibility, incident management, external data policy, and supportability for KORA + FORGE.",
     canonical: "https://szlholdings.com/trust/operations",
   });
 

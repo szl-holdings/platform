@@ -32,7 +32,7 @@ const COMMITS: CommitGroup[] = [
     title: "Inline approve/dismiss on Global Fabric approvals panel",
     body: "Operators can now approve or dismiss Alloy workflow items inline — no modal or page navigation required. Confirmation records to audit trail with actor attribution.",
     type: "feature",
-    products: ["Alloy", "Command"],
+    products: ["FORGE", "Command"],
     taskRef: "#1947",
   },
   {
@@ -41,7 +41,7 @@ const COMMITS: CommitGroup[] = [
     title: "Fabric: feed live signal/run data from real product sources",
     body: "Global Fabric now pulls signal data from live API endpoints across Lyte, Vessels, Terra, and Aegis. Replaced seeded mock data on the Command surface.",
     type: "feature",
-    products: ["Command", "Lyte", "Vessels", "Terra", "Aegis"],
+    products: ["Command", "KORA", "SEXTANT", "DOMAINE", "PARAGON"],
     taskRef: "#1948",
   },
   {
@@ -59,7 +59,7 @@ const COMMITS: CommitGroup[] = [
     title: "Decision Twin — causal what-if simulation with PRISM impact and audit",
     body: "Lyte operators can now fork a pending decision, adjust parameters, and run causal simulation against the PRISM model before confirming. All simulation runs record to the decision ledger.",
     type: "feature",
-    products: ["Lyte"],
+    products: ["KORA"],
   },
   {
     date: "2026-04-18",
@@ -76,7 +76,7 @@ const COMMITS: CommitGroup[] = [
     title: "Policy Compiler — plain-English to versioned executable governance",
     body: "Operators can now write governance policies in plain language and compile them to versioned, executable policy objects. Integrated with Covenant Policy enforcement layer.",
     type: "feature",
-    products: ["Alloy", "Lyte"],
+    products: ["FORGE", "KORA"],
     taskRef: "#1954",
   },
   {
@@ -85,7 +85,7 @@ const COMMITS: CommitGroup[] = [
     title: "Email/Slack daily proof-chain digest to executives",
     body: "Automated daily proof-chain summary now delivers to executive subscribers via email (Resend) and Slack. Summary includes decision count, pending approvals, and high-severity audit events.",
     type: "feature",
-    products: ["Alloy", "API Server"],
+    products: ["FORGE", "API Server"],
     taskRef: "#1945",
   },
   {
@@ -94,7 +94,7 @@ const COMMITS: CommitGroup[] = [
     title: "Policy approvals page: approve/reject buttons functional",
     body: "Fixed a blocking issue where policy approval/rejection UI calls were silently failing. Approve and reject now correctly route to the Alloy workflow engine and record to audit trail.",
     type: "fix",
-    products: ["Lyte", "Alloy"],
+    products: ["KORA", "FORGE"],
     taskRef: "#1944",
   },
   {
@@ -111,15 +111,15 @@ const COMMITS: CommitGroup[] = [
     title: "Policy mode badge on every operational product page",
     body: "Vessels, Terra, and Carlota Jo now display the current policy mode badge in their header. Operators can see at a glance whether AI decisions are advisory, enforced, or locked.",
     type: "feature",
-    products: ["Vessels", "Terra", "Carlota Jo"],
+    products: ["SEXTANT", "DOMAINE", "Carlota Jo"],
   },
   {
     date: "2026-04-13",
     sha: "1a79391",
-    title: "PRISM Counsel data scoped to signed-in organization",
-    body: "Legal matter data in PRISM Counsel is now fully tenant-scoped. All queries now enforce org_id at the DB layer. Closes a data isolation gap documented in KNOWN-GAPS.md.",
+    title: "Counsel data scoped to signed-in organization",
+    body: "Legal matter data in Counsel is now fully tenant-scoped. All queries now enforce org_id at the DB layer. Closes a data isolation gap documented in KNOWN-GAPS.md.",
     type: "security",
-    products: ["PRISM Counsel", "API Server"],
+    products: ["Counsel", "API Server"],
   },
   {
     date: "2026-04-12",
@@ -127,7 +127,7 @@ const COMMITS: CommitGroup[] = [
     title: "Sentra and Counsel marketing landing pages",
     body: "Public marketing pages launched for Sentra (Cyber Resilience Command) and Counsel (Legal Matter Command). Both include live demo narrative flows and product positioning.",
     type: "feature",
-    products: ["Sentra", "Counsel"],
+    products: ["TENAX", "Counsel"],
   },
   {
     date: "2026-04-11",
@@ -135,7 +135,7 @@ const COMMITS: CommitGroup[] = [
     title: "Sentra/Counsel demo narratives wired to live signal mesh",
     body: "Sentra and Counsel demo flows now pull from the live signal mesh via WebSocket. Incident and matter timelines update in real time during demos.",
     type: "feature",
-    products: ["Sentra", "Counsel"],
+    products: ["TENAX", "Counsel"],
     taskRef: "#1935",
   },
   {
@@ -178,7 +178,7 @@ const COMMITS: CommitGroup[] = [
     title: "Lyte surfaces wired to live API data",
     body: "PRISM dashboard, Command Inbox, and Watchdog surfaces in Lyte now pull from live API endpoints. BLS, GitHub Trending, and RSS feeds are active. Demo seed fallback retained for offline mode.",
     type: "feature",
-    products: ["Lyte"],
+    products: ["KORA"],
     taskRef: "#1893",
   },
 ];
@@ -199,7 +199,7 @@ function TypeBadge({ type }: { type: ChangeType }) {
 const PRODUCT_COLORS: Record<string, string> = {
   Lyte: "#d4a054", Alloy: "#8b7ac8", Command: "#5b8dd4", Vessels: "#4a90b8",
   Terra: "#c8953c", Aegis: "#c45a4a", Sentra: "#ef8c3a", Counsel: "#6aaa72",
-  "PRISM Counsel": "#70b890", "Carlota Jo": "#a0a0c0", "API Server": "#6aaa72",
+  "Counsel": "#70b890", "Carlota Jo": "#a0a0c0", "API Server": "#6aaa72",
   Infrastructure: "#808090", "Design System": "#7090a8", "SZL Holdings Mobile": "#7ecfc0",
   "All Products": "#d4a054",
 };

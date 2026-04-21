@@ -91,7 +91,7 @@ const RUNS: ReplayRun[] = [
   {
     runId: 'RUN-3038',
     workflowName: 'Security Posture Audit',
-    pack: 'Aegis',
+    pack: 'PARAGON',
     packColor: '#4f6ef7',
     status: 'completed',
     startedAt: '2026-04-01 06:14:22Z',
@@ -186,7 +186,7 @@ const RUNS: ReplayRun[] = [
   {
     runId: 'RUN-3041',
     workflowName: 'Q1 Financial Report Generation',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     status: 'completed',
     startedAt: '2026-04-01 04:02:11Z',
@@ -260,7 +260,7 @@ const RUNS: ReplayRun[] = [
   {
     runId: 'RUN-3039',
     workflowName: 'Fuel Surcharge Rate Calculator',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     status: 'failed',
     startedAt: '2026-03-31 06:44:18Z',
@@ -319,7 +319,7 @@ const RUNS: ReplayRun[] = [
   {
     runId: 'RUN-3037',
     workflowName: 'Asset Valuation Batch',
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     status: 'completed',
     startedAt: '2026-03-31 20:00:00Z',
@@ -570,7 +570,7 @@ function mapRealRunToReplay(run: AlloyWorkflowRun): ReplayRun {
   return {
     runId: `RUN-${run.id}`,
     workflowName: `Workflow #${run.workflowId}`,
-    pack: 'Alloy',
+    pack: 'FORGE',
     packColor: '#d4a054',
     status: run.state === 'failed' ? 'failed' : 'completed',
     startedAt: baseTs,

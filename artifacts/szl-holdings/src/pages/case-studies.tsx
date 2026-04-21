@@ -88,7 +88,7 @@ export default function CaseStudiesPage() {
               <div className="mt-8 flex flex-wrap gap-3" role="list" aria-label="Filter by product">
                 {[
                   { label: "All", count: caseStudies.length },
-                  ...["Lyte", "Vessels", "Alloy", "Terra", "Aegis", "Carlota Jo"].map(p => ({ label: p, count: caseStudies.filter(c => c.product === p).length })),
+                  ...["KORA", "SEXTANT", "FORGE", "DOMAINE", "PARAGON", "Carlota Jo"].map(p => ({ label: p, count: caseStudies.filter(c => c.product === p).length })),
                 ].filter(({ count }) => count > 0).map(({ label, count }) => (
                   <span key={label} role="listitem" className="text-xs px-3 py-1.5 rounded-full border text-white/50 border-white/10 bg-white/3">
                     {label} <span className="text-white/25 ml-1">{count}</span>

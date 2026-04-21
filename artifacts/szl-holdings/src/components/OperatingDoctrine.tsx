@@ -7,7 +7,7 @@ const doctrine = [
     desc: 'Every platform surfaces signals continuously — from operational data, fleet movements, business metrics, and environmental inputs. Nothing waits to be discovered.',
     accent: 'hsl(190,90%,55%)',
     accentRgb: '14,201,224',
-    platform: 'Lyte',
+    platform: 'KORA',
   },
   {
     step: '02',
@@ -15,7 +15,7 @@ const doctrine = [
     desc: 'The Alloy engine normalizes raw signal across all platforms — classifying severity, attributing ownership, and connecting data points into consequence-aware intelligence.',
     accent: 'hsl(214,80%,65%)',
     accentRgb: '92,155,228',
-    platform: 'Alloy Engine',
+    platform: 'FORGE Engine',
   },
   {
     step: '03',
@@ -23,7 +23,7 @@ const doctrine = [
     desc: 'Leadership teams receive structured, explainable recommendations with confidence scores, value-at-risk estimates, and clear action options — not data dumps.',
     accent: 'hsl(265,80%,60%)',
     accentRgb: '139,92,246',
-    platform: 'Aegis',
+    platform: 'PARAGON',
   },
   {
     step: '04',

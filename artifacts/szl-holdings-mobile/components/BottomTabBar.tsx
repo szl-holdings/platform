@@ -35,7 +35,7 @@ const TABS: TabItem[] = [
   },
   {
     id: 'intelligence',
-    label: 'CORTEX',
+    label: 'APEX',
     icon: 'cpu',
     accent: '#8b7ac8',
     route: '/(shell)/intelligence',
@@ -63,7 +63,7 @@ const TABS: TabItem[] = [
   },
   {
     id: 'properties',
-    label: 'Terra',
+    label: 'DOMAINE',
     icon: 'home',
     accent: '#c87941',
     route: '/(shell)/properties',

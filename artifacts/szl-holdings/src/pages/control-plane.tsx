@@ -45,7 +45,7 @@ const platformRegistry = [
     owner: 'Stephen Lutar',
   },
   {
-    name: 'Alloy',
+    name: 'FORGE',
     slug: 'alloy',
     type: 'Intelligence Engine',
     tier: 'Flagship',
@@ -69,7 +69,7 @@ const platformRegistry = [
     owner: 'Decision Intelligence Team',
   },
   {
-    name: 'Vessels',
+    name: 'SEXTANT',
     slug: 'vessels',
     type: 'Maritime Command',
     tier: 'Flagship',
@@ -81,7 +81,7 @@ const platformRegistry = [
     owner: 'Maritime Ops',
   },
   {
-    name: 'Aegis',
+    name: 'PARAGON',
     slug: 'aegis',
     type: 'Cyber Defense',
     tier: 'Platform',
@@ -105,7 +105,7 @@ const platformRegistry = [
     owner: 'AI Research',
   },
   {
-    name: 'Terra',
+    name: 'DOMAINE',
     slug: 'terra',
     type: 'Portfolio Intelligence',
     tier: 'Platform',

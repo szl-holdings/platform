@@ -29,7 +29,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     icon: () => null,
     color: '#f59e0b',
     domain: 'observability',
@@ -39,7 +39,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     icon: Shield,
     color: '#3b82f6',
     domain: 'security',
@@ -49,7 +49,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     icon: Anchor,
     color: '#06b6d4',
     domain: 'maritime',
@@ -59,7 +59,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     icon: Globe,
     color: '#10b981',
     domain: 'real-estate',
@@ -79,7 +79,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'prism',
-    name: 'PRISM Counsel',
+    name: 'Counsel',
     icon: Scale,
     color: '#8b5cf6',
     domain: 'legal',
@@ -99,7 +99,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'alloy',
-    name: 'Alloy',
+    name: 'FORGE',
     icon: Cpu,
     color: '#64748b',
     domain: 'automation',
@@ -802,7 +802,7 @@ export function DomainHealthGrid() {
     { name: 'Vessels Maritime', load: 35, color: '#06b6d4' },
     { name: 'Terra Real Estate', load: 28, color: '#10b981' },
     { name: 'Carlota Jo', load: 19, color: '#c4a265' },
-    { name: 'PRISM Counsel', load: 44, color: '#8b5cf6' },
+    { name: 'Counsel', load: 44, color: '#8b5cf6' },
     { name: 'Nexus Fusion', load: 52, color: '#ec4899' },
     { name: 'Alloy Fabric', load: 31, color: '#64748b' },
     { name: 'API Gateway', load: 58, color: '#d4a054' },
@@ -867,17 +867,17 @@ export function DomainHealthGrid() {
 
 export function CrossDomainIntelFlow() {
   const flows = [
-    { from: 'Aegis', to: 'Lyte', type: 'Threat → Priority Signal', color: '#3b82f6', intensity: 3 },
+    { from: 'PARAGON', to: 'KORA', type: 'Threat → Priority Signal', color: '#3b82f6', intensity: 3 },
     {
-      from: 'Vessels',
-      to: 'Terra',
+      from: 'SEXTANT',
+      to: 'DOMAINE',
       type: 'Port Data → Supply Chain',
       color: '#06b6d4',
       intensity: 2,
     },
     {
-      from: 'Terra',
-      to: 'PRISM',
+      from: 'DOMAINE',
+      to: 'PRAXIS',
       type: 'Deal → Compliance Review',
       color: '#10b981',
       intensity: 4,
@@ -889,8 +889,8 @@ export function CrossDomainIntelFlow() {
       color: '#ec4899',
       intensity: 5,
     },
-    { from: 'Alloy', to: 'All', type: 'Execution Fabric Dispatch', color: '#64748b', intensity: 3 },
-    { from: 'Lyte', to: 'Aegis', type: 'Anomaly → Investigation', color: '#f59e0b', intensity: 2 },
+    { from: 'FORGE', to: 'All', type: 'Execution Fabric Dispatch', color: '#64748b', intensity: 3 },
+    { from: 'KORA', to: 'PARAGON', type: 'Anomaly → Investigation', color: '#f59e0b', intensity: 2 },
   ];
   const [activeFlow, setActiveFlow] = useState(0);
   useEffect(() => {

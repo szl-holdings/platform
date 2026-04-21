@@ -30,7 +30,7 @@ const AGENTS = [
     icon: 'home',
     color: '#b8943c',
   },
-  { id: 'alloy', name: 'Alloy', role: 'Orchestration', icon: 'git-merge', color: '#c9a84c' },
+  { id: 'alloy', name: 'FORGE', role: 'Orchestration', icon: 'git-merge', color: '#c9a84c' },
   { id: 'eval', name: 'Eval Engine', role: 'Research', icon: 'search', color: '#8b5cf6' },
 ];
 

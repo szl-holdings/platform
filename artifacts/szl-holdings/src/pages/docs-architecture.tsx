@@ -49,7 +49,7 @@ const PROPERTIES = [
 export default function DocsArchitecturePage() {
   const __pageMeta = usePageMeta({
     title: "Architecture — Docs — SZL Holdings",
-    description: "Technical architecture documentation for the Lyte + Alloy platform: signal ingestion, twin enrichment, signal-to-action pipeline, governance, and proof chain.",
+    description: "Technical architecture documentation for the KORA + FORGE platform: signal ingestion, twin enrichment, signal-to-action pipeline, governance, and proof chain.",
     canonical: "https://szlholdings.com/docs/architecture",
   });
 
@@ -75,7 +75,7 @@ export default function DocsArchitecturePage() {
                 Platform architecture.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
-                The Lyte + Alloy platform is a layered signal-to-action operating system. Each layer has a
+                The KORA + FORGE platform is a layered signal-to-action operating system. Each layer has a
                 defined input, a defined output, and a defined governance boundary. This page documents how
                 those layers connect.
               </p>

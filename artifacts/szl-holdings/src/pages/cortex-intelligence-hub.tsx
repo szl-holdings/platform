@@ -229,7 +229,7 @@ export default function CortexIntelligenceHub() {
                 CORTEX Intelligence Hub
               </h1>
               <p style={{ margin: 0, fontSize: 13, color: '#ffffff60' }}>
-                Cross-domain fusion engine · Palantir-style entity graph · Autonomous action layer ·
+                Cross-domain fusion engine · enterprise entity graph · Autonomous action layer ·
                 Daily briefing
               </p>
             </div>

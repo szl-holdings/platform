@@ -677,7 +677,7 @@ export function ProofDrawer({ proof, defaultOpen = false, compact = false }: Pro
 export const SAMPLE_PROOF_RECORD: ProofRecord = {
   id: 'PCH-SF1-20260416',
   sourceSystem: 'Aegis SOC Feed',
-  sourceDomain: 'Aegis',
+  sourceDomain: 'PARAGON',
   signalType: 'threat_intelligence',
   confidence: 0.94,
   model: 'gpt-4o-mini',

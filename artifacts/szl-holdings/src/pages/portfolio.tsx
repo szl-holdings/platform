@@ -319,7 +319,7 @@ export default function PortfolioPage() {
           >
             <ModuleTile
               icon={BarChart3}
-              name="Lyte"
+              name="KORA"
               tagline="Decision Intelligence Platform"
               accentColor="hsl(191,92%,44%)"
               href="/lyte"
@@ -334,7 +334,7 @@ export default function PortfolioPage() {
 
             <ModuleTile
               icon={Building2}
-              name="Terra"
+              name="DOMAINE"
               tagline="Real Estate Intelligence"
               accentColor="hsl(140,50%,46%)"
               href="/solutions/terra"
@@ -349,7 +349,7 @@ export default function PortfolioPage() {
 
             <ModuleTile
               icon={Ship}
-              name="Vessels"
+              name="SEXTANT"
               tagline="Maritime Intelligence"
               accentColor="hsl(200,80%,52%)"
               href="/solutions/vessels"
@@ -364,7 +364,7 @@ export default function PortfolioPage() {
 
             <ModuleTile
               icon={ShieldCheck}
-              name="Sentra"
+              name="TENAX"
               tagline="Cyber Resilience Command"
               accentColor="hsl(0,72%,56%)"
               href="/solutions/aegis"
@@ -379,7 +379,7 @@ export default function PortfolioPage() {
 
             <ModuleTile
               icon={Workflow}
-              name="Alloy"
+              name="FORGE"
               tagline="Governed Execution Fabric"
               accentColor="hsl(258,55%,68%)"
               href="/alloy"

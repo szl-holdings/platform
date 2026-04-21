@@ -515,7 +515,7 @@ function SectionCard({
                       <ExternalLink size={10} />
                       {section.drillDownPath.includes('nexus')
                         ? 'Explore in NEXUS Graph'
-                        : 'Open in PRISM Counsel'}
+                        : 'Open in Counsel'}
                       <ChevronRight size={9} />
                     </span>
                   </Link>

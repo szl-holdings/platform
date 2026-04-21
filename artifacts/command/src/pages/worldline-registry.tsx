@@ -57,7 +57,7 @@ const DOMAIN_CONFIG: Record<
   aegis: { label: 'Aegis — Defense', color: '#ef4444', icon: Shield, appPath: '/aegis' },
   terra: { label: 'Terra — Real Estate', color: '#10b981', icon: Globe, appPath: '/terra' },
   vessels: { label: 'Vessels — Maritime', color: '#06b6d4', icon: Network, appPath: '/vessels' },
-  alloy: { label: 'Alloy — Execution', color: '#4B8BDB', icon: Zap, appPath: '/command' },
+  alloy: { label: 'FORGE — Execution', color: '#4B8BDB', icon: Zap, appPath: '/command' },
   prism: { label: 'Prism — Counsel', color: '#f59e0b', icon: Globe, appPath: '/command' },
   lyte: { label: 'Lyte — AIOps', color: '#d4a054', icon: Activity, appPath: '/command' },
 };

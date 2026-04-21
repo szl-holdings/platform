@@ -153,7 +153,7 @@ async function main() {
   results.push(runSeedScript('Marketing OS', 'seed-marketing-os.ts'));
   results.push(runSeedScript('Document Engine', 'seed-document-engine.ts'));
   results.push(await runSeed('Distribution OS', seedDistributionOS));
-  results.push(await runSeed('PRISM Counsel', seedPrismCounsel));
+  results.push(await runSeed('Counsel', seedPrismCounsel));
   results.push(runSeedScript('Alloy Narratives', 'seed-alloy.ts'));
   results.push(runSeedScript('Observability', 'seed-observability.ts'));
   results.push(runSeedScript('Terra Full', 'seed-terra-full.ts'));

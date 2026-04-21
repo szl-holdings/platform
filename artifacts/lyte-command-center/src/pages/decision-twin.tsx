@@ -599,7 +599,7 @@ function generateBriefingHTML(
 <p style="font-size:11px; line-height:1.6; margin-bottom:8px;">${sig.body}</p>
 <p style="font-size:10px; color:#666;">Source: ${sig.source} · Entity: ${sig.linkedEntityLabel}</p>
 
-<h2>PRISM Impact — Scenario Comparison</h2>
+<h2>Decision Impact — Scenario Comparison</h2>
 <table>
   <thead>
     <tr>

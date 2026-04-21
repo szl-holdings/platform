@@ -20,7 +20,7 @@ const ARCH_SECTIONS = [
     color: "var(--color-lyte-light)",
     colorMuted: "var(--color-lyte-muted)",
     colorBorder: "var(--color-lyte-border)",
-    business: "Every operating organization loses value in the gap between what is known and what gets done. Intelligence accumulates in dashboards. Actions get routed through email. Accountability disappears in status updates. Lyte + Alloy exists to close that gap structurally — not through better tooling, but through a different architecture.",
+    business: "Every operating organization loses value in the gap between what is known and what gets done. Intelligence accumulates in dashboards. Actions get routed through email. Accountability disappears in status updates. KORA + FORGE exists to close that gap structurally — not through better tooling, but through a different architecture.",
     product: "The platform connects signal detection, context interpretation, action recommendation, human approval, execution, and audit in a single governed pipeline. Each stage is a first-class product surface with structured inputs and outputs — not a sequence of loosely connected apps.",
     trust: "The pipeline architecture means every consequential action has a complete record: where the signal came from, who interpreted it, what was recommended, who approved it, what was executed, and what the outcome was. There are no gaps in the lineage.",
     operational: "Because the pipeline stages are defined at the infrastructure level, not the application level, operational observability, retry logic, and audit logging are built-in — not bolted on. Operations teams work with structured records, not logs.",
@@ -62,7 +62,7 @@ const ARCH_SECTIONS = [
     color: "hsl(40,90%,54%)",
     colorMuted: "hsla(40,90%,54%,0.08)",
     colorBorder: "hsla(40,90%,54%,0.22)",
-    business: "Defense operations (Aegis), maritime logistics (Vessels), real estate intelligence (Terra), and legal operations (PRISM Counsel) all have fundamentally different signal vocabularies, workflow models, and regulatory contexts. Pack-specific twins allow the platform to serve each vertical with domain-appropriate intelligence — without rebuilding the core governance model for each.",
+    business: "Defense operations (Aegis), maritime logistics (Vessels), real estate intelligence (Terra), and legal operations (Counsel) all have fundamentally different signal vocabularies, workflow models, and regulatory contexts. Pack-specific twins allow the platform to serve each vertical with domain-appropriate intelligence — without rebuilding the core governance model for each.",
     product: "Each domain pack extends Lyte's signal classification with pack-specific types, enriches the Alloy recommendation model with domain context, and surfaces domain-specific workflow surfaces. The pack sits above the core platform layer — it does not replace it.",
     trust: "Domain packs extend the governance model — they do not bypass it. Every signal, recommendation, approval, and action in a domain pack goes through the same core pipeline with the same approval tiers and audit requirements. Pack configuration cannot remove governance gates.",
     operational: "Pack deployments are versioned and independently updatable. A pack update does not affect core platform behavior. Pack-specific connectors are scoped to the data types required for that domain — no cross-pack permission leakage.",
@@ -230,7 +230,7 @@ export default function ArchitecturePage() {
                   Ten layers. One governed pipeline. Built to be defensible.
                 </h1>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "55ch", marginBottom: "2rem" }}>
-                  This page explains every architectural layer of Lyte + Alloy — what it does,
+                  This page explains every architectural layer of KORA + FORGE — what it does,
                   why it exists, what it means for trust, and what it means for operations.
                   Written for technical buyers, capital partners, and enterprise diligence teams.
                 </p>

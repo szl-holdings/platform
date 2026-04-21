@@ -138,7 +138,7 @@ export default function SolutionsAegisPage() {
                   </div>
                 </div>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch", marginBottom: "2.25rem" }}>
-                  SOC command, XDR, and managed security operations — built on the Lyte + Alloy
+                  SOC command, XDR, and managed security operations — built on the KORA + FORGE
                   platform for environments where every decision has consequence and every action
                   needs an audit trail.
                 </p>

@@ -29,7 +29,7 @@ const PROOF_ITEMS = [
 
 const proofs = [
   {
-    platform: 'Lyte',
+    platform: 'KORA',
     view: 'Command View',
     desc: 'Signals surfaced, owners identified, value at risk quantified across business operations.',
     accent: 'hsl(192, 80%, 48%)',
@@ -38,7 +38,7 @@ const proofs = [
     status: 'Live',
   },
   {
-    platform: 'Vessels',
+    platform: 'SEXTANT',
     view: 'Fleet Command',
     desc: 'Route visibility, voyage economics, and exceptions in one operational layer.',
     accent: 'hsl(210, 78%, 44%)',
@@ -47,7 +47,7 @@ const proofs = [
     status: 'Live',
   },
   {
-    platform: 'Alloy',
+    platform: 'FORGE',
     view: 'Architecture',
     desc: '6-layer pipeline: Inputs → Normalization → Reasoning → Orchestration → Outputs → Governance.',
     accent: 'hsl(222, 68%, 58%)',
@@ -56,7 +56,7 @@ const proofs = [
     status: 'Live',
   },
   {
-    platform: 'Lyte',
+    platform: 'KORA',
     view: 'Lyte Readiness',
     desc: 'Lyte Readiness is a first-class module within Lyte for execution tracking and maturity scoring.',
     accent: 'hsl(192, 80%, 48%)',

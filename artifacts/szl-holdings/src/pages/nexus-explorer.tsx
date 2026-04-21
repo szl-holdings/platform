@@ -881,7 +881,7 @@ export default function NexusExplorerPage() {
       date: 'Apr 14',
       time: '22:15',
       event: `NEXUS graph refresh — ${NEXUS_EDGES.filter((e) => e.inferred).length} new inferred edges`,
-      domain: 'NEXUS',
+      domain: 'PRAXIS',
       accent: '#60a5fa',
     },
     {
@@ -895,7 +895,7 @@ export default function NexusExplorerPage() {
       date: 'Apr 12',
       time: '03:10',
       event: 'MV Arctic Eagle entered Red Sea corridor',
-      domain: 'Vessels',
+      domain: 'SEXTANT',
       accent: '#38bdf8',
     },
     {
@@ -916,7 +916,7 @@ export default function NexusExplorerPage() {
       date: 'Apr 3',
       time: '14:22',
       event: 'Second MV Arctic Eagle Red Sea transit logged',
-      domain: 'Vessels',
+      domain: 'SEXTANT',
       accent: '#38bdf8',
     },
     {

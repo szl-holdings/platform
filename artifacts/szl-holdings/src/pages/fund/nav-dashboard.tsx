@@ -52,11 +52,11 @@ const NAV_HISTORY = [
 ];
 
 const COMPANY_NAVS = [
-  { company: "Vessels", nav: 28_400_000, cost: 12_000_000, moic: 2.37, irr: 34.2, color: "#4a90b8", pct: 33.7 },
-  { company: "Aegis", nav: 22_100_000, cost: 10_000_000, moic: 2.21, irr: 28.4, color: "#c45a4a", pct: 26.2 },
-  { company: "Terra", nav: 14_800_000, cost: 8_000_000, moic: 1.85, irr: 22.1, color: "#c8953c", pct: 17.6 },
-  { company: "Lyte", nav: 10_200_000, cost: 6_000_000, moic: 1.70, irr: 19.8, color: "#6aaa72", pct: 12.1 },
-  { company: "PRISM Counsel", nav: 5_400_000, cost: 4_000_000, moic: 1.35, irr: 14.2, color: "#d4a054", pct: 6.4 },
+  { company: "SEXTANT", nav: 28_400_000, cost: 12_000_000, moic: 2.37, irr: 34.2, color: "#4a90b8", pct: 33.7 },
+  { company: "PARAGON", nav: 22_100_000, cost: 10_000_000, moic: 2.21, irr: 28.4, color: "#c45a4a", pct: 26.2 },
+  { company: "DOMAINE", nav: 14_800_000, cost: 8_000_000, moic: 1.85, irr: 22.1, color: "#c8953c", pct: 17.6 },
+  { company: "KORA", nav: 10_200_000, cost: 6_000_000, moic: 1.70, irr: 19.8, color: "#6aaa72", pct: 12.1 },
+  { company: "Counsel", nav: 5_400_000, cost: 4_000_000, moic: 1.35, irr: 14.2, color: "#d4a054", pct: 6.4 },
   { company: "Carlota Jo", nav: 3_300_000, cost: 2_000_000, moic: 1.65, irr: 18.1, color: "#8b7ac8", pct: 3.9 },
 ];
 

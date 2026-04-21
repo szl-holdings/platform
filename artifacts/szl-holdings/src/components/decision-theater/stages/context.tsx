@@ -107,16 +107,16 @@ export function LiveContextStage({
   ];
 
   const domainSummary = [
-    { domain: 'Alloy', count: recommendations.filter((r) => r.domain === 'alloy').length },
+    { domain: 'FORGE', count: recommendations.filter((r) => r.domain === 'alloy').length },
     {
-      domain: 'Lyte',
+      domain: 'KORA',
       count: recommendations.filter((r) => r.domain === 'beacon' || r.domain === 'terra').length,
     },
     {
-      domain: 'Firestorm',
+      domain: 'Security',
       count: recommendations.filter((r) => r.domain === 'firestorm' || r.domain === 'aegis').length,
     },
-    { domain: 'Vessels', count: recommendations.filter((r) => r.domain === 'vessels').length },
+    { domain: 'SEXTANT', count: recommendations.filter((r) => r.domain === 'vessels').length },
   ].filter((d) => d.count > 0);
 
   return (

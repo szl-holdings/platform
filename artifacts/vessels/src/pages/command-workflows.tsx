@@ -224,7 +224,7 @@ export default function CommandWorkflowsPage() {
         body: JSON.stringify({ eventId, vesselId, workflowType, assignedTo }),
       }),
     onSuccess: (_data, vars) => {
-      toast.success(`Workflow "${WORKFLOW_TYPE_LABELS[vars.workflowType]}" created via Alloy`);
+      toast.success(`Workflow "${WORKFLOW_TYPE_LABELS[vars.workflowType]}" created via FORGE`);
       queryClient.invalidateQueries({ queryKey: ['vessel-events'] });
     },
     onError: () => toast.error('Failed to create workflow'),

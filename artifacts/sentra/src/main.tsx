@@ -19,13 +19,13 @@ initAnalytics({ appSlug: 'sentra' });
 if ('serviceWorker' in navigator && !import.meta.env.DEV) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sentra/sw.js', { scope: '/sentra/' }).catch((err) => {
-      console.warn('[Sentra SW] Registration failed:', err);
+      console.warn('[TENAX SW] Registration failed:', err);
     });
   });
 }
 
 createRoot(document.getElementById('root')!).render(
-  <ErrorBoundary appName="Sentra Cyber Resilience Command" accentColor="#ef4444">
+  <ErrorBoundary appName="TENAX Cyber Resilience Command" accentColor="#ef4444">
     <GraphQLProvider>
       <App />
     </GraphQLProvider>

@@ -39,7 +39,7 @@ interface ApiSlaResponse {
 const FALLBACK_SLAS: SLADefinition[] = [
   {
     id: 's1',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     domainColor: '#ef4444',
     name: 'Security Incident MTTR',
     metric: 'Mean Time to Respond',
@@ -54,7 +54,7 @@ const FALLBACK_SLAS: SLADefinition[] = [
   },
   {
     id: 's2',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     domainColor: '#0ea5e9',
     name: 'Fleet Uptime',
     metric: 'Vessel availability %',
@@ -69,7 +69,7 @@ const FALLBACK_SLAS: SLADefinition[] = [
   },
   {
     id: 's3',
-    domain: 'Lyte',
+    domain: 'KORA',
     domainColor: '#f97316',
     name: 'API Response Time P95',
     metric: '95th percentile latency',
@@ -85,7 +85,7 @@ const FALLBACK_SLAS: SLADefinition[] = [
   },
   {
     id: 's4',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     domainColor: '#22c55e',
     name: 'Deal Response Time',
     metric: 'Time from inquiry to response',
@@ -100,7 +100,7 @@ const FALLBACK_SLAS: SLADefinition[] = [
   },
   {
     id: 's5',
-    domain: 'PRISM',
+    domain: 'PRAXIS',
     domainColor: '#a855f7',
     name: 'Contract Review Turnaround',
     metric: 'Legal review completion',
@@ -115,7 +115,7 @@ const FALLBACK_SLAS: SLADefinition[] = [
   },
   {
     id: 's6',
-    domain: 'Lyte',
+    domain: 'KORA',
     domainColor: '#f97316',
     name: 'Driver On-Time Rate',
     metric: 'On-time delivery %',
@@ -147,7 +147,7 @@ const FALLBACK_SLAS: SLADefinition[] = [
   },
   {
     id: 's8',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     domainColor: '#ef4444',
     name: 'Vulnerability Patch SLA',
     metric: 'Critical CVE patching',

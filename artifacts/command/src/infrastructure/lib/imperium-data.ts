@@ -1323,7 +1323,7 @@ export const INITIAL_COALITION: CoalitionPartner[] = [
   },
   {
     id: 'cp-005',
-    name: 'PRISM Counsel',
+    name: 'Counsel',
     role: 'Legal & Compliance Advisory',
     domain: 'Legal',
     trustScore: 91,

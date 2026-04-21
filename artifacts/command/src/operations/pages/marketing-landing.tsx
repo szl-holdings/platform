@@ -36,7 +36,7 @@ import { useEffect, useRef, useState } from 'react';
 const prism = [
   {
     key: 'P',
-    name: 'Pulse',
+    name: 'LUMINA',
     color: '#d4a054',
     icon: Activity,
     meaning: 'Business health, operating heartbeat, trend status',
@@ -482,7 +482,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
               {
                 label: 'Business Observability',
                 items: ['Revenue velocity', 'Approval aging', 'Ownership gaps', 'Decision latency'],
-                note: 'Lyte',
+                note: 'KORA',
                 highlight: true,
               },
             ].map((col) => (
@@ -1239,9 +1239,9 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
             </div>
             <div className="flex items-center gap-4">
               {[
-                { name: 'Terra', href: '/terra/' },
-                { name: 'Vessels', href: '/vessels/' },
-                { name: 'Aegis', href: '/aegis/' },
+                { name: 'DOMAINE', href: '/terra/' },
+                { name: 'SEXTANT', href: '/vessels/' },
+                { name: 'PARAGON', href: '/aegis/' },
                 { name: 'Carlota Jo', href: '/carlota-jo/' },
                 { name: 'SZL', href: '/szl-holdings/' },
               ].map((l) => (

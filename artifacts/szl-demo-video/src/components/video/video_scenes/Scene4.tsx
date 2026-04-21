@@ -32,7 +32,7 @@ export function Scene4() {
             animate={phase >= 1 ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            CORTEX Mobile
+            APEX Mobile
             <br />
             <span className="text-[var(--color-text-muted)] text-[2vw]">Pocket-cockpit</span>
           </motion.h2>

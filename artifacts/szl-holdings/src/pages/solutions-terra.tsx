@@ -135,7 +135,7 @@ export default function SolutionsTerraPage() {
                 </div>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch", marginBottom: "2.25rem" }}>
                   A data-rich, execution-poor industry finally getting a command layer. Terra
-                  applies Lyte + Alloy to real estate acquisition, portfolio management, and
+                  applies KORA + FORGE to real estate acquisition, portfolio management, and
                   deal operations — so operators see the signal and act on it.
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>

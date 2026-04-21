@@ -54,7 +54,7 @@ const RECEIPTS: DecisionReceipt[] = [
     rank: 1,
     finalScore: 96,
     rankedAt: '2m ago',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     summary:
       'Ranked #1 because the owner is clear (Finance VP), the action is unambiguous (approve or delegate), and SLA breach activates in 4h with $2.1M penalty exposure. Evidence from 3 correlated signals and a historical pattern of approval delays.',
@@ -114,7 +114,7 @@ const RECEIPTS: DecisionReceipt[] = [
     rank: 2,
     finalScore: 89,
     rankedAt: '8m ago',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     summary:
       'Ranked #2 because the owner (CEO) is identified and the action is clear, but the window (17h) gives slightly more runway than the vessel SLA. Evidence from 4 correlated signals and a pricing expiry model.',
@@ -174,7 +174,7 @@ const RECEIPTS: DecisionReceipt[] = [
     rank: 3,
     finalScore: 78,
     rankedAt: '14m ago',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     summary:
       'Ranked #3 because the resolution is straightforward (single assignment) but requires COO involvement and has no hard deadline. Ownership is contested, reducing the actionability score slightly.',

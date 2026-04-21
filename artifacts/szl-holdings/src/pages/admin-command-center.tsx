@@ -1563,7 +1563,7 @@ function SupportPanel() {
   > = {
     szl_contact: { label: 'General', variant: 'blue' },
     vessels_demo: { label: 'Vessels Demo', variant: 'green' },
-    prism_counsel_access: { label: 'PRISM Counsel Access', variant: 'amber' },
+    prism_counsel_access: { label: 'Counsel Access', variant: 'amber' },
     carlota_private_inquiry: { label: 'Carlota Jo', variant: 'neutral' },
     stephen_contact: { label: 'Stephen', variant: 'neutral' },
   };

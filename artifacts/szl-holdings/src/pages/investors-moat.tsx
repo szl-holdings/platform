@@ -64,7 +64,7 @@ const moats = [
     title: "Observability Correlation",
     category: "Network",
     tagline: "Cross-domain signal correlation that surfaces intelligence no single-domain tool can produce.",
-    body: "The Event Fabric (PRISM Bus) normalizes events from all domain sources and enables cross-domain correlation — a sanctions hit in Vessels can surface a legal risk flag in PRISM Counsel, triggering a policy escalation in Lyte, appearing as an approval request in CORTEX. Each domain pack added contributes new signal sources. Correlation value grows nonlinearly with domain pack count. The more domain packs an organization runs, the more cross-domain intelligence they receive — unavailable anywhere else.",
+    body: "The Event Fabric (PRISM Bus) normalizes events from all domain sources and enables cross-domain correlation — a sanctions hit in Vessels can surface a legal risk flag in Counsel, triggering a policy escalation in Lyte, appearing as an approval request in CORTEX. Each domain pack added contributes new signal sources. Correlation value grows nonlinearly with domain pack count. The more domain packs an organization runs, the more cross-domain intelligence they receive — unavailable anywhere else.",
     evidence: ["lib/prism-bus/ — core library", "publish(), subscribe(), publishAndWait() — event operations", "Event types: domain_signal, cross_domain_correlation, workflow_triggered, approval_requested, policy_decision", "Command Portal 8-domain SSE dashboard surfaces cross-domain signals in real-time"],
     replication: "A single-domain tool cannot offer cross-domain correlation by definition. A platform competitor would need to build equivalent domain packs and accumulate equivalent signal history simultaneously.",
   },
@@ -85,7 +85,7 @@ const moats = [
     category: "Architectural",
     tagline: "An architectural model that adds governance to new domains without rebuilding the governance infrastructure.",
     body: "A domain pack is not a separate product — it is a governed extension of the shared platform. It inherits the full governance stack: Proof Chain, Covenant Policy, Outcome Graph, Monte Carlo, Workflow Engine, Event Fabric, RBAC, CORTEX mobile command, and the API server. Each domain pack added requires less governance engineering because the infrastructure is already built. The marginal cost of Domain Pack 7 is significantly lower than Domain Pack 1. Each new pack also adds signal sources and correlation opportunities for all existing packs.",
-    evidence: ["Domain pack structure: signal source → domain agent → domain UI → shared primitive inheritance", "Current packs: Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM (in dev)", "37 shared packages every domain pack inherits: @szl-holdings/shared-ui, db, auth, workflow-engine, ai-engine", "Domain pack artifacts: aegis/, vessels/, terra/, carlota-jo/"],
+    evidence: ["Domain pack structure: signal source → domain agent → domain UI → shared primitive inheritance", "Current packs: Aegis, Vessels, Terra, Counsel, Carlota Jo, IMPERIUM (in dev)", "37 shared packages every domain pack inherits: @szl-holdings/shared-ui, db, auth, workflow-engine, ai-engine", "Domain pack artifacts: aegis/, vessels/, terra/, carlota-jo/"],
     replication: "A single-domain tool cannot offer this. A multi-domain competitor would need to build the same governance infrastructure and accumulate the same domain-specific signal depth. The architecture takes years to design and validate across six domains.",
   },
   {

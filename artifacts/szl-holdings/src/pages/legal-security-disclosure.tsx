@@ -34,7 +34,7 @@ const SCOPE = [
   "Alloy execution fabric and API endpoints",
   "Authentication and authorization systems",
   "Data handling and storage infrastructure",
-  "PRISM Counsel, Vessels, Aegis, Terra, and Carlota Jo applications",
+  "Counsel, Vessels, Aegis, Terra, and Carlota Jo applications",
 ];
 
 const OUT_OF_SCOPE = [

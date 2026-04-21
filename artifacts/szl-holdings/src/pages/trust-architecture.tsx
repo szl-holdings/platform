@@ -31,7 +31,7 @@ const PIPELINE_STAGES = [
   {
     id: "recommendation",
     label: "Recommendation",
-    sublabel: "Alloy proposes action",
+    sublabel: "FORGE proposes action",
     color: "var(--color-alloy-light)",
     colorMuted: "var(--color-alloy-muted)",
     colorBorder: "var(--color-alloy-border)",

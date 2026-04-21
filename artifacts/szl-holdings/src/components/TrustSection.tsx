@@ -23,7 +23,7 @@ const credibilityBlocks = [
     label: 'Design stage',
     value: 'Design-partner',
     description:
-      'Lyte + Alloy is in active design-partner mode. Purpose-built for operators who want to co-develop the platform with direct founder access.',
+      'KORA + FORGE is in active design-partner mode. Purpose-built for operators who want to co-develop the platform with direct founder access.',
   },
 ];
 

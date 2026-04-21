@@ -152,7 +152,7 @@ const PRIORITY_SIGNALS = [
   },
   {
     id: 's2',
-    domain: 'Lyte',
+    domain: 'KORA',
     domainColor: '#f59e0b',
     title: 'API P95 Latency Breach',
     detail: '2.4s vs 2.0s target — SLA penalty risk',
@@ -161,7 +161,7 @@ const PRIORITY_SIGNALS = [
   },
   {
     id: 's3',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     domainColor: '#6366f1',
     title: 'Bundle Size Warning',
     detail: '1.34MB vs 900KB budget — MITRE module over-eager',
@@ -183,7 +183,7 @@ const AWAITING_APPROVAL = [
   },
   {
     id: 'p2',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     domainColor: '#6366f1',
     title: 'Critical CVE Patch Deploy',
     requester: 'Aegis SOC',
@@ -192,7 +192,7 @@ const AWAITING_APPROVAL = [
   },
   {
     id: 'p3',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     domainColor: '#4d7c0f',
     title: 'LP Q1 Report — CFO Sign-off',
     requester: 'Finance Lead',

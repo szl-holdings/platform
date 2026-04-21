@@ -55,7 +55,7 @@ export default function ProfileScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out of Aegis?', [
+    Alert.alert('Sign Out', 'Are you sure you want to sign out of PARAGON?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Sign Out',
@@ -110,7 +110,7 @@ export default function ProfileScreen() {
           fetchers={[
             {
               domain: 'aegis',
-              label: 'Aegis',
+              label: 'PARAGON',
               color: colors.amber,
               fetch: async () => {
                 try {
@@ -127,7 +127,7 @@ export default function ProfileScreen() {
             },
             {
               domain: 'lyte',
-              label: 'Lyte',
+              label: 'KORA',
               color: '#00d4ff',
               fetch: async () => {
                 try {
@@ -144,7 +144,7 @@ export default function ProfileScreen() {
             },
             {
               domain: 'vessels',
-              label: 'Vessels',
+              label: 'SEXTANT',
               color: '#0ea5e9',
               fetch: async () => {
                 try {
@@ -365,7 +365,7 @@ export default function ProfileScreen() {
           [
             {
               icon: 'shield-checkmark',
-              label: 'Aegis Platform',
+              label: 'PARAGON Platform',
               value: 'Connected',
               color: colors.emerald,
             },
@@ -439,7 +439,7 @@ export default function ProfileScreen() {
                 { color: colors.foreground, fontFamily: 'Inter_500Medium' },
               ]}
             >
-              Aegis Mobile v1.0
+              PARAGON Mobile v1.0
             </Text>
           </View>
           <View style={styles.aboutRow}>
@@ -475,7 +475,7 @@ export default function ProfileScreen() {
                 { color: colors.foreground, fontFamily: 'Inter_500Medium' },
               ]}
             >
-              Aegis API
+              PARAGON API
             </Text>
           </View>
         </View>

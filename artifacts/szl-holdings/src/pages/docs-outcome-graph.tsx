@@ -33,7 +33,7 @@ const GRAPH_PROPERTIES = [
   {
     icon: RefreshCw,
     name: "Cross-domain aggregation",
-    desc: "A single Outcome Graph spans all active Domain Packs within a tenant. Signals from Aegis, Vessels, Terra, and PRISM Counsel resolve into a unified graph — surfacing relationships that siloed systems cannot see.",
+    desc: "A single Outcome Graph spans all active Domain Packs within a tenant. Signals from Aegis, Vessels, Terra, and Counsel resolve into a unified graph — surfacing relationships that siloed systems cannot see.",
   },
 ];
 
@@ -49,7 +49,7 @@ const GRAPH_NODE_TYPES = [
 export default function DocsOutcomeGraphPage() {
   const __pageMeta = usePageMeta({
     title: "Outcome Graph — Docs — SZL Holdings",
-    description: "Outcome Graph documentation: the directed signal and state fabric that connects every input, inference, decision, and output in the Lyte + Alloy platform.",
+    description: "Outcome Graph documentation: the directed signal and state fabric that connects every input, inference, decision, and output in the KORA + FORGE platform.",
     canonical: "https://szlholdings.com/docs/outcome-graph",
   });
 
@@ -75,7 +75,7 @@ export default function DocsOutcomeGraphPage() {
                 Outcome Graph.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
-                The Outcome Graph is the directed signal and state fabric at the core of Lyte + Alloy.
+                The Outcome Graph is the directed signal and state fabric at the core of KORA + FORGE.
                 Every input signal, Domain Twin state transition, model inference, human decision, and
                 produced output is a node in this graph. The graph resolves causal relationships
                 deterministically — every outcome traces to a complete, auditable chain of causes.

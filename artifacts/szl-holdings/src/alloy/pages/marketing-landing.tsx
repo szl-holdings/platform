@@ -51,12 +51,12 @@ const agentRoles = [
 
 const powers = [
   {
-    name: 'Lyte',
+    name: 'KORA',
     desc: 'Decision intelligence and command. Alloy drives signal ingestion, anomaly classification, and workflow routing.',
     accent: '#f59e0b',
   },
   {
-    name: 'Vessels',
+    name: 'SEXTANT',
     desc: 'Maritime intelligence. Alloy processes voyage data, fleet exceptions, and regulatory signals into command-ready output.',
     accent: '#3b82f6',
   },
@@ -1272,7 +1272,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 >
                   <Zap size={12} style={{ color: '#4B8BDB' }} />
                 </div>
-                <span style={{ fontWeight: 700, fontSize: '14px', color: '#e2e8f0' }}>Alloy</span>
+                <span style={{ fontWeight: 700, fontSize: '14px', color: '#e2e8f0' }}>FORGE</span>
               </div>
               <p style={{ fontSize: '12px', color: '#334155', lineHeight: 1.65 }}>
                 Intelligence orchestration engine by SZL Holdings. Signal acquisition, reasoning,
@@ -1368,7 +1368,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 Ecosystem
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {['SZL Holdings', 'Terra', 'Lyte', 'Vessels', 'Aegis'].map((l) => (
+                {['SZL Holdings', 'DOMAINE', 'KORA', 'SEXTANT', 'PARAGON'].map((l) => (
                   <span
                     key={l}
                     style={{

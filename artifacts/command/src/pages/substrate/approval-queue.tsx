@@ -26,11 +26,11 @@ const RISK_COLORS: Record<RiskLevel, string> = {
 
 const VERTICAL_LABELS: Record<Vertical, string> = {
   firestorm: 'Firestorm',
-  vessels: 'Vessels',
-  terra: 'Terra',
-  lyte: 'Lyte',
-  prism: 'PRISM',
-  alloy: 'Alloy',
+  vessels: 'SEXTANT',
+  terra: 'DOMAINE',
+  lyte: 'KORA',
+  prism: 'PRAXIS',
+  alloy: 'FORGE',
   'carlota-jo': 'Carlota Jo',
 };
 

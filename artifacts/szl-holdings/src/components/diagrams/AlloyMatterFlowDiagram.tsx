@@ -22,7 +22,7 @@ const FLOW_NODES = [
     nodes: [
       'Matter Twin construction',
       'Worldline features',
-      'Alloy AI extraction',
+      'FORGE AI extraction',
       'External feeds merge',
     ],
   },

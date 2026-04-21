@@ -317,7 +317,7 @@ export default function OwnerCargoGraphPage() {
         <div className="grid grid-cols-7 gap-3 mb-5">
           {[
             { label: 'Total Nodes', value: data.stats.totalNodes, color: ACCENT },
-            { label: 'Vessels', value: data.stats.byType.vessel ?? 0, color: '#38bdf8' },
+            { label: 'SEXTANT', value: data.stats.byType.vessel ?? 0, color: '#38bdf8' },
             { label: 'Cargo Types', value: data.stats.uniqueCargoTypes ?? 0, color: '#fb923c' },
             {
               label: 'Hazardous Cargo',

@@ -38,7 +38,7 @@ const VENTURES: Record<
 > = {
   aegis: {
     id: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     subtitle: 'Defense & Intelligence Command',
     accentColor: '#6366f1',
     status: 'live',
@@ -65,7 +65,7 @@ const VENTURES: Record<
   },
   vessels: {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     subtitle: 'Maritime Intelligence',
     accentColor: '#3b82f6',
     status: 'live',
@@ -92,7 +92,7 @@ const VENTURES: Record<
   },
   terra: {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     subtitle: 'Real Estate Intelligence',
     accentColor: '#4d7c0f',
     status: 'live',
@@ -119,7 +119,7 @@ const VENTURES: Record<
   },
   lyte: {
     id: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     subtitle: 'Business Observability',
     accentColor: '#f59e0b',
     status: 'live',
@@ -146,7 +146,7 @@ const VENTURES: Record<
   },
   alloy: {
     id: 'alloy',
-    name: 'Alloy',
+    name: 'FORGE',
     subtitle: 'Execution Fabric',
     accentColor: '#8b5cf6',
     status: 'live',

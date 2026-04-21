@@ -33,7 +33,7 @@ const lpInvestors = [
     tier: 'Major LP',
   },
   {
-    name: 'Atlas Endowment Fund',
+    name: 'Crestview Endowment Fund',
     commitment: '$25M',
     deployed: '$19M',
     distributions: '$5.1M',

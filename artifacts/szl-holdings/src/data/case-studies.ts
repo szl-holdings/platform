@@ -3,7 +3,7 @@ import type { CaseStudy } from '@/components/CaseStudyCard';
 export const caseStudies: CaseStudy[] = [
   {
     id: 'lyte-approval-latency',
-    product: 'Lyte',
+    product: 'KORA',
     productAccent: '#f59e0b',
     category: 'Observability & Orchestration',
     title: 'Approval Latency Detected 8 Days Before the Weekly Review Would Have',
@@ -45,7 +45,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'vessels-dark-vessel-detection',
-    product: 'Vessels',
+    product: 'SEXTANT',
     productAccent: '#3b82f6',
     category: 'Maritime Intelligence',
     title: '34-Day Pre-Designation Lead on AIS-Dark Vessel Activity',
@@ -88,7 +88,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'alloy-workflow-output',
-    product: 'Alloy',
+    product: 'FORGE',
     productAccent: '#4B8BDB',
     category: 'Workflow Orchestration',
     title: '3.4× Decision Velocity Across a Multi-Entity Operating Structure',
@@ -132,7 +132,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'terra-listing-inquiry',
-    product: 'Terra',
+    product: 'DOMAINE',
     productAccent: '#22c55e',
     category: 'Real Estate Intelligence',
     title: 'High-Intent Acquisition Lead Identified Before Manual Review Would Have',
@@ -175,7 +175,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'aegis-ransomware-containment',
-    product: 'Aegis',
+    product: 'PARAGON',
     productAccent: '#6366f1',
     category: 'Threat Detection & Response',
     title: 'Ransomware Lateral Movement Contained in 9 Minutes — Before File Encryption Began',
@@ -219,7 +219,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'lyte-security-incident-response',
-    product: 'Lyte',
+    product: 'KORA',
     productAccent: '#f59e0b',
     category: 'Observability & Orchestration',
     title: 'Security Incident Response Time Cut from 6 Hours to 22 Minutes',
@@ -264,7 +264,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'vessels-maritime-compliance-exception',
-    product: 'Vessels',
+    product: 'SEXTANT',
     productAccent: '#3b82f6',
     category: 'Maritime Intelligence',
     title: 'Port State Control Deficiency Risk Identified 11 Days Before Scheduled Inspection',
@@ -308,7 +308,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'terra-distress-detection',
-    product: 'Terra',
+    product: 'DOMAINE',
     productAccent: '#22c55e',
     category: 'Real Estate Intelligence',
     title: 'Distressed Asset Identified 19 Days Before Public Foreclosure Filing',

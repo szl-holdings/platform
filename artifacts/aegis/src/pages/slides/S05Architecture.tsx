@@ -86,10 +86,10 @@ export default function S05Architecture() {
             </div>
             <div style={{ flex: 1, display: 'flex', gap: '1.5vw', flexWrap: 'wrap' }}>
               {[
-                'Aegis — Security',
-                'Vessels — Maritime',
-                'Terra — Real Estate',
-                'PRISM — Legal',
+                'PARAGON — Security',
+                'SEXTANT — Maritime',
+                'DOMAINE — Real Estate',
+                'Counsel — Legal',
                 'Carlota Jo — Advisory',
                 'IMPERIUM — Cloud',
               ].map((d) => (
@@ -153,12 +153,12 @@ export default function S05Architecture() {
             </div>
             <div style={{ flex: 1, display: 'flex', gap: '1.5vw', flexWrap: 'wrap' }}>
               {[
-                'Alloy Runtime',
+                'FORGE Runtime',
                 'Outcome Graph',
                 'Proof Chain',
                 'Covenant Policy',
                 'Simulation Engine',
-                'PRISM Bus',
+                'PRAXIS Bus',
               ].map((d) => (
                 <span
                   key={d}
@@ -219,7 +219,7 @@ export default function S05Architecture() {
               </div>
             </div>
             <div style={{ flex: 1, display: 'flex', gap: '1.5vw', flexWrap: 'wrap' }}>
-              {['Lyte Command Center', 'CORTEX Mobile', 'Command Portal'].map((d) => (
+              {['KORA Command Center', 'APEX Mobile', 'Command Portal'].map((d) => (
                 <span
                   key={d}
                   style={{

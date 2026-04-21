@@ -161,7 +161,7 @@ export const ALLOY_USE_CASES: UseCase[] = [
       'data retrieval tasks',
     ],
     alloyRole:
-      'Alloy acts as an intelligent internal concierge: receiving requests, retrieving and synthesising information, generating structured responses, and routing complex requests to the appropriate specialist workflow.',
+      'FORGE acts as an intelligent internal concierge: receiving requests, retrieving and synthesising information, generating structured responses, and routing complex requests to the appropriate specialist workflow.',
     outputs: ['Structured responses', 'Research summaries', 'Status briefs', 'Task confirmations'],
     businessImpact:
       'Reduced manual research overhead, faster response to internal requests, consistent quality',

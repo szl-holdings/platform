@@ -383,7 +383,7 @@ function SectionCard({ section, onFileDissent }: { section: BriefingSection; onF
               >
                 Sources
               </span>
-              {['Sentra', 'Vessels', 'Terra', 'Lyte']
+              {['TENAX', 'SEXTANT', 'DOMAINE', 'KORA']
                 .slice(0, 2 + (section.agentId.charCodeAt(0) % 3))
                 .map((src) => (
                   <span
@@ -954,7 +954,7 @@ export default function TodaysBrief() {
               dateStyle: 'medium',
               timeStyle: 'short',
             })}{' '}
-            UTC · <strong style={{ color: 'var(--pulse-text-dim)' }}>Alloy</strong> Multi-Agent
+            UTC · <strong style={{ color: 'var(--pulse-text-dim)' }}>FORGE</strong> Multi-Agent
             Synthesis
           </div>
           <a

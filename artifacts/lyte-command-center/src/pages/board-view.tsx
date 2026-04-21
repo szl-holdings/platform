@@ -219,7 +219,7 @@ export default function BoardViewPage() {
           <p>
             The primary risk driver is{' '}
             <span className="text-amber-300 font-semibold">cross-functional ownership gaps</span> —
-            work where multiple parties are named but none are acting. Alloy has detected 3 circular
+            work where multiple parties are named but none are acting. FORGE has detected 3 circular
             dependency patterns in the last 14 days. The Customer Success escalation management
             workflow carries the{' '}
             <span className="text-amber-300 font-semibold">

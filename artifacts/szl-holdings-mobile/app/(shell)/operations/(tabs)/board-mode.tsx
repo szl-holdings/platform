@@ -40,7 +40,7 @@ const DECISIONS: BoardItem[] = [
     urgency: 'Immediate',
     impact: '$2.1M',
     owner: 'Finance VP',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     detail:
       'Three vessels awaiting fuel surcharge approval. SLA breach window is 4 hours. Finance VP sign-off required — calendar conflict must be escalated to CFO.',
@@ -79,7 +79,7 @@ const RISKS: BoardItem[] = [
     urgency: 'Critical',
     impact: '$2.1M',
     owner: 'Fleet Ops',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     detail:
       'M/V Meridian, Pacific Star, and Coral Wind operating outside SLA windows. Penalty clauses activate at 26h mark.',
@@ -103,7 +103,7 @@ const RISKS: BoardItem[] = [
     urgency: 'High',
     impact: '$320K',
     owner: 'Legal',
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     detail:
       'Missing exhibit B. Tenant can void renewal in 3 days. Property manager unresponsive for 48h.',
@@ -118,7 +118,7 @@ const ASKS: BoardItem[] = [
     urgency: 'Now',
     impact: '$2.1M at stake',
     owner: 'CFO',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     detail:
       'Finance VP is in calendar conflict. Who is the designated backup approver for fleet surcharge decisions? Answer needed in 2h.',
@@ -142,7 +142,7 @@ const ASKS: BoardItem[] = [
     urgency: 'This week',
     impact: '$320K',
     owner: 'Carlota Jo Account',
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     detail:
       'Authorization needed to escalate directly to property management firm director and, if needed, engage legal.',

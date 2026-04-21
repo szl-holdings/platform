@@ -37,7 +37,7 @@ interface FusionSignalSeed {
 const FUSION_SIGNALS_SEED: FusionSignalSeed[] = [
   {
     id: 'sf1',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     severity: 'critical',
     title: 'KEV CVE-2025-1337 active exploitation — 3 internal hosts confirmed',
     sourceType: 'threat_intelligence',
@@ -54,7 +54,7 @@ const FUSION_SIGNALS_SEED: FusionSignalSeed[] = [
   },
   {
     id: 'sf2',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     severity: 'high',
     title: 'MV Adriatic Star — AIS dark gap 6h20m, last fix Strait of Messina',
     sourceType: 'ais_telemetry',
@@ -71,7 +71,7 @@ const FUSION_SIGNALS_SEED: FusionSignalSeed[] = [
   },
   {
     id: 'sf3',
-    domain: 'PRISM Counsel',
+    domain: 'Counsel',
     severity: 'high',
     title: 'Motion HC-2025-0487 — deadline T-38h, no filing draft, no owner',
     sourceType: 'deadline_monitor',
@@ -82,7 +82,7 @@ const FUSION_SIGNALS_SEED: FusionSignalSeed[] = [
   },
   {
     id: 'sf4',
-    domain: 'Alloy',
+    domain: 'FORGE',
     severity: 'high',
     title: 'Approval queue depth 14 workflows — 6 exceed 72h threshold',
     sourceType: 'workflow_monitor',
@@ -95,7 +95,7 @@ const FUSION_SIGNALS_SEED: FusionSignalSeed[] = [
   },
   {
     id: 'sf5',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     severity: 'medium',
     title: 'NYC portfolio distress threshold — 12 properties, $340M exposure',
     sourceType: 'market_intelligence',
@@ -162,12 +162,12 @@ const CORRELATION_PAIRS = [
 
 // Map known signal source values (from lyte_signals.source) to fusion domains.
 const SOURCE_TO_DOMAIN: Record<string, string> = {
-  aegis: 'Aegis',
-  vessels: 'Vessels',
-  terra: 'Terra',
-  prism: 'PRISM Counsel',
-  'prism-counsel': 'PRISM Counsel',
-  alloy: 'Alloy',
+  aegis: 'PARAGON',
+  vessels: 'SEXTANT',
+  terra: 'DOMAINE',
+  prism: 'Counsel',
+  'prism-counsel': 'Counsel',
+  alloy: 'FORGE',
   carlota: 'Carlota Jo',
   'carlota-jo': 'Carlota Jo',
   imperium: 'IMPERIUM',
@@ -251,7 +251,7 @@ interface DomainHealthSeed {
 
 const DOMAIN_HEALTH_SEED: DomainHealthSeed[] = [
   {
-    domain: 'Aegis',
+    domain: 'PARAGON',
     color: 'hsl(222,60%,60%)',
     iconKey: 'Shield',
     policyCount: 24,
@@ -266,7 +266,7 @@ const DOMAIN_HEALTH_SEED: DomainHealthSeed[] = [
     lastReviewed: '2d ago',
   },
   {
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     color: 'hsl(206,72%,54%)',
     iconKey: 'Ship',
     policyCount: 18,
@@ -281,7 +281,7 @@ const DOMAIN_HEALTH_SEED: DomainHealthSeed[] = [
     lastReviewed: '5d ago',
   },
   {
-    domain: 'Terra',
+    domain: 'DOMAINE',
     color: 'hsl(142,52%,48%)',
     iconKey: 'Building2',
     policyCount: 14,
@@ -296,7 +296,7 @@ const DOMAIN_HEALTH_SEED: DomainHealthSeed[] = [
     lastReviewed: '7d ago',
   },
   {
-    domain: 'PRISM Counsel',
+    domain: 'Counsel',
     color: 'hsl(260,60%,65%)',
     iconKey: 'Briefcase',
     policyCount: 21,
@@ -346,7 +346,7 @@ const APPROVAL_QUEUE_SEED = [
   {
     id: 'a1',
     title: 'KEV response — isolation approval',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     priority: 'critical',
     requestedBy: 'SOC Analyst',
     age: '4h',
@@ -356,7 +356,7 @@ const APPROVAL_QUEUE_SEED = [
   {
     id: 'a2',
     title: 'LP notification — NYC distressed portfolio',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     priority: 'high',
     requestedBy: 'Investment Lead',
     age: '18h',
@@ -366,7 +366,7 @@ const APPROVAL_QUEUE_SEED = [
   {
     id: 'a3',
     title: 'MV Adriatic Star — OFAC filing decision',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     priority: 'high',
     requestedBy: 'Compliance Officer',
     age: '11h',
@@ -376,7 +376,7 @@ const APPROVAL_QUEUE_SEED = [
   {
     id: 'a4',
     title: 'HC-2025-0487 — filing route selection',
-    domain: 'PRISM Counsel',
+    domain: 'Counsel',
     priority: 'high',
     requestedBy: 'Lead Attorney',
     age: '22h',
@@ -398,7 +398,7 @@ const APPROVAL_QUEUE_SEED = [
 const VIOLATION_LOG_SEED = [
   {
     id: 'v1',
-    domain: 'Alloy',
+    domain: 'FORGE',
     type: 'SLA breach',
     detail: 'Approval queue depth exceeded 72h threshold',
     severity: 'high',
@@ -407,7 +407,7 @@ const VIOLATION_LOG_SEED = [
   },
   {
     id: 'v2',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     type: 'Override without justification',
     detail: 'Policy gate bypassed on acquisition sign-off',
     severity: 'high',
@@ -416,7 +416,7 @@ const VIOLATION_LOG_SEED = [
   },
   {
     id: 'v3',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     type: 'Review state gap',
     detail: 'AI recommendation exported without review completion',
     severity: 'medium',
@@ -452,14 +452,14 @@ function dueInString(due: Date | null | undefined): string {
 }
 
 const CATEGORY_TO_DOMAIN: Record<string, string> = {
-  approval_latency: 'Alloy',
-  ownership_gap: 'PRISM Counsel',
-  forecast_drift: 'Terra',
-  stalled_workflow: 'Alloy',
+  approval_latency: 'FORGE',
+  ownership_gap: 'Counsel',
+  forecast_drift: 'DOMAINE',
+  stalled_workflow: 'FORGE',
   handoff_failure: 'Carlota Jo',
   status_conflict: 'IMPERIUM',
-  readiness_blocker: 'Aegis',
-  pipeline_hygiene: 'Vessels',
+  readiness_blocker: 'PARAGON',
+  pipeline_hygiene: 'SEXTANT',
 };
 
 router.get('/lyte/governance-domains', noAuth, async (_req, res) => {
@@ -559,7 +559,7 @@ router.get('/lyte/governance-domains', noAuth, async (_req, res) => {
     const liveApprovalQueue = queueRows.map((r) => ({
       id: `q${r.id}`,
       title: r.title,
-      domain: CATEGORY_TO_DOMAIN[r.signalCategory] ?? 'Alloy',
+      domain: CATEGORY_TO_DOMAIN[r.signalCategory] ?? 'FORGE',
       priority: r.priority === 'urgent' ? 'critical' : r.priority,
       requestedBy: r.owner ?? r.assignedTo ?? 'Unassigned',
       age: ageString(r.createdAt),
@@ -625,7 +625,7 @@ const SCHEMAS_SEED: DecisionSchemaSeed[] = [
     id: 'sch1',
     name: 'Cyber Incident Response',
     category: 'Security Operations',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     color: 'hsl(222,60%,60%)',
     iconKey: 'Shield',
     description:
@@ -703,7 +703,7 @@ const SCHEMAS_SEED: DecisionSchemaSeed[] = [
     id: 'sch2',
     name: 'Maritime Anomaly Investigation',
     category: 'Fleet Operations',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     color: 'hsl(206,72%,54%)',
     iconKey: 'Ship',
     description:
@@ -777,7 +777,7 @@ const SCHEMAS_SEED: DecisionSchemaSeed[] = [
     id: 'sch3',
     name: 'Distressed Asset Acquisition Review',
     category: 'Investment Operations',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     color: 'hsl(142,52%,48%)',
     iconKey: 'Building2',
     description:
@@ -847,7 +847,7 @@ const SCHEMAS_SEED: DecisionSchemaSeed[] = [
     id: 'sch4',
     name: 'Legal Deadline Response Protocol',
     category: 'Legal Operations',
-    domain: 'PRISM Counsel',
+    domain: 'Counsel',
     color: 'hsl(260,60%,65%)',
     iconKey: 'Briefcase',
     description:

@@ -238,7 +238,7 @@ export default function AegisHomePage() {
             >
               <Shield size={13} className="text-red-400" />
             </div>
-            <span className="font-bold text-[15px] tracking-tight text-white">Aegis</span>
+            <span className="font-bold text-[15px] tracking-tight text-white">PARAGON</span>
             <span className="hidden sm:inline text-[9px] tracking-[0.15em] uppercase text-white/15 font-mono ml-1">
               Defense & Intelligence
             </span>
@@ -721,7 +721,7 @@ export default function AegisHomePage() {
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2.5">
             <Shield size={12} className="text-white/15" />
-            <span className="text-[12px] font-semibold text-white/25">Aegis</span>
+            <span className="text-[12px] font-semibold text-white/25">PARAGON</span>
             <span className="text-[10px] text-white/15 font-mono">by SZL Holdings</span>
           </div>
           <p className="text-[10px] text-white/15">{copyrightLine()}</p>

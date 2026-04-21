@@ -12,7 +12,7 @@ interface EcosystemSummary {
 
 const PLATFORM_DEFS = [
   {
-    name: 'Lyte',
+    name: 'KORA',
     label: 'Operational Decision Intelligence',
     copy: 'See risk, latency, ownership gaps, and workflow friction before they hit execution.',
     cta: 'Explore Lyte',
@@ -28,7 +28,7 @@ const PLATFORM_DEFS = [
     fallbackMetrics: [{ label: 'Observability', value: 'Live' }],
   },
   {
-    name: 'Vessels',
+    name: 'SEXTANT',
     label: 'Maritime Intelligence Platform',
     copy: 'Turn fleet visibility, voyage performance, and operational exceptions into command.',
     cta: 'Explore Vessels',
@@ -48,7 +48,7 @@ const PLATFORM_DEFS = [
     ],
   },
   {
-    name: 'Aegis',
+    name: 'PARAGON',
     label: 'Unified Defense & Intelligence Command',
     copy: 'Security operations, managed services, and AI intelligence in one unified platform. SOC command, XDR, MSP ops, and agentic cortex.',
     cta: 'Enter Aegis',
@@ -68,7 +68,7 @@ const PLATFORM_DEFS = [
     ],
   },
   {
-    name: 'Terra',
+    name: 'DOMAINE',
     label: 'Real Estate Intelligence Platform',
     copy: 'Distress property tracking, deal pipeline management, ownership intelligence, and NYC market data for serious operators.',
     cta: 'Explore Terra',

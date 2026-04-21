@@ -37,7 +37,7 @@ router.post(
       return;
     }
     const { name, email, company, fleetSize, message, product } = parsed.data;
-    const subject = `Demo request — ${product ?? 'Vessels'} — ${company}`;
+    const subject = `Demo request — ${product ?? 'SEXTANT'} — ${company}`;
 
     try {
       const [row] = await db
@@ -60,19 +60,19 @@ router.post(
         try {
           await sendEmail({
             to: email.trim(),
-            subject: `We received your demo request — ${product === 'vessels' ? 'Vessels' : 'SZL Holdings'}`,
+            subject: `We received your demo request — ${product === 'vessels' ? 'SEXTANT' : 'SZL Holdings'}`,
             html: buildInquiryAckEmail(name.trim(), subject),
           });
           await sendEmail({
             to: INTERNAL_EMAIL,
-            subject: `New Demo Request: ${company.trim()} (${product ?? 'Vessels'}) — ${name.trim()}`,
+            subject: `New Demo Request: ${company.trim()} (${product ?? 'SEXTANT'}) — ${name.trim()}`,
             html: buildLeadNotificationEmail({
               name: name.trim(),
               email: email.trim(),
               company: company.trim(),
               subject,
               message: [
-                `Product: ${product ?? 'Vessels'}`,
+                `Product: ${product ?? 'SEXTANT'}`,
                 fleetSize ? `Fleet size: ${fleetSize}` : null,
                 message ? `Context: ${message}` : null,
               ]

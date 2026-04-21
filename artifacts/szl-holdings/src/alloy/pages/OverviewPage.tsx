@@ -54,19 +54,19 @@ const WHAT_ALLOY_IS = [
 
 const WHAT_ALLOY_POWERS = [
   {
-    platform: 'Lyte',
+    platform: 'KORA',
     accent: '#06b6d4',
     desc: 'Decision intelligence — signals classified, incidents triaged, and operators alerted with context, not noise.',
     href: '/command/operations/',
   },
   {
-    platform: 'Vessels',
+    platform: 'SEXTANT',
     accent: '#3b82f6',
     desc: 'Maritime intelligence — AIS signal interpretation, deviation detection, and fleet briefings for operations teams.',
     href: '/vessels/',
   },
   {
-    platform: 'Terra',
+    platform: 'DOMAINE',
     accent: '#a07848',
     desc: 'Real estate broker platform — deal conversion, lead routing, and distress property workflows for active pipelines.',
     href: '/terra/',

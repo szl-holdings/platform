@@ -401,8 +401,8 @@ export default function ExecutiveOverview() {
           {[
             { label: 'DETECT', desc: 'Lyte saw it', color: '#0ea5e9', active: true },
             { label: 'INTERPRET', desc: 'Lyte routed it', color: '#f59e0b', active: true },
-            { label: 'DECIDE', desc: 'Alloy modeled it', color: '#8b5cf6', active: true },
-            { label: 'EXECUTE', desc: 'Alloy ran it', color: '#4B8BDB', active: true },
+            { label: 'DECIDE', desc: 'FORGE modeled it', color: '#8b5cf6', active: true },
+            { label: 'EXECUTE', desc: 'FORGE ran it', color: '#4B8BDB', active: true },
             { label: 'VERIFY', desc: 'Lyte confirms', color: '#10b981', active: false },
           ].map((p) => (
             <div

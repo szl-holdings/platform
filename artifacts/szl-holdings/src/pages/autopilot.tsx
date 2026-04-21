@@ -34,12 +34,12 @@ type PlaybookStatus = "not-started" | "in-progress" | "complete";
 // ─── Static Data ─────────────────────────────────────────────────────────────
 
 const APPS = [
-  { id: "aegis", name: "Aegis", icon: Shield, accent: "#6366f1" },
-  { id: "terra", name: "Terra", icon: Building, accent: "#4d7c0f" },
-  { id: "vessels", name: "Vessels", icon: Ship, accent: "#3b82f6" },
-  { id: "lyte", name: "Lyte", icon: Zap, accent: "#f59e0b" },
+  { id: "aegis", name: "PARAGON", icon: Shield, accent: "#6366f1" },
+  { id: "terra", name: "DOMAINE", icon: Building, accent: "#4d7c0f" },
+  { id: "vessels", name: "SEXTANT", icon: Ship, accent: "#3b82f6" },
+  { id: "lyte", name: "KORA", icon: Zap, accent: "#f59e0b" },
   { id: "carlota", name: "Carlota Jo", icon: Globe, accent: "#c2a55a" },
-  { id: "prism", name: "PRISM", icon: Brain, accent: "#a855f7" },
+  { id: "prism", name: "PRAXIS", icon: Brain, accent: "#a855f7" },
 ];
 
 const CAPABILITY_CATEGORIES = [
@@ -69,58 +69,58 @@ const MATURITY_META: Record<MaturityLevel, { label: string; color: string; bg: s
 
 const DRIFT_ALERTS = [
   { id: "d1", severity: "critical" as DriftSeverity, app: "Carlota Jo", metric: "Data Freshness", detail: "Real-time feed last updated 3h 42m ago — exceeds 1hr threshold.", recommendation: "Reconnect the CRM sync pipeline and add a freshness watchdog to alert at >30m stale.", timestamp: "4 min ago" },
-  { id: "d2", severity: "warning" as DriftSeverity, app: "Terra", metric: "API Latency", detail: "/api/terra/distress-engine P95 at 2.4s — 20% above 2s threshold.", recommendation: "Add a DB index on distress_score + borough. Current query does a full table scan.", timestamp: "11 min ago" },
-  { id: "d3", severity: "warning" as DriftSeverity, app: "PRISM", metric: "Webhooks", detail: "Webhooks capability rated Stub — no production delivery confirmed in 7 days.", recommendation: "Implement PRISM outbound webhook dispatch using the existing webhook-engine lib.", timestamp: "2 hr ago" },
-  { id: "d4", severity: "info" as DriftSeverity, app: "Aegis", metric: "Bundle Size", detail: "Main bundle grew 8.3% this week (1.24MB → 1.34MB). Approaching 10% threshold.", recommendation: "Code-split the MITRE ATT&CK matrix — it's 280KB and loaded eagerly on all routes.", timestamp: "6 hr ago" },
+  { id: "d2", severity: "warning" as DriftSeverity, app: "DOMAINE", metric: "API Latency", detail: "/api/terra/distress-engine P95 at 2.4s — 20% above 2s threshold.", recommendation: "Add a DB index on distress_score + borough. Current query does a full table scan.", timestamp: "11 min ago" },
+  { id: "d3", severity: "warning" as DriftSeverity, app: "PRAXIS", metric: "Webhooks", detail: "Webhooks capability rated Stub — no production delivery confirmed in 7 days.", recommendation: "Implement PRISM outbound webhook dispatch using the existing webhook-engine lib.", timestamp: "2 hr ago" },
+  { id: "d4", severity: "info" as DriftSeverity, app: "PARAGON", metric: "Bundle Size", detail: "Main bundle grew 8.3% this week (1.24MB → 1.34MB). Approaching 10% threshold.", recommendation: "Code-split the MITRE ATT&CK matrix — it's 280KB and loaded eagerly on all routes.", timestamp: "6 hr ago" },
   { id: "d5", severity: "info" as DriftSeverity, app: "Carlota Jo", metric: "Webhooks", detail: "Webhooks capability listed as Missing — no implementation found.", recommendation: "Use the shared webhook-engine to add outbound hooks for client milestone events.", timestamp: "1 day ago" },
 ];
 
 const FEATURE_USAGE = [
-  { app: "Lyte", feature: "AI Signal Summarizer", uses: 1420, trend: "rising" as FeatureTrend, delta: "+34%" },
-  { app: "Aegis", feature: "Threat Feed Dashboard", uses: 980, trend: "rising" as FeatureTrend, delta: "+18%" },
-  { app: "Vessels", feature: "Voyage Economics", uses: 762, trend: "stable" as FeatureTrend, delta: "+2%" },
-  { app: "Terra", feature: "Distress Engine", uses: 640, trend: "rising" as FeatureTrend, delta: "+21%" },
-  { app: "Lyte", feature: "APM Trace Explorer", uses: 430, trend: "stable" as FeatureTrend, delta: "-1%" },
-  { app: "Aegis", feature: "MITRE ATT&CK Map", uses: 290, trend: "declining" as FeatureTrend, delta: "-14%" },
-  { app: "PRISM", feature: "Matter Timeline", uses: 210, trend: "stable" as FeatureTrend, delta: "+5%" },
-  { app: "Terra", feature: "Ownership Graph", uses: 180, trend: "declining" as FeatureTrend, delta: "-22%" },
+  { app: "KORA", feature: "AI Signal Summarizer", uses: 1420, trend: "rising" as FeatureTrend, delta: "+34%" },
+  { app: "PARAGON", feature: "Threat Feed Dashboard", uses: 980, trend: "rising" as FeatureTrend, delta: "+18%" },
+  { app: "SEXTANT", feature: "Voyage Economics", uses: 762, trend: "stable" as FeatureTrend, delta: "+2%" },
+  { app: "DOMAINE", feature: "Distress Engine", uses: 640, trend: "rising" as FeatureTrend, delta: "+21%" },
+  { app: "KORA", feature: "APM Trace Explorer", uses: 430, trend: "stable" as FeatureTrend, delta: "-1%" },
+  { app: "PARAGON", feature: "MITRE ATT&CK Map", uses: 290, trend: "declining" as FeatureTrend, delta: "-14%" },
+  { app: "PRAXIS", feature: "Matter Timeline", uses: 210, trend: "stable" as FeatureTrend, delta: "+5%" },
+  { app: "DOMAINE", feature: "Ownership Graph", uses: 180, trend: "declining" as FeatureTrend, delta: "-22%" },
   { app: "Carlota Jo", feature: "Estate Report PDF", uses: 94, trend: "stable" as FeatureTrend, delta: "+3%" },
-  { app: "Aegis", feature: "Adversary Emulation Wizard", uses: 28, trend: "dead" as FeatureTrend, delta: "-61%" },
-  { app: "Lyte", feature: "SCIM Provisioning UI", uses: 12, trend: "dead" as FeatureTrend, delta: "-40%" },
-  { app: "Vessels", feature: "Charter Rate Benchmarks", uses: 8, trend: "dead" as FeatureTrend, delta: "-73%" },
+  { app: "PARAGON", feature: "Adversary Emulation Wizard", uses: 28, trend: "dead" as FeatureTrend, delta: "-61%" },
+  { app: "KORA", feature: "SCIM Provisioning UI", uses: 12, trend: "dead" as FeatureTrend, delta: "-40%" },
+  { app: "SEXTANT", feature: "Charter Rate Benchmarks", uses: 8, trend: "dead" as FeatureTrend, delta: "-73%" },
 ];
 
 const FEEDBACK_SIGNALS = [
-  { app: "Lyte", feature: "AI Signal Summarizer", thumbsUp: 142, thumbsDown: 9, topComment: "Saves me 20 minutes every morning. Keep it." },
-  { app: "Vessels", feature: "Voyage Economics", thumbsUp: 89, thumbsDown: 4, topComment: "The fuel cost estimator is accurate now." },
-  { app: "Terra", feature: "Distress Engine", thumbsUp: 76, thumbsDown: 12, topComment: "Would love filtering by borough on the map." },
-  { app: "Aegis", feature: "Threat Feed Dashboard", thumbsUp: 61, thumbsDown: 3, topComment: "Clean. The priority scoring is spot on." },
-  { app: "PRISM", feature: "Matter Timeline", thumbsUp: 44, thumbsDown: 7, topComment: "Timeline needs event grouping by date." },
+  { app: "KORA", feature: "AI Signal Summarizer", thumbsUp: 142, thumbsDown: 9, topComment: "Saves me 20 minutes every morning. Keep it." },
+  { app: "SEXTANT", feature: "Voyage Economics", thumbsUp: 89, thumbsDown: 4, topComment: "The fuel cost estimator is accurate now." },
+  { app: "DOMAINE", feature: "Distress Engine", thumbsUp: 76, thumbsDown: 12, topComment: "Would love filtering by borough on the map." },
+  { app: "PARAGON", feature: "Threat Feed Dashboard", thumbsUp: 61, thumbsDown: 3, topComment: "Clean. The priority scoring is spot on." },
+  { app: "PRAXIS", feature: "Matter Timeline", thumbsUp: 44, thumbsDown: 7, topComment: "Timeline needs event grouping by date." },
   { app: "Carlota Jo", feature: "Estate Report PDF", thumbsUp: 38, thumbsDown: 2, topComment: "Client loved the layout. Very professional." },
-  { app: "Aegis", feature: "Adversary Emulation Wizard", thumbsUp: 6, thumbsDown: 18, topComment: "Confusing UX — 3 steps to get to the actual config." },
+  { app: "PARAGON", feature: "Adversary Emulation Wizard", thumbsUp: 6, thumbsDown: 18, topComment: "Confusing UX — 3 steps to get to the actual config." },
 ];
 
 const PERF_BUDGETS = [
-  { app: "Lyte", bundleBudgetKB: 800, bundleActualKB: 734, latencyBudgetMs: 1500, latencyActualMs: 820, ttiMs: 1100 },
-  { app: "Aegis", bundleBudgetKB: 900, bundleActualKB: 1340, latencyBudgetMs: 2000, latencyActualMs: 1740, ttiMs: 1800 },
-  { app: "Vessels", bundleBudgetKB: 700, bundleActualKB: 610, latencyBudgetMs: 1800, latencyActualMs: 1020, ttiMs: 1300 },
-  { app: "Terra", bundleBudgetKB: 850, bundleActualKB: 790, latencyBudgetMs: 2000, latencyActualMs: 2420, ttiMs: 2600 },
-  { app: "PRISM", bundleBudgetKB: 650, bundleActualKB: 490, latencyBudgetMs: 1500, latencyActualMs: 1100, ttiMs: 1400 },
+  { app: "KORA", bundleBudgetKB: 800, bundleActualKB: 734, latencyBudgetMs: 1500, latencyActualMs: 820, ttiMs: 1100 },
+  { app: "PARAGON", bundleBudgetKB: 900, bundleActualKB: 1340, latencyBudgetMs: 2000, latencyActualMs: 1740, ttiMs: 1800 },
+  { app: "SEXTANT", bundleBudgetKB: 700, bundleActualKB: 610, latencyBudgetMs: 1800, latencyActualMs: 1020, ttiMs: 1300 },
+  { app: "DOMAINE", bundleBudgetKB: 850, bundleActualKB: 790, latencyBudgetMs: 2000, latencyActualMs: 2420, ttiMs: 2600 },
+  { app: "PRAXIS", bundleBudgetKB: 650, bundleActualKB: 490, latencyBudgetMs: 1500, latencyActualMs: 1100, ttiMs: 1400 },
   { app: "Carlota Jo", bundleBudgetKB: 500, bundleActualKB: 380, latencyBudgetMs: 1200, latencyActualMs: 940, ttiMs: 1100 },
 ];
 
 const PLAYBOOKS = [
   { id: "p1", domain: "Carlota Jo", name: "Client Onboarding", steps: 8, completionRate: 84, avgDurationMin: 22, status: "complete" as PlaybookStatus, lastRun: "2 days ago", bottleneck: "Step 4: Contract sign-off (avg 6 min)" },
-  { id: "p2", domain: "Aegis", name: "Incident Response", steps: 12, completionRate: 91, avgDurationMin: 41, status: "complete" as PlaybookStatus, lastRun: "14 hr ago", bottleneck: "Step 7: Escalation approval (avg 11 min)" },
-  { id: "p3", domain: "Vessels", name: "Vessel Inspection", steps: 6, completionRate: 77, avgDurationMin: 18, status: "in-progress" as PlaybookStatus, lastRun: "4 hr ago", bottleneck: "Step 5: Photo upload (avg 4 min)" },
-  { id: "p4", domain: "Terra", name: "Property Due Diligence", steps: 10, completionRate: 68, avgDurationMin: 55, status: "in-progress" as PlaybookStatus, lastRun: "1 day ago", bottleneck: "Step 6: Ownership verification (avg 18 min)" },
-  { id: "p5", domain: "PRISM", name: "Matter Intake", steps: 7, completionRate: 88, avgDurationMin: 14, status: "complete" as PlaybookStatus, lastRun: "6 hr ago", bottleneck: "Step 3: Conflict check (avg 3 min)" },
+  { id: "p2", domain: "PARAGON", name: "Incident Response", steps: 12, completionRate: 91, avgDurationMin: 41, status: "complete" as PlaybookStatus, lastRun: "14 hr ago", bottleneck: "Step 7: Escalation approval (avg 11 min)" },
+  { id: "p3", domain: "SEXTANT", name: "Vessel Inspection", steps: 6, completionRate: 77, avgDurationMin: 18, status: "in-progress" as PlaybookStatus, lastRun: "4 hr ago", bottleneck: "Step 5: Photo upload (avg 4 min)" },
+  { id: "p4", domain: "DOMAINE", name: "Property Due Diligence", steps: 10, completionRate: 68, avgDurationMin: 55, status: "in-progress" as PlaybookStatus, lastRun: "1 day ago", bottleneck: "Step 6: Ownership verification (avg 18 min)" },
+  { id: "p5", domain: "PRAXIS", name: "Matter Intake", steps: 7, completionRate: 88, avgDurationMin: 14, status: "complete" as PlaybookStatus, lastRun: "6 hr ago", bottleneck: "Step 3: Conflict check (avg 3 min)" },
   { id: "p6", domain: "SZL Holdings", name: "LP Quarterly Update", steps: 9, completionRate: 55, avgDurationMin: 90, status: "not-started" as PlaybookStatus, lastRun: "Never", bottleneck: "Not yet run — template ready" },
 ];
 
 const COMPETITIVE_RADAR = [
   {
-    app: "Aegis",
+    app: "PARAGON",
     accent: "#6366f1",
     competitors: ["CrowdStrike", "Palo Alto", "SentinelOne"],
     axes: ["SOC Command", "Threat Intel", "MSP Ops", "AI Integration", "API Coverage", "UX Quality"],
@@ -130,7 +130,7 @@ const COMPETITIVE_RADAR = [
     theyHave: ["Broader threat intel feeds", "MDR services", "Larger partner ecosystem"],
   },
   {
-    app: "Terra",
+    app: "DOMAINE",
     accent: "#4d7c0f",
     competitors: ["CoStar", "ATTOM", "PropStream"],
     axes: ["Distress Engine", "NYC Depth", "Deal Pipeline", "Map UX", "Data Freshness", "AI Insights"],
@@ -155,7 +155,7 @@ const NEXT_BEST_ACTIONS = [
   {
     rank: 2,
     title: "Code-split Aegis bundle (MITRE ATT&CK module)",
-    app: "Aegis",
+    app: "PARAGON",
     accent: "#6366f1",
     why: "Bundle at 1.34MB vs 900KB budget. MITRE module is 280KB loaded eagerly. User feedback on Adversary Wizard is negative — simplify UX simultaneously.",
     effort: "Medium",
@@ -165,7 +165,7 @@ const NEXT_BEST_ACTIONS = [
   {
     rank: 3,
     title: "Add Terra distress engine borough filter",
-    app: "Terra",
+    app: "DOMAINE",
     accent: "#4d7c0f",
     why: "Top user feedback request. Usage rising +21% but would accelerate with this UX improvement. Competitive gap vs CoStar on map UX.",
     effort: "Low",
@@ -185,7 +185,7 @@ const NEXT_BEST_ACTIONS = [
   {
     rank: 5,
     title: "Fix Terra API latency (distress engine index)",
-    app: "Terra",
+    app: "DOMAINE",
     accent: "#4d7c0f",
     why: "P95 at 2.4s vs 2s budget. Full table scan identified. Straightforward index fix. Unlocks perception of speed for rising user base.",
     effort: "Low",
@@ -976,12 +976,12 @@ const FORGE_CLIENTS = [
   { name: "Vessels Fleet",  app: "vessels",         nps: 61, csat: 83, responseRate: 70, trend: "up"   as const },
   { name: "Lyte AIOps",     app: "lyte",            nps: 44, csat: 72, responseRate: 55, trend: "down" as const },
   { name: "Carlota Jo",     app: "carlota",         nps: 58, csat: 81, responseRate: 68, trend: "flat" as const },
-  { name: "PRISM Counsel",  app: "prism",           nps: 77, csat: 93, responseRate: 88, trend: "up"   as const },
+  { name: "Counsel",  app: "prism",           nps: 77, csat: 93, responseRate: 88, trend: "up"   as const },
 ];
 
 const FORGE_FEEDBACK = [
   { client: "SZL Holdings",   app: "szl-holdings",   rating: 5, comment: "The genome heatmap is a game-changer. We now know exactly what to prioritize.", date: "2026-04-10" },
-  { client: "PRISM Counsel",  app: "prism",           rating: 5, comment: "AI-assisted contract review cut our turnaround from 3 days to 4 hours.",        date: "2026-04-09" },
+  { client: "Counsel",  app: "prism",           rating: 5, comment: "AI-assisted contract review cut our turnaround from 3 days to 4 hours.",        date: "2026-04-09" },
   { client: "Aegis Security", app: "aegis",           rating: 4, comment: "Threat feed integration is solid. Would love geofencing for alert routing.",      date: "2026-04-08" },
   { client: "Carlota Jo",     app: "carlota",         rating: 4, comment: "Client portal is clean but we need offline sync for field visits.",               date: "2026-04-07" },
   { client: "Vessels Fleet",  app: "vessels",         rating: 4, comment: "AIS tracking accuracy improved a lot. Dark vessel detection is impressive.",      date: "2026-04-06" },

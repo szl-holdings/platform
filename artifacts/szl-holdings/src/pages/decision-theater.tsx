@@ -22,7 +22,7 @@ const DOMAIN_ICON: Record<CaseDomain, typeof Shield> = {
   Aegis: Shield,
   Vessels: Ship,
   Terra: Building2,
-  "PRISM Counsel": Briefcase,
+  "Counsel": Briefcase,
   "Carlota Jo": Users,
 };
 

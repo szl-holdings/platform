@@ -52,7 +52,7 @@ function AccountPanel() {
   const user = data?.user;
 
   return (
-    <SettingsSectionPanel title="Account" description="Your profile on the Aegis MSP platform">
+    <SettingsSectionPanel title="Account" description="Your profile on the PARAGON MSP platform">
       <SettingsCard title="Profile">
         <SettingsRow label="Display Name">
           <p className="text-sm">{user?.name ?? '—'}</p>
@@ -272,7 +272,7 @@ function BillingPanel() {
   return (
     <SettingsSectionPanel
       title="Billing"
-      description="Subscription, plan, and usage billing for your Aegis MSP account"
+      description="Subscription, plan, and usage billing for your PARAGON MSP account"
     >
       <SettingsCard title="Current Plan">
         <SettingsRow label="Plan">
@@ -340,7 +340,7 @@ function AuditPanel() {
   return (
     <SettingsSectionPanel
       title="Settings Change History"
-      description="Audit trail of settings changes in Aegis"
+      description="Audit trail of settings changes in PARAGON"
     >
       <p className="mb-4 text-xs text-muted-foreground/70">
         Org admins and platform admins see the full team history. Other members see only their own
@@ -517,7 +517,7 @@ export default function AegisUnifiedSettings() {
             'audit',
           ]}
           accentColor={AEGIS_ACCENT}
-          appName="Aegis MSP"
+          appName="PARAGON MSP"
         >
           {panels[activeSection] ?? (
             <div className="p-6 text-sm text-muted-foreground">

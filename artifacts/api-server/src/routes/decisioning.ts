@@ -680,7 +680,7 @@ function buildFallbackSignalGroups(): Array<Record<string, unknown>> {
         {
           label: 'Contracts at Risk',
           value: '8 with milestone delivery clauses',
-          source: 'PRISM Counsel',
+          source: 'Counsel',
         },
       ],
     },

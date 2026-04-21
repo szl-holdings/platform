@@ -53,9 +53,9 @@ const COMPLIANCE = [
 
 export default function SolutionsPrismCounselTrustPage() {
   const __pageMeta = usePageMeta({
-    title: "PRISM Counsel Trust & Governance · SZL Holdings",
-    description: "How PRISM Counsel protects privileged information, governs AI actions, and maintains complete audit trails for legal matter management.",
-    canonical: "https://szlholdings.com/solutions/prism-counsel/trust",
+    title: "Counsel Trust & Governance · SZL Holdings",
+    description: "How Counsel protects privileged information, governs AI actions, and maintains complete audit trails for legal matter management.",
+    canonical: "https://szlholdings.com/counsel/trust",
   });
 
   return (
@@ -67,16 +67,16 @@ export default function SolutionsPrismCounselTrustPage() {
         <section className="max-w-5xl mx-auto px-6 pt-32 pb-16">
           <div className="flex items-center gap-2 mb-4">
             <Scale className="w-5 h-5 text-[#d4a054]" />
-            <span className="text-[11px] font-medium text-[#d4a054] uppercase tracking-widest">PRISM Counsel · Trust</span>
+            <span className="text-[11px] font-medium text-[#d4a054] uppercase tracking-widest">Counsel · Trust</span>
           </div>
           <h1 className="text-4xl font-bold text-slate-100 leading-tight mb-4">
             Governed AI for legal matter execution.
           </h1>
           <p className="text-base text-slate-400 max-w-2xl leading-relaxed mb-8">
-            PRISM Counsel handles privileged, time-sensitive, and ethically complex legal data. Every surface — from AI recommendations to export pipelines — is built with governance as a first-class constraint, not an afterthought.
+            Counsel handles privileged, time-sensitive, and ethically complex legal data. Every surface — from AI recommendations to export pipelines — is built with governance as a first-class constraint, not an afterthought.
           </p>
           <div className="flex items-center gap-3">
-            <Link href="/solutions/prism-counsel">
+            <Link href="/counsel">
               <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20 hover:bg-[#d4a054]/20 transition-colors cursor-pointer">
                 Product Overview <ArrowRight className="w-4 h-4" />
               </span>
@@ -145,11 +145,11 @@ export default function SolutionsPrismCounselTrustPage() {
             <Shield className="w-8 h-8 text-[#d4a054] mx-auto mb-4" />
             <h2 className="text-lg font-semibold text-slate-100 mb-2">Audit-ready by default</h2>
             <p className="text-sm text-slate-400 max-w-xl mx-auto mb-6">
-              Every action in PRISM Counsel generates a complete audit record — who did what, when, why, and what informed the decision. Export audit packets for compliance review at any time.
+              Every action in Counsel generates a complete audit record — who did what, when, why, and what informed the decision. Export audit packets for compliance review at any time.
             </p>
             <a href="/aegis/">
               <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20 hover:bg-[#d4a054]/20 transition-colors cursor-pointer">
-                Enter PRISM Counsel <ArrowRight className="w-4 h-4" />
+                Enter Counsel <ArrowRight className="w-4 h-4" />
               </span>
             </a>
           </div>

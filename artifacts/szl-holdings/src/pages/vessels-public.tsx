@@ -206,7 +206,7 @@ export default function VesselsPublicPage() {
                     Maritime is a domain where critical decisions — rerouting, cargo holds, regulatory filings — are still made from fragmented data, disconnected systems, and manual reconciliation. Vessels applies Alloy's operating loop to the voyage lifecycle: a domain where the cost of undetected risk compounds fast and audit trails are legally required.
                   </p>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,54%)", maxWidth: "46ch" }}>
-                    The architecture generalizes from PRISM Counsel's operating model — a structured object (Voyage Twin, parallel to Matter Twin), signal enrichment from authoritative public data sources, governed action routing through Alloy, and a compliance-ready audit footprint.
+                    The architecture generalizes from Counsel's operating model — a structured object (Voyage Twin, parallel to Matter Twin), signal enrichment from authoritative public data sources, governed action routing through Alloy, and a compliance-ready audit footprint.
                   </p>
                 </m.div>
                 <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.08 }}>
@@ -293,7 +293,7 @@ export default function VesselsPublicPage() {
                   The execution fabric comes with every lane. Vessels builds on top of it.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
-                  Vessels does not rebuild what Alloy already provides. Every capability below is inherited from the shared platform — the same infrastructure that governs PRISM Counsel, Terra, Aegis, and Carlota Jo.
+                  Vessels does not rebuild what Alloy already provides. Every capability below is inherited from the shared platform — the same infrastructure that governs Counsel, Terra, Aegis, and Carlota Jo.
                 </p>
               </m.div>
               <div style={{ display: "grid", gap: "1rem", marginBottom: "2.5rem" }} className="lg:grid-cols-3 md:grid-cols-2">

@@ -691,7 +691,7 @@ function App() {
               <Suspense fallback={<PageLoader />}><CarlotaJoPublicPage /></Suspense>
             </Route>
 
-            {/* ── PRISM Counsel — merged into Aegis Legal workspace ── */}
+            {/* ── Counsel — merged into Aegis Legal workspace ── */}
             <Route path="/prism-counsel/:rest*">
               {() => { window.location.href = "/aegis/legal"; return null; }}
             </Route>

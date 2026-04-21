@@ -13,12 +13,12 @@ const METRICS = [
 ];
 
 const PORTFOLIO = [
-  { name: "Lyte", domain: "Business Observability", color: "#d4a054" },
-  { name: "Vessels", domain: "Maritime Intelligence", color: "#22d3ee" },
-  { name: "Aegis", domain: "Defense & Intelligence", color: "#ef4444" },
-  { name: "Terra", domain: "Real Estate Intelligence", color: "#4ade80" },
+  { name: "KORA", domain: "Business Observability", color: "#d4a054" },
+  { name: "SEXTANT", domain: "Maritime Intelligence", color: "#22d3ee" },
+  { name: "PARAGON", domain: "Defense & Intelligence", color: "#ef4444" },
+  { name: "DOMAINE", domain: "Real Estate Intelligence", color: "#4ade80" },
   { name: "Carlota Jo", domain: "Private Advisory", color: "#c4a265" },
-  { name: "Alloy", domain: "Execution Engine", color: "#8b5cf6" },
+  { name: "FORGE", domain: "Execution Engine", color: "#8b5cf6" },
 ];
 
 const CURRENT_FOCUS = [

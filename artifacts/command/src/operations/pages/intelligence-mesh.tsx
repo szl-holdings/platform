@@ -28,7 +28,7 @@ const NODES = [
   },
   {
     id: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     role: 'Spinal Cord',
     agent: 'Intelligence Hub',
     color: 'text-[#d4a054]',
@@ -40,7 +40,7 @@ const NODES = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     role: 'Maritime Organ',
     agent: 'Maritime Analyst',
     color: 'text-cyan-400',
@@ -64,7 +64,7 @@ const NODES = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     role: 'Real Estate Intelligence Organ',
     agent: 'Deal Scout',
     color: 'text-[#6b8f71]',
@@ -76,7 +76,7 @@ const NODES = [
   },
   {
     id: 'alloy',
-    name: 'Alloy',
+    name: 'FORGE',
     role: 'Orchestration Engine',
     agent: 'Intelligence Engine',
     color: 'text-violet-400',
@@ -152,7 +152,7 @@ const AGENT_ACTIVITY: {
 }[] = [
   {
     time: 'now',
-    app: 'Vessels',
+    app: 'SEXTANT',
     agent: 'Maritime Analyst',
     action: 'Dark vessel alert: MV Poseidon off Strait of Malacca',
     type: 'signal',
@@ -180,7 +180,7 @@ const AGENT_ACTIVITY: {
   },
   {
     time: '1m',
-    app: 'Terra',
+    app: 'DOMAINE',
     agent: 'Deal Scout',
     action: 'Off-market opportunity flagged: Brickell, Miami — $4.2M cap rate 7.1%',
     type: 'signal',
@@ -194,7 +194,7 @@ const AGENT_ACTIVITY: {
   },
   {
     time: '2m',
-    app: 'Alloy',
+    app: 'FORGE',
     agent: 'Creative Director',
     action: 'Campaign rebalance: +$12K to LinkedIn video segment',
     type: 'reflex',

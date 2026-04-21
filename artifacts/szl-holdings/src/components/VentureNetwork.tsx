@@ -1,6 +1,6 @@
 const ventures = [
   {
-    name: 'Alloy',
+    name: 'FORGE',
     sector: 'Execution Fabric · ENGINE',
     stage: 'Scale',
     investment: '$5.2M',
@@ -16,7 +16,7 @@ const ventures = [
     ],
   },
   {
-    name: 'Lyte',
+    name: 'KORA',
     sector: 'Command & Orchestration · EXECUTE',
     stage: 'Scale',
     investment: '$4.8M',
@@ -48,7 +48,7 @@ const ventures = [
     ],
   },
   {
-    name: 'Terra',
+    name: 'DOMAINE',
     sector: 'Real Estate Intelligence · PROPERTY',
     stage: 'Early Growth',
     investment: '$2.0M',
@@ -60,7 +60,7 @@ const ventures = [
     synergies: ['Alloy powers workflow routing', 'Lyte monitors deal pipeline health'],
   },
   {
-    name: 'Aegis',
+    name: 'PARAGON',
     sector: 'Defense & Intelligence · DEFEND',
     stage: 'Growth',
     investment: '$2.5M',

@@ -51,7 +51,7 @@ const GATE_ITEMS: WriteBackItem[] = [
     description:
       'Approved Q2 pricing revision will be written to the charter rate system. This action is irreversible without a full rollback workflow.',
     target: 'Charter Rate System',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     status: 'pending',
     requestedBy: 'Fleet Ops',
@@ -67,7 +67,7 @@ const GATE_ITEMS: WriteBackItem[] = [
     description:
       'Full asset valuation dataset export for external auditor. Contains appraisal values, income data, and cap rates for 14 assets.',
     target: 'Secure Auditor Portal',
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     status: 'pending',
     requestedBy: 'Finance',
@@ -83,7 +83,7 @@ const GATE_ITEMS: WriteBackItem[] = [
     description:
       'Asset valuation workflow completed. Results will overwrite existing NAV records in the asset management system.',
     target: 'Asset Management System',
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     status: 'approved',
     requestedBy: 'Finance',
@@ -99,7 +99,7 @@ const GATE_ITEMS: WriteBackItem[] = [
     description:
       'Board-level security posture summary export. Sanitized for external distribution, no operational details included.',
     target: 'Board Reporting Package',
-    pack: 'Aegis',
+    pack: 'PARAGON',
     packColor: '#4f6ef7',
     status: 'approved',
     requestedBy: 'Lisa Monroe',
@@ -115,7 +115,7 @@ const GATE_ITEMS: WriteBackItem[] = [
     description:
       'System detected ownership conflict in 3 AR accounts. Proposed resolution will assign single owner and remove conflicting claims.',
     target: 'PRISM Ownership Graph',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     status: 'held',
     requestedBy: 'System',

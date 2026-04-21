@@ -199,9 +199,9 @@ function Divider() {
 
 export default function PrismCounselPublicPage() {
   const __pageMeta = usePageMeta({
-    title: "PRISM Counsel — Litigation Command System | SZL Holdings",
-    description: "PRISM Counsel is a litigation command system for plaintiff-side insurance defense firms. Matter twin, governed workflows, proof chain, NY practice intelligence, and M365-native execution.",
-    canonical: "https://szlholdings.com/prism-counsel-public",
+    title: "Counsel — Litigation Command System | SZL Holdings",
+    description: "Counsel is a litigation command system for plaintiff-side insurance defense firms. Matter twin, governed workflows, proof chain, NY practice intelligence, and M365-native execution.",
+    canonical: "https://szlholdings.com/counsel-public",
   });
 
   return (
@@ -228,7 +228,7 @@ export default function PrismCounselPublicPage() {
                     <Scale size={16} color="hsl(38,72%,58%)" />
                   </div>
                   <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(38,72%,58%)" }}>
-                    PRISM Counsel · Litigation Command System
+                    Counsel · Litigation Command System
                   </span>
                 </div>
               </m.div>
@@ -263,7 +263,7 @@ export default function PrismCounselPublicPage() {
                       marginBottom: "0.875rem",
                     }}
                   >
-                    PRISM Counsel is a litigation command system for plaintiff-side insurance defense firms. Not another AI chatbot. A matter command layer with a proof chain for everything that moves.
+                    Counsel is a litigation command system for plaintiff-side insurance defense firms. Not another AI chatbot. A matter command layer with a proof chain for everything that moves.
                   </p>
                   <p
                     style={{
@@ -293,7 +293,7 @@ export default function PrismCounselPublicPage() {
                   style={{ borderRadius: "0.875rem", padding: "clamp(1.25rem,3vw,1.75rem)", background: "hsla(38,72%,58%,0.04)", border: "1px solid hsla(38,72%,58%,0.14)" }}
                 >
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
-                    What PRISM Counsel answers
+                    What Counsel answers
                   </p>
                   {[
                     "Which matters are at risk of missing a critical deadline?",
@@ -331,7 +331,7 @@ export default function PrismCounselPublicPage() {
                     Plaintiff-side insurance litigation firms manage dozens of matters simultaneously — across carriers, courts, adjusters, medical providers, lien holders, and deadlines. Critical signals are buried in email. Demand packets go out incomplete. Deadlines get missed. Insurer patterns go unrecognized.
                   </p>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(214,7%,52%)" }}>
-                    PRISM Counsel is the command surface that sits above all of that — case management, email, documents, and Microsoft 365 — and turns fragmented signals into governed legal action and outcome intelligence.
+                    Counsel is the command surface that sits above all of that — case management, email, documents, and Microsoft 365 — and turns fragmented signals into governed legal action and outcome intelligence.
                   </p>
                 </m.div>
                 <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.08 }}>
@@ -437,7 +437,7 @@ export default function PrismCounselPublicPage() {
                     <div style={{ aspectRatio: "16/9", overflow: "hidden", background: "hsl(214,16%,6%)", position: "relative" }}>
                       <img
                         src={view.src}
-                        alt={`PRISM Counsel — ${view.label}`}
+                        alt={`Counsel — ${view.label}`}
                         style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top left", display: "block" }}
                         loading="lazy"
                       />
@@ -504,14 +504,14 @@ export default function PrismCounselPublicPage() {
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                <SectionLabel>Why PRISM Counsel</SectionLabel>
+                <SectionLabel>Why Counsel</SectionLabel>
                 <SectionHeading maxWidth="32ch">What separates litigation command from generic legal AI.</SectionHeading>
               </m.div>
               <div style={{ borderRadius: "0.875rem", overflow: "hidden", border: "1px solid hsla(0,0%,100%,0.07)" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "140px 1fr 1fr", background: "hsla(38,72%,58%,0.06)", borderBottom: "1px solid hsla(0,0%,100%,0.07)", padding: "0.75rem 1.25rem", gap: "1.5rem" }}>
                   <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(38,7%,50%)" }}>Dimension</div>
                   <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(214,7%,45%)" }}>Generic Legal AI</div>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(38,72%,58%)" }}>PRISM Counsel</div>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(38,72%,58%)" }}>Counsel</div>
                 </div>
                 {COMPETITIVE_DIFF.map((row, i) => (
                   <m.div
@@ -536,7 +536,7 @@ export default function PrismCounselPublicPage() {
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
                 <SectionLabel>Alloy Governance API</SectionLabel>
-                <SectionHeading maxWidth="34ch">How Alloy powers everything that moves in PRISM Counsel.</SectionHeading>
+                <SectionHeading maxWidth="34ch">How Alloy powers everything that moves in Counsel.</SectionHeading>
               </m.div>
               <div style={{ display: "grid", gap: "clamp(2.5rem,5vw,4rem)" }} className="lg:grid-cols-[1fr_1.1fr]">
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -544,7 +544,7 @@ export default function PrismCounselPublicPage() {
                     {
                       icon: Workflow,
                       title: "Workflow orchestration",
-                      body: "Every named workflow in PRISM Counsel — Prep a Demand, Review Before Send, Sign-Off Queue, Clear Review Queue — is orchestrated by Alloy. Steps are sequenced, approvals enforced, and blockers surfaced.",
+                      body: "Every named workflow in Counsel — Prep a Demand, Review Before Send, Sign-Off Queue, Clear Review Queue — is orchestrated by Alloy. Steps are sequenced, approvals enforced, and blockers surfaced.",
                     },
                     {
                       icon: Cpu,
@@ -559,7 +559,7 @@ export default function PrismCounselPublicPage() {
                     {
                       icon: Database,
                       title: "Connector framework",
-                      body: "Alloy connectors handle Microsoft 365 (Teams, Outlook, SharePoint, Word), case management systems, NYSCEF, court feeds, and external regulatory data. PRISM Counsel adds domain logic on top of a proven integration fabric.",
+                      body: "Alloy connectors handle Microsoft 365 (Teams, Outlook, SharePoint, Word), case management systems, NYSCEF, court feeds, and external regulatory data. Counsel adds domain logic on top of a proven integration fabric.",
                     },
                   ].map((item, i) => {
                     const Icon = item.icon;
@@ -600,15 +600,15 @@ export default function PrismCounselPublicPage() {
               <div style={{ display: "grid", gap: "clamp(2.5rem,5vw,4rem)", alignItems: "start" }} className="lg:grid-cols-[1.1fr_1fr]">
                 <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(214,7%,60%)", marginBottom: "1.25rem" }}>
-                    PRISM Counsel is designed to operate inside Microsoft 365, not alongside it. Approval requests surface in Teams. Correspondence is ingested from Outlook. Demand letters are exported to Word. Documents are indexed from SharePoint. Matter intelligence is queryable through Copilot connectors.
+                    Counsel is designed to operate inside Microsoft 365, not alongside it. Approval requests surface in Teams. Correspondence is ingested from Outlook. Demand letters are exported to Word. Documents are indexed from SharePoint. Matter intelligence is queryable through Copilot connectors.
                   </p>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(214,7%,52%)", marginBottom: "2rem" }}>
-                    The goal: attorneys should be able to get PRISM Counsel intelligence without ever leaving their primary workspace. The command center is always available for deep-work sessions. But for ambient signals and quick approvals, M365 is the surface.
+                    The goal: attorneys should be able to get Counsel intelligence without ever leaving their primary workspace. The command center is always available for deep-work sessions. But for ambient signals and quick approvals, M365 is the surface.
                   </p>
                   <div style={{ padding: "1rem 1.25rem", borderRadius: "8px", background: "hsla(207,52%,40%,0.06)", border: "1px solid hsla(207,52%,40%,0.18)" }}>
                     <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "#4a90b8", marginBottom: "0.625rem" }}>Copilot connector story</p>
                     <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,58%)" }}>
-                      PRISM Counsel Copilot connectors expose matter data, deadline alerts, settlement forecasts, and approval queue status to Microsoft 365 Copilot — with permission-aware retrieval so attorneys only see matters they're assigned to. Ask "What's the settlement forecast on the Rodriguez matter?" and get a grounded, source-cited answer.
+                      Counsel Copilot connectors expose matter data, deadline alerts, settlement forecasts, and approval queue status to Microsoft 365 Copilot — with permission-aware retrieval so attorneys only see matters they're assigned to. Ask "What's the settlement forecast on the Rodriguez matter?" and get a grounded, source-cited answer.
                     </p>
                   </div>
                 </m.div>
@@ -649,7 +649,7 @@ export default function PrismCounselPublicPage() {
                     The outside world, inside the matter model.
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "46ch" }}>
-                    PRISM Counsel is not just a document system. It connects to regulatory feeds, weather records, federal databases, and court data — and weaves those signals into each matter's twin so attorneys see context they would otherwise miss or manually research.
+                    Counsel is not just a document system. It connects to regulatory feeds, weather records, federal databases, and court data — and weaves those signals into each matter's twin so attorneys see context they would otherwise miss or manually research.
                   </p>
                 </m.div>
                 <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.08 }}>
@@ -719,7 +719,7 @@ export default function PrismCounselPublicPage() {
                 transition={{ duration: 0.4, delay: 0.2 }}
                 style={{ marginTop: "1.5rem", display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}
               >
-                <Link href="/solutions/prism-counsel/trust" className="szl-btn-secondary">
+                <Link href="/counsel/trust" className="szl-btn-secondary">
                   Full trust & governance documentation <ChevronRight size={14} />
                 </Link>
                 <Link href="/trust" className="szl-btn-secondary">
@@ -736,7 +736,7 @@ export default function PrismCounselPublicPage() {
                 {[
                   {
                     icon: Zap,
-                    title: "What PRISM Counsel is",
+                    title: "What Counsel is",
                     accent: "#d4a054",
                     items: [
                       "A matter command system",
@@ -749,7 +749,7 @@ export default function PrismCounselPublicPage() {
                   },
                   {
                     icon: AlertTriangle,
-                    title: "What PRISM Counsel is not",
+                    title: "What Counsel is not",
                     accent: "#c45a4a",
                     items: [
                       "A generic legal chatbot",
@@ -813,7 +813,7 @@ export default function PrismCounselPublicPage() {
                     Ready to bring your matter operations into one command surface?
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "48ch" }}>
-                    We run focused design partner engagements with plaintiff-side litigation firms — PRISM Counsel instrumented against your actual matters, your actual deadlines, your actual insurer relationships.
+                    We run focused design partner engagements with plaintiff-side litigation firms — Counsel instrumented against your actual matters, your actual deadlines, your actual insurer relationships.
                   </p>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", flexShrink: 0 }}>
@@ -823,7 +823,7 @@ export default function PrismCounselPublicPage() {
                   <Link href="/contact" className="szl-btn-secondary">
                     Request controlled access
                   </Link>
-                  <Link href="/solutions/prism-counsel" className="szl-btn-secondary">
+                  <Link href="/counsel" className="szl-btn-secondary">
                     Product overview
                   </Link>
                 </div>

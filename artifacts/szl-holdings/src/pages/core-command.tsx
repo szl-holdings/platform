@@ -113,7 +113,7 @@ const SEVERITY_BG: Record<string, string> = {
 
 const platformLinks = [
   {
-    name: 'Terra',
+    name: 'DOMAINE',
     role: 'OBSERVE',
     subtitle: 'Property Intelligence',
     href: '/terra/',
@@ -121,7 +121,7 @@ const platformLinks = [
     color: '#4d7c0f',
   },
   {
-    name: 'Lyte',
+    name: 'KORA',
     role: 'INTERPRET',
     subtitle: 'Decision Intelligence',
     href: '/command/operations/',
@@ -137,7 +137,7 @@ const platformLinks = [
     color: '#ec4899',
   },
   {
-    name: 'Alloy',
+    name: 'FORGE',
     role: 'EXECUTE',
     subtitle: 'Execution Fabric',
     href: '/alloy/',
@@ -145,7 +145,7 @@ const platformLinks = [
     color: '#6366f1',
   },
   {
-    name: 'Aegis',
+    name: 'PARAGON',
     role: 'DEFEND',
     subtitle: 'Defense & Intelligence',
     href: '/aegis/',
@@ -153,7 +153,7 @@ const platformLinks = [
     color: '#6366f1',
   },
   {
-    name: 'Vessels',
+    name: 'SEXTANT',
     role: 'TRACK',
     subtitle: 'Maritime Intelligence',
     href: '/vessels/',

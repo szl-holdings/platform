@@ -315,7 +315,7 @@ export const tenants: Tenant[] = [
   {
     id: 't-009',
     propertyId: 'prop-004',
-    name: 'Atlas Logistics',
+    name: 'Meridian Logistics',
     unit: 'Warehouse A-C',
     leaseStart: '2020-01-01',
     leaseEnd: '2030-12-31',

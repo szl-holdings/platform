@@ -455,17 +455,17 @@ function AppShell() {
   const sentientCrossLinks: SentientCrossLink[] = [
     {
       id: 'cl1',
-      surface: 'Sentra',
+      surface: 'TENAX',
       surfaceAccent: '#ef4444',
-      label: 'Sentra: data breach incident linked to Greenfield',
+      label: 'TENAX: data breach incident linked to Greenfield',
       description:
-        "Sentra's IC-2409 incident is the source event for the Greenfield data breach matter.",
+        "TENAX's IC-2409 incident is the source event for the Greenfield data breach matter.",
       href: '/sentra/incident',
       preservedContext: { surface: 'counsel', matter: 'greenfield' },
     },
     {
       id: 'cl2',
-      surface: 'Vessels',
+      surface: 'SEXTANT',
       surfaceAccent: '#0ea5e9',
       label: 'Vessels: MV Atlantic Falcon sanctions linkage',
       description:
@@ -475,7 +475,7 @@ function AppShell() {
     },
     {
       id: 'cl3',
-      surface: 'Lyte',
+      surface: 'KORA',
       surfaceAccent: '#0ea5e9',
       label: 'Lyte: 2 legal decisions pending executive approval',
       description:

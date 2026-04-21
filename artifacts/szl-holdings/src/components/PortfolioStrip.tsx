@@ -3,7 +3,7 @@ import { ArrowUpRight } from 'lucide-react';
 
 const ventures = [
   {
-    name: 'Alloy',
+    name: 'FORGE',
     tagline: 'The AI command center powering the entire ecosystem.',
     category: 'AI Orchestration',
     status: 'Live',
@@ -12,7 +12,7 @@ const ventures = [
     accentMuted: 'hsla(218,50%,58%,0.10)',
   },
   {
-    name: 'Lyte',
+    name: 'KORA',
     tagline: 'Operational decision intelligence for enterprise operations.',
     category: 'Decision Intelligence',
     status: 'Live',
@@ -21,7 +21,7 @@ const ventures = [
     accentMuted: 'hsla(192,70%,46%,0.10)',
   },
   {
-    name: 'Vessels',
+    name: 'SEXTANT',
     tagline: 'Maritime command and fleet intelligence at scale.',
     category: 'Maritime Intelligence',
     status: 'Live',

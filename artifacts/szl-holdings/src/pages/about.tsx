@@ -25,10 +25,10 @@ const principles = [
 ];
 
 const DOMAIN_PACKS = [
-  { name: "Aegis", domain: "Security & defense", color: "hsl(222,60%,58%)" },
-  { name: "Vessels", domain: "Maritime intelligence", color: "hsl(206,72%,52%)" },
-  { name: "Terra", domain: "Real estate intelligence", color: "hsl(140,52%,46%)" },
-  { name: "PRISM Counsel", domain: "Legal intelligence", color: "hsl(260,60%,65%)" },
+  { name: "PARAGON", domain: "Security & defense", color: "hsl(222,60%,58%)" },
+  { name: "SEXTANT", domain: "Maritime intelligence", color: "hsl(206,72%,52%)" },
+  { name: "DOMAINE", domain: "Real estate intelligence", color: "hsl(140,52%,46%)" },
+  { name: "Counsel", domain: "Legal intelligence", color: "hsl(260,60%,65%)" },
   { name: "Carlota Jo", domain: "Premium advisory", color: "hsl(340,52%,58%)" },
   { name: "IMPERIUM", domain: "Cloud sovereignty", color: "hsl(25,72%,52%)" },
 ];

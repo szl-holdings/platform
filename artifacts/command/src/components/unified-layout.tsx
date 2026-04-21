@@ -102,7 +102,7 @@ const ECOSYSTEM_APPS_NAV: NavGroup = {
     { href: '/imperium/', label: 'IMPERIUM', icon: Crown, external: true },
     { href: '/lyte-command-center/', label: 'Lyte Command Center', icon: Zap, external: true },
     { href: '/stephen-site/', label: 'Stephen Site', icon: Globe, external: true },
-    { href: '/cortex-mobile/', label: 'CORTEX Mobile', icon: Cpu, external: true },
+    { href: '/cortex-mobile/', label: 'APEX Mobile', icon: Cpu, external: true },
   ],
 };
 
@@ -175,7 +175,7 @@ const OPERATIONS_NAV: NavGroup[] = [
     section: 'Governed Decision Loop',
     items: [
       { href: '/operations', label: 'Executive Command', icon: LayoutDashboard },
-      { href: '/operations/prism/pulse', label: 'Pulse', icon: Heart },
+      { href: '/operations/prism/pulse', label: 'LUMINA', icon: Heart },
       { href: '/operations/prism/signals', label: 'Signal Feed', icon: Radio },
       { href: '/operations/prism/atlas-execute', label: 'ATLAS Execute', icon: Play },
       { href: '/operations/blocker-board', label: 'Blocker Board', icon: AlertTriangle },

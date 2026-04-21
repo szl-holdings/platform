@@ -383,21 +383,21 @@ router.get('/intelligence/data-flow', intelRateLimit, authMiddleware(), async (_
       },
       {
         source: 'Digitraffic AIS',
-        target: 'Vessels',
+        target: 'SEXTANT',
         type: 'position_data',
         url: 'https://meri.digitraffic.fi/',
         status: 'active',
       },
       {
         source: 'BarentsWatch AIS',
-        target: 'Vessels',
+        target: 'SEXTANT',
         type: 'position_data',
         url: 'https://www.barentswatch.no/bwapi/',
         status: 'active',
       },
       {
         source: 'Open-Meteo Marine',
-        target: 'Vessels',
+        target: 'SEXTANT',
         type: 'marine_forecast',
         url: 'https://marine-api.open-meteo.com/',
         status: 'active',
@@ -425,14 +425,14 @@ router.get('/intelligence/data-flow', intelRateLimit, authMiddleware(), async (_
       },
       {
         source: 'Census Bureau',
-        target: 'Terra',
+        target: 'DOMAINE',
         type: 'demographics',
         url: 'https://data.census.gov/',
         status: 'active',
       },
       {
         source: 'SEC EDGAR',
-        target: 'Terra',
+        target: 'DOMAINE',
         type: 'reit_filings',
         url: 'https://www.sec.gov/cgi-bin/browse-edgar',
         status: 'active',
@@ -966,7 +966,7 @@ const DOMAIN_AGENTS: Record<
     systemPrompt: `You are Muse, a world-class creative director and brand strategist with expertise across film production, advertising, social media, and brand voice development. You generate compelling campaign copy, scripts, creative briefs, brand voice guidelines, and content strategies. Your work rivals top agencies like Wieden+Kennedy and BBDO. You understand audience psychology, cultural trends, and multi-channel campaign architecture. Be creative, bold, and strategically grounded. Today's date: ${new Date().toISOString().split('T')[0]}.`,
   },
   operations: {
-    name: 'Terra',
+    name: 'DOMAINE',
     provider: 'openai',
     model: 'gpt-5.2',
     systemPrompt: `You are Terra, a Tesla-grade operations intelligence engineer specializing in infrastructure anomaly detection, predictive analytics, SRE best practices, and cost forecasting. You analyze signals across distributed systems, detect anomalies using behavioral baselines, predict infrastructure failures, and generate cost optimization recommendations. Be data-driven, quantitative, and action-oriented. Use SRE terminology and reference SLOs/SLAs/error budgets. Today's date: ${new Date().toISOString().split('T')[0]}.`,
@@ -996,10 +996,10 @@ const DOMAIN_AGENTS: Record<
     systemPrompt: `You are Carlota AI, a McKinsey-caliber strategic advisor with expertise in market strategy, competitive intelligence, organizational transformation, and ROI analysis. You synthesize market data, competitive landscapes, and financial models to generate boardroom-ready strategic recommendations. You understand go-to-market strategy, pricing architecture, supply chain optimization, and digital transformation. Be direct, data-driven, and action-oriented. Today's date: ${new Date().toISOString().split('T')[0]}.`,
   },
   platform: {
-    name: 'Alloy',
+    name: 'FORGE',
     provider: 'openai',
     model: 'gpt-5.2',
-    systemPrompt: `You are Alloy, a Palantir-grade platform intelligence orchestrator with full visibility across the SZL ecosystem. You correlate intelligence across maritime, security, research, real estate, and operations domains to surface cross-cutting insights. You can diagnose system health, analyze connector status, interpret platform metrics, and generate cross-domain correlation analysis. Be authoritative, synthesizing, and operationally focused. Today's date: ${new Date().toISOString().split('T')[0]}.`,
+    systemPrompt: `You are FORGE, an enterprise-grade platform intelligence orchestrator with full visibility across the SZL ecosystem. You correlate intelligence across maritime, security, research, real estate, and operations domains to surface cross-cutting insights. You can diagnose system health, analyze connector status, interpret platform metrics, and generate cross-domain correlation analysis. Be authoritative, synthesizing, and operationally focused. Today's date: ${new Date().toISOString().split('T')[0]}.`,
   },
 };
 

@@ -67,7 +67,7 @@ interface WorkflowRun {
 const DOMAIN_LINKS = [
   {
     id: 'lyte',
-    label: 'Lyte',
+    label: 'KORA',
     description: 'Business Observability',
     color: '#06b6d4',
     href: '/command/operations/',
@@ -75,7 +75,7 @@ const DOMAIN_LINKS = [
   },
   {
     id: 'vessels',
-    label: 'Vessels',
+    label: 'SEXTANT',
     description: 'Maritime Command',
     color: '#3b82f6',
     href: '/vessels/',
@@ -83,7 +83,7 @@ const DOMAIN_LINKS = [
   },
   {
     id: 'terra',
-    label: 'Terra',
+    label: 'DOMAINE',
     description: 'Broker Platform',
     color: '#a07848',
     href: '/terra/',
@@ -91,7 +91,7 @@ const DOMAIN_LINKS = [
   },
   {
     id: 'alloy',
-    label: 'Alloy',
+    label: 'FORGE',
     description: 'Intelligence Engine',
     color: '#60a5fa',
     href: '/alloy/',
@@ -448,7 +448,7 @@ export default function UnifiedCommandDashboard() {
                 { label: 'View Lyte Action Queue', href: '/command/operations/action-queue' },
                 { label: 'Vessels Exceptions', href: '/vessels/exceptions' },
                 { label: 'Terra Listings', href: '/terra/listings' },
-                { label: 'Alloy Workflows', href: '/alloy/' },
+                { label: 'FORGE Workflows', href: '/alloy/' },
               ].map(({ label, href }) => (
                 <a
                   key={href}

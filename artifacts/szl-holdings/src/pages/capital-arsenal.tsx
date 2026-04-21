@@ -46,10 +46,10 @@ const STATUS_COLORS: Record<string, string> = {
 
 const LANE_ICONS: Record<string, React.ElementType> = {
   "SZL Holdings": Globe,
-  "Lyte": TrendingUp,
-  "Vessels": Ship,
-  "Aegis": Shield,
-  "Terra": MapPin,
+  "KORA": TrendingUp,
+  "SEXTANT": Ship,
+  "PARAGON": Shield,
+  "DOMAINE": MapPin,
   "Carlota Jo": Users,
 };
 

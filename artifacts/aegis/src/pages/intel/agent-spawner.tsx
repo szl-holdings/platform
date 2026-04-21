@@ -28,7 +28,7 @@ const DOMAIN_TEMPLATES = [
       'Tracks fleet anomalies, vessel behavior patterns, and predicts maritime disruptions.',
     defaultInstruction:
       'Monitor vessel AIS data for anomalous behavior, predict port congestion, and surface dark vessel activity in monitored regions.',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     systemType: 'fast' as const,
     capabilities: [
       'AIS signal analysis',
@@ -47,7 +47,7 @@ const DOMAIN_TEMPLATES = [
       'Auto-triages IT tickets, predicts outages, and orchestrates remediation playbooks.',
     defaultInstruction:
       'Monitor ticket queue for patterns, predict infrastructure failures 4 hours ahead, auto-triage P1 incidents.',
-    domain: 'Aegis Operations',
+    domain: 'PARAGON Operations',
     systemType: 'deep' as const,
     capabilities: [
       'Ticket auto-triage',
@@ -66,7 +66,7 @@ const DOMAIN_TEMPLATES = [
       'Surfaces investment opportunities, predicts market shifts, and scores properties.',
     defaultInstruction:
       'Scan MLS, off-market signals, and economic indicators to surface high-yield opportunities in target markets.',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     systemType: 'deep' as const,
     capabilities: [
       'Off-market opportunity detection',
@@ -85,7 +85,7 @@ const DOMAIN_TEMPLATES = [
       "Surfaces prediction scenarios, models confidence distributions, and generates forecast briefs via Alloy's predictive intelligence engine.",
     defaultInstruction:
       "Analyze signal data, model forward-looking scenarios, and generate confidence-weighted recommendations based on Alloy's predictive models.",
-    domain: 'Alloy',
+    domain: 'FORGE',
     systemType: 'fast' as const,
     capabilities: [
       'Scenario modeling',
@@ -142,7 +142,7 @@ const DOMAIN_TEMPLATES = [
       'Enforces agent security policies, detects threats, and orchestrates immune response.',
     defaultInstruction:
       'Monitor all agent actions for policy violations, detect anomalous AI behavior, enforce Policy Shield protocols.',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     systemType: 'fast' as const,
     capabilities: ['Policy enforcement', 'Anomaly detection', 'Action auditing', 'Threat response'],
   },
@@ -170,7 +170,7 @@ const DOMAIN_TEMPLATES = [
 const LIVE_AGENTS = [
   {
     name: 'Maritime Analyst',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     status: 'active',
     uptime: '14d 6h',
     actions: 1240,
@@ -178,7 +178,7 @@ const LIVE_AGENTS = [
   },
   {
     name: 'IT Sentinel',
-    domain: 'Aegis Operations',
+    domain: 'PARAGON Operations',
     status: 'active',
     uptime: '7d 2h',
     actions: 3847,
@@ -186,7 +186,7 @@ const LIVE_AGENTS = [
   },
   {
     name: 'Deal Scout',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     status: 'active',
     uptime: '21d 0h',
     actions: 892,
@@ -194,7 +194,7 @@ const LIVE_AGENTS = [
   },
   {
     name: 'Alloy Engine',
-    domain: 'Alloy',
+    domain: 'FORGE',
     status: 'active',
     uptime: '3d 18h',
     actions: 445,
@@ -210,7 +210,7 @@ const LIVE_AGENTS = [
   },
   {
     name: 'Security Sentinel',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     status: 'active',
     uptime: '30d 0h',
     actions: 7234,
@@ -218,7 +218,7 @@ const LIVE_AGENTS = [
   },
   {
     name: 'Intelligence Router',
-    domain: 'Lyte',
+    domain: 'KORA',
     status: 'active',
     uptime: '30d 0h',
     actions: 52843,

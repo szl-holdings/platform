@@ -176,7 +176,7 @@ function PinModal({ onSuccess }: { onSuccess: () => void }) {
             marginBottom: 12,
           }}
         >
-          PULSE · DEMO ACCESS
+          LUMINA · DEMO ACCESS
         </div>
         <h2
           style={{
@@ -317,7 +317,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
               marginBottom: 12,
             }}
           >
-            PULSE · AI EXECUTIVE BRIEFING
+            LUMINA · AI EXECUTIVE BRIEFING
           </div>
           <h2
             style={{
@@ -440,9 +440,9 @@ function PulsePalette() {
       open={open}
       onClose={() => setOpen(false)}
       commands={commands}
-      appName="Pulse"
+      appName="LUMINA"
       accentColor="#c8a84b"
-      placeholder="Search Pulse — briefs, library, actions..."
+      placeholder="Search LUMINA — briefs, library, actions..."
     />
   );
 }

@@ -32,7 +32,7 @@ const USE_CASES = [
     role: "Associate Attorney → Supervising Partner → Client",
     steps: [
       { signal: true, text: "Signal fires — adjuster at Empire Mutual has gone silent for 31 days, outside their documented response pattern for bodily injury files" },
-      { text: "PRISM Counsel surfaces insurer behavior intel: this adjuster typically responds within 18 days; silence at 30+ days preceded reserve increases in 4 of 6 prior matters" },
+      { text: "Counsel surfaces insurer behavior intel: this adjuster typically responds within 18 days; silence at 30+ days preceded reserve increases in 4 of 6 prior matters" },
       { text: "Settlement band forecast updated — governed recommendation surfaces a narrower offer window based on reserve movement pattern, with source citations" },
       { text: "Supervising partner reviews recommendation and approves accelerated outreach strategy — deadline for response demand set, client notified" },
       { proof: true, text: "Proof Chain logs the signal, governed recommendation, source citations, and partner approval — defensible record for any subsequent dispute over negotiation conduct" },
@@ -44,7 +44,7 @@ const USE_CASES = [
     role: "Intake Coordinator → Attorney → Partner",
     steps: [
       { signal: true, text: "New matter intake: Chen v. Metro Logistics — no-fault PIP claim, date of loss March 4, carrier is National Indemnity Group" },
-      { text: "PRISM Counsel scores the matter across six pillars: Posture 70, Readiness 45, Integrity 80, Strategy 55, Money 60, Governance 100" },
+      { text: "Counsel scores the matter across six pillars: Posture 70, Readiness 45, Integrity 80, Strategy 55, Money 60, Governance 100" },
       { text: "Compliance clocks started automatically: 30-day acknowledgement clock (NY Reg 68), 15-day verification clock, and notice of claim deadline entered in calendar" },
       { text: "National Indemnity Group insurer profile attached — adjuster behavior patterns, average time-to-offer, and prior matter outcomes surfaced" },
       { proof: true, text: "Alloy routes matter to assigned attorney with full intake packet; Proof Chain records the intake state, clock start timestamps, and routing decision" },
@@ -101,9 +101,9 @@ function UseCaseLane({ useCase, delay }: { useCase: typeof USE_CASES[0]; delay: 
 
 export default function SolutionsPrismCounselPage() {
   const __pageMeta = usePageMeta({
-    title: "PRISM Counsel — Legal Intelligence · SZL Holdings",
-    description: "Evidence-assisted legal operations with approval gates, proof chain, and immutable audit trail. PRISM Counsel is the legal intelligence domain pack — built on the same governance infrastructure as every SZL product.",
-    canonical: "https://szlholdings.com/solutions/prism-counsel",
+    title: "Counsel — Legal Intelligence · SZL Holdings",
+    description: "Evidence-assisted legal operations with approval gates, proof chain, and immutable audit trail. Counsel is the legal intelligence domain pack — built on the same governance infrastructure as every SZL product.",
+    canonical: "https://szlholdings.com/counsel",
     ogImage: "https://szlholdings.com/og/og-prism-counsel.jpg",
   });
 
@@ -116,7 +116,7 @@ export default function SolutionsPrismCounselPage() {
         <section className="max-w-5xl mx-auto px-6 pt-32 pb-16">
           <div className="flex items-center gap-2 mb-4">
             <Scale className="w-6 h-6 text-[#d4a054]" />
-            <span className="text-[11px] font-medium text-[#d4a054] uppercase tracking-widest">PRISM Counsel</span>
+            <span className="text-[11px] font-medium text-[#d4a054] uppercase tracking-widest">Counsel</span>
             <span style={{ display: "inline-flex", alignItems: "center", padding: "0.125rem 0.5rem", borderRadius: "0.25rem", background: "rgba(212,160,84,0.12)", border: "1px solid rgba(212,160,84,0.25)", fontFamily: "var(--font-mono, monospace)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#d4a054" }}>Beta</span>
           </div>
           <h1 className="text-4xl font-bold text-slate-100 leading-tight mb-4">
@@ -124,7 +124,7 @@ export default function SolutionsPrismCounselPage() {
             Governed Matter Execution.
           </h1>
           <p className="text-base text-slate-400 max-w-2xl leading-relaxed mb-3">
-            PRISM Counsel turns fragmented claim, matter, document, communication, and deadline signals into governed legal action and outcome forecasting. Built for plaintiff-side litigation teams operating in New York insurance litigation.
+            Counsel turns fragmented claim, matter, document, communication, and deadline signals into governed legal action and outcome forecasting. Built for plaintiff-side litigation teams operating in New York insurance litigation.
           </p>
           <p className="text-sm text-slate-500 max-w-2xl leading-relaxed mb-8">
             A command layer above case management, email, documents, claims feeds, and Microsoft 365. Not a chatbot. Not a case management clone. A matter command system.
@@ -140,7 +140,7 @@ export default function SolutionsPrismCounselPage() {
                 NY Litigation Command
               </span>
             </a>
-            <Link href="/solutions/prism-counsel/trust">
+            <Link href="/counsel/trust">
               <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-white/[0.04] text-slate-300 border border-white/[0.08] hover:bg-white/[0.08] transition-colors cursor-pointer">
                 Trust & Governance
               </span>
@@ -151,7 +151,7 @@ export default function SolutionsPrismCounselPage() {
         <section className="max-w-5xl mx-auto px-6 py-16">
           <h2 className="text-xl font-semibold text-slate-100 mb-2">Why It Matters</h2>
           <p className="text-sm text-slate-400 max-w-3xl mb-8 leading-relaxed">
-            Plaintiff-side litigation teams manage dozens of matters across insurance carriers, courts, adjusters, and deadlines. Critical signals are buried in email, scattered across documents, and tracked in spreadsheets. Deadlines get missed. Demand packets go out incomplete. Insurer patterns go unnoticed. PRISM Counsel makes every signal visible, every deadline tracked, and every action governed.
+            Plaintiff-side litigation teams manage dozens of matters across insurance carriers, courts, adjusters, and deadlines. Critical signals are buried in email, scattered across documents, and tracked in spreadsheets. Deadlines get missed. Demand packets go out incomplete. Insurer patterns go unnoticed. Counsel makes every signal visible, every deadline tracked, and every action governed.
           </p>
           <div className="grid grid-cols-3 gap-4">
             {[
@@ -204,7 +204,7 @@ export default function SolutionsPrismCounselPage() {
           <div className="rounded-lg border border-white/[0.06] p-8" style={{ background: "#0c1220" }}>
             <h2 className="text-xl font-semibold text-slate-100 mb-3">New York Insurance Litigation Wedge</h2>
             <p className="text-sm text-slate-400 mb-6 max-w-3xl leading-relaxed">
-              PRISM Counsel starts with New York insurance litigation — plaintiff-side auto, no-fault, bodily injury, premises liability, and coverage-linked disputes. The platform encodes NY-specific rules (11 NYCRR Part 65), compliance clocks, court scheduling patterns, and insurer behavior intelligence.
+              Counsel starts with New York insurance litigation — plaintiff-side auto, no-fault, bodily injury, premises liability, and coverage-linked disputes. The platform encodes NY-specific rules (11 NYCRR Part 65), compliance clocks, court scheduling patterns, and insurer behavior intelligence.
             </p>
             <div className="grid grid-cols-2 gap-3">
               {[
@@ -227,8 +227,8 @@ export default function SolutionsPrismCounselPage() {
         </section>
   
         <section className="max-w-5xl mx-auto px-6 py-16">
-          <h2 className="text-xl font-semibold text-slate-100 mb-2">How Lyte + Alloy Power It</h2>
-          <p className="text-sm text-slate-500 mb-8">PRISM Counsel is built on the Lyte + Alloy platform spine — not bolted on as a side project</p>
+          <h2 className="text-xl font-semibold text-slate-100 mb-2">How KORA + FORGE Power It</h2>
+          <p className="text-sm text-slate-500 mb-8">Counsel is built on the KORA + FORGE platform spine — not bolted on as a side project</p>
           <div className="grid grid-cols-2 gap-4">
             <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
               <h3 className="text-sm font-semibold text-slate-200 mb-2">Lyte — Command Surface</h3>
@@ -252,7 +252,7 @@ export default function SolutionsPrismCounselPage() {
         </section>
   
         <section className="max-w-5xl mx-auto px-6 py-16">
-          <h2 className="text-xl font-semibold text-slate-100 mb-2">What PRISM Counsel Delivers</h2>
+          <h2 className="text-xl font-semibold text-slate-100 mb-2">What Counsel Delivers</h2>
           <p className="text-sm text-slate-500 mb-8">Operational visibility for every stage of matter lifecycle</p>
           <div className="grid grid-cols-2 gap-3">
             {[
@@ -288,7 +288,7 @@ export default function SolutionsPrismCounselPage() {
               <h2 className="text-xl font-semibold text-slate-100">Copilot-Native</h2>
             </div>
             <p className="text-sm text-slate-400 mb-6 max-w-2xl">
-              Built for Microsoft environments. PRISM Counsel integrates with Outlook, Teams, SharePoint, and Word through Copilot connectors — bringing matter intelligence directly into the tools attorneys already use.
+              Built for Microsoft environments. Counsel integrates with Outlook, Teams, SharePoint, and Word through Copilot connectors — bringing matter intelligence directly into the tools attorneys already use.
             </p>
             <div className="grid grid-cols-2 gap-3">
               {[
@@ -353,8 +353,8 @@ export default function SolutionsPrismCounselPage() {
           <span className="px-3 py-1 rounded text-[10px] font-medium bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20">
             FUNCTIONAL ALPHA
           </span>
-          <p className="text-sm text-slate-500 mt-4 mb-2">Built on the Lyte + Alloy platform spine</p>
-          <p className="text-[10px] text-slate-600">SZL Holdings · PRISM Counsel · {new Date().getFullYear()}</p>
+          <p className="text-sm text-slate-500 mt-4 mb-2">Built on the KORA + FORGE platform spine</p>
+          <p className="text-[10px] text-slate-600">SZL Holdings · Counsel · {new Date().getFullYear()}</p>
         </section>
       </div>
         </>

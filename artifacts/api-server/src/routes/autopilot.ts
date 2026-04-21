@@ -207,7 +207,7 @@ autopilotRouter.get('/autopilot/drift-alerts', (_req: Request, res: Response) =>
           {
             id: 'terra-latency',
             severity: 'warning' as const,
-            app: 'Terra',
+            app: 'DOMAINE',
             metric: 'API Latency',
             detail: '/api/terra/distress-engine P95 at 2.4s — 20% above 2s threshold.',
             recommendation:
@@ -248,7 +248,7 @@ autopilotRouter.get('/autopilot/drift-alerts', (_req: Request, res: Response) =>
     {
       id: 'aegis-bundle-growth',
       severity: 'info',
-      app: 'Aegis',
+      app: 'PARAGON',
       metric: 'Bundle Size',
       detail: `Main bundle grew 8.3% this week (1.24MB → 1.34MB). Approaching ${BUNDLE_GROWTH_THRESHOLD_PCT}% threshold.`,
       recommendation:
@@ -277,30 +277,30 @@ autopilotRouter.get('/autopilot/drift-alerts', (_req: Request, res: Response) =>
 
 const FEATURE_USAGE_DATA = [
   {
-    app: 'Lyte',
+    app: 'KORA',
     feature: 'AI Signal Summarizer',
     uses: 1420,
     trend: 'rising' as const,
     delta: '+34%',
   },
   {
-    app: 'Aegis',
+    app: 'PARAGON',
     feature: 'Threat Feed Dashboard',
     uses: 980,
     trend: 'rising' as const,
     delta: '+18%',
   },
   {
-    app: 'Vessels',
+    app: 'SEXTANT',
     feature: 'Voyage Economics',
     uses: 762,
     trend: 'stable' as const,
     delta: '+2%',
   },
-  { app: 'Terra', feature: 'Distress Engine', uses: 640, trend: 'rising' as const, delta: '+21%' },
-  { app: 'Lyte', feature: 'APM Trace Explorer', uses: 430, trend: 'stable' as const, delta: '-1%' },
+  { app: 'DOMAINE', feature: 'Distress Engine', uses: 640, trend: 'rising' as const, delta: '+21%' },
+  { app: 'KORA', feature: 'APM Trace Explorer', uses: 430, trend: 'stable' as const, delta: '-1%' },
   {
-    app: 'Aegis',
+    app: 'PARAGON',
     feature: 'MITRE ATT&CK Map',
     uses: 290,
     trend: 'declining' as const,
@@ -308,7 +308,7 @@ const FEATURE_USAGE_DATA = [
   },
   { app: 'PRISM', feature: 'Matter Timeline', uses: 210, trend: 'stable' as const, delta: '+5%' },
   {
-    app: 'Terra',
+    app: 'DOMAINE',
     feature: 'Ownership Graph',
     uses: 180,
     trend: 'declining' as const,
@@ -322,15 +322,15 @@ const FEATURE_USAGE_DATA = [
     delta: '+3%',
   },
   {
-    app: 'Aegis',
+    app: 'PARAGON',
     feature: 'Adversary Emulation Wizard',
     uses: 28,
     trend: 'dead' as const,
     delta: '-61%',
   },
-  { app: 'Lyte', feature: 'SCIM Provisioning UI', uses: 12, trend: 'dead' as const, delta: '-40%' },
+  { app: 'KORA', feature: 'SCIM Provisioning UI', uses: 12, trend: 'dead' as const, delta: '-40%' },
   {
-    app: 'Vessels',
+    app: 'SEXTANT',
     feature: 'Charter Rate Benchmarks',
     uses: 8,
     trend: 'dead' as const,
@@ -360,7 +360,7 @@ autopilotRouter.get('/autopilot/feature-usage', (_req: Request, res: Response) =
 
 const PERF_BUDGETS = [
   {
-    app: 'Lyte',
+    app: 'KORA',
     bundleBudgetKB: 800,
     bundleActualKB: 734,
     latencyBudgetMs: 1500,
@@ -368,7 +368,7 @@ const PERF_BUDGETS = [
     ttiMs: 1100,
   },
   {
-    app: 'Aegis',
+    app: 'PARAGON',
     bundleBudgetKB: 900,
     bundleActualKB: 1340,
     latencyBudgetMs: 2000,
@@ -376,7 +376,7 @@ const PERF_BUDGETS = [
     ttiMs: 1800,
   },
   {
-    app: 'Vessels',
+    app: 'SEXTANT',
     bundleBudgetKB: 700,
     bundleActualKB: 610,
     latencyBudgetMs: 1800,
@@ -384,7 +384,7 @@ const PERF_BUDGETS = [
     ttiMs: 1300,
   },
   {
-    app: 'Terra',
+    app: 'DOMAINE',
     bundleBudgetKB: 850,
     bundleActualKB: 790,
     latencyBudgetMs: 2000,
@@ -434,28 +434,28 @@ autopilotRouter.get('/autopilot/performance-budgets', (_req: Request, res: Respo
 
 const FEEDBACK_SEED = [
   {
-    app: 'Lyte',
+    app: 'KORA',
     feature: 'AI Signal Summarizer',
     thumbsUp: 142,
     thumbsDown: 9,
     topComment: 'Saves me 20 minutes every morning. Keep it.',
   },
   {
-    app: 'Vessels',
+    app: 'SEXTANT',
     feature: 'Voyage Economics',
     thumbsUp: 89,
     thumbsDown: 4,
     topComment: 'The fuel cost estimator is accurate now.',
   },
   {
-    app: 'Terra',
+    app: 'DOMAINE',
     feature: 'Distress Engine',
     thumbsUp: 76,
     thumbsDown: 12,
     topComment: 'Would love filtering by borough on the map.',
   },
   {
-    app: 'Aegis',
+    app: 'PARAGON',
     feature: 'Threat Feed Dashboard',
     thumbsUp: 61,
     thumbsDown: 3,
@@ -476,7 +476,7 @@ const FEEDBACK_SEED = [
     topComment: 'Client loved the layout. Very professional.',
   },
   {
-    app: 'Aegis',
+    app: 'PARAGON',
     feature: 'Adversary Emulation Wizard',
     thumbsUp: 6,
     thumbsDown: 18,
@@ -544,7 +544,7 @@ const PLAYBOOKS_DATA = [
   },
   {
     id: 'p2',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     name: 'Incident Response',
     steps: 12,
     completionRate: 91,
@@ -555,7 +555,7 @@ const PLAYBOOKS_DATA = [
   },
   {
     id: 'p3',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     name: 'Vessel Inspection',
     steps: 6,
     completionRate: 77,
@@ -566,7 +566,7 @@ const PLAYBOOKS_DATA = [
   },
   {
     id: 'p4',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     name: 'Property Due Diligence',
     steps: 10,
     completionRate: 68,
@@ -616,7 +616,7 @@ autopilotRouter.get('/autopilot/playbooks', (_req: Request, res: Response) => {
 
 const COMPETITIVE_RADAR_DATA = [
   {
-    app: 'Aegis',
+    app: 'PARAGON',
     accent: '#6366f1',
     competitors: ['CrowdStrike', 'Palo Alto', 'SentinelOne'],
     axes: [
@@ -637,7 +637,7 @@ const COMPETITIVE_RADAR_DATA = [
     theyHave: ['Broader threat intel feeds', 'MDR services at scale', 'Larger partner ecosystem'],
   },
   {
-    app: 'Terra',
+    app: 'DOMAINE',
     accent: '#4d7c0f',
     competitors: ['CoStar', 'ATTOM', 'PropStream'],
     axes: [
@@ -696,7 +696,7 @@ function computeNextBestActions(
     {
       rank: 2,
       title: 'Code-split Aegis bundle (MITRE ATT&CK module)',
-      app: 'Aegis',
+      app: 'PARAGON',
       accent: '#6366f1',
       why: 'Bundle at 1.34MB vs 900KB budget (+49%). MITRE module is 280KB loaded eagerly. Adversary Wizard feedback is negative — simplify UX in same pass.',
       effort: 'Medium',
@@ -710,7 +710,7 @@ function computeNextBestActions(
     {
       rank: 3,
       title: 'Add Terra distress engine borough filter',
-      app: 'Terra',
+      app: 'DOMAINE',
       accent: '#4d7c0f',
       why: 'Top verbatim feedback request from 12 users. Distress Engine usage rising +21% — quality improvement compounds active growth. Closes map UX gap vs CoStar.',
       effort: 'Low',
@@ -738,7 +738,7 @@ function computeNextBestActions(
     {
       rank: 5,
       title: 'Fix Terra API latency (add distress engine index)',
-      app: 'Terra',
+      app: 'DOMAINE',
       accent: '#4d7c0f',
       why: 'P95 at 2.4s vs 2s budget (+21%). Root cause identified: full table scan on distress scoring query. One-line index fix. Unlocks speed perception for rising user base.',
       effort: 'Low',
@@ -757,9 +757,9 @@ function computeNextBestActions(
 autopilotRouter.get('/autopilot/next-best-actions', (_req: Request, res: Response) => {
   const driftAlerts: Array<{ severity: string; app: string; metric: string }> = [
     { severity: 'critical', app: 'Carlota Jo', metric: 'Data Freshness' },
-    { severity: 'warning', app: 'Terra', metric: 'API Latency' },
+    { severity: 'warning', app: 'DOMAINE', metric: 'API Latency' },
     { severity: 'warning', app: 'PRISM', metric: 'Webhooks' },
-    { severity: 'info', app: 'Aegis', metric: 'Bundle Size' },
+    { severity: 'info', app: 'PARAGON', metric: 'Bundle Size' },
     { severity: 'info', app: 'Carlota Jo', metric: 'Webhooks' },
   ];
 

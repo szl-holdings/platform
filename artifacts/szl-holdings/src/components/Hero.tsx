@@ -106,7 +106,7 @@ export function Hero() {
                   fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
                 }}
               >
-                Lyte + Alloy
+                KORA + FORGE
               </span>
             </m.div>
 
@@ -131,7 +131,7 @@ export function Hero() {
               className="text-[15px] sm:text-base leading-relaxed mb-8"
               style={{ color: 'hsl(210,10%,55%)', maxWidth: '36rem' }}
             >
-              Lyte + Alloy helps teams surface critical business signals, route action fast, and
+              KORA + FORGE helps teams surface critical business signals, route action fast, and
               verify follow-through across the workflows that usually break between systems.
             </m.p>
 
@@ -188,8 +188,8 @@ export function Hero() {
               className="flex flex-wrap gap-8 sm:gap-10"
             >
               {[
-                { value: 'Lyte', label: 'Decision Intelligence' },
-                { value: 'Alloy', label: 'Execution Orchestration' },
+                { value: 'KORA', label: 'Decision Intelligence' },
+                { value: 'FORGE', label: 'Execution Orchestration' },
                 { value: 'One', label: 'Unified Operating Layer' },
               ].map((stat) => (
                 <div key={stat.label} className="flex flex-col">

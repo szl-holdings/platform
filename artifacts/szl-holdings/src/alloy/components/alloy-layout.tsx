@@ -63,7 +63,7 @@ const ALLOY_ACCENT = '#4B8BDB';
 
 const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: 'szl-alloy',
-  appName: 'Alloy',
+  appName: 'FORGE',
   accentColor: ALLOY_ACCENT,
   steps: [
     {
@@ -529,7 +529,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         commands={alloyCommands}
-        appName="Alloy"
+        appName="FORGE"
         accentColor="#4B8BDB"
         placeholder="Navigate to any screen or / for slash commands..."
       />
@@ -732,7 +732,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
           <div className="px-2 mb-2">
             <GettingStartedChecklist
               appId="szl-alloy"
-              appName="Alloy"
+              appName="FORGE"
               items={SZL_ONBOARDING_CONFIG.checklist ?? []}
               accentColor={ALLOY_ACCENT}
               onReplayTour={() => {
@@ -934,7 +934,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
         <main className="flex-1 overflow-auto p-4 md:p-6" style={{ background: '#080c14' }}>
-          <SectionErrorBoundary sectionName="Alloy">{children}</SectionErrorBoundary>
+          <SectionErrorBoundary sectionName="FORGE">{children}</SectionErrorBoundary>
         </main>
         <ServiceStatusRail />
       </div>

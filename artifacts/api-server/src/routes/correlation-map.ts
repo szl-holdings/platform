@@ -259,7 +259,7 @@ function buildGraph(live?: LiveEntityData) {
   const nodes: GraphNode[] = [
     {
       id: 'domain-vessels',
-      label: 'Vessels',
+      label: 'SEXTANT',
       type: 'domain',
       domain: 'vessels',
       value: live ? Math.min(1, 0.3 + live.vesselHighAlertCount * 0.1) : 0.75,
@@ -267,7 +267,7 @@ function buildGraph(live?: LiveEntityData) {
     },
     {
       id: 'domain-aegis',
-      label: 'Aegis',
+      label: 'PARAGON',
       type: 'domain',
       domain: 'aegis',
       severity: live?.openIncidentCount ? 'critical' : 'high',
@@ -278,7 +278,7 @@ function buildGraph(live?: LiveEntityData) {
     },
     {
       id: 'domain-terra',
-      label: 'Terra',
+      label: 'DOMAINE',
       type: 'domain',
       domain: 'terra',
       severity: live?.distressCount ? (live.distressCount >= 10 ? 'high' : 'medium') : 'high',
@@ -300,7 +300,7 @@ function buildGraph(live?: LiveEntityData) {
     },
     {
       id: 'domain-lyte',
-      label: 'Lyte',
+      label: 'KORA',
       type: 'domain',
       domain: 'lyte',
       value: 0.35,

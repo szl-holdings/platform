@@ -61,7 +61,7 @@ const DOMAIN_COLOR: Record<string, string> = {
   Aegis: "hsl(222,60%,60%)",
   Vessels: "hsl(206,72%,54%)",
   Terra: "hsl(142,52%,48%)",
-  "PRISM Counsel": "hsl(260,60%,65%)",
+  "Counsel": "hsl(260,60%,65%)",
   "Carlota Jo": "hsl(340,52%,60%)",
   Alloy: "hsl(192,72%,48%)",
   IMPERIUM: "hsl(25,72%,54%)",
@@ -71,17 +71,17 @@ const DOMAIN_ICON: Record<string, typeof Shield> = {
   Aegis: Shield,
   Vessels: Ship,
   Terra: Building2,
-  "PRISM Counsel": Briefcase,
+  "Counsel": Briefcase,
   "Carlota Jo": Users,
   Alloy: Zap,
   IMPERIUM: Layers,
 };
 
 const SOURCE_TO_DOMAIN: Record<string, string> = {
-  terra: "Terra", vessels: "Vessels", firestorm: "Aegis",
-  prism: "PRISM Counsel", alloy: "Alloy", "carlota-jo": "Carlota Jo",
+  terra: "DOMAINE", vessels: "SEXTANT", firestorm: "PARAGON",
+  prism: "Counsel", alloy: "FORGE", "carlota-jo": "Carlota Jo",
   carlota: "Carlota Jo", manual: "IMPERIUM", monitor: "IMPERIUM",
-  api: "Alloy", scheduler: "Alloy",
+  api: "FORGE", scheduler: "FORGE",
 };
 
 interface ApiSignal {
@@ -197,20 +197,20 @@ interface SituationItem {
 }
 
 const SIGNAL_STREAM: SignalItem[] = [
-  { id: "s1", domain: "Aegis", severity: "critical", title: "KEV CVE-2025-1337 — active exploitation confirmed", detail: "3 systems in scope · analyst queue empty · SLA T-2h", age: "4m", status: "new", correlatedTo: "sit1" },
-  { id: "s2", domain: "Vessels", severity: "high", title: "Dark vessel detected — AIS signal gap 6h+", detail: "MV Adriatic Star · Last position: Strait of Messina · OFAC check pending", age: "11m", status: "acknowledged", correlatedTo: "sit2" },
-  { id: "s3", domain: "PRISM Counsel", severity: "high", title: "Motion deadline in 38 hours — no filing draft", detail: "Matter HC-2025-0487 · No owner assigned · LP approval outstanding", age: "22m", status: "new" },
-  { id: "s4", domain: "Terra", severity: "medium", title: "Distress signal threshold breached — 12 properties", detail: "NYC distress pipeline · Ownership graph query triggered · Diligence checklist 34% complete", age: "1h", status: "acknowledged" },
-  { id: "s5", domain: "Alloy", severity: "medium", title: "Approval queue depth: 14 pending > 72h", detail: "6 workflows stalled · 2 require exec review · Escalation paths unset", age: "2h", status: "acknowledged" },
+  { id: "s1", domain: "PARAGON", severity: "critical", title: "KEV CVE-2025-1337 — active exploitation confirmed", detail: "3 systems in scope · analyst queue empty · SLA T-2h", age: "4m", status: "new", correlatedTo: "sit1" },
+  { id: "s2", domain: "SEXTANT", severity: "high", title: "Dark vessel detected — AIS signal gap 6h+", detail: "MV Adriatic Star · Last position: Strait of Messina · OFAC check pending", age: "11m", status: "acknowledged", correlatedTo: "sit2" },
+  { id: "s3", domain: "Counsel", severity: "high", title: "Motion deadline in 38 hours — no filing draft", detail: "Matter HC-2025-0487 · No owner assigned · LP approval outstanding", age: "22m", status: "new" },
+  { id: "s4", domain: "DOMAINE", severity: "medium", title: "Distress signal threshold breached — 12 properties", detail: "NYC distress pipeline · Ownership graph query triggered · Diligence checklist 34% complete", age: "1h", status: "acknowledged" },
+  { id: "s5", domain: "FORGE", severity: "medium", title: "Approval queue depth: 14 pending > 72h", detail: "6 workflows stalled · 2 require exec review · Escalation paths unset", age: "2h", status: "acknowledged" },
   { id: "s6", domain: "Carlota Jo", severity: "info", title: "Engagement milestone 3 delivered — awaiting confirmation", detail: "Client: Archipelago Capital · Delivery package sent · Response SLA: 48h", age: "3h", status: "acknowledged" },
   { id: "s7", domain: "IMPERIUM", severity: "info", title: "Configuration drift detected — 2 cloud assets", detail: "AWS us-east-1 · Policy violation: unrestricted egress rule · Auto-tagged", age: "4h", status: "new" },
 ];
 
 const SITUATION_BOARD: SituationItem[] = [
-  { id: "sit1", title: "Active Exploitation Response — CVE-2025-1337", domain: "Aegis", severity: "critical", stage: "Simulation", owner: "Unassigned", pending: "Policy approval", updated: "4m ago" },
-  { id: "sit2", title: "MV Adriatic Star — Maritime Anomaly Investigation", domain: "Vessels", severity: "high", stage: "Context", owner: "K. Vasile", pending: "OFAC screening", updated: "11m ago" },
-  { id: "sit3", title: "HC-2025-0487 — Motion Filing Protocol", domain: "PRISM Counsel", severity: "high", stage: "Recommendation", owner: "Unassigned", pending: "Owner assignment", updated: "22m ago" },
-  { id: "sit4", title: "NYC Distress Pipeline — Acquisition Review", domain: "Terra", severity: "medium", stage: "Proof", owner: "R. Chen", pending: "LP review", updated: "1h ago" },
+  { id: "sit1", title: "Active Exploitation Response — CVE-2025-1337", domain: "PARAGON", severity: "critical", stage: "Simulation", owner: "Unassigned", pending: "Policy approval", updated: "4m ago" },
+  { id: "sit2", title: "MV Adriatic Star — Maritime Anomaly Investigation", domain: "SEXTANT", severity: "high", stage: "Context", owner: "K. Vasile", pending: "OFAC screening", updated: "11m ago" },
+  { id: "sit3", title: "HC-2025-0487 — Motion Filing Protocol", domain: "Counsel", severity: "high", stage: "Recommendation", owner: "Unassigned", pending: "Owner assignment", updated: "22m ago" },
+  { id: "sit4", title: "NYC Distress Pipeline — Acquisition Review", domain: "DOMAINE", severity: "medium", stage: "Proof", owner: "R. Chen", pending: "LP review", updated: "1h ago" },
 ];
 
 const STAGE_FLOW = [
@@ -512,7 +512,7 @@ const SIT_PROOF_RECORDS: Record<string, ProofRecord> = {
     ...SAMPLE_PROOF_RECORD,
     id: "PCH-SIT1-20260416",
     sourceSystem: "Aegis SOC Feed",
-    sourceDomain: "Aegis",
+    sourceDomain: "PARAGON",
     signalType: "threat_intelligence",
     confidence: 0.94,
     reviewState: "unreviewed",
@@ -536,7 +536,7 @@ const SIT_PROOF_RECORDS: Record<string, ProofRecord> = {
     ...SAMPLE_PROOF_RECORD,
     id: "PCH-SIT2-20260416",
     sourceSystem: "Vessels AIS Feed",
-    sourceDomain: "Vessels",
+    sourceDomain: "SEXTANT",
     signalType: "ais_telemetry",
     confidence: 0.91,
     reviewState: "human_reviewed",
@@ -550,7 +550,7 @@ const SIT_PROOF_RECORDS: Record<string, ProofRecord> = {
     ],
     chainLinks: [
       { id: "c1", event: "AIS dark gap detected — MV Adriatic Star", actor: "System / Vessels Feed", timestamp: "16 Apr 2026 07:07:44", hash: "sha256:d1e3f5b7a..." },
-      { id: "c2", event: "Temporal correlation with PRISM Counsel filing event", actor: "System / Signal Fusion", timestamp: "16 Apr 2026 08:03:11", hash: "sha256:f2a8c4e6b..." },
+      { id: "c2", event: "Temporal correlation with Counsel filing event", actor: "System / Signal Fusion", timestamp: "16 Apr 2026 08:03:11", hash: "sha256:f2a8c4e6b..." },
       { id: "c3", event: "OFAC screening initiated", actor: "K. Vasile", timestamp: "16 Apr 2026 08:18:55", hash: "sha256:e7b9d3c2f..." },
     ],
     metadata: { "Signal ID": "SIG-20260416-002", "Last AIS fix": "37.42N, 15.61E", "Gap duration": "6h20m", "OFAC status": "Pending" },
@@ -558,15 +558,15 @@ const SIT_PROOF_RECORDS: Record<string, ProofRecord> = {
   sit3: {
     ...SAMPLE_PROOF_RECORD,
     id: "PCH-SIT3-20260416",
-    sourceSystem: "PRISM Counsel Deadline Engine",
-    sourceDomain: "PRISM Counsel",
+    sourceSystem: "Counsel Deadline Engine",
+    sourceDomain: "Counsel",
     signalType: "deadline_breach_risk",
     confidence: 0.88,
     reviewState: "unreviewed",
     exportSafety: "restricted",
     policyChecks: [
       { label: "Role: ops_analyst — permitted", passed: true },
-      { label: "Domain: PRISM Counsel — in scope", passed: true },
+      { label: "Domain: Counsel — in scope", passed: true },
       { label: "Action: assign_owner — permitted", passed: true },
       { label: "Human-in-loop gate: owner assignment required", passed: false, note: "No owner assigned" },
     ],
@@ -580,7 +580,7 @@ const SIT_PROOF_RECORDS: Record<string, ProofRecord> = {
     ...SAMPLE_PROOF_RECORD,
     id: "PCH-SIT4-20260416",
     sourceSystem: "Terra Distress Signal Engine",
-    sourceDomain: "Terra",
+    sourceDomain: "DOMAINE",
     signalType: "distress_property_signal",
     confidence: 0.82,
     reviewState: "peer_reviewed",
@@ -1271,13 +1271,13 @@ export default function LytePage() {
                 Built on intelligence-grade architectural patterns.
               </h2>
               <p style={{ fontSize: "1rem", lineHeight: 1.72, color: TEXT_SEC, maxWidth: "52ch" }}>
-                Lyte absorbs the best patterns from GCHQ's operational nerve centers, Palantir's Ontology kinetic layer, Anduril's sense-decide-act architecture, and PLA JOCC's unified command hierarchy — and applies them to governed enterprise operations.
+                Lyte absorbs the best patterns from GCHQ's operational nerve centers, entity-layer architectures, Anduril's sense-decide-act architecture, and PLA JOCC's unified command hierarchy — and applies them to governed enterprise operations.
               </p>
             </m.div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1rem" }}>
               {[
-                { icon: Radio, color: "hsl(192,72%,48%)", title: "Persistent Signal Stream", body: "Live ingestion from all domain packs — Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM. Severity-ranked, correlation-tagged, continuously updated. No manual aggregation." },
+                { icon: Radio, color: "hsl(192,72%,48%)", title: "Persistent Signal Stream", body: "Live ingestion from all domain packs — Aegis, Vessels, Terra, Counsel, Carlota Jo, IMPERIUM. Severity-ranked, correlation-tagged, continuously updated. No manual aggregation." },
                 { icon: Target, color: "hsl(260,60%,65%)", title: "Active Situation Board", body: "Cross-domain decision objects tracked from signal intake to outcome measurement. Every situation shows stage, owner, pending gate, and progress against the governed decision loop." },
                 { icon: Brain, color: "hsl(340,52%,60%)", title: "Decision Theater", body: "The flagship governed decision flow: signal → AI recommendation with proof → Monte Carlo simulation → policy check → governed execution → immutable proof chain → outcome measurement." },
                 { icon: Lock, color: "hsl(142,60%,48%)", title: "Covenant Policy Enforcement", body: "Every action checked against policy at the platform layer, not the UI layer. Role-based gates, domain scope enforcement, high-risk action guards. Human-in-the-loop is an architectural primitive." },
@@ -1388,7 +1388,7 @@ export default function LytePage() {
                   layer: "01",
                   title: "Platform Command",
                   color: LYTE,
-                  items: ["Lyte — Operational nerve center", "CORTEX — Mobile command", "Command Portal — Ecosystem hub"],
+                  items: ["Lyte — Operational nerve center", "APEX — Mobile command", "Command Portal — Ecosystem hub"],
                   note: "Operator-facing command surfaces",
                 },
                 {
@@ -1402,7 +1402,7 @@ export default function LytePage() {
                   layer: "03",
                   title: "Domain Packs",
                   color: "hsl(260,60%,65%)",
-                  items: ["Aegis — Security & defense", "Vessels — Maritime intelligence", "Terra — Real estate intelligence", "PRISM Counsel — Legal operations", "Carlota Jo — Private advisory", "IMPERIUM — Cloud sovereignty"],
+                  items: ["Aegis — Security & defense", "Vessels — Maritime intelligence", "Terra — Real estate intelligence", "Counsel — Legal operations", "Carlota Jo — Private advisory", "IMPERIUM — Cloud sovereignty"],
                   note: "Vertical intelligence extensions",
                 },
               ].map((layer, i) => (

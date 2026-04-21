@@ -347,7 +347,7 @@ function CommandInboxAlerts() {
 
 const PRISM_CARDS = [
   {
-    key: 'Pulse',
+    key: 'LUMINA',
     icon: Heart,
     color: '#6b8f71',
     score: 72,
@@ -426,7 +426,7 @@ const ACTION_QUEUE: QueueItem[] = [
     type: 'approval',
     evidence: 'SLA breach detected by Alloy workflow monitor',
     next_action: 'Escalate to VP Legal with 24h deadline',
-    linked_product: 'Alloy',
+    linked_product: 'FORGE',
     linked_href: '/alloy',
   },
   {
@@ -441,7 +441,7 @@ const ACTION_QUEUE: QueueItem[] = [
     type: 'escalation',
     evidence: 'Alloy churn model v3.2 + usage telemetry',
     next_action: 'Schedule executive call within 24h',
-    linked_product: 'Alloy',
+    linked_product: 'FORGE',
     linked_href: '/alloy',
   },
   {
@@ -456,7 +456,7 @@ const ACTION_QUEUE: QueueItem[] = [
     type: 'ownership',
     evidence: 'Workflow graph gap detected automatically',
     next_action: 'Assign compliance owner and unblock pipeline',
-    linked_product: 'Terra',
+    linked_product: 'DOMAINE',
     linked_href: '/terra/',
   },
   {
@@ -482,7 +482,7 @@ const ACTION_QUEUE: QueueItem[] = [
     type: 'exception',
     evidence: 'Alloy execution engine — run #GF-2026-Q1-001',
     next_action: 'Assign approver or reroute workflow',
-    linked_product: 'Alloy',
+    linked_product: 'FORGE',
     linked_href: '/alloy',
   },
 ];

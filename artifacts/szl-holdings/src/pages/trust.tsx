@@ -230,7 +230,7 @@ export default function TrustPage() {
                   Trust is part of the product, not a slide at the end.
                 </h1>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "55ch", marginBottom: "2rem" }}>
-                  SZL is building Lyte + Alloy for serious operating environments. That means access discipline,
+                  SZL is building KORA + FORGE for serious operating environments. That means access discipline,
                   workflow accountability, observable AI behavior, and full auditability — documented here, not
                   promised in a deck.
                 </p>
@@ -954,7 +954,7 @@ export default function TrustPage() {
                       Why this architecture is hard to copy — and why that matters.
                     </h2>
                     <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "50ch" }}>
-                      The standalone architecture page explains every layer of Lyte + Alloy — Lyte as command layer,
+                      The standalone architecture page explains every layer of KORA + FORGE — Lyte as command layer,
                       Alloy as action spine, pack-specific twins, Proof Chain, external intelligence, the governance
                       API, and the governed inference layer — in terms of business value, trust, and defensibility.
                     </p>

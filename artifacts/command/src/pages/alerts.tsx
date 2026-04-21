@@ -117,7 +117,7 @@ function formatSnoozedUntil(iso: string | undefined): string {
 const INITIAL_ALERTS: Alert[] = [
   {
     id: 'a1',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     domainColor: '#0ea5e9',
     priority: 'critical',
     title: 'Engine room fire suppression triggered — MV Poseidon',
@@ -130,7 +130,7 @@ const INITIAL_ALERTS: Alert[] = [
   },
   {
     id: 'a2',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     domainColor: '#ef4444',
     priority: 'critical',
     title: 'Credential breach attempt — Maritime OT Systems',
@@ -142,7 +142,7 @@ const INITIAL_ALERTS: Alert[] = [
   },
   {
     id: 'a3',
-    domain: 'Lyte',
+    domain: 'KORA',
     domainColor: '#f97316',
     priority: 'high',
     title: 'API response times exceeding 2s SLA threshold',
@@ -155,7 +155,7 @@ const INITIAL_ALERTS: Alert[] = [
   },
   {
     id: 'a4',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     domainColor: '#22c55e',
     priority: 'high',
     title: 'Deal deadline: Miami Beach Commercial — 48h remaining',
@@ -167,7 +167,7 @@ const INITIAL_ALERTS: Alert[] = [
   },
   {
     id: 'a5',
-    domain: 'PRISM',
+    domain: 'PRAXIS',
     domainColor: '#a855f7',
     priority: 'high',
     title: 'Force majeure clause triggered — Q3 Cargo Agreement',
@@ -178,7 +178,7 @@ const INITIAL_ALERTS: Alert[] = [
   },
   {
     id: 'a6',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     domainColor: '#0ea5e9',
     priority: 'medium',
     title: 'MV Argo fuel consumption 18% above forecast',
@@ -201,7 +201,7 @@ const INITIAL_ALERTS: Alert[] = [
   },
   {
     id: 'a8',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     domainColor: '#ef4444',
     priority: 'medium',
     title: 'SSL certificate expiring in 14 days — legacy.szl.net',
@@ -223,7 +223,7 @@ const INITIAL_ALERTS: Alert[] = [
   },
   {
     id: 'a10',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     domainColor: '#22c55e',
     priority: 'low',
     title: 'Market data stale for Austin Industrial portfolio',

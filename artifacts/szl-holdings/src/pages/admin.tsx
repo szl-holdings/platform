@@ -521,7 +521,7 @@ export default function AdminPage() {
                     {
                       icon: '🛡️',
                       label: 'Security Posture Report',
-                      app: 'Aegis',
+                      app: 'PARAGON',
                       path: '/aegis/powerbi',
                       color: '#3b82f6',
                       desc: 'Real-time security posture metrics, incident trends, and compliance scores.',
@@ -529,7 +529,7 @@ export default function AdminPage() {
                     {
                       icon: '🏢',
                       label: 'Portfolio Analytics Report',
-                      app: 'Terra',
+                      app: 'DOMAINE',
                       path: '/terra/powerbi',
                       color: '#10b981',
                       desc: 'Property-level analytics including NOI, occupancy, IRR, and distress signals.',
@@ -537,7 +537,7 @@ export default function AdminPage() {
                     {
                       icon: '⚡',
                       label: 'Operational KPIs Report',
-                      app: 'Lyte',
+                      app: 'KORA',
                       path: '/command/operations/powerbi',
                       color: '#f59e0b',
                       desc: 'Decision intelligence KPIs including SLA performance and PRISM health scores.',

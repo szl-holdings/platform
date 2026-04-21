@@ -447,9 +447,9 @@ export default function AegisPulse() {
             items={[
               { label: 'SIEM', value: 'Elastic', color: '#3b82f6' },
               { label: 'EDR', value: 'Active', color: '#10b981' },
-              { label: 'SOAR', value: 'Alloy', color: '#d4a054' },
+              { label: 'SOAR', value: 'FORGE', color: '#d4a054' },
               { label: 'Threat Intel', value: 'MISP', color: '#ef4444' },
-              { label: 'GRC', value: 'Aegis', color: '#8b5cf6' },
+              { label: 'GRC', value: 'PARAGON', color: '#8b5cf6' },
               { label: 'MSP', value: 'Multi', color: '#64748b' },
               { label: 'Zero Trust', value: 'Active', color: '#06b6d4' },
               { label: 'Detection', value: 'ML', color: '#f59e0b' },

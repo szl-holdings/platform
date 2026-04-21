@@ -216,11 +216,11 @@ const BLOCK_PALETTE: BlockDef[] = [
 const BRAND_THEMES = [
   { value: 'szl', label: 'SZL Holdings', color: '#c2a55a' },
   { value: 'carlota', label: 'Carlota Jo', color: '#a855f7' },
-  { value: 'aegis', label: 'Aegis', color: '#06b6d4' },
-  { value: 'terra', label: 'Terra', color: '#22c55e' },
-  { value: 'vessels', label: 'Vessels', color: '#3b82f6' },
-  { value: 'lyte', label: 'Lyte', color: '#8b5cf6' },
-  { value: 'prism', label: 'PRISM', color: '#e879f9' },
+  { value: 'aegis', label: 'PARAGON', color: '#06b6d4' },
+  { value: 'terra', label: 'DOMAINE', color: '#22c55e' },
+  { value: 'vessels', label: 'SEXTANT', color: '#3b82f6' },
+  { value: 'lyte', label: 'KORA', color: '#8b5cf6' },
+  { value: 'prism', label: 'PRAXIS', color: '#e879f9' },
   { value: 'neutral', label: 'Neutral', color: '#64748b' },
 ];
 

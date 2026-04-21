@@ -69,7 +69,7 @@ import { Link, useLocation } from 'wouter';
 
 const LYTE_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: 'lyte',
-  appName: 'Lyte',
+  appName: 'KORA',
   accentColor: '#d4a054',
   steps: [
     {
@@ -160,7 +160,7 @@ const TEXT = {
 };
 
 const PRISM_ITEMS = [
-  { key: 'P', label: 'Pulse', color: '#d4a054', icon: Heart, href: '/operations/prism/pulse' },
+  { key: 'P', label: 'LUMINA', color: '#d4a054', icon: Heart, href: '/operations/prism/pulse' },
   {
     key: 'R',
     label: 'Risk',
@@ -203,7 +203,7 @@ const NAV_GROUPS = [
   {
     label: 'Intelligence',
     items: [
-      { href: '/operations/prism/pulse', label: 'Pulse', icon: Heart },
+      { href: '/operations/prism/pulse', label: 'LUMINA', icon: Heart },
       { href: '/operations/prism/risk', label: 'Risk', icon: AlertTriangle },
       { href: '/operations/prism/intelligence', label: 'Intelligence', icon: Brain },
       { href: '/operations/prism/signals', label: 'Signals Feed', icon: Radio },
@@ -786,7 +786,7 @@ export function LyteLayout({ children }: { children: ReactNode }) {
           role="main"
           style={{ background: BG.main }}
         >
-          <SectionErrorBoundary sectionName="Lyte">{children}</SectionErrorBoundary>
+          <SectionErrorBoundary sectionName="KORA">{children}</SectionErrorBoundary>
         </main>
         <ServiceStatusRail />
       </div>

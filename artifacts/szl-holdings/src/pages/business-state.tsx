@@ -365,11 +365,11 @@ function useToasts() {
 
 type DomainId = 'aegis' | 'terra' | 'vessels' | 'lyte' | 'prism' | 'carlota';
 const DOMAINS: Record<DomainId, { name: string; color: string }> = {
-  aegis: { name: 'Aegis', color: '#6366f1' },
-  terra: { name: 'Terra', color: '#4d7c0f' },
-  vessels: { name: 'Vessels', color: '#3b82f6' },
-  lyte: { name: 'Lyte', color: '#f59e0b' },
-  prism: { name: 'PRISM', color: '#a855f7' },
+  aegis: { name: 'PARAGON', color: '#6366f1' },
+  terra: { name: 'DOMAINE', color: '#4d7c0f' },
+  vessels: { name: 'SEXTANT', color: '#3b82f6' },
+  lyte: { name: 'KORA', color: '#f59e0b' },
+  prism: { name: 'PRAXIS', color: '#a855f7' },
   carlota: { name: 'Carlota', color: '#c2a55a' },
 };
 
@@ -639,7 +639,7 @@ const POLICIES_SUMMARY = [
     title: 'Cross-Domain Access Control',
     status: 'active',
     owner: 'James Okafor',
-    domains: ['Aegis', 'Vessels', 'Terra'],
+    domains: ['PARAGON', 'SEXTANT', 'DOMAINE'],
     lastReview: 'Apr 8',
     enforcement: 'auto',
   },
@@ -648,7 +648,7 @@ const POLICIES_SUMMARY = [
     title: 'AI Model Governance',
     status: 'pending',
     owner: 'Stephen Lutar',
-    domains: ['Command', 'Aegis'],
+    domains: ['Command', 'PARAGON'],
     lastReview: 'Apr 14',
     enforcement: 'manual',
   },
@@ -657,7 +657,7 @@ const POLICIES_SUMMARY = [
     title: 'Maritime Cybersecurity IR',
     status: 'active',
     owner: 'James Okafor',
-    domains: ['Vessels', 'Aegis'],
+    domains: ['SEXTANT', 'PARAGON'],
     lastReview: 'Apr 5',
     enforcement: 'auto',
   },
@@ -666,7 +666,7 @@ const POLICIES_SUMMARY = [
     title: 'RE Deal Approval Thresholds',
     status: 'draft',
     owner: 'Sofia Reyes',
-    domains: ['Terra'],
+    domains: ['DOMAINE'],
     lastReview: 'Apr 15',
     enforcement: 'manual',
   },

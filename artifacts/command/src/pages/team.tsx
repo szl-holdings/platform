@@ -24,11 +24,11 @@ interface TeamMember {
 }
 
 const APPS = [
-  'Aegis',
-  'Vessels',
-  'Terra',
-  'Lyte',
-  'PRISM',
+  'PARAGON',
+  'SEXTANT',
+  'DOMAINE',
+  'KORA',
+  'PRAXIS',
   'Carlota Jo',
   'SZL Holdings',
   'Command',
@@ -54,7 +54,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     team: 'Maritime Ops',
     status: 'active',
     lastSeen: '5m ago',
-    apps: ['Vessels', 'Command', 'SZL Holdings'],
+    apps: ['SEXTANT', 'Command', 'SZL Holdings'],
     avatar: 'MC',
   },
   {
@@ -65,7 +65,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     team: 'Legal',
     status: 'active',
     lastSeen: '1h ago',
-    apps: ['PRISM', 'Command', 'Aegis'],
+    apps: ['PRAXIS', 'Command', 'PARAGON'],
     avatar: 'PN',
   },
   {
@@ -76,7 +76,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     team: 'Aegis SOC',
     status: 'active',
     lastSeen: '2h ago',
-    apps: ['Aegis', 'Command'],
+    apps: ['PARAGON', 'Command'],
     avatar: 'JO',
   },
   {
@@ -84,10 +84,10 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     name: 'Sofia Reyes',
     email: 's.reyes@szlholdings.com',
     role: 'Real Estate Analyst',
-    team: 'Terra',
+    team: 'DOMAINE',
     status: 'active',
     lastSeen: 'Yesterday',
-    apps: ['Terra', 'Command'],
+    apps: ['DOMAINE', 'Command'],
     avatar: 'SR',
   },
   {
@@ -98,7 +98,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     team: 'Maritime Ops',
     status: 'active',
     lastSeen: '3h ago',
-    apps: ['Vessels', 'Aegis'],
+    apps: ['SEXTANT', 'PARAGON'],
     avatar: 'TH',
   },
   {
@@ -109,7 +109,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     team: 'Finance',
     status: 'active',
     lastSeen: 'Today',
-    apps: ['SZL Holdings', 'Command', 'Terra'],
+    apps: ['SZL Holdings', 'Command', 'DOMAINE'],
     avatar: 'AK',
   },
   {
@@ -131,7 +131,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     team: 'External',
     status: 'suspended',
     lastSeen: '3 months ago',
-    apps: ['Vessels'],
+    apps: ['SEXTANT'],
     avatar: 'LU',
   },
 ];
@@ -141,7 +141,7 @@ const FALLBACK_TEAMS = [
   { name: 'Maritime Ops', count: 2, color: '#0ea5e9' },
   { name: 'Aegis SOC', count: 1, color: '#ef4444' },
   { name: 'Legal', count: 1, color: '#a855f7' },
-  { name: 'Terra', count: 1, color: '#22c55e' },
+  { name: 'DOMAINE', count: 1, color: '#22c55e' },
   { name: 'Finance', count: 1, color: '#f97316' },
   { name: 'External', count: 1, color: '#6b7280' },
 ];

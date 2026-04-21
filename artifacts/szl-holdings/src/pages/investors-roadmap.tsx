@@ -23,13 +23,13 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 const statusBaseline = [
   { platform: "Lyte (Command)", status: "Functional Alpha", note: "Full PRISM framework, signal-to-action loop" },
-  { platform: "Alloy", status: "Functional Alpha", note: "Workflow engine, approval gates, audit trail" },
+  { platform: "FORGE", status: "Functional Alpha", note: "Workflow engine, approval gates, audit trail" },
   { platform: "CORTEX (Mobile)", status: "Alpha Prep", note: "All workspaces functional, pre-release hardening" },
-  { platform: "Aegis", status: "Functional Alpha", note: "SOC command, 8 security modules" },
-  { platform: "Vessels", status: "Functional Alpha", note: "Fleet, S&P, demurrage, freight, voyage P&L" },
-  { platform: "Terra", status: "Functional Alpha", note: "Distress pipeline, ownership graph, deal workflow" },
+  { platform: "PARAGON", status: "Functional Alpha", note: "SOC command, 8 security modules" },
+  { platform: "SEXTANT", status: "Functional Alpha", note: "Fleet, S&P, demurrage, freight, voyage P&L" },
+  { platform: "DOMAINE", status: "Functional Alpha", note: "Distress pipeline, ownership graph, deal workflow" },
   { platform: "Carlota Jo", status: "Live", note: "Client portal, advisory ops — paying-client capable" },
-  { platform: "PRISM Counsel", status: "Integrated", note: "Legal modules integrated into Aegis" },
+  { platform: "Counsel", status: "Integrated", note: "Legal modules integrated into Aegis" },
   { platform: "IMPERIUM", status: "In Development", note: "Cloud sovereignty — not yet functional" },
   { platform: "Command Portal", status: "Functional Alpha", note: "8-domain SSE dashboard, executive briefing" },
 ];

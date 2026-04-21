@@ -23,11 +23,11 @@ const QUARTERLY_PERFORMANCE = [
 ];
 
 const ATTRIBUTION = [
-  { name: "Lyte", contribution: 42, color: "#38bee0" },
-  { name: "Vessels", contribution: 28, color: "#3aa4dc" },
-  { name: "PRISM", contribution: 18, color: "#a855f7" },
-  { name: "Aegis", contribution: 14, color: "#6366f1" },
-  { name: "Terra", contribution: 8, color: "#6b9c30" },
+  { name: "KORA", contribution: 42, color: "#38bee0" },
+  { name: "SEXTANT", contribution: 28, color: "#3aa4dc" },
+  { name: "PRAXIS", contribution: 18, color: "#a855f7" },
+  { name: "PARAGON", contribution: 14, color: "#6366f1" },
+  { name: "DOMAINE", contribution: 8, color: "#6b9c30" },
   { name: "Carlota Jo", contribution: 12, color: "#c4924a" },
 ];
 

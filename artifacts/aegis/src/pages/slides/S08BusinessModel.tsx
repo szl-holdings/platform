@@ -152,7 +152,7 @@ export default function S08BusinessModel() {
                   color: 'rgba(240,236,230,0.4)',
                 }}
               >
-                Annual per domain. Aegis security modules, Vessels commercial intel, Terra property
+                Annual per domain. PARAGON security modules, SEXTANT commercial intel, DOMAINE property
                 analysis
               </div>
             </div>
@@ -194,7 +194,7 @@ export default function S08BusinessModel() {
                   color: 'rgba(240,236,230,0.4)',
                 }}
               >
-                Annual contract value. Palantir-tier aspirations with commercial operator focus
+                Annual contract value. Enterprise-tier aspirations with commercial operator focus
               </div>
             </div>
           </div>
@@ -360,7 +360,7 @@ export default function S08BusinessModel() {
                     color: 'rgba(240,236,230,0.45)',
                   }}
                 >
-                  Multi-domain enterprise platform contracts. Palantir-tier value with Vanta-tier
+                  Multi-domain enterprise platform contracts. Enterprise-tier value with Vanta-tier
                   sales motion for smaller buyers.
                 </div>
               </div>

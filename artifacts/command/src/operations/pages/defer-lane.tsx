@@ -41,7 +41,7 @@ const DEFER_ITEMS: DeferItem[] = [
     title: 'Security vendor background check — Aegis onboarding',
     description:
       'New physical security vendor cannot commence until background checks clear. HR vendor has 5-day processing backlog — this is an external dependency, not an internal delay.',
-    pack: 'Aegis',
+    pack: 'PARAGON',
     packColor: '#4f6ef7',
     category: 'dependency',
     safeUntil: 'Apr 8, 2026',
@@ -61,7 +61,7 @@ const DEFER_ITEMS: DeferItem[] = [
     title: 'Terra Building 7A appraisal report — asset refinancing',
     description:
       'Third-party appraiser has not delivered final report. Closing window does not close for 8 days. The appraisal is in progress — no action is possible until the report is delivered.',
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     category: 'resource',
     safeUntil: 'Apr 9, 2026',
@@ -81,7 +81,7 @@ const DEFER_ITEMS: DeferItem[] = [
     title: 'PRISM Q3 pricing model update',
     description:
       'Q3 pricing model needs annual calibration. Q2 pricing revision is in progress and must be resolved first. Q3 model work cannot begin until Q2 baseline is confirmed.',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     category: 'dependency',
     safeUntil: 'Apr 15, 2026',
@@ -100,7 +100,7 @@ const DEFER_ITEMS: DeferItem[] = [
     title: 'Vessels fleet maintenance scheduling — M/V Pacific Star',
     description:
       'Scheduled maintenance window is 3 weeks away. Vessel is currently operational and performance metrics are within normal range. Early scheduling would pull the vessel from active rotation unnecessarily.',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     category: 'scheduled',
     safeUntil: 'Apr 20, 2026',
@@ -121,7 +121,7 @@ const DEFER_ITEMS: DeferItem[] = [
     title: 'Audit log archival — Trust & Audit system',
     description:
       'Monthly audit log archival is 2 days overdue but within the 7-day compliance grace window. No data is at risk. This is a routine maintenance task that can be batched.',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     category: 'compliance',
     safeUntil: 'Apr 5, 2026',

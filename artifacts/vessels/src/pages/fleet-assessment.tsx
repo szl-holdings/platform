@@ -77,7 +77,7 @@ const EXCEPTION_SCENARIOS = [
       },
       {
         step: 'Context',
-        text: 'PRISM Counsel cross-domain: existing charter party contains no sanctions clause — legal team alerted automatically.',
+        text: 'Counsel cross-domain: existing charter party contains no sanctions clause — legal team alerted automatically.',
       },
       {
         step: 'Recommendation',

@@ -226,7 +226,7 @@ export default function ProfileScreen() {
             fetchers={[
               {
                 domain: 'lyte',
-                label: 'Lyte',
+                label: 'KORA',
                 color: LYTE_COLORS.electricBlue,
                 fetch: async () => {
                   try {
@@ -243,7 +243,7 @@ export default function ProfileScreen() {
               },
               {
                 domain: 'aegis',
-                label: 'Aegis',
+                label: 'PARAGON',
                 color: '#f59e0b',
                 fetch: async () => {
                   try {
@@ -260,7 +260,7 @@ export default function ProfileScreen() {
               },
               {
                 domain: 'vessels',
-                label: 'Vessels',
+                label: 'SEXTANT',
                 color: '#0ea5e9',
                 fetch: async () => {
                   try {

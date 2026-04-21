@@ -17,7 +17,7 @@ interface Platform {
 
 const FLAGSHIP: Platform[] = [
   {
-    name: "Alloy",
+    name: "FORGE",
     role: "Intelligence & Orchestration Engine",
     description: "The systems backbone. Workflow orchestration, signal processing, multi-agent execution, and Creative Workflows. Every platform in the ecosystem runs through Alloy.",
     accent: "hsl(222,68%,67%)",
@@ -27,7 +27,7 @@ const FLAGSHIP: Platform[] = [
     capabilities: ["Workflow orchestration", "Signal ingestion", "Multi-agent execution", "Creative Workflows"],
   },
   {
-    name: "Lyte",
+    name: "KORA",
     role: "Operational Decision Intelligence",
     description: "Role-based visibility into risk, latency, ownership gaps, and workflow friction. Executive, operations, and delivery views — before problems hit execution.",
     accent: "hsl(192,80%,48%)",
@@ -37,7 +37,7 @@ const FLAGSHIP: Platform[] = [
     capabilities: ["KPI command", "Risk observability", "Workflow telemetry", "Role-based views"],
   },
   {
-    name: "Vessels",
+    name: "SEXTANT",
     role: "Maritime Command Platform",
     description: "Fleet visibility, voyage performance, and operational exception management. Connects vessel movement to operational consequence and commercial outcome.",
     accent: "hsl(210,78%,54%)",
@@ -50,7 +50,7 @@ const FLAGSHIP: Platform[] = [
 
 const OPERATIONS: Platform[] = [
   {
-    name: "Aegis",
+    name: "PARAGON",
     role: "Unified Defense & Intelligence Command",
     description: "Consolidated security, managed operations, and AI intelligence in one platform. SOC command, XDR, adversary emulation, MSP operations, client management, AI research, model registry, and agentic cortex — for operators who need everything in one place.",
     accent: "hsl(232,68%,64%)",
@@ -60,7 +60,7 @@ const OPERATIONS: Platform[] = [
     capabilities: ["SOC & XDR command", "Managed operations", "AI intelligence engine", "Agentic cortex"],
   },
   {
-    name: "Terra",
+    name: "DOMAINE",
     role: "Portfolio Intelligence",
     description: "Full-stack real estate command: distress engine, deal pipeline, market intelligence, CRM, and brokerage-level visibility across NYC's five boroughs.",
     accent: "hsl(140,56%,40%)",
@@ -200,9 +200,9 @@ export default function EcosystemPage() {
               >
                 {[
                   { label: "SZL Holdings", desc: "Governed Platform", accent: "hsl(38,55%,60%)" },
-                  { label: "Lyte", desc: "Flagship Command", accent: "hsl(192,80%,48%)" },
+                  { label: "KORA", desc: "Flagship Command", accent: "hsl(192,80%,48%)" },
                   { label: "6 Domain Packs", desc: "Vertical intelligence", accent: "hsl(210,5%,54%)" },
-                  { label: "Alloy", desc: "Execution Fabric", accent: "hsl(222,68%,67%)" },
+                  { label: "FORGE", desc: "Execution Fabric", accent: "hsl(222,68%,67%)" },
                   { label: "2 Brands", desc: "Carlota Jo · Stephen Lutar", accent: "hsl(36,52%,54%)" },
                 ].map((item, i) => (
                   <div key={item.label} style={{

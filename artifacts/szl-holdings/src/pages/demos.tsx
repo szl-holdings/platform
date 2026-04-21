@@ -56,15 +56,15 @@ const DEMOS = [
   },
   {
     id: "prism-counsel",
-    title: "PRISM Counsel",
+    title: "Counsel",
     subtitle: "Legal matter intelligence",
     description: "Matter twin, demand readiness scoring, settlement band forecasting, deadline compliance, insurer behavior profiling — with a proof chain for everything that moves.",
     icon: Scale,
     color: "hsl(38,72%,58%)",
     colorMuted: "hsla(38,72%,58%,0.08)",
     colorBorder: "hsla(38,72%,58%,0.22)",
-    href: "/prism-counsel-public",
-    cta: "See PRISM Counsel",
+    href: "/counsel-public",
+    cta: "See Counsel",
   },
   {
     id: "mobile",
@@ -93,7 +93,7 @@ const DEMOS = [
 ];
 
 export default function DemosPage() {
-  const __pageMeta = usePageMeta({ title: "Live Demos — SZL Holdings", description: "Explore live demos of every SZL platform product. Lyte, Aegis, Vessels, Terra, PRISM Counsel, and Alloy." });
+  const __pageMeta = usePageMeta({ title: "Live Demos — SZL Holdings", description: "Explore live demos of every SZL platform product. Lyte, Aegis, Vessels, Terra, Counsel, and Alloy." });
 
   return (
     <>

@@ -28,7 +28,7 @@ import { SiteNav } from '@/components/SiteNav';
 const PLATFORMS = [
   {
     key: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     desc: 'Business Observability',
     accent: '#22d3ee',
     icon: Eye,
@@ -38,7 +38,7 @@ const PLATFORMS = [
   },
   {
     key: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     desc: 'Maritime Intelligence',
     accent: '#38bdf8',
     icon: Ship,
@@ -48,7 +48,7 @@ const PLATFORMS = [
   },
   {
     key: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     desc: 'Defense & Intel Command',
     accent: '#818cf8',
     icon: Shield,
@@ -58,7 +58,7 @@ const PLATFORMS = [
   },
   {
     key: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     desc: 'Real Estate Intelligence',
     accent: '#4ade80',
     icon: BarChart3,
@@ -68,7 +68,7 @@ const PLATFORMS = [
   },
   {
     key: 'prism',
-    name: 'PRISM Counsel',
+    name: 'Counsel',
     desc: 'Legal Matter Command',
     accent: '#d4a054',
     icon: Scale,
@@ -78,7 +78,7 @@ const PLATFORMS = [
   },
   {
     key: 'alloy',
-    name: 'Alloy',
+    name: 'FORGE',
     desc: 'Execution Fabric',
     accent: '#60a5fa',
     icon: Layers,
@@ -1116,7 +1116,7 @@ export default function NexusCommandPage() {
                       },
                       {
                         insight: 'Settlement forecast for Rodriguez matter increased to $320K',
-                        source: 'PRISM Counsel',
+                        source: 'Counsel',
                         accent: '#d4a054',
                       },
                       {

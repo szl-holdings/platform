@@ -350,7 +350,7 @@ export default function DecisionReplayPage() {
       <div className="flex items-center gap-4 flex-wrap">
         <span className="text-[10px] font-mono text-amber-400/40">EVENT TYPES:</span>
         {[
-          { type: 'alloy', label: 'Alloy Signal / System', color: '#f59e0b' },
+          { type: 'alloy', label: 'FORGE Signal / System', color: '#f59e0b' },
           { type: 'human', label: 'Human Actor', color: '#38bdf8' },
           { type: 'escalation', label: 'Escalation', color: '#f87171' },
         ].map((l) => (
@@ -441,7 +441,7 @@ export default function DecisionReplayPage() {
             <p className="text-[10px] font-mono text-amber-400/40 uppercase">Proof Coverage</p>
             <div className="space-y-2">
               {[
-                { label: 'Alloy Signals', value: alloyEvents, color: '#f59e0b' },
+                { label: 'FORGE Signals', value: alloyEvents, color: '#f59e0b' },
                 { label: 'Human Actions', value: humanEvents, color: '#38bdf8' },
                 { label: 'Total Events', value: totalEvents, color: '#a78bfa' },
               ].map((m) => (

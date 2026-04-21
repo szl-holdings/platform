@@ -1,7 +1,7 @@
 import type { ProofRecord } from '@/components/ProofDrawer';
 
 export type CaseSeverity = 'critical' | 'high' | 'medium' | 'info';
-export type CaseDomain = 'Aegis' | 'Vessels' | 'Terra' | 'PRISM Counsel' | 'Carlota Jo';
+export type CaseDomain = 'PARAGON' | 'SEXTANT' | 'DOMAINE' | 'Counsel' | 'Carlota Jo';
 
 export interface ApprovalContext {
   policyId: string;
@@ -71,7 +71,7 @@ export const DECISION_CASES: DecisionCase[] = [
     summary:
       'Aegis flagged unauthorized network access at Rotterdam partner port; Vessels detected an AIS gap on an inbound tanker. Cross-domain correlation triggered a governed isolation recommendation.',
     severity: 'critical',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     owner: 'J. van der Berg',
     ownerRole: 'SOC Lead',
     openedAt: '19 Apr 2026 08:14',
@@ -138,7 +138,7 @@ export const DECISION_CASES: DecisionCase[] = [
     proof: {
       id: 'PCH-DC-2026-0419-001',
       sourceSystem: 'Aegis SOC Feed',
-      sourceDomain: 'Aegis',
+      sourceDomain: 'PARAGON',
       signalType: 'threat_intelligence',
       confidence: 0.94,
       model: 'gpt-4o-mini',
@@ -214,7 +214,7 @@ export const DECISION_CASES: DecisionCase[] = [
     summary:
       'Terra surfaced a distressed asset with a 36-hour bid window. Capital allocation engine recommends a tier-2 bid below floor, conditional on legal review.',
     severity: 'high',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     owner: 'S. Mokoena',
     ownerRole: 'Capital Lead',
     openedAt: '18 Apr 2026 11:02',
@@ -232,12 +232,12 @@ export const DECISION_CASES: DecisionCase[] = [
     },
     recommendation: {
       title: 'Submit conditional bid at 0.84× floor with legal contingency',
-      body: 'Place a tier-2 bid at ZAR 15.5M conditional on a 72-hour legal title review through PRISM Counsel. Reserve secondary capital line for top-up if title is clean.',
+      body: 'Place a tier-2 bid at ZAR 15.5M conditional on a 72-hour legal title review through Counsel. Reserve secondary capital line for top-up if title is clean.',
       confidence: 0.81,
       model: 'gpt-4o · 2025-09-12',
       actions: [
         'Draft bid letter with title-clean contingency clause',
-        'Open PRISM Counsel matter for title review',
+        'Open Counsel matter for title review',
         'Reserve ZAR 4M secondary capital line',
         'Schedule physical walk-through within 24h',
       ],
@@ -260,7 +260,7 @@ export const DECISION_CASES: DecisionCase[] = [
       policyId: 'POL-CAP-TIER2-PROPERTY',
       policyName: 'Tier-2 Property Capital Allocation',
       covenantText:
-        'Single-asset bids above ZAR 10M require Capital Lead approval and a linked PRISM Counsel matter. Allocation cannot exceed 4% of available capital line without CFO sign-off.',
+        'Single-asset bids above ZAR 10M require Capital Lead approval and a linked Counsel matter. Allocation cannot exceed 4% of available capital line without CFO sign-off.',
       requiredRoles: ['capital_lead', 'legal_reviewer'],
       escalationPath: 'Capital Lead → CFO → Investment Committee',
       slaWindow: '24h',
@@ -270,15 +270,15 @@ export const DECISION_CASES: DecisionCase[] = [
       workflowId: 'WF-CAPITAL-BID-CT447',
       steps: [
         { label: 'Generate bid letter draft', status: 'queued' },
-        { label: 'Open PRISM Counsel matter', status: 'queued' },
+        { label: 'Open Counsel matter', status: 'queued' },
         { label: 'Reserve capital line', status: 'queued' },
         { label: 'Notify Capital Committee', status: 'queued' },
       ],
     },
     proof: {
       id: 'PCH-DC-2026-0418-014',
-      sourceSystem: 'Terra',
-      sourceDomain: 'Terra',
+      sourceSystem: 'DOMAINE Beacon',
+      sourceDomain: 'DOMAINE',
       signalType: 'capital_allocation',
       confidence: 0.81,
       model: 'gpt-4o',
@@ -290,7 +290,7 @@ export const DECISION_CASES: DecisionCase[] = [
         { label: 'Tier-2 allocation gate: requires legal review', passed: true },
         { label: 'Allocation under 4% of capital line', passed: true },
         {
-          label: 'PRISM Counsel matter: not yet opened',
+          label: 'Counsel matter: not yet opened',
           passed: false,
           note: 'Will be opened on approval',
         },
@@ -342,16 +342,16 @@ export const DECISION_CASES: DecisionCase[] = [
     id: 'DC-2026-0417-022',
     title: 'Counsel matter intake — vendor breach notice',
     summary:
-      'PRISM Counsel intake flagged a vendor breach notice that triggers a 72-hour data subject notification clock. Recommendation drafted with covenant context.',
+      'Counsel intake flagged a vendor breach notice that triggers a 72-hour data subject notification clock. Recommendation drafted with covenant context.',
     severity: 'medium',
-    domain: 'PRISM Counsel',
+    domain: 'Counsel',
     owner: 'L. Nkosi',
     ownerRole: 'Counsel Lead',
     openedAt: '17 Apr 2026 14:48',
     currentStage: 6,
     signal: {
       label: 'Vendor breach notification — VND-2026-088',
-      sourceSystem: 'PRISM Counsel · Intake Channel',
+      sourceSystem: 'Counsel · Intake Channel',
       receivedAt: '17 Apr 2026 14:48:02',
       raw: {
         vendor: 'Northwind Data Services',
@@ -407,8 +407,8 @@ export const DECISION_CASES: DecisionCase[] = [
     },
     proof: {
       id: 'PCH-DC-2026-0417-022',
-      sourceSystem: 'PRISM Counsel',
-      sourceDomain: 'PRISM Counsel',
+      sourceSystem: 'Counsel',
+      sourceDomain: 'Counsel',
       signalType: 'regulatory_obligation',
       confidence: 0.88,
       model: 'claude-sonnet-4',

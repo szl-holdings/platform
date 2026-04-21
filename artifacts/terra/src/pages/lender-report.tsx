@@ -107,7 +107,7 @@ const LP_INVESTORS = [
     status: 'current',
   },
   {
-    name: 'Atlas Endowment Fund',
+    name: 'Crestview Endowment Fund',
     commitment: 25000000,
     deployed: 19000000,
     distributions: 5100000,

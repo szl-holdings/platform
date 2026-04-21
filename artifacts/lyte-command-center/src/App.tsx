@@ -211,7 +211,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
         {expanded && (
           <div className="flex-1 min-w-0">
             <p className="text-[13px] font-semibold text-amber-100 font-display tracking-tight">
-              Lyte
+              KORA
             </p>
             <p className="text-[10px] text-amber-400/50 font-mono">Decision Intelligence</p>
           </div>
@@ -305,7 +305,7 @@ const SENTIENT_UPDATES: SentientUpdate[] = [
   {
     id: 'lu1',
     headline: 'Vantex approval chain still void at step 1 — 47 days stalled',
-    surface: 'Lyte',
+    surface: 'KORA',
     entityLabel: 'Vantex Acquisition',
     severity: 'critical',
     timestamp: new Date(Date.now() - 8 * 60000).toISOString(),
@@ -314,7 +314,7 @@ const SENTIENT_UPDATES: SentientUpdate[] = [
   {
     id: 'lu2',
     headline: '$4.2M Q2 revenue at risk — close probability collapsed 84% → 31%',
-    surface: 'Lyte',
+    surface: 'KORA',
     entityLabel: 'Vantex Acquisition',
     severity: 'critical',
     timestamp: new Date(Date.now() - 22 * 60000).toISOString(),
@@ -323,7 +323,7 @@ const SENTIENT_UPDATES: SentientUpdate[] = [
   {
     id: 'lu3',
     headline: '3 escalation attempts blocked by policy — manual override required',
-    surface: 'Lyte',
+    surface: 'KORA',
     entityLabel: 'Procurement Approval Chain',
     severity: 'warning',
     timestamp: new Date(Date.now() - 47 * 60000).toISOString(),
@@ -332,7 +332,7 @@ const SENTIENT_UPDATES: SentientUpdate[] = [
   {
     id: 'lu4',
     headline: 'Stratford Partners shows identical pattern — $1.8M secondary risk',
-    surface: 'Lyte',
+    surface: 'KORA',
     entityLabel: 'Stratford Expansion',
     severity: 'warning',
     timestamp: new Date(Date.now() - 3 * 3600000).toISOString(),
@@ -341,7 +341,7 @@ const SENTIENT_UPDATES: SentientUpdate[] = [
   {
     id: 'lu5',
     headline: 'Buyer engagement decay — David Chen silent for 28 days',
-    surface: 'Lyte',
+    surface: 'KORA',
     entityLabel: 'Vantex Acquisition',
     severity: 'info',
     timestamp: new Date(Date.now() - 5 * 3600000).toISOString(),
@@ -386,13 +386,13 @@ const SENTIENT_CROSS_LINKS: SentientCrossLink[] = [
     surfaceAccent: '#8b5cf6',
     label: 'Vantex legal review package — blocked 30 days',
     description:
-      'PRISM Counsel cannot advance the Vantex legal package until procurement clearance is restored.',
+      'Counsel cannot advance the Vantex legal package until procurement clearance is restored.',
     href: '/counsel/dashboard',
     preservedContext: { surface: 'lyte', entity: 'lyte-del-legal-001' },
   },
   {
     id: 'lcl2',
-    surface: 'Vessels',
+    surface: 'SEXTANT',
     surfaceAccent: '#0ea5e9',
     label: 'MV Atlantic Falcon voyage tied to Vantex acquisition',
     description:
@@ -402,12 +402,12 @@ const SENTIENT_CROSS_LINKS: SentientCrossLink[] = [
   },
   {
     id: 'lcl3',
-    surface: 'Sentra',
+    surface: 'TENAX',
     surfaceAccent: '#ef4444',
     label: 'Vantex endpoints flagged in CVE-2024-21412 sweep',
     description:
-      'Sentra has 3 Vantex-linked assets in active threat scope — coordinate before re-engaging buyer.',
-    href: '/sentra/threats',
+      'TENAX has 3 Vantex-linked assets in active threat scope — coordinate before re-engaging buyer.',
+    href: '/tenax/threats',
     preservedContext: { surface: 'lyte', entity: 'lyte-opp-vantex-001' },
   },
 ];
@@ -479,7 +479,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
             <Menu className="w-4 h-4" />
           </button>
           <div className="flex items-center gap-2 text-xs text-amber-400/40 font-mono">
-            <span>LYTE</span>
+            <span>KORA</span>
             {currentPage && (
               <>
                 <ChevronRight className="w-3 h-3" />
@@ -493,7 +493,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
           <div className="ml-auto flex items-center gap-3">
             <div className="proof-badge">
               <Shield className="w-2.5 h-2.5" />
-              LYTE-PROOF
+              KORA-PROOF
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-amber-500/15 bg-amber-500/5">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -515,7 +515,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
         onClose={sentientHide}
         onOpen={sentientShow}
         surfaceId="lyte"
-        surfaceName="Lyte Decision Intelligence"
+        surfaceName="KORA Decision Intelligence"
         accentColor={LYTE_ACCENT}
         entityType="Opportunity"
         entityLabel="Vantex Acquisition — Q2 Close"
@@ -528,9 +528,9 @@ function AppShell({ children }: { children: React.ReactNode }) {
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         commands={paletteCommands}
-        appName="Lyte"
+        appName="KORA"
         accentColor={LYTE_ACCENT}
-        placeholder="Search Lyte — pages, decisions, actions..."
+        placeholder="Search KORA — pages, decisions, actions..."
       />
     </div>
   );

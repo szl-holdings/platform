@@ -17,7 +17,7 @@ initWebVitals('lyte', '/api/');
 initAnalytics({ appSlug: 'lyte' });
 
 createRoot(document.getElementById('root')!).render(
-  <ErrorBoundary appName="Lyte" accentColor="#d4a054">
+  <ErrorBoundary appName="KORA" accentColor="#d4a054">
     <GraphQLProvider>
       <App />
     </GraphQLProvider>

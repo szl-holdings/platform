@@ -32,7 +32,7 @@ interface ChangeEntry {
 const FALLBACK_CHANGES: ChangeEntry[] = [
   {
     id: 'c1',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     domainColor: '#0ea5e9',
     type: 'security',
     severity: 'major',
@@ -48,7 +48,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c2',
-    domain: 'Lyte',
+    domain: 'KORA',
     domainColor: '#f97316',
     type: 'feature',
     severity: 'minor',
@@ -64,7 +64,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c3',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     domainColor: '#22c55e',
     type: 'deploy',
     severity: 'patch',
@@ -80,7 +80,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c4',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     domainColor: '#ef4444',
     type: 'config',
     severity: 'minor',
@@ -96,7 +96,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c5',
-    domain: 'PRISM',
+    domain: 'PRAXIS',
     domainColor: '#a855f7',
     type: 'feature',
     severity: 'major',
@@ -112,7 +112,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c6',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     domainColor: '#0ea5e9',
     type: 'fix',
     severity: 'patch',
@@ -128,7 +128,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c7',
-    domain: 'Lyte',
+    domain: 'KORA',
     domainColor: '#f97316',
     type: 'breaking',
     severity: 'major',
@@ -160,7 +160,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c9',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     domainColor: '#ef4444',
     type: 'feature',
     severity: 'minor',
@@ -176,7 +176,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c10',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     domainColor: '#22c55e',
     type: 'fix',
     severity: 'patch',
@@ -208,7 +208,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c12',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     domainColor: '#0ea5e9',
     type: 'config',
     severity: 'patch',

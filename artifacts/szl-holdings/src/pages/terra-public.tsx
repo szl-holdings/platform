@@ -241,7 +241,7 @@ export default function TerraPublicPage() {
                     Real estate is a domain rich in public data and poor in execution structure. Operators work from spreadsheets and manual data pulls while critical signals — distress, liens, flood risk — sit in disconnected systems. Terra applies Alloy's operating loop to the deal lifecycle: turning public data into a structured Property Twin, routing diligence actions through governed workflows, and producing LP-ready output with full provenance.
                   </p>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,54%)", maxWidth: "46ch" }}>
-                    The architecture directly mirrors PRISM Counsel: a live structured object per asset (Property Twin, parallel to Matter Twin), signal enrichment from authoritative public sources, governed workflow routing through Alloy, and a diligence audit trail designed for external review.
+                    The architecture directly mirrors Counsel: a live structured object per asset (Property Twin, parallel to Matter Twin), signal enrichment from authoritative public sources, governed workflow routing through Alloy, and a diligence audit trail designed for external review.
                   </p>
                 </m.div>
                 <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.08 }}>
@@ -341,7 +341,7 @@ export default function TerraPublicPage() {
                   The execution fabric is inherited. Terra brings real estate-specific intelligence.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
-                  Terra does not rebuild what Alloy already provides. Every capability below comes from the shared platform — the same infrastructure governing PRISM Counsel, Vessels, Aegis, and Carlota Jo.
+                  Terra does not rebuild what Alloy already provides. Every capability below comes from the shared platform — the same infrastructure governing Counsel, Vessels, Aegis, and Carlota Jo.
                 </p>
               </m.div>
               <div style={{ display: "grid", gap: "1rem", marginBottom: "2.5rem" }} className="lg:grid-cols-3 md:grid-cols-2">

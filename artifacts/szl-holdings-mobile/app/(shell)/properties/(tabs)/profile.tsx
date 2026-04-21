@@ -152,7 +152,7 @@ export default function ProfileTab() {
             fetchers={[
               {
                 domain: 'terra',
-                label: 'Terra',
+                label: 'DOMAINE',
                 color: colors.gold,
                 fetch: async () => {
                   try {
@@ -169,7 +169,7 @@ export default function ProfileTab() {
               },
               {
                 domain: 'lyte',
-                label: 'Lyte',
+                label: 'KORA',
                 color: '#00d4ff',
                 fetch: async () => {
                   try {
@@ -186,7 +186,7 @@ export default function ProfileTab() {
               },
               {
                 domain: 'aegis',
-                label: 'Aegis',
+                label: 'PARAGON',
                 color: '#f59e0b',
                 fetch: async () => {
                   try {

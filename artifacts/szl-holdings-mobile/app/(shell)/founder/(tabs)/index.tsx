@@ -54,7 +54,7 @@ const PROFILE = {
 const VENTURES = [
   {
     slug: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     tagline: 'Maritime Intelligence',
     description:
       'AIS fleet tracking, voyage economics, and sanctions screening covering global shipping routes.',
@@ -68,7 +68,7 @@ const VENTURES = [
   },
   {
     slug: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     tagline: 'Defense & Intelligence',
     description:
       'Unified cybersecurity command converging SOC operations, threat intel, and MSP management.',
@@ -82,7 +82,7 @@ const VENTURES = [
   },
   {
     slug: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     tagline: 'Real Estate Intelligence',
     description:
       'Distress-first real estate platform covering all five NYC boroughs with multi-factor scoring.',
@@ -96,7 +96,7 @@ const VENTURES = [
   },
   {
     slug: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     tagline: 'Business Observability',
     description:
       'AI ops dashboard with multi-model routing, cross-portfolio signal aggregation, and observability.',
@@ -153,7 +153,7 @@ const MILESTONES = [
   },
   {
     year: '2024 Q1',
-    event: 'Shipped Alloy — Execution Fabric',
+    event: 'Shipped FORGE — Execution Fabric',
     role: 'Lead Architect',
     company: 'SZL Holdings',
     logoInitials: 'AL',
@@ -271,7 +271,7 @@ const ARTICLES_FALLBACK: Article[] = [
     title: 'Governed Autonomy: The AI Governance Model That Actually Works in Enterprise',
     slug: 'governed-autonomy',
     excerpt:
-      "AI agents that act without approval are a liability. AI agents that require approval for everything are useless. The answer is a tiered guardian model — and it's the core of how CORTEX operates.",
+      "AI agents that act without approval are a liability. AI agents that require approval for everything are useless. The answer is a tiered guardian model — and it's the core of how APEX operates.",
     summary:
       'AI agents that act without approval are a liability. AI agents that require approval for everything are useless. The answer is a tiered guardian model.',
     publishedAt: '2025-03-01T00:00:00Z',

@@ -135,7 +135,7 @@ export default function SentraLandingPage() {
               <Shield className="w-5 h-5 text-red-400" />
             </div>
             <span className="text-sm font-medium text-red-400/60">
-              Sentra Cyber Resilience Command · Powered by Alloy
+              TENAX Cyber Resilience Command · Powered by FORGE
             </span>
           </div>
 
@@ -146,7 +146,7 @@ export default function SentraLandingPage() {
           </h1>
 
           <p className="text-lg text-red-200/60 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Sentra is the cyber resilience command platform for security leaders who need more than
+            TENAX is the cyber resilience command platform for security leaders who need more than
             a SIEM dashboard. See the exposures that map to real assets, prove the recovery you
             promised, and run incidents from a single command surface.
           </p>
@@ -185,13 +185,13 @@ export default function SentraLandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-[10px] font-mono text-red-400/40 uppercase tracking-widest mb-3">
-              What Sentra Does
+              What TENAX Does
             </p>
             <h2 className="font-display text-3xl font-bold text-red-50 mb-3">
               Cyber resilience command. Not another SIEM.
             </h2>
             <p className="text-red-300/50 mt-3 max-w-xl mx-auto text-sm">
-              Most security tools stop at alert. Sentra carries every signal through to the asset it
+              Most security tools stop at alert. TENAX carries every signal through to the asset it
               threatens, the recovery it endangers, and the decision someone has to make in the next
               ten minutes.
             </p>
@@ -287,7 +287,7 @@ export default function SentraLandingPage() {
               Every signal is a decision in waiting.
             </h2>
             <p className="text-red-300/50 max-w-xl mx-auto text-sm">
-              A snapshot from the Sentra command stream — every event already mapped to severity,
+              A snapshot from the TENAX command stream — every event already mapped to severity,
               asset, and the next action.
             </p>
           </div>
@@ -362,7 +362,7 @@ export default function SentraLandingPage() {
             <p className="text-red-300/50 text-sm max-w-2xl mx-auto leading-relaxed">
               Every CISO already has alerts. Very few can prove that the controls they attested to
               are still in place, that the recovery they promised is actually rehearsed, or that the
-              next incident has an owner before it happens. That is the gap Sentra closes.
+              next incident has an owner before it happens. That is the gap TENAX closes.
             </p>
           </div>
 
@@ -405,7 +405,7 @@ export default function SentraLandingPage() {
             utmSource="sentra"
             variant="banner"
             heading="Cyber resilience essays, straight to your inbox"
-            subheading="SZL Command essays on incident command, recovery readiness, and the decision infrastructure behind Sentra — delivered weekly."
+            subheading="SZL Command essays on incident command, recovery readiness, and the decision infrastructure behind TENAX — delivered weekly."
           />
         </div>
       </section>
@@ -417,7 +417,7 @@ export default function SentraLandingPage() {
           </p>
           <h2 className="font-display text-3xl font-bold text-red-50 mb-4">Request a Pilot</h2>
           <p className="text-red-300/55 mb-8 text-sm leading-relaxed max-w-xl mx-auto">
-            Sentra is built for security leaders who need to command resilience, not just monitor
+            TENAX is built for security leaders who need to command resilience, not just monitor
             it. Request a pilot — we will walk through the full command center against your
             environment.
           </p>
@@ -442,7 +442,7 @@ export default function SentraLandingPage() {
         onClose={() => setDemoOpen(false)}
         type="demo"
         app="sentra"
-        subtitle="Sentra Cyber Resilience Command"
+        subtitle="TENAX Cyber Resilience Command"
       />
     </div>
   );

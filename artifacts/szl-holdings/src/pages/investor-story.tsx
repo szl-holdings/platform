@@ -60,17 +60,17 @@ const nowThen = [
 const expansionLanes = [
   {
     icon: Ship,
-    name: "Vessels",
+    name: "SEXTANT",
     body: "Maritime intelligence for fleet and voyage operations once the core narrative is commercially anchored.",
   },
   {
     icon: ShieldCheck,
-    name: "Aegis",
+    name: "PARAGON",
     body: "A security and command environment for incident, threat, and managed operations workflows.",
   },
   {
     icon: Building2,
-    name: "Terra",
+    name: "DOMAINE",
     body: "Real-estate intelligence where fragmented signal, process latency, and ownership ambiguity create opportunity.",
   },
   {
@@ -163,7 +163,7 @@ export default function InvestorStoryPage() {
                   <div className="mb-4 inline-flex rounded-xl border border-[#4a90b8]/20 bg-black/20 p-3">
                     <Workflow className="h-5 w-5 text-[#4a90b8]" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white">Alloy</h3>
+                  <h3 className="text-xl font-semibold text-white">FORGE</h3>
                   <p className="mt-3 text-sm leading-7 text-white/78">
                     Execution fabric for signal normalization, workflow orchestration, routing, and
                     auditability. It is the system layer that makes the product durable.
@@ -255,7 +255,7 @@ export default function InvestorStoryPage() {
                 </p>
                 <ul className="mt-6 space-y-3">
                   {[
-                    "Lead with Lyte + Alloy in every investor and lender conversation.",
+                    "Lead with KORA + FORGE in every investor and lender conversation.",
                     "Describe Vessels, Aegis, Terra, and Carlota Jo as expansion lanes and option value.",
                     "Make proof, pilot readiness, and buyer clarity the standard for what becomes a first-class surface.",
                   ].map((item) => (

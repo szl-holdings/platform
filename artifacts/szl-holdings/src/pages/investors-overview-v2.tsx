@@ -6,13 +6,13 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { useCapabilityManifest } from "@/hooks/useCapabilityManifest";
 
 const platformMap = [
-  { name: "Lyte", role: "Flagship command surface — PRISM framework, signal-to-action loop, five-pillar intelligence", color: "#d4a054", href: "/lyte" },
-  { name: "Alloy", role: "Execution fabric — workflow orchestration, approval gates, immutable audit trail", color: "#8b7ac8", href: "/alloy-fabric" },
-  { name: "CORTEX", role: "Unified mobile command — all domain workspaces, biometric auth, offline sync", color: "#4a90b8", href: "/cortex" },
-  { name: "Aegis", role: "Domain pack — Security & defense intelligence, SOC command, threat governance", color: "#c45a4a", href: "/solutions/aegis" },
-  { name: "Vessels", role: "Domain pack — Maritime intelligence, voyage twins, route risk, sanctions compliance", color: "#4a90b8", href: "/solutions/vessels" },
-  { name: "Terra", role: "Domain pack — Real estate intelligence, distress pipeline, ownership graph, deal workflow", color: "#c8953c", href: "/solutions/terra" },
-  { name: "PRISM Counsel", role: "Domain pack — Legal matter command, deadlines, proof chain, export safety", color: "#6aaa72", href: "/solutions/prism-counsel" },
+  { name: "KORA", role: "Flagship command surface — PRISM framework, signal-to-action loop, five-pillar intelligence", color: "#d4a054", href: "/lyte" },
+  { name: "FORGE", role: "Execution fabric — workflow orchestration, approval gates, immutable audit trail", color: "#8b7ac8", href: "/alloy-fabric" },
+  { name: "APEX", role: "Unified mobile command — all domain workspaces, biometric auth, offline sync", color: "#4a90b8", href: "/cortex" },
+  { name: "PARAGON", role: "Domain pack — Security & defense intelligence, SOC command, threat governance", color: "#c45a4a", href: "/solutions/aegis" },
+  { name: "SEXTANT", role: "Domain pack — Maritime intelligence, voyage twins, route risk, sanctions compliance", color: "#4a90b8", href: "/solutions/vessels" },
+  { name: "DOMAINE", role: "Domain pack — Real estate intelligence, distress pipeline, ownership graph, deal workflow", color: "#c8953c", href: "/solutions/terra" },
+  { name: "Counsel", role: "Domain pack — Legal matter command, deadlines, proof chain, export safety", color: "#6aaa72", href: "/counsel" },
   { name: "Carlota Jo", role: "Domain pack — Premium advisory, client portal, structured delivery model", color: "#a0a0c0", href: "/carlota-jo" },
 ];
 
@@ -54,7 +54,7 @@ const INVESTOR_CLAIMS = [
     claim: "Live threat intelligence — CISA KEV, NVD CVE, MITRE ATT&CK",
     manifestStatus: "live" as const,
     evidence: "Aegis CAP: CISA KEV and NVD CVE active with no API key required. MITRE ATT&CK v14 integrated. Real-time ingestion confirmed.",
-    capId: "Aegis",
+    capId: "PARAGON",
   },
   {
     claim: "Multi-tenant RBAC with org-level data isolation",
@@ -66,7 +66,7 @@ const INVESTOR_CLAIMS = [
     claim: "NYC distress property pipeline — live government data",
     manifestStatus: "live" as const,
     evidence: "Terra CAP: NYC Open Data pipeline active — lis pendens, tax lien, pre-foreclosure. Census ACS, HUD, BLS, FEMA also live.",
-    capId: "Terra",
+    capId: "DOMAINE",
   },
   {
     claim: "AI agents advisory-only — no autonomous execution",

@@ -170,7 +170,7 @@ export default function CarlotaJoPublicPage() {
                     Carlota Jo is a premium advisory and client service platform for engagements where trust, discretion, and operational precision are non-negotiable. Governed intake. Structured service flows. Discreet, authorized delivery.
                   </p>
                   <p style={{ fontSize: "clamp(0.9375rem,1.6vw,1rem)", lineHeight: 1.72, color: "hsl(214,7%,52%)", maxWidth: "50ch", marginBottom: "2.25rem" }}>
-                    Powered by Alloy for governed execution — every service action logged, attributed, and auditable. Excellence is consistent because the platform makes it structural.
+                    Powered by FORGE for governed execution — every service action logged, attributed, and auditable. Excellence is consistent because the platform makes it structural.
                   </p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                     <Link href="/contact" className="szl-btn-primary">Inquire confidentially <ArrowRight size={15} /></Link>
@@ -215,7 +215,7 @@ export default function CarlotaJoPublicPage() {
                     A consulting and services lane — not a product vertical.
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "46ch", marginBottom: "1.25rem" }}>
-                    Carlota Jo is the consulting and professional services lane within SZL Holdings. Where the product lanes (Lyte, PRISM Counsel, Terra, Vessels, Aegis) deliver software platforms, Carlota Jo delivers advisory services — with the same Alloy operating infrastructure ensuring that service delivery is governed, attributable, and auditable.
+                    Carlota Jo is the consulting and professional services lane within SZL Holdings. Where the product lanes (Lyte, Counsel, Terra, Vessels, Aegis) deliver software platforms, Carlota Jo delivers advisory services — with the same Alloy operating infrastructure ensuring that service delivery is governed, attributable, and auditable.
                   </p>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,54%)", maxWidth: "46ch" }}>
                     The client service context demands a different user experience — premium, discreet, personally attentive. The operational infrastructure beneath it is the same: Alloy's approval gates, workflow routing, audit trail, and access controls applied to every engagement action.

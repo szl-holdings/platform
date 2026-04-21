@@ -201,7 +201,7 @@ export default function AegisMarketingHome() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
               <Flame className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-[15px] tracking-tight">Aegis</span>
+            <span className="font-bold text-[15px] tracking-tight">PARAGON</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
             {['Platform', 'Capabilities', 'Use Cases', 'Security', 'Pricing'].map((item) => (
@@ -581,7 +581,7 @@ export default function AegisMarketingHome() {
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
                   <Flame className="w-3.5 h-3.5 text-white" />
                 </div>
-                <span className="font-bold text-[14px]">Aegis</span>
+                <span className="font-bold text-[14px]">PARAGON</span>
               </div>
               <p className="text-[12px] text-gray-500 leading-relaxed">
                 {brand.products.find((p) => p.id === 'aegis')?.oneLiner ??
@@ -625,9 +625,9 @@ export default function AegisMarketingHome() {
               <div className="space-y-2.5">
                 {[
                   { name: 'SZL Holdings', href: '/szl-holdings/' },
-                  { name: 'Vessels', href: '/vessels/' },
-                  { name: 'Lyte', href: '/command/operations/' },
-                  { name: 'Terra', href: '/terra/' },
+                  { name: 'SEXTANT', href: '/vessels/' },
+                  { name: 'KORA', href: '/command/operations/' },
+                  { name: 'DOMAINE', href: '/terra/' },
                   { name: 'Carlota Jo', href: '/carlota-jo/' },
                 ].map((l) => (
                   <a

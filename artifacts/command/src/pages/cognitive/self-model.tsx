@@ -165,7 +165,7 @@ const DEMO_SELF_MODEL: SelfModel = {
   ],
   confidenceProfiles: [
     {
-      domain: 'Vessels',
+      domain: 'SEXTANT',
       calibrationAccuracy: 0.71,
       overconfidenceRate: 0.18,
       underconfidenceRate: 0.04,
@@ -173,7 +173,7 @@ const DEMO_SELF_MODEL: SelfModel = {
       lastUpdated: '2026-04-17',
     },
     {
-      domain: 'Terra',
+      domain: 'DOMAINE',
       calibrationAccuracy: 0.86,
       overconfidenceRate: 0.07,
       underconfidenceRate: 0.09,
@@ -181,7 +181,7 @@ const DEMO_SELF_MODEL: SelfModel = {
       lastUpdated: '2026-04-16',
     },
     {
-      domain: 'Aegis',
+      domain: 'PARAGON',
       calibrationAccuracy: 0.83,
       overconfidenceRate: 0.11,
       underconfidenceRate: 0.06,
@@ -189,7 +189,7 @@ const DEMO_SELF_MODEL: SelfModel = {
       lastUpdated: '2026-04-15',
     },
     {
-      domain: 'PRISM',
+      domain: 'PRAXIS',
       calibrationAccuracy: 0.88,
       overconfidenceRate: 0.05,
       underconfidenceRate: 0.07,
@@ -205,7 +205,7 @@ const DEMO_SELF_MODEL: SelfModel = {
       lastUpdated: '2026-04-16',
     },
     {
-      domain: 'Lyte',
+      domain: 'KORA',
       calibrationAccuracy: 0.85,
       overconfidenceRate: 0.09,
       underconfidenceRate: 0.06,

@@ -229,7 +229,7 @@ export default function S03Category() {
             }}
           >
             "This is the governance layer the AI action economy is missing. They've built what
-            Palantir would have built if it started today — but for commercial operators instead of
+            a vertically-integrated AI platform would achieve today — but for commercial operators instead of
             government."
           </div>
         </div>

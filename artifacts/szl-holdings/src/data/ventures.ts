@@ -85,7 +85,7 @@ export interface Venture {
 export const ventures: Venture[] = [
   {
     id: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     tagline: 'Signals → Insights → Actions',
     oneLiner:
       'Governed decision command layer that converts operational signals into prioritized, traceable, policy-gated decisions.',
@@ -169,7 +169,7 @@ export const ventures: Venture[] = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     tagline: 'Maritime Intelligence at Scale',
     oneLiner:
       'Full-spectrum maritime domain awareness — vessel tracking, sanctions compliance, and route intelligence in one unified command view.',
@@ -313,7 +313,7 @@ export const ventures: Venture[] = [
   },
   {
     id: 'firestorm',
-    name: 'Aegis',
+    name: 'PARAGON',
     tagline: 'Continuous Adversarial Security Simulation',
     oneLiner:
       'Military-grade cyber range platform enabling continuous red team / blue team exercises at enterprise scale.',
@@ -432,7 +432,7 @@ export const ventures: Venture[] = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     tagline: 'Operational Signal Intelligence — OBSERVE Layer',
     oneLiner:
       'Continuous operational decision intelligence detecting KPI movement, value leakage, and market anomalies across enterprise verticals.',
@@ -490,7 +490,7 @@ export const ventures: Venture[] = [
   },
   {
     id: 'alloy',
-    name: 'Alloy',
+    name: 'FORGE',
     tagline: 'Execution Fabric — ENGINE Layer',
     oneLiner:
       'The engine powering workflows, scenario modeling, agent coordination, and confidence-scored decision intelligence across the SZL ecosystem.',

@@ -108,7 +108,7 @@ export default function EnterpriseDemo() {
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
             <Flame className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="font-bold text-[14px]">Aegis</span>
+          <span className="font-bold text-[14px]">PARAGON</span>
           <span className="text-[11px] text-gray-600 ml-1">/ Enterprise</span>
         </div>
         <Link href="/home">

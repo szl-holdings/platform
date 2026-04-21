@@ -67,7 +67,7 @@ const SAMPLE_EVENTS: TimelineEvent[] = [
     label: 'Recommendation Generated',
     description: 'Alloy synthesized 3 countermeasures from 7 evidence signals',
     severity: 'info',
-    actor: 'Alloy',
+    actor: 'FORGE',
     meta: { confidence: '82%', model: 'gpt-4o' },
   },
   {
@@ -84,7 +84,7 @@ const SAMPLE_EVENTS: TimelineEvent[] = [
     label: 'Alert Threshold Breached',
     description: 'Action Debt score exceeded 85 — three compounding delays detected',
     severity: 'critical',
-    actor: 'Pulse',
+    actor: 'LUMINA',
   },
   {
     id: 't5',
@@ -92,14 +92,14 @@ const SAMPLE_EVENTS: TimelineEvent[] = [
     label: 'Baseline Established',
     description: 'Ownership Drift calibration completed for Q2',
     severity: 'neutral',
-    actor: 'Lyte',
+    actor: 'KORA',
   },
 ];
 
 const SAMPLE_NODES: GraphNode[] = [
   {
     id: 'alloy',
-    label: 'Alloy',
+    label: 'FORGE',
     x: 0.5,
     y: 0.15,
     radius: 14,
@@ -107,9 +107,9 @@ const SAMPLE_NODES: GraphNode[] = [
     ringColor: '#00d4ff',
   },
   { id: 'guardian', label: 'Guardian', x: 0.2, y: 0.45, radius: 10, color: '#a855f7' },
-  { id: 'pulse', label: 'Pulse', x: 0.8, y: 0.45, radius: 10, color: '#ffb700' },
-  { id: 'lyte', label: 'Lyte', x: 0.35, y: 0.75, radius: 10, color: '#00e878' },
-  { id: 'vessels', label: 'Vessels', x: 0.65, y: 0.75, radius: 10, color: '#14b8a6' },
+  { id: 'pulse', label: 'LUMINA', x: 0.8, y: 0.45, radius: 10, color: '#ffb700' },
+  { id: 'lyte', label: 'KORA', x: 0.35, y: 0.75, radius: 10, color: '#00e878' },
+  { id: 'vessels', label: 'SEXTANT', x: 0.65, y: 0.75, radius: 10, color: '#14b8a6' },
 ];
 
 const SAMPLE_EDGES: GraphEdge[] = [

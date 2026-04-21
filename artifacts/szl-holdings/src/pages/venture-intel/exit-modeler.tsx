@@ -12,7 +12,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const COMPANIES = [
   {
     id: "lyte",
-    name: "Lyte",
+    name: "KORA",
     color: "#38bee0",
     rgb: "56,190,224",
     currentArr: "12.4M",
@@ -62,7 +62,7 @@ const COMPANIES = [
   },
   {
     id: "vessels",
-    name: "Vessels",
+    name: "SEXTANT",
     color: "#3aa4dc",
     rgb: "58,164,220",
     currentArr: "8.2M",
@@ -112,7 +112,7 @@ const COMPANIES = [
   },
   {
     id: "aegis",
-    name: "Aegis",
+    name: "PARAGON",
     color: "#6366f1",
     rgb: "99,102,241",
     currentArr: "6.8M",
@@ -138,7 +138,7 @@ const COMPANIES = [
   },
   {
     id: "prism",
-    name: "PRISM",
+    name: "PRAXIS",
     color: "#a855f7",
     rgb: "168,85,247",
     currentArr: "5.4M",
@@ -164,7 +164,7 @@ const COMPANIES = [
   },
   {
     id: "terra",
-    name: "Terra",
+    name: "DOMAINE",
     color: "#6b9c30",
     rgb: "107,156,48",
     currentArr: "4.2M",

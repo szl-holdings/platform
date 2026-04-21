@@ -8,7 +8,7 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
   domains: [
     {
       id: 'aegis',
-      name: 'Aegis',
+      name: 'PARAGON',
       icon: 'shield',
       color: '#6366f1',
       score: 91,
@@ -23,7 +23,7 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
     },
     {
       id: 'vessels',
-      name: 'Vessels',
+      name: 'SEXTANT',
       icon: 'ship',
       color: '#0ea5e9',
       score: 87,
@@ -38,7 +38,7 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
     },
     {
       id: 'terra',
-      name: 'Terra',
+      name: 'DOMAINE',
       icon: 'map',
       color: '#10b981',
       score: 79,
@@ -53,7 +53,7 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
     },
     {
       id: 'lyte',
-      name: 'Lyte',
+      name: 'KORA',
       icon: 'zap',
       color: '#d4a054',
       score: 82,
@@ -83,7 +83,7 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
     },
     {
       id: 'prism',
-      name: 'PRISM',
+      name: 'PRAXIS',
       icon: 'brain',
       color: '#ec4899',
       score: 88,

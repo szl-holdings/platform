@@ -72,7 +72,7 @@ const BRIEFINGS: Briefing[] = [
           'Five independent signals across maritime, cyber, financial, and legal domains converge on coordinated disruption of Red Sea shipping corridors. APT-41 targeting logistics companies coincides with vessel rerouting and insurance premium spikes. Confidence: 94%. Immediate action required on vessel rerouting and contract force majeure triggers.',
         evidence: [
           'Vessels AIS anomaly detection',
-          'Aegis APT-41 IOC match',
+          'PARAGON APT-41 IOC match',
           'SZL insurance premium data',
           'PRISM contract review queue',
         ],

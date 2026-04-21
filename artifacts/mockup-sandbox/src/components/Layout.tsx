@@ -29,7 +29,7 @@ const NAV_ITEMS: Array<{
   description: string;
   group?: string;
 }> = [
-  { id: 'home', label: 'NEXUS', icon: Home, description: 'Home & Overview' },
+  { id: 'home', label: 'PRAXIS', icon: Home, description: 'Home & Overview' },
   { id: 'research', label: 'Research', icon: FlaskConical, description: 'Parallel Swarm' },
   { id: 'memory', label: 'Memory', icon: Brain, description: 'Persistent Memory' },
   { id: 'skills', label: 'Skills', icon: Layers, description: 'Skills Library' },
@@ -255,7 +255,7 @@ function StatusStrip({ status }: { status: NexusStatus }) {
 
       <div className="ml-auto flex items-center gap-1.5">
         <div className="w-1.5 h-1.5 rounded-full bg-nexus-green pulse-dot" />
-        <span className="text-[10px] text-muted-foreground/60 font-mono">NEXUS ONLINE</span>
+        <span className="text-[10px] text-muted-foreground/60 font-mono">PRAXIS ONLINE</span>
       </div>
     </div>
   );

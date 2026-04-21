@@ -317,11 +317,11 @@ export default function GovernedCockpit() {
             >
               <div className="grid grid-cols-5 gap-2">
                 {[
-                  { label: 'PRISM', value: '8.4', color: color.accent.green },
-                  { label: 'Lyte', value: '7.1', color: '#7a99b8' },
-                  { label: 'Vessels', value: '6.8', color: color.accent.amber },
-                  { label: 'Terra', value: '7.4', color: ACCENT },
-                  { label: 'Aegis', value: '6.9', color: color.accent.amber },
+                  { label: 'PRAXIS', value: '8.4', color: '#00e878' },
+                  { label: 'KORA', value: '7.1', color: '#7a99b8' },
+                  { label: 'SEXTANT', value: '6.8', color: '#ffb700' },
+                  { label: 'DOMAINE', value: '7.4', color: ACCENT },
+                  { label: 'PARAGON', value: '6.9', color: '#ffb700' },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="text-center">
                     <div className="text-xs" style={{ color: '#4a6070' }}>
@@ -393,7 +393,7 @@ export default function GovernedCockpit() {
             <div className="mt-3 space-y-2">
               {[
                 {
-                  domain: 'Aegis',
+                  domain: 'PARAGON',
                   item: 'APT-29 containment',
                   approver: 'CISO',
                   elapsed: '2h',
@@ -401,7 +401,7 @@ export default function GovernedCockpit() {
                   color: color.accent.red,
                 },
                 {
-                  domain: 'Vessels',
+                  domain: 'SEXTANT',
                   item: 'Horizon Star emergency port call',
                   approver: 'Ops Director',
                   elapsed: '47m',
@@ -409,7 +409,7 @@ export default function GovernedCockpit() {
                   color: color.accent.amber,
                 },
                 {
-                  domain: 'Terra',
+                  domain: 'DOMAINE',
                   item: 'Meridian acquisition financing',
                   approver: 'Investment Committee',
                   elapsed: '14m',

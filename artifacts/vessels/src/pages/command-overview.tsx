@@ -1025,7 +1025,7 @@ export default function CommandOverviewPage() {
       <div className="pb-2">
         <PackBanner
           vertical="Maritime Intelligence Pack"
-          description="Vessels runs on the Lyte + Alloy core — AIS processing, anomaly detection, sanctions screening, and route exception modeling all powered by the same intelligence fabric."
+          description="SEXTANT runs on the KORA + FORGE core — AIS processing, anomaly detection, sanctions screening, and route exception modeling all powered by the same intelligence fabric."
           accentColor="#0ea5e9"
         />
       </div>

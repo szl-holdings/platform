@@ -195,11 +195,11 @@ function TabBar({ tabs, active }: { tabs: Array<{ icon: typeof Activity; label: 
 
 function DashboardScreen() {
   const signals = [
-    { sev: "critical", source: "Aegis", title: "Privileged credential anomaly — finance VPC", time: "2m", color: "hsl(0,80%,62%)" },
-    { sev: "high", source: "Vessels", title: "MV Atlantic Crest deviated from filed route", time: "11m", color: "hsl(28,90%,58%)" },
-    { sev: "high", source: "Terra", title: "Distress signal: 4 properties in Zone 7 portfolio", time: "23m", color: "hsl(28,90%,58%)" },
-    { sev: "medium", source: "PRISM", title: "Settlement band updated — Matter #4421", time: "41m", color: "hsl(48,80%,58%)" },
-    { sev: "info", source: "Lyte", title: "Approval aging crossed 7-day threshold (3 deals)", time: "1h", color: "hsl(200,70%,60%)" },
+    { sev: "critical", source: "PARAGON", title: "Privileged credential anomaly — finance VPC", time: "2m", color: "hsl(0,80%,62%)" },
+    { sev: "high", source: "SEXTANT", title: "MV Atlantic Crest deviated from filed route", time: "11m", color: "hsl(28,90%,58%)" },
+    { sev: "high", source: "DOMAINE", title: "Distress signal: 4 properties in Zone 7 portfolio", time: "23m", color: "hsl(28,90%,58%)" },
+    { sev: "medium", source: "PRAXIS", title: "Settlement band updated — Matter #4421", time: "41m", color: "hsl(48,80%,58%)" },
+    { sev: "info", source: "KORA", title: "Approval aging crossed 7-day threshold (3 deals)", time: "1h", color: "hsl(200,70%,60%)" },
   ];
   const domains = [
     { label: "Defense", icon: ShieldCheck, count: 7, color: "hsl(0,72%,56%)" },
@@ -298,11 +298,11 @@ function DashboardScreen() {
 
 function PortfolioScreen() {
   const platforms = [
-    { name: "Aegis", role: "Defense", status: "online", latency: 84 },
-    { name: "Vessels", role: "Fleet", status: "online", latency: 112 },
-    { name: "Terra", role: "Real Estate", status: "degraded", latency: 248 },
-    { name: "Lyte", role: "Operations", status: "online", latency: 67 },
-    { name: "PRISM Counsel", role: "Advisory", status: "online", latency: 91 },
+    { name: "PARAGON", role: "Defense", status: "online", latency: 84 },
+    { name: "SEXTANT", role: "Fleet", status: "online", latency: 112 },
+    { name: "DOMAINE", role: "Real Estate", status: "degraded", latency: 248 },
+    { name: "KORA", role: "Operations", status: "online", latency: 67 },
+    { name: "Counsel", role: "Advisory", status: "online", latency: 91 },
     { name: "Cortex", role: "Intelligence", status: "online", latency: 103 },
   ];
   const kpis = [
@@ -674,7 +674,7 @@ export default function MobilePreviewPage() {
                 {
                   icon: Briefcase,
                   title: "Live portfolio health",
-                  body: "Real-time KPIs and ecosystem status across Aegis, Vessels, Terra, Lyte, PRISM Counsel, and Cortex.",
+                  body: "Real-time KPIs and ecosystem status across Aegis, Vessels, Terra, Lyte, Counsel, and Cortex.",
                 },
                 {
                   icon: Radio,

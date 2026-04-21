@@ -522,7 +522,7 @@ export const AGENT_CONFIGS: Record<AgentType, AgentConfig> = {
 function createStaticToolExecutor(appKey: string) {
   const platformInfo: Record<string, object> = {
     'readiness-report': {
-      platform: 'Aegis',
+      platform: 'PARAGON',
       description: 'Lyte Readiness and governance assessment platform',
       features: [
         'Comprehensive readiness scoring',

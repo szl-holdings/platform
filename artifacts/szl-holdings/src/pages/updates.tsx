@@ -11,7 +11,7 @@ const updates = [
   },
   {
     date: 'February 2026',
-    tag: 'Vessels',
+    tag: 'SEXTANT',
     headline: 'AI Route Optimization Engine — Q2 2026 development begins',
     summary:
       "Development started on Vessels' governed route optimization module. The engine will analyse historical voyage data, weather patterns, and port congestion to surface optimal routing recommendations for fleet operators.",
@@ -39,7 +39,7 @@ const updates = [
   },
   {
     date: 'December 2025',
-    tag: 'Aegis',
+    tag: 'PARAGON',
     headline: 'XDR Console and Threat Hunting Workbench launched',
     summary:
       'Aegis shipped the XDR (Extended Detection and Response) Console alongside the Threat Hunting Workbench — enabling security teams to correlate signals across endpoint, network, and cloud telemetry in a unified interface.',

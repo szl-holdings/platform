@@ -20,7 +20,7 @@ const capabilities = [
 function FlowDiagram() {
   const nodes = [
     { label: 'Inputs', x: 8 },
-    { label: 'Alloy', x: 38, highlight: true },
+    { label: 'FORGE', x: 38, highlight: true },
     { label: 'Agents', x: 62 },
     { label: 'Outputs', x: 90 },
   ];
@@ -142,7 +142,7 @@ export function AlloyStrip() {
                   color: 'hsl(218,50%,68%)',
                 }}
               >
-                Powered by Alloy
+                Powered by FORGE
               </div>
             </div>
             <h2
@@ -166,7 +166,7 @@ export function AlloyStrip() {
                 maxWidth: '30rem',
               }}
             >
-              Alloy is the AI orchestration engine that connects the entire ecosystem. Every
+              FORGE is the AI orchestration engine that connects the entire ecosystem. Every
               intelligent workflow, agent decision, and cross-platform signal flows through Alloy.
             </p>
 

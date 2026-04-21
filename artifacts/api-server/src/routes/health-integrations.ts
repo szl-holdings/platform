@@ -389,7 +389,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'AIS Vessel Positions',
     provider: 'Digitraffic (Finnish Transport)',
-    platform: 'Vessels',
+    platform: 'SEXTANT',
     url: 'https://meri.digitraffic.fi/api/ais/v1/locations/latest',
     cacheKey: 'digitraffic-ais',
     ttlMinutes: 5,
@@ -398,7 +398,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'Marine Weather',
     provider: 'Open-Meteo Marine API',
-    platform: 'Vessels',
+    platform: 'SEXTANT',
     url: 'https://marine-api.open-meteo.com/v1/marine?latitude=60&longitude=25&current=wave_height',
     cacheKey: 'open-meteo-marine',
     ttlMinutes: 15,
@@ -407,7 +407,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'AIS Norwegian Waters',
     provider: 'BarentsWatch (Norwegian Coastal Admin)',
-    platform: 'Vessels',
+    platform: 'SEXTANT',
     url: 'https://www.barentswatch.no/bwapi/v2/latest/combined?area=NOR',
     cacheKey: 'barentswatch-ais',
     ttlMinutes: 5,
@@ -416,7 +416,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'NYC PLUTO Property Data',
     provider: 'NYC Open Data',
-    platform: 'Terra',
+    platform: 'DOMAINE',
     url: 'https://data.cityofnewyork.us/resource/64uk-42ks.json?$limit=1',
     cacheKey: 'nyc-pluto',
     ttlMinutes: 360,
@@ -425,7 +425,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'NYC 311 Complaints',
     provider: 'NYC Open Data',
-    platform: 'Terra',
+    platform: 'DOMAINE',
     url: 'https://data.cityofnewyork.us/resource/erm2-nwe9.json?$limit=1',
     cacheKey: 'nyc-311',
     ttlMinutes: 60,
@@ -434,7 +434,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'Census ACS Housing',
     provider: 'U.S. Census Bureau',
-    platform: 'Terra',
+    platform: 'DOMAINE',
     url: 'https://api.census.gov/data/2022/acs/acs5?get=NAME&for=state:36&key=DEMO',
     cacheKey: 'census-acs',
     ttlMinutes: 1440,
@@ -443,7 +443,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'FRED Mortgage Rates',
     provider: 'Federal Reserve (FRED)',
-    platform: 'Terra',
+    platform: 'DOMAINE',
     url: 'https://api.stlouisfed.org/fred/series/observations?series_id=MORTGAGE30US&api_key=DEMO_KEY&limit=1&file_type=json',
     cacheKey: 'fred-mortgage',
     ttlMinutes: 360,
@@ -452,7 +452,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'Shodan InternetDB',
     provider: 'Shodan',
-    platform: 'Aegis',
+    platform: 'PARAGON',
     url: 'https://internetdb.shodan.io/8.8.8.8',
     cacheKey: 'shodan-internetdb',
     ttlMinutes: 60,
@@ -461,7 +461,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'GreyNoise Community',
     provider: 'GreyNoise',
-    platform: 'Aegis',
+    platform: 'PARAGON',
     url: 'https://api.greynoise.io/v3/community/8.8.8.8',
     cacheKey: 'greynoise-community',
     ttlMinutes: 60,
@@ -470,7 +470,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'MalwareBazaar Feed',
     provider: 'Abuse.ch',
-    platform: 'Aegis',
+    platform: 'PARAGON',
     url: 'https://mb-api.abuse.ch/api/v1/',
     cacheKey: 'malwarebazaar',
     ttlMinutes: 60,
@@ -482,7 +482,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'URLhaus Malicious URLs',
     provider: 'Abuse.ch',
-    platform: 'Aegis',
+    platform: 'PARAGON',
     url: 'https://urlhaus-api.abuse.ch/v1/urls/recent/limit/5/',
     cacheKey: 'urlhaus',
     ttlMinutes: 60,
@@ -491,7 +491,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'NVD CVE Feed',
     provider: 'NIST NVD',
-    platform: 'Aegis',
+    platform: 'PARAGON',
     url: 'https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=1',
     cacheKey: 'nvd-cves',
     ttlMinutes: 60,
@@ -500,7 +500,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'CISA KEV Catalog',
     provider: 'CISA',
-    platform: 'Aegis',
+    platform: 'PARAGON',
     url: 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
     cacheKey: 'cisa-kev',
     ttlMinutes: 1440,
@@ -509,7 +509,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'FEMA National Risk Index',
     provider: 'FEMA',
-    platform: 'Terra',
+    platform: 'DOMAINE',
     url: 'https://hazards.fema.gov/nri/api/counties?stateAbbreviation=FL&top=1',
     cacheKey: 'fema-nri',
     ttlMinutes: 1440 * 30,
@@ -518,7 +518,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'BLS Construction Employment',
     provider: 'Bureau of Labor Statistics',
-    platform: 'Terra',
+    platform: 'DOMAINE',
     url: 'https://api.bls.gov/publicAPI/v2/timeseries/data/CES2000000001',
     cacheKey: 'bls-construction',
     ttlMinutes: 1440,
@@ -527,7 +527,7 @@ const EXTERNAL_FEEDS: Array<{
   {
     name: 'GitHub API',
     provider: 'GitHub',
-    platform: 'Lyte',
+    platform: 'KORA',
     url: 'https://api.github.com/',
     cacheKey: 'github-api',
     ttlMinutes: 5,

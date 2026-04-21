@@ -22,25 +22,25 @@ const HIGHLIGHTS = [
 
 const DOMAINS: Array<{ name: string; tagline: string; detail: string }> = [
   {
-    name: "PRISM Counsel",
+    name: "Counsel",
     tagline: "Legal matter observability",
     detail:
       "Outside-counsel telemetry, matter risk scoring, and spend governance for in-house legal teams.",
   },
   {
-    name: "Vessels",
+    name: "SEXTANT",
     tagline: "Maritime intelligence",
     detail:
       "Fleet positioning, fuel & port analytics, and trading-grade alerts for maritime operators and lenders.",
   },
   {
-    name: "Aegis",
+    name: "PARAGON",
     tagline: "Security & defense observability",
     detail:
       "Cross-tenant cyber and physical-security signal fusion with continuous control attestations.",
   },
   {
-    name: "Terra",
+    name: "DOMAINE",
     tagline: "Real estate intelligence",
     detail:
       "Pro forma, lease abstraction, 1031 exchange, and waterfall modeling tied to live market signals.",

@@ -152,7 +152,7 @@ export default function TrustPositioningPage() {
             <div className="space-y-2">
               <p className="text-sm font-semibold text-amber-300">Our Trust Commitment</p>
               <p className="text-xs text-amber-200/80 font-mono leading-relaxed">
-                Aegis is in <strong>production-ready pilot</strong> stage. Everything on this page
+                PARAGON is in <strong>production-ready pilot</strong> stage. Everything on this page
                 reflects honest current state. We separate current capabilities from roadmap
                 clearly. We publish our AI trust metrics — schema validity rate, retrieval miss
                 rate, unsupported claim rate — because hiding them would undermine the trust we're

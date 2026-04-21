@@ -181,7 +181,7 @@ export default function ProfileScreen() {
               },
               {
                 domain: 'terra',
-                label: 'Terra',
+                label: 'DOMAINE',
                 color: '#b8943c',
                 fetch: async () => {
                   try {
@@ -198,7 +198,7 @@ export default function ProfileScreen() {
               },
               {
                 domain: 'lyte',
-                label: 'Lyte',
+                label: 'KORA',
                 color: '#00d4ff',
                 fetch: async () => {
                   try {

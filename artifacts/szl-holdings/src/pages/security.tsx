@@ -16,7 +16,7 @@ const SECTIONS = [
     colorMuted: "hsla(145,62%,40%,0.08)",
     colorBorder: "hsla(145,62%,40%,0.20)",
     items: [
-      "Lyte + Alloy is built for operating environments where governance, auditability, and data integrity are non-negotiable.",
+      "KORA + FORGE is built for operating environments where governance, auditability, and data integrity are non-negotiable.",
       "Security is an architectural constraint, not a feature layer — multi-tenant isolation, encrypted data paths, and human-in-the-loop approval are structurally enforced.",
       "This page reflects the current honest security state of the platform. Planned certifications are listed separately and clearly distinguished from in-place controls.",
     ],
@@ -112,7 +112,7 @@ const SECTIONS = [
     colorMuted: "var(--color-alloy-muted)",
     colorBorder: "var(--color-alloy-border)",
     items: [
-      "AI agents in Lyte + Alloy are advisory, not autonomous. Every consequential action requires human approval before execution.",
+      "AI agents in KORA + FORGE are advisory, not autonomous. Every consequential action requires human approval before execution.",
       "All AI-generated outputs are clearly labeled as such — no generated content is presented as human-authored output.",
       "Model isolation is enforced: client data is never used to train, fine-tune, or improve models beyond the agreed service scope.",
       "Confidence scoring and source-grounded assertions only — no opaque scoring on consequential recommendations.",
@@ -146,7 +146,7 @@ const COMPLIANCE = [
 export default function SecurityPage() {
   const __pageMeta = usePageMeta({
     title: "Security — SZL Holdings",
-    description: "Security overview for Lyte + Alloy: data handling, access control, logging, backup, secure development, vulnerability disclosure, and responsible AI use.",
+    description: "Security overview for KORA + FORGE: data handling, access control, logging, backup, secure development, vulnerability disclosure, and responsible AI use.",
     canonical: "https://szlholdings.com/security",
   });
 
@@ -168,7 +168,7 @@ export default function SecurityPage() {
                   Security as an architectural constraint, not an add-on.
                 </h1>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "56ch", marginBottom: "2rem" }}>
-                  This page documents the current security controls in place for Lyte + Alloy. It
+                  This page documents the current security controls in place for KORA + FORGE. It
                   reflects the honest current state — not aspirational certifications. Planned
                   certifications are clearly marked.
                 </p>

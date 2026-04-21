@@ -31,7 +31,7 @@ const PRISM_LAYERS = [
   {
     id: 'intelligence',
     label: 'Matter Intelligence Engine',
-    sublabel: 'Section 31 · Alloy AI fabric · PRISM scoring · Deadline engine · Insurer intel',
+    sublabel: 'Section 31 · FORGE AI fabric · PRISM scoring · Deadline engine · Insurer intel',
     items: [
       'PRISM pillars',
       'Settlement forecast',
@@ -46,7 +46,7 @@ const PRISM_LAYERS = [
   },
   {
     id: 'alloy',
-    label: 'Alloy Control Plane',
+    label: 'FORGE Control Plane',
     sublabel:
       'Workflow orchestration · Approval gates · Audit trail · AI governance · Source tracing',
     items: [
@@ -105,7 +105,7 @@ export function PrismCounselArchitectureDiagram() {
             color: 'hsl(38,72%,58%)',
           }}
         >
-          PRISM Counsel — Architecture
+          Counsel — Architecture
         </span>
       </div>
       <p
@@ -117,7 +117,7 @@ export function PrismCounselArchitectureDiagram() {
           letterSpacing: '0.04em',
         }}
       >
-        Alloy control plane · Section 31 intelligence · M365-native execution · Governed proof chain
+        FORGE control plane · Section 31 intelligence · M365-native execution · Governed proof chain
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>

@@ -37,20 +37,20 @@ const WEDGE_PLATFORM = [
   },
   {
     title: "Domain packs as the expansion model",
-    body: "Each vertical — PRISM Counsel, Vessels, Aegis, Terra — is a domain pack layered on top of the shared platform. New verticals inherit signal ingestion, AI governance, workflow orchestration, and audit infrastructure without rebuilding from scratch.",
+    body: "Each vertical — Counsel, Vessels, Aegis, Terra — is a domain pack layered on top of the shared platform. New verticals inherit signal ingestion, AI governance, workflow orchestration, and audit infrastructure without rebuilding from scratch.",
   },
 ];
 
 const VERTICALS = [
-  { icon: Target, name: "PRISM Counsel", color: "#d4a054", wedge: true, body: "Legal matter observability — deadlines, exposure tracking, approval governance, export safety. The commercial wedge. First vertical entering design-partner engagement." },
-  { icon: Ship, name: "Vessels", color: "#4a90b8", body: "Maritime intelligence — voyage twins, AIS monitoring, route risk, port congestion, sanctions compliance. Second vertical. Infrastructure ready." },
-  { icon: ShieldCheck, name: "Aegis", color: "#c45a4a", body: "Security and defense observability — threat twins, incident workflows, exposure prioritization. Third vertical. Architecture shared." },
-  { icon: Home, name: "Terra", color: "#c8953c", body: "Real estate intelligence — property twins, diligence workflows, distress scoring. Fourth vertical. Same execution model." },
+  { icon: Target, name: "Counsel", color: "#d4a054", wedge: true, body: "Legal matter observability — deadlines, exposure tracking, approval governance, export safety. The commercial wedge. First vertical entering design-partner engagement." },
+  { icon: Ship, name: "SEXTANT", color: "#4a90b8", body: "Maritime intelligence — voyage twins, AIS monitoring, route risk, port congestion, sanctions compliance. Second vertical. Infrastructure ready." },
+  { icon: ShieldCheck, name: "PARAGON", color: "#c45a4a", body: "Security and defense observability — threat twins, incident workflows, exposure prioritization. Third vertical. Architecture shared." },
+  { icon: Home, name: "DOMAINE", color: "#c8953c", body: "Real estate intelligence — property twins, diligence workflows, distress scoring. Fourth vertical. Same execution model." },
   { icon: BriefcaseBusiness, name: "Carlota Jo", color: "#8b7ac8", body: "Advisory and consulting intelligence. Premium client-facing layer. Near-term revenue opportunity while the software matures." },
 ];
 
 const PROOF_TODAY = [
-  "Live PRISM Counsel product across full workflow — signal detection, twin enrichment, approval gates, export safety, audit trail",
+  "Live Counsel product across full workflow — signal detection, twin enrichment, approval gates, export safety, audit trail",
   "Vessels Maritime Intelligence: voyage twin, AIS monitoring, sanctions compliance surface, port risk",
   "Aegis Defense: threat twin, incident workflows, exposure prioritization",
   "Terra Real Estate: property twin, distress scoring, diligence workflows",
@@ -60,7 +60,7 @@ const PROOF_TODAY = [
 ];
 
 const MILESTONES = [
-  { phase: "Now", label: "Lyte proof", items: ["PRISM Counsel in active design-partner engagement", "Full workflow demo available on request", "Architecture and trust surface complete and reviewable"] },
+  { phase: "Now", label: "Lyte proof", items: ["Counsel in active design-partner engagement", "Full workflow demo available on request", "Architecture and trust surface complete and reviewable"] },
   { phase: "Next", label: "Alloy maturity", items: ["First paid pilot contract signed", "Vessels entering design-partner phase", "SOC 2 Type II audit preparation underway"] },
   { phase: "Later", label: "Expansion", items: ["Aegis and Terra design-partner engagement", "Cross-vertical analytics via shared Lyte command layer", "Enterprise GTM with Microsoft 365 integration"] },
 ];

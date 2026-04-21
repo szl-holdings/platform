@@ -183,7 +183,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="terra-modules"
         options={{
-          title: 'Terra',
+          title: 'DOMAINE',
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="building.columns.fill" tintColor={color} size={22} />

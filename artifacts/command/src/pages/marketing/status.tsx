@@ -72,7 +72,7 @@ const BASELINE_SERVICES: ServiceHealth[] = [
     responseTimeMs: 55,
   },
   { name: 'Lyte — AIOps Command', status: 'operational', uptime: '99.95%', responseTimeMs: 88 },
-  { name: 'PRISM Counsel', status: 'operational', uptime: '100%', responseTimeMs: 45 },
+  { name: 'Counsel', status: 'operational', uptime: '100%', responseTimeMs: 45 },
   { name: 'SZL Holdings', status: 'operational', uptime: '99.99%', responseTimeMs: 50 },
   { name: 'Carlota Jo Consulting', status: 'operational', uptime: '99.99%', responseTimeMs: 43 },
   {

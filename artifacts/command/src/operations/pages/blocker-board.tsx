@@ -43,7 +43,7 @@ interface Blocker {
 const BLOCKERS: Blocker[] = [
   {
     id: 'BLK-2041',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     title: 'Fuel surcharge approval — Fleet ETA revision stalled',
     description:
@@ -58,7 +58,7 @@ const BLOCKERS: Blocker[] = [
   },
   {
     id: 'BLK-2039',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     title: 'Q2 pricing revision — executive approval overdue',
     description:
@@ -73,7 +73,7 @@ const BLOCKERS: Blocker[] = [
   },
   {
     id: 'BLK-2036',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     title: 'Charter contract missing port authority countersignature',
     description:
@@ -88,7 +88,7 @@ const BLOCKERS: Blocker[] = [
   },
   {
     id: 'BLK-2033',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     title: 'Accounts receivable ownership conflict unresolved',
     description:
@@ -103,7 +103,7 @@ const BLOCKERS: Blocker[] = [
   },
   {
     id: 'BLK-2030',
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     title: 'Lease renewal — missing signature block on exhibit B',
     description:
@@ -118,7 +118,7 @@ const BLOCKERS: Blocker[] = [
   },
   {
     id: 'BLK-2027',
-    pack: 'Aegis',
+    pack: 'PARAGON',
     packColor: '#4f6ef7',
     title: 'Security vendor onboarding — background check delayed',
     description:
@@ -133,7 +133,7 @@ const BLOCKERS: Blocker[] = [
   },
   {
     id: 'BLK-2024',
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     title: 'Asset refinancing — appraisal report incomplete',
     description:

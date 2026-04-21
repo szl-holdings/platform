@@ -48,7 +48,7 @@ const DIGESTS: Digest[] = [
       'Terra: Lease renewal at risk — exhibit B missing signature',
       'Portfolio: $15.3M total value at risk across open items',
     ],
-    packsCovered: ['PRISM', 'Terra', 'Vessels', 'Aegis'],
+    packsCovered: ['PRAXIS', 'DOMAINE', 'SEXTANT', 'PARAGON'],
     wordCount: 412,
   },
   {
@@ -65,7 +65,7 @@ const DIGESTS: Digest[] = [
       'Terra: 3 asset reviews completed — Building 7A refinancing initiated',
       'Aegis: Security vendor onboarding initiated — 2 vendors under review',
     ],
-    packsCovered: ['PRISM', 'Terra', 'Vessels', 'Aegis'],
+    packsCovered: ['PRAXIS', 'DOMAINE', 'SEXTANT', 'PARAGON'],
     wordCount: 388,
   },
   {
@@ -81,7 +81,7 @@ const DIGESTS: Digest[] = [
       'Vessels: Q2 charter contract cycle initiated — 7 vessels',
       'PRISM: Ownership review completed — 3 conflicts resolved',
     ],
-    packsCovered: ['PRISM', 'Vessels', 'Terra'],
+    packsCovered: ['PRAXIS', 'SEXTANT', 'DOMAINE'],
     wordCount: 301,
   },
   {
@@ -92,7 +92,7 @@ const DIGESTS: Digest[] = [
     status: 'scheduled',
     summary: '',
     highlights: [],
-    packsCovered: ['PRISM', 'Terra', 'Vessels', 'Aegis'],
+    packsCovered: ['PRAXIS', 'DOMAINE', 'SEXTANT', 'PARAGON'],
     wordCount: 0,
   },
 ];

@@ -43,7 +43,7 @@ interface AgentDef {
 const DEFAULT_AGENTS: AgentDef[] = [
   {
     id: 'alloy',
-    name: 'Alloy',
+    name: 'FORGE',
     domain: 'orchestration',
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',

@@ -366,7 +366,7 @@ export default function InboxScreen() {
       severity: actionSeverity(a),
       source: 'Action Queue',
       title: a.title,
-      platform: 'Lyte',
+      platform: 'KORA',
       time: a.dueAt ? timeAgo(a.dueAt) : '—',
       status: a.state,
       actionId: a.id,

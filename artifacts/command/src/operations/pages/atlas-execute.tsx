@@ -8,7 +8,7 @@ import {
 
 const DOMAIN = "counsel";
 const ACCENT = "#6366f1";
-const DOMAIN_LABEL = "PRISM Counsel — Legal Intelligence";
+const DOMAIN_LABEL = "Counsel — Legal Intelligence";
 const WORKFLOW_KEY = "prism-matter-execution";
 
 const SIGNAL_TYPES = ["filing-deadline", "compliance-event", "court-order", "matter-update", "regulatory-notice", "discovery-request"];

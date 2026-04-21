@@ -15,9 +15,9 @@ const milestones = [
   },
   {
     date: 'Q1 2023',
-    title: 'Alloy engine operational',
+    title: 'FORGE engine operational',
     description:
-      'Alloy execution fabric reaches operational status powering predictive intelligence across the ecosystem.',
+      'FORGE execution fabric reaches operational status powering predictive intelligence across the ecosystem.',
   },
   {
     date: 'Q2 2023',
@@ -35,7 +35,7 @@ const milestones = [
     date: '2024–2025',
     title: 'Ecosystem expansion',
     description:
-      'Lyte and Alloy platforms launched. Shared infrastructure layer connects all operating platforms.',
+      'KORA and FORGE platforms launched. Shared infrastructure layer connects all operating platforms.',
   },
 ];
 

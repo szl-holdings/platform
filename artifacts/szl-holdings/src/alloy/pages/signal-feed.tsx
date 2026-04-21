@@ -254,11 +254,11 @@ const SEVERITY_CONFIG: Record<
 };
 
 const SOURCE_CONFIG: Record<string, { color: string; label: string }> = {
-  terra: { color: '#10b981', label: 'Terra' },
-  aegis: { color: '#ef4444', label: 'Aegis' },
-  vessels: { color: '#0ea5e9', label: 'Vessels' },
-  lyte: { color: '#8b5cf6', label: 'Lyte' },
-  alloy: { color: '#4B8BDB', label: 'Alloy' },
+  terra: { color: '#10b981', label: 'DOMAINE' },
+  aegis: { color: '#ef4444', label: 'PARAGON' },
+  vessels: { color: '#0ea5e9', label: 'SEXTANT' },
+  lyte: { color: '#8b5cf6', label: 'KORA' },
+  alloy: { color: '#4B8BDB', label: 'FORGE' },
 };
 
 const STATUS_CONFIG: Record<string, { color: string; label: string }> = {

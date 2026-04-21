@@ -215,7 +215,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             >
               <Building2 size={13} style={{ color: ACCENT_LIGHT }} />
             </div>
-            <span className="font-bold text-sm tracking-tight text-white">Terra</span>
+            <span className="font-bold text-sm tracking-tight text-white">DOMAINE</span>
             <span
               className="hidden sm:inline text-[9px] tracking-[0.14em] uppercase ml-1"
               style={{ color: 'rgba(255,255,255,0.18)', fontFamily: 'monospace' }}
@@ -959,7 +959,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               >
                 <Building2 size={12} style={{ color: ACCENT_LIGHT }} />
               </div>
-              <span className="text-sm font-bold text-white">Terra</span>
+              <span className="text-sm font-bold text-white">DOMAINE</span>
               <span
                 className="text-[9px] font-mono ml-1"
                 style={{ color: 'rgba(255,255,255,0.2)' }}
@@ -969,9 +969,9 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             </div>
             <div className="flex items-center gap-4">
               {[
-                { name: 'Lyte', href: '/command/operations/' },
-                { name: 'Vessels', href: '/vessels/' },
-                { name: 'Aegis', href: '/aegis/' },
+                { name: 'KORA', href: '/command/operations/' },
+                { name: 'SEXTANT', href: '/vessels/' },
+                { name: 'PARAGON', href: '/aegis/' },
                 { name: 'Carlota Jo', href: '/carlota-jo/' },
                 { name: 'SZL', href: '/szl-holdings/' },
               ].map((l) => (

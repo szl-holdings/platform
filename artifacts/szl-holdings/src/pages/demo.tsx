@@ -39,7 +39,7 @@ interface Pack {
 const PACKS: Pack[] = [
   {
     id: "prism-counsel",
-    name: "PRISM Counsel",
+    name: "Counsel",
     tagline: "Legal matter intelligence and governed execution",
     description: "A command layer for plaintiff-side litigation teams. Every matter scored, every deadline tracked, every action governed — with a proof chain for everything that moves.",
     icon: Scale,
@@ -58,12 +58,12 @@ const PACKS: Pack[] = [
     outputs: ["Demand readiness scoring", "Settlement band forecast", "Deadline compliance queue", "Insurer behavior profiles", "Proof chain export"],
     signals: ["NY DFS Insurance Regulation 68", "NWS (weather/incident context)", "US Census (demographics)", "CMS MSPRP (Medicare liens)", "Court scheduling feeds"],
     trust: ["Human approval on every consequential action", "Privilege-aware architecture", "Source-grounded AI with defensibility scoring", "Immutable audit trail"],
-    ctaLabel: "See PRISM Counsel",
-    ctaHref: "/prism-counsel-public",
+    ctaLabel: "See Counsel",
+    ctaHref: "/counsel-public",
   },
   {
     id: "terra",
-    name: "Terra",
+    name: "DOMAINE",
     tagline: "Property intelligence and deal execution",
     description: "Real estate operators and investors finally get a command layer. Property Twin tracks every asset signal. Alloy routes action through governed workflows.",
     icon: Building2,
@@ -86,7 +86,7 @@ const PACKS: Pack[] = [
   },
   {
     id: "vessels",
-    name: "Vessels",
+    name: "SEXTANT",
     tagline: "Fleet intelligence and maritime operations command",
     description: "Command-grade observability for maritime operations. Voyage and fleet twins surface risk before it becomes a commercial incident. Alloy routes action with full traceability.",
     icon: Ship,
@@ -109,7 +109,7 @@ const PACKS: Pack[] = [
   },
   {
     id: "aegis",
-    name: "Aegis",
+    name: "PARAGON",
     tagline: "Threat intelligence and security operations command",
     description: "SOC command built for environments where every decision has consequence. Threat Twin tracks your exposure surface. Alloy routes response through governed playbooks.",
     icon: ShieldCheck,
@@ -132,14 +132,14 @@ const PACKS: Pack[] = [
   },
   {
     id: "lyte",
-    name: "Lyte",
+    name: "KORA",
     tagline: "Cross-pack executive command and portfolio intelligence",
     description: "The executive command layer above all packs. Lyte surfaces cross-portfolio pressure, movement, blockers, and action routing — so leadership sees the whole operational picture.",
     icon: BarChart3,
     accentColor: "hsl(192,80%,48%)",
     accentRgb: "6,182,212",
     twin: "Portfolio Command Surface",
-    twinDescription: "A unified view across every pack — PRISM Counsel, Terra, Vessels, Aegis, Carlota Jo — showing portfolio pressure, open blockers, pending approvals, and escalation status.",
+    twinDescription: "A unified view across every pack — Counsel, Terra, Vessels, Aegis, Carlota Jo — showing portfolio pressure, open blockers, pending approvals, and escalation status.",
     workflow: [
       { label: "Portfolio Pressure", detail: "Cross-pack signals aggregated — what's stuck, what's at risk, what needs leadership attention" },
       { label: "Movement Tracking", detail: "Progress across all active workflows surfaced with velocity and delay scoring" },

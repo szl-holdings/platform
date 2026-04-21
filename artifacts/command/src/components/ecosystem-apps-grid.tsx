@@ -26,7 +26,7 @@ export const ECOSYSTEM_APPS = [
   },
   {
     href: '/cortex-mobile/',
-    label: 'CORTEX Mobile',
+    label: 'APEX Mobile',
     description: 'Mobile command interface — governed decision loop and briefings on the go',
     icon: Cpu,
     color: '#f97316',

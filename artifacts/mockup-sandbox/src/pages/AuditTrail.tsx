@@ -60,7 +60,7 @@ function generateAuditEntries(): AuditEntry[] {
     },
     {
       slug: 'nexus',
-      name: 'NEXUS Orchestrator',
+      name: 'PRAXIS Orchestrator',
       actions: ['plan_agent_sequence', 'stitch_outputs', 'verify_completeness'],
     },
   ];

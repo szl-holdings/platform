@@ -10,7 +10,7 @@ const NOW = [
     area: "Lyte proof",
     color: "hsl(145,62%,46%)",
     items: [
-      { label: "PRISM Counsel live product across full workflow", done: true },
+      { label: "Counsel live product across full workflow", done: true },
       { label: "Signal detection, twin enrichment, approval gates, audit trail", done: true },
       { label: "Export safety and Proof Chain on every document output", done: true },
       { label: "Full investor surface — architecture, trust, moat, roadmap, data room", done: true },

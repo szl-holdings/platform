@@ -49,7 +49,7 @@ interface ApiCostsResponse {
 const FALLBACK_DOMAIN_BUDGETS = [
   {
     id: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     color: '#ef4444',
     budget: 28000,
     spent: 24800,
@@ -60,7 +60,7 @@ const FALLBACK_DOMAIN_BUDGETS = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     color: '#0ea5e9',
     budget: 35000,
     spent: 38200,
@@ -71,7 +71,7 @@ const FALLBACK_DOMAIN_BUDGETS = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     color: '#22c55e',
     budget: 18000,
     spent: 15300,
@@ -82,7 +82,7 @@ const FALLBACK_DOMAIN_BUDGETS = [
   },
   {
     id: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     color: '#f97316',
     budget: 22000,
     spent: 19700,
@@ -93,7 +93,7 @@ const FALLBACK_DOMAIN_BUDGETS = [
   },
   {
     id: 'prism',
-    name: 'PRISM',
+    name: 'PRAXIS',
     color: '#a855f7',
     budget: 12000,
     spent: 10100,

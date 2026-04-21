@@ -87,7 +87,7 @@ vi.mock('../lib/atlas-execution-engine.js', () => ({
   DOMAIN_WORKFLOWS: {
     'aegis-incident-response': {
       id: 'aegis-incident-response',
-      name: 'Aegis',
+      name: 'PARAGON',
       domain: 'aegis',
       steps: [],
     },

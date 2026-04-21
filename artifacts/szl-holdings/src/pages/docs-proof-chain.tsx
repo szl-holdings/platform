@@ -52,7 +52,7 @@ const CHAIN_ANATOMY = [
 export default function DocsProofChainPage() {
   const __pageMeta = usePageMeta({
     title: "Proof Chain — Docs — SZL Holdings",
-    description: "Proof chain documentation: how Lyte + Alloy traces every output back to its source signals, model invocations, and human approval record.",
+    description: "Proof chain documentation: how KORA + FORGE traces every output back to its source signals, model invocations, and human approval record.",
     canonical: "https://szlholdings.com/docs/proof-chain",
   });
 
@@ -78,7 +78,7 @@ export default function DocsProofChainPage() {
                 Proof Chain.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
-                Every output produced by Lyte + Alloy — a recommendation, an exported document, a governance
+                Every output produced by KORA + FORGE — a recommendation, an exported document, a governance
                 report — carries a proof chain: a structured record that traces every claim back to its source
                 signal, the model invocation that processed it, and the human approval that authorized it.
                 The chain travels with the output.
@@ -135,7 +135,7 @@ export default function DocsProofChainPage() {
               <h2 className="mt-3 text-2xl font-semibold text-white">Outputs that carry proof chains</h2>
               <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[
-                  { label: "Word export (PRISM Counsel)", detail: "Legal document exports embed the proof chain as document metadata, preserving the decision record for file use." },
+                  { label: "Word export (Counsel)", detail: "Legal document exports embed the proof chain as document metadata, preserving the decision record for file use." },
                   { label: "Diligence packet (Terra)", detail: "Property diligence exports carry source citations and IC approval records in structured metadata." },
                   { label: "Governance report (Aegis)", detail: "Security governance reports include the full threat assessment chain and response authorization record." },
                   { label: "Voyage exception report (Vessels)", detail: "Maritime exception reports carry the Voyage Twin state, risk scoring basis, and operator decision record." },

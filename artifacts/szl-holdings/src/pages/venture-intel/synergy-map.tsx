@@ -9,8 +9,8 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const SYNERGIES = [
   {
     id: "aegis-vessels",
-    source: "Aegis",
-    target: "Vessels",
+    source: "PARAGON",
+    target: "SEXTANT",
     sourceColor: "#6366f1",
     targetColor: "#3aa4dc",
     category: "Cross-sell",
@@ -26,8 +26,8 @@ const SYNERGIES = [
   },
   {
     id: "terra-prism",
-    source: "Terra",
-    target: "PRISM",
+    source: "DOMAINE",
+    target: "PRAXIS",
     sourceColor: "#6b9c30",
     targetColor: "#a855f7",
     category: "Data Feed",
@@ -44,7 +44,7 @@ const SYNERGIES = [
   {
     id: "carlota-vessels",
     source: "Carlota Jo",
-    target: "Vessels",
+    target: "SEXTANT",
     sourceColor: "#c4924a",
     targetColor: "#3aa4dc",
     category: "Referral",
@@ -60,8 +60,8 @@ const SYNERGIES = [
   },
   {
     id: "lyte-aegis",
-    source: "Lyte",
-    target: "Aegis",
+    source: "KORA",
+    target: "PARAGON",
     sourceColor: "#38bee0",
     targetColor: "#6366f1",
     category: "Platform",
@@ -77,7 +77,7 @@ const SYNERGIES = [
   },
   {
     id: "terra-carlota",
-    source: "Terra",
+    source: "DOMAINE",
     target: "Carlota Jo",
     sourceColor: "#6b9c30",
     targetColor: "#c4924a",
@@ -94,8 +94,8 @@ const SYNERGIES = [
   },
   {
     id: "prism-aegis",
-    source: "PRISM",
-    target: "Aegis",
+    source: "PRAXIS",
+    target: "PARAGON",
     sourceColor: "#a855f7",
     targetColor: "#6366f1",
     category: "Compliance",

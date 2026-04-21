@@ -29,7 +29,7 @@ const GB = 1024 * MB;
 
 const ALLOWLISTS: Record<UploadDomain, DomainAllowlist> = {
   prism: {
-    label: 'PRISM Counsel',
+    label: 'Counsel',
     mimeTypes: new Set([
       'application/pdf',
       'application/msword',

@@ -634,7 +634,7 @@ const DOMAIN_ICONS: Record<DomainKey, typeof Ship> = {
   personnel: Compass,
 };
 const DOMAIN_LABELS: Record<DomainKey, string> = {
-  vessels: 'Vessels',
+  vessels: 'SEXTANT',
   terra: 'Terra Properties',
   aegis: 'Aegis Threats',
   prism: 'PRISM Legal',

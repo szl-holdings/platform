@@ -50,7 +50,7 @@ export interface AgentDefinition {
 export const AGENT_REGISTRY: AgentDefinition[] = [
   {
     id: 'alloy',
-    name: 'Alloy',
+    name: 'FORGE',
     domain: 'orchestration',
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',
@@ -155,7 +155,7 @@ export const AGENT_REGISTRY: AgentDefinition[] = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     domain: 'real_estate',
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',

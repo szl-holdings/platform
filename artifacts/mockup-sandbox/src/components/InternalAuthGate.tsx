@@ -25,7 +25,7 @@ function LoginWall() {
         </div>
 
         <div className="text-center space-y-1">
-          <h1 className="text-nexus-cyan font-mono font-bold text-xl tracking-widest">NEXUS</h1>
+          <h1 className="text-nexus-cyan font-mono font-bold text-xl tracking-widest">PRAXIS</h1>
           <p className="text-muted-foreground text-xs">Unified Agentic AI Layer</p>
         </div>
 
@@ -62,7 +62,7 @@ function LoginWall() {
         </div>
 
         <p className="text-[10px] text-muted-foreground/40 text-center">
-          NEXUS · Internal Tooling · Not Production
+          PRAXIS · Internal Tooling · Not Production
         </p>
       </div>
     </div>

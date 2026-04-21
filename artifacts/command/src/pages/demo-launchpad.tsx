@@ -74,7 +74,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'lyte-signals',
     label: 'Signals Console',
-    domain: 'Lyte',
+    domain: 'KORA',
     domainColor: ACCENT,
     description: '47 live signals surfaced, prioritized by impact and urgency.',
     href: '/lyte/signals',
@@ -85,7 +85,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'lyte-decision-twin',
     label: 'Decision Twin',
-    domain: 'Lyte',
+    domain: 'KORA',
     domainColor: ACCENT,
     description:
       'Simulate approve / delay / reroute / escalate with downstream impact and confidence bands.',
@@ -98,7 +98,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'alloy-policy-compiler',
     label: 'Policy Compiler',
-    domain: 'Alloy',
+    domain: 'FORGE',
     domainColor: '#d4a054',
     description:
       'Plain-English → validated, versioned, rollback-able policy objects with workflow coverage.',
@@ -110,7 +110,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'terra-why-now',
     label: 'Why This Property Now',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     domainColor: '#4ade80',
     description:
       'Ranked acquisition thesis combining liens, violations, ownership complexity, and neighborhood trend.',
@@ -123,7 +123,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'terra-map',
     label: 'Property Intelligence Map',
-    domain: 'Terra',
+    domain: 'DOMAINE',
     domainColor: '#4ade80',
     description: 'NYC property opportunity map with distress scoring and ownership graph.',
     href: '/terra/property-map-page',
@@ -134,7 +134,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'aegis-adversary',
     label: 'Adversary Narrative Engine',
-    domain: 'Aegis',
+    domain: 'PARAGON',
     domainColor: '#f87171',
     description:
       'Readable incident storyline: attack chain, MITRE mapping, affected assets, confidence.',
@@ -147,7 +147,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'vessels-voyage-risk',
     label: 'Voyage Risk Twin',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
     domainColor: '#60a5fa',
     description:
       'Route-level risk: AIS gaps, sanctions, weather, voyage economics → explained risk + alternatives.',
@@ -172,7 +172,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'alloy-audit',
     label: 'Alloy Audit Trail',
-    domain: 'Alloy',
+    domain: 'FORGE',
     domainColor: '#d4a054',
     description: 'Every decision, every agent action, every approval — immutable proof chain.',
     href: `${BASE}/operations/alloy/receipts`,
@@ -1050,31 +1050,31 @@ export function DemoLaunchpad() {
               {[
                 {
                   label: 'Decision Twin',
-                  domain: 'Lyte',
+                  domain: 'KORA',
                   color: ACCENT,
                   href: '/lyte/decision-twin',
                 },
                 {
                   label: 'Policy Compiler',
-                  domain: 'Alloy',
+                  domain: 'FORGE',
                   color: ACCENT,
                   href: `${BASE}/operations/alloy/policy-compiler`,
                 },
                 {
                   label: 'Why This Property Now',
-                  domain: 'Terra',
+                  domain: 'DOMAINE',
                   color: '#4ade80',
                   href: '/terra/why-this-property-now',
                 },
                 {
                   label: 'Adversary Narrative Engine',
-                  domain: 'Aegis',
+                  domain: 'PARAGON',
                   color: '#f87171',
                   href: '/aegis/adversary-narrative-engine',
                 },
                 {
                   label: 'Voyage Risk Twin',
-                  domain: 'Vessels',
+                  domain: 'SEXTANT',
                   color: '#60a5fa',
                   href: '/vessels/voyage-risk-twin',
                 },

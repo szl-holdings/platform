@@ -286,7 +286,7 @@ function AppShell() {
     return (
       <BiometricLockScreen
         config={{
-          appName: 'CORTEX',
+          appName: 'APEX',
           subtitle: 'Authenticate to access Unified Command',
           accentColor: '#c9a84c',
           backgroundColor: '#090810',
@@ -340,7 +340,7 @@ export default function RootLayout() {
                     <BiometricProvider
                       config={{
                         storagePrefix: 'cortex',
-                        appName: 'CORTEX',
+                        appName: 'APEX',
                         promptMessage: 'Authenticate to access Unified Command',
                       }}
                     >

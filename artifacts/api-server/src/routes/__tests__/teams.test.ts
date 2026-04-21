@@ -393,8 +393,8 @@ describe('GET /teams/:team', () => {
       },
     ];
     store.apps = [
-      { slug: 'pulse', name: 'Pulse', ownerTeam: 'Platform' },
-      { slug: 'terra', name: 'Terra', ownerTeam: 'Other' },
+      { slug: 'pulse', name: 'LUMINA', ownerTeam: 'Platform' },
+      { slug: 'terra', name: 'DOMAINE', ownerTeam: 'Other' },
     ];
     const app = await makeApp();
     const r = await request(app).get('/teams/Platform');
@@ -406,7 +406,7 @@ describe('GET /teams/:team', () => {
     expect([1, 2]).toContain(r.body.onCall.id);
     // Escalation goes to highest-privilege active member (Bob: platform_admin)
     expect(r.body.escalation.id).toBe(2);
-    expect(r.body.ownedApps).toEqual([{ slug: 'pulse', name: 'Pulse' }]);
+    expect(r.body.ownedApps).toEqual([{ slug: 'pulse', name: 'LUMINA' }]);
   });
 });
 

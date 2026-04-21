@@ -48,9 +48,9 @@ const TRUST_CONTROLS = [
 
 export default function PilotPrismCounselPage() {
   const __pageMeta = usePageMeta({
-    title: "Pilot — PRISM Counsel — SZL Holdings",
-    description: "PRISM Counsel pilot: instrument one legal workflow end to end, with full trust controls, proof chain output, and a 30/60/90 day success path.",
-    canonical: "https://szlholdings.com/pilot/prism-counsel",
+    title: "Pilot — Counsel — SZL Holdings",
+    description: "Counsel pilot: instrument one legal workflow end to end, with full trust controls, proof chain output, and a 30/60/90 day success path.",
+    canonical: "https://szlholdings.com/pilot/counsel",
   });
 
   return (
@@ -65,13 +65,13 @@ export default function PilotPrismCounselPage() {
             <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054]">
                 <Scale className="h-3.5 w-3.5" />
-                PRISM Counsel Pilot
+                Counsel Pilot
               </div>
               <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
                 One legal workflow, fully instrumented, end to end.
               </h1>
               <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-                The PRISM Counsel pilot takes one high-friction legal workflow — from email and filing arrival
+                The Counsel pilot takes one high-friction legal workflow — from email and filing arrival
                 through matter update, risk surfacing, AI recommendation, attorney sign-off, and defensible
                 export — and instruments it with observability, governance, and proof. Not a software trial.
                 A structured proof of improvement.
@@ -277,7 +277,7 @@ export default function PilotPrismCounselPage() {
                   <a href="/counsel/" className="inline-flex items-center gap-2 rounded-xl border border-[#7c6fcd]/25 bg-[#7c6fcd]/08 px-5 py-2.5 text-sm font-semibold text-[#a89fdf]/90 transition hover:border-[#7c6fcd]/40 hover:bg-[#7c6fcd]/12">
                     Open live Counsel app <ArrowRight className="h-4 w-4" />
                   </a>
-                  <Link href="/solutions/prism-counsel" className="inline-flex items-center gap-2 rounded-xl border border-white/12 px-5 py-2.5 text-sm font-semibold text-white/75 transition hover:border-white/25 hover:bg-white/5">
+                  <Link href="/counsel" className="inline-flex items-center gap-2 rounded-xl border border-white/12 px-5 py-2.5 text-sm font-semibold text-white/75 transition hover:border-white/25 hover:bg-white/5">
                     Full product overview
                   </Link>
                 </div>

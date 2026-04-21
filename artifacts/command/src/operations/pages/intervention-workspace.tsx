@@ -200,19 +200,19 @@ export default function InterventionWorkspace() {
                       className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                       style={{
                         background:
-                          c.author.startsWith('System') || c.author.startsWith('Alloy')
+                          c.author.startsWith('System') || c.author.startsWith('FORGE')
                             ? 'rgba(139,92,246,0.15)'
                             : 'rgba(14,165,233,0.15)',
                         color:
-                          c.author.startsWith('System') || c.author.startsWith('Alloy')
+                          c.author.startsWith('System') || c.author.startsWith('FORGE')
                             ? '#8b7ac8'
                             : '#4a90b8',
-                        border: `1px solid ${c.author.startsWith('System') || c.author.startsWith('Alloy') ? 'rgba(139,92,246,0.3)' : 'rgba(14,165,233,0.3)'}`,
+                        border: `1px solid ${c.author.startsWith('System') || c.author.startsWith('FORGE') ? 'rgba(139,92,246,0.3)' : 'rgba(14,165,233,0.3)'}`,
                       }}
                     >
                       {c.author.startsWith('System')
                         ? 'AS'
-                        : c.author.startsWith('Alloy')
+                        : c.author.startsWith('FORGE')
                           ? 'AL'
                           : c.author
                               .split(' ')

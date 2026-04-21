@@ -60,7 +60,7 @@ const REPORTS = [
     netIrr: "22.1%", tvpi: "1.64×", dpi: "0.38×", moic: "1.64×",
     nav: "$64.1M", committed: "$65.0M", called: "$46.0M", distributed: "$17.5M",
     mgmtFee: "2.0%", carry: "20%", prefReturn: "8.0%",
-    narrative: "Q3 2025 saw steady portfolio maturation. Terra completed its Series A at a significant markup, and PRISM Counsel signed its first Big Law partnership. Fund deployment pace moderated as deal quality in the market improved following a correction in public market comparables.",
+    narrative: "Q3 2025 saw steady portfolio maturation. Terra completed its Series A at a significant markup, and Counsel signed its first Big Law partnership. Fund deployment pace moderated as deal quality in the market improved following a correction in public market comparables.",
     recipients: 23,
   },
 ];

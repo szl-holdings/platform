@@ -4,7 +4,7 @@ import { Package } from 'lucide-react';
 const PACKS = [
   {
     id: 'aegis',
-    label: 'Aegis',
+    label: 'PARAGON',
     sublabel: 'Defense & security ops',
     color: 'hsl(358,75%,58%)',
     bg: 'hsla(358,75%,58%,0.10)',
@@ -12,7 +12,7 @@ const PACKS = [
   },
   {
     id: 'vessels',
-    label: 'Vessels',
+    label: 'SEXTANT',
     sublabel: 'Maritime logistics',
     color: 'hsl(210,80%,60%)',
     bg: 'hsla(210,80%,60%,0.10)',
@@ -20,7 +20,7 @@ const PACKS = [
   },
   {
     id: 'terra',
-    label: 'Terra',
+    label: 'DOMAINE',
     sublabel: 'Real estate intelligence',
     color: 'hsl(145,62%,46%)',
     bg: 'hsla(145,62%,40%,0.10)',
@@ -28,7 +28,7 @@ const PACKS = [
   },
   {
     id: 'counsel',
-    label: 'PRISM Counsel',
+    label: 'Counsel',
     sublabel: 'Legal operations',
     color: 'hsl(258,55%,68%)',
     bg: 'hsla(258,55%,68%,0.10)',
@@ -38,7 +38,7 @@ const PACKS = [
 
 const PLATFORM_LAYERS = [
   { label: 'Lyte command layer', color: 'var(--color-lyte-light)' },
-  { label: 'Alloy action spine + HITL approval', color: 'var(--color-alloy-light)' },
+  { label: 'FORGE action spine + HITL approval', color: 'var(--color-alloy-light)' },
   { label: 'Proof Chain + audit trail', color: 'hsl(145,62%,46%)' },
   { label: 'GraphQL control plane', color: 'hsl(258,55%,68%)' },
   { label: 'Model mesh + Worldline', color: 'hsl(40,90%,54%)' },

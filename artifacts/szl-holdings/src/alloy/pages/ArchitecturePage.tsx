@@ -17,7 +17,7 @@ const LAYERS = [
       'Form & file inputs',
       'System event streams',
     ],
-    products: ['Lyte', 'Vessels', 'Carlota Jo', 'External APIs'],
+    products: ['KORA', 'SEXTANT', 'Carlota Jo', 'External APIs'],
     accent: '#4B8BDB',
     icon: '📥',
   },
@@ -114,7 +114,7 @@ const PRODUCT_INTEGRATIONS = [
     ],
   },
   {
-    name: 'Vessels',
+    name: 'SEXTANT',
     icon: '🚢',
     accent: '#3b82f6',
     description:
@@ -310,7 +310,7 @@ export default function ArchitecturePage({ onNavigate }: NavProps) {
                         className="text-[11px] px-1.5 py-0.5 rounded inline-flex mt-0.5 font-medium"
                         style={{ background: `${prod.accent}15`, color: prod.accent }}
                       >
-                        Powered by Alloy
+                        Powered by FORGE
                       </div>
                     </div>
                   </div>

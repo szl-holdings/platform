@@ -26,12 +26,12 @@ const LYTE = "hsl(192,72%,48%)";
 const MONO = "var(--font-mono)";
 
 const DOMAIN_CONFIG: Record<string, { color: string; icon: typeof Shield; shortName: string }> = {
-  Aegis:        { color: "hsl(222,60%,60%)", icon: Shield, shortName: "Aegis" },
-  Vessels:      { color: "hsl(206,72%,54%)", icon: Ship, shortName: "Vessels" },
-  Terra:        { color: "hsl(142,52%,48%)", icon: Building2, shortName: "Terra" },
-  "PRISM Counsel": { color: "hsl(260,60%,65%)", icon: Briefcase, shortName: "Prism" },
+  Aegis:        { color: "hsl(222,60%,60%)", icon: Shield, shortName: "PARAGON" },
+  Vessels:      { color: "hsl(206,72%,54%)", icon: Ship, shortName: "SEXTANT" },
+  Terra:        { color: "hsl(142,52%,48%)", icon: Building2, shortName: "DOMAINE" },
+  "Counsel": { color: "hsl(260,60%,65%)", icon: Briefcase, shortName: "Prism" },
   "Carlota Jo": { color: "hsl(340,52%,60%)", icon: Users, shortName: "CJ" },
-  Alloy:        { color: "hsl(192,72%,48%)", icon: Zap, shortName: "Alloy" },
+  Alloy:        { color: "hsl(192,72%,48%)", icon: Zap, shortName: "FORGE" },
   IMPERIUM:     { color: "hsl(25,72%,54%)", icon: Layers, shortName: "Imp." },
 };
 
@@ -81,7 +81,7 @@ interface FusionSignal {
 const FUSION_SIGNALS_FALLBACK: FusionSignal[] = [
   {
     id: "sf1",
-    domain: "Aegis",
+    domain: "PARAGON",
     severity: "critical",
     title: "KEV CVE-2025-1337 active exploitation — 3 internal hosts confirmed",
     sourceType: "threat_intelligence",
@@ -94,7 +94,7 @@ const FUSION_SIGNALS_FALLBACK: FusionSignal[] = [
   },
   {
     id: "sf2",
-    domain: "Vessels",
+    domain: "SEXTANT",
     severity: "high",
     title: "MV Adriatic Star — AIS dark gap 6h20m, last fix Strait of Messina",
     sourceType: "ais_telemetry",
@@ -107,7 +107,7 @@ const FUSION_SIGNALS_FALLBACK: FusionSignal[] = [
   },
   {
     id: "sf3",
-    domain: "PRISM Counsel",
+    domain: "Counsel",
     severity: "high",
     title: "Motion HC-2025-0487 — deadline T-38h, no filing draft, no owner",
     sourceType: "deadline_monitor",
@@ -118,7 +118,7 @@ const FUSION_SIGNALS_FALLBACK: FusionSignal[] = [
   },
   {
     id: "sf4",
-    domain: "Alloy",
+    domain: "FORGE",
     severity: "high",
     title: "Approval queue depth 14 workflows — 6 exceed 72h threshold",
     sourceType: "workflow_monitor",
@@ -131,7 +131,7 @@ const FUSION_SIGNALS_FALLBACK: FusionSignal[] = [
   },
   {
     id: "sf5",
-    domain: "Terra",
+    domain: "DOMAINE",
     severity: "medium",
     title: "NYC portfolio distress threshold — 12 properties, $340M exposure",
     sourceType: "market_intelligence",
@@ -313,7 +313,7 @@ const SIG_PROOF_RECORDS: Record<string, ProofRecord> = {
     ...SAMPLE_PROOF_RECORD,
     id: "PCH-SF1-20260416",
     sourceSystem: "Aegis SOC Feed",
-    sourceDomain: "Aegis",
+    sourceDomain: "PARAGON",
     signalType: "threat_intelligence",
     confidence: 0.94,
     reviewState: "unreviewed",
@@ -336,7 +336,7 @@ const SIG_PROOF_RECORDS: Record<string, ProofRecord> = {
     ...SAMPLE_PROOF_RECORD,
     id: "PCH-SF2-20260416",
     sourceSystem: "Vessels AIS Feed",
-    sourceDomain: "Vessels",
+    sourceDomain: "SEXTANT",
     signalType: "ais_telemetry",
     confidence: 0.91,
     reviewState: "human_reviewed",
@@ -350,7 +350,7 @@ const SIG_PROOF_RECORDS: Record<string, ProofRecord> = {
     ],
     chainLinks: [
       { id: "c1", event: "AIS dark gap detected — MV Adriatic Star (6h20m)", actor: "System / Vessels Feed", timestamp: "16 Apr 2026 07:07:44", hash: "sha256:d1e3f5b7a..." },
-      { id: "c2", event: "Temporal correlation with PRISM Counsel filing event (sf5)", actor: "System / Signal Fusion", timestamp: "16 Apr 2026 08:03:11", hash: "sha256:f2a8c4e6b..." },
+      { id: "c2", event: "Temporal correlation with Counsel filing event (sf5)", actor: "System / Signal Fusion", timestamp: "16 Apr 2026 08:03:11", hash: "sha256:f2a8c4e6b..." },
     ],
     metadata: { "Signal ID": "SIG-20260416-002", "Last AIS fix": "37.42N, 15.61E", "Gap duration": "6h20m", "OFAC status": "Pending" },
   },
@@ -435,7 +435,7 @@ export default function SignalFusionPage() {
                   Every signal. Every domain. One fusion layer.
                 </h1>
                 <p style={{ fontSize: "0.6875rem", fontFamily: MONO, letterSpacing: "0.04em", color: LYTE, marginBottom: "0.875rem" }}>
-                  Aegis · Vessels · Terra · PRISM Counsel · Carlota Jo · Alloy · IMPERIUM
+                  Aegis · Vessels · Terra · Counsel · Carlota Jo · Alloy · IMPERIUM
                 </p>
                 <p style={{ fontSize: "clamp(0.9375rem,1.6vw,1.0625rem)", lineHeight: 1.72, color: TEXT_SEC, maxWidth: "54ch", marginBottom: "2rem" }}>
                   Cross-domain signal aggregation showing where signals originate, how they correlate across domains, and what confidence the system places in each one. Inspired by Five Eyes STONE GHOST and NSA's multi-source correlation architecture.

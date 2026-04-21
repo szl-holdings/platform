@@ -32,7 +32,7 @@ export const WORKSPACES: WorkspaceConfig[] = [
   },
   {
     id: 'intelligence',
-    label: 'CORTEX',
+    label: 'APEX',
     icon: '◈',
     accent: '#8b7ac8',
     route: '/(shell)/intelligence',

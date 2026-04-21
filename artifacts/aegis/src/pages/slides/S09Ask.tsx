@@ -306,7 +306,7 @@ export default function S09Ask() {
                     color: 'rgba(240,236,230,0.4)',
                   }}
                 >
-                  CORTEX App Store launch, UX polish, Mapbox/Stripe activation, domain app
+                  APEX App Store launch, UX polish, Mapbox/Stripe activation, domain app
                   completion
                 </div>
               </div>

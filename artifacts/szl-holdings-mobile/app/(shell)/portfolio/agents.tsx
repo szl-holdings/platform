@@ -27,7 +27,7 @@ const TEXT_DIM = 'rgba(240,238,255,0.4)';
 const AGENT_DEFS = [
   {
     id: 'alloy',
-    name: 'Alloy',
+    name: 'FORGE',
     domain: 'Orchestration',
     color: ACCENT,
     icon: 'git-merge',
@@ -84,7 +84,7 @@ const AGENT_DEFS = [
 ];
 
 const SKILL_GRAPH = [
-  { agent: 'Alloy', skills: ['orchestration', 'synthesis', 'routing', 'coordination'], score: 97 },
+  { agent: 'FORGE', skills: ['orchestration', 'synthesis', 'routing', 'coordination'], score: 97 },
   {
     agent: 'Sentinel',
     skills: ['threat-analysis', 'CVE', 'incident-response', 'MITRE'],

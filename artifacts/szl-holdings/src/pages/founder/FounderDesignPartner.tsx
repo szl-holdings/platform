@@ -40,7 +40,7 @@ const PRODUCTS = [
   'Vessels — Maritime Intelligence',
   'Terra — Real Estate Intelligence',
   'Aegis — Defense & Intelligence',
-  'PRISM Counsel — Legal Command',
+  'Counsel — Legal Command',
   'Not sure yet',
 ];
 

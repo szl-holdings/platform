@@ -67,7 +67,7 @@ const ARTICLES_FALLBACK: Article[] = [
     title: 'Governed Autonomy: The AI Governance Model That Actually Works in Enterprise',
     slug: 'governed-autonomy',
     excerpt:
-      "AI agents that act without approval are a liability. AI agents that require approval for everything are useless. The answer is a tiered guardian model — and it's the core of how CORTEX operates.",
+      "AI agents that act without approval are a liability. AI agents that require approval for everything are useless. The answer is a tiered guardian model — and it's the core of how APEX operates.",
     publishedAt: '2025-03-01T00:00:00Z',
     readingTime: 8,
     tags: ['AI', 'governance'],

@@ -20,7 +20,7 @@ const STAGES = [
   {
     id: 'recommend',
     label: 'Recommend',
-    sublabel: 'Alloy proposes',
+    sublabel: 'FORGE proposes',
     color: 'var(--color-alloy-light)',
     bg: 'var(--color-alloy-muted)',
     border: 'var(--color-alloy-border)',
@@ -36,7 +36,7 @@ const STAGES = [
   {
     id: 'execute',
     label: 'Execute',
-    sublabel: 'Alloy acts',
+    sublabel: 'FORGE acts',
     color: 'var(--color-alloy)',
     bg: 'var(--color-alloy-muted)',
     border: 'var(--color-alloy-border)',

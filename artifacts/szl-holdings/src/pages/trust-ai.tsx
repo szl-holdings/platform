@@ -48,7 +48,7 @@ const MODEL_MESH_ROWS = [
 ];
 
 const DOMAIN_AGENTS = [
-  { name: "Alloy", domain: "Platform", role: "Execution fabric and orchestration layer routing signals across all domain packs", color: "hsl(258,55%,68%)" },
+  { name: "FORGE", domain: "Platform", role: "Execution fabric and orchestration layer routing signals across all domain packs", color: "hsl(258,55%,68%)" },
   { name: "Helmsman", domain: "Maritime — Vessels", role: "Voyage risk, sanctions screening, route optimization, and regulatory compliance", color: "hsl(200,65%,52%)" },
   { name: "Sentinel", domain: "Security — Aegis", role: "Threat triage, playbook recommendation, and security incident classification", color: "hsl(145,62%,46%)" },
   { name: "Eval Engine", domain: "Evaluation", role: "Model confidence calibration, output scoring, drift detection, and adversarial resistance testing", color: "hsl(38,80%,56%)" },
@@ -74,7 +74,7 @@ const HARD_BOUNDARIES = [
 export default function TrustAIPage() {
   const __pageMeta = usePageMeta({
     title: "AI Policy — Trust Center · SZL Holdings",
-    description: "AI usage model, source-grounding, governed inference layer, and generated-vs-source controls for Lyte + Alloy.",
+    description: "AI usage model, source-grounding, governed inference layer, and generated-vs-source controls for KORA + FORGE.",
     canonical: "https://szlholdings.com/trust/ai",
   });
 
@@ -100,7 +100,7 @@ export default function TrustAIPage() {
                   <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08 }}>AI Policy</h1>
                 </div>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.0625rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch" }}>
-                  Every AI capability in Lyte + Alloy — from Copilot recommendations to signal classification
+                  Every AI capability in KORA + FORGE — from Copilot recommendations to signal classification
                   to document generation — operates within a governance framework that enforces source grounding,
                   human approval, complete decision lineage, and hard boundaries on autonomous action.
                 </p>

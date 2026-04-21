@@ -14,7 +14,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const COMPANIES = [
   {
     id: "lyte",
-    name: "Lyte",
+    name: "KORA",
     tagline: "Business Observability",
     color: "#38bee0",
     rgb: "56,190,224",
@@ -39,7 +39,7 @@ const COMPANIES = [
   },
   {
     id: "vessels",
-    name: "Vessels",
+    name: "SEXTANT",
     tagline: "Maritime Intelligence",
     color: "#3aa4dc",
     rgb: "58,164,220",
@@ -64,7 +64,7 @@ const COMPANIES = [
   },
   {
     id: "aegis",
-    name: "Aegis",
+    name: "PARAGON",
     tagline: "SOC Command",
     color: "#6366f1",
     rgb: "99,102,241",
@@ -89,7 +89,7 @@ const COMPANIES = [
   },
   {
     id: "terra",
-    name: "Terra",
+    name: "DOMAINE",
     tagline: "Real Estate Intelligence",
     color: "#6b9c30",
     rgb: "107,156,48",
@@ -110,11 +110,11 @@ const COMPANIES = [
       { label: "NRR", value: "108%", good: true },
       { label: "Data Source Coverage", value: "8 feeds", good: true },
     ],
-    sentiment: "Proprietary ACRIS linkage is a defensible moat. CAC payback longer than target — channel partnership with PRISM Counsel for distress litigation pipeline is key lever.",
+    sentiment: "Proprietary ACRIS linkage is a defensible moat. CAC payback longer than target — channel partnership with Counsel for distress litigation pipeline is key lever.",
   },
   {
     id: "prism",
-    name: "PRISM",
+    name: "PRAXIS",
     tagline: "Legal Matter Command",
     color: "#a855f7",
     rgb: "168,85,247",

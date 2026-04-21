@@ -160,7 +160,7 @@ const DEMO_SIGNAL_GROUPS = [
       { label: "Vessel", value: "MV Pacific Star (IMO 9876543)", source: "AIS Tracking" },
       { label: "Delay", value: "32h at Port of Shanghai", source: "Port Authority" },
       { label: "Properties Flagged", value: "12 in Pudong logistics corridor", source: "Terra Intelligence" },
-      { label: "Contracts at Risk", value: "8 with milestone delivery clauses", source: "PRISM Counsel" },
+      { label: "Contracts at Risk", value: "8 with milestone delivery clauses", source: "Counsel" },
     ],
   },
 ];

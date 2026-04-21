@@ -22,7 +22,7 @@ const LAYERS = [
     ],
   },
   {
-    name: "Alloy",
+    name: "FORGE",
     tagline: "Execution Fabric",
     accent: "hsl(214,80%,65%)",
     accentRgb: "92,155,228",
@@ -39,22 +39,22 @@ const LAYERS = [
 
 const EXPANSION_VERTICALS = [
   {
-    name: "Aegis",
+    name: "PARAGON",
     domain: "Security & defense — SOC command, threat intelligence, MITRE ATT&CK, governed response.",
     accent: "hsl(222,60%,58%)",
   },
   {
-    name: "Vessels",
+    name: "SEXTANT",
     domain: "Maritime intelligence — fleet command, AIS telemetry, sanctions screening, voyage economics.",
     accent: "hsl(205,85%,55%)",
   },
   {
-    name: "Terra",
+    name: "DOMAINE",
     domain: "Real estate intelligence — distress pipeline, ownership graph, governed deal workflow.",
     accent: "hsl(140,52%,46%)",
   },
   {
-    name: "PRISM Counsel",
+    name: "Counsel",
     domain: "Legal intelligence — matter command, deadline tracking, governed demand workflows.",
     accent: "hsl(260,60%,65%)",
   },
@@ -74,7 +74,7 @@ const EXPANSION_VERTICALS = [
 export default function PlatformPage() {
   const __pageMeta = usePageMeta({
     title: "Platform — SZL Holdings",
-    description: "Governed decision operating system: Command operator surface, Alloy execution fabric, and six domain packs — Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM. One governance loop. Every high-consequence domain.",
+    description: "Governed decision operating system: Command operator surface, Alloy execution fabric, and six domain packs — Aegis, Vessels, Terra, Counsel, Carlota Jo, IMPERIUM. One governance loop. Every high-consequence domain.",
     canonical: "https://szlholdings.com/platform",
     ogImage: "https://szlholdings.com/og/og-platform.jpg",
   });

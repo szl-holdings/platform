@@ -369,7 +369,7 @@ export default function LytePulse() {
               { label: 'Workflows', value: '89', color: '#8b5cf6' },
               { label: 'Self-Heal', value: '98%', color: '#10b981' },
               { label: 'MTTR', value: '2.4s', color: '#06b6d4' },
-              { label: 'Alloy', value: 'Active', color: '#d4a054' },
+              { label: 'FORGE', value: 'Active', color: '#d4a054' },
               { label: 'Blockers', value: '3', color: '#ef4444' },
               { label: 'Actions', value: '47', color: '#ec4899' },
             ]}

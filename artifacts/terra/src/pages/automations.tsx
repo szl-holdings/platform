@@ -265,7 +265,7 @@ export default function AutomationsPage() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex items-center gap-3 mb-1">
           <Zap className="w-6 h-6 text-terra-primary" />
-          <h1 className="text-2xl font-display font-bold text-terra-text">Alloy Automation</h1>
+          <h1 className="text-2xl font-display font-bold text-terra-text">FORGE Automation</h1>
         </div>
         <p className="text-sm text-terra-text-secondary">
           Workflow automation — task templates, alerts, retry queue, override panel, and full audit

@@ -85,7 +85,7 @@ const HEADER_BG = toAlpha('#080b0d', 0.92);
 
 const TERRA_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: 'terra',
-  appName: 'Terra',
+  appName: 'DOMAINE',
   accentColor: TERRA_BRAND_ACCENT,
   steps: [
     {
@@ -568,7 +568,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           <Building2 className="w-4 h-4" style={{ color: TERRA_BRAND_ACCENT }} />
         </div>
         <div className="flex flex-col">
-          <span className="font-bold text-sm tracking-tight text-white leading-none">Terra</span>
+          <span className="font-bold text-sm tracking-tight text-white leading-none">DOMAINE</span>
           <span
             className="text-[9px] uppercase tracking-widest leading-none mt-0.5"
             style={{ color: colors.text.subtle, fontFamily: 'monospace' }}
@@ -737,7 +737,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           role="main"
           tabIndex={-1}
         >
-          <SectionErrorBoundary sectionName="Terra">{children}</SectionErrorBoundary>
+          <SectionErrorBoundary sectionName="DOMAINE">{children}</SectionErrorBoundary>
         </main>
       </SharedDashboardShell>
       <div className="fixed bottom-0 left-0 right-0 z-40">

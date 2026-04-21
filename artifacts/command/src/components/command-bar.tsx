@@ -112,7 +112,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   // Domain verticals
   {
     href: '/vessels/',
-    label: 'Vessels',
+    label: 'SEXTANT',
     description: 'Maritime intelligence, sanctions, and vessel risk',
     icon: Ship,
     color: '#4a90b8',
@@ -121,7 +121,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/terra/',
-    label: 'Terra',
+    label: 'DOMAINE',
     description: 'Real estate intelligence — pro-forma, waterfall, leases',
     icon: HomeIcon,
     color: '#c8953c',
@@ -176,7 +176,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/cortex-mobile/',
-    label: 'CORTEX Mobile',
+    label: 'APEX Mobile',
     description: 'Mobile command — governed decision loop and briefings',
     icon: Smartphone,
     color: '#f97316',
@@ -272,7 +272,7 @@ const QUICK_NAV: QuickNavItem[] = [
   },
   {
     href: '/operations/prism/pulse',
-    label: 'Pulse',
+    label: 'LUMINA',
     section: 'Intelligence',
     icon: Heart,
     color: '#d4a054',

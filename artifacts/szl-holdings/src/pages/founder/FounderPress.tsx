@@ -148,7 +148,7 @@ const INVESTOR_SIGNALS = [
   },
   {
     signal: `${seriesB ? seriesB.round : 'Series B'} is structured, not speculative`,
-    detail: `The ${seriesB ? seriesB.amount : '$45M'} Series B target is tied to specific product milestones: PRISM Counsel and Carlota Jo to GA, triple Aegis defense presence. The plan is real.`,
+    detail: `The ${seriesB ? seriesB.amount : '$45M'} Series B target is tied to specific product milestones: Counsel and Carlota Jo to GA, triple Aegis defense presence. The plan is real.`,
   },
 ];
 

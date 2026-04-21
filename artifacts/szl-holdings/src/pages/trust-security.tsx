@@ -65,7 +65,7 @@ const DISCLOSURE_STEPS = [
 export default function TrustSecurityPage() {
   const __pageMeta = usePageMeta({
     title: "Security — Trust Center · SZL Holdings",
-    description: "Identity & access model, infrastructure controls, credential management, and responsible disclosure for Lyte + Alloy.",
+    description: "Identity & access model, infrastructure controls, credential management, and responsible disclosure for KORA + FORGE.",
     canonical: "https://szlholdings.com/trust/security",
   });
 
@@ -91,7 +91,7 @@ export default function TrustSecurityPage() {
                   <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08 }}>Security Posture</h1>
                 </div>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.0625rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch" }}>
-                  This page documents the current security controls in place for Lyte + Alloy.
+                  This page documents the current security controls in place for KORA + FORGE.
                   It reflects the honest current state — not aspirational certifications or future
                   roadmap items presented as existing capabilities.
                 </p>

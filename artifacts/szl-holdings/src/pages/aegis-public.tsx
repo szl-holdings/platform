@@ -206,7 +206,7 @@ export default function AegisPublicPage() {
                     Security operations is a domain drowning in signal volume and starved for structured action. The typical SIEM gives analysts raw alerts. The typical SOAR automates without sufficient human judgment. Aegis applies Alloy's governed operating loop to the security workflow — so analysts act on context, not noise, and every action has a traceable record.
                   </p>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,54%)", maxWidth: "46ch" }}>
-                    The architecture mirrors PRISM Counsel's operating model: a structured threat object (Threat Twin), signal enrichment from authoritative intelligence sources, governed response routing through Alloy, and a compliance-ready audit footprint for every security decision.
+                    The architecture mirrors Counsel's operating model: a structured threat object (Threat Twin), signal enrichment from authoritative intelligence sources, governed response routing through Alloy, and a compliance-ready audit footprint for every security decision.
                   </p>
                 </m.div>
                 <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.08 }}>
@@ -293,7 +293,7 @@ export default function AegisPublicPage() {
                   The execution fabric comes with every lane. Aegis builds on top of it.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
-                  Aegis does not rebuild what Alloy already provides. Every capability below is inherited from the shared platform — the same infrastructure governing PRISM Counsel, Vessels, Terra, and Carlota Jo.
+                  Aegis does not rebuild what Alloy already provides. Every capability below is inherited from the shared platform — the same infrastructure governing Counsel, Vessels, Terra, and Carlota Jo.
                 </p>
               </m.div>
               <div style={{ display: "grid", gap: "1rem", marginBottom: "2.5rem" }} className="lg:grid-cols-3 md:grid-cols-2">

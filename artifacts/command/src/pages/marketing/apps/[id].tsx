@@ -25,7 +25,7 @@ import { MarketingNav } from '../../../components/marketing/MarketingNav';
 
 const appData = {
   terra: {
-    name: 'Terra',
+    name: 'DOMAINE',
     tagline: 'Real Estate Intelligence',
     color: 'text-[#40856a]',
     accentHex: '#40856a',
@@ -71,7 +71,7 @@ const appData = {
     ],
   },
   vessels: {
-    name: 'Vessels',
+    name: 'SEXTANT',
     tagline: 'Fleet Command',
     color: 'text-[#0ea5e9]',
     accentHex: '#0ea5e9',
@@ -124,7 +124,7 @@ const appData = {
     ],
   },
   lyte: {
-    name: 'Lyte',
+    name: 'KORA',
     tagline: 'AIOps Command',
     color: 'text-[#d4a054]',
     accentHex: '#d4a054',
@@ -170,7 +170,7 @@ const appData = {
     ],
   },
   aegis: {
-    name: 'Aegis',
+    name: 'PARAGON',
     tagline: 'Defense & Intelligence',
     color: 'text-[#3b82f6]',
     accentHex: '#3b82f6',
@@ -223,7 +223,7 @@ const appData = {
     ],
   },
   prism: {
-    name: 'PRISM Counsel',
+    name: 'Counsel',
     tagline: 'Legal Intelligence',
     color: 'text-[#f59e0b]',
     accentHex: '#f59e0b',

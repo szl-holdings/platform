@@ -61,25 +61,25 @@ const PLATFORM_NODES = [
   {
     id: 'lyte-core',
     label: 'Lyte Core',
-    platform: 'Lyte',
+    platform: 'KORA',
     connects: ['signal-bus', 'action-router', 'prism-engine'],
   },
   {
     id: 'alloy-engine',
     label: 'Alloy Engine',
-    platform: 'Alloy',
+    platform: 'FORGE',
     connects: ['signal-bus', 'workflow-exec', 'ml-inference'],
   },
   {
     id: 'firestorm-soc',
     label: 'Aegis SOC',
-    platform: 'Aegis',
+    platform: 'PARAGON',
     connects: ['signal-bus', 'threat-db'],
   },
   {
     id: 'terra-lyte',
     label: 'Terra Lyte',
-    platform: 'Terra',
+    platform: 'DOMAINE',
     connects: ['signal-bus', 'geo-index'],
   },
   {
@@ -88,14 +88,14 @@ const PLATFORM_NODES = [
     platform: 'Core',
     connects: ['prism-engine', 'alert-engine', 'escalation-mgr'],
   },
-  { id: 'ml-inference', label: 'ML Inference', platform: 'Alloy', connects: ['metrics-store'] },
+  { id: 'ml-inference', label: 'ML Inference', platform: 'FORGE', connects: ['metrics-store'] },
   {
     id: 'workflow-exec',
     label: 'Workflow Exec',
-    platform: 'Alloy',
+    platform: 'FORGE',
     connects: ['metrics-store', 'action-router'],
   },
-  { id: 'prism-engine', label: 'PRISM Engine', platform: 'Lyte', connects: ['metrics-store'] },
+  { id: 'prism-engine', label: 'PRISM Engine', platform: 'KORA', connects: ['metrics-store'] },
   { id: 'alert-engine', label: 'Alert Engine', platform: 'Core', connects: ['notification-svc'] },
   {
     id: 'escalation-mgr',
@@ -103,11 +103,11 @@ const PLATFORM_NODES = [
     platform: 'Core',
     connects: ['notification-svc', 'action-router'],
   },
-  { id: 'action-router', label: 'Action Router', platform: 'Lyte', connects: [] },
+  { id: 'action-router', label: 'Action Router', platform: 'KORA', connects: [] },
   { id: 'metrics-store', label: 'Metrics Store', platform: 'Core', connects: [] },
   { id: 'notification-svc', label: 'Notification Svc', platform: 'Core', connects: [] },
-  { id: 'threat-db', label: 'Threat DB', platform: 'Aegis', connects: [] },
-  { id: 'geo-index', label: 'Geo Index', platform: 'Terra', connects: [] },
+  { id: 'threat-db', label: 'Threat DB', platform: 'PARAGON', connects: [] },
+  { id: 'geo-index', label: 'Geo Index', platform: 'DOMAINE', connects: [] },
 ];
 
 const PLATFORM_COLORS: Record<string, string> = {

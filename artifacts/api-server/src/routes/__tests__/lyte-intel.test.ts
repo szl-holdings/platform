@@ -172,7 +172,7 @@ describe('lyte-intel router', () => {
     expect(res.body.dataAvailable).toBe(true);
     expect(res.body.approvalQueue[0].id).toBe('q101');
     expect(res.body.approvalQueue[0].title).toContain('Stripe webhook');
-    expect(res.body.approvalQueue[0].domain).toBe('Alloy');
+    expect(res.body.approvalQueue[0].domain).toBe('FORGE');
     expect(res.body.violations[0].id).toBe('vi202');
     expect(res.body.violations[0].domain).toBe('API Infrastructure');
     expect(res.body.violations[0].status).toBe('open');

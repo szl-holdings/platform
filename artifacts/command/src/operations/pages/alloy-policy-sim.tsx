@@ -148,7 +148,7 @@ const SCENARIOS: SimScenario[] = [
     name: 'Charter rate update at 2AM',
     description:
       'Apply a new fuel surcharge rate change (>$50K fleet-wide impact) at 2:00 AM outside business hours.',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     impactEstimate: '$72,000',
     timeOfDay: '02:00 AM',
@@ -192,7 +192,7 @@ const SCENARIOS: SimScenario[] = [
     name: 'Export portfolio data to external auditor',
     description:
       'Send full Q1 real estate valuation dataset to external auditor without redaction pre-check.',
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     impactEstimate: '$0',
     timeOfDay: '10:30 AM',
@@ -236,7 +236,7 @@ const SCENARIOS: SimScenario[] = [
     name: 'Security incident auto-remediation (known pattern)',
     description:
       'Attempt to auto-remediate a known brute-force pattern using the remediation playbook without approval.',
-    pack: 'Aegis',
+    pack: 'PARAGON',
     packColor: '#4f6ef7',
     impactEstimate: '$0',
     timeOfDay: '3:45 PM',
@@ -281,7 +281,7 @@ const SCENARIOS: SimScenario[] = [
     name: 'Q1 executive report distribution',
     description:
       'Distribute Q1 board report to external board members with exec sign-off in place.',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     impactEstimate: '$0',
     timeOfDay: '9:00 AM',

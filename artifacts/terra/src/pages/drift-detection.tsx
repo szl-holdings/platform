@@ -183,7 +183,7 @@ export default function DriftDetection() {
                   border: '1px solid rgba(99,102,241,0.2)',
                 }}
               >
-                <ArrowRight className="w-3 h-3" /> Model in Alloy
+                <ArrowRight className="w-3 h-3" /> Model in FORGE
               </a>
               <a
                 href="/causal-drilldown"

@@ -46,7 +46,7 @@ const TEMPLATES: WorkflowTemplate[] = [
     name: 'Executive Report Generation',
     description:
       'Generates structured executive reports from portfolio signals and delivers to the digest center. Requires exec sign-off before distribution.',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     trigger: 'scheduled',
     requiresApproval: true,
@@ -68,7 +68,7 @@ const TEMPLATES: WorkflowTemplate[] = [
     name: 'Fleet ETA Compliance Check',
     description:
       'Polls fleet position data and checks vessel ETAs against SLA windows. Flags compliance gaps with impact estimates.',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     trigger: 'interval',
     requiresApproval: false,
@@ -90,7 +90,7 @@ const TEMPLATES: WorkflowTemplate[] = [
     name: 'Security Posture Audit',
     description:
       'Comprehensive security posture assessment across physical, digital, and personnel dimensions. Produces a scored audit report.',
-    pack: 'Aegis',
+    pack: 'PARAGON',
     packColor: '#4f6ef7',
     trigger: 'manual',
     requiresApproval: true,
@@ -112,7 +112,7 @@ const TEMPLATES: WorkflowTemplate[] = [
     name: 'Asset Valuation Batch',
     description:
       'Runs batch valuation models across the real estate portfolio using current market comps and income data.',
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     trigger: 'scheduled',
     requiresApproval: false,
@@ -134,7 +134,7 @@ const TEMPLATES: WorkflowTemplate[] = [
     name: 'Ownership Conflict Detector',
     description:
       'Scans portfolio data for overlapping ownership assignments, unassigned items, and handoff gaps. Routes conflicts for resolution.',
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     packColor: '#d4a054',
     trigger: 'signal',
     requiresApproval: false,
@@ -156,7 +156,7 @@ const TEMPLATES: WorkflowTemplate[] = [
     name: 'Fuel Surcharge Rate Calculator',
     description:
       'Calculates updated fuel surcharge rates based on current Brent crude index. Requires finance approval before applying to charter rates.',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     trigger: 'signal',
     requiresApproval: true,

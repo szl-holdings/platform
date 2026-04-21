@@ -106,10 +106,10 @@ const FRESHNESS_CFG: Record<Freshness, { color: string; dot: string; label: stri
 };
 
 const DOMAIN_CFG: Record<Domain, { color: string; label: string }> = {
-  lyte: { color: 'text-amber-400', label: 'Lyte' },
-  aegis: { color: 'text-red-400', label: 'Aegis' },
-  vessels: { color: 'text-sky-400', label: 'Vessels' },
-  terra: { color: 'text-emerald-400', label: 'Terra' },
+  lyte: { color: 'text-amber-400', label: 'KORA' },
+  aegis: { color: 'text-red-400', label: 'PARAGON' },
+  vessels: { color: 'text-sky-400', label: 'SEXTANT' },
+  terra: { color: 'text-emerald-400', label: 'DOMAINE' },
   counsel: { color: 'text-violet-400', label: 'Counsel' },
   carlota: { color: 'text-pink-400', label: 'Carlota' },
   cross_domain: { color: 'text-slate-400', label: 'Cross-Domain' },
@@ -855,9 +855,9 @@ function DetailDrawer({ cardId, onClose }: { cardId: string; onClose: () => void
 
 const DOMAIN_FILTERS = [
   { value: undefined, label: 'All Domains' },
-  { value: 'lyte' as const, label: 'Lyte' },
-  { value: 'aegis' as const, label: 'Aegis' },
-  { value: 'vessels' as const, label: 'Vessels' },
+  { value: 'lyte' as const, label: 'KORA' },
+  { value: 'aegis' as const, label: 'PARAGON' },
+  { value: 'vessels' as const, label: 'SEXTANT' },
 ];
 
 const STATUS_FILTERS = [

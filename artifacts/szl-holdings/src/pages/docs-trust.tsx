@@ -8,7 +8,7 @@ const TRUST_PILLARS = [
   {
     icon: UserCheck,
     name: "Human-in-the-loop by architecture",
-    desc: "Human approval is not a policy configuration in Lyte + Alloy — it is a structural property of the platform. The signal-to-action pipeline cannot route from AI recommendation to execution without passing through a human decision gate. This is enforced at the architecture level, not the policy level.",
+    desc: "Human approval is not a policy configuration in KORA + FORGE — it is a structural property of the platform. The signal-to-action pipeline cannot route from AI recommendation to execution without passing through a human decision gate. This is enforced at the architecture level, not the policy level.",
   },
   {
     icon: Lock,
@@ -48,7 +48,7 @@ const GOVERNANCE_COMMITMENTS = [
 
 const DOMAIN_CONSIDERATIONS = [
   {
-    domain: "Legal (PRISM Counsel)",
+    domain: "Legal (Counsel)",
     items: [
       "Attorney-client privilege screening on all inputs before model processing",
       "Human attorney approval required for all recommendations before export",
@@ -88,7 +88,7 @@ const DOMAIN_CONSIDERATIONS = [
 export default function DocsTrustPage() {
   const __pageMeta = usePageMeta({
     title: "Trust — Docs — SZL Holdings",
-    description: "Technical trust documentation for Lyte + Alloy: human-in-the-loop architecture, immutable audit trail, proof chain, role-scoped access, and domain-specific governance.",
+    description: "Technical trust documentation for KORA + FORGE: human-in-the-loop architecture, immutable audit trail, proof chain, role-scoped access, and domain-specific governance.",
     canonical: "https://szlholdings.com/docs/trust",
   });
 
@@ -114,7 +114,7 @@ export default function DocsTrustPage() {
                 Trust documentation.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
-                Trust in the Lyte + Alloy platform is an architectural property, not a product feature.
+                Trust in the KORA + FORGE platform is an architectural property, not a product feature.
                 This page documents the trust controls, governance commitments, and domain-specific compliance
                 considerations that apply across all verticals and all operator environments.
               </p>

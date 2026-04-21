@@ -27,7 +27,7 @@ const TEXT_DIM = 'rgba(232,234,240,0.45)';
 const AGENT_DEFS = [
   {
     id: 'alloy',
-    name: 'Alloy',
+    name: 'FORGE',
     domain: 'Orchestration',
     color: ACCENT,
     icon: 'git-merge',
@@ -150,11 +150,11 @@ function AgentCard({
 }
 
 const DELEGATION_CHAIN = [
-  { from: 'User', to: 'Alloy', action: 'Query: threat landscape', ts: '14:32:01' },
-  { from: 'Alloy', to: 'Sentinel', action: 'Route: security analysis', ts: '14:32:02' },
+  { from: 'User', to: 'FORGE', action: 'Query: threat landscape', ts: '14:32:01' },
+  { from: 'FORGE', to: 'Sentinel', action: 'Route: security analysis', ts: '14:32:02' },
   { from: 'Sentinel', to: 'Eval Engine', action: 'Delegate: CVE research', ts: '14:32:03' },
-  { from: 'Sentinel', to: 'Alloy', action: 'Return: enriched response', ts: '14:32:05' },
-  { from: 'Alloy', to: 'User', action: 'Synthesized answer', ts: '14:32:06' },
+  { from: 'Sentinel', to: 'FORGE', action: 'Return: enriched response', ts: '14:32:05' },
+  { from: 'FORGE', to: 'User', action: 'Synthesized answer', ts: '14:32:06' },
 ];
 
 const CONNECTORS = [

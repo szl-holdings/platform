@@ -60,17 +60,17 @@ export const registry: BrandRegistry = {
       asOf: '2026',
     },
     alloyConnectors: {
-      label: 'Alloy connectors',
+      label: 'FORGE connectors',
       value: '35+',
       asOf: '2026-Q1',
     },
     terraDistressProperties: {
-      label: 'Terra distress properties tracked',
+      label: 'DOMAINE distress properties tracked',
       value: '340+',
       asOf: '2026-Q1',
     },
     terraDealPipeline: {
-      label: 'Terra deal pipeline',
+      label: 'DOMAINE deal pipeline',
       value: '$4.8B',
       asOf: '2026-Q1',
     },
@@ -95,20 +95,20 @@ export const registry: BrandRegistry = {
       amount: '$45M',
       date: '2026',
       detail:
-        'International expansion, PRISM Counsel and Carlota Jo to GA, triple Aegis defense presence.',
+        'International expansion, Counsel and Carlota Jo to GA, triple PARAGON defense presence.',
     },
   ],
 
   products: [
     {
       id: 'lyte',
-      name: 'Lyte',
+      name: 'KORA',
       tagline: 'Decision Intelligence Platform',
       category: 'Decision Intelligence',
       oneLiner:
         'Governed decision intelligence that detects operational risk, surfaces ownership gaps, and routes human action before business damage occurs.',
       description:
-        'Governed decision intelligence platform that detects operational risk, surfaces ownership gaps, and routes human action before business damage occurs. Built on the PRISM framework — Pulse, Risk, Intelligence, Signals, Motion.',
+        'Governed decision intelligence platform that detects operational risk, surfaces ownership gaps, and routes human action before business damage occurs. Built on the PRAXIS framework — Pulse, Risk, Action, eXecution, Intelligence, Signals.',
       status: 'live',
       doctrineRole: 'OBSERVE',
       link: '/command/operations/',
@@ -116,13 +116,13 @@ export const registry: BrandRegistry = {
     },
     {
       id: 'alloy',
-      name: 'Alloy',
+      name: 'FORGE',
       tagline: 'Execution Fabric & Predictive Intelligence Engine',
       category: 'Execution Fabric',
       oneLiner:
         'The execution backbone of the SZL platform — orchestrating connectors, automations, and the predictive intelligence layer across every subsidiary.',
       description:
-        'Alloy is the execution engine of the SZL platform — orchestrating connectors, DAGs, automations, and the predictive intelligence layer across every subsidiary. Scenario modeling, confidence scoring, agent coordination, and workflow automation are embedded capabilities, not bolted-on tools.',
+        'FORGE is the execution engine of the SZL platform — orchestrating connectors, DAGs, automations, and the predictive intelligence layer across every subsidiary. Scenario modeling, confidence scoring, agent coordination, and workflow automation are embedded capabilities, not bolted-on tools.',
       status: 'live',
       doctrineRole: 'EXECUTE',
       link: '/alloy/',
@@ -130,7 +130,7 @@ export const registry: BrandRegistry = {
     },
     {
       id: 'aegis',
-      name: 'Aegis',
+      name: 'PARAGON',
       tagline: 'Unified Defense & Intelligence Command',
       category: 'Defense & Intelligence',
       oneLiner:
@@ -144,7 +144,7 @@ export const registry: BrandRegistry = {
     },
     {
       id: 'vessels',
-      name: 'Vessels',
+      name: 'SEXTANT',
       tagline: 'Maritime Intelligence Platform',
       category: 'Maritime',
       oneLiner:
@@ -158,7 +158,7 @@ export const registry: BrandRegistry = {
     },
     {
       id: 'terra',
-      name: 'Terra',
+      name: 'DOMAINE',
       tagline: 'NYC Real Estate Intelligence',
       category: 'Real Estate Intelligence',
       oneLiner:
@@ -185,7 +185,7 @@ export const registry: BrandRegistry = {
     },
     {
       id: 'prism-counsel',
-      name: 'PRISM Counsel',
+      name: 'Counsel',
       tagline: 'Legal Matter Command',
       category: 'Legal Tech',
       oneLiner:
@@ -213,15 +213,15 @@ export const registry: BrandRegistry = {
 
   boilerplate: {
     aboutSzl:
-      'SZL Holdings is a technology holding company building a governed portfolio of enterprise intelligence platforms. Founded in 2021, our six operating platforms — Lyte, Alloy, Aegis, Vessels, Terra, and Carlota Jo — share a common execution fabric, compounding intelligence across every vertical. Every AI agent we deploy advises; humans confirm; the proof chain records everything.',
+      'SZL Holdings is a technology holding company building a governed portfolio of enterprise intelligence platforms. Founded in 2021, our six operating platforms — KORA, FORGE, PARAGON, SEXTANT, DOMAINE, and Carlota Jo — share a common execution fabric, compounding intelligence across every vertical. Every AI agent we deploy advises; humans confirm; the proof chain records everything.',
     footerRightsReserved: 'All rights reserved.',
     footerTagline: 'Governed Autonomy',
     governancePhilosophy: 'AI agents advise; humans confirm; the proof chain records everything.',
     missionStatement:
       'The enterprises that win the next decade are not the ones with the most data. They are the ones that can reason across their data, connect operational signal to strategic decision, and act with confidence.',
-    prismExpansion: 'Pulse, Risk, Intelligence, Signals, Motion',
+    prismExpansion: 'Pulse, Risk, Action, eXecution, Intelligence, Signals',
     alloyDescription:
-      'Alloy is the shared intelligence and automation backbone that handles workflow orchestration, AI processing, and signal collection across the SZL ecosystem.',
+      'FORGE is the shared intelligence and automation backbone that handles workflow orchestration, AI processing, and signal collection across the SZL ecosystem.',
     ecosystemThesis:
       'Six operating companies. One intelligence fabric. Each platform commands its vertical. Shared infrastructure compounds the advantage across all of them.',
   },

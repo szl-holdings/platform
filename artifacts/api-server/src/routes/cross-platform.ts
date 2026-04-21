@@ -3,7 +3,7 @@
  *
  * These endpoints implement rule-based cross-product signal correlation by
  * querying the trace-graph (defaultTraceStore + defaultQueryEngine) for real
- * data produced by Lyte, Vessels, Terra, PRISM, Aegis, and Carlota agents.
+ * data produced by KORA, SEXTANT, DOMAINE, PRAXIS, PARAGON, and Carlota agents.
  *
  * Auth model:
  *   - All four routes use authMiddleware({ required: false }), so an auth
@@ -55,11 +55,11 @@ const PRODUCT_META: Record<
   Product,
   { label: string; color: string; icon: string; drillBase: string }
 > = {
-  lyte: { label: 'Lyte AIOps', color: '#d4a054', icon: '⚡', drillBase: '/operations/runs' },
-  vessels: { label: 'Vessels', color: '#0ea5e9', icon: '⚓', drillBase: '/vessels' },
-  terra: { label: 'Terra', color: '#22c55e', icon: '⬢', drillBase: '/terra' },
-  prism: { label: 'PRISM Counsel', color: '#a855f7', icon: '⚖', drillBase: '/prism-counsel' },
-  aegis: { label: 'Aegis Security', color: '#ef4444', icon: '⚔', drillBase: '/aegis' },
+  lyte: { label: 'KORA AIOps', color: '#d4a054', icon: '⚡', drillBase: '/operations/runs' },
+  vessels: { label: 'SEXTANT', color: '#0ea5e9', icon: '⚓', drillBase: '/vessels' },
+  terra: { label: 'DOMAINE', color: '#22c55e', icon: '⬢', drillBase: '/terra' },
+  prism: { label: 'Counsel', color: '#a855f7', icon: '⚖', drillBase: '/prism-counsel' },
+  aegis: { label: 'PARAGON Security', color: '#ef4444', icon: '⚔', drillBase: '/aegis' },
   carlota: { label: 'Carlota Jo', color: '#f59e0b', icon: '◉', drillBase: '/carlota-jo' },
 };
 

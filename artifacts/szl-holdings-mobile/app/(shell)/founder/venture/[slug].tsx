@@ -32,7 +32,7 @@ const VENTURES_MAP: Record<
   }
 > = {
   vessels: {
-    name: 'Vessels',
+    name: 'SEXTANT',
     tagline: 'Maritime Intelligence',
     description:
       'A command-grade maritime intelligence platform covering global shipping routes. Vessels ingests live AIS feeds, enriches vessel and voyage data, applies sanctions screening against OFAC and UN watchlists, and surfaces operational exceptions in real time.',
@@ -56,10 +56,10 @@ const VENTURES_MAP: Record<
     tech: ['React', 'TypeScript', 'PostgreSQL', 'AIS Stream', 'Express'],
   },
   aegis: {
-    name: 'Aegis',
+    name: 'PARAGON',
     tagline: 'Unified Defense & Intelligence',
     description:
-      'A unified command surface for enterprise cybersecurity converging Security Operations (Firestorm), Managed Services (Aegis Operations), and Intelligence Engine (Aegis Labs). Aegis brings together threat detection, incident response, and managed operations under a single Palantir-grade interface.',
+      'A unified command surface for enterprise cybersecurity converging Security Operations (Firestorm), Managed Services (PARAGON Operations), and Intelligence Engine (PARAGON Labs). Aegis brings together threat detection, incident response, and managed operations under a single enterprise-grade interface.',
     color: '#6366f1',
     url: 'https://aegis.szlholdings.com',
     status: 'Live',
@@ -80,7 +80,7 @@ const VENTURES_MAP: Record<
     tech: ['React', 'TypeScript', 'WebSockets', 'PostgreSQL', 'AI/ML'],
   },
   terra: {
-    name: 'Terra',
+    name: 'DOMAINE',
     tagline: 'Real Estate Intelligence',
     description:
       'A distress-first real estate intelligence platform covering all five NYC boroughs. Terra surfaces pre-foreclosure signals, tax lien patterns, and ownership anomalies — giving operators a 6–18 month head start on distressed opportunity.',
@@ -104,7 +104,7 @@ const VENTURES_MAP: Record<
     tech: ['React', 'TypeScript', 'PostGIS', 'Mapbox', 'PostgreSQL'],
   },
   lyte: {
-    name: 'Lyte',
+    name: 'KORA',
     tagline: 'Business Observability',
     description:
       'A unified AI operations and business observability platform. Lyte provides cross-portfolio signal aggregation, multi-model AI routing, infrastructure health monitoring, and the PRISM framework for translating operational data into decisions.',

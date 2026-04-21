@@ -163,7 +163,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         domain: 'intelligence',
         severity: 'high',
         title: 'Port of Rotterdam throughput down 18%',
-        source: 'CORTEX',
+        source: 'APEX',
         time: '2m ago',
       },
       {
@@ -171,7 +171,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         domain: 'fleet',
         severity: 'medium',
         title: 'MSC Horizon ETA delay — weather routing',
-        source: 'Vessels',
+        source: 'SEXTANT',
         time: '7m ago',
       },
       {
@@ -187,7 +187,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         domain: 'properties',
         severity: 'low',
         title: 'NYC distressed portfolio — 2 new targets',
-        source: 'Terra',
+        source: 'DOMAINE',
         time: '22m ago',
       },
       {
@@ -222,7 +222,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
       },
       {
         domain: 'intelligence',
-        label: 'CORTEX',
+        label: 'APEX',
         icon: '◈',
         accent: '#8b7ac8',
         activeCount: 5,
@@ -475,9 +475,9 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         valueAtRisk: 680000,
         sourceSignalCount: 6,
         evidence: [
-          { label: 'Rotterdam throughput', value: '-18% vs 30d avg', source: 'Vessels' },
+          { label: 'Rotterdam throughput', value: '-18% vs 30d avg', source: 'SEXTANT' },
           { label: 'Charter demurrage trigger', value: '48h', source: 'Counsel' },
-          { label: 'Crude futures', value: '+4.2%', source: 'Lyte' },
+          { label: 'Crude futures', value: '+4.2%', source: 'KORA' },
         ],
         plannerAssessment: {
           riskLevel: 'high',
@@ -496,9 +496,9 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         valueAtRisk: 540000,
         sourceSignalCount: 9,
         evidence: [
-          { label: 'Blocked attempts', value: '112 in 14 min', source: 'Aegis' },
-          { label: 'Targeted accounts', value: '3 exec, 1 finance', source: 'Aegis' },
-          { label: 'Source ASN', value: 'AS15169 / RO', source: 'Aegis' },
+          { label: 'Blocked attempts', value: '112 in 14 min', source: 'PARAGON' },
+          { label: 'Targeted accounts', value: '3 exec, 1 finance', source: 'PARAGON' },
+          { label: 'Source ASN', value: 'AS15169 / RO', source: 'PARAGON' },
         ],
         plannerAssessment: { riskLevel: 'medium', requiredApproval: false, approvalReason: null },
       },
@@ -513,9 +513,9 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         valueAtRisk: 720000,
         sourceSignalCount: 4,
         evidence: [
-          { label: 'LTV distress', value: '42%', source: 'Terra' },
-          { label: 'Maturity window', value: '87 days', source: 'Terra' },
-          { label: 'Comp basis', value: '$1,180/sf', source: 'Terra' },
+          { label: 'LTV distress', value: '42%', source: 'DOMAINE' },
+          { label: 'Maturity window', value: '87 days', source: 'DOMAINE' },
+          { label: 'Comp basis', value: '$1,180/sf', source: 'DOMAINE' },
         ],
         plannerAssessment: {
           riskLevel: 'medium',
@@ -534,8 +534,8 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         valueAtRisk: 480000,
         sourceSignalCount: 5,
         evidence: [
-          { label: 'Hedge gap', value: '$2.1M unhedged', source: 'Lyte' },
-          { label: 'Correlation', value: '0.62 dwell↔crude', source: 'Lyte' },
+          { label: 'Hedge gap', value: '$2.1M unhedged', source: 'KORA' },
+          { label: 'Correlation', value: '0.62 dwell↔crude', source: 'KORA' },
         ],
         plannerAssessment: { riskLevel: 'low', requiredApproval: false, approvalReason: null },
       },

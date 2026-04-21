@@ -70,7 +70,7 @@ Founded and operated by Stephen Lutar, SZL is a single-founder, capital-efficien
       {
         title: 'Traction',
         content: `• Six platforms live and operational
-• Unified architecture via Alloy backbone — each platform benefits from shared capability
+• Unified architecture via FORGE backbone — each platform benefits from shared capability
 • Carlota Jo: active client relationships with premium advisory revenue
 • Terra: platform deployed in NYC market with distress data pipeline operational
 • Aegis: SOC platform built to FedRAMP-alignment standards
@@ -510,7 +510,7 @@ MARKET DOCUMENTS
   {
     id: 'lyte-one-pager',
     title: 'Lyte — Investor Product One-Pager',
-    lane: 'Lyte',
+    lane: 'KORA',
     channel: 'investor',
     type: 'one_pager',
     description:
@@ -581,7 +581,7 @@ Actual alternatives Lyte replaces:
 Lyte's differentiation:
 • Designed for operations buyers, not IT buyers
 • Real-time process visibility, not project task tracking
-• No implementation required — connects to existing tools via Alloy
+• No implementation required — connects to existing tools via FORGE
 • Priced for mid-market ($150–$400/seat/mo), not enterprise`,
       },
       {
@@ -619,7 +619,7 @@ Phase 3 (Months 7–12): Enterprise motion
   {
     id: 'vessels-one-pager',
     title: 'Vessels — Investor Product One-Pager',
-    lane: 'Vessels',
+    lane: 'SEXTANT',
     channel: 'investor',
     type: 'one_pager',
     description:
@@ -742,7 +742,7 @@ SBIR/STTR Target Agencies:
   {
     id: 'aegis-one-pager',
     title: 'Aegis — Investor Product One-Pager',
-    lane: 'Aegis',
+    lane: 'PARAGON',
     channel: 'investor',
     type: 'one_pager',
     description:
@@ -844,7 +844,7 @@ The Aegis position: Unified SOC command for the operator, not the vendor. Design
   {
     id: 'terra-one-pager',
     title: 'Terra — Investor Product One-Pager',
-    lane: 'Terra',
+    lane: 'DOMAINE',
     channel: 'investor',
     type: 'one_pager',
     description:

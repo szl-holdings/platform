@@ -326,7 +326,7 @@ export async function seedDistributionOS() {
           'legal AI',
           'settlement forecasting',
           'insurance claims',
-          'PRISM Counsel',
+          'Counsel',
         ],
         ctaType: 'demo',
         ctaText: 'See PRISM Counsel in action',

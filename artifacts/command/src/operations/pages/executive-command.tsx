@@ -67,7 +67,7 @@ interface PackSignal {
 
 const PACK_SIGNALS: PackSignal[] = [
   {
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     label: 'Portfolio Intelligence',
     color: '#d4a054',
     status: 'warning',
@@ -79,7 +79,7 @@ const PACK_SIGNALS: PackSignal[] = [
     trend: 'down',
   },
   {
-    pack: 'Terra',
+    pack: 'DOMAINE',
     label: 'Real Estate Intelligence',
     color: '#a07848',
     status: 'healthy',
@@ -91,7 +91,7 @@ const PACK_SIGNALS: PackSignal[] = [
     trend: 'stable',
   },
   {
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     label: 'Fleet Command',
     color: '#38bdf8',
     status: 'degraded',
@@ -103,7 +103,7 @@ const PACK_SIGNALS: PackSignal[] = [
     trend: 'down',
   },
   {
-    pack: 'Aegis',
+    pack: 'PARAGON',
     label: 'Defense & Intelligence',
     color: '#4f6ef7',
     status: 'healthy',
@@ -118,7 +118,7 @@ const PACK_SIGNALS: PackSignal[] = [
 
 const PRESSURE_ITEMS = [
   {
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     title: 'Fleet ETA compliance gap — 3 vessels outside SLA',
     severity: 'critical',
     age: '6h',
@@ -129,7 +129,7 @@ const PRESSURE_ITEMS = [
     risk: 'SLA Breach',
   },
   {
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     title: 'Ownership conflict detected in accounts receivable',
     severity: 'high',
     age: '14h',
@@ -140,7 +140,7 @@ const PRESSURE_ITEMS = [
     risk: 'Ownership Gap',
   },
   {
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     title: 'Fuel surcharge approval chain stalled',
     severity: 'high',
     age: '22h',
@@ -151,7 +151,7 @@ const PRESSURE_ITEMS = [
     risk: 'Process Stall',
   },
   {
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     title: 'Executive approval pending — Q2 pricing revision',
     severity: 'high',
     age: '31h',
@@ -162,7 +162,7 @@ const PRESSURE_ITEMS = [
     risk: 'Revenue Risk',
   },
   {
-    pack: 'Terra',
+    pack: 'DOMAINE',
     title: 'Lease renewal document missing signature block',
     severity: 'medium',
     age: '2d',
@@ -176,31 +176,31 @@ const PRESSURE_ITEMS = [
 
 const MOVEMENT_ITEMS = [
   {
-    pack: 'Aegis',
+    pack: 'PARAGON',
     title: 'Security posture audit completed — 94% score',
     type: 'milestone',
     time: '1h ago',
   },
   {
-    pack: 'Terra',
+    pack: 'DOMAINE',
     title: 'Portfolio appraisal cycle closed — 6 assets reviewed',
     type: 'completion',
     time: '3h ago',
   },
   {
-    pack: 'PRISM',
+    pack: 'PRAXIS',
     title: 'Q1 executive digest generated and distributed',
     type: 'completion',
     time: '5h ago',
   },
   {
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     title: 'Vessel M/V Meridian departed — Cape Town bound',
     type: 'event',
     time: '7h ago',
   },
   {
-    pack: 'Aegis',
+    pack: 'PARAGON',
     title: 'Threat brief updated — 3 new indicators catalogued',
     type: 'milestone',
     time: '9h ago',
@@ -270,7 +270,7 @@ const PENDING_APPROVALS = [
   {
     id: 'A-1029',
     title: 'New vendor onboarding — security services',
-    requestedBy: 'Aegis',
+    requestedBy: 'PARAGON',
     age: '6d',
     urgency: 'low',
     evidence: 'Vendor SOC2 report, pricing proposal',

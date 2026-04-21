@@ -131,7 +131,7 @@ export default function CausalDrilldown() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Brain className="w-3.5 h-3.5" style={{ color: '#8b5cf6' }} />
-                <span className="text-xs font-semibold text-white">Alloy</span>
+                <span className="text-xs font-semibold text-white">FORGE</span>
                 <span
                   className="text-[9px] px-1.5 py-0.5 rounded font-bold"
                   style={{ color: '#8b5cf6', background: 'rgba(139,92,246,0.15)' }}
@@ -143,7 +143,7 @@ export default function CausalDrilldown() {
                   className="ml-auto text-[9px] flex items-center gap-1 hover:opacity-80"
                   style={{ color: '#8b5cf6' }}
                 >
-                  <ExternalLink className="w-3 h-3" /> Open in Alloy
+                  <ExternalLink className="w-3 h-3" /> Open in FORGE
                 </a>
               </div>
               <div className="space-y-2 ml-4">
@@ -198,7 +198,7 @@ export default function CausalDrilldown() {
                   className="ml-auto text-[9px] flex items-center gap-1 hover:opacity-80"
                   style={{ color: '#4B8BDB' }}
                 >
-                  <ExternalLink className="w-3 h-3" /> Open in Alloy
+                  <ExternalLink className="w-3 h-3" /> Open in FORGE
                 </a>
               </div>
               <div className="space-y-2 ml-4">

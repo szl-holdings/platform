@@ -246,7 +246,7 @@ export default function VesselsAtlasArtifactsPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
           <span style={{ fontSize: 24 }}>🚢</span>
           <div>
-            <h1 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Atlas Artifacts — Maritime</h1>
+            <h1 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Intelligence Artifacts — Maritime</h1>
             <p style={{ fontSize: 12, color: TEXT.secondary, margin: 0 }}>
               Voyage reports, fleet briefs, and maritime intelligence documents
             </p>

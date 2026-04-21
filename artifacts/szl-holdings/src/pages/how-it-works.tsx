@@ -40,10 +40,10 @@ const STACK_LAYERS = [
 ];
 
 const VERTICALS = [
-  { name: "PRISM Counsel", domain: "Legal intelligence — domain pack", signal: "Claims, deadlines, documents, communications", output: "Governed legal actions, demand packets, Proof Chain audit trails", href: "/solutions/prism-counsel", color: "#d4a054" },
-  { name: "Terra", domain: "Real estate intelligence — domain pack", signal: "PLUTO, FEMA, permits, market data", output: "Acquisition signals, diligence workflows, governed LP reports", href: "/solutions/terra", color: "hsl(140,50%,38%)" },
-  { name: "Vessels", domain: "Maritime intelligence — domain pack", signal: "AIS, NWS, NOAA, port statistics", output: "Route optimization, weather routing, governed fleet commands", href: "/solutions/vessels", color: "#4a90b8" },
-  { name: "Aegis", domain: "Security & defense — domain pack", signal: "CISA, NVD, MITRE ATT&CK, threat feeds", output: "Threat triage, governed incident response, compliance evidence", href: "/solutions/aegis", color: "#c45a4a" },
+  { name: "Counsel", domain: "Legal intelligence — domain pack", signal: "Claims, deadlines, documents, communications", output: "Governed legal actions, demand packets, Proof Chain audit trails", href: "/counsel", color: "#d4a054" },
+  { name: "DOMAINE", domain: "Real estate intelligence — domain pack", signal: "PLUTO, FEMA, permits, market data", output: "Acquisition signals, diligence workflows, governed LP reports", href: "/solutions/terra", color: "hsl(140,50%,38%)" },
+  { name: "SEXTANT", domain: "Maritime intelligence — domain pack", signal: "AIS, NWS, NOAA, port statistics", output: "Route optimization, weather routing, governed fleet commands", href: "/solutions/vessels", color: "#4a90b8" },
+  { name: "PARAGON", domain: "Security & defense — domain pack", signal: "CISA, NVD, MITRE ATT&CK, threat feeds", output: "Threat triage, governed incident response, compliance evidence", href: "/solutions/aegis", color: "#c45a4a" },
 ];
 
 const DIFFERENTIATORS = [

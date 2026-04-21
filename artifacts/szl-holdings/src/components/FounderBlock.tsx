@@ -191,22 +191,22 @@ export function FounderBlock() {
               Current Platform Roster
             </p>
             {[
-              { Icon: Eye, name: 'Lyte', role: 'Decision Intelligence', color: 'hsl(190,90%,55%)' },
+              { Icon: Eye, name: 'KORA', role: 'Decision Intelligence', color: 'hsl(190,90%,55%)' },
               {
                 Icon: Anchor,
-                name: 'Vessels',
+                name: 'SEXTANT',
                 role: 'Maritime Intelligence',
                 color: 'hsl(205,85%,55%)',
               },
               {
                 Icon: Shield,
-                name: 'Aegis',
+                name: 'PARAGON',
                 role: 'Defense & Intelligence',
                 color: 'hsl(232,68%,60%)',
               },
               {
                 Icon: BarChart3,
-                name: 'Terra',
+                name: 'DOMAINE',
                 role: 'Real Estate Intelligence',
                 color: 'hsl(88,42%,44%)',
               },

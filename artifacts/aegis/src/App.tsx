@@ -642,7 +642,7 @@ function AegisSidebarContent({
           </div>
           {expanded && (
             <div className="flex-1 min-w-0">
-              <h1 className="text-sm font-semibold text-red-50 truncate tracking-tight">Aegis</h1>
+              <h1 className="text-sm font-semibold text-red-50 truncate tracking-tight">PARAGON</h1>
               <p className="text-[10px] truncate font-mono uppercase tracking-wider text-red-400/40">
                 SZL Holdings
               </p>
@@ -663,7 +663,7 @@ function AegisSidebarContent({
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
                 <span className="text-[10px] font-mono uppercase tracking-wider text-red-400/70">
-                  Aegis Runtime Live
+                  PARAGON Runtime Live
                 </span>
               </div>
             </div>
@@ -1030,7 +1030,7 @@ function AppShell({
   if (location === '/' || location === '') {
     return (
       <>
-        <EcosystemNav currentAppId="aegis" currentAppName="Aegis" accentColor={accent} />
+        <EcosystemNav currentAppId="aegis" currentAppName="PARAGON" accentColor={accent} />
         <Suspense fallback={<div style={{ height: '100vh', background: '#080510' }} />}>
           <HomePage />
         </Suspense>
@@ -1038,18 +1038,18 @@ function AppShell({
           open={paletteOpen}
           onClose={() => setPaletteOpen(false)}
           commands={paletteCommands}
-          appName="Aegis"
+          appName="PARAGON"
           accentColor={accent}
-          placeholder="Search Aegis — pages, entities, actions..."
+          placeholder="Search PARAGON — pages, entities, actions..."
         />
       </>
     );
   }
 
   return (
-    <PrivateAppGuard appName="Aegis" accentColor={AEGIS_BRAND_ACCENT}>
+    <PrivateAppGuard appName="PARAGON" accentColor={AEGIS_BRAND_ACCENT}>
       <div className="flex flex-col h-screen" style={{ background: '#080510' }}>
-        <EcosystemNav currentAppId="aegis" currentAppName="Aegis" accentColor={accent} />
+        <EcosystemNav currentAppId="aegis" currentAppName="PARAGON" accentColor={accent} />
         <SharedDashboardShell
           sidebar={
             <AegisSidebarContent
@@ -1077,7 +1077,7 @@ function AppShell({
                 <Menu className="w-4 h-4" />
               </button>
               <span className="text-[10px] font-mono uppercase tracking-wider text-red-400/80">
-                Aegis
+                PARAGON
               </span>
             </div>
           }
@@ -1090,9 +1090,9 @@ function AppShell({
           open={paletteOpen}
           onClose={() => setPaletteOpen(false)}
           commands={paletteCommands}
-          appName="Aegis"
+          appName="PARAGON"
           accentColor={accent}
-          placeholder="Search Aegis — pages, entities, actions..."
+          placeholder="Search PARAGON — pages, entities, actions..."
         />
       </div>
     </PrivateAppGuard>

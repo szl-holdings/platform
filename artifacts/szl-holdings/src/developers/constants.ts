@@ -63,8 +63,8 @@ export const NAV: NavSection[] = [
     subsections: [
       { id: 'samples-auth', label: 'Authentication' },
       { id: 'samples-projects', label: 'Projects' },
-      { id: 'samples-vessels', label: 'Vessels' },
-      { id: 'samples-alloy', label: 'Alloy Signals' },
+      { id: 'samples-vessels', label: 'SEXTANT' },
+      { id: 'samples-alloy', label: 'FORGE Signals' },
     ],
   },
   {

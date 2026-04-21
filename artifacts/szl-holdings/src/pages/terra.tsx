@@ -458,7 +458,7 @@ export default function TerraPage() {
                   flexWrap: 'wrap',
                 }}
               >
-                {['SZL Holdings', 'Alloy', 'Lyte', 'Vessels', 'Terra', 'Carlota Jo'].map(
+                {['SZL Holdings', 'FORGE', 'KORA', 'SEXTANT', 'DOMAINE', 'Carlota Jo'].map(
                   (name, i) => (
                     <span
                       key={name}

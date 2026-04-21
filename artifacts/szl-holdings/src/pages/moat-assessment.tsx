@@ -20,11 +20,11 @@ const ACCENT = "hsl(191,92%,44%)";
 
 const LOOP_STEPS = [
   { n: "01", label: "Signal", icon: Radio, color: "#0ea5e9", body: "Risk indicators, anomalies, and threshold breaches are detected, normalized, and routed by the Event Fabric — cross-domain context and correlation ID attached." },
-  { n: "02", label: "Context", icon: Layers, color: "#8b5cf6", body: "Cross-domain enrichment via Prism Bus. A sanctions alert in Vessels triggers a legal flag in PRISM Counsel, a risk entry in Lyte." },
+  { n: "02", label: "Context", icon: Layers, color: "#8b5cf6", body: "Cross-domain enrichment via Prism Bus. A sanctions alert in Vessels triggers a legal flag in Counsel, a risk entry in Lyte." },
   { n: "03", label: "Recommendation", icon: Brain, color: "#ec4899", body: "An AI agent proposes an action with source citations, confidence score, and full provenance. No opaque verdicts. Every output traceable." },
   { n: "04", label: "Simulation", icon: BarChart3, color: "#f59e0b", body: "Decision Simulation models risk before action. Operators see expected outcomes, confidence intervals, and the variables that matter most." },
   { n: "05", label: "Policy", icon: ShieldCheck, color: "#10b981", body: "Covenant Policy enforces who can approve and what conditions apply — at the platform layer, not the UI. Non-delegatable." },
-  { n: "06", label: "Execution", icon: Zap, color: "#6366f1", body: "Alloy orchestrates the approved action as a durable, multi-step process with checkpoint recovery and agent coordination." },
+  { n: "06", label: "Execution", icon: Zap, color: "#6366f1", body: "FORGE orchestrates the approved action as a durable, multi-step process with checkpoint recovery and agent coordination." },
   { n: "07", label: "Proof", icon: FileCheck, color: "#14b8a6", body: "The Proof Chain records the complete trail: signal, recommendation, simulation, policy decision, approval, execution. Immutable and queryable." },
   { n: "08", label: "Outcome", icon: Target, color: "#ef4444", body: "The Outcome Graph records the real-world result. Was the action effective? The data calibrates future AI confidence scores." },
   { n: "09", label: "Learning", icon: BookOpen, color: "#f97316", body: "Historical outcomes feed back into simulation models and agent confidence calibration. The platform improves with every governed decision." },
@@ -478,15 +478,15 @@ function PortfolioArchitecture() {
       tier: "Layer 01 — Command Surfaces",
       color: ACCENT,
       items: [
-        { name: "Lyte", desc: "Flagship command surface — signal stream, situation board, governed action panel" },
-        { name: "CORTEX", desc: "Mobile command — all domains, biometric auth, iOS + Android" },
+        { name: "KORA", desc: "Flagship command surface — signal stream, situation board, governed action panel" },
+        { name: "APEX", desc: "Mobile command — all domains, biometric auth, iOS + Android" },
       ],
     },
     {
       tier: "Layer 02 — Execution Fabric + Primitives",
       color: "hsl(215,72%,58%)",
       items: [
-        { name: "Alloy", desc: "Workflow orchestration and governed execution" },
+        { name: "FORGE", desc: "Workflow orchestration and governed execution" },
         { name: "Covenant Policy", desc: "Human-in-the-loop governance at the platform layer" },
         { name: "Proof Chain", desc: "Immutable AI provenance and audit trail" },
         { name: "Decision Simulation", desc: "Probabilistic risk modeling before action" },
@@ -498,10 +498,10 @@ function PortfolioArchitecture() {
       tier: "Layer 03 — Domain Packs",
       color: "hsl(260,60%,65%)",
       items: [
-        { name: "Aegis", desc: "Security & defense — SOC, XDR, MITRE ATT&CK" },
-        { name: "Vessels", desc: "Maritime — fleet command, AIS, sanctions, voyage economics" },
-        { name: "Terra", desc: "Real estate — distress pipeline, underwriting, deal governance" },
-        { name: "PRISM Counsel", desc: "Legal — obligation tracking, matter command" },
+        { name: "PARAGON", desc: "Security & defense — SOC, XDR, MITRE ATT&CK" },
+        { name: "SEXTANT", desc: "Maritime — fleet command, AIS, sanctions, voyage economics" },
+        { name: "DOMAINE", desc: "Real estate — distress pipeline, underwriting, deal governance" },
+        { name: "Counsel", desc: "Legal — obligation tracking, matter command" },
         { name: "Carlota Jo", desc: "Advisory — client intelligence, strategic diagnostics" },
       ],
     },

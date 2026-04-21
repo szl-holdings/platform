@@ -7,7 +7,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 const VENTURES = [
   {
-    name: "Lyte",
+    name: "KORA",
     tagline: "Decision Intelligence Platform",
     category: "Enterprise Software",
     stage: "Growth",
@@ -23,11 +23,11 @@ const VENTURES = [
     path: "/lyte",
   },
   {
-    name: "Alloy",
+    name: "FORGE",
     tagline: "AI Orchestration Engine",
     category: "AI Infrastructure",
     stage: "Growth",
-    description: "The execution layer beneath Lyte. Alloy routes decisions to the right actor, confirms completion, and maintains an auditable record of every workflow outcome. LangSmith-tier traceability with Palantir-tier operational depth.",
+    description: "The execution layer beneath Lyte. Alloy routes decisions to the right actor, confirms completion, and maintains an auditable record of every workflow outcome. LangSmith-tier traceability with enterprise-tier operational depth.",
     metrics: [
       { label: "Workflow Templates", value: "12 live" },
       { label: "Completion Rate", value: ">94%" },
@@ -39,7 +39,7 @@ const VENTURES = [
     path: "/platform",
   },
   {
-    name: "Vessels",
+    name: "SEXTANT",
     tagline: "Maritime Intelligence Command",
     category: "Maritime Technology",
     stage: "Growth",
@@ -55,7 +55,7 @@ const VENTURES = [
     path: "/vessels",
   },
   {
-    name: "Aegis",
+    name: "PARAGON",
     tagline: "SOC Command & Defense Intelligence",
     category: "Cybersecurity",
     stage: "Growth",
@@ -71,7 +71,7 @@ const VENTURES = [
     path: "/aegis/",
   },
   {
-    name: "Terra",
+    name: "DOMAINE",
     tagline: "Real Estate Intelligence",
     category: "PropTech",
     stage: "Growth",

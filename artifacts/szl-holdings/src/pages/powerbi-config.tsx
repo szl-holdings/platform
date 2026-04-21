@@ -124,7 +124,7 @@ const REPORTS: Array<{
   {
     id: 'security_posture',
     name: 'Security Posture Report',
-    app: 'Aegis',
+    app: 'PARAGON',
     appPath: '/aegis/powerbi',
     description:
       'Real-time security posture metrics, incident trends, control effectiveness, and compliance scores.',
@@ -134,7 +134,7 @@ const REPORTS: Array<{
   {
     id: 'portfolio_analytics',
     name: 'Portfolio Analytics Report',
-    app: 'Terra',
+    app: 'DOMAINE',
     appPath: '/terra/powerbi',
     description:
       'Property-level and portfolio-wide analytics including NOI, occupancy, IRR, and distress signals.',
@@ -144,7 +144,7 @@ const REPORTS: Array<{
   {
     id: 'operational_kpis',
     name: 'Operational KPIs Report',
-    app: 'Lyte',
+    app: 'KORA',
     appPath: '/command/operations/powerbi',
     description:
       'Business observability KPIs including SLA performance, escalation rates, and PRISM health scores.',

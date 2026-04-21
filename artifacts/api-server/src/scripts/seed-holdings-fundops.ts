@@ -61,7 +61,7 @@ export async function seedHoldingsFundops() {
       },
       {
         slug: 'prism-counsel',
-        name: 'PRISM Counsel',
+        name: 'Counsel',
         description:
           'AI-native legal operations platform for plaintiff law firms — matter management, demand readiness, and settlement intelligence at scale.',
         sector: 'Legal Technology',
@@ -477,7 +477,7 @@ export async function seedHoldingsFundops() {
     },
     {
       companySlug: 'prism-counsel',
-      companyName: 'PRISM Counsel',
+      companyName: 'Counsel',
       periodType: 'quarterly',
       periodLabel: 'Q1 2026',
       periodStart: '2026-01-01',
@@ -573,7 +573,7 @@ export async function seedHoldingsFundops() {
     },
     {
       companySlug: 'prism-counsel',
-      companyName: 'PRISM Counsel',
+      companyName: 'Counsel',
       periodLabel: 'Q1 2026',
       periodStart: '2026-01-01',
       periodEnd: '2026-03-31',
@@ -1212,7 +1212,7 @@ export async function seedFundNavLpReports() {
       },
       {
         companySlug: 'prism-counsel',
-        companyName: 'PRISM Counsel',
+        companyName: 'Counsel',
         periodType: 'quarterly',
         periodLabel: 'Q1 2026',
         periodStart: '2026-01-01',

@@ -159,14 +159,14 @@ export async function vesselsReplayQueue(
 
 const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: 'vessels',
-  appName: 'Vessels',
+  appName: 'SEXTANT',
   accentColor: VESSELS_BRAND_ACCENT,
   steps: [
     {
       id: 'welcome',
-      title: 'Welcome to Vessels',
+      title: 'Welcome to SEXTANT',
       description:
-        'Vessels is your maritime intelligence command — AIS fleet tracking (live feed or simulated), voyage economics, risk scoring, dark vessel detection, and sanctions screening for 1,200+ vessels.',
+        'SEXTANT is your maritime intelligence command — AIS fleet tracking (live feed or simulated), voyage economics, risk scoring, dark vessel detection, and sanctions screening for 1,200+ vessels.',
       placement: 'center',
       icon: Ship,
     },
@@ -348,7 +348,7 @@ if (typeof window !== 'undefined') {
 const primaryNavItems = [
   { path: '/dashboard', label: 'Overview', icon: LayoutDashboard },
   { path: '/dashboard/fleet', label: 'Fleet', icon: MapPin },
-  { path: '/dashboard/vessels', label: 'Vessels', icon: List },
+  { path: '/dashboard/vessels', label: 'SEXTANT', icon: List },
   { path: '/dashboard/routes', label: 'Routes', icon: Navigation },
   { path: '/dashboard/alerts', label: 'Alerts', icon: AlertTriangle },
   { path: '/dashboard/reports', label: 'Reports', icon: BarChart3 },
@@ -936,7 +936,7 @@ function VesselsSidebarContent({
             {expanded && (
               <div className="flex-1 min-w-0">
                 <h1 className="text-sm font-semibold text-sky-50 truncate tracking-tight">
-                  Vessels
+                  SEXTANT
                 </h1>
                 <p
                   className="text-[10px] truncate font-mono uppercase tracking-wider"
@@ -1243,7 +1243,7 @@ function VesselsDashboard({
     getConflictCount: () => _vesselsConflictResolver.getConflictCount('vessels'),
   });
   return (
-    <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor={accent}>
+    <PowerUserProvider shortcuts={vesselsShortcuts} appName="SEXTANT" accentColor={accent}>
       <div className="flex flex-col h-screen" style={{ background: '#060e1a' }}>
         <a
           href="#main-content"
@@ -1254,7 +1254,7 @@ function VesselsDashboard({
         </a>
         <EcosystemNav
           currentAppId="vessels"
-          currentAppName="Vessels Maritime Intelligence"
+          currentAppName="SEXTANT Maritime Intelligence"
           accentColor={accent}
         />
         <SandboxModeBanner />
@@ -1290,7 +1290,7 @@ function VesselsDashboard({
                 className="md:hidden text-[10px] font-mono uppercase tracking-wider"
                 style={{ color: toAlpha(VESSELS_BRAND_ACCENT, 0.8) }}
               >
-                Vessels Maritime Intelligence
+                SEXTANT Maritime Intelligence
               </span>
               <div className="ml-auto pr-1 flex items-center gap-2">
                 <PolicyModeBadge product="vessels" actionType={topbarActionType} />
@@ -1328,7 +1328,7 @@ function VesselsDashboard({
         open={cmdOpen}
         onClose={() => setCmdOpen(false)}
         commands={vesselsCommands}
-        appName="Vessels"
+        appName="SEXTANT"
         accentColor={accent}
       />
       <OnboardingWizard
@@ -1420,7 +1420,7 @@ function AppContent({
 
   if (isDashboard) {
     return (
-      <PrivateAppGuard appName="Vessels" accentColor={VESSELS_BRAND_ACCENT}>
+      <PrivateAppGuard appName="SEXTANT" accentColor={VESSELS_BRAND_ACCENT}>
         <VesselsDashboard cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
       </PrivateAppGuard>
     );
