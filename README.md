@@ -77,12 +77,14 @@ Domain packs extend the same governance infrastructure into domain-specific inte
 
 | Product | Domain | Status |
 |---------|--------|--------|
+| **Sentra** | Cyber resilience command — exposure mapping, recovery readiness, incident command, control drift detection | Active |
+| **Counsel** | Legal matter command — agentic matter management, obligation tracking, exposure quantification, court filing integration | Active |
 | **Aegis** | Security and defense intelligence — SOC command, advanced security modules, SOAR playbooks, threat intelligence | Domain backend active; web UI archived (Task #920) — see `artifacts/firestorm/` |
 | **Vessels** | Maritime fleet intelligence — AIS tracking, S&P workflow, demurrage, freight, voyage P&L | Active |
 | **Terra** | Real estate intelligence — distress pipeline, ownership graph, deal workflow, AI analysis | Active |
 | **Carlota Jo** | Premium advisory operations — UHNW client portal, service catalog, engagement management | Active |
 | **Pulse** | AI executive briefing — narrative intelligence reports synthesized from live platform signals | Active |
-| **PRISM Counsel** | Legal matter command — agentic matter management, court filings, recovery operations | Archived (Task #634) |
+| **PRISM Counsel** | Legal matter command — agentic matter management, court filings, recovery operations | Superseded by Counsel (Active); legacy domain API routes retained |
 | **IMPERIUM** | Cloud sovereignty — multi-cloud governance, policy enforcement, cloud estate visibility | Archived (Task #920) |
 
 <!-- END: portfolio-table -->
@@ -94,6 +96,10 @@ The Command Portal is the cross-domain real-time dashboard aggregating signals f
 ### Screens
 
 ![SZL Holdings Dashboard](assets/readme/products/szl-holdings-dashboard.jpg)
+
+![Sentra — Cyber Resilience Command](assets/readme/products/sentra-cyber-resilience.jpg)
+
+![Counsel — Legal Matter Command](assets/readme/products/counsel-legal-command.jpg)
 
 ![Aegis Command](assets/readme/products/aegis-command.jpg)
 
@@ -133,7 +139,8 @@ The six platform primitives define what is structurally different from dashboard
 +-----------------------------------------------------------------------+
 |  DOMAIN PACKS                                                         |
 |                                                                       |
-|  Aegis    Vessels    Terra    Carlota Jo    Pulse                    |
+|  Sentra   Counsel   Aegis    Vessels    Terra                        |
+|  Carlota Jo         Pulse                                            |
 +-----------------------------------------------------------------------+
 |  GOVERNANCE INFRASTRUCTURE                                            |
 |                                                                       |
@@ -171,6 +178,8 @@ Artifact inventory:
 | SZL Holdings Dashboard | web | `/` | **Active** — primary public web app | [README](artifacts/szl-holdings/README.md) |
 | API Server | web | `/api/` | **Active** — backend API, powers all surfaces | [README](artifacts/api-server/README.md) |
 | Unified Command | web | `/command/` | **Active** — ops command surface (merged Lyte + Imperium) | [README](artifacts/command/README.md) |
+| Sentra — Cyber Resilience Command | web | `/sentra/` | **Active** — domain pack: cyber posture, recovery readiness, incident command | [README](artifacts/sentra/README.md) |
+| Counsel — Legal Matter Command | web | `/counsel/` | **Active** — domain pack: legal matter management, obligation tracking, exposure quantification | [README](artifacts/counsel/README.md) |
 | Terra — Real Estate Intelligence | web | `/terra/` | **Active** — domain pack | [README](artifacts/terra/README.md) |
 | Vessels Maritime Intelligence | web | `/vessels/` | **Active** — domain pack | [README](artifacts/vessels/README.md) |
 | Carlota Jo Consulting | web | `/carlota-jo/` | **Active** — domain pack | [README](artifacts/carlota-jo/README.md) |

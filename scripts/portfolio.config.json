@@ -2,6 +2,18 @@
   "_comment": "Source of truth for the README Product Portfolio / Domain Packs marketing table. Each entry in `domainPacks` becomes one row in the table. `artifactId` should match the `id` field in artifacts/<name>/.replit-artifact/artifact.toml when the row corresponds to a shippable artifact; omit it for conceptual/roadmap entries. `excludeArtifacts` lists artifact ids that exist in the registry but are intentionally NOT marketed as Domain Packs (platform infra, internal sandboxes, demo videos, the dashboard host itself, etc.) — they will not trigger a drift error in --check mode.",
   "domainPacks": [
     {
+      "product": "Sentra",
+      "domain": "Cyber resilience command — exposure mapping, recovery readiness, incident command, control drift detection",
+      "status": "Active",
+      "artifactId": "artifacts/sentra"
+    },
+    {
+      "product": "Counsel",
+      "domain": "Legal matter command — agentic matter management, obligation tracking, exposure quantification, court filing integration",
+      "status": "Active",
+      "artifactId": "artifacts/counsel"
+    },
+    {
       "product": "Aegis",
       "domain": "Security and defense intelligence — SOC command, advanced security modules, SOAR playbooks, threat intelligence",
       "status": "Domain backend active; web UI archived (Task #920) — see `artifacts/firestorm/`",
@@ -34,8 +46,7 @@
     {
       "product": "PRISM Counsel",
       "domain": "Legal matter command — agentic matter management, court filings, recovery operations",
-      "status": "Archived (Task #634)",
-      "artifactId": "artifacts/prism-counsel"
+      "status": "Superseded by Counsel (Active); legacy domain API routes retained"
     },
     {
       "product": "IMPERIUM",
@@ -50,8 +61,6 @@
     "artifacts/szl-demo-video",
     "artifacts/szl-holdings-mobile",
     "artifacts/lyte-command-center",
-    "artifacts/sentra",
-    "artifacts/counsel",
     "XegfDyZt7HqfW2Bb8Ghoy"
   ]
 }
