@@ -311,3 +311,9 @@ id = "H6LMyQS_VpPfCC0s9Gtrm"
 uri = "file://output/szl-substack-launch-social/SZL-Substack-Launch-Social-Kit.docx"
 type = "word_document"
 title = "SZL Substack Launch — Social Announcement Kit"
+
+[[outputs]]
+id = "M6168ZjPA6qO8RNYwDe59"
+uri = "file://test-results/nexus-smoke-NEXUS-auth-gat-de130-n-wall-when-unauthenticated-chromium/test-failed-1.png"
+type = "image"
+title = "auth-gate failure screenshot"

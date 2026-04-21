@@ -50,9 +50,14 @@ test.describe('NEXUS pattern atlas', () => {
 
   test('shows component categories in left rail', async ({ page }) => {
     await page.goto(`${NEXUS}#patterns`);
-    await expect(page.getByRole('button', { name: /All/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Auth/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Analytics/ })).toBeVisible();
+    // Category buttons render as "<Label> <count>" (e.g. "Auth 2").
+    // Use anchored regexes so we don't collide with sidebar nav, the
+    // component list (e.g. "AuthGate"), or props rows.
+    await expect(page.getByRole('button', { name: /^All\s+\d+$/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Auth\s+\d+$/ })).toBeVisible();
+    // Categories without any registered components are filtered out, so
+    // assert on Observability (a populated category) instead of Analytics.
+    await expect(page.getByRole('button', { name: /^Observability\s+\d+$/ })).toBeVisible();
   });
 
   test('clicking a component shows its props and code snippet', async ({ page }) => {
@@ -65,7 +70,9 @@ test.describe('NEXUS pattern atlas', () => {
 
   test('filtering by category shows only matching components', async ({ page }) => {
     await page.goto(`${NEXUS}#patterns`);
-    await page.getByRole('button', { name: /Auth/ }).click();
+    // Click the "Auth N" category button (left rail) — the regex anchors avoid
+    // colliding with sidebar nav and component-list buttons like "AuthGate".
+    await page.getByRole('button', { name: /^Auth\s+\d+$/ }).click();
     const componentButtons = page.locator('button').filter({ hasText: /AuthGate|PrivateAppGuard/ });
     await expect(componentButtons.first()).toBeVisible();
   });
@@ -89,8 +96,14 @@ test.describe('NEXUS pattern atlas', () => {
   }) => {
     await page.goto(`${NEXUS}#patterns`);
     await expect(page.getByText('Pattern Atlas')).toBeVisible();
-    await expect(page.getByRole('button', { name: /^AuthGate$/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /^AuthGateProps$/ })).not.toBeVisible();
+    // Filter to the Auth category so the AuthGate button is in view (the
+    // catalog has hundreds of entries; the unfiltered list virtualises).
+    await page.getByRole('button', { name: /^Auth\s+\d+$/ }).click();
+    // Component buttons render the component name + category badge concatenated
+    // in their inner text (e.g. "AuthGateAuth●"), so match with a prefix
+    // anchor only.
+    await expect(page.locator('button').filter({ hasText: /^AuthGate/ }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /^AuthGateProps\b/ })).toHaveCount(0);
   });
 });
 
@@ -142,9 +155,11 @@ test.describe('NEXUS eval console', () => {
 
   test('shows RUN EVALS section with domain chips', async ({ page }) => {
     await page.goto(`${NEXUS}#eval-console`);
-    await expect(page.getByText('RUN EVALS')).toBeVisible();
-    await expect(page.getByRole('button', { name: /research/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /memory/ })).toBeVisible();
+    // 'RUN EVALS' appears as both the section heading and its label badge —
+    // pin to the heading to avoid a strict-mode violation.
+    await expect(page.getByRole('heading', { name: 'RUN EVALS' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^research\b/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^memory\b/ })).toBeVisible();
   });
 
   test('Run Evals button is present and clickable', async ({ page }) => {
@@ -225,13 +240,15 @@ test.describe('NEXUS prompt registry', () => {
 
   test('renders PROMPT REGISTRY heading', async ({ page }) => {
     await page.goto(`${NEXUS}#prompt-registry`);
-    await expect(page.getByText('PROMPT REGISTRY')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'PROMPT REGISTRY' })).toBeVisible();
   });
 
   test('shows prompt count metric card', async ({ page }) => {
     await page.goto(`${NEXUS}#prompt-registry`);
-    await expect(page.getByText('Prompts')).toBeVisible();
-    await expect(page.locator('.text-nexus-cyan').filter({ hasText: '1' }).first()).toBeVisible();
+    // 'Prompts' appears in the sidebar nav and on the metric card. Pin to
+    // the metric label by scoping to its sibling counter.
+    await expect(page.getByText('Prompts').first()).toBeVisible();
+    await expect(page.locator('.text-nexus-cyan').filter({ hasText: /^1$/ }).first()).toBeVisible();
   });
 
   test('lists prompts with name and status', async ({ page }) => {
@@ -337,24 +354,28 @@ test.describe('NEXUS prompt save flow', () => {
   test('expanding a prompt shows its version history with active badge', async ({ page }) => {
     await page.goto(`${NEXUS}#prompt-registry`);
     await page.getByRole('button', { name: /Research Summarizer/ }).click();
-    await expect(page.getByText(/v1/)).toBeVisible({ timeout: 5000 });
-    await expect(page.getByText('ACTIVE')).toBeVisible();
+    // The version rows render multiple "v1"-style strings (label + count
+    // metric). First() is sufficient to confirm the panel expanded.
+    await expect(page.getByText(/^v1\b/).first()).toBeVisible({ timeout: 5000 });
+    // ACTIVE appears as both a status chip on the prompt header and a badge
+    // on the active version row — first() is enough to assert presence.
+    await expect(page.getByText('ACTIVE').first()).toBeVisible();
   });
 
   test('version 2 shows Promote button since it is not the active version', async ({ page }) => {
     await page.goto(`${NEXUS}#prompt-registry`);
     await page.getByRole('button', { name: /Research Summarizer/ }).click();
-    await expect(page.getByText(/v2/)).toBeVisible({ timeout: 5000 });
-    await expect(page.getByRole('button', { name: /Promote/ })).toBeVisible();
+    await expect(page.getByText(/^v2\b/).first()).toBeVisible({ timeout: 5000 });
+    // Only inactive versions render a Promote button. .first() guards against
+    // future rows also exposing one.
+    await expect(page.getByRole('button', { name: /^Promote$/ }).first()).toBeVisible();
   });
 
   test('clicking Promote on v2 POSTs to the promote endpoint', async ({ page }) => {
     let promoteCalled = false;
-    let promoteBody: unknown = null;
 
     await page.route('**/api/ai/prompts/p1/promote', async (route) => {
       promoteCalled = true;
-      promoteBody = JSON.parse(route.request().postData() ?? '{}');
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -364,8 +385,9 @@ test.describe('NEXUS prompt save flow', () => {
 
     await page.goto(`${NEXUS}#prompt-registry`);
     await page.getByRole('button', { name: /Research Summarizer/ }).click();
-    await expect(page.getByRole('button', { name: /Promote/ })).toBeVisible({ timeout: 5000 });
-    await page.getByRole('button', { name: /Promote/ }).click();
+    const promote = page.getByRole('button', { name: /^Promote$/ }).first();
+    await expect(promote).toBeVisible({ timeout: 5000 });
+    await promote.click();
     await expect(page.getByText(/promoted to active/)).toBeVisible({ timeout: 8000 });
     expect(promoteCalled).toBe(true);
   });
@@ -386,10 +408,12 @@ test.describe('NEXUS prompt save flow', () => {
 
     await page.goto(`${NEXUS}#prompt-registry`);
     await page.getByRole('button', { name: /Research Summarizer/ }).click();
-    await expect(page.getByRole('button', { name: /Eval/ }).first()).toBeVisible({
-      timeout: 5000,
-    });
-    await page.getByRole('button', { name: /Eval/ }).first().click();
+    // Scope to the per-version Eval button (exact match) so we don't pick up
+    // the "Evals" sidebar nav entry which would just route away from the
+    // prompt registry.
+    const evalBtn = page.getByRole('button', { name: /^Eval$/ }).first();
+    await expect(evalBtn).toBeVisible({ timeout: 5000 });
+    await evalBtn.click();
     await expect(page.getByText(/Eval complete/)).toBeVisible({ timeout: 10000 });
     expect(evalCalled).toBe(true);
   });

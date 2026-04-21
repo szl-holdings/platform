@@ -44,10 +44,18 @@ export default defineConfig({
           if (id.includes('node_modules')) {
             if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
             if (id.includes('framer-motion')) return 'vendor-motion';
-            if (id.includes('@radix-ui')) return 'vendor-radix';
             if (id.includes('lucide-react')) return 'vendor-icons';
-            if (id.includes('react-dom')) return 'vendor-react';
-            if (id.includes('react/')) return 'vendor-react';
+            // Bundle React + Radix UI together: Radix primitives import React
+            // and were previously emitted as a separate chunk, which produced
+            // a vendor-radix → vendor-react → vendor-radix cycle that crashed
+            // the page at runtime ("Cannot access 'S' before initialization").
+            // Co-locating them in one chunk avoids the cycle entirely.
+            if (
+              id.includes('@radix-ui') ||
+              id.includes('react-dom') ||
+              id.includes('react/')
+            )
+              return 'vendor-react';
           }
           return undefined;
         },
