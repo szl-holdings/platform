@@ -40,7 +40,7 @@ Risk exposure, compliance posture, diligence readiness.
 | KG011 | No CodeQL SAST in CI pipeline | P1 | ⚠️ Open — Sprint 3 |
 | KG012 | No automated dependency vulnerability review in CI | P1 | ⚠️ Open — Sprint 3 |
 | KG010 | No automated E2E / integration test suite | P1 | ⚠️ Open — Sprint 3–4 |
-| GAP-002 | No CI/CD automated secret scanning | Med | ⚠️ Open |
+| GAP-002 | No CI/CD automated secret scanning | Med | ✅ Resolved Apr-2026 |
 | GAP-003 | Android keystore not managed by EAS | Med | ⚠️ Open |
 | VD1 | No responsible disclosure policy / `security.txt` | P2 | ⚠️ Open — Sprint 4 |
 | KG025 | WCAG accessibility not systematically audited | P2 | ⚠️ Open — Sprint 4 |
@@ -114,7 +114,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 
 | ID | Gap | Area | Impact | Notes |
 |----|-----|------|--------|-------|
-| GAP-002 | No CI/CD automated secret scanning | Security | Leaked keys risk | Add `gitleaks` to CI |
+| GAP-002 | No CI/CD automated secret scanning | Security | Leaked keys risk | ✅ Resolved Apr-2026. `gitleaks` PR gate in `.github/workflows/secret-scan.yml`; daily full-history sweep in `secret-scan-scheduled.yml`; SARIF uploaded to Security tab. |
 | GAP-003 | Android keystore not in EAS | Mobile Ops | SPOF risk | Upload to EAS and backup in Vault |
 | KG018 | 80+ env vars — no formal schema | Ops | Onboarding friction | ✅ Resolved Apr-2026 — ENVIRONMENT_VARIABLES.md created with full schema |
 | KG020c | No virus scanning on uploads | Security | Malware risk | `lib/virusScan.ts` is an explicit stub — integrate ClamAV or cloud AV |
@@ -181,10 +181,10 @@ Operational gaps, process health, test coverage, observability, team ownership.
 |----------|-------|----------|------|
 | P0 — Critical / High | 11 | 10 | 1 |
 | P1 — High | 14 | 0 | 14 |
-| P2 — Medium / Low | 30 | 8 | 22 |
+| P2 — Medium / Low | 30 | 9 | 21 |
 | Flow Audit Gaps (Phase 4–5) | 4 | 0 | 4 |
 | Test Quality Gaps (Phase 4–5) | 8 | 2 | 6 |
-| **Total** | **72** | **21** | **51** |
+| **Total** | **72** | **22** | **50** |
 
 > **April 2026 Phase 0–1 audit note:** Full operational audit (Phases 0–1) completed. Deliverables produced: FULL_SYSTEM_INVENTORY.md, AUDIT_FINDINGS_REGISTER.md, OUT_OF_SCOPE_REGISTER.md, ENVIRONMENT_VARIABLES.md, updated .env.example. KG018 (env var schema) resolved by ENVIRONMENT_VARIABLES.md. GAP-004 (.env.example) resolved by comprehensive update. KG029 (alloy-integrations test stub) newly cataloged. TD-004 remains re-opened. No new P0/P1 security findings discovered. No hardcoded credentials found in source. All GitHub Actions workflows remain SHA-pinned. Net P2 change: +2 gaps added, +2 resolved. See LAUNCH_BLOCKERS.md for the full pre-launch blocker register.
 >
