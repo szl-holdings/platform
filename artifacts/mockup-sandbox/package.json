@@ -10,7 +10,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
-    "format": "biome format --write ./src"
+    "format": "biome format --write ./src",
+    "test": "vitest run tests/"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -74,6 +75,7 @@
     "vite": "catalog:",
     "zod": "catalog:",
     "@szl-holdings/shared-ui": "workspace:*",
-    "@szl-holdings/design-system": "workspace:*"
+    "@szl-holdings/design-system": "workspace:*",
+    "vitest": "catalog:"
   }
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import InternalAuthGate from './components/InternalAuthGate';
 import Layout from './components/Layout';
 import type { Page } from './lib/types';
 import AIQuality from './pages/AIQuality';
@@ -36,7 +37,7 @@ function getInitialPage(): Page {
   return VALID_PAGES.includes(hash) ? hash : 'home';
 }
 
-export default function App() {
+function AppInner() {
   const [page, setPage] = useState<Page>(getInitialPage);
 
   useEffect(() => {
@@ -69,5 +70,13 @@ export default function App() {
       {page === 'eval-console' && <EvalConsole />}
       {page === 'audit' && <AuditTrail />}
     </Layout>
+  );
+}
+
+export default function App() {
+  return (
+    <InternalAuthGate>
+      <AppInner />
+    </InternalAuthGate>
   );
 }

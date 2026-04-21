@@ -35,7 +35,7 @@ import {
 } from '../middlewares/sliding-window-limiter';
 
 const router = Router();
-router.use(authMiddleware({ required: false }));
+router.use(authMiddleware({ required: true }));
 router.use(perUserApiSlidingLimiter);
 
 // ─── In-memory stores ────────────────────────────────────────────────────────

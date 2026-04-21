@@ -1,155 +1,781 @@
-import { AlertCircle, ChevronRight, GitBranch, Loader } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { nexusApi } from '../lib/api';
-import type { PatternFamily } from '../lib/types';
+import {
+  AlertCard,
+  AnimatedCounter,
+  LoadingSkeleton,
+} from '@szl-holdings/shared-ui';
+import {
+  Activity,
+  BarChart2,
+  Bell,
+  BookOpen,
+  Brain,
+  ChevronRight,
+  Code2,
+  Cpu,
+  Database,
+  Eye,
+  GitBranch,
+  Info,
+  Layers,
+  LayoutDashboard,
+  Network,
+  Package,
+  Palette,
+  Search,
+  Shield,
+  Table,
+  ToggleLeft,
+  Workflow,
+  Zap,
+} from 'lucide-react';
+import { Component, type ErrorInfo, type ReactNode, useState } from 'react';
+import { sharedUiExports } from 'virtual:shared-ui-manifest';
 
-const FAMILY_COLORS = [
-  '#00d4ff',
-  '#a855f7',
-  '#00ff88',
-  '#ffb700',
-  '#f472b6',
-  '#22d3ee',
-  '#fb923c',
-  '#34d399',
-  '#818cf8',
-  '#e879f9',
+interface PropDef {
+  name: string;
+  type: string;
+  required: boolean;
+  defaultValue?: string;
+  description: string;
+  control?: 'text' | 'boolean' | 'select' | 'number';
+  options?: string[];
+}
+
+type LivePreviewFn = (values: Record<string, string>) => ReactNode;
+
+interface ComponentMetadata {
+  category: string;
+  description: string;
+  status: 'stable' | 'beta' | 'experimental';
+  source: string;
+  props: PropDef[];
+  usageExample: string;
+  livePreview?: LivePreviewFn;
+}
+
+type MetadataRegistry = Record<string, ComponentMetadata>;
+
+const REGISTRY: MetadataRegistry = {
+  AuthGate: {
+    category: 'Auth',
+    description:
+      'Guards routes based on authentication state. Renders children when authenticated, falls back to a login prompt otherwise.',
+    status: 'stable',
+    source: 'lib/shared-ui/src/AuthGate.tsx',
+    props: [
+      { name: 'children', type: 'React.ReactNode', required: true, description: 'Content to render when authenticated' },
+      { name: 'fallback', type: 'React.ReactNode', required: false, description: 'Shown while session is loading' },
+      { name: 'loading', type: 'React.ReactNode', required: false, description: 'Custom loading state' },
+    ],
+    usageExample: `import { AuthGate } from '@szl-holdings/shared-ui';
+
+<AuthGate fallback={<LoginPage />}>
+  <ProtectedDashboard />
+</AuthGate>`,
+  },
+
+  AutonomyDial: {
+    category: 'Controls',
+    description: 'Operator control for autonomy levels from Suggest to Full Auto. Renders a circular dial with policy-cap enforcement.',
+    status: 'stable',
+    source: 'lib/shared-ui/src/AutonomyDial.tsx',
+    props: [
+      { name: 'value', type: 'number', required: true, description: 'Current autonomy level (0–100)', control: 'number', defaultValue: '40' },
+      { name: 'onChange', type: '(value: number) => void', required: false, description: 'Callback when dial value changes' },
+      { name: 'policyCap', type: 'number', required: false, defaultValue: '100', description: 'Maximum autonomy level allowed by policy', control: 'number' },
+      { name: 'disabled', type: 'boolean', required: false, defaultValue: 'false', description: 'Disables user interaction', control: 'boolean' },
+      { name: 'compact', type: 'boolean', required: false, defaultValue: 'false', description: 'Renders a smaller variant', control: 'boolean' },
+    ],
+    usageExample: `import { AutonomyDial } from '@szl-holdings/shared-ui';
+
+const [level, setLevel] = useState(40);
+
+<AutonomyDial value={level} onChange={setLevel} policyCap={75} />`,
+  },
+
+  AdminAuditTrail: {
+    category: 'Observability',
+    description: 'Timeline-based audit log for system and human actions with filtering support.',
+    status: 'stable',
+    source: 'lib/shared-ui/src/admin-audit-trail.tsx',
+    props: [
+      { name: 'entries', type: 'AuditTrailEntry[]', required: true, description: 'Array of audit log entries' },
+      { name: 'title', type: 'string', required: false, defaultValue: '"Audit Trail"', description: 'Panel heading', control: 'text' },
+      { name: 'accentColor', type: 'string', required: false, description: 'Hex color for timeline accent', control: 'text' },
+      { name: 'showFilters', type: 'boolean', required: false, defaultValue: 'true', description: 'Show filter bar', control: 'boolean' },
+      { name: 'maxVisible', type: 'number', required: false, description: 'Cap visible entries before "show more"', control: 'number' },
+    ],
+    usageExample: `import { AdminAuditTrail } from '@szl-holdings/shared-ui';
+
+<AdminAuditTrail
+  entries={auditEntries}
+  title="Agent Run Audit"
+  accentColor="#00d4ff"
+  showFilters
+/>`,
+  },
+
+  AnimatedCounter: {
+    category: 'Data Display',
+    description: 'Animated numeric display that transitions smoothly from one value to another using an eased animation.',
+    status: 'stable',
+    source: 'lib/shared-ui/src/animated-counter.tsx',
+    props: [
+      { name: 'value', type: 'number', required: true, description: 'Target numeric value to animate to', control: 'number', defaultValue: '1234' },
+      { name: 'duration', type: 'number', required: false, defaultValue: '1200', description: 'Animation duration in milliseconds', control: 'number' },
+      { name: 'decimals', type: 'number', required: false, defaultValue: '0', description: 'Decimal places to display', control: 'number' },
+      { name: 'prefix', type: 'string', required: false, description: 'String prepended to the value', control: 'text' },
+      { name: 'suffix', type: 'string', required: false, description: 'String appended to the value', control: 'text' },
+      { name: 'className', type: 'string', required: false, description: 'Additional Tailwind classes', control: 'text' },
+    ],
+    usageExample: `import { AnimatedCounter } from '@szl-holdings/shared-ui';
+
+<AnimatedCounter
+  value={1234}
+  duration={1200}
+  prefix="$"
+  suffix="K"
+/>`,
+    livePreview: (vals) => (
+      <div className="flex items-center justify-center py-8">
+        <AnimatedCounter
+          value={Number(vals.value) || 1234}
+          duration={Number(vals.duration) || 1200}
+          decimals={Number(vals.decimals) || 0}
+          prefix={vals.prefix || ''}
+          suffix={vals.suffix || ''}
+          className="text-4xl font-mono font-bold text-nexus-cyan"
+        />
+      </div>
+    ),
+  },
+
+  AlertCard: {
+    category: 'Feedback',
+    description: 'Structured alert block with severity-based color coding (info, success, warning, error, critical).',
+    status: 'stable',
+    source: 'lib/shared-ui/src/design-system/AlertCard.tsx',
+    props: [
+      { name: 'title', type: 'string', required: true, description: 'Short alert heading', control: 'text', defaultValue: 'Guardian Policy Triggered' },
+      { name: 'description', type: 'string', required: false, description: 'Alert body text', control: 'text', defaultValue: 'Autonomy cap reduced to 40% due to threshold breach.' },
+      { name: 'severity', type: '"info" | "success" | "warning" | "error" | "critical"', required: false, defaultValue: 'warning', description: 'Determines color scheme and icon', control: 'select', options: ['info', 'success', 'warning', 'error', 'critical'] },
+      { name: 'compact', type: 'boolean', required: false, defaultValue: 'false', description: 'Renders a smaller variant', control: 'boolean' },
+    ],
+    usageExample: `import { AlertCard } from '@szl-holdings/shared-ui';
+
+<AlertCard
+  title="Guardian Policy Triggered"
+  description="Autonomy cap reduced to 40% due to threshold breach."
+  severity="warning"
+/>`,
+    livePreview: (vals) => (
+      <div className="p-4">
+        <AlertCard
+          title={vals.title || 'Guardian Policy Triggered'}
+          description={vals.description || 'Autonomy cap reduced to 40% due to threshold breach.'}
+          severity={(vals.severity as 'info' | 'success' | 'warning' | 'error' | 'critical') || 'warning'}
+          compact={vals.compact === 'true'}
+        />
+      </div>
+    ),
+  },
+
+  LoadingSkeleton: {
+    category: 'Feedback',
+    description: 'Animated placeholder skeleton for cards, lists, and text blocks during data loading.',
+    status: 'stable',
+    source: 'lib/shared-ui/src/design-system/LoadingSkeleton.tsx',
+    props: [
+      { name: 'variant', type: '"card" | "line" | "block" | "table" | "avatar" | "page"', required: false, description: 'Shape of skeleton to render', control: 'select', options: ['card', 'line', 'block', 'table', 'avatar', 'page'], defaultValue: 'card' },
+      { name: 'lines', type: 'number', required: false, defaultValue: '3', description: 'Number of line skeletons (used with line variant)', control: 'number' },
+      { name: 'rows', type: 'number', required: false, description: 'Number of rows (used with table variant)', control: 'number' },
+      { name: 'className', type: 'string', required: false, description: 'Additional Tailwind classes', control: 'text' },
+    ],
+    usageExample: `import { LoadingSkeleton } from '@szl-holdings/shared-ui';
+
+<LoadingSkeleton variant="card" />
+<LoadingSkeleton variant="line" lines={4} />`,
+    livePreview: (vals) => (
+      <div className="p-4">
+        <LoadingSkeleton
+          variant={(vals.variant as 'card' | 'line' | 'block' | 'table' | 'avatar' | 'page') || 'card'}
+          {...(vals.lines ? { lines: Number(vals.lines) } : {})}
+        />
+      </div>
+    ),
+  },
+
+  AlloyDecisionCard: {
+    category: 'AI Controls',
+    description: 'Review card for AI-generated decisions with approve / deny / override actions.',
+    status: 'stable',
+    source: 'lib/shared-ui/src/alloy-decision-card.tsx',
+    props: [
+      { name: 'decision', type: 'AlloyDecision', required: true, description: 'Decision payload (id, summary, confidence, evidence)' },
+      { name: 'onApprove', type: '(id: string) => void', required: false, description: 'Called when operator approves the decision' },
+      { name: 'onDeny', type: '(id: string) => void', required: false, description: 'Called when operator denies the decision' },
+      { name: 'onOverride', type: '(id: string, reason: string) => void', required: false, description: 'Called when operator overrides with a reason' },
+    ],
+    usageExample: `import { AlloyDecisionCard } from '@szl-holdings/shared-ui';
+
+<AlloyDecisionCard
+  decision={pendingDecision}
+  onApprove={(id) => approveDecision(id)}
+  onDeny={(id) => denyDecision(id)}
+/>`,
+  },
+
+  ConstellationGraph: {
+    category: 'Visualization',
+    description: 'Force-directed graph for rendering entity relationships across domains.',
+    status: 'beta',
+    source: 'lib/shared-ui/src/constellation-graph.tsx',
+    props: [
+      { name: 'nodes', type: 'GraphNode[]', required: true, description: 'Array of graph nodes with id, label, type' },
+      { name: 'edges', type: 'GraphEdge[]', required: true, description: 'Array of directed edges with source, target, weight' },
+      { name: 'onNodeClick', type: '(node: GraphNode) => void', required: false, description: 'Callback when a node is clicked' },
+      { name: 'layout', type: '"force" | "radial" | "tree"', required: false, defaultValue: '"force"', description: 'Graph layout algorithm', control: 'select', options: ['force', 'radial', 'tree'] },
+    ],
+    usageExample: `import { ConstellationGraph } from '@szl-holdings/shared-ui';
+
+<ConstellationGraph
+  nodes={entityNodes}
+  edges={entityEdges}
+  layout="force"
+  onNodeClick={(n) => navigateTo(n.id)}
+/>`,
+  },
+
+  SimulationCockpit: {
+    category: 'AI Controls',
+    description: 'What-if scenario runner with diff comparison between runs.',
+    status: 'beta',
+    source: 'lib/shared-ui/src/simulation-cockpit.tsx',
+    props: [
+      { name: 'scenarios', type: 'Scenario[]', required: true, description: 'Array of scenario definitions' },
+      { name: 'onRun', type: '(scenarioId: string) => void', required: false, description: 'Callback to trigger a scenario run' },
+      { name: 'activeScenarioId', type: 'string', required: false, description: 'Currently selected scenario', control: 'text' },
+    ],
+    usageExample: `import { SimulationCockpit } from '@szl-holdings/shared-ui';
+
+<SimulationCockpit
+  scenarios={whatIfScenarios}
+  activeScenarioId={selected}
+  onRun={(id) => runScenario(id)}
+/>`,
+  },
+
+  DataTable: {
+    category: 'Data Display',
+    description: 'Full-featured data table with sortable columns, client-side filtering, and optional pagination.',
+    status: 'stable',
+    source: 'lib/shared-ui/src/design-system/',
+    props: [
+      { name: 'columns', type: 'ColumnDef[]', required: true, description: 'Column definitions with accessor, header, and optional cell renderer' },
+      { name: 'data', type: 'unknown[]', required: true, description: 'Row data array' },
+      { name: 'sortable', type: 'boolean', required: false, defaultValue: 'true', description: 'Enable column sorting', control: 'boolean' },
+      { name: 'filterable', type: 'boolean', required: false, defaultValue: 'false', description: 'Show global search filter', control: 'boolean' },
+      { name: 'pagination', type: 'boolean', required: false, defaultValue: 'false', description: 'Enable pagination', control: 'boolean' },
+    ],
+    usageExample: `import { DataTable } from '@szl-holdings/shared-ui';
+
+<DataTable
+  columns={[{ accessor: 'name', header: 'Name' }]}
+  data={rows}
+  sortable
+  filterable
+/>`,
+  },
+
+  DashboardShell: {
+    category: 'Layout',
+    description: 'Top-level layout wrapper providing sidebar, header slot, and scrollable main content area.',
+    status: 'stable',
+    source: 'lib/shared-ui/src/design-system/',
+    props: [
+      { name: 'sidebar', type: 'React.ReactNode', required: true, description: 'Left navigation sidebar content' },
+      { name: 'header', type: 'React.ReactNode', required: true, description: 'Top header bar content' },
+      { name: 'children', type: 'React.ReactNode', required: true, description: 'Main page content' },
+      { name: 'theme', type: '"dark" | "light"', required: false, defaultValue: '"dark"', description: 'Color theme', control: 'select', options: ['dark', 'light'] },
+    ],
+    usageExample: `import { DashboardShell } from '@szl-holdings/shared-ui';
+
+<DashboardShell
+  sidebar={<SidebarNav items={navItems} />}
+  header={<AppHeader />}
+  theme="dark"
+>
+  <PageContent />
+</DashboardShell>`,
+  },
+
+  PrivateAppGuard: {
+    category: 'Auth',
+    description: 'Permission-based gate for internal apps. Renders children only when the current user has all required permissions.',
+    status: 'stable',
+    source: 'lib/shared-ui/src/PrivateAppGuard.tsx',
+    props: [
+      { name: 'appId', type: 'string', required: true, description: 'Identifier of the protected app', control: 'text', defaultValue: 'nexus' },
+      { name: 'permissions', type: 'string[]', required: true, description: 'Required permission strings (AND logic)' },
+      { name: 'children', type: 'React.ReactNode', required: true, description: 'Protected content' },
+    ],
+    usageExample: `import { PrivateAppGuard } from '@szl-holdings/shared-ui';
+
+<PrivateAppGuard
+  appId="nexus"
+  permissions={['nexus:read', 'nexus:evals:run']}
+>
+  <EvalConsole />
+</PrivateAppGuard>`,
+  },
+
+  AgentInsightsWidget: {
+    category: 'Observability',
+    description: 'Displays AI agent execution history and knowledge retrieval stats.',
+    status: 'stable',
+    source: 'lib/shared-ui/src/agent-insights-widget.tsx',
+    props: [
+      { name: 'runs', type: 'AgentRun[]', required: true, description: 'Agent execution runs to display' },
+      { name: 'knowledge', type: 'AgentKnowledgeEntry[]', required: true, description: 'Knowledge retrieval entries' },
+      { name: 'onAction', type: '(action: string) => void', required: false, description: 'Callback for quick actions' },
+    ],
+    usageExample: `import { AgentInsightsWidget } from '@szl-holdings/shared-ui';
+
+<AgentInsightsWidget
+  runs={agentRuns}
+  knowledge={knowledgeEntries}
+  onAction={(a) => console.log(a)}
+/>`,
+  },
+
+  DoctrineLayerBadge: {
+    category: 'Identity',
+    description: 'Badge indicating which doctrine layer (Cognitive, Sentient, Governed, Tactical) a component belongs to.',
+    status: 'stable',
+    source: 'lib/shared-ui/src/doctrine-layer-badge.tsx',
+    props: [
+      { name: 'appId', type: 'string', required: true, description: 'App identifier resolved to a doctrine layer', control: 'text', defaultValue: 'nexus' },
+      { name: 'variant', type: '"compact" | "full" | "inline"', required: false, defaultValue: '"compact"', description: 'Visual variant', control: 'select', options: ['compact', 'full', 'inline'] },
+      { name: 'showTooltip', type: 'boolean', required: false, defaultValue: 'false', description: 'Show tooltip with description', control: 'boolean' },
+    ],
+    usageExample: `import { DoctrineLayerBadge } from '@szl-holdings/shared-ui';
+
+<DoctrineLayerBadge appId="nexus" variant="compact" />`,
+  },
+
+  DigitalTwinCard: {
+    category: 'Monitoring',
+    description: 'Monitoring card showing predicted state, live metrics, and active alerts for a digital twin entity.',
+    status: 'experimental',
+    source: 'lib/shared-ui/src/digital-twin-card.tsx',
+    props: [
+      { name: 'id', type: 'string', required: true, description: 'Entity identifier', control: 'text' },
+      { name: 'predictedState', type: 'Record<string, unknown>', required: true, description: 'Predicted state snapshot from simulation' },
+      { name: 'alerts', type: 'Alert[]', required: true, description: 'Active alert list' },
+      { name: 'metrics', type: 'MetricSnapshot[]', required: true, description: 'Live metric readings' },
+    ],
+    usageExample: `import { DigitalTwinCard } from '@szl-holdings/shared-ui';
+
+<DigitalTwinCard
+  id="vessel-imo-9876543"
+  predictedState={snapshot}
+  alerts={activeAlerts}
+  metrics={liveMetrics}
+/>`,
+  },
+};
+
+const CATEGORIES = [
+  { id: 'all', label: 'All', icon: Package },
+  { id: 'Auth', label: 'Auth', icon: Shield },
+  { id: 'Controls', label: 'Controls', icon: ToggleLeft },
+  { id: 'AI Controls', label: 'AI Controls', icon: Brain },
+  { id: 'Analytics', label: 'Analytics', icon: BarChart2 },
+  { id: 'Data Display', label: 'Data Display', icon: Table },
+  { id: 'Layout', label: 'Layout', icon: LayoutDashboard },
+  { id: 'Feedback', label: 'Feedback', icon: Bell },
+  { id: 'Observability', label: 'Observability', icon: Activity },
+  { id: 'Visualization', label: 'Visualization', icon: Network },
+  { id: 'Monitoring', label: 'Monitoring', icon: Eye },
+  { id: 'Identity', label: 'Identity', icon: Layers },
+  { id: 'Other', label: 'Other', icon: Cpu },
 ];
 
-export default function PatternAtlas() {
-  const [patterns, setPatterns] = useState<PatternFamily[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selected, setSelected] = useState<PatternFamily | null>(null);
+const STATUS_CFG = {
+  stable: { label: 'Stable', color: 'text-nexus-green border-nexus-green/30 bg-nexus-green/10' },
+  beta: { label: 'Beta', color: 'text-nexus-amber border-nexus-amber/30 bg-nexus-amber/10' },
+  experimental: { label: 'Experimental', color: 'text-nexus-red border-red-500/30 bg-red-500/10' },
+};
 
-  useEffect(() => {
-    nexusApi
-      .listPatterns()
-      .then((data) => {
-        setPatterns(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
+interface CatalogEntry {
+  name: string;
+  meta: ComponentMetadata;
+}
 
-  if (loading) {
+function buildCatalog(): CatalogEntry[] {
+  const componentNames = sharedUiExports
+    .filter((e) => e.isComponent)
+    .map((e) => e.name);
+
+  return componentNames.map((name) => ({
+    name,
+    meta: REGISTRY[name] ?? {
+      category: 'Other',
+      description: `Shared UI component from lib/shared-ui. See source for full props.`,
+      status: 'stable' as const,
+      source: `lib/shared-ui/src/index.ts`,
+      props: [],
+      usageExample: `import { ${name} } from '@szl-holdings/shared-ui';\n\n<${name} />`,
+    },
+  }));
+}
+
+const CATALOG = buildCatalog();
+
+class PreviewErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  override componentDidCatch(_err: Error, _info: ErrorInfo) {}
+  override render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
+
+function PropControl({
+  prop,
+  value,
+  onChange,
+}: {
+  prop: PropDef;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  if (prop.control === 'boolean') {
     return (
-      <div className="flex items-center justify-center h-full py-32">
-        <Loader className="w-6 h-6 animate-spin text-muted-foreground/40" />
-      </div>
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={value === 'true'}
+          onChange={(e) => onChange(e.target.checked ? 'true' : 'false')}
+          className="w-3 h-3 rounded border-nexus accent-[#00d4ff]"
+        />
+        <span className="text-[11px] text-muted-foreground">{value === 'true' ? 'true' : 'false'}</span>
+      </label>
     );
   }
+  if (prop.control === 'select' && prop.options) {
+    return (
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="bg-nexus-bg border border-nexus rounded px-2 py-1 text-[11px] text-foreground focus:outline-none focus:border-nexus-cyan/40"
+      >
+        {prop.options.map((o) => (
+          <option key={o} value={o}>{o}</option>
+        ))}
+      </select>
+    );
+  }
+  if (prop.control === 'number') {
+    return (
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-20 bg-nexus-bg border border-nexus rounded px-2 py-1 text-[11px] text-foreground focus:outline-none focus:border-nexus-cyan/40"
+      />
+    );
+  }
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="flex-1 min-w-0 bg-nexus-bg border border-nexus rounded px-2 py-1 text-[11px] text-foreground placeholder-muted-foreground/40 focus:outline-none focus:border-nexus-cyan/40"
+    />
+  );
+}
+
+function ComponentDetail({ entry }: { entry: CatalogEntry }) {
+  const { name, meta } = entry;
+  const [propValues, setPropValues] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {};
+    for (const p of meta.props) {
+      if (p.control) {
+        init[p.name] = p.defaultValue ?? (p.control === 'boolean' ? 'false' : p.options?.[0] ?? '');
+      }
+    }
+    return init;
+  });
+
+  const statusCfg = STATUS_CFG[meta.status];
+
+  function updateProp(name: string, value: string) {
+    setPropValues((prev) => ({ ...prev, [name]: value }));
+  }
+
+  function buildLiveCode() {
+    const controlled = meta.props.filter((p) => p.control && propValues[p.name] !== undefined);
+    if (controlled.length === 0) return meta.usageExample;
+    const propLines = controlled
+      .filter((p) => {
+        const v = propValues[p.name];
+        if (p.control === 'boolean' && v === 'false' && !p.required) return false;
+        return true;
+      })
+      .map((p) => {
+        const v = propValues[p.name];
+        if (p.control === 'boolean') return `  ${p.name}={${v}}`;
+        if (p.control === 'number') return `  ${p.name}={${v}}`;
+        return `  ${p.name}="${v}"`;
+      });
+    if (propLines.length === 0) return `<${name} />`;
+    return `<${name}\n${propLines.join('\n')}\n/>`;
+  }
+
+  const hasLivePreview = !!meta.livePreview;
 
   return (
-    <div className="min-h-full bg-nexus-bg p-6">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <GitBranch className="w-5 h-5 text-nexus-green" />
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="p-5 border-b border-nexus bg-nexus-surface shrink-0">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-lg font-semibold">Pattern Atlas</h1>
-            <p className="text-xs text-muted-foreground">
-              {patterns.length} pattern families absorbed from public repositories
-            </p>
+            <div className="flex items-center gap-2.5 mb-1">
+              <h2 className="text-base font-semibold font-mono text-nexus-cyan">{name}</h2>
+              <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase tracking-wider ${statusCfg.color}`}>
+                {statusCfg.label}
+              </span>
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-nexus bg-nexus-bg text-muted-foreground/60 uppercase">
+                {meta.category}
+              </span>
+              {hasLivePreview && (
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-nexus-green/30 bg-nexus-green/10 text-nexus-green uppercase tracking-wider">
+                  Live Preview
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed max-w-xl">{meta.description}</p>
+          </div>
+        </div>
+        <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground/40 font-mono">
+          <Code2 className="w-3 h-3" />
+          {meta.source}
+        </div>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+          {hasLivePreview && meta.livePreview && (
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/50 mb-2.5 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-nexus-green inline-block" />
+                Live Preview
+              </div>
+              <div className="rounded-lg border border-nexus-green/20 bg-nexus-bg overflow-hidden">
+                <PreviewErrorBoundary
+                  fallback={
+                    <div className="flex items-center gap-2 p-4 text-muted-foreground/50 text-xs">
+                      <Info className="w-3.5 h-3.5 shrink-0" />
+                      Live preview unavailable — component requires runtime context.
+                    </div>
+                  }
+                >
+                  {meta.livePreview(propValues)}
+                </PreviewErrorBoundary>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/50 mb-2.5">
+              {hasLivePreview ? 'Generated Code' : 'Usage'}
+            </div>
+            <pre className="bg-nexus-bg border border-nexus rounded-lg p-4 text-[11px] font-mono text-nexus-cyan/90 overflow-x-auto whitespace-pre leading-relaxed">
+              {buildLiveCode()}
+            </pre>
+          </div>
+
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/50 mb-2.5">
+              Full Example
+            </div>
+            <pre className="bg-nexus-bg border border-nexus rounded-lg p-4 text-[11px] font-mono text-muted-foreground/70 overflow-x-auto whitespace-pre leading-relaxed">
+              {meta.usageExample}
+            </pre>
           </div>
         </div>
 
-        {error && (
-          <div className="mb-4 flex items-center gap-2 bg-[#ff4455]/10 border border-[#ff4455]/30 rounded-lg px-4 py-3">
-            <AlertCircle className="w-4 h-4 text-nexus-red shrink-0" />
-            <p className="text-xs text-nexus-red">{error}</p>
+        <div className="w-72 border-l border-nexus bg-nexus-surface overflow-y-auto shrink-0">
+          <div className="p-4 border-b border-nexus">
+            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/50">
+              Props ({meta.props.length})
+            </div>
           </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-4">
-          {patterns.map((family, i) => {
-            const color = FAMILY_COLORS[i % FAMILY_COLORS.length];
-            const isSelected = selected?.id === family.id;
-            return (
-              <div
-                key={family.id}
-                className="rounded-xl border cursor-pointer transition-all overflow-hidden"
-                style={{
-                  borderColor: isSelected ? color : '#1a2535',
-                  background: isSelected
-                    ? `linear-gradient(135deg, ${color}08 0%, transparent 60%)`
-                    : 'transparent',
-                  backgroundColor: isSelected ? undefined : '#0d1520',
-                }}
-                onClick={() => setSelected(isSelected ? null : family)}
-              >
-                <div className="flex items-start gap-4 px-5 py-4">
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0"
-                    style={{ backgroundColor: `${color}15`, border: `1px solid ${color}30` }}
-                  >
-                    {family.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3
-                        className="text-sm font-semibold"
-                        style={{ color: isSelected ? color : undefined }}
-                      >
-                        {family.name}
-                      </h3>
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          className="text-[10px] font-mono px-1.5 py-0.5 rounded"
-                          style={{ color, backgroundColor: `${color}15` }}
-                        >
-                          {family.skills} skills
-                        </span>
-                        <ChevronRight
-                          className="w-3.5 h-3.5 transition-transform"
-                          style={{
-                            color,
-                            transform: isSelected ? 'rotate(90deg)' : 'rotate(0deg)',
-                          }}
-                        />
-                      </div>
+          {meta.props.length === 0 ? (
+            <div className="p-4 text-[11px] text-muted-foreground/50">
+              No documented props — see source for full interface.
+            </div>
+          ) : (
+            <div className="p-3 space-y-3">
+              {meta.props.map((prop) => (
+                <div key={prop.name} className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-mono font-semibold text-nexus-cyan">{prop.name}</span>
+                      {prop.required && <span className="text-[8px] text-nexus-red font-mono uppercase">*</span>}
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed mb-2">
-                      {family.description}
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {family.repos.map((repo) => (
-                        <span
-                          key={repo}
-                          className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-nexus-bg border border-nexus text-muted-foreground/50"
-                        >
-                          {repo}
-                        </span>
-                      ))}
-                    </div>
+                    <span className="text-[9px] font-mono text-muted-foreground/50 bg-nexus-bg border border-nexus px-1 py-0.5 rounded">
+                      {prop.type.length > 20 ? prop.type.slice(0, 20) + '…' : prop.type}
+                    </span>
                   </div>
+                  <p className="text-[10px] text-muted-foreground/60 leading-relaxed">{prop.description}</p>
+                  {prop.control && (
+                    <div className="pt-0.5">
+                      <PropControl
+                        prop={prop}
+                        value={propValues[prop.name] ?? prop.defaultValue ?? ''}
+                        onChange={(v) => updateProp(prop.name, v)}
+                      />
+                    </div>
+                  )}
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-                {isSelected && (
-                  <div className="px-5 pb-4 pt-2 border-t" style={{ borderColor: `${color}20` }}>
-                    <div
-                      className="text-[10px] font-mono uppercase tracking-widest mb-1.5"
-                      style={{ color }}
-                    >
-                      What NEXUS does natively from this pattern
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {family.nexusCapability}
-                    </p>
-                  </div>
-                )}
+export default function PatternAtlas() {
+  const [category, setCategory] = useState('all');
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState<CatalogEntry>(() => CATALOG[0] as CatalogEntry);
+
+  const filtered = CATALOG.filter((c) => {
+    const matchCat = category === 'all' || c.meta.category === category;
+    const matchSearch =
+      !search ||
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.meta.description.toLowerCase().includes(search.toLowerCase()) ||
+      c.meta.category.toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchSearch;
+  });
+
+  const counts = {
+    stable: CATALOG.filter((c) => c.meta.status === 'stable').length,
+    beta: CATALOG.filter((c) => c.meta.status === 'beta').length,
+    experimental: CATALOG.filter((c) => c.meta.status === 'experimental').length,
+  };
+
+  const activeCats = new Set(CATALOG.map((c) => c.meta.category));
+
+  return (
+    <div className="flex h-full overflow-hidden bg-nexus-bg">
+      <div className="w-56 border-r border-nexus bg-nexus-surface flex flex-col shrink-0 overflow-hidden">
+        <div className="p-3 border-b border-nexus shrink-0">
+          <div className="flex items-center gap-2 mb-3">
+            <GitBranch className="w-4 h-4 text-nexus-cyan" />
+            <div>
+              <div className="text-xs font-semibold font-mono">Pattern Atlas</div>
+              <div className="text-[9px] text-muted-foreground/50">
+                {CATALOG.length} components · sourced from lib/shared-ui
               </div>
+            </div>
+          </div>
+          <div className="relative">
+            <Search className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search components…"
+              className="w-full bg-nexus-bg border border-nexus rounded pl-6 pr-2 py-1.5 text-[11px] text-foreground placeholder-muted-foreground/40 focus:outline-none focus:border-nexus-cyan/40"
+            />
+          </div>
+          <div className="flex gap-2 mt-2.5 text-[9px] font-mono">
+            <span className="text-nexus-green">{counts.stable} stable</span>
+            <span className="text-muted-foreground/40">·</span>
+            <span className="text-nexus-amber">{counts.beta} beta</span>
+            <span className="text-muted-foreground/40">·</span>
+            <span className="text-nexus-red">{counts.experimental} exp</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-0.5 p-1.5 border-b border-nexus shrink-0">
+          {CATEGORIES.filter((cat) => cat.id === 'all' || activeCats.has(cat.id)).map((cat) => {
+            const Icon = cat.icon;
+            const count = cat.id === 'all' ? CATALOG.length : CATALOG.filter((c) => c.meta.category === cat.id).length;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setCategory(cat.id)}
+                className={`flex items-center gap-2 px-2 py-1.5 rounded text-left transition-colors ${
+                  category === cat.id
+                    ? 'bg-nexus-cyan/10 text-nexus-cyan border border-nexus-cyan/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-nexus-bg border border-transparent'
+                }`}
+              >
+                <Icon className="w-3 h-3 shrink-0" />
+                <span className="text-[11px] flex-1">{cat.label}</span>
+                <span className="text-[10px] text-muted-foreground/40 font-mono">{count}</span>
+              </button>
             );
           })}
         </div>
 
-        {patterns.length === 0 && !error && (
-          <div className="text-center py-16 text-muted-foreground/40">
-            <GitBranch className="w-12 h-12 mx-auto mb-4 opacity-20" />
-            <p className="text-sm">No pattern families indexed yet.</p>
-            <p className="text-xs mt-1">Run an Ingest job to populate the Pattern Atlas.</p>
+        <div className="flex-1 overflow-y-auto p-1.5 space-y-0.5">
+          {filtered.map((c) => {
+            const isSelected = selected?.name === c.name;
+            const statusCfg = STATUS_CFG[c.meta.status];
+            return (
+              <button
+                key={c.name}
+                onClick={() => setSelected(c)}
+                className={`w-full flex items-center gap-2 px-2.5 py-2 rounded text-left transition-colors ${
+                  isSelected
+                    ? 'bg-nexus-cyan/10 border border-nexus-cyan/20 text-nexus-cyan'
+                    : 'text-muted-foreground/80 hover:text-foreground hover:bg-nexus-bg border border-transparent'
+                }`}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="text-[11px] font-mono font-medium truncate">{c.name}</div>
+                  <div className="text-[9px] text-muted-foreground/50 truncate">{c.meta.category}</div>
+                </div>
+                {c.meta.livePreview && (
+                  <span className="text-[8px] text-nexus-green font-mono shrink-0">▶</span>
+                )}
+                <span className={`text-[8px] font-mono ${statusCfg.color} px-1 py-0.5 rounded border shrink-0`}>
+                  {c.meta.status === 'stable' ? '●' : c.meta.status === 'beta' ? '◐' : '○'}
+                </span>
+                {isSelected && <ChevronRight className="w-3 h-3 shrink-0" />}
+              </button>
+            );
+          })}
+          {filtered.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground/40 text-xs">No components match</div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-hidden">
+        {selected ? (
+          <ComponentDetail key={selected.name} entry={selected} />
+        ) : (
+          <div className="flex items-center justify-center h-full text-muted-foreground/30">
+            <div className="text-center">
+              <Palette className="w-10 h-10 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">Select a component to explore</p>
+            </div>
           </div>
         )}
       </div>

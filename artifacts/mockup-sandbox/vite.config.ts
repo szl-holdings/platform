@@ -3,6 +3,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
+import { sharedUiManifestPlugin } from './sharedUiManifestPlugin';
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
@@ -12,6 +13,7 @@ const basePath = process.env.BASE_PATH || '/nexus/';
 export default defineConfig({
   base: basePath,
   plugins: [
+    sharedUiManifestPlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),

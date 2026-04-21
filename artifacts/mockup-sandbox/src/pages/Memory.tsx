@@ -3,6 +3,7 @@ import {
   Brain,
   ChevronDown,
   Filter,
+  FlaskConical,
   Loader,
   Pin,
   Plus,
@@ -122,6 +123,16 @@ export default function Memory() {
               Add Memory
             </button>
           </div>
+        </div>
+
+        <div className="mb-5 flex items-center gap-2 rounded-lg border border-[#ffb700]/20 bg-[#ffb700]/5 px-3 py-2">
+          <FlaskConical className="w-3.5 h-3.5 text-nexus-amber shrink-0" />
+          <span className="text-[11px] text-nexus-amber font-mono uppercase tracking-wide">
+            Internal Tooling — Not Production
+          </span>
+          <span className="text-[10px] text-muted-foreground/60 ml-1">
+            This module is for internal NEXUS development only. Data here is not customer-facing.
+          </span>
         </div>
 
         {adding && (
