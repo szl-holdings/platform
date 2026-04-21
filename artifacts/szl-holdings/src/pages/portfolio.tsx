@@ -31,6 +31,7 @@ function ModuleTile({
   tagline,
   accentColor,
   href,
+  hrefExternal,
   externalHref,
   stats,
   status,
@@ -41,6 +42,7 @@ function ModuleTile({
   tagline: string;
   accentColor: string;
   href: string;
+  hrefExternal?: boolean;
   externalHref?: string;
   stats: { label: string; value: string | number }[];
   status: "active" | "live" | "pilot";
@@ -157,8 +159,9 @@ function ModuleTile({
       </div>
 
       <div style={{ display: "flex", gap: "0.5rem", marginTop: "auto" }}>
-        <Link href={href}>
-          <span
+        {hrefExternal ? (
+          <a
+            href={href}
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -166,12 +169,29 @@ function ModuleTile({
               fontSize: "0.8125rem",
               fontWeight: 500,
               color: accentColor,
+              textDecoration: "none",
               cursor: "pointer",
             }}
           >
             View module <ArrowUpRight size={13} />
-          </span>
-        </Link>
+          </a>
+        ) : (
+          <Link href={href}>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.375rem",
+                fontSize: "0.8125rem",
+                fontWeight: 500,
+                color: accentColor,
+                cursor: "pointer",
+              }}
+            >
+              View module <ArrowUpRight size={13} />
+            </span>
+          </Link>
+        )}
         {externalHref && (
           <a
             href={externalHref}
@@ -322,8 +342,9 @@ export default function PortfolioPage() {
               name="KORA"
               tagline="Decision Intelligence Platform"
               accentColor="hsl(191,92%,44%)"
-              href="/lyte"
-              externalHref="/command/operations/"
+              href="/lyte/overview"
+              hrefExternal
+              externalHref="/lyte/"
               stats={[
                 { label: "Incidents", value: data?.lyte.incidents ?? 0 },
                 { label: "Status", value: "Active" },
@@ -337,7 +358,8 @@ export default function PortfolioPage() {
               name="DOMAINE"
               tagline="Real Estate Intelligence"
               accentColor="hsl(140,50%,46%)"
-              href="/solutions/terra"
+              href="/terra/dashboard"
+              hrefExternal
               externalHref="/terra/"
               stats={[
                 { label: "Deals", value: data?.terra.activeDeals ?? 0 },
@@ -352,7 +374,8 @@ export default function PortfolioPage() {
               name="SEXTANT"
               tagline="Maritime Intelligence"
               accentColor="hsl(200,80%,52%)"
-              href="/solutions/vessels"
+              href="/vessels/dashboard"
+              hrefExternal
               externalHref="/vessels/"
               stats={[
                 { label: "Tracked", value: data?.vessels.trackedVessels ?? 0 },
@@ -367,7 +390,8 @@ export default function PortfolioPage() {
               name="TENAX"
               tagline="Cyber Resilience Command"
               accentColor="hsl(0,72%,56%)"
-              href="/solutions/aegis"
+              href="/sentra/dashboard"
+              hrefExternal
               externalHref="/sentra/"
               stats={[
                 { label: "Incidents", value: data?.aegis.incidents ?? 0 },
@@ -382,7 +406,7 @@ export default function PortfolioPage() {
               name="FORGE"
               tagline="Governed Execution Fabric"
               accentColor="hsl(258,55%,68%)"
-              href="/alloy"
+              href="/alloy/home"
               stats={[
                 { label: "Workflow Runs", value: data?.alloy.workflowRuns ?? 0 },
                 { label: "Status", value: "Running" },
@@ -396,7 +420,8 @@ export default function PortfolioPage() {
               name="Carlota Jo"
               tagline="Premium Advisory Services"
               accentColor="hsl(30,55%,55%)"
-              href="/services/carlota-jo"
+              href="/carlota-jo/consulting-os"
+              hrefExternal
               externalHref="/carlota-jo/"
               stats={[
                 { label: "Inquiries", value: data?.carlotaJo.inquiries ?? 0 },
