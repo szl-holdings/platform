@@ -105,6 +105,12 @@ const SCENARIO_COLORS = [
   DS.accent.purple,
   DS.accent.orange,
 ];
+
+const DEMO_PROFORMA_PROJECTS: { projectName: string; inputs: ProFormaInputs }[] = [
+  { projectName: 'Demo · Base Case', inputs: { ...DEFAULT_INPUTS } },
+  { projectName: 'Demo · Bear Case', inputs: { ...BEAR_INPUTS } },
+  { projectName: 'Demo · Bull Case', inputs: { ...BULL_INPUTS } },
+];
 function useProForma(inputs: ProFormaInputs) {
   return useMemo(() => calcProForma(inputs), [inputs]);
 }
@@ -875,6 +881,30 @@ export default function ProFormaPage() {
     },
   });
 
+  const seedDemoMutation = useStandardMutation({
+    mutationFn: async () => {
+      for (const demo of DEMO_PROFORMA_PROJECTS) {
+        const r = calcProForma(demo.inputs);
+        await api.proForma.create({
+          projectName: demo.projectName,
+          inputs: demo.inputs as unknown as Record<string, unknown>,
+          results: {
+            irr: r.irr,
+            equityMultiple: r.equityMultiple,
+            profitOnCost: r.profitOnCost,
+            totalProjectCost: r.totalProjectCost,
+            stabilizedValue: r.stabilizedValue,
+            developerProfit: r.developerProfit,
+          },
+          isDemo: true,
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['terra-pro-forma-projects'] });
+    },
+  });
+
   const deleteProjectMutation = useStandardMutation({
     mutationFn: (id: string) => api.proForma.remove(id),
     onSuccess: () => {
@@ -1048,7 +1078,7 @@ export default function ProFormaPage() {
             >
               Feasibility
             </span>
-            {(savedProjects?.projects.length ?? 0) > 0 && (
+            {(savedProjects?.projects.length ?? 0) > 0 ? (
               <span
                 className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded"
                 style={{
@@ -1060,6 +1090,22 @@ export default function ProFormaPage() {
                 <Database className="w-2.5 h-2.5" />
                 Live DB · {savedProjects!.projects.length}
               </span>
+            ) : (
+              savedProjects && (
+                <button
+                  onClick={() => seedDemoMutation.mutate()}
+                  disabled={seedDemoMutation.isPending}
+                  className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded cursor-pointer"
+                  style={{
+                    color: DS.text.muted,
+                    background: DS.surface,
+                    border: `1px solid ${DS.border}`,
+                  }}
+                >
+                  <Database className="w-2.5 h-2.5" />
+                  {seedDemoMutation.isPending ? 'Seeding…' : 'Seed Demo Data'}
+                </button>
+              )
             )}
           </div>
           <p className="text-[10px] font-mono" style={{ color: DS.text.muted }}>

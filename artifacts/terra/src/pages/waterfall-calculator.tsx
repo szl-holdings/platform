@@ -62,6 +62,10 @@ const DS = {
   },
 };
 
+const DEMO_WATERFALL_STRUCTURES: { name: string; inputs: WaterfallInputs }[] = [
+  { name: 'Demo · Standard 8% Pref / 80-20 Promote', inputs: { ...DEFAULT_WATERFALL_INPUTS } },
+];
+
 const fmt = (n: number) =>
   n >= 1e9
     ? `$${(n / 1e9).toFixed(2)}B`
@@ -241,6 +245,30 @@ export default function WaterfallCalculatorPage() {
     },
   });
 
+  const seedDemoMutation = useStandardMutation({
+    mutationFn: async () => {
+      for (const demo of DEMO_WATERFALL_STRUCTURES) {
+        const computed = calcWaterfall(demo.inputs);
+        await api.waterfall.create({
+          name: demo.name,
+          inputs: demo.inputs as unknown as Record<string, unknown>,
+          results: {
+            gpEM: computed.gpEM,
+            lpEM: computed.lpEM,
+            gpIRR: computed.gpIRR,
+            lpIRR: computed.lpIRR,
+            gpTotal: computed.gpTotal,
+            lpTotal: computed.lpTotal,
+          },
+          isDemo: true,
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['terra-waterfall-structures'] });
+    },
+  });
+
   const deleteStructureMutation = useStandardMutation({
     mutationFn: (id: string) => api.waterfall.remove(id),
     onSuccess: () => {
@@ -343,7 +371,7 @@ export default function WaterfallCalculatorPage() {
               >
                 GP / LP
               </span>
-              {(savedStructures?.structures.length ?? 0) > 0 && (
+              {(savedStructures?.structures.length ?? 0) > 0 ? (
                 <span
                   className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded"
                   style={{
@@ -355,6 +383,22 @@ export default function WaterfallCalculatorPage() {
                   <Database className="w-2.5 h-2.5" />
                   Live DB · {savedStructures!.structures.length}
                 </span>
+              ) : (
+                savedStructures && (
+                  <button
+                    onClick={() => seedDemoMutation.mutate()}
+                    disabled={seedDemoMutation.isPending}
+                    className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded cursor-pointer"
+                    style={{
+                      color: DS.text.muted,
+                      background: DS.surface,
+                      border: `1px solid ${DS.border}`,
+                    }}
+                  >
+                    <Database className="w-2.5 h-2.5" />
+                    {seedDemoMutation.isPending ? 'Seeding…' : 'Seed Demo Data'}
+                  </button>
+                )
               )}
             </div>
             {propInputs && (
@@ -588,7 +632,7 @@ export default function WaterfallCalculatorPage() {
             >
               GP / LP
             </span>
-            {(savedStructures?.structures.length ?? 0) > 0 && (
+            {(savedStructures?.structures.length ?? 0) > 0 ? (
               <span
                 className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded"
                 style={{
@@ -600,6 +644,22 @@ export default function WaterfallCalculatorPage() {
                 <Database className="w-2.5 h-2.5" />
                 Live DB · {savedStructures!.structures.length}
               </span>
+            ) : (
+              savedStructures && (
+                <button
+                  onClick={() => seedDemoMutation.mutate()}
+                  disabled={seedDemoMutation.isPending}
+                  className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded cursor-pointer"
+                  style={{
+                    color: DS.text.muted,
+                    background: DS.surface,
+                    border: `1px solid ${DS.border}`,
+                  }}
+                >
+                  <Database className="w-2.5 h-2.5" />
+                  {seedDemoMutation.isPending ? 'Seeding…' : 'Seed Demo Data'}
+                </button>
+              )
             )}
           </div>
           <p className="text-[10px] font-mono" style={{ color: DS.text.muted }}>
