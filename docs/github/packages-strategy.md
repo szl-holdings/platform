@@ -120,13 +120,13 @@ docker pull ghcr.io/szl-holdings/aegis:1.2.3
 
 ```bash
 # Start all services
-docker-compose up --build
+docker-compose -f ops/local/docker-compose.yml up --build
 
 # Start only API + SZL Holdings web
-docker-compose up api-server szl-holdings
+docker-compose -f ops/local/docker-compose.yml up api-server szl-holdings
 
 # Tear down
-docker-compose down
+docker-compose -f ops/local/docker-compose.yml down
 ```
 
 ---
@@ -223,7 +223,7 @@ See: [GitHub Packages billing](https://docs.github.com/en/billing/managing-billi
 ## Related Files
 
 - `.npmrc` — npm scope + registry configuration
-- `docker-compose.yml` — local multi-service development
+- `ops/local/docker-compose.yml` — local multi-service development
 - `.github/workflows/npm-publish.yml` — npm CI
 - `.github/workflows/container-publish.yml` — container CI
 - `docs/github/packages-security.md` — token management and secret hygiene

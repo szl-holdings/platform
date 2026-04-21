@@ -38,16 +38,16 @@ This file records every substantive decision made during the rehaul, with ration
 
 ## Deferred Decisions (Owner Approval Required)
 
-| # | Path | Recommended Action | Reason Deferred |
-|---|------|-------------------|----------------|
-| DD-001 | `LINKEDIN-LAUNCH/` | Archive to `archive/social-launch/` | Content may be sensitive; owner must verify |
-| DD-002 | `launch-shots/` | Move to `docs/assets/screenshots/archive/launch-2026/` | Owner must confirm superseded |
-| DD-003 | `docker-compose.yml` | Move to `ops/local/` | Owner must confirm no CI dependency |
-| DD-004 | `build_carousel.py` + `build_video.sh` + `pyproject.toml` | Move to `scripts/media/` | Owner must confirm no active usage |
-| DD-005 | `elite-layer/` | Investigate and document | Unknown purpose — needs owner review |
-| DD-006 | `content/` | Investigate and document | Unknown scope — needs owner review |
-| DD-007 | `audit/` (root-level) | Move content to `docs/audit/` | Owner must verify no external references |
-| DD-008 | `GITHUB_SETTINGS_APPLIED.json` | Move to `docs/github/` | Low risk but owner should approve |
+| # | Path | Recommended Action | Status |
+|---|------|-------------------|--------|
+| DD-001 | `LINKEDIN-LAUNCH/` | Archive to `archive/social-launch/` | ✅ Completed (Task #2857) — moved to `archive/social-launch/LINKEDIN-LAUNCH/` |
+| DD-002 | `launch-shots/` | Move to `docs/assets/screenshots/archive/launch-2026/` | ✅ Completed (Task #2857) |
+| DD-003 | `docker-compose.yml` | Move to `ops/local/` | ✅ Completed (Task #2857) — moved to `ops/local/docker-compose.yml`; doc references updated |
+| DD-004 | `build_carousel.py` + `build_video.sh` + `pyproject.toml` | Move to `scripts/media/` | ✅ Completed (Task #2857) — scripts updated to reference new archive paths |
+| DD-005 | `elite-layer/` | Investigate and document | Deferred — out of scope for Task #2857 |
+| DD-006 | `content/` | Investigate and document | Deferred — out of scope for Task #2857 |
+| DD-007 | `audit/` (root-level) | Move content to `docs/audit/` | Deferred — out of scope for Task #2857 |
+| DD-008 | `GITHUB_SETTINGS_APPLIED.json` | Move to `docs/github/` | ✅ Completed (Task #2857) |
 
 ---
 

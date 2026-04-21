@@ -21,7 +21,7 @@ This policy governs the creation, approval, storage, and retirement of screensho
 
 **Prohibited locations for approved screenshots:**
 - Root directory
-- `launch-shots/` (legacy; do not add new shots here)
+- `docs/assets/screenshots/archive/launch-2026/` (legacy launch screenshots, archived from former root `launch-shots/`; do not add new shots here)
 - `attached_assets/` (gitignored payload dumps)
 
 ---

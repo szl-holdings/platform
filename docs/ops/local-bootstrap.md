@@ -121,7 +121,7 @@ pnpm --filter @workspace/vessels dev
 ```bash
 # Requires Docker Desktop
 cp .env.example .env   # fill in DATABASE_URL etc.
-docker-compose up --build
+docker-compose -f ops/local/docker-compose.yml up --build
 
 # Services start on:
 #   API:          http://localhost:3000
@@ -132,7 +132,7 @@ docker-compose up --build
 #   Carlota Jo:   http://localhost:4005
 ```
 
-Note: `docker-compose.yml` does not include sentra, counsel, pulse, lyte, command, or mockup-sandbox. Start those separately if needed.
+Note: `ops/local/docker-compose.yml` does not include sentra, counsel, pulse, lyte, command, or mockup-sandbox. Start those separately if needed.
 
 ---
 
