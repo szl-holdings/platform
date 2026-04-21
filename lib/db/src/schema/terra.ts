@@ -717,6 +717,54 @@ export const insertTerraCovenantSchema = createInsertSchema(terraCovenantsTable)
 export type InsertTerraCovenant = z.infer<typeof insertTerraCovenantSchema>;
 export type TerraCovenant = typeof terraCovenantsTable.$inferSelect;
 
+/**
+ * Quarterly lender financial statements ingested per loan.
+ * Stores audited NOI, debt service, physical occupancy, and appraised value
+ * so covenant measurement reads real financial data instead of distress-derived
+ * proxies.
+ */
+export const terraLoanFinancialsTable = pgTable(
+  'terra_loan_financials',
+  {
+    id: serial('id').primaryKey(),
+    loanAgreementId: text('loan_agreement_id').notNull(),
+    propertyExternalId: text('property_external_id').notNull(),
+    statementPeriod: text('statement_period').notNull(),
+    // ISO-8601 'YYYY-MM-DD' format enforced at application layer before insert.
+    // Stored as text for Drizzle compatibility; ISO-8601 lexicographic ordering
+    // is identical to chronological ordering, so ORDER BY statement_date works
+    // correctly. Migrate to SQL date type if cross-DB date arithmetic is needed.
+    statementDate: text('statement_date').notNull(),
+    source: text('source').notNull().default('lender-portal'),
+    noi: numeric('noi', { precision: 16, scale: 2 }),
+    debtService: numeric('debt_service', { precision: 16, scale: 2 }),
+    occupancyRate: numeric('occupancy_rate', { precision: 5, scale: 4 }),
+    appraisedValue: numeric('appraised_value', { precision: 16, scale: 2 }),
+    outstandingBalance: numeric('outstanding_balance', { precision: 16, scale: 2 }),
+    isAudited: boolean('is_audited').notNull().default(false),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>().notNull().default({}),
+    ingestedAt: timestamp('ingested_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('terra_loan_fin_loan_idx').on(t.loanAgreementId),
+    index('terra_loan_fin_property_idx').on(t.propertyExternalId),
+    index('terra_loan_fin_period_idx').on(t.statementPeriod),
+    index('terra_loan_fin_date_idx').on(t.statementDate),
+    uniqueIndex('terra_loan_fin_loan_period_uniq').on(t.loanAgreementId, t.statementPeriod),
+  ],
+);
+
+export const insertTerraLoanFinancialsSchema = createInsertSchema(terraLoanFinancialsTable).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  ingestedAt: true,
+});
+export type InsertTerraLoanFinancials = z.infer<typeof insertTerraLoanFinancialsSchema>;
+export type TerraLoanFinancials = typeof terraLoanFinancialsTable.$inferSelect;
+
 // ─── Diligence Matters & Evidence Chain ──────────────────────────────────────
 
 export const terraDiligenceMattersTable = pgTable(

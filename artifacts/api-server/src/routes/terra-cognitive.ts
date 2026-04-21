@@ -31,7 +31,12 @@ import { tokenHasScope, verifyInternalHeader } from '../lib/internal-tokens';
 import { logger } from '../lib/logger';
 import { ObjectStorageService } from '../lib/objectStorage';
 import { guardSeedInProduction } from '../lib/seed-guard';
-import { evaluateAllCovenants, seedCovenantsFromDistress } from '../lib/terra-covenant-store';
+import {
+  evaluateAllCovenants,
+  ingestLoanFinancials,
+  seedCovenantsFromDistress,
+  syncLoanFinancialsFromDistress,
+} from '../lib/terra-covenant-store';
 import { searchDistressedProperties } from '../lib/terra-distress-service';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
@@ -1195,6 +1200,8 @@ router.get('/terra/cognitive/covenants', cogLimit, auth, async (req, res) => {
           severity: m.status === 'breach' ? 'high' : m.status === 'watch' ? 'medium' : 'none',
           breachDate: m.status === 'breach' ? new Date().toISOString().split('T')[0] : null,
           evidence: m.evidence,
+          financialSource: m.financialSource,
+          financialDate: m.financialDate,
           remedyDeadline: remedyDate,
           guardianActionId,
           pendingApproval,
@@ -1459,6 +1466,152 @@ router.post(
       sendSuccess(res, { inserted, source: 'distress-registry' });
     } catch (err) {
       handleRouteError(res, err, 'Failed to seed covenants');
+    }
+  },
+);
+
+// ─── Loan Financial Statement Ingestion ──────────────────────────────────────
+// Accepts quarterly NOI, debt service, occupancy, and appraisal from lender
+// portals or borrower data rooms. Idempotent on (loanAgreementId, period).
+
+router.post(
+  '/terra/cognitive/covenants/financials/ingest',
+  cogLimit,
+  auth,
+  validateBody(
+    bodyShape({
+      loanAgreementId: z.string(),
+      propertyExternalId: z.string(),
+      statementPeriod: z.string(),
+      statementDate: z.string(),
+      source: z.string().optional(),
+      noi: z.number().nullable().optional(),
+      debtService: z.number().nullable().optional(),
+      occupancyRate: z.number().nullable().optional(),
+      appraisedValue: z.number().nullable().optional(),
+      outstandingBalance: z.number().nullable().optional(),
+      isAudited: z.boolean().optional(),
+      metadata: z.record(z.unknown()).optional(),
+    }),
+  ),
+  async (req, res) => {
+    try {
+      // Require either a scoped internal service token (lender connector / scheduler)
+      // or an authenticated session user. Anonymous callers are rejected.
+      const reqToken = req.headers['x-internal-token'] as string | undefined;
+      const tokenMatch = verifyInternalHeader(reqToken, req.originalUrl || req.url);
+      const authorized =
+        (tokenMatch !== null && tokenHasScope(tokenMatch.context, 'agent:write')) || !!req.user;
+      if (!authorized) {
+        sendUnauthorized(res, 'Authentication required');
+        return;
+      }
+
+      const {
+        loanAgreementId,
+        propertyExternalId,
+        statementPeriod,
+        statementDate,
+        source,
+        noi,
+        debtService,
+        occupancyRate,
+        appraisedValue,
+        outstandingBalance,
+        isAudited,
+        metadata,
+      } = req.body as {
+        loanAgreementId: string;
+        propertyExternalId: string;
+        statementPeriod: string;
+        statementDate: string;
+        source?: string;
+        noi?: number | null;
+        debtService?: number | null;
+        occupancyRate?: number | null;
+        appraisedValue?: number | null;
+        outstandingBalance?: number | null;
+        isAudited?: boolean;
+        metadata?: Record<string, unknown>;
+      };
+
+      // Server-side range validation (in addition to schema type checks)
+      if (occupancyRate !== null && occupancyRate !== undefined) {
+        if (occupancyRate < 0 || occupancyRate > 1) {
+          sendBadRequest(res, 'occupancyRate must be between 0 and 1');
+          return;
+        }
+      }
+      for (const [field, val] of [
+        ['noi', noi],
+        ['debtService', debtService],
+        ['appraisedValue', appraisedValue],
+        ['outstandingBalance', outstandingBalance],
+      ] as [string, number | null | undefined][]) {
+        if (val !== null && val !== undefined && val < 0) {
+          sendBadRequest(res, `${field} must be non-negative`);
+          return;
+        }
+      }
+
+      await ingestLoanFinancials({
+        loanAgreementId,
+        propertyExternalId,
+        statementPeriod,
+        statementDate,
+        source: source ?? 'lender-portal',
+        noi,
+        debtService,
+        occupancyRate,
+        appraisedValue,
+        outstandingBalance,
+        isAudited,
+        metadata,
+      });
+      sendCreated(res, {
+        loanAgreementId,
+        statementPeriod,
+        source: source ?? 'lender-portal',
+        message: 'Financial statement ingested — next covenant evaluation will use these figures.',
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to ingest loan financials');
+    }
+  },
+);
+
+// ─── Connector sync: seed financials from distress registry into terra_loan_financials
+// Operator-triggered only. Only writes rows for loans that have NO existing
+// financial statement at all, so real lender data is never overwritten.
+
+router.post(
+  '/terra/cognitive/covenants/financials/sync',
+  cogLimit,
+  auth,
+  validateBody(bodyShape({})),
+  async (req, res) => {
+    try {
+      // Require an authenticated session user or a scoped internal token.
+      // Anonymous callers are rejected — this is an elevated operator action.
+      const reqToken = req.headers['x-internal-token'] as string | undefined;
+      const tokenMatch = verifyInternalHeader(reqToken, req.originalUrl || req.url);
+      const authorized =
+        (tokenMatch !== null && tokenHasScope(tokenMatch.context, 'agent:write')) || !!req.user;
+      if (!authorized) {
+        sendUnauthorized(res, 'Authentication required');
+        return;
+      }
+
+      const result = await syncLoanFinancialsFromDistress();
+      sendSuccess(res, {
+        ...result,
+        message:
+          result.synced > 0
+            ? `Seeded ${result.synced} loan financial statement(s) from distress registry (loans with no existing statements).`
+            : 'All active covenants already have at least one financial statement — no new rows written.',
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to sync loan financials');
     }
   },
 );

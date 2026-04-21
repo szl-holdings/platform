@@ -12,6 +12,7 @@ import {
   RefreshCw,
   Shield,
   Tag,
+  TrendingUp,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -139,6 +140,19 @@ function CovenantCard({ covenant }: { covenant: any }) {
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
+              {covenant.financialSource && (
+                <span
+                  className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded"
+                  style={{ background: 'rgba(64,133,106,0.12)', color: ACCENT, border: `1px solid rgba(64,133,106,0.2)` }}
+                  title={covenant.financialDate ? `Statement date: ${covenant.financialDate}` : undefined}
+                >
+                  <TrendingUp className="w-2.5 h-2.5" />
+                  {covenant.financialSource}
+                  {covenant.financialDate && (
+                    <span style={{ color: 'rgba(64,133,106,0.7)' }}> · {covenant.financialDate}</span>
+                  )}
+                </span>
+              )}
               {covenant.breachDate && (
                 <span className="flex items-center gap-1 text-[9px]" style={{ color: '#c04a2a' }}>
                   <AlertTriangle className="w-2.5 h-2.5" />
