@@ -4,6 +4,7 @@ import {
   INITIAL_DRAWDOWNS,
   INITIAL_RESERVES,
   type ReservePool,
+  type ReserveTrendPoint,
   type ReserveStatus,
 } from '@imp/lib/imperium-data';
 import { cn } from '@imp/lib/utils';
@@ -27,6 +28,129 @@ const DRAWDOWN_STATUS_CONFIG = {
 
 function pct(pool: ReservePool) {
   return Math.round((pool.currentLevel / pool.totalCapacity) * 100);
+}
+
+const W = 220;
+const H = 44;
+const PAD = 2;
+
+function ReserveTrendChart({
+  data,
+  color,
+  unit,
+  chartId,
+}: {
+  data: ReserveTrendPoint[];
+  color: string;
+  unit: string;
+  chartId: string;
+}) {
+  const [tooltip, setTooltip] = useState<{
+    x: number;
+    y: number;
+    point: ReserveTrendPoint;
+  } | null>(null);
+
+  if (!data || data.length < 2) return null;
+
+  const firstPoint = data[0]!;
+  const lastPoint = data[data.length - 1]!;
+
+  const levels = data.map((d) => d.level);
+  const minV = Math.min(...levels);
+  const maxV = Math.max(...levels);
+  const range = maxV - minV || 1;
+
+  function toX(i: number) {
+    return PAD + (i / (data.length - 1)) * (W - PAD * 2);
+  }
+  function toY(v: number) {
+    return PAD + (1 - (v - minV) / range) * (H - PAD * 2);
+  }
+
+  const points = data.map((d, i) => `${toX(i)},${toY(d.level)}`).join(' ');
+  const areaPoints = [
+    `${toX(0)},${H}`,
+    ...data.map((d, i) => `${toX(i)},${toY(d.level)}`),
+    `${toX(data.length - 1)},${H}`,
+  ].join(' ');
+
+  const areaId = `area-fill-${chartId}`;
+
+  return (
+    <div className="relative w-full mt-3 mb-1">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        width="100%"
+        height={H}
+        className="overflow-visible"
+        onMouseLeave={() => setTooltip(null)}
+      >
+        <defs>
+          <linearGradient id={areaId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+
+        <polygon points={areaPoints} fill={`url(#${areaId})`} />
+
+        <polyline
+          points={points}
+          fill="none"
+          stroke={color}
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+
+        {data.map((d, i) => (
+          <circle
+            key={i}
+            cx={toX(i)}
+            cy={toY(d.level)}
+            r={tooltip?.point === d ? 3.5 : 2.5}
+            fill={tooltip?.point === d ? color : 'rgba(10,13,26,0.9)'}
+            stroke={color}
+            strokeWidth="1.5"
+            className="cursor-crosshair"
+            onMouseEnter={(e) => {
+              const svg = e.currentTarget.closest('svg') as SVGSVGElement;
+              const rect = svg.getBoundingClientRect();
+              const cx = (toX(i) / W) * rect.width + rect.left;
+              const cy = (toY(d.level) / H) * rect.height + rect.top;
+              setTooltip({ x: cx, y: cy, point: d });
+            }}
+          />
+        ))}
+      </svg>
+
+      {tooltip && (
+        <div
+          className="fixed z-50 pointer-events-none px-2 py-1 rounded border font-mono text-[10px] shadow-xl whitespace-nowrap"
+          style={{
+            left: tooltip.x + 10,
+            top: tooltip.y - 32,
+            background: '#0a0d1a',
+            borderColor: color + '55',
+            color,
+          }}
+        >
+          <span className="text-slate-500 mr-1">{tooltip.point.date}</span>
+          {typeof tooltip.point.level === 'number' && tooltip.point.level % 1 !== 0
+            ? tooltip.point.level.toFixed(2)
+            : tooltip.point.level}{' '}
+          {unit}
+        </div>
+      )}
+
+      <div className="flex justify-between text-[9px] text-slate-700 font-mono mt-0.5 px-0.5">
+        <span>{firstPoint.date.slice(5)}</span>
+        <span className="text-slate-600">7-day trend</span>
+        <span>{lastPoint.date.slice(5)}</span>
+      </div>
+    </div>
+  );
 }
 
 function ReservePoolCard({
@@ -98,6 +222,13 @@ function ReservePoolCard({
           )}
         </div>
       </div>
+
+      <ReserveTrendChart
+        data={pool.trendHistory}
+        color={statusCfg.color}
+        unit={pool.unit}
+        chartId={pool.id}
+      />
 
       <p className="text-[11px] text-slate-500 leading-relaxed mb-3">{pool.notes}</p>
 

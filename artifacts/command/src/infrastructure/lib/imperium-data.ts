@@ -1349,6 +1349,11 @@ export const INITIAL_COALITION: CoalitionPartner[] = [
 
 export type ReserveStatus = 'NOMINAL' | 'REDUCED' | 'CRITICAL' | 'DEPLETED';
 
+export interface ReserveTrendPoint {
+  date: string;
+  level: number;
+}
+
 export interface ReservePool {
   id: string;
   name: string;
@@ -1360,6 +1365,7 @@ export interface ReservePool {
   classification: Classification;
   lastDrawdown?: Date;
   notes: string;
+  trendHistory: ReserveTrendPoint[];
 }
 
 export interface DrawdownRequest {
@@ -1384,6 +1390,15 @@ export const INITIAL_RESERVES: ReservePool[] = [
     classification: 'RESTRICTED',
     lastDrawdown: new Date(Date.now() - 3600000 * 48),
     notes: 'Container App max-replica headroom. Current burst capacity available.',
+    trendHistory: [
+      { date: '2026-04-15', level: 14 },
+      { date: '2026-04-16', level: 14 },
+      { date: '2026-04-17', level: 12 },
+      { date: '2026-04-18', level: 13 },
+      { date: '2026-04-19', level: 11 },
+      { date: '2026-04-20', level: 10 },
+      { date: '2026-04-21', level: 10 },
+    ],
   },
   {
     id: 'res-budget',
@@ -1395,6 +1410,15 @@ export const INITIAL_RESERVES: ReservePool[] = [
     status: 'NOMINAL',
     classification: 'CONFIDENTIAL',
     notes: 'Monthly cloud spend contingency above baseline $4,280 cap.',
+    trendHistory: [
+      { date: '2026-04-15', level: 8200 },
+      { date: '2026-04-16', level: 8100 },
+      { date: '2026-04-17', level: 7900 },
+      { date: '2026-04-18', level: 7900 },
+      { date: '2026-04-19', level: 7700 },
+      { date: '2026-04-20', level: 7550 },
+      { date: '2026-04-21', level: 7400 },
+    ],
   },
   {
     id: 'res-storage',
@@ -1407,6 +1431,15 @@ export const INITIAL_RESERVES: ReservePool[] = [
     classification: 'CONFIDENTIAL',
     lastDrawdown: new Date(Date.now() - 3600000 * 24),
     notes: 'PostgreSQL storage pool. Auto-grow enabled.',
+    trendHistory: [
+      { date: '2026-04-15', level: 89 },
+      { date: '2026-04-16', level: 88 },
+      { date: '2026-04-17', level: 87 },
+      { date: '2026-04-18', level: 86 },
+      { date: '2026-04-19', level: 85 },
+      { date: '2026-04-20', level: 84 },
+      { date: '2026-04-21', level: 83 },
+    ],
   },
   {
     id: 'res-redis',
@@ -1418,6 +1451,15 @@ export const INITIAL_RESERVES: ReservePool[] = [
     status: 'REDUCED',
     classification: 'CONFIDENTIAL',
     notes: 'Redis C1 Standard headroom. 62% consumed. Upgrade to P1 queued.',
+    trendHistory: [
+      { date: '2026-04-15', level: 3.9 },
+      { date: '2026-04-16', level: 3.6 },
+      { date: '2026-04-17', level: 3.2 },
+      { date: '2026-04-18', level: 2.95 },
+      { date: '2026-04-19', level: 2.75 },
+      { date: '2026-04-20', level: 2.5 },
+      { date: '2026-04-21', level: 2.28 },
+    ],
   },
   {
     id: 'res-waf',
@@ -1430,6 +1472,15 @@ export const INITIAL_RESERVES: ReservePool[] = [
     classification: 'SOVEREIGN',
     lastDrawdown: new Date(Date.now() - 3600000 * 1),
     notes: 'WAF rate-limit buffer. Current blocks well within tolerance.',
+    trendHistory: [
+      { date: '2026-04-15', level: 310 },
+      { date: '2026-04-16', level: 280 },
+      { date: '2026-04-17', level: 205 },
+      { date: '2026-04-18', level: 490 },
+      { date: '2026-04-19', level: 175 },
+      { date: '2026-04-20', level: 220 },
+      { date: '2026-04-21', level: 153 },
+    ],
   },
   {
     id: 'res-oncall',
@@ -1441,6 +1492,15 @@ export const INITIAL_RESERVES: ReservePool[] = [
     status: 'NOMINAL',
     classification: 'RESTRICTED',
     notes: 'On-call roster headroom. One engineer on approved leave.',
+    trendHistory: [
+      { date: '2026-04-15', level: 4 },
+      { date: '2026-04-16', level: 4 },
+      { date: '2026-04-17', level: 4 },
+      { date: '2026-04-18', level: 3 },
+      { date: '2026-04-19', level: 3 },
+      { date: '2026-04-20', level: 3 },
+      { date: '2026-04-21', level: 3 },
+    ],
   },
 ];
 
