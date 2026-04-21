@@ -51,6 +51,7 @@ const contactSubmissionSchema = z.object({
   message: z.string().min(1).max(10000).trim(),
   formKey: z.string().max(100).trim().optional(),
   metadata: z.record(z.unknown()).optional(),
+  _hp: z.string().max(200).optional(),
 });
 
 const createPageSchema = z.object({
@@ -1409,8 +1410,13 @@ router.patch(
 // ─── Contact Submissions ──────────────────────────────────────────────────────
 
 router.post('/cms/contact-submissions', validateBody(contactSubmissionSchema), async (req, res) => {
+  if (req.body._hp) {
+    res.status(400).json({ success: false, error: 'Bot submission detected' });
+    return;
+  }
   try {
-    const [row] = await db.insert(contactSubmissionsTable).values(req.body).returning();
+    const { _hp: _ignored, ...submission } = req.body;
+    const [row] = await db.insert(contactSubmissionsTable).values(submission).returning();
     sendSuccess(res, row, 201);
   } catch (err) {
     handleRouteError(res, err, 'Failed to submit contact form');

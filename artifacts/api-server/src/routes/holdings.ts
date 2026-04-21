@@ -93,6 +93,7 @@ const createInquirySchema = z.object({
   utm_medium: z.string().max(200).trim().optional(),
   utm_campaign: z.string().max(200).trim().optional(),
   utm_content: z.string().max(200).trim().optional(),
+  _hp: z.string().max(200).optional(),
 });
 
 const router: IRouter = Router();
@@ -576,6 +577,10 @@ const inquiryRateLimit = rateLimit({
 });
 
 router.post("/holdings/inquiries", inquiryRateLimit, validateBody(createInquirySchema), (req, res) => {
+  if ((req.body as z.infer<typeof createInquirySchema>)._hp) {
+    res.status(400).json({ success: false, error: "Bot submission detected" });
+    return;
+  }
   const { name, email, subject, message, company, intent, source, utm_source, utm_medium, utm_campaign, utm_content } = req.body as z.infer<typeof createInquirySchema>;
 
   const metadata: Record<string, string> = {};

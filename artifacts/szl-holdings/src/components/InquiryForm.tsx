@@ -87,6 +87,7 @@ interface FormState {
   email: string;
   subject: string;
   message: string;
+  _hp: string;
   [key: string]: string;
 }
 
@@ -114,7 +115,7 @@ export function InquiryForm({
   className,
 }: InquiryFormProps) {
   const [inquiryType, setInquiryType] = useState<InquiryType>(defaultType);
-  const [form, setForm] = useState<FormState>({ name: '', email: '', subject: '', message: '' });
+  const [form, setForm] = useState<FormState>({ name: '', email: '', subject: '', message: '', _hp: '' });
   const [errors, setErrors] = useState<FormErrors>({});
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [started, setStarted] = useState(false);
@@ -138,6 +139,11 @@ export function InquiryForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (form._hp) {
+      setStatus('success');
+      setForm({ name: '', email: '', subject: '', message: '', _hp: '' });
+      return;
+    }
     const validationErrors = validate(form);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -158,13 +164,14 @@ export function InquiryForm({
           company: form.firmName || form.organization || form.firm || '',
           message: `[${inquiryType}] ${form.subject}\n\n${form.message}`,
           metadataJson: { inquiryType, ...form },
+          _hp: form._hp,
         }),
       });
       if (!res.ok) throw new Error('Failed');
       analytics.contactFormSubmit(inquiryType);
       analytics.formSubmit('szl_contact', '/contact');
       setStatus('success');
-      setForm({ name: '', email: '', subject: '', message: '' });
+      setForm({ name: '', email: '', subject: '', message: '', _hp: '' });
     } catch {
       setStatus('error');
     }
@@ -288,6 +295,19 @@ export function InquiryForm({
             className={inputClasses('message')}
           />
           {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
+        </div>
+
+        <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+          <label htmlFor="_hp_field">Leave this blank</label>
+          <input
+            id="_hp_field"
+            type="text"
+            name="_hp"
+            value={form._hp}
+            onChange={handleChange}
+            tabIndex={-1}
+            autoComplete="off"
+          />
         </div>
 
         {status === 'success' && (
