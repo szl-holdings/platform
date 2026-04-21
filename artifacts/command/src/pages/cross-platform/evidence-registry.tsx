@@ -3,7 +3,7 @@ import { ArrowLeft, Database, ExternalLink, Search, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'wouter';
 import { apiUrl, fetchJson } from '../cognitive/shared';
-import { inferProductForEntity, productDashboardUrl, productEntityUrl } from './product-links';
+import { productDashboardUrl, productEntityUrl } from './product-links';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -250,11 +250,12 @@ export function EvidenceRegistryPage() {
                       {node.ref}
                     </span>
                     {(() => {
-                      const owner =
-                        node.entityOwner ?? inferProductForEntity(node.entityId, [node.product]);
-                      const entityUrl = productEntityUrl(owner, node.entityId);
-                      const ownerColor = PRODUCT_COLORS[owner] ?? '#8b7ac8';
-                      if (!entityUrl) {
+                      const owner = node.entityOwner;
+                      const entityUrl = owner ? productEntityUrl(owner, node.entityId) : null;
+                      const ownerColor = owner
+                        ? (PRODUCT_COLORS[owner] ?? '#8b7ac8')
+                        : '#8b7ac8';
+                      if (!owner || !entityUrl) {
                         return (
                           <span
                             className="text-[9px] font-mono"

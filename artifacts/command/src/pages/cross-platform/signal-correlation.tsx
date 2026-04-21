@@ -12,7 +12,7 @@ import {
 import { useState } from 'react';
 import { Link } from 'wouter';
 import { apiUrl, fetchJson } from '../cognitive/shared';
-import { inferProductForEntity, productDashboardUrl, productEntityUrl } from './product-links';
+import { productDashboardUrl, productEntityUrl } from './product-links';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -317,19 +317,20 @@ export function SignalCorrelationPage() {
                             </div>
                             <div className="flex flex-wrap gap-1.5 mb-3">
                               {c.entityIds.map((e) => {
-                                const apiOwner = c.entityOwners?.[e];
-                                const owner = apiOwner ?? inferProductForEntity(e, c.products);
-                                const url = productEntityUrl(owner, e);
-                                const ownerColor = PRODUCT_COLORS[owner] ?? '#8b7ac8';
-                                if (!url) {
+                                const owner = c.entityOwners?.[e];
+                                const url = owner ? productEntityUrl(owner, e) : null;
+                                const ownerColor = owner
+                                  ? (PRODUCT_COLORS[owner] ?? '#8b7ac8')
+                                  : '#8b7ac8';
+                                if (!owner || !url) {
                                   return (
                                     <span
                                       key={e}
                                       className="text-[10px] font-mono px-2 py-0.5 rounded"
                                       style={{
-                                        color: '#8b7ac8',
-                                        background: 'rgba(139,122,200,0.1)',
-                                        border: '1px solid rgba(139,122,200,0.2)',
+                                        color: 'rgba(255,255,255,0.6)',
+                                        background: 'rgba(255,255,255,0.04)',
+                                        border: '1px solid rgba(255,255,255,0.08)',
                                       }}
                                     >
                                       {e}
