@@ -1,4 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { color as dsColor } from '@szl-holdings/design-system';
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -687,9 +688,9 @@ function FinancingTab({ financing }: { financing: FinancingStress | undefined })
   const acrisRecords: AcrisMortgageRecord[] = financing?.acrisRecords ?? [];
 
   const pressureColors: Record<string, string> = {
-    critical: '#ef4444',
-    high: '#f59e0b',
-    medium: '#60a5fa',
+    critical: dsColor.accent.red,
+    high: dsColor.accent.amber,
+    medium: dsColor.accent.blue,
     low: ACCENT,
   };
   const pressureColor = pressureColors[financing?.refiPressure ?? 'low'] ?? ACCENT;

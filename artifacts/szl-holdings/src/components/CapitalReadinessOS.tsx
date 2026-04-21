@@ -1,4 +1,5 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { color as dsColor } from '@szl-holdings/design-system';
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, m } from 'framer-motion';
 import {
@@ -239,18 +240,18 @@ function PacketBuilder({
   const qc = useQueryClient();
 
   const statusColors: Record<string, string> = {
-    drafting: '#f59e0b',
-    ready_for_review: '#3b82f6',
-    submitted: '#6366f1',
-    in_diligence: '#8b5cf6',
-    approved: '#10b981',
-    in_outreach: '#06b6d4',
-    in_progress: '#06b6d4',
-    closed: '#10b981',
-    declined: '#ef4444',
-    archived: '#6b7280',
+    drafting: dsColor.accent.amber,
+    ready_for_review: dsColor.accent.blue,
+    submitted: dsColor.accent.violet,
+    in_diligence: dsColor.accent.violet,
+    approved: dsColor.accent.green,
+    in_outreach: dsColor.accent.teal,
+    in_progress: dsColor.accent.teal,
+    closed: dsColor.accent.green,
+    declined: dsColor.accent.red,
+    archived: dsColor.accent.slate,
   };
-  const color = statusColors[packet.status] ?? '#6b7280';
+  const color = statusColors[packet.status] ?? dsColor.accent.slate;
 
   return (
     <div className="space-y-4">

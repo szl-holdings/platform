@@ -1,4 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { color } from '@szl-holdings/design-system';
 import { ActivityFeed } from '@szl-holdings/shared-ui/collaboration';
 import { ExportButton } from '@szl-holdings/shared-ui/data-export';
 import { ActionLoop, DataProvenance, RoleSelector } from '@szl-holdings/shared-ui/data-provenance';
@@ -42,10 +43,10 @@ const statusColors: Record<string, string> = {
 };
 
 const vesselStatusDotColors: Record<string, string> = {
-  at_sea: '#22c55e',
-  in_port: '#0ea5e9',
-  anchored: '#eab308',
-  maintenance: '#ef4444',
+  at_sea: color.accent.green,
+  in_port: color.accent.blue,
+  anchored: color.accent.amber,
+  maintenance: color.accent.red,
 };
 
 function getRiskBadge(score: number) {
@@ -390,10 +391,10 @@ function FleetMap({
       <div className="absolute bottom-3 left-3 flex flex-col gap-1.5">
         <div className="flex items-center gap-3 bg-[#0a1628]/80 backdrop-blur rounded-lg px-3 py-2 border border-sky-500/10">
           {[
-            { label: 'At Sea', color: '#22c55e' },
-            { label: 'In Port', color: '#0ea5e9' },
-            { label: 'Anchored', color: '#eab308' },
-            { label: 'Maintenance', color: '#ef4444' },
+            { label: 'At Sea', color: color.accent.green },
+            { label: 'In Port', color: color.accent.blue },
+            { label: 'Anchored', color: color.accent.amber },
+            { label: 'Maintenance', color: color.accent.red },
           ].map((s) => (
             <span key={s.label} className="flex items-center gap-1.5 text-[10px] text-sky-200/60">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />

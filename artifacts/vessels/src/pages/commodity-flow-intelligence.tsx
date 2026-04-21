@@ -1,4 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { color } from '@szl-holdings/design-system';
 
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { cn } from '@szl-holdings/shared-ui/utils';
@@ -303,10 +304,10 @@ const VESSEL_QUEUE = [
 ];
 
 const riskColors: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#22c55e',
+  critical: color.accent.red,
+  high: color.accent.amber,
+  medium: color.accent.amber,
+  low: color.accent.green,
 };
 
 interface ChokepointAlert {

@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { AnimatePresence, motion as m } from 'framer-motion';
 import {
@@ -71,10 +72,10 @@ const GRADE_COLORS: Record<ConditionGrade, string> = {
 };
 
 const SEVERITY_COLORS: Record<HazardSeverity, string> = {
-  critical: '#ef4444',
-  moderate: '#f97316',
-  minor: '#fbbf24',
-  none: '#34d399',
+  critical: color.accent.red,
+  moderate: color.accent.amber,
+  minor: color.accent.amber,
+  none: color.accent.green,
 };
 
 const ANALYSES: PropertyAnalysis[] = [

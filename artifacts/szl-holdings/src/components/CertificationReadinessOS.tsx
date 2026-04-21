@@ -1,4 +1,4 @@
-import { StatusBadge as DSStatusBadge, type StatusVariant } from '@szl-holdings/design-system';
+import { StatusBadge as DSStatusBadge, type StatusVariant, color as dsColor } from '@szl-holdings/design-system';
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, m } from 'framer-motion';
@@ -132,23 +132,23 @@ interface CertDashboard {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  not_started: '#6b7280',
-  assessing: '#f59e0b',
-  preparing: '#3b82f6',
-  applied: '#6366f1',
-  in_review: '#8b5cf6',
-  approved: '#10b981',
-  denied: '#ef4444',
-  renewal_due: '#f97316',
-  expired: '#ef4444',
-  withdrawn: '#6b7280',
+  not_started: dsColor.accent.slate,
+  assessing: dsColor.accent.amber,
+  preparing: dsColor.accent.blue,
+  applied: dsColor.accent.violet,
+  in_review: dsColor.accent.violet,
+  approved: dsColor.accent.green,
+  denied: dsColor.accent.red,
+  renewal_due: dsColor.accent.amber,
+  expired: dsColor.accent.red,
+  withdrawn: dsColor.accent.slate,
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#6b7280',
+  critical: dsColor.accent.red,
+  high: dsColor.accent.amber,
+  medium: dsColor.accent.amber,
+  low: dsColor.accent.slate,
 };
 
 const PROGRAM_COLORS: Record<string, string> = {
@@ -834,11 +834,11 @@ function LegalReviewsView() {
   });
 
   const statusColors: Record<string, string> = {
-    pending: '#f59e0b',
-    scheduled: '#3b82f6',
-    in_review: '#8b5cf6',
-    complete: '#10b981',
-    waived: '#6b7280',
+    pending: dsColor.accent.amber,
+    scheduled: dsColor.accent.blue,
+    in_review: dsColor.accent.violet,
+    complete: dsColor.accent.green,
+    waived: dsColor.accent.slate,
   };
 
   return (

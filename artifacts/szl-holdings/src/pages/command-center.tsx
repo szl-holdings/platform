@@ -1,4 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { color } from '@szl-holdings/design-system';
 import { HelpTip } from '@szl-holdings/shared-ui/onboarding';
 import { AnimatePresence, m } from 'framer-motion';
 import {
@@ -291,10 +292,10 @@ const AI_BRIEF_PARAGRAPHS = [
 ];
 
 const SEV_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#eab308',
-  info: '#38bdf8',
+  critical: color.accent.red,
+  high: color.accent.amber,
+  medium: color.accent.amber,
+  info: color.accent.blue,
 };
 
 function PosturePanel({ score, trend }: { score: number; trend: number[] }) {

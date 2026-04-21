@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
@@ -41,35 +42,35 @@ function relTime(iso: string) {
 }
 
 const STATUS_COLOR: Record<string, string> = {
-  underway: '#40856a',
-  in_port: '#4a7dc8',
-  anchored: '#c08a2c',
-  maintenance: '#c04a2a',
-  laid_up: 'rgba(255,255,255,0.25)',
-  distress: '#9b1c1c',
+  underway: color.accent.green,
+  in_port: color.accent.blue,
+  anchored: color.accent.amber,
+  maintenance: color.accent.red,
+  laid_up: color.text.muted,
+  distress: color.accent.red,
 };
 
 const VOYAGE_STATUS_COLOR: Record<string, string> = {
-  planned: 'rgba(255,255,255,0.35)',
-  active: '#40856a',
-  deviating: '#c08a2c',
-  completed: 'rgba(255,255,255,0.25)',
-  cancelled: '#c04a2a',
-  exception: '#9b1c1c',
+  planned: color.text.muted,
+  active: color.accent.green,
+  deviating: color.accent.amber,
+  completed: color.text.muted,
+  cancelled: color.accent.red,
+  exception: color.accent.red,
 };
 
 const RISK_COLOR: Record<string, string> = {
-  low: '#40856a',
-  moderate: '#c08a2c',
-  elevated: '#c04a2a',
-  critical: '#9b1c1c',
+  low: color.accent.green,
+  moderate: color.accent.amber,
+  elevated: color.accent.red,
+  critical: color.accent.red,
 };
 
 const COMPLIANCE_COLOR: Record<string, string> = {
-  compliant: '#40856a',
-  minor_deficiency: '#c08a2c',
-  major_deficiency: '#c04a2a',
-  non_compliant: '#9b1c1c',
+  compliant: color.accent.green,
+  minor_deficiency: color.accent.amber,
+  major_deficiency: color.accent.red,
+  non_compliant: color.accent.red,
 };
 
 function ConnectorPanel({ connectors }: { connectors: VesselTwin['externalDataConnectors'] }) {

@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -65,9 +66,9 @@ const STATUS_CONFIG: Record<string, { icon: React.ReactNode; color: string }> = 
 };
 
 const EDGE_STATUS_COLOR: Record<string, string> = {
-  active: '#34d399',
-  stalled: '#fb923c',
-  broken: '#f87171',
+  active: color.accent.green,
+  stalled: color.accent.amber,
+  broken: color.accent.red,
 };
 
 function NodeCard({

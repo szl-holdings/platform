@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import { AnimatePresence, m } from 'framer-motion';
 import {
   Activity,
@@ -122,17 +123,17 @@ function buildSectionProof(
 }
 
 const SEVERITY_COLORS: Record<BriefSeverity, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#eab308',
-  low: '#10b981',
-  info: '#60a5fa',
+  critical: color.accent.red,
+  high: color.accent.amber,
+  medium: color.accent.amber,
+  low: color.accent.green,
+  info: color.accent.blue,
 };
 
 const PRIORITY_CONFIG: Record<string, { color: string; label: string; icon: React.ElementType }> = {
-  immediate: { color: '#ef4444', label: 'IMMEDIATE', icon: Zap },
-  today: { color: '#f97316', label: 'TODAY', icon: Activity },
-  'this-week': { color: '#eab308', label: 'THIS WEEK', icon: Clock },
+  immediate: { color: color.accent.red, label: 'IMMEDIATE', icon: Zap },
+  today: { color: color.accent.amber, label: 'TODAY', icon: Activity },
+  'this-week': { color: color.accent.amber, label: 'THIS WEEK', icon: Clock },
 };
 
 function ConfidenceMeter({ value, color }: { value: number; color: string }) {

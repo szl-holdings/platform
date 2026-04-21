@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import { AnimatePresence, m } from 'framer-motion';
 import {
   Activity,
@@ -392,11 +393,11 @@ const TYPE_ICONS: Record<EntityType, React.ElementType> = {
 };
 
 const RISK_COLORS: Record<RiskLevel, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#eab308',
-  low: '#10b981',
-  none: '#374151',
+  critical: color.accent.red,
+  high: color.accent.amber,
+  medium: color.accent.amber,
+  low: color.accent.green,
+  none: color.text.muted,
 };
 
 const REL_LABELS: Record<RelType, string> = {

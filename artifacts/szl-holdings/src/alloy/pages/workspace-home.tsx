@@ -1,4 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { color } from '@szl-holdings/design-system';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -41,11 +42,11 @@ function formatDuration(ms: number | null) {
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#10b981',
-  info: '#6b7280',
+  critical: color.accent.red,
+  high: color.accent.amber,
+  medium: color.accent.amber,
+  low: color.accent.green,
+  info: color.accent.slate,
 };
 
 const SOURCE_COLORS: Record<string, string> = {

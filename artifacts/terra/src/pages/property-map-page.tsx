@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion } from 'framer-motion';
 import { Building2, List, Map } from 'lucide-react';
@@ -8,9 +9,9 @@ import { properties } from '@/data/portfolio';
 import { useMapboxToken } from '@/hooks/use-mapbox-token';
 
 const STATUS_COLORS: Record<string, string> = {
-  performing: '#10b981',
-  watch: '#f59e0b',
-  critical: '#ef4444',
+  performing: color.accent.green,
+  watch: color.accent.amber,
+  critical: color.accent.red,
 };
 
 function formatCurrency(n: number) {

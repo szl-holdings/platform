@@ -1,4 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { color } from '@szl-holdings/design-system';
 import {
   AlertTriangle,
   CheckCircle,
@@ -53,10 +54,10 @@ function ConfidencePill({ value }: { value: number }) {
 }
 
 const SIGNAL_COLORS: Record<string, string> = {
-  critical: '#c04a2a',
-  high: '#d97706',
-  medium: '#c8a060',
-  low: '#64748b',
+  critical: color.accent.red,
+  high: color.accent.amber,
+  medium: color.accent.amber,
+  low: color.accent.slate,
 };
 
 function ForecastCard({ item }: { item: any }) {

@@ -1,4 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { color } from '@szl-holdings/design-system';
 import {
   AlertTriangle,
   BarChart3,
@@ -33,10 +34,10 @@ function fetchLenderExposure() {
 }
 
 const RISK_COLORS: Record<string, string> = {
-  Low: '#40856a',
-  'Low-Medium': '#4a7dc8',
-  Medium: '#c8a060',
-  High: '#c04a2a',
+  Low: color.accent.green,
+  'Low-Medium': color.accent.blue,
+  Medium: color.accent.amber,
+  High: color.accent.red,
 };
 
 const TYPE_COLORS: Record<string, string> = {

@@ -1,5 +1,6 @@
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { color } from '@szl-holdings/design-system';
 import { EmptyState } from '@szl-holdings/shared-ui/design-system';
 import { SectionErrorBoundary } from '@szl-holdings/shared-ui/error-boundary';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
@@ -34,14 +35,14 @@ import { useMapboxToken } from '@/hooks/use-mapbox-token';
 import { useFleetExceptions, useVessels } from '@/hooks/use-vessels-data';
 
 const statusColors: Record<string, string> = {
-  at_sea: '#22c55e',
-  in_port: '#0ea5e9',
-  anchored: '#f59e0b',
-  maintenance: '#ef4444',
-  delayed: '#f97316',
-  loading: '#a78bfa',
-  risk_watch: '#f59e0b',
-  exception_active: '#ef4444',
+  at_sea: color.accent.green,
+  in_port: color.accent.blue,
+  anchored: color.accent.amber,
+  maintenance: color.accent.red,
+  delayed: color.accent.amber,
+  loading: color.accent.violet,
+  risk_watch: color.accent.amber,
+  exception_active: color.accent.red,
 };
 
 const statusLabels: Record<string, string> = {
@@ -954,13 +955,13 @@ export default function FleetMapPage() {
         <div className="ml-auto flex items-center gap-2">
           <div className="hidden lg:flex items-center gap-3">
             {Object.entries({
-              at_sea: '#22c55e',
-              in_port: '#0ea5e9',
-              delayed: '#f97316',
-              maintenance: '#ef4444',
-            }).map(([key, color]) => (
+              at_sea: color.accent.green,
+              in_port: color.accent.blue,
+              delayed: color.accent.amber,
+              maintenance: color.accent.red,
+            }).map(([key, dotColor]) => (
               <span key={key} className="flex items-center gap-1 text-[10px] text-sky-400/50">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dotColor }} />
                 {statusLabels[key]}
               </span>
             ))}

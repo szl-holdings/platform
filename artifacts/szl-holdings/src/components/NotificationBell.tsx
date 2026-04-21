@@ -1,4 +1,5 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { color } from '@szl-holdings/design-system';
 import { useAuth } from '@szl-holdings/replit-auth-web';
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, m } from 'framer-motion';
@@ -17,11 +18,11 @@ interface Notification {
 }
 
 const TYPE_DOT: Record<string, string> = {
-  info: '#3b82f6',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  success: '#10b981',
-  action_required: '#8b5cf6',
+  info: color.accent.blue,
+  warning: color.accent.amber,
+  error: color.accent.red,
+  success: color.accent.green,
+  action_required: color.accent.violet,
 };
 
 function formatRelative(dateStr: string): string {

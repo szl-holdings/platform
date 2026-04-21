@@ -1,4 +1,4 @@
-import { StatusBadge as DSStatusBadge, type StatusVariant } from '@szl-holdings/design-system';
+import { StatusBadge as DSStatusBadge, type StatusVariant, color } from '@szl-holdings/design-system';
 import { type ApiFetchOptions, apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import {
   Activity,
@@ -38,20 +38,20 @@ const SEVERITIES = ['info', 'low', 'medium', 'high', 'critical'] as const;
 type Severity = (typeof SEVERITIES)[number];
 
 const SEV_COLOR: Record<Severity, string> = {
-  critical: '#ef4444',
-  high: '#f59e0b',
-  medium: '#f97316',
-  low: '#3b82f6',
-  info: '#6b7280',
+  critical: color.accent.red,
+  high: color.accent.amber,
+  medium: color.accent.amber,
+  low: color.accent.blue,
+  info: color.accent.slate,
 };
 const STATUS_COLOR: Record<string, string> = {
-  pending: '#f59e0b',
-  running: '#3b82f6',
-  completed: '#10b981',
-  failed: '#ef4444',
-  pending_approval: '#8b7ac8',
-  paused: '#f97316',
-  cancelled: '#6b7280',
+  pending: color.accent.amber,
+  running: color.accent.blue,
+  completed: color.accent.green,
+  failed: color.accent.red,
+  pending_approval: color.accent.violet,
+  paused: color.accent.amber,
+  cancelled: color.accent.slate,
 };
 
 const RUN_STATUS_VARIANT: Record<string, StatusVariant> = {

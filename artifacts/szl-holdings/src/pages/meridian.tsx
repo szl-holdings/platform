@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import {
   Activity,
   AlertTriangle,
@@ -619,10 +620,10 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
 }
 
 const SEV_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#3b82f6',
+  critical: color.accent.red,
+  high: color.accent.amber,
+  medium: color.accent.amber,
+  low: color.accent.blue,
 };
 const DOMAIN_ICONS: Record<DomainKey, typeof Ship> = {
   vessels: Ship,

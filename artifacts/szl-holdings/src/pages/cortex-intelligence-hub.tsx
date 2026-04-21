@@ -1,4 +1,5 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { color } from '@szl-holdings/design-system';
 import { type ActionDraft, CortexActionDrafts } from '@szl-holdings/shared-ui/cortex-action-drafts';
 import {
   CortexEntityGraph,
@@ -100,18 +101,18 @@ interface BriefingResponse {
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#eab308',
-  low: '#10b981',
-  info: '#64748b',
+  critical: color.accent.red,
+  high: color.accent.amber,
+  medium: color.accent.amber,
+  low: color.accent.green,
+  info: color.accent.slate,
 };
 
 const HEALTH_COLORS: Record<string, string> = {
-  nominal: '#10b981',
-  elevated: '#eab308',
-  degraded: '#f97316',
-  critical: '#ef4444',
+  nominal: color.accent.green,
+  elevated: color.accent.amber,
+  degraded: color.accent.amber,
+  critical: color.accent.red,
 };
 
 export default function CortexIntelligenceHub() {

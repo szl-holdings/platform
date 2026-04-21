@@ -1,3 +1,4 @@
+import { color as dsColor } from '@szl-holdings/design-system';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
@@ -80,10 +81,10 @@ function DisruptionGlobe({
   const H = 280;
 
   const severityColor: Record<string, string> = {
-    Critical: '#ef4444',
-    High: '#f97316',
-    Medium: '#f59e0b',
-    Low: '#22c55e',
+    Critical: dsColor.accent.red,
+    High: dsColor.accent.amber,
+    Medium: dsColor.accent.amber,
+    Low: dsColor.accent.green,
   };
 
   return (
@@ -99,9 +100,9 @@ function DisruptionGlobe({
       </div>
       <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
         {[
-          ['Critical', '#ef4444'],
-          ['High', '#f97316'],
-          ['Medium', '#f59e0b'],
+          ['Critical', dsColor.accent.red],
+          ['High', dsColor.accent.amber],
+          ['Medium', dsColor.accent.amber],
         ].map(([label, color]) => (
           <span key={label} className="flex items-center gap-1 text-[9px]" style={{ color }}>
             <span className="w-2 h-2 rounded-full" style={{ background: color, opacity: 0.8 }} />{' '}

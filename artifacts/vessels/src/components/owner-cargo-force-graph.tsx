@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 export interface ForceNode {
@@ -35,10 +36,10 @@ interface Props {
 }
 
 const RISK_RING: Record<string, string> = {
-  low: '#34d399',
-  medium: '#fbbf24',
-  high: '#f87171',
-  critical: '#ef4444',
+  low: color.accent.green,
+  medium: color.accent.amber,
+  high: color.accent.amber,
+  critical: color.accent.red,
 };
 
 function radiusFor(n: ForceNode): number {

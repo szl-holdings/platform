@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
@@ -116,10 +117,10 @@ const TYPE_CONFIG: Record<
 };
 
 const RISK_COLORS: Record<string, string> = {
-  low: '#34d399',
-  medium: '#fbbf24',
-  high: '#f87171',
-  critical: '#ef4444',
+  low: color.accent.green,
+  medium: color.accent.amber,
+  high: color.accent.amber,
+  critical: color.accent.red,
 };
 
 function NodeCard({

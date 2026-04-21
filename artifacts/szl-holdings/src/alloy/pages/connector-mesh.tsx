@@ -1,16 +1,17 @@
+import { color } from '@szl-holdings/design-system';
 import { CONNECTORS_UI } from '@szl-holdings/shared-ui/core-observability-data';
 import { AlertTriangle, CheckCircle, Network, XCircle } from 'lucide-react';
 
 const HEALTH_ICONS: Record<string, React.ReactNode> = {
-  healthy: <CheckCircle className="w-3.5 h-3.5" style={{ color: '#10b981' }} />,
-  degraded: <AlertTriangle className="w-3.5 h-3.5" style={{ color: '#f59e0b' }} />,
-  error: <XCircle className="w-3.5 h-3.5" style={{ color: '#ef4444' }} />,
+  healthy: <CheckCircle className="w-3.5 h-3.5" style={{ color: color.accent.green }} />,
+  degraded: <AlertTriangle className="w-3.5 h-3.5" style={{ color: color.accent.amber }} />,
+  error: <XCircle className="w-3.5 h-3.5" style={{ color: color.accent.red }} />,
 };
 
 const HEALTH_COLORS: Record<string, string> = {
-  healthy: '#10b981',
-  degraded: '#f59e0b',
-  error: '#ef4444',
+  healthy: color.accent.green,
+  degraded: color.accent.amber,
+  error: color.accent.red,
 };
 
 export default function ConnectorMesh() {

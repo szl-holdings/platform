@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -56,27 +57,27 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  active: '#40856a',
-  under_review: '#c08a2c',
-  pending_diligence: '#4a7dc8',
-  distress_watch: '#c04a2a',
-  approved: '#40856a',
-  closed: 'rgba(255,255,255,0.3)',
+  active: color.accent.green,
+  under_review: color.accent.amber,
+  pending_diligence: color.accent.blue,
+  distress_watch: color.accent.red,
+  approved: color.accent.green,
+  closed: color.text.muted,
 };
 
 const DISTRESS_COLOR: Record<string, string> = {
-  none: 'rgba(255,255,255,0.2)',
-  watch: '#c08a2c',
-  elevated: '#c04a2a',
-  critical: '#9b1c1c',
+  none: color.text.muted,
+  watch: color.accent.amber,
+  elevated: color.accent.red,
+  critical: color.accent.red,
 };
 
 const TASK_STATUS_COLOR: Record<string, string> = {
-  complete: '#40856a',
-  in_progress: '#4a7dc8',
-  not_started: 'rgba(255,255,255,0.2)',
-  blocked: '#c04a2a',
-  waived: 'rgba(255,255,255,0.15)',
+  complete: color.accent.green,
+  in_progress: color.accent.blue,
+  not_started: color.text.muted,
+  blocked: color.accent.red,
+  waived: color.text.muted,
 };
 
 function DiligenceProgress({ pct, stage }: { pct: number; stage: string }) {

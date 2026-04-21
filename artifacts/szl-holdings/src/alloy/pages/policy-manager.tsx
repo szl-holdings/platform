@@ -1,4 +1,5 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { color } from '@szl-holdings/design-system';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
 import { useQueryClient } from '@tanstack/react-query';
@@ -259,16 +260,16 @@ const KIND_CONFIG: Record<
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  active: '#10b981',
-  draft: '#6b7280',
-  archived: '#4b5563',
+  active: color.accent.green,
+  draft: color.accent.slate,
+  archived: color.text.muted,
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
-  low: '#6b7280',
-  medium: '#f59e0b',
-  high: '#ef4444',
-  critical: '#dc2626',
+  low: color.accent.slate,
+  medium: color.accent.amber,
+  high: color.accent.amber,
+  critical: color.accent.red,
 };
 
 function formatRelative(ts: string) {

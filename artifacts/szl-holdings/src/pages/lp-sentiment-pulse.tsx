@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import { AmbientBar, type AmbientSignal } from '@szl-holdings/shared-ui/ambient-intelligence';
 import {
   CorrelationFeed,
@@ -97,11 +98,11 @@ const DEMO_LPS: LPProfile[] = [
 
 const TREND_ICONS: Record<string, string> = { rising: '↑', stable: '→', declining: '↓' };
 const TREND_COLORS: Record<string, string> = {
-  rising: '#10b981',
-  stable: '#6b7280',
-  declining: '#ef4444',
+  rising: color.accent.green,
+  stable: color.accent.slate,
+  declining: color.accent.red,
 };
-const RISK_COLORS: Record<string, string> = { low: '#10b981', medium: '#f59e0b', high: '#ef4444' };
+const RISK_COLORS: Record<string, string> = { low: color.accent.green, medium: color.accent.amber, high: color.accent.red };
 
 function formatUsd(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(0)}M`;

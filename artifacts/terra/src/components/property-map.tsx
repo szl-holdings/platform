@@ -1,5 +1,6 @@
 // @ts-nocheck
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { color } from '@szl-holdings/design-system';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { Building2, ChevronRight, DollarSign, MapPin, TrendingUp, Users, X } from 'lucide-react';
 import type MapboxGL from 'mapbox-gl';
@@ -8,9 +9,9 @@ import { Link } from 'wouter';
 import type { Property } from '@/data/portfolio';
 
 const STATUS_COLORS: Record<string, string> = {
-  performing: '#10b981',
-  watch: '#f59e0b',
-  critical: '#ef4444',
+  performing: color.accent.green,
+  watch: color.accent.amber,
+  critical: color.accent.red,
 };
 
 const STATUS_LABELS: Record<string, string> = {

@@ -1,3 +1,4 @@
+import { color as dsColor } from '@szl-holdings/design-system';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion as m } from 'framer-motion';
 import {
@@ -248,17 +249,17 @@ const fmt = (n: number) =>
       : `$${n.toLocaleString()}`;
 
 const STATUS_COLORS: Record<string, string> = {
-  active: '#34d399',
-  expiring: '#fbbf24',
-  'month-to-month': '#f97316',
-  vacant: '#ef4444',
+  active: dsColor.accent.green,
+  expiring: dsColor.accent.amber,
+  'month-to-month': dsColor.accent.amber,
+  vacant: dsColor.accent.red,
 };
 
 const CREDIT_COLORS: Record<string, string> = {
-  A: '#34d399',
-  B: '#60a5fa',
-  C: '#fbbf24',
-  D: '#ef4444',
+  A: dsColor.accent.green,
+  B: dsColor.accent.blue,
+  C: dsColor.accent.amber,
+  D: dsColor.accent.red,
 };
 
 export default function RentRollPage() {

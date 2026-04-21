@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { AnimatePresence, motion as m } from 'framer-motion';
 import {
@@ -74,10 +75,10 @@ interface TitleReport {
 }
 
 const SEVERITY_COLORS: Record<DefectSeverity, string> = {
-  critical: '#ef4444',
-  major: '#f97316',
-  minor: '#fbbf24',
-  clear: '#34d399',
+  critical: color.accent.red,
+  major: color.accent.amber,
+  minor: color.accent.amber,
+  clear: color.accent.green,
 };
 
 const REPORT: TitleReport = {

@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
@@ -22,14 +23,14 @@ import type { VesselProfile } from '@/data/types';
 import { useFleetExceptions, useMaintenance, useVessels } from '@/hooks/use-vessels-data';
 
 const statusColors: Record<string, string> = {
-  at_sea: '#22c55e',
-  in_port: '#0ea5e9',
-  anchored: '#f59e0b',
-  maintenance: '#ef4444',
-  delayed: '#f97316',
-  loading: '#a78bfa',
-  risk_watch: '#f59e0b',
-  exception_active: '#ef4444',
+  at_sea: color.accent.green,
+  in_port: color.accent.blue,
+  anchored: color.accent.amber,
+  maintenance: color.accent.red,
+  delayed: color.accent.amber,
+  loading: color.accent.violet,
+  risk_watch: color.accent.amber,
+  exception_active: color.accent.red,
 };
 
 const statusLabels: Record<string, string> = {

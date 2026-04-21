@@ -1,3 +1,4 @@
+import { color } from '@szl-holdings/design-system';
 import { AlertTriangle, Anchor, BarChart3, Navigation, Plug, Shield, Wind } from 'lucide-react';
 import { useState } from 'react';
 import { vesselTwins, voyageTwins } from '@/data/fleet-twin';
@@ -5,18 +6,18 @@ import { vesselTwins, voyageTwins } from '@/data/fleet-twin';
 const ACCENT = 'hsl(205 70% 50%)';
 
 const RISK_STYLE = {
-  low: { color: '#40856a', bg: '#40856a15', border: '#40856a30', label: 'Low' },
-  moderate: { color: '#c08a2c', bg: '#c08a2c15', border: '#c08a2c30', label: 'Moderate' },
-  high: { color: '#c04a2a', bg: '#c04a2a15', border: '#c04a2a30', label: 'High' },
-  elevated: { color: '#c04a2a', bg: '#c04a2a15', border: '#c04a2a30', label: 'Elevated' },
-  critical: { color: '#f87171', bg: '#9b1c1c15', border: '#9b1c1c40', label: 'Critical' },
+  low: { color: color.accent.green, bg: `${color.accent.green}15`, border: `${color.accent.green}30`, label: 'Low' },
+  moderate: { color: color.accent.amber, bg: `${color.accent.amber}15`, border: `${color.accent.amber}30`, label: 'Moderate' },
+  high: { color: color.accent.red, bg: `${color.accent.red}15`, border: `${color.accent.red}30`, label: 'High' },
+  elevated: { color: color.accent.red, bg: `${color.accent.red}15`, border: `${color.accent.red}30`, label: 'Elevated' },
+  critical: { color: color.accent.red, bg: `${color.accent.red}15`, border: `${color.accent.red}40`, label: 'Critical' },
 };
 
 const WEATHER_STYLE = {
-  low: '#40856a',
-  moderate: '#c08a2c',
-  high: '#c04a2a',
-  severe: '#f87171',
+  low: color.accent.green,
+  moderate: color.accent.amber,
+  high: color.accent.red,
+  severe: color.accent.red,
 };
 
 function RiskGauge({ level }: { level: string }) {
