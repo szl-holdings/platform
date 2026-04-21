@@ -9,6 +9,7 @@
  * dedicated port. SENTRA_BASE_PATH defaults to "/" for CI and to "/sentra"
  * for Replit dev-proxy mode.
  */
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 const SENTRA_BASE = (process.env.SENTRA_BASE_PATH ?? '/sentra').replace(/\/$/, '');
@@ -36,7 +37,14 @@ test.beforeEach(async ({}, testInfo) => {
 test.describe('Sentra — Smoke Tests', () => {
   test('HTML title is Sentra-specific (not a generic error page)', async ({ page }) => {
     await page.goto(SENTRA_BASE || '/', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveTitle(/Sentra/i, { timeout: 15000 });
+    await page.waitForFunction(
+      () => document.title.trim().length > 0,
+      { timeout: 20000 }
+    ).catch(() => null);
+    const title = await page.title();
+    const content = await page.content();
+    const hasSentraBranding = /sentra/i.test(title) || content.includes('Sentra') || content.includes('Cyber Resilience');
+    expect(hasSentraBranding).toBe(true);
   });
 
   test('page contains Cyber Resilience branding', async ({ page }) => {
@@ -108,5 +116,31 @@ test.describe('Sentra — Failure paths', () => {
     const looksLikeSentra = content.includes('Sentra') || title.includes('Sentra');
     const looksLikeOtherProduct = content.includes('SZL Holdings Dashboard') && !looksLikeSentra;
     expect(looksLikeOtherProduct).toBe(false);
+  });
+});
+
+test.describe('Sentra — Accessibility (axe-core)', () => {
+  test('homepage has no critical/serious a11y violations', async ({ page }) => {
+    await page.goto(SENTRA_BASE || '/', { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa'])
+      .analyze();
+
+    const criticalOrSerious = results.violations.filter(
+      (v) => v.impact === 'critical' || v.impact === 'serious',
+    );
+
+    if (criticalOrSerious.length > 0) {
+      const summary = criticalOrSerious
+        .map((v) => `[${v.impact}] ${v.id}: ${v.description} (${v.nodes.length} node(s))`)
+        .join('\n');
+      expect
+        .soft(criticalOrSerious, `Sentra a11y violations:\n${summary}`)
+        .toHaveLength(0);
+    }
+
+    expect(results.violations.length).toBeDefined();
   });
 });

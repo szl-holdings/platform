@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 const TERRA_PATH = process.env.TERRA_BASE_PATH ?? '/terra';
@@ -386,4 +387,38 @@ test.describe('Terra — Mobile Viewport', () => {
     const body = await page.content();
     expect(body.length).toBeGreaterThan(200);
   });
+});
+
+test.describe('Terra — Accessibility (axe-core)', () => {
+  const axeRoutes = [
+    { path: '/', label: 'home' },
+    { path: '/deals', label: 'deals' },
+    { path: '/dashboard', label: 'dashboard' },
+  ];
+
+  for (const route of axeRoutes) {
+    test(`${route.label} has no critical/serious a11y violations`, async ({ page }) => {
+      await page.goto(`${TERRA_PATH}${route.path}`, { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+      const results = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa'])
+        .analyze();
+
+      const criticalOrSerious = results.violations.filter(
+        (v) => v.impact === 'critical' || v.impact === 'serious',
+      );
+
+      if (criticalOrSerious.length > 0) {
+        const summary = criticalOrSerious
+          .map((v) => `[${v.impact}] ${v.id}: ${v.description} (${v.nodes.length} node(s))`)
+          .join('\n');
+        expect
+          .soft(criticalOrSerious, `Critical/serious a11y violations on ${route.path}:\n${summary}`)
+          .toHaveLength(0);
+      }
+
+      expect(results.violations.length).toBeDefined();
+    });
+  }
 });

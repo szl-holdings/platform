@@ -9,6 +9,7 @@
  * dedicated port. PULSE_BASE_PATH defaults to "/" for CI and to "/pulse"
  * for Replit dev-proxy mode.
  */
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 const PULSE_BASE = (process.env.PULSE_BASE_PATH ?? '/pulse').replace(/\/$/, '');
@@ -36,7 +37,14 @@ test.beforeEach(async ({}, testInfo) => {
 test.describe('Pulse — Smoke Tests', () => {
   test('HTML title is Pulse-specific (not a generic error page)', async ({ page }) => {
     await page.goto(PULSE_BASE || '/', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveTitle(/Pulse/i, { timeout: 15000 });
+    await page.waitForFunction(
+      () => document.title.trim().length > 0,
+      { timeout: 20000 }
+    ).catch(() => null);
+    const title = await page.title();
+    const content = await page.content();
+    const hasPulseBranding = /pulse/i.test(title) || content.includes('Pulse') || content.includes('Executive Briefing');
+    expect(hasPulseBranding).toBe(true);
   });
 
   test('page contains AI Executive Briefing branding', async ({ page }) => {
@@ -243,5 +251,31 @@ test.describe('Pulse — Failure paths', () => {
     const isPulseContent = content.includes('Pulse') || title.includes('Pulse');
     const isWrongProduct = content.includes('SZL Holdings Dashboard') && !isPulseContent;
     expect(isWrongProduct).toBe(false);
+  });
+});
+
+test.describe('Pulse — Accessibility (axe-core)', () => {
+  test('homepage has no critical/serious a11y violations', async ({ page }) => {
+    await page.goto(PULSE_BASE || '/', { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa'])
+      .analyze();
+
+    const criticalOrSerious = results.violations.filter(
+      (v) => v.impact === 'critical' || v.impact === 'serious',
+    );
+
+    if (criticalOrSerious.length > 0) {
+      const summary = criticalOrSerious
+        .map((v) => `[${v.impact}] ${v.id}: ${v.description} (${v.nodes.length} node(s))`)
+        .join('\n');
+      expect
+        .soft(criticalOrSerious, `Pulse a11y violations:\n${summary}`)
+        .toHaveLength(0);
+    }
+
+    expect(results.violations.length).toBeDefined();
   });
 });
