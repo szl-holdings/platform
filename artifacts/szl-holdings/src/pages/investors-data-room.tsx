@@ -1,4 +1,4 @@
-import { type ElementType, useState, useEffect, useCallback, useRef } from "react";
+import { type ElementType, type ReactNode, useState, useEffect, useCallback, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAuth } from "@szl-holdings/replit-auth-web";
@@ -35,6 +35,8 @@ import {
   ArrowRight,
   Download,
   Printer,
+  Search,
+  SearchX,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -373,33 +375,68 @@ function NdaGate({ onAccept, accepting }: { onAccept: () => void; accepting?: bo
   );
 }
 
-function MarkdownRenderer({ content }: { content: string }) {
+interface DocSearchResult {
+  docId: string;
+  docTitle: string;
+  heading: string;
+  excerpt: string;
+}
+
+async function searchDocs(q: string): Promise<DocSearchResult[]> {
+  const data = await apiFetch<{ data: DocSearchResult[] }>(`/api/investors/search?q=${encodeURIComponent(q)}`);
+  return data.data;
+}
+
+function highlightText(text: string, term: string): ReactNode {
+  if (!term || !text) return text;
+  const idx = text.toLowerCase().indexOf(term.toLowerCase());
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark style={{ background: "#d4a054", color: "#000", borderRadius: "2px", padding: "0 1px" }}>
+        {text.slice(idx, idx + term.length)}
+      </mark>
+      {highlightText(text.slice(idx + term.length), term)}
+    </>
+  );
+}
+
+function applyHighlight(children: ReactNode, term: string): ReactNode {
+  if (!term) return children;
+  if (typeof children === "string") return highlightText(children, term);
+  if (Array.isArray(children)) return children.map((c, i) => <span key={i}>{applyHighlight(c, term)}</span>);
+  return children;
+}
+
+function MarkdownRenderer({ content, highlight }: { content: string; highlight?: string }) {
+  const term = highlight ?? "";
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
         h1: ({ children }) => (
           <h1 className="text-3xl font-semibold tracking-tight text-white mb-6 mt-0 leading-tight font-['Space_Grotesk']">
-            {children}
+            {applyHighlight(children, term)}
           </h1>
         ),
         h2: ({ children }) => (
           <h2 className="text-xl font-semibold tracking-tight text-white mt-10 mb-4 pb-3 border-b border-white/[0.07] font-['Space_Grotesk']">
-            {children}
+            {applyHighlight(children, term)}
           </h2>
         ),
         h3: ({ children }) => (
           <h3 className="text-base font-semibold text-white/90 mt-7 mb-3 font-['Space_Grotesk']">
-            {children}
+            {applyHighlight(children, term)}
           </h3>
         ),
         h4: ({ children }) => (
           <h4 className="text-sm font-semibold text-white/80 mt-5 mb-2 uppercase tracking-[0.12em]">
-            {children}
+            {applyHighlight(children, term)}
           </h4>
         ),
         p: ({ children }) => (
-          <p className="text-sm leading-7 text-white/65 mb-4">{children}</p>
+          <p className="text-sm leading-7 text-white/65 mb-4">{applyHighlight(children, term)}</p>
         ),
         a: ({ href, children }) => (
           <a
@@ -444,11 +481,11 @@ function MarkdownRenderer({ content }: { content: string }) {
         li: ({ children, ...props }) => {
           const isOrdered = (props as { ordered?: boolean }).ordered;
           return isOrdered ? (
-            <li className="text-sm leading-6 text-white/60 pl-1">{children}</li>
+            <li className="text-sm leading-6 text-white/60 pl-1">{applyHighlight(children, term)}</li>
           ) : (
             <li className="text-sm leading-6 text-white/60 flex gap-2">
               <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-white/20" />
-              <span className="flex-1">{children}</span>
+              <span className="flex-1">{applyHighlight(children, term)}</span>
             </li>
           );
         },
@@ -476,7 +513,7 @@ function MarkdownRenderer({ content }: { content: string }) {
           </th>
         ),
         td: ({ children }) => (
-          <td className="px-4 py-3 text-white/55 leading-5">{children}</td>
+          <td className="px-4 py-3 text-white/55 leading-5">{applyHighlight(children, term)}</td>
         ),
       }}
     >
@@ -1163,6 +1200,13 @@ export default function InvestorsDataRoomPage() {
   const [error, setError] = useState<string | null>(null);
   const [accepting, setAccepting] = useState(false);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<DocSearchResult[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [highlightTerm, setHighlightTerm] = useState("");
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchSeqRef = useRef(0);
+
   const analytics = useAnalytics();
   const { user } = useAuth();
   const investorProps = useCallback(
@@ -1269,6 +1313,51 @@ export default function InvestorsDataRoomPage() {
       setAccepting(false);
     }
   }, [analytics, investorProps]);
+
+  const handleSearchInput = useCallback((q: string) => {
+    setSearchQuery(q);
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    if (!q.trim() || q.trim().length < 2) {
+      setSearchResults([]);
+      setSearchLoading(false);
+      return;
+    }
+    setSearchLoading(true);
+    const seq = ++searchSeqRef.current;
+    searchTimerRef.current = setTimeout(async () => {
+      try {
+        const results = await searchDocs(q.trim());
+        if (seq === searchSeqRef.current) {
+          setSearchResults(results);
+        }
+      } catch {
+        if (seq === searchSeqRef.current) setSearchResults([]);
+      } finally {
+        if (seq === searchSeqRef.current) setSearchLoading(false);
+      }
+    }, 350);
+  }, []);
+
+  const handleSearchResultClick = useCallback((result: DocSearchResult) => {
+    setHighlightTerm(searchQuery.trim());
+    setActiveDocId(result.docId);
+    setSearchQuery("");
+    setSearchResults([]);
+    setSidebarOpen(false);
+  }, [searchQuery]);
+
+  const clearSearch = useCallback(() => {
+    setSearchQuery("");
+    setSearchResults([]);
+    setSearchLoading(false);
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+  }, []);
+
+  const navigateDoc = useCallback((id: string) => {
+    setHighlightTerm("");
+    setActiveDocId(id);
+    setSidebarOpen(false);
+  }, []);
 
   const activeDoc = DOC_META.find((d) => d.id === activeDocId);
 
@@ -1405,13 +1494,78 @@ export default function InvestorsDataRoomPage() {
         >
           <div className="px-4 py-5">
 
+            {/* Search bar */}
+            <div className="mb-5">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => handleSearchInput(e.target.value)}
+                  placeholder="Search documents…"
+                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-8 pr-8 py-2 text-xs text-white placeholder-white/25 focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={clearSearch}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition"
+                  >
+                    <SearchX className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Search results */}
+              {searchQuery.trim().length >= 2 && (
+                <div className="mt-2 rounded-xl border border-white/[0.06] bg-[#080c14] overflow-hidden">
+                  {searchLoading ? (
+                    <div className="flex items-center gap-2 px-3 py-3">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-white/30" />
+                      <p className="text-xs text-white/30">Searching…</p>
+                    </div>
+                  ) : searchResults.length === 0 ? (
+                    <div className="px-3 py-3">
+                      <p className="text-xs text-white/30">No results found</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-white/[0.04] max-h-[60vh] overflow-y-auto">
+                      {searchResults.map((result, i) => (
+                        <button
+                          key={`${result.docId}-${i}`}
+                          onClick={() => handleSearchResultClick(result)}
+                          className="w-full text-left px-3 py-2.5 hover:bg-white/[0.04] transition group"
+                        >
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/30 mb-0.5 truncate">
+                            {result.docTitle}
+                          </p>
+                          {result.heading && (
+                            <p className="text-xs font-semibold text-white/70 group-hover:text-white transition truncate mb-0.5">
+                              {result.heading}
+                            </p>
+                          )}
+                          <p className="text-[11px] leading-4 text-white/40 line-clamp-2">
+                            {result.excerpt}
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="px-3 py-2 border-t border-white/[0.04]">
+                    <p className="text-[10px] text-white/20">
+                      {searchResults.length > 0 ? `${searchResults.length} result${searchResults.length !== 1 ? "s" : ""} · click to open` : "Try a different term"}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Executive Brief — top CTA */}
             <div className="mb-5">
               <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/25">
                 Quick Access
               </p>
               <button
-                onClick={() => { setActiveDocId("executive-brief"); setSidebarOpen(false); }}
+                onClick={() => navigateDoc("executive-brief")}
                 className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
                   activeDocId === "executive-brief"
                     ? "bg-white/[0.06] text-white"
@@ -1438,7 +1592,7 @@ export default function InvestorsDataRoomPage() {
               </button>
 
               <button
-                onClick={() => { setActiveDocId("request-demo"); setSidebarOpen(false); }}
+                onClick={() => navigateDoc("request-demo")}
                 className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition mt-0.5 ${
                   activeDocId === "request-demo"
                     ? "bg-white/[0.06] text-white"
@@ -1465,7 +1619,7 @@ export default function InvestorsDataRoomPage() {
               </button>
 
               <button
-                onClick={() => { setActiveDocId("access-inquiry"); setSidebarOpen(false); }}
+                onClick={() => navigateDoc("access-inquiry")}
                 className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition mt-0.5 ${
                   activeDocId === "access-inquiry"
                     ? "bg-white/[0.06] text-white"
@@ -1512,10 +1666,7 @@ export default function InvestorsDataRoomPage() {
                       return (
                         <button
                           key={doc.id}
-                          onClick={() => {
-                            setActiveDocId(doc.id);
-                            setSidebarOpen(false);
-                          }}
+                          onClick={() => navigateDoc(doc.id)}
                           className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
                             isActive
                               ? "bg-white/[0.06] text-white"
@@ -1616,14 +1767,14 @@ export default function InvestorsDataRoomPage() {
               </p>
               <div className="flex flex-col gap-2">
                 <button
-                  onClick={() => { setActiveDocId("access-inquiry"); setSidebarOpen(false); }}
+                  onClick={() => navigateDoc("access-inquiry")}
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#d4a054] hover:text-[#e4b064] transition"
                 >
                   <FileText className="h-3.5 w-3.5" />
                   Request access
                 </button>
                 <button
-                  onClick={() => { setActiveDocId("request-demo"); setSidebarOpen(false); }}
+                  onClick={() => navigateDoc("request-demo")}
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#22d3ee] hover:text-[#32e3fe] transition"
                 >
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -1642,7 +1793,7 @@ export default function InvestorsDataRoomPage() {
               {activeDocId === "executive-brief" && <ExecutiveBriefPanel />}
               {activeDocId === "request-demo" && <RequestDemoPanel />}
               {activeDocId === "access-inquiry" && (
-                <AccessInquiryPanel onBack={() => setActiveDocId("executive-brief")} />
+                <AccessInquiryPanel onBack={() => navigateDoc("executive-brief")} />
               )}
             </div>
           ) : (
@@ -1710,7 +1861,7 @@ export default function InvestorsDataRoomPage() {
                       return (
                         <button
                           key={doc.id}
-                          onClick={() => setActiveDocId(doc.id)}
+                          onClick={() => navigateDoc(doc.id)}
                           className={`shrink-0 flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition ${
                             isActive
                               ? "border-white/20 bg-white/[0.07] text-white"
@@ -1766,7 +1917,7 @@ export default function InvestorsDataRoomPage() {
                   </div>
                 )}
                 {content && !loading && !error && (
-                  <MarkdownRenderer content={content} />
+                  <MarkdownRenderer content={content} highlight={highlightTerm} />
                 )}
                 {/* Per-page confidentiality footer for printed PDFs.
                     Hidden on screen via .print-footer base style; in @media print
@@ -1788,7 +1939,7 @@ export default function InvestorsDataRoomPage() {
                       <>
                         {prev ? (
                           <button
-                            onClick={() => setActiveDocId(prev.id)}
+                            onClick={() => navigateDoc(prev.id)}
                             className="flex items-center gap-2 text-sm text-white/45 hover:text-white/80 transition"
                           >
                             <ArrowLeft className="h-4 w-4" />
@@ -1802,7 +1953,7 @@ export default function InvestorsDataRoomPage() {
                         )}
                         {next ? (
                           <button
-                            onClick={() => setActiveDocId(next.id)}
+                            onClick={() => navigateDoc(next.id)}
                             className="flex items-center gap-2 text-sm text-white/45 hover:text-white/80 transition text-right"
                           >
                             <div>

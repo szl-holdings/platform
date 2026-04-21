@@ -743,6 +743,99 @@ const INVESTOR_DOC_MANIFEST: Record<string, InvestorDocMeta> = {
 
 const INVESTOR_NDA_ACTION = "investor_nda_accepted";
 
+function extractDocSections(content: string): Array<{ heading: string; text: string }> {
+  const lines = content.split("\n");
+  const sections: Array<{ heading: string; text: string }> = [];
+  let currentHeading = "";
+  let currentLines: string[] = [];
+
+  for (const line of lines) {
+    const headingMatch = /^#{1,4}\s+(.+)$/.exec(line);
+    if (headingMatch) {
+      if (currentLines.length > 0) {
+        sections.push({ heading: currentHeading, text: currentLines.join(" ").replace(/\s+/g, " ").trim() });
+      }
+      currentHeading = headingMatch[1]!.trim();
+      currentLines = [];
+    } else {
+      const stripped = line.replace(/[`*_~|[\]()]/g, " ").trim();
+      if (stripped) currentLines.push(stripped);
+    }
+  }
+  if (currentLines.length > 0) {
+    sections.push({ heading: currentHeading, text: currentLines.join(" ").replace(/\s+/g, " ").trim() });
+  }
+  return sections;
+}
+
+function buildExcerpt(text: string, query: string, window = 160): string {
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text.slice(0, window).trim() + (text.length > window ? "…" : "");
+  const start = Math.max(0, idx - 60);
+  const end = Math.min(text.length, idx + query.length + 100);
+  const prefix = start > 0 ? "…" : "";
+  const suffix = end < text.length ? "…" : "";
+  return prefix + text.slice(start, end).trim() + suffix;
+}
+
+export interface DocSearchResult {
+  docId: string;
+  docTitle: string;
+  heading: string;
+  excerpt: string;
+}
+
+router.get("/investors/search", authMiddleware(), requireRole("admin", "exec", "analyst"), async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ error: "Unauthenticated" });
+    return;
+  }
+  try {
+    const [ndaRecord] = await db
+      .select({ id: auditEventsTable.id })
+      .from(auditEventsTable)
+      .where(and(eq(auditEventsTable.userId, userId), eq(auditEventsTable.action, INVESTOR_NDA_ACTION)))
+      .limit(1);
+    if (!ndaRecord) {
+      res.status(403).json({ error: "NDA acceptance required", code: "NDA_REQUIRED" });
+      return;
+    }
+    const q = typeof req.query["q"] === "string" ? req.query["q"].trim() : "";
+    if (!q || q.length < 2) {
+      res.json({ data: [] });
+      return;
+    }
+    const results: DocSearchResult[] = [];
+    for (const [docId, meta] of Object.entries(INVESTOR_DOC_MANIFEST)) {
+      let content: string;
+      try {
+        content = readFileSync(join(INVESTOR_DOCS_DIR, meta.filename), "utf-8");
+      } catch {
+        continue;
+      }
+      const sections = extractDocSections(content);
+      for (const section of sections) {
+        const searchable = (section.heading + " " + section.text).toLowerCase();
+        if (searchable.includes(q.toLowerCase())) {
+          results.push({
+            docId,
+            docTitle: meta.title,
+            heading: section.heading,
+            excerpt: buildExcerpt(section.text || section.heading, q),
+          });
+          if (results.filter((r) => r.docId === docId).length >= 3) break;
+        }
+      }
+      if (results.length >= 20) break;
+    }
+    res.json({ data: results });
+  } catch (err) {
+    logger.error({ err }, "Failed to search investor docs");
+    res.status(500).json({ error: "Failed to search documents" });
+  }
+});
+
 router.get("/investors/nda/status", authMiddleware(), async (req, res) => {
   try {
     const userId = req.user?.id;
