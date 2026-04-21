@@ -78,7 +78,7 @@ export default defineConfig({
   server: {
     port: vitePort,
     strictPort: true,
-    host: '::',
+    host: '0.0.0.0',
     allowedHosts: true,
     hmr: { clientPort: 443, path: basePath },
     fs: {
