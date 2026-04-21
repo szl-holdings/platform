@@ -233,18 +233,22 @@ export const MCP_APP_TOOLS = {
         pageSize: { type: 'number' },
       },
     },
-    execute: (args: Record<string, unknown>): UIComponentResponse =>
-      buildDataTableComponent(
+    execute: (args: Record<string, unknown>): UIComponentResponse => {
+      const _title = args.title as string | undefined;
+      const _exportable = (args.exportable as boolean | undefined) ?? true;
+      const _pageSize = (args.pageSize as number | undefined) ?? 25;
+      return buildDataTableComponent(
         {
           columns: (args.columns as DataTableConfig['columns']) ?? [],
           rows: (args.rows as DataTableConfig['rows']) ?? [],
           totalRows: ((args.rows as unknown[]) ?? []).length,
-          title: args.title as string | undefined,
-          exportable: (args.exportable as boolean) ?? true,
-          pageSize: (args.pageSize as number) ?? 25,
+          ...(_title !== undefined ? { title: _title } : {}),
+          exportable: _exportable,
+          pageSize: _pageSize,
         },
         'data_table_viewer',
-      ),
+      );
+    },
   },
 
   chart_builder: {
@@ -264,20 +268,24 @@ export const MCP_APP_TOOLS = {
         legend: { type: 'boolean' },
       },
     },
-    execute: (args: Record<string, unknown>): UIComponentResponse =>
-      buildChartComponent(
+    execute: (args: Record<string, unknown>): UIComponentResponse => {
+      const _data = args.data as ChartConfig['data'];
+      const _xAxis = args.xAxis as ChartConfig['xAxis'];
+      const _yAxis = args.yAxis as ChartConfig['yAxis'];
+      return buildChartComponent(
         {
           chartType: (args.chartType as ChartConfig['chartType']) ?? 'bar',
           title: (args.title as string) ?? 'Chart',
           series: (args.series as ChartConfig['series']) ?? [],
-          data: args.data as ChartConfig['data'],
-          xAxis: args.xAxis as ChartConfig['xAxis'],
-          yAxis: args.yAxis as ChartConfig['yAxis'],
-          legend: (args.legend as boolean) ?? true,
+          legend: (args.legend as boolean | undefined) ?? true,
           responsive: true,
+          ...(_data !== undefined ? { data: _data } : {}),
+          ...(_xAxis !== undefined ? { xAxis: _xAxis } : {}),
+          ...(_yAxis !== undefined ? { yAxis: _yAxis } : {}),
         },
         'chart_builder',
-      ),
+      );
+    },
   },
 
   approval_form: {

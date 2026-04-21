@@ -34,7 +34,7 @@ describe('useStandardQuery', () => {
     useStandardQuery({ queryKey, queryFn });
 
     expect(useQueryMock).toHaveBeenCalledTimes(1);
-    const passed = useQueryMock.mock.calls[0][0] as Record<string, unknown>;
+    const passed = useQueryMock.mock.calls[0]![0] as Record<string, unknown>;
     expect(passed.queryKey).toEqual(queryKey);
     expect(passed.queryFn).toBe(queryFn);
   });
@@ -45,7 +45,7 @@ describe('useStandardQuery', () => {
       queryFn: async () => 1,
     });
 
-    const passed = useQueryMock.mock.calls[0][0] as Record<string, unknown>;
+    const passed = useQueryMock.mock.calls[0]![0] as Record<string, unknown>;
     expect(passed.staleTime).toBe(EXPECTED_DEFAULTS.staleTime);
     expect(passed.gcTime).toBe(EXPECTED_DEFAULTS.gcTime);
     expect(passed.refetchOnWindowFocus).toBe(EXPECTED_DEFAULTS.refetchOnWindowFocus);
@@ -62,7 +62,7 @@ describe('useStandardQuery', () => {
       gcTime: 1_000,
     });
 
-    const passed = useQueryMock.mock.calls[0][0] as Record<string, unknown>;
+    const passed = useQueryMock.mock.calls[0]![0] as Record<string, unknown>;
     expect(passed.staleTime).toBe(0);
     expect(passed.retry).toBe(5);
     expect(passed.refetchOnWindowFocus).toBe(true);
@@ -95,7 +95,7 @@ describe('useStandardMutation', () => {
     useStandardMutation({ mutationFn, onSuccess });
 
     expect(useMutationMock).toHaveBeenCalledTimes(1);
-    const passed = useMutationMock.mock.calls[0][0] as Record<string, unknown>;
+    const passed = useMutationMock.mock.calls[0]![0] as Record<string, unknown>;
     expect(passed.mutationFn).toBe(mutationFn);
     expect(passed.onSuccess).toBe(onSuccess);
     // Mutation wrapper should NOT silently inject the query defaults.

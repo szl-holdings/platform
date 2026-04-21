@@ -32,7 +32,7 @@ export const VALIDATE_STEP: WorkflowStep = {
       stepId: 'validate',
       success: isValid,
       output: { valid: isValid, validatedInput: previousOutput },
-      error: isValid ? undefined : 'Previous step produced no output',
+      ...(isValid ? {} : { error: 'Previous step produced no output' }),
       latencyMs: Date.now() - t0,
     };
   },

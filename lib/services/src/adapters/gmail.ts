@@ -45,7 +45,7 @@ export class GmailAdapter extends ServiceAdapter {
   readonly description = 'Gmail email management and notifications';
   readonly requiredEnvVars = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'];
 
-  get status(): ServiceStatus {
+  override get status(): ServiceStatus {
     const hasCredentials = this.requiredEnvVars.every(
       (v) => process.env[v] !== undefined && process.env[v] !== '',
     );
@@ -53,7 +53,7 @@ export class GmailAdapter extends ServiceAdapter {
     return 'MOCKED_DEMO_MODE';
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const result = await this.testConnection();
     if (!result.connected) throw new Error('Gmail connection verification failed');
   }

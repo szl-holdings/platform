@@ -1,37 +1,40 @@
 /**
  * Terra Repository — typed access to real estate property and deal tables.
  */
-import { db, dealPipelinesTable, propertiesTable, propertyValuationsTable } from '@szl-holdings/db';
-import { and, desc, eq, gte, lte } from 'drizzle-orm';
+import {
+  db,
+  terraPropertiesTable,
+  terraDealsTable,
+  dealPipelinesTable,
+  propertiesTable,
+  propertyValuationsTable,
+} from "@szl-holdings/db";
+import { and, desc, eq, gte, lte } from "drizzle-orm";
 
 export class TerraRepository {
   async findPropertyById(id: number) {
-    const rows = await db.select().from(propertiesTable).where(eq(propertiesTable.id, id)).limit(1);
+    const rows = await db
+      .select()
+      .from(terraPropertiesTable)
+      .where(eq(terraPropertiesTable.id, id))
+      .limit(1);
     return rows[0] ?? null;
   }
 
   async listProperties(limit = 100) {
-    return db.select().from(propertiesTable).orderBy(desc(propertiesTable.updatedAt)).limit(limit);
-  }
-
-  async listDeals(propertyId?: number, limit = 50) {
-    const where = propertyId != null ? eq(dealPipelinesTable.propertyId, propertyId) : undefined;
     return db
       .select()
-      .from(dealPipelinesTable)
-      .where(where)
-      .orderBy(desc(dealPipelinesTable.createdAt))
+      .from(terraPropertiesTable)
+      .orderBy(desc(terraPropertiesTable.updatedAt))
       .limit(limit);
   }
 
-  async getLatestValuation(propertyId: number) {
-    const rows = await db
+  async listDeals(limit = 50) {
+    return db
       .select()
-      .from(propertyValuationsTable)
-      .where(eq(propertyValuationsTable.propertyId, propertyId))
-      .orderBy(desc(propertyValuationsTable.valuationDate))
-      .limit(1);
-    return rows[0] ?? null;
+      .from(terraDealsTable)
+      .orderBy(desc(terraDealsTable.createdAt))
+      .limit(limit);
   }
 }
 

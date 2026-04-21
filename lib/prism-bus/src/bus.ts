@@ -1,23 +1,23 @@
-import type { PrismDomain } from './context.js';
+import type { PrismDomain } from "./context.js";
 
 export type PrismBusEventType =
-  | 'context_updated'
-  | 'tool_called'
-  | 'tool_result'
-  | 'workflow_triggered'
-  | 'workflow_completed'
-  | 'workflow_failed'
-  | 'approval_requested'
-  | 'approval_decided'
-  | 'evidence_captured'
-  | 'artifact_created'
-  | 'connector_state_changed'
-  | 'domain_signal'
-  | 'cross_domain_correlation'
-  | 'execution_started'
-  | 'execution_completed'
-  | 'execution_failed'
-  | 'policy_decision';
+  | "context_updated"
+  | "tool_called"
+  | "tool_result"
+  | "workflow_triggered"
+  | "workflow_completed"
+  | "workflow_failed"
+  | "approval_requested"
+  | "approval_decided"
+  | "evidence_captured"
+  | "artifact_created"
+  | "connector_state_changed"
+  | "domain_signal"
+  | "cross_domain_correlation"
+  | "execution_started"
+  | "execution_completed"
+  | "execution_failed"
+  | "policy_decision";
 
 export interface PrismBusEvent {
   id: string;
@@ -25,7 +25,7 @@ export interface PrismBusEvent {
   domain: PrismDomain;
   sourceId: string;
   payload: Record<string, unknown>;
-  severity: 'info' | 'low' | 'medium' | 'high' | 'critical';
+  severity: "info" | "low" | "medium" | "high" | "critical";
   timestamp: number;
   correlationId?: string;
   tenantId?: string | null;
@@ -37,8 +37,8 @@ type PrismBusEventHandler = (event: PrismBusEvent) => void | Promise<void>;
 interface PrismBusSubscription {
   id: string;
   subscriberId: string;
-  eventTypes: PrismBusEventType[] | '*';
-  domains?: PrismDomain[] | '*';
+  eventTypes: PrismBusEventType[] | "*";
+  domains?: PrismDomain[] | "*" | undefined;
   handler: PrismBusEventHandler;
 }
 
@@ -51,9 +51,9 @@ export class PrismEventBus {
 
   subscribe(
     subscriberId: string,
-    eventTypes: PrismBusEventType[] | '*',
+    eventTypes: PrismBusEventType[] | "*",
     handler: PrismBusEventHandler,
-    domains?: PrismDomain[] | '*',
+    domains?: PrismDomain[] | "*"
   ): () => void {
     const id = `prism-sub-${subscriberId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     this.subscriptions.set(id, { id, subscriberId, eventTypes, domains, handler });
@@ -63,7 +63,7 @@ export class PrismEventBus {
   }
 
   async publish(
-    event: Omit<PrismBusEvent, 'id' | 'timestamp'> & { id?: string; timestamp?: number },
+    event: Omit<PrismBusEvent, "id" | "timestamp"> & { id?: string; timestamp?: number }
   ): Promise<PrismBusEvent> {
     const full: PrismBusEvent = {
       ...event,
@@ -80,15 +80,17 @@ export class PrismEventBus {
 
     const handlers: Array<Promise<void>> = [];
     for (const sub of this.subscriptions.values()) {
-      const typeMatch = sub.eventTypes === '*' || sub.eventTypes.includes(full.type);
+      const typeMatch = sub.eventTypes === "*" || sub.eventTypes.includes(full.type);
       const domainMatch =
         !sub.domains ||
-        sub.domains === '*' ||
+        sub.domains === "*" ||
         sub.domains.includes(full.domain) ||
-        sub.domains.includes('global' as PrismDomain);
+        sub.domains.includes("global" as PrismDomain);
 
       if (typeMatch && domainMatch) {
-        handlers.push(Promise.resolve(sub.handler(full)).catch(() => {}));
+        handlers.push(
+          Promise.resolve(sub.handler(full)).catch(() => {})
+        );
       }
     }
 
@@ -99,21 +101,18 @@ export class PrismEventBus {
     return full;
   }
 
-  getHistory(
-    options: {
-      limit?: number;
-      type?: PrismBusEventType;
-      domain?: PrismDomain;
-      since?: number;
-      correlationId?: string;
-    } = {},
-  ): PrismBusEvent[] {
+  getHistory(options: {
+    limit?: number;
+    type?: PrismBusEventType;
+    domain?: PrismDomain;
+    since?: number;
+    correlationId?: string;
+  } = {}): PrismBusEvent[] {
     let results = this.history;
-    if (options.type) results = results.filter((e) => e.type === options.type);
-    if (options.domain) results = results.filter((e) => e.domain === options.domain);
-    if (options.since) results = results.filter((e) => e.timestamp >= options.since!);
-    if (options.correlationId)
-      results = results.filter((e) => e.correlationId === options.correlationId);
+    if (options.type) results = results.filter(e => e.type === options.type);
+    if (options.domain) results = results.filter(e => e.domain === options.domain);
+    if (options.since) results = results.filter(e => e.timestamp >= options.since!);
+    if (options.correlationId) results = results.filter(e => e.correlationId === options.correlationId);
     return results.slice(0, options.limit ?? 100);
   }
 

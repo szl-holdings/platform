@@ -1,6 +1,10 @@
-import { db, type ProvenanceSourceClass, proofChainTable } from '@szl-holdings/db';
-import { createHash } from 'crypto';
-import { and, eq } from 'drizzle-orm';
+import {
+  db,
+  proofChainTable,
+  type ProvenanceSourceClass,
+} from "@szl-holdings/db";
+import { eq, and } from "drizzle-orm";
+import { createHash } from "crypto";
 
 export interface TagSpatialContentParams {
   orgId?: number | null;
@@ -27,21 +31,21 @@ export interface TagSpatialContentParams {
 }
 
 function computePromptHash(promptText: string): string {
-  return createHash('sha256').update(promptText).digest('hex').slice(0, 16);
+  return createHash("sha256").update(promptText).digest("hex").slice(0, 16);
 }
 
 function computeArtifactHash(content: string): string {
-  return createHash('sha256').update(content).digest('hex').slice(0, 32);
+  return createHash("sha256").update(content).digest("hex").slice(0, 32);
 }
 
 function deriveExportSafetyState(
   sourceClass: ProvenanceSourceClass,
   confidenceScore: number,
-): 'safe' | 'restricted' | 'blocked' | 'pending_review' {
-  if (confidenceScore < 0.5) return 'restricted';
-  if (sourceClass === 'llm_generated' || sourceClass === 'llm_summarized') return 'pending_review';
-  if (sourceClass === 'human_authored' || sourceClass === 'system_computed') return 'safe';
-  return 'pending_review';
+): "safe" | "restricted" | "blocked" | "pending_review" {
+  if (confidenceScore < 0.5) return "restricted";
+  if (sourceClass === "llm_generated" || sourceClass === "llm_summarized") return "pending_review";
+  if (sourceClass === "human_authored" || sourceClass === "system_computed") return "safe";
+  return "pending_review";
 }
 
 export async function tagSpatialContent(
@@ -53,9 +57,7 @@ export async function tagSpatialContent(
   const enrichedMetadata: Record<string, unknown> = {
     ...(params.metadata ?? {}),
     ...(params.parentSnapshotId != null ? { parentSnapshotId: params.parentSnapshotId } : {}),
-    ...(params.derivedSimulationBranch
-      ? { derivedSimulationBranch: params.derivedSimulationBranch }
-      : {}),
+    ...(params.derivedSimulationBranch ? { derivedSimulationBranch: params.derivedSimulationBranch } : {}),
     ...(params.renderedArtifactHash ? { renderedArtifactHash: params.renderedArtifactHash } : {}),
     ...(params.modelLaneUsed ? { modelLaneUsed: params.modelLaneUsed } : {}),
     ...(params.sourceEvidenceList?.length ? { sourceEvidenceList: params.sourceEvidenceList } : {}),
@@ -66,31 +68,28 @@ export async function tagSpatialContent(
     ...(params.sourceEvidenceList ?? []),
   ];
 
-  const [proof] = await db
-    .insert(proofChainTable)
-    .values({
-      orgId: params.orgId ?? null,
-      contentId: params.contentId,
-      contentType: params.contentType,
-      sourceClass: params.sourceClass,
-      confidenceScore: confidence,
-      modelLane: params.modelLaneUsed ?? params.modelLane ?? null,
-      modelId: params.modelId ?? null,
-      modelProvider: params.modelProvider ?? null,
-      modelVersion: params.modelVersion ?? null,
-      promptHash: params.promptText ? computePromptHash(params.promptText) : null,
-      parentProofId: params.parentProofId ?? null,
-      reviewState: 'unreviewed',
-      exportSafetyState: exportSafety,
-      generatedByUserId: params.generatedByUserId ?? null,
-      correlationId: params.correlationId ?? null,
-      serviceAttribution: params.serviceAttribution ?? null,
-      inputSources: combinedInputSources,
-      metadata: enrichedMetadata,
-    })
-    .returning();
+  const [proof] = await db.insert(proofChainTable).values({
+    orgId: params.orgId ?? null,
+    contentId: params.contentId,
+    contentType: params.contentType,
+    sourceClass: params.sourceClass,
+    confidenceScore: confidence,
+    modelLane: params.modelLaneUsed ?? params.modelLane ?? null,
+    modelId: params.modelId ?? null,
+    modelProvider: params.modelProvider ?? null,
+    modelVersion: params.modelVersion ?? null,
+    promptHash: params.promptText ? computePromptHash(params.promptText) : null,
+    parentProofId: params.parentProofId ?? null,
+    reviewState: "unreviewed",
+    exportSafetyState: exportSafety,
+    generatedByUserId: params.generatedByUserId ?? null,
+    correlationId: params.correlationId ?? null,
+    serviceAttribution: params.serviceAttribution ?? null,
+    inputSources: combinedInputSources,
+    metadata: enrichedMetadata,
+  }).returning();
 
-  return proof;
+  return proof!;
 }
 
 export async function getProofBundle(
@@ -110,9 +109,7 @@ export async function getProofBundle(
   const [proof] = await db
     .select()
     .from(proofChainTable)
-    .where(
-      and(eq(proofChainTable.contentId, contentId), eq(proofChainTable.contentType, contentType)),
-    )
+    .where(and(eq(proofChainTable.contentId, contentId), eq(proofChainTable.contentType, contentType)))
     .limit(1);
 
   if (!proof) {
@@ -124,27 +121,25 @@ export async function getProofBundle(
         .select()
         .from(proofChainTable)
         .where(eq(proofChainTable.id, proof.parentProofId))
-        .then((r) => r[0] ?? null)
+        .then(r => r[0] ?? null)
     : null;
 
   const metadata = (proof.metadata as Record<string, unknown>) ?? {};
 
+  const _parentSnapshotId = typeof metadata.parentSnapshotId === "number" ? metadata.parentSnapshotId : undefined;
+  const _derivedSimulationBranch = typeof metadata.derivedSimulationBranch === "string" ? metadata.derivedSimulationBranch : undefined;
+  const _renderedArtifactHash = typeof metadata.renderedArtifactHash === "string" ? metadata.renderedArtifactHash : undefined;
+  const _modelLaneUsed = typeof metadata.modelLaneUsed === "string" ? metadata.modelLaneUsed : (proof.modelLane ?? undefined);
+  const _sourceEvidenceList = Array.isArray(metadata.sourceEvidenceList)
+    ? (metadata.sourceEvidenceList as Array<{ type: string; id: string; label?: string }>)
+    : undefined;
+
   const lineage = {
-    parentSnapshotId:
-      typeof metadata.parentSnapshotId === 'number' ? metadata.parentSnapshotId : undefined,
-    derivedSimulationBranch:
-      typeof metadata.derivedSimulationBranch === 'string'
-        ? metadata.derivedSimulationBranch
-        : undefined,
-    renderedArtifactHash:
-      typeof metadata.renderedArtifactHash === 'string' ? metadata.renderedArtifactHash : undefined,
-    modelLaneUsed:
-      typeof metadata.modelLaneUsed === 'string'
-        ? metadata.modelLaneUsed
-        : (proof.modelLane ?? undefined),
-    sourceEvidenceList: Array.isArray(metadata.sourceEvidenceList)
-      ? (metadata.sourceEvidenceList as Array<{ type: string; id: string; label?: string }>)
-      : undefined,
+    ...(_parentSnapshotId !== undefined ? { parentSnapshotId: _parentSnapshotId } : {}),
+    ...(_derivedSimulationBranch !== undefined ? { derivedSimulationBranch: _derivedSimulationBranch } : {}),
+    ...(_renderedArtifactHash !== undefined ? { renderedArtifactHash: _renderedArtifactHash } : {}),
+    ...(_modelLaneUsed !== undefined ? { modelLaneUsed: _modelLaneUsed } : {}),
+    ...(_sourceEvidenceList !== undefined ? { sourceEvidenceList: _sourceEvidenceList } : {}),
   };
 
   return { proof, parentProof, lineage };

@@ -94,9 +94,10 @@ export async function createEmbeddingAnalyticsRouter(): Promise<ExpressRouter> {
         ),
       );
 
+      const _batchModel = body.model || domainConfig?.model;
       const batchResult = await embeddingPipeline.embedBatch(texts, {
-        domain,
-        model: body.model || domainConfig?.model,
+        ...(domain !== undefined ? { domain } : {}),
+        ...(_batchModel !== undefined ? { model: _batchModel } : {}),
         concurrency,
       });
 
@@ -138,9 +139,10 @@ export async function createEmbeddingAnalyticsRouter(): Promise<ExpressRouter> {
       const domain = body.domain ? (inferDomain(body.domain) as EmbeddingDomain) : undefined;
       const domainConfig = domain ? getDomainModelConfig(domain) : undefined;
 
+      const _singleModel = body.model || domainConfig?.model;
       const result = await embeddingPipeline.embed(body.text, {
-        domain,
-        model: body.model || domainConfig?.model,
+        ...(domain !== undefined ? { domain } : {}),
+        ...(_singleModel !== undefined ? { model: _singleModel } : {}),
       });
 
       res.json({

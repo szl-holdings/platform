@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@szl-holdings/connectors": "workspace:*",
+    "@szl-holdings/constellation": "workspace:*",
     "@szl-holdings/db": "workspace:*",
     "@szl-holdings/env": "workspace:*",
     "@szl-holdings/evidence-graph": "workspace:*",

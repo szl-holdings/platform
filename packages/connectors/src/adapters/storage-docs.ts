@@ -5,8 +5,8 @@
  * unsigned agreement alerts, and compliance document expirations.
  */
 
-import type { Signal, SignalInput } from '@workspace/ontology';
-import type { ConnectorMetadata, ConnectorStatus, StorageDocsConnector } from '../interfaces.js';
+import type { Signal, SignalInput } from "@workspace/ontology/signal";
+import type { ConnectorMetadata, ConnectorStatus, StorageDocsConnector } from "../interfaces.js";
 
 export class StorageDocsDemoAdapter implements StorageDocsConnector {
   readonly category = 'storage-docs' as const;

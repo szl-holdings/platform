@@ -300,15 +300,16 @@ export class AlloyRetrievalEngine {
 
     try {
       const { hybridSearch } = await import('../rag-vector-store.js');
-      const { results, totalIndexed, latencyMs } = await hybridSearch({
+      const _hybridOpts = {
         query,
         queryEmbedding,
         tenantId,
         topK,
-        maxSensitivityLevel,
-        domains,
-        sourceTypes,
-      });
+        ...(maxSensitivityLevel !== undefined ? { maxSensitivityLevel } : {}),
+        ...(domains !== undefined ? { domains } : {}),
+        ...(sourceTypes !== undefined ? { sourceTypes } : {}),
+      };
+      const { results, totalIndexed, latencyMs } = await hybridSearch(_hybridOpts as Parameters<typeof hybridSearch>[0]);
 
       const chunks: ScoredChunk[] = results.map((r) => ({
         id: r.id,

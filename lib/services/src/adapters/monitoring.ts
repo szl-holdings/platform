@@ -5,14 +5,14 @@ export interface ErrorReport {
   message: string;
   level: 'error' | 'warning' | 'info';
   timestamp: string;
-  context?: Record<string, unknown>;
+  context?: Record<string, unknown> | undefined;
   reported: boolean;
   mock: boolean;
 }
 
 export interface AnalyticsEvent {
   name: string;
-  properties?: Record<string, unknown>;
+  properties?: Record<string, unknown> | undefined;
   tracked: boolean;
   mock: boolean;
 }
@@ -26,7 +26,7 @@ export class MonitoringAdapter extends ServiceAdapter {
     return process.env['SENTRY_DSN'];
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const dsn = this.sentryDsn;
     if (!dsn) throw new Error('SENTRY_DSN not configured');
     const parsed = new URL(dsn);

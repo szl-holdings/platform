@@ -1,55 +1,55 @@
-import { createOrchestratorRouter } from '@workspace/alloy-ingestion-orchestrator';
-import { Router } from 'express';
-import { conditionalAuth } from './middleware/auth.js';
-import { requestLogger } from './middleware/logger.js';
-import { metricsHandler, metricsMiddleware } from './middleware/prometheus.js';
-import { perTenantRateLimit } from './middleware/rate-limit.js';
-import { tenantScoping } from './middleware/tenant.js';
-import { requestTracing } from './middleware/tracing.js';
-import { openApiSpec } from './openapi/spec.js';
-import { embedRouter } from './routes/embed.js';
-import { evalsRouter } from './routes/evals.js';
-import { hybridSearchRouter } from './routes/hybrid-search.js';
-import { indexOpsRouter } from './routes/index-ops.js';
-import { ingestRouter } from './routes/ingest.js';
-import { openaiCompatRouter } from './routes/openai-compat.js';
-import { rerankRouter } from './routes/rerank.js';
+import { Router, type RequestHandler, type IRouter } from "express";
+import { requestTracing } from "./middleware/tracing.js";
+import { requestLogger } from "./middleware/logger.js";
+import { conditionalAuth } from "./middleware/auth.js";
+import { tenantScoping } from "./middleware/tenant.js";
+import { perTenantRateLimit } from "./middleware/rate-limit.js";
+import { metricsMiddleware, metricsHandler } from "./middleware/prometheus.js";
+import { embedRouter } from "./routes/embed.js";
+import { rerankRouter } from "./routes/rerank.js";
+import { hybridSearchRouter } from "./routes/hybrid-search.js";
+import { ingestRouter } from "./routes/ingest.js";
+import { indexOpsRouter } from "./routes/index-ops.js";
+import { evalsRouter } from "./routes/evals.js";
+import { openaiCompatRouter } from "./routes/openai-compat.js";
+import { openApiSpec } from "./openapi/spec.js";
+import { createOrchestratorRouter } from "@workspace/alloy-ingestion-orchestrator";
 
-export function createAefRouter(): Router {
-  const router = Router();
+export function createAefRouter(): IRouter {
+  const router: IRouter = Router();
 
-  router.use(requestTracing);
-  router.use(metricsMiddleware);
-  router.use(requestLogger);
+  router.use(requestTracing as RequestHandler);
+  router.use(metricsMiddleware as RequestHandler);
+  router.use(requestLogger as RequestHandler);
 
-  router.get('/health', (_req, res) => {
+  router.get("/health", (_req, res) => {
     res.status(200).json({
-      status: 'ok',
-      service: 'alloy-embedding-api',
-      version: '0.1.0',
+      status: "ok",
+      service: "alloy-embedding-api",
+      version: "0.1.0",
       timestamp: new Date().toISOString(),
     });
   });
 
-  router.get('/metrics', metricsHandler);
+  router.get("/metrics", metricsHandler as unknown as RequestHandler);
 
-  router.get('/docs', (_req, res) => {
+  router.get("/docs", (_req, res) => {
     res.status(200).json(openApiSpec);
   });
 
-  router.use(conditionalAuth);
-  router.use(tenantScoping);
-  router.use(perTenantRateLimit);
+  router.use(conditionalAuth as RequestHandler);
+  router.use(tenantScoping as RequestHandler);
+  router.use(perTenantRateLimit as RequestHandler);
 
-  router.use('/', embedRouter);
-  router.use('/', rerankRouter);
-  router.use('/', hybridSearchRouter);
-  router.use('/', ingestRouter);
-  router.use('/', indexOpsRouter);
-  router.use('/', evalsRouter);
-  router.use('/', openaiCompatRouter);
+  router.use("/", embedRouter as unknown as RequestHandler);
+  router.use("/", rerankRouter as unknown as RequestHandler);
+  router.use("/", hybridSearchRouter as unknown as RequestHandler);
+  router.use("/", ingestRouter as unknown as RequestHandler);
+  router.use("/", indexOpsRouter as unknown as RequestHandler);
+  router.use("/", evalsRouter as unknown as RequestHandler);
+  router.use("/", openaiCompatRouter as unknown as RequestHandler);
 
-  router.use('/orchestrator', createOrchestratorRouter());
+  router.use("/orchestrator", createOrchestratorRouter() as unknown as RequestHandler);
 
   return router;
 }

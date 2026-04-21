@@ -125,7 +125,7 @@ class InnerMonologueEngine {
       relatedAgents: input.relatedAgents ?? [],
       relatedDomains: input.relatedDomains ?? [],
       actionable,
-      suggestedAction: input.suggestedAction,
+      ...(input.suggestedAction !== undefined ? { suggestedAction: input.suggestedAction } : {}),
     };
 
     this.entries.push(entry);
@@ -181,8 +181,7 @@ class InnerMonologueEngine {
       thought,
       triggeringEvent: 'Post-synthesis evaluation',
       confidence: avgConfidence,
-      suggestedAction:
-        avgConfidence < 40 ? 'Consider requesting human review or additional context' : undefined,
+      ...(avgConfidence < 40 ? { suggestedAction: 'Consider requesting human review or additional context' } : {}),
     });
   }
 
@@ -429,10 +428,7 @@ class InnerMonologueEngine {
         triggeringEvent: `LLM introspection before routing: "${context.query.slice(0, 80)}"`,
         confidence: 70,
         relatedDomains: context.selectedDomains,
-        suggestedAction:
-          context.metacogState.confusionStreak > 1
-            ? 'Review routing decision carefully'
-            : undefined,
+        ...(context.metacogState.confusionStreak > 1 ? { suggestedAction: 'Review routing decision carefully' } : {}),
       });
     } catch {
       return this.preRoutingThought(

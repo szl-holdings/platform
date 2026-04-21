@@ -264,7 +264,7 @@ export class HoneyhiveConnector extends ToolConnector {
     }
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const apiKey = process.env['HONEYHIVE_API_KEY'];
     if (!apiKey) throw new Error('HONEYHIVE_API_KEY not configured');
     const resp = await fetch('https://api.honeyhive.ai/projects', {

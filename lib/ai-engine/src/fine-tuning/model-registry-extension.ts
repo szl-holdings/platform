@@ -60,6 +60,7 @@ export async function getActiveFineTunedModel(
     });
 
     const best = prioritized[0]!;
+    const _promotedAt = best.promotedAt?.toISOString();
     const result: FineTunedModelInfo = {
       modelId: best.modelId,
       agentId: best.agentId,
@@ -69,10 +70,10 @@ export async function getActiveFineTunedModel(
       lifecycle: best.lifecycle as FineTunedModelInfo['lifecycle'],
       evalPassRate: best.evalPassRate ?? 0,
       datasetVersion: best.datasetVersion,
-      costPer1kInput: best.costPer1kInput ?? undefined,
-      costPer1kOutput: best.costPer1kOutput ?? undefined,
       registeredAt: best.registeredAt.toISOString(),
-      promotedAt: best.promotedAt?.toISOString(),
+      ...(best.costPer1kInput != null ? { costPer1kInput: best.costPer1kInput } : {}),
+      ...(best.costPer1kOutput != null ? { costPer1kOutput: best.costPer1kOutput } : {}),
+      ...(_promotedAt !== undefined ? { promotedAt: _promotedAt } : {}),
     };
 
     _modelCache.set(cacheKey, { model: result, expiresAt: Date.now() + CACHE_TTL_MS });
@@ -129,20 +130,23 @@ export async function getAllFineTunedModels(): Promise<FineTunedModelInfo[]> {
     .where(eq(fineTunedModelRegistry.isActive, true))
     .orderBy(desc(fineTunedModelRegistry.registeredAt));
 
-  return models.map((m) => ({
-    modelId: m.modelId,
-    agentId: m.agentId,
-    jobId: m.jobId,
-    baseModel: m.baseModel,
-    provider: m.provider,
-    lifecycle: m.lifecycle as FineTunedModelInfo['lifecycle'],
-    evalPassRate: m.evalPassRate ?? 0,
-    datasetVersion: m.datasetVersion,
-    costPer1kInput: m.costPer1kInput ?? undefined,
-    costPer1kOutput: m.costPer1kOutput ?? undefined,
-    registeredAt: m.registeredAt.toISOString(),
-    promotedAt: m.promotedAt?.toISOString(),
-  }));
+  return models.map((m) => {
+    const _pAt = m.promotedAt?.toISOString();
+    return {
+      modelId: m.modelId,
+      agentId: m.agentId,
+      jobId: m.jobId,
+      baseModel: m.baseModel,
+      provider: m.provider,
+      lifecycle: m.lifecycle as FineTunedModelInfo['lifecycle'],
+      evalPassRate: m.evalPassRate ?? 0,
+      datasetVersion: m.datasetVersion,
+      registeredAt: m.registeredAt.toISOString(),
+      ...(m.costPer1kInput != null ? { costPer1kInput: m.costPer1kInput } : {}),
+      ...(m.costPer1kOutput != null ? { costPer1kOutput: m.costPer1kOutput } : {}),
+      ...(_pAt !== undefined ? { promotedAt: _pAt } : {}),
+    } satisfies FineTunedModelInfo;
+  });
 }
 
 export async function deprecateFineTunedModel(modelId: string): Promise<void> {
@@ -189,6 +193,7 @@ export async function getModelLineage(modelId: string): Promise<{
     .orderBy(desc(fineTuningJobs.createdAt))
     .limit(20);
 
+  const _mPAt = model.promotedAt?.toISOString();
   return {
     model: {
       modelId: model.modelId,
@@ -199,11 +204,11 @@ export async function getModelLineage(modelId: string): Promise<{
       lifecycle: model.lifecycle as FineTunedModelInfo['lifecycle'],
       evalPassRate: model.evalPassRate ?? 0,
       datasetVersion: model.datasetVersion,
-      costPer1kInput: model.costPer1kInput ?? undefined,
-      costPer1kOutput: model.costPer1kOutput ?? undefined,
       registeredAt: model.registeredAt.toISOString(),
-      promotedAt: model.promotedAt?.toISOString(),
-    },
+      ...(model.costPer1kInput != null ? { costPer1kInput: model.costPer1kInput } : {}),
+      ...(model.costPer1kOutput != null ? { costPer1kOutput: model.costPer1kOutput } : {}),
+      ...(_mPAt !== undefined ? { promotedAt: _mPAt } : {}),
+    } satisfies FineTunedModelInfo,
     baseModelName: model.baseModel,
     jobHistory: jobs.map((j) => ({
       jobId: j.jobId,

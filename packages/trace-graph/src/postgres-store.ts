@@ -48,20 +48,20 @@ export interface TracesTableLike extends PgTable {
  * delegate to the DB when a backend supports it.
  */
 export interface PostgresTraceHistoryFilter {
-  traceId?: string;
-  requestId?: string;
-  sessionId?: string;
-  workflowId?: string;
-  agentId?: string;
-  domain?: string;
-  model?: string;
-  status?: string;
-  after?: string;
-  before?: string;
-  hasErrors?: boolean;
-  hasPolicyBlock?: boolean;
-  limit?: number;
-  offset?: number;
+  traceId?: string | undefined;
+  requestId?: string | undefined;
+  sessionId?: string | undefined;
+  workflowId?: string | undefined;
+  agentId?: string | undefined;
+  domain?: string | undefined;
+  model?: string | undefined;
+  status?: string | undefined;
+  after?: string | undefined;
+  before?: string | undefined;
+  hasErrors?: boolean | undefined;
+  hasPolicyBlock?: boolean | undefined;
+  limit?: number | undefined;
+  offset?: number | undefined;
 }
 
 export interface PostgresTraceHistoryResult<T = unknown> {

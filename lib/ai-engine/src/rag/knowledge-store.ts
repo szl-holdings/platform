@@ -320,7 +320,7 @@ async function fallbackKeywordSearch(
 }
 
 export async function buildRAGContext(query: string, domain?: string): Promise<string> {
-  const results = await retrieveRelevantContext(query, { domain, limit: 5 });
+  const results = await retrieveRelevantContext(query, { ...(domain !== undefined ? { domain } : {}), limit: 5 });
   if (results.length === 0) return '';
 
   const parts = results.map(
@@ -334,11 +334,8 @@ export async function buildRAGContext(query: string, domain?: string): Promise<s
 export async function buildRAGContextWithCitations(
   query: string,
   domain?: string,
-): Promise<{
-  context: string;
-  citations: Array<{ id: string; title: string; domain: string; score: number }>;
-}> {
-  const results = await retrieveRelevantContext(query, { domain, limit: 5 });
+): Promise<{ context: string; citations: Array<{ id: string; title: string; domain: string; score: number }> }> {
+  const results = await retrieveRelevantContext(query, { ...(domain !== undefined ? { domain } : {}), limit: 5 });
   if (results.length === 0) return { context: '', citations: [] };
 
   const parts = results.map(
@@ -389,11 +386,12 @@ export async function getKnowledgeStoreStats(): Promise<{
       bySourceType[row.source_type] = row.count;
     }
 
+    const _vectorChunks = vectorResult ? (vectorResult.rows[0] as { total: number }).total : undefined;
     return {
       totalDocuments: (totalResult.rows[0] as { total: number }).total,
       byDomain,
       bySourceType,
-      vectorChunks: vectorResult ? (vectorResult.rows[0] as { total: number }).total : undefined,
+      ...(_vectorChunks !== undefined ? { vectorChunks: _vectorChunks } : {}),
     };
   } catch {
     return { totalDocuments: 0, byDomain: {}, bySourceType: {} };

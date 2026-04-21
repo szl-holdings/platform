@@ -12,8 +12,9 @@
  *       correlation cluster → estate-readiness recommendation → ops dispatch
  */
 
-import type { EvidenceItem, Recommendation, Signal } from '@workspace/ontology';
-import { createEvidenceItem, createRecommendation, createSignal } from '@workspace/ontology';
+import type { Signal } from '@workspace/ontology/signal';
+import type { EvidenceItem, Recommendation } from '@workspace/ontology';
+import { createSignal, createEvidenceItem, createRecommendation } from '@workspace/ontology';
 
 export type CarlotaJoEstateNarrative = typeof CARLOTA_JO_ESTATE_NARRATIVE;
 

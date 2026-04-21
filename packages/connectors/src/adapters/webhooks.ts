@@ -5,8 +5,8 @@
  * Emits signals from payment processors, partner APIs, and market data feeds.
  */
 
-import type { Signal, SignalInput } from '@workspace/ontology';
-import type { ConnectorMetadata, ConnectorStatus, WebhookConnector } from '../interfaces.js';
+import type { Signal, SignalInput } from "@workspace/ontology/signal";
+import type { ConnectorMetadata, ConnectorStatus, WebhookConnector } from "../interfaces.js";
 
 export class WebhookDemoAdapter implements WebhookConnector {
   readonly category = 'webhooks' as const;

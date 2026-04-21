@@ -123,10 +123,10 @@ export interface SalesforceQueryResult<T> {
 
 export interface SalesforceConnectionStatus {
   connected: boolean;
-  instanceUrl?: string;
-  orgId?: string;
-  userId?: string;
-  username?: string;
+  instanceUrl?: string | undefined;
+  orgId?: string | undefined;
+  userId?: string | undefined;
+  username?: string | undefined;
 }
 
 export interface SalesforceCdcEvent {
@@ -467,7 +467,7 @@ export class SalesforceAdapter extends ServiceAdapter {
     return response.json() as Promise<T>;
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const status = await this.testConnection();
     if (!status.connected) throw new Error('Salesforce connection verification failed');
   }

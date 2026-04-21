@@ -87,7 +87,7 @@ export function computePriorityScore(params: {
   const impactScore = scoreBusinessImpact(businessImpact);
   const urgencyScore = scoreUrgency(urgency);
   const confidenceScore = scoreConfidence(confidence);
-  const slaScore = signals.length > 0 ? scoreSlaProximity(signals[0]) : 0.1;
+  const slaScore = signals.length > 0 ? scoreSlaProximity(signals[0]!) : 0.1;
   const crossDomainScore = scoreCrossDomainRisk(
     businessImpact,
     signals.map((s) => s.domain),

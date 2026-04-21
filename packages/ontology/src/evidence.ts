@@ -227,15 +227,16 @@ export type Recommendation = z.infer<typeof RecommendationSchema>;
 
 export type RecommendationPolicyStatus = {
   outcome: 'allow' | 'require-approval' | 'block' | 'pending';
-  policyIds?: string[];
-  reason?: string;
-  evaluatedAt?: string;
+  policyIds?: string[] | undefined;
+  reason?: string | undefined;
+  evaluatedAt?: string | undefined;
 };
 
 export type RecommendationInput = Omit<
   Recommendation,
-  'recommendationId' | 'schemaVersion' | 'status'
+  'recommendationId' | 'schemaVersion' | 'status' | 'tags'
 > & {
+  tags?: string[] | undefined;
   /**
    * Policy status at recommendation construction time.
    * Must be explicitly passed at every call site to ensure the proof-chain is

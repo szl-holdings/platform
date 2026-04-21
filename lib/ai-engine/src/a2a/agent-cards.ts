@@ -338,8 +338,8 @@ export class A2ATaskManager {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       completedAt: null,
-      callerAgentId,
-      callerPlatform,
+      ...(callerAgentId !== undefined ? { callerAgentId } : {}),
+      ...(callerPlatform !== undefined ? { callerPlatform } : {}),
     };
     this.tasks.set(task.taskId, task);
     if (this.tasks.size > A2ATaskManager.MAX_TASKS) {

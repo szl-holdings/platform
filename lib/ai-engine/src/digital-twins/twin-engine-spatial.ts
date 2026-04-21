@@ -134,7 +134,7 @@ export async function persistSnapshot(
     })
     .returning({ id: spatialTwinSnapshotsTable.id });
 
-  return inserted.id;
+  return inserted!.id;
 }
 
 export async function getSnapshotHistory(
@@ -288,7 +288,7 @@ export async function branchScenario(
     })
     .returning({ id: spatialTwinSnapshotsTable.id });
 
-  return { branchId, snapshotId: branchSnapshot.id };
+  return { branchId, snapshotId: branchSnapshot!.id };
 }
 
 export async function replayState(

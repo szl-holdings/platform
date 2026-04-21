@@ -162,8 +162,8 @@ export async function replayPlan(
     .map((s) => ({
       stepId: s.stepId,
       title: s.title,
-      routeProvider: s.route.modelProvider,
-      routeModel: s.route.model,
+      ...(s.route.modelProvider !== undefined ? { routeProvider: s.route.modelProvider } : {}),
+      ...(s.route.model !== undefined ? { routeModel: s.route.model } : {}),
       requiredApproval: s.requiredApproval,
       riskLevel: s.riskLevel,
     }));

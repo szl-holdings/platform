@@ -53,27 +53,27 @@ export interface EvalCase {
   id: string;
   domain: string;
   label: string;
-  evalType?: EvalType;
+  evalType?: EvalType | undefined;
   graderType: GraderType;
   input: Record<string, unknown>;
   groundTruth: Record<string, unknown>;
-  expectedOutcome?: 'pass' | 'fail';
-  policies?: string[];
-  tags?: string[];
-  isRedTeam?: boolean;
-  weight?: number;
-  traceId?: string;
+  expectedOutcome?: 'pass' | 'fail' | undefined;
+  policies?: string[] | undefined;
+  tags?: string[] | undefined;
+  isRedTeam?: boolean | undefined;
+  weight?: number | undefined;
+  traceId?: string | undefined;
 }
 
 export interface EvalSuiteDef {
   suiteId: string;
   name: string;
-  description?: string;
+  description?: string | undefined;
   domain: string;
-  evalType?: EvalType;
+  evalType?: EvalType | undefined;
   cases: EvalCase[];
-  tags?: string[];
-  version?: number;
+  tags?: string[] | undefined;
+  version?: number | undefined;
 }
 
 export type EvalExecutor = (
@@ -82,19 +82,19 @@ export type EvalExecutor = (
   domain: string,
 ) => Promise<{
   output: Record<string, unknown>;
-  model?: string;
+  model?: string | undefined;
   latencyMs: number;
   tokensUsed: number;
   costUsd: number;
-  traceId?: string;
-  metadata?: Record<string, unknown>;
+  traceId?: string | undefined;
+  metadata?: Record<string, unknown> | undefined;
 }>;
 
 export interface EvalCaseResult {
   caseId: string;
   domain: string;
   label: string;
-  evalType?: EvalType;
+  evalType?: EvalType | undefined;
   graderType: GraderType;
   input: Record<string, unknown>;
   output: Record<string, unknown>;
@@ -105,11 +105,11 @@ export interface EvalCaseResult {
   latencyMs: number;
   tokensUsed: number;
   costUsd: number;
-  model?: string;
-  traceId?: string;
-  failureReason?: string;
-  graderDetails?: Record<string, unknown>;
-  tags?: string[];
+  model?: string | undefined;
+  traceId?: string | undefined;
+  failureReason?: string | undefined;
+  graderDetails?: Record<string, unknown> | undefined;
+  tags?: string[] | undefined;
 }
 
 export interface EvalForgeMetrics {
@@ -184,10 +184,10 @@ export interface EvalForgeMetrics {
 export interface EvalRunReport {
   runId: string;
   suiteId: string;
-  suiteName?: string;
-  domain?: string;
-  evalType?: EvalType;
-  model?: string;
+  suiteName?: string | undefined;
+  domain?: string | undefined;
+  evalType?: EvalType | undefined;
+  model?: string | undefined;
   runAt: string;
   triggeredBy: string;
   totalCases: number;
@@ -199,13 +199,13 @@ export interface EvalRunReport {
   totalCostUsd: number;
   totalTokensUsed: number;
   metrics: EvalForgeMetrics;
-  hasRegression?: boolean;
-  regressionSeverity?: 'none' | 'minor' | 'major' | 'critical';
-  regressionNotes?: string[];
-  improvementNotes?: string[];
-  baselineRunId?: string;
+  hasRegression?: boolean | undefined;
+  regressionSeverity?: 'none' | 'minor' | 'major' | 'critical' | undefined;
+  regressionNotes?: string[] | undefined;
+  improvementNotes?: string[] | undefined;
+  baselineRunId?: string | undefined;
   caseResults: EvalCaseResult[];
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, unknown> | undefined;
 }
 
 export const EvalRunReportSummarySchema = z.object({

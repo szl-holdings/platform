@@ -101,7 +101,7 @@ export async function registerSource(params: RegisterSourceParams): Promise<Worl
       })
       .where(eq(worldlineSourceRegistryTable.id, existing.id))
       .returning();
-    return updated;
+    return updated!;
   }
 
   const [source] = await db
@@ -124,7 +124,7 @@ export async function registerSource(params: RegisterSourceParams): Promise<Worl
     })
     .returning();
 
-  return source;
+  return source!;
 }
 
 export async function recordFetch(
@@ -192,7 +192,7 @@ export async function recordFetch(
     .set(stateUpdate)
     .where(eq(worldlineSourceRegistryTable.id, sourceId));
 
-  return log;
+  return log!;
 }
 
 export async function publishSignals(params: {

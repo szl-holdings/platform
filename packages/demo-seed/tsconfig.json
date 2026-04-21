@@ -8,6 +8,9 @@
     "composite": true,
     "types": ["node"]
   },
-  "references": [{ "path": "../../lib/db" }],
+  "references": [
+    { "path": "../../lib/db" },
+    { "path": "../../packages/constellation" }
+  ],
   "include": ["src/**/*"]
 }

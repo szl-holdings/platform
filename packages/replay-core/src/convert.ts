@@ -14,9 +14,9 @@
  *   exportDataset() + batchConvert() → ReplaySnapshot[] (ready for replay)
  */
 
-import type { FlowSnapshot, IncidentSnapshot } from './capture.ts';
-import type { ReplaySnapshot } from './snapshot.ts';
-import { createSnapshot } from './snapshot.ts';
+import type { FlowSnapshot, IncidentSnapshot } from './capture.js';
+import type { ReplaySnapshot } from './snapshot.js';
+import { createSnapshot } from './snapshot.js';
 
 export interface IncidentConvertOptions {
   /** Override the scenario ID (defaults to the incident's scenarioId). */

@@ -69,9 +69,9 @@ function VideoPlayer({
         title: CHAPTER_META[key]?.title ?? key,
         subtitle: CHAPTER_META[key]?.subtitle ?? '',
         startMs: cumulative,
-        durationMs: durations[key],
+        durationMs: durations[key]!,
       };
-      cumulative += durations[key];
+      cumulative += durations[key]!;
       return ch;
     });
   }, [activeCut]);
@@ -165,10 +165,10 @@ export default function VideoTemplate() {
       <motion.div
         className="absolute h-[1px] bg-gradient-to-r from-transparent via-[var(--color-hero-accent)] to-transparent z-10"
         animate={{
-          left: ['-10%', '0%', '10%', '5%', '20%'][currentScene],
-          width: ['120%', '100%', '80%', '90%', '60%'][currentScene],
-          top: ['50%', '20%', '80%', '30%', '50%'][currentScene],
-          opacity: [0.3, 0.6, 0.4, 0.7, 0.2][currentScene],
+          left: ['-10%', '0%', '10%', '5%', '20%'][currentScene]!,
+          width: ['120%', '100%', '80%', '90%', '60%'][currentScene]!,
+          top: ['50%', '20%', '80%', '30%', '50%'][currentScene]!,
+          opacity: [0.3, 0.6, 0.4, 0.7, 0.2][currentScene]!,
         }}
         transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
       />

@@ -255,8 +255,8 @@ export async function batchPredict(
         modelType: request.modelType,
         entityId: entity.entityId,
         entityType: entity.entityType,
-        inputFeatures: entity.inputFeatures,
-        includeExplanation: request.includeExplanation,
+        ...(entity.inputFeatures !== undefined ? { inputFeatures: entity.inputFeatures } : {}),
+        ...(request.includeExplanation !== undefined ? { includeExplanation: request.includeExplanation } : {}),
       });
       results.push(result);
     } catch (err) {

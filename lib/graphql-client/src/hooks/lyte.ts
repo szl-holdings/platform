@@ -1,4 +1,4 @@
-import { gql, useMutation, useQuery, useSubscription } from '@apollo/client';
+import { gql, useQuery, useMutation, useSubscription } from "@apollo/client";
 
 export const GET_LYTE_INCIDENTS = gql`
   query GetLyteIncidents($status: String, $severity: String, $limit: Int, $offset: Int) {
@@ -75,30 +75,20 @@ export const LYTE_INCIDENT_UPDATED = gql`
   }
 `;
 
-export function useLyteIncidents(variables?: {
-  status?: string;
-  severity?: string;
-  limit?: number;
-  offset?: number;
-}) {
-  return useQuery(GET_LYTE_INCIDENTS, { variables });
+export function useLyteIncidents(variables?: { status?: string; severity?: string; limit?: number; offset?: number }) {
+  return useQuery(GET_LYTE_INCIDENTS, variables !== undefined ? { variables } : {});
 }
 
-export function useLyteSignals(variables?: {
-  severity?: string;
-  status?: string;
-  limit?: number;
-  offset?: number;
-}) {
-  return useQuery(GET_LYTE_SIGNALS, { variables });
+export function useLyteSignals(variables?: { severity?: string; status?: string; limit?: number; offset?: number }) {
+  return useQuery(GET_LYTE_SIGNALS, variables !== undefined ? { variables } : {});
 }
 
 export function useLyteActions(variables?: { state?: string; limit?: number; offset?: number }) {
-  return useQuery(GET_LYTE_ACTIONS, { variables });
+  return useQuery(GET_LYTE_ACTIONS, variables !== undefined ? { variables } : {});
 }
 
 export function useLyteWorkspaces(variables?: { limit?: number; offset?: number }) {
-  return useQuery(GET_LYTE_WORKSPACES, { variables });
+  return useQuery(GET_LYTE_WORKSPACES, variables !== undefined ? { variables } : {});
 }
 
 export function useUpdateLyteIncident() {

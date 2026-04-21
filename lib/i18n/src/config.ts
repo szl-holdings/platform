@@ -45,7 +45,6 @@ export function createI18n(config: I18nConfig): I18nInstance {
       ),
       defaultNS: namespace,
       ns: [namespace],
-      lng: undefined,
       fallbackLng: defaultLocale,
       supportedLngs: supportedLocales,
       interpolation: {

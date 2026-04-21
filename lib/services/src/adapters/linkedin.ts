@@ -1,4 +1,4 @@
-import { ServiceAdapter, type ServiceStatus } from '../base.js';
+import { ServiceAdapter, type ServiceStatus } from "../base.js";
 
 export interface LinkedInPostResult {
   posted: boolean;
@@ -9,47 +9,47 @@ export interface LinkedInPostResult {
 }
 
 export class LinkedInAdapter extends ServiceAdapter {
-  readonly name = 'linkedin';
-  readonly description = 'LinkedIn Share API for posting content and articles';
-  readonly requiredEnvVars = ['LINKEDIN_ACCESS_TOKEN'];
+  readonly name = "linkedin";
+  readonly description = "LinkedIn Share API for posting content and articles";
+  readonly requiredEnvVars = ["LINKEDIN_ACCESS_TOKEN"];
 
   private get accessToken(): string | undefined {
-    return process.env['LINKEDIN_ACCESS_TOKEN'];
+    return process.env["LINKEDIN_ACCESS_TOKEN"];
   }
 
   private get personUrn(): string | undefined {
-    return process.env['LINKEDIN_PERSON_URN'];
+    return process.env["LINKEDIN_PERSON_URN"];
   }
 
   private get orgUrn(): string | undefined {
-    return process.env['LINKEDIN_ORG_URN'];
+    return process.env["LINKEDIN_ORG_URN"];
   }
 
-  get status(): ServiceStatus {
-    if (this.accessToken) return 'LIVE_CONFIGURED';
-    return 'MOCKED_DEMO_MODE';
+  override get status(): ServiceStatus {
+    if (this.accessToken) return "LIVE_CONFIGURED";
+    return "MOCKED_DEMO_MODE";
   }
 
-  get isLive(): boolean {
+  override get isLive(): boolean {
     return !!this.accessToken;
   }
 
-  get presentEnvVars(): string[] {
+  override get presentEnvVars(): string[] {
     const present: string[] = [];
-    if (this.accessToken) present.push('LINKEDIN_ACCESS_TOKEN');
-    if (this.personUrn) present.push('LINKEDIN_PERSON_URN');
-    if (this.orgUrn) present.push('LINKEDIN_ORG_URN');
+    if (this.accessToken) present.push("LINKEDIN_ACCESS_TOKEN");
+    if (this.personUrn) present.push("LINKEDIN_PERSON_URN");
+    if (this.orgUrn) present.push("LINKEDIN_ORG_URN");
     return present;
   }
 
-  get missingEnvVars(): string[] {
+  override get missingEnvVars(): string[] {
     if (this.accessToken) return [];
-    return ['LINKEDIN_ACCESS_TOKEN'];
+    return ["LINKEDIN_ACCESS_TOKEN"];
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     if (!this.isLive) return;
-    const res = await fetch('https://api.linkedin.com/v2/userinfo', {
+    const res = await fetch("https://api.linkedin.com/v2/userinfo", {
       headers: { Authorization: `Bearer ${this.accessToken}` },
     });
     if (!res.ok) throw new Error(`LinkedIn API health check failed: ${res.status}`);
@@ -60,9 +60,9 @@ export class LinkedInAdapter extends ServiceAdapter {
     articleUrl?: string;
     articleTitle?: string;
     articleDescription?: string;
-    visibility?: 'PUBLIC' | 'CONNECTIONS';
+    visibility?: "PUBLIC" | "CONNECTIONS";
   }): Promise<LinkedInPostResult> {
-    const authorUrn = this.personUrn || this.orgUrn || 'urn:li:person:mock';
+    const authorUrn = this.personUrn || this.orgUrn || "urn:li:person:mock";
 
     if (!this.isLive) {
       const mockId = `mock_linkedin_${Date.now()}`;
@@ -77,36 +77,32 @@ export class LinkedInAdapter extends ServiceAdapter {
     try {
       const shareContent: Record<string, unknown> = {
         author: authorUrn,
-        lifecycleState: 'PUBLISHED',
+        lifecycleState: "PUBLISHED",
         specificContent: {
-          'com.linkedin.ugc.ShareContent': {
+          "com.linkedin.ugc.ShareContent": {
             shareCommentary: { text: opts.text },
-            shareMediaCategory: opts.articleUrl ? 'ARTICLE' : 'NONE',
-            ...(opts.articleUrl
-              ? {
-                  media: [
-                    {
-                      status: 'READY',
-                      originalUrl: opts.articleUrl,
-                      title: { text: opts.articleTitle || '' },
-                      description: { text: opts.articleDescription || '' },
-                    },
-                  ],
-                }
-              : {}),
+            shareMediaCategory: opts.articleUrl ? "ARTICLE" : "NONE",
+            ...(opts.articleUrl ? {
+              media: [{
+                status: "READY",
+                originalUrl: opts.articleUrl,
+                title: { text: opts.articleTitle || "" },
+                description: { text: opts.articleDescription || "" },
+              }],
+            } : {}),
           },
         },
         visibility: {
-          'com.linkedin.ugc.MemberNetworkVisibility': opts.visibility || 'PUBLIC',
+          "com.linkedin.ugc.MemberNetworkVisibility": opts.visibility || "PUBLIC",
         },
       };
 
-      const res = await fetch('https://api.linkedin.com/v2/ugcPosts', {
-        method: 'POST',
+      const res = await fetch("https://api.linkedin.com/v2/ugcPosts", {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${this.accessToken}`,
-          'Content-Type': 'application/json',
-          'X-Restli-Protocol-Version': '2.0.0',
+          "Content-Type": "application/json",
+          "X-Restli-Protocol-Version": "2.0.0",
         },
         body: JSON.stringify(shareContent),
       });
@@ -116,7 +112,7 @@ export class LinkedInAdapter extends ServiceAdapter {
         return { posted: false, mock: false, error: `LinkedIn API ${res.status}: ${err}` };
       }
 
-      const postId = res.headers.get('x-restli-id') || `li_${Date.now()}`;
+      const postId = res.headers.get("x-restli-id") || `li_${Date.now()}`;
       return {
         posted: true,
         externalId: postId,
@@ -124,11 +120,7 @@ export class LinkedInAdapter extends ServiceAdapter {
         mock: false,
       };
     } catch (err) {
-      return {
-        posted: false,
-        mock: false,
-        error: err instanceof Error ? err.message : String(err),
-      };
+      return { posted: false, mock: false, error: err instanceof Error ? err.message : String(err) };
     }
   }
 }

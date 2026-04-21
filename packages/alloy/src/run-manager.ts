@@ -80,7 +80,7 @@ export class RunManager {
         'approval',
         `Operator ${params.decision} approval ${params.approvalId}${params.note ? `: ${params.note}` : ''}`,
         {
-          stepId,
+          ...(stepId !== undefined ? { stepId } : {}),
           metadata: {
             approvalId: params.approvalId,
             decision: params.decision,
@@ -145,7 +145,7 @@ export class RunManager {
       }
       this.pendingApprovals.delete(key);
     }
-    return { runId, approvalId: params.approvalId, resumed, finalState };
+    return { runId, approvalId: params.approvalId, resumed, ...(finalState !== undefined ? { finalState } : {}) };
   }
 
   createRun(config: RunConfig): RunState {
@@ -245,20 +245,20 @@ export class RunManager {
               const gateResult = await this.approvalGate.requestApproval({
                 runId,
                 workflowId: config.workflowId,
-                agentId: config.agentId,
+                ...(config.agentId !== undefined ? { agentId: config.agentId } : {}),
                 stepId: step.id,
                 stepIndex: i,
                 reason: decision.reason,
                 requiredApprovers: decision.requiredApprovers ?? [],
-                matchedRuleId: decision.matchedRuleId,
-                tier: config.policyTier,
+                ...(decision.matchedRuleId !== undefined
+                  ? { matchedRuleId: decision.matchedRuleId }
+                  : {}),
+                ...(config.policyTier !== undefined ? { tier: config.policyTier } : {}),
                 orgId: (meta['orgId'] as number | string | null | undefined) ?? null,
-                requestedById:
-                  (meta['requestedById'] as number | string | null | undefined) ?? null,
-                requestedByRole:
-                  typeof meta['requestedByRole'] === 'string'
-                    ? (meta['requestedByRole'] as string)
-                    : undefined,
+                requestedById: (meta['requestedById'] as number | string | null | undefined) ?? null,
+                ...(typeof meta['requestedByRole'] === 'string'
+                  ? { requestedByRole: meta['requestedByRole'] as string }
+                  : {}),
                 context: { stepId: step.id, stepIndex: i, ...meta },
               });
               approvalId = gateResult?.approvalId;

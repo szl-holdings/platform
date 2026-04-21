@@ -2,6 +2,7 @@ export * from './profiles/index.js';
 export * from './registry.js';
 export * from './schema.js';
 
+import { DomainProfileRegistry } from './registry.js';
 import {
   aegisSecurityIncident,
   carlotaPrivateAdvisory,
@@ -10,7 +11,6 @@ import {
   terraRealEstateIntel,
   vesselsMartitimeRisk,
 } from './profiles/index.js';
-import { ProfileRegistry } from './registry.js';
 
 export {
   aegisSecurityIncident as aegisSecurityIncidentProfile,
@@ -21,15 +21,15 @@ export {
   vesselsMartitimeRisk as vesselsMaritime_RiskProfile,
 } from './profiles/index.js';
 
-export function createDefaultProfileRegistry(): ProfileRegistry {
-  const registry = new ProfileRegistry();
+export function createDefaultProfileRegistry(): DomainProfileRegistry {
+  const registry = new DomainProfileRegistry([]);
 
-  registry.register(vesselsMartitimeRisk);
-  registry.register(lyteGovernanceOps);
-  registry.register(terraRealEstateIntel);
-  registry.register(aegisSecurityIncident);
-  registry.register(prismLegalMatter);
-  registry.register(carlotaPrivateAdvisory);
+  registry.registerProfile(vesselsMartitimeRisk);
+  registry.registerProfile(lyteGovernanceOps);
+  registry.registerProfile(terraRealEstateIntel);
+  registry.registerProfile(aegisSecurityIncident);
+  registry.registerProfile(prismLegalMatter);
+  registry.registerProfile(carlotaPrivateAdvisory);
 
   return registry;
 }

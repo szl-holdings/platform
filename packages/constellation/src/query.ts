@@ -196,7 +196,7 @@ export async function upsertNode(input: CreateCstNode): Promise<CstNode> {
     })
     .returning();
 
-  return mapDbNodeToSchema(row);
+  return mapDbNodeToSchema(row!);
 }
 
 export async function upsertNodeAlias(
@@ -254,7 +254,7 @@ export async function upsertEdge(input: CreateCstEdge): Promise<CstEdge> {
     })
     .returning();
 
-  return mapDbEdgeToSchema(row);
+  return mapDbEdgeToSchema(row!);
 }
 
 export async function addEdgeEvidence(input: AddCstEvidence): Promise<CstEdgeEvidence> {
@@ -273,15 +273,15 @@ export async function addEdgeEvidence(input: AddCstEvidence): Promise<CstEdgeEvi
     .returning();
 
   return {
-    id: row.id,
-    edgeId: row.edgeId,
-    evidenceType: row.evidenceType,
-    payload: (row.payload ?? {}) as Record<string, unknown>,
-    sourceId: row.sourceId ?? undefined,
-    sourceLabel: row.sourceLabel ?? undefined,
-    confidence: row.confidence ?? 1.0,
-    recordedBy: row.recordedBy ?? undefined,
-    recordedAt: row.recordedAt.toISOString(),
+    id: row!.id,
+    edgeId: row!.edgeId,
+    evidenceType: row!.evidenceType,
+    payload: (row!.payload ?? {}) as Record<string, unknown>,
+    sourceId: row!.sourceId ?? undefined,
+    sourceLabel: row!.sourceLabel ?? undefined,
+    confidence: row!.confidence ?? 1.0,
+    recordedBy: row!.recordedBy ?? undefined,
+    recordedAt: row!.recordedAt.toISOString(),
   };
 }
 

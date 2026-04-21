@@ -6,7 +6,7 @@ export class MITREAdapter extends ServiceAdapter {
     'MITRE ATT&CK Enterprise Matrix — Tactics, Techniques & Procedures (TTPs). Free, no key required. Hosted on GitHub.';
   readonly requiredEnvVars: string[] = [];
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const res = await fetch(
       'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json',
       { signal: AbortSignal.timeout(20000), headers: { 'User-Agent': 'SZL/1.0' } },

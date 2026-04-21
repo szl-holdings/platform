@@ -89,7 +89,7 @@ export function useVideoPlayer(options: UseVideoPlayerOptions): UseVideoPlayerRe
   return {
     currentScene,
     totalScenes,
-    currentSceneKey: sceneKeys[currentScene],
+    currentSceneKey: sceneKeys[currentScene] ?? '',
     hasEnded,
     totalElapsedMs,
     sceneElapsedMs,

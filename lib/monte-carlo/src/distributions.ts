@@ -54,7 +54,7 @@ export interface ConstantDistribution {
 export interface CustomDistribution {
   type: 'custom';
   values: number[];
-  weights?: number[];
+  weights?: number[] | undefined;
 }
 
 export type Distribution =

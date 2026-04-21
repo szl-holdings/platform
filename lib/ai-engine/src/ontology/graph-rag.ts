@@ -530,7 +530,7 @@ export class GraphRAGEngine {
       evidenceChain: deduplicateEvidence(allEvidenceLinks),
       crossDomainInsights,
       reasoningPath,
-      subgraph,
+      ...(subgraph !== undefined ? { subgraph } : {}),
     };
 
     reasoningPath.push({

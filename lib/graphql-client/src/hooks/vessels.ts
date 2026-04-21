@@ -1,4 +1,4 @@
-import { gql, useQuery, useSubscription } from '@apollo/client';
+import { gql, useQuery, useSubscription } from "@apollo/client";
 
 export const GET_VESSELS = gql`
   query GetVessels($status: String, $limit: Int, $offset: Int) {
@@ -79,7 +79,7 @@ export const VESSEL_POSITION_UPDATED = gql`
 `;
 
 export function useVessels(variables?: { status?: string; limit?: number; offset?: number }) {
-  return useQuery(GET_VESSELS, { variables });
+  return useQuery(GET_VESSELS, variables !== undefined ? { variables } : {});
 }
 
 export function useVessel(id: string) {
@@ -87,27 +87,17 @@ export function useVessel(id: string) {
 }
 
 export function useVesselPositions(variables?: { vesselId?: string; limit?: number }) {
-  return useQuery(GET_VESSEL_POSITIONS, { variables });
+  return useQuery(GET_VESSEL_POSITIONS, variables !== undefined ? { variables } : {});
 }
 
-export function useVesselRoutes(variables?: {
-  vesselId?: string;
-  status?: string;
-  limit?: number;
-  offset?: number;
-}) {
-  return useQuery(GET_VESSEL_ROUTES, { variables });
+export function useVesselRoutes(variables?: { vesselId?: string; status?: string; limit?: number; offset?: number }) {
+  return useQuery(GET_VESSEL_ROUTES, variables !== undefined ? { variables } : {});
 }
 
-export function useVesselEvents(variables?: {
-  vesselId?: string;
-  severity?: string;
-  limit?: number;
-  offset?: number;
-}) {
-  return useQuery(GET_VESSEL_EVENTS, { variables });
+export function useVesselEvents(variables?: { vesselId?: string; severity?: string; limit?: number; offset?: number }) {
+  return useQuery(GET_VESSEL_EVENTS, variables !== undefined ? { variables } : {});
 }
 
 export function useVesselPositionUpdated(variables?: { vesselId?: string }) {
-  return useSubscription(VESSEL_POSITION_UPDATED, { variables });
+  return useSubscription(VESSEL_POSITION_UPDATED, variables !== undefined ? { variables } : {});
 }

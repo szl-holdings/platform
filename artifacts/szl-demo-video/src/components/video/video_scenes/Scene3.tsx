@@ -25,16 +25,8 @@ export function Scene3() {
   ];
 
   // Connections between nodes (index pairs)
-  const edges = [
-    [0, 1],
-    [0, 2],
-    [1, 3],
-    [2, 4],
-    [1, 5],
-    [2, 5],
-    [3, 5],
-    [4, 5],
-    [0, 5],
+  const edges: [number, number][] = [
+    [0, 1], [0, 2], [1, 3], [2, 4], [1, 5], [2, 5], [3, 5], [4, 5], [0, 5]
   ];
 
   return (
@@ -67,10 +59,10 @@ export function Scene3() {
           {edges.map(([a, b], i) => (
             <motion.line
               key={i}
-              x1={nodes[a].x}
-              y1={nodes[a].y}
-              x2={nodes[b].x}
-              y2={nodes[b].y}
+              x1={nodes[a]!.x}
+              y1={nodes[a]!.y}
+              x2={nodes[b]!.x}
+              y2={nodes[b]!.y}
               stroke="var(--color-lyte-cyan)"
               strokeWidth="2"
               strokeOpacity="0.3"

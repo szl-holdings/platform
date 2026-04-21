@@ -3,10 +3,11 @@
  */
 import {
   db,
+  firestormScenariosTable,
+  firestormSimulationRunsTable,
   firestormFindingsTable,
   firestormRunsTable,
-  firestormScenariosTable,
-} from '@szl-holdings/db';
+} from "@szl-holdings/db";
 import { desc, eq } from 'drizzle-orm';
 
 export class FirestormRepository {
@@ -30,17 +31,17 @@ export class FirestormRepository {
   async listRunsForScenario(scenarioId: number, limit = 20) {
     return db
       .select()
-      .from(firestormRunsTable)
-      .where(eq(firestormRunsTable.scenarioId, scenarioId))
-      .orderBy(desc(firestormRunsTable.startedAt))
+      .from(firestormSimulationRunsTable)
+      .where(eq(firestormSimulationRunsTable.scenarioId, scenarioId))
+      .orderBy(desc(firestormSimulationRunsTable.startedAt))
       .limit(limit);
   }
 
-  async listFindingsForRun(runId: number) {
+  async listFindingsForRun(simulationRunId: number) {
     return db
       .select()
       .from(firestormFindingsTable)
-      .where(eq(firestormFindingsTable.runId, runId))
+      .where(eq(firestormFindingsTable.simulationRunId, simulationRunId))
       .orderBy(desc(firestormFindingsTable.severity));
   }
 }

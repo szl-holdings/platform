@@ -69,10 +69,10 @@ export interface PagerDutyWebhookEvent {
 
 export interface PagerDutyConnectionStatus {
   connected: boolean;
-  accountName?: string;
-  accountId?: string;
-  userId?: string;
-  userEmail?: string;
+  accountName?: string | undefined;
+  accountId?: string | undefined;
+  userId?: string | undefined;
+  userEmail?: string | undefined;
 }
 
 const MOCK_SERVICES: PagerDutyService[] = [
@@ -271,7 +271,7 @@ export class PagerDutyAdapter extends ServiceAdapter {
     return response.json() as Promise<T>;
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const status = await this.testConnection();
     if (!status.connected) throw new Error('PagerDuty connection verification failed');
   }

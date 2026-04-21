@@ -91,9 +91,8 @@ export type { SzlTreasuryNarrative } from './narrative-szl-treasury';
 export { SZL_TREASURY_NARRATIVE } from './narrative-szl-treasury';
 export type { VesselsPortCongestionNarrative } from './narrative-vessels-port-congestion';
 export { VESSELS_PORT_CONGESTION_NARRATIVE } from './narrative-vessels-port-congestion';
-export { CONSTELLATION_EDGES, CONSTELLATION_NODES, seedConstellation } from './seed-constellation';
+export { seedConstellationDemo as seedConstellation } from './seed-constellation';
 export { clearDemoData, seedAllNarratives, seedNarrative } from './seed-runner';
-
 export { seedSignalMesh } from './seed-signal-mesh';
 
 export const SIGNAL_MESH_NARRATIVES = [

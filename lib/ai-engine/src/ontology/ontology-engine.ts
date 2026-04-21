@@ -352,7 +352,7 @@ export class OntologyEngine {
       domain: row!.sourceApp,
       metadata: (row!.metadata as Record<string, unknown>) ?? {},
       tags: row!.tags ?? [],
-      riskScore: entity.riskScore,
+      ...(entity.riskScore !== undefined ? { riskScore: entity.riskScore } : {}),
       lastUpdated: row!.updatedAt.toISOString(),
     };
 
@@ -405,6 +405,7 @@ export class OntologyEngine {
     if (!row) return null;
 
     const meta = (row.metadata as Record<string, unknown>) ?? {};
+    const _riskScore0 = meta.riskScore as number | undefined;
     const entity: OntologyEntity = {
       id: row.id,
       type: (meta.ontologyType as OntologyEntityType) ?? mapEntityType(row.entityType),
@@ -412,7 +413,7 @@ export class OntologyEngine {
       domain: row.sourceApp,
       metadata: meta,
       tags: row.tags ?? [],
-      riskScore: meta.riskScore as number | undefined,
+      ...(_riskScore0 !== undefined ? { riskScore: _riskScore0 } : {}),
       lastUpdated: row.updatedAt.toISOString(),
     };
 
@@ -434,21 +435,20 @@ export class OntologyEngine {
       )
       .limit(limit);
 
-    return rows
-      .map((row) => {
-        const meta = (row.metadata as Record<string, unknown>) ?? {};
-        return {
-          id: row.id,
-          type: (meta.ontologyType as OntologyEntityType) ?? mapEntityType(row.entityType),
-          name: row.name,
-          domain: row.sourceApp,
-          metadata: meta,
-          tags: row.tags ?? [],
-          riskScore: meta.riskScore as number | undefined,
-          lastUpdated: row.updatedAt.toISOString(),
-        };
-      })
-      .filter((e) => !types || types.includes(e.type));
+    return rows.map((row) => {
+      const meta = (row.metadata as Record<string, unknown>) ?? {};
+      const _riskScoreA = meta.riskScore as number | undefined;
+      return {
+        id: row.id,
+        type: (meta.ontologyType as OntologyEntityType) ?? mapEntityType(row.entityType),
+        name: row.name,
+        domain: row.sourceApp,
+        metadata: meta,
+        tags: row.tags ?? [],
+        ...(_riskScoreA !== undefined ? { riskScore: _riskScoreA } : {}),
+        lastUpdated: row.updatedAt.toISOString(),
+      };
+    }).filter((e) => !types || types.includes(e.type));
   }
 
   async traverseGraph(
@@ -1141,6 +1141,7 @@ export class OntologyEngine {
 
     return rows.map((row) => {
       const meta = (row.metadata as Record<string, unknown>) ?? {};
+      const _riskScoreB = meta.riskScore as number | undefined;
       return {
         id: row.id,
         type: (meta.ontologyType as OntologyEntityType) ?? mapEntityType(row.entityType),
@@ -1148,7 +1149,7 @@ export class OntologyEngine {
         domain: row.sourceApp,
         metadata: meta,
         tags: row.tags ?? [],
-        riskScore: meta.riskScore as number | undefined,
+        ...(_riskScoreB !== undefined ? { riskScore: _riskScoreB } : {}),
         lastUpdated: row.updatedAt.toISOString(),
       };
     });

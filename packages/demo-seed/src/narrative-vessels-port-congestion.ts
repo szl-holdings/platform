@@ -11,8 +11,9 @@
  *       correlation cluster → reroute recommendation → operator approval gate
  */
 
-import type { EvidenceItem, Recommendation, Signal } from '@workspace/ontology';
-import { createEvidenceItem, createRecommendation, createSignal } from '@workspace/ontology';
+import type { Signal } from '@workspace/ontology/signal';
+import type { EvidenceItem, Recommendation } from '@workspace/ontology';
+import { createSignal, createEvidenceItem, createRecommendation } from '@workspace/ontology';
 
 export type VesselsPortCongestionNarrative = typeof VESSELS_PORT_CONGESTION_NARRATIVE;
 

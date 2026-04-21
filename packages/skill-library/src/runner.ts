@@ -112,8 +112,8 @@ export async function runSkill(
   const stepOutputs = new Map<string, Record<string, unknown>>();
 
   for (let i = 0; i < skill.steps.length; i++) {
-    const stepDef = skill.steps[i];
-    const stepRecord: SkillRunStepRecord = run.steps[i];
+    const stepDef = skill.steps[i]!;
+    const stepRecord: SkillRunStepRecord = run.steps[i]!;
 
     stepRecord.status = 'running';
     stepRecord.startedAt = Date.now();
@@ -154,7 +154,7 @@ export async function runSkill(
   }
 
   const lastStepOutputs =
-    stepOutputs.size > 0 ? (stepOutputs.get(skill.steps[skill.steps.length - 1].id) ?? {}) : {};
+    stepOutputs.size > 0 ? stepOutputs.get(skill.steps[skill.steps.length - 1]!.id) ?? {} : {};
 
   run.status = 'completed';
   run.outputs = lastStepOutputs;

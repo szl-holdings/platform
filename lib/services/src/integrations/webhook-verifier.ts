@@ -13,7 +13,7 @@ export interface WebhookVerifyOptions {
 
 export interface WebhookVerifyResult {
   valid: boolean;
-  reason?: string;
+  reason?: string | undefined;
 }
 
 export function verifyWebhookSignature(opts: WebhookVerifyOptions): WebhookVerifyResult {

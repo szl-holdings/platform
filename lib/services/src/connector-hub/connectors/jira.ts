@@ -163,12 +163,19 @@ export class JiraConnector extends ToolConnector {
         return adapter.createIssue({
           projectKey: String(params['projectKey']),
           summary: String(params['summary']),
-          issueType: params['issueType'] ? String(params['issueType']) : undefined,
-          description: params['description'] ? String(params['description']) : undefined,
-          priority: params['priority']
-            ? (String(params['priority']) as 'Highest' | 'High' | 'Medium' | 'Low' | 'Lowest')
-            : undefined,
-          assigneeEmail: params['assignee'] ? String(params['assignee']) : undefined,
+          ...(params['issueType'] ? { issueType: String(params['issueType']) } : {}),
+          ...(params['description'] ? { description: String(params['description']) } : {}),
+          ...(params['priority']
+            ? {
+                priority: String(params['priority']) as
+                  | 'Highest'
+                  | 'High'
+                  | 'Medium'
+                  | 'Low'
+                  | 'Lowest',
+              }
+            : {}),
+          ...(params['assignee'] ? { assigneeEmail: String(params['assignee']) } : {}),
         });
       case 'get_active_sprints':
         return adapter.getActiveSprints(params['boardId'] ? Number(params['boardId']) : undefined);
@@ -186,7 +193,7 @@ export class JiraConnector extends ToolConnector {
     }
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     await services.jira.testConnection();
   }
 }

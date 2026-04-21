@@ -5,8 +5,8 @@
  * and cross-domain escalation messages.
  */
 
-import type { Signal, SignalInput } from '@workspace/ontology';
-import type { ConnectorMetadata, ConnectorStatus, MessagingConnector } from '../interfaces.js';
+import type { Signal, SignalInput } from "@workspace/ontology/signal";
+import type { ConnectorMetadata, ConnectorStatus, MessagingConnector } from "../interfaces.js";
 
 export class MessagingDemoAdapter implements MessagingConnector {
   readonly category = 'messaging' as const;

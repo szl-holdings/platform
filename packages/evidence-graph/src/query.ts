@@ -5,7 +5,7 @@
  * Supports full evidence chain traversal: recommendation → evidence items → signals → entities.
  */
 
-import type { EntitySnapshot, EvidenceItem, Recommendation } from '@workspace/ontology';
+import type { EvidenceItem, Recommendation } from '@workspace/ontology';
 import { defaultEntityRegistry } from '@workspace/ontology';
 import {
   defaultEvidenceStore,
@@ -14,10 +14,12 @@ import {
   type RecommendationStore,
 } from './store.js';
 
+type RegistryEntitySnapshot = NonNullable<ReturnType<typeof defaultEntityRegistry.get>>;
+
 export interface EvidenceChain {
   recommendation: Recommendation;
   evidenceItems: EvidenceItem[];
-  entities: EntitySnapshot[];
+  entities: RegistryEntitySnapshot[];
   summary: string;
   confidenceBreakdown: Array<{
     evidenceId: string;
@@ -32,7 +34,7 @@ export interface EvidenceChain {
 
 export interface WhyResult {
   entityId: string;
-  entitySnapshot: EntitySnapshot | null;
+  entitySnapshot: RegistryEntitySnapshot | null;
   activeRecommendations: EvidenceChain[];
   allEvidenceItems: EvidenceItem[];
   narrative: string;
@@ -54,9 +56,11 @@ export class EvidenceGraphQuery {
       for (const ref of item.entityRefs) entityIds.add(ref.entityId);
     }
 
-    const entities = Array.from(entityIds)
-      .map((id) => defaultEntityRegistry.get(id))
-      .filter((e): e is EntitySnapshot => e !== undefined);
+    const entities: RegistryEntitySnapshot[] = [];
+    for (const id of entityIds) {
+      const e = defaultEntityRegistry.get(id);
+      if (e !== undefined) entities.push(e);
+    }
 
     const totalWeight = evidenceItems.reduce((sum, e) => sum + e.weight, 0);
     const confidenceBreakdown = evidenceItems.map((e) => ({

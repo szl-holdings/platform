@@ -146,7 +146,7 @@ export class SlackConnector extends ToolConnector {
           title: String(params['title']),
           message: String(params['message']),
           severity: (params['severity'] as 'info' | 'warning' | 'critical') ?? 'info',
-          source: params['source'] ? String(params['source']) : undefined,
+          ...(params['source'] ? { source: String(params['source']) } : {}),
         });
       case 'get_bot_info':
         return adapter.getBotInfo();
@@ -157,7 +157,7 @@ export class SlackConnector extends ToolConnector {
           severity: String(params['severity']) as 'info' | 'warning' | 'critical',
           title: String(params['title']),
           message: String(params['message']),
-          source: params['source'] ? String(params['source']) : undefined,
+          ...(params['source'] ? { source: String(params['source']) } : {}),
         });
       case 'send_webhook':
         return adapter.sendWebhookMessage(
@@ -169,7 +169,7 @@ export class SlackConnector extends ToolConnector {
     }
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     await services.slack.getBotInfo();
   }
 }

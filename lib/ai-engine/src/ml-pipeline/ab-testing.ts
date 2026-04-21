@@ -114,7 +114,7 @@ export function createAbTest(input: {
     testId: `ab-${crypto.randomUUID()}`,
     name: input.name,
     domain: input.domain,
-    description: input.description,
+    ...(input.description !== undefined ? { description: input.description } : {}),
     controlModelVersionId: input.controlModelVersionId,
     treatmentModelVersionId: input.treatmentModelVersionId,
     trafficSplitPct: input.trafficSplitPct ?? 0.5,

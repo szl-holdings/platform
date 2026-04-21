@@ -67,7 +67,7 @@ export async function createSignalOverlay(
     })
     .returning();
 
-  return overlay;
+  return overlay!;
 }
 
 export async function querySignalOverlays(
@@ -114,8 +114,8 @@ export async function getActiveOverlaysForEntity(
   return querySignalOverlays({
     entityId,
     isActive: true,
-    orgId: options?.orgId,
-    signalType: options?.signalType,
+    ...(options?.orgId !== undefined ? { orgId: options.orgId } : {}),
+    ...(options?.signalType !== undefined ? { signalType: options.signalType } : {}),
   });
 }
 

@@ -146,7 +146,7 @@ export class SiemConnector extends ToolConnector {
     }
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     services.siem.getCorrelationRules();
   }
 }

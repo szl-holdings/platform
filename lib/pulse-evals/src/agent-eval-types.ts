@@ -108,7 +108,7 @@ export interface CaseScoringResult {
   dimension_scores: EvalDimensionScores;
   aggregate_score: number;
   safety_passed: boolean;
-  failure_summary?: CaseFailureSummary;
+  failure_summary?: CaseFailureSummary | undefined;
   actual_output: Record<string, unknown>;
   latency_ms: number;
   model_version: string;
@@ -133,14 +133,14 @@ export interface AgentEvalRunRecord {
   aggregate_score: number;
   failure_summary: CaseFailureSummary[];
   case_results: CaseScoringResult[];
-  comparison_baseline_eval_id?: string;
-  delta_aggregate_score?: number;
+  comparison_baseline_eval_id?: string | undefined;
+  delta_aggregate_score?: number | undefined;
   regression_cases: number;
   promotion_approved: boolean;
   promotion_decision: PromotionDecision;
   promotion_blocked_reasons: string[];
   promotion_pending_reasons: string[];
-  ledger_entry_id?: string;
+  ledger_entry_id?: string | undefined;
 }
 
 export interface ReplayChainRecord {
@@ -157,8 +157,8 @@ export interface ReplayOutputDiff {
   chain_id: string;
   current_output: Record<string, unknown>;
   candidate_output: Record<string, unknown>;
-  current_recommendation?: string;
-  candidate_recommendation?: string;
+  current_recommendation?: string | undefined;
+  candidate_recommendation?: string | undefined;
   severity_escalated: boolean;
   severity_deescalated: boolean;
   recommendation_changed: boolean;
@@ -172,7 +172,7 @@ export interface AgentReplayRunRecord {
   agent_id: AgentId;
   model_version_current: string;
   model_version_candidate: string;
-  source_date_range?: { from: string; to: string };
+  source_date_range?: { from: string; to: string } | undefined;
   chains_replayed: number;
   output_diffs: ReplayOutputDiff[];
   output_changes: number;
@@ -181,9 +181,9 @@ export interface AgentReplayRunRecord {
   recommendation_changes: number;
   safety_violations_current: number;
   safety_violations_candidate: number;
-  reviewer?: string;
+  reviewer?: string | undefined;
   review_status: 'pending' | 'approved' | 'rejected';
-  review_notes?: string;
+  review_notes?: string | undefined;
   created_at: string;
 }
 
@@ -223,7 +223,7 @@ export interface PromotionGateResult {
   aggregate_score: number;
   safety_flag_score: number;
   regression_cases: number;
-  replay_run_id?: string;
+  replay_run_id?: string | undefined;
   replay_reviewed: boolean;
   human_reviewer_approved: boolean;
   blocked_reasons: string[];

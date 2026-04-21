@@ -633,14 +633,15 @@ async function checkGovernanceEnforce(
       approvalLevel?: string;
       violations?: Array<{ reason: string }>;
     };
+    const _reason = data.requiresApproval
+      ? `Requires ${data.approvalLevel ?? 'manager'}-level approval before execution`
+      : data.violations?.[0]?.reason;
     return {
       allowed: data.allowed && !data.requiresApproval,
-      hardBlocked: data.hardBlocked,
-      requiresApproval: data.requiresApproval,
-      approvalLevel: data.approvalLevel,
-      reason: data.requiresApproval
-        ? `Requires ${data.approvalLevel ?? 'manager'}-level approval before execution`
-        : data.violations?.[0]?.reason,
+      ...(data.hardBlocked !== undefined ? { hardBlocked: data.hardBlocked } : {}),
+      ...(data.requiresApproval !== undefined ? { requiresApproval: data.requiresApproval } : {}),
+      ...(data.approvalLevel !== undefined ? { approvalLevel: data.approvalLevel } : {}),
+      ...(_reason !== undefined ? { reason: _reason } : {}),
     };
   } catch {
     return {
@@ -2914,8 +2915,8 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       isHighStakes,
       validationPassed: validation?.validated ?? true,
       validationNotes: validation?.validatorNotes ?? '',
-      orgId: options.orgId,
       metadata: { workflowId, traceId },
+      ...(options.orgId !== undefined ? { orgId: options.orgId } : {}),
     });
 
     const recentTrajectories = trajectoryStore.getTrajectories(20);
@@ -3078,7 +3079,7 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
     const telemetry: OrchestrationTelemetry = {
       orchestrationId,
       timestamp: Date.now(),
-      routingDecision: { selectedAgents: targetAgents.map((a) => a.id), routingScores },
+      routingDecision: { selectedAgents: targetAgents.map((a) => a.id), ...(routingScores !== undefined ? { routingScores } : {}) },
       agentPerformance: agentTelemetry.getAllProfiles(),
       causalChains,
       conflicts,
@@ -3342,22 +3343,38 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       consciousnessTriggeredValidation,
     ).catch(() => {});
 
-    return {
+    const _ret: {
+      agentResponses: AgentCallResult[];
+      synthesis: string;
+      validation: ValidationResult | null;
+      averageConfidence: number;
+      isHighStakes: boolean;
+      routingScores?: SemanticRoutingScore[];
+      telemetry?: OrchestrationTelemetry;
+      traceId?: string;
+      trajectoryId?: string;
+      budgetStatus?: ReturnType<typeof budgetManager.getBudgetStatus>;
+      multiHypothesis?: Awaited<ReturnType<typeof runMultiHypothesisReasoning>>;
+      redTeam?: Awaited<ReturnType<typeof runRedTeamProtocol>>;
+      precomputeHit?: boolean;
+      consciousness?: ConsciousnessSnapshot;
+    } = {
       agentResponses,
       synthesis,
       validation,
       averageConfidence,
       isHighStakes,
-      routingScores,
-      telemetry,
-      traceId,
-      trajectoryId: trajectory.trajectoryId,
-      budgetStatus,
-      multiHypothesis,
-      redTeam,
-      precomputeHit: false,
-      consciousness,
     };
+    _ret.telemetry = telemetry;
+    if (traceId !== undefined) _ret.traceId = traceId;
+    _ret.trajectoryId = trajectory.trajectoryId;
+    _ret.budgetStatus = budgetStatus;
+    if (multiHypothesis !== undefined) _ret.multiHypothesis = multiHypothesis;
+    if (redTeam !== undefined) _ret.redTeam = redTeam;
+    _ret.precomputeHit = false;
+    if (consciousness !== undefined) _ret.consciousness = consciousness;
+    if (routingScores !== undefined) _ret.routingScores = routingScores;
+    return _ret;
   }
 }
 

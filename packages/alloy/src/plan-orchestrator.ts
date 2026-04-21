@@ -226,7 +226,7 @@ async function runPlan(args: RunPlanArgs): Promise<PlanRunResult> {
         awaitingApproval: {
           planId,
           stepId: step.stepId,
-          reason: step.approvalReason,
+          ...(step.approvalReason !== undefined ? { reason: step.approvalReason } : {}),
         },
         fallbacksUsed,
       };
@@ -298,7 +298,7 @@ async function runPlan(args: RunPlanArgs): Promise<PlanRunResult> {
     executed.push({
       stepId: step.stepId,
       status: 'failed',
-      error: result.error,
+      ...(result.error !== undefined ? { error: result.error } : {}),
       durationMs,
     });
     ledger.record(

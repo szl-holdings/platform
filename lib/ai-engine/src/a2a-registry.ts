@@ -366,6 +366,9 @@ export class A2ARegistryService {
   }
 
   private rowToCard(row: typeof a2aAgentCards.$inferSelect): AgentCard {
+    const _inputSchema = row.inputSchema as Record<string, unknown> | undefined;
+    const _outputSchema = row.outputSchema as Record<string, unknown> | undefined;
+    const _metadata = row.metadata as Record<string, unknown> | undefined;
     return {
       agentId: row.agentId,
       name: row.name,
@@ -373,8 +376,8 @@ export class A2ARegistryService {
       version: row.version,
       description: row.description,
       capabilities: row.capabilities ?? [],
-      inputSchema: row.inputSchema as Record<string, unknown> | undefined,
-      outputSchema: row.outputSchema as Record<string, unknown> | undefined,
+      ...(_inputSchema !== undefined ? { inputSchema: _inputSchema } : {}),
+      ...(_outputSchema !== undefined ? { outputSchema: _outputSchema } : {}),
       preferredModel: row.preferredModel,
       preferredProvider: row.preferredProvider,
       collaboratesWith: row.collaboratesWith ?? [],
@@ -383,7 +386,7 @@ export class A2ARegistryService {
       successRate: row.successRate,
       status: row.status as AgentCard['status'],
       lastHeartbeatAt: row.lastHeartbeatAt,
-      metadata: row.metadata as Record<string, unknown> | undefined,
+      ...(_metadata !== undefined ? { metadata: _metadata } : {}),
     };
   }
 }

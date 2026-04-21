@@ -32,7 +32,7 @@ export interface ScoringOutput {
   safety_passed: boolean;
   passed: boolean;
   partial: boolean;
-  failure_summary?: CaseFailureSummary;
+  failure_summary?: CaseFailureSummary | undefined;
 }
 
 function scoreSemanticAccuracy(

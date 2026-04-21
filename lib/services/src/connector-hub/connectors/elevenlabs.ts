@@ -67,7 +67,7 @@ export class ElevenLabsConnector extends ToolConnector {
     }
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     await services.elevenlabs.testConnection();
   }
 }

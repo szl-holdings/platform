@@ -1,4 +1,4 @@
-import { gql, useMutation, useQuery, useSubscription } from '@apollo/client';
+import { gql, useQuery, useMutation, useSubscription } from "@apollo/client";
 
 export const GET_FIRESTORM_INCIDENTS = gql`
   query GetFirestormIncidents($status: String, $severity: String, $limit: Int, $offset: Int) {
@@ -79,30 +79,20 @@ export const FIRESTORM_INCIDENT_UPDATED = gql`
   }
 `;
 
-export function useFirestormIncidents(variables?: {
-  status?: string;
-  severity?: string;
-  limit?: number;
-  offset?: number;
-}) {
-  return useQuery(GET_FIRESTORM_INCIDENTS, { variables });
+export function useFirestormIncidents(variables?: { status?: string; severity?: string; limit?: number; offset?: number }) {
+  return useQuery(GET_FIRESTORM_INCIDENTS, variables !== undefined ? { variables } : {});
 }
 
 export function useFirestormAssessments(variables?: { limit?: number; offset?: number }) {
-  return useQuery(GET_FIRESTORM_ASSESSMENTS, { variables });
+  return useQuery(GET_FIRESTORM_ASSESSMENTS, variables !== undefined ? { variables } : {});
 }
 
-export function useFirestormFindings(variables?: {
-  assessmentId?: string;
-  severity?: string;
-  limit?: number;
-  offset?: number;
-}) {
-  return useQuery(GET_FIRESTORM_FINDINGS, { variables });
+export function useFirestormFindings(variables?: { assessmentId?: string; severity?: string; limit?: number; offset?: number }) {
+  return useQuery(GET_FIRESTORM_FINDINGS, variables !== undefined ? { variables } : {});
 }
 
 export function useFirestormAssets(variables?: { limit?: number; offset?: number }) {
-  return useQuery(GET_FIRESTORM_ASSETS, { variables });
+  return useQuery(GET_FIRESTORM_ASSETS, variables !== undefined ? { variables } : {});
 }
 
 export function useUpdateFirestormIncident() {

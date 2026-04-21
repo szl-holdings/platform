@@ -36,6 +36,7 @@ function saveRegistry(tenantOrgId: number, registry: Record<string, Evidence>): 
     retries: existing?.retries ?? 0,
     modelsUsed: existing?.modelsUsed ?? [],
     promptVersions: existing?.promptVersions ?? [],
+    operatorComments: existing?.operatorComments ?? [],
     metadata: { tenantOrgId },
     output: { evidence: registry },
   });

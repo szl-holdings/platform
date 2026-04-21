@@ -168,7 +168,7 @@ export async function ingestTerraProperty(
       name: `${property.address}, ${property.city}`,
       entityType: 'real_estate_property',
       domain: 'terra',
-      subDomain: property.propertyType ?? undefined,
+      ...(property.propertyType != null ? { subDomain: property.propertyType } : {}),
       description,
       canonicalId: `terra_property_${property.id}`,
       sourceIds: [`terra_properties:${property.id}`],
@@ -201,7 +201,7 @@ export async function ingestTerraProperty(
       sourceType: 'document',
       tags: ['real_estate', property.propertyType ?? 'property', property.state],
       importance: 6,
-      extraMetadata: tenantId ? { orgId: tenantId } : undefined,
+      ...(tenantId ? { extraMetadata: { orgId: tenantId } } : {}),
     });
   } catch (err) {
     console.error(
@@ -283,7 +283,7 @@ export async function ingestAegisIncident(
       sourceType: 'incident',
       tags: [incident.incidentType, incident.severity, 'security'],
       importance: incident.severity === 'critical' ? 10 : 7,
-      extraMetadata: tenantId ? { orgId: tenantId } : undefined,
+      ...(tenantId ? { extraMetadata: { orgId: tenantId } } : {}),
     });
   } catch (err) {
     console.error(
@@ -330,7 +330,7 @@ export async function ingestCarlotaService(
       name: service.name,
       entityType: 'consulting_service',
       domain: 'carlota_jo',
-      subDomain: service.category ?? undefined,
+      ...(service.category != null ? { subDomain: service.category } : {}),
       description,
       canonicalId: `carlota_service_${service.id}`,
       sourceIds: [`carlota_services:${service.id}`],
@@ -491,7 +491,7 @@ export async function ingestFirestormFinding(
       sourceType: 'security_finding',
       tags: [finding.severity, finding.status, 'firestorm', 'finding'],
       importance: finding.severity === 'critical' ? 10 : finding.severity === 'high' ? 8 : 5,
-      extraMetadata: tenantId ? { orgId: tenantId } : undefined,
+      ...(tenantId ? { extraMetadata: { orgId: tenantId } } : {}),
     });
   } catch (err) {
     console.error(
@@ -565,7 +565,7 @@ export async function ingestFirestormScenario(
       sourceType: 'threat_scenario',
       tags: [scenario.category, scenario.severity, 'firestorm', 'scenario'],
       importance: scenario.severity === 'critical' ? 9 : 6,
-      extraMetadata: tenantId ? { orgId: tenantId } : undefined,
+      ...(tenantId ? { extraMetadata: { orgId: tenantId } } : {}),
     });
   } catch (err) {
     console.error(
@@ -638,7 +638,7 @@ export async function ingestFirestormAlert(
       sourceType: 'security_alert',
       tags: [alert.severity, alert.source, 'firestorm', 'alert'],
       importance: alert.severity === 'critical' ? 10 : alert.severity === 'high' ? 8 : 6,
-      extraMetadata: tenantId ? { orgId: tenantId } : undefined,
+      ...(tenantId ? { extraMetadata: { orgId: tenantId } } : {}),
     });
   } catch (err) {
     console.error(`[domain-embedding-hooks] Failed to ingest Firestorm alert id=${alert.id}:`, err);

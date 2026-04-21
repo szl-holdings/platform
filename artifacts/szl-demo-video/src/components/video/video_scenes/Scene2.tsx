@@ -370,14 +370,11 @@ export function Scene2() {
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div
-              className="font-mono text-[1vw] tracking-widest mb-[1vh]"
-              style={{ color: surfaces[activeSurface].color }}
-            >
-              {surfaces[activeSurface].desc}
+            <div className="font-mono text-[1vw] tracking-widest mb-[1vh]" style={{ color: surfaces[activeSurface]!.color }}>
+              {surfaces[activeSurface]!.desc}
             </div>
             <div className="font-display text-[4vw] tracking-tight leading-none text-[var(--color-text-primary)]">
-              {surfaces[activeSurface].name}
+              {surfaces[activeSurface]!.name}
             </div>
           </motion.div>
         </AnimatePresence>
@@ -392,7 +389,7 @@ export function Scene2() {
               exit={{ opacity: 0, rotateX: -20, y: -50, scale: 0.9 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             >
-              {surfaces[activeSurface].mock}
+              {surfaces[activeSurface]!.mock}
             </motion.div>
           </AnimatePresence>
         </div>

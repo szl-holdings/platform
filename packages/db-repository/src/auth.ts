@@ -3,12 +3,12 @@
  */
 import {
   db,
+  orgMembersTable,
   organizationsTable,
-  orgMembershipsTable,
   sessionsTable,
   usersTable,
-} from '@szl-holdings/db';
-import { and, eq, gt } from 'drizzle-orm';
+} from "@szl-holdings/db";
+import { eq, and, gt } from "drizzle-orm";
 
 export class AuthRepository {
   async findUserById(id: number) {
@@ -33,10 +33,10 @@ export class AuthRepository {
 
   async listOrgsForUser(userId: number) {
     return db
-      .select({ org: organizationsTable, membership: orgMembershipsTable })
-      .from(orgMembershipsTable)
-      .innerJoin(organizationsTable, eq(orgMembershipsTable.orgId, organizationsTable.id))
-      .where(eq(orgMembershipsTable.userId, userId));
+      .select({ org: organizationsTable, membership: orgMembersTable })
+      .from(orgMembersTable)
+      .innerJoin(organizationsTable, eq(orgMembersTable.orgId, organizationsTable.id))
+      .where(eq(orgMembersTable.userId, userId));
   }
 }
 

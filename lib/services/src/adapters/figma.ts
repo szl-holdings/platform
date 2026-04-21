@@ -56,7 +56,7 @@ export class FigmaAdapter extends ServiceAdapter {
     return response.json();
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const result = await this.testConnection();
     if (!result.connected) throw new Error('Figma connection verification failed');
   }

@@ -281,7 +281,7 @@ export async function executeWithKernel<T = unknown>(
       durationMs: Date.now() - startTime,
       timestamp: new Date().toISOString(),
       calledBy: options.calledBy,
-      tenantId: options.tenantId,
+      ...(options.tenantId !== undefined ? { tenantId: options.tenantId } : {}),
     });
     return {
       success: true,
@@ -313,7 +313,7 @@ export async function executeWithKernel<T = unknown>(
       durationMs: Date.now() - startTime,
       timestamp: new Date().toISOString(),
       calledBy: options.calledBy,
-      tenantId: options.tenantId,
+      ...(options.tenantId !== undefined ? { tenantId: options.tenantId } : {}),
     });
     return {
       success: false,
@@ -346,7 +346,7 @@ export async function executeWithKernel<T = unknown>(
       durationMs: Date.now() - startTime,
       timestamp: new Date().toISOString(),
       calledBy: options.calledBy,
-      tenantId: options.tenantId,
+      ...(options.tenantId !== undefined ? { tenantId: options.tenantId } : {}),
     });
     return {
       success: false,
@@ -399,7 +399,7 @@ export async function executeWithKernel<T = unknown>(
     durationMs: Date.now() - startTime,
     timestamp: new Date().toISOString(),
     calledBy: options.calledBy,
-    tenantId: options.tenantId,
+    ...(options.tenantId !== undefined ? { tenantId: options.tenantId } : {}),
   });
 
   return {

@@ -338,7 +338,7 @@ describe('executeWorkflow — live execution', () => {
       definition: def,
       policyEvaluation: makeMinimalPolicyEvaluation(),
     });
-    const step = run.steps[0];
+    const step = run.steps[0]!;
     expect(step.startedAt).toBeGreaterThan(0);
     expect(step.completedAt).toBeDefined();
     expect(step.completedAt).toBeGreaterThan(0);
@@ -370,8 +370,8 @@ describe('executeWorkflow — failure and rollback', () => {
       policyEvaluation: makeMinimalPolicyEvaluation(),
     });
     expect(run.status).toBe('failed');
-    expect(run.steps[0].status).toBe('failed');
-    expect(run.steps[0].error).toContain('intentional failure');
+    expect(run.steps[0]!.status).toBe('failed');
+    expect(run.steps[0]!.error).toContain('intentional failure');
   });
 
   it('performs rollback when rollbackPolicy=step and rollback handler is registered', async () => {
@@ -450,7 +450,7 @@ describe('executeWorkflow — unregistered handler graceful fallback', () => {
       policyEvaluation: makeMinimalPolicyEvaluation(),
     });
     expect(run.status).toBe('completed');
-    expect(run.steps[0].outputs).toBeDefined();
-    expect(String(run.steps[0].outputs!['result'])).toContain('not registered');
+    expect(run.steps[0]!.outputs).toBeDefined();
+    expect(String(run.steps[0]!.outputs!['result'])).toContain('not registered');
   });
 });

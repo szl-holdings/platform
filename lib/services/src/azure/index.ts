@@ -2,8 +2,8 @@ import { type Env, getEnv } from '@szl-holdings/env';
 
 export interface AzureServiceConfig {
   enabled: boolean;
-  connectionString?: string;
-  endpoint?: string;
+  connectionString?: string | undefined;
+  endpoint?: string | undefined;
 }
 
 function isAzureEnabled(envKey: keyof Env): boolean {

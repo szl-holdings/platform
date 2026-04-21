@@ -44,7 +44,7 @@ export class ConfluenceAdapter extends ServiceAdapter {
     return process.env['CONFLUENCE_BASE_URL'];
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const result = await this.testConnection();
     if (!result.connected) throw new Error('Confluence connection verification failed');
   }

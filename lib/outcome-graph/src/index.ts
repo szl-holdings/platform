@@ -1,22 +1,22 @@
 import {
   db,
+  outcomeGraphTable,
+  outcomeGraphLearningJobsTable,
   type InsertOutcomeGraph,
-  type OutcomeDecisionStatus,
-  type OutcomeDomain,
   type OutcomeGraph,
   type OutcomeGraphLearningJob,
+  type OutcomeDecisionStatus,
   type OutcomeResult,
-  outcomeGraphLearningJobsTable,
-  outcomeGraphTable,
-} from '@szl-holdings/db';
-import { and, avg, count, desc, eq, gte, sql } from 'drizzle-orm';
+  type OutcomeDomain,
+} from "@szl-holdings/db";
+import { eq, and, desc, sql, gte, count, avg } from "drizzle-orm";
 
 export type {
-  OutcomeDecisionStatus,
-  OutcomeDomain,
   OutcomeGraph,
   OutcomeGraphLearningJob,
+  OutcomeDecisionStatus,
   OutcomeResult,
+  OutcomeDomain,
 };
 
 export interface RecordRecommendationParams {
@@ -39,7 +39,7 @@ export interface RecordRecommendationParams {
 
 export interface RecordDecisionParams {
   outcomeId: number;
-  userDecision: 'accepted' | 'rejected' | 'overridden' | 'deferred';
+  userDecision: "accepted" | "rejected" | "overridden" | "deferred";
   decidedByUserId?: number;
   overrideReason?: string;
   correctionReason?: string;
@@ -67,38 +67,35 @@ export interface OutcomeStats {
 export async function recordRecommendation(
   params: RecordRecommendationParams,
 ): Promise<OutcomeGraph> {
-  const [row] = await db
-    .insert(outcomeGraphTable)
-    .values({
-      orgId: params.orgId ?? null,
-      domain: params.domain,
-      entityType: params.entityType,
-      entityId: params.entityId ?? null,
-      recommendationId: params.recommendationId ?? null,
-      recommendationText: params.recommendationText,
-      recommendationAction: params.recommendationAction ?? null,
-      agentId: params.agentId ?? null,
-      modelId: params.modelId ?? null,
-      modelProvider: params.modelProvider ?? null,
-      confidence: params.confidence ?? 0.5,
-      status: 'pending',
-      proofChainId: params.proofChainId ?? null,
-      correlationId: params.correlationId ?? null,
-      domainConditions: params.domainConditions ?? {},
-      metadata: params.metadata ?? {},
-    })
-    .returning();
-  return row;
+  const [row] = await db.insert(outcomeGraphTable).values({
+    orgId: params.orgId ?? null,
+    domain: params.domain,
+    entityType: params.entityType,
+    entityId: params.entityId ?? null,
+    recommendationId: params.recommendationId ?? null,
+    recommendationText: params.recommendationText,
+    recommendationAction: params.recommendationAction ?? null,
+    agentId: params.agentId ?? null,
+    modelId: params.modelId ?? null,
+    modelProvider: params.modelProvider ?? null,
+    confidence: params.confidence ?? 0.5,
+    status: "pending",
+    proofChainId: params.proofChainId ?? null,
+    correlationId: params.correlationId ?? null,
+    domainConditions: params.domainConditions ?? {},
+    metadata: params.metadata ?? {},
+  }).returning();
+  return row!;
 }
 
 export async function recordDecision(params: RecordDecisionParams): Promise<OutcomeGraph> {
   const now = new Date();
 
   const statusMap: Record<string, OutcomeDecisionStatus> = {
-    accepted: 'accepted',
-    rejected: 'rejected',
-    overridden: 'overridden',
-    deferred: 'deferred',
+    accepted: "accepted",
+    rejected: "rejected",
+    overridden: "overridden",
+    deferred: "deferred",
   };
 
   const [row] = await db
@@ -107,7 +104,7 @@ export async function recordDecision(params: RecordDecisionParams): Promise<Outc
       userDecision: params.userDecision,
       decidedByUserId: params.decidedByUserId ?? null,
       decidedAt: now,
-      status: statusMap[params.userDecision] ?? 'accepted',
+      status: statusMap[params.userDecision] ?? "accepted",
       overrideReason: params.overrideReason ?? null,
       correctionReason: params.correctionReason ?? null,
       actionExecuted: params.actionExecuted ?? null,
@@ -118,9 +115,7 @@ export async function recordDecision(params: RecordDecisionParams): Promise<Outc
     .returning();
 
   if (!row) {
-    throw Object.assign(new Error(`OutcomeGraph record ${params.outcomeId} not found`), {
-      code: 'NOT_FOUND',
-    });
+    throw Object.assign(new Error(`OutcomeGraph record ${params.outcomeId} not found`), { code: "NOT_FOUND" });
   }
   return row;
 }
@@ -132,13 +127,13 @@ export async function recordOutcome(params: RecordOutcomeParams): Promise<Outcom
     .where(eq(outcomeGraphTable.id, params.outcomeId));
 
   if (!existing) {
-    throw Object.assign(new Error(`OutcomeGraph record ${params.outcomeId} not found`), {
-      code: 'NOT_FOUND',
-    });
+    throw Object.assign(new Error(`OutcomeGraph record ${params.outcomeId} not found`), { code: "NOT_FOUND" });
   }
 
   const now = new Date();
-  const timeToOutcomeMs = existing.decidedAt ? now.getTime() - existing.decidedAt.getTime() : null;
+  const timeToOutcomeMs = existing.decidedAt
+    ? now.getTime() - existing.decidedAt.getTime()
+    : null;
 
   const [row] = await db
     .update(outcomeGraphTable)
@@ -148,13 +143,13 @@ export async function recordOutcome(params: RecordOutcomeParams): Promise<Outcom
       outcomeRecordedAt: now,
       timeToOutcomeMs,
       laterImpact: params.laterImpact ?? {},
-      status: 'executed',
+      status: "executed",
       updatedAt: now,
     })
     .where(eq(outcomeGraphTable.id, params.outcomeId))
     .returning();
 
-  return row;
+  return row!;
 }
 
 export async function getOutcomeStats(options: {
@@ -177,7 +172,7 @@ export async function getOutcomeStats(options: {
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .groupBy(outcomeGraphTable.domain);
 
-  return rows.map((r) => ({
+  return rows.map(r => ({
     domain: r.domain,
     totalRecommendations: Number(r.total),
     acceptanceRate: 0,
@@ -224,26 +219,17 @@ export async function getOutcomeById(id: number): Promise<OutcomeGraph | undefin
 export async function triggerLearningJob(params: {
   orgId?: number;
   domain: OutcomeDomain;
-  jobType:
-    | 'ranking_calibration'
-    | 'confidence_calibration'
-    | 'escalation_threshold'
-    | 'workflow_template'
-    | 'owner_suggestion'
-    | 'artifact_defaults';
+  jobType: "ranking_calibration" | "confidence_calibration" | "escalation_threshold" | "workflow_template" | "owner_suggestion" | "artifact_defaults";
   triggeredBy?: string;
 }): Promise<OutcomeGraphLearningJob> {
-  const [job] = await db
-    .insert(outcomeGraphLearningJobsTable)
-    .values({
-      orgId: params.orgId ?? null,
-      domain: params.domain,
-      jobType: params.jobType,
-      status: 'pending',
-      triggeredBy: params.triggeredBy ?? 'system',
-    })
-    .returning();
-  return job;
+  const [job] = await db.insert(outcomeGraphLearningJobsTable).values({
+    orgId: params.orgId ?? null,
+    domain: params.domain,
+    jobType: params.jobType,
+    status: "pending",
+    triggeredBy: params.triggeredBy ?? "system",
+  }).returning();
+  return job!;
 }
 
 export async function runLearningCalibration(jobId: number): Promise<OutcomeGraphLearningJob> {
@@ -253,12 +239,11 @@ export async function runLearningCalibration(jobId: number): Promise<OutcomeGrap
     .where(eq(outcomeGraphLearningJobsTable.id, jobId));
 
   if (!job) {
-    throw Object.assign(new Error(`Learning job ${jobId} not found`), { code: 'NOT_FOUND' });
+    throw Object.assign(new Error(`Learning job ${jobId} not found`), { code: "NOT_FOUND" });
   }
 
-  await db
-    .update(outcomeGraphLearningJobsTable)
-    .set({ status: 'running', startedAt: new Date() })
+  await db.update(outcomeGraphLearningJobsTable)
+    .set({ status: "running", startedAt: new Date() })
     .where(eq(outcomeGraphLearningJobsTable.id, jobId));
 
   try {
@@ -275,10 +260,10 @@ export async function runLearningCalibration(jobId: number): Promise<OutcomeGrap
       .limit(500);
 
     const total = recentOutcomes.length;
-    const accepted = recentOutcomes.filter((o) => o.userDecision === 'accepted').length;
-    const rejected = recentOutcomes.filter((o) => o.userDecision === 'rejected').length;
-    const overridden = recentOutcomes.filter((o) => o.userDecision === 'overridden').length;
-    const achieved = recentOutcomes.filter((o) => o.outcomeResult === 'achieved').length;
+    const accepted = recentOutcomes.filter(o => o.userDecision === "accepted").length;
+    const rejected = recentOutcomes.filter(o => o.userDecision === "rejected").length;
+    const overridden = recentOutcomes.filter(o => o.userDecision === "overridden").length;
+    const achieved = recentOutcomes.filter(o => o.outcomeResult === "achieved").length;
 
     const outputSummary = {
       totalSamples: total,
@@ -286,14 +271,12 @@ export async function runLearningCalibration(jobId: number): Promise<OutcomeGrap
       rejectionRate: total > 0 ? rejected / total : 0,
       overrideRate: total > 0 ? overridden / total : 0,
       achievementRate: total > 0 ? achieved / total : 0,
-      calibrationSuggestion:
-        accepted / Math.max(total, 1) > 0.7 ? 'increase_confidence' : 'maintain',
+      calibrationSuggestion: accepted / Math.max(total, 1) > 0.7 ? "increase_confidence" : "maintain",
     };
 
-    const [updated] = await db
-      .update(outcomeGraphLearningJobsTable)
+    const [updated] = await db.update(outcomeGraphLearningJobsTable)
       .set({
-        status: 'completed',
+        status: "completed",
         completedAt: new Date(),
         inputSampleSize: total,
         outputSummary,
@@ -302,26 +285,24 @@ export async function runLearningCalibration(jobId: number): Promise<OutcomeGrap
       .where(eq(outcomeGraphLearningJobsTable.id, jobId))
       .returning();
 
-    return updated;
+    return updated!;
   } catch (err) {
-    const [failed] = await db
-      .update(outcomeGraphLearningJobsTable)
-      .set({ status: 'failed', errorMessage: String(err), completedAt: new Date() })
+    const [failed] = await db.update(outcomeGraphLearningJobsTable)
+      .set({ status: "failed", errorMessage: String(err), completedAt: new Date() })
       .where(eq(outcomeGraphLearningJobsTable.id, jobId))
       .returning();
-    return failed;
+    return failed!;
   }
 }
 
 export async function listLearningJobs(options: {
   orgId?: number;
   domain?: OutcomeDomain;
-  status?: 'pending' | 'running' | 'completed' | 'failed';
+  status?: "pending" | "running" | "completed" | "failed";
   limit?: number;
 }): Promise<OutcomeGraphLearningJob[]> {
   const conditions = [];
-  if (options.orgId != null)
-    conditions.push(eq(outcomeGraphLearningJobsTable.orgId, options.orgId));
+  if (options.orgId != null) conditions.push(eq(outcomeGraphLearningJobsTable.orgId, options.orgId));
   if (options.domain) conditions.push(eq(outcomeGraphLearningJobsTable.domain, options.domain));
   if (options.status) conditions.push(eq(outcomeGraphLearningJobsTable.status, options.status));
 

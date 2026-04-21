@@ -40,7 +40,7 @@ export class CommandQueue {
   private maxCommands: number;
   private maxRetries: number;
   private storeName: string;
-  private conflictResolver?: ConflictResolver;
+  private conflictResolver?: ConflictResolver | undefined;
 
   constructor(options: CommandQueueOptions) {
     this.storage = options.storage;
@@ -58,7 +58,7 @@ export class CommandQueue {
       const all = await this.getAll();
       const lowPriority = all.filter((c) => c.priority === 'low');
       if (lowPriority.length > 0) {
-        await this.storage.delete(this.storeName, lowPriority[0].id);
+        await this.storage.delete(this.storeName, lowPriority[0]!.id);
       } else {
         throw new Error('Offline command queue is full');
       }
@@ -118,7 +118,7 @@ export class CommandQueue {
             'Content-Type': 'application/json',
             ...headers,
           },
-          body: command.body !== undefined ? JSON.stringify(command.body) : undefined,
+          ...(command.body !== undefined && { body: JSON.stringify(command.body) }),
         });
 
         if (res.ok) {

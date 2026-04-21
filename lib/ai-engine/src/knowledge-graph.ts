@@ -626,7 +626,7 @@ export async function detectCommunities(
     ).length;
     const cohesion = totalPossibleEdges > 0 ? actualEdges / totalPossibleEdges : 0;
 
-    communities.push({ id: communityId, members, centralEntity, cohesion, domains });
+    communities.push({ id: communityId, members, cohesion, domains, ...(centralEntity !== undefined ? { centralEntity } : {}) });
 
     if (communities.length >= maxCommunities) break;
   }

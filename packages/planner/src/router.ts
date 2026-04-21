@@ -12,9 +12,9 @@ export function routePlanSteps(steps: PlanStep[], context: ResolvedPlanContext):
       const result = modelRouter.route({
         routeClass: step.route.routeClass,
         promptTokenEstimate: 1500,
-        orgId: context.orgId,
-        agentTier: context.agentTier,
-        maxBudgetUsd: context.maxBudgetUsd,
+        ...(context.orgId !== undefined ? { orgId: context.orgId } : {}),
+        ...(context.agentTier !== undefined ? { agentTier: context.agentTier } : {}),
+        ...(context.maxBudgetUsd !== undefined ? { maxBudgetUsd: context.maxBudgetUsd } : {}),
       });
       const route: RouteDecision = {
         ...step.route,

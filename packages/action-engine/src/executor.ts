@@ -121,7 +121,7 @@ export async function executeWorkflow(params: {
         status: 'pending',
       })),
       approvalState: 'none',
-      policyEvaluation,
+      policyEvaluation: policyEvaluation as unknown as WorkflowRun['policyEvaluation'],
       auditTrail: [
         {
           at: Date.now(),
@@ -169,7 +169,7 @@ export async function executeWorkflow(params: {
     approvalState: needsApproval ? 'pending' : approvedBy ? 'approved' : 'none',
     approvedBy,
     approvedAt: approvedBy ? Date.now() : undefined,
-    policyEvaluation,
+    policyEvaluation: policyEvaluation as unknown as WorkflowRun["policyEvaluation"],
     auditTrail: [],
     startedAt: Date.now(),
     estimatedCostUsd: definition.estimatedCostUsd,
@@ -226,8 +226,8 @@ export async function executeWorkflow(params: {
   const completedOutputs: Map<string, Record<string, unknown>> = new Map();
 
   for (let i = 0; i < definition.steps.length; i++) {
-    const stepDef = definition.steps[i];
-    const stepRecord = run.steps[i];
+    const stepDef = definition.steps[i]!;
+    const stepRecord = run.steps[i]!;
 
     run.currentStepIndex = i;
     stepRecord.startedAt = Date.now();

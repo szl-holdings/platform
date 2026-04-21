@@ -72,7 +72,8 @@ export function recordToolCall(
       toolId,
       toolName,
       success,
-      latencyMs,
+      retries: 0,
+      ...(latencyMs !== undefined ? { latencyMs } : {}),
       approvalRequired: false,
     });
   } catch (traceErr) {

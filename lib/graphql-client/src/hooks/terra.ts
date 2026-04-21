@@ -1,4 +1,4 @@
-import { gql, useMutation, useQuery } from '@apollo/client';
+import { gql, useQuery, useMutation } from "@apollo/client";
 
 export const GET_TERRA_DISTRESS_PROPERTIES = gql`
   query GetTerraDistressProperties($borough: String, $distressType: String, $limit: Int, $offset: Int) {
@@ -83,25 +83,20 @@ export const CREATE_TERRA_LEAD = gql`
   }
 `;
 
-export function useTerraDistressProperties(variables?: {
-  borough?: string;
-  distressType?: string;
-  limit?: number;
-  offset?: number;
-}) {
-  return useQuery(GET_TERRA_DISTRESS_PROPERTIES, { variables });
+export function useTerraDistressProperties(variables?: { borough?: string; distressType?: string; limit?: number; offset?: number }) {
+  return useQuery(GET_TERRA_DISTRESS_PROPERTIES, variables !== undefined ? { variables } : {});
 }
 
 export function useTerraDeals(variables?: { stage?: string; limit?: number; offset?: number }) {
-  return useQuery(GET_TERRA_DEALS, { variables });
+  return useQuery(GET_TERRA_DEALS, variables !== undefined ? { variables } : {});
 }
 
 export function useTerraLeads(variables?: { stage?: string; limit?: number; offset?: number }) {
-  return useQuery(GET_TERRA_LEADS, { variables });
+  return useQuery(GET_TERRA_LEADS, variables !== undefined ? { variables } : {});
 }
 
 export function useTerraListings(variables?: { status?: string; limit?: number; offset?: number }) {
-  return useQuery(GET_TERRA_LISTINGS, { variables });
+  return useQuery(GET_TERRA_LISTINGS, variables !== undefined ? { variables } : {});
 }
 
 export function useUpdateTerraDeal() {

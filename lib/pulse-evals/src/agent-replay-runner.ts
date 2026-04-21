@@ -206,7 +206,7 @@ export function approveReplayRun(
   if (!run) return null;
   run.review_status = 'approved';
   run.reviewer = reviewer;
-  run.review_notes = notes;
+  if (notes !== undefined) run.review_notes = notes;
   return run;
 }
 
@@ -219,7 +219,7 @@ export function rejectReplayRun(
   if (!run) return null;
   run.review_status = 'rejected';
   run.reviewer = reviewer;
-  run.review_notes = notes;
+  if (notes !== undefined) run.review_notes = notes;
   return run;
 }
 

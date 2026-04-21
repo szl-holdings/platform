@@ -133,8 +133,8 @@ export class PagerDutyConnector extends ToolConnector {
             >)
           : undefined;
         return adapter.listIncidents({
-          status: statusArr,
-          limit: params['limit'] as number | undefined,
+          ...(statusArr && { status: statusArr }),
+          ...(params['limit'] !== undefined && { limit: params['limit'] as number }),
         });
       }
       case 'get_incident_summary':
@@ -153,7 +153,7 @@ export class PagerDutyConnector extends ToolConnector {
             ? String(params['fromEmail'])
             : 'alloy-agent@szlholdings.com',
           urgency: (params['urgency'] as 'high' | 'low') ?? 'high',
-          body: params['body'] ? String(params['body']) : undefined,
+          ...(params['body'] ? { body: String(params['body']) } : {}),
         });
       case 'resolve_incident':
         return adapter.resolveIncident(
@@ -165,7 +165,7 @@ export class PagerDutyConnector extends ToolConnector {
     }
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     await services.pagerduty.testConnection();
   }
 }

@@ -135,13 +135,13 @@ export async function delegateTask(req: DelegationRequest): Promise<DelegationRe
   if (!acceptance.accepted) {
     await updateTaskStatus(taskId, {
       status: 'rejected',
-      errorMessage: acceptance.reason,
+      ...(acceptance.reason !== undefined ? { errorMessage: acceptance.reason } : {}),
       completedAt: Date.now(),
     });
     return {
       taskId,
       status: 'rejected',
-      errorMessage: acceptance.reason,
+      ...(acceptance.reason !== undefined ? { errorMessage: acceptance.reason } : {}),
     };
   }
 

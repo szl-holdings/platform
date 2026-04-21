@@ -178,32 +178,33 @@ export class HuggingFaceConnector extends ToolConnector {
     switch (capabilityId) {
       case 'text_generation':
         return adapter.textGeneration(String(params['prompt']), {
-          model: params['model'] ? String(params['model']) : undefined,
+          ...(params['model'] ? { model: String(params['model']) } : {}),
           maxTokens: params['maxTokens'] ? Number(params['maxTokens']) : 512,
         });
       case 'summarize':
         return adapter.summarization(String(params['text']), {
-          model: params['model'] ? String(params['model']) : undefined,
+          ...(params['model'] ? { model: String(params['model']) } : {}),
           maxLength: params['maxLength'] ? Number(params['maxLength']) : 200,
         });
       case 'classify_text':
         return adapter.textClassification(String(params['text']), {
-          model: params['model'] ? String(params['model']) : undefined,
+          ...(params['model'] ? { model: String(params['model']) } : {}),
         });
       case 'zero_shot_classify':
         return adapter.zeroShotClassification(
           String(params['text']),
           Array.isArray(params['labels']) ? params['labels'].map(String) : [],
-          { model: params['model'] ? String(params['model']) : undefined },
+          { ...(params['model'] ? { model: String(params['model']) } : {}) },
         );
       case 'extract_entities':
         return adapter.namedEntityRecognition(String(params['text']), {
-          model: params['model'] ? String(params['model']) : undefined,
+          ...(params['model'] ? { model: String(params['model']) } : {}),
         });
       case 'get_embeddings':
         return adapter.embedding(
           Array.isArray(params['texts']) ? params['texts'].map(String) : [String(params['texts'])],
-          { model: params['model'] ? String(params['model']) : undefined },
+          { ...(params['model'] ? { model: String(params['model']) } : {}) },
+        );
         );
       case 'get_health':
         return adapter.getHealthStatus();
@@ -212,7 +213,7 @@ export class HuggingFaceConnector extends ToolConnector {
     }
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     services.huggingface.getHealthStatus();
   }
 }

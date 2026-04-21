@@ -1,40 +1,40 @@
 /**
  * Audit Repository — typed access to audit log and activity tables.
  */
-import { auditLogTable, db } from '@szl-holdings/db';
-import { and, desc, eq, gte } from 'drizzle-orm';
+import { db, auditLogsTable } from "@szl-holdings/db";
+import { desc, eq, and, gte } from "drizzle-orm";
 
 export interface AuditEntry {
-  actor: string;
-  action: string;
-  resource?: string;
-  resourceId?: string | number;
-  orgId?: number;
-  metadata?: Record<string, unknown>;
+  actorUserId?: number;
+  actionType: string;
+  entityType: string;
+  entityId?: string;
+  organizationId?: number;
+  payloadJson?: Record<string, unknown>;
 }
 
 export class AuditRepository {
   async log(entry: AuditEntry) {
-    await db.insert(auditLogTable).values({
-      actor: entry.actor,
-      action: entry.action,
-      resource: entry.resource ?? null,
-      resourceId: entry.resourceId != null ? String(entry.resourceId) : null,
-      orgId: entry.orgId ?? null,
-      metadata: entry.metadata ?? null,
+    await db.insert(auditLogsTable).values({
+      ...(entry.actorUserId !== undefined ? { actorUserId: entry.actorUserId } : {}),
+      actionType: entry.actionType,
+      entityType: entry.entityType,
+      ...(entry.entityId !== undefined ? { entityId: entry.entityId } : {}),
+      ...(entry.organizationId !== undefined ? { organizationId: entry.organizationId } : {}),
+      ...(entry.payloadJson !== undefined ? { payloadJson: entry.payloadJson } : {}),
     });
   }
 
-  async list(orgId?: number, since?: Date, limit = 50) {
+  async list(organizationId?: number, since?: Date, limit = 50) {
     const conditions = [];
-    if (orgId != null) conditions.push(eq(auditLogTable.orgId, orgId));
-    if (since != null) conditions.push(gte(auditLogTable.createdAt, since));
+    if (organizationId != null) conditions.push(eq(auditLogsTable.organizationId, organizationId));
+    if (since != null) conditions.push(gte(auditLogsTable.createdAt, since));
 
     return db
       .select()
-      .from(auditLogTable)
+      .from(auditLogsTable)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(auditLogTable.createdAt))
+      .orderBy(desc(auditLogsTable.createdAt))
       .limit(limit);
   }
 }

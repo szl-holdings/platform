@@ -1,15 +1,15 @@
-import { IngestRequestSchema } from '@workspace/aef-contracts';
-import { getRun, submitIngestDocument } from '@workspace/alloy-ingestion-orchestrator/client';
-import type { Request, Response } from 'express';
-import { Router } from 'express';
-import { logger } from '../middleware/logger.js';
+import { Router, type IRouter, type RequestHandler } from "express";
+import type { Request, Response } from "express";
+import { IngestRequestSchema } from "@workspace/aef-contracts";
+import { logger } from "../middleware/logger.js";
+import { submitIngestDocument, getRun } from "@workspace/alloy-ingestion-orchestrator/client";
 
-export const ingestRouter = Router();
+export const ingestRouter: IRouter = Router();
 
-ingestRouter.post('/v1/ingest', async (req: Request, res: Response) => {
+ingestRouter.post("/v1/ingest", (async (req: Request, res: Response) => {
   const parseResult = IngestRequestSchema.safeParse(req.body);
   if (!parseResult.success) {
-    res.status(400).json({ error: 'Validation failed', detail: parseResult.error.issues });
+    res.status(400).json({ error: "Validation failed", detail: parseResult.error.issues });
     return;
   }
 
@@ -18,7 +18,7 @@ ingestRouter.post('/v1/ingest', async (req: Request, res: Response) => {
 
   logger.info(
     { traceId, requestId: body.requestId, documentCount: body.documents.length },
-    'ingest payload dispatched to orchestrator',
+    "ingest payload dispatched to orchestrator",
   );
 
   const runIds: string[] = [];
@@ -27,7 +27,7 @@ ingestRouter.post('/v1/ingest', async (req: Request, res: Response) => {
       try {
         const run = await submitIngestDocument({
           tenantId: body.tenantId as string,
-          profileId: body.metadata?.['profileId'] as string | undefined,
+          profileId: body.metadata?.["profileId"] as string | undefined,
           sourceId: doc.sourceId,
           content: doc.content,
           contentType: doc.contentType,
@@ -39,8 +39,8 @@ ingestRouter.post('/v1/ingest', async (req: Request, res: Response) => {
           metadata: doc.metadata,
         });
         runIds.push(run.runId);
-        const embedStep = run.stepResults.find((r) => r.actor === 'EmbedDispatcher');
-        const verifyStep = run.stepResults.find((r) => r.actor === 'IndexVerifier');
+        const embedStep = run.stepResults.find((r) => r.actor === "EmbedDispatcher");
+        const verifyStep = run.stepResults.find((r) => r.actor === "IndexVerifier");
         const embedOutput = embedStep?.output as { embeddedChunks?: unknown[] } | undefined;
         const chunksProduced = Array.isArray(embedOutput?.embeddedChunks)
           ? embedOutput.embeddedChunks.length
@@ -51,12 +51,11 @@ ingestRouter.post('/v1/ingest', async (req: Request, res: Response) => {
           chunksIndexed: chunksProduced,
           runId: run.runId,
           runStatus: run.status,
-          indexHealthStatus: (verifyStep?.output as { healthStatus?: string } | undefined)
-            ?.healthStatus,
+          indexHealthStatus: (verifyStep?.output as { healthStatus?: string } | undefined)?.healthStatus,
         };
       } catch (err) {
         const error = err instanceof Error ? err.message : String(err);
-        logger.error({ traceId, sourceId: doc.sourceId, error }, 'orchestrator ingest failed');
+        logger.error({ traceId, sourceId: doc.sourceId, error }, "orchestrator ingest failed");
         return {
           sourceId: doc.sourceId,
           chunksProduced: 0,
@@ -68,7 +67,7 @@ ingestRouter.post('/v1/ingest', async (req: Request, res: Response) => {
   );
 
   const totalChunksIndexed = results.reduce((acc, r) => acc + (r.chunksIndexed ?? 0), 0);
-  const hasErrors = results.some((r) => 'error' in r && r.error);
+  const hasErrors = results.some((r) => "error" in r && r.error);
 
   res.status(hasErrors ? 207 : 200).json({
     requestId: body.requestId,
@@ -79,9 +78,9 @@ ingestRouter.post('/v1/ingest', async (req: Request, res: Response) => {
     traceId,
     processedAt: new Date().toISOString(),
   });
-});
+}) as unknown as RequestHandler);
 
-ingestRouter.get('/v1/ingest/runs/:runId', (req: Request, res: Response) => {
+ingestRouter.get("/v1/ingest/runs/:runId", ((req: Request, res: Response) => {
   const { runId } = req.params;
   const run = getRun(runId as string);
   if (!run) {
@@ -89,4 +88,4 @@ ingestRouter.get('/v1/ingest/runs/:runId', (req: Request, res: Response) => {
     return;
   }
   res.status(200).json(run);
-});
+}) as unknown as RequestHandler);

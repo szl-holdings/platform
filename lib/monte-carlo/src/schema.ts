@@ -1,6 +1,6 @@
-import type { Distribution } from './distributions.js';
+import type { Distribution } from "./distributions.js";
 
-export type Domain = 'vessels' | 'terra' | 'szl' | 'prism' | 'aegis' | 'nexus' | 'lyte' | 'generic';
+export type Domain = "vessels" | "terra" | "szl" | "prism" | "aegis" | "nexus" | "lyte" | "generic";
 
 export interface InputVariable {
   id: string;
@@ -8,27 +8,24 @@ export interface InputVariable {
   description?: string;
   distribution: Distribution;
   unit?: string;
-  format?: 'currency' | 'percentage' | 'number' | 'years';
+  format?: "currency" | "percentage" | "number" | "years";
   correlation?: Record<string, number>;
 }
 
-export type CalculationFn = (
-  inputs: Record<string, number>,
-  iteration: number,
-) => Record<string, number>;
+export type CalculationFn = (inputs: Record<string, number>, iteration: number) => Record<string, number>;
 
 export interface OutputMetric {
   id: string;
   label: string;
-  description?: string;
-  unit?: string;
-  format?: 'currency' | 'percentage' | 'number' | 'years';
-  higherIsBetter?: boolean;
+  description?: string | undefined;
+  unit?: string | undefined;
+  format?: "currency" | "percentage" | "number" | "years" | undefined;
+  higherIsBetter?: boolean | undefined;
   thresholds?: {
-    excellent?: number;
-    good?: number;
-    poor?: number;
-  };
+    excellent?: number | undefined;
+    good?: number | undefined;
+    poor?: number | undefined;
+  } | undefined;
 }
 
 export interface ScenarioConstraint {
@@ -91,7 +88,7 @@ export interface PartialOutputSnapshot {
 export type PartialResultCallback = (
   validIterations: number,
   totalIterations: number,
-  snapshots: PartialOutputSnapshot[],
+  snapshots: PartialOutputSnapshot[]
 ) => void;
 
 export const DEFAULT_RUN_CONFIG: RunConfig = {

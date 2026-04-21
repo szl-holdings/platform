@@ -210,7 +210,7 @@ export class FalAiConnector extends ToolConnector {
     }
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const apiKey = process.env['FAL_API_KEY'];
     if (!apiKey) throw new Error('FAL_API_KEY not configured');
     const resp = await fetch('https://fal.run/fal-ai/flux/schnell', {

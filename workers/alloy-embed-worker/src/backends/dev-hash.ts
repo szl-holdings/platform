@@ -58,6 +58,9 @@ export class DevHashEmbeddingBackend implements EmbeddingBackend {
     kind: 'cpu-local',
     displayName: 'DevHash (deterministic, no model required)',
     supportedModels: ['aef-dev-hash', '*'],
+    maxTokens: 512,
+    defaultPooling: 'mean',
+    defaultTruncation: 'truncate',
   };
 
   readonly dimensions = DEFAULT_DIM;
@@ -74,5 +77,9 @@ export class DevHashEmbeddingBackend implements EmbeddingBackend {
       dimensions: this.dimensions,
       tokenCounts,
     };
+  }
+
+  async health(): Promise<{ healthy: boolean; latencyMs?: number; detail?: string }> {
+    return { healthy: true, detail: "DevHash backend is always healthy" };
   }
 }

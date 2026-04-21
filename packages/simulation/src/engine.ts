@@ -21,7 +21,8 @@ const CONFIDENCE_DAMPENING = 0.92;
 
 export function runSimulation(request: SimulationRequest): SimulationResult {
   const now = Date.now();
-  const urgencyMultiplier = URGENCY_MULTIPLIERS[String(request.context?.['urgency'] ?? 'moderate')];
+  const urgencyMultiplier =
+    URGENCY_MULTIPLIERS[String(request.context?.['urgency'] ?? 'moderate')] ?? 1;
   const baseConfidence = Number(request.context?.['baseConfidence'] ?? 0.75);
   const projectedConfidence = Math.min(
     0.99,

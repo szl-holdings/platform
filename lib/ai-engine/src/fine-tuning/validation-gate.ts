@@ -79,8 +79,8 @@ async function runEvalsOnModel(modelId: string, provider: string): Promise<Model
   const byCategory: Record<string, { total: number; passed: number; passRate: number }> = {};
   for (const r of results) {
     if (!byCategory[r.category]) byCategory[r.category] = { total: 0, passed: 0, passRate: 0 };
-    byCategory[r.category].total++;
-    if (r.passed) byCategory[r.category].passed++;
+    byCategory[r.category]!.total++;
+    if (r.passed) byCategory[r.category]!.passed++;
   }
   for (const cat of Object.values(byCategory)) {
     cat.passRate = cat.total > 0 ? cat.passed / cat.total : 0;
@@ -342,10 +342,10 @@ export async function runValidationGate(
     promoted,
     fineTunedScores,
     baseModelScores,
-    failureReason,
     categoryComparison,
     estimatedCostPer1kInput: costs.input,
     estimatedCostPer1kOutput: costs.output,
+    ...(failureReason !== undefined ? { failureReason } : {}),
   };
 }
 

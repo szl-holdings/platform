@@ -227,25 +227,27 @@ export async function hybridSearch(
   const start = Date.now();
   const { query, queryEmbedding, tenantId, topK = 10, semanticWeight = 0.7 } = opts;
 
+  const _semOpts = {
+    queryEmbedding: queryEmbedding ?? [],
+    topK: topK * 2,
+    ...(tenantId !== undefined ? { tenantId } : {}),
+    ...(opts.domains !== undefined ? { domains: opts.domains } : {}),
+    ...(opts.maxSensitivityLevel !== undefined ? { maxSensitivityLevel: opts.maxSensitivityLevel } : {}),
+    ...(opts.sourceTypes !== undefined ? { sourceTypes: opts.sourceTypes } : {}),
+  };
+  const _kwOpts = {
+    query,
+    topK: topK * 2,
+    ...(tenantId !== undefined ? { tenantId } : {}),
+    ...(opts.domains !== undefined ? { domains: opts.domains } : {}),
+    ...(opts.maxSensitivityLevel !== undefined ? { maxSensitivityLevel: opts.maxSensitivityLevel } : {}),
+    ...(opts.sourceTypes !== undefined ? { sourceTypes: opts.sourceTypes } : {}),
+  };
   const [semanticResults, keywordResults] = await Promise.all([
     queryEmbedding
-      ? semanticSearch({
-          queryEmbedding,
-          tenantId,
-          topK: topK * 2,
-          domains: opts.domains,
-          maxSensitivityLevel: opts.maxSensitivityLevel,
-          sourceTypes: opts.sourceTypes,
-        })
+      ? semanticSearch(_semOpts)
       : Promise.resolve([]),
-    keywordSearch({
-      query,
-      tenantId,
-      topK: topK * 2,
-      domains: opts.domains,
-      maxSensitivityLevel: opts.maxSensitivityLevel,
-      sourceTypes: opts.sourceTypes,
-    }),
+    keywordSearch(_kwOpts),
   ]);
 
   const merged = new Map<string, RagSearchResult>();
@@ -267,7 +269,11 @@ export async function hybridSearch(
   }
 
   const results = [...merged.values()].sort((a, b) => b.score - a.score).slice(0, topK);
-  const totalIndexed = await getChunkCount({ tenantId, sourceType: opts.sourceTypes?.[0] });
+  const _sourceType0 = opts.sourceTypes?.[0];
+  const totalIndexed = await getChunkCount({
+    ...(tenantId !== undefined ? { tenantId } : {}),
+    ...(_sourceType0 !== undefined ? { sourceType: _sourceType0 } : {}),
+  });
 
   return { results, totalIndexed, latencyMs: Date.now() - start };
 }

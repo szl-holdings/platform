@@ -85,7 +85,7 @@ export async function tagAIContent(params: TagAIContentParams): Promise<ProofCha
     })
     .returning();
 
-  return proof;
+  return proof!;
 }
 
 export async function reviewProof(params: ReviewProofParams): Promise<ProofChain> {
@@ -119,7 +119,7 @@ export async function reviewProof(params: ReviewProofParams): Promise<ProofChain
     .where(eq(proofChainTable.id, params.proofId))
     .returning();
 
-  return updated;
+  return updated!;
 }
 
 export async function getProofByContent(

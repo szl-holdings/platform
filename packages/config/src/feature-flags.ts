@@ -11,7 +11,7 @@
  * all named flags in the system.
  */
 
-export type RuntimeMode = 'local-dev' | 'internal-preview' | 'demo' | 'production';
+import type { RuntimeMode } from './runtime-mode.js';
 
 export interface FeatureFlag {
   id: string;

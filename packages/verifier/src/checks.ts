@@ -284,7 +284,7 @@ export const domainRuleComplianceCheck: Check = (output, ctx) => {
   const violations: { ruleId: string; severity: DomainRule['severity']; message?: string }[] = [];
   for (const rule of ctx.domainRules) {
     if (!evalRule(rule, meta[rule.field])) {
-      violations.push({ ruleId: rule.id, severity: rule.severity, message: rule.description });
+      violations.push({ ruleId: rule.id, severity: rule.severity, ...(rule.description !== undefined ? { message: rule.description } : {}) });
     }
   }
   if (violations.length === 0) {

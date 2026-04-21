@@ -1,4 +1,4 @@
-import { ServiceAdapter } from '../base.js';
+import { ServiceAdapter } from "../base.js";
 
 export interface NvdCve {
   id: string;
@@ -22,7 +22,7 @@ export interface NvdSearchResult {
   startIndex: number;
   vulnerabilities: NvdCve[];
   fetchedAt: string;
-  source: 'live' | 'cache' | 'demo';
+  source: "live" | "cache" | "demo";
 }
 
 interface CacheEntry {
@@ -31,32 +31,27 @@ interface CacheEntry {
 }
 
 export class NVDAdapter extends ServiceAdapter {
-  readonly name = 'nvd';
-  readonly description =
-    'NIST National Vulnerability Database — CVE data, CVSS scores, and exploit status. Free, no key required (NVD API key optional for higher rate limits).';
+  readonly name = "nvd";
+  readonly description = "NIST National Vulnerability Database — CVE data, CVSS scores, and exploit status. Free, no key required (NVD API key optional for higher rate limits).";
   readonly requiredEnvVars: string[] = [];
 
-  protected rateLimitPerMinute = 5;
-  protected circuitBreakerThreshold = 3;
+  protected override rateLimitPerMinute = 5;
+  protected override circuitBreakerThreshold = 3;
 
   private _cache = new Map<string, CacheEntry>();
   private readonly _cacheTtlMs = 600_000;
   private _etags = new Map<string, string>();
 
-  get supportsMockMode(): boolean {
-    return true;
-  }
-  get status(): import('../base.js').ServiceStatus {
-    return 'LIVE_CONFIGURED';
-  }
+  override get supportsMockMode(): boolean { return true; }
+  override get status(): import("../base.js").ServiceStatus { return "LIVE_CONFIGURED"; }
 
   private get apiKey(): string | undefined {
-    return process.env['NVD_API_KEY'] || undefined;
+    return process.env["NVD_API_KEY"] || undefined;
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const res = await this.resilientFetch(
-      'https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=1&cvssV3Severity=CRITICAL',
+      "https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=1&cvssV3Severity=CRITICAL",
       {
         headers: this.apiKey ? { apiKey: this.apiKey } : {},
         maxRetries: 1,
@@ -65,15 +60,11 @@ export class NVDAdapter extends ServiceAdapter {
     );
     if (!res.ok) throw new Error(`NVD HTTP ${res.status}`);
     const json: { totalResults?: number } = await res.json();
-    if (!json.totalResults && json.totalResults !== 0)
-      throw new Error('NVD returned invalid response');
+    if (!json.totalResults && json.totalResults !== 0) throw new Error("NVD returned invalid response");
   }
 
   private _getCacheKey(params: Record<string, string>): string {
-    return Object.entries(params)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([k, v]) => `${k}=${v}`)
-      .join('&');
+    return Object.entries(params).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `${k}=${v}`).join("&");
   }
 
   private _getCached(key: string): NvdSearchResult | null {
@@ -83,19 +74,17 @@ export class NVDAdapter extends ServiceAdapter {
       this._cache.delete(key);
       return null;
     }
-    return { ...entry.data, source: 'cache' };
+    return { ...entry.data, source: "cache" };
   }
 
-  async searchCves(
-    opts: {
-      keyword?: string;
-      severity?: string;
-      startIndex?: number;
-      resultsPerPage?: number;
-      lastModStartDate?: string;
-      lastModEndDate?: string;
-    } = {},
-  ): Promise<NvdSearchResult> {
+  async searchCves(opts: {
+    keyword?: string;
+    severity?: string;
+    startIndex?: number;
+    resultsPerPage?: number;
+    lastModStartDate?: string;
+    lastModEndDate?: string;
+  } = {}): Promise<NvdSearchResult> {
     const params: Record<string, string> = {};
     if (opts.keyword) params.keywordSearch = opts.keyword;
     if (opts.severity) params.cvssV3Severity = opts.severity;
@@ -113,7 +102,7 @@ export class NVDAdapter extends ServiceAdapter {
       const headers: Record<string, string> = {};
       if (this.apiKey) headers.apiKey = this.apiKey;
       const cachedEtag = this._etags.get(cacheKey);
-      if (cachedEtag) headers['If-None-Match'] = cachedEtag;
+      if (cachedEtag) headers["If-None-Match"] = cachedEtag;
 
       const res = await this.resilientFetch(
         `https://services.nvd.nist.gov/rest/json/cves/2.0?${qs}`,
@@ -123,23 +112,14 @@ export class NVDAdapter extends ServiceAdapter {
       if (res.status === 304 && this._cache.has(cacheKey)) {
         const entry = this._cache.get(cacheKey)!;
         entry.fetchedAt = Date.now();
-        return { ...entry.data, source: 'cache' as const };
+        return { ...entry.data, source: "cache" as const };
       }
 
       if (!res.ok) throw new Error(`NVD HTTP ${res.status}`);
 
-      interface NvdDescription {
-        lang?: string;
-        value?: string;
-      }
-      interface NvdCvssMetric {
-        cvssData?: { baseScore?: number; baseSeverity?: string; vectorString?: string };
-        exploitabilityScore?: number;
-        impactScore?: number;
-      }
-      interface NvdWeakness {
-        description?: NvdDescription[];
-      }
+      interface NvdDescription { lang?: string; value?: string }
+      interface NvdCvssMetric { cvssData?: { baseScore?: number; baseSeverity?: string; vectorString?: string }; exploitabilityScore?: number; impactScore?: number }
+      interface NvdWeakness { description?: NvdDescription[] }
       interface NvdRawCve {
         id?: string;
         sourceIdentifier?: string;
@@ -163,22 +143,17 @@ export class NVDAdapter extends ServiceAdapter {
         const cve = v.cve ?? {};
         const metrics = cve.metrics?.cvssMetricV31?.[0] ?? cve.metrics?.cvssMetricV30?.[0];
         return {
-          id: cve.id ?? '',
-          sourceIdentifier: cve.sourceIdentifier ?? '',
-          published: cve.published ?? '',
-          lastModified: cve.lastModified ?? '',
-          vulnStatus: cve.vulnStatus ?? '',
-          description: cve.descriptions?.find((d) => d.lang === 'en')?.value ?? '',
+          id: cve.id ?? "",
+          sourceIdentifier: cve.sourceIdentifier ?? "",
+          published: cve.published ?? "",
+          lastModified: cve.lastModified ?? "",
+          vulnStatus: cve.vulnStatus ?? "",
+          description: cve.descriptions?.find((d) => d.lang === "en")?.value ?? "",
           cvssV3Score: metrics?.cvssData?.baseScore ?? null,
           cvssV3Severity: metrics?.cvssData?.baseSeverity ?? null,
           cvssVector: metrics?.cvssData?.vectorString ?? null,
-          weaknesses: (cve.weaknesses ?? []).flatMap(
-            (w) => w.description?.map((d) => d.value).filter((v): v is string => v != null) ?? [],
-          ),
-          references: (cve.references ?? []).map((r) => ({
-            url: r.url ?? '',
-            source: r.source ?? '',
-          })),
+          weaknesses: (cve.weaknesses ?? []).flatMap((w) => w.description?.map((d) => d.value).filter((v): v is string => v != null) ?? []),
+          references: (cve.references ?? []).map((r) => ({ url: r.url ?? "", source: r.source ?? "" })),
           exploitabilityScore: metrics?.exploitabilityScore ?? null,
           impactScore: metrics?.impactScore ?? null,
         };
@@ -190,16 +165,14 @@ export class NVDAdapter extends ServiceAdapter {
         startIndex: json.startIndex ?? 0,
         vulnerabilities,
         fetchedAt: new Date().toISOString(),
-        source: 'live',
+        source: "live",
       };
 
       this._cache.set(cacheKey, { data: result, fetchedAt: Date.now() });
-      const etag = res.headers.get('etag');
+      const etag = res.headers.get("etag");
       if (etag) this._etags.set(cacheKey, etag);
       if (this._cache.size > 50) {
-        const oldest = [...this._cache.entries()].sort(
-          (a, b) => a[1].fetchedAt - b[1].fetchedAt,
-        )[0];
+        const oldest = [...this._cache.entries()].sort((a, b) => a[1].fetchedAt - b[1].fetchedAt)[0];
         if (oldest) this._cache.delete(oldest[0]);
       }
 
@@ -211,13 +184,13 @@ export class NVDAdapter extends ServiceAdapter {
         startIndex: 0,
         vulnerabilities: [],
         fetchedAt: new Date().toISOString(),
-        source: 'demo',
+        source: "demo",
       };
     }
   }
 
   async getCriticalCves(limit = 15): Promise<NvdSearchResult> {
-    return this.searchCves({ severity: 'CRITICAL', resultsPerPage: limit });
+    return this.searchCves({ severity: "CRITICAL", resultsPerPage: limit });
   }
 
   async getRecentlyModified(days = 7): Promise<NvdSearchResult> {

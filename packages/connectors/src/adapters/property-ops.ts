@@ -5,8 +5,8 @@
  * occupancy changes, and estate readiness gaps for Carlota Jo.
  */
 
-import type { Signal, SignalInput } from '@workspace/ontology';
-import type { ConnectorMetadata, ConnectorStatus, PropertyOpsConnector } from '../interfaces.js';
+import type { Signal, SignalInput } from "@workspace/ontology/signal";
+import type { ConnectorMetadata, ConnectorStatus, PropertyOpsConnector } from "../interfaces.js";
 
 export class PropertyOpsDemoAdapter implements PropertyOpsConnector {
   readonly category = 'property-ops' as const;

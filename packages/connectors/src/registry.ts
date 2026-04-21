@@ -6,8 +6,8 @@
  * event automatically flows through the 9-stage mesh.
  */
 
-import type { Signal, SignalInput } from '@workspace/ontology';
-import type { ConnectorAdapter, ConnectorCategory } from './interfaces.js';
+import type { Signal, SignalInput } from "@workspace/ontology/signal";
+import type { ConnectorAdapter, ConnectorCategory } from "./interfaces.js";
 
 export interface ConnectorRegistryEntry {
   adapter: ConnectorAdapter;
@@ -92,8 +92,8 @@ export class ConnectorRegistry {
       category: entry.adapter.metadata.category,
       status: entry.adapter.status(),
       signalsEmitted: entry.signalsEmitted,
-      startedAt: entry.startedAt,
-      lastSignalAt: entry.lastSignalAt,
+      ...(entry.startedAt !== undefined ? { startedAt: entry.startedAt } : {}),
+      ...(entry.lastSignalAt !== undefined ? { lastSignalAt: entry.lastSignalAt } : {}),
     }));
   }
 

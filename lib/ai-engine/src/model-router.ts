@@ -161,29 +161,33 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
   }
 
   const route = routeModel(routeClass, {
-    model: modelOverride,
-    maxTokens: overrideMaxTokens,
-    temperature: overrideTemperature,
+    ...(modelOverride !== undefined ? { model: modelOverride } : {}),
+    ...(overrideMaxTokens !== undefined ? { maxTokens: overrideMaxTokens } : {}),
+    ...(overrideTemperature !== undefined ? { temperature: overrideTemperature } : {}),
   });
 
   const start = Date.now();
   let completion: HFCompletionResult;
   let usedFallback = false;
 
+  const _chatOpts = {
+    ...(tools !== undefined ? { tools } : {}),
+    ...(responseFormat !== undefined ? { responseFormat } : {}),
+  };
   if (useFallback) {
     try {
-      completion = await chatCompletion(messages, route, { tools, responseFormat });
+      completion = await chatCompletion(messages, route, _chatOpts);
     } catch (primaryErr) {
-      const fallbackRoute = routeModel('background_batch', { model: modelOverride });
+      const fallbackRoute = routeModel('background_batch', { ...(modelOverride !== undefined ? { model: modelOverride } : {}) });
       try {
-        completion = await chatCompletion(messages, fallbackRoute, { tools, responseFormat });
+        completion = await chatCompletion(messages, fallbackRoute, _chatOpts);
         usedFallback = true;
       } catch {
         throw primaryErr;
       }
     }
   } else {
-    completion = await chatCompletion(messages, route, { tools, responseFormat });
+    completion = await chatCompletion(messages, route, _chatOpts);
   }
 
   const latencyMs = Date.now() - start;
@@ -209,10 +213,10 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
     latencyMs,
     costEstimateUsd: costUsd,
     usedFallback,
-    correlationId,
-    tenantId: tenantToggles?.tenantId,
-    packSlug: tenantToggles?.packSlug,
-    taskId,
+    ...(correlationId !== undefined ? { correlationId } : {}),
+    ...(tenantToggles?.tenantId !== undefined ? { tenantId: tenantToggles.tenantId } : {}),
+    ...(tenantToggles?.packSlug !== undefined ? { packSlug: tenantToggles.packSlug } : {}),
+    ...(taskId !== undefined ? { taskId } : {}),
   };
 
   void emitTelemetry(telemetry);

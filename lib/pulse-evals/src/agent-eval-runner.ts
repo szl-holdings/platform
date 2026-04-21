@@ -286,14 +286,14 @@ export function getAgentEvalTrend(agent_id: AgentId, limit = 10): AgentEvalTrend
       })),
       trend: 'insufficient_data',
       latest_aggregate_score: runs[0]?.aggregate_score ?? null,
-      average_aggregate_score: runs.length > 0 ? runs[0].aggregate_score : null,
+      average_aggregate_score: runs.length > 0 ? (runs[0]?.aggregate_score ?? null) : null,
     };
   }
 
   const scores = runs.map((r) => r.aggregate_score);
   const avg = scores.reduce((s, x) => s + x, 0) / scores.length;
-  const latest = scores[0];
-  const oldest = scores[scores.length - 1];
+  const latest = scores[0] ?? 0;
+  const oldest = scores[scores.length - 1] ?? 0;
   const delta = latest - oldest;
 
   let trend: AgentEvalTrend['trend'];
@@ -312,7 +312,7 @@ export function getAgentEvalTrend(agent_id: AgentId, limit = 10): AgentEvalTrend
       completed_at: r.completed_at,
     })),
     trend,
-    latest_aggregate_score: latest,
+    latest_aggregate_score: latest ?? null,
     average_aggregate_score: avg,
   };
 }

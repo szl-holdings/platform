@@ -43,7 +43,7 @@ export class PostHogAdapter extends ServiceAdapter {
     return process.env['POSTHOG_HOST'] ?? 'https://app.posthog.com';
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const result = await this.testConnection();
     if (!result.connected) throw new Error('PostHog connection verification failed');
   }

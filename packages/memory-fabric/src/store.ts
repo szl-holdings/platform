@@ -23,15 +23,15 @@ export function assertMemoryDomain(entry: MemoryEntry): void {
 }
 
 export interface MemoryStoreQuery {
-  tier?: MemoryType;
-  key?: string;
-  scopeId?: string;
-  tags?: string[];
-  includeStale?: boolean;
-  minConfidence?: number;
-  sensitivity?: MemoryEntry['sensitivity'];
-  search?: string;
-  sortBy?: 'confidence' | 'freshness' | 'default';
+  tier?: MemoryType | undefined;
+  key?: string | undefined;
+  scopeId?: string | undefined;
+  tags?: string[] | undefined;
+  includeStale?: boolean | undefined;
+  minConfidence?: number | undefined;
+  sensitivity?: MemoryEntry['sensitivity'] | undefined;
+  search?: string | undefined;
+  sortBy?: 'confidence' | 'freshness' | 'default' | undefined;
 }
 
 export interface MemoryStore {

@@ -35,7 +35,7 @@ export class TwilioAdapter extends ServiceAdapter {
     return `Basic ${Buffer.from(`${this.accountSid}:${this.authToken}`).toString('base64')}`;
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const url = `https://api.twilio.com/2010-04-01/Accounts/${this.accountSid}.json`;
     const response = await fetch(url, {
       headers: {

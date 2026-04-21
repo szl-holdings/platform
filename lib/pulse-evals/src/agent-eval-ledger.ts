@@ -87,9 +87,10 @@ export function getLedgerSummary(): LedgerSummary {
     if (!byAgent[entry.agent_id]) {
       byAgent[entry.agent_id] = { total: 0, promoted: 0, latest_score: 0 };
     }
-    byAgent[entry.agent_id].total++;
-    if (entry.promotion_approved) byAgent[entry.agent_id].promoted++;
-    byAgent[entry.agent_id].latest_score = entry.aggregate_score;
+    const agentRecord = byAgent[entry.agent_id]!;
+    agentRecord.total++;
+    if (entry.promotion_approved) agentRecord.promoted++;
+    agentRecord.latest_score = entry.aggregate_score;
   }
 
   const avgAggregateScore =

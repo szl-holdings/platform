@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { replayFromTrace, replayScenario, replaySnapshot } from './replay.ts';
-import { createSnapshot } from './snapshot.ts';
+import { replayFromTrace, replayScenario, replaySnapshot } from './replay.js';
+import { createSnapshot } from './snapshot.js';
 
 describe('replayFromTrace — deterministic replay from trace', () => {
   it('returns full-fidelity deterministic result with captured tool outputs', () => {

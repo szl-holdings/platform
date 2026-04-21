@@ -1,4 +1,4 @@
-import type { ReplaySnapshot } from './snapshot.ts';
+import type { ReplaySnapshot } from './snapshot.js';
 
 export type AgentExecutor = (
   input: Record<string, unknown>,
@@ -10,25 +10,25 @@ export interface ReplayResult {
   snapshotId: string;
   agentOutput: Record<string, unknown>;
   latencyMs: number;
-  tokensUsed?: number;
-  costUsd?: number;
-  model?: string;
-  groundTruthMatch?: boolean;
-  groundTruthScore?: number;
-  errors?: string[];
-  metadata?: Record<string, unknown>;
+  tokensUsed?: number | undefined;
+  costUsd?: number | undefined;
+  model?: string | undefined;
+  groundTruthMatch?: boolean | undefined;
+  groundTruthScore?: number | undefined;
+  errors?: string[] | undefined;
+  metadata?: Record<string, unknown> | undefined;
 }
 
 export interface TraceReplayInput {
   traceId: string;
-  runId?: string;
-  objective?: string;
-  selfModelSnapshot?: Record<string, unknown>;
-  worldModelSnapshot?: Record<string, unknown>;
-  capturedToolOutputs?: Record<string, unknown>;
-  capturedModelOutputs?: Record<string, unknown>;
-  originalModel?: string;
-  originalPromptVersions?: string[];
+  runId?: string | undefined;
+  objective?: string | undefined;
+  selfModelSnapshot?: Record<string, unknown> | undefined;
+  worldModelSnapshot?: Record<string, unknown> | undefined;
+  capturedToolOutputs?: Record<string, unknown> | undefined;
+  capturedModelOutputs?: Record<string, unknown> | undefined;
+  originalModel?: string | undefined;
+  originalPromptVersions?: string[] | undefined;
 }
 
 export interface DeterministicReplayResult {
@@ -47,13 +47,12 @@ export interface DeterministicReplayResult {
 }
 
 export interface ReplayRunConfig {
-  maxConcurrency?: number;
-  timeoutMs?: number;
-  compareGroundTruth?: boolean;
-  groundTruthComparator?: (
-    output: Record<string, unknown>,
-    groundTruth: Record<string, unknown>,
-  ) => number;
+  maxConcurrency?: number | undefined;
+  timeoutMs?: number | undefined;
+  compareGroundTruth?: boolean | undefined;
+  groundTruthComparator?:
+    | ((output: Record<string, unknown>, groundTruth: Record<string, unknown>) => number)
+    | undefined;
 }
 
 export interface ReplayRunReport {
@@ -67,7 +66,7 @@ export interface ReplayRunReport {
   avgLatencyMs: number;
   totalCostUsd: number;
   totalTokensUsed: number;
-  groundTruthMatchRate?: number;
+  groundTruthMatchRate?: number | undefined;
   results: ReplayResult[];
 }
 

@@ -30,7 +30,7 @@ export class RAGPipeline {
     const newChunks: RAGChunk[] = textChunks.map((c, i) => ({
       id: `chunk-${Date.now()}-${i}`,
       content: c,
-      metadata,
+      ...(metadata !== undefined ? { metadata } : {}),
     }));
     this.chunks.push(...newChunks);
     return newChunks;

@@ -358,7 +358,7 @@ export class Dynamics365Adapter extends ServiceAdapter {
     return (await response.json()) as Record<string, unknown>;
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     await this.acquireToken();
     const url = `${this.orgUrl}/api/data/v9.2/WhoAmI`;
     const response = await fetch(url, {

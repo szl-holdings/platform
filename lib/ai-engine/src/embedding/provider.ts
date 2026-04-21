@@ -203,12 +203,10 @@ class OpenAICompatibleEmbeddingProvider extends BaseEmbeddingProvider {
 
   constructor() {
     super();
+    const _apiKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
     this.config = {
-      baseUrl:
-        process.env['OPENAI_EMBED_BASE_URL'] ||
-        process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'] ||
-        'https://api.openai.com/v1',
-      apiKey: process.env['AI_INTEGRATIONS_OPENAI_API_KEY'],
+      baseUrl: process.env['OPENAI_EMBED_BASE_URL'] || process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'] || 'https://api.openai.com/v1',
+      ...(_apiKey !== undefined ? { apiKey: _apiKey } : {}),
       defaultModel: process.env['OPENAI_EMBED_MODEL'] || 'text-embedding-3-small',
       maxInputLength: 8000,
     };

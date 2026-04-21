@@ -68,7 +68,10 @@ export const EntitySnapshotSchema = z.object({
 });
 export type EntitySnapshot = z.infer<typeof EntitySnapshotSchema>;
 
-export type EntitySnapshotInput = Omit<EntitySnapshot, 'snapshotId' | 'schemaVersion'>;
+export type EntitySnapshotInput = Omit<
+  z.input<typeof EntitySnapshotSchema>,
+  'snapshotId' | 'schemaVersion'
+>;
 
 export function createEntitySnapshot(input: EntitySnapshotInput): EntitySnapshot {
   return EntitySnapshotSchema.parse({

@@ -402,7 +402,7 @@ export function runAllDecisionTwinScenarios(profile: SignalProfile): DecisionTwi
 
 export function getBestScenario(scenarios: DecisionTwinScenario[]): DecisionTwinScenario | null {
   if (!scenarios.length) return null;
-  return [...scenarios].sort((a, b) => a.overallRiskAfter - b.overallRiskAfter)[0];
+  return [...scenarios].sort((a, b) => a.overallRiskAfter - b.overallRiskAfter)[0] ?? null;
 }
 
 export function riskLabel(score: number): { label: string; color: string } {

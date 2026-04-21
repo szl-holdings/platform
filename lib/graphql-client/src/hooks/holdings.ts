@@ -1,4 +1,4 @@
-import { gql, useMutation, useQuery } from '@apollo/client';
+import { gql, useQuery, useMutation } from "@apollo/client";
 
 export const GET_HOLDINGS_VENTURES = gql`
   query GetHoldingsVentures($status: String, $limit: Int, $offset: Int) {
@@ -66,12 +66,8 @@ export const CREATE_HOLDINGS_INQUIRY = gql`
   }
 `;
 
-export function useHoldingsVentures(variables?: {
-  status?: string;
-  limit?: number;
-  offset?: number;
-}) {
-  return useQuery(GET_HOLDINGS_VENTURES, { variables });
+export function useHoldingsVentures(variables?: { status?: string; limit?: number; offset?: number }) {
+  return useQuery(GET_HOLDINGS_VENTURES, variables !== undefined ? { variables } : {});
 }
 
 export function useHoldingsVentureBySlug(slug: string) {

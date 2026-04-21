@@ -13,9 +13,9 @@ export interface GraderContext {
   latencyMs: number;
   costUsd: number;
   tokensUsed: number;
-  traceId?: string;
-  model?: string;
-  metadata?: Record<string, unknown>;
+  traceId?: string | undefined;
+  model?: string | undefined;
+  metadata?: Record<string, unknown> | undefined;
 }
 
 export interface GraderResult {
@@ -23,7 +23,7 @@ export interface GraderResult {
   passed: boolean;
   graderType: GraderType;
   details: Record<string, unknown>;
-  failureReason?: string;
+  failureReason?: string | undefined;
 }
 
 export type Grader = (ctx: GraderContext) => GraderResult | Promise<GraderResult>;

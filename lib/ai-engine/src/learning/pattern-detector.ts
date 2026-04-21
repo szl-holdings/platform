@@ -92,17 +92,17 @@ function extractDimensions(entry: CaseMemoryEntry): Record<string, string[]> {
   const allText = `${caseText} ${noteText}`;
 
   for (const d of entry.decisions) {
-    if (d.impactLevel) dims.riskLevel.push(d.impactLevel);
-    if (d.decisionType) dims.decisionType.push(d.decisionType);
-    if (d.approvalRequired) dims.approvalRequired.push('approval_required');
-    if (d.humanReviewRequired) dims.humanReviewRequired.push('human_review_required');
+    if (d.impactLevel) dims.riskLevel!.push(d.impactLevel);
+    if (d.decisionType) dims.decisionType!.push(d.decisionType);
+    if (d.approvalRequired) dims.approvalRequired!.push('approval_required');
+    if (d.humanReviewRequired) dims.humanReviewRequired!.push('human_review_required');
   }
 
   const vector = extractAttackVector(allText);
-  if (vector) dims.attackVector.push(vector);
+  if (vector) dims.attackVector!.push(vector);
 
   const scope = extractScope(allText);
-  if (scope) dims.affectedScope.push(scope);
+  if (scope) dims.affectedScope!.push(scope);
 
   return dims;
 }

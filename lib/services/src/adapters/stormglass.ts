@@ -33,7 +33,7 @@ export class StormGlassAdapter extends ServiceAdapter {
     return process.env['STORMGLASS_API_KEY'];
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const result = await this.testConnection();
     if (!result.connected) throw new Error('StormGlass connection verification failed');
   }

@@ -67,14 +67,14 @@ export interface EvalCaseResult {
     expected: unknown;
     actual: unknown;
     passed: boolean;
-    description?: string;
+    description?: string | undefined;
   }>;
   model: string;
   latencyMs: number;
-  tokensUsed?: number;
-  costUsd?: number;
+  tokensUsed?: number | undefined;
+  costUsd?: number | undefined;
   error: string | null;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, unknown> | undefined;
 }
 
 export interface EvalSuiteReport {
@@ -105,9 +105,9 @@ export interface SideBySideComparison {
   domain: EvalDomain;
   timestamp: string;
   entries: ComparisonEntry[];
-  winner?: string;
-  deltaPassRate?: number;
-  deltaLatencyMs?: number;
+  winner?: string | undefined;
+  deltaPassRate?: number | undefined;
+  deltaLatencyMs?: number | undefined;
 }
 
 export interface RegressionBaseline {
@@ -132,8 +132,8 @@ export interface RegressionCheckResult {
 }
 
 export interface PulseEvalConfig {
-  passRateThreshold?: number;
-  latencyThresholdMs?: number;
-  regressionThresholdPct?: number;
-  redTeamPassRequirement?: 'all_fail' | 'majority_fail' | 'none';
+  passRateThreshold?: number | undefined;
+  latencyThresholdMs?: number | undefined;
+  regressionThresholdPct?: number | undefined;
+  redTeamPassRequirement?: 'all_fail' | 'majority_fail' | 'none' | undefined;
 }

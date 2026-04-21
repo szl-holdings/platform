@@ -178,7 +178,7 @@ export class DunBradstreetAdapter extends ServiceAdapter {
     return res.json() as Promise<T>;
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     await this.getToken();
   }
 

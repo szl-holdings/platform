@@ -15,15 +15,15 @@ export interface ConflictRecord {
   serverValue: unknown;
   severity: ConflictSeverity;
   resolution: ConflictResolution;
-  resolvedAt?: number;
-  resolvedBy?: string;
+  resolvedAt?: number | undefined;
+  resolvedBy?: string | undefined;
   createdAt: number;
 }
 
 export interface ConflictDetectionOptions {
   storage: StorageAdapter;
-  storeName?: string;
-  autoResolveSeverities?: ConflictSeverity[];
+  storeName?: string | undefined;
+  autoResolveSeverities?: ConflictSeverity[] | undefined;
 }
 
 const STORE_NAME = 'conflict-queue';

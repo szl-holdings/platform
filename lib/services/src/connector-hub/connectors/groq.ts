@@ -147,7 +147,7 @@ export class GroqConnector extends ToolConnector {
     }
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const apiKey = process.env['GROQ_API_KEY'];
     if (!apiKey) throw new Error('GROQ_API_KEY not configured');
     const resp = await fetch('https://api.groq.com/openai/v1/models', {

@@ -234,7 +234,7 @@ export class SecEdgarAdapter extends ServiceAdapter {
     });
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const res = await this.throttledFetch(`${this.SUBMISSIONS_URL}/CIK0000320193.json`);
     if (!res.ok) throw new Error(`SEC EDGAR health check failed: HTTP ${res.status}`);
   }

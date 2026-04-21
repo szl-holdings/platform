@@ -1,21 +1,21 @@
-import { RerankRequestSchema } from '@workspace/aef-contracts';
-import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
-import { PolicyEngine } from '@workspace/aef-policy-guard';
-import { rerankCandidates } from '@workspace/alloy-rerank-worker';
-import { randomUUID } from 'crypto';
-import type { Request, Response } from 'express';
-import { Router } from 'express';
-import { logger } from '../middleware/logger.js';
-import { errorBudgetCounter } from '../middleware/prometheus.js';
-import { getProfile } from '../profiles/default.js';
+import { Router, type IRouter, type RequestHandler } from "express";
+import type { Request, Response } from "express";
+import { RerankRequestSchema } from "@workspace/aef-contracts";
+import { defaultLedgerStore } from "@workspace/aef-evidence-ledger";
+import { PolicyEngine } from "@workspace/aef-policy-guard";
+import { rerankCandidates } from "@workspace/alloy-rerank-worker";
+import { randomUUID } from "crypto";
+import { logger } from "../middleware/logger.js";
+import { getProfile } from "../profiles/default.js";
+import { errorBudgetCounter } from "../middleware/prometheus.js";
 
-export const rerankRouter = Router();
+export const rerankRouter: IRouter = Router();
 const policyEngine = new PolicyEngine();
 
-rerankRouter.post('/v1/rerank', async (req: Request, res: Response) => {
+rerankRouter.post("/v1/rerank", (async (req: Request, res: Response) => {
   const parseResult = RerankRequestSchema.safeParse(req.body);
   if (!parseResult.success) {
-    res.status(400).json({ error: 'Validation failed', detail: parseResult.error.issues });
+    res.status(400).json({ error: "Validation failed", detail: parseResult.error.issues });
     return;
   }
 
@@ -25,9 +25,9 @@ rerankRouter.post('/v1/rerank', async (req: Request, res: Response) => {
 
   let profile;
   try {
-    profile = getProfile(body.profileId ?? req.profileId ?? 'default');
+    profile = getProfile(body.profileId ?? req.profileId ?? "default");
   } catch (err) {
-    res.status(400).json({ error: 'Profile not found', detail: String(err) });
+    res.status(400).json({ error: "Profile not found", detail: String(err) });
     return;
   }
 
@@ -40,10 +40,8 @@ rerankRouter.post('/v1/rerank', async (req: Request, res: Response) => {
   });
 
   if (!policyDecision.allow) {
-    errorBudgetCounter.inc({ kind: 'policy_denied', tenant_id: body.tenantId as string });
-    res
-      .status(403)
-      .json({ error: 'Request blocked by policy', reasons: policyDecision.reasons, traceId });
+    errorBudgetCounter.inc({ kind: "policy_denied", tenant_id: body.tenantId as string });
+    res.status(403).json({ error: "Request blocked by policy", reasons: policyDecision.reasons, traceId });
     return;
   }
 
@@ -60,14 +58,14 @@ rerankRouter.post('/v1/rerank', async (req: Request, res: Response) => {
           score: c.score,
         })),
         topK: body.topK,
-        model: body.model ?? 'aef-dev-rerank',
+        model: body.model ?? "aef-dev-rerank",
       },
       { useFallback: false },
     );
   } catch (err) {
-    errorBudgetCounter.inc({ kind: 'rerank_error', tenant_id: body.tenantId as string });
-    logger.error({ traceId, error: String(err) }, 'Rerank request failed');
-    res.status(502).json({ error: 'Rerank backend error', detail: String(err), traceId });
+    errorBudgetCounter.inc({ kind: "rerank_error", tenant_id: body.tenantId as string });
+    logger.error({ traceId, error: String(err) }, "Rerank request failed");
+    res.status(502).json({ error: "Rerank backend error", detail: String(err), traceId });
     return;
   }
 
@@ -82,7 +80,8 @@ rerankRouter.post('/v1/rerank', async (req: Request, res: Response) => {
       profileId: profile.profileId,
       profileVersion: profile.version,
       chunkId: r.id,
-      sourceId: 'rerank-request',
+      sourceId: "rerank-request",
+      boostApplied: false,
       rerankerScore: r.score,
       finalScore: r.score,
       policyAllow: true,
@@ -107,7 +106,7 @@ rerankRouter.post('/v1/rerank', async (req: Request, res: Response) => {
         id: r.id,
         score: r.score,
         rank: r.rank,
-        text: orig?.text ?? '',
+        text: orig?.text ?? "",
         metadata: orig?.metadata ?? {},
       };
     }),
@@ -116,8 +115,5 @@ rerankRouter.post('/v1/rerank', async (req: Request, res: Response) => {
     evidenceIds: evidenceEntries.map((e) => e.entryId),
   });
 
-  logger.info(
-    { traceId, requestId: body.requestId, resultCount: rerankResult.results.length, processingMs },
-    'rerank completed',
-  );
-});
+  logger.info({ traceId, requestId: body.requestId, resultCount: rerankResult.results.length, processingMs }, "rerank completed");
+}) as unknown as RequestHandler);

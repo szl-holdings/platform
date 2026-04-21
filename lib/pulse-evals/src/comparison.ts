@@ -13,7 +13,7 @@ export function compareSuites(reports: EvalSuiteReport[]): SideBySideComparison 
     throw new Error('At least one report required for comparison');
   }
 
-  const base = reports[0];
+  const base = reports[0]!;
   const entries = reports.map((r) => ({ model: r.model, report: r }));
 
   const sorted = [...reports].sort((a, b) => b.passRate - a.passRate);
@@ -105,7 +105,8 @@ export function getRegressionDashboard(): {
     totalTracked: baselines.length,
     lastUpdated:
       baselines.length > 0
-        ? baselines.sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))[0].recordedAt
+        ? baselines.sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))[0]?.recordedAt ??
+          new Date().toISOString()
         : new Date().toISOString(),
   };
 }

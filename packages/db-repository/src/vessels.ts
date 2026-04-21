@@ -1,8 +1,13 @@
 /**
- * Vessels Repository — typed access to vessel fleet and voyage tables.
+ * Vessels Repository — typed access to vessel fleet tables.
  */
-import { db, vesselPositionsTable, vesselsTable, voyagesTable } from '@szl-holdings/db';
-import { and, desc, eq, gte, lte } from 'drizzle-orm';
+import {
+  db,
+  vesselsTable,
+  vesselsPositionsTable,
+  voyagesTable,
+} from "@szl-holdings/db";
+import { and, desc, eq, gte, lte } from "drizzle-orm";
 
 export class VesselsRepository {
   async findVesselById(id: number) {
@@ -14,7 +19,7 @@ export class VesselsRepository {
     const rows = await db
       .select()
       .from(vesselsTable)
-      .where(eq(vesselsTable.imoNumber, imo))
+      .where(eq(vesselsTable.imo, imo))
       .limit(1);
     return rows[0] ?? null;
   }
@@ -23,21 +28,12 @@ export class VesselsRepository {
     return db.select().from(vesselsTable).orderBy(desc(vesselsTable.updatedAt)).limit(limit);
   }
 
-  async listVoyagesForVessel(vesselId: number, limit = 20) {
-    return db
-      .select()
-      .from(voyagesTable)
-      .where(eq(voyagesTable.vesselId, vesselId))
-      .orderBy(desc(voyagesTable.departureDatetime))
-      .limit(limit);
-  }
-
   async getLatestPosition(vesselId: number) {
     const rows = await db
       .select()
-      .from(vesselPositionsTable)
-      .where(eq(vesselPositionsTable.vesselId, vesselId))
-      .orderBy(desc(vesselPositionsTable.timestamp))
+      .from(vesselsPositionsTable)
+      .where(eq(vesselsPositionsTable.vesselId, vesselId))
+      .orderBy(desc(vesselsPositionsTable.recordedAt))
       .limit(1);
     return rows[0] ?? null;
   }

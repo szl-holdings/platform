@@ -84,23 +84,23 @@ export function enqueueForReview(input: EnqueueReviewInput): ReviewQueueItem {
   const item: ReviewQueueItem = {
     reviewId,
     traceId: trace.traceId,
-    orgId: trace.orgId,
     domain: trace.domain,
     recommendationType: trace.recommendationType,
     model: trace.model,
     confidence: trace.confidence,
-    riskLevel: trace.riskLevel,
     reviewReason: input.overrideReason ?? trace.reviewReason ?? 'Flagged for review',
     priority: input.priority ?? computePriority(trace),
-    inputSummary: trace.inputSummary,
-    outputSummary: trace.outputSummary,
     costEstimateUsd: trace.costEstimateUsd,
     latencyMs: trace.latencyMs,
-    evalScore: trace.evalScore,
-    evalPassed: trace.evalPassed,
     status: 'pending',
     enqueuedAt: new Date().toISOString(),
-    metadata: trace.metadata,
+    ...(trace.orgId !== undefined ? { orgId: trace.orgId } : {}),
+    ...(trace.riskLevel !== undefined ? { riskLevel: trace.riskLevel } : {}),
+    ...(trace.inputSummary !== undefined ? { inputSummary: trace.inputSummary } : {}),
+    ...(trace.outputSummary !== undefined ? { outputSummary: trace.outputSummary } : {}),
+    ...(trace.evalScore !== undefined ? { evalScore: trace.evalScore } : {}),
+    ...(trace.evalPassed !== undefined ? { evalPassed: trace.evalPassed } : {}),
+    ...(trace.metadata !== undefined ? { metadata: trace.metadata } : {}),
   };
 
   queue.unshift(item);
@@ -157,8 +157,8 @@ export function recordReviewDecision(input: ReviewDecisionInput): ReviewQueueIte
 
   item.verdict = input.verdict;
   item.reviewedBy = input.reviewedBy;
-  item.reviewNotes = input.reviewNotes;
-  item.escalatedTo = input.escalatedTo;
+  if (input.reviewNotes !== undefined) item.reviewNotes = input.reviewNotes;
+  if (input.escalatedTo !== undefined) item.escalatedTo = input.escalatedTo;
   item.reviewedAt = new Date().toISOString();
   item.status = input.verdict === 'escalated' ? 'escalated' : 'resolved';
 

@@ -450,7 +450,7 @@ const baseScores: Record<string, number> = {
 };
 
 dimensions.forEach((dimId) => {
-  let currentScore = baseScores[dimId];
+  let currentScore = baseScores[dimId] ?? 50;
   for (let i = 6; i >= 0; i--) {
     mockScoreHistory.push({
       id: `sh_${dimId}_${i}`,

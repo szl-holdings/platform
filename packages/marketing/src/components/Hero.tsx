@@ -7,16 +7,16 @@ const ACCENT = 'hsl(191,92%,44%)';
 const TEXT = 'hsl(38,8%,92%)';
 const TEXT_SEC = 'hsl(214,7%,55%)';
 
-interface HeroAction {
+export interface HeroAction {
   label: string;
-  href?: string;
-  onClick?: () => void;
-  primary?: boolean;
+  href?: string | undefined;
+  onClick?: (() => void) | undefined;
+  primary?: boolean | undefined;
 }
 
-interface HeroBadge {
+export interface HeroBadge {
   label: string;
-  live?: boolean;
+  live?: boolean | undefined;
 }
 
 export interface HeroProps {

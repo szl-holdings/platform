@@ -75,8 +75,8 @@ export interface PolicyEvaluationResult {
   effect: PolicyEffect;
   allowed: boolean;
   requiresApproval: boolean;
-  requiredApproverRole?: string;
-  escalationTarget?: string;
+  requiredApproverRole?: string | undefined;
+  escalationTarget?: string | undefined;
   matchedPolicies: Array<{ policyId: string; ruleName: string; effect: PolicyEffect }>;
   violations: Array<{ policyId: string; policyName: string; reason: string }>;
   reasoning: string;

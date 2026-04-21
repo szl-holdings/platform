@@ -1,4 +1,4 @@
-import { gql, useMutation, useQuery, useSubscription } from '@apollo/client';
+import { gql, useQuery, useMutation, useSubscription } from "@apollo/client";
 
 export const GET_ALLOY_WORKFLOWS = gql`
   query GetAlloyWorkflows($limit: Int, $offset: Int) {
@@ -93,23 +93,19 @@ export const ALLOY_WORKFLOW_RUN_UPDATED = gql`
 `;
 
 export function useAlloyWorkflows(variables?: { limit?: number; offset?: number }) {
-  return useQuery(GET_ALLOY_WORKFLOWS, { variables });
+  return useQuery(GET_ALLOY_WORKFLOWS, variables !== undefined ? { variables } : {});
 }
 
-export function useAlloyWorkflowRuns(variables?: {
-  workflowId?: string;
-  limit?: number;
-  offset?: number;
-}) {
-  return useQuery(GET_ALLOY_WORKFLOW_RUNS, { variables });
+export function useAlloyWorkflowRuns(variables?: { workflowId?: string; limit?: number; offset?: number }) {
+  return useQuery(GET_ALLOY_WORKFLOW_RUNS, variables !== undefined ? { variables } : {});
 }
 
 export function useAlloySignals(variables?: { limit?: number; offset?: number }) {
-  return useQuery(GET_ALLOY_SIGNALS, { variables });
+  return useQuery(GET_ALLOY_SIGNALS, variables !== undefined ? { variables } : {});
 }
 
 export function useAlloyArtifacts(variables?: { limit?: number; offset?: number }) {
-  return useQuery(GET_ALLOY_ARTIFACTS, { variables });
+  return useQuery(GET_ALLOY_ARTIFACTS, variables !== undefined ? { variables } : {});
 }
 
 export function useCreateAlloyWorkflow() {
@@ -121,5 +117,5 @@ export function useUpdateAlloyWorkflowRun() {
 }
 
 export function useAlloyWorkflowRunUpdated(variables?: { workflowId?: string }) {
-  return useSubscription(ALLOY_WORKFLOW_RUN_UPDATED, { variables });
+  return useSubscription(ALLOY_WORKFLOW_RUN_UPDATED, variables !== undefined ? { variables } : {});
 }

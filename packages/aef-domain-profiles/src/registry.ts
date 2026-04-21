@@ -373,7 +373,7 @@ export class DomainProfileRegistry {
       profile: targetProfile,
       activatedAt: new Date().toISOString(),
       activatedBy,
-      rotationReason,
+      ...(rotationReason !== undefined ? { rotationReason } : {}),
     };
 
     const newPointer: TenantProfilePointer = {

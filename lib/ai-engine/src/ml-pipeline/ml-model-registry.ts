@@ -91,8 +91,8 @@ class MlModelRegistryService {
       lifecycle: 'experimental',
       isProduction: false,
       tags: input.tags ?? [],
-      notes: input.notes,
       createdAt: new Date(),
+      ...(input.notes !== undefined ? { notes: input.notes } : {}),
     };
 
     modelStore.set(modelVersionId, model);
@@ -160,7 +160,7 @@ class MlModelRegistryService {
     model.isProduction = targetLifecycle === 'production';
     if (targetLifecycle === 'production') {
       model.promotedAt = new Date();
-      model.promotedBy = promotedBy;
+      if (promotedBy !== undefined) model.promotedBy = promotedBy;
     }
     if (targetLifecycle === 'deprecated') {
       model.deprecatedAt = new Date();

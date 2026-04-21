@@ -272,7 +272,7 @@ export async function curateDatasetForAgent(
   const rawResult = await exportTrainingData(agentId, format, {
     minRating: config.minQualityRating,
     maxSamples: config.maxSamples * 2,
-    since: options?.since,
+    ...(options?.since !== undefined ? { since: options.since } : {}),
   });
 
   let filteredSamples: typeof rawResult.samples;

@@ -326,9 +326,9 @@ export class PatternLibrary {
       alertId: input.alertId,
       relevance: input.relevance,
       rating: Math.max(1, Math.min(5, input.rating)),
-      notes: input.notes,
-      reviewedBy: input.reviewedBy,
       reviewedAt: new Date().toISOString(),
+      ...(input.notes !== undefined ? { notes: input.notes } : {}),
+      ...(input.reviewedBy !== undefined ? { reviewedBy: input.reviewedBy } : {}),
     };
 
     pattern.feedbackHistory.unshift(feedback);

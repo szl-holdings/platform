@@ -216,10 +216,10 @@ export type ParallelProgressCallback = (
 ) => void;
 
 export interface ParallelRunConfig {
-  workers?: number;
+  workers?: number | undefined;
   iterations: number;
-  timeoutMs?: number;
-  onProgress?: ParallelProgressCallback;
+  timeoutMs?: number | undefined;
+  onProgress?: ParallelProgressCallback | undefined;
 }
 
 export interface ChunkResult {

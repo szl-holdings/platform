@@ -4,8 +4,8 @@
  * Synthetic CRM deal and project task signals across domains.
  */
 
-import type { Signal, SignalInput } from '@workspace/ontology';
-import type { ConnectorMetadata, ConnectorStatus, CrmProjectConnector } from '../interfaces.js';
+import type { Signal, SignalInput } from "@workspace/ontology/signal";
+import type { ConnectorMetadata, ConnectorStatus, CrmProjectConnector } from "../interfaces.js";
 
 export class CrmProjectDemoAdapter implements CrmProjectConnector {
   readonly category = 'crm-project' as const;

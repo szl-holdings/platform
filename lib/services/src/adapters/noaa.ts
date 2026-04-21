@@ -6,7 +6,7 @@ export class NOAAAdapter extends ServiceAdapter {
     'NOAA CO-OPS Station API — Live air temperature and wind data from coastal stations. Free, no key required.';
   readonly requiredEnvVars: string[] = [];
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const res = await fetch(
       'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?station=8638610&date=recent&product=air_temperature&time_zone=GMT&units=metric&application=SZL&format=json',
       { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'SZL/1.0' } },

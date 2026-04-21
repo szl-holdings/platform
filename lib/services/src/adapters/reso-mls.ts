@@ -37,13 +37,13 @@ export interface MlsListing {
 }
 
 export interface ODataQueryParams {
-  filter?: string;
-  select?: string[];
-  top?: number;
-  skip?: number;
-  orderby?: string;
-  expand?: string[];
-  count?: boolean;
+  filter?: string | undefined;
+  select?: string[] | undefined;
+  top?: number | undefined;
+  skip?: number | undefined;
+  orderby?: string | undefined;
+  expand?: string[] | undefined;
+  count?: boolean | undefined;
 }
 
 export interface MlsIncrementalSyncResult {
@@ -308,7 +308,7 @@ export class ResoMlsAdapter extends ServiceAdapter {
     return response.json() as Promise<{ value: unknown[]; '@odata.count'?: number }>;
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     await this.fetchToken();
     await this.odataRequest('Property', { top: 1, select: ['ListingKey'] });
   }

@@ -33,7 +33,7 @@ export class OneDriveAdapter extends ServiceAdapter {
   readonly description = 'Microsoft OneDrive file storage';
   readonly requiredEnvVars = ['ONEDRIVE_CLIENT_ID', 'ONEDRIVE_CLIENT_SECRET'];
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const result = await this.testConnection();
     if (!result.connected) throw new Error('OneDrive connection verification failed');
   }

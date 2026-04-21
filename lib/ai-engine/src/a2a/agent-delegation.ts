@@ -157,10 +157,9 @@ export async function multiDelegateAndMerge(params: {
         fromAgentId: params.fromAgentId,
         toAgentId: toId,
         query: params.query,
-        context: params.context,
-        orgId: params.orgId,
+        ...(params.context !== undefined ? { context: params.context } : {}),
+        ...(params.orgId !== undefined ? { orgId: params.orgId } : {}),
       }),
-    ),
   );
 
   const successful: DelegationResult[] = [];

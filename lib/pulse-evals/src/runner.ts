@@ -30,7 +30,7 @@ function getNestedField(obj: Record<string, unknown>, field: string): unknown {
       const arrKey = part.replace(/\[\d+\]/, '');
       const arr = (current as Record<string, unknown>)[arrKey];
       if (Array.isArray(arr)) {
-        current = arr[parseInt(idx[1], 10)];
+        current = arr[parseInt(idx[1]!, 10)];
       } else {
         return undefined;
       }
@@ -171,7 +171,7 @@ export async function runPulseEvals(
           expected: assertion.value ?? 'exists',
           actual,
           passed,
-          description: assertion.description,
+          ...(assertion.description !== undefined && { description: assertion.description }),
         };
       });
 
@@ -207,7 +207,7 @@ export async function runPulseEvals(
 
   const passed = results.filter((r) => r.passed).length;
 
-  const domainForReport = domains?.length === 1 ? domains[0] : 'ranking';
+  const domainForReport: EvalDomain = domains?.length === 1 ? domains[0]! : 'ranking';
 
   return {
     suiteId,
@@ -237,7 +237,7 @@ export async function runDomainEvals(
     domains: [domain],
     suiteId: options?.suiteId ?? `pulse_${domain}_${Date.now()}`,
     suiteName: `PULSE EVALS — ${domain.toUpperCase()} Suite`,
-    config: options?.config,
+    ...(options?.config !== undefined && { config: options.config }),
   });
 }
 
@@ -250,6 +250,6 @@ export async function runRedTeamEvals(
     includeRedTeam: true,
     suiteId: options?.suiteId ?? `pulse_redteam_${Date.now()}`,
     suiteName: 'PULSE EVALS — Red Team Suite',
-    config: options?.config,
+    ...(options?.config !== undefined && { config: options.config }),
   });
 }

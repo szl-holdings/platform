@@ -180,18 +180,18 @@ export class SalesforceConnector extends ToolConnector {
       case 'create_case':
         return adapter.createCase({
           subject: String(params['subject']),
-          description: params['description'] ? String(params['description']) : undefined,
-          priority: params['priority']
-            ? (String(params['priority']) as 'High' | 'Medium' | 'Low')
-            : undefined,
-          accountId: params['accountId'] ? String(params['accountId']) : undefined,
+          ...(params['description'] ? { description: String(params['description']) } : {}),
+          ...(params['priority']
+            ? { priority: String(params['priority']) as 'High' | 'Medium' | 'Low' }
+            : {}),
+          ...(params['accountId'] ? { accountId: String(params['accountId']) } : {}),
         });
       default:
         throw new Error(`Unknown capability: ${capabilityId}`);
     }
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     await services.salesforce.testConnection();
   }
 }

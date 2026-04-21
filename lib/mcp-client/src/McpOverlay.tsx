@@ -502,7 +502,7 @@ export function McpOverlay({ domain }: { domain?: string }) {
       >
         <Cpu style={{ width: 16, height: 16, color: '#4B8BDB' }} />
       </button>
-      {open && <McpPanel onClose={() => setOpen(false)} domain={domain} />}
+      {open && <McpPanel onClose={() => setOpen(false)} {...(domain !== undefined && { domain })} />}
     </>
   );
 }

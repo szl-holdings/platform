@@ -16,8 +16,8 @@ export interface GraphCalendarEvent {
   subject: string;
   start: string;
   end: string;
-  location?: string;
-  organizer?: string;
+  location?: string | undefined;
+  organizer?: string | undefined;
   isOnlineMeeting: boolean;
   status: 'busy' | 'free' | 'tentative';
 }
@@ -26,17 +26,17 @@ export interface GraphContact {
   id: string;
   displayName: string;
   emailAddresses: string[];
-  phone?: string;
-  company?: string;
-  jobTitle?: string;
+  phone?: string | undefined;
+  company?: string | undefined;
+  jobTitle?: string | undefined;
 }
 
 export interface GraphTeamsNotification {
-  channelId?: string;
-  webHookUrl?: string;
+  channelId?: string | undefined;
+  webHookUrl?: string | undefined;
   text: string;
-  title?: string;
-  color?: string;
+  title?: string | undefined;
+  color?: string | undefined;
 }
 
 export interface GraphSharePointSite {
@@ -44,7 +44,7 @@ export interface GraphSharePointSite {
   name: string;
   displayName: string;
   webUrl: string;
-  description?: string;
+  description?: string | undefined;
 }
 
 export interface GraphConnectionStatus {
@@ -138,7 +138,7 @@ export class MicrosoftGraphAdapter extends ServiceAdapter {
     'MICROSOFT_CLIENT_SECRET',
   ];
 
-  get status(): ServiceStatus {
+  override get status(): ServiceStatus {
     const missing = this.missingEnvVars;
     if (missing.length === 0) return 'LIVE_CONFIGURED';
     return 'MOCKED_DEMO_MODE';
@@ -179,7 +179,7 @@ export class MicrosoftGraphAdapter extends ServiceAdapter {
     return res.json();
   }
 
-  protected async performHealthCheck(): Promise<void> {
+  protected override async performHealthCheck(): Promise<void> {
     const result = await this.testConnection();
     if (!result.connected) throw new Error('Microsoft Graph connection failed');
   }

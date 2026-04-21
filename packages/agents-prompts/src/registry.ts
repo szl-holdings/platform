@@ -93,7 +93,7 @@ export function registerPrompt(params: {
 }
 
 export function promotePromptVersion(promptId: string, versionId: string): void {
-  baseRegistry.promoteVersion(promptId, versionId);
+  baseRegistry.promote(promptId, versionId);
 }
 
 export { renderTemplate };

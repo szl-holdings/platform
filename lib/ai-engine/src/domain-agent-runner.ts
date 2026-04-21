@@ -380,8 +380,8 @@ export class DomainAgentRunner {
             return {
               role: 'tool' as const,
               content: m.content,
-              toolCallId: m.toolCallId,
-              name: m.toolName,
+              ...(m.toolCallId !== undefined ? { toolCallId: m.toolCallId } : {}),
+              ...(m.toolName !== undefined ? { name: m.toolName } : {}),
             };
           }
           return {

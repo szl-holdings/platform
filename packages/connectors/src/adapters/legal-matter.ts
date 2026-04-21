@@ -5,8 +5,8 @@
  * and billing milestone events for PRISM Counsel.
  */
 
-import type { Signal, SignalInput } from '@workspace/ontology';
-import type { ConnectorMetadata, ConnectorStatus, LegalMatterConnector } from '../interfaces.js';
+import type { Signal, SignalInput } from "@workspace/ontology/signal";
+import type { ConnectorMetadata, ConnectorStatus, LegalMatterConnector } from "../interfaces.js";
 
 export class LegalMatterDemoAdapter implements LegalMatterConnector {
   readonly category = 'legal-matter' as const;

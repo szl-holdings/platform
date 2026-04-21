@@ -181,11 +181,12 @@ async function pollOpenAIJobStatus(providerJobId: string): Promise<{
     ? (data.trained_tokens / 1000) * OPENAI_COST_PER_1K_TOKENS
     : undefined;
 
+  const _errMsg = data.error?.message;
   return {
     status: data.status,
-    fineTunedModelId: data.fine_tuned_model ?? undefined,
-    trainingCost,
-    error: data.error?.message,
+    ...(data.fine_tuned_model !== undefined ? { fineTunedModelId: data.fine_tuned_model } : {}),
+    ...(trainingCost !== undefined ? { trainingCost } : {}),
+    ...(_errMsg !== undefined ? { error: _errMsg } : {}),
   };
 }
 
@@ -215,8 +216,8 @@ async function pollHuggingFaceJobStatus(providerJobId: string): Promise<{
   const data = (await response.json()) as { status: string; model_id?: string; error?: string };
   return {
     status: data.status === 'completed' ? 'succeeded' : data.status,
-    fineTunedModelId: data.model_id,
-    error: data.error,
+    ...(data.model_id !== undefined ? { fineTunedModelId: data.model_id } : {}),
+    ...(data.error !== undefined ? { error: data.error } : {}),
   };
 }
 
@@ -226,7 +227,7 @@ export async function submitFineTuningJob(
   const { agentId, provider, baseModel, hyperparameters, options } = request;
   const minSamples = options?.minSamples ?? MIN_SAMPLES_DEFAULT;
 
-  const dataset = await curateDatasetForAgent(agentId, 'openai-jsonl', { since: options?.since });
+  const dataset = await curateDatasetForAgent(agentId, 'openai-jsonl', { ...(options?.since !== undefined ? { since: options.since } : {}) });
 
   if (dataset.sampleCount < minSamples) {
     throw new Error(
@@ -460,6 +461,8 @@ function mapProviderStatus(providerStatus: string): FineTuningJobStatus['status'
 }
 
 function mapJobToStatus(job: typeof fineTuningJobs.$inferSelect): FineTuningJobStatus {
+  const _completedAt = job.completedAt?.toISOString();
+  const _evalScores = job.evalScores as Record<string, unknown> | null;
   return {
     jobId: job.jobId,
     internalId: job.id,
@@ -467,15 +470,15 @@ function mapJobToStatus(job: typeof fineTuningJobs.$inferSelect): FineTuningJobS
     provider: job.provider as FineTuningProvider,
     baseModel: job.baseModel,
     status: job.status as FineTuningJobStatus['status'],
-    fineTunedModelId: job.fineTunedModelId ?? undefined,
     datasetSize: job.datasetSize,
     datasetVersion: job.datasetVersion,
     submittedAt: job.submittedAt.toISOString(),
-    completedAt: job.completedAt?.toISOString(),
-    trainingCostUsd: job.trainingCostUsd ?? undefined,
-    errorMessage: job.errorMessage ?? undefined,
-    evalScores: (job.evalScores as Record<string, unknown>) ?? undefined,
-    promotedToLifecycle: job.promotedToLifecycle ?? undefined,
+    ...(job.fineTunedModelId != null ? { fineTunedModelId: job.fineTunedModelId } : {}),
+    ...(_completedAt !== undefined ? { completedAt: _completedAt } : {}),
+    ...(job.trainingCostUsd != null ? { trainingCostUsd: job.trainingCostUsd } : {}),
+    ...(job.errorMessage != null ? { errorMessage: job.errorMessage } : {}),
+    ...(_evalScores != null ? { evalScores: _evalScores } : {}),
+    ...(job.promotedToLifecycle != null ? { promotedToLifecycle: job.promotedToLifecycle } : {}),
   };
 }
 

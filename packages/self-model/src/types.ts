@@ -44,14 +44,14 @@ export interface ActiveObjective {
 export interface PerformanceRecord {
   runId: string;
   agentId: string;
-  domain?: string;
+  domain?: string | undefined;
   outcome: 'success' | 'partial' | 'failure';
-  summary?: string;
-  durationMs?: number;
-  confidenceBefore?: number;
-  confidenceAfter?: number;
-  drift?: number;
-  errorCode?: string;
+  summary?: string | undefined;
+  durationMs?: number | undefined;
+  confidenceBefore?: number | undefined;
+  confidenceAfter?: number | undefined;
+  drift?: number | undefined;
+  errorCode?: string | undefined;
   occurredAt: string;
 }
 

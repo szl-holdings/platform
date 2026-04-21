@@ -6,8 +6,8 @@
  * estate-readiness deadlines approaching.
  */
 
-import type { Signal, SignalInput } from '@workspace/ontology';
-import type { ConnectorMetadata, ConnectorStatus, EmailCalendarConnector } from '../interfaces.js';
+import type { Signal, SignalInput } from "@workspace/ontology/signal";
+import type { ConnectorMetadata, ConnectorStatus, EmailCalendarConnector } from "../interfaces.js";
 
 export class EmailCalendarDemoAdapter implements EmailCalendarConnector {
   readonly category = 'email-calendar' as const;

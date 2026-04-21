@@ -7,8 +7,9 @@
  * Signal mesh clusters into isolation+recovery recommendation worth $2.8M cost avoidance.
  */
 
-import type { EvidenceItem, Recommendation, Signal } from '@workspace/ontology';
-import { createEvidenceItem, createRecommendation, createSignal } from '@workspace/ontology';
+import type { Signal } from '@workspace/ontology/signal';
+import type { EvidenceItem, Recommendation } from '@workspace/ontology';
+import { createSignal, createEvidenceItem, createRecommendation } from '@workspace/ontology';
 
 export type SentraRansomwareNarrative = typeof SENTRA_RANSOMWARE_NARRATIVE;
 

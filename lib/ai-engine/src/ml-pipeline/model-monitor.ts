@@ -88,26 +88,11 @@ function simulateAccuracyMetrics(
 
   return {
     sampleCount: predictionCount,
-    accuracy:
-      baseMetrics.accuracy !== undefined
-        ? Math.max(0, Math.min(1, baseMetrics.accuracy + degradation))
-        : undefined,
-    f1:
-      baseMetrics.f1 !== undefined
-        ? Math.max(0, Math.min(1, baseMetrics.f1 + degradation))
-        : undefined,
-    mse:
-      baseMetrics.mse !== undefined
-        ? Math.max(0, baseMetrics.mse + Math.abs(degradation) * 0.5)
-        : undefined,
-    r2:
-      baseMetrics.r2 !== undefined
-        ? Math.max(-1, Math.min(1, baseMetrics.r2 + degradation))
-        : undefined,
-    mape:
-      baseMetrics.mape !== undefined
-        ? Math.max(0, baseMetrics.mape + Math.abs(degradation))
-        : undefined,
+    ...(baseMetrics.accuracy !== undefined ? { accuracy: Math.max(0, Math.min(1, baseMetrics.accuracy + degradation)) } : {}),
+    ...(baseMetrics.f1 !== undefined ? { f1: Math.max(0, Math.min(1, baseMetrics.f1 + degradation)) } : {}),
+    ...(baseMetrics.mse !== undefined ? { mse: Math.max(0, baseMetrics.mse + Math.abs(degradation) * 0.5) } : {}),
+    ...(baseMetrics.r2 !== undefined ? { r2: Math.max(-1, Math.min(1, baseMetrics.r2 + degradation)) } : {}),
+    ...(baseMetrics.mape !== undefined ? { mape: Math.max(0, baseMetrics.mape + Math.abs(degradation)) } : {}),
   };
 }
 

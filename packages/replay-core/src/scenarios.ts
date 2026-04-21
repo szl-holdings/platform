@@ -1,4 +1,4 @@
-import { createSnapshot, type ReplaySnapshot } from './snapshot.ts';
+import { createSnapshot, type ReplaySnapshot } from './snapshot.js';
 
 export interface ScenarioDefinition {
   id: string;

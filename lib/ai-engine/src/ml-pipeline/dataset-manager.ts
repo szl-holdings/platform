@@ -165,7 +165,7 @@ export async function createDataset(input: CreateDatasetInput): Promise<ManagedD
     name: input.name,
     domain: input.domain,
     version,
-    description: input.description,
+    ...(input.description !== undefined ? { description: input.description } : {}),
     splitStrategy: input.splitStrategy ?? 'temporal',
     trainFraction: input.trainFraction ?? 0.8,
     valFraction: input.valFraction ?? 0.1,

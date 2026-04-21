@@ -3,8 +3,8 @@ import type { ScenarioDefinition } from './schema.js';
 
 export interface MonteCarloOutputStat {
   label: string;
-  format?: string;
-  higherIsBetter?: boolean;
+  format?: string | undefined;
+  higherIsBetter?: boolean | undefined;
   mean: number;
   p5: number;
   p25: number;
@@ -49,12 +49,12 @@ export interface SimulationProgress {
 
 export interface SimulationOptions {
   /** Optional progress callback fired periodically while iterating. */
-  onProgress?: (progress: SimulationProgress) => void;
+  onProgress?: ((progress: SimulationProgress) => void) | undefined;
   /**
    * Iteration interval at which to fire `onProgress`. Defaults to ~5% of the
    * shard's iteration count (min 1). Ignored when `onProgress` is absent.
    */
-  progressInterval?: number;
+  progressInterval?: number | undefined;
 }
 
 export type RunScenarioOptions = SimulationOptions;

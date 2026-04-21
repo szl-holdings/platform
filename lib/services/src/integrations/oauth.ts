@@ -1,9 +1,9 @@
 export interface OAuthTokenSet {
   accessToken: string;
-  refreshToken?: string;
-  expiresAt?: number;
-  tokenType?: string;
-  scope?: string;
+  refreshToken?: string | undefined;
+  expiresAt?: number | undefined;
+  tokenType?: string | undefined;
+  scope?: string | undefined;
 }
 
 export interface OAuthClientConfig {

@@ -85,7 +85,7 @@ export function planShards(iterations: number, shardCount: number): number[] {
  */
 export function planPoolSize(
   iterations: number,
-  options: { maxWorkers?: number; parallelThreshold?: number } = {},
+  options: { maxWorkers?: number | undefined; parallelThreshold?: number | undefined } = {},
 ): number {
   const maxWorkers = Math.max(1, options.maxWorkers ?? 4);
   const threshold = Math.max(1, options.parallelThreshold ?? 5_000);

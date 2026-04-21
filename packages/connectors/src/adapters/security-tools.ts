@@ -5,8 +5,8 @@
  * compliance drift, and SIEM events.
  */
 
-import type { Signal, SignalInput } from '@workspace/ontology';
-import type { ConnectorMetadata, ConnectorStatus, SecurityToolsConnector } from '../interfaces.js';
+import type { Signal, SignalInput } from "@workspace/ontology/signal";
+import type { ConnectorMetadata, ConnectorStatus, SecurityToolsConnector } from "../interfaces.js";
 
 export class SecurityToolsDemoAdapter implements SecurityToolsConnector {
   readonly category = 'security-tools' as const;

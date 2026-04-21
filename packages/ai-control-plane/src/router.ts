@@ -193,7 +193,12 @@ class ModelRouter {
       'Route resolved',
     );
 
-    return { endpoint: selected, fallbackChain, estimatedCostUsd, selectedBy };
+    return {
+      endpoint: selected,
+      fallbackChain,
+      selectedBy,
+      ...(estimatedCostUsd !== undefined ? { estimatedCostUsd } : {}),
+    };
   }
 
   private liveEvalScore(endpoint: ModelEndpoint, routeClass: RouteClass): number {
@@ -245,7 +250,7 @@ class ModelRouter {
     const state = this.circuitBreakers.get(key);
     if (!state || state.failures < this.FAILURE_THRESHOLD) return false;
     if (state.openedAt && Date.now() - state.openedAt > this.CIRCUIT_OPEN_MS) {
-      state.openedAt = undefined;
+      delete state.openedAt;
       state.failures = 0;
       return false;
     }

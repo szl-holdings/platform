@@ -137,9 +137,9 @@ export async function runEvals(
   const byCategory: EvalReport['byCategory'] = {};
   for (const r of results) {
     if (!byCategory[r.category]) byCategory[r.category] = { total: 0, passed: 0, failed: 0 };
-    byCategory[r.category].total++;
-    if (r.passed) byCategory[r.category].passed++;
-    else byCategory[r.category].failed++;
+    byCategory[r.category]!.total++;
+    if (r.passed) byCategory[r.category]!.passed++;
+    else byCategory[r.category]!.failed++;
   }
 
   return {

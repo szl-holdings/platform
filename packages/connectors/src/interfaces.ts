@@ -7,7 +7,7 @@
  *   3. Work without real credentials (demo adapters use synthetic data)
  */
 
-import type { Signal, SignalInput } from '@workspace/ontology';
+import type { Signal, SignalInput } from "@workspace/ontology/signal";
 
 export interface ConnectorMetadata {
   connectorId: string;

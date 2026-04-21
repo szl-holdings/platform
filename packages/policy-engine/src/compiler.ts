@@ -5,18 +5,18 @@ export interface CompiledRuleIR {
   description: string;
   effect: PolicyEffect;
   conditions: PolicyCondition[];
-  requiredApproverRole?: string;
-  escalateTo?: string;
+  requiredApproverRole?: string | undefined;
+  escalateTo?: string | undefined;
   reason: string;
   priority: number;
   confidence: number;
   warnings: string[];
   /** True when an LLM was used to merge/repair this rule. */
-  llmAssisted?: boolean;
+  llmAssisted?: boolean | undefined;
   /** Confidence reported by the LLM for the structured parse, if any. */
-  llmConfidence?: number;
+  llmConfidence?: number | undefined;
   /** Pre-merge deterministic confidence — kept for transparency. */
-  deterministicConfidence?: number;
+  deterministicConfidence?: number | undefined;
 }
 
 /**
@@ -51,19 +51,19 @@ export type LLMAssistFn = (
 
 export interface CompilePolicyOptions {
   /** Confidence below which an LLM fallback is invoked. Default 0.7. */
-  llmThreshold?: number;
+  llmThreshold?: number | undefined;
   /** Existing version number; the new policy version is `existingVersion + 1`. */
-  existingVersion?: number;
+  existingVersion?: number | undefined;
   /** Stable id; auto-generated when omitted. */
-  policyId?: string;
+  policyId?: string | undefined;
 }
 
 export interface CompiledPolicyIR {
   policyName: string;
   description: string;
   scope: 'tenant' | 'domain' | 'action';
-  domain?: string;
-  actionTypes?: string[];
+  domain?: string | undefined;
+  actionTypes?: string[] | undefined;
   rules: CompiledRuleIR[];
   overallConfidence: number;
   parseWarnings: string[];
@@ -99,9 +99,9 @@ export interface PolicyPreviewCase {
   actionType: string;
   description: string;
   context: Record<string, unknown>;
-  expectedEffect?: PolicyEffect;
+  expectedEffect?: PolicyEffect | undefined;
   actualEffect: PolicyEffect;
-  matchedRule?: string;
+  matchedRule?: string | undefined;
   reasoning: string;
   outcome: 'blocked' | 'allowed' | 'approval_required' | 'escalated' | 'audited';
 }
@@ -131,14 +131,14 @@ const DOMAIN_PATTERN =
 function parseAmount(text: string): number | null {
   const dollarMatch = text.match(AMOUNT_PATTERN);
   if (dollarMatch) {
-    const num = parseFloat(dollarMatch[1].replace(/,/g, ''));
+    const num = parseFloat(dollarMatch[1]!.replace(/,/g, ''));
     if (text.toLowerCase().includes('k') && !text.includes('$')) return num * 1000;
     return num;
   }
   const wordMatch = text.match(AMOUNT_WORD_PATTERN);
   if (wordMatch) {
-    const num = parseFloat(wordMatch[1].replace(/,/g, ''));
-    const suffix = (wordMatch[2] || '').toLowerCase();
+    const num = parseFloat(wordMatch[1]!.replace(/,/g, ''));
+    const suffix = (wordMatch[2] ?? '').toLowerCase();
     if (suffix === 'thousand' || suffix === 'k') return num * 1000;
     if (suffix === 'million' || suffix === 'm') return num * 1_000_000;
     return num;
@@ -149,7 +149,7 @@ function parseAmount(text: string): number | null {
 function parseApproverCount(text: string): number | null {
   const match = text.match(APPROVER_COUNT_PATTERN);
   if (!match) return null;
-  const word = match[1].toLowerCase();
+  const word = match[1]!.toLowerCase();
   const map: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5 };
   return map[word] ?? parseInt(word);
 }
@@ -237,7 +237,7 @@ function sentenceToRule(sentence: string, index: number): CompiledRuleIR {
     const toMatch = sentence.match(
       /(?:escalat[e]?\s+to|route\s+to|notify)\s+([a-z\s]+?)(?:\s+and|\.|,|$)/i,
     );
-    escalateTo = toMatch ? toMatch[1].trim() : (roles[0] ?? 'compliance_officer');
+    escalateTo = toMatch ? toMatch[1]!.trim() : (roles[0] ?? 'compliance_officer');
     priority += 10;
   } else if (isRequireApproval || approverCount !== null) {
     effect = 'require_approval';
@@ -310,8 +310,8 @@ function inferPolicyName(text: string): string {
   const actions = extractActions(text);
   const domains = extractDomains(text);
   const parts: string[] = [];
-  if (domains.length > 0) parts.push(domains[0].charAt(0).toUpperCase() + domains[0].slice(1));
-  if (actions.length > 0) parts.push(actions[0].charAt(0).toUpperCase() + actions[0].slice(1));
+  if (domains.length > 0) parts.push(domains[0]!.charAt(0).toUpperCase() + domains[0]!.slice(1));
+  if (actions.length > 0) parts.push(actions[0]!.charAt(0).toUpperCase() + actions[0]!.slice(1));
   parts.push('Policy');
   return parts.join(' ');
 }
