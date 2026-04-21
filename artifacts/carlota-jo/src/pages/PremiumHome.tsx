@@ -434,7 +434,7 @@ function ServicesOverview() {
           <Link href="/services">
             <span
               className="inline-flex items-center gap-2 text-[12px] font-medium tracking-[0.12em] uppercase transition-opacity hover:opacity-70"
-              style={{ color: GOLD }}
+              style={{ color: 'var(--color-ink-700)' }}
             >
               Full Service Overview <ArrowRight size={12} />
             </span>
@@ -720,17 +720,17 @@ function ClientExperienceStrip() {
               style={{
                 background: 'rgba(196,170,126,0.12)',
                 border: '1px solid rgba(196,170,126,0.2)',
-                color: 'rgba(196,170,126,0.75)',
+                color: 'rgba(196,170,126,0.85)',
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLElement;
                 el.style.background = 'rgba(196,170,126,0.18)';
-                el.style.color = 'rgba(196,170,126,0.9)';
+                el.style.color = 'rgba(196,170,126,0.95)';
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLElement;
                 el.style.background = 'rgba(196,170,126,0.12)';
-                el.style.color = 'rgba(196,170,126,0.75)';
+                el.style.color = 'rgba(196,170,126,0.85)';
               }}
             >
               <Lock size={12} /> Access Client Portal

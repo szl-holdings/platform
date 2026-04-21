@@ -139,7 +139,7 @@ function ParticipantAvatar({ participant, size = 28, showTooltip = true }: Parti
           justifyContent: 'center',
           fontSize: `${size * 0.35}px`,
           fontWeight: 700,
-          color: participant.avatarColor,
+          color: 'rgba(255,255,255,0.92)',
           opacity: isActive ? 1 : 0.5,
           transition: 'opacity 0.2s',
           cursor: 'default',
@@ -249,7 +249,7 @@ export function SessionPresenceBar({
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '9px',
-                color: 'rgba(255,255,255,0.5)',
+                color: 'rgba(255,255,255,0.85)',
                 fontWeight: 700,
               }}
             >
@@ -266,7 +266,7 @@ export function SessionPresenceBar({
               background: activeCount > 0 ? '#22c55e' : 'rgba(255,255,255,0.2)',
             }}
           />
-          <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>
+          <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.8)' }}>
             {activeCount} active
           </span>
         </div>
@@ -739,7 +739,7 @@ export function MultiplayerSessionBanner({
           flexShrink: 0,
         }}
       />
-      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>
+      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.8)' }}>
         Live session — {activeCount} participant{activeCount !== 1 ? 's' : ''} viewing
       </span>
       <SessionPresenceBar

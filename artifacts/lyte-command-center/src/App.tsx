@@ -213,12 +213,12 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
             <p className="text-[13px] font-semibold text-amber-100 font-display tracking-tight">
               KORA
             </p>
-            <p className="text-[10px] text-amber-400/50 font-mono">Decision Intelligence</p>
+            <p className="text-[10px] text-amber-400/75 font-mono">Decision Intelligence</p>
           </div>
         )}
         <button
           onClick={onToggle}
-          className="ml-auto p-1 rounded hover:bg-amber-500/5 text-amber-400/40 hover:text-amber-300 transition-colors shrink-0"
+          className="ml-auto p-1 rounded hover:bg-amber-500/5 text-amber-400/65 hover:text-amber-300 transition-colors shrink-0"
           aria-label="Toggle sidebar"
         >
           {expanded ? (
@@ -234,7 +234,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
             {expanded && (
-              <p className="text-[9px] font-mono text-amber-400/25 uppercase tracking-widest px-2 py-1.5">
+              <p className="text-[9px] font-mono text-amber-400/65 uppercase tracking-widest px-2 py-1.5">
                 {group.label}
               </p>
             )}
@@ -249,12 +249,12 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
                   className={`flex items-center gap-2.5 px-2 py-2 rounded-md text-xs transition-all group relative ${
                     active
                       ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
-                      : 'text-amber-400/50 hover:text-amber-200 hover:bg-amber-500/5 border border-transparent'
+                      : 'text-amber-400/75 hover:text-amber-200 hover:bg-amber-500/5 border border-transparent'
                   }`}
                 >
                   <span
                     className={
-                      active ? 'text-amber-400' : 'text-amber-400/40 group-hover:text-amber-400'
+                      active ? 'text-amber-400' : 'text-amber-400/65 group-hover:text-amber-400'
                     }
                   >
                     {item.icon}
@@ -290,7 +290,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
             </div>
             <div>
               <p className="text-[10px] text-amber-200/70">Demo Mode</p>
-              <p className="text-[9px] text-amber-400/40 font-mono">LYTE-SEED-v2</p>
+              <p className="text-[9px] text-amber-400/65 font-mono">LYTE-SEED-v2</p>
             </div>
           </div>
         </div>
@@ -473,12 +473,13 @@ function AppShell({ children }: { children: React.ReactNode }) {
         {/* Top bar */}
         <header className="h-14 border-b border-amber-500/10 flex items-center gap-3 px-4 shrink-0">
           <button
-            className="md:hidden p-1.5 rounded text-amber-400/50 hover:text-amber-300 hover:bg-amber-500/5 transition-colors"
+            className="md:hidden p-1.5 rounded text-amber-400/75 hover:text-amber-300 hover:bg-amber-500/5 transition-colors"
             onClick={() => setMobileOpen(true)}
+            aria-label="Open navigation menu"
           >
             <Menu className="w-4 h-4" />
           </button>
-          <div className="flex items-center gap-2 text-xs text-amber-400/40 font-mono">
+          <div className="flex items-center gap-2 text-xs text-amber-400/70 font-mono">
             <span>KORA</span>
             {currentPage && (
               <>

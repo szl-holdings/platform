@@ -2,22 +2,116 @@ import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
+import { CANONICAL_FALLBACK_PORT, PROXY_ROUTES } from '../../packages/proxy-routes.js';
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
 const vitePort = Number(process.env.VITE_PORT) || 5000;
 const basePath = process.env.BASE_PATH || '/command/';
 
-// The shared routing gateway that fronts every artifact on port 9090 used to
-// be embedded in this config (`sharedProxyPlugin` + an eager-bind block at
-// module load). It now runs as its own standalone workflow
-// (`scripts/shared-proxy.mjs`) so traffic to Terra, Vessels, Carlota Jo,
-// Pulse, etc. survives crashes or restarts of the Command app.
+const SHARED_PROXY_PORT = 9090;
+
+function healthCheckPlugin(): Plugin {
+  return {
+    name: 'health-check',
+    apply: 'serve' as const,
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url === '/__health') {
+          res.writeHead(200, { 'Content-Type': 'text/plain' });
+          res.end('OK');
+          return;
+        }
+        next();
+      });
+    },
+  };
+}
+
+function sharedProxyPlugin(): Plugin {
+  return {
+    name: 'shared-proxy',
+    apply: 'serve' as const,
+    async configureServer() {
+      const http = await import('http');
+      const net = await import('net');
+      const proxyServer = http.createServer((req, res) => {
+        const url = req.url || '/';
+        if (url === '/__health') {
+          res.writeHead(200, { 'Content-Type': 'text/plain' });
+          res.end('OK');
+          return;
+        }
+        const normalizedUrl = url.endsWith('/') ? url : url + '/';
+        const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
+        const targetPort = route ? route.port : CANONICAL_FALLBACK_PORT;
+        const upstream = http.request(
+          {
+            hostname: '127.0.0.1',
+            port: targetPort,
+            path: url,
+            method: req.method,
+            headers: { ...req.headers, host: 'localhost:' + targetPort },
+          },
+          (upRes) => {
+            res.writeHead(upRes.statusCode || 200, upRes.headers);
+            upRes.pipe(res, { end: true });
+          },
+        );
+        upstream.on('error', () => {
+          if (!res.headersSent) {
+            res.writeHead(503, { 'Content-Type': 'text/plain' });
+            res.end('Upstream not ready on port ' + targetPort);
+          }
+        });
+        req.pipe(upstream, { end: true });
+      });
+      await new Promise<void>((resolve) => {
+        let settled = false;
+        const finish = () => {
+          if (!settled) {
+            settled = true;
+            resolve();
+          }
+        };
+        proxyServer.once('error', (err: NodeJS.ErrnoException) => {
+          console.warn('[shared-proxy] Bind error:', err.code);
+          finish();
+        });
+        proxyServer.listen({ port: SHARED_PROXY_PORT, host: '::', reusePort: true }, () => {
+          console.log(
+            '[shared-proxy] Listening on port ' + SHARED_PROXY_PORT + ' (reusePort, dual-stack)',
+          );
+          finish();
+        });
+      });
+      proxyServer.on('upgrade', (req, socket, head) => {
+        const url = req.url || '/';
+        const normalizedUrl = url.endsWith('/') ? url : url + '/';
+        const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
+        const targetPort = route ? route.port : CANONICAL_FALLBACK_PORT;
+        const conn = net.connect(targetPort, '127.0.0.1', () => {
+          const rawHeaders = Object.entries(req.headers)
+            .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+            .join('\r\n');
+          conn.write(`${req.method} ${url} HTTP/1.1\r\n${rawHeaders}\r\n\r\n`);
+          if (head && head.length) conn.write(head);
+          socket.pipe(conn);
+          conn.pipe(socket);
+        });
+        conn.on('error', () => socket.destroy());
+        socket.on('error', () => conn.destroy());
+      });
+    },
+  };
+}
 
 export default defineConfig({
   base: basePath,
   plugins: [
+    healthCheckPlugin(),
+    sharedProxyPlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),

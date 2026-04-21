@@ -32,7 +32,7 @@ export function NewsletterSubscribe({
   const gold = accentColor ?? 'hsl(38, 52%, 58%)';
   const goldMuted = `hsla(38, 52%, 58%, 0.12)`;
   const goldBorder = `hsla(38, 52%, 58%, 0.22)`;
-  const textFaint = 'hsla(0, 0%, 100%, 0.35)';
+  const textFaint = 'hsla(0, 0%, 100%, 0.6)';
   const textSecondary = 'hsla(0, 0%, 100%, 0.6)';
   const surface = 'hsla(214, 12%, 10%, 0.75)';
   const border = 'hsla(0, 0%, 100%, 0.08)';
@@ -400,7 +400,7 @@ function SubscribeForm({
           href="https://szlholdings.substack.com"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: textSecondary, textDecoration: 'none' }}
+          style={{ color: textSecondary, textDecoration: 'underline' }}
         >
           szlholdings.substack.com
         </a>

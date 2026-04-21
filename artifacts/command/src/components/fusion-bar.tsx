@@ -212,6 +212,7 @@ export function FusionBar({ apiBase = '' }: FusionBarProps) {
         {(query || result) && !loading && (
           <button
             onClick={clear}
+            aria-label="Clear search"
             className="shrink-0 opacity-50 hover:opacity-100 transition-opacity"
           >
             <X className="w-4 h-4" style={{ color: 'var(--color-fg-muted)' }} />

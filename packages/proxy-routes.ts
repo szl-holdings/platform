@@ -10,7 +10,7 @@ export interface ProxyRoute {
 // instead of to its own vite port, which keeps routing deterministic even
 // when the kernel load-balances incoming connections across listeners that
 // all bind 9090 with SO_REUSEPORT.
-export const CANONICAL_FALLBACK_PORT = 5173;
+export const CANONICAL_FALLBACK_PORT = 21130;
 
 export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/aegis/', port: 3002 },

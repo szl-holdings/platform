@@ -23,7 +23,9 @@ import {
 import { useEffect, useRef, useState } from 'react';
 
 const ACCENT = '#2d6a4f';
-const ACCENT_LIGHT = '#40856a';
+const ACCENT_LIGHT = '#5a9e82';
+const ACCENT_LIGHT_BG = '#40856a';
+const BTN_BG = '#1e6e52';
 const BRASS = '#9a7840';
 const BRASS_LIGHT = '#b8943c';
 const BG = '#0a0c10';
@@ -170,7 +172,7 @@ function Reveal({
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'} ${className}`}
+      className={`transition-all duration-700 ease-out ${visible ? 'translate-y-0' : 'translate-y-6'} ${className}`}
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}
@@ -217,8 +219,9 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             </div>
             <span className="font-bold text-sm tracking-tight text-white">DOMAINE</span>
             <span
+              aria-hidden="true"
               className="hidden sm:inline text-[9px] tracking-[0.14em] uppercase ml-1"
-              style={{ color: 'rgba(255,255,255,0.18)', fontFamily: 'monospace' }}
+              style={{ color: 'rgba(255,255,255,0.65)', fontFamily: 'monospace' }}
             >
               Property Intelligence
             </span>
@@ -234,9 +237,9 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 key={l.label}
                 href={l.href}
                 className="text-[11px] tracking-[0.06em] uppercase font-medium transition-colors"
-                style={{ color: 'rgba(255,255,255,0.3)' }}
+                style={{ color: 'rgba(255,255,255,0.65)' }}
                 onMouseOver={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
-                onMouseOut={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.3)')}
+                onMouseOut={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
               >
                 {l.label}
               </a>
@@ -244,7 +247,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <button
               onClick={onSignIn}
               className="text-[12px] font-semibold px-5 py-1.5 rounded-lg transition-all"
-              style={{ background: ACCENT_LIGHT, color: '#fff' }}
+              style={{ background: BTN_BG, color: '#fff' }}
             >
               Sign in
             </button>
@@ -252,7 +255,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
           <button
             className="md:hidden p-2"
             onClick={() => setMobileNav(!mobileNav)}
-            style={{ color: 'rgba(255,255,255,0.4)' }}
+            style={{ color: 'rgba(255,255,255,0.65)' }}
           >
             {mobileNav ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -286,7 +289,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               setMobileNav(false);
             }}
             className="mt-4 text-sm font-semibold px-8 py-3 rounded-xl"
-            style={{ background: ACCENT_LIGHT, color: '#fff' }}
+            style={{ background: BTN_BG, color: '#fff' }}
           >
             Sign in
           </button>
@@ -307,7 +310,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
         <Reveal>
           <p
             className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-8 font-mono"
-            style={{ color: 'rgba(255,255,255,0.2)' }}
+            style={{ color: 'rgba(255,255,255,0.65)' }}
           >
             SZL Holdings &middot; Property / Portfolio / Broker Intelligence
           </p>
@@ -324,7 +327,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
         <Reveal delay={180}>
           <p
             className="text-[17px] sm:text-[19px] leading-[1.8] max-w-[600px] mt-7 mb-10"
-            style={{ color: 'rgba(255,255,255,0.32)' }}
+            style={{ color: 'rgba(255,255,255,0.65)' }}
           >
             Terra gives investors, brokers, and portfolio teams a single intelligence surface — from
             distressed property discovery through ownership analysis, pipeline management, and deal
@@ -337,7 +340,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <button
               onClick={onSignIn}
               className="inline-flex items-center gap-2 text-[13px] font-semibold px-7 py-3 rounded-lg transition-all"
-              style={{ background: ACCENT_LIGHT, color: '#fff' }}
+              style={{ background: BTN_BG, color: '#fff' }}
             >
               Sign In <ArrowRight size={14} />
             </button>
@@ -368,7 +371,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 </span>
                 <span
                   className="text-[10px] tracking-[0.06em] uppercase mt-1 block"
-                  style={{ color: 'rgba(255,255,255,0.22)' }}
+                  style={{ color: 'rgba(255,255,255,0.60)' }}
                 >
                   {s.label}
                 </span>
@@ -384,7 +387,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
           <Reveal>
             <p
               className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-6 font-mono"
-              style={{ color: 'rgba(255,255,255,0.18)' }}
+              style={{ color: 'rgba(255,255,255,0.65)' }}
             >
               The thesis
             </p>
@@ -395,7 +398,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
           <Reveal delay={80}>
             <div
               className="text-[16px] leading-[2] space-y-6"
-              style={{ color: 'rgba(255,255,255,0.3)' }}
+              style={{ color: 'rgba(255,255,255,0.65)' }}
             >
               <p>
                 The brokers and investors who consistently win in NYC real estate
@@ -431,13 +434,13 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               <div className="flex justify-between items-center mb-6">
                 <span
                   className="text-[9px] font-bold tracking-[0.15em] uppercase font-mono"
-                  style={{ color: 'rgba(255,255,255,0.25)' }}
+                  style={{ color: 'rgba(255,255,255,0.65)' }}
                 >
                   NYC Distress Snapshot — Demo
                 </span>
                 <span
                   className="flex items-center gap-1.5 text-[9px] font-mono"
-                  style={{ color: 'rgba(64,133,106,0.6)' }}
+                  style={{ color: '#5a9e82' }}
                 >
                   <span
                     className="w-1.5 h-1.5 rounded-full animate-pulse"
@@ -463,7 +466,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                     </span>
                     <span
                       className="text-[10px] mt-1 block"
-                      style={{ color: 'rgba(255,255,255,0.25)' }}
+                      style={{ color: 'rgba(255,255,255,0.65)' }}
                     >
                       {d.label}
                     </span>
@@ -482,14 +485,14 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <div className="max-w-[560px] mb-14">
               <p
                 className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 font-mono"
-                style={{ color: 'rgba(255,255,255,0.18)' }}
+                style={{ color: 'rgba(255,255,255,0.65)' }}
               >
                 The Terra Doctrine
               </p>
               <h2 className="text-[clamp(1.5rem,3.5vw,2.4rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
                 Five phases. One operating system.
               </h2>
-              <p className="text-[15px] leading-[1.85]" style={{ color: 'rgba(255,255,255,0.28)' }}>
+              <p className="text-[15px] leading-[1.85]" style={{ color: 'rgba(255,255,255,0.65)' }}>
                 Every serious real estate operation moves through the same sequence. Terra
                 structures it into a repeatable, intelligence-driven workflow.
               </p>
@@ -515,7 +518,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                     </div>
                     <span
                       className="text-[9px] font-bold tracking-[0.12em] uppercase font-mono"
-                      style={{ color: 'rgba(255,255,255,0.25)' }}
+                      style={{ color: 'rgba(255,255,255,0.65)' }}
                     >
                       {String(i + 1).padStart(2, '0')}
                     </span>
@@ -523,7 +526,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                   <h3 className="text-[13px] font-bold text-white mb-2">{d.phase}</h3>
                   <p
                     className="text-[12px] leading-[1.75]"
-                    style={{ color: 'rgba(255,255,255,0.3)' }}
+                    style={{ color: 'rgba(255,255,255,0.65)' }}
                   >
                     {d.desc}
                   </p>
@@ -541,7 +544,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <div className="max-w-[560px] mb-14">
               <p
                 className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 font-mono"
-                style={{ color: 'rgba(255,255,255,0.18)' }}
+                style={{ color: 'rgba(255,255,255,0.65)' }}
               >
                 Platform Capabilities
               </p>
@@ -570,7 +573,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                   <h3 className="text-[14px] font-bold text-white mb-2">{c.title}</h3>
                   <p
                     className="text-[13px] leading-[1.8]"
-                    style={{ color: 'rgba(255,255,255,0.3)' }}
+                    style={{ color: 'rgba(255,255,255,0.65)' }}
                   >
                     {c.desc}
                   </p>
@@ -588,7 +591,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <div className="max-w-[520px] mb-14">
               <p
                 className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 font-mono"
-                style={{ color: 'rgba(255,255,255,0.18)' }}
+                style={{ color: 'rgba(255,255,255,0.65)' }}
               >
                 Use Cases
               </p>
@@ -608,7 +611,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                   <h3 className="text-[13px] font-bold text-white mb-2">{u.title}</h3>
                   <p
                     className="text-[12px] leading-[1.8]"
-                    style={{ color: 'rgba(255,255,255,0.3)' }}
+                    style={{ color: 'rgba(255,255,255,0.65)' }}
                   >
                     {u.desc}
                   </p>
@@ -626,7 +629,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <div className="max-w-[520px] mb-14">
               <p
                 className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 font-mono"
-                style={{ color: 'rgba(255,255,255,0.18)' }}
+                style={{ color: 'rgba(255,255,255,0.65)' }}
               >
                 Who It's For
               </p>
@@ -645,7 +648,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 <h3 className="text-[14px] font-bold text-white mb-3">{b.role}</h3>
                 <p
                   className="text-[13px] leading-[1.85]"
-                  style={{ color: 'rgba(255,255,255,0.3)' }}
+                  style={{ color: 'rgba(255,255,255,0.65)' }}
                 >
                   {b.desc}
                 </p>
@@ -675,7 +678,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 </div>
                 <p
                   className="text-[10px] font-semibold tracking-[0.16em] uppercase font-mono"
-                  style={{ color: 'rgba(255,255,255,0.25)' }}
+                  style={{ color: 'rgba(255,255,255,0.65)' }}
                 >
                   Trust & Governance
                 </p>
@@ -698,7 +701,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                   <div key={t.label}>
                     <p
                       className="text-[10px] font-semibold uppercase tracking-wider mb-1"
-                      style={{ color: 'rgba(255,255,255,0.22)' }}
+                      style={{ color: 'rgba(255,255,255,0.60)' }}
                     >
                       {t.label}
                     </p>
@@ -719,7 +722,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <div className="text-center mb-14">
               <p
                 className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-6 font-mono"
-                style={{ color: 'rgba(255,255,255,0.18)' }}
+                style={{ color: 'rgba(255,255,255,0.65)' }}
               >
                 Ready to operate at a higher level
               </p>
@@ -728,7 +731,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               </h2>
               <p
                 className="text-[17px] leading-[1.8] max-w-[560px] mx-auto"
-                style={{ color: 'rgba(255,255,255,0.3)' }}
+                style={{ color: 'rgba(255,255,255,0.65)' }}
               >
                 Terra is available to qualified operators in three tiers. No free trials. No demo
                 accounts. Real intelligence from day one.
@@ -751,7 +754,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 tier: 'Pilot',
                 desc: '90-day structured pilot for a single acquisition team or brokerage desk. Includes onboarding, data integration, and dedicated success support.',
                 cta: 'Start a Pilot',
-                accent: ACCENT_LIGHT,
+                accent: '#5a9e82',
                 note: '90 days · Scoped engagement',
                 highlight: true,
                 ctaType: 'trial' as const,
@@ -784,7 +787,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 </div>
                 <p
                   className="text-[13px] leading-[1.85] flex-1 mb-5"
-                  style={{ color: 'rgba(255,255,255,0.35)' }}
+                  style={{ color: 'rgba(255,255,255,0.65)' }}
                 >
                   {t.desc}
                 </p>
@@ -796,14 +799,14 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                     }}
                     className="w-full text-[12px] font-semibold py-2.5 rounded-lg transition-all mb-2"
                     style={{
-                      background: t.highlight ? ACCENT_LIGHT : 'rgba(255,255,255,0.05)',
+                      background: t.highlight ? BTN_BG : 'rgba(255,255,255,0.05)',
                       color: t.highlight ? '#fff' : t.accent,
                       border: t.highlight ? 'none' : `1px solid rgba(255,255,255,0.07)`,
                     }}
                   >
                     {t.cta} →
                   </button>
-                  <p className="text-[10px] text-center" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                  <p className="text-[10px] text-center" style={{ color: 'rgba(255,255,255,0.65)' }}>
                     {t.note}
                   </p>
                 </div>
@@ -813,7 +816,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
 
           <Reveal delay={100}>
             <div className="flex items-center justify-center gap-2 text-center">
-              <span className="text-[12px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              <span className="text-[12px]" style={{ color: 'rgba(255,255,255,0.65)' }}>
                 Already have access?
               </span>
               <button
@@ -837,14 +840,14 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
           <div className="text-center mb-16">
             <p
               className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3"
-              style={{ color: 'rgba(64,133,106,0.6)' }}
+              style={{ color: '#5a9e82' }}
             >
               Platform Walkthrough
             </p>
             <h2 className="text-[clamp(1.6rem,3vw,2.1rem)] font-bold text-white mb-3 tracking-tight">
               How Terra works in practice
             </h2>
-            <p className="text-[14px] max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            <p className="text-[14px] max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.65)' }}>
               From data connection to first distress lead in under 30 minutes.
             </p>
           </div>
@@ -892,7 +895,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                       className="inline-flex items-center justify-center w-10 h-10 rounded-full text-[11px] font-bold"
                       style={{
                         background: 'rgba(64,133,106,0.12)',
-                        color: '#40856a',
+                        color: '#5a9e82',
                         border: '1px solid rgba(64,133,106,0.2)',
                       }}
                     >
@@ -909,7 +912,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                         className="text-[9px] font-mono px-2 py-0.5 rounded"
                         style={{
                           background: 'rgba(64,133,106,0.08)',
-                          color: 'rgba(64,133,106,0.6)',
+                          color: '#5a9e82',
                           border: '1px solid rgba(64,133,106,0.1)',
                         }}
                       >
@@ -918,7 +921,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                     </div>
                     <p
                       className="text-[13.5px] leading-relaxed"
-                      style={{ color: 'rgba(255,255,255,0.4)' }}
+                      style={{ color: 'rgba(255,255,255,0.65)' }}
                     >
                       {item.body}
                     </p>
@@ -962,7 +965,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               <span className="text-sm font-bold text-white">DOMAINE</span>
               <span
                 className="text-[9px] font-mono ml-1"
-                style={{ color: 'rgba(255,255,255,0.2)' }}
+                style={{ color: 'rgba(255,255,255,0.65)' }}
               >
                 Property Intelligence
               </span>
@@ -979,9 +982,9 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                   key={l.name}
                   href={l.href}
                   className="text-[10px] transition-colors"
-                  style={{ color: 'rgba(255,255,255,0.15)' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.15)')}
+                  style={{ color: 'rgba(255,255,255,0.65)' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
                 >
                   {l.name}
                 </a>
@@ -990,14 +993,14 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
           </div>
           <p
             className="text-[10px] leading-relaxed mb-4 max-w-[540px]"
-            style={{ color: 'rgba(255,255,255,0.12)' }}
+            style={{ color: 'rgba(255,255,255,0.65)' }}
           >
             {aboutSzlParagraph()}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <p
               className="text-[11px] text-center sm:text-left"
-              style={{ color: 'rgba(255,255,255,0.12)' }}
+              style={{ color: 'rgba(255,255,255,0.65)' }}
             >
               {copyrightLine()}
             </p>
@@ -1007,9 +1010,9 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[10px] transition-colors"
-                style={{ color: 'rgba(255,255,255,0.15)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.15)')}
+                style={{ color: 'rgba(255,255,255,0.65)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
               >
                 X
               </a>
@@ -1018,9 +1021,9 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[10px] transition-colors"
-                style={{ color: 'rgba(255,255,255,0.15)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.15)')}
+                style={{ color: 'rgba(255,255,255,0.65)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
               >
                 LinkedIn
               </a>
@@ -1029,9 +1032,9 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[10px] transition-colors"
-                style={{ color: 'rgba(255,255,255,0.15)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.15)')}
+                style={{ color: 'rgba(255,255,255,0.65)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
               >
                 Medium
               </a>

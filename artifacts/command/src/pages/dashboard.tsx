@@ -143,9 +143,9 @@ export function Dashboard() {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-fg-muted)' }}
+        style={{ backgroundColor: 'var(--color-bg-primary)', color: 'rgba(255,255,255,0.7)' }}
       >
-        <div className="text-xs font-mono uppercase tracking-widest animate-pulse">
+        <div className="text-xs font-mono uppercase tracking-widest animate-pulse text-white">
           Aggregating ecosystem data...
         </div>
       </div>

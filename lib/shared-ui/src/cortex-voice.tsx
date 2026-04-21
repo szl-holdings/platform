@@ -668,6 +668,7 @@ export function CortexVoiceTrigger({
       <span style={{ fontSize: '14px' }}>⟁</span>
       Ask CORTEX
       <span
+        aria-hidden="true"
         style={{
           fontSize: '9px',
           background: `${accentColor}20`,
@@ -675,7 +676,7 @@ export function CortexVoiceTrigger({
           borderRadius: '4px',
           padding: '1px 5px',
           fontFamily: 'monospace',
-          opacity: 0.7,
+          color: 'rgba(255,255,255,0.9)',
         }}
       >
         ⌘⇧K

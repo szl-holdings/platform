@@ -245,3 +245,11 @@ h1, h2, h3, h4, h5, h6 {
 .stagger-4 { animation-delay: 0.16s; }
 .stagger-5 { animation-delay: 0.2s; }
 .stagger-6 { animation-delay: 0.24s; }
+
+/* A11Y-SER-002: Underline inline links within text blocks (WCAG 1.4.1) */
+p a:not([class*="btn"]):not([class*="card"]):not([class*="nav"]):not([class*="terra-btn"]),
+li a:not([class*="btn"]):not([class*="nav"]),
+td a:not([class*="btn"]) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

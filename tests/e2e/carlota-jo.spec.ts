@@ -189,7 +189,7 @@ test.describe('Carlota Jo — Mobile Viewport', () => {
 
 test.describe('Carlota Jo — Accessibility (WCAG 2.1 AA)', () => {
   const a11yRoutes = [
-    { path: '', label: 'homepage' },
+    { path: '/', label: 'homepage' },
     { path: '/contact', label: 'contact' },
   ];
 

@@ -190,7 +190,7 @@ function LiveFleetPanel() {
   ];
   return (
     <m.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay: 0.5 }}
       className="mt-12 lg:mt-16 max-w-5xl mx-auto"
@@ -203,25 +203,25 @@ function LiveFleetPanel() {
               Live Fleet — 214 Vessels Tracked
             </span>
           </div>
-          <span className="text-[10px] text-sky-400/30 font-mono">Updated 12s ago</span>
+          <span className="text-[10px] text-sky-400/70 font-mono">Updated 12s ago</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-sky-500/6">
-                <th className="px-5 py-2.5 text-[10px] font-semibold text-sky-400/40 tracking-wider uppercase">
+                <th className="px-5 py-2.5 text-[10px] font-semibold text-sky-400/75 tracking-wider uppercase">
                   Vessel
                 </th>
-                <th className="px-4 py-2.5 text-[10px] font-semibold text-sky-400/40 tracking-wider uppercase hidden sm:table-cell">
+                <th className="px-4 py-2.5 text-[10px] font-semibold text-sky-400/75 tracking-wider uppercase hidden sm:table-cell">
                   Route
                 </th>
-                <th className="px-4 py-2.5 text-[10px] font-semibold text-sky-400/40 tracking-wider uppercase">
+                <th className="px-4 py-2.5 text-[10px] font-semibold text-sky-400/75 tracking-wider uppercase">
                   Status
                 </th>
-                <th className="px-4 py-2.5 text-[10px] font-semibold text-sky-400/40 tracking-wider uppercase hidden md:table-cell">
+                <th className="px-4 py-2.5 text-[10px] font-semibold text-sky-400/75 tracking-wider uppercase hidden md:table-cell">
                   ETA
                 </th>
-                <th className="px-4 py-2.5 text-[10px] font-semibold text-sky-400/40 tracking-wider uppercase hidden lg:table-cell">
+                <th className="px-4 py-2.5 text-[10px] font-semibold text-sky-400/75 tracking-wider uppercase hidden lg:table-cell">
                   Risk
                 </th>
               </tr>
@@ -230,18 +230,18 @@ function LiveFleetPanel() {
               {rows.map((r, i) => (
                 <m.tr
                   key={r.vessel}
-                  initial={{ opacity: 0 }}
+                  initial={{}}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.7 + i * 0.08 }}
                   className="border-b border-sky-500/4 last:border-0 hover:bg-sky-500/3 transition-colors"
                 >
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-[11px] text-sky-400/30 font-mono">{r.flag}</span>
+                      <span className="text-[11px] text-sky-400/70 font-mono">{r.flag}</span>
                       <span className="text-[13px] font-medium text-sky-100">{r.vessel}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-[12px] text-sky-300/40 hidden sm:table-cell">
+                  <td className="px-4 py-3 text-[12px] text-sky-300/70 hidden sm:table-cell">
                     {r.route}
                   </td>
                   <td className="px-4 py-3">
@@ -266,14 +266,14 @@ function LiveFleetPanel() {
                       {r.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-[12px] text-sky-300/50 font-mono hidden md:table-cell">
+                  <td className="px-4 py-3 text-[12px] text-sky-300/70 font-mono hidden md:table-cell">
                     {r.eta}
                   </td>
                   <td className="px-4 py-3 hidden lg:table-cell">
                     <span
                       className={`text-[10px] font-semibold tracking-wider uppercase ${
                         r.risk === 'low'
-                          ? 'text-emerald-400/60'
+                          ? 'text-emerald-400/85'
                           : r.risk === 'med'
                             ? 'text-amber-400/60'
                             : 'text-red-400/70'
@@ -370,20 +370,20 @@ export default function MarketingHomePage() {
 
         <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-6">
           <m.div
-            initial={{ opacity: 0 }}
+            initial={{}}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
             className="flex items-center gap-2 mb-6"
           >
             <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-            <span className="text-[11px] font-semibold text-cyan-400/70 tracking-[0.12em] uppercase">
+            <span className="text-[11px] font-semibold text-cyan-400/90 tracking-[0.12em] uppercase">
               Maritime Intelligence Platform
             </span>
           </m.div>
 
           <div className="max-w-4xl">
             <m.h1
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
               className="text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[4.2rem] font-bold leading-[1.08] tracking-tight mb-5"
@@ -395,17 +395,17 @@ export default function MarketingHomePage() {
             </m.h1>
 
             <m.p
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-[15px] sm:text-base text-sky-300/45 max-w-xl leading-relaxed mb-8"
+              className="text-[15px] sm:text-base text-sky-300/70 max-w-xl leading-relaxed mb-8"
             >
               Positions, voyage economics, compliance, and exception management — one command
               platform for maritime operators who need answers, not dashboards.
             </m.p>
 
             <m.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-col sm:flex-row items-start gap-3"
@@ -437,7 +437,7 @@ export default function MarketingHomePage() {
           ].map((k, i) => (
             <m.div
               key={k.label}
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
@@ -446,7 +446,7 @@ export default function MarketingHomePage() {
               <p className="text-2xl sm:text-3xl font-bold text-sky-100 mb-0.5 font-mono tracking-tight">
                 <AnimatedCounter value={k.value} suffix={k.suffix} />
               </p>
-              <p className="text-[11px] text-sky-400/35 tracking-wide">{k.label}</p>
+              <p className="text-[11px] text-sky-400/70 tracking-wide">{k.label}</p>
             </m.div>
           ))}
         </div>
@@ -455,21 +455,21 @@ export default function MarketingHomePage() {
       <section className="py-20 sm:py-28">
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           <m.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="mb-14"
           >
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-px bg-cyan-400/40" />
-              <span className="text-[11px] font-semibold text-cyan-400/60 tracking-[0.12em] uppercase">
+              <span className="text-[11px] font-semibold text-cyan-400/85 tracking-[0.12em] uppercase">
                 Capabilities
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-sky-50 mb-3 tracking-tight">
               Every layer of fleet intelligence.
             </h2>
-            <p className="text-[14px] text-sky-300/35 max-w-lg">
+            <p className="text-[14px] text-sky-300/65 max-w-lg">
               From vessel positions to voyage margins. Everything your operations team needs to
               decide faster.
             </p>
@@ -479,7 +479,7 @@ export default function MarketingHomePage() {
             {capabilities.map((c, i) => (
               <m.div
                 key={c.title}
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
@@ -487,14 +487,14 @@ export default function MarketingHomePage() {
               >
                 <div className="flex items-start justify-between mb-5">
                   <div className="w-10 h-10 rounded-lg bg-sky-500/6 border border-sky-500/10 flex items-center justify-center group-hover:border-cyan-400/20 transition-colors">
-                    <c.icon className="w-[18px] h-[18px] text-cyan-400/70" />
+                    <c.icon className="w-[18px] h-[18px] text-cyan-400/90" />
                   </div>
-                  <span className="text-[9px] font-semibold text-sky-400/25 tracking-[0.1em] uppercase mt-1">
+                  <span className="text-[9px] font-semibold text-sky-400/90 tracking-[0.1em] uppercase mt-1">
                     {c.tag}
                   </span>
                 </div>
                 <h3 className="text-[15px] font-semibold text-sky-100 mb-2">{c.title}</h3>
-                <p className="text-[12.5px] text-sky-300/35 leading-relaxed">{c.desc}</p>
+                <p className="text-[12.5px] text-sky-300/65 leading-relaxed">{c.desc}</p>
               </m.div>
             ))}
           </div>
@@ -504,14 +504,14 @@ export default function MarketingHomePage() {
       <section className="py-20 sm:py-28 border-t border-sky-500/6">
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           <m.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="mb-14"
           >
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-px bg-cyan-400/40" />
-              <span className="text-[11px] font-semibold text-cyan-400/60 tracking-[0.12em] uppercase">
+              <span className="text-[11px] font-semibold text-cyan-400/85 tracking-[0.12em] uppercase">
                 Built for
               </span>
             </div>
@@ -524,7 +524,7 @@ export default function MarketingHomePage() {
             {useCases.map((u, i) => (
               <m.div
                 key={u.role}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
@@ -532,21 +532,21 @@ export default function MarketingHomePage() {
               >
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-9 h-9 rounded-lg bg-sky-500/6 border border-sky-500/10 flex items-center justify-center">
-                    <u.icon className="w-4 h-4 text-cyan-400/60" />
+                    <u.icon className="w-4 h-4 text-cyan-400/85" />
                   </div>
-                  <span className="text-[10px] font-bold text-cyan-400/50 uppercase tracking-[0.1em]">
+                  <span className="text-[10px] font-bold text-cyan-400/80 uppercase tracking-[0.1em]">
                     {u.role}
                   </span>
                 </div>
                 <h3 className="text-[16px] font-semibold text-sky-100 mb-2.5 leading-snug">
                   {u.headline}
                 </h3>
-                <p className="text-[12.5px] text-sky-300/35 leading-relaxed mb-5">{u.desc}</p>
+                <p className="text-[12.5px] text-sky-300/65 leading-relaxed mb-5">{u.desc}</p>
                 <div className="flex flex-wrap gap-2">
                   {u.metrics.map((m) => (
                     <span
                       key={m}
-                      className="text-[10px] text-sky-400/30 border border-sky-500/8 px-2.5 py-1 font-medium"
+                      className="text-[10px] text-sky-400/70 border border-sky-500/8 px-2.5 py-1 font-medium"
                     >
                       {m}
                     </span>
@@ -562,20 +562,20 @@ export default function MarketingHomePage() {
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-start">
             <m.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-px bg-cyan-400/40" />
-                <span className="text-[11px] font-semibold text-cyan-400/60 tracking-[0.12em] uppercase">
+                <span className="text-[11px] font-semibold text-cyan-400/85 tracking-[0.12em] uppercase">
                   Platform
                 </span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-sky-50 mb-3 tracking-tight">
                 Command-grade infrastructure.
               </h2>
-              <p className="text-[13px] text-sky-300/35 mb-8 max-w-md leading-relaxed">
+              <p className="text-[13px] text-sky-300/65 mb-8 max-w-md leading-relaxed">
                 Built for maritime operators who need reliable, secure, always-on intelligence.
               </p>
 
@@ -604,18 +604,18 @@ export default function MarketingHomePage() {
                 ].map((item, i) => (
                   <m.div
                     key={item.label}
-                    initial={{ opacity: 0, x: -8 }}
+                    initial={{ x: -8 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.08 }}
                     className="flex gap-4"
                   >
                     <div className="mt-0.5 w-8 h-8 rounded-lg bg-sky-500/5 border border-sky-500/10 flex items-center justify-center shrink-0">
-                      <item.icon className="w-3.5 h-3.5 text-cyan-400/50" />
+                      <item.icon className="w-3.5 h-3.5 text-cyan-400/80" />
                     </div>
                     <div>
                       <p className="text-[13px] font-semibold text-sky-100 mb-0.5">{item.label}</p>
-                      <p className="text-[12px] text-sky-300/30 leading-relaxed">{item.desc}</p>
+                      <p className="text-[12px] text-sky-300/70 leading-relaxed">{item.desc}</p>
                     </div>
                   </m.div>
                 ))}
@@ -623,19 +623,19 @@ export default function MarketingHomePage() {
             </m.div>
 
             <m.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
               className="border border-sky-500/8 bg-[#070f1e]/60 p-6 sm:p-8"
             >
               <div className="flex items-center justify-between mb-6">
-                <span className="text-[11px] font-semibold text-sky-400/40 tracking-[0.1em] uppercase">
+                <span className="text-[11px] font-semibold text-sky-400/75 tracking-[0.1em] uppercase">
                   Fleet Snapshot
                 </span>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[10px] text-emerald-400/60 font-medium">Live</span>
+                  <span className="text-[10px] text-emerald-400/85 font-medium">Live</span>
                 </div>
               </div>
               <div className="space-y-0">
@@ -651,7 +651,7 @@ export default function MarketingHomePage() {
                     key={item.label}
                     className="flex items-center justify-between py-3.5 border-b border-sky-500/6 last:border-0"
                   >
-                    <span className="text-[12px] text-sky-300/35">{item.label}</span>
+                    <span className="text-[12px] text-sky-300/65">{item.label}</span>
                     <span className="text-[14px] font-mono font-semibold text-sky-100">
                       {item.value}
                     </span>
@@ -666,13 +666,13 @@ export default function MarketingHomePage() {
       <section className="py-24 sm:py-32 border-t border-sky-500/[0.06]">
         <div className="max-w-[1140px] mx-auto px-5 sm:px-6">
           <div className="text-center mb-16">
-            <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3 text-cyan-400/40">
+            <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3 text-cyan-400/80">
               Platform Walkthrough
             </p>
             <h2 className="text-3xl sm:text-4xl font-bold text-sky-50 mb-3 tracking-tight">
               How Vessels works in practice
             </h2>
-            <p className="text-sky-300/30 text-[14px] max-w-xl mx-auto">
+            <p className="text-sky-300/70 text-[14px] max-w-xl mx-auto">
               From AIS connection to full fleet intelligence in under 15 minutes.
             </p>
           </div>
@@ -720,11 +720,11 @@ export default function MarketingHomePage() {
                   <div className="flex-1 pb-10 border-b border-sky-500/[0.05]">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-[16px] font-semibold text-sky-50">{item.title}</h3>
-                      <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-400/8 text-cyan-400/50 border border-cyan-400/10">
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-400/8 text-cyan-400/80 border border-cyan-400/10">
                         {item.tag}
                       </span>
                     </div>
-                    <p className="text-[13.5px] leading-relaxed text-sky-300/35">{item.body}</p>
+                    <p className="text-[13.5px] leading-relaxed text-sky-300/65">{item.body}</p>
                   </div>
                 </div>
               ))}
@@ -736,7 +736,7 @@ export default function MarketingHomePage() {
       <section className="py-20 sm:py-24 border-t border-sky-500/6">
         <div className="max-w-3xl mx-auto px-5 sm:px-6 text-center">
           <m.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
@@ -746,7 +746,7 @@ export default function MarketingHomePage() {
                 in action.
               </span>
             </h2>
-            <p className="text-sky-300/35 text-[14px] mb-8 max-w-md mx-auto leading-relaxed">
+            <p className="text-sky-300/65 text-[14px] mb-8 max-w-md mx-auto leading-relaxed">
               A private walkthrough tailored to your fleet, routes, and operational priorities.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -757,7 +757,7 @@ export default function MarketingHomePage() {
               </a>
               <button
                 onClick={() => setDemoOpen(true)}
-                className="px-6 py-3.5 text-[13px] text-sky-400/50 hover:text-sky-300 transition-colors font-medium"
+                className="px-6 py-3.5 text-[13px] text-sky-400/80 hover:text-sky-300 transition-colors font-medium"
               >
                 Request a private demo <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
               </button>
@@ -769,7 +769,7 @@ export default function MarketingHomePage() {
       <section className="py-20 sm:py-24 border-t border-sky-500/[0.06] bg-[#050c17]">
         <div className="max-w-2xl mx-auto px-5 sm:px-6">
           <m.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >

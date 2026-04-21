@@ -284,7 +284,7 @@ export function SiteNav() {
                 <Link
                   href="/demo"
                   onClick={() => analytics.track('cta_click', { location: 'nav', label: 'Request Demo' })}
-                  style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#ffffff', background: 'var(--gi-accent-blue)', padding: '0.4375rem 0.875rem', borderRadius: 'var(--radius-md)', textDecoration: 'none', transition: 'opacity 0.15s' }}
+                  style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#ffffff', background: '#1e6abf', padding: '0.4375rem 0.875rem', borderRadius: 'var(--radius-md)', textDecoration: 'none', transition: 'opacity 0.15s' }}
                   onMouseEnter={e => (e.currentTarget.style.opacity = '0.88')}
                   onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
                 >

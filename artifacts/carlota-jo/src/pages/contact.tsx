@@ -91,7 +91,7 @@ export default function ContactPage() {
             >
               <p
                 className="text-[11px] font-medium tracking-[0.35em] uppercase mb-6"
-                style={{ color: 'var(--color-gold)' }}
+                style={{ color: 'var(--color-stone-700)' }}
               >
                 Request a Confidential Consultation
               </p>
@@ -138,7 +138,7 @@ export default function ContactPage() {
                 >
                   <p
                     className="text-[11px] font-medium tracking-[0.35em] uppercase mb-4"
-                    style={{ color: 'var(--color-gold)' }}
+                    style={{ color: 'var(--color-stone-700)' }}
                   >
                     What best describes your situation?
                   </p>
@@ -201,7 +201,7 @@ export default function ContactPage() {
                           {!path.form && path.note && selectedPath === path.id && (
                             <p
                               className="text-[11px] mt-3 italic"
-                              style={{ color: 'var(--color-gold)' }}
+                              style={{ color: 'var(--color-stone-700)' }}
                             >
                               {path.note}
                             </p>
@@ -222,7 +222,7 @@ export default function ContactPage() {
                       <div>
                         <label
                           className="block text-[11px] font-medium tracking-[0.2em] uppercase mb-2"
-                          style={{ color: 'var(--color-stone-400)' }}
+                          style={{ color: 'var(--color-stone-600)' }}
                         >
                           Your name
                         </label>
@@ -251,7 +251,7 @@ export default function ContactPage() {
                       <div>
                         <label
                           className="block text-[11px] font-medium tracking-[0.2em] uppercase mb-2"
-                          style={{ color: 'var(--color-stone-400)' }}
+                          style={{ color: 'var(--color-stone-600)' }}
                         >
                           Your email
                         </label>
@@ -280,7 +280,7 @@ export default function ContactPage() {
                       <div>
                         <label
                           className="block text-[11px] font-medium tracking-[0.2em] uppercase mb-2"
-                          style={{ color: 'var(--color-stone-400)' }}
+                          style={{ color: 'var(--color-stone-600)' }}
                         >
                           Tell Rosa about your situation
                         </label>
@@ -309,7 +309,7 @@ export default function ContactPage() {
                       <div>
                         <label
                           className="block text-[11px] font-medium tracking-[0.2em] uppercase mb-2"
-                          style={{ color: 'var(--color-stone-400)' }}
+                          style={{ color: 'var(--color-stone-600)' }}
                         >
                           How did you hear about Carlota Jo? (optional)
                         </label>
@@ -361,7 +361,7 @@ export default function ContactPage() {
                         </button>
                         <p
                           className="text-[11px] mt-3 font-light"
-                          style={{ color: 'var(--color-stone-400)' }}
+                          style={{ color: 'var(--color-stone-600)' }}
                         >
                           Rosa responds personally within two business days.
                         </p>
@@ -386,7 +386,7 @@ export default function ContactPage() {
                 >
                   <p
                     className="text-[11px] font-medium tracking-[0.35em] uppercase mb-5"
-                    style={{ color: 'var(--color-gold)' }}
+                    style={{ color: 'var(--color-stone-700)' }}
                   >
                     Enquiry received
                   </p>
@@ -403,7 +403,7 @@ export default function ContactPage() {
                     Rosa has received your enquiry and will respond personally within two business
                     days. Your message is handled with complete confidentiality.
                   </p>
-                  <p className="text-xs font-light" style={{ color: 'var(--color-stone-400)' }}>
+                  <p className="text-xs font-light" style={{ color: 'var(--color-stone-600)' }}>
                     If you have an urgent situation, please mention it in the subject line when Rosa
                     replies.
                   </p>
@@ -419,7 +419,7 @@ export default function ContactPage() {
               <div>
                 <p
                   className="text-[10px] font-medium tracking-[0.25em] uppercase mb-3"
-                  style={{ color: 'var(--color-stone-400)' }}
+                  style={{ color: 'var(--color-stone-600)' }}
                 >
                   Response time
                 </p>
@@ -430,7 +430,7 @@ export default function ContactPage() {
               <div>
                 <p
                   className="text-[10px] font-medium tracking-[0.25em] uppercase mb-3"
-                  style={{ color: 'var(--color-stone-400)' }}
+                  style={{ color: 'var(--color-stone-600)' }}
                 >
                   Confidentiality
                 </p>
@@ -441,7 +441,7 @@ export default function ContactPage() {
               <div>
                 <p
                   className="text-[10px] font-medium tracking-[0.25em] uppercase mb-3"
-                  style={{ color: 'var(--color-stone-400)' }}
+                  style={{ color: 'var(--color-stone-600)' }}
                 >
                   Location
                 </p>

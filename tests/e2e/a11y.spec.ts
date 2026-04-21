@@ -33,12 +33,8 @@ test.describe('Accessibility — SZL Holdings Public Routes', () => {
         const summary = criticalOrSerious
           .map((v) => `[${v.impact}] ${v.id}: ${v.description} (${v.nodes.length} node(s))`)
           .join('\n');
-        expect
-          .soft(criticalOrSerious, `Critical/serious a11y violations:\n${summary}`)
-          .toHaveLength(0);
+        expect(criticalOrSerious, `Critical/serious a11y violations:\n${summary}`).toHaveLength(0);
       }
-
-      expect(results.violations.filter((v) => v.impact === 'critical')).toHaveLength(0);
     });
   }
 
@@ -71,4 +67,99 @@ test.describe('Accessibility — SZL Holdings Public Routes', () => {
       expect(violations, `Interactive element a11y violations:\n${summary}`).toHaveLength(0);
     }
   });
+});
+
+/**
+ * Per-artifact root-page axe scan.
+ *
+ * In the a11y CI workflow each matrix job sets A11Y_ARTIFACT_NAME and
+ * PLAYWRIGHT_BASE_URL to point at a locally-served build of one artifact.
+ * When run in that mode only the single-artifact suite executes.
+ *
+ * When PLAYWRIGHT_BASE_URL is the monorepo proxy (default), every artifact
+ * is tested via its known path prefix (e.g. /aegis/, /terra/).
+ */
+const ARTIFACT_NAME = process.env.A11Y_ARTIFACT_NAME ?? 'all';
+
+const ARTIFACTS = [
+  { name: 'szl-holdings', rootPath: '/' },
+  { name: 'aegis',         rootPath: '/aegis/' },
+  { name: 'carlota-jo',    rootPath: '/carlota-jo/' },
+  { name: 'command',       rootPath: '/command/' },
+  { name: 'counsel',       rootPath: '/counsel/' },
+  { name: 'lyte-command-center', rootPath: '/lyte/' },
+  { name: 'pulse',         rootPath: '/pulse/' },
+  { name: 'sentra',        rootPath: '/sentra/' },
+  { name: 'terra',         rootPath: '/terra/' },
+  { name: 'vessels',       rootPath: '/vessels/' },
+];
+
+const artifactsToScan =
+  ARTIFACT_NAME === 'all'
+    ? ARTIFACTS
+    : ARTIFACTS.filter((a) => a.name === ARTIFACT_NAME);
+
+test.describe('Accessibility — Per-Artifact Root Page axe Scan', () => {
+  for (const artifact of artifactsToScan) {
+    test.describe(`${artifact.name}`, () => {
+      let resolvedBaseUrl: string;
+      let resolvedRootPath: string;
+
+      test.beforeAll(() => {
+        if (ARTIFACT_NAME !== 'all') {
+          resolvedBaseUrl = BASE_URL;
+          resolvedRootPath = '/';
+        } else {
+          resolvedBaseUrl = BASE_URL;
+          resolvedRootPath = artifact.rootPath;
+        }
+      });
+
+      test('root page has no critical or serious axe violations (WCAG 2.1 AA)', async ({ page }) => {
+        const url = `${resolvedBaseUrl}${resolvedRootPath}`.replace(/([^:])\/\//g, '$1/');
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => null);
+
+        const results = await new AxeBuilder({ page })
+          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+          .exclude("[data-testid='dev-only']")
+          .analyze();
+
+        const criticalOrSerious = results.violations.filter(
+          (v) => v.impact === 'critical' || v.impact === 'serious',
+        );
+
+        if (criticalOrSerious.length > 0) {
+          const summary = criticalOrSerious
+            .map(
+              (v) =>
+                `[${v.impact.toUpperCase()}] ${v.id}: ${v.description}\n` +
+                v.nodes
+                  .slice(0, 3)
+                  .map((n) => `  • ${n.html.slice(0, 120)}`)
+                  .join('\n'),
+            )
+            .join('\n\n');
+          expect(
+            criticalOrSerious,
+            `\n⚠ ${artifact.name} — ${criticalOrSerious.length} critical/serious violation(s):\n${summary}\n`,
+          ).toHaveLength(0);
+        }
+      });
+
+      test('root page html element has a lang attribute', async ({ page }) => {
+        const url = `${resolvedBaseUrl}${resolvedRootPath}`.replace(/([^:])\/\//g, '$1/');
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        const lang = await page.$eval('html', (el) => el.getAttribute('lang') ?? '');
+        expect(lang.trim(), `<html> must have a lang attribute on ${artifact.name}`).not.toBe('');
+      });
+
+      test('root page document has a non-empty title', async ({ page }) => {
+        const url = `${resolvedBaseUrl}${resolvedRootPath}`.replace(/([^:])\/\//g, '$1/');
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        const title = await page.title();
+        expect(title.trim(), `<title> must be non-empty on ${artifact.name}`).not.toBe('');
+      });
+    });
+  }
 });

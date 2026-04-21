@@ -172,7 +172,7 @@ export default function SentraLandingPage() {
               { icon: RotateCcw, label: 'RTO 42% critical tier' },
               { icon: Lock, label: '3 control gaps tracked' },
             ].map((s) => (
-              <div key={s.label} className="flex items-center gap-2 text-xs text-red-400/40">
+              <div key={s.label} className="flex items-center gap-2 text-xs text-red-400/80">
                 <s.icon className="w-3.5 h-3.5" />
                 {s.label}
               </div>
@@ -184,13 +184,13 @@ export default function SentraLandingPage() {
       <section className="px-6 py-20 bg-[#070404] border-y border-red-500/5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-[10px] font-mono text-red-400/40 uppercase tracking-widest mb-3">
+            <p className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest mb-3">
               What TENAX Does
             </p>
             <h2 className="font-display text-3xl font-bold text-red-50 mb-3">
               Cyber resilience command. Not another SIEM.
             </h2>
-            <p className="text-red-300/50 mt-3 max-w-xl mx-auto text-sm">
+            <p className="text-red-300/80 mt-3 max-w-xl mx-auto text-sm">
               Most security tools stop at alert. TENAX carries every signal through to the asset it
               threatens, the recovery it endangers, and the decision someone has to make in the next
               ten minutes.
@@ -242,7 +242,7 @@ export default function SentraLandingPage() {
               >
                 <feature.icon className={cn('w-5 h-5 mb-3', feature.color)} />
                 <h3 className="text-sm font-bold text-red-100 mb-2">{feature.title}</h3>
-                <p className="text-[11px] text-red-300/50 leading-relaxed">{feature.desc}</p>
+                <p className="text-[11px] text-red-300/80 leading-relaxed">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -251,13 +251,13 @@ export default function SentraLandingPage() {
 
       <section className="px-6 py-20 max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <p className="text-[10px] font-mono text-red-400/40 uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest mb-3">
             Core Views
           </p>
           <h2 className="font-display text-3xl font-bold text-red-50">
             Four command surfaces. One resilience platform.
           </h2>
-          <p className="text-red-300/50 mt-3 max-w-xl mx-auto text-sm">
+          <p className="text-red-300/80 mt-3 max-w-xl mx-auto text-sm">
             Each view is purpose-built for a specific decision security leaders actually have to
             make.
           </p>
@@ -271,7 +271,7 @@ export default function SentraLandingPage() {
             >
               <view.icon className={cn('w-5 h-5 mb-3', view.color)} />
               <h3 className="text-sm font-bold text-red-100 mb-2">{view.title}</h3>
-              <p className="text-[12px] text-red-300/55 leading-relaxed">{view.desc}</p>
+              <p className="text-[12px] text-red-300/85 leading-relaxed">{view.desc}</p>
             </div>
           ))}
         </div>
@@ -280,13 +280,13 @@ export default function SentraLandingPage() {
       <section className="px-6 py-20 bg-[#070404] border-y border-red-500/5">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
-            <p className="text-[10px] font-mono text-red-400/40 uppercase tracking-widest mb-3">
+            <p className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest mb-3">
               Live Signal Demo
             </p>
             <h2 className="font-display text-3xl font-bold text-red-50 mb-3">
               Every signal is a decision in waiting.
             </h2>
-            <p className="text-red-300/50 max-w-xl mx-auto text-sm">
+            <p className="text-red-300/80 max-w-xl mx-auto text-sm">
               A snapshot from the TENAX command stream — every event already mapped to severity,
               asset, and the next action.
             </p>
@@ -300,14 +300,14 @@ export default function SentraLandingPage() {
                   Live · Decision Stream
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-red-400/40">
+              <span className="text-[10px] font-mono text-red-400/80">
                 prod-finance-vpc · region us-east-1
               </span>
             </div>
             <div className="divide-y divide-red-500/5">
               {SIGNAL_DEMO.map((row) => (
                 <div key={row.time} className="grid grid-cols-12 gap-3 items-center px-5 py-3.5">
-                  <div className="col-span-2 text-[10px] font-mono text-red-400/50">{row.time}</div>
+                  <div className="col-span-2 text-[10px] font-mono text-red-400/85">{row.time}</div>
                   <div className="col-span-2">
                     <span
                       className={cn(
@@ -321,7 +321,7 @@ export default function SentraLandingPage() {
                   <div className="col-span-5 text-[12px] text-red-100/80 leading-snug">
                     {row.label}
                   </div>
-                  <div className="col-span-3 text-[11px] text-red-300/55 leading-snug text-right">
+                  <div className="col-span-3 text-[11px] text-red-300/85 leading-snug text-right">
                     {row.action}
                   </div>
                 </div>
@@ -333,7 +333,7 @@ export default function SentraLandingPage() {
 
       <section className="px-6 py-20 max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <p className="text-[10px] font-mono text-red-400/40 uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest mb-3">
             What It Solves
           </p>
           <h2 className="font-display text-3xl font-bold text-red-50 mb-3">
@@ -353,13 +353,13 @@ export default function SentraLandingPage() {
       <section className="px-6 py-20 bg-[#070404] border-y border-red-500/5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-[10px] font-mono text-red-400/40 uppercase tracking-widest mb-3">
+            <p className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest mb-3">
               Why It Matters
             </p>
             <h2 className="font-display text-3xl font-bold text-red-50 mb-4">
               From alert noise to resilience command.
             </h2>
-            <p className="text-red-300/50 text-sm max-w-2xl mx-auto leading-relaxed">
+            <p className="text-red-300/80 text-sm max-w-2xl mx-auto leading-relaxed">
               Every CISO already has alerts. Very few can prove that the controls they attested to
               are still in place, that the recovery they promised is actually rehearsed, or that the
               next incident has an owner before it happens. That is the gap TENAX closes.
@@ -391,8 +391,8 @@ export default function SentraLandingPage() {
             ].map((o) => (
               <div key={o.metric} className="text-center">
                 <p className="text-3xl font-bold font-display text-red-300 mb-1">{o.metric}</p>
-                <p className="text-[11px] text-red-300/55 leading-relaxed mb-1">{o.label}</p>
-                <p className="text-[9px] font-mono text-red-400/30">{o.trend}</p>
+                <p className="text-[11px] text-red-300/85 leading-relaxed mb-1">{o.label}</p>
+                <p className="text-[9px] font-mono text-red-400/80">{o.trend}</p>
               </div>
             ))}
           </div>
@@ -412,11 +412,11 @@ export default function SentraLandingPage() {
 
       <section className="px-6 py-20 bg-[#070404] border-t border-red-500/5">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-[10px] font-mono text-red-400/40 uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest mb-3">
             Powered by Alloy · SZL Holdings
           </p>
           <h2 className="font-display text-3xl font-bold text-red-50 mb-4">Request a Pilot</h2>
-          <p className="text-red-300/55 mb-8 text-sm leading-relaxed max-w-xl mx-auto">
+          <p className="text-red-300/85 mb-8 text-sm leading-relaxed max-w-xl mx-auto">
             TENAX is built for security leaders who need to command resilience, not just monitor
             it. Request a pilot — we will walk through the full command center against your
             environment.

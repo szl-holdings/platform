@@ -45,23 +45,32 @@ export function LanguageSwitcher({
     light: {
       button:
         'text-[#6b6259] hover:text-[#1a1614] border border-[#d4ccc2] bg-transparent hover:border-[#9a9086]',
+      buttonStyle: undefined as React.CSSProperties | undefined,
       dropdown: 'bg-white border border-[#e8e2da] shadow-sm',
       item: 'text-[#6b6259] hover:bg-[#f5f0e8] hover:text-[#1a1614]',
+      itemStyle: undefined as React.CSSProperties | undefined,
       activeItem: 'text-[#1a1614] bg-[#f5f0e8]',
+      activeItemStyle: undefined as React.CSSProperties | undefined,
     },
     dark: {
       button:
-        'text-[rgba(245,240,232,0.5)] hover:text-[rgba(245,240,232,0.85)] border border-[rgba(245,240,232,0.1)] bg-transparent hover:border-[rgba(245,240,232,0.25)]',
+        'border border-[rgba(245,240,232,0.1)] bg-transparent hover:border-[rgba(245,240,232,0.25)]',
+      buttonStyle: { color: 'rgba(245,240,232,0.85)' } as React.CSSProperties,
       dropdown: 'bg-[#12141a] border border-[rgba(245,240,232,0.1)] shadow-lg',
-      item: 'text-[rgba(245,240,232,0.5)] hover:bg-[rgba(245,240,232,0.06)] hover:text-[rgba(245,240,232,0.85)]',
-      activeItem: 'text-[rgba(245,240,232,0.85)] bg-[rgba(245,240,232,0.06)]',
+      item: 'hover:bg-[rgba(245,240,232,0.06)]',
+      itemStyle: { color: 'rgba(245,240,232,0.7)' } as React.CSSProperties,
+      activeItem: 'bg-[rgba(245,240,232,0.06)]',
+      activeItemStyle: { color: 'rgba(245,240,232,0.92)' } as React.CSSProperties,
     },
     gold: {
       button:
-        'text-[rgba(196,170,126,0.6)] hover:text-[rgba(196,170,126,0.9)] border border-[rgba(196,170,126,0.15)] bg-transparent hover:border-[rgba(196,170,126,0.35)]',
+        'border border-[rgba(196,170,126,0.25)] bg-transparent hover:border-[rgba(196,170,126,0.45)]',
+      buttonStyle: { color: 'rgba(196,170,126,0.9)' } as React.CSSProperties,
       dropdown: 'bg-[#1a1714] border border-[rgba(196,170,126,0.12)] shadow-lg',
-      item: 'text-[rgba(196,170,126,0.55)] hover:bg-[rgba(196,170,126,0.06)] hover:text-[rgba(196,170,126,0.9)]',
-      activeItem: 'text-[rgba(196,170,126,0.9)] bg-[rgba(196,170,126,0.06)]',
+      item: 'hover:bg-[rgba(196,170,126,0.06)]',
+      itemStyle: { color: 'rgba(196,170,126,0.85)' } as React.CSSProperties,
+      activeItem: 'bg-[rgba(196,170,126,0.06)]',
+      activeItemStyle: { color: 'rgba(196,170,126,0.95)' } as React.CSSProperties,
     },
   };
 
@@ -72,6 +81,7 @@ export function LanguageSwitcher({
       <button
         onClick={() => setOpen(!open)}
         className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium tracking-[0.08em] uppercase transition-all duration-200 ${s.button}`}
+        style={s.buttonStyle}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label="Select language"
@@ -104,6 +114,7 @@ export function LanguageSwitcher({
               className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[11px] font-medium tracking-[0.08em] uppercase transition-colors duration-150 ${
                 locale === currentLocale ? s.activeItem : s.item
               }`}
+              style={locale === currentLocale ? s.activeItemStyle : s.itemStyle}
             >
               <span aria-hidden="true">{LOCALE_FLAGS[locale]}</span>
               <span>{LOCALE_LABELS[locale]}</span>

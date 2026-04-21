@@ -275,13 +275,14 @@ const INFRASTRUCTURE_NAV: NavGroup[] = [
 function SectionHeader({ label }: { label: string }) {
   return (
     <div
+      aria-hidden="true"
       style={{
         padding: '0.5rem 0.625rem 0.25rem',
         fontSize: '7px',
         fontWeight: 700,
         letterSpacing: '0.14em',
         textTransform: 'uppercase',
-        color: 'rgba(255,255,255,0.2)',
+        color: 'rgba(255,255,255,0.6)',
         fontFamily: 'monospace',
         marginTop: '0.5rem',
       }}
@@ -311,7 +312,7 @@ function NavItem({
   const className =
     'flex items-center gap-2 px-2.5 py-[5px] text-[10px] font-medium transition-all relative group rounded';
   const style = {
-    color: isActive ? accent : 'rgba(255,255,255,0.5)',
+    color: isActive ? accent : 'rgba(255,255,255,0.75)',
     background: isActive ? `${accent}12` : 'transparent',
   } as const;
   const inner = (
@@ -324,7 +325,7 @@ function NavItem({
       )}
       <Icon
         className="w-3 h-3 shrink-0"
-        style={{ color: isActive ? accent : 'rgba(255,255,255,0.3)', opacity: isActive ? 1 : 0.7 }}
+        style={{ color: isActive ? accent : 'rgba(255,255,255,0.65)' }}
       />
       <span className="flex-1 truncate">{label}</span>
       {badge}
@@ -478,11 +479,11 @@ function WorkspaceSwitcher({
             >
               <Icon
                 className="w-3 h-3 mb-0.5"
-                style={{ color: isActive ? accent : 'rgba(255,255,255,0.3)' }}
+                style={{ color: isActive ? accent : 'rgba(255,255,255,0.65)' }}
               />
               <span
                 className="text-[8px] font-semibold uppercase tracking-wider"
-                style={{ color: isActive ? accent : 'rgba(255,255,255,0.3)' }}
+                style={{ color: isActive ? accent : 'rgba(255,255,255,0.65)' }}
               >
                 {tab.label}
               </span>
@@ -842,8 +843,9 @@ function UnifiedLayoutInner({
                 COMMAND
               </div>
               <div
+                aria-hidden="true"
                 className="text-[7px] uppercase tracking-[0.15em] mt-px"
-                style={{ color: `${accent}70` }}
+                style={{ color: accent }}
               >
                 Unified Command
               </div>
@@ -908,7 +910,7 @@ function UnifiedLayoutInner({
         <div className="px-3 py-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
           <div
             className="text-[7px] uppercase tracking-widest font-mono mb-1.5"
-            style={{ color: 'rgba(255,255,255,0.2)' }}
+            style={{ color: 'rgba(255,255,255,0.65)' }}
           >
             Domain Packs
           </div>
@@ -957,7 +959,7 @@ function UnifiedLayoutInner({
             <span className="text-[11px] font-mono font-semibold" style={{ color: accent }}>
               {WORKSPACE_TABS.find((t) => t.mode === mode)?.label}
             </span>
-            <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.2)' }}>
+            <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.65)' }}>
               · {WORKSPACE_TABS.find((t) => t.mode === mode)?.sublabel}
             </span>
             <div
@@ -968,8 +970,9 @@ function UnifiedLayoutInner({
           </div>
           <div className="flex items-center gap-2">
             <button
+              aria-label="Notifications"
               className="relative p-1 rounded hover:bg-white/5 transition-colors"
-              style={{ color: 'rgba(255,255,255,0.5)' }}
+              style={{ color: 'rgba(255,255,255,0.75)' }}
             >
               <Bell className="w-3.5 h-3.5" />
             </button>
@@ -977,7 +980,7 @@ function UnifiedLayoutInner({
               <div className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.85)' }}>
                 Stephen Lutar
               </div>
-              <div className="text-[8px] font-mono" style={{ color: `${accent}60` }}>
+              <div className="text-[8px] font-mono" style={{ color: accent }}>
                 SZL Holdings
               </div>
             </div>

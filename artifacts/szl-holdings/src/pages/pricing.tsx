@@ -217,13 +217,14 @@ export default function PricingPage() {
                     See the Demo First
                   </Link>
                 </div>
-              </m.div>
+              </div>
             </div>
-          </section>
-  
-          <section style={{ padding: "3rem 0", borderTop: "1px solid hsla(0,0%,100%,0.04)" }}>
-            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-              <div style={{ padding: "2rem", borderRadius: "12px", background: "hsla(192,80%,48%,0.04)", border: "1px solid hsla(192,80%,48%,0.16)", marginBottom: "2rem" }}>
+          </div>
+        </section>
+
+        <section style={{ padding: "3rem 0", borderTop: "1px solid hsla(0,0%,100%,0.04)" }}>
+          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+            <div style={{ padding: "2rem", borderRadius: "12px", background: "hsla(192,80%,48%,0.04)", border: "1px solid hsla(192,80%,48%,0.16)", marginBottom: "2rem" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "1.25rem", flexWrap: "wrap" }}>
                   <div style={{ flex: 1, minWidth: "240px" }}>
                     <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(192,80%,48%)", marginBottom: "0.5rem" }}>

@@ -138,7 +138,7 @@ export default function CounselLandingPage() {
             <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
               <Scale className="w-5 h-5 text-violet-400" />
             </div>
-            <span className="text-sm font-medium text-violet-300/60">
+            <span className="text-sm font-medium text-violet-300/85">
               Counsel Legal Matter Command · Powered by FORGE
             </span>
           </div>
@@ -149,7 +149,7 @@ export default function CounselLandingPage() {
             <span className="text-violet-400">and legal exposure into command.</span>
           </h1>
 
-          <p className="text-lg text-violet-200/60 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg text-violet-200/85 max-w-2xl mx-auto mb-10 leading-relaxed">
             Counsel is a legal matter command platform for general counsel and legal ops who need
             more than a matter management tool. See exposure across every matter, the obligations
             that depend on each other, and the next decision someone has to make this week.
@@ -177,7 +177,7 @@ export default function CounselLandingPage() {
               { icon: AlertTriangle, label: '$6.4M exposure tracked' },
               { icon: ShieldCheck, label: 'Privilege chain enforced' },
             ].map((s) => (
-              <div key={s.label} className="flex items-center gap-2 text-xs text-violet-400/40">
+              <div key={s.label} className="flex items-center gap-2 text-xs text-violet-400/80">
                 <s.icon className="w-3.5 h-3.5" />
                 {s.label}
               </div>
@@ -189,13 +189,13 @@ export default function CounselLandingPage() {
       <section className="px-6 py-20 bg-[#06040f] border-y border-violet-500/5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-[10px] font-mono text-violet-400/40 uppercase tracking-widest mb-3">
+            <p className="text-[10px] font-mono text-violet-400/80 uppercase tracking-widest mb-3">
               What Counsel Does
             </p>
             <h2 className="font-display text-3xl font-bold text-violet-50 mb-3">
               Legal matter command. Not a matter database.
             </h2>
-            <p className="text-violet-300/55 mt-3 max-w-xl mx-auto text-sm">
+            <p className="text-violet-300/80 mt-3 max-w-xl mx-auto text-sm">
               Most legal tools stop at storage. Counsel carries every matter through to the
               obligation it creates, the exposure it represents, and the decision that has to land
               before the next deadline.
@@ -247,7 +247,7 @@ export default function CounselLandingPage() {
               >
                 <feature.icon className={cn('w-5 h-5 mb-3', feature.color)} />
                 <h3 className="text-sm font-bold text-violet-100 mb-2">{feature.title}</h3>
-                <p className="text-[11px] text-violet-300/55 leading-relaxed">{feature.desc}</p>
+                <p className="text-[11px] text-violet-300/80 leading-relaxed">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -256,13 +256,13 @@ export default function CounselLandingPage() {
 
       <section className="px-6 py-20 max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <p className="text-[10px] font-mono text-violet-400/40 uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-mono text-violet-400/80 uppercase tracking-widest mb-3">
             Core Views
           </p>
           <h2 className="font-display text-3xl font-bold text-violet-50">
             Four command surfaces. One legal platform.
           </h2>
-          <p className="text-violet-300/55 mt-3 max-w-xl mx-auto text-sm">
+          <p className="text-violet-300/80 mt-3 max-w-xl mx-auto text-sm">
             Each view is purpose-built for a specific decision the GC and legal ops actually have to
             make.
           </p>
@@ -276,7 +276,7 @@ export default function CounselLandingPage() {
             >
               <view.icon className={cn('w-5 h-5 mb-3', view.color)} />
               <h3 className="text-sm font-bold text-violet-100 mb-2">{view.title}</h3>
-              <p className="text-[12px] text-violet-300/60 leading-relaxed">{view.desc}</p>
+              <p className="text-[12px] text-violet-300/85 leading-relaxed">{view.desc}</p>
             </div>
           ))}
         </div>
@@ -285,13 +285,13 @@ export default function CounselLandingPage() {
       <section className="px-6 py-20 bg-[#06040f] border-y border-violet-500/5">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
-            <p className="text-[10px] font-mono text-violet-400/40 uppercase tracking-widest mb-3">
+            <p className="text-[10px] font-mono text-violet-400/80 uppercase tracking-widest mb-3">
               Live Exposure Demo
             </p>
             <h2 className="font-display text-3xl font-bold text-violet-50 mb-3">
               Every matter is exposure with an owner.
             </h2>
-            <p className="text-violet-300/55 max-w-xl mx-auto text-sm">
+            <p className="text-violet-300/80 max-w-xl mx-auto text-sm">
               A snapshot from the Counsel exposure desk — every matter quantified, scored, and
               routed to the next decision.
             </p>
@@ -305,7 +305,7 @@ export default function CounselLandingPage() {
                   Live · Exposure Desk
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-violet-400/40">
+              <span className="text-[10px] font-mono text-violet-400/80">
                 Total tracked exposure · $6.4M
               </span>
             </div>
@@ -328,7 +328,7 @@ export default function CounselLandingPage() {
                       {row.status}
                     </span>
                   </div>
-                  <div className="col-span-4 text-[11px] text-violet-300/55 leading-snug text-right">
+                  <div className="col-span-4 text-[11px] text-violet-300/80 leading-snug text-right">
                     {row.next}
                   </div>
                 </div>
@@ -340,7 +340,7 @@ export default function CounselLandingPage() {
 
       <section className="px-6 py-20 max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <p className="text-[10px] font-mono text-violet-400/40 uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-mono text-violet-400/80 uppercase tracking-widest mb-3">
             What It Solves
           </p>
           <h2 className="font-display text-3xl font-bold text-violet-50 mb-3">
@@ -360,13 +360,13 @@ export default function CounselLandingPage() {
       <section className="px-6 py-20 bg-[#06040f] border-y border-violet-500/5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-[10px] font-mono text-violet-400/40 uppercase tracking-widest mb-3">
+            <p className="text-[10px] font-mono text-violet-400/80 uppercase tracking-widest mb-3">
               Why It Matters
             </p>
             <h2 className="font-display text-3xl font-bold text-violet-50 mb-4">
               From matter management to legal command.
             </h2>
-            <p className="text-violet-300/55 text-sm max-w-2xl mx-auto leading-relaxed">
+            <p className="text-violet-300/80 text-sm max-w-2xl mx-auto leading-relaxed">
               Every general counsel already has matters. Very few can show the board which matters
               represent the most exposure, which obligations land next, and which decisions are
               stalled because no one owns the next move. That is the gap Counsel closes.
@@ -398,8 +398,8 @@ export default function CounselLandingPage() {
             ].map((o) => (
               <div key={o.metric} className="text-center">
                 <p className="text-3xl font-bold font-display text-violet-300 mb-1">{o.metric}</p>
-                <p className="text-[11px] text-violet-300/55 leading-relaxed mb-1">{o.label}</p>
-                <p className="text-[9px] font-mono text-violet-400/30">{o.trend}</p>
+                <p className="text-[11px] text-violet-300/80 leading-relaxed mb-1">{o.label}</p>
+                <p className="text-[9px] font-mono text-violet-400/80">{o.trend}</p>
               </div>
             ))}
           </div>
@@ -419,11 +419,11 @@ export default function CounselLandingPage() {
 
       <section className="px-6 py-20 bg-[#06040f] border-t border-violet-500/5">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-[10px] font-mono text-violet-400/40 uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-mono text-violet-400/80 uppercase tracking-widest mb-3">
             Powered by FORGE · SZL Holdings
           </p>
           <h2 className="font-display text-3xl font-bold text-violet-50 mb-4">Request a Pilot</h2>
-          <p className="text-violet-300/55 mb-8 text-sm leading-relaxed max-w-xl mx-auto">
+          <p className="text-violet-300/80 mb-8 text-sm leading-relaxed max-w-xl mx-auto">
             Counsel is built for general counsel and legal ops who need to command exposure, not
             just track matters. Request a pilot — we will walk through the full command center
             against your active matter book.
@@ -442,7 +442,7 @@ export default function CounselLandingPage() {
               </button>
             </Link>
           </div>
-          <p className="text-[10px] font-mono text-violet-400/30 mt-6 inline-flex items-center gap-1.5">
+          <p className="text-[10px] font-mono text-violet-400/80 mt-6 inline-flex items-center gap-1.5">
             <DollarSign className="w-3 h-3" />
             Pilot pricing tied to matter book size · onboard in two weeks
           </p>

@@ -1598,7 +1598,6 @@ export function EcosystemNav({
   return (
     <>
       <nav
-        role="banner"
         aria-label="Global navigation"
         style={{
           position: 'sticky',
@@ -1832,6 +1831,7 @@ export function EcosystemNav({
                 fontSize: '10px',
                 fontFamily: typography.fontFamily.mono,
                 marginLeft: '2px',
+                color: 'rgba(255,255,255,0.72)',
               }}
             >
               ⌘K
@@ -2232,7 +2232,7 @@ export function EcosystemNav({
                 cursor: 'pointer',
                 fontSize: '12px',
                 fontWeight: 500,
-                color: accentColor,
+                color: 'rgba(235,230,220,0.9)',
                 transition: 'background 0.15s',
               }}
               onMouseEnter={(e) => {

@@ -91,8 +91,8 @@ const BG = {
 const BORDER = 'rgba(255,255,255,0.06)';
 const TEXT = {
   primary: 'rgba(255,255,255,0.88)',
-  secondary: 'rgba(255,255,255,0.52)',
-  muted: 'rgba(255,255,255,0.28)',
+  secondary: 'rgba(255,255,255,0.60)',
+  muted: 'rgba(255,255,255,0.55)',
 } as const;
 
 const VERDICT_COLORS = {

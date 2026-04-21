@@ -42,7 +42,7 @@ function MetricCard({ m }: { m: OverviewMetric }) {
   const trendColor = trendGood
     ? 'text-emerald-400'
     : m.trend === 'flat'
-      ? 'text-amber-400/50'
+      ? 'text-amber-400/75'
       : 'text-red-400';
   const sevBorder =
     m.severity === 'critical'
@@ -53,7 +53,7 @@ function MetricCard({ m }: { m: OverviewMetric }) {
 
   return (
     <div className={`cockpit-panel p-4 border ${sevBorder}`}>
-      <p className="text-[10px] font-mono text-amber-400/40 uppercase tracking-wider mb-2">
+      <p className="text-[10px] font-mono text-amber-400/70 uppercase tracking-wider mb-2">
         {m.label}
       </p>
       <p className="text-2xl font-mono font-bold text-amber-300">{m.value}</p>
@@ -63,7 +63,7 @@ function MetricCard({ m }: { m: OverviewMetric }) {
           <span className="text-[10px] font-mono">{m.delta}</span>
         </div>
       )}
-      <p className="text-[10px] text-amber-400/40 mt-2 leading-snug">{m.context}</p>
+      <p className="text-[10px] text-amber-400/70 mt-2 leading-snug">{m.context}</p>
     </div>
   );
 }
@@ -84,7 +84,7 @@ function SignalRow({ sig }: { sig: SignalItem }) {
       </span>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium text-amber-100 leading-snug truncate">{sig.title}</p>
-        <p className="text-[10px] text-amber-400/40 mt-0.5 font-mono">
+        <p className="text-[10px] text-amber-400/70 mt-0.5 font-mono">
           {sig.source} · {new Date(sig.detectedAt).toLocaleDateString()}
         </p>
       </div>
@@ -108,7 +108,7 @@ function RecRow({ rec }: { rec: DecisionRecommendation }) {
       ? 'text-amber-400'
       : rec.approvalState === 'approved'
         ? 'text-emerald-400'
-        : 'text-amber-400/40';
+        : 'text-amber-400/70';
   return (
     <div className="flex items-start gap-3 p-3 hover:bg-amber-500/3 rounded-md transition-colors cursor-pointer border border-transparent hover:border-amber-500/10">
       <Brain className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${urgColor}`} />
@@ -116,15 +116,15 @@ function RecRow({ rec }: { rec: DecisionRecommendation }) {
         <p className="text-xs font-medium text-amber-100 leading-snug">{rec.title}</p>
         <div className="flex items-center gap-3 mt-1">
           <span className={`text-[10px] font-mono ${urgColor}`}>{rec.urgency.toUpperCase()}</span>
-          <span className="text-[10px] text-amber-400/40 font-mono">·</span>
+          <span className="text-[10px] text-amber-400/70 font-mono">·</span>
           <span className={`text-[10px] font-mono ${approvalColor}`}>{rec.approvalState}</span>
-          <span className="text-[10px] text-amber-400/40 font-mono">·</span>
-          <span className="text-[10px] text-amber-400/40">
+          <span className="text-[10px] text-amber-400/70 font-mono">·</span>
+          <span className="text-[10px] text-amber-400/70">
             {Math.round(rec.confidence * 100)}% confidence
           </span>
         </div>
       </div>
-      <span className="text-[10px] font-mono text-amber-400/30 shrink-0">{rec.proofRef}</span>
+      <span className="text-[10px] font-mono text-amber-400/65 shrink-0">{rec.proofRef}</span>
     </div>
   );
 }
@@ -139,12 +139,12 @@ function WorkflowRow({ wf }: { wf: WorkflowItem }) {
           ? 'text-orange-400'
           : wf.status === 'on_track'
             ? 'text-emerald-400'
-            : 'text-amber-400/50';
+            : 'text-amber-400/75';
   return (
     <div className="flex items-center gap-3 p-3 hover:bg-amber-500/3 rounded-md transition-colors">
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium text-amber-100 truncate">{wf.name}</p>
-        <p className="text-[10px] text-amber-400/40 mt-0.5">{wf.owner}</p>
+        <p className="text-[10px] text-amber-400/70 mt-0.5">{wf.owner}</p>
       </div>
       <div className="flex items-center gap-2 shrink-0">
         {wf.slaBreach && (
@@ -210,7 +210,7 @@ export default function OverviewPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-lg font-semibold text-amber-100 font-display">Overview</h1>
-          <p className="text-xs text-amber-400/50 mt-0.5">
+          <p className="text-xs text-amber-400/75 mt-0.5">
             Decision operations snapshot —{' '}
             {new Date().toLocaleDateString('en-US', {
               weekday: 'long',
@@ -246,7 +246,7 @@ export default function OverviewPage() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <p className="text-[10px] font-mono text-amber-400/40 uppercase">
+              <p className="text-[10px] font-mono text-amber-400/70 uppercase">
                 Lyte Intelligence Summary
               </p>
               <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border text-emerald-400 bg-emerald-500/8 border-emerald-500/20">
@@ -261,7 +261,7 @@ export default function OverviewPage() {
             </p>
             <button
               onClick={() => setSummaryExpanded((v) => !v)}
-              className="text-[10px] text-amber-400/50 hover:text-amber-300 mt-1 transition-colors"
+              className="text-[10px] text-amber-400/75 hover:text-amber-300 mt-1 transition-colors"
             >
               {summaryExpanded ? 'Show less' : 'Show more'}
             </button>
@@ -287,7 +287,7 @@ export default function OverviewPage() {
             </div>
             <Link
               href="/signals"
-              className="flex items-center gap-1 text-[10px] text-amber-400/50 hover:text-amber-300 transition-colors"
+              className="flex items-center gap-1 text-[10px] text-amber-400/75 hover:text-amber-300 transition-colors"
             >
               All <ChevronRight className="w-3 h-3" />
             </Link>
@@ -308,7 +308,7 @@ export default function OverviewPage() {
             </div>
             <Link
               href="/decisions"
-              className="flex items-center gap-1 text-[10px] text-amber-400/50 hover:text-amber-300 transition-colors"
+              className="flex items-center gap-1 text-[10px] text-amber-400/75 hover:text-amber-300 transition-colors"
             >
               All <ChevronRight className="w-3 h-3" />
             </Link>
@@ -329,7 +329,7 @@ export default function OverviewPage() {
             </div>
             <Link
               href="/workflow-health"
-              className="flex items-center gap-1 text-[10px] text-amber-400/50 hover:text-amber-300 transition-colors"
+              className="flex items-center gap-1 text-[10px] text-amber-400/75 hover:text-amber-300 transition-colors"
             >
               All <ChevronRight className="w-3 h-3" />
             </Link>

@@ -199,7 +199,7 @@ function Reveal({
   return (
     <div
       ref={ref}
-      className={`transition-all duration-1000 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${className}`}
+      className={`transition-all duration-1000 ease-out ${visible ? 'translate-y-0' : 'translate-y-8'} ${className}`}
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}
@@ -239,7 +239,7 @@ export default function AegisHomePage() {
               <Shield size={13} className="text-red-400" />
             </div>
             <span className="font-bold text-[15px] tracking-tight text-white">PARAGON</span>
-            <span className="hidden sm:inline text-[9px] tracking-[0.15em] uppercase text-white/15 font-mono ml-1">
+            <span aria-hidden="true" className="hidden sm:inline text-[9px] tracking-[0.15em] uppercase text-white/60 font-mono ml-1">
               Defense & Intelligence
             </span>
           </div>
@@ -252,7 +252,7 @@ export default function AegisHomePage() {
               <a
                 key={l.label}
                 href={l.href}
-                className="text-[11px] text-white/30 hover:text-white/60 transition-colors tracking-[0.08em] uppercase font-medium"
+                className="text-[11px] text-white/65 hover:text-white/60 transition-colors tracking-[0.08em] uppercase font-medium"
               >
                 {l.label}
               </a>
@@ -264,7 +264,7 @@ export default function AegisHomePage() {
             </Link>
           </div>
           <button
-            className="md:hidden p-2 text-white/40"
+            className="md:hidden p-2 text-white/70"
             onClick={() => setMobileNav(!mobileNav)}
             aria-label={mobileNav ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileNav}
@@ -318,7 +318,7 @@ export default function AegisHomePage() {
 
       <section className="relative pt-32 sm:pt-40 pb-20 sm:pb-28 max-w-[1200px] mx-auto px-6">
         <Reveal>
-          <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/15 mb-8 font-mono">
+          <p aria-hidden="true" className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/60 mb-8 font-mono">
             SZL Holdings &middot; Unified Defense & Intelligence
           </p>
         </Reveal>
@@ -330,12 +330,12 @@ export default function AegisHomePage() {
         </Reveal>
         <Reveal delay={200}>
           <h1 className="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] max-w-[900px] mb-8">
-            <span className="text-white/20">One shared intelligence layer.</span>
+            <span className="text-white/70">One shared intelligence layer.</span>
           </h1>
         </Reveal>
 
         <Reveal delay={300}>
-          <p className="text-[17px] sm:text-[19px] leading-[1.75] text-white/30 max-w-[640px] mb-12">
+          <p className="text-[17px] sm:text-[19px] leading-[1.75] text-white/65 max-w-[640px] mb-12">
             Aegis unifies security operations, managed services, and AI-driven intelligence into a
             single console. Defense detects. Legal protects. Command operates. Labs reasons. All
             four share one data context, one correlation engine, one operating model.
@@ -373,7 +373,7 @@ export default function AegisHomePage() {
                 <span className="text-[22px] font-extrabold font-mono text-white block">
                   {s.value}
                 </span>
-                <span className="text-[10px] tracking-[0.08em] uppercase text-white/20 mt-1 block">
+                <span aria-hidden="true" className="text-[10px] tracking-[0.08em] uppercase text-white/65 mt-1 block">
                   {s.label}
                 </span>
               </div>
@@ -386,13 +386,13 @@ export default function AegisHomePage() {
         <section id="architecture" className="relative py-24 sm:py-32 px-6">
           <div className="max-w-[1200px] mx-auto">
             <div className="max-w-[600px] mb-16">
-              <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/15 mb-4">
+              <p aria-hidden="true" className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/60 mb-4">
                 Architecture
               </p>
               <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
                 One platform. Four operating surfaces.
               </h2>
-              <p className="text-[16px] leading-[1.8] text-white/28">
+              <p className="text-[16px] leading-[1.8] text-white/65">
                 Each workspace is a full operating environment for its domain. Together, they share
                 a unified data context — a threat in Defense informs a service risk in Command, and
                 a Labs model improves detection in real time.
@@ -417,11 +417,11 @@ export default function AegisHomePage() {
                     />
                     <div>
                       <span
-                        className={`text-[13px] font-semibold block ${activeWs === i ? 'text-white' : 'text-white/40'}`}
+                        className={`text-[13px] font-semibold block ${activeWs === i ? 'text-white' : 'text-white/70'}`}
                       >
                         {ws.name}
                       </span>
-                      <span className="text-[10px] text-white/15">{ws.subtitle}</span>
+                      <span aria-hidden="true" className="text-[10px] text-white/60">{ws.subtitle}</span>
                     </div>
                   </button>
                 ))}
@@ -452,7 +452,7 @@ export default function AegisHomePage() {
                         className="w-1 h-1 rounded-full mt-[7px] shrink-0"
                         style={{ background: workspaces[activeWs].color, opacity: 0.4 }}
                       />
-                      <span className="text-[13px] leading-relaxed text-white/40">{cap}</span>
+                      <span className="text-[13px] leading-relaxed text-white/70">{cap}</span>
                     </div>
                   ))}
                 </div>
@@ -478,13 +478,13 @@ export default function AegisHomePage() {
       <Reveal>
         <section id="convergence" className="relative py-24 sm:py-32 px-6">
           <div className="max-w-[900px] mx-auto">
-            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/15 mb-4">
+            <p aria-hidden="true" className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/60 mb-4">
               Convergence
             </p>
             <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
               Cross-module intelligence in action
             </h2>
-            <p className="text-[16px] leading-[1.8] text-white/28 mb-16 max-w-[560px]">
+            <p className="text-[16px] leading-[1.8] text-white/65 mb-16 max-w-[560px]">
               The real power of Aegis is convergence. When Defense, Legal, Command, and Labs share
               one data layer, correlations emerge that siloed tools miss entirely.
             </p>
@@ -498,7 +498,7 @@ export default function AegisHomePage() {
                   <div className="flex items-center gap-3 mb-5">
                     <span
                       className="text-[11px] font-bold px-3 py-1 rounded-lg"
-                      style={{ background: `${c.color}10`, color: c.color }}
+                      style={{ background: `${c.color}10`, color: "rgba(255,255,255,0.9)" }}
                     >
                       {c.from}
                     </span>
@@ -509,16 +509,16 @@ export default function AegisHomePage() {
                           background: `linear-gradient(90deg, ${c.color}40, ${c.toColor}40)`,
                         }}
                       />
-                      <ChevronRight size={10} className="text-white/10" />
+                      <ChevronRight aria-hidden="true" size={10} className="text-white/60" />
                     </div>
                     <span
                       className="text-[11px] font-bold px-3 py-1 rounded-lg"
-                      style={{ background: `${c.toColor}10`, color: c.toColor }}
+                      style={{ background: `${c.toColor}10`, color: "rgba(255,255,255,0.9)" }}
                     >
                       {c.to}
                     </span>
                   </div>
-                  <p className="text-[14px] leading-[1.85] text-white/35">{c.desc}</p>
+                  <p className="text-[14px] leading-[1.85] text-white/65">{c.desc}</p>
                 </div>
               ))}
             </div>
@@ -530,13 +530,13 @@ export default function AegisHomePage() {
         <section id="model" className="relative py-24 sm:py-32 px-6">
           <div className="max-w-[1200px] mx-auto">
             <div className="max-w-[560px] mb-16">
-              <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/15 mb-4">
+              <p aria-hidden="true" className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/60 mb-4">
                 Operating Model
               </p>
               <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
                 Observe. Understand. Decide. Execute.
               </h2>
-              <p className="text-[16px] leading-[1.8] text-white/28">
+              <p className="text-[16px] leading-[1.8] text-white/65">
                 The same decision framework whether you're triaging a breach, managing an SLA, or
                 validating a model. One loop. Every domain.
               </p>
@@ -549,15 +549,15 @@ export default function AegisHomePage() {
               {operatingModel.map((step, i) => (
                 <div key={step.phase} className="bg-[#080a10] p-8">
                   <div className="flex items-center gap-3 mb-5">
-                    <span className="text-[36px] font-extrabold text-white/[0.04] font-mono leading-none">
+                    <span aria-hidden="true" className="text-[36px] font-extrabold text-white/[0.55] font-mono leading-none">
                       {String(i + 1).padStart(2, '0')}
                     </span>
                   </div>
-                  <step.icon size={20} className="text-white/12 mb-4" />
+                  <step.icon size={20} className="text-white/60 mb-4" />
                   <h3 className="text-[13px] font-bold text-white uppercase tracking-[0.1em] mb-3">
                     {step.phase}
                   </h3>
-                  <p className="text-[12px] leading-[1.85] text-white/28">{step.desc}</p>
+                  <p className="text-[12px] leading-[1.85] text-white/65">{step.desc}</p>
                 </div>
               ))}
             </div>
@@ -568,7 +568,7 @@ export default function AegisHomePage() {
       <Reveal>
         <section className="relative py-24 sm:py-32 px-6">
           <div className="max-w-[1200px] mx-auto">
-            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/15 mb-6">
+            <p aria-hidden="true" className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/60 mb-6">
               Why One Platform
             </p>
             <div
@@ -598,9 +598,9 @@ export default function AegisHomePage() {
                 },
               ].map((item) => (
                 <div key={item.title} className="bg-[#080a10] p-8">
-                  <item.icon size={20} className="text-white/10 mb-5" />
+                  <item.icon size={20} className="text-white/60 mb-5" />
                   <h3 className="text-[14px] font-bold text-white mb-3">{item.title}</h3>
-                  <p className="text-[12px] leading-[1.85] text-white/28">{item.desc}</p>
+                  <p className="text-[12px] leading-[1.85] text-white/65">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -612,13 +612,13 @@ export default function AegisHomePage() {
       <Reveal>
         <section className="py-24 sm:py-32 px-6 max-w-[1140px] mx-auto">
           <div className="text-center mb-16">
-            <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3 text-red-400/50">
+            <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3 text-red-400/85">
               Platform Walkthrough
             </p>
             <h2 className="text-[clamp(1.6rem,3vw,2.1rem)] font-bold text-white mb-3 tracking-tight">
               How Aegis works in practice
             </h2>
-            <p className="text-[14px] max-w-xl mx-auto text-white/25">
+            <p className="text-[14px] max-w-xl mx-auto text-white/65">
               From deployment to full command in under an hour. Four workspaces, one unified
               console.
             </p>
@@ -667,11 +667,11 @@ export default function AegisHomePage() {
                   <div className="flex-1 pb-10 border-b border-white/[0.03]">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-[16px] font-semibold text-white">{item.title}</h3>
-                      <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-red-500/8 text-red-400/60 border border-red-500/10">
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-red-500/8 text-red-400/90 border border-red-500/10">
                         {item.tag}
                       </span>
                     </div>
-                    <p className="text-[13.5px] leading-relaxed text-white/35">{item.body}</p>
+                    <p className="text-[13.5px] leading-relaxed text-white/65">{item.body}</p>
                   </div>
                 </div>
               ))}
@@ -686,7 +686,7 @@ export default function AegisHomePage() {
             <h2 className="text-[clamp(1.5rem,3.5vw,2.25rem)] font-bold text-white mb-4 tracking-tight">
               Total command. Zero compromise.
             </h2>
-            <p className="text-[16px] text-white/28 mb-10">
+            <p className="text-[16px] text-white/65 mb-10">
               See what unified defense, operations, and intelligence looks like in one console.
             </p>
             <div className="flex justify-center flex-wrap gap-3">
@@ -697,7 +697,7 @@ export default function AegisHomePage() {
               </Link>
               <button
                 onClick={() => setDemoOpen(true)}
-                className="text-[14px] font-medium text-white/35 border border-white/[0.06] hover:border-white/[0.12] rounded-lg px-8 py-3.5 transition-all"
+                className="text-[14px] font-medium text-white/65 border border-white/[0.06] hover:border-white/[0.12] rounded-lg px-8 py-3.5 transition-all"
               >
                 Schedule a Demo
               </button>
@@ -720,11 +720,11 @@ export default function AegisHomePage() {
       <footer className="border-t border-white/[0.04] py-12 px-6 max-w-[1200px] mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2.5">
-            <Shield size={12} className="text-white/15" />
-            <span className="text-[12px] font-semibold text-white/25">PARAGON</span>
-            <span className="text-[10px] text-white/15 font-mono">by SZL Holdings</span>
+            <Shield size={12} className="text-white/60" />
+            <span className="text-[12px] font-semibold text-white/85">PARAGON</span>
+            <span aria-hidden="true" className="text-[10px] text-white/60 font-mono">by SZL Holdings</span>
           </div>
-          <p className="text-[10px] text-white/15">{copyrightLine()}</p>
+          <p className="text-[10px] text-white/60">{copyrightLine()}</p>
         </div>
       </footer>
 

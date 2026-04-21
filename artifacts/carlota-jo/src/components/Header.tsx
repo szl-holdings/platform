@@ -45,8 +45,8 @@ export default function Header() {
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="fixed top-0 inset-inline-0 z-50 transition-all duration-300"
       style={{
-        background: scrolled ? 'rgba(249,247,243,0.97)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        background: scrolled ? 'rgba(249,247,243,0.97)' : 'rgba(12,10,8,0.82)',
+        backdropFilter: 'blur(12px)',
         borderBottom: scrolled ? '1px solid rgba(154,125,82,0.12)' : 'none',
       }}
       data-scrolled={scrolled}
@@ -65,7 +65,7 @@ export default function Header() {
             </span>
             <span
               className="text-[9px] tracking-[0.3em] uppercase font-medium mt-0.5 transition-colors duration-300"
-              style={{ color: 'var(--color-gold)', opacity: scrolled ? 0.7 : 0.5 }}
+              style={{ color: scrolled ? 'var(--color-stone-600)' : 'rgba(245,240,232,0.8)' }}
             >
               {t('footer.consulting')}
             </span>
@@ -85,7 +85,7 @@ export default function Header() {
                     : 'var(--color-ink-500)'
                   : location === link.href
                     ? '#f5f0e8'
-                    : 'rgba(245,240,232,0.5)',
+                    : 'rgba(245,240,232,0.8)',
                 textDecoration: 'none',
               }}
               onMouseEnter={(e) => {
@@ -100,7 +100,7 @@ export default function Header() {
                     : 'var(--color-ink-500)'
                   : location === link.href
                     ? '#f5f0e8'
-                    : 'rgba(245,240,232,0.5)';
+                    : 'rgba(245,240,232,0.8)';
               }}
             >
               {link.label}
@@ -117,12 +117,12 @@ export default function Header() {
           <Link
             href="/contact"
             className="px-5 py-2 text-[12px] font-medium tracking-[0.08em] transition-colors duration-200"
-            style={{ color: 'var(--color-cream)', background: 'var(--color-gold)' }}
+            style={{ color: 'var(--color-ink-900)', background: 'var(--color-gold-light)' }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = 'var(--color-gold-light)';
+              (e.currentTarget as HTMLElement).style.opacity = '0.85';
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = 'var(--color-gold)';
+              (e.currentTarget as HTMLElement).style.opacity = '1';
             }}
           >
             {t('nav.requestConsultation')}
@@ -131,7 +131,7 @@ export default function Header() {
 
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden transition-colors"
+          className="md:hidden transition-colors p-2 -mr-2"
           style={{ color: 'var(--color-ink-500)' }}
           aria-label={mobileOpen ? t('nav.closeMenu') : t('nav.openMenu')}
         >
@@ -182,7 +182,7 @@ export default function Header() {
                 href="/contact"
                 onClick={() => setMobileOpen(false)}
                 className="mt-1 px-5 py-3 text-[13px] font-medium text-center transition-colors"
-                style={{ color: 'var(--color-cream)', background: 'var(--color-gold)' }}
+                style={{ color: 'var(--color-ink-900)', background: 'var(--color-gold-light)' }}
               >
                 {t('nav.requestConsultation')}
               </Link>

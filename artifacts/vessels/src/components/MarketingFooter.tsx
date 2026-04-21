@@ -32,13 +32,13 @@ export function MarketingFooter() {
               </div>
               <span className="font-bold text-[14px] text-sky-50">Vessels</span>
             </div>
-            <p className="text-sky-300/30 text-[13px] leading-relaxed max-w-xs mb-3">
+            <p className="text-sky-300/80 text-[13px] leading-relaxed max-w-xs mb-3">
               {aboutSzlParagraph()}
             </p>
           </div>
 
           <div>
-            <h4 className="text-[10px] font-semibold text-sky-400/40 uppercase tracking-[0.12em] mb-4">
+            <h4 className="text-[10px] font-semibold text-sky-400/80 uppercase tracking-[0.12em] mb-4">
               Product
             </h4>
             <ul className="space-y-2.5">
@@ -46,7 +46,7 @@ export function MarketingFooter() {
                 <li key={l.label}>
                   <Link
                     href={l.href}
-                    className="text-sky-300/30 text-[13px] hover:text-sky-200 transition-colors"
+                    className="text-sky-300/80 text-[13px] hover:text-sky-200 transition-colors"
                   >
                     {l.label}
                   </Link>
@@ -56,7 +56,7 @@ export function MarketingFooter() {
           </div>
 
           <div>
-            <h4 className="text-[10px] font-semibold text-sky-400/40 uppercase tracking-[0.12em] mb-4">
+            <h4 className="text-[10px] font-semibold text-sky-400/80 uppercase tracking-[0.12em] mb-4">
               Ecosystem
             </h4>
             <ul className="space-y-2.5">
@@ -64,7 +64,7 @@ export function MarketingFooter() {
                 <li key={l.label}>
                   <a
                     href={l.href}
-                    className="text-sky-300/30 text-[13px] hover:text-sky-200 transition-colors"
+                    className="text-sky-300/80 text-[13px] hover:text-sky-200 transition-colors"
                   >
                     {l.label}
                   </a>
@@ -75,13 +75,13 @@ export function MarketingFooter() {
         </div>
 
         <div className="pt-6 border-t border-sky-500/10 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-sky-400/20 text-[12px]">{copyrightLine()}</p>
+          <p className="text-sky-400/90 text-[12px]">{copyrightLine()}</p>
           <div className="flex items-center gap-4">
             <a
               href="https://x.com/szlholdings"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors"
+              className="text-sky-400/90 text-[12px] hover:text-sky-300/90 transition-colors"
             >
               X
             </a>
@@ -89,7 +89,7 @@ export function MarketingFooter() {
               href="https://linkedin.com/company/szlholdings"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors"
+              className="text-sky-400/90 text-[12px] hover:text-sky-300/90 transition-colors"
             >
               LinkedIn
             </a>
@@ -97,7 +97,7 @@ export function MarketingFooter() {
               href="https://medium.com/@stephen_38454"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors"
+              className="text-sky-400/90 text-[12px] hover:text-sky-300/90 transition-colors"
             >
               Medium
             </a>
@@ -105,7 +105,7 @@ export function MarketingFooter() {
               <Link
                 key={l.label}
                 href={l.href}
-                className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors"
+                className="text-sky-400/90 text-[12px] hover:text-sky-300/90 transition-colors"
               >
                 {l.label}
               </Link>

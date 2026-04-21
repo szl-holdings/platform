@@ -54,7 +54,7 @@ export default function Footer() {
               </h3>
               <p
                 className="text-[9px] tracking-[0.3em] uppercase font-medium mt-1"
-                style={{ color: 'var(--color-gold)', opacity: 0.7 }}
+                style={{ color: 'var(--color-stone-600)' }}
               >
                 {t('footer.consulting')}
               </p>
@@ -71,12 +71,12 @@ export default function Footer() {
               <Link
                 href="/contact"
                 className="inline-block px-5 py-2.5 text-[12px] font-medium tracking-[0.08em] transition-colors"
-                style={{ color: 'var(--color-cream)', background: 'var(--color-gold)' }}
+                style={{ color: 'var(--color-ink-900)', background: 'var(--color-gold-light)' }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'var(--color-gold-light)';
+                  (e.currentTarget as HTMLElement).style.opacity = '0.85';
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'var(--color-gold)';
+                  (e.currentTarget as HTMLElement).style.opacity = '1';
                 }}
               >
                 {t('nav.requestConsultation')}
@@ -87,7 +87,7 @@ export default function Footer() {
           <div className="md:col-span-2">
             <h4
               className="text-[10px] font-medium tracking-[0.22em] uppercase mb-4"
-              style={{ color: 'var(--color-stone-400)' }}
+              style={{ color: 'var(--color-stone-600)' }}
             >
               {t('nav.services')}
             </h4>
@@ -115,7 +115,7 @@ export default function Footer() {
           <div className="md:col-span-2">
             <h4
               className="text-[10px] font-medium tracking-[0.22em] uppercase mb-4"
-              style={{ color: 'var(--color-stone-400)' }}
+              style={{ color: 'var(--color-stone-600)' }}
             >
               About
             </h4>
@@ -143,7 +143,7 @@ export default function Footer() {
           <div className="md:col-span-2">
             <h4
               className="text-[10px] font-medium tracking-[0.22em] uppercase mb-4"
-              style={{ color: 'var(--color-stone-400)' }}
+              style={{ color: 'var(--color-stone-600)' }}
             >
               Ecosystem
             </h4>
@@ -171,7 +171,7 @@ export default function Footer() {
           <div className="md:col-span-2">
             <h4
               className="text-[10px] font-medium tracking-[0.22em] uppercase mb-4"
-              style={{ color: 'var(--color-stone-400)' }}
+              style={{ color: 'var(--color-stone-600)' }}
             >
               {t('footer.contact')}
             </h4>
@@ -185,12 +185,12 @@ export default function Footer() {
                 <Link
                   href="/contact"
                   className="text-[12px] font-light transition-colors"
-                  style={{ color: 'var(--color-gold)', opacity: 0.8, textDecoration: 'none' }}
+                  style={{ color: 'var(--color-stone-600)', textDecoration: 'none' }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.opacity = '1';
+                    (e.currentTarget as HTMLElement).style.color = 'var(--color-ink-900)';
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.opacity = '0.8';
+                    (e.currentTarget as HTMLElement).style.color = 'var(--color-stone-600)';
                   }}
                 >
                   {t('footer.requestConsultation')}
@@ -204,7 +204,7 @@ export default function Footer() {
           className="mt-12 pt-7 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
           style={{ borderColor: 'var(--color-stone-200)' }}
         >
-          <p className="text-[11px] tracking-wider" style={{ color: 'var(--color-stone-400)' }}>
+          <p className="text-[11px] tracking-wider" style={{ color: 'var(--color-stone-600)' }}>
             {subsidiaryCopyrightLine(getProduct('carlota-jo')?.name ?? 'Carlota Jo')}
           </p>
           <div className="flex items-center gap-6">
@@ -213,12 +213,12 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               className="text-[11px] tracking-wider transition-colors"
-              style={{ color: 'var(--color-stone-400)', textDecoration: 'none' }}
+              style={{ color: 'var(--color-stone-600)', textDecoration: 'none' }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.color = 'var(--color-ink-600)';
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = 'var(--color-stone-400)';
+                (e.currentTarget as HTMLElement).style.color = 'var(--color-stone-600)';
               }}
             >
               X
@@ -228,12 +228,12 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               className="text-[11px] tracking-wider transition-colors"
-              style={{ color: 'var(--color-stone-400)', textDecoration: 'none' }}
+              style={{ color: 'var(--color-stone-600)', textDecoration: 'none' }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.color = 'var(--color-ink-600)';
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = 'var(--color-stone-400)';
+                (e.currentTarget as HTMLElement).style.color = 'var(--color-stone-600)';
               }}
             >
               LinkedIn
@@ -243,12 +243,12 @@ export default function Footer() {
                 key={link.label}
                 href={link.href}
                 className="text-[11px] tracking-wider transition-colors"
-                style={{ color: 'var(--color-stone-400)', textDecoration: 'none' }}
+                style={{ color: 'var(--color-stone-600)', textDecoration: 'none' }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.color = 'var(--color-ink-600)';
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = 'var(--color-stone-400)';
+                  (e.currentTarget as HTMLElement).style.color = 'var(--color-stone-600)';
                 }}
               >
                 {link.label}
