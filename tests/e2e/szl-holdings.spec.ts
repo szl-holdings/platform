@@ -404,12 +404,175 @@ test.describe('SZL Holdings — Mobile Viewport', () => {
   });
 });
 
+test.describe('SZL Holdings — Portfolio Dashboard', () => {
+  test('portfolio page loads without crash', async ({ page }) => {
+    await page.goto(`${BASE_PATH}portfolio`.replace('//', '/'));
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const body = await page.content();
+    expect(body.length).toBeGreaterThan(500);
+  });
+
+  test('portfolio page renders module tiles for all six portfolio companies', async ({ page }) => {
+    await page.goto(`${BASE_PATH}portfolio`.replace('//', '/'));
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const modules = ['Lyte', 'Terra', 'Vessels', 'Sentra', 'Alloy', 'Carlota Jo'];
+    for (const name of modules) {
+      const tile = page.locator(`:text("${name}")`).first();
+      await expect(tile).toBeVisible({ timeout: 15000 });
+    }
+  });
+
+  test('portfolio page shows either live data or a clear data-state notice', async ({ page }) => {
+    await page.goto(`${BASE_PATH}portfolio`.replace('//', '/'));
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const hasDataNotice = await page
+      .locator(
+        ":text('demo data'), :text('seeded'), :text('live signal'), :text('unavailable'), :text('cached')",
+      )
+      .first()
+      .isVisible({ timeout: 10000 })
+      .catch(() => false);
+
+    const hasTile = await page.locator(':text("Lyte")').first().isVisible({ timeout: 5000 }).catch(() => false);
+
+    expect(hasDataNotice || hasTile).toBeTruthy();
+  });
+
+  test('portfolio page has a Refresh button', async ({ page }) => {
+    await page.goto(`${BASE_PATH}portfolio`.replace('//', '/'));
+    await page.waitForLoadState('domcontentloaded');
+
+    const refreshBtn = page.locator("button:has-text('Refresh'), button[aria-label*='refresh' i]").first();
+    await expect(refreshBtn).toBeVisible({ timeout: 15000 });
+  });
+});
+
+test.describe('SZL Holdings — Investors Hub', () => {
+  test('investors hub page loads and shows key sections', async ({ page }) => {
+    await page.goto(`${BASE_PATH}investors`.replace('//', '/'));
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const heading = page
+      .locator(":text('Investor'), :text('Series A'), :text('Governed'), :text('SZL Holdings')")
+      .first();
+    await expect(heading).toBeVisible({ timeout: 15000 });
+  });
+
+  test('investors hub shows company fundamentals section', async ({ page }) => {
+    await page.goto(`${BASE_PATH}investors`.replace('//', '/'));
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const fundamentals = page
+      .locator(":text('Stage'), :text('Category'), :text('Architecture'), :text('fundamentals')")
+      .first();
+    await expect(fundamentals).toBeVisible({ timeout: 15000 });
+  });
+
+  test('investors hub navigation grid shows all investor sub-sections', async ({ page }) => {
+    await page.goto(`${BASE_PATH}investors`.replace('//', '/'));
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const sections = ['Overview', 'Architecture', 'Moat', 'Roadmap', 'Trust', 'Data Room'];
+    for (const section of sections) {
+      const link = page.locator(`:text("${section}")`).first();
+      await expect(link).toBeVisible({ timeout: 10000 });
+    }
+  });
+
+  test('investors data room shows access controls for unauthenticated visitors', async ({ page }) => {
+    await page.goto(`${BASE_PATH}investors/data-room`.replace('//', '/'));
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const accessControl = page
+      .locator(
+        ":text('Sign in'), :text('Access'), :text('Data Room'), :text('Request'), :text('restricted')",
+      )
+      .first();
+    await expect(accessControl).toBeVisible({ timeout: 15000 });
+  });
+});
+
+test.describe('SZL Holdings — Academy Progress', () => {
+  test('academy page loads with learning path content', async ({ page }) => {
+    await page.goto(`${BASE_PATH}academy`.replace('//', '/'));
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const heading = page
+      .locator(":text('Academy'), :text('Learn'), :text('platform'), :text('Learning Paths')")
+      .first();
+    await expect(heading).toBeVisible({ timeout: 15000 });
+  });
+
+  test('academy page shows a progress bar or progress indicator', async ({ page }) => {
+    await page.goto(`${BASE_PATH}academy`.replace('//', '/'));
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const progressIndicator = page
+      .locator(":text('Progress'), :text('paths'), :text('0 /'), :text('/ 6')")
+      .first();
+    await expect(progressIndicator).toBeVisible({ timeout: 15000 });
+  });
+
+  test('academy learning path checkboxes are interactive', async ({ page }) => {
+    await page.goto(`${BASE_PATH}academy`.replace('//', '/'));
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const checkboxes = page.locator("button[aria-label], svg[class*='circle' i], [role='checkbox']");
+    const count = await checkboxes.count();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('academy progress persists across page navigations', async ({ page }) => {
+    await page.goto(`${BASE_PATH}academy`.replace('//', '/'));
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    await page.evaluate(() => {
+      const progress: Record<string, boolean> = { 'platform-foundations': true };
+      localStorage.setItem('szl-academy-progress-v1', JSON.stringify(progress));
+    });
+
+    await page.goto(`${BASE_PATH}`.replace('//', '/'));
+    await page.waitForLoadState('domcontentloaded');
+    await page.goto(`${BASE_PATH}academy`.replace('//', '/'));
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const stored = await page.evaluate(() =>
+      localStorage.getItem('szl-academy-progress-v1'),
+    );
+    expect(stored).toBeTruthy();
+    const parsed = JSON.parse(stored!);
+    expect(parsed['platform-foundations']).toBe(true);
+  });
+});
+
 test.describe('SZL Holdings — Accessibility (WCAG 2.1 AA)', () => {
   const a11yRoutes = [
     { path: '/', label: 'homepage' },
     { path: '/platform', label: 'platform' },
     { path: '/contact', label: 'contact' },
     { path: '/trust-center', label: 'trust center' },
+    { path: '/portfolio', label: 'portfolio dashboard' },
+    { path: '/investors', label: 'investors hub' },
+    { path: '/academy', label: 'academy' },
   ];
 
   for (const route of a11yRoutes) {

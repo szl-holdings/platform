@@ -274,6 +274,9 @@ export default function PilotPrismCounselPage() {
                   <Link href="/contact" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/90">
                     Request pilot access <ArrowRight className="h-4 w-4" />
                   </Link>
+                  <a href="/counsel/" className="inline-flex items-center gap-2 rounded-xl border border-[#7c6fcd]/25 bg-[#7c6fcd]/08 px-5 py-2.5 text-sm font-semibold text-[#a89fdf]/90 transition hover:border-[#7c6fcd]/40 hover:bg-[#7c6fcd]/12">
+                    Open live Counsel app <ArrowRight className="h-4 w-4" />
+                  </a>
                   <Link href="/solutions/prism-counsel" className="inline-flex items-center gap-2 rounded-xl border border-white/12 px-5 py-2.5 text-sm font-semibold text-white/75 transition hover:border-white/25 hover:bg-white/5">
                     Full product overview
                   </Link>

@@ -270,8 +270,11 @@ export default function PilotTerraPage() {
                   <Link href="/contact" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/90">
                     Request pilot access <ArrowRight className="h-4 w-4" />
                   </Link>
+                  <a href="/terra/" className="inline-flex items-center gap-2 rounded-xl border border-[#c8953c]/25 bg-[#c8953c]/08 px-5 py-2.5 text-sm font-semibold text-[#c8953c]/90 transition hover:border-[#c8953c]/40 hover:bg-[#c8953c]/12">
+                    Open live Terra app <ArrowRight className="h-4 w-4" />
+                  </a>
                   <Link href="/solutions/terra" className="inline-flex items-center gap-2 rounded-xl border border-white/12 px-5 py-2.5 text-sm font-semibold text-white/75 transition hover:border-white/25 hover:bg-white/5">
-                    Terra product overview
+                    Product overview
                   </Link>
                 </div>
               </div>

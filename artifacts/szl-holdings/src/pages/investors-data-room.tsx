@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { type ElementType, useState, useEffect, useCallback, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAuth } from "@szl-holdings/replit-auth-web";
@@ -53,7 +53,7 @@ interface DocMeta {
   id: string;
   label: string;
   subtitle: string;
-  icon: React.ElementType;
+  icon: ElementType;
   color: string;
   category: string;
 }

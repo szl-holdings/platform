@@ -270,8 +270,11 @@ export default function PilotVesselsPage() {
                   <Link href="/contact" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/90">
                     Request pilot access <ArrowRight className="h-4 w-4" />
                   </Link>
+                  <a href="/vessels/" className="inline-flex items-center gap-2 rounded-xl border border-[#3b82f6]/25 bg-[#3b82f6]/08 px-5 py-2.5 text-sm font-semibold text-[#3b82f6]/90 transition hover:border-[#3b82f6]/40 hover:bg-[#3b82f6]/12">
+                    Open live Vessels app <ArrowRight className="h-4 w-4" />
+                  </a>
                   <Link href="/solutions/vessels" className="inline-flex items-center gap-2 rounded-xl border border-white/12 px-5 py-2.5 text-sm font-semibold text-white/75 transition hover:border-white/25 hover:bg-white/5">
-                    Vessels product overview
+                    Product overview
                   </Link>
                 </div>
               </div>

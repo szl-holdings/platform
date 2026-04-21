@@ -271,6 +271,9 @@ export default function PilotAegisPage() {
                   <Link href="/contact" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/90">
                     Request pilot access <ArrowRight className="h-4 w-4" />
                   </Link>
+                  <a href="/sentra/" className="inline-flex items-center gap-2 rounded-xl border border-[#ef4444]/25 bg-[#ef4444]/08 px-5 py-2.5 text-sm font-semibold text-[#f87171]/90 transition hover:border-[#ef4444]/40 hover:bg-[#ef4444]/12">
+                    Open live Sentra app <ArrowRight className="h-4 w-4" />
+                  </a>
                   <Link href="/solutions/aegis" className="inline-flex items-center gap-2 rounded-xl border border-white/12 px-5 py-2.5 text-sm font-semibold text-white/75 transition hover:border-white/25 hover:bg-white/5">
                     Aegis product overview
                   </Link>
