@@ -20,6 +20,7 @@ import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
+import { DesignSystemProvider } from "@szl-holdings/design-system";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
@@ -321,6 +322,7 @@ const TrustStatusPage = lazy(() => import("@/pages/trust-status"));
 const TechnicalProofPage = lazy(() => import("@/pages/technical-proof"));
 const LPSentimentPulse = lazy(() => import("@/pages/lp-sentiment-pulse"));
 const CommandNewsletterPage = lazy(() => import("@/pages/command-newsletter"));
+const AeepCommandPage = lazy(() => import("@/pages/aeep-command"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -485,6 +487,7 @@ function DemoPersonaModeBridgeWired() {
 
 function App() {
   return (
+    <DesignSystemProvider defaultDensity="comfortable" defaultScreenMode="executive">
     <AppModeProvider>
     <AnalyticsProvider appName="szl-holdings">
     <PrismBusProvider domain="szl-holdings">
@@ -1537,6 +1540,14 @@ function App() {
               <Suspense fallback={<PageLoader />}><CommandNewsletterPage /></Suspense>
             </Route>
 
+            {/* AEEP — Governed-Intelligence Command (design-system shell) */}
+            <Route path="/aeep/:section*">
+              <Suspense fallback={<PageLoader />}><AeepCommandPage /></Suspense>
+            </Route>
+            <Route path="/aeep">
+              <Suspense fallback={<PageLoader />}><AeepCommandPage /></Suspense>
+            </Route>
+
             {/* Governed Intelligence — Hero Proof Surface */}
             <Route path="/governed-cockpit">
               <Suspense fallback={<PageLoader />}><GovernedCockpitPage /></Suspense>
@@ -1562,6 +1573,7 @@ function App() {
     </PrismBusProvider>
     </AnalyticsProvider>
     </AppModeProvider>
+    </DesignSystemProvider>
   );
 }
 
