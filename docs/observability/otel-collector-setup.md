@@ -6,6 +6,18 @@ console exporter in development and are dropped in production — to send them t
 a hosted observability platform, set two Vite environment variables and
 restart the workflow.
 
+> **Browser-secret warning.** `VITE_*` variables are inlined into the JS bundle
+> at build time, which means **anything you put into `VITE_OTEL_HEADERS` is
+> publicly visible to every browser that loads the Command app**. This is fine
+> for vendor tokens that are *designed* to be public ingest credentials
+> (Honeycomb classic ingest keys, Grafana Cloud OTLP tokens scoped to
+> `metrics:write,traces:write`), and **not safe** for full-power vendor API
+> keys (e.g. a Datadog `DD-API-KEY` that can also read/delete data). For those
+> vendors run a self-hosted OpenTelemetry Collector and point
+> `VITE_OTEL_ENDPOINT` at the collector — keep the privileged credential on
+> the collector, not in the browser. The collector recipe at the bottom of
+> this doc covers the exact relay shape.
+
 ## Environment variables
 
 | Var | Purpose | Required? |
@@ -42,17 +54,35 @@ Where `<BASE64(...)>` is the base64-encoded `instance_id:api_token` pair from
 Grafana Cloud → Connections → OpenTelemetry. Region examples: `prod-eu-west-0`,
 `prod-us-central-0`.
 
-### Datadog (paid, enterprise)
+### Datadog (paid, enterprise) — **server-side relay only**
 
-```env
-VITE_OTEL_ENDPOINT=https://trace.agent.<site>/api/v0.2/traces
-VITE_OTEL_HEADERS=DD-API-KEY=<YOUR_DD_API_KEY>
-```
+A Datadog `DD-API-KEY` is a privileged credential (it grants read + delete on
+your account, not just write). Do **not** put it in `VITE_OTEL_HEADERS` —
+every browser would download a copy. Instead:
 
-`<site>` is `datadoghq.com`, `datadoghq.eu`, `us3.datadoghq.com`, etc.
-Datadog also accepts the standard OTLP HTTP intake at
-`https://<site>/api/v2/otlp/v1/traces` with the same `DD-API-KEY` header — pick
-whichever matches your account.
+1. Run a self-hosted OpenTelemetry Collector (recipe below) with the Datadog
+   exporter holding `DD-API-KEY` server-side:
+   ```yaml
+   exporters:
+     datadog:
+       api:
+         site: datadoghq.com
+         key: ${env:DD_API_KEY}
+   service:
+     pipelines:
+       traces:
+         receivers: [otlp]
+         exporters: [datadog]
+   ```
+2. Point the browser at the collector:
+   ```env
+   VITE_OTEL_ENDPOINT=https://otel-collector.example.com
+   # VITE_OTEL_HEADERS left unset
+   ```
+
+Datadog publishes a separate "OTLP HTTP intake" at
+`https://<site>/api/v2/otlp/v1/traces` — it still requires `DD-API-KEY`, so
+the same warning applies. Use the collector relay.
 
 ### Self-hosted OpenTelemetry Collector
 

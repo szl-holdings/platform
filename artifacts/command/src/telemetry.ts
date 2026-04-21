@@ -60,7 +60,20 @@ export function initTelemetry(opts: TelemetryInitOptions = {}): Tracer {
   const processors: SpanProcessor[] = [];
   if (endpoint) {
     const trimmed = endpoint.replace(/\/+$/, '');
-    const url = /\/v1\/traces$/.test(trimmed) ? trimmed : trimmed + '/v1/traces';
+    // Append `/v1/traces` only when the operator gave us a base URL (no path
+    // beyond the host). If the URL already includes any path segment (e.g.
+    // Datadog's `/api/v0.2/traces`, Grafana's `/otlp/v1/traces`, or a
+    // collector route prefix), respect it verbatim — appending blindly would
+    // produce a 404 like `/api/v0.2/traces/v1/traces`.
+    let url: string;
+    try {
+      const parsed = new URL(trimmed);
+      const hasPath = parsed.pathname && parsed.pathname !== '/';
+      url = hasPath ? trimmed : trimmed + '/v1/traces';
+    } catch {
+      // Not a parseable URL — fall back to the simple suffix check.
+      url = /\/v1\/traces$/.test(trimmed) ? trimmed : trimmed + '/v1/traces';
+    }
     const exporter = new OTLPTraceExporter({
       url,
       ...(Object.keys(headers).length > 0 ? { headers } : {}),
