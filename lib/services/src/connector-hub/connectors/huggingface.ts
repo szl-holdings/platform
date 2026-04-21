@@ -205,7 +205,6 @@ export class HuggingFaceConnector extends ToolConnector {
           Array.isArray(params['texts']) ? params['texts'].map(String) : [String(params['texts'])],
           { ...(params['model'] ? { model: String(params['model']) } : {}) },
         );
-        );
       case 'get_health':
         return adapter.getHealthStatus();
       default:

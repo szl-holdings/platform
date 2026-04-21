@@ -5,7 +5,7 @@ import {
   pcGcObligationsTable,
   pcGcProofChainEntriesTable,
 } from '@szl-holdings/db';
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -1278,6 +1278,12 @@ router.get('/counsel/matters', async (req: Request, res: Response) => {
   try {
     const orgId = requireOrgId(req, res);
     if (!orgId) return;
+    const existingBefore = await db
+      .select({ id: pcGcMattersTable.id })
+      .from(pcGcMattersTable)
+      .where(eq(pcGcMattersTable.orgId, orgId))
+      .limit(1);
+    const wasEmpty = existingBefore.length === 0;
     await ensureSeeded(orgId, req);
     const ids = await db
       .select({ id: pcGcMattersTable.id })
@@ -1288,7 +1294,7 @@ router.get('/counsel/matters', async (req: Request, res: Response) => {
       const m = await loadMatter(id, orgId);
       if (m) matters.push(m);
     }
-    sendSuccess(res, { matters });
+    sendSuccess(res, { matters, provenance: wasEmpty ? 'seeded' : 'live' });
   } catch (err) {
     handleRouteError(res, err, 'GET /counsel/matters');
   }
@@ -1312,33 +1318,40 @@ const partySchema = z.object({
 const matterCreateSchema = z.object({
   id: z.string().min(1).optional(),
   name: z.string().min(1),
-  clientName: z.string().min(1),
+  clientName: z.string().optional().default(''),
   matterNumber: z.string().min(1),
-  type: z.enum([
-    'litigation',
-    'transaction',
-    'regulatory',
-    'employment',
-    'ip',
-    'real-estate',
-    'contract',
-  ]),
-  status: z.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']),
-  privilegeLevel: z.enum(['public', 'confidential', 'privileged', 'restricted']),
-  pressureScore: z.number().int().min(0).max(100),
-  complexityScore: z.number().int().min(0).max(100),
-  openedDate: z.string().min(1),
+  type: z
+    .enum(['litigation', 'transaction', 'regulatory', 'employment', 'ip', 'real-estate', 'contract'])
+    .optional()
+    .default('litigation'),
+  status: z.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']).optional().default('active'),
+  privilegeLevel: z
+    .enum(['public', 'confidential', 'privileged', 'restricted'])
+    .optional()
+    .default('confidential'),
+  pressureScore: z.number().int().min(0).max(100).optional().default(50),
+  complexityScore: z.number().int().min(0).max(100).optional().default(50),
+  openedDate: z.string().min(1).optional(),
   trialDate: z.string().nullable().optional(),
   closingDate: z.string().nullable().optional(),
-  nextDeadline: z.string().min(1),
-  nextDeadlineLabel: z.string().min(1),
+  nextDeadline: z.string().min(1).optional(),
+  nextDeadlineLabel: z.string().min(1).optional().default('Upcoming Deadline'),
   leadCounsel: z.string().min(1),
   jurisdiction: z.string().min(1),
-  estimatedExposure: z.number().nullable().optional(),
+  estimatedExposure: z
+    .union([
+      z.number().refine((n) => isFinite(n), { message: 'estimatedExposure must be a finite number' }),
+      z
+        .string()
+        .transform((v) => (v === '' ? null : Number(v)))
+        .refine((n) => n === null || isFinite(n), { message: 'estimatedExposure must be a finite number' }),
+    ])
+    .nullable()
+    .optional(),
   summary: z.string().min(1),
-  tags: z.array(z.string()),
-  wall: wallSchema,
-  parties: z.array(partySchema),
+  tags: z.array(z.string()).optional().default([]),
+  wall: wallSchema.optional(),
+  parties: z.array(partySchema).optional().default([]),
 });
 const matterPatchSchema = matterCreateSchema.partial().omit({ id: true });
 
@@ -1368,29 +1381,39 @@ router.post(
         sendBadRequest(res, 'Matter with this id already exists');
         return;
       }
+      const todayStr = new Date().toISOString().split('T')[0] as string;
+      const thirtyDaysStr = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0] as string;
+      const defaultWall = {
+        enabled: false,
+        reason: '',
+        blockedRoles: [],
+        approvedUsers: [],
+        createdAt: '',
+        createdBy: '',
+      };
       await db.insert(pcGcMattersTable).values({
         id,
         orgId,
         name: body.name,
-        clientName: body.clientName,
+        clientName: body.clientName ?? '',
         matterNumber: body.matterNumber,
-        type: body.type,
-        status: body.status,
-        privilegeLevel: body.privilegeLevel,
-        pressureScore: body.pressureScore,
-        complexityScore: body.complexityScore,
-        openedDate: body.openedDate,
+        type: body.type ?? 'litigation',
+        status: body.status ?? 'active',
+        privilegeLevel: body.privilegeLevel ?? 'confidential',
+        pressureScore: body.pressureScore ?? 50,
+        complexityScore: body.complexityScore ?? 50,
+        openedDate: body.openedDate ?? todayStr,
         trialDate: body.trialDate ?? null,
         closingDate: body.closingDate ?? null,
-        nextDeadline: body.nextDeadline,
-        nextDeadlineLabel: body.nextDeadlineLabel,
+        nextDeadline: body.nextDeadline ?? thirtyDaysStr,
+        nextDeadlineLabel: body.nextDeadlineLabel ?? 'Upcoming Deadline',
         leadCounsel: body.leadCounsel,
         jurisdiction: body.jurisdiction,
         estimatedExposure: body.estimatedExposure != null ? String(body.estimatedExposure) : null,
         summary: body.summary,
-        tags: body.tags,
-        wall: body.wall,
-        parties: body.parties,
+        tags: body.tags ?? [],
+        wall: body.wall ?? defaultWall,
+        parties: body.parties ?? [],
       } as never);
       const m = await loadMatter(id, orgId);
       sendSuccess(res, m);
@@ -1482,6 +1505,53 @@ router.delete(
     }
   },
 );
+
+router.get('/counsel/obligations', async (req: Request, res: Response) => {
+  try {
+    const orgId = requireOrgId(req, res);
+    if (!orgId) return;
+    const existingBefore = await db
+      .select({ id: pcGcMattersTable.id })
+      .from(pcGcMattersTable)
+      .where(eq(pcGcMattersTable.orgId, orgId));
+    const wasEmpty = existingBefore.length === 0;
+    await ensureSeeded(orgId, req);
+    const matterRows = await db
+      .select({ id: pcGcMattersTable.id })
+      .from(pcGcMattersTable)
+      .where(eq(pcGcMattersTable.orgId, orgId));
+    const matterIds = matterRows.map((r) => r.id);
+    if (matterIds.length === 0) {
+      sendSuccess(res, { obligations: [], provenance: wasEmpty ? 'seeded' : 'live' });
+      return;
+    }
+    const obligations = await db
+      .select()
+      .from(pcGcObligationsTable)
+      .where(inArray(pcGcObligationsTable.matterId, matterIds))
+      .orderBy(asc(pcGcObligationsTable.dueDate));
+    sendSuccess(res, {
+      obligations: obligations.map((o) => ({
+        id: o.id,
+        matterId: o.matterId,
+        title: o.title,
+        description: o.description,
+        dueDate: o.dueDate,
+        status: o.status,
+        assignee: o.assignee,
+        dependencies: o.dependencies as string[],
+        privilegeLevel: o.privilegeLevel,
+        filingRequired: o.filingRequired,
+        courtId: o.courtId ?? undefined,
+        consequence: o.consequence ?? undefined,
+        completedDate: o.completedDate ?? undefined,
+      })),
+      provenance: wasEmpty ? 'seeded' : 'live',
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'GET /counsel/obligations');
+  }
+});
 
 router.get('/counsel/matters/:id', async (req: Request, res: Response) => {
   try {
