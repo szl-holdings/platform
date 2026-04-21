@@ -21,6 +21,7 @@ type FeatherIconName = React.ComponentProps<typeof Feather>['name'];
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { useAuth } from '@/context/AuthContext';
+import { TAB_BAR_HEIGHT } from '@/constants/layout';
 import { useColors } from '@/hooks/useColors';
 import { apiFetch, getApiBase } from '@/lib/apiClient';
 
@@ -478,7 +479,7 @@ export default function PulseScreen() {
       {/* Content */}
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24 }]}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} tintColor={ACCENT} />
         }

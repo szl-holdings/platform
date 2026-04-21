@@ -17,6 +17,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TAB_BAR_HEIGHT } from '@/constants/layout';
 import { useColors } from '@/hooks/useColors';
 
 const ACCENT = '#c9a84c';
@@ -550,7 +551,7 @@ export default function DecisionsScreen() {
       {/* Recommendation list */}
       <ScrollView
         style={styles.list}
-        contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: insets.bottom + 24 }}
+        contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />

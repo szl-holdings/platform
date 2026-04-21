@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TAB_BAR_HEIGHT } from '@/constants/layout';
 import { apiFetch } from '@/lib/apiClient';
 
 const ACCENT = '#14b8a6';
@@ -411,7 +412,7 @@ export default function ProofEnvelopeScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24 }]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />
         }

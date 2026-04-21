@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { promptBiometric } from '@/context/BiometricLockContext';
+import { TAB_BAR_HEIGHT } from '@/constants/layout';
 import { useColors } from '@/hooks/useColors';
 import { apiFetch } from '@/lib/apiClient';
 import {
@@ -403,7 +404,7 @@ export default function SecureQuickActionsScreen() {
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

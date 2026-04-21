@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WORKSPACES } from '@/context/WorkspaceContext';
+import { TAB_BAR_HEIGHT } from '@/constants/layout';
 import { useColors } from '@/hooks/useColors';
 
 const ACCENT = '#c9a84c';
@@ -302,7 +303,7 @@ export default function WidgetConfigScreen() {
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24 }]}
         showsVerticalScrollIndicator={false}
       >
         <View

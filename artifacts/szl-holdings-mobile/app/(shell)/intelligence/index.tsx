@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WorkspaceTrigger } from '@/components/WorkspaceSwitcher';
 import { useAuth } from '@/context/AuthContext';
 import { useWorkspace } from '@/context/WorkspaceContext';
+import { TAB_BAR_HEIGHT } from '@/constants/layout';
 import { useColors } from '@/hooks/useColors';
 import { apiFetch } from '@/lib/apiClient';
 
@@ -585,7 +586,7 @@ export default function CortexIntelligenceScreen() {
       {activeTab === 'feed' && (
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24 }]}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
@@ -757,7 +758,7 @@ export default function CortexIntelligenceScreen() {
       {activeTab === 'drafts' && (
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24 }]}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
@@ -810,7 +811,7 @@ export default function CortexIntelligenceScreen() {
       {activeTab === 'whatif' && (
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24 }]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >

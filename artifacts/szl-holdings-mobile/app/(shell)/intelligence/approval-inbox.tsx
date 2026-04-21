@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { OfflineQueuePanel } from '@/components/OfflineQueuePanel';
+import { TAB_BAR_HEIGHT } from '@/constants/layout';
 import { useColors } from '@/hooks/useColors';
 import { apiFetch } from '@/lib/apiClient';
 import { CACHE_KEYS, cacheGetStale, cacheSet } from '@/lib/cache';
@@ -1373,7 +1374,7 @@ export default function ApprovalInboxScreen() {
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

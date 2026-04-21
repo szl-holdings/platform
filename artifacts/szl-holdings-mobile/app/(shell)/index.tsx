@@ -19,6 +19,7 @@ import { WorkspaceTrigger } from '@/components/WorkspaceSwitcher';
 import { useAuth } from '@/context/AuthContext';
 import { useNotificationCountContext } from '@/context/NotificationCountContext';
 import { useWorkspace, WORKSPACES, type WorkspaceDomain } from '@/context/WorkspaceContext';
+import { TAB_BAR_HEIGHT } from '@/constants/layout';
 import { useColors } from '@/hooks/useColors';
 
 const ACCENT = '#c9a84c';
@@ -398,7 +399,7 @@ export default function CommandFeedScreen() {
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + TAB_BAR_HEIGHT + 24 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={ACCENT} />
