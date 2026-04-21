@@ -4,6 +4,7 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  Download,
   History,
   Play,
   RefreshCw,
@@ -345,6 +346,18 @@ export function SignalChainsPanel({ apiBase = '' }: SignalChainsPanelProps) {
     }
   }
 
+  function exportCsv(chainId?: string) {
+    const params = new URLSearchParams({ format: 'csv' });
+    if (chainId) params.set('chainId', chainId);
+    const url = `${apiBase}/api/signal-chains/audit-log/export?${params.toString()}`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
   useEffect(() => {
     fetchChains();
   }, []);
@@ -639,17 +652,31 @@ export function SignalChainsPanel({ apiBase = '' }: SignalChainsPanelProps) {
                           </span>
                         )}
                       </div>
-                      <button
-                        onClick={() => fetchAudit(chain.id, false)}
-                        disabled={auditLoading === chain.id}
-                        className="flex items-center gap-1 text-[10px] hover:opacity-80"
-                        style={{ color: 'var(--color-fg-muted)' }}
-                      >
-                        <RefreshCw
-                          className={`w-3 h-3 ${auditLoading === chain.id ? 'animate-spin' : ''}`}
-                        />
-                        Reload
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => exportCsv(chain.id)}
+                          className="flex items-center gap-1 text-[10px] px-2 py-1 rounded hover:opacity-80"
+                          style={{
+                            backgroundColor: 'var(--color-surface-base)',
+                            border: '1px solid var(--color-surface-border)',
+                            color: 'var(--color-fg-muted)',
+                          }}
+                        >
+                          <Download className="w-3 h-3" />
+                          Export CSV
+                        </button>
+                        <button
+                          onClick={() => fetchAudit(chain.id, false)}
+                          disabled={auditLoading === chain.id}
+                          className="flex items-center gap-1 text-[10px] hover:opacity-80"
+                          style={{ color: 'var(--color-fg-muted)' }}
+                        >
+                          <RefreshCw
+                            className={`w-3 h-3 ${auditLoading === chain.id ? 'animate-spin' : ''}`}
+                          />
+                          Reload
+                        </button>
+                      </div>
                     </div>
 
                     {auditLoading === chain.id && chainAuditRows.length === 0 && (

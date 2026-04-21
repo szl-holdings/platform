@@ -620,6 +620,111 @@ router.get(
 );
 
 router.get(
+  '/signal-chains/audit-log/export',
+  authMiddleware({ required: true }),
+  perUserApiSlidingLimiter,
+  async (req, res) => {
+    const chainId = req.query.chainId as string | undefined;
+
+    const FORMULA_TRIGGER_CHARS = new Set(['=', '+', '-', '@', '|', '%']);
+
+    function escapeCsv(val: unknown): string {
+      let s = val == null ? '' : String(val);
+      // Mitigate CSV formula injection: prefix dangerous leading chars with a tab
+      if (s.length > 0 && FORMULA_TRIGGER_CHARS.has(s[0]!)) {
+        s = `\t${s}`;
+      }
+      if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
+        return `"${s.replace(/"/g, '""')}"`;
+      }
+      return s;
+    }
+
+    const dateSlug = new Date().toISOString().slice(0, 10);
+    const filename = chainId
+      ? `signal-chain-audit-${chainId}-${dateSlug}.csv`
+      : `signal-chain-audit-all-${dateSlug}.csv`;
+
+    const headers = [
+      'ID',
+      'Chain ID',
+      'Trigger Domain',
+      'Trigger Reason',
+      'Trigger Value',
+      'Status',
+      'Triggered At',
+      'Step Outcomes',
+    ];
+
+    try {
+      const rows = await (chainId
+        ? db
+            .select()
+            .from(signalChainExecutionsTable)
+            .where(eq(signalChainExecutionsTable.chainId, chainId))
+            .orderBy(desc(signalChainExecutionsTable.triggeredAt))
+        : db
+            .select()
+            .from(signalChainExecutionsTable)
+            .orderBy(desc(signalChainExecutionsTable.triggeredAt)));
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Transfer-Encoding', 'chunked');
+
+      res.write(headers.join(',') + '\r\n');
+
+      for (const row of rows) {
+        const payload = row.payloadSnapshot as
+          | { triggerReason?: string; triggerValue?: number }
+          | null
+          | undefined;
+        const outcomes = row.outcomes as
+          | Array<{ action?: string; explainability?: string }>
+          | null
+          | undefined;
+
+        const stepOutcomes = Array.isArray(outcomes)
+          ? outcomes
+              .map(
+                (s, i) =>
+                  `Step ${i + 1}: ${s.action ?? ''}${s.explainability ? ` — ${s.explainability}` : ''}`,
+              )
+              .join(' | ')
+          : '';
+
+        const triggeredAtIso =
+          row.triggeredAt instanceof Date
+            ? row.triggeredAt.toISOString()
+            : String(row.triggeredAt);
+
+        const cols = [
+          row.id,
+          row.chainId,
+          row.triggerDomain,
+          payload?.triggerReason ?? '',
+          payload?.triggerValue ?? '',
+          row.status,
+          triggeredAtIso,
+          stepOutcomes,
+        ].map(escapeCsv);
+
+        res.write(cols.join(',') + '\r\n');
+      }
+
+      res.end();
+    } catch (err) {
+      logger.warn({ err }, '[SignalChains] CSV export failed');
+      if (!res.headersSent) {
+        res.status(500).json({ success: false, error: 'Failed to export audit log' });
+      } else {
+        res.end();
+      }
+    }
+  },
+);
+
+router.get(
   '/signal-chains/:id/audit',
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
