@@ -44,7 +44,9 @@ export const fundInboundDealsTable = pgTable(
     risks: jsonb('risks').$type<string[]>().notNull().default([]),
     attachments: jsonb('attachments').$type<DealAttachment[]>().notNull().default([]),
     source: text('source').notNull().default('inbound'),
+    notes: text('notes'),
     submittedAt: timestamp('submitted_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (t) => [
     index('fund_inbound_deals_pipeline_id_idx').on(t.pipelineId),

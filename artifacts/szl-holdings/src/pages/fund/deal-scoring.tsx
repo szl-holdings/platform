@@ -1,6 +1,6 @@
 import { useStandardQuery } from "@szl-holdings/api-client-react";
-import { useEffect, useMemo, useState } from "react";
-import { getSubmittedDeals, loadSubmittedDeals, subscribeSubmittedDeals, type SubmittedDeal, type DealAttachmentRef } from "@/lib/dealSubmissions";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getSubmittedDeals, loadSubmittedDeals, subscribeSubmittedDeals, updateDeal, type SubmittedDeal, type DealAttachmentRef } from "@/lib/dealSubmissions";
 
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
@@ -8,14 +8,17 @@ import {
   Brain, ArrowLeft, Star,
   ChevronRight, Upload, AlertCircle, CheckCircle2,
   Zap, FileText, Target, Paperclip, Download, ExternalLink,
+  Mail, MessageSquare, Save, Loader2,
 } from "lucide-react";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
+
 async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(`${API_BASE}/api${path}`, {
     credentials: "include",
     headers: { "x-requested-with": "XMLHttpRequest" },
   });
@@ -35,12 +38,15 @@ type Deal = {
   scores: { team: number; market: number; product: number; traction: number; competitive: number; financials: number };
   status: "screening" | "active" | "passed" | "invested";
   founder: string;
+  founderEmail?: string | null;
   summary: string;
   risks: string[];
   strengths: string[];
   date: string;
   deckUrl?: string | null;
   attachments?: DealAttachmentRef[];
+  notes?: string | null;
+  isInbound?: boolean;
 };
 
 function formatBytes(n: number): string {
@@ -104,6 +110,13 @@ const STATUS_COLORS: Record<string, string> = {
   passed: "#c45a4a",
 };
 
+const STATUS_OPTIONS: { value: Deal["status"]; label: string }[] = [
+  { value: "screening", label: "Screening" },
+  { value: "active", label: "Active" },
+  { value: "passed", label: "Passed" },
+  { value: "invested", label: "Invested" },
+];
+
 function ScoreGauge({ score, label }: { score: number; label: string }) {
   const color = score >= 80 ? "#6aaa72" : score >= 65 ? "#d4a054" : "#c45a4a";
   return (
@@ -157,13 +170,116 @@ function toDeal(s: SubmittedDeal): Deal {
     scores: s.scores,
     status: s.status,
     founder: s.founder,
+    founderEmail: s.founderEmail ?? null,
     summary: s.summary,
     risks: s.risks.length ? s.risks : ["Awaiting analyst review"],
     strengths: s.strengths.length ? s.strengths : ["Inbound submission via founder portal"],
     date: s.date,
     deckUrl: s.deckUrl,
     attachments: s.attachments,
+    notes: s.notes ?? null,
+    isInbound: true,
   };
+}
+
+function PartnerActions({ deal, onUpdated }: { deal: Deal; onUpdated: (patch: { status?: Deal["status"]; notes?: string | null }) => void }) {
+  const [pendingStatus, setPendingStatus] = useState<Deal["status"]>(deal.status);
+  const [notes, setNotes] = useState<string>(deal.notes ?? "");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setPendingStatus(deal.status);
+    setNotes(deal.notes ?? "");
+    setSaveError(null);
+  }, [deal.id, deal.status, deal.notes]);
+
+  const isDirty = pendingStatus !== deal.status || notes !== (deal.notes ?? "");
+
+  async function handleSave() {
+    if (!isDirty || saving) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const patch: { status?: Deal["status"]; notes?: string | null } = {};
+      if (pendingStatus !== deal.status) patch.status = pendingStatus;
+      if (notes !== (deal.notes ?? "")) patch.notes = notes.trim() || null;
+      await updateDeal(deal.id, patch);
+      onUpdated(patch);
+      setSaved(true);
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+      savedTimer.current = setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Save failed — please try again");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="mt-5 rounded-xl border border-white/[0.08] bg-black/20 p-4 space-y-4">
+      <div className="flex items-center gap-2 mb-1">
+        <MessageSquare className="h-3.5 w-3.5 text-[#d4a054]" />
+        <span className="text-xs font-semibold text-white">Partner Actions</span>
+        <span className="text-[10px] text-white/35 ml-auto">Inbound deal — authenticated partners only</span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="text-[11px] text-white/50 w-14 flex-shrink-0">Status</span>
+        <div className="flex gap-1.5 flex-wrap">
+          {STATUS_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setPendingStatus(opt.value)}
+              className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition-all border ${
+                pendingStatus === opt.value
+                  ? "border-transparent text-black"
+                  : "border-white/[0.08] text-white/40 hover:border-white/20"
+              }`}
+              style={pendingStatus === opt.value ? { background: STATUS_COLORS[opt.value] } : {}}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <span className="text-[11px] text-white/50 block mb-1.5">Internal Notes</span>
+        <textarea
+          value={notes}
+          onChange={e => setNotes(e.target.value)}
+          rows={3}
+          placeholder="Add partner notes, action items, or next steps…"
+          className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-white/80 placeholder:text-white/25 focus:border-[#d4a054]/40 focus:outline-none resize-none"
+        />
+      </div>
+
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={handleSave}
+          disabled={!isDirty || saving}
+          className="flex items-center gap-1.5 rounded-xl bg-[#d4a054] px-4 py-2 text-xs font-semibold text-black hover:bg-[#d4a054]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+        >
+          {saving
+            ? <><Loader2 className="h-3 w-3 animate-spin" /> Saving…</>
+            : saved
+            ? <><CheckCircle2 className="h-3 w-3" /> Saved</>
+            : <><Save className="h-3 w-3" /> Save Changes</>
+          }
+        </button>
+        {saveError ? (
+          <span className="flex items-center gap-1 text-[10px] text-[#c45a4a]">
+            <AlertCircle className="h-3 w-3 flex-shrink-0" /> {saveError}
+          </span>
+        ) : isDirty && !saving ? (
+          <span className="text-[10px] text-white/35">Unsaved changes</span>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
 export default function DealScoringPage() {
@@ -184,8 +300,14 @@ export default function DealScoringPage() {
 
   const allDeals = useMemo<Deal[]>(() => [...submissions.map(toDeal), ...DEALS], [submissions]);
   const [selectedId, setSelectedId] = useState<string>(allDeals[0]?.id ?? "d1");
+  const [localPatch, setLocalPatch] = useState<Record<string, Partial<Deal>>>({});
 
-  const deal = allDeals.find(d => d.id === selectedId) ?? allDeals[0];
+  const deal: Deal = useMemo(() => {
+    const base = allDeals.find(d => d.id === selectedId) ?? allDeals[0];
+    const patch = localPatch[base?.id ?? ""] ?? {};
+    return { ...base, ...patch };
+  }, [allDeals, selectedId, localPatch]);
+
   const filtered = filter === "all" ? allDeals : allDeals.filter(d => d.status === filter);
   const radarData = [
     { subject: "Team", score: deal.scores.team },
@@ -195,6 +317,13 @@ export default function DealScoringPage() {
     { subject: "Competitive", score: deal.scores.competitive },
     { subject: "Financials", score: deal.scores.financials },
   ];
+
+  function handlePartnerUpdate(patch: { status?: Deal["status"]; notes?: string | null }) {
+    setLocalPatch(prev => ({
+      ...prev,
+      [deal.id]: { ...(prev[deal.id] ?? {}), ...patch },
+    }));
+  }
 
   return (
     <>
@@ -280,6 +409,17 @@ export default function DealScoringPage() {
                       </div>
                       <div className="text-xs text-white/40">{deal.sector} · {deal.stage} · {deal.founder}</div>
                       <div className="text-xs text-white/30 mt-0.5">Received {deal.date} · {deal.askSize} ask @ {deal.valuation}</div>
+                      {deal.founderEmail ? (
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                          <Mail className="h-3 w-3 text-[#4a90b8]" />
+                          <a
+                            href={`mailto:${deal.founderEmail}`}
+                            className="text-[11px] text-[#4a90b8] hover:underline"
+                          >
+                            {deal.founderEmail}
+                          </a>
+                        </div>
+                      ) : null}
                     </div>
                     <div className="text-center">
                       <div className={`text-4xl font-bold ${deal.convictionScore >= 80 ? "text-[#6aaa72]" : deal.convictionScore >= 65 ? "text-[#d4a054]" : "text-[#c45a4a]"}`}>
@@ -386,18 +526,22 @@ export default function DealScoringPage() {
                       ))}
                     </div>
                   </div>
-  
-                  <div className="mt-4 flex gap-2">
-                    <button className="rounded-xl bg-[#d4a054] px-4 py-2 text-xs font-semibold text-black hover:bg-[#d4a054]/90 flex items-center gap-1.5">
-                      <Zap className="h-3 w-3" /> Generate Full Memo
-                    </button>
-                    <button className="rounded-xl border border-white/[0.08] px-4 py-2 text-xs font-semibold text-white/60 hover:bg-white/[0.04]">
-                      Schedule Partner Call
-                    </button>
-                    <button className="rounded-xl border border-white/[0.08] px-4 py-2 text-xs font-semibold text-white/60 hover:bg-white/[0.04]">
-                      Pass Deal
-                    </button>
-                  </div>
+
+                  {deal.isInbound ? (
+                    <PartnerActions deal={deal} onUpdated={handlePartnerUpdate} />
+                  ) : (
+                    <div className="mt-4 flex gap-2">
+                      <button className="rounded-xl bg-[#d4a054] px-4 py-2 text-xs font-semibold text-black hover:bg-[#d4a054]/90 flex items-center gap-1.5">
+                        <Zap className="h-3 w-3" /> Generate Full Memo
+                      </button>
+                      <button className="rounded-xl border border-white/[0.08] px-4 py-2 text-xs font-semibold text-white/60 hover:bg-white/[0.04]">
+                        Schedule Partner Call
+                      </button>
+                      <button className="rounded-xl border border-white/[0.08] px-4 py-2 text-xs font-semibold text-white/60 hover:bg-white/[0.04]">
+                        Pass Deal
+                      </button>
+                    </div>
+                  )}
                 </m.div>
               </AnimatePresence>
             </div>
@@ -405,6 +549,6 @@ export default function DealScoringPage() {
         </main>
         <SiteFooter />
       </div>
-        </>
+    </>
   );
 }

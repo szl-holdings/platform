@@ -30,6 +30,7 @@ export type SubmittedDeal = {
   strengths: string[];
   deckUrl?: string | null;
   attachments?: DealAttachmentRef[];
+  notes?: string | null;
   date: string;
   source: 'inbound';
 };
@@ -45,6 +46,7 @@ export type AttachmentUpload = {
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
 const SUBMIT_ENDPOINT = `${API_BASE}/api/public/fund-inbound-deals`;
 const LIST_ENDPOINT = `${API_BASE}/api/fund-inbound-deals`;
+const DEAL_ENDPOINT = (id: string) => `${API_BASE}/api/fund-inbound-deals/${encodeURIComponent(id)}`;
 
 export type SubmitDealPayload = {
   company: string;
@@ -137,6 +139,7 @@ export async function loadSubmittedDeals(): Promise<SubmittedDeal[]> {
     // even when the frontend and API are served from different origins.
     cache = list.map((d) => ({
       ...d,
+      notes: (d as { notes?: string | null }).notes ?? null,
       attachments: (d.attachments ?? []).map((a) => ({
         kind: a.kind,
         name: a.name,
@@ -175,6 +178,29 @@ export async function submitDeal(
   // Refresh cache so pipeline page reflects the new entry on next read.
   void loadSubmittedDeals();
   return data;
+}
+
+export async function updateDeal(
+  pipelineId: string,
+  patch: { status?: SubmittedDeal['status']; notes?: string | null },
+): Promise<void> {
+  const res = await fetch(DEAL_ENDPOINT(pipelineId), {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'x-requested-with': 'XMLHttpRequest' },
+    credentials: 'include',
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(`Update failed (${res.status}): ${text}`);
+  }
+  // Optimistically patch the cache and notify subscribers.
+  cache = cache.map((d) =>
+    d.id === pipelineId ? { ...d, ...patch } : d,
+  );
+  listeners.forEach((fn) => fn());
+  // Then re-fetch to get authoritative server state.
+  void loadSubmittedDeals();
 }
 
 export function subscribeSubmittedDeals(fn: () => void): () => void {

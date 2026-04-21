@@ -368,11 +368,67 @@ router.get('/fund-inbound-deals', async (_req: Request, res: Response) => {
         year: 'numeric',
       }),
       source: r.source,
+      notes: r.notes ?? null,
+      updatedAt: r.updatedAt ? new Date(r.updatedAt).toISOString() : null,
     }));
 
     sendSuccess(res, mapped);
   } catch (err) {
     handleRouteError(res, err, 'Failed to list inbound deal submissions');
+  }
+});
+
+const patchDealSchema = z.object({
+  status: z.enum(['screening', 'active', 'passed', 'invested']).optional(),
+  notes: z.string().max(10000).optional().nullable(),
+});
+
+/**
+ * Authenticated PATCH for partners to update a deal's status and/or internal
+ * notes. Auth is enforced upstream by the global enforcer.
+ */
+router.patch('/fund-inbound-deals/:pipelineId', async (req: Request, res: Response) => {
+  try {
+    const parsed = patchDealSchema.safeParse(req.body);
+    if (!parsed.success) {
+      sendBadRequest(
+        res,
+        `Invalid update: ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`,
+      );
+      return;
+    }
+
+    const { status, notes } = parsed.data;
+    if (status === undefined && notes === undefined) {
+      sendBadRequest(res, 'Provide at least one field to update: status or notes');
+      return;
+    }
+
+    const updates: Partial<typeof fundInboundDealsTable.$inferInsert> & { updatedAt?: Date } = {
+      updatedAt: new Date(),
+    };
+    if (status !== undefined) updates.status = status;
+    if (notes !== undefined) updates.notes = notes ?? null;
+
+    const [row] = await db
+      .update(fundInboundDealsTable)
+      .set(updates)
+      .where(eq(fundInboundDealsTable.pipelineId, req.params.pipelineId as string))
+      .returning();
+
+    if (!row) {
+      sendNotFound(res, 'Deal not found');
+      return;
+    }
+
+    sendSuccess(res, {
+      pipelineId: row.pipelineId,
+      status: row.status,
+      notes: row.notes ?? null,
+      updatedAt: row.updatedAt ? new Date(row.updatedAt).toISOString() : null,
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to update deal');
   }
 });
 
