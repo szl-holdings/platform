@@ -58,7 +58,7 @@ import {
 } from '../../lib/api-response';
 import { logger } from '../../lib/logger';
 import { broadcastWs, FIRESTORM_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
-import { guardSeedInProduction } from '../../lib/seed-guard';
+import { seedProductionGuard } from '../../lib/seed-guard';
 import {
   ingestDecisionToEvidenceIndex,
   queryEvidenceIndex,
@@ -631,12 +631,18 @@ router.get('/firestorm/mitre-detections/:techniqueId', authMiddleware(), async (
   }
 });
 
+// Route-level gating: `seedProductionGuard` is the FIRST middleware on the
+// chain, so in production the request short-circuits with 404 +
+// SEED_DISABLED_IN_PRODUCTION before validateBody, authMiddleware, or the
+// dynamic `seed-aegis.js` import are ever invoked. This eliminates the
+// attack surface (no body parsing, no auth probing, no module load) while
+// keeping the route's response contract stable for any legacy callers.
 router.post(
   '/firestorm/seed',
+  seedProductionGuard,
   validateBody(bodyShape({})),
   authMiddleware({ required: true }),
   async (_req, res) => {
-    if (guardSeedInProduction(res)) return;
     try {
       // @ts-expect-error
       const { seedAegis } = await import('../scripts/seed-aegis.js');
