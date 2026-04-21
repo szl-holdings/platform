@@ -26,7 +26,7 @@ import {
   vesselsAlertsTable,
   vesselsEventsTable,
 } from '@szl-holdings/db';
-import { and, count, desc, eq, ne, sql } from 'drizzle-orm';
+import { and, count, desc, eq, max, ne, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
@@ -310,6 +310,50 @@ const DEFAULT_CHAINS: SignalChain[] = [
 ];
 
 const chainState = new Map<string, SignalChain>(DEFAULT_CHAINS.map((c) => [c.id, { ...c }]));
+
+/**
+ * On startup, seed chainState with real execution counts and last-executed timestamps
+ * from the signal_chain_executions table so counts survive server restarts.
+ */
+export async function bootstrapChainState(): Promise<void> {
+  try {
+    const rows = await db
+      .select({
+        chainId: signalChainExecutionsTable.chainId,
+        executionCount: count(),
+        lastExecuted: max(signalChainExecutionsTable.triggeredAt),
+      })
+      .from(signalChainExecutionsTable)
+      .groupBy(signalChainExecutionsTable.chainId);
+
+    // First reset every known chain to the DB-truth zero baseline so that
+    // chains with no persisted executions don't keep their hardcoded defaults.
+    for (const chain of chainState.values()) {
+      chain.executionCount = 0;
+      chain.lastExecuted = undefined;
+    }
+
+    // Then apply real counts / timestamps for chains that have DB rows.
+    for (const row of rows) {
+      const chain = chainState.get(row.chainId);
+      if (!chain) continue;
+      chain.executionCount = Number(row.executionCount);
+      if (row.lastExecuted) {
+        chain.lastExecuted = new Date(row.lastExecuted).getTime();
+      }
+    }
+
+    logger.info(
+      { bootstrappedChains: rows.length },
+      '[SignalChains] chainState bootstrapped from DB',
+    );
+  } catch (err) {
+    logger.warn(
+      { err },
+      '[SignalChains] chainState bootstrap failed — using in-memory defaults',
+    );
+  }
+}
 
 /**
  * Compute the live trigger value for a chain from a snapshot.

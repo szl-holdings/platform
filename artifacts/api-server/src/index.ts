@@ -72,6 +72,7 @@ import { initDurablePersistence, stopDurablePersistence } from './lib/persistenc
 import { providerHealth } from './lib/provider-health';
 import { registerQueuedJobHandlers } from './lib/queued-jobs';
 import { runAlertRuleEvaluation } from './routes/ops-management';
+import { bootstrapChainState } from './routes/signal-chains';
 
 failFastOnInvalidConfig();
 
@@ -339,6 +340,12 @@ export async function bootstrap(
     if (migrationsComplete) {
       logger.info('[bootstrap] All migrations complete');
     }
+
+    // Seed in-memory Signal Chain state from DB before opening traffic so that
+    // the very first /signal-chains request sees accurate DB-truth counts.
+    // The function is fast (one grouped query) and self-contained — errors are
+    // caught and logged non-fatally inside bootstrapChainState() itself.
+    await bootstrapChainState();
 
     // Schema is durable — open the live handler now so the server can serve
     // traffic while the rest of the post-migration init proceeds in the
