@@ -451,7 +451,7 @@ export default function GpuComputeObservatory() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: GOLD }}
             >
-              Lyte · GPU & AI Compute
+              Command · GPU & AI Compute
             </span>
             <span
               className="px-1.5 py-0.5 rounded text-[8px] font-bold"

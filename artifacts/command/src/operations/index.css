@@ -75,7 +75,7 @@
 }
 
 :root {
-  /* Lyte — signal cyan / intelligent blue. Alive, consequence-driven, executive-usable */
+  /* Command — signal cyan / intelligent blue. Alive, consequence-driven, executive-usable */
   --background: 218 22% 4%;
   --foreground: 208 18% 91%;
 
@@ -113,12 +113,12 @@
 
   --radius: 0.5rem;
 
-  /* Lyte semantic tokens */
-  --lyte-signal: hsl(192 85% 46%);
-  --lyte-signal-dim: hsla(192 85% 46% / 0.08);
-  --lyte-signal-border: hsla(192 85% 46% / 0.18);
-  --lyte-signal-glow: hsla(192 85% 46% / 0.05);
-  --lyte-teal: hsl(180 60% 44%);
+  /* Command semantic tokens */
+  --command-signal: hsl(192 85% 46%);
+  --command-signal-dim: hsla(192 85% 46% / 0.08);
+  --command-signal-border: hsla(192 85% 46% / 0.18);
+  --command-signal-glow: hsla(192 85% 46% / 0.05);
+  --command-teal: hsl(180 60% 44%);
 }
 
 @layer base {
@@ -145,7 +145,7 @@
 }
 
 @layer utilities {
-  /* Signal panel — Lyte's core command surface */
+  /* Signal panel — Command's core command surface */
   .signal-panel {
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
@@ -273,7 +273,7 @@
   }
 }
 
-/* ─── Signal surfacing motion — Lyte signature ─── */
+/* ─── Signal surfacing motion — Command signature ─── */
 @keyframes signal-surface {
   from {
     opacity: 0;

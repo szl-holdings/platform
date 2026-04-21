@@ -81,7 +81,7 @@ const ENDPOINTS: Endpoint[] = [
   {
     method: 'GET',
     path: '/api/lyte/health',
-    summary: 'Lyte analytics health',
+    summary: 'Command analytics health',
     tag: 'Analytics',
     auth: false,
   },
@@ -102,7 +102,7 @@ const ENDPOINTS: Endpoint[] = [
   {
     method: 'GET',
     path: '/api/lyte/health',
-    summary: 'Lyte observability health',
+    summary: 'Command observability health',
     tag: 'Analytics',
     auth: false,
   },

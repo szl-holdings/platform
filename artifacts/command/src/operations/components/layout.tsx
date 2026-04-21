@@ -26,9 +26,9 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useLocation } from 'wouter';
-import { LyteLogo } from './LyteLogo';
+import { CommandLogo } from './CommandLogo';
 
-const LYTE_ACCENT = LANE_ACCENT_HEX.lyte.primary;
+const COMMAND_ACCENT = LANE_ACCENT_HEX.lyte.primary;
 const SIDEBAR_BG = '#08090d';
 const HEADER_BG = toAlpha('#08090d', 0.9);
 
@@ -73,19 +73,19 @@ function DemoModeBanner() {
   return (
     <div
       className="px-4 py-1 flex items-center gap-2 shrink-0"
-      style={{ borderBottom: `1px solid ${toAlpha(LYTE_ACCENT, 0.1)}` }}
+      style={{ borderBottom: `1px solid ${toAlpha(COMMAND_ACCENT, 0.1)}` }}
     >
       <span
         className="text-[10px] font-mono px-2 py-0.5 rounded-full"
         style={{
-          color: toAlpha(LYTE_ACCENT, 0.75),
-          border: `1px solid ${toAlpha(LYTE_ACCENT, 0.2)}`,
-          background: toAlpha(LYTE_ACCENT, 0.06),
+          color: toAlpha(COMMAND_ACCENT, 0.75),
+          border: `1px solid ${toAlpha(COMMAND_ACCENT, 0.2)}`,
+          background: toAlpha(COMMAND_ACCENT, 0.06),
         }}
       >
         DEMO
       </span>
-      <span className="text-[10px]" style={{ color: toAlpha(LYTE_ACCENT, 0.55) }}>
+      <span className="text-[10px]" style={{ color: toAlpha(COMMAND_ACCENT, 0.55) }}>
         Business observability demo data
       </span>
     </div>
@@ -129,7 +129,7 @@ const PRIMARY_SECTIONS: SidebarNavSection[] = [
       {
         id: 'readiness',
         href: '/readiness',
-        label: 'Lyte Readiness',
+        label: 'Command Readiness',
         icon: <Shield className="w-full h-full" />,
       },
     ],
@@ -199,19 +199,19 @@ export function Layout({ children }: { children: ReactNode }) {
         <div
           className="p-1.5 rounded-lg shadow-lg relative shrink-0"
           style={{
-            background: `linear-gradient(135deg, ${LYTE_ACCENT}, #4a80d0)`,
-            boxShadow: `0 0 12px ${toAlpha(LYTE_ACCENT, 0.22)}`,
+            background: `linear-gradient(135deg, ${COMMAND_ACCENT}, #4a80d0)`,
+            boxShadow: `0 0 12px ${toAlpha(COMMAND_ACCENT, 0.22)}`,
           }}
         >
-          <LyteLogo className="w-4 h-4 text-white" />
+          <CommandLogo className="w-4 h-4 text-white" />
         </div>
         <div className="flex flex-col">
           <span className="font-display font-bold text-sm tracking-[0.1em] text-white leading-none">
-            LYTE
+            COMMAND
           </span>
           <span
             className="text-[9px] uppercase tracking-[0.15em] leading-none mt-0.5"
-            style={{ color: toAlpha(LYTE_ACCENT, 0.75) }}
+            style={{ color: toAlpha(COMMAND_ACCENT, 0.75) }}
           >
             Business Observability
           </span>
@@ -230,7 +230,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <a
         href="/alloy"
         className="flex items-center gap-1.5 px-2 py-1 rounded-lg w-full transition-colors"
-        style={{ color: toAlpha(LYTE_ACCENT, 0.45) }}
+        style={{ color: toAlpha(COMMAND_ACCENT, 0.45) }}
         title="Alloy Execution Fabric"
       >
         <span className="text-[10px] font-medium">⬡ Powered by Alloy</span>
@@ -262,7 +262,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <span className="mx-1" style={{ color: colors.border.DEFAULT }}>
             ·
           </span>
-          <span style={{ color: LYTE_ACCENT }}>$17.6M at risk</span>
+          <span style={{ color: COMMAND_ACCENT }}>$17.6M at risk</span>
         </div>
         <div className="h-6 w-px" style={{ background: colors.border.DEFAULT }} />
         <button
@@ -285,7 +285,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <SidebarNav
         sections={PRIMARY_SECTIONS}
         currentPath={location}
-        accentColor={LYTE_ACCENT}
+        accentColor={COMMAND_ACCENT}
         header={sidebarHeader}
         footer={sidebarFooter}
         onNavigate={(item) => {
@@ -300,16 +300,16 @@ export function Layout({ children }: { children: ReactNode }) {
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium"
-        style={{ background: LYTE_ACCENT, color: '#fff' }}
+        style={{ background: COMMAND_ACCENT, color: '#fff' }}
       >
         Skip to main content
       </a>
       <DashboardShell
         sidebar={sidebar}
         topbar={topbar}
-        accentColor={LYTE_ACCENT}
+        accentColor={COMMAND_ACCENT}
         theme={{
-          accentColor: LYTE_ACCENT,
+          accentColor: COMMAND_ACCENT,
           sidebarBg: SIDEBAR_BG,
           headerBg: HEADER_BG,
         }}

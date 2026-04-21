@@ -27,7 +27,7 @@ const USE_CASES = [
     bg: 'bg-[#c45a4a]/5',
     dot: 'bg-[#c45a4a]',
     description:
-      'Every approval day over target costs you close rate. Lyte surfaces approval bottlenecks before deals slip.',
+      'Every approval day over target costs you close rate. Command surfaces approval bottlenecks before deals slip.',
     signalType: 'approval_latency' as SignalType,
   },
   {
@@ -39,7 +39,7 @@ const USE_CASES = [
     bg: 'bg-[#c8953c]/5',
     dot: 'bg-[#c8953c]',
     description:
-      'Work stops. No alert fires. Lyte detects stagnation across implementation queues, SOWs, and handoff stages.',
+      'Work stops. No alert fires. Command detects stagnation across implementation queues, SOWs, and handoff stages.',
     signalType: 'stalled_workflow' as SignalType,
   },
   {
@@ -51,7 +51,7 @@ const USE_CASES = [
     bg: 'bg-[#d4a054]/5',
     dot: 'bg-[#d4a054]',
     description:
-      'Forecast credibility erodes quietly. Lyte tracks reclassification rates, coverage ratios, and drift velocity.',
+      'Forecast credibility erodes quietly. Command tracks reclassification rates, coverage ratios, and drift velocity.',
     signalType: 'forecast_drift' as SignalType,
   },
   {
@@ -63,7 +63,7 @@ const USE_CASES = [
     bg: 'bg-violet-500/5',
     dot: 'bg-violet-500',
     description:
-      'Sales-to-CS, CS-to-delivery, SE-to-account — every handoff is a churn risk. Lyte tracks all of them.',
+      'Sales-to-CS, CS-to-delivery, SE-to-account — every handoff is a churn risk. Command tracks all of them.',
     signalType: 'handoff_failure' as SignalType,
   },
   {
@@ -75,7 +75,7 @@ const USE_CASES = [
     bg: 'bg-[#4a90b8]/5',
     dot: 'bg-[#4a90b8]',
     description:
-      'Stale pipeline corrupts forecast models and wastes capacity. Lyte identifies and ages out ghost opportunities.',
+      'Stale pipeline corrupts forecast models and wastes capacity. Command identifies and ages out ghost opportunities.',
     signalType: 'pipeline_hygiene' as SignalType,
   },
 ];

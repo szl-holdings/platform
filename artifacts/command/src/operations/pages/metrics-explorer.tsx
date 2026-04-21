@@ -189,7 +189,7 @@ export default function MetricsExplorer() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#d4a054' }}
             >
-              Lyte · Metrics Explorer
+              Command · Metrics Explorer
             </span>
           </div>
           <h1 className="text-xl font-bold text-white">Metrics Explorer</h1>

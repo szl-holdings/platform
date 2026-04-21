@@ -11,7 +11,7 @@ export default function NotFound() {
           <h1 className="text-4xl font-display font-bold text-foreground mb-2">404</h1>
           <p className="text-base font-semibold text-foreground mb-1">Page not found</p>
           <p className="text-sm text-muted-foreground">
-            The Lyte view you are looking for does not exist or has been moved.
+            The Command view you are looking for does not exist or has been moved.
           </p>
         </div>
         <a
@@ -19,7 +19,7 @@ export default function NotFound() {
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Lyte
+          Back to Command
         </a>
       </div>
     </div>

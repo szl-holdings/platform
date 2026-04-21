@@ -6,7 +6,7 @@ import {
 } from '@szl-holdings/services';
 import { useSandboxMode } from '@szl-holdings/shared-ui/sandbox-mode';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, type LyteAction, type LyteIncident, type LyteSavedView } from '../lib/api';
+import { api, type CommandAction, type CommandIncident, type CommandSavedView } from '../lib/api';
 
 export function useSignals() {
   const { sandboxActive, resetKey } = useSandboxMode();
@@ -58,7 +58,7 @@ export function useCreateIncident() {
   const { sandboxActive } = useSandboxMode();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: Partial<LyteIncident>) => {
+    mutationFn: async (data: Partial<CommandIncident>) => {
       if (sandboxActive) {
         return { id: Date.now(), ...data };
       }
@@ -72,7 +72,7 @@ export function useUpdateIncident() {
   const { sandboxActive } = useSandboxMode();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...data }: { id: number } & Partial<LyteIncident>) => {
+    mutationFn: async ({ id, ...data }: { id: number } & Partial<CommandIncident>) => {
       if (sandboxActive) {
         const incident = mockIncidents.find((i) => i.id === id);
         if (incident) Object.assign(incident, data);
@@ -169,14 +169,14 @@ export function useUpdateAction() {
   const { sandboxActive } = useSandboxMode();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...data }: { id: number } & Partial<LyteAction>) => {
+    mutationFn: async ({ id, ...data }: { id: number } & Partial<CommandAction>) => {
       if (sandboxActive) return { id, ...data };
       return await api.actions.update(id, data);
     },
     onMutate: async ({ id, ...data }) => {
       await queryClient.cancelQueries({ queryKey: ['actions'] });
       const previous = queryClient.getQueriesData({ queryKey: ['actions'] });
-      queryClient.setQueriesData({ queryKey: ['actions'] }, (old: LyteAction[] | undefined) => {
+      queryClient.setQueriesData({ queryKey: ['actions'] }, (old: CommandAction[] | undefined) => {
         if (!old) return old;
         return old.map((a) => (a.id === id ? { ...a, ...data } : a));
       });
@@ -201,7 +201,7 @@ export function useSavedViews(role?: string) {
 export function useCreateSavedView() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<LyteSavedView>) => api.views.create(data),
+    mutationFn: (data: Partial<CommandSavedView>) => api.views.create(data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['savedViews'] }),
   });
 }

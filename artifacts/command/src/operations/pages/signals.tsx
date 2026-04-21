@@ -1,4 +1,4 @@
-import { api, type LyteSignal } from '@lyte/lib/api';
+import { api, type CommandSignal } from '@lyte/lib/api';
 import {
   type BusinessSignal,
   type SignalSeverity,
@@ -23,7 +23,7 @@ import {
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 
-function lyteSignalToDisplay(s: LyteSignal): BusinessSignal {
+function commandSignalToDisplay(s: CommandSignal): BusinessSignal {
   const meta = (s.metadata ?? {}) as Record<string, unknown>;
   const sev = (
     ['critical', 'high', 'medium', 'low', 'stable'].includes(s.severity) ? s.severity : 'medium'
@@ -370,7 +370,7 @@ export default function SignalsFeed() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lyte-signals-feed'] }),
   });
 
-  const allSignals = liveSignals.map(lyteSignalToDisplay);
+  const allSignals = liveSignals.map(commandSignalToDisplay);
 
   const selectedSignal = selectedId ? allSignals.find((s) => s.id === selectedId) || null : null;
 

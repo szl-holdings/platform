@@ -153,7 +153,7 @@ export default function PricingPage() {
             >
               <Zap className="w-3.5 h-3.5 text-black" />
             </div>
-            <span className="text-sm font-semibold tracking-tight text-white">Lyte</span>
+            <span className="text-sm font-semibold tracking-tight text-white">Command</span>
           </Link>
           <nav
             className="hidden md:flex items-center gap-6 text-[13px]"

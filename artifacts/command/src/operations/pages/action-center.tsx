@@ -1,7 +1,7 @@
 // @ts-nocheck
 
-import { LyteGraphQLPanel } from '@lyte/components/graphql-data-panel';
-import { api, type LyteAction } from '@lyte/lib/api';
+import { CommandGraphQLPanel } from '@lyte/components/graphql-data-panel';
+import { api, type CommandAction } from '@lyte/lib/api';
 import { cn } from '@lyte/lib/utils';
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { doctrineEventBus } from '@szl-holdings/observability';
@@ -118,7 +118,7 @@ function stateToStatus(state: string): StatusKey {
   return map[state] ?? 'open';
 }
 
-function liveActionToDisplay(a: LyteAction): DisplayAction {
+function liveActionToDisplay(a: CommandAction): DisplayAction {
   const meta = (a.metadata ?? {}) as Record<string, unknown>;
   return {
     id: `A-${a.id}`,
@@ -293,11 +293,11 @@ export default function ActionCenter() {
     refetchInterval: 300_000,
   });
 
-  const { lastMessage: wsLyteMsg } = useRealtimeChannel('lyte-metrics');
+  const { lastMessage: wsCommandMsg } = useRealtimeChannel('command-metrics');
   useEffect(() => {
-    if (!wsLyteMsg) return;
+    if (!wsCommandMsg) return;
     queryClient.invalidateQueries({ queryKey: ['lyte-actions'] });
-  }, [wsLyteMsg, queryClient]);
+  }, [wsCommandMsg, queryClient]);
 
   const updateMutation = useStandardMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) =>
@@ -332,7 +332,7 @@ export default function ActionCenter() {
         layer: 'DECIDE',
         severity: 'warning',
         title: `${immediate.length} immediate action${immediate.length > 1 ? 's' : ''} pending decision`,
-        description: `Lyte Action Center: ${immediate.length} immediate action(s) require decision. ${openCount} total open items.`,
+        description: `Command Action Center: ${immediate.length} immediate action(s) require decision. ${openCount} total open items.`,
         entitiesInvolved: immediate.slice(0, 3).map((a) => a.title),
         context: {
           source: 'action-center',
@@ -560,7 +560,7 @@ export default function ActionCenter() {
         </>
       )}
 
-      <LyteGraphQLPanel />
+      <CommandGraphQLPanel />
     </div>
   );
 }

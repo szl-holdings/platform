@@ -274,7 +274,7 @@ export default function PredictiveIntelligence() {
             className="text-[10px] font-bold uppercase tracking-widest font-mono"
             style={{ color: '#8b5cf6' }}
           >
-            Lyte · Predictive Intelligence
+            Command · Predictive Intelligence
           </span>
           <span
             className="px-1.5 py-0.5 rounded text-[8px] font-bold"

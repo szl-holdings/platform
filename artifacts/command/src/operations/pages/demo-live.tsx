@@ -619,7 +619,7 @@ export default function DemoLive() {
             <div className="flex items-center gap-2 mb-1">
               <Zap className="w-4 h-4" style={{ color: GOLD }} />
               <h1 className="text-sm font-bold tracking-wide" style={{ color: TEXT.primary }}>
-                Lyte Live Demo
+                Command Live Demo
               </h1>
               <span
                 className="text-[8px] px-2 py-px rounded font-mono uppercase tracking-wider"
@@ -633,7 +633,7 @@ export default function DemoLive() {
               </span>
             </div>
             <p className="text-[11px]" style={{ color: TEXT.secondary }}>
-              Watch Lyte detect a live signal, classify it, run the Alloy workflow engine through
+              Watch Command detect a live signal, classify it, run the Alloy workflow engine through
               PRISM phases, generate an AI recommendation, and execute — end to end.
             </p>
           </div>
@@ -853,7 +853,7 @@ export default function DemoLive() {
                         </span>
                       </div>
                       <p className="text-[10px]" style={{ color: TEXT.secondary }}>
-                        Lyte detected the signal, classified it, ran the Alloy workflow engine
+                        Command detected the signal, classified it, ran the Alloy workflow engine
                         through all 5 PRISM phases (Detect → Interpret → Decide → Execute → Verify),
                         generated an AI recommendation with evidence, received your approval, and
                         executed — in real-time.
@@ -890,7 +890,7 @@ export default function DemoLive() {
                       </span>
                     </div>
                     <p className="text-[10px] mb-3" style={{ color: TEXT.secondary }}>
-                      The recommendation was rejected. No action was taken. Lyte logged the decision
+                      The recommendation was rejected. No action was taken. Command logged the decision
                       in the audit trail.
                     </p>
                     <button

@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-interface LyteAlert {
+interface CommandAlert {
   id: number;
   name: string;
   description: string | null;
@@ -47,12 +47,12 @@ interface AlertEvent {
 }
 
 interface AlertsResponse {
-  data: LyteAlert[];
+  data: CommandAlert[];
   meta: { total: number; firingCount: number; activeCount: number };
 }
 
 const STATUS_CONFIG: Record<
-  LyteAlert['status'],
+  CommandAlert['status'],
   { label: string; color: string; bg: string; border: string; icon: React.ReactNode }
 > = {
   firing: {
@@ -110,12 +110,12 @@ const COND_LABELS: Record<string, string> = {
 function AlertDetail({ alertId, onClose }: { alertId: number; onClose: () => void }) {
   const { data, isLoading } = useStandardQuery({
     queryKey: ['alert-detail', alertId],
-    queryFn: () => apiFetch<LyteAlert & { events: AlertEvent[] }>(`/lyte/alerts/${alertId}`),
+    queryFn: () => apiFetch<CommandAlert & { events: AlertEvent[] }>(`/lyte/alerts/${alertId}`),
   });
 
   const qc = useQueryClient();
   const updateMutation = useStandardMutation({
-    mutationFn: (patch: Partial<LyteAlert>) =>
+    mutationFn: (patch: Partial<CommandAlert>) =>
       apiFetch(`/lyte/alerts/${alertId}`, { method: 'PATCH', body: JSON.stringify(patch) }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['alerts'] });
@@ -596,7 +596,7 @@ export default function AlertConfig() {
     refetchInterval: 30000,
   });
 
-  const alerts: LyteAlert[] = Array.isArray(data) ? data : (data?.data ?? []);
+  const alerts: CommandAlert[] = Array.isArray(data) ? data : (data?.data ?? []);
   const meta = data?.meta ?? {};
   const firingCount = alerts.filter((a) => a.status === 'firing').length;
   const activeCount = alerts.filter((a) => a.status === 'active').length;
@@ -617,7 +617,7 @@ export default function AlertConfig() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#d4a054' }}
             >
-              Lyte · Alert Config
+              Command · Alert Config
             </span>
           </div>
           <h1 className="text-xl font-bold text-white">Alert Configuration</h1>

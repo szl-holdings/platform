@@ -462,7 +462,7 @@ export default function PrismDashboard() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <BarChart3 className="w-3.5 h-3.5" style={{ color: "#d4a054" }} />
-            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#d4a054" }}>Lyte · PRISM Intelligence</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#d4a054" }}>Command · PRISM Intelligence</span>
           </div>
           <h1 className="text-xl font-bold text-white">PRISM Dashboard</h1>
           <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>7-lens intelligence model. Each lens scored 0–100 from live signals. Click any lens to drill into signals and recommended actions.</p>

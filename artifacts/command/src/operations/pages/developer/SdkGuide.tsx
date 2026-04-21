@@ -99,13 +99,13 @@ const scenarios = await client.security.getScenarios();`,
             name: 'Analytics',
             icon: Globe,
             color: 'text-tag-analytics',
-            code: `// Lyte analytics
-const metrics = await client.analytics.getLyteMetrics();
-const projects = await client.analytics.getLyteProjects();
+            code: `// Command analytics
+const metrics = await client.analytics.getCommandMetrics();
+const projects = await client.analytics.getCommandProjects();
 
-// Lyte observability
-const services = await client.analytics.getLyteServices();
-const alerts = await client.analytics.getLyteAlerts();`,
+// Command observability
+const services = await client.analytics.getCommandServices();
+const alerts = await client.analytics.getCommandAlerts();`,
           },
           {
             name: 'Maritime',

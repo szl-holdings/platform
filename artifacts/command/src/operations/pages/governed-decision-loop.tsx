@@ -2034,7 +2034,7 @@ export default function GovernedDecisionLoop() {
         <div className="flex items-center gap-2 mb-1">
           <BarChart3 className="w-4 h-4" style={{ color: ACCENT }} />
           <span className="text-xs font-medium uppercase tracking-widest" style={{ color: ACCENT }}>
-            Lyte · Governed Decision Loop
+            Command · Governed Decision Loop
           </span>
         </div>
         <h1 className="text-2xl font-bold" style={{ color: TEXT.primary }}>

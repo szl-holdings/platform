@@ -480,7 +480,7 @@ export default function EscalationWorkflow() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#d4a054' }}
             >
-              Lyte · Escalation Workflow
+              Command · Escalation Workflow
             </span>
           </div>
           <h1 className="text-xl font-bold text-white">Escalation Workflow</h1>

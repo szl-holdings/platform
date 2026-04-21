@@ -64,7 +64,7 @@ export default function EscalationCenter() {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: '#d4a054' }}
           >
-            Lyte · Escalation Center
+            Command · Escalation Center
           </span>
         </div>
         <h1 className="text-2xl font-bold text-white">Escalation Center</h1>

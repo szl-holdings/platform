@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { api, type LyteReadinessItem } from '@lyte/lib/api';
+import { api, type CommandReadinessItem } from '@lyte/lib/api';
 import { cn } from '@lyte/lib/utils';
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -60,7 +60,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; b
   },
 };
 
-function computeScore(items: LyteReadinessItem[]): number {
+function computeScore(items: CommandReadinessItem[]): number {
   if (items.length === 0) return 0;
   const scorable = items.filter((i) => i.status !== 'waived');
   if (scorable.length === 0) return 100;
@@ -104,7 +104,7 @@ function ScoreRing({ score }: { score: number }) {
   );
 }
 
-function ReadinessItemCard({ item, onUpdate }: { item: LyteReadinessItem; onUpdate: () => void }) {
+function ReadinessItemCard({ item, onUpdate }: { item: CommandReadinessItem; onUpdate: () => void }) {
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
   const typeConf = itemTypeConfig[item.itemType] ?? itemTypeConfig.launch_gate;
@@ -242,7 +242,7 @@ export default function ReadinessPage() {
   const itemTypes = [...new Set(items.map((i) => i.itemType))];
   const filtered = items.filter((i) => categoryFilter === 'all' || i.itemType === categoryFilter);
 
-  const groupedByType = itemTypes.reduce<Record<string, LyteReadinessItem[]>>((acc, t) => {
+  const groupedByType = itemTypes.reduce<Record<string, CommandReadinessItem[]>>((acc, t) => {
     acc[t] = (categoryFilter === 'all' ? items : filtered).filter((i) => i.itemType === t);
     return acc;
   }, {});
@@ -256,7 +256,7 @@ export default function ReadinessPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="font-display font-bold text-2xl text-white tracking-tight">
-            Lyte Readiness
+            Command Readiness
           </h1>
           <p className="text-sm text-slate-400 mt-1">
             Operational readiness scoring across all business dimensions

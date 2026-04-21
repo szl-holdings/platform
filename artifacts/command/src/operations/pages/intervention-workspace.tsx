@@ -116,7 +116,7 @@ export default function InterventionWorkspace() {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: '#d4a054' }}
           >
-            Lyte · Intervention Workspace
+            Command · Intervention Workspace
           </span>
         </div>
         <h1 className="text-2xl font-bold text-white">Intervention Workspace</h1>

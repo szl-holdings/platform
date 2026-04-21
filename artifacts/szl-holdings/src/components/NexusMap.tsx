@@ -17,7 +17,7 @@ const ecosystemNodes = [
   },
   {
     id: 'lyte',
-    name: 'Lyte · OBSERVE',
+    name: 'Command · OBSERVE',
     type: 'subsidiary',
     x: 82,
     y: 30,

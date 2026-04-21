@@ -78,12 +78,12 @@ export default function IntelligencePage() {
   });
 
   const qcIntel = useQueryClient();
-  const { lastMessage: wsLyteMsg } = useRealtimeChannel('lyte-metrics');
+  const { lastMessage: wsCommandMsg } = useRealtimeChannel('command-metrics');
   useEffect(() => {
-    if (!wsLyteMsg) return;
+    if (!wsCommandMsg) return;
     qcIntel.invalidateQueries({ queryKey: ['intel-anomalies'] });
     qcIntel.invalidateQueries({ queryKey: ['intel-ops-heatmap'] });
-  }, [wsLyteMsg, qcIntel]);
+  }, [wsCommandMsg, qcIntel]);
 
   const criticalAnomalies = anomalies.filter((a: any) => a.severity === 'critical').length;
 

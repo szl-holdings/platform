@@ -80,7 +80,7 @@ const DATA_SOURCE_LABELS: Record<string, string> = {
   firestorm_findings: 'Aegis Incidents',
   vessels: 'Vessels Fleet',
   terra_deals: 'Terra Deals',
-  lyte_signals: 'Lyte Signals',
+  lyte_signals: 'Command Signals',
   msp_tickets: 'MSP Tickets',
 };
 

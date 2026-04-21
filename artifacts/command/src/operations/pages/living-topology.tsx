@@ -60,7 +60,7 @@ const PLATFORM_NODES = [
   },
   {
     id: 'lyte-core',
-    label: 'Lyte Core',
+    label: 'Command Core',
     platform: 'KORA',
     connects: ['signal-bus', 'action-router', 'prism-engine'],
   },
@@ -78,7 +78,7 @@ const PLATFORM_NODES = [
   },
   {
     id: 'terra-lyte',
-    label: 'Terra Lyte',
+    label: 'Terra Command',
     platform: 'DOMAINE',
     connects: ['signal-bus', 'geo-index'],
   },
@@ -112,7 +112,7 @@ const PLATFORM_NODES = [
 
 const PLATFORM_COLORS: Record<string, string> = {
   Core: '#d4a054',
-  Lyte: '#d4a054',
+  Command: '#d4a054',
   Alloy: '#4B8BDB',
   Terra: '#4a90b8',
   Vessels: '#38bdf8',
@@ -469,7 +469,7 @@ export default function LivingTopology() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#d4a054' }}
             >
-              Lyte · Living Topology
+              Command · Living Topology
             </span>
             <span
               className="px-1.5 py-0.5 rounded text-[8px] font-bold"

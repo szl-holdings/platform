@@ -12,7 +12,7 @@ async function apiFetchList<T>(path: string): Promise<T[]> {
   return json as T[];
 }
 
-export interface LyteSignal {
+export interface CommandSignal {
   id: number;
   workspaceId: number;
   source: string;
@@ -26,7 +26,7 @@ export interface LyteSignal {
   createdAt: string;
 }
 
-export interface LyteIncident {
+export interface CommandIncident {
   id: number;
   workspaceId: number;
   title: string;
@@ -41,7 +41,7 @@ export interface LyteIncident {
   updatedAt: string;
 }
 
-export interface LyteRecommendation {
+export interface CommandRecommendation {
   id: number;
   workspaceId: number;
   incidentId?: number;
@@ -56,7 +56,7 @@ export interface LyteRecommendation {
   createdAt: string;
 }
 
-export interface LytePlaybook {
+export interface CommandPlaybook {
   id: number;
   workspaceId: number;
   title: string;
@@ -72,7 +72,7 @@ export interface LytePlaybook {
   updatedAt: string;
 }
 
-export interface LyteCommandCard {
+export interface CommandCard {
   id: number;
   workspaceId: number;
   title: string;
@@ -88,7 +88,7 @@ export interface LyteCommandCard {
   updatedAt: string;
 }
 
-export interface LyteAction {
+export interface CommandAction {
   id: number;
   workspaceId?: number;
   title: string;
@@ -115,7 +115,7 @@ export interface LyteAction {
   resolvedAt?: string;
 }
 
-export interface LyteSavedView {
+export interface CommandSavedView {
   id: number;
   workspaceId?: number;
   userId?: number;
@@ -134,7 +134,7 @@ export interface LyteSavedView {
   updatedAt: string;
 }
 
-export interface LyteReadinessItem {
+export interface CommandReadinessItem {
   id: number;
   workspaceId?: number;
   title: string;
@@ -154,7 +154,7 @@ export interface LyteReadinessItem {
   updatedAt: string;
 }
 
-export interface LyteDashboard {
+export interface CommandDashboard {
   summary: {
     totalSignals: number;
     criticalUnresolved: number;
@@ -168,43 +168,43 @@ export interface LyteDashboard {
     decisionLatency?: string;
   };
   correlations?: Array<{ cluster: string; entities: string[]; impact: string; sev: string }>;
-  recentSignals: LyteSignal[];
+  recentSignals: CommandSignal[];
   fetchedAt: string;
 }
 
-export interface LyteReadinessSummary {
-  items: LyteReadinessItem[];
+export interface CommandReadinessSummary {
+  items: CommandReadinessItem[];
   summary: { total: number; complete: number; blocked: number; score: number };
 }
 
 export const api = {
   signals: {
-    list: () => apiFetchList<LyteSignal>('/lyte/signals'),
-    create: (data: Partial<LyteSignal>) =>
-      apiFetch<LyteSignal>('/lyte/signals', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LyteSignal>) =>
-      apiFetch<LyteSignal>(`/lyte/signals/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    list: () => apiFetchList<CommandSignal>('/lyte/signals'),
+    create: (data: Partial<CommandSignal>) =>
+      apiFetch<CommandSignal>('/lyte/signals', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<CommandSignal>) =>
+      apiFetch<CommandSignal>(`/lyte/signals/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (id: number) =>
       apiFetch<{ deleted: boolean }>(`/lyte/signals/${id}`, { method: 'DELETE' }),
     acknowledge: (id: number) =>
-      apiFetch<LyteSignal>(`/lyte/signals/${id}/acknowledge`, { method: 'POST' }),
+      apiFetch<CommandSignal>(`/lyte/signals/${id}/acknowledge`, { method: 'POST' }),
     assign: (id: number, assignee: string) =>
-      apiFetch<LyteSignal>(`/lyte/signals/${id}/assign`, {
+      apiFetch<CommandSignal>(`/lyte/signals/${id}/assign`, {
         method: 'POST',
         body: JSON.stringify({ assignee }),
       }),
     escalate: (id: number, to?: string, notes?: string) =>
-      apiFetch<LyteSignal>(`/lyte/signals/${id}/escalate`, {
+      apiFetch<CommandSignal>(`/lyte/signals/${id}/escalate`, {
         method: 'POST',
         body: JSON.stringify({ escalateTo: to, notes }),
       }),
     resolve: (id: number, notes?: string) =>
-      apiFetch<LyteSignal>(`/lyte/signals/${id}/resolve`, {
+      apiFetch<CommandSignal>(`/lyte/signals/${id}/resolve`, {
         method: 'POST',
         body: JSON.stringify({ notes }),
       }),
     override: (id: number, reason: string) =>
-      apiFetch<LyteSignal>(`/lyte/signals/${id}/override`, {
+      apiFetch<CommandSignal>(`/lyte/signals/${id}/override`, {
         method: 'POST',
         body: JSON.stringify({ reason }),
       }),
@@ -217,11 +217,11 @@ export const api = {
       }),
   },
   incidents: {
-    list: () => apiFetchList<LyteIncident>('/lyte/incidents'),
-    create: (data: Partial<LyteIncident>) =>
-      apiFetch<LyteIncident>('/lyte/incidents', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LyteIncident>) =>
-      apiFetch<LyteIncident>(`/lyte/incidents/${id}`, {
+    list: () => apiFetchList<CommandIncident>('/lyte/incidents'),
+    create: (data: Partial<CommandIncident>) =>
+      apiFetch<CommandIncident>('/lyte/incidents', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<CommandIncident>) =>
+      apiFetch<CommandIncident>(`/lyte/incidents/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
@@ -229,14 +229,14 @@ export const api = {
       apiFetch<{ deleted: boolean }>(`/lyte/incidents/${id}`, { method: 'DELETE' }),
   },
   recommendations: {
-    list: () => apiFetchList<LyteRecommendation>('/lyte/recommendations'),
-    create: (data: Partial<LyteRecommendation>) =>
-      apiFetch<LyteRecommendation>('/lyte/recommendations', {
+    list: () => apiFetchList<CommandRecommendation>('/lyte/recommendations'),
+    create: (data: Partial<CommandRecommendation>) =>
+      apiFetch<CommandRecommendation>('/lyte/recommendations', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
-    update: (id: number, data: Partial<LyteRecommendation>) =>
-      apiFetch<LyteRecommendation>(`/lyte/recommendations/${id}`, {
+    update: (id: number, data: Partial<CommandRecommendation>) =>
+      apiFetch<CommandRecommendation>(`/lyte/recommendations/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
@@ -244,12 +244,12 @@ export const api = {
       apiFetch<{ deleted: boolean }>(`/lyte/recommendations/${id}`, { method: 'DELETE' }),
   },
   playbooks: {
-    list: () => apiFetchList<LytePlaybook>('/lyte/playbooks'),
-    get: (id: number) => apiFetch<LytePlaybook>(`/lyte/playbooks/${id}`),
-    create: (data: Partial<LytePlaybook>) =>
-      apiFetch<LytePlaybook>('/lyte/playbooks', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LytePlaybook>) =>
-      apiFetch<LytePlaybook>(`/lyte/playbooks/${id}`, {
+    list: () => apiFetchList<CommandPlaybook>('/lyte/playbooks'),
+    get: (id: number) => apiFetch<CommandPlaybook>(`/lyte/playbooks/${id}`),
+    create: (data: Partial<CommandPlaybook>) =>
+      apiFetch<CommandPlaybook>('/lyte/playbooks', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<CommandPlaybook>) =>
+      apiFetch<CommandPlaybook>(`/lyte/playbooks/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
@@ -257,14 +257,14 @@ export const api = {
       apiFetch<{ deleted: boolean }>(`/lyte/playbooks/${id}`, { method: 'DELETE' }),
   },
   commandCards: {
-    list: () => apiFetchList<LyteCommandCard>('/lyte/command-cards'),
-    create: (data: Partial<LyteCommandCard>) =>
-      apiFetch<LyteCommandCard>('/lyte/command-cards', {
+    list: () => apiFetchList<CommandCard>('/lyte/command-cards'),
+    create: (data: Partial<CommandCard>) =>
+      apiFetch<CommandCard>('/lyte/command-cards', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
-    update: (id: number, data: Partial<LyteCommandCard>) =>
-      apiFetch<LyteCommandCard>(`/lyte/command-cards/${id}`, {
+    update: (id: number, data: Partial<CommandCard>) =>
+      apiFetch<CommandCard>(`/lyte/command-cards/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
@@ -278,13 +278,13 @@ export const api = {
             Object.entries(params).filter(([, v]) => v != null) as [string, string][],
           ).toString()
         : '';
-      return apiFetchList<LyteAction>(`/lyte/actions${qs ? `?${qs}` : ''}`);
+      return apiFetchList<CommandAction>(`/lyte/actions${qs ? `?${qs}` : ''}`);
     },
-    get: (id: number) => apiFetch<LyteAction>(`/lyte/actions/${id}`),
-    create: (data: Partial<LyteAction>) =>
-      apiFetch<LyteAction>('/lyte/actions', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LyteAction>) =>
-      apiFetch<LyteAction>(`/lyte/actions/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    get: (id: number) => apiFetch<CommandAction>(`/lyte/actions/${id}`),
+    create: (data: Partial<CommandAction>) =>
+      apiFetch<CommandAction>('/lyte/actions', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<CommandAction>) =>
+      apiFetch<CommandAction>(`/lyte/actions/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (id: number) =>
       apiFetch<{ deleted: boolean }>(`/lyte/actions/${id}`, { method: 'DELETE' }),
   },
@@ -295,29 +295,29 @@ export const api = {
             Object.entries(params).filter(([, v]) => v != null) as [string, string][],
           ).toString()
         : '';
-      return apiFetchList<LyteSavedView>(`/lyte/views${qs ? `?${qs}` : ''}`);
+      return apiFetchList<CommandSavedView>(`/lyte/views${qs ? `?${qs}` : ''}`);
     },
-    create: (data: Partial<LyteSavedView>) =>
-      apiFetch<LyteSavedView>('/lyte/views', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LyteSavedView>) =>
-      apiFetch<LyteSavedView>(`/lyte/views/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    create: (data: Partial<CommandSavedView>) =>
+      apiFetch<CommandSavedView>('/lyte/views', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<CommandSavedView>) =>
+      apiFetch<CommandSavedView>(`/lyte/views/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (id: number) =>
       apiFetch<{ deleted: boolean }>(`/lyte/views/${id}`, { method: 'DELETE' }),
   },
   readiness: {
-    get: () => apiFetch<LyteReadinessSummary>('/lyte/readiness'),
+    get: () => apiFetch<CommandReadinessSummary>('/lyte/readiness'),
     list: (workspaceId?: number) =>
-      apiFetchList<LyteReadinessItem>(
+      apiFetchList<CommandReadinessItem>(
         `/lyte/readiness${workspaceId ? `?workspaceId=${workspaceId}` : ''}`,
       ),
-    getItem: (id: number) => apiFetch<LyteReadinessItem>(`/lyte/readiness/${id}`),
-    create: (data: Partial<LyteReadinessItem>) =>
-      apiFetch<LyteReadinessItem>('/lyte/readiness', {
+    getItem: (id: number) => apiFetch<CommandReadinessItem>(`/lyte/readiness/${id}`),
+    create: (data: Partial<CommandReadinessItem>) =>
+      apiFetch<CommandReadinessItem>('/lyte/readiness', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
-    update: (id: number, data: Partial<LyteReadinessItem>) =>
-      apiFetch<LyteReadinessItem>(`/lyte/readiness/${id}`, {
+    update: (id: number, data: Partial<CommandReadinessItem>) =>
+      apiFetch<CommandReadinessItem>(`/lyte/readiness/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
@@ -332,7 +332,7 @@ export const api = {
         lastUpdated: string;
       }>(`/lyte/readiness/score${workspaceId ? `?workspaceId=${workspaceId}` : ''}`),
   },
-  dashboard: () => apiFetch<LyteDashboard>('/lyte/dashboard'),
+  dashboard: () => apiFetch<CommandDashboard>('/lyte/dashboard'),
   dashboards: {
     list: () => apiFetch<unknown[]>('/lyte/dashboards'),
     get: (id: number) => apiFetch<unknown>(`/lyte/dashboards/${id}`),

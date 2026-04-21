@@ -261,7 +261,7 @@ export default function OwnershipMap() {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: '#d4a054' }}
           >
-            Lyte · Ownership Map
+            Command · Ownership Map
           </span>
           <span
             className="inline-flex items-center gap-1 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ml-1"

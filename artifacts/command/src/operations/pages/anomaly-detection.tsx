@@ -204,7 +204,7 @@ export default function AnomalyDetection() {
       <div className="flex justify-end pt-2">
         <MicroFeedbackWidget
           featureId="lyte-anomaly-detection"
-          featureName="Lyte AIOps Metric Spike & Anomaly Cards"
+          featureName="Command AIOps Metric Spike & Anomaly Cards"
           app="lyte"
           compact
           prompt="Were these anomaly cards useful?"

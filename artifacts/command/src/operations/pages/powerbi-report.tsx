@@ -92,7 +92,7 @@ interface EmbedTokenResponse {
   expiration: string;
 }
 
-export default function LytePowerBiReport() {
+export default function CommandPowerBiReport() {
   const [embedConfig, setEmbedConfig] = useState<PowerBiEmbedConfig | null>(null);
   const [fetching, setFetching] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);

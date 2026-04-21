@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { analytics } from '@lyte/lib/analytics';
-import { api, type LyteDashboard, type LyteRecommendation, type LyteSignal } from '@lyte/lib/api';
+import { api, type CommandDashboard, type CommandRecommendation, type CommandSignal } from '@lyte/lib/api';
 import type { SignalSeverity } from '@lyte/lib/business-data';
 import { severityColors } from '@lyte/lib/business-data';
 import { cn } from '@lyte/lib/utils';
@@ -334,7 +334,7 @@ function PrismCompositeRing({
 
 export default function Dashboard() {
   const [activeRole, setActiveRole] = useState('operator');
-  const [auditSignal, setAuditSignal] = useState<LyteSignal | null>(null);
+  const [auditSignal, setAuditSignal] = useState<CommandSignal | null>(null);
 
   useEffect(() => {
     const start = Date.now();
@@ -348,7 +348,7 @@ export default function Dashboard() {
     isLoading: dashLoading,
     error: dashError,
     refetch,
-  } = useStandardQuery<LyteDashboard>({
+  } = useStandardQuery<CommandDashboard>({
     queryKey: ['lyte-dashboard'],
     queryFn: () => api.dashboard(),
     refetchInterval: 60_000,
@@ -366,7 +366,7 @@ export default function Dashboard() {
     refetchInterval: 30_000,
   });
 
-  const { data: recommendationsData = [] } = useStandardQuery<LyteRecommendation[]>({
+  const { data: recommendationsData = [] } = useStandardQuery<CommandRecommendation[]>({
     queryKey: ['lyte-recommendations'],
     queryFn: () => api.recommendations.list(),
     staleTime: 120_000,
@@ -554,7 +554,7 @@ export default function Dashboard() {
                 freshness: dashLoading ? 'unknown' : 'minutes',
                 confidence: 'high',
                 dataState: dashError ? 'demo' : 'live',
-                owner: 'Lyte Operations',
+                owner: 'Command Operations',
                 nextRefresh: 'Auto · 60s',
               } as DataProvenanceInfo
             }
@@ -708,7 +708,7 @@ export default function Dashboard() {
             {activeRole === 'analyst' &&
               `${signals.length} signals across ${new Set(signals.map((s) => s.source)).size} sources. ${criticalSignals.length} critical, ${highSignals.length} high. $5.03M exposure.`}
             {activeRole === 'buyer' &&
-              'Viewing Lyte with sample data. Signals and actions demonstrate intelligence from your existing tools.'}
+              'Viewing Command with sample data. Signals and actions demonstrate intelligence from your existing tools.'}
           </span>
           <Link
             href="/operations/approvals"

@@ -42,7 +42,7 @@ const TRACES: Trace[] = [
   {
     id: 'trace-001',
     traceId: 'trc-lyte-4f8a2b',
-    agent: 'Lyte Autonomous Agent',
+    agent: 'Command Autonomous Agent',
     trigger: 'scheduled_run',
     status: 'completed',
     startedAt: '2 min ago',

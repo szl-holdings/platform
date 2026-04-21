@@ -703,7 +703,7 @@ export default function AlertManagementPage() {
         <div className="flex justify-end pt-3">
           <MicroFeedbackWidget
             featureId="lyte-alert-management-summary"
-            featureName="Lyte AIOps Alert Summaries"
+            featureName="Command AIOps Alert Summaries"
             app="lyte"
             compact
             prompt="Were these alert summaries useful?"

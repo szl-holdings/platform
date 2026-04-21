@@ -48,7 +48,7 @@ interface MetricRow {
 const REGISTERED_AGENTS: Agent[] = [
   {
     id: 'lyte-autonomous',
-    name: 'Lyte Autonomous Agent',
+    name: 'Command Autonomous Agent',
     status: 'running',
     type: 'Business Observability',
     uptime: '14d 6h',

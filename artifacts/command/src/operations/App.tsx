@@ -1,4 +1,4 @@
-import { LyteLayout } from '@lyte/components/lyte-layout';
+import { CommandLayout } from '@lyte/components/lyte-layout';
 import { DemoModeProvider } from '@lyte/lib/demo-mode';
 import { McpOverlay } from '@szl-holdings/mcp-client';
 import {
@@ -37,7 +37,7 @@ import type React from 'react';
 import { lazy, Suspense, useEffect } from 'react';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
-const LYTE_ACCENT = LANE_ACCENT_HEX.lyte.primary;
+const COMMAND_ACCENT = LANE_ACCENT_HEX.lyte.primary;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,14 +66,14 @@ function PageLoader() {
     <div className="flex items-center justify-center h-full min-h-[200px]">
       <div
         className="w-6 h-6 border-2 rounded-full animate-spin"
-        style={{ borderColor: 'rgba(212,160,84,0.25)', borderTopColor: LYTE_ACCENT }}
+        style={{ borderColor: 'rgba(212,160,84,0.25)', borderTopColor: COMMAND_ACCENT }}
       />
     </div>
   );
 }
 
-const LytePulse = lazy(() => import('@/pages/pulse'));
-const LyteAtlasArtifactsPage = lazy(() => import('@/pages/atlas-artifacts'));
+const CommandPulse = lazy(() => import('@/pages/pulse'));
+const CommandAtlasArtifactsPage = lazy(() => import('@/pages/atlas-artifacts'));
 const ExecutiveCommand = lazy(() => import('@/pages/executive-command'));
 const BlockerBoard = lazy(() => import('@/pages/blocker-board'));
 const DigestCenter = lazy(() => import('@/pages/digest-center'));
@@ -106,7 +106,7 @@ const OperationalQueue = lazy(() => import('@/pages/operational-queue'));
 const SignalsPage = lazy(() => import('@/pages/signals-page'));
 const ActionsPage = lazy(() => import('@/pages/actions-page'));
 const ReadinessPage = lazy(() => import('@/pages/readiness-page'));
-const LyteMarketingLanding = lazy(() => import('@/pages/marketing-landing'));
+const CommandMarketingLanding = lazy(() => import('@/pages/marketing-landing'));
 const PrismDashboard = lazy(() => import('@/pages/prism-dashboard'));
 const MetricsExplorer = lazy(() => import('@/pages/metrics-explorer'));
 
@@ -159,7 +159,7 @@ const DecisionEventLog = lazy(() => import('@/pages/developer/DecisionEventLog')
 const LivingTopology = lazy(() => import('@/pages/living-topology'));
 const GpuComputeObservatory = lazy(() => import('@/pages/gpu-compute-observatory'));
 const BusinessSignalsIntelligence = lazy(() => import('@/pages/business-signals-intelligence'));
-const LytePredictiveIntelligence = lazy(() => import('@/pages/predictive-intelligence'));
+const CommandPredictiveIntelligence = lazy(() => import('@/pages/predictive-intelligence'));
 
 // ─── Self-Healing Ops & Revenue Attribution (new) ─────────────────────────────
 const RevenueImpact = lazy(() => import('@/pages/revenue-impact'));
@@ -209,7 +209,7 @@ function PrivateRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/pulse" component={LytePulse} />
+        <Route path="/pulse" component={CommandPulse} />
         <Route path="/" component={ExecutiveCommand} />
         <Route path="/overview" component={Dashboard} />
         <Route path="/dashboard" component={DemoDashboard} />
@@ -303,13 +303,13 @@ function PrivateRouter() {
         <Route path="/developer/decision-events" component={DecisionEventLog} />
         <Route path="/defer-lane" component={DeferLane} />
         <Route path="/shadow-mode" component={ShadowMode} />
-        <Route path="/atlas-artifacts" component={LyteAtlasArtifactsPage} />
+        <Route path="/atlas-artifacts" component={CommandAtlasArtifactsPage} />
         <Route path="/ai-ops" component={AIQualityDashboard} />
         {/* Living Intelligence Platform */}
         <Route path="/living-topology" component={LivingTopology} />
         <Route path="/gpu-observatory" component={GpuComputeObservatory} />
         <Route path="/business-signals" component={BusinessSignalsIntelligence} />
-        <Route path="/predictive-intelligence" component={LytePredictiveIntelligence} />
+        <Route path="/predictive-intelligence" component={CommandPredictiveIntelligence} />
         {/* Self-Healing Ops & Revenue Attribution */}
         <Route path="/revenue-impact" component={RevenueImpact} />
         <Route path="/self-healing" component={SelfHealing} />
@@ -766,18 +766,18 @@ function PrivateApp({
   setCmdOpen: (v: boolean) => void;
 }) {
   return (
-    <PowerUserProvider shortcuts={lyteShortcuts} appName="KORA" accentColor={LYTE_ACCENT}>
+    <PowerUserProvider shortcuts={lyteShortcuts} appName="KORA" accentColor={COMMAND_ACCENT}>
       <div className="flex flex-col h-screen bg-[#080c14]">
         <EcosystemNav
           currentAppId="command"
           currentAppName="Unified Command"
-          accentColor={LYTE_ACCENT}
+          accentColor={COMMAND_ACCENT}
         />
         <SandboxModeBanner />
         <div className="flex-1 overflow-hidden">
-          <LyteLayout>
+          <CommandLayout>
             <PrivateRouter />
-          </LyteLayout>
+          </CommandLayout>
         </div>
       </div>
       <CommandPalette
@@ -785,7 +785,7 @@ function PrivateApp({
         onClose={() => setCmdOpen(false)}
         commands={lyteCommands}
         appName="KORA"
-        accentColor={LYTE_ACCENT}
+        accentColor={COMMAND_ACCENT}
       />
     </PowerUserProvider>
   );
@@ -822,7 +822,7 @@ function AppContent({
   if (normalizedPath === '/pulse') {
     return (
       <Suspense fallback={<div style={{ height: '100vh', background: '#080c14' }} />}>
-        <LytePulse />
+        <CommandPulse />
       </Suspense>
     );
   }
@@ -847,7 +847,7 @@ function AppContent({
             width: 24,
             height: 24,
             border: '2px solid rgba(212,160,84,0.25)',
-            borderTopColor: LYTE_ACCENT,
+            borderTopColor: COMMAND_ACCENT,
             borderRadius: '50%',
             animation: 'spin 0.8s linear infinite',
           }}
@@ -859,7 +859,7 @@ function AppContent({
   if (!isAuthenticated || forceWebsite) {
     return (
       <Suspense fallback={<div style={{ height: '100vh', background: '#080c14' }} />}>
-        <LyteMarketingLanding onSignIn={login} />
+        <CommandMarketingLanding onSignIn={login} />
       </Suspense>
     );
   }
@@ -867,7 +867,7 @@ function AppContent({
   return <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
 }
 
-const LYTE_STATUS_CONFIG = {
+const COMMAND_STATUS_CONFIG = {
   active: false,
   level: 'maintenance' as const,
   message: 'Scheduled maintenance in progress. Some features may be temporarily unavailable.',
@@ -882,16 +882,16 @@ function App() {
       <PrismBusProvider domain="lyte">
         <SandboxModeProvider>
           <QueryClientProvider client={queryClient}>
-            <StaleIndicator accentColor={LYTE_ACCENT} />
+            <StaleIndicator accentColor={COMMAND_ACCENT} />
             <DemoModeProvider>
               <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-                <StatusBanner config={LYTE_STATUS_CONFIG} />
+                <StatusBanner config={COMMAND_STATUS_CONFIG} />
                 <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
                 <AgentCopilot config={beaconConfig} />
                 <McpOverlay domain="lyte" />
                 <CookieBanner
                   privacyUrl="https://szlholdings.com/legal/privacy"
-                  accentColor={LYTE_ACCENT}
+                  accentColor={COMMAND_ACCENT}
                 />
               </WouterRouter>
             </DemoModeProvider>

@@ -89,7 +89,7 @@ export default function GettingStarted() {
             {
               icon: Globe,
               name: 'Analytics',
-              desc: 'Lyte — decision analytics, metrics, observability',
+              desc: 'Command — decision analytics, metrics, observability',
               color: 'text-[#4a90b8] bg-[#4a90b8]/10',
             },
             {
@@ -156,7 +156,7 @@ const health = await client.platform.health();
 const threats = await client.security.getThreats();
 
 // Access analytics
-const metrics = await client.analytics.getLyteMetrics();`}</code>
+const metrics = await client.analytics.getCommandMetrics();`}</code>
             </pre>
           </div>
         </div>

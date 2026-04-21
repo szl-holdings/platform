@@ -260,7 +260,7 @@ export default function DemoPrioritiesPage() {
               className="text-[10px] font-medium uppercase tracking-widest"
               style={{ color: '#d4a054' }}
             >
-              Lyte · Priorities
+              Command · Priorities
             </span>
           </div>
           <h1 className="text-lg font-bold" style={{ color: TEXT.primary }}>

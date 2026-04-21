@@ -590,7 +590,7 @@ export const demoAlerts: DemoAlert[] = [
     id: 'ALT-009',
     name: 'Critical Signal Threshold',
     alertType: 'threshold',
-    service: 'Lyte Signal Engine',
+    service: 'Command Signal Engine',
     metricName: 'active_critical_signals',
     condition: 'gte',
     threshold: 3,
@@ -1145,7 +1145,7 @@ export const demoRuns: DemoRun[] = [
     id: 'RUN-001',
     workflowId: 'WF-001',
     workflowName: 'Enterprise Deal Approval',
-    triggeredBy: 'Lyte Signal Engine (DS-001)',
+    triggeredBy: 'Command Signal Engine (DS-001)',
     startedAt: daysAgo(18),
     completedAt: null,
     status: 'running',
@@ -1526,7 +1526,7 @@ export const demoAuditEvents: DemoAuditEvent[] = [
   {
     id: 'AUD-001',
     timestamp: minsAgo(8),
-    actor: 'Lyte Signal Engine',
+    actor: 'Command Signal Engine',
     actorRole: 'System',
     action: 'Signal Detected',
     resource: 'Signal',
@@ -1554,7 +1554,7 @@ export const demoAuditEvents: DemoAuditEvent[] = [
   {
     id: 'AUD-003',
     timestamp: minsAgo(35),
-    actor: 'Lyte Workflow Engine',
+    actor: 'Command Workflow Engine',
     actorRole: 'System',
     action: 'Escalation Triggered',
     resource: 'Workflow',
@@ -1582,7 +1582,7 @@ export const demoAuditEvents: DemoAuditEvent[] = [
   {
     id: 'AUD-005',
     timestamp: hoursAgo(4),
-    actor: 'Lyte Alert Engine',
+    actor: 'Command Alert Engine',
     actorRole: 'System',
     action: 'Alert Fired',
     resource: 'Alert',
@@ -1638,7 +1638,7 @@ export const demoAuditEvents: DemoAuditEvent[] = [
   {
     id: 'AUD-009',
     timestamp: hoursAgo(18),
-    actor: 'Lyte Signal Engine',
+    actor: 'Command Signal Engine',
     actorRole: 'System',
     action: 'Signal Auto-Resolved',
     resource: 'Signal',
@@ -1672,7 +1672,7 @@ export const demoAuditEvents: DemoAuditEvent[] = [
     resource: 'User',
     resourceId: 'USR-044',
     context:
-      'Quarterly access review completed for 44 active Lyte users. 3 users flagged for role downgrade (last login >90 days). Access review report generated and sent to IT Security.',
+      'Quarterly access review completed for 44 active Command users. 3 users flagged for role downgrade (last login >90 days). Access review report generated and sent to IT Security.',
     outcome: 'success',
     ipAddress: '10.0.1.10',
     tags: ['compliance', 'access_review', 'automated'],
@@ -1694,7 +1694,7 @@ export const demoAuditEvents: DemoAuditEvent[] = [
   {
     id: 'AUD-013',
     timestamp: daysAgo(2),
-    actor: 'Lyte Compliance Engine',
+    actor: 'Command Compliance Engine',
     actorRole: 'System',
     action: 'Compliance Check Failed',
     resource: 'Readiness Item',
@@ -1923,7 +1923,7 @@ export const demoReadinessItems: DemoReadinessItem[] = [
     category: 'Compliance',
     title: 'Quarterly access review completed',
     description:
-      'Review of all user access levels in Lyte, CRM, and financial systems. Remove or downgrade inactive or over-provisioned accounts.',
+      'Review of all user access levels in Command, CRM, and financial systems. Remove or downgrade inactive or over-provisioned accounts.',
     status: 'complete',
     score: 100,
     owner: 'IT Security',
@@ -1994,7 +1994,7 @@ export const demoIntegrations: DemoIntegration[] = [
     errorsLast24h: 0,
     owner: 'RevOps',
     description:
-      'Primary CRM integration for pipeline, opportunities, accounts, contacts, and activity logs. Bidirectional sync with Lyte signal engine.',
+      'Primary CRM integration for pipeline, opportunities, accounts, contacts, and activity logs. Bidirectional sync with Command signal engine.',
     signalSources: 6,
   },
   {
@@ -2022,7 +2022,7 @@ export const demoIntegrations: DemoIntegration[] = [
     errorsLast24h: 2,
     owner: 'Engineering Ops',
     description:
-      'Workflow ticket creation and status sync. Exceptions and action items in Lyte create corresponding Jira tickets. Inbound status updates close Lyte items.',
+      'Workflow ticket creation and status sync. Exceptions and action items in Command create corresponding Jira tickets. Inbound status updates close Command items.',
     signalSources: 1,
   },
   {
@@ -2036,7 +2036,7 @@ export const demoIntegrations: DemoIntegration[] = [
     errorsLast24h: 0,
     owner: 'CS Ops',
     description:
-      'Customer health scores, QBR tracking, and CS activity data. Health score drops trigger Lyte signals automatically.',
+      'Customer health scores, QBR tracking, and CS activity data. Health score drops trigger Command signals automatically.',
     signalSources: 2,
   },
   {
@@ -2050,7 +2050,7 @@ export const demoIntegrations: DemoIntegration[] = [
     errorsLast24h: 0,
     owner: 'IT Operations',
     description:
-      'Incident routing for critical Lyte alerts. PagerDuty incidents created automatically for severity: critical alerts with appropriate escalation paths.',
+      'Incident routing for critical Command alerts. PagerDuty incidents created automatically for severity: critical alerts with appropriate escalation paths.',
     signalSources: 0,
   },
   {
@@ -2092,7 +2092,7 @@ export const demoIntegrations: DemoIntegration[] = [
     errorsLast24h: 0,
     owner: 'Finance Ops',
     description:
-      'Usage telemetry and billing data for revenue leakage detection. Monthly reconciliation runs automatically and feeds into Lyte exception queue.',
+      'Usage telemetry and billing data for revenue leakage detection. Monthly reconciliation runs automatically and feeds into Command exception queue.',
     signalSources: 1,
   },
   {
@@ -2106,7 +2106,7 @@ export const demoIntegrations: DemoIntegration[] = [
     errorsLast24h: 0,
     owner: 'Legal',
     description:
-      'Contract signature tracking. SOW and approval document status feeds into workflow signals. Unsigned document age triggers Lyte alerts.',
+      'Contract signature tracking. SOW and approval document status feeds into workflow signals. Unsigned document age triggers Command alerts.',
     signalSources: 1,
   },
   {
@@ -2120,7 +2120,7 @@ export const demoIntegrations: DemoIntegration[] = [
     errorsLast24h: 0,
     owner: 'IT Security',
     description:
-      'User identity and access management. Lyte role assignments synchronized with Okta groups. Access review data sourced from Okta audit logs.',
+      'User identity and access management. Command role assignments synchronized with Okta groups. Access review data sourced from Okta audit logs.',
     signalSources: 0,
   },
   {
@@ -2134,7 +2134,7 @@ export const demoIntegrations: DemoIntegration[] = [
     errorsLast24h: 0,
     owner: 'Data Engineering',
     description:
-      "Central data warehouse for historical signal analysis, trend modeling, and forecast baseline computation. Powers Lyte's anomaly detection ML models.",
+      "Central data warehouse for historical signal analysis, trend modeling, and forecast baseline computation. Powers Command's anomaly detection ML models.",
     signalSources: 0,
   },
   {
@@ -2159,7 +2159,7 @@ export const demoReports: DemoReport[] = [
     name: 'Q1 Executive Business Review',
     type: 'executive_summary',
     generatedAt: hoursAgo(2),
-    generatedBy: 'Lyte Auto-Report Engine',
+    generatedBy: 'Command Auto-Report Engine',
     status: 'complete',
     recipientCount: 8,
     format: 'pdf',
@@ -2173,7 +2173,7 @@ export const demoReports: DemoReport[] = [
     name: 'Daily Signal Digest',
     type: 'signal_digest',
     generatedAt: hoursAgo(6),
-    generatedBy: 'Lyte Auto-Report Engine',
+    generatedBy: 'Command Auto-Report Engine',
     status: 'complete',
     recipientCount: 24,
     format: 'html',
@@ -2187,7 +2187,7 @@ export const demoReports: DemoReport[] = [
     name: 'Workflow Health Report',
     type: 'workflow_health',
     generatedAt: daysAgo(1),
-    generatedBy: 'Lyte Auto-Report Engine',
+    generatedBy: 'Command Auto-Report Engine',
     status: 'complete',
     recipientCount: 12,
     format: 'pdf',
@@ -2215,7 +2215,7 @@ export const demoReports: DemoReport[] = [
     name: 'Operational Readiness Assessment — Q1 Close',
     type: 'readiness_assessment',
     generatedAt: daysAgo(2),
-    generatedBy: 'Lyte Auto-Report Engine',
+    generatedBy: 'Command Auto-Report Engine',
     status: 'complete',
     recipientCount: 6,
     format: 'pdf',
@@ -2229,7 +2229,7 @@ export const demoReports: DemoReport[] = [
     name: 'Forecast Variance Report — Week of Apr 3',
     type: 'forecast_variance',
     generatedAt: minsAgo(45),
-    generatedBy: 'Lyte Auto-Report Engine',
+    generatedBy: 'Command Auto-Report Engine',
     status: 'complete',
     recipientCount: 5,
     format: 'pdf',
@@ -2243,7 +2243,7 @@ export const demoReports: DemoReport[] = [
     name: 'Weekly Signal Digest — Apr 7',
     type: 'signal_digest',
     generatedAt: minsAgo(5),
-    generatedBy: 'Lyte Auto-Report Engine',
+    generatedBy: 'Command Auto-Report Engine',
     status: 'generating',
     recipientCount: 24,
     format: 'html',

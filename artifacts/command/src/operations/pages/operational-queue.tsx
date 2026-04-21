@@ -1,4 +1,4 @@
-import { api, type LyteAction, type LyteIncident, type LyteSignal } from '@lyte/lib/api';
+import { api, type CommandAction, type CommandIncident, type CommandSignal } from '@lyte/lib/api';
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Button } from '@szl-holdings/shared-ui/ui/button';
@@ -102,7 +102,7 @@ const ENTITY_ICONS: Record<EntityType, typeof Radio> = {
 
 // ── Adapters: REST → QueueItem ────────────────────────────────────────────────
 
-function signalToQueueItem(s: LyteSignal): QueueItem {
+function signalToQueueItem(s: CommandSignal): QueueItem {
   const meta = (s.metadata ?? {}) as Record<string, unknown>;
   const sev = (
     ['critical', 'high', 'medium', 'low', 'info'].includes(s.severity) ? s.severity : 'medium'
@@ -128,7 +128,7 @@ function signalToQueueItem(s: LyteSignal): QueueItem {
   };
 }
 
-function incidentToQueueItem(i: LyteIncident): QueueItem {
+function incidentToQueueItem(i: CommandIncident): QueueItem {
   const meta = (i.metadata ?? {}) as Record<string, unknown>;
   const sev = (
     ['critical', 'high', 'medium', 'low'].includes(i.severity) ? i.severity : 'high'
@@ -152,7 +152,7 @@ function incidentToQueueItem(i: LyteIncident): QueueItem {
   };
 }
 
-function actionToQueueItem(a: LyteAction): QueueItem {
+function actionToQueueItem(a: CommandAction): QueueItem {
   const history = Array.isArray(a.stateHistory) ? (a.stateHistory as AuditEntry[]) : [];
   const escalations = history
     .filter((h) => h.state === 'escalated')

@@ -15,7 +15,7 @@ const PLATFORM_DEFS = [
     name: 'KORA',
     label: 'Operational Decision Intelligence',
     copy: 'See risk, latency, ownership gaps, and workflow friction before they hit execution.',
-    cta: 'Explore Lyte',
+    cta: 'Explore Command',
     href: '/command/operations/',
     accent: 'hsl(190,90%,50%)',
     accentRgb: '14,188,212',

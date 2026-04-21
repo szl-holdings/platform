@@ -54,7 +54,7 @@ const TABS: { id: Tab; label: string; icon: typeof Brain; desc: string }[] = [
     id: 'signal-fusion',
     label: 'Signal Fusion',
     icon: Layers,
-    desc: 'Fused entities across all Lyte sources → CONSTELLATION',
+    desc: 'Fused entities across all Command sources → CONSTELLATION',
   },
   {
     id: 'bottlenecks',
@@ -1753,7 +1753,7 @@ export default function CognitiveRuntimePage(): JSX.Element {
                 letterSpacing: '0.06em',
               }}
             >
-              LYTE AI
+              COMMAND AI
             </span>
           </div>
           <div style={{ fontSize: 13, color: TEXT.tertiary }}>

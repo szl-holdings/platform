@@ -82,7 +82,7 @@ export default function DemoExceptionsPage() {
             className="text-[10px] font-medium uppercase tracking-widest"
             style={{ color: '#c45a4a' }}
           >
-            Lyte · Exceptions
+            Command · Exceptions
           </span>
         </div>
         <h1 className="text-lg font-bold" style={{ color: TEXT.primary }}>

@@ -67,16 +67,16 @@ import {
 import { type ReactNode, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 
-const LYTE_ONBOARDING_CONFIG: OnboardingConfig = {
-  appId: 'lyte',
+const COMMAND_ONBOARDING_CONFIG: OnboardingConfig = {
+  appId: 'command',
   appName: 'KORA',
   accentColor: '#d4a054',
   steps: [
     {
       id: 'welcome',
-      title: 'Welcome to Lyte',
+      title: 'Welcome to Command',
       description:
-        'Lyte is your business observability command center — detecting operational risk, surfacing ownership gaps, and routing action before business damage occurs.',
+        'Command is your business observability command center — detecting operational risk, surfacing ownership gaps, and routing action before business damage occurs.',
       placement: 'center',
       icon: Zap,
     },
@@ -84,7 +84,7 @@ const LYTE_ONBOARDING_CONFIG: OnboardingConfig = {
       id: 'prism',
       title: 'The PRISM Framework',
       description:
-        "PRISM is Lyte's intelligence spine: Pulse (health), Risk (exposure), Intelligence (analysis), Signals (events), and Motion (action). Each dimension gives you a different lens on your business.",
+        "PRISM is Command's intelligence spine: Pulse (health), Risk (exposure), Intelligence (analysis), Signals (events), and Motion (action). Each dimension gives you a different lens on your business.",
       placement: 'center',
       icon: Activity,
     },
@@ -438,11 +438,11 @@ function AdminSection({ location }: { location: string }) {
   );
 }
 
-export function LyteLayout({ children }: { children: ReactNode }) {
+export function CommandLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { status: wsStatus } = useRealtimeChannel('lyte-metrics');
-  const { replay: replayOnboarding } = useOnboardingState('lyte');
+  const { status: wsStatus } = useRealtimeChannel('command-metrics');
+  const { replay: replayOnboarding } = useOnboardingState('command');
   const { sandboxActive } = useSandboxMode();
   const isDemoMode =
     sandboxActive || new URLSearchParams(window.location.search).get('demo') === 'true';
@@ -491,7 +491,7 @@ export function LyteLayout({ children }: { children: ReactNode }) {
                 className="text-[11px] font-bold tracking-wide leading-none"
                 style={{ color: TEXT.primary }}
               >
-                LYTE
+                COMMAND
               </div>
               <div
                 className="text-[7px] uppercase tracking-[0.15em] mt-px"
@@ -574,13 +574,13 @@ export function LyteLayout({ children }: { children: ReactNode }) {
 
           <DemoModeToggle />
 
-          {LYTE_ONBOARDING_CONFIG.checklist && (
+          {COMMAND_ONBOARDING_CONFIG.checklist && (
             <div className="mx-2 mb-2">
               <GettingStartedChecklist
-                appId={LYTE_ONBOARDING_CONFIG.appId}
-                appName={LYTE_ONBOARDING_CONFIG.appName}
-                items={LYTE_ONBOARDING_CONFIG.checklist}
-                accentColor={LYTE_ONBOARDING_CONFIG.accentColor}
+                appId={COMMAND_ONBOARDING_CONFIG.appId}
+                appName={COMMAND_ONBOARDING_CONFIG.appName}
+                items={COMMAND_ONBOARDING_CONFIG.checklist}
+                accentColor={COMMAND_ONBOARDING_CONFIG.accentColor}
                 onReplayTour={replayOnboarding}
                 collapsed
               />
@@ -790,7 +790,7 @@ export function LyteLayout({ children }: { children: ReactNode }) {
         </main>
         <ServiceStatusRail />
       </div>
-      <OnboardingWizard config={LYTE_ONBOARDING_CONFIG} />
+      <OnboardingWizard config={COMMAND_ONBOARDING_CONFIG} />
     </div>
   );
 }

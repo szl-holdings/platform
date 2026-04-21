@@ -39,7 +39,7 @@ interface RevenueAnalytics {
   totalLifetimeRevenue: number;
 }
 
-interface LytePilotMetrics {
+interface CommandPilotMetrics {
   totalPilots: number;
   activePilots: number;
   trialingPilots: number;
@@ -121,7 +121,7 @@ export default function BillingAdminPage() {
     queryFn: () => apiFetch('/billing/revenue-analytics'),
   });
 
-  const { data: pilotData } = useStandardQuery<{ data: LytePilotMetrics }>({
+  const { data: pilotData } = useStandardQuery<{ data: CommandPilotMetrics }>({
     queryKey: ['lyte-pilot-metrics'],
     queryFn: () => apiFetch('/lyte/billing/pilot-metrics'),
     retry: false,
@@ -156,7 +156,7 @@ export default function BillingAdminPage() {
         <div>
           <h1 className="text-xl font-mono font-semibold text-[#e4d5b7]">Billing Admin</h1>
           <p className="text-xs text-[#556070] mt-1">
-            Revenue operations · Lyte pilot commercial flow
+            Revenue operations · Command pilot commercial flow
           </p>
         </div>
         <button
@@ -230,7 +230,7 @@ export default function BillingAdminPage() {
         <div className="bg-[#0e1420] border border-[#1e2a38] rounded-xl p-4">
           <h2 className="text-sm font-mono text-[#9ba8b8] mb-3 flex items-center gap-2">
             <Activity size={14} className="text-[#d4a054]" />
-            Lyte Pilot Contracts
+            Command Pilot Contracts
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div className="text-center">

@@ -305,7 +305,7 @@ export default function BusinessSignalsIntelligence() {
             className="text-[10px] font-bold uppercase tracking-widest font-mono"
             style={{ color: GOLD }}
           >
-            Lyte · Business Signal Intelligence
+            Command · Business Signal Intelligence
           </span>
         </div>
         <h1 className="text-xl font-bold text-white">Business Signal Intelligence</h1>

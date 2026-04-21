@@ -84,19 +84,19 @@ const prism = [
 const pillars = [
   {
     name: 'Visibility',
-    desc: 'See every operational surface — revenue pipelines, approval queues, team handoffs, customer health. If it affects outcomes, Lyte shows it.',
+    desc: 'See every operational surface — revenue pipelines, approval queues, team handoffs, customer health. If it affects outcomes, Command shows it.',
   },
   {
     name: 'Context',
-    desc: 'Signals without context are noise. Lyte connects every anomaly to the business process it impacts, the owner responsible, and the financial exposure it creates.',
+    desc: 'Signals without context are noise. Command connects every anomaly to the business process it impacts, the owner responsible, and the financial exposure it creates.',
   },
   {
     name: 'Ownership',
-    desc: 'Every process, risk, and decision has an owner. Lyte maps accountability chains so nothing falls between teams, departments, or role boundaries.',
+    desc: 'Every process, risk, and decision has an owner. Command maps accountability chains so nothing falls between teams, departments, or role boundaries.',
   },
   {
     name: 'Prioritization',
-    desc: 'Not everything is urgent. Lyte scores every signal by business impact, time sensitivity, and confidence — so operators work on what matters.',
+    desc: 'Not everything is urgent. Command scores every signal by business impact, time sensitivity, and confidence — so operators work on what matters.',
   },
   {
     name: 'Explainability',
@@ -104,18 +104,18 @@ const pillars = [
   },
   {
     name: 'Intervention',
-    desc: 'Visibility without action is a spectator sport. Lyte routes decisions to the right person with full context — approve, escalate, delegate, or resolve.',
+    desc: 'Visibility without action is a spectator sport. Command routes decisions to the right person with full context — approve, escalate, delegate, or resolve.',
   },
   {
     name: 'Continuous Motion',
-    desc: 'Are decisions getting faster? Are risks caught earlier? Is the organization accelerating or decelerating? Lyte tracks the velocity of improvement itself.',
+    desc: 'Are decisions getting faster? Are risks caught earlier? Is the organization accelerating or decelerating? Command tracks the velocity of improvement itself.',
   },
 ];
 
 const capabilities = [
   {
     title: 'Ownership Mapping',
-    desc: 'Every process, approval, and risk has an accountable owner. Lyte maps responsibility chains across teams, departments, and role boundaries.',
+    desc: 'Every process, approval, and risk has an accountable owner. Command maps responsibility chains across teams, departments, and role boundaries.',
   },
   {
     title: 'Approval Visibility',
@@ -127,7 +127,7 @@ const capabilities = [
   },
   {
     title: 'Signal Correlation',
-    desc: 'Connect anomalies across tools. A silent Slack channel + spiking Jira queue + missed standup = at-risk delivery. Lyte sees the pattern.',
+    desc: 'Connect anomalies across tools. A silent Slack channel + spiking Jira queue + missed standup = at-risk delivery. Command sees the pattern.',
   },
   {
     title: 'Business Risk Awareness',
@@ -231,7 +231,7 @@ function Reveal({
   );
 }
 
-export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => void }) {
+export default function CommandMarketingLanding({ onSignIn }: { onSignIn?: () => void }) {
   const [expandedPrism, setExpandedPrism] = useState<number | null>(null);
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -263,7 +263,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
             >
               <Zap size={13} style={{ color: '#d4a054' }} />
             </div>
-            <span className="font-bold text-[15px] tracking-tight text-white">Lyte</span>
+            <span className="font-bold text-[15px] tracking-tight text-white">Command</span>
             <span
               className="hidden sm:inline text-[9px] tracking-[0.15em] uppercase font-mono ml-1"
               style={{ color: 'rgba(255,255,255,0.12)' }}
@@ -367,7 +367,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
         </Reveal>
         <Reveal delay={200}>
           <h1 className="text-[clamp(2.2rem,5.5vw,4rem)] font-extrabold leading-[1.06] tracking-[-0.03em] max-w-[820px] mb-10">
-            <span style={{ color: '#d4a054' }}>let Lyte guide you.</span>
+            <span style={{ color: '#d4a054' }}>let Command guide you.</span>
           </h1>
         </Reveal>
 
@@ -377,7 +377,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
             style={{ color: 'rgba(255,255,255,0.3)' }}
           >
             Revenue stalling. Approvals aging. Ownership gaps widening. By the time these surface as
-            problems, the damage has already compounded. Lyte makes the invisible visible — before
+            problems, the damage has already compounded. Command makes the invisible visible — before
             it costs you.
           </p>
         </Reveal>
@@ -462,7 +462,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
                 Why has a team lead been silent for 72 hours while the sprint hemorrhages tickets?
               </p>
               <p>
-                Lyte connects the tools your business already runs on — Salesforce, ServiceNow,
+                Command connects the tools your business already runs on — Salesforce, ServiceNow,
                 Jira, Slack, Workday — and surfaces the operational signals that compound into risk,
                 revenue loss, and execution failure.
               </p>
@@ -737,7 +737,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
                 Capabilities
               </p>
               <h2 className="text-[clamp(1.5rem,3.5vw,2.25rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
-                What Lyte does
+                What Command does
               </h2>
               <p className="text-[15px] leading-[1.9]" style={{ color: 'rgba(255,255,255,0.25)' }}>
                 Six operational capabilities that transform how enterprises understand, prioritize,
@@ -787,7 +787,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
               style={{ color: 'rgba(255,255,255,0.25)' }}
             >
               These aren't hypotheticals. They're the kind of operational failures that happen every
-              day — and the interventions that Lyte makes possible.
+              day — and the interventions that Command makes possible.
             </p>
 
             <div className="flex flex-col gap-5">
@@ -846,7 +846,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
         </section>
       </Reveal>
 
-      {/* WHY LYTE / WHY NOW */}
+      {/* WHY COMMAND / WHY NOW */}
       <Reveal>
         <section className="relative py-28 sm:py-36 px-6">
           <div className="max-w-[720px] mx-auto">
@@ -881,7 +881,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
                 operational signals to the people who can act on them.
               </p>
               <p>
-                Lyte is that layer. It doesn't replace your tools. It makes them{' '}
+                Command is that layer. It doesn't replace your tools. It makes them{' '}
                 <span style={{ color: '#d4a054' }}>compound</span>.
               </p>
             </div>
@@ -892,9 +892,9 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
             >
               {[
                 { metric: '34h', label: 'Avg decision latency', direction: 'Current' },
-                { metric: '4h', label: 'With Lyte', direction: 'Target' },
+                { metric: '4h', label: 'With Command', direction: 'Target' },
                 { metric: '$2.1M', label: 'Avg annual exposure', direction: 'From gaps' },
-                { metric: '89%', label: 'Reduction', direction: 'With Lyte' },
+                { metric: '89%', label: 'Reduction', direction: 'With Command' },
               ].map((m) => (
                 <div key={m.label} className="bg-[#0a0d14] p-6 text-center">
                   <span
@@ -983,7 +983,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
               </h2>
               <p className="text-[15px] leading-[1.9]" style={{ color: 'rgba(255,255,255,0.25)' }}>
                 Every recommendation is auditable. Every action is tracked. Every boundary is
-                enforced. Lyte operates within strict governance guardrails designed for regulated
+                enforced. Command operates within strict governance guardrails designed for regulated
                 enterprises.
               </p>
             </div>
@@ -996,12 +996,12 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
                 {
                   icon: Cpu,
                   title: 'AI Reasoning Boundaries',
-                  desc: "Lyte's intelligence layer operates within strict analytical boundaries. No autonomous decision-making. Every recommendation requires human approval before action.",
+                  desc: "Command's intelligence layer operates within strict analytical boundaries. No autonomous decision-making. Every recommendation requires human approval before action.",
                 },
                 {
                   icon: Users,
                   title: 'Human-in-the-Loop',
-                  desc: 'Critical decisions are always routed to the right person with full context. Lyte surfaces and recommends — humans decide and act.',
+                  desc: 'Critical decisions are always routed to the right person with full context. Command surfaces and recommends — humans decide and act.',
                 },
                 {
                   icon: Lock,
@@ -1082,7 +1082,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
               Platform Walkthrough
             </p>
             <h2 className="text-[clamp(1.6rem,3vw,2.1rem)] font-bold text-white mb-3 tracking-tight">
-              How Lyte works in practice
+              How Command works in practice
             </h2>
             <p className="text-[14px] max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.3)' }}>
               From connection to command in under 5 minutes. No configuration. No professional
@@ -1099,7 +1099,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
                 {
                   step: '01',
                   title: 'Connect your tools',
-                  body: 'Lyte connects to your existing stack in one click — no custom integrations, no engineering time. Microsoft 365, Slack, Jira, Salesforce, GitHub, and 50+ more connectors available out of the box.',
+                  body: 'Command connects to your existing stack in one click — no custom integrations, no engineering time. Microsoft 365, Slack, Jira, Salesforce, GitHub, and 50+ more connectors available out of the box.',
                   tag: 'Setup',
                 },
                 {
@@ -1111,7 +1111,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
                 {
                   step: '03',
                   title: 'Ownership mapping resolves accountability',
-                  body: 'Lyte maps every process, approval, and risk to the person accountable for it — across teams, departments, and role boundaries. Nothing falls through the cracks when ownership is explicit.',
+                  body: 'Command maps every process, approval, and risk to the person accountable for it — across teams, departments, and role boundaries. Nothing falls through the cracks when ownership is explicit.',
                   tag: 'Command',
                 },
                 {
@@ -1176,7 +1176,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
         <section className="relative py-28 sm:py-36 px-6">
           <div className="max-w-[600px] mx-auto text-center">
             <h2 className="text-[clamp(1.5rem,3.5vw,2.25rem)] font-bold text-white mb-4 tracking-tight">
-              In the dark, let Lyte guide you.
+              In the dark, let Command guide you.
             </h2>
             <p className="text-[15px] mb-12" style={{ color: 'rgba(255,255,255,0.25)' }}>
               Connect your first tool in under 5 minutes. See what you've been missing.
@@ -1216,7 +1216,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
         onClose={() => setDemoOpen(false)}
         type="demo"
         app="lyte"
-        subtitle="Lyte — Business Observability Platform"
+        subtitle="Command — Business Observability Platform"
       />
 
       <footer
@@ -1231,7 +1231,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
                 className="text-[12px] font-semibold"
                 style={{ color: 'rgba(255,255,255,0.2)' }}
               >
-                Lyte
+                Command
               </span>
               <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.1)' }}>
                 by SZL Holdings

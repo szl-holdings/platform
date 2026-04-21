@@ -263,7 +263,7 @@ export default function DemoAlertsPage() {
               className="text-[10px] font-medium uppercase tracking-widest"
               style={{ color: '#d4a054' }}
             >
-              Lyte · Alerts
+              Command · Alerts
             </span>
           </div>
           <h1 className="text-lg font-bold" style={{ color: TEXT.primary }}>

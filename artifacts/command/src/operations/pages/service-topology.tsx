@@ -41,7 +41,7 @@ const PLATFORM_NODES = [
   },
   {
     id: 'lyte-core',
-    label: 'Lyte Core',
+    label: 'Command Core',
     icon: Zap,
     connects: ['signal-bus', 'action-router', 'prism-engine'],
     platform: 'KORA',
@@ -55,7 +55,7 @@ const PLATFORM_NODES = [
   },
   {
     id: 'terra-lyte',
-    label: 'Terra Lyte',
+    label: 'Terra Command',
     icon: Globe,
     connects: ['signal-bus', 'geo-index', 'crm-sync'],
     platform: 'DOMAINE',
@@ -129,7 +129,7 @@ const PLATFORM_NODES = [
 
 const PLATFORM_COLORS: Record<string, string> = {
   Core: '#d4a054',
-  Lyte: '#d4a054',
+  Command: '#d4a054',
   Alloy: '#4B8BDB',
   Terra: '#4a90b8',
   Vessels: '#38bdf8',
@@ -302,7 +302,7 @@ export default function ServiceTopology() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#d4a054' }}
             >
-              Lyte · Service Topology
+              Command · Service Topology
             </span>
           </div>
           <h1 className="text-xl font-bold text-white">Service Topology Map</h1>

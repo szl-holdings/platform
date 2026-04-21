@@ -27,7 +27,7 @@ import {
 import { useEffect, useState } from 'react';
 
 const AGENTS = [
-  { name: 'Lyte Observer', domain: 'signals' },
+  { name: 'Command Observer', domain: 'signals' },
   { name: 'Blocker Hunter', domain: 'blockers' },
   { name: 'Action Router', domain: 'actions' },
   { name: 'Priority Engine', domain: 'priorities' },
@@ -142,7 +142,7 @@ function SignalWaterfall() {
   );
 }
 
-export default function LytePulse() {
+export default function CommandPulse() {
   const [signalCount, setSignalCount] = useState(3421);
   useEffect(() => {
     const t = setInterval(() => setSignalCount((p) => p + Math.floor(Math.random() * 5)), 2000);

@@ -144,7 +144,7 @@ const SEED_CHANGES: TwinChange[] = [
     id: 'c-002',
     timestamp: '14:32:07',
     domain: 'lyte',
-    twinName: 'Lyte AIOps Twin',
+    twinName: 'Command AIOps Twin',
     changeType: 'incident_opened',
     summary:
       'SLO breach on payment-api service. P95 latency 847ms vs. 200ms target. Autonomous NOC engaged.',
@@ -211,7 +211,7 @@ const SEED_CHANGES: TwinChange[] = [
     id: 'c-008',
     timestamp: '14:02:11',
     domain: 'lyte',
-    twinName: 'Lyte AIOps Twin',
+    twinName: 'Command AIOps Twin',
     changeType: 'drift_detected',
     summary:
       '4 SLO contracts breached in last 30 minutes. Escalation path activated for payment-api. Runbook triggered.',
@@ -264,7 +264,7 @@ const SEED_CHANGES: TwinChange[] = [
     id: 'c-013',
     timestamp: '13:30:15',
     domain: 'lyte',
-    twinName: 'Lyte AIOps Twin',
+    twinName: 'Command AIOps Twin',
     changeType: 'incident_resolved',
     summary:
       'P2 incident on auth-service resolved by self-healing playbook. Root cause: memory leak in session handler.',
@@ -355,7 +355,7 @@ export default function WhatChanged() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#d4a054' }}
             >
-              Lyte · What Changed
+              Command · What Changed
             </span>
             {isLoading && (
               <Loader2 className="w-3 h-3 animate-spin" style={{ color: 'rgba(212,160,84,0.5)' }} />

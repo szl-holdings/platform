@@ -136,7 +136,7 @@ export const signals: BusinessSignal[] = [
       { time: daysAgo(14), event: 'Legal review assigned — no activity since' },
       { time: daysAgo(10), event: 'Anomaly threshold breached (10-day dwell)' },
       { time: daysAgo(7), event: 'Finance approval requested but not opened' },
-      { time: minsAgo(18), event: 'Signal detected by Lyte' },
+      { time: minsAgo(18), event: 'Signal detected by Command' },
     ],
   },
   {
@@ -164,7 +164,7 @@ export const signals: BusinessSignal[] = [
       { time: daysAgo(11), event: 'Oldest stalled project: Nexus Group implementation' },
       { time: daysAgo(8), event: 'Handoff queue SLA breach threshold crossed' },
       { time: daysAgo(5), event: 'Auto-escalation attempted — no owner resolved' },
-      { time: minsAgo(35), event: 'Signal detected by Lyte' },
+      { time: minsAgo(35), event: 'Signal detected by Command' },
     ],
   },
   {

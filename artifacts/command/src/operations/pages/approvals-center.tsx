@@ -18,7 +18,7 @@ export default function ApprovalsCenter() {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: '#d4a054' }}
           >
-            Lyte · Approvals Center
+            Command · Approvals Center
           </span>
         </div>
         <h1 className="text-2xl font-bold text-white">Approvals Center</h1>

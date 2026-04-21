@@ -268,7 +268,7 @@ export default function IntelligenceMesh() {
         </div>
         <p className="text-sm text-slate-400">
           The Intelligence Network — visualizing the signal mesh connecting all ecosystem apps. Each
-          app is an organ, Lyte is the spinal cord, SZL Cortex is the brain.
+          app is an organ, Command is the spinal cord, SZL Cortex is the brain.
         </p>
       </div>
 

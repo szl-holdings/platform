@@ -1,7 +1,7 @@
 import { useLyteActions, useLyteSignals } from '@szl-holdings/graphql-client/hooks';
 import { GraphQLDataPanel } from '@szl-holdings/shared-ui/design-system';
 
-export function LyteGraphQLPanel() {
+export function CommandGraphQLPanel() {
   const { data: signalsData, loading: sLoading } = useLyteSignals({ limit: 3 });
   const { data: actionsData, loading: aLoading } = useLyteActions({ limit: 3 });
 

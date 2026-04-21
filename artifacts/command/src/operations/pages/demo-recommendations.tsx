@@ -240,7 +240,7 @@ export default function DemoRecommendationsPage() {
               className="text-[10px] font-medium uppercase tracking-widest"
               style={{ color: '#8b7ac8' }}
             >
-              Lyte · AI Engine
+              Command · AI Engine
             </span>
           </div>
           <h1 className="text-lg font-bold" style={{ color: TEXT.primary }}>

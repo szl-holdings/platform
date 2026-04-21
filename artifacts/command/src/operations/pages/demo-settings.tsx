@@ -112,7 +112,7 @@ export default function DemoSettingsPage() {
               className="text-[10px] font-medium uppercase tracking-widest"
               style={{ color: '#d4a054' }}
             >
-              Lyte · Admin
+              Command · Admin
             </span>
           </div>
           <h1 className="text-lg font-bold" style={{ color: TEXT.primary }}>
@@ -177,7 +177,7 @@ export default function DemoSettingsPage() {
             <>
               <SettingRow
                 label="Workspace Name"
-                description="Organization display name across all Lyte surfaces"
+                description="Organization display name across all Command surfaces"
                 control={
                   <input
                     defaultValue="SZL Holdings"
@@ -302,7 +302,7 @@ export default function DemoSettingsPage() {
             <>
               <SettingRow
                 label="Multi-Factor Authentication"
-                description="Require MFA for all users accessing Lyte"
+                description="Require MFA for all users accessing Command"
                 control={
                   <Toggle value={settings.mfaRequired} onChange={(v) => set('mfaRequired', v)} />
                 }
@@ -530,7 +530,7 @@ export default function DemoSettingsPage() {
         <Zap className="w-3.5 h-3.5 shrink-0" style={{ color: '#d4a054' }} />
         <div className="flex-1">
           <div className="text-[10px] font-medium" style={{ color: TEXT.primary }}>
-            SZL Holdings · Lyte Business Observability
+            SZL Holdings · Command Business Observability
           </div>
           <div className="text-[9px]" style={{ color: TEXT.muted }}>
             Version 3.4.2 · Environment: Demo · Workspace: szl-holdings · Plan: Enterprise

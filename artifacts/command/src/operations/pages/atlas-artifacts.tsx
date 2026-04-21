@@ -77,7 +77,7 @@ const OPS_TEMPLATES = [
   'approval_packet',
 ] as const;
 
-export default function LyteAtlasArtifactsPage() {
+export default function CommandAtlasArtifactsPage() {
   const [artifacts, setArtifacts] = useState<ArtifactMeta[]>([]);
   const [selected, setSelected] = useState<ArtifactFull | null>(null);
   const [loading, setLoading] = useState(false);

@@ -468,7 +468,7 @@ const ACTION_QUEUE: QueueItem[] = [
     confidence: 91,
     age_hours: 36,
     type: 'approval',
-    evidence: 'Approval chain audit — Lyte governance module',
+    evidence: 'Approval chain audit — Command governance module',
     next_action: 'Send reminder with 48h escalation trigger',
   },
   {
@@ -582,14 +582,14 @@ function LiveDot() {
   );
 }
 
-export default function LyteOverview() {
+export default function CommandOverview() {
   return (
     <div className="p-4 md:p-6 space-y-4 max-w-[1400px]">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold text-white tracking-tight">Business Observability</h1>
           <p className="text-[11px] mt-0.5 italic" style={{ color: 'rgba(212,160,84,0.5)' }}>
-            In the dark, let Lyte guide you.
+            In the dark, let Command guide you.
           </p>
         </div>
         <div className="flex items-center gap-3">

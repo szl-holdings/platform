@@ -372,7 +372,7 @@ export default function AdminDiagnosticsPage() {
               </Link>
             </div>
             <p className="text-[11px] text-muted-foreground mb-3">
-              Recent OBS-005 (tenant isolation) and OBS-006 (auth-failure rate) signals from Lyte Self-Monitor.
+              Recent OBS-005 (tenant isolation) and OBS-006 (auth-failure rate) signals from Command Self-Monitor.
             </p>
             {(securityAlerts?.items?.length ?? 0) === 0 ? (
               <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">

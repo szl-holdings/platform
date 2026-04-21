@@ -238,7 +238,7 @@ export default function DemoSignalsPage() {
               className="text-[10px] font-medium uppercase tracking-widest"
               style={{ color: '#d4a054' }}
             >
-              Lyte · Signals
+              Command · Signals
             </span>
           </div>
           <h1 className="text-lg font-bold" style={{ color: TEXT.primary }}>

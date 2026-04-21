@@ -138,7 +138,7 @@ const RECENT_APPROVALS: ApprovalEntry[] = [
   {
     id: 'apr-001',
     action: 'Notify: Ownership gap — ProjectX',
-    agent: 'Lyte Autonomous',
+    agent: 'Command Autonomous',
     requester: 'System',
     status: 'approved',
     approver: 'J. Chen',

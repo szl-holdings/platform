@@ -18,10 +18,10 @@ const OUTCOME: Record<string, { color: string; bg: string; border: string }> = {
 };
 
 const ACTOR_TYPE: Record<string, string> = {
-  'Lyte Signal Engine': '#d4a054',
-  'Lyte Workflow Engine': '#4a90b8',
-  'Lyte Alert Engine': '#c8953c',
-  'Lyte Compliance Engine': '#8b7ac8',
+  'Command Signal Engine': '#d4a054',
+  'Command Workflow Engine': '#4a90b8',
+  'Command Alert Engine': '#c8953c',
+  'Command Compliance Engine': '#8b7ac8',
   'Admin System': '#6b8f71',
 };
 
@@ -83,7 +83,7 @@ export default function DemoAuditPage() {
             className="text-[10px] font-medium uppercase tracking-widest"
             style={{ color: '#d4a054' }}
           >
-            Lyte · Audit
+            Command · Audit
           </span>
         </div>
         <h1 className="text-lg font-bold" style={{ color: TEXT.primary }}>

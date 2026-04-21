@@ -16,13 +16,13 @@ import {
 import { useState } from 'react';
 import { Link } from 'wouter';
 
-const HOW_LYTE_WORKS = [
+const HOW_COMMAND_WORKS = [
   {
     step: '01',
     label: 'Ingest',
     color: 'border-[#c45a4a]/20 bg-[#c45a4a]/5',
     accent: 'text-[#c45a4a]',
-    desc: 'Lyte connects to your operational data sources — CRM, ERP, project management, finance systems — and continuously monitors for signal anomalies across approval chains, workflow queues, and ownership records.',
+    desc: 'Command connects to your operational data sources — CRM, ERP, project management, finance systems — and continuously monitors for signal anomalies across approval chains, workflow queues, and ownership records.',
   },
   {
     step: '02',
@@ -50,7 +50,7 @@ const HOW_LYTE_WORKS = [
     label: 'Approve',
     color: 'border-[#6b8f71]/20 bg-[#6b8f71]/5',
     accent: 'text-[#6b8f71]',
-    desc: 'High-stakes actions route through human approval gates. Lyte keeps humans in the loop on consequential decisions while automating the routine.',
+    desc: 'High-stakes actions route through human approval gates. Command keeps humans in the loop on consequential decisions while automating the routine.',
   },
 ];
 
@@ -177,7 +177,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-lg text-slate-400 leading-relaxed mb-8 max-w-2xl mx-auto">
-            Lyte converts operational signals into prioritized, explainable decisions. Not another
+            Command converts operational signals into prioritized, explainable decisions. Not another
             alerting tool — a command surface built for the real work.
           </p>
 
@@ -229,13 +229,13 @@ export default function LandingPage() {
       <section>
         <div className="text-center mb-10">
           <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-3">
-            What Lyte Does
+            What Command Does
           </p>
           <h2 className="font-display font-bold text-3xl text-white mb-3">
             One surface. Complete operational picture.
           </h2>
           <p className="text-slate-400 max-w-xl mx-auto text-sm">
-            Lyte surfaces the signals that matter, translates them into intelligence, and routes the
+            Command surfaces the signals that matter, translates them into intelligence, and routes the
             right actions to the right people — before problems reach execution.
           </p>
         </div>
@@ -248,7 +248,7 @@ export default function LandingPage() {
               color: 'border-[#c45a4a]/20 bg-[#c45a4a]/5',
               accent: 'text-[#c45a4a]',
               icon: Activity,
-              desc: 'Lyte detects anomalies across approval chains, workflow queues, ownership records, forecast data, and pipeline health. Every signal carries severity, affected function, owner, and value at risk.',
+              desc: 'Command detects anomalies across approval chains, workflow queues, ownership records, forecast data, and pipeline health. Every signal carries severity, affected function, owner, and value at risk.',
             },
             {
               step: '02',
@@ -288,7 +288,7 @@ export default function LandingPage() {
       <section>
         <div className="text-center mb-10">
           <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-3">
-            How Lyte Works
+            How Command Works
           </p>
           <h2 className="font-display font-bold text-3xl text-white mb-3">
             Five-step sequence from signal to action.
@@ -299,7 +299,7 @@ export default function LandingPage() {
         </div>
 
         <div className="space-y-3">
-          {HOW_LYTE_WORKS.map((step) => (
+          {HOW_COMMAND_WORKS.map((step) => (
             <div
               key={step.step}
               className={cn('rounded-xl p-5 border flex items-start gap-5', step.color)}
@@ -386,7 +386,7 @@ export default function LandingPage() {
           Explainability is the product.
         </h2>
         <p className="text-slate-400 max-w-2xl mx-auto mb-8 leading-relaxed">
-          Lyte shows you what's wrong, why it matters, what's at stake, who owns it, and what to do.
+          Command shows you what's wrong, why it matters, what's at stake, who owns it, and what to do.
           Every signal carries context. Every action has a clear owner and value case.
         </p>
         <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto mb-8">
@@ -417,7 +417,7 @@ export default function LandingPage() {
           Results from production deployments
         </h2>
         <p className="text-slate-400 text-sm max-w-xl mb-8 leading-relaxed">
-          Not projections. Specific operational outcomes from Lyte running in live environments.
+          Not projections. Specific operational outcomes from Command running in live environments.
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           {[
@@ -437,7 +437,7 @@ export default function LandingPage() {
               metric: '8 days',
               label: 'Lead over manual review',
               detail:
-                "Lyte's continuous monitoring eliminated the 7-day blind spot in weekly ops reviews",
+                "Command's continuous monitoring eliminated the 7-day blind spot in weekly ops reviews",
               accent: '#0e7490',
             },
             {
@@ -497,7 +497,7 @@ export default function LandingPage() {
           </button>
           <Link href="/dashboard">
             <button className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/5 transition-colors">
-              Open Lyte <ArrowRight className="w-4 h-4" />
+              Open Command <ArrowRight className="w-4 h-4" />
             </button>
           </Link>
         </div>

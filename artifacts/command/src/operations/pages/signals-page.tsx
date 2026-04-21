@@ -183,7 +183,7 @@ export default function SignalsPage() {
           <div className="flex items-center gap-2 mb-1">
             <Activity className="w-4 h-4 text-[#d4a054]" />
             <span className="text-xs font-medium uppercase tracking-widest text-[#d4a054]">
-              Lyte · Signals Feed
+              Command · Signals Feed
             </span>
           </div>
           <h1 className="text-2xl font-bold text-white">Signals</h1>
