@@ -555,6 +555,57 @@ export function useArchiveBriefing() {
   });
 }
 
+export function useResolveDissent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, resolution }: { id: string; resolution: string }) =>
+      rawFetch<{ success: true; dissent: DissentRecord }>(`/api/pulse/dissents/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'resolved', resolution, resolvedAt: new Date().toISOString() }),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pulse', 'dissents'] });
+    },
+  });
+}
+
+export function useSavedBriefingIds() {
+  return useQuery({
+    queryKey: ['pulse', 'saved-briefings'],
+    queryFn: () =>
+      apiFetch<{ success: true; savedBriefingIds: string[] }>('/api/pulse/briefings/saved').then(
+        (d) => d.savedBriefingIds,
+      ),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useSaveBriefing() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      rawFetch<{ success: true; briefingId: string }>(`/api/pulse/briefings/${encodeURIComponent(id)}/save`, {
+        method: 'POST',
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pulse', 'saved-briefings'] });
+    },
+  });
+}
+
+export function useUnsaveBriefing() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      rawFetch<{ success: true; briefingId: string }>(`/api/pulse/briefings/${encodeURIComponent(id)}/save`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pulse', 'saved-briefings'] });
+    },
+  });
+}
+
 export function useRequestCustomBrief() {
   const qc = useQueryClient();
   return useMutation({

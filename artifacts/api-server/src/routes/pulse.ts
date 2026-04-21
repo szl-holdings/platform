@@ -25,7 +25,13 @@ import { z } from 'zod';
 import { gatewayInfer } from '../lib/ai-gateway';
 import { sendBadRequest, sendNotFound, sendUnauthorized } from '../lib/api-response';
 import { logger } from '../lib/logger';
-import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import {
+  clampRisk,
+  confidenceLabel,
+  type ConfidenceLevel,
+  type RiskLevel,
+} from '../lib/pulse-confidence';
+import { listQuerySchema, validateBody, validateParams, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router = Router();
@@ -251,8 +257,6 @@ const PULSE_BASE_URL = process.env.REPLIT_DEV_DOMAIN
   ? `https://${process.env.REPLIT_DEV_DOMAIN}/pulse`
   : 'http://localhost:5201';
 
-type ConfidenceLevel = 'HIGH' | 'MODERATE' | 'LOW' | 'INSUFFICIENT';
-type RiskLevel = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
 type DomainKey =
   | 'maritime'
   | 'security'
@@ -1220,18 +1224,6 @@ interface AIBriefingPayload {
   }>;
 }
 
-function clampRisk(s: unknown): RiskLevel {
-  const v = String(s ?? '').toUpperCase();
-  if (v === 'CRITICAL' || v === 'HIGH' || v === 'MEDIUM' || v === 'LOW') return v;
-  return 'MEDIUM';
-}
-
-function confidenceLabel(c: number): ConfidenceLevel {
-  if (c >= 0.8) return 'HIGH';
-  if (c >= 0.65) return 'MODERATE';
-  if (c >= 0.5) return 'LOW';
-  return 'INSUFFICIENT';
-}
 
 function extractJson(text: string): unknown {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
@@ -1602,6 +1594,74 @@ router.get(
     });
   },
 );
+
+// ─── Save-for-later ───────────────────────────────────────────────────────────
+// Per-user bookmarking for Library briefings. Backed by `pulse_saved_briefings`
+// with (user_id, briefing_id) uniqueness.  Global CSRF middleware covers all
+// state-mutating POST/DELETE requests; auth enforced via requireRole guard.
+
+const writeSaveRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false, ip: false },
+  keyGenerator: (req) => String((req as Request & { user?: { id: number } }).user?.id ?? req.ip ?? 'anon'),
+});
+
+router.get(
+  '/briefings/saved',
+  requireRole('ops', 'exec', 'admin', 'super_admin'),
+  async (req: Request, res: Response): Promise<void> => {
+    if (!req.user) { sendUnauthorized(res); return; }
+    const rows = await db.execute(
+      sql`SELECT briefing_id FROM pulse_saved_briefings WHERE user_id = ${req.user.id}`,
+    );
+    const ids = (rows as unknown as { rows: { briefing_id: string }[] }).rows.map((r) => r.briefing_id);
+    res.json({ success: true, savedBriefingIds: ids });
+  },
+);
+
+const briefingIdParamSchema = z.object({
+  id: z.string().min(1, 'briefing_id_required').max(256),
+});
+
+router.post(
+  '/briefings/:id/save',
+  requireRole('ops', 'exec', 'admin', 'super_admin'),
+  validateParams(briefingIdParamSchema),
+  writeSaveRateLimit,
+  async (req: Request, res: Response): Promise<void> => {
+    if (!req.user) { sendUnauthorized(res); return; }
+    const briefingId = req.params.id;
+    try {
+      await db.execute(
+        sql`INSERT INTO pulse_saved_briefings (user_id, briefing_id) VALUES (${req.user.id}, ${briefingId}) ON CONFLICT (user_id, briefing_id) DO NOTHING`,
+      );
+      res.json({ success: true, briefingId });
+    } catch (err) {
+      logger.error({ err }, '[pulse] save briefing failed');
+      res.status(500).json({ success: false, error: 'save_failed' });
+    }
+  },
+);
+
+router.delete(
+  '/briefings/:id/save',
+  requireRole('ops', 'exec', 'admin', 'super_admin'),
+  validateParams(briefingIdParamSchema),
+  writeSaveRateLimit,
+  async (req: Request, res: Response): Promise<void> => {
+    if (!req.user) { sendUnauthorized(res); return; }
+    const briefingId = req.params.id;
+    await db.execute(
+      sql`DELETE FROM pulse_saved_briefings WHERE user_id = ${req.user.id} AND briefing_id = ${briefingId}`,
+    );
+    res.json({ success: true, briefingId });
+  },
+);
+
+// ─── Generate ─────────────────────────────────────────────────────────────────
 
 router.post(
   '/briefings/generate',

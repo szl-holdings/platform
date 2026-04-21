@@ -1,6 +1,7 @@
 import { AlertTriangle, CheckCircle, Clock, MessageSquare, X } from 'lucide-react';
-import { useState } from 'react';
-import { useDissents, useFileDissent, useTodaysBrief } from '../lib/api';
+import { useEffect, useState } from 'react';
+import { useSearch } from 'wouter';
+import { useDissents, useFileDissent, useResolveDissent, useTodaysBrief } from '../lib/api';
 import type { DissentRecord } from '../lib/data';
 
 type StatusFilter = 'all' | 'open' | 'under_review' | 'acknowledged' | 'resolved';
@@ -63,13 +64,26 @@ export default function DissentChannel() {
   const { data: dissentsData } = useDissents();
   const { data: todaysBrief } = useTodaysBrief();
   const fileDissent = useFileDissent();
+  const resolveDissent = useResolveDissent();
   const dissents: DissentRecord[] = dissentsData ?? [];
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [resolveText, setResolveText] = useState('');
   const [form, setForm] = useState<NewDissentForm>({
     sectionTitle: '',
     dissentingView: '',
     basis: '',
     impactIfCorrect: '',
   });
+
+  const searchStr = useSearch();
+  useEffect(() => {
+    const params = new URLSearchParams(searchStr);
+    const section = params.get('section');
+    if (section) {
+      setForm((f) => ({ ...f, sectionTitle: section }));
+      setShowForm(true);
+    }
+  }, [searchStr]);
 
   const filtered = dissents.filter((d) => filter === 'all' || d.status === filter);
 
@@ -544,19 +558,133 @@ export default function DissentChannel() {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8,
+                justifyContent: 'space-between',
                 marginTop: 12,
                 fontSize: '0.68rem',
                 color: 'var(--pulse-text-muted)',
               }}
             >
-              <span>
-                Filed by{' '}
-                <strong style={{ color: 'var(--pulse-text-dim)' }}>{dissent.filedBy}</strong>
-              </span>
-              <span>·</span>
-              <span>Brief: {dissent.briefingId}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>
+                  Filed by{' '}
+                  <strong style={{ color: 'var(--pulse-text-dim)' }}>{dissent.filedBy}</strong>
+                </span>
+                <span>·</span>
+                <span>Brief: {dissent.briefingId}</span>
+              </div>
+              {dissent.status !== 'resolved' && (
+                <button
+                  onClick={() => {
+                    setResolvingId(resolvingId === dissent.id ? null : dissent.id);
+                    setResolveText('');
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '3px 10px',
+                    borderRadius: 4,
+                    background: 'rgba(78,202,139,0.08)',
+                    border: '1px solid rgba(78,202,139,0.25)',
+                    color: '#4eca8b',
+                    fontSize: '0.65rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <CheckCircle size={11} />
+                  Resolve
+                </button>
+              )}
             </div>
+
+            {resolvingId === dissent.id && (
+              <div
+                style={{
+                  marginTop: 12,
+                  padding: '12px 14px',
+                  borderRadius: 6,
+                  background: 'rgba(78,202,139,0.04)',
+                  border: '1px solid rgba(78,202,139,0.2)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                }}
+              >
+                <label
+                  style={{
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    color: '#4eca8b',
+                  }}
+                >
+                  Resolution Note
+                </label>
+                <textarea
+                  value={resolveText}
+                  onChange={(e) => setResolveText(e.target.value)}
+                  placeholder="Describe how this dissent was resolved…"
+                  rows={2}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    borderRadius: 5,
+                    background: 'var(--pulse-bg)',
+                    border: '1px solid rgba(78,202,139,0.25)',
+                    color: 'var(--pulse-text)',
+                    fontSize: '0.83rem',
+                    outline: 'none',
+                    resize: 'vertical',
+                    fontFamily: 'inherit',
+                  }}
+                />
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    disabled={!resolveText.trim() || resolveDissent.isPending}
+                    onClick={() => {
+                      if (!resolveText.trim()) return;
+                      resolveDissent.mutate(
+                        { id: dissent.id, resolution: resolveText.trim() },
+                        {
+                          onSuccess: () => {
+                            setResolvingId(null);
+                            setResolveText('');
+                          },
+                        },
+                      );
+                    }}
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: 4,
+                      background: 'rgba(78,202,139,0.12)',
+                      border: '1px solid rgba(78,202,139,0.35)',
+                      color: '#4eca8b',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {resolveDissent.isPending ? 'Resolving…' : 'Mark Resolved'}
+                  </button>
+                  <button
+                    onClick={() => { setResolvingId(null); setResolveText(''); }}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: 4,
+                      background: 'transparent',
+                      border: '1px solid var(--pulse-border)',
+                      color: 'var(--pulse-text-muted)',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
 

@@ -1,3 +1,4 @@
+import { Info } from 'lucide-react';
 import { useState } from 'react';
 import type { TooltipProps } from 'recharts';
 import {
@@ -73,11 +74,18 @@ function AgentConfidenceCard({
   agentId,
   domainKey,
   history,
+  briefSectionCount,
+  briefDate,
+  briefDomains,
 }: {
   agentId: string;
   domainKey: DomainMetricKey;
   history: ConfidenceHistoryEntry[];
+  briefSectionCount?: number;
+  briefDate?: string;
+  briefDomains?: string[];
 }) {
+  const [showRubric, setShowRubric] = useState(false);
   const latest = history[history.length - 1];
   const prevEntry = history[history.length - 2];
   const score = latest?.[domainKey] ?? 0;
@@ -92,6 +100,7 @@ function AgentConfidenceCard({
         borderRadius: 8,
         background: 'var(--pulse-card)',
         border: '1px solid var(--pulse-border)',
+        position: 'relative',
       }}
     >
       <div
@@ -103,8 +112,113 @@ function AgentConfidenceCard({
         }}
       >
         <AgentBadge agentId={agentId} />
-        <ConfidenceChip score={score} label={label} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <ConfidenceChip score={score} label={label} />
+          <button
+            onMouseEnter={() => setShowRubric(true)}
+            onMouseLeave={() => setShowRubric(false)}
+            onClick={() => setShowRubric(!showRubric)}
+            title="How this confidence score is calculated"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--pulse-text-muted)',
+              cursor: 'pointer',
+              padding: 2,
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <Info size={12} />
+          </button>
+        </div>
       </div>
+      {showRubric && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 42,
+            right: 12,
+            zIndex: 10,
+            background: '#0f1624',
+            border: '1px solid rgba(200,168,75,0.25)',
+            borderRadius: 7,
+            padding: '10px 12px',
+            minWidth: 230,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '0.6rem',
+              fontWeight: 700,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: 'var(--pulse-gold)',
+              marginBottom: 8,
+            }}
+          >
+            Confidence Rubric Inputs
+          </div>
+          {RUBRIC_DIMS.map((dim) => (
+            <div key={dim.key} style={{ marginBottom: 6 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  marginBottom: 2,
+                }}
+              >
+                <span style={{ fontSize: '0.68rem', color: 'var(--pulse-text)', fontWeight: 600 }}>
+                  {dim.key}
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.6rem',
+                    color: 'var(--pulse-text-muted)',
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  {dim.weight}
+                </span>
+              </div>
+              <div style={{ fontSize: '0.63rem', color: 'var(--pulse-text-muted)' }}>
+                {dim.desc}
+              </div>
+            </div>
+          ))}
+          <div
+            style={{
+              marginTop: 8,
+              paddingTop: 8,
+              borderTop: '1px solid var(--pulse-border)',
+              fontSize: '0.63rem',
+              color: 'var(--pulse-text-muted)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 3,
+            }}
+          >
+            <div>Score: <strong style={{ color: 'var(--pulse-text)' }}>{Math.round(score * 100)}%</strong> &nbsp;·&nbsp; {label}</div>
+            {briefSectionCount != null && (
+              <div>Sections analysed: <strong style={{ color: 'var(--pulse-text)' }}>{briefSectionCount}</strong></div>
+            )}
+            {briefDomains && briefDomains.length > 0 && (
+              <div>
+                Domain active:{' '}
+                <strong style={{ color: briefDomains.some(d => d.toLowerCase().replace(/\s+/g, '_') === domainKey) ? '#4eca8b' : 'var(--pulse-text-muted)' }}>
+                  {briefDomains.some(d => d.toLowerCase().replace(/\s+/g, '_') === domainKey) ? 'Yes' : 'Not in latest brief'}
+                </strong>
+              </div>
+            )}
+            {briefDate && (
+              <div style={{ opacity: 0.65 }}>Last briefing: {briefDate}</div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div
         style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--pulse-text)', marginBottom: 4 }}
       >
@@ -168,21 +282,32 @@ export default function ConfidenceDashboard() {
       </div>
 
       {/* Agent confidence cards */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 12,
-          marginBottom: 28,
-        }}
-      >
-        <AgentConfidenceCard agentId="helmsman" domainKey="maritime" history={confidenceHistory} />
-        <AgentConfidenceCard agentId="sentinel" domainKey="security" history={confidenceHistory} />
-        <AgentConfidenceCard agentId="terra" domainKey="real_estate" history={confidenceHistory} />
-        <AgentConfidenceCard agentId="lexis" domainKey="legal" history={confidenceHistory} />
-        <AgentConfidenceCard agentId="atlas" domainKey="financial" history={confidenceHistory} />
-        <AgentConfidenceCard agentId="beacon" domainKey="platform" history={confidenceHistory} />
-      </div>
+      {(() => {
+        const sectionCount = Array.isArray((latestBrief as { sections?: unknown[] } | null)?.sections)
+          ? (latestBrief as { sections: unknown[] }).sections.length
+          : undefined;
+        const briefDate = (latestBrief as { date?: string } | null)?.date;
+        const briefDomains = Array.isArray((latestBrief as { domains?: string[] } | null)?.domains)
+          ? (latestBrief as { domains: string[] }).domains
+          : undefined;
+        return (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 12,
+              marginBottom: 28,
+            }}
+          >
+            <AgentConfidenceCard agentId="helmsman" domainKey="maritime" history={confidenceHistory} briefSectionCount={sectionCount} briefDate={briefDate} briefDomains={briefDomains} />
+            <AgentConfidenceCard agentId="sentinel" domainKey="security" history={confidenceHistory} briefSectionCount={sectionCount} briefDate={briefDate} briefDomains={briefDomains} />
+            <AgentConfidenceCard agentId="terra" domainKey="real_estate" history={confidenceHistory} briefSectionCount={sectionCount} briefDate={briefDate} briefDomains={briefDomains} />
+            <AgentConfidenceCard agentId="lexis" domainKey="legal" history={confidenceHistory} briefSectionCount={sectionCount} briefDate={briefDate} briefDomains={briefDomains} />
+            <AgentConfidenceCard agentId="atlas" domainKey="financial" history={confidenceHistory} briefSectionCount={sectionCount} briefDate={briefDate} briefDomains={briefDomains} />
+            <AgentConfidenceCard agentId="beacon" domainKey="platform" history={confidenceHistory} briefSectionCount={sectionCount} briefDate={briefDate} briefDomains={briefDomains} />
+          </div>
+        );
+      })()}
 
       {/* Confidence trend chart */}
       <div className="section-card" style={{ padding: 20, marginBottom: 24 }}>

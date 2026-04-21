@@ -7,6 +7,7 @@ import {
   serial,
   text,
   timestamp,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 export const pulseBriefingsTable = pgTable('pulse_briefings', {
@@ -76,6 +77,17 @@ export const pulseEmailSubscriptionsTable = pgTable('pulse_email_subscriptions',
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
+
+export const pulseSavedBriefingsTable = pgTable(
+  'pulse_saved_briefings',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').notNull(),
+    briefingId: text('briefing_id').notNull(),
+    savedAt: timestamp('saved_at').notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('pulse_saved_briefings_user_briefing_unique').on(t.userId, t.briefingId)],
+);
 
 export const pulseExecBriefsTable = pgTable('pulse_exec_briefs', {
   id: text('id').primaryKey(),

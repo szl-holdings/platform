@@ -1,16 +1,21 @@
-import { Archive, Calendar, Check, ChevronRight, Search, Shield } from 'lucide-react';
+import { Archive, Bookmark, Calendar, Check, ChevronRight, Search, Shield } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import ConfidenceChip from '../components/ConfidenceChip';
+import { LibrarySkeleton } from '../components/SkeletonRow';
 import {
   isDemoMode,
   useApproveBriefing,
   useArchiveBriefing,
   useBriefingSearch,
   useBriefings,
+  useSaveBriefing,
+  useSavedBriefingIds,
+  useUnsaveBriefing,
 } from '../lib/api';
 import { PULSE_SYNTHESIZED_LABEL } from '../lib/claims';
 import { type DomainKey, getRiskColor, type RiskLevel } from '../lib/data';
+import { getSavedBriefIds, toggleSavedBrief } from '../lib/saved-briefs';
 
 type RiskFilter = RiskLevel | 'all';
 
@@ -41,6 +46,33 @@ export default function Library() {
   const [search, setSearch] = useState('');
   const [domainFilter, setDomainFilter] = useState<DomainKey | 'all'>('all');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
+  const [savedOnly, setSavedOnly] = useState(false);
+
+  const { data: serverSavedIds } = useSavedBriefingIds();
+  const saveMut = useSaveBriefing();
+  const unsaveMut = useUnsaveBriefing();
+
+  // Optimistic local state (localStorage) — provides instant UI feedback.
+  // When the server query resolves, it becomes the source of truth.
+  const [localIds, setLocalIds] = useState<Set<string>>(() => getSavedBriefIds());
+  const savedIds: Set<string> = serverSavedIds != null
+    ? new Set(serverSavedIds)
+    : localIds;
+
+  const handleToggleSave = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const isSaved = savedIds.has(id);
+    // Optimistic local update (immediate feedback while server round-trips)
+    toggleSavedBrief(id);
+    setLocalIds(getSavedBriefIds());
+    // Persist to backend
+    if (isSaved) {
+      unsaveMut.mutate(id);
+    } else {
+      saveMut.mutate(id);
+    }
+  };
 
   const debouncedSearch = useDebounced(search.trim(), SEARCH_DEBOUNCE_MS);
   const isSearching = debouncedSearch.length > 0;
@@ -55,13 +87,15 @@ export default function Library() {
   const isLoading = isSearching ? searchQuery.isLoading : listQuery.isLoading;
   const error = isSearching ? searchQuery.error : listQuery.error;
 
-  const filtered = isSearching
-    ? allBriefings
-    : allBriefings.filter((b) => {
-        if (domainFilter !== 'all' && !b.domains.includes(domainFilter)) return false;
-        if (riskFilter !== 'all' && b.overallRisk !== riskFilter) return false;
-        return true;
-      });
+  const filtered = (
+    isSearching
+      ? allBriefings
+      : allBriefings.filter((b) => {
+          if (domainFilter !== 'all' && !b.domains.includes(domainFilter)) return false;
+          if (riskFilter !== 'all' && b.overallRisk !== riskFilter) return false;
+          return true;
+        })
+  ).filter((b) => (savedOnly ? savedIds.has(b.id) : true));
 
   const approveMut = useApproveBriefing();
   const archiveMut = useArchiveBriefing();
@@ -88,7 +122,7 @@ export default function Library() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
         <div
           style={{
             flex: 1,
@@ -168,6 +202,37 @@ export default function Library() {
               <option value="MEDIUM">Medium</option>
               <option value="LOW">Low</option>
             </select>
+            <button
+              onClick={() => setSavedOnly(!savedOnly)}
+              title={savedOnly ? 'Show all briefings' : 'Show saved briefings only'}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '8px 12px',
+                borderRadius: 6,
+                background: savedOnly ? 'rgba(200,168,75,0.12)' : 'var(--pulse-card)',
+                border: savedOnly ? '1px solid rgba(200,168,75,0.4)' : '1px solid var(--pulse-border)',
+                color: savedOnly ? 'var(--pulse-gold)' : 'var(--pulse-text-muted)',
+                fontSize: '0.82rem',
+                cursor: 'pointer',
+                fontWeight: savedOnly ? 600 : 400,
+              }}
+            >
+              <Bookmark size={13} style={{ fill: savedOnly ? 'currentColor' : 'none' }} />
+              {savedOnly ? 'Saved' : 'Saved'}
+              {savedIds.size > 0 && (
+                <span style={{
+                  fontSize: '0.65rem',
+                  padding: '1px 5px',
+                  borderRadius: 8,
+                  background: savedOnly ? 'rgba(200,168,75,0.2)' : 'rgba(255,255,255,0.06)',
+                  color: savedOnly ? 'var(--pulse-gold)' : 'var(--pulse-text-muted)',
+                }}>
+                  {savedIds.size}
+                </span>
+              )}
+            </button>
           </>
         )}
       </div>
@@ -187,6 +252,7 @@ export default function Library() {
 
       {/* Briefing list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {isLoading && <LibrarySkeleton />}
         {filtered.map((briefing, i) => (
           <Link key={briefing.id} href={`${BASE}/library/${briefing.id}`}>
             <a style={{ textDecoration: 'none' }}>
@@ -375,6 +441,26 @@ export default function Library() {
                         e.stopPropagation();
                       }}
                     >
+                      <button
+                        type="button"
+                        title={savedIds.has(briefing.id) ? 'Remove from saved' : 'Save for later'}
+                        onClick={(e) => handleToggleSave(briefing.id, e)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          padding: '3px 8px',
+                          borderRadius: 4,
+                          background: savedIds.has(briefing.id) ? 'rgba(200,168,75,0.12)' : 'rgba(255,255,255,0.04)',
+                          border: savedIds.has(briefing.id) ? '1px solid rgba(200,168,75,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                          color: savedIds.has(briefing.id) ? 'var(--pulse-gold)' : 'var(--pulse-text-muted)',
+                          fontSize: '0.65rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Bookmark size={10} style={{ fill: savedIds.has(briefing.id) ? 'currentColor' : 'none' }} />
+                      </button>
                       <button
                         type="button"
                         title="Approve briefing"

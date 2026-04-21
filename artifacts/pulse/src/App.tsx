@@ -15,6 +15,7 @@ import {
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { Route, Switch, useLocation } from 'wouter';
 import Constellation from '@/pages/Constellation';
+import ErrorBoundary from './components/ErrorBoundary';
 import Shell from './components/Shell';
 import BriefingDetail from './pages/BriefingDetail';
 import BriefingEngine from './pages/BriefingEngine';
@@ -453,35 +454,37 @@ export default function App() {
       <RequireAuth>
         <PulsePalette />
         <Shell>
-          <Switch>
-            <Route path={`${BASE}/`} component={TodaysBrief} />
-            <Route path={`${BASE}`} component={TodaysBrief} />
-            <Route path={`${BASE}/library`} component={Library} />
-            <Route path={`${BASE}/library/:id`} component={BriefingDetail} />
-            <Route path={`${BASE}/confidence`} component={ConfidenceDashboard} />
-            <Route path={`${BASE}/custom`} component={CustomBrief} />
-            <Route path={`${BASE}/dissent`} component={DissentChannel} />
-            <Route path={`${BASE}/system`} component={SystemHealth} />
-            <Route path={`${BASE}/settings`} component={Settings} />
-            <Route path={`${BASE}/constellation`} component={Constellation} />
-            <Route path={`${BASE}/constellation/entities/:id`} component={Constellation} />
-            <Route path={`${BASE}/engine`} component={BriefingEngine} />
-            <Route path={`${BASE}/decisions`}>
-              {() => (
-                <Suspense fallback={null}>
-                  <DecisionCenterPage />
-                </Suspense>
-              )}
-            </Route>
-            <Route path={`${BASE}/governed-cockpit`}>
-              {() => (
-                <Suspense fallback={null}>
-                  <GovernedCockpitPage />
-                </Suspense>
-              )}
-            </Route>
-            <Route component={TodaysBrief} />
-          </Switch>
+          <ErrorBoundary>
+            <Switch>
+              <Route path={`${BASE}/`} component={TodaysBrief} />
+              <Route path={`${BASE}`} component={TodaysBrief} />
+              <Route path={`${BASE}/library`} component={Library} />
+              <Route path={`${BASE}/library/:id`} component={BriefingDetail} />
+              <Route path={`${BASE}/confidence`} component={ConfidenceDashboard} />
+              <Route path={`${BASE}/custom`} component={CustomBrief} />
+              <Route path={`${BASE}/dissent`} component={DissentChannel} />
+              <Route path={`${BASE}/system`} component={SystemHealth} />
+              <Route path={`${BASE}/settings`} component={Settings} />
+              <Route path={`${BASE}/constellation`} component={Constellation} />
+              <Route path={`${BASE}/constellation/entities/:id`} component={Constellation} />
+              <Route path={`${BASE}/engine`} component={BriefingEngine} />
+              <Route path={`${BASE}/decisions`}>
+                {() => (
+                  <Suspense fallback={null}>
+                    <DecisionCenterPage />
+                  </Suspense>
+                )}
+              </Route>
+              <Route path={`${BASE}/governed-cockpit`}>
+                {() => (
+                  <Suspense fallback={null}>
+                    <GovernedCockpitPage />
+                  </Suspense>
+                )}
+              </Route>
+              <Route component={TodaysBrief} />
+            </Switch>
+          </ErrorBoundary>
         </Shell>
       </RequireAuth>
     </AppModeProvider>
