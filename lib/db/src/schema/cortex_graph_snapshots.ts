@@ -3,6 +3,34 @@ import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
 import { organizationsTable } from './organizations';
 
+export interface GraphSnapshotNode {
+  id: string;
+  label: string;
+  type: string;
+  domain: string;
+  riskScore: number;
+  tags: string[];
+  metadata?: unknown;
+  lastSeen?: unknown;
+}
+
+export interface GraphSnapshotEdge {
+  source: string;
+  target: string;
+  type: string;
+  strength: string;
+}
+
+export interface GraphSnapshotMeta {
+  totalNodes: number;
+  totalEdges: number;
+  domain: string;
+  minRisk: number;
+  graphStats: Record<string, unknown>;
+  source?: 'manual' | 'scheduled';
+  [key: string]: unknown;
+}
+
 /**
  * cortex_graph_snapshots — point-in-time captures of the CORTEX entity graph.
  *
@@ -17,9 +45,9 @@ export const cortexGraphSnapshotsTable = pgTable(
     snapshotUuid: text('snapshot_uuid').notNull().unique(),
     orgId: integer('org_id').references(() => organizationsTable.id, { onDelete: 'cascade' }),
     label: text('label'),
-    nodes: jsonb('nodes').notNull().default([]),
-    edges: jsonb('edges').notNull().default([]),
-    meta: jsonb('meta').notNull().default({}),
+    nodes: jsonb('nodes').$type<GraphSnapshotNode[]>().notNull().default([]),
+    edges: jsonb('edges').$type<GraphSnapshotEdge[]>().notNull().default([]),
+    meta: jsonb('meta').$type<GraphSnapshotMeta>().notNull().default({} as GraphSnapshotMeta),
     retentionDays: integer('retention_days').notNull().default(30),
     snapshotAt: timestamp('snapshot_at').notNull().defaultNow(),
     expiresAt: timestamp('expires_at').notNull(),

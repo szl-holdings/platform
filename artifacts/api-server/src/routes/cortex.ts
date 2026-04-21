@@ -36,6 +36,7 @@ import {
 } from '@szl-holdings/db';
 import crypto from 'crypto';
 import { and, desc, eq, gt, gte, inArray, lte, sql } from 'drizzle-orm';
+import { captureGraphSnapshot } from '../services/cortex-graph-snapshot';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendNotFound, sendSuccess } from '../lib/api-response';
@@ -1913,121 +1914,33 @@ router.post(
         sendBadRequest(res, 'An organisation context is required to create a graph snapshot');
         return;
       }
+
       const label: string | undefined =
         typeof req.body?.label === 'string' ? req.body.label.slice(0, 120) : undefined;
-      const parsedRetention = parseInt(
-        String(req.body?.retentionDays ?? DEFAULT_RETENTION_DAYS),
-        10,
-      );
-      const retentionDays = Math.min(
-        Math.max(1, Number.isFinite(parsedRetention) ? parsedRetention : DEFAULT_RETENTION_DAYS),
-        365,
-      );
-
       const domain = req.body?.domain ? String(req.body.domain) : undefined;
       const parsedLimit = parseInt(String(req.body?.limit ?? '60'), 10);
-      const limit = Math.min(Number.isFinite(parsedLimit) ? Math.max(1, parsedLimit) : 60, 150);
+      const limit = Number.isFinite(parsedLimit) ? Math.max(1, parsedLimit) : 60;
       const parsedRisk = parseFloat(String(req.body?.minRisk ?? '0'));
-      const minRisk = Number.isFinite(parsedRisk) ? Math.min(Math.max(0, parsedRisk), 1) : 0;
+      const minRisk = Number.isFinite(parsedRisk) ? parsedRisk : 0;
+      const parsedRetention = parseInt(String(req.body?.retentionDays ?? DEFAULT_RETENTION_DAYS), 10);
+      const retentionDays = Number.isFinite(parsedRetention) ? parsedRetention : DEFAULT_RETENTION_DAYS;
 
-      const domainEntities = await ontologyEngine.getDomainEntities(
-        domain ?? 'vessels',
-        Math.ceil(limit / 2),
-      );
-      const allDomains = ['vessels', 'firestorm', 'terra', 'prism', 'szl'];
-      const crossDomainEntities = domain
-        ? []
-        : (
-            await Promise.all(
-              allDomains
-                .slice(0, 4)
-                .map((d) => ontologyEngine.getDomainEntities(d, Math.ceil(limit / 8))),
-            )
-          ).flat();
-
-      const rawEntities = [...domainEntities, ...crossDomainEntities]
-        .filter((e, i, arr) => arr.findIndex((x) => x.id === e.id) === i)
-        .filter((e) => (e.riskScore ?? 0) >= minRisk)
-        .slice(0, limit);
-
-      const nodes = rawEntities.map((e) => ({
-        id: e.id,
-        label: e.name,
-        type: e.type,
-        domain: e.domain,
-        riskScore: e.riskScore ?? 0,
-        tags: e.tags ?? [],
-        metadata: e.metadata,
-        lastSeen: e.lastUpdated,
-      }));
-
-      const entityIds = new Set(rawEntities.map((e) => e.id));
-      const edgesRaw: Array<{ source: string; target: string; type: string; strength: string }> =
-        [];
-      for (const entity of rawEntities.slice(0, 20)) {
-        try {
-          const connections = await ontologyEngine.getEntityConnections(entity.id);
-          const allConns = [
-            ...connections.outgoing.map((c) => c.rel),
-            ...connections.incoming.map((c) => c.rel),
-          ];
-          for (const conn of allConns) {
-            if (entityIds.has(conn.fromEntityId) && entityIds.has(conn.toEntityId)) {
-              edgesRaw.push({
-                source: conn.fromEntityId,
-                target: conn.toEntityId,
-                type: conn.type,
-                strength: conn.strength,
-              });
-            }
-          }
-        } catch {
-          /* skip */
-        }
-      }
-      const edges = edgesRaw.filter(
-        (e, i, arr) =>
-          arr.findIndex(
-            (x) => x.source === e.source && x.target === e.target && x.type === e.type,
-          ) === i,
-      );
-
-      const graphStats = await ontologyEngine
-        .getGraphStats()
-        .catch(() => ({ totalEntities: 0, totalRelationships: 0 }));
-      const snapshotAt = new Date();
-      const expiresAt = new Date(snapshotAt.getTime() + retentionDays * 24 * 60 * 60 * 1000);
+      const result = await captureGraphSnapshot({ orgId, label, domain, limit, minRisk, retentionDays, source: 'manual' });
 
       const [created] = await db
-        .insert(cortexGraphSnapshotsTable)
-        .values({
-          snapshotUuid: crypto.randomUUID(),
-          orgId: orgId,
-          label: label ?? null,
-          nodes: nodes as unknown as any[],
-          edges: edges as unknown as any[],
-          meta: {
-            totalNodes: nodes.length,
-            totalEdges: edges.length,
-            domain: domain ?? 'all',
-            minRisk,
-            graphStats,
-          } as any,
-          retentionDays,
-          expiresAt,
-        })
-        .returning();
-
-      logger.info({ snapshotUuid: created.snapshotUuid, orgId }, '[CORTEX] Graph snapshot created');
+        .select()
+        .from(cortexGraphSnapshotsTable)
+        .where(eq(cortexGraphSnapshotsTable.snapshotUuid, result.snapshotUuid))
+        .limit(1);
 
       sendSuccess(res, {
         snapshot: {
-          id: created.snapshotUuid,
-          label: created.label,
-          snapshotAt: created.snapshotAt,
-          expiresAt: created.expiresAt,
-          retentionDays: created.retentionDays,
-          meta: created.meta,
+          id: result.snapshotUuid,
+          label: result.label,
+          snapshotAt: result.snapshotAt,
+          expiresAt: result.expiresAt,
+          retentionDays: created?.retentionDays ?? retentionDays,
+          meta: created?.meta ?? null,
         },
         message: 'Graph snapshot saved',
       });

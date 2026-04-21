@@ -32,6 +32,7 @@ export const NAMED_JOB_TYPES = {
   ON_CALL_HANDOFF_NOTIFY: "on_call_handoff_notify",
   STUCK_RUN_NOTIFY: "stuck_run_notify",
   DAILY_LIVE_SIGNAL_REFRESH: "daily_live_signal_refresh",
+  DAILY_CORTEX_GRAPH_SNAPSHOT: "daily_cortex_graph_snapshot",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -1803,6 +1804,81 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, async (job) 
       lastStatus: "failed",
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+});
+
+registerEntry({ type: NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT, name: "CORTEX Graph Snapshot", description: "Captures a point-in-time entity graph snapshot for every active org on the configured schedule (default: daily at midnight UTC; set CORTEX_SNAPSHOT_INTERVAL_HOURS=1–23 for sub-daily cadence). Snapshots are labelled with the capture timestamp (e.g. 'Daily — Apr 21 00:00') and expire after the configured retention window (default 30 days via CORTEX_SNAPSHOT_RETENTION_DAYS). Accepts optional orgIds payload to target specific orgs.", schedule: "daily", enabled: true });
+
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT, async (job) => {
+  const start = Date.now();
+  const payload = (job.payload ?? {}) as { orgIds?: number[]; retentionDays?: number };
+  logger.info({ jobId: job.id }, "daily_cortex_graph_snapshot: starting scheduled capture");
+
+  let succeeded = 0;
+  let failed = 0;
+
+  try {
+    const { db, organizationsTable } = await import("@szl-holdings/db");
+    const { eq } = await import("drizzle-orm");
+    const { captureGraphSnapshot, buildScheduledSnapshotLabel } = await import("../services/cortex-graph-snapshot");
+
+    const label = buildScheduledSnapshotLabel(new Date());
+
+    let orgIds: number[];
+    if (Array.isArray(payload.orgIds) && payload.orgIds.length > 0) {
+      orgIds = payload.orgIds;
+    } else {
+      const rows = await db
+        .select({ id: organizationsTable.id })
+        .from(organizationsTable)
+        .where(eq(organizationsTable.isActive, true));
+      orgIds = rows.map((r) => r.id);
+    }
+
+    logger.info({ jobId: job.id, orgCount: orgIds.length, label }, "daily_cortex_graph_snapshot: capturing for orgs");
+
+    for (const orgId of orgIds) {
+      try {
+        await captureGraphSnapshot({
+          orgId,
+          label,
+          retentionDays: payload.retentionDays,
+          source: 'scheduled',
+        });
+        succeeded++;
+      } catch (err) {
+        failed++;
+        logger.error({ err, orgId, jobId: job.id }, "daily_cortex_graph_snapshot: org capture failed");
+      }
+    }
+
+    serverTelemetry.recordBusinessEvent({
+      type: "daily_cortex_graph_snapshot_completed",
+      domain: "cortex",
+      durationMs: Date.now() - start,
+      success: failed === 0,
+      metadata: { orgCount: orgIds.length, succeeded, failed, label },
+    });
+
+    updateRegistry(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT, {
+      lastStatus: failed > 0 && succeeded === 0 ? "failed" : "completed",
+      lastDurationMs: Date.now() - start,
+      ...(failed > 0 ? { failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT)?.failCount || 0) + failed } : {}),
+    });
+
+    logger.info({ jobId: job.id, succeeded, failed, durationMs: Date.now() - start }, "daily_cortex_graph_snapshot: complete");
+
+    if (succeeded === 0 && orgIds.length > 0) {
+      throw new Error(`daily_cortex_graph_snapshot: all ${orgIds.length} org snapshots failed`);
+    }
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "daily_cortex_graph_snapshot: fatal");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT, {
+      lastStatus: "failed",
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT)?.failCount || 0) + 1,
     });
     throw err;
   }
