@@ -1,46 +1,19 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
+@import "@szl-holdings/design-system/tokens/css";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
-/* ─── Accessibility: Skip to content link ─── */
-.skip-to-content {
-  position: absolute;
-  top: -100px;
-  left: 1rem;
-  z-index: 9999;
-  padding: 0.625rem 1.25rem;
-  background: #0ea5e9;
-  color: #020a14;
-  font-weight: 700;
-  font-size: 0.875rem;
-  border-radius: 0.25rem;
-  text-decoration: none;
-  transition: top 0.2s ease;
-}
-.skip-to-content:focus {
-  top: 1rem;
-}
-
-/* ─── Accessibility: Focus indicators ─── */
-:focus-visible {
-  outline: 2px solid #38bdf8;
-  outline-offset: 2px;
-  border-radius: 2px;
-}
+@custom-variant dark (&:is(.dark *));
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 }
-
-@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: hsl(var(--background));
@@ -78,324 +51,194 @@
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-display: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
+  --radius-sm:  0.125rem;
+  --radius-md:  0.25rem;
+  --radius-lg:  0.375rem;
+  --radius-xl:  0.5rem;
+  --radius-2xl: 0.75rem;
 }
 
 :root {
-  /* Vessels — deep ocean blue / storm-teal / marine steel */
+  /* Vessels product — accent.blue (#4d8fcc ≈ hsl(210 52% 55%)) */
   --background: 216 30% 4%;
   --foreground: 205 18% 92%;
   --border: 214 24% 11%;
   --input: 214 24% 13%;
-  --ring: 202 80% 48%;
+  --ring: 210 52% 55%;
   --card: 215 26% 6%;
   --card-foreground: 205 18% 92%;
   --popover: 215 26% 8%;
   --popover-foreground: 205 18% 92%;
-
-  /* Deep ocean / storm-teal accent — maritime command */
-  --primary: 202 80% 48%;
+  --primary: 210 52% 55%;
   --primary-foreground: 216 30% 4%;
   --secondary: 214 24% 11%;
   --secondary-foreground: 205 15% 75%;
   --muted: 214 24% 9%;
   --muted-foreground: 210 12% 48%;
-  --accent: 188 58% 44%;
+  --accent: 196 45% 44%;
   --accent-foreground: 205 18% 92%;
-  --destructive: 0 72% 51%;
+  --destructive: 352 44% 45%;
   --destructive-foreground: 0 0% 100%;
-
-  --chart-1: 202 80% 48%;
-  --chart-2: 188 58% 44%;
-  --chart-3: 35 85% 52%;
-  --chart-4: 160 60% 42%;
-  --chart-5: 340 70% 52%;
-
+  --chart-1: 210 52% 55%;
+  --chart-2: 196 45% 44%;
+  --chart-3: 35 65% 48%;
+  --chart-4: 152 38% 42%;
+  --chart-5: 352 44% 45%;
   --sidebar: 216 32% 3%;
   --sidebar-foreground: 205 15% 70%;
   --sidebar-border: 214 24% 10%;
-  --sidebar-primary: 202 80% 48%;
+  --sidebar-primary: 210 52% 55%;
   --sidebar-primary-foreground: 216 30% 4%;
   --sidebar-accent: 214 24% 9%;
   --sidebar-accent-foreground: 205 18% 92%;
-  --sidebar-ring: 202 80% 48%;
+  --sidebar-ring: 210 52% 55%;
 
-  /* Vessels semantic tokens */
-  --vessels-ocean: hsl(202 80% 48%);
-  --vessels-ocean-dim: hsla(202 80% 48% / 0.08);
-  --vessels-ocean-border: hsla(202 80% 48% / 0.16);
-  --vessels-teal: hsl(188 58% 44%);
-  --vessels-teal-dim: hsla(188 58% 44% / 0.08);
-  --vessels-marine: hsl(215 26% 16%);
+  /* Vessels product tokens */
+  --vessels-ocean-dim:   rgba(77, 143, 204, 0.08);
+  --vessels-ocean-border:rgba(77, 143, 204, 0.16);
+  --vessels-teal-dim:    rgba(62, 168, 154, 0.08);
+  --vessels-marine:      hsl(215 26% 16%);
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
   body {
-    @apply bg-background text-foreground antialiased font-sans;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background-image:
-      linear-gradient(hsla(202, 80%, 48%, 0.022) 1px, transparent 1px),
-      linear-gradient(90deg, hsla(202, 80%, 48%, 0.022) 1px, transparent 1px);
-    background-size: 64px 64px;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
   }
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: "Space Grotesk", system-ui, sans-serif;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     @apply tracking-tight font-semibold;
   }
-  ::selection {
-    background: hsla(202 80% 48% / 0.22);
-    color: hsl(205 18% 92%);
-  }
+  ::selection { background: rgba(77, 143, 204, 0.2); color: hsl(205 18% 92%); }
 }
 
-/* ─── Refined scrollbars ─── */
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: hsl(214 24% 16%);
+:focus-visible {
+  outline: 2px solid var(--gi-accent-blue);
+  outline-offset: 2px;
   border-radius: 2px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(214 24% 24%);
-}
 
-/* ─── Vessel command surfaces ─── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gi-border-subtle); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gi-border-default); }
+
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.625rem 1.25rem;
+  background: var(--gi-accent-blue);
+  color: #020a14;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+.skip-to-content:focus { top: 1rem; }
+
 .vessel-panel {
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
-  border-top: 1px solid hsla(202 80% 48% / 0.15);
+  border-top: 1px solid rgba(77, 143, 204, 0.14);
   border-radius: var(--radius-lg);
-  transition:
-    border-color 0.22s ease,
-    box-shadow 0.22s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .vessel-panel:hover {
-  border-top-color: hsla(202 80% 48% / 0.32);
-  border-color: hsla(202 80% 48% / 0.2);
-  box-shadow:
-    0 0 18px hsla(202 80% 48% / 0.09),
-    0 4px 24px rgba(0, 0, 0, 0.32);
+  border-top-color: rgba(77, 143, 204, 0.28);
+  border-color: rgba(77, 143, 204, 0.18);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.32);
 }
 
-/* KPI stat panel */
-.stat-panel {
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-top: 1px solid hsla(202 80% 48% / 0.18);
-  border-radius: var(--radius-lg);
-  transition: border-color 0.15s ease;
-}
-.stat-panel:hover {
-  border-color: hsla(202 80% 48% / 0.28);
-}
-
-/* KPI accent rule */
-.kpi-accent-rule {
-  border-top: 2px solid hsla(202 80% 48% / 0.4);
-}
-
-/* Vessel detail card — elite level */
 .vessel-card {
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
-  border-left: 2px solid hsla(202 80% 48% / 0.35);
+  border-left: 2px solid rgba(77, 143, 204, 0.3);
   border-radius: var(--radius-lg);
-  transition:
-    border-left-color 0.18s ease,
-    background 0.18s ease;
+  transition: border-left-color 0.18s ease, background 0.18s ease;
 }
 .vessel-card:hover {
-  border-left-color: hsla(202 80% 48% / 0.65);
+  border-left-color: rgba(77, 143, 204, 0.6);
   background: hsl(215 26% 7%);
 }
 
-/* Exception / alert severity bands */
-.exception-critical {
-  border-left: 2px solid hsl(0 72% 51%);
+.stat-panel {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-top: 1px solid rgba(77, 143, 204, 0.14);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.15s ease;
 }
-.exception-high {
-  border-left: 2px solid hsl(30 88% 52%);
+.stat-panel:hover { border-color: rgba(77, 143, 204, 0.24); }
+
+.kpi-accent-rule { border-top: 2px solid rgba(77, 143, 204, 0.38); }
+
+.exception-critical { border-left: 2px solid var(--gi-accent-red); }
+.exception-high     { border-left: 2px solid var(--gi-accent-amber); }
+.exception-medium   { border-left: 2px solid var(--gi-accent-amber); }
+.exception-low      { border-left: 2px solid var(--gi-accent-green); }
+
+.badge-underway  { background: rgba(77, 143, 204, 0.1);  color: #6ea8d8; border: 1px solid rgba(77, 143, 204, 0.22); }
+.badge-anchored  { background: rgba(201, 168, 92, 0.1);  color: var(--gi-accent-amber); border: 1px solid rgba(201, 168, 92, 0.22); }
+.badge-moored    { background: rgba(91, 170, 138, 0.1);  color: var(--gi-accent-green); border: 1px solid rgba(91, 170, 138, 0.22); }
+.badge-exception { background: rgba(201, 96, 112, 0.1);  color: var(--gi-accent-red);   border: 1px solid rgba(201, 96, 112, 0.22); }
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.exception-medium {
-  border-left: 2px solid hsl(45 85% 52%);
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
-.exception-low {
-  border-left: 2px solid hsl(160 65% 42%);
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.4); opacity: 0.6; }
+}
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes wave-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-3px); }
+}
+@keyframes route-dash { to { stroke-dashoffset: -12; } }
+@keyframes vessel-ping {
+  0%  { transform: scale(1); opacity: 1; }
+  75% { transform: scale(2); opacity: 0; }
+  100%{ opacity: 0; }
+}
+@keyframes panel-reveal {
+  from { opacity: 0; transform: translateX(8px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
-/* Route indicator */
+.animate-fade-in-up     { animation: fade-in-up 0.3s ease-out both; }
+.animate-fade-in        { animation: fade-in 0.2s ease-out both; }
+.animate-scale-in       { animation: scale-in 0.25s ease-out both; }
+.animate-slide-in-right { animation: slide-in-right 0.22s ease-out both; }
+.animate-pulse-dot      { animation: pulse-dot 2s ease-in-out infinite; }
+.animate-wave-float     { animation: wave-float 4s ease-in-out infinite; }
+.animate-vessel-ping    { animation: vessel-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+.animate-panel-reveal   { animation: panel-reveal 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
 .route-active {
-  stroke: hsl(202 80% 48%);
+  stroke: var(--gi-accent-blue);
   stroke-width: 2;
   stroke-dasharray: 8 4;
   animation: route-dash 2s linear infinite;
-}
-
-/* Status badges */
-.badge-underway {
-  background: hsla(202 80% 48% / 0.12);
-  color: hsl(202 80% 60%);
-  border: 1px solid hsla(202 80% 48% / 0.25);
-}
-.badge-anchored {
-  background: hsla(45 85% 52% / 0.12);
-  color: hsl(45 85% 62%);
-  border: 1px solid hsla(45 85% 52% / 0.25);
-}
-.badge-moored {
-  background: hsla(160 65% 42% / 0.12);
-  color: hsl(160 65% 55%);
-  border: 1px solid hsla(160 65% 42% / 0.25);
-}
-.badge-exception {
-  background: hsla(0 72% 51% / 0.12);
-  color: hsl(0 72% 62%);
-  border: 1px solid hsla(0 72% 51% / 0.25);
-}
-
-/* ─── Maritime motion — purposeful, operational ─── */
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-@keyframes pulse-dot {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.4);
-    opacity: 0.6;
-  }
-}
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-@keyframes progress-fill {
-  from {
-    width: 0%;
-  }
-}
-@keyframes wave-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
-}
-@keyframes route-dash {
-  to {
-    stroke-dashoffset: -12;
-  }
-}
-@keyframes vessel-ping {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  75% {
-    transform: scale(2);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0;
-  }
-}
-@keyframes panel-reveal {
-  from {
-    opacity: 0;
-    transform: translateX(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.35s ease-out both;
-}
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out both;
-}
-.animate-scale-in {
-  animation: scale-in 0.3s ease-out both;
-}
-.animate-slide-in-right {
-  animation: slide-in-right 0.25s ease-out both;
-}
-.animate-pulse-dot {
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-.animate-wave-float {
-  animation: wave-float 4s ease-in-out infinite;
-}
-.animate-vessel-ping {
-  animation: vessel-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-.animate-panel-reveal {
-  animation: panel-reveal 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .skeleton {
@@ -407,40 +250,14 @@
   );
   background-size: 200% 100%;
   animation: shimmer 1.8s ease-in-out infinite;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-md);
 }
 
-.stagger-1 {
-  animation-delay: 0.04s;
-}
-.stagger-2 {
-  animation-delay: 0.08s;
-}
-.stagger-3 {
-  animation-delay: 0.12s;
-}
-.stagger-4 {
-  animation-delay: 0.16s;
-}
-.stagger-5 {
-  animation-delay: 0.2s;
-}
-.stagger-6 {
-  animation-delay: 0.24s;
-}
-.stagger-7 {
-  animation-delay: 0.28s;
-}
-.stagger-8 {
-  animation-delay: 0.32s;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
+.stagger-1 { animation-delay: 0.04s; }
+.stagger-2 { animation-delay: 0.08s; }
+.stagger-3 { animation-delay: 0.12s; }
+.stagger-4 { animation-delay: 0.16s; }
+.stagger-5 { animation-delay: 0.2s; }
+.stagger-6 { animation-delay: 0.24s; }
+.stagger-7 { animation-delay: 0.28s; }
+.stagger-8 { animation-delay: 0.32s; }

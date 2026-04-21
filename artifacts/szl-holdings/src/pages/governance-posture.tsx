@@ -1,3 +1,4 @@
+import { StatusBadge as DSStatusBadge, type StatusVariant } from '@szl-holdings/design-system';
 import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
@@ -208,24 +209,18 @@ function TrendIcon({ trend }: { trend: string }) {
   return <Activity size={12} style={{ color: YELLOW }} />;
 }
 
+const PRIORITY_VARIANT: Record<string, StatusVariant> = {
+  critical: 'error', high: 'warning', medium: 'warning',
+};
 function PriorityBadge({ priority }: { priority: string }) {
-  const colors: Record<string, string> = { critical: RED, high: ORANGE, medium: YELLOW };
-  const c = colors[priority] ?? TEXT_FAINT;
-  return (
-    <span style={{ fontSize: "0.575rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: MONO, padding: "2px 5px", borderRadius: 3, background: `${c}15`, border: `1px solid ${c}25`, color: c }}>
-      {priority}
-    </span>
-  );
+  return <DSStatusBadge variant={PRIORITY_VARIANT[priority] ?? 'neutral'} label={priority} />;
 }
 
+const APPROVAL_STATUS_VARIANT: Record<string, StatusVariant> = {
+  pending: 'pending', escalated: 'escalated', resolved: 'approved', open: 'active',
+};
 function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = { pending: YELLOW, escalated: RED, resolved: GREEN, open: RED };
-  const c = colors[status] ?? TEXT_FAINT;
-  return (
-    <span style={{ fontSize: "0.575rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: MONO, padding: "2px 5px", borderRadius: 3, background: `${c}12`, border: `1px solid ${c}22`, color: c }}>
-      {status}
-    </span>
-  );
+  return <DSStatusBadge variant={APPROVAL_STATUS_VARIANT[status] ?? 'neutral'} label={status} />;
 }
 
 interface LedgerRow {

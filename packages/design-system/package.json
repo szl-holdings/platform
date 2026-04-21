@@ -26,7 +26,13 @@
     "./cockpit/recommendation-card": "./src/cockpit/RecommendationCard.tsx",
     "./cockpit/approval-dialog": "./src/cockpit/ApprovalDialog.tsx",
     "./cockpit/audit-rail": "./src/cockpit/AuditRail.tsx",
-    "./alloy-bridge": "./src/alloy-bridge.ts"
+    "./data": "./src/data/index.ts",
+    "./data/status-badge": "./src/data/StatusBadge.tsx",
+    "./data/metric-stat": "./src/data/MetricStat.tsx",
+    "./data/data-grid": "./src/data/DataGrid.tsx",
+    "./data/filter-bar": "./src/data/FilterBar.tsx",
+    "./alloy-bridge": "./src/alloy-bridge.ts",
+    "./tokens/css": "./src/tokens/gi-tokens.css"
   },
   "peerDependencies": {
     "react": "^19.0.0",

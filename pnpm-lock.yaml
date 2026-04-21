@@ -1924,6 +1924,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus

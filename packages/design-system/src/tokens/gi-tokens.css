@@ -1,0 +1,77 @@
+/**
+ * GI Design Language — CSS Token Export
+ * Single source of truth for --gi-* custom properties.
+ * Import via: @import "@szl-holdings/design-system/tokens/css";
+ * Values must stay in sync with src/tokens/index.ts
+ */
+
+:root {
+  /* Backgrounds */
+  --gi-bg-base:     #060b12;
+  --gi-bg-surface:  #0d1520;
+  --gi-bg-overlay:  #111c2a;
+  --gi-bg-raised:   #162030;
+  --gi-bg-hover:    #1a2a3a;
+  --gi-bg-active:   #1e3248;
+
+  /* Borders */
+  --gi-border-subtle:  #1a2535;
+  --gi-border-default: #243040;
+  --gi-border-strong:  #304055;
+  --gi-border-focus:   #4d8fcc;
+
+  /* Text */
+  --gi-text-primary:     #c8d8e8;
+  --gi-text-secondary:   #7a99b8;
+  --gi-text-muted:       #4a6070;
+  --gi-text-inverse:     #060b12;
+  --gi-text-link:        #4d8fcc;
+  --gi-text-placeholder: #3a5060;
+
+  /* Accent family */
+  --gi-accent-blue:   #4d8fcc;
+  --gi-accent-teal:   #3ea89a;
+  --gi-accent-green:  #5baa8a;
+  --gi-accent-amber:  #c9a85c;
+  --gi-accent-red:    #c96070;
+  --gi-accent-violet: #9b7cc8;
+  --gi-accent-slate:  #7a99b8;
+
+  /* Semantic state */
+  --gi-state-allowed:           #5baa8a;
+  --gi-state-requires-approval: #c9a85c;
+  --gi-state-blocked:           #c96070;
+
+  /* Confidence */
+  --gi-confidence-high:          #5baa8a;
+  --gi-confidence-medium:        #c9a85c;
+  --gi-confidence-low:           #c96070;
+  --gi-confidence-contradiction: #9b7cc8;
+
+  /* Chart palette */
+  --gi-chart-1: #4d8fcc;
+  --gi-chart-2: #5baa8a;
+  --gi-chart-3: #c9a85c;
+  --gi-chart-4: #9b7cc8;
+  --gi-chart-5: #c97a64;
+  --gi-chart-6: #6bb5c2;
+
+  /* Radius */
+  --gi-radius-none: 0px;
+  --gi-radius-sm:   2px;
+  --gi-radius-md:   4px;
+  --gi-radius-lg:   6px;
+  --gi-radius-xl:   8px;
+  --gi-radius-2xl:  12px;
+  --gi-radius-full: 9999px;
+
+  /* Motion */
+  --gi-duration-instant: 60ms;
+  --gi-duration-fast:    120ms;
+  --gi-duration-normal:  200ms;
+  --gi-duration-slow:    350ms;
+  --gi-duration-glacial: 600ms;
+  --gi-ease-standard:    cubic-bezier(0.4, 0, 0.2, 1);
+  --gi-ease-decelerate:  cubic-bezier(0, 0, 0.2, 1);
+  --gi-ease-accelerate:  cubic-bezier(0.4, 0, 1, 1);
+}

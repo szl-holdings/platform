@@ -1,3 +1,4 @@
+import { StatusBadge as DSStatusBadge, type StatusVariant } from '@szl-holdings/design-system';
 import { AlertTriangle, CheckCircle2, Circle, X } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -21,48 +22,21 @@ export function FitBadge({ level }: { level: string }) {
   );
 }
 
+const OWNERSHIP_PRIORITY_VARIANT: Record<string, StatusVariant> = {
+  critical: 'error', high: 'warning', medium: 'warning', low: 'info',
+};
 export function PriorityBadge({ priority }: { priority: string }) {
-  const map: Record<string, string> = {
-    critical: 'bg-red-500/10 text-red-500 border-red-500/20',
-    high: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
-    medium: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-    low: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-  };
-  return (
-    <span
-      className={cn(
-        'text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider',
-        map[priority] ?? map.medium,
-      )}
-    >
-      {priority}
-    </span>
-  );
+  return <DSStatusBadge variant={OWNERSHIP_PRIORITY_VARIANT[priority] ?? 'neutral'} label={priority} />;
 }
 
+const OWNERSHIP_STATUS_VARIANT: Record<string, StatusVariant> = {
+  open: 'active', in_progress: 'pending', pending: 'pending',
+  resolved: 'approved', current: 'success', documented: 'success',
+  missing: 'error', needs_update: 'warning',
+  draft: 'neutral', not_started: 'neutral',
+};
 export function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    open: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-    in_progress: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-    resolved: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-    current: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-    missing: 'bg-red-500/10 text-red-500 border-red-500/20',
-    needs_update: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-    draft: 'bg-muted text-muted-foreground border-border',
-    not_started: 'bg-muted text-muted-foreground border-border',
-    documented: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-    pending: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-  };
-  return (
-    <span
-      className={cn(
-        'text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider',
-        map[status] ?? map.draft,
-      )}
-    >
-      {status.replace(/_/g, ' ')}
-    </span>
-  );
+  return <DSStatusBadge variant={OWNERSHIP_STATUS_VARIANT[status] ?? 'neutral'} label={status.replace(/_/g, ' ')} />;
 }
 
 export function ScoreBar({

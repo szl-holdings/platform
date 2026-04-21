@@ -1,3 +1,4 @@
+import { StatusBadge as DSStatusBadge, type StatusVariant } from '@szl-holdings/design-system';
 import { AnimatePresence, m } from 'framer-motion';
 import {
   AlertCircle,
@@ -100,22 +101,12 @@ const STATUS_META: Record<string, { color: string; bg: string }> = {
   archived: { color: '#4a4540', bg: 'hsla(0,0%,100%,0.02)' },
 };
 
+const CAMPAIGN_STATUS_VARIANT: Record<string, StatusVariant> = {
+  active: 'success', completed: 'approved',
+  paused: 'pending', draft: 'neutral', archived: 'neutral',
+};
 function StatusBadge({ status }: { status: string }) {
-  const meta = STATUS_META[status] || STATUS_META.draft;
-  return (
-    <span
-      style={{
-        fontSize: '0.6875rem',
-        fontWeight: 700,
-        color: meta.color,
-        background: meta.bg,
-        padding: '0.2rem 0.625rem',
-        borderRadius: '100px',
-      }}
-    >
-      {status.toUpperCase()}
-    </span>
-  );
+  return <DSStatusBadge variant={CAMPAIGN_STATUS_VARIANT[status] ?? 'neutral'} label={status} />;
 }
 
 function buildUtmUrl(

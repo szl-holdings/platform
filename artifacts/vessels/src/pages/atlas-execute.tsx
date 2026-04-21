@@ -1,3 +1,4 @@
+import { StatusBadge as DSStatusBadge, type StatusVariant } from '@szl-holdings/design-system';
 import { type ApiFetchOptions, apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import {
   Activity,
@@ -53,16 +54,12 @@ const STATUS_COLOR: Record<string, string> = {
   cancelled: '#6b7280',
 };
 
+const RUN_STATUS_VARIANT: Record<string, StatusVariant> = {
+  pending: 'pending', pending_approval: 'pending', paused: 'pending',
+  running: 'active', completed: 'approved', failed: 'error', cancelled: 'neutral',
+};
 function StatusBadge({ status }: { status: string }) {
-  const color = STATUS_COLOR[status] ?? '#6b7280';
-  return (
-    <span
-      className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded font-mono"
-      style={{ color, background: `${color}18`, border: `1px solid ${color}30` }}
-    >
-      {status.replace(/_/g, ' ')}
-    </span>
-  );
+  return <DSStatusBadge variant={RUN_STATUS_VARIANT[status] ?? 'neutral'} label={status.replace(/_/g, ' ')} />;
 }
 
 interface Signal {

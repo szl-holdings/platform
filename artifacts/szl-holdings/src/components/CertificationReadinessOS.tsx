@@ -1,3 +1,4 @@
+import { StatusBadge as DSStatusBadge, type StatusVariant } from '@szl-holdings/design-system';
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, m } from 'framer-motion';
@@ -160,16 +161,15 @@ const PROGRAM_COLORS: Record<string, string> = {
   'sam-registration': '#06b6d4',
 };
 
+const CERT_STATUS_VARIANT: Record<string, StatusVariant> = {
+  not_started: 'neutral', withdrawn: 'neutral',
+  assessing: 'warning', renewal_due: 'warning',
+  preparing: 'info', applied: 'pending', in_review: 'pending',
+  approved: 'approved',
+  denied: 'error', expired: 'error',
+};
 function StatusBadge({ status }: { status: string }) {
-  const color = STATUS_COLORS[status] ?? '#6b7280';
-  return (
-    <span
-      className="text-[10px] font-mono px-2 py-0.5 rounded shrink-0"
-      style={{ background: `${color}18`, color }}
-    >
-      {status.replace(/_/g, ' ')}
-    </span>
-  );
+  return <DSStatusBadge variant={CERT_STATUS_VARIANT[status] ?? 'neutral'} label={status.replace(/_/g, ' ')} />;
 }
 
 function TaskRow({ task }: { task: CertTask }) {

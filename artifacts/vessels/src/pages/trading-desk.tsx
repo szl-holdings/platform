@@ -1,3 +1,4 @@
+import { StatusBadge as DSStatusBadge, type StatusVariant } from '@szl-holdings/design-system';
 import {
   Activity,
   AlertCircle,
@@ -417,21 +418,12 @@ function OrderEntry({
   );
 }
 
+const ORDER_STATUS_VARIANT: Record<string, StatusVariant> = {
+  filled: 'success', open: 'active', partially_filled: 'pending',
+  pending: 'pending', cancelled: 'neutral', rejected: 'rejected',
+};
 function StatusBadge({ status }: { status: string }) {
-  const cfg: Record<string, { bg: string; color: string }> = {
-    filled: { bg: `${GREEN}18`, color: GREEN },
-    open: { bg: `${ACCENT}18`, color: ACCENT },
-    partially_filled: { bg: `${AMBER}18`, color: AMBER },
-    pending: { bg: 'rgba(255,255,255,0.06)', color: TEXT.secondary },
-    cancelled: { bg: 'rgba(255,255,255,0.04)', color: TEXT.muted },
-    rejected: { bg: `${RED}18`, color: RED },
-  };
-  const c = cfg[status] ?? cfg.pending;
-  return (
-    <span className="rounded px-1.5 py-0.5 text-[9px] font-medium uppercase" style={c}>
-      {status.replace('_', ' ')}
-    </span>
-  );
+  return <DSStatusBadge variant={ORDER_STATUS_VARIANT[status] ?? 'neutral'} label={status.replace(/_/g, ' ')} />;
 }
 
 function SideBadge({ side }: { side: string }) {

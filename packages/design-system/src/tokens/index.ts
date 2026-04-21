@@ -87,12 +87,15 @@ export const color = {
 } as const;
 
 export const productAccent = {
-  command: color.accent.cyan,
+  command: color.accent.blue,
   holdings: color.accent.teal,
+  sentra: color.accent.red,
+  counsel: color.accent.violet,
   aegis: color.accent.violet,
-  vessels: color.accent.cyan,
+  vessels: color.accent.blue,
   terra: color.accent.green,
   pulse: color.accent.amber,
+  lyte: color.accent.amber,
   carlota: color.accent.violet,
 } as const;
 

@@ -1,3 +1,4 @@
+import { StatusBadge as DSStatusBadge, type StatusVariant } from '@szl-holdings/design-system';
 import {
   Activity,
   AlertTriangle,
@@ -134,15 +135,12 @@ const SOURCE_TYPE_ICONS: Record<string, React.ReactNode> = {
 
 // ─── Badges ───────────────────────────────────────────────────────────────────
 
+const SEVERITY_VARIANT: Record<string, StatusVariant> = {
+  critical: 'error', high: 'warning', medium: 'warning', low: 'info',
+};
 function SeverityBadge({ severity }: { severity: Severity }) {
   const cfg = SEVERITY_CFG[severity];
-  return (
-    <span
-      className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider border ${cfg.color} ${cfg.bg} ${cfg.border}`}
-    >
-      {cfg.label}
-    </span>
-  );
+  return <DSStatusBadge variant={SEVERITY_VARIANT[severity] ?? 'neutral'} label={cfg.label} />;
 }
 
 function AutonomyBadge({ mode }: { mode: AutonomyMode }) {

@@ -78,6 +78,7 @@
     "graphql": "^16.13.2",
     "urql": "^5.0.1",
     "@szl-holdings/brand-registry": "workspace:*",
-    "@szl-holdings/shared-ui": "workspace:*"
+    "@szl-holdings/shared-ui": "workspace:*",
+    "@szl-holdings/design-system": "workspace:*"
   }
 }

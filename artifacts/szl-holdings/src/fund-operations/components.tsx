@@ -1,33 +1,20 @@
+import { StatusBadge as DSStatusBadge, type StatusVariant } from '@szl-holdings/design-system';
 import { m } from 'framer-motion';
 import { ArrowDownRight, ArrowUpRight, X } from 'lucide-react';
 import type { ElementType } from 'react';
 import { useState } from 'react';
 import { derivePeriodDates, fmt, PORTFOLIO_COMPANIES } from './api';
 
+const FUND_STATUS_VARIANT: Record<string, StatusVariant> = {
+  verified: 'success', compliant: 'success', final: 'success', fully_funded: 'success',
+  pending: 'pending', review_needed: 'pending',
+  filed: 'info', notices_sent: 'info', approved: 'info',
+  draft: 'neutral',
+  overdue: 'error', expired: 'error',
+  distributed: 'escalated',
+};
 export function StatusBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    verified: 'bg-[#6aaa72]/15 text-[#6aaa72] border-[#6aaa72]/20',
-    pending: 'bg-[#d4a054]/15 text-[#d4a054] border-[#d4a054]/20',
-    filed: 'bg-[#4a90b8]/15 text-[#4a90b8] border-[#4a90b8]/20',
-    compliant: 'bg-[#6aaa72]/15 text-[#6aaa72] border-[#6aaa72]/20',
-    review_needed: 'bg-[#d4a054]/15 text-[#d4a054] border-[#d4a054]/20',
-    final: 'bg-[#6aaa72]/15 text-[#6aaa72] border-[#6aaa72]/20',
-    draft: 'bg-white/[0.06] text-white/50 border-white/10',
-    notices_sent: 'bg-[#4a90b8]/15 text-[#4a90b8] border-[#4a90b8]/20',
-    fully_funded: 'bg-[#6aaa72]/15 text-[#6aaa72] border-[#6aaa72]/20',
-    overdue: 'bg-[#c45a4a]/15 text-[#c45a4a] border-[#c45a4a]/20',
-    distributed: 'bg-[#8b7ac8]/15 text-[#8b7ac8] border-[#8b7ac8]/20',
-    approved: 'bg-[#4a90b8]/15 text-[#4a90b8] border-[#4a90b8]/20',
-    expired: 'bg-[#c45a4a]/15 text-[#c45a4a] border-[#c45a4a]/20',
-  };
-  const cls = colors[status] ?? 'bg-white/[0.06] text-white/50 border-white/10';
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${cls}`}
-    >
-      {status.replace(/_/g, ' ')}
-    </span>
-  );
+  return <DSStatusBadge variant={FUND_STATUS_VARIANT[status] ?? 'neutral'} label={status.replace(/_/g, ' ')} />;
 }
 
 export function MetricCard({
