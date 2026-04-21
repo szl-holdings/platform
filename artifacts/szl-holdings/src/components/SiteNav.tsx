@@ -2,820 +2,316 @@ import { useAuth } from '@szl-holdings/replit-auth-web';
 import { UserButton } from '@szl-holdings/shared-ui/UserButton';
 import { useRole } from '@szl-holdings/shared-ui/use-role';
 import { AnimatePresence, m } from 'framer-motion';
-import { ChevronDown, Menu, Terminal, X } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { analytics } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
 
+/**
+ * Institutional navigation — 6 top-level items.
+ * Lower-priority applications are demoted behind Solutions.
+ */
 const NAV_ITEMS = [
   {
     label: 'Platform',
     href: '/platform',
-    highlight: false,
     children: [
-      { label: 'Platform Overview', href: '/platform', note: 'Governed decision operating system' },
-      { label: 'Governed Intelligence', href: '/governed-cockpit', note: 'Proof envelope cockpit' },
-      { label: 'Lyte', href: '/lyte', note: 'Operational nerve center' },
-      {
-        label: 'Lyte · Decision Theater',
-        href: '/lyte/decision-theater',
-        note: 'Governed decision flow',
-      },
-      {
-        label: 'Lyte · Signal Fusion',
-        href: '/lyte/signal-fusion',
-        note: 'Cross-domain signal aggregation',
-      },
-      {
-        label: 'Lyte · Health & Freshness',
-        href: '/lyte/health-freshness',
-        note: 'Connector freshness & data health',
-      },
-      {
-        label: 'Lyte · Decision Schemas',
-        href: '/lyte/decision-schemas',
-        note: 'Reusable schema library',
-      },
-      {
-        label: 'Lyte · Governance Posture',
-        href: '/lyte/governance-posture',
-        note: 'CISO-grade policy dashboard',
-      },
-      { label: 'Alloy', href: '/alloy-fabric', note: 'Governance execution fabric' },
-      { label: 'CORTEX', href: 'https://cortex.szlholdings.com', note: 'Mobile command' },
-      { label: 'Command Portal', href: '/command/', note: 'Ecosystem overview' },
-      { label: 'Business State', href: '/business-state', note: 'Enterprise business overview' },
+      { label: 'Platform Overview', href: '/platform', note: 'Governed operational intelligence' },
+      { label: 'Alloy — Execution Fabric', href: '/alloy-fabric', note: 'Workflow orchestration and human approval gates' },
+      { label: 'Lyte — Decision Intelligence', href: '/lyte', note: 'Operational command surface' },
+      { label: 'Command Portal', href: '/command/', note: 'Cross-domain ecosystem hub' },
+      { label: 'How It Works', href: '/how-it-works', note: 'Governed decision loop' },
     ],
   },
   {
-    label: 'Primitives',
-    href: '/architecture',
-    highlight: false,
-    children: [
-      { label: 'Architecture Overview', href: '/architecture', note: 'Three-tier design' },
-      { label: 'Outcome Graph', href: '/docs/outcome-graph', note: 'Signal & state fabric' },
-      { label: 'Proof Chain', href: '/docs/proof-chain', note: 'Immutable audit record' },
-      { label: 'Covenant Policy', href: '/docs/covenant-policy', note: 'Governance rules engine' },
-      { label: 'Simulation', href: '/docs/simulation', note: 'Decision modeling' },
-      { label: 'Workflow Engine', href: '/how-it-works', note: 'Governed action routing' },
-    ],
-  },
-  {
-    label: 'Domain Packs',
+    label: 'Solutions',
     href: '/solutions',
-    highlight: false,
     children: [
-      { label: 'Domain Packs Overview', href: '/solutions', note: 'Governed vertical extensions' },
-      { label: 'Aegis', href: '/solutions/aegis', note: 'Defense & intelligence  ·  Beta' },
-      { label: 'Vessels', href: '/solutions/vessels', note: 'Maritime intelligence  ·  Beta' },
-      { label: 'Terra', href: '/solutions/terra', note: 'Real estate intelligence  ·  Beta' },
-      {
-        label: 'PRISM Counsel',
-        href: '/solutions/prism-counsel',
-        note: 'Legal operations  ·  Beta',
-      },
-      { label: 'Carlota Jo', href: '/carlota-jo/', note: 'Private advisory  ·  Beta' },
+      { label: 'Solutions Overview', href: '/solutions', note: 'Governed domain intelligence extensions' },
+      { label: 'Vessels — Maritime Intelligence', href: '/solutions/vessels', note: 'Fleet command, sanctions screening, dark vessel detection' },
+      { label: 'Aegis — Security & Defense', href: '/solutions/aegis', note: 'SOC, threat intelligence, MITRE ATT&CK' },
+      { label: 'Terra — Real Estate', href: '/solutions/terra', note: 'Distress signals, deal pipeline, ownership graph' },
+      { label: 'PRISM Counsel — Legal', href: '/solutions/prism-counsel', note: 'Matter command, deadline tracking' },
+      { label: 'Carlota Jo — Advisory', href: '/carlota-jo/', note: 'Private advisory operations' },
     ],
   },
   {
     label: 'Trust',
     href: '/trust',
-    highlight: false,
     children: [
       { label: 'Trust Center', href: '/trust', note: 'Full diligence index' },
-      { label: 'Executive Brief', href: '/trust/diligence/executive', note: 'Buyer · ROI & oversight' },
-      { label: 'Technical Brief', href: '/trust/diligence/technical', note: 'Architecture & integration' },
-      { label: 'Security Brief', href: '/trust/diligence/security', note: 'Controls & isolation' },
-      { label: 'Investor Brief', href: '/trust/diligence/investor', note: 'Moat & defensibility' },
-      { label: 'Security', href: '/trust/security', note: 'Controls & posture' },
-      { label: 'AI Governance', href: '/trust/ai', note: 'Model accountability' },
-      { label: 'Proof Chain', href: '/docs/proof-chain', note: 'Audit trail design' },
-      { label: 'Compliance Architecture', href: '/trust/governance', note: 'Policy & audit' },
+      { label: 'Security Posture', href: '/trust/security', note: 'Controls and isolation model' },
+      { label: 'AI Governance', href: '/trust/ai', note: 'Human-in-the-loop accountability' },
+      { label: 'Executive Brief', href: '/trust/diligence/executive', note: 'ROI and oversight — for buyers' },
+      { label: 'Technical Brief', href: '/trust/diligence/technical', note: 'Architecture and integration depth' },
+      { label: 'Investor Brief', href: '/trust/diligence/investor', note: 'Moat and defensibility' },
     ],
   },
   {
-    label: 'Proof',
-    href: '/product-readiness',
-    highlight: false,
+    label: 'Architecture',
+    href: '/architecture',
     children: [
-      {
-        label: 'Product Readiness Matrix',
-        href: '/product-readiness',
-        note: 'What ships today vs. roadmap',
-      },
-      {
-        label: 'Trust Center Status',
-        href: '/trust-center/status',
-        note: 'Live posture & evidence',
-      },
-      { label: 'Technical Proof', href: '/technical-proof', note: 'Architecture & build evidence' },
-      {
-        label: 'Changelog Highlights',
-        href: '/changelog-highlights',
-        note: 'Recent shipped milestones',
-      },
-      { label: 'Full Changelog', href: '/changelog', note: 'Every release, dated' },
+      { label: 'Architecture Overview', href: '/architecture', note: 'Three-tier platform design' },
+      { label: 'Proof Chain', href: '/docs/proof-chain', note: 'Immutable audit record design' },
+      { label: 'Outcome Graph', href: '/docs/outcome-graph', note: 'Decision lifecycle and consequence' },
+      { label: 'Covenant Policy', href: '/docs/covenant-policy', note: 'Governance rules engine' },
+      { label: 'Simulation Engine', href: '/docs/simulation', note: 'Probabilistic risk modeling' },
+      { label: 'Technical Proof', href: '/technical-proof', note: 'Build evidence for evaluators' },
     ],
   },
   {
     label: 'Company',
     href: '/company',
-    highlight: false,
     children: [
-      { label: 'About SZL Holdings', href: '/company', note: 'Mission & thesis' },
+      { label: 'About SZL Holdings', href: '/company', note: 'Mission and thesis' },
       { label: 'Founder', href: '/founder', note: 'Stephen Lutar' },
+      { label: 'Investor Relations', href: '/investor', note: 'Series A diligence materials' },
+      { label: 'Design Partners', href: '/design-partner', note: 'Work with us during beta' },
       { label: 'Operating Doctrine', href: '/operating-doctrine', note: 'How we build' },
-      { label: 'Design Partners', href: '/design-partner', note: 'Work with us' },
-      { label: 'Investor Relations', href: '/investor', note: 'Series A diligence' },
-      { label: 'Contact', href: '/contact', note: '' },
+      { label: 'Insights', href: '/insights', note: 'Analysis and commentary' },
     ],
   },
   {
-    label: 'Resources',
-    href: '/insights',
-    highlight: false,
-    children: [
-      { label: 'Insights & Analysis', href: '/insights', note: '' },
-      { label: 'Documentation', href: '/docs', note: '' },
-      { label: 'FAQ', href: '/faq', note: '' },
-      { label: 'Case Studies', href: '/case-studies', note: '' },
-      { label: 'Public Roadmap', href: '/roadmap', note: '' },
-    ],
-  },
-  {
-    label: 'Request Demo',
-    href: '/demo',
+    label: 'Contact',
+    href: '/contact',
     children: null,
-    highlight: true,
   },
 ];
 
 const NAV_LINKS_MOBILE = [
   { label: 'Request a Demo', href: '/demo', primary: true },
   { label: 'Design Partners', href: '/design-partner', primary: true },
-  { label: 'Investor Relations', href: '/investor', primary: true },
-  { label: '— Platform —', href: '/platform', primary: false, section: true },
-  { label: 'Platform Overview', href: '/platform', primary: false },
-  { label: 'Governed Intelligence', href: '/governed-cockpit', primary: false },
-  { label: 'Lyte', href: '/lyte', primary: false },
-  { label: 'Lyte · Decision Theater', href: '/lyte/decision-theater', primary: false },
-  { label: 'Lyte · Signal Fusion', href: '/lyte/signal-fusion', primary: false },
-  { label: 'Lyte · Decision Schemas', href: '/lyte/decision-schemas', primary: false },
-  { label: 'Lyte · Governance Posture', href: '/lyte/governance-posture', primary: false },
-  { label: 'Alloy', href: '/alloy-fabric', primary: false },
-  { label: 'CORTEX', href: 'https://cortex.szlholdings.com', primary: false },
-  { label: 'Command Portal', href: '/command/', primary: false },
-  { label: 'Business State', href: '/business-state', primary: false },
-  { label: '— Primitives —', href: '/architecture', primary: false, section: true },
-  { label: 'Architecture', href: '/architecture', primary: false },
-  { label: 'Outcome Graph', href: '/docs/outcome-graph', primary: false },
-  { label: 'Proof Chain', href: '/docs/proof-chain', primary: false },
-  { label: 'Covenant Policy', href: '/docs/covenant-policy', primary: false },
-  { label: 'Simulation', href: '/docs/simulation', primary: false },
-  { label: '— Domain Packs —', href: '/solutions', primary: false, section: true },
-  { label: 'Domain Packs Overview', href: '/solutions', primary: false },
-  { label: 'Aegis', href: '/solutions/aegis', primary: false },
-  { label: 'Vessels', href: '/solutions/vessels', primary: false },
-  { label: 'Terra', href: '/solutions/terra', primary: false },
-  { label: 'PRISM Counsel', href: '/solutions/prism-counsel', primary: false },
-  { label: 'Carlota Jo', href: '/carlota-jo/', primary: false },
-  { label: '— Proof —', href: '/product-readiness', primary: false, section: true },
-  { label: 'Product Readiness Matrix', href: '/product-readiness', primary: false },
-  { label: 'Trust Center Status', href: '/trust-center/status', primary: false },
-  { label: 'Technical Proof', href: '/technical-proof', primary: false },
-  { label: 'Changelog Highlights', href: '/changelog-highlights', primary: false },
-  { label: 'Full Changelog', href: '/changelog', primary: false },
-  { label: '— Trust & Company —', href: '/trust', primary: false, section: true },
-  { label: 'Trust Center', href: '/trust', primary: false },
-  { label: 'Executive Brief', href: '/trust/diligence/executive', primary: false },
-  { label: 'Technical Brief', href: '/trust/diligence/technical', primary: false },
-  { label: 'Security Brief', href: '/trust/diligence/security', primary: false },
-  { label: 'Investor Brief', href: '/trust/diligence/investor', primary: false },
-  { label: 'Security', href: '/trust/security', primary: false },
-  { label: 'Documentation', href: '/docs', primary: false },
-  { label: 'Insights', href: '/insights', primary: false },
-  { label: 'About SZL Holdings', href: '/company', primary: false },
-  { label: 'Contact', href: '/contact', primary: false },
+  { label: '— Platform —', href: '/platform', section: true },
+  { label: 'Platform Overview', href: '/platform' },
+  { label: 'Alloy — Execution Fabric', href: '/alloy-fabric' },
+  { label: 'Lyte — Decision Intelligence', href: '/lyte' },
+  { label: 'Command Portal', href: '/command/' },
+  { label: 'How It Works', href: '/how-it-works' },
+  { label: '— Solutions —', href: '/solutions', section: true },
+  { label: 'Solutions Overview', href: '/solutions' },
+  { label: 'Vessels — Maritime Intelligence', href: '/solutions/vessels' },
+  { label: 'Aegis — Security & Defense', href: '/solutions/aegis' },
+  { label: 'Terra — Real Estate', href: '/solutions/terra' },
+  { label: 'PRISM Counsel — Legal', href: '/solutions/prism-counsel' },
+  { label: 'Carlota Jo — Advisory', href: '/carlota-jo/' },
+  { label: '— Trust —', href: '/trust', section: true },
+  { label: 'Trust Center', href: '/trust' },
+  { label: 'Security Posture', href: '/trust/security' },
+  { label: 'AI Governance', href: '/trust/ai' },
+  { label: '— Architecture —', href: '/architecture', section: true },
+  { label: 'Architecture Overview', href: '/architecture' },
+  { label: 'Proof Chain', href: '/docs/proof-chain' },
+  { label: 'Covenant Policy', href: '/docs/covenant-policy' },
+  { label: 'Technical Proof', href: '/technical-proof' },
+  { label: '— Company —', href: '/company', section: true },
+  { label: 'About SZL Holdings', href: '/company' },
+  { label: 'Founder', href: '/founder' },
+  { label: 'Investor Relations', href: '/investor' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 export function SiteNav() {
-  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [scrolled, setScrolled] = useState(false);
   const [location] = useLocation();
   const { isAuthenticated } = useAuth();
-  const { isAdmin, roles } = useRole();
-  const isAdminUser = isAdmin || roles.includes('super_admin');
+  const { role } = useRole();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    const handler = () => setScrolled(window.scrollY > 12);
+    window.addEventListener('scroll', handler, { passive: true });
+    return () => window.removeEventListener('scroll', handler);
   }, []);
 
   useEffect(() => {
     setMobileOpen(false);
-    setOpenDropdown(null);
+    setOpen(null);
   }, [location]);
 
-  const handleNavClick = (label: string, href: string) => {
-    analytics.navLinkClick(label, href);
-  };
+  useEffect(() => {
+    if (mobileOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
 
   return (
     <>
-      <a href="#main-content" className="skip-to-content">
-        Skip to main content
-      </a>
-      <m.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.45, ease: 'easeOut' }}
-        className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-          scrolled ? 'szl-glass' : 'bg-transparent',
-        )}
-        role="navigation"
-        aria-label="Main navigation"
-        onMouseLeave={() => setOpenDropdown(null)}
+      <header
+        className={cn('szl-site-nav', scrolled && 'szl-site-nav--scrolled')}
+        style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+          height: '3.5rem',
+          background: scrolled ? 'hsla(214,16%,4%,0.96)' : 'transparent',
+          backdropFilter: scrolled ? 'blur(12px)' : 'none',
+          borderBottom: scrolled ? '1px solid hsla(0,0%,100%,0.055)' : '1px solid transparent',
+          transition: 'background 0.2s, backdrop-filter 0.2s, border-color 0.2s',
+        }}
       >
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 var(--space-content-x)' }}>
-          <div
-            style={{
-              height: '64px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            {/* Logo */}
-            <Link
-              href="/"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.625rem',
-                textDecoration: 'none',
-              }}
-              onClick={() => handleNavClick('SZL Holdings', '/')}
-            >
+        <div style={{ maxWidth: '80rem', margin: '0 auto', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 var(--space-content-x)' }}>
+
+          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.9375rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--gi-text-primary)', fontFamily: 'var(--font-display)' }}>SZL Holdings</span>
+          </Link>
+
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '0.125rem' }} role="navigation" aria-label="Main navigation" className="szl-desktop-nav">
+            {NAV_ITEMS.map(item => (
               <div
-                style={{
-                  width: '30px',
-                  height: '30px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '0.3125rem',
-                  background: 'hsla(0,0%,100%,0.04)',
-                  border: '1px solid hsla(0,0%,100%,0.14)',
-                }}
+                key={item.label}
+                style={{ position: 'relative' }}
+                onMouseEnter={() => item.children && setOpen(item.label)}
+                onMouseLeave={() => setOpen(null)}
               >
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono, 'Geist Mono', ui-monospace, monospace)",
-                    fontWeight: 700,
-                    fontSize: '0.6875rem',
-                    color: 'var(--color-szl-text)',
-                    letterSpacing: '0.04em',
-                  }}
-                >
-                  SZL
-                </span>
-              </div>
-              <span
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontWeight: 600,
-                  fontSize: '0.9375rem',
-                  color: 'var(--color-szl-text)',
-                  letterSpacing: '-0.022em',
-                }}
-              >
-                SZL Holdings
-              </span>
-            </Link>
+                {item.children ? (
+                  <button
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.25rem',
+                      padding: '0.375rem 0.625rem',
+                      fontSize: '0.8125rem', fontWeight: 500,
+                      color: open === item.label ? 'var(--gi-text-primary)' : 'var(--gi-text-secondary)',
+                      background: 'transparent', border: 'none', cursor: 'pointer',
+                      borderRadius: 'var(--radius-sm)', transition: 'color 0.15s',
+                    }}
+                    aria-expanded={open === item.label}
+                    aria-haspopup="true"
+                  >
+                    {item.label}
+                    <ChevronDown size={13} style={{ transition: 'transform 0.15s', transform: open === item.label ? 'rotate(-180deg)' : 'none' }} />
+                  </button>
+                ) : (
+                  <Link
+                    href={item.href}
+                    style={{ padding: '0.375rem 0.625rem', fontSize: '0.8125rem', fontWeight: 500, color: 'var(--gi-text-secondary)', textDecoration: 'none', borderRadius: 'var(--radius-sm)', display: 'block', transition: 'color 0.15s' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--gi-text-primary)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--gi-text-secondary)')}
+                  >
+                    {item.label}
+                  </Link>
+                )}
 
-            {/* Desktop nav */}
-            <div
-              style={{ display: 'flex', alignItems: 'center', gap: '0.125rem' }}
-              className="hidden lg:flex"
-            >
-              {NAV_ITEMS.map((item) => {
-                const isActive = location === item.href || location.startsWith(item.href + '/');
-                const hasChildren = !!item.children;
-                const isOpen = openDropdown === item.label;
-
-                if (item.highlight) {
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => handleNavClick(item.label, item.href)}
-                      className="szl-btn-primary"
+                <AnimatePresence>
+                  {open === item.label && item.children && (
+                    <m.div
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 6 }}
+                      transition={{ duration: 0.15 }}
                       style={{
-                        padding: '0.375rem 0.875rem',
-                        borderRadius: '0.375rem',
-                        marginLeft: '0.5rem',
+                        position: 'absolute', top: 'calc(100% + 0.5rem)', left: '50%', transform: 'translateX(-50%)',
+                        minWidth: '18rem', background: 'hsla(214,16%,6%,0.98)', border: '1px solid hsla(0,0%,100%,0.08)',
+                        borderRadius: 'var(--radius-lg)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                        backdropFilter: 'blur(16px)', overflow: 'hidden', padding: '0.375rem',
                       }}
                     >
-                      {item.label}
-                    </Link>
-                  );
-                }
+                      {item.children.map(child => (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          onClick={() => { setOpen(null); analytics.track('nav_click', { item: child.label }); }}
+                          style={{ display: 'block', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-md)', textDecoration: 'none', transition: 'background 0.12s' }}
+                          onMouseEnter={e => (e.currentTarget.style.background = 'hsla(0,0%,100%,0.055)')}
+                          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                        >
+                          <p style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--gi-text-primary)', margin: '0 0 0.125rem' }}>{child.label}</p>
+                          {child.note && (
+                            <p style={{ fontSize: '0.6875rem', color: 'var(--gi-text-muted)', margin: 0 }}>{child.note}</p>
+                          )}
+                        </Link>
+                      ))}
+                    </m.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </nav>
 
-                if (hasChildren) {
-                  return (
-                    <div
-                      key={item.label}
-                      style={{ position: 'relative' }}
-                      onMouseEnter={() => setOpenDropdown(item.label)}
-                    >
-                      <Link
-                        href={item.href}
-                        onClick={() => handleNavClick(item.label, item.href)}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.25rem',
-                          fontSize: '0.8125rem',
-                          fontWeight: 500,
-                          color: isActive
-                            ? 'var(--color-szl-text)'
-                            : 'var(--color-szl-text-secondary)',
-                          textDecoration: 'none',
-                          padding: '0.375rem 0.625rem',
-                          borderRadius: '0.375rem',
-                          transition: 'color 0.18s ease, background 0.18s ease',
-                          cursor: 'pointer',
-                        }}
-                        onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLElement).style.color = 'var(--color-szl-text)';
-                          (e.currentTarget as HTMLElement).style.background =
-                            'hsla(0,0%,100%,0.04)';
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLElement).style.color = isActive
-                            ? 'var(--color-szl-text)'
-                            : 'var(--color-szl-text-secondary)';
-                          (e.currentTarget as HTMLElement).style.background = 'transparent';
-                        }}
-                      >
-                        {item.label}
-                        <ChevronDown
-                          size={12}
-                          style={{
-                            opacity: 0.6,
-                            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                            transition: 'transform 0.2s ease',
-                          }}
-                        />
-                      </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+            {isAuthenticated ? (
+              <UserButton />
+            ) : (
+              <>
+                <Link href="/login" style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--gi-text-secondary)', textDecoration: 'none', padding: '0.375rem 0.625rem' }} className="szl-desktop-nav">
+                  Sign in
+                </Link>
+                <Link
+                  href="/demo"
+                  onClick={() => analytics.track('cta_click', { location: 'nav', label: 'Request Demo' })}
+                  style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#ffffff', background: 'var(--gi-accent-blue)', padding: '0.4375rem 0.875rem', borderRadius: 'var(--radius-md)', textDecoration: 'none', transition: 'opacity 0.15s' }}
+                  onMouseEnter={e => (e.currentTarget.style.opacity = '0.88')}
+                  onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+                >
+                  Request Demo
+                </Link>
+              </>
+            )}
 
-                      <AnimatePresence>
-                        {isOpen && (
-                          <m.div
-                            initial={{ opacity: 0, y: 6, scale: 0.97 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 4, scale: 0.97 }}
-                            transition={{ duration: 0.15 }}
-                            style={{
-                              position: 'absolute',
-                              top: 'calc(100% + 4px)',
-                              left: '50%',
-                              transform: 'translateX(-50%)',
-                              minWidth: '230px',
-                              background: 'hsl(214,16%,6%)',
-                              border: '1px solid var(--color-szl-border-hover)',
-                              borderRadius: '0.625rem',
-                              padding: '0.375rem',
-                              boxShadow: '0 12px 40px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.30)',
-                              backdropFilter: 'blur(20px)',
-                            }}
-                          >
-                            {item.children!.map((child) => {
-                              const isChildExt = child.href.startsWith('http');
-                              const ddStyle = {
-                                display: 'block',
-                                padding: '0.5rem 0.75rem',
-                                borderRadius: '0.375rem',
-                                textDecoration: 'none' as const,
-                                transition: 'background 0.15s ease',
-                              };
-                              const ddEnter = (e: React.MouseEvent) => {
-                                (e.currentTarget as HTMLElement).style.background =
-                                  'hsla(0,0%,100%,0.05)';
-                              };
-                              const ddLeave = (e: React.MouseEvent) => {
-                                (e.currentTarget as HTMLElement).style.background = 'transparent';
-                              };
-                              const childContent = (
-                                <>
-                                  <span
-                                    style={{
-                                      display: 'block',
-                                      fontSize: '0.8125rem',
-                                      fontWeight: 500,
-                                      color: 'var(--color-szl-text-secondary)',
-                                      transition: 'color 0.15s ease',
-                                    }}
-                                    onMouseEnter={(e) => {
-                                      (e.currentTarget as HTMLElement).style.color =
-                                        'var(--color-szl-text)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      (e.currentTarget as HTMLElement).style.color =
-                                        'var(--color-szl-text-secondary)';
-                                    }}
-                                  >
-                                    {child.label}
-                                  </span>
-                                  {child.note && (
-                                    <span
-                                      style={{
-                                        display: 'block',
-                                        fontSize: '0.6875rem',
-                                        color: 'var(--color-szl-text-faint)',
-                                        marginTop: '1px',
-                                        fontFamily: 'var(--font-mono)',
-                                      }}
-                                    >
-                                      {child.note}
-                                    </span>
-                                  )}
-                                </>
-                              );
-                              return isChildExt ? (
-                                <a
-                                  key={child.href + child.label}
-                                  href={child.href}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={ddStyle}
-                                  onMouseEnter={ddEnter}
-                                  onMouseLeave={ddLeave}
-                                >
-                                  {childContent}
-                                </a>
-                              ) : (
-                                <Link
-                                  key={child.href + child.label}
-                                  href={child.href}
-                                  onClick={() => {
-                                    handleNavClick(child.label, child.href);
-                                    setOpenDropdown(null);
-                                  }}
-                                  style={ddStyle}
-                                  onMouseEnter={ddEnter}
-                                  onMouseLeave={ddLeave}
-                                >
-                                  {childContent}
-                                </Link>
-                              );
-                            })}
-                          </m.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                }
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="szl-mobile-toggle"
+              style={{ padding: '0.375rem', background: 'transparent', border: 'none', color: 'var(--gi-text-secondary)', cursor: 'pointer' }}
+              aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'}
+            >
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </div>
+      </header>
 
+      <AnimatePresence>
+        {mobileOpen && (
+          <m.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'tween', duration: 0.22 }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 99, background: 'hsla(214,16%,4%,0.99)',
+              backdropFilter: 'blur(12px)', overflowY: 'auto', paddingTop: '4rem', paddingBottom: '2rem',
+            }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation"
+          >
+            <div style={{ padding: '0 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
+              {NAV_LINKS_MOBILE.map((item, i) => {
+                const isSection = 'section' in item && item.section;
+                const isPrimary = 'primary' in item && item.primary;
                 return (
                   <Link
-                    key={item.href}
+                    key={`${item.href}-${i}`}
                     href={item.href}
-                    onClick={() => handleNavClick(item.label, item.href)}
+                    onClick={() => setMobileOpen(false)}
                     style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      fontSize: '0.8125rem',
-                      fontWeight: 500,
-                      color: isActive ? 'var(--color-szl-text)' : 'var(--color-szl-text-secondary)',
+                      padding: isSection ? '1rem 0 0.25rem' : '0.625rem 0',
+                      fontSize: isSection ? '0.6875rem' : '1rem',
+                      fontWeight: isSection ? 700 : isPrimary ? 600 : 400,
+                      letterSpacing: isSection ? '0.1em' : 'normal',
+                      textTransform: isSection ? 'uppercase' : 'none',
+                      color: isSection ? 'var(--gi-text-muted)' : isPrimary ? 'var(--gi-accent-blue)' : 'var(--gi-text-secondary)',
                       textDecoration: 'none',
-                      padding: '0.375rem 0.625rem',
-                      borderRadius: '0.375rem',
-                      transition: 'color 0.18s ease, background 0.18s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = 'var(--color-szl-text)';
-                      (e.currentTarget as HTMLElement).style.background = 'hsla(0,0%,100%,0.04)';
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = isActive
-                        ? 'var(--color-szl-text)'
-                        : 'var(--color-szl-text-secondary)';
-                      (e.currentTarget as HTMLElement).style.background = 'transparent';
+                      borderBottom: isSection ? '1px solid hsla(0,0%,100%,0.055)' : 'none',
+                      display: 'block',
                     }}
                   >
                     {item.label}
                   </Link>
                 );
               })}
-              {isAuthenticated && (
-                <Link
-                  href="/forge"
-                  onClick={() => handleNavClick('Forge', '/forge')}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    fontSize: '0.8125rem',
-                    fontWeight: 500,
-                    color: location.startsWith('/forge')
-                      ? 'var(--color-szl-accent)'
-                      : 'var(--color-szl-text-secondary)',
-                    textDecoration: 'none',
-                    padding: '0.375rem 0.625rem',
-                    borderRadius: '0.375rem',
-                    transition: 'color 0.18s ease, background 0.18s ease',
-                    borderLeft: '1px solid var(--color-szl-border)',
-                    marginLeft: '0.25rem',
-                    paddingLeft: '0.75rem',
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = 'var(--color-szl-accent)';
-                    (e.currentTarget as HTMLElement).style.background = 'hsla(0,0%,100%,0.04)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = location.startsWith('/forge')
-                      ? 'var(--color-szl-accent)'
-                      : 'var(--color-szl-text-secondary)';
-                    (e.currentTarget as HTMLElement).style.background = 'transparent';
-                  }}
-                >
-                  Forge
-                </Link>
-              )}
-              {isAdminUser && (
-                <Link
-                  href="/admin/command-center"
-                  onClick={() => handleNavClick('Admin Command Center', '/admin/command-center')}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                    fontSize: '0.8125rem',
-                    fontWeight: 500,
-                    color: location.startsWith('/admin/command-center')
-                      ? 'hsl(191,92%,44%)'
-                      : 'var(--color-szl-text-secondary)',
-                    textDecoration: 'none',
-                    padding: '0.375rem 0.625rem',
-                    borderRadius: '0.375rem',
-                    transition: 'color 0.18s ease, background 0.18s ease',
-                    borderLeft: '1px solid var(--color-szl-border)',
-                    marginLeft: '0.25rem',
-                    paddingLeft: '0.75rem',
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = 'hsl(191,92%,44%)';
-                    (e.currentTarget as HTMLElement).style.background = 'hsla(0,0%,100%,0.04)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = location.startsWith(
-                      '/admin/command-center',
-                    )
-                      ? 'hsl(191,92%,44%)'
-                      : 'var(--color-szl-text-secondary)';
-                    (e.currentTarget as HTMLElement).style.background = 'transparent';
-                  }}
-                >
-                  <Terminal size={12} style={{ opacity: 0.8 }} />
-                  Admin Command Center
-                </Link>
-              )}
-              {isAdminUser && (
-                <Link
-                  href="/admin/pipeline-command"
-                  onClick={() => handleNavClick('Pipeline Command', '/admin/pipeline-command')}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                    fontSize: '0.8125rem',
-                    fontWeight: 500,
-                    color: location.startsWith('/admin/pipeline-command')
-                      ? 'hsl(38,90%,62%)'
-                      : 'var(--color-szl-text-secondary)',
-                    textDecoration: 'none',
-                    padding: '0.375rem 0.625rem',
-                    borderRadius: '0.375rem',
-                    transition: 'color 0.18s ease, background 0.18s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = 'hsl(38,90%,62%)';
-                    (e.currentTarget as HTMLElement).style.background = 'hsla(0,0%,100%,0.04)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = location.startsWith(
-                      '/admin/pipeline-command',
-                    )
-                      ? 'hsl(38,90%,62%)'
-                      : 'var(--color-szl-text-secondary)';
-                    (e.currentTarget as HTMLElement).style.background = 'transparent';
-                  }}
-                >
-                  Pipeline
-                </Link>
-              )}
-              <UserButton />
             </div>
+          </m.div>
+        )}
+      </AnimatePresence>
 
-            {/* Mobile toggle */}
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="lg:hidden"
-              style={{
-                padding: '0.375rem',
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--color-szl-text-secondary)',
-                cursor: 'pointer',
-                borderRadius: '0.375rem',
-                transition: 'color 0.18s ease',
-              }}
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={mobileOpen}
-            >
-              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        <AnimatePresence>
-          {mobileOpen && (
-            <m.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden overflow-hidden"
-              style={{
-                background: 'hsla(214,16%,5%,0.97)',
-                backdropFilter: 'blur(24px)',
-                borderBottom: '1px solid var(--color-szl-border)',
-              }}
-            >
-              <div
-                style={{
-                  padding: '1.25rem var(--space-content-x) 1.5rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.125rem',
-                }}
-              >
-                {NAV_LINKS_MOBILE.map((link, idx) => {
-                  if ((link as { section?: boolean }).section) {
-                    return (
-                      <p
-                        key={link.href + idx}
-                        style={{
-                          padding: '0.75rem 0.75rem 0.25rem',
-                          fontSize: '0.5625rem',
-                          fontWeight: 700,
-                          letterSpacing: '0.12em',
-                          textTransform: 'uppercase',
-                          color: 'var(--color-szl-text-faint)',
-                          fontFamily: 'var(--font-mono)',
-                          marginTop: '0.5rem',
-                        }}
-                      >
-                        {link.label.replace(/^—\s*/, '').replace(/\s*—$/, '')}
-                      </p>
-                    );
-                  }
-                  const isExtLink = link.href.startsWith('http');
-                  const mobileStyle = {
-                    padding: link.primary ? '0.625rem 0.75rem' : '0.4rem 0.75rem',
-                    fontSize: link.primary ? '0.9375rem' : '0.875rem',
-                    fontWeight: link.primary ? 600 : 500,
-                    color: link.primary
-                      ? 'var(--color-szl-accent)'
-                      : 'var(--color-szl-text-secondary)',
-                    textDecoration: 'none' as const,
-                    borderRadius: '0.375rem',
-                    transition: 'color 0.18s ease, background 0.18s ease',
-                    display: 'block',
-                    borderBottom: link.primary ? '1px solid var(--color-szl-border)' : 'none',
-                    marginBottom: link.primary ? '0.5rem' : 0,
-                    paddingBottom: link.primary ? '1rem' : undefined,
-                  };
-                  const mEnter = (e: React.MouseEvent) => {
-                    (e.currentTarget as HTMLElement).style.color = 'var(--color-szl-text)';
-                    if (!link.primary)
-                      (e.currentTarget as HTMLElement).style.background = 'hsla(0,0%,100%,0.04)';
-                  };
-                  const mLeave = (e: React.MouseEvent) => {
-                    (e.currentTarget as HTMLElement).style.color = link.primary
-                      ? 'var(--color-szl-accent)'
-                      : 'var(--color-szl-text-secondary)';
-                    (e.currentTarget as HTMLElement).style.background = 'transparent';
-                  };
-
-                  if (isExtLink) {
-                    return (
-                      <a
-                        key={link.href + idx}
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={mobileStyle}
-                        onMouseEnter={mEnter}
-                        onMouseLeave={mLeave}
-                      >
-                        {link.label}
-                      </a>
-                    );
-                  }
-
-                  return (
-                    <Link
-                      key={link.href + idx}
-                      href={link.href}
-                      onClick={() => handleNavClick(link.label, link.href)}
-                      style={mobileStyle}
-                      onMouseEnter={mEnter}
-                      onMouseLeave={mLeave}
-                    >
-                      {link.label}
-                    </Link>
-                  );
-                })}
-                {(isAuthenticated || isAdminUser) && (
-                  <>
-                    <div
-                      style={{
-                        height: '1px',
-                        background: 'var(--color-szl-border)',
-                        margin: '0.5rem 0.75rem',
-                      }}
-                    />
-                    {isAuthenticated && (
-                      <Link
-                        href="/forge"
-                        onClick={() => handleNavClick('Forge', '/forge')}
-                        style={{
-                          padding: '0.5rem 0.75rem',
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
-                          color: 'var(--color-szl-accent)',
-                          textDecoration: 'none',
-                          borderRadius: '0.375rem',
-                          transition: 'color 0.18s ease, background 0.18s ease',
-                          display: 'block',
-                        }}
-                        onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLElement).style.color = 'var(--color-szl-text)';
-                          (e.currentTarget as HTMLElement).style.background =
-                            'hsla(0,0%,100%,0.04)';
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLElement).style.color = 'var(--color-szl-accent)';
-                          (e.currentTarget as HTMLElement).style.background = 'transparent';
-                        }}
-                      >
-                        Forge
-                      </Link>
-                    )}
-                    {isAdminUser && (
-                      <Link
-                        href="/admin/command-center"
-                        onClick={() =>
-                          handleNavClick('Admin Command Center', '/admin/command-center')
-                        }
-                        style={{
-                          padding: '0.5rem 0.75rem',
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
-                          color: 'hsl(191,92%,44%)',
-                          textDecoration: 'none',
-                          borderRadius: '0.375rem',
-                          transition: 'color 0.18s ease, background 0.18s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.375rem',
-                        }}
-                        onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLElement).style.color = 'var(--color-szl-text)';
-                          (e.currentTarget as HTMLElement).style.background =
-                            'hsla(0,0%,100%,0.04)';
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLElement).style.color = 'hsl(191,92%,44%)';
-                          (e.currentTarget as HTMLElement).style.background = 'transparent';
-                        }}
-                      >
-                        <Terminal size={14} style={{ opacity: 0.8 }} />
-                        Admin Command Center
-                      </Link>
-                    )}
-                  </>
-                )}
-              </div>
-            </m.div>
-          )}
-        </AnimatePresence>
-      </m.nav>
+      <style>{`
+        @media (max-width: 768px) {
+          .szl-desktop-nav { display: none !important; }
+          .szl-mobile-toggle { display: flex !important; }
+        }
+        @media (min-width: 769px) {
+          .szl-mobile-toggle { display: none !important; }
+        }
+      `}</style>
     </>
   );
 }

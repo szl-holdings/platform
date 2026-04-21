@@ -178,7 +178,7 @@ No archived artifact should be deployed, registered, or referenced as an active 
 | **Artifact** | `artifacts/api-server` |
 | **Package** | `@workspace/api-server` |
 | **Status** | **GA** |
-| **Role** | Central Express backend — all 182 route files, all database access, all AI integrations |
+| **Role** | Central Express backend — 382 route files (268 route groups), all database access, all AI integrations |
 | **URL** | `/api/` |
 | **Health endpoint** | `GET /api/health` |
 | **Known gaps** | Zod validation: 21/170 routes (see `docs/known-gaps.md`); integration tests not in CI |

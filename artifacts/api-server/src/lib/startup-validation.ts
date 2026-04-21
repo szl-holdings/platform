@@ -492,6 +492,54 @@ export function validateStartupConfig(): ValidationResult {
     }
   }
 
+  // B-02: Detect known-dev plaintext key values that must never reach production.
+  // These values appear in the .replit [userenv] block for convenience during
+  // local development. In production they MUST be superseded by Replit Secrets.
+  const KNOWN_DEV_ALLOY_TOKEN = 'dev-3e8122992689a527adcf8ba067ccabfae77b81f3e52aa713';
+  const KNOWN_DEV_SUBSTRATE_KEY = '5228884b12bc50c3be1c0f8345d5f5475baf5bc2ccb265d5e9bc02674c04258a';
+  const KNOWN_DEV_SUBSTRATE_GW_KEY = 'szl_dev_9b77bf02c5939ec060f07d87ad02542a2561330d0c9ae5fc';
+
+  if (process.env.ALLOY_INTERNAL_TOKEN === KNOWN_DEV_ALLOY_TOKEN) {
+    if (isProduction) {
+      errors.push(
+        'ALLOY_INTERNAL_TOKEN matches the known dev-tier placeholder — this value MUST NOT run in production. ' +
+          'Set a cryptographically random 64+ character token in Replit Secrets (see docs/SECRETS_POLICY.md).',
+      );
+    } else {
+      warnings.push(
+        '[B-02] ALLOY_INTERNAL_TOKEN is the known dev placeholder — override via Replit Secrets before deploying.',
+      );
+    }
+  }
+
+  const substrateSigningKey = process.env.SUBSTRATE_SIGNING_KEY;
+  if (substrateSigningKey === KNOWN_DEV_SUBSTRATE_KEY) {
+    if (isProduction) {
+      errors.push(
+        'SUBSTRATE_SIGNING_KEY matches the known dev-tier value from .replit — this key MUST NOT run in production. ' +
+          'Set a unique 64-char hex key in Replit Secrets (see docs/SECRETS_POLICY.md).',
+      );
+    } else {
+      warnings.push(
+        '[B-02] SUBSTRATE_SIGNING_KEY is the known dev value — override via Replit Secrets before deploying.',
+      );
+    }
+  }
+
+  const substrateGwKey = process.env.SUBSTRATE_GATEWAY_API_KEY;
+  if (substrateGwKey === KNOWN_DEV_SUBSTRATE_GW_KEY) {
+    if (isProduction) {
+      errors.push(
+        'SUBSTRATE_GATEWAY_API_KEY matches the known dev-tier value — this key MUST NOT run in production. ' +
+          'Rotate and set the production key in Replit Secrets (see docs/SECRETS_POLICY.md).',
+      );
+    } else {
+      warnings.push(
+        '[B-02] SUBSTRATE_GATEWAY_API_KEY is the known dev value — override via Replit Secrets before deploying.',
+      );
+    }
+  }
+
   const connectorKey = process.env.CONNECTOR_ENCRYPTION_KEY;
   if (!connectorKey) {
     if (isProduction) {

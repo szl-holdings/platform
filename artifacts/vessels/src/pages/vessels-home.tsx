@@ -723,37 +723,37 @@ export default function VesselsHome() {
                 metric: metricDisplay(VESSELS_DARK_DETECTION_LEAD),
                 label: 'Pre-designation lead time',
                 detail: 'AIS-dark vessel activity flagged before formal OFAC listing',
-                accent: '#3b82f6',
+                accentVar: 'var(--gi-chart-1)',
               },
               {
                 metric: '94%',
                 label: 'Confidence score',
                 detail: 'Security AI v4 behavioral signature accuracy on pre-designation case',
-                accent: '#0ea5e9',
+                accentVar: 'var(--gi-chart-2)',
               },
               {
                 metric: metricDisplay(VESSELS_COUNT),
                 label: 'Vessels monitored',
                 detail: 'Continuous autonomous intelligence across global maritime corridors',
-                accent: '#38bdf8',
+                accentVar: 'var(--gi-chart-3)',
               },
               {
                 metric: '0',
                 label: 'Compliance breaches',
                 detail: 'Fleet operators cleared exposure window before formal designation',
-                accent: '#22d3ee',
+                accentVar: 'var(--gi-chart-4)',
               },
               {
                 metric: '< 2h',
                 label: 'P&I notification time',
                 detail: 'From autonomous alert to insurer notification — same monitoring cycle',
-                accent: '#67e8f9',
+                accentVar: 'var(--gi-chart-5)',
               },
               {
                 metric: '72h',
                 label: 'Dark period detected',
                 detail: 'Near known STS transfer zone, part of 90-day behavioral pattern',
-                accent: '#a5f3fc',
+                accentVar: 'var(--gi-chart-6)',
               },
             ].map((item, i) => (
               <m.div
@@ -764,7 +764,7 @@ export default function VesselsHome() {
                 transition={{ duration: 0.4, delay: i * 0.06 }}
                 className="rounded-xl p-5 border border-sky-500/12 bg-sky-500/4 hover:border-sky-500/20 transition-colors duration-200"
               >
-                <div className="text-2xl font-bold mb-1" style={{ color: item.accent }}>
+                <div className="text-2xl font-bold mb-1" style={{ color: item.accentVar }}>
                   {item.metric}
                 </div>
                 <div className="text-[13px] font-semibold text-sky-100 mb-1.5">{item.label}</div>

@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-The SZL Holdings Platform is a governed decision infrastructure designed to enforce governance, attribution, and outcome tracking for critical decisions. It integrates signal detection with action execution through a canonical nine-step loop. The platform is a pnpm monorepo encompassing web and mobile applications, an API, a design system, and a development sandbox. Its core capabilities are built around six platform primitives: Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric. The project aims to provide comprehensive decision-making support with robust governance and observability, driving a vision of evidence-backed and traceable autonomy.
+SZL Holdings builds governed operational intelligence for regulated enterprises. One platform — the Alloy execution fabric — where every AI recommendation requires human confirmation, every action creates an immutable record, and every outcome is attributable. The platform is a pnpm monorepo encompassing web and mobile applications, an API, a design system, and a development sandbox. Its core architectural differentiator is the Alloy execution fabric: human-in-the-loop governance enforced at the platform layer, not the UI layer. Primary wedge: Governed Workflow Orchestration (Alloy + Command + Lyte). Secondary wedge: Maritime Intelligence (Vessels). All other domain packs (Aegis, Terra, PRISM Counsel, Carlota Jo) are governed extensions of the same platform.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -42,14 +42,14 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 -   **Frontend:** React 19, Vite, TanStack React Query, Wouter, Tailwind CSS v4, Framer Motion.
 -   **Backend:** Express 5, Drizzle ORM, Zod, pino.
 -   **Database:** PostgreSQL 16.
--   **Authentication:** OIDC/PKCE, session-based, 11-role RBAC.
+-   **Authentication:** OIDC/PKCE, session-based, 12-value platformRole enum RBAC (dual system with rolesTable — consolidation pending; see audit B-05).
 -   **Mobile:** Expo / React Native, NativeWind.
 -   **AI:** Multi-provider (OpenAI, Anthropic, Gemini) with schema-validated decision types, AI evaluation infrastructure, and an AI Ops Dashboard.
 -   **Real-time:** WebSocket, Server-Sent Events (SSE), push notifications.
 
 **AI Control Plane & NVIDIA-Ready Packages:** Provide provider-agnostic AI infrastructure, prompt/tool management, NVIDIA integration, and OpenUSD digital twin export.
 
-**UI/UX and Design System:** A premium, dark-first governed-intelligence design language is provided by `@szl-holdings/design-system`, offering proof-envelope and cockpit primitives. `@szl-holdings/ui-command` provides higher-level business components.
+**UI/UX and Design System:** An institutional dark-first governed-intelligence design language provided by `@szl-holdings/design-system`. The token system uses a restrained enterprise accent family (no neon palette in public or authenticated surfaces). Public landing pages were rebuilt in Task #2849 with the new IA (hero → proof strip → core platform → primary wedge → secondary wedge → trust → ROI → CTA) and institutional copy. Navigation collapsed to 6 items: Platform / Solutions / Trust / Architecture / Company / Contact. See `audit/03-ui-ux-overhaul-decisions.md` for full design decision record.
 
 **OS Layer (Decision Center):** Provides shared primitives and UI components for recommendations, evidence, policy verdicts, and agent run tracing.
 

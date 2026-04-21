@@ -18,7 +18,7 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 | Codename | AEEP (Alloy Execution and Evidence Platform) |
 | Version | 4.0.0 |
 | Founded | 2024 |
-| Last comprehensive audit | 2026-04-20 |
+| Last comprehensive audit | 2026-04-21 |
 
 ---
 
@@ -26,7 +26,7 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 
 | Metric | Count |
 |--------|-------|
-| Active registered artifacts | 14 |
+| Active registered artifacts | 15 registered across both systems (2 in `.replit [[artifacts]]`; 15 in workspace registry; none currently running — B-01) |
 | Total artifacts (including archived) | 20 |
 | Domain packs | 6 |
 | Standalone applications | 3 |
@@ -62,7 +62,7 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 
 | Metric | Count |
 |--------|-------|
-| Database tables (Drizzle pgTable) | 906 |
+| Database tables (Drizzle pgTable) | 915 |
 | Schema files | 165 |
 | Schema domains | 10 |
 
@@ -72,7 +72,8 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 
 | Metric | Count |
 |--------|-------|
-| API route groups | 12 |
+| API route groups (top-level entries) | 268 |
+| Total API route files | 382 |
 | AEEP v1 endpoints (active) | 18 |
 
 ### AEEP v1 Endpoint Map
@@ -132,13 +133,15 @@ cpu-local · external-http · gpu-stub · azure-stub · dev-hash
 
 | Metric | Value |
 |--------|-------|
-| RBAC roles | 11 |
+| RBAC roles | 12 platformRole enum values + 4 rolesTable roles (dual system — consolidation pending; see audit B-05) |
 | Authentication providers | Replit Auth (OIDC/PKCE), Clerk |
 | Tenant isolation | Org-scoped, deny-by-default |
 
-### RBAC Roles
+### RBAC Roles (platformRole enum — 12 values)
 
-`anonymous_visitor` · `founder_admin` · `platform_admin` · `operator` · `analyst` · `executive_viewer` · `ops_manager` · `sales_delivery_user` · `maritime_ops_user` · `service_coordinator` · `pilot_customer_user`
+`anonymous_visitor` · `founder_admin` · `platform_admin` · `operator` · `analyst` · `executive_viewer` · `ops_manager` · `sales_delivery_user` · `maritime_ops_user` · `service_coordinator` · `pilot_customer_user` · `compliance_viewer`
+
+**Note:** A parallel `rolesTable` exists with 4 roles (`super_admin`, `exec`, `ops`, `compliance`). Dual system requires consolidation — see `audit/00-executive-summary.md` B-05.
 
 ---
 

@@ -143,7 +143,7 @@ API server additionally supports: `pnpm seed:terra`, `pnpm seed:ecosystem`
 | Schema location | `lib/db/src/schema/` |
 | Connection | `DATABASE_URL` environment variable (primary) |
 | Seed strategy | Idempotent seeds using `onConflictDoNothing()` |
-| Session store | In-memory (development); Redis (enterprise production, not yet activated) |
+| Session store | In-memory (all environments — Redis is documented but not activated; sessions lost on restart — see audit B-10) |
 
 ---
 
@@ -155,7 +155,7 @@ API server additionally supports: `pnpm seed:terra`, `pnpm seed:ecosystem`
 | Provider | Replit Auth (`https://replit.com/oidc`) |
 | Library | `@szl-holdings/replit-auth-web` (frontend), `lib/auth` (backend) |
 | Sessions | Express session with cookie-based tokens |
-| RBAC roles | `super_admin`, `exec`, `ops`, `compliance`, `maintenance`, `analyst`, `viewer` |
+| RBAC roles | Dual system: `platformRole` enum (12 values) + `rolesTable` (4 roles). Consolidation required — see audit B-05. Canonical roles: `founder_admin`, `platform_admin`, `operator`, `analyst`, `executive_viewer`, `ops_manager`, `sales_delivery_user`, `maritime_ops_user`, `service_coordinator`, `pilot_customer_user`, `compliance_viewer`, `anonymous_visitor` |
 | Internal token | `ALLOY_INTERNAL_TOKEN` → grants `super_admin`; service-to-service only |
 
 ---
