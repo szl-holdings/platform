@@ -778,6 +778,139 @@ router.get(
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Investor Data Room — Per-Document Stats
+//   Aggregates data_room_document_opened and data_room_document_dwell events
+//   into per-document view counts and dwell time. Used by the founder dashboard
+//   to see which documents investors are reading and how long they spend on each.
+//   No PII beyond session identifier is stored in dos_analytics_events.
+// ─────────────────────────────────────────────────────────────────────────────
+
+router.get(
+  '/investor-analytics/data-room-docs',
+  authMiddleware(),
+  requireRole(...ALLOWED_ROLES),
+  async (_req: Request, res: Response) => {
+    try {
+      const since = new Date();
+      since.setUTCDate(since.getUTCDate() - 90);
+
+      const rows = await db
+        .select({
+          createdAt: dosAnalyticsEventsTable.createdAt,
+          metadata: dosAnalyticsEventsTable.metadata,
+        })
+        .from(dosAnalyticsEventsTable)
+        .where(
+          and(
+            gte(dosAnalyticsEventsTable.createdAt, since),
+            sql`${dosAnalyticsEventsTable.metadata}->>'app' = 'szl-holdings'`,
+            sql`${dosAnalyticsEventsTable.metadata}->>'eventName' IN (
+              'data_room_document_opened',
+              'data_room_document_dwell',
+              'data_room_executive_brief_pdf_downloaded'
+            )`,
+          ),
+        )
+        .orderBy(asc(dosAnalyticsEventsTable.createdAt))
+        .limit(10000);
+
+      // Aggregate by docId.  No PII: events no longer carry userEmail/userId,
+      // so uniqueness is derived from dwell-event counts rather than identity.
+      type DocStat = {
+        docId: string;
+        docTitle: string | null;
+        docCategory: string | null;
+        openCount: number;
+        dwellEvents: number;
+        totalDwellSeconds: number;
+        maxDwellSeconds: number;
+        pdfDownloads: number;
+      };
+
+      const byDoc = new Map<string, DocStat>();
+
+      function getOrCreate(docId: string, docTitle: string | null, docCategory: string | null): DocStat {
+        let stat = byDoc.get(docId);
+        if (!stat) {
+          stat = {
+            docId,
+            docTitle,
+            docCategory,
+            openCount: 0,
+            dwellEvents: 0,
+            totalDwellSeconds: 0,
+            maxDwellSeconds: 0,
+            pdfDownloads: 0,
+          };
+          byDoc.set(docId, stat);
+        }
+        return stat;
+      }
+
+      for (const row of rows) {
+        const meta = (row.metadata ?? {}) as Record<string, unknown>;
+        const eventName = String(meta.eventName ?? '');
+
+        if (eventName === 'data_room_document_opened') {
+          const docId = typeof meta.docId === 'string' ? meta.docId : null;
+          if (!docId) continue;
+          const stat = getOrCreate(
+            docId,
+            typeof meta.docTitle === 'string' ? meta.docTitle : null,
+            typeof meta.docCategory === 'string' ? meta.docCategory : null,
+          );
+          stat.openCount += 1;
+        } else if (eventName === 'data_room_document_dwell') {
+          const docId = typeof meta.docId === 'string' ? meta.docId : null;
+          if (!docId) continue;
+          const durationSeconds = typeof meta.durationSeconds === 'number' ? meta.durationSeconds : 0;
+          const stat = getOrCreate(
+            docId,
+            typeof meta.docTitle === 'string' ? meta.docTitle : null,
+            typeof meta.docCategory === 'string' ? meta.docCategory : null,
+          );
+          stat.dwellEvents += 1;
+          stat.totalDwellSeconds += durationSeconds;
+          if (durationSeconds > stat.maxDwellSeconds) stat.maxDwellSeconds = durationSeconds;
+        } else if (eventName === 'data_room_executive_brief_pdf_downloaded') {
+          const stat = getOrCreate('executive-brief', 'Executive Brief', 'Overview');
+          stat.pdfDownloads += 1;
+        }
+      }
+
+      const docs = Array.from(byDoc.values())
+        .map((stat) => ({
+          docId: stat.docId,
+          docTitle: stat.docTitle,
+          docCategory: stat.docCategory,
+          openCount: stat.openCount,
+          // dwellEvents approximates unique dwell sessions (one event per leave action)
+          dwellEvents: stat.dwellEvents,
+          totalDwellSeconds: stat.totalDwellSeconds,
+          avgDwellSeconds: stat.dwellEvents > 0
+            ? Math.round(stat.totalDwellSeconds / stat.dwellEvents)
+            : null,
+          maxDwellSeconds: stat.dwellEvents > 0 ? stat.maxDwellSeconds : null,
+          pdfDownloads: stat.pdfDownloads,
+        }))
+        .sort((a, b) => b.openCount - a.openCount || b.dwellEvents - a.dwellEvents);
+
+      const summary = {
+        windowDays: 90,
+        totalDocuments: docs.length,
+        totalOpenEvents: docs.reduce((s, d) => s + d.openCount, 0),
+        totalDwellEvents: docs.reduce((s, d) => s + d.dwellEvents, 0),
+        totalDwellSeconds: docs.reduce((s, d) => s + d.totalDwellSeconds, 0),
+      };
+
+      sendSuccess(res, { summary, docs }, 200, { computedAt: new Date().toISOString() });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to compute data room doc stats');
+    }
+  },
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Investor Data Room Engagement
 //   Aggregates dos_analytics_events emitted by the szl-holdings investor data
 //   room (NDA acceptance, document opens, executive brief views, demo

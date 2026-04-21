@@ -1221,6 +1221,13 @@ export default function InvestorsDataRoomPage() {
   const briefViewedRef = useRef(false);
   const pageViewFiredRef = useRef(false);
 
+  // Dwell time tracking — stable ref so the cleanup closure never goes stale.
+  // No PII in dwell events: only docId, docTitle, docCategory, and durationSeconds
+  // are emitted. The analytics event fabric assigns its own anonymous session id.
+  const analyticsRef = useRef(analytics);
+  analyticsRef.current = analytics;
+  const dwellStartRef = useRef<{ id: string; at: number } | null>(null);
+
   const __pageMeta = usePageMeta({
     title: "Data Room — Investor Relations — SZL Holdings",
     description:
@@ -1242,29 +1249,64 @@ export default function InvestorsDataRoomPage() {
     analytics.page("investors_data_room", investorProps());
   }, [accepted, analytics, investorProps]);
 
-  // Document / brief open events.
+  // Document / brief navigation events.
+  // Fires on every navigation, not just the first, so revisits are captured.
+  // No PII: userEmail / userId are intentionally omitted — these events carry
+  // only document metadata and are stored in the shared analytics fabric.
   useEffect(() => {
     if (!accepted || !activeDocId) return;
     if (activeDocId === "executive-brief") {
+      // PII-free navigation event — fires on every visit, used for doc engagement stats.
+      analytics.track("data_room_document_opened", {
+        docId: "executive-brief",
+        docTitle: "Executive Brief",
+        docCategory: "Overview",
+        firstView: !briefViewedRef.current,
+      });
+      // PII-bearing first-view event — retained for per-investor engagement rollup.
       if (!briefViewedRef.current) {
         briefViewedRef.current = true;
         analytics.track("data_room_executive_brief_viewed", investorProps());
       }
     } else if (!isSpecialId(activeDocId)) {
-      if (!docOpenedRef.current.has(activeDocId)) {
-        docOpenedRef.current.add(activeDocId);
-        const doc = DOC_META.find((d) => d.id === activeDocId);
-        analytics.track(
-          "data_room_document_opened",
-          investorProps({
-            docId: activeDocId,
-            docTitle: doc?.title ?? null,
-            docCategory: doc?.category ?? null,
-          }),
-        );
-      }
+      const doc = DOC_META.find((d) => d.id === activeDocId);
+      analytics.track("data_room_document_opened", {
+        docId: activeDocId,
+        docTitle: doc?.label ?? null,
+        docCategory: doc?.category ?? null,
+        firstView: !docOpenedRef.current.has(activeDocId),
+      });
+      docOpenedRef.current.add(activeDocId);
     }
   }, [accepted, activeDocId, analytics, investorProps]);
+
+  // Dwell time tracking — records how long the investor spends on each doc.
+  // Fires data_room_document_dwell when they navigate away or the page unmounts.
+  // No PII: only docId, docTitle, docCategory, and durationSeconds are included.
+  useEffect(() => {
+    if (!accepted || !activeDocId) return;
+    // Track dwell for regular docs and the executive brief, but not for form panels.
+    const isFormPanel = activeDocId === "request-demo" || activeDocId === "access-inquiry";
+    if (isFormPanel) {
+      dwellStartRef.current = null;
+      return;
+    }
+    dwellStartRef.current = { id: activeDocId, at: Date.now() };
+    return () => {
+      const start = dwellStartRef.current;
+      if (!start || start.id !== activeDocId) return;
+      const durationSeconds = Math.round((Date.now() - start.at) / 1000);
+      dwellStartRef.current = null;
+      if (durationSeconds < 2) return;
+      const doc = DOC_META.find((d) => d.id === start.id);
+      analyticsRef.current.track("data_room_document_dwell", {
+        docId: start.id,
+        docTitle: start.id === "executive-brief" ? "Executive Brief" : (doc?.label ?? null),
+        docCategory: start.id === "executive-brief" ? "Overview" : (doc?.category ?? null),
+        durationSeconds,
+      });
+    };
+  }, [accepted, activeDocId]);
 
   const loadDoc = useCallback(async (id: string) => {
     if (isSpecialId(id)) return;

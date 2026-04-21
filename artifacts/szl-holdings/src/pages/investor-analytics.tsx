@@ -396,6 +396,29 @@ interface DataRoomEngagement {
   investors: DataRoomInvestor[];
 }
 
+interface DataRoomDocStat {
+  docId: string;
+  docTitle: string | null;
+  docCategory: string | null;
+  openCount: number;
+  dwellEvents: number;
+  totalDwellSeconds: number;
+  avgDwellSeconds: number | null;
+  maxDwellSeconds: number | null;
+  pdfDownloads: number;
+}
+
+interface DataRoomDocStats {
+  summary: {
+    windowDays: number;
+    totalDocuments: number;
+    totalOpenEvents: number;
+    totalDwellEvents: number;
+    totalDwellSeconds: number;
+  };
+  docs: DataRoomDocStat[];
+}
+
 export default function InvestorAnalytics() {
   const [tab, setTab] = useState<'metrics' | 'funnel' | 'cohort' | 'diffs' | 'dataRoom'>(
     'metrics',
@@ -433,6 +456,14 @@ export default function InvestorAnalytics() {
     refetchInterval: 60_000,
   });
   const dataRoom: DataRoomEngagement | undefined = dataRoomRaw?.data;
+
+  const { data: dataRoomDocsRaw, isLoading: dataRoomDocsLoading } = useStandardQuery({
+    queryKey: ['investor-data-room-docs'],
+    queryFn: () => apiFetch('/investor-analytics/data-room-docs'),
+    enabled: tab === 'dataRoom',
+    refetchInterval: 60_000,
+  });
+  const dataRoomDocs: DataRoomDocStats | undefined = dataRoomDocsRaw?.data;
 
   const metrics = metricsRaw?.data;
   const funnel = funnelRaw?.data;
@@ -1135,6 +1166,130 @@ export default function InvestorAnalytics() {
                 </div>
               </>
             )}
+
+            {/* ── Per-Document Stats ── */}
+            <div className="mt-8">
+              <SectionHeader
+                title="Document Engagement — View Counts & Dwell Time"
+                sub={`Which documents investors are reading and how long they spend — past ${dataRoomDocs?.summary?.windowDays ?? 90} days`}
+              />
+              {dataRoomDocsLoading ? (
+                <div className="text-center py-12 text-zinc-600 text-sm">Loading document stats…</div>
+              ) : !dataRoomDocs || dataRoomDocs.docs.length === 0 ? (
+                <div className="bg-[#111318] border border-[#1e2230] rounded-xl p-8 text-center text-zinc-600 text-sm">
+                  No document engagement data yet. Events will appear here as investors view documents.
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+                    <MetricCard
+                      label="Docs Tracked"
+                      value={fmt(dataRoomDocs.summary.totalDocuments)}
+                      sub="documents with engagement"
+                      color={GOLD}
+                    />
+                    <MetricCard
+                      label="Total Opens"
+                      value={fmt(dataRoomDocs.summary.totalOpenEvents)}
+                      sub="document open events"
+                      color={BLUE}
+                    />
+                    <MetricCard
+                      label="Dwell Events"
+                      value={fmt(dataRoomDocs.summary.totalDwellEvents)}
+                      sub="time-on-doc recordings"
+                      color={VIOLET}
+                    />
+                    <MetricCard
+                      label="Total Dwell"
+                      value={
+                        dataRoomDocs.summary.totalDwellSeconds >= 3600
+                          ? `${(dataRoomDocs.summary.totalDwellSeconds / 3600).toFixed(1)}h`
+                          : dataRoomDocs.summary.totalDwellSeconds >= 60
+                          ? `${Math.round(dataRoomDocs.summary.totalDwellSeconds / 60)}m`
+                          : `${dataRoomDocs.summary.totalDwellSeconds}s`
+                      }
+                      sub="combined reading time"
+                      color={EMERALD}
+                    />
+                  </div>
+
+                  <div className="bg-[#111318] border border-[#1e2230] rounded-xl p-5">
+                    <div className="overflow-x-auto">
+                      <table className="text-xs w-full border-collapse">
+                        <thead>
+                          <tr className="border-b border-[#1e2230]">
+                            {['Document', 'Category', 'Opens', 'Dwell Events', 'Avg Dwell', 'Max Dwell', 'PDF'].map((h) => (
+                              <th
+                                key={h}
+                                className="text-left text-zinc-500 uppercase tracking-widest pb-2 pr-4 font-normal whitespace-nowrap"
+                              >
+                                {h}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dataRoomDocs.docs.map((doc) => {
+                            function fmtDwell(s: number | null) {
+                              if (s == null) return <span className="text-zinc-600">—</span>;
+                              if (s >= 3600) return `${(s / 3600).toFixed(1)}h`;
+                              if (s >= 60) return `${Math.floor(s / 60)}m ${s % 60}s`;
+                              return `${s}s`;
+                            }
+                            const heatColor =
+                              doc.openCount >= 10
+                                ? GOLD
+                                : doc.openCount >= 5
+                                ? BLUE
+                                : doc.openCount >= 2
+                                ? VIOLET
+                                : MUTED;
+                            return (
+                              <tr
+                                key={doc.docId}
+                                className="border-b border-[#1a1d27] hover:bg-[#131620] transition-colors"
+                              >
+                                <td className="py-2 pr-4 text-zinc-200 font-medium whitespace-nowrap">
+                                  {doc.docTitle ?? doc.docId}
+                                </td>
+                                <td className="py-2 pr-4 text-zinc-500">
+                                  {doc.docCategory ?? '—'}
+                                </td>
+                                <td className="py-2 pr-4">
+                                  <span className="font-semibold" style={{ color: heatColor }}>
+                                    {doc.openCount}
+                                  </span>
+                                </td>
+                                <td className="py-2 pr-4 text-zinc-400">{doc.dwellEvents}</td>
+                                <td className="py-2 pr-4 text-zinc-300">
+                                  {fmtDwell(doc.avgDwellSeconds)}
+                                </td>
+                                <td className="py-2 pr-4 text-zinc-500">
+                                  {fmtDwell(doc.maxDwellSeconds)}
+                                </td>
+                                <td className="py-2 pr-4 text-zinc-400">
+                                  {doc.pdfDownloads > 0 ? (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-400">
+                                      {doc.pdfDownloads}
+                                    </span>
+                                  ) : (
+                                    <span className="text-zinc-700">—</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                    <p className="mt-3 text-[11px] text-zinc-700">
+                      Opens = total navigation events to this document (including revisits). Dwell Events = number of timed reading sessions recorded. Avg Dwell = mean seconds before navigating away. No PII stored — events carry only document metadata.
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
           </>
         )}
       </div>
