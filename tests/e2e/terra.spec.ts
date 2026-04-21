@@ -173,6 +173,184 @@ test.describe('Terra — User Journey: Browse Portfolio → View Asset → Creat
   });
 });
 
+const API_BASE = process.env.API_BASE_URL ?? 'http://localhost:80/api';
+
+test.describe('Terra — Pro Forma API Round-Trip', () => {
+  test('proforma CRUD: create → list → update name → delete', async ({ request }) => {
+    const payload = {
+      projectName: 'E2E Test Project — ' + Date.now(),
+      inputs: { totalUnits: 50, avgUnitSF: 800, landCost: 2_000_000 },
+      results: { irr: 14.5, equityMultiple: 1.8 },
+    };
+
+    const createRes = await request.post(`${API_BASE}/terra/pro-forma-projects`, {
+      data: payload,
+      headers: { 'content-type': 'application/json' },
+    });
+
+    if (createRes.status() === 401 || createRes.status() === 403) {
+      test.skip();
+      return;
+    }
+
+    expect(createRes.status()).toBe(201);
+    const { project } = await createRes.json();
+    expect(project.id).toBeTruthy();
+    expect(project.projectName).toBe(payload.projectName);
+    expect(typeof project.id).toBe('string');
+
+    const listRes = await request.get(`${API_BASE}/terra/pro-forma-projects`);
+    expect(listRes.status()).toBe(200);
+    const { projects } = await listRes.json();
+    const found = projects.find((p: { id: string }) => p.id === project.id);
+    expect(found).toBeDefined();
+    expect(found.projectName).toBe(payload.projectName);
+
+    const newName = 'E2E Test Project — Renamed';
+    const updateRes = await request.put(`${API_BASE}/terra/pro-forma-projects/${project.id}`, {
+      data: { projectName: newName },
+      headers: { 'content-type': 'application/json' },
+    });
+    expect(updateRes.status()).toBe(200);
+    const updateBody = await updateRes.json();
+    expect(updateBody.updated ?? updateBody.project?.projectName).toBeTruthy();
+
+    const listAfterUpdate = await request.get(`${API_BASE}/terra/pro-forma-projects`);
+    const { projects: updated } = await listAfterUpdate.json();
+    const renamedProject = updated.find((p: { id: string }) => p.id === project.id);
+    expect(renamedProject?.projectName).toBe(newName);
+
+    const deleteRes = await request.delete(`${API_BASE}/terra/pro-forma-projects/${project.id}`);
+    expect(deleteRes.status()).toBe(200);
+
+    const listAfterDelete = await request.get(`${API_BASE}/terra/pro-forma-projects`);
+    const { projects: remaining } = await listAfterDelete.json();
+    const deletedStillPresent = remaining.find((p: { id: string }) => p.id === project.id);
+    expect(deletedStillPresent).toBeUndefined();
+  });
+
+  test('proforma API: invalid create is rejected with 400', async ({ request }) => {
+    const createRes = await request.post(`${API_BASE}/terra/pro-forma-projects`, {
+      data: { projectName: '' },
+      headers: { 'content-type': 'application/json' },
+    });
+    if (createRes.status() === 401 || createRes.status() === 403) {
+      test.skip();
+      return;
+    }
+    expect([400, 422]).toContain(createRes.status());
+  });
+});
+
+test.describe('Terra — Waterfall API Round-Trip', () => {
+  test('waterfall CRUD: create → list → rename → delete', async ({ request }) => {
+    const payload = {
+      name: 'E2E Waterfall — ' + Date.now(),
+      inputs: {
+        totalEquity: 10_000_000,
+        gpContributionPct: 10,
+        preferredReturn: 8,
+        catchUpPct: 50,
+        promotePct: 20,
+        exitProceeds: 18_000_000,
+        holdMonths: 48,
+      },
+      results: { gpEM: 2.1, lpEM: 1.7 },
+    };
+
+    const createRes = await request.post(`${API_BASE}/terra/waterfall-structures`, {
+      data: payload,
+      headers: { 'content-type': 'application/json' },
+    });
+
+    if (createRes.status() === 401 || createRes.status() === 403) {
+      test.skip();
+      return;
+    }
+
+    expect([200, 201]).toContain(createRes.status());
+    const body = await createRes.json();
+    const structure = body.structure ?? body;
+    expect(structure.id).toBeTruthy();
+
+    const listRes = await request.get(`${API_BASE}/terra/waterfall-structures`);
+    expect(listRes.status()).toBe(200);
+    const { structures } = await listRes.json();
+    const found = structures.find((s: { id: string }) => s.id === structure.id);
+    expect(found).toBeDefined();
+
+    const newName = 'E2E Waterfall — Renamed';
+    const updateRes = await request.put(
+      `${API_BASE}/terra/waterfall-structures/${structure.id}`,
+      { data: { name: newName }, headers: { 'content-type': 'application/json' } },
+    );
+    expect(updateRes.status()).toBe(200);
+
+    const deleteRes = await request.delete(
+      `${API_BASE}/terra/waterfall-structures/${structure.id}`,
+    );
+    expect(deleteRes.status()).toBe(200);
+  });
+});
+
+test.describe('Terra — Pro Forma Page', () => {
+  test('pro-forma route serves non-empty HTML without 5xx', async ({ page }) => {
+    const res = await page.goto(`${TERRA_PATH}/pro-forma`);
+    expect(res?.status()).toBeLessThan(500);
+    const body = await page.content();
+    expect(body.length).toBeGreaterThan(500);
+    const hasJsError = page.locator('text=Something went wrong').first();
+    expect(await hasJsError.isVisible().catch(() => false)).toBe(false);
+  });
+
+  test('pro-forma page renders at least one heading', async ({ page }) => {
+    await page.goto(`${TERRA_PATH}/pro-forma`);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const headings = page.locator('h1, h2, h3');
+    const count = await headings.count();
+    expect(count).toBeGreaterThan(0);
+  });
+});
+
+test.describe('Terra — Waterfall Calculator Page', () => {
+  test('waterfall-calculator route serves non-empty HTML without 5xx', async ({ page }) => {
+    const res = await page.goto(`${TERRA_PATH}/waterfall-calculator`);
+    expect(res?.status()).toBeLessThan(500);
+    const body = await page.content();
+    expect(body.length).toBeGreaterThan(500);
+    const hasJsError = page.locator('text=Something went wrong').first();
+    expect(await hasJsError.isVisible().catch(() => false)).toBe(false);
+  });
+
+  test('waterfall page renders at least one heading', async ({ page }) => {
+    await page.goto(`${TERRA_PATH}/waterfall-calculator`);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const headings = page.locator('h1, h2, h3');
+    const count = await headings.count();
+    expect(count).toBeGreaterThan(0);
+  });
+});
+
+test.describe('Terra — Module Routes', () => {
+  const moduleRoutes = [
+    { path: '/pro-forma', label: 'pro forma' },
+    { path: '/waterfall-calculator', label: 'waterfall calculator' },
+    { path: '/lease-abstraction', label: 'lease abstraction' },
+    { path: '/exchange-1031', label: '1031 exchange' },
+  ];
+
+  for (const route of moduleRoutes) {
+    test(`${route.label} route: no 5xx, renders HTML > 500 chars`, async ({ page }) => {
+      const res = await page.goto(`${TERRA_PATH}${route.path}`);
+      expect(res?.status()).toBeLessThan(500);
+      const body = await page.content();
+      expect(body.length).toBeGreaterThan(500);
+      const hasJsError = page.locator('text=Something went wrong').first();
+      expect(await hasJsError.isVisible().catch(() => false)).toBe(false);
+    });
+  }
+});
+
 test.describe('Terra — Mobile Viewport', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 

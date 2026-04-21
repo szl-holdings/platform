@@ -8,15 +8,19 @@ import {
   BarChart3,
   Calculator,
   ChevronDown,
+  Database,
   DollarSign,
   Download,
   FolderOpen,
   Layers,
   Loader2,
+  Pencil,
   Save,
+  Trash2,
   TrendingUp,
   Users,
 } from 'lucide-react';
+import { calcWaterfall, DEFAULT_WATERFALL_INPUTS, type TierResult, type WaterfallInputs } from '../lib/waterfall-math';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Bar,
@@ -68,148 +72,8 @@ const fmt = (n: number) =>
         : `$${Math.round(n).toLocaleString()}`;
 const pct = (n: number) => `${n.toFixed(2)}%`;
 
-interface WaterfallInputs {
-  totalEquity: number;
-  gpContributionPct: number;
-  preferredReturn: number;
-  catchUpPct: number;
-  promotePct: number;
-  exitProceeds: number;
-  holdMonths: number;
-}
-
-interface TierResult {
-  tier: string;
-  description: string;
-  gpAmount: number;
-  lpAmount: number;
-  total: number;
-  gpPct: number;
-  lpPct: number;
-  cumGp: number;
-  cumLp: number;
-}
-
 function useWaterfall(inputs: WaterfallInputs) {
-  return useMemo(() => {
-    const gpEquity = inputs.totalEquity * (inputs.gpContributionPct / 100);
-    const lpEquity = inputs.totalEquity - gpEquity;
-
-    const prefReturnAmount =
-      inputs.totalEquity * (inputs.preferredReturn / 100) * (inputs.holdMonths / 12);
-    const returnOfCapital = inputs.totalEquity;
-    const remainingAfterPref = Math.max(
-      0,
-      inputs.exitProceeds - returnOfCapital - prefReturnAmount,
-    );
-
-    const catchUpTarget =
-      remainingAfterPref > 0
-        ? (inputs.catchUpPct / 100) * (prefReturnAmount / (1 - inputs.catchUpPct / 100))
-        : 0;
-    const catchUpAmount = Math.min(catchUpTarget, remainingAfterPref);
-    const afterCatchUp = remainingAfterPref - catchUpAmount;
-    const gpPromote = afterCatchUp * (inputs.promotePct / 100);
-    const lpResidual = afterCatchUp * (1 - inputs.promotePct / 100);
-
-    const gpTotal = gpEquity + catchUpAmount + gpPromote;
-    const lpTotal = lpEquity + prefReturnAmount + lpResidual;
-    const gpEM = gpEquity > 0 ? gpTotal / gpEquity : 0;
-    const lpEM = lpEquity > 0 ? lpTotal / lpEquity : 0;
-    const totalMonths = inputs.holdMonths;
-    const gpIRR = gpEquity > 0 ? (gpEM ** (12 / totalMonths) - 1) * 100 : 0;
-    const lpIRR = lpEquity > 0 ? (lpEM ** (12 / totalMonths) - 1) * 100 : 0;
-
-    let cumGp = 0,
-      cumLp = 0;
-
-    const tiers: TierResult[] = [
-      (() => {
-        const gp = gpEquity,
-          lp = lpEquity;
-        cumGp += gp;
-        cumLp += lp;
-        return {
-          tier: 'Tier 1',
-          description: 'Return of Capital',
-          gpAmount: gp,
-          lpAmount: lp,
-          total: gp + lp,
-          gpPct: (gp / (gp + lp)) * 100,
-          lpPct: (lp / (gp + lp)) * 100,
-          cumGp,
-          cumLp,
-        };
-      })(),
-      (() => {
-        const gp = 0,
-          lp = prefReturnAmount;
-        cumGp += gp;
-        cumLp += lp;
-        return {
-          tier: 'Tier 2',
-          description: `Preferred Return (${inputs.preferredReturn}% p.a.)`,
-          gpAmount: gp,
-          lpAmount: lp,
-          total: gp + lp,
-          gpPct: 0,
-          lpPct: 100,
-          cumGp,
-          cumLp,
-        };
-      })(),
-      (() => {
-        const gp = catchUpAmount,
-          lp = 0;
-        cumGp += gp;
-        cumLp += lp;
-        return {
-          tier: 'Tier 3',
-          description: `GP Catch-Up (${inputs.catchUpPct}%)`,
-          gpAmount: gp,
-          lpAmount: lp,
-          total: gp + lp,
-          gpPct: gp > 0 ? 100 : 0,
-          lpPct: 0,
-          cumGp,
-          cumLp,
-        };
-      })(),
-      (() => {
-        const gp = gpPromote,
-          lp = lpResidual;
-        cumGp += gp;
-        cumLp += lp;
-        return {
-          tier: 'Tier 4',
-          description: `Residual (GP ${inputs.promotePct}% promote)`,
-          gpAmount: gp,
-          lpAmount: lp,
-          total: gp + lp,
-          gpPct: gp + lp > 0 ? (gp / (gp + lp)) * 100 : 0,
-          lpPct: gp + lp > 0 ? (lp / (gp + lp)) * 100 : 0,
-          cumGp,
-          cumLp,
-        };
-      })(),
-    ];
-
-    return {
-      gpEquity,
-      lpEquity,
-      gpTotal,
-      lpTotal,
-      gpEM,
-      lpEM,
-      gpIRR,
-      lpIRR,
-      tiers,
-      prefReturnAmount,
-      catchUpAmount,
-      gpPromote,
-      lpResidual,
-    };
-  }, [inputs]);
+  return useMemo(() => calcWaterfall(inputs), [inputs]);
 }
 
 function NumInput({
@@ -280,16 +144,6 @@ const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
 };
 
 const TIER_COLORS = [DS.accent.blue, DS.accent.green, DS.accent.purple, DS.accent.gold];
-
-const DEFAULT_WATERFALL_INPUTS: WaterfallInputs = {
-  totalEquity: 15_000_000,
-  gpContributionPct: 10,
-  preferredReturn: 8,
-  catchUpPct: 50,
-  promotePct: 20,
-  exitProceeds: 28_500_000,
-  holdMonths: 48,
-};
 
 function exportWaterfallCSV(
   inputs: WaterfallInputs,
@@ -378,6 +232,24 @@ export default function WaterfallCalculatorPage() {
       queryClient.invalidateQueries({ queryKey: ['terra-waterfall-structures'] });
     },
   });
+
+  const updateStructureMutation = useStandardMutation({
+    mutationFn: (args: { id: string; name: string }) =>
+      api.waterfall.update(args.id, { name: args.name }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['terra-waterfall-structures'] });
+    },
+  });
+
+  const deleteStructureMutation = useStandardMutation({
+    mutationFn: (id: string) => api.waterfall.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['terra-waterfall-structures'] });
+    },
+  });
+
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
 
   const [inputs, setInputs] = useState<WaterfallInputs>(DEFAULT_WATERFALL_INPUTS);
   const [showStructures, setShowStructures] = useState(false);
@@ -471,6 +343,19 @@ export default function WaterfallCalculatorPage() {
               >
                 GP / LP
               </span>
+              {(savedStructures?.structures.length ?? 0) > 0 && (
+                <span
+                  className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded"
+                  style={{
+                    color: DS.accent.green,
+                    background: `${DS.accent.green}10`,
+                    border: `1px solid ${DS.accent.green}20`,
+                  }}
+                >
+                  <Database className="w-2.5 h-2.5" />
+                  Live DB · {savedStructures!.structures.length}
+                </span>
+              )}
             </div>
             {propInputs && (
               <button
@@ -703,6 +588,19 @@ export default function WaterfallCalculatorPage() {
             >
               GP / LP
             </span>
+            {(savedStructures?.structures.length ?? 0) > 0 && (
+              <span
+                className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded"
+                style={{
+                  color: DS.accent.green,
+                  background: `${DS.accent.green}10`,
+                  border: `1px solid ${DS.accent.green}20`,
+                }}
+              >
+                <Database className="w-2.5 h-2.5" />
+                Live DB · {savedStructures!.structures.length}
+              </span>
+            )}
           </div>
           <p className="text-[10px] font-mono" style={{ color: DS.text.muted }}>
             Preferred return · catch-up · promote splits · multi-tier GP/LP distribution waterfall
@@ -756,23 +654,75 @@ export default function WaterfallCalculatorPage() {
             </button>
             {showStructures && (savedStructures?.structures.length ?? 0) > 0 && (
               <div
-                className="absolute right-0 top-full mt-1 w-64 rounded-xl border shadow-2xl z-50 overflow-hidden"
+                className="absolute right-0 top-full mt-1 w-72 rounded-xl border shadow-2xl z-50 overflow-hidden"
                 style={{ background: '#0d0f15', borderColor: DS.border }}
               >
                 {savedStructures!.structures.map((s) => (
-                  <button
+                  <div
                     key={s.id}
-                    onClick={() => loadStructure(s)}
-                    className="w-full text-left px-3 py-2.5 hover:bg-white/5 transition-colors"
+                    className="flex items-center gap-1 px-3 py-2 hover:bg-white/5 transition-colors"
                     style={{ borderBottom: `1px solid ${DS.border}` }}
                   >
-                    <p className="text-[11px] font-medium" style={{ color: DS.text.primary }}>
-                      {s.name}
-                    </p>
-                    <p className="text-[9px] mt-0.5" style={{ color: DS.text.muted }}>
-                      {new Date(s.updatedAt).toLocaleDateString()}
-                    </p>
-                  </button>
+                    {renamingId === s.id ? (
+                      <input
+                        className="flex-1 bg-transparent text-[11px] text-white focus:outline-none border-b"
+                        style={{ borderColor: DS.accent.purple }}
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && renameValue.trim()) {
+                            updateStructureMutation.mutate({ id: s.id, name: renameValue.trim() });
+                            setRenamingId(null);
+                          } else if (e.key === 'Escape') {
+                            setRenamingId(null);
+                          }
+                        }}
+                        autoFocus
+                      />
+                    ) : (
+                      <button
+                        onClick={() => loadStructure(s)}
+                        className="flex-1 text-left min-w-0"
+                      >
+                        <p className="text-[11px] font-medium truncate" style={{ color: DS.text.primary }}>
+                          {s.name}
+                        </p>
+                        <p className="text-[9px]" style={{ color: DS.text.muted }}>
+                          {new Date(s.updatedAt).toLocaleDateString()}
+                        </p>
+                      </button>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (renamingId === s.id) {
+                          if (renameValue.trim()) {
+                            updateStructureMutation.mutate({ id: s.id, name: renameValue.trim() });
+                          }
+                          setRenamingId(null);
+                        } else {
+                          setRenamingId(s.id);
+                          setRenameValue(s.name);
+                        }
+                      }}
+                      className="p-1 rounded shrink-0"
+                      title="Rename"
+                      style={{ color: DS.text.muted }}
+                    >
+                      {renamingId === s.id ? <Save className="w-3 h-3" /> : <Pencil className="w-3 h-3" />}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteStructureMutation.mutate(s.id);
+                      }}
+                      className="p-1 rounded shrink-0"
+                      title="Delete"
+                      style={{ color: `${DS.accent.red}99` }}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
                 ))}
               </div>
             )}

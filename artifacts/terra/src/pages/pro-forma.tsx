@@ -13,11 +13,13 @@ import {
   ChevronDown,
   ChevronUp,
   Copy,
+  Database,
   DollarSign,
   Download,
   FolderOpen,
   GitCompare,
   Grid3X3,
+  Pencil,
   Plus,
   RefreshCw,
   Save,
@@ -38,6 +40,14 @@ import {
   YAxis,
 } from 'recharts';
 import { api } from '../lib/api';
+import {
+  BEAR_INPUTS,
+  BULL_INPUTS,
+  calcProForma,
+  DEFAULT_INPUTS,
+  type ProFormaInputs,
+  type ProFormaResult,
+} from '../lib/pro-forma-math';
 
 interface TooltipPayloadEntry {
   name: string;
@@ -80,26 +90,6 @@ const fmt = (n: number) =>
         : `$${Math.round(n)}`;
 const pct = (n: number) => `${n.toFixed(1)}%`;
 
-interface ProFormaInputs {
-  projectName: string;
-  propertyType: string;
-  totalUnits: number;
-  avgUnitSF: number;
-  landCost: number;
-  hardCostPerSF: number;
-  softCostPct: number;
-  contingencyPct: number;
-  financingRate: number;
-  loanToCost: number;
-  constructionMonths: number;
-  absorptionMonths: number;
-  stabilizedOccupancy: number;
-  marketRentPerSF: number;
-  opexPerSF: number;
-  exitCapRate: number;
-  equityMultipleTarget: number;
-}
-
 interface Scenario {
   id: string;
   name: string;
@@ -114,124 +104,6 @@ const SCENARIO_COLORS = [
   DS.accent.purple,
   DS.accent.orange,
 ];
-const DEFAULT_INPUTS: ProFormaInputs = {
-  projectName: 'The Arbor — Mixed-Use Tower',
-  propertyType: 'Mixed-Use',
-  totalUnits: 120,
-  avgUnitSF: 950,
-  landCost: 8_500_000,
-  hardCostPerSF: 285,
-  softCostPct: 18,
-  contingencyPct: 8,
-  financingRate: 7.25,
-  loanToCost: 65,
-  constructionMonths: 24,
-  absorptionMonths: 12,
-  stabilizedOccupancy: 94,
-  marketRentPerSF: 3.4,
-  opexPerSF: 1.05,
-  exitCapRate: 5.25,
-  equityMultipleTarget: 1.85,
-};
-
-const BEAR_INPUTS: ProFormaInputs = {
-  ...DEFAULT_INPUTS,
-  hardCostPerSF: 310,
-  financingRate: 8.0,
-  marketRentPerSF: 3.1,
-  exitCapRate: 5.75,
-  stabilizedOccupancy: 90,
-};
-
-const BULL_INPUTS: ProFormaInputs = {
-  ...DEFAULT_INPUTS,
-  hardCostPerSF: 265,
-  financingRate: 6.75,
-  marketRentPerSF: 3.65,
-  exitCapRate: 4.75,
-  stabilizedOccupancy: 96,
-};
-
-function calcProForma(inputs: ProFormaInputs) {
-  const totalSF = inputs.totalUnits * inputs.avgUnitSF;
-  const hardCosts = totalSF * inputs.hardCostPerSF;
-  const softCosts = hardCosts * (inputs.softCostPct / 100);
-  const contingency = (hardCosts + softCosts) * (inputs.contingencyPct / 100);
-  const totalDevelopmentCost = inputs.landCost + hardCosts + softCosts + contingency;
-  const totalDebt = totalDevelopmentCost * (inputs.loanToCost / 100);
-  const totalEquity = totalDevelopmentCost - totalDebt;
-  const constructionInterest =
-    totalDebt * (inputs.financingRate / 100) * (inputs.constructionMonths / 12) * 0.6;
-  const totalProjectCost = totalDevelopmentCost + constructionInterest;
-
-  const grossPotentialRent = inputs.totalUnits * (inputs.avgUnitSF * inputs.marketRentPerSF) * 12;
-  const effectiveGrossIncome = grossPotentialRent * (inputs.stabilizedOccupancy / 100);
-  const opex = totalSF * inputs.opexPerSF * 12;
-  const noi = effectiveGrossIncome - opex;
-  const stabilizedValue = noi / (inputs.exitCapRate / 100);
-  const developerProfit = stabilizedValue - totalProjectCost;
-  const profitOnCost = (developerProfit / totalProjectCost) * 100;
-  const yieldOnCost = (noi / totalProjectCost) * 100;
-  const spreadToCapRate = yieldOnCost - inputs.exitCapRate;
-
-  const equityProceeds = stabilizedValue - totalDebt;
-  const equityMultiple = equityProceeds / totalEquity;
-  const projectMonths = inputs.constructionMonths + inputs.absorptionMonths;
-  const irr = (Math.max(equityMultiple, 0.001) ** (12 / projectMonths) - 1) * 100;
-
-  const costPerUnit = totalProjectCost / inputs.totalUnits;
-  const valuePerUnit = stabilizedValue / inputs.totalUnits;
-
-  const schedule: { phase: string; cost: number; cumulative: number }[] = [];
-  let cum = 0;
-  const phases = [
-    { phase: 'Land', cost: inputs.landCost },
-    { phase: 'Hard Costs', cost: hardCosts },
-    { phase: 'Soft Costs', cost: softCosts },
-    { phase: 'Contingency', cost: contingency },
-    { phase: 'Const. Interest', cost: constructionInterest },
-  ];
-  phases.forEach((p) => {
-    cum += p.cost;
-    schedule.push({ ...p, cumulative: cum });
-  });
-
-  const sensRows: { capRate: number; value: number; profit: number; em: number }[] = [];
-  for (let cr = inputs.exitCapRate - 1; cr <= inputs.exitCapRate + 1; cr += 0.25) {
-    const v = noi / (cr / 100);
-    const pr = v - totalProjectCost;
-    const eq = (v - totalDebt) / totalEquity;
-    sensRows.push({ capRate: cr, value: v, profit: pr, em: eq });
-  }
-
-  return {
-    totalSF,
-    hardCosts,
-    softCosts,
-    contingency,
-    totalDevelopmentCost,
-    totalDebt,
-    totalEquity,
-    constructionInterest,
-    totalProjectCost,
-    grossPotentialRent,
-    effectiveGrossIncome,
-    opex,
-    noi,
-    stabilizedValue,
-    developerProfit,
-    profitOnCost,
-    yieldOnCost,
-    spreadToCapRate,
-    equityMultiple,
-    irr,
-    costPerUnit,
-    valuePerUnit,
-    schedule,
-    sensRows,
-  };
-}
-
 function useProForma(inputs: ProFormaInputs) {
   return useMemo(() => calcProForma(inputs), [inputs]);
 }
@@ -319,19 +191,85 @@ function irrBg(irr: number) {
   return 'rgba(192,80,58,0.30)';
 }
 
-function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
-  const hardCostSteps = [-30, -20, -10, 0, 10, 20, 30];
-  const capRateSteps = [-0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75];
+type SensAxisKey = 'hardCost' | 'capRate' | 'rent' | 'occupancy' | 'financing';
+const SENS_AXES: Record<
+  SensAxisKey,
+  {
+    label: string;
+    shortLabel: string;
+    steps: number[];
+    formatStep: (d: number) => string;
+    applyDelta: (inp: ProFormaInputs, d: number) => ProFormaInputs;
+    stepColor: (d: number) => string;
+    isRevenue: boolean;
+  }
+> = {
+  hardCost: {
+    label: 'Hard Cost/SF Δ',
+    shortLabel: 'HC/SF Δ',
+    steps: [-30, -20, -10, 0, 10, 20, 30],
+    formatStep: (d) => (d === 0 ? '$0' : d > 0 ? `+$${d}` : `-$${Math.abs(d)}`),
+    applyDelta: (inp, d) => ({ ...inp, hardCostPerSF: inp.hardCostPerSF + d }),
+    stepColor: (d) => (d < 0 ? DS.accent.green : d > 0 ? DS.accent.red : DS.accent.gold),
+    isRevenue: false,
+  },
+  capRate: {
+    label: 'Exit Cap Rate Δ',
+    shortLabel: 'Cap Rate Δ',
+    steps: [-0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75],
+    formatStep: (d) => (d === 0 ? '0%' : d > 0 ? `+${d.toFixed(2)}%` : `${d.toFixed(2)}%`),
+    applyDelta: (inp, d) => ({ ...inp, exitCapRate: inp.exitCapRate + d }),
+    stepColor: (d) => (d < 0 ? DS.accent.green : d > 0 ? DS.accent.red : DS.accent.gold),
+    isRevenue: false,
+  },
+  rent: {
+    label: 'Market Rent/SF Δ',
+    shortLabel: 'Rent/SF Δ',
+    steps: [-0.4, -0.25, -0.1, 0, 0.1, 0.25, 0.4],
+    formatStep: (d) =>
+      d === 0 ? '$0' : d > 0 ? `+$${d.toFixed(2)}` : `-$${Math.abs(d).toFixed(2)}`,
+    applyDelta: (inp, d) => ({ ...inp, marketRentPerSF: inp.marketRentPerSF + d }),
+    stepColor: (d) => (d > 0 ? DS.accent.green : d < 0 ? DS.accent.red : DS.accent.gold),
+    isRevenue: true,
+  },
+  occupancy: {
+    label: 'Occupancy Δ',
+    shortLabel: 'Occ Δ',
+    steps: [-6, -4, -2, 0, 2, 4, 6],
+    formatStep: (d) => (d === 0 ? '0%' : d > 0 ? `+${d}%` : `${d}%`),
+    applyDelta: (inp, d) => ({ ...inp, stabilizedOccupancy: inp.stabilizedOccupancy + d }),
+    stepColor: (d) => (d > 0 ? DS.accent.green : d < 0 ? DS.accent.red : DS.accent.gold),
+    isRevenue: true,
+  },
+  financing: {
+    label: 'Financing Rate Δ',
+    shortLabel: 'Rate Δ',
+    steps: [-1.5, -1.0, -0.5, 0, 0.5, 1.0, 1.5],
+    formatStep: (d) => (d === 0 ? '0%' : d > 0 ? `+${d.toFixed(1)}%` : `${d.toFixed(1)}%`),
+    applyDelta: (inp, d) => ({ ...inp, financingRate: inp.financingRate + d }),
+    stepColor: (d) => (d < 0 ? DS.accent.green : d > 0 ? DS.accent.red : DS.accent.gold),
+    isRevenue: false,
+  },
+};
+const AXIS_OPTIONS = Object.entries(SENS_AXES).map(([k, v]) => ({
+  key: k as SensAxisKey,
+  label: v.label,
+  shortLabel: v.shortLabel,
+}));
 
-  const rows = capRateSteps.map((capDelta) => ({
-    capRate: inputs.exitCapRate + capDelta,
-    cells: hardCostSteps.map((hcDelta) => {
-      const r = calcProForma({
-        ...inputs,
-        hardCostPerSF: inputs.hardCostPerSF + hcDelta,
-        exitCapRate: inputs.exitCapRate + capDelta,
-      });
-      return { irr: r.irr, isBase: hcDelta === 0 && capDelta === 0 };
+function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
+  const [colAxis, setColAxis] = useState<SensAxisKey>('hardCost');
+  const [rowAxis, setRowAxis] = useState<SensAxisKey>('capRate');
+  const colCfg = SENS_AXES[colAxis];
+  const rowCfg = SENS_AXES[rowAxis];
+
+  const rows = rowCfg.steps.map((rowDelta) => ({
+    delta: rowDelta,
+    label: rowCfg.formatStep(rowDelta),
+    cells: colCfg.steps.map((colDelta) => {
+      const modified = rowCfg.applyDelta(colCfg.applyDelta(inputs, colDelta), rowDelta);
+      const r = calcProForma(modified);
+      return { irr: r.irr, isBase: rowDelta === 0 && colDelta === 0 };
     }),
   }));
 
@@ -340,15 +278,61 @@ function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
       className="rounded-xl border p-4"
       style={{ borderColor: DS.border, background: DS.surface }}
     >
-      <div className="flex items-center gap-2 mb-3">
-        <Grid3X3 className="w-3.5 h-3.5" style={{ color: DS.accent.gold }} />
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
+        <Grid3X3 className="w-3.5 h-3.5 shrink-0" style={{ color: DS.accent.gold }} />
         <p
           className="text-[10px] font-bold uppercase tracking-wider"
           style={{ color: DS.text.muted }}
         >
-          2D Sensitivity: Hard Cost/SF Δ × Exit Cap Rate → Levered IRR
+          2D Sensitivity → Levered IRR
         </p>
+        <div className="flex items-center gap-2 ml-2 flex-wrap">
+          <span className="text-[9px] uppercase tracking-wider" style={{ color: DS.text.muted }}>
+            Cols →
+          </span>
+          <div className="flex items-center gap-1">
+            {AXIS_OPTIONS.filter((o) => o.key !== rowAxis).map((o) => (
+              <button
+                key={o.key}
+                onClick={() => setColAxis(o.key)}
+                className="text-[9px] px-2 py-0.5 rounded font-medium transition-all"
+                style={{
+                  background: colAxis === o.key ? `${DS.accent.blue}20` : 'transparent',
+                  border: `1px solid ${colAxis === o.key ? `${DS.accent.blue}50` : DS.border}`,
+                  color: colAxis === o.key ? DS.accent.blue : DS.text.muted,
+                }}
+              >
+                {o.shortLabel}
+              </button>
+            ))}
+          </div>
+          <span
+            className="text-[9px] uppercase tracking-wider ml-2"
+            style={{ color: DS.text.muted }}
+          >
+            Rows ↓
+          </span>
+          <div className="flex items-center gap-1">
+            {AXIS_OPTIONS.filter((o) => o.key !== colAxis).map((o) => (
+              <button
+                key={o.key}
+                onClick={() => setRowAxis(o.key)}
+                className="text-[9px] px-2 py-0.5 rounded font-medium transition-all"
+                style={{
+                  background: rowAxis === o.key ? `${DS.accent.gold}20` : 'transparent',
+                  border: `1px solid ${rowAxis === o.key ? `${DS.accent.gold}50` : DS.border}`,
+                  color: rowAxis === o.key ? DS.accent.gold : DS.text.muted,
+                }}
+              >
+                {o.shortLabel}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
+      <p className="text-[9px] mb-3" style={{ color: DS.text.muted }}>
+        {colCfg.label} (columns) × {rowCfg.label} (rows) → Levered IRR. Outlined cell = base case.
+      </p>
       <div className="overflow-x-auto">
         <table className="text-[9px] font-mono border-separate" style={{ borderSpacing: 2 }}>
           <thead>
@@ -357,37 +341,28 @@ function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
                 className="text-left pr-3 pb-1 whitespace-nowrap font-semibold uppercase tracking-wider"
                 style={{ color: DS.text.muted }}
               >
-                Cap Rate ↓ / HC/SF Δ →
+                {rowCfg.shortLabel} ↓ / {colCfg.shortLabel} →
               </th>
-              {hardCostSteps.map((hc) => (
+              {colCfg.steps.map((d) => (
                 <th
-                  key={hc}
+                  key={d}
                   className="text-center px-2 pb-1 font-semibold whitespace-nowrap"
-                  style={{
-                    color: hc < 0 ? DS.accent.green : hc > 0 ? DS.accent.red : DS.accent.gold,
-                  }}
+                  style={{ color: colCfg.stepColor(d) }}
                 >
-                  {hc >= 0 ? `+$${hc}` : `-$${Math.abs(hc)}`}
+                  {colCfg.formatStep(d)}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.capRate}>
+              <tr key={row.delta}>
                 <td
                   className="pr-3 py-0.5 font-semibold whitespace-nowrap"
-                  style={{
-                    color:
-                      row.capRate < inputs.exitCapRate
-                        ? DS.accent.green
-                        : row.capRate > inputs.exitCapRate
-                          ? DS.accent.red
-                          : DS.accent.gold,
-                  }}
+                  style={{ color: rowCfg.stepColor(row.delta) }}
                 >
-                  {pct(row.capRate)}
-                  {Math.abs(row.capRate - inputs.exitCapRate) < 0.001 ? ' ◀ base' : ''}
+                  {row.label}
+                  {row.delta === 0 ? ' ◀ base' : ''}
                 </td>
                 {row.cells.map((cell, ci) => (
                   <td
@@ -433,54 +408,160 @@ function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
   );
 }
 
+type ProFormaMetricKey = Extract<
+  keyof Pick<
+    ProFormaResult,
+    | 'irr'
+    | 'equityMultiple'
+    | 'profitOnCost'
+    | 'totalProjectCost'
+    | 'stabilizedValue'
+    | 'developerProfit'
+    | 'noi'
+    | 'yieldOnCost'
+  >,
+  string
+>;
+
+interface ComparisonMetric {
+  key: ProFormaMetricKey;
+  label: string;
+  format: (v: number) => string;
+  good: (v: number) => boolean;
+}
+
+const COMPARISON_METRICS: ComparisonMetric[] = [
+  { key: 'irr', label: 'Levered IRR', format: (v: number) => pct(v), good: (v: number) => v >= 18 },
+  {
+    key: 'equityMultiple',
+    label: 'Equity Multiple',
+    format: (v: number) => `${v.toFixed(2)}×`,
+    good: (v: number) => v >= 1.85,
+  },
+  {
+    key: 'profitOnCost',
+    label: 'Profit on Cost',
+    format: (v: number) => pct(v),
+    good: (v: number) => v >= 15,
+  },
+  {
+    key: 'totalProjectCost',
+    label: 'Total Project Cost',
+    format: (v: number) => fmt(v),
+    good: () => true,
+  },
+  {
+    key: 'stabilizedValue',
+    label: 'Stabilized Value',
+    format: (v: number) => fmt(v),
+    good: () => true,
+  },
+  {
+    key: 'developerProfit',
+    label: 'Developer Profit',
+    format: (v: number) => fmt(v),
+    good: (v: number) => v > 0,
+  },
+  { key: 'noi', label: 'NOI', format: (v: number) => fmt(v), good: () => true },
+  {
+    key: 'yieldOnCost',
+    label: 'Yield on Cost',
+    format: (v: number) => pct(v),
+    good: (v: number) => v >= 5,
+  },
+];
+
+function exportComparisonCSV(scenarios: Scenario[]) {
+  const results = scenarios.map((s) => ({ ...s, r: calcProForma(s.inputs) }));
+  const header = ['Metric', ...results.map((s) => s.name)];
+  const rows = COMPARISON_METRICS.map((m) => [
+    m.label,
+    ...results.map((s) => m.format(s.r[m.key])),
+  ]);
+  const inputRows = [
+    ['=== INPUTS ==='],
+    ['Hard Cost/SF', ...results.map((s) => `$${s.inputs.hardCostPerSF}`)],
+    ['Market Rent/SF/Mo', ...results.map((s) => `$${s.inputs.marketRentPerSF}`)],
+    ['Occupancy', ...results.map((s) => `${s.inputs.stabilizedOccupancy}%`)],
+    ['Financing Rate', ...results.map((s) => `${s.inputs.financingRate}%`)],
+    ['Exit Cap Rate', ...results.map((s) => `${s.inputs.exitCapRate}%`)],
+  ];
+  const csv = [
+    ['Terra — Scenario Comparison'],
+    [`Export Date: ${new Date().toLocaleDateString()}`],
+    [],
+    header,
+    ...rows,
+    [],
+    ...inputRows,
+  ]
+    .map((r) => r.map((c) => `"${c}"`).join(','))
+    .join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `terra-scenario-comparison-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportComparisonPDF(scenarios: Scenario[]) {
+  const results = scenarios.map((s) => ({ ...s, r: calcProForma(s.inputs) }));
+  const headerCells = results
+    .map(
+      (s) =>
+        `<th style="padding:8px 12px;background:${s.color}18;color:${s.color};border:1px solid ${s.color}30;font-family:monospace">${s.name}</th>`,
+    )
+    .join('');
+  const metricRows = COMPARISON_METRICS.map((m) => {
+    const values = results.map((s) => s.r[m.key]);
+    const best = m.key === 'totalProjectCost' ? Math.min(...values) : Math.max(...values);
+    const cells = results
+      .map((s, i) => {
+        const v = values[i];
+        const isBest = Math.abs(v - best) < 0.001;
+        const isOk = m.good(v);
+        const color = isOk ? (isBest ? s.color : '#999') : '#c0503a';
+        return `<td style="padding:6px 12px;text-align:right;font-family:monospace;font-weight:600;color:${color};border:1px solid #111">${m.format(v)}${isBest ? ' ▲' : ''}</td>`;
+      })
+      .join('');
+    return `<tr><td style="padding:6px 12px;color:#999;border:1px solid #111">${m.label}</td>${cells}</tr>`;
+  }).join('');
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <title>Terra — Scenario Comparison</title>
+  <style>
+    body{background:#0a0c10;color:#ddd;font-family:sans-serif;padding:32px;font-size:13px}
+    h1{color:#b8943c;font-size:20px;margin-bottom:4px}
+    p{color:#555;margin-bottom:24px;font-size:11px}
+    table{border-collapse:collapse;width:100%;background:#0d0f15}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+    @media print{body{background:white;color:#111}table{background:white}}
+  </style>
+</head>
+<body>
+  <h1>Terra — Scenario Comparison</h1>
+  <p>Exported ${new Date().toLocaleString()} · ${results.length} scenarios</p>
+  <table>
+    <thead><tr><th style="padding:8px 12px;text-align:left;color:#555;border:1px solid #222">Metric</th>${headerCells}</tr></thead>
+    <tbody>${metricRows}</tbody>
+  </table>
+</body>
+</html>`;
+  const win = window.open('', '_blank');
+  if (win) {
+    win.document.write(html);
+    win.document.close();
+    win.print();
+  }
+}
+
 function ScenarioComparisonPanel({ scenarios }: { scenarios: Scenario[] }) {
   if (scenarios.length < 2) return null;
 
-  const metrics = [
-    {
-      key: 'irr',
-      label: 'Levered IRR',
-      format: (v: number) => pct(v),
-      good: (v: number) => v >= 18,
-    },
-    {
-      key: 'equityMultiple',
-      label: 'Equity Multiple',
-      format: (v: number) => `${v.toFixed(2)}×`,
-      good: (v: number) => v >= 1.85,
-    },
-    {
-      key: 'profitOnCost',
-      label: 'Profit on Cost',
-      format: (v: number) => pct(v),
-      good: (v: number) => v >= 15,
-    },
-    {
-      key: 'totalProjectCost',
-      label: 'Total Project Cost',
-      format: (v: number) => fmt(v),
-      good: () => true,
-    },
-    {
-      key: 'stabilizedValue',
-      label: 'Stabilized Value',
-      format: (v: number) => fmt(v),
-      good: () => true,
-    },
-    {
-      key: 'developerProfit',
-      label: 'Developer Profit',
-      format: (v: number) => fmt(v),
-      good: (v: number) => v > 0,
-    },
-    { key: 'noi', label: 'NOI', format: (v: number) => fmt(v), good: () => true },
-    {
-      key: 'yieldOnCost',
-      label: 'Yield on Cost',
-      format: (v: number) => pct(v),
-      good: (v: number) => v >= 5,
-    },
-  ];
+  const metrics = COMPARISON_METRICS;
 
   const results = scenarios.map((s) => ({ ...s, r: calcProForma(s.inputs) }));
 
@@ -489,7 +570,7 @@ function ScenarioComparisonPanel({ scenarios }: { scenarios: Scenario[] }) {
       className="rounded-xl border p-4"
       style={{ borderColor: DS.border, background: DS.surface }}
     >
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
         <GitCompare className="w-3.5 h-3.5" style={{ color: DS.accent.blue }} />
         <p
           className="text-[10px] font-bold uppercase tracking-wider"
@@ -497,7 +578,7 @@ function ScenarioComparisonPanel({ scenarios }: { scenarios: Scenario[] }) {
         >
           Scenario Comparison
         </p>
-        <div className="flex items-center gap-2 ml-2">
+        <div className="flex items-center gap-2 ml-2 flex-wrap">
           {results.map((s) => (
             <span
               key={s.id}
@@ -515,6 +596,32 @@ function ScenarioComparisonPanel({ scenarios }: { scenarios: Scenario[] }) {
               {s.name}
             </span>
           ))}
+        </div>
+        <div className="flex items-center gap-1 ml-auto">
+          <button
+            onClick={() => exportComparisonCSV(scenarios)}
+            className="flex items-center gap-1 text-[9px] px-2 py-0.5 rounded font-medium"
+            style={{
+              background: `${DS.accent.green}12`,
+              border: `1px solid ${DS.accent.green}30`,
+              color: DS.accent.green,
+            }}
+            title="Export comparison as CSV"
+          >
+            <Download className="w-3 h-3" /> CSV
+          </button>
+          <button
+            onClick={() => exportComparisonPDF(scenarios)}
+            className="flex items-center gap-1 text-[9px] px-2 py-0.5 rounded font-medium"
+            style={{
+              background: `${DS.accent.blue}12`,
+              border: `1px solid ${DS.accent.blue}30`,
+              color: DS.accent.blue,
+            }}
+            title="Export comparison as PDF (print dialog)"
+          >
+            <Download className="w-3 h-3" /> PDF
+          </button>
         </div>
       </div>
       <div className="overflow-x-auto">
@@ -540,7 +647,7 @@ function ScenarioComparisonPanel({ scenarios }: { scenarios: Scenario[] }) {
           </thead>
           <tbody>
             {metrics.map((m) => {
-              const values = results.map((s) => (s.r as unknown as Record<string, number>)[m.key]);
+              const values = results.map((s) => s.r[m.key]);
               const best = m.key === 'totalProjectCost' ? Math.min(...values) : Math.max(...values);
               return (
                 <tr key={m.key} className="border-t" style={{ borderColor: DS.border }}>
@@ -607,6 +714,24 @@ export default function ProFormaPage() {
       queryClient.invalidateQueries({ queryKey: ['terra-pro-forma-projects'] });
     },
   });
+
+  const updateProjectMutation = useStandardMutation({
+    mutationFn: (args: { id: string; projectName: string }) =>
+      api.proForma.update(args.id, { projectName: args.projectName }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['terra-pro-forma-projects'] });
+    },
+  });
+
+  const deleteProjectMutation = useStandardMutation({
+    mutationFn: (id: string) => api.proForma.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['terra-pro-forma-projects'] });
+    },
+  });
+
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
 
   const [scenarios, setScenarios] = useState<Scenario[]>(INITIAL_SCENARIOS);
   const [activeId, setActiveId] = useState('base');
@@ -714,6 +839,19 @@ export default function ProFormaPage() {
             >
               Feasibility
             </span>
+            {(savedProjects?.projects.length ?? 0) > 0 && (
+              <span
+                className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded"
+                style={{
+                  color: DS.accent.green,
+                  background: `${DS.accent.green}10`,
+                  border: `1px solid ${DS.accent.green}20`,
+                }}
+              >
+                <Database className="w-2.5 h-2.5" />
+                Live DB · {savedProjects!.projects.length}
+              </span>
+            )}
           </div>
           <p className="text-[10px] font-mono" style={{ color: DS.text.muted }}>
             Ground-up development analysis · IRR · Equity Multiple · Sensitivity · Multi-Scenario
@@ -749,23 +887,75 @@ export default function ProFormaPage() {
             </button>
             {showProjects && (savedProjects?.projects.length ?? 0) > 0 && (
               <div
-                className="absolute right-0 top-full mt-1 w-64 rounded-xl border shadow-2xl z-50 overflow-hidden"
+                className="absolute right-0 top-full mt-1 w-72 rounded-xl border shadow-2xl z-50 overflow-hidden"
                 style={{ background: '#0d0f15', borderColor: DS.border }}
               >
                 {savedProjects!.projects.map((p) => (
-                  <button
+                  <div
                     key={p.id}
-                    onClick={() => loadProject(p)}
-                    className="w-full text-left px-3 py-2.5 hover:bg-white/5 transition-colors"
+                    className="flex items-center gap-1 px-3 py-2 hover:bg-white/5 transition-colors"
                     style={{ borderBottom: `1px solid ${DS.border}` }}
                   >
-                    <p className="text-[11px] font-medium" style={{ color: DS.text.primary }}>
-                      {p.projectName}
-                    </p>
-                    <p className="text-[9px] mt-0.5" style={{ color: DS.text.muted }}>
-                      {new Date(p.updatedAt).toLocaleDateString()}
-                    </p>
-                  </button>
+                    {renamingId === p.id ? (
+                      <input
+                        className="flex-1 bg-transparent text-[11px] text-white focus:outline-none border-b"
+                        style={{ borderColor: DS.accent.gold }}
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && renameValue.trim()) {
+                            updateProjectMutation.mutate({ id: p.id, projectName: renameValue.trim() });
+                            setRenamingId(null);
+                          } else if (e.key === 'Escape') {
+                            setRenamingId(null);
+                          }
+                        }}
+                        autoFocus
+                      />
+                    ) : (
+                      <button
+                        onClick={() => loadProject(p)}
+                        className="flex-1 text-left min-w-0"
+                      >
+                        <p className="text-[11px] font-medium truncate" style={{ color: DS.text.primary }}>
+                          {p.projectName}
+                        </p>
+                        <p className="text-[9px]" style={{ color: DS.text.muted }}>
+                          {new Date(p.updatedAt).toLocaleDateString()}
+                        </p>
+                      </button>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (renamingId === p.id) {
+                          if (renameValue.trim()) {
+                            updateProjectMutation.mutate({ id: p.id, projectName: renameValue.trim() });
+                          }
+                          setRenamingId(null);
+                        } else {
+                          setRenamingId(p.id);
+                          setRenameValue(p.projectName);
+                        }
+                      }}
+                      className="p-1 rounded shrink-0"
+                      title="Rename"
+                      style={{ color: DS.text.muted }}
+                    >
+                      {renamingId === p.id ? <Save className="w-3 h-3" /> : <Pencil className="w-3 h-3" />}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteProjectMutation.mutate(p.id);
+                      }}
+                      className="p-1 rounded shrink-0"
+                      title="Delete"
+                      style={{ color: `${DS.accent.red}99` }}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
@@ -1283,9 +1473,9 @@ export default function ProFormaPage() {
                 Analyzing <span style={{ color: activeScenario.color }}>{activeScenario.name}</span>
               </p>
               <p className="text-[9px] mt-0.5" style={{ color: DS.text.muted }}>
-                The heat map below shows Levered IRR across a grid of Hard Cost/SF adjustments
-                (columns) vs. Exit Cap Rate adjustments (rows). The outlined cell is your current
-                base assumption. Green = strong returns, red = challenged deal.
+                Select any two axes — Hard Cost, Cap Rate, Rent/SF, Occupancy, or Financing Rate —
+                to generate a Levered IRR heat map. Use the Cols/Rows pickers inside the panel.
+                Green = strong returns, red = challenged deal. Outlined cell = base case.
               </p>
             </div>
           </div>
