@@ -506,6 +506,72 @@ function exportComparisonCSV(scenarios: Scenario[]) {
   URL.revokeObjectURL(url);
 }
 
+function buildHeatMapHtml(baseInputs: ProFormaInputs, baseScenarioName: string): string {
+  const colCfg = SENS_AXES['hardCost'];
+  const rowCfg = SENS_AXES['capRate'];
+
+  function heatColor(irr: number): { bg: string; fg: string } {
+    if (irr >= 22) return { bg: '#1a3d2e', fg: '#40856a' };
+    if (irr >= 18) return { bg: '#18312a', fg: '#7db89e' };
+    if (irr >= 14) return { bg: '#2e2410', fg: '#b8943c' };
+    return { bg: '#2e1410', fg: '#c0503a' };
+  }
+
+  const colHeaders = colCfg.steps
+    .map(
+      (d) =>
+        `<th style="padding:5px 10px;text-align:center;font-size:10px;color:#888;border:1px solid #222">${colCfg.formatStep(d)}</th>`,
+    )
+    .join('');
+
+  const bodyRows = rowCfg.steps
+    .map((rowDelta) => {
+      const rowLabel = rowCfg.formatStep(rowDelta) + (rowDelta === 0 ? ' ◀' : '');
+      const cells = colCfg.steps
+        .map((colDelta) => {
+          const modified = rowCfg.applyDelta(colCfg.applyDelta(baseInputs, colDelta), rowDelta);
+          const r = calcProForma(modified);
+          const isBase = rowDelta === 0 && colDelta === 0;
+          const { bg, fg } = heatColor(r.irr);
+          const outline = isBase ? 'outline:2px solid #b8943c;outline-offset:-2px;' : '';
+          return `<td style="padding:5px 10px;text-align:center;font-family:monospace;font-weight:700;font-size:10px;background:${bg};color:${fg};border:1px solid #111;${outline}">${pct(r.irr)}</td>`;
+        })
+        .join('');
+      const labelColor = rowDelta === 0 ? '#b8943c' : '#666';
+      return `<tr><td style="padding:5px 10px;font-size:10px;color:${labelColor};font-family:monospace;border:1px solid #111;white-space:nowrap">${rowLabel}</td>${cells}</tr>`;
+    })
+    .join('');
+
+  return `
+  <h2 style="color:#b8943c;font-size:14px;margin:32px 0 4px">2D Sensitivity — Levered IRR</h2>
+  <p style="color:#555;font-size:10px;margin-bottom:8px">
+    Columns: ${colCfg.label} &nbsp;·&nbsp; Rows: ${rowCfg.label} &nbsp;·&nbsp;
+    Base scenario: ${baseScenarioName} &nbsp;·&nbsp; ◀ = base case cell
+  </p>
+  <table style="border-collapse:collapse;background:#0d0f15">
+    <thead>
+      <tr>
+        <th style="padding:5px 10px;text-align:left;font-size:10px;color:#555;border:1px solid #222">${rowCfg.shortLabel} ↓ / ${colCfg.shortLabel} →</th>
+        ${colHeaders}
+      </tr>
+    </thead>
+    <tbody>${bodyRows}</tbody>
+  </table>
+  <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+    ${[
+      { label: '≥22% IRR', bg: '#1a3d2e', fg: '#40856a' },
+      { label: '≥18% IRR', bg: '#18312a', fg: '#7db89e' },
+      { label: '≥14% IRR', bg: '#2e2410', fg: '#b8943c' },
+      { label: '<14% IRR', bg: '#2e1410', fg: '#c0503a' },
+    ]
+      .map(
+        (l) =>
+          `<span style="display:flex;align-items:center;gap:6px;font-size:10px;color:#666"><span style="display:inline-block;width:12px;height:12px;background:${l.bg};border:1px solid ${l.fg}40;border-radius:2px"></span>${l.label}</span>`,
+      )
+      .join('')}
+  </div>`;
+}
+
 function exportComparisonPDF(scenarios: Scenario[]) {
   const results = scenarios.map((s) => ({ ...s, r: calcProForma(s.inputs) }));
   const headerCells = results
@@ -528,26 +594,74 @@ function exportComparisonPDF(scenarios: Scenario[]) {
       .join('');
     return `<tr><td style="padding:6px 12px;color:#999;border:1px solid #111">${m.label}</td>${cells}</tr>`;
   }).join('');
+
+  const inputRows = results
+    .map((s) => {
+      const inp = s.inputs;
+      return `
+      <tr>
+        <td style="padding:5px 10px;color:#b8943c;font-family:monospace;font-weight:700;border:1px solid #111" colspan="${results.length + 1}">${s.name}</td>
+      </tr>
+      <tr>
+        <td style="padding:4px 10px;color:#666;font-size:10px;border:1px solid #111">Hard Cost/SF</td>
+        <td style="padding:4px 10px;font-family:monospace;font-size:10px;color:#ccc;border:1px solid #111" colspan="${results.length}">$${inp.hardCostPerSF}</td>
+      </tr>
+      <tr>
+        <td style="padding:4px 10px;color:#666;font-size:10px;border:1px solid #111">Market Rent/SF/Mo</td>
+        <td style="padding:4px 10px;font-family:monospace;font-size:10px;color:#ccc;border:1px solid #111" colspan="${results.length}">$${inp.marketRentPerSF}</td>
+      </tr>
+      <tr>
+        <td style="padding:4px 10px;color:#666;font-size:10px;border:1px solid #111">Occupancy</td>
+        <td style="padding:4px 10px;font-family:monospace;font-size:10px;color:#ccc;border:1px solid #111" colspan="${results.length}">${inp.stabilizedOccupancy}%</td>
+      </tr>
+      <tr>
+        <td style="padding:4px 10px;color:#666;font-size:10px;border:1px solid #111">Financing Rate</td>
+        <td style="padding:4px 10px;font-family:monospace;font-size:10px;color:#ccc;border:1px solid #111" colspan="${results.length}">${inp.financingRate}%</td>
+      </tr>
+      <tr>
+        <td style="padding:4px 10px;color:#666;font-size:10px;border:1px solid #111">Exit Cap Rate</td>
+        <td style="padding:4px 10px;font-family:monospace;font-size:10px;color:#ccc;border:1px solid #111" colspan="${results.length}">${inp.exitCapRate}%</td>
+      </tr>`;
+    })
+    .join('');
+
+  const heatMapSection = buildHeatMapHtml(scenarios[0].inputs, scenarios[0].name);
+
   const html = `<!DOCTYPE html>
 <html>
 <head>
-  <title>Terra — Scenario Comparison</title>
+  <title>Terra — Scenario Comparison Report</title>
   <style>
     body{background:#0a0c10;color:#ddd;font-family:sans-serif;padding:32px;font-size:13px}
     h1{color:#b8943c;font-size:20px;margin-bottom:4px}
-    p{color:#555;margin-bottom:24px;font-size:11px}
-    table{border-collapse:collapse;width:100%;background:#0d0f15}
+    h2{color:#b8943c;font-size:15px;margin:28px 0 6px}
+    p{color:#555;margin-bottom:16px;font-size:11px}
+    table{border-collapse:collapse;background:#0d0f15}
     th{font-size:11px;text-transform:uppercase;letter-spacing:.08em}
-    @media print{body{background:white;color:#111}table{background:white}}
+    .full-width{width:100%}
+    @media print{
+      body{background:white;color:#111}
+      table{background:white}
+      h1,h2{color:#7a6028}
+    }
   </style>
 </head>
 <body>
-  <h1>Terra — Scenario Comparison</h1>
-  <p>Exported ${new Date().toLocaleString()} · ${results.length} scenarios</p>
-  <table>
+  <h1>Terra — Scenario Comparison Report</h1>
+  <p>Exported ${new Date().toLocaleString()} &nbsp;·&nbsp; ${results.length} scenarios &nbsp;·&nbsp; ▲ = best value</p>
+
+  <h2>Key Metrics</h2>
+  <table class="full-width">
     <thead><tr><th style="padding:8px 12px;text-align:left;color:#555;border:1px solid #222">Metric</th>${headerCells}</tr></thead>
     <tbody>${metricRows}</tbody>
   </table>
+
+  <h2>Scenario Inputs</h2>
+  <table class="full-width">
+    <tbody>${inputRows}</tbody>
+  </table>
+
+  ${heatMapSection}
 </body>
 </html>`;
   const win = window.open('', '_blank');
