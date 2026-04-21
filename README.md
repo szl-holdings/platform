@@ -35,7 +35,7 @@ An AI-assisted operations platform carries a distinct trust burden. The platform
 | AI without oversight | Covenant Policy enforces approval gates — AI cannot execute consequential actions without human confirmation |
 | Opaque AI outputs | All recommendations include source citations, confidence scores, and retrieval provenance |
 | Audit accountability | Every action generates an immutable audit event with actor attribution via Proof Chain |
-| Access control | 11-role RBAC with org-scoped tenant isolation. Deny-by-default global auth enforcer |
+| Access control | 12-role RBAC with org-scoped tenant isolation. Deny-by-default global auth enforcer |
 | Multi-tenancy | All queries scoped by org identifier. Cross-org access returns 404 to prevent information leakage |
 | Decision traceability | Outcome Graph tracks the full chain: signal to recommendation to decision to outcome |
 
@@ -251,7 +251,7 @@ See [docs/operations/deployment-guide.md](docs/operations/deployment-guide.md) f
 
 ## Governance, Security, and Contact
 
-**Access control:** 11-role RBAC with deny-by-default enforcement. All routes require authentication. All queries are org-scoped.
+**Access control:** 12-role RBAC with deny-by-default enforcement. All routes require authentication. All queries are org-scoped.
 
 **AI governance:** Advisory agents only. Covenant Policy enforces approval gates at the workflow layer. AI cannot bypass human confirmation requirements.
 
