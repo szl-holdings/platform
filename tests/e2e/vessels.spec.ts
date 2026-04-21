@@ -153,6 +153,140 @@ test.describe('Vessels — User Journey: View Fleet → Open Exception → Revie
   });
 });
 
+test.describe('Vessels — Write Path: Alert Rules', () => {
+  test('alert center renders Rules tab with New Rule button', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/dashboard/alerts`);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const rulesTab = page.locator("button:has-text('Alert Rules'), [role='tab']:has-text('Alert Rules')").first();
+    await expect(rulesTab).toBeVisible({ timeout: 12000 });
+    await rulesTab.click();
+
+    const newRuleBtn = page.locator("button:has-text('New Rule'), button:has-text('Create Rule')").first();
+    await expect(newRuleBtn).toBeVisible({ timeout: 8000 });
+  });
+
+  test('user can open Create Alert Rule dialog from Alert Center', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/dashboard/alerts`);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const rulesTab = page.locator("button:has-text('Alert Rules'), [role='tab']:has-text('Alert Rules')").first();
+    await expect(rulesTab).toBeVisible({ timeout: 10000 });
+
+    await rulesTab.click();
+    await page.waitForTimeout(500);
+
+    const newRuleBtn = page.locator("button:has-text('New Rule')").first();
+    await expect(newRuleBtn).toBeVisible({ timeout: 8000 });
+
+    await newRuleBtn.click();
+
+    const dialog = page.locator("[role='dialog'], [data-radix-dialog-content]").first();
+    await expect(dialog).toBeVisible({ timeout: 8000 });
+
+    const nameInput = dialog.locator("input[placeholder*='Alert'], input[placeholder*='Speed'], input").first();
+    await expect(nameInput).toBeVisible({ timeout: 5000 });
+  });
+
+  test('dark vessel detection page shows SIMULATED provenance badge', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/dark-vessel-detection`);
+    await page.waitForLoadState('domcontentloaded');
+
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const badge = page.locator('text=SIMULATED').first();
+    await expect(badge).toBeVisible({ timeout: 10000 });
+  });
+
+  test('PSC inspector page shows SCENARIO-BASED provenance badge', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/psc-inspector`);
+    await page.waitForLoadState('domcontentloaded');
+
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const badge = page.locator('text=SCENARIO-BASED').first();
+    await expect(badge).toBeVisible({ timeout: 10000 });
+  });
+
+  test('blockchain BoL page shows signed-record demo notice', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/blockchain-bol`);
+    await page.waitForLoadState('domcontentloaded');
+
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const notice = page.locator('text=Signed-record demonstration').first();
+    await expect(notice).toBeVisible({ timeout: 10000 });
+  });
+});
+
+test.describe('Vessels — Write Path: Trading Desk', () => {
+  test('trading desk renders order entry panel', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/trading-desk`);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const body = await page.content();
+    expect(body.length).toBeGreaterThan(500);
+
+    const orderPanel = page.locator(
+      "text=Order Entry, text=Instrument, text=BUY, text=SELL, button:has-text('Buy'), button:has-text('Sell')"
+    ).first();
+    await expect(orderPanel).toBeVisible({ timeout: 15000 });
+  });
+
+  test('trading desk orders tab loads without crash', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/trading-desk`);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const ordersTab = page.locator(
+      "button:has-text('Orders'), [role='tab']:has-text('Orders')"
+    ).first();
+    await expect(ordersTab).toBeVisible({ timeout: 10000 });
+
+    await ordersTab.click();
+    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => null);
+
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+  });
+});
+
+test.describe('Vessels — Write Path: Voyage Economics', () => {
+  test('voyage economics page loads with live or seeded data', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/economics`);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const heading = page.locator('text=Voyage Economics, text=Fleet Revenue, text=Fleet Margin').first();
+    await expect(heading).toBeVisible({ timeout: 15000 });
+  });
+
+  test('voyage economics shows fleet revenue KPI', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/economics`);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const revenueKpi = page.locator('text=Fleet Revenue').first();
+    await expect(revenueKpi).toBeVisible({ timeout: 15000 });
+  });
+});
+
 test.describe('Vessels — Mobile Viewport', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 

@@ -257,13 +257,18 @@ export default function PscInspectorPage() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="font-display text-xl font-bold text-sky-50 flex items-center gap-2">
-          <Shield className="w-5 h-5 text-sky-400" />
-          Port State Control Inspector
-        </h1>
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="font-display text-xl font-bold text-sky-50 flex items-center gap-2">
+            <Shield className="w-5 h-5 text-sky-400" />
+            Port State Control Inspector
+          </h1>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-amber-500/30 bg-amber-500/8 text-amber-400/80 tracking-wider">
+            SCENARIO-BASED · Labeled MoU data
+          </span>
+        </div>
         <p className="text-xs text-sky-400/50 mt-0.5">
           Detention risk predictor, deficiency history, and pre-inspection checklists — Paris MoU /
-          Tokyo MoU methodology
+          Tokyo MoU methodology · vessel records are scenario-seeded for demonstration
         </p>
       </div>
 

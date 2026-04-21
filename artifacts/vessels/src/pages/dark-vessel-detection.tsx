@@ -234,7 +234,7 @@ export default function DarkVesselDetection() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-bold flex items-center gap-2 flex-wrap">
             <EyeOff className="w-6 h-6 text-red-400" />
             Dark Vessel Detection
             <HelpTip
@@ -245,10 +245,13 @@ export default function DarkVesselDetection() {
               accentColor="#0ea5e9"
               iconSize={14}
             />
+            <span className="text-[10px] font-mono font-normal px-2 py-0.5 rounded border border-amber-500/30 bg-amber-500/8 text-amber-400/80 tracking-wider">
+              SIMULATED · Behavioral-model data
+            </span>
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             AIS manipulation, ship-to-ship transfers, and IUU fishing alerts — powered by behavioral
-            AI
+            AI · vessel records are scenario-seeded for demonstration
           </p>
         </div>
         <div className="flex items-center gap-2">

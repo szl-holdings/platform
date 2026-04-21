@@ -165,7 +165,7 @@ const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
       id: 'welcome',
       title: 'Welcome to Vessels',
       description:
-        'Vessels is your maritime intelligence command — real-time AIS fleet tracking, voyage economics, risk scoring, dark vessel detection, and sanctions screening for 1,200+ vessels.',
+        'Vessels is your maritime intelligence command — AIS fleet tracking (live feed or simulated), voyage economics, risk scoring, dark vessel detection, and sanctions screening for 1,200+ vessels.',
       placement: 'center',
       icon: Ship,
     },
@@ -173,7 +173,7 @@ const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
       id: 'fleet-map',
       title: 'Live Fleet Map',
       description:
-        'The Fleet Map shows real-time vessel positions from AIS feeds. Click any vessel to drill into voyage details, fuel performance, ETAs, and flag risk indicators.',
+        'The Fleet Map shows vessel positions from AIS feeds (live when connected, labeled-simulated otherwise). Click any vessel to drill into voyage details, fuel performance, ETAs, and flag risk indicators.',
       targetSelector: "a[href='/fleet']",
       placement: 'right',
       icon: Globe,
@@ -843,7 +843,7 @@ function VesselsSidebarContent({
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-white/35">Vessels tracked</span>
             <span className="text-[9px] font-mono" style={{ color: VESSELS_BRAND_ACCENT }}>
-              1,247 live
+              1,247 tracked
             </span>
           </div>
           <div className="flex items-center justify-between">

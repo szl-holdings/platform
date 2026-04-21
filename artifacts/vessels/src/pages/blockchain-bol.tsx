@@ -252,6 +252,19 @@ export default function BlockchainBoLPage() {
 
   return (
     <div className="p-6 space-y-6">
+      <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 flex items-start gap-3">
+        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+        <div>
+          <p className="text-xs font-semibold text-amber-300">Signed-record demonstration</p>
+          <p className="text-[11px] text-amber-400/70 mt-0.5">
+            This module implements a SHA-256 hash-chain in the application database — not on a
+            public blockchain. Each event is cryptographically linked to the previous entry and
+            verifiable within this platform. Integration with an external distributed ledger (e.g.
+            Ethereum, Hyperledger) is out of scope for this demo.
+          </p>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
