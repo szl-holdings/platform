@@ -25,11 +25,20 @@ export interface DebtHistoryPoint {
   medium: number;
 }
 
+// Polling intervals (ms) — critical surfaces refresh within seconds so operators
+// see new signals/workflow events as Alloy emits them; secondary surfaces poll
+// less aggressively to limit network churn.
+const LIVE_REFRESH_CRITICAL_MS = 5_000;
+const LIVE_REFRESH_STANDARD_MS = 15_000;
+const LIVE_REFRESH_SLOW_MS = 30_000;
+
 export function useOwnershipDrift() {
   return useQuery({
     queryKey: ['lyte', 'ownership-drift'],
     queryFn: () =>
       getJson<{ items: DriftItem[]; history: DriftHistoryPoint[] }>('/api/lyte/ownership-drift'),
+    refetchInterval: LIVE_REFRESH_STANDARD_MS,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -37,6 +46,8 @@ export function usePressureMap() {
   return useQuery({
     queryKey: ['lyte', 'pressure-map'],
     queryFn: () => getJson<{ cells: PressureCell[] }>('/api/lyte/pressure-map'),
+    refetchInterval: LIVE_REFRESH_CRITICAL_MS,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -45,6 +56,8 @@ export function useActionDebt() {
     queryKey: ['lyte', 'action-debt'],
     queryFn: () =>
       getJson<{ items: DebtItem[]; history: DebtHistoryPoint[] }>('/api/lyte/action-debt'),
+    refetchInterval: LIVE_REFRESH_CRITICAL_MS,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -52,6 +65,8 @@ export function useDecisionReplay() {
   return useQuery({
     queryKey: ['lyte', 'decision-replay'],
     queryFn: () => getJson<{ scenarios: ReplayScenario[] }>('/api/lyte/decision-replay'),
+    refetchInterval: LIVE_REFRESH_SLOW_MS,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -59,6 +74,8 @@ export function useBoardView() {
   return useQuery({
     queryKey: ['lyte', 'board-view'],
     queryFn: () => getJson<{ metrics: BoardMetric[]; risks: BoardRisk[] }>('/api/lyte/board-view'),
+    refetchInterval: LIVE_REFRESH_STANDARD_MS,
+    refetchOnWindowFocus: true,
   });
 }
 
