@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { Code2, Download, ArrowLeft, Layers, Database, Lock, Cpu, ArrowRight } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { analytics } from "@/lib/analytics";
 
 const SECTIONS = [
   {
@@ -65,6 +66,10 @@ export default function DiligenceTechnicalPage() {
   });
 
   useEffect(() => {
+    analytics.diligenceBriefView('technical');
+  }, []);
+
+  useEffect(() => {
     const style = document.createElement("style");
     style.id = "print-override";
     style.textContent = `
@@ -93,7 +98,7 @@ export default function DiligenceTechnicalPage() {
             <ArrowLeft size={13} /> Back to Trust Center
           </Link>
           <button
-            onClick={() => window.print()}
+            onClick={() => { analytics.diligenceBriefDownload('technical'); window.print(); }}
             style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 1rem", borderRadius: "0.5rem", background: accentColor, color: "#fff", border: "none", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer" }}
           >
             <Download size={13} /> Save as PDF

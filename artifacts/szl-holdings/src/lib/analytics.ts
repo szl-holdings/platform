@@ -136,7 +136,9 @@ type EventName =
   | 'diligence_requested'
   | 'domain_pack_viewed'
   | 'audience_path_click'
-  | 'newsletter_signup';
+  | 'newsletter_signup'
+  | 'diligence_brief_viewed'
+  | 'diligence_brief_downloaded';
 
 interface EventProperties {
   site?: string;
@@ -325,4 +327,22 @@ export const analytics = {
 
   newsletterSignup: (source: string, site = 'szl-holdings') =>
     track('newsletter_signup', { source, site }),
+
+  diligenceBriefView: (
+    evaluatorType: 'executive' | 'technical' | 'security' | 'investor',
+  ) =>
+    track('diligence_brief_viewed', {
+      evaluator_type: evaluatorType,
+      page: `/trust/diligence/${evaluatorType}`,
+      site: 'szl-holdings',
+    }),
+
+  diligenceBriefDownload: (
+    evaluatorType: 'executive' | 'technical' | 'security' | 'investor',
+  ) =>
+    track('diligence_brief_downloaded', {
+      evaluator_type: evaluatorType,
+      page: `/trust/diligence/${evaluatorType}`,
+      site: 'szl-holdings',
+    }),
 };

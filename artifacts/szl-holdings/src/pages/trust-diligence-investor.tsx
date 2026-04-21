@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { BarChart2, Download, ArrowLeft, Layers, ShieldCheck, TrendingUp, Lock, ArrowRight } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { analytics } from "@/lib/analytics";
 
 const SECTIONS = [
   {
@@ -62,6 +63,10 @@ export default function DiligenceInvestorPage() {
   });
 
   useEffect(() => {
+    analytics.diligenceBriefView('investor');
+  }, []);
+
+  useEffect(() => {
     const style = document.createElement("style");
     style.id = "print-override";
     style.textContent = `
@@ -89,7 +94,7 @@ export default function DiligenceInvestorPage() {
             <ArrowLeft size={13} /> Back to Trust Center
           </Link>
           <button
-            onClick={() => window.print()}
+            onClick={() => { analytics.diligenceBriefDownload('investor'); window.print(); }}
             style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 1rem", borderRadius: "0.5rem", background: accentColor, color: "#000", border: "none", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer" }}
           >
             <Download size={13} /> Save as PDF

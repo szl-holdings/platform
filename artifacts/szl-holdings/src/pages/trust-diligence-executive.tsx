@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { Briefcase, Download, ArrowLeft, ShieldCheck, CheckSquare, Eye, Lock, ArrowRight } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { analytics } from "@/lib/analytics";
 
 const SECTIONS = [
   {
@@ -57,6 +58,10 @@ export default function DiligenceExecutivePage() {
   });
 
   useEffect(() => {
+    analytics.diligenceBriefView('executive');
+  }, []);
+
+  useEffect(() => {
     const style = document.createElement("style");
     style.id = "print-override";
     style.textContent = `
@@ -82,7 +87,7 @@ export default function DiligenceExecutivePage() {
             <ArrowLeft size={13} /> Back to Trust Center
           </Link>
           <button
-            onClick={() => window.print()}
+            onClick={() => { analytics.diligenceBriefDownload('executive'); window.print(); }}
             style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 1rem", borderRadius: "0.5rem", background: "hsl(192,72%,48%)", color: "#fff", border: "none", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer" }}
           >
             <Download size={13} /> Save as PDF
