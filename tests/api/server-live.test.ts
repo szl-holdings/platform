@@ -158,37 +158,6 @@ vi.mock("../../artifacts/api-server/src/middlewares/optimistic-concurrency", () 
   etagMiddleware: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
-// Wrap the real authMiddleware so internal-agent requests carry the `admin`
-// role.  Org-scoped routers (notably PRISM Counsel) call a `requireAuth`
-// helper that resolves an org id from `req.user.orgs`; the bare internal
-// agent has an empty orgs array, so the helper short-circuits with 403.
-// Granting `admin` lets `getOrgId` fall back to org 1 (its documented
-// behaviour) while leaving the auth code path itself unchanged.  Existing
-// vessels / lyte / firestorm POST tests are unaffected: their `requireRole`
-// guards already accept `ops`, and adding `admin` is additive.
-vi.mock("../../artifacts/api-server/src/middlewares/auth", async () => {
-  const actual = await vi.importActual<
-    typeof import("../../artifacts/api-server/src/middlewares/auth")
-  >("../../artifacts/api-server/src/middlewares/auth");
-  return {
-    ...actual,
-    authMiddleware: (opts?: Parameters<typeof actual.authMiddleware>[0]) => {
-      const real = actual.authMiddleware(opts);
-      return (req: any, res: any, next: any) => {
-        real(req, res, (err?: unknown) => {
-          if (!err && req.isInternalAgent && req.user) {
-            const roles: string[] = req.user.roles ?? [];
-            if (!roles.includes("admin")) {
-              req.user = { ...req.user, roles: [...roles, "admin"] };
-            }
-          }
-          next(err);
-        });
-      };
-    },
-  };
-});
-
 // ── Real server builder ──────────────────────────────────────────────────────
 //
 // Builds an Express app with the REAL CSRF and rate-limiting middleware from
@@ -432,8 +401,32 @@ describe.skipIf(!LIVE_TOKEN)("Live Server — Successful POST mutations via CSRF
   });
 
   it("POST /api/prism-counsel/matters creates a matter after acquiring CSRF token from GET", async () => {
-    const router = (await import("../../artifacts/api-server/src/routes/prism-counsel-core")).default;
-    const app = await buildLiveApp([router]);
+    // PRISM Counsel routes resolve an org id from req.user.orgs and reject the
+    // request with 403 when none is present.  The bare ALLOY_INTERNAL_TOKEN
+    // principal has an empty orgs array, so we mount a tiny pre-middleware
+    // that pre-populates req.user with `admin` (which lets the documented
+    // getOrgId fallback in prism-counsel-core resolve org 1).  The real
+    // authMiddleware short-circuits when it sees an existing internal-agent
+    // principal (auth.ts:219-222), so the rest of the auth chain runs
+    // unchanged.  Scoped to this test only — no module-level auth mock.
+    const counselRouter = (await import("../../artifacts/api-server/src/routes/prism-counsel-core")).default;
+    const elevateInternalAgent = (req: Request, _res: Response, next: express.NextFunction) => {
+      if (req.headers["x-internal-token"] === LIVE_TOKEN) {
+        req.isInternalAgent = true;
+        req.user = {
+          id: 0,
+          displayName: "Internal Agent (test)",
+          email: null,
+          roles: ["ops", "admin"],
+          orgs: [],
+        };
+      }
+      next();
+    };
+    const wrappedRouter = express.Router();
+    wrappedRouter.use(elevateInternalAgent);
+    wrappedRouter.use(counselRouter);
+    const app = await buildLiveApp([wrappedRouter]);
 
     // Step 1: GET to obtain csrf_token cookie
     const getRes = await request(app)
@@ -459,13 +452,18 @@ describe.skipIf(!LIVE_TOKEN)("Live Server — Successful POST mutations via CSRF
     expect(postRes.body.matterType).toBe("advisory");
   });
 
-  it("POST /api/terra/pro-forma-projects creates a pro forma project after acquiring CSRF token from GET", async () => {
-    const router = (await import("../../artifacts/api-server/src/routes/terra-modules")).default;
+  it("POST /api/terra/enterprise/sync/mls completes after acquiring CSRF token from GET", async () => {
+    // Exercises the Terra router (artifacts/api-server/src/routes/terra.ts).
+    // The POST takes an empty body (validated by terraSyncTriggerSchema) and
+    // delegates to the mocked runMlsListingSync, returning the standard
+    // sendSuccess envelope.  GET /terra/properties triggers the real
+    // csrfMiddleware to mint a csrf_token cookie.
+    const router = (await import("../../artifacts/api-server/src/routes/terra")).default;
     const app = await buildLiveApp([router]);
 
-    // Step 1: GET to obtain csrf_token cookie (any GET on the same router will do)
+    // Step 1: GET to obtain csrf_token cookie
     const getRes = await request(app)
-      .get("/api/terra/pro-forma-projects")
+      .get("/api/terra/properties")
       .set("x-internal-token", LIVE_TOKEN);
     expect(getRes.status).toBe(200);
 
@@ -475,18 +473,15 @@ describe.skipIf(!LIVE_TOKEN)("Live Server — Successful POST mutations via CSRF
 
     // Step 3: POST with cookie + matching header
     const postRes = await request(app)
-      .post("/api/terra/pro-forma-projects")
+      .post("/api/terra/enterprise/sync/mls")
       .set("x-internal-token", LIVE_TOKEN)
       .set("Cookie", `csrf_token=${csrfToken}`)
       .set("x-csrf-token", csrfToken!)
       .set("Content-Type", "application/json")
-      .send({
-        projectName: "Integration Test Pro Forma",
-        inputs: { capRate: 0.06, noi: 100000 },
-      });
+      .send({});
     expect(postRes.status).toBe(200);
-    expect(postRes.body).toHaveProperty("project");
-    expect(postRes.body.project.projectName).toBe("Integration Test Pro Forma");
+    expect(postRes.body).toHaveProperty("message");
+    expect(postRes.body.message).toContain("MLS sync");
   });
 });
 
