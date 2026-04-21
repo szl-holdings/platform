@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'wouter';
+import { SubscriptionManager } from '@/components/SubscriptionManager';
 
 const API = '/api';
 
@@ -401,29 +402,24 @@ export default function OrgSettingsPage() {
               <div className="bg-white/4 border border-white/10 rounded-2xl p-6">
                 <h2 className="text-base font-semibold mb-1">Plan & Billing</h2>
                 <p className="text-xs text-white/40 mb-4">Your current subscription and usage</p>
-                <div className="flex items-center justify-between p-4 bg-[#c9a84c]/5 border border-[#c9a84c]/20 rounded-xl">
-                  <div>
-                    <p className="text-sm font-semibold capitalize">{org?.plan ?? '—'} Plan</p>
-                    <p className="text-xs text-white/40">Status: {org?.status ?? '—'}</p>
-                  </div>
-                  <button
-                    className="text-xs px-3 py-1.5 border border-white/15 rounded-lg text-white/60 hover:text-white transition-colors"
-                    onClick={async () => {
-                      const origin = window.location.origin;
-                      const data = await apiFetch<{ data?: { url?: string }; url?: string }>(
-                        '/billing/portal-session',
-                        {
-                          method: 'POST',
-                          body: JSON.stringify({ returnUrl: `${origin}/settings` }),
-                        },
-                      );
+                <div className="mb-2 px-1">
+                  <p className="text-sm font-semibold capitalize">{org?.plan ?? '—'} Plan</p>
+                  <p className="text-xs text-white/40">Status: {org?.status ?? '—'}</p>
+                </div>
+                <SubscriptionManager
+                  apiBase={API}
+                  returnUrl={`${typeof window !== 'undefined' ? window.location.origin : ''}/settings`}
+                  onManageClick={() => {
+                    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+                    apiFetch<{ data?: { url?: string }; url?: string }>(
+                      '/billing/portal-session',
+                      { method: 'POST', body: JSON.stringify({ returnUrl: `${origin}/settings` }) },
+                    ).then((data) => {
                       const url = data?.data?.url ?? data?.url;
                       if (url) window.location.href = url;
-                    }}
-                  >
-                    Manage Billing
-                  </button>
-                </div>
+                    });
+                  }}
+                />
               </div>
             </m.div>
           )}

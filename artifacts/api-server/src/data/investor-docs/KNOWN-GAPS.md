@@ -39,13 +39,13 @@ Risk exposure, compliance posture, diligence readiness.
 | GAP-001 | Firebase & Google credentials require manual rotation | High | ⚠️ Open |
 | KG011 | No CodeQL SAST in CI pipeline | P1 | ⚠️ Open — Sprint 3 |
 | KG012 | No automated dependency vulnerability review in CI | P1 | ⚠️ Open — Sprint 3 |
-| KG010 | No automated E2E / integration test suite | P1 | ⚠️ Open — Sprint 3–4 |
+| KG010 | No automated E2E / integration test suite | P1 | ✅ Resolved Apr-2026 |
 | GAP-002 | No CI/CD automated secret scanning | Med | ✅ Resolved Apr-2026 |
 | GAP-003 | Android keystore not managed by EAS | Med | ⚠️ Open |
 | VD1 | No responsible disclosure policy / `security.txt` | P2 | ⚠️ Open — Sprint 4 |
 | KG025 | WCAG accessibility not systematically audited | P2 | ⚠️ Open — Sprint 4 |
 
-**Diligence verdict:** All P0 security gaps identified in the pre-sprint audit are resolved. Remaining open items (P1–P2, High/Med) are scoped, have remediation owners, and do not represent critical blockers for Series A close. The three highest remaining enterprise risks are the absence of automated SAST (KG011), dependency review (KG012), and E2E regression testing (KG010).
+**Diligence verdict:** All P0 security gaps identified in the pre-sprint audit are resolved. Remaining open items (P1–P2, High/Med) are scoped, have remediation owners, and do not represent critical blockers for Series A close. KG010 (E2E regression testing) is now resolved — Playwright suite covers login, dashboard, approval, and billing flows wired into CI. The two highest remaining enterprise risks are the absence of automated SAST (KG011) and dependency review (KG012).
 
 ---
 
@@ -55,7 +55,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | Gap ID | Description | Severity | Status |
 |--------|-------------|----------|--------|
 | KG009 | OpenTelemetry exporter not configured for production | P1 | ⚠️ Open — pre-deploy |
-| KG010 | No automated E2E / integration test suite | P1 | ⚠️ Open — Sprint 3–4 |
+| KG010 | No automated E2E / integration test suite | P1 | ✅ Resolved Apr-2026 |
 | KG011 | CodeQL SAST not configured in CI | P1 | ⚠️ Open — Sprint 3 |
 | KG012 | Dependency review not in CI | P1 | ⚠️ Open — Sprint 3 |
 | KG013 | No `CODEOWNERS` file | P1 | ⚠️ Open — Sprint 3 |
@@ -65,7 +65,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | KG023 | SLI/SLO definitions absent | P2 | ⚠️ Open — Sprint 4 |
 | KG024 | Large vendor bundle sizes on all web apps (1–1.7 MB) | P2 | ⚠️ Open — Sprint 4 |
 
-**VP Engineering verdict:** Core security hardening is complete. Highest-priority operational work for the new VP is: (1) wire OTEL exporter before first prod deploy (KG009), (2) establish CI security gates (KG011/KG012), (3) build E2E regression suite (KG010), (4) define SLI/SLOs (KG023).
+**VP Engineering verdict:** Core security hardening is complete. KG010 (E2E regression suite) is now resolved — Playwright suite wired into CI covers all critical flows. Highest-priority remaining operational work for the new VP is: (1) wire OTEL exporter before first prod deploy (KG009), (2) establish CI security gates (KG011/KG012), (3) define SLI/SLOs (KG023).
 
 ---
 
@@ -94,7 +94,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | ID | Gap | Area | Impact | Mitigation Plan | Owner |
 |----|-----|------|--------|-----------------|-------|
 | KG009 | OTEL exporter not configured for prod | Observability | No prod tracing | Configure OTLP endpoint before deploy | Platform |
-| KG010 | No automated E2E test suite | Quality | Regression risk | Build Playwright suite for critical flows | Engineering |
+| KG010 | No automated E2E test suite | Quality | ✅ Resolved Apr-2026 — Playwright suite built covering login, core dashboard, approval flow (governed-decision-loop), and billing event flows. `billing.spec.ts` added; all specs wired into `.github/workflows/e2e.yml` matrix. | — | — |
 | KG011 | CodeQL SAST not in CI | Security / CI | SAST coverage gap | Add `.github/workflows/codeql.yml` | DevOps |
 | KG012 | Dependency review not in CI | Supply Chain | Vulnerable deps risk | Add `dependency-review-action` to PRs | DevOps |
 | KG013 | No `CODEOWNERS` file | Process | No review ownership | Create `CODEOWNERS` mapping | Eng Lead |
@@ -157,7 +157,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 
 | ID | Gap | Area | Severity | Status |
 |----|-----|------|----------|--------|
-| TG-001 | No tests for billing event flows | Quality | P1 | ⚠️ Open — Sprint 3 |
+| TG-001 | No tests for billing event flows | Quality | P1 | ✅ Resolved Apr-2026 — `tests/e2e/billing.spec.ts` covers checkout, portal, cancel-confirm, and subscription-status flows via mocked Stripe APIs |
 | TG-002 | No tests for webhook delivery | Quality | P1 | ⚠️ Open — Sprint 3 |
 | TG-003 | Admin-only route tests incomplete | Quality | P1 | ⚠️ Open — Sprint 3 |
 | TG-004 | Approval escalation not tested | Quality | P1 | ⚠️ Open — Sprint 3 |
@@ -180,11 +180,11 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | Severity | Total | Resolved | Open |
 |----------|-------|----------|------|
 | P0 — Critical / High | 11 | 10 | 1 |
-| P1 — High | 14 | 0 | 14 |
+| P1 — High | 14 | 1 | 13 |
 | P2 — Medium / Low | 30 | 9 | 21 |
 | Flow Audit Gaps (Phase 4–5) | 4 | 0 | 4 |
-| Test Quality Gaps (Phase 4–5) | 8 | 2 | 6 |
-| **Total** | **72** | **22** | **50** |
+| Test Quality Gaps (Phase 4–5) | 8 | 3 | 5 |
+| **Total** | **72** | **23** | **49** |
 
 > **April 2026 Phase 0–1 audit note:** Full operational audit (Phases 0–1) completed. Deliverables produced: FULL_SYSTEM_INVENTORY.md, AUDIT_FINDINGS_REGISTER.md, OUT_OF_SCOPE_REGISTER.md, ENVIRONMENT_VARIABLES.md, updated .env.example. KG018 (env var schema) resolved by ENVIRONMENT_VARIABLES.md. GAP-004 (.env.example) resolved by comprehensive update. KG029 (alloy-integrations test stub) newly cataloged. TD-004 remains re-opened. No new P0/P1 security findings discovered. No hardcoded credentials found in source. All GitHub Actions workflows remain SHA-pinned. Net P2 change: +2 gaps added, +2 resolved. See LAUNCH_BLOCKERS.md for the full pre-launch blocker register.
 >

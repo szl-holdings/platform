@@ -189,6 +189,19 @@ jobs:
             dist: artifacts/szl-holdings/dist/public
             port: 3000
             spec: health-and-404.spec.ts
+          # billing.spec.ts covers the billing event flows previously absent
+          # from the test suite (KG010 / TG-001 resolution):
+          #   - Pricing/pilot page CTAs render without error
+          #   - SubscriptionManager: no-subscription state
+          #   - SubscriptionManager: active subscription state (mocked Stripe)
+          #   - Checkout initiation, billing portal, and cancel confirmation
+          # All Stripe API calls are intercepted via page.route(); no live
+          # API server or Stripe account is required.
+          - app: billing
+            filter: "@workspace/szl-holdings"
+            dist: artifacts/szl-holdings/dist/public
+            port: 3000
+            spec: billing.spec.ts
           # No specs are currently excluded from this matrix.
           # All registered specs use appAvailable guards and call testInfo.skip()
           # when the target path is unavailable — they will not cause false failures.
