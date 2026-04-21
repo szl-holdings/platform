@@ -64,6 +64,15 @@ app.get('/health', (_req, res) => {
   });
 });
 
+// Standard Kubernetes probe aliases
+app.get('/healthz', (_req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+app.get('/readyz', (_req, res) => {
+  res.status(200).json({ ready: true });
+});
+
 app.post('/control/ingest', authMiddleware, async (req, res) => {
   const parsed = IngestRequestSchema.safeParse(req.body);
   if (!parsed.success) {

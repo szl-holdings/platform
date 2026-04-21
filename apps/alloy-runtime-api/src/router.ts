@@ -78,6 +78,15 @@ export function createRouter(): Router {
     });
   });
 
+  // Standard Kubernetes probe aliases
+  router.get('/healthz', (_req, res) => {
+    res.status(200).json({ status: 'ok' });
+  });
+
+  router.get('/readyz', (_req, res) => {
+    res.status(200).json({ ready: true });
+  });
+
   router.get('/metrics', (_req, res) => {
     res.status(200).json({
       service: 'alloy-runtime-api',

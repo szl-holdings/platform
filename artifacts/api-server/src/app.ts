@@ -371,6 +371,16 @@ app.get('/api/health/live', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// Standard Kubernetes probe aliases: /healthz (liveness) and /readyz (readiness).
+// Mirrors /api/health/live and /api/health/ready respectively so Kubernetes
+// liveness/readiness probe configs can use the canonical /healthz + /readyz
+// paths without the /api prefix.
+app.get('/healthz', (_req: Request, res: Response) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+app.get('/readyz', handleReadiness);
+
 async function handleReadiness(_req: Request, res: Response) {
   const dbUrl = process.env.DATABASE_URL;
   let dbStatus = 'not_configured';

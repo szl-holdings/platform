@@ -21,6 +21,15 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', service: 'alloy-ingestion-orchestrator' });
 });
 
+// Standard Kubernetes probe aliases
+app.get('/healthz', (_req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+app.get('/readyz', (_req, res) => {
+  res.status(200).json({ ready: true });
+});
+
 const PORT = process.env['PORT'] ? parseInt(process.env['PORT'], 10) : 3003;
 
 app.listen(PORT, () => {

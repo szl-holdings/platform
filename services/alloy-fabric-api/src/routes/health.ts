@@ -16,4 +16,13 @@ export function registerHealthRoute(router: IRouter): void {
   router.get('/ready', (_req: Request, res: Response) => {
     res.json({ ready: true });
   });
+
+  // Standard Kubernetes probe aliases
+  router.get('/healthz', (_req: Request, res: Response) => {
+    res.status(200).json({ status: 'ok' });
+  });
+
+  router.get('/readyz', (_req: Request, res: Response) => {
+    res.status(200).json({ ready: true });
+  });
 }

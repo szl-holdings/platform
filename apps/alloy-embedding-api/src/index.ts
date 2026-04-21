@@ -37,6 +37,16 @@ app.get(`${BASE_PATH}/health`, (_req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Standard Kubernetes probe aliases (no BASE_PATH prefix — standard probe paths)
+app.get("/healthz", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+app.get("/readyz", (_req, res) => {
+  res.status(200).json({ ready: true });
+});
+
 app.get(`${BASE_PATH}/metrics`, metricsHandler as unknown as RequestHandler);
 app.get(`${BASE_PATH}/docs`, (_req, res) => {
   res.status(200).json(openApiSpec);
