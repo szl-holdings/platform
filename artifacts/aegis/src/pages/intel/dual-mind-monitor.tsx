@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-interface IntiAction {
+interface ReflexiveAction {
   id: string;
   timestamp: Date;
   agent: string;
@@ -22,7 +22,7 @@ interface IntiAction {
   outcome: 'completed' | 'escalated' | 'blocked';
 }
 
-interface MamaQuillaTask {
+interface DeliberativeTask {
   id: string;
   agent: string;
   task: string;
@@ -33,7 +33,7 @@ interface MamaQuillaTask {
   depth: 'shallow' | 'medium' | 'deep';
 }
 
-const INTI_ACTIONS_SEED: IntiAction[] = [
+const REFLEXIVE_ACTIONS_SEED: ReflexiveAction[] = [
   {
     id: 'ia1',
     timestamp: new Date(Date.now() - 8000),
@@ -81,7 +81,7 @@ const INTI_ACTIONS_SEED: IntiAction[] = [
   },
 ];
 
-const MAMA_QUILLA_TASKS: MamaQuillaTask[] = [
+const DELIBERATIVE_TASKS: DeliberativeTask[] = [
   {
     id: 'mq1',
     agent: 'Portfolio Analyst',
@@ -134,7 +134,7 @@ const MAMA_QUILLA_TASKS: MamaQuillaTask[] = [
   },
 ];
 
-function generateIntiAction(): IntiAction {
+function generateReflexiveAction(): ReflexiveAction {
   const actions = [
     {
       agent: 'Maritime Analyst',
@@ -167,7 +167,7 @@ function generateIntiAction(): IntiAction {
       trigger: 'Metric refresh cycle',
     },
   ];
-  const outcomes: IntiAction['outcome'][] = [
+  const outcomes: ReflexiveAction['outcome'][] = [
     'completed',
     'completed',
     'completed',
@@ -218,8 +218,8 @@ const DEPTH_CONFIG = {
 };
 
 export default function DualMindMonitor() {
-  const [intiActions, setIntiActions] = useState<IntiAction[]>(INTI_ACTIONS_SEED);
-  const [mamaQuillaTasks] = useState<MamaQuillaTask[]>(MAMA_QUILLA_TASKS);
+  const [reflexiveActions, setReflexiveActions] = useState<ReflexiveAction[]>(REFLEXIVE_ACTIONS_SEED);
+  const [deliberativeTasks] = useState<DeliberativeTask[]>(DELIBERATIVE_TASKS);
   const [tick, setTick] = useState(0);
   const counterRef = useRef(0);
 
@@ -228,30 +228,30 @@ export default function DualMindMonitor() {
       setTick((k) => k + 1);
       counterRef.current++;
       if (counterRef.current % 4 === 0) {
-        setIntiActions((prev) => [generateIntiAction(), ...prev.slice(0, 14)]);
+        setReflexiveActions((prev) => [generateReflexiveAction(), ...prev.slice(0, 14)]);
       }
     }, 1500);
     return () => clearInterval(t);
   }, []);
 
-  const intiStats = {
-    total: intiActions.length,
-    completed: intiActions.filter((a) => a.outcome === 'completed').length,
-    blocked: intiActions.filter((a) => a.outcome === 'blocked').length,
-    escalated: intiActions.filter((a) => a.outcome === 'escalated').length,
-    avgLatency: Math.round(intiActions.reduce((s, a) => s + a.latency, 0) / intiActions.length),
+  const reflexiveStats = {
+    total: reflexiveActions.length,
+    completed: reflexiveActions.filter((a) => a.outcome === 'completed').length,
+    blocked: reflexiveActions.filter((a) => a.outcome === 'blocked').length,
+    escalated: reflexiveActions.filter((a) => a.outcome === 'escalated').length,
+    avgLatency: Math.round(reflexiveActions.reduce((s, a) => s + a.latency, 0) / reflexiveActions.length),
   };
 
-  const mamaStats = {
-    total: mamaQuillaTasks.length,
-    inProgress: mamaQuillaTasks.filter((t) => t.stage !== 'delivering').length,
-    delivering: mamaQuillaTasks.filter((t) => t.stage === 'delivering').length,
+  const deliberativeStats = {
+    total: deliberativeTasks.length,
+    inProgress: deliberativeTasks.filter((t) => t.stage !== 'delivering').length,
+    delivering: deliberativeTasks.filter((t) => t.stage === 'delivering').length,
     avgProgress: Math.round(
-      mamaQuillaTasks.reduce((s, t) => s + t.progress, 0) / mamaQuillaTasks.length,
+      deliberativeTasks.reduce((s, t) => s + t.progress, 0) / deliberativeTasks.length,
     ),
   };
 
-  const outcomeStyle = (outcome: IntiAction['outcome']) =>
+  const outcomeStyle = (outcome: ReflexiveAction['outcome']) =>
     ({
       completed: { icon: CheckCircle2, color: 'text-emerald-400' },
       escalated: { icon: AlertCircle, color: 'text-amber-400' },
@@ -276,16 +276,16 @@ export default function DualMindMonitor() {
           </h1>
         </div>
         <p className="text-xs text-muted-foreground">
-          <span className="text-yellow-400">Inti</span> (System 1) — fast reflexive responses
-          happening right now. &nbsp;
-          <span className="text-indigo-400">Mama Quilla</span> (System 2) — deep reasoning tasks in
-          progress. Inspired by the Inca dual-divinity of Sun and Moon.
+          <span className="text-yellow-400">Reflexive Reasoning</span> (System 1) — fast reflexive
+          responses happening right now. &nbsp;
+          <span className="text-indigo-400">Deliberate Reasoning</span> (System 2) — deep analytical
+          tasks in progress.
         </p>
       </div>
 
       {/* Split view */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* INTI — System 1 */}
+        {/* Reflexive Reasoning — System 1 */}
         <div className="bg-gradient-to-br from-yellow-500/5 via-orange-500/3 to-transparent border border-yellow-400/20 rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-yellow-400/15">
             <div className="flex items-center justify-between mb-3">
@@ -293,7 +293,7 @@ export default function DualMindMonitor() {
                 <Sun className="w-5 h-5 text-yellow-400" />
                 <div>
                   <h2 className="text-sm font-display font-bold text-yellow-400">
-                    Inti — System 1
+                    Reflexive Reasoning — System 1
                   </h2>
                   <p className="text-[10px] text-muted-foreground">Reflexive real-time actions</p>
                 </div>
@@ -305,12 +305,12 @@ export default function DualMindMonitor() {
             </div>
             <div className="grid grid-cols-4 gap-2">
               {[
-                { label: 'Actions', value: intiStats.total, color: 'text-foreground' },
-                { label: 'Completed', value: intiStats.completed, color: 'text-emerald-400' },
-                { label: 'Escalated', value: intiStats.escalated, color: 'text-amber-400' },
+                { label: 'Actions', value: reflexiveStats.total, color: 'text-foreground' },
+                { label: 'Completed', value: reflexiveStats.completed, color: 'text-emerald-400' },
+                { label: 'Escalated', value: reflexiveStats.escalated, color: 'text-amber-400' },
                 {
                   label: 'Avg Latency',
-                  value: `${intiStats.avgLatency}ms`,
+                  value: `${reflexiveStats.avgLatency}ms`,
                   color: 'text-cyan-400',
                 },
               ].map((s) => (
@@ -322,7 +322,7 @@ export default function DualMindMonitor() {
             </div>
           </div>
           <div className="divide-y divide-yellow-400/5 max-h-96 overflow-y-auto">
-            {intiActions.map((action, i) => {
+            {reflexiveActions.map((action, i) => {
               const os = outcomeStyle(action.outcome);
               const OutcomeIcon = os.icon;
               return (
@@ -364,7 +364,7 @@ export default function DualMindMonitor() {
           </div>
         </div>
 
-        {/* MAMA QUILLA — System 2 */}
+        {/* Deliberate Reasoning — System 2 */}
         <div className="bg-gradient-to-br from-indigo-500/5 via-violet-500/3 to-transparent border border-indigo-400/20 rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-indigo-400/15">
             <div className="flex items-center justify-between mb-3">
@@ -372,7 +372,7 @@ export default function DualMindMonitor() {
                 <Moon className="w-5 h-5 text-indigo-400" />
                 <div>
                   <h2 className="text-sm font-display font-bold text-indigo-400">
-                    Mama Quilla — System 2
+                    Deliberate Reasoning — System 2
                   </h2>
                   <p className="text-[10px] text-muted-foreground">
                     Deep analytical reasoning in progress
@@ -386,11 +386,11 @@ export default function DualMindMonitor() {
             </div>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { label: 'Tasks', value: mamaStats.total, color: 'text-foreground' },
-                { label: 'In Progress', value: mamaStats.inProgress, color: 'text-indigo-400' },
+                { label: 'Tasks', value: deliberativeStats.total, color: 'text-foreground' },
+                { label: 'In Progress', value: deliberativeStats.inProgress, color: 'text-indigo-400' },
                 {
                   label: 'Avg Progress',
-                  value: `${mamaStats.avgProgress}%`,
+                  value: `${deliberativeStats.avgProgress}%`,
                   color: 'text-violet-400',
                 },
               ].map((s) => (
@@ -402,7 +402,7 @@ export default function DualMindMonitor() {
             </div>
           </div>
           <div className="p-4 space-y-4">
-            {mamaQuillaTasks.map((task) => {
+            {deliberativeTasks.map((task) => {
               const stage = STAGE_CONFIG[task.stage];
               const depth = DEPTH_CONFIG[task.depth];
               return (
@@ -469,7 +469,7 @@ export default function DualMindMonitor() {
           <div className="bg-yellow-400/5 border border-yellow-400/15 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <Sun className="w-4 h-4 text-yellow-400" />
-              <h4 className="text-xs font-bold text-yellow-400">Inti — Sun God · System 1</h4>
+              <h4 className="text-xs font-bold text-yellow-400">Reflexive Reasoning · System 1</h4>
             </div>
             <div className="space-y-1.5 text-[11px] text-muted-foreground">
               {[
@@ -490,7 +490,7 @@ export default function DualMindMonitor() {
             <div className="flex items-center gap-2 mb-3">
               <Moon className="w-4 h-4 text-indigo-400" />
               <h4 className="text-xs font-bold text-indigo-400">
-                Mama Quilla — Moon Goddess · System 2
+                Deliberate Reasoning · System 2
               </h4>
             </div>
             <div className="space-y-1.5 text-[11px] text-muted-foreground">

@@ -635,7 +635,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Inca Mythology Cortex Banner */}
+      {/* AI Cortex Summary Banner */}
       <div className="relative bg-gradient-to-r from-amber-500/8 via-yellow-500/5 to-emerald-500/5 border border-amber-400/15 rounded-xl p-5 overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.03]"

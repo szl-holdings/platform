@@ -578,7 +578,7 @@ export default function AiCommandCenter() {
       <div className="flex flex-wrap gap-3">
         {[
           { href: '/agent-spawner', label: 'Spawn New Agent' },
-          { href: '/intel/signal-relay', label: 'Signal Routing Console' },
+          { href: '/intel/signal-routing', label: 'Signal Routing Console' },
           { href: '/dual-mind', label: 'Dual-Mode Monitor' },
           { href: '/intel/ai-advisor', label: 'AI Advisor Console' },
         ].map((link) => (

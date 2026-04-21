@@ -173,7 +173,7 @@ const ROUTING_RULES = [
   },
 ];
 
-export default function SignalRelay() {
+export default function SignalRouting() {
   const [events, setEvents] = useState<RelayEvent[]>(() =>
     Array.from({ length: 12 }, generateEvent),
   );
