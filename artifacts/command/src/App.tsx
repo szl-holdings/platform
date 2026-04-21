@@ -138,6 +138,22 @@ const AtlasRuntimePage = lazy(() =>
 const WorldlineRegistryPage = lazy(() => import('./pages/worldline-registry'));
 const WhatChangedPage = lazy(() => import('./operations/pages/what-changed'));
 const DeploymentsPage = lazy(() => import('./operations/pages/deployments'));
+const BoardModePage = lazy(() => import('@lyte/pages/board-mode'));
+const DemoLivePage = lazy(() => import('@lyte/pages/demo-live'));
+const DecisionReceiptsPage = lazy(() => import('@lyte/pages/decision-receipts'));
+const BottleneckHeatmapPage = lazy(() => import('@lyte/pages/bottleneck-heatmap'));
+const MspCommandPage = lazy(() => import('@lyte/pages/msp-command'));
+const DevFeedbackPage = lazy(() => import('@lyte/pages/dev-feedback'));
+const ClientValuePage = lazy(() => import('@lyte/pages/client-value'));
+const OpsSavingsPage = lazy(() => import('@lyte/pages/ops-savings'));
+const OutcomeLoopPage = lazy(() => import('@lyte/pages/outcome-loop'));
+const DeferLanePage = lazy(() => import('@lyte/pages/defer-lane'));
+const ShadowModePage = lazy(() => import('@lyte/pages/shadow-mode'));
+const GpuObservatoryPage = lazy(() => import('@lyte/pages/gpu-observatory'));
+const FailureTimelinePage = lazy(() => import('@lyte/pages/failure-timeline'));
+const ExecutiveSummaryPage = lazy(() => import('@lyte/pages/executive-summary'));
+const ExplorerPage = lazy(() => import('@lyte/pages/explorer'));
+const EscalationIntelligencePage = lazy(() => import('@lyte/pages/escalation-intelligence'));
 const ExecutiveCommand = lazy(() => import('@lyte/pages/executive-command'));
 const LytePulse = lazy(() => import('@lyte/pages/pulse'));
 const PrismDashboard = lazy(() => import('@lyte/pages/prism-dashboard'));
@@ -559,6 +575,22 @@ function AppShell() {
                 component={() => <PrismAtlasExecute />}
               />
               <Route path="/operations/blocker-board" component={() => <BlockerBoard />} />
+              <Route path="/operations/board-mode" component={() => <BoardModePage />} />
+              <Route path="/operations/demo-live" component={() => <DemoLivePage />} />
+              <Route path="/operations/decision-receipts" component={() => <DecisionReceiptsPage />} />
+              <Route path="/operations/bottleneck-heatmap" component={() => <BottleneckHeatmapPage />} />
+              <Route path="/operations/msp-command" component={() => <MspCommandPage />} />
+              <Route path="/operations/dev-feedback" component={() => <DevFeedbackPage />} />
+              <Route path="/operations/client-value" component={() => <ClientValuePage />} />
+              <Route path="/operations/ops-savings" component={() => <OpsSavingsPage />} />
+              <Route path="/operations/outcome-loop" component={() => <OutcomeLoopPage />} />
+              <Route path="/operations/defer-lane" component={() => <DeferLanePage />} />
+              <Route path="/operations/shadow-mode" component={() => <ShadowModePage />} />
+              <Route path="/operations/gpu-observatory" component={() => <GpuObservatoryPage />} />
+              <Route path="/operations/failure-timeline" component={() => <FailureTimelinePage />} />
+              <Route path="/operations/executive-summary" component={() => <ExecutiveSummaryPage />} />
+              <Route path="/operations/explorer" component={() => <ExplorerPage />} />
+              <Route path="/operations/escalation-intelligence" component={() => <EscalationIntelligencePage />} />
               <Route path="/operations/what-changed" component={() => <WhatChangedPage />} />
               <Route path="/operations/deployments" component={() => <DeploymentsPage />} />
               <Route path="/lyte/what-changed" component={() => <WhatChangedPage />} />
