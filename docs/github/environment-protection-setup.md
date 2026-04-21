@@ -6,12 +6,12 @@ This guide documents the `staging` and `production` GitHub Environments configur
 
 ## Current State (Configured via API)
 
-Both environments now exist in **Settings → Environments**:
+Both environments now exist in **Settings → Environments** with all required secrets configured:
 
-| Environment | Status | Branch Restriction | Required Reviewers |
-|---|---|---|---|
-| `staging` | Created | `main`, `master` only | Not applicable (free plan) |
-| `production` | Pre-existing | Protected branches only | Requires Team/Enterprise plan |
+| Environment | Status | Branch Restriction | Required Reviewers | Secrets |
+|---|---|---|---|---|
+| `staging` | Created | `main`, `master` only | Not applicable (free plan) | ✅ Configured (2026-04-21) |
+| `production` | Pre-existing | Protected branches only | Requires Team/Enterprise plan | ✅ Configured (2026-04-21) |
 
 ---
 
@@ -24,12 +24,12 @@ Both environments now exist in **Settings → Environments**:
 - **Required reviewers:** None (GitHub free plan limitation — see upgrade path below)
 - **Workflow:** `.github/workflows/deploy-staging.yml` — triggers automatically on push to `main`/`master`
 
-**Required secrets (set under Settings → Environments → staging → Environment secrets):**
+**Environment secrets (set under Settings → Environments → staging → Environment secrets):**
 
-| Secret | Description |
-|---|---|
-| `REPLIT_STAGING_DEPLOY_TOKEN` | Replit personal access or deploy token for the staging Repl |
-| `REPLIT_STAGING_APP_ID` | Replit app/repl ID for the staging environment |
+| Secret | Description | Status |
+|---|---|---|
+| `REPLIT_STAGING_DEPLOY_TOKEN` | Replit personal access or deploy token for the staging Repl | ✅ Set 2026-04-21 |
+| `REPLIT_STAGING_APP_ID` | Replit app/repl ID for the staging environment | ✅ Set 2026-04-21 |
 
 ### `production`
 
@@ -38,21 +38,22 @@ Both environments now exist in **Settings → Environments**:
 - **Required reviewers:** Requires GitHub Team or Enterprise plan (see upgrade path below)
 - **Workflow:** `.github/workflows/deploy-production.yml` — triggers on published releases or `workflow_dispatch` with `confirm: "deploy"`
 
-**Required secrets (set under Settings → Environments → production → Environment secrets):**
+**Environment secrets (set under Settings → Environments → production → Environment secrets):**
 
-| Secret | Description |
-|---|---|
-| `REPLIT_DEPLOY_TOKEN` | Replit personal access or deploy token for the production Repl |
-| `REPLIT_APP_ID` | Replit app/repl ID for the production environment |
+| Secret | Description | Status |
+|---|---|---|
+| `REPLIT_DEPLOY_TOKEN` | Replit personal access or deploy token for the production Repl | ✅ Set 2026-04-21 |
+| `REPLIT_APP_ID` | Replit app/repl ID for the production environment | ✅ Set 2026-04-21 |
 
 ---
 
-## How to Add Secrets
+## How to Rotate Secrets
+
+All secrets have been configured. To rotate a secret (e.g., after a token is revoked):
 
 1. Go to **GitHub → Settings → Environments → [environment name]**
 2. Scroll to **Environment secrets**
-3. Click **Add secret** and enter the name and value
-4. Repeat for each required secret listed above
+3. Click the secret name, then **Update** and enter the new value
 
 Secrets scoped to an environment are only available to workflows running in that environment's context, providing stronger access control than repository-level secrets.
 
