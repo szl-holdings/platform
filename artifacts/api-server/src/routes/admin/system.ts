@@ -584,6 +584,25 @@ export function register(router: IRouter): void {
     }
   });
 
+  router.post("/admin/retention/sweep", async (req, res) => {
+    try {
+      const { runRetentionSweep } = await import("../../lib/persistence-init.js");
+      const startedAt = Date.now();
+      const counts = await runRetentionSweep();
+      const durationMs = Date.now() - startedAt;
+      await logActivity(req, "run_signal_mesh_retention_sweep", "system", "retention", "Manually triggered signal mesh retention sweep");
+      res.json({
+        success: true,
+        timestamp: new Date().toISOString(),
+        durationMs,
+        counts,
+      });
+    } catch (err) {
+      logger.error({ err }, "[admin] retention sweep failed");
+      sendError(res, "Failed to run retention sweep", 500, "INTERNAL_ERROR");
+    }
+  });
+
   router.get("/admin/environment/full", (_req, res) => {
     const { validateStartupConfig } = require("../../lib/startup-validation");
     const result = validateStartupConfig();

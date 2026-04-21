@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { m } from "framer-motion";
-import { Shield, Clock, Trash2, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Database, Play } from "lucide-react";
+import { Shield, Clock, Trash2, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Database, Play, Activity } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
@@ -41,6 +41,21 @@ interface AuditLogEntry {
   executedAt: string;
 }
 
+interface SignalMeshSweepResult {
+  success: boolean;
+  timestamp: string;
+  durationMs: number;
+  counts: {
+    tracesEvicted: { cacheRemoved: number; dbRemoved: number };
+    memoryEvicted: { cacheRemoved: number; dbRemoved: number };
+    signalsEvicted: { dbRemoved: number };
+    evidenceEvicted: { cacheRemoved: number; dbRemoved: number };
+    recommendationsEvicted: { cacheRemoved: number; dbRemoved: number };
+    entitiesEvicted: { cacheRemoved: number; dbRemoved: number };
+    checkpointsEvicted: { cacheRemoved: number; dbRemoved: number };
+  };
+}
+
 interface SweepStatus {
   schedule: {
     name: string;
@@ -60,6 +75,24 @@ const PURGE_STRATEGY_LABELS: Record<string, string> = {
   archive: "Archive (mark purged, no hard delete)",
 };
 
+const SIGNAL_MESH_LABELS: Record<string, string> = {
+  tracesEvicted: "Traces",
+  memoryEvicted: "Memory",
+  signalsEvicted: "Signals",
+  evidenceEvicted: "Evidence",
+  recommendationsEvicted: "Recommendations",
+  entitiesEvicted: "Entity snapshots",
+  checkpointsEvicted: "Checkpoints",
+};
+
+function sumCounts(counts: SignalMeshSweepResult["counts"]): number {
+  return Object.values(counts).reduce((acc, group) => {
+    const cache = (group as { cacheRemoved?: number }).cacheRemoved ?? 0;
+    const db = (group as { dbRemoved?: number }).dbRemoved ?? 0;
+    return acc + cache + db;
+  }, 0);
+}
+
 const STATUS_COLORS: Record<string, string> = {
   success: "hsl(142,60%,50%)",
   failure: "hsl(0,72%,55%)",
@@ -74,6 +107,7 @@ export default function AdminDataRetentionPage() {
   const [editingPolicy, setEditingPolicy] = useState<{ tableName: string; retentionDays: number; purgeStrategy: "archive" | "delete" | "anonymize"; isActive: boolean; description: string } | null>(null);
   const [runningTable, setRunningTable] = useState<string | null>(null);
   const [orgIdInput, setOrgIdInput] = useState<string>("");
+  const [signalMeshSweepResult, setSignalMeshSweepResult] = useState<SignalMeshSweepResult | null>(null);
   const selectedOrgId = orgIdInput.trim() !== "" ? Number(orgIdInput.trim()) || null : null;
 
   const { data: tablesData } = useStandardQuery({
@@ -137,6 +171,26 @@ export default function AdminDataRetentionPage() {
       }, 3000);
     },
     onError: (err: Error) => toast.error(err.message ?? "Failed to trigger sweep."),
+  });
+
+  const runSignalMeshSweepMutation = useStandardMutation({
+    mutationFn: async () => {
+      const res = await fetch(`${API}/admin/retention/sweep`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(body.error ?? `Sweep failed (HTTP ${res.status})`);
+      }
+      return res.json() as Promise<SignalMeshSweepResult>;
+    },
+    onSuccess: (data) => {
+      setSignalMeshSweepResult(data);
+      const total = sumCounts(data.counts);
+      toast.success(`Signal mesh sweep complete — ${total.toLocaleString()} records pruned in ${(data.durationMs / 1000).toFixed(1)}s.`);
+    },
+    onError: (err: Error) => toast.error(err.message ?? "Signal mesh sweep failed."),
   });
 
   type PolicyInput = Pick<RetentionPolicy, "tableName" | "retentionDays" | "purgeStrategy" | "isActive" | "description">;
@@ -313,6 +367,72 @@ export default function AdminDataRetentionPage() {
               </div>
             </div>
   
+            <div style={{ ...cardStyle, marginBottom: "2rem" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                  <Activity size={14} style={{ color: "hsl(280,70%,60%)" }} />
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,82%)" }}>Signal Mesh Retention</span>
+                  <span style={{ fontSize: "11px", padding: "0.15rem 0.5rem", borderRadius: "20px", background: "hsla(280,70%,60%,0.1)", color: "hsl(280,70%,65%)", border: "1px solid hsla(280,70%,60%,0.2)" }}>
+                    on-demand prune
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    if (confirm("Run the signal mesh retention sweep now? This prunes traces, memory, signals, evidence, recommendations, entity snapshots, and checkpoints older than their configured retention windows.")) {
+                      runSignalMeshSweepMutation.mutate();
+                    }
+                  }}
+                  disabled={runSignalMeshSweepMutation.isPending}
+                  style={{ padding: "0.4rem 0.875rem", borderRadius: "6px", fontSize: "12px", fontWeight: 600, background: "hsla(280,70%,60%,0.1)", border: "1px solid hsla(280,70%,60%,0.25)", color: "hsl(280,70%,65%)", cursor: runSignalMeshSweepMutation.isPending ? "wait" : "pointer", display: "flex", alignItems: "center", gap: "5px" }}
+                >
+                  {runSignalMeshSweepMutation.isPending ? <RefreshCw size={11} style={{ animation: "spin 1s linear infinite" }} /> : <Play size={11} />}
+                  {runSignalMeshSweepMutation.isPending ? "Pruning…" : "Prune now"}
+                </button>
+              </div>
+              <p style={{ fontSize: "12px", color: "hsl(210,5%,45%)", marginTop: "0.625rem" }}>
+                Triggers an immediate sweep of the in-process Signal Mesh stores (traces, memory, signals, evidence, recommendations, entity snapshots, and orchestration checkpoints). Useful after a noisy ingest backfill — no need to wait for the next scheduled hourly sweep.
+              </p>
+              {signalMeshSweepResult && (
+                <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid hsla(0,0%,100%,0.06)" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.625rem", flexWrap: "wrap", gap: "0.5rem" }}>
+                    <span style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "hsl(38,12%,72%)" }}>
+                      Last manual sweep
+                    </span>
+                    <span style={{ fontSize: "11px", color: "hsl(210,5%,50%)", fontFamily: "var(--font-mono)" }}>
+                      {new Date(signalMeshSweepResult.timestamp).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                      {" · "}
+                      {(signalMeshSweepResult.durationMs / 1000).toFixed(2)}s
+                      {" · "}
+                      {sumCounts(signalMeshSweepResult.counts).toLocaleString()} pruned
+                    </span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0.625rem" }}>
+                    {(Object.keys(SIGNAL_MESH_LABELS) as Array<keyof typeof SIGNAL_MESH_LABELS>).map((key) => {
+                      const group = signalMeshSweepResult.counts[key as keyof SignalMeshSweepResult["counts"]] as { cacheRemoved?: number; dbRemoved?: number };
+                      const cache = group.cacheRemoved ?? 0;
+                      const db = group.dbRemoved ?? 0;
+                      const total = cache + db;
+                      return (
+                        <div key={key} style={{ padding: "0.625rem 0.75rem", borderRadius: "6px", background: "hsla(0,0%,100%,0.03)", border: "1px solid hsla(0,0%,100%,0.06)" }}>
+                          <span style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "hsl(210,5%,42%)", display: "block", marginBottom: "0.25rem" }}>
+                            {SIGNAL_MESH_LABELS[key]}
+                          </span>
+                          <span style={{ fontSize: "16px", fontWeight: 700, color: total > 0 ? "hsl(38,12%,88%)" : "hsl(210,5%,38%)" }}>
+                            {total.toLocaleString()}
+                          </span>
+                          {("cacheRemoved" in group) && (
+                            <span style={{ display: "block", fontSize: "10px", color: "hsl(210,5%,38%)", marginTop: "0.125rem" }}>
+                              cache {cache.toLocaleString()} · db {db.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div style={sectionStyle}>
               <h2 style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,75%)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "1rem" }}>Retention Policies</h2>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
