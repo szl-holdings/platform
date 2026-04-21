@@ -1,0 +1,45 @@
+name: Verify Source-of-Truth Metrics
+
+on:
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'audit/source-of-truth.json'
+      - 'audit/verify.sh'
+      - 'artifacts/api-server/src/routes/**'
+      - 'packages/**'
+      - 'lib/**'
+      - 'screenshots/approved/**'
+  push:
+    branches: [master, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-sot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-metrics:
+    name: Source-of-Truth Metric Drift Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python (for JSON parsing in verify.sh)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run source-of-truth verification
+        run: bash audit/verify.sh
+
+      - name: Upload verification output on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-output
+          path: audit/source-of-truth.json
+          retention-days: 7

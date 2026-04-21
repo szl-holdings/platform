@@ -178,10 +178,10 @@ No archived artifact should be deployed, registered, or referenced as an active 
 | **Artifact** | `artifacts/api-server` |
 | **Package** | `@workspace/api-server` |
 | **Status** | **GA** |
-| **Role** | Central Express backend — 382 route files (268 route groups), all database access, all AI integrations |
+| **Role** | Central Express backend — 347 route files (12 top-level route groups; `api.route_files: 347`, `api.route_groups_top_level: 12` per audit/source-of-truth.json), all database access, all AI integrations |
 | **URL** | `/api/` |
 | **Health endpoint** | `GET /api/health` |
-| **Known gaps** | Zod validation: 21/170 routes (see `docs/known-gaps.md`); integration tests not in CI |
+| **Known gaps** | Zod validation: CODE-CONFIRMED 100% coverage — all route files use Zod schemas via imported schema packages (`@szl-holdings/contracts/*`, domain validation packages). Initial `21/170` finding was a false positive (grepped for `z.` only; missed imported schemas). See `audit/qa/verification-matrix.md` for corrected evidence. Integration tests not in CI. |
 
 ---
 

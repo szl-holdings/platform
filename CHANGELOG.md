@@ -23,6 +23,27 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 
 ---
 
+## Track 6 — Zero-Gap: Screenshots, README, Release & Executive Summary — 2026-04-21
+
+### Added
+
+**Screenshots — Approved Set**
+- `screenshots/approved/` — 10 verified post-redesign screenshots captured live from running artifact dev servers (2026-04-21)
+- Surfaces: SZL Holdings (home, ecosystem, trust), Sentra, Vessels, Counsel, Terra, Carlota Jo, Pulse (auth gate), Aegis
+- All shots from live surfaces, post Governed-Intelligence Design System v2 redesign
+- `audit/screenshot-catalog.md` — full metadata catalog: filename, surface, URL, environment, data status, notes; disposition decisions for the 100+ legacy screenshots in `screenshots/`
+
+**Audit Deliverables**
+- `audit/final-executive-summary.md` — comprehensive Track 1–6 executive summary; four mandatory sections (verified working, what was fixed, not verified, production blockers); every claim labeled VERIFIED / CODE-CONFIRMED / OPEN
+- `audit/deployment-proof.md` — explicit deployment state (not deployed; 8 artifact dev servers running, 1 failed (command — startup timeout), 5 not started); exact secrets required for production deployment; health evidence table
+
+### Fixed
+
+- **README** — Removed misleading `![Aegis Command]` screenshot reference (pointed to archived Firestorm/defense surface; Aegis is now the investor pitch deck). Added screenshot context note linking to `audit/screenshot-catalog.md` and `audit/deployment-proof.md`.
+- **`artifacts/szl-holdings/public/opengraph.jpg`** — Refreshed to reflect Design System v2 branding (2026-04-21). Social card now matches the current SZL Holdings home surface.
+
+---
+
 ## [1.0.0-alpha] — 2026-04-20
 
 First public alpha release. Tagged on the public `szl-holdings/szl-holdings-platform` repo and published to the [Releases page](https://github.com/szl-holdings/szl-holdings-platform/releases/tag/v1.0.0-alpha) as the first shipping-cadence signal for outside reviewers.

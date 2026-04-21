@@ -24,16 +24,21 @@ AI outputs without traceability create noise, not trust. Signal to routing to ap
 
 ---
 
-## Domain Packs
+## Domain Packs and Product Surfaces
 
-| Product | Domain |
-|---------|--------|
-| **Aegis** | Security and defense intelligence |
-| **Vessels** | Maritime fleet command |
-| **Terra** | Real estate intelligence |
-| **Carlota Jo** | Premium advisory operations |
-| **PRISM Counsel** | Legal matter command *(archived)* |
-| **IMPERIUM** | Cloud sovereignty *(archived)* |
+**Domain packs** (Sentra, Counsel, Aegis, Vessels, Terra, Carlota Jo) own a vertical of business data and operations. **Cross-domain surfaces** (Pulse, Command, SZL Holdings dashboard) aggregate signals across packs.
+
+| Product | Domain | Status |
+|---------|--------|--------|
+| **Sentra** | Cyber resilience command | Active (domain pack) |
+| **Counsel** | Legal matter command | Active (domain pack) |
+| **Vessels** | Maritime fleet command | Active (domain pack) |
+| **Terra** | Real estate intelligence | Active (domain pack) |
+| **Carlota Jo** | Premium advisory operations | Active (domain pack) |
+| **Pulse** | AI executive briefing — synthesizes signals across all domain packs | Active (cross-domain surface) |
+| **Aegis** | Security and defense intelligence domain pack (API routes active); `artifacts/aegis` web artifact is the investor pitch deck + ATLAS runtime | API domain active; pitch deck active |
+| **PRISM Counsel** | Legal matter command | Superseded by Counsel |
+| **IMPERIUM** | Cloud sovereignty | Archived |
 
 ---
 

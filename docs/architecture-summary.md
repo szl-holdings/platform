@@ -47,17 +47,17 @@ The six platform primitives are the structural differentiators — what makes th
 | Design system | `@szl-holdings/design-system` — dark-first enterprise token set; shared across all artifacts |
 | Mobile | Expo / React Native (iOS + Android) |
 | API | Express.js with comprehensive middleware stack |
-| Validation | Zod schema-first validation on all 268 route groups |
+| Validation | Zod schema-first validation on all 347 route files (12 top-level route groups) |
 | ORM / Database | Drizzle ORM 0.45.x on PostgreSQL 16 |
 | Schema | 915 database table definitions across 165 schema files |
 | Authentication | OpenID Connect (PKCE); `__Host-sid` session cookie |
-| Authorization | 12-role RBAC; deny-by-default global auth enforcer; org-scoped tenant isolation |
+| Authorization | 11-role RBAC; deny-by-default global auth enforcer; org-scoped tenant isolation |
 | Audit | Proof Chain — immutable append-only event log |
 | Observability | Pino structured logging, OpenTelemetry (OTLP), Sentry |
 | Payments | Stripe (Checkout, Subscriptions, Invoicing) |
 | CI/CD | GitHub Actions — CodeQL SAST, dependency review, secret scanning, build gates |
 | Infrastructure | Azure Bicep IaC for enterprise deployments |
-| Monorepo | pnpm workspaces; Turborepo task graph; 122 packages (81 package dirs + 41 lib dirs) |
+| Monorepo | pnpm workspaces; Turborepo task graph; 123 packages (82 domain packages + 41 lib packages; `packages.total_packages.count: 123` per audit/source-of-truth.json) |
 
 ---
 
@@ -67,7 +67,7 @@ The six platform primitives are the structural differentiators — what makes th
 szl-holdings-platform/
 ├── artifacts/       # 14 deployable web, mobile, and video artifacts
 ├── lib/             # 41 shared libraries: db, auth, AI, event bus, UI
-├── packages/        # 81 domain packages: design system, agent core, evidence ledger
+├── packages/        # 82 domain packages: design system, agent core, evidence ledger
 ├── apps/            # Background applications: embedding, ingestion, runtime
 ├── services/        # Platform services: Alloy fabric, metrics, gateway
 ├── workers/         # Background workers: embedding, ranking, vector
@@ -100,8 +100,8 @@ szl-holdings-platform/
 
 ## The API Surface
 
-- **268 route groups** across all domains
-- **382 route files** total
+- **12 top-level route groups** across all domains (`api.route_groups_top_level: 12` per audit/source-of-truth.json)
+- **347 route files** total (`api.route_files: 347` per audit/source-of-truth.json)
 - **100% Zod schema validation** via `@szl-holdings/contracts` and domain validation packages
 - **Middleware stack:** OTel spans, correlation IDs, structured logging, Helmet CSP/HSTS, session policy, CSRF, rate limiting, tenant scope, ETag optimistic concurrency
 - **Error envelopes:** Consistent `sendError`/`sendNotFound`/`sendUnauthorized`/`sendForbidden` across all routes

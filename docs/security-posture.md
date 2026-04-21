@@ -9,7 +9,7 @@
 
 ## Summary Verdict
 
-The SZL platform security posture is **structurally sound with several open operational gaps**. The code-level security architecture is defense-in-depth: deny-by-default authentication, 12-role RBAC, CSRF protection, rate limiting, tenant isolation, and an immutable audit trail are all implemented and code-verified. The primary gaps are operational: three secrets need rotation, Sentry error monitoring is not configured, and the Redis session store is not activated. None of these require architectural changes — they require operator configuration.
+The SZL platform security posture is **structurally sound with several open operational gaps**. The code-level security architecture is defense-in-depth: deny-by-default authentication, 11-role RBAC, CSRF protection, rate limiting, tenant isolation, and an immutable audit trail are all implemented and code-verified. The primary gaps are operational: three secrets need rotation, Sentry error monitoring is not configured, and the Redis session store is not activated. None of these require architectural changes — they require operator configuration.
 
 ---
 
@@ -31,12 +31,32 @@ The SZL platform security posture is **structurally sound with several open oper
 
 | Control | Implementation | Status |
 |---------|---------------|--------|
-| RBAC model | 12 `platformRole` enum values; canonical role mapping layer | VERIFIED |
+| RBAC model | 11 granted user roles (see taxonomy below); `platformRole` column in `lib/db/src/schema/auth.ts`; `auth.rbac_roles.count: 11` per `audit/source-of-truth.json` | VERIFIED |
 | Auth enforcer | Deny-by-default global auth enforcer on all `/api/*` routes; public allowlist explicitly documented | VERIFIED |
 | Tenant isolation | All queries scoped by org identifier; cross-org access returns 404 to prevent information leakage | VERIFIED |
 | Org scoped access | Tenant scope middleware logs violations to telemetry | VERIFIED |
 | Role assignment | Access granted by explicit role assignment; no default access | VERIFIED |
 | Privileged actions | Destructive/irreversible actions require multi-step confirmation and audit trail entry | VERIFIED (architecture); PARTIALLY VERIFIED (coverage) |
+
+### RBAC Role Taxonomy
+
+The `platformRole` text column in `lib/db/src/schema/auth.ts` (lines 21–36) contains **12 enum values**. Eleven of these are **granted user roles** — assignable permissions for authenticated platform users. The twelfth, `anonymous_visitor`, represents the unauthenticated visitor state and is not a grantable role. All public-facing documentation and `audit/source-of-truth.json` (`auth.rbac_roles.count: 11`) count only the 11 granted roles.
+
+| Role | Scope | Notes |
+|------|-------|-------|
+| `founder_admin` | Platform-wide | Full administrative access |
+| `platform_admin` | Platform-wide | Platform configuration and user management |
+| `operator` | Platform-wide | Operational management |
+| `analyst` | Platform-wide | Read-only analytics access |
+| `executive_viewer` | Platform-wide | Executive dashboard access |
+| `ops_manager` | Domain | Operations management within assigned tenant |
+| `sales_delivery_user` | Domain | Sales and delivery operations |
+| `maritime_ops_user` | Domain (Vessels) | Vessels domain access |
+| `real_estate_ops_user` | Domain (Terra) | Terra domain access |
+| `service_coordinator` | Domain | Service coordination access |
+| `pilot_customer_user` | Domain | Pilot/trial customer access |
+
+*Plus `anonymous_visitor` (unauthenticated state — not a grantable role). Total enum values: 12. Granted roles: 11. Source: `lib/db/src/schema/auth.ts` lines 21–35; verified via `audit/verify.sh` RBAC note.*
 
 ---
 
@@ -49,7 +69,7 @@ The SZL platform security posture is **structurally sound with several open oper
 | CSRF protection | Double-submit cookie pattern on all state-mutating routes | VERIFIED |
 | Security headers | Helmet.js: CSP, HSTS, X-Frame-Options, X-Content-Type-Options | VERIFIED |
 | Rate limiting | Global limiter + per-endpoint sliding window; applied to auth routes | VERIFIED |
-| API validation | Zod schema validation on all 268 route groups via `@szl-holdings/contracts` | VERIFIED |
+| API validation | Zod schema validation on all 347 route files across 12 top-level route groups via `@szl-holdings/contracts` (`api.route_files: 347`, `api.route_groups_top_level: 12` per audit/source-of-truth.json) | VERIFIED |
 | WebSocket auth | HMAC-signed tickets with per-channel access control | VERIFIED |
 
 ---

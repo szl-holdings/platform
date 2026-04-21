@@ -87,7 +87,7 @@ The following standards apply to all work on the SZL Holdings platform:
 ### Architecture Conventions
 
 - **Shared libraries** — Cross-surface logic belongs in `lib/`. Never duplicate business logic across `artifacts/`.
-- **Platform primitives** — Use the five platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine) where applicable. Do not rebuild governance infrastructure in a domain pack.
+- **Platform primitives** — Use the six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric) where applicable. Do not rebuild governance infrastructure in a domain pack.
 - **API-first** — All data access goes through the API server. Frontends never directly query the database.
 - **Typed API contracts** — All API endpoints are typed via Zod schemas in `lib/api-zod/` and codegen hooks in `lib/api-client-react/`.
 - **Explicit over implicit** — Platform state (data freshness, demo mode, model version) is always visible to the user.

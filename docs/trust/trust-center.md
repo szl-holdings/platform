@@ -40,16 +40,23 @@ Every SZL application implements RBAC as a first-class concern.
 - Destructive or irreversible actions require multi-step confirmation and are flagged in the audit trail
 - Session tokens are short-lived. Privileged sessions require explicit re-authentication
 
-**Role model:**
+**Role model — 11 granted user roles** (`auth.rbac_roles.count: 11` per `audit/source-of-truth.json`):
 
-| Role | Access Scope |
-|------|-------------|
-| `founder_admin` | Full platform access, configuration, and user management |
-| `admin` | Platform administration within organization scope |
-| `operator` | Full operational read/write: alerts, incidents, workflows |
-| `analyst` | Read access to all operational data and audit logs |
-| `viewer` | Read-only access to dashboards and summaries |
-| `client` | External client access (Carlota Jo context) |
+> **Counting methodology:** The `platformRole` column in `lib/db/src/schema/auth.ts` contains **12 enum values**: 11 granted user roles (assignable permissions for authenticated users) plus `anonymous_visitor` (the unauthenticated visitor state, not a grantable role). All platform counts, source-of-truth entries, and public-facing documentation use 11 to refer to the granted roles only. See `docs/security-posture.md` for the full role taxonomy with scope definitions.
+
+| Role | Scope | Access |
+|------|-------|--------|
+| `founder_admin` | Platform-wide | Full administrative access, configuration, user management |
+| `platform_admin` | Platform-wide | Platform administration and configuration |
+| `operator` | Platform-wide | Full operational read/write: alerts, incidents, workflows |
+| `analyst` | Platform-wide | Read access to all operational data and audit logs |
+| `executive_viewer` | Platform-wide | Executive dashboard and strategic summary access |
+| `ops_manager` | Domain | Operations management within assigned tenant |
+| `sales_delivery_user` | Domain | Sales and delivery operations |
+| `maritime_ops_user` | Domain (Vessels) | Vessels maritime domain access |
+| `real_estate_ops_user` | Domain (Terra) | Terra real estate domain access |
+| `service_coordinator` | Domain | Service coordination across assigned workflows |
+| `pilot_customer_user` | Domain | Pilot and trial customer access |
 
 Role assignments are logged. Changes to role configuration require approval from a platform administrator.
 

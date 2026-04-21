@@ -64,15 +64,15 @@ Organizations operating at scale face four compounding problems:
 | Claim | Status | Evidence |
 |-------|--------|----------|
 | 915 database table definitions | VERIFIED | `grep -r "pgTable(" lib/db/src/schema/ --include="*.ts" | wc -l` = 915 |
-| 382 API route files (268 route groups) | VERIFIED | `find artifacts/api-server/src/routes -name "*.ts" | wc -l` = 382 |
-| 122 shared packages | VERIFIED | 81 package directories + 41 lib directories |
+| 347 API route files (12 top-level route groups) | VERIFIED | `find artifacts/api-server/src/routes -name "*.ts" ! -name "*.test.ts" | wc -l` = 347; `api.route_files: 347`, `api.route_groups_top_level: 12` per audit/source-of-truth.json |
+| 123 shared packages | VERIFIED | 82 domain packages (`packages/`) + 41 lib packages (`lib/`); `packages.total_packages.count: 123` per audit/source-of-truth.json |
 | 165 schema files | VERIFIED | `find lib/db/src/schema -name "*.ts" | wc -l` = 165 |
 | Deny-by-default auth on all routes | VERIFIED | Global auth enforcer with documented public allowlist |
 | Human-in-the-loop enforcement | VERIFIED | Covenant Policy enforced at workflow layer; not UI-only |
 | Immutable audit trail | VERIFIED | Proof Chain architecture in lib/proof-chain |
 | CSRF protection | VERIFIED | Double-submit cookie pattern on all state-mutating routes |
 | Rate limiting | VERIFIED | Global + per-endpoint sliding window applied to auth routes |
-| Zod validation on all 268 route groups | VERIFIED | Schema-first validation via @szl-holdings/contracts |
+| Zod validation on all 347 route files (12 top-level route groups) | VERIFIED | Schema-first validation via @szl-holdings/contracts |
 
 ---
 

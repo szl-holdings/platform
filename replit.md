@@ -134,6 +134,22 @@ The monorepo has been evolved into AEEP. The following new packages form the AEE
 
 **Substrate Command Center:** A cross-vertical operator UI for the governed decision substrate, integrated into the `command` artifact at `/command/substrate/`. It offers four operator perspectives, a live trajectory map of in-flight runs, detailed run views, a counterfactual diff viewer, and a unified approval queue.
 
+## Zero-Gap Track 6 — Screenshots, README, Release & Executive Summary (2026-04-21)
+
+**Deliverables:**
+- `screenshots/approved/` — 10 verified post-redesign screenshots from live artifact dev servers; all surfaces reflect Governed-Intelligence Design System v2
+- `audit/screenshot-catalog.md` — full metadata for every approved screenshot; disposition decisions for legacy `screenshots/` pool
+- `audit/final-executive-summary.md` — comprehensive Track 1–6 four-section executive summary (verified working / what was fixed / not verified / production blockers); every claim labeled VERIFIED, CODE-CONFIRMED, or OPEN
+- `audit/deployment-proof.md` — exact deployment state: 8 artifact dev servers running, API server not started (no DATABASE_URL), Command failed (startup timeout), no production push
+
+**Fixes:**
+- `README.md` — Removed misleading `aegis-command.jpg` screenshot reference (pointed to archived Firestorm surface); added screenshot context note
+- `CHANGELOG.md` — Added Track 6 entry under dated section
+- `CONTRIBUTING.md` — Fixed "five platform primitives" → "six platform primitives" (Event Fabric was missing)
+- `profile-readme/README.md` — Updated domain packs table to include Sentra, Counsel, Pulse; corrected Aegis description (investor pitch deck, not defense); added Status column
+
+---
+
 ## Series-A Reset Pass (2026-04-20)
 
 The following changes were applied as part of the Series-A one-pass foundation, inventory, and sanitation reset:
