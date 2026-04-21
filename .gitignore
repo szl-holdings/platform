@@ -75,12 +75,20 @@ nohup.out
 *.out
 *.log
 
-# Large zip archives at repo root (quarantined to archive/phase-a/ — do not re-add to root)
+# Large zip archives at repo root (quarantined to archive/ — do not re-add to root)
 /01-thursday-intro.zip
 /02-sunday-deep-dive.zip
 /03-monday-operator-lens.zip
 /LINKEDIN-LAUNCH.zip
 /X-LAUNCH-SERIES.zip
+
+# Root-level build scripts (relocated to archive/scripts/ by Zero-Gap Track 1)
+/build_carousel.py
+/build_video.sh
+
+# Social content and launch shots (relocated to archive/ by Zero-Gap Track 1)
+/LINKEDIN-LAUNCH/
+/launch-shots/
 
 # Internal / non-public content
 social-content/
