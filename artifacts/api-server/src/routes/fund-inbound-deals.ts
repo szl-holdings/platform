@@ -228,6 +228,26 @@ router.post(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
+      // Honeypot check: bots typically fill every visible input. Real users
+      // never see this field (it is hidden off-screen in the client form). A
+      // non-empty value is a strong spam signal — return a convincing fake
+      // success so the bot thinks the submission was accepted, suppressing
+      // retries, while nothing is written to the database.
+      const hp = req.body?._hp;
+      if (typeof hp === 'string' && hp.trim().length > 0) {
+        sendSuccess(
+          res,
+          {
+            pipelineId: `DF-${Date.now().toString(36).toUpperCase().slice(-4)}XXXX`,
+            submittedAt: new Date().toISOString(),
+            confirmationEmail: req.body?.founderEmail ?? '',
+            message: `Submission received.`,
+          },
+          201,
+        );
+        return;
+      }
+
       const parsed = submitSchema.safeParse(req.body);
       if (!parsed.success) {
         sendBadRequest(

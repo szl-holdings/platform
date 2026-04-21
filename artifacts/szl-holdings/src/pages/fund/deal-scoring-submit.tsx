@@ -161,6 +161,7 @@ export default function DealScoringSubmitPage() {
   });
 
   const [form, setForm] = useState<SubmissionForm>(EMPTY);
+  const [honeypot, setHoneypot] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [pipelineId, setPipelineId] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
@@ -279,6 +280,7 @@ export default function DealScoringSubmitPage() {
           ...(deck ? [deck] : []),
           ...dataRoom,
         ],
+        _hp: honeypot,
         convictionScore: compositeScore,
         scores: {
           team: teamScore,
@@ -342,6 +344,19 @@ export default function DealScoringSubmitPage() {
             ) : (
               <div className="grid grid-cols-12 gap-5 mt-8">
                 <form onSubmit={handleSubmit} className="col-span-7 space-y-5">
+                  {/* Honeypot: hidden from real users, bots fill it automatically */}
+                  <div style={{ position: "absolute", left: "-9999px", opacity: 0, height: 0, overflow: "hidden" }} aria-hidden="true">
+                    <label htmlFor="_hp_field">Leave this field empty</label>
+                    <input
+                      id="_hp_field"
+                      type="text"
+                      name="website2"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={honeypot}
+                      onChange={e => setHoneypot(e.target.value)}
+                    />
+                  </div>
                   <Section icon={Building2} title="Company">
                     <div className="grid grid-cols-2 gap-3">
                       <Field label="Company name *" value={form.company} onChange={v => update("company", v)} placeholder="Acme AI, Inc." />

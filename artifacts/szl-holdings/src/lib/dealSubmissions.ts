@@ -68,6 +68,7 @@ export type SubmitDealPayload = {
   strengths: string[];
   risks: string[];
   attachments?: AttachmentUpload[];
+  _hp?: string;
 };
 
 export async function uploadAttachment(
