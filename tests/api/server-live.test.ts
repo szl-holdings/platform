@@ -158,6 +158,37 @@ vi.mock("../../artifacts/api-server/src/middlewares/optimistic-concurrency", () 
   etagMiddleware: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
+// Wrap the real authMiddleware so internal-agent requests carry the `admin`
+// role.  Org-scoped routers (notably PRISM Counsel) call a `requireAuth`
+// helper that resolves an org id from `req.user.orgs`; the bare internal
+// agent has an empty orgs array, so the helper short-circuits with 403.
+// Granting `admin` lets `getOrgId` fall back to org 1 (its documented
+// behaviour) while leaving the auth code path itself unchanged.  Existing
+// vessels / lyte / firestorm POST tests are unaffected: their `requireRole`
+// guards already accept `ops`, and adding `admin` is additive.
+vi.mock("../../artifacts/api-server/src/middlewares/auth", async () => {
+  const actual = await vi.importActual<
+    typeof import("../../artifacts/api-server/src/middlewares/auth")
+  >("../../artifacts/api-server/src/middlewares/auth");
+  return {
+    ...actual,
+    authMiddleware: (opts?: Parameters<typeof actual.authMiddleware>[0]) => {
+      const real = actual.authMiddleware(opts);
+      return (req: any, res: any, next: any) => {
+        real(req, res, (err?: unknown) => {
+          if (!err && req.isInternalAgent && req.user) {
+            const roles: string[] = req.user.roles ?? [];
+            if (!roles.includes("admin")) {
+              req.user = { ...req.user, roles: [...roles, "admin"] };
+            }
+          }
+          next(err);
+        });
+      };
+    },
+  };
+});
+
 // ── Real server builder ──────────────────────────────────────────────────────
 //
 // Builds an Express app with the REAL CSRF and rate-limiting middleware from
@@ -398,6 +429,64 @@ describe.skipIf(!LIVE_TOKEN)("Live Server — Successful POST mutations via CSRF
     expect(postRes.status).toBe(201);
     expect(postRes.body).toHaveProperty("id");
     expect(postRes.body.name).toBe("Integration Test Scenario");
+  });
+
+  it("POST /api/prism-counsel/matters creates a matter after acquiring CSRF token from GET", async () => {
+    const router = (await import("../../artifacts/api-server/src/routes/prism-counsel-core")).default;
+    const app = await buildLiveApp([router]);
+
+    // Step 1: GET to obtain csrf_token cookie
+    const getRes = await request(app)
+      .get("/api/prism-counsel/matters")
+      .set("x-internal-token", LIVE_TOKEN);
+    expect(getRes.status).toBe(200);
+
+    // Step 2: Extract CSRF token
+    const csrfToken = extractCsrfToken(getRes.headers["set-cookie"] as string[] | undefined);
+    expect(csrfToken).toBeDefined();
+
+    // Step 3: POST with cookie + matching header
+    const postRes = await request(app)
+      .post("/api/prism-counsel/matters")
+      .set("x-internal-token", LIVE_TOKEN)
+      .set("Cookie", `csrf_token=${csrfToken}`)
+      .set("x-csrf-token", csrfToken!)
+      .set("Content-Type", "application/json")
+      .send({ title: "Integration Test Matter", matterType: "advisory" });
+    expect(postRes.status).toBe(201);
+    expect(postRes.body).toHaveProperty("id");
+    expect(postRes.body.title).toBe("Integration Test Matter");
+    expect(postRes.body.matterType).toBe("advisory");
+  });
+
+  it("POST /api/terra/pro-forma-projects creates a pro forma project after acquiring CSRF token from GET", async () => {
+    const router = (await import("../../artifacts/api-server/src/routes/terra-modules")).default;
+    const app = await buildLiveApp([router]);
+
+    // Step 1: GET to obtain csrf_token cookie (any GET on the same router will do)
+    const getRes = await request(app)
+      .get("/api/terra/pro-forma-projects")
+      .set("x-internal-token", LIVE_TOKEN);
+    expect(getRes.status).toBe(200);
+
+    // Step 2: Extract CSRF token
+    const csrfToken = extractCsrfToken(getRes.headers["set-cookie"] as string[] | undefined);
+    expect(csrfToken).toBeDefined();
+
+    // Step 3: POST with cookie + matching header
+    const postRes = await request(app)
+      .post("/api/terra/pro-forma-projects")
+      .set("x-internal-token", LIVE_TOKEN)
+      .set("Cookie", `csrf_token=${csrfToken}`)
+      .set("x-csrf-token", csrfToken!)
+      .set("Content-Type", "application/json")
+      .send({
+        projectName: "Integration Test Pro Forma",
+        inputs: { capRate: 0.06, noi: 100000 },
+      });
+    expect(postRes.status).toBe(200);
+    expect(postRes.body).toHaveProperty("project");
+    expect(postRes.body.project.projectName).toBe("Integration Test Pro Forma");
   });
 });
 
