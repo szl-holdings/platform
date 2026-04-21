@@ -14,6 +14,7 @@
 import request from 'supertest';
 import { afterAll, describe, expect, it, vi } from 'vitest';
 import { createTestApp } from '../utils/test-app';
+import { registerCleanup, flushAllCleanup } from '../utils/cleanup-registry';
 
 // ── Module mocks ──────────────────────────────────────────────────────────────
 
@@ -143,9 +144,6 @@ function buildAuthApp(roles: string[] = ['admin', 'ops', 'exec', 'super_admin'])
   return app;
 }
 
-const testInsertedBriefingIds: number[] = [];
-let seededBriefingId: number | null = null;
-
 beforeAll(async () => {
   try {
     const { db, dailyBriefingsTable } = await import('../../lib/db/src/index');
@@ -172,7 +170,7 @@ beforeAll(async () => {
           isPublished: true,
         })
         .returning();
-      seededBriefingId = row.id;
+      registerCleanup({ table: 'dailyBriefingsTable', id: row.id });
     }
   } catch (e) {
     console.warn('[cortex-smoke] beforeAll seed failed:', e instanceof Error ? e.message : e);
@@ -180,16 +178,9 @@ beforeAll(async () => {
 }, 10000);
 
 afterAll(async () => {
+  await flushAllCleanup();
   try {
-    const { db, pool } = await import('../../lib/db/src/index');
-    const { sql } = await import('drizzle-orm');
-    const idsToDelete = [...testInsertedBriefingIds];
-    if (seededBriefingId != null) idsToDelete.push(seededBriefingId);
-    if (idsToDelete.length > 0) {
-      await db.execute(
-        sql.raw(`DELETE FROM daily_briefings WHERE id IN (${idsToDelete.join(', ')})`),
-      );
-    }
+    const { pool } = await import('../../lib/db/src/index');
     if (pool && typeof pool.end === 'function') {
       await pool.end();
     }
@@ -307,7 +298,7 @@ describe('Domain: CORTEX Intelligence', () => {
     expect(body).toHaveProperty('briefing');
     expect(typeof body.cached).toBe('boolean');
     if (!body.cached && typeof body.briefing?.id === 'number') {
-      testInsertedBriefingIds.push(body.briefing.id);
+      registerCleanup({ table: 'dailyBriefingsTable', id: body.briefing.id });
     }
   });
 

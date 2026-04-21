@@ -10,6 +10,7 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { registerCleanup, flushAllCleanup } from '../utils/cleanup-registry';
 
 // ── Shared mock constants ────────────────────────────────────────────────────
 const TEST_USER = {
@@ -296,6 +297,7 @@ describe('Integration — /deployments', () => {
       status: 'active',
     });
     expect(typeof res.body.deployedAt).toBe('string');
+    registerCleanup({ table: 'deploymentsTable', id: res.body.id as number });
   });
 
   it('GET /deployments/:appId returns the active deployment for that app', async () => {
@@ -326,6 +328,7 @@ describe('Integration — /deployments', () => {
     expect(res.status).toBe(201);
     expect(res.body.version).toBe('1.1.0');
     expect(res.body.status).toBe('active');
+    registerCleanup({ table: 'deploymentsTable', id: res.body.id as number });
 
     const active = await request(app).get(`/deployments/${APP_ID}`).query({ environment: ENV });
     expect(active.status).toBe(200);
@@ -355,6 +358,7 @@ describe('Integration — /deployments', () => {
     expect(res.body.current.status).toBe('active');
     expect(res.body.previous.version).toBe('1.1.0');
     expect(res.body.previous.status).toBe('rolled-back');
+    registerCleanup({ table: 'deploymentsTable', id: res.body.current.id as number });
 
     const active = await request(app).get(`/deployments/${APP_ID}`).query({ environment: ENV });
     expect(active.status).toBe(200);
@@ -448,6 +452,7 @@ describe('Integration — /deployments', () => {
     });
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject({ appId: execAppId, status: 'active' });
+    registerCleanup({ table: 'deploymentsTable', id: res.body.id as number });
   });
 
   it('POST /deployments succeeds (201) for the admin role', async () => {
@@ -460,6 +465,7 @@ describe('Integration — /deployments', () => {
     });
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject({ appId: adminAppId, status: 'active' });
+    registerCleanup({ table: 'deploymentsTable', id: res.body.id as number });
   });
 
   it('POST /deployments/:appId/rollback succeeds (200) for an allowed role (admin)', async () => {
@@ -469,11 +475,13 @@ describe('Integration — /deployments', () => {
       .set(TEST_ROLE_HEADER, 'admin')
       .send({ appId: rbAppId, appName: 'RB App', version: '1.0.0', environment: ENV });
     expect(v1.status).toBe(201);
+    registerCleanup({ table: 'deploymentsTable', id: v1.body.id as number });
     const v2 = await request(app)
       .post('/deployments')
       .set(TEST_ROLE_HEADER, 'admin')
       .send({ appId: rbAppId, appName: 'RB App', version: '1.1.0', environment: ENV });
     expect(v2.status).toBe(201);
+    registerCleanup({ table: 'deploymentsTable', id: v2.body.id as number });
 
     const rb = await request(app)
       .post(`/deployments/${rbAppId}/rollback`)
@@ -482,6 +490,7 @@ describe('Integration — /deployments', () => {
     expect(rb.status).toBe(200);
     expect(rb.body).toMatchObject({ rolledBack: true });
     expect(rb.body.current.version).toBe('1.0.0');
+    registerCleanup({ table: 'deploymentsTable', id: rb.body.current.id as number });
   });
 
   it('POST /deployments records the authenticated principal as deployedBy and ignores client-supplied value', async () => {
@@ -497,6 +506,7 @@ describe('Integration — /deployments', () => {
     expect(res.status).toBe(201);
     expect(res.body.deployedBy).not.toBe('spoofed-attacker');
     expect(res.body.deployedBy).toBe(TEST_USER.email);
+    registerCleanup({ table: 'deploymentsTable', id: res.body.id as number });
   });
 
   it("enriches deployments with the deployer's user profile (name + avatar) when a matching user exists", async () => {
@@ -525,6 +535,7 @@ describe('Integration — /deployments', () => {
         environment: ENV,
       });
       expect(created.status).toBe(201);
+      registerCleanup({ table: 'deploymentsTable', id: created.body.id as number });
       expect(created.body.deployedByUser).toMatchObject({
         id: seeded!.id,
         displayName,
@@ -555,11 +566,13 @@ describe('Integration — /deployments', () => {
         environment: ENV,
       });
       expect(second.status).toBe(201);
+      registerCleanup({ table: 'deploymentsTable', id: second.body.id as number });
 
       const rolled = await request(app)
         .post(`/deployments/${enrichedAppId}/rollback`)
         .send({ environment: ENV });
       expect(rolled.status).toBe(200);
+      registerCleanup({ table: 'deploymentsTable', id: rolled.body.current.id as number });
       expect(rolled.body.previous.deployedByUser).toMatchObject({
         id: seeded!.id,
         displayName,
@@ -610,6 +623,10 @@ describe('Integration — /deployments', () => {
         r.version === '1.1.0' && r.status === 'rolled-back',
     );
     expect(rolledBack).toBeTruthy();
+  });
+
+  afterAll(async () => {
+    await flushAllCleanup();
   });
 });
 

@@ -26,6 +26,7 @@ import express, {
   type NextFunction,
 } from "express";
 import { vi, beforeAll, afterAll, describe, it, expect } from "vitest";
+import { registerCleanup, flushAllCleanup } from "../utils/cleanup-registry";
 
 // ── Shared mock constants ────────────────────────────────────────────────────
 const TEST_ROLE = "ops";
@@ -123,10 +124,6 @@ function buildApp() {
   return app;
 }
 
-const cleanupVentureIds: number[] = [];
-const cleanupFleetIds: number[] = [];
-const cleanupAlertIds: number[] = [];
-
 // ── Domain: Vessels ───────────────────────────────────────────────────────────
 describe("DB Integration — Vessels domain", () => {
   let app: express.Express;
@@ -176,7 +173,7 @@ describe("DB Integration — Vessels domain", () => {
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty("id");
     expect(typeof res.body.id).toBe("number");
-    cleanupFleetIds.push(res.body.id as number);
+    registerCleanup({ table: "vesselsFleetsTable", id: res.body.id as number });
   });
 
   it("POST /vessels/alerts rejects missing required fields with 400", async () => {
@@ -199,19 +196,11 @@ describe("DB Integration — Vessels domain", () => {
     expect(res.body).toHaveProperty("id");
     expect(typeof res.body.id).toBe("number");
     expect(res.body.severity).toBe("low");
-    cleanupAlertIds.push(res.body.id as number);
+    registerCleanup({ table: "vesselsAlertsTable", id: res.body.id as number });
   });
 
   afterAll(async () => {
-    for (const id of cleanupFleetIds) {
-      await request(app).delete(`/vessels/fleets/${id}`);
-    }
-    if (cleanupAlertIds.length > 0) {
-      const { pool } = await import("@szl-holdings/db");
-      for (const id of cleanupAlertIds) {
-        await pool.query("DELETE FROM vessels_alerts WHERE id = $1", [id]);
-      }
-    }
+    await flushAllCleanup();
   });
 });
 
@@ -270,20 +259,17 @@ describe("DB Integration — SZL Holdings domain", () => {
       .send({ slug, name: "Integration Test Venture", status: "active" });
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty("id");
-    cleanupVentureIds.push(res.body.id as number);
+    registerCleanup({ table: "holdingsVenturesTable", id: res.body.id as number });
   });
 
   afterAll(async () => {
-    for (const id of cleanupVentureIds) {
-      await request(app).delete(`/holdings/ventures/${id}`);
-    }
+    await flushAllCleanup();
   });
 });
 
 // ── Domain: Carlota Jo ────────────────────────────────────────────────────────
 describe("DB Integration — Carlota Jo domain", () => {
   let app: express.Express;
-  const cleanupInquiryIds: number[] = [];
 
   beforeAll(async () => {
     app = buildApp();
@@ -324,21 +310,17 @@ describe("DB Integration — Carlota Jo domain", () => {
     expect(res.status).toBe(200);
     const inquiryId: number = res.body.inquiryId ?? res.body.data?.id ?? res.body.id;
     expect(typeof inquiryId).toBe("number");
-    cleanupInquiryIds.push(inquiryId);
+    registerCleanup({ table: "carlotaInquiriesTable", id: inquiryId });
   });
 
   afterAll(async () => {
-    const { pool } = await import("@szl-holdings/db");
-    for (const id of cleanupInquiryIds) {
-      await pool.query("DELETE FROM carlota_inquiries WHERE id = $1", [id]);
-    }
+    await flushAllCleanup();
   });
 });
 
 // ── Domain: Lyte (AIOps) ─────────────────────────────────────────────────────
 describe("DB Integration — Lyte domain", () => {
   let app: express.Express;
-  const cleanupWorkspaceIds: number[] = [];
 
   beforeAll(async () => {
     app = buildApp();
@@ -375,7 +357,7 @@ describe("DB Integration — Lyte domain", () => {
     expect([200, 201]).toContain(res.status);
     expect(res.body).toBeDefined();
     const id = res.body?.id ?? res.body?.data?.id;
-    if (typeof id === "number") cleanupWorkspaceIds.push(id);
+    if (typeof id === "number") registerCleanup({ table: "lyteWorkspacesTable", id });
   });
 
   it("POST /lyte/workspaces rejects missing name with 4xx/5xx (DB NOT NULL constraint)", async () => {
@@ -390,20 +372,13 @@ describe("DB Integration — Lyte domain", () => {
   });
 
   afterAll(async () => {
-    if (cleanupWorkspaceIds.length > 0) {
-      const { pool } = await import("@szl-holdings/db");
-      for (const id of cleanupWorkspaceIds) {
-        await pool.query("DELETE FROM lyte_workspaces WHERE id = $1", [id]);
-      }
-    }
+    await flushAllCleanup();
   });
 });
 
 // ── Domain: Aegis / Firestorm ─────────────────────────────────────────────────
 describe("DB Integration — Aegis / Firestorm domain", () => {
   let app: express.Express;
-  const cleanupScenarioIds: number[] = [];
-  const cleanupIncidentIds: number[] = [];
 
   beforeAll(async () => {
     app = buildApp();
@@ -437,7 +412,7 @@ describe("DB Integration — Aegis / Firestorm domain", () => {
     expect(res.body).toHaveProperty("id");
     expect(typeof res.body.id).toBe("number");
     expect(res.body.category).toBe("network");
-    cleanupScenarioIds.push(res.body.id as number);
+    registerCleanup({ table: "firestormScenariosTable", id: res.body.id as number });
   });
 
   it("POST /firestorm/scenarios rejects invalid category with 400 (Zod validation)", async () => {
@@ -469,19 +444,11 @@ describe("DB Integration — Aegis / Firestorm domain", () => {
     expect(typeof res.body.id).toBe("number");
     expect(res.body.severity).toBe("medium");
     expect(res.body.status).toBe("detection");
-    cleanupIncidentIds.push(res.body.id as number);
+    registerCleanup({ table: "firestormIncidentsTable", id: res.body.id as number });
   });
 
   afterAll(async () => {
-    for (const id of cleanupScenarioIds) {
-      await request(app).delete(`/firestorm/scenarios/${id}`);
-    }
-    if (cleanupIncidentIds.length > 0) {
-      const { pool } = await import("@szl-holdings/db");
-      for (const id of cleanupIncidentIds) {
-        await pool.query("DELETE FROM firestorm_incidents WHERE id = $1", [id]);
-      }
-    }
+    await flushAllCleanup();
   });
 });
 

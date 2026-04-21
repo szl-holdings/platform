@@ -19,7 +19,13 @@ type IntTableName =
   | 'firestormFindingsTable'
   | 'firestormAssessmentsTable'
   | 'holdingsVenturesTable'
-  | 'vesselsAlertRulesTable';
+  | 'vesselsAlertRulesTable'
+  | 'vesselsAlertsTable'
+  | 'lyteWorkspacesTable'
+  | 'firestormScenariosTable'
+  | 'firestormIncidentsTable'
+  | 'deploymentsTable'
+  | 'dailyBriefingsTable';
 
 type TextTableName = 'pcGcMattersTable';
 
