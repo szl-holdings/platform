@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
+@import "@szl-holdings/design-system/tokens/css";
 @import "tw-animate-css";
 
 @theme inline {
@@ -16,7 +17,7 @@
   --color-muted-foreground: hsl(var(--muted-foreground));
 
   --color-gold: #c9a227;
-  --color-gold-light: #e8c547;
+  --color-gold-light: #d4b445;
   --color-gold-dim: #7a6015;
   --color-imperial-navy: #0a0d1a;
   --color-obsidian: #060810;
@@ -35,7 +36,6 @@
   --muted-foreground: 220 20% 55%;
 
   --gold: #c9a227;
-  --gold-glow: rgba(201, 162, 39, 0.3);
 }
 
 * {
@@ -84,10 +84,10 @@ body {
   color: #c9a227;
 }
 
+/* v2: text-shadow glow removed — enterprise surfaces use color alone */
 .gold-glow {
-  text-shadow:
-    0 0 20px rgba(201, 162, 39, 0.5),
-    0 0 40px rgba(201, 162, 39, 0.25);
+  color: #c9a227;
+  font-weight: 600;
 }
 
 .imperial-border {
@@ -102,7 +102,7 @@ body {
 
 .imperial-card:hover {
   border-color: rgba(201, 162, 39, 0.35);
-  box-shadow: 0 0 20px rgba(201, 162, 39, 0.08);
+  box-shadow: var(--gi-shadow-2);
 }
 
 .scrollbar-imperial::-webkit-scrollbar {
@@ -116,81 +116,62 @@ body {
   border-radius: 2px;
 }
 
+/* Classification badges — muted enterprise palette */
 .classification-open {
-  color: #4ade80;
-  border-color: #4ade80;
-  background-color: rgba(74, 222, 128, 0.08);
+  color: var(--gi-accent-green);
+  border-color: var(--gi-accent-green);
+  background-color: var(--gi-success-bg);
 }
 .classification-restricted {
-  color: #fb923c;
-  border-color: #fb923c;
-  background-color: rgba(251, 146, 60, 0.08);
+  color: var(--gi-accent-amber);
+  border-color: var(--gi-accent-amber);
+  background-color: var(--gi-warning-bg);
 }
 .classification-confidential {
-  color: #f87171;
-  border-color: #f87171;
-  background-color: rgba(248, 113, 113, 0.08);
+  color: var(--gi-accent-red);
+  border-color: var(--gi-accent-red);
+  background-color: var(--gi-error-bg);
 }
 .classification-sovereign {
   color: #c9a227;
   border-color: #c9a227;
-  background-color: rgba(201, 162, 39, 0.12);
+  background-color: rgba(201, 162, 39, 0.10);
 }
 
+/* Threat levels — enterprise palette */
 .threat-pax {
-  color: #4ade80;
+  color: var(--gi-accent-green);
 }
 .threat-vigilia {
-  color: #facc15;
+  color: var(--gi-accent-amber);
 }
 .threat-bellum {
-  color: #fb923c;
+  color: #c97a64;
 }
 .threat-furor {
-  color: #ef4444;
+  color: var(--gi-accent-red);
 }
 
+/* v2: pulse-gold is a subtle opacity pulse, no box-shadow glow */
 @keyframes pulse-gold {
-  0%,
-  100% {
-    opacity: 1;
-    box-shadow: 0 0 0 0 rgba(201, 162, 39, 0.4);
-  }
-  50% {
-    opacity: 0.8;
-    box-shadow: 0 0 0 6px rgba(201, 162, 39, 0);
-  }
-}
-
-@keyframes scanline {
-  0% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(100vh);
-  }
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
 }
 
 @keyframes data-stream {
-  0% {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  0%   { opacity: 0; transform: translateX(-8px); }
+  100% { opacity: 1; transform: translateX(0); }
 }
 
 .animate-pulse-gold {
-  animation: pulse-gold 2s infinite;
+  animation: pulse-gold 2s ease-in-out infinite;
 }
 .animate-data-stream {
-  animation: data-stream 0.4s ease-out forwards;
+  animation: data-stream 0.35s var(--gi-ease-decelerate) forwards;
 }
 
 .hex-grid {
-  background-image: radial-gradient(circle, rgba(201, 162, 39, 0.04) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(201, 162, 39, 0.03) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -202,25 +183,26 @@ body {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 0, 0, 0.03) 2px,
-    rgba(0, 0, 0, 0.03) 4px
+    rgba(0, 0, 0, 0.02) 2px,
+    rgba(0, 0, 0, 0.02) 4px
   );
   pointer-events: none;
   z-index: 1;
 }
 
+/* Aquila scores — enterprise palette */
 .aquila-score-excellent {
-  color: #4ade80;
+  color: var(--gi-accent-green);
 }
 .aquila-score-good {
-  color: #a3e635;
+  color: #6bb5c2;
 }
 .aquila-score-fair {
-  color: #facc15;
+  color: var(--gi-accent-amber);
 }
 .aquila-score-poor {
-  color: #fb923c;
+  color: #c97a64;
 }
 .aquila-score-critical {
-  color: #ef4444;
+  color: var(--gi-accent-red);
 }

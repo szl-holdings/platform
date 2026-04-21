@@ -206,7 +206,7 @@ const LANES: Lane[] = [
     name: "Real Estate Intelligence",
     artifact: "Terra",
     artifactPath: "/terra/",
-    accentColor: "#00e878",
+    accentColor: "#5baa8a",
     icon: Building2,
     champions: [
       {
@@ -411,7 +411,7 @@ const LANES: Lane[] = [
     name: "Decision Intelligence",
     artifact: "Lyte",
     artifactPath: "/lyte/",
-    accentColor: "#ffb700",
+    accentColor: "#c9a85c",
     icon: BarChart3,
     champions: [
       {

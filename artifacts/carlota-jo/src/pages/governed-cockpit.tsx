@@ -5,6 +5,7 @@ import {
   type PolicyState,
   ProofEnvelope,
   productAccent,
+  color,
 } from '@szl-holdings/design-system';
 import { AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
 import React, { useState } from 'react';
@@ -159,8 +160,8 @@ export default function GovernedCockpit() {
         <div className="grid grid-cols-4 gap-4 mb-6">
           {[
             { label: 'Active Engagements', value: '7', icon: Briefcase, color: ACCENT },
-            { label: 'Pipeline Value', value: '£1.4M', icon: TrendingUp, color: '#00e878' },
-            { label: 'At-Risk Accounts', value: '2', icon: AlertTriangle, color: '#ff4455' },
+            { label: 'Pipeline Value', value: '£1.4M', icon: TrendingUp, color: color.accent.green },
+            { label: 'At-Risk Accounts', value: '2', icon: AlertTriangle, color: color.accent.red },
             { label: 'Prospects Tracked', value: '34', icon: Users, color: '#7a99b8' },
           ].map(({ label, value, icon: Icon, color }) => (
             <div
@@ -206,7 +207,7 @@ export default function GovernedCockpit() {
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { label: 'Addressable Market', value: '72 firms', color: ACCENT },
-                  { label: 'Engagement Value', value: '£200–350K', color: '#00e878' },
+                  { label: 'Engagement Value', value: '£200–350K', color: color.accent.green },
                   { label: 'Engagement Archive Match', value: '88%', color: '#7a99b8' },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
@@ -225,7 +226,7 @@ export default function GovernedCockpit() {
 
         <ProofEnvelope
           title="Engagement Risk: Pemberton Capital — Sponsor Change Risk"
-          accentColor="#ff4455"
+          accentColor={color.accent.red}
           evidence={RISK_EVIDENCE}
           timestamp={FRESH_5M}
           confidence={77}
@@ -244,9 +245,9 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3 text-xs"
-              style={{ background: '#060b12', border: '1px solid #ff445530' }}
+              style={{ background: '#060b12', border: '1px solid rgba(201,96,112,0.19)' }}
             >
-              <span className="font-semibold" style={{ color: '#ff4455' }}>
+              <span className="font-semibold" style={{ color: color.accent.red }}>
                 Recommended action:
               </span>
               <span style={{ color: '#7a99b8' }}>
@@ -283,7 +284,7 @@ export default function GovernedCockpit() {
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { label: 'Budget Signal', value: '£200–350K', color: ACCENT },
-                  { label: 'Capacity Available', value: '1.2 FTE', color: '#00e878' },
+                  { label: 'Capacity Available', value: '1.2 FTE', color: color.accent.green },
                   { label: 'Proposal Readiness', value: '89%', color: '#7a99b8' },
                 ].map(({ label, value, color }) => (
                   <div key={label}>

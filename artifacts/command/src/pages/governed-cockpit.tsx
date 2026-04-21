@@ -5,6 +5,7 @@ import {
   type PolicyState,
   ProofEnvelope,
   productAccent,
+  color,
 } from '@szl-holdings/design-system';
 import { Activity, AlertTriangle, Command, Loader2, TrendingUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
@@ -202,14 +203,14 @@ export default function GovernedCockpit() {
       value: counts.loading ? null : (counts.approvals ?? 3),
       demo: isDemo(counts.approvals),
       icon: AlertTriangle,
-      color: '#ffb700',
+      color: color.accent.amber,
     },
     {
       label: 'Decisions Today',
       value: counts.loading ? null : (counts.decisions ?? 14),
       demo: isDemo(counts.decisions),
       icon: TrendingUp,
-      color: '#00e878',
+      color: color.accent.green,
     },
     {
       label: 'Domains Live',
@@ -316,11 +317,11 @@ export default function GovernedCockpit() {
             >
               <div className="grid grid-cols-5 gap-2">
                 {[
-                  { label: 'PRISM', value: '8.4', color: '#00e878' },
+                  { label: 'PRISM', value: '8.4', color: color.accent.green },
                   { label: 'Lyte', value: '7.1', color: '#7a99b8' },
-                  { label: 'Vessels', value: '6.8', color: '#ffb700' },
+                  { label: 'Vessels', value: '6.8', color: color.accent.amber },
                   { label: 'Terra', value: '7.4', color: ACCENT },
-                  { label: 'Aegis', value: '6.9', color: '#ffb700' },
+                  { label: 'Aegis', value: '6.9', color: color.accent.amber },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="text-center">
                     <div className="text-xs" style={{ color: '#4a6070' }}>
@@ -338,7 +339,7 @@ export default function GovernedCockpit() {
 
         <ProofEnvelope
           title="Cross-Domain Correlation: Aegis Threat ↔ Vessels Counterparty Exposure"
-          accentColor="#ffb700"
+          accentColor={color.accent.amber}
           evidence={CORRELATION_EVIDENCE}
           timestamp={FRESH_2M}
           confidence={71}
@@ -357,9 +358,9 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3 text-xs"
-              style={{ background: '#060b12', border: '1px solid #ffb70030' }}
+              style={{ background: '#060b12', border: '1px solid rgba(201,168,92,0.19)' }}
             >
-              <span className="font-semibold" style={{ color: '#ffb700' }}>
+              <span className="font-semibold" style={{ color: color.accent.amber }}>
                 Correlated domains:
               </span>
               <span style={{ color: '#7a99b8' }}>
@@ -397,7 +398,7 @@ export default function GovernedCockpit() {
                   approver: 'CISO',
                   elapsed: '2h',
                   sla: '4h',
-                  color: '#ff4455',
+                  color: color.accent.red,
                 },
                 {
                   domain: 'Vessels',
@@ -405,7 +406,7 @@ export default function GovernedCockpit() {
                   approver: 'Ops Director',
                   elapsed: '47m',
                   sla: '2h',
-                  color: '#ffb700',
+                  color: color.accent.amber,
                 },
                 {
                   domain: 'Terra',

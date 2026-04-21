@@ -5,6 +5,7 @@ import {
   type PolicyState,
   ProofEnvelope,
   productAccent,
+  color,
 } from '@szl-holdings/design-system';
 import { RiskEvidenceList } from '@szl-holdings/shared-ui/risk-evidence';
 import { AlertTriangle, Building2, MapPin, TrendingUp } from 'lucide-react';
@@ -158,8 +159,8 @@ export default function GovernedCockpit() {
         <div className="grid grid-cols-4 gap-4 mb-6">
           {[
             { label: 'Active Deals', value: '34', icon: Building2, color: ACCENT },
-            { label: 'Distress Signals', value: '847', icon: AlertTriangle, color: '#ffb700' },
-            { label: 'Pipeline Value', value: '$284M', icon: TrendingUp, color: '#00e878' },
+            { label: 'Distress Signals', value: '847', icon: AlertTriangle, color: color.accent.amber },
+            { label: 'Pipeline Value', value: '$284M', icon: TrendingUp, color: color.accent.green },
             { label: 'Markets Tracked', value: '12', icon: MapPin, color: '#7a99b8' },
           ].map(({ label, value, icon: Icon, color }) => (
             <div
@@ -204,7 +205,7 @@ export default function GovernedCockpit() {
               <div className="grid grid-cols-4 gap-3">
                 {[
                   { label: 'AVM', value: '$4.82M', color: ACCENT },
-                  { label: 'Equity Cushion', value: '$2.5M', color: '#00e878' },
+                  { label: 'Equity Cushion', value: '$2.5M', color: color.accent.green },
                   { label: '5yr IRR', value: '18.4%', color: ACCENT },
                   { label: 'Cap Rate', value: '5.8%', color: '#7a99b8' },
                 ].map(({ label, value, color }) => (
@@ -246,8 +247,8 @@ export default function GovernedCockpit() {
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { label: 'Active Signals', value: '847', color: ACCENT },
-                  { label: 'New This Week', value: '23', color: '#ffb700' },
-                  { label: 'Avg Equity', value: '$1.8M', color: '#00e878' },
+                  { label: 'New This Week', value: '23', color: color.accent.amber },
+                  { label: 'Avg Equity', value: '$1.8M', color: color.accent.green },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
                     <div className="text-xs" style={{ color: '#4a6070' }}>
@@ -265,7 +266,7 @@ export default function GovernedCockpit() {
 
         <ProofEnvelope
           title="Portfolio Risk: LTV Covenant Headroom Compressed — Action Required"
-          accentColor="#ffb700"
+          accentColor={color.accent.amber}
           evidence={RISK_EVIDENCE}
           timestamp={FRESH_4M}
           confidence={96}
@@ -283,9 +284,9 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3 text-xs"
-              style={{ background: '#060b12', border: '1px solid #ffb70030' }}
+              style={{ background: '#060b12', border: '1px solid rgba(201,168,92,0.19)' }}
             >
-              <span className="font-semibold" style={{ color: '#ffb700' }}>
+              <span className="font-semibold" style={{ color: color.accent.amber }}>
                 Risk mitigation:
               </span>
               <span style={{ color: '#7a99b8' }}>

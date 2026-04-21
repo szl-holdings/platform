@@ -5,6 +5,7 @@ import {
   type PolicyState,
   ProofEnvelope,
   productAccent,
+  color,
 } from '@szl-holdings/design-system';
 import { AlertTriangle, BarChart3, TrendingUp, Zap } from 'lucide-react';
 import React, { useState } from 'react';
@@ -158,8 +159,8 @@ export default function GovernedCockpit() {
           {[
             { label: "Today's Signals", value: '47', icon: Zap, color: ACCENT },
             { label: 'Briefings Issued', value: '3', icon: BarChart3, color: '#7a99b8' },
-            { label: 'Open Decisions', value: '2', icon: TrendingUp, color: '#00e878' },
-            { label: 'Dissent Flags', value: '1', icon: AlertTriangle, color: '#ff4455' },
+            { label: 'Open Decisions', value: '2', icon: TrendingUp, color: color.accent.green },
+            { label: 'Dissent Flags', value: '1', icon: AlertTriangle, color: color.accent.red },
           ].map(({ label, value, icon: Icon, color }) => (
             <div
               key={label}
@@ -205,8 +206,8 @@ export default function GovernedCockpit() {
             >
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: 'June Cut Probability', value: '22%', color: '#ff4455' },
-                  { label: 'Rate Sensitivity', value: '-3.8%/100bps', color: '#ffb700' },
+                  { label: 'June Cut Probability', value: '22%', color: color.accent.red },
+                  { label: 'Rate Sensitivity', value: '-3.8%/100bps', color: color.accent.amber },
                   { label: 'Hedge Ratio', value: '61%', color: ACCENT },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
@@ -225,7 +226,7 @@ export default function GovernedCockpit() {
 
         <ProofEnvelope
           title="Dissent Channel: CIO Office — Contradicting Evidence on Rate Thesis"
-          accentColor="#ff4455"
+          accentColor={color.accent.red}
           evidence={DISSENT_EVIDENCE}
           timestamp={FRESH_18M}
           confidence={62}
@@ -245,9 +246,9 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3 text-xs"
-              style={{ background: '#060b12', border: '1px solid #ff445520' }}
+              style={{ background: '#060b12', border: '1px solid rgba(201,96,112,0.13)' }}
             >
-              <span className="font-semibold" style={{ color: '#ff4455' }}>
+              <span className="font-semibold" style={{ color: color.accent.red }}>
                 Dissent protocol:
               </span>
               <span style={{ color: '#7a99b8' }}>
@@ -285,7 +286,7 @@ export default function GovernedCockpit() {
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { label: 'Hedge Increase', value: '61%→73%', color: ACCENT },
-                  { label: 'Execution Cost', value: '$840K', color: '#ffb700' },
+                  { label: 'Execution Cost', value: '$840K', color: color.accent.amber },
                   { label: 'Break-even Move', value: '23bps', color: '#7a99b8' },
                 ].map(({ label, value, color }) => (
                   <div key={label}>

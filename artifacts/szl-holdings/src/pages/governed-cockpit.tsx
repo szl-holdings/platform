@@ -5,6 +5,7 @@ import {
   type PolicyState,
   ProofEnvelope,
   productAccent,
+  color,
 } from '@szl-holdings/design-system';
 import { AlertTriangle, BarChart3, Layers, TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
@@ -158,8 +159,8 @@ export default function GovernedCockpit() {
         <div className="grid grid-cols-4 gap-4 mb-6">
           {[
             { label: 'Fund NAV', value: '$142M', icon: BarChart3, color: ACCENT },
-            { label: 'IRR (Inception)', value: '24.1%', icon: TrendingUp, color: '#00e878' },
-            { label: 'Undeployed Capital', value: '$12.4M', icon: Layers, color: '#ffb700' },
+            { label: 'IRR (Inception)', value: '24.1%', icon: TrendingUp, color: color.accent.green },
+            { label: 'Undeployed Capital', value: '$12.4M', icon: Layers, color: color.accent.amber },
             { label: 'Portfolio Companies', value: '5', icon: AlertTriangle, color: '#7a99b8' },
           ].map(({ label, value, icon: Icon, color }) => (
             <div
@@ -206,8 +207,8 @@ export default function GovernedCockpit() {
               <div className="grid grid-cols-4 gap-3">
                 {[
                   { label: 'Fund NAV', value: '$142.3M', color: ACCENT },
-                  { label: 'Unrealised Gains', value: '$38.7M', color: '#00e878' },
-                  { label: 'IRR', value: '24.1%', color: '#00e878' },
+                  { label: 'Unrealised Gains', value: '$38.7M', color: color.accent.green },
+                  { label: 'IRR', value: '24.1%', color: color.accent.green },
                   { label: 'TVPI', value: '1.42x', color: ACCENT },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
@@ -251,7 +252,7 @@ export default function GovernedCockpit() {
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { label: 'ARR', value: '$2.4M', color: ACCENT },
-                  { label: 'QoQ Growth', value: '+22%', color: '#00e878' },
+                  { label: 'QoQ Growth', value: '+22%', color: color.accent.green },
                   { label: 'Series A ETA', value: '18 mo', color: '#7a99b8' },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
@@ -297,8 +298,8 @@ export default function GovernedCockpit() {
                 {[
                   { label: 'Dry Powder', value: '$12.4M', color: ACCENT },
                   { label: 'Q2 Pipeline', value: '$6.5M', color: '#7a99b8' },
-                  { label: 'Valuation Compression', value: '-18%', color: '#00e878' },
-                  { label: 'Concentration (post)', value: '26%', color: '#ffb700' },
+                  { label: 'Valuation Compression', value: '-18%', color: color.accent.green },
+                  { label: 'Concentration (post)', value: '26%', color: color.accent.amber },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
                     <div className="text-xs" style={{ color: '#4a6070' }}>

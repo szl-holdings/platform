@@ -1,12 +1,20 @@
 /**
- * GI Design Language — CSS Token Export
+ * GI Design Language v2 — CSS Token Export
  * Single source of truth for --gi-* custom properties.
  * Import via: @import "@szl-holdings/design-system/tokens/css";
  * Values must stay in sync with src/tokens/index.ts
+ *
+ * v2 additions: light theme, typography scale, spacing scale,
+ * elevation/shadow system, density mode vars, semantic shorthands.
  */
 
+/* ─────────────────────────────────────────────────────────────
+   DARK THEME (default — :root)
+   ───────────────────────────────────────────────────────────── */
 :root {
-  /* Backgrounds */
+  color-scheme: dark;
+
+  /* ── Backgrounds ─────────────────────────────────────────── */
   --gi-bg-base:     #060b12;
   --gi-bg-surface:  #0d1520;
   --gi-bg-overlay:  #111c2a;
@@ -14,13 +22,13 @@
   --gi-bg-hover:    #1a2a3a;
   --gi-bg-active:   #1e3248;
 
-  /* Borders */
+  /* ── Borders ─────────────────────────────────────────────── */
   --gi-border-subtle:  #1a2535;
   --gi-border-default: #243040;
   --gi-border-strong:  #304055;
   --gi-border-focus:   #4d8fcc;
 
-  /* Text */
+  /* ── Text ────────────────────────────────────────────────── */
   --gi-text-primary:     #c8d8e8;
   --gi-text-secondary:   #7a99b8;
   --gi-text-muted:       #4a6070;
@@ -28,7 +36,7 @@
   --gi-text-link:        #4d8fcc;
   --gi-text-placeholder: #3a5060;
 
-  /* Accent family */
+  /* ── Accent family (enterprise — no neon) ────────────────── */
   --gi-accent-blue:   #4d8fcc;
   --gi-accent-teal:   #3ea89a;
   --gi-accent-green:  #5baa8a;
@@ -37,26 +45,47 @@
   --gi-accent-violet: #9b7cc8;
   --gi-accent-slate:  #7a99b8;
 
-  /* Semantic state */
+  /* ── Semantic state ──────────────────────────────────────── */
   --gi-state-allowed:           #5baa8a;
   --gi-state-requires-approval: #c9a85c;
   --gi-state-blocked:           #c96070;
 
-  /* Confidence */
+  /* ── Semantic status (text / bg / border) ────────────────── */
+  --gi-success-text:   #5baa8a;
+  --gi-success-bg:     #0d2a1a;
+  --gi-success-border: #1a4a2a;
+  --gi-warning-text:   #c9a85c;
+  --gi-warning-bg:     #2a2010;
+  --gi-warning-border: #4a3810;
+  --gi-error-text:     #c96070;
+  --gi-error-bg:       #2a0d12;
+  --gi-error-border:   #4a1a22;
+  --gi-info-text:      #4d8fcc;
+  --gi-info-bg:        #0d1a2a;
+  --gi-info-border:    #1a304a;
+  --gi-neutral-text:   #7a99b8;
+  --gi-neutral-bg:     #111c2a;
+  --gi-neutral-border: #243040;
+
+  /* ── Confidence ──────────────────────────────────────────── */
   --gi-confidence-high:          #5baa8a;
   --gi-confidence-medium:        #c9a85c;
   --gi-confidence-low:           #c96070;
   --gi-confidence-contradiction: #9b7cc8;
 
-  /* Chart palette */
+  /* ── Chart palette (executive-quiet) ─────────────────────── */
   --gi-chart-1: #4d8fcc;
   --gi-chart-2: #5baa8a;
   --gi-chart-3: #c9a85c;
   --gi-chart-4: #9b7cc8;
   --gi-chart-5: #c97a64;
   --gi-chart-6: #6bb5c2;
+  --gi-chart-grid:    #1a2535;
+  --gi-chart-axis:    #4a6070;
+  --gi-chart-tooltip-bg:     #0d1520;
+  --gi-chart-tooltip-border: #243040;
 
-  /* Radius */
+  /* ── Radius ──────────────────────────────────────────────── */
   --gi-radius-none: 0px;
   --gi-radius-sm:   2px;
   --gi-radius-md:   4px;
@@ -65,7 +94,69 @@
   --gi-radius-2xl:  12px;
   --gi-radius-full: 9999px;
 
-  /* Motion */
+  /* ── Elevation / Shadow ──────────────────────────────────── */
+  --gi-shadow-0: none;
+  --gi-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.50);
+  --gi-shadow-2: 0 4px 12px rgba(0, 0, 0, 0.60);
+  --gi-shadow-3: 0 8px 24px rgba(0, 0, 0, 0.70);
+  --gi-shadow-4: 0 16px 48px rgba(0, 0, 0, 0.80);
+
+  /* ── Typography — families ───────────────────────────────── */
+  --gi-font-sans:    'Inter', 'DM Sans', system-ui, sans-serif;
+  --gi-font-display: 'DM Sans', 'Inter', system-ui, sans-serif;
+  --gi-font-mono:    'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  /* ── Typography — scale ──────────────────────────────────── */
+  --gi-text-2xs:  0.625rem;   /* 10px */
+  --gi-text-xs:   0.75rem;    /* 12px */
+  --gi-text-sm:   0.8125rem;  /* 13px */
+  --gi-text-base: 0.875rem;   /* 14px */
+  --gi-text-md:   1rem;       /* 16px */
+  --gi-text-lg:   1.125rem;   /* 18px */
+  --gi-text-xl:   1.25rem;    /* 20px */
+  --gi-text-2xl:  1.5rem;     /* 24px */
+  --gi-text-3xl:  1.875rem;   /* 30px */
+  --gi-text-4xl:  2.25rem;    /* 36px */
+
+  /* ── Typography — weight ─────────────────────────────────── */
+  --gi-weight-normal:   400;
+  --gi-weight-medium:   500;
+  --gi-weight-semibold: 600;
+  --gi-weight-bold:     700;
+
+  /* ── Typography — leading ────────────────────────────────── */
+  --gi-leading-tight:   1.2;
+  --gi-leading-snug:    1.375;
+  --gi-leading-normal:  1.5;
+  --gi-leading-relaxed: 1.625;
+
+  /* ── Spacing scale (4px base) ────────────────────────────── */
+  --gi-space-0:   0px;
+  --gi-space-0-5: 2px;
+  --gi-space-1:   4px;
+  --gi-space-1-5: 6px;
+  --gi-space-2:   8px;
+  --gi-space-3:   12px;
+  --gi-space-4:   16px;
+  --gi-space-5:   20px;
+  --gi-space-6:   24px;
+  --gi-space-8:   32px;
+  --gi-space-10:  40px;
+  --gi-space-12:  48px;
+  --gi-space-16:  64px;
+  --gi-space-20:  80px;
+  --gi-space-24:  96px;
+
+  /* ── Density mode: comfortable (default) ─────────────────── */
+  --gi-density-page-padding:  32px;
+  --gi-density-section-gap:   24px;
+  --gi-density-card-padding:  20px;
+  --gi-density-row-height:    56px;
+  --gi-density-input-height:  40px;
+  --gi-density-icon-size:     20px;
+  --gi-density-font-size:     13px;
+
+  /* ── Motion ──────────────────────────────────────────────── */
   --gi-duration-instant: 60ms;
   --gi-duration-fast:    120ms;
   --gi-duration-normal:  200ms;
@@ -74,4 +165,116 @@
   --gi-ease-standard:    cubic-bezier(0.4, 0, 0.2, 1);
   --gi-ease-decelerate:  cubic-bezier(0, 0, 0.2, 1);
   --gi-ease-accelerate:  cubic-bezier(0.4, 0, 1, 1);
+  --gi-ease-sharp:       cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   DENSITY MODES
+   ───────────────────────────────────────────────────────────── */
+[data-density="compact"] {
+  --gi-density-page-padding:  24px;
+  --gi-density-section-gap:   16px;
+  --gi-density-card-padding:  14px;
+  --gi-density-row-height:    40px;
+  --gi-density-input-height:  32px;
+  --gi-density-icon-size:     16px;
+  --gi-density-font-size:     12px;
+}
+
+[data-density="dense"] {
+  --gi-density-page-padding:  16px;
+  --gi-density-section-gap:   12px;
+  --gi-density-card-padding:  10px;
+  --gi-density-row-height:    32px;
+  --gi-density-input-height:  28px;
+  --gi-density-icon-size:     14px;
+  --gi-density-font-size:     11px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   LIGHT THEME — [data-theme="light"] or .light
+   For investor decks, screenshots, and editorial surfaces.
+   Neutral warm-white base with the same enterprise accent family.
+   ───────────────────────────────────────────────────────────── */
+[data-theme="light"],
+.gi-light {
+  color-scheme: light;
+
+  /* ── Backgrounds ─────────────────────────────────────────── */
+  --gi-bg-base:     #f8f9fa;
+  --gi-bg-surface:  #ffffff;
+  --gi-bg-overlay:  #f1f3f5;
+  --gi-bg-raised:   #e9ecef;
+  --gi-bg-hover:    #e2e6ea;
+  --gi-bg-active:   #d8dde3;
+
+  /* ── Borders ─────────────────────────────────────────────── */
+  --gi-border-subtle:  #e2e6ea;
+  --gi-border-default: #ced4da;
+  --gi-border-strong:  #adb5bd;
+  --gi-border-focus:   #3a78c9;
+
+  /* ── Text ────────────────────────────────────────────────── */
+  --gi-text-primary:     #0d1520;
+  --gi-text-secondary:   #495057;
+  --gi-text-muted:       #868e96;
+  --gi-text-inverse:     #f8f9fa;
+  --gi-text-link:        #1e6abf;
+  --gi-text-placeholder: #adb5bd;
+
+  /* ── Accent family (same enterprise hues, lightened slightly) */
+  --gi-accent-blue:   #1e6abf;
+  --gi-accent-teal:   #1d9b8e;
+  --gi-accent-green:  #2d8f6f;
+  --gi-accent-amber:  #b07d28;
+  --gi-accent-red:    #b84055;
+  --gi-accent-violet: #7450b5;
+  --gi-accent-slate:  #4a6070;
+
+  /* ── Semantic state ──────────────────────────────────────── */
+  --gi-state-allowed:           #2d8f6f;
+  --gi-state-requires-approval: #b07d28;
+  --gi-state-blocked:           #b84055;
+
+  /* ── Semantic status ─────────────────────────────────────── */
+  --gi-success-text:   #2d8f6f;
+  --gi-success-bg:     #f0faf5;
+  --gi-success-border: #a7d7c0;
+  --gi-warning-text:   #b07d28;
+  --gi-warning-bg:     #fffbf0;
+  --gi-warning-border: #e0c88a;
+  --gi-error-text:     #b84055;
+  --gi-error-bg:       #fff5f5;
+  --gi-error-border:   #e8a0aa;
+  --gi-info-text:      #1e6abf;
+  --gi-info-bg:        #f0f5ff;
+  --gi-info-border:    #a0bce8;
+  --gi-neutral-text:   #495057;
+  --gi-neutral-bg:     #f1f3f5;
+  --gi-neutral-border: #ced4da;
+
+  /* ── Confidence ──────────────────────────────────────────── */
+  --gi-confidence-high:          #2d8f6f;
+  --gi-confidence-medium:        #b07d28;
+  --gi-confidence-low:           #b84055;
+  --gi-confidence-contradiction: #7450b5;
+
+  /* ── Chart palette ────────────────────────────────────────── */
+  --gi-chart-1: #1e6abf;
+  --gi-chart-2: #2d8f6f;
+  --gi-chart-3: #b07d28;
+  --gi-chart-4: #7450b5;
+  --gi-chart-5: #c97a64;
+  --gi-chart-6: #2a8fa0;
+  --gi-chart-grid:           #e2e6ea;
+  --gi-chart-axis:           #868e96;
+  --gi-chart-tooltip-bg:     #ffffff;
+  --gi-chart-tooltip-border: #ced4da;
+
+  /* ── Elevation / Shadow ──────────────────────────────────── */
+  --gi-shadow-0: none;
+  --gi-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --gi-shadow-2: 0 4px 12px rgba(0, 0, 0, 0.10);
+  --gi-shadow-3: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --gi-shadow-4: 0 16px 48px rgba(0, 0, 0, 0.16);
 }

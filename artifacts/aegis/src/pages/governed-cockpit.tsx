@@ -5,6 +5,7 @@ import {
   type PolicyState,
   ProofEnvelope,
   productAccent,
+  color,
 } from '@szl-holdings/design-system';
 import { Activity, AlertTriangle, Eye, Shield } from 'lucide-react';
 import React, { useState } from 'react';
@@ -153,9 +154,9 @@ export default function GovernedCockpit() {
 
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
-            { label: 'Active Threats', value: '3', icon: AlertTriangle, color: '#ff4455' },
+            { label: 'Active Threats', value: '3', icon: AlertTriangle, color: color.accent.red },
             { label: 'Open Findings', value: '17', icon: Shield, color: ACCENT },
-            { label: 'Hosts Monitored', value: '2,847', icon: Activity, color: '#00e878' },
+            { label: 'Hosts Monitored', value: '2,847', icon: Activity, color: color.accent.green },
           ].map(({ label, value, icon: Icon, color }) => (
             <div
               key={label}
@@ -177,7 +178,7 @@ export default function GovernedCockpit() {
 
         <ProofEnvelope
           title="Critical: Active Lateral Movement — APT-29 TTP Cluster"
-          accentColor="#ff4455"
+          accentColor={color.accent.red}
           evidence={THREAT_EVIDENCE}
           timestamp={FRESH_2M}
           confidence={91}
@@ -198,9 +199,9 @@ export default function GovernedCockpit() {
                   key={tag}
                   className="text-xs px-2 py-0.5 rounded font-mono"
                   style={{
-                    background: '#ff445518',
-                    color: '#ff4455',
-                    border: '1px solid #ff445530',
+                    background: 'rgba(201,96,112,0.09)',
+                    color: color.accent.red,
+                    border: '1px solid rgba(201,96,112,0.19)',
                   }}
                 >
                   {tag}
@@ -211,7 +212,7 @@ export default function GovernedCockpit() {
               className="mt-3 rounded-lg p-3 text-xs"
               style={{ background: '#060b12', border: '1px solid #243040' }}
             >
-              <span className="font-semibold" style={{ color: '#ffb700' }}>
+              <span className="font-semibold" style={{ color: color.accent.amber }}>
                 Suggested containment:
               </span>
               <span style={{ color: '#7a99b8' }}>
@@ -265,7 +266,7 @@ export default function GovernedCockpit() {
 
         <ProofEnvelope
           title="Vulnerability: CVE-2026-1147 (CVSS 9.1) — 14 Production Hosts Unpatched"
-          accentColor="#ffb700"
+          accentColor={color.accent.amber}
           evidence={RISK_EVIDENCE}
           timestamp={FRESH_2M}
           confidence={88}
@@ -287,10 +288,10 @@ export default function GovernedCockpit() {
             >
               <div className="grid grid-cols-4 gap-3">
                 {[
-                  { label: 'CVSS Score', value: '9.1', color: '#ff4455' },
-                  { label: 'Tier-1 Hosts', value: '8', color: '#ffb700' },
-                  { label: 'PoC Available', value: '48h', color: '#ff4455' },
-                  { label: 'Patch ETA', value: '4h', color: '#00e878' },
+                  { label: 'CVSS Score', value: '9.1', color: color.accent.red },
+                  { label: 'Tier-1 Hosts', value: '8', color: color.accent.amber },
+                  { label: 'PoC Available', value: '48h', color: color.accent.red },
+                  { label: 'Patch ETA', value: '4h', color: color.accent.green },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
                     <div className="text-xs" style={{ color: '#4a6070' }}>

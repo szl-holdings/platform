@@ -5,6 +5,7 @@ import {
   type PolicyState,
   ProofEnvelope,
   productAccent,
+  color,
 } from '@szl-holdings/design-system';
 import { RiskEvidenceList } from '@szl-holdings/shared-ui/risk-evidence';
 import { AlertTriangle, Anchor, Navigation, Ship } from 'lucide-react';
@@ -158,9 +159,9 @@ export default function GovernedCockpit() {
         <div className="grid grid-cols-4 gap-4 mb-6">
           {[
             { label: 'Vessels at Sea', value: '47', icon: Ship, color: ACCENT },
-            { label: 'Alerts Active', value: '6', icon: AlertTriangle, color: '#ff4455' },
-            { label: 'Routes Optimised', value: '12', icon: Navigation, color: '#00e878' },
-            { label: 'In Port', value: '8', icon: Anchor, color: '#ffb700' },
+            { label: 'Alerts Active', value: '6', icon: AlertTriangle, color: color.accent.red },
+            { label: 'Routes Optimised', value: '12', icon: Navigation, color: color.accent.green },
+            { label: 'In Port', value: '8', icon: Anchor, color: color.accent.amber },
           ].map(({ label, value, icon: Icon, color }) => (
             <div
               key={label}
@@ -205,8 +206,8 @@ export default function GovernedCockpit() {
             >
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: 'Delay (Nominal Route)', value: '+3.2d', color: '#ff4455' },
-                  { label: 'Delay (Deviation)', value: '+1.3d', color: '#ffb700' },
+                  { label: 'Delay (Nominal Route)', value: '+3.2d', color: color.accent.red },
+                  { label: 'Delay (Deviation)', value: '+1.3d', color: color.accent.amber },
                   { label: 'Fuel Delta', value: '+$42K', color: '#7a99b8' },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
@@ -225,7 +226,7 @@ export default function GovernedCockpit() {
 
         <ProofEnvelope
           title="Sanctions Alert: Counterparty 'Starline Maritime SA' — OFAC Match (94%)"
-          accentColor="#ff4455"
+          accentColor={color.accent.red}
           evidence={SANCTIONS_EVIDENCE}
           timestamp={FRESH_3M}
           confidence={94}
@@ -245,9 +246,9 @@ export default function GovernedCockpit() {
             </p>
             <div
               className="mt-3 rounded-lg p-3 text-xs"
-              style={{ background: '#060b12', border: '1px solid #ff445530' }}
+              style={{ background: '#060b12', border: '1px solid rgba(201,96,112,0.19)' }}
             >
-              <span className="font-semibold" style={{ color: '#ff4455' }}>
+              <span className="font-semibold" style={{ color: color.accent.red }}>
                 Transaction blocked:
               </span>
               <span style={{ color: '#7a99b8' }}>
@@ -261,7 +262,7 @@ export default function GovernedCockpit() {
 
         <ProofEnvelope
           title="Predictive Maintenance: MV Horizon Star — Main Engine Cylinder 4 Anomaly"
-          accentColor="#ffb700"
+          accentColor={color.accent.amber}
           evidence={MAINTENANCE_EVIDENCE}
           timestamp={FRESH_3M}
           confidence={79}
@@ -285,9 +286,9 @@ export default function GovernedCockpit() {
             >
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: 'Failure Probability', value: '31%', color: '#ffb700' },
+                  { label: 'Failure Probability', value: '31%', color: color.accent.amber },
                   { label: 'Running Hours', value: '7,840', color: '#7a99b8' },
-                  { label: 'Downtime Saving', value: '$340K', color: '#00e878' },
+                  { label: 'Downtime Saving', value: '$340K', color: color.accent.green },
                 ].map(({ label, value, color }) => (
                   <div key={label}>
                     <div className="text-xs" style={{ color: '#4a6070' }}>

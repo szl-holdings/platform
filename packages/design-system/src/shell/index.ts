@@ -1,4 +1,5 @@
 export * from './AppShell.js';
+export * from './Breadcrumb.js';
 export * from './CommandBar.js';
 export * from './GlobalCommandPalette.js';
 export * from './PageHeader.js';
