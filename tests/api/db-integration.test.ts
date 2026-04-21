@@ -199,8 +199,87 @@ describe("DB Integration — Vessels domain", () => {
     registerCleanup({ table: "vesselsAlertsTable", id: res.body.id as number });
   });
 
+  it("POST /vessels/alert-rules rejects missing required fields with 400", async () => {
+    const res = await request(app)
+      .post("/vessels/alert-rules")
+      .send({ name: "Incomplete Rule" });
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /vessels/alert-rules creates a real DB record and returns 201", async () => {
+    const res = await request(app)
+      .post("/vessels/alert-rules")
+      .send({
+        name: `IT-AlertRule-${Date.now()}`,
+        ruleType: "speed",
+        conditions: { threshold: 20, unit: "knots" },
+        severity: "high",
+      });
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty("id");
+    expect(typeof res.body.id).toBe("number");
+    expect(res.body.ruleType).toBe("speed");
+    expect(res.body.severity).toBe("high");
+    registerCleanup({ table: "vesselsAlertRulesTable", id: res.body.id as number });
+  });
+
   afterAll(async () => {
     await flushAllCleanup();
+  });
+});
+
+// ── Domain: Vessels Trading ───────────────────────────────────────────────────
+// NOTE: Trading orders are stored in-memory (sessionOrders) — there is no DB
+// table for them. Tests validate the route's validation and success response
+// shapes; no afterAll cleanup is required.
+describe("DB Integration — Vessels Trading domain", () => {
+  let app: express.Express;
+
+  beforeAll(async () => {
+    app = buildApp();
+    const router = (await import("../../artifacts/api-server/src/routes/vessels-trading")).default;
+    app.use(router);
+  });
+
+  it("POST /vessels/trading/orders rejects missing required fields with 400", async () => {
+    const res = await request(app)
+      .post("/vessels/trading/orders")
+      .send({ notes: "missing instrumentId, side, and quantity" });
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /vessels/trading/orders rejects unknown instrumentId with 404", async () => {
+    const res = await request(app)
+      .post("/vessels/trading/orders")
+      .send({ instrumentId: 99999, side: "buy", quantity: "1", orderType: "market" });
+    expect(res.status).toBe(404);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /vessels/trading/orders places a market order and returns filled envelope", async () => {
+    const res = await request(app)
+      .post("/vessels/trading/orders")
+      .send({ instrumentId: 1, side: "buy", quantity: "2", orderType: "market" });
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("order");
+    expect(res.body.filled).toBe(true);
+    expect(res.body.order.status).toBe("filled");
+    expect(res.body.order.side).toBe("buy");
+    expect(res.body.order.quantity).toBe("2");
+    expect(res.body).toHaveProperty("message");
+  });
+
+  it("POST /vessels/trading/orders places a limit order and returns open envelope", async () => {
+    const res = await request(app)
+      .post("/vessels/trading/orders")
+      .send({ instrumentId: 1, side: "sell", quantity: "3", orderType: "limit", limitPrice: "2000" });
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("order");
+    expect(res.body.filled).toBe(false);
+    expect(res.body.order.status).toBe("open");
+    expect(res.body.order.limitPrice).toBe("2000");
   });
 });
 
