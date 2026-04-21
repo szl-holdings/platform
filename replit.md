@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-SZL Holdings builds governed operational intelligence for regulated enterprises. One platform — the Alloy execution fabric — where every AI recommendation requires human confirmation, every action creates an immutable record, and every outcome is attributable. The platform is a pnpm monorepo encompassing web and mobile applications, an API, a design system, and a development sandbox. Its core architectural differentiator is the Alloy execution fabric: human-in-the-loop governance enforced at the platform layer, not the UI layer. Primary wedge: Governed Workflow Orchestration (Alloy + Command + Lyte). Secondary wedge: Maritime Intelligence (Vessels). All other domain packs (Aegis, Terra, PRISM Counsel, Carlota Jo) are governed extensions of the same platform.
+SZL Holdings provides a governed operational intelligence platform for regulated enterprises. The platform, known as Alloy, enforces human-in-the-loop governance, immutable record-keeping, and attributable outcomes for all AI recommendations and actions. It is a pnpm monorepo supporting web and mobile applications, an API, and a design system. Key offerings include Governed Workflow Orchestration (Alloy + Command + Lyte) and Maritime Intelligence (Vessels), with other domain-specific extensions like Aegis, Terra, PRISM Counsel, and Carlota Jo built on the same governed platform.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -11,72 +11,46 @@ Do not make changes to the folder `Z`.
 Do not make changes to the file `Y`.
 
 ## System Architecture
-The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and Node.js. It employs a micro-frontend architecture for web applications, routed via a shared gateway proxy.
+The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and Node.js. It features a micro-frontend architecture for web applications, managed via a shared gateway proxy.
 
-**Core Platform Primitives:**
--   **Outcome Graph:** Manages decision lifecycle and outcomes.
--   **Proof Chain:** Ensures an immutable audit trail with provenance.
--   **Covenant Policy:** Handles permissions and human approval gates.
--   **Monte Carlo (Decision Simulation):** Provides probabilistic risk assessment.
--   **Workflow Engine:** Orchestrates durable business processes.
--   **Event Fabric (PRISM Bus):** A cross-domain event bus for signal routing.
--   **Sovereign Execution Substrate (`@szl/substrate`):** Unifies orchestration, planning, governance, policy enforcement, and evidence chaining into a durable, governed, and replayable runtime. It features policy-shaped graphs, evidence-chained transitions, confidence-budget routing, and counterfactual replay.
+**Core Architectural Primitives:**
+- **Alloy Execution Fabric:** Provides human-in-the-loop governance, including an Outcome Graph for decision lifecycle, a Proof Chain for immutable audit trails, and Covenant Policy for permissions and approval gates.
+- **Sovereign Execution Substrate (`@szl/substrate`):** A durable, governed, and replayable runtime unifying orchestration, planning, governance, policy enforcement, and evidence chaining, featuring policy-shaped graphs, evidence-chained transitions, confidence-budget routing, and counterfactual replay.
+- **Workflow Engine:** Orchestrates durable business processes.
+- **Event Fabric (PRISM Bus):** A cross-domain event bus for signal routing.
+- **Monte Carlo (Decision Simulation):** Provides probabilistic risk assessment.
 
-**Monorepo Structure:** Includes active and archived artifact directories, shared library packages for infrastructure and primitives, and dedicated packages for business observability, AI Control Plane, and NVIDIA-Ready Modules. The database schema is managed by Drizzle ORM.
+**Monorepo Structure:** Organizes active and archived artifacts, shared infrastructure packages, and dedicated packages for business observability (ATLAS), AI Control Plane, and NVIDIA-Ready Modules. Drizzle ORM manages the PostgreSQL database schema.
 
-**Business Observability Fabric (ATLAS):** Implemented via `@szl-holdings/observability-core`, `@szl-holdings/business-events`, and `@szl-holdings/telemetry-standards` for OpenTelemetry setup, event emission, and semantic conventions.
+**Business Observability Fabric (ATLAS):** Utilizes OpenTelemetry for event emission and telemetry standards.
 
-**Canonical Artifacts (Active Applications):** The platform has 14 registered artifacts: `szl-holdings` (corporate dashboard), `api-server` (backend), `command` (unified operations), `vessels` (maritime intelligence), `terra` (real estate), `pulse` (AI executive briefing), `lyte-command-center` (Decision Intelligence), `aegis` (investor pitch deck), `sentra` (cyber resilience), `counsel` (legal matter), `carlota-jo` (private advisory), `szl-demo-video` (demo video), `szl-holdings-mobile` (mobile), and `mockup-sandbox` (NEXUS internal tooling). Verified count: 14 (see `audit/source-of-truth.json` — method: `find artifacts -name artifact.toml | wc -l`).
+**Canonical Artifacts:** The platform comprises 14 primary applications, including a corporate dashboard (`szl-holdings`), backend API (`api-server`), unified operations (`command`), maritime intelligence (`vessels`), and decision intelligence (`lyte-command-center`).
 
-**NEXUS — Unified Agentic AI Layer (`artifacts/mockup-sandbox`):** Internal tooling sandbox for AI agent research, memory management, skill registry, protocol bridging, cross-app orchestration, and the AI Control Plane (prompts, evals, quality). Secured with an auth guard (`authMiddleware({ required: true })` on all `/api/nexus/*` routes); frontend shows a login wall on 401 via `InternalAuthGate`. Pattern Atlas (`src/pages/PatternAtlas.tsx`) enumerates all real `lib/shared-ui` exports via a build-time Vite virtual module plugin (`sharedUiManifestPlugin.ts` → `virtual:shared-ui-manifest`), merges them with a rich metadata registry, and renders live interactive previews for `AnimatedCounter`, `AlertCard`, and `LoadingSkeleton` using actual `@szl-holdings/shared-ui` imports. Memory and Skills pages carry "Internal Tooling — Not Production" banners. E2E smoke tests in `tests/e2e/nexus-smoke.spec.ts` cover auth-gate, atlas browse, eval run, and prompt-save/version flows.
+**NEXUS – Unified Agentic AI Layer:** An internal tooling sandbox for AI agent research, memory management, skill registry, protocol bridging, and AI Control Plane features.
 
-**Demo Launchpad (`/command/demo`):** A single presenter control surface for investor demos, featuring scripted tracks, audience persona switching, and one-click reset.
+**Lyte – Decision Intelligence:** A flagship application offering nine surfaces for executive narratives, signal feeds, entity graphs, and decision centers, characterized by a dark amber design language.
 
-**Six Signature Innovations:** Includes Decision Twin, Policy Compiler, Why This Property Now, Adversary Narrative Engine, Voyage Risk Twin, and White-Glove Command.
+**UI/UX and Design System (v2):** The Governed-Intelligence Design Language v2 (`@szl-holdings/design-system`) serves as the single visual source of truth, establishing an enterprise accent palette, typography, spacing, elevation, density modes, and a comprehensive set of UI components. Authenticated product surfaces eschew neon/glow palettes.
 
-**Lyte — Decision Intelligence:** A flagship application providing nine surfaces for executive narrative, signal feeds, entity graphs, decision centers, workflow health, agent trace logs, evidence explorers, policy centers, and evaluation studios. It features a dark amber design language and uses the Vantex Acquisition scenario as its central demo narrative.
+**One-of-One Platform Shell:** Unifies the user interface across all applications with shared modules like an intelligence rail, agent run card, incident management, and scenario comparison, presented via a DashboardShell, EcosystemNav, and CommandPalette.
 
-**Vite Sub-Path App Configuration:** Sub-path applications share `PORT=9090` via a shared gateway proxy, each having its own Vite dev server on a dedicated `VITE_PORT`.
+**API Layers:** Includes REST API, GraphQL API (Apollo Server), and an MCP Gateway for tool integration.
 
-**Technology Stack:**
--   **Frontend:** React 19, Vite, TanStack React Query, Wouter, Tailwind CSS v4, Framer Motion.
--   **Backend:** Express 5, Drizzle ORM, Zod, pino.
--   **Database:** PostgreSQL 16.
--   **Authentication:** OIDC/PKCE, session-based, 12-value platformRole enum RBAC (dual system with rolesTable — consolidation pending; see audit B-05).
--   **Mobile:** Expo / React Native, NativeWind.
--   **AI:** Multi-provider (OpenAI, Anthropic, Gemini) with schema-validated decision types, AI evaluation infrastructure, and an AI Ops Dashboard.
--   **Real-time:** WebSocket, Server-Sent Events (SSE), push notifications.
+**AI Infrastructure:** Features a multi-provider AI backend (OpenAI, Anthropic, Gemini), AI evaluation infrastructure, an AI Ops Dashboard, and NVIDIA-Ready Packages for provider-agnostic AI infrastructure and OpenUSD digital twin export.
 
-**AI Control Plane & NVIDIA-Ready Packages:** Provide provider-agnostic AI infrastructure, prompt/tool management, NVIDIA integration, and OpenUSD digital twin export.
+**Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents, including registry, runtime capture, drift evaluation, and auditing.
 
-**UI/UX and Design System (v2):** The Governed-Intelligence Design Language v2 (`@szl-holdings/design-system`) is the single visual source of truth for all 13 web artifacts. Public landing pages were rebuilt in Task #2849 with the new IA (hero → proof strip → core platform → primary wedge → secondary wedge → trust → ROI → CTA) and institutional copy. Navigation collapsed to 6 items: Platform / Solutions / Trust / Architecture / Company / Contact. v2 additions: light theme (`[data-theme="light"]` / `.gi-light`), typography/spacing/elevation CSS custom properties, density mode vars, semantic status shorthands, `Button`, `SkeletonLoader` (4 variants), `Toast` system, and `Breadcrumb`. All neon/glow palette colors removed from authenticated product surfaces — replaced with the enterprise accent family. Token CSS file: `packages/design-system/src/tokens/gi-tokens.css`. Design docs: `docs/design/design-system-v2.md`, `docs/design/ui-principles.md`, `docs/design/component-audit.md`, `audit/03-ui-ux-overhaul-decisions.md`. `@szl-holdings/ui-command` is deprecated in favour of the v2 design-system.
+**Replay, Eval & Trust Infrastructure:** Provides capabilities for incident capture, scenario replay, and comprehensive evaluation of agent behavior.
 
-**OS Layer (Decision Center):** Provides shared primitives and UI components for recommendations, evidence, policy verdicts, and agent run tracing.
-
-**One-of-One Platform Shell:** Introduced four canonical shared modules for an intelligence rail, agent run card, incident management, and scenario comparison, unifying the user interface across all surfaces with a DashboardShell, EcosystemNav, and CommandPalette.
-
-**API Layers:** Includes a REST API, a GraphQL API using Apollo Server, and an MCP Gateway for tool integration.
-
-**Key Features:** Reporting & Analytics Engine, Authentication & RBAC, Alloy Execution Fabric, 12 specialized AI Agents, PRISM Bus, Monte Carlo Engine, Multi-Tenant Provisioning, and GCS-backed Object Storage.
-
-**Forge — AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents, including registry, runtime capture, drift evaluation, promotion validation, rollback orchestration, and auditing.
-
-**Replay, Eval & Trust Infrastructure:** Enables incident capture, scenario replay, comprehensive evaluation of agent behavior, and regression detection with dedicated UI surfaces.
-
-**SZL Foundation — Trace Graph:** Provides a canonical trace layer linking all agent runs, model calls, tool invocations, retrievals, memory operations, and workflow steps into a queryable graph.
+**SZL Foundation – Trace Graph:** A canonical trace layer linking all agent runs, model calls, and workflow steps into a queryable graph.
 
 **ATLAS Enterprise State Model:** Defines a shared entity vocabulary and standardized event taxonomy.
 
-**Living Signal Mesh & Evidence Graph:** Unifies event/signal handling into a typed, pipeline-driven mesh, providing `Signal` and `EvidenceItem` definitions, a 9-stage signal pipeline, an `EvidenceStore`, and various `ConnectorAdapter` implementations.
+**Living Signal Mesh & Evidence Graph:** Unifies event/signal handling into a typed, pipeline-driven mesh, including `Signal` and `EvidenceItem` definitions, a 9-stage signal pipeline, and an `EvidenceStore`.
 
-**Memory Fabric & Alloy Runtime:** Provides a tiered memory layer with provenance, freshness, retention, and sensitivity tracking, and acts as the cognitive runtime and execution control plane for workflows.
+**Memory Fabric & Alloy Runtime:** Provides a tiered memory layer with provenance, freshness, retention, and sensitivity tracking, acting as the cognitive runtime and execution control plane for workflows.
 
-**Alloy Embedding Fabric (AEF) — Phase 3 Runtime:** REST API gateway and TypeScript worker layer for semantic embedding, reranking, and hybrid search. Mounted at `/alloy-embedding-api/` via the api-server.
-- `apps/alloy-embedding-api/`: Express 5 gateway — /v1/embed, /v1/rerank, /v1/hybrid-search, /v1/ingest, /v1/index/rebuild, /v1/index/verify, /v1/evals/run, /v1/openai/embeddings, /health, /metrics, /docs. Bearer-token auth, per-tenant rate limiting, Prometheus metrics, OTel tracing, evidence-ledger writes.
-- `workers/alloy-embed-worker/`: MicroBatchQueue, 5 backends (cpu-local, external-http, gpu-stub, azure-stub, dev-hash), pooling (cls/mean/last_token), truncation, WarmPool.
-- `workers/alloy-rerank-worker/`: Cross-encoder HTTP backend + deterministic TF fallback.
-- `services/substrate-py-workers`: Extended with /aef/embed and /aef/rerank (deterministic hash-based; no model download required in dev).
-- `scripts/aef-smoke.ts`: End-to-end smoke test — run with `AEF_API_URL=http://localhost:8080/alloy-embedding-api AEF_API_KEY=<token> tsx scripts/aef-smoke.ts`.
+**Alloy Embedding Fabric (AEF):** A REST API gateway and TypeScript worker layer for semantic embedding, reranking, and hybrid search.
 
 **Reflection Engine:** A structured self-improvement package that scores run quality, classifies failure modes, identifies best-performing routes, and drafts candidate skills.
 
@@ -174,6 +148,8 @@ The following changes were applied as part of the Series-A one-pass foundation, 
 
 **Test Results:**
 - api-server unit tests: 180 failures → ~6 failures (all remaining are pre-existing DB migration issues)
+
+**AEEP – Alloy Execution and Evidence Platform:** The evolved platform spine, incorporating core packages for contracts, agent runtime, workflow execution, retrieval, memory, evidence ledger, and policy enforcement. The AEEP Design System adheres to strict aesthetic and functional constraints, emphasizing evidence-first displays and an enterprise accent palette.
 
 ## External Dependencies
 -   **Database:** PostgreSQL 16

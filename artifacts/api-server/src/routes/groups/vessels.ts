@@ -9,6 +9,7 @@ export function register(router: IRouter): void {
 
   router.use(lazyMatch('/vessels', () => import('../vessels'), 'vessels'));
   router.use(lazyMatch('/vessels', () => import('../vessels-extended'), 'vessels-extended'));
+  router.use(lazyMatch('/vessels', () => import('../vessels-psc'), 'vessels-psc'));
   router.use(lazyMatch('/vessels', () => import('../vessels-platform'), 'vessels-platform'));
   router.use(lazyMatch('/vessels', () => import('../vessels-live'), 'vessels-live'));
   router.use(lazyMatch('/vessels', () => import('../vessels-trading'), 'vessels-trading'));

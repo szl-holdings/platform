@@ -13,8 +13,12 @@ import {
   vesselSanctionsScreeningTable,
   vesselsFleetsTable,
   vesselsPositionsTable,
+  vesselsPscChecklistItemsTable,
+  vesselsPscInspectionsTable,
   vesselsTable,
   vesselVoyageEconomicsTable,
+  type InsertVesselsPscChecklistItem,
+  type InsertVesselsPscInspection,
 } from '@szl-holdings/db';
 import { sql } from 'drizzle-orm';
 
@@ -1133,5 +1137,154 @@ export async function seedVesselsData(): Promise<void> {
       .onConflictDoNothing();
   }
   console.log(`[seed-vessels] Created ${screeningRows.length} sanctions screening records`);
+
+  await seedPscData(insertedVessels);
+
   console.log('[seed-vessels] Vessels seed complete.');
+}
+
+async function seedPscData(
+  vessels: Array<{ id: number; name: string; flag: string | null; orgId?: number | null }>,
+): Promise<void> {
+  const PSC_PORTS: Array<{ port: string; country: string; mou: string }> = [
+    { port: 'Rotterdam', country: 'Netherlands', mou: 'Paris MoU' },
+    { port: 'Hamburg', country: 'Germany', mou: 'Paris MoU' },
+    { port: 'Antwerp', country: 'Belgium', mou: 'Paris MoU' },
+    { port: 'Singapore', country: 'Singapore', mou: 'Tokyo MoU' },
+    { port: 'Shanghai', country: 'China', mou: 'Tokyo MoU' },
+    { port: 'Yokohama', country: 'Japan', mou: 'Tokyo MoU' },
+    { port: 'Houston', country: 'USA', mou: 'USCG' },
+    { port: 'Long Beach', country: 'USA', mou: 'USCG' },
+    { port: 'Santos', country: 'Brazil', mou: 'Vina del Mar' },
+    { port: 'Durban', country: 'South Africa', mou: 'Indian Ocean MoU' },
+  ];
+  const DEFICIENCY_CATEGORIES = [
+    'Fire safety',
+    'Life saving appliances',
+    'MARPOL — Annex I',
+    'ISM Code',
+    'Navigation safety',
+    'Crew certification',
+    'Structural conditions',
+    'Working & living conditions',
+    'Radio communications',
+  ];
+  const INSPECTORS = [
+    'Inspector M. Rodriguez',
+    'Inspector S. Tanaka',
+    'Inspector K. van Houten',
+    'Inspector A. Müller',
+    'Inspector P. Da Silva',
+    'Inspector L. Chen',
+  ];
+
+  const inspectionRows: InsertVesselsPscInspection[] = [];
+  const checklistRows: InsertVesselsPscChecklistItem[] = [];
+
+  const baseChecklist: Array<{ category: string }> = [
+    { category: 'ISM Code — SMS Manual' },
+    { category: 'Fire Detection System' },
+    { category: 'MARPOL — Oil Record Book current' },
+    { category: 'Life Saving Appliances' },
+    { category: 'ISPS Documentation' },
+    { category: 'Navigation Equipment' },
+    { category: 'Crew Certificates' },
+  ];
+
+  for (const vessel of vessels) {
+    const v = vessel.id;
+    // 1-3 inspections in the past ~2 years.
+    const count = 1 + Math.floor(seeded(v, 401, 3));
+    for (let i = 0; i < count; i++) {
+      const portIdx = Math.floor(seeded(v, 410 + i, PSC_PORTS.length));
+      const port = PSC_PORTS[portIdx];
+      const daysBack = 30 + Math.floor(seeded(v, 420 + i, 700));
+      const roll = seeded(v, 430 + i, 1);
+      let result: 'passed' | 'deficiency' | 'detained';
+      let deficienciesCount: number;
+      let detained = false;
+      let detentionDays: number | null = null;
+      if (roll < 0.55) {
+        result = 'passed';
+        deficienciesCount = 0;
+      } else if (roll < 0.9) {
+        result = 'deficiency';
+        deficienciesCount = 1 + Math.floor(seeded(v, 440 + i, 4));
+      } else {
+        result = 'detained';
+        deficienciesCount = 4 + Math.floor(seeded(v, 450 + i, 6));
+        detained = true;
+        detentionDays = 1 + Math.floor(seeded(v, 460 + i, 6));
+      }
+      const cats: string[] = [];
+      for (let k = 0; k < Math.min(deficienciesCount, 3); k++) {
+        const c =
+          DEFICIENCY_CATEGORIES[
+            Math.floor(seeded(v, 470 + i * 10 + k, DEFICIENCY_CATEGORIES.length))
+          ];
+        if (!cats.includes(c)) cats.push(c);
+      }
+      inspectionRows.push({
+        vesselId: vessel.id,
+        orgId: vessel.orgId ?? null,
+        port: port.port,
+        portCountry: port.country,
+        mouRegime: port.mou,
+        inspectionDate: daysAgo(daysBack),
+        result,
+        deficienciesCount,
+        deficiencyCategories: cats,
+        detained,
+        detentionDays,
+        inspector: INSPECTORS[Math.floor(seeded(v, 480 + i, INSPECTORS.length))],
+        notes:
+          result === 'detained'
+            ? 'Vessel detained pending rectification of cited deficiencies.'
+            : result === 'deficiency'
+              ? 'Deficiencies noted; rectification confirmed before sailing.'
+              : null,
+      });
+    }
+
+    // Checklist: mostly pass, occasional action_required when recent deficiencies exist.
+    const hasRecentDeficiency = inspectionRows.some(
+      (r) =>
+        r.vesselId === vessel.id &&
+        r.result !== 'passed' &&
+        new Date(r.inspectionDate).getTime() > Date.now() - 180 * 86400_000,
+    );
+    baseChecklist.forEach((item, idx) => {
+      let status: 'pass' | 'fail' | 'action_required' = 'pass';
+      if (hasRecentDeficiency && seeded(v, 500 + idx, 1) > 0.75) {
+        status = 'action_required';
+      }
+      checklistRows.push({
+        vesselId: vessel.id,
+        orgId: vessel.orgId ?? null,
+        category: item.category,
+        status,
+        sortOrder: idx,
+        note:
+          status === 'action_required'
+            ? 'Follow-up rectification required before next port call.'
+            : null,
+      });
+    });
+  }
+
+  for (let i = 0; i < inspectionRows.length; i += 100) {
+    await db
+      .insert(vesselsPscInspectionsTable)
+      .values(inspectionRows.slice(i, i + 100))
+      .onConflictDoNothing();
+  }
+  for (let i = 0; i < checklistRows.length; i += 100) {
+    await db
+      .insert(vesselsPscChecklistItemsTable)
+      .values(checklistRows.slice(i, i + 100))
+      .onConflictDoNothing();
+  }
+  console.log(
+    `[seed-vessels] Created ${inspectionRows.length} PSC inspections and ${checklistRows.length} checklist items`,
+  );
 }
