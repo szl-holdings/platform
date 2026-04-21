@@ -63,6 +63,31 @@ const fmt = (n: number) =>
       ? `$${(n / 1000).toFixed(0)}K`
       : `$${n}`;
 
+const VALID_CANDIDATE_STATUSES: ReplacementCandidate['status'][] = [
+  'identified',
+  'under-loi',
+  'in-diligence',
+  'closed',
+];
+
+function normalizeCandidateStatus(raw: unknown): ReplacementCandidate['status'] {
+  const s = String(raw ?? '').toLowerCase().replace(/_/g, '-');
+  if ((VALID_CANDIDATE_STATUSES as string[]).includes(s))
+    return s as ReplacementCandidate['status'];
+  if (s === 'under-contract' || s === 'contract') return 'under-loi';
+  if (s === 'due-diligence' || s === 'diligence') return 'in-diligence';
+  if (s === 'complete' || s === 'completed') return 'closed';
+  return 'identified';
+}
+
+function formatApiDate(raw: unknown): string {
+  const s = String(raw ?? '');
+  if (!s) return '';
+  const d = new Date(s);
+  if (Number.isNaN(d.getTime())) return s;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 function normalizeApiExchanges(data: unknown): Exchange1031[] | null {
   const envelope = data as Record<string, unknown> | null;
   const arr = Array.isArray(envelope?.exchanges)
@@ -80,7 +105,7 @@ function normalizeApiExchanges(data: unknown): Exchange1031[] | null {
         const days = Math.ceil((ms - now) / 86_400_000);
         deadlines.push({
           label: '45-Day ID Deadline',
-          date: String(item.identificationDeadline),
+          date: formatApiDate(item.identificationDeadline),
           daysRemaining: Math.max(days, 0),
           status: days <= 0 ? 'passed' : days <= 7 ? 'critical' : days <= 21 ? 'warning' : 'on-track',
         });
@@ -90,7 +115,7 @@ function normalizeApiExchanges(data: unknown): Exchange1031[] | null {
         const days = Math.ceil((ms - now) / 86_400_000);
         deadlines.push({
           label: '180-Day Close Deadline',
-          date: String(item.exchangeDeadline),
+          date: formatApiDate(item.exchangeDeadline),
           daysRemaining: Math.max(days, 0),
           status: days <= 0 ? 'passed' : days <= 14 ? 'critical' : days <= 45 ? 'warning' : 'on-track',
         });
@@ -103,7 +128,7 @@ function normalizeApiExchanges(data: unknown): Exchange1031[] | null {
         address: String(p.address ?? p.name ?? ''),
         listPrice: Number(p.listPrice ?? p.list_price ?? p.price ?? 0),
         capRate: Number(p.capRate ?? p.cap_rate ?? 0),
-        status: (p.status ?? 'identified') as ReplacementCandidate['status'],
+        status: normalizeCandidateStatus(p.status),
       }));
       return {
         id: String(item.id ?? `ex-api-${idx}`),
@@ -113,7 +138,7 @@ function normalizeApiExchanges(data: unknown): Exchange1031[] | null {
         bootAmount: 0,
         deferredGain: Number(item.deferredGain ?? 0),
         qualifiedIntermediary: String(item.qi ?? item.qiContact ?? ''),
-        exchangeDate: String(item.saleDate ?? item.createdAt ?? ''),
+        exchangeDate: formatApiDate(item.saleDate ?? item.createdAt ?? ''),
         deadlines,
         replacementCandidates,
       };
