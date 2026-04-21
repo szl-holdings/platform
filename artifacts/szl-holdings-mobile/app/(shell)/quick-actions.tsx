@@ -54,6 +54,20 @@ const TERRA_SHORTCUTS: {
     icon: 'file-text',
     route: '/(shell)/properties/rent-roll',
   },
+  {
+    id: 'construction-monitor',
+    label: 'Construction',
+    icon: 'tool',
+    route: '/(shell)/properties/construction-monitor',
+    badge: 'Live',
+  },
+  {
+    id: 'tenant-screening',
+    label: 'Screening',
+    icon: 'user-check',
+    route: '/(shell)/properties/tenant-screening',
+    badge: 'AI',
+  },
 ];
 
 function TerraShortcutsStrip() {
