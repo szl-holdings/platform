@@ -58,7 +58,7 @@ import {
 } from '../../lib/api-response';
 import { logger } from '../../lib/logger';
 import { broadcastWs, FIRESTORM_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
-import { seedProductionGuard } from '../../lib/seed-guard';
+import { isProductionEnvironment } from '../../lib/seed-guard';
 import {
   ingestDecisionToEvidenceIndex,
   queryEvidenceIndex,
@@ -631,28 +631,28 @@ router.get('/firestorm/mitre-detections/:techniqueId', authMiddleware(), async (
   }
 });
 
-// Route-level gating: `seedProductionGuard` is the FIRST middleware on the
-// chain, so in production the request short-circuits with 404 +
-// SEED_DISABLED_IN_PRODUCTION before validateBody, authMiddleware, or the
-// dynamic `seed-aegis.js` import are ever invoked. This eliminates the
-// attack surface (no body parsing, no auth probing, no module load) while
-// keeping the route's response contract stable for any legacy callers.
-router.post(
-  '/firestorm/seed',
-  seedProductionGuard,
-  validateBody(bodyShape({})),
-  authMiddleware({ required: true }),
-  async (_req, res) => {
-    try {
-      // @ts-expect-error
-      const { seedAegis } = await import('../scripts/seed-aegis.js');
-      const result = await seedAegis();
-      sendSuccess(res, { message: 'Aegis data seeded successfully', result });
-    } catch (err) {
-      handleRouteError(res, err, 'Failed to seed Aegis data');
-    }
-  },
-);
+// NOTE: POST /firestorm/seed is registered conditionally inside `register()`
+// below — it is mounted ONLY when `isProductionEnvironment()` is false.
+// In production the route is never declared on the router, so requests get
+// a generic Express 404 (route not found). See DEAD_ROUTES_AUDIT / SURFACE_MAP.
+function registerSeedRouteIfNonProd(): void {
+  if (isProductionEnvironment()) return;
+  router.post(
+    '/firestorm/seed',
+    validateBody(bodyShape({})),
+    authMiddleware({ required: true }),
+    async (_req, res) => {
+      try {
+        // @ts-expect-error
+        const { seedAegis } = await import('../scripts/seed-aegis.js');
+        const result = await seedAegis();
+        sendSuccess(res, { message: 'Aegis data seeded successfully', result });
+      } catch (err) {
+        handleRouteError(res, err, 'Failed to seed Aegis data');
+      }
+    },
+  );
+}
 
 // ─── External Threat Intelligence (T003) ───────────────────────────────────
 
@@ -2218,5 +2218,6 @@ router.get(
 );
 
 export function register(r: IRouter): void {
+  registerSeedRouteIfNonProd();
   r.use(router);
 }

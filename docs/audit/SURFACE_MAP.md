@@ -139,7 +139,7 @@
 | Contact form | `POST /api/contact` | ✅ | Public |
 | Demo request | `POST /api/demo` | ✅ | Public |
 | Admin panel | `/api/admin/*` | ✅ 🔒 | Super admin only |
-| Firestorm seed | `POST /api/firestorm/seed` | ⚠️ | Must be guarded in production |
+| Firestorm seed | `POST /api/firestorm/seed` | 🚫 prod | Route is NOT registered when `NODE_ENV=production` or `APP_ENV=production` (see `artifacts/api-server/src/routes/firestorm/assets-cases.ts` → `registerSeedRouteIfNonProd`). Production requests receive a generic Express 404. Available in dev/test only. |
 | NEXUS endpoints | `/api/nexus/*` | ✅ 🔒 | |
 
 ---

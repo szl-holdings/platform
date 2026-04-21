@@ -185,7 +185,7 @@ function buildApp(): express.Express {
 // Tests — POST /firestorm/seed production guard
 // ---------------------------------------------------------------------------
 
-describe('firestorm seed endpoint — real router production guard', () => {
+describe('firestorm seed endpoint — production route is not registered', () => {
   const originalNodeEnv = process.env.NODE_ENV;
   const originalAppEnv = process.env.APP_ENV;
 
@@ -194,7 +194,11 @@ describe('firestorm seed endpoint — real router production guard', () => {
     process.env.APP_ENV = originalAppEnv;
   });
 
-  it('returns 404 with SEED_DISABLED_IN_PRODUCTION when NODE_ENV=production', async () => {
+  // The route is NOT mounted when isProductionEnvironment() is true at the
+  // moment register() runs. A request therefore falls through to Express's
+  // default 404 (no body / empty body), advertising no endpoint surface.
+
+  it('is unregistered (generic 404) when NODE_ENV=production', async () => {
     process.env.NODE_ENV = 'production';
     delete (process.env as Record<string, string | undefined>).APP_ENV;
 
@@ -202,10 +206,12 @@ describe('firestorm seed endpoint — real router production guard', () => {
     const res = await request(app).post('/firestorm/seed').send({});
 
     expect(res.status).toBe(404);
-    expect(res.body.code).toBe('SEED_DISABLED_IN_PRODUCTION');
+    // Generic Express 404 — no SEED_DISABLED_IN_PRODUCTION code, because
+    // the route was never mounted on the router at all.
+    expect(res.body.code).toBeUndefined();
   });
 
-  it('returns 404 when APP_ENV=production (even if NODE_ENV is development)', async () => {
+  it('is unregistered (generic 404) when APP_ENV=production (even if NODE_ENV is development)', async () => {
     process.env.NODE_ENV = 'development';
     process.env.APP_ENV = 'production';
 
@@ -213,15 +219,18 @@ describe('firestorm seed endpoint — real router production guard', () => {
     const res = await request(app).post('/firestorm/seed').send({});
 
     expect(res.status).toBe(404);
-    expect(res.body.code).toBe('SEED_DISABLED_IN_PRODUCTION');
+    expect(res.body.code).toBeUndefined();
   });
 
-  it('response code is SEED_DISABLED_IN_PRODUCTION when blocked in production', async () => {
-    process.env.NODE_ENV = 'production';
+  it('IS registered in non-production (e.g. NODE_ENV=test) so dev/CI seeding still works', async () => {
+    process.env.NODE_ENV = 'test';
+    delete (process.env as Record<string, string | undefined>).APP_ENV;
+
     const app = buildApp();
     const res = await request(app).post('/firestorm/seed').send({});
 
-    expect(res.status).toBe(404);
-    expect(res.body.code).toBe('SEED_DISABLED_IN_PRODUCTION');
+    // The handler is mounted; it will not return 404 (Express not-found).
+    // Whatever the seedAegis dynamic import does, it should NOT be a 404.
+    expect(res.status).not.toBe(404);
   });
 });
