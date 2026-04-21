@@ -577,6 +577,55 @@ type GraphSnapshotEdge = {
   strength: string;
 };
 
+// --- What-if LRU cache (50 entries, 5-minute TTL) ---
+const WHATIF_CACHE_MAX = 50;
+const WHATIF_CACHE_TTL_MS = 5 * 60 * 1000;
+
+interface WhatIfCacheEntry {
+  result: WhatIfResult;
+  expiresAt: number;
+}
+
+class WhatIfLruCache {
+  private map = new Map<string, WhatIfCacheEntry>();
+  constructor(private maxSize: number) {}
+
+  get(key: string): WhatIfCacheEntry | undefined {
+    const entry = this.map.get(key);
+    if (!entry) return undefined;
+    if (entry.expiresAt <= Date.now()) {
+      this.map.delete(key);
+      return undefined;
+    }
+    this.map.delete(key);
+    this.map.set(key, entry);
+    return entry;
+  }
+
+  set(key: string, value: WhatIfCacheEntry): void {
+    if (this.map.has(key)) this.map.delete(key);
+    else if (this.map.size >= this.maxSize) {
+      const oldest = this.map.keys().next().value;
+      if (oldest !== undefined) this.map.delete(oldest);
+    }
+    this.map.set(key, value);
+  }
+}
+
+const whatIfCache = new WhatIfLruCache(WHATIF_CACHE_MAX);
+
+function whatIfCacheKey(
+  query: string,
+  orgId: number | undefined,
+  scenario: string | undefined,
+): string {
+  const normalized = query.trim().toLowerCase().replace(/\s+/g, ' ');
+  return crypto
+    .createHash('sha256')
+    .update(`${orgId ?? 'noorg'}:${scenario ?? ''}:${normalized}`)
+    .digest('hex');
+}
+
 /**
  * Assembles LLM grounding context exclusively from org-scoped data sources.
  *
@@ -1048,9 +1097,23 @@ router.post(
 
     try {
       const orgId = callerOrgId(req as unknown as any);
+      const scenarioParam = typeof scenario === 'string' ? scenario : undefined;
+      const cacheKey = whatIfCacheKey(query.trim(), orgId, scenarioParam);
+      const cached = whatIfCache.get(cacheKey);
+
+      if (cached) {
+        logger.info(
+          { query: query.substring(0, 100) },
+          '[CORTEX] What-if cache hit — returning cached result',
+        );
+        sendSuccess(res, { ...cached.result, cached: true });
+        return;
+      }
+
       const llmResult = await callWhatIfLLM(query.trim(), orgId);
 
       if (llmResult) {
+        whatIfCache.set(cacheKey, { result: llmResult, expiresAt: Date.now() + WHATIF_CACHE_TTL_MS });
         logger.info(
           { query: query.substring(0, 100), source: 'llm' },
           '[CORTEX] What-if scenario computed via LLM',
@@ -1071,6 +1134,7 @@ router.post(
       }
 
       const result = WHATIF_SCENARIOS[selectedScenario](query.trim());
+      whatIfCache.set(cacheKey, { result, expiresAt: Date.now() + WHATIF_CACHE_TTL_MS });
       logger.info(
         { query: query.substring(0, 100), scenario: selectedScenario, source: 'pattern-fallback' },
         '[CORTEX] What-if scenario computed via pattern matching',
