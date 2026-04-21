@@ -417,6 +417,7 @@ interface SectionErrorBoundaryProps {
 interface SectionErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  errorRef: string | null;
 }
 
 export class SectionErrorBoundary extends Component<
@@ -425,16 +426,18 @@ export class SectionErrorBoundary extends Component<
 > {
   constructor(props: SectionErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, errorRef: null };
   }
 
   static getDerivedStateFromError(error: Error): SectionErrorBoundaryState {
-    return { hasError: true, error };
+    return { hasError: true, error, errorRef: null };
   }
 
   override componentDidCatch(error: Error, errorInfo: { componentStack: string }) {
+    const errorRef = `ref_${Date.now().toString(36).slice(-6)}`;
+    this.setState({ errorRef });
     console.error(
-      `[SectionErrorBoundary:${this.props.sectionName || 'unknown'}]`,
+      `[SectionErrorBoundary:${this.props.sectionName || 'unknown'}] ${errorRef}`,
       error,
       errorInfo,
     );
@@ -442,12 +445,13 @@ export class SectionErrorBoundary extends Component<
   }
 
   handleRetry = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, errorRef: null });
   };
 
   override render() {
     if (this.state.hasError) {
       const { sectionName = 'This section' } = this.props;
+      const { errorRef } = this.state;
       return (
         <div
           style={{
@@ -459,18 +463,18 @@ export class SectionErrorBoundary extends Component<
           }}
         >
           <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: '0 0 0.75rem' }}>
-            {sectionName} encountered an error
+            {sectionName} is temporarily unavailable
           </p>
-          {this.state.error && (
+          {errorRef && (
             <p
               style={{
-                color: '#64748b',
-                fontSize: '0.75rem',
+                color: '#475569',
+                fontSize: '0.7rem',
                 fontFamily: 'monospace',
                 margin: '0 0 1rem',
               }}
             >
-              {this.state.error.message}
+              Reference: {errorRef}
             </p>
           )}
           <button
