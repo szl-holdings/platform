@@ -125,7 +125,7 @@ export const SENTRA_SIGNAL_LABELS = [
   },
   {
     id: 'sig-sentra-002',
-    label: 'Anomalous C2 Beacon',
+    label: 'Anomalous C2 Callback',
     severity: 'critical',
     occurredAt: hoursAgo(3.5),
   },

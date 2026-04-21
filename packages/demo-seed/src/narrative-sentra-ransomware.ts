@@ -49,10 +49,10 @@ export const SENTRA_RANSOMWARE_NARRATIVE = {
       displayName: 'PLC Controller - Zone B',
       domain: 'security' as const,
     },
-    c2Beacon: {
+    c2Callback: {
       entityId: 'threat-c2-99',
       entityType: 'indicator' as const,
-      displayName: 'Anomalous C2 Beacon',
+      displayName: 'Anomalous C2 Callback',
       domain: 'security' as const,
     },
   },
@@ -92,7 +92,7 @@ export const SENTRA_RANSOMWARE_NARRATIVE = {
         freshness: 0.98,
         confidence: 0.89,
         severity: 'high',
-        entityRefs: [this.entities.c2Beacon, this.entities.scadaServer],
+        entityRefs: [this.entities.c2Callback, this.entities.scadaServer],
         rawPayload: {
           eventType: 'c2_beaconing',
           destinationIp: '185.220.101.42',
@@ -168,7 +168,7 @@ export const SENTRA_RANSOMWARE_NARRATIVE = {
         type: 'external-data',
         domain: 'security',
         signalId: signals[1]?.signalId,
-        entityRefs: [this.entities.c2Beacon],
+        entityRefs: [this.entities.c2Callback],
         summary: 'C2 beaconing to known ransomware-associated IP detected from SCADA segment',
         confidence: 0.89,
         freshness: 0.98,

@@ -1,16 +1,16 @@
 # License Compliance Report
 
-**Generated:** 2026-04-20
-**Total packages scanned:** 1808
+**Generated:** 2026-04-21
+**Total packages scanned:** 1769
 
 ## Summary
 
 | Category | Count |
 |----------|-------|
-| Permissive — OK | 1785 |
-| Copyleft — REVIEW | 10 |
-| Unknown / Non-standard — CHECK | 13 |
-| **Total** | **1808** |
+| Permissive — OK | 1747 |
+| Copyleft — REVIEW | 11 |
+| Unknown / Non-standard — CHECK | 11 |
+| **Total** | **1769** |
 
 **Flag key:**
 - `OK` — permissive license (MIT, Apache-2.0, ISC, BSD-*, Unlicense, CC0, etc.); no commercial use restrictions
@@ -24,6 +24,7 @@ These packages have licenses that impose obligations or restrict commercial use.
 | Package | Version | License | Notes |
 |---------|---------|---------|-------|
 | `@axe-core/playwright` | 4.11.1 | MPL-2.0 | File-scoped copyleft; no obligation if unmodified |
+| `@img/sharp-libvips-linux-x64` | 1.2.4 | LGPL-3.0-or-later | Copyleft — review before distribution |
 | `@react-leaflet/core` | 3.0.0 | Hippocratic-2.1 | Restrictive ethical license — confirm commercial use compliance |
 | `axe-core` | 4.11.3 | MPL-2.0 | File-scoped copyleft; no obligation if unmodified |
 | `dompurify` | 3.4.0 | (MPL-2.0 OR Apache-2.0) | Dual-licensed — elect permissive option |
@@ -40,8 +41,6 @@ These packages have missing or non-SPDX license identifiers. Verify acceptable u
 
 | Package | Version | License String |
 |---------|---------|---------------|
-| `@expo/ngrok-bin` | 2.3.42 | UNKNOWN |
-| `@expo/ngrok-bin-linux-x64` | 2.3.41 | UNKNOWN |
 | `@mapbox/jsonlint-lines-primitives` | 2.0.2 | UNKNOWN |
 | `@replit/connectors-sdk` | 0.3.0 | UNKNOWN |
 | `@replit/vite-plugin-cartographer` | 0.5.1 | UNKNOWN |
@@ -61,6 +60,7 @@ Complete per-package license listing for all installed dependencies.
 | Package | Version | License | Flag |
 |---------|---------|---------|------|
 | `@axe-core/playwright` | 4.11.1 | MPL-2.0 | REVIEW |
+| `@img/sharp-libvips-linux-x64` | 1.2.4 | LGPL-3.0-or-later | REVIEW |
 | `@react-leaflet/core` | 3.0.0 | Hippocratic-2.1 | REVIEW |
 | `axe-core` | 4.11.3 | MPL-2.0 | REVIEW |
 | `dompurify` | 3.4.0 | (MPL-2.0 OR Apache-2.0) | REVIEW |
@@ -70,8 +70,6 @@ Complete per-package license listing for all installed dependencies.
 | `node-forge` | 1.4.0 | (BSD-3-Clause OR GPL-2.0) | REVIEW |
 | `react-leaflet` | 5.0.0 | Hippocratic-2.1 | REVIEW |
 | `web-push` | 3.6.7 | MPL-2.0 | REVIEW |
-| `@expo/ngrok-bin` | 2.3.42 | UNKNOWN | CHECK |
-| `@expo/ngrok-bin-linux-x64` | 2.3.41 | UNKNOWN | CHECK |
 | `@mapbox/jsonlint-lines-primitives` | 2.0.2 | UNKNOWN | CHECK |
 | `@replit/connectors-sdk` | 0.3.0 | UNKNOWN | CHECK |
 | `@replit/vite-plugin-cartographer` | 0.5.1 | UNKNOWN | CHECK |
@@ -223,17 +221,8 @@ Complete per-package license listing for all installed dependencies.
 | `@esbuild-kit/core-utils` | 3.3.2 | MIT | OK |
 | `@esbuild-kit/esm-loader` | 2.6.5 | MIT | OK |
 | `@esbuild/linux-x64` | 0.27.3 | MIT | OK |
-| `@eslint-community/eslint-utils` | 4.9.1 | MIT | OK |
-| `@eslint-community/regexpp` | 4.12.2 | MIT | OK |
-| `@eslint/config-array` | 0.21.2 | Apache-2.0 | OK |
-| `@eslint/config-helpers` | 0.4.2 | Apache-2.0 | OK |
-| `@eslint/core` | 0.17.0 | Apache-2.0 | OK |
-| `@eslint/eslintrc` | 3.3.5 | MIT | OK |
-| `@eslint/js` | 9.39.4 | MIT | OK |
-| `@eslint/object-schema` | 2.1.7 | Apache-2.0 | OK |
-| `@eslint/plugin-kit` | 0.4.1 | Apache-2.0 | OK |
-| `@expo-google-fonts/cormorant-garamond` | 0.4.1 | MIT AND OFL-1.1 | OK |
 | `@expo-google-fonts/inter` | 0.4.2 | MIT AND OFL-1.1 | OK |
+| `@expo-google-fonts/material-symbols` | 0.4.32 | MIT AND Apache-2.0 | OK |
 | `@expo-google-fonts/space-grotesk` | 0.4.1 | MIT AND OFL-1.1 | OK |
 | `@expo/cli` | 54.0.23 | MIT | OK |
 | `@expo/code-signing-certificates` | 0.0.6 | MIT | OK |
@@ -249,11 +238,11 @@ Complete per-package license listing for all installed dependencies.
 | `@expo/metro` | 54.2.0 | MIT | OK |
 | `@expo/metro-config` | 54.0.14 | MIT | OK |
 | `@expo/metro-runtime` | 6.1.2 | MIT | OK |
-| `@expo/ngrok` | 4.1.3 | BSD-2-Clause | OK |
 | `@expo/osascript` | 2.4.2 | MIT | OK |
 | `@expo/package-manager` | 1.10.3 | MIT | OK |
 | `@expo/plist` | 0.4.8 | MIT | OK |
 | `@expo/prebuild-config` | 54.0.8 | MIT | OK |
+| `@expo/require-utils` | 55.0.4 | MIT | OK |
 | `@expo/schema-utils` | 0.1.8 | MIT | OK |
 | `@expo/sdk-runtime-versions` | 1.0.0 | MIT | OK |
 | `@expo/spawn-async` | 1.7.2 | MIT | OK |
@@ -277,11 +266,12 @@ Complete per-package license listing for all installed dependencies.
 | `@graphql-tools/utils` | 11.0.0 | MIT | OK |
 | `@graphql-typed-document-node/core` | 3.2.0 | MIT | OK |
 | `@hookform/resolvers` | 3.10.0 | MIT | OK |
-| `@humanfs/core` | 0.19.1 | Apache-2.0 | OK |
-| `@humanfs/node` | 0.16.7 | Apache-2.0 | OK |
-| `@humanwhocodes/module-importer` | 1.0.1 | Apache-2.0 | OK |
-| `@humanwhocodes/retry` | 0.4.3 | Apache-2.0 | OK |
+| `@huggingface/jinja` | 0.5.7 | MIT | OK |
+| `@huggingface/tokenizers` | 0.1.3 | Apache-2.0 | OK |
+| `@huggingface/transformers` | 4.1.0 | Apache-2.0 | OK |
 | `@ide/backoff` | 1.0.0 | MIT | OK |
+| `@img/colour` | 1.1.0 | MIT | OK |
+| `@img/sharp-linux-x64` | 0.34.5 | Apache-2.0 | OK |
 | `@ioredis/commands` | 1.5.1 | MIT | OK |
 | `@isaacs/cliui` | 8.0.2 | ISC | OK |
 | `@isaacs/fs-minipass` | 4.0.1 | ISC | OK |
@@ -360,7 +350,7 @@ Complete per-package license listing for all installed dependencies.
 | `@opentelemetry/resources` | 2.6.1 | Apache-2.0 | OK |
 | `@opentelemetry/sdk-logs` | 0.208.0 | Apache-2.0 | OK |
 | `@opentelemetry/sdk-metrics` | 2.2.0 | Apache-2.0 | OK |
-| `@opentelemetry/sdk-trace-base` | 2.6.1 | Apache-2.0 | OK |
+| `@opentelemetry/sdk-trace-base` | 2.7.0 | Apache-2.0 | OK |
 | `@opentelemetry/sdk-trace-web` | 2.7.0 | Apache-2.0 | OK |
 | `@opentelemetry/semantic-conventions` | 1.40.0 | Apache-2.0 | OK |
 | `@opentelemetry/sql-common` | 0.41.2 | Apache-2.0 | OK |
@@ -523,14 +513,11 @@ Complete per-package license listing for all installed dependencies.
 | `@shikijs/types` | 3.23.0 | MIT | OK |
 | `@shikijs/vscode-textmate` | 10.0.2 | MIT | OK |
 | `@sinclair/typebox` | 0.34.49 | MIT | OK |
-| `@sindresorhus/is` | 4.6.0 | MIT | OK |
 | `@sindresorhus/merge-streams` | 4.0.0 | MIT | OK |
 | `@sinonjs/commons` | 3.0.1 | BSD-3-Clause | OK |
 | `@sinonjs/fake-timers` | 15.3.2 | BSD-3-Clause | OK |
 | `@standard-schema/spec` | 1.1.0 | MIT | OK |
-| `@stardazed/streams-text-encoding` | 1.0.2 | MIT | OK |
 | `@swc/helpers` | 0.5.20 | Apache-2.0 | OK |
-| `@szmarczak/http-timer` | 4.0.6 | MIT | OK |
 | `@tabby_ai/hijri-converter` | 1.0.5 | MIT | OK |
 | `@tailwindcss/node` | 4.2.1 | MIT | OK |
 | `@tailwindcss/oxide` | 4.2.1 | MIT | OK |
@@ -558,7 +545,6 @@ Complete per-package license listing for all installed dependencies.
 | `@types/babel__template` | 7.4.4 | MIT | OK |
 | `@types/babel__traverse` | 7.28.0 | MIT | OK |
 | `@types/body-parser` | 1.19.6 | MIT | OK |
-| `@types/cacheable-request` | 6.0.3 | MIT | OK |
 | `@types/caseless` | 0.12.5 | MIT | OK |
 | `@types/chai` | 5.2.3 | MIT | OK |
 | `@types/compression` | 1.8.1 | MIT | OK |
@@ -588,15 +574,12 @@ Complete per-package license listing for all installed dependencies.
 | `@types/graphql-depth-limit` | 1.1.6 | MIT | OK |
 | `@types/hammerjs` | 2.0.46 | MIT | OK |
 | `@types/hast` | 3.0.4 | MIT | OK |
-| `@types/http-cache-semantics` | 4.2.0 | MIT | OK |
 | `@types/http-errors` | 2.0.5 | MIT | OK |
 | `@types/istanbul-lib-coverage` | 2.0.6 | MIT | OK |
 | `@types/istanbul-lib-report` | 3.0.3 | MIT | OK |
 | `@types/istanbul-reports` | 3.0.4 | MIT | OK |
 | `@types/jest` | 30.0.0 | MIT | OK |
 | `@types/js-yaml` | 4.0.9 | MIT | OK |
-| `@types/json-schema` | 7.0.15 | MIT | OK |
-| `@types/keyv` | 3.1.4 | MIT | OK |
 | `@types/leaflet` | 1.9.21 | MIT | OK |
 | `@types/linkify-it` | 5.0.0 | MIT | OK |
 | `@types/long` | 4.0.2 | MIT | OK |
@@ -605,6 +588,7 @@ Complete per-package license listing for all installed dependencies.
 | `@types/mdast` | 4.0.4 | MIT | OK |
 | `@types/mdurl` | 2.0.0 | MIT | OK |
 | `@types/methods` | 1.1.4 | MIT | OK |
+| `@types/mime` | 1.3.5 | MIT | OK |
 | `@types/ms` | 2.1.0 | MIT | OK |
 | `@types/multer` | 2.1.0 | MIT | OK |
 | `@types/mysql` | 2.15.27 | MIT | OK |
@@ -624,9 +608,8 @@ Complete per-package license listing for all installed dependencies.
 | `@types/react-reconciler` | 0.28.9 | MIT | OK |
 | `@types/readdir-glob` | 1.1.5 | MIT | OK |
 | `@types/request` | 2.48.13 | MIT | OK |
-| `@types/responselike` | 1.0.3 | MIT | OK |
 | `@types/retry` | 0.12.2 | MIT | OK |
-| `@types/send` | 1.2.1 | MIT | OK |
+| `@types/send` | 0.17.6 | MIT | OK |
 | `@types/serve-static` | 2.2.0 | MIT | OK |
 | `@types/stack-utils` | 2.0.3 | MIT | OK |
 | `@types/stats.js` | 0.17.4 | MIT | OK |
@@ -647,16 +630,6 @@ Complete per-package license listing for all installed dependencies.
 | `@types/yargs-parser` | 21.0.3 | MIT | OK |
 | `@types/yauzl` | 2.10.3 | MIT | OK |
 | `@types/zen-observable` | 0.8.3 | MIT | OK |
-| `@typescript-eslint/eslint-plugin` | 8.58.0 | MIT | OK |
-| `@typescript-eslint/parser` | 8.58.0 | MIT | OK |
-| `@typescript-eslint/project-service` | 8.58.0 | MIT | OK |
-| `@typescript-eslint/scope-manager` | 8.58.0 | MIT | OK |
-| `@typescript-eslint/tsconfig-utils` | 8.58.0 | MIT | OK |
-| `@typescript-eslint/type-utils` | 8.58.0 | MIT | OK |
-| `@typescript-eslint/types` | 8.58.0 | MIT | OK |
-| `@typescript-eslint/typescript-estree` | 8.58.0 | MIT | OK |
-| `@typescript-eslint/utils` | 8.58.0 | MIT | OK |
-| `@typescript-eslint/visitor-keys` | 8.58.0 | MIT | OK |
 | `@udecode/plate-common` | 42.0.0 | MIT | OK |
 | `@udecode/plate-core` | 49.0.0 | MIT | OK |
 | `@udecode/react-hotkeys` | 37.0.0 | MIT | OK |
@@ -701,9 +674,9 @@ Complete per-package license listing for all installed dependencies.
 | `accepts` | 2.0.0 | MIT | OK |
 | `acorn` | 8.16.0 | MIT | OK |
 | `acorn-import-attributes` | 1.9.5 | MIT | OK |
-| `acorn-jsx` | 5.3.2 | MIT | OK |
+| `adm-zip` | 0.5.17 | MIT | OK |
 | `agent-base` | 7.1.4 | MIT | OK |
-| `ajv` | 6.14.0 | MIT | OK |
+| `ajv` | 8.18.0 | MIT | OK |
 | `ajv-draft-04` | 1.0.0 | MIT | OK |
 | `ajv-formats` | 3.0.1 | MIT | OK |
 | `anser` | 1.4.10 | MIT | OK |
@@ -720,6 +693,7 @@ Complete per-package license listing for all installed dependencies.
 | `argparse` | 2.0.1 | Python-2.0 | OK |
 | `aria-hidden` | 1.2.6 | MIT | OK |
 | `aria-query` | 5.3.2 | Apache-2.0 | OK |
+| `array-flatten` | 1.1.1 | MIT | OK |
 | `arrify` | 1.0.1 | MIT | OK |
 | `asap` | 2.0.6 | MIT | OK |
 | `asn1.js` | 5.4.1 | MIT | OK |
@@ -749,7 +723,7 @@ Complete per-package license listing for all installed dependencies.
 | `babel-preset-jest` | 30.3.0 | MIT | OK |
 | `badgin` | 1.2.3 | MIT | OK |
 | `bail` | 2.0.2 | MIT | OK |
-| `balanced-match` | 4.0.4 | MIT | OK |
+| `balanced-match` | 1.0.2 | MIT | OK |
 | `bare-events` | 2.8.2 | Apache-2.0 | OK |
 | `bare-fs` | 4.5.6 | Apache-2.0 | OK |
 | `bare-os` | 3.8.6 | Apache-2.0 | OK |
@@ -764,10 +738,12 @@ Complete per-package license listing for all installed dependencies.
 | `bidi-js` | 1.0.3 | MIT | OK |
 | `big-integer` | 1.6.52 | Unlicense | OK |
 | `bignumber.js` | 9.3.1 | MIT | OK |
+| `bintrees` | 1.0.2 | MIT | OK |
 | `bluebird` | 3.4.7 | MIT | OK |
 | `bn.js` | 4.12.3 | MIT | OK |
 | `body-parser` | 2.2.2 | MIT | OK |
 | `boolbase` | 1.0.0 | ISC | OK |
+| `boolean` | 3.2.0 | MIT | OK |
 | `bplist-creator` | 0.1.0 | MIT | OK |
 | `bplist-parser` | 0.3.1 | MIT | OK |
 | `brace-expansion` | 2.1.0 | MIT | OK |
@@ -783,8 +759,7 @@ Complete per-package license listing for all installed dependencies.
 | `buffer-from` | 1.1.2 | MIT | OK |
 | `busboy` | 1.6.0 | MIT | OK |
 | `bytes` | 3.1.2 | MIT | OK |
-| `cacheable-lookup` | 5.0.4 | MIT | OK |
-| `cacheable-request` | 7.0.4 | MIT | OK |
+| `cac` | 6.7.14 | MIT | OK |
 | `call-bind` | 1.0.8 | MIT | OK |
 | `call-bind-apply-helpers` | 1.0.2 | MIT | OK |
 | `call-bound` | 1.0.4 | MIT | OK |
@@ -794,7 +769,7 @@ Complete per-package license listing for all installed dependencies.
 | `caniuse-lite` | 1.0.30001777 | CC-BY-4.0 | OK |
 | `canvg` | 3.0.11 | MIT | OK |
 | `ccount` | 2.0.1 | MIT | OK |
-| `chai` | 6.2.2 | MIT | OK |
+| `chai` | 5.3.3 | MIT | OK |
 | `chalk` | 2.4.2 | MIT | OK |
 | `char-regex` | 1.0.2 | MIT | OK |
 | `character-entities` | 2.0.2 | MIT | OK |
@@ -802,6 +777,7 @@ Complete per-package license listing for all installed dependencies.
 | `character-entities-legacy` | 3.0.0 | MIT | OK |
 | `character-reference-invalid` | 2.0.1 | MIT | OK |
 | `cheap-ruler` | 4.0.0 | ISC | OK |
+| `check-error` | 2.1.3 | MIT | OK |
 | `chokidar` | 5.0.0 | MIT | OK |
 | `chownr` | 3.0.0 | BlueOak-1.0.0 | OK |
 | `chrome-launcher` | 0.15.2 | Apache-2.0 | OK |
@@ -816,7 +792,6 @@ Complete per-package license listing for all installed dependencies.
 | `client-only` | 0.0.1 | MIT | OK |
 | `cliui` | 8.0.1 | ISC | OK |
 | `clone` | 2.1.2 | MIT | OK |
-| `clone-response` | 1.0.3 | MIT | OK |
 | `clsx` | 2.1.1 | MIT | OK |
 | `cluster-key-slot` | 1.1.2 | Apache-2.0 | OK |
 | `cmdk` | 1.1.1 | MIT | OK |
@@ -836,7 +811,6 @@ Complete per-package license listing for all installed dependencies.
 | `compressible` | 2.0.18 | MIT | OK |
 | `compression` | 1.8.1 | MIT | OK |
 | `compute-scroll-into-view` | 3.1.1 | MIT | OK |
-| `concat-map` | 0.0.1 | MIT | OK |
 | `concat-stream` | 2.0.0 | MIT | OK |
 | `connect` | 3.7.0 | MIT | OK |
 | `content-disposition` | 1.0.1 | MIT | OK |
@@ -887,13 +861,11 @@ Complete per-package license listing for all installed dependencies.
 | `decimal.js-light` | 2.5.1 | MIT | OK |
 | `decode-named-character-reference` | 1.3.0 | MIT | OK |
 | `decode-uri-component` | 0.2.2 | MIT | OK |
-| `decompress-response` | 6.0.0 | MIT | OK |
 | `dedent` | 1.7.2 | MIT | OK |
+| `deep-eql` | 5.0.2 | MIT | OK |
 | `deep-extend` | 0.6.0 | MIT | OK |
-| `deep-is` | 0.1.4 | MIT | OK |
 | `deepmerge` | 4.3.1 | MIT | OK |
 | `defaults` | 1.0.4 | MIT | OK |
-| `defer-to-connect` | 2.0.1 | MIT | OK |
 | `define-data-property` | 1.1.4 | MIT | OK |
 | `define-lazy-prop` | 2.0.0 | MIT | OK |
 | `define-properties` | 1.2.1 | MIT | OK |
@@ -906,6 +878,7 @@ Complete per-package license listing for all installed dependencies.
 | `detect-gpu` | 5.0.70 | MIT | OK |
 | `detect-libc` | 2.1.2 | Apache-2.0 | OK |
 | `detect-newline` | 3.1.0 | MIT | OK |
+| `detect-node` | 2.1.0 | MIT | OK |
 | `detect-node-es` | 1.1.0 | MIT | OK |
 | `devlop` | 1.1.0 | MIT | OK |
 | `devtools-protocol` | 0.0.1595872 | BSD-3-Clause | OK |
@@ -953,6 +926,7 @@ Complete per-package license listing for all installed dependencies.
 | `es-module-lexer` | 2.0.0 | MIT | OK |
 | `es-object-atoms` | 1.1.1 | MIT | OK |
 | `es-set-tostringtag` | 2.1.0 | MIT | OK |
+| `es6-error` | 4.1.1 | MIT | OK |
 | `esbuild` | 0.27.3 | MIT | OK |
 | `esbuild-plugin-pino` | 2.3.3 | MIT | OK |
 | `esbuild-register` | 3.6.0 | MIT | OK |
@@ -960,13 +934,7 @@ Complete per-package license listing for all installed dependencies.
 | `escape-html` | 1.0.3 | MIT | OK |
 | `escape-string-regexp` | 2.0.0 | MIT | OK |
 | `escodegen` | 2.1.0 | BSD-2-Clause | OK |
-| `eslint` | 9.39.4 | MIT | OK |
-| `eslint-scope` | 8.4.0 | BSD-2-Clause | OK |
-| `eslint-visitor-keys` | 4.2.1 | Apache-2.0 | OK |
-| `espree` | 10.4.0 | BSD-2-Clause | OK |
 | `esprima` | 4.0.1 | BSD-2-Clause | OK |
-| `esquery` | 1.7.0 | BSD-3-Clause | OK |
-| `esrecurse` | 4.3.0 | BSD-2-Clause | OK |
 | `estraverse` | 5.3.0 | BSD-2-Clause | OK |
 | `estree-util-is-identifier-name` | 3.0.0 | MIT | OK |
 | `estree-walker` | 3.0.3 | MIT | OK |
@@ -993,29 +961,28 @@ Complete per-package license listing for all installed dependencies.
 | `expo-document-picker` | 55.0.13 | MIT | OK |
 | `expo-file-system` | 19.0.21 | MIT | OK |
 | `expo-font` | 14.0.11 | MIT | OK |
-| `expo-glass-effect` | 0.1.9 | MIT | OK |
+| `expo-glass-effect` | 55.0.10 | MIT | OK |
 | `expo-haptics` | 15.0.8 | MIT | OK |
-| `expo-image` | 3.0.11 | MIT | OK |
-| `expo-image-loader` | 6.0.0 | MIT | OK |
-| `expo-image-picker` | 17.0.10 | MIT | OK |
+| `expo-image-loader` | 55.0.0 | MIT | OK |
+| `expo-image-picker` | 55.0.18 | MIT | OK |
 | `expo-keep-awake` | 15.0.8 | MIT | OK |
 | `expo-linear-gradient` | 15.0.8 | MIT | OK |
 | `expo-linking` | 8.0.11 | MIT | OK |
 | `expo-local-authentication` | 17.0.8 | MIT | OK |
-| `expo-location` | 19.0.8 | MIT | OK |
+| `expo-location` | 55.1.8 | MIT | OK |
 | `expo-modules-autolinking` | 3.0.24 | MIT | OK |
 | `expo-modules-core` | 3.0.29 | MIT | OK |
 | `expo-notifications` | 0.32.16 | MIT | OK |
 | `expo-router` | 6.0.23 | MIT | OK |
 | `expo-screen-capture` | 8.0.9 | MIT | OK |
 | `expo-secure-store` | 15.0.8 | MIT | OK |
-| `expo-sensors` | 15.0.8 | MIT | OK |
+| `expo-sensors` | 55.0.13 | MIT | OK |
 | `expo-server` | 1.0.5 | MIT | OK |
 | `expo-server-sdk` | 6.1.0 | MIT | OK |
 | `expo-speech` | 14.0.8 | MIT | OK |
 | `expo-splash-screen` | 31.0.13 | MIT | OK |
 | `expo-status-bar` | 3.0.9 | MIT | OK |
-| `expo-symbols` | 1.0.8 | MIT | OK |
+| `expo-symbols` | 55.0.7 | MIT | OK |
 | `expo-system-ui` | 6.0.9 | MIT | OK |
 | `expo-web-browser` | 15.0.10 | MIT | OK |
 | `exponential-backoff` | 3.1.3 | Apache-2.0 | OK |
@@ -1029,7 +996,6 @@ Complete per-package license listing for all installed dependencies.
 | `fast-fifo` | 1.3.2 | MIT | OK |
 | `fast-glob` | 3.3.3 | MIT | OK |
 | `fast-json-stable-stringify` | 2.1.0 | MIT | OK |
-| `fast-levenshtein` | 2.0.6 | MIT | OK |
 | `fast-png` | 6.4.0 | MIT | OK |
 | `fast-safe-stringify` | 2.1.1 | MIT | OK |
 | `fast-uri` | 3.1.0 | BSD-3-Clause | OK |
@@ -1044,12 +1010,11 @@ Complete per-package license listing for all installed dependencies.
 | `fetch-blob` | 3.2.0 | MIT | OK |
 | `fflate` | 0.6.10 | MIT | OK |
 | `figures` | 6.1.0 | MIT | OK |
-| `file-entry-cache` | 8.0.0 | MIT | OK |
 | `fill-range` | 7.1.1 | MIT | OK |
 | `filter-obj` | 1.1.0 | MIT | OK |
 | `finalhandler` | 2.1.1 | MIT | OK |
 | `find-up` | 4.1.0 | MIT | OK |
-| `flat-cache` | 4.0.1 | MIT | OK |
+| `flatbuffers` | 25.9.23 | Apache-2.0 | OK |
 | `flatted` | 3.4.2 | ISC | OK |
 | `flow-enums-runtime` | 0.0.6 | MIT | OK |
 | `fontfaceobserver` | 2.3.0 | BSD-2-Clause | OK |
@@ -1083,14 +1048,14 @@ Complete per-package license listing for all installed dependencies.
 | `getenv` | 2.0.0 | MIT | OK |
 | `gl-matrix` | 3.4.4 | MIT | OK |
 | `glob` | 7.2.3 | ISC | OK |
-| `glob-parent` | 6.0.2 | ISC | OK |
-| `globals` | 14.0.0 | MIT | OK |
+| `glob-parent` | 5.1.2 | ISC | OK |
+| `global-agent` | 3.0.0 | BSD-3-Clause | OK |
+| `globalthis` | 1.0.4 | MIT | OK |
 | `globby` | 16.1.0 | MIT | OK |
 | `glsl-noise` | 0.0.0 | MIT | OK |
 | `google-auth-library` | 9.15.1 | Apache-2.0 | OK |
 | `google-logging-utils` | 1.1.3 | Apache-2.0 | OK |
 | `gopd` | 1.2.0 | MIT | OK |
-| `got` | 11.8.6 | MIT | OK |
 | `graceful-fs` | 4.2.11 | ISC | OK |
 | `graphql` | 16.13.2 | MIT | OK |
 | `graphql-depth-limit` | 1.1.0 | MIT | OK |
@@ -1099,6 +1064,7 @@ Complete per-package license listing for all installed dependencies.
 | `graphql-ws` | 6.0.8 | MIT | OK |
 | `grid-index` | 1.1.0 | ISC | OK |
 | `gtoken` | 7.1.0 | MIT | OK |
+| `guid-typescript` | 1.0.9 | ISC | OK |
 | `handlebars` | 4.7.9 | MIT | OK |
 | `happy-dom` | 20.8.9 | MIT | OK |
 | `has-flag` | 4.0.0 | MIT | OK |
@@ -1123,10 +1089,8 @@ Complete per-package license listing for all installed dependencies.
 | `html-url-attributes` | 3.0.1 | MIT | OK |
 | `html2canvas` | 1.4.1 | MIT | OK |
 | `http_ece` | 1.2.0 | MIT | OK |
-| `http-cache-semantics` | 4.2.0 | BSD-2-Clause | OK |
 | `http-errors` | 2.0.1 | MIT | OK |
 | `http-proxy-agent` | 5.0.0 | MIT | OK |
-| `http2-wrapper` | 1.0.3 | MIT | OK |
 | `https-proxy-agent` | 7.0.6 | MIT | OK |
 | `human-signals` | 8.0.1 | Apache-2.0 | OK |
 | `hyphen` | 1.14.1 | ISC | OK |
@@ -1140,7 +1104,6 @@ Complete per-package license listing for all installed dependencies.
 | `image-size` | 1.2.1 | MIT | OK |
 | `immediate` | 3.0.6 | MIT | OK |
 | `immer` | 10.2.0 | MIT | OK |
-| `import-fresh` | 3.3.1 | MIT | OK |
 | `import-in-the-middle` | 3.0.1 | Apache-2.0 | OK |
 | `import-local` | 3.2.0 | MIT | OK |
 | `imurmurhash` | 0.1.4 | MIT | OK |
@@ -1230,16 +1193,15 @@ Complete per-package license listing for all installed dependencies.
 | `jotai-x` | 2.3.2 | MIT | OK |
 | `joycon` | 3.1.1 | MIT | OK |
 | `js-md5` | 0.8.3 | MIT | OK |
-| `js-tokens` | 4.0.0 | MIT | OK |
+| `js-tokens` | 9.0.1 | MIT | OK |
 | `js-yaml` | 4.1.1 | MIT | OK |
 | `jsc-safe-url` | 0.2.4 | 0BSD | OK |
 | `jsesc` | 3.1.0 | MIT | OK |
 | `json-bigint` | 1.0.0 | MIT | OK |
-| `json-buffer` | 3.0.1 | MIT | OK |
 | `json-parse-even-better-errors` | 2.3.1 | MIT | OK |
 | `json-schema-to-ts` | 3.1.1 | MIT | OK |
 | `json-schema-traverse` | 1.0.0 | MIT | OK |
-| `json-stable-stringify-without-jsonify` | 1.0.1 | MIT | OK |
+| `json-stringify-safe` | 5.0.1 | ISC | OK |
 | `json5` | 2.2.3 | MIT | OK |
 | `jsonfile` | 6.2.0 | MIT | OK |
 | `jsonpointer` | 5.0.1 | MIT | OK |
@@ -1247,13 +1209,11 @@ Complete per-package license listing for all installed dependencies.
 | `jwa` | 2.0.1 | MIT | OK |
 | `jws` | 4.0.1 | MIT | OK |
 | `kdbush` | 4.0.2 | ISC | OK |
-| `keyv` | 4.5.4 | MIT | OK |
 | `kleur` | 3.0.3 | MIT | OK |
 | `lan-network` | 0.1.7 | MIT | OK |
 | `lazystream` | 1.0.1 | MIT | OK |
 | `leaflet` | 1.9.4 | BSD-2-Clause | OK |
 | `leven` | 4.1.0 | MIT | OK |
-| `levn` | 0.4.1 | MIT | OK |
 | `lie` | 3.3.0 | MIT | OK |
 | `lighthouse-logger` | 1.4.2 | Apache-2.0 | OK |
 | `linebreak` | 1.1.0 | MIT | OK |
@@ -1266,7 +1226,6 @@ Complete per-package license listing for all installed dependencies.
 | `lodash.isarguments` | 3.1.0 | MIT | OK |
 | `lodash.mapvalues` | 4.6.0 | MIT | OK |
 | `lodash.memoize` | 4.1.2 | MIT | OK |
-| `lodash.merge` | 4.6.2 | MIT | OK |
 | `lodash.sortby` | 4.7.0 | MIT | OK |
 | `lodash.throttle` | 4.1.1 | MIT | OK |
 | `log-symbols` | 2.2.0 | MIT | OK |
@@ -1277,7 +1236,7 @@ Complete per-package license listing for all installed dependencies.
 | `lop` | 0.4.2 | BSD-2-Clause | OK |
 | `lottie-react` | 2.4.1 | MIT | OK |
 | `lottie-web` | 5.13.0 | MIT | OK |
-| `lowercase-keys` | 2.0.0 | MIT | OK |
+| `loupe` | 3.2.1 | MIT | OK |
 | `lru-cache` | 7.18.3 | ISC | OK |
 | `lucide-react` | 0.545.0 | ISC | OK |
 | `lunr` | 2.3.9 | MIT | OK |
@@ -1293,6 +1252,7 @@ Complete per-package license listing for all installed dependencies.
 | `markdown-table` | 3.0.4 | MIT | OK |
 | `marky` | 1.3.0 | Apache-2.0 | OK |
 | `martinez-polygon-clipping` | 0.8.1 | MIT | OK |
+| `matcher` | 3.0.0 | MIT | OK |
 | `math-intrinsics` | 1.1.0 | MIT | OK |
 | `mdast-util-find-and-replace` | 3.0.2 | MIT | OK |
 | `mdast-util-from-markdown` | 2.0.3 | MIT | OK |
@@ -1369,7 +1329,6 @@ Complete per-package license listing for all installed dependencies.
 | `mime-match` | 1.0.2 | ISC | OK |
 | `mime-types` | 3.0.2 | MIT | OK |
 | `mimic-fn` | 2.1.0 | MIT | OK |
-| `mimic-response` | 3.1.0 | MIT | OK |
 | `min-indent` | 1.0.1 | MIT | OK |
 | `minimalistic-assert` | 1.0.1 | ISC | OK |
 | `minimatch` | 9.0.9 | ISC | OK |
@@ -1404,7 +1363,6 @@ Complete per-package license listing for all installed dependencies.
 | `nodemailer` | 8.0.5 | MIT-0 | OK |
 | `normalize-path` | 3.0.0 | MIT | OK |
 | `normalize-svg-path` | 1.1.0 | MIT | OK |
-| `normalize-url` | 6.1.0 | MIT | OK |
 | `npm-package-arg` | 11.0.3 | ISC | OK |
 | `npm-run-path` | 6.0.0 | MIT | OK |
 | `nth-check` | 2.1.1 | BSD-2-Clause | OK |
@@ -1422,18 +1380,19 @@ Complete per-package license listing for all installed dependencies.
 | `on-headers` | 1.1.0 | MIT | OK |
 | `once` | 1.4.0 | ISC | OK |
 | `onetime` | 2.0.1 | MIT | OK |
+| `onnxruntime-common` | 1.24.0-dev.20251116-b39e144322 | MIT | OK |
+| `onnxruntime-node` | 1.24.3 | MIT | OK |
+| `onnxruntime-web` | 1.26.0-dev.20260410-5e55544225 | MIT | OK |
 | `open` | 8.4.2 | MIT | OK |
 | `openai` | 6.33.0 | Apache-2.0 | OK |
 | `openid-client` | 6.8.2 | MIT | OK |
 | `optics-ts` | 2.4.1 | MIT | OK |
 | `optimism` | 0.18.1 | MIT | OK |
 | `option` | 0.2.4 | BSD-2-Clause | OK |
-| `optionator` | 0.9.4 | MIT | OK |
 | `ora` | 3.4.0 | MIT | OK |
 | `orval` | 8.5.3 | MIT | OK |
 | `otplib` | 13.4.0 | MIT | OK |
 | `oxlint` | 1.60.0 | MIT | OK |
-| `p-cancelable` | 2.1.1 | MIT | OK |
 | `p-limit` | 4.0.0 | MIT | OK |
 | `p-locate` | 6.0.0 | MIT | OK |
 | `p-queue` | 8.1.1 | MIT | OK |
@@ -1444,7 +1403,6 @@ Complete per-package license listing for all installed dependencies.
 | `pac-resolver` | 7.0.1 | MIT | OK |
 | `package-json-from-dist` | 1.0.1 | BlueOak-1.0.0 | OK |
 | `pako` | 0.2.9 | MIT | OK |
-| `parent-module` | 1.0.1 | MIT | OK |
 | `parse-entities` | 4.0.2 | MIT | OK |
 | `parse-json` | 5.2.0 | MIT | OK |
 | `parse-ms` | 4.0.0 | MIT | OK |
@@ -1459,6 +1417,7 @@ Complete per-package license listing for all installed dependencies.
 | `path-scurry` | 2.0.2 | BlueOak-1.0.0 | OK |
 | `path-to-regexp` | 8.4.2 | MIT | OK |
 | `pathe` | 2.0.3 | MIT | OK |
+| `pathval` | 2.0.1 | MIT | OK |
 | `pbf` | 4.0.1 | BSD-3-Clause | OK |
 | `pdfkit` | 0.18.0 | MIT | OK |
 | `pend` | 1.2.0 | MIT | OK |
@@ -1480,6 +1439,7 @@ Complete per-package license listing for all installed dependencies.
 | `pino-std-serializers` | 7.1.0 | MIT | OK |
 | `pirates` | 4.0.7 | MIT | OK |
 | `pkg-dir` | 4.2.0 | MIT | OK |
+| `platform` | 1.3.6 | MIT | OK |
 | `playwright` | 1.58.2 | Apache-2.0 | OK |
 | `playwright-core` | 1.58.2 | Apache-2.0 | OK |
 | `plist` | 3.1.0 | MIT | OK |
@@ -1494,8 +1454,7 @@ Complete per-package license listing for all installed dependencies.
 | `postgres-interval` | 1.2.0 | MIT | OK |
 | `potpack` | 1.0.2 | ISC | OK |
 | `preact` | 10.29.1 | MIT | OK |
-| `prelude-ls` | 1.2.1 | MIT | OK |
-| `prettier` | 3.8.1 | MIT | OK |
+| `prettier` | 3.8.3 | MIT | OK |
 | `pretty-bytes` | 6.1.1 | MIT | OK |
 | `pretty-format` | 29.7.0 | MIT | OK |
 | `pretty-ms` | 9.3.0 | MIT | OK |
@@ -1504,6 +1463,7 @@ Complete per-package license listing for all installed dependencies.
 | `process-nextick-args` | 2.0.1 | MIT | OK |
 | `process-warning` | 5.0.0 | MIT | OK |
 | `progress` | 2.0.3 | MIT | OK |
+| `prom-client` | 15.1.3 | Apache-2.0 | OK |
 | `promise` | 8.3.0 | MIT | OK |
 | `promise-limit` | 2.7.0 | ISC | OK |
 | `promise-retry` | 2.0.1 | MIT | OK |
@@ -1511,7 +1471,7 @@ Complete per-package license listing for all installed dependencies.
 | `prompts` | 2.4.2 | MIT | OK |
 | `prop-types` | 15.8.1 | MIT | OK |
 | `property-information` | 7.1.0 | MIT | OK |
-| `protobufjs` | 8.0.1 | BSD-3-Clause | OK |
+| `protobufjs` | 7.5.5 | BSD-3-Clause | OK |
 | `protocol-buffers-schema` | 3.6.1 | MIT | OK |
 | `proxy-addr` | 2.0.7 | MIT | OK |
 | `proxy-agent` | 6.5.0 | MIT | OK |
@@ -1529,7 +1489,6 @@ Complete per-package license listing for all installed dependencies.
 | `queue` | 6.0.2 | MIT | OK |
 | `queue-microtask` | 1.2.3 | MIT | OK |
 | `quick-format-unescaped` | 4.0.4 | MIT | OK |
-| `quick-lru` | 5.1.1 | MIT | OK |
 | `quickselect` | 3.0.0 | ISC | OK |
 | `raf` | 3.4.1 | MIT | OK |
 | `range-parser` | 1.2.1 | MIT | OK |
@@ -1592,20 +1551,19 @@ Complete per-package license listing for all installed dependencies.
 | `require-in-the-middle` | 8.0.1 | MIT | OK |
 | `requireg` | 0.2.2 | MIT | OK |
 | `resolve` | 1.7.1 | MIT | OK |
-| `resolve-alpn` | 1.2.1 | MIT | OK |
 | `resolve-cwd` | 3.0.0 | MIT | OK |
 | `resolve-from` | 5.0.0 | MIT | OK |
 | `resolve-pkg-maps` | 1.0.0 | MIT | OK |
 | `resolve-protobuf-schema` | 2.1.0 | MIT | OK |
 | `resolve-workspace-root` | 2.0.1 | MIT | OK |
 | `resolve.exports` | 2.0.3 | MIT | OK |
-| `responselike` | 2.0.1 | MIT | OK |
 | `restore-cursor` | 2.0.0 | MIT | OK |
 | `restructure` | 3.0.2 | MIT | OK |
 | `retry` | 0.13.1 | MIT | OK |
 | `retry-request` | 7.0.2 | MIT | OK |
 | `reusify` | 1.1.0 | MIT | OK |
 | `rimraf` | 3.0.2 | ISC | OK |
+| `roarr` | 2.15.4 | BSD-3-Clause | OK |
 | `robust-predicates` | 2.0.4 | Unlicense | OK |
 | `rollup` | 4.59.0 | MIT | OK |
 | `router` | 2.2.0 | MIT | OK |
@@ -1620,8 +1578,9 @@ Complete per-package license listing for all installed dependencies.
 | `scroll-into-view-if-needed` | 3.1.0 | MIT | OK |
 | `secure-json-parse` | 4.1.0 | BSD-3-Clause | OK |
 | `semver` | 7.7.4 | ISC | OK |
+| `semver-compare` | 1.0.0 | MIT | OK |
 | `send` | 1.2.1 | MIT | OK |
-| `serialize-error` | 2.1.0 | MIT | OK |
+| `serialize-error` | 7.0.1 | MIT | OK |
 | `serve-static` | 2.2.1 | MIT | OK |
 | `server-only` | 0.0.1 | MIT | OK |
 | `set-function-length` | 1.2.2 | MIT | OK |
@@ -1631,6 +1590,7 @@ Complete per-package license listing for all installed dependencies.
 | `sha.js` | 2.4.12 | (MIT AND BSD-3-Clause) | OK |
 | `shallow-equal` | 3.1.0 | MIT | OK |
 | `shallowequal` | 1.1.0 | MIT | OK |
+| `sharp` | 0.34.5 | Apache-2.0 | OK |
 | `shebang-command` | 2.0.0 | MIT | OK |
 | `shebang-regex` | 3.0.0 | MIT | OK |
 | `shell-quote` | 1.8.3 | MIT | OK |
@@ -1663,7 +1623,7 @@ Complete per-package license listing for all installed dependencies.
 | `splaytree` | 0.1.4 | MIT | OK |
 | `split-on-first` | 1.1.0 | MIT | OK |
 | `split2` | 4.2.0 | ISC | OK |
-| `sprintf-js` | 1.0.3 | BSD-3-Clause | OK |
+| `sprintf-js` | 1.1.3 | BSD-3-Clause | OK |
 | `stack-utils` | 2.0.6 | MIT | OK |
 | `stackback` | 0.0.2 | MIT | OK |
 | `stackblur-canvas` | 2.7.0 | MIT | OK |
@@ -1690,6 +1650,7 @@ Complete per-package license listing for all installed dependencies.
 | `strip-final-newline` | 4.0.0 | MIT | OK |
 | `strip-indent` | 3.0.0 | MIT | OK |
 | `strip-json-comments` | 5.0.3 | MIT | OK |
+| `strip-literal` | 3.1.0 | MIT | OK |
 | `strnum` | 2.2.3 | MIT | OK |
 | `structured-headers` | 0.4.1 | MIT | OK |
 | `stubs` | 3.0.0 | MIT | OK |
@@ -1717,6 +1678,7 @@ Complete per-package license listing for all installed dependencies.
 | `tar` | 7.5.13 | BlueOak-1.0.0 | OK |
 | `tar-fs` | 3.1.2 | MIT | OK |
 | `tar-stream` | 3.1.8 | MIT | OK |
+| `tdigest` | 0.1.2 | MIT | OK |
 | `teeny-request` | 9.0.0 | Apache-2.0 | OK |
 | `teex` | 1.0.1 | MIT | OK |
 | `temp-dir` | 2.0.0 | MIT | OK |
@@ -1738,8 +1700,10 @@ Complete per-package license listing for all installed dependencies.
 | `tinybench` | 2.9.0 | MIT | OK |
 | `tinyexec` | 1.0.4 | MIT | OK |
 | `tinyglobby` | 0.2.15 | MIT | OK |
+| `tinypool` | 1.1.1 | MIT | OK |
 | `tinyqueue` | 3.0.0 | ISC | OK |
 | `tinyrainbow` | 3.1.0 | MIT | OK |
+| `tinyspy` | 4.0.4 | MIT | OK |
 | `tmpl` | 1.0.5 | BSD-3-Clause | OK |
 | `to-buffer` | 1.2.2 | MIT | OK |
 | `to-regex-range` | 5.0.1 | MIT | OK |
@@ -1752,7 +1716,6 @@ Complete per-package license listing for all installed dependencies.
 | `troika-worker-utils` | 0.52.0 | MIT | OK |
 | `trough` | 2.2.0 | MIT | OK |
 | `ts-algebra` | 2.0.0 | MIT | OK |
-| `ts-api-utils` | 2.5.0 | MIT | OK |
 | `ts-interface-checker` | 0.1.13 | Apache-2.0 | OK |
 | `ts-invariant` | 0.10.3 | MIT | OK |
 | `ts-jest` | 29.4.9 | MIT | OK |
@@ -1762,7 +1725,6 @@ Complete per-package license listing for all installed dependencies.
 | `tunnel-rat` | 0.1.2 | MIT | OK |
 | `turbo` | 2.9.6 | MIT | OK |
 | `tw-animate-css` | 1.4.0 | MIT | OK |
-| `type-check` | 0.4.0 | MIT | OK |
 | `type-detect` | 4.0.8 | MIT | OK |
 | `type-fest` | 4.41.0 | (MIT OR CC0-1.0) | OK |
 | `type-is` | 2.0.1 | MIT | OK |
@@ -1797,7 +1759,6 @@ Complete per-package license listing for all installed dependencies.
 | `unpipe` | 1.0.0 | MIT | OK |
 | `unrs-resolver` | 1.11.1 | MIT | OK |
 | `update-browserslist-db` | 1.2.3 | MIT | OK |
-| `uri-js` | 4.4.1 | BSD-2-Clause | OK |
 | `urql` | 5.0.1 | MIT | OK |
 | `use-callback-ref` | 1.3.3 | MIT | OK |
 | `use-context-selector` | 1.4.4 | MIT | OK |
@@ -1820,6 +1781,7 @@ Complete per-package license listing for all installed dependencies.
 | `victory-vendor` | 36.9.2 | MIT AND ISC | OK |
 | `vite` | 7.3.2 | MIT | OK |
 | `vite-compatible-readable-stream` | 3.6.1 | MIT | OK |
+| `vite-node` | 3.2.4 | MIT | OK |
 | `vitest` | 4.1.2 | MIT | OK |
 | `vlq` | 1.0.1 | MIT | OK |
 | `void-elements` | 3.1.0 | MIT | OK |
@@ -1840,7 +1802,6 @@ Complete per-package license listing for all installed dependencies.
 | `why-is-node-running` | 2.3.0 | MIT | OK |
 | `wildcard` | 1.1.2 | MIT | OK |
 | `wonka` | 6.3.6 | MIT | OK |
-| `word-wrap` | 1.2.5 | MIT | OK |
 | `wordwrap` | 1.0.0 | MIT | OK |
 | `wouter` | 3.9.0 | Unlicense | OK |
 | `wrap-ansi` | 8.1.0 | MIT | OK |
@@ -1864,7 +1825,6 @@ Complete per-package license listing for all installed dependencies.
 | `zen-observable-ts` | 1.2.5 | MIT | OK |
 | `zip-stream` | 6.0.1 | MIT | OK |
 | `zod` | 4.3.6 | MIT | OK |
-| `zod-validation-error` | 3.5.4 | MIT | OK |
 | `zustand` | 5.0.12 | MIT | OK |
 | `zustand-x` | 6.1.0 | MIT | OK |
 | `zwitch` | 2.0.4 | MIT | OK |

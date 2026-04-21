@@ -221,7 +221,7 @@ export const DECISION_CASES: DecisionCase[] = [
     currentStage: 2,
     signal: {
       label: 'Distressed asset — TER-DST-2026-447',
-      sourceSystem: 'Terra Beacon · Distress Pipeline',
+      sourceSystem: 'Terra · Distress Pipeline',
       receivedAt: '18 Apr 2026 11:02:18',
       raw: {
         asset_id: 'TER-DST-2026-447',
@@ -277,7 +277,7 @@ export const DECISION_CASES: DecisionCase[] = [
     },
     proof: {
       id: 'PCH-DC-2026-0418-014',
-      sourceSystem: 'Terra Beacon',
+      sourceSystem: 'Terra',
       sourceDomain: 'Terra',
       signalType: 'capital_allocation',
       confidence: 0.81,
@@ -300,7 +300,7 @@ export const DECISION_CASES: DecisionCase[] = [
         {
           id: 'c1',
           event: 'Distress signal ingested',
-          actor: 'System / Terra Beacon',
+          actor: 'System / Terra',
           timestamp: '18 Apr 2026 11:02:18',
           hash: 'sha256:7c1a9d…',
         },
@@ -476,4 +476,4 @@ export const DECISION_CASES: DecisionCase[] = [
   },
 ];
 
-export const DEFAULT_CASE_ID = DECISION_CASES[0]!.id;
+export const DEFAULT_CASE_ID = DECISION_CASES[0]?.id ?? 'DC-2026-0419-001';

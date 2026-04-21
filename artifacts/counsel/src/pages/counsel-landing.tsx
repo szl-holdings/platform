@@ -68,7 +68,7 @@ const EXPOSURE_DEMO = [
     next: 'Counter-redline · response within 48h',
   },
   {
-    matter: 'Beacon employment claim',
+    matter: 'Meridian employment claim',
     exposure: '$0.5M',
     status: 'monitoring',
     severity: 'info',
@@ -157,13 +157,14 @@ export default function CounselLandingPage() {
 
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <button
+              type="button"
               onClick={() => setDemoOpen(true)}
               className="flex items-center gap-2 px-6 py-3 bg-violet-500 hover:bg-violet-400 text-[#0a0614] font-semibold rounded-xl transition-all text-sm"
             >
               Request a Pilot <ChevronRight className="w-4 h-4" />
             </button>
             <Link href="/dashboard">
-              <button className="flex items-center gap-2 px-6 py-3 bg-violet-500/10 hover:bg-violet-500/15 border border-violet-500/20 text-violet-200 font-medium rounded-xl transition-all text-sm">
+              <button type="button" className="flex items-center gap-2 px-6 py-3 bg-violet-500/10 hover:bg-violet-500/15 border border-violet-500/20 text-violet-200 font-medium rounded-xl transition-all text-sm">
                 Open Matter Command <Activity className="w-4 h-4" />
               </button>
             </Link>
@@ -429,13 +430,14 @@ export default function CounselLandingPage() {
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <button
+              type="button"
               onClick={() => setDemoOpen(true)}
               className="flex items-center gap-2 px-6 py-3 bg-violet-500 hover:bg-violet-400 text-[#0a0614] font-semibold rounded-xl transition-all text-sm"
             >
               Request a Pilot <Gavel className="w-4 h-4" />
             </button>
             <Link href="/dashboard">
-              <button className="flex items-center gap-2 px-6 py-3 border border-violet-500/20 hover:border-violet-500/40 text-violet-200 font-medium rounded-xl transition-all text-sm">
+              <button type="button" className="flex items-center gap-2 px-6 py-3 border border-violet-500/20 hover:border-violet-500/40 text-violet-200 font-medium rounded-xl transition-all text-sm">
                 Open Matter Command <FileText className="w-4 h-4" />
               </button>
             </Link>

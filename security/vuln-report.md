@@ -1,7 +1,7 @@
 # Dependency Vulnerability Report
 
-**Generated:** 2026-04-20 (pnpm audit)
-**Total dependencies scanned:** 2372
+**Generated:** 2026-04-21 (pnpm audit)
+**Total dependencies scanned:** 2322
 
 ## Summary
 

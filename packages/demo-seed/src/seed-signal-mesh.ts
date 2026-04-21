@@ -48,7 +48,8 @@ export async function seedSignalMesh(opts: { startConnectors?: boolean } = {}): 
   entitiesRegistered: number;
   connectorsStarted: number;
 }> {
-  console.log('[seed-signal-mesh] Starting signal mesh seed...');
+  // biome-ignore lint/suspicious/noConsole: seed script
+  console.log("[seed-signal-mesh] Starting signal mesh seed...");
 
   registerEntities();
   clearNarrativeMeshIndex();
@@ -64,6 +65,7 @@ export async function seedSignalMesh(opts: { startConnectors?: boolean } = {}): 
     SENTRA_RANSOMWARE_NARRATIVE,
     COUNSEL_DEADLINE_NARRATIVE,
   ]) {
+    // biome-ignore lint/suspicious/noConsole: seed script
     console.log(`[seed-signal-mesh] Seeding narrative: ${narrative.title}`);
 
     const signals = narrative.buildSignals();
@@ -143,6 +145,7 @@ export async function seedSignalMesh(opts: { startConnectors?: boolean } = {}): 
     connectorsStarted,
   };
 
+  // biome-ignore lint/suspicious/noConsole: seed script
   console.log('[seed-signal-mesh] ✓ Seed complete:', stats);
   return stats;
 }
@@ -306,7 +309,7 @@ function registerEntities(): void {
       entityId: 'threat-c2-99',
       entityType: 'custom',
       domain: 'security',
-      displayName: 'Anomalous C2 Beacon',
+      displayName: 'Anomalous C2 Callback',
       health: 'degraded',
       attributes: { destinationIp: '185.220.101.42' },
       snapshotAt: now,

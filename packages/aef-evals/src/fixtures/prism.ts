@@ -3,7 +3,7 @@ import type { GoldenQuery } from '../metrics.js';
 export const PRISM_GOLDEN_QUERIES: GoldenQuery[] = [
   {
     queryId: 'prism-q001',
-    query: 'What are the upcoming filing deadlines for matter 14:23-cv-Beacon?',
+    query: 'What are the upcoming filing deadlines for matter Harrington v. Meridian Collective?',
     relevantChunkIds: ['prism-chunk-001', 'prism-chunk-002'],
     exactMatchBoostTerms: ['docket', 'filing deadline'],
     metadata: {
@@ -162,14 +162,14 @@ export const PRISM_MOCK_CORPUS = new Map<string, { text: string; boostTerms: str
   [
     'prism-chunk-001',
     {
-      text: 'Matter 14:23-cv-Beacon — SDNY. Filing deadlines: Motion to Dismiss response due 2024-07-12. Pre-trial conference: 2024-08-05. Trial date: 2025-01-14. Counsel: Greenfield & Partners LLP.',
+      text: 'Matter 14:23-cv-Harrington — SDNY. Filing deadlines: Motion to Dismiss response due 2024-07-12. Pre-trial conference: 2024-08-05. Trial date: 2025-01-14. Counsel: Greenfield & Partners LLP.',
       boostTerms: ['docket', 'filing deadline'],
     },
   ],
   [
     'prism-chunk-002',
     {
-      text: 'Docket 14:23-cv-Beacon obligation log: 3 upcoming deadlines within 30 days. Priority 1 — response to summary judgment motion (July 12). Priority 2 — expert witness disclosure (July 22). Priority 3 — joint pretrial order (August 5).',
+      text: 'Docket 14:23-cv-Harrington obligation log: 3 upcoming deadlines within 30 days. Priority 1 — response to summary judgment motion (July 12). Priority 2 — expert witness disclosure (July 22). Priority 3 — joint pretrial order (August 5).',
       boostTerms: ['docket', 'filing deadline'],
     },
   ],
