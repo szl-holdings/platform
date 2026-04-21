@@ -608,6 +608,221 @@ function PendingActionsPanel() {
   );
 }
 
+interface TerraLeaseRow {
+  id: string;
+  tiAllowance: number;
+  expirationDate: string;
+}
+
+interface TerraTaxAppealRow {
+  id: string;
+  appealStatus: 'eligible' | 'filed' | 'hearing' | 'won' | 'lost' | 'not-eligible';
+  potentialSavings: number;
+}
+
+interface TerraConstructionRow {
+  id: string;
+  status: 'on-track' | 'behind' | 'at-risk' | 'complete';
+  totalBudget: number;
+  totalSpent: number;
+}
+
+interface TerraLeasesResponse {
+  count: number;
+  leases: TerraLeaseRow[];
+  dataMode: string;
+}
+
+interface TerraTaxAppealsResponse {
+  count: number;
+  properties: TerraTaxAppealRow[];
+  dataMode: string;
+}
+
+interface TerraConstructionResponse {
+  count: number;
+  projects: TerraConstructionRow[];
+  dataMode: string;
+}
+
+function useTerraIntel() {
+  const leases = useStandardQuery<TerraLeasesResponse>({
+    queryKey: ['terra-portfolio-leases'],
+    queryFn: async () => {
+      const res = await fetch('/terra/leases');
+      if (!res.ok) throw new Error('terra leases unavailable');
+      return res.json();
+    },
+    refetchInterval: 60000,
+    retry: 1,
+  });
+  const taxAppeals = useStandardQuery<TerraTaxAppealsResponse>({
+    queryKey: ['terra-portfolio-tax-appeals'],
+    queryFn: async () => {
+      const res = await fetch('/terra/tax-appeals');
+      if (!res.ok) throw new Error('terra tax appeals unavailable');
+      return res.json();
+    },
+    refetchInterval: 60000,
+    retry: 1,
+  });
+  const construction = useStandardQuery<TerraConstructionResponse>({
+    queryKey: ['terra-portfolio-construction'],
+    queryFn: async () => {
+      const res = await fetch('/terra/construction-projects');
+      if (!res.ok) throw new Error('terra construction unavailable');
+      return res.json();
+    },
+    refetchInterval: 60000,
+    retry: 1,
+  });
+  return { leases, taxAppeals, construction };
+}
+
+function fmtMoney(n: number): string {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
+  return `$${n}`;
+}
+
+function TerraIntelPanel() {
+  const { leases, taxAppeals, construction } = useTerraIntel();
+  const isLoading = leases.isLoading || taxAppeals.isLoading || construction.isLoading;
+
+  const today = new Date();
+  const leaseRows = leases.data?.leases ?? [];
+  const activeLeases = leaseRows.filter(
+    (l) => !l.expirationDate || new Date(l.expirationDate) >= today,
+  );
+  const leaseCount = activeLeases.length;
+  const totalTI = activeLeases.reduce((s, l) => s + (l.tiAllowance || 0), 0);
+
+  const appealRows = taxAppeals.data?.properties ?? [];
+  const activeAppeals = appealRows.filter(
+    (a) => a.appealStatus === 'filed' || a.appealStatus === 'hearing',
+  ).length;
+  const totalSavings = appealRows.reduce((s, a) => s + (a.potentialSavings || 0), 0);
+
+  const projectRows = construction.data?.projects ?? [];
+  const activeProjects = projectRows.filter((p) => p.status !== 'complete');
+  const onTrackCount = activeProjects.filter((p) => p.status === 'on-track').length;
+  const atRiskCount = activeProjects.filter(
+    (p) => p.status === 'behind' || p.status === 'at-risk',
+  ).length;
+
+  return (
+    <div className="bg-card border border-border rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+          <Building className="w-3.5 h-3.5" style={{ color: '#4d7c0f' }} />
+          Terra Intel
+        </h3>
+        <a
+          href="/terra/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+        >
+          DOMAINE <ArrowUpRight className="w-2.5 h-2.5" />
+        </a>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-10 bg-muted/50 rounded-lg animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2.5 py-2 border-b border-border/30">
+            <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-lime-900/20">
+              <FileText className="w-3.5 h-3.5 text-lime-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-semibold text-foreground leading-tight">
+                Lease Abstraction
+              </p>
+              {leases.error ? (
+                <p className="text-[10px] text-amber-500 flex items-center gap-1">
+                  <AlertTriangle className="w-2.5 h-2.5" /> unavailable
+                </p>
+              ) : (
+                <p className="text-[10px] text-muted-foreground">
+                  TI exposure: {leases.data ? fmtMoney(totalTI) : '—'}
+                </p>
+              )}
+            </div>
+            <div className="text-right shrink-0">
+              <p className="text-sm font-bold font-mono text-foreground">
+                {leases.error ? '—' : leaseCount}
+              </p>
+              <p className="text-[10px] text-muted-foreground">active</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 py-2 border-b border-border/30">
+            <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-emerald-900/20">
+              <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-semibold text-foreground leading-tight">Tax Appeals</p>
+              {taxAppeals.error ? (
+                <p className="text-[10px] text-amber-500 flex items-center gap-1">
+                  <AlertTriangle className="w-2.5 h-2.5" /> unavailable
+                </p>
+              ) : (
+                <p className="text-[10px] text-muted-foreground">
+                  Potential: {taxAppeals.data ? fmtMoney(totalSavings) : '—'}
+                </p>
+              )}
+            </div>
+            <div className="text-right shrink-0">
+              <p className="text-sm font-bold font-mono text-foreground">
+                {taxAppeals.error ? '—' : activeAppeals}
+              </p>
+              <p className="text-[10px] text-muted-foreground">in progress</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 py-2">
+            <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-amber-900/20">
+              <Layers className="w-3.5 h-3.5 text-amber-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-semibold text-foreground leading-tight">Construction</p>
+              {construction.error ? (
+                <p className="text-[10px] text-amber-500 flex items-center gap-1">
+                  <AlertTriangle className="w-2.5 h-2.5" /> unavailable
+                </p>
+              ) : (
+                <p className="text-[10px] text-muted-foreground">
+                  {construction.data ? (
+                    <>
+                      <span className="text-emerald-500">{onTrackCount} on-track</span>
+                      {atRiskCount > 0 && (
+                        <span className="text-amber-500"> · {atRiskCount} at risk</span>
+                      )}
+                    </>
+                  ) : (
+                    '—'
+                  )}
+                </p>
+              )}
+            </div>
+            <div className="text-right shrink-0">
+              <p className="text-sm font-bold font-mono text-foreground">
+                {construction.error ? '—' : activeProjects.length}
+              </p>
+              <p className="text-[10px] text-muted-foreground">active</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface AppHealth {
   appSlug: string;
   overallScore: number;
@@ -1180,6 +1395,9 @@ export default function CommandCenter() {
 
             {/* Stale source warnings */}
             <StaleSourcesWarning />
+
+            {/* Terra Intel — live portfolio data from DOMAINE */}
+            <TerraIntelPanel />
 
             {/* Watchlist Deltas */}
             <WatchlistPanel />
