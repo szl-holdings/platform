@@ -132,6 +132,13 @@ void SLOW_QUERY_THRESHOLD_MS;
 
 interface CheckoutRecord {
   id: number;
+  // Wall-clock at which the caller invoked pool.connect() (BEFORE awaiting).
+  // Used to compute pool-queue wait time; NOT used for the OBS-007 "held"
+  // threshold so wait-on-saturated-pool does not produce a false leak alert.
+  requestedAt: number;
+  // Wall-clock at which pg actually handed us a usable client (AFTER await).
+  // This is what counts as "the client was checked out" — the OBS-007 hold
+  // threshold and the warn payload's "held" message both key off this.
   acquiredAt: number;
   stack: string;
   warned: boolean;
@@ -167,7 +174,10 @@ function captureStack(): string {
 
 export interface LongCheckoutInfo {
   id: number;
+  /** Time the client has actually been held since pg handed it over. */
   ageMs: number;
+  /** Time the caller spent waiting in the pool queue before acquisition. */
+  waitMs: number;
   acquiredAt: string;
   stack: string;
 }
@@ -183,6 +193,7 @@ export function getLongRunningCheckouts(
       out.push({
         id: rec.id,
         ageMs,
+        waitMs: rec.acquiredAt - rec.requestedAt,
         acquiredAt: new Date(rec.acquiredAt).toISOString(),
         stack: rec.stack,
       });
@@ -209,10 +220,18 @@ const _originalPoolConnect = pool.connect.bind(pool);
   const stack = captureStack();
   const requestedAt = Date.now();
   const client = (await _originalPoolConnect()) as pg.PoolClient;
+  // The OBS-007 "held" semantics intentionally measure time AFTER pg
+  // handed us a usable client — pool-queue wait time (caller blocked
+  // because all max=10 slots were busy) is reported separately as
+  // waitMs and must not contribute to the leak threshold, otherwise
+  // brief contention bursts under boot fan-out produce false alerts
+  // for callers that release their client immediately.
+  const acquiredAt = Date.now();
   const id = nextCheckoutId++;
   const record: CheckoutRecord = {
     id,
-    acquiredAt: requestedAt,
+    requestedAt,
+    acquiredAt,
     stack,
     warned: false,
   };
@@ -241,16 +260,21 @@ const _sweeperInterval = _sweeperEnabled ? setInterval(() => {
     const ageMs = now - rec.acquiredAt;
     if (!rec.warned && ageMs >= CHECKOUT_WARN_THRESHOLD_MS) {
       rec.warned = true;
+      const waitMs = rec.acquiredAt - rec.requestedAt;
       const payload = {
         level: "warn",
         event: "db.pool.checkout.long",
         obsRef: "OBS-007",
         checkoutId: rec.id,
+        // ageMs measures only "held since acquisition" — pool-queue wait
+        // time is reported separately as waitMs. See instrumentedConnect
+        // for the rationale (avoids false leak alerts under contention).
         ageMs,
+        waitMs,
         thresholdMs: CHECKOUT_WARN_THRESHOLD_MS,
         acquiredAt: new Date(rec.acquiredAt).toISOString(),
         stack: rec.stack,
-        message: `[db] Pool checkout #${rec.id} held ${ageMs}ms (> ${CHECKOUT_WARN_THRESHOLD_MS}ms threshold) — possible client leak or long-running transaction`,
+        message: `[db] Pool checkout #${rec.id} held ${ageMs}ms (> ${CHECKOUT_WARN_THRESHOLD_MS}ms threshold; waited ${waitMs}ms in pool queue before acquisition) — possible client leak or long-running transaction`,
       };
       // Structured single-line JSON so log shippers / Pino sinks can index
       // the event without a custom parser.
