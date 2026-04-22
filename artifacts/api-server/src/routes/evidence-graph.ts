@@ -200,11 +200,13 @@ router.post(
         decision,
         actorId,
         actorRole,
+        orgId: tenantId,
         justification: trimmed,
         policyOutcome,
         previousStatus,
         newStatus: effectiveStatus,
         decidedAt,
+        sourceSurface: 'evidence-explorer',
       };
       defaultRecommendationStore.recordDecision(record);
 

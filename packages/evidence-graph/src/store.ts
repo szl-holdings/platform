@@ -48,11 +48,18 @@ export interface RecommendationDecision {
   decision: RecommendationDecisionType;
   actorId: string;
   actorRole?: string;
+  /** Tenant / org the actor decided on behalf of (when known). */
+  orgId?: string;
   justification?: string;
   policyOutcome: 'allow' | 'require-approval' | 'block' | 'pending';
   previousStatus: Recommendation['status'];
   newStatus: Recommendation['status'];
   decidedAt: string;
+  /**
+   * Product surface that submitted the decision (e.g. `evidence-explorer`,
+   * `unified-command`). Useful for downstream audit + analytics.
+   */
+  sourceSurface?: string;
 }
 
 export interface RecommendationStoreBackend {

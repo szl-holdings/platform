@@ -69,6 +69,7 @@ export async function initDurablePersistence(): Promise<void> {
       meshEvidenceItemsTable,
       meshEvidenceEntityLinksTable,
       meshRecommendationsTable,
+      meshRecommendationDecisionsTable,
       meshEntitySnapshotsTable,
     } = await import("@szl-holdings/db/schema");
 
@@ -120,6 +121,7 @@ export async function initDurablePersistence(): Promise<void> {
       recommendationStore = new PostgresRecommendationStore({
         db,
         recommendationsTable: meshRecommendationsTable,
+        recommendationDecisionsTable: meshRecommendationDecisionsTable,
         flushIntervalMs: FLUSH_INTERVAL_MS,
         logger,
       });

@@ -64,6 +64,12 @@ export interface MeshRecommendationsTableLike extends PgTable {
   generatedAt: PgColumn;
 }
 
+export interface MeshRecommendationDecisionsTableLike extends PgTable {
+  decisionId: PgColumn;
+  recommendationId: PgColumn;
+  decidedAt: PgColumn;
+}
+
 export interface MeshEntitySnapshotsTableLike extends PgTable {
   entityId: PgColumn;
   snapshotAt: PgColumn;
@@ -332,11 +338,21 @@ export class PostgresEvidenceStore implements EvidenceStoreBackend {
 
 export interface PostgresRecommendationStoreOptions extends BaseOpts {
   recommendationsTable: MeshRecommendationsTableLike;
+  /**
+   * Optional table for the durable decision audit log. When omitted, decisions
+   * are kept only in the in-memory cache (matching legacy behaviour). When
+   * provided, every recordDecision() write-throughs to PostgreSQL on the next
+   * flush and hydrate() restores the audit trail on boot.
+   */
+  recommendationDecisionsTable?: MeshRecommendationDecisionsTableLike;
+  /** Max number of decision rows to hydrate at boot. Defaults to 5000. */
+  decisionHydrateLimit?: number;
 }
 
 export class PostgresRecommendationStore implements RecommendationStoreBackend {
   private readonly cache = new InMemoryRecommendationStore();
   private readonly pending = new Map<string, Recommendation>();
+  private readonly pendingDecisions = new Map<string, RecommendationDecision>();
   private flushTimer: ReturnType<typeof setInterval> | undefined;
   private flushing = false;
   private readonly opts: Required<Pick<BaseOpts, 'flushIntervalMs' | 'hydrateLimit'>> &
@@ -383,9 +399,14 @@ export class PostgresRecommendationStore implements RecommendationStoreBackend {
   }
 
   recordDecision(decision: RecommendationDecision): void {
-    // Decisions are tracked in the in-memory cache; durable persistence is
-    // tracked separately via the outcome signal emitted on the bus.
+    // Always update the in-memory cache so reads via listDecisions are
+    // immediately consistent. When a decisions table is configured, also
+    // queue the row for write-through to PostgreSQL on the next flush so
+    // the audit trail survives restarts.
     this.cache.recordDecision(decision);
+    if (this.opts.recommendationDecisionsTable) {
+      this.pendingDecisions.set(decision.decisionId, decision);
+    }
   }
 
   listDecisions(recommendationId: string): RecommendationDecision[] {
@@ -409,6 +430,45 @@ export class PostgresRecommendationStore implements RecommendationStoreBackend {
         }
       }
       this.opts.logger?.info?.({ loaded }, 'PostgresRecommendationStore: hydrated');
+
+      // Hydrate the decision audit log so listDecisions returns the durable
+      // history after a restart, not just decisions made since boot.
+      if (this.opts.recommendationDecisionsTable) {
+        try {
+          const decisionMax = this.opts.decisionHydrateLimit ?? 5000;
+          const decisionRows = await this.opts.db
+            .select()
+            .from(this.opts.recommendationDecisionsTable)
+            .orderBy(desc(this.opts.recommendationDecisionsTable.decidedAt))
+            .limit(decisionMax);
+          let decisionsLoaded = 0;
+          // Order ascending in the cache so listDecisions returns the
+          // chronological order callers expect.
+          const ordered = (
+            decisionRows as Array<{ payload?: { decision?: RecommendationDecision } | null }>
+          )
+            .map((r) => r.payload?.decision)
+            .filter(
+              (d): d is RecommendationDecision =>
+                !!d && typeof d === 'object' && typeof d.decisionId === 'string',
+            )
+            .sort((a, b) => a.decidedAt.localeCompare(b.decidedAt));
+          for (const d of ordered) {
+            this.cache.recordDecision(d);
+            decisionsLoaded++;
+          }
+          this.opts.logger?.info?.(
+            { decisionsLoaded },
+            'PostgresRecommendationStore: hydrated decision audit log',
+          );
+        } catch (err) {
+          this.opts.logger?.warn?.(
+            { err },
+            'PostgresRecommendationStore: decision audit log hydration failed',
+          );
+        }
+      }
+
       return loaded;
     } catch (err) {
       this.opts.logger?.error?.({ err }, 'PostgresRecommendationStore: hydrate failed');
@@ -417,48 +477,92 @@ export class PostgresRecommendationStore implements RecommendationStoreBackend {
   }
 
   async flush(): Promise<{ saved: number }> {
-    if (this.flushing || this.pending.size === 0) return { saved: 0 };
+    if (this.flushing) return { saved: 0 };
+    if (this.pending.size === 0 && this.pendingDecisions.size === 0) return { saved: 0 };
     this.flushing = true;
     const writes = Array.from(this.pending.values());
     this.pending.clear();
+    const decisionWrites = Array.from(this.pendingDecisions.values());
+    this.pendingDecisions.clear();
     let saved = 0;
     try {
-      const rows = writes.map((rec) => ({
-        recommendationId: rec.recommendationId,
-        domain: rec.domain,
-        title: rec.title,
-        suggestedAction: rec.suggestedAction,
-        status: rec.status,
-        confidence: rec.confidence,
-        freshness: rec.freshness,
-        tenantId: rec.tenantId ?? null,
-        generatedBy: rec.generatedBy ?? null,
-        generatedAt: new Date(rec.generatedAt),
-        expiresAt: rec.expiresAt ? new Date(rec.expiresAt) : null,
-        resolvedAt: rec.resolvedAt ? new Date(rec.resolvedAt) : null,
-        payload: { recommendation: rec },
-      }));
-      const updateSet = buildExcludedSet(this.opts.recommendationsTable, rows[0]!);
-      const batches = chunkArray(rows, BATCH_SIZE);
-      for (let i = 0; i < batches.length; i++) {
-        const batchRows = batches[i]!;
-        const batchRecs = writes.slice(i * BATCH_SIZE, i * BATCH_SIZE + batchRows.length);
-        try {
-          await this.opts.db
-            .insert(this.opts.recommendationsTable)
-            .values(batchRows as never)
-            .onConflictDoUpdate({
-              target: this.opts.recommendationsTable.recommendationId,
-              set: updateSet as never,
-            });
-          saved += batchRows.length;
-        } catch (err) {
-          this.opts.logger?.warn?.(
-            { err, batchSize: batchRows.length },
-            'PostgresRecommendationStore: batch upsert failed; re-queuing',
-          );
-          for (const rec of batchRecs) {
-            this.pending.set(rec.recommendationId, rec);
+      if (writes.length > 0) {
+        const rows = writes.map((rec) => ({
+          recommendationId: rec.recommendationId,
+          domain: rec.domain,
+          title: rec.title,
+          suggestedAction: rec.suggestedAction,
+          status: rec.status,
+          confidence: rec.confidence,
+          freshness: rec.freshness,
+          tenantId: rec.tenantId ?? null,
+          generatedBy: rec.generatedBy ?? null,
+          generatedAt: new Date(rec.generatedAt),
+          expiresAt: rec.expiresAt ? new Date(rec.expiresAt) : null,
+          resolvedAt: rec.resolvedAt ? new Date(rec.resolvedAt) : null,
+          payload: { recommendation: rec },
+        }));
+        const updateSet = buildExcludedSet(this.opts.recommendationsTable, rows[0]!);
+        const batches = chunkArray(rows, BATCH_SIZE);
+        for (let i = 0; i < batches.length; i++) {
+          const batchRows = batches[i]!;
+          const batchRecs = writes.slice(i * BATCH_SIZE, i * BATCH_SIZE + batchRows.length);
+          try {
+            await this.opts.db
+              .insert(this.opts.recommendationsTable)
+              .values(batchRows as never)
+              .onConflictDoUpdate({
+                target: this.opts.recommendationsTable.recommendationId,
+                set: updateSet as never,
+              });
+            saved += batchRows.length;
+          } catch (err) {
+            this.opts.logger?.warn?.(
+              { err, batchSize: batchRows.length },
+              'PostgresRecommendationStore: batch upsert failed; re-queuing',
+            );
+            for (const rec of batchRecs) {
+              this.pending.set(rec.recommendationId, rec);
+            }
+          }
+        }
+      }
+
+      // Persist decision audit log rows. Decisions are append-only and keyed
+      // by decisionId — onConflictDoNothing protects against double-flushes.
+      const decisionsTable = this.opts.recommendationDecisionsTable;
+      if (decisionsTable && decisionWrites.length > 0) {
+        const decisionRows = decisionWrites.map((d) => ({
+          decisionId: d.decisionId,
+          recommendationId: d.recommendationId,
+          actorId: d.actorId,
+          actorRole: d.actorRole ?? null,
+          orgId: d.orgId ?? null,
+          decision: d.decision,
+          justification: d.justification ?? null,
+          policyOutcome: d.policyOutcome,
+          previousStatus: d.previousStatus,
+          newStatus: d.newStatus,
+          sourceSurface: d.sourceSurface ?? null,
+          decidedAt: new Date(d.decidedAt),
+          payload: { decision: d },
+        }));
+        for (let i = 0; i < decisionRows.length; i += BATCH_SIZE) {
+          const batchRows = decisionRows.slice(i, i + BATCH_SIZE);
+          const batchDecs = decisionWrites.slice(i, i + BATCH_SIZE);
+          try {
+            await this.opts.db
+              .insert(decisionsTable)
+              .values(batchRows as never)
+              .onConflictDoNothing();
+          } catch (err) {
+            this.opts.logger?.warn?.(
+              { err, batchSize: batchRows.length },
+              'PostgresRecommendationStore: decision batch insert failed; re-queuing',
+            );
+            for (const d of batchDecs) {
+              this.pendingDecisions.set(d.decisionId, d);
+            }
           }
         }
       }

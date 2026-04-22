@@ -138,3 +138,43 @@ export type MeshEntitySnapshotRow = typeof meshEntitySnapshotsTable.$inferSelect
 export type MeshEntitySnapshotInsert = typeof meshEntitySnapshotsTable.$inferInsert;
 export type MeshEvidenceEntityLinkRow = typeof meshEvidenceEntityLinksTable.$inferSelect;
 export type MeshEvidenceEntityLinkInsert = typeof meshEvidenceEntityLinksTable.$inferInsert;
+
+/**
+ * Durable audit log of every operator decision recorded against a
+ * recommendation via POST /evidence-graph/recommendations/:id/decision.
+ *
+ * Decisions are append-only (no upsert) and identified by `decisionId`.
+ * Survives API server restarts so the audit trail is not lost when the
+ * in-memory cache is rebuilt.
+ */
+export const meshRecommendationDecisionsTable = pgTable(
+  'mesh_recommendation_decisions',
+  {
+    decisionId: uuid('decision_id').primaryKey(),
+    recommendationId: uuid('recommendation_id').notNull(),
+    actorId: text('actor_id').notNull(),
+    actorRole: text('actor_role'),
+    orgId: text('org_id'),
+    decision: text('decision').notNull(),
+    justification: text('justification'),
+    policyOutcome: text('policy_outcome').notNull(),
+    previousStatus: text('previous_status').notNull(),
+    newStatus: text('new_status').notNull(),
+    sourceSurface: text('source_surface'),
+    decidedAt: timestamp('decided_at', { withTimezone: true }).notNull(),
+    payload: jsonb('payload').$type<{ decision: unknown }>().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    recommendationIdx: index('mesh_recommendation_decisions_recommendation_id_idx').on(
+      t.recommendationId,
+    ),
+    actorIdx: index('mesh_recommendation_decisions_actor_id_idx').on(t.actorId),
+    orgIdx: index('mesh_recommendation_decisions_org_id_idx').on(t.orgId),
+    decidedAtIdx: index('mesh_recommendation_decisions_decided_at_idx').on(t.decidedAt),
+  }),
+);
+
+export type MeshRecommendationDecisionRow = typeof meshRecommendationDecisionsTable.$inferSelect;
+export type MeshRecommendationDecisionInsert =
+  typeof meshRecommendationDecisionsTable.$inferInsert;

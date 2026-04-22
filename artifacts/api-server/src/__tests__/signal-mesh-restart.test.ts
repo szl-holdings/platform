@@ -70,6 +70,14 @@ const fakeTables = {
     table: { entityId: { name: 'entityId' }, snapshotAt: { name: 'snapshotAt' } },
     state: { kind: 'keyed', idField: 'entityId', rows: new Map() } as TableState,
   },
+  recommendationDecisions: {
+    table: {
+      decisionId: { name: 'decisionId' },
+      recommendationId: { name: 'recommendationId' },
+      decidedAt: { name: 'decidedAt' },
+    },
+    state: { kind: 'keyed', idField: 'decisionId', rows: new Map() } as TableState,
+  },
 };
 
 function lookupState(t: unknown): TableState {
@@ -135,6 +143,7 @@ vi.mock('@szl-holdings/db/schema', () => ({
   meshEvidenceItemsTable: fakeTables.evidence.table,
   meshEvidenceEntityLinksTable: fakeTables.evidenceLinks.table,
   meshRecommendationsTable: fakeTables.recommendations.table,
+  meshRecommendationDecisionsTable: fakeTables.recommendationDecisions.table,
   meshEntitySnapshotsTable: fakeTables.entities.table,
 }));
 
@@ -201,6 +210,7 @@ async function bootDurablePersistence(opts: { hydrate: boolean }) {
   const recommendationStore = new PostgresRecommendationStore({
     db: fakeDb as never,
     recommendationsTable: fakeTables.recommendations.table as never,
+    recommendationDecisionsTable: fakeTables.recommendationDecisions.table as never,
     flushIntervalMs: 0,
   });
   const entityRegistry = new PostgresEntityRegistry({
@@ -283,16 +293,45 @@ describe('signal mesh — survives a simulated API server restart (Task #1923)',
     expect(stats.recommendationsSeeded).toBeGreaterThan(0);
     expect(stats.entitiesRegistered).toBeGreaterThan(0);
 
-    // Capture the live counts that the public API will report later.
+    // Pick a target recommendation/entity before the decision so we can
+    // verify the audit trail post-restart.
+    const beforeRecId = defaultEvidenceGraphQuery
+      .listRecommendations({ limit: 10000 })[0]!.recommendationId;
+    const beforeEntityWithSignals = defaultEntityRegistry
+      .list()
+      .find((e) => e.activeSignalIds.length > 0)!;
+    expect(beforeEntityWithSignals).toBeDefined();
+
+    // Record a decision through the public API so we can verify the audit
+    // log survives a "restart" via the new mesh_recommendation_decisions table.
+    // (Recording a decision also publishes an outcome signal back into the
+    // bus, so we must capture the "before" snapshots AFTER this call so the
+    // post-restart hydration counts line up.)
+    const preApp = buildApp();
+    const decideRes = await request(preApp)
+      .post(`/evidence-graph/recommendations/${beforeRecId}/decision`)
+      .send({ decision: 'approve', justification: 'durable audit smoke test' });
+    expect(decideRes.status).toBe(200);
+    expect(decideRes.body.decision.decisionId).toBeDefined();
+    expect(decideRes.body.decision.sourceSurface).toBe('evidence-explorer');
+    const persistedDecisionId = decideRes.body.decision.decisionId as string;
+    const beforeDecisions = defaultRecommendationStore.listDecisions(beforeRecId);
+    expect(beforeDecisions.length).toBe(1);
+    expect(beforeDecisions[0]!.decisionId).toBe(persistedDecisionId);
+
+    // Capture the live counts that the public API will report later. Done
+    // after the decision so the outcome signal + status update are included.
     const beforeSignals = defaultSignalBus.snapshot({ limit: 10000 });
     const beforeEvidence = defaultEvidenceGraphQuery.listEvidence({ limit: 10000 });
     const beforeRecs = defaultEvidenceGraphQuery.listRecommendations({ limit: 10000 });
     const beforeEntities = defaultEntityRegistry.list();
-    const beforeRecId = beforeRecs[0]?.recommendationId;
-    const beforeEntityWithSignals = beforeEntities.find((e) => e.activeSignalIds.length > 0)!;
-    expect(beforeEntityWithSignals).toBeDefined();
 
     await flushAll(beforeStores);
+
+    // Decision row landed in the durable audit table.
+    expect(
+      (fakeTables.recommendationDecisions.state as { rows: Map<string, Row> }).rows.size,
+    ).toBe(1);
 
     // The fake DB must now hold every record we just published.
     expect(fakeTables.signals.state.kind).toBe('keyed');
@@ -323,9 +362,20 @@ describe('signal mesh — survives a simulated API server restart (Task #1923)',
     expect(defaultEvidenceGraphQuery.listEvidence({ limit: 10000 }).length).toBe(0);
     expect(defaultEvidenceGraphQuery.listRecommendations({ limit: 10000 }).length).toBe(0);
     expect(defaultEntityRegistry.list().length).toBe(0);
+    // Decision audit log was wiped from the in-memory cache too.
+    expect(defaultRecommendationStore.listDecisions(beforeRecId).length).toBe(0);
 
     // ---- Boot 2: re-instantiate stores against the SAME fake DB and hydrate ----
     await bootDurablePersistence({ hydrate: true });
+
+    // The recommendation decision audit log survives the restart via the
+    // durable mesh_recommendation_decisions table.
+    const afterDecisions = defaultRecommendationStore.listDecisions(beforeRecId);
+    expect(afterDecisions.length).toBe(1);
+    expect(afterDecisions[0]!.decisionId).toBe(persistedDecisionId);
+    expect(afterDecisions[0]!.decision).toBe('approve');
+    expect(afterDecisions[0]!.justification).toBe('durable audit smoke test');
+    expect(afterDecisions[0]!.sourceSurface).toBe('evidence-explorer');
 
     // ---- Verify the singletons backing the public API recovered everything ----
     const afterSignals = defaultSignalBus.snapshot({ limit: 10000 });

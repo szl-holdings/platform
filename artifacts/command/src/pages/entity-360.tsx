@@ -100,11 +100,11 @@ export function Entity360Page() {
     <div style={{ padding: 24, fontFamily: 'ui-monospace,SFMono-Regular,Menlo,monospace' }}>
       <header style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0, letterSpacing: 1 }}>
-          ENTITY 360 — NEXUS ONTOLOGY FABRIC
+          ENTITY 360 — PRAXIS ONTOLOGY FABRIC
         </h1>
         <p style={{ opacity: 0.7, marginTop: 8, fontSize: 13 }}>
           Resolve any <code>szl://</code> entity URI and inspect its cross-app neighbours.
-          Backed by the unified entity registry that links Terra properties, Vessels,
+          Backed by the unified entity registry that links DOMAINE properties, SEXTANT,
           Counsel matters, threats, and more.
         </p>
       </header>
