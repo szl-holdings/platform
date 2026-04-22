@@ -1,5 +1,5 @@
 <p align="center">
-  <strong>SZL HOLDINGS</strong>
+  <img src="https://raw.githubusercontent.com/szl-holdings/.github/master/profile/assets/szl-holdings-logo.svg" alt="SZL Holdings" width="480" />
 </p>
 
 <p align="center">
