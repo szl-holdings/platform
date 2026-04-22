@@ -148,6 +148,5 @@ eas-cli-local-build-plugin-*
 artifacts/szl-holdings/public/briefs/*.pdf
 artifacts/szl-holdings/public/briefs/index.json
 
-# Investor-facing PDFs — keep out of public repo (task #2703)
-demo-assets/szl-holdings-investor-carousel.pdf
-demo-assets/*-investor-*.pdf
+# Investor-facing PDFs (tracked in repo for version history)
+# demo-assets/szl-holdings-investor-carousel.pdf
