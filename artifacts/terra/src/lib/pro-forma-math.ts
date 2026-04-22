@@ -79,6 +79,7 @@ export interface ProFormaResult {
   spreadToCapRate: number;
   equityMultiple: number;
   irr: number;
+  cashOnCash: number;
   costPerUnit: number;
   valuePerUnit: number;
   schedule: { phase: string; cost: number; cumulative: number }[];
@@ -111,6 +112,8 @@ export function calcProForma(inputs: ProFormaInputs): ProFormaResult {
   const equityMultiple = equityProceeds / totalEquity;
   const projectMonths = inputs.constructionMonths + inputs.absorptionMonths;
   const irr = (Math.max(equityMultiple, 0.001) ** (12 / projectMonths) - 1) * 100;
+  const annualDebtService = totalDebt * (inputs.financingRate / 100);
+  const cashOnCash = ((noi - annualDebtService) / totalEquity) * 100;
 
   const costPerUnit = totalProjectCost / inputs.totalUnits;
   const valuePerUnit = stabilizedValue / inputs.totalUnits;
@@ -158,6 +161,7 @@ export function calcProForma(inputs: ProFormaInputs): ProFormaResult {
     spreadToCapRate,
     equityMultiple,
     irr,
+    cashOnCash,
     costPerUnit,
     valuePerUnit,
     schedule,

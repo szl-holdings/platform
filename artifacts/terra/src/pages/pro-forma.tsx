@@ -188,6 +188,96 @@ function irrBg(irr: number) {
   return 'rgba(192,80,58,0.30)';
 }
 
+type HeatMapMetric = 'irr' | 'equityMultiple' | 'cashOnCash';
+
+interface HeatMapMetricCfg {
+  key: HeatMapMetric;
+  label: string;
+  shortLabel: string;
+  format: (v: number) => string;
+  color: (v: number) => string;
+  bg: (v: number) => string;
+  legend: { label: string; bg: string; color: string }[];
+  extract: (r: ProFormaResult) => number;
+}
+
+function emColor(em: number) {
+  if (em >= 2.0) return DS.accent.green;
+  if (em >= 1.85) return '#7db89e';
+  if (em >= 1.5) return DS.accent.gold;
+  if (em >= 1.25) return '#c88a3c';
+  return DS.accent.red;
+}
+function emBg(em: number) {
+  if (em >= 2.0) return 'rgba(64,133,106,0.35)';
+  if (em >= 1.85) return 'rgba(64,133,106,0.20)';
+  if (em >= 1.5) return 'rgba(184,148,60,0.25)';
+  if (em >= 1.25) return 'rgba(200,138,60,0.18)';
+  return 'rgba(192,80,58,0.30)';
+}
+function cocColor(c: number) {
+  if (c >= 10) return DS.accent.green;
+  if (c >= 8) return '#7db89e';
+  if (c >= 6) return DS.accent.gold;
+  if (c >= 4) return '#c88a3c';
+  return DS.accent.red;
+}
+function cocBg(c: number) {
+  if (c >= 10) return 'rgba(64,133,106,0.35)';
+  if (c >= 8) return 'rgba(64,133,106,0.20)';
+  if (c >= 6) return 'rgba(184,148,60,0.25)';
+  if (c >= 4) return 'rgba(200,138,60,0.18)';
+  return 'rgba(192,80,58,0.30)';
+}
+
+const HEATMAP_METRICS: Record<HeatMapMetric, HeatMapMetricCfg> = {
+  irr: {
+    key: 'irr',
+    label: 'Levered IRR',
+    shortLabel: 'IRR',
+    format: (v) => pct(v),
+    color: irrColor,
+    bg: irrBg,
+    legend: [
+      { label: '≥22% IRR', bg: 'rgba(64,133,106,0.35)', color: DS.accent.green },
+      { label: '≥18% IRR', bg: 'rgba(64,133,106,0.20)', color: '#7db89e' },
+      { label: '≥14% IRR', bg: 'rgba(184,148,60,0.25)', color: DS.accent.gold },
+      { label: '<14% IRR', bg: 'rgba(192,80,58,0.30)', color: DS.accent.red },
+    ],
+    extract: (r) => r.irr,
+  },
+  equityMultiple: {
+    key: 'equityMultiple',
+    label: 'Equity Multiple',
+    shortLabel: 'EM',
+    format: (v) => `${v.toFixed(2)}×`,
+    color: emColor,
+    bg: emBg,
+    legend: [
+      { label: '≥2.0× EM', bg: 'rgba(64,133,106,0.35)', color: DS.accent.green },
+      { label: '≥1.85× EM', bg: 'rgba(64,133,106,0.20)', color: '#7db89e' },
+      { label: '≥1.5× EM', bg: 'rgba(184,148,60,0.25)', color: DS.accent.gold },
+      { label: '<1.5× EM', bg: 'rgba(192,80,58,0.30)', color: DS.accent.red },
+    ],
+    extract: (r) => r.equityMultiple,
+  },
+  cashOnCash: {
+    key: 'cashOnCash',
+    label: 'Cash-on-Cash',
+    shortLabel: 'CoC',
+    format: (v) => pct(v),
+    color: cocColor,
+    bg: cocBg,
+    legend: [
+      { label: '≥10% CoC', bg: 'rgba(64,133,106,0.35)', color: DS.accent.green },
+      { label: '≥8% CoC', bg: 'rgba(64,133,106,0.20)', color: '#7db89e' },
+      { label: '≥6% CoC', bg: 'rgba(184,148,60,0.25)', color: DS.accent.gold },
+      { label: '<6% CoC', bg: 'rgba(192,80,58,0.30)', color: DS.accent.red },
+    ],
+    extract: (r) => r.cashOnCash,
+  },
+};
+
 type SensAxisKey = 'hardCost' | 'capRate' | 'rent' | 'occupancy' | 'financing';
 const SENS_AXES: Record<
   SensAxisKey,
@@ -291,6 +381,7 @@ function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
   const stored = readStoredSensPair();
   const [colAxis, setColAxis] = useState<SensAxisKey>(stored?.col ?? 'hardCost');
   const [rowAxis, setRowAxis] = useState<SensAxisKey>(stored?.row ?? 'capRate');
+  const [metric, setMetric] = useState<HeatMapMetric>('irr');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -305,6 +396,7 @@ function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
   }, [colAxis, rowAxis]);
   const colCfg = SENS_AXES[colAxis];
   const rowCfg = SENS_AXES[rowAxis];
+  const metricCfg = HEATMAP_METRICS[metric];
 
   const rows = rowCfg.steps.map((rowDelta) => ({
     delta: rowDelta,
@@ -312,7 +404,7 @@ function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
     cells: colCfg.steps.map((colDelta) => {
       const modified = rowCfg.applyDelta(colCfg.applyDelta(inputs, colDelta), rowDelta);
       const r = calcProForma(modified);
-      return { irr: r.irr, isBase: rowDelta === 0 && colDelta === 0 };
+      return { value: metricCfg.extract(r), isBase: rowDelta === 0 && colDelta === 0 };
     }),
   }));
 
@@ -327,9 +419,28 @@ function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
           className="text-[10px] font-bold uppercase tracking-wider"
           style={{ color: DS.text.muted }}
         >
-          2D Sensitivity → Levered IRR
+          2D Sensitivity → {metricCfg.label}
         </p>
         <div className="flex items-center gap-2 ml-auto flex-wrap">
+          <span className="text-[9px] uppercase tracking-wider" style={{ color: DS.text.muted }}>
+            Metric
+          </span>
+          <div className="flex items-center gap-1">
+            {(Object.values(HEATMAP_METRICS) as HeatMapMetricCfg[]).map((m) => (
+              <button
+                key={m.key}
+                onClick={() => setMetric(m.key)}
+                className="text-[9px] px-2 py-0.5 rounded font-medium transition-all"
+                style={{
+                  background: metric === m.key ? `${DS.accent.gold}20` : 'transparent',
+                  border: `1px solid ${metric === m.key ? `${DS.accent.gold}50` : DS.border}`,
+                  color: metric === m.key ? DS.accent.gold : DS.text.muted,
+                }}
+              >
+                {m.shortLabel}
+              </button>
+            ))}
+          </div>
           <span className="text-[9px] uppercase tracking-wider" style={{ color: DS.text.muted }}>
             Quick Pair
           </span>
@@ -414,7 +525,8 @@ function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
         </div>
       </div>
       <p className="text-[9px] mb-3" style={{ color: DS.text.muted }}>
-        {colCfg.label} (columns) × {rowCfg.label} (rows) → Levered IRR. Outlined cell = base case.
+        {colCfg.label} (columns) × {rowCfg.label} (rows) → {metricCfg.label}. Outlined cell = base
+        case.
       </p>
       <div className="overflow-x-auto">
         <table className="text-[9px] font-mono border-separate" style={{ borderSpacing: 2 }}>
@@ -452,13 +564,13 @@ function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
                     key={ci}
                     className="text-center px-2 py-1 rounded-md font-bold"
                     style={{
-                      background: irrBg(cell.irr),
-                      color: irrColor(cell.irr),
+                      background: metricCfg.bg(cell.value),
+                      color: metricCfg.color(cell.value),
                       outline: cell.isBase ? `1.5px solid ${DS.accent.gold}` : undefined,
                       minWidth: 52,
                     }}
                   >
-                    {pct(cell.irr)}
+                    {metricCfg.format(cell.value)}
                   </td>
                 ))}
               </tr>
@@ -467,12 +579,7 @@ function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
         </table>
       </div>
       <div className="flex items-center gap-4 mt-3 flex-wrap">
-        {[
-          { label: '≥22% IRR', bg: 'rgba(64,133,106,0.35)', color: DS.accent.green },
-          { label: '≥18% IRR', bg: 'rgba(64,133,106,0.20)', color: '#7db89e' },
-          { label: '≥14% IRR', bg: 'rgba(184,148,60,0.25)', color: DS.accent.gold },
-          { label: '<14% IRR', bg: 'rgba(192,80,58,0.30)', color: DS.accent.red },
-        ].map((l) => (
+        {metricCfg.legend.map((l) => (
           <div key={l.label} className="flex items-center gap-1.5">
             <div
               className="w-3 h-3 rounded-sm"
