@@ -298,7 +298,7 @@ function EvidenceCard({
                   <a
                     href={
                       evidence.document.url.startsWith('/objects/')
-                        ? `${API}${evidence.document.url}`
+                        ? `${API}/terra/cognitive/diligence-room/evidence/${encodeURIComponent(evidence.id)}/download`
                         : evidence.document.url
                     }
                     target="_blank"

@@ -163,12 +163,6 @@
   "artifacts/aegis/src/pages/simulation-runner.tsx": {
     "Aegis": 1
   },
-  "artifacts/aegis/src/pages/slides/S04Loop.tsx": {
-    "Alloy": 1
-  },
-  "artifacts/aegis/src/pages/slides/S06Primitives.tsx": {
-    "Alloy": 1
-  },
   "artifacts/aegis/src/pages/soc-dashboard.tsx": {
     "Aegis": 3
   },
@@ -1206,6 +1200,12 @@
     "Lyte": 1,
     "Vessels": 1
   },
+  "artifacts/szl-holdings/src/pages/carousel-preview.tsx": {
+    "Lyte": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Aegis": 1
+  },
   "artifacts/szl-holdings/src/pages/case-studies.tsx": {
     "Terra": 2,
     "Lyte": 3,
@@ -1523,12 +1523,7 @@
     "Vessels": 3
   },
   "artifacts/szl-holdings/src/pages/landing.tsx": {
-    "LYTE": 14,
-    "Vessels": 4,
-    "Sentra": 2,
-    "Terra": 3,
-    "Lyte": 5,
-    "Aegis": 1
+    "LYTE": 14
   },
   "artifacts/szl-holdings/src/pages/leadership.tsx": {
     "Alloy": 2,
@@ -2878,9 +2873,6 @@
     "Vessels": 1,
     "Alloy": 1
   },
-  "tests/e2e/prism-counsel.spec.ts": {
-    "PRISM Counsel": 5
-  },
   "tests/e2e/pulse.spec.ts": {
     "Pulse": 10
   },
@@ -2910,6 +2902,9 @@
   },
   "tests/unit/substrate/substrate-command-center.test.ts": {
     "Vessels": 1
+  },
+  "scripts/evals/run-arena.ts": {
+    "Terra": 1
   },
   "scripts/generate-platform-metrics.ts": {
     "Alloy": 1,

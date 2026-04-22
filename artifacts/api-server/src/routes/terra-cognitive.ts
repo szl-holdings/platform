@@ -15,6 +15,7 @@ import { computeApprovalExpiresAt } from '@workspace/guardian';
 import { createHash, randomUUID } from 'crypto';
 import { and, desc, eq, inArray, isNotNull, or, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
+import { Readable } from 'stream';
 import rateLimit from 'express-rate-limit';
 import multer from 'multer';
 import { z } from 'zod';
@@ -2860,6 +2861,121 @@ router.patch(
       sendSuccess(res, { evidence: updated[0] });
     } catch (err) {
       handleRouteError(res, err, 'Failed to update evidence');
+    }
+  },
+);
+
+// GET: authenticated download of an evidence document
+//
+// Auth enforcement is handled manually so that denied attempts are explicitly
+// logged before the response is sent. Mirrors the auth pattern used in the
+// neighboring covenant routes (verifyInternalHeader + tokenHasScope).
+//
+// Response codes:
+//   401 — no valid session and no valid internal token (logged at WARN)
+//   403 — session user is authenticated but is not the matter owner and has no
+//          privileged role (admin / super_admin / editor) — logged at WARN.
+//          Internal-token callers with a valid agent:write scope bypass the
+//          ownership check (trusted service path).
+//   404 — evidence record not found, or document is not in object storage
+//   200 — file streamed with Content-Disposition: attachment
+router.get(
+  '/terra/cognitive/diligence-room/evidence/:evidenceId/download',
+  cogLimit,
+  auth,
+  async (req: Request, res: Response) => {
+    const evidenceId = req.params.evidenceId as string;
+    const user = (req as Request & { user?: { id?: string | number; roles?: string[] } }).user;
+
+    // Accept either a scoped internal-service token or an authenticated session.
+    const reqToken = req.headers['x-internal-token'] as string | undefined;
+    const tokenMatch = verifyInternalHeader(reqToken, req.originalUrl || req.url);
+    const hasValidToken = tokenMatch !== null && tokenHasScope(tokenMatch.context, 'agent:write');
+
+    if (!hasValidToken && !user) {
+      logger.warn({ evidenceId, ip: req.ip }, 'Diligence evidence download: unauthenticated attempt');
+      res.status(401).json({ error: 'Authentication required', code: 'UNAUTHORIZED' });
+      return;
+    }
+
+    try {
+      const evidenceRows = await db
+        .select()
+        .from(terraDiligenceEvidenceTable)
+        .where(eq(terraDiligenceEvidenceTable.id, evidenceId))
+        .limit(1);
+
+      if (!evidenceRows[0]) {
+        logger.warn({ evidenceId }, 'Diligence evidence download: record not found');
+        res.status(404).json({ error: 'Evidence not found' });
+        return;
+      }
+
+      // Ownership check applies only to session users. Internal-token callers
+      // (trusted services / schedulers) bypass it, as do privileged roles.
+      if (!hasValidToken) {
+        const userRoles = user!.roles ?? [];
+        const isPrivileged = userRoles.some(
+          (r) => r === 'admin' || r === 'super_admin' || r === 'editor',
+        );
+
+        if (!isPrivileged) {
+          const matterRows = await db
+            .select({ ownerUserId: terraDiligenceMattersTable.ownerUserId })
+            .from(terraDiligenceMattersTable)
+            .where(eq(terraDiligenceMattersTable.id, evidenceRows[0].matterId))
+            .limit(1);
+
+          const ownerUserId = matterRows[0]?.ownerUserId;
+          const isOwner =
+            ownerUserId !== null &&
+            ownerUserId !== undefined &&
+            String(ownerUserId) === String(user!.id);
+
+          if (!isOwner) {
+            logger.warn(
+              { evidenceId, userId: user!.id },
+              'Diligence evidence download: forbidden — caller is not the matter owner',
+            );
+            res.status(403).json({ error: 'Forbidden: you do not have access to this document', code: 'FORBIDDEN' });
+            return;
+          }
+        }
+      }
+
+      const documentUrl = evidenceRows[0].documentUrl;
+      if (!documentUrl || !documentUrl.startsWith('/objects/')) {
+        logger.warn({ evidenceId, documentUrl }, 'Diligence evidence download: no object to stream');
+        res.status(404).json({ error: 'No downloadable document attached to this evidence record' });
+        return;
+      }
+
+      const storage = new ObjectStorageService();
+      const objectFile = await storage.getObjectEntityFile(documentUrl);
+      const response = await storage.downloadObject(objectFile, 0);
+
+      const fileName = evidenceRows[0].documentName ?? 'document';
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${fileName.replace(/"/g, '_')}"`,
+      );
+      res.status(response.status);
+      response.headers.forEach((value: string, key: string) => {
+        if (key.toLowerCase() !== 'content-disposition') res.setHeader(key, value);
+      });
+      if (response.body) {
+        Readable.fromWeb(response.body as ReadableStream<Uint8Array>).pipe(res);
+      } else {
+        res.end();
+      }
+    } catch (err) {
+      if ((err as Error)?.name === 'ObjectNotFoundError') {
+        logger.warn({ evidenceId }, 'Diligence evidence download: object not found in storage');
+        res.status(404).json({ error: 'Document not found in storage' });
+        return;
+      }
+      logger.error({ err, evidenceId }, 'Diligence evidence download: unexpected error');
+      res.status(500).json({ error: 'Failed to download evidence document' });
     }
   },
 );
