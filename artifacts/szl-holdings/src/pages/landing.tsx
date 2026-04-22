@@ -34,7 +34,7 @@ const fadeUp = {
 
 const LOOP_STEPS = [
   { n: "01", label: "Signal", icon: Radio, color: "#0ea5e9", body: "Risk indicators, anomalies, and threshold breaches are detected, normalized, and routed by the Event Fabric — cross-domain context and correlation ID attached." },
-  { n: "02", label: "Context", icon: Layers, color: "#8b5cf6", body: "Cross-domain enrichment via Prism Bus. A sanctions alert in Vessels triggers a legal flag in Counsel, a risk entry in Lyte." },
+  { n: "02", label: "Context", icon: Layers, color: "#8b5cf6", body: "Cross-domain enrichment via PRAXIS Bus. A sanctions alert in SEXTANT triggers a legal flag in Counsel, a risk entry in KORA." },
   { n: "03", label: "Recommendation", icon: Brain, color: "#ec4899", body: "An AI agent proposes an action with source citations, confidence score, and full provenance. No opaque verdicts. Every output traceable." },
   { n: "04", label: "Simulation", icon: BarChart3, color: "#f59e0b", body: "The Monte Carlo engine models risk before action. Operators see expected outcomes, confidence intervals, and the variables that matter most." },
   { n: "05", label: "Policy", icon: ShieldCheck, color: "#10b981", body: "Covenant Policy enforces who can approve and what conditions apply — at the platform layer, not the UI. Non-delegatable." },
@@ -177,7 +177,7 @@ const ONE_SHELL_PRIMITIVES = [
   {
     key: "EcosystemNav",
     label: "Ecosystem Nav",
-    note: "Jump instantly between Lyte, Sentra, Counsel, Vessels, Terra, PRISM and every domain pack.",
+    note: "Jump instantly between KORA, TENAX, Counsel, SEXTANT, DOMAINE, LUMINA and every domain pack.",
     color: "hsl(260,60%,65%)",
   },
   {
@@ -416,7 +416,7 @@ export default function HomePage() {
                     { label: "SZL Holdings", note: "governed platform", color: "hsl(38,72%,58%)" },
                     { label: "FORGE", note: "execution fabric", color: "hsl(215,72%,58%)" },
                     { label: "KORA", note: "flagship command", color: "hsl(192,72%,48%)" },
-                    { label: "Aegis · Vessels · Terra · PRISM · CJ · IMPERIUM", note: "domain packs", color: "hsl(260,60%,65%)" },
+                    { label: "PARAGON · SEXTANT · DOMAINE · Counsel · CJ · IMPERIUM", note: "domain packs", color: "hsl(260,60%,65%)" },
                   ].map((item, i) => (
                     <div key={item.label} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       {i > 0 && <span style={{ color: "hsla(0,0%,100%,0.2)", fontSize: "0.75rem" }}>→</span>}
@@ -465,7 +465,7 @@ export default function HomePage() {
                       textDecoration: "none",
                     }}
                   >
-                    See Lyte — the nerve center <ArrowUpRight size={14} />
+                    See KORA — the nerve center <ArrowUpRight size={14} />
                   </Link>
                   <Link
                     href="/design-partner"
@@ -765,7 +765,7 @@ export default function HomePage() {
                   One shell. Thirteen surfaces.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: TEXT_SEC, maxWidth: "54ch" }}>
-                  Every domain pack — Sentra, Counsel, Vessels, Terra, PRISM, Carlota Jo — runs inside the same shared shell. One navigation model, one design language, one intelligence rail. Not a design coincidence: a platform architecture decision.
+                  Every domain pack — TENAX, Counsel, SEXTANT, DOMAINE, PARAGON, Carlota Jo — runs inside the same shared shell. One navigation model, one design language, one intelligence rail. Not a design coincidence: a platform architecture decision.
                 </p>
               </m.div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1px", background: BORDER, borderRadius: "10px", overflow: "hidden", border: `1px solid ${BORDER}` }}>
@@ -1021,7 +1021,7 @@ export default function HomePage() {
             </div>
           </section>
   
-          {/* ── Lyte CTA ────────────────────────────────────────────── */}
+          {/* ── KORA CTA ────────────────────────────────────────────── */}
           <section style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(4rem,8vw,5.5rem) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div
@@ -1039,7 +1039,7 @@ export default function HomePage() {
               >
                 <div>
                   <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.75rem" }}>
-                    Lyte — Operational Nerve Center
+                    KORA — Operational Nerve Center
                   </p>
                   <h3 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, marginBottom: "1rem", maxWidth: "30ch" }}>
                     The command surface that sees everything — and routes it to the right action.
@@ -1060,7 +1060,7 @@ export default function HomePage() {
                       textDecoration: "none", whiteSpace: "nowrap",
                     }}
                   >
-                    Open Lyte <ArrowRight size={15} />
+                    Open KORA <ArrowRight size={15} />
                   </Link>
                   <Link
                     href="/demo"

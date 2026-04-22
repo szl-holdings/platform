@@ -2,7 +2,7 @@
   "_comment": "Source of truth for the README Product Portfolio / Domain Packs marketing table. Each entry in `domainPacks` becomes one row in the table. `artifactId` should match the `id` field in artifacts/<name>/.replit-artifact/artifact.toml when the row corresponds to a shippable artifact; omit it for conceptual/roadmap entries. `excludeArtifacts` lists artifact ids that exist in the registry but are intentionally NOT marketed as Domain Packs (platform infra, internal sandboxes, demo videos, the dashboard host itself, etc.) — they will not trigger a drift error in --check mode.",
   "domainPacks": [
     {
-      "product": "Sentra",
+      "product": "TENAX",
       "domain": "Cyber resilience command — exposure mapping, recovery readiness, incident command, control drift detection",
       "status": "Active",
       "artifactId": "artifacts/sentra"
@@ -14,19 +14,19 @@
       "artifactId": "artifacts/counsel"
     },
     {
-      "product": "Aegis",
+      "product": "PARAGON",
       "domain": "Security and defense intelligence — SOC command, advanced security modules, SOAR playbooks, threat intelligence",
       "status": "Domain backend active; web UI archived (Task #920) — see `artifacts/firestorm/`",
       "artifactId": "artifacts/aegis"
     },
     {
-      "product": "Vessels",
+      "product": "SEXTANT",
       "domain": "Maritime fleet intelligence — AIS tracking, S&P workflow, demurrage, freight, voyage P&L",
       "status": "Active",
       "artifactId": "artifacts/vessels"
     },
     {
-      "product": "Terra",
+      "product": "DOMAINE",
       "domain": "Real estate intelligence — distress pipeline, ownership graph, deal workflow, AI analysis",
       "status": "Active",
       "artifactId": "artifacts/terra"
@@ -38,13 +38,13 @@
       "artifactId": "artifacts/carlota-jo"
     },
     {
-      "product": "Pulse",
+      "product": "LUMINA",
       "domain": "AI executive briefing — narrative intelligence reports synthesized from live platform signals",
       "status": "Active",
       "artifactId": "artifacts/pulse"
     },
     {
-      "product": "PRISM Counsel",
+      "product": "Counsel (legacy PRISM Counsel)",
       "domain": "Legal matter command — agentic matter management, court filings, recovery operations",
       "status": "Superseded by Counsel (Active); legacy domain API routes retained"
     },

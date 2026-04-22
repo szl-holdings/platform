@@ -21,12 +21,12 @@ export default function S06Primitives() {
       color: '#f59e0b',
     },
     {
-      name: 'Alloy Runtime',
+      name: 'FORGE Runtime',
       desc: 'Durable workflow orchestration — multi-step execution with checkpoint recovery and agent coordination',
       color: '#6366f1',
     },
     {
-      name: 'PRISM Bus',
+      name: 'PRAXIS Bus',
       desc: 'Cross-domain event fabric — signal routing with correlation IDs across all domain packs',
       color: '#ec4899',
     },

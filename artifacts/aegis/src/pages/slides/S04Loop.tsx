@@ -10,7 +10,7 @@ export default function S04Loop() {
       n: '02',
       label: 'Context',
       color: '#8b5cf6',
-      desc: 'Cross-domain enrichment via PRISM Bus — correlation ID attached',
+      desc: 'Cross-domain enrichment via PRAXIS Bus — correlation ID attached',
     },
     {
       n: '03',
@@ -34,7 +34,7 @@ export default function S04Loop() {
       n: '06',
       label: 'Execution',
       color: '#6366f1',
-      desc: 'Alloy orchestrates the approved action as a durable process',
+      desc: 'FORGE orchestrates the approved action as a durable process',
     },
     {
       n: '07',
