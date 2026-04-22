@@ -269,6 +269,18 @@ const DirectiveCascade = lazy(() => import('@imp/pages/directive-cascade'));
 const Coalition = lazy(() => import('@imp/pages/coalition'));
 const StrategicReserves = lazy(() => import('@imp/pages/strategic-reserves'));
 
+const AdminOpsConsole = lazy(() => import('./operations/pages/admin/ops-console'));
+const AdminOverview = lazy(() => import('./operations/pages/admin/overview'));
+const AdminUsers = lazy(() => import('./operations/pages/admin/users'));
+const AdminFlags = lazy(() => import('./operations/pages/admin/feature-flags'));
+const AdminApps = lazy(() => import('./operations/pages/admin/apps-registry'));
+const AdminRuns = lazy(() => import('./operations/pages/admin/run-viewer'));
+const AdminApprovals = lazy(() => import('./operations/pages/admin/approval-queue'));
+const AdminAudit = lazy(() => import('./operations/pages/admin/audit-log'));
+const AdminExports = lazy(() => import('./operations/pages/admin/export-history'));
+const AdminSeeder = lazy(() => import('./operations/pages/admin/seeder'));
+const AdminJobs = lazy(() => import('./operations/pages/admin/jobs'));
+
 function getMode(location: string): WorkspaceMode {
   if (location.startsWith('/operations') || location.startsWith('/cognitive')) return 'operations';
   if (location.startsWith('/infrastructure')) return 'infrastructure';
@@ -739,6 +751,18 @@ function AppShell() {
                 path="/infrastructure/imperium/atlas-execute"
                 component={() => <ImperiumAtlasExecute />}
               />
+
+              <Route path="/operations/admin/ops" component={() => <AdminOpsConsole />} />
+              <Route path="/operations/admin/overview" component={() => <AdminOverview />} />
+              <Route path="/operations/admin/users" component={() => <AdminUsers />} />
+              <Route path="/operations/admin/flags" component={() => <AdminFlags />} />
+              <Route path="/operations/admin/apps" component={() => <AdminApps />} />
+              <Route path="/operations/admin/runs" component={() => <AdminRuns />} />
+              <Route path="/operations/admin/approvals" component={() => <AdminApprovals />} />
+              <Route path="/operations/admin/audit" component={() => <AdminAudit />} />
+              <Route path="/operations/admin/exports" component={() => <AdminExports />} />
+              <Route path="/operations/admin/seeder" component={() => <AdminSeeder />} />
+              <Route path="/operations/admin/jobs" component={() => <AdminJobs />} />
 
               <Route>
                 <div className="flex items-center justify-center h-64 text-slate-400 text-sm">
