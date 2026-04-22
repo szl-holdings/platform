@@ -32,22 +32,22 @@ const PROTOCOLS = ['MCP', 'A2A', 'ACP', 'ANP'] as const;
 
 const PROTOCOL_META: Record<string, { color: string; description: string; badge: string }> = {
   MCP: {
-    color: '#00d4ff',
+    color: 'var(--gi-accent-blue)',
     description: 'Model Context Protocol — Anthropic standard for tool calling',
     badge: 'Live',
   },
   A2A: {
-    color: '#a855f7',
+    color: 'var(--gi-accent-violet)',
     description: 'Agent-to-Agent protocol — Google standard for agent interop',
     badge: 'Loopback',
   },
   ACP: {
-    color: '#00ff88',
+    color: 'var(--gi-accent-green)',
     description: 'Agent Communication Protocol — IBM standard for enterprise agents',
     badge: 'Loopback',
   },
   ANP: {
-    color: '#ffb700',
+    color: 'var(--gi-accent-amber)',
     description: 'Agent Network Protocol — decentralized agent discovery',
     badge: 'Loopback',
   },
@@ -169,7 +169,7 @@ export default function Bridge() {
         </div>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 bg-[#ff4455]/10 border border-[#ff4455]/30 rounded-lg px-4 py-3">
+          <div className="mb-4 flex items-center gap-2 bg-nexus-red/10 border border-nexus-red/30 rounded-lg px-4 py-3">
             <AlertCircle className="w-4 h-4 text-nexus-red shrink-0" />
             <p className="text-xs text-nexus-red">{error}</p>
           </div>
@@ -274,7 +274,7 @@ function ToolCard({
               <span className="text-[9px] text-muted-foreground/40 font-mono">{tool.domain}</span>
               {tool.isCustom && (
                 <span
-                  className="text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1 text-[#a855f7] bg-[#a855f7]/10 border border-[#a855f7]/30"
+                  className="text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1 text-nexus-purple bg-nexus-purple/10 border border-nexus-purple/30"
                   title="You added this tool"
                 >
                   <Sparkles className="w-2.5 h-2.5" />
@@ -283,7 +283,7 @@ function ToolCard({
               )}
               {!tool.isCustom && tool.lastModifiedAt && (
                 <span
-                  className="text-[9px] font-mono px-1.5 py-0.5 rounded text-[#ffb700] bg-[#ffb700]/10 border border-[#ffb700]/30"
+                  className="text-[9px] font-mono px-1.5 py-0.5 rounded text-nexus-amber bg-nexus-amber/10 border border-nexus-amber/30"
                   title={
                     `Last modified ${new Date(tool.lastModifiedAt).toLocaleString()}` +
                     (tool.lastModifiedBy ? ` by ${tool.lastModifiedBy}` : '')

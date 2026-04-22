@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@szl-holdings/design-system/tokens/css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -27,15 +28,17 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
 
-  --color-nexus-cyan: #00d4ff;
-  --color-nexus-green: #00ff88;
-  --color-nexus-amber: #ffb700;
-  --color-nexus-red: #ff4455;
-  --color-nexus-purple: #a855f7;
-  --color-nexus-bg: #060b12;
-  --color-nexus-surface: #0d1520;
-  --color-nexus-border: #1a2535;
-  --color-nexus-text: #c8d8e8;
+  /* Enterprise accent family — aliased to gi-tokens so legacy
+     `nexus-*` Tailwind utilities resolve to the design-system palette. */
+  --color-nexus-cyan: var(--gi-accent-blue);
+  --color-nexus-green: var(--gi-accent-green);
+  --color-nexus-amber: var(--gi-accent-amber);
+  --color-nexus-red: var(--gi-accent-red);
+  --color-nexus-purple: var(--gi-accent-violet);
+  --color-nexus-bg: var(--gi-bg-base);
+  --color-nexus-surface: var(--gi-bg-surface);
+  --color-nexus-border: var(--gi-border-subtle);
+  --color-nexus-text: var(--gi-text-primary);
 }
 
 :root {
@@ -45,7 +48,7 @@
   --card-foreground: 210 40% 90%;
   --popover: 215 45% 8%;
   --popover-foreground: 210 40% 90%;
-  --primary: 195 100% 50%;
+  --primary: 210 50% 55%;
   --primary-foreground: 215 50% 4%;
   --secondary: 215 35% 14%;
   --secondary-foreground: 210 40% 90%;
@@ -53,10 +56,10 @@
   --muted-foreground: 210 20% 55%;
   --accent: 215 35% 14%;
   --accent-foreground: 210 40% 90%;
-  --destructive: 350 90% 60%;
+  --destructive: 350 45% 58%;
   --border: 215 30% 15%;
   --input: 215 30% 15%;
-  --ring: 195 100% 50%;
+  --ring: 210 50% 55%;
   --radius: 0.5rem;
   --font-sans: "Inter", "Space Grotesk", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
@@ -73,8 +76,8 @@
 
   body {
     @apply antialiased;
-    background-color: #060b12;
-    color: #c8d8e8;
+    background-color: var(--gi-bg-base);
+    color: var(--gi-text-primary);
     font-family: "Inter", "Space Grotesk", sans-serif;
   }
 
@@ -83,71 +86,67 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #0d1520;
+    background: var(--gi-bg-surface);
   }
   ::-webkit-scrollbar-thumb {
-    background: #1a2535;
+    background: var(--gi-border-subtle);
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #243347;
+    background: var(--gi-border-default);
   }
 }
 
 @layer utilities {
   .nexus-glow {
-    box-shadow:
-      0 0 20px rgba(0, 212, 255, 0.15),
-      0 0 40px rgba(0, 212, 255, 0.05);
+    box-shadow: var(--gi-shadow-2);
   }
 
   .nexus-glow-green {
-    box-shadow:
-      0 0 20px rgba(0, 255, 136, 0.15),
-      0 0 40px rgba(0, 255, 136, 0.05);
+    box-shadow: var(--gi-shadow-2);
   }
 
   .text-nexus-cyan {
-    color: #00d4ff;
+    color: var(--gi-accent-blue);
   }
 
   .text-nexus-green {
-    color: #00ff88;
+    color: var(--gi-accent-green);
   }
 
   .text-nexus-amber {
-    color: #ffb700;
+    color: var(--gi-accent-amber);
   }
 
   .text-nexus-red {
-    color: #ff4455;
+    color: var(--gi-accent-red);
   }
 
   .text-nexus-purple {
-    color: #a855f7;
+    color: var(--gi-accent-violet);
   }
 
   .bg-nexus-surface {
-    background-color: #0d1520;
+    background-color: var(--gi-bg-surface);
   }
 
   .bg-nexus-bg {
-    background-color: #060b12;
+    background-color: var(--gi-bg-base);
   }
 
   .border-nexus {
-    border-color: #1a2535;
+    border-color: var(--gi-border-subtle);
   }
 
   .font-mono {
-    font-family: "JetBrains Mono", monospace;
+    font-family: var(--gi-font-mono);
   }
 
   .scan-line {
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      rgba(0, 212, 255, 0.03) 50%,
+      rgba(77, 143, 204, 0.04) 50%,
       transparent 100%
     );
     animation: scan 4s ease-in-out infinite;
@@ -179,20 +178,20 @@
   }
 
   .lane-active {
-    border-left: 2px solid #00d4ff;
-    background: linear-gradient(90deg, rgba(0, 212, 255, 0.05) 0%, transparent 100%);
+    border-left: 2px solid var(--gi-accent-blue);
+    background: linear-gradient(90deg, rgba(77, 143, 204, 0.06) 0%, transparent 100%);
   }
 
   .lane-done {
-    border-left: 2px solid #00ff88;
-    background: linear-gradient(90deg, rgba(0, 255, 136, 0.04) 0%, transparent 100%);
+    border-left: 2px solid var(--gi-accent-green);
+    background: linear-gradient(90deg, rgba(91, 170, 138, 0.05) 0%, transparent 100%);
   }
 
   .lane-idle {
-    border-left: 2px solid #1a2535;
+    border-left: 2px solid var(--gi-border-subtle);
   }
 
   .lane-error {
-    border-left: 2px solid #ff4455;
+    border-left: 2px solid var(--gi-accent-red);
   }
 }

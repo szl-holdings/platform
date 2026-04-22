@@ -37,11 +37,11 @@ const EXAMPLE_INTENTS = [
 ];
 
 const APP_COLORS: Record<string, string> = {
-  aegis: '#ff4455',
-  vessels: '#00d4ff',
-  terra: '#00ff88',
-  pulse: '#ffb700',
-  command: '#a855f7',
+  aegis: 'var(--gi-accent-red)',
+  vessels: 'var(--gi-accent-blue)',
+  terra: 'var(--gi-accent-green)',
+  pulse: 'var(--gi-accent-amber)',
+  command: 'var(--gi-accent-violet)',
   'szl-holdings': '#22d3ee',
   'carlota-jo': '#f472b6',
   'prism-counsel': '#818cf8',
@@ -147,7 +147,7 @@ const STEP_EXPLANATIONS: Record<
 
 function RateLimitMiniBar({ used, total }: { used: number; total: number }) {
   const pct = (used / total) * 100;
-  const color = pct >= 95 ? '#ff4455' : pct >= 80 ? '#ffb700' : '#00ff88';
+  const color = pct >= 95 ? 'var(--gi-accent-red)' : pct >= 80 ? 'var(--gi-accent-amber)' : 'var(--gi-accent-green)';
   return (
     <div className="flex items-center gap-1.5">
       <div className="h-1 w-12 rounded-full bg-nexus-bg overflow-hidden">
@@ -229,13 +229,13 @@ function ExplainPanel({ step, onClose }: { step: OrchestrationStep; onClose: () 
             </div>
 
             <div className="bg-nexus-bg rounded-lg p-3">
-              <div className="text-[10px] font-mono text-[#ffb700] mb-1.5 uppercase tracking-widest">
+              <div className="text-[10px] font-mono text-nexus-amber mb-1.5 uppercase tracking-widest">
                 Confidence
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-2 bg-nexus-surface rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-[#00ff88]"
+                    className="h-full rounded-full bg-nexus-green"
                     style={{ width: `${explanation.confidence * 100}%` }}
                   />
                 </div>
@@ -256,8 +256,8 @@ function ExplainPanel({ step, onClose }: { step: OrchestrationStep; onClose: () 
         {rl && (
           <div className="bg-nexus-bg rounded-lg p-3">
             <div className="flex items-center gap-1.5 mb-2">
-              <Gauge className="w-3 h-3 text-[#ffb700]" />
-              <span className="text-[10px] font-mono text-[#ffb700] uppercase tracking-widest">
+              <Gauge className="w-3 h-3 text-nexus-amber" />
+              <span className="text-[10px] font-mono text-nexus-amber uppercase tracking-widest">
                 Rate Limits
               </span>
             </div>
@@ -305,7 +305,7 @@ function ExplainPanel({ step, onClose }: { step: OrchestrationStep; onClose: () 
                     step.confidence >= 0.7
                       ? 'text-nexus-green'
                       : step.confidence >= 0.4
-                        ? 'text-[#ffb700]'
+                        ? 'text-nexus-amber'
                         : 'text-nexus-red'
                   }
                 >
@@ -349,11 +349,11 @@ function StepCard({
     <div
       className={`rounded-lg border p-3 ${
         step.status === 'running'
-          ? 'border-[#00d4ff]/40 bg-[#00d4ff]/05'
+          ? 'border-nexus-cyan/40 bg-nexus-cyan/05'
           : step.status === 'done'
-            ? 'border-[#00ff88]/30 bg-[#00ff88]/04'
+            ? 'border-nexus-green/30 bg-nexus-green/04'
             : step.status === 'error'
-              ? 'border-[#ff4455]/30'
+              ? 'border-nexus-red/30'
               : 'border-nexus'
       } bg-nexus-surface`}
     >
@@ -405,7 +405,7 @@ function StepCard({
                   step.confidence >= 0.7
                     ? 'text-nexus-green'
                     : step.confidence >= 0.4
-                      ? 'text-[#ffb700]'
+                      ? 'text-nexus-amber'
                       : 'text-nexus-red'
                 }
               >
@@ -519,7 +519,7 @@ export default function Orchestrator() {
         className={`max-w-5xl mx-auto transition-all duration-200 ${explainStep ? 'mr-[24rem]' : ''}`}
       >
         <div className="flex items-center gap-3 mb-6">
-          <Workflow className="w-5 h-5 text-[#ffb700]" />
+          <Workflow className="w-5 h-5 text-nexus-amber" />
           <div>
             <h1 className="text-lg font-semibold">Cross-App Orchestrator</h1>
             <p className="text-xs text-muted-foreground">
@@ -529,10 +529,10 @@ export default function Orchestrator() {
           </div>
         </div>
 
-        <div className="bg-nexus-surface border border-[#ffb700]/20 rounded-xl p-4 mb-6">
+        <div className="bg-nexus-surface border border-nexus-amber/20 rounded-xl p-4 mb-6">
           <div className="flex gap-3 mb-3">
             <textarea
-              className="flex-1 bg-nexus-bg border border-nexus rounded-lg px-3 py-2.5 text-sm font-mono resize-none focus:outline-none focus:border-[#ffb700]/50 text-foreground placeholder:text-muted-foreground/40"
+              className="flex-1 bg-nexus-bg border border-nexus rounded-lg px-3 py-2.5 text-sm font-mono resize-none focus:outline-none focus:border-nexus-amber/50 text-foreground placeholder:text-muted-foreground/40"
               rows={2}
               placeholder="Describe what you want across the SZL portfolio…"
               value={intent}
@@ -544,7 +544,7 @@ export default function Orchestrator() {
             <button
               onClick={() => handleRun()}
               disabled={loading || !intent.trim()}
-              className="px-4 py-2 rounded-lg bg-[#ffb700]/10 border border-[#ffb700]/30 text-[#ffb700] text-sm font-medium hover:bg-[#ffb700]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-nexus-amber/10 border border-nexus-amber/30 text-nexus-amber text-sm font-medium hover:bg-nexus-amber/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               {loading ? <Loader className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
               Run
@@ -560,9 +560,9 @@ export default function Orchestrator() {
                   setIntent(ex.intent);
                   handleRun(ex.intent);
                 }}
-                className="text-[10px] px-2.5 py-1 rounded-lg bg-nexus-bg border border-nexus text-muted-foreground/60 hover:text-muted-foreground hover:border-[#ffb700]/20 transition-colors flex items-center gap-1"
+                className="text-[10px] px-2.5 py-1 rounded-lg bg-nexus-bg border border-nexus text-muted-foreground/60 hover:text-muted-foreground hover:border-nexus-amber/20 transition-colors flex items-center gap-1"
               >
-                <Zap className="w-2.5 h-2.5 text-[#ffb700]/60" />
+                <Zap className="w-2.5 h-2.5 text-nexus-amber/60" />
                 {ex.label}
               </button>
             ))}
@@ -570,7 +570,7 @@ export default function Orchestrator() {
         </div>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 bg-[#ff4455]/10 border border-[#ff4455]/30 rounded-lg px-4 py-3">
+          <div className="mb-4 flex items-center gap-2 bg-nexus-red/10 border border-nexus-red/30 rounded-lg px-4 py-3">
             <AlertCircle className="w-4 h-4 text-nexus-red shrink-0" />
             <p className="text-xs text-nexus-red">{error}</p>
           </div>
@@ -585,7 +585,7 @@ export default function Orchestrator() {
                   <button
                     onClick={() => handleRetry(plan.id)}
                     disabled={retrying}
-                    className="text-[10px] font-mono px-2 py-1 rounded bg-[#ffb700]/10 border border-[#ffb700]/30 text-[#ffb700] hover:bg-[#ffb700]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+                    className="text-[10px] font-mono px-2 py-1 rounded bg-nexus-amber/10 border border-nexus-amber/30 text-nexus-amber hover:bg-nexus-amber/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
                   >
                     {retrying ? (
                       <Loader className="w-3 h-3 animate-spin" />
@@ -598,11 +598,11 @@ export default function Orchestrator() {
                 <span
                   className={`text-[10px] font-mono px-2 py-0.5 rounded ${
                     plan.status === 'completed'
-                      ? 'bg-[#00ff88]/10 text-nexus-green'
+                      ? 'bg-nexus-green/10 text-nexus-green'
                       : plan.status === 'running' || plan.status === 'planning'
-                        ? 'bg-[#00d4ff]/10 text-nexus-cyan'
+                        ? 'bg-nexus-cyan/10 text-nexus-cyan'
                         : plan.status === 'failed'
-                          ? 'bg-[#ff4455]/10 text-nexus-red'
+                          ? 'bg-nexus-red/10 text-nexus-red'
                           : 'bg-nexus-surface text-muted-foreground'
                   }`}
                 >
@@ -611,7 +611,7 @@ export default function Orchestrator() {
               </div>
             </div>
 
-            <div className="bg-nexus-surface border border-[#ffb700]/20 rounded-lg px-4 py-2 text-sm font-mono text-[#ffb700]">
+            <div className="bg-nexus-surface border border-nexus-amber/20 rounded-lg px-4 py-2 text-sm font-mono text-nexus-amber">
               {plan.intent}
             </div>
 
@@ -622,7 +622,7 @@ export default function Orchestrator() {
             </div>
 
             {plan.stitchedOutput && (
-              <div className="bg-nexus-surface border border-[#00ff88]/20 rounded-xl p-5">
+              <div className="bg-nexus-surface border border-nexus-green/20 rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <CheckCircle className="w-4 h-4 text-nexus-green" />
                   <h3 className="text-sm font-semibold text-nexus-green">Stitched Output</h3>
@@ -644,7 +644,7 @@ export default function Orchestrator() {
               {history.slice(0, 5).map((h) => (
                 <div
                   key={h.id}
-                  className="w-full bg-nexus-surface border border-nexus rounded-lg px-4 py-3 hover:border-[#ffb700]/20 transition-colors"
+                  className="w-full bg-nexus-surface border border-nexus rounded-lg px-4 py-3 hover:border-nexus-amber/20 transition-colors"
                 >
                   <button
                     className="w-full text-left"
@@ -680,7 +680,7 @@ export default function Orchestrator() {
                           handleRetry(h.id);
                         }}
                         disabled={retrying}
-                        className="text-[10px] font-mono px-2 py-1 rounded bg-[#ffb700]/10 border border-[#ffb700]/30 text-[#ffb700] hover:bg-[#ffb700]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+                        className="text-[10px] font-mono px-2 py-1 rounded bg-nexus-amber/10 border border-nexus-amber/30 text-nexus-amber hover:bg-nexus-amber/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
                       >
                         <RotateCw className="w-3 h-3" />
                         Retry

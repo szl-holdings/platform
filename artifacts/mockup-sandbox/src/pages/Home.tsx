@@ -9,7 +9,7 @@ const PILLARS = [
     tagline: 'Feynman-style parallel agents',
     description:
       'Four specialized agents — Gatherer, Peer-Reviewer, Drafter, Verifier — run concurrently on every query. The Verifier HEAD-checks every cited URL and kills unverifiable claims before output reaches you.',
-    accent: '#00d4ff',
+    accent: 'var(--gi-accent-blue)',
     bullets: [
       'Gatherer discovers sources in real time',
       'Peer-Reviewer challenges assumptions',
@@ -24,7 +24,7 @@ const PILLARS = [
     tagline: 'Cross-session memory fabric',
     description:
       'Long-lived memory built on the memory-fabric multi-tier store (working → session → episodic → semantic). The Skills Library adapts 50+ patterns from public repos into native PRAXIS capabilities.',
-    accent: '#a855f7',
+    accent: 'var(--gi-accent-violet)',
     bullets: [
       'Facts, preferences, entities persist across sessions',
       'Automatic memory write from Research Swarm',
@@ -39,7 +39,7 @@ const PILLARS = [
     tagline: 'MCP · A2A · ACP · ANP',
     description:
       'A single adapter layer that speaks MCP, A2A, ACP, and ANP. Any tool or agent in any protocol can be called from one place — built as a thin façade over our tool-mesh/tool-registry.',
-    accent: '#00ff88',
+    accent: 'var(--gi-accent-green)',
     bullets: [
       'Normalizes tool definitions across 4 protocols',
       'Single invokeTool(protocol, toolId, args) API',
@@ -54,7 +54,7 @@ const PILLARS = [
     tagline: 'Agent of agents',
     description:
       'Routes user intents to the right artifact — Aegis, Vessels, Terra, Pulse, Command, SZL Holdings, Carlota Jo, Lyte, Prism Counsel, Imperium — via the API server and stitches multi-app workflows together.',
-    accent: '#ffb700',
+    accent: 'var(--gi-accent-amber)',
     bullets: [
       'Knows capabilities of every SZL artifact',
       'Produces an execution plan as a graph',
@@ -65,10 +65,10 @@ const PILLARS = [
 ];
 
 const STATS = [
-  { label: 'Protocols Bridged', value: '4', icon: Network, color: '#00ff88' },
-  { label: 'Adapted Skills', value: '50+', icon: Zap, color: '#00d4ff' },
-  { label: 'Source Repos', value: '20+', icon: Brain, color: '#a855f7' },
-  { label: 'Connected Apps', value: '10', icon: Workflow, color: '#ffb700' },
+  { label: 'Protocols Bridged', value: '4', icon: Network, color: 'var(--gi-accent-green)' },
+  { label: 'Adapted Skills', value: '50+', icon: Zap, color: 'var(--gi-accent-blue)' },
+  { label: 'Source Repos', value: '20+', icon: Brain, color: 'var(--gi-accent-violet)' },
+  { label: 'Connected Apps', value: '10', icon: Workflow, color: 'var(--gi-accent-amber)' },
 ];
 
 export default function Home({ navigate }: { navigate: (p: Page) => void }) {
@@ -84,7 +84,7 @@ export default function Home({ navigate }: { navigate: (p: Page) => void }) {
         />
         <div className="relative max-w-5xl mx-auto px-8 py-16">
           <div className="mb-3 flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-[#00d4ff]/10 border border-[#00d4ff]/30 flex items-center justify-center">
+            <div className="w-8 h-8 rounded bg-nexus-cyan/10 border border-nexus-cyan/30 flex items-center justify-center">
               <span className="text-nexus-cyan font-mono font-bold text-sm">N</span>
             </div>
             <span className="text-xs font-mono text-nexus-cyan tracking-widest uppercase">
@@ -181,7 +181,7 @@ export default function Home({ navigate }: { navigate: (p: Page) => void }) {
           })}
         </div>
 
-        <div className="mt-8 bg-nexus-surface border border-[#00d4ff]/20 rounded-xl p-6">
+        <div className="mt-8 bg-nexus-surface border border-nexus-cyan/20 rounded-xl p-6">
           <div className="flex items-center gap-2 mb-3">
             <Shield className="w-4 h-4 text-nexus-cyan" />
             <h3 className="text-sm font-semibold text-nexus-cyan">Why PRAXIS is One of One</h3>

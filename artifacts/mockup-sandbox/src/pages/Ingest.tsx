@@ -38,11 +38,11 @@ const STATUS_META: Record<
   }
 > = {
   queued: { color: '#8896aa', label: 'Queued', icon: Clock },
-  fetching: { color: '#00d4ff', label: 'Fetching', icon: Download },
-  adapting: { color: '#a855f7', label: 'Adapting', icon: RefreshCw },
-  publishing: { color: '#ffb700', label: 'Publishing', icon: RefreshCw },
-  done: { color: '#00ff88', label: 'Done', icon: CheckCircle },
-  failed: { color: '#ff4455', label: 'Failed', icon: XCircle },
+  fetching: { color: 'var(--gi-accent-blue)', label: 'Fetching', icon: Download },
+  adapting: { color: 'var(--gi-accent-violet)', label: 'Adapting', icon: RefreshCw },
+  publishing: { color: 'var(--gi-accent-amber)', label: 'Publishing', icon: RefreshCw },
+  done: { color: 'var(--gi-accent-green)', label: 'Done', icon: CheckCircle },
+  failed: { color: 'var(--gi-accent-red)', label: 'Failed', icon: XCircle },
 };
 
 export default function Ingest() {
@@ -111,7 +111,7 @@ export default function Ingest() {
           </button>
         </div>
 
-        <div className="bg-nexus-surface border border-[#00d4ff]/20 rounded-xl p-5 mb-6">
+        <div className="bg-nexus-surface border border-nexus-cyan/20 rounded-xl p-5 mb-6">
           <h2 className="text-xs font-mono text-nexus-cyan uppercase tracking-widest mb-3">
             Ingest New Repository
           </h2>
@@ -126,13 +126,13 @@ export default function Ingest() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleIngest();
                 }}
-                className="w-full bg-nexus-bg border border-nexus rounded-lg pl-9 pr-3 py-2.5 text-sm font-mono focus:outline-none focus:border-[#00d4ff]/50 placeholder:text-muted-foreground/30"
+                className="w-full bg-nexus-bg border border-nexus rounded-lg pl-9 pr-3 py-2.5 text-sm font-mono focus:outline-none focus:border-nexus-cyan/50 placeholder:text-muted-foreground/30"
               />
             </div>
             <button
               onClick={() => handleIngest()}
               disabled={submitting || !newUrl.trim()}
-              className="px-4 py-2 rounded-lg bg-[#00d4ff]/10 border border-[#00d4ff]/30 text-nexus-cyan text-sm font-medium hover:bg-[#00d4ff]/20 disabled:opacity-40 transition-colors flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-nexus-cyan/10 border border-nexus-cyan/30 text-nexus-cyan text-sm font-medium hover:bg-nexus-cyan/20 disabled:opacity-40 transition-colors flex items-center gap-2"
             >
               {submitting ? (
                 <Loader className="w-4 h-4 animate-spin" />
@@ -160,8 +160,8 @@ export default function Ingest() {
                     disabled={alreadyIngested || submitting}
                     className={`text-[10px] font-mono px-2 py-1 rounded border transition-colors flex items-center gap-1 ${
                       alreadyIngested
-                        ? 'border-[#00ff88]/30 text-nexus-green/60 cursor-default'
-                        : 'border-nexus text-muted-foreground/60 hover:text-muted-foreground hover:border-[#00d4ff]/20'
+                        ? 'border-nexus-green/30 text-nexus-green/60 cursor-default'
+                        : 'border-nexus text-muted-foreground/60 hover:text-muted-foreground hover:border-nexus-cyan/20'
                     }`}
                   >
                     {alreadyIngested && <CheckCircle className="w-2.5 h-2.5" />}
@@ -174,7 +174,7 @@ export default function Ingest() {
         </div>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 bg-[#ff4455]/10 border border-[#ff4455]/30 rounded-lg px-4 py-3">
+          <div className="mb-4 flex items-center gap-2 bg-nexus-red/10 border border-nexus-red/30 rounded-lg px-4 py-3">
             <AlertCircle className="w-4 h-4 text-nexus-red shrink-0" />
             <p className="text-xs text-nexus-red">{error}</p>
           </div>
@@ -276,10 +276,10 @@ function JobCard({
     <div
       className={`rounded-lg border bg-nexus-surface overflow-hidden transition-all ${
         job.status === 'done'
-          ? 'border-[#00ff88]/20'
+          ? 'border-nexus-green/20'
           : job.status === 'failed'
-            ? 'border-[#ff4455]/20'
-            : 'border-[#00d4ff]/20'
+            ? 'border-nexus-red/20'
+            : 'border-nexus-cyan/20'
       }`}
     >
       <button onClick={onExpand} className="w-full flex items-center gap-3 px-4 py-3 text-left">
@@ -350,7 +350,7 @@ function JobCard({
             </div>
           )}
           {job.error && (
-            <div className="bg-[#ff4455]/05 border border-[#ff4455]/20 rounded-lg p-3">
+            <div className="bg-nexus-red/05 border border-nexus-red/20 rounded-lg p-3">
               <p className="text-xs text-nexus-red font-mono">{job.error}</p>
             </div>
           )}
@@ -372,7 +372,7 @@ function JobCard({
                   }
                 }}
                 disabled={retrying}
-                className="text-[10px] font-mono px-2 py-1 rounded bg-[#00d4ff]/10 border border-[#00d4ff]/30 text-nexus-cyan hover:bg-[#00d4ff]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 shrink-0"
+                className="text-[10px] font-mono px-2 py-1 rounded bg-nexus-cyan/10 border border-nexus-cyan/30 text-nexus-cyan hover:bg-nexus-cyan/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 shrink-0"
               >
                 {retrying ? (
                   <Loader className="w-3 h-3 animate-spin" />

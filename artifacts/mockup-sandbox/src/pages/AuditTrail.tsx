@@ -13,11 +13,11 @@ import { useCallback, useEffect, useState } from 'react';
 import type { AuditEntry } from '../lib/types';
 
 const APP_COLORS: Record<string, string> = {
-  aegis: '#ff4455',
-  vessels: '#00d4ff',
-  terra: '#00ff88',
-  pulse: '#ffb700',
-  command: '#a855f7',
+  aegis: 'var(--gi-accent-red)',
+  vessels: 'var(--gi-accent-blue)',
+  terra: 'var(--gi-accent-green)',
+  pulse: 'var(--gi-accent-amber)',
+  command: 'var(--gi-accent-violet)',
   'szl-holdings': '#22d3ee',
   'carlota-jo': '#f472b6',
   'prism-counsel': '#818cf8',
@@ -286,7 +286,7 @@ const OUTPUT_SUMMARIES: Record<string, [string, string]> = {
 
 function RateLimitBar({ used, total, label }: { used: number; total: number; label: string }) {
   const pct = Math.round((used / total) * 100);
-  const color = pct >= 95 ? '#ff4455' : pct >= 80 ? '#ffb700' : '#00ff88';
+  const color = pct >= 95 ? 'var(--gi-accent-red)' : pct >= 80 ? 'var(--gi-accent-amber)' : 'var(--gi-accent-green)';
   return (
     <div>
       <div className="flex items-center justify-between mb-0.5">
@@ -309,7 +309,7 @@ function EntryRow({ entry }: { entry: AuditEntry }) {
   const [open, setOpen] = useState(false);
   const color = APP_COLORS[entry.agentSlug] ?? '#8896aa';
   const statusColor =
-    entry.status === 'success' ? '#00ff88' : entry.status === 'error' ? '#ff4455' : '#8896aa';
+    entry.status === 'success' ? 'var(--gi-accent-green)' : entry.status === 'error' ? 'var(--gi-accent-red)' : '#8896aa';
 
   return (
     <div
@@ -421,8 +421,8 @@ function EntryRow({ entry }: { entry: AuditEntry }) {
 
           <div className="bg-nexus-bg rounded-lg p-3">
             <div className="flex items-center gap-1.5 mb-2">
-              <Gauge className="w-3 h-3 text-[#ffb700]" />
-              <span className="text-[10px] font-semibold text-[#ffb700]">
+              <Gauge className="w-3 h-3 text-nexus-amber" />
+              <span className="text-[10px] font-semibold text-nexus-amber">
                 Agent Rate Limits at Execution
               </span>
             </div>
@@ -469,7 +469,7 @@ function AgentRateLimitPanel({ entries }: { entries: AuditEntry[] }) {
           const pct = Math.round(
             (e.rateLimit.requestsUsedThisMinute / e.rateLimit.requestsPerMinute) * 100,
           );
-          const statusColor = pct >= 95 ? '#ff4455' : pct >= 80 ? '#ffb700' : '#00ff88';
+          const statusColor = pct >= 95 ? 'var(--gi-accent-red)' : pct >= 80 ? 'var(--gi-accent-amber)' : 'var(--gi-accent-green)';
           return (
             <div key={e.agentSlug} className="bg-nexus-bg rounded-lg p-3">
               <div className="flex items-center gap-2 mb-2">
@@ -540,9 +540,9 @@ export default function AuditTrail() {
         <div className="grid grid-cols-4 gap-3 mb-5">
           {[
             { label: 'Total Runs', value: entries.length, color: '#a3e635' },
-            { label: 'Successful', value: successCount, color: '#00ff88' },
-            { label: 'Errors', value: errorCount, color: '#ff4455' },
-            { label: 'Avg Duration', value: `${avgDuration}ms`, color: '#ffb700' },
+            { label: 'Successful', value: successCount, color: 'var(--gi-accent-green)' },
+            { label: 'Errors', value: errorCount, color: 'var(--gi-accent-red)' },
+            { label: 'Avg Duration', value: `${avgDuration}ms`, color: 'var(--gi-accent-amber)' },
           ].map((stat) => (
             <div key={stat.label} className="bg-nexus-surface border border-nexus rounded-xl p-4">
               <div className="text-[10px] font-mono text-muted-foreground/50 mb-1">

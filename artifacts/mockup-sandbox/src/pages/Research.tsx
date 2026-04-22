@@ -17,10 +17,10 @@ import { nexusApi } from '../lib/api';
 import type { AgentLane, Citation, ResearchRun } from '../lib/types';
 
 const LANE_META: Record<string, { color: string; role: string; icon: string }> = {
-  gatherer: { color: '#00d4ff', role: 'Evidence Discovery', icon: '🔍' },
-  'peer-reviewer': { color: '#a855f7', role: 'Assumption Challenge', icon: '🔬' },
-  drafter: { color: '#ffb700', role: 'Synthesis', icon: '✍️' },
-  verifier: { color: '#00ff88', role: 'Citation Verification', icon: '✅' },
+  gatherer: { color: 'var(--gi-accent-blue)', role: 'Evidence Discovery', icon: '🔍' },
+  'peer-reviewer': { color: 'var(--gi-accent-violet)', role: 'Assumption Challenge', icon: '🔬' },
+  drafter: { color: 'var(--gi-accent-amber)', role: 'Synthesis', icon: '✍️' },
+  verifier: { color: 'var(--gi-accent-green)', role: 'Citation Verification', icon: '✅' },
 };
 
 const EXAMPLES = [
@@ -31,7 +31,7 @@ const EXAMPLES = [
 
 function LaneCard({ lane }: { lane: AgentLane }) {
   const [open, setOpen] = useState(true);
-  const meta = LANE_META[lane.id] ?? { color: '#00d4ff', role: 'Agent', icon: '🤖' };
+  const meta = LANE_META[lane.id] ?? { color: 'var(--gi-accent-blue)', role: 'Agent', icon: '🤖' };
 
   const statusClass =
     lane.status === 'running'
@@ -75,7 +75,7 @@ function LaneCard({ lane }: { lane: AgentLane }) {
                   lane.confidence >= 0.7
                     ? 'text-nexus-green'
                     : lane.confidence >= 0.4
-                      ? 'text-[#ffb700]'
+                      ? 'text-nexus-amber'
                       : 'text-nexus-red'
                 }
                 title="Confidence score"
@@ -123,7 +123,7 @@ function LaneCard({ lane }: { lane: AgentLane }) {
                   href={src}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#00d4ff]/10 text-nexus-cyan hover:bg-[#00d4ff]/20 transition-colors"
+                  className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-nexus-cyan/10 text-nexus-cyan hover:bg-nexus-cyan/20 transition-colors"
                 >
                   <Link className="w-2.5 h-2.5" />
                   {new URL(src).hostname.replace('www.', '')}
@@ -285,10 +285,10 @@ export default function Research() {
           </div>
         </div>
 
-        <div className="bg-nexus-surface border border-[#00d4ff]/20 rounded-xl p-4 mb-6">
+        <div className="bg-nexus-surface border border-nexus-cyan/20 rounded-xl p-4 mb-6">
           <div className="flex gap-3">
             <textarea
-              className="flex-1 bg-nexus-bg border border-nexus rounded-lg px-3 py-2.5 text-sm font-mono resize-none focus:outline-none focus:border-[#00d4ff]/50 text-foreground placeholder:text-muted-foreground/40"
+              className="flex-1 bg-nexus-bg border border-nexus rounded-lg px-3 py-2.5 text-sm font-mono resize-none focus:outline-none focus:border-nexus-cyan/50 text-foreground placeholder:text-muted-foreground/40"
               rows={2}
               placeholder="Enter your research query…"
               value={query}
@@ -300,7 +300,7 @@ export default function Research() {
             <button
               onClick={() => handleSubmit()}
               disabled={loading || !query.trim()}
-              className="px-4 py-2 rounded-lg bg-[#00d4ff]/10 border border-[#00d4ff]/30 text-nexus-cyan text-sm font-medium hover:bg-[#00d4ff]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-nexus-cyan/10 border border-nexus-cyan/30 text-nexus-cyan text-sm font-medium hover:bg-nexus-cyan/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               {loading ? <Loader className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               Run
@@ -316,7 +316,7 @@ export default function Research() {
                   setQuery(ex);
                   handleSubmit(ex);
                 }}
-                className="text-[10px] px-2 py-1 rounded bg-nexus-bg border border-nexus text-muted-foreground/60 hover:text-muted-foreground hover:border-[#00d4ff]/20 transition-colors text-left max-w-xs truncate"
+                className="text-[10px] px-2 py-1 rounded bg-nexus-bg border border-nexus text-muted-foreground/60 hover:text-muted-foreground hover:border-nexus-cyan/20 transition-colors text-left max-w-xs truncate"
               >
                 {ex}
               </button>
@@ -325,7 +325,7 @@ export default function Research() {
         </div>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 bg-[#ff4455]/10 border border-[#ff4455]/30 rounded-lg px-4 py-3">
+          <div className="mb-4 flex items-center gap-2 bg-nexus-red/10 border border-nexus-red/30 rounded-lg px-4 py-3">
             <AlertCircle className="w-4 h-4 text-nexus-red shrink-0" />
             <p className="text-xs text-nexus-red">{error}</p>
           </div>
@@ -342,11 +342,11 @@ export default function Research() {
                 <span
                   className={`text-[10px] font-mono px-2 py-0.5 rounded ${
                     currentRun.status === 'completed'
-                      ? 'bg-[#00ff88]/10 text-nexus-green'
+                      ? 'bg-nexus-green/10 text-nexus-green'
                       : currentRun.status === 'running'
-                        ? 'bg-[#00d4ff]/10 text-nexus-cyan'
+                        ? 'bg-nexus-cyan/10 text-nexus-cyan'
                         : currentRun.status === 'failed'
-                          ? 'bg-[#ff4455]/10 text-nexus-red'
+                          ? 'bg-nexus-red/10 text-nexus-red'
                           : 'bg-nexus-surface text-muted-foreground'
                   }`}
                 >
@@ -370,7 +370,7 @@ export default function Research() {
             )}
 
             {currentRun.finalBrief && (
-              <div className="bg-nexus-surface border border-[#00ff88]/20 rounded-xl p-5">
+              <div className="bg-nexus-surface border border-nexus-green/20 rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <CheckCircle className="w-4 h-4 text-nexus-green" />
                   <h3 className="text-sm font-semibold text-nexus-green">
@@ -394,7 +394,7 @@ export default function Research() {
               {history.slice(0, 5).map((run) => (
                 <button
                   key={run.id}
-                  className="w-full text-left bg-nexus-surface border border-nexus rounded-lg px-4 py-3 hover:border-[#00d4ff]/20 transition-colors"
+                  className="w-full text-left bg-nexus-surface border border-nexus rounded-lg px-4 py-3 hover:border-nexus-cyan/20 transition-colors"
                   onClick={async () => {
                     const r = await nexusApi.getResearch(run.id);
                     setCurrentRun(r);

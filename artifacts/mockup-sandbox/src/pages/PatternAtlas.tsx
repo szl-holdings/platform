@@ -136,7 +136,7 @@ const [mode, setMode] = useState<AutonomyMode>('approve_each');
 <AdminAuditTrail
   entries={auditEntries}
   title="Agent Run Audit"
-  accentColor="#00d4ff"
+  accentColor="var(--gi-accent-blue)"
   showFilters
 />`,
   },
@@ -613,7 +613,7 @@ function PropControl({
           type="checkbox"
           checked={value === 'true'}
           onChange={(e) => onChange(e.target.checked ? 'true' : 'false')}
-          className="w-3 h-3 rounded border-nexus accent-[#00d4ff]"
+          className="w-3 h-3 rounded border-nexus accent-nexus-cyan"
         />
         <span className="text-[11px] text-muted-foreground">{value === 'true' ? 'true' : 'false'}</span>
       </label>

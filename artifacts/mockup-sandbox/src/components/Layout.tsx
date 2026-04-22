@@ -118,7 +118,7 @@ export default function Layout({
       >
         <div className="flex items-center h-14 px-3 border-b border-nexus">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded bg-[#00d4ff]/10 border border-[#00d4ff]/30 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded bg-nexus-cyan/10 border border-nexus-cyan/30 flex items-center justify-center shrink-0">
               <span className="text-nexus-cyan font-mono font-bold text-sm">N</span>
             </div>
             {expanded && (
@@ -155,7 +155,7 @@ export default function Layout({
                   title={expanded ? undefined : item.description}
                   className={`flex items-center gap-2.5 px-2 py-2 rounded-md text-left transition-all w-full group ${
                     active
-                      ? 'bg-[#00d4ff]/10 text-nexus-cyan'
+                      ? 'bg-nexus-cyan/10 text-nexus-cyan'
                       : 'text-muted-foreground hover:text-foreground hover:bg-[#1a2535]/60'
                   }`}
                 >

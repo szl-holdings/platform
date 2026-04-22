@@ -16,10 +16,10 @@ import { nexusApi } from '../lib/api';
 import type { MemoryItem } from '../lib/types';
 
 const TYPE_COLORS: Record<string, string> = {
-  fact: '#00d4ff',
-  preference: '#a855f7',
-  entity: '#00ff88',
-  claim: '#ffb700',
+  fact: 'var(--gi-accent-blue)',
+  preference: 'var(--gi-accent-violet)',
+  entity: 'var(--gi-accent-green)',
+  claim: 'var(--gi-accent-amber)',
   context: '#8896aa',
 };
 
@@ -107,7 +107,7 @@ export default function Memory() {
     <div className="min-h-full bg-nexus-bg p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
-          <Brain className="w-5 h-5 text-[#a855f7]" />
+          <Brain className="w-5 h-5 text-nexus-purple" />
           <div>
             <h1 className="text-lg font-semibold">Persistent Memory</h1>
             <p className="text-xs text-muted-foreground">
@@ -117,7 +117,7 @@ export default function Memory() {
           <div className="ml-auto flex items-center gap-2">
             <button
               onClick={() => setAdding((a) => !a)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#a855f7]/10 border border-[#a855f7]/30 text-[#a855f7] text-xs font-medium hover:bg-[#a855f7]/20 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-nexus-purple/10 border border-nexus-purple/30 text-nexus-purple text-xs font-medium hover:bg-nexus-purple/20 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Memory
@@ -125,7 +125,7 @@ export default function Memory() {
           </div>
         </div>
 
-        <div className="mb-5 flex items-center gap-2 rounded-lg border border-[#ffb700]/20 bg-[#ffb700]/5 px-3 py-2">
+        <div className="mb-5 flex items-center gap-2 rounded-lg border border-nexus-amber/20 bg-nexus-amber/5 px-3 py-2">
           <FlaskConical className="w-3.5 h-3.5 text-nexus-amber shrink-0" />
           <span className="text-[11px] text-nexus-amber font-mono uppercase tracking-wide">
             Internal Tooling — Not Production
@@ -136,8 +136,8 @@ export default function Memory() {
         </div>
 
         {adding && (
-          <div className="bg-nexus-surface border border-[#a855f7]/20 rounded-xl p-4 mb-5 space-y-3">
-            <h3 className="text-sm font-semibold text-[#a855f7]">New Memory Item</h3>
+          <div className="bg-nexus-surface border border-nexus-purple/20 rounded-xl p-4 mb-5 space-y-3">
+            <h3 className="text-sm font-semibold text-nexus-purple">New Memory Item</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] text-muted-foreground/60 uppercase tracking-widest mb-1 block">
@@ -148,7 +148,7 @@ export default function Memory() {
                   placeholder="e.g. preferred_output_format"
                   value={newKey}
                   onChange={(e) => setNewKey(e.target.value)}
-                  className="w-full bg-nexus-bg border border-nexus rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#a855f7]/50 placeholder:text-muted-foreground/30"
+                  className="w-full bg-nexus-bg border border-nexus rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-nexus-purple/50 placeholder:text-muted-foreground/30"
                 />
               </div>
               <div>
@@ -158,7 +158,7 @@ export default function Memory() {
                 <select
                   value={newType}
                   onChange={(e) => setNewType(e.target.value as MemoryItem['type'])}
-                  className="w-full bg-nexus-bg border border-nexus rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#a855f7]/50"
+                  className="w-full bg-nexus-bg border border-nexus rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-nexus-purple/50"
                 >
                   {Object.keys(TYPE_COLORS).map((t) => (
                     <option key={t} value={t}>
@@ -177,7 +177,7 @@ export default function Memory() {
                 value={newValue}
                 onChange={(e) => setNewValue(e.target.value)}
                 rows={2}
-                className="w-full bg-nexus-bg border border-nexus rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[#a855f7]/50 placeholder:text-muted-foreground/30"
+                className="w-full bg-nexus-bg border border-nexus rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-nexus-purple/50 placeholder:text-muted-foreground/30"
               />
             </div>
             <div className="flex gap-2 justify-end">
@@ -190,7 +190,7 @@ export default function Memory() {
               <button
                 onClick={handleAdd}
                 disabled={submitting || !newKey.trim() || !newValue.trim()}
-                className="px-4 py-1.5 text-xs rounded-lg bg-[#a855f7]/10 border border-[#a855f7]/30 text-[#a855f7] hover:bg-[#a855f7]/20 disabled:opacity-40 transition-colors"
+                className="px-4 py-1.5 text-xs rounded-lg bg-nexus-purple/10 border border-nexus-purple/30 text-nexus-purple hover:bg-nexus-purple/20 disabled:opacity-40 transition-colors"
               >
                 {submitting ? 'Saving…' : 'Save'}
               </button>
@@ -206,7 +206,7 @@ export default function Memory() {
               placeholder="Search memory…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-nexus-surface border border-nexus rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-[#a855f7]/30 placeholder:text-muted-foreground/30"
+              className="w-full bg-nexus-surface border border-nexus rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-nexus-purple/30 placeholder:text-muted-foreground/30"
             />
           </div>
           <select
@@ -225,7 +225,7 @@ export default function Memory() {
             onClick={() => setPinnedOnly((p) => !p)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs transition-colors ${
               pinnedOnly
-                ? 'bg-[#ffb700]/10 border-[#ffb700]/30 text-[#ffb700]'
+                ? 'bg-nexus-amber/10 border-nexus-amber/30 text-nexus-amber'
                 : 'border-nexus text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -235,7 +235,7 @@ export default function Memory() {
         </div>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 bg-[#ff4455]/10 border border-[#ff4455]/30 rounded-lg px-4 py-3">
+          <div className="mb-4 flex items-center gap-2 bg-nexus-red/10 border border-nexus-red/30 rounded-lg px-4 py-3">
             <AlertCircle className="w-4 h-4 text-nexus-red shrink-0" />
             <p className="text-xs text-nexus-red">{error}</p>
           </div>
@@ -249,7 +249,7 @@ export default function Memory() {
           <>
             {grouped.pinned.length > 0 && (
               <section className="mb-6">
-                <h2 className="text-[10px] font-mono text-[#ffb700] uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                <h2 className="text-[10px] font-mono text-nexus-amber uppercase tracking-widest mb-3 flex items-center gap-1.5">
                   <Pin className="w-3 h-3" /> Pinned
                 </h2>
                 <div className="space-y-2">
@@ -358,8 +358,8 @@ function MemoryCard({
           onClick={() => onPin(item)}
           className={`p-1.5 rounded-md transition-colors ${
             item.pinned
-              ? 'text-[#ffb700] bg-[#ffb700]/10'
-              : 'text-muted-foreground/40 hover:text-[#ffb700] hover:bg-[#ffb700]/10'
+              ? 'text-nexus-amber bg-nexus-amber/10'
+              : 'text-muted-foreground/40 hover:text-nexus-amber hover:bg-nexus-amber/10'
           }`}
           title={item.pinned ? 'Unpin' : 'Pin'}
         >
@@ -367,7 +367,7 @@ function MemoryCard({
         </button>
         <button
           onClick={() => onForget(item.id)}
-          className="p-1.5 rounded-md text-muted-foreground/40 hover:text-nexus-red hover:bg-[#ff4455]/10 transition-colors"
+          className="p-1.5 rounded-md text-muted-foreground/40 hover:text-nexus-red hover:bg-nexus-red/10 transition-colors"
           title="Forget"
         >
           <Trash2 className="w-3 h-3" />

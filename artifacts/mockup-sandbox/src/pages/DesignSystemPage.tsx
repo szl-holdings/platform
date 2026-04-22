@@ -103,19 +103,19 @@ const SAMPLE_NODES: GraphNode[] = [
     x: 0.5,
     y: 0.15,
     radius: 14,
-    color: '#00d4ff',
-    ringColor: '#00d4ff',
+    color: 'var(--gi-accent-blue)',
+    ringColor: 'var(--gi-accent-blue)',
   },
-  { id: 'guardian', label: 'Guardian', x: 0.2, y: 0.45, radius: 10, color: '#a855f7' },
-  { id: 'pulse', label: 'LUMINA', x: 0.8, y: 0.45, radius: 10, color: '#ffb700' },
-  { id: 'lyte', label: 'KORA', x: 0.35, y: 0.75, radius: 10, color: '#00e878' },
+  { id: 'guardian', label: 'Guardian', x: 0.2, y: 0.45, radius: 10, color: 'var(--gi-accent-violet)' },
+  { id: 'pulse', label: 'LUMINA', x: 0.8, y: 0.45, radius: 10, color: 'var(--gi-accent-amber)' },
+  { id: 'lyte', label: 'KORA', x: 0.35, y: 0.75, radius: 10, color: 'var(--gi-accent-green)' },
   { id: 'vessels', label: 'SEXTANT', x: 0.65, y: 0.75, radius: 10, color: '#14b8a6' },
 ];
 
 const SAMPLE_EDGES: GraphEdge[] = [
-  { id: 'a-g', source: 'alloy', target: 'guardian', color: '#a855f7', weight: 1.5 },
-  { id: 'a-p', source: 'alloy', target: 'pulse', color: '#ffb700', weight: 1.5 },
-  { id: 'a-l', source: 'alloy', target: 'lyte', color: '#00e878', dashed: true },
+  { id: 'a-g', source: 'alloy', target: 'guardian', color: 'var(--gi-accent-violet)', weight: 1.5 },
+  { id: 'a-p', source: 'alloy', target: 'pulse', color: 'var(--gi-accent-amber)', weight: 1.5 },
+  { id: 'a-l', source: 'alloy', target: 'lyte', color: 'var(--gi-accent-green)', dashed: true },
   { id: 'a-v', source: 'alloy', target: 'vessels', color: '#14b8a6', dashed: true },
   { id: 'g-l', source: 'guardian', target: 'lyte', color: '#243040' },
   { id: 'p-v', source: 'pulse', target: 'vessels', color: '#243040' },
@@ -127,7 +127,7 @@ const SAMPLE_MARKERS: MapMarker[] = [
     label: 'Singapore',
     x: 0.72,
     y: 0.58,
-    color: '#00d4ff',
+    color: 'var(--gi-accent-blue)',
     pulse: true,
     size: 'lg',
     tooltip: 'High vessel density — 47 assets',
@@ -137,7 +137,7 @@ const SAMPLE_MARKERS: MapMarker[] = [
     label: 'Shanghai',
     x: 0.76,
     y: 0.38,
-    color: '#ffb700',
+    color: 'var(--gi-accent-amber)',
     size: 'md',
     tooltip: '12 vessels in port',
   },
@@ -146,7 +146,7 @@ const SAMPLE_MARKERS: MapMarker[] = [
     label: 'London',
     x: 0.45,
     y: 0.28,
-    color: '#00e878',
+    color: 'var(--gi-accent-green)',
     size: 'md',
     tooltip: 'HQ — command hub',
   },
@@ -155,7 +155,7 @@ const SAMPLE_MARKERS: MapMarker[] = [
     label: 'New York',
     x: 0.22,
     y: 0.32,
-    color: '#a855f7',
+    color: 'var(--gi-accent-violet)',
     size: 'sm',
     tooltip: 'Capital markets desk',
   },
@@ -187,10 +187,10 @@ const TABLE_COLS: ColumnDef<TableRow>[] = [
     align: 'center',
     accessor: (r) => {
       const map: Record<string, string> = {
-        critical: 'bg-[#ff4455]/15 text-[#ff4455] border-[#ff4455]/30',
-        warning: 'bg-[#ffb700]/15 text-[#ffb700] border-[#ffb700]/30',
-        info: 'bg-[#00d4ff]/15 text-[#00d4ff] border-[#00d4ff]/30',
-        success: 'bg-[#00e878]/15 text-[#00e878] border-[#00e878]/30',
+        critical: 'bg-nexus-red/15 text-nexus-red border-nexus-red/30',
+        warning: 'bg-nexus-amber/15 text-nexus-amber border-nexus-amber/30',
+        info: 'bg-nexus-cyan/15 text-nexus-cyan border-nexus-cyan/30',
+        success: 'bg-nexus-green/15 text-nexus-green border-nexus-green/30',
       };
       return (
         <span
@@ -262,11 +262,11 @@ export default function DesignSystemPage() {
       <div className="mx-auto max-w-5xl">
         <div className="mb-8">
           <div className="mb-1 flex items-center gap-2">
-            <div className="h-px flex-1 bg-gradient-to-r from-[#00d4ff]/40 to-transparent" />
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-[#00d4ff]">
+            <div className="h-px flex-1 bg-gradient-to-r from-nexus-cyan/40 to-transparent" />
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-nexus-cyan">
               @szl-holdings/design-system
             </span>
-            <div className="h-px flex-1 bg-gradient-to-l from-[#00d4ff]/40 to-transparent" />
+            <div className="h-px flex-1 bg-gradient-to-l from-nexus-cyan/40 to-transparent" />
           </div>
           <h1 className="text-center text-2xl font-bold tracking-tight text-[#c8d8e8]">
             Governed-Intelligence Design Language
@@ -391,13 +391,13 @@ export default function DesignSystemPage() {
             policyReason="Action value > $500k"
             autonomyMode={autonomyMode}
             onAutonomyChange={setAutonomyMode}
-            accentColor="#00d4ff"
+            accentColor="var(--gi-accent-blue)"
           >
             <p className="text-sm text-[#7a99b8] leading-relaxed">
               Reroute the <span className="text-[#c8d8e8] font-medium">7 vessels</span> currently
               queued at Tanjong Pagar to the Pasir Panjang terminal. Expected clearing time
-              reduction: <span className="text-[#00e878] font-semibold">−9.4 days</span>. Recovery
-              value estimate: <span className="text-[#00e878] font-semibold">$2.1M</span>. Two
+              reduction: <span className="text-nexus-green font-semibold">−9.4 days</span>. Recovery
+              value estimate: <span className="text-nexus-green font-semibold">$2.1M</span>. Two
               approvers required.
             </p>
           </ProofEnvelope>
@@ -437,7 +437,7 @@ export default function DesignSystemPage() {
                 <p className="mb-2 text-[11px] text-[#4a6070]">
                   <span className="font-mono text-[#7a99b8]">&lt;GraphCanvas /&gt;</span>
                   {selectedNode && (
-                    <span className="ml-2 text-[#00d4ff]">Selected: {selectedNode.label}</span>
+                    <span className="ml-2 text-nexus-cyan">Selected: {selectedNode.label}</span>
                   )}
                 </p>
                 <GraphCanvas
@@ -454,7 +454,7 @@ export default function DesignSystemPage() {
               <p className="mb-2 text-[11px] text-[#4a6070]">
                 <span className="font-mono text-[#7a99b8]">&lt;MapSurface /&gt;</span>
                 {selectedMarker && (
-                  <span className="ml-2 text-[#00d4ff]">{selectedMarker.tooltip}</span>
+                  <span className="ml-2 text-nexus-cyan">{selectedMarker.tooltip}</span>
                 )}
               </p>
               <MapSurface
@@ -475,7 +475,7 @@ export default function DesignSystemPage() {
                 paragraphs={NARRATIVE_PARAGRAPHS}
                 attribution="Synthesized by Alloy · 7 signals · 91% evidence coverage · Traceable to audit log #2026-04-18-0047"
                 collapseAfter={2}
-                accentColor="#00d4ff"
+                accentColor="var(--gi-accent-blue)"
               />
             </div>
           </div>
@@ -487,8 +487,8 @@ export default function DesignSystemPage() {
           subtitle="Governed-intelligence vocabulary — enforced by scripts/lint-copy.sh"
         >
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-[#ff4455]/20 bg-[#ff4455]/5 p-4">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#ff4455]">
+            <div className="rounded-lg border border-nexus-red/20 bg-nexus-red/5 p-4">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-nexus-red">
                 Forbidden
               </p>
               <ul className="space-y-1">
@@ -503,13 +503,13 @@ export default function DesignSystemPage() {
                   'fully autonomous AI',
                 ].map((t) => (
                   <li key={t} className="flex items-center gap-2 text-[11px] text-[#7a99b8]">
-                    <span className="text-[#ff4455]">✕</span> {t}
+                    <span className="text-nexus-red">✕</span> {t}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="rounded-lg border border-[#00e878]/20 bg-[#00e878]/5 p-4">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#00e878]">
+            <div className="rounded-lg border border-nexus-green/20 bg-nexus-green/5 p-4">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-nexus-green">
                 Preferred
               </p>
               <ul className="space-y-1">
@@ -524,7 +524,7 @@ export default function DesignSystemPage() {
                   'audit trail',
                 ].map((t) => (
                   <li key={t} className="flex items-center gap-2 text-[11px] text-[#7a99b8]">
-                    <span className="text-[#00e878]">✓</span> {t}
+                    <span className="text-nexus-green">✓</span> {t}
                   </li>
                 ))}
               </ul>

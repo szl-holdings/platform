@@ -35,10 +35,10 @@ function formatRelative(iso?: string): string {
 }
 
 const PRIMITIVE_COLORS: Record<string, string> = {
-  Skill: '#00d4ff',
-  Hook: '#a855f7',
-  Command: '#ffb700',
-  Agent: '#00ff88',
+  Skill: 'var(--gi-accent-blue)',
+  Hook: 'var(--gi-accent-violet)',
+  Command: 'var(--gi-accent-amber)',
+  Agent: 'var(--gi-accent-green)',
   MemorySchema: '#f472b6',
   RAGStrategy: '#22d3ee',
   Tool: '#fb923c',
@@ -133,7 +133,7 @@ export default function Skills() {
             onClick={handleReset}
             disabled={resetting || (customCount === 0 && modifiedCount === 0)}
             title="Remove your custom skills and clear toggle history on seeded skills"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-nexus text-muted-foreground hover:text-foreground hover:border-[#ff4455]/40 hover:text-nexus-red disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-nexus text-muted-foreground hover:text-foreground hover:border-nexus-red/40 hover:text-nexus-red disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             {resetting ? (
               <Loader className="w-3 h-3 animate-spin" />
@@ -144,7 +144,7 @@ export default function Skills() {
           </button>
         </div>
 
-        <div className="mb-5 flex items-center gap-2 rounded-lg border border-[#ffb700]/20 bg-[#ffb700]/5 px-3 py-2">
+        <div className="mb-5 flex items-center gap-2 rounded-lg border border-nexus-amber/20 bg-nexus-amber/5 px-3 py-2">
           <FlaskConical className="w-3.5 h-3.5 text-nexus-amber shrink-0" />
           <span className="text-[11px] text-nexus-amber font-mono uppercase tracking-wide">
             Internal Tooling — Not Production
@@ -156,7 +156,7 @@ export default function Skills() {
         </div>
 
         {resetSummary && (
-          <div className="mb-4 flex items-center gap-2 bg-[#00d4ff]/5 border border-[#00d4ff]/20 rounded-lg px-4 py-2">
+          <div className="mb-4 flex items-center gap-2 bg-nexus-cyan/5 border border-nexus-cyan/20 rounded-lg px-4 py-2">
             <Sparkles className="w-3.5 h-3.5 text-nexus-cyan shrink-0" />
             <p className="text-xs text-muted-foreground">{resetSummary}</p>
           </div>
@@ -170,7 +170,7 @@ export default function Skills() {
               placeholder="Search skills…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-nexus-surface border border-nexus rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-[#00d4ff]/30 placeholder:text-muted-foreground/30"
+              className="w-full bg-nexus-surface border border-nexus rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-nexus-cyan/30 placeholder:text-muted-foreground/30"
             />
           </div>
           <div className="flex rounded-lg border border-nexus overflow-hidden text-xs">
@@ -180,7 +180,7 @@ export default function Skills() {
                 onClick={() => setEnabledFilter(f)}
                 className={`px-3 py-2 transition-colors capitalize ${
                   enabledFilter === f
-                    ? 'bg-[#00d4ff]/10 text-nexus-cyan'
+                    ? 'bg-nexus-cyan/10 text-nexus-cyan'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -195,7 +195,7 @@ export default function Skills() {
                 onClick={() => setCustomFilter(f)}
                 className={`px-3 py-2 transition-colors capitalize ${
                   customFilter === f
-                    ? 'bg-[#a855f7]/10 text-[#a855f7]'
+                    ? 'bg-nexus-purple/10 text-nexus-purple'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -206,7 +206,7 @@ export default function Skills() {
         </div>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 bg-[#ff4455]/10 border border-[#ff4455]/30 rounded-lg px-4 py-3">
+          <div className="mb-4 flex items-center gap-2 bg-nexus-red/10 border border-nexus-red/30 rounded-lg px-4 py-3">
             <AlertCircle className="w-4 h-4 text-nexus-red shrink-0" />
             <p className="text-xs text-nexus-red">{error}</p>
           </div>
@@ -254,7 +254,7 @@ function SkillCard({
   expanded: boolean;
   onExpand: () => void;
 }) {
-  const primColor = PRIMITIVE_COLORS[skill.primitiveType] ?? '#00d4ff';
+  const primColor = PRIMITIVE_COLORS[skill.primitiveType] ?? 'var(--gi-accent-blue)';
 
   const modifiedRel = formatRelative(skill.lastModifiedAt);
   const modifiedTitle = skill.lastModifiedAt
@@ -266,9 +266,9 @@ function SkillCard({
     <div
       className={`bg-nexus-surface border rounded-lg overflow-hidden transition-all ${
         skill.isCustom
-          ? 'border-[#a855f7]/30'
+          ? 'border-nexus-purple/30'
           : skill.enabled
-            ? 'border-[#00d4ff]/20'
+            ? 'border-nexus-cyan/20'
             : 'border-nexus'
       }`}
     >
@@ -299,9 +299,9 @@ function SkillCard({
                 <span
                   className="text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1"
                   style={{
-                    color: '#a855f7',
-                    backgroundColor: '#a855f715',
-                    border: '1px solid #a855f730',
+                    color: 'var(--gi-accent-violet)',
+                    backgroundColor: 'color-mix(in srgb, var(--gi-accent-violet) 10%, transparent)',
+                    border: '1px solid color-mix(in srgb, var(--gi-accent-violet) 25%, transparent)',
                   }}
                   title="You added this skill"
                 >
@@ -311,7 +311,7 @@ function SkillCard({
               )}
               {!skill.isCustom && skill.lastModifiedAt && (
                 <span
-                  className="text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1 text-[#ffb700] bg-[#ffb700]/10 border border-[#ffb700]/30"
+                  className="text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1 text-nexus-amber bg-nexus-amber/10 border border-nexus-amber/30"
                   title={modifiedTitle}
                 >
                   modified
@@ -374,7 +374,7 @@ function SkillCard({
               </div>
             </div>
             <div>
-              <h4 className="text-[10px] font-mono text-[#00d4ff]/70 uppercase tracking-widest mb-1.5">
+              <h4 className="text-[10px] font-mono text-nexus-cyan/70 uppercase tracking-widest mb-1.5">
                 NEXUS Adaptation
               </h4>
               <div

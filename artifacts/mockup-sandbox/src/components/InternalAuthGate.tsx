@@ -20,7 +20,7 @@ function LoginWall() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-nexus-bg">
       <div className="flex flex-col items-center gap-6 max-w-sm w-full px-6">
-        <div className="w-14 h-14 rounded-xl bg-[#00d4ff]/10 border border-[#00d4ff]/30 flex items-center justify-center">
+        <div className="w-14 h-14 rounded-xl bg-nexus-cyan/10 border border-nexus-cyan/30 flex items-center justify-center">
           <span className="text-nexus-cyan font-mono font-bold text-xl">N</span>
         </div>
 
@@ -29,7 +29,7 @@ function LoginWall() {
           <p className="text-muted-foreground text-xs">Unified Agentic AI Layer</p>
         </div>
 
-        <div className="w-full rounded-xl border border-[#ffb700]/30 bg-[#ffb700]/5 px-4 py-3 flex items-start gap-3">
+        <div className="w-full rounded-xl border border-nexus-amber/30 bg-nexus-amber/5 px-4 py-3 flex items-start gap-3">
           <ShieldAlert className="w-4 h-4 text-nexus-amber shrink-0 mt-0.5" />
           <div className="space-y-1">
             <p className="text-xs font-semibold text-nexus-amber font-mono uppercase tracking-wide">
@@ -73,7 +73,7 @@ function LoadingScreen() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-nexus-bg">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-10 h-10 rounded-lg bg-[#00d4ff]/10 border border-[#00d4ff]/30 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-lg bg-nexus-cyan/10 border border-nexus-cyan/30 flex items-center justify-center">
           <span className="text-nexus-cyan font-mono font-bold">N</span>
         </div>
         <div className="flex items-center gap-2 text-muted-foreground/50 text-xs font-mono">
