@@ -96,6 +96,7 @@ const convergences = [
   {
     from: 'Defense',
     to: 'Command',
+    toHref: '/ops/dashboard',
     icon: AlertTriangle,
     desc: 'Incident INC-2847 impacts managed client Northgate. Lateral movement on DC-PROD-03 triggers automatic SLA escalation, client notification, and containment protocol — before the client knows.',
     color: '#ef4444',
@@ -104,6 +105,7 @@ const convergences = [
   {
     from: 'Labs',
     to: 'Defense',
+    toHref: '/soc',
     icon: Brain,
     desc: 'Neural explorer detects anomalous pattern matching APT29 TTPs. Intelligence model confidence: 94%. MITRE mapping and hunting queries generated automatically. Defense SOC receives enriched alert in < 60 seconds.',
     color: '#8b5cf6',
@@ -112,6 +114,7 @@ const convergences = [
   {
     from: 'Command',
     to: 'Labs',
+    toHref: '/intel/dashboard',
     icon: Radio,
     desc: 'Service desk ticket volume anomaly across 3 managed clients. Labs ingests the signal, generates churn risk model, and surfaces preventive actions to Command — within the same operating session.',
     color: '#3b82f6',
@@ -120,6 +123,7 @@ const convergences = [
   {
     from: 'Defense',
     to: 'Legal',
+    toHref: '/legal',
     icon: AlertTriangle,
     desc: 'Ransomware containment on client Harfield Group triggers automatic legal intake. Matter opened, breach notification deadlines calculated across 7 jurisdictions, and privilege log initiated — all within the incident response window.',
     color: '#ef4444',
@@ -128,6 +132,7 @@ const convergences = [
   {
     from: 'Legal',
     to: 'Command',
+    toHref: '/ops/dashboard',
     icon: FileSearch,
     desc: 'Regulatory filing deadline for client Meridian Capital is 11 days out. Legal surfaces the hard constraint to Command, which auto-adjusts SLA priorities, reassigns support bandwidth, and flags any at-risk delivery commitments.',
     color: '#d4a054',
@@ -496,35 +501,41 @@ export default function AegisHomePage() {
 
             <div className="flex flex-col gap-4">
               {convergences.map((c, i) => (
-                <div
-                  key={i}
-                  className="border border-white/[0.05] rounded-2xl p-7 sm:p-8 transition-all hover:border-white/[0.08]"
-                >
-                  <div className="flex items-center gap-3 mb-5">
-                    <span
-                      className="text-[11px] font-bold px-3 py-1 rounded-lg"
-                      style={{ background: `${c.color}10`, color: "rgba(255,255,255,0.9)" }}
-                    >
-                      {c.from}
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <div
-                        className="w-8 h-px"
-                        style={{
-                          background: `linear-gradient(90deg, ${c.color}40, ${c.toColor}40)`,
-                        }}
+                <Link key={i} href={c.toHref}>
+                  <div
+                    className="group border border-white/[0.05] rounded-2xl p-7 sm:p-8 transition-all hover:border-white/[0.12] hover:bg-white/[0.02] cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 mb-5">
+                      <span
+                        className="text-[11px] font-bold px-3 py-1 rounded-lg"
+                        style={{ background: `${c.color}10`, color: "rgba(255,255,255,0.9)" }}
+                      >
+                        {c.from}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <div
+                          className="w-8 h-px"
+                          style={{
+                            background: `linear-gradient(90deg, ${c.color}40, ${c.toColor}40)`,
+                          }}
+                        />
+                        <ChevronRight aria-hidden="true" size={10} className="text-white/60" />
+                      </div>
+                      <span
+                        className="text-[11px] font-bold px-3 py-1 rounded-lg"
+                        style={{ background: `${c.toColor}10`, color: "rgba(255,255,255,0.9)" }}
+                      >
+                        {c.to}
+                      </span>
+                      <ArrowRight
+                        size={13}
+                        className="ml-auto text-white/20 group-hover:text-white/50 transition-colors shrink-0"
+                        aria-hidden="true"
                       />
-                      <ChevronRight aria-hidden="true" size={10} className="text-white/60" />
                     </div>
-                    <span
-                      className="text-[11px] font-bold px-3 py-1 rounded-lg"
-                      style={{ background: `${c.toColor}10`, color: "rgba(255,255,255,0.9)" }}
-                    >
-                      {c.to}
-                    </span>
+                    <p className="text-[14px] leading-[1.85] text-white/65">{c.desc}</p>
                   </div>
-                  <p className="text-[14px] leading-[1.85] text-white/65">{c.desc}</p>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
