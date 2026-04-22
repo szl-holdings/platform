@@ -200,6 +200,20 @@ jobs:
           PORT: 5000
           BASE_URL: http://localhost:5000
           INTEGRATION_TEST_TOKEN: ${{ secrets.INTEGRATION_TEST_TOKEN }}
+      # Pins the contract that /api/health stays fast even when the main
+      # `db` pool is fully checked out. Saturates the main pool with
+      # DB_POOL_MAX held connections, then asserts /api/health responds
+      # in < 500 ms and that probeDatabase / probeAuth / probeQueue all
+      # complete via the dedicated `healthPool` without error. Guards
+      # against a regression where a future change quietly routes the
+      # probes back through the main pool. Task #2902.
+      - name: Health pool saturation regression test
+        run: pnpm --filter @workspace/api-server exec vitest run src/__tests__/health-pool-saturation.test.ts
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/szl_test
+          SESSION_SECRET: ci-test-session-secret-not-for-production
+          NODE_ENV: test
+          CI: true
       - name: Stop API server and dump logs on failure
         if: always()
         run: |
