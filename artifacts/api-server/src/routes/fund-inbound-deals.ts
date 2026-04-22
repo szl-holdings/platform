@@ -7,6 +7,8 @@ import multer from 'multer';
 import { Readable } from 'stream';
 import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendNotFound, sendSuccess } from '../lib/api-response';
+import { buildDealSubmissionAckEmail, sendEmail } from '../lib/email';
+import { logger } from '../lib/logger';
 import { ObjectNotFoundError, ObjectStorageService } from '../lib/objectStorage';
 import { validateBody } from '../lib/validation';
 import { publicSubmitLimiter, publicUploadLimiter } from '../middlewares/rate-limiters';
@@ -309,6 +311,39 @@ router.post(
         },
         201,
       );
+
+      // Fire-and-forget confirmation email. Failures are logged but must not
+      // surface as errors to the founder — the submission is already persisted.
+      const submittedAtIso = new Date(row.submittedAt).toLocaleString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZoneName: 'short',
+      });
+      setImmediate(async () => {
+        try {
+          const { subject, html, text } = buildDealSubmissionAckEmail({
+            founderName: v.founderName,
+            company: v.company,
+            pipelineId: row.pipelineId,
+            submittedAt: submittedAtIso,
+          });
+          const result = await sendEmail({ to: v.founderEmail, subject, html, text });
+          if (!result.success) {
+            logger.warn(
+              { pipelineId: row.pipelineId, to: v.founderEmail, error: result.error },
+              '[fund-inbound-deals] Confirmation email not delivered (non-blocking)',
+            );
+          }
+        } catch (emailErr) {
+          logger.warn(
+            { err: emailErr, pipelineId: row.pipelineId, to: v.founderEmail },
+            '[fund-inbound-deals] Confirmation email failed (non-blocking)',
+          );
+        }
+      });
     } catch (err) {
       handleRouteError(res, err, 'Failed to record inbound deal submission');
     }

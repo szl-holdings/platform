@@ -1632,3 +1632,54 @@ export function buildPulseBriefingEmail(opts: PulseBriefingEmailOptions): {
     text: textLines.join('\n'),
   };
 }
+
+export function buildDealSubmissionAckEmail(params: {
+  founderName: string;
+  company: string;
+  pipelineId: string;
+  submittedAt: string;
+}): { subject: string; html: string; text: string } {
+  const { founderName, company, pipelineId, submittedAt } = params;
+  const safeName = escapeHtml(founderName);
+  const safeCompany = escapeHtml(company);
+  const safePipelineId = escapeHtml(pipelineId);
+
+  const subject = `Deal submission received — ${safeCompany} (${safePipelineId})`;
+
+  const html = szlBrand(`
+    <h2>Submission Received</h2>
+    <p>Hello ${safeName},</p>
+    <p>Thank you for submitting <strong>${safeCompany}</strong> to SZL Holdings. We've received your application and our investment team will review it carefully.</p>
+    <div class="highlight">
+      <p class="label">Pipeline ID</p>
+      <p style="font-family:monospace;font-size:16px;font-weight:700;color:#111827;">${safePipelineId}</p>
+      <p class="label" style="margin-top:8px;">Submitted</p>
+      <p>${escapeHtml(submittedAt)}</p>
+    </div>
+    <p>Please keep your Pipeline ID for your records — you may be asked to reference it in any future correspondence with our team.</p>
+    <p>Our team reviews submissions on a rolling basis. If your opportunity aligns with our thesis, a member of our team will be in touch. Due to the volume of submissions we receive, we are unable to provide individual feedback on applications that do not advance.</p>
+    <p>Thank you again for considering SZL Holdings as a partner.</p>
+    <a class="cta" href="https://szlholdings.com/corporate">Learn About SZL Holdings</a>
+  `);
+
+  const text = [
+    `Submission Received — SZL Holdings`,
+    ``,
+    `Hello ${founderName},`,
+    ``,
+    `Thank you for submitting ${company} to SZL Holdings. We've received your application and our investment team will review it carefully.`,
+    ``,
+    `Pipeline ID:  ${pipelineId}`,
+    `Submitted:    ${submittedAt}`,
+    ``,
+    `Please keep your Pipeline ID for your records — you may be asked to reference it in any future correspondence with our team.`,
+    ``,
+    `Our team reviews submissions on a rolling basis. If your opportunity aligns with our thesis, a member of our team will be in touch.`,
+    ``,
+    `Thank you again for considering SZL Holdings as a partner.`,
+    ``,
+    `SZL Holdings · Washington, D.C. · London · Singapore`,
+  ].join('\n');
+
+  return { subject, html, text };
+}
