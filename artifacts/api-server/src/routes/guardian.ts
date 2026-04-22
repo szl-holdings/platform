@@ -735,15 +735,65 @@ router.get('/policies/tiers', authMiddleware(), async (req: Request, res: Respon
   try {
     const orgId = userOrgId(req.user);
     const tiers = await getAllEffectiveTiers(orgId);
+
+    // Decorate with editor metadata so admins see who last changed each tier.
+    // Persisted rows live in `guardian_tiers`; constant-default tiers have no
+    // editor info. Org override beats global default for the same tier name.
+    const persistedRows = await db
+      .select({
+        tier: guardianTiersTable.tier,
+        orgId: guardianTiersTable.orgId,
+        updatedAt: guardianTiersTable.updatedAt,
+        updatedById: guardianTiersTable.updatedById,
+        updatedByName: usersTable.displayName,
+        updatedByEmail: usersTable.email,
+      })
+      .from(guardianTiersTable)
+      .leftJoin(usersTable, eq(usersTable.id, guardianTiersTable.updatedById))
+      .where(
+        orgId != null
+          ? or(isNull(guardianTiersTable.orgId), eq(guardianTiersTable.orgId, orgId))!
+          : isNull(guardianTiersTable.orgId),
+      );
+
+    const editorByTier = new Map<
+      string,
+      {
+        updatedAt: string | null;
+        updatedBy: { id: number; displayName: string; email: string | null } | null;
+      }
+    >();
+    for (const row of persistedRows) {
+      const existing = editorByTier.get(row.tier);
+      // Org-specific row beats global default.
+      if (existing && row.orgId == null) continue;
+      editorByTier.set(row.tier, {
+        updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : row.updatedAt,
+        updatedBy:
+          row.updatedById != null
+            ? {
+                id: row.updatedById,
+                displayName: row.updatedByName ?? 'Unknown',
+                email: row.updatedByEmail,
+              }
+            : null,
+      });
+    }
+
     sendSuccess(
       res,
-      tiers.map((t) => ({
-        tier: t.tier,
-        tierNumber: t.tierNumber,
-        description: t.description,
-        riskLevel: t.riskLevel,
-        controls: t.controls as unknown as Record<string, unknown>,
-      })),
+      tiers.map((t) => {
+        const editor = editorByTier.get(t.tier);
+        return {
+          tier: t.tier,
+          tierNumber: t.tierNumber,
+          description: t.description,
+          riskLevel: t.riskLevel,
+          controls: t.controls as unknown as Record<string, unknown>,
+          updatedAt: editor?.updatedAt ?? null,
+          updatedBy: editor?.updatedBy ?? null,
+        };
+      }),
     );
   } catch (err) {
     handleRouteError(res, err, 'Failed to list policy tiers');
@@ -3574,7 +3624,13 @@ router.post(
 // GUARDRAIL CONFIGS — persisted runtime guardrail configurations
 // ============================================================
 
-function guardrailRowToApi(row: GuardrailConfig) {
+interface GuardrailEditor {
+  id: number;
+  displayName: string;
+  email: string | null;
+}
+
+function guardrailRowToApi(row: GuardrailConfig, createdBy?: GuardrailEditor | null) {
   return {
     id: row.id,
     orgId: row.orgId,
@@ -3588,7 +3644,25 @@ function guardrailRowToApi(row: GuardrailConfig) {
     enabled: row.enabled,
     createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt,
     updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : row.updatedAt,
+    createdById: row.createdById ?? null,
+    createdBy: createdBy ?? null,
   };
+}
+
+async function loadCreatedByForGuardrails(
+  ids: Array<number | null>,
+): Promise<Map<number, GuardrailEditor>> {
+  const uniqueIds = Array.from(new Set(ids.filter((x): x is number => typeof x === 'number')));
+  const out = new Map<number, GuardrailEditor>();
+  if (uniqueIds.length === 0) return out;
+  const rows = await db
+    .select({ id: usersTable.id, displayName: usersTable.displayName, email: usersTable.email })
+    .from(usersTable)
+    .where(sql`${usersTable.id} = ANY(${uniqueIds})`);
+  for (const r of rows) {
+    out.set(r.id, { id: r.id, displayName: r.displayName ?? 'Unknown', email: r.email ?? null });
+  }
+  return out;
 }
 
 router.get(
@@ -3642,11 +3716,19 @@ router.get(
           .where(where as ReturnType<typeof and>),
       ]);
 
-      sendSuccess(res, rows.map(guardrailRowToApi), 200, {
-        page,
-        limit,
-        total: totalRow[0]?.count ?? 0,
-      });
+      const editorMap = await loadCreatedByForGuardrails(rows.map((r) => r.createdById));
+      sendSuccess(
+        res,
+        rows.map((r) =>
+          guardrailRowToApi(r, r.createdById != null ? (editorMap.get(r.createdById) ?? null) : null),
+        ),
+        200,
+        {
+          page,
+          limit,
+          total: totalRow[0]?.count ?? 0,
+        },
+      );
     } catch (err) {
       handleRouteError(res, err, 'Failed to list guardrail configs');
     }
@@ -3684,7 +3766,11 @@ router.get(
           return;
         }
       }
-      sendSuccess(res, guardrailRowToApi(row));
+      const editorMap = await loadCreatedByForGuardrails([row.createdById]);
+      sendSuccess(
+        res,
+        guardrailRowToApi(row, row.createdById != null ? (editorMap.get(row.createdById) ?? null) : null),
+      );
     } catch (err) {
       handleRouteError(res, err, 'Failed to get guardrail config');
     }
@@ -3751,7 +3837,14 @@ router.post(
         { guardrailId: inserted.guardrailId, type: inserted.guardrailType },
         'Guardrail config created',
       );
-      sendCreated(res, guardrailRowToApi(inserted));
+      const editorMap = await loadCreatedByForGuardrails([inserted.createdById]);
+      sendCreated(
+        res,
+        guardrailRowToApi(
+          inserted,
+          inserted.createdById != null ? (editorMap.get(inserted.createdById) ?? null) : null,
+        ),
+      );
     } catch (err) {
       handleRouteError(res, err, 'Failed to create guardrail config');
     }
@@ -3823,7 +3916,14 @@ router.patch(
         sendNotFound(res, 'Guardrail config not found');
         return;
       }
-      sendSuccess(res, guardrailRowToApi(updated));
+      const editorMap = await loadCreatedByForGuardrails([updated.createdById]);
+      sendSuccess(
+        res,
+        guardrailRowToApi(
+          updated,
+          updated.createdById != null ? (editorMap.get(updated.createdById) ?? null) : null,
+        ),
+      );
     } catch (err) {
       handleRouteError(res, err, 'Failed to update guardrail config');
     }

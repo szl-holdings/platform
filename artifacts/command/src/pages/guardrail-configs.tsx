@@ -53,6 +53,15 @@ interface GuardrailConfig {
   enabled: boolean;
   createdAt?: string;
   updatedAt?: string;
+  createdById?: number | null;
+  createdBy?: { id: number; displayName: string; email: string | null } | null;
+}
+
+function formatTimestamp(iso?: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleString();
 }
 
 interface ApiResponse<T> {
@@ -719,6 +728,35 @@ export default function GuardrailConfigsPage() {
                     {item.description && (
                       <div className="text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
                         {item.description}
+                      </div>
+                    )}
+                    {(item.createdAt || item.updatedAt || item.createdBy) && (
+                      <div
+                        data-testid={`guardrail-audit-${item.id}`}
+                        className="text-[10px] font-mono mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5"
+                        style={{ color: 'rgba(255,255,255,0.4)' }}
+                      >
+                        {item.createdBy && (
+                          <span data-testid={`guardrail-created-by-${item.id}`}>
+                            Created by{' '}
+                            <span style={{ color: 'rgba(255,255,255,0.7)' }}>
+                              {item.createdBy.displayName}
+                            </span>
+                            {item.createdAt
+                              ? ` on ${formatTimestamp(item.createdAt) ?? item.createdAt}`
+                              : ''}
+                          </span>
+                        )}
+                        {!item.createdBy && item.createdAt && (
+                          <span data-testid={`guardrail-created-at-${item.id}`}>
+                            Created on {formatTimestamp(item.createdAt) ?? item.createdAt}
+                          </span>
+                        )}
+                        {item.updatedAt && (
+                          <span data-testid={`guardrail-updated-at-${item.id}`}>
+                            Updated on {formatTimestamp(item.updatedAt) ?? item.updatedAt}
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
