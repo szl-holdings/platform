@@ -1,167 +1,128 @@
-import { graphRAGEngine, ontologyEngine } from '@szl-holdings/ai-engine';
-import { bodyShape } from '@szl-holdings/contracts/common';
-import { Router } from 'express';
+import { Router, type IRouter } from 'express';
 import { z } from 'zod';
-import { sendBadRequest, sendError } from '../lib/api-response';
-import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
-import { authMiddleware } from '../middlewares/auth';
+import {
+  ENTITY_KINDS,
+  entityKindSchema,
+  entityUri,
+  isUri,
+  neighbors,
+  registerEdge,
+  registerEntity,
+  resolveEntity,
+  uriSchema,
+} from '@szl-holdings/ontology';
+import { authMiddleware, isElevatedUser } from '../middlewares/auth';
+import {
+  handleRouteError,
+  sendBadRequest,
+  sendCreated,
+  sendNotFound,
+  sendSuccess,
+  sendUnauthorized,
+} from '../lib/api-response';
+import { validateBody, validateQuery } from '../lib/validation';
 
-const router = Router();
+const router: IRouter = Router();
 
-router.get('/ontology/stats', authMiddleware(), async (_req, res) => {
+router.use(authMiddleware());
+
+function orgScopeFor(req: Express.Request): number[] | null {
+  const user = (req as any).user;
+  if (!user) return [];
+  if (isElevatedUser(user)) return null;
+  return user.orgs.map((o: { orgId: number }) => o.orgId);
+}
+
+const resolveQuerySchema = z.object({
+  uri: uriSchema,
+});
+
+router.get('/resolve', validateQuery(resolveQuerySchema), async (req, res) => {
   try {
-    const stats = await ontologyEngine.getGraphStats();
-    res.json({ success: true, stats });
+    const uri = String(req.query.uri);
+    const scope = orgScopeFor(req);
+    const entity = await resolveEntity(uri, { orgScope: scope });
+    if (!entity) {
+      sendNotFound(res, 'Entity not registered');
+      return;
+    }
+    sendSuccess(res, { entity });
   } catch (err) {
-    sendError(res, 'Failed to fetch ontology stats');
+    handleRouteError(res, err);
   }
 });
 
-router.get('/ontology/entity/:id', authMiddleware(), async (req, res) => {
+const neighborsQuerySchema = z.object({
+  uri: uriSchema,
+  limit: z.coerce.number().int().min(1).max(200).optional(),
+});
+
+router.get('/neighbors', validateQuery(neighborsQuerySchema), async (req, res) => {
   try {
-    const entity = await ontologyEngine.getEntity(req.params.id as string);
-    if (!entity) return sendError(res, 'Entity not found', 404, 'NOT_FOUND');
-    res.json({ success: true, entity });
+    const uri = String(req.query.uri);
+    const limit = req.query.limit ? Number(req.query.limit) : undefined;
+    const scope = orgScopeFor(req);
+    const entity = await resolveEntity(uri, { orgScope: scope });
+    if (!entity) {
+      sendNotFound(res, 'Entity not registered');
+      return;
+    }
+    const links = await neighbors(uri, { orgScope: scope, limit });
+    sendSuccess(res, { entity, neighbors: links });
   } catch (err) {
-    sendError(res, 'Failed to fetch entity');
+    handleRouteError(res, err);
   }
 });
 
-router.get('/ontology/entity/:id/connections', authMiddleware(), async (req, res) => {
+const registerEntityBody = z.object({
+  kind: entityKindSchema,
+  namespace: z.string().regex(/^[a-z0-9_-]+$/),
+  identifier: z.union([z.string(), z.number()]),
+  orgId: z.number().int().nullable().optional(),
+  sourceTable: z.string().min(1),
+  sourceId: z.union([z.string(), z.number()]),
+  displayName: z.string().min(1),
+  attributes: z.record(z.unknown()).optional().nullable(),
+});
+
+router.post('/register', validateBody(registerEntityBody), async (req, res) => {
   try {
-    const connections = await ontologyEngine.getEntityConnections(req.params.id as string);
-    res.json({ success: true, connections });
+    const user = (req as any).user;
+    if (!user || !isElevatedUser(user)) {
+      sendUnauthorized(res, 'Elevated role required to register ontology entities');
+      return;
+    }
+    const entity = await registerEntity(req.body);
+    sendCreated(res, { entity });
   } catch (err) {
-    sendError(res, 'Failed to fetch entity connections');
+    handleRouteError(res, err);
   }
 });
 
-router.get(
-  '/ontology/entity/:id/traverse',
-  authMiddleware(),
-  validateQuery(listQuerySchema),
-  async (req, res) => {
-    try {
-      const maxHops = Math.min(parseInt(String(req.query.hops ?? '2')), 4);
-      const result = await ontologyEngine.traverseGraph(req.params.id as string, maxHops);
-      res.json({ success: true, result });
-    } catch (err) {
-      sendError(res, 'Failed to traverse graph');
-    }
-  },
-);
+const registerEdgeBody = z.object({
+  fromUri: uriSchema,
+  toUri: uriSchema,
+  relation: z.string().min(1).max(64),
+  orgId: z.number().int().nullable().optional(),
+  attributes: z.record(z.unknown()).optional().nullable(),
+});
 
-router.get(
-  '/ontology/search',
-  authMiddleware(),
-  validateQuery(listQuerySchema),
-  async (req, res) => {
-    try {
-      const query = String(req.query.q ?? '');
-      if (!query) return sendBadRequest(res, "Query parameter 'q' is required");
-      const limit = Math.min(parseInt(String(req.query.limit ?? '20')), 50);
-      const entities = await ontologyEngine.searchEntities(query, undefined, limit);
-      res.json({ success: true, entities });
-    } catch (err) {
-      sendError(res, 'Search failed');
-    }
-  },
-);
-
-router.get(
-  '/ontology/domain/:domain',
-  authMiddleware(),
-  validateQuery(listQuerySchema),
-  async (req, res) => {
-    try {
-      const limit = Math.min(parseInt(String(req.query.limit ?? '50')), 100);
-      const entities = await ontologyEngine.getDomainEntities(req.params.domain as string, limit);
-      res.json({ success: true, entities });
-    } catch (err) {
-      sendError(res, 'Failed to fetch domain entities');
-    }
-  },
-);
-
-router.post('/ontology/entity', authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
+router.post('/edges', validateBody(registerEdgeBody), async (req, res) => {
   try {
-    const { type, name, domain, metadata = {}, tags = [], riskScore, externalId } = req.body;
-    if (!type || !name || !domain)
-      return sendBadRequest(res, 'type, name, and domain are required');
-    const entity = await ontologyEngine.upsertEntity({
-      type,
-      name,
-      domain,
-      metadata,
-      tags,
-      riskScore,
-      externalId,
-    });
-    res.json({ success: true, entity });
+    const user = (req as any).user;
+    if (!user || !isElevatedUser(user)) {
+      sendUnauthorized(res, 'Elevated role required to register ontology edges');
+      return;
+    }
+    const edge = await registerEdge(req.body);
+    sendCreated(res, { edge });
   } catch (err) {
-    sendError(res, 'Failed to upsert entity');
+    handleRouteError(res, err);
   }
 });
 
-router.post(
-  '/ontology/relationship',
-  authMiddleware(),
-  validateBody(bodyShape({})),
-  async (req, res) => {
-    try {
-      const { fromEntityId, toEntityId, type, strength = 'moderate', metadata = {} } = req.body;
-      if (!fromEntityId || !toEntityId || !type)
-        return sendBadRequest(res, 'fromEntityId, toEntityId, and type are required');
-      const rel = await ontologyEngine.createRelationship(
-        fromEntityId,
-        toEntityId,
-        type,
-        strength,
-        metadata,
-      );
-      res.json({ success: true, relationship: rel });
-    } catch (err) {
-      sendError(res, 'Failed to create relationship');
-    }
-  },
-);
-
-router.post(
-  '/ontology/graph-rag',
-  authMiddleware(),
-  validateBody(
-    bodyShape({
-      domains: z.unknown().optional(),
-      maxEntitiesPerHop: z.unknown().optional(),
-      maxHops: z.unknown().optional(),
-      query: z.unknown().optional(),
-      topKChunksPerEntity: z.unknown().optional(),
-    }),
-  ),
-  async (req, res) => {
-    try {
-      const {
-        query,
-        maxHops = 2,
-        maxEntitiesPerHop = 5,
-        topKChunksPerEntity = 3,
-        domains,
-      } = req.body;
-      if (!query) return sendBadRequest(res, 'query is required');
-
-      const result = await graphRAGEngine.query({
-        query,
-        maxHops: Math.min(maxHops, 4),
-        maxEntitiesPerHop: Math.min(maxEntitiesPerHop, 10),
-        topKChunksPerEntity: Math.min(topKChunksPerEntity, 10),
-        domains,
-      });
-
-      res.json({ success: true, result });
-    } catch (err) {
-      sendError(res, 'GraphRAG query failed');
-    }
-  },
-);
+router.get('/kinds', async (_req, res) => {
+  sendSuccess(res, { kinds: ENTITY_KINDS });
+});
 
 export default router;

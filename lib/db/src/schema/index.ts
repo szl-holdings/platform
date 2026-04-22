@@ -97,6 +97,7 @@ export * from './msp';
 export * from './msp_rmm';
 export * from './multiplayer_sessions';
 export * from './nexus_memory';
+export * from './nexus_ontology';
 export * from './nexus_state';
 export * from './notifications';
 export * from './nuro_mesh';

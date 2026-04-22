@@ -41,6 +41,9 @@ const SignalChainsPage = lazy(() =>
   import('./pages/signal-chains').then((m) => ({ default: m.SignalChainsPage })),
 );
 const EnterpriseStatePage = lazy(() => import('./pages/enterprise-state'));
+const Entity360Page = lazy(() =>
+  import('./pages/entity-360').then((m) => ({ default: m.Entity360Page })),
+);
 
 const CrossPlatformHubPage = lazy(() =>
   import('./pages/cross-platform/index').then((m) => ({ default: m.CrossPlatformHubPage })),
@@ -547,6 +550,7 @@ function AppShell() {
               <Route path="/strategy/signal-chains" component={() => <SignalChainsPage />} />
               <Route path="/strategy/enterprise-state" component={() => <EnterpriseStatePage />} />
               <Route path="/strategy/atlas-runtime" component={() => <AtlasRuntimePage />} />
+              <Route path="/strategy/entity-360" component={() => <Entity360Page />} />
               <Route
                 path="/strategy/worldline-registry"
                 component={() => <WorldlineRegistryPage />}

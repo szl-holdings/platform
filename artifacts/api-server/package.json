@@ -66,6 +66,7 @@
     "@szl-holdings/crdt-sync": "workspace:*",
     "@szl-holdings/data-connectors": "workspace:*",
     "@szl-holdings/db": "workspace:*",
+    "@szl-holdings/ontology": "workspace:*",
     "@szl-holdings/db-repository": "workspace:*",
     "@szl-holdings/db-schema": "workspace:*",
     "@szl-holdings/decision-engine": "workspace:*",

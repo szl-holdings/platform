@@ -192,6 +192,10 @@ skillLibrary.register(router);
 
 router.use("/nexus", lazyMount(() => import("./nexus"), "nexus"));
 
+// NEXUS Ontology Fabric — unified entity registry + adjacency graph
+// across Terra/Vessels/Counsel/Sentra/etc. URI scheme: szl://<kind>/<ns>/<id>.
+router.use("/ontology", lazyMount(() => import("./ontology"), "ontology"));
+
 router.use(lazyMatch("/cognitive-runtime", () => import("./cognitive-runtime"), "cognitive-runtime"));
 router.use(lazyMatch("/agents", () => import("./agents"), "agents"));
 router.use(lazyMatch("/atlas/artifacts", () => import("./atlas-artifacts"), "atlas-artifacts"));
