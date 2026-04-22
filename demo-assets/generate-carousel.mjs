@@ -368,7 +368,7 @@ function slide06Terra(imgData) {
   </div></body></html>`;
 }
 
-function slide07Aegis() {
+function slide07Aegis(imgData) {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
     ${BASE_CSS}
     .bg {
@@ -382,48 +382,54 @@ function slide07Aegis() {
         linear-gradient(90deg, rgba(239,68,68,0.04) 1px, transparent 1px);
       background-size: 48px 48px;
     }
-    .content { position: absolute; inset: 0; padding: 76px 84px; display: flex; flex-direction: column; }
-    .app-tag { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: #ef4444; margin-bottom: 18px; }
-    h1 { font-size: 54px; line-height: 1.1; font-weight: 900; color: #fff; margin-bottom: 10px; }
-    .tagline { font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.38); margin-bottom: 52px; letter-spacing: 0.5px; }
-    .cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 44px; }
-    .card { border-radius: 10px; padding: 26px 22px; border: 1px solid; }
+    .screenshot-wrapper {
+      position: absolute; right: -24px; top: 50%; transform: translateY(-50%);
+      width: 580px; height: 580px; border-radius: 14px; overflow: hidden;
+      box-shadow: -60px 0 140px rgba(239,68,68,0.12);
+      border: 1px solid rgba(239,68,68,0.22);
+    }
+    .screenshot-wrapper img { width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+    .overlay-fade { position: absolute; right: 556px; top: 0; bottom: 0; width: 200px; background: linear-gradient(90deg, #080a10 30%, transparent 100%); }
+    .content { position: absolute; top: 0; left: 0; bottom: 0; width: 560px; display: flex; flex-direction: column; justify-content: center; padding: 80px 48px 80px 84px; }
+    .app-tag { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: #ef4444; margin-bottom: 22px; }
+    h1 { font-size: 40px; line-height: 1.1; font-weight: 900; color: #fff; margin-bottom: 10px; }
+    .tagline { font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.38); margin-bottom: 36px; letter-spacing: 0.5px; }
+    .cards { display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; }
+    .card { border-radius: 8px; padding: 16px 18px; border: 1px solid; display: flex; align-items: flex-start; gap: 14px; }
     .card-defense { background: rgba(239,68,68,0.07); border-color: rgba(239,68,68,0.22); }
     .card-command { background: rgba(59,130,246,0.07); border-color: rgba(59,130,246,0.22); }
     .card-labs    { background: rgba(139,92,246,0.07); border-color: rgba(139,92,246,0.22); }
-    .card-title { font-size: 12px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 10px; }
+    .card-title { font-size: 11px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 4px; }
     .card-defense .card-title { color: #ef4444; }
     .card-command .card-title { color: #3b82f6; }
     .card-labs .card-title    { color: #8b5cf6; }
-    .card-desc { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.48); }
-    .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
-    .stat { text-align: center; }
-    .stat-val { font-size: 21px; font-weight: 800; color: #fff; display: block; }
+    .card-desc { font-size: 12.5px; line-height: 1.55; color: rgba(255,255,255,0.48); }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .stat { text-align: left; }
+    .stat-val { font-size: 18px; font-weight: 800; color: #fff; display: block; }
     .stat-lbl { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.3); letter-spacing: 1.2px; text-transform: uppercase; }
   </style></head><body><div class="slide">
     <div class="bg"></div>
     <div class="grid"></div>
+    <div class="screenshot-wrapper"><img src="${imgData}" alt="Aegis Platform"></div>
+    <div class="overlay-fade"></div>
     <div class="content">
       <div class="app-tag">Aegis &mdash; Unified Defense &amp; Intelligence Command</div>
-      <h1>Stop Breaches. Before They Start.</h1>
-      <div class="tagline">Three workspaces. One shared intelligence layer.</div>
+      <h1>Four Workspaces. One Shared Intelligence Layer.</h1>
+      <div class="tagline">Defense. Command. Labs. Legal. All sharing one data context.</div>
       <div class="cards">
         <div class="card card-defense">
-          <div class="card-title">Defense</div>
-          <div class="card-desc">XDR &amp; threat detection. Continuous monitoring across every endpoint and perimeter.</div>
+          <div><div class="card-title">Defense</div><div class="card-desc">XDR &amp; threat detection. Continuous monitoring across every endpoint and perimeter.</div></div>
         </div>
         <div class="card card-command">
-          <div class="card-title">Command</div>
-          <div class="card-desc">SOC automation &amp; managed operations. From detection to remediation in minutes.</div>
+          <div><div class="card-title">Command</div><div class="card-desc">SOC automation &amp; managed operations. From detection to remediation in minutes.</div></div>
         </div>
         <div class="card card-labs">
-          <div class="card-title">Labs</div>
-          <div class="card-desc">AI inference &amp; threat reasoning. Context that closes the loop on every incident.</div>
+          <div><div class="card-title">Labs</div><div class="card-desc">AI inference &amp; threat reasoning. Context that closes the loop on every incident.</div></div>
         </div>
       </div>
       <div class="stats">
         <div class="stat"><span class="stat-val">&lt;4 min</span><span class="stat-lbl">MTTD</span></div>
-        <div class="stat"><span class="stat-val">&lt;12 min</span><span class="stat-lbl">MTTR</span></div>
         <div class="stat"><span class="stat-val">94%</span><span class="stat-lbl">AI Confidence</span></div>
         <div class="stat"><span class="stat-val">99.7%</span><span class="stat-lbl">ATT&amp;CK Coverage</span></div>
         <div class="stat"><span class="stat-val">2.1M/day</span><span class="stat-lbl">Events</span></div>
@@ -605,12 +611,13 @@ function slide10Thesis() {
 
 async function run() {
   console.log('Loading screenshots as base64 data URLs...');
-  const [szlImg, lyteImg, vesselsImg, terraImg, prismImg, carlotaImg, stephenImg] =
+  const [szlImg, lyteImg, vesselsImg, terraImg, aegisImg, prismImg, carlotaImg, stephenImg] =
     await Promise.all([
       loadDataUrl('szl-holdings-hero.jpg'),
       loadDataUrl('lyte-hero.jpg'),
       loadDataUrl('vessels-hero.jpg'),
       loadDataUrl('terra-hero.jpg'),
+      loadDataUrl('aegis-hero.jpg'),
       loadDataUrl('prism-counsel-hero.jpg'),
       loadDataUrl('carlota-jo-hero.jpg'),
       loadDataUrl('stephen-site-hero.jpg'),
@@ -624,7 +631,7 @@ async function run() {
     { id: 'slide-04-lyte', html: slide04Lyte(lyteImg) },
     { id: 'slide-05-vessels', html: slide05Vessels(vesselsImg) },
     { id: 'slide-06-terra', html: slide06Terra(terraImg) },
-    { id: 'slide-07-aegis', html: slide07Aegis() },
+    { id: 'slide-07-aegis', html: slide07Aegis(aegisImg) },
     { id: 'slide-08-prism-imperium', html: slide08PrismImperium(prismImg) },
     { id: 'slide-09-carlota-stephen', html: slide09CarlotaStephen(carlotaImg, stephenImg) },
     { id: 'slide-10-thesis', html: slide10Thesis() },
