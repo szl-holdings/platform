@@ -22,7 +22,7 @@ import { logger } from './lib/logger';
 import { ENV_SPECS } from './lib/startup-validation';
 import { apiVersionMiddleware } from './middlewares/api-version';
 import { appModeMiddleware } from './middlewares/app-mode.js';
-import { authMiddleware } from './middlewares/authMiddleware';
+import { authMiddleware } from './middlewares/auth';
 import { correlationMiddleware } from './middlewares/correlation';
 import { csrfMiddleware } from './middlewares/csrf';
 import { globalAuthEnforcer } from './middlewares/global-auth-enforcer';
