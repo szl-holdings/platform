@@ -37,7 +37,7 @@ import { PrismBusProvider } from '@szl-holdings/prism-bus';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { persistQueryClient } from '@tanstack/query-persist-client-core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { router, Stack } from 'expo-router';
+import { router, Stack, usePathname } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
@@ -47,7 +47,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppModeBanner } from '@/components/AppModeBanner';
 import { ErrorFallback } from '@/components/ErrorFallback';
-import { AUTH_TOKEN_KEY, AuthProvider } from '@/context/AuthContext';
+import { AUTH_TOKEN_KEY, AuthProvider, setLastKnownAppPath } from '@/context/AuthContext';
 import { ScreenshotGuardProvider } from '@/context/ScreenshotGuardContext';
 import { WorkspaceProvider } from '@/context/WorkspaceContext';
 import { useEscalatedApprovalNotifier } from '@/hooks/operations/useEscalatedApprovalNotifier';
@@ -199,6 +199,13 @@ let lastHandledNotificationId: string | null = null;
 
 function AppShell() {
   const { isLocked, isEnabled } = useBiometric();
+
+  // Track the active in-app pathname so a force-revoked session can deep-link
+  // the user back to the same screen after they sign in again.
+  const currentPath = usePathname();
+  useEffect(() => {
+    if (currentPath) setLastKnownAppPath(currentPath);
+  }, [currentPath]);
 
   // App-level watchers for new failed/stuck runs and newly escalated
   // approvals — fire regardless of which screen is active.

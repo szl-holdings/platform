@@ -3,13 +3,18 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  consumeSessionReturnPath,
   consumeSessionRevocationReason,
   detectSessionRevocationCode,
   extractServerMessage,
   notifySessionRevoked,
   onSessionRevoked,
+  peekSessionReturnPath,
+  recordSessionReturnPath,
+  SESSION_RETURN_PATH_KEY,
   SESSION_REVOCATION_EVENT,
   SESSION_REVOCATION_FLAG_KEY,
+  withReturnToQuery,
 } from '../../../lib/shared-ui/src/session-revocation';
 
 let clock = 0;
@@ -114,5 +119,71 @@ describe('consumeSessionRevocationReason', () => {
     const first = consumeSessionRevocationReason();
     expect(first).not.toBeNull();
     expect(consumeSessionRevocationReason()).toBeNull();
+  });
+});
+
+describe('return-path stash', () => {
+  it('records the current pathname when notifySessionRevoked fires', () => {
+    window.history.replaceState({}, '', '/pulse/briefings/123?tab=signals');
+    notifySessionRevoked('SESSION_REVOKED', { redirect: false });
+    expect(window.sessionStorage.getItem(SESSION_RETURN_PATH_KEY)).toBe(
+      '/pulse/briefings/123?tab=signals',
+    );
+    expect(peekSessionReturnPath()).toBe('/pulse/briefings/123?tab=signals');
+  });
+
+  it('does not capture login-like paths as return targets', () => {
+    window.history.replaceState({}, '', '/login?next=/pulse');
+    notifySessionRevoked('SESSION_REVOKED', { redirect: false });
+    expect(window.sessionStorage.getItem(SESSION_RETURN_PATH_KEY)).toBeNull();
+  });
+
+  it('does not capture the bare home route', () => {
+    window.history.replaceState({}, '', '/');
+    notifySessionRevoked('SESSION_REVOKED', { redirect: false });
+    expect(window.sessionStorage.getItem(SESSION_RETURN_PATH_KEY)).toBeNull();
+  });
+
+  it('rejects protocol-relative or external paths from explicit calls', () => {
+    recordSessionReturnPath('//evil.example/oops');
+    expect(peekSessionReturnPath()).toBeNull();
+    recordSessionReturnPath('https://evil.example');
+    expect(peekSessionReturnPath()).toBeNull();
+  });
+
+  it('consumeSessionReturnPath returns and clears', () => {
+    recordSessionReturnPath('/command/queue');
+    expect(consumeSessionReturnPath()).toBe('/command/queue');
+    expect(consumeSessionReturnPath()).toBeNull();
+  });
+});
+
+describe('withReturnToQuery', () => {
+  it('appends returnTo when a path is stashed', () => {
+    recordSessionReturnPath('/command/queue?focus=open');
+    expect(withReturnToQuery('/api/login')).toBe(
+      '/api/login?returnTo=' + encodeURIComponent('/command/queue?focus=open'),
+    );
+  });
+
+  it('uses & joiner when the URL already has a query string', () => {
+    recordSessionReturnPath('/pulse/dashboard');
+    expect(withReturnToQuery('/api/login?prompt=1')).toBe(
+      '/api/login?prompt=1&returnTo=' + encodeURIComponent('/pulse/dashboard'),
+    );
+  });
+
+  it('does not double-append when returnTo is already present', () => {
+    recordSessionReturnPath('/pulse/dashboard');
+    const url = '/api/login?returnTo=/explicit';
+    expect(withReturnToQuery(url)).toBe(url);
+  });
+
+  it('returns the URL unchanged when nothing is stashed', () => {
+    expect(withReturnToQuery('/api/login')).toBe('/api/login');
+  });
+
+  it('refuses protocol-relative override values', () => {
+    expect(withReturnToQuery('/api/login', '//evil.example/oops')).toBe('/api/login');
   });
 });

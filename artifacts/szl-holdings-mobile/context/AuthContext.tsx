@@ -36,10 +36,51 @@ export interface SessionRevocationInfo {
   code: 'SESSION_REVOKED' | 'REFRESH_TOKEN_REPLAY' | string;
   message: string;
   at: string;
+  /** Pathname (within the expo-router shell) the user was on when the
+   * session was force-revoked. The auth screen reads this to deep-link the
+   * user back to the same screen after a successful sign-in. */
+  returnTo?: string | null;
 }
 
 const REVOCATION_LISTENERS = new Set<(info: SessionRevocationInfo | null) => void>();
 let _latestRevocation: SessionRevocationInfo | null = null;
+
+// Last known in-app pathname tracked by the AppShell. Updated on every
+// expo-router navigation via `setLastKnownAppPath`.
+let _lastKnownAppPath: string | null = null;
+// Pending return path captured at the moment of revocation, consumed by the
+// auth screen after the user successfully signs back in. Kept separate from
+// `_latestRevocation` so it survives `clearSessionRevocation()` (which fires
+// at the start of `login()`) and is only cleared on consumption.
+let _pendingReturnPath: string | null = null;
+
+const RETURN_PATH_BLOCKLIST = new Set(['/auth', '/+not-found']);
+
+function isUsableReturnPath(path: string | null | undefined): path is string {
+  if (typeof path !== 'string' || path.length === 0) return false;
+  if (!path.startsWith('/')) return false;
+  if (RETURN_PATH_BLOCKLIST.has(path)) return false;
+  return true;
+}
+
+/** Called from the AppShell whenever the active expo-router pathname changes. */
+export function setLastKnownAppPath(path: string | null | undefined): void {
+  if (isUsableReturnPath(path)) {
+    _lastKnownAppPath = path;
+  }
+}
+
+/** Read (and clear) the path the user should be deep-linked back to after sign-in. */
+export function consumePendingReturnPath(): string | null {
+  const v = _pendingReturnPath;
+  _pendingReturnPath = null;
+  return v;
+}
+
+/** Visible mostly for tests — stash a return path without going through revocation. */
+export function setPendingReturnPath(path: string | null): void {
+  _pendingReturnPath = isUsableReturnPath(path) ? path : null;
+}
 
 function defaultRevocationMessage(code: string): string {
   if (code === 'REFRESH_TOKEN_REPLAY') {
@@ -50,10 +91,17 @@ function defaultRevocationMessage(code: string): string {
 
 /** Called by apiClient when an API response carries a revocation code. */
 export function recordSessionRevocation(input: { code: string; message?: string }): void {
+  // Snapshot the page the user was on so the auth screen can deep-link the
+  // user back to it after a successful sign-in. Done before listeners fire
+  // because listeners typically wipe the auth state and route to /auth.
+  if (isUsableReturnPath(_lastKnownAppPath)) {
+    _pendingReturnPath = _lastKnownAppPath;
+  }
   const info: SessionRevocationInfo = {
     code: input.code,
     message: input.message?.trim() || defaultRevocationMessage(input.code),
     at: new Date().toISOString(),
+    returnTo: _pendingReturnPath,
   };
   _latestRevocation = info;
   REVOCATION_LISTENERS.forEach((listener) => {

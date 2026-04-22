@@ -1,10 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Redirect } from 'expo-router';
-import React, { useEffect } from 'react';
+import React, { useRef } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '@/context/AuthContext';
+import { consumePendingReturnPath, useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
+
+const DEFAULT_POST_LOGIN_HREF = '/(shell)';
 
 export default function AuthScreen() {
   const { isAuthenticated, isLoading, login, sessionRevocation, dismissSessionRevocation } =
@@ -12,8 +14,16 @@ export default function AuthScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
 
+  // Resolve the post-login destination on the first render where the user
+  // is authenticated. We consume (and clear) the saved return path stashed
+  // by `recordSessionRevocation`, falling back to the shell home route.
+  const postLoginHrefRef = useRef<string | null>(null);
+  if (isAuthenticated && postLoginHrefRef.current === null) {
+    postLoginHrefRef.current = consumePendingReturnPath() ?? DEFAULT_POST_LOGIN_HREF;
+  }
+
   if (isAuthenticated) {
-    return <Redirect href={'/(shell)' as any} />;
+    return <Redirect href={(postLoginHrefRef.current ?? DEFAULT_POST_LOGIN_HREF) as any} />;
   }
 
   return (

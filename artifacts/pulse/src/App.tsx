@@ -7,6 +7,7 @@ import {
 import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';
 import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
 import { useSessionRevocationToast } from '@szl-holdings/shared-ui/use-session-revocation-toast';
+import { consumeSessionReturnPath } from '@szl-holdings/shared-ui/session-revocation';
 import {
   type CommandItem,
   CommandPalette,
@@ -128,7 +129,12 @@ function useAuth() {
 
   const login = useCallback(() => {
     const base = import.meta.env.BASE_URL?.replace(/\/+$/, '') || '/pulse';
-    window.location.href = `/api/login?returnTo=${encodeURIComponent(base + '/')}`;
+    // If a previous force-revoke stashed the page the user was on,
+    // deep-link them back to it instead of dumping them at /pulse/.
+    const savedPath = consumeSessionReturnPath();
+    const returnTo =
+      savedPath && savedPath.startsWith(base + '/') ? savedPath : base + '/';
+    window.location.href = `/api/login?returnTo=${encodeURIComponent(returnTo)}`;
   }, []);
 
   return { user, isLoading, isAuthenticated: !!user, login, activateDemo };

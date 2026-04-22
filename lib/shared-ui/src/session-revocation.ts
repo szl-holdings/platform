@@ -8,6 +8,13 @@ export const SESSION_REVOCATION_CODES: ReadonlySet<string> = new Set([
 
 export const SESSION_REVOCATION_FLAG_KEY = 'szl:session-revocation-reason';
 export const SESSION_REVOCATION_EVENT = 'szl:session-revoked';
+/**
+ * Stash of the in-app path the user was viewing when their session was
+ * force-revoked. Login flows read this so they can deep-link the user back
+ * to the same screen after a successful sign-in instead of dumping them at
+ * the home route.
+ */
+export const SESSION_RETURN_PATH_KEY = 'szl:session-return-path';
 
 const KNOWN_AUTH_TOKEN_KEYS = [
   'cortex_auth_token',
@@ -63,6 +70,82 @@ export function extractServerMessage(body: unknown): string | null {
 }
 
 let lastNotifiedAt = 0;
+
+const LOGIN_LIKE_PATH_RE = /^\/(login|signin|sign-in|auth(\/|$)|api\/(login|auth)\b)/i;
+
+function isLoginLikePath(path: string): boolean {
+  return LOGIN_LIKE_PATH_RE.test(path);
+}
+
+function readCurrentBrowserPath(): string | null {
+  if (typeof window === 'undefined' || !window.location) return null;
+  try {
+    const path =
+      (window.location.pathname || '') +
+      (window.location.search || '') +
+      (window.location.hash || '');
+    if (!path || path === '/' || isLoginLikePath(path)) return null;
+    return path;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Persist the in-app path to deep-link to after the next successful sign-in.
+ * No-op when called outside the browser, when the path looks like a login
+ * surface, or when the path is not a same-origin absolute path.
+ */
+export function recordSessionReturnPath(path?: string | null): void {
+  if (typeof window === 'undefined') return;
+  const target = path ?? readCurrentBrowserPath();
+  if (!target || !target.startsWith('/') || target.startsWith('//')) return;
+  if (isLoginLikePath(target)) return;
+  try {
+    window.sessionStorage?.setItem(SESSION_RETURN_PATH_KEY, target);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Read the saved post-login return path without clearing it. */
+export function peekSessionReturnPath(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const v = window.sessionStorage?.getItem(SESSION_RETURN_PATH_KEY);
+    if (typeof v !== 'string') return null;
+    if (!v.startsWith('/') || v.startsWith('//')) return null;
+    return v;
+  } catch {
+    return null;
+  }
+}
+
+/** Read and clear the saved post-login return path. */
+export function consumeSessionReturnPath(): string | null {
+  const v = peekSessionReturnPath();
+  if (v == null) return null;
+  try {
+    window.sessionStorage?.removeItem(SESSION_RETURN_PATH_KEY);
+  } catch {
+    /* ignore */
+  }
+  return v;
+}
+
+/**
+ * Append `?returnTo=<encoded>` to a same-origin login URL when a saved
+ * return path is available. Login URLs that already carry a `returnTo` are
+ * left alone so explicit overrides win.
+ */
+export function withReturnToQuery(loginUrl: string, returnTo?: string | null): string {
+  const path = returnTo ?? peekSessionReturnPath();
+  if (!path) return loginUrl;
+  if (!path.startsWith('/') || path.startsWith('//')) return loginUrl;
+  if (/[?&]returnTo=/.test(loginUrl)) return loginUrl;
+  const joiner = loginUrl.includes('?') ? '&' : '?';
+  return `${loginUrl}${joiner}returnTo=${encodeURIComponent(path)}`;
+}
 
 function clearKnownAuthTokens(): void {
   if (typeof window === 'undefined') return;
@@ -134,6 +217,12 @@ export function notifySessionRevoked(code: string, options: NotifyOptions = {}):
   const message = options.message ?? defaultMessage(code);
   const detail: SessionRevocationDetail = { code, message };
 
+  // Capture the page the user was on so the login flow can deep-link back
+  // after a successful sign-in. Done before clearing tokens / dispatching
+  // the event so a synchronous listener that navigates away can still see
+  // the original path persisted in sessionStorage.
+  recordSessionReturnPath();
+
   clearKnownAuthTokens();
 
   try {
@@ -168,7 +257,7 @@ export function notifySessionRevoked(code: string, options: NotifyOptions = {}):
       try {
         const current = window.location.pathname + window.location.search;
         if (!current.startsWith(target)) {
-          window.location.assign(target);
+          window.location.assign(withReturnToQuery(target));
         }
       } catch {
         /* ignore */

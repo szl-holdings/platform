@@ -2,6 +2,8 @@ import {
   detectSessionRevocationCode,
   extractServerMessage,
   notifySessionRevoked,
+  recordSessionReturnPath,
+  withReturnToQuery,
 } from "./session-revocation";
 
 const API_BASE = "/api";
@@ -212,7 +214,10 @@ export function installAuthClearedRedirect(loginUrl = "/api/login"): () => void 
     if (reason === "manual") return;
     if (typeof window === "undefined") return;
     try {
-      window.location.assign(loginUrl);
+      // Stash the page the user was on so the OIDC callback can deep-link
+      // them back after a successful sign-in instead of dumping them at /.
+      recordSessionReturnPath();
+      window.location.assign(withReturnToQuery(loginUrl));
     } catch (err) {
       console.error("[auth] redirect to login failed:", err);
     }
