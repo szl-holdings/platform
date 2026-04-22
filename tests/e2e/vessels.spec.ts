@@ -286,6 +286,33 @@ test.describe('Vessels — Write Path: Voyage Economics', () => {
     const revenueKpi = page.locator('text=Fleet Revenue').first();
     await expect(revenueKpi).toBeVisible({ timeout: 15000 });
   });
+
+  test('voyage economics exposes CSV and PDF export buttons', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/economics`);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const csvBtn = page.getByTestId('voyage-export-csv');
+    const pdfBtn = page.getByTestId('voyage-export-pdf');
+    await expect(csvBtn).toBeVisible({ timeout: 15000 });
+    await expect(pdfBtn).toBeVisible({ timeout: 15000 });
+  });
+
+  test('CSV export downloads a dated file with header row', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/economics`);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const csvBtn = page.getByTestId('voyage-export-csv');
+    await expect(csvBtn).toBeVisible({ timeout: 15000 });
+    // Wait for data to load so the button is enabled.
+    await expect(csvBtn).toBeEnabled({ timeout: 20000 });
+
+    const [download] = await Promise.all([
+      page.waitForEvent('download', { timeout: 15000 }),
+      csvBtn.click(),
+    ]);
+    const name = download.suggestedFilename();
+    expect(name).toMatch(/^voyage-economics(-\w+)?-\d{4}-\d{2}-\d{2}\.csv$/);
+  });
 });
 
 test.describe('Vessels — Mobile Viewport', () => {

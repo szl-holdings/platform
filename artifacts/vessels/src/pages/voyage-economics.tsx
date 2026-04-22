@@ -6,6 +6,8 @@ import {
   BarChart3,
   Clock,
   DollarSign,
+  FileDown,
+  FileText,
   Fuel,
   Loader2,
   Ship,
@@ -20,6 +22,7 @@ import {
   useFreightBenchmarks,
   type VesselClassKey,
 } from '../lib/freight-benchmarks';
+import { exportVoyagesToCsv, exportVoyagesToPdf } from '../lib/voyage-export';
 
 const charterColors: Record<string, string> = {
   time_charter: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
@@ -344,9 +347,28 @@ export default function VoyageEconomicsPage() {
     return acc;
   }, {});
 
+  const exportContext = {
+    voyages: sorted,
+    filter: statusFilter,
+    sort: sortBy,
+    totals: {
+      revenue: totalRevenue,
+      margin: totalMargin,
+      fuelCost: totalFuel,
+      delayCost: totalDelay,
+      avgTce: avgTCE,
+      voyageCount: sorted.length,
+    },
+    topRoutes: analytics?.topRoutes,
+  };
+
+  const handleExportCsv = () => exportVoyagesToCsv(exportContext);
+  const handleExportPdf = () => exportVoyagesToPdf(exportContext);
+  const exportDisabled = isLoading || sorted.length === 0;
+
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-display text-xl font-bold text-sky-50">Voyage Economics</h1>
           <p className="text-xs text-sky-400/50 mt-0.5">
@@ -356,7 +378,37 @@ export default function VoyageEconomicsPage() {
             across fleet operations
           </p>
         </div>
-        {isLoading && <Loader2 className="w-4 h-4 text-sky-400 animate-spin" />}
+        <div className="flex items-center gap-2">
+          {isLoading && <Loader2 className="w-4 h-4 text-sky-400 animate-spin" />}
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            disabled={exportDisabled}
+            data-testid="voyage-export-csv"
+            className={cn(
+              'flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border transition-all',
+              'bg-sky-500/10 border-sky-500/30 text-sky-200 hover:bg-sky-500/20',
+              'disabled:opacity-40 disabled:cursor-not-allowed',
+            )}
+            title={`Export ${sorted.length} voyages to CSV`}
+          >
+            <FileDown className="w-3.5 h-3.5" /> Export CSV
+          </button>
+          <button
+            type="button"
+            onClick={handleExportPdf}
+            disabled={exportDisabled}
+            data-testid="voyage-export-pdf"
+            className={cn(
+              'flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border transition-all',
+              'bg-violet-500/10 border-violet-500/30 text-violet-200 hover:bg-violet-500/20',
+              'disabled:opacity-40 disabled:cursor-not-allowed',
+            )}
+            title="Open printable summary (Save as PDF from print dialog)"
+          >
+            <FileText className="w-3.5 h-3.5" /> Export PDF
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
