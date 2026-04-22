@@ -19,6 +19,7 @@ import rateLimit from 'express-rate-limit';
 import multer from 'multer';
 import { z } from 'zod';
 import { dispatchCovenantBreaches } from '../lib/agent-scheduler';
+import { PLACEHOLDER_SQL_PATTERN, resolveDistressOwnerNames } from '../jobs/terra-owner-enrichment';
 import {
   handleRouteError,
   sendBadRequest,
@@ -3267,6 +3268,156 @@ router.get(
       });
     } catch (err) {
       handleRouteError(res, err, 'Failed to load diligence room');
+    }
+  },
+);
+
+// ─── Owner Enrichment ─────────────────────────────────────────────────────────
+
+/**
+ * POST /terra/cognitive/enrichment/run
+ * Trigger an immediate owner-name enrichment pass on placeholder distress
+ * property owners. Accepts optional `batchSize` (default 200) and `dryRun`
+ * (default false) in the JSON body.
+ *
+ * Safe to run at any time — the resolver is idempotent: re-resolving an
+ * already-resolved owner is a no-op because CONSTELLATION alias lookups
+ * deduplicate by name, and already-resolved DB rows won't match the
+ * placeholder filter.
+ */
+router.post(
+  '/terra/cognitive/enrichment/run',
+  cogLimit,
+  auth,
+  validateBody(
+    z.object({
+      batchSize: z.number().int().min(1).max(1000).optional(),
+      dryRun: z.boolean().optional(),
+    }),
+  ),
+  async (req, res) => {
+    try {
+      const reqAny = req as Request & { user?: { id?: unknown } };
+      const reqToken = req.headers['x-internal-token'] as string | undefined;
+      const tokenMatch = verifyInternalHeader(reqToken, req.originalUrl || req.url);
+      const authorized =
+        !!reqAny.user ||
+        (tokenMatch !== null && tokenHasScope(tokenMatch.context, 'agent:write'));
+      if (!authorized) {
+        return sendUnauthorized(res, 'Enrichment run requires an authenticated session or an internal service token with agent:write scope');
+      }
+
+      const { batchSize, dryRun } = req.body as { batchSize?: number; dryRun?: boolean };
+      const trace = reqTraceRef(req);
+
+      const result = await resolveDistressOwnerNames({ batchSize, dryRun });
+
+      return sendSuccess(res, {
+        result,
+        provenance: provenance('terra-owner-enrichment-v1', 0.85, trace),
+      });
+    } catch (err) {
+      return handleRouteError(res, err, 'Owner enrichment run failed');
+    }
+  },
+);
+
+/**
+ * GET /terra/cognitive/enrichment/status
+ * Returns the current count of remaining placeholder owners and the measured
+ * Ownership Graph confidence derived from actual CONSTELLATION owner node
+ * confidence scores — useful for tracking progress toward the ≥ 0.85 target.
+ *
+ * Graph confidence is computed as the mean confidence of all active
+ * terra-domain owner/person nodes in CONSTELLATION. This is the same
+ * confidence surface the Ownership Graph endpoint exposes, so the metric
+ * reflects real progress from enrichment runs.
+ */
+router.get(
+  '/terra/cognitive/enrichment/status',
+  cogLimit,
+  auth,
+  async (req, res) => {
+    try {
+      const trace = reqTraceRef(req);
+
+      const [placeholderCountResult, totalCountResult, resolvedCountResult, ownerNodes, personNodes] =
+        await Promise.all([
+          db
+            .select({ count: sql<number>`count(*)::int` })
+            .from(terraDistressPropertiesTable)
+            .where(
+              and(
+                eq(terraDistressPropertiesTable.isActive, true),
+                sql`lower(trim(${terraDistressPropertiesTable.ownerName})) ~ ${PLACEHOLDER_SQL_PATTERN}`,
+              ),
+            ),
+          db
+            .select({ count: sql<number>`count(*)::int` })
+            .from(terraDistressPropertiesTable)
+            .where(eq(terraDistressPropertiesTable.isActive, true)),
+          db
+            .select({ count: sql<number>`count(*)::int` })
+            .from(terraDistressPropertiesTable)
+            .where(
+              and(
+                eq(terraDistressPropertiesTable.isActive, true),
+                sql`NOT (lower(trim(${terraDistressPropertiesTable.ownerName})) ~ ${PLACEHOLDER_SQL_PATTERN})`,
+              ),
+            ),
+          // Real graph confidence: sample up to 200 active terra entity nodes
+          // (owners = entities / corporations; persons = individual owners)
+          queryNodes({
+            domain: 'terra',
+            entityType: 'owner',
+            isActive: true,
+            limit: 200,
+            offset: 0,
+          }),
+          queryNodes({
+            domain: 'terra',
+            entityType: 'person',
+            isActive: true,
+            limit: 200,
+            offset: 0,
+          }),
+        ]);
+
+      const unresolvedCount = placeholderCountResult[0]?.count ?? 0;
+      const totalCount = totalCountResult[0]?.count ?? 0;
+      const resolvedCount = resolvedCountResult[0]?.count ?? 0;
+      const resolutionRate = totalCount > 0 ? resolvedCount / totalCount : 0;
+
+      // Graph confidence = arithmetic mean of actual owner+person node confidence
+      // values from CONSTELLATION. Includes both entity types so individual
+      // owners resolved at tier 1 are correctly represented in the metric.
+      const allOwnerNodes = [...ownerNodes.nodes, ...personNodes.nodes];
+      let graphConfidence: number;
+      if (allOwnerNodes.length > 0) {
+        const sum = allOwnerNodes.reduce((acc, n) => acc + (n.confidence ?? 0.5), 0);
+        graphConfidence = sum / allOwnerNodes.length;
+      } else {
+        // Cold-start estimate: scale from 0.40 (all unresolved) toward 0.85
+        // (all resolved at tier-2 confidence). Capped at 0.84 to prevent
+        // the estimate from falsely claiming success.
+        graphConfidence = Math.min(0.84, 0.4 + resolutionRate * 0.45);
+      }
+
+      return sendSuccess(res, {
+        unresolvedOwners: unresolvedCount,
+        resolvedOwners: resolvedCount,
+        totalProperties: totalCount,
+        resolutionRate: +resolutionRate.toFixed(3),
+        graphConfidence: +graphConfidence.toFixed(3),
+        graphConfidenceSource:
+          allOwnerNodes.length > 0
+            ? `constellation:${allOwnerNodes.length}_owner_person_nodes`
+            : 'estimate:cold_start',
+        onTrack: graphConfidence >= 0.85,
+        provenance: provenance('terra-owner-enrichment-v1', 0.9, trace),
+      });
+    } catch (err) {
+      return handleRouteError(res, err, 'Failed to fetch enrichment status');
     }
   },
 );

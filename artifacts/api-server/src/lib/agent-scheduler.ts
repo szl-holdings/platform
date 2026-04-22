@@ -16,6 +16,7 @@ import { computeApprovalExpiresAt } from '@workspace/guardian';
 import { createHash } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { runAtlasCompaction } from '../jobs/atlas-compaction';
+import { resolveDistressOwnerNames } from '../jobs/terra-owner-enrichment';
 import { publishGuardianDecisionEvent } from './guardian-engine';
 import { logger } from './logger';
 import {
@@ -486,6 +487,34 @@ export async function registerDefaultSchedules(): Promise<void> {
     name: 'atlas_snapshot_compactor',
     jobType: 'atlas_snapshot_compact',
     cronExpression: '0 * * * *',
+    payload: {},
+    queue: 'maintenance',
+    maxRetries: 1,
+  });
+
+  agentExecutionRuntime.registerAgent(
+    {
+      agentId: 'terra-owner-enrichment',
+      name: 'Terra Owner Enrichment',
+      domain: 'terra',
+      jobType: 'terra_owner_enrichment',
+      queue: 'maintenance',
+      maxRetries: 1,
+    },
+    async (_job, ctx) => {
+      const result = await resolveDistressOwnerNames({ batchSize: 500 });
+      await ctx.saveState({
+        lastRunAt: new Date().toISOString(),
+        runCount: ctx.runCount + 1,
+        lastResult: result,
+      });
+    },
+  );
+
+  durableScheduleEntries.push({
+    name: 'terra_owner_enrichment',
+    jobType: 'terra_owner_enrichment',
+    cronExpression: '0 2 * * *',
     payload: {},
     queue: 'maintenance',
     maxRetries: 1,
