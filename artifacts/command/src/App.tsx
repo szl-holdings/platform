@@ -121,6 +121,7 @@ const MarketingOpsFeaturePage = lazy(() =>
 const MarketingPricing = lazy(() =>
   import('./pages/marketing/pricing').then((m) => ({ default: m.MarketingPricing })),
 );
+const CommandBillingPage = lazy(() => import('./operations/pages/billing-account'));
 const MarketingSignup = lazy(() =>
   import('./pages/marketing/signup').then((m) => ({ default: m.MarketingSignup })),
 );
@@ -479,6 +480,7 @@ function AppShell() {
           <Route path="/marketing/apps/:id" component={() => <MarketingAppPage />} />
           <Route path="/marketing/ops/:slug" component={() => <MarketingOpsFeaturePage />} />
           <Route path="/marketing/pricing" component={() => <MarketingPricing />} />
+          <Route path="/account/billing" component={() => <CommandBillingPage />} />
           <Route path="/marketing/signup" component={() => <MarketingSignup />} />
           <Route path="/marketing/onboarding" component={() => <MarketingOnboarding />} />
           <Route path="/marketing/status" component={() => <MarketingStatus />} />

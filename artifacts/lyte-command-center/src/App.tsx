@@ -55,6 +55,7 @@ const PolicyCenterPage = lazy(() => import('@/pages/policy-center'));
 const EvalStudioPage = lazy(() => import('@/pages/eval-studio'));
 
 const BriefPage = lazy(() => import('@/pages/brief'));
+const LyteBillingPage = lazy(() => import('@/pages/billing-account'));
 const BriefingPage = lazy(() => import('@/pages/briefing'));
 
 // Legacy surfaces (kept for historical nav)
@@ -552,6 +553,7 @@ function DashboardRoutes() {
         <Route path="/policies" component={PolicyCenterPage} />
         <Route path="/eval" component={EvalStudioPage} />
         <Route path="/brief" component={BriefPage} />
+        <Route path="/account/billing" component={LyteBillingPage} />
         {/* Legacy surfaces */}
         <Route path="/board" component={BoardViewPage} />
         <Route path="/ownership-drift" component={OwnershipDriftPage} />

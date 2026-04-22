@@ -101,6 +101,7 @@ const InquiriesPage = lazy(() => import('@/pages/inquiries-command'));
 const AgentsPage = lazy(() => import('@/pages/agents-command'));
 const CaseStudyPage = lazy(() => import('@/pages/case-study'));
 const TerraPerricingPage = lazy(() => import('@/pages/pricing'));
+const TerraBillingPage = lazy(() => import('@/pages/billing-account'));
 const LenderReport = lazy(() => import('@/pages/lender-report'));
 const PropertyDesk = lazy(() => import('@/pages/property-desk'));
 const WhatChanged = lazy(() => import('@/pages/what-changed'));
@@ -205,6 +206,7 @@ function PrivateRouter() {
         <Route path="/document-engine/:sub" component={DocumentEngine} />
         <Route path="/atlas-artifacts" component={TerraAtlasArtifactsPage} />
         <Route path="/pricing" component={TerraPerricingPage} />
+        <Route path="/account/billing" component={TerraBillingPage} />
         <Route path="/lender-report" component={LenderReport} />
         <Route path="/property-desk" component={PropertyDesk} />
         <Route path="/what-changed" component={WhatChanged} />

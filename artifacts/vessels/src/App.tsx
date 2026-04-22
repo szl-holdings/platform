@@ -310,6 +310,7 @@ const PscInspectorPage = lazy(() => import('@/pages/psc-inspector'));
 const InsurancePanelPage = lazy(() => import('@/pages/insurance-panel'));
 const VesselsSettingsPage = lazy(() => import('@/pages/settings'));
 const VesselsBillingPanelPage = lazy(() => import('@/pages/billing-panel'));
+const VesselsBillingAccountPage = lazy(() => import('@/pages/account-billing'));
 const VesselsTeamPanelPage = lazy(() => import('@/pages/team-panel'));
 const VesselsAuditLogPanelPage = lazy(() => import('@/pages/audit-log-panel'));
 const DecisionCenterPage = lazy(() => import('@/pages/decision-center'));
@@ -1003,6 +1004,7 @@ function DashboardRouter() {
         <Route path="/dashboard/alerts" component={AlertCenterPage} />
         <Route path="/dashboard/reports" component={PerformanceAnalyticsPage} />
         <Route path="/dashboard/billing" component={VesselsBillingPanelPage} />
+        <Route path="/account/billing" component={VesselsBillingAccountPage} />
         <Route path="/dashboard/settings" component={VesselsSettingsPage} />
         <Route path="/dashboard/team" component={VesselsTeamPanelPage} />
         <Route path="/dashboard/audit-log" component={VesselsAuditLogPanelPage} />

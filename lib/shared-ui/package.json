@@ -122,6 +122,7 @@
     "./energy-heartbeat": "./src/energy-heartbeat.tsx",
     "./cross-domain-correlation": "./src/cross-domain-correlation.tsx",
     "./settings-shell": "./src/settings-shell.tsx",
+    "./billing": "./src/billing/index.ts",
     "./onboarding": "./src/onboarding/index.ts",
     "./onboarding/product-tour": "./src/onboarding/product-tour.tsx",
     "./onboarding/use-product-tour": "./src/onboarding/use-product-tour.ts",

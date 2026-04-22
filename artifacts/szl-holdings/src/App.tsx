@@ -104,6 +104,8 @@ const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
 const AccessibilityPage = lazy(() => import("@/pages/accessibility"));
 const DemoPage = lazy(() => import("@/pages/demo"));
 const PricingPage = lazy(() => import("@/pages/pricing"));
+const SZLBillingPage = lazy(() => import("@/pages/billing-account"));
+const AdminBillingPage = lazy(() => import("@/pages/admin-billing"));
 const HelmConsolePage = lazy(() => import("@/pages/helm-console"));
 const CommercialPackagingPage = lazy(() => import("@/pages/commercial-packaging"));
 const RoiCalculatorPage = lazy(() => import("@/pages/roi-calculator"));
@@ -906,6 +908,12 @@ function App() {
             </Route>
             <Route path="/pricing">
               <Suspense fallback={<PageLoader />}><PricingPage /></Suspense>
+            </Route>
+            <Route path="/account/billing">
+              <Suspense fallback={<PageLoader />}><SZLBillingPage /></Suspense>
+            </Route>
+            <Route path="/admin/billing">
+              <Suspense fallback={<PageLoader />}><AdminBillingPage /></Suspense>
             </Route>
 
             {/* ── Alloy app routes (internal, not public nav) ── */}

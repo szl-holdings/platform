@@ -69,6 +69,8 @@ const {
 };
 const LegalPrivacyPage = lazy(() => import('@/pages/legal-privacy'));
 const LegalTermsPage = lazy(() => import('@/pages/legal-terms'));
+const CarlotaJoPricingPage = lazy(() => import('@/pages/pricing'));
+const CarlotaJoBillingPage = lazy(() => import('@/pages/billing-account'));
 const BookingFlow = lazy(() => import('@/pages/BookingFlow'));
 const BookingSuccess = lazy(() => import('@/pages/BookingSuccess'));
 const BookingCancel = lazy(() => import('@/pages/BookingCancel'));
@@ -284,6 +286,8 @@ function Router() {
         <Route path="/booking/success" component={BookingSuccess} />
         <Route path="/booking/cancel" component={BookingCancel} />
         <Route path="/booking/follow-up" component={BookingFollowUp} />
+        <Route path="/pricing" component={CarlotaJoPricingPage} />
+        <Route path="/account/billing" component={CarlotaJoBillingPage} />
         <Route path="/decision-center" component={DecisionCenterPage} />
         <Route path="/observability" component={ObservabilityPage} />
         <Route path="/aef-search" component={AefKnowledgeSearchPage} />

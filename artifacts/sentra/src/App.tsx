@@ -61,6 +61,8 @@ const TrustProvenancePage = lazy(() => import('@/pages/trust-provenance'));
 const AlertsPage = lazy(() => import('@/pages/alerts'));
 const ApprovalsPage = lazy(() => import('@/pages/approvals'));
 const SentraLandingPage = lazy(() => import('@/pages/sentra-landing'));
+const SentraPricingPage = lazy(() => import('@/pages/pricing'));
+const SentraBillingPage = lazy(() => import('@/pages/billing-account'));
 const MeshMapPage = lazy(() => import('@/pages/mesh-map'));
 const MeshExposuresPage = lazy(() => import('@/pages/mesh-exposures'));
 const ContainmentRulesPage = lazy(() => import('@/pages/containment-rules'));
@@ -334,6 +336,8 @@ function DashboardRouter() {
         <Route path="/mesh/containment" component={ContainmentRulesPage} />
         <Route path="/mesh/drift" component={MeshDriftPage} />
         <Route path="/mesh/connectors" component={MeshConnectorsPage} />
+        <Route path="/pricing" component={SentraPricingPage} />
+        <Route path="/account/billing" component={SentraBillingPage} />
         <Route path="/" component={SentraLandingPage} />
         <Route>
           <div className="flex items-center justify-center h-full">

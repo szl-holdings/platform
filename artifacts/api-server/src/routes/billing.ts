@@ -1,13 +1,16 @@
 import {
   billingPlansTable,
   db,
+  entitlementOverridesTable,
+  entitlementsTable,
+  fulfillmentsTable,
   invoicesTable,
   organizationsTable,
   revenueEventsTable,
   subscriptionsTable,
 } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import { desc, eq, or } from 'drizzle-orm';
+import { and, desc, eq, gt, isNull, or } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import type { z } from 'zod';
 import {
@@ -284,16 +287,28 @@ router.get('/billing/stripe-config', async (_req, res) => {
       : 'mock';
 
     const priceVars = [
-      { key: 'STRIPE_PRICE_STRATEGY_SESSION', label: 'Carlota Jo — Strategy Session' },
-      { key: 'STRIPE_PRICE_PORTFOLIO_REVIEW', label: 'Carlota Jo — Portfolio Review' },
-      { key: 'STRIPE_PRICE_ADVISORY_RETAINER', label: 'Carlota Jo — Advisory Retainer' },
+      { key: 'STRIPE_PRICE_SZL_PRO_MONTHLY', label: 'SZL Holdings — Pro (Monthly)' },
+      { key: 'STRIPE_PRICE_SZL_PRO_ANNUAL', label: 'SZL Holdings — Pro (Annual)' },
+      { key: 'STRIPE_PRICE_COMMAND_PRO_MONTHLY', label: 'Command — Pro (Monthly)' },
+      { key: 'STRIPE_PRICE_COMMAND_PRO_ANNUAL', label: 'Command — Pro (Annual)' },
+      { key: 'STRIPE_PRICE_VESSELS_ENTERPRISE_MONTHLY', label: 'Vessels — Enterprise (Monthly)' },
+      { key: 'STRIPE_PRICE_VESSELS_ENTERPRISE_ANNUAL', label: 'Vessels — Enterprise (Annual)' },
+      { key: 'STRIPE_PRICE_PULSE_EXECUTIVE_MONTHLY', label: 'Pulse — Executive (Monthly)' },
+      { key: 'STRIPE_PRICE_PULSE_EXECUTIVE_ANNUAL', label: 'Pulse — Executive (Annual)' },
       { key: 'STRIPE_PRICE_TERRA_STARTER_MONTHLY', label: 'Terra — Starter (Monthly)' },
       { key: 'STRIPE_PRICE_TERRA_STARTER_ANNUAL', label: 'Terra — Starter (Annual)' },
       { key: 'STRIPE_PRICE_TERRA_PRO_MONTHLY', label: 'Terra — Pro (Monthly)' },
       { key: 'STRIPE_PRICE_TERRA_PRO_ANNUAL', label: 'Terra — Pro (Annual)' },
       { key: 'STRIPE_PRICE_TERRA_ENTERPRISE_MONTHLY', label: 'Terra — Enterprise (Monthly)' },
       { key: 'STRIPE_PRICE_TERRA_ENTERPRISE_ANNUAL', label: 'Terra — Enterprise (Annual)' },
+      { key: 'STRIPE_PRICE_SENTRA_TEAM_MONTHLY', label: 'Sentra — Team (Monthly)' },
+      { key: 'STRIPE_PRICE_SENTRA_TEAM_ANNUAL', label: 'Sentra — Team (Annual)' },
+      { key: 'STRIPE_PRICE_COUNSEL_TEAM_MONTHLY', label: 'Counsel — Team (Monthly)' },
+      { key: 'STRIPE_PRICE_COUNSEL_TEAM_ANNUAL', label: 'Counsel — Team (Annual)' },
       { key: 'STRIPE_PRICE_AEGIS_ENTERPRISE', label: 'Aegis — Enterprise' },
+      { key: 'STRIPE_PRICE_STRATEGY_SESSION', label: 'Carlota Jo — Strategy Session' },
+      { key: 'STRIPE_PRICE_PORTFOLIO_REVIEW', label: 'Carlota Jo — Portfolio Review' },
+      { key: 'STRIPE_PRICE_ADVISORY_RETAINER', label: 'Carlota Jo — Advisory Retainer' },
     ];
 
     const prices = priceVars.map(({ key, label }) => ({
@@ -356,9 +371,43 @@ router.post(
           const session = eventData;
           if (!session) break;
           logger.info(
-            { sessionId: session.id, customerId: session.customer },
+            { sessionId: session.id, customerId: session.customer, mode: session.mode },
             'Checkout completed',
           );
+
+          if (session.mode === 'payment') {
+            const metadata = session.metadata as Record<string, string> | undefined;
+            try {
+              await db
+                .insert(fulfillmentsTable)
+                .values({
+                  stripeSessionId: session.id as string,
+                  stripePaymentIntentId: session.payment_intent as string | undefined,
+                  product: metadata?.product ?? metadata?.service ?? 'carlota-jo',
+                  tierId: metadata?.tierId ?? 'unknown',
+                  tierName: metadata?.tierName ?? 'Unknown',
+                  customerEmail:
+                    (session.customer_details as Record<string, string> | undefined)?.email ??
+                    (session.customer_email as string | undefined) ??
+                    null,
+                  amount: session.amount_total
+                    ? String((session.amount_total as number) / 100)
+                    : null,
+                  currency: (session.currency as string) ?? 'usd',
+                  status: 'fulfilled',
+                  fulfilledAt: new Date(),
+                  metadata: { eventId: event.id, sessionMetadata: metadata },
+                })
+                .onConflictDoNothing();
+              logger.info(
+                { sessionId: session.id, tierId: metadata?.tierId },
+                'One-time fulfillment recorded',
+              );
+            } catch (dbErr) {
+              logger.warn({ dbErr }, 'Fulfillment may already exist in DB');
+            }
+            break;
+          }
 
           if (session.subscription) {
             const sub = await services.stripe.getSubscription(session.subscription as string);
@@ -1173,6 +1222,600 @@ router.post(
       });
     } catch (err) {
       handleRouteError(res, err, 'Failed to create and send invoice');
+    }
+  },
+);
+
+const SENTRA_PLANS = {
+  'sentra-team-monthly': {
+    priceEnv: 'STRIPE_PRICE_SENTRA_TEAM_MONTHLY',
+    name: 'Sentra Team (Monthly)',
+    interval: 'month',
+  },
+  'sentra-team-annual': {
+    priceEnv: 'STRIPE_PRICE_SENTRA_TEAM_ANNUAL',
+    name: 'Sentra Team (Annual)',
+    interval: 'year',
+  },
+} as const;
+
+router.get('/billing/sentra/plans', (_req, res) => {
+  const plans = Object.entries(SENTRA_PLANS).map(([planId, plan]) => ({
+    planId,
+    name: plan.name,
+    interval: plan.interval,
+    configured: !!process.env[plan.priceEnv],
+    stripePriceEnv: plan.priceEnv,
+  }));
+  sendSuccess(res, plans);
+});
+
+router.post(
+  '/billing/sentra/subscribe',
+  validateBody(planSubscribeSchema),
+  authMiddleware({ required: false }),
+  requireStripeLive,
+  async (req: Request, res: Response) => {
+    try {
+      const { planId, email, successUrl, cancelUrl } = req.body as z.infer<typeof planSubscribeSchema>;
+      const plan = SENTRA_PLANS[planId as keyof typeof SENTRA_PLANS];
+      if (!plan) {
+        sendBadRequest(res, `Unknown Sentra plan "${planId}". Valid: ${Object.keys(SENTRA_PLANS).join(', ')}`);
+        return;
+      }
+      const priceId = process.env[plan.priceEnv];
+      if (!priceId) {
+        sendError(res, `Stripe price not configured for "${planId}". Set ${plan.priceEnv}.`, 503);
+        return;
+      }
+      const session = await services.stripe.createCheckoutSession({
+        priceId,
+        mode: 'subscription',
+        successUrl,
+        cancelUrl,
+        customerEmail: email,
+        metadata: { planId, planName: plan.name, product: 'sentra' },
+      });
+      sendSuccess(res, { sessionId: session.id, url: session.url });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create Sentra subscription checkout');
+    }
+  },
+);
+
+const COUNSEL_PLANS = {
+  'counsel-team-monthly': {
+    priceEnv: 'STRIPE_PRICE_COUNSEL_TEAM_MONTHLY',
+    name: 'Counsel Team (Monthly)',
+    interval: 'month',
+  },
+  'counsel-team-annual': {
+    priceEnv: 'STRIPE_PRICE_COUNSEL_TEAM_ANNUAL',
+    name: 'Counsel Team (Annual)',
+    interval: 'year',
+  },
+} as const;
+
+router.get('/billing/counsel/plans', (_req, res) => {
+  const plans = Object.entries(COUNSEL_PLANS).map(([planId, plan]) => ({
+    planId,
+    name: plan.name,
+    interval: plan.interval,
+    configured: !!process.env[plan.priceEnv],
+    stripePriceEnv: plan.priceEnv,
+  }));
+  sendSuccess(res, plans);
+});
+
+router.post(
+  '/billing/counsel/subscribe',
+  validateBody(planSubscribeSchema),
+  authMiddleware({ required: false }),
+  requireStripeLive,
+  async (req: Request, res: Response) => {
+    try {
+      const { planId, email, successUrl, cancelUrl } = req.body as z.infer<typeof planSubscribeSchema>;
+      const plan = COUNSEL_PLANS[planId as keyof typeof COUNSEL_PLANS];
+      if (!plan) {
+        sendBadRequest(res, `Unknown Counsel plan "${planId}". Valid: ${Object.keys(COUNSEL_PLANS).join(', ')}`);
+        return;
+      }
+      const priceId = process.env[plan.priceEnv];
+      if (!priceId) {
+        sendError(res, `Stripe price not configured for "${planId}". Set ${plan.priceEnv}.`, 503);
+        return;
+      }
+      const session = await services.stripe.createCheckoutSession({
+        priceId,
+        mode: 'subscription',
+        successUrl,
+        cancelUrl,
+        customerEmail: email,
+        metadata: { planId, planName: plan.name, product: 'counsel' },
+      });
+      sendSuccess(res, { sessionId: session.id, url: session.url });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create Counsel subscription checkout');
+    }
+  },
+);
+
+const PULSE_PLANS = {
+  'pulse-executive-monthly': {
+    priceEnv: 'STRIPE_PRICE_PULSE_EXECUTIVE_MONTHLY',
+    name: 'Pulse Executive (Monthly)',
+    interval: 'month',
+  },
+  'pulse-executive-annual': {
+    priceEnv: 'STRIPE_PRICE_PULSE_EXECUTIVE_ANNUAL',
+    name: 'Pulse Executive (Annual)',
+    interval: 'year',
+  },
+} as const;
+
+router.get('/billing/pulse/plans', (_req, res) => {
+  const plans = Object.entries(PULSE_PLANS).map(([planId, plan]) => ({
+    planId,
+    name: plan.name,
+    interval: plan.interval,
+    configured: !!process.env[plan.priceEnv],
+    stripePriceEnv: plan.priceEnv,
+  }));
+  sendSuccess(res, plans);
+});
+
+router.post(
+  '/billing/pulse/subscribe',
+  validateBody(planSubscribeSchema),
+  authMiddleware({ required: false }),
+  requireStripeLive,
+  async (req: Request, res: Response) => {
+    try {
+      const { planId, email, successUrl, cancelUrl } = req.body as z.infer<typeof planSubscribeSchema>;
+      const plan = PULSE_PLANS[planId as keyof typeof PULSE_PLANS];
+      if (!plan) {
+        sendBadRequest(res, `Unknown Pulse plan "${planId}". Valid: ${Object.keys(PULSE_PLANS).join(', ')}`);
+        return;
+      }
+      const priceId = process.env[plan.priceEnv];
+      if (!priceId) {
+        sendError(res, `Stripe price not configured for "${planId}". Set ${plan.priceEnv}.`, 503);
+        return;
+      }
+      const session = await services.stripe.createCheckoutSession({
+        priceId,
+        mode: 'subscription',
+        successUrl,
+        cancelUrl,
+        customerEmail: email,
+        metadata: { planId, planName: plan.name, product: 'pulse' },
+      });
+      sendSuccess(res, { sessionId: session.id, url: session.url });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create Pulse subscription checkout');
+    }
+  },
+);
+
+const SZL_PLANS = {
+  'szl-pro-monthly': {
+    priceEnv: 'STRIPE_PRICE_SZL_PRO_MONTHLY',
+    name: 'SZL Pro (Monthly)',
+    interval: 'month',
+  },
+  'szl-pro-annual': {
+    priceEnv: 'STRIPE_PRICE_SZL_PRO_ANNUAL',
+    name: 'SZL Pro (Annual)',
+    interval: 'year',
+  },
+} as const;
+
+router.get('/billing/szl/plans', (_req, res) => {
+  const plans = Object.entries(SZL_PLANS).map(([planId, plan]) => ({
+    planId,
+    name: plan.name,
+    interval: plan.interval,
+    configured: !!process.env[plan.priceEnv],
+    stripePriceEnv: plan.priceEnv,
+  }));
+  sendSuccess(res, plans);
+});
+
+router.post(
+  '/billing/szl/subscribe',
+  validateBody(planSubscribeSchema),
+  authMiddleware({ required: false }),
+  requireStripeLive,
+  async (req: Request, res: Response) => {
+    try {
+      const { planId, email, successUrl, cancelUrl } = req.body as z.infer<typeof planSubscribeSchema>;
+      const plan = SZL_PLANS[planId as keyof typeof SZL_PLANS];
+      if (!plan) {
+        sendBadRequest(res, `Unknown SZL plan "${planId}". Valid: ${Object.keys(SZL_PLANS).join(', ')}`);
+        return;
+      }
+      const priceId = process.env[plan.priceEnv];
+      if (!priceId) {
+        sendError(res, `Stripe price not configured for "${planId}". Set ${plan.priceEnv}.`, 503);
+        return;
+      }
+      const session = await services.stripe.createCheckoutSession({
+        priceId,
+        mode: 'subscription',
+        successUrl,
+        cancelUrl,
+        customerEmail: email,
+        metadata: { planId, planName: plan.name, product: 'szl' },
+      });
+      sendSuccess(res, { sessionId: session.id, url: session.url });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create SZL Pro checkout');
+    }
+  },
+);
+
+const VESSELS_PLANS = {
+  'vessels-enterprise-monthly': {
+    priceEnv: 'STRIPE_PRICE_VESSELS_ENTERPRISE_MONTHLY',
+    name: 'Vessels Enterprise (Monthly)',
+    interval: 'month',
+  },
+  'vessels-enterprise-annual': {
+    priceEnv: 'STRIPE_PRICE_VESSELS_ENTERPRISE_ANNUAL',
+    name: 'Vessels Enterprise (Annual)',
+    interval: 'year',
+  },
+} as const;
+
+router.get('/billing/vessels/plans', (_req, res) => {
+  const plans = Object.entries(VESSELS_PLANS).map(([planId, plan]) => ({
+    planId,
+    name: plan.name,
+    interval: plan.interval,
+    configured: !!process.env[plan.priceEnv],
+    stripePriceEnv: plan.priceEnv,
+  }));
+  sendSuccess(res, plans);
+});
+
+router.post(
+  '/billing/vessels/subscribe',
+  validateBody(planSubscribeSchema),
+  authMiddleware({ required: false }),
+  requireStripeLive,
+  async (req: Request, res: Response) => {
+    try {
+      const { planId, email, successUrl, cancelUrl } = req.body as z.infer<typeof planSubscribeSchema>;
+      const plan = VESSELS_PLANS[planId as keyof typeof VESSELS_PLANS];
+      if (!plan) {
+        sendBadRequest(res, `Unknown Vessels plan "${planId}". Valid: ${Object.keys(VESSELS_PLANS).join(', ')}`);
+        return;
+      }
+      const priceId = process.env[plan.priceEnv];
+      if (!priceId) {
+        sendError(res, `Stripe price not configured for "${planId}". Set ${plan.priceEnv}.`, 503);
+        return;
+      }
+      const session = await services.stripe.createCheckoutSession({
+        priceId,
+        mode: 'subscription',
+        successUrl,
+        cancelUrl,
+        customerEmail: email,
+        metadata: { planId, planName: plan.name, product: 'vessels' },
+      });
+      sendSuccess(res, { sessionId: session.id, url: session.url });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create Vessels subscription checkout');
+    }
+  },
+);
+
+router.get(
+  '/billing/entitlements/check',
+  authMiddleware({ required: false }),
+  async (req: Request, res: Response) => {
+    try {
+      const featureKey = req.query.featureKey as string | undefined;
+      const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : undefined;
+
+      if (!featureKey) {
+        sendBadRequest(res, 'featureKey is required');
+        return;
+      }
+
+      const resolvedOrgId = orgId ?? (req.user as { orgId?: number })?.orgId ?? undefined;
+
+      const now = new Date();
+
+      if (resolvedOrgId) {
+        const [override] = await db
+          .select()
+          .from(entitlementOverridesTable)
+          .where(
+            and(
+              eq(entitlementOverridesTable.orgId, resolvedOrgId),
+              eq(entitlementOverridesTable.featureKey, featureKey),
+              or(isNull(entitlementOverridesTable.expiresAt), gt(entitlementOverridesTable.expiresAt, now)),
+            ),
+          )
+          .limit(1);
+
+        if (override) {
+          sendSuccess(res, {
+            granted: override.granted,
+            source: 'override',
+            featureKey,
+            plan: null,
+          });
+          return;
+        }
+
+        const activeSubs = await db
+          .select({ planId: subscriptionsTable.planId })
+          .from(subscriptionsTable)
+          .where(
+            and(
+              eq(subscriptionsTable.orgId, resolvedOrgId),
+              or(
+                eq(subscriptionsTable.status, 'active'),
+                eq(subscriptionsTable.status, 'trialing'),
+              ),
+            ),
+          );
+
+        if (activeSubs.length > 0) {
+          const planIds = activeSubs.map((s) => s.planId);
+          const entitlementRows = await db
+            .select()
+            .from(entitlementsTable)
+            .where(eq(entitlementsTable.featureKey, featureKey));
+
+          const granted = entitlementRows.some((e) => planIds.includes(e.planId));
+          const plan = granted
+            ? (await db.select().from(billingPlansTable).where(eq(billingPlansTable.id, planIds[0]!)).limit(1))[0]?.slug ?? null
+            : null;
+
+          sendSuccess(res, {
+            granted,
+            source: 'subscription',
+            featureKey,
+            plan,
+          });
+          return;
+        }
+      }
+
+      sendSuccess(res, { granted: false, source: 'none', featureKey, plan: null });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to check entitlement');
+    }
+  },
+);
+
+router.get(
+  '/billing/fulfillments',
+  authMiddleware(),
+  requireRole('ops', 'admin', 'super_admin'),
+  validateQuery(listQuerySchema),
+  async (req, res) => {
+    try {
+      const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
+      const rows = await db
+        .select()
+        .from(fulfillmentsTable)
+        .orderBy(desc(fulfillmentsTable.createdAt))
+        .limit(limit)
+        .offset(offset);
+      sendSuccess(res, rows, 200, { page, limit, offset });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to list fulfillments');
+    }
+  },
+);
+
+router.get(
+  '/billing/admin/orgs/:orgId/subscription',
+  authMiddleware(),
+  requireRole('admin', 'super_admin'),
+  async (req: Request, res: Response) => {
+    try {
+      const orgId = parseIdParam(req.params.orgId);
+      const subs = await db
+        .select()
+        .from(subscriptionsTable)
+        .where(eq(subscriptionsTable.orgId, orgId))
+        .orderBy(desc(subscriptionsTable.createdAt));
+      const [org] = await db
+        .select()
+        .from(organizationsTable)
+        .where(eq(organizationsTable.id, orgId));
+      if (!org) {
+        sendNotFound(res, 'Organization');
+        return;
+      }
+
+      let stripeCustomer = null;
+      if (org.billingCustomerId && services.stripe.isLive) {
+        try {
+          stripeCustomer = await services.stripe.getCustomerByEmail(org.billingCustomerId);
+        } catch {
+          stripeCustomer = null;
+        }
+      }
+
+      sendSuccess(res, { org, subscriptions: subs, stripeCustomer });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to get org subscription');
+    }
+  },
+);
+
+router.post(
+  '/billing/admin/orgs/:orgId/subscription/resync',
+  authMiddleware(),
+  requireRole('admin', 'super_admin'),
+  requireStripeLive,
+  async (req: Request, res: Response) => {
+    try {
+      const orgId = parseIdParam(req.params.orgId);
+      const [org] = await db
+        .select()
+        .from(organizationsTable)
+        .where(eq(organizationsTable.id, orgId));
+      if (!org) {
+        sendNotFound(res, 'Organization');
+        return;
+      }
+      if (!org.billingCustomerId) {
+        sendBadRequest(res, 'Organization has no Stripe customer ID. billingCustomerId must be set.');
+        return;
+      }
+      const stripeSubs = await services.stripe.listCustomerSubscriptions(org.billingCustomerId);
+      let synced = 0;
+      for (const sub of stripeSubs) {
+        const [existing] = await db
+          .select()
+          .from(subscriptionsTable)
+          .where(eq(subscriptionsTable.stripeSubscriptionId, sub.id));
+        if (existing) {
+          await db
+            .update(subscriptionsTable)
+            .set({
+              status:
+                sub.status === 'active'
+                  ? 'active'
+                  : sub.status === 'trialing'
+                    ? 'trialing'
+                    : sub.status === 'past_due'
+                      ? 'past_due'
+                      : 'canceled',
+              currentPeriodStart: new Date(sub.currentPeriodStart * 1000),
+              currentPeriodEnd: new Date(sub.currentPeriodEnd * 1000),
+              updatedAt: new Date(),
+            })
+            .where(eq(subscriptionsTable.stripeSubscriptionId, sub.id));
+        } else {
+          const [firstPlan] = await db.select().from(billingPlansTable).limit(1);
+          await db.insert(subscriptionsTable).values({
+            orgId,
+            planId: firstPlan?.id ?? 1,
+            status: sub.status === 'active' ? 'active' : sub.status === 'trialing' ? 'trialing' : 'canceled',
+            stripeSubscriptionId: sub.id,
+            currentPeriodStart: new Date(sub.currentPeriodStart * 1000),
+            currentPeriodEnd: new Date(sub.currentPeriodEnd * 1000),
+          });
+        }
+        synced++;
+      }
+      sendSuccess(res, { synced, stripeSubscriptions: stripeSubs.length });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to resync subscription');
+    }
+  },
+);
+
+router.get(
+  '/billing/admin/orgs/:orgId/entitlements',
+  authMiddleware(),
+  requireRole('admin', 'super_admin'),
+  async (req: Request, res: Response) => {
+    try {
+      const orgId = parseIdParam(req.params.orgId);
+      const overrides = await db
+        .select()
+        .from(entitlementOverridesTable)
+        .where(eq(entitlementOverridesTable.orgId, orgId))
+        .orderBy(desc(entitlementOverridesTable.createdAt));
+      sendSuccess(res, overrides);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to get entitlement overrides');
+    }
+  },
+);
+
+router.post(
+  '/billing/admin/orgs/:orgId/entitlements',
+  authMiddleware(),
+  requireRole('admin', 'super_admin'),
+  async (req: Request, res: Response) => {
+    try {
+      const orgId = parseIdParam(req.params.orgId);
+      const { featureKey, granted, reason, expiresAt } = req.body as {
+        featureKey: string;
+        granted: boolean;
+        reason?: string;
+        expiresAt?: string;
+      };
+      if (!featureKey) {
+        sendBadRequest(res, 'featureKey is required');
+        return;
+      }
+
+      const existing = await db
+        .select()
+        .from(entitlementOverridesTable)
+        .where(
+          and(
+            eq(entitlementOverridesTable.orgId, orgId),
+            eq(entitlementOverridesTable.featureKey, featureKey),
+          ),
+        )
+        .limit(1);
+
+      if (existing.length > 0) {
+        await db
+          .update(entitlementOverridesTable)
+          .set({
+            granted: granted ?? true,
+            reason: reason ?? null,
+            grantedBy: req.user?.id ?? null,
+            expiresAt: expiresAt ? new Date(expiresAt) : null,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(entitlementOverridesTable.orgId, orgId),
+              eq(entitlementOverridesTable.featureKey, featureKey),
+            ),
+          );
+        sendSuccess(res, { action: 'updated', featureKey, granted });
+      } else {
+        await db.insert(entitlementOverridesTable).values({
+          orgId,
+          featureKey,
+          granted: granted ?? true,
+          reason: reason ?? null,
+          grantedBy: req.user?.id ?? null,
+          expiresAt: expiresAt ? new Date(expiresAt) : null,
+        });
+        sendSuccess(res, { action: 'created', featureKey, granted });
+      }
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to set entitlement override');
+    }
+  },
+);
+
+router.delete(
+  '/billing/admin/orgs/:orgId/entitlements/:featureKey',
+  authMiddleware(),
+  requireRole('admin', 'super_admin'),
+  async (req: Request, res: Response) => {
+    try {
+      const orgId = parseIdParam(req.params.orgId);
+      const featureKey = req.params.featureKey as string;
+      await db
+        .delete(entitlementOverridesTable)
+        .where(
+          and(
+            eq(entitlementOverridesTable.orgId, orgId),
+            eq(entitlementOverridesTable.featureKey, featureKey),
+          ),
+        );
+      sendSuccess(res, { deleted: true, featureKey });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to delete entitlement override');
     }
   },
 );

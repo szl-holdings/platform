@@ -44,6 +44,8 @@ const COUNSEL_ACCENT = '#8b5cf6';
 
 const DashboardPage = lazy(() => import('./pages/dashboard'));
 const CounselLandingPage = lazy(() => import('./pages/counsel-landing'));
+const CounselPricingPage = lazy(() => import('./pages/pricing'));
+const CounselBillingPage = lazy(() => import('./pages/billing-account'));
 const MatterOverviewPage = lazy(() => import('./pages/matter-overview'));
 const ObligationTimelinePage = lazy(() => import('./pages/obligation-timeline'));
 const DependencyGraphPage = lazy(() => import('./pages/dependency-graph'));
@@ -283,6 +285,8 @@ function DashboardRouter() {
         <Route path="/approvals" component={ApprovalsPage} />
         <Route path="/trust" component={TrustProvenancePage} />
         <Route path="/aef-search" component={AefKnowledgeSearchPage} />
+        <Route path="/pricing" component={CounselPricingPage} />
+        <Route path="/account/billing" component={CounselBillingPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-violet-400/40">Page not found</p>

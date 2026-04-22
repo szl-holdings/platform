@@ -145,3 +145,65 @@ export const insertUsageEventSchema = createInsertSchema(usageEventsTable).omit(
 });
 export type InsertUsageEvent = z.infer<typeof insertUsageEventSchema>;
 export type UsageEvent = typeof usageEventsTable.$inferSelect;
+
+export const fulfillmentsTable = pgTable(
+  'fulfillments',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id').references(() => organizationsTable.id, { onDelete: 'set null' }),
+    stripeSessionId: text('stripe_session_id').unique(),
+    stripePaymentIntentId: text('stripe_payment_intent_id'),
+    product: text('product').notNull(),
+    tierId: text('tier_id').notNull(),
+    tierName: text('tier_name').notNull(),
+    customerEmail: text('customer_email'),
+    amount: numeric('amount', { precision: 10, scale: 2 }),
+    currency: text('currency').notNull().default('usd'),
+    status: text('status', { enum: ['pending', 'fulfilled', 'refunded', 'failed'] })
+      .notNull()
+      .default('pending'),
+    metadata: jsonb('metadata'),
+    fulfilledAt: timestamp('fulfilled_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('fulfillments_org_id_idx').on(t.orgId),
+    index('fulfillments_session_id_idx').on(t.stripeSessionId),
+    index('fulfillments_product_idx').on(t.product),
+  ],
+);
+
+export const insertFulfillmentSchema = createInsertSchema(fulfillmentsTable).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertFulfillment = z.infer<typeof insertFulfillmentSchema>;
+export type Fulfillment = typeof fulfillmentsTable.$inferSelect;
+
+export const entitlementOverridesTable = pgTable(
+  'entitlement_overrides',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id')
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: 'cascade' }),
+    featureKey: text('feature_key').notNull(),
+    granted: boolean('granted').notNull().default(true),
+    reason: text('reason'),
+    grantedBy: integer('granted_by'),
+    expiresAt: timestamp('expires_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('entitlement_overrides_org_feature_idx').on(t.orgId, t.featureKey),
+  ],
+);
+
+export const insertEntitlementOverrideSchema = createInsertSchema(entitlementOverridesTable).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertEntitlementOverride = z.infer<typeof insertEntitlementOverrideSchema>;
+export type EntitlementOverride = typeof entitlementOverridesTable.$inferSelect;

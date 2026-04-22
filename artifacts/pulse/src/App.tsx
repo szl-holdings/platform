@@ -32,6 +32,8 @@ import TodaysBrief from './pages/TodaysBrief';
 
 const DecisionCenterPage = lazy(() => import('@/pages/decision-center'));
 const GovernedCockpitPage = lazy(() => import('@/pages/governed-cockpit'));
+const PulsePricingPage = lazy(() => import('@/pages/pricing'));
+const PulseBillingPage = lazy(() => import('@/pages/billing-account'));
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') || '/pulse';
 
@@ -488,6 +490,20 @@ export default function App() {
                 {() => (
                   <Suspense fallback={null}>
                     <GovernedCockpitPage />
+                  </Suspense>
+                )}
+              </Route>
+              <Route path={`${BASE}/pricing`}>
+                {() => (
+                  <Suspense fallback={null}>
+                    <PulsePricingPage />
+                  </Suspense>
+                )}
+              </Route>
+              <Route path={`${BASE}/account/billing`}>
+                {() => (
+                  <Suspense fallback={null}>
+                    <PulseBillingPage />
                   </Suspense>
                 )}
               </Route>
