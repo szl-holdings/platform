@@ -6,10 +6,10 @@ const SLIDES = [
   { id: "slide-01-cover", label: "Cover" },
   { id: "slide-02-thesis", label: "The Thesis" },
   { id: "slide-03-szl-dashboard", label: "SZL Holdings" },
-  { id: "slide-04-lyte", label: "Lyte" },
-  { id: "slide-05-vessels", label: "Vessels" },
-  { id: "slide-06-terra", label: "Terra" },
-  { id: "slide-07-aegis", label: "Aegis" },
+  { id: "slide-04-lyte", label: "KORA" },
+  { id: "slide-05-vessels", label: "SEXTANT" },
+  { id: "slide-06-terra", label: "DOMAINE" },
+  { id: "slide-07-aegis", label: "PARAGON" },
   { id: "slide-08-prism-imperium", label: "PRISM & IMPERIUM" },
   { id: "slide-09-carlota-stephen", label: "Carlota Jo & Founder" },
   { id: "slide-10-thesis", label: "Investment Thesis" },
@@ -17,6 +17,7 @@ const SLIDES = [
 
 export default function CarouselPreview() {
   const [current, setCurrent] = useState(0);
+  const [preloaded, setPreloaded] = useState(false);
   const goNext = useCallback(() => {
     setCurrent((c) => Math.min(c + 1, SLIDES.length - 1));
   }, []);
@@ -46,10 +47,12 @@ export default function CarouselPreview() {
   }, [goNext, goPrev]);
 
   useEffect(() => {
-    SLIDES.forEach((s) => {
+    const imgs = SLIDES.map((s) => {
       const img = new Image();
       img.src = `${base}carousel/${s.id}.jpg`;
+      return img;
     });
+    Promise.all(imgs.map((img) => new Promise((r) => { img.onload = r; img.onerror = r; }))).then(() => setPreloaded(true));
   }, []);
 
   const slide = SLIDES[current];

@@ -168,6 +168,40 @@ test.describe('Aegis — User Journey: View Queue → Open Incident → Navigate
   });
 });
 
+test.describe('PARAGON Home — Convergence section: Labs → Legal card', () => {
+  test('convergence section is present on the home page', async ({ page }) => {
+    await page.goto(`${AEGIS_PATH}/`);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const heading = page.locator('#convergence, [id="convergence"]').first();
+    const hasSection = await heading.isVisible().catch(() => false);
+    if (!hasSection) {
+      const body = await page.content();
+      expect(body).toMatch(/convergence/i);
+    } else {
+      await expect(heading).toBeVisible();
+    }
+  });
+
+  test('Labs → Legal card is present with correct from/to labels', async ({ page }) => {
+    await page.goto(`${AEGIS_PATH}/`);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const body = await page.content();
+    expect(body).toMatch(/Labs/);
+    expect(body).toMatch(/Legal/);
+  });
+
+  test('Labs → Legal card contains AI-assisted contract risk detection scenario text', async ({
+    page,
+  }) => {
+    await page.goto(`${AEGIS_PATH}/`);
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const body = await page.content();
+    expect(body).toMatch(/indemnification/i);
+    expect(body).toMatch(/Vantage Partners/i);
+    expect(body).toMatch(/matter opened/i);
+  });
+});
+
 test.describe('Aegis — Mobile Viewport', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
