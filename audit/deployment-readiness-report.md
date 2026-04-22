@@ -312,7 +312,7 @@ Items that are known issues without a hard blocker:
 
 | ID | Item | Owner | Status | Reproducer |
 |----|------|-------|--------|-----------|
-| RES-001 | `prism-counsel` E2E matrix entry references archived artifact | Platform team | ⚠️ Tracked | Run e2e.yml; prism-counsel build may fail if package is cleaned up |
+| RES-001 | `prism-counsel` E2E matrix entry references archived artifact | Platform team | ✅ Resolved (Task #2880) | Directory `artifacts/prism-counsel/`, matrix entry, and `tests/e2e/prism-counsel.spec.ts` removed |
 | RES-002 | `deploy-staging.yml` / `deploy-production.yml` missing Replit secrets | DevOps | ⚠️ Tracked | Run workflow without `REPLIT_DEPLOY_TOKEN` — warns, skips |
 | RES-003 | `backup.yml` Azure secrets absent → short-retention backup only | Platform team | ⚠️ Tracked | Run backup.yml without `AZURE_STORAGE_*` secrets |
 | RES-004 | `infra/runbooks/RUNBOOK_DEPLOYMENT.md` references deprecated Azure path | DevOps | 📦 Stale | Read file — references Azure Container Apps deploy |
