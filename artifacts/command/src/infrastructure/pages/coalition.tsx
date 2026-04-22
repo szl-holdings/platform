@@ -14,6 +14,7 @@ import {
   Clock,
   Edit2,
   Plus,
+  RotateCcw,
   Scale,
   Shield,
   Users,
@@ -575,6 +576,30 @@ export default function Coalition() {
     createMut.mutate(partner);
   }
 
+  const resetMut = useStandardMutation({
+    mutationFn: () =>
+      fetchJson<{ data: PartnerDTO[] }>(`${API_BASE}/reset`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      }),
+    onSuccess: (resp) => {
+      qc.setQueryData<{ data: PartnerDTO[] }>(COALITION_QUERY_KEY, resp);
+      showToast('Coalition reset to defaults');
+    },
+    onError: (e: Error) => showToast(`Reset failed: ${e.message}`),
+    onSettled: () => invalidate(),
+  });
+
+  function handleReset() {
+    if (
+      window.confirm(
+        'Reset the coalition to the original demo partners? Any partners you added or changed will be lost.',
+      )
+    ) {
+      resetMut.mutate();
+    }
+  }
+
   const domains = ['ALL', ...Array.from(new Set(partners.map((p) => p.domain)))];
   const filtered =
     filterDomain === 'ALL' ? partners : partners.filter((p) => p.domain === filterDomain);
@@ -604,13 +629,23 @@ export default function Coalition() {
               Coalition & Stakeholder Manager
             </h1>
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-3 py-2 rounded font-mono text-[11px] tracking-widest font-bold border transition-all hover:bg-gold/10"
-            style={{ borderColor: 'rgba(201,162,39,0.4)', color: '#c9a227' }}
-          >
-            <Plus className="w-3.5 h-3.5" /> ADD PARTNER
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-2 px-3 py-2 rounded font-mono text-[11px] tracking-widest border transition-all hover:bg-white/5"
+              style={{ borderColor: 'rgba(148,163,184,0.25)', color: '#94a3b8' }}
+              title="Restore the original demo coalition"
+            >
+              <RotateCcw className="w-3.5 h-3.5" /> RESET TO DEFAULTS
+            </button>
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded font-mono text-[11px] tracking-widest font-bold border transition-all hover:bg-gold/10"
+              style={{ borderColor: 'rgba(201,162,39,0.4)', color: '#c9a227' }}
+            >
+              <Plus className="w-3.5 h-3.5" /> ADD PARTNER
+            </button>
+          </div>
         </div>
         <p className="text-xs text-slate-500 ml-8">
           Edit partner trust scores and engagement status — changes reflected immediately

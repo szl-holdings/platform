@@ -709,6 +709,24 @@ router.patch(
   },
 );
 
+router.post('/sync/directives/reset', async (req: Request, res: Response) => {
+  try {
+    const tid = tenantKey(req);
+    await db
+      .delete(commandDirectivesTable)
+      .where(eq(commandDirectivesTable.tenantId, tid));
+    await seedDirectivesIfEmpty(tid);
+    const rows = await db
+      .select()
+      .from(commandDirectivesTable)
+      .where(eq(commandDirectivesTable.tenantId, tid))
+      .orderBy(desc(commandDirectivesTable.issuedAt));
+    sendSuccess(res, { data: rows.map(serialiseDirective) });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to reset directives');
+  }
+});
+
 router.delete('/sync/directives/:id', async (req: Request, res: Response) => {
   try {
     const tid = tenantKey(req);
@@ -806,6 +824,24 @@ router.patch(
   },
 );
 
+router.post('/sync/coalition/reset', async (req: Request, res: Response) => {
+  try {
+    const tid = tenantKey(req);
+    await db
+      .delete(commandCoalitionPartnersTable)
+      .where(eq(commandCoalitionPartnersTable.tenantId, tid));
+    await seedPartnersIfEmpty(tid);
+    const rows = await db
+      .select()
+      .from(commandCoalitionPartnersTable)
+      .where(eq(commandCoalitionPartnersTable.tenantId, tid))
+      .orderBy(asc(commandCoalitionPartnersTable.createdAt));
+    sendSuccess(res, { data: rows.map(serialisePartner) });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to reset coalition partners');
+  }
+});
+
 router.delete('/sync/coalition/:id', async (req: Request, res: Response) => {
   try {
     const tid = tenantKey(req);
@@ -855,6 +891,39 @@ router.get('/sync/reserves', async (req: Request, res: Response) => {
     });
   } catch (err) {
     handleRouteError(res, err, 'Failed to load strategic reserves');
+  }
+});
+
+router.post('/sync/reserves/reset', async (req: Request, res: Response) => {
+  try {
+    const tid = tenantKey(req);
+    await db
+      .delete(commandDrawdownRequestsTable)
+      .where(eq(commandDrawdownRequestsTable.tenantId, tid));
+    await db
+      .delete(commandReservePoolsTable)
+      .where(eq(commandReservePoolsTable.tenantId, tid));
+    await seedReservesIfEmpty(tid);
+    const [pools, drawdowns] = await Promise.all([
+      db
+        .select()
+        .from(commandReservePoolsTable)
+        .where(eq(commandReservePoolsTable.tenantId, tid))
+        .orderBy(asc(commandReservePoolsTable.createdAt)),
+      db
+        .select()
+        .from(commandDrawdownRequestsTable)
+        .where(eq(commandDrawdownRequestsTable.tenantId, tid))
+        .orderBy(desc(commandDrawdownRequestsTable.requestedAt)),
+    ]);
+    sendSuccess(res, {
+      data: {
+        pools: pools.map(serialisePool),
+        drawdowns: drawdowns.map(serialiseDrawdown),
+      },
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to reset strategic reserves');
   }
 });
 

@@ -15,6 +15,7 @@ import {
   Pause,
   Plus,
   RefreshCw,
+  RotateCcw,
   Search,
   Send,
   X,
@@ -597,6 +598,30 @@ export default function DirectiveCascade() {
     createMut.mutate(directive);
   }
 
+  const resetMut = useStandardMutation({
+    mutationFn: () =>
+      fetchJson<{ data: DirectiveDTO[] }>(`${API_BASE}/reset`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      }),
+    onSuccess: (resp) => {
+      qc.setQueryData<{ data: DirectiveDTO[] }>(DIRECTIVES_QUERY_KEY, resp);
+      showToast('Directives reset to defaults');
+    },
+    onError: (e: Error) => showToast(`Reset failed: ${e.message}`),
+    onSettled: () => invalidate(),
+  });
+
+  function handleReset() {
+    if (
+      window.confirm(
+        'Reset all directives to the original demo data? Any directives you added or changed will be lost.',
+      )
+    ) {
+      resetMut.mutate();
+    }
+  }
+
   const query = searchQuery.trim().toLowerCase();
 
   const filtered = directives.filter((d) => {
@@ -639,13 +664,23 @@ export default function DirectiveCascade() {
               Directive Cascade Engine
             </h1>
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-3 py-2 rounded font-mono text-[11px] tracking-widest font-bold border transition-all hover:bg-gold/10"
-            style={{ borderColor: 'rgba(201,162,39,0.4)', color: '#c9a227' }}
-          >
-            <Plus className="w-3.5 h-3.5" /> ISSUE DIRECTIVE
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-2 px-3 py-2 rounded font-mono text-[11px] tracking-widest border transition-all hover:bg-white/5"
+              style={{ borderColor: 'rgba(148,163,184,0.25)', color: '#94a3b8' }}
+              title="Restore the original demo directives"
+            >
+              <RotateCcw className="w-3.5 h-3.5" /> RESET TO DEFAULTS
+            </button>
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded font-mono text-[11px] tracking-widest font-bold border transition-all hover:bg-gold/10"
+              style={{ borderColor: 'rgba(201,162,39,0.4)', color: '#c9a227' }}
+            >
+              <Plus className="w-3.5 h-3.5" /> ISSUE DIRECTIVE
+            </button>
+          </div>
         </div>
         <p className="text-xs text-slate-500 ml-8">
           Command directives cascade to assigned groups — create, update, suspend, or archive

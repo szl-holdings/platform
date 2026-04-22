@@ -9,7 +9,7 @@ import {
 import { cn } from '@imp/lib/utils';
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Check, ChevronDown, ChevronUp, Clock, Database, TrendingDown, X } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Clock, Database, RotateCcw, TrendingDown, X } from 'lucide-react';
 import React, { useState } from 'react';
 
 const BASE_URL = (import.meta.env.BASE_URL ?? '/imperium/').replace(/\/$/, '');
@@ -628,6 +628,30 @@ export default function StrategicReserves() {
     approveMut.mutate(id);
   }
 
+  const resetMut = useStandardMutation({
+    mutationFn: () =>
+      fetchJson<ReservesResponse>(`${API_BASE}/reset`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      }),
+    onSuccess: (resp) => {
+      qc.setQueryData<ReservesResponse>(RESERVES_QUERY_KEY, resp);
+      showToast('Reserves reset to defaults');
+    },
+    onError: (e: Error) => showToast(`Reset failed: ${e.message}`),
+    onSettled: () => invalidate(),
+  });
+
+  function handleReset() {
+    if (
+      window.confirm(
+        'Reset reserve pools and drawdown history to the original demo data? Any changes you made will be lost.',
+      )
+    ) {
+      resetMut.mutate();
+    }
+  }
+
   function handleReject(id: string) {
     rejectMut.mutate(id);
   }
@@ -660,11 +684,21 @@ export default function StrategicReserves() {
       )}
 
       <div>
-        <div className="flex items-center gap-3 mb-1">
-          <Database className="w-5 h-5" style={{ color: '#c9a227' }} />
-          <h1 className="font-display text-lg tracking-[0.2em] gold-text gold-glow font-bold uppercase">
-            Strategic Reserve Dashboard
-          </h1>
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-3">
+            <Database className="w-5 h-5" style={{ color: '#c9a227' }} />
+            <h1 className="font-display text-lg tracking-[0.2em] gold-text gold-glow font-bold uppercase">
+              Strategic Reserve Dashboard
+            </h1>
+          </div>
+          <button
+            onClick={handleReset}
+            className="flex items-center gap-2 px-3 py-2 rounded font-mono text-[11px] tracking-widest border transition-all hover:bg-white/5"
+            style={{ borderColor: 'rgba(148,163,184,0.25)', color: '#94a3b8' }}
+            title="Restore the original demo reserve pools and drawdown history"
+          >
+            <RotateCcw className="w-3.5 h-3.5" /> RESET TO DEFAULTS
+          </button>
         </div>
         <p className="text-xs text-slate-500 ml-8">
           Monitor reserve pools and submit drawdown requests — changes reflected immediately
