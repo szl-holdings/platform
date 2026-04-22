@@ -25,6 +25,16 @@ import {
   type Intervention,
   useInterventions,
 } from '@/data/interventions';
+import {
+  effectiveRevealed,
+  isReplayMode as computeIsReplayMode,
+  pauseReplay as pureReplayPause,
+  resetReplay as pureReplayReset,
+  startReplay as pureReplayStart,
+  stepBack as pureReplayStepBack,
+  stepForward as pureReplayStepForward,
+  tick as pureReplayTick,
+} from '@/data/replay-state';
 import type { ReplayEvent, ReplayScenario } from '@/data/seed';
 
 const INTERVENTION_ICON: Record<Intervention['type'], React.ReactNode> = {
@@ -245,7 +255,7 @@ export default function DecisionReplayPage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const totalEvents = activeScenario?.events.length ?? 0;
-  const currentRevealed = revealedCount ?? totalEvents;
+  const currentRevealed = effectiveRevealed({ revealedCount, playing }, totalEvents);
 
   useEffect(() => {
     if (!data?.scenarios?.length) return;
@@ -269,26 +279,29 @@ export default function DecisionReplayPage() {
   }
 
   function startReplay() {
-    setRevealedCount(0);
-    setPlaying(true);
+    const next = pureReplayStart();
+    setRevealedCount(next.revealedCount);
+    setPlaying(next.playing);
   }
 
   function pauseReplay() {
-    setPlaying(false);
+    const next = pureReplayPause({ revealedCount, playing });
+    setPlaying(next.playing);
     if (intervalRef.current) clearInterval(intervalRef.current);
   }
 
   function stepForward() {
-    setRevealedCount((c) => Math.min((c ?? 0) + 1, totalEvents));
+    setRevealedCount((c) => pureReplayStepForward({ revealedCount: c, playing }, totalEvents).revealedCount);
   }
 
   function stepBack() {
-    setRevealedCount((c) => Math.max((c ?? 0) - 1, 0));
+    setRevealedCount((c) => pureReplayStepBack({ revealedCount: c, playing }).revealedCount);
   }
 
   function resetReplay() {
-    setRevealedCount(null);
-    setPlaying(false);
+    const next = pureReplayReset();
+    setRevealedCount(next.revealedCount);
+    setPlaying(next.playing);
     if (intervalRef.current) clearInterval(intervalRef.current);
   }
 
@@ -296,13 +309,12 @@ export default function DecisionReplayPage() {
     if (playing) {
       intervalRef.current = setInterval(() => {
         setRevealedCount((c) => {
-          const next = (c ?? 0) + 1;
-          if (next >= totalEvents) {
+          const next = pureReplayTick({ revealedCount: c, playing }, totalEvents);
+          if (!next.playing) {
             setPlaying(false);
-            clearInterval(intervalRef.current!);
-            return totalEvents;
+            if (intervalRef.current) clearInterval(intervalRef.current);
           }
-          return next;
+          return next.revealedCount;
         });
       }, REPLAY_INTERVAL_MS);
     } else {
@@ -313,7 +325,7 @@ export default function DecisionReplayPage() {
     };
   }, [playing, totalEvents]);
 
-  const isReplayMode = revealedCount !== null;
+  const isReplayMode = computeIsReplayMode({ revealedCount, playing });
 
   if (isLoading) {
     return <div className="p-6 text-xs font-mono text-amber-400/50">Loading decision replay…</div>;
