@@ -26,7 +26,7 @@ import {
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@szl-holdings/shared-ui/ui/tabs';
 import { useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Bell, BellOff, Clock, Plus, Shield, Trash2 } from 'lucide-react';
+import { AlertTriangle, Bell, BellOff, CheckCircle2, Clock, EyeOff, Plus, Shield, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { api } from '@/lib/api';
 
@@ -135,6 +135,16 @@ export default function AlertCenterPage() {
       qc.invalidateQueries({ queryKey: ['alertRules'] });
       toast.success('Rule deleted');
     },
+  });
+
+  const updateAlertMut = useStandardMutation({
+    mutationFn: ({ id, status }: { id: number; status: 'acknowledged' | 'resolved' | 'dismissed' }) =>
+      api.alerts.updateStatus(id, status),
+    onSuccess: (_d, vars) => {
+      qc.invalidateQueries({ queryKey: ['alerts'] });
+      toast.success(`Alert ${vars.status}`);
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const activeAlerts = alerts.filter((a) => a.status === 'active');
@@ -284,19 +294,54 @@ export default function AlertCenterPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant="outline"
-                          className={`${severityColors[alert.severity] || ''} ${isCritical && isActive ? 'animate-pulse' : ''}`}
-                        >
-                          {isCritical && isActive && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5 animate-pulse-dot" />
-                          )}
-                          {alert.severity}
-                        </Badge>
-                        <Badge variant="outline" className={alertStatusColors[alert.status] || ''}>
-                          {alertStatusLabels[alert.status] || alert.status}
-                        </Badge>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant="outline"
+                            className={`${severityColors[alert.severity] || ''} ${isCritical && isActive ? 'animate-pulse' : ''}`}
+                          >
+                            {isCritical && isActive && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5 animate-pulse-dot" />
+                            )}
+                            {alert.severity}
+                          </Badge>
+                          <Badge
+                            variant="outline"
+                            className={alertStatusColors[alert.status] || ''}
+                          >
+                            {alertStatusLabels[alert.status] || alert.status}
+                          </Badge>
+                        </div>
+                        {(alert.status === 'active' || alert.status === 'acknowledged') && (
+                          <div className="flex items-center gap-1.5">
+                            {alert.status === 'active' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 px-2 text-xs"
+                                disabled={updateAlertMut.isPending}
+                                onClick={() =>
+                                  updateAlertMut.mutate({ id: alert.id, status: 'acknowledged' })
+                                }
+                                data-testid={`ack-alert-${alert.id}`}
+                              >
+                                <EyeOff className="w-3 h-3 mr-1" /> Acknowledge
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2 text-xs"
+                              disabled={updateAlertMut.isPending}
+                              onClick={() =>
+                                updateAlertMut.mutate({ id: alert.id, status: 'resolved' })
+                              }
+                              data-testid={`resolve-alert-${alert.id}`}
+                            >
+                              <CheckCircle2 className="w-3 h-3 mr-1" /> Resolve
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>

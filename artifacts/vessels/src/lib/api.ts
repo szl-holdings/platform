@@ -387,6 +387,16 @@ export const api = {
   },
   alerts: {
     list: () => apiFetch<Record<string, unknown>[]>('/vessels/alerts/all'),
+    create: (data: MutationInput) =>
+      apiFetch<Record<string, unknown>>('/vessels/alerts', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    updateStatus: (id: number, status: 'active' | 'acknowledged' | 'resolved' | 'dismissed') =>
+      apiFetch<Record<string, unknown>>(`/vessels/alerts/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      }),
   },
   weather: {
     snapshots: (routeId?: number) =>

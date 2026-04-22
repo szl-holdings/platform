@@ -892,6 +892,82 @@ router.post(
   },
 );
 
+// PATCH /vessels/alerts/:id — lifecycle update (active → acknowledged → resolved)
+router.patch(
+  '/vessels/alerts/:id',
+  authMiddleware(),
+  tenantScope(),
+  requireRole('ops', 'exec', 'admin', 'editor'),
+  validateBody(vesselsResourceMutationSchema),
+  async (req: Request, res) => {
+    try {
+      const id = parseIdParam(req.params.id);
+      const parseResult = z
+        .object({
+          status: z.enum(['active', 'acknowledged', 'resolved', 'dismissed']),
+        })
+        .safeParse(req.body);
+      if (!parseResult.success) {
+        res.status(400).json({
+          error: 'Invalid status',
+          code: 'INVALID_STATUS',
+          details: parseResult.error.flatten(),
+        });
+        return;
+      }
+      const { status: nextStatus } = parseResult.data;
+      const [existing] = await db
+        .select()
+        .from(vesselsAlertsTable)
+        .where(eq(vesselsAlertsTable.id, id));
+      if (!existing) {
+        sendNotFound(res, 'Alert');
+        return;
+      }
+      // Reject orphan alerts (no vessel link) — cannot be tenant-scoped safely.
+      if (!existing.vesselId) {
+        sendNotFound(res, 'Alert');
+        return;
+      }
+      const vessel = await getVesselInOrg(existing.vesselId, req.tenantOrgId);
+      if (!vessel) {
+        sendNotFound(res, 'Alert');
+        return;
+      }
+      // Enforce lifecycle transition matrix.
+      const allowed: Record<string, ReadonlyArray<string>> = {
+        active: ['acknowledged', 'resolved', 'dismissed'],
+        acknowledged: ['resolved', 'dismissed'],
+        resolved: [],
+        dismissed: [],
+      };
+      const currentStatus = existing.status ?? 'active';
+      if (currentStatus === nextStatus) {
+        sendSuccess(res, existing);
+        return;
+      }
+      const validNext = allowed[currentStatus] ?? [];
+      if (!validNext.includes(nextStatus)) {
+        res.status(400).json({
+          error: `Invalid transition: ${currentStatus} → ${nextStatus}`,
+          code: 'INVALID_STATUS_TRANSITION',
+        });
+        return;
+      }
+      const updates: Record<string, unknown> = { status: nextStatus };
+      if (nextStatus === 'resolved') updates.resolvedAt = new Date();
+      const [updated] = await db
+        .update(vesselsAlertsTable)
+        .set(updates)
+        .where(eq(vesselsAlertsTable.id, id))
+        .returning();
+      sendSuccess(res, updated);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to update alert');
+    }
+  },
+);
+
 router.delete(
   '/vessels/alerts/:id',
   validateBody(vesselsResourceDeleteSchema),

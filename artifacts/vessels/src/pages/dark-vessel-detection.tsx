@@ -2,8 +2,12 @@ import { MicroFeedbackWidget } from '@szl-holdings/shared-ui/micro-feedback-widg
 import { HelpTip } from '@szl-holdings/shared-ui/onboarding';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
+import { toast } from '@szl-holdings/shared-ui/ui/sonner';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
+  BellPlus,
+  CheckCircle2,
   Clock,
   Eye,
   EyeOff,
@@ -18,6 +22,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useState } from 'react';
+import { api } from '@/lib/api';
 
 const darkVessels = [
   {
@@ -179,10 +184,71 @@ interface VesselAnalysis {
   error?: string;
 }
 
+type RaiseState = 'idle' | 'raising' | 'raised';
+
+function severityFromScore(score: number): 'critical' | 'high' | 'medium' | 'low' {
+  if (score >= 85) return 'critical';
+  if (score >= 70) return 'high';
+  if (score >= 50) return 'medium';
+  return 'low';
+}
+
 export default function DarkVesselDetection() {
   const [activeTab, setActiveTab] = useState<'dark' | 'sts' | 'iuu'>('dark');
   const [search, setSearch] = useState('');
   const [vesselAnalyses, setVesselAnalyses] = useState<Record<string, VesselAnalysis>>({});
+  const [raiseState, setRaiseState] = useState<Record<string, RaiseState>>({});
+  const qc = useQueryClient();
+
+  const raiseAlert = async (vessel: (typeof darkVessels)[0]) => {
+    setRaiseState((p) => ({ ...p, [vessel.id]: 'raising' }));
+    try {
+      const fleetVessels = (await api.vessels.list()) as Array<{ id: number }>;
+      const anchorVesselId = fleetVessels[0]?.id ?? null;
+      if (!anchorVesselId) {
+        toast.error(
+          'No fleet vessel available to attribute alert. Add a vessel before raising dark-vessel alerts.',
+        );
+        setRaiseState((p) => ({ ...p, [vessel.id]: 'idle' }));
+        return;
+      }
+      const severity = severityFromScore(vessel.suspicionScore);
+      const message = [
+        `Suspicion score ${vessel.suspicionScore}/100 — ${vessel.reason}.`,
+        `AIS gap: ${vessel.gapDuration} (last fix ${vessel.lastAIS}).`,
+        `Last known position: ${vessel.lat.toFixed(2)}°N ${vessel.lon.toFixed(2)}°E.`,
+        `Prior port calls: ${vessel.priorCalls.join(' → ')}.`,
+        `Owner chain: ${vessel.ownerChain}.`,
+      ].join(' ');
+      await api.alerts.create({
+        vesselId: anchorVesselId,
+        title: `Dark Vessel: ${vessel.name} (IMO ${vessel.imo})`,
+        message,
+        severity,
+        status: 'active',
+        metadata: {
+          source: 'dark-vessel-detection',
+          darkVesselId: vessel.id,
+          imo: vessel.imo,
+          flag: vessel.flag,
+          suspicionScore: vessel.suspicionScore,
+          gapDuration: vessel.gapDuration,
+          lastAIS: vessel.lastAIS,
+          lat: vessel.lat,
+          lon: vessel.lon,
+          priorCalls: vessel.priorCalls,
+          ownerChain: vessel.ownerChain,
+          behaviour: vessel.reason,
+        },
+      });
+      qc.invalidateQueries({ queryKey: ['alerts'] });
+      setRaiseState((p) => ({ ...p, [vessel.id]: 'raised' }));
+      toast.success(`Alert raised for ${vessel.name} — visible in Alert Center`);
+    } catch (err) {
+      setRaiseState((p) => ({ ...p, [vessel.id]: 'idle' }));
+      toast.error(err instanceof Error ? err.message : 'Failed to raise alert');
+    }
+  };
 
   const analyzeVessel = async (vessel: (typeof darkVessels)[0]) => {
     setVesselAnalyses((prev) => ({ ...prev, [vessel.id]: { loading: true, content: '' } }));
@@ -432,6 +498,28 @@ export default function DarkVesselDetection() {
                         ) : (
                           <>
                             <Sparkles className="w-3 h-3" /> AI Analysis
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => raiseAlert(vessel)}
+                        disabled={
+                          raiseState[vessel.id] === 'raising' || raiseState[vessel.id] === 'raised'
+                        }
+                        data-testid={`raise-alert-${vessel.id}`}
+                        className="text-[10px] px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors flex items-center gap-1 disabled:opacity-60 whitespace-nowrap"
+                      >
+                        {raiseState[vessel.id] === 'raising' ? (
+                          <>
+                            <Loader2 className="w-3 h-3 animate-spin" /> Raising...
+                          </>
+                        ) : raiseState[vessel.id] === 'raised' ? (
+                          <>
+                            <CheckCircle2 className="w-3 h-3" /> Alert Raised
+                          </>
+                        ) : (
+                          <>
+                            <BellPlus className="w-3 h-3" /> Raise Alert
                           </>
                         )}
                       </button>
