@@ -107,6 +107,8 @@
     "metrics:validate": "tsx scripts/validate-platform-facts.ts",
     "metrics:check": "tsx scripts/validate-platform-facts.ts --strict",
     "design:check-hex": "tsx scripts/check-no-raw-hex.ts",
+    "tokens:drift": "tsx scripts/check-design-tokens-drift.ts",
+    "tokens:drift:check": "tsx scripts/check-design-tokens-drift.ts --check --threshold=60",
     "audit:source-of-truth": "node scripts/audit/validate-source-of-truth.js"
   },
   "private": true,
