@@ -9,7 +9,7 @@
  * and proof points. Wired into scripts/post-merge.sh so briefs stay in
  * sync with manifest edits.
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import PDFDocument from 'pdfkit';
@@ -134,7 +134,10 @@ function hex(c: string): [number, number, number] {
   return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [255, 255, 255];
 }
 
-function loadManifest(): Manifest {
+function loadManifest(): Manifest | null {
+  if (!existsSync(MANIFEST_PATH)) {
+    return null;
+  }
   const raw = readFileSync(MANIFEST_PATH, 'utf8');
   return JSON.parse(raw) as Manifest;
 }
@@ -489,6 +492,13 @@ async function generateBrief(
 
 async function main(): Promise<void> {
   const manifest = loadManifest();
+  if (!manifest) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[solution-briefs] Skipping regeneration: manifest not found at ${MANIFEST_PATH}`,
+    );
+    return;
+  }
   mkdirSync(OUT_DIR, { recursive: true });
   const results: Array<{
     slug: string;
