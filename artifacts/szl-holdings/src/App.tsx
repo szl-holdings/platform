@@ -221,6 +221,7 @@ const PromptRegistryPage = lazy(() => import("@/pages/prompt-registry"));
 const RevenueFusionPage = lazy(() => import("@/pages/revenue-fusion"));
 const PulsePage = lazy(() => import("@/pages/pulse"));
 const LinkInBioPage = lazy(() => import("@/pages/link-in-bio"));
+const CarouselPreviewPage = lazy(() => import("@/pages/carousel-preview"));
 const NewsletterLandingPage = lazy(() => import("@/pages/newsletter-landing"));
 const DistOsDashboard = lazy(() => import("@/pages/distribution-os/admin-dashboard"));
 const DistOsArticles = lazy(() => import("@/pages/distribution-os/articles-cms"));
@@ -1421,6 +1422,9 @@ function App() {
             {/* ── Distribution OS: Public Pages ── */}
             <Route path="/link-in-bio">
               <Suspense fallback={<PageLoader />}><LinkInBioPage /></Suspense>
+            </Route>
+            <Route path="/carousel">
+              <Suspense fallback={<PageLoader />}><CarouselPreviewPage /></Suspense>
             </Route>
             <Route path="/newsletter">
               <Suspense fallback={<PageLoader />}><NewsletterLandingPage /></Suspense>
