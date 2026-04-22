@@ -79,7 +79,7 @@ Domain packs extend the same governance infrastructure into domain-specific inte
 |---------|--------|--------|
 | **TENAX** | Cyber resilience command — exposure mapping, recovery readiness, incident command, control drift detection | Active |
 | **Counsel** | Legal matter command — agentic matter management, obligation tracking, exposure quantification, court filing integration | Active |
-| **PARAGON** | Security and defense intelligence — SOC command, advanced security modules, SOAR playbooks, threat intelligence | Domain backend active; web UI archived (Task #920) — see `artifacts/firestorm/` |
+| **PARAGON** | Security and defense intelligence — SOC command, advanced security modules, SOAR playbooks, threat intelligence | Domain backend active; web UI consolidated into Aegis |
 | **SEXTANT** | Maritime fleet intelligence — AIS tracking, S&P workflow, demurrage, freight, voyage P&L | Active |
 | **DOMAINE** | Real estate intelligence — distress pipeline, ownership graph, deal workflow, AI analysis | Active |
 | **Carlota Jo** | Premium advisory operations — UHNW client portal, service catalog, engagement management | Active |
@@ -197,9 +197,9 @@ Artifact inventory:
 
 | Artifact | Disposition | Notes |
 |----------|-------------|-------|
-| `artifacts/firestorm/` | Archived (Task #920) | PARAGON defense UI; source retained on disk; `/firestorm/*` API routes still live |
-| `artifacts/imperium/` | Archived (Task #920) | Cloud sovereignty UI merged into FORGE Command Portal; source retained on disk |
-| `artifacts/lyte-command-center/` | Archived (Task #920) | Merged into FORGE Command Portal; source retained on disk |
+| `artifacts/imperium/` | Archived (Task #920) | Cloud sovereignty UI; source retained on disk |
+| `artifacts/cortex-mobile/` | Archived | Superseded by `artifacts/szl-holdings-mobile` |
+| `artifacts/prism-counsel/` | Archived | Superseded by `artifacts/counsel`; legacy API routes retained |
 
 **Removed artifacts** (directory deleted, no remaining code on disk):
 

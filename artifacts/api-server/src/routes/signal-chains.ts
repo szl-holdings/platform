@@ -210,8 +210,8 @@ const DEFAULT_CHAINS: SignalChain[] = [
     targetDomains: ['terra', 'prism'],
     severity: 'high',
     enabled: true,
-    executionCount: 3,
-    lastExecuted: Date.now() - 7200000,
+    executionCount: 0,
+    lastExecuted: undefined,
     steps: [
       {
         domain: 'vessels',
@@ -244,8 +244,8 @@ const DEFAULT_CHAINS: SignalChain[] = [
     targetDomains: ['prism', 'szl-holdings'],
     severity: 'critical',
     enabled: true,
-    executionCount: 1,
-    lastExecuted: Date.now() - 43200000,
+    executionCount: 0,
+    lastExecuted: undefined,
     steps: [
       {
         domain: 'aegis',
@@ -278,8 +278,8 @@ const DEFAULT_CHAINS: SignalChain[] = [
     targetDomains: ['terra', 'vessels', 'szl-holdings'],
     severity: 'medium',
     enabled: true,
-    executionCount: 7,
-    lastExecuted: Date.now() - 3600000,
+    executionCount: 0,
+    lastExecuted: undefined,
     steps: [
       {
         domain: 'szl-holdings',
@@ -326,20 +326,24 @@ export async function bootstrapChainState(): Promise<void> {
       .from(signalChainExecutionsTable)
       .groupBy(signalChainExecutionsTable.chainId);
 
-    // First reset every known chain to the DB-truth zero baseline so that
-    // chains with no persisted executions don't keep their hardcoded defaults.
-    for (const chain of chainState.values()) {
-      chain.executionCount = 0;
-      chain.lastExecuted = undefined;
-    }
-
-    // Then apply real counts / timestamps for chains that have DB rows.
+    // Merge DB-truth counts non-destructively: the live HTTP handler may
+    // already be accepting /signal-chains/:id/trigger requests by the time
+    // this runs (bootstrap now opens traffic before hydration completes),
+    // so we MUST NOT reset counters to zero — that would clobber legitimate
+    // in-memory increments performed during the hydration window. Take the
+    // max of (in-memory, DB) for both count and lastExecuted to guarantee
+    // monotonic counters regardless of the order events arrive in.
     for (const row of rows) {
       const chain = chainState.get(row.chainId);
       if (!chain) continue;
-      chain.executionCount = Number(row.executionCount);
+      const dbCount = Number(row.executionCount);
+      chain.executionCount = Math.max(chain.executionCount ?? 0, dbCount);
       if (row.lastExecuted) {
-        chain.lastExecuted = new Date(row.lastExecuted).getTime();
+        const dbLastExecutedMs = new Date(row.lastExecuted).getTime();
+        chain.lastExecuted =
+          chain.lastExecuted === undefined
+            ? dbLastExecutedMs
+            : Math.max(chain.lastExecuted, dbLastExecutedMs);
       }
     }
 

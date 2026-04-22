@@ -341,16 +341,12 @@ export async function bootstrap(
       logger.info('[bootstrap] All migrations complete');
     }
 
-    // Seed in-memory Signal Chain state from DB before opening traffic so that
-    // the very first /signal-chains request sees accurate DB-truth counts.
-    // The function is fast (one grouped query) and self-contained — errors are
-    // caught and logged non-fatally inside bootstrapChainState() itself.
-    await bootstrapChainState();
-
-    // Schema is durable — open the live handler now so the server can serve
-    // traffic while the rest of the post-migration init proceeds in the
+    // Schema is durable — open the live handler IMMEDIATELY so the server can
+    // serve traffic while the rest of the post-migration init proceeds in the
     // background. Without this, slow optional inits (Guardian engine, durable
-    // queue, seeds, etc.) gate the entire HTTP surface behind a 503 wall.
+    // queue, seeds, chain state hydration, etc.) gate the entire HTTP surface
+    // behind a 503 wall — and any one of them hanging (e.g. a query against a
+    // table the migration order failed to create) takes the whole API down.
     if (onMigrationsReady) {
       try {
         onMigrationsReady(app as unknown as http.RequestListener);
@@ -359,6 +355,27 @@ export async function bootstrap(
         logger.warn({ err }, '[bootstrap] onMigrationsReady callback threw (non-fatal)');
       }
     }
+
+    // Hydrate in-memory Signal Chain state from DB. Fire-and-forget with a
+    // hard timeout so a hung query (missing relation, lock contention, etc.)
+    // can never re-block the bootstrap sequence. The very first
+    // /signal-chains request may see hardcoded defaults for a few hundred ms
+    // until this resolves; that is far better than a permanent 503.
+    const CHAIN_STATE_HYDRATE_TIMEOUT_MS = 10_000;
+    void Promise.race([
+      bootstrapChainState(),
+      new Promise<void>((_, reject) =>
+        setTimeout(
+          () => reject(new Error(`bootstrapChainState exceeded ${CHAIN_STATE_HYDRATE_TIMEOUT_MS}ms`)),
+          CHAIN_STATE_HYDRATE_TIMEOUT_MS,
+        ),
+      ),
+    ]).catch((err) => {
+      logger.warn(
+        { err },
+        '[bootstrap] chainState hydration failed or timed out — continuing with in-memory defaults',
+      );
+    });
 
     // Step 2: Platform flags and knowledge store depend on schema being ready
     await ensurePlatformFlags();

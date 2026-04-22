@@ -108,6 +108,38 @@ The monorepo has been evolved into AEEP. The following new packages form the AEE
 
 **Substrate Command Center:** A cross-vertical operator UI for the governed decision substrate, integrated into the `command` artifact at `/command/substrate/`. It offers four operator perspectives, a live trajectory map of in-flight runs, detailed run views, a counterfactual diff viewer, and a unified approval queue.
 
+## Platform Hardening Audit (2026-04-22)
+
+**Critical fix:** API server bootstrap deadlock resolved — `bootstrapChainState()` was blocking the live HTTP handler flip. Moved `onMigrationsReady()` to fire immediately after migrations. Chain state hydration now runs fire-and-forget with 10s timeout and merge-only semantics (no counter reset race).
+
+**Files changed:** `artifacts/api-server/src/index.ts` (bootstrap order), `artifacts/api-server/src/routes/signal-chains.ts` (merge-only hydration)
+
+**Audit deliverables created (docs/):**
+- `AUDIT_INVENTORY.md` — full workspace inventory (17 artifacts, 41 libs, 82 packages, 2,781 routes, 732 tables)
+- `OPERABILITY_MATRIX.md` — per-artifact build/start/health grades
+- `PUBLIC_SURFACE_MATRIX.md` — public claims verified against code reality
+- `FIX_LOG.md` — fixes applied this session
+- `BUILD_AND_QA_SCORECARD.md` — pipeline stage results
+- `GITHUB_ASCENSION_REPORT.md` — CI pipeline and public surface assessment
+- `REPLIT_RUNBOOK.md` — operator runbook for Replit workspace
+- `REPLIT_BOOT_MATRIX.md` — startup sequence and timing
+- `CORE_PLATFORM_PRIMITIVES.md` — implementation register for all 8 primitives
+- `DECISION_LIFECYCLE.md` — canonical nine-step governed decision loop
+- `INNOVATION_LANES.md` — per-domain current state + differentiation roadmap
+- `API_TRUTH_MATRIX.md` — route group inventory and auth model
+- `DATABASE_TRUTH_MATRIX.md` — table distribution, pool config, migration health
+- `REDUNDANCY_CLEANUP.md` — dead artifacts, stale references, cleanup actions
+- `BUYER_READINESS.md` — enterprise evaluation summary
+- `INVESTOR_PLATFORM_BRIEF.md` — investor-facing platform brief with code-derived metrics
+- `SECURITY_AND_GOVERNANCE_FAQ.md` — security/governance FAQ for procurement
+- `RELEASE_NOTES_TEMPLATE.md` — structured release notes template
+
+**README fixes:** Removed dead `firestorm/` reference, updated archived artifacts table, corrected PARAGON status
+
+**Removed:** `uv.lock` (no Python artifacts)
+
+---
+
 ## Zero-Gap Track 6 — Screenshots, README, Release & Executive Summary (2026-04-21)
 
 **Deliverables:**
