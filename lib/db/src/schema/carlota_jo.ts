@@ -324,6 +324,7 @@ export const carlotaProposalDraftsTable = pgTable('carlota_proposal_drafts', {
   id: serial('id').primaryKey(),
   organizationId: integer('organization_id'),
   createdByUserId: integer('created_by_user_id'),
+  clientExternalId: text('client_external_id'),
   title: text('title').notNull(),
   prospectName: text('prospect_name').notNull().default(''),
   prospectCompany: text('prospect_company').notNull().default(''),

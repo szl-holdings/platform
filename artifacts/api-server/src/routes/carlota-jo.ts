@@ -3375,6 +3375,77 @@ router.delete('/carlota/knowledge/:id', authMiddleware(), async (req, res) => {
 
 // ── Proposal Drafts CRUD ───────────────────────────────────────────────────────
 
+// GET /carlota/proposals/clients — role-gated lightweight client picker
+// (carlota_advisory_clients is global reference data; matches the access
+// model of the existing GET /carlota/clients route.)
+router.get(
+  '/carlota/proposals/clients',
+  authMiddleware(),
+  requireRole('admin', 'editor', 'exec'),
+  async (_req, res) => {
+    try {
+      const rows = await db
+        .select({
+          externalId: carlotaAdvisoryClientsTable.externalId,
+          name: carlotaAdvisoryClientsTable.name,
+          industry: carlotaAdvisoryClientsTable.industry,
+        })
+        .from(carlotaAdvisoryClientsTable)
+        .orderBy(carlotaAdvisoryClientsTable.sortOrder);
+      sendSuccess(res, { clients: rows });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to list advisory clients');
+    }
+  },
+);
+
+// GET /carlota/proposals/knowledge-suggestions?industry=...
+router.get(
+  '/carlota/proposals/knowledge-suggestions',
+  authMiddleware(),
+  async (req, res) => {
+    try {
+      const rawParam = req.query?.industry;
+      const industryRaw = (Array.isArray(rawParam) ? String(rawParam[0] ?? '') : String(rawParam ?? ''))
+        .trim()
+        .slice(0, 200);
+      const orgId = req.user?.orgs[0]?.orgId ?? null;
+      const orgFilter = orgId
+        ? or(
+            eq(carlotaKnowledgeItemsTable.organizationId, orgId),
+            eq(carlotaKnowledgeItemsTable.isSeeded, true),
+          )!
+        : eq(carlotaKnowledgeItemsTable.isSeeded, true);
+      const all = await db
+        .select()
+        .from(carlotaKnowledgeItemsTable)
+        .where(orgFilter)
+        .orderBy(desc(carlotaKnowledgeItemsTable.uses))
+        .limit(50);
+      const norm = industryRaw.toLowerCase();
+      const matches = norm
+        ? all.filter((k) =>
+            (k.industries ?? []).some((ind) => ind.toLowerCase().includes(norm)),
+          )
+        : [];
+      const fallback = all.filter((k) => k.type === 'case-study' || k.type === 'framework');
+      const picked = (matches.length > 0 ? matches : fallback).slice(0, 2);
+      sendSuccess(res, {
+        items: picked.map((k) => ({
+          id: k.id,
+          type: k.type,
+          title: k.title,
+          description: k.description,
+          tags: k.tags,
+          industries: k.industries,
+        })),
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to suggest knowledge items');
+    }
+  },
+);
+
 // GET /carlota/proposals
 router.get('/carlota/proposals', authMiddleware(), async (req, res) => {
   try {
@@ -3431,6 +3502,7 @@ const proposalWriteSchema = bodyShape({
   title: z.string().min(1).max(300).optional(),
   prospectName: z.string().max(200).optional(),
   prospectCompany: z.string().max(200).optional(),
+  clientExternalId: z.string().max(100).nullable().optional(),
   template: z.enum(['standard', 'rapid', 'retainer']).optional(),
   status: proposalStatusEnum.optional(),
   formData: z.record(z.string(), z.string()).optional(),
@@ -3457,6 +3529,7 @@ router.post(
           title: body.title,
           prospectName: body.prospectName ?? '',
           prospectCompany: body.prospectCompany ?? '',
+          clientExternalId: body.clientExternalId ?? null,
           template: body.template ?? 'standard',
           formData: body.formData ?? {},
           generatedProposal: body.generatedProposal ?? null,
@@ -3501,6 +3574,7 @@ router.put(
       if (body.title != null) update.title = body.title;
       if (body.prospectName != null) update.prospectName = body.prospectName;
       if (body.prospectCompany != null) update.prospectCompany = body.prospectCompany;
+      if (body.clientExternalId !== undefined) update.clientExternalId = body.clientExternalId;
       if (body.template != null) update.template = body.template;
       if (body.formData != null) update.formData = body.formData;
       if (body.generatedProposal !== undefined) update.generatedProposal = body.generatedProposal;

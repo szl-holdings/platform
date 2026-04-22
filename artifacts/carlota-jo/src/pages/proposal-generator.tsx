@@ -45,11 +45,27 @@ type ProposalDraft = {
   title: string;
   prospectName: string;
   prospectCompany: string;
+  clientExternalId: string | null;
   template: string;
   formData: Record<string, string>;
   generatedProposal: GeneratedProposal | null;
   status: 'draft' | 'generated' | 'sent';
   updatedAt: string;
+};
+
+type AdvisoryClient = {
+  externalId: string;
+  name: string;
+  industry: string;
+};
+
+type KnowledgeSuggestion = {
+  id: number;
+  type: string;
+  title: string;
+  description: string;
+  tags: string[];
+  industries: string[];
 };
 
 async function apiGet<T>(path: string): Promise<T> {
@@ -286,6 +302,35 @@ export default function ProposalGenerator() {
     timeline: '',
     additionalContext: '',
   });
+  const [advisoryClients, setAdvisoryClients] = useState<AdvisoryClient[]>([]);
+  const [selectedClientId, setSelectedClientId] = useState<string>('');
+  const [knowledgeSuggestions, setKnowledgeSuggestions] = useState<KnowledgeSuggestion[]>([]);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const data = await apiGet<{ clients: AdvisoryClient[] }>('/carlota/proposals/clients');
+        setAdvisoryClients(data.clients ?? []);
+      } catch {
+        // Optional — proposal still works without prefill
+      }
+    })();
+  }, []);
+
+  const onSelectClient = (externalId: string) => {
+    setSelectedClientId(externalId);
+    if (!externalId) return;
+    const c = advisoryClients.find((x) => x.externalId === externalId);
+    if (!c) return;
+    setForm((f) => ({
+      ...f,
+      company: f.company || c.name,
+      industry: f.industry || c.industry,
+      challenge:
+        f.challenge ||
+        `Continue advisory engagement with ${c.name} (${c.industry}). Pre-filled from existing client intel — replace with the specific challenge for this proposal.`,
+    }));
+  };
 
   const update =
     (k: keyof typeof form) =>
@@ -319,6 +364,7 @@ export default function ProposalGenerator() {
         title,
         prospectName: form.prospectName,
         prospectCompany: form.company,
+        clientExternalId: selectedClientId || null,
         template: selectedTemplate,
         formData: form,
         generatedProposal: currentProposal ?? proposal ?? null,
@@ -349,6 +395,7 @@ export default function ProposalGenerator() {
     }
     setSelectedTemplate(draft.template);
     setSavedDraftId(draft.id);
+    setSelectedClientId(draft.clientExternalId ?? '');
     if (draft.generatedProposal) {
       setProposal(draft.generatedProposal);
     } else {
@@ -388,6 +435,22 @@ export default function ProposalGenerator() {
   const generate = async () => {
     setLoading(true);
     try {
+      let suggestions: KnowledgeSuggestion[] = [];
+      try {
+        const data = await apiGet<{ items: KnowledgeSuggestion[] }>(
+          `/carlota/proposals/knowledge-suggestions?industry=${encodeURIComponent(form.industry)}`,
+        );
+        suggestions = data.items ?? [];
+        setKnowledgeSuggestions(suggestions);
+      } catch {
+        suggestions = [];
+      }
+      const knowledgeBlock = suggestions.length
+        ? `\n\nRelevant knowledge vault items to draw upon (incorporate at least one as a case study):\n${suggestions
+            .map((k, i) => `${i + 1}. [${k.type}] ${k.title} — ${k.description}`)
+            .join('\n')}`
+        : '';
+
       const prompt = `You are Carlota Jo, a premium management consulting firm. Generate a tailored client proposal as JSON with EXACTLY this structure:
 {
   "prospectName": "${form.prospectName}",
@@ -427,7 +490,7 @@ Budget: ${form.budget}
 Timeline: ${form.timeline}
 Additional context: ${form.additionalContext}
 
-Template: ${selectedTemplate}. Use UK spelling. Return ONLY valid JSON.`;
+Template: ${selectedTemplate}. Use UK spelling. Return ONLY valid JSON.${knowledgeBlock}`;
 
       const res = await fetch(`${BASE}api/intelligence/ai/advisory`, {
         method: 'POST',
@@ -1239,6 +1302,25 @@ Template: ${selectedTemplate}. Use UK spelling. Return ONLY valid JSON.`;
           <h3 style={{ fontSize: 15, fontWeight: 600, color: '#2C2416', marginBottom: 20 }}>
             {t('proposalGenerator.prospectDetails', 'Prospect Details')}
           </h3>
+          {advisoryClients.length > 0 && (
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>
+                {t('proposalGenerator.formExistingClient', 'Pre-fill from existing client (optional)')}
+              </label>
+              <select
+                style={inputStyle}
+                value={selectedClientId}
+                onChange={(e) => onSelectClient(e.target.value)}
+              >
+                <option value="">— New prospect —</option>
+                {advisoryClients.map((c) => (
+                  <option key={c.externalId} value={c.externalId}>
+                    {c.name}{c.industry ? ` · ${c.industry}` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
             <div>
               <label style={labelStyle}>{t('proposalGenerator.formProspectName', 'Prospect Name')} *</label>
