@@ -56,5 +56,10 @@
     "artifacts/api-server/"
   ],
   "$lineAllowlistComment": "Per-line exemptions. Each entry: { file, line, term, reason }. The check matches by exact file path + line number + matched term.",
-  "lineAllowlist": []
+  "lineAllowlist": [
+    { "file": "artifacts/szl-holdings/src/pages/carousel-preview.tsx", "line": 9, "term": "Lyte", "reason": "Display label mirrors archival LinkedIn carousel JPG content (slide-04-lyte.jpg) generated under prior branding." },
+    { "file": "artifacts/szl-holdings/src/pages/carousel-preview.tsx", "line": 10, "term": "Vessels", "reason": "Display label mirrors archival LinkedIn carousel JPG content (slide-05-vessels.jpg) generated under prior branding." },
+    { "file": "artifacts/szl-holdings/src/pages/carousel-preview.tsx", "line": 11, "term": "Terra", "reason": "Display label mirrors archival LinkedIn carousel JPG content (slide-06-terra.jpg) generated under prior branding." },
+    { "file": "artifacts/szl-holdings/src/pages/carousel-preview.tsx", "line": 12, "term": "Aegis", "reason": "Display label mirrors archival LinkedIn carousel JPG content (slide-07-aegis.jpg) generated under prior branding." }
+  ]
 }
