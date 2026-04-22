@@ -98,6 +98,7 @@ The following standards apply to all work on the SZL Holdings platform:
 - All API routes require authentication unless explicitly designated public. The `globalAuthEnforcer` middleware enforces deny-by-default.
 - Destructive operations require multi-step confirmation and audit log entries via Proof Chain.
 - AI agents are advisory-only — all consequential actions require human approval via Covenant Policy gates.
+- The api-server **security test suite** (`pnpm --filter @workspace/api-server test`, including `security-middleware.test.ts`, `security-routes.test.ts`, and `security-hardening.test.ts`) runs automatically in CI on every push and pull request via the [Security workflow](./.github/workflows/security.yml) ([![Security](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml)). The `Security Gate (blocking)` job is a required status check on the default branch, so failures block merges. Run the suite locally before pushing to avoid red builds.
 
 ### Design Conventions
 

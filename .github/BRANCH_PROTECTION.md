@@ -31,6 +31,8 @@ Enable **"Require status checks to pass before merging"** and add the following 
 | `Lighthouse Gate` | `.github/workflows/lighthouse.yml` | Performance score thresholds |
 | `dependency-review` | `.github/workflows/dependency-review.yml` | Vulnerability scan on dependency changes |
 | `analyze` | `.github/workflows/codeql.yml` | CodeQL security analysis |
+| `Security Gate (blocking)` | `.github/workflows/security.yml` | Aggregate gate — dependency scan, secret scan, lockfile integrity, license report, **and the api-server `security-tests` vitest suite** |
+| `Security Tests (api-server vitest)` | `.github/workflows/security.yml` | Runs `pnpm --filter @workspace/api-server test` on every push/PR — covers `security-middleware.test.ts`, `security-routes.test.ts`, `security-hardening.test.ts` and the rest of the api-server suite |
 
 > **Tip:** `CI Gate` and `E2E Gate` are aggregate jobs — requiring these two (plus `Lighthouse Gate` and `dependency-review`) gives clean PR feedback while covering all required checks underneath.
 >
