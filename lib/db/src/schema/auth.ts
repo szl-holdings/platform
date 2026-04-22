@@ -1,4 +1,5 @@
 import {
+  type AnyPgColumn,
   boolean,
   index,
   integer,
@@ -108,7 +109,10 @@ export const sessionsTable = pgTable(
     refreshToken: text('refresh_token').unique(),
     refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
     refreshTokenUsedAt: timestamp('refresh_token_used_at'),
-    replacedBySessionId: integer('replaced_by_session_id'),
+    replacedBySessionId: integer('replaced_by_session_id').references(
+      (): AnyPgColumn => sessionsTable.id,
+      { onDelete: 'set null' },
+    ),
     revokedAt: timestamp('revoked_at'),
     revokedReason: text('revoked_reason'),
     createdAt: timestamp('created_at').notNull().defaultNow(),

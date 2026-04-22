@@ -1,4 +1,5 @@
 import {
+  type AnyPgColumn,
   boolean,
   index,
   integer,
@@ -13,6 +14,7 @@ import {
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
 import { organizationsTable } from './organizations';
+import { usersTable } from './auth';
 
 export const terraBrokeragesTable = pgTable(
   'terra_brokerages',
@@ -460,7 +462,9 @@ export const terraLeadsTable = pgTable(
     conversionProbability: numeric('conversion_probability', { precision: 5, scale: 4 })
       .notNull()
       .default('0.5'),
-    ownerUserId: integer('owner_user_id'),
+    ownerUserId: integer('owner_user_id').references(() => usersTable.id, {
+      onDelete: 'set null',
+    }),
     ownerName: text('owner_name'),
     assignedDate: text('assigned_date'),
     lastContact: text('last_contact'),
@@ -470,7 +474,10 @@ export const terraLeadsTable = pgTable(
       { onDelete: 'set null' },
     ),
     distressPropertyExternalId: text('distress_property_external_id'),
-    linkedDealId: integer('linked_deal_id'),
+    linkedDealId: integer('linked_deal_id').references(
+      (): AnyPgColumn => terraDealsTable.id,
+      { onDelete: 'set null' },
+    ),
     budget: jsonb('budget').$type<{ min: number; max: number } | null>(),
     desiredAreas: jsonb('desired_areas').$type<string[]>().notNull().default([]),
     notes: text('notes'),
@@ -530,7 +537,9 @@ export const terraDealsTable = pgTable(
     riskLevel: text('risk_level', { enum: ['low', 'medium', 'high', 'critical'] })
       .notNull()
       .default('medium'),
-    ownerUserId: integer('owner_user_id'),
+    ownerUserId: integer('owner_user_id').references(() => usersTable.id, {
+      onDelete: 'set null',
+    }),
     ownerName: text('owner_name'),
     clientName: text('client_name'),
     distressPropertyId: integer('distress_property_id').references(
@@ -810,7 +819,9 @@ export const terraDiligenceMattersTable = pgTable(
     completionPct: integer('completion_pct').notNull().default(0),
     openedAt: timestamp('opened_at').notNull().defaultNow(),
     targetCloseDate: text('target_close_date'),
-    ownerUserId: integer('owner_user_id'),
+    ownerUserId: integer('owner_user_id').references(() => usersTable.id, {
+      onDelete: 'set null',
+    }),
     ownerName: text('owner_name'),
     notes: text('notes'),
     metadata: jsonb('metadata'),
@@ -853,7 +864,10 @@ export const terraDiligenceEvidenceTable = pgTable(
       .$type<Array<{ ref: string; page?: number; excerpt: string }>>()
       .notNull()
       .default([]),
-    reviewedByUserId: integer('reviewed_by_user_id'),
+    reviewedByUserId: integer('reviewed_by_user_id').references(
+      () => usersTable.id,
+      { onDelete: 'set null' },
+    ),
     reviewedByName: text('reviewed_by_name'),
     reviewedAt: timestamp('reviewed_at'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -1297,7 +1311,7 @@ export const terraWaterfallStructuresTable = pgTable(
     inputs: jsonb('inputs').$type<Record<string, unknown>>().notNull().default({}),
     results: jsonb('results').$type<Record<string, unknown>>(),
     ownerName: text('owner_name'),
-    ownerUserId: integer('owner_user_id'),
+    ownerUserId: integer('owner_user_id').references(() => usersTable.id, { onDelete: 'set null' }),
     isDemo: boolean('is_demo').notNull().default(false),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -1339,7 +1353,7 @@ export const terraConstructionProjectsTable = pgTable(
       .notNull()
       .default([]),
     photos: jsonb('photos').$type<Array<Record<string, unknown>>>().notNull().default([]),
-    ownerUserId: integer('owner_user_id'),
+    ownerUserId: integer('owner_user_id').references(() => usersTable.id, { onDelete: 'set null' }),
     isDemo: boolean('is_demo').notNull().default(false),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),

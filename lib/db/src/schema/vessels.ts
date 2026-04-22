@@ -15,10 +15,13 @@ import {
 import { sql } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
+import { organizationsTable } from './organizations';
 
 export const vesselsFleetsTable = pgTable('vessels_fleets', {
   id: serial('id').primaryKey(),
-  orgId: integer('org_id'),
+  orgId: integer('org_id').references(() => organizationsTable.id, {
+    onDelete: 'cascade',
+  }),
   name: text('name').notNull(),
   description: text('description'),
   region: text('region'),
@@ -34,7 +37,9 @@ export const vesselsTable = pgTable(
   'vessels',
   {
     id: serial('id').primaryKey(),
-    orgId: integer('org_id'),
+    orgId: integer('org_id').references(() => organizationsTable.id, {
+      onDelete: 'cascade',
+    }),
     fleetId: integer('fleet_id').references(() => vesselsFleetsTable.id, { onDelete: 'set null' }),
     name: text('name').notNull(),
     imo: text('imo').unique(),
@@ -138,7 +143,9 @@ export const vesselsRoutesTable = pgTable(
 
 export const vesselsAlertRulesTable = pgTable('vessels_alert_rules', {
   id: serial('id').primaryKey(),
-  orgId: integer('org_id'),
+  orgId: integer('org_id').references(() => organizationsTable.id, {
+    onDelete: 'cascade',
+  }),
   name: text('name').notNull(),
   description: text('description'),
   ruleType: text('rule_type', {

@@ -11,12 +11,16 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod/v4';
+import { organizationsTable } from './organizations';
+import { usersTable } from './auth';
 
 export const pcMattersTable = pgTable(
   'pc_matters',
   {
   id: serial('id').primaryKey(),
-  orgId: integer('org_id').notNull(),
+  orgId: integer('org_id')
+    .notNull()
+    .references(() => organizationsTable.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   caseNumber: text('case_number'),
   matterType: text('matter_type', {
@@ -58,15 +62,25 @@ export const pcMattersTable = pgTable(
   settlementMid: numeric('settlement_mid', { precision: 14, scale: 2 }),
   totalDamages: numeric('total_damages', { precision: 14, scale: 2 }),
   totalLiens: numeric('total_liens', { precision: 14, scale: 2 }),
-  assignedAttorneyId: integer('assigned_attorney_id'),
-  assignedParalegalId: integer('assigned_paralegal_id'),
+  assignedAttorneyId: integer('assigned_attorney_id').references(
+    () => usersTable.id,
+    { onDelete: 'set null' },
+  ),
+  assignedParalegalId: integer('assigned_paralegal_id').references(
+    () => usersTable.id,
+    { onDelete: 'set null' },
+  ),
   tags: jsonb('tags'),
   notes: text('notes'),
   sourceLineage: text('source_lineage'),
   privilegeFlag: boolean('privilege_flag').default(false),
   exportSafe: boolean('export_safe').default(true),
-  createdBy: integer('created_by'),
-  updatedBy: integer('updated_by'),
+  createdBy: integer('created_by').references(() => usersTable.id, {
+    onDelete: 'set null',
+  }),
+  updatedBy: integer('updated_by').references(() => usersTable.id, {
+    onDelete: 'set null',
+  }),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
@@ -520,8 +534,12 @@ export const pcApprovalRequestsTable = pgTable('pc_approval_requests', {
 export const pcAuditEventsTable = pgTable('pc_audit_events', {
   id: serial('id').primaryKey(),
   matterId: integer('matter_id').references(() => pcMattersTable.id),
-  orgId: integer('org_id').notNull(),
-  actorId: integer('actor_id'),
+  orgId: integer('org_id')
+    .notNull()
+    .references(() => organizationsTable.id, { onDelete: 'cascade' }),
+  actorId: integer('actor_id').references(() => usersTable.id, {
+    onDelete: 'set null',
+  }),
   action: text('action').notNull(),
   entityType: text('entity_type'),
   entityId: integer('entity_id'),

@@ -232,7 +232,10 @@ export const firestormAlertsTable = pgTable('firestorm_alerts', {
     .notNull()
     .default('new'),
   relatedCve: text('related_cve'),
-  relatedIncidentId: integer('related_incident_id'),
+  relatedIncidentId: integer('related_incident_id').references(
+    () => firestormIncidentsTable.id,
+    { onDelete: 'set null' },
+  ),
   metadata: jsonb('metadata'),
   acknowledgedAt: timestamp('acknowledged_at'),
   resolvedAt: timestamp('resolved_at'),
