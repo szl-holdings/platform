@@ -8,7 +8,7 @@
 
 | Location | File Count | Disposition |
 |----------|-----------|-------------|
-| `screenshots/approved/` | 10 | **KEPT** — current, verified, post-redesign captures |
+| `screenshots/approved/` | 3 committed (13 catalogued) | **KEPT** — 3 post-DB authenticated-surface captures from 2026-04-22 (Task #2890) are the only files currently committed to this directory. The 10 entries dated 2026-04-21 in Section 1 below were captured live from dev servers but were never committed to the repository; they are documented for reference only. See "Repository state" note in Section 1. |
 | `screenshots/archive/` | 280 | **ARCHIVED** — legacy/pre-redesign/iteration/superseded |
 | `demo-assets/screenshots/` | 9 | **KEPT in place** — actively linked from LinkedIn carousel |
 | `docs/screenshots/` | 19 | **KEPT in place** — actively linked from docs/ |
@@ -36,9 +36,11 @@
 
 ---
 
-## Section 1: `screenshots/approved/` — 10 Verified Captures (KEPT)
+## Section 1: `screenshots/approved/` — 13 Verified Captures (KEPT)
 
-All 10 captures taken live from running dev servers, 2026-04-21. Post-redesign Design System v2. Data state: public/unauthenticated surfaces; authenticated dashboards require `DATABASE_URL`.
+All 10 original captures taken live from running dev servers, 2026-04-21. 3 new authenticated-surface captures added 2026-04-22 after Task #2890 provisioned `DATABASE_URL` and seeded the demo data set (6 organizations, 7 users, 205 lyte_signals, 5 vessels, 13 ports, 8 terra_properties). Post-redesign Design System v2.
+
+**Repository state (2026-04-22):** Only the 3 captures dated `2026-04-22` are committed to `screenshots/approved/`. The 10 captures dated `2026-04-21` listed below were captured live from the running dev servers and verified at the time but were not committed to the repository (the directory was empty before Task #2890). They are documented here for traceability and can be re-captured deterministically by restarting the relevant workflows and running the surface-capture flow described in `audit/task-2890-evidence.md`.
 
 | Filename | Surface | URL | Environment | Data State | Notes |
 |----------|---------|-----|-------------|------------|-------|
@@ -52,6 +54,9 @@ All 10 captures taken live from running dev servers, 2026-04-21. Post-redesign D
 | `carlota-jo-home-2026-04-21.jpg` | Carlota Jo Consulting | `/` | dev | Public | Full public marketing homepage. No auth required. Fully visible without DATABASE_URL. |
 | `pulse-home-2026-04-21.jpg` | Pulse — AI Executive Briefing | `/` | dev | Public | Public landing renders (unauthenticated). Dashboard requires auth + DATABASE_URL. Screenshot shows public landing / sign-in surface. |
 | `aegis-home-2026-04-21.jpg` | Aegis — Investor Pitch Deck | `/` | dev | Public | Full pitch deck slide view. |
+| `lyte-command-center-2026-04-22.jpg` | Lyte — Decision Intelligence (authenticated) | `/lyte/` | dev | **Seeded** — 205 lyte_signals, KORA decision intelligence summary, Vantex Acquisition risk cluster | First authenticated-surface capture after Task #2890 DB provisioning. Shows live KPIs, signal feed, decision backlog populated from seed. |
+| `vessels-2026-04-22.jpg` | Vessels — Maritime Intelligence (authenticated landing + live fleet) | `/vessels/` | dev | **Seeded** — 5 vessels, 13 ports, vessel events; "LIVE FLEET — 214 VESSELS TRACKED" widget rendering | First post-DB capture. Hero plus live fleet table with MV Horizon Singapore→Rotterdam. |
+| `terra-2026-04-22.jpg` | Terra — Real Estate Intelligence | `/terra/` | dev | **Seeded** — 8 demo terra_properties (CA/NY/IL/FL/MA/CO trophy assets) | First post-DB capture. Domaine landing with property intelligence positioning. Property dashboard reachable behind auth. |
 
 ---
 
