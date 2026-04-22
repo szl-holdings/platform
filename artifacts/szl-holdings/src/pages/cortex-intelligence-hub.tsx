@@ -5,6 +5,7 @@ import {
   CortexEntityGraph,
   type EntityGraphEdge,
   type EntityGraphNode,
+  type SnapshotInfo,
 } from '@szl-holdings/shared-ui/cortex-entity-graph';
 import {
   CortexIntelligenceFeed,
@@ -100,6 +101,23 @@ interface BriefingResponse {
   cached: boolean;
 }
 
+interface SnapshotsListResponse {
+  snapshots: SnapshotInfo[];
+  total: number;
+}
+
+interface SnapshotDetailResponse {
+  snapshot: SnapshotInfo & {
+    nodes: EntityGraphNode[];
+    edges: EntityGraphEdge[];
+  };
+}
+
+interface SnapshotCaptureResponse {
+  snapshot: SnapshotInfo;
+  message: string;
+}
+
 const SEVERITY_COLORS: Record<string, string> = {
   critical: color.accent.red,
   high: color.accent.amber,
@@ -120,6 +138,8 @@ export default function CortexIntelligenceHub() {
   const [graphDomain, setGraphDomain] = useState<string | undefined>(undefined);
   const [graphSinceHours, setGraphSinceHours] = useState<number | undefined>(undefined);
   const [graphMinRisk, setGraphMinRisk] = useState(0);
+  const [graphViewMode, setGraphViewMode] = useState<'live' | 'snapshot'>('live');
+  const [activeSnapshotId, setActiveSnapshotId] = useState<string | undefined>(undefined);
   const qc = useQueryClient();
 
   const feedQuery = useStandardQuery<FeedResponse>({
@@ -154,6 +174,73 @@ export default function CortexIntelligenceHub() {
     staleTime: 5 * 60 * 1000,
     enabled: activeTab === 'briefing',
   });
+
+  const snapshotsQuery = useStandardQuery<SnapshotsListResponse>({
+    queryKey: ['cortex-graph-snapshots'],
+    queryFn: () =>
+      apiRequest<SnapshotsListResponse>('GET', '/api/cortex/entity-graph/snapshots'),
+    enabled: activeTab === 'graph',
+    staleTime: 30000,
+  });
+
+  const snapshotDetailQuery = useStandardQuery<SnapshotDetailResponse>({
+    queryKey: ['cortex-graph-snapshot', activeSnapshotId],
+    queryFn: () =>
+      apiRequest<SnapshotDetailResponse>(
+        'GET',
+        `/api/cortex/entity-graph/snapshot/${activeSnapshotId}`,
+      ),
+    enabled:
+      activeTab === 'graph' && graphViewMode === 'snapshot' && Boolean(activeSnapshotId),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const captureSnapshotMutation = useStandardMutation({
+    mutationFn: () => {
+      const body: Record<string, unknown> = {};
+      if (graphDomain) body['domain'] = graphDomain;
+      if (graphMinRisk > 0) body['minRisk'] = graphMinRisk / 100;
+      const stamp = new Date().toLocaleString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      body['label'] = `Manual capture · ${stamp}`;
+      return apiRequest<SnapshotCaptureResponse>(
+        'POST',
+        '/api/cortex/entity-graph/snapshot',
+        body,
+      );
+    },
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['cortex-graph-snapshots'] });
+      const newId = res?.snapshot?.id;
+      if (newId) {
+        setActiveSnapshotId(newId);
+        setGraphViewMode('snapshot');
+      }
+    },
+  });
+
+  const handleViewModeChange = useCallback(
+    (mode: 'live' | 'snapshot') => {
+      setGraphViewMode(mode);
+      if (mode === 'snapshot' && !activeSnapshotId) {
+        const latest = snapshotsQuery.data?.snapshots?.[0]?.id;
+        if (latest) setActiveSnapshotId(latest);
+      }
+    },
+    [activeSnapshotId, snapshotsQuery.data?.snapshots],
+  );
+
+  const handleSnapshotSelect = useCallback((snapshotId: string) => {
+    setActiveSnapshotId(snapshotId);
+  }, []);
+
+  const handleSnapshotCapture = useCallback(() => {
+    captureSnapshotMutation.mutate();
+  }, [captureSnapshotMutation]);
 
   const generateDraftsMutation = useStandardMutation({
     mutationFn: async (signal: IntelligenceSignal) =>
@@ -420,18 +507,37 @@ export default function CortexIntelligenceHub() {
                   inspect.
                 </p>
                 <CortexEntityGraph
-                  nodes={graphQuery.data?.nodes ?? []}
-                  edges={graphQuery.data?.edges ?? []}
+                  nodes={
+                    graphViewMode === 'snapshot'
+                      ? (snapshotDetailQuery.data?.snapshot?.nodes ?? [])
+                      : (graphQuery.data?.nodes ?? [])
+                  }
+                  edges={
+                    graphViewMode === 'snapshot'
+                      ? (snapshotDetailQuery.data?.snapshot?.edges ?? [])
+                      : (graphQuery.data?.edges ?? [])
+                  }
                   meta={graphQuery.data?.meta}
                   accentColor={ACCENT}
                   height={500}
-                  loading={graphQuery.isLoading}
+                  loading={
+                    graphViewMode === 'snapshot'
+                      ? snapshotDetailQuery.isLoading
+                      : graphQuery.isLoading
+                  }
                   filterDomain={graphDomain}
                   onFilterDomain={setGraphDomain}
                   sinceHours={graphSinceHours}
                   onSinceHoursChange={setGraphSinceHours}
                   minRisk={graphMinRisk}
                   onMinRiskChange={setGraphMinRisk}
+                  viewMode={graphViewMode}
+                  onViewModeChange={handleViewModeChange}
+                  snapshots={snapshotsQuery.data?.snapshots ?? []}
+                  activeSnapshotId={activeSnapshotId}
+                  onSnapshotSelect={handleSnapshotSelect}
+                  onSnapshotCapture={handleSnapshotCapture}
+                  snapshotLoading={captureSnapshotMutation.isPending}
                 />
               </div>
             )}
