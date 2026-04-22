@@ -2,17 +2,114 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
   AlertTriangle,
   Calendar,
+  CheckCircle2,
   Clock,
   Download,
   FileText,
   Filter,
+  Link2,
   Search,
   Shield,
+  ShieldAlert,
   User,
   X,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
+
+interface ChainVerifyResult {
+  intact: boolean;
+  chainLength: number;
+  brokenAt: number | null;
+  verifiedAt: string;
+}
+
+function ChainIntegrityWidget() {
+  const [result, setResult] = useState<ChainVerifyResult | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const run = async () => {
+    setBusy(true);
+    setErr(null);
+    try {
+      const r = await fetch('/api/audit-chain/verify');
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const json = await r.json();
+      setResult(json.data ?? json);
+    } catch (e) {
+      setErr(String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const exportChain = async (format: 'csv' | 'json') => {
+    const r = await fetch(`/api/audit-chain/export?format=${format}`);
+    if (!r.ok) {
+      setErr(`Export failed: ${r.status}`);
+      return;
+    }
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `audit-chain-${new Date().toISOString().slice(0, 10)}.${format}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const intact = result?.intact === true;
+  const broken = result?.intact === false;
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-3 flex items-center gap-3 flex-wrap">
+      <Link2 className="w-4 h-4 text-primary shrink-0" />
+      <div className="flex-1 min-w-[180px]">
+        <div className="text-xs font-semibold flex items-center gap-2">
+          Tamper-Evident Chain
+          {intact && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#6b8f71]">
+              <CheckCircle2 className="w-3 h-3" /> INTACT
+            </span>
+          )}
+          {broken && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#c45a4a]">
+              <ShieldAlert className="w-3 h-3" /> BROKEN @ #{result?.brokenAt}
+            </span>
+          )}
+        </div>
+        <div className="text-[10px] text-muted-foreground mt-0.5">
+          {result
+            ? `${result.chainLength} events · verified ${new Date(result.verifiedAt).toLocaleTimeString()}`
+            : 'SHA-256 hash chain · click Verify to recompute every link'}
+          {err && <span className="ml-2 text-[#c45a4a]">{err}</span>}
+        </div>
+      </div>
+      <button
+        onClick={run}
+        disabled={busy}
+        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 disabled:opacity-50"
+      >
+        {busy ? 'Verifying…' : 'Verify Chain'}
+      </button>
+      <button
+        onClick={() => exportChain('csv')}
+        className="px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-muted hover:bg-muted/70 text-foreground border border-border"
+      >
+        Chain CSV
+      </button>
+      <button
+        onClick={() => exportChain('json')}
+        className="px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-muted hover:bg-muted/70 text-foreground border border-border"
+      >
+        Chain JSON
+      </button>
+    </div>
+  );
+}
 
 async function apiFetch<T>(path: string): Promise<T> {
   const r = await fetch(`/api${path}`);
@@ -198,6 +295,8 @@ export default function AuditLog() {
           </button>
         </div>
       )}
+
+      <ChainIntegrityWidget />
 
       {error ? (
         <div className="bg-card border border-border rounded-xl p-8 text-center text-muted-foreground">
