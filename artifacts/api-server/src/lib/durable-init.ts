@@ -328,6 +328,7 @@ const DEFAULT_SCHEDULES: ScheduleDefinition[] = [
   { name: "stuck_run_notify_5m", jobType: NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, cronExpression: "*/5 * * * *", payload: {}, maxRetries: 1 },
   { name: "live_signal_refresh_daily_0600", jobType: NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, cronExpression: "0 6 * * *", payload: {}, maxRetries: 2 },
   { name: "cortex_graph_snapshot_daily", jobType: NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT, cronExpression: cortexSnapshotCronExpression(), payload: {}, maxRetries: 2 },
+  { name: "cortex_graph_snapshot_prune_0330", jobType: NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, cronExpression: "30 3 * * *", payload: {}, maxRetries: 1 },
 ] as const;
 
 export async function startDurableQueue(): Promise<void> {
