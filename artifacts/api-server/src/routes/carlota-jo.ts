@@ -74,6 +74,14 @@ const portalUpload = multer({
 
 const router: IRouter = Router();
 
+const inquiryRateLimit = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many inquiry submissions. Please try again later.' },
+});
+
 router.get(
   '/booking/inquiries',
   authMiddleware(),
@@ -99,6 +107,7 @@ router.get(
 
 router.post(
   '/booking/inquiries',
+  inquiryRateLimit,
   validateBody(carlotaInquirySchema),
   async (req: Request, res: Response) => {
     try {

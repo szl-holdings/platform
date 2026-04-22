@@ -119,7 +119,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | KG018 | 80+ env vars — no formal schema | Ops | Onboarding friction | ✅ Resolved Apr-2026 — ENVIRONMENT_VARIABLES.md created with full schema |
 | KG020c | No virus scanning on uploads | Security | Malware risk | `lib/virusScan.ts` is an explicit stub — integrate ClamAV or cloud AV |
 | KG020d | No field-level encryption for PII | Privacy | Compliance risk | Evaluate encryption for PII columns |
-| KG021 | No rate-limit on inquiries | DDoS | Abuse risk | Add `express-rate-limit` |
+| KG021 | No rate-limit on inquiries | DDoS | Abuse risk | ✅ Resolved Apr-2026 — `express-rate-limit` (10 req/hr/IP) on `POST /holdings/inquiries` and `POST /booking/inquiries` (Carlota Jo). |
 | KG023 | SLI/SLO definitions absent | Reliability | No targets | Define SLIs for latency/uptime |
 | KG024 | Large vendor bundle sizes | Performance | Slow load | Code-split heavy components |
 | VD1 | No `security.txt` | Compliance | No disclosure channel | Publish `/.well-known/security.txt` |
