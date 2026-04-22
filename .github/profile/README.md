@@ -30,7 +30,21 @@
 
 SZL Holdings builds the **governed decision infrastructure layer** — the platform that connects what's observable to what's executable, under governance, with full attribution.
 
-**Lyte** is the command surface. **Alloy** is the execution fabric. **CORTEX** is the unified mobile command center. Domain intelligence packs extend the same system into cybersecurity, maritime, real estate, and private advisory.
+**Lyte** is the command surface. **Alloy** is the execution fabric. **CORTEX** is the unified mobile command center. Domain intelligence packs extend the same system into cybersecurity, maritime, real estate, executive briefing, and private advisory.
+
+---
+
+## Products
+
+| Product | What it does | Live |
+|---------|--------------|------|
+| **[Pulse](https://szlholdings.com/pulse)** | AI executive briefing — daily intelligence digest across every domain, source-cited and decision-ready | [pulse →](https://szlholdings.com/pulse) |
+| **[Terra](https://szlholdings.com/terra)** | Real estate intelligence — distress signals, ownership graph, covenant monitoring, deal pipeline | [terra →](https://szlholdings.com/terra) |
+| **[Vessels](https://szlholdings.com/vessels)** | Maritime fleet command — AIS tracking, sanctions screening, voyage economics | [vessels →](https://szlholdings.com/vessels) |
+| **[Aegis](https://szlholdings.com/aegis)** | Cyber resilience command — SOC + SOAR + threat intel under one governance layer | [aegis →](https://szlholdings.com/aegis) |
+| **[Counsel](https://szlholdings.com/counsel)** | Legal matter command — diligence, evidence, and AI-assisted contract risk | [counsel →](https://szlholdings.com/counsel) |
+| **[Carlota Jo](https://szlholdings.com/carlota-jo)** | Premium advisory operations for UHNW clients | [carlota-jo →](https://szlholdings.com/carlota-jo) |
+| **CORTEX** | Unified mobile command — all domain workspaces in one Expo/React Native app | iOS / Android |
 
 ---
 
@@ -41,16 +55,18 @@ SZL Holdings Platform
 ├── Lyte         Business observability — PRISM framework surfaces risk, drift, and friction before they compound
 ├── Alloy        Execution fabric — signal normalization, workflow orchestration, human-in-the-loop gates
 │
+├── Pulse        AI executive briefing — daily cross-domain intelligence digest
 ├── Aegis        Security intelligence command (SOC + SOAR + threat intel)
 ├── Vessels      Maritime fleet command, AIS tracking, sanctions screening, voyage economics
 ├── Terra        Real estate intelligence — distress signals, ownership graph, deal pipeline
+├── Counsel      Legal matter command — diligence and evidence under governance
 ├── Carlota Jo   Premium advisory operations for UHNW clients
 │
 ├── CORTEX       Unified mobile command — all domain workspaces in one native app
 └── Command Portal Cross-domain ecosystem hub — real-time SSE, executive briefing, global search
 ```
 
-**Lyte + Alloy** form the core platform. The active vertical platforms (Aegis, Vessels, Terra, Carlota Jo) run on this shared foundation and share intelligence through the PRISM Bus — a cross-domain event system that makes every new vertical make the whole platform smarter.
+**Lyte + Alloy** form the core platform. The active vertical products (Pulse, Aegis, Vessels, Terra, Counsel, Carlota Jo) run on this shared foundation and share intelligence through the PRISM Bus — a cross-domain event system that makes every new vertical make the whole platform smarter.
 
 ---
 
