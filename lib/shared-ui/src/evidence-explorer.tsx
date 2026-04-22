@@ -394,7 +394,48 @@ function formatUsd(n?: number): string {
 
 // ─── Sub-components ────────────────────────────────────────────────────────
 
-function StatusBar({ status, title }: { status?: ApiStatus; title: string }) {
+export function StreamStateBadge({ connected }: { connected: boolean }) {
+  const label = connected ? 'Live' : 'Polling';
+  const tooltip = connected
+    ? 'Live stream connected — updates arrive instantly via SSE.'
+    : 'Stream disconnected — falling back to periodic polling (every 5–15s).';
+  const dotColor = connected ? '#00e878' : MUTED_DIM;
+  const textColor = connected ? '#00e878' : MUTED;
+  return (
+    <span
+      title={tooltip}
+      aria-label={tooltip}
+      data-testid="stream-state-badge"
+      data-state={connected ? 'live' : 'polling'}
+      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full"
+      style={{
+        background: connected ? 'rgba(0,232,120,0.10)' : 'rgba(255,255,255,0.04)',
+        border: `1px solid ${connected ? 'rgba(0,232,120,0.35)' : BORDER}`,
+      }}
+    >
+      <span
+        className={`inline-block w-1.5 h-1.5 rounded-full ${connected ? 'animate-pulse' : ''}`}
+        style={{ background: dotColor }}
+      />
+      <span
+        className="text-[10px] font-semibold uppercase tracking-wider"
+        style={{ color: textColor }}
+      >
+        {label}
+      </span>
+    </span>
+  );
+}
+
+function StatusBar({
+  status,
+  title,
+  sseConnected,
+}: {
+  status?: ApiStatus;
+  title: string;
+  sseConnected: boolean;
+}) {
   const items = [
     { label: 'Signals', value: status?.counts.signals ?? 0, icon: Radio },
     { label: 'Evidence', value: status?.counts.evidenceItems ?? 0, icon: Database },
@@ -420,6 +461,7 @@ function StatusBar({ status, title }: { status?: ApiStatus; title: string }) {
         <span className="text-[10px]" style={{ color: MUTED_DIM }}>
           mesh {status?.meshVersion ?? '—'}
         </span>
+        <StreamStateBadge connected={sseConnected} />
       </div>
       <div className="flex items-center gap-5 ml-auto">
         {items.map((it) => (
@@ -1669,7 +1711,11 @@ export function EvidenceExplorer({
 
   return (
     <div className="flex flex-col h-full relative" style={{ background: '#080c14' }}>
-      <StatusBar {...(status !== undefined ? { status } : {})} title={title} />
+      <StatusBar
+        {...(status !== undefined ? { status } : {})}
+        title={title}
+        sseConnected={sseConnected}
+      />
       <FilterBar
         domain={filterMemo.domain}
         onDomain={(d) => {
