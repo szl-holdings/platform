@@ -145,6 +145,14 @@ function captureStack(): string {
   Error.captureStackTrace?.(err, captureStack);
   // Drop the leading "Error: ..." line and trim the first few frames so the
   // trace points at the originating route/handler, not this wrapper file.
+  //
+  // IMPORTANT: this function MUST be called synchronously from
+  // `instrumentedConnect` BEFORE the `await _originalPoolConnect()`. Once
+  // execution crosses that await, the synchronous call chain is unwound
+  // and Error.captureStackTrace can only see internal Node frames
+  // (`processTicksAndRejections`), which is why earlier OBS-007 warnings
+  // showed no useful caller. Capturing on the call-side preserves the
+  // route/handler/init frame that actually opened the checkout.
   const lines = (err.stack ?? "").split("\n").slice(1);
   return lines
     .filter(
@@ -192,12 +200,20 @@ const _originalPoolConnect = pool.connect.bind(pool);
 // promise-only wrapper that records the checkout. Internal callers in this
 // codebase always use the await form, so collapsing overloads is safe.
 (pool as unknown as { connect: () => Promise<pg.PoolClient> }).connect = async function instrumentedConnect(): Promise<pg.PoolClient> {
+  // ── OBS-007 fix: capture the originating stack synchronously, BEFORE the
+  // await crosses an async boundary. If we capture after the await, V8 has
+  // unwound the synchronous call chain and Error.captureStackTrace can only
+  // see internal Node frames (the warnings used to read just
+  // "process.processTicksAndRejections"), giving zero signal about who held
+  // the connection. Capturing here pins the actual route/initialiser frame.
+  const stack = captureStack();
+  const requestedAt = Date.now();
   const client = (await _originalPoolConnect()) as pg.PoolClient;
   const id = nextCheckoutId++;
   const record: CheckoutRecord = {
     id,
-    acquiredAt: Date.now(),
-    stack: captureStack(),
+    acquiredAt: requestedAt,
+    stack,
     warned: false,
   };
   activeCheckouts.set(id, record);

@@ -101,7 +101,7 @@ async function ensureSchema(): Promise<void> {
       .catch((err) => logger.warn({ err, sql: sql.slice(0, 60) }, '[ops-mgmt] Migration warning'));
   }
 }
-ensureSchema().catch((err) => logger.warn({ err }, '[ops-mgmt] Schema init failed (non-fatal)'));
+// (init scheduling moved to the bottom of file — see runOpsMgmtBootInit)
 
 // Seed default service dependencies
 async function seedServiceDeps(): Promise<void> {
@@ -261,9 +261,7 @@ async function seedServiceDeps(): Promise<void> {
       .catch(() => {});
   }
 }
-setTimeout(() => {
-  seedServiceDeps().catch(() => {});
-}, 5000);
+// (init scheduling moved to runOpsMgmtBootInit)
 
 // Seed default runbooks
 async function seedRunbooks(): Promise<void> {
@@ -461,9 +459,7 @@ Fires when Node.js heap usage exceeds 80% of available memory.
       .catch(() => {});
   }
 }
-setTimeout(() => {
-  seedRunbooks().catch(() => {});
-}, 6000);
+// (init scheduling moved to runOpsMgmtBootInit)
 
 // Seed default alert rules
 async function seedAlertRules(): Promise<void> {
@@ -543,9 +539,7 @@ async function seedAlertRules(): Promise<void> {
       .catch(() => {});
   }
 }
-setTimeout(() => {
-  seedAlertRules().catch(() => {});
-}, 7000);
+// (init scheduling moved to runOpsMgmtBootInit)
 
 // Ensure P0/P1 platform alert rules per SLOS_AND_ALERTS.md spec exist —
 // uses WHERE NOT EXISTS on name so they are never duplicated.
@@ -659,9 +653,7 @@ async function ensurePlatformAlertRules(): Promise<void> {
       .catch(() => {});
   }
 }
-setTimeout(() => {
-  ensurePlatformAlertRules().catch(() => {});
-}, 8000);
+// (init scheduling moved to runOpsMgmtBootInit)
 
 // ──────────────────────────────────────────────────────────────────────────────
 // INCIDENTS
@@ -1741,5 +1733,44 @@ router.get('/ops/uptime-history', validateQuery(listQuerySchema), async (req, re
     res.status(500).json({ error: 'Failed to get uptime history' });
   }
 });
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Boot-time init (OBS-007 mitigation)
+//
+// Previously each of these helpers fired at module-load time (one immediate,
+// three on staggered 5–8 s setTimeouts). Combined with the rest of the boot
+// fan-out (durable scheduler seeds, AI evals hydration, knowledge-store load,
+// per-route module init) this saturated the shared pg Pool (max=10) and
+// produced ~30 OBS-007 long-checkout warnings per cold start.
+//
+// We now run all five sequentially behind a single `setTimeout`, well after
+// the main boot pressure has cleared. They are pure idempotent backfill
+// (CREATE TABLE IF NOT EXISTS / WHERE NOT EXISTS / COUNT-then-INSERT) so
+// deferring them by a few seconds has no behavioural effect — admin UI
+// reads happen far later than this delay in any realistic flow. The
+// `unref()` keeps test runs from being held open by the timer.
+// ──────────────────────────────────────────────────────────────────────────────
+async function runOpsMgmtBootInit(): Promise<void> {
+  await ensureSchema().catch((err) =>
+    logger.warn({ err }, '[ops-mgmt] Schema init failed (non-fatal)'),
+  );
+  await seedServiceDeps().catch((err) =>
+    logger.warn({ err }, '[ops-mgmt] seedServiceDeps failed (non-fatal)'),
+  );
+  await seedRunbooks().catch((err) =>
+    logger.warn({ err }, '[ops-mgmt] seedRunbooks failed (non-fatal)'),
+  );
+  await seedAlertRules().catch((err) =>
+    logger.warn({ err }, '[ops-mgmt] seedAlertRules failed (non-fatal)'),
+  );
+  await ensurePlatformAlertRules().catch((err) =>
+    logger.warn({ err }, '[ops-mgmt] ensurePlatformAlertRules failed (non-fatal)'),
+  );
+}
+if (process.env.NODE_ENV !== 'test') {
+  setTimeout(() => {
+    runOpsMgmtBootInit().catch(() => {});
+  }, 60_000).unref();
+}
 
 export default router;
