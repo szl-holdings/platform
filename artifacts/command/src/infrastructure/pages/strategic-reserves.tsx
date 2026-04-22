@@ -1,16 +1,73 @@
 import { ClassificationBadge } from '@imp/components/classification-badge';
 import {
   type DrawdownRequest,
-  INITIAL_DRAWDOWNS,
-  INITIAL_RESERVES,
   type ReservePool,
   type ReserveTrendPoint,
   type ReserveStatus,
+  type Classification,
 } from '@imp/lib/imperium-data';
 import { cn } from '@imp/lib/utils';
+import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Check, ChevronDown, ChevronUp, Clock, Database, TrendingDown, X } from 'lucide-react';
-import { useLocalStorage } from '@imp/lib/use-local-storage';
 import React, { useState } from 'react';
+
+const BASE_URL = (import.meta.env.BASE_URL ?? '/imperium/').replace(/\/$/, '');
+const API_BASE = `${BASE_URL}/api/command/sync/reserves`;
+
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...init?.headers },
+    ...init,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+interface PoolDTO {
+  id: string;
+  name: string;
+  category: string;
+  totalCapacity: number;
+  currentLevel: number;
+  unit: string;
+  status: ReserveStatus;
+  classification: Classification;
+  lastDrawdown?: string;
+  notes: string;
+  trendHistory: ReserveTrendPoint[];
+}
+
+interface DrawdownDTO {
+  id: string;
+  poolId: string;
+  amount: number;
+  justification: string;
+  requestedBy: string;
+  requestedAt: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
+interface ReservesResponse {
+  data: { pools: PoolDTO[]; drawdowns: DrawdownDTO[] };
+}
+
+const RESERVES_QUERY_KEY = ['command-sync', 'reserves'] as const;
+
+function dtoToPool(p: PoolDTO): ReservePool {
+  return {
+    ...p,
+    lastDrawdown: p.lastDrawdown ? new Date(p.lastDrawdown) : undefined,
+  };
+}
+
+function dtoToDrawdown(d: DrawdownDTO): DrawdownRequest {
+  return { ...d, requestedAt: new Date(d.requestedAt) };
+}
 
 const STATUS_CONFIG: Record<ReserveStatus, { color: string; bg: string; border: string }> = {
   NOMINAL: { color: '#4ade80', bg: 'rgba(74,222,128,0.08)', border: 'rgba(74,222,128,0.25)' },
@@ -414,55 +471,165 @@ function DrawdownHistoryItem({ request, pool }: { request: DrawdownRequest; pool
 }
 
 export default function StrategicReserves() {
-  const [pools, setPools] = useLocalStorage<ReservePool[]>('command:reserves', INITIAL_RESERVES);
-  const [drawdowns, setDrawdowns] = useLocalStorage<DrawdownRequest[]>('command:drawdowns', INITIAL_DRAWDOWNS);
+  const qc = useQueryClient();
   const [drawdownPoolId, setDrawdownPoolId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(true);
+
+  const reservesQ = useStandardQuery<ReservesResponse>({
+    queryKey: RESERVES_QUERY_KEY,
+    queryFn: () => fetchJson<ReservesResponse>(API_BASE),
+  });
+
+  const pools: ReservePool[] = (reservesQ.data?.data.pools ?? []).map(dtoToPool);
+  const drawdowns: DrawdownRequest[] = (reservesQ.data?.data.drawdowns ?? []).map(dtoToDrawdown);
+
+  const invalidate = () => qc.invalidateQueries({ queryKey: RESERVES_QUERY_KEY });
 
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   }
 
-  function handleDrawdownSubmit(request: DrawdownRequest) {
-    setDrawdowns((prev) => [request, ...prev]);
-    setDrawdownPoolId(null);
-    showToast('Drawdown request submitted — awaiting approval before reserves are adjusted');
-  }
-
-  function applyDrawdownToPool(poolId: string, amount: number) {
-    setPools((prev) =>
-      prev.map((p) => {
-        if (p.id !== poolId) return p;
-        const newLevel = Math.max(0, p.currentLevel - amount);
-        const pctLeft = (newLevel / p.totalCapacity) * 100;
-        const newStatus: ReserveStatus =
-          pctLeft === 0
-            ? 'DEPLETED'
-            : pctLeft < 15
-              ? 'CRITICAL'
-              : pctLeft < 35
-                ? 'REDUCED'
-                : 'NOMINAL';
-        return { ...p, currentLevel: newLevel, status: newStatus, lastDrawdown: new Date() };
-      }),
+  // Snapshot helper — react-query cache is mirrored to localStorage by the
+  // app-level persistQueryClient, so optimistic writes/rollbacks naturally
+  // hit the localStorage cache layer.
+  function snapshot(): ReservesResponse {
+    return (
+      qc.getQueryData<ReservesResponse>(RESERVES_QUERY_KEY) ?? {
+        data: { pools: [], drawdowns: [] },
+      }
     );
   }
 
+  const submitMut = useStandardMutation({
+    mutationFn: (req: DrawdownRequest) =>
+      fetchJson(`${API_BASE}/drawdowns`, {
+        method: 'POST',
+        body: JSON.stringify({
+          id: req.id,
+          poolId: req.poolId,
+          amount: req.amount,
+          justification: req.justification,
+          requestedBy: req.requestedBy,
+          requestedAt: req.requestedAt.toISOString(),
+        }),
+      }),
+    onMutate: async (req: DrawdownRequest) => {
+      await qc.cancelQueries({ queryKey: RESERVES_QUERY_KEY });
+      const prev = snapshot();
+      const optimistic: DrawdownDTO = {
+        id: req.id,
+        poolId: req.poolId,
+        amount: req.amount,
+        justification: req.justification,
+        requestedBy: req.requestedBy,
+        requestedAt: req.requestedAt.toISOString(),
+        status: 'PENDING',
+      };
+      qc.setQueryData<ReservesResponse>(RESERVES_QUERY_KEY, {
+        data: {
+          pools: prev.data.pools,
+          drawdowns: [optimistic, ...prev.data.drawdowns],
+        },
+      });
+      return { prev };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(RESERVES_QUERY_KEY, ctx.prev);
+      showToast(`Submit failed: ${e.message}`);
+    },
+    onSuccess: () => {
+      setDrawdownPoolId(null);
+      showToast('Drawdown request submitted — awaiting approval before reserves are adjusted');
+    },
+    onSettled: () => invalidate(),
+  });
+
+  const approveMut = useStandardMutation({
+    mutationFn: (id: string) =>
+      fetchJson(`${API_BASE}/drawdowns/${encodeURIComponent(id)}/approve`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      }),
+    onMutate: async (id: string) => {
+      await qc.cancelQueries({ queryKey: RESERVES_QUERY_KEY });
+      const prev = snapshot();
+      const req = prev.data.drawdowns.find((d) => d.id === id);
+      const updatedDrawdowns = prev.data.drawdowns.map((d) =>
+        d.id === id ? { ...d, status: 'APPROVED' as const } : d,
+      );
+      const updatedPools = req
+        ? prev.data.pools.map((p) => {
+            if (p.id !== req.poolId) return p;
+            const newLevel = Math.max(0, p.currentLevel - req.amount);
+            const pctLeft = (newLevel / p.totalCapacity) * 100;
+            const newStatus =
+              pctLeft === 0
+                ? ('DEPLETED' as const)
+                : pctLeft < 15
+                  ? ('CRITICAL' as const)
+                  : pctLeft < 35
+                    ? ('REDUCED' as const)
+                    : ('NOMINAL' as const);
+            return {
+              ...p,
+              currentLevel: newLevel,
+              status: newStatus,
+              lastDrawdown: new Date().toISOString(),
+            };
+          })
+        : prev.data.pools;
+      qc.setQueryData<ReservesResponse>(RESERVES_QUERY_KEY, {
+        data: { pools: updatedPools, drawdowns: updatedDrawdowns },
+      });
+      return { prev };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(RESERVES_QUERY_KEY, ctx.prev);
+      showToast(`Approval failed: ${e.message}`);
+    },
+    onSuccess: () => showToast('Drawdown approved — reserve levels updated'),
+    onSettled: () => invalidate(),
+  });
+
+  const rejectMut = useStandardMutation({
+    mutationFn: (id: string) =>
+      fetchJson(`${API_BASE}/drawdowns/${encodeURIComponent(id)}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      }),
+    onMutate: async (id: string) => {
+      await qc.cancelQueries({ queryKey: RESERVES_QUERY_KEY });
+      const prev = snapshot();
+      qc.setQueryData<ReservesResponse>(RESERVES_QUERY_KEY, {
+        data: {
+          pools: prev.data.pools,
+          drawdowns: prev.data.drawdowns.map((d) =>
+            d.id === id ? { ...d, status: 'REJECTED' as const } : d,
+          ),
+        },
+      });
+      return { prev };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(RESERVES_QUERY_KEY, ctx.prev);
+      showToast(`Rejection failed: ${e.message}`);
+    },
+    onSuccess: () => showToast('Drawdown rejected — reserves unchanged'),
+    onSettled: () => invalidate(),
+  });
+
+  function handleDrawdownSubmit(request: DrawdownRequest) {
+    submitMut.mutate(request);
+  }
+
   function handleApprove(id: string) {
-    const request = drawdowns.find((d) => d.id === id);
-    if (!request || request.status !== 'PENDING') return;
-    applyDrawdownToPool(request.poolId, request.amount);
-    setDrawdowns((prev) => prev.map((d) => (d.id === id ? { ...d, status: 'APPROVED' } : d)));
-    showToast('Drawdown approved — reserve levels updated');
+    approveMut.mutate(id);
   }
 
   function handleReject(id: string) {
-    const request = drawdowns.find((d) => d.id === id);
-    if (!request || request.status !== 'PENDING') return;
-    setDrawdowns((prev) => prev.map((d) => (d.id === id ? { ...d, status: 'REJECTED' } : d)));
-    showToast('Drawdown rejected — reserves unchanged');
+    rejectMut.mutate(id);
   }
 
   const nominalCount = pools.filter((p) => p.status === 'NOMINAL').length;
@@ -504,6 +671,12 @@ export default function StrategicReserves() {
         </p>
       </div>
 
+      {reservesQ.isError && (
+        <div className="rounded-lg border border-red-900/40 bg-red-950/20 p-3 text-xs font-mono text-red-400">
+          Failed to load strategic reserves: {(reservesQ.error as Error).message}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: 'Nominal', value: nominalCount, color: '#4ade80' },
@@ -520,11 +693,15 @@ export default function StrategicReserves() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {pools.map((pool) => (
-          <ReservePoolCard key={pool.id} pool={pool} onDrawdown={setDrawdownPoolId} />
-        ))}
-      </div>
+      {reservesQ.isLoading && pools.length === 0 ? (
+        <div className="text-center py-12 text-slate-600 text-sm font-mono">LOADING RESERVES…</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {pools.map((pool) => (
+            <ReservePoolCard key={pool.id} pool={pool} onDrawdown={setDrawdownPoolId} />
+          ))}
+        </div>
+      )}
 
       <div className="imperial-card rounded-lg overflow-hidden">
         <button

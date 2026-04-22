@@ -3,9 +3,10 @@ import {
   type Classification,
   type CoalitionPartner,
   type CoalitionStatus,
-  INITIAL_COALITION,
 } from '@imp/lib/imperium-data';
 import { cn } from '@imp/lib/utils';
+import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
   Anchor,
@@ -19,8 +20,42 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { useLocalStorage } from '@imp/lib/use-local-storage';
 import React, { useState } from 'react';
+
+const BASE_URL = (import.meta.env.BASE_URL ?? '/imperium/').replace(/\/$/, '');
+const API_BASE = `${BASE_URL}/api/command/sync/coalition`;
+
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...init?.headers },
+    ...init,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+interface PartnerDTO {
+  id: string;
+  name: string;
+  role: string;
+  domain: string;
+  trustScore: number;
+  status: CoalitionStatus;
+  classification: Classification;
+  lastContact: string;
+  notes: string;
+  alerts: number;
+}
+
+const COALITION_QUERY_KEY = ['command-sync', 'coalition'] as const;
+
+function dtoToPartner(p: PartnerDTO): CoalitionPartner {
+  return { ...p, lastContact: new Date(p.lastContact) };
+}
 
 const STATUS_CONFIG: Record<
   CoalitionStatus,
@@ -415,30 +450,129 @@ function AddPartnerModal({
 }
 
 export default function Coalition() {
-  const [partners, setPartners] = useLocalStorage<CoalitionPartner[]>('command:coalition', INITIAL_COALITION);
+  const qc = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [filterDomain, setFilterDomain] = useState<string>('ALL');
+
+  const listQ = useStandardQuery<{ data: PartnerDTO[] }>({
+    queryKey: COALITION_QUERY_KEY,
+    queryFn: () => fetchJson<{ data: PartnerDTO[] }>(API_BASE),
+  });
+
+  const partners: CoalitionPartner[] = (listQ.data?.data ?? []).map(dtoToPartner);
+
+  const invalidate = () => qc.invalidateQueries({ queryKey: COALITION_QUERY_KEY });
 
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   }
 
+  // Snapshot helper — react-query cache is mirrored to localStorage by the
+  // app-level persistQueryClient, so optimistic writes/rollbacks naturally
+  // hit the localStorage cache layer.
+  function snapshot(): { data: PartnerDTO[] } {
+    return qc.getQueryData<{ data: PartnerDTO[] }>(COALITION_QUERY_KEY) ?? { data: [] };
+  }
+
+  const createMut = useStandardMutation({
+    mutationFn: (p: CoalitionPartner) =>
+      fetchJson(API_BASE, {
+        method: 'POST',
+        body: JSON.stringify({ ...p, lastContact: p.lastContact.toISOString() }),
+      }),
+    onMutate: async (p: CoalitionPartner) => {
+      await qc.cancelQueries({ queryKey: COALITION_QUERY_KEY });
+      const prev = snapshot();
+      const optimistic: PartnerDTO = {
+        id: p.id,
+        name: p.name,
+        role: p.role,
+        domain: p.domain,
+        trustScore: p.trustScore,
+        status: p.status,
+        classification: p.classification,
+        lastContact: p.lastContact.toISOString(),
+        notes: p.notes,
+        alerts: p.alerts,
+      };
+      qc.setQueryData<{ data: PartnerDTO[] }>(COALITION_QUERY_KEY, {
+        data: [...prev.data, optimistic],
+      });
+      return { prev };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(COALITION_QUERY_KEY, ctx.prev);
+      showToast(`Failed to add partner: ${e.message}`);
+    },
+    onSuccess: () => {
+      setShowModal(false);
+      showToast('Coalition partner added — observing');
+    },
+    onSettled: () => invalidate(),
+  });
+
+  const patchMut = useStandardMutation({
+    mutationFn: ({ id, body }: { id: string; body: object }) =>
+      fetchJson(`${API_BASE}/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      }),
+    onMutate: async ({ id, body }) => {
+      await qc.cancelQueries({ queryKey: COALITION_QUERY_KEY });
+      const prev = snapshot();
+      qc.setQueryData<{ data: PartnerDTO[] }>(COALITION_QUERY_KEY, {
+        data: prev.data.map((p) => (p.id === id ? { ...p, ...(body as object) } : p)),
+      });
+      return { prev };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(COALITION_QUERY_KEY, ctx.prev);
+      showToast(`Update failed: ${e.message}`);
+    },
+    onSuccess: () => showToast('Partner record updated'),
+    onSettled: () => invalidate(),
+  });
+
+  const deleteMut = useStandardMutation({
+    mutationFn: (id: string) =>
+      fetchJson(`${API_BASE}/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    onMutate: async (id: string) => {
+      await qc.cancelQueries({ queryKey: COALITION_QUERY_KEY });
+      const prev = snapshot();
+      qc.setQueryData<{ data: PartnerDTO[] }>(COALITION_QUERY_KEY, {
+        data: prev.data.filter((p) => p.id !== id),
+      });
+      return { prev };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(COALITION_QUERY_KEY, ctx.prev);
+      showToast(`Removal failed: ${e.message}`);
+    },
+    onSuccess: () => showToast('Partner removed from coalition'),
+    onSettled: () => invalidate(),
+  });
+
   function handleUpdate(id: string, changes: Partial<CoalitionPartner>) {
-    setPartners((prev) => prev.map((p) => (p.id === id ? { ...p, ...changes } : p)));
-    showToast('Partner record updated');
+    const body: Record<string, unknown> = {};
+    if (changes.trustScore !== undefined) body.trustScore = changes.trustScore;
+    if (changes.status !== undefined) body.status = changes.status;
+    if (changes.notes !== undefined) body.notes = changes.notes;
+    if (changes.name !== undefined) body.name = changes.name;
+    if (changes.role !== undefined) body.role = changes.role;
+    if (changes.domain !== undefined) body.domain = changes.domain;
+    if (changes.classification !== undefined) body.classification = changes.classification;
+    if (changes.alerts !== undefined) body.alerts = changes.alerts;
+    patchMut.mutate({ id, body });
   }
 
   function handleDelete(id: string) {
-    setPartners((prev) => prev.filter((p) => p.id !== id));
-    showToast('Partner removed from coalition');
+    deleteMut.mutate(id);
   }
 
   function handleAdd(partner: CoalitionPartner) {
-    setPartners((prev) => [...prev, partner]);
-    setShowModal(false);
-    showToast('Coalition partner added — observing');
+    createMut.mutate(partner);
   }
 
   const domains = ['ALL', ...Array.from(new Set(partners.map((p) => p.domain)))];
@@ -483,6 +617,12 @@ export default function Coalition() {
         </p>
       </div>
 
+      {listQ.isError && (
+        <div className="rounded-lg border border-red-900/40 bg-red-950/20 p-3 text-xs font-mono text-red-400">
+          Failed to load coalition partners: {(listQ.error as Error).message}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: 'Total Partners', value: partners.length, color: '#c9a227' },
@@ -524,16 +664,22 @@ export default function Coalition() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {filtered.map((p) => (
-          <PartnerCard key={p.id} partner={p} onUpdate={handleUpdate} onDelete={handleDelete} />
-        ))}
-        {filtered.length === 0 && (
-          <div className="col-span-2 text-center py-12 text-slate-600 text-sm font-mono">
-            NO PARTNERS IN THIS DOMAIN
-          </div>
-        )}
-      </div>
+      {listQ.isLoading && partners.length === 0 ? (
+        <div className="text-center py-12 text-slate-600 text-sm font-mono">
+          LOADING PARTNERS…
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {filtered.map((p) => (
+            <PartnerCard key={p.id} partner={p} onUpdate={handleUpdate} onDelete={handleDelete} />
+          ))}
+          {filtered.length === 0 && (
+            <div className="col-span-2 text-center py-12 text-slate-600 text-sm font-mono">
+              NO PARTNERS IN THIS DOMAIN
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

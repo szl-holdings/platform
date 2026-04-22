@@ -41,6 +41,7 @@ export * from './cms';
 export * from './cognitive_runtime';
 export * from './command_inbox_alert_audit';
 export * from './command_inbox_alert_states';
+export * from './command_sync';
 export * from './comments';
 export * from './competitive_intel';
 export * from './compliance';

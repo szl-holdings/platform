@@ -29,6 +29,10 @@ export function register(router: IRouter): void {
     '/command',
     lazyMount(() => import('../command'), 'command'),
   );
+  router.use(
+    '/command',
+    lazyMount(() => import('../command-sync'), 'command-sync'),
+  );
 
   router.use('/governance', _readLimiter);
   router.use(

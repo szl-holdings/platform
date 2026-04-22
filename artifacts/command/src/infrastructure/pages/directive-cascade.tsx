@@ -4,9 +4,10 @@ import {
   type Directive,
   type DirectivePriority,
   type DirectiveStatus,
-  INITIAL_DIRECTIVES,
 } from '@imp/lib/imperium-data';
 import { cn } from '@imp/lib/utils';
+import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Archive,
   ChevronDown,
@@ -19,8 +20,43 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { useLocalStorage } from '@imp/lib/use-local-storage';
 import React, { useState } from 'react';
+
+const BASE_URL = (import.meta.env.BASE_URL ?? '/imperium/').replace(/\/$/, '');
+const API_BASE = `${BASE_URL}/api/command/sync/directives`;
+
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...init?.headers },
+    ...init,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+interface DirectiveDTO {
+  id: string;
+  title: string;
+  body: string;
+  priority: DirectivePriority;
+  status: DirectiveStatus;
+  classification: Classification;
+  issuedBy: string;
+  issuedAt: string;
+  cascadedTo: string[];
+  tags: string[];
+  cascadeCount: number;
+}
+
+const DIRECTIVES_QUERY_KEY = ['command-sync', 'directives'] as const;
+
+function dtoToDirective(d: DirectiveDTO): Directive {
+  return { ...d, issuedAt: new Date(d.issuedAt) };
+}
 
 const COHORT_OPTIONS = [
   'GROUP — SECURITY',
@@ -417,7 +453,7 @@ const CLASSIFICATION_CONFIG: Record<Classification, { color: string; bg: string;
 };
 
 export default function DirectiveCascade() {
-  const [directives, setDirectives] = useLocalStorage<Directive[]>('command:directives', INITIAL_DIRECTIVES);
+  const qc = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<DirectiveStatus | 'ALL'>('ALL');
@@ -425,48 +461,140 @@ export default function DirectiveCascade() {
   const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
 
-  const allTags = Array.from(new Set(directives.flatMap((d) => d.tags))).sort();
+  const listQ = useStandardQuery<{ data: DirectiveDTO[] }>({
+    queryKey: DIRECTIVES_QUERY_KEY,
+    queryFn: () => fetchJson<{ data: DirectiveDTO[] }>(API_BASE),
+  });
 
-  function toggleTag(tag: string) {
-    setActiveTags((prev) => {
-      const next = new Set(prev);
-      if (next.has(tag)) {
-        next.delete(tag);
-      } else {
-        next.add(tag);
-      }
-      return next;
-    });
-  }
+  const directives: Directive[] = (listQ.data?.data ?? []).map(dtoToDirective);
 
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   }
 
+  const invalidate = () => qc.invalidateQueries({ queryKey: DIRECTIVES_QUERY_KEY });
+
+  // Snapshot current cache so onError can roll back the optimistic write.
+  // The react-query cache is mirrored to localStorage by the app-level
+  // persistQueryClient, so optimistic writes hit localStorage immediately
+  // and revert there too on failure.
+  function snapshot(): { data: DirectiveDTO[] } {
+    return (
+      qc.getQueryData<{ data: DirectiveDTO[] }>(DIRECTIVES_QUERY_KEY) ?? { data: [] }
+    );
+  }
+
+  const createMut = useStandardMutation({
+    mutationFn: (d: Directive) =>
+      fetchJson(API_BASE, {
+        method: 'POST',
+        body: JSON.stringify({ ...d, issuedAt: d.issuedAt.toISOString() }),
+      }),
+    onMutate: async (d: Directive) => {
+      await qc.cancelQueries({ queryKey: DIRECTIVES_QUERY_KEY });
+      const prev = snapshot();
+      const optimistic: DirectiveDTO = {
+        id: d.id,
+        title: d.title,
+        body: d.body,
+        priority: d.priority,
+        status: d.status,
+        classification: d.classification,
+        issuedBy: d.issuedBy,
+        issuedAt: d.issuedAt.toISOString(),
+        cascadedTo: d.cascadedTo,
+        tags: d.tags,
+        cascadeCount: d.cascadeCount,
+      };
+      qc.setQueryData<{ data: DirectiveDTO[] }>(DIRECTIVES_QUERY_KEY, {
+        data: [optimistic, ...prev.data],
+      });
+      return { prev };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(DIRECTIVES_QUERY_KEY, ctx.prev);
+      showToast(`Failed to issue directive: ${e.message}`);
+    },
+    onSuccess: () => {
+      setShowModal(false);
+      showToast('Directive issued successfully');
+    },
+    onSettled: () => invalidate(),
+  });
+
+  const patchMut = useStandardMutation({
+    mutationFn: ({ id, body }: { id: string; body: object }) =>
+      fetchJson(`${API_BASE}/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      }),
+    onMutate: async ({ id, body }) => {
+      await qc.cancelQueries({ queryKey: DIRECTIVES_QUERY_KEY });
+      const prev = snapshot();
+      qc.setQueryData<{ data: DirectiveDTO[] }>(DIRECTIVES_QUERY_KEY, {
+        data: prev.data.map((d) => (d.id === id ? { ...d, ...(body as object) } : d)),
+      });
+      return { prev };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(DIRECTIVES_QUERY_KEY, ctx.prev);
+      showToast(`Update failed: ${e.message}`);
+    },
+    onSettled: () => invalidate(),
+  });
+
+  const deleteMut = useStandardMutation({
+    mutationFn: (id: string) =>
+      fetchJson(`${API_BASE}/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    onMutate: async (id: string) => {
+      await qc.cancelQueries({ queryKey: DIRECTIVES_QUERY_KEY });
+      const prev = snapshot();
+      qc.setQueryData<{ data: DirectiveDTO[] }>(DIRECTIVES_QUERY_KEY, {
+        data: prev.data.filter((d) => d.id !== id),
+      });
+      return { prev };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(DIRECTIVES_QUERY_KEY, ctx.prev);
+      showToast(`Delete failed: ${e.message}`);
+    },
+    onSuccess: () => showToast('Directive removed'),
+    onSettled: () => invalidate(),
+  });
+
+  const allTags = Array.from(new Set(directives.flatMap((d) => d.tags))).sort();
+
+  function toggleTag(tag: string) {
+    setActiveTags((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) next.delete(tag);
+      else next.add(tag);
+      return next;
+    });
+  }
+
   function handleStatusChange(id: string, status: DirectiveStatus) {
-    setDirectives((prev) => prev.map((d) => (d.id === id ? { ...d, status } : d)));
+    patchMut.mutate({ id, body: { status } });
     showToast(`Directive status updated to ${status}`);
   }
 
   function handleCascade(id: string) {
-    setDirectives((prev) =>
-      prev.map((d) =>
-        d.id === id ? { ...d, status: 'CASCADING', cascadeCount: d.cascadeCount + 1 } : d,
-      ),
-    );
+    const d = directives.find((x) => x.id === id);
+    if (!d) return;
+    patchMut.mutate({
+      id,
+      body: { status: 'CASCADING', cascadeCount: d.cascadeCount + 1 },
+    });
     showToast('Directive cascaded to all assigned groups');
   }
 
   function handleDelete(id: string) {
-    setDirectives((prev) => prev.filter((d) => d.id !== id));
-    showToast('Directive removed');
+    deleteMut.mutate(id);
   }
 
   function handleAdd(directive: Directive) {
-    setDirectives((prev) => [directive, ...prev]);
-    setShowModal(false);
-    showToast('Directive issued successfully');
+    createMut.mutate(directive);
   }
 
   const query = searchQuery.trim().toLowerCase();
@@ -523,6 +651,12 @@ export default function DirectiveCascade() {
           Command directives cascade to assigned groups — create, update, suspend, or archive
         </p>
       </div>
+
+      {listQ.isError && (
+        <div className="rounded-lg border border-red-900/40 bg-red-950/20 p-3 text-xs font-mono text-red-400">
+          Failed to load directives: {(listQ.error as Error).message}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {(['ACTIVE', 'CASCADING', 'SUSPENDED', 'ARCHIVED'] as DirectiveStatus[]).map((s) => {
@@ -586,30 +720,23 @@ export default function DirectiveCascade() {
             Classification
           </div>
           <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={() => setClassificationFilter('ALL')}
-              className={cn(
-                'px-3 py-1.5 rounded font-mono text-[10px] tracking-widest border transition-all',
-                classificationFilter === 'ALL'
-                  ? 'border-gold/40 bg-gold/10 text-gold'
-                  : 'border-white/5 text-slate-500 hover:border-white/10',
-              )}
-            >
-              ALL
-            </button>
-            {(['OPEN', 'RESTRICTED', 'CONFIDENTIAL', 'SOVEREIGN'] as Classification[]).map((c) => {
-              const cfg = CLASSIFICATION_CONFIG[c];
-              const active = classificationFilter === c;
+            {(['ALL', 'OPEN', 'RESTRICTED', 'CONFIDENTIAL', 'SOVEREIGN'] as const).map((c) => {
+              const cfg = c === 'ALL' ? null : CLASSIFICATION_CONFIG[c];
               return (
                 <button
                   key={c}
-                  onClick={() => setClassificationFilter(active ? 'ALL' : c)}
-                  className="px-3 py-1.5 rounded font-mono text-[10px] tracking-widest border transition-all"
-                  style={{
-                    color: active ? cfg.color : '#64748b',
-                    background: active ? cfg.bg : 'transparent',
-                    borderColor: active ? cfg.border : 'rgba(255,255,255,0.05)',
-                  }}
+                  onClick={() => setClassificationFilter(c)}
+                  className={cn(
+                    'px-3 py-1.5 rounded font-mono text-[10px] tracking-widest border transition-all',
+                    classificationFilter === c
+                      ? 'border-gold/40 bg-gold/10 text-gold'
+                      : 'border-white/5 text-slate-500 hover:border-white/10',
+                  )}
+                  style={
+                    classificationFilter === c && cfg
+                      ? { borderColor: cfg.border, background: cfg.bg, color: cfg.color }
+                      : undefined
+                  }
                 >
                   {c}
                 </button>
@@ -620,65 +747,80 @@ export default function DirectiveCascade() {
 
         {allTags.length > 0 && (
           <div className="space-y-2">
-            <div className="text-[9px] font-mono tracking-widest text-slate-600 uppercase">Tags</div>
+            <div className="flex items-center justify-between">
+              <div className="text-[9px] font-mono tracking-widest text-slate-600 uppercase">
+                Tags
+              </div>
+              {activeTags.size > 0 && (
+                <button
+                  onClick={() => setActiveTags(new Set())}
+                  className="text-[9px] font-mono tracking-wider text-slate-500 hover:text-slate-300 transition-colors"
+                >
+                  CLEAR
+                </button>
+              )}
+            </div>
             <div className="flex gap-1.5 flex-wrap">
-              {allTags.map((tag) => {
-                const active = activeTags.has(tag);
-                return (
-                  <button
-                    key={tag}
-                    onClick={() => toggleTag(tag)}
-                    className={cn(
-                      'px-2 py-0.5 rounded font-mono text-[10px] border transition-all',
-                      active
-                        ? 'border-blue-500/50 bg-blue-950/50 text-blue-400'
-                        : 'border-white/5 bg-white/2 text-slate-500 hover:border-white/10 hover:text-slate-400',
-                    )}
-                  >
-                    #{tag}
-                  </button>
-                );
-              })}
+              {allTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={cn(
+                    'px-2 py-1 rounded font-mono text-[10px] transition-all border',
+                    activeTags.has(tag)
+                      ? 'border-blue-500/50 bg-blue-950/40 text-blue-400'
+                      : 'border-white/5 bg-white/2 text-slate-500 hover:border-white/10',
+                  )}
+                >
+                  #{tag}
+                </button>
+              ))}
             </div>
           </div>
         )}
 
         {hasActiveFilters && (
-          <button
-            onClick={() => {
-              setStatusFilter('ALL');
-              setClassificationFilter('ALL');
-              setActiveTags(new Set());
-              setSearchQuery('');
-            }}
-            className="text-[10px] font-mono text-slate-500 hover:text-slate-300 transition-colors tracking-wider flex items-center gap-1.5"
-          >
-            <X className="w-3 h-3" /> CLEAR ALL FILTERS
-          </button>
+          <div className="flex items-center justify-between pt-1 border-t border-white/5">
+            <span className="text-[10px] font-mono text-slate-500">
+              Showing {filtered.length} of {directives.length}
+            </span>
+            <button
+              onClick={() => {
+                setStatusFilter('ALL');
+                setClassificationFilter('ALL');
+                setActiveTags(new Set());
+                setSearchQuery('');
+              }}
+              className="text-[10px] font-mono tracking-wider text-gold hover:text-gold/80 transition-colors"
+            >
+              CLEAR ALL FILTERS
+            </button>
+          </div>
         )}
       </div>
 
-      <div className="space-y-3">
-        {filtered.length === 0 && (
-          <div className="text-center py-12 text-slate-600 text-sm font-mono">
-            {hasActiveFilters ? 'NO DIRECTIVES MATCH CURRENT FILTERS' : 'NO DIRECTIVES — ISSUE THE FIRST COMMAND'}
-          </div>
-        )}
-        {filtered.length > 0 && hasActiveFilters && (
-          <div className="text-[10px] font-mono text-slate-600 tracking-wider">
-            {filtered.length} of {directives.length} directive{directives.length !== 1 ? 's' : ''} shown
-          </div>
-        )}
-        {filtered.map((d) => (
-          <DirectiveCard
-            key={d.id}
-            directive={d}
-            onStatusChange={handleStatusChange}
-            onCascade={handleCascade}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
+      {listQ.isLoading && directives.length === 0 ? (
+        <div className="text-center py-12 text-slate-600 text-sm font-mono">
+          LOADING DIRECTIVES…
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {filtered.map((d) => (
+            <DirectiveCard
+              key={d.id}
+              directive={d}
+              onStatusChange={handleStatusChange}
+              onCascade={handleCascade}
+              onDelete={handleDelete}
+            />
+          ))}
+          {filtered.length === 0 && (
+            <div className="text-center py-12 text-slate-600 text-sm font-mono">
+              NO DIRECTIVES MATCH FILTERS
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
