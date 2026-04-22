@@ -27,6 +27,7 @@
     "test:cognitive-contracts": "tsx src/scripts/smoke-cognitive-contracts.ts",
     "smoke:vessels-cognitive": "tsx src/scripts/smoke-vessels-cognitive.ts",
     "test:terra-cognitive": "tsx src/scripts/smoke-terra-cognitive-api.ts",
+    "smoke:terra-diligence-lifecycle": "tsx src/scripts/smoke-terra-diligence-lifecycle.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "biome lint ./src",
