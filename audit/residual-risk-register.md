@@ -44,7 +44,7 @@
 | RR-21 | Hand-authored migration drift | `lib/db/migrations/0003_skill_library_tables.sql` previously failed on `skills.category` / `skills.enabled` index creation against `drizzle push`-bootstrapped schemas. Resolved 2026-04-21 by inserting `ALTER TABLE skills ADD COLUMN IF NOT EXISTS category|enabled|is_builtin` immediately before the index DDL. Live-verified: file now applies cleanly through the `__manual_migrations` runner; no longer in any quarantine list. | MEDIUM | DB Platform | **RESOLVED** ✓ |
 | RR-22 | Rollback script BEGIN/COMMIT | All 5 rollback scripts (`scripts/rollback/001–005`) contain embedded `BEGIN/COMMIT` blocks. This means (a) dry-run via transaction wrapper is impossible, and (b) rollback execution against a live DB is irreversible without a backup. Verified live: `001_rollback_0004_terra_broker_schema.sql` executed and committed all 36 DROP statements; tables restored via forward migration `0007_terra_broker_schema.sql`. | MEDIUM | DB Platform | NEW (2026-04-21) — remove embedded BEGIN/COMMIT from rollback scripts; ensure callers wrap in explicit transaction |
 | RR-101 | Login Rate Limiting Absent (F-01) | | HIGH | Platform | **RESOLVED** ✓ | `loginLimiter` (10 req/15 min prod, skip-success) applied to all 6 credential routes: `POST /auth/login`, `/auth/login-password`, `/auth/refresh`, `/auth/mfa/challenge`, `/auth/mfa/setup-required`, `/auth/mfa/enable-required` |
-| RR-102 | MFA Encryption Key Absent (F-02) | | HIGH | Ops | OPEN | TOTP secrets stored unencrypted at rest in dev. Set `MFA_SECRET_ENCRYPTION_KEY` in Replit Secrets. |
+| RR-102 | MFA Encryption Key Absent (F-02) | | HIGH | Ops | **RESOLVED** ✓ | `MFA_SECRET_ENCRYPTION_KEY` set in Replit Secrets (64 hex chars / 32 bytes) on 2026-04-22 (task #2885). Startup warning no longer emitted; validator confirms valid format. New TOTP enrollments are AES-256-GCM encrypted with `enc:` prefix; legacy `plain:` rows transparently re-encrypted on next access via existing migration logic in `routes/auth.ts`. |
 | RR-103 | Cookie Security Flags (F-03) | | MEDIUM | Platform | **RESOLVED** ✓ | `__Host-sid` cookie: `httpOnly: true`, `secure: true`, `sameSite: 'lax'`, `path: '/'`, no `domain` attribute. |
 | RR-104 | Tenant/Org Isolation Per-Route (F-05) | | MEDIUM | Platform | OPEN | `tenantScope` middleware present; per-route coverage not fully enumerated. |
 | RR-105 | Password Reset Single-Use Token (F-06) | | MEDIUM | Platform | **RESOLVED** ✓ | Password reset token column exists in schema; single-use token consumption verified at `org-settings.ts:950`. |
@@ -97,7 +97,8 @@
 2. **RR-04 (HIGH):** Requires engineering leadership decision before any consolidation work begins.
 3. **RR-18 (HIGH):** Add `org_id` column to `terra_covenants` in next Terra migration cycle.
 4. **RR-14 (MEDIUM):** Add Terra 1031 and Lease Abstraction seeds before next investor demo.
-6. **RR-102 (HIGH):** Set `MFA_SECRET_ENCRYPTION_KEY` in Replit Secrets (`openssl rand -hex 32`).
+5. **RR-12/RR-13 (MEDIUM):** Standardize hand-authored migration tracking — either register in Drizzle journal or maintain a separate apply log.
+6. ~~**RR-102 (HIGH):** Set `MFA_SECRET_ENCRYPTION_KEY` in Replit Secrets (`openssl rand -hex 32`).~~ — **DONE** 2026-04-22 (task #2885)
 7. **RR-108 (MEDIUM):** Deprecate `rolesTable`; make `platformRole` enum canonical.
 8. **RR-115 (LOW):** Set `AEF_BEARER_TOKEN` and `AEF_S2S_SECRET` in Replit Secrets for production deployments.
 
@@ -118,13 +119,11 @@
 
 ### RR-002 — MFA Encryption Key Absent (F-02)
 
-**Status:** OPEN | **Severity:** HIGH | **Owner:** Ops — follow-up task #2885
+**Status:** RESOLVED ✓ | **Severity:** HIGH | **Track:** Follow-up #2885 (closed 2026-04-22)
 
-Dev: plaintext fallback with startup WARNING. Prod: boot blocked if unset. Not a silent failure.
+`MFA_SECRET_ENCRYPTION_KEY` set in Replit Secrets as a 64-character hex value (32 bytes), satisfying both the `startup-validation.ts` regex (`/^[0-9a-fA-F]{64}$/`) and the `routes/auth.ts` 32-byte buffer check. Startup no longer emits the plaintext-fallback warning. New TOTP enrollments are stored AES-256-GCM-encrypted with the `enc:` prefix; existing `plain:` rows continue to be readable via the legacy decode path in `decryptMfaSecret` and are transparently rotated to `enc:` on the next setup.
 
-**Resolution:** Set `MFA_SECRET_ENCRYPTION_KEY` in Replit Secrets: `openssl rand -hex 32`
-
-**Reproducer:** Boot logs: `WARN: MFA_SECRET_ENCRYPTION_KEY not set — TOTP secrets will fall back to plaintext storage`
+**Reproducer (verifies resolution):** Restart `artifacts/api-server: api`; the `[mfa] MFA_SECRET_ENCRYPTION_KEY not set …` warning is absent and the env summary line shows `"MFA_SECRET_ENCRYPTION_KEY": "***"`.
 
 ---
 

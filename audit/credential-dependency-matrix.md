@@ -22,7 +22,7 @@ Categories:
 | `REPL_ID` | **required-prod** | Replit OIDC sign-in | Optional (OIDC disabled) | **MUST SET** | OIDC client ID; without it `/api/login` returns 404 |
 | `ISSUER_URL` | optional | Replit OIDC | Defaults to `https://replit.com/oidc` | Set explicitly | OIDC discovery URL |
 | `OAUTH_STATE_SECRET` | **required-prod** | OIDC state param CSRF | Auto-generated at boot | **MUST SET** | Prevents OIDC state forgery; auto-gen is dev-safe only |
-| `MFA_SECRET_ENCRYPTION_KEY` | **required-prod** | TOTP/MFA | Optional (plaintext fallback, warn emitted) | **MUST SET** | 64 hex chars; unset → TOTP secrets stored unencrypted |
+| `MFA_SECRET_ENCRYPTION_KEY` | **required-prod** | TOTP/MFA | **SET** ✓ (64 hex, 2026-04-22, task #2885) | **SET** ✓ | 64 hex chars; AES-256-GCM encryption of TOTP secrets at rest active |
 | `AZURE_AD_TENANT_ID` | optional | Azure AD SSO | Not required | Set for AAD tenants | Multi-tenant SSO |
 | `AZURE_AD_CLIENT_ID` | optional | Azure AD SSO | Not required | Set for AAD tenants | |
 | `AZURE_AD_CLIENT_SECRET` | optional | Azure AD SSO | Not required | Set for AAD tenants | Sensitive |
