@@ -2,6 +2,8 @@ import { DemoModeProvider } from '@lyte/lib/demo-mode';
 import { PrismBusProvider } from '@szl-holdings/prism-bus';
 import { AnalyticsProvider } from '@szl-holdings/shared-ui/analytics-provider';
 import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';
+import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
+import { useSessionRevocationToast } from '@szl-holdings/shared-ui/use-session-revocation-toast';
 import {
   type CommandItem,
   CommandPalette,
@@ -780,9 +782,11 @@ function AppShell() {
 }
 
 function App() {
+  useSessionRevocationToast();
   return (
     <AppModeProvider>
       <AppModeBanner />
+      <Toaster position="bottom-right" theme="dark" />
       <AnalyticsProvider appName="command">
         <PrismBusProvider domain="lyte">
           <SandboxModeProvider>

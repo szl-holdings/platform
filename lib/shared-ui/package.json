@@ -15,6 +15,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./session-revocation": "./src/session-revocation.ts",
+    "./use-session-revocation-toast": "./src/use-session-revocation-toast.tsx",
     "./design-system": "./src/design-system/index.ts",
     "./tokens": "./src/tokens.ts",
     "./animations": "./src/animations.ts",

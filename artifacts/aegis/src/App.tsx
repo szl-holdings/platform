@@ -1,6 +1,8 @@
 import { PrivateAppGuard } from '@szl-holdings/shared-ui';
 import { AnalyticsProvider } from '@szl-holdings/shared-ui/analytics-provider';
 import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';
+import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
+import { useSessionRevocationToast } from '@szl-holdings/shared-ui/use-session-revocation-toast';
 import {
   type CommandItem,
   CommandPalette,
@@ -1138,6 +1140,7 @@ function AppShell({
 }
 
 export default function App() {
+  useSessionRevocationToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { prefs, setPreference, isLoaded } = useUserPreferences();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => prefs.sidebar_collapsed);
@@ -1162,6 +1165,7 @@ export default function App() {
   return (
     <AppModeProvider>
       <AppModeBanner />
+      <Toaster position="bottom-right" theme="dark" />
       <AnalyticsProvider appName="aegis">
         <QueryClientProvider client={queryClient}>
           <DemoPersonaProvider>

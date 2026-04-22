@@ -5,6 +5,8 @@ import {
   setUser as setSentryUser,
 } from '@szl-holdings/observability/react';
 import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';
+import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
+import { useSessionRevocationToast } from '@szl-holdings/shared-ui/use-session-revocation-toast';
 import {
   type CommandItem,
   CommandPalette,
@@ -448,12 +450,14 @@ function PulsePalette() {
 }
 
 export default function App() {
+  useSessionRevocationToast();
   return (
     <AppModeProvider>
       <AppModeBanner />
       <RequireAuth>
         <PulsePalette />
         <Shell>
+          <Toaster position="bottom-right" theme="dark" />
           <ErrorBoundary>
             <Switch>
               <Route path={`${BASE}/`} component={TodaysBrief} />

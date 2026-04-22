@@ -8,6 +8,8 @@ import {
 import { PrismBusProvider } from '@szl-holdings/prism-bus';
 import { useAuth } from '@szl-holdings/replit-auth-web';
 import { AnalyticsProvider } from '@szl-holdings/shared-ui/analytics-provider';
+import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
+import { useSessionRevocationToast } from '@szl-holdings/shared-ui/use-session-revocation-toast';
 import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';
 import {
   type CommandItem,
@@ -628,10 +630,12 @@ function AppShell() {
 
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(carlotaCommands);
+  useSessionRevocationToast();
 
   return (
     <AppModeProvider>
       <AppModeBanner />
+      <Toaster position="bottom-right" theme="dark" />
       <AnalyticsProvider appName="carlota-jo">
         <PrismBusProvider domain="carlota-jo">
           <SandboxModeProvider>

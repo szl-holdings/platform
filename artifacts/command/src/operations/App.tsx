@@ -8,6 +8,8 @@ import {
   setUser as setSentryUser,
 } from '@szl-holdings/observability/react';
 import { PrismBusProvider } from '@szl-holdings/prism-bus';
+import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
+import { useSessionRevocationToast } from '@szl-holdings/shared-ui/use-session-revocation-toast';
 import { useAuth } from '@szl-holdings/replit-auth-web';
 import { AnalyticsProvider } from '@szl-holdings/shared-ui/analytics-provider';
 import {
@@ -876,6 +878,7 @@ const COMMAND_STATUS_CONFIG = {
 
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(lyteCommands);
+  useSessionRevocationToast();
 
   return (
     <AnalyticsProvider appName="lyte">
@@ -883,6 +886,7 @@ function App() {
         <SandboxModeProvider>
           <QueryClientProvider client={queryClient}>
             <StaleIndicator accentColor={COMMAND_ACCENT} />
+            <Toaster position="bottom-right" theme="dark" />
             <DemoModeProvider>
               <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
                 <StatusBanner config={COMMAND_STATUS_CONFIG} />

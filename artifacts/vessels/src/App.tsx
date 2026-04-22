@@ -54,6 +54,7 @@ import { StaleIndicator } from '@szl-holdings/shared-ui/stale-indicator';
 import { SyncStatusBadge } from '@szl-holdings/shared-ui/sync-status-badge';
 import { UserButton } from '@szl-holdings/shared-ui/UserButton';
 import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
+import { useSessionRevocationToast } from '@szl-holdings/shared-ui/use-session-revocation-toast';
 import { useRealtimeChannel } from '@szl-holdings/shared-ui/use-realtime-channel';
 import {
   useEffectiveAccent,
@@ -1460,10 +1461,12 @@ function DemoPersonaModeBridgeWired() {
 
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(vesselsCommands);
+  useSessionRevocationToast();
 
   return (
     <AppModeProvider>
       <AppModeBanner />
+      <Toaster />
       <AnalyticsProvider appName="vessels">
         <PrismBusProvider domain="vessels">
           <SandboxModeProvider>

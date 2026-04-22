@@ -23,6 +23,7 @@ import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { DesignSystemProvider } from "@szl-holdings/design-system";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
+import { useSessionRevocationToast } from "@szl-holdings/shared-ui/use-session-revocation-toast";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 
 const SZL_ACCENT = LANE_ACCENT_HEX.szl.primary;
@@ -487,6 +488,7 @@ function DemoPersonaModeBridgeWired() {
 }
 
 function App() {
+  useSessionRevocationToast();
   return (
     <DesignSystemProvider defaultDensity="comfortable" defaultScreenMode="executive">
     <AppModeProvider>

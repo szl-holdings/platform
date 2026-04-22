@@ -34,6 +34,7 @@ import {
 } from '@szl-holdings/shared-ui/sandbox-mode';
 import { StaleIndicator } from '@szl-holdings/shared-ui/stale-indicator';
 import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
+import { useSessionRevocationToast } from '@szl-holdings/shared-ui/use-session-revocation-toast';
 import { persistQueryClient } from '@tanstack/query-persist-client-core';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -524,6 +525,7 @@ function AppContent({
 
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(terraCommands);
+  useSessionRevocationToast();
 
   return (
     <AppModeProvider>
