@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { fetchJson } from '../../pages/cognitive/shared';
+
 const BG = { page: '#080c14', surface: '#0c1018', elevated: '#10141e' };
 const BORDER = { subtle: 'rgba(255,255,255,0.04)', muted: 'rgba(255,255,255,0.06)' };
 const TEXT = {
@@ -45,15 +47,6 @@ interface PolicyDecisionAuditRow {
 interface ListResponse<T> {
   data: T[];
   meta?: { total?: number };
-}
-
-async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-  return res.json() as Promise<T>;
 }
 
 function timeAgo(iso: string): string {

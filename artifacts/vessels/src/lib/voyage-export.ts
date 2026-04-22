@@ -234,7 +234,7 @@ export function exportVoyagesToPdf(ctx: VoyageExportContext): void {
   </table>
 
   <div class="footer">
-    SZL Holdings · Vessels Maritime Intelligence · Voyage Economics Export · ${date}
+    SZL Holdings · SEXTANT Maritime Intelligence · Voyage Economics Export · ${date}
   </div>
   <script>
     setTimeout(function() { window.print(); }, 250);

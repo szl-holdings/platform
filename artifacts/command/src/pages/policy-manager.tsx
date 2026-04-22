@@ -21,6 +21,8 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { useSearch } from 'wouter';
 
+import { fetchJson as tracedFetchJson } from './cognitive/shared';
+
 const ACCENT = '#d4a054';
 
 type PolicyMode =
@@ -111,20 +113,13 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const method = (init?.method ?? 'GET').toUpperCase();
   const isMutating = ['POST', 'PATCH', 'PUT', 'DELETE'].includes(method);
   const csrf = isMutating ? getCsrfToken() : undefined;
-  const res = await fetch(url, {
-    credentials: 'include',
+  return tracedFetchJson<T>(url, {
+    ...init,
     headers: {
-      'Content-Type': 'application/json',
       ...(csrf ? { 'x-csrf-token': csrf } : {}),
       ...(init?.headers ?? {}),
     },
-    ...init,
   });
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
-  }
-  return res.json() as Promise<T>;
 }
 
 function ModePill({ mode }: { mode: PolicyMode }) {

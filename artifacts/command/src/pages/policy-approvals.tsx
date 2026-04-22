@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { fetchJson } from './cognitive/shared';
+
 const ACCENT = '#d4a054';
 
 type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'expired' | 'cancelled';
@@ -105,19 +107,6 @@ interface PolicyEvaluation {
 interface ListResponse<T> {
   data: T[];
   meta?: { total?: number };
-}
-
-async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
-    ...init,
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
-  }
-  return res.json() as Promise<T>;
 }
 
 const TIER_COLORS: Record<string, { fg: string; bg: string; border: string }> = {
