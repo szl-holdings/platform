@@ -51,7 +51,7 @@ interface ListResponse<T> {
 
 function timeAgo(iso: string): string {
   const t = new Date(iso).getTime();
-  if (isNaN(t)) return iso;
+  if (Number.isNaN(t)) return iso;
   const s = Math.max(1, Math.floor((Date.now() - t) / 1000));
   if (s < 60) return `${s}s ago`;
   const m = Math.floor(s / 60);
@@ -337,18 +337,18 @@ export default function TrustAuditPage() {
           {events.map((ev) => {
             const newValues = ev.newValues ?? {};
             const action =
-              typeof newValues['action'] === 'string'
-                ? (newValues['action'] as string)
+              typeof newValues.action === 'string'
+                ? (newValues.action as string)
                 : 'policy decision';
             const decisionReason =
-              typeof newValues['decisionReason'] === 'string'
-                ? (newValues['decisionReason'] as string)
+              typeof newValues.decisionReason === 'string'
+                ? (newValues.decisionReason as string)
                 : null;
             const impact = ev.projectedImpact ?? {};
             const severity =
-              typeof impact['severity'] === 'string' ? (impact['severity'] as string) : null;
+              typeof impact.severity === 'string' ? (impact.severity as string) : null;
             const reversible =
-              typeof impact['reversible'] === 'boolean' ? (impact['reversible'] as boolean) : null;
+              typeof impact.reversible === 'boolean' ? (impact.reversible as boolean) : null;
             const conf = ev.confidence !== null ? `${(ev.confidence * 100).toFixed(0)}%` : '—';
 
             return (

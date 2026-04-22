@@ -2,7 +2,7 @@ import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFuzzySearch, useSSEStream } from '@szl-holdings/mobile-shared';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   FlatList,
@@ -148,7 +148,7 @@ function SwipeableSignalCard({
 
   return (
     <View style={styles.swipeContainer}>
-      <View style={[styles.swipeReveal, { backgroundColor: revealBg + '20' }]}>
+      <View style={[styles.swipeReveal, { backgroundColor: `${revealBg}20` }]}>
         {actionLabel === 'acknowledge' && (
           <View style={styles.revealLeft}>
             <Feather name="check-circle" size={20} color="#00ff88" />

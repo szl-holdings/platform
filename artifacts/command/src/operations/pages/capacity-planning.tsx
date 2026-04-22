@@ -1,16 +1,11 @@
 import {
-  AlertTriangle,
   ArrowDown,
   ArrowUp,
-  BarChart3,
   CheckCircle,
-  ChevronRight,
   Cloud,
   Cpu,
   Database,
-  DollarSign,
   Server,
-  TrendingUp,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -206,7 +201,7 @@ export default function CapacityPlanning() {
                 className="px-3 py-1.5 rounded text-[10px] font-mono font-medium transition-all"
                 style={{
                   background: horizon === h ? `${GOLD}12` : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${horizon === h ? GOLD + '35' : DS.border}`,
+                  border: `1px solid ${horizon === h ? `${GOLD}35` : DS.border}`,
                   color: horizon === h ? GOLD : DS.text.muted,
                 }}
               >

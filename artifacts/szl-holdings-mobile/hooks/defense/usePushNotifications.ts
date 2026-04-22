@@ -20,9 +20,7 @@ async function registerTokenWithBackend(token: string): Promise<void> {
       platform: Platform.OS,
       appId: 'aegis-mobile',
     });
-    console.log('[Push] Token registered with backend (aegis-mobile)');
-  } catch (err) {
-    console.warn('[Push] Failed to register token with backend:', err);
+  } catch (_err) {
   }
 }
 

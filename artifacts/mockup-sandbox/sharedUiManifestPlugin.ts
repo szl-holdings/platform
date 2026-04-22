@@ -1,9 +1,9 @@
-import { readFileSync } from 'fs';
-import path from 'path';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import type { Plugin } from 'vite';
 
 const VIRTUAL_ID = 'virtual:shared-ui-manifest';
-const RESOLVED_ID = '\0' + VIRTUAL_ID;
+const RESOLVED_ID = `\0${VIRTUAL_ID}`;
 
 export interface SharedUiExport {
   name: string;
@@ -131,7 +131,7 @@ export function parseExportsFromIndex(indexPath: string): SharedUiExport[] {
       if (line.includes('}')) {
         inBlock = false;
         if (!isTypeBlock) {
-          const inner = blockBuffer + ',' + line.replace(/\}.*/, '');
+          const inner = `${blockBuffer},${line.replace(/\}.*/, '')}`;
           for (const item of inner.split(',')) {
             processExportItem(item, seen, exports);
           }
@@ -140,7 +140,7 @@ export function parseExportsFromIndex(indexPath: string): SharedUiExport[] {
         isTypeBlock = false;
       } else {
         if (!isTypeBlock) {
-          blockBuffer += ',' + line;
+          blockBuffer += `,${line}`;
         }
       }
     }

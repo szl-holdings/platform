@@ -1,5 +1,4 @@
-import type { UsdExportResult, UsdPrim, UsdStage } from './serializer.js';
-import { buildExportResult, serializeToUsda } from './serializer.js';
+import { type UsdExportResult, type UsdPrim, type UsdStage, buildExportResult } from './serializer.js';
 
 export interface VesselUsdState {
   imoNumber: string;

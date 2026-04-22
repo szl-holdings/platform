@@ -510,7 +510,6 @@ export function InlineFeedbackBar({
       {showComment && pendingVote && (
         <div style={{ display: 'flex', gap: 6 }}>
           <input
-            autoFocus
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="Add a comment (optional)"

@@ -240,19 +240,19 @@ export class ResoMlsAdapter extends ServiceAdapter {
   private _tokenCache: TokenCache | null = null;
 
   private get clientId(): string | undefined {
-    return process.env['MLS_CLIENT_ID'];
+    return process.env.MLS_CLIENT_ID;
   }
 
   private get clientSecret(): string | undefined {
-    return process.env['MLS_CLIENT_SECRET'];
+    return process.env.MLS_CLIENT_SECRET;
   }
 
   private get tokenUrl(): string | undefined {
-    return process.env['MLS_TOKEN_URL'];
+    return process.env.MLS_TOKEN_URL;
   }
 
   private get baseUrl(): string | undefined {
-    return process.env['MLS_BASE_URL'];
+    return process.env.MLS_BASE_URL;
   }
 
   private async fetchToken(): Promise<string> {
@@ -433,40 +433,40 @@ export class ResoMlsAdapter extends ServiceAdapter {
 
   private mapResoRecord(raw: Record<string, unknown>): MlsListing {
     return {
-      listingKey: String(raw['ListingKey'] ?? ''),
-      listingId: String(raw['ListingId'] ?? raw['ListingKey'] ?? ''),
-      standardStatus: (raw['StandardStatus'] as MlsListing['standardStatus']) ?? 'Active',
-      listPrice: Number(raw['ListPrice'] ?? 0),
-      originalListPrice: Number(raw['OriginalListPrice'] ?? raw['ListPrice'] ?? 0),
-      address: String(raw['UnparsedAddress'] ?? ''),
-      city: String(raw['City'] ?? ''),
-      stateOrProvince: String(raw['StateOrProvince'] ?? ''),
-      postalCode: String(raw['PostalCode'] ?? ''),
-      county: String(raw['CountyOrParish'] ?? ''),
-      latitude: raw['Latitude'] != null ? Number(raw['Latitude']) : null,
-      longitude: raw['Longitude'] != null ? Number(raw['Longitude']) : null,
-      propertyType: (raw['PropertyType'] as MlsListing['propertyType']) ?? 'Residential',
-      propertySubType: String(raw['PropertySubType'] ?? ''),
-      bedroomsTotal: raw['BedroomsTotal'] != null ? Number(raw['BedroomsTotal']) : null,
+      listingKey: String(raw.ListingKey ?? ''),
+      listingId: String(raw.ListingId ?? raw.ListingKey ?? ''),
+      standardStatus: (raw.StandardStatus as MlsListing['standardStatus']) ?? 'Active',
+      listPrice: Number(raw.ListPrice ?? 0),
+      originalListPrice: Number(raw.OriginalListPrice ?? raw.ListPrice ?? 0),
+      address: String(raw.UnparsedAddress ?? ''),
+      city: String(raw.City ?? ''),
+      stateOrProvince: String(raw.StateOrProvince ?? ''),
+      postalCode: String(raw.PostalCode ?? ''),
+      county: String(raw.CountyOrParish ?? ''),
+      latitude: raw.Latitude != null ? Number(raw.Latitude) : null,
+      longitude: raw.Longitude != null ? Number(raw.Longitude) : null,
+      propertyType: (raw.PropertyType as MlsListing['propertyType']) ?? 'Residential',
+      propertySubType: String(raw.PropertySubType ?? ''),
+      bedroomsTotal: raw.BedroomsTotal != null ? Number(raw.BedroomsTotal) : null,
       bathroomsTotalInteger:
-        raw['BathroomsTotalInteger'] != null ? Number(raw['BathroomsTotalInteger']) : null,
-      livingArea: raw['LivingArea'] != null ? Number(raw['LivingArea']) : null,
-      lotSizeSquareFeet: raw['LotSizeSquareFeet'] != null ? Number(raw['LotSizeSquareFeet']) : null,
-      yearBuilt: raw['YearBuilt'] != null ? Number(raw['YearBuilt']) : null,
-      daysOnMarket: Number(raw['DaysOnMarket'] ?? 0),
-      modificationTimestamp: String(raw['ModificationTimestamp'] ?? new Date().toISOString()),
-      listingContractDate: String(raw['ListingContractDate'] ?? ''),
+        raw.BathroomsTotalInteger != null ? Number(raw.BathroomsTotalInteger) : null,
+      livingArea: raw.LivingArea != null ? Number(raw.LivingArea) : null,
+      lotSizeSquareFeet: raw.LotSizeSquareFeet != null ? Number(raw.LotSizeSquareFeet) : null,
+      yearBuilt: raw.YearBuilt != null ? Number(raw.YearBuilt) : null,
+      daysOnMarket: Number(raw.DaysOnMarket ?? 0),
+      modificationTimestamp: String(raw.ModificationTimestamp ?? new Date().toISOString()),
+      listingContractDate: String(raw.ListingContractDate ?? ''),
       media: (
-        (raw['Media'] as Array<{ MediaURL: string; MediaType: string; Order: number }>) ?? []
+        (raw.Media as Array<{ MediaURL: string; MediaType: string; Order: number }>) ?? []
       ).map((m) => ({
         mediaUrl: m.MediaURL,
         mediaType: m.MediaType,
         order: m.Order,
       })),
-      listAgentFullName: String(raw['ListAgentFullName'] ?? ''),
-      listOfficeName: String(raw['ListOfficeName'] ?? ''),
-      publicRemarks: String(raw['PublicRemarks'] ?? ''),
-      mlsName: String(raw['OriginatingSystemName'] ?? 'RESO MLS'),
+      listAgentFullName: String(raw.ListAgentFullName ?? ''),
+      listOfficeName: String(raw.ListOfficeName ?? ''),
+      publicRemarks: String(raw.PublicRemarks ?? ''),
+      mlsName: String(raw.OriginatingSystemName ?? 'RESO MLS'),
     };
   }
 

@@ -3,8 +3,6 @@ import {
   Brain,
   CheckCircle,
   ChevronRight,
-  Clock,
-  Mail,
   MessageSquare,
   Phone,
   Shield,
@@ -288,7 +286,7 @@ function RoutingFactorBar({
 
 function EngineerChip({ eng, primary }: { eng: Engineer; primary?: boolean }) {
   const loadPct = (eng.currentLoad / eng.maxLoad) * 100;
-  const loadColor = loadPct >= 75 ? '#ef4444' : loadPct >= 50 ? '#f59e0b' : '#10b981';
+  const _loadColor = loadPct >= 75 ? '#ef4444' : loadPct >= 50 ? '#f59e0b' : '#10b981';
   return (
     <div
       className="flex items-center gap-2 p-2 rounded-lg"

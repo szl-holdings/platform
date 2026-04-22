@@ -61,7 +61,7 @@ export default function ThreatTwinView() {
   const nodes = topoData?.nodes ?? [];
   const syncedCount = topoData?.syncedCount ?? 0;
   const driftedCount = topoData?.driftedCount ?? 0;
-  const offlineCount = topoData?.offlineCount ?? 0;
+  const _offlineCount = topoData?.offlineCount ?? 0;
   const totalVulns = topoData?.totalVulns ?? 0;
   const fidelity = topoData?.fidelity ?? '—';
 

@@ -1,19 +1,15 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
   AlertTriangle,
-  BarChart3,
   Building,
   Calculator,
   ChevronRight,
-  Clock,
   DollarSign,
   EyeOff,
   Scale,
   Shield,
   Ship,
-  TrendingUp,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';

@@ -1,9 +1,8 @@
 import { db } from '@szl-holdings/db';
-import { pcCommunicationsTable, pcDeadlinesTable, pcMattersTable } from '@szl-holdings/db/schema';
+import { pcCommunicationsTable, pcMattersTable } from '@szl-holdings/db/schema';
 import { and, desc, eq, gte } from 'drizzle-orm';
 import { forecastExpanded } from './prism-forecast-expanded';
 import { insurerPressureEngine } from './prism-insurer-pressure';
-import { portfolioLearning } from './prism-portfolio-learning';
 import { settlementFrictionEngine } from './prism-settlement-friction';
 
 interface ActionCardResult {
@@ -286,7 +285,7 @@ ${((snapshot.recentSignals as string[]) ?? []).map((s) => `- ${s}`).join('\n') |
   }
 
   private async whatChangedSinceMonday(
-    orgId: number,
+    _orgId: number,
     matterId: number,
     title: string,
     ref: string,
@@ -709,7 +708,7 @@ ${(pressure?.snapshot.overallScore ?? 0 > 0.65) ? 'If the pressure trend continu
     title: string,
     ref: string,
   ): Promise<ActionCardResult> {
-    const [pressure, friction, forecasts] = await Promise.all([
+    const [_pressure, friction, forecasts] = await Promise.all([
       insurerPressureEngine.getLatestSnapshot(orgId, matterId),
       settlementFrictionEngine.getLatestSnapshot(orgId, matterId),
       forecastExpanded.getForecastDiffView(orgId, matterId),

@@ -74,7 +74,7 @@ const RejectSchema = z.object({
   domain: z.string().default('substrate'),
 });
 
-const ListWorkflowsSchema = z.object({});
+const _ListWorkflowsSchema = z.object({});
 
 // ─── Registered workflows cache ───────────────────────────────────────────────
 // Since WorkflowRegistry in the substrate is module-local, we maintain our own
@@ -664,7 +664,7 @@ const RUN_SCHEMA = {
 const STAGE_RESULT_SCHEMA = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
   title: 'StageResult',
-  ...RUN_SCHEMA.$defs['StageResult'],
+  ...RUN_SCHEMA.$defs.StageResult,
 };
 
 const COUNTERFACTUAL_DIFF_SCHEMA = {
@@ -767,7 +767,7 @@ export async function handleResourceRead(
       let policies: unknown[] = [];
       try {
         const policyMod = await import('@szl-holdings/policy-engine');
-        const fn = (policyMod as Record<string, unknown>)['getRegisteredPolicies'];
+        const fn = (policyMod as Record<string, unknown>).getRegisteredPolicies;
         if (typeof fn === 'function') {
           policies = (fn() as Array<{ id: string; name: string }>).map((p) => ({
             id: p.id,

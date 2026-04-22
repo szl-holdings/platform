@@ -12,7 +12,6 @@ import { PulseBriefingPanel } from '@szl-holdings/shared-ui/pulse-briefing-panel
 import { motion as m } from 'framer-motion';
 import {
   Activity,
-  AlertTriangle,
   Anchor,
   BarChart3,
   Compass,
@@ -21,9 +20,7 @@ import {
   Navigation,
   Package,
   Ship,
-  Truck,
   Waves,
-  Wind,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 

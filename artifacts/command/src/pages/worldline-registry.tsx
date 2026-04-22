@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
+const _BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
 
 type TwinState = 'stable' | 'degraded' | 'awaiting_approval' | 'offline';
 type Domain = 'aegis' | 'terra' | 'vessels' | 'alloy' | 'prism' | 'lyte';
@@ -663,7 +663,7 @@ export function WorldlineRegistryPage() {
                     style={{ color: 'rgba(255,255,255,0.3)' }}
                   >
                     <Copy className="w-2 h-2" />
-                    {copiedId === br.id ? 'Copied!' : br.id.slice(0, 12) + '…'}
+                    {copiedId === br.id ? 'Copied!' : `${br.id.slice(0, 12)}…`}
                   </button>
                 </div>
               </div>
@@ -782,7 +782,7 @@ export function WorldlineRegistryPage() {
                 <div className="mt-3 flex gap-1 flex-wrap">
                   {wl.twins.map((tw) => {
                     const s = STATE_CONFIG[tw.state];
-                    const d = DOMAIN_CONFIG[tw.domain];
+                    const _d = DOMAIN_CONFIG[tw.domain];
                     return (
                       <span
                         key={tw.id}

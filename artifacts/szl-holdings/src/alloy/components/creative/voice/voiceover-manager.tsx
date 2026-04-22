@@ -15,7 +15,7 @@ export function VoiceoverManager({ campaignId }: { campaignId: string }) {
         campaignId: parseInt(campaignId, 10),
         text: newText,
         provider: 'elevenlabs',
-        name: 'AI Generate - ' + new Date().toLocaleTimeString(),
+        name: `AI Generate - ${new Date().toLocaleTimeString()}`,
       },
       {
         onSuccess: () => {

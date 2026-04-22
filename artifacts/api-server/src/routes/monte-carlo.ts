@@ -1,6 +1,5 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import type { RequestHandler } from 'express';
-import { type IRouter, type Request, type Response, Router } from 'express';
+import { type RequestHandler, type IRouter, type Request, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import {
@@ -26,7 +25,7 @@ const customSimulateSchema = z.object({
   batchSize: z.number().int().min(100).max(5000).optional(),
 });
 
-const compareSchema = z.object({
+const _compareSchema = z.object({
   scenarioIds: z.array(z.string().min(1).max(200)).min(2).max(10),
   iterations: z.number().int().min(100).max(100000).optional(),
 });

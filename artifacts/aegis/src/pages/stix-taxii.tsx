@@ -6,14 +6,10 @@ import {
   AlertTriangle,
   Bug,
   CheckCircle,
-  ChevronRight,
-  Clock,
-  Database,
   Download,
   Eye,
   FileText,
   Globe,
-  Layers,
   Link2,
   Radio,
   Shield,
@@ -248,7 +244,7 @@ export default function StixTaxii() {
   const [activeTab, setActiveTab] = useState<'objects' | 'feeds' | 'export'>('objects');
   const [selectedType, setSelectedType] = useState<StixType | 'all'>('all');
   const [selectedObject, setSelectedObject] = useState<StixObject | null>(STIX_OBJECTS[0]);
-  const [selectedForExport, setSelectedForExport] = useState<Set<string>>(new Set());
+  const [_selectedForExport, _setSelectedForExport] = useState<Set<string>>(new Set());
 
   const { data: stixData } = useStandardQuery({
     queryKey: ['stix-objects'],

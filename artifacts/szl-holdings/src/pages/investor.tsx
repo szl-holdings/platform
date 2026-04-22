@@ -1,8 +1,8 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
 import {
-  Building2, ArrowRight, Layers, Shield, Target, Clock, Zap,
-  CheckCircle2, Map, Ship, ShieldCheck, Home, BriefcaseBusiness
+  Building2, ArrowRight, Shield, Target, Clock, Zap,
+  CheckCircle2, Ship, ShieldCheck, Home, BriefcaseBusiness
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -77,7 +77,7 @@ export default function InvestorPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
           <section className="szl-grid-texture szl-depth-glow-gold" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>

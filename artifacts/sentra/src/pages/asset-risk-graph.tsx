@@ -1,7 +1,7 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { ChevronDown, ChevronRight, Cpu, Database, Filter, RefreshCcw, Search, ShieldAlert } from 'lucide-react';
 import { useState } from 'react';
-import { DataProvenance, EmptyState, PageHeader, SeverityChip } from '@/lib/data-provenance';
+import { EmptyState, PageHeader, SeverityChip } from '@/lib/data-provenance';
 import { sentraTwin, type CyberAsset } from '@/data/sentra-twin';
 
 type FilterType = 'all' | 'OT' | 'IT' | 'IoT';

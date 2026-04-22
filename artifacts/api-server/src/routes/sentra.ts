@@ -1,17 +1,12 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
-import { handleRouteError, sendCreated, sendError, sendNotFound, sendSuccess } from '../lib/api-response';
+import { handleRouteError, sendCreated, sendNotFound, sendSuccess } from '../lib/api-response';
 import { validateBody } from '../lib/validation';
 import { logger } from '../lib/logger';
 import {
-  type IncidentSeverity,
-  type IncidentStatus,
   type Incident,
-  type Alert,
   type TimelineEntry,
-  hoursAgo,
-  minsAgo,
   incidentsStore,
   alertsStore,
 } from '../services/sentra-store';

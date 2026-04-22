@@ -32,7 +32,7 @@ export function useOfflineReady(): OfflineReadyResult {
 
   useEffect(() => {
     refresh();
-  }, [isOffline, refresh]);
+  }, [refresh]);
 
   return {
     isOfflineReady: true,

@@ -1,5 +1,5 @@
 import { m } from 'framer-motion';
-import { ArrowRight, Building2, CheckCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle } from 'lucide-react';
 import { useEffect } from 'react';
 import { Link } from 'wouter';
 import { Footer } from '@/components/Footer';

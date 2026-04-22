@@ -1,22 +1,14 @@
-import { AnimatePresence, m } from 'framer-motion';
+import { m } from 'framer-motion';
 import {
   ArrowUpRight,
-  BarChart3,
   Check,
   CheckCircle2,
-  ChevronDown,
-  ChevronUp,
   Copy,
   Gift,
   Globe,
   Link2,
-  Mail,
-  Plus,
   Share2,
   Star,
-  Tag,
-  Target,
-  Trash2,
   TrendingUp,
   Users,
   Zap,
@@ -25,7 +17,7 @@ import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { DistributionOsLayout } from './admin-dashboard';
 
-const API = import.meta.env.VITE_API_URL || '';
+const _API = import.meta.env.VITE_API_URL || '';
 
 interface Subscriber {
   id: number;

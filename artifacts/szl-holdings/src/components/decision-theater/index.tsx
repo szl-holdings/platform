@@ -18,14 +18,11 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ProofDrawer } from '@/components/ProofDrawer';
 import type { DecisionCase } from '@/data/decision-theater-cases';
-import type { EngineState } from '@/hooks/useDecisionEngine';
-import { useDecisionEngine } from '@/hooks/useDecisionEngine';
-import type { LiveAuditRecord, LiveMetrics, LiveRecommendation } from '@/hooks/useLiveTheaterData';
-import { useLiveTheaterData } from '@/hooks/useLiveTheaterData';
+import { type EngineState, useDecisionEngine } from '@/hooks/useDecisionEngine';
+import { type LiveAuditRecord, type LiveMetrics, type LiveRecommendation, useLiveTheaterData } from '@/hooks/useLiveTheaterData';
 import { cn } from '@/lib/utils';
 import { LiveDataBanner } from './helpers';
-import type { StageId } from './scenarios';
-import { DEMO_SCENARIO, LOOP_STAGES } from './scenarios';
+import { type StageId, DEMO_SCENARIO, LOOP_STAGES } from './scenarios';
 import { ContextStage, LiveContextStage } from './stages/context';
 import { ExecutionStage } from './stages/execution';
 import { LearningStage } from './stages/learning';
@@ -928,7 +925,7 @@ export default function DecisionTheater({ activeCase }: DecisionTheaterProps = {
           )}
         >
           <ChevronLeft className="w-4 h-4" />
-          {currentStage > 0 ? LOOP_STAGES[currentStage - 1]!.label : 'Previous'}
+          {currentStage > 0 ? LOOP_STAGES[currentStage - 1]?.label : 'Previous'}
         </button>
 
         <div className="flex items-center gap-1">
@@ -959,7 +956,7 @@ export default function DecisionTheater({ activeCase }: DecisionTheaterProps = {
           )}
         >
           {currentStage < LOOP_STAGES.length - 1
-            ? LOOP_STAGES[currentStage + 1]!.label
+            ? LOOP_STAGES[currentStage + 1]?.label
             : 'Complete'}
           <ChevronRight className="w-4 h-4" />
         </button>

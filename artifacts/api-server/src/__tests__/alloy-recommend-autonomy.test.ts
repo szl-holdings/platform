@@ -19,8 +19,7 @@
  * approval row and operators would have nothing to act on.
  */
 
-import type { Router as ExpressRouter } from 'express';
-import express from 'express';
+import express, { type Router as ExpressRouter } from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -302,7 +301,7 @@ describe('POST /alloy/recommend autonomy → approval wiring', () => {
     expect(body.approval?.status).toBe('pending');
 
     expect(createApprovalRequestMock).toHaveBeenCalledTimes(1);
-    const call = createApprovalRequestMock.mock.calls[0]![0] as Record<string, unknown>;
+    const call = createApprovalRequestMock.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(call.orgId).toBe(7);
     expect(call.resourceType).toBe('alloy_recommendation');
     expect(call.resourceId).toBe('rec-uuid-1');
@@ -331,7 +330,7 @@ describe('POST /alloy/recommend autonomy → approval wiring', () => {
     expect(body.draftArtifactId).toBeNull();
 
     expect(createApprovalRequestMock).toHaveBeenCalledTimes(1);
-    const call = createApprovalRequestMock.mock.calls[0]![0] as Record<string, unknown>;
+    const call = createApprovalRequestMock.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(call.resourceId).toBe('rec-uuid-1');
     expect((call.payload as Record<string, unknown>).autonomyMode).toBe('recommend');
 
@@ -352,7 +351,7 @@ describe('POST /alloy/recommend autonomy → approval wiring', () => {
 
     // Approval row created with reference to recommendation + draft artifact id.
     expect(createApprovalRequestMock).toHaveBeenCalledTimes(1);
-    const call = createApprovalRequestMock.mock.calls[0]![0] as Record<string, unknown>;
+    const call = createApprovalRequestMock.mock.calls[0]?.[0] as Record<string, unknown>;
     const payload = call.payload as Record<string, unknown>;
     expect(payload.autonomyMode).toBe('draft');
     expect(payload.draftArtifactId).toBe(body.draftArtifactId);
@@ -360,7 +359,7 @@ describe('POST /alloy/recommend autonomy → approval wiring', () => {
     // platform_artifacts row inserted in pending_review state.
     const artifactInserts = insertCalls.filter((c) => c.table === ALLOY_ARTIFACTS_TABLE);
     expect(artifactInserts).toHaveLength(1);
-    const artifactRow = artifactInserts[0]!.values;
+    const artifactRow = artifactInserts[0]?.values;
     expect(artifactRow.status).toBe('pending_review');
     expect(artifactRow.approvalStatus).toBe('pending');
     expect(artifactRow.orgId).toBe(7);

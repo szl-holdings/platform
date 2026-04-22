@@ -3,7 +3,7 @@ export const API = '/api';
 export async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(`${API}${path}`, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...(opts?.headers ?? {}) },
+    headers: { 'Content-Type': 'application/json', ...opts?.headers },
     ...opts,
   });
   if (!res.ok) {

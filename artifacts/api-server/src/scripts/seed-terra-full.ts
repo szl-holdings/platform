@@ -1,17 +1,12 @@
 import {
   db,
   type InsertTerraDeal,
-  type InsertTerraDistressAlert,
   type InsertTerraDistressProperty,
   type InsertTerraLead,
   terraDealsTable,
-  terraDistressAlertsTable,
-  terraDistressPropertiesTable,
   terraIngestionRunsTable,
   terraLeadsTable,
-  terraSavedOpportunitiesTable,
 } from '@szl-holdings/db';
-import { eq, sql } from 'drizzle-orm';
 import {
   completeIngestionRun,
   generateAlertsForProperty,
@@ -39,8 +34,8 @@ function futureDateStr(daysAhead: number) {
   return d.toISOString().slice(0, 10);
 }
 
-const BOROUGHS = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'] as const;
-const COUNTIES = [
+const _BOROUGHS = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'] as const;
+const _COUNTIES = [
   'New York',
   'Kings',
   'Queens',
@@ -1023,7 +1018,7 @@ function generateProperties(): InsertTerraDistressProperty[] {
         externalId: `dp-${counter}`,
         address,
         borough: borough as any,
-        county: BOROUGH_DATA[borough]!.county,
+        county: BOROUGH_DATA[borough]?.county,
         zipCode,
         propertyType: propertyType as any,
         distressType: distressType as any,
@@ -1050,7 +1045,7 @@ function generateProperties(): InsertTerraDistressProperty[] {
           distressType,
           borough.toLowerCase().replace(' ', '-'),
           propertyType,
-          confidence + '-confidence',
+          `${confidence}-confidence`,
         ],
         timeline: generateTimeline(distressType, filingDate, auctionDate),
         connectorSource: pick(CONNECTOR_SOURCES),
@@ -1542,13 +1537,7 @@ function generateIngestionRuns(): Array<{
 }
 
 async function main() {
-  console.log(
-    'Starting Terra full seed (500+ properties, 100+ leads, 50+ deals, 20+ ingestion runs)...',
-  );
-
-  console.log('Generating property records...');
   const allProps = generateProperties();
-  console.log(`  Generated ${allProps.length} properties`);
 
   const runId = await startIngestionRun('seed', { description: 'Full Terra distress seed v2' });
 
@@ -1557,8 +1546,6 @@ async function main() {
   let alertsGenerated = 0;
   const insertedPropertyIds: number[] = [];
   const propertyMap = new Map<number, InsertTerraDistressProperty>();
-
-  console.log('Inserting properties...');
   for (const prop of allProps) {
     try {
       const { dbId, isNew } = await upsertDistressProperty(prop, runId);
@@ -1568,12 +1555,11 @@ async function main() {
         propertyMap.set(dbId, prop);
         const alerts = await generateAlertsForProperty(prop, dbId, prop.externalId!);
         alertsGenerated += alerts;
-        if (inserted % 50 === 0) console.log(`  Inserted ${inserted} properties...`);
+        if (inserted % 50 === 0) {}
       } else {
         skipped++;
       }
-    } catch (err) {
-      console.error(`  ! Failed: ${prop.externalId}`, err);
+    } catch (_err) {
     }
   }
 
@@ -1585,10 +1571,6 @@ async function main() {
     alertsGenerated,
     status: 'completed',
   });
-
-  console.log(`\nProperties: ${inserted} inserted, ${skipped} skipped`);
-
-  console.log('\nSeeding ingestion run history...');
   const historicRuns = generateIngestionRuns();
   for (const run of historicRuns) {
     try {
@@ -1604,13 +1586,9 @@ async function main() {
         completedAt: run.completedAt,
         metadata: run.metadata,
       });
-    } catch (err) {
-      console.error(`  ! Failed ingestion run insert`, err);
+    } catch (_err) {
     }
   }
-  console.log(`  Inserted ${historicRuns.length} ingestion run records`);
-
-  console.log('\nSeeding leads...');
   const allDbPropertyIds = [...insertedPropertyIds];
   const leads = generateLeads(allDbPropertyIds.slice(0, 40), propertyMap);
   const leadDbIds: number[] = [];
@@ -1622,39 +1600,25 @@ async function main() {
         .onConflictDoNothing({ target: terraLeadsTable.externalId })
         .returning({ id: terraLeadsTable.id });
       if (result[0]) leadDbIds.push(result[0].id);
-    } catch (err) {
-      console.error(`  ! Failed lead: ${lead.externalId}`, err);
+    } catch (_err) {
     }
   }
-  console.log(`  Inserted ${leadDbIds.length} leads`);
-
-  console.log('\nSeeding deals...');
   const deals = generateDeals(allDbPropertyIds.slice(0, 50), leadDbIds.slice(0, 30), propertyMap);
-  let dealCount = 0;
+  let _dealCount = 0;
   for (const deal of deals) {
     try {
       await db
         .insert(terraDealsTable)
         .values(deal)
         .onConflictDoNothing({ target: terraDealsTable.externalId });
-      dealCount++;
-    } catch (err) {
-      console.error(`  ! Failed deal: ${deal.externalId}`, err);
+      _dealCount++;
+    } catch (_err) {
     }
   }
-  console.log(`  Inserted ${dealCount} deals`);
-
-  console.log('\nFull Terra seed complete:');
-  console.log(`  Properties: ${inserted}`);
-  console.log(`  Leads: ${leadDbIds.length}`);
-  console.log(`  Deals: ${dealCount}`);
-  console.log(`  Ingestion runs: ${historicRuns.length}`);
-  console.log(`  Alerts generated: ${alertsGenerated}`);
 
   process.exit(0);
 }
 
-main().catch((err) => {
-  console.error('Full seed failed:', err);
+main().catch((_err) => {
   process.exit(1);
 });

@@ -1,7 +1,6 @@
 import type { IRouter } from 'express';
 import { lazyMatch, lazyMount } from '../../lib/lazy-router';
 import {
-  idempotencyMiddleware,
   optionalIdempotencyMiddleware,
 } from '../../middlewares/idempotency';
 import {

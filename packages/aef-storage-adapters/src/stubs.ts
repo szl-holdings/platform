@@ -20,7 +20,7 @@ function notImplemented(name: string): never {
 }
 
 export class PgvectorVectorStoreStub implements VectorStore {
-  constructor(private readonly connectionString: string) {}
+  constructor(readonly _connectionString: string) {}
 
   async upsert(_record: VectorRecord): Promise<void> {
     notImplemented('PgvectorVectorStoreStub.upsert');
@@ -45,10 +45,7 @@ export class PgvectorVectorStoreStub implements VectorStore {
 }
 
 export class AzureAISearchVectorStoreStub implements VectorStore {
-  constructor(
-    private readonly endpoint: string,
-    private readonly apiKey: string,
-    private readonly indexName: string,
+  constructor(readonly _endpoint: string,readonly _apiKey: string,readonly _indexName: string,
   ) {}
 
   async upsert(_record: VectorRecord): Promise<void> {
@@ -74,10 +71,7 @@ export class AzureAISearchVectorStoreStub implements VectorStore {
 }
 
 export class AzureAISearchMetadataIndexStoreStub implements MetadataIndexStore {
-  constructor(
-    private readonly endpoint: string,
-    private readonly apiKey: string,
-    private readonly indexName: string,
+  constructor(readonly _endpoint: string,readonly _apiKey: string,readonly _indexName: string,
   ) {}
 
   async upsert(_record: MetadataIndexRecord): Promise<void> {
@@ -103,7 +97,7 @@ export class AzureAISearchMetadataIndexStoreStub implements MetadataIndexStore {
 }
 
 export class ObjectStorageRawDocStoreStub implements RawDocStore {
-  constructor(private readonly bucketUrl: string) {}
+  constructor(readonly _bucketUrl: string) {}
 
   async upsert(_doc: RawDocRecord): Promise<void> {
     notImplemented('ObjectStorageRawDocStoreStub.upsert');
@@ -123,7 +117,7 @@ export class ObjectStorageRawDocStoreStub implements RawDocStore {
 }
 
 export class ObjectStorageChunkStoreStub implements ChunkStore {
-  constructor(private readonly bucketUrl: string) {}
+  constructor(readonly _bucketUrl: string) {}
 
   async upsert(_chunk: ChunkRecord): Promise<void> {
     notImplemented('ObjectStorageChunkStoreStub.upsert');

@@ -63,7 +63,7 @@ function collectBrowserFingerprint(): string {
       hash = ((hash << 5) + hash) ^ components.charCodeAt(i);
       hash = hash & 0xffffffff;
     }
-    return (hash >>> 0).toString(16).padStart(8, '0') + '-' + components.length.toString(16);
+    return `${(hash >>> 0).toString(16).padStart(8, '0')}-${components.length.toString(16)}`;
   } catch {
     return 'fp-unavailable';
   }
@@ -73,7 +73,7 @@ async function apiFetch(path: string, options?: RequestInit) {
   const res = await fetch(`${BASE_URL}/api${path}`, {
     ...options,
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...(options?.headers || {}) },
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Request failed' }));
@@ -94,7 +94,7 @@ function canvasToBase64(canvas: HTMLCanvasElement): string {
   return canvas.toDataURL('image/png');
 }
 
-function isCanvasBlank(canvas: HTMLCanvasElement): boolean {
+function _isCanvasBlank(canvas: HTMLCanvasElement): boolean {
   const ctx = canvas.getContext('2d');
   if (!ctx) return true;
   const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -194,7 +194,7 @@ export function EmbeddedSigner({
     ctx.arc(pos.x, pos.y, 1.5, 0, 2 * Math.PI);
     ctx.fillStyle = '#1e3a5f';
     ctx.fill();
-  }, []);
+  }, [getPos]);
 
   const onDrawMove = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
@@ -216,7 +216,7 @@ export function EmbeddedSigner({
       lastPos.current = pos;
       setHasDrawn(true);
     },
-    [isDrawing],
+    [isDrawing, getPos],
   );
 
   const onDrawEnd = useCallback(() => {
@@ -299,7 +299,7 @@ export function EmbeddedSigner({
     } finally {
       setSubmitting(false);
     }
-  }, [agreed, documentId, sigId, mode, typedName, hasDrawn, uploadPreview, onComplete]);
+  }, [agreed, documentId, sigId, onComplete, captureSignatureBase64]);
 
   const handleDecline = useCallback(async () => {
     if (!window.confirm('Are you sure you want to decline to sign this document?')) return;

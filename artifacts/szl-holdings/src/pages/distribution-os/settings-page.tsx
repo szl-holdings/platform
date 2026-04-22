@@ -1,27 +1,18 @@
 import { AnimatePresence, m } from 'framer-motion';
 import {
-  AlertCircle,
   BookOpen,
-  Building2,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
   Edit3,
   ExternalLink,
-  Eye,
-  EyeOff,
   Globe,
-  GripVertical,
   Link2,
   Loader2,
   Mail,
   Newspaper,
-  Phone,
   Plus,
   RefreshCw,
   Save,
-  Settings,
-  Tag,
   ToggleLeft,
   ToggleRight,
   Trash2,
@@ -203,7 +194,7 @@ export default function SettingsPage() {
   const [integrations, setIntegrations] = useState<Integration[]>([]);
   const [settings, setSettings] = useState<SiteSetting[]>([]);
   const [linktreeItems, setLinktreeItems] = useState<LinktreeItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [saving, setSaving] = useState(false);
@@ -495,7 +486,6 @@ export default function SettingsPage() {
                         {isEditing ? (
                           <div style={{ display: 'flex', gap: '0.5rem', flex: 1 }}>
                             <input
-                              autoFocus
                               value={editValue}
                               onChange={(e) => setEditValue(e.target.value)}
                               onKeyDown={(e) => {

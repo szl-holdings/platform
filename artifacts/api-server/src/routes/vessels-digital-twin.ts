@@ -6,12 +6,10 @@ import {
   vesselsRoutesTable,
   vesselsTable,
 } from '@szl-holdings/db';
-import type { RouteSimulationParams, VesselUsdState } from '@szl-holdings/openusd-export';
-import { exportRouteSimulation, exportVesselTwin } from '@szl-holdings/openusd-export';
+import { type RouteSimulationParams, type VesselUsdState, exportRouteSimulation, exportVesselTwin } from '@szl-holdings/openusd-export';
 import { desc, eq } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendNotFound } from '../lib/api-response';
 import { validateBody } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
@@ -87,7 +85,7 @@ router.get(
         routeWaypoints: Array.isArray(
           (activeRoute as { waypoints?: unknown } | undefined)?.waypoints,
         )
-          ? (activeRoute!.waypoints as Array<{ lat: number; lon: number; name?: string }>)
+          ? (activeRoute?.waypoints as Array<{ lat: number; lon: number; name?: string }>)
           : [],
         deadweightTonnage: vessel.grossTonnage ? Number(vessel.grossTonnage) : undefined,
         flagState: vessel.flag ?? undefined,
@@ -201,7 +199,7 @@ router.post(
       const waypoints = Array.isArray(
         (activeRoute as { waypoints?: unknown } | undefined)?.waypoints,
       )
-        ? (activeRoute!.waypoints as Array<{ lat: number; lon: number; name?: string }>)
+        ? (activeRoute?.waypoints as Array<{ lat: number; lon: number; name?: string }>)
         : [];
 
       const simulationParams: RouteSimulationParams = {

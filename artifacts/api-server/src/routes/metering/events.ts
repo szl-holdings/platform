@@ -1,58 +1,31 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  billingLineItemsTable,
-  costAllocationsTable,
   db,
-  invoicesTable,
   meteringEventsTable,
-  organizationsTable,
-  quotaConfigsTable,
-  quotaViolationsTable,
-  rateCardAssignmentsTable,
-  rateCardsTable,
-  rateCardTiersTable,
-  revenueEventsTable,
-  subscriptionsTable,
-  usageAggregatesTable,
 } from '@szl-holdings/db';
 import {
   and,
-  asc,
-  avg,
-  count,
   desc,
   eq,
   gte,
-  inArray,
-  isNull,
   lte,
-  ne,
-  sql,
-  sum,
 } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
   sendBadRequest,
-  sendError,
-  sendNotFound,
   sendSuccess,
 } from '../../lib/api-response';
-import { logger } from '../../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../../lib/validation';
-import { authMiddleware, parseIdParam, requireRole } from '../../middlewares/auth';
-import { assertTenantAccess, tenantScope } from '../../middlewares/tenant-scope';
+import { authMiddleware, requireRole } from '../../middlewares/auth';
 import {
   checkAndEnforceQuota,
-  computeCharge,
-  meteringRateLimit,
-  periodBounds,
   recomputeAggregate,
 } from './shared';
 
 const router: IRouter = Router();
-const ADMIN_ROLES = ['admin', 'super_admin', 'ops'] as const;
+const _ADMIN_ROLES = ['admin', 'super_admin', 'ops'] as const;
 const READ_ROLES = ['admin', 'super_admin', 'ops', 'analyst'] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────

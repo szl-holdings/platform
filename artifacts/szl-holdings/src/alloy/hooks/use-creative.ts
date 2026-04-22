@@ -78,7 +78,7 @@ export function useScripts(campaignId: string) {
     queryKey: ['creative-scripts', campaignId],
     queryFn: async () => {
       const numId = parseInt(campaignId, 10);
-      if (isNaN(numId)) return [];
+      if (Number.isNaN(numId)) return [];
       return (await creativeApi.scripts.listForCampaign(numId)) as Script[];
     },
   });
@@ -103,7 +103,7 @@ export function useStoryboards(campaignId: string) {
     queryKey: ['creative-storyboards', campaignId],
     queryFn: async () => {
       const numId = parseInt(campaignId, 10);
-      if (isNaN(numId)) return [];
+      if (Number.isNaN(numId)) return [];
       return (await creativeApi.storyboards.listForCampaign(numId)) as StoryboardScene[];
     },
   });
@@ -133,7 +133,7 @@ export function useVoiceovers(campaignId: string) {
     queryKey: ['creative-voiceovers', campaignId],
     queryFn: async () => {
       const numId = parseInt(campaignId, 10);
-      if (isNaN(numId)) return [];
+      if (Number.isNaN(numId)) return [];
       return (await creativeApi.voiceAssets.listForCampaign(numId)) as Voiceover[];
     },
   });
@@ -161,7 +161,7 @@ export function useAssets(campaignId: string) {
     queryKey: ['creative-assets', campaignId],
     queryFn: async () => {
       const numId = parseInt(campaignId, 10);
-      if (isNaN(numId)) return [];
+      if (Number.isNaN(numId)) return [];
       return (await creativeApi.campaignAssets.listForCampaign(numId)) as Asset[];
     },
   });
@@ -183,7 +183,7 @@ export function useReviews(campaignId: string) {
     queryKey: ['creative-reviews', campaignId],
     queryFn: async () => {
       const numId = parseInt(campaignId, 10);
-      if (isNaN(numId)) return [];
+      if (Number.isNaN(numId)) return [];
       return (await creativeApi.reviews.listForCampaign(numId)) as Review[];
     },
   });

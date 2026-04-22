@@ -1,15 +1,12 @@
 import { m } from 'framer-motion';
 import {
   BarChart3,
-  Calendar,
   Clock,
   Download,
   Eye,
   FileText,
-  LineChart,
   Loader2,
   Megaphone,
-  RefreshCw,
   TrendingUp,
   Users,
 } from 'lucide-react';

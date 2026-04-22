@@ -1,6 +1,6 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion } from 'framer-motion';
-import { ArrowRight, Building2, Calendar, DollarSign, Handshake, MapPin, User } from 'lucide-react';
+import { ArrowRight, Building2, MapPin, User } from 'lucide-react';
 import { deals } from '@/data/portfolio';
 
 const stages = [

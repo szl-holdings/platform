@@ -1,8 +1,7 @@
 import { type CapturedStepIO as CoreStepIO, listStepIOForRun } from '@workspace/agents-core';
-import type { EvalCase, EvalExecutor, EvalRunReport, EvalSuiteDef } from '@workspace/eval-forge';
-import { runEvalSuite } from '@workspace/eval-forge';
+import { type EvalCase, type EvalExecutor, type EvalRunReport, type EvalSuiteDef, runEvalSuite } from '@workspace/eval-forge';
 import { defaultTraceStore, type ToolCallRecord, type TraceRecord } from '@workspace/trace-graph';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 export interface CapturedStepIO {
   stepId: string;
@@ -129,7 +128,7 @@ export async function replayRunAsEval(
 
   const stepsByStepId = new Map(manifest.steps.map((s) => [s.stepId, s]));
 
-  const executor: EvalExecutor = async (input, caseId, _domain) => {
+  const executor: EvalExecutor = async (_input, caseId, _domain) => {
     const stepId = caseId.split(':')[2];
     const capturedStep = stepId ? stepsByStepId.get(stepId) : undefined;
 

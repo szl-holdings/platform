@@ -328,7 +328,7 @@ export class InfraSimulator {
 
     const isTraining = activeJob?.type === 'training' || activeJob?.type === 'fine-tuning';
     const trainingLoss = isTraining
-      ? parseFloat((2.8 - (activeJob!.progress / 100) * 2.4 + rng.gauss(0, 0.05)).toFixed(4))
+      ? parseFloat((2.8 - (activeJob?.progress / 100) * 2.4 + rng.gauss(0, 0.05)).toFixed(4))
       : undefined;
     const gradientNorm = isTraining ? parseFloat(rng.range(0.8, 4.5).toFixed(3)) : undefined;
 
@@ -377,7 +377,7 @@ export class InfraSimulator {
 
     const nodes: GpuNode[] = nodeConfigs.map((cfg, i) => {
       const tier = i < 2 ? 0 : 1;
-      const name = NODE_NAMES[tier]![i < 2 ? i : i - 2]!;
+      const name = NODE_NAMES[tier]?.[i < 2 ? i : i - 2]!;
       return this.generateGpuNode(
         `node-${String(i + 1).padStart(2, '0')}`,
         name,
@@ -464,7 +464,7 @@ export class InfraSimulator {
       'cdn-edge',
       'monitoring',
     ];
-    const actions = ['ALLOW', 'DENY', 'INSPECT'] as const;
+    const _actions = ['ALLOW', 'DENY', 'INSPECT'] as const;
     const threats = [
       'port-scan',
       'data-exfiltration',
@@ -523,7 +523,7 @@ export class InfraSimulator {
       'OOMKilled',
     ];
 
-    return Array.from({ length: count }, (_, i) => {
+    return Array.from({ length: count }, (_, _i) => {
       const status = rng.pick(statuses);
       return {
         namespace: rng.pick(namespaces),

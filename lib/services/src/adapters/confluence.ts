@@ -37,11 +37,11 @@ export class ConfluenceAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ['CONFLUENCE_API_TOKEN', 'CONFLUENCE_BASE_URL'];
 
   private get apiToken(): string | undefined {
-    return process.env['CONFLUENCE_API_TOKEN'];
+    return process.env.CONFLUENCE_API_TOKEN;
   }
 
   private get baseUrl(): string | undefined {
-    return process.env['CONFLUENCE_BASE_URL'];
+    return process.env.CONFLUENCE_BASE_URL;
   }
 
   protected override async performHealthCheck(): Promise<void> {

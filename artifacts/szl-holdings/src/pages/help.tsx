@@ -1,6 +1,6 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { HelpCircle, BookOpen, MessageSquare, FileText, Search, ArrowRight, Mail, Shield, ExternalLink, Zap } from "lucide-react";
+import { HelpCircle, BookOpen, MessageSquare, FileText, ArrowRight, Mail, Shield, ExternalLink, Zap } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";

@@ -1,7 +1,7 @@
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+import path from 'node:path';
 import { defineConfig } from 'vite';
 import { sharedUiManifestPlugin } from './sharedUiManifestPlugin';
 

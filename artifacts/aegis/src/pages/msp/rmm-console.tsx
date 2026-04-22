@@ -14,22 +14,15 @@ import {
   Clock,
   Cpu,
   Eye,
-  HardDrive,
-  MemoryStick,
   Monitor,
   Package,
-  Play,
   RefreshCw,
-  RotateCcw,
   Server,
   Shield,
   Terminal,
   Wifi,
-  WifiOff,
-  Wrench,
   X,
   XCircle,
-  Zap,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -311,7 +304,7 @@ export default function RMMConsole() {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<'endpoints' | 'actions' | 'healing'>('endpoints');
   const [systemMetrics, setSystemMetrics] = useState<SystemMetrics | null>(null);
-  const [metricsLoading, setMetricsLoading] = useState(true);
+  const [_metricsLoading, setMetricsLoading] = useState(true);
   const [lastPolled, setLastPolled] = useState<Date>(new Date());
   const [actionDevice, setActionDevice] = useState<Device | null>(null);
   const [actionFilter, setActionFilter] = useState('all');

@@ -1,7 +1,7 @@
 import { Storage } from '@google-cloud/storage';
-import { existsSync, readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const REPLIT_SIDECAR_ENDPOINT = 'http://127.0.0.1:1106';
 const SEED_DATA_PREFIX = 'seed-data';
@@ -27,7 +27,7 @@ function createGCSClient(): Storage {
 }
 
 async function loadFromGCS<T>(objectKey: string): Promise<T | null> {
-  const bucketId = process.env['DEFAULT_OBJECT_STORAGE_BUCKET_ID'];
+  const bucketId = process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID;
   if (!bucketId) return null;
 
   try {
@@ -47,8 +47,8 @@ async function loadFromGCS<T>(objectKey: string): Promise<T | null> {
 function resolveLocalPath(relativePath: string): string | null {
   const candidates: string[] = [];
 
-  if (process.env['SEED_DATA_DIR']) {
-    candidates.push(join(process.env['SEED_DATA_DIR'], relativePath));
+  if (process.env.SEED_DATA_DIR) {
+    candidates.push(join(process.env.SEED_DATA_DIR, relativePath));
   }
 
   candidates.push(join(process.cwd(), 'seed-data', relativePath));

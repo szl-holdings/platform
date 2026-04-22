@@ -21,7 +21,7 @@ import {
   firestormIncidentsTable,
   firestormRiskScoresTable,
 } from '@szl-holdings/db';
-import { desc, eq } from 'drizzle-orm';
+import { desc, } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
@@ -327,7 +327,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const identityId = (req.query['identityId'] as string | undefined) ?? 'j.smith@corp.com';
+      const identityId = (req.query.identityId as string | undefined) ?? 'j.smith@corp.com';
 
       const [assets, findings] = await Promise.all([
         db
@@ -388,9 +388,9 @@ router.get(
           .slice(0, 2)
           .map((a) => `Asset-Group-${a.id}`)
           .concat(['Domain-Users']),
-        mfaEnabled: deterministicHash(identityId + 'mfa') % 2 === 0,
+        mfaEnabled: deterministicHash(`${identityId}mfa`) % 2 === 0,
         lastLogin: 'unknown',
-        anomalyCount: deterministicHash(identityId + 'anomaly') % 5,
+        anomalyCount: deterministicHash(`${identityId}anomaly`) % 5,
       };
 
       const reachableAssets = assets.slice(0, 12).map((a, i) => ({
@@ -590,7 +590,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const rawId = req.query['incidentId'] as string | undefined;
+      const rawId = req.query.incidentId as string | undefined;
       const incidentIdParam = rawId ? parseInt(rawId, 10) : null;
 
       const incidents = await db

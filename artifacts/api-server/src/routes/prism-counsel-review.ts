@@ -19,7 +19,7 @@ const router = Router();
 router.use(authMiddleware());
 router.use(tenantScope({ required: true }));
 
-const REVIEW_LIFECYCLE_STATES = [
+const _REVIEW_LIFECYCLE_STATES = [
   'new',
   'pending_review',
   'in_review',
@@ -229,7 +229,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const userId = req.query.userId ? parseInt(req.query.userId as string) : null;
+      const userId = req.query.userId ? parseInt(req.query.userId as string, 10) : null;
       const items = await db
         .select()
         .from(pcManagedReviewItemsTable)
@@ -287,7 +287,7 @@ router.get('/review-desk/high-risk', async (req: Request, res: Response) => {
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
     res.json({ items, count: items.length });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to get high-risk queue' });
   }
 });
@@ -307,7 +307,7 @@ router.get('/review-desk/low-confidence', async (req: Request, res: Response) =>
       .orderBy(desc(pcManagedReviewItemsTable.lowConfidenceScore))
       .limit(50);
     res.json({ items, count: items.length });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to get low-confidence queue' });
   }
 });
@@ -327,7 +327,7 @@ router.get('/review-desk/contradiction', async (req: Request, res: Response) => 
       .orderBy(desc(pcManagedReviewItemsTable.contradictionSeverityScore))
       .limit(50);
     res.json({ items, count: items.length });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to get contradiction queue' });
   }
 });
@@ -346,7 +346,7 @@ router.get('/review-desk/needs-attorney', async (req: Request, res: Response) =>
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
     res.json({ items, count: items.length });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to get attorney review queue' });
   }
 });
@@ -365,7 +365,7 @@ router.get('/review-desk/needs-partner', async (req: Request, res: Response) => 
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
     res.json({ items, count: items.length });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to get partner review queue' });
   }
 });
@@ -385,7 +385,7 @@ router.get('/review-desk/ready-to-export', async (req: Request, res: Response) =
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
     res.json({ items, count: items.length });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to get ready-to-export queue' });
   }
 });
@@ -407,7 +407,7 @@ router.get('/review-desk/blocked', async (req: Request, res: Response) => {
       .orderBy(desc(pcManagedReviewItemsTable.priorityScore))
       .limit(50);
     res.json({ items, count: items.length });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to get blocked queue' });
   }
 });
@@ -485,7 +485,7 @@ router.get('/review-desk/overview', async (req: Request, res: Response) => {
 
 router.get('/review-desk/items/:id', validateParams(commonSchemas.idParam), async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id as string);
+    const id = parseInt(req.params.id as string, 10);
     const [item, notes, assignments] = await Promise.all([
       db
         .select()
@@ -509,7 +509,7 @@ router.get('/review-desk/items/:id', validateParams(commonSchemas.idParam), asyn
     ]);
     if (!item.length) return void res.status(404).json({ error: 'Review item not found' });
     res.json({ item: item[0], notes, assignments });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to get review item' });
   }
 });
@@ -619,9 +619,9 @@ router.post(
   validateBody(TransitionSchema),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const { toState, reason } = req.body as z.infer<typeof TransitionSchema>;
-      const actorId = req.user!.id;
+      const actorId = req.user?.id;
       const validTransitions = buildValidTransitions();
 
       const [item] = await db
@@ -697,9 +697,9 @@ router.post(
   validateBody(ApproveActionSchema),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const { notes } = req.body as z.infer<typeof ApproveActionSchema>;
-      const actorId = req.user!.id;
+      const actorId = req.user?.id;
 
       const [item] = await db
         .select()
@@ -751,7 +751,7 @@ router.post(
         toState: 'approved',
       });
       res.json({ item: updated });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to approve' });
     }
   },
@@ -763,9 +763,9 @@ router.post(
   validateBody(RejectActionSchema),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const { reason } = req.body as z.infer<typeof RejectActionSchema>;
-      const actorId = req.user!.id;
+      const actorId = req.user?.id;
 
       const [item] = await db
         .select()
@@ -811,7 +811,7 @@ router.post(
         details: { reason },
       });
       res.json({ item: updated });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to reject' });
     }
   },
@@ -823,9 +823,9 @@ router.post(
   validateBody(ReviseActionSchema),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const { notes } = req.body as z.infer<typeof ReviseActionSchema>;
-      const actorId = req.user!.id;
+      const actorId = req.user?.id;
 
       const [item] = await db
         .select()
@@ -865,7 +865,7 @@ router.post(
         toState: 'revised',
       });
       res.json({ item: updated });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to revise' });
     }
   },
@@ -877,9 +877,9 @@ router.post(
   validateBody(EscalateActionSchema),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const { escalateTo, reason } = req.body as z.infer<typeof EscalateActionSchema>;
-      const actorId = req.user!.id;
+      const actorId = req.user?.id;
 
       const [item] = await db
         .select()
@@ -924,7 +924,7 @@ router.post(
         details: { escalateTo, reason },
       });
       res.json({ item: updated });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to escalate' });
     }
   },
@@ -936,9 +936,9 @@ router.post(
   validateBody(AssignActionSchema),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const { assignTo, role } = req.body as z.infer<typeof AssignActionSchema>;
-      const actorId = req.user!.id;
+      const actorId = req.user?.id;
 
       const [item] = await db
         .select()
@@ -994,7 +994,7 @@ router.post(
         details: { assignTo, role },
       });
       res.json({ item: updated });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to assign' });
     }
   },
@@ -1006,9 +1006,9 @@ router.post(
   validateBody(BlockActionSchema),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const { reason } = req.body as z.infer<typeof BlockActionSchema>;
-      const actorId = req.user!.id;
+      const actorId = req.user?.id;
 
       const [item] = await db
         .select()
@@ -1039,7 +1039,7 @@ router.post(
         details: { reason },
       });
       res.json({ item: updated });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to block' });
     }
   },
@@ -1051,9 +1051,9 @@ router.post(
   validateBody(SupportRequestSchema),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const { request } = req.body as z.infer<typeof SupportRequestSchema>;
-      const actorId = req.user!.id;
+      const actorId = req.user?.id;
 
       const [item] = await db
         .select()
@@ -1091,7 +1091,7 @@ router.post(
         toState: 'needs_evidence',
       });
       res.json({ item: updated });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to request support' });
     }
   },
@@ -1103,8 +1103,8 @@ router.post(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id as string);
-      const actorId = req.user!.id;
+      const id = parseInt(req.params.id as string, 10);
+      const actorId = req.user?.id;
 
       const [item] = await db
         .select()
@@ -1133,7 +1133,7 @@ router.post(
         details: { packetRef },
       });
       res.json({ packetRef, message: 'Review packet generation queued' });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to generate review packet' });
     }
   },
@@ -1145,8 +1145,8 @@ router.post(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id as string);
-      const actorId = req.user!.id;
+      const id = parseInt(req.params.id as string, 10);
+      const actorId = req.user?.id;
 
       const [item] = await db
         .select()
@@ -1190,7 +1190,7 @@ router.post(
         details: { exportRef },
       });
       res.json({ item: updated, exportRef });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to create export packet' });
     }
   },
@@ -1202,9 +1202,9 @@ router.post(
   validateBody(AddNoteSchema),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const { noteType, content, isPrivileged } = req.body as z.infer<typeof AddNoteSchema>;
-      const authorId = req.user!.id;
+      const authorId = req.user?.id;
 
       const [note] = await db
         .insert(pcManagedReviewNotesTable)
@@ -1219,7 +1219,7 @@ router.post(
         .returning();
 
       res.status(201).json({ note });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to add note' });
     }
   },
@@ -1230,7 +1230,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const periodDays = parseInt((req.query.days as string) ?? '30');
+      const periodDays = parseInt((req.query.days as string) ?? '30', 10);
       const since = new Date(Date.now() - periodDays * 86400000);
 
       const [closed, all, breaches] = await Promise.all([
@@ -1418,7 +1418,7 @@ router.get(
         reviewPacketFailures: failedPackets,
         totalActive: all.filter((i) => !['closed', 'exported'].includes(i.lifecycleState)).length,
       });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to get admin view' });
     }
   },
@@ -1429,7 +1429,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const userId = req.query.userId ? parseInt(req.query.userId as string) : null;
+      const userId = req.query.userId ? parseInt(req.query.userId as string, 10) : null;
 
       const items = await db
         .select()
@@ -1464,7 +1464,7 @@ router.get(
         missingItems: missing.slice(0, 3),
         topUnblockers: unblocks,
       });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to get my review summary' });
     }
   },
@@ -1508,7 +1508,7 @@ router.get('/review-desk/copilot/max-unblock', async (req: Request, res: Respons
         workUnblockedScore: i.workUnblockedScore,
       })),
     });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to get max-unblock item' });
   }
 });

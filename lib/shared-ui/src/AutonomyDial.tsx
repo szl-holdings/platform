@@ -4,8 +4,7 @@
  * Policy-capped, audited, visible on every recommendation.
  */
 import * as React from 'react';
-import type { AutonomyMode } from './os-layer';
-import { AUTONOMY_DESCRIPTIONS, AUTONOMY_LABELS } from './os-layer';
+import { type AutonomyMode, AUTONOMY_DESCRIPTIONS, AUTONOMY_LABELS } from './os-layer';
 import { cn } from './utils';
 
 const MODES: AutonomyMode[] = [

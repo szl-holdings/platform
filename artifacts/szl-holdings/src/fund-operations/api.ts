@@ -11,14 +11,14 @@ export const PORTFOLIO_COMPANIES = [
 
 export function fmt(n: number, currency = true): string {
   if (n === 0) return currency ? '$0' : '0';
-  if (Math.abs(n) >= 1_000_000) return (currency ? '$' : '') + (n / 1_000_000).toFixed(1) + 'M';
-  if (Math.abs(n) >= 1_000) return (currency ? '$' : '') + (n / 1_000).toFixed(0) + 'K';
+  if (Math.abs(n) >= 1_000_000) return `${(currency ? '$' : '') + (n / 1_000_000).toFixed(1)}M`;
+  if (Math.abs(n) >= 1_000) return `${(currency ? '$' : '') + (n / 1_000).toFixed(0)}K`;
   return (currency ? '$' : '') + n.toFixed(0);
 }
 
 export function pct(n: number | null | undefined): string {
   if (n == null) return '—';
-  return (n * 100).toFixed(1) + '%';
+  return `${(n * 100).toFixed(1)}%`;
 }
 
 export function derivePeriodDates(

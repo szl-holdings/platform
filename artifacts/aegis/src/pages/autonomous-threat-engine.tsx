@@ -1,16 +1,11 @@
 import {
   Activity,
-  AlertTriangle,
   Brain,
   CheckCircle,
-  ChevronRight,
   Clock,
   Eye,
-  Lock,
   Pause,
   Play,
-  Shield,
-  Target,
   XCircle,
   Zap,
 } from 'lucide-react';
@@ -299,7 +294,7 @@ export default function AutonomousThreatEngine() {
   const [autonomous, setAutonomous] = useState(true);
   const [playbook, setPlaybook] = useState<PlaybookStep[]>([]);
   const [scanPulse, setScanPulse] = useState(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const _intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const selectedThreat = threats.find((t) => t.id === selected) ?? null;
 

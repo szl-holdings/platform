@@ -45,9 +45,8 @@ const EXPECTED_SCENES = [
 ];
 
 async function main() {
-  console.log('[qa:atlas] Checking ATLAS demo scene seed completeness...\n');
 
-  let passed = 0;
+  let _passed = 0;
   let failed = 0;
 
   for (const expected of EXPECTED_SCENES) {
@@ -60,8 +59,6 @@ async function main() {
     `;
 
     if (rows.length === 0) {
-      console.error(`  [FAIL] Missing scene: ${expected.slug}`);
-      console.error(`         Run 'pnpm seed:atlas' to seed this scene`);
       failed++;
       continue;
     }
@@ -69,48 +66,31 @@ async function main() {
     const row = rows[0];
 
     if (row.domain !== expected.domain) {
-      console.error(
-        `  [FAIL] ${expected.slug}: domain mismatch. Expected ${expected.domain}, got ${row.domain}`,
-      );
       failed++;
       continue;
     }
 
     if (row.entity_type !== expected.entityType) {
-      console.error(
-        `  [FAIL] ${expected.slug}: entityType mismatch. Expected ${expected.entityType}, got ${row.entity_type}`,
-      );
       failed++;
       continue;
     }
 
     if (row.status !== 'ready') {
-      console.error(`  [FAIL] ${expected.slug}: status is '${row.status}', expected 'ready'`);
       failed++;
       continue;
     }
 
     const sections = Array.isArray(row.sections) ? row.sections : [];
     if (sections.length < expected.minSections) {
-      console.error(
-        `  [FAIL] ${expected.slug}: has ${sections.length} sections, expected at least ${expected.minSections}`,
-      );
       failed++;
       continue;
     }
 
     const metadata = row.metadata ?? {};
     if (!metadata.demo) {
-      console.error(
-        `  [WARN] ${expected.slug}: metadata.demo is not set — may not be labelled as demo data`,
-      );
     }
-
-    console.log(`  [PASS] ${expected.slug} (id: ${row.id}, sections: ${sections.length})`);
-    passed++;
+    _passed++;
   }
-
-  console.log(`\n[qa:atlas] Results: ${passed} passed, ${failed} failed`);
 
   await sql.end();
 
@@ -119,7 +99,6 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error('[qa:atlas] Error:', err.message);
+main().catch((_err) => {
   process.exit(1);
 });

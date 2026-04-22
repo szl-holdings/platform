@@ -13,49 +13,21 @@
  */
 
 import {
-  billingLineItemsTable,
-  costAllocationsTable,
   db,
-  invoicesTable,
   meteringEventsTable,
-  organizationsTable,
   quotaConfigsTable,
   quotaViolationsTable,
-  rateCardAssignmentsTable,
-  rateCardsTable,
-  rateCardTiersTable,
-  revenueEventsTable,
-  subscriptionsTable,
   usageAggregatesTable,
 } from '@szl-holdings/db';
 import {
   and,
-  asc,
-  avg,
-  count,
-  desc,
   eq,
   gte,
-  inArray,
-  isNull,
   lte,
-  ne,
   sql,
-  sum,
 } from 'drizzle-orm';
 import type { RequestHandler } from 'express';
-import { type IRouter, type Request, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import {
-  handleRouteError,
-  sendBadRequest,
-  sendError,
-  sendNotFound,
-  sendSuccess,
-} from '../../lib/api-response';
-import { logger } from '../../lib/logger';
-import { authMiddleware, parseIdParam, requireRole } from '../../middlewares/auth';
-import { assertTenantAccess, tenantScope } from '../../middlewares/tenant-scope';
 
 export const meteringRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -66,8 +38,8 @@ export const meteringRateLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const ADMIN_ROLES = ['admin', 'super_admin', 'ops'] as const;
-const READ_ROLES = ['admin', 'super_admin', 'ops', 'analyst'] as const;
+const _ADMIN_ROLES = ['admin', 'super_admin', 'ops'] as const;
+const _READ_ROLES = ['admin', 'super_admin', 'ops', 'analyst'] as const;
 
 export function periodBounds(period: 'month' | 'day' | 'year' = 'month', refDate = new Date()) {
   const y = refDate.getUTCFullYear();

@@ -13,13 +13,7 @@
  *   safety_flag             0.05  — (blocking) no prohibited actions?
  */
 
-import type {
-  AgentEvalCase,
-  CaseFailureSummary,
-  EvalDimensionScores,
-  FailureReason,
-} from './agent-eval-types.js';
-import { DIMENSION_WEIGHTS } from './agent-eval-types.js';
+import { type AgentEvalCase, type CaseFailureSummary, type EvalDimensionScores, DIMENSION_WEIGHTS } from './agent-eval-types.js';
 
 export interface ScoringInput {
   evalCase: AgentEvalCase;

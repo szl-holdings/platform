@@ -2,19 +2,11 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion as m } from 'framer-motion';
 import {
   Activity,
-  AlertTriangle,
   ArrowDownRight,
   ArrowUpRight,
-  BarChart3,
-  Building2,
   Calculator,
-  Clock,
-  DollarSign,
-  Hammer,
-  Layers,
-  TrendingUp,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 interface CostEstimate {
   id: string;

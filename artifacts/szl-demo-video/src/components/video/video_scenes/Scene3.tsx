@@ -59,10 +59,10 @@ export function Scene3() {
           {edges.map(([a, b], i) => (
             <motion.line
               key={i}
-              x1={nodes[a]!.x}
-              y1={nodes[a]!.y}
-              x2={nodes[b]!.x}
-              y2={nodes[b]!.y}
+              x1={nodes[a]?.x}
+              y1={nodes[a]?.y}
+              x2={nodes[b]?.x}
+              y2={nodes[b]?.y}
               stroke="var(--color-lyte-cyan)"
               strokeWidth="2"
               strokeOpacity="0.3"

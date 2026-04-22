@@ -61,7 +61,7 @@ export class AlphaVantageAdapter extends ServiceAdapter {
     "Alpha Vantage — real-time and historical stock quotes, technical indicators, forex rates, crypto prices, and company fundamentals. Requires API key. Falls back to demo mode when ALPHA_VANTAGE_API_KEY is absent.";
   readonly requiredEnvVars = ["ALPHA_VANTAGE_API_KEY"];
 
-  private get apiKey(): string | undefined { return process.env["ALPHA_VANTAGE_API_KEY"]; }
+  private get apiKey(): string | undefined { return process.env.ALPHA_VANTAGE_API_KEY; }
 
   private readonly BASE_URL = "https://www.alphavantage.co/query";
 
@@ -75,7 +75,7 @@ export class AlphaVantageAdapter extends ServiceAdapter {
     });
     if (!res.ok) throw new Error(`Alpha Vantage API error: HTTP ${res.status}`);
     const data = await res.json() as Record<string, unknown>;
-    if (data["Note"] || data["Information"]) throw new Error(`Alpha Vantage rate limit: ${data["Note"] ?? data["Information"]}`);
+    if (data.Note || data.Information) throw new Error(`Alpha Vantage rate limit: ${data.Note ?? data.Information}`);
     return data as T;
   }
 
@@ -84,13 +84,13 @@ export class AlphaVantageAdapter extends ServiceAdapter {
   }
 
   async getQuote(symbol: string): Promise<AVQuote> {
-    if (this.isDemoMode) return MOCK_QUOTES[symbol.toUpperCase()] ?? { ...MOCK_QUOTES["AAPL"]!, symbol };
+    if (this.isDemoMode) return MOCK_QUOTES[symbol.toUpperCase()] ?? { ...MOCK_QUOTES.AAPL!, symbol };
     const data = await this.avRequest<{ "Global Quote": Record<string, string> }>({ function: "GLOBAL_QUOTE", symbol });
     const q = data["Global Quote"];
     return {
       symbol, open: parseFloat(q["02. open"] ?? "0"), high: parseFloat(q["03. high"] ?? "0"),
       low: parseFloat(q["04. low"] ?? "0"), price: parseFloat(q["05. price"] ?? "0"),
-      volume: parseInt(q["06. volume"] ?? "0"), latestTradingDay: q["07. latest trading day"] ?? "",
+      volume: parseInt(q["06. volume"] ?? "0", 10), latestTradingDay: q["07. latest trading day"] ?? "",
       previousClose: parseFloat(q["08. previous close"] ?? "0"), change: parseFloat(q["09. change"] ?? "0"),
       changePercent: parseFloat((q["10. change percent"] ?? "0%").replace("%", "")),
     };
@@ -115,7 +115,7 @@ export class AlphaVantageAdapter extends ServiceAdapter {
       dataPoints: Object.entries(series ?? {}).map(([ts, v]) => ({
         timestamp: ts, open: parseFloat(v["1. open"] ?? "0"), high: parseFloat(v["2. high"] ?? "0"),
         low: parseFloat(v["3. low"] ?? "0"), close: parseFloat(v["4. close"] ?? "0"),
-        volume: parseInt(v["6. volume"] ?? "0"), adjustedClose: parseFloat(v["5. adjusted close"] ?? "0"),
+        volume: parseInt(v["6. volume"] ?? "0", 10), adjustedClose: parseFloat(v["5. adjusted close"] ?? "0"),
       })),
     };
   }
@@ -152,11 +152,11 @@ export class AlphaVantageAdapter extends ServiceAdapter {
     const data = await this.avRequest<{ annualEarnings: Array<Record<string, string>>; quarterlyEarnings: Array<Record<string, string>> }>({ function: "EARNINGS", symbol });
     return {
       symbol,
-      annualEarnings: (data.annualEarnings ?? []).map(e => ({ fiscalDateEnding: e["fiscalDateEnding"] ?? "", reportedEPS: e["reportedEPS"] ?? "" })),
+      annualEarnings: (data.annualEarnings ?? []).map(e => ({ fiscalDateEnding: e.fiscalDateEnding ?? "", reportedEPS: e.reportedEPS ?? "" })),
       quarterlyEarnings: (data.quarterlyEarnings ?? []).map(e => ({
-        fiscalDateEnding: e["fiscalDateEnding"] ?? "", reportedDate: e["reportedDate"] ?? "",
-        reportedEPS: e["reportedEPS"] ?? "", estimatedEPS: e["estimatedEPS"] ?? "",
-        surprise: e["surprise"] ?? "", surprisePercentage: e["surprisePercentage"] ?? "",
+        fiscalDateEnding: e.fiscalDateEnding ?? "", reportedDate: e.reportedDate ?? "",
+        reportedEPS: e.reportedEPS ?? "", estimatedEPS: e.estimatedEPS ?? "",
+        surprise: e.surprise ?? "", surprisePercentage: e.surprisePercentage ?? "",
       })),
     };
   }

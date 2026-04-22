@@ -1,5 +1,5 @@
 import type { IRouter } from 'express';
-import { lazyMatch, lazyMount } from '../../lib/lazy-router';
+import { lazyMatch, } from '../../lib/lazy-router';
 import { perUserApiSlidingLimiter } from '../../middlewares/sliding-window-limiter';
 import { tenantScope } from '../../middlewares/tenant-scope';
 

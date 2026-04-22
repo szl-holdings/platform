@@ -4,9 +4,7 @@ import {
   insertLyteActionSchema,
   insertLyteReadinessItemSchema,
   insertLyteSavedViewSchema,
-  insertLyteSignalCommentSchema,
   lyteActionsTable,
-  lyteCommandCardsTable,
   lyteIncidentsTable,
   lyteReadinessItemsTable,
   lyteRecommendationsTable,
@@ -14,7 +12,6 @@ import {
   lyteSignalCommentsTable,
   lyteSignalsTable,
   lyteSignalTimelineTable,
-  lyteWorkspacesTable,
 } from '@szl-holdings/db';
 import { and, desc, eq, ne, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
@@ -405,7 +402,7 @@ router.delete('/actions/:id', validateBody(bodyShape({})), authMiddleware(), asy
   }
 });
 
-router.get('/saved-views', authMiddleware(), async (req, res) => {
+router.get('/saved-views', authMiddleware(), async (_req, res) => {
   try {
     const rows = await db
       .select()

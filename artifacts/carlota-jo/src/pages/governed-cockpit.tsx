@@ -8,7 +8,7 @@ import {
   color,
 } from '@szl-holdings/design-system';
 import { AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { SubstrateWorkflowPanel } from '@/components/SubstrateWorkflowPanel';
 
 const ACCENT = productAccent.carlota;

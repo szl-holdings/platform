@@ -28,7 +28,7 @@
  */
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || null;
-const USERNAME = process.argv[2] || 'stephenlutar2-hash';
+const _USERNAME = process.argv[2] || 'stephenlutar2-hash';
 
 // The 8 canonical SZL Holdings star lists
 const CANONICAL_LISTS = [
@@ -82,25 +82,9 @@ const CANONICAL_LISTS = [
 ];
 
 function printManualInstructions() {
-  console.log('\n================================================================');
-  console.log('  MANUAL FALLBACK — Create Lists via GitHub Web UI');
-  console.log('================================================================\n');
-  console.log('GitHub Lists must be created manually if a token is not available.\n');
-  console.log('Steps:\n');
-  console.log(`  1. Go to: https://github.com/${USERNAME}?tab=stars\n`);
-  console.log("  2. Click 'Create list' in the left sidebar\n");
-  console.log('  3. Create each list below:\n');
 
-  for (const list of CANONICAL_LISTS) {
-    console.log(`  ---`);
-    console.log(`  Name:        ${list.name}`);
-    console.log(`  Description: ${list.description}`);
+  for (const _list of CANONICAL_LISTS) {
   }
-
-  console.log('\n  4. Once lists exist, assign starred repos to the');
-  console.log('     appropriate list using the bookmark icon on each repo.\n');
-  console.log('  Reference: docs/github/list-taxonomy.md for inclusion criteria.\n');
-  console.log('================================================================\n');
 }
 
 async function checkListsApi(): Promise<boolean> {
@@ -122,25 +106,10 @@ async function checkListsApi(): Promise<boolean> {
 }
 
 async function main() {
-  console.log('================================================================');
-  console.log('  SZL Holdings — Scaffold List Taxonomy');
-  console.log(`  User: @${USERNAME}`);
-  console.log('================================================================\n');
-
-  // Be explicit upfront: this is a guided setup tool, not an API creator.
-  console.log('NOTE: GitHub Lists are a web UI-only feature.');
-  console.log('  This script CANNOT create lists via the GitHub API.');
-  console.log('  It prints the canonical list definitions and setup instructions.');
-  console.log('  You must create lists manually at: github.com/' + USERNAME + '?tab=stars\n');
-
-  console.log('Canonical lists to configure:\n');
-  for (const list of CANONICAL_LISTS) {
-    console.log(`  - ${list.name}`);
-    console.log(`    ${list.description}\n`);
+  for (const _list of CANONICAL_LISTS) {
   }
 
   if (!GITHUB_TOKEN) {
-    console.log('GITHUB_TOKEN not set — skipping token validation.\n');
     printManualInstructions();
     process.exit(0);
   }
@@ -151,25 +120,13 @@ async function main() {
   const tokenValid = await checkListsApi();
 
   if (!tokenValid) {
-    console.error(
-      'GitHub token is set but could not authenticate. Verify GITHUB_TOKEN is valid.\n',
-    );
     printManualInstructions();
     process.exit(1);
   }
 
-  console.log('Token verified (valid for export-starred-repos.ts and other API operations).');
-  console.log('List creation still requires GitHub web UI — see instructions below.\n');
-
   printManualInstructions();
-
-  console.log('\nAlternative: Use the export and report scripts to analyze');
-  console.log('your existing stars and manually organize into these lists.\n');
-  console.log('  npx tsx scripts/github/stars/export-starred-repos.ts');
-  console.log('  npx tsx scripts/github/stars/generate-category-report.ts\n');
 }
 
-main().catch((err) => {
-  console.error('Unexpected error:', err);
+main().catch((_err) => {
   process.exit(1);
 });

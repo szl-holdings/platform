@@ -28,7 +28,7 @@
  *  - Per-service health probes
  */
 
-import { timingSafeEqual } from "crypto";
+import { timingSafeEqual } from "node:crypto";
 import type { Request, Response, NextFunction } from "express";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { sendUnauthorized } from "../lib/api-response";
@@ -356,7 +356,7 @@ function isNexusOrchestratorLoopback(req: Request): boolean {
   if (!isLoopback) return false;
   const path = req.path;
   for (const allowed of NEXUS_ORCHESTRATOR_PATH_ALLOWLIST) {
-    if (path === allowed || path.startsWith(allowed + "/")) return true;
+    if (path === allowed || path.startsWith(`${allowed}/`)) return true;
   }
   return false;
 }
@@ -371,7 +371,7 @@ function isValidUsageEventServiceToken(req: Request): boolean {
   if (req.method !== "POST") return false;
   // Match /api/orgs/<slug>/usage/events
   if (!/^\/api\/orgs\/[^/]+\/usage\/events\/?$/.test(req.path)) return false;
-  const secret = process.env["USAGE_EVENT_SERVICE_TOKEN"];
+  const secret = process.env.USAGE_EVENT_SERVICE_TOKEN;
   if (!secret) return false;
   const header = req.headers["x-service-token"];
   if (typeof header !== "string") return false;

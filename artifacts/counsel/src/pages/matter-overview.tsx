@@ -334,17 +334,14 @@ export default function MatterOverview() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {isLoading ? (
-            <>
-              {[1, 2, 3, 4].map((i) => (
+            [1, 2, 3, 4].map((i) => (
                 <div key={i} className="bg-violet-500/5 border border-violet-500/10 p-4 rounded-xl animate-pulse">
                   <div className="h-3 bg-violet-500/10 rounded w-1/2 mb-3" />
                   <div className="h-7 bg-violet-500/10 rounded w-1/3" />
                 </div>
-              ))}
-            </>
+              ))
           ) : (
-            <>
-              {[
+            [
                 { label: 'Total Matters', value: matters.length, icon: Briefcase },
                 { label: 'In Litigation', value: litigationCount, icon: Scale },
                 { label: 'M&A / Transaction', value: maCount, icon: DollarSign },
@@ -363,8 +360,7 @@ export default function MatterOverview() {
                   </div>
                   <div className="text-2xl font-bold text-violet-100">{stat.value}</div>
                 </div>
-              ))}
-            </>
+              ))
           )}
         </div>
 

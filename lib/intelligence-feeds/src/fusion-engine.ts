@@ -107,11 +107,7 @@ export class FusionEngine {
     for (const cb of this.alertCallbacks) {
       try {
         await cb(alert);
-      } catch (err) {
-        console.warn(
-          '[FusionEngine] Alert callback error:',
-          err instanceof Error ? err.message : err,
-        );
+      } catch (_err) {
       }
     }
   }
@@ -143,11 +139,7 @@ export class FusionEngine {
       this.recordProcessingTime(durationMs);
       this.stats.lastRunAt = new Date().toISOString();
       this.stats.monitoredEntityCount++;
-    } catch (err) {
-      console.warn(
-        '[FusionEngine] processEntityUpdate error:',
-        err instanceof Error ? err.message : err,
-      );
+    } catch (_err) {
     }
 
     return newAlerts;

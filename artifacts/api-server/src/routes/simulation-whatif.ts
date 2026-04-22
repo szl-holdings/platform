@@ -23,7 +23,7 @@ interface DomainImpact {
   affectedEntities: string[];
 }
 
-function computeWhatIf(vars: Record<string, number>, iterations: number): DomainImpact[] {
+function computeWhatIf(vars: Record<string, number>, _iterations: number): DomainImpact[] {
   const oil = vars['oil-price'] ?? 0;
   const rate = (vars['interest-rate'] ?? 0) / 100;
   const threat = vars['threat-level'] ?? 2;

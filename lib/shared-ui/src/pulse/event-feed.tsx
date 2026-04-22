@@ -70,7 +70,7 @@ export function PulseEventFeed({
       );
     }, 2200);
     return () => clearInterval(timer);
-  }, []);
+  }, [maxVisible, eventTypes, agents]);
   return (
     <div className="space-y-1.5">
       <AnimatePresence mode="popLayout">

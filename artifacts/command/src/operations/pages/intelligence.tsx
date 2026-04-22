@@ -3,25 +3,22 @@ import { type AutonomyMode, ProofEnvelope } from '@szl-holdings/design-system';
 import { AnimatedCounter } from '@szl-holdings/shared-ui/animated-counter';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import { useRealtimeChannel } from '@szl-holdings/shared-ui/use-realtime-channel';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
   AlertTriangle,
   Brain,
-  Clock,
   FileText,
   Globe,
   Newspaper,
   Radio,
   Shield,
-  TrendingUp,
   Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-function LocalCounter({ value }: { value: number }) {
+function _LocalCounter({ value }: { value: number }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
     let c = false;

@@ -70,7 +70,7 @@ export class CourtListenerAdapter extends ServiceAdapter {
     "CourtListener — free federal court opinions, docket tracking, PACER integration, and legal citation search. API token optional for higher rate limits. Falls back to demo mode when COURT_LISTENER_TOKEN is absent.";
   readonly requiredEnvVars = ["COURT_LISTENER_TOKEN"];
 
-  private get token(): string | undefined { return process.env["COURT_LISTENER_TOKEN"]; }
+  private get token(): string | undefined { return process.env.COURT_LISTENER_TOKEN; }
 
   override get supportsMockMode(): boolean { return true; }
 
@@ -80,7 +80,7 @@ export class CourtListenerAdapter extends ServiceAdapter {
     const url = new URL(`${this.BASE_URL}${path}`);
     for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
     const headers: Record<string, string> = { Accept: "application/json" };
-    if (this.token) headers["Authorization"] = `Token ${this.token}`;
+    if (this.token) headers.Authorization = `Token ${this.token}`;
     const res = await fetch(url.toString(), { headers, signal: AbortSignal.timeout(15000) });
     if (!res.ok) throw new Error(`CourtListener API error: HTTP ${res.status}`);
     return res.json() as Promise<T>;
@@ -93,34 +93,34 @@ export class CourtListenerAdapter extends ServiceAdapter {
   async searchCases(query: string, court?: string, dateAfter?: string): Promise<CourtListenerCase[]> {
     if (this.isDemoMode) return MOCK_CASES;
     const params: Record<string, string> = { q: query, order_by: "score desc", limit: "20" };
-    if (court) params["court"] = court;
-    if (dateAfter) params["date_filed__gte"] = dateAfter;
+    if (court) params.court = court;
+    if (dateAfter) params.date_filed__gte = dateAfter;
     const data = await this.clRequest<{ results: Array<Record<string, unknown>> }>("/dockets/", params);
     return (data.results ?? []).map(c => ({
-      id: Number(c["id"] ?? 0), absoluteUrl: String(c["absolute_url"] ?? ""),
-      caseName: String(c["case_name"] ?? ""), dateFiled: c["date_filed"] ? String(c["date_filed"]) : null,
-      dateTerminated: c["date_terminated"] ? String(c["date_terminated"]) : null,
-      court: String((c["court"] as Record<string, unknown>)?.["id"] ?? ""),
-      courtFullName: String(c["court_full_name"] ?? ""),
-      docketNumber: String(c["docket_number"] ?? ""),
-      natureOfSuit: c["nature_of_suit"] ? String(c["nature_of_suit"]) : null,
-      cause: c["cause"] ? String(c["cause"]) : null,
-      status: String(c["status"] ?? ""), pacer: Boolean(c["pacer_case_id"]),
+      id: Number(c.id ?? 0), absoluteUrl: String(c.absolute_url ?? ""),
+      caseName: String(c.case_name ?? ""), dateFiled: c.date_filed ? String(c.date_filed) : null,
+      dateTerminated: c.date_terminated ? String(c.date_terminated) : null,
+      court: String((c.court as Record<string, unknown>)?.id ?? ""),
+      courtFullName: String(c.court_full_name ?? ""),
+      docketNumber: String(c.docket_number ?? ""),
+      natureOfSuit: c.nature_of_suit ? String(c.nature_of_suit) : null,
+      cause: c.cause ? String(c.cause) : null,
+      status: String(c.status ?? ""), pacer: Boolean(c.pacer_case_id),
     }));
   }
 
   async searchOpinions(query: string, court?: string, limit = 10): Promise<CourtListenerOpinion[]> {
     if (this.isDemoMode) return MOCK_OPINIONS;
     const params: Record<string, string> = { q: query, type: "o", order_by: "score desc", limit: String(limit) };
-    if (court) params["court"] = court;
+    if (court) params.court = court;
     const data = await this.clRequest<{ results: Array<Record<string, unknown>> }>("/search/", params);
     return (data.results ?? []).map(o => ({
-      id: Number(o["id"] ?? 0), absoluteUrl: String(o["absolute_url"] ?? ""),
-      caseName: String(o["caseName"] ?? ""), dateFiled: String(o["dateFiled"] ?? ""),
-      court: String(o["court_id"] ?? ""), type: String(o["type"] ?? ""),
-      precedentialStatus: String(o["status"] ?? ""),
-      citation: Array.isArray(o["citation"]) ? (o["citation"] as string[]).join(", ") : String(o["citation"] ?? ""),
-      plainText: String(o["snippet"] ?? ""),
+      id: Number(o.id ?? 0), absoluteUrl: String(o.absolute_url ?? ""),
+      caseName: String(o.caseName ?? ""), dateFiled: String(o.dateFiled ?? ""),
+      court: String(o.court_id ?? ""), type: String(o.type ?? ""),
+      precedentialStatus: String(o.status ?? ""),
+      citation: Array.isArray(o.citation) ? (o.citation as string[]).join(", ") : String(o.citation ?? ""),
+      plainText: String(o.snippet ?? ""),
     }));
   }
 

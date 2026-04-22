@@ -5,7 +5,7 @@ import type {
   RawEmbedResponse,
 } from './interface.js';
 
-const SUBSTRATE_EMBED_URL = process.env['SUBSTRATE_EMBED_URL'] ?? 'http://localhost:9800';
+const SUBSTRATE_EMBED_URL = process.env.SUBSTRATE_EMBED_URL ?? 'http://localhost:9800';
 
 export class CpuLocalEmbeddingBackend implements EmbeddingBackend {
   readonly descriptor: EmbeddingBackendDescriptor = {

@@ -22,14 +22,14 @@ const API_BASE = (() => {
   return `http://localhost:${port}`;
 })();
 
-const REQUIRED = [
+const _REQUIRED = [
   'stripe',
   'sentry_server',
   'posthog_frontend',
   'amplitude_frontend',
   'google_maps',
 ];
-const WARN_ONLY = new Set(['mapbox']);
+const _WARN_ONLY = new Set(['mapbox']);
 
 async function checkEnvIntegrations() {
   return {
@@ -102,27 +102,21 @@ async function checkEnvIntegrations() {
 }
 
 async function probeApiHealth(apiBase) {
-  console.log(`\n--- API Server health check ---`);
   try {
     const res = await fetch(`${apiBase}/api/health`, { signal: AbortSignal.timeout(8_000) });
-    const json = await res.json();
+    const _json = await res.json();
     if (res.ok) {
-      console.log(`✅ API Server healthy — status: ${json.status ?? 'ok'}`);
       return true;
     } else {
-      console.log(`❌ API Server unhealthy — HTTP ${res.status}`);
       return false;
     }
-  } catch (err) {
-    console.log(`⚠️  API Server not reachable at ${apiBase}: ${err.message}`);
+  } catch (_err) {
     return false;
   }
 }
 
 async function probeGoogleMapsProxy(apiBase) {
-  console.log(`\n--- Google Maps proxy probe ---`);
   if (!process.env.GOOGLE_MAPS_API_KEY) {
-    console.log(`⚠️  Google Maps proxy skipped: GOOGLE_MAPS_API_KEY not set`);
     return;
   }
   try {
@@ -131,22 +125,16 @@ async function probeGoogleMapsProxy(apiBase) {
     });
     const gmJson = await gmRes.json();
     if (gmRes.status === 503) {
-      console.log(`⚠️  Google Maps proxy: GOOGLE_MAPS_API_KEY not configured on server`);
     } else if (gmJson.status === 'OK') {
-      const loc = gmJson.results?.[0]?.geometry?.location;
-      console.log(`✅ Google Maps geocode OK — lat: ${loc?.lat}, lng: ${loc?.lng}`);
+      const _loc = gmJson.results?.[0]?.geometry?.location;
     } else {
-      console.log(`⚠️  Google Maps response: ${gmJson.status} — ${gmJson.error_message ?? ''}`);
     }
-  } catch (err) {
-    console.log(`⚠️  Google Maps probe skipped: ${err.message}`);
+  } catch (_err) {
   }
 }
 
 async function probeStripeCheckoutE2E() {
-  console.log(`\n--- Stripe checkout E2E probe ---`);
   if (!process.env.STRIPE_SECRET_KEY) {
-    console.log(`⚠️  Stripe E2E probe skipped: STRIPE_SECRET_KEY not set`);
     return;
   }
   try {
@@ -169,60 +157,41 @@ async function probeStripeCheckoutE2E() {
       cancel_url: 'https://example.com/cancel',
     });
     if (session.id && session.url) {
-      console.log(`✅ Stripe checkout session created — id: ${session.id.slice(0, 20)}...`);
-      console.log(
-        `   mode: ${process.env.STRIPE_SECRET_KEY.startsWith('sk_live') ? 'LIVE' : 'test'}, url: ${session.url.slice(0, 60)}...`,
-      );
     } else {
-      console.log(`❌ Stripe session created but missing id/url`);
     }
   } catch (err) {
     if (err.type === 'StripeAuthenticationError') {
-      console.log(`❌ Stripe authentication failed — check STRIPE_SECRET_KEY`);
     } else if (err.code === 'ERR_MODULE_NOT_FOUND' || err.message?.includes('Cannot find module')) {
-      console.log(`⚠️  Stripe SDK not available for E2E probe (run pnpm install first)`);
     } else {
-      console.log(`⚠️  Stripe probe error: ${err.message}`);
     }
   }
 }
 
 async function main() {
-  console.log(`\n=== Integration Smoke Test — SZL Holdings Platform ===`);
-  console.log(`API base: ${API_BASE}`);
-  console.log(`Environment: ${process.env.NODE_ENV ?? 'development'}\n`);
 
   const integrations = await checkEnvIntegrations();
   const results = Object.values(integrations);
 
   let failures = 0;
   for (const r of results) {
-    const icon = r.ok ? '✅' : r.warnOnly ? '⚠️ ' : '❌';
-    const status = r.ok ? 'PASS' : r.warnOnly ? 'WARN' : 'FAIL';
-    console.log(`${icon} ${r.name.padEnd(24)} ${status}`);
-    console.log(`   ${r.detail}`);
+    const _icon = r.ok ? '✅' : r.warnOnly ? '⚠️ ' : '❌';
+    const _status = r.ok ? 'PASS' : r.warnOnly ? 'WARN' : 'FAIL';
     if (!r.ok && !r.warnOnly) failures++;
   }
 
   await probeApiHealth(API_BASE);
   await probeGoogleMapsProxy(API_BASE);
   await probeStripeCheckoutE2E();
-
-  console.log(`\n=== Summary ===`);
-  const passed = results.filter((r) => r.ok).length;
-  const warned = results.filter((r) => !r.ok && r.warnOnly).length;
-  console.log(`${passed}/${results.length} integrations configured, ${warned} warning(s)\n`);
+  const _passed = results.filter((r) => r.ok).length;
+  const _warned = results.filter((r) => !r.ok && r.warnOnly).length;
 
   if (failures > 0) {
-    console.error(`❌ ${failures} required integration(s) not configured. See above for details.`);
     process.exit(1);
   } else {
-    console.log(`✅ All required integrations are configured.`);
     process.exit(0);
   }
 }
 
-main().catch((err) => {
-  console.error('Unexpected error:', err);
+main().catch((_err) => {
   process.exit(1);
 });

@@ -1,6 +1,5 @@
 import L from 'leaflet';
-import type React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
@@ -74,16 +73,16 @@ interface GeoIntelResponse {
 function isValidGeoIntelResponse(data: unknown): data is GeoIntelResponse {
   if (!data || typeof data !== 'object') return false;
   const d = data as Record<string, unknown>;
-  if (!Array.isArray(d['pins'])) return false;
-  if (typeof d['generation'] !== 'number') return false;
-  if (typeof d['generatedAt'] !== 'string') return false;
-  for (const pin of d['pins'] as unknown[]) {
+  if (!Array.isArray(d.pins)) return false;
+  if (typeof d.generation !== 'number') return false;
+  if (typeof d.generatedAt !== 'string') return false;
+  for (const pin of d.pins as unknown[]) {
     if (!pin || typeof pin !== 'object') return false;
     const p = pin as Record<string, unknown>;
-    if (typeof p['id'] !== 'string') return false;
-    if (typeof p['lat'] !== 'number' || typeof p['lng'] !== 'number') return false;
-    if (!['SIGINT', 'INFRASTRUCTURE', 'PERSONNEL', 'WEATHER'].includes(p['layer'] as string)) return false;
-    if (!['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'NOMINAL'].includes(p['threat'] as string)) return false;
+    if (typeof p.id !== 'string') return false;
+    if (typeof p.lat !== 'number' || typeof p.lng !== 'number') return false;
+    if (!['SIGINT', 'INFRASTRUCTURE', 'PERSONNEL', 'WEATHER'].includes(p.layer as string)) return false;
+    if (!['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'NOMINAL'].includes(p.threat as string)) return false;
   }
   return true;
 }

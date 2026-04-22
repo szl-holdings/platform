@@ -76,7 +76,7 @@ export class ZillowAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["ZILLOW_API_KEY"];
 
   private get apiKey(): string | undefined {
-    return process.env["ZILLOW_API_KEY"];
+    return process.env.ZILLOW_API_KEY;
   }
 
   private readonly BASE_URL = "https://zillow-com1.p.rapidapi.com";
@@ -103,26 +103,26 @@ export class ZillowAdapter extends ServiceAdapter {
   async getPropertyDetails(zpid: string): Promise<ZillowPropertyDetails | null> {
     if (this.isDemoMode) return MOCK_PROPERTIES.find(p => p.zpid === zpid) ?? MOCK_PROPERTIES[0] ?? null;
     const data = await this.zRequest<Record<string, unknown>>("/property", { zpid });
-    const zest = (data["zestimate"] as number) ?? 0;
+    const zest = (data.zestimate as number) ?? 0;
     return {
       zpid: zpid,
-      address: String(data["address"] ?? ""),
-      city: String((data["address"] as Record<string, unknown>)?.["city"] ?? ""),
-      state: String((data["address"] as Record<string, unknown>)?.["state"] ?? ""),
-      zipCode: String((data["address"] as Record<string, unknown>)?.["zipcode"] ?? ""),
-      bedrooms: Number(data["bedrooms"] ?? 0),
-      bathrooms: Number(data["bathrooms"] ?? 0),
-      livingArea: Number(data["livingArea"] ?? 0),
-      lotSize: data["lotSize"] ? Number(data["lotSize"]) : null,
-      yearBuilt: data["yearBuilt"] ? Number(data["yearBuilt"]) : null,
-      propertyType: String(data["propertyType"] ?? ""),
-      listingStatus: String(data["homeStatus"] ?? ""),
-      listingPrice: data["price"] ? Number(data["price"]) : null,
-      zestimate: { zpid, address: String(data["address"] ?? ""), zestimate: zest, zestimateLow: zest * 0.9, zestimateHigh: zest * 1.1, rentZestimate: data["rentZestimate"] ? Number(data["rentZestimate"]) : null, lastUpdated: new Date().toISOString().split("T")[0]!, changePercent30Day: null, changePercent1Year: null },
-      latitude: Number(data["latitude"] ?? 0),
-      longitude: Number(data["longitude"] ?? 0),
-      taxAssessedValue: data["taxAssessedValue"] ? Number(data["taxAssessedValue"]) : null,
-      taxAssessedYear: data["taxAssessedYear"] ? Number(data["taxAssessedYear"]) : null,
+      address: String(data.address ?? ""),
+      city: String((data.address as Record<string, unknown>)?.city ?? ""),
+      state: String((data.address as Record<string, unknown>)?.state ?? ""),
+      zipCode: String((data.address as Record<string, unknown>)?.zipcode ?? ""),
+      bedrooms: Number(data.bedrooms ?? 0),
+      bathrooms: Number(data.bathrooms ?? 0),
+      livingArea: Number(data.livingArea ?? 0),
+      lotSize: data.lotSize ? Number(data.lotSize) : null,
+      yearBuilt: data.yearBuilt ? Number(data.yearBuilt) : null,
+      propertyType: String(data.propertyType ?? ""),
+      listingStatus: String(data.homeStatus ?? ""),
+      listingPrice: data.price ? Number(data.price) : null,
+      zestimate: { zpid, address: String(data.address ?? ""), zestimate: zest, zestimateLow: zest * 0.9, zestimateHigh: zest * 1.1, rentZestimate: data.rentZestimate ? Number(data.rentZestimate) : null, lastUpdated: new Date().toISOString().split("T")[0]!, changePercent30Day: null, changePercent1Year: null },
+      latitude: Number(data.latitude ?? 0),
+      longitude: Number(data.longitude ?? 0),
+      taxAssessedValue: data.taxAssessedValue ? Number(data.taxAssessedValue) : null,
+      taxAssessedYear: data.taxAssessedYear ? Number(data.taxAssessedYear) : null,
       priceHistory: [],
     };
   }
@@ -138,13 +138,13 @@ export class ZillowAdapter extends ServiceAdapter {
     }
     const data = await this.zRequest<{ props: Array<Record<string, unknown>> }>("/propertyExtendedSearch", { location: query, status_type: "ForSale" });
     return (data.props ?? []).slice(0, maxResults).map(p => ({
-      zpid: String(p["zpid"] ?? ""), address: String(p["address"] ?? ""),
-      price: Number(p["price"] ?? 0), bedrooms: Number(p["bedrooms"] ?? 0),
-      bathrooms: Number(p["bathrooms"] ?? 0), livingArea: Number(p["livingArea"] ?? 0),
-      propertyType: String(p["propertyType"] ?? ""), listingStatus: String(p["listingStatus"] ?? ""),
-      zestimate: p["zestimate"] ? Number(p["zestimate"]) : null,
-      imageUrl: p["imgSrc"] ? String(p["imgSrc"]) : null,
-      daysOnMarket: p["daysOnMarket"] ? Number(p["daysOnMarket"]) : null,
+      zpid: String(p.zpid ?? ""), address: String(p.address ?? ""),
+      price: Number(p.price ?? 0), bedrooms: Number(p.bedrooms ?? 0),
+      bathrooms: Number(p.bathrooms ?? 0), livingArea: Number(p.livingArea ?? 0),
+      propertyType: String(p.propertyType ?? ""), listingStatus: String(p.listingStatus ?? ""),
+      zestimate: p.zestimate ? Number(p.zestimate) : null,
+      imageUrl: p.imgSrc ? String(p.imgSrc) : null,
+      daysOnMarket: p.daysOnMarket ? Number(p.daysOnMarket) : null,
     }));
   }
 

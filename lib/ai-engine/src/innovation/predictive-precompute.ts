@@ -153,10 +153,7 @@ export async function triggerBackgroundPrecompute(
             expiresAt: new Date(entry.expiresAt),
           });
         } catch {}
-
-        console.log(`[predictive-precompute] Pre-computed: "${prediction.query.slice(0, 60)}"`);
-      } catch (err) {
-        console.warn('[predictive-precompute] Background precompute failed:', err);
+      } catch (_err) {
       }
     })();
   }

@@ -1,5 +1,5 @@
 import type { IRouter } from 'express';
-import { lazyMatch, lazyMount, lazyRegister, lazyRegisterMatch } from '../../lib/lazy-router';
+import { lazyMatch, lazyRegisterMatch } from '../../lib/lazy-router';
 import {
   idempotencyMiddleware,
   optionalIdempotencyMiddleware,

@@ -1,22 +1,21 @@
 import express from 'express';
 import { z } from 'zod';
-import type { RankMode } from './scorer.js';
-import { rankCandidates } from './scorer.js';
+import { type RankMode, rankCandidates } from './scorer.js';
 
 const app: express.Express = express();
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '10mb' }));
 
-const BEARER = process.env['AEF_S2S_SECRET'] ?? 'dev-s2s-secret';
+const BEARER = process.env.AEF_S2S_SECRET ?? 'dev-s2s-secret';
 const DEFAULT_MODE: RankMode =
-  (process.env['AEF_RANK_MODE'] as RankMode | undefined) ?? 'cross-encoder';
+  (process.env.AEF_RANK_MODE as RankMode | undefined) ?? 'cross-encoder';
 
 function authMiddleware(
   req: express.Request,
   res: express.Response,
   next: express.NextFunction,
 ): void {
-  const header = req.headers['authorization'];
+  const header = req.headers.authorization;
   const token = header?.startsWith('Bearer ') ? header.slice(7) : null;
   if (token !== BEARER) {
     res.status(401).json({ error: 'unauthorized' });
@@ -81,11 +80,9 @@ app.post('/rerank', authMiddleware, (req, res) => {
   });
 });
 
-const PORT = Number(process.env['AEF_RANK_WORKER_PORT'] ?? process.env['PORT'] ?? 4203);
+const PORT = Number(process.env.AEF_RANK_WORKER_PORT ?? process.env.PORT ?? 4203);
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[alloy-rank-worker] Listening on port ${PORT}`);
-  console.log(`[alloy-rank-worker] Mode: ${DEFAULT_MODE}`);
 });
 
 export default app;

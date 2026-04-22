@@ -9,8 +9,7 @@ import {
   Target,
   X,
 } from 'lucide-react';
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 const BG = { page: '#080c14', surface: '#0c1018', elevated: '#10141e', panel: '#0e1219' };
@@ -172,7 +171,7 @@ function OutcomeBadge({ outcome }: { outcome: OutcomeType }) {
 
 function OutcomeCard({ rec }: { rec: RecommendationOutcome }) {
   const [expanded, setExpanded] = useState(false);
-  const c = OUTCOME_COLORS[rec.outcome];
+  const _c = OUTCOME_COLORS[rec.outcome];
   const accColor = !rec.accuracy
     ? TEXT.muted
     : rec.accuracy >= 90

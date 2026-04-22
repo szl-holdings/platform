@@ -27,10 +27,10 @@ export function SimulationStage({ engine }: { engine: EngineState }) {
   const mc = engine.monteCarloResult;
   if (!mc) return <p className="text-sm text-muted-foreground">Running simulation...</p>;
 
-  const cost = mc.metrics['totalVoyageCost'];
-  const fuelShare = mc.metrics['fuelCostShare'];
-  const costPerDay = mc.metrics['costPerDay'];
-  const totalDays = mc.metrics['totalDays'];
+  const cost = mc.metrics.totalVoyageCost;
+  const fuelShare = mc.metrics.fuelCostShare;
+  const costPerDay = mc.metrics.costPerDay;
+  const totalDays = mc.metrics.totalDays;
 
   const metricRows = [
     { label: 'Total Voyage Cost ($K)', m: cost, isCurrency: true },

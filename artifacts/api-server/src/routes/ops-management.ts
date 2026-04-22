@@ -113,7 +113,7 @@ async function ensureSchema(): Promise<void> {
 // Seed default service dependencies
 async function seedServiceDeps(): Promise<void> {
   const count = await pool.query(`SELECT COUNT(*) as c FROM platform_service_deps`);
-  if (parseInt(count.rows[0]?.c) > 0) return;
+  if (parseInt(count.rows[0]?.c, 10) > 0) return;
   const deps = [
     [
       'api',
@@ -273,7 +273,7 @@ async function seedServiceDeps(): Promise<void> {
 // Seed default runbooks
 async function seedRunbooks(): Promise<void> {
   const count = await pool.query(`SELECT COUNT(*) as c FROM platform_runbooks`);
-  if (parseInt(count.rows[0]?.c) > 0) return;
+  if (parseInt(count.rows[0]?.c, 10) > 0) return;
   const runbooks = [
     {
       title: 'High API Error Rate Response',
@@ -471,7 +471,7 @@ Fires when Node.js heap usage exceeds 80% of available memory.
 // Seed default alert rules
 async function seedAlertRules(): Promise<void> {
   const count = await pool.query(`SELECT COUNT(*) as c FROM platform_alert_rules`);
-  if (parseInt(count.rows[0]?.c) > 0) return;
+  if (parseInt(count.rows[0]?.c, 10) > 0) return;
   const rules = [
     {
       name: 'High Error Rate',
@@ -680,7 +680,7 @@ router.get('/ops/incidents', validateQuery(listQuerySchema), async (req, res) =>
       sql += ` AND severity = $${params.length}`;
     }
     sql += ` ORDER BY created_at DESC LIMIT $${params.length + 1}`;
-    params.push(Math.min(parseInt(limit) || 50, 200));
+    params.push(Math.min(parseInt(limit, 10) || 50, 200));
     const result = await pool.query(sql, params);
     res.json({ incidents: result.rows });
   } catch (err) {
@@ -715,7 +715,7 @@ router.post('/ops/incidents', validateBody(createIncidentSchema), async (req, re
         user?.displayName ?? user?.email ?? 'System',
       ],
     );
-    const id = result.rows[0]!.id;
+    const id = result.rows[0]?.id;
     await pool.query(
       `INSERT INTO platform_incident_updates (incident_id, message, status, author) VALUES ($1, $2, 'open', $3)`,
       [id, `Incident opened: ${description}`, user?.displayName ?? 'System'],
@@ -728,7 +728,7 @@ router.post('/ops/incidents', validateBody(createIncidentSchema), async (req, re
 });
 
 router.get('/ops/incidents/:id', async (req, res) => {
-  const id = parseInt(req.params['id'] as string);
+  const id = parseInt(req.params.id as string, 10);
   try {
     const [incResult, updatesResult] = await Promise.all([
       pool.query(`SELECT * FROM platform_incidents WHERE id = $1`, [id]),
@@ -758,7 +758,7 @@ const updateIncidentSchema = z.object({
 });
 
 router.patch('/ops/incidents/:id', validateBody(updateIncidentSchema), async (req, res) => {
-  const id = parseInt(req.params['id'] as string);
+  const id = parseInt(req.params.id as string, 10);
   const { status, message, assignee, postmortem, severity, affectedServices } = req.body as z.infer<
     typeof updateIncidentSchema
   >;
@@ -870,11 +870,11 @@ router.patch('/ops/incidents/:id', validateBody(updateIncidentSchema), async (re
 });
 
 router.delete('/ops/incidents/:id', validateBody(bodyShape({})), async (req, res) => {
-  const id = parseInt(req.params['id'] as string);
+  const id = parseInt(req.params.id as string, 10);
   try {
     await pool.query(`DELETE FROM platform_incidents WHERE id = $1`, [id]);
     res.json({ ok: true });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to delete incident' });
   }
 });
@@ -887,7 +887,7 @@ router.get('/ops/alert-rules', async (_req, res) => {
   try {
     const result = await pool.query(`SELECT * FROM platform_alert_rules ORDER BY created_at DESC`);
     res.json({ rules: result.rows });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to list alert rules' });
   }
 });
@@ -928,14 +928,14 @@ router.post('/ops/alert-rules', validateBody(alertRuleSchema), async (req, res) 
         b.runbookId ?? null,
       ],
     );
-    res.json({ ok: true, id: result.rows[0]!.id });
-  } catch (err) {
+    res.json({ ok: true, id: result.rows[0]?.id });
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to create alert rule' });
   }
 });
 
 router.patch('/ops/alert-rules/:id', validateBody(bodyShape({})), async (req, res) => {
-  const id = parseInt(req.params['id'] as string);
+  const id = parseInt(req.params.id as string, 10);
   const b = req.body as Partial<z.infer<typeof alertRuleSchema>>;
   try {
     const sets: string[] = ['updated_at = NOW()'];
@@ -967,17 +967,17 @@ router.patch('/ops/alert-rules/:id', validateBody(bodyShape({})), async (req, re
       params,
     );
     res.json({ ok: true });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to update alert rule' });
   }
 });
 
 router.delete('/ops/alert-rules/:id', validateBody(bodyShape({})), async (req, res) => {
-  const id = parseInt(req.params['id'] as string);
+  const id = parseInt(req.params.id as string, 10);
   try {
     await pool.query(`DELETE FROM platform_alert_rules WHERE id = $1`, [id]);
     res.json({ ok: true });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to delete alert rule' });
   }
 });
@@ -992,16 +992,16 @@ router.get('/ops/alert-events', validateQuery(listQuerySchema), async (req, res)
       sql += ` AND status = $${params.length}`;
     }
     sql += ` ORDER BY created_at DESC LIMIT $${params.length + 1}`;
-    params.push(Math.min(parseInt(limit) || 50, 200));
+    params.push(Math.min(parseInt(limit, 10) || 50, 200));
     const result = await pool.query(sql, params);
     res.json({ events: result.rows });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to list alert events' });
   }
 });
 
 router.post('/ops/alert-events/:id/acknowledge', validateBody(bodyShape({})), async (req, res) => {
-  const id = parseInt(req.params['id'] as string);
+  const id = parseInt(req.params.id as string, 10);
   const user = req.user;
   try {
     await pool.query(
@@ -1009,7 +1009,7 @@ router.post('/ops/alert-events/:id/acknowledge', validateBody(bodyShape({})), as
       [user?.displayName ?? 'System', id],
     );
     res.json({ ok: true });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to acknowledge alert event' });
   }
 });
@@ -1065,7 +1065,7 @@ export async function runAlertRuleEvaluation(): Promise<{
   const metricValues: Record<string, number> = {
     'api.error_rate': parseFloat((snapshot.errorRate ?? 0).toFixed(2)),
     'api.latency_p95': parseFloat((latencyRes.rows[0]?.p95 ?? 0).toString()),
-    'queue.depth': parseInt(queueRes.rows[0]?.depth ?? '0'),
+    'queue.depth': parseInt(queueRes.rows[0]?.depth ?? '0', 10),
     'db.pool_utilization': parseFloat(poolRes.rows[0]?.util ?? '0'),
     'system.memory_pct': (() => {
       const mem = process.memoryUsage();
@@ -1131,8 +1131,8 @@ export async function runAlertRuleEvaluation(): Promise<{
           );
         } else {
           const alertsUrl =
-            process.env['ALERTS_PAGE_URL'] ??
-            `${process.env['APP_BASE_URL'] ?? 'https://szlholdings.com'}/command/ops/alerts`;
+            process.env.ALERTS_PAGE_URL ??
+            `${process.env.APP_BASE_URL ?? 'https://szlholdings.com'}/command/ops/alerts`;
           const { subject, html, text } = buildAlertFiredEmail({
             ruleName: rule.name,
             severity: rule.severity,
@@ -1213,13 +1213,13 @@ router.get('/ops/runbooks', validateQuery(listQuerySchema), async (req, res) => 
     sql += ` ORDER BY created_at DESC`;
     const result = await pool.query(sql, params);
     res.json({ runbooks: result.rows });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to list runbooks' });
   }
 });
 
 router.get('/ops/runbooks/:id', async (req, res) => {
-  const id = parseInt(req.params['id'] as string);
+  const id = parseInt(req.params.id as string, 10);
   try {
     const result = await pool.query(`SELECT * FROM platform_runbooks WHERE id = $1`, [id]);
     if (!result.rows[0]) {
@@ -1227,7 +1227,7 @@ router.get('/ops/runbooks/:id', async (req, res) => {
       return;
     }
     res.json({ runbook: result.rows[0] });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to get runbook' });
   }
 });
@@ -1265,14 +1265,14 @@ router.post('/ops/runbooks', validateBody(runbookSchema), async (req, res) => {
         b.author ?? user?.displayName ?? 'System',
       ],
     );
-    res.json({ ok: true, id: result.rows[0]!.id });
-  } catch (err) {
+    res.json({ ok: true, id: result.rows[0]?.id });
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to create runbook' });
   }
 });
 
 router.patch('/ops/runbooks/:id', validateBody(bodyShape({})), async (req, res) => {
-  const id = parseInt(req.params['id'] as string);
+  const id = parseInt(req.params.id as string, 10);
   const b = req.body as Partial<z.infer<typeof runbookSchema>> & { isActive?: boolean };
   try {
     const sets: string[] = ['updated_at = NOW()', 'version = version + 1'];
@@ -1303,17 +1303,17 @@ router.patch('/ops/runbooks/:id', validateBody(bodyShape({})), async (req, res) 
       params,
     );
     res.json({ ok: true });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to update runbook' });
   }
 });
 
 router.delete('/ops/runbooks/:id', validateBody(bodyShape({})), async (req, res) => {
-  const id = parseInt(req.params['id'] as string);
+  const id = parseInt(req.params.id as string, 10);
   try {
     await pool.query(`DELETE FROM platform_runbooks WHERE id = $1`, [id]);
     res.json({ ok: true });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to delete runbook' });
   }
 });
@@ -1439,19 +1439,19 @@ router.post(
           b.description ?? null,
         ],
       );
-      res.json({ ok: true, id: result.rows[0]!.id });
-    } catch (err) {
+      res.json({ ok: true, id: result.rows[0]?.id });
+    } catch (_err) {
       res.status(500).json({ error: 'Failed to create service dependency' });
     }
   },
 );
 
 router.delete('/ops/service-deps/:id', validateBody(bodyShape({})), async (req, res) => {
-  const id = parseInt(req.params['id'] as string);
+  const id = parseInt(req.params.id as string, 10);
   try {
     await pool.query(`DELETE FROM platform_service_deps WHERE id = $1`, [id]);
     res.json({ ok: true });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to delete service dependency' });
   }
 });
@@ -1576,7 +1576,7 @@ router.get('/ops/slo', async (_req, res) => {
     const availabilityRaw = availabilityRes.rows[0]?.uptime_pct;
     const availability30d = availabilityRaw != null ? parseFloat(availabilityRaw) : null;
     const hasAvailabilityData =
-      availabilityRaw != null && parseInt(availabilityRes.rows[0]?.total_checks ?? '0') > 0;
+      availabilityRaw != null && parseInt(availabilityRes.rows[0]?.total_checks ?? '0', 10) > 0;
 
     let errorBudgetConsumedMinutes = 0;
     let errorBudgetRemainingPct = 100;
@@ -1612,7 +1612,7 @@ router.get('/ops/slo', async (_req, res) => {
       if (approvalLatencyBySeverity[sev]) {
         approvalLatencyBySeverity[sev] = {
           ...approvalLatencyBySeverity[sev],
-          count: parseInt(row.count ?? '0'),
+          count: parseInt(row.count ?? '0', 10),
           avgMinutes: parseFloat(row.avg_pending_minutes ?? '0'),
           maxMinutes: parseFloat(row.max_pending_minutes ?? '0'),
         };
@@ -1685,7 +1685,7 @@ router.get('/ops/slo', async (_req, res) => {
       },
       latency: latencySlos,
       workflowEngine: {
-        queueDepth: parseInt(queueDepthRes.rows[0]?.depth ?? '0'),
+        queueDepth: parseInt(queueDepthRes.rows[0]?.depth ?? '0', 10),
         queueDepthThreshold: 100,
         completionRate24h: parseFloat(workflowCompletionRes.rows[0]?.completion_rate ?? '100'),
         completionRateTarget: 99,
@@ -1728,7 +1728,7 @@ router.get('/ops/uptime-history', validateQuery(listQuerySchema), async (req, re
       FROM platform_status_checks
       WHERE checked_at > NOW() - INTERVAL '1 day' * $1
     `;
-    const params: unknown[] = [Math.min(parseInt(days) || 30, 90)];
+    const params: unknown[] = [Math.min(parseInt(days, 10) || 30, 90)];
     if (serviceId) {
       params.push(serviceId);
       sql += ` AND service_id = $${params.length}`;
@@ -1736,7 +1736,7 @@ router.get('/ops/uptime-history', validateQuery(listQuerySchema), async (req, re
     sql += ` GROUP BY service_id, DATE_TRUNC('day', checked_at) ORDER BY service_id, day DESC`;
     const result = await pool.query(sql, params);
     res.json({ history: result.rows });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to get uptime history' });
   }
 });

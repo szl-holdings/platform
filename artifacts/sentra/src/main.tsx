@@ -18,8 +18,7 @@ initAnalytics({ appSlug: 'sentra' });
 
 if ('serviceWorker' in navigator && !import.meta.env.DEV) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sentra/sw.js', { scope: '/sentra/' }).catch((err) => {
-      console.warn('[TENAX SW] Registration failed:', err);
+    navigator.serviceWorker.register('/sentra/sw.js', { scope: '/sentra/' }).catch((_err) => {
     });
   });
 }

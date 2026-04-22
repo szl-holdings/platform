@@ -7,7 +7,6 @@
 import * as React from 'react';
 import { AutonomyDial } from './AutonomyDial';
 import type { Recommendation, RecommendationAction } from './os-layer';
-import { AUTONOMY_LABELS } from './os-layer';
 import { PolicyVerdictBadge } from './PolicyVerdictBadge';
 import { cn } from './utils';
 
@@ -187,7 +186,7 @@ function EvidenceInlineDrawer({ rec, onClose }: { rec: Recommendation; onClose: 
                         >
                           {step}
                         </span>
-                        {i < ev.lineage!.length - 1 && <span style={{ color: TEXT.muted }}>→</span>}
+                        {i < (ev.lineage?.length ?? 0) - 1 && <span style={{ color: TEXT.muted }}>→</span>}
                       </React.Fragment>
                     ))}
                   </div>
@@ -516,9 +515,9 @@ export function RecommendationCard({
                       onClick={() => requestAction('rollback')}
                       className="rounded px-3 py-1.5 text-[11px] font-medium transition-opacity disabled:opacity-50"
                       style={{
-                        background: ACTION_BUTTON.rollback!.bg,
-                        color: ACTION_BUTTON.rollback!.color,
-                        border: `1px solid ${ACTION_BUTTON.rollback!.border}`,
+                        background: ACTION_BUTTON.rollback?.bg,
+                        color: ACTION_BUTTON.rollback?.color,
+                        border: `1px solid ${ACTION_BUTTON.rollback?.border}`,
                       }}
                     >
                       Rollback

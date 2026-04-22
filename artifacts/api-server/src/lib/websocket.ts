@@ -1,8 +1,8 @@
 import { getOrCreateDoc, pruneRegistry } from '@szl-holdings/crdt-sync';
 import { changeEventsTable, db, sessionsTable, usersTable } from '@szl-holdings/db';
-import { createHmac, randomBytes, timingSafeEqual } from 'crypto';
+import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { and, eq, gt, isNull } from 'drizzle-orm';
-import type { IncomingMessage, Server } from 'http';
+import type { IncomingMessage, Server } from 'node:http';
 import { LRUCache } from 'lru-cache';
 import { WebSocket, WebSocketServer } from 'ws';
 import { logger } from './logger';
@@ -45,7 +45,7 @@ const crdtRoomClients = new Map<string, Set<string>>();
 
 function addCrdtRoom(clientId: string, room: string): void {
   if (!crdtRoomClients.has(room)) crdtRoomClients.set(room, new Set());
-  crdtRoomClients.get(room)!.add(clientId);
+  crdtRoomClients.get(room)?.add(clientId);
 }
 
 function removeCrdtRooms(clientId: string): void {
@@ -110,7 +110,7 @@ function addPresence(
   displayName?: string,
 ): void {
   if (!presenceMap.has(channel)) presenceMap.set(channel, new Map());
-  presenceMap.get(channel)!.set(clientId, { userId, displayName, since: Date.now() });
+  presenceMap.get(channel)?.set(clientId, { userId, displayName, since: Date.now() });
   broadcastPresence(channel);
 }
 
@@ -240,8 +240,8 @@ const CHANNEL_ALLOWED_ROLES: Record<string, Set<string>> = {
   ]),
 };
 
-const INTERNAL_TOKEN = process.env['ALLOY_INTERNAL_TOKEN'];
-const _rawSessionSecret = process.env['SESSION_SECRET'];
+const INTERNAL_TOKEN = process.env.ALLOY_INTERNAL_TOKEN;
+const _rawSessionSecret = process.env.SESSION_SECRET;
 if (!_rawSessionSecret) {
   logger.warn(
     'SESSION_SECRET is not set — WS ticket signing will use a per-process ephemeral secret. Set SESSION_SECRET in production.',

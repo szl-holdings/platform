@@ -10,7 +10,7 @@
  * Domain-specific data is passed via props; the UI and interaction model
  * are shared across all surfaces.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { cn } from './utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────
@@ -320,7 +320,7 @@ function TimelinePanel({ events }: { events: IncidentTimelineEvent[] }) {
       </div>
       <div className="relative flex flex-col gap-0">
         <div className="absolute left-[6px] top-2 bottom-2 w-px" style={{ background: BORDER }} />
-        {events.map((event, i) => (
+        {events.map((event, _i) => (
           <div key={event.id} className="flex gap-3 pb-3 relative">
             <div
               className="w-3.5 h-3.5 rounded-full flex-shrink-0 mt-0.5 z-10"

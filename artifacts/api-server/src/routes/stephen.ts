@@ -338,7 +338,7 @@ router.get('/stephen/portfolio-case-studies', async (_req, res) => {
       .from(stephenCaseStudiesTable)
       .orderBy(desc(stephenCaseStudiesTable.createdAt));
     res.json(studies.map(serializeCaseStudy));
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to list portfolio case studies' });
   }
 });

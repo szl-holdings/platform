@@ -134,8 +134,6 @@ async function main(): Promise<void> {
   });
 }
 
-main().catch((err) => {
-  // eslint-disable-next-line no-console
-  console.error('[crash-child] fatal:', err);
+main().catch((_err) => {
   process.exit(2);
 });

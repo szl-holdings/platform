@@ -1,5 +1,4 @@
-import type { ChatCompletionResult, ChatMessage } from '@szl-holdings/services';
-import { services } from '@szl-holdings/services';
+import { type ChatCompletionResult, type ChatMessage, services } from '@szl-holdings/services';
 import { estimateCost, type InferenceProvider, inferenceTelemetry } from './inference-telemetry';
 import { logger } from './logger';
 import { providerHealth } from './provider-health';
@@ -246,7 +245,7 @@ function selectCandidates(request: GatewayRequest): ProviderCandidate[] {
   const strategy = request.strategy ?? 'fastest';
   const candidates: ProviderCandidate[] = [];
   const taskType = detectTaskType(request.messages);
-  const modelList = PROVIDER_MODELS[taskType] ?? PROVIDER_MODELS['default']!;
+  const modelList = PROVIDER_MODELS[taskType] ?? PROVIDER_MODELS.default!;
 
   if (strategy === 'preferred' && request.preferredProvider) {
     const preferred = request.preferredProvider;

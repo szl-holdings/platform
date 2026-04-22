@@ -4,7 +4,6 @@ import { LiveClock as SharedLiveClock } from '@szl-holdings/shared-ui/live-clock
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
-  AlertCircle,
   ArrowRight,
   ArrowUpDown,
   BarChart3,
@@ -12,7 +11,6 @@ import {
   CheckCircle,
   ChevronDown,
   ChevronUp,
-  Clock,
   Cpu,
   DollarSign,
   FlaskConical,
@@ -22,16 +20,10 @@ import {
   Lightbulb,
   Radio,
   Shield,
-  TrendingDown,
-  TrendingUp,
   Users,
-  Zap,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
-  Bar,
-  BarChart,
-  Cell,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -826,7 +818,7 @@ export default function Dashboard() {
                 className="flex items-center gap-2 p-2 rounded-lg bg-muted/10 border border-border/50"
               >
                 <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
-                  {a.split(' ').pop()![0]}
+                  {a.split(' ').pop()?.[0]}
                 </div>
                 <span className="text-xs text-foreground">{a}</span>
                 <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

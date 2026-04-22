@@ -35,7 +35,7 @@ export class ConnectorRegistry {
     if (!this._emitSignal) throw new Error('Call setEmitSignal() before startAll()');
     const emitter = this._emitSignal;
 
-    for (const [id, entry] of this.adapters) {
+    for (const [_id, entry] of this.adapters) {
       const wrapped = async (input: SignalInput): Promise<Signal> => {
         const signal = await emitter(input);
         entry.signalsEmitted++;
@@ -46,19 +46,16 @@ export class ConnectorRegistry {
       try {
         await entry.adapter.start(wrapped);
         entry.startedAt = new Date().toISOString();
-        console.log(`[connectors] started: ${id}`);
-      } catch (err) {
-        console.error(`[connectors] failed to start ${id}:`, err);
+      } catch (_err) {
       }
     }
   }
 
   async stopAll(): Promise<void> {
-    for (const [id, entry] of this.adapters) {
+    for (const [_id, entry] of this.adapters) {
       try {
         await entry.adapter.stop();
-      } catch (err) {
-        console.error(`[connectors] failed to stop ${id}:`, err);
+      } catch (_err) {
       }
     }
   }
@@ -70,8 +67,7 @@ export class ConnectorRegistry {
       try {
         const signals = await entry.adapter.poll();
         all.push(...signals);
-      } catch (err) {
-        console.error(`[connectors] poll error on ${entry.adapter.metadata.connectorId}:`, err);
+      } catch (_err) {
       }
     }
     return all;

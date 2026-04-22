@@ -1,5 +1,5 @@
 import { demoExceptions } from '@lyte/lib/demo-seed';
-import { AlertOctagon, AlertTriangle, CheckCircle, Clock, Filter } from 'lucide-react';
+import { AlertOctagon, Clock, } from 'lucide-react';
 import { useState } from 'react';
 
 const BG = { surface: '#0c1018', elevated: '#10141e' };
@@ -60,7 +60,7 @@ function timeAgo(iso: string): string {
 export default function DemoExceptionsPage() {
   const [sevFilter, setSevFilter] = useState('all');
   const [catFilter, setCatFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, _setStatusFilter] = useState('all');
 
   const filtered = demoExceptions.filter((e) => {
     if (sevFilter !== 'all' && e.severity !== sevFilter) return false;

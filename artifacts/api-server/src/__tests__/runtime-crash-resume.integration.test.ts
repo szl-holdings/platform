@@ -24,9 +24,9 @@
  * Skipped automatically when `DATABASE_URL` is not set.
  */
 
-import { type ChildProcess, spawn } from 'child_process';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { type ChildProcess, spawn } from 'node:child_process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { afterAll, describe, expect, it } from 'vitest';
 
@@ -163,7 +163,7 @@ describeIfDb('runtime crash → resume from orchestration_checkpoints', () => {
       .from(orchestrationCheckpointsTable)
       .where(eq(orchestrationCheckpointsTable.ref, ref));
     expect(rows.length).toBe(1);
-    expect(rows[0]!.runId).toBe(runId);
+    expect(rows[0]?.runId).toBe(runId);
     expect((rows[0] as { stepIndex: number }).stepIndex).toBeGreaterThanOrEqual(2);
 
     // ── Step 4: hydrate a fresh PostgresCheckpointStore (production-
@@ -186,19 +186,19 @@ describeIfDb('runtime crash → resume from orchestration_checkpoints', () => {
 
     const recovered = store.load(ref);
     expect(recovered, 'checkpoint must be hydrated from Postgres after crash').toBeDefined();
-    expect(recovered!.runId).toBe(runId);
-    expect(recovered!.stepIndex).toBeGreaterThanOrEqual(2);
-    expect(recovered!.snapshot.planId).toBeTruthy();
+    expect(recovered?.runId).toBe(runId);
+    expect(recovered?.stepIndex).toBeGreaterThanOrEqual(2);
+    expect(recovered?.snapshot.planId).toBeTruthy();
     // Snapshot persisted by the crashed orchestrator must contain the
     // step results executed before the kill — proving zero data loss.
-    expect(recovered!.snapshot.stepResults.length).toBeGreaterThanOrEqual(3);
+    expect(recovered?.snapshot.stepResults.length).toBeGreaterThanOrEqual(3);
 
     defaultCheckpointStore.setBackend(store);
 
     // ── Step 5: resume the orchestrator from the persisted ref ──────────
     const executedStepIds: string[] = [];
     const result = await runCognitiveLoop(
-      recovered!.objective,
+      recovered?.objective,
       {
         agentId,
         domain: 'test',
@@ -222,8 +222,8 @@ describeIfDb('runtime crash → resume from orchestration_checkpoints', () => {
     // The child completed plan-step indices 0, 1, 2 before SIGKILL, so
     // the resumed run must execute exactly indices 3 and 4 (Verify and
     // Reflect from the baseline 5-step plan).
-    const recoveredStepIds = recovered!.snapshot.stepResults.map((s) => s.stepId);
-    const expectedResumedStepIds = recovered!.snapshot.phases
+    const recoveredStepIds = recovered?.snapshot.stepResults.map((s) => s.stepId);
+    const expectedResumedStepIds = recovered?.snapshot.phases
       .filter((p) => p.phase === 'plan')
       .flatMap((p) => {
         const out = p.output as { plan?: { executionOrder?: string[] } } | undefined;
@@ -254,6 +254,4 @@ describeIfDb('runtime crash → resume from orchestration_checkpoints', () => {
 });
 
 if (!HAS_DB) {
-  // eslint-disable-next-line no-console
-  console.warn('[runtime-crash-resume] DATABASE_URL not set — integration test suite skipped');
 }

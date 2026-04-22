@@ -9,7 +9,6 @@ import {
   Pause,
   Play,
   Plus,
-  Shuffle,
   Trophy,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -272,7 +271,7 @@ export default function AbTestingPage() {
                   style={{
                     padding: '1rem 1.125rem',
                     background: isSelected ? `${DS.accent}07` : DS.surface,
-                    border: `1px solid ${isSelected ? DS.accent + '25' : DS.border}`,
+                    border: `1px solid ${isSelected ? `${DS.accent}25` : DS.border}`,
                     borderRadius: '8px',
                     cursor: 'pointer',
                     textAlign: 'left',
@@ -342,7 +341,7 @@ export default function AbTestingPage() {
           {/* Detail */}
           {selected &&
             (() => {
-              const cfg = STATUS_CONFIG[selected.status] || STATUS_CONFIG.draft;
+              const _cfg = STATUS_CONFIG[selected.status] || STATUS_CONFIG.draft;
               return (
                 <div
                   style={{
@@ -417,7 +416,7 @@ export default function AbTestingPage() {
                     Variants
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {selected.variants.map((v: Record<string, unknown>, i) => {
+                    {selected.variants.map((v: Record<string, unknown>, _i) => {
                       const vid = v.id as string;
                       const isWinner = selected.winnerVariant === vid;
                       return (
@@ -426,7 +425,7 @@ export default function AbTestingPage() {
                           style={{
                             padding: '0.75rem',
                             background: isWinner ? `${DS.green}08` : DS.elevated,
-                            border: `1px solid ${isWinner ? DS.green + '20' : DS.border}`,
+                            border: `1px solid ${isWinner ? `${DS.green}20` : DS.border}`,
                             borderRadius: '7px',
                           }}
                         >

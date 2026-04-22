@@ -264,7 +264,7 @@ router.post(
     };
 
     const centurion = centurionId || 'CAESAR';
-    const response = responses[centurion] || responses['CAESAR'];
+    const response = responses[centurion] || responses.CAESAR;
 
     return res.json({
       centurionId: centurion,

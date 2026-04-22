@@ -89,7 +89,7 @@ export default function TrustArchitecturePage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
           <section className="szl-grid-texture szl-depth-glow-dual" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>

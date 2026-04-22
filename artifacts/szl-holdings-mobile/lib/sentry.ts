@@ -104,7 +104,6 @@ export function captureMessage(
 
 export function initSentryGlobalHandlers(): void {
   if (!isSentryEnabled()) {
-    console.debug('[sentry] Mobile Sentry disabled — set EXPO_PUBLIC_SENTRY_DSN to enable');
     return;
   }
 
@@ -138,8 +137,4 @@ export function initSentryGlobalHandlers(): void {
       origTracked?.(fn, err);
     };
   }
-
-  console.debug(
-    '[sentry] Mobile Sentry HTTP reporter initialized — global errors + promise rejections captured',
-  );
 }

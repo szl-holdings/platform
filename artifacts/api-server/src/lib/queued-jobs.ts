@@ -74,7 +74,7 @@ export function registerQueuedJobHandlers(): void {
     if (callback?.url) {
       const res = await fetch(callback.url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(callback.headers ?? {}) },
+        headers: { 'Content-Type': 'application/json', ...callback.headers },
         body: JSON.stringify({ jobId: job.id, response }),
         signal: AbortSignal.timeout(10_000),
       });

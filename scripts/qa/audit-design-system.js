@@ -12,9 +12,9 @@
  *   node scripts/qa/audit-design-system.js
  */
 
-import { readdirSync, readFileSync } from 'fs';
-import { dirname, extname, join, relative } from 'path';
-import { fileURLToPath } from 'url';
+import { readdirSync, readFileSync } from 'node:fs';
+import { dirname, extname, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
@@ -117,8 +117,6 @@ function auditFile(filePath) {
 }
 
 function main() {
-  console.log('\nSZL Holdings — Design System Compliance Audit');
-  console.log('Checking for hardcoded colors, fonts, and design token violations...\n');
 
   const allFindings = [];
 
@@ -132,7 +130,7 @@ function main() {
 
   const errors = allFindings.filter((f) => f.severity === 'error');
   const warnings = allFindings.filter((f) => f.severity === 'warning');
-  const infos = allFindings.filter((f) => f.severity === 'info');
+  const _infos = allFindings.filter((f) => f.severity === 'info');
 
   // Summarize by file
   const byFile = new Map();
@@ -142,35 +140,18 @@ function main() {
   }
 
   if (warnings.length > 0) {
-    console.log(
-      `WARNINGS — ${warnings.length} hardcoded values found across ${byFile.size} file(s):`,
-    );
     let shown = 0;
-    for (const [file, findings] of byFile) {
+    for (const [_file, _findings] of byFile) {
       if (shown >= 20) {
-        console.warn(`  ... and ${byFile.size - shown} more files`);
         break;
       }
-      console.warn(`  [WARN] ${file} (${findings.length} instance(s))`);
       shown++;
     }
-    console.log('');
   }
 
-  console.log(
-    `Summary: ${errors.length} errors, ${warnings.length} warnings, ${infos.length} info`,
-  );
-
   if (errors.length > 0) {
-    console.error('\nFAIL — Design system errors must be fixed before deployment.');
     process.exit(1);
   } else {
-    // In a codebase with inline styles using hsl() with direct values, warnings are expected
-    // and don't block deployment. This is advisory.
-    console.log('\nPASS — No blocking design system violations found.');
-    console.log(
-      'Note: Warnings indicate direct hsl/hex usage. Consider migrating to CSS tokens over time.',
-    );
     process.exit(0);
   }
 }

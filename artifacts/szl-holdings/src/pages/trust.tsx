@@ -216,7 +216,7 @@ export default function TrustPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
           {/* Hero */}
           <section className="szl-grid-texture szl-depth-glow-dual" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
@@ -369,7 +369,7 @@ export default function TrustPage() {
                     >
                       <Link href={page.href} style={{ display: "block", textDecoration: "none" }}>
                         <div className="szl-card" style={{ borderRadius: "0.875rem", padding: "1.5rem", height: "100%", transition: "border-color 0.18s ease, background 0.18s ease", cursor: "pointer" }}
-                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = page.color + "40"; (e.currentTarget as HTMLElement).style.background = page.colorMuted; }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = `${page.color}40`; (e.currentTarget as HTMLElement).style.background = page.colorMuted; }}
                           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = ""; (e.currentTarget as HTMLElement).style.background = ""; }}
                         >
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
@@ -784,7 +784,7 @@ export default function TrustPage() {
                           <p style={{ fontSize: "0.8125rem", fontWeight: 500, color: "hsl(38,8%,80%)", marginBottom: "0.2rem" }}>{row.milestone}</p>
                           <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", color: "hsl(214,7%,48%)" }}>{row.target}</p>
                         </div>
-                        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: row.color, background: row.color + "14", border: `1px solid ${row.color}30`, borderRadius: "99px", padding: "0.2rem 0.6rem", whiteSpace: "nowrap", flexShrink: 0 }}>{row.status}</span>
+                        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: row.color, background: `${row.color}14`, border: `1px solid ${row.color}30`, borderRadius: "99px", padding: "0.2rem 0.6rem", whiteSpace: "nowrap", flexShrink: 0 }}>{row.status}</span>
                       </div>
                     ))}
                   </div>

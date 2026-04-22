@@ -72,7 +72,7 @@ export function usePresence(channel: string, options: UsePresenceOptions = {}): 
       mountedRef.current = false;
       clearInterval(interval);
     };
-  }, [channel, fetchPresence, pollIntervalMs]);
+  }, [fetchPresence, pollIntervalMs]);
 
   return { presence, isLoading, refresh };
 }

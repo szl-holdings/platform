@@ -197,10 +197,10 @@ function domainHandler(domain: string) {
     try {
       const rawLimit = parseInt((req.query.limit as string) ?? '100', 10);
       const rawOffset = parseInt((req.query.offset as string) ?? '0', 10);
-      if (isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
+      if (Number.isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
         return sendBadRequest(res, 'limit must be 1–500');
       }
-      if (isNaN(rawOffset) || rawOffset < 0) {
+      if (Number.isNaN(rawOffset) || rawOffset < 0) {
         return sendBadRequest(res, 'offset must be >= 0');
       }
       const includeCross = req.query.includeCross !== 'false';

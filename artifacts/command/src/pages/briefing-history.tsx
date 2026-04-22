@@ -5,7 +5,7 @@ import {
   MorningBriefingCard,
 } from '@szl-holdings/shared-ui/morning-briefing';
 import { PageDataSkeleton } from '@szl-holdings/shared-ui/page-data-skeleton';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const ACCENT = '#8b7ac8';
 

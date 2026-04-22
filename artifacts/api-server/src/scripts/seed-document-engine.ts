@@ -17,13 +17,11 @@ import {
   documentTemplatesTable,
   signaturesTable,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
-import { eq, sql } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
 
 async function seedDocumentTemplates() {
   const existing = await db.select().from(documentTemplatesTable).limit(1);
   if (existing.length > 0) {
-    console.log('  document_templates: already seeded, skipping');
     return;
   }
 
@@ -195,13 +193,11 @@ async function seedDocumentTemplates() {
   await db
     .insert(documentTemplatesTable)
     .values(templates as (typeof documentTemplatesTable.$inferInsert)[]);
-  console.log(`  document_templates: inserted ${templates.length} templates`);
 }
 
 async function seedContentLibrary() {
   const existing = await db.select().from(contentLibraryBlocksTable).limit(1);
   if (existing.length > 0) {
-    console.log('  content_library_blocks: already seeded, skipping');
     return;
   }
 
@@ -351,20 +347,17 @@ async function seedContentLibrary() {
   await db
     .insert(contentLibraryBlocksTable)
     .values(blocks as (typeof contentLibraryBlocksTable.$inferInsert)[]);
-  console.log(`  content_library_blocks: inserted ${blocks.length} blocks`);
 }
 
 async function seedDemoSignature() {
   // Only seed if there are documents and if there are no existing signatures
   const docs = await db.select().from(documentsTable).limit(1);
   if (docs.length === 0) {
-    console.log('  signatures: no documents found, skipping demo signature');
     return;
   }
 
   const existingSigs = await db.select().from(signaturesTable).limit(1);
   if (existingSigs.length > 0) {
-    console.log('  signatures: already seeded, skipping');
     return;
   }
 
@@ -385,19 +378,15 @@ async function seedDemoSignature() {
     auditHash: randomUUID(),
     expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
-  console.log(`  signatures: inserted demo signed signature for document #${doc.id}`);
 }
 
 async function main() {
-  console.log('Seeding Document Engine tables…');
   try {
     await seedDocumentTemplates();
     await seedContentLibrary();
     await seedDemoSignature();
-    console.log('Done.');
     process.exit(0);
-  } catch (err) {
-    console.error('Seed failed:', err);
+  } catch (_err) {
     process.exit(1);
   }
 }

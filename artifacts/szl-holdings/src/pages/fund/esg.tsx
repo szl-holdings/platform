@@ -2,8 +2,8 @@ import { useState } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
-  Leaf, ArrowLeft, ChevronRight, Users, BarChart3, TrendingUp,
-  Download, Star, AlertCircle, CheckCircle2, Info, Globe,
+  Leaf, ArrowLeft, ChevronRight, Users, TrendingUp,
+  Download, Star, AlertCircle, CheckCircle2, Globe,
   Heart, ShieldCheck,
 } from "lucide-react";
 import {
@@ -176,8 +176,8 @@ export default function EsgPage() {
   
             <div className="grid grid-cols-4 gap-4 mb-8">
               {[
-                { label: "Portfolio ESG Score", value: String(PORTFOLIO_ESG_AVG.composite) + "/100", icon: Star, color: "#6aaa72", sub: "Weighted avg." },
-                { label: "Avg. DEI Score", value: String(Math.round(ESG_SCORES.reduce((s, c) => s + c.deiScore, 0) / ESG_SCORES.length)) + "/100", icon: Users, color: "#8b7ac8", sub: "Diversity & Inclusion" },
+                { label: "Portfolio ESG Score", value: `${String(PORTFOLIO_ESG_AVG.composite)}/100`, icon: Star, color: "#6aaa72", sub: "Weighted avg." },
+                { label: "Avg. DEI Score", value: `${String(Math.round(ESG_SCORES.reduce((s, c) => s + c.deiScore, 0) / ESG_SCORES.length))}/100`, icon: Users, color: "#8b7ac8", sub: "Diversity & Inclusion" },
                 { label: "Total Carbon Footprint", value: `${totalCarbon.toLocaleString()} t`, icon: Globe, color: "#4a90b8", sub: "CO₂e / year (portfolio)" },
                 { label: "Companies Improving", value: `${ESG_SCORES.filter(c => c.trend === "improving").length}/${ESG_SCORES.length}`, icon: TrendingUp, color: "#d4a054", sub: "ESG trend YoY" },
               ].map(item => (
@@ -267,7 +267,7 @@ export default function EsgPage() {
                     {ESG_SCORES.map(c => (
                       <button key={c.company} onClick={() => setSelected(c)}
                         className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition ${selected.company === c.company ? "text-white" : "bg-white/[0.04] text-white/50 hover:bg-white/[0.07]"}`}
-                        style={selected.company === c.company ? { background: c.color + "25", color: c.color, border: `1px solid ${c.color}40` } : {}}>
+                        style={selected.company === c.company ? { background: `${c.color}25`, color: c.color, border: `1px solid ${c.color}40` } : {}}>
                         {c.company}
                       </button>
                     ))}

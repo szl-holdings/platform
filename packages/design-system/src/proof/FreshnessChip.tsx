@@ -14,7 +14,7 @@ export interface FreshnessChipProps {
 function computeLevel(ts: string | Date | null | undefined): FreshnessLevel {
   if (!ts) return 'unknown';
   const d = typeof ts === 'string' ? new Date(ts) : ts;
-  if (isNaN(d.getTime())) return 'unknown';
+  if (Number.isNaN(d.getTime())) return 'unknown';
   const ageMs = Date.now() - d.getTime();
   const ageH = ageMs / 3_600_000;
   if (ageH < 1) return 'fresh';
@@ -25,7 +25,7 @@ function computeLevel(ts: string | Date | null | undefined): FreshnessLevel {
 function relativeLabel(ts: string | Date | null | undefined): string {
   if (!ts) return 'unknown';
   const d = typeof ts === 'string' ? new Date(ts) : ts;
-  if (isNaN(d.getTime())) return 'unknown';
+  if (Number.isNaN(d.getTime())) return 'unknown';
   const ms = Date.now() - d.getTime();
   const s = Math.round(ms / 1000);
   if (s < 60) return `${s}s ago`;

@@ -1,4 +1,4 @@
-import type { RerankCandidate } from '@workspace/aef-contracts';
+
 import { describe, expect, it } from 'vitest';
 
 describe('DeterministicFallbackBackend logic', () => {

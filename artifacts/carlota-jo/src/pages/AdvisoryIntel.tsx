@@ -1,7 +1,6 @@
 import {
   ArrowUpRight,
   Award,
-  BarChart3,
   BookOpen,
   Lightbulb,
   Star,

@@ -2,23 +2,19 @@ import {
   AlertTriangle,
   Building2,
   CheckCircle,
-  Clock,
   Cpu,
   Crosshair,
   Download,
   Eye,
   FileText,
-  Globe,
   Lock,
   Shield,
-  Target,
-  Users,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 const PHANTOM_ACCENT = '#a855f7';
 const SENTINEL_ACCENT = '#8b5cf6';
-const ACCENT = '#ef4444';
+const _ACCENT = '#ef4444';
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
   border: 'rgba(255,255,255,0.06)',

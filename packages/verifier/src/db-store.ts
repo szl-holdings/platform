@@ -2,14 +2,7 @@ import { and, desc, eq, type SQL, sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
 import type { VerifierAccessScope, VerifierStore, VerifierStoreQuery } from './store.js';
-import type {
-  CheckOutcome,
-  CheckResult,
-  DecisionAction,
-  VerifierDecision,
-  VerifierTarget,
-} from './types.js';
-import { VerifierResultNotFoundError } from './types.js';
+import { type CheckOutcome, type CheckResult, type DecisionAction, type VerifierDecision, type VerifierTarget, VerifierResultNotFoundError } from './types.js';
 
 type Drizzle = NodePgDatabase<Record<string, unknown>>;
 
@@ -84,20 +77,20 @@ function asRecord(v: unknown): Record<string, unknown> {
 
 function rowToDecision(row: VerifierRow): VerifierDecision {
   const meta = asRecord(row.metadata);
-  const planner = asRecord(meta['__verifier']);
+  const planner = asRecord(meta.__verifier);
   const userMeta: Record<string, unknown> = { ...meta };
-  delete userMeta['__verifier'];
+  delete userMeta.__verifier;
 
-  const action = (planner['action'] as DecisionAction) ?? 'approve';
-  const failCount = typeof planner['failCount'] === 'number' ? (planner['failCount'] as number) : 0;
+  const action = (planner.action as DecisionAction) ?? 'approve';
+  const failCount = typeof planner.failCount === 'number' ? (planner.failCount as number) : 0;
   const evaluatedAt =
-    typeof planner['evaluatedAt'] === 'number'
-      ? (planner['evaluatedAt'] as number)
+    typeof planner.evaluatedAt === 'number'
+      ? (planner.evaluatedAt as number)
       : row.createdAt.getTime();
   const orgId =
-    typeof planner['orgId'] === 'number'
-      ? (planner['orgId'] as number)
-      : planner['orgId'] === null
+    typeof planner.orgId === 'number'
+      ? (planner.orgId as number)
+      : planner.orgId === null
         ? null
         : null;
 
@@ -105,12 +98,12 @@ function rowToDecision(row: VerifierRow): VerifierDecision {
     ? (row.checks as unknown[]).map((c): CheckResult => {
         const obj = asRecord(c);
         return {
-          name: String(obj['name'] ?? 'unknown'),
-          outcome: asOutcome(String(obj['outcome'] ?? 'warn')),
-          score: typeof obj['score'] === 'number' ? (obj['score'] as number) : 0,
-          message: obj['message'] === undefined ? undefined : String(obj['message']),
-          evidence: obj['evidence'],
-          recommendedAction: obj['recommendedAction'] as DecisionAction | undefined,
+          name: String(obj.name ?? 'unknown'),
+          outcome: asOutcome(String(obj.outcome ?? 'warn')),
+          score: typeof obj.score === 'number' ? (obj.score as number) : 0,
+          message: obj.message === undefined ? undefined : String(obj.message),
+          evidence: obj.evidence,
+          recommendedAction: obj.recommendedAction as DecisionAction | undefined,
         };
       })
     : [];

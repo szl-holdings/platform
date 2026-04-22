@@ -30,7 +30,7 @@ function GlobalFeedStats() {
       {[
         {
           label: 'Security Findings',
-          value: knowledge?.byDomain?.['aegis'] ?? 0,
+          value: knowledge?.byDomain?.aegis ?? 0,
           icon: ShieldAlert,
           color: 'text-orange-400',
           bg: 'bg-orange-500/10',

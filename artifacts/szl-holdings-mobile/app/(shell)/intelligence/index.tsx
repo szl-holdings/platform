@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -16,7 +16,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WorkspaceTrigger } from '@/components/WorkspaceSwitcher';
-import { useAuth } from '@/context/AuthContext';
 import { useWorkspace } from '@/context/WorkspaceContext';
 import { TAB_BAR_HEIGHT } from '@/constants/layout';
 import { useColors } from '@/hooks/useColors';
@@ -142,7 +141,7 @@ function SignalCard({
       onPress={() => setExpanded((v) => !v)}
       style={[
         styles.signalCard,
-        { backgroundColor: colors.card, borderColor: expanded ? sevColor + '40' : colors.border },
+        { backgroundColor: colors.card, borderColor: expanded ? `${sevColor}40` : colors.border },
         { borderLeftColor: sevColor, borderLeftWidth: 3 },
       ]}
       activeOpacity={0.85}
@@ -158,7 +157,7 @@ function SignalCard({
               <View
                 style={[
                   styles.draftsBadge,
-                  { borderColor: ACCENT + '50', backgroundColor: ACCENT + '15' },
+                  { borderColor: `${ACCENT}50`, backgroundColor: `${ACCENT}15` },
                 ]}
               >
                 <Text style={[styles.draftsBadgeText, { color: ACCENT }]}>DRAFTS</Text>
@@ -190,7 +189,7 @@ function SignalCard({
                   key={d}
                   style={[
                     styles.domainPill,
-                    { backgroundColor: meta.color + '18', borderColor: meta.color + '30' },
+                    { backgroundColor: `${meta.color}18`, borderColor: `${meta.color}30` },
                   ]}
                 >
                   <Text style={[styles.domainPillText, { color: meta.color }]}>
@@ -232,7 +231,7 @@ function SignalCard({
               onPress={() => onGenerateDrafts(signal)}
               style={[
                 styles.generateBtn,
-                { borderColor: ACCENT + '50', backgroundColor: ACCENT + '15' },
+                { borderColor: `${ACCENT}50`, backgroundColor: `${ACCENT}15` },
               ]}
             >
               <Text style={[styles.generateBtnText, { color: ACCENT }]}>
@@ -373,7 +372,7 @@ function CascadeCard({
         <View
           style={[
             styles.cascadeIcon,
-            { backgroundColor: domMeta.color + '20', borderColor: domMeta.color + '40' },
+            { backgroundColor: `${domMeta.color}20`, borderColor: `${domMeta.color}40` },
           ]}
         >
           <Text style={styles.cascadeIconText}>{domMeta.icon}</Text>
@@ -384,7 +383,7 @@ function CascadeCard({
             <View
               style={[
                 styles.impactBadge,
-                { backgroundColor: color + '20', borderColor: color + '40' },
+                { backgroundColor: `${color}20`, borderColor: `${color}40` },
               ]}
             >
               <Text style={[styles.impactBadgeText, { color }]}>
@@ -572,7 +571,7 @@ export default function CortexIntelligenceScreen() {
                     styles.tabBadge,
                     {
                       backgroundColor:
-                        activeTab === tab.key ? ACCENT : colors.mutedForeground + '80',
+                        activeTab === tab.key ? ACCENT : `${colors.mutedForeground}80`,
                     },
                   ]}
                 >
@@ -690,13 +689,13 @@ export default function CortexIntelligenceScreen() {
                   activeOpacity={0.8}
                   style={[
                     styles.runtimeCard,
-                    { backgroundColor: color + '0d', borderColor: color + '30' },
+                    { backgroundColor: `${color}0d`, borderColor: `${color}30` },
                   ]}
                 >
                   <View
                     style={[
                       styles.runtimeIcon,
-                      { backgroundColor: color + '18', borderColor: color + '35' },
+                      { backgroundColor: `${color}18`, borderColor: `${color}35` },
                     ]}
                   >
                     <Feather name={icon} size={16} color={color} />
@@ -908,8 +907,8 @@ export default function CortexIntelligenceScreen() {
                       styles.riskBadge,
                       {
                         backgroundColor:
-                          (IMPACT_COLORS[whatIfResult.overallRisk] ?? '#6b7280') + '20',
-                        borderColor: (IMPACT_COLORS[whatIfResult.overallRisk] ?? '#6b7280') + '40',
+                          `${IMPACT_COLORS[whatIfResult.overallRisk] ?? '#6b7280'}20`,
+                        borderColor: `${IMPACT_COLORS[whatIfResult.overallRisk] ?? '#6b7280'}40`,
                       },
                     ]}
                   >
@@ -983,7 +982,7 @@ export default function CortexIntelligenceScreen() {
                         key={d}
                         style={[
                           styles.domainPill,
-                          { backgroundColor: meta.color + '18', borderColor: meta.color + '30' },
+                          { backgroundColor: `${meta.color}18`, borderColor: `${meta.color}30` },
                         ]}
                       >
                         <Text style={[styles.domainPillText, { color: meta.color }]}>

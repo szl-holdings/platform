@@ -1,15 +1,13 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { db, notificationPreferencesTable, notificationsTable } from '@szl-holdings/db';
 import { durableJobQueue } from '@szl-holdings/forge-runtime';
-import { and, desc, eq, isNull, count as sqlCount } from 'drizzle-orm';
+import { and, desc, eq, count as sqlCount } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import type { z } from 'zod';
 import {
   handleRouteError,
   parsePagination,
-  sendBadRequest,
   sendCreated,
-  sendError,
   sendNoContent,
   sendNotFound,
   sendSuccess,
@@ -28,7 +26,7 @@ import { authMiddleware, parseIdParam, requireRole } from '../middlewares/auth';
 const router: IRouter = Router();
 
 const validTypes = ['info', 'warning', 'error', 'success', 'action_required'] as const;
-const validChannels = ['in_app', 'email', 'sms', 'slack'] as const;
+const _validChannels = ['in_app', 'email', 'sms', 'slack'] as const;
 
 export async function dispatchToExternalChannels(params: {
   notificationId: number;
@@ -173,7 +171,7 @@ router.patch(
       const [existing] = await db
         .select()
         .from(notificationsTable)
-        .where(and(eq(notificationsTable.id, id), eq(notificationsTable.userId, req.user!.id)));
+        .where(and(eq(notificationsTable.id, id), eq(notificationsTable.userId, req.user?.id)));
       if (!existing) {
         sendNotFound(res, 'Notification');
         return;
@@ -200,7 +198,7 @@ router.patch(
   validateBody(bodyShape({})),
   async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       await db
         .update(notificationsTable)
         .set({
@@ -226,7 +224,7 @@ router.delete(
       const [existing] = await db
         .select()
         .from(notificationsTable)
-        .where(and(eq(notificationsTable.id, id), eq(notificationsTable.userId, req.user!.id)));
+        .where(and(eq(notificationsTable.id, id), eq(notificationsTable.userId, req.user?.id)));
       if (!existing) {
         sendNotFound(res, 'Notification');
         return;

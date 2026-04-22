@@ -62,7 +62,7 @@ let _persistFailureHandler: LedgerPersistFailureHandler = (entry, error) => {
     error: error instanceof Error ? { name: error.name, message: error.message } : String(error),
   });
   const proc = (globalThis as { process?: { stderr?: { write: (s: string) => void } } }).process;
-  proc?.stderr?.write?.(payload + '\n');
+  proc?.stderr?.write?.(`${payload}\n`);
 };
 
 export function setLedgerPersistFailureHandler(handler: LedgerPersistFailureHandler): void {
@@ -149,7 +149,7 @@ export class EvidenceLedger {
     entries: LedgerEntry[],
     options?: { title?: string; generatedBy?: string; workflowRunId?: string },
   ) {
-    const allSources = entries.flatMap((e) => e.envelope.sources);
+    const _allSources = entries.flatMap((e) => e.envelope.sources);
     const confidences = entries.map((e) => e.envelope.confidence);
 
     const overallConfidence = resolveOverallConfidence(confidences);

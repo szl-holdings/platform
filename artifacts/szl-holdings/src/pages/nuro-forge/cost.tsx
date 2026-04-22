@@ -1,5 +1,5 @@
 import { m } from 'framer-motion';
-import { AlertTriangle, ArrowRight, BarChart3, DollarSign, TrendingDown, Zap } from 'lucide-react';
+import { BarChart3, DollarSign, TrendingDown, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { routeOptimalModel } from '@/lib/nuro-forge-service';
 
@@ -311,10 +311,10 @@ export default function CostIntelligencePage() {
                     {d.domain}
                   </div>
                   <div className="text-[11px] font-semibold" style={{ color: '#06b6d4' }}>
-                    {d.model!.name}
+                    {d.model?.name}
                   </div>
                   <div className="text-[9px] mt-0.5" style={{ color: 'rgba(255,255,255,0.2)' }}>
-                    ${d.model!.costPer1k.toFixed(2)}/1k
+                    ${d.model?.costPer1k.toFixed(2)}/1k
                   </div>
                 </div>
               ))}

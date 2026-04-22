@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
+const _BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 const API = '/api';
 
 function fetchJson(path: string) {

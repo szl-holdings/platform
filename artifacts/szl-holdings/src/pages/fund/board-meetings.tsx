@@ -3,8 +3,7 @@ import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
   Calendar, ArrowLeft, ChevronRight, Users, FileText, CheckCircle2,
-  Clock, AlertCircle, Plus, X, Download, BookOpen, Target,
-  MessageSquare, Archive, Send, ChevronDown, Edit3,
+  Clock, AlertCircle, Plus, Download, BookOpen, Target,Archive, 
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";

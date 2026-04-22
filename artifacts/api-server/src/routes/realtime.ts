@@ -74,8 +74,8 @@ router.get(
   validateQuery(listQuerySchema),
   (req: Request, res: Response) => {
     const { channel } = req.params;
-    const sinceSeq = parseInt((req.query['since'] as string) ?? '0', 10);
-    const limit = Math.min(parseInt((req.query['limit'] as string) ?? '50', 10), 200);
+    const sinceSeq = parseInt((req.query.since as string) ?? '0', 10);
+    const limit = Math.min(parseInt((req.query.limit as string) ?? '50', 10), 200);
     const messages = getMessagesSince(channel as string, sinceSeq || 0, limit);
     res.json({
       channel,

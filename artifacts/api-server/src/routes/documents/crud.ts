@@ -6,12 +6,8 @@ import {
   documentsTable,
   documentTemplatesTable,
   documentVersionsTable,
-  pdfBatchesTable,
-  pdfJobsTable,
-  signaturesTable,
 } from '@szl-holdings/db';
-import { createHash, createHmac, createSign, randomUUID } from 'crypto';
-import { and, desc, eq, ne, or, sql } from 'drizzle-orm';
+import { and, desc, eq, or, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -22,17 +18,12 @@ import {
   sendNotFound,
   sendSuccess,
 } from '../../lib/api-response';
-import { logger } from '../../lib/logger';
-import { setObjectAclPolicy } from '../../lib/objectAcl';
-import { ObjectNotFoundError, ObjectStorageService } from '../../lib/objectStorage';
-import { renderDocumentToPdfBuffer, renderEntityDataToPdfBuffer } from '../../lib/pdf-renderer';
-import type { BlockNode } from '../../lib/pdf-renderer-types';
+import { ObjectStorageService } from '../../lib/objectStorage';
 import { listQuerySchema, validateBody, validateQuery } from '../../lib/validation';
-import { authMiddleware, requireRole } from '../../middlewares/auth';
+import { authMiddleware, } from '../../middlewares/auth';
 import {
   canAccessDocument,
   canMutateDocument,
-  getRequestUserEmail,
   getRequestUserId,
   getUserRole,
 } from './shared';
@@ -45,7 +36,7 @@ interface AuthUser {
 }
 type ExtendedRequest = Request & { user?: AuthUser };
 const router: IRouter = Router();
-const objectStorageService = new ObjectStorageService();
+const _objectStorageService = new ObjectStorageService();
 
 router.get('/documents', authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
@@ -185,7 +176,7 @@ router.put(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id as string, 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
 
       const [existing] = await db.select().from(documentsTable).where(eq(documentsTable.id, id));
       if (!existing) return sendNotFound(res, 'Document');
@@ -246,7 +237,7 @@ router.delete(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id as string, 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
 
       const [existing] = await db.select().from(documentsTable).where(eq(documentsTable.id, id));
       if (!existing) return sendNotFound(res, 'Document');
@@ -273,7 +264,7 @@ router.delete(
 router.get('/documents/:id/versions', authMiddleware(), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
-    if (isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
+    if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
 
     const [doc] = await db.select().from(documentsTable).where(eq(documentsTable.id, id));
     if (!doc) return sendNotFound(res, 'Document');
@@ -308,7 +299,7 @@ router.post(
     try {
       const id = parseInt(req.params.id as string, 10);
       const version = parseInt(req.body.version, 10);
-      if (isNaN(id) || isNaN(version)) return sendBadRequest(res, 'Invalid document ID or version');
+      if (Number.isNaN(id) || Number.isNaN(version)) return sendBadRequest(res, 'Invalid document ID or version');
 
       const [doc] = await db.select().from(documentsTable).where(eq(documentsTable.id, id));
       if (!doc) return sendNotFound(res, 'Document');
@@ -367,7 +358,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id as string, 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
 
       const [doc] = await db.select().from(documentsTable).where(eq(documentsTable.id, id));
       if (!doc) return sendNotFound(res, 'Document');
@@ -467,7 +458,7 @@ router.get('/documents/templates', validateQuery(listQuerySchema), async (req, r
 router.get('/documents/templates/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id as string, 10);
-    const bySlug = isNaN(id);
+    const bySlug = Number.isNaN(id);
 
     const [template] = bySlug
       ? await db

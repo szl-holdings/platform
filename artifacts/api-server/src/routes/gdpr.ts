@@ -40,8 +40,8 @@ router.post(
   validateBody(erasureBodySchema),
   async (req, res) => {
     try {
-      const userId = req.user!.id;
-      const userEmail = req.user!.email;
+      const userId = req.user?.id;
+      const userEmail = req.user?.email;
 
       logger.info({ userId }, '[gdpr] Right-to-erasure requested — initiating atomic hard delete');
 
@@ -71,7 +71,7 @@ router.post(
 
 router.get('/gdpr/export', authMiddleware(), gdprLimiter, async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
 
     const [user] = await db
       .select({

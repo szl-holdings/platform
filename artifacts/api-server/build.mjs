@@ -61,7 +61,7 @@ function workspacePlugin(packageMap) {
         subpath = '';
         break;
       }
-      if (importPath.startsWith(name + '/')) {
+      if (importPath.startsWith(`${name}/`)) {
         pkgName = name;
         subpath = importPath.slice(name.length + 1);
         break;
@@ -268,7 +268,6 @@ server.listen(port, "0.0.0.0", async () => {
 `;
 
   await writeFile(path.join(distDir, 'index.mjs'), wrapper, 'utf8');
-  console.log('Fast-start wrapper written to dist/index.mjs (server bundle: dist/server.mjs)');
 }
 
 async function copyPdfkitData() {
@@ -288,8 +287,7 @@ async function copyPdfkitData() {
       } else {
         throw new Error('pdfkit not found in .pnpm store');
       }
-    } catch (e) {
-      console.warn('Warning: could not locate pdfkit:', e.message);
+    } catch (_e) {
       return;
     }
   }
@@ -297,9 +295,7 @@ async function copyPdfkitData() {
   try {
     await mkdir(distDataDest, { recursive: true });
     await cp(pdfkitDataSrc, distDataDest, { recursive: true });
-    console.log('Copied pdfkit data (AFM fonts) to dist/data from:', pdfkitDataSrc);
-  } catch (err) {
-    console.warn('Warning: could not copy pdfkit data directory:', err.message);
+  } catch (_err) {
   }
 }
 
@@ -310,9 +306,7 @@ async function copyConfigFiles() {
   try {
     await mkdir(configDest, { recursive: true });
     await cp(configSrc, configDest, { recursive: true });
-    console.log('Copied src/config/ → dist/config/');
-  } catch (err) {
-    console.warn('Warning: could not copy config directory:', err.message);
+  } catch (_err) {
   }
 }
 
@@ -322,7 +316,6 @@ buildAll()
   )
   .then(() => copyConfigFiles())
   .then(() => copyPdfkitData())
-  .catch((err) => {
-    console.error(err);
+  .catch((_err) => {
     process.exit(1);
   });

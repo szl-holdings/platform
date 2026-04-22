@@ -18,7 +18,6 @@ import { getSkillUsageStats } from '@szl-holdings/ai-engine/skills/skill-manager
 import { getAllSkills } from '@szl-holdings/ai-engine/skills/skill-registry';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { Router } from 'express';
-import { z } from 'zod';
 import { sendError, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
@@ -133,7 +132,7 @@ router.get('/agent-autonomy/delegations', (_req, res) => {
     const history = getDelegationHistory(50);
     const stats = getDelegationStats();
     sendSuccess(res, { history, stats });
-  } catch (err) {
+  } catch (_err) {
     sendError(res, 'Failed to get delegation data', 500);
   }
 });
@@ -143,7 +142,7 @@ router.get('/agent-autonomy/skills', (_req, res) => {
     const skills = getAllSkills();
     const usage = getSkillUsageStats();
     sendSuccess(res, { skills, usage });
-  } catch (err) {
+  } catch (_err) {
     sendError(res, 'Failed to get skill data', 500);
   }
 });
@@ -156,7 +155,7 @@ router.get('/agent-autonomy/connectors', async (_req, res) => {
       total: summary.length,
       configured: summary.filter((c) => c.configured).length,
     });
-  } catch (err) {
+  } catch (_err) {
     sendError(res, 'Failed to get connector data', 500);
   }
 });
@@ -168,7 +167,7 @@ router.post(
     try {
       const health = await connectorRegistry.checkHealth(req.params.connectorId!);
       sendSuccess(res, health);
-    } catch (err) {
+    } catch (_err) {
       sendError(res, 'Health check failed', 500);
     }
   },
@@ -178,7 +177,7 @@ router.get('/agent-autonomy/rag', async (_req, res) => {
   try {
     const stats = await getKnowledgeStoreStats();
     sendSuccess(res, stats);
-  } catch (err) {
+  } catch (_err) {
     sendError(res, 'Failed to get RAG stats', 500);
   }
 });
@@ -200,7 +199,7 @@ router.get('/agent-autonomy/performance', async (_req, res) => {
   try {
     const snapshots = await getAllAgentPerformanceSnapshots();
     sendSuccess(res, { snapshots, total: snapshots.length });
-  } catch (err) {
+  } catch (_err) {
     sendError(res, 'Failed to get performance data', 500);
   }
 });

@@ -6,7 +6,6 @@ import {
   Clock,
   Scale,
   Shield,
-  Target,
 } from 'lucide-react';
 import { Link } from 'wouter';
 

@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type { PlanStep, ResolvedPlanContext, RouteDecision } from './types.js';
 
 /**

@@ -16,7 +16,6 @@ import {
   handleRouteError,
   sendBadRequest,
   sendCreated,
-  sendError,
   sendSuccess,
 } from '../lib/api-response';
 import { logger } from '../lib/logger';
@@ -271,7 +270,7 @@ ragKnowledgeRouter.post(
   '/rag/reindex',
   authMiddleware,
   requireRole('admin'),
-  async (req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     try {
       logger.info('Full RAG reindex triggered');
 

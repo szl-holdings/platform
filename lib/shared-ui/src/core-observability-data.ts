@@ -704,7 +704,7 @@ export const WORKFLOWS_UI: WorkflowUI[] = WORKFLOWS.map((w) => {
     'wf-006': 'regulatory_filing',
   };
 
-  const stateMap: Record<EntityState, EntityState> = {
+  const _stateMap: Record<EntityState, EntityState> = {
     healthy: 'healthy',
     degraded: 'degraded',
     blocked: 'blocked',

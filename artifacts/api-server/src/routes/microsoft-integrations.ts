@@ -1,14 +1,12 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { services } from '@szl-holdings/services';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { type IRouter, type RequestHandler, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import {
   handleRouteError,
   sendBadRequest,
-  sendCreated,
-  sendError,
   sendNotFound,
   sendSuccess,
 } from '../lib/api-response';
@@ -16,7 +14,6 @@ import { logger } from '../lib/logger';
 import { isFlagEnabled } from '../lib/platform-flags';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
-import { platformAuth } from '../middlewares/platform-auth';
 
 const router: IRouter = Router();
 
@@ -141,7 +138,7 @@ router.post(
 
       const adapter = services.dynamics365;
       const resolvedDirection = direction ?? 'ingest';
-      const resolvedThreshold = leadScoreThreshold ?? 75;
+      const _resolvedThreshold = leadScoreThreshold ?? 75;
 
       const signals = await adapter.getMockSyncSignals();
 
@@ -273,7 +270,7 @@ router.post(
         return;
       }
 
-      const webhookSecret = process.env['POWER_AUTOMATE_WEBHOOK_SECRET'];
+      const webhookSecret = process.env.POWER_AUTOMATE_WEBHOOK_SECRET;
       if (webhookSecret) {
         const rawBody = JSON.stringify(req.body);
         const sig = req.headers['x-szl-signature'] as string | undefined;
@@ -326,7 +323,7 @@ router.post(
           severity,
           body: signalPayload?.body ?? null,
           metadata: {
-            ...(signalPayload?.metadata ?? {}),
+            ...signalPayload?.metadata,
             poweredBy: 'power_automate',
             receivedAt: new Date().toISOString(),
           },
@@ -346,7 +343,7 @@ router.post(
   },
 );
 
-router.get('/integrations/sharepoint/webparts', authMiddleware(), async (req, res) => {
+router.get('/integrations/sharepoint/webparts', authMiddleware(), async (_req, res) => {
   try {
     const enabled = await isFlagEnabled('sharepoint_spfx_enabled');
     if (!enabled) {
@@ -397,7 +394,7 @@ router.get(
   '/integrations/sharepoint/deployment',
   authMiddleware(),
   requireRole('super_admin', 'ops'),
-  async (req, res) => {
+  async (_req, res) => {
     try {
       const enabled = await isFlagEnabled('sharepoint_spfx_enabled');
       if (!enabled) {

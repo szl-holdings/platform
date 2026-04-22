@@ -1,5 +1,4 @@
-import type { TenantId } from '@workspace/aef-contracts';
-import { TenantIdSchema } from '@workspace/aef-contracts';
+import { type TenantId, TenantIdSchema } from '@workspace/aef-contracts';
 import type { NextFunction, Request, Response } from 'express';
 
 declare module 'express' {
@@ -15,7 +14,7 @@ const DEFAULT_PROFILE = 'default';
 export function tenantScoping(req: Request, res: Response, next: NextFunction): void {
   const rawTenant =
     (req.headers['x-tenant-id'] as string | undefined) ??
-    (req.query['tenantId'] as string | undefined) ??
+    (req.query.tenantId as string | undefined) ??
     DEFAULT_TENANT;
 
   const tenantResult = TenantIdSchema.safeParse(rawTenant);
@@ -27,7 +26,7 @@ export function tenantScoping(req: Request, res: Response, next: NextFunction): 
   req.tenantId = tenantResult.data;
   req.profileId =
     (req.headers['x-profile-id'] as string | undefined) ??
-    (req.query['profileId'] as string | undefined) ??
+    (req.query.profileId as string | undefined) ??
     DEFAULT_PROFILE;
 
   next();

@@ -15,10 +15,9 @@ import {
   pulseEmailSubscriptionsTable,
 } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import { createHash, randomBytes, timingSafeEqual } from 'crypto';
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
-import type { Request, Response } from 'express';
-import { Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import PDFDocument from 'pdfkit';
 import { z } from 'zod';
@@ -212,7 +211,7 @@ router.get('/unsubscribe', async (req: Request, res: Response): Promise<void> =>
       );
     return;
   }
-  const safeEmail = result[0]!.email
+  const safeEmail = result[0]?.email
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -926,11 +925,7 @@ async function seedBriefingsIfEmpty(): Promise<void> {
     const existing = await db.select().from(pulseBriefingsTable).limit(1);
     if (existing.length > 0) return;
     for (const b of DEMO_BRIEFINGS) await insertBriefing(b);
-  } catch (err) {
-    console.warn(
-      '[pulse] briefing seed skipped:',
-      err instanceof Error ? err.message : String(err),
-    );
+  } catch (_err) {
   }
 }
 void seedBriefingsIfEmpty();
@@ -1313,15 +1308,15 @@ async function generateAIBriefing(date: string): Promise<Briefing> {
       confidenceLabel: confidenceLabel(conf),
       riskLevel: risk,
       keyJudgment: String(aiSection?.keyJudgment ?? 'No judgment generated for this domain.'),
-      narrative: Array.isArray(aiSection?.narrative) ? aiSection!.narrative.map(String) : [],
+      narrative: Array.isArray(aiSection?.narrative) ? aiSection?.narrative.map(String) : [],
       keyFindings: Array.isArray(aiSection?.keyFindings)
-        ? aiSection!.keyFindings.map((f) => ({
+        ? aiSection?.keyFindings.map((f) => ({
             finding: String(f.finding ?? ''),
             severity: clampRisk(f.severity),
           }))
         : [],
-      assumptions: Array.isArray(aiSection?.assumptions) ? aiSection!.assumptions.map(String) : [],
-      gaps: Array.isArray(aiSection?.gaps) ? aiSection!.gaps.map(String) : [],
+      assumptions: Array.isArray(aiSection?.assumptions) ? aiSection?.assumptions.map(String) : [],
+      gaps: Array.isArray(aiSection?.gaps) ? aiSection?.gaps.map(String) : [],
       lastUpdated: now.toISOString(),
     };
   });
@@ -1440,7 +1435,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     const domain = req.query.domain as string | undefined;
     const risk = req.query.risk as string | undefined;
-    const limit = parseInt((req.query.limit as string) || '20');
+    const limit = parseInt((req.query.limit as string) || '20', 10);
 
     let briefings = await listBriefings(limit * 2);
     if (domain) briefings = briefings.filter((b) => b.domains.includes(domain as DomainKey));
@@ -1808,8 +1803,7 @@ async function seedDissentsIfEmpty(): Promise<void> {
         })
         .onConflictDoNothing();
     }
-  } catch (err) {
-    console.warn('[pulse] dissent seed skipped:', err instanceof Error ? err.message : String(err));
+  } catch (_err) {
   }
 }
 void seedDissentsIfEmpty();
@@ -1853,7 +1847,7 @@ router.post(
       scenario,
       domains,
       agents,
-      requestedAt: row!.requestedAt.toISOString(),
+      requestedAt: row?.requestedAt.toISOString(),
       status: 'pending',
     };
 
@@ -2545,7 +2539,7 @@ router.post(
           status: 'active',
           updatedAt: new Date(),
         })
-        .where(eq(pulseEmailSubscriptionsTable.id, existing[0]!.id))
+        .where(eq(pulseEmailSubscriptionsTable.id, existing[0]?.id))
         .returning();
       res.json({
         success: true,

@@ -122,8 +122,7 @@ export async function ingestPrismMatter(
       importance: 7,
       extraMetadata: { orgId: tenantId ?? String(matter.orgId) },
     });
-  } catch (err) {
-    console.error(`[domain-embedding-hooks] Failed to ingest PRISM matter id=${matter.id}:`, err);
+  } catch (_err) {
   }
 }
 
@@ -149,9 +148,6 @@ export async function ingestTerraProperty(
   tenantId?: string,
 ): Promise<void> {
   if (!tenantId) {
-    console.warn(
-      `[domain-embedding-hooks] ingestTerraProperty skipped — no tenant context for property id=${property.id}. Global artifact creation is not permitted from route-level hooks.`,
-    );
     return;
   }
   try {
@@ -203,11 +199,7 @@ export async function ingestTerraProperty(
       importance: 6,
       ...(tenantId ? { extraMetadata: { orgId: tenantId } } : {}),
     });
-  } catch (err) {
-    console.error(
-      `[domain-embedding-hooks] Failed to ingest Terra property id=${property.id}:`,
-      err,
-    );
+  } catch (_err) {
   }
 }
 
@@ -231,9 +223,6 @@ export async function ingestAegisIncident(
   tenantId?: string,
 ): Promise<void> {
   if (!tenantId) {
-    console.warn(
-      `[domain-embedding-hooks] ingestAegisIncident skipped — no tenant context for incident id=${incident.id}`,
-    );
     return;
   }
   try {
@@ -285,11 +274,7 @@ export async function ingestAegisIncident(
       importance: incident.severity === 'critical' ? 10 : 7,
       ...(tenantId ? { extraMetadata: { orgId: tenantId } } : {}),
     });
-  } catch (err) {
-    console.error(
-      `[domain-embedding-hooks] Failed to ingest Aegis incident id=${incident.id}:`,
-      err,
-    );
+  } catch (_err) {
   }
 }
 
@@ -312,9 +297,6 @@ export async function ingestCarlotaService(
   tenantId?: string,
 ): Promise<void> {
   if (!tenantId) {
-    console.warn(
-      `[domain-embedding-hooks] ingestCarlotaService skipped — no tenant context for service id=${service.id}`,
-    );
     return;
   }
   try {
@@ -351,11 +333,7 @@ export async function ingestCarlotaService(
         priority: 6,
       });
     }
-  } catch (err) {
-    console.error(
-      `[domain-embedding-hooks] Failed to ingest Carlota Jo service id=${service.id}:`,
-      err,
-    );
+  } catch (_err) {
   }
 }
 
@@ -379,9 +357,6 @@ export async function ingestLyteSystem(
 ): Promise<void> {
   const effectiveTenantId = tenantId ?? (system.orgId != null ? String(system.orgId) : undefined);
   if (!effectiveTenantId) {
-    console.warn(
-      `[domain-embedding-hooks] ingestLyteSystem skipped — no tenant context for system id=${system.id}`,
-    );
     return;
   }
   try {
@@ -419,8 +394,7 @@ export async function ingestLyteSystem(
         priority: 5,
       });
     }
-  } catch (err) {
-    console.error(`[domain-embedding-hooks] Failed to ingest Lyte system id=${system.id}:`, err);
+  } catch (_err) {
   }
 }
 
@@ -443,9 +417,6 @@ export async function ingestFirestormFinding(
   tenantId?: string,
 ): Promise<void> {
   if (!tenantId) {
-    console.warn(
-      `[domain-embedding-hooks] ingestFirestormFinding skipped — no tenant context for finding id=${finding.id}`,
-    );
     return;
   }
   try {
@@ -493,11 +464,7 @@ export async function ingestFirestormFinding(
       importance: finding.severity === 'critical' ? 10 : finding.severity === 'high' ? 8 : 5,
       ...(tenantId ? { extraMetadata: { orgId: tenantId } } : {}),
     });
-  } catch (err) {
-    console.error(
-      `[domain-embedding-hooks] Failed to ingest Firestorm finding id=${finding.id}:`,
-      err,
-    );
+  } catch (_err) {
   }
 }
 
@@ -516,9 +483,6 @@ export async function ingestFirestormScenario(
   tenantId?: string,
 ): Promise<void> {
   if (!tenantId) {
-    console.warn(
-      `[domain-embedding-hooks] ingestFirestormScenario skipped — no tenant context for scenario id=${scenario.id}`,
-    );
     return;
   }
   try {
@@ -567,11 +531,7 @@ export async function ingestFirestormScenario(
       importance: scenario.severity === 'critical' ? 9 : 6,
       ...(tenantId ? { extraMetadata: { orgId: tenantId } } : {}),
     });
-  } catch (err) {
-    console.error(
-      `[domain-embedding-hooks] Failed to ingest Firestorm scenario id=${scenario.id}:`,
-      err,
-    );
+  } catch (_err) {
   }
 }
 
@@ -590,9 +550,6 @@ export async function ingestFirestormAlert(
   tenantId?: string,
 ): Promise<void> {
   if (!tenantId) {
-    console.warn(
-      `[domain-embedding-hooks] ingestFirestormAlert skipped — no tenant context for alert id=${alert.id}`,
-    );
     return;
   }
   try {
@@ -640,8 +597,7 @@ export async function ingestFirestormAlert(
       importance: alert.severity === 'critical' ? 10 : alert.severity === 'high' ? 8 : 6,
       ...(tenantId ? { extraMetadata: { orgId: tenantId } } : {}),
     });
-  } catch (err) {
-    console.error(`[domain-embedding-hooks] Failed to ingest Firestorm alert id=${alert.id}:`, err);
+  } catch (_err) {
   }
 }
 
@@ -670,8 +626,7 @@ export async function linkDomainEntities(opts: {
       strength: opts.strength ?? 0.8,
       detectedBy: opts.detectedBy ?? 'domain_hook',
     });
-  } catch (err) {
-    console.error(`[domain-embedding-hooks] Failed to link entities:`, err);
+  } catch (_err) {
     return null;
   }
 }

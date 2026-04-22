@@ -1,16 +1,7 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
-  AlertTriangle,
-  Box,
   Brain,
-  CheckCircle2,
-  Clock,
   Database,
-  GitBranch,
-  Shield,
-  Tag,
-  Upload,
 } from 'lucide-react';
 import { useState } from 'react';
 

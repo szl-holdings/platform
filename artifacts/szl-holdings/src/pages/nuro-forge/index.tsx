@@ -1,7 +1,6 @@
 import { AnimatePresence, m } from 'framer-motion';
 import {
   Activity,
-  ArrowRight,
   BarChart3,
   Brain,
   ChevronRight,
@@ -13,7 +12,6 @@ import {
   Package,
   Shield,
   Signal,
-  TrendingUp,
   Trophy,
   Wand2,
   Zap,

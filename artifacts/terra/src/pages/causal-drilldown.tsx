@@ -1,12 +1,11 @@
 import {
   EVENTS,
   EXECUTION_RUNS,
-  formatCurrency,
   GOLDEN_FLOW_CORRELATION_ID,
   getSeverityColor,
   PREDICTIONS,
 } from '@szl-holdings/shared-ui/core-observability-data';
-import { Activity, ArrowRight, Brain, ExternalLink, GitBranch, Zap } from 'lucide-react';
+import { Activity, Brain, ExternalLink, GitBranch, Zap } from 'lucide-react';
 
 export default function CausalDrilldown() {
   const goldenFlowEvents = EVENTS.filter((e) => e.correlation_id === GOLDEN_FLOW_CORRELATION_ID);

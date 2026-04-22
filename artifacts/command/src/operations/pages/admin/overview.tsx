@@ -3,7 +3,6 @@ import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import {
   Activity,
   AlertTriangle,
-  CheckCircle,
   Clock,
   Database,
   HardDrive,

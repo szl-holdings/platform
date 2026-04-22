@@ -138,7 +138,7 @@ export class FalAiConnector extends ToolConnector {
     capabilityId: string,
     params: Record<string, unknown>,
   ): Promise<unknown> {
-    const apiKey = process.env['FAL_API_KEY'];
+    const apiKey = process.env.FAL_API_KEY;
     if (!apiKey) throw new Error('FAL_API_KEY not configured');
 
     const baseUrl = 'https://fal.run';
@@ -149,16 +149,16 @@ export class FalAiConnector extends ToolConnector {
 
     switch (capabilityId) {
       case 'generate_image': {
-        const model = String(params['model'] ?? 'fal-ai/flux/schnell');
+        const model = String(params.model ?? 'fal-ai/flux/schnell');
         const resp = await fetch(`${baseUrl}/${model}`, {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            prompt: params['prompt'],
-            image_size: { width: params['width'] ?? 1024, height: params['height'] ?? 1024 },
-            num_images: params['numImages'] ?? 1,
-            negative_prompt: params['negativePrompt'],
-            seed: params['seed'],
+            prompt: params.prompt,
+            image_size: { width: params.width ?? 1024, height: params.height ?? 1024 },
+            num_images: params.numImages ?? 1,
+            negative_prompt: params.negativePrompt,
+            seed: params.seed,
           }),
           signal: AbortSignal.timeout(60_000),
         });
@@ -167,15 +167,15 @@ export class FalAiConnector extends ToolConnector {
         return resp.json();
       }
       case 'generate_video': {
-        const model = String(params['model'] ?? 'fal-ai/stable-video');
+        const model = String(params.model ?? 'fal-ai/stable-video');
         const resp = await fetch(`${baseUrl}/${model}`, {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            prompt: params['prompt'],
-            image_url: params['imageUrl'],
-            num_frames: params['numFrames'] ?? 25,
-            fps: params['fps'] ?? 8,
+            prompt: params.prompt,
+            image_url: params.imageUrl,
+            num_frames: params.numFrames ?? 25,
+            fps: params.fps ?? 8,
           }),
           signal: AbortSignal.timeout(120_000),
         });
@@ -187,7 +187,7 @@ export class FalAiConnector extends ToolConnector {
         const resp = await fetch(`${baseUrl}/fal-ai/birefnet`, {
           method: 'POST',
           headers,
-          body: JSON.stringify({ image_url: params['imageUrl'] }),
+          body: JSON.stringify({ image_url: params.imageUrl }),
           signal: AbortSignal.timeout(30_000),
         });
         if (!resp.ok)
@@ -195,11 +195,11 @@ export class FalAiConnector extends ToolConnector {
         return resp.json();
       }
       case 'upscale_image': {
-        const model = params['model'] === 'swinir' ? 'fal-ai/swinir' : 'fal-ai/esrgan';
+        const model = params.model === 'swinir' ? 'fal-ai/swinir' : 'fal-ai/esrgan';
         const resp = await fetch(`${baseUrl}/${model}`, {
           method: 'POST',
           headers,
-          body: JSON.stringify({ image_url: params['imageUrl'], scale: params['scale'] ?? 4 }),
+          body: JSON.stringify({ image_url: params.imageUrl, scale: params.scale ?? 4 }),
           signal: AbortSignal.timeout(30_000),
         });
         if (!resp.ok) throw new Error(`Fal.ai upscale error ${resp.status}: ${await resp.text()}`);
@@ -211,7 +211,7 @@ export class FalAiConnector extends ToolConnector {
   }
 
   protected override async performHealthCheck(): Promise<void> {
-    const apiKey = process.env['FAL_API_KEY'];
+    const apiKey = process.env.FAL_API_KEY;
     if (!apiKey) throw new Error('FAL_API_KEY not configured');
     const resp = await fetch('https://fal.run/fal-ai/flux/schnell', {
       method: 'POST',

@@ -43,12 +43,12 @@ describe('compilePolicyWithLLM', () => {
     expect(llm).toHaveBeenCalledTimes(1);
     const ambiguousRule = result.ir.rules.find((r) => r.llmAssisted);
     expect(ambiguousRule).toBeDefined();
-    expect(ambiguousRule!.effect).toBe('block');
-    expect(ambiguousRule!.confidence).toBeGreaterThanOrEqual(
-      ambiguousRule!.deterministicConfidence ?? 0,
+    expect(ambiguousRule?.effect).toBe('block');
+    expect(ambiguousRule?.confidence).toBeGreaterThanOrEqual(
+      ambiguousRule?.deterministicConfidence ?? 0,
     );
-    expect(ambiguousRule!.llmConfidence).toBeCloseTo(0.92, 2);
-    expect(ambiguousRule!.conditions).toEqual([
+    expect(ambiguousRule?.llmConfidence).toBeCloseTo(0.92, 2);
+    expect(ambiguousRule?.conditions).toEqual([
       { field: 'counterparty.watchlist', operator: 'eq', value: true },
     ]);
     expect(result.ir.parseWarnings.some((w) => w.includes('LLM assistance'))).toBe(true);

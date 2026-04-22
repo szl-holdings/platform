@@ -30,7 +30,6 @@ const SCENARIO_NAMES = [
 ];
 
 export async function seedOwnership() {
-  console.log('[seed-ownership] Starting Ownership seed...');
 
   // Look up existing scenarios by name to support partial-failure recovery
   const existingScenarios = await db
@@ -52,7 +51,6 @@ export async function seedOwnership() {
     : 0;
 
   if (fullySeeded && existingAllocCount > 0 && existingRoleCount > 0) {
-    console.log('[seed-ownership] Ownership data already fully seeded, skipping.');
     return { skipped: true };
   }
 
@@ -60,9 +58,6 @@ export async function seedOwnership() {
   // This heals missing allocations, missing control roles, and partial scenario sets.
   if (existingScenarios.length > 0) {
     const ids = existingScenarios.map((s) => s.id);
-    console.log(
-      `[seed-ownership] Partial seed detected (${existingScenarios.length} scenarios) — rebuilding.`,
-    );
     await db
       .delete(ownershipAllocationsTable)
       .where(inArray(ownershipAllocationsTable.scenarioId, ids));
@@ -195,8 +190,6 @@ export async function seedOwnership() {
       },
     ])
     .returning();
-
-  console.log(`[seed-ownership] Inserted ${scenarios.length} scenarios`);
 
   const scenarioA = scenarios.find((s) => s.isActive)!;
   const scenarioBaseline = scenarios.find((s) => s.name.includes('Baseline'))!;
@@ -375,7 +368,6 @@ export async function seedOwnership() {
   ];
 
   await db.insert(ownershipAllocationsTable).values(allocations);
-  console.log(`[seed-ownership] Inserted ${allocations.length} allocations`);
 
   const controlRoles: (typeof controlRolesTable.$inferInsert)[] = [
     {
@@ -421,7 +413,6 @@ export async function seedOwnership() {
   ];
 
   await db.insert(controlRolesTable).values(controlRoles);
-  console.log(`[seed-ownership] Inserted ${controlRoles.length} control roles`);
 
   return {
     scenarios: scenarios.length,

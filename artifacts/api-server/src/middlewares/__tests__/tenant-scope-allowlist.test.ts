@@ -1,4 +1,4 @@
-import express, { type NextFunction, type Request, type Response, Router } from 'express';
+import express, { type Request, type Response, Router } from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 

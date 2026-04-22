@@ -6,7 +6,7 @@ import {
   lyteSignalsTable,
 } from "@szl-holdings/db";
 import { seedLyteObservability } from "../../lib/lyte-observability-seed.js";
-import { desc, sql, eq, and, inArray } from "drizzle-orm";
+import { desc, sql, eq, and, } from "drizzle-orm";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { logger } from "../../lib/logger.js";
@@ -318,8 +318,8 @@ export function register(router: IRouter): void {
   });
 
   router.get("/admin/security-alerts", async (req, res) => {
-    const limitParam = parseInt(req.query["limit"] as string ?? "10", 10);
-    const limit = Math.max(1, Math.min(isNaN(limitParam) ? 10 : limitParam, 50));
+    const limitParam = parseInt(req.query.limit as string ?? "10", 10);
+    const limit = Math.max(1, Math.min(Number.isNaN(limitParam) ? 10 : limitParam, 50));
     try {
       const rows = await db
         .select()
@@ -335,13 +335,13 @@ export function register(router: IRouter): void {
 
       const items = rows.map((r: any) => {
         const meta = (r.metadata ?? {}) as Record<string, unknown>;
-        const obsRef = (meta["obsRef"] as string | undefined) ?? null;
-        const sample = Array.isArray(meta["sample"])
-          ? (meta["sample"] as Array<Record<string, unknown>>)
+        const obsRef = (meta.obsRef as string | undefined) ?? null;
+        const sample = Array.isArray(meta.sample)
+          ? (meta.sample as Array<Record<string, unknown>>)
           : [];
         const samplePath =
-          (sample[0]?.["path"] as string | undefined) ??
-          (sample[0]?.["route"] as string | undefined) ??
+          (sample[0]?.path as string | undefined) ??
+          (sample[0]?.route as string | undefined) ??
           null;
         return {
           id: r.id,
@@ -358,9 +358,9 @@ export function register(router: IRouter): void {
             : obsRef === "OBS-006"
               ? "auth-failure"
               : "other",
-          violationCount: (meta["violationCount"] as number | undefined) ?? null,
+          violationCount: (meta.violationCount as number | undefined) ?? null,
           authFailureRatePerMin:
-            (meta["authFailureRatePerMin"] as number | undefined) ?? null,
+            (meta.authFailureRatePerMin as number | undefined) ?? null,
           samplePath,
           detailUrl: `/operations/prism/signals?signal=${r.id}`,
         };
@@ -385,7 +385,7 @@ export function register(router: IRouter): void {
       const ents = await db.select().from(entitlementsTable).orderBy(entitlementsTable.planId);
       const usageResult = await db.select({ featureKey: usageEventsTable.featureKey, totalQuantity: sql<number>`SUM(${usageEventsTable.quantity})::int`, eventCount: sql<number>`COUNT(*)::int` }).from(usageEventsTable).groupBy(usageEventsTable.featureKey);
       res.json({ stripeConfigured: services.stripe.isLive, plans, subscriptions: subs, invoices: invs, entitlements: ents, usageSummary: usageResult });
-    } catch (err) {
+    } catch (_err) {
       sendError(res, "Failed to load billing settings", 500, "INTERNAL_ERROR");
     }
   });
@@ -404,7 +404,7 @@ export function register(router: IRouter): void {
       }
     }
     const envVars = Array.from(allEnvVars.entries()).map(([name, info]) => ({ name, ...info }));
-    res.json({ environment: process.env["NODE_ENV"] ?? "development", envVars, configured: envVars.filter((v) => v.configured).length, missing: envVars.filter((v) => !v.configured).length, total: envVars.length });
+    res.json({ environment: process.env.NODE_ENV ?? "development", envVars, configured: envVars.filter((v) => v.configured).length, missing: envVars.filter((v) => !v.configured).length, total: envVars.length });
   });
 
   router.post("/admin/seed", validateBody(adminSeedSchema), async (_req, res) => {
@@ -430,11 +430,11 @@ export function register(router: IRouter): void {
   });
 
   router.get("/admin/workflow-runs", validateQuery(listQuerySchema), async (req, res) => {
-    const domain = req.query["domain"] as string | undefined;
-    const status = req.query["status"] as string | undefined;
-    const workflowType = req.query["workflowType"] as string | undefined;
-    const limitParam = parseInt(req.query["limit"] as string ?? "50", 10);
-    const limit = Math.min(isNaN(limitParam) ? 50 : limitParam, 200);
+    const domain = req.query.domain as string | undefined;
+    const status = req.query.status as string | undefined;
+    const workflowType = req.query.workflowType as string | undefined;
+    const limitParam = parseInt(req.query.limit as string ?? "50", 10);
+    const limit = Math.min(Number.isNaN(limitParam) ? 50 : limitParam, 200);
     try {
       const conditions = [];
       if (domain) conditions.push(eq(platformJobRunsTable.domain, domain));
@@ -457,7 +457,7 @@ export function register(router: IRouter): void {
       const runs = [...filteredJobRuns, ...dbRuns].slice(0, limit);
       const summary = { total: runs.length, completed: runs.filter((r) => r.status === "completed").length, completedWithWarnings: runs.filter((r) => r.status === "completed_with_warnings").length, failed: runs.filter((r) => r.status === "failed").length, running: runs.filter((r) => r.status === "running").length, pending: runs.filter((r) => r.status === "pending").length };
       res.json({ timestamp: new Date().toISOString(), runs, summary });
-    } catch (err) {
+    } catch (_err) {
       sendError(res, "Failed to fetch workflow runs", 500, "INTERNAL_ERROR");
     }
   });
@@ -470,7 +470,7 @@ export function register(router: IRouter): void {
       const jobRun = (await durableJobQueue.getRecentJobs(200)).find((j) => j.id === id);
       if (jobRun) { res.json(jobRun); return; }
       sendNotFound(res, "Workflow run");
-    } catch (err) {
+    } catch (_err) {
       sendError(res, "Failed to fetch workflow run", 500, "INTERNAL_ERROR");
     }
   });
@@ -478,8 +478,8 @@ export function register(router: IRouter): void {
   router.get("/admin/artifact-approvals", validateQuery(listQuerySchema), async (req, res) => {
     const approvalsEnabled = await isFlagEnabled("alloy_artifact_approvals_enabled");
     if (!approvalsEnabled) { sendForbidden(res, "Feature not available: alloy_artifact_approvals_enabled"); return; }
-    const status = req.query["status"] as string | undefined;
-    const domain = req.query["domain"] as string | undefined;
+    const status = req.query.status as string | undefined;
+    const domain = req.query.domain as string | undefined;
     try {
       const conditions = [];
       if (status) conditions.push(eq(artifactApprovalsTable.status, status as "pending" | "approved" | "rejected" | "expired"));
@@ -487,7 +487,7 @@ export function register(router: IRouter): void {
       const approvals = await db.select().from(artifactApprovalsTable).where(conditions.length > 0 ? and(...conditions) : undefined).orderBy(desc(artifactApprovalsTable.requestedAt)).limit(100);
       const pendingCount = await db.select({ count: sql<number>`COUNT(*)::int` }).from(artifactApprovalsTable).where(eq(artifactApprovalsTable.status, "pending" as any)).then((rows) => rows[0]?.count ?? 0);
       res.json({ timestamp: new Date().toISOString(), approvals, total: approvals.length, pendingCount, summary: { pending: approvals.filter((a) => a.status === "pending").length, approved: approvals.filter((a) => a.status === "approved").length, rejected: approvals.filter((a) => a.status === "rejected").length, expired: approvals.filter((a) => a.status === "expired").length } });
-    } catch (err) {
+    } catch (_err) {
       sendError(res, "Failed to fetch artifact approvals", 500, "INTERNAL_ERROR");
     }
   });
@@ -504,7 +504,7 @@ export function register(router: IRouter): void {
       const updated = await db.update(artifactApprovalsTable).set({ status: "approved", reviewedByUserId: req.user?.id ?? null, reviewedByLabel: reviewerLabel, reviewedAt: new Date() }).where(eq(artifactApprovalsTable.approvalId, id!)).returning().then((rows) => rows[0]);
       await logActivity(req, "approve_artifact", "artifact_approval", id!, `Approved artifact: ${approval.artifactId}`);
       res.json({ success: true, approval: updated });
-    } catch (err) {
+    } catch (_err) {
       sendError(res, "Failed to approve artifact", 500, "INTERNAL_ERROR");
     }
   });
@@ -522,7 +522,7 @@ export function register(router: IRouter): void {
       const updated = await db.update(artifactApprovalsTable).set({ status: "rejected", reviewedByUserId: req.user?.id ?? null, reviewedByLabel: reviewerLabel, reviewNote: reason ?? null, reviewedAt: new Date() }).where(eq(artifactApprovalsTable.approvalId, id!)).returning().then((rows) => rows[0]);
       await logActivity(req, "reject_artifact", "artifact_approval", id!, `Rejected artifact: ${approval.artifactId}${reason ? ` (${reason})` : ""}`);
       res.json({ success: true, approval: updated });
-    } catch (err) {
+    } catch (_err) {
       sendError(res, "Failed to reject artifact", 500, "INTERNAL_ERROR");
     }
   });
@@ -545,7 +545,7 @@ export function register(router: IRouter): void {
     const productMetrics = { signalCountBySeverity: (snapshot.businessEvents as Record<string, number>) ?? {}, unresolvedActionCount: 0, jobFailures: snapshot.jobFailures, workflowCompletions: snapshot.workflowCompletions, artifactGenerationSuccess: 0, artifactGenerationFailed: 0, pendingApprovals: await db.select({ count: sql<number>`COUNT(*)::int` }).from(artifactApprovalsTable).where(eq(artifactApprovalsTable.status, "pending" as any)).then((rows) => rows[0]?.count ?? 0) };
     const eventsByType = snapshot.businessEvents as Record<string, number>;
     if (eventsByType) {
-      productMetrics.artifactGenerationSuccess = eventsByType["artifact_generation_completed"] ?? 0;
+      productMetrics.artifactGenerationSuccess = eventsByType.artifact_generation_completed ?? 0;
       productMetrics.artifactGenerationFailed = snapshot.jobFailures ?? 0;
     }
     res.json({ timestamp: new Date().toISOString(), technical: technicalMetrics, product: productMetrics, jobs: { ...jobStats, recentFailures: recentJobs.filter((j) => j.status === "failed").map((j) => ({ id: j.id, type: j.type, error: j.error, retries: (j as any).retryCount ?? 0, completedAt: j.completedAt ? new Date(j.completedAt).toISOString() : null })) }, alerts: { active: activeAlerts.length, items: activeAlerts.slice(0, 10) }, uptime: process.uptime() });
@@ -560,7 +560,7 @@ export function register(router: IRouter): void {
       const byPlatform = await db.select({ platform: pushTokensTable.platform, count: drizzleSql<number>`count(*)::int` }).from(pushTokensTable).where(eq(pushTokensTable.isActive, true)).groupBy(pushTokensTable.platform);
       const byApp = await db.select({ appId: pushTokensTable.appId, count: drizzleSql<number>`count(*)::int` }).from(pushTokensTable).where(eq(pushTokensTable.isActive, true)).groupBy(pushTokensTable.appId);
       res.json({ total: totalResult[0]?.count ?? 0, active: activeResult[0]?.count ?? 0, byPlatform, byApp });
-    } catch (err) {
+    } catch (_err) {
       sendError(res, "Failed to fetch push token stats", 500, "INTERNAL_ERROR");
     }
   });
@@ -579,7 +579,7 @@ export function register(router: IRouter): void {
       }
       const result = await sendPushBroadcast(payload);
       res.json({ success: true, sent: result.sent, failed: result.failed });
-    } catch (err) {
+    } catch (_err) {
       sendError(res, "Failed to send broadcast push notification", 500, "INTERNAL_ERROR");
     }
   });
@@ -608,8 +608,8 @@ export function register(router: IRouter): void {
     const result = validateStartupConfig();
     res.json({
       timestamp: new Date().toISOString(),
-      environment: process.env["NODE_ENV"] ?? "development",
-      appEnv: process.env["APP_ENV"] ?? "development",
+      environment: process.env.NODE_ENV ?? "development",
+      appEnv: process.env.APP_ENV ?? "development",
       runtimeMode: result.runtimeMode,
       demoMode: result.runtimeMode === "demo",
       valid: result.valid,

@@ -1,12 +1,9 @@
 import {
   Activity,
-  AlertTriangle,
   CheckCircle2,
   ChevronRight,
   Clock,
   Eye,
-  Filter,
-  Play,
   RefreshCw,
   RotateCcw,
   XCircle,
@@ -220,7 +217,7 @@ export default function AlloyActionConsolePage() {
               className="rounded-md p-2.5 text-center transition-all hover:opacity-80"
               style={{
                 background: tab === state ? cfg.bg : BG.surface,
-                border: `1px solid ${tab === state ? cfg.color + '30' : BORDER.subtle}`,
+                border: `1px solid ${tab === state ? `${cfg.color}30` : BORDER.subtle}`,
               }}
             >
               <div className="text-base font-bold font-mono" style={{ color: cfg.color }}>
@@ -283,7 +280,7 @@ export default function AlloyActionConsolePage() {
               >
                 <div
                   className="w-1.5 shrink-0 mt-1.5 h-8 rounded-full"
-                  style={{ background: STATE_CONFIG[a.state].color + '60' }}
+                  style={{ background: `${STATE_CONFIG[a.state].color}60` }}
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">

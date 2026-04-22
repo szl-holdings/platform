@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   RefreshControl,
@@ -202,7 +202,7 @@ function InterventionCard({
         <View
           style={[
             styles.domainPill,
-            { backgroundColor: meta.color + '18', borderColor: meta.color + '35' },
+            { backgroundColor: `${meta.color}18`, borderColor: `${meta.color}35` },
           ]}
         >
           <Text style={[styles.domainPillText, { color: meta.color }]}>
@@ -212,7 +212,7 @@ function InterventionCard({
         <View
           style={[
             styles.urgencyChip,
-            { backgroundColor: uColor + '18', borderColor: uColor + '35' },
+            { backgroundColor: `${uColor}18`, borderColor: `${uColor}35` },
           ]}
         >
           <Text style={[styles.urgencyChipText, { color: uColor }]}>
@@ -223,7 +223,7 @@ function InterventionCard({
           <View
             style={[
               styles.approvalChip,
-              { backgroundColor: ACCENT + '18', borderColor: ACCENT + '35' },
+              { backgroundColor: `${ACCENT}18`, borderColor: `${ACCENT}35` },
             ]}
           >
             <Feather name="shield" size={9} color={ACCENT} />
@@ -281,7 +281,7 @@ function DomainVarRow({
         <View
           style={[
             styles.varDomainIcon,
-            { backgroundColor: meta.color + '18', borderColor: meta.color + '35' },
+            { backgroundColor: `${meta.color}18`, borderColor: `${meta.color}35` },
           ]}
         >
           <Text style={[styles.varDomainIconText, { color: meta.color }]}>{meta.icon}</Text>
@@ -294,7 +294,7 @@ function DomainVarRow({
         </View>
         <Text style={[styles.varAmount, { color: meta.color }]}>{formatUsd(data.var)}</Text>
       </View>
-      <View style={[styles.varBarTrack, { backgroundColor: colors.border + '60' }]}>
+      <View style={[styles.varBarTrack, { backgroundColor: `${colors.border}60` }]}>
         <View style={[styles.varBarFill, { width: `${pct}%`, backgroundColor: meta.color }]} />
       </View>
     </View>
@@ -333,7 +333,7 @@ function BottleneckOwnerCard({
         <View
           style={[
             styles.urgencyChip,
-            { backgroundColor: lColor + '18', borderColor: lColor + '35' },
+            { backgroundColor: `${lColor}18`, borderColor: `${lColor}35` },
           ]}
         >
           <Text style={[styles.urgencyChipText, { color: lColor }]}>
@@ -422,7 +422,7 @@ function AccountabilityOwnerCard({
         <View
           style={[
             styles.urgencyChip,
-            { backgroundColor: cColor + '18', borderColor: cColor + '35' },
+            { backgroundColor: `${cColor}18`, borderColor: `${cColor}35` },
           ]}
         >
           <Text style={[styles.urgencyChipText, { color: cColor }]}>
@@ -652,7 +652,7 @@ export default function CognitiveBriefingScreen() {
                 <View
                   style={[
                     styles.summaryCard,
-                    { backgroundColor: '#0a0a0a', borderColor: ACCENT + '30' },
+                    { backgroundColor: '#0a0a0a', borderColor: `${ACCENT}30` },
                   ]}
                 >
                   <Text style={styles.summaryLabel}>
@@ -762,7 +762,7 @@ export default function CognitiveBriefingScreen() {
               <View
                 style={[
                   styles.summaryCard,
-                  { backgroundColor: '#0a0a0a', borderColor: ACCENT + '30' },
+                  { backgroundColor: '#0a0a0a', borderColor: `${ACCENT}30` },
                 ]}
               >
                 <Text style={styles.summaryLabel}>STALLED VALUE AT RISK</Text>
@@ -835,8 +835,8 @@ export default function CognitiveBriefingScreen() {
                             style={[
                               styles.varDomainIcon,
                               {
-                                backgroundColor: meta.color + '18',
-                                borderColor: meta.color + '35',
+                                backgroundColor: `${meta.color}18`,
+                                borderColor: `${meta.color}35`,
                               },
                             ]}
                           >
@@ -895,7 +895,7 @@ export default function CognitiveBriefingScreen() {
               <View
                 style={[
                   styles.summaryCard,
-                  { backgroundColor: '#0a0a0a', borderColor: ACCENT + '30' },
+                  { backgroundColor: '#0a0a0a', borderColor: `${ACCENT}30` },
                 ]}
               >
                 <Text style={styles.summaryLabel}>MAPPED VALUE AT RISK</Text>
@@ -997,7 +997,7 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { padding: 14, gap: 10 },
   summaryCard: { borderRadius: 10, borderWidth: 1, padding: 16 },
-  summaryLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.8, color: ACCENT + 'cc' },
+  summaryLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.8, color: `${ACCENT}cc` },
   summaryValue: {
     fontSize: 28,
     fontWeight: '800',
@@ -1028,9 +1028,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
-    backgroundColor: ACCENT + '15',
+    backgroundColor: `${ACCENT}15`,
     borderWidth: 1,
-    borderColor: ACCENT + '35',
+    borderColor: `${ACCENT}35`,
   },
   rankBadgeText: { fontSize: 10, fontWeight: '800' },
   domainPill: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 4, borderWidth: 1 },

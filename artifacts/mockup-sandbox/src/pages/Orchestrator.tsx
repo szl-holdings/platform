@@ -8,7 +8,6 @@ import {
   Loader,
   Play,
   RotateCw,
-  Send,
   Workflow,
   X,
   XCircle,

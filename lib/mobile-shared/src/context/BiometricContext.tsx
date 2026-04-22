@@ -139,8 +139,7 @@ export function BiometricProvider({
         return true;
       }
       return false;
-    } catch (err) {
-      console.warn('[Biometric] unlock failed:', err);
+    } catch (_err) {
       return false;
     }
   }, [defaultPrompt]);
@@ -162,8 +161,7 @@ export function BiometricProvider({
         return true;
       }
       return false;
-    } catch (err) {
-      console.warn('[Biometric] enableBiometric failed:', err);
+    } catch (_err) {
       return false;
     }
   }, [enabledKey]);

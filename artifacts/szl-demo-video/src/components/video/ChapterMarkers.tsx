@@ -28,15 +28,15 @@ export function ChapterMarkers({
   totalElapsedMs,
   totalDurationMs,
 }: ChapterMarkersProps) {
-  const progress = Math.min(totalElapsedMs / totalDurationMs, 1);
+  const _progress = Math.min(totalElapsedMs / totalDurationMs, 1);
 
   return (
     <div className="absolute bottom-0 left-0 right-0 z-30 px-6 pb-4">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-1 mb-2">
           {chapters.map((ch, i) => {
-            const chProgress = ch.startMs / totalDurationMs;
-            const chWidth = ch.durationMs / totalDurationMs;
+            const _chProgress = ch.startMs / totalDurationMs;
+            const _chWidth = ch.durationMs / totalDurationMs;
             const isActive = currentScene === i;
             const isPast = currentScene > i;
 

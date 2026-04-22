@@ -1,8 +1,8 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
 import {
-  ArrowRight, ShieldCheck, CheckCircle2, Shield, FileText, Eye, Lock,
-  Database, AlertTriangle, Zap, Server, Users, Clock, Layers, GitBranch
+  ArrowRight, ShieldCheck, CheckCircle2, FileText, Eye, Lock,
+  Database, AlertTriangle, Zap, Server, Users, Clock, Layers, 
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -110,7 +110,7 @@ export default function AegisPublicPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
           {/* Maturity banner */}
           <div style={{ background: "hsla(222,60%,50%,0.07)", borderBottom: "1px solid hsla(222,60%,50%,0.18)", padding: "0.75rem var(--space-content-x)" }}>

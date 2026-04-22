@@ -110,7 +110,6 @@ export class SanctionsFeedAdapter extends BaseFeedAdapter {
 
   async connect(): Promise<void> {
     this.health.status = 'healthy';
-    console.log('[Sanctions] Adapter ready — will poll OFAC, EU, and UN lists');
     await this.ensureCanonicalSanctioningBodies();
   }
 
@@ -209,7 +208,6 @@ export class SanctionsFeedAdapter extends BaseFeedAdapter {
       relationships.push(...ofac.value.relationships);
       recordCount += ofac.value.recordCount;
     } else {
-      console.warn('[Sanctions:OFAC] Poll failed:', ofac.reason);
     }
 
     if (eu.status === 'fulfilled') {
@@ -217,7 +215,6 @@ export class SanctionsFeedAdapter extends BaseFeedAdapter {
       relationships.push(...eu.value.relationships);
       recordCount += eu.value.recordCount;
     } else {
-      console.warn('[Sanctions:EU] Poll failed:', eu.reason);
     }
 
     if (un.status === 'fulfilled') {
@@ -225,7 +222,6 @@ export class SanctionsFeedAdapter extends BaseFeedAdapter {
       relationships.push(...un.value.relationships);
       recordCount += un.value.recordCount;
     } else {
-      console.warn('[Sanctions:UN] Poll failed:', un.reason);
     }
 
     return {

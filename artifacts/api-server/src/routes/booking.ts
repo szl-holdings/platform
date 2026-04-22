@@ -34,7 +34,7 @@ router.get('/booking/appointments', async (_req, res) => {
 
 router.get('/booking/appointments/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  if (isNaN(id)) {
+  if (Number.isNaN(id)) {
     res.status(400).json({ error: 'Invalid ID' });
     return;
   }

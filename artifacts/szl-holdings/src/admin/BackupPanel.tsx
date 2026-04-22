@@ -4,24 +4,19 @@ import {
   Activity,
   AlertCircle,
   CheckCircle2,
-  Clock,
   Database,
   Download,
   FileText,
   HardDrive,
   Loader2,
-  Plus,
-  RefreshCw,
-  Save,
   Shield,
-  X,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { apiFetchAdmin } from './api';
 
 const API = '/api';
-function getCsrfToken(): string {
+function _getCsrfToken(): string {
   const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
   return match ? decodeURIComponent(match[1]) : '';
 }

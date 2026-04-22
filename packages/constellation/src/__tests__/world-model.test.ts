@@ -133,7 +133,7 @@ describe('Schema — extended node types', () => {
 
   it('accepts aliases on nodes', async () => {
     const { ConstellationNodeSchema } = await import('../schema.js');
-    const now = new Date().toISOString();
+    const _now = new Date().toISOString();
     const result = ConstellationNodeSchema.safeParse(
       makeNode({
         id: 'n1',
@@ -146,7 +146,7 @@ describe('Schema — extended node types', () => {
 
   it('accepts impactScore on nodes', async () => {
     const { ConstellationNodeSchema } = await import('../schema.js');
-    const now = new Date().toISOString();
+    const _now = new Date().toISOString();
     const result = ConstellationNodeSchema.safeParse(makeNode({ id: 'n1', impactScore: 8.5 }));
     expect(result.success).toBe(true);
     expect(result.data?.impactScore).toBe(8.5);
@@ -229,20 +229,20 @@ describe('Entity Resolution', () => {
   it('resolves by alias type + value', () => {
     const result = resolveAlias(store, 'imo', 'IMO9876543');
     expect(result).not.toBeNull();
-    expect(result!.canonical.id).toBe('vessel-1');
-    expect(result!.resolvedFromAlias).toBe(true);
+    expect(result?.canonical.id).toBe('vessel-1');
+    expect(result?.resolvedFromAlias).toBe(true);
   });
 
   it('resolves by direct node id', () => {
     const result = resolveEntity(store, 'vessel-1');
-    expect(result!.resolvedFromAlias).toBe(false);
-    expect(result!.canonical.id).toBe('vessel-1');
+    expect(result?.resolvedFromAlias).toBe(false);
+    expect(result?.canonical.id).toBe('vessel-1');
   });
 
   it('resolves by alias value without specifying type', () => {
     const result = resolveEntity(store, 'IMO9876543');
     expect(result).not.toBeNull();
-    expect(result!.canonical.id).toBe('vessel-1');
+    expect(result?.canonical.id).toBe('vessel-1');
   });
 
   it('returns null for unknown entity', () => {
@@ -263,16 +263,16 @@ describe('Entity Resolution', () => {
 
     const result = mergeNodes(store, 'vessel-1', 'vessel-2');
     expect(result).not.toBeNull();
-    expect(result!.absorbedId).toBe('vessel-2');
+    expect(result?.absorbedId).toBe('vessel-2');
     expect(store.getNode('vessel-2')).toBeUndefined();
     const merged = store.getNode('vessel-1');
-    expect(merged!.aliases.some((a) => a.aliasValue === 'IMO9876543-dup')).toBe(true);
-    expect(merged!.aliases.some((a) => a.aliasValue === 'vessel-2')).toBe(true);
-    expect(merged!.confidence).toBeCloseTo((1.0 + 0.7) / 2);
+    expect(merged?.aliases.some((a) => a.aliasValue === 'IMO9876543-dup')).toBe(true);
+    expect(merged?.aliases.some((a) => a.aliasValue === 'vessel-2')).toBe(true);
+    expect(merged?.confidence).toBeCloseTo((1.0 + 0.7) / 2);
   });
 
   it('mergeNodes rewires source edges to target, no dangling edges', () => {
-    const now = new Date().toISOString();
+    const _now = new Date().toISOString();
     store.upsertNode(makeNode({ id: 'third-party', domain: 'prism', label: 'Legal Matter' }));
     store.upsertEdge(
       makeEdge({ id: 'src-edge', fromNodeId: 'vessel-2-id', toNodeId: 'third-party' }),
@@ -415,8 +415,8 @@ describe('Evidence Ranking', () => {
       { id: 'e3', edgeId: 'x', evidenceType: 'doc', confidence: 0.3, recordedAt: now },
     ];
     const ranked = rankEvidence(items);
-    expect(ranked[0]!.id).toBe('e2');
-    expect(ranked[ranked.length - 1]!.id).toBe('e3');
+    expect(ranked[0]?.id).toBe('e2');
+    expect(ranked[ranked.length - 1]?.id).toBe('e3');
   });
 
   it('returns correct rank indices', () => {
@@ -426,8 +426,8 @@ describe('Evidence Ranking', () => {
       { id: 'e2', edgeId: 'x', evidenceType: 'doc', confidence: 0.9, recordedAt: now },
     ];
     const ranked = rankEvidence(items);
-    expect(ranked.find((r) => r.id === 'e2')!.rank).toBe(1);
-    expect(ranked.find((r) => r.id === 'e1')!.rank).toBe(2);
+    expect(ranked.find((r) => r.id === 'e2')?.rank).toBe(1);
+    expect(ranked.find((r) => r.id === 'e1')?.rank).toBe(2);
   });
 
   it('prefers API source over manual source', () => {
@@ -451,7 +451,7 @@ describe('Evidence Ranking', () => {
       },
     ];
     const ranked = rankEvidence(items);
-    expect(ranked[0]!.id).toBe('api');
+    expect(ranked[0]?.id).toBe('api');
   });
 
   it('topEvidence returns null for empty input', () => {
@@ -508,7 +508,7 @@ describe('Freshness Decay', () => {
 
     const result = applyFreshnessDecay(store);
     expect(result.refreshed).toBe(1);
-    expect(store.getNode('was-stale')!.freshness.isStale).toBe(false);
+    expect(store.getNode('was-stale')?.freshness.isStale).toBe(false);
   });
 
   it('freshnessScore returns ~1 for a brand-new node', () => {
@@ -628,7 +628,7 @@ describe('Cross-Domain Queries', () => {
 
   it('domainReachability returns counts per domain', () => {
     const counts = domainReachability(store, 'v1', 3);
-    expect(counts['prism']).toBeGreaterThanOrEqual(1);
-    expect(counts['aegis']).toBeGreaterThanOrEqual(1);
+    expect(counts.prism).toBeGreaterThanOrEqual(1);
+    expect(counts.aegis).toBeGreaterThanOrEqual(1);
   });
 });

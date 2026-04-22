@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "wouter";
-import { Briefcase, Download, ArrowLeft, ShieldCheck, CheckSquare, Eye, Lock, ArrowRight } from "lucide-react";
+import { Briefcase, Download, ArrowLeft, ShieldCheck, ArrowRight } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { analytics } from "@/lib/analytics";
 

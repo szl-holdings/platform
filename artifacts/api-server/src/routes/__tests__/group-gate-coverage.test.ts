@@ -45,7 +45,7 @@ function isExempt(file: string, prefix: string): boolean {
 /** Returns true if prefix is covered by a gated ancestor (e.g. /vessels/platform under /vessels). */
 function isCoveredByParentGate(prefix: string, gated: Set<string>): boolean {
   for (const gate of gated) {
-    if (prefix !== gate && prefix.startsWith(gate + '/')) {
+    if (prefix !== gate && prefix.startsWith(`${gate}/`)) {
       return true;
     }
   }

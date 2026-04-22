@@ -1,5 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
-import { AlertTriangle, CheckCircle2, Clock, GitCommit, Rocket, Search, Tag } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock, Rocket, Search, Tag } from 'lucide-react';
 import { useState } from 'react';
 import { OpsLayout } from '../components/ops-layout';
 

@@ -99,9 +99,9 @@ router.get(
       const user = req.user;
       const isAdmin = user?.roles?.some((r) => ['super_admin', 'admin'].includes(r)) ?? false;
       const orgId = isAdmin ? undefined : (user?.orgs?.[0]?.orgId ?? undefined);
-      const domain = req.query['domain'] as string | undefined;
-      const status = req.query['status'] as string | undefined;
-      const limit = Math.min(parseInt((req.query['limit'] as string) ?? '100', 10), 500);
+      const domain = req.query.domain as string | undefined;
+      const status = req.query.status as string | undefined;
+      const limit = Math.min(parseInt((req.query.limit as string) ?? '100', 10), 500);
 
       const { listSources } = await import('@szl-holdings/worldline');
       const results = await listSources({
@@ -146,7 +146,7 @@ router.get(
       const { slug } = req.params as { slug: string };
       const user = req.user;
       const orgId = user?.orgs?.[0]?.orgId ?? null;
-      const limit = Math.min(parseInt((req.query['limit'] as string) ?? '50', 10), 200);
+      const limit = Math.min(parseInt((req.query.limit as string) ?? '50', 10), 200);
 
       const { getSourceBySlug, getFetchHistory } = await import('@szl-holdings/worldline');
       const source = await getSourceBySlug(slug, orgId);

@@ -31,14 +31,14 @@ function isLocalhost(): boolean {
 function hasPlausible(): boolean {
   return (
     typeof window !== 'undefined' &&
-    typeof (window as unknown as Record<string, unknown>)['plausible'] === 'function'
+    typeof (window as unknown as Record<string, unknown>).plausible === 'function'
   );
 }
 
 function hasGtag(): boolean {
   return (
     typeof window !== 'undefined' &&
-    typeof (window as unknown as Record<string, unknown>)['gtag'] === 'function'
+    typeof (window as unknown as Record<string, unknown>).gtag === 'function'
   );
 }
 
@@ -50,41 +50,36 @@ export function trackEvent(
   if (!_config.enabled) return;
   if (isLocalhost() && !_config.trackLocalhost) {
     if (_config.debugMode) {
-      console.debug(`[analytics:plausible] Skipped (localhost): ${eventName}`, properties);
     }
     return;
   }
 
   if (_config.debugMode) {
-    console.debug(`[analytics] ${eventName}`, properties);
   }
 
   if (hasPlausible()) {
     try {
-      (window as unknown as Record<string, (...args: unknown[]) => void>)['plausible']!(eventName, {
+      (window as unknown as Record<string, (...args: unknown[]) => void>).plausible?.(eventName, {
         props: properties,
       });
-    } catch (e) {
-      console.warn('[analytics] Plausible error:', e);
+    } catch (_e) {
     }
     return;
   }
 
   if (_config.fallbackToGtag && hasGtag()) {
     try {
-      (window as unknown as Record<string, (...args: unknown[]) => void>)['gtag']!(
+      (window as unknown as Record<string, (...args: unknown[]) => void>).gtag?.(
         'event',
         eventName,
         properties,
       );
-    } catch (e) {
-      console.warn('[analytics] gtag error:', e);
+    } catch (_e) {
     }
     return;
   }
 
   if (_config.debugMode) {
-    console.debug(`[analytics] No provider available for: ${eventName}`);
   }
 }
 

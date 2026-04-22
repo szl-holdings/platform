@@ -13,7 +13,6 @@
  *   9. telemetry-writeback — publish final signal to bus, log telemetry
  */
 
-import { randomUUID } from 'node:crypto';
 import {
   createEvidenceItem,
   createRecommendation,
@@ -128,7 +127,7 @@ export class SignalPipeline {
     if (typeof normalized.ts === 'number') {
       normalized.occurredAt = new Date(normalized.ts as number).toISOString();
     }
-    if (typeof normalized.value === 'string' && !isNaN(Number(normalized.value))) {
+    if (typeof normalized.value === 'string' && !Number.isNaN(Number(normalized.value))) {
       normalized.value = Number(normalized.value);
     }
 
@@ -365,9 +364,6 @@ export class SignalPipeline {
     };
     this.bus.publish(final);
     if (recommendation) {
-      console.log(
-        `[signal-mesh] recommendation=${recommendation.recommendationId} action=${recommendation.suggestedAction} policy=${recommendation.policyEvaluation.outcome}`,
-      );
     }
     return final;
   }

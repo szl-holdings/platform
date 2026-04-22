@@ -1,9 +1,6 @@
 import { m } from 'framer-motion';
 import {
-  AlertCircle,
   CheckCircle,
-  Clock,
-  Edit3,
   ExternalLink,
   Eye,
   FileText,

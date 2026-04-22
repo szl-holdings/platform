@@ -552,7 +552,7 @@ function buildGraph(live?: LiveEntityData) {
     // Live KG entity nodes from knowledge graph — supplement static nodes with DB-backed entities
     ...(live?.kgEntityNodes.map((kg) => ({
       id: `kg-entity-${kg.id}`,
-      label: kg.name.length > 40 ? kg.name.slice(0, 37) + '…' : kg.name,
+      label: kg.name.length > 40 ? `${kg.name.slice(0, 37)}…` : kg.name,
       type: 'entity' as const,
       domain: kg.domain,
       severity: kgConfidenceToSeverity(kg.confidence),

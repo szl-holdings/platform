@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { getProduct } from '@szl-holdings/brand-registry/mobile';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Linking,
   Platform,
@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const ACCENT = '#6366f1';
+const _ACCENT = '#6366f1';
 const BG = '#0a0a0a';
 const BORDER = 'rgba(255,255,255,0.06)';
 const TEXT = '#e8e8f0';
@@ -134,7 +134,7 @@ export default function VenturesScreen() {
             <TouchableOpacity
               key={v.slug}
               activeOpacity={0.85}
-              style={[styles.card, { borderColor: v.color + '25' }]}
+              style={[styles.card, { borderColor: `${v.color}25` }]}
               onPress={() => setExpanded(isExpanded ? null : v.slug)}
             >
               <View style={styles.cardTop}>
@@ -158,7 +158,7 @@ export default function VenturesScreen() {
                         key={m.label}
                         style={[
                           styles.metricChip,
-                          { borderColor: v.color + '30', backgroundColor: v.color + '0a' },
+                          { borderColor: `${v.color}30`, backgroundColor: `${v.color}0a` },
                         ]}
                       >
                         <Text style={[styles.metricValue, { color: v.color }]}>{m.value}</Text>
@@ -168,7 +168,7 @@ export default function VenturesScreen() {
                   </View>
                   <View style={styles.cardActions}>
                     <TouchableOpacity
-                      style={[styles.btn, { borderColor: v.color + '40' }]}
+                      style={[styles.btn, { borderColor: `${v.color}40` }]}
                       onPress={() =>
                         router.push({
                           pathname: '/venture/[slug]',
@@ -183,7 +183,7 @@ export default function VenturesScreen() {
                       style={[
                         styles.btn,
                         styles.btnPrimary,
-                        { backgroundColor: v.color + '18', borderColor: v.color + '40' },
+                        { backgroundColor: `${v.color}18`, borderColor: `${v.color}40` },
                       ]}
                       onPress={() => Linking.openURL(v.url)}
                       activeOpacity={0.75}

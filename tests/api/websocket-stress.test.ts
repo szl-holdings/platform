@@ -19,8 +19,8 @@
 // Self-contained: DB is mocked; WS server is created in-process on port 0.
 // No DATABASE_URL or running API server required — runs unconditionally in CI.
 
-import http from 'http';
-import type { AddressInfo } from 'net';
+import http from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import WebSocket from 'ws';
 
@@ -64,7 +64,7 @@ vi.mock('@szl-holdings/crdt-sync', () => ({
 // ── ALLOY_INTERNAL_TOKEN for sensitive channel tests ──────────────────────────
 
 const INTERNAL_TOKEN = 'ws-test-internal-token-0123456789';
-process.env['ALLOY_INTERNAL_TOKEN'] = INTERNAL_TOKEN;
+process.env.ALLOY_INTERNAL_TOKEN = INTERNAL_TOKEN;
 
 // ── Dynamic import of real platform WS module (after mocks are set) ──────────
 
@@ -178,49 +178,49 @@ describe('Platform WS — Path routing & basic protocol', () => {
   it('ping → pong protocol works on platform WS server', async () => {
     const ws = await connect();
     send(ws, { type: 'ping' });
-    const pong = await nextMsg(ws, (m) => m['type'] === 'pong');
-    expect(pong['type']).toBe('pong');
-    expect(typeof pong['timestamp']).toBe('number');
+    const pong = await nextMsg(ws, (m) => m.type === 'pong');
+    expect(pong.type).toBe('pong');
+    expect(typeof pong.timestamp).toBe('number');
     await closeConn(ws);
   });
 
   it('public channel subscribe (no auth) returns subscribed confirmation', async () => {
     const ws = await connect();
     send(ws, { type: 'subscribe', channel: 'health' });
-    const sub = await nextMsg(ws, (m) => m['type'] === 'subscribed');
-    expect(sub['type']).toBe('subscribed');
-    expect(sub['channel']).toBe('health');
-    expect(typeof sub['currentSeq']).toBe('number');
-    expect(Array.isArray(sub['missedMessages'])).toBe(true);
+    const sub = await nextMsg(ws, (m) => m.type === 'subscribed');
+    expect(sub.type).toBe('subscribed');
+    expect(sub.channel).toBe('health');
+    expect(typeof sub.currentSeq).toBe('number');
+    expect(Array.isArray(sub.missedMessages)).toBe(true);
     await closeConn(ws);
   });
 
   it('sensitive channel without token returns unauthorized error', async () => {
     const ws = await connect();
     send(ws, { type: 'subscribe', channel: 'aegis-incidents' });
-    const err = await nextMsg(ws, (m) => m['type'] === 'error');
-    expect(err['type']).toBe('error');
-    expect(err['code']).toBe('unauthorized');
+    const err = await nextMsg(ws, (m) => m.type === 'error');
+    expect(err.type).toBe('error');
+    expect(err.code).toBe('unauthorized');
     await closeConn(ws);
   });
 
   it('sensitive channel with valid ALLOY_INTERNAL_TOKEN returns subscribed', async () => {
     const ws = await connect();
     send(ws, { type: 'subscribe', channel: 'aegis-incidents', token: INTERNAL_TOKEN });
-    const sub = await nextMsg(ws, (m) => m['type'] === 'subscribed' || m['type'] === 'error');
-    expect(sub['type']).toBe('subscribed');
-    expect(sub['channel']).toBe('aegis-incidents');
+    const sub = await nextMsg(ws, (m) => m.type === 'subscribed' || m.type === 'error');
+    expect(sub.type).toBe('subscribed');
+    expect(sub.channel).toBe('aegis-incidents');
     await closeConn(ws);
   });
 
   it('subscribe then unsubscribe a public channel returns unsubscribed confirmation', async () => {
     const ws = await connect();
     send(ws, { type: 'subscribe', channel: 'notifications' });
-    await nextMsg(ws, (m) => m['type'] === 'subscribed');
+    await nextMsg(ws, (m) => m.type === 'subscribed');
     send(ws, { type: 'unsubscribe', channel: 'notifications' });
-    const unsub = await nextMsg(ws, (m) => m['type'] === 'unsubscribed');
-    expect(unsub['type']).toBe('unsubscribed');
-    expect(unsub['channel']).toBe('notifications');
+    const unsub = await nextMsg(ws, (m) => m.type === 'unsubscribed');
+    expect(unsub.type).toBe('unsubscribed');
+    expect(unsub.channel).toBe('notifications');
     await closeConn(ws);
   });
 });
@@ -235,7 +235,6 @@ describe('Platform WS — Concurrent connection scaling (20 clients)', () => {
     expect(conns).toHaveLength(N);
     expect(conns.every((ws) => ws.readyState === WebSocket.OPEN)).toBe(true);
     await Promise.all(conns.map(closeConn));
-    console.info(`[ws-stress] ${N} concurrent connections accepted`);
   });
 
   it(`${N} concurrent clients all receive pong on simultaneous ping`, async () => {
@@ -245,15 +244,14 @@ describe('Platform WS — Concurrent connection scaling (20 clients)', () => {
     const results = await Promise.all(
       conns.map((ws) => {
         send(ws, { type: 'ping' });
-        return nextMsg(ws, (m) => m['type'] === 'pong');
+        return nextMsg(ws, (m) => m.type === 'pong');
       }),
     );
 
-    const elapsed = Date.now() - start;
+    const _elapsed = Date.now() - start;
     expect(results).toHaveLength(N);
-    expect(results.every((r) => r['type'] === 'pong')).toBe(true);
+    expect(results.every((r) => r.type === 'pong')).toBe(true);
     await Promise.all(conns.map(closeConn));
-    console.info(`[ws-stress] ${N} concurrent pings — all pong in ${elapsed}ms`);
   });
 
   it(`${N} concurrent clients subscribe to 'health' channel`, async () => {
@@ -261,13 +259,12 @@ describe('Platform WS — Concurrent connection scaling (20 clients)', () => {
     const results = await Promise.all(
       conns.map((ws) => {
         send(ws, { type: 'subscribe', channel: 'health' });
-        return nextMsg(ws, (m) => m['type'] === 'subscribed' && m['channel'] === 'health');
+        return nextMsg(ws, (m) => m.type === 'subscribed' && m.channel === 'health');
       }),
     );
     expect(results).toHaveLength(N);
-    expect(results.every((r) => r['type'] === 'subscribed')).toBe(true);
+    expect(results.every((r) => r.type === 'subscribed')).toBe(true);
     await Promise.all(conns.map(closeConn));
-    console.info(`[ws-stress] ${N} concurrent subscriptions to 'health' — all confirmed`);
   });
 });
 
@@ -281,15 +278,14 @@ describe('Platform WS — Burst traffic (sequential ping/pong verification)', ()
 
     for (let i = 0; i < BURST; i++) {
       send(ws, { type: 'ping' });
-      const pong = await nextMsg(ws, (m) => m['type'] === 'pong');
-      pongTimestamps.push(pong['timestamp'] as number);
+      const pong = await nextMsg(ws, (m) => m.type === 'pong');
+      pongTimestamps.push(pong.timestamp as number);
     }
 
     expect(pongTimestamps).toHaveLength(BURST);
     expect(pongTimestamps.every((t) => typeof t === 'number' && t > 0)).toBe(true);
 
     await closeConn(ws);
-    console.info(`[ws-stress] ${BURST} sequential pings — all pong timestamps verified`);
   });
 });
 
@@ -303,7 +299,6 @@ describe('Platform WS — Rapid open/close cycling', () => {
       expect(ws.readyState).toBe(WebSocket.OPEN);
       await closeConn(ws);
     }
-    console.info(`[ws-stress] ${CYCLES} rapid open/close cycles completed`);
   });
 });
 
@@ -317,12 +312,12 @@ describe('Platform WS — Multi-channel subscriptions', () => {
     const subs = await Promise.all(
       PUBLIC_CHANNELS.map((ch) => {
         send(ws, { type: 'subscribe', channel: ch });
-        return nextMsg(ws, (m) => m['type'] === 'subscribed' && m['channel'] === ch);
+        return nextMsg(ws, (m) => m.type === 'subscribed' && m.channel === ch);
       }),
     );
 
     expect(subs).toHaveLength(PUBLIC_CHANNELS.length);
-    expect(subs.map((s) => s['channel'])).toEqual(expect.arrayContaining(PUBLIC_CHANNELS));
+    expect(subs.map((s) => s.channel)).toEqual(expect.arrayContaining(PUBLIC_CHANNELS));
 
     await closeConn(ws);
   });

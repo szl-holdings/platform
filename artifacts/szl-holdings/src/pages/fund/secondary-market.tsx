@@ -3,8 +3,8 @@ import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
   ArrowLeftRight, ArrowLeft, ChevronRight, Clock, CheckCircle2,
-  AlertCircle, DollarSign, FileText, Users, Scale, Plus,
-  ShieldCheck, TrendingUp, BarChart3, Download, Send,
+  AlertCircle, FileText, Scale, Plus,
+  ShieldCheck, Download, Send,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -111,9 +111,9 @@ const STATUS_CONFIG: Record<TransferStatus, { label: string; color: string; desc
 };
 
 function fmt(n: number): string {
-  if (n >= 1_000_000) return "$" + (n / 1_000_000).toFixed(2) + "M";
-  if (n >= 1_000) return "$" + (n / 1_000).toFixed(0) + "K";
-  return "$" + n.toFixed(0);
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
+  return `$${n.toFixed(0)}`;
 }
 
 const ROFR_STEPS = [

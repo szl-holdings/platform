@@ -1,7 +1,6 @@
 import { logActivity } from '@szl-holdings/audit';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  alloyArtifactsTable,
   alloyAuditLogTable,
   alloyDecisions,
   alloySkillRuns,
@@ -11,12 +10,12 @@ import {
   db,
 } from '@szl-holdings/db';
 import { connectorHub } from '@szl-holdings/services';
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
-import { type AuthenticatedUser, authMiddleware, requireRole } from '../middlewares/auth';
+import { type AuthenticatedUser, authMiddleware, } from '../middlewares/auth';
 import { AGENT_CONFIGS } from './domain-agents/configs';
 
 const router = Router();
@@ -112,7 +111,7 @@ function buildInternalUrl(path: string): string {
   const devDomain = process.env.REPLIT_DEV_DOMAIN;
   const base = devDomain
     ? `https://${devDomain}`
-    : `http://localhost:${process.env['PORT'] || 3000}`;
+    : `http://localhost:${process.env.PORT || 3000}`;
   return `${base}${path}`;
 }
 
@@ -160,7 +159,7 @@ async function internalPost(path: string, body: unknown, internalToken?: string)
 }
 
 function getInternalToken(): string | undefined {
-  return process.env['ALLOY_INTERNAL_TOKEN'];
+  return process.env.ALLOY_INTERNAL_TOKEN;
 }
 
 const DOMAIN_TOOLS: McpTool[] = [
@@ -639,9 +638,9 @@ function buildPromptMessages(
 ): Array<{ role: string; content: { type: string; text: string } }> {
   switch (promptName) {
     case 'research_brief': {
-      const topic = args['topic'] ?? 'unknown topic';
-      const domains = args['domains'] ?? 'all relevant domains';
-      const depth = args['depth'] ?? 'standard';
+      const topic = args.topic ?? 'unknown topic';
+      const domains = args.domains ?? 'all relevant domains';
+      const depth = args.depth ?? 'standard';
       return [
         {
           role: 'user',
@@ -653,9 +652,9 @@ function buildPromptMessages(
       ];
     }
     case 'threat_assessment': {
-      const target = args['target'] ?? 'the target system';
-      const threatType = args['threat_type'] ?? 'general threats';
-      const framework = args['framework'] ?? 'MITRE ATT&CK';
+      const target = args.target ?? 'the target system';
+      const threatType = args.threat_type ?? 'general threats';
+      const framework = args.framework ?? 'MITRE ATT&CK';
       return [
         {
           role: 'user',
@@ -667,9 +666,9 @@ function buildPromptMessages(
       ];
     }
     case 'property_analysis': {
-      const location = args['location'] ?? 'the target location';
-      const propertyType = args['property_type'] ?? 'all property types';
-      const analysisType = args['analysis_type'] ?? 'comprehensive';
+      const location = args.location ?? 'the target location';
+      const propertyType = args.property_type ?? 'all property types';
+      const analysisType = args.analysis_type ?? 'comprehensive';
       return [
         {
           role: 'user',
@@ -681,9 +680,9 @@ function buildPromptMessages(
       ];
     }
     case 'fleet_report': {
-      const scope = args['fleet_scope'] ?? 'full fleet';
-      const focus = args['focus_areas'] ?? 'all areas';
-      const period = args['report_period'] ?? '24h';
+      const scope = args.fleet_scope ?? 'full fleet';
+      const focus = args.focus_areas ?? 'all areas';
+      const period = args.report_period ?? '24h';
       return [
         {
           role: 'user',
@@ -695,9 +694,9 @@ function buildPromptMessages(
       ];
     }
     case 'executive_digest': {
-      const timeRange = args['time_range'] ?? '24h';
-      const domains = args['include_domains'] ?? 'all';
-      const format = args['format'] ?? 'detailed';
+      const timeRange = args.time_range ?? '24h';
+      const domains = args.include_domains ?? 'all';
+      const format = args.format ?? 'detailed';
       return [
         {
           role: 'user',
@@ -726,7 +725,7 @@ async function executeTool(
       return { tool: toolName, domain: 'vessels', result: data };
     }
     case 'vessels_weather_risk': {
-      const region = toolArgs['region'] as string | undefined;
+      const region = toolArgs.region as string | undefined;
       const path = region
         ? `/api/intelligence/maritime/weather?region=${encodeURIComponent(region)}`
         : '/api/intelligence/maritime/weather';
@@ -734,7 +733,7 @@ async function executeTool(
       return { tool: toolName, domain: 'vessels', result: data };
     }
     case 'firestorm_threat_scan': {
-      const severity = toolArgs['severity'] as string | undefined;
+      const severity = toolArgs.severity as string | undefined;
       const path = severity
         ? `/api/intelligence/threats?severity=${encodeURIComponent(severity)}`
         : '/api/intelligence/threats';
@@ -746,7 +745,7 @@ async function executeTool(
       return { tool: toolName, domain: 'firestorm', result: data };
     }
     case 'terra_property_search': {
-      const region = toolArgs['region'] as string | undefined;
+      const region = toolArgs.region as string | undefined;
       const path = region
         ? `/api/terra/distress?region=${encodeURIComponent(region)}`
         : '/api/terra/distress';
@@ -765,7 +764,7 @@ async function executeTool(
       return { tool: toolName, domain: 'lyte', health, alerts };
     }
     case 'lyte_executive_summary': {
-      const timeRange = toolArgs['timeRange'] as string | undefined;
+      const timeRange = toolArgs.timeRange as string | undefined;
       const path = timeRange
         ? `/api/lyte/executive-summary?timeRange=${encodeURIComponent(timeRange)}`
         : '/api/lyte/executive-summary';
@@ -773,8 +772,8 @@ async function executeTool(
       return { tool: toolName, domain: 'lyte', result: data };
     }
     case 'inca_experiment_status': {
-      const status = toolArgs['status'] as string | undefined;
-      const limit = toolArgs['limit'] as number | undefined;
+      const status = toolArgs.status as string | undefined;
+      const limit = toolArgs.limit as number | undefined;
       let path = '/api/inca/experiments';
       const params = new URLSearchParams();
       if (status) params.set('status', status);
@@ -784,7 +783,7 @@ async function executeTool(
       return { tool: toolName, domain: 'inca', result: data };
     }
     case 'alloy_launch_workflow': {
-      const workflowId = toolArgs['workflowId'] as number;
+      const workflowId = toolArgs.workflowId as number;
       if (!workflowId) throw new Error('workflowId is required');
       const [workflow] = await db
         .select()
@@ -799,14 +798,14 @@ async function executeTool(
       const runResult = await internalPost(
         `/api/alloy/workflows/${workflowId}/run`,
         {
-          input: toolArgs['input'] ?? {},
+          input: toolArgs.input ?? {},
         },
         token,
       );
       return { tool: toolName, workflowId, result: runResult };
     }
     case 'alloy_workflow_status': {
-      const runId = toolArgs['runId'] as number;
+      const runId = toolArgs.runId as number;
       if (!runId) throw new Error('runId is required');
       const [run] = await db
         .select()
@@ -858,9 +857,9 @@ async function executeTool(
       return { tool: toolName, result };
     }
     case 'alloy_research': {
-      const query = toolArgs['query'] as string;
+      const query = toolArgs.query as string;
       if (!query) throw new Error('query is required');
-      const domains = toolArgs['domains'] as string[] | undefined;
+      const domains = toolArgs.domains as string[] | undefined;
       const result = await internalPost(
         '/api/nuro-mesh/orchestrate',
         {
@@ -872,8 +871,8 @@ async function executeTool(
       return { tool: toolName, query, result };
     }
     case 'alloy_decision_status': {
-      const status = toolArgs['status'] as string | undefined;
-      const limit = toolArgs['limit'] as number | undefined;
+      const status = toolArgs.status as string | undefined;
+      const limit = toolArgs.limit as number | undefined;
       const conditions = [];
       if (status) {
         conditions.push(
@@ -899,8 +898,8 @@ async function executeTool(
       if (!user) throw new Error('Authentication required');
       if (!isGlobalAdmin(user) && !user.roles.includes('ops'))
         throw new Error('Insufficient permissions — requires ops or admin role');
-      const decisionId = toolArgs['decisionId'] as number;
-      const action = toolArgs['action'] as 'approve' | 'reject';
+      const decisionId = toolArgs.decisionId as number;
+      const action = toolArgs.action as 'approve' | 'reject';
       if (!decisionId || !action) throw new Error('decisionId and action are required');
       const [decision] = await db
         .select()
@@ -914,14 +913,14 @@ async function executeTool(
           : `/api/decisions/${decisionId}/reject`;
       const result = await internalPost(
         path,
-        { notes: toolArgs['notes'] ?? `${action} via MCP`, reviewer },
+        { notes: toolArgs.notes ?? `${action} via MCP`, reviewer },
         token,
       );
       return { tool: toolName, decisionId, action, result };
     }
     case 'alloy_skill_list': {
-      const category = toolArgs['category'] as string | undefined;
-      const approvalClass = toolArgs['approvalClass'] as string | undefined;
+      const category = toolArgs.category as string | undefined;
+      const approvalClass = toolArgs.approvalClass as string | undefined;
       const conditions = [];
       conditions.push(eq(alloySkills.isEnabled, true));
       if (category) conditions.push(eq(alloySkills.category, category));
@@ -951,9 +950,9 @@ async function executeTool(
     }
     case 'alloy_skill_invoke': {
       if (!user) throw new Error('Authentication required');
-      const skillSlug = toolArgs['skillSlug'] as string;
-      const input = toolArgs['input'] as Record<string, unknown>;
-      const dryRun = toolArgs['dryRun'] as boolean | undefined;
+      const skillSlug = toolArgs.skillSlug as string;
+      const input = toolArgs.input as Record<string, unknown>;
+      const dryRun = toolArgs.dryRun as boolean | undefined;
       if (!skillSlug || !input) throw new Error('skillSlug and input are required');
       const [skill] = await db.select().from(alloySkills).where(eq(alloySkills.slug, skillSlug));
       if (!skill) throw new Error(`Skill '${skillSlug}' not found`);
@@ -1059,8 +1058,8 @@ async function executeTool(
       ) {
         throw new Error('Insufficient permissions — requires ops, compliance, or admin role');
       }
-      const action = toolArgs['action'] as string | undefined;
-      const limit = Math.min((toolArgs['limit'] as number | undefined) ?? 50, 200);
+      const action = toolArgs.action as string | undefined;
+      const limit = Math.min((toolArgs.limit as number | undefined) ?? 50, 200);
       const rows = await db
         .select()
         .from(alloyAuditLogTable)
@@ -1074,9 +1073,9 @@ async function executeTool(
       return { tool: toolName, result: data };
     }
     case 'connector_hub_discover': {
-      const category = toolArgs['category'] as string | undefined;
-      const connectorId = toolArgs['connectorId'] as string | undefined;
-      const tagsRaw = toolArgs['tags'] as string | undefined;
+      const category = toolArgs.category as string | undefined;
+      const connectorId = toolArgs.connectorId as string | undefined;
+      const tagsRaw = toolArgs.tags as string | undefined;
       const tags = tagsRaw ? tagsRaw.split(',').map((t) => t.trim()) : undefined;
       const results = connectorHub.discoverCapabilities({ category, connectorId, tags });
       return {
@@ -1087,9 +1086,9 @@ async function executeTool(
       };
     }
     case 'connector_hub_execute': {
-      const connectorId = toolArgs['connectorId'] as string;
-      const capabilityId = toolArgs['capabilityId'] as string;
-      const params = (toolArgs['params'] as Record<string, unknown>) ?? {};
+      const connectorId = toolArgs.connectorId as string;
+      const capabilityId = toolArgs.capabilityId as string;
+      const params = (toolArgs.params as Record<string, unknown>) ?? {};
       if (!connectorId) throw new Error('connectorId is required');
       if (!capabilityId) throw new Error('capabilityId is required');
       logger.info({ connectorId, capabilityId }, 'MCP connector_hub_execute');
@@ -1097,7 +1096,7 @@ async function executeTool(
       return { tool: toolName, ...result };
     }
     case 'connector_hub_health': {
-      const connectorId = toolArgs['connectorId'] as string | undefined;
+      const connectorId = toolArgs.connectorId as string | undefined;
       if (connectorId) {
         const connector = connectorHub.getConnector(connectorId);
         if (!connector) throw new Error(`Connector '${connectorId}' not found`);
@@ -1112,7 +1111,7 @@ async function executeTool(
   }
 }
 
-async function readResource(uri: string, token?: string): Promise<unknown> {
+async function readResource(uri: string, _token?: string): Promise<unknown> {
   switch (uri) {
     case 'alloy://schema/platform': {
       return {
@@ -1321,8 +1320,8 @@ async function handleMcpMethod(
     }
 
     case 'tools/call': {
-      const toolName = params['name'] as string;
-      const toolArgs = (params['arguments'] as Record<string, unknown>) ?? {};
+      const toolName = params.name as string;
+      const toolArgs = (params.arguments as Record<string, unknown>) ?? {};
       if (!toolName)
         throw Object.assign(new Error('Tool name is required'), {
           code: JSON_RPC_ERRORS.INVALID_PARAMS,
@@ -1379,7 +1378,7 @@ async function handleMcpMethod(
     }
 
     case 'resources/read': {
-      const uri = params['uri'] as string;
+      const uri = params.uri as string;
       if (!uri)
         throw Object.assign(new Error('URI is required'), { code: JSON_RPC_ERRORS.INVALID_PARAMS });
       const content = await readResource(uri, getInternalToken());
@@ -1399,7 +1398,7 @@ async function handleMcpMethod(
     }
 
     case 'prompts/get': {
-      const promptName = params['name'] as string;
+      const promptName = params.name as string;
       if (!promptName)
         throw Object.assign(new Error('Prompt name is required'), {
           code: JSON_RPC_ERRORS.INVALID_PARAMS,
@@ -1409,7 +1408,7 @@ async function handleMcpMethod(
         throw Object.assign(new Error(`Prompt '${promptName}' not found`), {
           code: JSON_RPC_ERRORS.INVALID_PARAMS,
         });
-      const args = (params['arguments'] as Record<string, string>) ?? {};
+      const args = (params.arguments as Record<string, string>) ?? {};
       const messages = buildPromptMessages(promptName, args);
       return { description: prompt.description, messages };
     }

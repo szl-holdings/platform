@@ -40,9 +40,9 @@
  *   pnpm --filter @workspace/api-server exec tsx src/scripts/route-security-matrix.ts --strict-auth
  */
 
-import { readdirSync, readFileSync, statSync } from 'fs';
-import { basename, dirname, join, relative } from 'path';
-import { fileURLToPath } from 'url';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { basename, dirname, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -486,28 +486,14 @@ if (jsonMode) {
       indicators: e.indicators,
     })),
   };
-  process.stdout.write(JSON.stringify(output, null, 2) + '\n');
+  process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
 } else {
-  const pad = (s: string, n: number) => s.padEnd(n);
+  const _pad = (s: string, n: number) => s.padEnd(n);
   const COL_FILE = 55;
   const COL_STATUS = 16;
   const COL_INDICATORS = 40;
 
-  const sep = '-'.repeat(COL_FILE + COL_STATUS + COL_INDICATORS + 6);
-  console.log('\n=== SZL Holdings — Route Security Matrix ===');
-  console.log(`Generated: ${new Date().toISOString()}`);
-  console.log(
-    'Backstop: global deny-by-default enforcer blocks all unauthenticated /api/* requests',
-  );
-  console.log('         not in the public allowlist (src/middlewares/global-auth-enforcer.ts).\n');
-  console.log(
-    pad('Route file', COL_FILE) +
-      ' | ' +
-      pad('Status', COL_STATUS) +
-      ' | ' +
-      'Auth indicators / notes',
-  );
-  console.log(sep);
+  const _sep = '-'.repeat(COL_FILE + COL_STATUS + COL_INDICATORS + 6);
 
   const grouped: Record<string, RouteEntry[]> = {
     PROTECTED: protected_,
@@ -516,71 +502,29 @@ if (jsonMode) {
     UNCLASSIFIED: unclassified,
   };
 
-  for (const [groupName, group] of Object.entries(grouped)) {
+  for (const [_groupName, group] of Object.entries(grouped)) {
     if (group.length === 0) continue;
     for (const e of group.sort((a, b) => a.relPath.localeCompare(b.relPath))) {
-      let notes: string;
+      let _notes: string;
       if (e.status === 'PROTECTED') {
-        notes =
+        _notes =
           e.indicators.slice(0, 3).join(', ') +
           (e.indicators.length > 3 ? ` +${e.indicators.length - 3}` : '');
       } else if (e.status === 'PUBLIC') {
-        notes = '(in enforcer allowlist — intentionally public)';
+        _notes = '(in enforcer allowlist — intentionally public)';
       } else if (e.status === 'GROUP-PROTECTED') {
-        notes = '(auth applied at route-group level — attested April 2026)';
+        _notes = '(auth applied at route-group level — attested April 2026)';
       } else {
-        notes = '⚠ NONE — review required';
+        _notes = '⚠ NONE — review required';
       }
-      console.log(pad(e.relPath, COL_FILE) + ' | ' + pad(groupName, COL_STATUS) + ' | ' + notes);
     }
-    console.log(sep);
   }
-
-  console.log('\nSummary:');
-  console.log(`  Total route files   : ${entries.length}`);
-  console.log(`  PROTECTED           : ${protected_.length} (explicit auth enforcement in file)`);
-  console.log(
-    `  GROUP-PROTECTED     : ${groupProtected.length} (auth applied at route-group registration level)`,
-  );
-  console.log(
-    `  PUBLIC              : ${public_.length} (intentionally unauthenticated, in enforcer allowlist)`,
-  );
-  console.log(`  UNCLASSIFIED        : ${unclassified.length} (require review)`);
-  console.log(
-    `  Total auth coverage : ${Math.round(((protected_.length + groupProtected.length + public_.length) / entries.length) * 100)}%`,
-  );
-
-  console.log('\nZod input validation:');
-  console.log(`  Files with validation: ${filesWithValidation.length}/${entries.length}`);
-  console.log(`  Total route handlers : ${validationTotals.totalRoutes}`);
-  console.log(
-    `  Unvalidated body     : ${validationTotals.unvalidatedBody} mutating routes (POST/PUT/PATCH/DELETE)`,
-  );
-  console.log(
-    `  Unvalidated query    : ${validationTotals.unvalidatedQuery} routes reading req.query`,
-  );
-  console.log(`  Files needing fixes  : ${filesWithUnvalidated.length}`);
   if (filesWithUnvalidated.length > 0 && filesWithUnvalidated.length <= 25) {
-    console.log('\n  Files with unvalidated handlers:');
     for (const e of filesWithUnvalidated) {
-      const v = e.validation;
-      console.log(
-        `    - ${e.relPath}  body=${v.unvalidatedBody} query=${v.unvalidatedQuery}  e.g. ${v.unvalidatedExamples.join('; ')}`,
-      );
+      const _v = e.validation;
     }
   }
-
-  console.log('\nField-level (tightened) schema coverage:');
-  console.log(
-    `  Routes on baseline body schema (jsonObjectBodySchema)  : ${validationTotals.baselineBody}`,
-  );
-  console.log(
-    `  Routes on baseline query schema (anyQuerySchema, etc.) : ${validationTotals.baselineQuery}`,
-  );
-  console.log(
-    `  Files with one or more baseline-schema routes          : ${filesWithBaseline.length}`,
-  );
-  const tightenedPct = Math.round(
+  const _tightenedPct = Math.round(
     ((validationTotals.totalRoutes -
       validationTotals.unvalidatedBody -
       validationTotals.unvalidatedQuery -
@@ -589,43 +533,18 @@ if (jsonMode) {
       Math.max(1, validationTotals.totalRoutes)) *
       100,
   );
-  console.log(`  Tightened (route-specific) coverage                    : ${tightenedPct}%`);
   if (filesWithBaseline.length > 0) {
     const top = filesWithBaseline.slice(0, 20);
-    console.log(`\n  Top ${top.length} files still on baseline schemas (highest counts first):`);
     for (const e of top) {
-      const v = e.validation;
-      console.log(
-        `    - ${e.relPath}  body=${v.baselineBody} query=${v.baselineQuery}  e.g. ${v.baselineExamples.join('; ')}`,
-      );
+      const _v = e.validation;
     }
   }
 
   if (unclassified.length > 0) {
-    console.log(`\n⚠  ${unclassified.length} route file(s) are UNCLASSIFIED:`);
-    for (const e of unclassified) {
-      console.log(`   - ${e.relPath}`);
+    for (const _e of unclassified) {
     }
-    console.log('\n  Action required: either:');
-    console.log(
-      '   (a) Add auth enforcement middleware to the file (authMiddleware, requireRole, tenantScope, etc.)',
-    );
-    console.log('   (b) Add the file to PUBLIC_FILE_BASENAMES in this script AND to');
-    console.log(
-      '       PUBLIC_EXACT_PATHS / PUBLIC_PREFIXES in src/middlewares/global-auth-enforcer.ts',
-    );
-    console.log('   (c) Add the file to GROUP_PROTECTED_BASENAMES in this script and attest');
-    console.log('       that it is protected by group-level middleware in routes/groups/*.ts');
-    console.log('\n  Note: the global deny-by-default enforcer blocks unauthenticated access');
-    console.log('  to all non-allowlisted routes regardless — but defence-in-depth requires');
-    console.log('  explicit file-level or group-level classification.');
   } else {
-    console.log(
-      '\n✓  All route files are classified as PROTECTED, GROUP-PROTECTED, or explicitly PUBLIC.',
-    );
-    console.log('   Deny-by-default enforcement gap is closed.');
   }
-  console.log();
 }
 
 // Strict mode fails if there are any UNCLASSIFIED auth routes OR any
@@ -637,47 +556,18 @@ if (strictMode) {
     validationTotals.unvalidatedBody > 0 ||
     validationTotals.unvalidatedQuery > 0;
   if (hasIssues) {
-    console.error('\n✗  Route Security Matrix --strict: regression detected.\n');
     if (unclassified.length > 0) {
-      console.error(
-        `  • ${unclassified.length} route file(s) are UNCLASSIFIED — add explicit ` +
-          `auth enforcement, register them in a group with auth middleware, or ` +
-          `add them to the PUBLIC allowlist in global-auth-enforcer.ts.`,
-      );
     }
     if (validationTotals.unvalidatedBody > 0 || validationTotals.unvalidatedQuery > 0) {
-      console.error(
-        `  • ${validationTotals.unvalidatedBody} mutating handler(s) missing validateBody, ` +
-          `${validationTotals.unvalidatedQuery} handler(s) reading req.query without validateQuery.`,
-      );
       const sample = filesWithUnvalidated.slice(0, 5).map((e) => {
         const v = e.validation;
         const ex = v.unvalidatedExamples.join('; ');
         return `      - ${e.relPath}  body=${v.unvalidatedBody} query=${v.unvalidatedQuery}  e.g. ${ex}`;
       });
       if (sample.length > 0) {
-        console.error(
-          `\n    Files needing validation (first ${sample.length} of ${filesWithUnvalidated.length}):`,
-        );
-        for (const line of sample) console.error(line);
+        for (const _line of sample) {}
       }
-      console.error(
-        '\n  How to fix:\n' +
-          '    1) Preferred — add a route-specific Zod schema in src/lib/validation.ts and\n' +
-          '       wire it as the first middleware:\n' +
-          '         router.post("/path", validateBody(myRouteSchema), handler)\n' +
-          '    2) Fast unblock — install the baseline safety net automatically:\n' +
-          '         pnpm --filter @workspace/api-server exec tsx \\\n' +
-          '           src/scripts/apply-validation-codemod.ts\n' +
-          '       This adds validateBody(jsonObjectBodySchema) /\n' +
-          '       validateQuery(anyQuerySchema) to any new mutating routes so the\n' +
-          '       gate goes green; tighten the schema in a follow-up PR.',
-      );
     }
-    console.error(
-      '\n  Re-run locally to verify:\n' +
-        '    pnpm --filter @workspace/api-server run audit:route-security:strict\n',
-    );
     process.exit(1);
   }
 }
@@ -690,11 +580,6 @@ if (strictMode) {
 // validation backlog tracked separately.
 if (strictAuthMode) {
   if (unclassified.length > 0) {
-    console.error(
-      `\n✗  Route Security Matrix: ${unclassified.length} route file(s) are UNCLASSIFIED. ` +
-        `Add explicit auth enforcement, register the file in a group with auth ` +
-        `middleware, or add it to the PUBLIC allowlist in global-auth-enforcer.ts.`,
-    );
     process.exit(1);
   }
 }

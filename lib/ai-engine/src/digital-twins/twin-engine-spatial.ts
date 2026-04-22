@@ -7,8 +7,8 @@
  */
 
 import { db, type SpatialTwinCategory, spatialTwinSnapshotsTable } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
+import { and, desc, eq } from 'drizzle-orm';
 import {
   type SimulationResult,
   type SimulationScenario,
@@ -134,7 +134,7 @@ export async function persistSnapshot(
     })
     .returning({ id: spatialTwinSnapshotsTable.id });
 
-  return inserted!.id;
+  return inserted?.id;
 }
 
 export async function getSnapshotHistory(
@@ -288,7 +288,7 @@ export async function branchScenario(
     })
     .returning({ id: spatialTwinSnapshotsTable.id });
 
-  return { branchId, snapshotId: branchSnapshot!.id };
+  return { branchId, snapshotId: branchSnapshot?.id };
 }
 
 export async function replayState(

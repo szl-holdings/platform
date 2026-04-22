@@ -3,7 +3,6 @@ import {
   alloyArtifacts,
   alloyAuditLog,
   alloyOwners,
-  alloySignals,
   alloyWorkflowRuns,
   alloyWorkflows,
   db,

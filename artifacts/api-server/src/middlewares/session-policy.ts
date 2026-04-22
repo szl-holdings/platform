@@ -13,21 +13,12 @@
  */
 
 import { hashIp } from '@szl-holdings/audit';
-import type { RoleName } from '@szl-holdings/db';
-import {
-  auditEventsTable,
-  db,
-  rolesTable,
-  sessionsTable,
-  userRolesTable,
-  usersTable,
-} from '@szl-holdings/db';
-import crypto from 'crypto';
-import { and, desc, eq, gt, isNull, sql } from 'drizzle-orm';
+import { type RoleName, auditEventsTable, db, rolesTable, sessionsTable, userRolesTable, usersTable } from '@szl-holdings/db';
+import crypto from 'node:crypto';
+import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import type { NextFunction, Request, Response } from 'express';
 import { SESSION_COOKIE, SESSION_TTL, setSessionCookie } from '../lib/auth';
 import { logger } from '../lib/logger';
-import type { AuthenticatedUser } from './auth';
 
 export const SESSION_REFRESH_WINDOW = 24 * 60 * 60 * 1000;
 export const IMPERSONATION_TTL = 60 * 60 * 1000;
@@ -175,7 +166,7 @@ export async function writeAuditEvent(params: {
  */
 let _cachedCutoff: { raw: string; value: Date | null } | null = null;
 export function getSessionMinCreatedAt(): Date | null {
-  const raw = process.env['SESSION_MIN_CREATED_AT']?.trim();
+  const raw = process.env.SESSION_MIN_CREATED_AT?.trim();
   if (!raw) {
     _cachedCutoff = null;
     return null;
@@ -467,7 +458,7 @@ export async function rotateRefreshToken(params: {
     .where(eq(usersTable.id, session.userId))
     .limit(1);
 
-  if (!user || !user.isActive) {
+  if (!user?.isActive) {
     throw new RefreshTokenInvalidError('User is not active');
   }
 
@@ -565,7 +556,7 @@ export async function startImpersonation(params: {
     .where(eq(usersTable.id, targetUserId))
     .limit(1);
 
-  if (!target || !target.isActive) {
+  if (!target?.isActive) {
     throw new Error('Target user not found or inactive');
   }
 

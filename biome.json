@@ -53,11 +53,43 @@
       "recommended": true,
       "correctness": {
         "noUnusedImports": "warn",
-        "noUnusedVariables": "warn"
+        "noUnusedVariables": "warn",
+        "noEmptyPattern": "warn",
+        "noVoidTypeReturn": "warn",
+        "noUnsafeOptionalChaining": "warn",
+        "noPrecisionLoss": "warn",
+        "useExhaustiveDependencies": "warn",
+        "noInvalidUseBeforeDeclaration": "warn"
       },
       "suspicious": {
         "noExplicitAny": "warn",
-        "noConsole": "warn"
+        "noConsole": "warn",
+        "noArrayIndexKey": "warn",
+        "useIterableCallbackReturn": "warn",
+        "noAssignInExpressions": "warn",
+        "noThenProperty": "warn",
+        "noImplicitAnyLet": "warn",
+        "noNonNullAssertedOptionalChain": "warn",
+        "noShadowRestrictedNames": "warn",
+        "noCommentText": "warn",
+        "noShorthandPropertyOverrides": "warn",
+        "noRedeclare": "warn"
+      },
+      "a11y": {
+        "useButtonType": "warn",
+        "noLabelWithoutControl": "warn",
+        "noStaticElementInteractions": "warn",
+        "useKeyWithClickEvents": "warn",
+        "noSvgWithoutTitle": "warn",
+        "useValidAnchor": "warn",
+        "useSemanticElements": "warn",
+        "useAriaPropsSupportedByRole": "warn",
+        "useKeyWithMouseEvents": "warn",
+        "useFocusableInteractive": "warn",
+        "useAriaPropsForRole": "warn"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "warn"
       },
       "style": {
         "useImportType": "warn",
@@ -75,6 +107,15 @@
           }
         }
       }
+    }
+  },
+  "css": {
+    "parser": {
+      "cssModules": true,
+      "allowWrongLineComments": false
+    },
+    "linter": {
+      "enabled": false
     }
   },
   "javascript": {

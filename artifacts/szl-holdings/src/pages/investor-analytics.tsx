@@ -34,31 +34,31 @@ const AMBER = '#f59e0b';
 const MUTED = '#52525b';
 
 function fmt(n: number | null | undefined, prefix = '', suffix = '') {
-  if (n == null || !isFinite(n)) return '—';
+  if (n == null || !Number.isFinite(n)) return '—';
   if (n >= 1_000_000) return `${prefix}${(n / 1_000_000).toFixed(1)}M${suffix}`;
   if (n >= 1_000) return `${prefix}${(n / 1_000).toFixed(1)}K${suffix}`;
   return `${prefix}${n.toFixed(0)}${suffix}`;
 }
 
 function fmtCurrency(n: number | null | undefined) {
-  if (n == null || !isFinite(n)) return '—';
+  if (n == null || !Number.isFinite(n)) return '—';
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
   return `$${n.toFixed(2)}`;
 }
 
 function fmtPct(n: number | null | undefined, decimals = 1) {
-  if (n == null || !isFinite(n)) return '—';
+  if (n == null || !Number.isFinite(n)) return '—';
   return `${n.toFixed(decimals)}%`;
 }
 
 function fmtRatio(n: number | null | undefined, suffix = 'x', decimals = 2) {
-  if (n == null || !isFinite(n)) return '—';
+  if (n == null || !Number.isFinite(n)) return '—';
   return `${n.toFixed(decimals)}${suffix}`;
 }
 
 function fmtMonths(n: number | null | undefined) {
-  if (n == null || !isFinite(n)) return '—';
+  if (n == null || !Number.isFinite(n)) return '—';
   return `${n.toFixed(1)} mo`;
 }
 
@@ -542,8 +542,7 @@ export default function InvestorAnalytics() {
       <div className="max-w-7xl mx-auto px-6 py-6 space-y-8">
         {/* ── Business Metrics Tab ── */}
         {tab === 'metrics' && (
-          <>
-            {mLoading ? (
+          mLoading ? (
               <div className="text-center py-20 text-zinc-600">Computing metrics...</div>
             ) : (
               <>
@@ -723,14 +722,12 @@ export default function InvestorAnalytics() {
                   </div>
                 </div>
               </>
-            )}
-          </>
+            )
         )}
 
         {/* ── Funnel Analytics Tab ── */}
         {tab === 'funnel' && (
-          <>
-            {!funnel ? (
+          !funnel ? (
               <div className="text-center py-20 text-zinc-600">Loading funnel data...</div>
             ) : (
               <>
@@ -784,8 +781,7 @@ export default function InvestorAnalytics() {
                   <MonthlyFunnelChart data={funnel.monthlyFunnel ?? []} />
                 </div>
               </>
-            )}
-          </>
+            )
         )}
 
         {/* ── Cohort Retention Tab ── */}
@@ -902,8 +898,7 @@ export default function InvestorAnalytics() {
 
         {/* ── Change Audit Tab ── */}
         {tab === 'diffs' && (
-          <>
-            <div className="bg-[#111318] border border-[#1e2230] rounded-xl p-5">
+          <div className="bg-[#111318] border border-[#1e2230] rounded-xl p-5">
               <SectionHeader
                 title="Change Audit Report"
                 sub="Before/after diff view for entity mutations tracked in audit events"
@@ -1002,7 +997,6 @@ export default function InvestorAnalytics() {
                 </div>
               )}
             </div>
-          </>
         )}
 
         {/* ── Data Room Engagement Tab ── */}

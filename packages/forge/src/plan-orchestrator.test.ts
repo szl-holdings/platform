@@ -31,9 +31,9 @@ describe('plan orchestrator', () => {
 
     const persisted = await store.get(plan.planId);
     expect(persisted?.status).toBe('completed');
-    for (const step of persisted!.steps) {
+    for (const step of persisted?.steps) {
       expect(step.status).toBe('completed');
-      expect((step.metadata as Record<string, unknown>)['output']).toBeDefined();
+      expect((step.metadata as Record<string, unknown>).output).toBeDefined();
     }
   });
 
@@ -52,10 +52,10 @@ describe('plan orchestrator', () => {
     const first = await executePlan(plan.planId, { store, stepExecutor: executor });
     expect(first.status).toBe('awaiting-approval');
     expect(first.awaitingApproval).toBeDefined();
-    const gatedStepId = first.awaitingApproval!.stepId;
+    const gatedStepId = first.awaitingApproval?.stepId;
 
     const persistedAfterGate = await store.get(plan.planId);
-    const gatedStep = persistedAfterGate!.steps.find((s) => s.stepId === gatedStepId)!;
+    const gatedStep = persistedAfterGate?.steps.find((s) => s.stepId === gatedStepId)!;
     expect(gatedStep.status).toBe('blocked');
     expect(gatedStep.requiredApproval).toBe(true);
 
@@ -89,7 +89,7 @@ describe('plan orchestrator', () => {
     const result = await executePlan(plan.planId, {
       store,
       stepExecutor: executor,
-      approvedStepIds: [gated!.stepId],
+      approvedStepIds: [gated?.stepId],
     });
 
     expect(result.status).toBe('completed');
@@ -140,7 +140,7 @@ describe('plan orchestrator', () => {
 
     const primaryPersisted = await store.get(plan.planId);
     expect(primaryPersisted?.status).toBe('failed');
-    const failedStep = primaryPersisted!.steps.find((s) => s.title === 'Act')!;
+    const failedStep = primaryPersisted?.steps.find((s) => s.title === 'Act')!;
     expect(failedStep.status).toBe('failed');
 
     const fallbackPersisted = await store.get(plan.fallbacks[0]!);

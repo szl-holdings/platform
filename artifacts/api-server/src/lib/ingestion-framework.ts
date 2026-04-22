@@ -4,7 +4,7 @@ import {
   streamDataSourcesTable,
   streamIngestedEventsTable,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { desc, eq } from 'drizzle-orm';
 import { logger } from './logger';
 import { publish, WS_CHANNELS } from './websocket';
@@ -238,15 +238,15 @@ export async function registerDataSource(
     .returning();
 
   const full: DataSourceConfig = {
-    id: row!.id,
-    name: row!.name,
-    type: row!.type as 'webhook' | 'polling',
-    category: row!.category as StreamCategory,
-    endpoint: row!.endpoint ?? undefined,
+    id: row?.id,
+    name: row?.name,
+    type: row?.type as 'webhook' | 'polling',
+    category: row?.category as StreamCategory,
+    endpoint: row?.endpoint ?? undefined,
     authToken: config.authToken,
-    pollingIntervalMs: row!.pollingIntervalMs ?? 30000,
-    enabled: row!.enabled,
-    status: row!.status,
+    pollingIntervalMs: row?.pollingIntervalMs ?? 30000,
+    enabled: row?.enabled,
+    status: row?.status,
     eventsIngested: 0,
   };
 
@@ -622,12 +622,12 @@ export function normalizeSiemPayload(
   const now = new Date().toISOString();
   return {
     id: `siem_wh_${Date.now()}_${randomUUID().slice(0, 6)}`,
-    type: (raw['event_type'] ?? raw['type'] ?? raw['action'] ?? 'siem_event') as string,
-    source: (raw['source'] ?? raw['product'] ?? sourceHint ?? 'webhook') as string,
+    type: (raw.event_type ?? raw.type ?? raw.action ?? 'siem_event') as string,
+    source: (raw.source ?? raw.product ?? sourceHint ?? 'webhook') as string,
     category: 'siem',
-    severity: ((raw['severity'] ?? raw['priority'] ?? 'medium') as string).toLowerCase() as string,
+    severity: ((raw.severity ?? raw.priority ?? 'medium') as string).toLowerCase() as string,
     payload: raw,
-    timestamp: (raw['timestamp'] ?? raw['event_time'] ?? raw['time'] ?? now) as string,
+    timestamp: (raw.timestamp ?? raw.event_time ?? raw.time ?? now) as string,
   };
 }
 

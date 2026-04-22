@@ -13,8 +13,8 @@
 
 'use strict';
 
-const https = require('https');
-const { URL } = require('url');
+const https = require('node:https');
+const { URL } = require('node:url');
 
 const { POSTS } = require('./posts.cjs');
 
@@ -23,7 +23,6 @@ const { POSTS } = require('./posts.cjs');
 function requireEnv(key) {
   const val = process.env[key];
   if (!val) {
-    console.error(`ERROR: missing required env var ${key} — see PUBLISH.md`);
     process.exit(1);
   }
   return val;
@@ -170,10 +169,7 @@ async function main() {
 
   const posts = POSTS.slice(0, 3);
 
-  console.log(`\nPublishing ${posts.length} drafts to ${pubUrl}\n`);
-
   for (const post of posts) {
-    console.log(`  → [${post.id}] "${post.title}"`);
 
     const draftBody = {
       draft_title: post.title,
@@ -195,22 +191,15 @@ async function main() {
 
     if (result.status === 200 || result.status === 201) {
       const draft = result.body;
-      const id = draft.id ?? draft.draft_id ?? '(unknown)';
-      console.log(`     ✓ draft created  id=${id}`);
-      console.log(`       ${pubUrl}/publish/post/${id}`);
+      const _id = draft.id ?? draft.draft_id ?? '(unknown)';
     } else {
-      console.error(`     ✗ HTTP ${result.status}`);
-      console.error('       ' + JSON.stringify(result.body, null, 2));
     }
 
     // small delay between requests
     await new Promise((r) => setTimeout(r, 600));
   }
-
-  console.log('\nDone. Open your Substack drafts dashboard to review before publishing.');
 }
 
-main().catch((err) => {
-  console.error('Fatal:', err.message);
+main().catch((_err) => {
   process.exit(1);
 });

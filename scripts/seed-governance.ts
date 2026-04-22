@@ -1,11 +1,9 @@
 import { seedGovernance } from '../artifacts/api-server/src/scripts/seed-governance.js';
 
 seedGovernance()
-  .then((result) => {
-    console.log('[runner] seed-governance complete:', result);
+  .then((_result) => {
     process.exit(0);
   })
-  .catch((err) => {
-    console.error('[runner] seed-governance failed:', err);
+  .catch((_err) => {
     process.exit(1);
   });

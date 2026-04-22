@@ -49,30 +49,17 @@ const observed = {
 
 const report = validateFacts(observed, PLATFORM_FACTS);
 
-console.log('=== Platform Facts Validation ===');
-console.log('');
-
 if (report.driftItems.length === 0) {
-  console.log('✓ ' + report.summary);
 } else {
-  console.log('Drift detected:\n');
   for (const item of report.driftItems) {
-    const icon = item.severity === 'error' ? '✗' : '⚠';
-    console.log(
-      `  ${icon} ${item.fact}: registry=${item.registryValue}, observed=${item.observedValue}, delta=${item.delta}`,
-    );
+    const _icon = item.severity === 'error' ? '✗' : '⚠';
   }
-  console.log('');
-  console.log(report.summary);
 }
 
 const hasErrors = report.driftItems.some((i) => i.severity === 'error');
 const hasWarnings = report.driftItems.some((i) => i.severity === 'warning');
 
 if (hasErrors || (STRICT && hasWarnings)) {
-  console.log('\nFix: run `tsx scripts/generate-platform-metrics.ts` to update the registry.');
   process.exit(1);
 }
-
-console.log('\nValidation passed.');
 process.exit(0);

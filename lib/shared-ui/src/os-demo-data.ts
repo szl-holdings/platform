@@ -970,7 +970,7 @@ function baseRuns(variant: string): Run[] {
       toolCalls: [
         {
           toolName: 'fetch-signals',
-          inputSummary: 'domain=' + variant,
+          inputSummary: `domain=${variant}`,
           outputSummary: '12 signals retrieved',
           latencyMs: 280,
           success: true,

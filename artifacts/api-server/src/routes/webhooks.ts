@@ -1,11 +1,9 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import { db } from '@szl-holdings/db';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
-  sendBadRequest,
   sendError,
   sendNotFound,
   sendSuccess,
@@ -107,7 +105,7 @@ export const SZL_EVENT_TYPES = [
 export type SzlEventType = (typeof SZL_EVENT_TYPES)[number];
 
 function generateWebhookSecret(): string {
-  return 'whsec_' + crypto.randomBytes(24).toString('hex');
+  return `whsec_${crypto.randomBytes(24).toString('hex')}`;
 }
 
 function signPayload(payload: string, secret: string): string {
@@ -423,7 +421,7 @@ router.get(
       if (eventType) {
         const prefix = eventType.endsWith('.*') ? eventType.slice(0, -2) : null;
         deliveries = deliveries.filter((d) =>
-          prefix ? d.eventType.startsWith(prefix + '.') : d.eventType === eventType,
+          prefix ? d.eventType.startsWith(`${prefix}.`) : d.eventType === eventType,
         );
       }
 

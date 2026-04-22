@@ -1,5 +1,5 @@
 import { demoReports } from '@lyte/lib/demo-seed';
-import { BarChart3, CheckCircle, Clock, Download, FileText, Plus, RefreshCw } from 'lucide-react';
+import { BarChart3, Download, FileText, Plus, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 
 const BG = { surface: '#0c1018', elevated: '#10141e' };

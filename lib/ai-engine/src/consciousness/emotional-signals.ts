@@ -446,7 +446,7 @@ class EmotionalSignalEngine {
 
     if (state.activeRegulations.length > 0) {
       lines.push(
-        `Regulation: ${state.activeRegulations[0]!.type} — ${state.activeRegulations[0]!.action.slice(0, 80)}`,
+        `Regulation: ${state.activeRegulations[0]?.type} — ${state.activeRegulations[0]?.action.slice(0, 80)}`,
       );
     }
 

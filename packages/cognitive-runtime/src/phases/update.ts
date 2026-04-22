@@ -1,8 +1,6 @@
-import type { MemoryEntry, MemoryStore } from '@workspace/memory-fabric';
-import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
-import type { SelfModelStore } from '@workspace/self-model';
-import { defaultSelfModelStore, updateAfterRun } from '@workspace/self-model';
-import { randomUUID } from 'crypto';
+import { type MemoryEntry, type MemoryStore, defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
+import { type SelfModelStore, defaultSelfModelStore, updateAfterRun } from '@workspace/self-model';
+import { randomUUID } from 'node:crypto';
 import type { PhaseResult } from '../types.js';
 import type { ExecutePhaseOutput } from './execute.js';
 import type { ReflectPhaseOutput } from './reflect.js';
@@ -181,7 +179,7 @@ export async function updateMemoryPhase(
 
   // Semantic lesson entry — extracted learning for future reference
   let lessonId: string | undefined;
-  if (reflectOutput && reflectOutput.lesson) {
+  if (reflectOutput?.lesson) {
     lessonId = `semantic-lesson-${opts.runId}-${randomUUID()}`;
     const lessonEntry: MemoryEntry = {
       id: lessonId,
@@ -276,7 +274,7 @@ export async function updatePhase(
     driftScore: selfModelResult.output.driftScore,
     helpRequested: selfModelResult.output.helpRequested,
     memoryIdsWritten: memoryResult.output.memoryIdsWritten,
-    summary: selfModelResult.output.summary + ' ' + memoryResult.output.summary,
+    summary: `${selfModelResult.output.summary} ${memoryResult.output.summary}`,
   };
 
   const completedAt = Date.now();

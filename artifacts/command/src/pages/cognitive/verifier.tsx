@@ -1,5 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CognitiveLayout } from './cognitive-layout';
 
 const ACCENT = '#8b7ac8';
@@ -844,7 +844,7 @@ export default function VerifierConsole() {
                       }}
                     >
                       {check.evidence.length > 140
-                        ? check.evidence.slice(0, 140) + '…'
+                        ? `${check.evidence.slice(0, 140)}…`
                         : check.evidence}
                     </div>
                     <div style={{ marginTop: 6, fontSize: 10, color: '#334155' }}>

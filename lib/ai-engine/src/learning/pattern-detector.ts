@@ -92,17 +92,17 @@ function extractDimensions(entry: CaseMemoryEntry): Record<string, string[]> {
   const allText = `${caseText} ${noteText}`;
 
   for (const d of entry.decisions) {
-    if (d.impactLevel) dims.riskLevel!.push(d.impactLevel);
-    if (d.decisionType) dims.decisionType!.push(d.decisionType);
-    if (d.approvalRequired) dims.approvalRequired!.push('approval_required');
-    if (d.humanReviewRequired) dims.humanReviewRequired!.push('human_review_required');
+    if (d.impactLevel) dims.riskLevel?.push(d.impactLevel);
+    if (d.decisionType) dims.decisionType?.push(d.decisionType);
+    if (d.approvalRequired) dims.approvalRequired?.push('approval_required');
+    if (d.humanReviewRequired) dims.humanReviewRequired?.push('human_review_required');
   }
 
   const vector = extractAttackVector(allText);
-  if (vector) dims.attackVector!.push(vector);
+  if (vector) dims.attackVector?.push(vector);
 
   const scope = extractScope(allText);
-  if (scope) dims.affectedScope!.push(scope);
+  if (scope) dims.affectedScope?.push(scope);
 
   return dims;
 }
@@ -121,12 +121,13 @@ export async function detectCrossPatterns(
       if (!dimensionCounts[dimension]) dimensionCounts[dimension] = {};
       for (const value of values) {
         if (!value) continue;
-        if (!dimensionCounts[dimension]![value]) {
+        if (!dimensionCounts[dimension]?.[value]) {
           dimensionCounts[dimension]![value] = { count: 0, cases: [] };
         }
-        if (!dimensionCounts[dimension]![value]!.cases.includes(entry.caseId)) {
-          dimensionCounts[dimension]![value]!.count++;
-          dimensionCounts[dimension]![value]!.cases.push(entry.caseId);
+        if (!dimensionCounts[dimension]?.[value]?.cases.includes(entry.caseId)) {
+          const bucket = dimensionCounts[dimension]![value]!;
+          bucket.count++;
+          bucket.cases.push(entry.caseId);
         }
       }
     }
@@ -181,11 +182,6 @@ export async function runPatternDetectionAndStore(allCases: CaseMemoryEntry[]): 
         })
         .onConflictDoNothing();
     }
-
-    console.log(
-      `[pattern-detector] Stored ${patterns.length} pattern alerts (high: ${patterns.filter((p) => p.significance === 'high').length})`,
-    );
-  } catch (err) {
-    console.warn('[pattern-detector] Failed to store patterns:', err);
+  } catch (_err) {
   }
 }

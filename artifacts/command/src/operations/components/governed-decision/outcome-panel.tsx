@@ -1,5 +1,4 @@
 import {
-  ArrowRight,
   Calendar,
   CheckCircle,
   Clock,

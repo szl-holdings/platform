@@ -496,7 +496,7 @@ export default function MarketPage() {
           <h3 className="font-display font-bold text-terra-text">Regional Market Overview</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm" role="table">
+          <table className="w-full text-sm" >
             <thead>
               <tr className="border-b border-terra-border">
                 <th className="text-left py-3 px-3 text-xs font-semibold text-terra-text-muted uppercase tracking-wider">

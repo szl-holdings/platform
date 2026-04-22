@@ -22,16 +22,7 @@
 import { atlas, atlasEventBus } from '@szl-holdings/business-events';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ATLAS_EVENT_CLASS, BUSINESS_ATTRS } from './business/index.js';
-import type {
-  AgentHandoffContract,
-  AgentPolicyGateContract,
-  AgentRunContract,
-  GenAIAgentStepContract,
-  GenAIModelCallContract,
-  GenAIRetrievalContract,
-  GenAIToolCallContract,
-} from './genai/index.js';
-import { AGENT_RUN_ATTRS, GENAI_ATTRS, GENAI_OPERATION, GENAI_SYSTEM } from './genai/index.js';
+import { type AgentHandoffContract, type AgentPolicyGateContract, type AgentRunContract, type GenAIAgentStepContract, type GenAIModelCallContract, type GenAIRetrievalContract, type GenAIToolCallContract, AGENT_RUN_ATTRS, GENAI_ATTRS, GENAI_OPERATION, GENAI_SYSTEM } from './genai/index.js';
 import { HTTP_ATTRS, SPAN_NAMES, SZL_ATTRS } from './http/index.js';
 
 // ---------------------------------------------------------------------------

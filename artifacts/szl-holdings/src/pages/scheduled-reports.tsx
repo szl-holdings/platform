@@ -61,7 +61,7 @@ const DOMAIN_COLORS: Record<string, string> = {
 async function apiFetch(path: string, opts?: RequestInit) {
   const res = await fetch(`${API}${path}`, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...(opts?.headers || {}) },
+    headers: { 'Content-Type': 'application/json', ...opts?.headers },
     ...opts,
   });
   if (!res.ok) {

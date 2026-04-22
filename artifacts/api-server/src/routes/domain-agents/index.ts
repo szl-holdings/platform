@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import { type Request, type RequestHandler, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { sendError, sendSuccess } from '../../lib/api-response';
@@ -7,7 +7,7 @@ import { getModelConfig } from '../../lib/model-registry';
 import { authMiddleware } from '../../middlewares/auth';
 import { agentChatSchema, validateBody } from '../../lib/validation';
 import a2aRouter from './a2a';
-import { AGENT_CONFIGS, type AgentType, isValidAgentType } from './configs';
+import { AGENT_CONFIGS, isValidAgentType } from './configs';
 import { runDomainAgentChat, streamDomainAgentChat } from './runner';
 
 const router = Router();
@@ -78,7 +78,7 @@ router.get('/domain-agents/agents/:agentType', (req, res) => {
     temperature: modelConfig.temperature,
     maxTokens: modelConfig.maxCompletionTokens,
     tools: config.tools.map((t) => ({ name: t.name, description: t.description })),
-    systemPromptPreview: config.systemPrompt.slice(0, 200) + '...',
+    systemPromptPreview: `${config.systemPrompt.slice(0, 200)}...`,
   });
 });
 

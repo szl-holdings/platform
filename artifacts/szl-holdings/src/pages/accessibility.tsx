@@ -16,7 +16,7 @@ export default function AccessibilityPage() {
       }}
     >
       <Navbar />
-      <main id="main-content" role="main" style={{ paddingTop: '6rem', paddingBottom: '4rem' }}>
+      <main id="main-content" style={{ paddingTop: '6rem', paddingBottom: '4rem' }}>
         <div style={{ maxWidth: '720px', margin: '0 auto', padding: '0 1.5rem' }}>
           <div style={{ marginBottom: '2.5rem' }}>
             <div

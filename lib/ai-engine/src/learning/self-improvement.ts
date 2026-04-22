@@ -56,7 +56,7 @@ export async function computeAgentPerformanceSnapshot(
     const avgConf = Number(row.avg_conf ?? 0.5);
 
     const accuracyScore = total > 0 ? accepted / total : 0.75;
-    const expectedAccuracy = 0.8;
+    const _expectedAccuracy = 0.8;
     const calibrationBias = avgConf - accuracyScore;
 
     const prevResult = await pool.query(

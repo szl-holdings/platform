@@ -123,7 +123,7 @@ export function requireApproval<
   resolver: (source: TSource, args: TArgs, context: TContext, info: unknown) => unknown,
 ) {
   return async (source: TSource, args: TArgs, context: TContext, info: unknown) => {
-    const isDev = process.env['NODE_ENV'] === 'development' || process.env['NODE_ENV'] === 'test';
+    const isDev = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
     const approvalId = args?.approvalId ?? context?.req?.headers?.['x-approval-id'];
     const user = context?.req?.user;
 

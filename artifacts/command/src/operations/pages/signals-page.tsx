@@ -4,9 +4,7 @@ import { useSignals, useUpdateSignal } from '@lyte/hooks/use-lyte';
 import { cn } from '@lyte/lib/utils';
 import {
   Activity,
-  AlertTriangle,
   CheckCircle,
-  ChevronDown,
   ChevronRight,
   Clock,
   RefreshCw,

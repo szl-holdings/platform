@@ -28,8 +28,8 @@ export function initServerSentry(): void {
     beforeSend(event) {
       if (event.request?.headers) {
         const sanitized = { ...event.request.headers };
-        delete sanitized['authorization'];
-        delete sanitized['cookie'];
+        delete sanitized.authorization;
+        delete sanitized.cookie;
         delete sanitized['x-internal-token'];
         event.request.headers = sanitized;
       }

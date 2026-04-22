@@ -1,6 +1,5 @@
 import { motion, useInView } from 'framer-motion';
-import type { LucideIcon } from 'lucide-react';
-import { BarChart3, FileCheck, GitBranch, Radio, ShieldCheck, Zap } from 'lucide-react';
+import { type LucideIcon, BarChart3, FileCheck, GitBranch, Radio, ShieldCheck, Zap } from 'lucide-react';
 import { useRef } from 'react';
 
 const BG = 'hsl(214,16%,4%)';

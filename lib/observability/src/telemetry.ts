@@ -1,4 +1,4 @@
-import type { PillarId } from './types.js';
+
 
 export interface TelemetryEvent {
   metricId: string;
@@ -101,7 +101,7 @@ export class ServerTelemetryCollector {
 
   private pruneOldEntries() {
     const cutoff = Date.now() - WINDOW_SIZE;
-    while (this.requests.length > 0 && this.requests[0]!.timestamp < cutoff) {
+    while (this.requests.length > 0 && this.requests[0]?.timestamp < cutoff) {
       this.requests.shift();
     }
     if (this.requests.length > MAX_REQUESTS) {
@@ -195,7 +195,7 @@ export class ServerTelemetryCollector {
     const cutoff = Date.now() - WINDOW_SIZE;
     while (
       this.tenantIsolationViolations.length > 0 &&
-      this.tenantIsolationViolations[0]!.timestamp < cutoff
+      this.tenantIsolationViolations[0]?.timestamp < cutoff
     ) {
       this.tenantIsolationViolations.shift();
     }
@@ -289,7 +289,7 @@ export class ServerTelemetryCollector {
     for (const s of spans) {
       const key = `${s.method} ${s.route}`;
       if (!byRoute.has(key)) byRoute.set(key, []);
-      byRoute.get(key)!.push(s);
+      byRoute.get(key)?.push(s);
     }
 
     const routes = Array.from(byRoute.entries())
@@ -332,7 +332,7 @@ export class ServerTelemetryCollector {
     const byProvider = new Map<string, number[]>();
     for (const c of recent) {
       if (!byProvider.has(c.provider)) byProvider.set(c.provider, []);
-      byProvider.get(c.provider)!.push(c.durationMs);
+      byProvider.get(c.provider)?.push(c.durationMs);
     }
     const result: Record<string, { count: number; avgMs: number; p99Ms: number }> = {};
     for (const [provider, durations] of byProvider) {

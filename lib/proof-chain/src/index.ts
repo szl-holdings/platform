@@ -1,14 +1,13 @@
 import {
   db,
-  type InsertProofChain,
   type ProofChain,
   type ProofExportSafetyState,
   type ProofReviewState,
   type ProvenanceSourceClass,
   proofChainTable,
 } from '@szl-holdings/db';
-import { createHash } from 'crypto';
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { createHash } from 'node:crypto';
+import { and, desc, eq, } from 'drizzle-orm';
 
 export type { ProofChain, ProofExportSafetyState, ProofReviewState, ProvenanceSourceClass };
 

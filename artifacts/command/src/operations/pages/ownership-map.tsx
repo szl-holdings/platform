@@ -1,6 +1,6 @@
-import { type OwnershipRecord, ownershipMap, severityColors } from '@lyte/lib/business-data';
+import { type OwnershipRecord, ownershipMap, } from '@lyte/lib/business-data';
 import { cn } from '@lyte/lib/utils';
-import { AlertTriangle, CheckCircle2, DollarSign, HelpCircle, Users } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, HelpCircle, } from 'lucide-react';
 
 function formatCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -105,7 +105,7 @@ export default function OwnershipMapPage() {
   const clear = ownershipMap.filter((r) => r.status === 'clear');
 
   const totalVaRAtRisk = [...missing, ...ambiguous].reduce((sum, r) => sum + r.valueAtRisk, 0);
-  const totalMissingItems = missing.reduce((sum, r) => sum + r.stalledItems, 0);
+  const _totalMissingItems = missing.reduce((sum, r) => sum + r.stalledItems, 0);
 
   return (
     <div className="max-w-[1100px] space-y-6">

@@ -6,7 +6,6 @@ import {
   ChevronDown,
   ChevronUp,
   Eye,
-  Filter,
   Lock,
   Shield,
   XCircle,

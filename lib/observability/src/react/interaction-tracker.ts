@@ -2,7 +2,7 @@ import type { MetricCollector } from '../collector.js';
 
 let trackerInitialized = false;
 
-export function initInteractionTracker(collector: MetricCollector, appSlug: string) {
+export function initInteractionTracker(collector: MetricCollector, _appSlug: string) {
   if (trackerInitialized || typeof window === 'undefined') return;
   trackerInitialized = true;
 

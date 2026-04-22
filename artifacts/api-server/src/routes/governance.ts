@@ -114,7 +114,7 @@ const createCostEventSchema = z.object({
 
 const router: IRouter = Router();
 
-function isAdmin(user?: AuthenticatedUser): boolean {
+function _isAdmin(user?: AuthenticatedUser): boolean {
   if (!user) return false;
   return user.roles.includes('super_admin') || user.roles.includes('admin');
 }
@@ -154,7 +154,7 @@ router.get(
 router.get('/policies/:id', authMiddleware(), async (req: Request, res: Response) => {
   try {
     const id = parseInt(String(req.params.id), 10);
-    if (isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
+    if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
     const [row] = await db
       .select()
       .from(alloyLegacyPoliciesTable)
@@ -213,7 +213,7 @@ router.patch(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
       const { name, description, rules, isActive, priority, scope } = req.body;
       const updates: Record<string, unknown> = { updatedAt: new Date() };
       if (name !== undefined) updates.name = name;
@@ -251,7 +251,7 @@ router.delete(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
       const [row] = await db
         .delete(alloyLegacyPoliciesTable)
         .where(eq(alloyLegacyPoliciesTable.id, id))
@@ -358,7 +358,7 @@ router.patch(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid ID');
       const { isAllowed, isDefault, maxCostPerCall, priority, taskCategories } = req.body;
       const updates: Record<string, unknown> = { updatedAt: new Date() };
       if (isAllowed !== undefined) updates.isAllowed = isAllowed;
@@ -652,7 +652,7 @@ router.patch(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid incident ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid incident ID');
       const { resolution } = req.body;
       const [row] = await db
         .update(governanceIncidentsTable)

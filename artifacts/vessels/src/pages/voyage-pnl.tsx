@@ -5,10 +5,8 @@ import {
   Activity,
   AlertTriangle,
   Anchor,
-  BarChart3,
   Calculator,
   CheckCircle2,
-  ChevronDown,
   ChevronRight,
   Clock,
   DollarSign,
@@ -27,8 +25,6 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -680,7 +676,7 @@ function VoyagePnLCard({
 export default function VoyagePnL() {
   const totalRevenue = VOYAGES.reduce((s, v) => s + v.scenarios.base.grossRevenue, 0);
   const totalNet = VOYAGES.reduce((s, v) => s + v.scenarios.base.netRevenue, 0);
-  const avgMargin = VOYAGES.reduce((s, v) => s + v.scenarios.base.margin, 0) / VOYAGES.length;
+  const _avgMargin = VOYAGES.reduce((s, v) => s + v.scenarios.base.margin, 0) / VOYAGES.length;
   const lossCount = VOYAGES.filter((v) => v.scenarios.pessimistic.netRevenue < 0).length;
 
   const {

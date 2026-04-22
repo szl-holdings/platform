@@ -8,7 +8,6 @@ import {
   Info,
   Lock,
   Shield,
-  TrendingUp,
 } from 'lucide-react';
 
 const ENVIRONMENT_LABELS = [

@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import React from 'react';
+import type React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 export type ProvenanceStatus = 'live' | 'cached' | 'fallback' | 'loading';
@@ -22,11 +22,11 @@ export function ProvenanceChip({ status, label, lastUpdated }: Props) {
   const text = label ?? defaultLabel;
 
   return (
-    <View style={[styles.chip, { borderColor: color + '40', backgroundColor: color + '12' }]}>
+    <View style={[styles.chip, { borderColor: `${color}40`, backgroundColor: `${color}12` }]}>
       <Feather name={icon} size={9} color={color} />
       <Text style={[styles.label, { color }]}>{text}</Text>
       {lastUpdated && (
-        <Text style={[styles.updated, { color: color + 'aa' }]}>{lastUpdated}</Text>
+        <Text style={[styles.updated, { color: `${color}aa` }]}>{lastUpdated}</Text>
       )}
     </View>
   );

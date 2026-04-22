@@ -7,7 +7,6 @@ import {
   handleRouteError,
   sendBadRequest,
   sendCreated,
-  sendError,
   sendNoContent,
   sendNotFound,
   sendSuccess,

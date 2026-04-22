@@ -14,7 +14,11 @@ export interface PrivateAppGuardProps {
 // demo mode without prompting again. The PIN is never embedded in the URL or
 // the client bundle — it is entered via the modal and validated server-side.
 const DEMO_TOKEN_KEY = 'szl-demo-token';
-const DEMO_ALLOWED = import.meta.env.DEV || import.meta.env.VITE_DEMO_ALLOWED === 'true';
+const DEMO_ALLOWED =
+  ((import.meta as unknown as { env?: Record<string, string | boolean | undefined> }).env?.DEV ===
+    true) ||
+  ((import.meta as unknown as { env?: Record<string, string | boolean | undefined> }).env
+    ?.VITE_DEMO_ALLOWED === 'true');
 
 function isDemoActive(): boolean {
   if (!DEMO_ALLOWED) return false;
@@ -131,7 +135,6 @@ function PinModal({
           value={pin}
           onChange={(e) => setPin(e.target.value)}
           placeholder="Access code"
-          autoFocus
           style={{
             width: '100%',
             padding: '0.625rem 0.875rem',

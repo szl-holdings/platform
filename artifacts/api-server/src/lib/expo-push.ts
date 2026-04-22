@@ -8,7 +8,7 @@ import {
   scheduledNotificationsTable,
   userSettingsTable,
 } from '@szl-holdings/db';
-import { and, eq, inArray, isNull, lt, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, lt, } from 'drizzle-orm';
 import {
   Expo,
   type ExpoPushMessage,

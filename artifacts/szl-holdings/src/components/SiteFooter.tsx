@@ -1,4 +1,4 @@
-import { brand, copyrightLine, copyrightLineShort } from '@szl-holdings/brand-registry';
+import { brand, copyrightLineShort } from '@szl-holdings/brand-registry';
 import { NewsletterSubscribe } from '@szl-holdings/shared-ui/newsletter-subscribe';
 import { Link } from 'wouter';
 

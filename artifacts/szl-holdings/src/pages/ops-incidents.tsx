@@ -3,9 +3,7 @@ import {
   BookOpen,
   CheckCircle,
   ChevronDown,
-  ChevronUp,
   Clock,
-  Edit3,
   FileText,
   MessageSquare,
   Plus,
@@ -44,7 +42,7 @@ interface Incident {
   updated_at: string;
 }
 
-const STATUS_FLOW: IncidentStatus[] = [
+const _STATUS_FLOW: IncidentStatus[] = [
   'open',
   'investigating',
   'mitigating',

@@ -2,14 +2,11 @@ import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import {
   AlertTriangle,
-  BarChart3,
-  Brain,
   CheckCircle,
   Loader2,
   MessageSquare,
   Play,
   Sparkles,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';

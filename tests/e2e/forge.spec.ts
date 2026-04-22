@@ -245,10 +245,10 @@ test.describe('Forge — Submit Execution Mutation E2E', () => {
     await expect(page.getByTestId('text-forge-submit-success')).toContainText('queued');
 
     expect(captured).not.toBeNull();
-    expect(captured!.method).toBe('POST');
-    expect(captured!.url).toContain('/api/forge/submit');
-    expect(captured!.contentType).toContain('application/json');
-    expect(captured!.body).toMatchObject({
+    expect(captured?.method).toBe('POST');
+    expect(captured?.url).toContain('/api/forge/submit');
+    expect(captured?.contentType).toContain('application/json');
+    expect(captured?.body).toMatchObject({
       agentSlug: 'legal-risk-v3',
       envTier: 'staging',
       input: { matterId: 'mat_001', task: 'risk-scan' },

@@ -28,14 +28,14 @@ describe('verifyInternalHeader under a mounted router (GAP-016 reviewer fix)', (
   let prevScoped: string | undefined;
 
   beforeEach(() => {
-    prevScoped = process.env['INTERNAL_SERVICE_TOKENS'];
-    process.env['INTERNAL_SERVICE_TOKENS'] = SCOPED;
+    prevScoped = process.env.INTERNAL_SERVICE_TOKENS;
+    process.env.INTERNAL_SERVICE_TOKENS = SCOPED;
     resetInternalTokenRegistry();
   });
 
   afterEach(() => {
-    if (prevScoped === undefined) delete process.env['INTERNAL_SERVICE_TOKENS'];
-    else process.env['INTERNAL_SERVICE_TOKENS'] = prevScoped;
+    if (prevScoped === undefined) delete process.env.INTERNAL_SERVICE_TOKENS;
+    else process.env.INTERNAL_SERVICE_TOKENS = prevScoped;
     resetInternalTokenRegistry();
   });
 

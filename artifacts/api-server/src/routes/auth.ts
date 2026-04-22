@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { bodyShape } from "@szl-holdings/contracts/common";
 import { db, usersTable, sessionsTable, rolesTable, userRolesTable, organizationsTable, orgMembersTable, mfaSecretsTable, toCanonicalRole, type RoleName } from "@szl-holdings/db";
 import { eq, desc, and, inArray } from "drizzle-orm";
-import { randomBytes, pbkdf2Sync, timingSafeEqual, createCipheriv, createDecipheriv } from "crypto";
+import { randomBytes, pbkdf2Sync, timingSafeEqual, createCipheriv, createDecipheriv } from "node:crypto";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendForbidden, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";
@@ -10,7 +10,6 @@ import { logger } from "../lib/logger";
 import { createAuthService } from "@szl-holdings/auth";
 import { issueWsTicket } from "../lib/websocket.js";
 import { getSessionToken, getSessionUser } from "../lib/auth";
-import { hashIp } from "@szl-holdings/audit";
 import {
   createSessionWithRefresh,
   rotateRefreshToken,
@@ -43,7 +42,7 @@ const MFA_CHALLENGE_TTL_MS = 5 * 60 * 1000;
 const MFA_REDIS_PREFIX = "mfac:";
 
 async function createMfaChallengeToken(userId: number): Promise<string> {
-  const token = "mfac_" + randomBytes(24).toString("hex");
+  const token = `mfac_${randomBytes(24).toString("hex")}`;
   const challenge: MfaChallenge = { userId, expiresAt: Date.now() + MFA_CHALLENGE_TTL_MS };
   // Dual-write: in-memory first (synchronous, always succeeds) then Redis
   _pendingMfaChallengesFallback.set(token, challenge);
@@ -97,12 +96,12 @@ function getMfaEncryptionKey(): Buffer | null {
 
 function encryptMfaSecret(plaintext: string): string {
   const key = getMfaEncryptionKey();
-  if (!key) return "plain:" + plaintext;
+  if (!key) return `plain:${plaintext}`;
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", key, iv);
   const encrypted = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
   const authTag = cipher.getAuthTag();
-  return "enc:" + iv.toString("hex") + ":" + authTag.toString("hex") + ":" + encrypted.toString("hex");
+  return `enc:${iv.toString("hex")}:${authTag.toString("hex")}:${encrypted.toString("hex")}`;
 }
 
 function decryptMfaSecret(stored: string): string {
@@ -157,7 +156,7 @@ const MFA_SETUP_TTL_MS = 15 * 60 * 1000;
 const MFA_SETUP_REDIS_PREFIX = "mfasetup:";
 
 async function createMfaSetupToken(userId: number): Promise<string> {
-  const token = "mfasetup_" + randomBytes(24).toString("hex");
+  const token = `mfasetup_${randomBytes(24).toString("hex")}`;
   const challenge: MfaSetupChallenge = { userId, expiresAt: Date.now() + MFA_SETUP_TTL_MS };
   _pendingMfaSetupFallback.set(token, challenge);
   await redisSet(MFA_SETUP_REDIS_PREFIX + token, challenge, MFA_SETUP_TTL_MS);
@@ -284,7 +283,7 @@ router.get("/auth/providers", async (_req, res) => {
 
 router.get("/auth/me", authMiddleware(), async (req, res) => {
   try {
-    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.id));
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.user?.id));
     if (!user) {
       sendNotFound(res, "User");
       return;
@@ -298,14 +297,14 @@ router.get("/auth/me", authMiddleware(), async (req, res) => {
       })
       .from(orgMembersTable)
       .innerJoin(organizationsTable, eq(orgMembersTable.orgId, organizationsTable.id))
-      .where(eq(orgMembersTable.userId, req.user!.id));
+      .where(eq(orgMembersTable.userId, req.user?.id));
 
     sendSuccess(res, {
       id: user.id,
       displayName: user.displayName,
       email: user.email,
       avatarUrl: user.avatarUrl,
-      roles: req.user!.roles,
+      roles: req.user?.roles,
       orgs: orgRows,
     });
   } catch (err) {
@@ -317,7 +316,7 @@ router.get("/auth/me", authMiddleware(), async (req, res) => {
 router.post("/auth/sessions", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
   try {
     const created = await createSessionWithRefresh({
-      userId: req.user!.id,
+      userId: req.user?.id,
       ipAddress: req.ip ?? null,
       userAgent: req.headers["user-agent"] ?? null,
       reason: "manual_session_create",
@@ -396,7 +395,7 @@ router.delete("/auth/sessions/current", validateBody(bodyShape({})), authMiddlew
     await db.delete(sessionsTable).where(eq(sessionsTable.token, token));
     await logActivity(req, "delete", "session", String(session.id));
     await writeAuditEvent({
-      userId: req.user!.id,
+      userId: req.user?.id,
       action: "session.invalidate",
       entityType: "session",
       entityId: String(session.id),
@@ -424,8 +423,8 @@ router.delete("/auth/sessions/:id", validateBody(bodyShape({})), authMiddleware(
       return;
     }
 
-    const isOwner = session.userId === req.user!.id;
-    const isPrivileged = req.user!.roles.includes("super_admin") || req.user!.roles.includes("ops");
+    const isOwner = session.userId === req.user?.id;
+    const isPrivileged = req.user?.roles.includes("super_admin") || req.user?.roles.includes("ops");
     if (!isOwner && !isPrivileged) {
       sendForbidden(res);
       return;
@@ -434,7 +433,7 @@ router.delete("/auth/sessions/:id", validateBody(bodyShape({})), authMiddleware(
     await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
     await logActivity(req, "delete", "session", String(session.id));
     await writeAuditEvent({
-      userId: req.user!.id,
+      userId: req.user?.id,
       action: "session.invalidate",
       entityType: "session",
       entityId: String(session.id),
@@ -443,7 +442,7 @@ router.delete("/auth/sessions/:id", validateBody(bodyShape({})), authMiddleware(
       newValues: {
         reason: "session_delete_by_id",
         targetUserId: session.userId,
-        invokedBy: req.user!.id,
+        invokedBy: req.user?.id,
       },
     });
     sendNoContent(res);
@@ -454,7 +453,7 @@ router.delete("/auth/sessions/:id", validateBody(bodyShape({})), authMiddleware(
 });
 
 router.get("/auth/my-roles", authMiddleware(), async (req, res) => {
-  res.json({ roles: req.user!.roles ?? [] });
+  res.json({ roles: req.user?.roles ?? [] });
 });
 
 router.get("/auth/roles", authMiddleware(), requireRole("ops", "analyst"), async (_req, res) => {
@@ -659,7 +658,7 @@ router.post("/auth/login-password", loginLimiter, validateBody(loginPasswordSche
       .limit(1);
 
     const invalidMsg = "Invalid email or password.";
-    if (!user || !user.passwordHash) {
+    if (!user?.passwordHash) {
       sendError(res, invalidMsg, 401, "INVALID_CREDENTIALS");
       return;
     }
@@ -731,7 +730,7 @@ const mfaSetupSchema = z.object({});
 
 router.post("/auth/mfa/setup", authMiddleware(), validateBody(mfaSetupSchema), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
 
     const [existing] = await db
       .select()
@@ -778,7 +777,7 @@ const mfaEnableSchema = z.object({
 
 router.post("/auth/mfa/enable", authMiddleware(), validateBody(mfaEnableSchema), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const { code } = req.body as z.infer<typeof mfaEnableSchema>;
 
     const [record] = await db
@@ -858,7 +857,7 @@ router.post("/auth/mfa/challenge", loginLimiter, validateBody(mfaChallengeSchema
     }
 
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-    if (!user || !user.isActive) {
+    if (!user?.isActive) {
       sendError(res, "Account is disabled.", 403, "ACCOUNT_DISABLED");
       return;
     }
@@ -900,7 +899,7 @@ const mfaDisableSchema = z.object({
 
 router.delete("/auth/mfa", authMiddleware(), validateBody(mfaDisableSchema), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const { code } = req.body as z.infer<typeof mfaDisableSchema>;
 
     const [record] = await db
@@ -1051,7 +1050,7 @@ router.post("/auth/mfa/enable-required", loginLimiter, validateBody(mfaEnableReq
     await consumeMfaSetupToken(mfa_setup_token);
 
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-    if (!user || !user.isActive) {
+    if (!user?.isActive) {
       sendError(res, "Account is disabled.", 403, "ACCOUNT_DISABLED");
       return;
     }
@@ -1090,7 +1089,7 @@ router.post("/auth/mfa/enable-required", loginLimiter, validateBody(mfaEnableReq
 
 router.get("/auth/mfa/status", authMiddleware(), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const [record] = await db
       .select({ enabled: mfaSecretsTable.enabled, enabledAt: mfaSecretsTable.enabledAt })
       .from(mfaSecretsTable)

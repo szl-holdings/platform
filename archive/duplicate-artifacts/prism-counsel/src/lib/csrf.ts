@@ -1,6 +1,6 @@
 import { setCsrfTokenGetter } from '@szl-holdings/api-client-react';
 
-const CSRF_COOKIE = 'csrf_token';
+const _CSRF_COOKIE = 'csrf_token';
 
 function readCookie(): string | null {
   if (typeof document === 'undefined') return null;

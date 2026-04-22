@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
-import { apiFetch, apiFetchRaw } from '@/lib/apiClient';
+import { apiFetchRaw } from '@/lib/apiClient';
 
 interface AgentDetail {
   id: string | number;
@@ -152,7 +152,7 @@ export default function AgentDetailScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
-        colors={[`${cfg!.color}10`, 'transparent']}
+        colors={[`${cfg?.color}10`, 'transparent']}
         style={[styles.headerGradient, { height: topPad + 140 }]}
       />
 
@@ -186,8 +186,8 @@ export default function AgentDetailScreen() {
             { backgroundColor: colors.card, borderColor: colors.borderSubtle },
           ]}
         >
-          <View style={[styles.agentIconLarge, { backgroundColor: `${cfg!.color}15` }]}>
-            <Feather name="cpu" size={28} color={cfg!.color} />
+          <View style={[styles.agentIconLarge, { backgroundColor: `${cfg?.color}15` }]}>
+            <Feather name="cpu" size={28} color={cfg?.color} />
           </View>
           <View style={styles.agentHeaderText}>
             <Text style={[styles.agentName, { color: colors.cream }]}>{agent.name}</Text>
@@ -196,11 +196,11 @@ export default function AgentDetailScreen() {
           <View
             style={[
               styles.statusBadge,
-              { backgroundColor: `${cfg!.color}15`, borderColor: `${cfg!.color}30` },
+              { backgroundColor: `${cfg?.color}15`, borderColor: `${cfg?.color}30` },
             ]}
           >
-            <View style={[styles.statusDot, { backgroundColor: cfg!.color }]} />
-            <Text style={[styles.statusText, { color: cfg!.color }]}>{cfg!.label}</Text>
+            <View style={[styles.statusDot, { backgroundColor: cfg?.color }]} />
+            <Text style={[styles.statusText, { color: cfg?.color }]}>{cfg?.label}</Text>
           </View>
         </View>
 

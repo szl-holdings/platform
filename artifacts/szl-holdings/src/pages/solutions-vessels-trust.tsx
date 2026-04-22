@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Anchor, Shield, Eye, FileCheck2, Lock, ArrowRight, CheckCircle, Radio, Cloud, MapPin } from "lucide-react";
+import { Anchor, Shield, Eye, FileCheck2, Lock, ArrowRight, Radio, Cloud, } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";

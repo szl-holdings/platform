@@ -15,8 +15,7 @@
  *   - DELETE /vessels/alert-rules/:id      — delete rule: success (204) + 404 when not found
  */
 
-import type { NextFunction, Request, Response } from 'express';
-import express from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -179,7 +178,7 @@ vi.mock('../../middlewares/auth', () => ({
     },
   parseIdParam: (id: string) => {
     const n = parseInt(id, 10);
-    if (!isFinite(n) || n <= 0) {
+    if (!Number.isFinite(n) || n <= 0) {
       throw new InvalidIdError();
     }
     return n;

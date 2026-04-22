@@ -60,7 +60,7 @@ export default function PrivilegeControls() {
       } else {
         setCheckError(json.error ?? 'Policy check failed');
       }
-    } catch (err) {
+    } catch (_err) {
       setCheckError('Could not reach policy engine — API server may be offline');
     } finally {
       setChecking(false);

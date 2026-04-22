@@ -202,9 +202,9 @@ function parseAdvisorMatches(output: unknown, input: CarlotaJoTaskRoutingInput):
   if (
     output &&
     typeof output === 'object' &&
-    Array.isArray((output as Record<string, unknown>)['advisorMatches'])
+    Array.isArray((output as Record<string, unknown>).advisorMatches)
   ) {
-    return (output as Record<string, unknown>)['advisorMatches'] as AdvisorMatch[];
+    return (output as Record<string, unknown>).advisorMatches as AdvisorMatch[];
   }
   return [
     {

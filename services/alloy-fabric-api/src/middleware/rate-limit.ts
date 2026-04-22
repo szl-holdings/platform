@@ -5,7 +5,7 @@ interface RateLimitState {
   windowStart: number;
 }
 
-const MAX_REQUESTS_PER_WINDOW = Number(process.env['AEF_RATE_LIMIT_RPM'] ?? 60);
+const MAX_REQUESTS_PER_WINDOW = Number(process.env.AEF_RATE_LIMIT_RPM ?? 60);
 const WINDOW_MS = 60_000;
 
 const state = new Map<string, RateLimitState>();

@@ -1,6 +1,5 @@
 import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
 import {
-  AlertTriangle,
   ArrowRight,
   Building2,
   CheckCircle,
@@ -11,7 +10,6 @@ import {
   Settings2,
   Shield,
   Star,
-  User,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';

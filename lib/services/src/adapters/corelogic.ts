@@ -67,8 +67,8 @@ export class CoreLogicAdapter extends ServiceAdapter {
     "CoreLogic property data platform — AVM, ownership records, tax assessment, foreclosure status, flood zones, and comprehensive property history. Enterprise API. Falls back to demo mode when CORELOGIC_API_KEY is absent.";
   readonly requiredEnvVars = ["CORELOGIC_API_KEY", "CORELOGIC_CLIENT_ID"];
 
-  private get apiKey(): string | undefined { return process.env["CORELOGIC_API_KEY"]; }
-  private get clientId(): string | undefined { return process.env["CORELOGIC_CLIENT_ID"]; }
+  private get apiKey(): string | undefined { return process.env.CORELOGIC_API_KEY; }
+  private get clientId(): string | undefined { return process.env.CORELOGIC_CLIENT_ID; }
 
   private readonly BASE_URL = "https://api.corelogic.com/property/v2";
 
@@ -95,26 +95,26 @@ export class CoreLogicAdapter extends ServiceAdapter {
     if (this.isDemoMode) return MOCK_PROPERTIES;
     const data = await this.clRequest<{ properties: Array<Record<string, unknown>> }>("/properties", { address, city, state });
     return (data.properties ?? []).map(p => ({
-      apn: String(p["apn"] ?? ""), fipsCode: String(p["fipsCode"] ?? ""),
-      address: String(p["address"] ?? ""), city: String(p["city"] ?? ""),
-      state: String(p["state"] ?? ""), zipCode: String(p["zipCode"] ?? ""),
-      latitude: Number(p["latitude"] ?? 0), longitude: Number(p["longitude"] ?? 0),
-      ownerName: String(p["ownerName"] ?? ""), ownerAddress: p["ownerAddress"] ? String(p["ownerAddress"]) : null,
-      landUse: String(p["landUse"] ?? ""), propertyType: String(p["propertyType"] ?? ""),
-      bedrooms: p["bedrooms"] ? Number(p["bedrooms"]) : null,
-      bathrooms: p["bathrooms"] ? Number(p["bathrooms"]) : null,
-      livingArea: p["livingArea"] ? Number(p["livingArea"]) : null,
-      lotSize: p["lotSize"] ? Number(p["lotSize"]) : null,
-      yearBuilt: p["yearBuilt"] ? Number(p["yearBuilt"]) : null,
-      assessedValue: p["assessedValue"] ? Number(p["assessedValue"]) : null,
-      marketValue: p["marketValue"] ? Number(p["marketValue"]) : null,
-      assessedYear: p["assessedYear"] ? Number(p["assessedYear"]) : null,
-      lastSaleDate: p["lastSaleDate"] ? String(p["lastSaleDate"]) : null,
-      lastSalePrice: p["lastSalePrice"] ? Number(p["lastSalePrice"]) : null,
-      mortgageAmount: p["mortgageAmount"] ? Number(p["mortgageAmount"]) : null,
-      mortgageLender: p["mortgageLender"] ? String(p["mortgageLender"]) : null,
-      foreclosureStatus: p["foreclosureStatus"] ? String(p["foreclosureStatus"]) : null,
-      avm: p["avm"] ? Number(p["avm"]) : null,
+      apn: String(p.apn ?? ""), fipsCode: String(p.fipsCode ?? ""),
+      address: String(p.address ?? ""), city: String(p.city ?? ""),
+      state: String(p.state ?? ""), zipCode: String(p.zipCode ?? ""),
+      latitude: Number(p.latitude ?? 0), longitude: Number(p.longitude ?? 0),
+      ownerName: String(p.ownerName ?? ""), ownerAddress: p.ownerAddress ? String(p.ownerAddress) : null,
+      landUse: String(p.landUse ?? ""), propertyType: String(p.propertyType ?? ""),
+      bedrooms: p.bedrooms ? Number(p.bedrooms) : null,
+      bathrooms: p.bathrooms ? Number(p.bathrooms) : null,
+      livingArea: p.livingArea ? Number(p.livingArea) : null,
+      lotSize: p.lotSize ? Number(p.lotSize) : null,
+      yearBuilt: p.yearBuilt ? Number(p.yearBuilt) : null,
+      assessedValue: p.assessedValue ? Number(p.assessedValue) : null,
+      marketValue: p.marketValue ? Number(p.marketValue) : null,
+      assessedYear: p.assessedYear ? Number(p.assessedYear) : null,
+      lastSaleDate: p.lastSaleDate ? String(p.lastSaleDate) : null,
+      lastSalePrice: p.lastSalePrice ? Number(p.lastSalePrice) : null,
+      mortgageAmount: p.mortgageAmount ? Number(p.mortgageAmount) : null,
+      mortgageLender: p.mortgageLender ? String(p.mortgageLender) : null,
+      foreclosureStatus: p.foreclosureStatus ? String(p.foreclosureStatus) : null,
+      avm: p.avm ? Number(p.avm) : null,
     }));
   }
 
@@ -125,9 +125,9 @@ export class CoreLogicAdapter extends ServiceAdapter {
     const data = await this.clRequest<{ floodZone: Record<string, unknown> }>("/flood-zone", { address, city, state, zipCode: zip });
     const fz = data.floodZone;
     return {
-      address, floodZone: String(fz["zone"] ?? ""), floodZoneDescription: String(fz["description"] ?? ""),
-      panelNumber: String(fz["panelNumber"] ?? ""), effectiveDate: String(fz["effectiveDate"] ?? ""),
-      inSpecialFloodHazardArea: Boolean(fz["inSFHA"]),
+      address, floodZone: String(fz.zone ?? ""), floodZoneDescription: String(fz.description ?? ""),
+      panelNumber: String(fz.panelNumber ?? ""), effectiveDate: String(fz.effectiveDate ?? ""),
+      inSpecialFloodHazardArea: Boolean(fz.inSFHA),
     };
   }
 

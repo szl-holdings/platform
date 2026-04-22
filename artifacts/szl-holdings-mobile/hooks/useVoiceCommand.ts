@@ -56,7 +56,7 @@ function routeToDomain(query: string): WorkspaceDomain {
 }
 
 function generateResponse(
-  query: string,
+  _query: string,
   domain: WorkspaceDomain,
 ): { response: string; cards: VoiceResultCard[] } {
   const domainResponses: Record<WorkspaceDomain, { response: string; cards: VoiceResultCard[] }> = {

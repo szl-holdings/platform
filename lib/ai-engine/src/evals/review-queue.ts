@@ -107,12 +107,7 @@ export function enqueueForReview(input: EnqueueReviewInput): ReviewQueueItem {
   if (queue.length > MAX_QUEUE_SIZE) queue.length = MAX_QUEUE_SIZE;
 
   if (reviewQueueSink?.onEnqueue) {
-    reviewQueueSink.onEnqueue(item).catch((err) => {
-      console.error(
-        '[ai-engine/review-queue] onEnqueue sink failed for reviewId=%s: %s',
-        item.reviewId,
-        err instanceof Error ? err.message : String(err),
-      );
+    reviewQueueSink.onEnqueue(item).catch((_err) => {
     });
   }
 
@@ -163,12 +158,7 @@ export function recordReviewDecision(input: ReviewDecisionInput): ReviewQueueIte
   item.status = input.verdict === 'escalated' ? 'escalated' : 'resolved';
 
   if (reviewQueueSink?.onDecision) {
-    reviewQueueSink.onDecision(item).catch((err) => {
-      console.error(
-        '[ai-engine/review-queue] onDecision sink failed for reviewId=%s: %s',
-        item.reviewId,
-        err instanceof Error ? err.message : String(err),
-      );
+    reviewQueueSink.onDecision(item).catch((_err) => {
     });
   }
 
@@ -181,12 +171,7 @@ export function markInReview(reviewId: string): boolean {
   item.status = 'in_review';
 
   if (reviewQueueSink?.onClaim) {
-    reviewQueueSink.onClaim(reviewId).catch((err) => {
-      console.error(
-        '[ai-engine/review-queue] onClaim sink failed for reviewId=%s: %s',
-        reviewId,
-        err instanceof Error ? err.message : String(err),
-      );
+    reviewQueueSink.onClaim(reviewId).catch((_err) => {
     });
   }
 

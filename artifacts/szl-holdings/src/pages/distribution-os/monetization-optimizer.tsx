@@ -9,7 +9,6 @@ import {
   Megaphone,
   Package,
   Target,
-  TrendingUp,
   Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -283,7 +282,7 @@ export default function MonetizationOptimizerPage() {
               style={{
                 padding: '0.375rem 0.875rem',
                 borderRadius: '6px',
-                border: `1px solid ${activeTab === tab ? DS.accent + '40' : DS.border}`,
+                border: `1px solid ${activeTab === tab ? `${DS.accent}40` : DS.border}`,
                 background: activeTab === tab ? `${DS.accent}10` : 'transparent',
                 color: activeTab === tab ? DS.accent : DS.text.tertiary,
                 fontSize: '0.8125rem',
@@ -330,7 +329,7 @@ export default function MonetizationOptimizerPage() {
                     style={{
                       padding: '0.875rem',
                       background: DS.elevated,
-                      border: `1px solid ${rec.priority === 'high' ? DS.accent + '20' : DS.border}`,
+                      border: `1px solid ${rec.priority === 'high' ? `${DS.accent}20` : DS.border}`,
                       borderRadius: '8px',
                     }}
                   >

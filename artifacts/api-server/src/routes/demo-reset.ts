@@ -1,8 +1,7 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { defaultMemoryStore } from '@workspace/memory-fabric/store';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { type IRouter, type NextFunction, type Request, type Response, Router } from 'express';
-import { z } from 'zod';
 import { handleRouteError, sendError, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { guardSeedInProduction, isProductionEnvironment } from '../lib/seed-guard';
@@ -26,7 +25,7 @@ function isDemoModeEnabled(): boolean {
   // Only available in demo / staging environments. DEMO_MODE=true must be set
   // explicitly. Production is also blocked by the seed-guard regardless.
   if (isProductionEnvironment()) return false;
-  const flag = (process.env['DEMO_MODE'] ?? '').trim().toLowerCase();
+  const flag = (process.env.DEMO_MODE ?? '').trim().toLowerCase();
   return flag === 'true' || flag === '1' || flag === 'yes';
 }
 

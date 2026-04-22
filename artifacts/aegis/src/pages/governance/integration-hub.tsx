@@ -1,10 +1,7 @@
 import {
-  AlertTriangle,
   Calendar,
   CheckCircle2,
   ChevronRight,
-  Clock,
-  Database,
   FileText,
   Globe,
   HardDrive,

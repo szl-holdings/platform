@@ -1,6 +1,5 @@
 import { RunManager } from './run-manager.js';
-import type { StepContext, StepResult, WorkflowStep } from './types.js';
-import { RunConfigSchema } from './types.js';
+import { type StepContext, type StepResult, type WorkflowStep, RunConfigSchema } from './types.js';
 
 export const ECHO_STEP: WorkflowStep = {
   id: 'echo',
@@ -8,7 +7,7 @@ export const ECHO_STEP: WorkflowStep = {
   async execute(ctx: StepContext): Promise<StepResult> {
     const t0 = Date.now();
     const output = {
-      echo: ctx.metadata['input'] ?? 'no input provided',
+      echo: ctx.metadata.input ?? 'no input provided',
       stepIndex: ctx.stepIndex,
       runId: ctx.runId,
     };

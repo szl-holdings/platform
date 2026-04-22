@@ -16,8 +16,8 @@ import { evalsRouter } from "./routes/evals.js";
 import { openaiCompatRouter } from "./routes/openai-compat.js";
 import { openApiSpec } from "./openapi/spec.js";
 
-const PORT = Number(process.env["PORT"] ?? 8766);
-const BASE_PATH = process.env["BASE_PATH"] ?? "/alloy-embedding-api";
+const PORT = Number(process.env.PORT ?? 8766);
+const BASE_PATH = process.env.BASE_PATH ?? "/alloy-embedding-api";
 
 const app: Application = express();
 

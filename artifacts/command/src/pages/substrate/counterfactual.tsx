@@ -6,7 +6,6 @@ import {
   GitBranch,
   Play,
   RefreshCw,
-  XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 import { MOCK_RUNS } from './mock-data';
@@ -245,7 +244,7 @@ export function CounterfactualViewer() {
   const [policyProfile, setPolicyProfile] = useState('');
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<CounterfactualDiff | null>(null);
-  const [gatewayUsed, setGatewayUsed] = useState(false);
+  const [_gatewayUsed, setGatewayUsed] = useState(false);
   const client = useSubstrateClient();
 
   const run = MOCK_RUNS.find((r) => r.id === selectedRun);

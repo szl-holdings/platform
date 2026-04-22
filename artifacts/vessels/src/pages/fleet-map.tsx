@@ -9,22 +9,13 @@ import { useRealtimeChannel } from '@szl-holdings/shared-ui/use-realtime-channel
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  Activity,
-  AlertTriangle,
-  Anchor,
   ChevronRight,
-  Clock,
   Filter,
-  Layers,
   MapPin,
-  Navigation,
   Pause,
   Play,
   Radio,
   Ship,
-  TrendingDown,
-  TrendingUp,
-  Wrench,
   X,
 } from 'lucide-react';
 import type * as mapboxgl from 'mapbox-gl';
@@ -415,10 +406,10 @@ function MapboxFleetMap({
   const { data: trackData } = useStandardQuery<TrackHistoryResponse>({
     queryKey: ['vessel-track', selectedVessel?.id],
     queryFn: async (): Promise<TrackHistoryResponse> => {
-      const res = await fetch(`/api/vessels/track/${selectedVessel!.id}`, {
+      const res = await fetch(`/api/vessels/track/${selectedVessel?.id}`, {
         credentials: 'include',
       });
-      if (!res.ok) return { data: { vesselId: selectedVessel!.id, track: [] } };
+      if (!res.ok) return { data: { vesselId: selectedVessel?.id ?? 0, track: [] } };
       return res.json() as Promise<TrackHistoryResponse>;
     },
     enabled: !!selectedVessel,
@@ -553,8 +544,7 @@ function MapboxFleetMap({
           }
         });
       })
-      .catch((err: unknown) => {
-        console.error('Map library failed to load:', err);
+      .catch((_err: unknown) => {
         if (!destroyed) {
           setMapError('load-failed');
           toast.error('Failed to load the map. Please refresh the page.');
@@ -768,7 +758,7 @@ function MapboxFleetMap({
       if (!showAis) return;
 
       aisVessels.forEach((v) => {
-        if (!v.lat || !v.lon || isNaN(v.lat) || isNaN(v.lon)) return;
+        if (!v.lat || !v.lon || Number.isNaN(v.lat) || Number.isNaN(v.lon)) return;
 
         const color = navStatusColor(v.navStatus);
         const el = document.createElement('div');

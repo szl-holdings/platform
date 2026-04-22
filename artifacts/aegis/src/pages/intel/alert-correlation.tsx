@@ -1,11 +1,8 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
   AlertTriangle,
   Brain,
-  CheckCircle2,
   Clock,
-  GitBranch,
   Link2,
   Zap,
 } from 'lucide-react';
@@ -135,7 +132,7 @@ export default function AlertCorrelation() {
 
             <div className="relative ml-4 mb-4">
               <div className="absolute left-3 top-0 bottom-0 w-px bg-border" />
-              {group.alerts.map((alert, i) => (
+              {group.alerts.map((alert, _i) => (
                 <div key={alert.id} className="relative pl-8 py-2">
                   <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-primary/20 border border-primary flex items-center justify-center">
                     <div className="w-1 h-1 rounded-full bg-primary" />

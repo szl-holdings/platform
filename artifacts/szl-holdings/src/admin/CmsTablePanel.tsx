@@ -2,7 +2,6 @@ import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, m } from 'framer-motion';
 import {
-  Activity,
   AlertCircle,
   BarChart3,
   Building2,
@@ -18,14 +17,11 @@ import {
   Save,
   Tag,
   Trash2,
-  TrendingUp,
-  Users,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { Article, ContactSubmission, HoldingsInquiry, Site, Venture } from './api';
-import { apiFetch } from './api';
+import { type Article, type ContactSubmission, type HoldingsInquiry, type Site, type Venture, apiFetch } from './api';
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 
@@ -96,7 +92,7 @@ function DashboardPanel() {
               <div
                 className={cn(
                   'w-8 h-8 rounded-lg flex items-center justify-center mb-3',
-                  s.color.replace('text-', 'bg-') + '/10',
+                  `${s.color.replace('text-', 'bg-')}/10`,
                 )}
               >
                 <Icon className={cn('w-4 h-4', s.color)} />

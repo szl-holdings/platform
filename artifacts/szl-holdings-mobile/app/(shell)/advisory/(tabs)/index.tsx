@@ -3,7 +3,7 @@ import { SkeletonLoader, useApiStatus } from '@szl-holdings/mobile-shared';
 import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
@@ -185,7 +185,7 @@ export default function DashboardScreen() {
   } = useQuery({
     queryKey: ['carlota-dashboard'],
     queryFn: async () => {
-      const res = await fetch(API_BASE + '/carlotajo/dashboard');
+      const res = await fetch(`${API_BASE}/carlotajo/dashboard`);
       if (!res.ok) throw new Error('fetch failed');
       const json = await res.json();
       return json.data ?? json;

@@ -11,25 +11,22 @@
  * Output: security/vuln-report.md
  */
 
-import { execSync } from 'child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { execSync } from 'node:child_process';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
 const OUTPUT_DIR = join(ROOT, 'security');
 const OUTPUT_FILE = join(OUTPUT_DIR, 'vuln-report.md');
 
-function fatal(msg) {
-  console.error(`[vuln-report] FATAL: ${msg}`);
+function fatal(_msg) {
   process.exit(1);
 }
 
 async function main() {
   mkdirSync(OUTPUT_DIR, { recursive: true });
-
-  console.log('[vuln-report] Running pnpm audit --json ...');
 
   let rawOutput;
   try {
@@ -64,10 +61,6 @@ async function main() {
   const moderate = vulnMeta.moderate ?? 0;
   const low = vulnMeta.low ?? 0;
   const total = critical + high + moderate + low;
-
-  console.log(
-    `[vuln-report] Scan complete: ${total} total findings (critical=${critical} high=${high} moderate=${moderate} low=${low})`,
-  );
 
   let report = '# Dependency Vulnerability Report\n\n';
   report += `**Generated:** ${generated} (pnpm audit)\n`;
@@ -138,10 +131,7 @@ async function main() {
   try {
     const rootPkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
     overrides = rootPkg.pnpm?.overrides ?? {};
-  } catch (e) {
-    console.warn(
-      `[vuln-report] WARN: Could not read pnpm.overrides from package.json: ${e.message}`,
-    );
+  } catch (_e) {
   }
 
   const overrideEntries = Object.entries(overrides);
@@ -161,17 +151,10 @@ async function main() {
   report += '_Re-run locally: `node scripts/qa/generate-vuln-report.js`_\n';
 
   writeFileSync(OUTPUT_FILE, report);
-  console.log(`[vuln-report] Written to ${OUTPUT_FILE}`);
 
   if (critical > 0 || high > 0) {
-    console.error(
-      `\n[vuln-report] ALERT: ${critical} critical and ${high} high severity vulnerabilities found.`,
-    );
-    console.error("[vuln-report] Action required: run 'pnpm update' to remediate where possible.");
     process.exit(1);
   }
-
-  console.log('[vuln-report] No high/critical vulnerabilities found. Scan passed.');
 }
 
 main().catch((err) => fatal(err.message));

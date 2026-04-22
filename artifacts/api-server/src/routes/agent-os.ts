@@ -1,6 +1,5 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { Router } from 'express';
-import { z } from 'zod';
 import { agentScheduler } from '../lib/agent-scheduler';
 import { sendError, sendSuccess } from '../lib/api-response';
 import { agentEventBus } from '../lib/event-bus';
@@ -101,7 +100,7 @@ router.get(
   (req, res) => {
     const { domain } = req.params;
     const { limit } = req.query;
-    const maxResults = limit ? parseInt(limit as string, 10) : 20;
+    const _maxResults = limit ? parseInt(limit as string, 10) : 20;
 
     const domainEntries = knowledgeStore.query({
       domain: domain as KnowledgeDomain,

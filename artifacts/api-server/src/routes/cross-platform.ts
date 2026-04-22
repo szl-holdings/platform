@@ -37,7 +37,7 @@ import {
 import { and, eq, gte, inArray, isNull, lte, or, type SQL } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
-import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
+import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
@@ -68,7 +68,7 @@ const PRODUCT_META: Record<
 // ────────────────────────────────────────────────────────────────────────────
 
 function domainFromTrace(metadata: Record<string, unknown>): string | null {
-  const d = metadata?.['domain'];
+  const d = metadata?.domain;
   return typeof d === 'string' ? d.toLowerCase() : null;
 }
 
@@ -106,10 +106,10 @@ function buildTenantFilter(orgSlug: string | null, base: TraceQueryFilter = {}):
 function filterByOrg(traces: TraceRecord[], orgSlug: string | null): TraceRecord[] {
   if (!orgSlug) return traces; // unauthenticated / demo mode: no restriction
 
-  const isProd = process.env['NODE_ENV'] === 'production';
+  const isProd = process.env.NODE_ENV === 'production';
 
   return traces.filter((t) => {
-    const traceOrg = t.metadata?.['orgSlug'];
+    const traceOrg = t.metadata?.orgSlug;
     if (typeof traceOrg === 'string') {
       return traceOrg === orgSlug; // tagged trace: strict org match
     }
@@ -121,9 +121,9 @@ function filterByOrg(traces: TraceRecord[], orgSlug: string | null): TraceRecord
   });
 }
 
-function parseTimeWindow(query: Record<string, unknown>): { after?: string; before?: string } {
-  const after = typeof query['after'] === 'string' ? query['after'] : undefined;
-  const before = typeof query['before'] === 'string' ? query['before'] : undefined;
+function _parseTimeWindow(query: Record<string, unknown>): { after?: string; before?: string } {
+  const after = typeof query.after === 'string' ? query.after : undefined;
+  const before = typeof query.before === 'string' ? query.before : undefined;
   return { after, before };
 }
 
@@ -209,7 +209,6 @@ function productToPrismDomain(
       return product;
     case 'carlota':
       return 'carlota-jo';
-    case 'prism':
     default:
       return 'global';
   }
@@ -385,7 +384,7 @@ router.get(
         const entityIds = defaultQueryEngine.getEntitiesForTrace(t.traceId);
         for (const eid of entityIds) {
           if (!entityDomainMap.has(eid)) entityDomainMap.set(eid, []);
-          entityDomainMap.get(eid)!.push({ domain: dom, traceId: t.traceId });
+          entityDomainMap.get(eid)?.push({ domain: dom, traceId: t.traceId });
         }
       }
 

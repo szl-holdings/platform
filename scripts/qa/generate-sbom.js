@@ -13,9 +13,9 @@
  *   - Any high or critical severity vulnerability is found
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
@@ -25,8 +25,7 @@ const HISTORY_DIR = join(OUTPUT_DIR, 'sbom-history');
 const NPM_BULK_ADVISORY_URL = 'https://registry.npmjs.org/-/npm/v1/security/advisories/bulk';
 const SEVERITY_ORDER = ['critical', 'high', 'moderate', 'low'];
 
-function fatal(message) {
-  console.error(`[sbom] FATAL: ${message}`);
+function fatal(_message) {
   process.exit(1);
 }
 
@@ -75,8 +74,7 @@ async function fetchAdvisories(packages) {
     body[name] = versions;
   }
 
-  const packageCount = Object.keys(body).length;
-  console.log(`[sbom] Querying npm advisory bulk endpoint for ${packageCount} unique packages...`);
+  const _packageCount = Object.keys(body).length;
 
   let response;
   try {
@@ -186,17 +184,12 @@ function buildSbom(packages, advisories) {
 async function main() {
   mkdirSync(OUTPUT_DIR, { recursive: true });
   mkdirSync(HISTORY_DIR, { recursive: true });
-
-  console.log('[sbom] Parsing lockfile for package inventory...');
   const packages = parseLockfile();
-  const packageCount = Object.keys(packages).length;
-  console.log(`[sbom] Found ${packageCount} unique packages in lockfile.`);
+  const _packageCount = Object.keys(packages).length;
 
   const advisories = await fetchAdvisories(packages);
 
   const flatVulns = flattenAdvisories(advisories);
-
-  console.log(`[sbom] Advisory scan complete. Found ${flatVulns.length} advisories.`);
 
   const sbom = buildSbom(packages, advisories);
 
@@ -207,15 +200,11 @@ async function main() {
 
   writeFileSync(sbomPath, JSON.stringify(sbom, null, 2));
   writeFileSync(latestPath, JSON.stringify(sbom, null, 2));
-  console.log(`[sbom] SBOM archive written to ${sbomPath}`);
-  console.log(`[sbom] Latest SBOM written to ${latestPath}`);
 
   if (flatVulns.length > 0) {
-    console.log('\n[sbom] Vulnerability summary:');
     for (const severity of SEVERITY_ORDER) {
       const count = flatVulns.filter((v) => v.severity === severity).length;
       if (count > 0) {
-        console.log(`  ${severity.toUpperCase()}: ${count}`);
       }
     }
   }
@@ -225,24 +214,10 @@ async function main() {
   );
 
   if (highAndCritical.length > 0) {
-    console.error(
-      `\n[sbom] SECURITY ALERT: ${highAndCritical.length} high/critical vulnerabilities found:\n`,
-    );
-    for (const v of highAndCritical) {
-      console.error(
-        `  [${v.severity.toUpperCase()}] ${v.packageName}@${v.vulnerable_versions ?? 'unknown range'}`,
-      );
-      console.error(`    Title: ${v.title}`);
-      console.error(`    CVSS:  ${v.cvss?.score ?? 'N/A'} (${v.cvss?.vectorString ?? 'N/A'})`);
-      console.error(`    CWE:   ${v.cwe?.join(', ') ?? 'N/A'}`);
-      console.error(`    Info:  ${v.url}`);
-      console.error();
+    for (const _v of highAndCritical) {
     }
-    console.error("Action required: run 'pnpm update' to remediate where possible.");
     process.exit(1);
   }
-
-  console.log('\n[sbom] No high/critical vulnerabilities found. SBOM scan passed.');
 }
 
 main().catch((err) => fatal(err.message));

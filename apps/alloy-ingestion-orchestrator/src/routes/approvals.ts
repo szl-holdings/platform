@@ -5,8 +5,7 @@
  * Resuming an approved run continues from the gate's checkpoint.
  */
 
-import type { Request, Response } from 'express';
-import { Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 import { defaultEngine } from '../engine.js';
 import { defaultRunStore } from '../run-store.js';
 import { ApprovalDecisionSchema } from '../types.js';
@@ -93,10 +92,10 @@ function resolveWorkflowDefinitionFromRun(run: {
     case 'ingest_document':
       return buildIngestDocumentWorkflow(
         {
-          sourceId: (input['sourceId'] as string) ?? 'unknown',
-          content: (input['content'] as string) ?? '',
-          contentType: (input['contentType'] as string) ?? 'text/plain',
-          metadata: (input['metadata'] as Record<string, unknown>) ?? {},
+          sourceId: (input.sourceId as string) ?? 'unknown',
+          content: (input.content as string) ?? '',
+          contentType: (input.contentType as string) ?? 'text/plain',
+          metadata: (input.metadata as Record<string, unknown>) ?? {},
         },
         run.tenantId,
         run.profileId,
@@ -109,9 +108,9 @@ function resolveWorkflowDefinitionFromRun(run: {
       return buildRunRetrievalEvalWorkflow({
         tenantId: run.tenantId,
         profileId: run.profileId,
-        datasetId: (input['datasetId'] as string) ?? 'default',
+        datasetId: (input.datasetId as string) ?? 'default',
         queries:
-          (input['queries'] as Array<{
+          (input.queries as Array<{
             queryId: string;
             query: string;
             relevantChunkIds: string[];
@@ -121,8 +120,8 @@ function resolveWorkflowDefinitionFromRun(run: {
       return buildRotateProfileVersionWorkflow({
         tenantId: run.tenantId,
         currentProfileId: run.profileId,
-        newProfileId: (input['newProfileId'] as string) ?? run.profileId,
-        newProfileVersion: (input['newProfileVersion'] as string) ?? 'v2',
+        newProfileId: (input.newProfileId as string) ?? run.profileId,
+        newProfileVersion: (input.newProfileVersion as string) ?? 'v2',
       });
     default:
       return null;

@@ -188,7 +188,7 @@ function pillarsRollup(posts: TrackingRow[]) {
     map[p.pillar].count++;
   }
   return Object.entries(map).map(([pillar, v]) => ({
-    pillar: pillar.length > 20 ? pillar.slice(0, 18) + "…" : pillar,
+    pillar: pillar.length > 20 ? `${pillar.slice(0, 18)}…` : pillar,
     fullPillar: pillar,
     avgOpenRate: v.count ? Math.round(v.opens / v.count / 12) : 0,
     totalClicks: v.clicks,
@@ -218,7 +218,7 @@ function parseCsvRows(text: string): Partial<TrackingRow>[] {
     headers.forEach((h, i) => {
       const val = values[i] ?? "";
       const num = parseFloat(val);
-      row[h] = isNaN(num) ? val : num;
+      row[h] = Number.isNaN(num) ? val : num;
     });
     return row as Partial<TrackingRow>;
   });
@@ -715,7 +715,7 @@ export default function CommandNewsletterPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedPosts.map((post, i) => {
+                  {sortedPosts.map((post, _i) => {
                     const pillarColor = PILLAR_COLORS[post.pillar] ?? GOLD;
                     const isExpanded = expandedPost === post.post_id;
                     return (

@@ -295,7 +295,7 @@ class GoalFormationEngine {
     const completed = this.completedCount;
     const totalCreated = this.goals.size;
     const completionRate = totalCreated > 0 ? completed / totalCreated : 0;
-    const avgProgress =
+    const _avgProgress =
       active.length > 0 ? active.reduce((s, g) => s + g.progress, 0) / active.length : 0;
 
     this.metaGoals = [
@@ -337,7 +337,7 @@ class GoalFormationEngine {
   }
 
   detectGoalsFromOrchestration(
-    query: string,
+    _query: string,
     domains: string[],
     knowledgeGaps: string[],
     confusionSignals: string[],

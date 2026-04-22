@@ -2,7 +2,6 @@ import { bodyShape } from '@szl-holdings/contracts/common';
 import { db, scheduledNotificationsTable } from '@szl-holdings/db';
 import { and, eq, gte } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
-import { z } from 'zod';
 import {
   handleRouteError,
   sendBadRequest,
@@ -11,8 +10,7 @@ import {
   sendNotFound,
   sendSuccess,
 } from '../lib/api-response';
-import type { PushMessagePayload } from '../lib/expo-push';
-import { sendPushBroadcast, sendPushToApp, sendPushToUser } from '../lib/expo-push';
+import { type PushMessagePayload, sendPushBroadcast, sendPushToApp, sendPushToUser } from '../lib/expo-push';
 import { buildPushMessage, type NotificationTemplate } from '../lib/push-templates';
 import {
   listQuerySchema,
@@ -122,7 +120,7 @@ router.post(
       const { target, userId, appId, template, vars, title, body, data, sendAt } = req.body;
 
       const sendAtDate = new Date(sendAt);
-      if (isNaN(sendAtDate.getTime()) || sendAtDate <= new Date()) {
+      if (Number.isNaN(sendAtDate.getTime()) || sendAtDate <= new Date()) {
         sendBadRequest(res, 'sendAt must be a valid future timestamp');
         return;
       }
@@ -228,7 +226,7 @@ router.delete(
   async (req, res) => {
     try {
       const id = Number(req.params.id);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid id');
         return;
       }
@@ -264,7 +262,7 @@ router.get(
   '/push-notifications/templates',
   authMiddleware(),
   requireRole('ops'),
-  async (req, res) => {
+  async (_req, res) => {
     sendSuccess(res, {
       templates: VALID_TEMPLATES,
       domains: {

@@ -3,19 +3,6 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import { AnimatePresence, motion as m } from 'framer-motion';
 import {
   AlertTriangle,
-  Building2,
-  CheckCircle,
-  ChevronRight,
-  Clock,
-  DollarSign,
-  Eye,
-  FileText,
-  Layers,
-  Link,
-  MapPin,
-  Scale,
-  Shield,
-  XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 

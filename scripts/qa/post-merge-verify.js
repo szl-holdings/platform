@@ -21,10 +21,10 @@
  *              (--strict mode is always enabled in post-merge verification)
  */
 
-import { spawnSync } from 'child_process';
-import { writeFileSync } from 'fs';
-import { dirname, join, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { spawnSync } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -38,8 +38,7 @@ const ROOT = resolve(join(__dirname, '../..'));
 const startTime = Date.now();
 const SEP = '='.repeat(60);
 
-function log(msg) {
-  console.log(msg);
+function log(_msg) {
 }
 function logSection(title) {
   log(`\n${SEP}\n  ${title}\n${SEP}`);
@@ -156,7 +155,7 @@ async function main() {
       if (failed.length > 0) {
         log(`    ✗ ${domain}: ${failed.length} route(s) failed`);
         for (const r of failed.slice(0, 5)) {
-          log(`      ✗ ${r.path} — HTTP ${r.status}${r.error ? ' ' + r.error : ''}`);
+          log(`      ✗ ${r.path} — HTTP ${r.status}${r.error ? ` ${r.error}` : ''}`);
         }
       }
     }
@@ -228,7 +227,6 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error('post-merge-verify fatal error:', err);
+main().catch((_err) => {
   process.exit(1);
 });

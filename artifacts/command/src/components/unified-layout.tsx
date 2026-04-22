@@ -7,8 +7,6 @@ import {
   MODE_LABELS,
   useDemoMode,
 } from '@szl-holdings/shared-ui/demo-mode';
-import { EcosystemNav } from '@szl-holdings/shared-ui/ecosystem-nav';
-import { MultiplayerSessionBanner } from '@szl-holdings/shared-ui/multiplayer-session';
 import { useQuery } from '@tanstack/react-query';
 import {
   Activity,
@@ -21,8 +19,6 @@ import {
   Bot,
   Brain,
   Building,
-  Calculator,
-  Calendar,
   CheckCircle2,
   CheckSquare,
   ChevronRight,
@@ -32,9 +28,7 @@ import {
   Crown,
   Database,
   DollarSign,
-  Download,
   FileText,
-  Flag,
   FlaskConical,
   GitBranch,
   GitCommit,
@@ -49,22 +43,17 @@ import {
   Lock,
   Map,
   Menu,
-  Monitor,
   Network,
   Phone,
   Play,
-  Power,
   Radio,
   RotateCcw,
   Satellite,
   Scale,
-  Send,
-  Settings,
   Shield,
   ShieldCheck,
   Sigma,
   Target,
-  TrendingUp,
   Users,
   Workflow,
   X,
@@ -496,7 +485,7 @@ function WorkspaceSwitcher({
               className="flex flex-col items-center py-1.5 px-1 rounded transition-all"
               style={{
                 background: isActive ? `${accent}12` : 'transparent',
-                border: `1px solid ${isActive ? accent + '30' : 'transparent'}`,
+                border: `1px solid ${isActive ? `${accent}30` : 'transparent'}`,
               }}
             >
               <Icon

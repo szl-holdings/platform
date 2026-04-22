@@ -2,7 +2,7 @@ import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { openai } from '@szl-holdings/ai-engine/providers/openai';
 import { conversations, db, messages, pool } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { asc, desc, eq } from 'drizzle-orm';
 import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
@@ -122,7 +122,7 @@ function routeModel(
   };
 }
 
-async function buildSystemPrompt(req: Request): Promise<string> {
+async function buildSystemPrompt(_req: Request): Promise<string> {
   const devDomain = process.env.REPLIT_DEV_DOMAIN;
   let systemContext = '';
 
@@ -301,8 +301,8 @@ alloyChatRouter.get(
   '/alloy-chat/conversations/:id/messages',
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(String(req.params['id']!), 10);
-      if (isNaN(id)) {
+      const id = parseInt(String(req.params.id!), 10);
+      if (Number.isNaN(id)) {
         res.status(400).json({ error: 'Invalid conversation ID' });
         return;
       }
@@ -320,8 +320,8 @@ alloyChatRouter.get(
 
 alloyChatRouter.delete('/alloy-chat/conversations/:id', async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params['id']!), 10);
-    if (isNaN(id)) {
+    const id = parseInt(String(req.params.id!), 10);
+    if (Number.isNaN(id)) {
       res.status(400).json({ error: 'Invalid conversation ID' });
       return;
     }
@@ -335,8 +335,8 @@ alloyChatRouter.delete('/alloy-chat/conversations/:id', async (req: Request, res
 alloyChatRouter.post(
   '/alloy-chat/conversations/:id/messages',
   async (req: Request, res: Response) => {
-    const id = parseInt(String(req.params['id']!), 10);
-    if (isNaN(id)) {
+    const id = parseInt(String(req.params.id!), 10);
+    if (Number.isNaN(id)) {
       res.status(400).json({ error: 'Invalid conversation ID' });
       return;
     }
@@ -484,7 +484,7 @@ alloyChatRouter.get('/alloy-chat/suggested-prompts', async (_req: Request, res: 
       contextualPrompts.push('Diagnose the current system health issues');
     if ((health?.summary?.degraded ?? 0) > 0)
       contextualPrompts.push(
-        `What's causing the ${health!.summary!.degraded} degraded service(s)?`,
+        `What's causing the ${health?.summary?.degraded} degraded service(s)?`,
       );
     if ((connectors?.summary?.manualRequired ?? 0) > 0)
       contextualPrompts.push(`Which connectors need configuration and how do I set them up?`);
@@ -545,8 +545,8 @@ alloyChatRouter.post(
       const startTime = Date.now();
 
       if (provider === 'openai') {
-        const replitProxyKey = process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
-        const replitProxyUrl = process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'];
+        const replitProxyKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+        const replitProxyUrl = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
         const apiKey = replitProxyKey;
         const baseUrl = replitProxyUrl;
 
@@ -912,7 +912,7 @@ alloyChatRouter.get(
   authMiddleware({ required: false }),
   async (req, res) => {
     try {
-      const limit = parseInt((req.query as Record<string, string>).limit || '20');
+      const limit = parseInt((req.query as Record<string, string>).limit || '20', 10);
       const result = await pool.query(
         `SELECT id, category, title, content, severity, is_read, metadata, generated_at FROM alloy_chat_advisories ORDER BY generated_at DESC LIMIT $1`,
         [limit],
@@ -1002,8 +1002,8 @@ alloyChatRouter.post(
           const start = Date.now();
           try {
             if (provider === 'openai') {
-              const apiKey = process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
-              const baseUrl = process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'];
+              const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+              const baseUrl = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
               if (!apiKey || !baseUrl) {
                 results[provider] = {
                   content: '',
@@ -1032,7 +1032,7 @@ alloyChatRouter.post(
                 },
               };
             } else if (provider === 'anthropic') {
-              const anthropicKey = process.env['AI_INTEGRATIONS_ANTHROPIC_API_KEY'];
+              const anthropicKey = process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY;
               if (!anthropicKey) {
                 results[provider] = {
                   content: '',
@@ -1045,7 +1045,7 @@ alloyChatRouter.post(
                 return;
               }
               const anthropicBase =
-                process.env['AI_INTEGRATIONS_ANTHROPIC_BASE_URL'] ?? 'https://api.anthropic.com';
+                process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? 'https://api.anthropic.com';
               const systemMsg = chatMsgs.find((m) => m.role === 'system');
               const nonSystemMsgs = chatMsgs.filter((m) => m.role !== 'system');
               const body: Record<string, unknown> = {
@@ -1053,7 +1053,7 @@ alloyChatRouter.post(
                 max_tokens: 512,
                 messages: nonSystemMsgs,
               };
-              if (systemMsg) body['system'] = systemMsg.content;
+              if (systemMsg) body.system = systemMsg.content;
               const resp = await fetch(`${anthropicBase}/v1/messages`, {
                 method: 'POST',
                 headers: {

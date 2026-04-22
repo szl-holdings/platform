@@ -1,19 +1,9 @@
 import { GuardianDecisionEngine } from '@workspace/guardian/decision-engine';
 import { InMemoryTraceStore } from '@workspace/trace-graph/store';
 import { TraceWriter } from '@workspace/trace-graph/writer';
-import type { CheckpointStore } from './checkpoint.js';
-import { createCheckpoint, InMemoryCheckpointStore } from './checkpoint.js';
+import { type CheckpointStore, createCheckpoint, InMemoryCheckpointStore } from './checkpoint.js';
 import { InMemoryActionLedger, makeLedgerEntry } from './ledger.js';
-import type {
-  ActionLedgerWriter,
-  ApprovalGate,
-  RunConfig,
-  RunState,
-  StepContext,
-  StepResult,
-  WorkflowStep,
-} from './types.js';
-import { RunConfigSchema, RunStateSchema } from './types.js';
+import { type ActionLedgerWriter, type ApprovalGate, type RunConfig, type RunState, type StepContext, type StepResult, type WorkflowStep, RunConfigSchema, RunStateSchema } from './types.js';
 
 export interface RunManagerOptions {
   checkpointStore?: CheckpointStore;
@@ -254,10 +244,10 @@ export class RunManager {
                   ? { matchedRuleId: decision.matchedRuleId }
                   : {}),
                 ...(config.policyTier !== undefined ? { tier: config.policyTier } : {}),
-                orgId: (meta['orgId'] as number | string | null | undefined) ?? null,
-                requestedById: (meta['requestedById'] as number | string | null | undefined) ?? null,
-                ...(typeof meta['requestedByRole'] === 'string'
-                  ? { requestedByRole: meta['requestedByRole'] as string }
+                orgId: (meta.orgId as number | string | null | undefined) ?? null,
+                requestedById: (meta.requestedById as number | string | null | undefined) ?? null,
+                ...(typeof meta.requestedByRole === 'string'
+                  ? { requestedByRole: meta.requestedByRole as string }
                   : {}),
                 context: { stepId: step.id, stepIndex: i, ...meta },
               });

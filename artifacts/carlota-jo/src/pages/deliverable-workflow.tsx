@@ -7,12 +7,10 @@ import {
   Clock,
   Eye,
   FileText,
-  Filter,
   GitBranch,
   History,
   MessageSquare,
   Plus,
-  RotateCcw,
   Send,
   Upload,
   User,
@@ -72,7 +70,7 @@ const STATUS_META: Record<DeliverableStatus, { label: string; color: string; bg:
   archived: { label: 'Archived', color: '#64748B', bg: '#F1F5F9' },
 };
 
-const TYPE_ICONS: Record<Deliverable['type'], typeof FileText> = {
+const _TYPE_ICONS: Record<Deliverable['type'], typeof FileText> = {
   presentation: FileText,
   report: FileText,
   model: FileText,

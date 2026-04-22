@@ -339,7 +339,7 @@ function DissentForm({ briefId, onSuccess }: { briefId: string; onSuccess: () =>
 
 export default function PulseScreen() {
   const insets = useSafeAreaInsets();
-  const colors = useColors();
+  const _colors = useColors();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<Tab>('brief');

@@ -58,7 +58,7 @@ const AGENT_SPECIALTIES = [
   'land',
   'residential',
 ] as const;
-const AGENT_STATUSES = ['active', 'inactive', 'on_leave'] as const;
+const _AGENT_STATUSES = ['active', 'inactive', 'on_leave'] as const;
 const INQUIRY_STATUSES = [
   'new',
   'contacted',
@@ -80,7 +80,7 @@ const INQUIRY_BUYER_TYPES = [
 const INQUIRY_FINANCING = ['cash', 'pre_approved', 'seeking_financing', 'unknown'] as const;
 const INQUIRY_SOURCES = ['web', 'email', 'phone', 'referral', 'portal', 'direct', 'other'] as const;
 const TX_STATUSES = ['completed', 'fallen_through', 'pending_recording'] as const;
-const TX_FINANCING = [
+const _TX_FINANCING = [
   'cash',
   'conventional',
   'bridge',
@@ -778,7 +778,7 @@ router.get(
 
 // ─── GET /terra/broker/brokerage ──────────────────────────────────────────────
 
-router.get('/terra/broker/brokerage', terraRateLimit, auth, async (req, res) => {
+router.get('/terra/broker/brokerage', terraRateLimit, auth, async (_req, res) => {
   try {
     const brokerages = await db
       .select()
@@ -830,7 +830,7 @@ router.get('/terra/broker/brokerage', terraRateLimit, auth, async (req, res) => 
 
 // ─── GET /terra/broker/map ────────────────────────────────────────────────────
 
-router.get('/terra/broker/map', terraRateLimit, auth, async (req, res) => {
+router.get('/terra/broker/map', terraRateLimit, auth, async (_req, res) => {
   try {
     const listings = await db
       .select({

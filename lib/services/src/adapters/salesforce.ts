@@ -399,27 +399,27 @@ export class SalesforceAdapter extends ServiceAdapter {
   private readonly TOKEN_KEY = 'salesforce_main';
 
   private get instanceUrl(): string | undefined {
-    return process.env['SALESFORCE_INSTANCE_URL'];
+    return process.env.SALESFORCE_INSTANCE_URL;
   }
 
   private get accessToken(): string | undefined {
-    return process.env['SALESFORCE_ACCESS_TOKEN'];
+    return process.env.SALESFORCE_ACCESS_TOKEN;
   }
 
   private get refreshToken(): string | undefined {
-    return process.env['SALESFORCE_REFRESH_TOKEN'];
+    return process.env.SALESFORCE_REFRESH_TOKEN;
   }
 
   private get clientId(): string | undefined {
-    return process.env['SALESFORCE_CLIENT_ID'];
+    return process.env.SALESFORCE_CLIENT_ID;
   }
 
   private get clientSecret(): string | undefined {
-    return process.env['SALESFORCE_CLIENT_SECRET'];
+    return process.env.SALESFORCE_CLIENT_SECRET;
   }
 
   private get webhookSecret(): string | undefined {
-    return process.env['SALESFORCE_WEBHOOK_SECRET'];
+    return process.env.SALESFORCE_WEBHOOK_SECRET;
   }
 
   private async getValidAccessToken(): Promise<string> {
@@ -498,17 +498,17 @@ export class SalesforceAdapter extends ServiceAdapter {
     const soql = `SELECT Id, Name, Industry, AnnualRevenue, NumberOfEmployees, Website, Phone, BillingCity, BillingCountry, Type, LastActivityDate FROM Account ORDER BY LastModifiedDate DESC LIMIT ${limit}`;
     const result = await this.sfRequest<SalesforceQueryResult<Record<string, unknown>>>(soql);
     return result.records.map((r) => ({
-      id: r['Id'] as string,
-      name: r['Name'] as string,
-      industry: (r['Industry'] as string) ?? '',
-      annualRevenue: (r['AnnualRevenue'] as number) ?? null,
-      numberOfEmployees: (r['NumberOfEmployees'] as number) ?? null,
-      website: (r['Website'] as string) ?? null,
-      phone: (r['Phone'] as string) ?? null,
-      billingCity: (r['BillingCity'] as string) ?? null,
-      billingCountry: (r['BillingCountry'] as string) ?? null,
-      type: (r['Type'] as string) ?? null,
-      lastActivityDate: (r['LastActivityDate'] as string) ?? null,
+      id: r.Id as string,
+      name: r.Name as string,
+      industry: (r.Industry as string) ?? '',
+      annualRevenue: (r.AnnualRevenue as number) ?? null,
+      numberOfEmployees: (r.NumberOfEmployees as number) ?? null,
+      website: (r.Website as string) ?? null,
+      phone: (r.Phone as string) ?? null,
+      billingCity: (r.BillingCity as string) ?? null,
+      billingCountry: (r.BillingCountry as string) ?? null,
+      type: (r.Type as string) ?? null,
+      lastActivityDate: (r.LastActivityDate as string) ?? null,
     }));
   }
 
@@ -521,19 +521,19 @@ export class SalesforceAdapter extends ServiceAdapter {
     const soql = `SELECT Id, Name, AccountId, Account.Name, Amount, StageName, CloseDate, Probability, ForecastCategory, IsClosed, IsWon, Type, LastModifiedDate FROM Opportunity WHERE IsClosed = false${stageFilter} ORDER BY Amount DESC NULLS LAST LIMIT ${limit}`;
     const result = await this.sfRequest<SalesforceQueryResult<Record<string, unknown>>>(soql);
     return result.records.map((r) => ({
-      id: r['Id'] as string,
-      name: r['Name'] as string,
-      accountId: r['AccountId'] as string,
-      accountName: ((r['Account'] as Record<string, unknown>)?.['Name'] as string) ?? '',
-      amount: (r['Amount'] as number) ?? null,
-      stageName: r['StageName'] as string,
-      closeDate: r['CloseDate'] as string,
-      probability: (r['Probability'] as number) ?? null,
-      forecastCategory: r['ForecastCategory'] as string,
-      isClosed: r['IsClosed'] as boolean,
-      isWon: r['IsWon'] as boolean,
-      type: (r['Type'] as string) ?? null,
-      lastModifiedDate: r['LastModifiedDate'] as string,
+      id: r.Id as string,
+      name: r.Name as string,
+      accountId: r.AccountId as string,
+      accountName: ((r.Account as Record<string, unknown>)?.Name as string) ?? '',
+      amount: (r.Amount as number) ?? null,
+      stageName: r.StageName as string,
+      closeDate: r.CloseDate as string,
+      probability: (r.Probability as number) ?? null,
+      forecastCategory: r.ForecastCategory as string,
+      isClosed: r.IsClosed as boolean,
+      isWon: r.IsWon as boolean,
+      type: (r.Type as string) ?? null,
+      lastModifiedDate: r.LastModifiedDate as string,
     }));
   }
 
@@ -546,18 +546,18 @@ export class SalesforceAdapter extends ServiceAdapter {
     const soql = `SELECT Id, CaseNumber, Subject, Status, Priority, Origin, AccountId, Account.Name, ContactId, IsEscalated, CreatedDate, LastModifiedDate FROM Case WHERE IsClosed = false${escalatedFilter} ORDER BY LastModifiedDate DESC LIMIT ${limit}`;
     const result = await this.sfRequest<SalesforceQueryResult<Record<string, unknown>>>(soql);
     return result.records.map((r) => ({
-      id: r['Id'] as string,
-      caseNumber: r['CaseNumber'] as string,
-      subject: r['Subject'] as string,
-      status: r['Status'] as string,
-      priority: r['Priority'] as string,
-      origin: r['Origin'] as string,
-      accountId: (r['AccountId'] as string) ?? null,
-      accountName: ((r['Account'] as Record<string, unknown>)?.['Name'] as string) ?? null,
-      contactId: (r['ContactId'] as string) ?? null,
-      isEscalated: r['IsEscalated'] as boolean,
-      createdDate: r['CreatedDate'] as string,
-      lastModifiedDate: r['LastModifiedDate'] as string,
+      id: r.Id as string,
+      caseNumber: r.CaseNumber as string,
+      subject: r.Subject as string,
+      status: r.Status as string,
+      priority: r.Priority as string,
+      origin: r.Origin as string,
+      accountId: (r.AccountId as string) ?? null,
+      accountName: ((r.Account as Record<string, unknown>)?.Name as string) ?? null,
+      contactId: (r.ContactId as string) ?? null,
+      isEscalated: r.IsEscalated as boolean,
+      createdDate: r.CreatedDate as string,
+      lastModifiedDate: r.LastModifiedDate as string,
     }));
   }
 
@@ -566,16 +566,16 @@ export class SalesforceAdapter extends ServiceAdapter {
     const soql = `SELECT Id, FirstName, LastName, Company, Email, Phone, Status, LeadSource, IsConverted, LastModifiedDate FROM Lead ORDER BY LastModifiedDate DESC LIMIT ${limit}`;
     const result = await this.sfRequest<SalesforceQueryResult<Record<string, unknown>>>(soql);
     return result.records.map((r) => ({
-      id: r['Id'] as string,
-      firstName: (r['FirstName'] as string) ?? null,
-      lastName: r['LastName'] as string,
-      company: r['Company'] as string,
-      email: (r['Email'] as string) ?? null,
-      phone: (r['Phone'] as string) ?? null,
-      status: r['Status'] as string,
-      leadSource: (r['LeadSource'] as string) ?? null,
-      isConverted: r['IsConverted'] as boolean,
-      lastModifiedDate: r['LastModifiedDate'] as string,
+      id: r.Id as string,
+      firstName: (r.FirstName as string) ?? null,
+      lastName: r.LastName as string,
+      company: r.Company as string,
+      email: (r.Email as string) ?? null,
+      phone: (r.Phone as string) ?? null,
+      status: r.Status as string,
+      leadSource: (r.LeadSource as string) ?? null,
+      isConverted: r.IsConverted as boolean,
+      lastModifiedDate: r.LastModifiedDate as string,
     }));
   }
 
@@ -655,23 +655,23 @@ export class SalesforceAdapter extends ServiceAdapter {
       }
     }
 
-    const event = payload['event'] as Record<string, unknown> | undefined;
-    const sobject = payload['sobject'] as Record<string, unknown> | undefined;
+    const event = payload.event as Record<string, unknown> | undefined;
+    const sobject = payload.sobject as Record<string, unknown> | undefined;
 
     if (!event || !sobject) return null;
 
-    const changeType = (event['type'] as string) ?? 'UPDATE';
+    const changeType = (event.type as string) ?? 'UPDATE';
     const changedFields = Object.keys(sobject).filter((k) => k !== 'Id' && k !== 'attributes');
 
     return {
       id: `sf_cdc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       objectType:
-        ((sobject['attributes'] as Record<string, unknown>)?.['type'] as string) ?? 'Unknown',
+        ((sobject.attributes as Record<string, unknown>)?.type as string) ?? 'Unknown',
       changeType: changeType as SalesforceCdcEvent['changeType'],
-      recordId: (sobject['Id'] as string) ?? '',
+      recordId: (sobject.Id as string) ?? '',
       changedFields,
-      changeOrigin: (event['changeOrigin'] as string) ?? '',
-      changedAt: (event['createdDate'] as string) ?? new Date().toISOString(),
+      changeOrigin: (event.changeOrigin as string) ?? '',
+      changedAt: (event.createdDate as string) ?? new Date().toISOString(),
       payload: sobject,
     };
   }

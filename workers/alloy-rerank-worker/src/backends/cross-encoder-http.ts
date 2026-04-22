@@ -5,7 +5,7 @@ import type {
   RerankBackendDescriptor,
 } from './interface.js';
 
-const SUBSTRATE_RERANK_URL = process.env['SUBSTRATE_RERANK_URL'] ?? 'http://localhost:9800';
+const SUBSTRATE_RERANK_URL = process.env.SUBSTRATE_RERANK_URL ?? 'http://localhost:9800';
 
 export class CrossEncoderHttpRerankBackend implements RerankBackend {
   readonly descriptor: RerankBackendDescriptor = {

@@ -75,7 +75,7 @@ export default function LegalSecurityDisclosurePage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
           <section style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(3rem,6vw,5rem)", borderBottom: "1px solid var(--color-szl-border)", background: "radial-gradient(ellipse at 50% 0%, hsla(40,90%,54%,0.04) 0%, transparent 60%)" }}>
             <div style={{ maxWidth: "860px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>

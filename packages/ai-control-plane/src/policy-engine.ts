@@ -1,10 +1,4 @@
-import type { AgentTierName } from './agent-tiers.js';
-import {
-  AGENT_TIER_DEFINITIONS,
-  isRouteClassAllowedForTier,
-  isToolAllowedForTier,
-  requiresApproval,
-} from './agent-tiers.js';
+import { type AgentTierName, AGENT_TIER_DEFINITIONS, isRouteClassAllowedForTier, isToolAllowedForTier, requiresApproval } from './agent-tiers.js';
 import { createLogger } from './logger.js';
 
 const logger = createLogger('ai-control-plane:policy-engine');
@@ -113,7 +107,7 @@ function resolveApprovalLevel(
 ): PolicyDecision['approvalLevel'] {
   if (violations.some((v) => v.severity === 'block')) return 'none';
   if (!requiresApproval(req.tier, req.isHighRisk ?? false)) return 'none';
-  const def = AGENT_TIER_DEFINITIONS[req.tier];
+  const _def = AGENT_TIER_DEFINITIONS[req.tier];
   if (req.estimatedCostUsd && req.estimatedCostUsd > 5.0) return 'executive';
   if (req.tier === 'operator') return 'manager';
   return 'operator';

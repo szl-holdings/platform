@@ -290,7 +290,7 @@ export default function ApiExplorer() {
     try {
       const token = localStorage.getItem('szl_token');
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (token && ep.auth) headers['Authorization'] = `Bearer ${token}`;
+      if (token && ep.auth) headers.Authorization = `Bearer ${token}`;
 
       const res = await fetch(ep.path, {
         method: ep.method,

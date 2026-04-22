@@ -20,8 +20,6 @@
 import {
   type ActionEngineResult,
   executeWorkflow,
-  getRunById,
-  listRuns,
   recordRun,
   registerStepHandler,
   type WorkflowDefinition,
@@ -48,7 +46,7 @@ import {
   type PolicyEvaluationResult,
   registerPolicy,
 } from '@szl-holdings/policy-engine';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { and, desc, eq } from 'drizzle-orm';
 import { dbRecordWorkflowRun } from './decisioning-store.js';
 import { logger } from './logger.js';
@@ -1437,7 +1435,7 @@ export async function executedomainWorkflow(
 
   if (!req.isDryRun && !req.isSimulation) {
     const signals = req.signalIds
-      ? (await getSignals(req.domain, 100)).filter((s) => req.signalIds!.includes(s.id))
+      ? (await getSignals(req.domain, 100)).filter((s) => req.signalIds?.includes(s.id))
       : [];
     await registerEvaluationHook({
       domain: req.domain,

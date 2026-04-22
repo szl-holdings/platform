@@ -17,7 +17,7 @@ interface ProviderStats {
 }
 
 const MAX_LATENCY_SAMPLES = 200;
-const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+const _STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 
 class EmbeddingAnalyticsTracker {
   private providerStats = new Map<EmbeddingProviderType, ProviderStats>();

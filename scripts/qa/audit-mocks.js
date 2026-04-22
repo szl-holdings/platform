@@ -12,9 +12,9 @@
  *   node scripts/qa/audit-mocks.js
  */
 
-import { readdirSync, readFileSync, statSync } from 'fs';
-import { dirname, extname, join, relative } from 'path';
-import { fileURLToPath } from 'url';
+import { readdirSync, readFileSync, } from 'node:fs';
+import { dirname, extname, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
@@ -114,8 +114,6 @@ function auditFile(filePath) {
 }
 
 function main() {
-  console.log('\nSZL Holdings — Mock Audit');
-  console.log('Scanning for mock/demo data patterns in production paths...\n');
 
   const allFindings = [];
 
@@ -131,32 +129,20 @@ function main() {
   const infos = allFindings.filter((f) => f.severity === 'info');
 
   if (warnings.length > 0) {
-    console.log(`WARNINGS (${warnings.length}):`);
-    for (const f of warnings) {
-      console.warn(`  [WARN] ${f.file}:${f.line} — ${f.label}`);
-      console.warn(`         ${f.text}`);
+    for (const _f of warnings) {
     }
-    console.log('');
   }
 
   if (infos.length > 0) {
-    console.log(`INFO (${infos.length}):`);
-    for (const f of infos) {
-      console.log(`  [INFO] ${f.file}:${f.line} — ${f.label}`);
+    for (const _f of infos) {
     }
-    console.log('');
   }
 
   if (allFindings.length === 0) {
-    console.log('PASS — No mock/demo data patterns found in production paths.');
     process.exit(0);
   } else if (warnings.length === 0) {
-    console.log(`PASS — ${infos.length} informational notes found, no hard failures.`);
     process.exit(0);
   } else {
-    console.error(
-      `WARN — ${warnings.length} warning(s), ${infos.length} info(s). Review before deploying.`,
-    );
     process.exit(0); // warnings don't fail — they're advisory
   }
 }

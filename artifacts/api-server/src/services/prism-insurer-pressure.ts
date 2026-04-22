@@ -1,8 +1,6 @@
 import {
   db,
   pcCarrierBehaviorPatternsTable,
-  pcCarrierOfferBehaviorTable,
-  pcCarrierReserveBehaviorTable,
   pcCarrierResponseEventsTable,
   pcCarrierSilenceWindowsTable,
   pcClaimsTable,
@@ -11,7 +9,7 @@ import {
   pcInsurerPressureSnapshotsTable,
   pcMattersTable,
 } from '@szl-holdings/db';
-import { and, desc, eq, gte, lt } from 'drizzle-orm';
+import { and, desc, eq, } from 'drizzle-orm';
 import { logger } from '../lib/logger';
 
 const PRESSURE_DIMENSIONS = [

@@ -5,14 +5,13 @@ import {
   ChevronRight,
   Clock,
   ExternalLink,
-  FileText,
   FlaskConical,
   Link,
   Loader,
   Send,
   XCircle,
 } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { nexusApi } from '../lib/api';
 import type { AgentLane, Citation, ResearchRun } from '../lib/types';
 

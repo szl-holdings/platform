@@ -12,10 +12,10 @@
  *  7. globalAuthEnforcer — deny-by-default for /api/* with no public prefix
  */
 
-import { createHmac, timingSafeEqual } from 'crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
 // ---------------------------------------------------------------------------
@@ -68,7 +68,7 @@ function successHandler(_req: Request, res: Response) {
   res.json({ ok: true });
 }
 
-function authedRequest(
+function _authedRequest(
   app: express.Express,
   method: 'get' | 'post' | 'put' | 'delete',
   path: string,
@@ -123,9 +123,9 @@ describe('timingSafeEqual token comparison — HMAC digest approach', () => {
     // architectural property — constant-time HMAC digest comparison, no
     // length side-channel — is enforced there now and consumed by
     // admin-guard, csrf, global-auth-enforcer, and auth.
-    const { readFileSync } = await import('fs');
-    const { fileURLToPath } = await import('url');
-    const { dirname, resolve } = await import('path');
+    const { readFileSync } = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
+    const { dirname, resolve } = await import('node:path');
     const dir = dirname(fileURLToPath(import.meta.url));
     const src = readFileSync(resolve(dir, '../lib/internal-tokens.ts'), 'utf8');
     expect(src).toContain('createHmac');
@@ -337,9 +337,9 @@ describe('tenantScope middleware', () => {
 
 describe('AF-003 / AF-007 — vessels routes and schema enforce tenant isolation', () => {
   it('routes/vessels.ts uses tenantScope() on every router handler', async () => {
-    const { readFileSync } = await import('fs');
-    const { fileURLToPath } = await import('url');
-    const { dirname, resolve } = await import('path');
+    const { readFileSync } = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
+    const { dirname, resolve } = await import('node:path');
     const dir = dirname(fileURLToPath(import.meta.url));
     const src = readFileSync(resolve(dir, '../routes/vessels.ts'), 'utf8');
 
@@ -373,9 +373,9 @@ describe('AF-003 / AF-007 — vessels routes and schema enforce tenant isolation
   });
 
   it('schema/vessels.ts declares org_id on the tenant-owning tables', async () => {
-    const { readFileSync } = await import('fs');
-    const { fileURLToPath } = await import('url');
-    const { dirname, resolve } = await import('path');
+    const { readFileSync } = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
+    const { dirname, resolve } = await import('node:path');
     const dir = dirname(fileURLToPath(import.meta.url));
     // Resolve up to lib/db/src/schema/vessels.ts via the workspace root
     const schemaPath = resolve(
@@ -398,9 +398,9 @@ describe('AF-003 / AF-007 — vessels routes and schema enforce tenant isolation
   });
 
   it('migrations 0076 (parent tables) + 0094 (sub-resource tables) cover all AF-007 in-scope tables', async () => {
-    const { readFileSync, existsSync } = await import('fs');
-    const { fileURLToPath } = await import('url');
-    const { dirname, resolve } = await import('path');
+    const { readFileSync, existsSync } = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
+    const { dirname, resolve } = await import('node:path');
     const dir = dirname(fileURLToPath(import.meta.url));
     const drizzleDir = resolve(dir, '../../../../lib/db/drizzle');
 
@@ -446,9 +446,9 @@ describe('AF-003 / AF-007 — vessels routes and schema enforce tenant isolation
   });
 
   it('PUT /vessels/routes/:id strips client-supplied orgId (tenant key is immutable)', async () => {
-    const { readFileSync } = await import('fs');
-    const { fileURLToPath } = await import('url');
-    const { dirname, resolve } = await import('path');
+    const { readFileSync } = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
+    const { dirname, resolve } = await import('node:path');
     const dir = dirname(fileURLToPath(import.meta.url));
     const src = readFileSync(resolve(dir, '../routes/vessels.ts'), 'utf8');
 
@@ -470,9 +470,9 @@ describe('AF-003 / AF-007 — vessels routes and schema enforce tenant isolation
   });
 
   it('GET /vessels/routes/all combines org_id filter with parent-vessel id-set', async () => {
-    const { readFileSync } = await import('fs');
-    const { fileURLToPath } = await import('url');
-    const { dirname, resolve } = await import('path');
+    const { readFileSync } = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
+    const { dirname, resolve } = await import('node:path');
     const dir = dirname(fileURLToPath(import.meta.url));
     const src = readFileSync(resolve(dir, '../routes/vessels.ts'), 'utf8');
 

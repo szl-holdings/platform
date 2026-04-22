@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Platform,
@@ -227,7 +227,6 @@ async function doSignalAction(
     headers,
   });
   if (!res.ok) {
-    console.warn(`[Inbox] Signal action ${action} failed: HTTP ${res.status}`);
   }
 }
 
@@ -243,7 +242,6 @@ async function doActionUpdate(
     body: JSON.stringify({ state }),
   });
   if (!res.ok) {
-    console.warn(`[Inbox] Action update to state=${state} failed: HTTP ${res.status}`);
   }
 }
 

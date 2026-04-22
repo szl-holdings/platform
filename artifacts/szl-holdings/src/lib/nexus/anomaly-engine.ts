@@ -5,9 +5,7 @@
  */
 
 import {
-  EdgeRecord,
   type EntityRecord,
-  getConnectedEdges,
   getEntity,
   KNOWLEDGE_GRAPH,
   type KnowledgeGraph,
@@ -552,7 +550,6 @@ export function runAnomalyDetection(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): An
       allAnomalies.push(...matches);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      console.warn(`[NEXUS] Anomaly pattern ${pattern.id} threw:`, err);
       patternErrors.push({ patternId: pattern.id, patternName: pattern.name, error: message });
     }
   }

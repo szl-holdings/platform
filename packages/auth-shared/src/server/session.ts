@@ -4,7 +4,7 @@
  * `artifacts/api-server`.
  */
 
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import type { SessionToken } from '../types.js';
 
 /** Number of random bytes used for a session token (64-char hex). */

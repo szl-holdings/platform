@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QuickActionDeck } from '@/components/QuickActionDeck';
 import { useColors } from '@/hooks/useColors';
@@ -91,7 +91,7 @@ function TerraShortcutsStrip() {
             }}
             style={[
               terraStyles.shortcutBtn,
-              { backgroundColor: TERRA + '10', borderColor: TERRA + '30' },
+              { backgroundColor: `${TERRA}10`, borderColor: `${TERRA}30` },
             ]}
             activeOpacity={0.75}
             accessibilityLabel={item.label}
@@ -100,7 +100,7 @@ function TerraShortcutsStrip() {
             <Feather name={item.icon} size={14} color={TERRA} />
             <Text style={terraStyles.shortcutLabel}>{item.label}</Text>
             {item.badge && (
-              <View style={[terraStyles.shortcutBadge, { backgroundColor: TERRA + '25' }]}>
+              <View style={[terraStyles.shortcutBadge, { backgroundColor: `${TERRA}25` }]}>
                 <Text style={[terraStyles.shortcutBadgeText, { color: TERRA }]}>{item.badge}</Text>
               </View>
             )}
@@ -326,7 +326,7 @@ function BusinessHealthStrip({ colors }: { colors: ReturnType<typeof useColors> 
 function SignalsView({ colors }: { colors: ReturnType<typeof useColors> }) {
   return (
     <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}>
-      {PRIORITY_SIGNALS.map((signal, i) => {
+      {PRIORITY_SIGNALS.map((signal, _i) => {
         const sc = severityColor(signal.severity);
         return (
           <View

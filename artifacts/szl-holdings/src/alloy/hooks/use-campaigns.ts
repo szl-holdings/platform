@@ -57,11 +57,11 @@ export function useCampaign(id: string) {
     queryKey: ['creative-campaign', id],
     queryFn: async () => {
       const numId = parseInt(id, 10);
-      if (isNaN(numId)) throw new Error('Invalid campaign ID');
+      if (Number.isNaN(numId)) throw new Error('Invalid campaign ID');
       const row = await creativeApi.campaigns.get(numId);
       return toCampaign(row);
     },
-    enabled: !!id && !isNaN(parseInt(id, 10)),
+    enabled: !!id && !Number.isNaN(parseInt(id, 10)),
   });
 }
 

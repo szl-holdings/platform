@@ -1,19 +1,17 @@
 import { Feather } from '@expo/vector-icons';
-import { type NotificationFetcher, NotificationHub, useTheme } from '@szl-holdings/mobile-shared';
+import { NotificationHub, useTheme } from '@szl-holdings/mobile-shared';
 import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, router } from 'expo-router';
-import type React from 'react';
-import type { ComponentProps } from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 const NYC_BOROUGHS = [
@@ -30,7 +28,7 @@ function MarketPulseCard() {
   const { data } = useQuery({
     queryKey: ['terra-nyc-dashboard'],
     queryFn: async () => {
-      const res = await fetch(API_BASE + '/terra/live/nyc-dashboard');
+      const res = await fetch(`${API_BASE}/terra/live/nyc-dashboard`);
       if (!res.ok) return null;
       return res.json();
     },
@@ -44,7 +42,7 @@ function MarketPulseCard() {
         <View
           style={[
             styles.liveBadge,
-            { backgroundColor: colors.emerald + '15', borderColor: colors.emerald + '30' },
+            { backgroundColor: `${colors.emerald}15`, borderColor: `${colors.emerald}30` },
           ]}
         >
           <View style={[styles.liveDot, { backgroundColor: colors.emerald }]} />

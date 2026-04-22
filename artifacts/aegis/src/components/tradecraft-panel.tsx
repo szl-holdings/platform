@@ -3,26 +3,7 @@ import { Button } from '@szl-holdings/shared-ui/ui/button';
 import { Input } from '@szl-holdings/shared-ui/ui/input';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import type { LucideIcon } from 'lucide-react';
-import {
-  Activity,
-  AlertCircle,
-  AlertTriangle,
-  BookOpen,
-  Brain,
-  CheckCircle,
-  ChevronRight,
-  Database,
-  FileText,
-  Info,
-  Loader2,
-  Lock,
-  Search,
-  Shield,
-  Star,
-  TrendingUp,
-  Zap,
-} from 'lucide-react';
+import { type LucideIcon, Activity, AlertCircle, AlertTriangle, BookOpen, Brain, CheckCircle, ChevronRight, Database, FileText, Info, Loader2, Lock, Search, Shield, Star, TrendingUp, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'wouter';
 import { api } from '@/lib/api';
@@ -507,7 +488,7 @@ export function EvidenceIndexPanel({
         maxResults: 15,
       }),
     onSuccess: (data) => {
-      if (data && data.entries) setResult(data as EvidenceQueryResult);
+      if (data?.entries) setResult(data as EvidenceQueryResult);
     },
   });
 
@@ -592,8 +573,7 @@ export function EvidenceIndexPanel({
           </div>
         )}
 
-        {result &&
-          result.entries.map((entry) => {
+        {result?.entries.map((entry) => {
             const scorePercent = Math.round(entry.score * 100);
             return (
               <div

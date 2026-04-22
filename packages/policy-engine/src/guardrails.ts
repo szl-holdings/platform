@@ -1,4 +1,4 @@
-import type { Policy, PolicyRule } from './types.js';
+import type { Policy, } from './types.js';
 
 export const BUILT_IN_GUARDRAILS: Policy[] = [
   {

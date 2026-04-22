@@ -6,13 +6,12 @@ import { z } from 'zod';
 import {
   handleRouteError,
   sendBadRequest,
-  sendCreated,
   sendError,
   sendSuccess,
 } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
-import { authMiddleware, requireRole } from '../middlewares/auth';
+import { authMiddleware, } from '../middlewares/auth';
 
 const router: IRouter = Router();
 

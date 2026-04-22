@@ -4,7 +4,6 @@ import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import {
   Activity,
   AlertTriangle,
-  CheckCircle,
   Database,
   Globe,
   Layers,
@@ -271,7 +270,7 @@ export default function ServiceTopology() {
     metricsMap[n.service] = n;
   }
 
-  const healthyPlatforms = PLATFORM_NODES.filter((n) => {
+  const _healthyPlatforms = PLATFORM_NODES.filter((n) => {
     const m =
       metricsMap[n.id] ??
       metricsMap[n.label] ??

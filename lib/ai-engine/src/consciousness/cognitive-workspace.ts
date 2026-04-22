@@ -216,7 +216,7 @@ class CognitiveWorkspace {
     let rebalanceRecommendation: string | null = null;
 
     const queryDomainAttention = queryDomains.reduce((s, d) => s + (allocation[d] ?? 0), 0);
-    const nonQueryAttention = 1 - queryDomainAttention;
+    const _nonQueryAttention = 1 - queryDomainAttention;
 
     if (
       queryDomains.length > 0 &&

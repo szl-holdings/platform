@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { AGENT_REGISTRY, callAgent } from '../nuro-mesh.js';
 import { getAgentCard, recordDelegationResult } from './agent-registry.js';
 

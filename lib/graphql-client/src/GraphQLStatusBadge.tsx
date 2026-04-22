@@ -1,5 +1,4 @@
 import { gql, useQuery } from '@apollo/client';
-import React from 'react';
 
 const GET_VERSION = gql`
   query GetVersion {

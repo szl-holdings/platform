@@ -1,12 +1,8 @@
-import { AnimatePresence, m } from 'framer-motion';
+import { m } from 'framer-motion';
 import {
-  AlertTriangle,
   ArrowRight,
   Check,
   GitMerge,
-  Play,
-  RotateCcw,
-  TrendingUp,
   Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';

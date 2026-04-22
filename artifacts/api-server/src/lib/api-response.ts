@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type { Response } from 'express';
 import { InvalidIdError } from '../middlewares/auth';
 

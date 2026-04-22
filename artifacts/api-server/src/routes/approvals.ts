@@ -109,9 +109,9 @@ interface ApprovalLike {
  */
 function hydrateApproval<T extends ApprovalLike>(approval: T): T {
   const payload = (approval.payload ?? {}) as Record<string, unknown>;
-  const matchedRuleDetails = lookupMatchedRule(payload['matchedRuleId']);
+  const matchedRuleDetails = lookupMatchedRule(payload.matchedRuleId);
   const tierDetails =
-    lookupTierDetails(payload['tier']) ??
+    lookupTierDetails(payload.tier) ??
     (matchedRuleDetails ? lookupTierDetails(matchedRuleDetails.tier) : null);
 
   if (!matchedRuleDetails && !tierDetails) return approval;
@@ -132,7 +132,7 @@ async function hydrateApprovals<T extends ApprovalLike>(rows: T[]): Promise<T[]>
   const engine = getGuardianEngine();
   const knownIds = new Set(engine.getRules().map((r: GuardianRule) => r.id));
   const needsSync = rows.some((row) => {
-    const id = (row.payload as Record<string, unknown> | null)?.['matchedRuleId'];
+    const id = (row.payload as Record<string, unknown> | null)?.matchedRuleId;
     return typeof id === 'string' && id.length > 0 && !knownIds.has(id);
   });
   if (needsSync) {
@@ -253,7 +253,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { page, limit } = parsePagination(req.query as Record<string, unknown>);
-      const status = req.query['status'] as string | undefined;
+      const status = req.query.status as string | undefined;
       const user = req.user;
       const isAdmin = user?.roles?.some((r) => ['super_admin', 'admin'].includes(r)) ?? false;
       const orgId = isAdmin ? undefined : (user?.orgs?.[0]?.orgId ?? undefined);
@@ -280,8 +280,8 @@ router.get(
 
 router.get('/approvals/:id', authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params['id'] as string, 10);
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id as string, 10);
+    if (Number.isNaN(id)) {
       sendBadRequest(res, 'Invalid approval ID');
       return;
     }
@@ -310,8 +310,8 @@ router.post(
   validateBody(approvalReviewSchema),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params['id'] as string, 10);
-      if (isNaN(id)) {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid approval ID');
         return;
       }
@@ -389,7 +389,7 @@ router.post(
                 'approvals.plan-step-flip-skipped-plan-missing',
               );
             } else {
-              const planOrg = linkedPlan.context['orgId'];
+              const planOrg = linkedPlan.context.orgId;
               const approvalOrg = guard.orgId;
               const planScopedOk =
                 approvalOrg == null
@@ -440,8 +440,8 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params['id'] as string, 10);
-      if (isNaN(id)) {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid approval ID');
         return;
       }
@@ -538,8 +538,8 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params['id'] as string, 10);
-      if (isNaN(id)) {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid approval ID');
         return;
       }
@@ -576,8 +576,8 @@ router.get(
   requireRole('super_admin', 'admin', 'ops', 'compliance'),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params['id'] as string, 10);
-      if (isNaN(id)) {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid approval ID');
         return;
       }
@@ -596,8 +596,8 @@ router.get(
 
 router.get('/approvals/:id/comments', authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params['id'] as string, 10);
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id as string, 10);
+    if (Number.isNaN(id)) {
       sendBadRequest(res, 'Invalid approval ID');
       return;
     }

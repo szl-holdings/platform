@@ -21,7 +21,6 @@
  */
 
 import {
-  db,
   decisionAuditEventsTable,
   decisionEvidenceTable,
   decisionRunsTable,
@@ -30,19 +29,14 @@ import {
   drizzleConnect,
   PgPool,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
-import { and, asc, desc, eq, inArray } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
+import { and, asc, desc, eq, } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod/v4';
 import { logger } from '../lib/logger';
 import { type AuthenticatedUser, authMiddleware } from '../middlewares/auth';
-import type {
-  AdversarialValidationInput,
-  EvidenceItem,
-} from '../services/decision-adversarial-validation';
-import { runAdversarialValidation } from '../services/decision-adversarial-validation';
-import type { DecisionInput } from '../services/decision-policy-engine';
-import { evaluateDecisionPolicy } from '../services/decision-policy-engine';
+import { type AdversarialValidationInput, type EvidenceItem, runAdversarialValidation } from '../services/decision-adversarial-validation';
+import { type DecisionInput, evaluateDecisionPolicy } from '../services/decision-policy-engine';
 import { seedDecisionsIfEmpty } from '../services/decision-seed';
 
 // ─── Dedicated pool for decision-runtime routes ────────────────────────────────

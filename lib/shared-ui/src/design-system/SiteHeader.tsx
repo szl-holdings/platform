@@ -63,7 +63,6 @@ export function SiteHeader({
           : 'bg-transparent',
         className,
       )}
-      role="banner"
     >
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <a

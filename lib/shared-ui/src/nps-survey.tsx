@@ -14,7 +14,7 @@ export interface NpsSurveyProps {
   className?: string;
 }
 
-const SCORE_LABELS: Record<number, string> = {
+const _SCORE_LABELS: Record<number, string> = {
   0: 'Not at all likely',
   5: 'Neutral',
   10: 'Extremely likely',

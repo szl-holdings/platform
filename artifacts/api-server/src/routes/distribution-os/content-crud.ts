@@ -1,11 +1,8 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   db,
-  dosAbTestsTable,
-  dosAnalyticsEventsTable,
   dosArticlesTable,
   dosArticleVersionsTable,
-  dosAudienceSegmentsTable,
   dosAuthorProfilesTable,
   dosAutomationRunsTable,
   dosCampaignLinksTable,
@@ -13,7 +10,6 @@ import {
   dosCarouselProjectsTable,
   dosCarouselSlidesTable,
   dosContentCalendarItemsTable,
-  dosContentLifecycleTable,
   dosCtaBlocksTable,
   dosDistributionTargetsTable,
   dosEditorialPillarsTable,
@@ -21,14 +17,9 @@ import {
   dosLeadNotesTable,
   dosLeadsTable,
   dosLinktreeConfigTable,
-  dosMonetizationRulesTable,
   dosNewslettersTable,
   dosPageViewsTable,
-  dosPublicationUrlsTable,
-  dosSeoKeywordsTable,
   dosSiteSettingsTable,
-  dosTrendSignalsTable,
-  dosViralityScoresTable,
   dosXPostsTable,
   insertDosArticleSchema,
   insertDosAuthorProfileSchema,
@@ -45,8 +36,7 @@ import {
   insertDosNewsletterSchema,
   insertDosXPostSchema,
 } from '@szl-holdings/db';
-import { createHash, randomBytes } from 'crypto';
-import { and, asc, count, desc, eq, gte, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { sendBadRequest, sendError, sendNotFound } from '../../lib/api-response';
@@ -741,7 +731,7 @@ router.post(
 router.get(
   '/calendar',
   validateQuery(listQuerySchema),
-  async (req: Request, res: Response): Promise<void> => {
+  async (_req: Request, res: Response): Promise<void> => {
     const items = await db
       .select()
       .from(dosContentCalendarItemsTable)

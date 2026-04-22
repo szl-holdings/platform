@@ -10,7 +10,6 @@ import {
   Layers,
   Loader2,
   RefreshCw,
-  Shield,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -98,9 +97,9 @@ function apiChangeToTwinChange(ev: ApiChangeEvent): TwinChange {
     ) as Domain) ?? 'alloy';
   const changeType: ChangeType =
     ENTITY_TYPE_CHANGE[ev.entityType] ??
-    (delta['status'] === 'resolved'
+    (delta.status === 'resolved'
       ? 'drift_resolved'
-      : delta['status'] === 'pending'
+      : delta.status === 'pending'
         ? 'approval_pending'
         : 'twin_synced');
 
@@ -113,15 +112,15 @@ function apiChangeToTwinChange(ev: ApiChangeEvent): TwinChange {
       second: '2-digit',
     }),
     domain,
-    twinName: (delta['twinName'] as string) ?? (delta['name'] as string) ?? ev.entityId,
+    twinName: (delta.twinName as string) ?? (delta.name as string) ?? ev.entityId,
     changeType,
     summary:
-      (delta['summary'] as string) ??
-      (delta['description'] as string) ??
+      (delta.summary as string) ??
+      (delta.description as string) ??
       `${ev.entityType} updated — actor: ${ev.actorId}`,
-    driftDelta: delta['driftScore'] as number | undefined,
-    severity: delta['severity'] as TwinChange['severity'] | undefined,
-    worldline: delta['worldline'] as string | undefined,
+    driftDelta: delta.driftScore as number | undefined,
+    severity: delta.severity as TwinChange['severity'] | undefined,
+    worldline: delta.worldline as string | undefined,
     actor: ev.actorId,
   };
 }
@@ -308,7 +307,7 @@ function DriftPill({ delta }: { delta: number }) {
 
 export default function WhatChanged() {
   const [domainFilter, setDomainFilter] = useState<Domain | 'all'>('all');
-  const [typeFilter, setTypeFilter] = useState<ChangeType | 'all'>('all');
+  const [typeFilter, _setTypeFilter] = useState<ChangeType | 'all'>('all');
 
   const {
     data: changeData,

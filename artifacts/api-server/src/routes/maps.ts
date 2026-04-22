@@ -54,7 +54,7 @@ router.get(
       res.set('Cache-Control', 'public, max-age=86400');
       const buffer = await upstream.arrayBuffer();
       res.send(Buffer.from(buffer));
-    } catch (err) {
+    } catch (_err) {
       res.status(502).json({ error: 'Failed to fetch from Google Maps' });
     }
   },
@@ -84,7 +84,7 @@ router.get(
       const upstream = await fetch(upstreamUrl);
       const data = (await upstream.json()) as Record<string, unknown>;
       res.json(data);
-    } catch (err) {
+    } catch (_err) {
       res.status(502).json({ error: 'Failed to geocode address' });
     }
   },

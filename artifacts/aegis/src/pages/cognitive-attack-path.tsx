@@ -8,13 +8,11 @@ import {
   CheckCircle,
   ChevronRight,
   Eye,
-  Lock,
   Network,
   RefreshCw,
   Server,
   Shield,
   Users,
-  XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 import { AccessDeniedNotice, HttpError, isAccessDenied } from '../components/AccessDeniedNotice';

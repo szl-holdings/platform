@@ -3,11 +3,8 @@ import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  Activity,
-  AlertTriangle,
   CheckCircle,
   Clock,
-  Copy,
   Database,
   GitBranch,
   History,
@@ -15,7 +12,6 @@ import {
   Play,
   Plus,
   RefreshCw,
-  Shield,
   Trash2,
   User,
   Zap,
@@ -525,7 +521,7 @@ export default function SOARBuilder() {
                               </span>
                               <span
                                 className="text-[9px] px-1 py-0.5 rounded"
-                                style={{ color: cfg.color, background: cfg.color + '15' }}
+                                style={{ color: cfg.color, background: `${cfg.color}15` }}
                               >
                                 {cfg.label}
                               </span>

@@ -1,4 +1,4 @@
-import { GitBranch, Loader2, Maximize2, RefreshCw, ZoomIn, ZoomOut } from 'lucide-react';
+import { GitBranch, Loader2, RefreshCw, ZoomIn, ZoomOut } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface GraphNode {
@@ -284,7 +284,7 @@ function layoutNodes(
   });
 
   otherNodes.forEach((n) => {
-    const connectedDomain = edges.find((e) => {
+    const _connectedDomain = edges.find((e) => {
       const srcNode = nodes.find((nd) => nd.id === e.source);
       const tgtNode = nodes.find((nd) => nd.id === e.target);
       return (
@@ -297,9 +297,9 @@ function layoutNodes(
     const domainPos = domainMatch ? placed.get(domainMatch.id) : null;
 
     if (domainPos) {
-      const angle = Math.random() * 2 * Math.PI;
+      const _angle = Math.random() * 2 * Math.PI;
       const r = entityRadius * (0.85 + Math.random() * 0.15);
-      const dp = placed.get(domainMatch!.id)!;
+      const dp = placed.get(domainMatch?.id ?? '')!;
       const angleFromCenter = Math.atan2(dp.y - cy, dp.x - cx);
       const spread = 0.6;
       const finalAngle = angleFromCenter + (Math.random() - 0.5) * spread;
@@ -638,7 +638,7 @@ export function CorrelationMapViz({ apiBase = '' }: CorrelationMapVizProps) {
                     dy={r + 10}
                     style={{ pointerEvents: 'none', userSelect: 'none' }}
                   >
-                    {node.label.length > 14 ? node.label.slice(0, 13) + '…' : node.label}
+                    {node.label.length > 14 ? `${node.label.slice(0, 13)}…` : node.label}
                   </text>
                 </g>
               );

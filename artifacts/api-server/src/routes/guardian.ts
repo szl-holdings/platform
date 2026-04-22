@@ -218,7 +218,7 @@ function buildLiveApprovalPolicyEvaluation(args: {
 
   // Confidence: prefer caller-supplied; otherwise derive from match status.
   const ctxConfidence =
-    typeof ctx['confidence'] === 'number' ? (ctx['confidence'] as number) : undefined;
+    typeof ctx.confidence === 'number' ? (ctx.confidence as number) : undefined;
   const confidence = ctxConfidence ?? (args.matchedRuleId ? 0.86 : 0.62);
 
   // Risk factors: assemble from real signals on the decision.
@@ -227,9 +227,9 @@ function buildLiveApprovalPolicyEvaluation(args: {
   if (args.outcome === 'require-dual-approval') factors.push('dual-approval-required');
   if (args.rollbackRequired) factors.push('rollback-required');
   if ((args.controlViolations?.length ?? 0) > 0)
-    factors.push(`control-violations:${args.controlViolations!.length}`);
+    factors.push(`control-violations:${args.controlViolations?.length}`);
   if ((args.redactedFields?.length ?? 0) > 0)
-    factors.push(`pii-redacted:${args.redactedFields!.length}`);
+    factors.push(`pii-redacted:${args.redactedFields?.length}`);
   if (args.blockedReason) factors.push('policy-blocked');
 
   // Reversibility: regulated/dual-approved tiers and rollback-required actions
@@ -238,12 +238,12 @@ function buildLiveApprovalPolicyEvaluation(args: {
 
   // Affected entities: pull common id-bearing fields out of the context.
   const affectedEntityIds = pickStrings(
-    ctx['entityId'],
-    ctx['entityIds'],
-    ctx['targetId'],
-    ctx['targetIds'],
-    ctx['resourceId'],
-    ctx['recommendationId'],
+    ctx.entityId,
+    ctx.entityIds,
+    ctx.targetId,
+    ctx.targetIds,
+    ctx.resourceId,
+    ctx.recommendationId,
     args.workflowId ?? undefined,
   ).slice(0, 8);
 
@@ -336,7 +336,7 @@ function buildLiveApprovalPolicyEvaluation(args: {
 function extractPolicyEvaluation(payload: unknown): PolicyEvaluationLike | null {
   if (!payload || typeof payload !== 'object') return null;
   const obj = payload as Record<string, unknown>;
-  const ev = (obj['policyEvaluation'] ?? obj['policy_evaluation']) as
+  const ev = (obj.policyEvaluation ?? obj.policy_evaluation) as
     | PolicyEvaluationLike
     | undefined;
   return ev && typeof ev === 'object' ? ev : null;
@@ -345,8 +345,8 @@ function extractPolicyEvaluation(payload: unknown): PolicyEvaluationLike | null 
 function extractProduct(payload: unknown, fallback?: string | null): string | null {
   if (payload && typeof payload === 'object') {
     const obj = payload as Record<string, unknown>;
-    if (typeof obj['product'] === 'string') return obj['product'] as string;
-    const ev = obj['policyEvaluation'] as { product?: string } | undefined;
+    if (typeof obj.product === 'string') return obj.product as string;
+    const ev = obj.policyEvaluation as { product?: string } | undefined;
     if (ev && typeof ev.product === 'string') return ev.product;
   }
   return fallback ?? null;
@@ -390,7 +390,7 @@ async function recordPolicyDecisionAudit(params: {
         action: params.action,
         decisionReason: params.decisionReason ?? null,
         memoryRefs: ev?.memoryRefs ?? ev?.evidenceChain ?? null,
-        ...(params.extra ?? {}),
+        ...params.extra,
       },
       ipAddress: params.req.ip ?? null,
       userAgent: params.req.get('user-agent') ?? null,
@@ -686,8 +686,8 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { page, limit } = parsePagination(req.query as Record<string, unknown>);
-      const tier = req.query['tier'] as string | undefined;
-      const enabled = req.query['enabled'] as string | undefined;
+      const tier = req.query.tier as string | undefined;
+      const enabled = req.query.enabled as string | undefined;
       const user = req.user;
 
       const conditions: Parameters<typeof and>[0][] = [];
@@ -815,7 +815,7 @@ router.patch(
   ),
   async (req: Request, res: Response) => {
     try {
-      const tierName = req.params['tier'] as string;
+      const tierName = req.params.tier as string;
       const tierParsed = PolicyTierSchema.safeParse(tierName);
       if (!tierParsed.success) {
         sendBadRequest(res, 'Invalid tier name');
@@ -886,8 +886,8 @@ router.patch(
 
 router.get('/policies/:id', authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params['id'] as string, 10);
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id as string, 10);
+    if (Number.isNaN(id)) {
       sendBadRequest(res, 'Invalid policy ID');
       return;
     }
@@ -927,8 +927,8 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params['id'] as string, 10);
-      if (isNaN(id)) {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid policy ID');
         return;
       }
@@ -1083,8 +1083,8 @@ router.patch(
   ),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params['id'] as string, 10);
-      if (isNaN(id)) {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid policy ID');
         return;
       }
@@ -1171,8 +1171,8 @@ router.delete(
   requireRole('super_admin', 'admin'),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params['id'] as string, 10);
-      if (isNaN(id)) {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid policy ID');
         return;
       }
@@ -1215,8 +1215,8 @@ router.get(
   requireRole('super_admin', 'admin', 'ops', 'analyst'),
   async (req: Request, res: Response) => {
     try {
-      const policyId = parseInt(req.params['id'] as string, 10);
-      if (isNaN(policyId)) {
+      const policyId = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(policyId)) {
         sendBadRequest(res, 'Invalid policy ID');
         return;
       }
@@ -1246,8 +1246,8 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     try {
-      const policyId = parseInt(req.params['id'] as string, 10);
-      if (isNaN(policyId)) {
+      const policyId = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(policyId)) {
         sendBadRequest(res, 'Invalid policy ID');
         return;
       }
@@ -1336,9 +1336,9 @@ router.delete(
   requireRole('super_admin', 'admin', 'ops'),
   async (req: Request, res: Response) => {
     try {
-      const policyId = parseInt(req.params['id'] as string, 10);
-      const assignmentId = parseInt(req.params['assignmentId'] as string, 10);
-      if (isNaN(policyId) || isNaN(assignmentId)) {
+      const policyId = parseInt(req.params.id as string, 10);
+      const assignmentId = parseInt(req.params.assignmentId as string, 10);
+      if (Number.isNaN(policyId) || Number.isNaN(assignmentId)) {
         sendBadRequest(res, 'Invalid ID');
         return;
       }
@@ -1392,9 +1392,9 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { page, limit } = parsePagination(req.query as Record<string, unknown>);
-      const domainTag = req.query['domainTag'] as string | undefined;
-      const policyTier = req.query['policyTier'] as string | undefined;
-      const enabled = req.query['enabled'] as string | undefined;
+      const domainTag = req.query.domainTag as string | undefined;
+      const policyTier = req.query.policyTier as string | undefined;
+      const enabled = req.query.enabled as string | undefined;
 
       const conditions: Parameters<typeof and>[0][] = [];
       if (policyTier)
@@ -1429,7 +1429,7 @@ router.get(
 
 router.get('/tools/:toolId', authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const toolId = req.params['toolId'] as string;
+    const toolId = req.params.toolId as string;
     const [row] = await db
       .select()
       .from(toolMeshToolsTable)
@@ -1548,7 +1548,7 @@ router.patch(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const toolId = req.params['toolId'] as string;
+      const toolId = req.params.toolId as string;
       const [existing] = await db
         .select()
         .from(toolMeshToolsTable)
@@ -1647,7 +1647,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const toolId = req.params['toolId'] as string;
+      const toolId = req.params.toolId as string;
       const [toolRow] = await db
         .select({ id: toolMeshToolsTable.id })
         .from(toolMeshToolsTable)
@@ -1707,7 +1707,7 @@ router.get(
 
 router.get('/tools/:toolId/versions', authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const toolId = req.params['toolId'] as string;
+    const toolId = req.params.toolId as string;
     const [tool] = await db
       .select({ id: toolMeshToolsTable.id })
       .from(toolMeshToolsTable)
@@ -1741,7 +1741,7 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     try {
-      const toolId = req.params['toolId'] as string;
+      const toolId = req.params.toolId as string;
       const body = req.body as {
         version?: string;
         changelog?: string;
@@ -1797,7 +1797,7 @@ router.get(
   requireRole('super_admin', 'admin', 'ops', 'analyst'),
   async (req: Request, res: Response) => {
     try {
-      const toolId = req.params['toolId'] as string;
+      const toolId = req.params.toolId as string;
       const [tool] = await db
         .select({ id: toolMeshToolsTable.id })
         .from(toolMeshToolsTable)
@@ -1833,7 +1833,7 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     try {
-      const toolId = req.params['toolId'] as string;
+      const toolId = req.params.toolId as string;
       const body = req.body as {
         subjectType?: ToolMeshToolPermission['subjectType'];
         subjectId?: string;
@@ -1914,9 +1914,9 @@ router.delete(
   requireRole('super_admin', 'admin'),
   async (req: Request, res: Response) => {
     try {
-      const toolId = req.params['toolId'] as string;
-      const permissionId = parseInt(req.params['permissionId'] as string, 10);
-      if (isNaN(permissionId)) {
+      const toolId = req.params.toolId as string;
+      const permissionId = parseInt(req.params.permissionId as string, 10);
+      if (Number.isNaN(permissionId)) {
         sendBadRequest(res, 'Invalid permission ID');
         return;
       }
@@ -1968,9 +1968,9 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { page, limit } = parsePagination(req.query as Record<string, unknown>);
-      const status = req.query['status'] as string | undefined;
-      const agentId = req.query['agentId'] as string | undefined;
-      const toolId = req.query['toolId'] as string | undefined;
+      const status = req.query.status as string | undefined;
+      const agentId = req.query.agentId as string | undefined;
+      const toolId = req.query.toolId as string | undefined;
       const user = req.user;
 
       const conditions: Parameters<typeof and>[0][] = [];
@@ -2077,7 +2077,7 @@ router.get(
       ] as const;
       type GuardianDecision = (typeof ALLOWED_DECISIONS)[number];
       const rawDecision =
-        typeof req.query['decision'] === 'string' ? (req.query['decision'] as string) : '';
+        typeof req.query.decision === 'string' ? (req.query.decision as string) : '';
       let decision: GuardianDecision | null = null;
       if (rawDecision) {
         if (!(ALLOWED_DECISIONS as readonly string[]).includes(rawDecision)) {
@@ -2086,11 +2086,11 @@ router.get(
         }
         decision = rawDecision as GuardianDecision;
       }
-      const domain = req.query['domain'] as string | undefined;
-      const agentId = req.query['agentId'] as string | undefined;
-      const sinceParam = req.query['since'] as string | undefined;
-      const rawLimit = parseInt((req.query['limit'] as string) ?? '50', 10);
-      const limit = isNaN(rawLimit) ? 50 : Math.min(200, Math.max(1, rawLimit));
+      const domain = req.query.domain as string | undefined;
+      const agentId = req.query.agentId as string | undefined;
+      const sinceParam = req.query.since as string | undefined;
+      const rawLimit = parseInt((req.query.limit as string) ?? '50', 10);
+      const limit = Number.isNaN(rawLimit) ? 50 : Math.min(200, Math.max(1, rawLimit));
 
       const conditions: Parameters<typeof and>[0][] = [];
       const user = req.user;
@@ -2107,7 +2107,7 @@ router.get(
       if (domain) conditions.push(eq(tracesTable.domain, domain));
       if (sinceParam) {
         const sinceDate = new Date(sinceParam);
-        if (!isNaN(sinceDate.getTime())) {
+        if (!Number.isNaN(sinceDate.getTime())) {
           conditions.push(sql`${guardianActionsTable.decidedAt} >= ${sinceDate}`);
         }
       }
@@ -2231,10 +2231,10 @@ router.get(
   requireRole('super_admin', 'admin', 'ops', 'analyst', 'compliance', 'exec'),
   async (req: Request, res: Response) => {
     try {
-      const rawWindow = parseInt((req.query['windowMinutes'] as string) ?? '60', 10);
-      const windowMinutes = isNaN(rawWindow) ? 60 : Math.min(1440, Math.max(1, rawWindow));
-      const rawLimit = parseInt((req.query['limit'] as string) ?? '10', 10);
-      const limit = isNaN(rawLimit) ? 10 : Math.min(50, Math.max(1, rawLimit));
+      const rawWindow = parseInt((req.query.windowMinutes as string) ?? '60', 10);
+      const windowMinutes = Number.isNaN(rawWindow) ? 60 : Math.min(1440, Math.max(1, rawWindow));
+      const rawLimit = parseInt((req.query.limit as string) ?? '10', 10);
+      const limit = Number.isNaN(rawLimit) ? 10 : Math.min(50, Math.max(1, rawLimit));
       const since = new Date(Date.now() - windowMinutes * 60_000);
 
       const user = req.user;
@@ -2387,8 +2387,8 @@ router.get(
 
 router.get('/actions/:id', authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params['id'] as string, 10);
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id as string, 10);
+    if (Number.isNaN(id)) {
       sendBadRequest(res, 'Invalid action ID');
       return;
     }
@@ -2509,39 +2509,39 @@ router.post(
 
       const callerEval =
         incomingPayload &&
-        typeof incomingPayload['policyEvaluation'] === 'object' &&
-        incomingPayload['policyEvaluation'] !== null
-          ? (incomingPayload['policyEvaluation'] as Record<string, unknown>)
+        typeof incomingPayload.policyEvaluation === 'object' &&
+        incomingPayload.policyEvaluation !== null
+          ? (incomingPayload.policyEvaluation as Record<string, unknown>)
           : null;
 
       const callerMemoryRefs = Array.isArray(callerEval?.memoryRefs)
-        ? (callerEval!.memoryRefs as unknown[])
+        ? (callerEval?.memoryRefs as unknown[])
         : [];
       const mergedMemoryRefs =
         callerMemoryRefs.length >= 3 ? callerMemoryRefs : synthesized.memoryRefs;
 
       const repairedEvaluation: UiPolicyEvaluation = {
         ...synthesized,
-        ...(callerEval ?? {}),
+        ...callerEval,
         // Force the four UI-critical fields to be well-formed.
         resolvedMode:
-          (callerEval?.['resolvedMode'] as UiPolicyMode | undefined) ?? synthesized.resolvedMode,
+          (callerEval?.resolvedMode as UiPolicyMode | undefined) ?? synthesized.resolvedMode,
         projectedRisk:
           callerEval &&
-          typeof callerEval['projectedRisk'] === 'object' &&
-          callerEval['projectedRisk'] !== null
-            ? (callerEval['projectedRisk'] as UiPolicyEvaluation['projectedRisk'])
+          typeof callerEval.projectedRisk === 'object' &&
+          callerEval.projectedRisk !== null
+            ? (callerEval.projectedRisk as UiPolicyEvaluation['projectedRisk'])
             : synthesized.projectedRisk,
         projectedImpact:
           callerEval &&
-          typeof callerEval['projectedImpact'] === 'object' &&
-          callerEval['projectedImpact'] !== null
-            ? (callerEval['projectedImpact'] as UiPolicyEvaluation['projectedImpact'])
+          typeof callerEval.projectedImpact === 'object' &&
+          callerEval.projectedImpact !== null
+            ? (callerEval.projectedImpact as UiPolicyEvaluation['projectedImpact'])
             : synthesized.projectedImpact,
         memoryRefs: mergedMemoryRefs as UiPolicyEvaluation['memoryRefs'],
         evaluationId:
-          (callerEval?.['evaluationId'] as string | undefined) ?? synthesized.evaluationId,
-        evaluatedAt: (callerEval?.['evaluatedAt'] as number | undefined) ?? synthesized.evaluatedAt,
+          (callerEval?.evaluationId as string | undefined) ?? synthesized.evaluationId,
+        evaluatedAt: (callerEval?.evaluatedAt as number | undefined) ?? synthesized.evaluatedAt,
       };
 
       const enrichedPayload: Record<string, unknown> = {
@@ -2588,8 +2588,8 @@ router.post(
 
 const approveActionHandler = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params['id'] as string, 10);
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id as string, 10);
+    if (Number.isNaN(id)) {
       sendBadRequest(res, 'Invalid action ID');
       return;
     }
@@ -2651,8 +2651,8 @@ const approveActionHandler = async (req: Request, res: Response) => {
 
 const rejectActionHandler = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params['id'] as string, 10);
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id as string, 10);
+    if (Number.isNaN(id)) {
       sendBadRequest(res, 'Invalid action ID');
       return;
     }
@@ -2756,8 +2756,8 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { page, limit } = parsePagination(req.query as Record<string, unknown>);
-      const status = req.query['status'] as string | undefined;
-      const tier = req.query['tier'] as string | undefined;
+      const status = req.query.status as string | undefined;
+      const tier = req.query.tier as string | undefined;
       const user = req.user;
 
       const conditions: Parameters<typeof and>[0][] = [];
@@ -2802,7 +2802,7 @@ router.get(
   requireRole('super_admin', 'admin', 'ops', 'compliance', 'exec'),
   async (req: Request, res: Response) => {
     try {
-      const requestId = req.params['requestId'] as string;
+      const requestId = req.params.requestId as string;
       const [approval] = await db
         .select()
         .from(guardianApprovalRequestsTable)
@@ -2842,7 +2842,7 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     try {
-      const requestId = req.params['requestId'] as string;
+      const requestId = req.params.requestId as string;
       const { decision, note } = req.body as { decision?: string; note?: string };
 
       if (!decision || !['approved', 'rejected'].includes(decision)) {
@@ -2893,7 +2893,7 @@ router.post(
       }
       const resolvedApproverRole = matchingRole ?? userRoles[0] ?? 'operator';
 
-      if (currentApprovals.find((a) => a['approverId'] === resolvedApproverId)) {
+      if (currentApprovals.find((a) => a.approverId === resolvedApproverId)) {
         sendBadRequest(res, 'You have already submitted a review for this approval request');
         return;
       }
@@ -2913,9 +2913,9 @@ router.post(
       if (decision === 'rejected') {
         newStatus = 'rejected';
       } else if (isDualApproval) {
-        const approved = updatedApprovals.filter((a) => a['decision'] === 'approved');
-        const distinctIds = new Set(approved.map((a) => a['approverId']));
-        const distinctRoles = new Set(approved.map((a) => a['approverRole']));
+        const approved = updatedApprovals.filter((a) => a.decision === 'approved');
+        const distinctIds = new Set(approved.map((a) => a.approverId));
+        const distinctRoles = new Set(approved.map((a) => a.approverRole));
         if (distinctIds.size >= 2 && distinctRoles.size >= 2) newStatus = 'approved';
       } else {
         newStatus = 'approved';
@@ -2969,10 +2969,10 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { page, limit } = parsePagination(req.query as Record<string, unknown>);
-      const product = req.query['product'] as string | undefined;
-      const mode = req.query['mode'] as string | undefined;
-      const decision = req.query['decision'] as string | undefined;
-      const sinceParam = req.query['since'] as string | undefined;
+      const product = req.query.product as string | undefined;
+      const mode = req.query.mode as string | undefined;
+      const decision = req.query.decision as string | undefined;
+      const sinceParam = req.query.since as string | undefined;
 
       const conditions: Parameters<typeof and>[0][] = [
         sql`${auditEventsTable.action} IN ('policy.approve', 'policy.reject')`,
@@ -2982,13 +2982,13 @@ router.get(
       if (decision) conditions.push(eq(auditEventsTable.decision, decision));
       if (sinceParam) {
         const sinceDate = new Date(sinceParam);
-        if (!isNaN(sinceDate.getTime())) {
+        if (!Number.isNaN(sinceDate.getTime())) {
           conditions.push(sql`${auditEventsTable.createdAt} >= ${sinceDate}`);
         }
       }
 
       const where = and(...conditions);
-      const format = (req.query['format'] as string | undefined)?.toLowerCase();
+      const format = (req.query.format as string | undefined)?.toLowerCase();
 
       if (format === 'csv') {
         res.setHeader('Content-Type', 'text/csv; charset=utf-8');
@@ -3016,7 +3016,7 @@ router.get(
           let s = String(v);
           // Neutralize CSV formula injection: prefix cells starting with =, +, -, @, tab, or CR
           // with a single quote so spreadsheet apps treat them as literal text.
-          if (s.length > 0 && /^[=+\-@\t\r]/.test(s)) s = "'" + s;
+          if (s.length > 0 && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
           if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
           return s;
         };
@@ -3025,7 +3025,7 @@ router.get(
             await new Promise<void>((resolve) => res.once('drain', () => resolve()));
           }
         };
-        await writeLine(header.join(',') + '\n');
+        await writeLine(`${header.join(',')}\n`);
 
         const CHUNK = 500;
         let offset = 0;
@@ -3041,16 +3041,16 @@ router.get(
           for (const row of batch) {
             const newValues = (row.newValues as Record<string, unknown> | null) ?? {};
             const action =
-              typeof newValues['action'] === 'string' ? (newValues['action'] as string) : '';
+              typeof newValues.action === 'string' ? (newValues.action as string) : '';
             const impact = (row.projectedImpact as Record<string, unknown> | null) ?? {};
             const severity =
-              typeof impact['severity'] === 'string' ? (impact['severity'] as string) : '';
+              typeof impact.severity === 'string' ? (impact.severity as string) : '';
             const ts =
               row.createdAt instanceof Date
                 ? row.createdAt.toISOString()
                 : String(row.createdAt ?? '');
             await writeLine(
-              [
+              `${[
                 csvEscape(ts),
                 csvEscape(row.userId ?? ''),
                 csvEscape(action),
@@ -3062,7 +3062,7 @@ router.get(
                 csvEscape(severity),
                 csvEscape(row.policyEvaluationId ?? ''),
                 csvEscape(row.entityId ?? ''),
-              ].join(',') + '\n',
+              ].join(',')}\n`,
             );
           }
           if (batch.length < CHUNK) break;
@@ -3107,8 +3107,8 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { page, limit } = parsePagination(req.query as Record<string, unknown>);
-      const status = req.query['status'] as string | undefined;
-      const tier = req.query['tier'] as string | undefined;
+      const status = req.query.status as string | undefined;
+      const tier = req.query.tier as string | undefined;
       const user = req.user;
 
       const conditions: Parameters<typeof and>[0][] = [];
@@ -3149,8 +3149,8 @@ router.get(
 
 router.get('/rollback-events/:id', authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params['id'] as string, 10);
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id as string, 10);
+    if (Number.isNaN(id)) {
       sendBadRequest(res, 'Invalid rollback event ID');
       return;
     }
@@ -3255,8 +3255,8 @@ router.patch(
   ),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params['id'] as string, 10);
-      if (isNaN(id)) {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid rollback event ID');
         return;
       }
@@ -3673,8 +3673,8 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { page, limit } = parsePagination(req.query as Record<string, unknown>);
-      const guardrailType = req.query['guardrailType'] as string | undefined;
-      const enabled = req.query['enabled'] as string | undefined;
+      const guardrailType = req.query.guardrailType as string | undefined;
+      const enabled = req.query.enabled as string | undefined;
       const user = req.user;
 
       const conditions: Parameters<typeof and>[0][] = [];
@@ -3741,8 +3741,8 @@ router.get(
   requireRole('super_admin', 'admin', 'ops', 'analyst'),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params['id'] as string, 10);
-      if (isNaN(id)) {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid guardrail config ID');
         return;
       }
@@ -3867,8 +3867,8 @@ router.patch(
   ),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params['id'] as string, 10);
-      if (isNaN(id)) {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid guardrail config ID');
         return;
       }
@@ -3937,8 +3937,8 @@ router.delete(
   requireRole('super_admin', 'admin'),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params['id'] as string, 10);
-      if (isNaN(id)) {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid guardrail config ID');
         return;
       }

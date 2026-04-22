@@ -2,36 +2,24 @@ import { color } from '@szl-holdings/design-system';
 import {
   Activity,
   AlertTriangle,
-  Anchor,
-  Bell,
-  BellOff,
   Building2,
-  ChevronDown,
   ChevronRight,
   Circle,
   Compass,
   Crosshair,
   Eye,
   EyeOff,
-  Flame,
   Globe,
-  Layers,
-  Lock,
-  MapPin,
-  Radio,
   RotateCcw,
   Scale,
-  Search,
   Shield,
   Ship,
-  Target,
   X,
   ZoomIn,
   ZoomOut,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
-import { cn } from '@/lib/utils';
 
 const DS = {
   bg: '#070b12',
@@ -458,7 +446,7 @@ function drawGlobe(
 function drawGeofences(
   ctx: CanvasRenderingContext2D,
   geofences: GeofenceZone[],
-  activeLayers: Set<DomainKey>,
+  _activeLayers: Set<DomainKey>,
   rotation: number,
   zoom: number,
   canvas: { width: number; height: number },
@@ -471,12 +459,12 @@ function drawGeofences(
     const radiusPx = (gf.radiusKm / 20000) * R * Math.PI * pos.z;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, Math.max(4, radiusPx), 0, Math.PI * 2);
-    ctx.strokeStyle = gf.color + '60';
+    ctx.strokeStyle = `${gf.color}60`;
     ctx.lineWidth = 1;
     ctx.setLineDash([4, 4]);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = gf.color + '10';
+    ctx.fillStyle = `${gf.color}10`;
     ctx.fill();
   }
 }
@@ -511,11 +499,11 @@ function drawEntities(
       const pulse = (Math.sin(tick * 0.05) + 1) / 2;
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, size + 8 + pulse * 4, 0, Math.PI * 2);
-      ctx.fillStyle = color + '18';
+      ctx.fillStyle = `${color}18`;
       ctx.fill();
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, size + 4 + pulse * 2, 0, Math.PI * 2);
-      ctx.fillStyle = color + '25';
+      ctx.fillStyle = `${color}25`;
       ctx.fill();
     }
 
@@ -553,7 +541,7 @@ function drawEntities(
         pos.x - Math.cos(headingRad) * trailLen,
         pos.y - Math.sin(headingRad) * trailLen,
       );
-      trail.addColorStop(0, color + '50');
+      trail.addColorStop(0, `${color}50`);
       trail.addColorStop(1, 'transparent');
       ctx.strokeStyle = trail;
       ctx.lineWidth = 1;
@@ -660,7 +648,7 @@ export default function MeridianPage() {
   const [proximityRadiusKm, setProximityRadiusKm] = useState(500);
   const [proximityResults, setProximityResults] = useState<GeoEntity[]>([]);
   const [alerts] = useState(GEOFENCE_ALERTS);
-  const [showAlerts, setShowAlerts] = useState(true);
+  const [_showAlerts, _setShowAlerts] = useState(true);
   const [showGeofences, setShowGeofences] = useState(true);
   const [activePanel, setActivePanel] = useState<'layers' | 'geofence' | 'alerts' | 'proximity'>(
     'layers',
@@ -1082,8 +1070,8 @@ export default function MeridianPage() {
                           style={{ color: DS.text.muted }}
                         >
                           {haversineKm(
-                            proximityCenter!.lat,
-                            proximityCenter!.lng,
+                            proximityCenter?.lat ?? 0,
+                            proximityCenter?.lng ?? 0,
                             e.lat,
                             e.lng,
                           ).toFixed(0)}

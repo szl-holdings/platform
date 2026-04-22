@@ -38,10 +38,7 @@ import {
   Send,
   Settings,
   Shuffle,
-  Target,
-  TrendingUp,
   Twitter,
-  UserPlus,
   Users,
   Zap,
 } from 'lucide-react';
@@ -156,7 +153,7 @@ export function DistributionOsLayout({
             </h2>
           </div>
           {NAV_ITEMS.map((item) => {
-            const active = currentPath === item.href || currentPath.startsWith(item.href + '/');
+            const active = currentPath === item.href || currentPath.startsWith(`${item.href}/`);
             return (
               <a
                 key={item.href}
@@ -459,7 +456,7 @@ export default function DistributionOsDashboard() {
   };
 
   const conversionRate =
-    s.visitsThisWeek > 0 ? ((s.leadsThisWeek / s.visitsThisWeek) * 100).toFixed(1) + '%' : '0.0%';
+    s.visitsThisWeek > 0 ? `${((s.leadsThisWeek / s.visitsThisWeek) * 100).toFixed(1)}%` : '0.0%';
 
   const pipelineTotal = s.xQueued + s.xSentTotal + (s.xFailed || 0);
 

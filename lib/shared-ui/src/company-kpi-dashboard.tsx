@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export interface CompanyKPI {
   id: string;
@@ -317,8 +317,8 @@ function Sparkline({
         opacity="0.8"
       />
       <circle
-        cx={pts[pts.length - 1]!.split(',')[0]!}
-        cy={pts[pts.length - 1]!.split(',')[1]!}
+        cx={pts[pts.length - 1]?.split(',')[0]!}
+        cy={pts[pts.length - 1]?.split(',')[1]!}
         r="2.5"
         fill={color}
         opacity="1"

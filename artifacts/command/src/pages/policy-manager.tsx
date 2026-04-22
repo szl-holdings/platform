@@ -117,7 +117,7 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
     ...init,
     headers: {
       ...(csrf ? { 'x-csrf-token': csrf } : {}),
-      ...(init?.headers ?? {}),
+      ...init?.headers,
     },
   });
 }

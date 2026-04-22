@@ -82,7 +82,7 @@ interface ListResponse<T> {
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+    headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
   });
   if (!res.ok) {
@@ -135,13 +135,13 @@ const TIER_COLORS: Record<
 };
 
 function tierStyle(tier: GuardianTier) {
-  return TIER_COLORS[tier] ?? TIER_COLORS['advisory'];
+  return TIER_COLORS[tier] ?? TIER_COLORS.advisory;
 }
 
 function timeAgo(iso?: string | null): string {
   if (!iso) return '—';
   const t = new Date(iso).getTime();
-  if (isNaN(t)) return iso;
+  if (Number.isNaN(t)) return iso;
   const s = Math.max(1, Math.floor((Date.now() - t) / 1000));
   if (s < 60) return `${s}s ago`;
   const m = Math.floor(s / 60);

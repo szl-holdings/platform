@@ -10,15 +10,17 @@
  *   createDrizzleInstrumentation(pool);
  */
 import * as api from '@opentelemetry/api';
-import type { Pool } from 'pg';
+
+interface PoolLike {
+  query: (...args: unknown[]) => Promise<unknown>;
+}
 
 const SLOW_QUERY_MS = 500;
 
-export function createDrizzleInstrumentation(pool: Pool): void {
+export function createDrizzleInstrumentation(pool: PoolLike): void {
   const tracer = api.trace.getTracer('drizzle-orm');
-  const originalQuery = pool.query.bind(pool) as typeof pool.query;
+  const originalQuery = pool.query.bind(pool) as PoolLike['query'];
 
-  // @ts-expect-error — overriding overloaded pool.query for instrumentation
   pool.query = async function instrumentedQuery(...args: unknown[]) {
     const sql =
       typeof args[0] === 'string' ? args[0] : ((args[0] as { text?: string })?.text ?? 'unknown');
@@ -37,7 +39,6 @@ export function createDrizzleInstrumentation(pool: Pool): void {
           'db.statement': sql.slice(0, 512),
         });
         try {
-          // @ts-expect-error — spread over overloaded function
           const result = await originalQuery(...args);
           const durationMs = Date.now() - start;
           span.setAttribute('db.duration_ms', durationMs);

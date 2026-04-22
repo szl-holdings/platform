@@ -13,8 +13,8 @@
  * If GITHUB_TOKEN is not set, this script will print manual fallback instructions.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || null;
 const USERNAME = process.argv[2] || 'stephenlutar2-hash';
@@ -36,35 +36,12 @@ interface StarredRepo {
 }
 
 function printManualFallback() {
-  console.log('\n================================================================');
-  console.log('  MANUAL FALLBACK — GitHub Auth Not Available');
-  console.log('================================================================\n');
-  console.log('To export your starred repos manually:\n');
-  console.log(
-    '  Option 1: GitHub CLI\n' +
-      '    gh auth login\n' +
-      `    gh api users/${USERNAME}/starred --paginate > exports/github-stars/raw.json\n`,
-  );
-  console.log(
-    '  Option 2: GitHub API with token\n' +
-      '    1. Create a token at https://github.com/settings/tokens (read:user scope)\n' +
-      '    2. Set GITHUB_TOKEN=your_token in your environment\n' +
-      '    3. Re-run this script\n',
-  );
-  console.log(
-    '  Option 3: Manual web export\n' +
-      `    1. Go to https://github.com/${USERNAME}?tab=stars\n` +
-      '    2. Manually copy relevant repos into docs/github/reference-library-index.md\n',
-  );
-  console.log('================================================================\n');
 }
 
 async function fetchAllStarredRepos(): Promise<StarredRepo[]> {
   const repos: StarredRepo[] = [];
   let page = 1;
   const perPage = 100;
-
-  console.log(`Fetching starred repos for @${USERNAME}...`);
 
   while (true) {
     const url = `https://api.github.com/users/${USERNAME}/starred?per_page=${perPage}&page=${page}`;
@@ -74,7 +51,7 @@ async function fetchAllStarredRepos(): Promise<StarredRepo[]> {
     };
 
     if (GITHUB_TOKEN) {
-      headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
+      headers.Authorization = `Bearer ${GITHUB_TOKEN}`;
     }
 
     const response = await fetch(url, { headers });
@@ -95,7 +72,6 @@ async function fetchAllStarredRepos(): Promise<StarredRepo[]> {
     if (data.length === 0) break;
 
     repos.push(...data);
-    console.log(`  Fetched page ${page} (${repos.length} repos total)`);
 
     if (data.length < perPage) break;
     page++;
@@ -147,15 +123,8 @@ function generateMarkdownExport(repos: StarredRepo[]): string {
 }
 
 async function main() {
-  console.log('================================================================');
-  console.log('  SZL Holdings — GitHub Stars Export');
-  console.log(`  User: @${USERNAME}`);
-  console.log('================================================================\n');
 
   if (!GITHUB_TOKEN) {
-    console.warn('WARNING: GITHUB_TOKEN not set. Attempting unauthenticated request.');
-    console.warn('  Rate limit: 60 requests/hour (unauthenticated)');
-    console.warn('  If this fails, set GITHUB_TOKEN and retry.\n');
   }
 
   let repos: StarredRepo[];
@@ -163,13 +132,10 @@ async function main() {
   try {
     repos = await fetchAllStarredRepos();
   } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    console.error(`\nFailed to fetch starred repos: ${msg}`);
+    const _msg = error instanceof Error ? error.message : String(error);
     printManualFallback();
     process.exit(1);
   }
-
-  console.log(`\nFetched ${repos.length} starred repos.\n`);
 
   // Ensure output directory exists
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -177,13 +143,11 @@ async function main() {
   // Write JSON
   const jsonPath = path.join(OUTPUT_DIR, 'starred-repos.json');
   fs.writeFileSync(jsonPath, JSON.stringify(repos, null, 2));
-  console.log(`JSON export: ${jsonPath}`);
 
   // Write Markdown
   const markdown = generateMarkdownExport(repos);
   const mdPath = path.join(OUTPUT_DIR, 'starred-repos.md');
   fs.writeFileSync(mdPath, markdown);
-  console.log(`Markdown export: ${mdPath}`);
 
   // Write summary
   const summaryPath = path.join(OUTPUT_DIR, 'export-summary.md');
@@ -201,12 +165,8 @@ async function main() {
     `- \`starred-repos.md\` — Readable report\n` +
     `- \`export-summary.md\` — This file\n`;
   fs.writeFileSync(summaryPath, summary);
-  console.log(`Summary: ${summaryPath}`);
-
-  console.log('\nDone.');
 }
 
-main().catch((err) => {
-  console.error('Unexpected error:', err);
+main().catch((_err) => {
   process.exit(1);
 });

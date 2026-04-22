@@ -2,7 +2,6 @@ import { bodyShape } from '@szl-holdings/contracts/common';
 import { db, pushNotificationPreferencesTable } from '@szl-holdings/db';
 import { and, eq } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
-import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendNoContent, sendSuccess } from '../lib/api-response';
 import { pushPreferenceUpdateSchema, validateBody } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
@@ -31,7 +30,7 @@ const CATEGORIES_BY_APP: Record<string, string[]> = {
 
 router.get('/push-preferences', authMiddleware(), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const preferences = await db
       .select()
       .from(pushNotificationPreferencesTable)
@@ -44,7 +43,7 @@ router.get('/push-preferences', authMiddleware(), async (req, res) => {
 
 router.get('/push-preferences/:appId', authMiddleware(), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const { appId } = req.params as { appId: string };
 
     if (!VALID_APP_IDS.includes(appId)) {
@@ -73,7 +72,7 @@ router.put(
   validateBody(pushPreferenceUpdateSchema),
   async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const { appId, category } = req.params as { appId: string; category: string };
       const { enabled } = req.body;
 
@@ -135,7 +134,7 @@ router.delete(
   authMiddleware(),
   async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const { appId } = req.params as { appId: string };
 
       await db

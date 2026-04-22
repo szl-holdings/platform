@@ -1,18 +1,12 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
   Activity,
-  AlertTriangle,
   Brain,
-  CheckCircle2,
-  ChevronRight,
   Clock,
   Eye,
-  GitBranch,
   Info,
-  Layers,
   Shield,
   Target,
-  Zap,
 } from 'lucide-react';
 import { CognitiveLayout } from './cognitive-layout';
 

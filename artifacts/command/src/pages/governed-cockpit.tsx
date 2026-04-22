@@ -8,7 +8,7 @@ import {
   color,
 } from '@szl-holdings/design-system';
 import { Activity, AlertTriangle, Command, Loader2, TrendingUp } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const ACCENT = productAccent.command;
 

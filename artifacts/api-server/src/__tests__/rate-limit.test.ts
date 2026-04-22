@@ -26,8 +26,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import express from "express";
-import type { RequestHandler, Router as ExpressRouter } from "express";
+import express, { type RequestHandler, type Router as ExpressRouter } from 'express';
 import request from "supertest";
 
 // ---------------------------------------------------------------------------
@@ -78,7 +77,7 @@ vi.mock("@szl-holdings/db", () => ({
 vi.mock("express-rate-limit", async (importOriginal) => {
   const actual = await importOriginal<typeof import("express-rate-limit")>();
   const patched = (opts: Parameters<typeof actual.default>[0]) =>
-    actual.default({ ...(opts ?? {}), max: 2 });
+    actual.default({ ...opts, max: 2 });
   return { default: patched, rateLimit: patched };
 });
 
@@ -422,8 +421,8 @@ describe("simulationLimiter — express-rate-limit behaviour (standalone, per-te
         .post("/monte-carlo/simulate")
         .send({ scenarioId: "s1" });
     }
-    expect(lastRes!.status).toBe(429);
-    expect(lastRes!.headers["ratelimit-reset"]).toBeDefined();
+    expect(lastRes?.status).toBe(429);
+    expect(lastRes?.headers["ratelimit-reset"]).toBeDefined();
   });
 
   it("returns expected 429 message body from the simulationLimiter", async () => {
@@ -433,8 +432,8 @@ describe("simulationLimiter — express-rate-limit behaviour (standalone, per-te
         .post("/monte-carlo/simulate")
         .send({ scenarioId: "s1" });
     }
-    expect(lastRes!.status).toBe(429);
-    const body = lastRes!.body as { error?: string };
+    expect(lastRes?.status).toBe(429);
+    const body = lastRes?.body as { error?: string };
     expect(typeof body.error).toBe("string");
     expect(body.error).toMatch(/simulation/i);
   });
@@ -446,8 +445,8 @@ describe("simulationLimiter — express-rate-limit behaviour (standalone, per-te
         .post("/monte-carlo/simulate")
         .send({ scenarioId: "s1" });
     }
-    expect(lastRes!.status).toBe(429);
-    expect(Number(lastRes!.headers["ratelimit-remaining"])).toBe(0);
+    expect(lastRes?.status).toBe(429);
+    expect(Number(lastRes?.headers["ratelimit-remaining"])).toBe(0);
   });
 });
 
@@ -492,8 +491,8 @@ describe("simulationLimiter — REAL monteCarloRouter route wiring (POST /monte-
         .post("/monte-carlo/simulate")
         .send({ scenarioId: "s1" });
     }
-    expect(lastRes!.status).toBe(429);
-    expect(lastRes!.headers["ratelimit-reset"]).toBeDefined();
+    expect(lastRes?.status).toBe(429);
+    expect(lastRes?.headers["ratelimit-reset"]).toBeDefined();
   });
 
   it("real router 429 carries the simulationLimiter error message", async () => {
@@ -503,8 +502,8 @@ describe("simulationLimiter — REAL monteCarloRouter route wiring (POST /monte-
         .post("/monte-carlo/simulate")
         .send({ scenarioId: "s1" });
     }
-    expect(lastRes!.status).toBe(429);
-    const body = lastRes!.body as { error?: string };
+    expect(lastRes?.status).toBe(429);
+    const body = lastRes?.body as { error?: string };
     expect(typeof body.error).toBe("string");
     expect(body.error).toMatch(/simulation/i);
   });

@@ -1,6 +1,6 @@
 import { formatDate as formatSharedDate } from '@szl-holdings/shared-ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Calendar, Check, Shield, User } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Shield, } from 'lucide-react';
 import { useState } from 'react';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
@@ -54,7 +54,7 @@ function getNextBusinessDays(): string[] {
 }
 
 function formatDate(dateStr: string) {
-  return formatSharedDate(new Date(dateStr + 'T12:00:00'), {
+  return formatSharedDate(new Date(`${dateStr}T12:00:00`), {
     intlOptions: { weekday: 'short', month: 'short', day: 'numeric' },
   });
 }
@@ -151,7 +151,7 @@ export default function BookingPage() {
       if (!res.ok) throw new Error('Request failed');
       const data = await res.json();
       setConfirmationId(
-        data.inquiryId ? `CJ-REQ-${data.inquiryId}` : 'CJ-' + Date.now().toString(36).toUpperCase(),
+        data.inquiryId ? `CJ-REQ-${data.inquiryId}` : `CJ-${Date.now().toString(36).toUpperCase()}`,
       );
       setSubmitted(true);
     } catch {

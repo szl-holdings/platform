@@ -1,28 +1,11 @@
 import { m } from 'framer-motion';
 import {
   Activity,
-  AlertTriangle,
-  ArrowUpRight,
-  CheckCircle2,
-  Clock,
-  Cpu,
-  Database,
-  Eye,
-  Gauge,
-  GitBranch,
-  Globe,
-  HardDrive,
   Layers,
-  Lock,
   Plug,
-  RefreshCw,
   type Server,
-  Settings,
-  Shield,
-  Terminal,
   ToggleLeft,
   ToggleRight,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import { SiteFooter } from '@/components/SiteFooter';

@@ -27,7 +27,7 @@ import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@szl-holdings/shared-ui/ui/tabs';
 import { useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Bell, BellOff, CheckCircle2, Clock, EyeOff, Plus, Shield, Trash2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 
 interface FleetAlert {
@@ -250,11 +250,9 @@ export default function AlertCenterPage() {
 
         <TabsContent value="alerts" className="space-y-3">
           {loadingAlerts ? (
-            <>
-              {[...Array(3)].map((_, i) => (
+            [...Array(3)].map((_, i) => (
                 <AlertSkeleton key={i} />
-              ))}
-            </>
+              ))
           ) : alerts.length === 0 ? (
             <EmptyState
               icon={BellOff}

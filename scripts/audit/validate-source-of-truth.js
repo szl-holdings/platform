@@ -16,10 +16,10 @@
  *   1 — one or more checks failed (details printed to stdout)
  */
 
-import { execSync } from 'child_process';
-import { readFileSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { execSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..', '..');
@@ -217,37 +217,18 @@ const crossChecks = [
 
 let failures = 0;
 
-function printChecks(title, checks) {
-  console.log(`\n${title}`);
-  console.log(
-    'Metric'.padEnd(55) +
-    'Expected'.padStart(8) +
-    'Actual'.padStart(8) +
-    'Status'.padStart(8)
-  );
-  console.log('─'.repeat(82));
+function printChecks(_title, checks) {
   for (const { name, expected, actual } of checks) {
     const ok = expected === actual;
     if (!ok) failures++;
-    console.log(
-      name.padEnd(55) +
-      String(expected).padStart(8) +
-      String(actual).padStart(8) +
-      (ok ? '    ✅' : '    ❌')
-    );
   }
-  console.log('─'.repeat(82));
 }
-
-console.log('audit/source-of-truth.json — validation');
 
 printChecks('Phase 1: Filesystem vs source-of-truth.json', fsChecks);
 printChecks('Phase 2: audit/README.md vs source-of-truth.json', crossChecks);
 
 if (failures > 0) {
-  console.log(`\n${failures} check(s) failed. Update audit/source-of-truth.json and the affected docs.\n`);
   process.exit(1);
 } else {
-  console.log('\nAll checks passed.\n');
   process.exit(0);
 }

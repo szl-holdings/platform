@@ -3,8 +3,7 @@ import { SkeletonLoader } from '@szl-holdings/mobile-shared';
 import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import type React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
@@ -67,7 +66,7 @@ function fmt(
   n: number | undefined | null,
   opts?: { currency?: boolean; compact?: boolean },
 ): string {
-  if (n == null || isNaN(n)) return '—';
+  if (n == null || Number.isNaN(n)) return '—';
   if (opts?.currency) {
     if (opts?.compact) {
       if (Math.abs(n) >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;

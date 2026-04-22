@@ -2,13 +2,9 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
   AlertCircle,
-  ArrowRight,
-  Brain,
   CheckCircle2,
-  Clock,
   Moon,
   Sun,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -220,7 +216,7 @@ const DEPTH_CONFIG = {
 export default function DualMindMonitor() {
   const [reflexiveActions, setReflexiveActions] = useState<ReflexiveAction[]>(REFLEXIVE_ACTIONS_SEED);
   const [deliberativeTasks] = useState<DeliberativeTask[]>(DELIBERATIVE_TASKS);
-  const [tick, setTick] = useState(0);
+  const [_tick, setTick] = useState(0);
   const counterRef = useRef(0);
 
   useEffect(() => {

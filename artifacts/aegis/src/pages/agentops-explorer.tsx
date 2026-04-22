@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-const ACCENT = '#ef4444';
+const _ACCENT = '#ef4444';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const API_BASE: string = (import.meta as any).env?.VITE_API_BASE ?? '';
 

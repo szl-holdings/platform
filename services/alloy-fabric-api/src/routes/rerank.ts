@@ -1,8 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { RerankRequestSchema } from '@workspace/aef-contracts';
 import type { PolicyContext } from '@workspace/aef-policy-guard';
-import type { RankCandidate } from '@workspace/alloy-rank-worker';
-import { rankCandidates } from '@workspace/alloy-rank-worker';
+import { type RankCandidate, rankCandidates } from '@workspace/alloy-rank-worker';
 import type { Request, Response, Router } from 'express';
 import { defaultLedgerStore, policyEngine, tenantEnforcer } from '../context.js';
 import { logger } from '../logger.js';

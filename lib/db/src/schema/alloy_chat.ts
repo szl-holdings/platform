@@ -1,4 +1,4 @@
-import { boolean, integer, jsonb, pgTable, real, text, timestamp } from 'drizzle-orm/pg-core';
+import { boolean, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const alloyChatKbDocuments = pgTable('alloy_chat_kb_documents', {
   id: text('id').primaryKey(),

@@ -1,5 +1,5 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
-import { AlertTriangle, ArrowUpRight, CheckCircle, Sparkles, TrendingUp } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Sparkles, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 import { type InsightCategory, insights } from '@/data/seed-data';
 
@@ -159,12 +159,12 @@ export default function Insights() {
                   categoryFilter === cat
                     ? cat === 'all'
                       ? 'bg-primary/15 text-primary'
-                      : cn(config!.bg, config!.color)
+                      : cn(config?.bg, config?.color)
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
                 )}
               >
                 {config && <config.icon className="w-3 h-3" />}
-                {cat === 'all' ? 'All' : config!.label}
+                {cat === 'all' ? 'All' : config?.label}
                 <span className="text-[10px] opacity-60">{categoryCounts[cat]}</span>
               </button>
             );

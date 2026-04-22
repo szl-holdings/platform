@@ -1,22 +1,14 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
-  AlertTriangle,
   ArrowRight,
-  BarChart3,
-  CheckCircle,
   Clock,
   ExternalLink,
   Eye,
   GitBranch,
   Navigation,
-  Package,
-  Shield,
   Ship,
-  TrendingDown,
-  User,
   Zap,
 } from 'lucide-react';
 
@@ -220,7 +212,7 @@ export default function UnifiedCommandDashboard() {
             key={id}
             href={href}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all hover:opacity-80"
-            style={{ borderColor: color + '40', background: color + '10', color }}
+            style={{ borderColor: `${color}40`, background: `${color}10`, color }}
           >
             <Icon className="w-3.5 h-3.5" />
             {label}

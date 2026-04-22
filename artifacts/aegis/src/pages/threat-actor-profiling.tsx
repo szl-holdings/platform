@@ -1,18 +1,10 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import {
-  AlertTriangle,
   ChevronRight,
-  Clock,
-  Eye,
-  FileText,
-  Globe,
   Radio,
-  Search,
-  Shield,
   Target,
   TrendingUp,
   Users,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import {

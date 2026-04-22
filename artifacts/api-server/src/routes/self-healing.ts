@@ -6,7 +6,7 @@ import {
   selfHealingRunsTable,
   usersTable,
 } from '@szl-holdings/db';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
@@ -101,7 +101,7 @@ interface SeedRun {
   auditRef: string;
 }
 
-const SEED_PATTERNS: SeedPattern[] = [
+const _SEED_PATTERNS: SeedPattern[] = [
   {
     patternKey: 'p1',
     name: 'Service Restart on OOM',
@@ -819,7 +819,7 @@ router.patch(
         sendNotFound(res, 'Policy');
         return;
       }
-      const next = !existing[0]!.enabled;
+      const next = !existing[0]?.enabled;
       await db
         .update(selfHealingPatternsTable)
         .set({ enabled: next, updatedAt: new Date() })

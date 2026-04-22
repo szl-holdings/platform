@@ -10,8 +10,8 @@ import { alloyAgentCorrections, db } from '@szl-holdings/db';
 import { desc, eq } from 'drizzle-orm';
 
 const logger = {
-  warn: (obj: Record<string, unknown>, msg: string) =>
-    console.warn('[agent-corrections]', msg, obj),
+  warn: (_obj: Record<string, unknown>, _msg: string) =>
+    {},
 };
 
 export interface CorrectionRecord {

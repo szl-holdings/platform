@@ -6,7 +6,6 @@ import {
 } from '@szl-holdings/design-system';
 import { FileText, Globe, ShieldAlert, TrendingUp, Zap } from 'lucide-react';
 import { useState } from 'react';
-import { sentraTwin } from '@/data/sentra-twin';
 import { DataProvenance } from '@/lib/data-provenance';
 
 const ACCENT = '#ef4444';

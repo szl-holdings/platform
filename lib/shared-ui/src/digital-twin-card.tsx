@@ -4,16 +4,12 @@
  */
 
 import {
-  Activity,
   AlertTriangle,
-  CheckCircle,
   ChevronDown,
   ChevronUp,
   Clock,
   Play,
-  TrendingDown,
   TrendingUp,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 

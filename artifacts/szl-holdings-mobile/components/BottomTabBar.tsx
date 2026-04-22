@@ -1,8 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router, usePathname } from 'expo-router';
-import type React from 'react';
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -185,7 +184,7 @@ export function BottomTabBar() {
   useOperationsBadge();
   useAdvisoryBadge();
 
-  if (HIDDEN_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
+  if (HIDDEN_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`))) {
     return null;
   }
 

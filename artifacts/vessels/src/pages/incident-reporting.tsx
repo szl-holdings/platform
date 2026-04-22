@@ -1,10 +1,8 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
+import { Card, CardContent, } from '@szl-holdings/shared-ui/ui/card';
 import {
   AlertTriangle,
-  Anchor,
   Bomb,
-  ChevronRight,
   Clock,
   Flag,
   MapPin,

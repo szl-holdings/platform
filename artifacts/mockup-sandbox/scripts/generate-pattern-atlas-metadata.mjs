@@ -5,9 +5,9 @@
 //
 // Run from repo root:  node artifacts/mockup-sandbox/scripts/generate-pattern-atlas-metadata.mjs
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), '../../..');
@@ -16,7 +16,7 @@ const INDEX = path.join(SRC, 'index.ts');
 const OUT = path.join(ROOT, 'artifacts/mockup-sandbox/src/pages/patternAtlasMetadata.generated.ts');
 
 function resolveFile(p) {
-  const c = [p + '.tsx', p + '.ts', path.join(p, 'index.tsx'), path.join(p, 'index.ts')];
+  const c = [`${p}.tsx`, `${p}.ts`, path.join(p, 'index.tsx'), path.join(p, 'index.ts')];
   for (const x of c) if (existsSync(x)) return x;
   return null;
 }
@@ -105,13 +105,13 @@ function parseFields(body) {
     const t = line.trim();
     if (!t) { comment = ''; continue; }
     if (t.startsWith('//')) { comment = t.replace(/^\/\/\s*/, ''); continue; }
-    buf += ' ' + line;
+    buf += ` ${line}`;
     const { opens, closes } = bracketBalance(buf);
     if (opens === closes && /[;,]\s*$/.test(buf.trim())) {
       const ft = buf.trim().replace(/[;,]\s*$/, '');
       const ci = findTopColon(ft);
       if (ci > 0) {
-        let nameRaw = ft.slice(0, ci).trim();
+        const nameRaw = ft.slice(0, ci).trim();
         const optional = nameRaw.endsWith('?');
         const fname = nameRaw.replace(/\?$/, '').replace(/^readonly\s+/, '');
         const ty = ft.slice(ci + 1).trim();
@@ -158,7 +158,7 @@ function traceComponentToFile(name, file, depth = 0) {
   return null;
 }
 
-function categorize(name, fromPath, source) {
+function categorize(name, _fromPath, source) {
   const lc = name.toLowerCase();
   if (source.includes('design-system')) {
     if (/(table|chart|kpi|metric|graph|tornado|pressure|confidence|review)/.test(lc)) return 'Data Display';
@@ -167,13 +167,13 @@ function categorize(name, fromPath, source) {
     if (/(audit|evidence|export|inquiry)/.test(lc)) return 'Forms & Drawers';
     return 'Design System';
   }
-  if (source.includes('/pulse/') || /^Pulse/.test(name)) return 'Pulse';
+  if (source.includes('/pulse/') || name.startsWith('Pulse')) return 'Pulse';
   if (source.includes('document-engine')) return 'Document Engine';
   if (source.includes('/onboarding/')) return 'Onboarding';
   if (source.includes('/analytics')) return 'Analytics';
   if (source.includes('receipt-graph') || /Provenance|Receipt|Trust/.test(name)) return 'Receipt Graph';
-  if (source.includes('operational-primitives') || /^Operational/.test(name)) return 'Operational Primitives';
-  if (/^Cortex/.test(name)) return 'Cortex AI';
+  if (source.includes('operational-primitives') || name.startsWith('Operational')) return 'Operational Primitives';
+  if (name.startsWith('Cortex')) return 'Cortex AI';
   if (/(autonomy|alloydecision|decisioncard|decisionshield|decisionreceipt|decisioncenter|simulation|whatif|recommendation|alloy)/.test(lc)) return 'AI Controls';
   if (/(constellation|knowledge|hierarchical|timelinegraph|nodedetail|graphlegend|graphstats|graphqldata|tornado|cohort|funnel|probabilitydensity|cumulativedist|confidenceband|scenariocomparison|simulationresult)/.test(lc)) return 'Visualization';
   if (/(twin|sourcehealth|freshness|status|sync|realtime|policyresult|policyverdict|stale|servicestatus)/.test(lc)) return 'Monitoring';
@@ -208,7 +208,7 @@ function isComponent(n) { for (const s of TYPE_SUFFIXES) if (n.endsWith(s)) retu
 
 function shortType(t) {
   let s = String(t).replace(/\s+/g, ' ').trim();
-  if (s.length > 120) s = s.slice(0, 117) + '\u2026';
+  if (s.length > 120) s = `${s.slice(0, 117)}\u2026`;
   return s;
 }
 
@@ -290,7 +290,6 @@ function main() {
   lines.push('');
 
   writeFileSync(OUT, lines.join('\n'));
-  console.log(`Wrote ${OUT} (${components.length} components)`);
 }
 
 main();

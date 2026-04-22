@@ -4,7 +4,6 @@ import {
   type Cohort,
   getAquilaColor,
   getAquilaLabel,
-  getClassificationColor,
   getThreatColor,
   IMPERIUM_DATA,
   type Legion,

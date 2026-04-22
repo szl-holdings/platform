@@ -1,5 +1,4 @@
-import type { UsdExportResult, UsdPrim, UsdStage } from './serializer.js';
-import { buildExportResult } from './serializer.js';
+import { type UsdExportResult, type UsdPrim, type UsdStage, buildExportResult } from './serializer.js';
 
 export interface ThreatActor {
   id: string;
@@ -92,7 +91,7 @@ export function exportSecurityScenario(scenario: SecurityScenario): UsdExportRes
   };
 
   scenario.threatActors?.forEach((actor, i) => {
-    scenarioPrim.children!.push({
+    scenarioPrim.children?.push({
       path: `${scenarioPrim.path}/ThreatActor_${i}`,
       typeName: 'Xform',
       attributes: [
@@ -105,7 +104,7 @@ export function exportSecurityScenario(scenario: SecurityScenario): UsdExportRes
   });
 
   scenario.affectedSystems?.forEach((sys, i) => {
-    scenarioPrim.children!.push({
+    scenarioPrim.children?.push({
       path: `${scenarioPrim.path}/AffectedSystem_${i}`,
       typeName: 'Xform',
       attributes: [
@@ -119,7 +118,7 @@ export function exportSecurityScenario(scenario: SecurityScenario): UsdExportRes
   });
 
   scenario.phases?.forEach((phase, i) => {
-    scenarioPrim.children!.push({
+    scenarioPrim.children?.push({
       path: `${scenarioPrim.path}/Phase_${i}`,
       typeName: 'Xform',
       attributes: [

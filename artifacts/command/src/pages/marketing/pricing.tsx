@@ -253,8 +253,8 @@ export function MarketingPricing() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           planId,
-          successUrl: window.location.origin + '/command/marketing/signup?success=true',
-          cancelUrl: window.location.origin + '/command/marketing/pricing',
+          successUrl: `${window.location.origin}/command/marketing/signup?success=true`,
+          cancelUrl: `${window.location.origin}/command/marketing/pricing`,
           email: checkoutEmail || undefined,
         }),
       });
@@ -269,7 +269,7 @@ export function MarketingPricing() {
 
       const data = await res.json();
       const url = data.url ?? data.data?.url;
-      if (url && url.startsWith('http')) {
+      if (url?.startsWith('http')) {
         window.location.href = url;
       } else {
         toast.success('Trial initialized — redirecting to signup');

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { m } from "framer-motion";
 import {
-  Shield, Activity, Database, Lock, CheckCircle, AlertTriangle, XCircle, Clock,
-  ExternalLink, RefreshCw, Wifi, WifiOff, Server,
+  Shield, Activity, Database, Lock, CheckCircle, AlertTriangle, XCircle, Clock,RefreshCw, Server,
 } from "lucide-react";
 import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
@@ -109,7 +108,7 @@ export default function TrustStatusPage() {
       detail: loading
         ? "Checking…"
         : healthStatus === "live"
-          ? `All services healthy. Uptime: ${health?.uptime ? Math.round(health.uptime / 3600) + "h" : "—"}`
+          ? `All services healthy. Uptime: ${health?.uptime ? `${Math.round(health.uptime / 3600)}h` : "—"}`
           : "Degraded or unreachable — check /api/health",
       source: "GET /api/health (live probe)",
       lastChecked,
@@ -197,7 +196,7 @@ export default function TrustStatusPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
           <section style={{
             paddingTop: "clamp(7rem,12vw,10rem)",

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -68,7 +68,6 @@ function NotificationRow({
       try {
         onNavigate(notification.actionUrl);
       } catch {
-        console.warn('[NotificationCenter] Navigate failed:', notification.actionUrl);
       }
     }
   }, [notification, onMarkRead, onNavigate]);

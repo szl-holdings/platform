@@ -1,12 +1,11 @@
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Feather, } from '@expo/vector-icons';
 import { useEmbeddingSearch } from '@szl-holdings/mobile-shared';
 import * as Haptics from 'expo-haptics';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -71,7 +70,7 @@ function MessageBubble({ msg }: { msg: Message }) {
             {msg.agentName}
           </Text>
         )}
-        <Text style={styles.bubbleText}>{msg.streaming ? msg.content + '▍' : msg.content}</Text>
+        <Text style={styles.bubbleText}>{msg.streaming ? `${msg.content}▍` : msg.content}</Text>
         <Text style={styles.timestamp}>
           {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </Text>

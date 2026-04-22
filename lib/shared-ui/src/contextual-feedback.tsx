@@ -1,6 +1,6 @@
-import { AnimatePresence, m } from 'framer-motion';
+import { m } from 'framer-motion';
 import { MessageSquare, Send, ThumbsDown, ThumbsUp, X } from 'lucide-react';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { cn } from './utils';
 
 export interface ContextualFeedbackProps {
@@ -136,7 +136,6 @@ export function ContextualFeedback({
           onChange={(e) => setComment(e.target.value.slice(0, 300))}
           placeholder="Optional — tell us more..."
           rows={2}
-          autoFocus
           className="w-full bg-background border border-border rounded-lg px-2.5 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none transition-all"
         />
 

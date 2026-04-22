@@ -1,12 +1,8 @@
 import { AnimatePresence, m } from 'framer-motion';
 import {
-  Activity,
   AlertTriangle,
   Check,
   Eye,
-  FileText,
-  Lock,
-  Scale,
   Shield,
   X,
 } from 'lucide-react';

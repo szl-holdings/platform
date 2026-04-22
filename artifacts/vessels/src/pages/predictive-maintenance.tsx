@@ -1,18 +1,13 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
   AlertTriangle,
-  BarChart3,
   Calendar,
   CheckCircle2,
   ChevronRight,
   Clock,
-  Cpu,
-  Thermometer,
   TrendingUp,
   Wrench,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 

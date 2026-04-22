@@ -5,7 +5,7 @@ import { Link } from "wouter";
 import {
   TrendingUp, ArrowLeft, ChevronRight, DollarSign, BarChart3,
   Calculator, Download, RefreshCw, ArrowUpRight, ArrowDownRight,
-  AlertCircle, CheckCircle2, FileText, PieChart,
+  AlertCircle, CheckCircle2, FileText, 
 } from "lucide-react";
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -38,8 +38,8 @@ type NavRecord = {
 
 function fmt(n: number, currency = true): string {
   const prefix = currency ? "$" : "";
-  if (Math.abs(n) >= 1_000_000) return prefix + (n / 1_000_000).toFixed(2) + "M";
-  if (Math.abs(n) >= 1_000) return prefix + (n / 1_000).toFixed(0) + "K";
+  if (Math.abs(n) >= 1_000_000) return `${prefix + (n / 1_000_000).toFixed(2)}M`;
+  if (Math.abs(n) >= 1_000) return `${prefix + (n / 1_000).toFixed(0)}K`;
   return prefix + n.toFixed(0);
 }
 
@@ -121,7 +121,7 @@ export default function NavDashboardPage() {
   });
 
   const [tab, setTab] = useState<"nav" | "companies" | "fees" | "reports">("nav");
-  const [selectedPeriod, setSelectedPeriod] = useState("Q1 2026");
+  const [_selectedPeriod, _setSelectedPeriod] = useState("Q1 2026");
 
   const { data: navRecords } = useStandardQuery({
     queryKey: ["fund-ops", "nav-records"],

@@ -1,11 +1,8 @@
-import type { SecurityScenario, ThreatActor } from '@szl-holdings/openusd-export';
-import { exportSecurityScenario } from '@szl-holdings/openusd-export';
+import { type SecurityScenario, type ThreatActor, exportSecurityScenario } from '@szl-holdings/openusd-export';
 import { type IRouter, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { handleRouteError, sendBadRequest, sendNotFound } from '../lib/api-response';
 import {
-  aegisDigitalTwinScenarioRunSchema,
-  aegisDigitalTwinSyncSchema,
   aegisScenarioExportSchema,
   validateBody,
 } from '../lib/validation';

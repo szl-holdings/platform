@@ -1,22 +1,10 @@
-import { db, mspClientsTable, mspDevicesTable } from '@szl-holdings/db';
-import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto';
-import { and, desc, eq, sql } from 'drizzle-orm';
-import { type IRouter, Router } from 'express';
-import {
-  handleRouteError,
-  sendBadRequest,
-  sendCreated,
-  sendNotFound,
-  sendSuccess,
-} from '../../lib/api-response';
+import { db, } from '@szl-holdings/db';
+import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
+import { sql } from 'drizzle-orm';
 import { logger } from '../../lib/logger';
 import { authMiddleware, requireRole } from '../../middlewares/auth';
-import {
-  clearProviderCache,
-  createRmmProvider,
-  getCachedProvider,
-  type RmmProviderConfig,
-  setCachedProvider,
+import type {
+  RmmProviderConfig,
 } from '../../services/rmm-provider';
 
 export const SUPPORTED_PROVIDERS = [

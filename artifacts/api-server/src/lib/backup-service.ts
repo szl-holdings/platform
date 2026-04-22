@@ -1,6 +1,6 @@
-import fs from "fs";
-import path from "path";
-import { execSync } from "child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { execSync } from "node:child_process";
 import { pool } from "@szl-holdings/db";
 
 const WORKSPACE_ROOT = path.resolve(process.cwd(), "../../");
@@ -225,7 +225,7 @@ export function getBackupHealthStatus(): BackupHealthStatus {
     return base;
   };
 
-  if (!manifest || !manifest.lastBackupAt) {
+  if (!manifest?.lastBackupAt) {
     return {
       status: escalate("warning", remoteUpload.status),
       lastBackupAt: null,

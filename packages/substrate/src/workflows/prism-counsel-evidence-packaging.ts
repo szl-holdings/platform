@@ -214,9 +214,9 @@ function parseMatterDeadlines(output: unknown): MatterDeadline[] {
   if (
     output &&
     typeof output === 'object' &&
-    Array.isArray((output as Record<string, unknown>)['deadlines'])
+    Array.isArray((output as Record<string, unknown>).deadlines)
   ) {
-    return (output as Record<string, unknown>)['deadlines'] as MatterDeadline[];
+    return (output as Record<string, unknown>).deadlines as MatterDeadline[];
   }
   return [
     {
@@ -246,9 +246,9 @@ function parseSeedPackages(output: unknown): EvidencePackage[] {
   if (
     output &&
     typeof output === 'object' &&
-    Array.isArray((output as Record<string, unknown>)['evidencePackages'])
+    Array.isArray((output as Record<string, unknown>).evidencePackages)
   ) {
-    return (output as Record<string, unknown>)['evidencePackages'] as EvidencePackage[];
+    return (output as Record<string, unknown>).evidencePackages as EvidencePackage[];
   }
   return [
     {

@@ -83,7 +83,7 @@ vi.mock('@szl-holdings/db', () => {
         const buildResult = (): unknown[] => {
           if (state.table?._name === 'alloy_autonomy_modes') {
             const tenantOrgId = state.filters.find((f) => f.col === 'tenant_org_id')
-              ? (state.filters.find((f) => f.col === 'tenant_org_id')!.val as number)
+              ? (state.filters.find((f) => f.col === 'tenant_org_id')?.val as number)
               : state.filters.find((f) => f.op === 'isNull' && f.col === 'tenant_org_id')
                 ? null
                 : undefined;
@@ -128,7 +128,7 @@ vi.mock('@szl-holdings/db', () => {
               const domain = String((row as { domain?: string }).domain ?? '');
               const key = _autonomyKey(tenantOrgId, domain);
               const existing = _autonomyRows.get(key);
-              const merged = existing ? { ...existing, ...(set ?? {}) } : { ...row };
+              const merged = existing ? { ...existing, ...set } : { ...row };
               _autonomyRows.set(key, merged);
               return merged;
             };

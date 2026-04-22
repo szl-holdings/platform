@@ -1,30 +1,25 @@
-import { ConfidenceMeter, PolicyStateChip, ProofEnvelope } from '@szl-holdings/design-system';
+import { PolicyStateChip, ProofEnvelope } from '@szl-holdings/design-system';
 import { cn } from '@szl-holdings/shared-ui/utils';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
   Activity,
   AlertTriangle,
   Building2,
   CheckCircle,
-  ChevronRight,
   Clock,
-  ExternalLink,
   History,
   Info,
   Link as LinkIcon,
-  Shield,
   ShieldAlert,
   ShieldCheck,
-  TrendingUp,
   XCircle,
 } from 'lucide-react';
-import { lazy, Suspense, useState } from 'react';
+import { useState } from 'react';
 import { propertyTwins } from '@/data/property-twin';
 
 const property = propertyTwins.find((p) => p.id === 'twin-004')!;
 
 export default function PropertyTwinView() {
-  const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(
+  const [_activeWorkflowId, _setActiveWorkflowId] = useState<string | null>(
     property.escalationWorkflows?.[0]?.id || null,
   );
 

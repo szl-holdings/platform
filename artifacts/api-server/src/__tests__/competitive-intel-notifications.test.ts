@@ -1,6 +1,6 @@
-import { promises as fs } from 'fs';
-import os from 'os';
-import path from 'path';
+import { promises as fs } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Run the monitor against an isolated .data dir (a tmp cwd per test) so the
@@ -179,7 +179,7 @@ describe('competitive-intel notifications', () => {
     expect(lanes.every((l) => Array.isArray(l.champions))).toBe(true);
     const cyber = lanes.find((l) => l.laneId === 'cyber');
     expect(cyber).toBeTruthy();
-    expect(cyber!.muted).toBe(false);
+    expect(cyber?.muted).toBe(false);
   });
 
   // Restore cwd at end so the rest of the test run is unaffected.

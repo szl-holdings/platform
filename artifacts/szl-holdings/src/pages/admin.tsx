@@ -1,15 +1,11 @@
 import { m } from 'framer-motion';
 import {
-  Activity,
   AlertCircle,
   ArrowLeft,
   BarChart3,
   BookOpen,
   Building2,
-  ChevronDown,
-  ChevronUp,
   ClipboardList,
-  Clock,
   Cloud,
   Database,
   DollarSign,
@@ -18,10 +14,7 @@ import {
   EyeOff,
   FileText,
   Gauge,
-  Globe,
-  HardDrive,
   HelpCircle,
-  Key,
   Layers,
   Loader2,
   Lock,
@@ -30,8 +23,6 @@ import {
   MessageSquare,
   MousePointer,
   Navigation,
-  Plus,
-  RefreshCw,
   Settings,
   Shield,
   SmilePlus,
@@ -40,7 +31,6 @@ import {
   TrendingUp,
   UserCheck,
   Users,
-  X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
@@ -549,7 +539,7 @@ export default function AdminPage() {
                     >
                       <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-                        style={{ background: r.color + '22' }}
+                        style={{ background: `${r.color}22` }}
                       >
                         {r.icon}
                       </div>

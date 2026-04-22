@@ -4,7 +4,6 @@ import { EmptyState } from '@szl-holdings/shared-ui/design-system';
 import {
   OperationalOwnerChip,
   OperationalRiskBadge,
-  OperationalStatusBadge,
   severityToRiskLevel,
 } from '@szl-holdings/shared-ui/operational-primitives';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
@@ -25,7 +24,6 @@ import {
   Radio,
   RefreshCw,
   Ship,
-  User,
   Wrench,
 } from 'lucide-react';
 import { useState } from 'react';

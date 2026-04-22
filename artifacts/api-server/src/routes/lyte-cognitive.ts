@@ -8,7 +8,6 @@ import {
   lyteIncidentsTable,
   lyteMetricsTable,
   lyteReadinessItemsTable,
-  lyteRecommendationsTable,
   lyteSignalsTable,
 } from '@szl-holdings/db';
 import { rankSignalGroups, type SignalGroup } from '@szl-holdings/decision-engine';
@@ -18,13 +17,10 @@ import {
   type PlanStep,
   type ResolvedPlanContext,
 } from '@workspace/planner';
-import { and, desc, eq, gte, lte, ne, or, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, lte, ne, or, } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
-import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
-import { logger } from '../lib/logger';
 import {
-  anyQuerySchema,
   listQuerySchema,
   lyteCognitiveInterventionsQuerySchema,
   validateBody,
@@ -37,7 +33,6 @@ import {
   computeBottleneckUrgency,
   estimateVarFromSignal,
   parseTimeWindow,
-  SEVERITY_VAR,
   safeParseLimit,
 } from './lyte-cognitive-helpers.js';
 
@@ -132,7 +127,7 @@ export async function runSignalFusion(
         source: sig.source,
         domain: 'lyte',
       });
-    } catch (e) {
+    } catch (_e) {
       errors.push(`signal:${sig.id}`);
     }
   }
@@ -156,7 +151,7 @@ export async function runSignalFusion(
         source: alert.service ?? 'lyte',
         domain: 'lyte',
       });
-    } catch (e) {
+    } catch (_e) {
       errors.push(`alert:${alert.id}`);
     }
   }
@@ -184,7 +179,7 @@ export async function runSignalFusion(
         source: 'lyte:escalation',
         domain: 'lyte',
       });
-    } catch (e) {
+    } catch (_e) {
       errors.push(`escalation:${esc.id}`);
     }
   }
@@ -212,7 +207,7 @@ export async function runSignalFusion(
         source: 'lyte:metric-anomaly',
         domain: 'lyte',
       });
-    } catch (e) {
+    } catch (_e) {
       errors.push(`metric:${metric.id}`);
     }
   }
@@ -256,7 +251,7 @@ router.post(
   },
 );
 
-router.get('/lyte/cognitive/signal-fusion', authMiddleware(), async (req, res) => {
+router.get('/lyte/cognitive/signal-fusion', authMiddleware(), async (_req, res) => {
   try {
     const [signals, alerts, escalations] = await Promise.all([
       db
@@ -351,7 +346,7 @@ router.get('/lyte/cognitive/signal-fusion', authMiddleware(), async (req, res) =
   }
 });
 
-router.get('/lyte/cognitive/bottlenecks', authMiddleware(), async (req, res) => {
+router.get('/lyte/cognitive/bottlenecks', authMiddleware(), async (_req, res) => {
   try {
     const now = new Date();
     const [blockedItems, stalledActions, openEscalations, criticalSignals] = await Promise.all([
@@ -444,7 +439,7 @@ router.get('/lyte/cognitive/bottlenecks', authMiddleware(), async (req, res) => 
       domainBottlenecks[domain].count++;
       domainBottlenecks[domain].var += parseFloat(action.valueAtRisk ?? '0');
     }
-    for (const [domain, data] of Object.entries(domainBottlenecks)) {
+    for (const [_domain, data] of Object.entries(domainBottlenecks)) {
       data.level =
         data.var > 500_000
           ? 'critical'
@@ -674,7 +669,7 @@ router.get(
   },
 );
 
-router.get('/lyte/cognitive/accountability-map', authMiddleware(), async (req, res) => {
+router.get('/lyte/cognitive/accountability-map', authMiddleware(), async (_req, res) => {
   try {
     const [actions, readinessItems, escalations, incidents] = await Promise.all([
       db.select().from(lyteActionsTable).where(ne(lyteActionsTable.state, 'resolved')).limit(100),
@@ -1022,7 +1017,7 @@ router.get(
 
       const activeSignals = signals.filter((s) => !['resolved', 'dismissed'].includes(s.status));
       const criticalSignals = activeSignals.filter((s) => s.severity === 'critical');
-      const highSignals = activeSignals.filter((s) => s.severity === 'high');
+      const _highSignals = activeSignals.filter((s) => s.severity === 'high');
       const openIncidents = incidents.filter((i) => !['resolved', 'closed'].includes(i.status));
       const pendingActions = actions.filter((a) => !['resolved', 'dismissed'].includes(a.state));
       const overdueActions = pendingActions.filter((a) => a.dueAt && a.dueAt < new Date());
@@ -1077,7 +1072,7 @@ router.get(
               .map((s) => `SIG-${s.id}`)
               .join(', ')}]. ` +
             `These signals represent an estimated $${(totalVaR / 1_000_000).toFixed(2)}M in aggregate value at risk across ` +
-            `${[...new Set(activeSignals.map((s) => s.source))].length} operational sources.`,
+            `${new Set(activeSignals.map((s) => s.source)).size} operational sources.`,
         );
       } else {
         paragraphs.push(

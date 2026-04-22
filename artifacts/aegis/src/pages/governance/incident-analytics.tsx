@@ -2,7 +2,6 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
   Activity,
   AlertTriangle,
-  BarChart3,
   CheckCircle2,
   Clock,
   Info,
@@ -10,7 +9,6 @@ import {
   Target,
   TrendingDown,
   TrendingUp,
-  Users,
 } from 'lucide-react';
 import {
   Bar,
@@ -21,10 +19,6 @@ import {
   LineChart,
   Pie,
   PieChart,
-  PolarAngleAxis,
-  PolarGrid,
-  Radar,
-  RadarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -146,7 +140,7 @@ export default function IncidentAnalyticsPage() {
   });
   const closedIncidents = incidents?.filter((i) => i.status === 'closed') ?? [];
   const activeIncidents = incidents?.filter((i) => i.status !== 'closed') ?? [];
-  const criticalFindings =
+  const _criticalFindings =
     findings?.filter((f) => f.severity === 'critical' && f.status !== 'mitigated').length ?? 0;
   const totalIncidents = incidents?.length ?? 0;
   const resolutionRate =

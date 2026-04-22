@@ -1,9 +1,8 @@
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { type ComponentProps, useCallback, useMemo, useState } from 'react';
+import { type ComponentProps, useCallback, useMemo, useState } from 'react';
 import {
-  Animated,
   Platform,
   Pressable,
   RefreshControl,

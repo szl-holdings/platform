@@ -4,7 +4,7 @@ import {
   scenarioBranchesTable,
   spatialTwinSnapshotsTable,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { and, desc, eq } from 'drizzle-orm';
 import type { ScenarioBranch, ScenarioBranchComparison, ScenarioForgeInput } from './types.js';
 

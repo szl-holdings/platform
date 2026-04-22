@@ -504,7 +504,7 @@ router.post(
         });
       }
 
-      const appUrl = process.env['APP_URL'] ?? process.env['VITE_APP_URL'] ?? '';
+      const appUrl = process.env.APP_URL ?? process.env.VITE_APP_URL ?? '';
       const actionUrl = `${appUrl}/command/operations/deployments`;
       const title = `Page from ${actorName} · ${team}`;
       const message = note
@@ -595,7 +595,7 @@ router.post(
           message: note ? note : null,
           inAppDelivered: inAppOn,
           mutedAsDuplicate: isDuplicate,
-          duplicateOfPageId: isDuplicate ? recentDup!.id : null,
+          duplicateOfPageId: isDuplicate ? recentDup?.id : null,
         });
       } catch (auditErr) {
         // The page itself succeeded — do not fail the request because the
@@ -614,7 +614,7 @@ router.post(
           urgency,
           inAppDelivered: inAppOn,
           mutedAsDuplicate: isDuplicate,
-          duplicateOfPageId: isDuplicate ? recentDup!.id : null,
+          duplicateOfPageId: isDuplicate ? recentDup?.id : null,
         },
         isDuplicate ? 'Team page muted as duplicate' : 'Team paged',
       );
@@ -627,7 +627,7 @@ router.post(
         urgency,
         inAppDelivered: inAppOn,
         mutedAsDuplicate: isDuplicate,
-        duplicateOfPageId: isDuplicate ? recentDup!.id : null,
+        duplicateOfPageId: isDuplicate ? recentDup?.id : null,
       });
     } catch (err) {
       return handleRouteError(res, err, `POST /teams/${req.params.team}/page`);
@@ -745,7 +745,7 @@ router.get(
       }
 
       const roleRaw =
-        typeof req.query['role'] === 'string' ? req.query['role'].toLowerCase() : 'recipient';
+        typeof req.query.role === 'string' ? req.query.role.toLowerCase() : 'recipient';
       const role: 'recipient' | 'actor' | 'both' =
         roleRaw === 'actor' || roleRaw === 'both' ? roleRaw : 'recipient';
 
@@ -938,7 +938,7 @@ async function writeScheduleAudit(params: {
         team: params.team,
         ...(params.before !== undefined ? { _before: params.before } : {}),
         ...(params.after !== undefined ? { _after: params.after } : {}),
-        ...(params.extra ?? {}),
+        ...params.extra,
       },
     });
   } catch (err) {
@@ -1363,7 +1363,7 @@ router.delete(
       }
 
       await db.delete(onCallShiftsTable).where(eq(onCallShiftsTable.id, id));
-      const actorId = req.user!.id;
+      const actorId = req.user?.id;
       logger.info({ team, actorId, overrideId: id }, 'On-call override deleted');
 
       await writeScheduleAudit({

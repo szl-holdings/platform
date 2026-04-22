@@ -1,7 +1,7 @@
 import { MicroFeedbackWidget } from '@szl-holdings/shared-ui/micro-feedback-widget';
 import { HelpTip } from '@szl-holdings/shared-ui/onboarding';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
+import { Card, CardContent, } from '@szl-holdings/shared-ui/ui/card';
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -9,7 +9,6 @@ import {
   BellPlus,
   CheckCircle2,
   Clock,
-  Eye,
   EyeOff,
   Filter,
   Loader2,
@@ -17,7 +16,6 @@ import {
   Radio,
   RefreshCw,
   Search,
-  Shield,
   Ship,
   Sparkles,
 } from 'lucide-react';

@@ -1,10 +1,8 @@
 import { and, desc, eq, type InferInsertModel, inArray, lt, or } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
-import type { MemoryStore, MemoryStoreQuery } from './store.js';
-import { assertMemoryDomain } from './store.js';
-import type { MemoryEntry, MemoryTier } from './types.js';
-import { MEMORY_DOMAIN_UNKNOWN } from './types.js';
+import { type MemoryStore, type MemoryStoreQuery, assertMemoryDomain } from './store.js';
+import { type MemoryEntry, type MemoryTier, MEMORY_DOMAIN_UNKNOWN } from './types.js';
 
 export interface PostgresMemoryStoreLogger {
   info?: (...args: unknown[]) => void;
@@ -62,7 +60,7 @@ function buildRow(entry: MemoryEntry): InferInsertModel<MemoryRecordsTableLike> 
   // writer didn't set its own scope) `scope_id = "domain:<d>"`. This keeps
   // the executive briefing query a single equality check while preserving
   // any explicit scopeId the writer chose.
-  const metadata = { ...(entry.metadata ?? {}), domain: entry.domain };
+  const metadata = { ...entry.metadata, domain: entry.domain };
   const scopeId = entry.scopeId ?? `domain:${entry.domain}`;
   const row = {
     externalId: entry.id,
@@ -102,7 +100,7 @@ function rowToEntry(raw: unknown): MemoryEntry | undefined {
   // store passes its own `assertMemoryDomain` check on subsequent puts.
   const metadataDomain =
     row.metadata && typeof row.metadata === 'object'
-      ? (row.metadata as Record<string, unknown>)['domain']
+      ? (row.metadata as Record<string, unknown>).domain
       : undefined;
   const domain =
     typeof metadataDomain === 'string' && metadataDomain.length > 0
@@ -178,7 +176,7 @@ export class PostgresMemoryStore implements MemoryStore {
       ...entry,
       freshness: { ...entry.freshness, lastUpdatedAt: new Date().toISOString() },
       // Mirror canonical domain into metadata for direct SQL readers.
-      metadata: { ...(entry.metadata ?? {}), domain: entry.domain },
+      metadata: { ...entry.metadata, domain: entry.domain },
     };
     const copy: MemoryEntry = JSON.parse(JSON.stringify(updated));
     this.cache.set(entry.id, copy);
@@ -215,7 +213,7 @@ export class PostgresMemoryStore implements MemoryStore {
     if (query?.key) results = results.filter((e) => e.key === query.key);
     if (query?.scopeId) results = results.filter((e) => e.scopeId === query.scopeId);
     if (query?.tags?.length) {
-      results = results.filter((e) => query.tags!.every((t) => e.tags.includes(t)));
+      results = results.filter((e) => query.tags?.every((t) => e.tags.includes(t)));
     }
     if (query?.search) {
       const needle = query.search.toLowerCase();

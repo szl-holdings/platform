@@ -6,18 +6,12 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
-  Building2,
   CheckCircle,
-  ChevronDown,
-  Clock,
-  Eye,
   Filter,
-  Home,
   MapPin,
   Radio,
   Search,
   TrendingDown,
-  X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
@@ -238,7 +232,6 @@ export default function ListingsPage() {
       })
       .catch((err) => {
         if (err?.name === 'AbortError') return;
-        console.error('Failed to load MLS listing count:', err);
         toast.error('Unable to load listing data. Some information may be unavailable.');
       });
     return () => controller.abort();

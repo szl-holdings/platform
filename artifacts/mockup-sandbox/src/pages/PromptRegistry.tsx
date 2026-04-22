@@ -3,7 +3,6 @@ import {
   ArrowUp,
   BarChart2,
   BookOpen,
-  CheckCircle,
   ChevronDown,
   ChevronRight,
   Clock,

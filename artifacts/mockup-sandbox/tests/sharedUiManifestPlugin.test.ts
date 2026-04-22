@@ -1,6 +1,6 @@
-import { writeFileSync, mkdtempSync } from 'fs';
-import os from 'os';
-import path from 'path';
+import { writeFileSync, mkdtempSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { classifyName, parseExportsFromIndex } from '../sharedUiManifestPlugin.js';
 
@@ -67,7 +67,7 @@ describe('parseExportsFromIndex — single-line blocks', () => {
         const result = parseExportsFromIndex(fp);
         const e = result.find((x) => x.name === 'AnimatedCounter');
         expect(e).toBeDefined();
-        expect(e!.isComponent).toBe(true);
+        expect(e?.isComponent).toBe(true);
       },
     );
   });

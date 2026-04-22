@@ -56,7 +56,7 @@ class DoctrineEventBus {
     if (!this.appListeners.has(appId)) {
       this.appListeners.set(appId, new Set());
     }
-    this.appListeners.get(appId)!.add(listener);
+    this.appListeners.get(appId)?.add(listener);
     return () => this.appListeners.get(appId)?.delete(listener);
   }
 
@@ -64,7 +64,7 @@ class DoctrineEventBus {
     if (!this.layerListeners.has(layer)) {
       this.layerListeners.set(layer, new Set());
     }
-    this.layerListeners.get(layer)!.add(listener);
+    this.layerListeners.get(layer)?.add(listener);
     return () => this.layerListeners.get(layer)?.delete(listener);
   }
 
@@ -101,7 +101,7 @@ class DoctrineEventBus {
     const byApp = new Map<string, NormalizedEvent[]>();
     for (const event of this.events) {
       if (!byApp.has(event.sourceApp)) byApp.set(event.sourceApp, []);
-      byApp.get(event.sourceApp)!.push(event);
+      byApp.get(event.sourceApp)?.push(event);
     }
     return byApp;
   }
@@ -110,7 +110,7 @@ class DoctrineEventBus {
     const byLayer = new Map<DoctrineLayer, NormalizedEvent[]>();
     for (const event of this.events) {
       if (!byLayer.has(event.layer)) byLayer.set(event.layer, []);
-      byLayer.get(event.layer)!.push(event);
+      byLayer.get(event.layer)?.push(event);
     }
     return byLayer;
   }

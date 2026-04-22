@@ -12,7 +12,7 @@
  * Do not define brand colors or radius values outside this file.
  */
 
-import { color, radius, motion, productAccent } from '@szl-holdings/design-system/tokens';
+import { color, productAccent } from '@szl-holdings/design-system/tokens';
 
 export const giColors = {
   bg: {

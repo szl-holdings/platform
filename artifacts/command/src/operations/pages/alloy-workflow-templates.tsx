@@ -1,15 +1,10 @@
 import {
-  Activity,
   Archive,
-  CheckCircle2,
   ChevronRight,
-  Clock,
   Edit3,
   Play,
   Plus,
-  Users,
   Workflow,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 

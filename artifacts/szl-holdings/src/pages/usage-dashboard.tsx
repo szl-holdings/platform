@@ -318,7 +318,7 @@ function AdminUsageView({ days }: { days: number }) {
                 </tr>
               </thead>
               <tbody>
-                {processedRows.map((row, i) => {
+                {processedRows.map((row, _i) => {
                   const hasAnyOverage = Object.values(row.overages).some((v) => v !== 'none');
                   return (
                     <tr

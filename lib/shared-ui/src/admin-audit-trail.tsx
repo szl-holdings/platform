@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export type AuditActorType = 'human' | 'ai_model' | 'agent' | 'system';
 export type AuditActionType =

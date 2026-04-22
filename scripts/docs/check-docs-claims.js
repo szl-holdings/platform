@@ -29,9 +29,9 @@
  * Exits 0 on full pass, 1 on any failure.
  */
 
-import { appendFileSync, existsSync, readdirSync, readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { appendFileSync, existsSync, readdirSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -61,7 +61,7 @@ function fileExists(relPath) {
 function extractTsEnumValues(src, colName) {
   // Match text("col_name", { enum: [...] }) — colName is the quoted string argument
   const escaped = colName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const re = new RegExp('"' + escaped + '"\\s*,\\s*\\{[^}]*enum:\\s*\\[([^\\]]+)\\]', 's');
+  const re = new RegExp(`"${escaped}"\\s*,\\s*\\{[^}]*enum:\\s*\\[([^\\]]+)\\]`, 's');
   const m = src.match(re);
   if (!m) return null;
   const items = m[1].match(/"([^"]+)"/g);
@@ -101,26 +101,22 @@ let passes = 0;
 
 function pass(label, detail) {
   passes++;
-  const msg = '  \u2713  ' + label + (detail ? '  (' + detail + ')' : '');
-  console.log(msg);
-  addSummary('| \u2705 Pass | ' + label + ' | ' + (detail || '') + ' |');
+  const _msg = `  \u2713  ${label}${detail ? `  (${detail})` : ''}`;
+  addSummary(`| \u2705 Pass | ${label} | ${detail || ''} |`);
 }
 
 function fail(label, detail) {
   failures++;
-  const msg = '  \u2717  ' + label + (detail ? '\n       \u21b3 ' + detail : '');
-  console.error(msg);
-  addSummary('| \u274c Fail | ' + label + ' | ' + (detail || '') + ' |');
+  const _msg = `  \u2717  ${label}${detail ? `\n       \u21b3 ${detail}` : ''}`;
+  addSummary(`| \u274c Fail | ${label} | ${detail || ''} |`);
 }
 
 function skip(label, reason) {
-  const msg = '  \u2014  ' + label + ' (skipped: ' + reason + ')';
-  console.log(msg);
-  addSummary('| \u23ed Skip | ' + label + ' | ' + reason + ' |');
+  const _msg = `  \u2014  ${label} (skipped: ${reason})`;
+  addSummary(`| \u23ed Skip | ${label} | ${reason} |`);
 }
 
-function section(title) {
-  console.log('\n[ ' + title + ' ]');
+function section(_title) {
 }
 
 // ─── load source files ────────────────────────────────────────────────────────
@@ -130,13 +126,7 @@ const csrfMiddleware = readFile('artifacts/api-server/src/middlewares/csrf.ts');
 const routesIndex = readFile('artifacts/api-server/src/routes/index.ts');
 const accessMatrix = readFile('ACCESS-CONTROL-MATRIX.md');
 const apiSpec = readFile('API-SPEC.md');
-const securityChecklist = readFile('SECURITY-CHECKLIST.md');
-
-// ─── header ───────────────────────────────────────────────────────────────────
-
-console.log('\n\u2554' + '\u2550'.repeat(62) + '\u2557');
-console.log('\u2551        Strict Documentation Claims Check                    \u2551');
-console.log('\u255a' + '\u2550'.repeat(62) + '\u255d');
+const _securityChecklist = readFile('SECURITY-CHECKLIST.md');
 
 addSummary('## Strict Documentation Claims Check');
 addSummary('');
@@ -168,13 +158,13 @@ if (!authSchema) {
       if (inDocNotCode.length > 0) {
         fail(
           'ACCESS-CONTROL-MATRIX.md documents platform roles not found in auth.ts enum',
-          'Missing from code: ' + inDocNotCode.join(', '),
+          `Missing from code: ${inDocNotCode.join(', ')}`,
         );
       }
       if (inCodeNotDoc.length > 0) {
         fail(
           'auth.ts platform_role enum has values not documented in ACCESS-CONTROL-MATRIX.md',
-          'Undocumented roles: ' + inCodeNotDoc.join(', '),
+          `Undocumented roles: ${inCodeNotDoc.join(', ')}`,
         );
       }
       if (inDocNotCode.length === 0 && inCodeNotDoc.length === 0) {
@@ -239,13 +229,13 @@ if (!authSchema) {
       if (inDocNotCode.length > 0) {
         fail(
           'ACCESS-CONTROL-MATRIX.md Extended Roles Table lists roles absent from auth.ts',
-          'Missing from code: ' + inDocNotCode.join(', '),
+          `Missing from code: ${inDocNotCode.join(', ')}`,
         );
       }
       if (inCodeNotDoc.length > 0) {
         fail(
           'auth.ts rolesTable has values not listed in ACCESS-CONTROL-MATRIX.md Extended Roles Table',
-          'Undocumented: ' + inCodeNotDoc.join(', '),
+          `Undocumented: ${inCodeNotDoc.join(', ')}`,
         );
       }
       if (inDocNotCode.length === 0 && inCodeNotDoc.length === 0) {
@@ -280,13 +270,13 @@ if (!csrfMiddleware) {
   for (const exemptPath of DOCUMENTED_CSRF_EXEMPT_PATHS) {
     // The path should appear as a quoted string literal in csrf.ts
     const escaped = exemptPath.replace(/\//g, '\\/');
-    const pattern = new RegExp('"' + escaped + '"');
+    const pattern = new RegExp(`"${escaped}"`);
     if (pattern.test(csrfMiddleware)) {
-      pass('CSRF exempt: ' + exemptPath);
+      pass(`CSRF exempt: ${exemptPath}`);
     } else {
       fail(
         'Documented CSRF-exempt path not found in csrf.ts EXEMPT_PATHS',
-        exemptPath + ' — API-SPEC.md claims this path is CSRF-exempt but it is not in the source',
+        `${exemptPath} — API-SPEC.md claims this path is CSRF-exempt but it is not in the source`,
       );
     }
   }
@@ -318,11 +308,11 @@ if (!csrfMiddleware) {
 
   for (const { desc, pattern } of prefixChecks) {
     if (pattern.test(csrfMiddleware)) {
-      pass('CSRF prefix rule present: ' + desc);
+      pass(`CSRF prefix rule present: ${desc}`);
     } else {
       fail(
         'Documented CSRF prefix exemption not found in csrf.ts isExempt()',
-        desc + ' — pattern not found in source',
+        `${desc} — pattern not found in source`,
       );
     }
   }
@@ -353,7 +343,7 @@ if (!routesIndex) {
 } else {
   for (const { desc, pattern } of DOCUMENTED_ROUTE_MOUNTS) {
     if (pattern.test(routesIndex)) {
-      pass('Route mount confirmed: ' + desc);
+      pass(`Route mount confirmed: ${desc}`);
     } else {
       fail(
         'Documented route group not found in routes/index.ts',
@@ -386,11 +376,11 @@ const SECURITY_REFERENCED_FILES = [
 
 for (const relPath of SECURITY_REFERENCED_FILES) {
   if (fileExists(relPath)) {
-    pass('File exists: ' + relPath);
+    pass(`File exists: ${relPath}`);
   } else {
     fail(
       'File referenced in SECURITY-CHECKLIST.md no longer exists',
-      relPath + ' — update SECURITY-CHECKLIST.md evidence column if the file was moved or renamed',
+      `${relPath} — update SECURITY-CHECKLIST.md evidence column if the file was moved or renamed`,
     );
   }
 }
@@ -418,11 +408,11 @@ for (const [tableName, citation] of Object.entries(DOCUMENTED_TABLES)) {
   // Since we can't do a true recursive grep here, we search through known schema file paths
   // and the main auth.ts that we already loaded.
 
-  const quotedName = '"' + tableName + '"';
+  const quotedName = `"${tableName}"`;
   let found = false;
 
   // Check in the already-loaded auth.ts
-  if (authSchema && authSchema.includes(quotedName)) {
+  if (authSchema?.includes(quotedName)) {
     found = true;
   }
 
@@ -432,8 +422,8 @@ for (const [tableName, citation] of Object.entries(DOCUMENTED_TABLES)) {
     try {
       const files = readdirSync(schemaDir).filter((f) => f.endsWith('.ts'));
       for (const f of files) {
-        const content = readFile('lib/db/src/schema/' + f);
-        if (content && content.includes(quotedName)) {
+        const content = readFile(`lib/db/src/schema/${f}`);
+        if (content?.includes(quotedName)) {
           found = true;
           break;
         }
@@ -444,37 +434,23 @@ for (const [tableName, citation] of Object.entries(DOCUMENTED_TABLES)) {
   }
 
   if (found) {
-    pass('Table "' + tableName + '" exists in schema (cited by ' + citation + ')');
+    pass(`Table "${tableName}" exists in schema (cited by ${citation})`);
   } else {
     fail(
       'Documented table not found in lib/db/src/schema/',
-      '"' + tableName + '" — cited by ' + citation + '. Update docs if table was renamed/removed.',
+      `"${tableName}" — cited by ${citation}. Update docs if table was renamed/removed.`,
     );
   }
 }
 
-// ─── summary ──────────────────────────────────────────────────────────────────
-
-console.log('\n' + '\u2501'.repeat(66));
-console.log('  Result: ' + passes + ' check(s) passed, ' + failures + ' failure(s)');
-
 if (failures > 0) {
-  console.error(
-    '\n  \u274c ' +
-      failures +
-      ' documented claim(s) no longer match the codebase.\n' +
-      '  Update the relevant docs (API-SPEC.md, ACCESS-CONTROL-MATRIX.md,\n' +
-      '  SECURITY-CHECKLIST.md) to reflect the current implementation, or\n' +
-      '  revert the code change that caused the divergence.\n',
-  );
 } else {
-  console.log('\n  \u2713 All documented claims are consistent with the codebase.\n');
 }
 
 // Write GitHub Actions step summary when running in CI.
 if (GH_SUMMARY) {
   addSummary('');
-  addSummary('**Result:** ' + passes + ' passed, ' + failures + ' failure(s)');
+  addSummary(`**Result:** ${passes} passed, ${failures} failure(s)`);
   if (failures > 0) {
     addSummary('');
     addSummary(
@@ -486,7 +462,7 @@ if (GH_SUMMARY) {
     );
   }
   try {
-    appendFileSync(GH_SUMMARY, summaryLines.join('\n') + '\n');
+    appendFileSync(GH_SUMMARY, `${summaryLines.join('\n')}\n`);
   } catch {
     // Non-fatal: step summary is best-effort
   }

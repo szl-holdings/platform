@@ -9,7 +9,6 @@ import {
   Clock,
   DollarSign,
   Layers,
-  Plus,
   RefreshCw,
   TrendingDown,
   TrendingUp,
@@ -212,7 +211,7 @@ function OrderEntry({
       return;
     }
     onSubmit({
-      instrumentId: parseInt(instrumentId),
+      instrumentId: parseInt(instrumentId, 10),
       side,
       orderType,
       quantity,
@@ -312,7 +311,7 @@ function OrderEntry({
             style={{
               background: orderType === ot ? `${ACCENT}18` : 'rgba(255,255,255,0.04)',
               color: orderType === ot ? ACCENT : TEXT.muted,
-              border: `1px solid ${orderType === ot ? ACCENT + '40' : BORDER.muted}`,
+              border: `1px solid ${orderType === ot ? `${ACCENT}40` : BORDER.muted}`,
             }}
           >
             {ot}
@@ -407,7 +406,7 @@ function OrderEntry({
         style={{
           background: side === 'buy' ? `${GREEN}22` : `${RED}22`,
           color: side === 'buy' ? GREEN : RED,
-          border: `1px solid ${side === 'buy' ? GREEN + '40' : RED + '40'}`,
+          border: `1px solid ${side === 'buy' ? `${GREEN}40` : `${RED}40`}`,
         }}
       >
         {submitting
@@ -562,7 +561,7 @@ export default function TradingDeskPage() {
           className="fixed top-4 right-4 z-50 rounded-xl px-4 py-3 shadow-2xl flex items-center gap-2 text-[12px]"
           style={{
             background: toast.type === 'success' ? `${GREEN}18` : `${RED}18`,
-            border: `1px solid ${toast.type === 'success' ? GREEN + '40' : RED + '40'}`,
+            border: `1px solid ${toast.type === 'success' ? `${GREEN}40` : `${RED}40`}`,
             color: toast.type === 'success' ? GREEN : RED,
           }}
         >
@@ -712,7 +711,7 @@ export default function TradingDeskPage() {
                 {t.count != null && t.count > 0 && (
                   <span
                     className="rounded-full px-1.5 text-[9px] font-bold"
-                    style={{ background: ACCENT + '30', color: ACCENT }}
+                    style={{ background: `${ACCENT}30`, color: ACCENT }}
                   >
                     {t.count}
                   </span>
@@ -726,7 +725,7 @@ export default function TradingDeskPage() {
               <div className="p-4">
                 <div className="grid grid-cols-1 gap-2">
                   {instruments.map((inst) => {
-                    const chg = fmtChange(inst.change);
+                    const _chg = fmtChange(inst.change);
                     const chgPct = fmtChange(inst.changePct);
                     return (
                       <div

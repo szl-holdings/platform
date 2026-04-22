@@ -1,5 +1,5 @@
 import type { IRouter } from 'express';
-import { lazyMatch, lazyMount, lazyRegister, lazyRegisterMatch } from '../../lib/lazy-router';
+import { lazyMatch, lazyMount, lazyRegisterMatch } from '../../lib/lazy-router';
 import {
   perUserApiSlidingLimiter,
   perUserWriteSlidingLimiter,

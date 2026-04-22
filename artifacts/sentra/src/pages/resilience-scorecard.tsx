@@ -1,20 +1,14 @@
 import { analytics } from '@szl-holdings/analytics';
 import { AnimatePresence, motion, useInView } from 'framer-motion';
 import {
-  Activity,
   AlertTriangle,
   ArrowLeft,
-  ArrowRight,
-  BarChart3,
   CheckCircle2,
   ChevronRight,
-  Clock,
   Eye,
   FileCheck,
   Lock,
   Shield,
-  ShieldAlert,
-  Target,
   TrendingUp,
   Zap,
 } from 'lucide-react';

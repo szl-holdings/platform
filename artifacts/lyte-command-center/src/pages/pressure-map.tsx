@@ -271,8 +271,8 @@ export default function PressureMapPage() {
                   className="text-sm font-mono font-bold px-2 py-0.5 rounded border shrink-0"
                   style={{
                     color: scoreToColor(selectedCell.score),
-                    borderColor: scoreToColor(selectedCell.score) + '40',
-                    background: scoreToColor(selectedCell.score) + '15',
+                    borderColor: `${scoreToColor(selectedCell.score)}40`,
+                    background: `${scoreToColor(selectedCell.score)}15`,
                   }}
                 >
                   {selectedCell.score}

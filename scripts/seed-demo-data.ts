@@ -11,7 +11,6 @@ import {
 } from '@szl-holdings/db';
 
 async function seedFirestorm() {
-  console.log('[seed] Seeding firestorm assets...');
   const assets = await db
     .insert(firestormAssetsTable)
     .values([
@@ -87,11 +86,7 @@ async function seedFirestorm() {
       },
     ])
     .returning();
-
-  console.log(`[seed] Inserted ${assets.length} firestorm assets`);
-
-  console.log('[seed] Seeding firestorm workflow actions...');
-  const wfActions = await db
+  const _wfActions = await db
     .insert(firestormWorkflowActionsTable)
     .values([
       {
@@ -126,13 +121,10 @@ async function seedFirestorm() {
       },
     ])
     .returning();
-
-  console.log(`[seed] Inserted ${wfActions.length} firestorm workflow actions`);
 }
 
 async function seedLyte() {
-  console.log('[seed] Seeding lyte actions...');
-  const actions = await db
+  const _actions = await db
     .insert(lyteActionsTable)
     .values([
       {
@@ -249,10 +241,6 @@ async function seedLyte() {
       },
     ])
     .returning();
-
-  console.log(`[seed] Inserted ${actions.length} lyte actions`);
-
-  console.log('[seed] Seeding lyte saved views...');
   await db.insert(lyteSavedViewsTable).values([
     {
       name: 'Executive Dashboard',
@@ -273,8 +261,6 @@ async function seedLyte() {
       isDefault: false,
     },
   ]);
-
-  console.log('[seed] Seeding lyte readiness items...');
   await db.insert(lyteReadinessItemsTable).values([
     {
       title: 'Security Review Sign-off',
@@ -351,12 +337,9 @@ async function seedLyte() {
       metadata: { runbookVersion: 'draft-2', oncallRotation: 'engineering-leads' },
     },
   ]);
-
-  console.log('[seed] Lyte readiness items inserted');
 }
 
 async function seedVessels() {
-  console.log('[seed] Seeding vessels roster...');
   const vessels = await db
     .insert(vesselsTable)
     .values([
@@ -367,8 +350,6 @@ async function seedVessels() {
     ])
     .returning();
   const vesselIds = vessels.map((v) => v.id);
-
-  console.log('[seed] Seeding vessel events...');
   const events = await db
     .insert(vesselsEventsTable)
     .values([
@@ -445,10 +426,6 @@ async function seedVessels() {
       },
     ])
     .returning();
-
-  console.log(`[seed] Inserted ${events.length} vessel events`);
-
-  console.log('[seed] Seeding vessel command workflows...');
   await db.insert(vesselsCommandWorkflowsTable).values([
     {
       eventId: events[0].id,
@@ -481,22 +458,16 @@ async function seedVessels() {
       completedAt: new Date(),
     },
   ]);
-
-  console.log('[seed] Vessel command workflows inserted');
 }
 
 async function main() {
-  console.log('=== SZL Platform Demo Data Seed ===\n');
 
   try {
     await seedFirestorm();
     await seedLyte();
     await seedVessels();
-
-    console.log('\n=== Seed complete ===');
     process.exit(0);
-  } catch (err) {
-    console.error('Seed failed:', err);
+  } catch (_err) {
     process.exit(1);
   }
 }

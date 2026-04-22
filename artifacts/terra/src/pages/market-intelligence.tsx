@@ -3,21 +3,11 @@ import { type AutonomyMode, ProofEnvelope } from '@szl-holdings/design-system';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
-  AlertTriangle,
-  ArrowRight,
-  BarChart3,
-  Building2,
-  CheckCircle,
   ChevronDown,
-  Clock,
   DollarSign,
   Download,
-  Eye,
-  Filter,
   Globe,
   Layers,
-  MapPin,
   Target,
   TrendingDown,
   TrendingUp,
@@ -36,8 +26,6 @@ import {
   LineChart,
   ReferenceLine,
   ResponsiveContainer,
-  Scatter,
-  ScatterChart,
   Tooltip,
   XAxis,
   YAxis,
@@ -304,7 +292,7 @@ export default function MarketIntelligence() {
   });
 
   const liveMarket = marketData?.data;
-  const liveSectors = sectorData?.data?.sectors ?? [];
+  const _liveSectors = sectorData?.data?.sectors ?? [];
   const liveMortgage = mortgageData?.data?.rates ?? [];
   const isLive = !isMarketError && !!liveMarket;
 

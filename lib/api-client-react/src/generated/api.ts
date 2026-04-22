@@ -9,19 +9,9 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-import type {
-  MutationFunction,
-  QueryFunction,
-  QueryKey,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult,
-} from '@tanstack/react-query';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import type { BodyType, ErrorType } from '../custom-fetch';
+import { type MutationFunction, type QueryFunction, type QueryKey, type UseMutationOptions, type UseMutationResult, type UseQueryOptions, type UseQueryResult, useMutation, useQuery } from '@tanstack/react-query';
+import { type BodyType, type ErrorType, customFetch } from '../custom-fetch';
 
-import { customFetch } from '../custom-fetch';
 import type {
   A2AAgentCard,
   A2ATask,
@@ -2467,7 +2457,7 @@ export const getBeginBrowserLoginQueryKey = (
 
 export const getBeginBrowserLoginQueryOptions = <
   TData = Awaited<ReturnType<typeof beginBrowserLogin>>,
-  TError = ErrorType<void | UnauthorizedResponse>,
+  TError = ErrorType<undefined | UnauthorizedResponse>,
 >(
   params?: BeginBrowserLoginParams,
   options?: {
@@ -2499,7 +2489,7 @@ export type BeginBrowserLoginQueryResult = NonNullable<
   Awaited<ReturnType<typeof beginBrowserLogin>>
 >;
 export type BeginBrowserLoginQueryError =
-  ErrorType<void | UnauthorizedResponse>;
+  ErrorType<undefined | UnauthorizedResponse>;
 
 /**
  * @summary Start the browser OIDC login flow
@@ -2507,7 +2497,7 @@ export type BeginBrowserLoginQueryError =
 
 export function useBeginBrowserLogin<
   TData = Awaited<ReturnType<typeof beginBrowserLogin>>,
-  TError = ErrorType<void | UnauthorizedResponse>,
+  TError = ErrorType<undefined | UnauthorizedResponse>,
 >(
   params?: BeginBrowserLoginParams,
   options?: {
@@ -2567,7 +2557,7 @@ export const getHandleBrowserLoginCallbackQueryKey = (
 
 export const getHandleBrowserLoginCallbackQueryOptions = <
   TData = Awaited<ReturnType<typeof handleBrowserLoginCallback>>,
-  TError = ErrorType<void | UnauthorizedResponse>,
+  TError = ErrorType<undefined | UnauthorizedResponse>,
 >(
   params?: HandleBrowserLoginCallbackParams,
   options?: {
@@ -2600,7 +2590,7 @@ export type HandleBrowserLoginCallbackQueryResult = NonNullable<
   Awaited<ReturnType<typeof handleBrowserLoginCallback>>
 >;
 export type HandleBrowserLoginCallbackQueryError =
-  ErrorType<void | UnauthorizedResponse>;
+  ErrorType<undefined | UnauthorizedResponse>;
 
 /**
  * @summary Complete the browser OIDC login flow
@@ -2608,7 +2598,7 @@ export type HandleBrowserLoginCallbackQueryError =
 
 export function useHandleBrowserLoginCallback<
   TData = Awaited<ReturnType<typeof handleBrowserLoginCallback>>,
-  TError = ErrorType<void | UnauthorizedResponse>,
+  TError = ErrorType<undefined | UnauthorizedResponse>,
 >(
   params?: HandleBrowserLoginCallbackParams,
   options?: {
@@ -2654,7 +2644,7 @@ export const getLogoutBrowserSessionQueryKey = () => {
 
 export const getLogoutBrowserSessionQueryOptions = <
   TData = Awaited<ReturnType<typeof logoutBrowserSession>>,
-  TError = ErrorType<void | UnauthorizedResponse>,
+  TError = ErrorType<undefined | UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof logoutBrowserSession>>,
@@ -2682,7 +2672,7 @@ export type LogoutBrowserSessionQueryResult = NonNullable<
   Awaited<ReturnType<typeof logoutBrowserSession>>
 >;
 export type LogoutBrowserSessionQueryError =
-  ErrorType<void | UnauthorizedResponse>;
+  ErrorType<undefined | UnauthorizedResponse>;
 
 /**
  * @summary Clear the session and begin OIDC logout
@@ -2690,7 +2680,7 @@ export type LogoutBrowserSessionQueryError =
 
 export function useLogoutBrowserSession<
   TData = Awaited<ReturnType<typeof logoutBrowserSession>>,
-  TError = ErrorType<void | UnauthorizedResponse>,
+  TError = ErrorType<undefined | UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof logoutBrowserSession>>,
@@ -8546,7 +8536,7 @@ export const getVerifyEmailQueryKey = (params?: VerifyEmailParams) => {
 
 export const getVerifyEmailQueryOptions = <
   TData = Awaited<ReturnType<typeof verifyEmail>>,
-  TError = ErrorType<void | UnauthorizedResponse>,
+  TError = ErrorType<undefined | UnauthorizedResponse>,
 >(
   params: VerifyEmailParams,
   options?: {
@@ -8576,7 +8566,7 @@ export const getVerifyEmailQueryOptions = <
 export type VerifyEmailQueryResult = NonNullable<
   Awaited<ReturnType<typeof verifyEmail>>
 >;
-export type VerifyEmailQueryError = ErrorType<void | UnauthorizedResponse>;
+export type VerifyEmailQueryError = ErrorType<undefined | UnauthorizedResponse>;
 
 /**
  * @summary Verify an email address with a token
@@ -8584,7 +8574,7 @@ export type VerifyEmailQueryError = ErrorType<void | UnauthorizedResponse>;
 
 export function useVerifyEmail<
   TData = Awaited<ReturnType<typeof verifyEmail>>,
-  TError = ErrorType<void | UnauthorizedResponse>,
+  TError = ErrorType<undefined | UnauthorizedResponse>,
 >(
   params: VerifyEmailParams,
   options?: {

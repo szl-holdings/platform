@@ -1,6 +1,6 @@
 import { ImperiumLayout } from '@imp/components/imperium-layout';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React, { lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 
 const queryClient = new QueryClient({

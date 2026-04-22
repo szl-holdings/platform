@@ -68,13 +68,10 @@ export async function ingestDocument(
     );
 
     const ingestText = `${doc.title}\n\n${doc.content}`.slice(0, 8000);
-    const activeModelId = process.env['HF_EMBED_MODEL'] ?? 'BAAI/bge-m3';
+    const activeModelId = process.env.HF_EMBED_MODEL ?? 'BAAI/bge-m3';
     generateEmbedding(ingestText)
       .then(async (embedding) => {
         if (embedding.every((v) => v === 0)) {
-          console.warn(
-            `[rag-knowledge-store] Zero embedding for doc=${doc.docId}; skipping vector upsert`,
-          );
           return;
         }
         await pool.query(
@@ -100,18 +97,16 @@ export async function ingestDocument(
               docId: doc.docId,
               tags: doc.tags,
               importance: doc.importance,
-              ...(doc.extraMetadata ?? {}),
+              ...doc.extraMetadata,
             }),
             toVectorLiteral(embedding),
             activeModelId,
           ],
         );
       })
-      .catch((err: unknown) => {
-        console.error(`[rag-knowledge-store] Vector ingest failed for doc=${doc.docId}:`, err);
+      .catch((_err: unknown) => {
       });
-  } catch (err) {
-    console.warn('[rag-knowledge-store] Ingest failed:', err);
+  } catch (_err) {
   }
 }
 
@@ -143,15 +138,11 @@ export async function retrieveRelevantContext(
     // fail-closed: rag_knowledge_documents has no orgId column and cannot enforce
     // tenant boundaries. Return empty rather than risk cross-tenant leakage.
     if (options.tenantId) {
-      console.warn(
-        '[rag-knowledge-store] Vector retrieval unavailable for tenant-scoped query — returning empty (fail-closed)',
-      );
       return [];
     }
 
     return await fulltextRetrieve(query, options);
-  } catch (err) {
-    console.warn('[rag-knowledge-store] Retrieval failed:', err);
+  } catch (_err) {
     // Fail-closed: never fall back to unscoped keyword search for tenant-scoped queries.
     // rag_knowledge_documents has no orgId column; using it under a tenantId would risk
     // cross-tenant data exposure.
@@ -163,7 +154,7 @@ export async function retrieveRelevantContext(
 }
 
 async function vectorRetrieve(
-  query: string,
+  _query: string,
   embedding: number[],
   options: { domain?: string; limit?: number; tenantId?: string },
 ): Promise<RetrievalResult[]> {
@@ -420,8 +411,7 @@ export async function autoIngestFromDecisionStore(): Promise<number> {
 
     await ingestBatch(docs);
     return docs.length;
-  } catch (err) {
-    console.warn('[rag-knowledge-store] Auto-ingest failed:', err);
+  } catch (_err) {
     return 0;
   }
 }

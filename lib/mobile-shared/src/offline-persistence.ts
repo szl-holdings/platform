@@ -98,7 +98,7 @@ export async function applyDeltaToReplica(
     string,
     { value: unknown; timestamp: number; actorId: string; clock: Record<string, number> }
   >,
-  actorId: string,
+  _actorId: string,
 ): Promise<LocalReplica> {
   const existing = (await getLocalReplica(entityType, entityId)) ?? {
     entityType,

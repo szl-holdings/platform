@@ -236,7 +236,7 @@ class SelfModelEngine {
         (a, b) => new Date(a[1].timestamp).getTime() - new Date(b[1].timestamp).getTime(),
       );
       for (let i = 0; i < oldest.length - SelfModelEngine.MAX_BELIEFS; i++) {
-        this.beliefModels.delete(oldest[i]![0]);
+        this.beliefModels.delete(oldest[i]?.[0]);
       }
     }
 

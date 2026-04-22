@@ -24,22 +24,22 @@ describe('ALLOY_INTERNAL_TOKEN — legacy allowlist + bypass containment', () =>
   let prevAllow: string | undefined;
 
   beforeEach(() => {
-    prevLegacy = process.env['ALLOY_INTERNAL_TOKEN'];
-    prevScoped = process.env['INTERNAL_SERVICE_TOKENS'];
-    prevAllow = process.env['INTERNAL_TOKENS_ALLOW_LEGACY_ONLY'];
-    delete process.env['INTERNAL_SERVICE_TOKENS'];
-    delete process.env['INTERNAL_TOKENS_ALLOW_LEGACY_ONLY'];
-    process.env['ALLOY_INTERNAL_TOKEN'] = LEGACY;
+    prevLegacy = process.env.ALLOY_INTERNAL_TOKEN;
+    prevScoped = process.env.INTERNAL_SERVICE_TOKENS;
+    prevAllow = process.env.INTERNAL_TOKENS_ALLOW_LEGACY_ONLY;
+    delete process.env.INTERNAL_SERVICE_TOKENS;
+    delete process.env.INTERNAL_TOKENS_ALLOW_LEGACY_ONLY;
+    process.env.ALLOY_INTERNAL_TOKEN = LEGACY;
     resetInternalTokenRegistry();
   });
 
   afterEach(() => {
-    if (prevLegacy === undefined) delete process.env['ALLOY_INTERNAL_TOKEN'];
-    else process.env['ALLOY_INTERNAL_TOKEN'] = prevLegacy;
-    if (prevScoped === undefined) delete process.env['INTERNAL_SERVICE_TOKENS'];
-    else process.env['INTERNAL_SERVICE_TOKENS'] = prevScoped;
-    if (prevAllow === undefined) delete process.env['INTERNAL_TOKENS_ALLOW_LEGACY_ONLY'];
-    else process.env['INTERNAL_TOKENS_ALLOW_LEGACY_ONLY'] = prevAllow;
+    if (prevLegacy === undefined) delete process.env.ALLOY_INTERNAL_TOKEN;
+    else process.env.ALLOY_INTERNAL_TOKEN = prevLegacy;
+    if (prevScoped === undefined) delete process.env.INTERNAL_SERVICE_TOKENS;
+    else process.env.INTERNAL_SERVICE_TOKENS = prevScoped;
+    if (prevAllow === undefined) delete process.env.INTERNAL_TOKENS_ALLOW_LEGACY_ONLY;
+    else process.env.INTERNAL_TOKENS_ALLOW_LEGACY_ONLY = prevAllow;
     resetInternalTokenRegistry();
   });
 
@@ -93,7 +93,7 @@ describe('ALLOY_INTERNAL_TOKEN — legacy allowlist + bypass containment', () =>
   });
 
   it('permits production start with explicit INTERNAL_TOKENS_ALLOW_LEGACY_ONLY=true override', () => {
-    process.env['INTERNAL_TOKENS_ALLOW_LEGACY_ONLY'] = 'true';
+    process.env.INTERNAL_TOKENS_ALLOW_LEGACY_ONLY = 'true';
     expect(() => assertInternalTokenPolicy({ isProduction: true })).not.toThrow();
   });
 
@@ -102,7 +102,7 @@ describe('ALLOY_INTERNAL_TOKEN — legacy allowlist + bypass containment', () =>
   });
 
   it('does not block startup when at least one scoped token is configured', () => {
-    process.env['INTERNAL_SERVICE_TOKENS'] = JSON.stringify([
+    process.env.INTERNAL_SERVICE_TOKENS = JSON.stringify([
       {
         name: 'ops-runner',
         token: 'scoped-ok',

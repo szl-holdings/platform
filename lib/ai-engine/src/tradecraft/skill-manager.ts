@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import {
   type SkillCapability,
   type SkillChain,
@@ -88,7 +88,7 @@ export class SkillManager {
       const triggered = skillRegistry.matchTriggers(context);
       if (triggered.some((t) => t.skillId === skill.skillId)) score += 25;
 
-      if (skill.domain === context['domain']) score += 10;
+      if (skill.domain === context.domain) score += 10;
 
       return { skill, score };
     });
@@ -161,7 +161,7 @@ export class SkillManager {
 
       if (skill.chainMetadata.parallelizable && i > 0) {
         const lastGroup = parallelGroups[parallelGroups.length - 1];
-        if (lastGroup && lastGroup.every((s) => s.chainMetadata.parallelizable)) {
+        if (lastGroup?.every((s) => s.chainMetadata.parallelizable)) {
           lastGroup.push(skill);
         } else {
           parallelGroups.push([skill]);
@@ -257,7 +257,7 @@ export class SkillManager {
         phaseInputs[inputName] = `{{${sourceMapping}}}`;
       }
 
-      phases[phase]!.skills.push({
+      phases[phase]?.skills.push({
         skillId: step.skillId,
         capability: step.capability,
         inputs: phaseInputs,

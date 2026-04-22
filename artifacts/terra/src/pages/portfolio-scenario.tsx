@@ -1,24 +1,11 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
-import { motion } from 'framer-motion';
 import {
-  Activity,
   ArrowDownRight,
   ArrowUpRight,
-  BarChart3,
   Building2,
   ChevronRight,
-  DollarSign,
-  Info,
-  LayoutGrid,
-  MapPin,
-  Minus,
-  PieChart,
   Plus,
-  RefreshCw,
   Sliders,
-  Target,
-  TrendingDown,
-  TrendingUp,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -194,7 +181,7 @@ function formatCurrency(n: number, compact = false) {
   return `$${n}`;
 }
 
-function DeltaBadge({
+function _DeltaBadge({
   base,
   projected,
   format = 'pct',
@@ -572,7 +559,7 @@ export default function PortfolioScenario() {
     if (!candidate) return baseMetrics;
     const adjustedRehab = candidate.rehabCost * rehabMultiplier;
     const totalCost = candidate.askPrice + adjustedRehab;
-    const equityIn = totalCost * (equityContribution / 100);
+    const _equityIn = totalCost * (equityContribution / 100);
     const adjustedIrr =
       candidate.projectedIrr *
       (1 - (rehabMultiplier - 1) * 0.3) *

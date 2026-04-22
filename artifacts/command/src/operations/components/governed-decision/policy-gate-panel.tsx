@@ -5,9 +5,7 @@ import {
   ChevronDown,
   ChevronRight,
   Clock,
-  Lock,
   Scale,
-  Shield,
   User,
   XCircle,
 } from 'lucide-react';

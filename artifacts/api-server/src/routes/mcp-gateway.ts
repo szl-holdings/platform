@@ -5,7 +5,7 @@ import {
   approvalRequestsTable,
   db,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { and, avg, count, desc, eq, gte, isNotNull, isNull, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { handleRouteError, sendError, sendSuccess } from '../lib/api-response';
@@ -38,12 +38,12 @@ interface GatewayRule {
 }
 
 const GATEWAY_ENDPOINT =
-  process.env['MCP_GATEWAY_ENDPOINT'] ?? 'https://mcp-gateway.sentra.szl.local/v1/proxy';
+  process.env.MCP_GATEWAY_ENDPOINT ?? 'https://mcp-gateway.sentra.szl.local/v1/proxy';
 // Only attempt a real upstream round-trip when the operator has explicitly
 // configured an endpoint. Otherwise the placeholder hostname above would
 // cause every allowed/logged call to wait for a DNS/connect timeout in dev,
 // which would poison the recorded latency_ms average.
-const GATEWAY_ENDPOINT_CONFIGURED = process.env['MCP_GATEWAY_ENDPOINT'] !== undefined;
+const GATEWAY_ENDPOINT_CONFIGURED = process.env.MCP_GATEWAY_ENDPOINT !== undefined;
 function parseUpstreamTimeoutMs(raw: string | undefined): number {
   if (raw === undefined) return 5000;
   const n = Number(raw);
@@ -51,7 +51,7 @@ function parseUpstreamTimeoutMs(raw: string | undefined): number {
   // Clamp to a sane operator-facing range (50ms .. 60s).
   return Math.min(60_000, Math.max(50, Math.floor(n)));
 }
-const UPSTREAM_TIMEOUT_MS = parseUpstreamTimeoutMs(process.env['MCP_GATEWAY_UPSTREAM_TIMEOUT_MS']);
+const UPSTREAM_TIMEOUT_MS = parseUpstreamTimeoutMs(process.env.MCP_GATEWAY_UPSTREAM_TIMEOUT_MS);
 
 const startedAt = Date.now();
 
@@ -546,7 +546,7 @@ router.get('/mcp-gateway/config', async (_req: Request, res: Response) => {
 router.get('/mcp-gateway/events', async (req: Request, res: Response) => {
   try {
     await ensureSeeded();
-    const limit = Math.min(Number(req.query['limit'] ?? 50), 200);
+    const limit = Math.min(Number(req.query.limit ?? 50), 200);
     const rows = await db
       .select()
       .from(agentMeshGatewayEventsTable)
@@ -576,7 +576,7 @@ router.get('/mcp-gateway/events', async (req: Request, res: Response) => {
 
 router.get('/mcp-gateway/latency', async (req: Request, res: Response) => {
   try {
-    const hoursRaw = Number(req.query['hours']);
+    const hoursRaw = Number(req.query.hours);
     const windowHours =
       Number.isFinite(hoursRaw) && hoursRaw > 0 && hoursRaw <= 24 * 30 ? hoursRaw : 24;
     const breakdown = await getGatewayLatencyBreakdown(windowHours);
@@ -591,10 +591,10 @@ router.post('/mcp-gateway/proxy', async (req: Request, res: Response) => {
   try {
     await ensureSeeded();
     const body = (req.body ?? {}) as Record<string, unknown>;
-    const agentClass = String(body['agentClass'] ?? '');
-    const mcpServerId = String(body['mcpServerId'] ?? '');
-    const tool = String(body['tool'] ?? '');
-    const egressDomain = body['egressDomain'] ? String(body['egressDomain']) : undefined;
+    const agentClass = String(body.agentClass ?? '');
+    const mcpServerId = String(body.mcpServerId ?? '');
+    const tool = String(body.tool ?? '');
+    const egressDomain = body.egressDomain ? String(body.egressDomain) : undefined;
 
     if (!agentClass || !mcpServerId || !tool) {
       return sendError(res, 'agentClass, mcpServerId, and tool are required', 400);
@@ -661,7 +661,7 @@ router.post('/mcp-gateway/proxy', async (req: Request, res: Response) => {
             mcpServerId,
             tool,
             egressDomain: egressDomain ?? null,
-            payload: body['payload'] ?? null,
+            payload: body.payload ?? null,
           }),
           signal: ctrl.signal,
         });
@@ -783,17 +783,17 @@ router.post('/mcp-gateway/proxy', async (req: Request, res: Response) => {
 router.patch('/mcp-gateway/rules/:ruleId/enforcement-mode', async (req: Request, res: Response) => {
   try {
     await ensureSeeded();
-    const ruleId = req.params['ruleId'];
+    const ruleId = req.params.ruleId;
     if (!ruleId) return sendError(res, 'ruleId is required', 400);
     const rule = await findRuleById(ruleId);
     if (!rule) return sendError(res, `Rule '${ruleId}' not found`, 404);
 
     const body = (req.body ?? {}) as Record<string, unknown>;
-    const requestedMode = String(body['mode'] ?? '') as EnforcementMode;
+    const requestedMode = String(body.mode ?? '') as EnforcementMode;
     if (!['log-only', 'block', 'quarantine'].includes(requestedMode)) {
       return sendError(res, 'mode must be one of: log-only, block, quarantine', 400);
     }
-    const requestedBy = String(body['requestedBy'] ?? 'operator');
+    const requestedBy = String(body.requestedBy ?? 'operator');
 
     if (rule.tier === 'critical' && rule.enforcementMode !== requestedMode) {
       // Persist the pending mode change AND open an entry in the

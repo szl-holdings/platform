@@ -14,7 +14,7 @@
  *   HumanApprovalGate   — pauses the run and creates an approval request
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type { AuditEmitter } from '../audit.js';
 import type { StorageAdapters } from '../storage/interfaces.js';
 

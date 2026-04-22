@@ -14,7 +14,4 @@ const server = net.createServer((clientSocket) => {
 });
 
 server.listen(LISTEN_PORT, '0.0.0.0', () => {
-  console.log(`  ➜  Local:   http://localhost:${LISTEN_PORT}/`);
-  console.log(`  ➜  Network: http://0.0.0.0:${LISTEN_PORT}/`);
-  console.log(`  ➜  Proxying to localhost:${TARGET_PORT}`);
 });

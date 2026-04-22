@@ -3,66 +3,66 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Constellation — cross-domain ontology and intelligence graph for the SZL platform",
+  "description": "Constellation \u2014 cross-domain ontology and intelligence graph for the SZL platform",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./src/index.ts",
       "import": "./src/index.ts"
     },
     "./schema": {
-      "types": "./dist/schema.d.ts",
+      "types": "./src/schema.ts",
       "import": "./src/schema.ts"
     },
     "./types": {
-      "types": "./dist/types.d.ts",
+      "types": "./src/types.ts",
       "import": "./src/types.ts"
     },
     "./adapter": {
-      "types": "./dist/adapter.d.ts",
+      "types": "./src/adapter.ts",
       "import": "./src/adapter.ts"
     },
     "./store": {
-      "types": "./dist/store.d.ts",
+      "types": "./src/store.ts",
       "import": "./src/store.ts"
     },
     "./query": {
-      "types": "./dist/query.d.ts",
+      "types": "./src/query.ts",
       "import": "./src/query.ts"
     },
     "./registry": {
-      "types": "./dist/registry.d.ts",
+      "types": "./src/registry.ts",
       "import": "./src/registry.ts"
     },
     "./adapters/*": {
-      "types": "./dist/adapters/*.d.ts",
+      "types": "./src/adapters/*.ts",
       "import": "./src/adapters/*.ts"
     },
     "./entity-resolution": {
-      "types": "./dist/entity-resolution.d.ts",
+      "types": "./src/entity-resolution.ts",
       "import": "./src/entity-resolution.ts"
     },
     "./relationship-inference": {
-      "types": "./dist/relationship-inference.d.ts",
+      "types": "./src/relationship-inference.ts",
       "import": "./src/relationship-inference.ts"
     },
     "./contradiction-detection": {
-      "types": "./dist/contradiction-detection.d.ts",
+      "types": "./src/contradiction-detection.ts",
       "import": "./src/contradiction-detection.ts"
     },
     "./evidence-ranking": {
-      "types": "./dist/evidence-ranking.d.ts",
+      "types": "./src/evidence-ranking.ts",
       "import": "./src/evidence-ranking.ts"
     },
     "./freshness-decay": {
-      "types": "./dist/freshness-decay.d.ts",
+      "types": "./src/freshness-decay.ts",
       "import": "./src/freshness-decay.ts"
     },
     "./confidence-fusion": {
-      "types": "./dist/confidence-fusion.d.ts",
+      "types": "./src/confidence-fusion.ts",
       "import": "./src/confidence-fusion.ts"
     },
     "./cross-domain": {
-      "types": "./dist/cross-domain.d.ts",
+      "types": "./src/cross-domain.ts",
       "import": "./src/cross-domain.ts"
     }
   },

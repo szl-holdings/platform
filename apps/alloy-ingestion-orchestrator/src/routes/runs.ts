@@ -4,13 +4,11 @@
  * Submit / monitor / cancel / list workflow runs.
  */
 
-import { randomUUID } from 'crypto';
-import type { Request, Response } from 'express';
-import { Router } from 'express';
+import { randomUUID } from 'node:crypto';
+import { type Request, type Response, Router } from 'express';
 import { defaultEngine } from '../engine.js';
 import { defaultRunStore } from '../run-store.js';
-import type { ListRunsFilter } from '../types.js';
-import { SubmitRunRequestSchema } from '../types.js';
+import { type ListRunsFilter, SubmitRunRequestSchema } from '../types.js';
 import { buildIngestDocumentWorkflow } from '../workflows/ingest-document.js';
 import { buildRebuildIndexWorkflow } from '../workflows/rebuild-index.js';
 import { buildRotateProfileVersionWorkflow } from '../workflows/rotate-profile-version.js';
@@ -92,12 +90,12 @@ export function createRunsRouter(): Router {
 
   router.get('/runs', (req: Request, res: Response) => {
     const filter: ListRunsFilter = {
-      tenantId: req.query['tenantId'] as string | undefined,
-      profileId: req.query['profileId'] as string | undefined,
-      status: req.query['status'] as ListRunsFilter['status'],
-      workflowId: req.query['workflowId'] as string | undefined,
-      limit: req.query['limit'] ? parseInt(req.query['limit'] as string, 10) : 100,
-      offset: req.query['offset'] ? parseInt(req.query['offset'] as string, 10) : 0,
+      tenantId: req.query.tenantId as string | undefined,
+      profileId: req.query.profileId as string | undefined,
+      status: req.query.status as ListRunsFilter['status'],
+      workflowId: req.query.workflowId as string | undefined,
+      limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 100,
+      offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0,
     };
     const runs = defaultRunStore.list(filter);
     res.status(200).json({ runs, total: runs.length });
@@ -116,15 +114,15 @@ function resolveWorkflowDefinition(
     case 'ingest_document':
       return buildIngestDocumentWorkflow(
         {
-          sourceId: (input['sourceId'] as string) ?? randomUUID(),
-          content: (input['content'] as string) ?? '',
-          contentType: (input['contentType'] as string) ?? 'text/plain',
-          title: input['title'] as string | undefined,
-          sourceUri: input['sourceUri'] as string | undefined,
-          chunkSize: input['chunkSize'] as number | undefined,
-          chunkOverlap: input['chunkOverlap'] as number | undefined,
-          model: input['model'] as string | undefined,
-          metadata: (input['metadata'] as Record<string, unknown>) ?? {},
+          sourceId: (input.sourceId as string) ?? randomUUID(),
+          content: (input.content as string) ?? '',
+          contentType: (input.contentType as string) ?? 'text/plain',
+          title: input.title as string | undefined,
+          sourceUri: input.sourceUri as string | undefined,
+          chunkSize: input.chunkSize as number | undefined,
+          chunkOverlap: input.chunkOverlap as number | undefined,
+          model: input.model as string | undefined,
+          metadata: (input.metadata as Record<string, unknown>) ?? {},
         },
         tenantId,
         profileId,
@@ -133,40 +131,40 @@ function resolveWorkflowDefinition(
       return buildRebuildIndexWorkflow({
         tenantId,
         profileId,
-        fullRebuild: input['fullRebuild'] as boolean | undefined,
-        sourceIds: input['sourceIds'] as string[] | undefined,
+        fullRebuild: input.fullRebuild as boolean | undefined,
+        sourceIds: input.sourceIds as string[] | undefined,
       });
     case 'verify_index_health':
       return buildVerifyIndexHealthWorkflow({
         tenantId,
         profileId,
-        goldQueries: input['goldQueries'] as
+        goldQueries: input.goldQueries as
           | Array<{ query: string; expectedChunkIds: string[] }>
           | undefined,
-        sampleSize: input['sampleSize'] as number | undefined,
+        sampleSize: input.sampleSize as number | undefined,
       });
     case 'run_retrieval_eval':
       return buildRunRetrievalEvalWorkflow({
         tenantId,
         profileId,
-        datasetId: (input['datasetId'] as string) ?? 'default',
+        datasetId: (input.datasetId as string) ?? 'default',
         queries:
-          (input['queries'] as Array<{
+          (input.queries as Array<{
             queryId: string;
             query: string;
             relevantChunkIds: string[];
           }>) ?? [],
-        topK: input['topK'] as number | undefined,
-        metrics: input['metrics'] as Array<'ndcg' | 'recall' | 'precision' | 'mrr'> | undefined,
+        topK: input.topK as number | undefined,
+        metrics: input.metrics as Array<'ndcg' | 'recall' | 'precision' | 'mrr'> | undefined,
       });
     case 'rotate_profile_version':
       return buildRotateProfileVersionWorkflow({
         tenantId,
-        currentProfileId: (input['currentProfileId'] as string) ?? profileId,
-        newProfileId: (input['newProfileId'] as string) ?? profileId,
-        newProfileVersion: (input['newProfileVersion'] as string) ?? 'v2',
-        shadowDatasetId: input['shadowDatasetId'] as string | undefined,
-        shadowQueries: input['shadowQueries'] as
+        currentProfileId: (input.currentProfileId as string) ?? profileId,
+        newProfileId: (input.newProfileId as string) ?? profileId,
+        newProfileVersion: (input.newProfileVersion as string) ?? 'v2',
+        shadowDatasetId: input.shadowDatasetId as string | undefined,
+        shadowQueries: input.shadowQueries as
           | Array<{ queryId: string; query: string; relevantChunkIds: string[] }>
           | undefined,
       });

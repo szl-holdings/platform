@@ -1,12 +1,9 @@
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import {
   AlertTriangle,
-  Anchor,
-  ArrowUpRight,
   CheckCircle,
   Clock,
   Filter,
-  Shield,
   User,
 } from 'lucide-react';
 import { useState } from 'react';

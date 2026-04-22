@@ -141,10 +141,10 @@ export function computeShapExplanation(
   } else if (typeof prediction === 'object' && prediction !== null) {
     const pred = prediction as Record<string, unknown>;
     predictedNumeric =
-      typeof pred['probability'] === 'number'
-        ? pred['probability']
-        : typeof pred['score'] === 'number'
-          ? pred['score']
+      typeof pred.probability === 'number'
+        ? pred.probability
+        : typeof pred.score === 'number'
+          ? pred.score
           : 0.5;
   }
 
@@ -152,7 +152,7 @@ export function computeShapExplanation(
 
   const allContributions: ShapValue[] = importanceEntries.map(([featureId, importance]) => {
     const rawValue = featureValues[featureId];
-    const numericValue = typeof rawValue === 'number' ? rawValue : 0;
+    const _numericValue = typeof rawValue === 'number' ? rawValue : 0;
     const contribution =
       (importance / Math.max(totalImportance, 0.001)) * (predictedNumeric - baseValue);
     const percentOfTotal = totalImportance > 0 ? importance / totalImportance : 0;

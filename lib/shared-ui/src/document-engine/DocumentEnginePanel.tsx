@@ -4,28 +4,23 @@ import {
   CheckCircle,
   ChevronRight,
   Clock,
-  Download,
   Edit3,
   Eye,
   FileText,
   History,
-  Layers,
   MessageSquare,
   Pen,
   Plus,
-  Printer,
   Save,
   Search,
-  Send,
-  Trash2,
   X,
   XCircle,
 } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { cn } from '../utils';
 import { createEmptyDocument, DocumentEditor, type DocumentEditorContent } from './editor';
 import { DOCUMENT_TEMPLATES } from './templates';
-import type { AppSource, DocumentRecord, DocumentTemplate, DocumentVersionMeta } from './types';
+import type { AppSource, DocumentRecord, DocumentVersionMeta } from './types';
 
 const BASE_URL = typeof window !== 'undefined' ? (window as any).__REPLIT_BASE_URL || '' : '';
 
@@ -36,7 +31,7 @@ function apiUrl(path: string) {
 async function apiFetch(path: string, options?: RequestInit) {
   const res = await fetch(apiUrl(path), {
     ...options,
-    headers: { 'Content-Type': 'application/json', ...(options?.headers || {}) },
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Request failed' }));
@@ -112,14 +107,14 @@ export function DocumentEnginePanel({
   const [statusFilter, setStatusFilter] = useState('all');
   const [editorContent, setEditorContent] = useState<DocumentEditorContent>(createEmptyDocument());
   const [showNewDoc, setShowNewDoc] = useState(false);
-  const [showTemplates, setShowTemplates] = useState(false);
+  const [_showTemplates, _setShowTemplates] = useState(false);
   const [newDocTitle, setNewDocTitle] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [showSignModal, setShowSignModal] = useState(false);
   const [signerInputs, setSignerInputs] = useState([{ email: '', name: '' }]);
   const [saveMessage, setSaveMessage] = useState('');
   const [versions, setVersions] = useState<DocumentVersionMeta[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
 
   const appTemplates = DOCUMENT_TEMPLATES.filter(
     (t) => t.appSource === appSource || t.appSource === 'general',
@@ -494,7 +489,6 @@ export function DocumentEnginePanel({
                   onChange={(e) => setNewDocTitle(e.target.value)}
                   placeholder="Enter document title..."
                   className="w-full px-3 py-2 rounded-lg border border-white/20 bg-white/5 text-sm text-white placeholder:text-white/30 focus:outline-none"
-                  autoFocus
                   onKeyDown={(e) => e.key === 'Enter' && createDocument()}
                 />
               </div>

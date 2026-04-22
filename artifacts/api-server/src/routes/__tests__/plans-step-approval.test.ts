@@ -19,8 +19,7 @@ vi.mock('../../lib/logger.js', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-import type { PlanGraph } from '@workspace/planner';
-import { defaultPlanStore } from '@workspace/planner';
+import { type PlanGraph, defaultPlanStore } from '@workspace/planner';
 import plansRouter from '../plans';
 
 function makePlan(overrides: Partial<PlanGraph> = {}): PlanGraph {

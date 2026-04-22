@@ -130,8 +130,8 @@ router.get(
       const filterParts: ReturnType<typeof eq>[] = [];
 
       if (orgId) {
-        const orgIdNum = parseInt(orgId);
-        if (isNaN(orgIdNum)) {
+        const orgIdNum = parseInt(orgId, 10);
+        if (Number.isNaN(orgIdNum)) {
           res.status(400).json({ error: 'Invalid orgId' });
           return;
         }
@@ -266,9 +266,9 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const user = req.user as AuthenticatedUser;
-      const policyId = parseInt(req.params['policyId'] as string);
+      const policyId = parseInt(req.params.policyId as string, 10);
 
-      if (isNaN(policyId)) {
+      if (Number.isNaN(policyId)) {
         res.status(400).json({ error: 'Invalid policy ID' });
         return;
       }
@@ -439,8 +439,8 @@ router.get(
       const filterParts: ReturnType<typeof eq>[] = [];
 
       if (orgId) {
-        const orgIdNum = parseInt(orgId);
-        if (isNaN(orgIdNum)) {
+        const orgIdNum = parseInt(orgId, 10);
+        if (Number.isNaN(orgIdNum)) {
           res.status(400).json({ error: 'Invalid orgId' });
           return;
         }
@@ -467,7 +467,7 @@ router.get(
         .from(dataRetentionAuditLogTable)
         .where(filterParts.length > 0 ? and(...filterParts) : undefined)
         .orderBy(desc(dataRetentionAuditLogTable.executedAt))
-        .limit(Math.min(parseInt(limit), 200));
+        .limit(Math.min(parseInt(limit, 10), 200));
 
       res.json({ entries });
     } catch (err) {

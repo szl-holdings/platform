@@ -1,5 +1,5 @@
 import { AnimatePresence, m } from 'framer-motion';
-import { ArrowLeft, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 
@@ -16,7 +16,7 @@ const NAV_LINKS = [
 export function FounderLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isHome = location === '/founder' || location === '/founder/';
+  const _isHome = location === '/founder' || location === '/founder/';
 
   return (
     <div
@@ -87,7 +87,7 @@ export function FounderLayout({ children }: { children: ReactNode }) {
             className="hidden-mobile"
           >
             {NAV_LINKS.map((link) => {
-              const active = location === link.href || location.startsWith(link.href + '/');
+              const active = location === link.href || location.startsWith(`${link.href}/`);
               return (
                 <Link key={link.href} href={link.href}>
                   <span

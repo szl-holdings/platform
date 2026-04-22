@@ -323,7 +323,7 @@ class NuroForgeService {
     return [...this.duelHistory];
   }
 
-  evaluateGovernance(model: string, domain: string, output: string): GovernanceEvent {
+  evaluateGovernance(model: string, domain: string, _output: string): GovernanceEvent {
     const types: GovernanceEvent['type'][] = [
       'bias',
       'hallucination',

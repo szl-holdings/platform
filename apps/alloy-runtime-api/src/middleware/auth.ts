@@ -20,10 +20,10 @@ declare module 'express' {
 }
 
 export function apiKeyGuard(req: Request, res: Response, next: NextFunction): void {
-  const configuredKey = process.env['ALLOY_API_KEY'];
+  const configuredKey = process.env.ALLOY_API_KEY;
 
   if (!configuredKey) {
-    if (process.env['NODE_ENV'] === 'production') {
+    if (process.env.NODE_ENV === 'production') {
       res.status(503).json({
         error: 'Service misconfigured — ALLOY_API_KEY not set',
         code: 'MISSING_API_KEY_CONFIG',

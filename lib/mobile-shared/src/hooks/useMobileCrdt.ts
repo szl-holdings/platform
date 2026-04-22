@@ -6,7 +6,6 @@ import {
   getLocalReplica,
   getOutbox,
   getStoredCursor,
-  type LocalReplica,
   removeFromOutbox,
   saveStoredCursor,
 } from '../offline-persistence';
@@ -80,7 +79,7 @@ export function useMobileCrdt(
     return () => {
       cancelled = true;
     };
-  }, [entityType, entityId]);
+  }, [entityType, entityId, initialValues]);
 
   const setField = useCallback(
     async (key: string, value: unknown) => {
@@ -128,7 +127,7 @@ export function useMobileCrdt(
 
     const outbox = await getOutbox();
     if (outbox.length === 0) {
-      await pollRemoteChanges();
+      await pollRemoteChangesRef.current?.();
       return;
     }
 
@@ -159,8 +158,10 @@ export function useMobileCrdt(
       setPendingCount(remaining.length);
     }
 
-    await pollRemoteChanges();
-  }, [isOffline, entityType, entityId, actorId]);
+    await pollRemoteChangesRef.current?.();
+  }, [isOffline]);
+
+  const pollRemoteChangesRef = useRef<(() => Promise<void>) | null>(null);
 
   const pollRemoteChanges = useCallback(async () => {
     if (!API_BASE) return;
@@ -227,6 +228,10 @@ export function useMobileCrdt(
       /* ignore */
     }
   }, [entityType, entityId, actorId]);
+
+  useEffect(() => {
+    pollRemoteChangesRef.current = pollRemoteChanges;
+  }, [pollRemoteChanges]);
 
   useEffect(() => {
     if (!isOffline && isReady) {

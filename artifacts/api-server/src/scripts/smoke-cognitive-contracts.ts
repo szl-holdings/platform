@@ -19,15 +19,13 @@
 export {};
 
 const errors: string[] = [];
-let passed = 0;
+let _passed = 0;
 
 function assert(label: string, cond: boolean, detail?: string) {
   if (cond) {
-    console.log(`[contract] ✓  ${label}`);
-    passed++;
+    _passed++;
   } else {
     const msg = detail ? `${label} — ${detail}` : label;
-    console.error(`[contract] ✗  ${msg}`);
     errors.push(msg);
   }
 }
@@ -63,10 +61,6 @@ function makeProvenance(source: string, verifiedBy = 'CONSTELLATION Engine', tra
 }
 
 const VALID_FRESHNESS = new Set(['fresh', 'aging', 'stale-90d']);
-
-// ─── 1. makeProvenance contract ───────────────────────────────────────────────
-
-console.log('\n[contract] === makeProvenance ===');
 {
   const p = makeProvenance('Test Source');
   assert('provenance has traceId', typeof p.traceId === 'string' && p.traceId.startsWith('trace-'));
@@ -77,21 +71,15 @@ console.log('\n[contract] === makeProvenance ===');
   assert('provenance traceId === traceRef', p.traceId === p.traceRef);
   assert('provenance has source', p.source === 'Test Source');
   assert('provenance has verifiedBy', typeof p.verifiedBy === 'string');
-  assert('provenance has generatedAt (ISO)', !isNaN(Date.parse(p.generatedAt)));
+  assert('provenance has generatedAt (ISO)', !Number.isNaN(Date.parse(p.generatedAt)));
   assert('provenance approvalStatus is auto-verified', p.approvalStatus === 'auto-verified');
   assert('provenance has cognitiveRuntime', typeof p.cognitiveRuntime === 'string');
 }
-
-console.log('\n[contract] === makeProvenance — explicit traceRef ===');
 {
   const p = makeProvenance('Business Impact Engine', 'CONSTELLATION BI Engine', 'trace-bim-42');
   assert('explicit traceRef is preserved', p.traceRef === 'trace-bim-42');
   assert('explicit traceRef mirrors traceId', p.traceId === 'trace-bim-42');
 }
-
-// ─── 2. deterministic hash stability ─────────────────────────────────────────
-
-console.log('\n[contract] === deterministicHash ===');
 {
   const h1 = deterministicHash('test-seed-123');
   const h2 = deterministicHash('test-seed-123');
@@ -102,10 +90,6 @@ console.log('\n[contract] === deterministicHash ===');
   const daysSinceCheck = (deterministicHash('42-days') % 45) + 1;
   assert('derived daysSinceCheck in [1, 45]', daysSinceCheck >= 1 && daysSinceCheck <= 45);
 }
-
-// ─── 3. freshness enum constraint ────────────────────────────────────────────
-
-console.log('\n[contract] === freshnessStatus enum ===');
 {
   const cases = [
     { days: 3, expected: 'fresh' },
@@ -129,10 +113,6 @@ console.log('\n[contract] === freshnessStatus enum ===');
     !VALID_FRESHNESS.has('stale'),
   );
 }
-
-// ─── 4. business impact map — incidentImpact.provenance.traceRef contract ─────
-
-console.log('\n[contract] === business impact map provenance.traceRef ===');
 {
   const mockIncidentId = 99;
   const impactMapping = {
@@ -165,10 +145,6 @@ console.log('\n[contract] === business impact map provenance.traceRef ===');
   );
   assert('estimatedFinancialImpact is deterministic', impactMapping.estimatedFinancialImpact > 0);
 }
-
-// ─── 5. attack path graph node shapes ────────────────────────────────────────
-
-console.log('\n[contract] === attack path graph node shape ===');
 {
   const NODE_TYPES = ['asset', 'identity', 'control', 'incident'] as const;
   const mockNodes = NODE_TYPES.map((type, i) => ({
@@ -197,10 +173,6 @@ console.log('\n[contract] === attack path graph node shape ===');
     assert(`node[${node.type}] type is valid`, NODE_TYPES.includes(node.type as never));
   }
 }
-
-// ─── 6. incident proof chain event shape ─────────────────────────────────────
-
-console.log('\n[contract] === incident proof chain event shape ===');
 {
   const VALID_EVENT_TYPES = [
     'detection',
@@ -232,10 +204,6 @@ console.log('\n[contract] === incident proof chain event shape ===');
   );
   assert('event eventType is valid', VALID_EVENT_TYPES.includes(mockEvent.eventType));
 }
-
-// ─── 7. identity blast radius — unknown identity falls back to DB-derived ─────
-
-console.log('\n[contract] === identity blast radius — unknown identity handling ===');
 {
   const KNOWN_PROFILES: Record<string, { displayName: string; role: string; riskScore: number }> = {
     'j.smith@corp.com': { displayName: 'John Smith', role: 'Finance Analyst', riskScore: 97 },
@@ -287,10 +255,6 @@ console.log('\n[contract] === identity blast radius — unknown identity handlin
     resolveIdentity('unknown@external.com', mockAssets).riskScore === unknown.riskScore,
   );
 }
-
-// ─── 8. control evidence graph — staleEvidence count uses stale-90d ───────────
-
-console.log('\n[contract] === control evidence graph stale count ===');
 {
   const mockEvidenceItems = [
     { freshnessDays: 3, freshnessStatus: 'fresh' },
@@ -305,15 +269,9 @@ console.log('\n[contract] === control evidence graph stale count ===');
     mockEvidenceItems.every((e) => e.freshnessStatus !== 'stale'),
   );
 }
-
-// ─── Summary ──────────────────────────────────────────────────────────────────
-
-console.log('\n─────────────────────────────────────────');
 if (errors.length === 0) {
-  console.log(`[contract] ✓  All ${passed} cognitive API contract checks PASSED`);
   process.exit(0);
 } else {
-  console.error(`[contract] ✗  ${errors.length} contract check(s) FAILED:`);
-  errors.forEach((e) => console.error(`         • ${e}`));
+  errors.forEach((_e) => {});
   process.exit(1);
 }

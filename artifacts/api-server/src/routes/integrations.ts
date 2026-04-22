@@ -1,7 +1,7 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { alloySignals, connectorsTable, db } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import { createHmac, randomBytes, timingSafeEqual } from 'crypto';
+import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
@@ -37,7 +37,7 @@ async function validateSalesforceWebhookSecret(req: Request): Promise<boolean> {
     if (!connector?.config) return false;
     const config = connector.config as Record<string, unknown>;
     const storedSecret =
-      typeof config['webhookSecret'] === 'string' ? config['webhookSecret'] : null;
+      typeof config.webhookSecret === 'string' ? config.webhookSecret : null;
     if (!storedSecret) return false;
     const provided = Buffer.from(providedSecret, 'utf-8');
     const stored = Buffer.from(storedSecret, 'utf-8');
@@ -332,11 +332,11 @@ router.post(
       }
 
       const eventType =
-        (body['eventType'] as string) ?? (body['type'] as string) ?? 'salesforce.event';
-      const objectType = (body['sObject'] as string) ?? (body['object'] as string) ?? 'unknown';
-      const recordId = (body['id'] as string) ?? (body['recordId'] as string) ?? 'unknown';
-      const title = (body['title'] as string) ?? `Salesforce ${objectType} event — ${recordId}`;
-      const description = (body['description'] as string) ?? JSON.stringify(body).slice(0, 500);
+        (body.eventType as string) ?? (body.type as string) ?? 'salesforce.event';
+      const objectType = (body.sObject as string) ?? (body.object as string) ?? 'unknown';
+      const recordId = (body.id as string) ?? (body.recordId as string) ?? 'unknown';
+      const title = (body.title as string) ?? `Salesforce ${objectType} event — ${recordId}`;
+      const description = (body.description as string) ?? JSON.stringify(body).slice(0, 500);
 
       await ingestSignalToDB(
         'salesforce_webhook',
@@ -570,8 +570,8 @@ router.post(
       const body = req.body as Record<string, unknown>;
       logger.info(
         {
-          webhookEvent: body['webhookEvent'],
-          issueKey: (body['issue'] as Record<string, unknown>)?.['key'],
+          webhookEvent: body.webhookEvent,
+          issueKey: (body.issue as Record<string, unknown>)?.key,
         },
         'integrations: Jira webhook received',
       );
@@ -587,15 +587,13 @@ router.post(
       const adapter = services.jira;
       const event = await adapter.handleWebhookEvent(body, JSON.stringify(body));
 
-      const webhookEvent = (body['webhookEvent'] as string) ?? 'jira_event';
-      const issue = body['issue'] as Record<string, unknown> | undefined;
-      const issueKey = (issue?.['key'] as string) ?? 'unknown';
+      const webhookEvent = (body.webhookEvent as string) ?? 'jira_event';
+      const issue = body.issue as Record<string, unknown> | undefined;
+      const issueKey = (issue?.key as string) ?? 'unknown';
       const issueSummary =
-        ((issue?.['fields'] as Record<string, unknown>)?.['summary'] as string) ?? 'Jira event';
+        ((issue?.fields as Record<string, unknown>)?.summary as string) ?? 'Jira event';
       const issueStatus =
-        (((issue?.['fields'] as Record<string, unknown>)?.['status'] as Record<string, unknown>)?.[
-          'name'
-        ] as string) ?? 'unknown';
+        (((issue?.fields as Record<string, unknown>)?.status as Record<string, unknown>)?.name as string) ?? 'unknown';
 
       const syncEnabled = await isFlagEnabled('jira_sync_enabled');
       if (syncEnabled) {
@@ -610,7 +608,7 @@ router.post(
             webhookEvent,
             issueKey,
             issueStatus,
-            changelog: body['changelog'],
+            changelog: body.changelog,
             receivedAt: event.timestamp,
           },
         );
@@ -735,15 +733,15 @@ router.post(
   },
 );
 
-const OAUTH_STATE_SECRET = process.env['OAUTH_STATE_SECRET'];
+const OAUTH_STATE_SECRET = process.env.OAUTH_STATE_SECRET;
 if (!OAUTH_STATE_SECRET) {
   logger.warn(
     'integrations: OAUTH_STATE_SECRET env var not set — OAuth state validation will reject all callbacks. Set this to a random secret in production.',
   );
 }
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
-const PLATFORM_UI_URL = process.env['PLATFORM_UI_URL'] ?? 'https://szlholdings.com';
-const PLATFORM_API_URL = process.env['PLATFORM_API_URL'] ?? 'https://api.szlholdings.com';
+const PLATFORM_UI_URL = process.env.PLATFORM_UI_URL ?? 'https://szlholdings.com';
+const PLATFORM_API_URL = process.env.PLATFORM_API_URL ?? 'https://api.szlholdings.com';
 const SF_LOGIN_URL = 'https://login.salesforce.com';
 const ATLASSIAN_AUTH_URL = 'https://auth.atlassian.com';
 
@@ -769,7 +767,7 @@ function validateOAuthState(
     const [provider, nonce, issuedAtStr, sig] = parts as [string, string, string, string];
     if (provider !== expectedProvider) return false;
     const issuedAt = parseInt(issuedAtStr, 10);
-    if (isNaN(issuedAt) || Date.now() - issuedAt > OAUTH_STATE_TTL_MS) return false;
+    if (Number.isNaN(issuedAt) || Date.now() - issuedAt > OAUTH_STATE_TTL_MS) return false;
     const expectedSig = createHmac('sha256', OAUTH_STATE_SECRET)
       .update(`${provider}:${nonce}:${issuedAtStr}`)
       .digest('hex');
@@ -784,7 +782,7 @@ function validateOAuthState(
 
 router.get('/integrations/salesforce/oauth/authorize', (_req: Request, res: Response) => {
   try {
-    const clientId = process.env['SALESFORCE_CLIENT_ID'] ?? '';
+    const clientId = process.env.SALESFORCE_CLIENT_ID ?? '';
     const redirectUri = `${PLATFORM_API_URL}/api/integrations/salesforce/oauth/callback`;
     const state = generateOAuthState('salesforce');
 
@@ -844,8 +842,8 @@ router.get(
       const params = new URLSearchParams({
         grant_type: 'authorization_code',
         code,
-        client_id: process.env['SALESFORCE_CLIENT_ID'] ?? '',
-        client_secret: process.env['SALESFORCE_CLIENT_SECRET'] ?? '',
+        client_id: process.env.SALESFORCE_CLIENT_ID ?? '',
+        client_secret: process.env.SALESFORCE_CLIENT_SECRET ?? '',
         redirect_uri: redirectUri,
       });
 
@@ -884,8 +882,8 @@ router.get(
 
       const existingConfig = existing?.config as Record<string, unknown> | null | undefined;
       const webhookSecret =
-        typeof existingConfig?.['webhookSecret'] === 'string' && existingConfig['webhookSecret']
-          ? existingConfig['webhookSecret']
+        typeof existingConfig?.webhookSecret === 'string' && existingConfig.webhookSecret
+          ? existingConfig.webhookSecret
           : randomBytes(32).toString('hex');
 
       const connectorConfig = {
@@ -924,7 +922,7 @@ router.get(
 
 router.get('/integrations/jira/oauth/authorize', (_req: Request, res: Response) => {
   try {
-    const clientId = process.env['JIRA_CLIENT_ID'] ?? '';
+    const clientId = process.env.JIRA_CLIENT_ID ?? '';
     const redirectUri = `${PLATFORM_API_URL}/api/integrations/jira/oauth/callback`;
     const state = generateOAuthState('jira');
 
@@ -986,8 +984,8 @@ router.get(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           grant_type: 'authorization_code',
-          client_id: process.env['JIRA_CLIENT_ID'] ?? '',
-          client_secret: process.env['JIRA_CLIENT_SECRET'] ?? '',
+          client_id: process.env.JIRA_CLIENT_ID ?? '',
+          client_secret: process.env.JIRA_CLIENT_SECRET ?? '',
           code,
           redirect_uri: `${PLATFORM_API_URL}/api/integrations/jira/oauth/callback`,
         }),
@@ -1049,7 +1047,7 @@ router.get(
 );
 
 router.get('/integrations/atlassian/descriptor', (_req: Request, res: Response) => {
-  const baseUrl = process.env['CONNECT_BASE_URL'] ?? `${PLATFORM_API_URL}/api/atlassian`;
+  const baseUrl = process.env.CONNECT_BASE_URL ?? `${PLATFORM_API_URL}/api/atlassian`;
   res.redirect(`${baseUrl}/atlassian-connect.json`);
 });
 

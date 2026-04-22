@@ -6,18 +6,13 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
-  Clock,
-  Code2,
   Copy,
   Eye,
   EyeOff,
   FileCode,
-  Globe,
   Key,
   Loader2,
   Plus,
-  RefreshCw,
-  Send,
   Trash2,
   Webhook,
 } from 'lucide-react';
@@ -361,7 +356,7 @@ export default function DeveloperApiPage() {
   const [activeTab, setActiveTab] = useState<'keys' | 'docs' | 'webhooks' | 'logs'>('keys');
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [webhooks, setWebhooks] = useState<Webhook[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [showNewKey, setShowNewKey] = useState(false);
   const [showNewWebhook, setShowNewWebhook] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
@@ -419,8 +414,7 @@ export default function DeveloperApiPage() {
             })),
           );
         }
-      } catch (e) {
-        console.error('Failed to load API data', e);
+      } catch (_e) {
       } finally {
         setLoading(false);
       }
@@ -458,8 +452,7 @@ export default function DeveloperApiPage() {
       setNewKeyCreated(created.key);
       setShowNewKey(false);
       setNewKeyName('');
-    } catch (e) {
-      console.error(e);
+    } catch (_e) {
     } finally {
       setCreatingKey(false);
     }
@@ -473,8 +466,7 @@ export default function DeveloperApiPage() {
         headers: jsonHeaders(),
       });
       setApiKeys((prev) => prev.filter((k) => k.id !== id));
-    } catch (e) {
-      console.error(e);
+    } catch (_e) {
     }
   }
 
@@ -509,8 +501,7 @@ export default function DeveloperApiPage() {
       ]);
       setNewWebhookForm({ name: '', url: '', events: [] });
       setShowNewWebhook(false);
-    } catch (e) {
-      console.error(e);
+    } catch (_e) {
     } finally {
       setCreatingWebhook(false);
     }
@@ -524,8 +515,7 @@ export default function DeveloperApiPage() {
         headers: jsonHeaders(),
       });
       setWebhooks((prev) => prev.filter((w) => w.id !== id));
-    } catch (e) {
-      console.error(e);
+    } catch (_e) {
     }
   }
 

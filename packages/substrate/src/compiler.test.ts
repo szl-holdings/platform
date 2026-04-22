@@ -71,7 +71,6 @@ function testHighRiskWithoutGate(): void {
   }
   if (!threw)
     throw new Error('Expected SubstrateCompilerError for high-risk side effect without gate');
-  console.log('✓ REJECTED: Decide with financial side effect, no ApprovalGate');
 }
 
 function testHighRiskWithGate(): void {
@@ -97,7 +96,6 @@ function testHighRiskWithGate(): void {
   if (!decideNode.hasApprovalGateAncestor) {
     throw new Error("Expected 'decide' to have approval gate ancestor");
   }
-  console.log('✓ ACCEPTED: Decide with financial side effect + ApprovalGate ancestor');
 }
 
 function testCycleDetection(): void {
@@ -119,7 +117,6 @@ function testCycleDetection(): void {
     }
   }
   if (!threw) throw new Error('Expected SubstrateCompilerError for cycle');
-  console.log('✓ REJECTED: Cyclic dependency detected');
 }
 
 function testUnknownDependency(): void {
@@ -138,7 +135,6 @@ function testUnknownDependency(): void {
     }
   }
   if (!threw) throw new Error('Expected SubstrateCompilerError for unknown dependency');
-  console.log('✓ REJECTED: Unknown stage dependency');
 }
 
 function testDuplicateStageIds(): void {
@@ -157,7 +153,6 @@ function testDuplicateStageIds(): void {
     }
   }
   if (!threw) throw new Error('Expected SubstrateCompilerError for duplicate stage IDs');
-  console.log('✓ REJECTED: Duplicate stage IDs');
 }
 
 function testToolCallWithSideEffectWithoutGate(): void {
@@ -186,7 +181,6 @@ function testToolCallWithSideEffectWithoutGate(): void {
   }
   if (!threw)
     throw new Error('Expected SubstrateCompilerError for ToolCall with deletion side effect');
-  console.log('✓ REJECTED: ToolCall with deletion side effect, no ApprovalGate');
 }
 
 function testExecutionOrder(): void {
@@ -213,8 +207,6 @@ function testExecutionOrder(): void {
   if (reasonIdx >= verifyIdx) throw new Error('reason must come before verify');
   if (verifyIdx >= gateIdx) throw new Error('verify must come before gate');
   if (gateIdx >= decideIdx) throw new Error('gate must come before decide');
-
-  console.log(`✓ ACCEPTED: Correct execution order [${order.join(' → ')}]`);
 }
 
 function testWarningsForMissingVerify(): void {
@@ -225,7 +217,6 @@ function testWarningsForMissingVerify(): void {
   );
   const hasWarning = graph.warnings.some((w) => w.includes('Verify'));
   if (!hasWarning) throw new Error('Expected warning about missing Verify stage');
-  console.log('✓ WARNING: Missing Verify stage produces warning');
 }
 
 // ─── Budget Router Tests ──────────────────────────────────────────────────────
@@ -255,17 +246,14 @@ async function testBudgetRouterAccept(): Promise<void> {
 
   const decision = routeFn(0.75, stage, budget, mockRun);
   if (decision.action !== 'accept') throw new Error('Expected accept for 0.75 confidence');
-  console.log('✓ BUDGET: Confidence 75% → accept');
 
   const escalateModel = routeFn(0.4, stage, budget, mockRun);
   if (escalateModel.action !== 'escalate-model')
     throw new Error('Expected escalate-model for 0.4 confidence');
-  console.log('✓ BUDGET: Confidence 40% → escalate-model');
 
   const escalateHuman = routeFn(0.2, stage, budget, mockRun);
   if (escalateHuman.action !== 'escalate-human')
     throw new Error('Expected escalate-human for 0.2 confidence');
-  console.log('✓ BUDGET: Confidence 20% → escalate-human');
 }
 
 // ─── Hash Stability Test ──────────────────────────────────────────────────────
@@ -277,7 +265,6 @@ async function testHashStability(): Promise<void> {
   const h1 = hashValue(val);
   const h2 = hashValue(val);
   if (h1 !== h2) throw new Error('hashValue must be deterministic');
-  console.log('✓ JOURNAL: hashValue is deterministic');
 
   // computeBundleHash excludes runId by design so replay hashes are run-agnostic
   const bundle1 = computeBundleHash({
@@ -293,7 +280,6 @@ async function testHashStability(): Promise<void> {
     confidence: 0.8,
   });
   if (bundle1 !== bundle2) throw new Error('computeBundleHash must be deterministic');
-  console.log('✓ JOURNAL: computeBundleHash is deterministic');
 
   const bundle3 = computeBundleHash({
     stageId: 's1',
@@ -302,13 +288,11 @@ async function testHashStability(): Promise<void> {
     confidence: 0.8,
   });
   if (bundle1 === bundle3) throw new Error('Different inputs must produce different hashes');
-  console.log('✓ JOURNAL: Different outputs produce different hashes');
 }
 
 // ─── Test Runner ──────────────────────────────────────────────────────────────
 
 export async function runCompilerTests(): Promise<void> {
-  console.log('\n═══ @szl/substrate Compiler Tests ═══\n');
 
   testHighRiskWithoutGate();
   testHighRiskWithGate();
@@ -320,8 +304,6 @@ export async function runCompilerTests(): Promise<void> {
   testWarningsForMissingVerify();
   await testBudgetRouterAccept();
   await testHashStability();
-
-  console.log('\n═══ All compiler tests passed ═══\n');
 }
 
 // Auto-run in Node.js

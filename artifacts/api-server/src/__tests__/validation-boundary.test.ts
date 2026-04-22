@@ -48,7 +48,7 @@ function makeUpdateChain(returnVal: unknown = {}) {
   return chain;
 }
 
-function makeSelectChain(rows: unknown[] = []) {
+function _makeSelectChain(rows: unknown[] = []) {
   const chain: Record<string, unknown> = {
     from: (_t: unknown) => chain,
     where: (_d: unknown) => chain,

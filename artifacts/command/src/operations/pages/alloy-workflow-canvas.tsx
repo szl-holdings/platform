@@ -18,7 +18,6 @@ import {
   Play,
   Plug,
   Plus,
-  RefreshCw,
   RotateCcw,
   Search,
   Shield,
@@ -1371,7 +1370,7 @@ export default function AlloyWorkflowCanvas() {
           </div>
 
           <div className="space-y-2">
-            {POLICY_RULES.map((rule, i) => (
+            {POLICY_RULES.map((rule, _i) => (
               <div
                 key={rule.id}
                 className="rounded-lg p-3"
@@ -1499,7 +1498,7 @@ export default function AlloyWorkflowCanvas() {
               </div>
             </div>
             <div className="divide-y" style={{ borderColor: BORDER.subtle }}>
-              {AUDIT_LOG.map((entry, i) => {
+              {AUDIT_LOG.map((entry, _i) => {
                 const levelColor =
                   entry.level === 'error'
                     ? '#c45a4a'

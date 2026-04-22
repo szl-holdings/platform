@@ -80,9 +80,9 @@ describe('rankFallbacks (decision-engine)', () => {
     };
 
     const ranked = rankFallbacks(primary, [expensive, cheap]);
-    expect(ranked[0]!.planId).toBe('cheap');
-    expect(ranked[0]!.rank).toBe(1);
-    expect(ranked[1]!.planId).toBe('expensive');
-    expect(ranked[1]!.rank).toBe(2);
+    expect(ranked[0]?.planId).toBe('cheap');
+    expect(ranked[0]?.rank).toBe(1);
+    expect(ranked[1]?.planId).toBe('expensive');
+    expect(ranked[1]?.rank).toBe(2);
   });
 });

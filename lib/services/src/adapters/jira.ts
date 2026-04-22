@@ -400,10 +400,10 @@ export class JiraAdapter extends ServiceAdapter {
 
   private oauthInitialized = false;
 
-  private get oauthClientId(): string | undefined { return process.env["JIRA_OAUTH_CLIENT_ID"]; }
-  private get oauthClientSecret(): string | undefined { return process.env["JIRA_OAUTH_CLIENT_SECRET"]; }
-  private get oauthRefreshToken(): string | undefined { return process.env["JIRA_OAUTH_REFRESH_TOKEN"]; }
-  private get cloudId(): string | undefined { return process.env["JIRA_CLOUD_ID"]; }
+  private get oauthClientId(): string | undefined { return process.env.JIRA_OAUTH_CLIENT_ID; }
+  private get oauthClientSecret(): string | undefined { return process.env.JIRA_OAUTH_CLIENT_SECRET; }
+  private get oauthRefreshToken(): string | undefined { return process.env.JIRA_OAUTH_REFRESH_TOKEN; }
+  private get cloudId(): string | undefined { return process.env.JIRA_CLOUD_ID; }
 
   private get isOAuthMode(): boolean {
     if (this.cloudId && this.oauthClientId && this.oauthClientSecret && this.oauthRefreshToken) {
@@ -433,19 +433,19 @@ export class JiraAdapter extends ServiceAdapter {
   }
 
   private get baseUrl(): string | undefined {
-    return process.env["JIRA_BASE_URL"];
+    return process.env.JIRA_BASE_URL;
   }
 
   private get apiToken(): string | undefined {
-    return process.env["JIRA_API_TOKEN"];
+    return process.env.JIRA_API_TOKEN;
   }
 
   private get userEmail(): string | undefined {
-    return process.env["JIRA_USER_EMAIL"];
+    return process.env.JIRA_USER_EMAIL;
   }
 
   private get webhookSecret(): string | undefined {
-    return process.env["JIRA_WEBHOOK_SECRET"];
+    return process.env.JIRA_WEBHOOK_SECRET;
   }
 
   private get basicAuthHeader(): string {
@@ -638,7 +638,8 @@ export class JiraAdapter extends ServiceAdapter {
         : null;
       const blockers = (i.fields.issuelinks ?? [])
         .filter((l) => l.type.name === "Blocks" && l.inwardIssue)
-        .map((l) => l.inwardIssue!.key);
+        .map((l) => l.inwardIssue?.key)
+        .filter((k): k is string => typeof k === "string");
 
       const catName = i.fields.status.statusCategory.name;
       let statusCategory: "To Do" | "In Progress" | "Done" = "To Do";
@@ -826,9 +827,9 @@ export class JiraAdapter extends ServiceAdapter {
     }
     return {
       id: `jira_wh_${Date.now()}`,
-      webhookEvent: (payload["webhookEvent"] as string) ?? "unknown",
+      webhookEvent: (payload.webhookEvent as string) ?? "unknown",
       issue: undefined,
-      changelog: (payload["changelog"] as JiraWebhookEvent["changelog"]) ?? undefined,
+      changelog: (payload.changelog as JiraWebhookEvent["changelog"]) ?? undefined,
       timestamp: new Date().toISOString(),
       source: "jira",
     };

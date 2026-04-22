@@ -1,5 +1,4 @@
-import type { EvaluationRequest, PolicyEvaluationResult } from '@szl-holdings/policy-engine';
-import { checkAction } from '@szl-holdings/policy-engine';
+import { type EvaluationRequest, type PolicyEvaluationResult, checkAction } from '@szl-holdings/policy-engine';
 import type {
   CheckResult,
   DomainRule,
@@ -191,9 +190,9 @@ function isEvaluationRequest(value: unknown): value is EvaluationRequest {
   if (!value || typeof value !== 'object') return false;
   const v = value as Record<string, unknown>;
   return (
-    typeof v['action'] === 'string' &&
-    typeof v['subject'] === 'object' &&
-    typeof v['resource'] === 'object'
+    typeof v.action === 'string' &&
+    typeof v.subject === 'object' &&
+    typeof v.resource === 'object'
   );
 }
 

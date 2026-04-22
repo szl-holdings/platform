@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { colors, typography } from './tokens';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { typography } from './tokens';
 
 export interface CortexIntent {
   type: 'navigate' | 'query' | 'action' | 'report' | 'workflow';
@@ -343,7 +343,7 @@ export function CortexVoice({
             style={{
               flex: 1,
               background: 'rgba(255,255,255,0.05)',
-              border: `1px solid ${query ? accentColor + '50' : 'rgba(255,255,255,0.1)'}`,
+              border: `1px solid ${query ? `${accentColor}50` : 'rgba(255,255,255,0.1)'}`,
               borderRadius: '12px',
               padding: '12px 16px',
               color: 'rgba(255,255,255,0.9)',
@@ -373,7 +373,7 @@ export function CortexVoice({
               width: '44px',
               height: '44px',
               borderRadius: '12px',
-              border: `1px solid ${isListening ? '#ef4444' : accentColor + '50'}`,
+              border: `1px solid ${isListening ? '#ef4444' : `${accentColor}50`}`,
               background: isListening ? 'rgba(239,68,68,0.15)' : `${accentColor}15`,
               color: isListening ? '#ef4444' : accentColor,
               cursor: 'pointer',

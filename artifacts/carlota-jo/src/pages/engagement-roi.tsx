@@ -1,4 +1,4 @@
-import { Badge } from '@szl-holdings/shared-ui/ui/badge';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import { motion } from 'framer-motion';
 import {
@@ -50,7 +50,7 @@ const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-stone-50 text-stone-600 border-stone-200',
 };
 
-const API = import.meta.env.BASE_URL + 'api';
+const API = `${import.meta.env.BASE_URL}api`;
 
 export default function EngagementROI() {
   usePageMeta({

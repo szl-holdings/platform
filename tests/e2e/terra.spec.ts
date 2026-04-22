@@ -179,7 +179,7 @@ const API_BASE = process.env.API_BASE_URL ?? 'http://localhost:80/api';
 test.describe('Terra — Pro Forma API Round-Trip', () => {
   test('proforma CRUD: create → list → update name → delete', async ({ request }) => {
     const payload = {
-      projectName: 'E2E Test Project — ' + Date.now(),
+      projectName: `E2E Test Project — ${Date.now()}`,
       inputs: { totalUnits: 50, avgUnitSF: 800, landCost: 2_000_000 },
       results: { irr: 14.5, equityMultiple: 1.8 },
     };
@@ -246,7 +246,7 @@ test.describe('Terra — Pro Forma API Round-Trip', () => {
 test.describe('Terra — Waterfall API Round-Trip', () => {
   test('waterfall CRUD: create → list → rename → delete', async ({ request }) => {
     const payload = {
-      name: 'E2E Waterfall — ' + Date.now(),
+      name: `E2E Waterfall — ${Date.now()}`,
       inputs: {
         totalEquity: 10_000_000,
         gpContributionPct: 10,

@@ -1,5 +1,4 @@
 import { useDemoMode } from '@lyte/lib/demo-mode';
-import { cn } from '@lyte/lib/utils';
 import {
   Activity,
   AlertTriangle,
@@ -12,12 +11,8 @@ import {
   ChevronRight,
   CircleDot,
   Clock,
-  Cpu,
-  Database,
   Eye,
   FileText,
-  GitBranch,
-  Hash,
   Heart,
   Layers,
   Play,
@@ -28,8 +23,6 @@ import {
   TrendingDown,
   TrendingUp,
   User,
-  Users,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'wouter';
@@ -497,7 +490,7 @@ function OperatingLoopRail() {
                   className="rounded px-2 py-2 flex flex-col items-center gap-1 transition-all hover:border-opacity-40"
                   style={{
                     background: 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${step.active ? ELECTRIC + '20' : BORDER.subtle}`,
+                    border: `1px solid ${step.active ? `${ELECTRIC}20` : BORDER.subtle}`,
                   }}
                   title={step.description}
                 >

@@ -2,8 +2,7 @@ import {
   DEMO_BRIEFING_HISTORY,
   MorningBriefingCard,
 } from '@szl-holdings/shared-ui/morning-briefing';
-import type { ActivationStep } from '@szl-holdings/shared-ui/onboarding';
-import { ActivationBanner, useActivationState } from '@szl-holdings/shared-ui/onboarding';
+import { type ActivationStep, ActivationBanner, useActivationState } from '@szl-holdings/shared-ui/onboarding';
 import { GitBranch, Map, TrendingUp, Zap } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';

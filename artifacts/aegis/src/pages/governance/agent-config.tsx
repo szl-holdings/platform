@@ -1,29 +1,18 @@
-import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  AlertTriangle,
   Brain,
   CheckCircle2,
-  ChevronDown,
-  ChevronUp,
   Cpu,
   Eye,
   EyeOff,
-  Info,
   Lock,
   Pause,
-  Play,
   RefreshCw,
   Save,
-  Settings,
-  Shield,
   SlidersHorizontal,
-  ToggleLeft,
-  ToggleRight,
-  Wrench,
   X,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -473,7 +462,7 @@ export default function AgentConfigPage() {
             },
             {
               label: 'Tool Permissions',
-              value: [...new Set(agents.flatMap((a) => a.tools))].length,
+              value: new Set(agents.flatMap((a) => a.tools)).size,
               color: '#8b5cf6',
             },
           ].map((m) => (

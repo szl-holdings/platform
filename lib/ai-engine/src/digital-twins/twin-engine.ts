@@ -160,7 +160,7 @@ class TwinRegistry {
 
   onUpdate(twinId: string, callback: (state: TwinState) => void): () => void {
     if (!this.updateCallbacks.has(twinId)) this.updateCallbacks.set(twinId, []);
-    this.updateCallbacks.get(twinId)!.push(callback);
+    this.updateCallbacks.get(twinId)?.push(callback);
     return () => {
       const cbs = this.updateCallbacks.get(twinId);
       if (cbs) {
@@ -332,7 +332,7 @@ export class VesselTwin {
       {
         timeHorizon: '7d',
         state: {
-          estimatedPosition: 'En route to ' + state.destination,
+          estimatedPosition: `En route to ${state.destination}`,
           fuelLevelPercent: Math.max(0, state.fuelLevelPercent - fuelDecay * 168),
         },
         confidence: 0.71,
@@ -342,7 +342,7 @@ export class VesselTwin {
     ];
   }
 
-  private assessSimulationRisk(original: VesselTwinState, simulated: VesselTwinState): string {
+  private assessSimulationRisk(_original: VesselTwinState, simulated: VesselTwinState): string {
     if (simulated.fuelLevelPercent < 10 || simulated.routeRiskLevel === 'critical') {
       return 'CRITICAL: Simulation indicates unacceptable operational risk. Immediate intervention required.';
     }
@@ -353,7 +353,7 @@ export class VesselTwin {
   }
 
   private buildRecommendations(
-    original: VesselTwinState,
+    _original: VesselTwinState,
     simulated: VesselTwinState,
     etaDeltaHours: number,
   ): string[] {
@@ -712,7 +712,7 @@ export class PostureTwin {
   }
 
   private computePredictions(state: PostureTwinState): PredictedState[] {
-    const patchingRate = 0.02;
+    const _patchingRate = 0.02;
     return [
       {
         timeHorizon: '7d',

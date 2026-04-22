@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { AlloyGraphQLPanel } from '../components/graphql-data-panel';
 import { trackEvent } from '../lib/track-event';
 
-const BASE_PATH = import.meta.env.BASE_URL?.replace(/\/$/, '') || '/alloy';
+const _BASE_PATH = import.meta.env.BASE_URL?.replace(/\/$/, '') || '/alloy';
 
 function useSectionEngagement(sectionId: string) {
   const ref = useRef<HTMLElement>(null);
@@ -714,7 +714,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
               detail: 'Highest-frequency procurement, legal, finance, and operations workflows',
               accent: '#164e63',
             },
-          ].map((item, i) => (
+          ].map((item, _i) => (
             <div
               key={item.label}
               className="rounded-xl p-5 border transition-colors duration-200 hover:border-white/15"

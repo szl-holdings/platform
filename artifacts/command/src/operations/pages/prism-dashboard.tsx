@@ -2,9 +2,8 @@ import { MicroFeedbackWidget } from "@szl-holdings/shared-ui/micro-feedback-widg
 import { useState } from "react";
 
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
-import { TrendingUp, TrendingDown, Minus, BarChart3, ChevronRight, Zap, AlertTriangle, RefreshCw, ArrowRight, CheckCircle2, Clock, Target, UserCheck, Shield } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, BarChart3, ChevronRight, Zap, AlertTriangle, RefreshCw, CheckCircle2, Target, UserCheck, Shield } from "lucide-react";
 import { DbPoolTile } from "@/operations/components/db-pool-tile";
-import { cn } from "@szl-holdings/shared-ui/utils";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const LENS_META: Record<string, { label: string; color: string; emoji: string; description: string }> = {
@@ -166,7 +165,7 @@ function buildDemoLensHistory(lens: string): PrismScore[] {
   return out;
 }
 
-const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
+const _BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const TEXT = { primary: "rgba(255,255,255,0.88)", secondary: "rgba(255,255,255,0.55)", tertiary: "rgba(255,255,255,0.28)", muted: "rgba(255,255,255,0.14)" };
 
 function ScoreGauge({ score, color, size = 52 }: { score: number; color: string; size?: number }) {

@@ -200,10 +200,6 @@ for (const f of allFiles) {
 }
 
 if (VERBOSE) {
-  console.log(`Scanned ${allFiles.length} .ts/.tsx files`);
-  console.log(`Banned terms: ${config.bannedStrings.map((b) => b.term).join(', ')}`);
-  console.log(`File allowlist entries: ${config.fileAllowlist.length}`);
-  console.log(`Line allowlist entries: ${config.lineAllowlist.length}\n`);
 }
 
 // ---------------------------------------------------------------------------
@@ -233,11 +229,7 @@ function buildCounts(violations: Violation[]): BaselineMap {
 const currentCounts = buildCounts(allViolations);
 
 if (UPDATE_BASELINE) {
-  writeFileSync(BASELINE_PATH, JSON.stringify(currentCounts, null, 2) + '\n');
-  console.log(
-    `\u2705  Baseline updated — ${allViolations.length} occurrence(s) recorded across ${Object.keys(currentCounts).length} file(s).\n` +
-      `Path: ${relative(ROOT, BASELINE_PATH)}`,
-  );
+  writeFileSync(BASELINE_PATH, `${JSON.stringify(currentCounts, null, 2)}\n`);
   process.exit(0);
 }
 
@@ -258,19 +250,9 @@ for (const v of allViolations) {
 }
 
 if (VERBOSE) {
-  console.log(
-    `Baseline: ${Object.keys(baseline).length} file(s), ${Object.values(baseline).reduce((a, b) => a + Object.values(b).reduce((x, y) => x + y, 0), 0)} occurrence(s).`,
-  );
-  console.log(
-    `Current : ${Object.keys(currentCounts).length} file(s), ${allViolations.length} occurrence(s).`,
-  );
-  console.log(`New violations beyond baseline: ${newViolations.length}\n`);
 }
 
 if (newViolations.length === 0) {
-  console.log(
-    `\u2705  Banned brand-string check passed — ${allFiles.length} files scanned, 0 new violations beyond baseline (${allViolations.length} known legacy occurrence(s)).`,
-  );
   // Warn about stale baseline entries (file/term in baseline but no current matches).
   let stale = 0;
   for (const [file, terms] of Object.entries(baseline)) {
@@ -280,16 +262,9 @@ if (newViolations.length === 0) {
     }
   }
   if (stale > 0) {
-    console.log(
-      `\u2139\ufe0f   Baseline has ${stale} occurrence(s) that no longer exist. Run with --update-baseline to refresh.`,
-    );
   }
   process.exit(0);
 }
-
-console.error(
-  `\u274C  Banned brand-string check FAILED — ${newViolations.length} NEW violation(s) introduced beyond the audit baseline.\n`,
-);
 
 const byFile = new Map<string, Violation[]>();
 for (const v of newViolations) {
@@ -298,22 +273,9 @@ for (const v of newViolations) {
   byFile.set(v.file, arr);
 }
 
-for (const [file, vs] of byFile) {
-  console.error(`  ${file}`);
-  for (const v of vs) {
-    console.error(
-      `    ${v.line}:${v.col}  "${v.term}" → use "${v.replacement}"  (${v.reason})`,
-    );
-    console.error(`      ${v.snippet}`);
+for (const [_file, vs] of byFile) {
+  for (const _v of vs) {
   }
 }
-
-console.error(
-  `\nFix by replacing the banned term with its canonical replacement.\n` +
-    `Legitimate occurrences (e.g. external entity name, citation) can be added to\n` +
-    `scripts/banned-brand-strings.json under "lineAllowlist" or "fileAllowlist".\n` +
-    `If a deliberate refactor introduced these and they are intentional, regenerate\n` +
-    `the baseline with: tsx scripts/check-banned-brand-strings.ts --update-baseline\n`,
-);
 
 process.exit(1);

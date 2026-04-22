@@ -382,7 +382,7 @@ export default function DigitalTwin() {
                       <div className="h-1.5 rounded-full bg-white/5">
                         <div
                           className="h-full rounded-full"
-                          style={{ width: `${item.risk}%`, background: color + '80' }}
+                          style={{ width: `${item.risk}%`, background: `${color}80` }}
                         />
                       </div>
                     </div>

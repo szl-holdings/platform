@@ -190,7 +190,7 @@ function generateSpanId(): string {
 }
 
 const MAX_SPANS = 2000;
-const MAX_TOKEN_SAMPLES = 1000;
+const _MAX_TOKEN_SAMPLES = 1000;
 
 export interface GenAITelemetrySnapshot {
   windowMs: number;

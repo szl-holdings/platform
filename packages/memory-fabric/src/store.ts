@@ -60,7 +60,7 @@ export class InMemoryStore implements MemoryStore {
       },
       // Mirror the canonical domain into metadata so consumers that read
       // `metadata.domain` directly (e.g. raw SQL queries) see the same value.
-      metadata: { ...(entry.metadata ?? {}), domain: entry.domain },
+      metadata: { ...entry.metadata, domain: entry.domain },
     };
     this.entries.set(entry.id, updated);
   }
@@ -94,7 +94,7 @@ export class InMemoryStore implements MemoryStore {
     if (query?.key) results = results.filter((e) => e.key === query.key);
     if (query?.scopeId) results = results.filter((e) => e.scopeId === query.scopeId);
     if (query?.tags?.length) {
-      results = results.filter((e) => query.tags!.every((t) => e.tags.includes(t)));
+      results = results.filter((e) => query.tags?.every((t) => e.tags.includes(t)));
     }
     if (!query?.includeStale) {
       results = results.filter((e) => !e.freshness.isStale);
@@ -108,7 +108,7 @@ export class InMemoryStore implements MemoryStore {
         (e) =>
           e.key.toLowerCase().includes(needle) ||
           (typeof e.value === 'string' && e.value.toLowerCase().includes(needle)) ||
-          (e.summary && e.summary.toLowerCase().includes(needle)) ||
+          (e.summary?.toLowerCase().includes(needle)) ||
           e.tags.some((t) => t.toLowerCase().includes(needle)),
       );
     }

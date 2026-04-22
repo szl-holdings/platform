@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
 
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:80';
 

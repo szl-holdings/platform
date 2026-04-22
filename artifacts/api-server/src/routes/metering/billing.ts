@@ -4,46 +4,33 @@ import {
   costAllocationsTable,
   db,
   invoicesTable,
-  meteringEventsTable,
   organizationsTable,
   quotaConfigsTable,
   quotaViolationsTable,
   rateCardAssignmentsTable,
   rateCardsTable,
   rateCardTiersTable,
-  revenueEventsTable,
-  subscriptionsTable,
   usageAggregatesTable,
 } from '@szl-holdings/db';
 import {
   and,
   asc,
-  avg,
-  count,
   desc,
   eq,
   gte,
-  inArray,
-  isNull,
   lte,
-  ne,
   sql,
-  sum,
 } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
   sendBadRequest,
-  sendError,
-  sendNotFound,
   sendSuccess,
 } from '../../lib/api-response';
-import { logger } from '../../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../../lib/validation';
-import { authMiddleware, parseIdParam, requireRole } from '../../middlewares/auth';
-import { assertTenantAccess, tenantScope } from '../../middlewares/tenant-scope';
-import { checkAndEnforceQuota, computeCharge, meteringRateLimit, periodBounds } from './shared';
+import { authMiddleware, requireRole } from '../../middlewares/auth';
+import { checkAndEnforceQuota, computeCharge, periodBounds } from './shared';
 
 const router: IRouter = Router();
 const ADMIN_ROLES = ['admin', 'super_admin', 'ops'] as const;

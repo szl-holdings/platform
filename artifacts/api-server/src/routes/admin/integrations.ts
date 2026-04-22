@@ -1,7 +1,7 @@
 import { APP_INTEGRATIONS, PLATFORM_APPS } from '@szl-holdings/config';
-import { db, invoicesTable, webhookEventsTable } from '@szl-holdings/db';
+import { db, webhookEventsTable } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import { desc, eq, sql } from 'drizzle-orm';
+import { desc, eq, } from 'drizzle-orm';
 import type { IRouter } from 'express';
 import { z } from 'zod';
 import { sendError, sendNotFound } from '../../lib/api-response.js';
@@ -276,7 +276,7 @@ export function register(router: IRouter): void {
     '/admin/connectors/:name/test',
     validateBody(connectorActionSchema),
     async (req, res) => {
-      const result = await services.testConnection(req.params['name']!);
+      const result = await services.testConnection(req.params.name!);
       if (!result) {
         sendNotFound(res, 'Connector');
         return;
@@ -297,7 +297,7 @@ export function register(router: IRouter): void {
   );
 
   router.put('/admin/connectors/:name/enable', validateBody(enabledSchema), (req, res) => {
-    const adapter = services.getAdapter(req.params['name'] as string);
+    const adapter = services.getAdapter(req.params.name as string);
     if (!adapter) {
       sendNotFound(res, 'Connector');
       return;
@@ -350,7 +350,7 @@ export function register(router: IRouter): void {
     '/admin/connectors/:name/sync',
     validateBody(connectorActionSchema),
     async (req, res) => {
-      const adapter = services.getAdapter(req.params['name']!);
+      const adapter = services.getAdapter(req.params.name!);
       if (!adapter) {
         sendNotFound(res, 'Connector');
         return;
@@ -426,9 +426,9 @@ export function register(router: IRouter): void {
 
   router.get('/admin/webhooks', validateQuery(listQuerySchema), async (req, res) => {
     try {
-      const limitParam = parseInt((req.query['limit'] as string) ?? '50', 10);
-      const limit = Math.min(isNaN(limitParam) ? 50 : limitParam, 200);
-      const source = req.query['source'] as string | undefined;
+      const limitParam = parseInt((req.query.limit as string) ?? '50', 10);
+      const limit = Math.min(Number.isNaN(limitParam) ? 50 : limitParam, 200);
+      const source = req.query.source as string | undefined;
       let query = db
         .select()
         .from(webhookEventsTable)
@@ -496,10 +496,10 @@ export function register(router: IRouter): void {
 
   router.get('/admin/integration-activity', validateQuery(listQuerySchema), (req, res) => {
     let events = [...integrationActivityLog];
-    const connector = req.query['connector'] as string | undefined;
-    const app = req.query['app'] as string | undefined;
-    const type = req.query['type'] as string | undefined;
-    const status = req.query['status'] as string | undefined;
+    const connector = req.query.connector as string | undefined;
+    const app = req.query.app as string | undefined;
+    const type = req.query.type as string | undefined;
+    const status = req.query.status as string | undefined;
     if (connector) events = events.filter((e) => e.connector === connector);
     if (app) events = events.filter((e) => e.app === app);
     if (type) events = events.filter((e) => e.type === type);

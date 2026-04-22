@@ -13,18 +13,14 @@ import {
   ChevronRight,
   Clock,
   Database,
-  ExternalLink,
-  GitBranch,
   Search,
 } from 'lucide-react';
-import type React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ACCENT,
   AGENT_RUN_ATTRS,
   apiUrl,
   emitSpan,
-  fetchJson,
   tracedFetch,
 } from './cognitive/shared';
 
@@ -166,7 +162,7 @@ interface RecommendationChainResponse {
 function deriveFreshness(capturedAt: string | undefined): 'fresh' | 'aging' | 'stale' | 'unknown' {
   if (!capturedAt) return 'unknown';
   const ageMs = Date.now() - new Date(capturedAt).getTime();
-  if (isNaN(ageMs)) return 'unknown';
+  if (Number.isNaN(ageMs)) return 'unknown';
   if (ageMs < 3_600_000) return 'fresh';
   if (ageMs < 86_400_000) return 'aging';
   return 'stale';
@@ -594,10 +590,10 @@ export default function EvidenceExplorer() {
     queryFn: () =>
       tracedFetch<RecommendationChainResponse>(
         'evidence_explorer.rec_chain.fetch',
-        apiUrl(`/evidence-graph/recommendations/${selectedRec!.recommendationId}`),
+        apiUrl(`/evidence-graph/recommendations/${selectedRec?.recommendationId}`),
         {
-          [AGENT_RUN_ATTRS.EVIDENCE_ENTITY_ID]: selectedRec!.recommendationId,
-          [AGENT_RUN_ATTRS.RUN_DOMAIN]: selectedRec!.domain,
+          [AGENT_RUN_ATTRS.EVIDENCE_ENTITY_ID]: selectedRec?.recommendationId,
+          [AGENT_RUN_ATTRS.RUN_DOMAIN]: selectedRec?.domain,
           [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: '/operations/evidence-explorer',
         },
       ),

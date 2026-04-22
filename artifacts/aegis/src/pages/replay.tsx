@@ -3,11 +3,9 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import {
   AlertTriangle,
-  ChevronRight,
   Clock,
   Loader2,
   Lock,
-  Network,
   Pause,
   Play,
   Server,
@@ -300,7 +298,7 @@ function AegisReplayContent() {
 
   function handleScrub(e: React.ChangeEvent<HTMLInputElement>) {
     setPlaying(false);
-    setPlayhead(parseInt(e.target.value));
+    setPlayhead(parseInt(e.target.value, 10));
   }
 
   function reset() {

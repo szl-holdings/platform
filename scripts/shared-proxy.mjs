@@ -36,7 +36,7 @@ function loadProxyRoutes() {
     routes.push({ prefix: match[1], port: Number(match[2]) });
   }
   if (routes.length === 0) {
-    throw new Error('[shared-proxy] Failed to parse any routes from ' + CANONICAL_ROUTES_PATH);
+    throw new Error(`[shared-proxy] Failed to parse any routes from ${CANONICAL_ROUTES_PATH}`);
   }
   return routes;
 }
@@ -46,7 +46,7 @@ function loadFallbackPort() {
   const m = source.match(/CANONICAL_FALLBACK_PORT\s*=\s*(\d+)/);
   if (!m) {
     throw new Error(
-      '[shared-proxy] Failed to parse CANONICAL_FALLBACK_PORT from ' + CANONICAL_ROUTES_PATH,
+      `[shared-proxy] Failed to parse CANONICAL_FALLBACK_PORT from ${CANONICAL_ROUTES_PATH}`,
     );
   }
   return Number(m[1]);
@@ -65,16 +65,8 @@ if (missing.length > 0) {
   );
 }
 
-console.log(
-  '[shared-proxy] Loaded ' +
-    PROXY_ROUTES.length +
-    ' proxy routes (fallback port ' +
-    CANONICAL_FALLBACK_PORT +
-    ')',
-);
-
 function pickTargetPort(url) {
-  const normalizedUrl = url.endsWith('/') ? url : url + '/';
+  const normalizedUrl = url.endsWith('/') ? url : `${url}/`;
   const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
   return route ? route.port : CANONICAL_FALLBACK_PORT;
 }
@@ -93,7 +85,7 @@ const server = http.createServer((req, res) => {
       port: targetPort,
       path: url,
       method: req.method,
-      headers: { ...req.headers, host: 'localhost:' + targetPort },
+      headers: { ...req.headers, host: `localhost:${targetPort}` },
     },
     (upRes) => {
       res.writeHead(upRes.statusCode || 200, upRes.headers);
@@ -103,7 +95,7 @@ const server = http.createServer((req, res) => {
   upstream.on('error', () => {
     if (!res.headersSent) {
       res.writeHead(503, { 'Content-Type': 'text/plain' });
-      res.end('Upstream not ready on port ' + targetPort);
+      res.end(`Upstream not ready on port ${targetPort}`);
     }
   });
   req.pipe(upstream, { end: true });
@@ -117,7 +109,7 @@ server.on('upgrade', (req, socket, head) => {
       .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
       .join('\r\n');
     conn.write(`${req.method} ${url} HTTP/1.1\r\n${rawHeaders}\r\n\r\n`);
-    if (head && head.length) conn.write(head);
+    if (head?.length) conn.write(head);
     socket.pipe(conn);
     conn.pipe(socket);
   });
@@ -125,14 +117,8 @@ server.on('upgrade', (req, socket, head) => {
   socket.on('error', () => conn.destroy());
 });
 
-server.on('error', (err) => {
-  console.warn('[shared-proxy] Server error:', err.code || err.message);
+server.on('error', (_err) => {
 });
 
 server.listen({ port: SHARED_PROXY_PORT, host: '::', reusePort: true }, () => {
-  console.log(
-    '[shared-proxy] Listening on port ' +
-      SHARED_PROXY_PORT +
-      ' (reusePort, dual-stack, standalone)',
-  );
 });

@@ -14,15 +14,15 @@ export class LinkedInAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["LINKEDIN_ACCESS_TOKEN"];
 
   private get accessToken(): string | undefined {
-    return process.env["LINKEDIN_ACCESS_TOKEN"];
+    return process.env.LINKEDIN_ACCESS_TOKEN;
   }
 
   private get personUrn(): string | undefined {
-    return process.env["LINKEDIN_PERSON_URN"];
+    return process.env.LINKEDIN_PERSON_URN;
   }
 
   private get orgUrn(): string | undefined {
-    return process.env["LINKEDIN_ORG_URN"];
+    return process.env.LINKEDIN_ORG_URN;
   }
 
   override get status(): ServiceStatus {

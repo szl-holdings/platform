@@ -5,7 +5,7 @@
  * workflow transition. Each event is append-only and tamper-evident.
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type { OrchestratorAuditEvent } from './types.js';
 
 export interface AuditEmitter {

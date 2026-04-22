@@ -1,50 +1,28 @@
 import {
-  billingLineItemsTable,
-  costAllocationsTable,
   db,
   invoicesTable,
   meteringEventsTable,
   organizationsTable,
-  quotaConfigsTable,
-  quotaViolationsTable,
-  rateCardAssignmentsTable,
-  rateCardsTable,
-  rateCardTiersTable,
-  revenueEventsTable,
   subscriptionsTable,
-  usageAggregatesTable,
 } from '@szl-holdings/db';
 import {
   and,
-  asc,
-  avg,
-  count,
-  desc,
   eq,
   gte,
-  inArray,
-  isNull,
   lte,
-  ne,
   sql,
-  sum,
 } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import {
   handleRouteError,
-  sendBadRequest,
-  sendError,
-  sendNotFound,
   sendSuccess,
 } from '../../lib/api-response';
-import { logger } from '../../lib/logger';
 import { listQuerySchema, validateQuery } from '../../lib/validation.js';
-import { authMiddleware, parseIdParam, requireRole } from '../../middlewares/auth';
-import { assertTenantAccess, tenantScope } from '../../middlewares/tenant-scope';
-import { meteringRateLimit, periodBounds } from './shared';
+import { authMiddleware, requireRole } from '../../middlewares/auth';
+import { periodBounds } from './shared';
 
 const router: IRouter = Router();
-const ADMIN_ROLES = ['admin', 'super_admin', 'ops'] as const;
+const _ADMIN_ROLES = ['admin', 'super_admin', 'ops'] as const;
 const READ_ROLES = ['admin', 'super_admin', 'ops', 'analyst'] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -55,7 +33,7 @@ router.get(
   '/metering/analytics/overview',
   authMiddleware(),
   requireRole(...READ_ROLES),
-  async (req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     try {
       const now = new Date();
       const { start: monthStart } = periodBounds('month', now);
@@ -263,7 +241,7 @@ router.get(
   '/metering/analytics/cohort',
   authMiddleware(),
   requireRole(...READ_ROLES),
-  async (req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     try {
       const rows = await db
         .select({
@@ -312,7 +290,7 @@ router.get(
         acc[cm]!.total++;
         if (r.status === 'active') acc[cm]!.active++;
         if (r.status === 'canceled') acc[cm]!.churned++;
-        acc[cm]!.tenants.push({
+        acc[cm]?.tenants.push({
           orgId: r.orgId,
           orgName: r.orgName,
           status: r.status,

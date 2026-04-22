@@ -1,16 +1,6 @@
 import { Info } from 'lucide-react';
 import { useState } from 'react';
-import type { TooltipProps } from 'recharts';
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { type TooltipProps, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import AgentBadge from '../components/AgentBadge';
 import ConfidenceChip from '../components/ConfidenceChip';

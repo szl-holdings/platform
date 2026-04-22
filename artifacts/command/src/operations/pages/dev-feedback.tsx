@@ -1,16 +1,7 @@
 import {
-  Activity,
-  AlertTriangle,
   Brain,
-  CheckCircle,
-  ChevronRight,
-  Clock,
   Code,
-  GitBranch,
-  Terminal,
-  TrendingDown,
   TrendingUp,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -311,7 +302,7 @@ export default function DevFeedback() {
                   className="w-full text-left p-3 rounded-lg transition-all"
                   style={{
                     background: selected.id === r.id ? `${SEV_COLOR[r.severity]}08` : DS.surface,
-                    border: `1px solid ${selected.id === r.id ? SEV_COLOR[r.severity] + '30' : DS.border}`,
+                    border: `1px solid ${selected.id === r.id ? `${SEV_COLOR[r.severity]}30` : DS.border}`,
                   }}
                 >
                   <div className="flex items-start gap-2 mb-1">

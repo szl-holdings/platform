@@ -7,8 +7,7 @@ import { InMemoryTraceStore } from '@workspace/trace-graph/store';
 import { TraceWriter } from '@workspace/trace-graph/writer';
 import type { ToolManifest, ToolPolicyTier } from './manifest.js';
 import { ToolRateLimiter } from './rate-limiter.js';
-import type { ToolRegistry } from './registry.js';
-import { defaultToolRegistry } from './registry.js';
+import { type ToolRegistry, defaultToolRegistry } from './registry.js';
 import { validateAgainstSchema } from './schema-validator.js';
 
 export type ToolHandler = (input: unknown, manifest: ToolManifest) => Promise<unknown>;
@@ -360,7 +359,7 @@ export class ToolMeshGateway {
   }
 
   private async tryFallbackViaInvoke(
-    failedToolId: string,
+    _failedToolId: string,
     input: unknown,
     context: GatewayInvokeContext,
     manifest: ToolManifest,

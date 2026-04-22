@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  BarChart3, Filter, ChevronDown, ArrowUpRight, Search,
+  BarChart3, Search,
   AlertTriangle, TrendingUp, CheckCircle2, Clock, Building2,
   Ship, Shield, Brain, Users, RefreshCw,
 } from "lucide-react";

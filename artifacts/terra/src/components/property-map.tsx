@@ -335,7 +335,7 @@ export default function PropertyMap({
             const feature = features[0];
             if (!feature) return;
             const src = map.getSource('properties') as MapboxGL.GeoJSONSource;
-            src.getClusterExpansionZoom(feature.properties!.cluster_id as number, (err, zoom) => {
+            src.getClusterExpansionZoom(feature.properties?.cluster_id as number, (err, zoom) => {
               if (err) return;
               const geom = feature.geometry as GeoJSON.Point;
               map.easeTo({ center: geom.coordinates as [number, number], zoom: zoom ?? 10 });

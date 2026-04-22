@@ -1,6 +1,5 @@
 import {
   APPROVALS,
-  DRIFT_EVENTS,
   EVENTS,
   formatCurrency,
   getSeverityColor,
@@ -12,10 +11,8 @@ import {
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
-  AlertTriangle,
   ArrowRight,
   Clock,
-  DollarSign,
   Eye,
   TrendingDown,
   TrendingUp,
@@ -108,7 +105,7 @@ function CommandLoopPanel({ activePhase }: { activePhase: string }) {
               style={{
                 color: p.current ? p.color : 'rgba(255,255,255,0.3)',
                 background: p.current ? `${p.color}20` : 'transparent',
-                border: `1px solid ${p.current ? p.color + '60' : 'transparent'}`,
+                border: `1px solid ${p.current ? `${p.color}60` : 'transparent'}`,
               }}
             >
               {p.phase}
@@ -119,7 +116,7 @@ function CommandLoopPanel({ activePhase }: { activePhase: string }) {
               style={{
                 color: p.current ? p.color : 'rgba(255,255,255,0.3)',
                 background: p.current ? `${p.color}20` : 'transparent',
-                border: `1px solid ${p.current ? p.color + '60' : 'transparent'}`,
+                border: `1px solid ${p.current ? `${p.color}60` : 'transparent'}`,
               }}
             >
               {p.phase}
@@ -410,7 +407,7 @@ export default function ExecutiveOverview() {
               className="flex-1 rounded-lg p-2.5 text-center"
               style={{
                 background: p.active ? `${p.color}10` : 'rgba(255,255,255,0.02)',
-                border: `1px solid ${p.active ? p.color + '30' : 'rgba(255,255,255,0.06)'}`,
+                border: `1px solid ${p.active ? `${p.color}30` : 'rgba(255,255,255,0.06)'}`,
               }}
             >
               <div

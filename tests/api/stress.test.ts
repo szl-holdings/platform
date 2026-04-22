@@ -22,19 +22,15 @@ import express, { type Request, type Response, type NextFunction } from "express
 // with a clear message rather than crashing on a connection error mid-test.
 // Top-level await is valid in ESM (vitest runs tests as ESM modules).
 const HAS_DB: boolean = await (async (): Promise<boolean> => {
-  const url = process.env["DATABASE_URL"];
+  const url = process.env.DATABASE_URL;
   if (!url) {
-    console.warn(
-      "[stress] DATABASE_URL is not set — skipping stress tests. " +
-        "Set DATABASE_URL (and ensure a database is reachable) to run these tests.",
-    );
     return false;
   }
   try {
     const parsed = new URL(url);
     const host = parsed.hostname || "localhost";
     const port = parseInt(parsed.port || "5432", 10);
-    const net = await import("net");
+    const net = await import("node:net");
     await new Promise<void>((resolve, reject) => {
       const socket = new net.Socket();
       const timer = setTimeout(() => {
@@ -52,11 +48,7 @@ const HAS_DB: boolean = await (async (): Promise<boolean> => {
       });
     });
     return true;
-  } catch (err) {
-    console.warn(
-      `[stress] Database is not reachable (${String(err)}) — skipping stress tests. ` +
-        "Ensure the database is running and DATABASE_URL points to it.",
-    );
+  } catch (_err) {
     return false;
   }
 })();
@@ -71,7 +63,7 @@ vi.mock("../../artifacts/api-server/src/middlewares/auth", () => {
   const requireAnyAuth = passthrough;
   const parseIdParam = (id: string) => {
     const n = parseInt(id, 10);
-    if (isNaN(n)) throw new Error("Invalid ID");
+    if (Number.isNaN(n)) throw new Error("Invalid ID");
     return n;
   };
   class InvalidIdError extends Error {}
@@ -241,12 +233,10 @@ describe.skipIf(!HAS_DB)("Stress — Concurrent GET requests across domain route
     const errors = results.filter((r) => r.status >= 500);
     const durations = results.map((r) => r.durationMs).sort((a, b) => a - b);
     const p95 = percentile(durations, 95);
-    const p50 = percentile(durations, 50);
+    const _p50 = percentile(durations, 50);
 
     expect(errors.length).toBe(0);
     expect(p95).toBeLessThan(MAX_ACCEPTABLE_P95_MS);
-
-    console.info(`[stress] GET /vessels/fleets x${STRESS_CONCURRENCY} — p50: ${p50}ms, p95: ${p95}ms, max: ${durations[durations.length - 1]}ms`);
   });
 
   it(`handles ${STRESS_CONCURRENCY} concurrent GET /lyte/workspaces requests without errors`, async () => {
@@ -265,7 +255,6 @@ describe.skipIf(!HAS_DB)("Stress — Concurrent GET requests across domain route
 
     expect(errors.length).toBe(0);
     expect(p95).toBeLessThan(MAX_ACCEPTABLE_P95_MS);
-    console.info(`[stress] GET /lyte/workspaces x${STRESS_CONCURRENCY} — p95: ${p95}ms`);
   });
 
   it(`handles ${STRESS_CONCURRENCY} concurrent GET /firestorm/scenarios requests without errors`, async () => {
@@ -284,7 +273,6 @@ describe.skipIf(!HAS_DB)("Stress — Concurrent GET requests across domain route
 
     expect(errors.length).toBe(0);
     expect(p95).toBeLessThan(MAX_ACCEPTABLE_P95_MS);
-    console.info(`[stress] GET /firestorm/scenarios x${STRESS_CONCURRENCY} — p95: ${p95}ms`);
   });
 
   it(`handles ${STRESS_CONCURRENCY} concurrent GET /holdings/ventures requests without errors`, async () => {
@@ -303,7 +291,6 @@ describe.skipIf(!HAS_DB)("Stress — Concurrent GET requests across domain route
 
     expect(errors.length).toBe(0);
     expect(p95).toBeLessThan(MAX_ACCEPTABLE_P95_MS);
-    console.info(`[stress] GET /holdings/ventures x${STRESS_CONCURRENCY} — p95: ${p95}ms`);
   });
 
   // PRISM Counsel stress test removed in Task #2696 (routes archived).
@@ -324,7 +311,6 @@ describe.skipIf(!HAS_DB)("Stress — Concurrent GET requests across domain route
 
     expect(errors.length).toBe(0);
     expect(p95).toBeLessThan(MAX_ACCEPTABLE_P95_MS);
-    console.info(`[stress] GET /terra/market-intelligence x${STRESS_CONCURRENCY} — p95: ${p95}ms`);
   });
 });
 
@@ -332,7 +318,7 @@ describe.skipIf(!HAS_DB)("Stress — Concurrent GET requests across domain route
 
 describe.skipIf(!HAS_DB)("Stress — Cross-domain concurrent load (mixed domain endpoints)", () => {
   it(`executes ${STRESS_CONCURRENCY} mixed domain reads concurrently without 5xx errors`, async () => {
-    const apps: Array<{ app: express.Express; path: string }> = [];
+    const _apps: Array<{ app: express.Express; path: string }> = [];
 
     const [
       { default: vesselsRouter },
@@ -373,11 +359,10 @@ describe.skipIf(!HAS_DB)("Stress — Cross-domain concurrent load (mixed domain 
     const errors = results.filter((r) => r.status >= 500);
     const durations = results.map((r) => r.durationMs).sort((a, b) => a - b);
     const p95 = percentile(durations, 95);
-    const p50 = percentile(durations, 50);
+    const _p50 = percentile(durations, 50);
 
     expect(errors.length).toBe(0);
     expect(p95).toBeLessThan(MAX_ACCEPTABLE_P95_MS);
-    console.info(`[stress] Cross-domain x${results.length} — p50: ${p50}ms, p95: ${p95}ms, max: ${durations[durations.length - 1]}ms`);
   });
 });
 
@@ -428,8 +413,6 @@ describe.skipIf(!HAS_DB)("Stress — Parallel DB read/write operations", () => {
         stressCleanupFleetIds.push(wr.body.id as number);
       }
     }
-
-    console.info(`[stress] DB write/read — ${WRITE_COUNT} inserts + ${READ_COUNT} reads concurrent, ${writeErrors.length + readErrors.length} errors`);
   });
 
   it("high-volume sequential reads against real DB maintain consistent response shape", async () => {
@@ -450,7 +433,6 @@ describe.skipIf(!HAS_DB)("Stress — Parallel DB read/write operations", () => {
 
     expect(errors.length).toBe(0);
     expect(shapeMismatches.length).toBe(0);
-    console.info(`[stress] Sequential GET /vessels x${SEQUENTIAL_COUNT} — ${errors.length} errors, ${shapeMismatches.length} shape mismatches`);
   });
 });
 
@@ -492,12 +474,11 @@ describe.skipIf(!HAS_DB)("Stress — Rate-limiter validation", () => {
     );
 
     const ok = results.filter((r) => r.status === 200);
-    const throttled = results.filter((r) => r.status === 429);
+    const _throttled = results.filter((r) => r.status === 429);
     const serverErrors = results.filter((r) => r.status >= 500);
 
     expect(ok.length).toBeGreaterThanOrEqual(10);
     expect(serverErrors.length).toBe(0);
-    console.info(`[stress] Rate-limiter burst x${BURST_COUNT} — 200: ${ok.length}, 429: ${throttled.length}, 5xx: ${serverErrors.length}`);
   });
 
   it("concurrent requests behind CSRF middleware all return non-500 status codes", async () => {
@@ -538,7 +519,6 @@ describe.skipIf(!HAS_DB)("Stress — Rate-limiter validation", () => {
 
     expect(serverErrors.length).toBe(0);
     expect(successful.length).toBeGreaterThan(0);
-    console.info(`[stress] CSRF middleware burst x${CSRF_COUNT} — 200: ${successful.length}, 5xx: ${serverErrors.length}`);
   });
 });
 
@@ -561,16 +541,11 @@ describe.skipIf(!HAS_DB)("Stress — Sustained load benchmark", () => {
     }
 
     durations.sort((a, b) => a - b);
-    const p50 = percentile(durations, 50);
+    const _p50 = percentile(durations, 50);
     const p95 = percentile(durations, 95);
-    const p99 = percentile(durations, 99);
+    const _p99 = percentile(durations, 99);
 
     expect(errors.length).toBe(0);
     expect(p95).toBeLessThan(MAX_ACCEPTABLE_P95_MS);
-
-    console.info(
-      `[stress] Sustained GET /vessels/fleets x${STRESS_ITERATIONS}` +
-      ` — p50: ${p50}ms, p95: ${p95}ms, p99: ${p99}ms, max: ${durations[durations.length - 1]}ms`,
-    );
   });
 });

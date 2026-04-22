@@ -1,4 +1,4 @@
-import React, { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { color } from '../tokens/index.js';
 import { cn } from '../utils.js';
 

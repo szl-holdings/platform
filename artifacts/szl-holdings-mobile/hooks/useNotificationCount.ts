@@ -39,7 +39,7 @@ export function useNotificationCount(): NotificationCountResult {
       if (deadRef.current) return;
       const base = getApiBase();
       if (!base) return;
-      const wsUrl = base.replace(/^https?/, (p) => (p === 'https' ? 'wss' : 'ws')) + '/api/ws';
+      const wsUrl = `${base.replace(/^https?/, (p) => (p === 'https' ? 'wss' : 'ws'))}/api/ws`;
       const token = getCachedAuthToken();
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;

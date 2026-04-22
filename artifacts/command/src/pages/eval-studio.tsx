@@ -1,23 +1,19 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
-import type { AuditEvent } from '@szl-holdings/design-system/cockpit/audit-rail';
-import { AuditRail } from '@szl-holdings/design-system/cockpit/audit-rail';
+import { type AuditEvent, AuditRail } from '@szl-holdings/design-system/cockpit/audit-rail';
 import {
   AlertTriangle,
   Brain,
   CheckCircle,
   ChevronDown,
   ChevronRight,
-  Clock,
   Cpu,
   DollarSign,
   FlaskConical,
   GitCompare,
   Play,
   Shield,
-  XCircle,
 } from 'lucide-react';
-import type React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ACCENT,
   AGENT_RUN_ATTRS,
@@ -123,7 +119,7 @@ function RegressionBadge({ severity }: { severity: EvalRunSummary['regressionSev
     major: { color: '#f97316', label: 'Major regression' },
     critical: { color: '#ef4444', label: 'Critical regression' },
   };
-  const { color, label } = map[severity] ?? map['none']!;
+  const { color, label } = map[severity] ?? map.none!;
   return (
     <span
       style={{

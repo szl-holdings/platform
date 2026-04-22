@@ -47,6 +47,8 @@ interface CovenantRecord {
   evidence?: CovenantEvidence[];
   requiredApprovers?: string[];
   remedyPeriodDays?: number;
+  financialSource?: string | null;
+  financialDate?: string | null;
 }
 
 const ACCENT = '#40856a';
@@ -637,7 +639,7 @@ function CovenantCard({
                   >
                     {covenant.type === 'ltv' || covenant.type === 'occupancy'
                       ? `${(covenant.current * 100).toFixed(0)}%`
-                      : covenant.current.toFixed(2) + 'x'}
+                      : `${covenant.current.toFixed(2)}x`}
                   </span>
                 </span>
                 <span>
@@ -645,7 +647,7 @@ function CovenantCard({
                   <span className="font-mono font-semibold" style={{ color: '#e8edf8' }}>
                     {covenant.type === 'ltv' || covenant.type === 'occupancy'
                       ? `${(covenant.threshold * 100).toFixed(0)}%`
-                      : covenant.threshold.toFixed(2) + 'x'}
+                      : `${covenant.threshold.toFixed(2)}x`}
                   </span>
                 </span>
               </div>
@@ -738,7 +740,7 @@ function CovenantCard({
         </div>
       </div>
 
-      {expanded && covenant.evidence?.length > 0 && (
+      {expanded && (covenant.evidence?.length ?? 0) > 0 && covenant.evidence && (
         <div
           className="p-4 space-y-2"
           style={{ background: 'rgba(0,0,0,0.2)', borderTop: '1px solid rgba(255,255,255,0.04)' }}

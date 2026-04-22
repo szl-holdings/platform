@@ -16,7 +16,6 @@ import {
   type InsertOrgCustomDomain,
   type InsertPartnerAccount,
   type InsertPartnerOrgAssignment,
-  meteringEventsTable,
   organizationsTable,
   orgBrandingTable,
   orgCustomDomainsTable,
@@ -27,9 +26,9 @@ import {
   usageAggregatesTable,
   usersTable,
 } from '@szl-holdings/db';
-import { randomBytes } from 'crypto';
-import { promises as dnsPromises } from 'dns';
-import { and, count, desc, eq, inArray, or } from 'drizzle-orm';
+import { randomBytes } from 'node:crypto';
+import { promises as dnsPromises } from 'node:dns';
+import { and, count, desc, eq, inArray, } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -166,7 +165,7 @@ router.post(
         .values({
           name: body.name,
           slug: body.slug,
-          ownerUserId: req.user!.id,
+          ownerUserId: req.user?.id,
           status: isAdmin(req) ? 'active' : 'pending_approval',
           tier: body.tier ?? 'reseller',
           contactEmail: body.contactEmail ?? null,
@@ -177,7 +176,7 @@ router.post(
 
       await db.insert(partnerUsersTable).values({
         partnerId: partner.id,
-        userId: req.user!.id,
+        userId: req.user?.id,
         role: 'owner',
       });
 
@@ -190,7 +189,7 @@ router.post(
 
 router.get('/partner/me', authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const membership = await getPartnerForUser(req.user!.id);
+    const membership = await getPartnerForUser(req.user?.id);
     if (!membership) {
       sendNotFound(res, 'Partner account');
       return;
@@ -235,13 +234,13 @@ router.get('/partner/me', authMiddleware(), async (req: Request, res: Response) 
 router.get('/partner/accounts/:id', authMiddleware(), async (req: Request, res: Response) => {
   try {
     const id = parseIdParam(req.params.id);
-    if (isNaN(id)) {
+    if (Number.isNaN(id)) {
       sendBadRequest(res, 'Invalid partner ID');
       return;
     }
 
     if (!isAdmin(req)) {
-      const membership = await getPartnerForUser(req.user!.id);
+      const membership = await getPartnerForUser(req.user?.id);
       if (!membership || membership.partnerId !== id) {
         sendForbidden(res);
         return;
@@ -311,13 +310,13 @@ router.patch(
   async (req: Request, res: Response) => {
     try {
       const id = parseIdParam(req.params.id);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid partner ID');
         return;
       }
 
       if (!isAdmin(req)) {
-        const membership = await getPartnerForUser(req.user!.id);
+        const membership = await getPartnerForUser(req.user?.id);
         if (
           !membership ||
           membership.partnerId !== id ||
@@ -343,7 +342,7 @@ router.patch(
           updates.maxManagedTenants = Number(body.maxManagedTenants);
         if (body.status === 'active' && !body.approvedAt) {
           updates.approvedAt = new Date();
-          updates.approvedByUserId = req.user!.id;
+          updates.approvedByUserId = req.user?.id;
         }
       }
 
@@ -385,13 +384,13 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const partnerId = parseIdParam(req.params.id);
-      if (isNaN(partnerId)) {
+      if (Number.isNaN(partnerId)) {
         sendBadRequest(res, 'Invalid partner ID');
         return;
       }
 
       if (!isAdmin(req)) {
-        const membership = await getPartnerForUser(req.user!.id);
+        const membership = await getPartnerForUser(req.user?.id);
         if (
           !membership ||
           membership.partnerId !== partnerId ||
@@ -456,7 +455,7 @@ router.post(
 
       await db.insert(orgMembersTable).values({
         orgId: org.id,
-        userId: req.user!.id,
+        userId: req.user?.id,
         role: 'owner',
       });
 
@@ -464,7 +463,7 @@ router.post(
         partnerId,
         orgId: org.id,
         accessLevel: body.accessLevel ?? 'manage',
-        provisionedByUserId: req.user!.id,
+        provisionedByUserId: req.user?.id,
       } as InsertPartnerOrgAssignment);
 
       sendCreated(res, { org });
@@ -486,13 +485,13 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const partnerId = parseIdParam(req.params.id);
-      if (isNaN(partnerId)) {
+      if (Number.isNaN(partnerId)) {
         sendBadRequest(res, 'Invalid partner ID');
         return;
       }
 
       if (!isAdmin(req)) {
-        const membership = await getPartnerForUser(req.user!.id);
+        const membership = await getPartnerForUser(req.user?.id);
         if (
           !membership ||
           membership.partnerId !== partnerId ||
@@ -560,7 +559,7 @@ router.post(
           partnerId,
           orgId: org.id,
           accessLevel: accessLevel ?? 'manage',
-          provisionedByUserId: req.user!.id,
+          provisionedByUserId: req.user?.id,
         } as InsertPartnerOrgAssignment)
         .onConflictDoUpdate({
           target: [partnerOrgAssignmentsTable.partnerId, partnerOrgAssignmentsTable.orgId],
@@ -583,13 +582,13 @@ router.delete(
     try {
       const partnerId = parseIdParam(req.params.id);
       const orgId = parseIdParam(req.params.orgId);
-      if (isNaN(partnerId) || isNaN(orgId)) {
+      if (Number.isNaN(partnerId) || Number.isNaN(orgId)) {
         sendBadRequest(res, 'Invalid ID');
         return;
       }
 
       if (!isAdmin(req)) {
-        const membership = await getPartnerForUser(req.user!.id);
+        const membership = await getPartnerForUser(req.user?.id);
         if (
           !membership ||
           membership.partnerId !== partnerId ||
@@ -689,14 +688,14 @@ router.get('/org-branding/:orgSlug', async (req: Request, res: Response) => {
 router.get('/orgs/:orgId/branding', authMiddleware(), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
-    if (isNaN(orgId)) {
+    if (Number.isNaN(orgId)) {
       sendBadRequest(res, 'Invalid org ID');
       return;
     }
 
     if (!isAdmin(req)) {
       const isMember = req.user?.orgs?.some((o) => o.orgId === orgId);
-      const isPartner = await hasPartnerOrgAccess(req.user!.id, orgId);
+      const isPartner = await hasPartnerOrgAccess(req.user?.id, orgId);
       if (!isMember && !isPartner) {
         sendForbidden(res);
         return;
@@ -722,7 +721,7 @@ router.put(
   async (req: Request, res: Response) => {
     try {
       const orgId = parseIdParam(req.params.orgId);
-      if (isNaN(orgId)) {
+      if (Number.isNaN(orgId)) {
         sendBadRequest(res, 'Invalid org ID');
         return;
       }
@@ -731,7 +730,7 @@ router.put(
         const orgMembership = req.user?.orgs?.find((o) => o.orgId === orgId);
         const hasOrgAccess =
           (orgMembership && ['owner', 'admin'].includes(orgMembership.role)) ||
-          (await hasPartnerOrgAccess(req.user!.id, orgId, true));
+          (await hasPartnerOrgAccess(req.user?.id, orgId, true));
         if (!hasOrgAccess) {
           sendForbidden(res);
           return;
@@ -742,7 +741,7 @@ router.put(
 
       const upsertData: InsertOrgBranding = {
         orgId,
-        updatedByUserId: req.user!.id,
+        updatedByUserId: req.user?.id,
         ...(body.appName !== undefined ? { appName: body.appName || null } : {}),
         ...(body.tagline !== undefined ? { tagline: body.tagline || null } : {}),
         ...(body.logoUrl !== undefined ? { logoUrl: body.logoUrl || null } : {}),
@@ -787,7 +786,7 @@ router.delete(
   async (req: Request, res: Response) => {
     try {
       const orgId = parseIdParam(req.params.orgId);
-      if (isNaN(orgId)) {
+      if (Number.isNaN(orgId)) {
         sendBadRequest(res, 'Invalid org ID');
         return;
       }
@@ -796,7 +795,7 @@ router.delete(
         const orgMembership = req.user?.orgs?.find((o) => o.orgId === orgId);
         const hasOrgAccess =
           (orgMembership && ['owner', 'admin'].includes(orgMembership.role)) ||
-          (await hasPartnerOrgAccess(req.user!.id, orgId, true));
+          (await hasPartnerOrgAccess(req.user?.id, orgId, true));
         if (!hasOrgAccess) {
           sendForbidden(res);
           return;
@@ -816,14 +815,14 @@ router.delete(
 router.get('/orgs/:orgId/custom-domains', authMiddleware(), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
-    if (isNaN(orgId)) {
+    if (Number.isNaN(orgId)) {
       sendBadRequest(res, 'Invalid org ID');
       return;
     }
 
     if (!isAdmin(req)) {
       const isMember = req.user?.orgs?.some((o) => o.orgId === orgId);
-      const isPartner = await hasPartnerOrgAccess(req.user!.id, orgId);
+      const isPartner = await hasPartnerOrgAccess(req.user?.id, orgId);
       if (!isMember && !isPartner) {
         sendForbidden(res);
         return;
@@ -854,7 +853,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const orgId = parseIdParam(req.params.orgId);
-      if (isNaN(orgId)) {
+      if (Number.isNaN(orgId)) {
         sendBadRequest(res, 'Invalid org ID');
         return;
       }
@@ -863,7 +862,7 @@ router.post(
         const orgMembership = req.user?.orgs?.find((o) => o.orgId === orgId);
         const hasOrgAccess =
           (orgMembership && ['owner', 'admin'].includes(orgMembership.role)) ||
-          (await hasPartnerOrgAccess(req.user!.id, orgId, true));
+          (await hasPartnerOrgAccess(req.user?.id, orgId, true));
         if (!hasOrgAccess) {
           sendForbidden(res);
           return;
@@ -912,7 +911,7 @@ router.post(
           verificationMethod: method,
           verificationToken,
           verificationRecord,
-          createdByUserId: req.user!.id,
+          createdByUserId: req.user?.id,
         } as InsertOrgCustomDomain)
         .returning();
 
@@ -944,7 +943,7 @@ router.post(
     try {
       const orgId = parseIdParam(req.params.orgId);
       const domainId = parseIdParam(req.params.domainId);
-      if (isNaN(orgId) || isNaN(domainId)) {
+      if (Number.isNaN(orgId) || Number.isNaN(domainId)) {
         sendBadRequest(res, 'Invalid ID');
         return;
       }
@@ -953,7 +952,7 @@ router.post(
         const orgMembership = req.user?.orgs?.find((o) => o.orgId === orgId);
         const hasOrgAccess =
           (orgMembership && ['owner', 'admin'].includes(orgMembership.role)) ||
-          (await hasPartnerOrgAccess(req.user!.id, orgId, true));
+          (await hasPartnerOrgAccess(req.user?.id, orgId, true));
         if (!hasOrgAccess) {
           sendForbidden(res);
           return;
@@ -1089,7 +1088,7 @@ router.post(
         const orgMembership = req.user?.orgs?.find((o) => o.orgId === orgId);
         const hasOrgAccess =
           (orgMembership && ['owner', 'admin'].includes(orgMembership.role)) ||
-          (await hasPartnerOrgAccess(req.user!.id, orgId, true));
+          (await hasPartnerOrgAccess(req.user?.id, orgId, true));
         if (!hasOrgAccess) {
           sendForbidden(res);
           return;
@@ -1149,7 +1148,7 @@ router.patch(
     try {
       const orgId = parseIdParam(req.params.orgId);
       const domainId = parseIdParam(req.params.domainId);
-      if (isNaN(orgId) || isNaN(domainId)) {
+      if (Number.isNaN(orgId) || Number.isNaN(domainId)) {
         sendBadRequest(res, 'Invalid ID');
         return;
       }
@@ -1158,7 +1157,7 @@ router.patch(
         const orgMembership = req.user?.orgs?.find((o) => o.orgId === orgId);
         const hasOrgAccess =
           (orgMembership && ['owner', 'admin'].includes(orgMembership.role)) ||
-          (await hasPartnerOrgAccess(req.user!.id, orgId, true));
+          (await hasPartnerOrgAccess(req.user?.id, orgId, true));
         if (!hasOrgAccess) {
           sendForbidden(res);
           return;
@@ -1200,7 +1199,7 @@ router.delete(
     try {
       const orgId = parseIdParam(req.params.orgId);
       const domainId = parseIdParam(req.params.domainId);
-      if (isNaN(orgId) || isNaN(domainId)) {
+      if (Number.isNaN(orgId) || Number.isNaN(domainId)) {
         sendBadRequest(res, 'Invalid ID');
         return;
       }
@@ -1209,7 +1208,7 @@ router.delete(
         const orgMembership = req.user?.orgs?.find((o) => o.orgId === orgId);
         const hasOrgAccess =
           (orgMembership && ['owner', 'admin'].includes(orgMembership.role)) ||
-          (await hasPartnerOrgAccess(req.user!.id, orgId, true));
+          (await hasPartnerOrgAccess(req.user?.id, orgId, true));
         if (!hasOrgAccess) {
           sendForbidden(res);
           return;
@@ -1232,13 +1231,13 @@ router.delete(
 router.get('/partner/accounts/:id/usage', authMiddleware(), async (req: Request, res: Response) => {
   try {
     const partnerId = parseIdParam(req.params.id);
-    if (isNaN(partnerId)) {
+    if (Number.isNaN(partnerId)) {
       sendBadRequest(res, 'Invalid partner ID');
       return;
     }
 
     if (!isAdmin(req)) {
-      const membership = await getPartnerForUser(req.user!.id);
+      const membership = await getPartnerForUser(req.user?.id);
       if (!membership || membership.partnerId !== partnerId) {
         sendForbidden(res);
         return;

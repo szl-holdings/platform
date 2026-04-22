@@ -7,7 +7,7 @@ import {
   unregisterPolicy,
 } from './index.js';
 import { defaultPolicyModeRegistry, PolicyModeConfigSchema, PolicyModeRegistry } from './modes.js';
-import type { EvaluationRequest, Policy, PolicyEvaluation } from './types.js';
+import type { EvaluationRequest, Policy, } from './types.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -317,7 +317,7 @@ describe('PolicyModeRegistry', () => {
         workspace: 'default',
       });
       expect(resolved).not.toBeNull();
-      expect(resolved!.mode).toBe(mode);
+      expect(resolved?.mode).toBe(mode);
     });
   }
 
@@ -343,7 +343,7 @@ describe('PolicyModeRegistry', () => {
       workspace: 'any-ws',
     });
     expect(resolved).not.toBeNull();
-    expect(resolved!.mode).toBe('recommend');
+    expect(resolved?.mode).toBe('recommend');
   });
 
   it('more specific scope beats wildcard scope', () => {
@@ -364,7 +364,7 @@ describe('PolicyModeRegistry', () => {
       actionType: 'analyze',
       workspace: 'default',
     });
-    expect(resolved!.mode).toBe('auto-within-guardrails');
+    expect(resolved?.mode).toBe('auto-within-guardrails');
   });
 
   it('unregister removes config', () => {
@@ -438,10 +438,10 @@ describe('buildPolicyEvaluation — required metadata fields', () => {
     expect(typeof pe.freshnessScore).toBe('number');
 
     expect(typeof pe.projectedImpact).toBe('string');
-    expect(pe.projectedImpact!.length).toBeGreaterThan(0);
+    expect(pe.projectedImpact?.length).toBeGreaterThan(0);
 
     expect(typeof pe.projectedRisk).toBe('string');
-    expect(pe.projectedRisk!.length).toBeGreaterThan(0);
+    expect(pe.projectedRisk?.length).toBeGreaterThan(0);
 
     expect(pe.policyResult).toBeDefined();
     expect(typeof pe.policyResult.effect).toBe('string');

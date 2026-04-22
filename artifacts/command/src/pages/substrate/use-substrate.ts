@@ -85,7 +85,7 @@ function sdkStageToLocal(sr: StageResultSummary): RunStage {
         ? 'completed'
         : sr.status === 'failed'
           ? 'failed'
-          : sr.status === 'running' || sr.status === 'pending-approval'
+          : sr.status === 'pending-approval'
             ? 'running'
             : 'pending',
     startedAt: null,

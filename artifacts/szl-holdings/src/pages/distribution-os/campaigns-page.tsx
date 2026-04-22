@@ -7,19 +7,14 @@ import {
   ChevronUp,
   Copy,
   Download,
-  Edit3,
   ExternalLink,
-  Filter,
   Link2,
   Loader2,
   Megaphone,
   Plus,
-  RefreshCw,
   Save,
   Search,
   Target,
-  Trash2,
-  X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
@@ -93,7 +88,7 @@ const defaultLinkForm = {
 };
 type SortDir = 'asc' | 'desc';
 
-const STATUS_META: Record<string, { color: string; bg: string }> = {
+const _STATUS_META: Record<string, { color: string; bg: string }> = {
   draft: { color: '#8b8579', bg: 'hsla(0,0%,100%,0.04)' },
   active: { color: '#5a9c5a', bg: 'hsla(120,30%,40%,0.12)' },
   paused: { color: '#d4a054', bg: 'hsla(40,60%,50%,0.12)' },
@@ -251,7 +246,7 @@ export default function CampaignsPage() {
     setSaving(false);
   }
 
-  async function deleteCampaign(id: number) {
+  async function _deleteCampaign(id: number) {
     if (!confirm('Delete this campaign?')) return;
     await fetch(`${API}/api/distribution-os/campaigns/${id}`, { method: 'DELETE' });
     setCampaigns((prev) => prev.filter((c) => c.id !== id));
@@ -331,7 +326,7 @@ export default function CampaignsPage() {
     linkForm.term,
   );
 
-  function SortIcon({ k }: { k: SortKey }) {
+  function _SortIcon({ k }: { k: SortKey }) {
     if (sortKey !== k) return <ChevronDown size={12} style={{ color: '#4a4540' }} />;
     return sortDir === 'desc' ? (
       <ChevronDown size={12} style={{ color: '#d4a054' }} />

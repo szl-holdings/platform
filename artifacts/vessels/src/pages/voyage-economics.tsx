@@ -2,7 +2,6 @@ import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
-  Anchor,
   BarChart3,
   Clock,
   DollarSign,
@@ -336,7 +335,7 @@ export default function VoyageEconomicsPage() {
 
   const totalRevenue = voyageEconomics.reduce((a, v) => a + (v.estimatedRevenue || 0), 0);
   const totalMargin = voyageEconomics.reduce((a, v) => a + (v.marginEstimate || 0), 0);
-  const totalFuel = voyageEconomics.reduce((a, v) => a + (v.fuelCost || 0), 0);
+  const _totalFuel = voyageEconomics.reduce((a, v) => a + (v.fuelCost || 0), 0);
   const totalDelay = voyageEconomics.reduce((a, v) => a + (v.delayCost || 0), 0);
   const tceVoyages = voyageEconomics.filter((v) => v.tce > 0);
   const avgTCE =

@@ -1,13 +1,11 @@
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
-  Calendar,
   CheckCircle,
   ChevronDown,
   ChevronUp,
   Clock,
   Lock,
-  MessageSquare,
   Shield,
 } from 'lucide-react';
 import { useState } from 'react';

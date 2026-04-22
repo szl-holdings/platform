@@ -5,7 +5,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import type { Request, RequestHandler } from 'express';
 import depthLimit from 'graphql-depth-limit';
 import { useServer } from 'graphql-ws/use/ws';
-import type { Server as HttpServer } from 'http';
+import type { Server as HttpServer } from 'node:http';
 import { WebSocketServer } from 'ws';
 import { logger } from '../lib/logger.js';
 import { type AppDataLoaders, createDataLoaders } from './dataloaders.js';

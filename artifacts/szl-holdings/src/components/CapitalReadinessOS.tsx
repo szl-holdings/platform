@@ -15,8 +15,6 @@ import {
   ChevronUp,
   Circle,
   Clock,
-  DollarSign,
-  FileText,
   Loader2,
   Plus,
   TrendingUp,
@@ -29,7 +27,7 @@ const API = '/api';
 
 async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(`${API}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(opts?.headers ?? {}) },
+    headers: { 'Content-Type': 'application/json', ...opts?.headers },
     ...opts,
   });
   if (!res.ok) throw new Error(`API ${res.status}`);
@@ -237,7 +235,7 @@ function PacketBuilder({
     queryKey: [...queryKey, packet.id],
     queryFn: () => apiFetch(`${endpoint}/${packet.id}`),
   });
-  const qc = useQueryClient();
+  const _qc = useQueryClient();
 
   const statusColors: Record<string, string> = {
     drafting: dsColor.accent.amber,

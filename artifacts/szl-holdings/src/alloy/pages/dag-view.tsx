@@ -71,7 +71,7 @@ function layoutDAG(steps: Step[]): Map<string, { x: number; y: number; col: numb
     inDegree.set(s.id, 0);
   });
   steps.forEach((s) => {
-    s.deps.forEach((dep) => {
+    s.deps.forEach((_dep) => {
       if (inDegree.has(s.id)) inDegree.set(s.id, (inDegree.get(s.id) ?? 0) + 1);
     });
   });
@@ -98,7 +98,7 @@ function layoutDAG(steps: Step[]): Map<string, { x: number; y: number; col: numb
   steps.forEach((s) => {
     const l = levels.get(s.id) ?? 0;
     if (!byLevel.has(l)) byLevel.set(l, []);
-    byLevel.get(l)!.push(s);
+    byLevel.get(l)?.push(s);
   });
 
   const maxLevel = Math.max(...Array.from(levels.values()), 0);

@@ -102,7 +102,7 @@ ${sections.includes('outlook') ? 'OUTLOOK: [2 sentences on the near-term outlook
 Respond ONLY with the section markers and content, no other text.`;
 }
 
-function parseNarrativeResponse(text: string, sections: string[]): Partial<NarrativeResult> {
+function parseNarrativeResponse(text: string, _sections: string[]): Partial<NarrativeResult> {
   const result: Partial<NarrativeResult> = {};
 
   const sectionMap: Record<string, keyof NarrativeResult> = {
@@ -119,7 +119,7 @@ function parseNarrativeResponse(text: string, sections: string[]): Partial<Narra
       'i',
     );
     const match = text.match(regex);
-    if (match && match[1]) {
+    if (match?.[1]) {
       (result as Record<string, string>)[key] = match[1].trim();
     }
   }

@@ -5,7 +5,7 @@
  * and triggers automatic alerts and human review escalation recommendations.
  */
 
-import { type AgentPerformanceProfile, scoringEngine } from './scoring-engine.js';
+import { scoringEngine } from './scoring-engine.js';
 
 export type AlertSeverity = 'critical' | 'high' | 'medium' | 'low';
 export type AlertType =

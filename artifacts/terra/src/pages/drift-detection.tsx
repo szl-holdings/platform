@@ -4,8 +4,7 @@ import {
   getSeverityColor,
   type Severity,
 } from '@szl-holdings/shared-ui/core-observability-data';
-import { cn } from '@szl-holdings/shared-ui/utils';
-import { AlertTriangle, ArrowRight, Clock, Radar } from 'lucide-react';
+import { ArrowRight, Clock, Radar } from 'lucide-react';
 
 function SeverityBadge({ severity }: { severity: Severity }) {
   const color = getSeverityColor(severity);

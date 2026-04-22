@@ -232,7 +232,7 @@ export async function runDomainEvals(
   executor: EvalExecutor,
   options?: { suiteId?: string; config?: PulseEvalConfig },
 ): Promise<EvalSuiteReport> {
-  const cases = DOMAIN_DATASETS[domain] ?? [];
+  const _cases = DOMAIN_DATASETS[domain] ?? [];
   return runPulseEvals(executor, {
     domains: [domain],
     suiteId: options?.suiteId ?? `pulse_${domain}_${Date.now()}`,

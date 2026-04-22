@@ -678,7 +678,7 @@ export default function BlockchainBoLPage() {
                         ev.confirmed ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse',
                       )}
                     />
-                    {i < selectedDoc.chain!.length - 1 && (
+                    {i < (selectedDoc.chain?.length ?? 0) - 1 && (
                       <div className="w-px flex-1 bg-sky-500/10 mt-1" />
                     )}
                   </div>

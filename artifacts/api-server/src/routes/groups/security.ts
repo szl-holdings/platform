@@ -1,7 +1,7 @@
-import { type IRouter } from "express";
+import type { IRouter } from "express";
 import { perUserApiSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { tenantScope } from "../../middlewares/tenant-scope";
-import { lazyMount, lazyRegister, lazyMatch, lazyRegisterMatch } from "../../lib/lazy-router";
+import { lazyRegister, lazyMatch, lazyRegisterMatch } from "../../lib/lazy-router";
 
 const _readLimiter = perUserApiSlidingLimiter;
 

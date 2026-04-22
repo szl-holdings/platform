@@ -16,10 +16,10 @@
  *   TENANT_ID     — tenant to use (default: smoke-test-tenant)
  */
 
-const BASE_URL = process.env['AEF_API_URL'] ?? 'http://localhost:4200';
-const API_KEY = process.env['AEF_API_KEY'] ?? '';
-const ROUNDS = parseInt(process.env['BENCH_ROUNDS'] ?? '20', 10);
-const TENANT_ID = process.env['TENANT_ID'] ?? 'smoke-test-tenant';
+const BASE_URL = process.env.AEF_API_URL ?? 'http://localhost:4200';
+const API_KEY = process.env.AEF_API_KEY ?? '';
+const ROUNDS = parseInt(process.env.BENCH_ROUNDS ?? '20', 10);
+const TENANT_ID = process.env.TENANT_ID ?? 'smoke-test-tenant';
 
 const headers: Record<string, string> = {
   'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ async function post(
   return { statusCode: res.status, json, elapsedMs: Date.now() - t0 };
 }
 
-function row(label: string, s: ReturnType<typeof stats>, unit = 'ms'): string {
+function _row(label: string, s: ReturnType<typeof stats>, unit = 'ms'): string {
   return `  ${label.padEnd(22)} min=${s.min}${unit}  p50=${s.p50}${unit}  p95=${s.p95}${unit}  p99=${s.p99}${unit}  max=${s.max}${unit}  avg=${s.avg}${unit}`;
 }
 
@@ -79,7 +79,6 @@ function row(label: string, s: ReturnType<typeof stats>, unit = 'ms'): string {
 // ---------------------------------------------------------------------------
 
 async function benchEmbed(): Promise<void> {
-  console.log('\n── Embed Throughput ──────────────────────────────────────');
   const INPUTS = [
     'Quarterly risk summary for maritime shipping lanes',
     'DORA compliance gap analysis for financial institutions',
@@ -101,19 +100,14 @@ async function benchEmbed(): Promise<void> {
     }
   }
 
-  const s = stats(latencies);
-  console.log(row('embed (2 inputs)', s));
-  if (failures > 0) console.warn(`  WARN: ${failures}/${ROUNDS} requests failed`);
-  const throughput = Math.round(
+  const _s = stats(latencies);
+  if (failures > 0) {}
+  const _throughput = Math.round(
     (ROUNDS * INPUTS.length * 1000) / latencies.reduce((a, b) => a + b, 0),
-  );
-  console.log(
-    `  throughput              ≈${throughput} vectors/sec (${ROUNDS} rounds × ${INPUTS.length} inputs)`,
   );
 }
 
 async function benchSearch(): Promise<void> {
-  console.log('\n── Hybrid Search Latency ─────────────────────────────────');
 
   const QUERIES = [
     'container vessel detention risk Red Sea',
@@ -140,22 +134,17 @@ async function benchSearch(): Promise<void> {
       const resp = json as { retrievalPath?: string[] };
       // Validate 13-stage canonical pipeline is present
       if (resp.retrievalPath?.length !== 13) {
-        console.warn(
-          `  WARN round ${i}: expected 13 retrieval stages, got ${resp.retrievalPath?.length}`,
-        );
       }
     } else {
       failures++;
     }
   }
 
-  const s = stats(latencies);
-  console.log(row('hybrid-search (topK=5)', s));
-  if (failures > 0) console.warn(`  WARN: ${failures}/${ROUNDS} requests failed`);
+  const _s = stats(latencies);
+  if (failures > 0) {}
 }
 
 async function benchRerank(): Promise<void> {
-  console.log('\n── Rerank Latency ────────────────────────────────────────');
 
   const CANDIDATES = [
     { id: 'c1', text: 'Tanker detention at Suez Canal due to revised IMO SOLAS requirements' },
@@ -181,9 +170,8 @@ async function benchRerank(): Promise<void> {
     }
   }
 
-  const s = stats(latencies);
-  console.log(row('rerank (3 candidates)', s));
-  if (failures > 0) console.warn(`  WARN: ${failures}/${ROUNDS} requests failed`);
+  const _s = stats(latencies);
+  if (failures > 0) {}
 }
 
 // ---------------------------------------------------------------------------
@@ -191,26 +179,18 @@ async function benchRerank(): Promise<void> {
 // ---------------------------------------------------------------------------
 
 async function main(): Promise<void> {
-  console.log(`\nAEF Benchmark — ${BASE_URL}  (${ROUNDS} rounds per suite)`);
-  console.log(`Tenant: ${TENANT_ID}`);
 
   // Health check before benchmarking
   const health = await fetch(`${BASE_URL}/health`, { headers });
   if (!health.ok) {
-    console.error(`ERROR: /health returned ${health.status} — is the server running?`);
     process.exit(1);
   }
 
   await benchEmbed();
   await benchSearch();
   await benchRerank();
-
-  console.log('\n── Summary ───────────────────────────────────────────────');
-  console.log('  All benchmark suites complete. Review p95/p99 for SLA targets.');
-  console.log('  CPU-only backend — production GPU/Azure backends will be significantly faster.\n');
 }
 
-main().catch((err) => {
-  console.error('Benchmark crashed:', err);
+main().catch((_err) => {
   process.exit(1);
 });

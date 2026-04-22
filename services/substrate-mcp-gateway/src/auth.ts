@@ -12,21 +12,12 @@
 
 import type { NextFunction, Request, Response } from 'express';
 
-const API_KEY = process.env['SUBSTRATE_GATEWAY_API_KEY'];
-const IS_DEV = process.env['NODE_ENV'] !== 'production';
+const API_KEY = process.env.SUBSTRATE_GATEWAY_API_KEY;
+const IS_DEV = process.env.NODE_ENV !== 'production';
 
 if (!API_KEY) {
   if (IS_DEV) {
-    console.warn(
-      '[substrate-mcp-gateway] SUBSTRATE_GATEWAY_API_KEY is not set. ' +
-        'Running in unauthenticated development mode — ALL requests are accepted. ' +
-        'Set this variable before deploying to production.',
-    );
   } else {
-    console.error(
-      '[substrate-mcp-gateway] FATAL: SUBSTRATE_GATEWAY_API_KEY is not set in production mode. ' +
-        'The gateway will reject every authenticated request.',
-    );
   }
 }
 
@@ -47,7 +38,7 @@ export function resolveAuthContext(req: Request): {
   actorId: string;
   apiKey: string | null;
 } {
-  const authHeader = req.headers['authorization'] ?? '';
+  const authHeader = req.headers.authorization ?? '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
   // Dev-only unauthenticated bypass: only when API_KEY is unset AND NODE_ENV is not production

@@ -1,5 +1,5 @@
 import PDFDocument from 'pdfkit';
-import { PassThrough } from 'stream';
+import { PassThrough } from 'node:stream';
 
 const BRAND = {
   bg: [10, 12, 16] as [number, number, number],

@@ -165,7 +165,7 @@ describe('executeWorkflow — blocked run path', () => {
     const { run } = await executeWorkflow({ definition: def, policyEvaluation: pe });
     const blockEntry = run.auditTrail.find((e) => e.action === 'workflow.policy_blocked');
     expect(blockEntry).toBeDefined();
-    expect(blockEntry!.detail).toContain('Blocked by compliance policy');
+    expect(blockEntry?.detail).toContain('Blocked by compliance policy');
   });
 });
 
@@ -205,7 +205,7 @@ describe('executeWorkflow — approval-required', () => {
       policyEvaluation: makeMinimalPolicyEvaluation(),
     });
     expect(approvalRequest).toBeDefined();
-    expect(approvalRequest!.approverRole).toBe('compliance');
+    expect(approvalRequest?.approverRole).toBe('compliance');
   });
 
   it('executes when approvedBy is supplied', async () => {
@@ -254,7 +254,7 @@ describe('executeWorkflow — dry-run', () => {
     const def = makeDefinition({ requiresExplicitApproval: false });
     const { dryRunSummary } = await executeWorkflow({ definition: def, isDryRun: true });
     expect(typeof dryRunSummary).toBe('string');
-    expect(dryRunSummary!.length).toBeGreaterThan(0);
+    expect(dryRunSummary?.length).toBeGreaterThan(0);
   });
 });
 
@@ -370,8 +370,8 @@ describe('executeWorkflow — failure and rollback', () => {
       policyEvaluation: makeMinimalPolicyEvaluation(),
     });
     expect(run.status).toBe('failed');
-    expect(run.steps[0]!.status).toBe('failed');
-    expect(run.steps[0]!.error).toContain('intentional failure');
+    expect(run.steps[0]?.status).toBe('failed');
+    expect(run.steps[0]?.error).toContain('intentional failure');
   });
 
   it('performs rollback when rollbackPolicy=step and rollback handler is registered', async () => {
@@ -450,7 +450,7 @@ describe('executeWorkflow — unregistered handler graceful fallback', () => {
       policyEvaluation: makeMinimalPolicyEvaluation(),
     });
     expect(run.status).toBe('completed');
-    expect(run.steps[0]!.outputs).toBeDefined();
-    expect(String(run.steps[0]!.outputs!['result'])).toContain('not registered');
+    expect(run.steps[0]?.outputs).toBeDefined();
+    expect(String(run.steps[0]?.outputs?.result)).toContain('not registered');
   });
 });

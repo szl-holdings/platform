@@ -1,14 +1,13 @@
 import {
   alloyApprovalsTable,
-  alloyArtifactsTable,
   alloyAuditLogTable,
   alloySignalsTable,
   alloyWorkflowRunsTable,
   alloyWorkflowsTable,
   db,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
-import { eq, sql } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
+import { sql } from 'drizzle-orm';
 
 const WORKFLOW_TYPES = [
   {
@@ -216,11 +215,11 @@ function randBetween(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function hoursAgo(h: number) {
+function _hoursAgo(h: number) {
   return new Date(Date.now() - h * 3600000);
 }
 
-function minutesAgo(m: number) {
+function _minutesAgo(m: number) {
   return new Date(Date.now() - m * 60000);
 }
 
@@ -265,14 +264,12 @@ function generateStepHistory(
 }
 
 async function seedAlloyWorkflows() {
-  console.log('Seeding Alloy platform workflows…');
 
   const existingWorkflows = await db
     .select({ id: alloyWorkflowsTable.id })
     .from(alloyWorkflowsTable)
     .limit(1);
   if (existingWorkflows.length > 0) {
-    console.log('  Alloy workflows already seeded, skipping.');
     return;
   }
 
@@ -294,16 +291,13 @@ async function seedAlloyWorkflows() {
     .insert(alloyWorkflowsTable)
     .values(workflows as any)
     .returning();
-  console.log(`  Inserted ${inserted.length} workflows.`);
   return inserted;
 }
 
 async function seedAlloySignals(count = 500) {
-  console.log(`Seeding ${count} Alloy signals…`);
 
   const existing = await db.select({ id: alloySignalsTable.id }).from(alloySignalsTable).limit(1);
   if (existing.length > 0) {
-    console.log('  Alloy signals already seeded, skipping.');
     return;
   }
 
@@ -338,20 +332,17 @@ async function seedAlloySignals(count = 500) {
   });
 
   await db.insert(alloySignalsTable).values(signals);
-  console.log(`  Inserted ${signals.length} signals.`);
 }
 
 async function seedAlloyRuns(
   workflows: Array<{ id: number; name: string; requiresApproval: boolean; steps: unknown }>,
 ) {
-  console.log('Seeding 200+ Alloy workflow runs…');
 
   const existing = await db
     .select({ id: alloyWorkflowRunsTable.id })
     .from(alloyWorkflowRunsTable)
     .limit(1);
   if (existing.length > 0) {
-    console.log('  Alloy workflow runs already seeded, skipping.');
     return;
   }
 
@@ -459,19 +450,16 @@ async function seedAlloyRuns(
   }
 
   await db.insert(alloyWorkflowRunsTable).values(allRuns as any);
-  console.log(`  Inserted ${allRuns.length} workflow runs.`);
   return allRuns;
 }
 
-async function seedAlloyApprovals(workflows: Array<{ id: number; requiresApproval: boolean }>) {
-  console.log('Seeding Alloy approvals…');
+async function seedAlloyApprovals(_workflows: Array<{ id: number; requiresApproval: boolean }>) {
 
   const existing = await db
     .select({ id: alloyApprovalsTable.id })
     .from(alloyApprovalsTable)
     .limit(1);
   if (existing.length > 0) {
-    console.log('  Alloy approvals already seeded, skipping.');
     return;
   }
 
@@ -481,7 +469,6 @@ async function seedAlloyApprovals(workflows: Array<{ id: number; requiresApprova
     .where(sql`state IN ('waiting_approval', 'completed')`);
 
   if (waitingRuns.length === 0) {
-    console.log('  No runs to create approvals for.');
     return;
   }
 
@@ -522,15 +509,12 @@ async function seedAlloyApprovals(workflows: Array<{ id: number; requiresApprova
   });
 
   await db.insert(alloyApprovalsTable).values(approvalsToInsert);
-  console.log(`  Inserted ${approvalsToInsert.length} approvals.`);
 }
 
 async function seedAlloyAuditLog() {
-  console.log('Seeding Alloy audit log…');
 
   const existing = await db.select({ id: alloyAuditLogTable.id }).from(alloyAuditLogTable).limit(1);
   if (existing.length > 0) {
-    console.log('  Alloy audit log already seeded, skipping.');
     return;
   }
 
@@ -561,17 +545,14 @@ async function seedAlloyAuditLog() {
   });
 
   await db.insert(alloyAuditLogTable).values(entries);
-  console.log(`  Inserted ${entries.length} audit log entries.`);
 }
 
 async function main() {
-  console.log('=== Seeding Alloy Orchestration Engine ===');
 
   const workflows = await seedAlloyWorkflows();
   if (!workflows || workflows.length === 0) {
     const existing = await db.select().from(alloyWorkflowsTable);
     if (existing.length === 0) {
-      console.error('No workflows found, aborting.');
       process.exit(1);
     }
     const workflowDefs = existing.map((w) => ({
@@ -594,12 +575,9 @@ async function main() {
     await seedAlloyApprovals(workflowDefs);
     await seedAlloyAuditLog();
   }
-
-  console.log('=== Alloy seed complete ===');
   process.exit(0);
 }
 
-main().catch((err) => {
-  console.error('Seed failed:', err);
+main().catch((_err) => {
   process.exit(1);
 });

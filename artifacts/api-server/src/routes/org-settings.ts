@@ -30,10 +30,9 @@ import {
   sessionsTable,
   usersTable,
 } from '@szl-holdings/db';
-import crypto, { pbkdf2Sync, randomBytes } from 'crypto';
-import { and, eq, ne } from 'drizzle-orm';
-import type { Request, Response } from 'express';
-import { Router } from 'express';
+import crypto, { pbkdf2Sync, randomBytes } from 'node:crypto';
+import { and, eq, } from 'drizzle-orm';
+import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
@@ -114,7 +113,7 @@ router.get(
   authMiddleware(),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
       const [org] = await db
         .select()
         .from(organizationsTable)
@@ -130,7 +129,7 @@ router.get(
         const [membership] = await db
           .select()
           .from(orgMembersTable)
-          .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, req.user!.id)))
+          .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, req.user?.id)))
           .limit(1);
         if (!membership) {
           sendForbidden(res, 'Not a member of this organization');
@@ -177,7 +176,7 @@ router.patch(
   validateBody(mfaRequiredSchema),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
       const { mfaRequired } = req.body as z.infer<typeof mfaRequiredSchema>;
 
       const [org] = await db
@@ -192,7 +191,7 @@ router.patch(
       }
 
       if (!isElevated(req)) {
-        const { membership } = await resolveOrgMembership(orgSlug, req.user!.id, 'admin');
+        const { membership } = await resolveOrgMembership(orgSlug, req.user?.id, 'admin');
         if (!membership) {
           sendForbidden(res, 'Admin access required to change MFA enforcement');
           return;
@@ -208,7 +207,7 @@ router.patch(
         .returning();
 
       await db.insert(auditEventsTable).values({
-        userId: req.user!.id,
+        userId: req.user?.id,
         action: mfaRequired ? 'org_mfa_enforcement_enabled' : 'org_mfa_enforcement_disabled',
         entityType: 'organization',
         entityId: String(org.id),
@@ -218,7 +217,7 @@ router.patch(
       });
 
       logger.info(
-        { orgId: org.id, orgSlug, mfaRequired, changedBy: req.user!.id },
+        { orgId: org.id, orgSlug, mfaRequired, changedBy: req.user?.id },
         '[org-mfa] Org-level MFA enforcement updated',
       );
 
@@ -246,7 +245,7 @@ router.patch(
   validateBody(mfaRequiredSchema),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
       const { mfaRequired } = req.body as z.infer<typeof mfaRequiredSchema>;
 
       const [org] = await db
@@ -261,7 +260,7 @@ router.patch(
       }
 
       if (!isElevated(req)) {
-        const { membership } = await resolveOrgMembership(orgSlug, req.user!.id, 'admin');
+        const { membership } = await resolveOrgMembership(orgSlug, req.user?.id, 'admin');
         if (!membership) {
           sendForbidden(res, 'Admin access required');
           return;
@@ -276,7 +275,7 @@ router.patch(
         .returning();
 
       await db.insert(auditEventsTable).values({
-        userId: req.user!.id,
+        userId: req.user?.id,
         action: mfaRequired ? 'org_mfa_enforcement_enabled' : 'org_mfa_enforcement_disabled',
         entityType: 'organization',
         entityId: String(org.id),
@@ -303,7 +302,7 @@ router.put(
   validateBody(updateOrgProfileSchema),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
       const updates = req.body as z.infer<typeof updateOrgProfileSchema>;
 
       const [org] = await db
@@ -318,7 +317,7 @@ router.put(
       }
 
       if (!isElevated(req)) {
-        const { membership } = await resolveOrgMembership(orgSlug, req.user!.id, 'admin');
+        const { membership } = await resolveOrgMembership(orgSlug, req.user?.id, 'admin');
         if (!membership) {
           sendForbidden(res, 'Admin access required to update organization profile');
           return;
@@ -338,7 +337,7 @@ router.put(
         .returning();
 
       await db.insert(auditEventsTable).values({
-        userId: req.user!.id,
+        userId: req.user?.id,
         action: 'org_profile_updated',
         entityType: 'organization',
         entityId: String(org.id),
@@ -359,7 +358,7 @@ router.get(
   authMiddleware(),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
 
       const [org] = await db
         .select({ id: organizationsTable.id, name: organizationsTable.name })
@@ -376,7 +375,7 @@ router.get(
         const [membership] = await db
           .select()
           .from(orgMembersTable)
-          .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, req.user!.id)))
+          .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, req.user?.id)))
           .limit(1);
         if (!membership) {
           sendForbidden(res, 'Not a member of this organization');
@@ -414,10 +413,10 @@ router.delete(
   authMiddleware(),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
-      const targetUserId = parseInt(req.params['userId'] as string, 10);
+      const orgSlug = req.params.orgSlug as string;
+      const targetUserId = parseInt(req.params.userId as string, 10);
 
-      if (isNaN(targetUserId)) {
+      if (Number.isNaN(targetUserId)) {
         sendBadRequest(res, 'Invalid user ID');
         return;
       }
@@ -437,19 +436,19 @@ router.delete(
         const [requesterMembership] = await db
           .select()
           .from(orgMembersTable)
-          .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, req.user!.id)))
+          .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, req.user?.id)))
           .limit(1);
 
         if (
           !requesterMembership ||
-          (ORG_ROLE_HIERARCHY[requesterMembership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']
+          (ORG_ROLE_HIERARCHY[requesterMembership.role] ?? 0) < ORG_ROLE_HIERARCHY.admin
         ) {
           sendForbidden(res, 'Admin access required');
           return;
         }
       }
 
-      if (targetUserId === req.user!.id) {
+      if (targetUserId === req.user?.id) {
         sendBadRequest(res, 'Cannot remove yourself from the organization');
         return;
       }
@@ -475,7 +474,7 @@ router.delete(
         .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, targetUserId)));
 
       await db.insert(auditEventsTable).values({
-        userId: req.user!.id,
+        userId: req.user?.id,
         action: 'member_removed',
         entityType: 'org_member',
         entityId: String(targetMembership.id),
@@ -487,7 +486,7 @@ router.delete(
       // their access reflects the new membership within ≤30s.
       await revokeUserSessionsOnRoleChange({
         userId: targetUserId,
-        changedByUserId: req.user!.id,
+        changedByUserId: req.user?.id,
         reason: 'org_member_removed',
         ipAddress: req.ip ?? null,
         userAgent: req.headers['user-agent'] ?? null,
@@ -507,11 +506,11 @@ router.put(
   validateBody(updateMemberRoleSchema),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
-      const targetUserId = parseInt(req.params['userId'] as string, 10);
+      const orgSlug = req.params.orgSlug as string;
+      const targetUserId = parseInt(req.params.userId as string, 10);
       const { role } = req.body as z.infer<typeof updateMemberRoleSchema>;
 
-      if (isNaN(targetUserId)) {
+      if (Number.isNaN(targetUserId)) {
         sendBadRequest(res, 'Invalid user ID');
         return;
       }
@@ -531,12 +530,12 @@ router.put(
         const [requesterMembership] = await db
           .select()
           .from(orgMembersTable)
-          .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, req.user!.id)))
+          .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, req.user?.id)))
           .limit(1);
 
         if (
           !requesterMembership ||
-          (ORG_ROLE_HIERARCHY[requesterMembership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']
+          (ORG_ROLE_HIERARCHY[requesterMembership.role] ?? 0) < ORG_ROLE_HIERARCHY.admin
         ) {
           sendForbidden(res, 'Admin access required');
           return;
@@ -566,7 +565,7 @@ router.put(
         .returning();
 
       await db.insert(auditEventsTable).values({
-        userId: req.user!.id,
+        userId: req.user?.id,
         action: 'member_role_updated',
         entityType: 'org_member',
         entityId: String(targetMembership.id),
@@ -576,7 +575,7 @@ router.put(
 
       await revokeUserSessionsOnRoleChange({
         userId: targetUserId,
-        changedByUserId: req.user!.id,
+        changedByUserId: req.user?.id,
         reason: 'org_member_role_updated',
         ipAddress: req.ip ?? null,
         userAgent: req.headers['user-agent'] ?? null,
@@ -595,7 +594,7 @@ router.get(
   authMiddleware(),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
       const [org] = await db
         .select({ id: organizationsTable.id })
         .from(organizationsTable)
@@ -611,7 +610,7 @@ router.get(
         const [membership] = await db
           .select()
           .from(orgMembersTable)
-          .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, req.user!.id)))
+          .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, req.user?.id)))
           .limit(1);
         if (!membership) {
           sendForbidden(res, 'Not a member of this organization');
@@ -650,9 +649,9 @@ router.put(
   validateBody(notifPrefsSchema),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
       const updates = req.body as z.infer<typeof notifPrefsSchema>;
-      const userId = req.user!.id;
+      const userId = req.user?.id;
 
       const [org] = await db
         .select({ id: organizationsTable.id })
@@ -673,7 +672,7 @@ router.put(
           .limit(1);
         if (
           !membership ||
-          (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']
+          (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY.admin
         ) {
           sendForbidden(res, 'Org admin role required to update notification settings');
           return;
@@ -731,7 +730,7 @@ router.get('/user/profile', readLimiter, authMiddleware(), async (req: Request, 
         createdAt: usersTable.createdAt,
       })
       .from(usersTable)
-      .where(eq(usersTable.id, req.user!.id))
+      .where(eq(usersTable.id, req.user?.id))
       .limit(1);
 
     if (!user) {
@@ -753,7 +752,7 @@ router.put(
   async (req: Request, res: Response) => {
     try {
       const updates = req.body as z.infer<typeof userProfileSchema>;
-      const userId = req.user!.id;
+      const userId = req.user?.id;
 
       const [updated] = await db
         .update(usersTable)
@@ -790,7 +789,7 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const { reason } = req.body as { reason?: string };
 
       await db
@@ -982,7 +981,7 @@ router.get(
   authMiddleware(),
   async (req: Request, res: Response) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const [prefs] = await db
         .select()
         .from(notificationPreferencesTable)
@@ -1012,7 +1011,7 @@ router.put(
   async (req: Request, res: Response) => {
     try {
       const updates = req.body as z.infer<typeof notifPrefsSchema>;
-      const userId = req.user!.id;
+      const userId = req.user?.id;
 
       const [existing] = await db
         .select()

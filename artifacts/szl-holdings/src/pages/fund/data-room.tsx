@@ -2,9 +2,8 @@ import { useState } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
-  FolderOpen, ArrowLeft, Lock, Eye, Download, Shield, FileText,
-  Users, Clock, AlertTriangle, CheckCircle2, ChevronRight, Search,
-  Plus, X, Filter, Activity, Folder, File, ImageIcon, BarChart3,
+  FolderOpen, ArrowLeft, Lock, Eye, Download, Shield, FileText,AlertTriangle, CheckCircle2, ChevronRight, Search,
+  Plus, Filter, Activity, Folder, ImageIcon, BarChart3,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";

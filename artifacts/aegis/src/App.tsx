@@ -26,7 +26,6 @@ import {
 } from '@szl-holdings/shared-ui/use-user-preferences';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
-  Activity,
   AlertTriangle,
   BarChart3,
   BookOpen,
@@ -55,7 +54,6 @@ import {
   Menu,
   Microscope,
   Network,
-  Play,
   Presentation,
   Radio,
   RotateCcw,

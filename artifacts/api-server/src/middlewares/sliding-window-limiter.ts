@@ -75,7 +75,7 @@ export function createSlidingWindowLimiter(opts: SlidingWindowOptions): RequestH
     const key = keyGenerator
       ? keyGenerator(req)
       : (req as Request & { user?: { id?: string | number } }).user?.id != null
-        ? `user:${(req as Request & { user?: { id?: string | number } }).user!.id}`
+        ? `user:${(req as Request & { user?: { id?: string | number } }).user?.id}`
         : `ip:${req.ip ?? 'unknown'}`;
 
     const windowStart = new Date(Date.now() - windowMs).toISOString();
@@ -128,7 +128,7 @@ export function createSlidingWindowLimiter(opts: SlidingWindowOptions): RequestH
           typeof messageBody === 'object' &&
           messageBody !== null &&
           'error' in (messageBody as object)
-            ? String((messageBody as Record<string, unknown>)['error'])
+            ? String((messageBody as Record<string, unknown>).error)
             : String(messageBody);
         sendError(res, errorMessage, 429, 'RATE_LIMITED');
         return;

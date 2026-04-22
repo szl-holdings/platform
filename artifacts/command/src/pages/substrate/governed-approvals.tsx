@@ -15,13 +15,12 @@ import {
   ChevronRight,
   ChevronUp,
   Clock,
-  FileText,
   Loader2,
   RefreshCw,
   Shield,
   XCircle,
 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import type { ApprovalRequest } from './governance-types';
 import { formatAge } from './layout';
 import { decideGovernedApproval, useGovernedApprovals } from './use-governance';
@@ -354,7 +353,7 @@ function ApprovalCard({ request, onDecided }: { request: ApprovalRequest; onDeci
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all"
                   style={{
                     background: 'transparent',
-                    borderColor: cfg.color + '60',
+                    borderColor: `${cfg.color}60`,
                     color: cfg.color,
                   }}
                 >

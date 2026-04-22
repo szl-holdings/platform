@@ -1,5 +1,4 @@
 import type {
-  EvalDomain,
   EvalSuiteReport,
   RegressionBaseline,
   RegressionCheckResult,

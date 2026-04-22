@@ -92,7 +92,7 @@ export function useCrdtEntity(
         };
       }
     }
-  }, []);
+  }, [initialValues]);
 
   const connect = useCallback(() => {
     const url = getWsUrl();
@@ -185,7 +185,7 @@ export function useCrdtEntity(
     ws.onerror = () => {
       setIsConnected(false);
     };
-  }, [room, actorId, schema, onMerge, apiBaseUrl]);
+  }, [room, actorId, schema, onMerge]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -199,7 +199,7 @@ export function useCrdtEntity(
         wsRef.current = null;
       }
     };
-  }, [entityType, entityId, connect]);
+  }, [connect]);
 
   const setField = useCallback(
     (key: string, value: unknown) => {

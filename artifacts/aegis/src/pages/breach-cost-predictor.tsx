@@ -1,18 +1,10 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import {
-  AlertTriangle,
-  BarChart3,
   Building2,
   ChevronRight,
   Clock,
   DollarSign,
-  Info,
-  RefreshCw,
-  Shield,
-  Target,
-  TrendingUp,
   Users,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -21,8 +13,6 @@ import {
   Bar,
   BarChart,
   Cell,
-  RadialBar,
-  RadialBarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -310,7 +300,7 @@ export default function BreachCostPredictor() {
   }, 0);
   const selectedTotal = Object.values(selected.components).reduce((a, b) => a + b, 0);
 
-  const compData = [
+  const _compData = [
     { name: 'Regulatory', value: selected.components.regulatory, color: '#ef4444' },
     { name: 'Business Int.', value: selected.components.interruption, color: '#f97316' },
     { name: 'Data Liability', value: selected.components.dataLoss, color: '#eab308' },

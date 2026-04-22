@@ -3,8 +3,6 @@ import {
   type AuditHistoryEntry,
   OperationalAuditTimeline,
   OperationalOwnerChip,
-  OperationalRiskBadge,
-  OperationalStatusBadge,
 } from '@szl-holdings/shared-ui/operational-primitives';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
@@ -25,14 +23,12 @@ import {
   RefreshCw,
   Shield,
   Ship,
-  TrendingDown,
-  TrendingUp,
   Wrench,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import { AtlasScenePanel } from '@/components/atlas-scene-panel';
-import { useFleetExceptions, useVesselDetail } from '@/hooks/use-vessels-data';
+import { useVesselDetail } from '@/hooks/use-vessels-data';
 
 const statusConfig: Record<string, { label: string; color: string; dotColor: string }> = {
   at_sea: {
@@ -94,7 +90,7 @@ function fmtDt(d: string | null | undefined) {
 function fmtUsd(v: string | null | undefined) {
   if (!v) return '—';
   const n = parseFloat(v);
-  if (isNaN(n)) return '—';
+  if (Number.isNaN(n)) return '—';
   if (Math.abs(n) >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
   if (Math.abs(n) >= 1000) return `$${(n / 1000).toFixed(0)}K`;
   return `$${n.toFixed(0)}`;
@@ -103,12 +99,12 @@ function fmtUsd(v: string | null | undefined) {
 function fmtNum(v: string | null | undefined, decimals = 1) {
   if (!v) return '—';
   const n = parseFloat(v);
-  return isNaN(n) ? '—' : n.toFixed(decimals);
+  return Number.isNaN(n) ? '—' : n.toFixed(decimals);
 }
 
 export default function VesselDetailEnhancedPage() {
-  const [matchShort, paramsShort] = useRoute('/vessel/:id');
-  const [matchLong, paramsLong] = useRoute('/vessels/:id');
+  const [_matchShort, paramsShort] = useRoute('/vessel/:id');
+  const [_matchLong, paramsLong] = useRoute('/vessels/:id');
   const params = paramsShort ?? paramsLong;
   const vesselId = Number(params?.id);
   const [tab, setTab] = useState<

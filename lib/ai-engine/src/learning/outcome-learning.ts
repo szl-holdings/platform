@@ -10,7 +10,7 @@ import { alloyOutcomeLearning, db } from '@szl-holdings/db';
 import { desc, eq, sql } from 'drizzle-orm';
 
 const logger = {
-  warn: (obj: Record<string, unknown>, msg: string) => console.warn('[outcome-learning]', msg, obj),
+  warn: (_obj: Record<string, unknown>, _msg: string) => {},
 };
 
 export type OutcomeType = 'accepted' | 'rejected' | 'overridden' | 'deferred';

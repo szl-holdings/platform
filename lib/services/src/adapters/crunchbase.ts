@@ -92,7 +92,7 @@ export class CrunchbaseAdapter extends ServiceAdapter {
     "Crunchbase API — startup intelligence, funding rounds, investor profiles, M&A activity, and company firmographics. Requires API key. Falls back to demo mode when CRUNCHBASE_API_KEY is absent.";
   readonly requiredEnvVars = ["CRUNCHBASE_API_KEY"];
 
-  private get apiKey(): string | undefined { return process.env["CRUNCHBASE_API_KEY"]; }
+  private get apiKey(): string | undefined { return process.env.CRUNCHBASE_API_KEY; }
 
   private readonly BASE_URL = "https://api.crunchbase.com/api/v4";
 
@@ -118,24 +118,24 @@ export class CrunchbaseAdapter extends ServiceAdapter {
     const data = await this.cbRequest<{ properties: Record<string, unknown> }>(`/entities/organizations/${permalink}`, { field_ids: fields });
     const p = data.properties;
     return {
-      uuid: String((p["identifier"] as Record<string, unknown>)?.["uuid"] ?? ""),
-      permalink, name: String((p["identifier"] as Record<string, unknown>)?.["value"] ?? ""),
-      shortDescription: p["short_description"] ? String(p["short_description"]) : null,
-      description: p["description"] ? String(p["description"]) : null,
-      primaryRole: "company", founded: p["founded_on"] ? String(p["founded_on"]) : null,
-      closedOn: p["closed_on"] ? String(p["closed_on"]) : null,
-      operatingStatus: String(p["operating_status"] ?? ""),
-      categories: Array.isArray(p["categories"]) ? (p["categories"] as Array<Record<string, unknown>>).map(c => String(c["value"] ?? "")) : [],
+      uuid: String((p.identifier as Record<string, unknown>)?.uuid ?? ""),
+      permalink, name: String((p.identifier as Record<string, unknown>)?.value ?? ""),
+      shortDescription: p.short_description ? String(p.short_description) : null,
+      description: p.description ? String(p.description) : null,
+      primaryRole: "company", founded: p.founded_on ? String(p.founded_on) : null,
+      closedOn: p.closed_on ? String(p.closed_on) : null,
+      operatingStatus: String(p.operating_status ?? ""),
+      categories: Array.isArray(p.categories) ? (p.categories as Array<Record<string, unknown>>).map(c => String(c.value ?? "")) : [],
       categoryGroups: [], headquartersLocation: null, website: null, linkedin: null, twitter: null,
-      employeeCount: p["num_employees_enum"] ? String(p["num_employees_enum"]) : null,
-      totalFundingUsd: (p["funding_total"] as Record<string, number>)?.["value_usd"] ?? null,
-      lastFundingType: p["last_funding_type"] ? String(p["last_funding_type"]) : null,
-      lastFundingDate: p["last_funding_at"] ? String(p["last_funding_at"]) : null,
-      lastFundingAmount: (p["last_funding_total"] as Record<string, number>)?.["value_usd"] ?? null,
-      numberOfFundingRounds: Number(p["num_funding_rounds"] ?? 0),
-      investors: Array.isArray(p["investor_identifiers"]) ? (p["investor_identifiers"] as Array<Record<string, unknown>>).map(i => String(i["value"] ?? "")) : [],
-      ipo: null, acquisitions: Number(p["num_acquisitions"] ?? 0), acquisitions_by: 0,
-      rankOrg: p["rank_org"] ? Number(p["rank_org"]) : null,
+      employeeCount: p.num_employees_enum ? String(p.num_employees_enum) : null,
+      totalFundingUsd: (p.funding_total as Record<string, number>)?.value_usd ?? null,
+      lastFundingType: p.last_funding_type ? String(p.last_funding_type) : null,
+      lastFundingDate: p.last_funding_at ? String(p.last_funding_at) : null,
+      lastFundingAmount: (p.last_funding_total as Record<string, number>)?.value_usd ?? null,
+      numberOfFundingRounds: Number(p.num_funding_rounds ?? 0),
+      investors: Array.isArray(p.investor_identifiers) ? (p.investor_identifiers as Array<Record<string, unknown>>).map(i => String(i.value ?? "")) : [],
+      ipo: null, acquisitions: Number(p.num_acquisitions ?? 0), acquisitions_by: 0,
+      rankOrg: p.rank_org ? Number(p.rank_org) : null,
     };
   }
 
@@ -156,17 +156,17 @@ export class CrunchbaseAdapter extends ServiceAdapter {
     if (!res.ok) throw new Error(`Crunchbase search error: HTTP ${res.status}`);
     const data = await res.json() as { entities: Array<{ properties: Record<string, unknown> }> };
     return (data.entities ?? []).map(e => ({
-      uuid: String((e.properties["identifier"] as Record<string, unknown>)?.["uuid"] ?? ""),
-      permalink: String((e.properties["identifier"] as Record<string, unknown>)?.["permalink"] ?? ""),
-      name: String((e.properties["identifier"] as Record<string, unknown>)?.["value"] ?? ""),
-      shortDescription: e.properties["short_description"] ? String(e.properties["short_description"]) : null,
+      uuid: String((e.properties.identifier as Record<string, unknown>)?.uuid ?? ""),
+      permalink: String((e.properties.identifier as Record<string, unknown>)?.permalink ?? ""),
+      name: String((e.properties.identifier as Record<string, unknown>)?.value ?? ""),
+      shortDescription: e.properties.short_description ? String(e.properties.short_description) : null,
       description: null, primaryRole: "company", founded: null, closedOn: null,
       operatingStatus: "active", categories: [], categoryGroups: [],
       headquartersLocation: null, website: null, linkedin: null, twitter: null,
       employeeCount: null, totalFundingUsd: null, lastFundingType: null,
       lastFundingDate: null, lastFundingAmount: null, numberOfFundingRounds: 0,
       investors: [], ipo: null, acquisitions: 0, acquisitions_by: 0,
-      rankOrg: e.properties["rank_org"] ? Number(e.properties["rank_org"]) : null,
+      rankOrg: e.properties.rank_org ? Number(e.properties.rank_org) : null,
     }));
   }
 

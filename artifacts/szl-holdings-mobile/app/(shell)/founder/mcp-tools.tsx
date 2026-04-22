@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -50,7 +50,7 @@ const BORDER = 'rgba(255,255,255,0.06)';
 export default function McpToolsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [tools, setTools] = useState<McpTool[]>(BUILT_IN_TOOLS);
+  const [tools, _setTools] = useState<McpTool[]>(BUILT_IN_TOOLS);
   const [selected, setSelected] = useState<McpTool | null>(null);
   const [params, setParams] = useState<Record<string, string>>({});
   const [running, setRunning] = useState(false);
@@ -116,7 +116,7 @@ export default function McpToolsScreen() {
           <Text style={styles.headerTitle}>MCP Tools</Text>
           <Text style={styles.headerSub}>Model Context Protocol · Stephen</Text>
         </View>
-        <View style={[styles.statusBadge, { borderColor: statusColor + '30' }]}>
+        <View style={[styles.statusBadge, { borderColor: `${statusColor}30` }]}>
           <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
           <Text style={[styles.statusText, { color: statusColor }]}>
             {serverStatus === 'healthy' ? 'Online' : serverStatus === 'error' ? 'Offline' : '...'}
@@ -143,7 +143,7 @@ export default function McpToolsScreen() {
             style={[
               styles.toolRow,
               selected?.name === tool.name && {
-                backgroundColor: ACCENT + '15',
+                backgroundColor: `${ACCENT}15`,
                 borderLeftColor: ACCENT,
               },
             ]}
@@ -163,7 +163,7 @@ export default function McpToolsScreen() {
           <View style={styles.callSection}>
             <Text style={styles.callTitle}>{selected.name}</Text>
             {hasParams &&
-              Object.entries(selected.inputSchema!.properties!).map(([key, schema]) => (
+              Object.entries(selected.inputSchema?.properties!).map(([key, schema]) => (
                 <View key={key} style={{ marginBottom: 8 }}>
                   <Text style={styles.paramLabel}>{schema.description ?? key}</Text>
                   <TextInput

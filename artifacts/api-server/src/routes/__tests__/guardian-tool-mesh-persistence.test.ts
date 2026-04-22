@@ -20,9 +20,8 @@ import {
   toolMeshActionApprovalsTable,
   toolMeshToolsTable,
 } from '@szl-holdings/db';
-import { inArray, like, or } from 'drizzle-orm';
-import type { NextFunction, Request, Response } from 'express';
-import express from 'express';
+import { inArray, like, } from 'drizzle-orm';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 

@@ -1,5 +1,5 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendSuccess } from '../lib/api-response';

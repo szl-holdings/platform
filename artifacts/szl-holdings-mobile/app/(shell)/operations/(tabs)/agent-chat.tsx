@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useEmbeddingSearch } from '@szl-holdings/mobile-shared';
 import * as Haptics from 'expo-haptics';
-import React, { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -206,7 +206,7 @@ export default function AgentChatScreen() {
                   </Text>
                 )}
                 <Text style={[styles.bubbleText, isUser && { color: BG }]}>
-                  {msg.streaming ? msg.content + '▍' : msg.content}
+                  {msg.streaming ? `${msg.content}▍` : msg.content}
                 </Text>
               </View>
             </View>

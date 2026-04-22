@@ -59,7 +59,7 @@ describe('reflections decision routes', () => {
     const data = res.body.data ?? res.body;
     expect(data.audit.decision).toBe('rejected');
     const bucket = reflectionDecisions.get('ref-001');
-    expect(bucket?.skills['sk1']?.decision).toBe('rejected');
+    expect(bucket?.skills.sk1?.decision).toBe('rejected');
   });
 
   it('applies a strategy by index', async () => {

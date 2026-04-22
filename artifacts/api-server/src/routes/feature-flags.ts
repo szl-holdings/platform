@@ -5,16 +5,14 @@ import {
   featureFlagsTable,
   orgMembersTable,
 } from '@szl-holdings/db';
-import { desc, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
-import { z } from 'zod';
 import { logActivity } from '../lib/activity-logger';
 import {
   handleRouteError,
   parsePagination,
   sendBadRequest,
   sendCreated,
-  sendError,
   sendNoContent,
   sendNotFound,
   sendSuccess,
@@ -23,9 +21,7 @@ import {
   evaluateFlag,
   evaluateFlags,
   type FlagEvaluationContext,
-  isFlagEnabled,
   PLATFORM_FLAGS,
-  type PlatformFlagKey,
 } from '../lib/platform-flags';
 import {
   createFeatureFlagSchema,
@@ -92,7 +88,7 @@ router.post(
     try {
       const { key, keys } = req.body;
 
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       let orgId: number | undefined;
 
       try {
@@ -108,7 +104,7 @@ router.post(
 
       const ctx: FlagEvaluationContext = {
         userId,
-        roles: req.user!.roles,
+        roles: req.user?.roles,
         orgId,
       };
 

@@ -1,5 +1,4 @@
-import type React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from './utils';
 
 export interface EntityGraphNode {
@@ -230,7 +229,7 @@ export function CortexEntityGraph({
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver(([entry]) => {
-      setCanvasWidth(entry!.contentRect.width);
+      setCanvasWidth(entry?.contentRect.width);
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
@@ -343,7 +342,7 @@ export function CortexEntityGraph({
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         ctx.fillText(
-          node.label.length > 14 ? node.label.slice(0, 13) + '…' : node.label,
+          node.label.length > 14 ? `${node.label.slice(0, 13)}…` : node.label,
           node.x,
           node.y + radius + 3,
         );

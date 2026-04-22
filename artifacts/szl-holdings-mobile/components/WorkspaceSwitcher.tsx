@@ -1,9 +1,8 @@
 import { router } from 'expo-router';
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   Animated,
   Dimensions,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,

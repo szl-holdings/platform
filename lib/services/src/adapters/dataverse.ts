@@ -329,9 +329,9 @@ export class DataverseAdapter extends ServiceAdapter {
     clientSecret?: string,
     options: RequestInit = {},
   ): Promise<unknown> {
-    const tid = tenantId ?? process.env["DATAVERSE_TENANT_ID"]!;
-    const cid = clientId ?? process.env["DATAVERSE_CLIENT_ID"]!;
-    const csec = clientSecret ?? process.env["DATAVERSE_CLIENT_SECRET"]!;
+    const tid = tenantId ?? process.env.DATAVERSE_TENANT_ID!;
+    const cid = clientId ?? process.env.DATAVERSE_CLIENT_ID!;
+    const csec = clientSecret ?? process.env.DATAVERSE_CLIENT_SECRET!;
     const orgResource = orgUrl.replace(/\/$/, "");
 
     const token = await this.getAccessToken(tid, cid, csec, orgResource);
@@ -345,7 +345,7 @@ export class DataverseAdapter extends ServiceAdapter {
         "OData-MaxVersion": "4.0",
         "OData-Version": "4.0",
         "Content-Type": "application/json",
-        ...(options.headers ?? {}),
+        ...options.headers,
       },
     });
 
@@ -358,7 +358,7 @@ export class DataverseAdapter extends ServiceAdapter {
   }
 
   protected override async performHealthCheck(): Promise<void> {
-    const orgUrl = process.env["DATAVERSE_ORG_URL"]!;
+    const orgUrl = process.env.DATAVERSE_ORG_URL!;
     await this.dataverseFetch(orgUrl, "/WhoAmI");
   }
 
@@ -369,10 +369,10 @@ export class DataverseAdapter extends ServiceAdapter {
     clientSecret?: string,
   ): Promise<DataverseConnectionStatus> {
     if (!this.isLive && !orgUrl) return { connected: false };
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     try {
       await this.dataverseFetch(url, "/WhoAmI", tenantId, clientId, clientSecret);
-      return { connected: true, orgUrl: url, ...(tenantId ?? process.env["DATAVERSE_TENANT_ID"] ? { tenantId: tenantId ?? process.env["DATAVERSE_TENANT_ID"]! } : {}) };
+      return { connected: true, orgUrl: url, ...(tenantId ?? process.env.DATAVERSE_TENANT_ID ? { tenantId: tenantId ?? process.env.DATAVERSE_TENANT_ID! } : {}) };
     } catch (err) {
       return {
         connected: false,
@@ -384,7 +384,7 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async listAccounts(orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<DataverseAccount[]> {
     if (!this.isLive && !orgUrl) return MOCK_ACCOUNTS;
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const data = await this.dataverseFetch(
       url,
       "/accounts?$select=accountid,name,accountnumber,primarycontactid,telephone1,emailaddress1,websiteurl,revenue,numberofemployees,statecode,createdon,modifiedon&$top=100",
@@ -407,7 +407,7 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async getAccount(accountId: string, orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<DataverseAccount | null> {
     if (!this.isLive && !orgUrl) return MOCK_ACCOUNTS.find(a => a.id === accountId) ?? null;
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const data = await this.dataverseFetch(url, `/accounts(${accountId})`, tenantId, clientId, clientSecret) as Record<string, unknown>;
     return {
       id: String(data.accountid ?? accountId),
@@ -426,7 +426,7 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async listContacts(orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<DataverseContact[]> {
     if (!this.isLive && !orgUrl) return MOCK_CONTACTS;
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const data = await this.dataverseFetch(
       url,
       "/contacts?$select=contactid,fullname,firstname,lastname,emailaddress1,telephone1,jobtitle,_parentcustomerid_value,statecode,createdon,modifiedon&$top=100",
@@ -440,7 +440,7 @@ export class DataverseAdapter extends ServiceAdapter {
       emailAddress1: r.emailaddress1 ? String(r.emailaddress1) : undefined,
       telephone1: r.telephone1 ? String(r.telephone1) : undefined,
       jobTitle: r.jobtitle ? String(r.jobtitle) : undefined,
-      accountId: r["_parentcustomerid_value"] ? String(r["_parentcustomerid_value"]) : undefined,
+      accountId: r._parentcustomerid_value ? String(r._parentcustomerid_value) : undefined,
       statecode: Number(r.statecode ?? 0),
       createdOn: String(r.createdon ?? new Date().toISOString()),
       modifiedOn: String(r.modifiedon ?? new Date().toISOString()),
@@ -449,7 +449,7 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async getContact(contactId: string, orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<DataverseContact | null> {
     if (!this.isLive && !orgUrl) return MOCK_CONTACTS.find(c => c.id === contactId) ?? null;
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const data = await this.dataverseFetch(url, `/contacts(${contactId})`, tenantId, clientId, clientSecret) as Record<string, unknown>;
     return {
       id: String(data.contactid ?? contactId),
@@ -459,7 +459,7 @@ export class DataverseAdapter extends ServiceAdapter {
       emailAddress1: data.emailaddress1 ? String(data.emailaddress1) : undefined,
       telephone1: data.telephone1 ? String(data.telephone1) : undefined,
       jobTitle: data.jobtitle ? String(data.jobtitle) : undefined,
-      accountId: data["_parentcustomerid_value"] ? String(data["_parentcustomerid_value"]) : undefined,
+      accountId: data._parentcustomerid_value ? String(data._parentcustomerid_value) : undefined,
       statecode: Number(data.statecode ?? 0),
       createdOn: String(data.createdon ?? new Date().toISOString()),
       modifiedOn: String(data.modifiedon ?? new Date().toISOString()),
@@ -468,7 +468,7 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async updateContact(contactId: string, patch: { firstName?: string; lastName?: string; emailAddress1?: string; telephone1?: string; jobTitle?: string }, orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<{ success: boolean }> {
     if (!this.isLive && !orgUrl) return { success: true };
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const body: Record<string, unknown> = {};
     if (patch.firstName !== undefined) body.firstname = patch.firstName;
     if (patch.lastName !== undefined) body.lastname = patch.lastName;
@@ -481,14 +481,14 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async deleteContact(contactId: string, orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<{ success: boolean }> {
     if (!this.isLive && !orgUrl) return { success: true };
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     await this.dataverseFetch(url, `/contacts(${contactId})`, tenantId, clientId, clientSecret, { method: "DELETE" });
     return { success: true };
   }
 
   async listLeads(orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<DataverseLead[]> {
     if (!this.isLive && !orgUrl) return MOCK_LEADS;
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const data = await this.dataverseFetch(
       url,
       "/leads?$select=leadid,fullname,firstname,lastname,companyname,emailaddress1,telephone1,subject,statecode,statuscode,estimatedvalue,estimatedclosedate,leadqualitycode,createdon,modifiedon&$top=100",
@@ -515,7 +515,7 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async getLead(leadId: string, orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<DataverseLead | null> {
     if (!this.isLive && !orgUrl) return MOCK_LEADS.find(l => l.id === leadId) ?? null;
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const data = await this.dataverseFetch(url, `/leads(${leadId})`, tenantId, clientId, clientSecret) as Record<string, unknown>;
     return {
       id: String(data.leadid ?? leadId),
@@ -538,7 +538,7 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async updateLead(leadId: string, patch: { companyName?: string; emailAddress1?: string; telephone1?: string; subject?: string; estimatedvalue?: number; statuscode?: number }, orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<{ success: boolean }> {
     if (!this.isLive && !orgUrl) return { success: true };
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const body: Record<string, unknown> = {};
     if (patch.companyName !== undefined) body.companyname = patch.companyName;
     if (patch.emailAddress1 !== undefined) body.emailaddress1 = patch.emailAddress1;
@@ -552,14 +552,14 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async deleteLead(leadId: string, orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<{ success: boolean }> {
     if (!this.isLive && !orgUrl) return { success: true };
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     await this.dataverseFetch(url, `/leads(${leadId})`, tenantId, clientId, clientSecret, { method: "DELETE" });
     return { success: true };
   }
 
   async listOpportunities(orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<DataverseOpportunity[]> {
     if (!this.isLive && !orgUrl) return MOCK_OPPORTUNITIES;
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const data = await this.dataverseFetch(
       url,
       "/opportunities?$select=opportunityid,name,_parentaccountid_value,_parentcontactid_value,estimatedvalue,estimatedclosedate,statecode,statuscode,stepname,probability,closeprobability,description,createdon,modifiedon&$top=100",
@@ -568,8 +568,8 @@ export class DataverseAdapter extends ServiceAdapter {
     return (data.value ?? []).map(r => ({
       id: String(r.opportunityid ?? ""),
       name: String(r.name ?? ""),
-      accountId: r["_parentaccountid_value"] ? String(r["_parentaccountid_value"]) : undefined,
-      contactId: r["_parentcontactid_value"] ? String(r["_parentcontactid_value"]) : undefined,
+      accountId: r._parentaccountid_value ? String(r._parentaccountid_value) : undefined,
+      contactId: r._parentcontactid_value ? String(r._parentcontactid_value) : undefined,
       estimatedvalue: r.estimatedvalue ? Number(r.estimatedvalue) : undefined,
       estimatedclosedate: r.estimatedclosedate ? String(r.estimatedclosedate) : undefined,
       statecode: Number(r.statecode ?? 0),
@@ -585,13 +585,13 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async getOpportunity(opportunityId: string, orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<DataverseOpportunity | null> {
     if (!this.isLive && !orgUrl) return MOCK_OPPORTUNITIES.find(o => o.id === opportunityId) ?? null;
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const data = await this.dataverseFetch(url, `/opportunities(${opportunityId})`, tenantId, clientId, clientSecret) as Record<string, unknown>;
     return {
       id: String(data.opportunityid ?? opportunityId),
       name: String(data.name ?? ""),
-      accountId: data["_parentaccountid_value"] ? String(data["_parentaccountid_value"]) : undefined,
-      contactId: data["_parentcontactid_value"] ? String(data["_parentcontactid_value"]) : undefined,
+      accountId: data._parentaccountid_value ? String(data._parentaccountid_value) : undefined,
+      contactId: data._parentcontactid_value ? String(data._parentcontactid_value) : undefined,
       estimatedvalue: data.estimatedvalue ? Number(data.estimatedvalue) : undefined,
       estimatedclosedate: data.estimatedclosedate ? String(data.estimatedclosedate) : undefined,
       statecode: Number(data.statecode ?? 0),
@@ -607,7 +607,7 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async updateOpportunity(opportunityId: string, patch: { name?: string; estimatedvalue?: number; estimatedclosedate?: string; stepname?: string; probability?: number; description?: string }, orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<{ success: boolean }> {
     if (!this.isLive && !orgUrl) return { success: true };
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const body: Record<string, unknown> = {};
     if (patch.name !== undefined) body.name = patch.name;
     if (patch.estimatedvalue !== undefined) body.estimatedvalue = patch.estimatedvalue;
@@ -621,14 +621,14 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async deleteOpportunity(opportunityId: string, orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<{ success: boolean }> {
     if (!this.isLive && !orgUrl) return { success: true };
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     await this.dataverseFetch(url, `/opportunities(${opportunityId})`, tenantId, clientId, clientSecret, { method: "DELETE" });
     return { success: true };
   }
 
   async listActivities(orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<DataverseActivity[]> {
     if (!this.isLive && !orgUrl) return MOCK_ACTIVITIES;
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const data = await this.dataverseFetch(
       url,
       "/activitypointers?$select=activityid,subject,activitytypecode,_regardingobjectid_value,scheduledstart,scheduledend,statecode,statuscode,description,createdon,modifiedon&$top=100",
@@ -638,7 +638,7 @@ export class DataverseAdapter extends ServiceAdapter {
       id: String(r.activityid ?? ""),
       subject: String(r.subject ?? ""),
       activityType: String(r.activitytypecode ?? ""),
-      regardingObjectId: r["_regardingobjectid_value"] ? String(r["_regardingobjectid_value"]) : undefined,
+      regardingObjectId: r._regardingobjectid_value ? String(r._regardingobjectid_value) : undefined,
       scheduledstart: r.scheduledstart ? String(r.scheduledstart) : undefined,
       scheduledend: r.scheduledend ? String(r.scheduledend) : undefined,
       statecode: Number(r.statecode ?? 0),
@@ -651,14 +651,14 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async getActivity(activityId: string, activityType: string, orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<DataverseActivity | null> {
     if (!this.isLive && !orgUrl) return MOCK_ACTIVITIES.find(a => a.id === activityId) ?? null;
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const entitySet = activityType === "phonecall" ? "phonecalls" : activityType === "email" ? "emails" : activityType === "appointment" ? "appointments" : "tasks";
     const data = await this.dataverseFetch(url, `/${entitySet}(${activityId})`, tenantId, clientId, clientSecret) as Record<string, unknown>;
     return {
       id: String(data.activityid ?? activityId),
       subject: String(data.subject ?? ""),
       activityType,
-      regardingObjectId: data["_regardingobjectid_value"] ? String(data["_regardingobjectid_value"]) : undefined,
+      regardingObjectId: data._regardingobjectid_value ? String(data._regardingobjectid_value) : undefined,
       scheduledstart: data.scheduledstart ? String(data.scheduledstart) : undefined,
       scheduledend: data.scheduledend ? String(data.scheduledend) : undefined,
       statecode: Number(data.statecode ?? 0),
@@ -671,7 +671,7 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async updateActivity(activityId: string, activityType: string, patch: { subject?: string; description?: string; scheduledstart?: string; scheduledend?: string; statuscode?: number }, orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<{ success: boolean }> {
     if (!this.isLive && !orgUrl) return { success: true };
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const entitySet = activityType === "phonecall" ? "phonecalls" : activityType === "email" ? "emails" : activityType === "appointment" ? "appointments" : "tasks";
     const body: Record<string, unknown> = {};
     if (patch.subject !== undefined) body.subject = patch.subject;
@@ -685,7 +685,7 @@ export class DataverseAdapter extends ServiceAdapter {
 
   async deleteActivity(activityId: string, activityType: string, orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string): Promise<{ success: boolean }> {
     if (!this.isLive && !orgUrl) return { success: true };
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const entitySet = activityType === "phonecall" ? "phonecalls" : activityType === "email" ? "emails" : activityType === "appointment" ? "appointments" : "tasks";
     await this.dataverseFetch(url, `/${entitySet}(${activityId})`, tenantId, clientId, clientSecret, { method: "DELETE" });
     return { success: true };
@@ -696,7 +696,7 @@ export class DataverseAdapter extends ServiceAdapter {
     orgUrl?: string, tenantId?: string, clientId?: string, clientSecret?: string,
   ): Promise<{ id: string; success: boolean }> {
     if (!this.isLive && !orgUrl) return { id: `mock-contact-${Date.now()}`, success: true };
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     try {
       const body: Record<string, unknown> = {
         firstname: data.firstName,
@@ -735,7 +735,7 @@ export class DataverseAdapter extends ServiceAdapter {
     if (!this.isLive && !orgUrl) {
       return { id: `mock-lead-${Date.now()}`, success: true };
     }
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     try {
       const res = await this.dataverseFetch(url, "/leads", tenantId, clientId, clientSecret, {
         method: "POST",
@@ -766,7 +766,7 @@ export class DataverseAdapter extends ServiceAdapter {
     if (!this.isLive && !orgUrl) {
       return { success: true };
     }
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     try {
       await this.dataverseFetch(url, `/opportunities(${opportunityId})`, tenantId, clientId, clientSecret, {
         method: "PATCH",
@@ -795,7 +795,7 @@ export class DataverseAdapter extends ServiceAdapter {
     if (!this.isLive && !orgUrl) {
       return { id: `mock-activity-${Date.now()}`, success: true };
     }
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     const entityPath = data.activityType === "phonecall" ? "/phonecalls"
       : data.activityType === "email" ? "/emails"
       : data.activityType === "appointment" ? "/appointments"
@@ -832,7 +832,7 @@ export class DataverseAdapter extends ServiceAdapter {
     if (!this.isLive && !orgUrl) {
       return { id: `mock-note-${Date.now()}`, success: true };
     }
-    const url = orgUrl ?? process.env["DATAVERSE_ORG_URL"]!;
+    const url = orgUrl ?? process.env.DATAVERSE_ORG_URL!;
     try {
       const res = await this.dataverseFetch(url, "/annotations", tenantId, clientId, clientSecret, {
         method: "POST",
@@ -855,8 +855,8 @@ export class DataverseAdapter extends ServiceAdapter {
     clientSecret?: string,
   ): Promise<DataverseLyteSignal[]> {
     const signals: DataverseLyteSignal[] = [];
-    const url = orgUrl ?? (this.isLive ? process.env["DATAVERSE_ORG_URL"]! : "mock");
-    const tid = tenantId ?? process.env["DATAVERSE_TENANT_ID"] ?? "mock-tenant";
+    const url = orgUrl ?? (this.isLive ? process.env.DATAVERSE_ORG_URL! : "mock");
+    const tid = tenantId ?? process.env.DATAVERSE_TENANT_ID ?? "mock-tenant";
 
     const opportunities = await this.listOpportunities(orgUrl, tenantId, clientId, clientSecret);
     const now = new Date();

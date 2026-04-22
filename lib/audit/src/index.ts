@@ -121,7 +121,7 @@ export function createAuditMiddleware(options: {
       const action = req.method.toLowerCase();
       const resource = req.path.split("/").filter(Boolean).slice(0, 2).join("/");
       const mwUser = (req as any).user;
-      const _mwResourceId = typeof req.params["id"] === "string" ? req.params["id"] : undefined;
+      const _mwResourceId = typeof req.params.id === "string" ? req.params.id : undefined;
       logActivity({
         userId: mwUser?.id ?? null,
         action,

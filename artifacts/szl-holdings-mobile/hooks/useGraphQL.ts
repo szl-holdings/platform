@@ -12,9 +12,9 @@ export interface Incident {
   updatedAt: string;
 }
 
-export function useIncidentSubscription(options?: { active?: boolean }) {
-  const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [loading, setLoading] = useState(false);
+export function useIncidentSubscription(_options?: { active?: boolean }) {
+  const [incidents, _setIncidents] = useState<Incident[]>([]);
+  const [loading, _setLoading] = useState(false);
   const mountedRef = useRef(true);
 
   useEffect(() => {

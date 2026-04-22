@@ -1,36 +1,26 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   db,
-  pcAiRecommendationsTable,
   pcApprovalRequestsTable,
   pcAuditEventsTable,
-  pcBackgroundJobsTable,
   pcClaimsTable,
   pcCommunicationsTable,
-  pcConnectorAccountsTable,
-  pcConnectorSyncRunsTable,
   pcDamagesTable,
   pcDeadLetterEventsTable,
   pcDeadlinesTable,
-  pcDepositionsTable,
   pcDiscoveryTable,
-  pcDocumentChunksTable,
-  pcDocumentsTable,
   pcExportsTable,
-  pcExtractionJobsTable,
   pcForecastsTable,
   pcLiensTable,
   pcMattersTable,
-  pcMedicalEventsTable,
   pcNotificationsTable,
   pcOffersTable,
   pcPartiesTable,
-  pcPlaybooksTable,
   pcReadinessScoresTable,
   pcTasksTable,
   pcWitnessesTable,
 } from '@szl-holdings/db';
-import { and, count, desc, eq, sql, sum } from 'drizzle-orm';
+import { and, count, desc, eq, sql, } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -209,7 +199,7 @@ function getOrgId(req: Request): number {
   return r.tenantOrgId ?? req.user?.orgs?.[0]?.orgId ?? 1;
 }
 
-function requireAuth(req: Request, res: Response): boolean {
+function _requireAuth(req: Request, res: Response): boolean {
   if (!req.user) {
     sendForbidden(res, 'Authentication required');
     return false;
@@ -240,8 +230,8 @@ router.get('/matters', authMiddleware(), validateQuery(listQuerySchema), async (
     const orgId = getOrgId(req);
     const status = req.query.status as string | undefined;
     const jurisdiction = req.query.jurisdiction as string | undefined;
-    const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
-    const offset = parseInt(req.query.offset as string) || 0;
+    const limit = Math.min(parseInt(req.query.limit as string, 10) || 50, 200);
+    const offset = parseInt(req.query.offset as string, 10) || 0;
 
     const query = db
       .select()
@@ -998,8 +988,8 @@ router.get('/notifications', authMiddleware(), async (req, res) => {
 router.get('/audit', authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = getOrgId(req);
-    const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
-    const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
+    const matterId = req.query.matterId ? parseInt(req.query.matterId as string, 10) : undefined;
+    const limit = Math.min(parseInt(req.query.limit as string, 10) || 100, 500);
 
     const conditions = [eq(pcAuditEventsTable.orgId, orgId)];
     if (matterId) conditions.push(eq(pcAuditEventsTable.matterId, matterId));

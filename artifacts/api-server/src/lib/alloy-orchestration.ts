@@ -2,7 +2,6 @@ import {
   type AlloySignal,
   type AlloyWorkflow,
   type AlloyWorkflowRun,
-  alloyActions,
   alloyApprovals,
   alloyArtifacts,
   alloyAuditLog,
@@ -12,7 +11,6 @@ import {
   db,
   type InsertAlloyArtifact,
   type InsertAlloyWorkflow,
-  type InsertAlloyWorkflowRun,
 } from '@szl-holdings/db';
 import { durableJobQueue } from '@szl-holdings/forge-runtime';
 import { desc, eq } from 'drizzle-orm';
@@ -276,7 +274,7 @@ export async function startWorkflowRun(
   const runNumber = (existingRuns[0]?.runNumber ?? 0) + 1;
 
   const steps = (workflow.steps ?? []) as WorkflowStep[];
-  const updatedSteps = steps.length > 0 ? startStep(steps, steps[0]!.step) : steps;
+  const updatedSteps = steps.length > 0 ? startStep(steps, steps[0]?.step) : steps;
 
   const [run] = await db
     .insert(alloyWorkflowRuns)

@@ -10,8 +10,6 @@ import {
   FileText,
   GraduationCap,
   Loader2,
-  Play,
-  Plus,
   Sparkles,
   Star,
   Target,

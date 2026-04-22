@@ -165,9 +165,9 @@ export function recordAbTestOutcome(
   if (!test.treatmentMetrics) test.treatmentMetrics = { sum: 0, count: 0, sumSq: 0 };
 
   const target = variant === 'control' ? test.controlMetrics : test.treatmentMetrics;
-  target['sum'] = (target['sum'] ?? 0) + metricValue;
-  target['sumSq'] = (target['sumSq'] ?? 0) + metricValue ** 2;
-  target['count'] = (target['count'] ?? 0) + 1;
+  target.sum = (target.sum ?? 0) + metricValue;
+  target.sumSq = (target.sumSq ?? 0) + metricValue ** 2;
+  target.count = (target.count ?? 0) + 1;
 }
 
 export function evaluateAbTest(testId: string): AbTestResult | null {
@@ -178,15 +178,15 @@ export function evaluateAbTest(testId: string): AbTestResult | null {
   const tm = test.treatmentMetrics;
   if (!cm || !tm) return null;
 
-  const cCount = cm['count'] ?? 0;
-  const tCount = tm['count'] ?? 0;
+  const cCount = cm.count ?? 0;
+  const tCount = tm.count ?? 0;
 
   if (cCount < test.minSampleSize || tCount < test.minSampleSize) return null;
 
-  const cMean = cCount > 0 ? (cm['sum'] ?? 0) / cCount : 0;
-  const tMean = tCount > 0 ? (tm['sum'] ?? 0) / tCount : 0;
-  const cVariance = cCount > 1 ? ((cm['sumSq'] ?? 0) - cCount * cMean ** 2) / (cCount - 1) : 0;
-  const tVariance = tCount > 1 ? ((tm['sumSq'] ?? 0) - tCount * tMean ** 2) / (tCount - 1) : 0;
+  const cMean = cCount > 0 ? (cm.sum ?? 0) / cCount : 0;
+  const tMean = tCount > 0 ? (tm.sum ?? 0) / tCount : 0;
+  const cVariance = cCount > 1 ? ((cm.sumSq ?? 0) - cCount * cMean ** 2) / (cCount - 1) : 0;
+  const tVariance = tCount > 1 ? ((tm.sumSq ?? 0) - tCount * tMean ** 2) / (tCount - 1) : 0;
   const cStd = Math.sqrt(Math.max(0, cVariance));
   const tStd = Math.sqrt(Math.max(0, tVariance));
 

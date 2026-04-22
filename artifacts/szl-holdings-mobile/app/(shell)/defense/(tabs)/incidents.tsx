@@ -8,7 +8,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -107,7 +107,7 @@ async function fetchIncidents(): Promise<Incident[]> {
     const data = await apiGet<Incident[]>('/api/aegis/incidents');
     await cacheSet(CACHE_KEYS.INCIDENTS, data);
     return data;
-  } catch (err) {
+  } catch (_err) {
     const cached = await cacheGetStale<Incident[]>(CACHE_KEYS.INCIDENTS);
     if (cached && cached.length > 0) return cached;
     Promise.all(DEMO_INCIDENTS.map((inc) => cacheSet(`incident:${inc.id}`, inc))).catch(() => {});

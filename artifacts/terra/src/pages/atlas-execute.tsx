@@ -16,7 +16,6 @@ import {
   RefreshCw,
   Shield,
   XCircle,
-  Zap,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -698,7 +697,7 @@ export default function TerraAtlasExecute() {
                         <div key={step.id} className="flex items-center gap-2.5">
                           <div className="relative flex flex-col items-center">
                             <div className="w-2 h-2 rounded-full" style={{ background: sc }} />
-                            {i < run.steps!.length - 1 && (
+                            {i < (run.steps?.length ?? 0) - 1 && (
                               <div
                                 className="w-px flex-1 mt-1"
                                 style={{ background: 'rgba(255,255,255,0.1)', minHeight: 12 }}

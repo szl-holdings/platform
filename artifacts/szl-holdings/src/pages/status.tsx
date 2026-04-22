@@ -159,11 +159,11 @@ function UptimeBar({
                 const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                 const parentRect = (
                   e.currentTarget as HTMLElement
-                ).parentElement!.parentElement!.getBoundingClientRect();
+                ).parentElement?.parentElement?.getBoundingClientRect();
                 setTooltip({
                   day,
-                  x: rect.left - parentRect.left + rect.width / 2,
-                  y: rect.top - parentRect.top,
+                  x: rect.left - (parentRect?.left ?? 0) + rect.width / 2,
+                  y: rect.top - (parentRect?.top ?? 0),
                 });
               }}
               onMouseLeave={() => setTooltip(null)}
@@ -199,7 +199,7 @@ function UptimeBar({
           }}
         >
           <div style={{ fontSize: 11, fontWeight: 600, color: 'hsl(38,12%,88%)', marginBottom: 3 }}>
-            {new Date(tooltip.day + 'T00:00:00Z').toLocaleDateString('en-US', {
+            {new Date(`${tooltip.day}T00:00:00Z`).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',
               year: 'numeric',

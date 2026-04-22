@@ -157,8 +157,8 @@ describe('PRISM Counsel tenant isolation — real router with DB-level org scopi
     _lastSelectWhere = null;
     // Disable seeding for these tests so list queries don't trigger the
     // 6-matter SEED_MATTERS insert against the mocked DB.
-    process.env['PRISM_COUNSEL_SEED_DEMO'] = '0';
-    process.env['NODE_ENV'] = 'production';
+    process.env.PRISM_COUNSEL_SEED_DEMO = '0';
+    process.env.NODE_ENV = 'production';
   });
 
   describe('GET /counsel/matters — org-scoped list', () => {

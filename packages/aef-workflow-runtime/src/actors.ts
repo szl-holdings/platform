@@ -23,8 +23,8 @@ export class IngestionPlannerActor extends WorkflowActor {
     ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const sourceId = String(input['sourceId'] ?? 'unknown');
-    const contentLength = String(input['content'] ?? '').length;
+    const sourceId = String(input.sourceId ?? 'unknown');
+    const contentLength = String(input.content ?? '').length;
 
     const estimatedChunks = Math.max(1, Math.ceil(contentLength / 512));
 
@@ -48,7 +48,7 @@ export class SourceNormalizerActor extends WorkflowActor {
     _ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const content = String(input['content'] ?? '');
+    const content = String(input.content ?? '');
     const normalized = content
       .replace(/\r\n/g, '\n')
       .replace(/\t/g, ' ')
@@ -58,7 +58,7 @@ export class SourceNormalizerActor extends WorkflowActor {
     return {
       output: {
         normalizedLength: normalized.length,
-        contentType: String(input['contentType'] ?? 'text/plain'),
+        contentType: String(input.contentType ?? 'text/plain'),
         normalizedAt: new Date().toISOString(),
       },
     };
@@ -116,12 +116,7 @@ export async function loadDefaultChunkTokenizer(
       encode: (text: string) => tok.encode(text),
       decode: (ids: number[]) => tok.decode(ids),
     };
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      `[ChunkPlanner] tokenizer load failed for ${modelRef}, falling back to word-based chunking:`,
-      err instanceof Error ? err.message : err,
-    );
+  } catch (_err) {
     return undefined;
   }
 }
@@ -168,10 +163,10 @@ export class ChunkPlannerActor extends WorkflowActor {
     _ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const content = String(input['content'] ?? '');
-    const chunkSize = Number(input['chunkSize'] ?? 512);
-    const chunkOverlap = Number(input['chunkOverlap'] ?? 64);
-    const policy: ChunkTruncationPolicy = (input['truncationPolicy'] as
+    const content = String(input.content ?? '');
+    const chunkSize = Number(input.chunkSize ?? 512);
+    const chunkOverlap = Number(input.chunkOverlap ?? 64);
+    const policy: ChunkTruncationPolicy = (input.truncationPolicy as
       | ChunkTruncationPolicy
       | undefined) ??
       this.truncationPolicy ?? {
@@ -303,7 +298,7 @@ export class PolicyGuardActor extends WorkflowActor {
     ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const operation = String(input['operation'] ?? 'ingest');
+    const operation = String(input.operation ?? 'ingest');
     const tenantId = ctx.tenantId;
 
     const isDestructive = ['rebuild_index', 'rotate_profile_version'].includes(operation);
@@ -328,7 +323,7 @@ export class VectorDispatchActor extends WorkflowActor {
     ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const totalChunks = Number(input['totalChunks'] ?? 0);
+    const totalChunks = Number(input.totalChunks ?? 0);
 
     return {
       output: {
@@ -350,8 +345,8 @@ export class IndexVerifierActor extends WorkflowActor {
     ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const expectedChunks = Number(input['expectedChunks'] ?? 0);
-    const indexedChunks = Number(input['indexedChunks'] ?? expectedChunks);
+    const expectedChunks = Number(input.expectedChunks ?? 0);
+    const indexedChunks = Number(input.indexedChunks ?? expectedChunks);
 
     const missing = expectedChunks - indexedChunks;
     const verified = missing === 0;
@@ -376,7 +371,7 @@ export class RetrievalEvaluatorActor extends WorkflowActor {
     ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const queryCount = Number(input['queryCount'] ?? 0);
+    const queryCount = Number(input.queryCount ?? 0);
 
     return {
       output: {
@@ -401,7 +396,7 @@ export class ApprovalGateActor extends WorkflowActor {
     _ctx: WorkflowContext,
     input: Record<string, unknown>,
   ): Promise<ActorExecutionResult> {
-    const requiresApproval = Boolean(input['requiresApproval'] ?? false);
+    const requiresApproval = Boolean(input.requiresApproval ?? false);
 
     return {
       output: {

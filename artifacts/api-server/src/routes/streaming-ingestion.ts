@@ -200,7 +200,7 @@ streamingRouter.get('/stream/ais-tracking', (req: Request, res: Response) => {
 });
 
 streamingRouter.post('/stream/webhook/:sourceToken', async (req: Request, res: Response) => {
-  const sourceToken = String(req.params['sourceToken'] ?? '');
+  const sourceToken = String(req.params.sourceToken ?? '');
   const body = req.body as Record<string, unknown>;
 
   const sources = listDataSources().filter(
@@ -240,7 +240,7 @@ streamingRouter.post('/stream/webhook/:sourceToken', async (req: Request, res: R
 });
 
 streamingRouter.post('/stream/webhook-siem', async (req: Request, res: Response) => {
-  const authHeader = req.headers['authorization'];
+  const authHeader = req.headers.authorization;
   const body = req.body as Record<string, unknown> | Record<string, unknown>[];
 
   const rawEvents: Record<string, unknown>[] = Array.isArray(body) ? body : [body];
@@ -288,13 +288,13 @@ streamingRouter.post(
     const { source, category, events } = req.body as z.infer<typeof ingestSchema>;
 
     const normalized = (events as Record<string, unknown>[]).map((e) => ({
-      id: (e['id'] as string) ?? undefined,
-      type: (e['type'] as string) ?? 'raw_event',
-      source: (e['source'] as string) ?? source,
+      id: (e.id as string) ?? undefined,
+      type: (e.type as string) ?? 'raw_event',
+      source: (e.source as string) ?? source,
       category: category as StreamCategory,
-      severity: e['severity'] as string | undefined,
-      payload: (e['payload'] as Record<string, unknown>) ?? e,
-      timestamp: (e['timestamp'] as string) ?? new Date().toISOString(),
+      severity: e.severity as string | undefined,
+      payload: (e.payload as Record<string, unknown>) ?? e,
+      timestamp: (e.timestamp as string) ?? new Date().toISOString(),
     }));
 
     const { ingested, dropped } = await ingestBatch(normalized, undefined);
@@ -353,15 +353,15 @@ streamingRouter.post(
   '/stream/sources/:id/pause',
   authMiddleware(),
   async (req: Request, res: Response) => {
-    const id = parseInt(String(req.params['id']), 10);
-    if (isNaN(id)) {
+    const id = parseInt(String(req.params.id), 10);
+    if (Number.isNaN(id)) {
       sendBadRequest(res, 'Invalid id');
       return;
     }
     try {
       await pauseDataSource(id);
       res.json({ status: 'paused', id, timestamp: new Date().toISOString() });
-    } catch (err) {
+    } catch (_err) {
       sendNotFound(res, 'Data source');
     }
   },
@@ -371,22 +371,22 @@ streamingRouter.post(
   '/stream/sources/:id/resume',
   authMiddleware(),
   async (req: Request, res: Response) => {
-    const id = parseInt(String(req.params['id']), 10);
-    if (isNaN(id)) {
+    const id = parseInt(String(req.params.id), 10);
+    if (Number.isNaN(id)) {
       sendBadRequest(res, 'Invalid id');
       return;
     }
     try {
       await resumeDataSource(id);
       res.json({ status: 'resumed', id, timestamp: new Date().toISOString() });
-    } catch (err) {
+    } catch (_err) {
       sendNotFound(res, 'Data source');
     }
   },
 );
 
 streamingRouter.get('/stream/sources/:id', (req: Request, res: Response) => {
-  const id = parseInt(String(req.params['id']), 10);
+  const id = parseInt(String(req.params.id), 10);
   const source = getDataSource(id);
   if (!source) {
     sendNotFound(res, 'Source');

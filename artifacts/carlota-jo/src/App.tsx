@@ -25,7 +25,6 @@ import {
 } from '@szl-holdings/shared-ui/keyboard-shortcuts';
 import { LANE_ACCENT_HEX } from '@szl-holdings/shared-ui/lane-colors';
 import { SandboxModeProvider } from '@szl-holdings/shared-ui/sandbox-mode';
-import { MessageSquare, Users } from 'lucide-react';
 import { lazy, type ReactNode, Suspense, useEffect } from 'react';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 import PlatformSidebar, {

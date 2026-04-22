@@ -1,5 +1,5 @@
 import { EcosystemNav } from '@szl-holdings/shared-ui/ecosystem-nav';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const ACCENT = '#8b7ac8';
 

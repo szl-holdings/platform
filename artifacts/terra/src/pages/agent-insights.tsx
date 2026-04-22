@@ -30,7 +30,7 @@ function GlobalFeedStats() {
       {[
         {
           label: 'Market Findings',
-          value: knowledge?.byDomain?.['terra'] ?? 0,
+          value: knowledge?.byDomain?.terra ?? 0,
           icon: Building2,
           color: 'text-amber-400',
           bg: 'bg-amber-500/10',

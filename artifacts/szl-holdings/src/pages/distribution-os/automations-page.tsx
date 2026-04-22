@@ -568,8 +568,7 @@ export default function AutomationsPage() {
         body: '{}',
       });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Unknown error' }));
-        console.error('Job failed:', err);
+        const _err = await res.json().catch(() => ({ error: 'Unknown error' }));
         return;
       }
       const result: TriggerResult = await res.json();
@@ -583,8 +582,7 @@ export default function AutomationsPage() {
       } else if (jobId === 'carousel-ideas' && result.output?.carouselIdeas) {
         setLatestCarouselIdeas(result.output.carouselIdeas as string[]);
       }
-    } catch (e) {
-      console.error('Job trigger error:', e);
+    } catch (_e) {
     } finally {
       setRunningJobs((prev) => {
         const n = new Set(prev);

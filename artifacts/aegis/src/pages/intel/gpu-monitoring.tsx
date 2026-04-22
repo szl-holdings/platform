@@ -1,12 +1,10 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
-import type { GpuNode, QueuedJob } from '@szl-holdings/observability';
-import { InfraSimulator, MetricTimeSeriesSimulator } from '@szl-holdings/observability';
+import { type GpuNode, type QueuedJob, InfraSimulator, MetricTimeSeriesSimulator } from '@szl-holdings/observability';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import {
   Activity,
   AlertTriangle,
-  BarChart3,
   CheckCircle,
   Clock,
   Cpu,
@@ -15,18 +13,14 @@ import {
   Server,
   Thermometer,
   TrendingUp,
-  Zap,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
   Line,
   LineChart,
-  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -46,7 +40,7 @@ const throughputHistory = metricSim.generateTimeSeries(148_000, 24, 3_600_000, {
   nowMs: NOW,
 });
 
-const throughputData = throughputHistory.map((p, i) => ({
+const throughputData = throughputHistory.map((p, _i) => ({
   hour: `${new Date(p.timestamp).getHours()}:00`,
   tokens: Math.floor(p.value),
   flops: Math.floor(p.value / 800),
@@ -93,7 +87,7 @@ function stateBg(state: GpuNode['state']) {
 }
 
 function GpuNodeCard({ node }: { node: GpuNode }) {
-  const [expanded, setExpanded] = useState(false);
+  const [_expanded, _setExpanded] = useState(false);
   const vramPct = (node.vramUsedGb / node.vramTotalGb) * 100;
   const powerPct = (node.powerWatts / node.powerLimitWatts) * 100;
   const nvlinkPct = (node.nvlinkBandwidthGbps / node.nvlinkBandwidthMaxGbps) * 100;

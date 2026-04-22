@@ -28,7 +28,7 @@ function dateStr(n: number) {
   return d.toISOString().slice(0, 10);
 }
 
-const DOMAINS = ['aegis', 'vessels', 'terra', 'lyte', 'carlota-jo', 'platform'] as const;
+const _DOMAINS = ['aegis', 'vessels', 'terra', 'lyte', 'carlota-jo', 'platform'] as const;
 
 const RISK_LEVELS = ['critical', 'high', 'elevated', 'moderate', 'low'] as const;
 const RISK_WEIGHTS = [0.05, 0.12, 0.28, 0.4, 0.15];
@@ -227,7 +227,6 @@ function makeRecommendedActions(day: number) {
 }
 
 export async function seedPulse() {
-  console.log('[seed-pulse] Starting Pulse briefing seed...');
 
   const briefings: (typeof pulseBriefingsTable.$inferInsert)[] = [];
   const execBriefs: (typeof pulseExecBriefsTable.$inferInsert)[] = [];
@@ -262,7 +261,7 @@ export async function seedPulse() {
         briefingId: briefId,
         domain,
         status: 'published',
-        headline: `${domain.charAt(0).toUpperCase() + domain.slice(1)} — ${headline.length > 60 ? headline.slice(0, 60) + '…' : headline}`,
+        headline: `${domain.charAt(0).toUpperCase() + domain.slice(1)} — ${headline.length > 60 ? `${headline.slice(0, 60)}…` : headline}`,
         situation: `${domain} domain operating within defined autonomy envelope. ${domain === 'aegis' ? '3 open critical findings requiring human review.' : domain === 'vessels' ? '47 vessels tracked, 2 flagged for screening.' : domain === 'terra' ? '12 active distress opportunities in pipeline.' : 'ARR tracking above plan across 3 monitored entities.'}`,
         autonomyTier: domain === 'aegis' ? 'tier-2' : 'tier-3',
         confidence: String(parseFloat(conf(0.88, 0.06))),
@@ -311,12 +310,10 @@ export async function seedPulse() {
   }
 
   await db.insert(pulseBriefingsTable).values(briefings).onConflictDoNothing();
-  console.log(`[seed-pulse] Inserted ${briefings.length} briefings`);
 
   await db.insert(pulseExecBriefsTable).values(execBriefs).onConflictDoNothing();
-  console.log(`[seed-pulse] Inserted ${execBriefs.length} exec briefs`);
 
-  const dissentBriefId = briefings.find((b) => b.date === dateStr(5))?.id ?? briefings[0]!.id;
+  const dissentBriefId = briefings.find((b) => b.date === dateStr(5))?.id ?? briefings[0]?.id;
   const dissents: (typeof pulseDissentsTable.$inferInsert)[] = [
     {
       dissentId: 'dissent-001',
@@ -339,7 +336,7 @@ export async function seedPulse() {
     },
     {
       dissentId: 'dissent-002',
-      briefingId: briefings.find((b) => b.date === dateStr(12))?.id ?? briefings[0]!.id,
+      briefingId: briefings.find((b) => b.date === dateStr(12))?.id ?? briefings[0]?.id,
       sectionId: `sec-terra-12`,
       sectionTitle: 'Real Estate Distress Intelligence',
       dissentingView:
@@ -358,7 +355,7 @@ export async function seedPulse() {
     },
     {
       dissentId: 'dissent-003',
-      briefingId: briefings.find((b) => b.date === dateStr(2))?.id ?? briefings[0]!.id,
+      briefingId: briefings.find((b) => b.date === dateStr(2))?.id ?? briefings[0]?.id,
       sectionId: `sec-aegis-2`,
       sectionTitle: 'Security & Threat Intelligence',
       dissentingView:
@@ -374,7 +371,7 @@ export async function seedPulse() {
     },
     {
       dissentId: 'dissent-004',
-      briefingId: briefings.find((b) => b.date === dateStr(18))?.id ?? briefings[0]!.id,
+      briefingId: briefings.find((b) => b.date === dateStr(18))?.id ?? briefings[0]?.id,
       sectionId: `sec-lyte-18`,
       sectionTitle: 'Business Observability & Revenue Intelligence',
       dissentingView:
@@ -393,7 +390,7 @@ export async function seedPulse() {
     },
     {
       dissentId: 'dissent-005',
-      briefingId: briefings.find((b) => b.date === dateStr(7))?.id ?? briefings[0]!.id,
+      briefingId: briefings.find((b) => b.date === dateStr(7))?.id ?? briefings[0]?.id,
       sectionId: `sec-aegis-7`,
       sectionTitle: 'Security & Threat Intelligence',
       dissentingView:
@@ -410,7 +407,6 @@ export async function seedPulse() {
   ];
 
   await db.insert(pulseDissentsTable).values(dissents).onConflictDoNothing();
-  console.log(`[seed-pulse] Inserted ${dissents.length} dissents`);
 
   const customBriefs: (typeof pulseCustomBriefsTable.$inferInsert)[] = [
     {
@@ -463,7 +459,6 @@ export async function seedPulse() {
   ];
 
   await db.insert(pulseCustomBriefsTable).values(customBriefs).onConflictDoNothing();
-  console.log(`[seed-pulse] Inserted ${customBriefs.length} custom briefs`);
 
   return {
     briefings: briefings.length,

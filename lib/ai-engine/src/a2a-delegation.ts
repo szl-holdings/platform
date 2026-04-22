@@ -6,7 +6,7 @@
  */
 
 import { a2aDelegationTasks, db } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { a2aRegistry } from './a2a-registry.js';
 import { AGENT_REGISTRY, callAgent } from './nuro-mesh.js';

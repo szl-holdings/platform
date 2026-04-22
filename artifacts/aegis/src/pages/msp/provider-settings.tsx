@@ -162,7 +162,7 @@ function validateProviderForm(
   }
 
   const syncVal = parseInt(form.syncIntervalMinutes || '5', 10);
-  if (isNaN(syncVal) || syncVal < 1 || syncVal > 60) {
+  if (Number.isNaN(syncVal) || syncVal < 1 || syncVal > 60) {
     errors.syncIntervalMinutes = 'Sync interval must be between 1 and 60 minutes';
   }
 

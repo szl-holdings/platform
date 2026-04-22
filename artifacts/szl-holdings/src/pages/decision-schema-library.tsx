@@ -3,12 +3,9 @@ import { useState, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/api";
-import {
-  BookOpen, Shield, Ship, Building2, Briefcase, Users, Zap,
-  ArrowRight, ChevronRight, Play, Clock, CheckCircle2,
-  AlertTriangle, GitBranch, Target, BarChart3, Lock,
-  Radio, Brain, FileCheck, ShieldCheck, Layers, Star,
-  Filter, Search, ArrowUpRight, TrendingUp,
+import {Shield, Ship, Building2, Briefcase, Users, 
+  ArrowRight, ChevronRight, Play, GitBranch, BarChart3, Lock,
+  Radio, Layers, ArrowUpRight, 
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -380,7 +377,7 @@ export default function DecisionSchemaLibraryPage() {
                     { label: "Schemas", value: SCHEMAS.length.toString(), color: LYTE },
                     { label: "Total executions", value: totalUses.toString(), color: "hsl(260,60%,65%)" },
                     { label: "Avg success rate", value: `${(avgSuccess * 100).toFixed(0)}%`, color: "hsl(142,60%,48%)" },
-                    { label: "Domains covered", value: [...new Set(SCHEMAS.map(s => s.domain))].length.toString(), color: "hsl(206,72%,54%)" },
+                    { label: "Domains covered", value: new Set(SCHEMAS.map(s => s.domain)).size.toString(), color: "hsl(206,72%,54%)" },
                   ].map((stat, i) => (
                     <div key={i}>
                       <p style={{ fontSize: "1.5rem", fontWeight: 700, fontFamily: MONO, color: stat.color, margin: 0 }}>{stat.value}</p>
@@ -401,7 +398,7 @@ export default function DecisionSchemaLibraryPage() {
                 <div style={{ display: "flex", gap: "0.375rem", alignItems: "center" }}>
                   <span style={{ fontSize: "0.6875rem", color: TEXT_FAINT }}>Category:</span>
                   {["all", ...CATEGORIES].map(c => (
-                    <button key={c} onClick={() => setFilterCat(c)} style={{ padding: "0.25rem 0.625rem", borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 500, border: `1px solid ${filterCat === c ? LYTE + "40" : BORDER}`, background: filterCat === c ? `${LYTE}12` : "transparent", color: filterCat === c ? LYTE : TEXT_FAINT, cursor: "pointer" }}>
+                    <button key={c} onClick={() => setFilterCat(c)} style={{ padding: "0.25rem 0.625rem", borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 500, border: `1px solid ${filterCat === c ? `${LYTE}40` : BORDER}`, background: filterCat === c ? `${LYTE}12` : "transparent", color: filterCat === c ? LYTE : TEXT_FAINT, cursor: "pointer" }}>
                       {c === "all" ? "All" : c}
                     </button>
                   ))}
@@ -412,7 +409,7 @@ export default function DecisionSchemaLibraryPage() {
                     const colors: Record<string, string> = { low: "hsl(142,60%,48%)", medium: "hsl(48,90%,52%)", high: "hsl(0,72%,54%)" };
                     const cc = filterComp === c ? (colors[c] ?? LYTE) : TEXT_FAINT;
                     return (
-                      <button key={c} onClick={() => setFilterComp(c)} style={{ padding: "0.25rem 0.625rem", borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 500, border: `1px solid ${filterComp === c ? cc + "40" : BORDER}`, background: filterComp === c ? `${cc}12` : "transparent", color: cc, cursor: "pointer" }}>
+                      <button key={c} onClick={() => setFilterComp(c)} style={{ padding: "0.25rem 0.625rem", borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 500, border: `1px solid ${filterComp === c ? `${cc}40` : BORDER}`, background: filterComp === c ? `${cc}12` : "transparent", color: cc, cursor: "pointer" }}>
                         {c === "all" ? "All" : c}
                       </button>
                     );
@@ -439,7 +436,7 @@ export default function DecisionSchemaLibraryPage() {
                           padding: "1rem 1.125rem",
                           borderRadius: "8px",
                           background: activeSchema === s.id ? `${s.color}08` : SURFACE,
-                          border: `1px solid ${activeSchema === s.id ? s.color + "30" : BORDER}`,
+                          border: `1px solid ${activeSchema === s.id ? `${s.color}30` : BORDER}`,
                           cursor: "pointer",
                         }}
                       >

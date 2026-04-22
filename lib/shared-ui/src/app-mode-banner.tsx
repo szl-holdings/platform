@@ -13,8 +13,7 @@
  *   useProductionConfirm() — hook for gating destructive actions in production.
  */
 
-import type React from 'react';
-import { createContext, useCallback, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 export type AppMode = 'demo' | 'sandbox' | 'production' | 'local-dev';
 
@@ -23,15 +22,15 @@ function resolveAppMode(): AppMode {
     const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
     if (!env) return 'local-dev';
 
-    const explicit = (env['VITE_APP_MODE'] ?? env['VITE_RUNTIME_MODE'] ?? '').toLowerCase().trim();
+    const explicit = (env.VITE_APP_MODE ?? env.VITE_RUNTIME_MODE ?? '').toLowerCase().trim();
     if (explicit === 'demo') return 'demo';
     if (explicit === 'sandbox') return 'sandbox';
     if (explicit === 'production') return 'production';
 
-    const appEnv = (env['VITE_APP_ENV'] ?? '').toLowerCase().trim();
+    const appEnv = (env.VITE_APP_ENV ?? '').toLowerCase().trim();
     if (appEnv === 'demo') return 'demo';
     if (appEnv === 'sandbox') return 'sandbox';
-    if (appEnv === 'production' || env['MODE'] === 'production') return 'production';
+    if (appEnv === 'production' || env.MODE === 'production') return 'production';
   } catch {}
   return 'local-dev';
 }

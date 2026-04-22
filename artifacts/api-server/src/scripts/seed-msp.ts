@@ -9,11 +9,9 @@ import {
 import { sql } from 'drizzle-orm';
 
 async function seed() {
-  console.log('[msp-seed] Starting MSP seed...');
 
   const existing = await db.select({ c: sql<number>`count(*)::int` }).from(mspClientsTable);
   if (existing[0].c > 0) {
-    console.log('[msp-seed] MSP data already seeded, skipping.');
     return;
   }
 
@@ -251,8 +249,6 @@ async function seed() {
     ])
     .returning();
 
-  console.log(`[msp-seed] Inserted ${clients.length} clients`);
-
   const technicians = await db
     .insert(mspTechniciansTable)
     .values([
@@ -343,8 +339,6 @@ async function seed() {
     ])
     .returning();
 
-  console.log(`[msp-seed] Inserted ${technicians.length} technicians`);
-
   const clientMap = Object.fromEntries(clients.map((c) => [c.name, c.id]));
   const techMap = Object.fromEntries(technicians.map((t) => [t.name, { id: t.id, name: t.name }]));
 
@@ -417,7 +411,7 @@ async function seed() {
       subject: 'Ransomware alert investigation',
       description:
         'CrowdStrike Falcon detected suspicious process chain on WORKSTATION-NV-22. Isolation pending review.',
-      clientId: clientMap['NovaTech'],
+      clientId: clientMap.NovaTech,
       clientName: 'NovaTech',
       priority: 'critical' as const,
       status: 'in-progress' as const,
@@ -519,7 +513,7 @@ async function seed() {
       subject: 'Active Directory sync errors',
       description:
         'Azure AD Connect sync failing with error 8344. Users unable to login to cloud apps.',
-      clientId: clientMap['NovaTech'],
+      clientId: clientMap.NovaTech,
       clientName: 'NovaTech',
       priority: 'critical' as const,
       status: 'open' as const,
@@ -562,7 +556,7 @@ async function seed() {
       subject: 'DDoS attack detected — mitigation active',
       description:
         '400Gbps volumetric DDoS attack detected. Cloudflare Magic Transit engaged. Traffic scrubbing active.',
-      clientId: clientMap['NovaTech'],
+      clientId: clientMap.NovaTech,
       clientName: 'NovaTech',
       priority: 'critical' as const,
       status: 'in-progress' as const,
@@ -710,7 +704,7 @@ async function seed() {
       subject: 'Multi-factor authentication rollout',
       description:
         'MFA rollout for all 89 users. Microsoft Authenticator deployment via Intune conditional access.',
-      clientId: clientMap['NovaTech'],
+      clientId: clientMap.NovaTech,
       clientName: 'NovaTech',
       priority: 'high' as const,
       status: 'in-progress' as const,
@@ -830,9 +824,7 @@ async function seed() {
   }));
   await db.insert(mspTicketsTable).values(normalizedTickets);
 
-  console.log(`[msp-seed] Inserted ${ticketData.length} tickets`);
-
-  const clientIds = clients.map((c) => c.id);
+  const _clientIds = clients.map((c) => c.id);
   const deviceTypes = [
     'server',
     'workstation',
@@ -917,9 +909,8 @@ async function seed() {
   }
 
   await db.insert(mspDevicesTable).values(deviceData as any);
-  console.log(`[msp-seed] Inserted ${deviceData.length} devices`);
 
-  const contracts = await db
+  const _contracts = await db
     .insert(mspContractsTable)
     .values([
       {
@@ -999,7 +990,7 @@ async function seed() {
       },
       {
         name: 'NovaTech — Break/Fix + Security Retainer',
-        clientId: clientMap['NovaTech'],
+        clientId: clientMap.NovaTech,
         clientName: 'NovaTech',
         type: 'break-fix',
         status: 'pending-renewal',
@@ -1085,14 +1076,10 @@ async function seed() {
       },
     ])
     .returning();
-
-  console.log(`[msp-seed] Inserted ${contracts.length} contracts`);
-  console.log('[msp-seed] MSP seed complete!');
 }
 
 seed()
-  .catch((err) => {
-    console.error('[msp-seed] Seed failed:', err);
+  .catch((_err) => {
     process.exit(1);
   })
   .finally(() => process.exit(0));

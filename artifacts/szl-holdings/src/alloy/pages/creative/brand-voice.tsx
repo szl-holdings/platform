@@ -91,7 +91,7 @@ export default function BrandVoiceEngine() {
     try {
       const result = await transformVoice(input, currentVoice.systemPrompt);
       setOutputs((prev) => ({ ...prev, [selected]: result }));
-    } catch (e) {
+    } catch (_e) {
       setError('AI transformation failed. Please try again.');
     } finally {
       setLoading(false);

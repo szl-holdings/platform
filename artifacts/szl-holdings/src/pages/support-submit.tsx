@@ -88,7 +88,7 @@ export default function SupportSubmitPage() {
     }
   };
 
-  const ACCENT = "hsl(192,72%,48%)";
+  const _ACCENT = "hsl(192,72%,48%)";
 
   if (submitted) {
     return (

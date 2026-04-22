@@ -18,8 +18,7 @@ initAnalytics({ appSlug: 'counsel' });
 
 if ('serviceWorker' in navigator && !import.meta.env.DEV) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/counsel/sw.js', { scope: '/counsel/' }).catch((err) => {
-      console.warn('[Counsel SW] Registration failed:', err);
+    navigator.serviceWorker.register('/counsel/sw.js', { scope: '/counsel/' }).catch((_err) => {
     });
   });
 }

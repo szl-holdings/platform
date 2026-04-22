@@ -11,9 +11,9 @@
  * dependency-free CommonJS script.
  */
 
-const fs = require('fs');
-const http = require('http');
-const path = require('path');
+const fs = require('node:fs');
+const http = require('node:http');
+const path = require('node:path');
 
 const CANONICAL_ROUTES_PATH = path.resolve(__dirname, '../../../packages/proxy-routes.ts');
 
@@ -26,7 +26,7 @@ function loadProxyRoutes() {
     routes.push({ prefix: match[1], port: Number(match[2]) });
   }
   if (routes.length === 0) {
-    throw new Error('[health-proxy] Failed to parse any routes from ' + CANONICAL_ROUTES_PATH);
+    throw new Error(`[health-proxy] Failed to parse any routes from ${CANONICAL_ROUTES_PATH}`);
   }
   return routes;
 }
@@ -47,10 +47,6 @@ if (missing.length > 0) {
   );
 }
 
-console.log(
-  '[health-proxy] Loaded ' + PROXY_ROUTES.length + ' proxy routes from packages/proxy-routes.ts',
-);
-
 const EXPO_PORT = Number(process.env.EXPO_PORT) || 8085;
 
 const server = http.createServer((req, res) => {
@@ -60,7 +56,7 @@ const server = http.createServer((req, res) => {
     res.end('OK');
     return;
   }
-  const normalizedUrl = url.endsWith('/') ? url : url + '/';
+  const normalizedUrl = url.endsWith('/') ? url : `${url}/`;
   const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
   const targetPort = route ? route.port : EXPO_PORT;
   const upstream = http.request(
@@ -69,7 +65,7 @@ const server = http.createServer((req, res) => {
       port: targetPort,
       path: url,
       method: req.method,
-      headers: { ...req.headers, host: 'localhost:' + targetPort },
+      headers: { ...req.headers, host: `localhost:${targetPort}` },
     },
     (upRes) => {
       res.writeHead(upRes.statusCode || 200, upRes.headers);
@@ -79,15 +75,13 @@ const server = http.createServer((req, res) => {
   upstream.on('error', () => {
     if (!res.headersSent) {
       res.writeHead(503, { 'Content-Type': 'text/plain' });
-      res.end('Upstream not ready on port ' + targetPort);
+      res.end(`Upstream not ready on port ${targetPort}`);
     }
   });
   req.pipe(upstream, { end: true });
 });
 
 server.listen({ port: 9090, host: '0.0.0.0', reusePort: true }, () => {
-  console.log('[health-proxy] Listening on port 9090 (reusePort)');
 });
-server.on('error', (e) => {
-  console.warn('[health-proxy] Port 9090 bind error:', e.code);
+server.on('error', (_e) => {
 });

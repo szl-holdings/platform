@@ -3,7 +3,7 @@ import { useFuzzySearch } from '@szl-holdings/mobile-shared';
 import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Platform,
   Pressable,
@@ -27,7 +27,7 @@ import { useColors } from '@/hooks/useColors';
 import { CACHE_KEYS, cacheGetStale, cacheSet } from '@/lib/cache';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 const BOROUGHS = ['All', 'Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'];
@@ -112,9 +112,9 @@ const DEMO_PROPERTIES: DistressProperty[] = [
 ];
 
 function formatCurrency(n: number) {
-  if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + 'M';
-  if (n >= 1e3) return '$' + Math.round(n / 1e3) + 'K';
-  return '$' + n;
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
+  if (n >= 1e3) return `$${Math.round(n / 1e3)}K`;
+  return `$${n}`;
 }
 
 const COMP_DATA: Record<
@@ -190,7 +190,7 @@ function PropertyCard({
       <View
         style={[
           styles.swipeReveal,
-          { backgroundColor: showFlagHint ? (colors.amber ?? '#b8943c') + '15' : 'transparent' },
+          { backgroundColor: showFlagHint ? `${colors.amber ?? '#b8943c'}15` : 'transparent' },
         ]}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -206,9 +206,9 @@ function PropertyCard({
             style={[
               styles.propertyCard,
               {
-                borderColor: flagged ? (colors.amber ?? '#b8943c') + '50' : colors.border,
+                borderColor: flagged ? `${colors.amber ?? '#b8943c'}50` : colors.border,
                 backgroundColor: flagged
-                  ? (colors.amber ?? '#b8943c') + '06'
+                  ? `${colors.amber ?? '#b8943c'}06`
                   : 'rgba(255,255,255,0.02)',
               },
             ]}
@@ -231,7 +231,7 @@ function PropertyCard({
                 <View
                   style={[
                     styles.scoreCircle,
-                    { borderColor: scoreColor + '40', backgroundColor: scoreColor + '10' },
+                    { borderColor: `${scoreColor}40`, backgroundColor: `${scoreColor}10` },
                   ]}
                 >
                   <Text style={[styles.scoreNum, { color: scoreColor }]}>
@@ -243,7 +243,7 @@ function PropertyCard({
                 <View
                   style={[
                     styles.typeChip,
-                    { backgroundColor: typeColor + '15', borderColor: typeColor + '30' },
+                    { backgroundColor: `${typeColor}15`, borderColor: `${typeColor}30` },
                   ]}
                 >
                   <Text style={[styles.typeText, { color: typeColor }]}>
@@ -259,7 +259,7 @@ function PropertyCard({
                       styles.vsAvgChip,
                       {
                         backgroundColor:
-                          parseFloat(vsAvg) < 0 ? colors.emerald + '15' : colors.rose + '15',
+                          parseFloat(vsAvg) < 0 ? `${colors.emerald}15` : `${colors.rose}15`,
                       },
                     ]}
                   >
@@ -383,7 +383,7 @@ export default function PropertiesTab() {
         if (selectedBorough !== 'All') params.set('borough', selectedBorough);
         if (selectedType !== 'All') params.set('distressType', selectedType);
         if (search) params.set('q', search);
-        const res = await fetch(API_BASE + '/terra/distress/search?' + params.toString());
+        const res = await fetch(`${API_BASE}/terra/distress/search?${params.toString()}`);
         if (!res.ok) throw new Error('fetch failed');
         const json = await res.json();
         setLastFetchedAt(new Date());
@@ -564,7 +564,7 @@ export default function PropertiesTab() {
                 styles.filterChip,
                 {
                   borderColor: isSelected ? typeColor : colors.border,
-                  backgroundColor: isSelected ? typeColor + '15' : 'transparent',
+                  backgroundColor: isSelected ? `${typeColor}15` : 'transparent',
                 },
               ]}
             >
@@ -602,7 +602,7 @@ export default function PropertiesTab() {
                 styles.filterChip,
                 {
                   borderColor: isSelected ? scoreColor : colors.border,
-                  backgroundColor: isSelected ? scoreColor + '15' : 'transparent',
+                  backgroundColor: isSelected ? `${scoreColor}15` : 'transparent',
                 },
               ]}
             >
@@ -612,7 +612,7 @@ export default function PropertiesTab() {
                   { color: isSelected ? scoreColor : colors.mutedForeground },
                 ]}
               >
-                {score === 0 ? 'Any Score' : 'Score ' + score + '+'}
+                {score === 0 ? 'Any Score' : `Score ${score}+`}
               </Text>
             </Pressable>
           );

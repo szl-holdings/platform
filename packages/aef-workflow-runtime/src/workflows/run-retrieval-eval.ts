@@ -22,10 +22,10 @@ export const runRetrievalEvalWorkflow: WorkflowDefinition = {
       description:
         'Execute the retrieval evaluation against golden fixtures, compute nDCG, recall, precision, MRR, and evidence-completeness metrics.',
       async execute(ctx: WorkflowContext, _prior: WorkflowStepResult[]) {
-        const queries = ctx.input['queries'];
+        const queries = ctx.input.queries;
         const queryCount = Array.isArray(queries)
           ? queries.length
-          : Number(ctx.input['queryCount'] ?? 0);
+          : Number(ctx.input.queryCount ?? 0);
         return evaluator.execute(ctx, { queryCount, ...ctx.input });
       },
     },

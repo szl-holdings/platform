@@ -44,7 +44,7 @@ function resolveOrgScope(req: Request): { orgIds: number[] | undefined } {
   if (!user) return { orgIds: [] };
 
   const isPrivileged = user.roles.some((r) => PRIVILEGED_ROLES.has(r));
-  const wantsAllOrgs = String(req.query['allOrgs'] ?? '') === 'true';
+  const wantsAllOrgs = String(req.query.allOrgs ?? '') === 'true';
   if (isPrivileged && wantsAllOrgs) return { orgIds: undefined };
 
   return { orgIds: user.orgs.map((o) => o.orgId) };
@@ -150,11 +150,11 @@ router.get('/verifier', authMiddleware(), validateQuery(listQuerySchema), async 
 
     const limit = parseInt((req.query.limit as string) ?? '50', 10);
     const offset = parseInt((req.query.offset as string) ?? '0', 10);
-    if (isNaN(limit) || limit < 1 || limit > 500) {
+    if (Number.isNaN(limit) || limit < 1 || limit > 500) {
       sendBadRequest(res, 'limit must be between 1 and 500');
       return;
     }
-    if (isNaN(offset) || offset < 0) {
+    if (Number.isNaN(offset) || offset < 0) {
       sendBadRequest(res, 'offset must be >= 0');
       return;
     }

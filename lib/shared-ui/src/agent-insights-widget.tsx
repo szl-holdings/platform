@@ -5,7 +5,6 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  ExternalLink,
   RefreshCw,
   TrendingUp,
   Zap,

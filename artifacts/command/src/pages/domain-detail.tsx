@@ -18,8 +18,8 @@ import { Line, LineChart, ResponsiveContainer, YAxis } from 'recharts';
 import { useLocation, useParams } from 'wouter';
 import { Timeline } from '../components/timeline';
 import { useEcosystemData } from '../hooks/use-ecosystem-data';
-import { getDomainColor, getSeverityColor } from '../lib/utils';
-import type { DomainData, TimelineEvent } from '../types';
+import { getSeverityColor } from '../lib/utils';
+import type { TimelineEvent } from '../types';
 
 const DOMAIN_ICONS: Record<string, ElementType> = {
   ShieldAlert,

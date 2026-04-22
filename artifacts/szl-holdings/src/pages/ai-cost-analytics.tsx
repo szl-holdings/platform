@@ -131,7 +131,7 @@ function BudgetStatusBar({
   );
 }
 
-const API_BASE = '/api';
+const _API_BASE = '/api';
 
 export default function AICostAnalyticsPage() {
   const {
@@ -160,7 +160,7 @@ export default function AICostAnalyticsPage() {
   const topModel = Object.entries(costData?.byModel ?? {}).sort(
     (a, b) => b[1].spend - a[1].spend,
   )[0];
-  const topAgent = Object.entries(costData?.byAgent ?? {}).sort(
+  const _topAgent = Object.entries(costData?.byAgent ?? {}).sort(
     (a, b) => b[1].spend - a[1].spend,
   )[0];
   const activeBudgets = (costData?.budgetStatuses ?? []).filter((b) => b.status !== 'ok');

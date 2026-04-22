@@ -13,12 +13,10 @@ import {
   EyeOff,
   Pencil,
   Play,
-  Plus,
   RefreshCw,
   RotateCcw,
   Save,
   Shield,
-  Trash2,
   Wifi,
   WifiOff,
   X,
@@ -206,7 +204,7 @@ export default function IntegrationManager() {
 
   const syncMutation = useStandardMutation({
     mutationFn: (name: string) => apiFetch(`/admin/connectors/${name}/sync`, { method: 'POST' }),
-    onSettled: (_, __, name) => {
+    onSettled: (_, __, _name) => {
       setSyncing(null);
       qc.invalidateQueries({ queryKey: ['admin-connectors'] });
     },
@@ -322,7 +320,7 @@ export default function IntegrationManager() {
         ) : (
           <div className="divide-y divide-border">
             {filtered.map((c) => {
-              const statusStyle = STATUS_COLORS[c.status] ?? STATUS_COLORS['MANUAL_REQUIRED'];
+              const statusStyle = STATUS_COLORS[c.status] ?? STATUS_COLORS.MANUAL_REQUIRED;
               const isExpanded = expanded === c.name;
               const schedule = schedules[c.name] ?? 'disabled';
               return (

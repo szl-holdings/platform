@@ -8,7 +8,6 @@ import {
   Clock,
   DollarSign,
   Eye,
-  Target,
   TrendingUp,
   Users,
   Zap,
@@ -461,7 +460,7 @@ export default function LandingPage() {
                 'Role changes had left approvals with no acknowledged owner — caught immediately',
               accent: '#0c4a6e',
             },
-          ].map((item, i) => (
+          ].map((item, _i) => (
             <div key={item.label} className="rounded-xl p-4 border border-white/5 bg-white/[0.02]">
               <div className="text-xl font-bold mb-1" style={{ color: item.accent }}>
                 {item.metric}

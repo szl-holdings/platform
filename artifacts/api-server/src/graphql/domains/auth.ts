@@ -1,4 +1,4 @@
-import { GraphQLError } from 'graphql';
+
 
 export const authTypeDefs = `#graphql
   type User {

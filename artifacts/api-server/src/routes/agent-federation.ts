@@ -125,7 +125,7 @@ federationRouter.get('/federation/agents', (_req, res) => {
 });
 
 federationRouter.get('/federation/agents/:agentId', (req, res) => {
-  const agent = AGENT_REGISTRY.find((a) => a.id === req.params['agentId']);
+  const agent = AGENT_REGISTRY.find((a) => a.id === req.params.agentId);
   if (!agent) {
     res.status(404).json({ error: 'Agent not found', available: AGENT_REGISTRY.map((a) => a.id) });
     return;
@@ -134,7 +134,7 @@ federationRouter.get('/federation/agents/:agentId', (req, res) => {
 });
 
 federationRouter.get('/federation/agents/:agentId/capabilities', (req, res) => {
-  const agent = AGENT_REGISTRY.find((a) => a.id === req.params['agentId']);
+  const agent = AGENT_REGISTRY.find((a) => a.id === req.params.agentId);
   if (!agent) {
     res.status(404).json({ error: 'Agent not found' });
     return;
@@ -158,14 +158,14 @@ federationRouter.get('/federation/agents/:agentId/capabilities', (req, res) => {
 });
 
 federationRouter.post('/federation/agents/:agentId/chat', async (req, res) => {
-  const agent = AGENT_REGISTRY.find((a) => a.id === req.params['agentId']);
+  const agent = AGENT_REGISTRY.find((a) => a.id === req.params.agentId);
   if (!agent) {
     res.status(404).json({ error: 'Agent not found' });
     return;
   }
 
-  const authHeader = req.headers['authorization'];
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
     res.status(401).json({
       error: 'Authentication required',
       hint: 'Provide Bearer token in Authorization header',

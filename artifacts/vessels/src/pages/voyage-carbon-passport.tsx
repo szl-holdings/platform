@@ -202,7 +202,7 @@ export default function VoyageCarbonPassport() {
   }
 
   const { voyages, totals } = data;
-  const selected = voyages.find((v) => v.id === selectedId);
+  const _selected = voyages.find((v) => v.id === selectedId);
 
   return (
     <div className="min-h-screen bg-[#060810] text-white p-6 space-y-6">

@@ -7,14 +7,11 @@ import {
   ChevronRight,
   Clock,
   Eye,
-  GitBranch,
   Info,
-  Lock,
   Play,
   RefreshCw,
   Shield,
   XCircle,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -543,7 +540,7 @@ export default function AlloyPolicySimPage() {
               className="rounded-md p-4 cursor-pointer hover:bg-white/[0.02] transition-colors"
               style={{
                 background: BG.surface,
-                border: `1px solid ${activeScenario?.name === s.name ? ACCENT + '40' : BORDER.subtle}`,
+                border: `1px solid ${activeScenario?.name === s.name ? `${ACCENT}40` : BORDER.subtle}`,
               }}
               onClick={() => !isRunning && runSim(s)}
             >
@@ -658,7 +655,7 @@ export default function AlloyPolicySimPage() {
                           )}
                           <p
                             className="text-[9px] italic"
-                            style={{ color: OUTCOME_CFG[step.outcome].color + 'cc' }}
+                            style={{ color: `${OUTCOME_CFG[step.outcome].color}cc` }}
                           >
                             {step.reason}
                           </p>
@@ -689,7 +686,7 @@ export default function AlloyPolicySimPage() {
                           className="rounded-md p-2.5 text-center"
                           style={{
                             background: BG.elevated,
-                            border: `1px solid ${val > 0 ? cfg.color + '20' : BORDER.subtle}`,
+                            border: `1px solid ${val > 0 ? `${cfg.color}20` : BORDER.subtle}`,
                           }}
                         >
                           <div

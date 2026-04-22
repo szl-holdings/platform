@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
@@ -50,7 +50,7 @@ const CREDIT_COLORS: Record<string, string> = {
   D: '#ef4444',
 };
 
-const PAYMENT_COLORS: Record<string, string> = {
+const _PAYMENT_COLORS: Record<string, string> = {
   excellent: '#34d399',
   good: '#60a5fa',
   fair: '#fbbf24',
@@ -384,7 +384,7 @@ export default function RentRollScreen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · RENT ROLL</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · RENT ROLL</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Lease Ledger</Text>
         </View>
         {expiringCount > 0 && (
@@ -416,7 +416,7 @@ export default function RentRollScreen() {
               styles.propertyTab,
               {
                 borderColor: selectedProperty === p.id ? ACCENT : colors.border,
-                backgroundColor: selectedProperty === p.id ? ACCENT + '12' : 'transparent',
+                backgroundColor: selectedProperty === p.id ? `${ACCENT}12` : 'transparent',
               },
             ]}
           >

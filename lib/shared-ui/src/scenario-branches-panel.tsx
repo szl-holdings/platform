@@ -10,7 +10,7 @@
  * Domain data is passed via props. The branching UI and interaction model
  * are shared across all surfaces.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { cn } from './utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────

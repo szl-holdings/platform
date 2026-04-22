@@ -1,16 +1,7 @@
 import {
   AlertTriangle,
-  Calendar,
   CheckCircle,
-  ChevronRight,
-  Clock,
-  GitBranch,
-  RefreshCw,
-  Shield,
-  TrendingUp,
-  Users,
   XCircle,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -272,7 +263,7 @@ export default function ChangeManagement() {
                   className="w-full text-left p-3 rounded-lg transition-all"
                   style={{
                     background: selected.id === c.id ? `${GOLD}08` : DS.surface,
-                    border: `1px solid ${selected.id === c.id ? GOLD + '30' : DS.border}`,
+                    border: `1px solid ${selected.id === c.id ? `${GOLD}30` : DS.border}`,
                   }}
                 >
                   <div className="flex items-start gap-2 mb-1">

@@ -506,7 +506,7 @@ function LedgerDetail({ entry }: { entry: RunLedgerEntry }) {
                     className="h-full rounded-full"
                     style={{
                       width: `${Math.min((timing.durationMs / (entry.totalDurationMs || 1)) * 100, 100)}%`,
-                      background: ACCENT + '80',
+                      background: `${ACCENT}80`,
                     }}
                   />
                 </div>

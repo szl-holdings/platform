@@ -96,7 +96,7 @@ function traceEntityFunnel(
 
   const stepToStepMs: number[] = [];
   for (let i = 1; i < stepTimestamps.length; i++) {
-    stepToStepMs.push(stepTimestamps[i]!.getTime() - stepTimestamps[i - 1]!.getTime());
+    stepToStepMs.push(stepTimestamps[i]?.getTime() - stepTimestamps[i - 1]?.getTime());
   }
 
   return {
@@ -116,7 +116,7 @@ export function runFunnelAnalysis(
   events: FunnelEvent[],
   from: Date,
   to: Date,
-  segmentDimension?: string,
+  _segmentDimension?: string,
 ): FunnelAnalysisResult {
   const { steps, funnelId, domain } = definition;
 

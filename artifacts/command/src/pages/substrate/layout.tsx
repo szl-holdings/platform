@@ -1,6 +1,5 @@
 import {
   Activity,
-  AlertTriangle,
   CheckSquare,
   ChevronRight,
   FlaskConical,
@@ -9,7 +8,6 @@ import {
   LayoutDashboard,
   Search,
   Shield,
-  User,
   Zap,
 } from 'lucide-react';
 import { type ReactNode, useEffect, useState } from 'react';
@@ -100,7 +98,7 @@ export function SubstrateLayout({ children, pendingCount = 0 }: SubstrateLayoutP
   const PerspIcon = currentPerspective.icon;
 
   function isActive(href: string, exact?: boolean): boolean {
-    return exact ? location === href || location === href + '/' : location.startsWith(href);
+    return exact ? location === href || location === `${href}/` : location.startsWith(href);
   }
 
   return (

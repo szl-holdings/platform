@@ -1,38 +1,21 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   db,
-  dosAbTestsTable,
   dosAnalyticsEventsTable,
   dosArticlesTable,
-  dosArticleVersionsTable,
-  dosAudienceSegmentsTable,
-  dosAuthorProfilesTable,
   dosAutomationRunsTable,
   dosCampaignLinksTable,
   dosCampaignsTable,
   dosCarouselProjectsTable,
   dosCarouselSlidesTable,
-  dosContentCalendarItemsTable,
-  dosContentLifecycleTable,
-  dosCtaBlocksTable,
-  dosDistributionTargetsTable,
-  dosEditorialPillarsTable,
   dosIntegrationStatusTable,
-  dosLeadNotesTable,
   dosLeadsTable,
   dosLinktreeConfigTable,
-  dosMonetizationRulesTable,
   dosNewslettersTable,
   dosPageViewsTable,
-  dosPublicationUrlsTable,
-  dosSeoKeywordsTable,
-  dosSiteSettingsTable,
-  dosTrendSignalsTable,
-  dosViralityScoresTable,
   dosXPostsTable,
 } from '@szl-holdings/db';
-import { createHash, randomBytes } from 'crypto';
-import { and, asc, count, desc, eq, gte, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -41,7 +24,6 @@ import {
   publishNewsletterToSubstack,
   publishXPost,
 } from '../../jobs/launch-publish-scheduler';
-import { computeLeadScore } from '../../lib/lead-scoring';
 import { guardSeedInProduction } from '../../lib/seed-guard';
 import { listQuerySchema, validateBody, validateQuery } from '../../lib/validation';
 import { authMiddleware } from '../../middlewares/auth';

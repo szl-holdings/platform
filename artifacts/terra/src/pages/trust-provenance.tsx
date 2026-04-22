@@ -9,14 +9,13 @@ import {
 } from '@szl-holdings/shared-ui/simulation-cockpit';
 import {
   AlertCircle,
-  Building2,
   Clock,
   FileSearch,
   Loader2,
   Shield,
   TrendingUp,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PendingAutonomyApprovalsPanel } from '../components/pending-autonomy-approvals';
 
 const ACCENT = '#f59e0b';
@@ -83,8 +82,7 @@ function useApiData<T>(url: string): {
           setLoading(false);
         }
       })
-      .catch((err) => {
-        console.warn(`[trust-provenance] fetch failed: ${url}`, err);
+      .catch((_err) => {
         if (!cancelled) {
           setError(true);
           setLoading(false);

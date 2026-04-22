@@ -127,11 +127,11 @@ export function ProductTour({
       window.removeEventListener('resize', updateRect);
       window.removeEventListener('scroll', updateRect, true);
     };
-  }, [step?.target, visible, currentStep]);
+  }, [step?.target, visible]);
 
   React.useEffect(() => {
     if (visible && step) onStepChange?.(currentStep, step);
-  }, [currentStep, visible]);
+  }, [currentStep, visible, step, onStepChange]);
 
   const handleDismiss = React.useCallback(() => {
     setVisible(false);

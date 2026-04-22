@@ -26,9 +26,9 @@
  *   pnpm --filter @szl-holdings/api-server exec tsx src/scripts/apply-validation-codemod.ts --dry
  */
 
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
-import { dirname, join, relative } from 'path';
-import { fileURLToPath } from 'url';
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -64,7 +64,7 @@ function findMatchingParen(src: string, openIdx: number): number {
   let inTpl = false;
   let inLineComment = false;
   let inBlockComment = false;
-  let prev = '';
+  let _prev = '';
   while (i < src.length) {
     const c = src[i];
     const next = src[i + 1];
@@ -78,14 +78,14 @@ function findMatchingParen(src: string, openIdx: number): number {
     } else if (inStr) {
       if (c === '\\') {
         i += 2;
-        prev = '';
+        _prev = '';
         continue;
       }
       if (c === inStr) inStr = null;
     } else if (inTpl) {
       if (c === '\\') {
         i += 2;
-        prev = '';
+        _prev = '';
         continue;
       }
       if (c === '`') inTpl = false;
@@ -106,7 +106,7 @@ function findMatchingParen(src: string, openIdx: number): number {
         if (depth === 0) return i;
       }
     }
-    prev = c;
+    _prev = c;
     i++;
   }
   return -1;
@@ -217,7 +217,7 @@ function processFile(filePath: string): FileResult {
       inserts.push('validateQuery(anyQuerySchema)');
       queryAdds++;
     }
-    const insertText = ', ' + inserts.join(', ');
+    const insertText = `, ${inserts.join(', ')}`;
 
     // Insert right after pathEnd (which is the closing quote/bracket index)
     src = src.slice(0, pathEnd + 1) + insertText + src.slice(pathEnd + 1);
@@ -272,7 +272,7 @@ function ensureValidationImports(
     /\\/g,
     '/',
   );
-  const importPath = rel.startsWith('.') ? rel : './' + rel;
+  const importPath = rel.startsWith('.') ? rel : `./${rel}`;
   const names = Array.from(required).sort().join(', ');
   const importLine = `import { ${names} } from "${importPath}";\n`;
 
@@ -289,30 +289,19 @@ function ensureValidationImports(
 const files = collectRouteFiles(ROUTES_DIR);
 const results = files.map(processFile);
 
-let totalBody = 0,
-  totalQuery = 0,
+let _totalBody = 0,
+  _totalQuery = 0,
   filesChanged = 0,
-  totalRoutes = 0;
+  _totalRoutes = 0;
 for (const r of results) {
-  totalBody += r.bodyAdds;
-  totalQuery += r.queryAdds;
-  totalRoutes += r.routesScanned;
+  _totalBody += r.bodyAdds;
+  _totalQuery += r.queryAdds;
+  _totalRoutes += r.routesScanned;
   if (r.bodyAdds || r.queryAdds) filesChanged++;
 }
-
-console.log(`\n=== apply-validation-codemod ===`);
-console.log(`Mode             : ${DRY ? 'DRY RUN (no writes)' : 'WRITE'}`);
-console.log(`Files scanned    : ${files.length}`);
-console.log(`Files modified   : ${filesChanged}`);
-console.log(`Routes scanned   : ${totalRoutes}`);
-console.log(`validateBody adds: ${totalBody}`);
-console.log(`validateQuery adds: ${totalQuery}`);
 if (filesChanged > 0 && filesChanged <= 50) {
-  console.log('\nModified files:');
   for (const r of results) {
     if (r.bodyAdds || r.queryAdds) {
-      console.log(`  ${relative(ROUTES_DIR, r.file)}  body+${r.bodyAdds} query+${r.queryAdds}`);
     }
   }
 }
-console.log();

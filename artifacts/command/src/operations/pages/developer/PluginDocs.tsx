@@ -1,4 +1,4 @@
-import { Bell, Box, Database, Layers, Puzzle } from 'lucide-react';
+import { Bell, Box, Database, Layers, } from 'lucide-react';
 
 export default function PluginDocs() {
   return (

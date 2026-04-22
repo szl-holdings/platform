@@ -18,7 +18,6 @@ export async function seedDreamscapeData(): Promise<void> {
         `Seed data is only permitted in local-dev, internal-preview, and demo modes.`,
     );
   }
-  console.log('[seed-dreamscape] Starting Creative Workflows seed data...');
 
   // Check ALL Dreamscape tables — previously only campaigns was checked, so a
   // partial-state restart (campaigns inserted but a downstream table failed)
@@ -46,15 +45,9 @@ export async function seedDreamscapeData(): Promise<void> {
     assetCount > 0 &&
     reviewCount > 0
   ) {
-    console.log(
-      `[seed-dreamscape] All Dreamscape tables already populated (campaigns=${campaignCount}, scripts=${scriptCount}, storyboards=${storyboardCount}, voice=${voiceCount}, assets=${assetCount}, reviews=${reviewCount}), skipping.`,
-    );
     return;
   }
   if (campaignCount > 0) {
-    console.warn(
-      `[seed-dreamscape] Partial seed state detected — campaigns=${campaignCount} exist but downstream tables are empty (scripts=${scriptCount}, storyboards=${storyboardCount}, voice=${voiceCount}, assets=${assetCount}, reviews=${reviewCount}). Aborting to avoid duplicating campaigns; please clear dreamscape_* tables to re-seed.`,
-    );
     return;
   }
 
@@ -169,8 +162,6 @@ export async function seedDreamscapeData(): Promise<void> {
     ])
     .returning();
 
-  console.log(`[seed-dreamscape] Inserted ${campaigns.length} campaigns.`);
-
   if (campaigns.length === 0) return;
 
   const [horizon, alloy, vessels] = campaigns;
@@ -241,9 +232,7 @@ END CARD: alloy.szlholdings.com — Request Access`,
     ])
     .returning();
 
-  console.log(`[seed-dreamscape] Inserted ${scripts.length} scripts.`);
-
-  const storyboards = await db
+  const _storyboards = await db
     .insert(dreamscapeStoryboardsTable)
     .values([
       {
@@ -310,8 +299,6 @@ END CARD: alloy.szlholdings.com — Request Access`,
       },
     ])
     .returning();
-
-  console.log(`[seed-dreamscape] Inserted ${storyboards.length} storyboards.`);
 
   await db.insert(dreamscapeVoiceAssetsTable).values([
     {
@@ -431,6 +418,4 @@ END CARD: alloy.szlholdings.com — Request Access`,
       status: 'changes_requested',
     },
   ]);
-
-  console.log('[seed-dreamscape] Creative Workflows seed data complete.');
 }

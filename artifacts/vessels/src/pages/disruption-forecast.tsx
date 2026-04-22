@@ -2,21 +2,15 @@ import { color as dsColor } from '@szl-holdings/design-system';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
   AlertTriangle,
-  Anchor,
   BarChart3,
-  ChevronDown,
   ChevronRight,
   Clock,
   Filter,
   Globe,
-  MapPin,
   Navigation,
   RefreshCw,
   Shield,
-  TrendingUp,
-  Wind,
   Zap,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -304,7 +298,7 @@ const severityColors: Record<string, string> = {
   Low: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
 };
 
-const typeColors: Record<string, string> = {
+const _typeColors: Record<string, string> = {
   Geopolitical: 'text-red-400',
   Security: 'text-orange-400',
   Congestion: 'text-amber-400',

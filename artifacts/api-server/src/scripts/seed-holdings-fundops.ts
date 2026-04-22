@@ -30,14 +30,12 @@ function daysAhead(n: number) {
 }
 
 export async function seedHoldingsFundops() {
-  console.log('[seed-holdings-fundops] Starting Holdings & Fund Ops seed...');
 
   const existing = await db
     .select({ id: holdingsVenturesTable.id })
     .from(holdingsVenturesTable)
     .limit(1);
   if (existing.length > 0) {
-    console.log('[seed-holdings-fundops] Ventures already seeded, skipping main block.');
     await seedFundNavLpReports();
     return { skipped: true };
   }
@@ -133,9 +131,7 @@ export async function seedHoldingsFundops() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-holdings-fundops] Seeded ${ventures.length} ventures`);
-
-  const milestones = await db
+  const _milestones = await db
     .insert(holdingsMilestonesTable)
     .values([
       {
@@ -227,8 +223,6 @@ export async function seedHoldingsFundops() {
       },
     ])
     .returning();
-
-  console.log(`[seed-holdings-fundops] Seeded ${milestones.length} milestones`);
 
   await db.insert(holdingsMetricsTable).values([
     {
@@ -346,8 +340,6 @@ export async function seedHoldingsFundops() {
     },
   ]);
 
-  console.log(`[seed-holdings-fundops] Seeded metrics`);
-
   await db.insert(holdingsMetricsTable).values([
     {
       ventureId: null,
@@ -393,8 +385,6 @@ export async function seedHoldingsFundops() {
     },
   ]);
 
-  console.log(`[seed-holdings-fundops] Seeded company fundamentals`);
-
   await db.insert(holdingsLeadershipTable).values([
     {
       name: 'Stephen L.',
@@ -427,8 +417,6 @@ export async function seedHoldingsFundops() {
       sortOrder: 5,
     },
   ]);
-
-  console.log(`[seed-holdings-fundops] Seeded leadership`);
 
   await db.insert(holdingsInquiriesTable).values([
     {
@@ -468,8 +456,6 @@ export async function seedHoldingsFundops() {
       status: 'new',
     },
   ]);
-
-  console.log(`[seed-holdings-fundops] Seeded inquiries`);
 
   await db.insert(fundPortfolioFinancialsTable).values([
     {
@@ -573,8 +559,6 @@ export async function seedHoldingsFundops() {
     },
   ]);
 
-  console.log(`[seed-holdings-fundops] Seeded portfolio financials`);
-
   await db.insert(fundPortfolioKpisTable).values([
     {
       companySlug: 'vessels-maritime',
@@ -641,8 +625,6 @@ export async function seedHoldingsFundops() {
     },
   ]);
 
-  console.log(`[seed-holdings-fundops] Seeded portfolio KPIs`);
-
   const capitalArtifacts = await db
     .insert(capitalArtifactsTable)
     .values([
@@ -696,8 +678,6 @@ export async function seedHoldingsFundops() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-holdings-fundops] Seeded capital artifacts`);
-
   const lenderPackets = await db
     .insert(lenderPacketsTable)
     .values([
@@ -724,8 +704,6 @@ export async function seedHoldingsFundops() {
       },
     ])
     .returning();
-
-  console.log(`[seed-holdings-fundops] Seeded lender packets`);
 
   await db.insert(lenderPacketDeliverables).values([
     {
@@ -777,8 +755,6 @@ export async function seedHoldingsFundops() {
     },
   ]);
 
-  console.log(`[seed-holdings-fundops] Seeded lender deliverables`);
-
   const investorPackets = await db
     .insert(investorPacketsTable)
     .values([
@@ -807,8 +783,6 @@ export async function seedHoldingsFundops() {
       },
     ])
     .returning();
-
-  console.log(`[seed-holdings-fundops] Seeded investor packets`);
 
   await db.insert(investorPacketDeliverables).values([
     {
@@ -871,8 +845,6 @@ export async function seedHoldingsFundops() {
       sortOrder: 1,
     },
   ]);
-
-  console.log(`[seed-holdings-fundops] Seeded investor deliverables`);
 
   await db.insert(fundraisingMilestonesTable).values([
     {
@@ -943,8 +915,6 @@ export async function seedHoldingsFundops() {
     },
   ]);
 
-  console.log(`[seed-holdings-fundops] Seeded fundraising milestones`);
-
   await db.insert(financialModelsTable).values([
     {
       title: '12-Month Operating Model — Q2 2026',
@@ -975,8 +945,6 @@ export async function seedHoldingsFundops() {
       artifactId: capitalArtifacts[4].id,
     },
   ]);
-
-  console.log(`[seed-holdings-fundops] Seeded financial models`);
 
   await db.insert(useOfFundsVersionsTable).values([
     {
@@ -1011,8 +979,6 @@ export async function seedHoldingsFundops() {
       status: 'final',
     },
   ]);
-
-  console.log(`[seed-holdings-fundops] Seeded use of funds versions`);
 
   const diligenceChecklists = await db
     .insert(diligenceChecklistsTable)
@@ -1131,8 +1097,6 @@ export async function seedHoldingsFundops() {
     },
   ]);
 
-  console.log(`[seed-holdings-fundops] Seeded diligence checklists and items`);
-
   await db.insert(capTablePlaceholdersTable).values([
     {
       holderName: 'Stephen L. (Founder)',
@@ -1187,11 +1151,7 @@ export async function seedHoldingsFundops() {
     },
   ]);
 
-  console.log(`[seed-holdings-fundops] Seeded cap table placeholders`);
-
   await seedFundNavLpReports();
-
-  console.log('[seed-holdings-fundops] Holdings & Fund Ops seed complete.');
   return { seeded: true };
 }
 
@@ -1357,9 +1317,7 @@ export async function seedFundNavLpReports() {
         capitalRaised: '0',
       },
     ]);
-    console.log('[seed-holdings-fundops] Seeded 6 portfolio financial records');
   } else {
-    console.log('[seed-holdings-fundops] Portfolio financials already present, skipping.');
   }
 
   const existingNav = await db
@@ -1466,9 +1424,7 @@ export async function seedFundNavLpReports() {
         notes: 'Q1 2026 mark-to-market — Lyte enterprise expansion',
       },
     ]);
-    console.log('[seed-holdings-fundops] Seeded 6 quarterly NAV records');
   } else {
-    console.log('[seed-holdings-fundops] NAV records already present, skipping.');
   }
 
   const existingReports = await db
@@ -1630,8 +1586,6 @@ export async function seedFundNavLpReports() {
         distributedAt: new Date('2025-04-14'),
       },
     ]);
-    console.log('[seed-holdings-fundops] Seeded 5 quarterly LP reports');
   } else {
-    console.log('[seed-holdings-fundops] LP reports already present, skipping.');
   }
 }

@@ -7,8 +7,8 @@ import {
   complianceSupervisionQueueTable,
   db,
 } from '@szl-holdings/db';
-import crypto from 'crypto';
-import { and, desc, eq, gte, ilike, lte, or, sql } from 'drizzle-orm';
+import crypto from 'node:crypto';
+import { and, desc, eq, gte, lte, } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -19,7 +19,7 @@ import {
   sendSuccess,
 } from '../lib/api-response';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
-import { authMiddleware, requireRole } from '../middlewares/auth';
+import { authMiddleware, } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
@@ -133,7 +133,7 @@ const CreateCalendarSchema = z.object({
 
 // All mock compliance data functions removed — data is sourced exclusively from PostgreSQL.
 
-router.get('/compliance/posture', authMiddleware(), async (req, res) => {
+router.get('/compliance/posture', authMiddleware(), async (_req, res) => {
   try {
     const [latestScore] = await db
       .select()

@@ -7,8 +7,8 @@
  *   npx tsx scripts/github/stars/print-system-summary.ts
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 const FILES = [
   {
@@ -99,62 +99,24 @@ function formatBytes(filePath: string): string {
 }
 
 function main() {
-  const now = new Date().toISOString().split('T')[0];
+  const _now = new Date().toISOString().split('T')[0];
 
-  console.log('================================================================');
-  console.log('  SZL Holdings — GitHub Stars & Lists System');
-  console.log(`  Summary as of: ${now}`);
-  console.log('================================================================\n');
-
-  let totalFiles = 0;
-  let missingFiles = 0;
+  let _totalFiles = 0;
+  let _missingFiles = 0;
 
   for (const { section, entries } of FILES) {
-    console.log(`${section}`);
-    console.log('─'.repeat(section.length));
 
     for (const entry of entries) {
       const status = checkFile(entry.path);
-      const size = status === 'OK' ? formatBytes(entry.path) : '—';
-      const statusIcon = status === 'OK' ? '✓' : '✗';
-      console.log(`  ${statusIcon} ${path.basename(entry.path)}`);
-      console.log(`    ${entry.description}`);
+      const _size = status === 'OK' ? formatBytes(entry.path) : '—';
+      const _statusIcon = status === 'OK' ? '✓' : '✗';
       if (status === 'OK') {
-        console.log(`    Path: ${entry.path} (${size})`);
       } else {
-        console.log(`    Path: ${entry.path} [MISSING]`);
-        missingFiles++;
+        _missingFiles++;
       }
-      console.log('');
-      totalFiles++;
+      _totalFiles++;
     }
   }
-
-  console.log('================================================================');
-  console.log(`  Total files: ${totalFiles}`);
-  console.log(
-    `  Status: ${missingFiles === 0 ? 'All files present' : `${missingFiles} file(s) missing — run task to regenerate`}`,
-  );
-  console.log('================================================================\n');
-
-  console.log('Quick reference — automation scripts:\n');
-  console.log(
-    '  # Export starred repos (requires GITHUB_TOKEN or public unauthenticated access)\n' +
-      '  npx tsx scripts/github/stars/export-starred-repos.ts\n',
-  );
-  console.log(
-    '  # Generate category reports from export\n' +
-      '  npx tsx scripts/github/stars/generate-category-report.ts\n',
-  );
-  console.log(
-    '  # View canonical list definitions + guided setup instructions\n' +
-      '  npx tsx scripts/github/stars/scaffold-list-taxonomy.ts\n',
-  );
-  console.log(
-    '  # Print this summary again\n' + '  npx tsx scripts/github/stars/print-system-summary.ts\n',
-  );
-  console.log('  Outputs are written to: exports/github-stars/\n');
-  console.log('================================================================\n');
 }
 
 main();

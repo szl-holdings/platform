@@ -1,6 +1,5 @@
 import { InMemoryStore } from '@workspace/memory-fabric';
-import type { TraceRecord } from '@workspace/trace-graph';
-import { defaultTraceStore } from '@workspace/trace-graph';
+import { type TraceRecord, defaultTraceStore } from '@workspace/trace-graph';
 import { describe, expect, it } from 'vitest';
 import { InMemoryCandidateSkillLibrary } from './candidate-skill-library.js';
 import { classifyFailureMode } from './classifier.js';

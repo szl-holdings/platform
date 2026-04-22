@@ -11,8 +11,8 @@
  *   npx tsx scripts/media/generate-wiki-gallery.ts --output docs/wiki/Screenshots-and-Demos.md
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const ASSETS_DIR =
   process.argv.find((_, i) => process.argv[i - 1] === '--assets-dir') || 'docs/wiki/assets';
@@ -218,7 +218,6 @@ npx tsx scripts/media/generate-wiki-gallery.ts
 
 function main() {
   if (!fs.existsSync(ASSETS_DIR)) {
-    console.error(`Assets directory not found: ${ASSETS_DIR}`);
     process.exit(1);
   }
 
@@ -228,11 +227,8 @@ function main() {
   });
 
   if (files.length === 0) {
-    console.log('No image files found in assets directory.');
     process.exit(0);
   }
-
-  console.log(`Found ${files.length} assets in ${ASSETS_DIR}`);
 
   const entries: GalleryEntry[] = files.map(getEntry);
   const markdown = generateGalleryMarkdown(entries);
@@ -243,8 +239,6 @@ function main() {
   }
 
   fs.writeFileSync(OUTPUT_FILE, markdown, 'utf-8');
-  console.log(`Generated gallery: ${OUTPUT_FILE}`);
-  console.log(`  ${entries.length} assets documented`);
 }
 
 main();

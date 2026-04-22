@@ -1,6 +1,5 @@
-import type { MemoryStore } from '@workspace/memory-fabric';
-import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
-import { randomUUID } from 'crypto';
+import { type MemoryStore, defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
+import { randomUUID } from 'node:crypto';
 import type { PhaseResult, WorldModelUpdate } from '../types.js';
 import type { PerceiveOutput } from './perceive.js';
 
@@ -42,23 +41,23 @@ export async function orientPhase(
   let uncertaintyScore = 0;
 
   for (const signal of perceptOutput.raw.rawSignals) {
-    if (signal['entityId']) {
+    if (signal.entityId) {
       entities.push({
-        entityId: signal['entityId'] as string,
-        entityType: (signal['entityType'] ?? 'unknown') as string,
+        entityId: signal.entityId as string,
+        entityType: (signal.entityType ?? 'unknown') as string,
         attributes: signal as Record<string, unknown>,
-        confidence: typeof signal['confidence'] === 'number' ? signal['confidence'] : 0.8,
+        confidence: typeof signal.confidence === 'number' ? signal.confidence : 0.8,
       });
     }
 
-    if (signal['risk'] && typeof signal['risk'] === 'number') {
-      riskScore = Math.max(riskScore, signal['risk'] as number);
+    if (signal.risk && typeof signal.risk === 'number') {
+      riskScore = Math.max(riskScore, signal.risk as number);
     }
-    if (signal['anomaly']) {
-      detectedAnomalies.push(String(signal['anomaly']));
+    if (signal.anomaly) {
+      detectedAnomalies.push(String(signal.anomaly));
     }
-    if (signal['novelty'] && typeof signal['novelty'] === 'number') {
-      noveltyScore = Math.max(noveltyScore, signal['novelty'] as number);
+    if (signal.novelty && typeof signal.novelty === 'number') {
+      noveltyScore = Math.max(noveltyScore, signal.novelty as number);
     }
   }
 

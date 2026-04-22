@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import type { RagSourceType, SensitivityLevel } from './types.js';
 
 export interface ChunkMetadata {
@@ -158,18 +158,13 @@ export async function ingestToVectorStore(
       const res = batchResult.results[i];
       if (!res || res.error) return { ...chunk, embedding: null };
       if (res.embedding.length !== RAG_DB_DIMENSIONS) {
-        console.warn(
-          `[rag-ingestion] Skipping embedding for chunk ${chunk.id}: ` +
-            `expected ${RAG_DB_DIMENSIONS} dimensions, got ${res.embedding.length} from ${res.provider}/${res.model}`,
-        );
         return { ...chunk, embedding: null };
       }
       return { ...chunk, embedding: res.embedding };
     });
     await upsertChunksBatch(chunksWithEmbeddings);
     return chunks;
-  } catch (err) {
-    console.warn('[rag-ingestion] Failed to persist chunks to vector store:', err);
+  } catch (_err) {
     return chunks;
   }
 }
@@ -369,8 +364,7 @@ export async function runFullReindex(): Promise<{ processed: number; errors: num
         errors++;
       }
     }
-  } catch (err) {
-    console.warn('[rag-reindex] Failed to reindex AI decisions:', err);
+  } catch (_err) {
   }
 
   try {
@@ -384,8 +378,7 @@ export async function runFullReindex(): Promise<{ processed: number; errors: num
         errors++;
       }
     }
-  } catch (err) {
-    console.warn('[rag-reindex] Failed to reindex case memory:', err);
+  } catch (_err) {
   }
 
   try {
@@ -414,8 +407,7 @@ export async function runFullReindex(): Promise<{ processed: number; errors: num
         errors++;
       }
     }
-  } catch (err) {
-    console.warn('[rag-reindex] Failed to reindex agent knowledge:', err);
+  } catch (_err) {
   }
 
   try {
@@ -443,8 +435,7 @@ export async function runFullReindex(): Promise<{ processed: number; errors: num
         errors++;
       }
     }
-  } catch (err) {
-    console.warn('[rag-reindex] Failed to reindex incident reports:', err);
+  } catch (_err) {
   }
 
   try {
@@ -474,10 +465,7 @@ export async function runFullReindex(): Promise<{ processed: number; errors: num
         errors++;
       }
     }
-  } catch (err) {
-    console.warn('[rag-reindex] Failed to reindex documents:', err);
+  } catch (_err) {
   }
-
-  console.log(`[rag-reindex] Reindex complete: ${processed} processed, ${errors} errors`);
   return { processed, errors };
 }

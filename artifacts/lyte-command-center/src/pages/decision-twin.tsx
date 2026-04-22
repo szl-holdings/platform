@@ -1,12 +1,10 @@
 import {
-  DECISION_TWIN_ACTION_DESCRIPTIONS,
   DECISION_TWIN_ACTION_LABELS,
   DECISION_TWIN_ENGINE_VERSION,
   type DecisionTwinAction,
   type DecisionTwinScenario,
   deltaLabel,
   getBestScenario,
-  PRISM_DIMENSION_ICONS,
   PRISM_DIMENSION_LABELS,
   type PRISMDimension,
   riskLabel,
@@ -15,25 +13,15 @@ import {
 } from '@workspace/simulation';
 import {
   Activity,
-  AlertTriangle,
-  ArrowRight,
-  BarChart2,
-  Brain,
   CheckCircle2,
-  ChevronDown,
-  ChevronUp,
   Clock,
   GitBranch,
-  Info,
   Link2,
   Lock,
-  Minus,
   Printer,
   Shield,
   TrendingDown,
-  TrendingUp,
   Users,
-  XCircle,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearch } from 'wouter';
@@ -729,7 +717,7 @@ export default function DecisionTwinPage() {
     const params = new URLSearchParams(search);
     const fromUrl = params.get('signal');
     if (fromUrl && signalItems.some((s) => s.id === fromUrl)) return fromUrl;
-    return signalItems[0]!.id;
+    return signalItems[0]?.id;
   }
 
   const [selectedSignalId, setSelectedSignalId] = useState(resolveInitialSignalId);

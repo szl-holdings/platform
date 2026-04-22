@@ -2,8 +2,6 @@ import { InfraSimulator, seededRng } from '@szl-holdings/observability';
 import {
   Activity,
   AlertTriangle,
-  BarChart3,
-  Brain,
   Cpu,
   DollarSign,
   RefreshCw,
@@ -11,7 +9,7 @@ import {
   TrendingUp,
   Zap,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface GpuState {
   id: string;

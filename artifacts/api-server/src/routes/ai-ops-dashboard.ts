@@ -74,8 +74,7 @@ import {
 } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
-import type { AuthenticatedUser } from '../middlewares/auth';
-import { authMiddleware, requireRole } from '../middlewares/auth';
+import { type AuthenticatedUser, authMiddleware, requireRole } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
@@ -231,23 +230,23 @@ router.get(
         return;
       }
       const orgId = getOrgId(req.user);
-      const domain = req.query['domain'] as string | undefined;
-      const requiresReviewQ = req.query['requiresReview'] as string | undefined;
-      const status = req.query['status'] as string | undefined;
-      const riskLevel = req.query['riskLevel'] as string | undefined;
-      const sinceQ = req.query['since'] as string | undefined;
-      const untilQ = req.query['until'] as string | undefined;
-      const limitQ = req.query['limit'] as string | undefined;
-      const offsetQ = req.query['offset'] as string | undefined;
+      const domain = req.query.domain as string | undefined;
+      const requiresReviewQ = req.query.requiresReview as string | undefined;
+      const status = req.query.status as string | undefined;
+      const riskLevel = req.query.riskLevel as string | undefined;
+      const sinceQ = req.query.since as string | undefined;
+      const untilQ = req.query.until as string | undefined;
+      const limitQ = req.query.limit as string | undefined;
+      const offsetQ = req.query.offset as string | undefined;
 
       const since = sinceQ ? new Date(sinceQ) : undefined;
       const until = untilQ ? new Date(untilQ) : undefined;
 
-      if (since && isNaN(since.getTime())) {
+      if (since && Number.isNaN(since.getTime())) {
         sendBadRequest(res, "Invalid 'since' date format — use ISO 8601");
         return;
       }
-      if (until && isNaN(until.getTime())) {
+      if (until && Number.isNaN(until.getTime())) {
         sendBadRequest(res, "Invalid 'until' date format — use ISO 8601");
         return;
       }
@@ -419,27 +418,27 @@ router.get(
         return;
       }
       const orgId = getOrgId(req.user);
-      const domain = req.query['domain'] as string | undefined;
-      const status = req.query['status'] as
+      const domain = req.query.domain as string | undefined;
+      const status = req.query.status as
         | ('pending' | 'in_review' | 'resolved' | 'escalated')
         | undefined;
-      const priority = req.query['priority'] as
+      const priority = req.query.priority as
         | ('low' | 'medium' | 'high' | 'critical')
         | undefined;
-      const verdict = req.query['verdict'] as ReviewVerdict | undefined;
-      const sinceQ = req.query['since'] as string | undefined;
-      const untilQ = req.query['until'] as string | undefined;
-      const limitQ = req.query['limit'] as string | undefined;
-      const offsetQ = req.query['offset'] as string | undefined;
+      const verdict = req.query.verdict as ReviewVerdict | undefined;
+      const sinceQ = req.query.since as string | undefined;
+      const untilQ = req.query.until as string | undefined;
+      const limitQ = req.query.limit as string | undefined;
+      const offsetQ = req.query.offset as string | undefined;
 
       const since = sinceQ ? new Date(sinceQ) : undefined;
       const until = untilQ ? new Date(untilQ) : undefined;
 
-      if (since && isNaN(since.getTime())) {
+      if (since && Number.isNaN(since.getTime())) {
         sendBadRequest(res, "Invalid 'since' date format — use ISO 8601");
         return;
       }
-      if (until && isNaN(until.getTime())) {
+      if (until && Number.isNaN(until.getTime())) {
         sendBadRequest(res, "Invalid 'until' date format — use ISO 8601");
         return;
       }
@@ -837,7 +836,7 @@ router.get(
   validateQuery(listQuerySchema),
   (req, res) => {
     try {
-      const limitQ = req.query['limit'] as string | undefined;
+      const limitQ = req.query.limit as string | undefined;
       const limit = Math.min(limitQ ? parseInt(limitQ, 10) : 100, 200);
       const orgId = String(req.user?.orgs?.[0]?.orgId ?? 'default');
       const all = costController.getRecords(limit);
@@ -900,7 +899,7 @@ router.get(
       const byCondition: Record<string, typeof rules> = {};
       for (const rule of rules) {
         if (!byCondition[rule.triggerCondition]) byCondition[rule.triggerCondition] = [];
-        byCondition[rule.triggerCondition]!.push(rule);
+        byCondition[rule.triggerCondition]?.push(rule);
       }
 
       const circuitStatus = modelRouter.getCircuitStatus();

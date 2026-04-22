@@ -17,17 +17,13 @@
  *   Step 12 — Generate executive brief from live state
  */
 
-import type { EvaluationRequest, Policy } from '@szl-holdings/policy-engine';
-import { checkAction, registerPolicy, unregisterPolicy } from '@szl-holdings/policy-engine';
+import { type EvaluationRequest, checkAction, registerPolicy, unregisterPolicy } from '@szl-holdings/policy-engine';
 import { createSnapshot, replaySnapshot } from '@szl-holdings/replay-core';
-import type { EvalCase, EvalSuiteDef } from '@workspace/agents-evals';
-import { runEvalSuite } from '@workspace/agents-evals';
-import type { TraceRecord } from '@workspace/trace-graph';
-import { InMemoryTraceStore, TraceQueryEngine } from '@workspace/trace-graph';
+import { type EvalCase, type EvalSuiteDef, runEvalSuite } from '@workspace/agents-evals';
+import { type TraceRecord, InMemoryTraceStore } from '@workspace/trace-graph';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { findNeighbors } from '../graph-utils.js';
-import type { ConstellationNode } from '../schema.js';
-import { ConstellationEdgeSchema, ConstellationNodeSchema } from '../schema.js';
+import { type ConstellationNode, ConstellationEdgeSchema, ConstellationNodeSchema } from '../schema.js';
 import { InMemoryGraphStore } from '../store.js';
 
 const NOW = new Date().toISOString();
@@ -69,10 +65,10 @@ describe('12-Step Foundation Smoke Test', () => {
     expect(store.nodeCount()).toBe(1);
     const retrieved = store.getNode('terra-1');
     expect(retrieved).toBeDefined();
-    expect(retrieved!.label).toBe('Harbor View Tower');
-    expect(retrieved!.domain).toBe('terra');
-    expect(retrieved!.provenance.source).toBe('smoke-test');
-    expect(retrieved!.provenance.ingestedAt).toBe(NOW);
+    expect(retrieved?.label).toBe('Harbor View Tower');
+    expect(retrieved?.domain).toBe('terra');
+    expect(retrieved?.provenance.source).toBe('smoke-test');
+    expect(retrieved?.provenance.ingestedAt).toBe(NOW);
   });
 
   it('Step 2: creates cross-domain edges between Constellation nodes', () => {
@@ -151,9 +147,9 @@ describe('12-Step Foundation Smoke Test', () => {
 
     const retrieved = traceStore.get('trace-001');
     expect(retrieved).toBeDefined();
-    expect(retrieved!.agentId).toBe('smoke-test-agent');
-    expect(retrieved!.totalTokens).toBe(847);
-    expect(retrieved!.toolCalls[0]?.toolName).toBe('smoke_test_tool');
+    expect(retrieved?.agentId).toBe('smoke-test-agent');
+    expect(retrieved?.totalTokens).toBe(847);
+    expect(retrieved?.toolCalls[0]?.toolName).toBe('smoke_test_tool');
   });
 
   it('Step 5: grades agent output using evals-core', async () => {
@@ -317,9 +313,9 @@ describe('12-Step Foundation Smoke Test', () => {
 
     const entry = auditLog.find((e) => e.event === 'action_executed');
     expect(entry).toBeDefined();
-    expect((entry!.payload as Record<string, unknown>).actionId).toBe('action-001');
-    expect((entry!.payload as Record<string, unknown>).approvalId).toBe('approval-001');
-    expect((entry!.payload as Record<string, unknown>).domain).toBe('terra');
+    expect((entry?.payload as Record<string, unknown>).actionId).toBe('action-001');
+    expect((entry?.payload as Record<string, unknown>).approvalId).toBe('approval-001');
+    expect((entry?.payload as Record<string, unknown>).domain).toBe('terra');
   });
 
   it('Step 10: replays an agent run against a historical snapshot', async () => {
@@ -367,8 +363,8 @@ describe('12-Step Foundation Smoke Test', () => {
     deploymentHistory.push({ version: prev.version, status: 'active' });
 
     const current = deploymentHistory.filter((d) => d.status === 'active').at(-1);
-    expect(current!.version).toBe('1.0.0');
-    expect(deploymentHistory.find((d) => d.status === 'rolled-back')!.version).toBe('1.1.0');
+    expect(current?.version).toBe('1.0.0');
+    expect(deploymentHistory.find((d) => d.status === 'rolled-back')?.version).toBe('1.1.0');
   });
 
   it('Step 12: generates an executive brief from Constellation live state', () => {
@@ -387,8 +383,8 @@ describe('12-Step Foundation Smoke Test', () => {
         ConstellationEdgeSchema.parse({
           id: `brief-edge-${i}`,
           type: 'relates-to',
-          fromNodeId: nodes[i]!.id,
-          toNodeId: nodes[i + 1]!.id,
+          fromNodeId: nodes[i]?.id,
+          toNodeId: nodes[i + 1]?.id,
           provenance: { source: 'smoke-test', ingestedAt: NOW },
           createdAt: NOW,
           updatedAt: NOW,

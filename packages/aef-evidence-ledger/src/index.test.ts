@@ -132,7 +132,7 @@ describe('InMemoryLedgerStore', () => {
     store.append(makeEntry({ entryId: 'e-2', tenantId: 'tenant-beta' }));
     const results = store.query({ tenantId: 'tenant-alpha' });
     expect(results).toHaveLength(1);
-    expect(results[0]!.tenantId).toBe('tenant-alpha');
+    expect(results[0]?.tenantId).toBe('tenant-alpha');
   });
 
   it('queries by policyAllow=false', () => {
@@ -140,7 +140,7 @@ describe('InMemoryLedgerStore', () => {
     store.append(makeEntry({ entryId: 'e-2', policyAllow: false }));
     const results = store.query({ policyAllow: false });
     expect(results).toHaveLength(1);
-    expect(results[0]!.policyAllow).toBe(false);
+    expect(results[0]?.policyAllow).toBe(false);
   });
 
   it('respects limit and offset', () => {
@@ -151,7 +151,7 @@ describe('InMemoryLedgerStore', () => {
     const page2 = store.query({ requestId: 'req-X', limit: 3, offset: 3 });
     expect(page1).toHaveLength(3);
     expect(page2).toHaveLength(3);
-    expect(page1[0]!.entryId).not.toBe(page2[0]!.entryId);
+    expect(page1[0]?.entryId).not.toBe(page2[0]?.entryId);
   });
 
   it('queries by time range', () => {
@@ -166,7 +166,7 @@ describe('InMemoryLedgerStore', () => {
       before: '2024-09-01T00:00:00.000Z',
     });
     expect(results).toHaveLength(1);
-    expect(results[0]!.entryId).toBe('e-mid');
+    expect(results[0]?.entryId).toBe('e-mid');
   });
 
   it('enforces tenant isolation: querying tenant-beta does not return tenant-alpha entries', () => {
@@ -227,13 +227,13 @@ describe('Query helpers', () => {
   it("queryByTenant returns only the tenant's entries", () => {
     const results = queryByTenant(store, 't-b');
     expect(results).toHaveLength(1);
-    expect(results[0]!.tenantId).toBe('t-b');
+    expect(results[0]?.tenantId).toBe('t-b');
   });
 
   it('queryDenied returns only denied entries', () => {
     const results = queryDenied(store);
     expect(results).toHaveLength(1);
-    expect(results[0]!.policyAllow).toBe(false);
+    expect(results[0]?.policyAllow).toBe(false);
   });
 
   it('queryDenied with tenantId scopes to that tenant', () => {
@@ -247,8 +247,8 @@ describe('Query helpers', () => {
     store.append(makeEntry({ entryId: 'replay-b', requestId: 'req-replay', requestedAt: t2 }));
     store.append(makeEntry({ entryId: 'replay-a', requestId: 'req-replay', requestedAt: t1 }));
     const results = replayRequest(store, 'req-replay');
-    expect(results[0]!.requestedAt).toBe(t1);
-    expect(results[1]!.requestedAt).toBe(t2);
+    expect(results[0]?.requestedAt).toBe(t1);
+    expect(results[1]?.requestedAt).toBe(t2);
   });
 });
 
@@ -286,7 +286,7 @@ describe('FilesystemLedgerStore', () => {
     store.append(makeEntry({ entryId: 'fs-b', tenantId: 't-b' }));
     const results = store.query({ tenantId: 't-a' });
     expect(results).toHaveLength(1);
-    expect(results[0]!.tenantId).toBe('t-a');
+    expect(results[0]?.tenantId).toBe('t-a');
   });
 
   it('clears the file', () => {
@@ -304,6 +304,6 @@ describe('FilesystemLedgerStore', () => {
     store.append(makeEntry({ entryId: 'fs-t3', requestedAt: t3 }));
     const results = queryByTimeRange(store, '2024-03-01T00:00:00.000Z', '2024-09-01T00:00:00.000Z');
     expect(results).toHaveLength(1);
-    expect(results[0]!.entryId).toBe('fs-t2');
+    expect(results[0]?.entryId).toBe('fs-t2');
   });
 });

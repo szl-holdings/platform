@@ -17,17 +17,17 @@ async function getLinearAccessToken(): Promise<string> {
     return cachedAccessToken.token;
   }
 
-  const hostname = process.env['REPLIT_CONNECTORS_HOSTNAME'];
+  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   if (!hostname) {
     throw new Error(
       'REPLIT_CONNECTORS_HOSTNAME is not set — Linear connector is unavailable in this environment',
     );
   }
 
-  const xReplitToken = process.env['REPL_IDENTITY']
-    ? `repl ${process.env['REPL_IDENTITY']}`
-    : process.env['WEB_REPL_RENEWAL']
-      ? `depl ${process.env['WEB_REPL_RENEWAL']}`
+  const xReplitToken = process.env.REPL_IDENTITY
+    ? `repl ${process.env.REPL_IDENTITY}`
+    : process.env.WEB_REPL_RENEWAL
+      ? `depl ${process.env.WEB_REPL_RENEWAL}`
       : null;
 
   if (!xReplitToken) {
@@ -374,7 +374,7 @@ export async function createLinearIssue(
 
 export function isLinearConfigured(): boolean {
   return (
-    Boolean(process.env['REPLIT_CONNECTORS_HOSTNAME']) &&
-    Boolean(process.env['REPL_IDENTITY'] ?? process.env['WEB_REPL_RENEWAL'])
+    Boolean(process.env.REPLIT_CONNECTORS_HOSTNAME) &&
+    Boolean(process.env.REPL_IDENTITY ?? process.env.WEB_REPL_RENEWAL)
   );
 }

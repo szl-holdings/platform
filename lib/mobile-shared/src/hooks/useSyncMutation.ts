@@ -38,7 +38,7 @@ export function useSyncMutation<TData = unknown, TInput = unknown>(
 
       if (options.getToken) {
         const token = await options.getToken();
-        if (token) headers['Authorization'] = `Bearer ${token}`;
+        if (token) headers.Authorization = `Bearer ${token}`;
       }
 
       const idempotencyKey = options.idempotencyKeyFn

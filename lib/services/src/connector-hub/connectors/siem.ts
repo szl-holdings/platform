@@ -122,21 +122,21 @@ export class SiemConnector extends ToolConnector {
     const adapter = services.siem;
     switch (capabilityId) {
       case 'ingest_cef':
-        return adapter.ingestCef(Array.isArray(params['lines']) ? params['lines'].map(String) : []);
+        return adapter.ingestCef(Array.isArray(params.lines) ? params.lines.map(String) : []);
       case 'ingest_syslog':
         return adapter.ingestSyslog(
-          Array.isArray(params['lines']) ? params['lines'].map(String) : [],
+          Array.isArray(params.lines) ? params.lines.map(String) : [],
         );
       case 'ingest_splunk_hec':
-        return adapter.ingestSplunkHec(params['body'] as Record<string, unknown>);
+        return adapter.ingestSplunkHec(params.body as Record<string, unknown>);
       case 'ingest_generic':
         return adapter.ingestGeneric(
-          Array.isArray(params['events'])
-            ? (params['events'] as Array<Record<string, unknown>>)
+          Array.isArray(params.events)
+            ? (params.events as Array<Record<string, unknown>>)
             : [],
         );
       case 'get_correlated_alerts':
-        return adapter.getCorrelatedAlerts(params['limit'] ? Number(params['limit']) : 50);
+        return adapter.getCorrelatedAlerts(params.limit ? Number(params.limit) : 50);
       case 'get_correlation_rules':
         return adapter.getCorrelationRules();
       case 'get_event_stats':

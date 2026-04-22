@@ -75,7 +75,7 @@ export interface PagerDutyConnectionStatus {
   userEmail?: string | undefined;
 }
 
-const MOCK_SERVICES: PagerDutyService[] = [
+const _MOCK_SERVICES: PagerDutyService[] = [
   {
     id: 'P1SVC01',
     name: 'Lyte Command Center — Production',
@@ -247,11 +247,11 @@ export class PagerDutyAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ['PAGERDUTY_API_TOKEN'];
 
   private get apiToken(): string | undefined {
-    return process.env['PAGERDUTY_API_TOKEN'];
+    return process.env.PAGERDUTY_API_TOKEN;
   }
 
   private get webhookSecret(): string | undefined {
-    return process.env['PAGERDUTY_WEBHOOK_SECRET'];
+    return process.env.PAGERDUTY_WEBHOOK_SECRET;
   }
 
   private async pdRequest<T>(path: string, options?: RequestInit): Promise<T> {
@@ -302,7 +302,7 @@ export class PagerDutyAdapter extends ServiceAdapter {
     if (!this.isLive) {
       let incidents = [...MOCK_INCIDENTS];
       if (params?.status) {
-        incidents = incidents.filter((i) => params.status!.includes(i.status));
+        incidents = incidents.filter((i) => params.status?.includes(i.status));
       }
       if (params?.urgency) {
         incidents = incidents.filter((i) => i.urgency === params.urgency);
@@ -604,40 +604,40 @@ export class PagerDutyAdapter extends ServiceAdapter {
       }
     }
 
-    const messages = payload['messages'] as Array<Record<string, unknown>> | undefined;
+    const messages = payload.messages as Array<Record<string, unknown>> | undefined;
     if (!messages || !Array.isArray(messages) || messages.length === 0) return null;
 
     const msg = messages[0]!;
-    const eventType = (msg['event'] as string | undefined) ?? 'unknown';
-    const incident = msg['incident'] as Record<string, unknown> | undefined;
+    const eventType = (msg.event as string | undefined) ?? 'unknown';
+    const incident = msg.incident as Record<string, unknown> | undefined;
 
     if (!incident) return null;
 
-    const serviceObj = incident['service'] as { id?: string; name?: string } | undefined;
+    const serviceObj = incident.service as { id?: string; name?: string } | undefined;
     return {
       id: `pd_wh_${Date.now()}`,
       eventType: eventType as PagerDutyWebhookEvent['eventType'],
       incident: {
-        id: (incident['id'] as string | undefined) ?? '',
-        incidentNumber: (incident['incident_number'] as number | undefined) ?? 0,
-        title: (incident['title'] as string | undefined) ?? '',
-        status: ((incident['status'] as string | undefined) ??
+        id: (incident.id as string | undefined) ?? '',
+        incidentNumber: (incident.incident_number as number | undefined) ?? 0,
+        title: (incident.title as string | undefined) ?? '',
+        status: ((incident.status as string | undefined) ??
           'triggered') as PagerDutyIncident['status'],
-        urgency: ((incident['urgency'] as string | undefined) ??
+        urgency: ((incident.urgency as string | undefined) ??
           'high') as PagerDutyIncident['urgency'],
         priority: null,
         service: { id: serviceObj?.id ?? '', name: serviceObj?.name ?? '' },
         assignedTo: [],
         escalationPolicy: { id: '', name: '' },
-        createdAt: (incident['created_at'] as string | undefined) ?? new Date().toISOString(),
+        createdAt: (incident.created_at as string | undefined) ?? new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         acknowledgedAt: null,
         resolvedAt: null,
-        description: (incident['title'] as string | undefined) ?? '',
+        description: (incident.title as string | undefined) ?? '',
         body: null,
         alertCount: 0,
-        selfUrl: (incident['self'] as string | undefined) ?? '',
-        htmlUrl: (incident['html_url'] as string | undefined) ?? '',
+        selfUrl: (incident.self as string | undefined) ?? '',
+        htmlUrl: (incident.html_url as string | undefined) ?? '',
       },
       logEntries: [],
       createdOn: new Date().toISOString(),

@@ -8,8 +8,8 @@
  */
 
 import { a2aAgentCards, a2aAgentHeartbeats, a2aDiscoveryQueries, db } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
-import { and, desc, eq, gte, sql } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { AGENT_REGISTRY, DOMAIN_ROUTING_RULES } from './nuro-mesh.js';
 import type { AgentDefinition } from './types.js';
 
@@ -185,8 +185,7 @@ export class A2ARegistryService {
               updatedAt: now,
             },
           });
-      } catch (err) {
-        console.warn(`[a2a-registry] Failed to sync agent ${agent.id}:`, err);
+      } catch (_err) {
       }
     }
   }

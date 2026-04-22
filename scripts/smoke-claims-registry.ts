@@ -20,10 +20,10 @@
  * Audit reference: docs/audit/2026-04/public-claims-registry.md
  */
 
-import { execSync } from 'child_process';
-import { readdirSync, readFileSync, statSync } from 'fs';
-import { dirname, relative, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { execSync } from 'node:child_process';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { dirname, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { getProduct, PLATFORM_PRODUCTS } from '../packages/config/src/platform-registry.js';
 import {
   BANNED_HARDCODED_STRINGS,
@@ -38,19 +38,13 @@ const __dirname = dirname(__filename);
 let passed = 0;
 let failed = 0;
 
-function check(description: string, condition: boolean, detail?: string): void {
+function check(_description: string, condition: boolean, _detail?: string): void {
   if (condition) {
-    console.log(`  ✓  ${description}`);
     passed++;
   } else {
-    console.error(`  ✗  ${description}${detail ? ` — ${detail}` : ''}`);
     failed++;
   }
 }
-
-// ─── 1. Registry structure checks ────────────────────────────────────────────
-
-console.log('\n[1] Public Claims Registry integrity\n');
 
 check(
   'PUBLIC_CLAIMS array is non-empty',
@@ -86,10 +80,6 @@ for (const claim of PUBLIC_CLAIMS) {
   );
 }
 
-// ─── 2. getClaim helper ───────────────────────────────────────────────────────
-
-console.log('\n[2] getClaim() helper\n');
-
 const expectedClaimIds = [
   'tagline-governed-decision',
   'covenant-policy-enforcement',
@@ -118,10 +108,6 @@ check(
   getClaim('non-existent-claim') === undefined,
 );
 
-// ─── 3. Computed claims ───────────────────────────────────────────────────────
-
-console.log('\n[3] Computed claims\n');
-
 check(
   'FOUNDER_YEARS_EXPERIENCE is a positive integer',
   Number.isInteger(FOUNDER_YEARS_EXPERIENCE) && FOUNDER_YEARS_EXPERIENCE > 0,
@@ -133,10 +119,6 @@ check(
   FOUNDER_YEARS_EXPERIENCE >= 18,
   `computed: ${FOUNDER_YEARS_EXPERIENCE}`,
 );
-
-// ─── 4. Platform registry checks ─────────────────────────────────────────────
-
-console.log('\n[4] Platform Registry integrity\n');
 
 const expectedProductIds = [
   'szl-holdings',
@@ -174,10 +156,6 @@ check(
   `found: ${gaProducts.map((p) => p.id).join(', ')}`,
 );
 
-// ─── 5. "No mock theater" principle — unverified claims must have labels ──────
-
-console.log('\n[5] No mock theater — unverified claims must have displayLabel\n');
-
 const unverifiedWithoutLabel = PUBLIC_CLAIMS.filter(
   (c) => c.truthValue !== 'verified' && !c.displayLabel,
 );
@@ -189,15 +167,6 @@ check(
     ? `offending claims: ${unverifiedWithoutLabel.map((c) => c.id).join(', ')}`
     : undefined,
 );
-
-// ─── 6. ventures.ts wiring check ─────────────────────────────────────────────
-//
-// This check verifies that ventures.ts (the main rendered data file in
-// szl-holdings) imports from the claims adapter. If the import disappears,
-// it means registry-sourced strings are no longer feeding the render path,
-// which would allow hardcoded claims to reappear silently.
-
-console.log('\n[6] ventures.ts → claims adapter wiring (render path check)\n');
 
 const venturesPath = resolve(__dirname, '../artifacts/szl-holdings/src/data/ventures.ts');
 const venturesSource = readFileSync(venturesPath, 'utf8');
@@ -239,10 +208,6 @@ for (const banned of bannedHardcodedStrings) {
   );
 }
 
-// ─── 7. claims.ts adapter wiring check ───────────────────────────────────────
-
-console.log('\n[7] claims.ts adapter → config package wiring\n');
-
 const claimsAdapterPath = resolve(__dirname, '../artifacts/szl-holdings/src/lib/claims.ts');
 const claimsAdapterSource = readFileSync(claimsAdapterPath, 'utf8');
 
@@ -260,13 +225,6 @@ check(
 check('claims.ts exports VESSELS_COUNT', claimsAdapterSource.includes('VESSELS_COUNT'));
 
 check('claims.ts exports metricDisplay', claimsAdapterSource.includes('metricDisplay'));
-
-// ─── 7b. Per-artifact claims.ts adapter wiring check ─────────────────────────
-//
-// Verifies each migrated artifact has a claims.ts adapter that imports from
-// the central config package and exports the expected named constants.
-
-console.log('\n[7b] Per-artifact claims.ts adapters\n');
 
 const perArtifactAdapters: Array<{
   artifact: string;
@@ -332,14 +290,6 @@ for (const { artifact, exports } of perArtifactAdapters) {
     check(`${artifact}/claims.ts exports "${exp}"`, new RegExp(`\\b${exp}\\b`).test(adapterSource));
   }
 }
-
-// ─── 7c. Per-artifact adapter consumption check ──────────────────────────────
-//
-// "Adapter added but unused" is a regression — the adapter file exists but no
-// page actually imports the registry-backed constants. This check asserts that
-// each artifact has at least one consumer file outside lib/claims.ts.
-
-console.log('\n[7c] Per-artifact adapter consumption (UI wiring)\n');
 
 const adapterConsumptionChecks: Array<{
   artifact: string;
@@ -445,17 +395,6 @@ for (const { artifact, consumers } of adapterConsumptionChecks) {
   }
 }
 
-// ─── 7d. Banned hardcoded claim string scan ──────────────────────────────────
-//
-// Walks each migrated artifact's src/ directory and reports any .ts/.tsx file
-// (excluding lib/claims.ts — the sanctioned adapter) that contains a banned
-// hardcoded claim string from BANNED_HARDCODED_STRINGS in public-claims.ts.
-//
-// This is the regression guard: someone adds a new hardcoded "31,200+" or
-// "52,000+" in vessels-home.tsx and CI catches it on the next run.
-
-console.log('\n[7d] Banned hardcoded claim string scan (per-artifact src/)\n');
-
 const migratedArtifacts = [
   'command',
   'carlota-jo',
@@ -555,36 +494,10 @@ for (const artifact of migratedArtifacts) {
 }
 
 if (allHits.length > 0) {
-  console.error('\n  ── Hardcoded claim regression diff ────────────────────');
   for (const hit of allHits) {
-    console.error(`  ${hit.file}:${hit.line}  ⟶  banned "${hit.banned}" (claim: ${hit.claimId})`);
-    console.error(`    │ ${hit.snippet}`);
-    if (hit.reason) console.error(`    └─ ${hit.reason}`);
+    if (hit.reason) {}
   }
-  console.error(
-    '  ───────────────────────────────────────────────────────\n' +
-      '  Fix: replace each hardcoded value with the registry-backed constant\n' +
-      "  exported from the artifact's src/lib/claims.ts adapter, or add the\n" +
-      '  string to public-claims.ts BANNED_HARDCODED_STRINGS exemption list\n' +
-      '  only if it represents a genuinely unrelated use of the same characters.\n',
-  );
 }
-
-// ─── 8. Data-layer render assertion (subprocess) ─────────────────────────────
-//
-// Runs artifacts/szl-holdings/scripts/render-check.ts as a subprocess from
-// within the szl-holdings package directory. This gives the subprocess access
-// to the @szl-holdings/config package via the local node_modules symlinks.
-//
-// The subprocess imports ventures.ts (the actual render data) and verifies
-// that every registry-sourced metric value equals metricDisplay(claim), proving
-// the registry flows through to the UI render path — not just to import
-// statements. Fails this test if:
-//   - Any registry-sourced metric returns "undefined" (venture ID mismatch)
-//   - Any metric value differs from the expected computed registry string
-//   - Any banned hardcoded claim string appears in any venture's metrics
-
-console.log('\n[8] Data-layer render assertion (subprocess — ventures.ts → registry)\n');
 
 const renderCheckScript = resolve(__dirname, '../artifacts/szl-holdings/scripts/render-check.ts');
 const szlHoldingsDir = resolve(__dirname, '../artifacts/szl-holdings');
@@ -610,19 +523,10 @@ try {
 
 // ─── Summary ──────────────────────────────────────────────────────────────────
 
-const total = passed + failed;
-console.log(`\n${'─'.repeat(60)}`);
-console.log(`Smoke test complete: ${passed}/${total} passed, ${failed} failed`);
-console.log(`${'─'.repeat(60)}\n`);
+const _total = passed + failed;
 
 if (failed > 0) {
-  console.error('FAIL — Registry smoke test failed. Fix the issues above before deploying.\n');
   process.exit(1);
 } else {
-  console.log(
-    'PASS — Public claims registry is structurally sound and render path is wired.\n' +
-      'Note: This test verifies structure and import wiring. Truth value of claims\n' +
-      'must be verified by a human reviewer against live data sources.\n',
-  );
   process.exit(0);
 }

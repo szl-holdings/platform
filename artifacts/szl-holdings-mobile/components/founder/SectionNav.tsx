@@ -1,5 +1,4 @@
 import { BlurView } from 'expo-blur';
-import React from 'react';
 import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 

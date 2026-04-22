@@ -1,7 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
 import {
   Dimensions,
   Linking,
@@ -240,17 +239,17 @@ export default function VentureDetailScreen() {
         contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
       >
         {/* Hero visual */}
-        <View style={[styles.heroVisual, { backgroundColor: venture.color + '12' }]}>
+        <View style={[styles.heroVisual, { backgroundColor: `${venture.color}12` }]}>
           <LinearGradient
-            colors={[venture.color + '20', 'transparent']}
+            colors={[`${venture.color}20`, 'transparent']}
             style={StyleSheet.absoluteFill}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
           />
           {/* Abstract graphic */}
           <View style={styles.heroGraphicContainer}>
-            <View style={[styles.heroRing, { borderColor: venture.color + '30' }]}>
-              <View style={[styles.heroRingInner, { borderColor: venture.color + '50' }]}>
+            <View style={[styles.heroRing, { borderColor: `${venture.color}30` }]}>
+              <View style={[styles.heroRingInner, { borderColor: `${venture.color}50` }]}>
                 <View style={[styles.heroCore, { backgroundColor: venture.color }]}>
                   <Text style={styles.heroCoreInitial}>
                     {venture.name.slice(0, 2).toUpperCase()}
@@ -261,7 +260,7 @@ export default function VentureDetailScreen() {
             <View
               style={[
                 styles.statusBadge,
-                { backgroundColor: venture.color + '20', borderColor: venture.color + '40' },
+                { backgroundColor: `${venture.color}20`, borderColor: `${venture.color}40` },
               ]}
             >
               <View style={[styles.statusDot, { backgroundColor: venture.color }]} />

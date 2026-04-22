@@ -133,14 +133,14 @@ function parseAgentPlan(
     const agentMatch = line.match(/AGENT:\s*([^|]+)/i);
     const taskMatch = line.match(/TASK:\s*(.+)/i);
     if (agentMatch && taskMatch) {
-      const domain = agentMatch[1]!.trim().toLowerCase();
+      const domain = agentMatch[1]?.trim().toLowerCase();
       if (DOMAIN_AGENTS[domain]) {
         if (
           !requestedDomains ||
           requestedDomains.length === 0 ||
           requestedDomains.includes(domain)
         ) {
-          parsed.push({ domain, task: taskMatch[1]!.trim() });
+          parsed.push({ domain, task: taskMatch[1]?.trim() });
         }
       }
     }
@@ -216,7 +216,7 @@ export async function orchestrate(request: OrchestrationRequest): Promise<Orches
     const agentConfig = DOMAIN_AGENTS[step.domain]!;
     const messages: ChatMessage[] = [
       { role: 'system', content: agentConfig.systemPrompt },
-      { role: 'user', content: `${agentTasks[idx]!.task}\n\nOriginal query: ${request.query}` },
+      { role: 'user', content: `${agentTasks[idx]?.task}\n\nOriginal query: ${request.query}` },
     ];
 
     try {

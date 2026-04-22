@@ -62,8 +62,6 @@ async function checkCmsVentures() {
 }
 
 async function main() {
-  console.log(`\nSZL Holdings — Demo Seed Integrity Check`);
-  console.log(`API URL: ${API_URL}\n`);
 
   const checks = [
     { name: 'API Health', fn: checkApiHealth },
@@ -71,28 +69,21 @@ async function main() {
     { name: 'CMS Ventures', fn: checkCmsVentures },
   ];
 
-  let passed = 0;
+  let _passed = 0;
   let failed = 0;
 
   for (const { name, fn } of checks) {
     const result = await fn();
     if (result.ok) {
-      console.log(`  ✓ ${name}${result.detail ? ' — ' + result.detail : ''}`);
-      passed++;
+      _passed++;
     } else {
-      console.error(`  ✗ ${name} — ${result.issue}`);
       failed++;
     }
   }
 
-  console.log(`\nResults: ${passed} passed, ${failed} failed`);
-
   if (failed > 0) {
-    console.error(`\nFAIL — Demo environment may not be properly seeded`);
-    console.error(`Run: pnpm seed:demo`);
     process.exit(1);
   } else {
-    console.log(`\nPASS — Demo environment appears properly configured`);
     process.exit(0);
   }
 }

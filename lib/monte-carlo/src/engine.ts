@@ -7,8 +7,7 @@ import {
   type HistogramBucket,
   sample,
 } from './distributions.js';
-import type { SerializableScenario } from './dsl.js';
-import { buildScenarioCalculate } from './dsl.js';
+import { type SerializableScenario, buildScenarioCalculate } from './dsl.js';
 import { runParallelChunks } from './parallel.js';
 import type {
   OutputMetric,
@@ -131,7 +130,7 @@ export async function runSimulation(
       for (const v of scenario.inputs) {
         const val = sample(v.distribution);
         inputs[v.id] = val;
-        inputSamples[v.id]!.push(val);
+        inputSamples[v.id]?.push(val);
       }
 
       let outputs: Record<string, number>;
@@ -157,12 +156,12 @@ export async function runSimulation(
 
       validIterations++;
       for (const v of scenario.inputs) {
-        validInputSamples[v.id]!.push(inputs[v.id]!);
+        validInputSamples[v.id]?.push(inputs[v.id]!);
       }
       for (const m of scenario.outputs) {
         const val = outputs[m.id];
-        if (val !== undefined && isFinite(val)) {
-          outputAccumulators[m.id]!.push(val);
+        if (val !== undefined && Number.isFinite(val)) {
+          outputAccumulators[m.id]?.push(val);
         }
       }
 

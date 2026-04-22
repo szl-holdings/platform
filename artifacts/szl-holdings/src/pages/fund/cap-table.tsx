@@ -167,7 +167,7 @@ export default function CapTablePage() {
                           {pieData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
                         </Pie>
                         <Tooltip contentStyle={{ background: "#0c1018", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 11 }}
-                          formatter={(v: number) => [v.toLocaleString() + " shares", ""]} />
+                          formatter={(v: number) => [`${v.toLocaleString()} shares`, ""]} />
                         <Legend iconType="circle" formatter={(v) => <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 11 }}>{v}</span>} />
                       </RePie>
                     </ResponsiveContainer>

@@ -1,26 +1,14 @@
 import { AnimatePresence, m } from 'framer-motion';
 import {
   Activity,
-  AlertCircle,
-  Check,
   CheckCircle2,
   ChevronRight,
-  Clock,
-  Copy,
   ExternalLink,
   Globe,
   Key,
-  Link2,
-  Plus,
-  RefreshCw,
-  Settings,
   Shield,
-  ToggleLeft,
-  ToggleRight,
-  Twitter,
   Wifi,
   WifiOff,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
@@ -32,7 +20,7 @@ function getCsrfToken(): string {
   const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
   return match ? decodeURIComponent(match[1]) : '';
 }
-function writeHeaders(): Record<string, string> {
+function _writeHeaders(): Record<string, string> {
   return { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() };
 }
 
@@ -851,7 +839,7 @@ export default function PlatformConnectionsPage() {
   const [connectingPlatform, setConnectingPlatform] = useState<Platform | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [platforms, setPlatforms] = useState<Platform[]>(PLATFORMS);
-  const [loadingStatus, setLoadingStatus] = useState(true);
+  const [_loadingStatus, setLoadingStatus] = useState(true);
 
   useEffect(() => {
     fetch(`${API}/api/distribution-os/platform-connections`, { credentials: 'include' })

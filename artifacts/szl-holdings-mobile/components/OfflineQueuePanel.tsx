@@ -425,11 +425,11 @@ async function keepMineFromConflict(
 function previewValue(value: unknown, max = 80): string {
   if (value === null || value === undefined) return '—';
   if (typeof value === 'string') {
-    return value.length > max ? value.slice(0, max - 1) + '…' : value;
+    return value.length > max ? `${value.slice(0, max - 1)}…` : value;
   }
   try {
     const s = JSON.stringify(value);
-    return s.length > max ? s.slice(0, max - 1) + '…' : s;
+    return s.length > max ? `${s.slice(0, max - 1)}…` : s;
   } catch {
     return String(value);
   }
@@ -726,7 +726,7 @@ export function OfflineQueuePanel({
         styles.container,
         {
           backgroundColor: colors.card ?? '#0d1220',
-          borderColor: accentColor + '55',
+          borderColor: `${accentColor}55`,
         },
       ]}
     >
@@ -752,7 +752,7 @@ export function OfflineQueuePanel({
             styles.bulkBar,
             {
               borderColor: colors.border ?? '#1e2433',
-              backgroundColor: (colors.background ?? '#070a14') + '60',
+              backgroundColor: `${colors.background ?? '#070a14'}60`,
             },
           ]}
         >
@@ -761,7 +761,7 @@ export function OfflineQueuePanel({
             disabled={bulkBusy !== null || retryingId !== null}
             style={[
               styles.bulkBtn,
-              { borderColor: ACCENT + '55', backgroundColor: ACCENT + '18' },
+              { borderColor: `${ACCENT}55`, backgroundColor: `${ACCENT}18` },
               (bulkBusy !== null || retryingId !== null) && { opacity: 0.5 },
             ]}
             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
@@ -782,7 +782,7 @@ export function OfflineQueuePanel({
             disabled={bulkBusy !== null || retryingId !== null}
             style={[
               styles.bulkBtn,
-              { borderColor: RED + '55', backgroundColor: RED + '18' },
+              { borderColor: `${RED}55`, backgroundColor: `${RED}18` },
               (bulkBusy !== null || retryingId !== null) && { opacity: 0.5 },
             ]}
             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
@@ -815,12 +815,12 @@ export function OfflineQueuePanel({
                 key={conflict.id}
                 style={[
                   styles.conflictRow,
-                  { borderColor: RED + '55', backgroundColor: RED + '0d' },
+                  { borderColor: `${RED}55`, backgroundColor: `${RED}0d` },
                 ]}
               >
                 <View style={styles.itemMetaRow}>
                   <View
-                    style={[styles.tag, { backgroundColor: RED + '18', borderColor: RED + '40' }]}
+                    style={[styles.tag, { backgroundColor: `${RED}18`, borderColor: `${RED}40` }]}
                   >
                     <Text style={[styles.tagText, { color: RED }]}>
                       {(conflict.method ?? 'CONFLICT').toUpperCase()}
@@ -875,7 +875,7 @@ export function OfflineQueuePanel({
                     disabled={resolvingConflictId !== null || !conflict.method}
                     style={[
                       styles.retryBtn,
-                      { borderColor: ACCENT + '40', backgroundColor: ACCENT + '12', flex: 1 },
+                      { borderColor: `${ACCENT}40`, backgroundColor: `${ACCENT}12`, flex: 1 },
                       resolvingConflictId !== null && !isResolving && { opacity: 0.4 },
                       !conflict.method && { opacity: 0.4 },
                     ]}
@@ -895,7 +895,7 @@ export function OfflineQueuePanel({
                     disabled={resolvingConflictId !== null}
                     style={[
                       styles.discardBtn,
-                      { borderColor: RED + '40', backgroundColor: RED + '12', flex: 1 },
+                      { borderColor: `${RED}40`, backgroundColor: `${RED}12`, flex: 1 },
                       resolvingConflictId !== null && !isResolving && { opacity: 0.4 },
                     ]}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -922,7 +922,7 @@ export function OfflineQueuePanel({
                 styles.itemRow,
                 {
                   borderColor: colors.border ?? '#1e2433',
-                  backgroundColor: (colors.background ?? '#070a14') + '80',
+                  backgroundColor: `${colors.background ?? '#070a14'}80`,
                 },
               ]}
             >
@@ -931,7 +931,7 @@ export function OfflineQueuePanel({
                   <View
                     style={[
                       styles.tag,
-                      { backgroundColor: accentColor + '18', borderColor: accentColor + '40' },
+                      { backgroundColor: `${accentColor}18`, borderColor: `${accentColor}40` },
                     ]}
                   >
                     <Text style={[styles.tagText, { color: accentColor }]}>
@@ -960,7 +960,7 @@ export function OfflineQueuePanel({
                   disabled={retryingId !== null}
                   style={[
                     styles.retryBtn,
-                    { borderColor: ACCENT + '40', backgroundColor: ACCENT + '12' },
+                    { borderColor: `${ACCENT}40`, backgroundColor: `${ACCENT}12` },
                     retryingId !== null && retryingId !== item.id && { opacity: 0.4 },
                   ]}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -979,7 +979,7 @@ export function OfflineQueuePanel({
                   disabled={retryingId === item.id}
                   style={[
                     styles.discardBtn,
-                    { borderColor: RED + '40', backgroundColor: RED + '12' },
+                    { borderColor: `${RED}40`, backgroundColor: `${RED}12` },
                   ]}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >

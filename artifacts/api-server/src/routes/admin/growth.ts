@@ -20,7 +20,7 @@ function classifyProduct(formKey: string): string {
 }
 
 export function register(router: IRouter): void {
-  router.get('/admin/inquiries', async (req, res) => {
+  router.get('/admin/inquiries', async (_req, res) => {
     try {
       const now = new Date();
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);

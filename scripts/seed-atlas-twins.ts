@@ -401,7 +401,7 @@ async function seedVessels(): Promise<{ inserted: number; skipped: number }> {
   for (const seed of VESSEL_SEEDS) {
     const prior = existingByImo.get(seed.vessel.imo!);
     let vesselId: number;
-    let action: string;
+    let _action: string;
     if (prior) {
       vesselId = prior.id;
       // Backfill org_id if it was inserted without one previously
@@ -412,7 +412,7 @@ async function seedVessels(): Promise<{ inserted: number; skipped: number }> {
           .where(eq(vesselsTable.id, vesselId));
       }
       skipped++;
-      action = 'backfill';
+      _action = 'backfill';
     } else {
       const [vessel] = await db
         .insert(vesselsTable)
@@ -420,7 +420,7 @@ async function seedVessels(): Promise<{ inserted: number; skipped: number }> {
         .returning();
       vesselId = vessel.id;
       inserted++;
-      action = 'insert';
+      _action = 'insert';
     }
     // Idempotently ensure each vessel has at least one position, cargo, and active route row
     const [pos] = await db
@@ -441,9 +441,6 @@ async function seedVessels(): Promise<{ inserted: number; skipped: number }> {
       .where(eq(vesselsRoutesTable.vesselId, vesselId))
       .limit(1);
     if (!route) await db.insert(vesselsRoutesTable).values({ ...seed.route, vesselId });
-    console.log(
-      `  [${action}] vessel ${seed.vessel.imo} ${seed.vessel.name} (id: ${vesselId}, org: ${SEED_ORG_ID}) → ${seed.destination}`,
-    );
   }
   return { inserted, skipped };
 }
@@ -479,34 +476,20 @@ async function seedProperties(): Promise<{ inserted: number; skipped: number }> 
       continue;
     }
     inserted++;
-    console.log(
-      `  [ok] property ${property.externalId} ${property.address}, ${property.city} (id: ${property.id})`,
-    );
   }
   return { inserted, skipped };
 }
 
 async function main() {
-  console.log('[seed:atlas-twins] Seeding ATLAS twin live data...');
+  const _v = await seedVessels();
+  const _p = await seedProperties();
 
-  console.log('\n[vessels] Seeding vessel records, positions, cargo, routes...');
-  const v = await seedVessels();
-  console.log(`[vessels] Done: inserted=${v.inserted} skipped=${v.skipped}`);
-
-  console.log('\n[terra] Seeding property records...');
-  const p = await seedProperties();
-  console.log(`[terra] Done: inserted=${p.inserted} skipped=${p.skipped}`);
-
-  const totalVessels = (await db.select().from(vesselsTable)).length;
-  const totalProps = (await db.select().from(terraPropertiesTable)).length;
-  console.log(
-    `\n[seed:atlas-twins] Complete. Total vessels in DB: ${totalVessels}. Total properties in DB: ${totalProps}.`,
-  );
+  const _totalVessels = (await db.select().from(vesselsTable)).length;
+  const _totalProps = (await db.select().from(terraPropertiesTable)).length;
 }
 
 main()
   .then(() => process.exit(0))
-  .catch((err) => {
-    console.error('[seed:atlas-twins] Failed:', err);
+  .catch((_err) => {
     process.exit(1);
   });

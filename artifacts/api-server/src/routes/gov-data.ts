@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import { type IRouter, type RequestHandler, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { LRUCache } from 'lru-cache';
-import { handleRouteError, sendError, sendSuccess } from '../lib/api-response';
+import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { redisGet, redisSet } from '../lib/redis-client.js';
 import { listQuerySchema, validateQuery } from '../lib/validation.js';
 import { authMiddleware } from '../middlewares/auth';
@@ -90,7 +90,7 @@ async function fetchJson(
   try {
     const res = await fetch(url, {
       signal: controller.signal,
-      headers: { 'User-Agent': 'SZL-GovData/1.0', Accept: 'application/json', ...(headers || {}) },
+      headers: { 'User-Agent': 'SZL-GovData/1.0', Accept: 'application/json', ...headers },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
     return res.json();
@@ -115,7 +115,7 @@ async function postJson(
         'User-Agent': 'SZL-GovData/1.0',
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        ...(headers || {}),
+        ...headers,
       },
       body: JSON.stringify(body),
     });
@@ -236,7 +236,7 @@ router.get(
     try {
       const severity = (req.query.severity as string)?.toUpperCase();
       const keyword = req.query.keyword as string;
-      const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+      const limit = Math.min(parseInt(req.query.limit as string, 10) || 10, 20);
 
       const params = new URLSearchParams({
         resultsPerPage: String(limit),
@@ -300,7 +300,7 @@ router.get(
                 lastModified: cve?.lastModified,
                 references: cve?.references?.length ?? 0,
                 cwe: cve?.weaknesses?.[0]?.description?.[0]?.value ?? null,
-                cisaExploited: cve?.cisaExploitAdd ? true : false,
+                cisaExploited: !!cve?.cisaExploitAdd,
                 cisaDueDate: cve?.cisaActionDue ?? null,
               };
             });
@@ -497,9 +497,9 @@ router.get('/gov/census', govRateLimit, authMiddleware(), async (_req, res) => {
       if (!Array.isArray(raw) || raw.length < 2) throw new Error('No Census data');
       const [headers, values] = raw as [string[], string[]];
       return {
-        population: { total: parseInt(values[headers.indexOf('B01003_001E')] ?? '0') || null },
-        medianHouseholdIncome: parseInt(values[headers.indexOf('B19013_001E')] ?? '0') || null,
-        medianHomeValue: parseInt(values[headers.indexOf('B25077_001E')] ?? '0') || null,
+        population: { total: parseInt(values[headers.indexOf('B01003_001E')] ?? '0', 10) || null },
+        medianHouseholdIncome: parseInt(values[headers.indexOf('B19013_001E')] ?? '0', 10) || null,
+        medianHomeValue: parseInt(values[headers.indexOf('B25077_001E')] ?? '0', 10) || null,
         source: 'U.S. Census Bureau ACS 5-Year Estimates',
       };
     }).catch(() => ({
@@ -560,7 +560,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const region = req.query.region as string;
+      const _region = req.query.region as string;
       sendSuccess(res, {
         source: 'FEMA National Risk Index',
         url: 'https://hazards.fema.gov/nri/',
@@ -705,7 +705,7 @@ async function fetchNoaaStation(
       const readings: any[] = Array.isArray(json.data) ? json.data : [];
       const last = readings[readings.length - 1];
       const v = parseFloat(last?.v ?? '');
-      if (!isNaN(v)) airTemp = v;
+      if (!Number.isNaN(v)) airTemp = v;
     }
 
     let windSpeed: number | null = null;
@@ -717,8 +717,8 @@ async function fetchNoaaStation(
         const last = readings[readings.length - 1];
         const s = parseFloat(last?.s ?? '');
         const d = parseFloat(last?.d ?? '');
-        if (!isNaN(s)) windSpeed = s;
-        if (!isNaN(d)) windDir = `${Math.round(d)}°`;
+        if (!Number.isNaN(s)) windSpeed = s;
+        if (!Number.isNaN(d)) windDir = `${Math.round(d)}°`;
       }
     }
 
@@ -779,7 +779,7 @@ router.get(
   async (req, res) => {
     try {
       const query = (req.query.q as string) || 'machine learning';
-      const limit = Math.min(parseInt(req.query.limit as string) || 8, 20);
+      const limit = Math.min(parseInt(req.query.limit as string, 10) || 8, 20);
       const papers = await getCached(`arxiv-${query}-${limit}`, 1800000, () =>
         fetchArxivPapersXml(query, limit),
       );
@@ -826,7 +826,7 @@ router.get(
             title: doc.title ?? 'Unknown',
             authors: (doc.authors ?? []).slice(0, 3).map((a: any) => a.name ?? ''),
             journal: doc.fulljournalname ?? doc.source ?? 'Unknown',
-            year: doc.pubdate ? parseInt(doc.pubdate.slice(0, 4)) : null,
+            year: doc.pubdate ? parseInt(doc.pubdate.slice(0, 4), 10) : null,
             doi: doc.elocationid ?? null,
             meshTerms: doc.meshheadinglist?.map((m: any) => m.name ?? '')?.slice(0, 4) ?? [],
           };
@@ -878,12 +878,12 @@ router.get(
           formType,
           filings:
             searchData?.hits?.hits?.slice(0, 5).map((h: any) => ({
-              accessionNo: h._source?.['period_of_report'] ?? 'N/A',
-              filedAt: h._source?.['file_date'] ?? '',
-              reportDate: h._source?.['period_of_report'] ?? '',
-              form: h._source?.['form_type'] ?? formType,
-              description: h._source?.['entity_name'] ?? ticker,
-              url: h._source?.['biz_location'] ?? '',
+              accessionNo: h._source?.period_of_report ?? 'N/A',
+              filedAt: h._source?.file_date ?? '',
+              reportDate: h._source?.period_of_report ?? '',
+              form: h._source?.form_type ?? formType,
+              description: h._source?.entity_name ?? ticker,
+              url: h._source?.biz_location ?? '',
             })) ?? [],
         };
       });

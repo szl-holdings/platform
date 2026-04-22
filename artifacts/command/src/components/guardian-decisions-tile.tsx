@@ -50,7 +50,7 @@ interface SummaryResponse {
 function timeAgo(iso?: string | null): string {
   if (!iso) return '—';
   const t = new Date(iso).getTime();
-  if (isNaN(t)) return iso;
+  if (Number.isNaN(t)) return iso;
   const s = Math.max(1, Math.floor((Date.now() - t) / 1000));
   if (s < 60) return `${s}s ago`;
   const m = Math.floor(s / 60);

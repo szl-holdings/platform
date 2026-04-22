@@ -71,7 +71,7 @@ export class RedfinAdapter extends ServiceAdapter {
     "Redfin real estate data — MLS listings, market statistics, price history, and neighborhood intelligence via the Redfin Data API. Falls back to demo mode when REDFIN_API_KEY is absent.";
   readonly requiredEnvVars = ["REDFIN_API_KEY"];
 
-  private get apiKey(): string | undefined { return process.env["REDFIN_API_KEY"]; }
+  private get apiKey(): string | undefined { return process.env.REDFIN_API_KEY; }
 
   private readonly BASE_URL = "https://redfin-com-data.p.rapidapi.com";
 
@@ -97,23 +97,23 @@ export class RedfinAdapter extends ServiceAdapter {
   async searchListings(location: string, maxPrice?: number, minBeds?: number, propertyType?: string): Promise<RedfinListing[]> {
     if (this.isDemoMode) return MOCK_LISTINGS;
     const params: Record<string, string> = { location };
-    if (maxPrice) params["maxPrice"] = String(maxPrice);
-    if (minBeds) params["minBeds"] = String(minBeds);
-    if (propertyType) params["homeType"] = propertyType;
+    if (maxPrice) params.maxPrice = String(maxPrice);
+    if (minBeds) params.minBeds = String(minBeds);
+    if (propertyType) params.homeType = propertyType;
     const data = await this.rfRequest<{ data: { homes: Array<Record<string, unknown>> } }>("/properties/search", params);
     return (data.data?.homes ?? []).map(h => ({
-      listingId: String(h["mlsId"] ?? ""), mlsId: h["mlsId"] ? String(h["mlsId"]) : null,
-      address: String(h["streetLine"] ?? ""), city: String(h["city"] ?? ""),
-      state: String(h["state"] ?? ""), zipCode: String(h["zip"] ?? ""),
-      latitude: Number(h["latitude"] ?? 0), longitude: Number(h["longitude"] ?? 0),
-      price: Number(h["price"] ?? 0), pricePerSqFt: h["pricePerSqFt"] ? Number(h["pricePerSqFt"]) : null,
-      bedrooms: Number(h["beds"] ?? 0), bathrooms: Number(h["baths"] ?? 0),
-      livingArea: Number(h["sqFt"] ?? 0), lotSize: h["lotSize"] ? Number(h["lotSize"]) : null,
-      yearBuilt: h["yearBuilt"] ? Number(h["yearBuilt"]) : null,
-      propertyType: String(h["propertyType"] ?? ""), listingStatus: String(h["status"] ?? ""),
-      daysOnMarket: Number(h["dom"] ?? 0), priceDropPercent: h["priceDrop"] ? Number(h["priceDrop"]) : null,
+      listingId: String(h.mlsId ?? ""), mlsId: h.mlsId ? String(h.mlsId) : null,
+      address: String(h.streetLine ?? ""), city: String(h.city ?? ""),
+      state: String(h.state ?? ""), zipCode: String(h.zip ?? ""),
+      latitude: Number(h.latitude ?? 0), longitude: Number(h.longitude ?? 0),
+      price: Number(h.price ?? 0), pricePerSqFt: h.pricePerSqFt ? Number(h.pricePerSqFt) : null,
+      bedrooms: Number(h.beds ?? 0), bathrooms: Number(h.baths ?? 0),
+      livingArea: Number(h.sqFt ?? 0), lotSize: h.lotSize ? Number(h.lotSize) : null,
+      yearBuilt: h.yearBuilt ? Number(h.yearBuilt) : null,
+      propertyType: String(h.propertyType ?? ""), listingStatus: String(h.status ?? ""),
+      daysOnMarket: Number(h.dom ?? 0), priceDropPercent: h.priceDrop ? Number(h.priceDrop) : null,
       estimatedMonthlyMortgage: null, walkScore: null, transitScore: null, bikeScore: null,
-      listingUrl: String(h["url"] ?? ""), photoCount: Number(h["numPhotos"] ?? 0),
+      listingUrl: String(h.url ?? ""), photoCount: Number(h.numPhotos ?? 0),
     }));
   }
 
@@ -122,13 +122,13 @@ export class RedfinAdapter extends ServiceAdapter {
     const data = await this.rfRequest<{ data: Record<string, unknown> }>("/market-stats", { region_id: regionId });
     const d = data.data;
     return {
-      regionId, regionName: String(d["regionName"] ?? ""),
-      medianSalePrice: Number(d["medianSalePrice"] ?? 0),
-      medianPricePerSqFt: Number(d["medianPricePerSqFt"] ?? 0),
-      avgDaysOnMarket: Number(d["avgDom"] ?? 0), totalListings: Number(d["totalListings"] ?? 0),
-      newListings: Number(d["newListings"] ?? 0), pendingSales: Number(d["pendingSales"] ?? 0),
-      soldLastMonth: Number(d["sold"] ?? 0), priceDropPercent: Number(d["priceDropPercent"] ?? 0),
-      period: String(d["period"] ?? ""),
+      regionId, regionName: String(d.regionName ?? ""),
+      medianSalePrice: Number(d.medianSalePrice ?? 0),
+      medianPricePerSqFt: Number(d.medianPricePerSqFt ?? 0),
+      avgDaysOnMarket: Number(d.avgDom ?? 0), totalListings: Number(d.totalListings ?? 0),
+      newListings: Number(d.newListings ?? 0), pendingSales: Number(d.pendingSales ?? 0),
+      soldLastMonth: Number(d.sold ?? 0), priceDropPercent: Number(d.priceDropPercent ?? 0),
+      period: String(d.period ?? ""),
     };
   }
 

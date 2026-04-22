@@ -3,14 +3,12 @@ import {
   atlasArtifactsTable,
   atlasExportJobsTable,
   db,
-  outcomeGraphLearningJobsTable,
   outcomeGraphTable,
   proofChainTable,
   worldlineSourceRegistryTable,
 } from '@szl-holdings/db';
-import { and, avg, count, desc, eq, gte, sql } from 'drizzle-orm';
-import type { Request, Response } from 'express';
-import { type IRouter, Router } from 'express';
+import { and, avg, count, desc, eq, gte, } from 'drizzle-orm';
+import { type Request, type Response, type IRouter, Router } from 'express';
 import { sendError } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { authMiddleware, requireRole } from '../middlewares/auth';

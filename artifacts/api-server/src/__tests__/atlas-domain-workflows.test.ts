@@ -22,10 +22,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { randomUUID } from "crypto";
-import express from "express";
+import { randomUUID } from "node:crypto";
+import express, { type IRouter } from 'express';
 import request from "supertest";
-import type { IRouter } from "express";
 import type { WorkflowRun } from "@szl-holdings/action-engine";
 
 // ---------------------------------------------------------------------------

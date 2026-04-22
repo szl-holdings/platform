@@ -1,10 +1,9 @@
 import { Feather } from '@expo/vector-icons';
-import { type NotificationFetcher, NotificationHub, useTheme } from '@szl-holdings/mobile-shared';
+import { NotificationHub, useTheme } from '@szl-holdings/mobile-shared';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, router } from 'expo-router';
-import type React from 'react';
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   Alert,
   Platform,

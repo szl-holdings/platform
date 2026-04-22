@@ -7,7 +7,6 @@ import {
   CheckCircle,
   Clock,
   DollarSign,
-  Users,
   Zap,
 } from 'lucide-react';
 

@@ -1,14 +1,9 @@
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import { motion } from 'framer-motion';
 import {
-  AlertTriangle,
-  ArrowRight,
   CheckCircle,
   Clock,
   Filter,
-  Inbox,
-  Star,
-  User,
 } from 'lucide-react';
 import { useState } from 'react';
 

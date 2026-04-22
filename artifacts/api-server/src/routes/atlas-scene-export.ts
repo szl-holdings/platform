@@ -5,14 +5,7 @@ import {
   type SpatialTwinSnapshot,
   spatialTwinSnapshotsTable,
 } from '@szl-holdings/db';
-import type { BranchPackage, ProofBundle, SceneSnapshot } from '@szl-holdings/scene-export';
-import {
-  buildOpenUSDManifest,
-  exportBranchPackage,
-  exportJsonSnapshot,
-  exportOpenUSDManifest,
-  exportProofBundle,
-} from '@szl-holdings/scene-export';
+import { type BranchPackage, type ProofBundle, type SceneSnapshot, buildOpenUSDManifest, exportBranchPackage, exportJsonSnapshot, exportOpenUSDManifest, exportProofBundle } from '@szl-holdings/scene-export';
 import { desc, eq } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
@@ -73,7 +66,7 @@ async function recordAtlasExportAudit(params: {
       entityId: params.entityId ?? undefined,
       newValues: {
         format: params.format,
-        ...(params.details ?? {}),
+        ...params.details,
       },
       ipAddress: params.req.ip ?? null,
       userAgent: params.req.get('user-agent') ?? null,

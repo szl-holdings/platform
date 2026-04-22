@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { defaultQueryEngine, type TraceQueryEngine } from './query.js';
 import type {
   MemoryIORecord,
@@ -92,7 +92,7 @@ export class TraceSession {
       latencyMs,
       status: opts.status ?? 'ok',
       errorMessage: opts.errorMessage,
-      attributes: { ...entry.span.attributes, ...(opts.attributes ?? {}) },
+      attributes: { ...entry.span.attributes, ...opts.attributes },
     };
     this.writer.appendSpan(this.traceId, completed);
     this.activeSpans.delete(spanId);
@@ -116,13 +116,13 @@ export class TraceSession {
 
   linkEntity(entityId: string, role?: string): void {
     this.queryEngine.linkEntityToTrace(this.traceId, entityId);
-    const trace = this.writer['store']['get']?.(this.traceId);
+    const trace = this.writer.store.get?.(this.traceId);
     if (trace) {
       const links: Array<{ entityId: string; role: string }> =
-        (trace.metadata?.['entityLinks'] as Array<{ entityId: string; role: string }>) ?? [];
+        (trace.metadata?.entityLinks as Array<{ entityId: string; role: string }>) ?? [];
       links.push({ entityId, role: role ?? 'touched' });
       trace.metadata = { ...trace.metadata, entityLinks: links };
-      this.writer['store']['save']?.(trace);
+      this.writer.store.save?.(trace);
     }
   }
 
@@ -168,10 +168,10 @@ export class TraceSdk {
     return async (...args: TArgs): Promise<TResult> => {
       const spanId = session.startSpan({ name: `tool:${toolName}` });
       const start = Date.now();
-      let success = false;
+      let _success = false;
       try {
         const result = await fn(...args);
-        success = true;
+        _success = true;
         session.endSpan(spanId, { status: 'ok' });
         session.recordToolCall({
           toolId,

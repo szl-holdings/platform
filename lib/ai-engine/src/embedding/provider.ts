@@ -150,16 +150,16 @@ class HuggingFaceEmbeddingProvider extends BaseEmbeddingProvider {
 
   constructor() {
     super();
-    this.apiKey = process.env['HUGGINGFACE_API_KEY'];
-    this.baseUrl = process.env['HF_INFERENCE_URL'] || 'https://api-inference.huggingface.co/models';
+    this.apiKey = process.env.HUGGINGFACE_API_KEY;
+    this.baseUrl = process.env.HF_INFERENCE_URL || 'https://api-inference.huggingface.co/models';
   }
 
   async embed(text: string, model?: string): Promise<number[]> {
-    const targetModel = model || process.env['HF_EMBED_MODEL'] || 'BAAI/bge-m3';
+    const targetModel = model || process.env.HF_EMBED_MODEL || 'BAAI/bge-m3';
     const start = Date.now();
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (this.apiKey) headers['Authorization'] = `Bearer ${this.apiKey}`;
+    if (this.apiKey) headers.Authorization = `Bearer ${this.apiKey}`;
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
@@ -203,11 +203,11 @@ class OpenAICompatibleEmbeddingProvider extends BaseEmbeddingProvider {
 
   constructor() {
     super();
-    const _apiKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
+    const _apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
     this.config = {
-      baseUrl: process.env['OPENAI_EMBED_BASE_URL'] || process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'] || 'https://api.openai.com/v1',
+      baseUrl: process.env.OPENAI_EMBED_BASE_URL || process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || 'https://api.openai.com/v1',
       ...(_apiKey !== undefined ? { apiKey: _apiKey } : {}),
-      defaultModel: process.env['OPENAI_EMBED_MODEL'] || 'text-embedding-3-small',
+      defaultModel: process.env.OPENAI_EMBED_MODEL || 'text-embedding-3-small',
       maxInputLength: 8000,
     };
     if (!this.config.apiKey) {
@@ -266,10 +266,10 @@ class LocalSentenceTransformersEmbeddingProvider extends BaseEmbeddingProvider {
 
   constructor() {
     super();
-    this.baseUrl = process.env['LOCAL_EMBED_URL'] || 'http://localhost:8765';
+    this.baseUrl = process.env.LOCAL_EMBED_URL || 'http://localhost:8765';
     this.defaultModel =
-      process.env['LOCAL_EMBED_MODEL'] || 'sentence-transformers/all-MiniLM-L6-v2';
-    if (!process.env['LOCAL_EMBED_URL']) {
+      process.env.LOCAL_EMBED_MODEL || 'sentence-transformers/all-MiniLM-L6-v2';
+    if (!process.env.LOCAL_EMBED_URL) {
       this.health.available = false;
     }
   }
@@ -331,7 +331,7 @@ class ReplitAIProxyEmbeddingProvider extends BaseEmbeddingProvider {
 
   constructor() {
     super();
-    this.defaultModel = process.env['REPLIT_EMBED_MODEL'] || 'text-embedding-3-small';
+    this.defaultModel = process.env.REPLIT_EMBED_MODEL || 'text-embedding-3-small';
   }
 
   async embed(text: string, model?: string): Promise<number[]> {
@@ -380,7 +380,7 @@ export class EmbeddingPipeline {
       new MockEmbeddingProvider(),
     ];
 
-    const order = (process.env['EMBEDDING_PROVIDER_ORDER'] || '')
+    const order = (process.env.EMBEDDING_PROVIDER_ORDER || '')
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
@@ -428,17 +428,13 @@ export class EmbeddingPipeline {
         const modelForProvider = options.model
           ? options.model
           : isHfLike
-            ? domainConfig?.hfModel || process.env['HF_EMBED_MODEL'] || 'BAAI/bge-m3'
+            ? domainConfig?.hfModel || process.env.HF_EMBED_MODEL || 'BAAI/bge-m3'
             : domainConfig?.model || 'text-embedding-3-small';
 
         const vector = await provider.embed(text, modelForProvider);
         const latencyMs = Date.now() - start;
 
         if (expectedDimensions !== null && vector.length !== expectedDimensions) {
-          console.warn(
-            `[embedding-pipeline] Dimension mismatch for domain "${options.domain}": ` +
-              `expected ${expectedDimensions}, got ${vector.length} from ${provider.type}/${modelForProvider}`,
-          );
         }
 
         const result: EmbeddingResult = {
@@ -459,17 +455,13 @@ export class EmbeddingPipeline {
           options.domain,
         );
         return result;
-      } catch (err) {
+      } catch (_err) {
         embeddingAnalytics.recordEmbedding(
           provider.type,
           canonicalModel,
           Date.now() - start,
           false,
           options.domain,
-        );
-        console.warn(
-          `[embedding-pipeline] Provider ${provider.type} failed:`,
-          err instanceof Error ? err.message : String(err),
         );
       }
     }

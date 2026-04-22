@@ -277,12 +277,12 @@ describe('TraceReplayer — deterministic replay', () => {
     const tree = replayer.getTraceTree(traceId);
 
     expect(tree).toBeDefined();
-    expect(tree!.trace.traceId).toBe(traceId);
-    expect(Array.isArray(tree!.spans)).toBe(true);
-    expect(tree!.spans).toHaveLength(1); // sp-root is the only root
-    expect(tree!.spans[0].span.spanId).toBe('sp-root');
-    expect(tree!.spans[0].children).toHaveLength(1);
-    expect(tree!.spans[0].children[0].span.spanId).toBe('sp-child');
+    expect(tree?.trace.traceId).toBe(traceId);
+    expect(Array.isArray(tree?.spans)).toBe(true);
+    expect(tree?.spans).toHaveLength(1); // sp-root is the only root
+    expect(tree?.spans[0].span.spanId).toBe('sp-root');
+    expect(tree?.spans[0].children).toHaveLength(1);
+    expect(tree?.spans[0].children[0].span.spanId).toBe('sp-child');
   });
 
   it('getTraceTree returns undefined for unknown traceId', () => {
@@ -423,7 +423,7 @@ describe('TraceQueryEngine — trace querying', () => {
     const engine = new TraceQueryEngine(store);
     const found = engine.getById('t-lookup');
     expect(found).toBeDefined();
-    expect(found!.objective).toBe('Specific trace');
+    expect(found?.objective).toBe('Specific trace');
   });
 
   it('query() with hasErrors=true filters to traces with errors', () => {
@@ -495,7 +495,7 @@ describe('TraceSdk — convenience SDK', () => {
 
     const stored = store.get(session.traceId);
     expect(stored).toBeDefined();
-    expect(stored!.agentId).toBe('agent-sdk-test');
+    expect(stored?.agentId).toBe('agent-sdk-test');
   });
 
   it('session.complete() sets status to completed', () => {
@@ -548,7 +548,7 @@ describe('TraceSdk — convenience SDK', () => {
 
     const trace = store.get(session.traceId)!;
     expect(trace.toolCalls.some((tc) => tc.toolName === 'ais-fetch')).toBe(true);
-    expect(trace.toolCalls.find((tc) => tc.toolName === 'ais-fetch')!.success).toBe(true);
+    expect(trace.toolCalls.find((tc) => tc.toolName === 'ais-fetch')?.success).toBe(true);
   });
 });
 
@@ -691,8 +691,8 @@ describe('TraceWriter — operator comments and run grading', () => {
     });
     const trace = store.get('t-grade')!;
     expect(trace.grade).toBeDefined();
-    expect(trace.grade!.score).toBe(0.92);
-    expect(trace.grade!.rubric['policy_compliance']).toBe(1.0);
-    expect(typeof trace.grade!.gradedAt).toBe('string');
+    expect(trace.grade?.score).toBe(0.92);
+    expect(trace.grade?.rubric.policy_compliance).toBe(1.0);
+    expect(typeof trace.grade?.gradedAt).toBe('string');
   });
 });

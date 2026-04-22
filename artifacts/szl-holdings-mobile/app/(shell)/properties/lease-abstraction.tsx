@@ -3,15 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import type React from 'react';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProvenanceChip, type ProvenanceStatus } from '@/components/ProvenanceChip';
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 const ACCENT = '#8b5cf6';
@@ -172,7 +171,7 @@ const LEASES: AbstractedLease[] = [
 function normalizeApiLeases(data: unknown): AbstractedLease[] | null {
   const envelope = data as Record<string, unknown> | null;
   const arr = Array.isArray(envelope?.leases)
-    ? (envelope!.leases as Record<string, unknown>[])
+    ? (envelope?.leases as Record<string, unknown>[])
     : Array.isArray(data)
       ? (data as Record<string, unknown>[])
       : null;
@@ -226,14 +225,14 @@ function ClauseCard({ clause }: { clause: LeaseClause }) {
         <View
           style={[
             styles.clauseIcon,
-            { backgroundColor: ACCENT + '15', borderColor: ACCENT + '25' },
+            { backgroundColor: `${ACCENT}15`, borderColor: `${ACCENT}25` },
           ]}
         >
           <Feather name={icon} size={12} color={ACCENT} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={[styles.clauseTitle, { color: colors.cream }]}>{clause.title}</Text>
-          <View style={[styles.riskPill, { backgroundColor: riskColor + '15' }]}>
+          <View style={[styles.riskPill, { backgroundColor: `${riskColor}15` }]}>
             <Text style={[styles.riskText, { color: riskColor }]}>{clause.riskLevel} risk</Text>
           </View>
         </View>
@@ -265,7 +264,7 @@ export default function LeaseAbstractionScreen() {
   const { data: apiData, isFetching } = useQuery({
     queryKey: ['terra-lease-abstraction'],
     queryFn: async () => {
-      const res = await fetch(API_BASE + '/terra/leases');
+      const res = await fetch(`${API_BASE}/terra/leases`);
       if (!res.ok) throw new Error('API error');
       return res.json();
     },
@@ -299,7 +298,7 @@ export default function LeaseAbstractionScreen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · AI</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · AI</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Lease Abstraction</Text>
         </View>
         <View style={styles.headerRight}>
@@ -336,7 +335,7 @@ export default function LeaseAbstractionScreen() {
               styles.leaseTab,
               {
                 borderColor: activeId === l.id ? ACCENT : colors.border,
-                backgroundColor: activeId === l.id ? ACCENT + '12' : 'transparent',
+                backgroundColor: activeId === l.id ? `${ACCENT}12` : 'transparent',
               },
             ]}
           >

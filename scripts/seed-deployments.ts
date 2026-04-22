@@ -46,8 +46,8 @@ const NOW = Date.now();
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 async function seed(): Promise<void> {
-  let inserted = 0;
-  let skipped = 0;
+  let _inserted = 0;
+  let _skipped = 0;
 
   for (const app of APPS) {
     for (const env of ENVIRONMENTS) {
@@ -58,7 +58,7 @@ async function seed(): Promise<void> {
         .limit(1);
 
       if (existing.length > 0) {
-        skipped++;
+        _skipped++;
         continue;
       }
 
@@ -81,18 +81,13 @@ async function seed(): Promise<void> {
       });
 
       await db.insert(deploymentsTable).values(rows);
-      inserted += rows.length;
+      _inserted += rows.length;
     }
   }
-
-  console.log(
-    `[seed-deployments] Inserted ${inserted} rows, skipped ${skipped} (app, env) pairs already populated.`,
-  );
 }
 
 seed()
   .then(() => process.exit(0))
-  .catch((err) => {
-    console.error('[seed-deployments] Failed:', err);
+  .catch((_err) => {
     process.exit(1);
   });

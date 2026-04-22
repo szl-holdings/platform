@@ -3,13 +3,10 @@ import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
-  AlertTriangle,
-  CheckCircle,
   ChevronDown,
   Eye,
   Lock,
   RefreshCw,
-  Server,
   Shield,
   Users,
 } from 'lucide-react';

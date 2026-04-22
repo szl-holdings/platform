@@ -30,10 +30,9 @@ app.get('/readyz', (_req, res) => {
   res.status(200).json({ ready: true });
 });
 
-const PORT = process.env['PORT'] ? parseInt(process.env['PORT'], 10) : 3003;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3003;
 
 app.listen(PORT, () => {
-  console.log(`[alloy-ingestion-orchestrator] Listening on port ${PORT}`);
 });
 
 export { app };

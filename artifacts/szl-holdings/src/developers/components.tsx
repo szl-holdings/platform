@@ -1,4 +1,4 @@
-import { AlertCircle, Check, ChevronDown, Copy, Lock, Shield } from 'lucide-react';
+import { AlertCircle, Check, Copy, Shield } from 'lucide-react';
 import { useState } from 'react';
 
 export function CodeBlock({

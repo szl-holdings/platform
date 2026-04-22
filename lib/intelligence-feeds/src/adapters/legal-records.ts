@@ -106,9 +106,6 @@ export class LegalRecordsFeedAdapter extends BaseFeedAdapter {
 
   async connect(): Promise<void> {
     if (!this.apiToken) {
-      console.warn(
-        '[LegalRecords] No CourtListener API token — rate limits will apply to public requests',
-      );
     }
     this.health.status = 'healthy';
     await this.loadPrismMatterIndex();
@@ -142,13 +139,7 @@ export class LegalRecordsFeedAdapter extends BaseFeedAdapter {
           });
         }
       }
-      console.log(
-        `[LegalRecords] Loaded ${this.prismMatterIndex.size} PRISM Counsel matters for cross-linking`,
-      );
     } catch {
-      console.warn(
-        '[LegalRecords] Could not load PRISM Counsel matter index — cross-linking disabled for this cycle',
-      );
     }
   }
 
@@ -185,11 +176,7 @@ export class LegalRecordsFeedAdapter extends BaseFeedAdapter {
           allRelationships.push(...result.relationships);
           totalRecords += result.recordCount;
         }
-      } catch (err) {
-        console.warn(
-          `[LegalRecords] Query "${query}" failed:`,
-          err instanceof Error ? err.message : err,
-        );
+      } catch (_err) {
       }
     }
 
@@ -222,7 +209,7 @@ export class LegalRecordsFeedAdapter extends BaseFeedAdapter {
       });
 
       const headers: Record<string, string> = { Accept: 'application/json' };
-      if (this.apiToken) headers['Authorization'] = `Token ${this.apiToken}`;
+      if (this.apiToken) headers.Authorization = `Token ${this.apiToken}`;
 
       const url = `${this.baseUrl}/dockets/?${params.toString()}`;
       const response = await fetch(url, { signal: controller.signal, headers });

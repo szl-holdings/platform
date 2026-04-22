@@ -120,7 +120,7 @@ export default function SynergyMapPage() {
     canonical: "https://szlholdings.com/venture-intelligence/synergy-map",
   });
 
-  const [activeSynergy, setActiveSynergy] = useState<string>(SYNERGIES[0]!.id);
+  const [activeSynergy, setActiveSynergy] = useState<string>(SYNERGIES[0]?.id);
   const detail = SYNERGIES.find(s => s.id === activeSynergy) ?? SYNERGIES[0]!;
 
   return (
@@ -128,7 +128,7 @@ export default function SynergyMapPage() {
       {__pageMeta}
       <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
           <section style={{ padding: "clamp(5rem,8vw,7rem) 0 2rem", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
               <Link href="/venture-intelligence" style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "hsl(210,5%,42%)", textDecoration: "none", marginBottom: "1.5rem" }}>

@@ -3,7 +3,6 @@ import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   AlertTriangle,
-  Brain,
   Calendar,
   CheckCircle2,
   ChevronDown,
@@ -13,7 +12,6 @@ import {
   FileText,
   Filter,
   Plus,
-  Ship,
   Sparkles,
 } from 'lucide-react';
 import { useState } from 'react';

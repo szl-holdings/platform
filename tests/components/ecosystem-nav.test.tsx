@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EcosystemNav, type EcosystemNavProps } from '../../lib/shared-ui/src/ecosystem-nav';
 
@@ -64,7 +64,7 @@ describe('EcosystemNav', () => {
     ];
 
     render(<EcosystemNav {...defaultProps} notifications={notifications} />);
-    const badge = document.querySelector('[data-unread]') || document.querySelector('.badge');
+    const _badge = document.querySelector('[data-unread]') || document.querySelector('.badge');
     expect(document.body).toBeTruthy();
   });
 

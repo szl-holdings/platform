@@ -5,10 +5,8 @@ import {
   ChevronUp,
   Clock,
   Loader,
-  Play,
   Shield,
   XCircle,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import { SubstrateWorkflowPanel } from '@/components/SubstrateWorkflowPanel';

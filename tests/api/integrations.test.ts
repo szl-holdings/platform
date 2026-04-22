@@ -9,7 +9,7 @@ vi.mock('../../artifacts/api-server/src/middlewares/auth', () => {
     (req: unknown, res: unknown, next: () => void) => {
       const r = req as Record<string, unknown>;
       const respondRes = res as { status: (n: number) => { json: (b: unknown) => void } };
-      if (r['user']) {
+      if (r.user) {
         next();
       } else {
         respondRes.status(401).json({ error: 'Authentication required' });
@@ -20,7 +20,7 @@ vi.mock('../../artifacts/api-server/src/middlewares/auth', () => {
     (..._roles: string[]) =>
     (req: unknown, res: unknown, next: () => void) => {
       const r = req as Record<string, unknown>;
-      const user = r['user'] as { roles?: string[] } | undefined;
+      const user = r.user as { roles?: string[] } | undefined;
       const respondRes = res as { status: (n: number) => { json: (b: unknown) => void } };
       if (!user) {
         respondRes.status(401).json({ error: 'Authentication required' });
@@ -39,7 +39,7 @@ vi.mock('../../artifacts/api-server/src/middlewares/auth', () => {
     requireRole,
     parseIdParam: (id: string) => {
       const n = parseInt(id, 10);
-      if (isNaN(n)) throw new Error('InvalidId');
+      if (Number.isNaN(n)) throw new Error('InvalidId');
       return n;
     },
     InvalidIdError: class InvalidIdError extends Error {},

@@ -6,7 +6,6 @@ import {
   ArrowLeftRight,
   CheckCircle,
   Clock,
-  DollarSign,
   Filter,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -14,7 +13,6 @@ import {
   ApprovalChip,
   ConfidenceBadge,
   formatCurrency,
-  RiskBadge,
 } from '@/components/brokerage-ui';
 import { type Offer, offers } from '@/data/brokerage';
 
@@ -249,7 +247,7 @@ function ComparisonTable({ listing, listingOffers }: { listing: string; listingO
               { label: 'Close Date', key: (o: Offer) => o.closingDate },
               {
                 label: 'Contingencies',
-                key: (o: Offer) => o.contingencies.filter((c) => !c.waived).length + ' active',
+                key: (o: Offer) => `${o.contingencies.filter((c) => !c.waived).length} active`,
               },
               {
                 label: 'Close Confidence',

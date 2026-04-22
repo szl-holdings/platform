@@ -4,7 +4,6 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
   AlertTriangle,
-  BarChart3,
   CheckCircle2,
   Info,
   Loader2,

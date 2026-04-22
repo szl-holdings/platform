@@ -43,7 +43,7 @@ export function fuseConfidence(
   };
 
   if (signals.length === 0) return { ...base, fused: 0 };
-  if (signals.length === 1) return { ...base, fused: clamp(signals[0]!.value) };
+  if (signals.length === 1) return { ...base, fused: clamp(signals[0]?.value) };
 
   let fused: number;
 

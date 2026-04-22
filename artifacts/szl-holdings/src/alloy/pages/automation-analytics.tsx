@@ -4,7 +4,7 @@ import {
   formatCurrency,
   WORKFLOWS_UI,
 } from '@szl-holdings/shared-ui/core-observability-data';
-import { BarChart2, TrendingUp } from 'lucide-react';
+import { BarChart2, } from 'lucide-react';
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 const VOLUME_DATA = [
@@ -18,7 +18,7 @@ const VOLUME_DATA = [
 ];
 
 const TOP_WORKFLOWS = WORKFLOWS_UI.slice(0, 5).map((w, i) => ({
-  name: w.name.length > 32 ? w.name.slice(0, 32) + '…' : w.name,
+  name: w.name.length > 32 ? `${w.name.slice(0, 32)}…` : w.name,
   runs: [73, 61, 48, 42, 29][i],
   success_rate: [94, 88, 96, 82, 100][i],
 }));

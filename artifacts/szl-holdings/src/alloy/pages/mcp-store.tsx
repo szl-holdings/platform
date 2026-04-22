@@ -4,23 +4,16 @@ import {
   BarChart2,
   Check,
   CheckCircle,
-  ChevronRight,
   Code2,
   Database,
-  ExternalLink,
   Filter,
-  GitBranch,
-  Globe,
   Loader2,
   MessageSquare,
   Plus,
-  RefreshCw,
   Search,
   Server,
   Shield,
   Store,
-  Wifi,
-  WifiOff,
   X,
   Zap,
 } from 'lucide-react';
@@ -528,7 +521,7 @@ export default function McpStore() {
   const featured = filtered.filter((s) => s.featured);
   const nonFeatured = filtered.filter((s) => !s.featured);
 
-  const handleConnect = (server: McpRegistryEntry, url: string, creds: Record<string, string>) => {
+  const handleConnect = (server: McpRegistryEntry, url: string, _creds: Record<string, string>) => {
     setConnectedIds((prev) => new Set([...prev, server.id]));
     setConnectedServers((prev) => [
       ...prev.filter((s) => s.id !== server.id),

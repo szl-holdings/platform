@@ -3,23 +3,9 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import { AnimatePresence, motion as m } from 'framer-motion';
 import {
   ArrowLeft,
-  ArrowUpRight,
-  BarChart3,
-  Box,
-  Building2,
-  ChevronRight,
-  DollarSign,
-  Eye,
-  FileText,
-  Grid3X3,
-  Layers,
   Loader2,
-  MapPin,
-  Maximize2,
-  Scale,
-  TrendingUp,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import { api } from '@/lib/api';
 

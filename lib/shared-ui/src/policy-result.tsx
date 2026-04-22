@@ -1,5 +1,4 @@
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 export type PolicyEffect = 'allow' | 'deny' | 'escalate' | 'pending';
 

@@ -4,7 +4,6 @@ import {
   CheckCircle,
   ChevronRight,
   Clock,
-  Database,
   FileText,
   Filter,
   Link2,
@@ -13,7 +12,6 @@ import {
   Plus,
   Search,
   Sparkles,
-  Tag,
   TrendingUp,
   Users,
   Zap,
@@ -554,7 +552,7 @@ Only respond with the JSON, no markdown.`;
                     >
                       {type === 'all'
                         ? 'All'
-                        : TYPE_META[type as KnowledgeNode['type']].label + 's'}
+                        : `${TYPE_META[type as KnowledgeNode['type']].label}s`}
                     </button>
                   );
                 },

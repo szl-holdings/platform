@@ -1,5 +1,4 @@
-import type { BusinessImpact } from '@szl-holdings/decision-engine';
-import { computePriorityScore } from '@szl-holdings/decision-engine';
+import { type BusinessImpact, computePriorityScore } from '@szl-holdings/decision-engine';
 import type { PlanGraph } from './types.js';
 
 /**
@@ -42,7 +41,7 @@ export function rankFallbacks(primary: PlanGraph, fallbacks: PlanGraph[]): PlanG
       crossDomainBlastRadius: dedupe(
         fb.steps
           .map((s) => {
-            const kind = s.metadata['fallbackKind'];
+            const kind = s.metadata.fallbackKind;
             return typeof kind === 'string' ? kind : '';
           })
           .filter((k): k is string => k.length > 0),

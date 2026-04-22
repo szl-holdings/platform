@@ -1,14 +1,10 @@
 import {
   AlertTriangle,
   Brain,
-  Building2,
-  CheckCircle,
-  ChevronRight,
   Clock,
   FileText,
   Play,
   RotateCcw,
-  Shield,
   Star,
   Users,
   Zap,
@@ -842,7 +838,7 @@ export default function PhantomTabletop() {
   const [consequenceLog, setConsequenceLog] = useState<
     Array<{ text: string; severity: 'critical' | 'high' | 'medium' }>
   >([]);
-  const [currentInjectIdx, setCurrentInjectIdx] = useState(0);
+  const [_currentInjectIdx, _setCurrentInjectIdx] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const scenario = SCENARIOS[selectedScenario];

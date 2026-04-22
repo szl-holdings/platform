@@ -344,7 +344,7 @@ export class SecEdgarAdapter extends ServiceAdapter {
   ): Promise<EdgarConceptUnit[]> {
     if (this.isDemoMode) {
       const facts = MOCK_COMPANY_FACTS.facts['us-gaap'];
-      return facts?.[concept]?.units?.['USD'] ?? [];
+      return facts?.[concept]?.units?.USD ?? [];
     }
 
     const paddedCik = cik.replace(/^CIK0*/, '').padStart(10, '0');
@@ -352,6 +352,6 @@ export class SecEdgarAdapter extends ServiceAdapter {
     const res = await this.throttledFetch(url);
     if (!res.ok) throw new Error(`SEC EDGAR concept error: HTTP ${res.status}`);
     const data = (await res.json()) as { units?: Record<string, EdgarConceptUnit[]> };
-    return data.units?.['USD'] ?? [];
+    return data.units?.USD ?? [];
   }
 }

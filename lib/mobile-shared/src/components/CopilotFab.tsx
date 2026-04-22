@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
@@ -39,7 +39,7 @@ interface ChatMessage {
 const API_BASE =
   getApiBaseUrl('https://szl-holdings.replit.app') ?? 'https://szl-holdings.replit.app';
 
-function loadHistory(key?: string): ChatMessage[] {
+function loadHistory(_key?: string): ChatMessage[] {
   return [];
 }
 
@@ -84,7 +84,7 @@ export function CopilotFab({ config }: { config: MobileCopilotConfig }) {
 
   useEffect(() => {
     if (isOpen) scrollToEnd();
-  }, [messages, streamingContent, isOpen, scrollToEnd]);
+  }, [isOpen, scrollToEnd]);
 
   const openFab = () => {
     Animated.sequence([
@@ -216,7 +216,7 @@ export function CopilotFab({ config }: { config: MobileCopilotConfig }) {
         statusBarTranslucent
       >
         <SafeAreaView style={styles.modal}>
-          <View style={[styles.header, { borderBottomColor: config.accentColor + '33' }]}>
+          <View style={[styles.header, { borderBottomColor: `${config.accentColor}33` }]}>
             <View style={styles.headerLeft}>
               <Text style={styles.headerIcon}>{config.icon}</Text>
               <View>
@@ -260,7 +260,7 @@ export function CopilotFab({ config }: { config: MobileCopilotConfig }) {
                             key={i}
                             style={[
                               styles.suggestionChip,
-                              { borderColor: config.accentColor + '66' },
+                              { borderColor: `${config.accentColor}66` },
                             ]}
                             onPress={() => sendMessage(q)}
                             activeOpacity={0.7}
@@ -290,7 +290,7 @@ export function CopilotFab({ config }: { config: MobileCopilotConfig }) {
 
             <View style={styles.inputRow}>
               <TextInput
-                style={[styles.input, { borderColor: config.accentColor + '66' }]}
+                style={[styles.input, { borderColor: `${config.accentColor}66` }]}
                 value={input}
                 onChangeText={setInput}
                 placeholder={config.placeholderText ?? 'Ask anything…'}
@@ -305,7 +305,7 @@ export function CopilotFab({ config }: { config: MobileCopilotConfig }) {
                 style={[
                   styles.sendBtn,
                   {
-                    backgroundColor: input.trim() ? config.accentColor : config.accentColor + '55',
+                    backgroundColor: input.trim() ? config.accentColor : `${config.accentColor}55`,
                   },
                 ]}
                 onPress={() => sendMessage()}

@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   type DimensionValue,
   Platform,
@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -57,7 +57,7 @@ function MarkerCard({ marker, onPress }: { marker: Marker; onPress: () => void }
         onPress();
       }}
     >
-      <View style={[styles.markerCard, { borderColor: statusColor + '30' }]}>
+      <View style={[styles.markerCard, { borderColor: `${statusColor}30` }]}>
         <View style={[styles.markerDot, { backgroundColor: statusColor }]} />
         <View style={styles.markerInfo}>
           <Text style={[styles.markerAddress, { color: colors.cream }]} numberOfLines={1}>
@@ -67,7 +67,7 @@ function MarkerCard({ marker, onPress }: { marker: Marker; onPress: () => void }
             {marker.borough} · {marker.price}
           </Text>
         </View>
-        <View style={[styles.scoreChip, { backgroundColor: statusColor + '15' }]}>
+        <View style={[styles.scoreChip, { backgroundColor: `${statusColor}15` }]}>
           <Text style={[styles.scoreText, { color: statusColor }]}>{marker.score}</Text>
         </View>
       </View>
@@ -93,7 +93,7 @@ export default function MapTab() {
     queryKey: ['terra-distress-map'],
     queryFn: async () => {
       try {
-        const res = await fetch(API_BASE + '/terra/distress/search?limit=20');
+        const res = await fetch(`${API_BASE}/terra/distress/search?limit=20`);
         if (!res.ok) {
           setMapApiError(true);
           return null;
@@ -130,8 +130,8 @@ export default function MapTab() {
               borough: p.borough,
               price: p.estimatedValue
                 ? p.estimatedValue >= 1e6
-                  ? '$' + (p.estimatedValue / 1e6).toFixed(1) + 'M'
-                  : '$' + Math.round(p.estimatedValue / 1000) + 'K'
+                  ? `$${(p.estimatedValue / 1e6).toFixed(1)}M`
+                  : `$${Math.round(p.estimatedValue / 1000)}K`
                 : 'Est. N/A',
               lat: 40.7128 + Math.sin(idx * 1.3) * 0.08,
               lng: -73.976 + Math.cos(idx * 0.9) * 0.1,
@@ -200,8 +200,8 @@ export default function MapTab() {
                 borough: p.borough,
                 price: p.estimatedValue
                   ? p.estimatedValue >= 1e6
-                    ? '$' + (p.estimatedValue / 1e6).toFixed(1) + 'M'
-                    : '$' + Math.round(p.estimatedValue / 1000) + 'K'
+                    ? `$${(p.estimatedValue / 1e6).toFixed(1)}M`
+                    : `$${Math.round(p.estimatedValue / 1000)}K`
                   : 'Est. N/A',
                 lat: latitude + Math.sin(idx * 0.7) * 0.015,
                 lng: longitude + Math.cos(idx * 0.5) * 0.015,
@@ -311,7 +311,7 @@ export default function MapTab() {
                 styles.filterChip,
                 {
                   borderColor: selectedStatus === s.key ? s.color : colors.border,
-                  backgroundColor: selectedStatus === s.key ? s.color + '15' : 'transparent',
+                  backgroundColor: selectedStatus === s.key ? `${s.color}15` : 'transparent',
                 },
               ]}
             >
@@ -365,8 +365,8 @@ export default function MapTab() {
             {mapApiError
               ? 'Cannot reach server · Check connection'
               : nearMeActive
-                ? displayMarkers.length + ' properties within 2mi of your location'
-                : displayMarkers.length + ' properties · Tap pins to inspect'}
+                ? `${displayMarkers.length} properties within 2mi of your location`
+                : `${displayMarkers.length} properties · Tap pins to inspect`}
           </Text>
         </View>
       </View>
@@ -377,7 +377,7 @@ export default function MapTab() {
             styles.markerDetail,
             {
               backgroundColor: colors.surfaceElevated,
-              borderColor: STATUS_COLORS[selectedMarker.status] + '30',
+              borderColor: `${STATUS_COLORS[selectedMarker.status]}30`,
             },
           ]}
         >

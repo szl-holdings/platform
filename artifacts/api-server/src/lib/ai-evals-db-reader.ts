@@ -33,77 +33,77 @@ export function isDbAvailable(): boolean {
 
 function rowToTrace(row: Record<string, unknown>): AITrace {
   return {
-    traceId: String(row['trace_id']),
-    correlationId: row['correlation_id'] != null ? String(row['correlation_id']) : undefined,
-    orgId: row['org_id'] != null ? Number(row['org_id']) : null,
-    agentId: row['agent_id'] != null ? String(row['agent_id']) : undefined,
-    model: String(row['model']),
-    modelProvider: String(row['model_provider']),
-    modelVersion: row['model_version'] != null ? String(row['model_version']) : undefined,
-    routeClass: row['route_class'] != null ? String(row['route_class']) : undefined,
-    domain: String(row['domain']) as AITrace['domain'],
-    recommendationType: String(row['recommendation_type']) as AITrace['recommendationType'],
-    promptHash: String(row['prompt_hash']),
-    promptTokens: Number(row['prompt_tokens'] ?? 0),
-    completionTokens: Number(row['completion_tokens'] ?? 0),
-    latencyMs: Number(row['latency_ms'] ?? 0),
-    costEstimateUsd: Number(row['cost_estimate_usd'] ?? 0),
-    confidence: Number(row['confidence'] ?? 1),
+    traceId: String(row.trace_id),
+    correlationId: row.correlation_id != null ? String(row.correlation_id) : undefined,
+    orgId: row.org_id != null ? Number(row.org_id) : null,
+    agentId: row.agent_id != null ? String(row.agent_id) : undefined,
+    model: String(row.model),
+    modelProvider: String(row.model_provider),
+    modelVersion: row.model_version != null ? String(row.model_version) : undefined,
+    routeClass: row.route_class != null ? String(row.route_class) : undefined,
+    domain: String(row.domain) as AITrace['domain'],
+    recommendationType: String(row.recommendation_type) as AITrace['recommendationType'],
+    promptHash: String(row.prompt_hash),
+    promptTokens: Number(row.prompt_tokens ?? 0),
+    completionTokens: Number(row.completion_tokens ?? 0),
+    latencyMs: Number(row.latency_ms ?? 0),
+    costEstimateUsd: Number(row.cost_estimate_usd ?? 0),
+    confidence: Number(row.confidence ?? 1),
     riskLevel:
-      row['risk_level'] != null ? (String(row['risk_level']) as AITrace['riskLevel']) : undefined,
-    requiresReview: Boolean(row['requires_review']),
-    reviewReason: row['review_reason'] != null ? String(row['review_reason']) : undefined,
-    proofChainId: row['proof_chain_id'] != null ? Number(row['proof_chain_id']) : undefined,
-    outcomeGraphId: row['outcome_graph_id'] != null ? Number(row['outcome_graph_id']) : undefined,
-    inputSummary: row['input_summary'] != null ? String(row['input_summary']) : undefined,
-    outputSummary: row['output_summary'] != null ? String(row['output_summary']) : undefined,
-    toolsUsed: Array.isArray(row['tools_used']) ? (row['tools_used'] as string[]) : undefined,
-    evalScore: row['eval_score'] != null ? Number(row['eval_score']) : undefined,
-    evalPassed: row['eval_passed'] != null ? Boolean(row['eval_passed']) : undefined,
-    status: String(row['status']) as AITrace['status'],
-    metadata: row['metadata'] != null ? (row['metadata'] as Record<string, unknown>) : undefined,
+      row.risk_level != null ? (String(row.risk_level) as AITrace['riskLevel']) : undefined,
+    requiresReview: Boolean(row.requires_review),
+    reviewReason: row.review_reason != null ? String(row.review_reason) : undefined,
+    proofChainId: row.proof_chain_id != null ? Number(row.proof_chain_id) : undefined,
+    outcomeGraphId: row.outcome_graph_id != null ? Number(row.outcome_graph_id) : undefined,
+    inputSummary: row.input_summary != null ? String(row.input_summary) : undefined,
+    outputSummary: row.output_summary != null ? String(row.output_summary) : undefined,
+    toolsUsed: Array.isArray(row.tools_used) ? (row.tools_used as string[]) : undefined,
+    evalScore: row.eval_score != null ? Number(row.eval_score) : undefined,
+    evalPassed: row.eval_passed != null ? Boolean(row.eval_passed) : undefined,
+    status: String(row.status) as AITrace['status'],
+    metadata: row.metadata != null ? (row.metadata as Record<string, unknown>) : undefined,
     capturedAt:
-      row['captured_at'] instanceof Date
-        ? (row['captured_at'] as Date).toISOString()
-        : String(row['captured_at']),
+      row.captured_at instanceof Date
+        ? (row.captured_at as Date).toISOString()
+        : String(row.captured_at),
   };
 }
 
 function rowToReviewItem(row: Record<string, unknown>): ReviewQueueItem {
   return {
-    reviewId: String(row['review_id']),
-    traceId: String(row['trace_id']),
-    orgId: row['org_id'] != null ? Number(row['org_id']) : null,
-    domain: String(row['domain']),
-    recommendationType: String(row['recommendation_type']),
-    model: String(row['model']),
-    confidence: Number(row['confidence'] ?? 1),
-    riskLevel: row['risk_level'] != null ? String(row['risk_level']) : undefined,
-    reviewReason: String(row['review_reason'] ?? ''),
-    priority: String(row['priority']) as ReviewQueueItem['priority'],
-    inputSummary: row['input_summary'] != null ? String(row['input_summary']) : undefined,
-    outputSummary: row['output_summary'] != null ? String(row['output_summary']) : undefined,
-    costEstimateUsd: Number(row['cost_estimate_usd'] ?? 0),
-    latencyMs: Number(row['latency_ms'] ?? 0),
-    evalScore: row['eval_score'] != null ? Number(row['eval_score']) : undefined,
-    evalPassed: row['eval_passed'] != null ? Boolean(row['eval_passed']) : undefined,
+    reviewId: String(row.review_id),
+    traceId: String(row.trace_id),
+    orgId: row.org_id != null ? Number(row.org_id) : null,
+    domain: String(row.domain),
+    recommendationType: String(row.recommendation_type),
+    model: String(row.model),
+    confidence: Number(row.confidence ?? 1),
+    riskLevel: row.risk_level != null ? String(row.risk_level) : undefined,
+    reviewReason: String(row.review_reason ?? ''),
+    priority: String(row.priority) as ReviewQueueItem['priority'],
+    inputSummary: row.input_summary != null ? String(row.input_summary) : undefined,
+    outputSummary: row.output_summary != null ? String(row.output_summary) : undefined,
+    costEstimateUsd: Number(row.cost_estimate_usd ?? 0),
+    latencyMs: Number(row.latency_ms ?? 0),
+    evalScore: row.eval_score != null ? Number(row.eval_score) : undefined,
+    evalPassed: row.eval_passed != null ? Boolean(row.eval_passed) : undefined,
     verdict:
-      row['verdict'] != null ? (String(row['verdict']) as ReviewQueueItem['verdict']) : undefined,
-    reviewedBy: row['reviewed_by'] != null ? Number(row['reviewed_by']) : undefined,
-    reviewNotes: row['review_notes'] != null ? String(row['review_notes']) : undefined,
-    escalatedTo: row['escalated_to'] != null ? String(row['escalated_to']) : undefined,
-    status: String(row['status']) as ReviewQueueItem['status'],
+      row.verdict != null ? (String(row.verdict) as ReviewQueueItem['verdict']) : undefined,
+    reviewedBy: row.reviewed_by != null ? Number(row.reviewed_by) : undefined,
+    reviewNotes: row.review_notes != null ? String(row.review_notes) : undefined,
+    escalatedTo: row.escalated_to != null ? String(row.escalated_to) : undefined,
+    status: String(row.status) as ReviewQueueItem['status'],
     enqueuedAt:
-      row['enqueued_at'] instanceof Date
-        ? (row['enqueued_at'] as Date).toISOString()
-        : String(row['enqueued_at']),
+      row.enqueued_at instanceof Date
+        ? (row.enqueued_at as Date).toISOString()
+        : String(row.enqueued_at),
     reviewedAt:
-      row['reviewed_at'] != null
-        ? row['reviewed_at'] instanceof Date
-          ? (row['reviewed_at'] as Date).toISOString()
-          : String(row['reviewed_at'])
+      row.reviewed_at != null
+        ? row.reviewed_at instanceof Date
+          ? (row.reviewed_at as Date).toISOString()
+          : String(row.reviewed_at)
         : undefined,
-    metadata: row['metadata'] != null ? (row['metadata'] as Record<string, unknown>) : undefined,
+    metadata: row.metadata != null ? (row.metadata as Record<string, unknown>) : undefined,
   };
 }
 
@@ -244,7 +244,7 @@ export async function dbAggregateTraces(options: {
       .query(
         `SELECT domain, risk_level, COUNT(*)::int AS cnt
        FROM ai_traces
-       ${where ? where + ' AND' : 'WHERE'} risk_level IS NOT NULL
+       ${where ? `${where} AND` : 'WHERE'} risk_level IS NOT NULL
        GROUP BY domain, risk_level`,
         where ? params : [],
       )
@@ -258,17 +258,17 @@ export async function dbAggregateTraces(options: {
     }
 
     return (mainResult.rows as Record<string, unknown>[]).map((row) => {
-      const total = Number(row['total_traces'] ?? 0);
-      const evaluated = Number(row['evaluated_count'] ?? 0);
-      const passed = Number(row['passed_count'] ?? 0);
-      const domain = String(row['domain']);
+      const total = Number(row.total_traces ?? 0);
+      const evaluated = Number(row.evaluated_count ?? 0);
+      const passed = Number(row.passed_count ?? 0);
+      const domain = String(row.domain);
       return {
         domain,
         totalTraces: total,
-        reviewRequired: Number(row['review_required'] ?? 0),
-        avgConfidence: Number(row['avg_confidence'] ?? 0),
-        avgLatencyMs: Number(row['avg_latency_ms'] ?? 0),
-        totalCostUsd: Number(row['total_cost_usd'] ?? 0),
+        reviewRequired: Number(row.review_required ?? 0),
+        avgConfidence: Number(row.avg_confidence ?? 0),
+        avgLatencyMs: Number(row.avg_latency_ms ?? 0),
+        totalCostUsd: Number(row.total_cost_usd ?? 0),
         evalPassRate: evaluated > 0 ? passed / evaluated : null,
         byRiskLevel: riskMap.get(domain) ?? {},
       };
@@ -418,10 +418,10 @@ export async function dbGetReviewQueueStats(orgId?: number): Promise<ReviewQueue
 
     const row = result.rows[0] as Record<string, unknown>;
     const byPriority: Record<ReviewPriority, number> = {
-      low: Number(row['p_low'] ?? 0),
-      medium: Number(row['p_medium'] ?? 0),
-      high: Number(row['p_high'] ?? 0),
-      critical: Number(row['p_critical'] ?? 0),
+      low: Number(row.p_low ?? 0),
+      medium: Number(row.p_medium ?? 0),
+      high: Number(row.p_high ?? 0),
+      critical: Number(row.p_critical ?? 0),
     };
 
     const byDomain: Record<string, number> = {};
@@ -435,14 +435,14 @@ export async function dbGetReviewQueueStats(orgId?: number): Promise<ReviewQueue
     }
 
     return {
-      total: Number(row['total'] ?? 0),
-      pending: Number(row['pending'] ?? 0),
-      inReview: Number(row['in_review'] ?? 0),
-      resolved: Number(row['resolved'] ?? 0),
-      escalated: Number(row['escalated'] ?? 0),
+      total: Number(row.total ?? 0),
+      pending: Number(row.pending ?? 0),
+      inReview: Number(row.in_review ?? 0),
+      resolved: Number(row.resolved ?? 0),
+      escalated: Number(row.escalated ?? 0),
       byPriority,
       byDomain,
-      avgConfidence: Number(row['avg_confidence'] ?? 0),
+      avgConfidence: Number(row.avg_confidence ?? 0),
       verdictBreakdown,
     };
   } catch (err) {

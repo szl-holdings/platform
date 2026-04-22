@@ -1,6 +1,5 @@
 import {
   AlertTriangle,
-  BookOpen,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -230,7 +229,7 @@ export default function PolicyCenterPage() {
   const totalTriggers = policyRules.reduce((sum, r) => sum + r.triggerCount, 0);
   const recentBlocks = policyEvaluationLog.filter((e) => e.outcome === 'blocked').length;
 
-  const BASE_COMMAND = window.location.origin + '/command';
+  const BASE_COMMAND = `${window.location.origin}/command`;
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-5">

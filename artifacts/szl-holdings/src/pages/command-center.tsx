@@ -1,35 +1,27 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { color } from '@szl-holdings/design-system';
 import { HelpTip } from '@szl-holdings/shared-ui/onboarding';
-import { AnimatePresence, m } from 'framer-motion';
+import { m } from 'framer-motion';
 import {
   Activity,
   AlertTriangle,
   ArrowRight,
-  ArrowUpDown,
   ArrowUpRight,
   BarChart3,
   Bell,
-  Brain,
   Building,
   CheckCircle2,
   ChevronDown,
-  ChevronRight,
-  Circle,
-  Clock,
   Cpu,
   Database,
-  ExternalLink,
   Eye,
   FileText,
   GitBranch,
   Globe,
   Grid,
-  Laptop,
   Layers,
   List,
   Map,
-  MessageSquare,
   Minus,
   Palette,
   Radio,
@@ -39,14 +31,9 @@ import {
   Shield,
   Ship,
   Sparkles,
-  Star,
   Target,
   TrendingDown,
   TrendingUp,
-  TriangleAlert,
-  Users,
-  Wifi,
-  WifiOff,
   Zap,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';

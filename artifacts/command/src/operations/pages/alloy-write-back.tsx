@@ -1,13 +1,11 @@
 import {
   AlertTriangle,
-  ArrowRight,
   CheckCircle2,
   ChevronRight,
   Clock,
   Database,
   Download,
   Eye,
-  FileText,
   Lock,
   Shield,
   XCircle,
@@ -23,7 +21,7 @@ const TEXT = {
   muted: 'rgba(255,255,255,0.14)',
 };
 const ALLOY = '#4B8BDB';
-const ALLOY_DIM = 'rgba(75,139,219,0.12)';
+const _ALLOY_DIM = 'rgba(75,139,219,0.12)';
 
 type GateStatus = 'pending' | 'approved' | 'rejected' | 'held';
 
@@ -257,7 +255,7 @@ export default function AlloyWriteBackPage() {
               className="rounded-md overflow-hidden"
               style={{
                 background: BG.surface,
-                border: `1px solid ${item.status === 'pending' ? cfg.color + '25' : BORDER.subtle}`,
+                border: `1px solid ${item.status === 'pending' ? `${cfg.color}25` : BORDER.subtle}`,
               }}
             >
               <button

@@ -19,7 +19,7 @@ import {
   UserCircle,
   Users,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 
@@ -308,7 +308,7 @@ export function MarketingOnboarding() {
                         }`}
                         style={
                           isSelected
-                            ? { borderColor: app.color + '70', backgroundColor: app.color + '12' }
+                            ? { borderColor: `${app.color}70`, backgroundColor: `${app.color}12` }
                             : {}
                         }
                         data-testid={`app-toggle-${app.id}`}
@@ -317,7 +317,7 @@ export function MarketingOnboarding() {
                           className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                           style={
                             isSelected
-                              ? { backgroundColor: app.color + '25' }
+                              ? { backgroundColor: `${app.color}25` }
                               : { backgroundColor: 'rgba(255,255,255,0.06)' }
                           }
                         >

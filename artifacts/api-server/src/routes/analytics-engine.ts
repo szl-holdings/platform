@@ -17,10 +17,8 @@ import {
   parseTimeRange,
   selectGranularity,
   serializeAnalyticsEvents,
-  serializeAnomalies,
-  serializeMetricSnapshots,
 } from '@szl-holdings/observability/analytics';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import { and, asc, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
 import { jobQueue } from '../lib/job-queue';
@@ -785,7 +783,7 @@ analyticsEngineRouter.post('/analytics-engine/export', async (req: Request, res:
       scheduleFrequency as 'once' | 'daily' | 'weekly' | 'monthly',
     );
 
-    const [exportJob] = await db
+    const [_exportJob] = await db
       .insert(analyticsExportJobsTable)
       .values({
         exportId,

@@ -1,4 +1,4 @@
-import { BarChart3, Calculator, Clock, DollarSign, Download, TrendingUp, Zap } from 'lucide-react';
+import { Calculator, Clock, DollarSign, Download, TrendingUp, Zap } from 'lucide-react';
 import { useState } from 'react';
 
 const GOLD = '#d4a054';

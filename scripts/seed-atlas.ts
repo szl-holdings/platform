@@ -53,7 +53,6 @@ async function upsertAtlasScene(params: {
     .where(eq(atlasArtifactsTable.slug, params.slug));
 
   if (existing.length > 0) {
-    console.log(`  [skip] Scene already exists: ${params.slug}`);
     return existing[0];
   }
 
@@ -76,13 +75,10 @@ async function upsertAtlasScene(params: {
       isLatest: true,
     })
     .returning();
-
-  console.log(`  [ok] Created ATLAS scene: ${params.slug} (id: ${artifact.id})`);
   return artifact;
 }
 
 async function seedAegisRansomware() {
-  console.log('\n[ATLAS:Aegis] Seeding ransomware branch comparison scene...');
 
   await upsertAtlasScene({
     slug: 'atlas-aegis-ransomware-inc2026001',
@@ -158,7 +154,6 @@ async function seedAegisRansomware() {
 }
 
 async function seedVesselsSanctions() {
-  console.log('\n[ATLAS:Vessels] Seeding sanctions/weather reroute scene...');
 
   await upsertAtlasScene({
     slug: 'atlas-vessels-sanctions-imo9876543',
@@ -234,7 +229,6 @@ async function seedVesselsSanctions() {
 }
 
 async function seedTerraDistress() {
-  console.log('\n[ATLAS:Terra] Seeding property distress stress test scene...');
 
   await upsertAtlasScene({
     slug: 'atlas-terra-distress-propbk2026-0142',
@@ -300,7 +294,6 @@ async function seedTerraDistress() {
 }
 
 async function seedPrismCounselMatter() {
-  console.log('\n[ATLAS:Counsel] Seeding matter pressure & settlement scene...');
 
   await upsertAtlasScene({
     slug: 'atlas-counsel-matter-mtr2026-0891',
@@ -377,17 +370,12 @@ async function main() {
   const args = process.argv.slice(2);
   const target = args[0] ?? 'all';
 
-  console.log(`[seed:atlas] Starting ATLAS demo scene seed (target: ${target})`);
-
   try {
     if (target === 'all' || target === 'aegis') await seedAegisRansomware();
     if (target === 'all' || target === 'vessels') await seedVesselsSanctions();
     if (target === 'all' || target === 'terra') await seedTerraDistress();
     if (target === 'all' || target === 'counsel') await seedPrismCounselMatter();
-
-    console.log('\n[seed:atlas] ATLAS demo seed complete.');
-  } catch (err) {
-    console.error('[seed:atlas] Seed failed:', err);
+  } catch (_err) {
     process.exit(1);
   }
 }

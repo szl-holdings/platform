@@ -28,7 +28,7 @@ async function courtListenerFetch(
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
   const headers: Record<string, string> = { Accept: 'application/json' };
-  if (apiKey) headers['Authorization'] = `Token ${apiKey}`;
+  if (apiKey) headers.Authorization = `Token ${apiKey}`;
 
   const res = await fetch(url.toString(), { headers, signal: AbortSignal.timeout(10000) });
   if (!res.ok) {

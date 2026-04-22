@@ -9,8 +9,8 @@
  *   AEF_API_URL=http://localhost:8080/alloy-embedding-api tsx scripts/aef-smoke.ts
  */
 
-const BASE_URL = process.env['AEF_API_URL'] ?? 'http://localhost:8080/alloy-embedding-api';
-const API_KEY = process.env['AEF_API_KEY'] ?? '';
+const BASE_URL = process.env.AEF_API_URL ?? 'http://localhost:8080/alloy-embedding-api';
+const API_KEY = process.env.AEF_API_KEY ?? '';
 const TENANT_ID = 'smoke-test-tenant';
 
 const headers: Record<string, string> = {
@@ -19,7 +19,7 @@ const headers: Record<string, string> = {
   'x-tenant-id': TENANT_ID,
 };
 
-let passed = 0;
+let _passed = 0;
 let failed = 0;
 
 async function runTest(name: string, fn: () => Promise<void>): Promise<void> {
@@ -27,10 +27,9 @@ async function runTest(name: string, fn: () => Promise<void>): Promise<void> {
   try {
     await fn();
     process.stdout.write('PASS\n');
-    passed++;
-  } catch (err) {
+    _passed++;
+  } catch (_err) {
     process.stdout.write(`FAIL\n`);
-    console.error(`    ↳ ${String(err)}`);
     failed++;
   }
 }
@@ -58,7 +57,6 @@ function assert(condition: boolean, message: string): void {
 }
 
 async function main(): Promise<void> {
-  console.log(`\nAEF Smoke Test — ${BASE_URL}\n`);
 
   await runTest('GET /health returns 200', async () => {
     const { status, text } = await get('/health');
@@ -94,7 +92,7 @@ async function main(): Promise<void> {
     assert(data.vectors.length === 2, `Expected 2 vectors, got ${data.vectors.length}`);
     assert(data.dimensions > 0, `Expected positive dimensions, got ${data.dimensions}`);
     assert(typeof data.traceId === 'string', 'Expected traceId string');
-    const v = data.vectors[0]!.vector;
+    const v = data.vectors[0]?.vector;
     assert(Array.isArray(v) && v.length > 0, 'Expected non-empty vector');
   });
 
@@ -114,7 +112,7 @@ async function main(): Promise<void> {
     assert(status === 200, `Expected 200, got ${status}: ${JSON.stringify(json)}`);
     assert(Array.isArray(data.results), 'Expected results array');
     assert(data.results.length === 2, `Expected 2 results, got ${data.results.length}`);
-    assert(data.results[0]!.rank === 1, `Expected rank=1 for top result`);
+    assert(data.results[0]?.rank === 1, `Expected rank=1 for top result`);
   });
 
   await runTest('POST /v1/hybrid-search returns hits with evidence', async () => {
@@ -214,17 +212,14 @@ async function main(): Promise<void> {
     assert(data.object === 'list', `Expected object=list, got ${data.object}`);
     assert(Array.isArray(data.data), 'Expected data array');
     assert(data.data.length === 2, `Expected 2 embeddings, got ${data.data.length}`);
-    assert(Array.isArray(data.data[0]!.embedding), 'Expected embedding array');
+    assert(Array.isArray(data.data[0]?.embedding), 'Expected embedding array');
   });
-
-  console.log(`\nResults: ${passed} passed, ${failed} failed\n`);
 
   if (failed > 0) {
     process.exit(1);
   }
 }
 
-main().catch((err) => {
-  console.error('Smoke test runner crashed:', err);
+main().catch((_err) => {
   process.exit(1);
 });

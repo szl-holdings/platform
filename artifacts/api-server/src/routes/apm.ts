@@ -8,7 +8,7 @@ const router: IRouter = Router();
 
 router.get('/apm/latency', authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const windowMs = req.query.windowMs ? parseInt(req.query.windowMs as string) : 300_000;
+    const windowMs = req.query.windowMs ? parseInt(req.query.windowMs as string, 10) : 300_000;
     if (windowMs < 0 || windowMs > 86_400_000) {
       sendBadRequest(res, 'windowMs must be between 0 and 86400000');
       return;
@@ -22,8 +22,8 @@ router.get('/apm/latency', authMiddleware(), validateQuery(listQuerySchema), asy
 
 router.get('/apm/spans', authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const windowMs = req.query.windowMs ? parseInt(req.query.windowMs as string) : 300_000;
-    const limit = req.query.limit ? Math.min(parseInt(req.query.limit as string), 500) : 100;
+    const windowMs = req.query.windowMs ? parseInt(req.query.windowMs as string, 10) : 300_000;
+    const limit = req.query.limit ? Math.min(parseInt(req.query.limit as string, 10), 500) : 100;
     if (windowMs < 0 || windowMs > 86_400_000) {
       sendBadRequest(res, 'windowMs must be between 0 and 86400000');
       return;
@@ -41,7 +41,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const windowMs = req.query.windowMs ? parseInt(req.query.windowMs as string) : 300_000;
+      const windowMs = req.query.windowMs ? parseInt(req.query.windowMs as string, 10) : 300_000;
       const stats = serverTelemetry.getExternalCallStats(windowMs);
       sendSuccess(res, stats);
     } catch (err) {
@@ -50,7 +50,7 @@ router.get(
   },
 );
 
-router.get('/apm/snapshot', authMiddleware(), async (req, res) => {
+router.get('/apm/snapshot', authMiddleware(), async (_req, res) => {
   try {
     const snapshot = serverTelemetry.getSnapshot();
     const apmBreakdown = serverTelemetry.getApmLatencyBreakdown();

@@ -1,16 +1,5 @@
 import {
-  AlertTriangle,
   Brain,
-  CheckCircle,
-  Eye,
-  FileText,
-  Globe,
-  Layers,
-  Link2,
-  MessageSquare,
-  Plus,
-  Shield,
-  Users,
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
@@ -223,13 +212,13 @@ export default function AnalystWorkspacePage() {
             <div className="flex items-center gap-2 mb-1">
               <span
                 className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5"
-                style={{ background: techColor(b.technique) + '15', color: techColor(b.technique) }}
+                style={{ background: `${techColor(b.technique)}15`, color: techColor(b.technique) }}
               >
                 {b.technique}
               </span>
               <span
                 className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5"
-                style={{ background: statColor(b.status) + '15', color: statColor(b.status) }}
+                style={{ background: `${statColor(b.status)}15`, color: statColor(b.status) }}
               >
                 {b.status}
               </span>
@@ -376,7 +365,7 @@ export default function AnalystWorkspacePage() {
                 onClick={handleAddNote}
                 aria-label="Submit note"
                 className="rounded-lg px-3 py-2 text-[9px] font-semibold hover:brightness-125 transition"
-                style={{ background: ACCENT + '20', color: ACCENT }}
+                style={{ background: `${ACCENT}20`, color: ACCENT }}
               >
                 Add
               </button>

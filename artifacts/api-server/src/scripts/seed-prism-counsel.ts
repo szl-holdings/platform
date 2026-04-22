@@ -45,11 +45,9 @@ function daysAhead(n: number) {
 }
 
 export async function seedPrismCounsel() {
-  console.log('[seed-prism-counsel] Starting PRISM Counsel seed...');
 
   const existing = await db.select({ id: pcMattersTable.id }).from(pcMattersTable).limit(1);
   if (existing.length > 0) {
-    console.log('[seed-prism-counsel] Data already seeded, skipping.');
     return { skipped: true };
   }
 
@@ -214,9 +212,7 @@ export async function seedPrismCounsel() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-prism-counsel] Seeded ${matters.length} matters`);
-
-  const parties = await db
+  const _parties = await db
     .insert(pcPartiesTable)
     .values([
       {
@@ -324,8 +320,6 @@ export async function seedPrismCounsel() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-prism-counsel] Seeded ${parties.length} parties`);
-
   const claims = await db
     .insert(pcClaimsTable)
     .values([
@@ -387,8 +381,6 @@ export async function seedPrismCounsel() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-prism-counsel] Seeded ${claims.length} claims`);
-
   await db
     .insert(pcOffersTable)
     .values([
@@ -448,8 +440,6 @@ export async function seedPrismCounsel() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-prism-counsel] Seeded offers`);
 
   await db
     .insert(pcMedicalEventsTable)
@@ -541,8 +531,6 @@ export async function seedPrismCounsel() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-prism-counsel] Seeded medical events`);
 
   await db
     .insert(pcDamagesTable)
@@ -638,8 +626,6 @@ export async function seedPrismCounsel() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-prism-counsel] Seeded damages`);
-
   await db
     .insert(pcLiensTable)
     .values([
@@ -703,8 +689,6 @@ export async function seedPrismCounsel() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-prism-counsel] Seeded liens`);
 
   await db
     .insert(pcDeadlinesTable)
@@ -781,8 +765,6 @@ export async function seedPrismCounsel() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-prism-counsel] Seeded deadlines`);
-
   await db
     .insert(pcDiscoveryTable)
     .values([
@@ -841,8 +823,6 @@ export async function seedPrismCounsel() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-prism-counsel] Seeded discovery`);
-
   await db
     .insert(pcDepositionsTable)
     .values([
@@ -890,8 +870,6 @@ export async function seedPrismCounsel() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-prism-counsel] Seeded depositions`);
 
   await db
     .insert(pcForecastsTable)
@@ -949,8 +927,6 @@ export async function seedPrismCounsel() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-prism-counsel] Seeded forecasts`);
-
   await db
     .insert(pcReadinessScoresTable)
     .values([
@@ -968,8 +944,6 @@ export async function seedPrismCounsel() {
       { matterId: matters[4].id, pillar: 'governance', score: 93, maxScore: 100 },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-prism-counsel] Seeded readiness scores`);
 
   await db
     .insert(pcCommunicationsTable)
@@ -1024,8 +998,6 @@ export async function seedPrismCounsel() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-prism-counsel] Seeded communications`);
 
   await db
     .insert(pcAiRecommendationsTable)
@@ -1083,9 +1055,7 @@ export async function seedPrismCounsel() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-prism-counsel] Seeded AI recommendations`);
-
-  const connectors = await db
+  const _connectors = await db
     .insert(pcConnectorAccountsTable)
     .values([
       {
@@ -1115,8 +1085,6 @@ export async function seedPrismCounsel() {
     ])
     .onConflictDoNothing()
     .returning();
-
-  console.log(`[seed-prism-counsel] Seeded ${connectors.length} connector accounts`);
 
   await db
     .insert(pcPlaybooksTable)
@@ -1169,8 +1137,6 @@ export async function seedPrismCounsel() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-prism-counsel] Seeded playbooks`);
-
   await db
     .insert(pcWitnessesTable)
     .values([
@@ -1217,8 +1183,6 @@ export async function seedPrismCounsel() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-prism-counsel] Seeded witnesses`);
-
   await db
     .insert(pcDocumentChunksTable)
     .values([
@@ -1257,8 +1221,6 @@ export async function seedPrismCounsel() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-prism-counsel] Seeded document chunks`);
 
   await db
     .insert(pcNyRuleProfilesTable)
@@ -1338,8 +1300,6 @@ export async function seedPrismCounsel() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-prism-counsel] Seeded NY rule profiles`);
-
   const clocks = await db
     .insert(pcMatterClocksTable)
     .values([
@@ -1406,8 +1366,6 @@ export async function seedPrismCounsel() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-prism-counsel] Seeded matter clocks`);
-
   await db
     .insert(pcClockEventsTable)
     .values([
@@ -1454,8 +1412,6 @@ export async function seedPrismCounsel() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-prism-counsel] Seeded clock events`);
-
   const noFaultClaims = await db
     .insert(pcNoFaultClaimsTable)
     .values([
@@ -1501,8 +1457,6 @@ export async function seedPrismCounsel() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-prism-counsel] Seeded no-fault claims`);
-
   await db
     .insert(pcDisclaimersTable)
     .values([
@@ -1537,8 +1491,6 @@ export async function seedPrismCounsel() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-prism-counsel] Seeded disclaimers`);
 
   await db
     .insert(pcCoveragePositionsTable)
@@ -1582,8 +1534,6 @@ export async function seedPrismCounsel() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-prism-counsel] Seeded coverage positions`);
 
   await db
     .insert(pcMedicalBillCyclesTable)
@@ -1652,8 +1602,6 @@ export async function seedPrismCounsel() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-prism-counsel] Seeded medical bill cycles`);
-
   await db
     .insert(pcVerificationRequestsTable)
     .values([
@@ -1688,8 +1636,6 @@ export async function seedPrismCounsel() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-prism-counsel] Seeded verification requests`);
-
   await db
     .insert(pcDenialsTable)
     .values([
@@ -1722,8 +1668,6 @@ export async function seedPrismCounsel() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-prism-counsel] Seeded denials`);
 
   await db
     .insert(pcOfferMovementsTable)
@@ -1778,10 +1722,8 @@ export async function seedPrismCounsel() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-prism-counsel] Seeded offer movements`);
-
   // ── Court Filing Documents ────────────────────────────────────────────────
-  const courtDocs = await db
+  const _courtDocs = await db
     .insert(pcDocumentsTable)
     .values([
       {
@@ -1908,8 +1850,6 @@ export async function seedPrismCounsel() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-prism-counsel] Seeded ${courtDocs.length} court filing documents`);
-
   // ── Privilege Logs ────────────────────────────────────────────────────────
   await db
     .insert(pcPrivilegeFlagsTable)
@@ -1965,8 +1905,6 @@ export async function seedPrismCounsel() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-prism-counsel] Seeded privilege logs`);
-
   // ── Inconsistency Flags ────────────────────────────────────────────────────
   await db
     .insert(pcInconsistencyFlagsTable)
@@ -2013,8 +1951,6 @@ export async function seedPrismCounsel() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-prism-counsel] Seeded inconsistency flags`);
 
   // ── Legal Holds (Purview) ─────────────────────────────────────────────────
   await db
@@ -2082,8 +2018,6 @@ export async function seedPrismCounsel() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-prism-counsel] Seeded legal holds`);
 
   // ── Billing / Recovery Items ──────────────────────────────────────────────
   const recoveryItems = await db
@@ -2201,8 +2135,6 @@ export async function seedPrismCounsel() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-prism-counsel] Seeded ${recoveryItems.length} billing/recovery items`);
-
   await db
     .insert(pcRecoveryPartiesTable)
     .values([
@@ -2291,9 +2223,5 @@ export async function seedPrismCounsel() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-prism-counsel] Seeded recovery parties and documents`);
-
-  console.log('[seed-prism-counsel] PRISM Counsel seed complete.');
   return { seeded: true, matters: matters.length };
 }

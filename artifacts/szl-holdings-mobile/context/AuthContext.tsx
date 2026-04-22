@@ -2,7 +2,7 @@ import { setMobileUserTimeZone } from '@szl-holdings/mobile-shared/utils';
 import * as AuthSession from 'expo-auth-session';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
-import React, {
+import {
   createContext,
   type ReactNode,
   useCallback,
@@ -141,16 +141,16 @@ const REVOCATION_CODES = new Set(['SESSION_REVOKED', 'REFRESH_TOKEN_REPLAY']);
 
 function pickRevocationCodeFromBody(body: unknown): string | null {
   if (!body || typeof body !== 'object') return null;
-  const code = (body as Record<string, unknown>)['code'];
+  const code = (body as Record<string, unknown>).code;
   return typeof code === 'string' && REVOCATION_CODES.has(code) ? code : null;
 }
 
 function pickServerMessageFromBody(body: unknown): string | null {
   if (!body || typeof body !== 'object') return null;
   const record = body as Record<string, unknown>;
-  const error = record['error'];
+  const error = record.error;
   if (typeof error === 'string' && error.trim()) return error;
-  const message = record['message'];
+  const message = record.message;
   if (typeof message === 'string' && message.trim()) return message;
   return null;
 }
@@ -351,7 +351,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const json = await res.json().catch(() => ({}));
         if (!res.ok) {
           if (json?.code === 'REFRESH_TOKEN_REPLAY') {
-            console.warn('[Auth] Refresh token replay detected; forcing re-login');
             recordSessionRevocation({
               code: 'REFRESH_TOKEN_REPLAY',
               message: pickServerMessageFromBody(json) ?? undefined,
@@ -512,8 +511,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const stored = tokensRef.current;
       if (!stored?.refreshToken) return;
       if (tokenIsNearExpiry(stored.expiresAt)) {
-        refreshTokens().catch((err) => {
-          console.warn('[Auth] Foreground refresh failed:', err);
+        refreshTokens().catch((_err) => {
         });
       }
     });
@@ -558,9 +556,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const prefs = json?.data ?? json;
         const zone = prefs?.time_zone;
         setMobileUserTimeZone(typeof zone === 'string' ? zone : null);
-      } catch (err) {
+      } catch (_err) {
         if (!cancelled) {
-          console.warn('[Auth] Failed to load user preferences:', err);
         }
       }
     })();
@@ -606,8 +603,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await persistTokens(stored);
         setAccessToken(stored.token);
         await fetchUser();
-      } catch (err) {
-        console.error('[Auth] Token exchange error:', err);
+      } catch (_err) {
         setIsLoading(false);
       }
     })();
@@ -618,8 +614,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearSessionRevocation();
     try {
       await promptAsync();
-    } catch (err) {
-      console.error('[Auth] Login error:', err);
+    } catch (_err) {
     }
   }, [promptAsync]);
 
@@ -655,7 +650,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut: logout,
         buildHeaders: (extra?: Record<string, string>) => {
           const headers: Record<string, string> = { 'Content-Type': 'application/json', ...extra };
-          if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+          if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
           return headers;
         },
         buildWsAuthMessage: () => {

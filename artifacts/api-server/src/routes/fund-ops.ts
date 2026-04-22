@@ -19,7 +19,7 @@ import {
   fundShareClassesTable,
   fundVestingSchedulesTable,
 } from '@szl-holdings/db';
-import { and, asc, desc, eq, sql } from 'drizzle-orm';
+import { asc, desc, eq, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, parsePagination, sendNotFound, sendSuccess } from '../lib/api-response';
@@ -64,7 +64,7 @@ router.get(
     try {
       const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
       const companySlug = req.query.companySlug as string | undefined;
-      const periodLabel = req.query.periodLabel as string | undefined;
+      const _periodLabel = req.query.periodLabel as string | undefined;
 
       let query = db.select().from(fundPortfolioFinancialsTable);
       if (companySlug)
@@ -555,7 +555,7 @@ router.patch(
 
 // ─── CAP TABLE — SHARE CLASSES ────────────────────────────────────────────────
 
-router.get('/fund-ops/share-classes', ...auth, async (req, res) => {
+router.get('/fund-ops/share-classes', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -603,7 +603,7 @@ router.patch(
 
 // ─── CAP TABLE — HOLDERS ──────────────────────────────────────────────────────
 
-router.get('/fund-ops/cap-table-holders', ...auth, async (req, res) => {
+router.get('/fund-ops/cap-table-holders', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -699,7 +699,7 @@ router.post(
 
 // ─── CAP TABLE SUMMARY (dilution model) ──────────────────────────────────────
 
-router.get('/fund-ops/cap-table-summary', ...auth, async (req, res) => {
+router.get('/fund-ops/cap-table-summary', ...auth, async (_req, res) => {
   try {
     const holders = await db
       .select()
@@ -762,7 +762,7 @@ router.get('/fund-ops/cap-table-summary', ...auth, async (req, res) => {
 
 // ─── VESTING SCHEDULES ────────────────────────────────────────────────────────
 
-router.get('/fund-ops/vesting-schedules', ...auth, async (req, res) => {
+router.get('/fund-ops/vesting-schedules', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -953,7 +953,7 @@ router.patch(
 
 // ─── LP CAPITAL ACCOUNTS ──────────────────────────────────────────────────────
 
-router.get('/fund-ops/lp-capital-accounts', ...auth, async (req, res) => {
+router.get('/fund-ops/lp-capital-accounts', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select({
@@ -1109,7 +1109,7 @@ router.patch(
 
 // ─── NAV RECORDS ──────────────────────────────────────────────────────────────
 
-router.get('/fund-ops/nav-records', ...auth, async (req, res) => {
+router.get('/fund-ops/nav-records', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -1153,7 +1153,7 @@ router.get('/fund-ops/audit-log', ...auth, validateQuery(listQuerySchema), async
 
 // ─── FUND OPS SUMMARY DASHBOARD ───────────────────────────────────────────────
 
-router.get('/fund-ops/summary', ...auth, async (req, res) => {
+router.get('/fund-ops/summary', ...auth, async (_req, res) => {
   try {
     const [
       [{ investorCount }],

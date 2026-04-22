@@ -86,7 +86,7 @@ function buildTestApp(extraExemptPaths: string[] = []): Express {
   app.use(csrfMiddleware);
 
   app.get('/api/csrf-token', (_req: Request, res: Response) => {
-    res.json({ csrfToken: _req.cookies?.['csrf_token'] ?? null });
+    res.json({ csrfToken: _req.cookies?.csrf_token ?? null });
   });
 
   const protectedPaths = [
@@ -137,7 +137,7 @@ async function fetchCsrfToken(app: Express): Promise<{ token: string; cookieHead
   const cookieStr = Array.isArray(cookieHeader) ? cookieHeader.join('; ') : cookieHeader;
   const match = cookieStr.match(/csrf_token=([^;]+)/);
   expect(match).not.toBeNull();
-  const token = match![1]!;
+  const token = match?.[1]!;
   return { token, cookieHeader: cookieStr };
 }
 
@@ -259,6 +259,6 @@ describe('CSRF token endpoint', () => {
     const cookieStr = ((res.headers['set-cookie'] as string[]) ?? []).join('; ');
     const match = cookieStr.match(/csrf_token=([a-f0-9]+)/i);
     expect(match).not.toBeNull();
-    expect(match![1]!.length).toBe(64);
+    expect(match?.[1]?.length).toBe(64);
   });
 });

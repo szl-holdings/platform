@@ -52,14 +52,11 @@ vi.mock('../../artifacts/api-server/src/middlewares/auth', () => ({
   denyIfReadOnly: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   parseIdParam: (id: string) => {
     const n = parseInt(id, 10);
-    if (isNaN(n)) throw Object.assign(new Error('Invalid ID'), { status: 400 });
+    if (Number.isNaN(n)) throw Object.assign(new Error('Invalid ID'), { status: 400 });
     return n;
   },
   InvalidIdError: class InvalidIdError extends Error {
     status = 400;
-    constructor(msg: string) {
-      super(msg);
-    }
   },
 }));
 
@@ -263,13 +260,13 @@ describe('Integration — GET /graph/entities/:id/neighbors', () => {
 
     const out2 = neighbors.find((n) => n.id === seeded.out2);
     expect(out2).toBeTruthy();
-    expect(out2!.domain).toBe('vessels');
-    expect(out2!.entityType).toBe(FIXTURE_ENTITY_TYPE);
-    expect(out2!.name).toBe(`${RUN_TAG}-OUT_2`);
+    expect(out2?.domain).toBe('vessels');
+    expect(out2?.entityType).toBe(FIXTURE_ENTITY_TYPE);
+    expect(out2?.name).toBe(`${RUN_TAG}-OUT_2`);
 
     const in1 = neighbors.find((n) => n.id === seeded.in1);
     expect(in1).toBeTruthy();
-    expect(in1!.domain).toBe('aegis');
+    expect(in1?.domain).toBe('aegis');
   });
 
   it('returns 200 with empty neighbors/edges for an isolated node (zero edges)', async () => {

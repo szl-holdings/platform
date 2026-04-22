@@ -2,28 +2,17 @@ import {
   Activity,
   AlertTriangle,
   Brain,
-  ChevronRight,
   Clock,
   Cpu,
   Crosshair,
   Database,
-  Eye,
-  FileText,
   Globe,
-  Layers,
   Lock,
-  Network,
   Pause,
   Play,
   RadioTower,
   RotateCcw,
-  Server,
-  Shield,
-  Target,
-  TrendingUp,
   Users,
-  Wifi,
-  Zap,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -970,7 +959,7 @@ export default function PhantomWarRoom() {
     }, 1000);
   }
 
-  function runSimulation(gen: Campaign, steps: AttackStep[]) {
+  function runSimulation(_gen: Campaign, steps: AttackStep[]) {
     let idx = -1;
     clockRef.current = setInterval(() => setSimClock((c) => c + 1), 200);
     intervalRef.current = setInterval(() => {
@@ -991,7 +980,7 @@ export default function PhantomWarRoom() {
       stopSim();
       setPhase('paused');
     } else if (phase === 'paused' && campaign) {
-      const remaining = campaign.steps.slice(currentStepIdx + 1);
+      const _remaining = campaign.steps.slice(currentStepIdx + 1);
       setPhase('running');
       clockRef.current = setInterval(() => setSimClock((c) => c + 1), 200);
       let idx = currentStepIdx;
@@ -1019,7 +1008,7 @@ export default function PhantomWarRoom() {
   }
 
   const profileConfig = ADVERSARY_PROFILES[profile];
-  const ProfileIcon = profileConfig.icon;
+  const _ProfileIcon = profileConfig.icon;
 
   const visibleSteps = campaign ? campaign.steps.slice(0, currentStepIdx + 1) : [];
   const currentChainStage =
@@ -1110,7 +1099,7 @@ export default function PhantomWarRoom() {
                     className="w-full text-left flex items-start gap-3 p-2.5 rounded-lg transition-all"
                     style={{
                       background: profile === key ? `${cfg.color}12` : 'rgba(255,255,255,0.02)',
-                      border: `1px solid ${profile === key ? cfg.color + '35' : 'transparent'}`,
+                      border: `1px solid ${profile === key ? `${cfg.color}35` : 'transparent'}`,
                     }}
                   >
                     <div
@@ -1427,7 +1416,7 @@ export default function PhantomWarRoom() {
                       style={{
                         background: reached ? `${s.color}22` : 'rgba(255,255,255,0.03)',
                         color: reached ? s.color : 'rgba(255,255,255,0.2)',
-                        border: `1px solid ${active ? s.color + '80' : reached ? s.color + '35' : 'transparent'}`,
+                        border: `1px solid ${active ? `${s.color}80` : reached ? `${s.color}35` : 'transparent'}`,
                         animation: active ? 'pulse 1s ease-in-out infinite' : 'none',
                       }}
                     >
@@ -1466,7 +1455,7 @@ export default function PhantomWarRoom() {
                 className="divide-y max-h-80 overflow-y-auto"
                 style={{ borderColor: 'rgba(255,255,255,0.03)' }}
               >
-                {visibleSteps.map((step, i) => (
+                {visibleSteps.map((step, _i) => (
                   <div
                     key={step.id}
                     className="flex gap-3 px-4 py-3 transition-all"

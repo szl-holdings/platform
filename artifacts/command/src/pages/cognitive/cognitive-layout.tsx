@@ -9,7 +9,7 @@ import {
   Globe,
   Lightbulb,
 } from 'lucide-react';
-import React, { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');

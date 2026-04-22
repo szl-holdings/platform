@@ -1,5 +1,5 @@
 
-import { Activity, AlertTriangle, CheckCircle, Clock, Database, Server, Wifi, Zap, RefreshCw, ShieldCheck, BarChart3, ShieldAlert, ExternalLink } from "lucide-react";
+import { Activity, AlertTriangle, CheckCircle, Clock, Database, Server, Zap, RefreshCw, ShieldCheck, BarChart3, ShieldAlert, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
@@ -27,7 +27,7 @@ interface SecurityAlertsResponse {
 
 function formatRelativeTime(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime();
-  if (!isFinite(ms) || ms < 0) return new Date(iso).toLocaleString();
+  if (!Number.isFinite(ms) || ms < 0) return new Date(iso).toLocaleString();
   const min = Math.floor(ms / 60_000);
   if (min < 1) return "just now";
   if (min < 60) return `${min}m ago`;

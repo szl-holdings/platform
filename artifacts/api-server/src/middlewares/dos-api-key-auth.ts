@@ -1,5 +1,5 @@
 import { db, dosSiteSettingsTable } from '@szl-holdings/db';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { and, eq, sql } from 'drizzle-orm';
 import type { NextFunction, Request, Response } from 'express';
 import { sendError, sendUnauthorized } from '../lib/api-response';
@@ -42,7 +42,7 @@ export async function dosApiKeyAuth(
     (req as any).dosApiKeyId = rows[0].id;
     (req as any).dosApiKeyName = rows[0].label;
     next();
-  } catch (err) {
+  } catch (_err) {
     sendError(res, 'Authentication service error', 500, 'INTERNAL_ERROR');
   }
 }

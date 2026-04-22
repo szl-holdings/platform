@@ -2,17 +2,11 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
   Activity,
   AlertTriangle,
-  BarChart2,
   CheckCircle2,
-  ChevronDown,
   Clock,
   Database,
   DollarSign,
-  Info,
-  RefreshCw,
   Shield,
-  Wifi,
-  WifiOff,
 } from 'lucide-react';
 import { useState } from 'react';
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from 'recharts';
@@ -423,7 +417,7 @@ export default function HealthPage() {
     Math.round(DIMENSIONS.reduce((s, d) => s + d.score * d.weight, 0));
   const [selected, setSelected] = useState<string | null>(null);
 
-  const selectedDimension = DIMENSIONS.find((d) => d.key === selected);
+  const _selectedDimension = DIMENSIONS.find((d) => d.key === selected);
   const radarData = DIMENSIONS.map((d) => ({ subject: d.label, score: d.score }));
 
   return (

@@ -1,14 +1,9 @@
 import {
-  Activity,
   Anchor,
   ArrowDown,
   ArrowUp,
-  BarChart3,
-  Clock,
   Globe,
   Package,
-  Ship,
-  TrendingUp,
 } from 'lucide-react';
 
 interface Port {

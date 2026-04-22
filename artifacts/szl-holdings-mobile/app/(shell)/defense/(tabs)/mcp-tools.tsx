@@ -1,5 +1,5 @@
 import { useEmbeddingSearch } from '@szl-holdings/mobile-shared';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -227,7 +227,7 @@ export default function McpToolsScreen() {
             <Text style={styles.sectionLabel}>Call: {selected.name}</Text>
 
             {hasParams &&
-              Object.entries(selected.inputSchema!.properties!).map(([key, schema]) => (
+              Object.entries(selected.inputSchema?.properties!).map(([key, schema]) => (
                 <View key={key} style={{ marginBottom: 8 }}>
                   <Text style={styles.paramLabel}>{schema.description ?? key}</Text>
                   <TextInput

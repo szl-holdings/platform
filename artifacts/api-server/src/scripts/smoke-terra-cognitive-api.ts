@@ -15,21 +15,19 @@
  * Run:  pnpm --filter @workspace/api-server test:terra-cognitive
  */
 
-const BASE = `http://localhost:${process.env['PORT'] ?? 8080}`;
-const TOKEN = process.env['ALLOY_INTERNAL_TOKEN'] ?? '';
+const BASE = `http://localhost:${process.env.PORT ?? 8080}`;
+const TOKEN = process.env.ALLOY_INTERNAL_TOKEN ?? '';
 
 export {};
 
 const errors: string[] = [];
-let passed = 0;
+let _passed = 0;
 
 function assert(label: string, cond: boolean, detail?: string) {
   if (cond) {
-    console.log(`[terra-cog] ✓  ${label}`);
-    passed++;
+    _passed++;
   } else {
     const msg = detail ? `${label} — ${detail}` : label;
-    console.error(`[terra-cog] ✗  ${msg}`);
     errors.push(msg);
   }
 }
@@ -68,7 +66,7 @@ function checkProvenance(label: string, prov: unknown) {
   if (!p) return;
   assert(`${label}: provenance.source is string`, typeof p.source === 'string');
   assert(`${label}: provenance.traceRef is string`, typeof p.traceRef === 'string');
-  assert(`${label}: provenance.generatedAt is ISO date`, !isNaN(Date.parse(String(p.generatedAt))));
+  assert(`${label}: provenance.generatedAt is ISO date`, !Number.isNaN(Date.parse(String(p.generatedAt))));
   assert(`${label}: provenance.confidence is number`, typeof p.confidence === 'number');
   assert(`${label}: provenance.confidenceLabel is string`, typeof p.confidenceLabel === 'string');
 }
@@ -76,7 +74,6 @@ function checkProvenance(label: string, prov: unknown) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function testOwnershipGraph() {
-  console.log('\n[terra-cog] === Ownership Graph ===');
   const { status, body } = await get('/api/terra/cognitive/ownership-graph');
   const b = body as Record<string, unknown>;
   assert('status 200', status === 200, `got ${status}`);
@@ -103,7 +100,6 @@ async function testOwnershipGraph() {
 }
 
 async function testLenderExposure() {
-  console.log('\n[terra-cog] === Lender Exposure ===');
   const { status, body } = await get('/api/terra/cognitive/lender-exposure');
   const b = body as Record<string, unknown>;
   assert('status 200', status === 200, `got ${status}`);
@@ -128,7 +124,6 @@ async function testLenderExposure() {
 }
 
 async function testCovenants() {
-  console.log('\n[terra-cog] === Covenant Monitor ===');
   const { status, body } = await get('/api/terra/cognitive/covenants');
   const b = body as Record<string, unknown>;
   assert('status 200', status === 200, `got ${status}`);
@@ -148,7 +143,6 @@ async function testCovenants() {
 }
 
 async function testCovenantSubmitReview() {
-  console.log('\n[terra-cog] === Covenant Submit-Review (mutation) ===');
 
   // Without auth: expect rejection
   const noAuth = await post(
@@ -166,9 +160,6 @@ async function testCovenantSubmitReview() {
   );
 
   if (!TOKEN) {
-    console.warn(
-      '[terra-cog] ⚠  No ALLOY_INTERNAL_TOKEN — skipping authenticated submit-review test',
-    );
     return;
   }
 
@@ -203,7 +194,6 @@ async function testCovenantSubmitReview() {
 }
 
 async function testDistressForecast() {
-  console.log('\n[terra-cog] === Distress Forecast ===');
   const { status, body } = await get('/api/terra/cognitive/distress-forecast?limit=5');
   const b = body as Record<string, unknown>;
   assert('status 200', status === 200, `got ${status}`);
@@ -213,7 +203,6 @@ async function testDistressForecast() {
 }
 
 async function testUnderwritingCopilot() {
-  console.log('\n[terra-cog] === Underwriting Copilot ===');
   const { status, body } = await get(
     '/api/terra/cognitive/underwriting-copilot?propertyId=test-001',
   );
@@ -225,7 +214,6 @@ async function testUnderwritingCopilot() {
 }
 
 async function testDiligenceRoom() {
-  console.log('\n[terra-cog] === Diligence Room ===');
   const { status, body } = await get('/api/terra/cognitive/diligence-room');
   const b = body as Record<string, unknown>;
   assert('status 200', status === 200, `got ${status}`);
@@ -237,7 +225,6 @@ async function testDiligenceRoom() {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function run() {
-  console.log(`[terra-cog] Terra Cognitive API Smoke Tests — ${BASE}\n`);
 
   await testOwnershipGraph();
   await testLenderExposure();
@@ -247,20 +234,14 @@ async function run() {
   await testUnderwritingCopilot();
   await testDiligenceRoom();
 
-  console.log('\n─────────────────────────────────────────────────────────────');
-  console.log(`[terra-cog] Passed: ${passed}  Failed: ${errors.length}`);
-
   if (errors.length === 0) {
-    console.log('[terra-cog] ✓  All Terra cognitive API contract tests PASSED');
     process.exit(0);
   } else {
-    console.error('[terra-cog] ✗  Failures:');
-    errors.forEach((e) => console.error(`         • ${e}`));
+    errors.forEach((_e) => {});
     process.exit(1);
   }
 }
 
-run().catch((err) => {
-  console.error('[terra-cog] Unexpected error:', err);
+run().catch((_err) => {
   process.exit(1);
 });

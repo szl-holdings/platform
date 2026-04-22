@@ -135,10 +135,10 @@ export class LocalCpuBackend implements EmbeddingBackend {
         const env = (tf as { env: Record<string, unknown> }).env;
         const cacheDir = this.cacheDir;
         if (cacheDir) {
-          env['cacheDir'] = cacheDir;
+          env.cacheDir = cacheDir;
         }
-        env['allowLocalModels'] = true;
-        env['allowRemoteModels'] = true;
+        env.allowLocalModels = true;
+        env.allowRemoteModels = true;
         const pipeline = (
           tf as { pipeline: (task: string, model: string, opts?: unknown) => Promise<unknown> }
         ).pipeline;
@@ -274,7 +274,7 @@ export class FutureAzureBackend implements EmbeddingBackend {
   }
 
   async isAvailable(): Promise<boolean> {
-    return Boolean(process.env['AZURE_OPENAI_API_KEY'] && process.env['AZURE_OPENAI_ENDPOINT']);
+    return Boolean(process.env.AZURE_OPENAI_API_KEY && process.env.AZURE_OPENAI_ENDPOINT);
   }
 
   async embed(_inputs: EmbedInput[]): Promise<EmbedOutput[]> {
@@ -285,11 +285,11 @@ export class FutureAzureBackend implements EmbeddingBackend {
 }
 
 export function createDefaultBackend(): EmbeddingBackend {
-  const backendEnv = process.env['AEF_EMBED_BACKEND'] ?? 'local-cpu';
+  const backendEnv = process.env.AEF_EMBED_BACKEND ?? 'local-cpu';
 
   if (backendEnv === 'external-http') {
-    const endpoint = process.env['AEF_EMBED_ENDPOINT'] ?? '';
-    const apiKey = process.env['AEF_EMBED_API_KEY'] ?? '';
+    const endpoint = process.env.AEF_EMBED_ENDPOINT ?? '';
+    const apiKey = process.env.AEF_EMBED_API_KEY ?? '';
     if (!endpoint) throw new Error('AEF_EMBED_ENDPOINT is required for external-http backend');
     return new ExternalHttpBackend({ endpoint, apiKey });
   }

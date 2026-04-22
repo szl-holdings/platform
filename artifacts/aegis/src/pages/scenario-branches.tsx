@@ -11,8 +11,6 @@ import {
   Loader2,
   Lock,
   Play,
-  Shield,
-  Target,
   XCircle,
   Zap,
 } from 'lucide-react';

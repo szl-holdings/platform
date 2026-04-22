@@ -12,7 +12,6 @@ import { PulseBriefingPanel } from '@szl-holdings/shared-ui/pulse-briefing-panel
 import { motion as m } from 'framer-motion';
 import {
   Activity,
-  ArrowUpRight,
   BarChart3,
   Briefcase,
   Building,

@@ -92,15 +92,17 @@ export function useSSEStream<T = unknown>({
 
     xhr.onerror = () => {
       setStatus('error');
-      scheduleReconnect();
+      scheduleReconnectRef.current?.();
     };
 
     xhr.onload = () => {
-      scheduleReconnect();
+      scheduleReconnectRef.current?.();
     };
 
     xhr.send();
   }, [url, cleanup]);
+
+  const scheduleReconnectRef = useRef<(() => void) | null>(null);
 
   const scheduleReconnect = useCallback(() => {
     if (!enabledRef.current) return;
@@ -115,6 +117,10 @@ export function useSSEStream<T = unknown>({
       if (enabledRef.current) connect();
     }, delay);
   }, [connect, maxReconnectAttempts, reconnectDelay]);
+
+  useEffect(() => {
+    scheduleReconnectRef.current = scheduleReconnect;
+  }, [scheduleReconnect]);
 
   useEffect(() => {
     if (enabled) {

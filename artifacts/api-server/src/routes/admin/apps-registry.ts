@@ -79,8 +79,8 @@ function serialize(row: {
 export function register(router: IRouter): void {
   router.get('/admin/apps/activity', async (req, res) => {
     try {
-      const slug = typeof req.query['slug'] === 'string' ? req.query['slug'] : undefined;
-      const limitRaw = Number(req.query['limit'] ?? 50);
+      const slug = typeof req.query.slug === 'string' ? req.query.slug : undefined;
+      const limitRaw = Number(req.query.limit ?? 50);
       const limit = Math.min(Math.max(Number.isFinite(limitRaw) ? limitRaw : 50, 1), 200);
 
       const conditions = [eq(activityLogTable.resource, 'app_registry')];
@@ -186,7 +186,7 @@ export function register(router: IRouter): void {
 
   router.put('/admin/apps/:slug/owner-team', validateBody(ownerTeamSchema), async (req, res) => {
     try {
-      const slug = req.params['slug'] as string;
+      const slug = req.params.slug as string;
       const { ownerTeam } = req.body as { ownerTeam: string | null };
       const [updated] = await db
         .update(appsRegistryTable)
@@ -212,7 +212,7 @@ export function register(router: IRouter): void {
 
   router.put('/admin/apps/:slug/status', validateBody(updateStatusSchema), async (req, res) => {
     try {
-      const slug = req.params['slug'] as string;
+      const slug = req.params.slug as string;
       const { status } = req.body as { status: AppStatus };
       const [updated] = await db
         .update(appsRegistryTable)
@@ -238,7 +238,7 @@ export function register(router: IRouter): void {
 
   router.delete('/admin/apps/:slug', async (req, res) => {
     try {
-      const slug = req.params['slug'] as string;
+      const slug = req.params.slug as string;
       if (!slug) {
         sendBadRequest(res, 'Missing slug');
         return;

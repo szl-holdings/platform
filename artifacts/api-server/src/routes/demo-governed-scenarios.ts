@@ -5,7 +5,7 @@ import {
 } from '@szl-holdings/policy-engine';
 import { defaultMemoryStore } from '@workspace/memory-fabric/store';
 import type { MemoryEntry } from '@workspace/memory-fabric/types';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { handleRouteError, sendCreated } from '../lib/api-response';
 import { logger } from '../lib/logger';
@@ -26,9 +26,9 @@ function buildMemoryEntry(
     value: overrides.value,
     summary: overrides.summary,
     provenance: overrides.provenance ?? { source: 'demo-seed', method: 'import', createdAt: now },
-    freshness: { lastUpdatedAt: now, isStale: false, ...(overrides.freshness ?? {}) },
+    freshness: { lastUpdatedAt: now, isStale: false, ...overrides.freshness },
     confidence: overrides.confidence ?? 0.92,
-    retention: { policy: 'persistent', pinned: false, ...(overrides.retention ?? {}) },
+    retention: { policy: 'persistent', pinned: false, ...overrides.retention },
     sensitivity: overrides.sensitivity ?? 'internal',
     linkedEntities: overrides.linkedEntities ?? [],
     linkedTraces: overrides.linkedTraces ?? [],

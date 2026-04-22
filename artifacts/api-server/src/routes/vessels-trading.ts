@@ -402,7 +402,7 @@ router.get(
   authMiddleware({ required: false }),
   (req, res) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const instruments = getCached('instruments', 30 * 1000, getLiveInstruments);
       const inst = instruments.find((i) => i.id === id);
       if (!inst) {
@@ -492,7 +492,7 @@ router.post(
         return;
       }
       const instruments = getCached('instruments', 30 * 1000, getLiveInstruments);
-      const inst = instruments.find((i) => i.id === parseInt(instrumentId));
+      const inst = instruments.find((i) => i.id === parseInt(instrumentId, 10));
       if (!inst) {
         res.status(404).json({ error: 'Instrument not found' });
         return;
@@ -507,7 +507,7 @@ router.post(
 
       const newOrder: any = {
         id: nextOrderId++,
-        instrumentId: parseInt(instrumentId),
+        instrumentId: parseInt(instrumentId, 10),
         orderRef,
         orderType: orderType ?? 'market',
         side,
@@ -532,7 +532,7 @@ router.post(
         sessionFills.push({
           id: nextFillId - 1,
           orderId: newOrder.id,
-          instrumentId: parseInt(instrumentId),
+          instrumentId: parseInt(instrumentId, 10),
           fillRef,
           side,
           quantity: String(qty),
@@ -564,7 +564,7 @@ router.delete(
   authMiddleware({ required: false }),
   (req, res) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const idx = sessionOrders.findIndex((o) => o.id === id);
       const demoIdx = DEMO_ORDERS.findIndex((o) => o.id === id);
       if (idx >= 0) {

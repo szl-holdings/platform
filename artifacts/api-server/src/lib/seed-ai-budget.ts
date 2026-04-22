@@ -14,10 +14,10 @@ import { logger } from './logger';
 
 const DEFAULT_ORG_ID = 'default';
 
-const HOURLY_LIMIT_USD = parseFloat(process.env['AI_BUDGET_HOURLY_USD'] ?? '5.0');
-const DAILY_LIMIT_USD = parseFloat(process.env['AI_BUDGET_DAILY_USD'] ?? '50.0');
-const MONTHLY_LIMIT_USD = parseFloat(process.env['AI_BUDGET_MONTHLY_USD'] ?? '500.0');
-const ALERT_THRESHOLD_PCT = parseFloat(process.env['AI_BUDGET_ALERT_PCT'] ?? '80');
+const HOURLY_LIMIT_USD = parseFloat(process.env.AI_BUDGET_HOURLY_USD ?? '5.0');
+const DAILY_LIMIT_USD = parseFloat(process.env.AI_BUDGET_DAILY_USD ?? '50.0');
+const MONTHLY_LIMIT_USD = parseFloat(process.env.AI_BUDGET_MONTHLY_USD ?? '500.0');
+const ALERT_THRESHOLD_PCT = parseFloat(process.env.AI_BUDGET_ALERT_PCT ?? '80');
 
 export function seedAiBudgetPolicies(): void {
   try {

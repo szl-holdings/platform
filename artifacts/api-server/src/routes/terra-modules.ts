@@ -8,7 +8,7 @@ import {
   terraTenantApplicationsTable,
   terraWaterfallStructuresTable,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { and, desc, eq, isNull, ne, or } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import mammoth from 'mammoth';
@@ -39,7 +39,7 @@ const upload = multer({
   limits: { fileSize: 20 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     const allowed = ['.pdf', '.docx', '.txt', '.doc'];
-    const ext = '.' + (file.originalname.split('.').pop() ?? '').toLowerCase();
+    const ext = `.${(file.originalname.split('.').pop() ?? '').toLowerCase()}`;
     cb(null, allowed.includes(ext));
   },
 });
@@ -233,7 +233,7 @@ function getScreeningProvider(): ScreeningProvider {
 
 function extractLeaseFromText(
   text: string,
-  filename: string,
+  _filename: string,
 ): {
   tenant: string;
   commencementDate: string;
@@ -253,7 +253,7 @@ function extractLeaseFromText(
   options: string[];
   confidence: number;
 } {
-  const upper = text.toUpperCase();
+  const _upper = text.toUpperCase();
   let confidence = 50;
   const fields: string[] = [];
 
@@ -297,7 +297,7 @@ function extractLeaseFromText(
   const commencementDate = commenceDateMatch
     ? new Date(commenceDateMatch[1]).toISOString().slice(0, 10)
     : '';
-  if (commenceDateMatch && !isNaN(new Date(commenceDateMatch[1]).getTime())) {
+  if (commenceDateMatch && !Number.isNaN(new Date(commenceDateMatch[1]).getTime())) {
     confidence += 8;
     fields.push('commencementDate');
   }
@@ -308,7 +308,7 @@ function extractLeaseFromText(
   const expirationDate = expireDateMatch
     ? new Date(expireDateMatch[1]).toISOString().slice(0, 10)
     : '';
-  if (expireDateMatch && !isNaN(new Date(expireDateMatch[1]).getTime())) {
+  if (expireDateMatch && !Number.isNaN(new Date(expireDateMatch[1]).getTime())) {
     confidence += 8;
     fields.push('expirationDate');
   }
@@ -854,7 +854,7 @@ router.delete(
 
 router.get('/terra/pro-forma-session', authRead, async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const [row] = await db
       .select()
       .from(terraProFormaProjectsTable)
@@ -880,7 +880,7 @@ router.put(
   validateBody(terraResourceMutationSchema),
   async (req: Request, res: Response) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const sessionData = req.body as Record<string, unknown>;
       const [existing] = await db
         .select({ id: terraProFormaProjectsTable.id })
@@ -1695,7 +1695,7 @@ router.post(
         s === 'error' ? 'error' : s === 'warning' ? 'warning' : 'info';
 
       const screeningData: Record<string, unknown> = {
-        ...(d.screeningData ?? {}),
+        ...d.screeningData,
         providerName: screeningResult?.providerName ?? 'Manual Entry',
         providerStatus: screeningResult?.providerStatus ?? 'unavailable',
         creditHistory: screeningResult?.creditHistory,
@@ -1855,7 +1855,7 @@ router.get('/terra/rent-roll', authRead, async (req: Request, res: Response) => 
     for (const row of rows) {
       const key = row.propertyAddress ?? row.documentName ?? 'Unknown Property';
       if (!byAddress.has(key)) byAddress.set(key, []);
-      byAddress.get(key)!.push(row);
+      byAddress.get(key)?.push(row);
     }
 
     const properties = Array.from(byAddress.entries()).map(([address, leases], pi) => {

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 export interface HistogramBucket {
   lo: number;
@@ -49,7 +49,7 @@ export interface ScenarioComparisonItem {
 }
 
 function fmt(value: number, format?: string): string {
-  if (!isFinite(value)) return '—';
+  if (!Number.isFinite(value)) return '—';
   if (format === 'currency')
     return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   if (format === 'percentage') return `${value.toFixed(1)}%`;
@@ -208,8 +208,8 @@ export function CumulativeDistributionCurve({
 
   if (!cdf || cdf.length === 0) return null;
 
-  const minVal = cdf[0]!.value;
-  const maxVal = cdf[cdf.length - 1]!.value;
+  const minVal = cdf[0]?.value;
+  const maxVal = cdf[cdf.length - 1]?.value;
   const valRange = maxVal - minVal || 1;
 
   const xScale = (v: number) => ((v - minVal) / valRange) * plotW;
@@ -329,7 +329,7 @@ export function TornadoDiagram({
 
   const maxSwing = Math.max(
     ...entries.map((e) => Math.abs(e.highValue - baselineMean)),
-    Math.abs(entries[0]!.lowValue - baselineMean),
+    Math.abs(entries[0]?.lowValue - baselineMean),
     0.001,
   );
   const centerX = labelW + barAreaW / 2;
@@ -375,7 +375,7 @@ export function TornadoDiagram({
                 fill={COLORS.text}
                 fontWeight={i === 0 ? 600 : 400}
               >
-                {e.inputLabel.length > 22 ? e.inputLabel.slice(0, 22) + '…' : e.inputLabel}
+                {e.inputLabel.length > 22 ? `${e.inputLabel.slice(0, 22)}…` : e.inputLabel}
               </text>
               <rect
                 x={x1}
@@ -545,12 +545,12 @@ export function ConfidenceBandChart({
 
   if (!cdf || cdf.length === 0) return null;
 
-  const minVal = cdf[0]!.value;
-  const maxVal = cdf[cdf.length - 1]!.value;
+  const minVal = cdf[0]?.value;
+  const maxVal = cdf[cdf.length - 1]?.value;
   const valRange = maxVal - minVal || 1;
 
   const xScale = (v: number) => ((v - minVal) / valRange) * plotW;
-  const yScale = (p: number) => plotH - p * plotH;
+  const _yScale = (p: number) => plotH - p * plotH;
 
   const ci90Lower = cdf.find((p) => p.cumProb >= 0.05)?.value ?? minVal;
   const ci90Upper = cdf.find((p) => p.cumProb >= 0.95)?.value ?? maxVal;

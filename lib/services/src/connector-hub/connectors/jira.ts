@@ -153,21 +153,21 @@ export class JiraConnector extends ToolConnector {
     const adapter = services.jira;
     switch (capabilityId) {
       case 'list_projects':
-        return adapter.listProjects(params['limit'] ? Number(params['limit']) : 50);
+        return adapter.listProjects(params.limit ? Number(params.limit) : 50);
       case 'search_issues':
         return adapter.searchIssues(
-          String(params['jql']),
-          params['limit'] ? Number(params['limit']) : 50,
+          String(params.jql),
+          params.limit ? Number(params.limit) : 50,
         );
       case 'create_issue':
         return adapter.createIssue({
-          projectKey: String(params['projectKey']),
-          summary: String(params['summary']),
-          ...(params['issueType'] ? { issueType: String(params['issueType']) } : {}),
-          ...(params['description'] ? { description: String(params['description']) } : {}),
-          ...(params['priority']
+          projectKey: String(params.projectKey),
+          summary: String(params.summary),
+          ...(params.issueType ? { issueType: String(params.issueType) } : {}),
+          ...(params.description ? { description: String(params.description) } : {}),
+          ...(params.priority
             ? {
-                priority: String(params['priority']) as
+                priority: String(params.priority) as
                   | 'Highest'
                   | 'High'
                   | 'Medium'
@@ -175,18 +175,18 @@ export class JiraConnector extends ToolConnector {
                   | 'Lowest',
               }
             : {}),
-          ...(params['assignee'] ? { assigneeEmail: String(params['assignee']) } : {}),
+          ...(params.assignee ? { assigneeEmail: String(params.assignee) } : {}),
         });
       case 'get_active_sprints':
-        return adapter.getActiveSprints(params['boardId'] ? Number(params['boardId']) : undefined);
+        return adapter.getActiveSprints(params.boardId ? Number(params.boardId) : undefined);
       case 'get_sprint_health':
-        return adapter.getSprintHealth(params['sprintId'] ? Number(params['sprintId']) : undefined);
+        return adapter.getSprintHealth(params.sprintId ? Number(params.sprintId) : undefined);
       case 'ingest_signals':
         return adapter.ingestSignals();
       case 'transition_issue':
         return adapter.transitionIssue(
-          String(params['issueKey']),
-          String(params['transitionName']),
+          String(params.issueKey),
+          String(params.transitionName),
         );
       default:
         throw new Error(`Unknown capability: ${capabilityId}`);

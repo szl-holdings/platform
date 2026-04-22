@@ -3,7 +3,6 @@ import { db, pushTokensTable } from '@szl-holdings/db';
 import { and, eq } from 'drizzle-orm';
 import { Expo } from 'expo-server-sdk';
 import { type IRouter, Router } from 'express';
-import { z } from 'zod';
 import {
   handleRouteError,
   sendBadRequest,
@@ -102,7 +101,7 @@ router.delete(
   async (req, res) => {
     try {
       const { token } = req.params as Record<string, string>;
-      const userId = req.user!.id;
+      const userId = req.user?.id;
 
       await db
         .update(pushTokensTable)
@@ -118,7 +117,7 @@ router.delete(
 
 router.get('/push-tokens/me', authMiddleware(), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const tokens = await db
       .select()
       .from(pushTokensTable)

@@ -12,7 +12,7 @@ import {
   modelRoutingPoliciesTable,
   organizationsTable,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { sql } from 'drizzle-orm';
 
 /**
@@ -49,14 +49,12 @@ function daysAhead(n: number) {
 }
 
 export async function seedGovernance() {
-  console.log('[seed-governance] Starting Governance & Compliance seed...');
 
   const existing = await db
     .select({ id: alloyLegacyPoliciesTable.id })
     .from(alloyLegacyPoliciesTable)
     .limit(1);
   if (existing.length > 0) {
-    console.log('[seed-governance] Data already seeded, skipping.');
     return { skipped: true };
   }
 
@@ -182,8 +180,6 @@ export async function seedGovernance() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-governance] Seeded ${policies.length} policies`);
-
   await db
     .insert(modelRoutingPoliciesTable)
     .values([
@@ -255,8 +251,6 @@ export async function seedGovernance() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-governance] Seeded model routing policies`);
-
   const budgets = await db
     .insert(costBudgetsTable)
     .values([
@@ -304,8 +298,6 @@ export async function seedGovernance() {
     ])
     .onConflictDoNothing()
     .returning();
-
-  console.log(`[seed-governance] Seeded ${budgets.length} cost budgets`);
 
   await db
     .insert(costEventsTable)
@@ -385,8 +377,6 @@ export async function seedGovernance() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-governance] Seeded cost events`);
-
   await db
     .insert(governanceIncidentsTable)
     .values([
@@ -448,8 +438,6 @@ export async function seedGovernance() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-governance] Seeded governance incidents`);
 
   await db
     .insert(complianceSuitabilityTable)
@@ -518,8 +506,6 @@ export async function seedGovernance() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-governance] Seeded compliance suitability records`);
-
   await db
     .insert(complianceArchivalTable)
     .values([
@@ -571,8 +557,6 @@ export async function seedGovernance() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-governance] Seeded compliance archival records`);
 
   await db
     .insert(complianceSupervisionQueueTable)
@@ -643,8 +627,6 @@ export async function seedGovernance() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-governance] Seeded compliance supervision queue`);
-
   await db
     .insert(complianceCalendarTable)
     .values([
@@ -711,8 +693,6 @@ export async function seedGovernance() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-governance] Seeded compliance calendar`);
-
   await db
     .insert(complianceRiskScoreTable)
     .values([
@@ -748,9 +728,5 @@ export async function seedGovernance() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-governance] Seeded compliance risk scores`);
-
-  console.log('[seed-governance] Governance & Compliance seed complete.');
   return { seeded: true };
 }

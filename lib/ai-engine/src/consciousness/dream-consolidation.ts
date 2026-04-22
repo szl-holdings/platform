@@ -131,7 +131,7 @@ class DreamConsolidationEngine {
       const key = r.domains.sort().join('+');
       if (!domainCombos[key]) domainCombos[key] = { count: 0, outcomes: [] };
       domainCombos[key]!.count++;
-      domainCombos[key]!.outcomes.push(r.outcome);
+      domainCombos[key]?.outcomes.push(r.outcome);
     }
 
     for (const [combo, data] of Object.entries(domainCombos)) {
@@ -193,7 +193,7 @@ class DreamConsolidationEngine {
       const hour = new Date(r.timestamp).getHours();
       const slot = hour < 8 ? 'night' : hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
       if (!timeSlots[slot]) timeSlots[slot] = [];
-      timeSlots[slot]!.push(r.outcome);
+      timeSlots[slot]?.push(r.outcome);
     }
 
     for (const [slot, outcomes] of Object.entries(timeSlots)) {

@@ -1,11 +1,8 @@
 import {
   AlertTriangle,
   CheckCircle,
-  ChevronDown,
-  ChevronUp,
   Clock,
   Code2,
-  Copy,
   Database,
   Download,
   GitBranch,
@@ -16,7 +13,6 @@ import {
   RefreshCw,
   Save,
   Shield,
-  Trash2,
   Upload,
   X,
   Zap,
@@ -312,7 +308,7 @@ export default function McpToolCreator() {
     setEditing((e) => (e ? { ...e, ...updated } : e));
   };
 
-  const approvalConfig = APPROVAL_CLASSES.find((a) => a.id === editing?.approvalClass);
+  const _approvalConfig = APPROVAL_CLASSES.find((a) => a.id === editing?.approvalClass);
 
   return (
     <div className="max-w-6xl mx-auto space-y-5">

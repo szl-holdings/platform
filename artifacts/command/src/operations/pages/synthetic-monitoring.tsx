@@ -311,7 +311,7 @@ export default function SyntheticMonitoring() {
                 className="w-full text-left p-3 rounded-lg transition-all"
                 style={{
                   background: selected.id === check.id ? `${sc.color}06` : DS.surface,
-                  border: `1px solid ${selected.id === check.id ? sc.color + '30' : DS.border}`,
+                  border: `1px solid ${selected.id === check.id ? `${sc.color}30` : DS.border}`,
                 }}
               >
                 <div className="flex items-start gap-2 mb-1.5">

@@ -1,14 +1,8 @@
 import {
   db,
-  pcCarrierBehaviorPatternsTable,
-  pcCarrierResponseEventsTable,
-  pcCarrierSilenceWindowsTable,
   pcInsurerPressureDriversTable,
   pcInsurerPressureSnapshotsTable,
   pcMovementRecommendationsTable,
-  pcPortfolioActionEffectivenessTable,
-  pcPortfolioBenchmarkSnapshotsTable,
-  pcPortfolioMatterCohortsTable,
   pcPortfolioTeamLagMetricsTable,
   pcQuietRiskSnapshotsTable,
   pcSettlementFrictionDriversTable,
@@ -18,13 +12,12 @@ import {
   pcWorldlineSignalOverlaysTable,
   pcWorldlineWeatherEventsTable,
 } from '@szl-holdings/db';
-import { and, desc, eq, gte } from 'drizzle-orm';
+import { and, desc, eq, } from 'drizzle-orm';
 import { copilotPilotOne } from '../../services/prism-copilot-pilot-one';
 import { forecastExpanded } from '../../services/prism-forecast-expanded';
 import { insurerPressureEngine } from '../../services/prism-insurer-pressure';
 import { portfolioLearning } from '../../services/prism-portfolio-learning';
 import { settlementFrictionEngine } from '../../services/prism-settlement-friction';
-import type { GraphQLContext } from '../index.js';
 
 export const prismCounselPilotOneTypeDefs = `#graphql
 

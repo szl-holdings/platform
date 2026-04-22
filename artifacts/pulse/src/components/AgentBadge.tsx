@@ -1,4 +1,4 @@
-import { AGENTS, type Agent } from '../lib/data';
+import { AGENTS, } from '../lib/data';
 
 interface Props {
   agentId: string;

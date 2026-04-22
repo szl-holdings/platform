@@ -1,6 +1,6 @@
 import { type Distribution, sample } from './distributions.js';
 import type { SimulationResult } from './engine.js';
-import type { InputVariable, ScenarioDefinition } from './schema.js';
+import type { ScenarioDefinition } from './schema.js';
 
 export interface TornadoEntry {
   inputId: string;
@@ -84,7 +84,7 @@ export function computeSensitivity(
       perturbedInputs[input.id] = sample(input.distribution);
       try {
         const out = scenario.calculate(perturbedInputs, j)[outputId];
-        if (out !== undefined && isFinite(out)) perturbedOutputs.push(out);
+        if (out !== undefined && Number.isFinite(out)) perturbedOutputs.push(out);
       } catch {
         /* skip invalid iteration */
       }
@@ -176,7 +176,7 @@ function expectedValue(dist: Distribution): number {
     case 'custom': {
       if (dist.weights) {
         const total = dist.weights.reduce((a, b) => a + b, 0);
-        return dist.values.reduce((s, v, i) => s + v * (dist.weights![i]! / total), 0);
+        return dist.values.reduce((s, v, i) => s + v * (dist.weights?.[i]! / total), 0);
       }
       return dist.values.reduce((a, b) => a + b, 0) / dist.values.length;
     }
@@ -187,7 +187,7 @@ function buildAssumptionSummary(entry: TornadoEntry): string {
   return `${entry.inputLabel} accounts for ${entry.impactPct.toFixed(1)}% of ${entry.outputLabel} variance (swing: ${(entry.highValue - entry.lowValue).toFixed(2)})`;
 }
 
-function buildNarrative(entry: TornadoEntry, outputLabel: string, baseline: number): string {
+function buildNarrative(entry: TornadoEntry, outputLabel: string, _baseline: number): string {
   const pct = entry.impactPct.toFixed(0);
   const dir =
     entry.direction === 'positive'

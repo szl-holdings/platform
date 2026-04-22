@@ -16,12 +16,9 @@ import {
   organizationsTable,
   orgInvitationsTable,
   orgMembersTable,
-  usersTable,
 } from '@szl-holdings/db';
-import crypto from 'crypto';
-import { and, eq, gt } from 'drizzle-orm';
-import type { Request, Response } from 'express';
-import { Router } from 'express';
+import { and, eq, } from 'drizzle-orm';
+import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
@@ -31,7 +28,6 @@ import {
   sendNotFound,
   sendUnauthorized,
 } from '../lib/api-response';
-import { buildOrgInviteEmail, sendEmail } from '../lib/email';
 import { createOrgInvitation } from '../lib/invitation-service';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
@@ -40,7 +36,7 @@ import { writeLimiter } from '../middlewares/rate-limiters';
 
 const router = Router();
 
-const INVITE_TTL = 7 * 24 * 60 * 60 * 1000;
+const _INVITE_TTL = 7 * 24 * 60 * 60 * 1000;
 
 const inviteBodySchema = z.object({
   email: z.string().email('Valid email is required'),
@@ -105,7 +101,7 @@ async function resolveOrgAndCheckAdminRole(
     return null;
   }
 
-  if ((ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']) {
+  if ((ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY.admin) {
     sendForbidden(res, 'Insufficient organization role — admin or owner required');
     return null;
   }
@@ -120,7 +116,7 @@ router.post(
   validateBody(inviteBodySchema),
   async (req, res) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
       const { email, role } = req.body as z.infer<typeof inviteBodySchema>;
 
       const org = await resolveOrgAndCheckAdminRole(req, res, orgSlug);
@@ -134,7 +130,7 @@ router.post(
         orgName: org.name,
         email,
         role: role as 'admin' | 'member' | 'viewer',
-        invitedByUserId: req.user!.id,
+        invitedByUserId: req.user?.id,
         ipAddress: req.ip,
         conflictMode: 'reject',
       });
@@ -159,7 +155,7 @@ router.post(
 
 router.get('/orgs/accept-invite', validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const token = req.query['token'];
+    const token = req.query.token;
     if (!token || typeof token !== 'string') {
       sendBadRequest(res, 'Invitation token is required');
       return;
@@ -260,10 +256,10 @@ router.post(
         return;
       }
 
-      const userEmail = (req.user!.email ?? '').toLowerCase();
+      const userEmail = (req.user?.email ?? '').toLowerCase();
       if (userEmail !== invitation.email.toLowerCase()) {
         await writeAuditEvent({
-          userId: req.user!.id,
+          userId: req.user?.id,
           action: 'invitation_accept_denied',
           entityType: 'org_invitation',
           entityId: String(invitation.id),
@@ -280,7 +276,7 @@ router.post(
         .where(
           and(
             eq(orgMembersTable.orgId, invitation.orgId),
-            eq(orgMembersTable.userId, req.user!.id),
+            eq(orgMembersTable.userId, req.user?.id),
           ),
         )
         .limit(1);
@@ -290,7 +286,7 @@ router.post(
           .update(orgInvitationsTable)
           .set({
             status: 'accepted',
-            acceptedByUserId: req.user!.id,
+            acceptedByUserId: req.user?.id,
             acceptedAt: new Date(),
           })
           .where(eq(orgInvitationsTable.id, invitation.id));
@@ -301,7 +297,7 @@ router.post(
 
       await db.insert(orgMembersTable).values({
         orgId: invitation.orgId,
-        userId: req.user!.id,
+        userId: req.user?.id,
         role: invitation.role as 'admin' | 'member' | 'viewer',
       });
 
@@ -309,20 +305,20 @@ router.post(
         .update(orgInvitationsTable)
         .set({
           status: 'accepted',
-          acceptedByUserId: req.user!.id,
+          acceptedByUserId: req.user?.id,
           acceptedAt: new Date(),
         })
         .where(eq(orgInvitationsTable.id, invitation.id));
 
       await writeAuditEvent({
-        userId: req.user!.id,
+        userId: req.user?.id,
         action: 'invitation_accepted',
         entityType: 'org_invitation',
         entityId: String(invitation.id),
         ipAddress: req.ip,
         newValues: {
           orgId: invitation.orgId,
-          acceptedByUserId: req.user!.id,
+          acceptedByUserId: req.user?.id,
           role: invitation.role,
         },
       });
@@ -350,11 +346,11 @@ router.delete(
   authMiddleware(),
   async (req, res) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
-      const invitationId = req.params['invitationId'] as string;
+      const orgSlug = req.params.orgSlug as string;
+      const invitationId = req.params.invitationId as string;
       const id = parseInt(invitationId, 10);
 
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid invitation ID');
         return;
       }
@@ -393,12 +389,12 @@ router.delete(
         .where(eq(orgInvitationsTable.id, id));
 
       await writeAuditEvent({
-        userId: req.user!.id,
+        userId: req.user?.id,
         action: 'invitation_revoked',
         entityType: 'org_invitation',
         entityId: String(id),
         ipAddress: req.ip,
-        newValues: { revokedByUserId: req.user!.id },
+        newValues: { revokedByUserId: req.user?.id },
       });
 
       res.status(200).json({ message: 'Invitation revoked' });
@@ -410,7 +406,7 @@ router.delete(
 
 router.get('/orgs/:orgSlug/invitations', authMiddleware(), async (req, res) => {
   try {
-    const orgSlug = req.params['orgSlug'] as string;
+    const orgSlug = req.params.orgSlug as string;
 
     const org = await resolveOrgAndCheckAdminRole(req, res, orgSlug);
     if (!org) return;

@@ -1,8 +1,6 @@
 import { AnimatePresence, m } from 'framer-motion';
 import {
   Activity,
-  AlertTriangle,
-  ArrowRight,
   Check,
   Clock,
   HeartPulse,
@@ -10,10 +8,9 @@ import {
   Shield,
   Zap,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   canaryDeploy,
-  promoteCanary,
   rollbackModel,
   triggerFailover,
 } from '@/lib/nuro-forge-service';

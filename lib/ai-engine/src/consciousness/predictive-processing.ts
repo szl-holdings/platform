@@ -250,7 +250,7 @@ class PredictiveProcessingEngine {
         worldModelAge: Date.now() - this.modelCreatedAt,
         lastUpdateTimestamp:
           this.errors.length > 0
-            ? this.errors[this.errors.length - 1]!.timestamp
+            ? this.errors[this.errors.length - 1]?.timestamp
             : new Date().toISOString(),
       },
       routingPriors: { ...this.routingPriors },

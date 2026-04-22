@@ -7,9 +7,9 @@
  *   node scripts/qa/audit-routes.js
  */
 
-import { existsSync, readdirSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { readdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
@@ -149,30 +149,25 @@ function listSubDirs(dir) {
 }
 
 function main() {
-  console.log('\nSZL Holdings — Route Coverage Audit');
-  console.log('Checking that expected route files exist in each app...\n');
 
-  let totalChecks = 0;
-  let totalPassed = 0;
+  let _totalChecks = 0;
+  let _totalPassed = 0;
   let totalFailed = 0;
   const failures = [];
 
   for (const config of APP_CONFIGS) {
     const pagesDir = join(config.appPath, config.pagesDir);
     const existingFiles = new Set(listPageFiles(pagesDir));
-    const existingSubDirs = new Set(listSubDirs(pagesDir));
-
-    console.log(`  ${config.name} (${config.pagesDir}/)`);
+    const _existingSubDirs = new Set(listSubDirs(pagesDir));
 
     // Check top-level routes
     for (const route of config.knownRoutes) {
-      totalChecks++;
+      _totalChecks++;
       if (existingFiles.has(route)) {
-        totalPassed++;
+        _totalPassed++;
       } else {
         totalFailed++;
         failures.push({ app: config.name, route, context: 'top-level' });
-        console.log(`    ✗ MISSING: ${route}`);
       }
     }
 
@@ -183,33 +178,23 @@ function main() {
         const subFiles = new Set(listPageFiles(subPath));
 
         for (const route of routes) {
-          totalChecks++;
+          _totalChecks++;
           if (subFiles.has(route)) {
-            totalPassed++;
+            _totalPassed++;
           } else {
             totalFailed++;
             failures.push({ app: config.name, route: `${subDir}/${route}`, context: 'sub-dir' });
-            console.log(`    ✗ MISSING: ${subDir}/${route}`);
           }
         }
       }
     }
-
-    console.log(
-      `    → ${config.knownRoutes.length + (config.subDirRoutes?.reduce((a, b) => a + b.routes.length, 0) ?? 0)} routes checked`,
-    );
   }
 
-  console.log(`\nSummary: ${totalPassed}/${totalChecks} routes present, ${totalFailed} missing`);
-
   if (totalFailed > 0) {
-    console.error(`\nFAIL — ${totalFailed} expected route file(s) are missing:`);
-    for (const f of failures) {
-      console.error(`  [${f.app}] ${f.route}`);
+    for (const _f of failures) {
     }
     process.exit(1);
   } else {
-    console.log(`\nPASS — All expected route files present.`);
     process.exit(0);
   }
 }

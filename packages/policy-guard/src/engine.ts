@@ -10,7 +10,6 @@ import type {
   PolicyCheckRequest,
   PolicyCheckResult,
   PolicyRule,
-  PolicyVerdict,
 } from '@szl-holdings/shared-contracts';
 
 let _requestCounter = 0;

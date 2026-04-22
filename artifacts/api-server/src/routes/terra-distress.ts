@@ -175,10 +175,10 @@ router.get(
       const { lat, lng, radiusMiles, limit } = req.query;
       const latNum = lat ? Number(lat) : NaN;
       const lngNum = lng ? Number(lng) : NaN;
-      const latitude = !isNaN(latNum) && latNum >= -90 && latNum <= 90 ? latNum : null;
-      const longitude = !isNaN(lngNum) && lngNum >= -180 && lngNum <= 180 ? lngNum : null;
+      const latitude = !Number.isNaN(latNum) && latNum >= -90 && latNum <= 90 ? latNum : null;
+      const longitude = !Number.isNaN(lngNum) && lngNum >= -180 && lngNum <= 180 ? lngNum : null;
       const radiusNum = radiusMiles ? Number(radiusMiles) : 2;
-      const lim = !isNaN(Number(limit)) ? Math.min(Math.max(Number(limit), 1), 50) : 10;
+      const lim = !Number.isNaN(Number(limit)) ? Math.min(Math.max(Number(limit), 1), 50) : 10;
 
       let borough: string | undefined;
       if (latitude !== null && longitude !== null) {
@@ -204,7 +204,7 @@ router.get(
         searchParams: {
           lat: latitude,
           lng: longitude,
-          radiusMiles: !isNaN(radiusNum) ? radiusNum : 2,
+          radiusMiles: !Number.isNaN(radiusNum) ? radiusNum : 2,
           resolvedBorough: borough ?? 'All',
         },
         fetchedAt: new Date().toISOString(),
@@ -518,7 +518,7 @@ router.get(
   '/terra/distress/ingestion/stats',
   authMiddleware({ required: true }),
   requireRole('super_admin', 'ops', 'analyst'),
-  async (req, res) => {
+  async (_req, res) => {
     try {
       const stats = await getIngestionStats();
       sendSuccess(res, stats);

@@ -1,11 +1,5 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import type {
-  ApprovalClass,
-  ForgeTask,
-  ForgeTaskType,
-  ForgeTenantPolicy,
-} from '@szl-holdings/forge-runtime';
-import { forgeEvidenceStore, forgeRuntime, forgeTimeline } from '@szl-holdings/forge-runtime';
+import { type ApprovalClass, type ForgeTask, type ForgeTaskType, type ForgeTenantPolicy, forgeEvidenceStore, forgeRuntime, forgeTimeline } from '@szl-holdings/forge-runtime';
 import type { PrismDomain } from '@szl-holdings/prism-bus';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';

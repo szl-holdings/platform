@@ -1,9 +1,8 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
-import { Activity, AlertTriangle, Clock, Eye, Lock, MapPin, Users } from 'lucide-react';
-import { useState } from 'react';
+import { Card, CardContent, } from '@szl-holdings/shared-ui/ui/card';
+import { Clock, MapPin, Users } from 'lucide-react';
 
 interface LiveAlert {
   id: number | string;
@@ -164,7 +163,7 @@ export default function IdentityThreat() {
 
   const liveIdentityAlerts = idAlerts.slice(0, 5).map((a, i) => ({
     id: String(a.id ?? `LIVE-${i}`),
-    user: (a.affectedAssets && a.affectedAssets[0]) || a.source || 'unknown.user@corp.com',
+    user: (a.affectedAssets?.[0]) || a.source || 'unknown.user@corp.com',
     type: a.title ?? 'Identity Anomaly',
     severity: ((a.severity ?? 'Medium').charAt(0).toUpperCase() +
       (a.severity ?? 'Medium').slice(1).toLowerCase()) as 'Critical' | 'High' | 'Medium',

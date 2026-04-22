@@ -22,7 +22,6 @@ import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { Textarea } from '@szl-holdings/shared-ui/ui/textarea';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  AlertTriangle,
   Building,
   Globe,
   Link2,

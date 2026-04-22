@@ -1125,7 +1125,6 @@ export default function DashboardBuilder() {
                 placeholder="Dashboard name..."
                 className="flex-1 bg-transparent border-b text-sm text-white outline-none placeholder:text-slate-600"
                 style={{ borderColor: 'rgba(255,255,255,0.15)' }}
-                autoFocus
               />
               <button
                 onClick={handleCreateBlank}

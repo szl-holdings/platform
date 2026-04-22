@@ -1,22 +1,11 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Activity,
   AlertTriangle,
-  ArrowUpRight,
-  BarChart3,
-  Building2,
   Calendar,
   Camera,
-  CheckCircle,
-  ChevronRight,
-  Clock,
   Database,
-  DollarSign,
-  Hammer,
-  TrendingUp,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -374,7 +363,7 @@ export default function ConstructionMonitorPage() {
   const effectiveId = selectedId ?? projects[0]?.id;
   const proj = projects.find((p) => p.id === effectiveId) ?? projects[0];
   if (!proj) return null;
-  const statusCfg = STATUS_CONFIG[proj.status];
+  const _statusCfg = STATUS_CONFIG[proj.status];
   const budgetVariance = proj.totalBudget - proj.totalSpent;
   const completeMilestones = proj.milestones.filter(
     (m) => (m as { status: string }).status === 'complete',

@@ -3,7 +3,6 @@ import {
   index,
   integer,
   jsonb,
-  numeric,
   pgTable,
   real,
   serial,
@@ -11,7 +10,7 @@ import {
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { pcConnectorAccountsTable, pcMattersTable } from './prism_counsel';
+import { pcMattersTable } from './prism_counsel';
 
 /* ─── RBAC / Roles ──────────────────────────────────────────────────────── */
 

@@ -1,6 +1,6 @@
 import { db } from '@szl-holdings/db';
 import { pcProofChainEntriesTable } from '@szl-holdings/db/schema';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { and, desc, eq } from 'drizzle-orm';
 import { logger } from '../lib/logger';
 

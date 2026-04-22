@@ -1,7 +1,6 @@
 import type { PostgresTraceHistoryFilter, PostgresTraceHistoryResult } from './postgres-store.js';
 import type { TraceRecord } from './schema.js';
-import type { TraceStore } from './store.js';
-import { defaultTraceStore, MutableTraceStore } from './store.js';
+import { type TraceStore, defaultTraceStore, MutableTraceStore } from './store.js';
 
 /**
  * Optional capability marker — if a TraceStore backend implements this, the
@@ -101,7 +100,7 @@ export class TraceQueryEngine {
     if (agentId) results = results.filter((t) => t.agentId === agentId);
     if (workflowId) results = results.filter((t) => t.workflowId === workflowId);
     if (sessionId) results = results.filter((t) => t.sessionId === sessionId);
-    if (domain) results = results.filter((t) => (t.metadata?.['domain'] ?? undefined) === domain);
+    if (domain) results = results.filter((t) => (t.metadata?.domain ?? undefined) === domain);
     if (model) results = results.filter((t) => t.model === model);
     if (status) results = results.filter((t) => t.status === status);
     if (hasErrors === true) results = results.filter((t) => t.errors.length > 0);

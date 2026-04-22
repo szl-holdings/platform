@@ -21,7 +21,6 @@ import {
   szlDecisioningRunsTable,
   szlPolicyViolationsTable,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
 
 function daysAgo(n: number) {
   return new Date(Date.now() - n * 86400000);
@@ -62,7 +61,6 @@ const WORKFLOWS = [
 ];
 
 export async function seedDecisions() {
-  console.log('[seed-decisions] Starting AI decisions + decisioning runs seed...');
   // Each insert below uses onConflictDoNothing() on stable IDs — fully idempotent per row.
   // No early-exit skip needed; partial failures are healed on rerun.
 
@@ -242,7 +240,7 @@ export async function seedDecisions() {
     ...Array.from({ length: 25 }, (_, i) => ({
       decisionId: `dec-auto-${String(i + 6).padStart(3, '0')}`,
       orgId: 1,
-      workflowId: WORKFLOWS[i % WORKFLOWS.length]!.id,
+      workflowId: WORKFLOWS[i % WORKFLOWS.length]?.id,
       signalIds: [`signal-${DOMAINS[i % DOMAINS.length]}-${i}`],
       recommendedAction: [
         'Rotate API credentials for affected service — low disruption, automated rollout',
@@ -281,7 +279,6 @@ export async function seedDecisions() {
   ];
 
   await db.insert(alloyAiDecisions).values(aiDecisions).onConflictDoNothing();
-  console.log(`[seed-decisions] Inserted ${aiDecisions.length} AI decisions`);
 
   // ── Decisioning Runs ──────────────────────────────────────────────────────────
 
@@ -375,7 +372,6 @@ export async function seedDecisions() {
   );
 
   await db.insert(szlDecisioningRunsTable).values(decisioningRuns).onConflictDoNothing();
-  console.log(`[seed-decisions] Inserted ${decisioningRuns.length} decisioning runs`);
 
   // ── Decisioning Recommendations ───────────────────────────────────────────────
 
@@ -537,7 +533,6 @@ export async function seedDecisions() {
   ];
 
   await db.insert(szlDecisioningRecommendationsTable).values(recommendations).onConflictDoNothing();
-  console.log(`[seed-decisions] Inserted ${recommendations.length} decisioning recommendations`);
 
   // ── Policy Violations ─────────────────────────────────────────────────────────
 
@@ -610,7 +605,6 @@ export async function seedDecisions() {
   ];
 
   await db.insert(szlPolicyViolationsTable).values(policyViolations).onConflictDoNothing();
-  console.log(`[seed-decisions] Inserted ${policyViolations.length} policy violations`);
 
   // ── Agent Knowledge ───────────────────────────────────────────────────────────
 
@@ -731,7 +725,6 @@ export async function seedDecisions() {
   ];
 
   await db.insert(agentKnowledgeTable).values(knowledgeEntries).onConflictDoNothing();
-  console.log(`[seed-decisions] Inserted ${knowledgeEntries.length} knowledge entries`);
 
   // ── Agent Runs ────────────────────────────────────────────────────────────────
 
@@ -760,7 +753,6 @@ export async function seedDecisions() {
   );
 
   await db.insert(agentRunsTable).values(agentRuns).onConflictDoNothing();
-  console.log(`[seed-decisions] Inserted ${agentRuns.length} agent runs`);
 
   return {
     aiDecisions: aiDecisions.length,

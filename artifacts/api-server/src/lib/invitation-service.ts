@@ -9,7 +9,7 @@
 
 import { hashIp } from '@szl-holdings/audit';
 import { auditEventsTable, db, orgInvitationsTable, usersTable } from '@szl-holdings/db';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { and, eq, gt } from 'drizzle-orm';
 import { buildOrgInviteEmail, sendEmail } from './email';
 import { logger } from './logger';

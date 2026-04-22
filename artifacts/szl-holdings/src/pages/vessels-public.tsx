@@ -1,8 +1,8 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
 import {
-  ArrowRight, Ship, CheckCircle2, Shield, FileText, Eye, Lock, Database,
-  AlertTriangle, Map, Anchor, Wind, Clock, Users, Layers, GitBranch
+  ArrowRight, Ship, CheckCircle2, FileText, Eye, Lock, Database,
+  AlertTriangle, Map, Anchor, Wind, Clock, Users, Layers, 
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -110,7 +110,7 @@ export default function VesselsPublicPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
           {/* Maturity banner */}
           <div style={{ background: "hsla(206,72%,40%,0.07)", borderBottom: "1px solid hsla(206,72%,40%,0.18)", padding: "0.75rem var(--space-content-x)" }}>

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   buildCDF,
   buildHistogram,
@@ -111,8 +111,8 @@ describe('histogram and CDF helpers', () => {
     const cdf = buildCDF(xs, 25);
     expect(cdf).toHaveLength(25);
     for (let i = 1; i < cdf.length; i++) {
-      expect(cdf[i]!.cumProb).toBeGreaterThanOrEqual(cdf[i - 1]!.cumProb);
+      expect(cdf[i]?.cumProb).toBeGreaterThanOrEqual(cdf[i - 1]?.cumProb);
     }
-    expect(cdf[cdf.length - 1]!.cumProb).toBeCloseTo(1, 2);
+    expect(cdf[cdf.length - 1]?.cumProb).toBeCloseTo(1, 2);
   });
 });

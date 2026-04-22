@@ -112,7 +112,6 @@ export class AISFeedAdapter extends BaseFeedAdapter {
 
   async connect(): Promise<void> {
     if (!this.apiKey) {
-      console.warn('[AIS] No API key configured — will use AISHub public feed as fallback');
     }
     this.health.status = 'healthy';
   }
@@ -191,19 +190,19 @@ export class AISFeedAdapter extends BaseFeedAdapter {
       const raw = (await response.json()) as Array<Record<string, unknown>>;
       const positions: AISVesselPosition[] = (Array.isArray(raw) ? raw.flat() : [])
         .map((r) => ({
-          mmsi: String(r['MMSI'] ?? r['mmsi'] ?? ''),
-          imo: r['IMO'] ? String(r['IMO']) : undefined,
-          shipname: r['NAME'] ? String(r['NAME']) : undefined,
-          latitude: Number(r['LATITUDE'] ?? r['lat'] ?? 0),
-          longitude: Number(r['LONGITUDE'] ?? r['lon'] ?? 0),
-          speed: r['SPEED'] ? Number(r['SPEED']) / 10 : undefined,
-          course: r['COURSE'] ? Number(r['COURSE']) : undefined,
-          heading: r['HEADING'] ? Number(r['HEADING']) : undefined,
-          destination: r['DESTINATION'] ? String(r['DESTINATION']) : undefined,
-          shiptype: r['TYPE'] ? Number(r['TYPE']) : undefined,
-          flag: r['COUNTRY'] ? String(r['COUNTRY']) : undefined,
-          callsign: r['CALLSIGN'] ? String(r['CALLSIGN']) : undefined,
-          timestamp: r['TIME'] ? String(r['TIME']) : new Date().toISOString(),
+          mmsi: String(r.MMSI ?? r.mmsi ?? ''),
+          imo: r.IMO ? String(r.IMO) : undefined,
+          shipname: r.NAME ? String(r.NAME) : undefined,
+          latitude: Number(r.LATITUDE ?? r.lat ?? 0),
+          longitude: Number(r.LONGITUDE ?? r.lon ?? 0),
+          speed: r.SPEED ? Number(r.SPEED) / 10 : undefined,
+          course: r.COURSE ? Number(r.COURSE) : undefined,
+          heading: r.HEADING ? Number(r.HEADING) : undefined,
+          destination: r.DESTINATION ? String(r.DESTINATION) : undefined,
+          shiptype: r.TYPE ? Number(r.TYPE) : undefined,
+          flag: r.COUNTRY ? String(r.COUNTRY) : undefined,
+          callsign: r.CALLSIGN ? String(r.CALLSIGN) : undefined,
+          timestamp: r.TIME ? String(r.TIME) : new Date().toISOString(),
         }))
         .filter((p) => p.mmsi && p.latitude !== 0);
 

@@ -45,7 +45,7 @@ export class FigmaAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ['FIGMA_ACCESS_TOKEN'];
 
   private get token(): string | undefined {
-    return process.env['FIGMA_ACCESS_TOKEN'];
+    return process.env.FIGMA_ACCESS_TOKEN;
   }
 
   private async figmaRequest(path: string): Promise<unknown> {

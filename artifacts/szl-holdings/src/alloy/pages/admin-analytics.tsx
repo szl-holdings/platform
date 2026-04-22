@@ -3,31 +3,19 @@ import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
 import {
   Activity,
-  AlertTriangle,
   BarChart2,
-  ChevronRight,
   Clock,
   DollarSign,
   Radio,
-  RefreshCw,
   Shield,
-  TrendingUp,
   Users,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
-  Bar,
-  BarChart,
   Cell,
-  Line,
-  LineChart,
   Pie,
   PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
 } from 'recharts';
 
 interface TenantSummary {
@@ -118,7 +106,7 @@ function BudgetBar({ used, total }: { used: number; total: number }) {
   );
 }
 
-function TenantRow({ tenant }: { tenant: TenantSummary }) {
+function _TenantRow({ tenant }: { tenant: TenantSummary }) {
   const budgetPct = Math.min(100, Math.round((tenant.costUsd / tenant.budgetUsd) * 100));
   const budgetColor = budgetPct >= 100 ? '#ef4444' : budgetPct >= 80 ? '#f59e0b' : '#10b981';
 

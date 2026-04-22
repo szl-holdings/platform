@@ -1,6 +1,6 @@
-import { existsSync, readFileSync } from 'fs';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -8,8 +8,7 @@ const manifestPath = resolve(root, 'src/data/slides-manifest.json');
 
 let errors = 0;
 
-function fail(msg) {
-  console.error('[validate-slides] FAIL:', msg);
+function fail(_msg) {
   errors++;
 }
 
@@ -22,7 +21,7 @@ let manifest;
 try {
   manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
 } catch (e) {
-  fail('slides-manifest.json is invalid JSON: ' + e.message);
+  fail(`slides-manifest.json is invalid JSON: ${e.message}`);
   process.exit(1);
 }
 
@@ -61,9 +60,7 @@ for (let i = 0; i < sorted.length; i++) {
 }
 
 if (errors === 0) {
-  console.log(`[validate-slides] OK — ${manifest.length} slides validated`);
   process.exit(0);
 } else {
-  console.error(`[validate-slides] ${errors} error(s) found`);
   process.exit(1);
 }

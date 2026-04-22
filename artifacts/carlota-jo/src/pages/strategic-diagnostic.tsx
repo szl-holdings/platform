@@ -149,7 +149,7 @@ export default function StrategicDiagnostic() {
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
       setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const BASE_URL_API = import.meta.env.BASE_URL + 'api';
+  const BASE_URL_API = `${import.meta.env.BASE_URL}api`;
 
   useEffect(() => {
     fetch(`${BASE_URL_API}/carlota/diagnostics`, { credentials: 'include' })
@@ -264,8 +264,7 @@ Return ONLY valid JSON, no markdown, no explanation.`;
       const parsed = JSON.parse(fullContent) as DiagnosticReport;
       setReport(parsed);
       void persistDiagnostic(parsed);
-    } catch (err) {
-      console.error('Diagnostic failed:', err);
+    } catch (_err) {
       const fallback: DiagnosticReport = {
         executiveSummary: `${form.companyName} is positioned in a competitive market with meaningful differentiation opportunities. The diagnostic reveals a balanced risk profile with clear growth vectors in the primary segment.`,
         marketPosition: {

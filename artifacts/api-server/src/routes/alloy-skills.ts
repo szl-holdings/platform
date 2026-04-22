@@ -360,7 +360,7 @@ router.delete(
 
 // ─── Skill Chain Management ────────────────────────────────────────────────────
 
-router.get('/alloy/skills/chains/list', authMiddleware(), async (req, res) => {
+router.get('/alloy/skills/chains/list', authMiddleware(), async (_req, res) => {
   try {
     const { skillManager } = await import('@szl-holdings/ai-engine');
     sendSuccess(res, skillManager.listChains());
@@ -702,8 +702,8 @@ router.get(
   async (req, res) => {
     try {
       const agentId = req.params.agentId as string;
-      const windowDays = parseInt(String(req.query.windowDays ?? '30'));
-      if (isNaN(windowDays) || windowDays < 1 || windowDays > 365) {
+      const windowDays = parseInt(String(req.query.windowDays ?? '30'), 10);
+      if (Number.isNaN(windowDays) || windowDays < 1 || windowDays > 365) {
         return sendBadRequest(res, 'windowDays must be between 1 and 365');
       }
 
@@ -725,7 +725,7 @@ router.get(
   async (req, res) => {
     try {
       const agentId = req.params.agentId as string;
-      const windowDays = parseInt(String(req.query.windowDays ?? '30'));
+      const windowDays = parseInt(String(req.query.windowDays ?? '30'), 10);
 
       const { scoringEngine } = await import('@szl-holdings/ai-engine');
       await scoringEngine.loadFromDb(agentId);
@@ -745,7 +745,7 @@ router.get(
   async (req, res) => {
     try {
       const agentId = req.params.agentId as string;
-      const windowDays = parseInt(String(req.query.windowDays ?? '30'));
+      const windowDays = parseInt(String(req.query.windowDays ?? '30'), 10);
 
       const { scoringEngine } = await import('@szl-holdings/ai-engine');
       await scoringEngine.loadFromDb(agentId);
@@ -765,8 +765,8 @@ router.get(
   async (req, res) => {
     try {
       const agentId = req.params.agentId as string;
-      const shortWindow = parseInt(String(req.query.shortWindow ?? '7'));
-      const longWindow = parseInt(String(req.query.longWindow ?? '30'));
+      const shortWindow = parseInt(String(req.query.shortWindow ?? '7'), 10);
+      const longWindow = parseInt(String(req.query.longWindow ?? '30'), 10);
 
       const { scoringEngine } = await import('@szl-holdings/ai-engine');
       await scoringEngine.loadFromDb(agentId);
@@ -786,7 +786,7 @@ router.get(
   async (req, res) => {
     try {
       const agentId = req.params.agentId as string;
-      const windowDays = parseInt(String(req.query.windowDays ?? '30'));
+      const windowDays = parseInt(String(req.query.windowDays ?? '30'), 10);
 
       const { scoringEngine } = await import('@szl-holdings/ai-engine');
       await scoringEngine.loadFromDb(agentId);
@@ -815,7 +815,7 @@ router.post(
         return sendForbidden(res, "You do not have access to this tenant's data");
       }
 
-      const windowDays = parseInt(String(req.body.windowDays ?? '30'));
+      const windowDays = parseInt(String(req.body.windowDays ?? '30'), 10);
 
       const { scoringEngine } = await import('@szl-holdings/ai-engine');
       await scoringEngine.loadFromDb(agentId);
@@ -887,7 +887,7 @@ router.get(
       const agentId = req.params.agentId as string;
       const tenantId = req.query.tenantId as string | undefined;
       const user = req.user as AuthenticatedUser | undefined;
-      const windowDays = parseInt(String(req.query.windowDays ?? '30'));
+      const windowDays = parseInt(String(req.query.windowDays ?? '30'), 10);
 
       if (tenantId && !requireTenantAccessOrAdmin(user, tenantId)) {
         return sendForbidden(res, "You do not have access to this tenant's data");

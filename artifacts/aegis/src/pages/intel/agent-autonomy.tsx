@@ -34,7 +34,7 @@ import { useState } from 'react';
 import { useLocation } from 'wouter';
 
 const BASE = import.meta.env.BASE_URL ?? '/aegis/';
-const API = BASE.replace(/\/$/, '') + '/../api-server/api';
+const API = `${BASE.replace(/\/$/, '')}/../api-server/api`;
 
 async function apiFetch(path: string, opts?: RequestInit) {
   const r = await fetch(`${API}${path}`, { credentials: 'include', ...opts });
@@ -169,7 +169,7 @@ function Sparkline({
     const y = h - ((v - min) / range) * (h - 4) - 2;
     return `${x},${y}`;
   });
-  const lastPt = pts[pts.length - 1]!.split(',');
+  const lastPt = pts[pts.length - 1]?.split(',');
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="overflow-visible">
       <polyline
@@ -486,7 +486,7 @@ function A2AGraph({
             ))}
           </defs>
 
-          {edges.map((edge, i) => {
+          {edges.map((edge, _i) => {
             const from = nodeMap[edge.from];
             const to = nodeMap[edge.to];
             if (!from || !to || from.id === to.id) return null;
@@ -554,7 +554,7 @@ function A2AGraph({
                 fill="rgba(255,255,255,0.45)"
                 fontFamily="sans-serif"
               >
-                {node.label.length > 14 ? node.label.slice(0, 13) + '…' : node.label}
+                {node.label.length > 14 ? `${node.label.slice(0, 13)}…` : node.label}
               </text>
             </g>
           ))}
@@ -854,7 +854,7 @@ function SelfImprovementFeed({
           </div>
         ) : (
           <div className="divide-y divide-zinc-800/60 max-h-80 overflow-y-auto">
-            {events.map((event, i) => {
+            {events.map((event, _i) => {
               const cfg = EVENT_TYPE_CONFIG[event.eventType] ?? EVENT_TYPE_CONFIG.strategy_adjusted;
               const Icon = cfg.icon;
               const sevBg =
@@ -1334,8 +1334,7 @@ export default function AgentAutonomyDashboard() {
       <div className="p-6 space-y-6">
         {/* ─── Overview ─── */}
         {tab === 'overview' && (
-          <>
-            {overviewLoading ? (
+          overviewLoading ? (
               <div className="flex items-center justify-center h-40 text-zinc-500">Loading...</div>
             ) : (
               <>
@@ -1512,8 +1511,7 @@ export default function AgentAutonomyDashboard() {
                   </div>
                 </div>
               </>
-            )}
-          </>
+            )
         )}
 
         {/* ─── Live Agents ─── */}

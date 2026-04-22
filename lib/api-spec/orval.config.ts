@@ -1,5 +1,5 @@
 import { defineConfig, type InputTransformerFn } from 'orval';
-import path from 'path';
+import path from 'node:path';
 
 const root = path.resolve(__dirname, '..', '..');
 const apiClientReactSrc = path.resolve(root, 'lib', 'api-client-react', 'src');
@@ -27,7 +27,7 @@ export default defineConfig({
       client: 'react-query',
       mode: 'split',
       baseUrl: '/api',
-      clean: true,
+      clean: false,
       prettier: true,
       override: {
         fetch: {
@@ -53,7 +53,7 @@ export default defineConfig({
       target: 'generated',
       schemas: { path: 'generated/types', type: 'typescript' },
       mode: 'split',
-      clean: true,
+      clean: false,
       prettier: true,
       override: {
         zod: {

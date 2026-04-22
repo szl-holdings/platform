@@ -45,12 +45,10 @@ export function usePushNotificationsBase(options: UsePushNotificationsBaseOption
           if (!mounted) return;
 
           if (token && onTokenAcquiredRef.current) {
-            await onTokenAcquiredRef.current(token).catch((err) => {
-              console.warn('[Push] onTokenAcquired failed:', err);
+            await onTokenAcquiredRef.current(token).catch((_err) => {
             });
           }
-        } catch (err) {
-          console.warn('[Push] Token registration failed; listeners will still attach:', err);
+        } catch (_err) {
         }
 
         if (!mounted) return;
@@ -72,5 +70,5 @@ export function usePushNotificationsBase(options: UsePushNotificationsBaseOption
       notificationListener?.remove();
       responseListener?.remove();
     };
-  }, [enabled]); // Only re-run when enabled changes, not on callback identity changes
+  }, [enabled, skipAutoRegistration]); // Only re-run when enabled changes, not on callback identity changes
 }

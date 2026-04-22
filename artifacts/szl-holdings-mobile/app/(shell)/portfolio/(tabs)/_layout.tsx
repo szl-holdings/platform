@@ -9,7 +9,7 @@ import { isLiquidGlassAvailable } from 'expo-glass-effect';
 import { router, Tabs } from 'expo-router';
 import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs';
 import { SymbolView } from 'expo-symbols';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';
 import { WorkspaceTrigger } from '@/components/WorkspaceSwitcher';
 import { useWorkspace } from '@/context/WorkspaceContext';

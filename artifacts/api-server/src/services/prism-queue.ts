@@ -1,6 +1,6 @@
 import { db, pcBackgroundJobsTable, pcDeadLetterEventsTable } from '@szl-holdings/db';
 import { forgeRuntime } from '@szl-holdings/forge-runtime';
-import { and, eq, lte, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { logger } from '../lib/logger';
 
 export const PRISM_JOB_TYPES = {

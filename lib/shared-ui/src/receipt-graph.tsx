@@ -1,11 +1,10 @@
 import type {
-  AuditPacket,
   ExecutiveTrustSummary,
   ReceiptSummary,
   TrustReceipt,
   TrustReceiptGraph,
 } from '@szl-holdings/receipt-graph';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 function confidenceColor(score: number): string {
   if (score >= 0.8) return 'text-emerald-600 dark:text-emerald-400';

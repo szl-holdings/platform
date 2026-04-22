@@ -246,7 +246,7 @@ class InnerMonologueEngine {
     }
 
     const confidenceSpread =
-      sorted.length > 1 ? sorted[0]!.confidence - sorted[sorted.length - 1]!.confidence : 0;
+      sorted.length > 1 ? sorted[0]?.confidence - sorted[sorted.length - 1]?.confidence : 0;
 
     let synthesis: string;
     if (confidenceSpread < 15) {
@@ -353,7 +353,7 @@ class InnerMonologueEngine {
     return chain;
   }
 
-  simulatePerspectives(topic: string, context: string): PerspectiveSimulation {
+  simulatePerspectives(topic: string, _context: string): PerspectiveSimulation {
     const perspectives: PerspectiveSimulation['perspectives'] = [
       {
         viewpoint: 'user',

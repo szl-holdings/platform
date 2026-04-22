@@ -1,5 +1,4 @@
 import type {
-  AnalyticsGranularity,
   CalculationType,
   FilterCondition,
   MetricDefinitionInput,

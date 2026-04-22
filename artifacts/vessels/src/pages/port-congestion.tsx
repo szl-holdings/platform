@@ -1,14 +1,10 @@
-import { Badge } from '@szl-holdings/shared-ui/ui/badge';
-import { cn } from '@szl-holdings/shared-ui/utils';
+
 import {
   Activity,
   AlertTriangle,
   Anchor,
-  ArrowRight,
   BarChart3,
   Clock,
-  Filter,
-  MapPin,
   RefreshCw,
   Ship,
   TrendingDown,
@@ -315,7 +311,7 @@ function CongestionBar({ value, color }: { value: number; color: string }) {
   );
 }
 
-function BerthAvailability({ berths }: { berths: BerthSlot[] }) {
+function _BerthAvailability({ berths }: { berths: BerthSlot[] }) {
   return (
     <div className="flex items-center gap-1">
       {berths.map((b) => {
@@ -335,10 +331,10 @@ function BerthAvailability({ berths }: { berths: BerthSlot[] }) {
 
 export default function PortCongestionPage() {
   const [selectedPort, setSelectedPort] = useState<PortData | null>(PORTS[0]);
-  const [filterRegion, setFilterRegion] = useState('all');
+  const [filterRegion, _setFilterRegion] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  const regions = ['all', ...Array.from(new Set(PORTS.map((p) => p.region)))];
+  const _regions = ['all', ...Array.from(new Set(PORTS.map((p) => p.region)))];
 
   const filtered = PORTS.filter((p) => {
     const matchRegion = filterRegion === 'all' || p.region === filterRegion;

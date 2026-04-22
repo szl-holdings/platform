@@ -17,10 +17,8 @@ import {
 } from '@szl-holdings/db';
 import { count, eq } from 'drizzle-orm';
 import { logger } from '../lib/logger';
-import type { EvidenceItem } from './decision-adversarial-validation';
-import { runAdversarialValidation } from './decision-adversarial-validation';
-import type { DecisionInput } from './decision-policy-engine';
-import { evaluateDecisionPolicy } from './decision-policy-engine';
+import { type EvidenceItem, runAdversarialValidation } from './decision-adversarial-validation';
+import { type DecisionInput, evaluateDecisionPolicy } from './decision-policy-engine';
 
 const DEMO_WORKSPACE = 'ws-demo-001';
 

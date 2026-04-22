@@ -122,7 +122,7 @@ router.get('/a2a/agents', async (_req: Request, res: Response) => {
 });
 
 router.get('/a2a/agents/:agentId', async (req: Request, res: Response) => {
-  const agentId = req.params['agentId'] as string;
+  const agentId = req.params.agentId as string;
   try {
     const card = await a2aRegistry.getAgentCard(agentId);
     if (!card) {
@@ -250,7 +250,7 @@ router.post(
 );
 
 router.get('/a2a/delegate/:taskId', async (req: Request, res: Response) => {
-  const taskId = req.params['taskId'] as string;
+  const taskId = req.params.taskId as string;
   try {
     const task = await getDelegationTask(taskId);
     if (!task) {
@@ -270,7 +270,7 @@ router.get('/a2a/delegate', validateQuery(listQuerySchema), async (req: Request,
     const tasks = await getDelegationHistory({
       requestingAgentId,
       targetAgentId,
-      limit: limit ? Math.min(parseInt(limit), 200) : 50,
+      limit: limit ? Math.min(parseInt(limit, 10), 200) : 50,
     });
     sendSuccess(res, { tasks, count: tasks.length });
   } catch (err) {

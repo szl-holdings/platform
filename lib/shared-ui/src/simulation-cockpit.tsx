@@ -1,5 +1,4 @@
-import type React from 'react';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 export interface ScenarioRange {
   best: number;
@@ -96,7 +95,7 @@ const TEXT = {
   secondary: 'rgba(255,255,255,0.55)',
   tertiary: 'rgba(255,255,255,0.28)',
 };
-const BORDER = { subtle: 'rgba(255,255,255,0.06)', muted: 'rgba(255,255,255,0.08)' };
+const _BORDER = { subtle: 'rgba(255,255,255,0.06)', muted: 'rgba(255,255,255,0.08)' };
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -379,7 +378,7 @@ export function SimulationCockpit({
     const base = scenarios.find((s) => s.tag === 'baseline') ?? scenarios[0];
     return scenarios.map((s) => ({
       ...s,
-      delta: base && base.id !== s.id ? s.primaryMetric.base - base!.primaryMetric.base : 0,
+      delta: base && base.id !== s.id ? s.primaryMetric.base - base?.primaryMetric.base : 0,
     }));
   }, [scenarios]);
 
@@ -575,7 +574,7 @@ export function SimulationCockpit({
                   {activeScenario.costOfWaiting.perDay !== undefined && (
                     <div>
                       <div style={{ fontSize: 14, fontWeight: 700, color: '#c8953c' }}>
-                        {FORMAT_FNS.currency!(
+                        {FORMAT_FNS.currency?.(
                           activeScenario.costOfWaiting.perDay,
                           activeScenario.costOfWaiting.unit ?? '$',
                         )}
@@ -586,7 +585,7 @@ export function SimulationCockpit({
                   {activeScenario.costOfWaiting.perWeek !== undefined && (
                     <div>
                       <div style={{ fontSize: 14, fontWeight: 700, color: '#c8953c' }}>
-                        {FORMAT_FNS.currency!(
+                        {FORMAT_FNS.currency?.(
                           activeScenario.costOfWaiting.perWeek,
                           activeScenario.costOfWaiting.unit ?? '$',
                         )}
@@ -628,8 +627,7 @@ export function SimulationCockpit({
         )}
 
         {activeTab === 'sensitivity' && (
-          <>
-            {activeScenario?.sensitivityDrivers && activeScenario.sensitivityDrivers.length > 0 ? (
+          activeScenario?.sensitivityDrivers && activeScenario.sensitivityDrivers.length > 0 ? (
               <div>
                 <SectionLabel>
                   Key Sensitivity Drivers (impact on {primaryMetricLabel})
@@ -650,8 +648,7 @@ export function SimulationCockpit({
               >
                 No sensitivity data available for this scenario
               </div>
-            )}
-          </>
+            )
         )}
 
         {activeTab === 'comparison' && (

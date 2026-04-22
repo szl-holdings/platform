@@ -1,7 +1,7 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { pool } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import { createHmac, timingSafeEqual } from 'crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -274,7 +274,7 @@ router.get(
         `SELECT priority, COUNT(*) as count FROM alloy_email_triage WHERE status = 'pending' GROUP BY priority`,
       );
       const priorityCounts: Record<string, number> = {};
-      for (const row of counts.rows) priorityCounts[row.priority] = parseInt(row.count);
+      for (const row of counts.rows) priorityCounts[row.priority] = parseInt(row.count, 10);
 
       sendSuccess(res, { emails: result.rows, total: result.rowCount, priorityCounts });
     } catch (err) {
@@ -518,10 +518,10 @@ router.get('/alloy/email/stats', authMiddleware(), async (_req: Request, res: Re
       ),
     ]);
     sendSuccess(res, {
-      total: parseInt(totalResult.rows[0]?.total ?? 0),
+      total: parseInt(totalResult.rows[0]?.total ?? 0, 10),
       avgPriorityScore: Math.round(parseFloat(totalResult.rows[0]?.avg_score ?? 0)),
-      byStatus: Object.fromEntries(byStatus.rows.map((r) => [r.status, parseInt(r.count)])),
-      byCategory: Object.fromEntries(byCategory.rows.map((r) => [r.category, parseInt(r.count)])),
+      byStatus: Object.fromEntries(byStatus.rows.map((r) => [r.status, parseInt(r.count, 10)])),
+      byCategory: Object.fromEntries(byCategory.rows.map((r) => [r.category, parseInt(r.count, 10)])),
     });
   } catch (err) {
     handleRouteError(res, err, 'Failed to get email stats');

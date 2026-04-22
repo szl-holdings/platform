@@ -124,7 +124,7 @@ class NimEndpointManager {
     if (filters.gpuRequired !== undefined)
       results = results.filter((e) => e.gpuRequired === filters.gpuRequired);
     if (filters.tags?.length)
-      results = results.filter((e) => filters.tags!.some((t) => e.tags.includes(t)));
+      results = results.filter((e) => filters.tags?.some((t) => e.tags.includes(t)));
     return results;
   }
 

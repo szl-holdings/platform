@@ -6,14 +6,14 @@
  */
 
 import { alloyOutcomeLearning, db, evalRuns } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { desc, sql } from 'drizzle-orm';
 import { type EvalReport, runEvals } from '../evals/run-evals.js';
 
 const logger = {
-  warn: (obj: Record<string, unknown>, msg: string) => console.warn('[eval-pipeline]', msg, obj),
-  error: (obj: Record<string, unknown>, msg: string) => console.error('[eval-pipeline]', msg, obj),
-  info: (msg: string) => console.log('[eval-pipeline]', msg),
+  warn: (_obj: Record<string, unknown>, _msg: string) => {},
+  error: (_obj: Record<string, unknown>, _msg: string) => {},
+  info: (_msg: string) => {},
 };
 
 export interface AgentCalibrationSummary {

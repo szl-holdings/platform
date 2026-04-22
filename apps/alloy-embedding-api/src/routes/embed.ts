@@ -1,10 +1,9 @@
-import { Router, type IRouter, type RequestHandler } from "express";
-import type { Request, Response } from "express";
+import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
 import { EmbedRequestSchema } from "@workspace/aef-contracts";
 import { defaultLedgerStore } from "@workspace/aef-evidence-ledger";
 import { PolicyEngine } from "@workspace/aef-policy-guard";
 import { embedTexts } from "@workspace/alloy-embed-worker";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { logger } from "../middleware/logger.js";
 import { getProfile } from "../profiles/default.js";
 import { errorBudgetCounter } from "../middleware/prometheus.js";
@@ -52,8 +51,8 @@ embedRouter.post("/v1/embed", (async (req: Request, res: Response) => {
   let vectors: number[][];
   const embedStart = Date.now();
 
-  const substrateUrl = process.env["SUBSTRATE_EMBED_URL"];
-  const useDevHash = !substrateUrl && process.env["NODE_ENV"] !== "production";
+  const substrateUrl = process.env.SUBSTRATE_EMBED_URL;
+  const useDevHash = !substrateUrl && process.env.NODE_ENV !== "production";
   const primaryBackend = useDevHash ? "dev-hash" : "cpu-local";
 
   try {
@@ -64,7 +63,7 @@ embedRouter.post("/v1/embed", (async (req: Request, res: Response) => {
       normalize: body.normalize,
     });
   } catch (primaryErr) {
-    if (!useDevHash && process.env["NODE_ENV"] !== "production") {
+    if (!useDevHash && process.env.NODE_ENV !== "production") {
       logger.warn({ traceId, primaryBackend, error: String(primaryErr) }, "Primary embed backend failed; falling back to dev-hash");
       try {
         vectors = await embedTexts(body.texts, {
@@ -91,7 +90,7 @@ embedRouter.post("/v1/embed", (async (req: Request, res: Response) => {
   const completedAt = new Date().toISOString();
   const dimensions = vectors[0]?.length ?? 0;
 
-  const evidenceEntries = body.texts.map((text, i) => {
+  const evidenceEntries = body.texts.map((_text, i) => {
     const entryId = randomUUID();
     const entry = {
       entryId,

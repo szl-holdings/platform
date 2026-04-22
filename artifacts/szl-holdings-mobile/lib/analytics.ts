@@ -124,7 +124,6 @@ export function trackEvent(event: string, properties?: Record<string, unknown>):
   }
 
   if (__DEV__) {
-    console.debug(`[analytics] ${event}`, properties);
   }
 }
 

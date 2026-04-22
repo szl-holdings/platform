@@ -1,5 +1,5 @@
 import { EcosystemNav } from '@szl-holdings/shared-ui/ecosystem-nav';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ACCENT,
   AGENT_RUN_ATTRS,
@@ -1026,13 +1026,13 @@ export function RunConsole() {
                       <span
                         style={{
                           fontSize: 11,
-                          color: DOMAIN_COLORS[run.domain] ?? DOMAIN_COLORS['default'],
-                          background: `${DOMAIN_COLORS[run.domain] ?? DOMAIN_COLORS['default']}15`,
+                          color: DOMAIN_COLORS[run.domain] ?? DOMAIN_COLORS.default,
+                          background: `${DOMAIN_COLORS[run.domain] ?? DOMAIN_COLORS.default}15`,
                           padding: '2px 8px',
                           borderRadius: 4,
                         }}
                       >
-                        {DOMAIN_ICONS[run.domain] ?? DOMAIN_ICONS['default']} {run.domain}
+                        {DOMAIN_ICONS[run.domain] ?? DOMAIN_ICONS.default} {run.domain}
                       </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center' }}>

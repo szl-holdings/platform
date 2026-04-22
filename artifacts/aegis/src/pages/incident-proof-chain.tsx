@@ -7,12 +7,9 @@ import {
   AlertTriangle,
   CheckCircle,
   ChevronDown,
-  Clock,
   FileText,
   Link2,
   RefreshCw,
-  Shield,
-  Target,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearch } from 'wouter';

@@ -288,7 +288,7 @@ export function FeaturedVentures() {
         <div>
           {featured
             .filter((f) => f.weight === 'secondary')
-            .map((v, i) => (
+            .map((v, _i) => (
               <m.a
                 key={v.name}
                 href={v.href}

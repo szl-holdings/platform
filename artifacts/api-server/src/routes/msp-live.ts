@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import { type IRouter, type RequestHandler, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { LRUCache } from 'lru-cache';
-import os from 'os';
+import os from 'node:os';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { redisGet, redisSet } from '../lib/redis-client.js';
 import { listQuerySchema, validateQuery } from '../lib/validation.js';

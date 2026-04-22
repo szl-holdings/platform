@@ -1,6 +1,5 @@
 import { createLogger } from './logger.js';
-import type { PromptEvalMetadata, PromptVersion } from './registry.js';
-import { promptRegistry } from './registry.js';
+import { type PromptEvalMetadata, promptRegistry } from './registry.js';
 
 const logger = createLogger('prompt-registry:evaluator');
 

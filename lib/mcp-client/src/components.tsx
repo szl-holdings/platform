@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMcpStore } from './McpStoreProvider';
 import type { McpConnectionState, McpTool, McpToolResult } from './types';
 
-function cn(...classes: (string | boolean | undefined | null)[]): string {
+function _cn(...classes: (string | boolean | undefined | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
@@ -156,7 +156,6 @@ export function McpToolPalette({
             </span>
           </div>
           <input
-            autoFocus
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);

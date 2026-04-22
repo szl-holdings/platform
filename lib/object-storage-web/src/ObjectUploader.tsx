@@ -1,8 +1,6 @@
-import type { UploadResult, UppyFile } from '@uppy/core';
-import Uppy from '@uppy/core';
+import Uppy, { type UploadResult, type UppyFile } from '@uppy/core';
 import DashboardModal from '@uppy/react/dashboard-modal';
-import type { ReactNode } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import '@uppy/core/css/style.min.css';
 import '@uppy/dashboard/css/style.min.css';
 import AwsS3 from '@uppy/aws-s3';

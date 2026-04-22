@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { GitBranch, Sparkles, Bug, Zap, Shield, RefreshCw } from "lucide-react";
+import { GitBranch, Sparkles, Bug, Zap, Shield, } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 

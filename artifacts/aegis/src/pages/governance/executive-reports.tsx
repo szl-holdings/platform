@@ -10,7 +10,6 @@ import {
   FileText,
   Info,
   Shield,
-  TrendingDown,
   TrendingUp,
 } from 'lucide-react';
 import { useState } from 'react';

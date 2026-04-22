@@ -74,7 +74,7 @@ export class ConnectorHub {
 
         if (query?.tags && query.tags.length > 0) {
           capabilities = capabilities.filter((cap) =>
-            cap.tags?.some((t) => query.tags!.includes(t)),
+            cap.tags?.some((t) => query.tags?.includes(t)),
           );
         }
 

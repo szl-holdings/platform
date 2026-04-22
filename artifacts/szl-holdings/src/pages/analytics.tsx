@@ -1,5 +1,4 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
-import { m } from 'framer-motion';
 import {
   Activity,
   ArrowLeft,
@@ -104,7 +103,7 @@ const CustomTooltip = ({
   payload?: Array<{ value: number; name: string; color: string }>;
   label?: string;
 }) => {
-  if (active && payload && payload.length) {
+  if (active && payload?.length) {
     return (
       <div className="bg-card border border-border rounded-lg px-3 py-2 text-xs shadow-lg">
         <p className="font-semibold text-foreground mb-1">{label}</p>

@@ -6,16 +6,14 @@ import {
   exportJobsTable,
   firestormFindingsTable,
   invoicesTable,
-  lyteIncidentsTable,
   lyteSignalsTable,
   meteringEventsTable,
   mspTicketsTable,
   terraDealsTable,
   usersTable,
-  vesselsFleetsTable,
   vesselsTable,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { and, desc, eq, gte, ilike, lte, or, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
@@ -26,17 +24,7 @@ import {
   sendNotFound,
   sendSuccess,
 } from '../lib/api-response';
-import type { ExportColumn } from '../lib/export-service';
-import {
-  generateCsv,
-  generatePdf,
-  getExportBuffer,
-  getExportByToken,
-  getExportJobStatus,
-  listExportHistory,
-  runExport,
-  storeExportBuffer,
-} from '../lib/export-service';
+import { type ExportColumn, generateCsv, generatePdf, getExportBuffer, getExportByToken, getExportJobStatus, listExportHistory, runExport, storeExportBuffer } from '../lib/export-service';
 import { isFlagEnabled } from '../lib/platform-flags';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
@@ -1650,7 +1638,7 @@ router.get(
           break;
         }
         case 'usage_metering': {
-          const numericOrgId = orgId && !isNaN(parseInt(orgId)) ? parseInt(orgId) : undefined;
+          const numericOrgId = orgId && !Number.isNaN(parseInt(orgId, 10)) ? parseInt(orgId, 10) : undefined;
           const w = and(
             from ? gte(meteringEventsTable.occurredAt, from) : undefined,
             to ? lte(meteringEventsTable.occurredAt, to) : undefined,
@@ -1672,7 +1660,7 @@ router.get(
           break;
         }
         case 'revenue_events': {
-          const numericOrgId = orgId && !isNaN(parseInt(orgId)) ? parseInt(orgId) : undefined;
+          const numericOrgId = orgId && !Number.isNaN(parseInt(orgId, 10)) ? parseInt(orgId, 10) : undefined;
           const w = and(
             from ? gte(invoicesTable.createdAt, from) : undefined,
             to ? lte(invoicesTable.createdAt, to) : undefined,
@@ -1724,8 +1712,8 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const page = Math.max(1, parseInt((req.query['page'] as string) ?? '1', 10));
-      const limit = Math.min(parseInt((req.query['limit'] as string) ?? '50', 10), 200);
+      const page = Math.max(1, parseInt((req.query.page as string) ?? '1', 10));
+      const limit = Math.min(parseInt((req.query.limit as string) ?? '50', 10), 200);
       const offset = (page - 1) * limit;
 
       const userRoles = ((req as Request & { user?: { roles?: string[] } }).user?.roles ??

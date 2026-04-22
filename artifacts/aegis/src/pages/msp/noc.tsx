@@ -9,15 +9,8 @@ import {
   AlertTriangle,
   Bell,
   CheckCircle2,
-  Clock,
-  Cloud,
-  Database,
   Eye,
-  Mail,
-  RefreshCw,
   Server,
-  Shield,
-  Wifi,
   XCircle,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';

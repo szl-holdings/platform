@@ -140,7 +140,7 @@ async function assertMatterAccess(
   orgId: number,
   res: Response,
 ): Promise<boolean> {
-  if (!matterId || isNaN(matterId)) {
+  if (!matterId || Number.isNaN(matterId)) {
     sendBadRequest(res, 'Invalid or missing matter ID');
     return false;
   }
@@ -218,7 +218,7 @@ router.get(
 router.get('/court/dockets/:id', authMiddleware(), courtListenerLimiter, async (req, res) => {
   try {
     const docketId = parseInt(String(req.params.id as string), 10);
-    if (isNaN(docketId)) return sendBadRequest(res, 'Invalid docket ID');
+    if (Number.isNaN(docketId)) return sendBadRequest(res, 'Invalid docket ID');
     const result = await courtListener.getDocket(docketId);
     sendSuccess(res, result);
   } catch (err) {
@@ -276,7 +276,7 @@ router.post(
     try {
       if (!hasAttorneyRole(req)) return sendForbidden(res, 'Attorney role required');
       const matterId = parseInt(String(req.params.matterId as string), 10);
-      if (isNaN(matterId)) return sendBadRequest(res, 'Invalid matter ID');
+      if (Number.isNaN(matterId)) return sendBadRequest(res, 'Invalid matter ID');
       const { docketEntryId: docketId } = req.body as z.infer<typeof docketLinkSchema>;
       const { courtId, caseNumber } = req.body as { courtId?: string; caseNumber?: string };
       if (!docketId) return sendBadRequest(res, 'docketEntryId is required');
@@ -341,7 +341,7 @@ router.get('/court/matters/:matterId/linked-dockets', authMiddleware(), async (r
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, 'Attorney role required');
     const matterId = parseInt(String(req.params.matterId as string), 10);
-    if (isNaN(matterId)) return sendBadRequest(res, 'Invalid matter ID');
+    if (Number.isNaN(matterId)) return sendBadRequest(res, 'Invalid matter ID');
     const orgId = getOrgId(req);
     if (!(await assertMatterAccess(matterId, orgId, res))) return;
     const events = await db
@@ -417,7 +417,7 @@ router.get('/privilege/log/:matterId/production', authMiddleware(), async (req, 
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, 'Attorney role required');
     const matterId = parseInt(String(req.params.matterId as string), 10);
-    if (isNaN(matterId)) return sendBadRequest(res, 'Invalid matter ID');
+    if (Number.isNaN(matterId)) return sendBadRequest(res, 'Invalid matter ID');
     const orgId = getOrgId(req);
     if (!(await assertMatterAccess(matterId, orgId, res))) return;
     const result = await privilegeEngine.generatePrivilegeLogForProduction(matterId, orgId);
@@ -559,7 +559,7 @@ router.post(
       if (!hasAttorneyRole(req)) return sendForbidden(res, 'Attorney role required');
 
       const tagId = parseInt(String(req.params.tagId as string), 10);
-      if (isNaN(tagId)) return sendBadRequest(res, 'Invalid tag ID');
+      if (Number.isNaN(tagId)) return sendBadRequest(res, 'Invalid tag ID');
       const { decision } = req.body as z.infer<typeof privilegeResolveSchema>;
 
       const orgId = getOrgId(req);
@@ -585,7 +585,7 @@ router.post(
       if (!hasAttorneyRole(req)) return sendForbidden(res, 'Attorney role required');
 
       const tagId = parseInt(String(req.params.tagId as string), 10);
-      if (isNaN(tagId)) return sendBadRequest(res, 'Invalid tag ID');
+      if (Number.isNaN(tagId)) return sendBadRequest(res, 'Invalid tag ID');
       const { reason } = req.body as z.infer<typeof privilegeClawbackSchema>;
 
       const orgId = getOrgId(req);
@@ -741,11 +741,11 @@ router.post(
       const orgId = getOrgId(req);
       const actorId = req.user?.id as number | undefined;
       const matterIdInt = parseInt(String(matterId), 10);
-      if (isNaN(matterIdInt)) return sendBadRequest(res, 'Invalid matterId');
+      if (Number.isNaN(matterIdInt)) return sendBadRequest(res, 'Invalid matterId');
       if (!(await assertMatterAccess(matterIdInt, orgId, res))) return;
 
       const approvalId = parseInt(draftId, 10);
-      if (isNaN(approvalId)) {
+      if (Number.isNaN(approvalId)) {
         return sendBadRequest(
           res,
           'draftId must be a persisted integer — demo/synthetic IDs cannot be advanced',

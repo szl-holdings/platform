@@ -178,7 +178,7 @@ function clusterHypotheses(hypotheses: Hypothesis[]): HypothesisCluster[] {
     const uniqueDomains = new Set(cluster.map((h) => h.domain));
     const avgConfidence = cluster.reduce((sum, h) => sum + h.confidence, 0) / cluster.length;
 
-    const themeWords = cluster[0]!.statement
+    const themeWords = cluster[0]?.statement
       .split(/\W+/)
       .filter((w) => w.length > 5)
       .slice(0, 3)
@@ -186,7 +186,7 @@ function clusterHypotheses(hypotheses: Hypothesis[]): HypothesisCluster[] {
 
     clusters.push({
       clusterId: `cluster-${clusters.length + 1}`,
-      theme: themeWords || cluster[0]!.statement.slice(0, 60),
+      theme: themeWords || cluster[0]?.statement.slice(0, 60),
       hypotheses: cluster.sort((a, b) => b.confidence - a.confidence),
       aggregateConfidence: Math.round(avgConfidence),
       agentConsensusCount: uniqueDomains.size,
@@ -264,8 +264,7 @@ export async function runMultiHypothesisReasoning(
       isAmbiguous: true,
       hypothesisCount: allHypotheses.length,
     };
-  } catch (err) {
-    console.warn('[multi-hypothesis] Failed:', err);
+  } catch (_err) {
     return null;
   }
 }

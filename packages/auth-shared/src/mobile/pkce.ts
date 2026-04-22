@@ -9,7 +9,7 @@
  * Reference: RFC 7636 §4.1–4.2
  */
 
-import { createHash, randomBytes } from 'crypto';
+import { createHash, randomBytes } from 'node:crypto';
 
 /** Length of the PKCE code verifier in bytes (43–128 chars after base64url). */
 const VERIFIER_BYTES = 32;

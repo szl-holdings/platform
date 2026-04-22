@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type {
   ATLASActor,
   ATLASBaseEvent,
@@ -50,12 +50,10 @@ class ATLASEventEmitter {
         try {
           const result = handler(event);
           if (result instanceof Promise) {
-            result.catch((err: unknown) => {
-              console.error(`[business-events] Handler error for ${event.eventClass}:`, err);
+            result.catch((_err: unknown) => {
             });
           }
-        } catch (err) {
-          console.error(`[business-events] Handler error for ${event.eventClass}:`, err);
+        } catch (_err) {
         }
       }
     }
@@ -64,12 +62,10 @@ class ATLASEventEmitter {
       try {
         const result = handler(event);
         if (result instanceof Promise) {
-          result.catch((err: unknown) => {
-            console.error('[business-events] Wildcard handler error:', err);
+          result.catch((_err: unknown) => {
           });
         }
-      } catch (err) {
-        console.error('[business-events] Wildcard handler error:', err);
+      } catch (_err) {
       }
     }
   }

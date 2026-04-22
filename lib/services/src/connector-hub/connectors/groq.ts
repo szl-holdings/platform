@@ -99,7 +99,7 @@ export class GroqConnector extends ToolConnector {
     capabilityId: string,
     params: Record<string, unknown>,
   ): Promise<unknown> {
-    const apiKey = process.env['GROQ_API_KEY'];
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) throw new Error('GROQ_API_KEY not configured');
 
     const baseUrl = 'https://api.groq.com/openai/v1';
@@ -114,10 +114,10 @@ export class GroqConnector extends ToolConnector {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            model: params['model'] ?? 'llama3-70b-8192',
-            messages: params['messages'],
-            max_tokens: params['maxTokens'] ?? 1024,
-            temperature: params['temperature'] ?? 0.7,
+            model: params.model ?? 'llama3-70b-8192',
+            messages: params.messages,
+            max_tokens: params.maxTokens ?? 1024,
+            temperature: params.temperature ?? 0.7,
           }),
         });
         if (!resp.ok) throw new Error(`Groq API error ${resp.status}: ${await resp.text()}`);
@@ -128,9 +128,9 @@ export class GroqConnector extends ToolConnector {
           method: 'POST',
           headers: { Authorization: `Bearer ${apiKey}` },
           body: JSON.stringify({
-            url: params['audioUrl'],
-            model: params['model'] ?? 'whisper-large-v3',
-            language: params['language'],
+            url: params.audioUrl,
+            model: params.model ?? 'whisper-large-v3',
+            language: params.language,
           }),
         });
         if (!resp.ok)
@@ -148,7 +148,7 @@ export class GroqConnector extends ToolConnector {
   }
 
   protected override async performHealthCheck(): Promise<void> {
-    const apiKey = process.env['GROQ_API_KEY'];
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) throw new Error('GROQ_API_KEY not configured');
     const resp = await fetch('https://api.groq.com/openai/v1/models', {
       headers: { Authorization: `Bearer ${apiKey}` },

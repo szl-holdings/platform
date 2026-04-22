@@ -123,7 +123,7 @@ describe('TraceRecordSchema', () => {
       },
     });
     expect(trace.grade?.score).toBe(0.87);
-    expect(trace.grade?.rubric['accuracy']).toBe(0.9);
+    expect(trace.grade?.rubric.accuracy).toBe(0.9);
   });
 });
 

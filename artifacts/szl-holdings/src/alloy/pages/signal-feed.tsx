@@ -1,9 +1,9 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
-import { apiFetch, isAuthError } from '@szl-holdings/shared-ui/api-fetch';
+import { apiFetch, } from '@szl-holdings/shared-ui/api-fetch';
 import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import { useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ChevronRight, Filter, Info, Radio, RefreshCw } from 'lucide-react';
+import { AlertTriangle, ChevronRight, Filter, Radio, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 
 interface Signal {

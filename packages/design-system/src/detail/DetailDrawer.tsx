@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { type InspectorTab, InspectorTabs } from '../layout/InspectorTabs.js';
 import { color } from '../tokens/index.js';
 import { cn } from '../utils.js';

@@ -128,7 +128,7 @@ export const RUNTIME_MODE_PROFILES: Record<RuntimeMode, RuntimeModeProfile> = {
 // ---------------------------------------------------------------------------
 
 export function resolveRuntimeMode(): RuntimeMode {
-  const explicit = process.env['RUNTIME_MODE'];
+  const explicit = process.env.RUNTIME_MODE;
   if (explicit) {
     if (!RUNTIME_MODES.includes(explicit as RuntimeMode)) {
       const msg =
@@ -140,23 +140,23 @@ export function resolveRuntimeMode(): RuntimeMode {
     return explicit as RuntimeMode;
   }
 
-  const appMode = (process.env['APP_MODE'] ?? '').toLowerCase().trim();
+  const appMode = (process.env.APP_MODE ?? '').toLowerCase().trim();
   if (appMode === 'demo') return 'demo';
   if (appMode === 'sandbox') return 'sandbox';
   if (appMode === 'production') return 'production';
 
-  const demoMode = process.env['DEMO_MODE'];
+  const demoMode = process.env.DEMO_MODE;
   if (demoMode === 'true' || demoMode === '1') {
     return 'demo';
   }
 
-  const enableDemoSeed = process.env['ENABLE_DEMO_SEED'];
+  const enableDemoSeed = process.env.ENABLE_DEMO_SEED;
   if (enableDemoSeed === 'true' || enableDemoSeed === '1') {
     return 'demo';
   }
 
-  const appEnv = process.env['APP_ENV'];
-  const nodeEnv = process.env['NODE_ENV'];
+  const appEnv = process.env.APP_ENV;
+  const nodeEnv = process.env.NODE_ENV;
 
   if (appEnv === 'demo') return 'demo';
   if (appEnv === 'sandbox') return 'sandbox';
@@ -227,25 +227,21 @@ export function areDemoLabelsRequired(): boolean {
 // ---------------------------------------------------------------------------
 
 export function getClientRuntimeMode(env: Record<string, string | undefined>): RuntimeMode {
-  const explicit = env['VITE_RUNTIME_MODE'] ?? env['VITE_APP_MODE'];
+  const explicit = env.VITE_RUNTIME_MODE ?? env.VITE_APP_MODE;
   if (explicit) {
     if (!RUNTIME_MODES.includes(explicit as RuntimeMode)) {
-      console.error(
-        `[runtime-mode] Invalid VITE_RUNTIME_MODE/VITE_APP_MODE value: "${explicit}". ` +
-          `Valid values: ${RUNTIME_MODES.join(', ')}. Falling back to derived mode.`,
-      );
     } else {
       return explicit as RuntimeMode;
     }
   }
 
-  const demoMode = env['VITE_DEMO_MODE'];
+  const demoMode = env.VITE_DEMO_MODE;
   if (demoMode === 'true' || demoMode === '1') {
     return 'demo';
   }
 
-  const appEnv = env['VITE_APP_ENV'];
-  const mode = env['MODE'];
+  const appEnv = env.VITE_APP_ENV;
+  const mode = env.MODE;
 
   if (appEnv === 'demo') return 'demo';
   if (appEnv === 'sandbox') return 'sandbox';
@@ -272,7 +268,7 @@ export interface ConnectorStatus {
 }
 
 export function resolveConnectorStatus(
-  connectorName: string,
+  _connectorName: string,
   credentialKeys: string[],
   envGetter: (key: string) => string | undefined = (k) => process.env[k],
 ): ConnectorStatus {

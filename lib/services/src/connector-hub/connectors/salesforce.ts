@@ -158,33 +158,33 @@ export class SalesforceConnector extends ToolConnector {
     const adapter = services.salesforce;
     switch (capabilityId) {
       case 'query_accounts':
-        return adapter.queryAccounts(params['limit'] ? Number(params['limit']) : 50);
+        return adapter.queryAccounts(params.limit ? Number(params.limit) : 50);
       case 'query_opportunities':
         return adapter.queryOpportunities(
-          params['limit'] ? Number(params['limit']) : 50,
-          params['stage'] ? String(params['stage']) : undefined,
+          params.limit ? Number(params.limit) : 50,
+          params.stage ? String(params.stage) : undefined,
         );
       case 'query_cases':
         return adapter.queryCases(
-          params['limit'] ? Number(params['limit']) : 50,
-          params['escalatedOnly'] === true,
+          params.limit ? Number(params.limit) : 50,
+          params.escalatedOnly === true,
         );
       case 'query_leads':
-        return adapter.queryLeads(params['limit'] ? Number(params['limit']) : 50);
+        return adapter.queryLeads(params.limit ? Number(params.limit) : 50);
       case 'get_pipeline_health':
         return adapter.getPipelineHealth();
       case 'execute_soql':
-        return adapter.executeSOQL(String(params['soql']));
+        return adapter.executeSOQL(String(params.soql));
       case 'ingest_signals':
         return adapter.ingestSignals();
       case 'create_case':
         return adapter.createCase({
-          subject: String(params['subject']),
-          ...(params['description'] ? { description: String(params['description']) } : {}),
-          ...(params['priority']
-            ? { priority: String(params['priority']) as 'High' | 'Medium' | 'Low' }
+          subject: String(params.subject),
+          ...(params.description ? { description: String(params.description) } : {}),
+          ...(params.priority
+            ? { priority: String(params.priority) as 'High' | 'Medium' | 'Low' }
             : {}),
-          ...(params['accountId'] ? { accountId: String(params['accountId']) } : {}),
+          ...(params.accountId ? { accountId: String(params.accountId) } : {}),
         });
       default:
         throw new Error(`Unknown capability: ${capabilityId}`);

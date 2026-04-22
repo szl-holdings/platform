@@ -1,18 +1,16 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { AnimatedCounter } from '@szl-holdings/shared-ui/animated-counter';
-import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent } from '@szl-holdings/shared-ui/ui/card';
 import { Progress } from '@szl-holdings/shared-ui/ui/progress';
 import {
   AlertTriangle,
-  BarChart3,
   Gauge,
   Minus,
   Shield,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 
 function getScoreColor(score: number) {

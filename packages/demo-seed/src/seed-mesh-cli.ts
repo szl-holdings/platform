@@ -29,11 +29,6 @@ import { seedSignalMesh } from './seed-signal-mesh.js';
 
 const startConnectors = !process.argv.includes('--no-connectors');
 
-console.log('╔═══════════════════════════════════════════════════╗');
-console.log('║  SZL Holdings — Signal Mesh Boot                 ║');
-console.log('╚═══════════════════════════════════════════════════╝');
-console.log('');
-
 let signalBusStore: PostgresSignalBusStore | undefined;
 let evidenceStore: PostgresEvidenceStore | undefined;
 let recommendationStore: PostgresRecommendationStore | undefined;
@@ -78,15 +73,12 @@ if (getEnv().DATABASE_URL) {
     defaultRecommendationStore.setBackend(recommendationStore);
     defaultEntityRegistry.setBackend(entityRegistry);
     dbReady = true;
-    console.log('[seed-mesh] Postgres-backed mesh stores wired in');
-  } catch (err) {
-    console.warn('[seed-mesh] Failed to wire Postgres stores — falling back to in-memory:', err);
+  } catch (_err) {
   }
 } else {
-  console.log('[seed-mesh] DATABASE_URL not set — seeding into in-memory stores only');
 }
 
-const stats = await seedSignalMesh({ startConnectors });
+const _stats = await seedSignalMesh({ startConnectors });
 
 if (dbReady) {
   await Promise.all([
@@ -96,20 +88,6 @@ if (dbReady) {
     entityRegistry?.flush(),
   ]);
 }
-
-console.log('');
-console.log('✅ Signal Mesh Ready');
-console.log('──────────────────────────────────────────────────');
-console.log(`  Signals seeded:        ${stats.signalsSeeded}`);
-console.log(`  Evidence items:        ${stats.evidenceItemsSeeded}`);
-console.log(`  Recommendations:       ${stats.recommendationsSeeded}`);
-console.log(`  Entities registered:   ${stats.entitiesRegistered}`);
-console.log(`  Connectors started:    ${stats.connectorsStarted}`);
-console.log('');
-console.log('  Bus signals buffered:  ' + defaultSignalBus.count());
-console.log('  Evidence graph items:  ' + defaultEvidenceStore.count());
-console.log('  Recommendations:       ' + defaultRecommendationStore.count());
-console.log('  Entity snapshots:      ' + defaultEntityRegistry.count());
 
 if (dbReady) {
   try {
@@ -125,28 +103,14 @@ if (dbReady) {
     const rows =
       (counts as unknown as { rows: Array<{ table_name: string; n: string }> }).rows ??
       (counts as unknown as Array<{ table_name: string; n: string }>);
-    console.log('');
-    console.log('  Database (live counts from Postgres):');
-    for (const r of rows) {
-      console.log(`    ${r.table_name.padEnd(28)} ${r.n}`);
+    for (const _r of rows) {
     }
-  } catch (err) {
-    console.warn('[seed-mesh] DB count query failed:', err);
+  } catch (_err) {
   }
 }
 
-console.log('');
-console.log('  Evidence graph read API exposed at:');
-console.log('    GET /api/evidence-graph/recommendations');
-console.log('    GET /api/evidence-graph/recommendations/:id');
-console.log('    GET /api/evidence-graph/why/:entityId');
-console.log('    GET /api/evidence-graph/signals');
-console.log('');
-
 if (startConnectors) {
-  console.log('  Connector adapters running — press Ctrl+C to stop');
   process.on('SIGINT', async () => {
-    console.log('\n[seed-mesh] Shutting down connectors...');
     await Promise.all([
       signalBusStore?.stop(),
       evidenceStore?.stop(),
@@ -162,6 +126,5 @@ if (startConnectors) {
     recommendationStore?.stop(),
     entityRegistry?.stop(),
   ]);
-  console.log('  Connector adapters not started (--no-connectors flag)');
   process.exit(0);
 }

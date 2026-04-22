@@ -9,7 +9,7 @@ import {
 } from './doctrine-layer';
 import { type LiveNotification, useNotificationCenter } from './notification-center';
 import { SandboxToggle } from './sandbox-mode';
-import { colors, effects, typography } from './tokens';
+import { typography } from './tokens';
 import { useUserPreferences } from './use-user-preferences';
 
 export interface EcosystemApp {
@@ -1593,7 +1593,7 @@ export function EcosystemNav({
     [markRead, onNotificationRead],
   );
 
-  const currentApp = ECOSYSTEM_APPS.find((a) => a.id === currentAppId);
+  const _currentApp = ECOSYSTEM_APPS.find((a) => a.id === currentAppId);
 
   return (
     <>

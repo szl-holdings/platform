@@ -12,10 +12,8 @@ import {
   Eye,
   Lock,
   Plus,
-  RefreshCw,
   Settings2,
   Shield,
-  Trash2,
   Zap,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -179,7 +177,7 @@ interface GovernanceIncident {
   createdAt: string;
 }
 
-const DEMO_INCIDENTS: GovernanceIncident[] = [
+const _DEMO_INCIDENTS: GovernanceIncident[] = [
   {
     id: 1,
     policyId: 1,
@@ -481,7 +479,7 @@ function NewPolicyDialog({ onClose, onCreated }: { onClose: () => void; onCreate
           slug,
           kind,
           status: 'draft',
-          orgId: parseInt(orgId) || null,
+          orgId: parseInt(orgId, 10) || null,
           description: description || null,
           rules: defaultRules[kind],
         }),
@@ -619,7 +617,7 @@ function NewPolicyDialog({ onClose, onCreated }: { onClose: () => void; onCreate
 export default function PolicyManager() {
   const [tab, setTab] = useState<'policies' | 'incidents'>('policies');
   const [kindFilter, setKindFilter] = useState<string>('all');
-  const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
+  const [_selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
   const [showNewPolicy, setShowNewPolicy] = useState(false);
   const queryClient = useQueryClient();
 

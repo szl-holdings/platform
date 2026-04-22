@@ -8,21 +8,12 @@ import {
   BarChart2,
   Brain,
   CheckCircle,
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
   Clock,
-  Eye,
-  Layers,
-  Play,
-  Radio,
   RefreshCw,
   RotateCcw,
   Server,
   Shield,
-  TrendingUp,
   XCircle,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -146,7 +137,7 @@ interface AgentHealth {
   lastRunAt: string;
 }
 
-const DEMO_STATE = {
+const _DEMO_STATE = {
   agentHealth: [
     {
       id: 'stub-agent',
@@ -254,7 +245,7 @@ function AgentHealthRow({
 }
 
 export default function OperatorControlCenter() {
-  const [alertThresholds, _setAlertThresholds] = useState({ timeMs: 120000, costUsd: 20 });
+  const [_alertThresholds, _setAlertThresholds] = useState({ timeMs: 120000, costUsd: 20 });
   const qc = useQueryClient();
 
   const { data: agentStats } = useStandardQuery({
@@ -417,7 +408,7 @@ export default function OperatorControlCenter() {
               <AgentHealthRow
                 key={agent.id}
                 agent={agent}
-                onRestart={(id) => {
+                onRestart={(_id) => {
                   qc.invalidateQueries({ queryKey: ['alloyOperatorAgents'] });
                 }}
               />

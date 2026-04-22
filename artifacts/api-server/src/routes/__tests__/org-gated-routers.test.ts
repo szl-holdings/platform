@@ -314,7 +314,7 @@ async function send(
 
 describe('Org-gated routers reject unauthorized callers (task #1329 / regression for #718)', () => {
   beforeEach(() => {
-    process.env['NODE_ENV'] = 'test';
+    process.env.NODE_ENV = 'test';
   });
 
   for (const c of cases) {

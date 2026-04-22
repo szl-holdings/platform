@@ -5,8 +5,7 @@ import {
   getStateColor,
   WORKFLOWS,
 } from '@szl-holdings/shared-ui/core-observability-data';
-import { cn } from '@szl-holdings/shared-ui/utils';
-import { Activity, AlertTriangle, Clock, ExternalLink, User } from 'lucide-react';
+import { Activity, AlertTriangle, User } from 'lucide-react';
 
 function StateBadge({ state }: { state: EntityState }) {
   const color = getStateColor(state);

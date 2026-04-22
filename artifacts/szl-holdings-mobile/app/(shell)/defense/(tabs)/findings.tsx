@@ -2,7 +2,7 @@ import { Feather, Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -83,7 +83,7 @@ export default function FindingsScreen() {
     queryFn: fetchFindings,
   });
 
-  const updateMut = useMutation({
+  const _updateMut = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<Finding> }) => updateFinding(id, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['aegis-findings'] }),
   });

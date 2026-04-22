@@ -69,10 +69,10 @@ export function initTelemetry(opts: TelemetryInitOptions = {}): Tracer {
     try {
       const parsed = new URL(trimmed);
       const hasPath = parsed.pathname && parsed.pathname !== '/';
-      url = hasPath ? trimmed : trimmed + '/v1/traces';
+      url = hasPath ? trimmed : `${trimmed}/v1/traces`;
     } catch {
       // Not a parseable URL — fall back to the simple suffix check.
-      url = /\/v1\/traces$/.test(trimmed) ? trimmed : trimmed + '/v1/traces';
+      url = trimmed.endsWith('/v1/traces') ? trimmed : `${trimmed}/v1/traces`;
     }
     const exporter = new OTLPTraceExporter({
       url,
@@ -84,23 +84,11 @@ export function initTelemetry(opts: TelemetryInitOptions = {}): Tracer {
         scheduledDelayMillis: 1500,
       }),
     );
-    if (typeof console !== 'undefined' && console.info) {
-      console.info(
-        '[telemetry] OTLP exporter wired',
-        JSON.stringify({
-          service: opts.serviceName ?? SERVICE_NAME,
-          environment,
-          endpoint: url,
-          authHeaders: Object.keys(headers),
-        }),
-      );
+    if (typeof console !== 'undefined') {
     }
   } else if (environment !== 'production') {
     processors.push(new BatchSpanProcessor(new ConsoleSpanExporter()));
-  } else if (typeof console !== 'undefined' && console.warn) {
-    console.warn(
-      '[telemetry] VITE_OTEL_ENDPOINT is not set in production — Run Console / Eval Studio spans will be dropped. See docs/observability/otel-collector-setup.md.',
-    );
+  } else if (typeof console !== 'undefined') {
   }
 
   const provider = new WebTracerProvider({ resource, spanProcessors: processors });

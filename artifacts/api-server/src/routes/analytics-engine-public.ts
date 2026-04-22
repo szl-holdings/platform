@@ -14,7 +14,7 @@
 
 import { db } from '@szl-holdings/db';
 import { analyticsEventsTable } from '@szl-holdings/db/schema';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { logger } from '../lib/logger';
 

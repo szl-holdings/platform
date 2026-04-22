@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WORKSPACES } from '@/context/WorkspaceContext';
@@ -254,7 +254,7 @@ export default function WidgetConfigScreen() {
   const insets = useSafeAreaInsets();
   const [slots, setSlots] = useState<WidgetSlot[]>(DEFAULT_SLOTS);
   const [saved, setSaved] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const [_loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)

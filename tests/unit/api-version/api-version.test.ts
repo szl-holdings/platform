@@ -1,4 +1,4 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 function createMockReq(headers: Record<string, string> = {}): Partial<Request> {
@@ -35,14 +35,14 @@ function createMockRes(): Partial<Response> & {
 
 describe('apiVersionMiddleware', () => {
   let apiVersionMiddleware: typeof import('../../../artifacts/api-server/src/middlewares/api-version').apiVersionMiddleware;
-  let requireMinVersion: typeof import('../../../artifacts/api-server/src/middlewares/api-version').requireMinVersion;
+  let _requireMinVersion: typeof import('../../../artifacts/api-server/src/middlewares/api-version').requireMinVersion;
   let CURRENT_VERSION: string;
   let SUPPORTED_VERSIONS: readonly string[];
 
   beforeEach(async () => {
     const mod = await import('../../../artifacts/api-server/src/middlewares/api-version');
     apiVersionMiddleware = mod.apiVersionMiddleware;
-    requireMinVersion = mod.requireMinVersion;
+    _requireMinVersion = mod.requireMinVersion;
     CURRENT_VERSION = mod.CURRENT_VERSION;
     SUPPORTED_VERSIONS = mod.SUPPORTED_VERSIONS;
   });
@@ -90,9 +90,9 @@ describe('apiVersionMiddleware', () => {
 
     apiVersionMiddleware(req as Request, res as unknown as Response, next);
 
-    expect(res._headers['Deprecation']).toBe('true');
+    expect(res._headers.Deprecation).toBe('true');
     expect(res._headers['X-Api-Deprecated']).toBe('true');
-    expect(res._headers['Sunset']).toBeTruthy();
+    expect(res._headers.Sunset).toBeTruthy();
     expect(res._headers['X-Api-Deprecation-Notice']).toContain('deprecated');
     expect(next).toHaveBeenCalled();
   });
@@ -104,7 +104,7 @@ describe('apiVersionMiddleware', () => {
 
     apiVersionMiddleware(req as Request, res as unknown as Response, next);
 
-    expect(res._headers['Deprecation']).toBeUndefined();
+    expect(res._headers.Deprecation).toBeUndefined();
     expect(res._headers['X-Api-Deprecated']).toBeUndefined();
     expect(next).toHaveBeenCalled();
   });

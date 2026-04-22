@@ -5,23 +5,18 @@ import {
   IndexVerifyRequestSchema,
   IngestRequestSchema,
 } from '@workspace/aef-contracts';
-import type { AuditEmitter, WorkflowContext } from '@workspace/aef-workflow-runtime';
-import {
-  createWorkflowMachine,
-  FileApprovalStore,
-  FileCheckpointStore,
-} from '@workspace/aef-workflow-runtime';
+import { type AuditEmitter, type WorkflowContext, createWorkflowMachine, FileApprovalStore, FileCheckpointStore } from '@workspace/aef-workflow-runtime';
 import express from 'express';
 
 const app = express();
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '20mb' }));
 
-const DATA_DIR = process.env['AEF_DATA_DIR'] ?? '/tmp/aef-ingest-control';
+const DATA_DIR = process.env.AEF_DATA_DIR ?? '/tmp/aef-ingest-control';
 const checkpointStore = new FileCheckpointStore(`${DATA_DIR}/checkpoints.json`);
 const approvalStore = new FileApprovalStore(`${DATA_DIR}/approvals.json`);
 
-const BEARER = process.env['AEF_S2S_SECRET'];
+const BEARER = process.env.AEF_S2S_SECRET;
 if (!BEARER) {
   throw new Error('AEF_S2S_SECRET env var is required — refusing to start without an auth secret');
 }
@@ -31,7 +26,7 @@ function authMiddleware(
   res: express.Response,
   next: express.NextFunction,
 ): void {
-  const header = req.headers['authorization'];
+  const header = req.headers.authorization;
   const token = header?.startsWith('Bearer ') ? header.slice(7) : null;
   if (token !== BEARER) {
     res.status(401).json({ error: 'unauthorized' });
@@ -43,7 +38,7 @@ function authMiddleware(
 function makeStepLogger(workflowId: string): AuditEmitter {
   return (event) => {
     process.stdout.write(
-      JSON.stringify({
+      `${JSON.stringify({
         level: 'info',
         ts: new Date().toISOString(),
         service: 'alloy-fabric-ingest-control',
@@ -51,7 +46,7 @@ function makeStepLogger(workflowId: string): AuditEmitter {
         workflowId,
         stepId: event.stepId,
         outcome: event.outcome,
-      }) + '\n',
+      })}\n`,
     );
   };
 }
@@ -322,10 +317,9 @@ app.get('/control/approvals/:workflowId', authMiddleware, (req, res) => {
   res.json({ workflowId, approvals: pending });
 });
 
-const PORT = Number(process.env['AEF_INGEST_CONTROL_PORT'] ?? process.env['PORT'] ?? 4201);
+const PORT = Number(process.env.AEF_INGEST_CONTROL_PORT ?? process.env.PORT ?? 4201);
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[alloy-fabric-ingest-control] Listening on port ${PORT}`);
 });
 
 export default app;

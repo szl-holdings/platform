@@ -15,9 +15,9 @@ const BOOT_TENANTS: Set<string> = new Set([
   'szl-smoke-test',
   'szl-dev',
   'smoke-test-tenant',
-  ...(process.env['AEF_SMOKE_TENANT'] ? [process.env['AEF_SMOKE_TENANT']] : []),
-  ...(process.env['AEF_BOOT_TENANTS']
-    ? process.env['AEF_BOOT_TENANTS']
+  ...(process.env.AEF_SMOKE_TENANT ? [process.env.AEF_SMOKE_TENANT] : []),
+  ...(process.env.AEF_BOOT_TENANTS
+    ? process.env.AEF_BOOT_TENANTS
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean)

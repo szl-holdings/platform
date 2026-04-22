@@ -1,51 +1,30 @@
 import { type DecisionObjectType, validateAndBuildDecision } from '@szl-holdings/ai-engine';
-import {
-  ingestFirestormAlert,
-  ingestFirestormFinding,
-  ingestFirestormScenario,
-} from '@szl-holdings/ai-engine/domain-embedding-hooks';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   alloyRuntimeAgentsTable,
   alloyRuntimeAgentVersionsTable,
-  auditEventsTable,
   db,
   inferenceLogTable,
   firestormAlertsTable,
   firestormAnalystNotebookTable,
-  firestormAssessmentsTable,
   firestormAssetsTable,
   firestormCaseMemoryTable,
   firestormCasesTable,
-  firestormComplianceControlsTable,
-  firestormFindingsTable,
   firestormHardeningControlsTable,
   firestormIncidentsTable,
   firestormMitreDetectionsTable,
-  firestormRiskScoresTable,
-  firestormScenariosTable,
-  firestormSimulationRunsTable,
   firestormTradecraftDecisionsTable,
   firestormTradecraftValidationAuditTable,
   firestormWorkflowActionsTable,
   type InsertFirestormCaseMemory,
-  insertFirestormAlertSchema,
   insertFirestormAnalystNotebookSchema,
-  insertFirestormAssessmentSchema,
   insertFirestormAssetSchema,
   insertFirestormCaseSchema,
-  insertFirestormFindingSchema,
-  insertFirestormIncidentSchema,
-  insertFirestormRiskScoreSchema,
-  insertFirestormScenarioSchema,
-  insertFirestormSimulationRunSchema,
   insertFirestormTradecraftDecisionSchema,
   insertFirestormWorkflowActionSchema,
 } from '@szl-holdings/db';
-import { and, desc, eq, inArray, or, sql } from 'drizzle-orm';
-import { type IRouter, type RequestHandler, Router } from 'express';
-import rateLimit from 'express-rate-limit';
-import { LRUCache } from 'lru-cache';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
@@ -58,7 +37,6 @@ import {
   sendSuccess,
 } from '../../lib/api-response';
 import { logger } from '../../lib/logger';
-import { broadcastWs, FIRESTORM_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
 import { isProductionEnvironment } from '../../lib/seed-guard';
 import {
   ingestDecisionToEvidenceIndex,
@@ -66,13 +44,8 @@ import {
 } from '../../lib/tradecraft-evidence-store';
 import { listQuerySchema, validateBody, validateQuery } from '../../lib/validation';
 import { authMiddleware, parseIdParam } from '../../middlewares/auth';
-import { validateIfMatch } from '../../middlewares/optimistic-concurrency';
-import { REFERENCE_COMPLIANCE_CONTROLS } from '../readiness.js';
 import {
   evidenceIndexQuerySchema,
-  fetchFsJson,
-  firestormLiveLimit,
-  getFsCached,
   ingestSyslogSchema,
   pushTokenSchema,
   tradecraftDecisionActionSchema,
@@ -85,7 +58,7 @@ import {
 
 const router = Router();
 
-router.get('/firestorm/assets', authMiddleware(), async (req, res) => {
+router.get('/firestorm/assets', authMiddleware(), async (_req, res) => {
   try {
     const assets = await db
       .select()
@@ -1328,7 +1301,7 @@ router.post(
   ),
   async (req, res) => {
     try {
-      const { randomUUID } = await import('crypto');
+      const { randomUUID } = await import('node:crypto');
       const parsedDecision = tradecraftDecisionInputSchema.parse(req.body);
       const body = parsedDecision as any;
 
@@ -1343,7 +1316,7 @@ router.post(
       }
       if (parsedDecision.confidence !== undefined) {
         const conf = parseFloat(String(parsedDecision.confidence));
-        if (isNaN(conf) || conf < 0 || conf > 1) {
+        if (Number.isNaN(conf) || conf < 0 || conf > 1) {
           sendError(
             res,
             'confidence must be a number between 0 and 1.',
@@ -1369,7 +1342,7 @@ router.post(
       );
 
       if (!validationResult.valid || !validationResult.object) {
-        const { randomUUID: uuid422 } = await import('crypto');
+        const { randomUUID: uuid422 } = await import('node:crypto');
         await db
           .insert(firestormTradecraftValidationAuditTable)
           .values({
@@ -1774,7 +1747,7 @@ router.post(
   ),
   async (req, res) => {
     try {
-      const { randomUUID } = await import('crypto');
+      const { randomUUID } = await import('node:crypto');
       const body = req.body as any;
       if (!body.content || typeof body.content !== 'string' || body.content.trim().length < 3) {
         sendError(
@@ -2027,7 +2000,7 @@ function getSessionContext(req: import('express').Request): {
   const rawUserId = user?.id;
   const toInt = (v: unknown) => {
     const n = typeof v === 'number' ? v : parseInt(String(v ?? ''), 10);
-    return isNaN(n) ? undefined : n;
+    return Number.isNaN(n) ? undefined : n;
   };
   return {
     userId: toInt(rawUserId),
@@ -2097,11 +2070,11 @@ router.get('/firestorm/ai-governance/registry', authMiddleware(), async (req, re
         description: agent.description,
         provider,
         model: modelName,
-        version: (version?.version ?? meta['version'] ?? '1.0') as string,
+        version: (version?.version ?? meta.version ?? '1.0') as string,
         domain: agent.domain,
         policyTier: agent.policyTier,
         status: agent.isActive ? 'active' : 'deprecated',
-        confidenceBaseline: (meta['confidenceBaseline'] ?? meta['confidence_baseline'] ?? null) as
+        confidenceBaseline: (meta.confidenceBaseline ?? meta.confidence_baseline ?? null) as
           | number
           | null,
         deployedAt: version?.deployedAt ?? null,
@@ -2123,7 +2096,7 @@ router.get(
   async (req, res) => {
     try {
       const rawLimit = parseInt((req.query.limit as string) ?? '50', 10);
-      const limit = isNaN(rawLimit) ? 50 : Math.max(1, Math.min(rawLimit, 200));
+      const limit = Number.isNaN(rawLimit) ? 50 : Math.max(1, Math.min(rawLimit, 200));
 
       const { orgId, isPrivileged } = getSessionContext(req);
 

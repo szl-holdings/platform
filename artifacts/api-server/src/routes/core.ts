@@ -1,6 +1,5 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  alloyWorkflows,
   auditLogsTable,
   db,
   firestormFindingsTable,
@@ -14,8 +13,7 @@ import {
 } from '@szl-holdings/db';
 import { count, desc, eq, gte, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
-import { z } from 'zod';
-import { handleRouteError, sendError, sendSuccess } from '../lib/api-response';
+import { handleRouteError, sendError, } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
@@ -318,8 +316,8 @@ router.get(
     try {
       const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit ?? '20'), 10) || 20));
       const offset = Math.max(0, parseInt(String(req.query.offset ?? '0'), 10) || 0);
-      const entityType = req.query.entity_type as string | undefined;
-      const domain = req.query.domain as string | undefined;
+      const _entityType = req.query.entity_type as string | undefined;
+      const _domain = req.query.domain as string | undefined;
 
       const query = db
         .select()

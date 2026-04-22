@@ -1,11 +1,10 @@
 import { AnimatedCounter } from '@szl-holdings/shared-ui/animated-counter';
 import { ContactModal } from '@szl-holdings/shared-ui/contact-modal';
 import { NewsletterSubscribe } from '@szl-holdings/shared-ui/newsletter-subscribe';
-import { animate, motion as m, useMotionValue, useTransform } from 'framer-motion';
+import { motion as m, } from 'framer-motion';
 import {
   Activity,
   AlertTriangle,
-  Anchor,
   ArrowRight,
   BarChart3,
   ChevronRight,
@@ -14,12 +13,9 @@ import {
   Eye,
   Globe,
   Lock,
-  MapPin,
   Navigation,
   Shield,
-  Ship,
   TrendingUp,
-  Waves,
   Zap,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -140,7 +136,6 @@ function OceanCanvas() {
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full pointer-events-none"
-      aria-hidden="true"
     />
   );
 }
@@ -646,7 +641,7 @@ export default function MarketingHomePage() {
                   { label: 'Ports monitored', value: '340+' },
                   { label: 'Data points / day', value: '4.2M' },
                   { label: 'Avg exception resolution', value: '3.2h' },
-                ].map((item, i) => (
+                ].map((item, _i) => (
                   <div
                     key={item.label}
                     className="flex items-center justify-between py-3.5 border-b border-sky-500/6 last:border-0"

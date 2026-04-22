@@ -4,7 +4,7 @@ import {
   supportTicketCommentsTable,
   supportTicketsTable,
 } from '@szl-holdings/db';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import { and, desc, eq, ilike, inArray, isNull, or, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
@@ -126,7 +126,7 @@ router.get('/support/knowledge/:slug', async (req: Request, res: Response) => {
       .from(supportKnowledgeArticlesTable)
       .where(
         and(
-          eq(supportKnowledgeArticlesTable.slug, req.params['slug'] as string),
+          eq(supportKnowledgeArticlesTable.slug, req.params.slug as string),
           eq(supportKnowledgeArticlesTable.isPublished, true),
         ),
       )
@@ -321,8 +321,8 @@ router.get(
 router.get('/support/tickets/:id', authMiddleware(), async (req: Request, res: Response) => {
   try {
     const user = req.user as AuthenticatedUser;
-    const ticketId = parseInt(req.params['id'] as string);
-    if (isNaN(ticketId)) {
+    const ticketId = parseInt(req.params.id as string, 10);
+    if (Number.isNaN(ticketId)) {
       sendBadRequest(res, 'Invalid ticket ID');
       return;
     }
@@ -383,8 +383,8 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const user = req.user as AuthenticatedUser;
-      const ticketId = parseInt(req.params['id'] as string);
-      if (isNaN(ticketId)) {
+      const ticketId = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(ticketId)) {
         sendBadRequest(res, 'Invalid ticket ID');
         return;
       }
@@ -451,8 +451,8 @@ router.patch(
   async (req: Request, res: Response) => {
     try {
       const user = req.user as AuthenticatedUser;
-      const ticketId = parseInt(req.params['id'] as string);
-      if (isNaN(ticketId)) {
+      const ticketId = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(ticketId)) {
         sendBadRequest(res, 'Invalid ticket ID');
         return;
       }

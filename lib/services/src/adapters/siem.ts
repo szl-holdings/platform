@@ -72,7 +72,7 @@ export interface SiemConnectionStatus {
   endpoint?: string;
 }
 
-const CEF_FIELD_MAP: Record<string, string> = {
+const _CEF_FIELD_MAP: Record<string, string> = {
   src: "sourceIp",
   dst: "destinationIp",
   spt: "sourcePort",
@@ -185,28 +185,28 @@ function parseCefEvent(cefLine: string): Partial<NormalizedSiemEvent> {
   const extPattern = /(\w+)=([^=]+?)(?=\s+\w+=|$)/g;
   let match;
   while ((match = extPattern.exec(extensionStr)) !== null) {
-    extFields[match[1]!] = match[2]!.trim();
+    extFields[match[1]!] = match[2]?.trim();
   }
 
   return {
     severity: severityMap[Math.min(severity, 10)] ?? "medium",
     message: parts[7] ?? cefLine,
     category: parts[5] ?? "security",
-    sourceIp: extFields["src"] ?? null,
-    destinationIp: extFields["dst"] ?? null,
-    sourcePort: extFields["spt"] ? parseInt(extFields["spt"], 10) : null,
-    destinationPort: extFields["dpt"] ? parseInt(extFields["dpt"], 10) : null,
-    protocol: extFields["proto"] ?? null,
-    action: extFields["act"] ?? null,
-    user: extFields["suser"] ?? extFields["duser"] ?? null,
-    hostname: extFields["dhost"] ?? extFields["shost"] ?? null,
-    process: extFields["app"] ?? null,
+    sourceIp: extFields.src ?? null,
+    destinationIp: extFields.dst ?? null,
+    sourcePort: extFields.spt ? parseInt(extFields.spt, 10) : null,
+    destinationPort: extFields.dpt ? parseInt(extFields.dpt, 10) : null,
+    protocol: extFields.proto ?? null,
+    action: extFields.act ?? null,
+    user: extFields.suser ?? extFields.duser ?? null,
+    hostname: extFields.dhost ?? extFields.shost ?? null,
+    process: extFields.app ?? null,
     rawPayload: extFields as Record<string, unknown>,
   };
 }
 
 function parseSyslogEvent(syslogLine: string): Partial<NormalizedSiemEvent> {
-  const severityPattern = /^\<(\d+)\>/;
+  const severityPattern = /^<(\d+)>/;
   const priMatch = severityPattern.exec(syslogLine);
   const pri = priMatch ? parseInt(priMatch[1]!, 10) : 14;
   const facility = Math.floor(pri / 8);
@@ -236,13 +236,13 @@ function inferMitreMapping(event: Partial<NormalizedSiemEvent>): { tactic: strin
   }
 
   if (msg.includes("fail") && cat.includes("auth")) {
-    return MITRE_TACTIC_MAP["brute_force"]!;
+    return MITRE_TACTIC_MAP.brute_force!;
   }
   if (msg.includes("sudo") || msg.includes("privilege") || msg.includes("escalat")) {
-    return MITRE_TACTIC_MAP["privilege_escalation"]!;
+    return MITRE_TACTIC_MAP.privilege_escalation!;
   }
   if (msg.includes("scan") || msg.includes("probe")) {
-    return MITRE_TACTIC_MAP["discovery"]!;
+    return MITRE_TACTIC_MAP.discovery!;
   }
 
   return null;
@@ -277,29 +277,29 @@ export class SiemAdapter extends ServiceAdapter {
 
     for (const raw of events) {
       try {
-        const eventData = raw["event"] as Record<string, unknown> ?? raw;
-        const time = raw["time"] as number | undefined;
+        const eventData = raw.event as Record<string, unknown> ?? raw;
+        const time = raw.time as number | undefined;
         const timestamp = time ? new Date(time * 1000).toISOString() : new Date().toISOString();
 
         const severity = this.mapSplunkSeverity(
-          (eventData["severity"] as string) ?? (eventData["level"] as string) ?? "informational",
+          (eventData.severity as string) ?? (eventData.level as string) ?? "informational",
         );
 
         const partial: Partial<NormalizedSiemEvent> = {
           severity,
           timestamp,
-          sourceIp: (eventData["src"] as string) ?? (eventData["src_ip"] as string) ?? null,
-          destinationIp: (eventData["dest"] as string) ?? (eventData["dest_ip"] as string) ?? null,
-          sourcePort: eventData["src_port"] ? parseInt(String(eventData["src_port"]), 10) : null,
-          destinationPort: eventData["dest_port"] ? parseInt(String(eventData["dest_port"]), 10) : null,
-          protocol: (eventData["protocol"] as string) ?? null,
-          action: (eventData["action"] as string) ?? null,
-          outcome: this.mapOutcome((eventData["result"] as string) ?? (eventData["outcome"] as string)),
-          user: (eventData["user"] as string) ?? (eventData["src_user"] as string) ?? null,
-          hostname: (eventData["host"] as string) ?? (raw["host"] as string) ?? null,
-          process: (eventData["process"] as string) ?? null,
-          message: (eventData["message"] as string) ?? (eventData["msg"] as string) ?? JSON.stringify(eventData),
-          category: (raw["sourcetype"] as string) ?? (eventData["category"] as string) ?? "security",
+          sourceIp: (eventData.src as string) ?? (eventData.src_ip as string) ?? null,
+          destinationIp: (eventData.dest as string) ?? (eventData.dest_ip as string) ?? null,
+          sourcePort: eventData.src_port ? parseInt(String(eventData.src_port), 10) : null,
+          destinationPort: eventData.dest_port ? parseInt(String(eventData.dest_port), 10) : null,
+          protocol: (eventData.protocol as string) ?? null,
+          action: (eventData.action as string) ?? null,
+          outcome: this.mapOutcome((eventData.result as string) ?? (eventData.outcome as string)),
+          user: (eventData.user as string) ?? (eventData.src_user as string) ?? null,
+          hostname: (eventData.host as string) ?? (raw.host as string) ?? null,
+          process: (eventData.process as string) ?? null,
+          message: (eventData.message as string) ?? (eventData.msg as string) ?? JSON.stringify(eventData),
+          category: (raw.sourcetype as string) ?? (eventData.category as string) ?? "security",
           rawPayload: raw,
         };
 
@@ -322,36 +322,36 @@ export class SiemAdapter extends ServiceAdapter {
 
     for (const alert of alerts) {
       try {
-        const entities = (alert["Entities"] as Array<Record<string, unknown>>) ?? [];
-        const ipEntity = entities.find((e) => e["Type"] === "ip");
-        const accountEntity = entities.find((e) => e["Type"] === "account");
+        const entities = (alert.Entities as Array<Record<string, unknown>>) ?? [];
+        const ipEntity = entities.find((e) => e.Type === "ip");
+        const accountEntity = entities.find((e) => e.Type === "account");
 
-        const severityStr = (alert["Severity"] as string) ?? "Informational";
+        const severityStr = (alert.Severity as string) ?? "Informational";
         const severity = this.mapSentinelSeverity(severityStr);
 
         const partial: Partial<NormalizedSiemEvent> = {
           severity,
-          timestamp: (alert["TimeGenerated"] as string) ?? new Date().toISOString(),
-          sourceIp: (ipEntity?.["Address"] as string) ?? null,
+          timestamp: (alert.TimeGenerated as string) ?? new Date().toISOString(),
+          sourceIp: (ipEntity?.Address as string) ?? null,
           destinationIp: null,
           sourcePort: null,
           destinationPort: null,
           protocol: null,
-          action: (alert["AlertName"] as string) ?? null,
+          action: (alert.AlertName as string) ?? null,
           outcome: "unknown",
-          user: (accountEntity?.["Name"] as string) ?? null,
-          hostname: (alert["CompromisedEntity"] as string) ?? null,
+          user: (accountEntity?.Name as string) ?? null,
+          hostname: (alert.CompromisedEntity as string) ?? null,
           process: null,
-          message: (alert["Description"] as string) ?? (alert["AlertName"] as string) ?? "",
-          category: (alert["ProductName"] as string) ?? "microsoft_sentinel",
-          tags: [(alert["AlertType"] as string) ?? "sentinel"].filter(Boolean),
-          correlationId: (alert["SystemAlertId"] as string) ?? null,
+          message: (alert.Description as string) ?? (alert.AlertName as string) ?? "",
+          category: (alert.ProductName as string) ?? "microsoft_sentinel",
+          tags: [(alert.AlertType as string) ?? "sentinel"].filter(Boolean),
+          correlationId: (alert.SystemAlertId as string) ?? null,
           rawPayload: alert,
         };
 
         const mitreMapping = inferMitreMapping(partial);
-        partial.mitreTactic = (alert["Tactics"] as string) ?? mitreMapping?.tactic ?? null;
-        partial.mitreTechnique = (alert["Techniques"] as string) ?? mitreMapping?.technique ?? null;
+        partial.mitreTactic = (alert.Tactics as string) ?? mitreMapping?.tactic ?? null;
+        partial.mitreTechnique = (alert.Techniques as string) ?? mitreMapping?.technique ?? null;
 
         normalized.push(this.buildEvent("microsoft_sentinel", partial));
       } catch {
@@ -417,26 +417,26 @@ export class SiemAdapter extends ServiceAdapter {
     for (const raw of events) {
       try {
         const partial: Partial<NormalizedSiemEvent> = {
-          severity: this.mapSplunkSeverity((raw["severity"] as string) ?? (raw["level"] as string) ?? "informational"),
-          timestamp: (raw["timestamp"] as string) ?? (raw["time"] as string) ?? new Date().toISOString(),
-          sourceIp: (raw["src_ip"] as string) ?? (raw["source_ip"] as string) ?? null,
-          destinationIp: (raw["dst_ip"] as string) ?? (raw["dest_ip"] as string) ?? null,
-          sourcePort: raw["src_port"] ? parseInt(String(raw["src_port"]), 10) : null,
-          destinationPort: raw["dst_port"] ? parseInt(String(raw["dst_port"]), 10) : null,
-          protocol: (raw["protocol"] as string) ?? null,
-          action: (raw["action"] as string) ?? null,
-          outcome: this.mapOutcome((raw["outcome"] as string) ?? (raw["result"] as string)),
-          user: (raw["user"] as string) ?? (raw["username"] as string) ?? null,
-          hostname: (raw["hostname"] as string) ?? (raw["host"] as string) ?? null,
-          process: (raw["process"] as string) ?? (raw["application"] as string) ?? null,
-          message: (raw["message"] as string) ?? (raw["msg"] as string) ?? JSON.stringify(raw),
-          category: (raw["category"] as string) ?? (raw["type"] as string) ?? "generic",
-          correlationId: (raw["correlation_id"] as string) ?? null,
+          severity: this.mapSplunkSeverity((raw.severity as string) ?? (raw.level as string) ?? "informational"),
+          timestamp: (raw.timestamp as string) ?? (raw.time as string) ?? new Date().toISOString(),
+          sourceIp: (raw.src_ip as string) ?? (raw.source_ip as string) ?? null,
+          destinationIp: (raw.dst_ip as string) ?? (raw.dest_ip as string) ?? null,
+          sourcePort: raw.src_port ? parseInt(String(raw.src_port), 10) : null,
+          destinationPort: raw.dst_port ? parseInt(String(raw.dst_port), 10) : null,
+          protocol: (raw.protocol as string) ?? null,
+          action: (raw.action as string) ?? null,
+          outcome: this.mapOutcome((raw.outcome as string) ?? (raw.result as string)),
+          user: (raw.user as string) ?? (raw.username as string) ?? null,
+          hostname: (raw.hostname as string) ?? (raw.host as string) ?? null,
+          process: (raw.process as string) ?? (raw.application as string) ?? null,
+          message: (raw.message as string) ?? (raw.msg as string) ?? JSON.stringify(raw),
+          category: (raw.category as string) ?? (raw.type as string) ?? "generic",
+          correlationId: (raw.correlation_id as string) ?? null,
           rawPayload: raw,
         };
         const mitreMapping = inferMitreMapping(partial);
-        partial.mitreTactic = (raw["mitre_tactic"] as string) ?? mitreMapping?.tactic ?? null;
-        partial.mitreTechnique = (raw["mitre_technique"] as string) ?? mitreMapping?.technique ?? null;
+        partial.mitreTactic = (raw.mitre_tactic as string) ?? mitreMapping?.tactic ?? null;
+        partial.mitreTechnique = (raw.mitre_technique as string) ?? mitreMapping?.technique ?? null;
         normalized.push(this.buildEvent("generic", partial));
       } catch {
         rejected++;
@@ -476,7 +476,7 @@ export class SiemAdapter extends ServiceAdapter {
   }
 
   private finalizeIngestion(
-    source: SiemSourceFormat,
+    _source: SiemSourceFormat,
     events: NormalizedSiemEvent[],
     rejected: number,
   ): SiemIngestionResult {
@@ -500,7 +500,7 @@ export class SiemAdapter extends ServiceAdapter {
     };
   }
 
-  private runCorrelationRules(newEvents: NormalizedSiemEvent[]): SiemCorrelatedAlert[] {
+  private runCorrelationRules(_newEvents: NormalizedSiemEvent[]): SiemCorrelatedAlert[] {
     const alerts: SiemCorrelatedAlert[] = [];
     const enabledRules = this.correlationRules.filter((r) => r.enabled);
 

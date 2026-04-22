@@ -2,16 +2,11 @@ import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import {
   AlertTriangle,
   Award,
-  BarChart3,
-  Building2,
   CheckCircle,
-  ChevronRight,
   Clock,
-  Lock,
   Shield,
   Target,
   TrendingDown,
-  TrendingUp,
   Users,
   XCircle,
 } from 'lucide-react';
@@ -19,8 +14,6 @@ import { useState } from 'react';
 import {
   Area,
   AreaChart,
-  Line,
-  LineChart,
   RadialBar,
   RadialBarChart,
   ResponsiveContainer,

@@ -2,15 +2,11 @@ import { type AlloyWorkflowRun, api } from '@lyte/lib/api';
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
   Activity,
-  AlertTriangle,
   ArrowRight,
   Camera,
   CheckCircle,
-  ChevronDown,
   ChevronRight,
-  Clock,
   Cpu,
-  Eye,
   FileText,
   Lock,
   Play,
@@ -528,7 +524,7 @@ function mapRealRunToReplay(run: AlloyWorkflowRun): ReplayRun {
     detail: `Workflow ID ${run.workflowId} · State: ${run.state}`,
   });
 
-  (run.stateHistory ?? []).forEach((h, i) => {
+  (run.stateHistory ?? []).forEach((h, _i) => {
     const ts = new Date(h.at).getTime();
     const offset = Math.max(0, ts - baseTime);
     const event: StepEvent =

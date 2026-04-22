@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { logger } from './logger';
-import { PUBLIC_CHANNELS, SENSITIVE_CHANNELS } from './websocket';
+import { SENSITIVE_CHANNELS } from './websocket';
 
 interface SseClient {
   res: Response;
@@ -15,7 +15,7 @@ const sseClients = new Map<string, SseClient>();
 let totalSseConnections = 0;
 
 export function handleSseConnection(req: Request, res: Response): void {
-  const channel = req.query['channel'] as string | undefined;
+  const channel = req.query.channel as string | undefined;
   if (!channel) {
     res.status(400).json({ error: 'Missing channel parameter' });
     return;
@@ -64,7 +64,7 @@ export function attachSseClient(
   const clientId = `sse-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const tenantOverrideProvided = opts !== undefined && Object.hasOwn(opts, 'tenantId');
   const tenantId = tenantOverrideProvided
-    ? (opts!.tenantId ?? null)
+    ? (opts?.tenantId ?? null)
     : ((user as { tenantId?: string } | undefined)?.tenantId ?? null);
   const client: SseClient = {
     res,

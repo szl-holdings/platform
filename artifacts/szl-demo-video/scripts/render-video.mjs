@@ -111,23 +111,19 @@ function findPlaywrightChromium() {
 function findChromium() {
   for (const p of EXPLICIT_PATHS) {
     if (existsSync(p)) {
-      console.log(`[render] Chromium found at: ${p}`);
       return p;
     }
   }
   const nixPath = findChromiumInNixStore();
   if (nixPath) {
-    console.log(`[render] Chromium found in Nix store: ${nixPath}`);
     return nixPath;
   }
   const pwPath = findPlaywrightChromium();
   if (pwPath) {
-    console.log(`[render] Playwright Chromium found: ${pwPath}`);
     return pwPath;
   }
   const out = spawnSync('which', ['chromium'], { encoding: 'utf8' });
   if (out.status === 0 && out.stdout.trim()) {
-    console.log(`[render] Chromium found via which: ${out.stdout.trim()}`);
     return out.stdout.trim();
   }
   throw new Error(
@@ -173,7 +169,7 @@ function staticServer(root) {
       } catch {
         st = null;
       }
-      if (st && st.isDirectory()) {
+      if (st?.isDirectory()) {
         filePath = path.join(filePath, 'index.html');
       }
       try {
@@ -217,7 +213,6 @@ function run(cmd, args, opts = {}) {
 
 // ── CI setup ──────────────────────────────────────────────────────────────
 async function installBrowsers() {
-  console.log('[render] Installing Playwright Chromium (--install-browsers)…');
   // Try --with-deps first (installs OS-level shared libraries).
   // Some minimal/non-root CI images don't support --with-deps (requires sudo/apt);
   // in those cases fall back to the plain install which relies on pre-installed libs.
@@ -226,19 +221,15 @@ async function installBrowsers() {
       cwd: ARTIFACT_DIR,
       env: { ...process.env },
     });
-    console.log('[render] Playwright Chromium installed (with system deps).');
   } catch {
-    console.warn('[render] --with-deps install failed; retrying without system deps…');
     await run('npx', ['playwright', 'install', 'chromium'], {
       cwd: ARTIFACT_DIR,
       env: { ...process.env },
     });
-    console.log('[render] Playwright Chromium installed (without system deps).');
   }
 }
 
 async function buildArtifact() {
-  console.log('[render] Building artifact (BASE_PATH=/)…');
   await run('npx', ['vite', 'build', '--config', 'vite.config.ts'], {
     cwd: ARTIFACT_DIR,
     env: { ...process.env, BASE_PATH: '/', PORT: '3000', NODE_ENV: 'production' },
@@ -247,7 +238,6 @@ async function buildArtifact() {
 
 // ── Browser recording ─────────────────────────────────────────────────────
 async function recordVideo({ port }) {
-  console.log('[render] Launching headless Chromium…');
   await rm(RAW_DIR, { recursive: true, force: true });
   await mkdir(RAW_DIR, { recursive: true });
 
@@ -277,11 +267,9 @@ async function recordVideo({ port }) {
   const stopped = new Promise((resolve) => {
     page.exposeFunction('__captureStart', () => {
       startMs = Date.now();
-      console.log('[render] startRecording fired.');
     });
     page.exposeFunction('__captureStop', () => {
       stopMs = Date.now();
-      console.log('[render] stopRecording fired.');
       resolve();
     });
   });
@@ -308,8 +296,6 @@ async function recordVideo({ port }) {
       },
     });
   });
-
-  console.log('[render] Navigating to page (capture=full)…');
   await page.goto(`http://127.0.0.1:${port}/?capture=full`, { waitUntil: 'load' });
 
   const timeout = new Promise((_, reject) =>
@@ -325,7 +311,6 @@ async function recordVideo({ port }) {
   const files = (await readdir(RAW_DIR)).filter((f) => f.endsWith('.webm'));
   if (files.length === 0) throw new Error('Playwright did not produce a video file.');
   const rawPath = path.join(RAW_DIR, files[0]);
-  console.log(`[render] Raw recording: ${rawPath}`);
   return { rawPath, startMs, stopMs };
 }
 
@@ -355,14 +340,10 @@ async function encode(rawPath, { startMs, stopMs }) {
 
   await rm(mp4Wide, { force: true });
   await rm(mp4Square, { force: true });
-
-  console.log(`[render] Encoding 1920x1080 MP4 (~${totalSec.toFixed(1)}s)…`);
   await run('ffmpeg', [
     '-y', '-ss', '0.4', '-i', rawPath, '-t', String(totalSec),
     ...h264Args('scale=1920:1080:flags=lanczos,fps=30,format=yuv420p', mp4Wide),
   ]);
-
-  console.log('[render] Encoding 1080x1080 square MP4 (center crop)…');
   await run('ffmpeg', [
     '-y', '-ss', '0.4', '-i', rawPath, '-t', String(totalSec),
     ...h264Args(
@@ -391,14 +372,10 @@ async function encodeVerticalSocialCuts(rawPath) {
 
   await rm(out30s, { force: true });
   await rm(out60s, { force: true });
-
-  console.log('[render] Encoding 9:16 vertical social cut — 30s…');
   await run('ffmpeg', [
     '-y', '-ss', '0.4', '-i', rawPath, '-t', '30',
     ...h264Args(VERTICAL_FILTER, out30s),
   ]);
-
-  console.log('[render] Encoding 9:16 vertical social cut — 60s…');
   await run('ffmpeg', [
     '-y', '-ss', '0.4', '-i', rawPath, '-t', '60',
     ...h264Args(VERTICAL_FILTER, out60s),
@@ -464,11 +441,11 @@ function msToVttTime(ms) {
   const hours = Math.floor(totalSec / 3600);
   const minutes = Math.floor((totalSec % 3600) / 60);
   const seconds = totalSec % 60;
-  return [
+  return `${[
     String(hours).padStart(2, '0'),
     String(minutes).padStart(2, '0'),
     String(seconds).padStart(2, '0'),
-  ].join(':') + '.' + String(msPart).padStart(3, '0');
+  ].join(':')}.${String(msPart).padStart(3, '0')}`;
 }
 
 async function generateWebVTT() {
@@ -499,7 +476,6 @@ async function generateWebVTT() {
 
   const vttPath = path.join(DELIVERABLES_DIR, 'captions.vtt');
   await writeFile(vttPath, vtt, 'utf8');
-  console.log(`[render] WebVTT written: ${vttPath}`);
   return vttPath;
 }
 
@@ -508,7 +484,6 @@ async function generateWebVTT() {
 async function rezipDeliverables() {
   const zipPath = path.join(DELIVERABLES_DIR, 'szl-demo-video.zip');
   await rm(zipPath, { force: true });
-  console.log('[render] Re-zipping deliverables/szl-demo-video.zip…');
   // The `zip` CLI is not installed in this environment, so use python3's
   // built-in zipfile module (always present).
   await run('python3', [
@@ -571,30 +546,20 @@ async function main() {
 
   const server = staticServer(DIST_DIR);
   const port = await listen(server);
-  console.log(`[render] Static server on http://127.0.0.1:${port}`);
 
   try {
     const { rawPath, startMs, stopMs } = await recordVideo({ port });
     const { mp4Wide, mp4Square } = await encode(rawPath, { startMs, stopMs });
     const { out30s, out60s } = await encodeVerticalSocialCuts(rawPath);
-    const vttPath = await generateWebVTT();
+    const _vttPath = await generateWebVTT();
     await writeReadme();
-    const zipPath = await rezipDeliverables();
+    const _zipPath = await rezipDeliverables();
     await rm(RAW_DIR, { recursive: true, force: true });
-
-    console.log('\n[render] ✓ Done. Outputs:');
-    console.log('  16:9  full  →', mp4Wide);
-    console.log('  1:1   full  →', mp4Square);
-    console.log('  9:16  30s   →', out30s);
-    console.log('  9:16  60s   →', out60s);
-    console.log('  VTT         →', vttPath);
-    console.log('  Bundle      →', zipPath);
   } finally {
     server.close();
   }
 }
 
-main().catch((err) => {
-  console.error('[render] FAILED:', err);
+main().catch((_err) => {
   process.exit(1);
 });

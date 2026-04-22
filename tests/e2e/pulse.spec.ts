@@ -71,7 +71,7 @@ test.describe('Pulse — Smoke Tests', () => {
   });
 
   test('demo mode — app shell renders without crashing', async ({ page }) => {
-    const demoUrl = (PULSE_BASE || '/') + '?demo=true';
+    const demoUrl = `${PULSE_BASE || '/'}?demo=true`;
     const resp = await page
       .goto(demoUrl, {
         waitUntil: 'domcontentloaded',
@@ -122,7 +122,7 @@ test.describe('Pulse — API write paths', () => {
 
     expect(res.status()).toBeLessThan(400);
     const body = await res.json().catch(() => null);
-    if (body && body.success) {
+    if (body?.success) {
       expect(body.dissent).toBeDefined();
       expect(body.dissent.sectionTitle).toBe(payload.sectionTitle);
     }

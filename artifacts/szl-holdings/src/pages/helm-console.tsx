@@ -2,8 +2,8 @@ import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useEffect, useCallback } from "react";
 import { m } from "framer-motion";
 import {
-  Activity, AlertTriangle, ArrowRight, CheckCircle2, ChevronRight,
-  Circle, Clock, GitBranch, Globe, Layers, Shield, TrendingUp, Zap,
+  Activity, ArrowRight, CheckCircle2, 
+  Circle, GitBranch, Globe, Layers, Shield, Zap,
   BarChart3, Server, Link2
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
@@ -56,7 +56,7 @@ const HANDOFF_CONTRACTS = [
 ];
 
 
-const SEVERITY_COLOR: Record<string, string> = {
+const _SEVERITY_COLOR: Record<string, string> = {
   critical: "hsl(0,72%,58%)",
   high: "hsl(30,90%,52%)",
   medium: "hsl(48,90%,52%)",

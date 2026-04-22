@@ -61,7 +61,7 @@ export interface OracleBrief {
 }
 
 // Domain color mapping
-const DOMAIN_COLORS: Record<string, string> = {
+const _DOMAIN_COLORS: Record<string, string> = {
   'Vessels + Threat': '#ef4444',
   'Threat + Legal': '#f97316',
   'Property + Financial': '#4ade80',
@@ -121,7 +121,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
     for (const e of vesselEntities) relatedEntityIds.add(e.id);
 
     const entityIdArr = [...relatedEntityIds];
-    const maxRisk = entityIdArr.reduce(
+    const _maxRisk = entityIdArr.reduce(
       (mx, id) => Math.max(mx, getEntity(id, graph)?.riskScore ?? 0),
       0,
     );
@@ -237,7 +237,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
           .filter((s) => s.domain === 'legal' && s.breached)
           .map((s) => ({
             label: 'Active Litigation — Timing Correlation',
-            detail: s.value + ' — escalation within 72h of threat indicator detection',
+            detail: `${s.value} — escalation within 72h of threat indicator detection`,
             severity: 'high' as BriefSeverity,
             entityIds: a.involvedEntityIds,
             metric: s.metric,
@@ -392,7 +392,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
       ),
       analystNote:
         'High confidence on trend identification. Causal linkage between verticals is probabilistic. Pattern is consistent with credit cycle stress in overlapping counterparty networks.',
-      summary: `NEXUS cross-domain analysis reveals ${stressAnomalies.length} counterparty network(s) under simultaneous stress across ${[...new Set(stressAnomalies.flatMap((a) => a.domains))].length} domains. This risk concentration is invisible within individual vertical dashboards.`,
+      summary: `NEXUS cross-domain analysis reveals ${stressAnomalies.length} counterparty network(s) under simultaneous stress across ${new Set(stressAnomalies.flatMap((a) => a.domains)).size} domains. This risk concentration is invisible within individual vertical dashboards.`,
       findings,
       recommendedActions: [
         {

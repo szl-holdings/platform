@@ -6,7 +6,6 @@ import type {
   ExecutiveTrustSummary,
   ReceiptClass,
   ReceiptStatus,
-  ReceiptSummary,
   RecordDeltaParams,
   TrustReceipt,
   TrustReceiptGraph,

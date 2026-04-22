@@ -10,8 +10,7 @@
  *     in-app notification when the recipient hasn't opted out.
  */
 
-import type { NextFunction, Request, Response } from 'express';
-import express from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -325,7 +324,7 @@ vi.mock('../../middlewares/auth', () => ({
     },
   parseIdParam: (raw: string | string[]): number => {
     const id = Number(Array.isArray(raw) ? raw[0] : raw);
-    if (isNaN(id) || id < 1) throw new Error('InvalidIdError');
+    if (Number.isNaN(id) || id < 1) throw new Error('InvalidIdError');
     return id;
   },
   InvalidIdError: class InvalidIdError extends Error {
@@ -468,10 +467,10 @@ describe('POST /teams/:team/page', () => {
     expect(r.body.onCall.id).toBe(1);
     expect(r.body.urgency).toBe('critical');
     expect(store.notifs).toHaveLength(1);
-    expect(store.notifs[0]!.userId).toBe(1);
+    expect(store.notifs[0]?.userId).toBe(1);
     // "critical" maps to "error" on the notification type enum
-    expect(store.notifs[0]!.type).toBe('error');
-    expect(store.notifs[0]!.message).toContain('Pulse is down');
+    expect(store.notifs[0]?.type).toBe('error');
+    expect(store.notifs[0]?.message).toContain('Pulse is down');
   });
 
   it('does not page yourself when the actor IS the on-call', async () => {
@@ -562,9 +561,9 @@ describe('POST /teams/:team/page', () => {
     const r = await request(app).post('/teams/Platform/page').send({ urgency: 'info' });
     expect(r.status).toBe(200);
     expect(store.teamPages).toHaveLength(1);
-    expect(store.teamPages[0]!.inAppDelivered).toBe(false);
-    expect(store.teamPages[0]!.urgency).toBe('info');
-    expect(store.teamPages[0]!.message).toBeNull();
+    expect(store.teamPages[0]?.inAppDelivered).toBe(false);
+    expect(store.teamPages[0]?.urgency).toBe('info');
+    expect(store.teamPages[0]?.message).toBeNull();
   });
 
   it('mutes a duplicate page (same actor → recipient → urgency within 5 min) and skips the in-app insert', async () => {
@@ -591,7 +590,7 @@ describe('POST /teams/:team/page', () => {
     expect(r1.body.mutedAsDuplicate).toBe(false);
     expect(store.notifs).toHaveLength(1);
     expect(store.teamPages).toHaveLength(1);
-    expect(store.teamPages[0]!.mutedAsDuplicate).toBe(false);
+    expect(store.teamPages[0]?.mutedAsDuplicate).toBe(false);
 
     // Second identical page within the window collapses.
     const r2 = await request(app)
@@ -601,14 +600,14 @@ describe('POST /teams/:team/page', () => {
     expect(r2.body.paged).toBe(false);
     expect(r2.body.reason).toBe('muted_duplicate');
     expect(r2.body.mutedAsDuplicate).toBe(true);
-    expect(r2.body.duplicateOfPageId).toBe(store.teamPages[0]!.id);
+    expect(r2.body.duplicateOfPageId).toBe(store.teamPages[0]?.id);
     expect(r2.body.inAppDelivered).toBe(false);
     // No new notification, but the audit row is still appended.
     expect(store.notifs).toHaveLength(1);
     expect(store.teamPages).toHaveLength(2);
     const dup = store.teamPages[1]!;
     expect(dup.mutedAsDuplicate).toBe(true);
-    expect(dup.duplicateOfPageId).toBe(store.teamPages[0]!.id);
+    expect(dup.duplicateOfPageId).toBe(store.teamPages[0]?.id);
     expect(dup.inAppDelivered).toBe(false);
     expect(dup.message).toBe('still down');
   });
@@ -978,7 +977,7 @@ describe('GET /users/:id/pages', () => {
     const byId = new Map<number, { role: string }>(
       r.body.pages.map((p: { id: number; role: string }) => [p.id, p]),
     );
-    expect(byId.get(1)!.role).toBe('received');
-    expect(byId.get(3)!.role).toBe('sent');
+    expect(byId.get(1)?.role).toBe('received');
+    expect(byId.get(3)?.role).toBe('sent');
   });
 });

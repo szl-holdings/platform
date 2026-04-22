@@ -71,7 +71,7 @@ export class AlienVaultOTXAdapter extends ServiceAdapter {
     "AlienVault OTX (Open Threat Exchange) — crowdsourced threat intelligence, IoC lookup, pulse feeds, and ATT&CK mappings across global security community. Requires API key. Falls back to demo mode when OTX_API_KEY is absent.";
   readonly requiredEnvVars = ["OTX_API_KEY"];
 
-  private get apiKey(): string | undefined { return process.env["OTX_API_KEY"]; }
+  private get apiKey(): string | undefined { return process.env.OTX_API_KEY; }
 
   private readonly BASE_URL = "https://otx.alienvault.com/api/v1";
 
@@ -96,27 +96,27 @@ export class AlienVaultOTXAdapter extends ServiceAdapter {
       this.otxRequest<Record<string, unknown>>(`/indicators/IPv4/${ip}/general`),
       this.otxRequest<Record<string, unknown>>(`/indicators/IPv4/${ip}/malware`),
     ]);
-    const pulses = ((general["pulse_info"] as Record<string, unknown>)?.["pulses"] as Array<Record<string, unknown>> ?? []).slice(0, 5);
+    const pulses = ((general.pulse_info as Record<string, unknown>)?.pulses as Array<Record<string, unknown>> ?? []).slice(0, 5);
     return {
       indicator: ip, type: "IPv4",
-      pulseCount: Number(((general["pulse_info"] as Record<string, unknown>)?.["count"]) ?? 0),
-      reputation: Number(general["reputation"] ?? 0),
-      sections: Array.isArray(general["sections"]) ? general["sections"] as string[] : [],
+      pulseCount: Number(((general.pulse_info as Record<string, unknown>)?.count) ?? 0),
+      reputation: Number(general.reputation ?? 0),
+      sections: Array.isArray(general.sections) ? general.sections as string[] : [],
       pulses: pulses.map(p => this.mapPulse(p)),
-      geolocation: { country: String(general["country_name"] ?? ""), city: general["city"] ? String(general["city"]) : null },
-      malwareFamilies: ((malware["data"] as Array<Record<string, unknown>>) ?? []).map(m => String(m["family"] ?? "")),
+      geolocation: { country: String(general.country_name ?? ""), city: general.city ? String(general.city) : null },
+      malwareFamilies: ((malware.data as Array<Record<string, unknown>>) ?? []).map(m => String(m.family ?? "")),
     };
   }
 
   async lookupDomain(domain: string): Promise<OTXIndicatorResult> {
     if (this.isDemoMode) return { ...MOCK_INDICATOR_RESULT, indicator: domain, type: "domain" };
     const data = await this.otxRequest<Record<string, unknown>>(`/indicators/domain/${domain}/general`);
-    const pulses = ((data["pulse_info"] as Record<string, unknown>)?.["pulses"] as Array<Record<string, unknown>> ?? []).slice(0, 5);
+    const pulses = ((data.pulse_info as Record<string, unknown>)?.pulses as Array<Record<string, unknown>> ?? []).slice(0, 5);
     return {
       indicator: domain, type: "domain",
-      pulseCount: Number(((data["pulse_info"] as Record<string, unknown>)?.["count"]) ?? 0),
-      reputation: Number(data["reputation"] ?? 0),
-      sections: Array.isArray(data["sections"]) ? data["sections"] as string[] : [],
+      pulseCount: Number(((data.pulse_info as Record<string, unknown>)?.count) ?? 0),
+      reputation: Number(data.reputation ?? 0),
+      sections: Array.isArray(data.sections) ? data.sections as string[] : [],
       pulses: pulses.map(p => this.mapPulse(p)),
     };
   }
@@ -139,16 +139,16 @@ export class AlienVaultOTXAdapter extends ServiceAdapter {
 
   private mapPulse(p: Record<string, unknown>): OTXPulse {
     return {
-      id: String(p["id"] ?? ""), name: String(p["name"] ?? ""), description: String(p["description"] ?? ""),
-      author: String((p["author"] as Record<string, unknown>)?.["username"] ?? p["author_name"] ?? ""),
-      created: String(p["created"] ?? ""), modified: String(p["modified"] ?? ""),
-      tlp: String(p["tlp"] ?? "white"), tags: Array.isArray(p["tags"]) ? p["tags"] as string[] : [],
-      industries: Array.isArray(p["industries"]) ? p["industries"] as string[] : [],
-      targetedCountries: Array.isArray(p["targeted_countries"]) ? p["targeted_countries"] as string[] : [],
-      malwareFamilies: Array.isArray(p["malware_families"]) ? (p["malware_families"] as Array<Record<string, string>>).map(m => m["display_name"] ?? "") : [],
-      attackIds: Array.isArray(p["attack_ids"]) ? p["attack_ids"] as Array<{ id: string; display_name: string }> : [],
-      indicators: Number(p["indicator_count"] ?? 0),
-      references: Array.isArray(p["references"]) ? p["references"] as string[] : [],
+      id: String(p.id ?? ""), name: String(p.name ?? ""), description: String(p.description ?? ""),
+      author: String((p.author as Record<string, unknown>)?.username ?? p.author_name ?? ""),
+      created: String(p.created ?? ""), modified: String(p.modified ?? ""),
+      tlp: String(p.tlp ?? "white"), tags: Array.isArray(p.tags) ? p.tags as string[] : [],
+      industries: Array.isArray(p.industries) ? p.industries as string[] : [],
+      targetedCountries: Array.isArray(p.targeted_countries) ? p.targeted_countries as string[] : [],
+      malwareFamilies: Array.isArray(p.malware_families) ? (p.malware_families as Array<Record<string, string>>).map(m => m.display_name ?? "") : [],
+      attackIds: Array.isArray(p.attack_ids) ? p.attack_ids as Array<{ id: string; display_name: string }> : [],
+      indicators: Number(p.indicator_count ?? 0),
+      references: Array.isArray(p.references) ? p.references as string[] : [],
     };
   }
 

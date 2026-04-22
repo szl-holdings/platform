@@ -1,8 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
@@ -135,7 +134,7 @@ function RunCard({
             <View
               style={[
                 styles.statePill,
-                { backgroundColor: stateColor + '18', borderColor: stateColor + '35' },
+                { backgroundColor: `${stateColor}18`, borderColor: `${stateColor}35` },
               ]}
             >
               <Text style={[styles.statePillText, { color: stateColor }]}>
@@ -262,7 +261,7 @@ function RunDetailPanel({
         <Text style={[styles.detailTitle, { color: colors.foreground }]}>Run #{run.id}</Text>
         <TouchableOpacity
           onPress={openReplay}
-          style={[styles.replayBtn, { borderColor: ACCENT + '50', backgroundColor: ACCENT + '12' }]}
+          style={[styles.replayBtn, { borderColor: `${ACCENT}50`, backgroundColor: `${ACCENT}12` }]}
         >
           <Feather name="external-link" size={12} color={ACCENT} />
           <Text style={[styles.replayBtnText, { color: ACCENT }]}>Replay on Web</Text>
@@ -356,7 +355,7 @@ function RunDetailPanel({
                 { backgroundColor: colors.card, borderColor: colors.border },
               ]}
             >
-              <View style={[styles.loopLine, { backgroundColor: ACCENT + '30' }]} />
+              <View style={[styles.loopLine, { backgroundColor: `${ACCENT}30` }]} />
               {steps.map((step, i) => (
                 <StepRow key={step.id ?? i} step={step} colors={colors} />
               ))}
@@ -383,7 +382,7 @@ function RunDetailPanel({
           onPress={openReplay}
           style={[
             styles.fullReplayBtn,
-            { borderColor: ACCENT + '50', backgroundColor: ACCENT + '10' },
+            { borderColor: `${ACCENT}50`, backgroundColor: `${ACCENT}10` },
           ]}
         >
           <Feather name="monitor" size={14} color={ACCENT} />
@@ -486,7 +485,7 @@ export default function RunReviewScreen() {
             style={[
               styles.filterChip,
               activeFilter === f.key
-                ? { backgroundColor: ACCENT + '18', borderColor: ACCENT + '50' }
+                ? { backgroundColor: `${ACCENT}18`, borderColor: `${ACCENT}50` }
                 : { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >

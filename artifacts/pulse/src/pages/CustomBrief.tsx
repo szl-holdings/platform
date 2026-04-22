@@ -1,4 +1,4 @@
-import { CheckCircle, ChevronRight, FileText, Loader2, Plus, X } from 'lucide-react';
+import { ChevronRight, FileText, Loader2, } from 'lucide-react';
 import { useState } from 'react';
 import AgentBadge from '../components/AgentBadge';
 import { useCustomBriefs, useRequestCustomBrief } from '../lib/api';
@@ -147,7 +147,7 @@ export default function CustomBrief() {
                       textAlign: 'left',
                     }}
                   >
-                    {ex.length > 55 ? ex.slice(0, 55) + '…' : ex}
+                    {ex.length > 55 ? `${ex.slice(0, 55)}…` : ex}
                   </button>
                 ))}
               </div>

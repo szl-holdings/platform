@@ -2,7 +2,6 @@ import { db } from '@szl-holdings/db';
 import {
   pcChangeEventsTable,
   pcIngestionJobsTable,
-  pcMatterDeskSnapshotsTable,
 } from '@szl-holdings/db/schema';
 import { and, desc, eq } from 'drizzle-orm';
 import { logger } from '../lib/logger';

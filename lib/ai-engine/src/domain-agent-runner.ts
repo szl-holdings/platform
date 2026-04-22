@@ -1,6 +1,5 @@
 import type {
   DomainAgentConfig,
-  StructuredToolCall,
   StructuredToolResult,
   ToolDefinition,
 } from './types.js';
@@ -64,7 +63,7 @@ const CONVERSATION_TTL = 30 * 60 * 1000;
 
 async function generateConversationSummary(
   messages: ConversationMessage[],
-  agentId: string,
+  _agentId: string,
 ): Promise<string | null> {
   try {
     const { openai } = await import('./providers/openai/index.js');
@@ -395,10 +394,14 @@ export class DomainAgentRunner {
     while (rounds < MAX_TOOL_ROUNDS) {
       rounds++;
 
-      const result = await ai.chatCompletionWithTools!(buildNativeMessages(), toolSchema, {
+      const result = await ai.chatCompletionWithTools?.(buildNativeMessages(), toolSchema, {
         model: this.modelConfig.model,
         maxTokens: this.modelConfig.maxCompletionTokens,
       });
+
+      if (!result) {
+        throw new Error('chatCompletionWithTools is not available');
+      }
 
       if (result.toolCalls.length === 0) {
         const finalContent = result.content ?? 'Analysis complete.';

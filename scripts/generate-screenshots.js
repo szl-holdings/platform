@@ -13,9 +13,9 @@
  *   node scripts/generate-screenshots.js [apps...] [--all] [--output-dir <dir>]
  */
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
@@ -333,16 +333,11 @@ function main() {
       ? opts.apps
       : Object.keys(APPS);
 
-  console.log('\n📸 Screenshot Generation Utility\n');
-
   for (const appKey of targetKeys) {
     const app = APPS[appKey];
     if (!app) {
-      console.warn(`  ⚠️  Unknown app: ${appKey}, skipping`);
       continue;
     }
-
-    console.log(`  Processing ${app.name}...`);
 
     const appDir = path.resolve(REPO_ROOT, app.dir);
     const manifestDir = path.join(appDir, 'store');
@@ -369,17 +364,7 @@ function main() {
       readmePath,
       `${app.name} — Screenshots\n${'='.repeat(50)}\n\nOpen ${app.dir}/store/screenshot-guide.html\nfor capture instructions and device size requirements.\n\nManifest: ${app.dir}/store/screenshot-manifest.json\n`,
     );
-
-    console.log(
-      `  ✅ ${appKey}: manifest + guide written, ${screenshotDirs.length} output dirs created`,
-    );
   }
-
-  console.log('\n✅ Done! Next steps:');
-  console.log("   1. Open each app's store/screenshot-guide.html in a browser");
-  console.log('   2. Follow the capture instructions for each device size');
-  console.log('   3. Place captured screenshots in the output directories');
-  console.log('   4. Upload to App Store Connect and Google Play Console\n');
 }
 
 main();

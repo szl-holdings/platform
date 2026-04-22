@@ -308,7 +308,7 @@ class BudgetManager {
     }
 
     if (!this.usages.has(workflowId)) {
-      const budget =
+      const _budget =
         this.budgets.get(workflowId) ?? this.getDefaultBudget(workflowId, orgId ?? null);
       this.usages.set(workflowId, {
         workflowId,

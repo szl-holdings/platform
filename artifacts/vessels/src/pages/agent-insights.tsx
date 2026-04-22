@@ -1,8 +1,7 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { AgentInsightsWidget } from '@szl-holdings/shared-ui/agent-insights-widget';
 import { MicroFeedbackWidget } from '@szl-holdings/shared-ui/micro-feedback-widget';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Brain, Database, Radio, Zap } from 'lucide-react';
+import { Brain, Radio, Zap } from 'lucide-react';
 
 const ACCENT = '#3b82f6';
 
@@ -31,7 +30,7 @@ function GlobalFeedStats() {
       {[
         {
           label: 'Fleet Findings',
-          value: knowledge?.byDomain?.['vessels'] ?? 0,
+          value: knowledge?.byDomain?.vessels ?? 0,
           icon: Brain,
           color: 'text-sky-400',
           bg: 'bg-sky-500/10',

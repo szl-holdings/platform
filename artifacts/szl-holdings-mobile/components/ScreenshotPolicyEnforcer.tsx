@@ -2,8 +2,7 @@ import * as ScreenCapture from 'expo-screen-capture';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { useScreenshotGuard } from '@/context/ScreenshotGuardContext';
-import type { WorkspaceDomain } from '@/context/WorkspaceContext';
-import { useWorkspace } from '@/context/WorkspaceContext';
+import { type WorkspaceDomain, useWorkspace } from '@/context/WorkspaceContext';
 
 export function ScreenshotPolicyEnforcer() {
   const { activeWorkspace } = useWorkspace();

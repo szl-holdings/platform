@@ -8,7 +8,6 @@ beforeAll(() => {
 
 vi.mock('@workspace/aef-sdk/client', () => {
   class MockAefClient {
-    constructor(_config: unknown) {}
     async hybridSearch(req: { requestId?: string; query: string; profileId?: string }) {
       return {
         requestId: req.requestId ?? 'mock-req',
@@ -20,7 +19,7 @@ vi.mock('@workspace/aef-sdk/client', () => {
           {
             documentId: 'mock-doc-1',
             chunkId: 'mock-chunk-1',
-            text: 'mock retrieval result for ' + req.query,
+            text: `mock retrieval result for ${req.query}`,
             fusedScore: 0.9,
             finalScore: 0.9,
             boostApplied: false,

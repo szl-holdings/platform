@@ -1,33 +1,14 @@
 import {
-  AlertCircle,
   ArrowRight,
-  Book,
-  ChevronDown,
-  ChevronRight,
-  Code2,
   Database,
-  ExternalLink,
-  FileCode,
   Globe,
-  Hash,
   Key,
-  Layers,
-  Lock,
-  PlayCircle,
-  RefreshCw,
-  Server,
-  Shield,
-  Terminal,
   Webhook,
-  Zap,
 } from 'lucide-react';
 import {
   Callout,
-  CodeBlock,
   InlineCode,
-  LanguageTabs,
   SectionHeader,
-  SubSectionHeader,
 } from './components';
 
 export function OverviewSection({ scrollTo }: { scrollTo: (id: string) => void }) {

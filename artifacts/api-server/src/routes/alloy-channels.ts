@@ -1,7 +1,7 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { pool } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import { createHmac, timingSafeEqual } from 'crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -102,7 +102,7 @@ async function postToSlack(channel: string, text: string, blocks?: unknown[]): P
     return;
   }
   const body: Record<string, unknown> = { channel, text };
-  if (blocks) body['blocks'] = blocks;
+  if (blocks) body.blocks = blocks;
   const res = await fetch('https://slack.com/api/chat.postMessage', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SLACK_BOT_TOKEN}` },
@@ -148,8 +148,8 @@ router.post(
 
       const body = req.body as Record<string, unknown>;
 
-      if (body['type'] === 'url_verification') {
-        res.json({ challenge: body['challenge'] });
+      if (body.type === 'url_verification') {
+        res.json({ challenge: body.challenge });
         return;
       }
 
@@ -157,14 +157,14 @@ router.post(
 
       setImmediate(async () => {
         try {
-          const event = body['event'] as Record<string, unknown> | undefined;
-          const command = body['command'] as string | undefined;
+          const event = body.event as Record<string, unknown> | undefined;
+          const command = body.command as string | undefined;
 
           if (command) {
-            const channelId = body['channel_id'] as string;
-            const userId = body['user_id'] as string;
-            const userName = body['user_name'] as string;
-            const text = (body['text'] as string) ?? '';
+            const channelId = body.channel_id as string;
+            const userId = body.user_id as string;
+            const userName = body.user_name as string;
+            const text = (body.text as string) ?? '';
 
             const config = await getChannelConfig('slack', channelId);
             const trustLevel = (config?.trust_level as string) ?? 'standard';
@@ -301,11 +301,11 @@ router.post(
             return;
           }
 
-          if (body['type'] === 'event_callback' && event?.['type'] === 'message') {
-            const channelId = event['channel'] as string;
-            const userId = event['user'] as string;
-            const text = (event['text'] as string) ?? '';
-            const botId = event['bot_id'] as string | undefined;
+          if (body.type === 'event_callback' && event?.type === 'message') {
+            const channelId = event.channel as string;
+            const userId = event.user as string;
+            const text = (event.text as string) ?? '';
+            const botId = event.bot_id as string | undefined;
 
             if (botId) return;
             if (!text.toLowerCase().includes('alloy')) return;
@@ -354,7 +354,7 @@ router.post(
         return;
       }
 
-      const payloadRaw = (req.body as Record<string, string>)['payload'];
+      const payloadRaw = (req.body as Record<string, string>).payload;
       if (!payloadRaw) {
         res.status(400).json({ error: 'Missing payload' });
         return;

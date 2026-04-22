@@ -30,8 +30,8 @@ import {
   db,
 } from '@szl-holdings/db';
 import { and, desc, eq, inArray, like, sql } from 'drizzle-orm';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 import { logger } from '../lib/logger';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -992,7 +992,7 @@ async function refreshMutedLanesCache(): Promise<void> {
   const row = await getState();
   for (const k of Object.keys(_mutedLanesCache)) delete _mutedLanesCache[k];
   const meta = (row?.meta ?? null) as { mutedLanes?: Record<string, boolean> } | null;
-  if (meta && meta.mutedLanes && typeof meta.mutedLanes === 'object') {
+  if (meta?.mutedLanes && typeof meta.mutedLanes === 'object') {
     for (const [laneId, muted] of Object.entries(meta.mutedLanes)) {
       if (muted) _mutedLanesCache[laneId] = true;
     }
@@ -1037,7 +1037,7 @@ export async function setLaneMute(laneId: string, muted: boolean): Promise<LaneI
   };
   if (muted) mutedLanes[laneId] = true;
   else delete mutedLanes[laneId];
-  const nextMeta = { ...(currentMeta ?? {}), mutedLanes };
+  const nextMeta = { ...currentMeta, mutedLanes };
 
   await db
     .update(competitiveIntelStateTable)

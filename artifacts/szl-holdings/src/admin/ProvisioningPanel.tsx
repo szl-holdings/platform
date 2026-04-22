@@ -1,25 +1,16 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { AnimatePresence, m } from 'framer-motion';
 import {
-  Activity,
   AlertCircle,
   BookOpen,
   CheckCircle2,
   ChevronDown,
-  ChevronRight,
   ChevronUp,
-  Cloud,
-  Database,
   ExternalLink,
-  Globe,
   HelpCircle,
   Key,
   Loader2,
   RefreshCw,
-  Server,
-  Settings,
-  Shield,
-  XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -177,7 +168,7 @@ function ProvisioningPanel() {
             ) : (
               filtered.map((adapter) => {
                 const isExpanded = expandedAdapter === adapter.name;
-                const catColor = CATEGORY_COLORS[adapter.category] ?? CATEGORY_COLORS['Other'];
+                const catColor = CATEGORY_COLORS[adapter.category] ?? CATEGORY_COLORS.Other;
                 return (
                   <div
                     key={adapter.name}

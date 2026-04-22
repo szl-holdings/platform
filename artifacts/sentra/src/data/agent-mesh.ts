@@ -1267,7 +1267,7 @@ export function useAgentMeshGateway(filters: GatewayEventFilters = {}): UseAgent
         } catch {
           return;
         }
-        if (!parsed || !parsed.id) return;
+        if (!parsed?.id) return;
         // Receiving a message means the channel is healthy even if
         // `onopen` never fired (e.g. some proxies skip the open event).
         backoffMs = GATEWAY_STREAM_BACKOFF_INITIAL_MS;
@@ -1279,12 +1279,12 @@ export function useAgentMeshGateway(filters: GatewayEventFilters = {}): UseAgent
           // event is actually new do we bump the count + decision
           // tiles below — otherwise the totals would drift upward
           // on every reconnect/race.
-          if (prev.some((e) => e.id === parsed!.id)) return prev;
+          if (prev.some((e) => e.id === parsed?.id)) return prev;
           setFilteredEventCount((c) => c + 1);
           setGateway((g) => {
             const next = { ...g, callsLast24h: g.callsLast24h + 1 };
-            if (parsed!.decision === 'blocked') next.blockedLast24h = g.blockedLast24h + 1;
-            else if (parsed!.decision === 'quarantined')
+            if (parsed?.decision === 'blocked') next.blockedLast24h = g.blockedLast24h + 1;
+            else if (parsed?.decision === 'quarantined')
               next.quarantinedLast24h = g.quarantinedLast24h + 1;
             return next;
           });

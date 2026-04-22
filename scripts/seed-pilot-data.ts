@@ -35,7 +35,6 @@ async function getPilotOrgId(): Promise<number> {
 }
 
 async function seedPilotSignals(orgId: number) {
-  console.log('[seed-pilot-data] Seeding pilot signals...');
 
   const now = new Date();
 
@@ -111,12 +110,9 @@ async function seedPilotSignals(orgId: number) {
       },
     ])
     .onConflictDoNothing();
-
-  console.log('[seed-pilot-data] 4 pilot signals seeded');
 }
 
 async function seedPilotActions(orgId: number) {
-  console.log('[seed-pilot-data] Seeding pilot actions...');
 
   await db
     .insert(szlActionsTable)
@@ -162,12 +158,9 @@ async function seedPilotActions(orgId: number) {
       },
     ])
     .onConflictDoNothing();
-
-  console.log('[seed-pilot-data] 3 pilot actions seeded');
 }
 
 async function seedPilotWorkflows(orgId: number) {
-  console.log('[seed-pilot-data] Seeding pilot workflow templates...');
 
   await db
     .insert(szlWorkflowsTable)
@@ -212,21 +205,16 @@ async function seedPilotWorkflows(orgId: number) {
       },
     ])
     .onConflictDoNothing();
-
-  console.log('[seed-pilot-data] 3 pilot workflows seeded');
 }
 
 async function main() {
-  console.log('=== Pilot Data Seed ===\n');
   try {
     const orgId = await getPilotOrgId();
     await seedPilotSignals(orgId);
     await seedPilotActions(orgId);
     await seedPilotWorkflows(orgId);
-    console.log('\n=== Pilot data seed complete ===');
     process.exit(0);
-  } catch (err) {
-    console.error('[seed-pilot-data] Failed:', err);
+  } catch (_err) {
     process.exit(1);
   }
 }

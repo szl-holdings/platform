@@ -1,6 +1,5 @@
 import {
   db,
-  type InsertWorldlineSource,
   type WorldlineFetchLog,
   type WorldlineFreshnessCadence,
   type WorldlineSource,

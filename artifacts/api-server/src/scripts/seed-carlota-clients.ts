@@ -13,26 +13,24 @@ import {
 function daysAgo(n: number) {
   return new Date(Date.now() - n * 86400000);
 }
-function daysAhead(n: number) {
+function _daysAhead(n: number) {
   return new Date(Date.now() + n * 86400000);
 }
 
 export async function seedCarlotaClients() {
-  console.log('[seed-carlota-clients] Starting Carlota Jo client seed...');
 
   const existing = await db
     .select({ id: carlotaServicesTable.id })
     .from(carlotaServicesTable)
     .limit(1);
   if (existing.length > 0) {
-    console.log('[seed-carlota-clients] Data already seeded, skipping.');
     return { skipped: true };
   }
 
   const ORG_ID = 1;
   const OWNER_USER_ID = 1;
 
-  const services = await db
+  const _services = await db
     .insert(carlotaServicesTable)
     .values([
       {
@@ -128,9 +126,7 @@ export async function seedCarlotaClients() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-carlota-clients] Seeded ${services.length} services`);
-
-  const clientProfiles = await db
+  const _clientProfiles = await db
     .insert(carlotaClientProfilesTable)
     .values([
       {
@@ -185,8 +181,6 @@ export async function seedCarlotaClients() {
     ])
     .returning();
 
-  console.log(`[seed-carlota-clients] Seeded ${clientProfiles.length} client profiles`);
-
   await db.insert(carlotaInquiriesTable).values([
     {
       name: 'Thomas Beaumont',
@@ -235,9 +229,7 @@ export async function seedCarlotaClients() {
     },
   ]);
 
-  console.log(`[seed-carlota-clients] Seeded inquiries`);
-
-  const reservations = await db
+  const _reservations = await db
     .insert(carlotaReservationsTable)
     .values([
       {
@@ -320,8 +312,6 @@ export async function seedCarlotaClients() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-carlota-clients] Seeded ${reservations.length} reservations`);
-
   const clientAccounts = await db
     .insert(clientAccountsTable)
     .values([
@@ -351,8 +341,6 @@ export async function seedCarlotaClients() {
       },
     ])
     .returning();
-
-  console.log(`[seed-carlota-clients] Seeded ${clientAccounts.length} client accounts`);
 
   await db.insert(clientDocumentsTable).values([
     {
@@ -398,8 +386,6 @@ export async function seedCarlotaClients() {
       visibility: 'internal',
     },
   ]);
-
-  console.log(`[seed-carlota-clients] Seeded client documents`);
 
   await db.insert(clientUpdatesTable).values([
     {
@@ -448,9 +434,5 @@ export async function seedCarlotaClients() {
         '<p>Priya — I have reviewed your investor narrative draft. Below are my notes ahead of our next session...</p>',
     },
   ]);
-
-  console.log(`[seed-carlota-clients] Seeded client updates and messages`);
-
-  console.log('[seed-carlota-clients] Carlota Jo client seed complete.');
   return { seeded: true };
 }

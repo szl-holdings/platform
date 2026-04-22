@@ -1,5 +1,5 @@
 import { m, useReducedMotion } from 'framer-motion';
-import { ArrowDown, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const FLOW_NODES = [
   {

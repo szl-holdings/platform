@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ArrowRight, ArrowLeft, Layers, Database, Network, Cpu, Shield, GitBranch } from "lucide-react";
+import { ArrowRight, Layers, Database, Network, Cpu, Shield, GitBranch } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";

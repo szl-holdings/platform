@@ -141,7 +141,7 @@ export function PowerBiEmbed({
         <div className="flex items-center gap-2.5">
           <div
             className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: accentColor + '22' }}
+            style={{ background: `${accentColor}22` }}
           >
             <BarChart3 className="w-4 h-4" style={{ color: accentColor }} />
           </div>
@@ -157,7 +157,7 @@ export function PowerBiEmbed({
               title="Open in Power BI"
               onClick={() =>
                 window.open(
-                  `https://app.powerbi.com/groups/${config!.groupId}/reports/${config!.reportId}`,
+                  `https://app.powerbi.com/groups/${config?.groupId}/reports/${config?.reportId}`,
                   '_blank',
                 )
               }
@@ -183,7 +183,7 @@ export function PowerBiEmbed({
             <div className="text-center max-w-xs mx-auto px-6">
               <div
                 className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                style={{ background: accentColor + '22' }}
+                style={{ background: `${accentColor}22` }}
               >
                 <BarChart3 className="w-7 h-7" style={{ color: accentColor }} />
               </div>
@@ -220,9 +220,9 @@ export function PowerBiEmbed({
               Live · Power BI Embedded · Token server-minted
             </span>
           </div>
-          {config!.expiration && (
+          {config?.expiration && (
             <span className="text-[10px] text-muted-foreground">
-              Expires: {new Date(config!.expiration).toLocaleTimeString()}
+              Expires: {new Date(config?.expiration).toLocaleTimeString()}
             </span>
           )}
         </div>

@@ -41,22 +41,22 @@ async function queryLyteData(_query: string, topK: number): Promise<RetrievedDoc
 
   for (const s of signals) {
     const row = s as Record<string, unknown>;
-    const sev = String(row['severity'] ?? '');
+    const sev = String(row.severity ?? '');
     docs.push({
-      id: `signal-${String(row['id'] ?? '')}`,
+      id: `signal-${String(row.id ?? '')}`,
       content: [
-        `Signal sourceType=${String(row['sourceType'] ?? '')}`,
-        `source=${String(row['source'] ?? '')}`,
+        `Signal sourceType=${String(row.sourceType ?? '')}`,
+        `source=${String(row.source ?? '')}`,
         `severity=${sev}`,
-        `status=${String(row['status'] ?? '')}`,
-        `receivedAt=${String(row['receivedAt'] ?? '')}`,
+        `status=${String(row.status ?? '')}`,
+        `receivedAt=${String(row.receivedAt ?? '')}`,
       ].join(' | '),
       relevanceScore: sev === 'critical' ? 0.95 : sev === 'high' ? 0.85 : 0.7,
       source: 'lyte_signals',
       metadata: {
-        receivedAt: row['receivedAt'] ?? null,
-        severity: row['severity'] ?? null,
-        source: row['source'] ?? null,
+        receivedAt: row.receivedAt ?? null,
+        severity: row.severity ?? null,
+        source: row.source ?? null,
       },
     });
   }
@@ -64,19 +64,19 @@ async function queryLyteData(_query: string, topK: number): Promise<RetrievedDoc
   for (const inc of incidents) {
     const row = inc as Record<string, unknown>;
     docs.push({
-      id: `incident-${String(row['id'] ?? '')}`,
+      id: `incident-${String(row.id ?? '')}`,
       content: [
-        `Incident title=${String(row['title'] ?? 'unknown')}`,
-        `status=${String(row['status'] ?? '')}`,
-        `severity=${String(row['severity'] ?? '')}`,
-        `createdAt=${String(row['createdAt'] ?? '')}`,
+        `Incident title=${String(row.title ?? 'unknown')}`,
+        `status=${String(row.status ?? '')}`,
+        `severity=${String(row.severity ?? '')}`,
+        `createdAt=${String(row.createdAt ?? '')}`,
       ].join(' | '),
-      relevanceScore: row['status'] === 'open' ? 0.9 : 0.65,
+      relevanceScore: row.status === 'open' ? 0.9 : 0.65,
       source: 'lyte_incidents',
       metadata: {
-        createdAt: row['createdAt'] ?? null,
-        status: row['status'] ?? null,
-        severity: row['severity'] ?? null,
+        createdAt: row.createdAt ?? null,
+        status: row.status ?? null,
+        severity: row.severity ?? null,
       },
     });
   }
@@ -84,17 +84,17 @@ async function queryLyteData(_query: string, topK: number): Promise<RetrievedDoc
   for (const act of actions) {
     const row = act as Record<string, unknown>;
     docs.push({
-      id: `action-${String(row['id'] ?? '')}`,
+      id: `action-${String(row.id ?? '')}`,
       content: [
-        `Action title=${String(row['title'] ?? row['description'] ?? 'unknown')}`,
-        `state=${String(row['state'] ?? '')}`,
-        `category=${String(row['signalCategory'] ?? '')}`,
+        `Action title=${String(row.title ?? row.description ?? 'unknown')}`,
+        `state=${String(row.state ?? '')}`,
+        `category=${String(row.signalCategory ?? '')}`,
       ].join(' | '),
       relevanceScore: 0.75,
       source: 'lyte_actions',
       metadata: {
-        state: row['state'] ?? null,
-        createdAt: row['createdAt'] ?? null,
+        state: row.state ?? null,
+        createdAt: row.createdAt ?? null,
       },
     });
   }

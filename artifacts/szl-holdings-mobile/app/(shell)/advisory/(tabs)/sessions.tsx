@@ -7,7 +7,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -22,7 +22,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 
-const API_URL = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
+const _API_URL = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
 
 const TIME_SLOTS = ['9:00 AM', '10:00 AM', '11:00 AM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'];
 
@@ -49,7 +49,7 @@ function getNextBusinessDays(): string[] {
 }
 
 function formatDate(dateStr: string): { day: string; date: string; month: string } {
-  const d = new Date(dateStr + 'T12:00:00');
+  const d = new Date(`${dateStr}T12:00:00`);
   return {
     day: formatInUserTimeZone(d, { weekday: 'short' }, 'en-GB').toUpperCase(),
     date: formatInUserTimeZone(d, { day: 'numeric' }, 'en-GB'),

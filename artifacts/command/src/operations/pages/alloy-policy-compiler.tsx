@@ -313,7 +313,7 @@ function parseApproverCount(text: string): number | null {
   const m = text.match(/\b(\d+|one|two|three|four|five)\s+approvers?\b/i);
   if (!m) return null;
   const map: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5 };
-  return map[m[1].toLowerCase()] ?? parseInt(m[1]);
+  return map[m[1].toLowerCase()] ?? parseInt(m[1], 10);
 }
 
 function extractRoles(text: string): string[] {
@@ -430,7 +430,7 @@ function compileNaturalLanguage(input: string): CompiledPolicy {
 
     rules.push({
       id: `rule_${uid()}`,
-      name: s.length > 70 ? s.slice(0, 70) + '…' : s,
+      name: s.length > 70 ? `${s.slice(0, 70)}…` : s,
       sourceText: s,
       effect,
       conditions,
@@ -471,7 +471,7 @@ function compileNaturalLanguage(input: string): CompiledPolicy {
 
 function buildReason(
   s: string,
-  effect: PolicyEffect,
+  _effect: PolicyEffect,
   amount: number | null,
   roles: string[],
   approverCount: number | null,
@@ -812,11 +812,8 @@ export default function AlloyPolicyCompilerPage() {
           setInput(latest.input);
           setCompiled(latest.policy);
         }
-      } catch (err) {
+      } catch (_err) {
         if (!cancelled) {
-          // Surface to console for debugging; UI still works in transient mode.
-          // eslint-disable-next-line no-console
-          console.error('[policy-compiler] load failed', err);
         }
       }
     })();
@@ -853,8 +850,6 @@ export default function AlloyPolicyCompilerPage() {
         setSaveMessage('');
         addAudit(`Policy version ${newVersion.versionNumber} saved by Sarah Mitchell`);
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('[policy-compiler] save version failed', err);
         addAudit(
           `Failed to save policy version: ${err instanceof Error ? err.message : 'unknown error'}`,
         );
@@ -1068,8 +1063,6 @@ export default function AlloyPolicyCompilerPage() {
         setVersions((prev) => prev.map((v) => (v.id === versionId ? updated : v)));
         addAudit('Policy version signed by Sarah Mitchell (compliance_officer)');
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('[policy-compiler] sign version failed', err);
         addAudit(
           `Failed to sign policy version: ${err instanceof Error ? err.message : 'unknown error'}`,
         );
@@ -1138,8 +1131,6 @@ export default function AlloyPolicyCompilerPage() {
         const tc = fromServerTestCase(body);
         setTestCases((prev) => [...prev, tc]);
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('[policy-compiler] add test case failed', err);
         addAudit(
           `Failed to add test case: ${err instanceof Error ? err.message : 'unknown error'}`,
         );
@@ -1157,9 +1148,6 @@ export default function AlloyPolicyCompilerPage() {
           { method: 'DELETE' },
         );
       } catch (err) {
-        // Roll back on failure so the UI reflects the actual server state.
-        // eslint-disable-next-line no-console
-        console.error('[policy-compiler] delete test case failed', err);
         setTestCases(prevList);
         addAudit(
           `Failed to remove test case: ${err instanceof Error ? err.message : 'unknown error'}`,
@@ -1308,7 +1296,7 @@ export default function AlloyPolicyCompilerPage() {
                       <button
                         key={i}
                         onClick={() => {
-                          setInput((prev) => prev + (prev.endsWith('\n') ? '' : '\n') + p + '.');
+                          setInput((prev) => `${prev + (prev.endsWith('\n') ? '' : '\n') + p}.`);
                           setShowSuggestions(false);
                         }}
                         className="text-left text-[10px] px-2 py-1.5 rounded hover:bg-white/5 transition-colors"
@@ -1866,7 +1854,7 @@ export default function AlloyPolicyCompilerPage() {
                             <span>type: {c.actionType}</span>
                             <span>
                               cost: $
-                              {((c.context['estimatedCostUsd'] as number) ?? 0).toLocaleString()}
+                              {((c.context.estimatedCostUsd as number) ?? 0).toLocaleString()}
                             </span>
                             {c.matchedRule && (
                               <span>
@@ -2131,10 +2119,10 @@ export default function AlloyPolicyCompilerPage() {
                           className="flex items-center gap-3 text-[9px] font-mono flex-wrap"
                           style={{ color: TEXT.tertiary }}
                         >
-                          <span>action: {String(tc.context['action'] ?? 'any')}</span>
-                          {tc.context['estimatedCostUsd'] !== undefined && (
+                          <span>action: {String(tc.context.action ?? 'any')}</span>
+                          {tc.context.estimatedCostUsd !== undefined && (
                             <span>
-                              cost: ${Number(tc.context['estimatedCostUsd']).toLocaleString()}
+                              cost: ${Number(tc.context.estimatedCostUsd).toLocaleString()}
                             </span>
                           )}
                         </div>
@@ -2250,7 +2238,7 @@ export default function AlloyPolicyCompilerPage() {
                             style={{
                               background: isLatest ? `${ACCENT}15` : 'rgba(255,255,255,0.04)',
                               color: isLatest ? ACCENT : TEXT.tertiary,
-                              border: `1px solid ${isLatest ? ACCENT + '40' : BORDER.muted}`,
+                              border: `1px solid ${isLatest ? `${ACCENT}40` : BORDER.muted}`,
                             }}
                           >
                             v{v.versionNumber}

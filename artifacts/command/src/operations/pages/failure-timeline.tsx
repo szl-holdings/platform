@@ -2,10 +2,8 @@ import {
   Activity,
   AlertTriangle,
   ChevronRight,
-  Clock,
   Shield,
   TrendingUp,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -172,8 +170,8 @@ function fmt$(n: number): string {
   return `$${n}`;
 }
 
-function TimelineMarker({ hours, label }: { hours: number; label: string }) {
-  const now = 0;
+function _TimelineMarker({ hours, label }: { hours: number; label: string }) {
+  const _now = 0;
   const maxHours = 30;
   const pct = Math.min(100, (hours / maxHours) * 100);
   return (
@@ -344,7 +342,7 @@ export default function FailureTimelinePage() {
             className="absolute inset-x-0 top-1/2 h-px"
             style={{ background: 'rgba(255,255,255,0.08)' }}
           />
-          {[0, 6, 12, 18, 24, 30].map((h, i) => (
+          {[0, 6, 12, 18, 24, 30].map((h, _i) => (
             <div
               key={h}
               className="absolute"

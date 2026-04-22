@@ -1,14 +1,8 @@
 import {
-  Activity,
   AlertTriangle,
-  BarChart3,
   ChevronRight,
   Clock,
   Eye,
-  Globe,
-  Layers,
-  Shield,
-  TrendingUp,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -266,7 +260,7 @@ export default function HistoricalPatternsPage() {
               <div className="flex items-center gap-2 mb-1">
                 <span
                   className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5"
-                  style={{ background: catColor(e.category) + '15', color: catColor(e.category) }}
+                  style={{ background: `${catColor(e.category)}15`, color: catColor(e.category) }}
                 >
                   {e.category}
                 </span>
@@ -300,7 +294,7 @@ export default function HistoricalPatternsPage() {
               <h2 className="text-lg font-semibold text-white">{selected.title}</h2>
               <span
                 className="text-[9px] font-semibold rounded-full px-2.5 py-0.5"
-                style={{ background: ACCENT + '15', color: ACCENT }}
+                style={{ background: `${ACCENT}15`, color: ACCENT }}
               >
                 Analogy: {selected.analogyScore}%
               </span>
@@ -337,10 +331,10 @@ export default function HistoricalPatternsPage() {
                       style={{
                         background:
                           c.magnitude === 'Catastrophic'
-                            ? RED + '15'
+                            ? `${RED}15`
                             : c.magnitude === 'Severe'
-                              ? ACCENT + '15'
-                              : BLUE + '15',
+                              ? `${ACCENT}15`
+                              : `${BLUE}15`,
                         color:
                           c.magnitude === 'Catastrophic'
                             ? RED
@@ -375,7 +369,7 @@ export default function HistoricalPatternsPage() {
 
             <div
               className="rounded-lg p-3 mb-4"
-              style={{ background: ACCENT + '08', borderLeft: `2px solid ${ACCENT}` }}
+              style={{ background: `${ACCENT}08`, borderLeft: `2px solid ${ACCENT}` }}
             >
               <div className="flex items-center gap-1.5 mb-1">
                 <Eye className="h-3 w-3" style={{ color: ACCENT }} />

@@ -1,5 +1,4 @@
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 export type ProvenanceSourceClass =
   | 'human_authored'
@@ -226,7 +225,7 @@ export function ProofPanelBadge({
 }) {
   const [open, setOpen] = useState(false);
   const review = REVIEW_CONFIG[proof.reviewState];
-  const exportCfg = EXPORT_CONFIG[proof.exportSafetyState];
+  const _exportCfg = EXPORT_CONFIG[proof.exportSafetyState];
   const pct = Math.round((proof.confidenceScore ?? 0.5) * 100);
   const confColor = pct >= 80 ? '#6b8f71' : pct >= 55 ? '#c8953c' : '#ef4444';
 

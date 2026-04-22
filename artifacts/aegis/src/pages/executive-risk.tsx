@@ -6,15 +6,12 @@ import {
   CheckCircle,
   ChevronRight,
   Clock,
-  DollarSign,
   Download,
   Layers,
   Lock,
   Radio,
   Shield,
   Target,
-  TrendingDown,
-  Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
@@ -25,8 +22,6 @@ import {
   CartesianGrid,
   Line,
   LineChart,
-  RadialBar,
-  RadialBarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,

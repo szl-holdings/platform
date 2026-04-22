@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { sendError } from '../lib/api-response';
 import { verifyInternalHeader } from '../lib/internal-tokens';
@@ -104,7 +104,7 @@ function isExempt(path: string): boolean {
 }
 
 function isGraphQLPath(path: string): boolean {
-  return GRAPHQL_PATHS.some((p) => path === p || path.startsWith(p + '/'));
+  return GRAPHQL_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
 }
 
 function generateToken(): string {
@@ -136,7 +136,7 @@ export function csrfMiddleware(req: Request, res: Response, next: NextFunction):
   // cross-origin requests; bearer tokens must be explicitly included and cannot
   // be forged this way. Requests that carry a bearer token are still subject to
   // full authMiddleware() + requireRole() checks in each route handler.
-  const authHeader = req.headers['authorization'] as string | undefined;
+  const authHeader = req.headers.authorization as string | undefined;
   if (authHeader?.startsWith('Bearer ')) {
     return next();
   }

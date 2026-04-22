@@ -1,7 +1,7 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Button } from '@szl-holdings/shared-ui/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
+import { Card, CardContent, } from '@szl-holdings/shared-ui/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import {
 } from '@szl-holdings/shared-ui/ui/select';
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowRight, Clock, MapPin, Navigation, Plus, Route, Trash2 } from 'lucide-react';
+import { ArrowRight, Clock, MapPin, Navigation, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { api } from '@/lib/api';
 

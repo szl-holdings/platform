@@ -1,5 +1,5 @@
 import { color } from '@szl-holdings/design-system';
-import { AlertTriangle, Anchor, BarChart3, Navigation, Plug, Shield, Wind } from 'lucide-react';
+import { Anchor, Navigation, Plug, Shield, Wind } from 'lucide-react';
 import { useState } from 'react';
 import { vesselTwins, voyageTwins } from '@/data/fleet-twin';
 

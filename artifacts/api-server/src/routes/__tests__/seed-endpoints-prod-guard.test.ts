@@ -95,7 +95,6 @@ vi.mock('@szl-holdings/observability', () => ({
   },
   seededRng: () => () => 0,
   MetricTimeSeriesSimulator: class {
-    constructor(_seed?: number) {}
     next() {
       return 0;
     }

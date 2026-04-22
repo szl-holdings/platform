@@ -15,9 +15,9 @@
  *
  * Requires autocannon (pnpm add -g autocannon or npx autocannon).
  */
-'use strict';
 
-const { execFileSync, spawn } = require('child_process');
+
+const { execFileSync, spawn } = require('node:child_process');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:5000';
 const TARGET_ENDPOINT = process.env.ENDPOINT || null;
@@ -70,8 +70,6 @@ const selected = TARGET_ENDPOINT
   : ENDPOINTS;
 
 if (selected.length === 0) {
-  console.error(`No endpoint found matching ENDPOINT=${TARGET_ENDPOINT}`);
-  console.error(`Available paths: ${ENDPOINTS.map((e) => e.path).join(', ')}`);
   process.exit(1);
 }
 
@@ -81,7 +79,7 @@ function resolveAutocannonBin() {
     if (which) return which;
   } catch {}
   try {
-    const npxResult = execFileSync('npx', ['--yes', 'autocannon', '--version'], {
+    const _npxResult = execFileSync('npx', ['--yes', 'autocannon', '--version'], {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
     });
@@ -126,7 +124,7 @@ function runAutocannon(endpoint) {
   });
 }
 
-function formatMs(ms) {
+function _formatMs(ms) {
   if (ms === undefined || ms === null) return 'n/a';
   return `${Math.round(ms)} ms`;
 }
@@ -139,12 +137,6 @@ function statusIcon(p97_5, budget) {
 
 async function main() {
   if (!JSON_OUTPUT) {
-    console.log('\nSZL Holdings — API Load Test Baseline');
-    console.log(`Base URL:    ${BASE_URL}`);
-    console.log(`Concurrency: ${CONCURRENCY} connections`);
-    console.log(`Duration:    ${DURATION}s per endpoint`);
-    console.log(`Endpoints:   ${selected.length}`);
-    console.log(`Note:        Latency percentiles are p50, p97.5 (≈p95), and p99 per autocannon histogram.\n`);
   }
 
   const results = [];
@@ -160,20 +152,19 @@ async function main() {
       result = await runAutocannon(endpoint);
     } catch (err) {
       if (!JSON_OUTPUT) {
-        console.error(`FAILED\n    ${err.message}`);
       }
       results.push({ endpoint: endpoint.path, error: err.message });
       overallPass = false;
       continue;
     }
 
-    const p50 = result.latency && result.latency.p50;
-    const p97_5 = result.latency && result.latency.p97_5;
-    const p99 = result.latency && result.latency.p99;
-    const rps = result.requests && result.requests.average;
+    const p50 = result.latency?.p50;
+    const p97_5 = result.latency?.p97_5;
+    const p99 = result.latency?.p99;
+    const rps = result.requests?.average;
     const errors = result.errors || 0;
     const timeouts = result.timeouts || 0;
-    const totalRequests = (result.requests && result.requests.total) || 0;
+    const totalRequests = (result.requests?.total) || 0;
     const errorRate = totalRequests > 0 ? ((errors + timeouts) / totalRequests) * 100 : 0;
 
     const pass = p97_5 !== undefined ? p97_5 <= endpoint.p97_5Budget : true;
@@ -201,54 +192,25 @@ async function main() {
     results.push(summary);
 
     if (!JSON_OUTPUT) {
-      const icon = statusIcon(p97_5, endpoint.p97_5Budget);
-      console.log(`${icon} done`);
-      console.log(`    p50: ${formatMs(p50)}  p97.5: ${formatMs(p97_5)}  p99: ${formatMs(p99)}  rps: ${Math.round(rps || 0)}  errors: ${errors}`);
+      const _icon = statusIcon(p97_5, endpoint.p97_5Budget);
     }
   }
 
   if (JSON_OUTPUT) {
-    console.log(JSON.stringify({
-      capturedAt: new Date().toISOString(),
-      baseUrl: BASE_URL,
-      concurrency: CONCURRENCY,
-      duration: DURATION,
-      note: 'p97_5Ms is the autocannon p97.5 percentile (closest available to p95)',
-      results,
-      pass: overallPass,
-    }, null, 2));
     process.exit(overallPass ? 0 : 1);
     return;
   }
 
-  console.log('\n─────────────────────────────────────────────────────────────────────');
-  console.log(
-    `${'Endpoint'.padEnd(30)} ${'p50'.padStart(7)} ${'p97.5'.padStart(8)} ${'p99'.padStart(8)} ${'RPS'.padStart(7)} ${'ErrRate'.padStart(9)} ${'Status'.padStart(8)}`
-  );
-  console.log('─────────────────────────────────────────────────────────────────────');
-
   for (const r of results) {
     if (r.error) {
-      console.log(`${r.endpoint.padEnd(30)} ${'ERROR'.padStart(7)} ${r.error.slice(0, 40)}`);
       continue;
     }
-    const icon = statusIcon(r.p97_5Ms, r.p97_5Budget);
-    console.log(
-      `${r.endpoint.padEnd(30)} ${formatMs(r.p50Ms).padStart(7)} ${formatMs(r.p97_5Ms).padStart(8)} ${formatMs(r.p99Ms).padStart(8)} ${String(r.rps).padStart(7)} ${`${r.errorRatePct.toFixed(2)}%`.padStart(9)} ${icon}`
-    );
+    const _icon = statusIcon(r.p97_5Ms, r.p97_5Budget);
   }
-
-  console.log('─────────────────────────────────────────────────────────────────────');
-  console.log(
-    overallPass
-      ? '\nPASS — All endpoints within p97.5 latency budget.'
-      : '\nFAIL — One or more endpoints exceeded p97.5 latency budget. See load-baseline.md.'
-  );
 
   process.exit(overallPass ? 0 : 1);
 }
 
-main().catch((err) => {
-  console.error('Load test runner error:', err);
+main().catch((_err) => {
   process.exit(1);
 });

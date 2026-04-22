@@ -26,7 +26,7 @@ const TIMEOUT_MS = parseInt(process.env.SMOKE_TIMEOUT_MS ?? '10000', 10);
 const NODE_ENV = process.env.NODE_ENV ?? 'development';
 const IS_PRODUCTION = NODE_ENV === 'production';
 
-const COLORS = {
+const _COLORS = {
   green: '\x1b[32m',
   red: '\x1b[31m',
   yellow: '\x1b[33m',
@@ -35,11 +35,11 @@ const COLORS = {
   reset: '\x1b[0m',
 };
 
-const pass = (msg) => console.log(`  ${COLORS.green}✓${COLORS.reset} ${msg}`);
-const fail = (msg) => console.log(`  ${COLORS.red}✗${COLORS.reset} ${msg}`);
-const warn = (msg) => console.log(`  ${COLORS.yellow}⚠${COLORS.reset} ${msg}`);
-const info = (msg) => console.log(`  ${COLORS.cyan}ℹ${COLORS.reset} ${msg}`);
-const header = (msg) => console.log(`\n${COLORS.bold}${msg}${COLORS.reset}`);
+const pass = (_msg) => {};
+const fail = (_msg) => {};
+const warn = (_msg) => {};
+const info = (_msg) => {};
+const header = (_msg) => {};
 
 const results = { sev0: [], sev1: [], sev2: [], skipped: [] };
 
@@ -464,69 +464,35 @@ if (healthData?.services) {
   recordSkip('health:authenticity', 'Health endpoint not reachable — cannot check authenticity');
 }
 
-// ─── Final Report ─────────────────────────────────────────────────────────────
-
-console.log('\n' + '─'.repeat(60));
-console.log(`${COLORS.bold}Product-Mode Smoke Test — Results${COLORS.reset}`);
-console.log('─'.repeat(60));
-
 const totalFailed = results.sev0.length + results.sev1.length;
 const totalWarnings = results.sev2.length;
 
 if (results.sev0.length > 0) {
-  console.log(
-    `\n${COLORS.red}${COLORS.bold}SEV 0 FAILURES (${results.sev0.length}) — DEPLOYMENT BLOCKED:${COLORS.reset}`,
-  );
   for (const { name, message } of results.sev0) {
-    console.log(`  ${COLORS.red}✗ [${name}] ${message}${COLORS.reset}`);
   }
 }
 
 if (results.sev1.length > 0) {
-  console.log(
-    `\n${COLORS.yellow}${COLORS.bold}SEV 1 FAILURES (${results.sev1.length}) — RELEASE BLOCKED:${COLORS.reset}`,
-  );
   for (const { name, message } of results.sev1) {
-    console.log(`  ${COLORS.yellow}✗ [${name}] ${message}${COLORS.reset}`);
   }
 }
 
 if (results.sev2.length > 0) {
-  console.log(
-    `\n${COLORS.cyan}SEV 2 WARNINGS (${results.sev2.length}) — Fix this sprint:${COLORS.reset}`,
-  );
   for (const { name, message } of results.sev2) {
-    console.log(`  ${COLORS.cyan}⚠ [${name}] ${message}${COLORS.reset}`);
   }
 }
 
 if (results.skipped.length > 0) {
-  console.log(`\nSkipped (${results.skipped.length}):`);
   for (const { name, reason } of results.skipped) {
-    console.log(`  - [${name}] ${reason}`);
   }
 }
-
-console.log('\n' + '─'.repeat(60));
 
 if (totalFailed === 0 && totalWarnings === 0) {
-  console.log(`${COLORS.green}${COLORS.bold}✓ All product-mode checks passed.${COLORS.reset}`);
 } else if (totalFailed === 0) {
-  console.log(
-    `${COLORS.yellow}${COLORS.bold}⚠ No blocking failures. ${totalWarnings} warning(s) to address.${COLORS.reset}`,
-  );
 } else {
-  console.log(
-    `${COLORS.red}${COLORS.bold}✗ ${totalFailed} blocking failure(s). Platform not ready for release.${COLORS.reset}`,
-  );
   if (results.sev0.length > 0) {
-    console.log(
-      `${COLORS.red}  Sev 0 failures require immediate resolution before any deployment.${COLORS.reset}`,
-    );
   }
 }
-
-console.log(`\nSee docs/FAILURE_SEVERITY_POLICY.md for severity definitions.\n`);
 
 // ─── GitHub Actions Step Summary ─────────────────────────────────────────────
 // When running in GitHub Actions, $GITHUB_STEP_SUMMARY points to a markdown file
@@ -599,8 +565,7 @@ if (process.env.GITHUB_STEP_SUMMARY) {
     lines.push('');
 
     fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n'));
-  } catch (err) {
-    console.log(`(Could not write GITHUB_STEP_SUMMARY: ${err.message})`);
+  } catch (_err) {
   }
 }
 

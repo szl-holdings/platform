@@ -29,20 +29,17 @@ import {
   fundNavRecordsTable,
   fundPortfolioFinancialsTable,
   GLOBAL_TENANT_SENTINEL,
-  guardianActionsTable,
   guardianPoliciesTable,
   healthChecksTable,
   intelligenceCacheTable,
-  lyteAlertEventsTable,
   lyteAlertsTable,
   lyteMetricsTable,
-  maritimeVesselsTable,
   pcDeadlinesTable,
   pcMattersTable,
   usageEventsTable,
   usersTable,
 } from '@szl-holdings/db';
-import { and, asc, count, desc, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, lte, or, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { requireAnyAuth, requireRole } from '../middlewares/auth';
@@ -57,7 +54,7 @@ function tenantKey(tenantId: string | null): string {
 }
 
 import { bodyShape } from '@szl-holdings/contracts/common';
-import os from 'os';
+import os from 'node:os';
 import { z } from 'zod';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
@@ -109,7 +106,7 @@ function clamp(v: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, v));
 }
 
-function fmtUsd(cents: string | number | null | undefined): string {
+function _fmtUsd(cents: string | number | null | undefined): string {
   const v = Number(cents ?? 0);
   if (v >= 1e11) return `$${(v / 1e11).toFixed(1)}B`;
   if (v >= 1e8) return `$${(v / 1e8).toFixed(0)}M`;
@@ -453,7 +450,7 @@ async function getTerraData() {
   }
 }
 
-async function buildTimeline(aegisData: Awaited<ReturnType<typeof getAegisData>>) {
+async function buildTimeline(_aegisData: Awaited<ReturnType<typeof getAegisData>>) {
   const items: Array<{
     id: number;
     time: string;
@@ -866,7 +863,7 @@ async function buildSnapshot() {
  * Returns a full EcosystemSnapshot aggregated from all domain data sources.
  * Auth-optional: session cookie is used if present, but not required.
  */
-router.get('/snapshot', async (req: Request, res: Response) => {
+router.get('/snapshot', async (_req: Request, res: Response) => {
   try {
     const snapshot = await buildSnapshot();
     sendSuccess(res, snapshot);
@@ -1266,20 +1263,20 @@ async function computeAlerts(
       .slice(0, 25);
     for (const evt of visible) {
       const p = evt.payload as Record<string, unknown>;
-      const correlationId = typeof p['correlationId'] === 'string' ? p['correlationId'] : evt.id;
+      const correlationId = typeof p.correlationId === 'string' ? p.correlationId : evt.id;
       const title =
-        typeof p['title'] === 'string' ? p['title'] : 'Cross-platform correlation detected';
-      const description = typeof p['description'] === 'string' ? p['description'] : '';
-      const products = Array.isArray(p['products'])
-        ? (p['products'] as unknown[]).filter((x): x is string => typeof x === 'string')
+        typeof p.title === 'string' ? p.title : 'Cross-platform correlation detected';
+      const description = typeof p.description === 'string' ? p.description : '';
+      const products = Array.isArray(p.products)
+        ? (p.products as unknown[]).filter((x): x is string => typeof x === 'string')
         : [];
-      const strengthVal = typeof p['strength'] === 'number' ? (p['strength'] as number) : 0;
-      const outcome = typeof p['outcome'] === 'string' ? (p['outcome'] as string) : 'informational';
+      const strengthVal = typeof p.strength === 'number' ? (p.strength as number) : 0;
+      const outcome = typeof p.outcome === 'string' ? (p.outcome as string) : 'informational';
       const priority: 'critical' | 'high' | 'medium' =
         evt.severity === 'critical' ? 'critical' : evt.severity === 'high' ? 'high' : 'medium';
       const drillUrl =
-        typeof p['drillUrl'] === 'string'
-          ? (p['drillUrl'] as string)
+        typeof p.drillUrl === 'string'
+          ? (p.drillUrl as string)
           : `/strategy/cross-platform?correlationId=${encodeURIComponent(correlationId)}`;
       alerts.push({
         id: `xplat-corr-${correlationId}`,
@@ -1474,7 +1471,7 @@ router.post(
   validateBody(alertStateBodySchema),
   async (req: Request, res: Response) => {
     try {
-      const alertId = req.params['alertId'];
+      const alertId = req.params.alertId;
       if (!alertId || alertId.length > 200) {
         return handleRouteError(res, new Error('Invalid alertId'), 'Invalid alertId');
       }
@@ -1577,7 +1574,7 @@ router.post(
  */
 router.get('/alerts/:alertId/audit', requireAnyAuth(), async (req: Request, res: Response) => {
   try {
-    const alertId = req.params['alertId'];
+    const alertId = req.params.alertId;
     if (!alertId || alertId.length > 200) {
       return handleRouteError(res, new Error('Invalid alertId'), 'Invalid alertId');
     }

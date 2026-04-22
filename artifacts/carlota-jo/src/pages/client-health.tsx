@@ -1,17 +1,15 @@
-import { Badge } from '@szl-holdings/shared-ui/ui/badge';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import { motion } from 'framer-motion';
 import {
   AlertTriangle,
   Bell,
-  ChevronRight,
   Heart,
   Loader2,
   Minus,
   Sparkles,
   TrendingDown,
   TrendingUp,
-  Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import {

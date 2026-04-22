@@ -4,8 +4,7 @@ import { useOptimisticMutation } from '@szl-holdings/mobile-shared/hooks';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import type React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -234,7 +233,7 @@ export default function AlloyScreen() {
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
   const [tab, setTab] = useState<'runs' | 'approvals'>('runs');
-  const qc = useQueryClient();
+  const _qc = useQueryClient();
   const decideApproval = useDecideApproval();
   const [recentlyUpdatedIds, setRecentlyUpdatedIds] = useState<Set<number>>(new Set());
 

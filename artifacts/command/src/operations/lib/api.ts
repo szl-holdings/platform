@@ -1,7 +1,6 @@
 import {
   apiFetch,
   type PaginatedResponse,
-  type PaginationMeta,
 } from '@szl-holdings/shared-ui/api-fetch';
 
 async function apiFetchList<T>(path: string): Promise<T[]> {

@@ -1,6 +1,6 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion } from 'framer-motion';
-import { AlertTriangle, Award, Target, TrendingUp, Users } from 'lucide-react';
+import { AlertTriangle, } from 'lucide-react';
 import { useState } from 'react';
 import {
   Bar,

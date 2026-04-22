@@ -19,7 +19,7 @@
 
 import { logActivity } from '@szl-holdings/audit';
 import { db, decisionReceipts } from '@szl-holdings/db';
-import { createHash, randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { and, desc, eq } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
@@ -32,8 +32,7 @@ import {
 } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
-import type { AuthenticatedUser } from '../middlewares/auth';
-import { authMiddleware } from '../middlewares/auth';
+import { type AuthenticatedUser, authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
@@ -178,8 +177,8 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const user = req.user!;
-      const domain = req.query['domain'] as string | undefined;
-      const limit = Math.min(parseInt((req.query['limit'] as string) ?? '50', 10) || 50, 200);
+      const domain = req.query.domain as string | undefined;
+      const limit = Math.min(parseInt((req.query.limit as string) ?? '50', 10) || 50, 200);
 
       const conditions = [eq(decisionReceipts.actorUserId, user.id)];
       if (domain) conditions.push(eq(decisionReceipts.domain, domain));

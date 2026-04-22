@@ -40,7 +40,7 @@ const TIERS = [
   },
 ];
 
-const PATH_STEPS = [
+const _PATH_STEPS = [
   { icon: CheckSquare, label: 'Trigger', color: 'var(--color-lyte-light)' },
   { icon: Clock, label: 'Route to tier', color: 'hsl(40,90%,54%)' },
   { icon: CheckSquare, label: 'Human review', color: 'hsl(258,55%,68%)' },

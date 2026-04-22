@@ -2,24 +2,11 @@ import { MicroFeedbackWidget } from '@szl-holdings/shared-ui/micro-feedback-widg
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion as m } from 'framer-motion';
 import {
-  Activity,
   ArrowDownRight,
   ArrowUpRight,
-  BarChart3,
-  Building2,
-  Calculator,
-  ChevronRight,
-  DollarSign,
-  Eye,
-  Layers,
-  MapPin,
-  Percent,
-  Scale,
   Shield,
-  Target,
-  TrendingUp,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 type Approach = 'sales_comparison' | 'income' | 'cost' | 'dcf';
 

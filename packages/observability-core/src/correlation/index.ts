@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 export const CORRELATION_HEADER = 'x-correlation-id';
 export const REQUEST_ID_HEADER = 'x-request-id';

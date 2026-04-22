@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Redirect } from 'expo-router';
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { consumePendingReturnPath, useAuth } from '@/context/AuthContext';

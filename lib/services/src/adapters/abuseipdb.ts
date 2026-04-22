@@ -27,7 +27,7 @@ export class AbuseIPDBAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["ABUSEIPDB_API_KEY"];
 
   protected override async performHealthCheck(): Promise<void> {
-    const key = process.env["ABUSEIPDB_API_KEY"];
+    const key = process.env.ABUSEIPDB_API_KEY;
     const res = await fetch("https://api.abuseipdb.com/api/v2/check?ipAddress=8.8.8.8", {
       headers: { Key: key!, Accept: "application/json" },
     });
@@ -39,7 +39,7 @@ export class AbuseIPDBAdapter extends ServiceAdapter {
       return DEMO_IP_RESULTS[ipAddress] ?? this.generateMockResult(ipAddress);
     }
     try {
-      const key = process.env["ABUSEIPDB_API_KEY"]!;
+      const key = process.env.ABUSEIPDB_API_KEY!;
       const res = await fetch(
         `https://api.abuseipdb.com/api/v2/check?ipAddress=${encodeURIComponent(ipAddress)}&maxAgeInDays=${maxAgeInDays}&verbose`,
         { headers: { Key: key, Accept: "application/json" } },
@@ -59,7 +59,7 @@ export class AbuseIPDBAdapter extends ServiceAdapter {
         totalReports: d?.totalReports ?? 0,
         numDistinctUsers: d?.numDistinctUsers ?? 0,
         lastReportedAt: d?.lastReportedAt ?? null,
-        categories: d?.reports?.map((r: any) => r.categories).flat().slice(0, 5) ?? [],
+        categories: d?.reports?.flatMap((r: any) => r.categories).slice(0, 5) ?? [],
         isWhitelisted: d?.isWhitelisted ?? false,
         riskLevel: score >= 75 ? "critical" : score >= 50 ? "high" : score >= 25 ? "medium" : "low",
       };

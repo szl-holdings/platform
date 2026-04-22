@@ -127,7 +127,7 @@ export function simulateScenarioShard(
       let allFinite = true;
       for (const out of scenario.outputs) {
         const v = outputs[out.id];
-        if (v === undefined || !isFinite(v)) {
+        if (v === undefined || !Number.isFinite(v)) {
           allFinite = false;
           break;
         }
@@ -136,16 +136,16 @@ export function simulateScenarioShard(
 
       validIterations++;
       for (const inp of scenario.inputs) {
-        inputSamples[inp.id]!.push(inputs[inp.id]!);
+        inputSamples[inp.id]?.push(inputs[inp.id]!);
       }
       for (const out of scenario.outputs) {
-        outputSamples[out.id]!.push(outputs[out.id]!);
+        outputSamples[out.id]?.push(outputs[out.id]!);
       }
     } catch {
       /* constraint or calculation violation */
     }
     if (progressInterval > 0 && (i + 1) % progressInterval === 0 && i + 1 < iterations) {
-      onProgress!({
+      onProgress?.({
         completed: i + 1,
         total: iterations,
         validIterations,
@@ -179,11 +179,11 @@ export function aggregateScenarioShards(
     validIterations += shard.validIterations;
     for (const inp of scenario.inputs) {
       const src = shard.inputSamples[inp.id];
-      if (src && src.length) inputAccum[inp.id]!.push(...src);
+      if (src?.length) inputAccum[inp.id]?.push(...src);
     }
     for (const out of scenario.outputs) {
       const src = shard.outputSamples[out.id];
-      if (src && src.length) outputAccum[out.id]!.push(...src);
+      if (src?.length) outputAccum[out.id]?.push(...src);
     }
   }
 

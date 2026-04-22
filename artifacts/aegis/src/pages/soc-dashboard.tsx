@@ -1,29 +1,21 @@
 import { ThreatFeedSimulator } from '@szl-holdings/observability';
-import { AnimatedCounter } from '@szl-holdings/shared-ui/animated-counter';
-import { ActionLoop, DataProvenance, RoleSelector } from '@szl-holdings/shared-ui/data-provenance';
+import { DataProvenance, RoleSelector } from '@szl-holdings/shared-ui/data-provenance';
 import { LiveClock } from '@szl-holdings/shared-ui/live-clock';
 import type { DataProvenanceInfo } from '@szl-holdings/shared-ui/ontology';
-import { PackBanner } from '@szl-holdings/shared-ui/pack-banner';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
   AlertTriangle,
   ArrowUpRight,
   BarChart3,
-  Bell,
   Brain,
   Bug,
   CheckCircle,
   ChevronRight,
-  Clock,
   Crosshair,
   DollarSign,
-  Eye,
-  FileText,
-  Flame,
   GitBranch,
   Grid,
-  Hexagon,
   ListChecks,
   Lock,
   Network,
@@ -31,14 +23,11 @@ import {
   Search,
   Server,
   Shield,
-  Target,
   Ticket,
   TrendingUp,
-  UserCheck,
-  Users,
   Zap,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'wouter';
 
 const _threatSim = new ThreatFeedSimulator(0xfeed1337);
@@ -147,7 +136,7 @@ const CROSS_MODULE_FEED = [
   },
 ].sort((a, b) => {
   const toMins = (t: string) => {
-    const n = parseInt(t);
+    const n = parseInt(t, 10);
     return t.endsWith('h') ? n * 60 : n;
   };
   return toMins(a.time) - toMins(b.time);

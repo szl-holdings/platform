@@ -25,7 +25,6 @@ import {
   useEffectiveAccent,
   useUserPreferences,
 } from '@szl-holdings/shared-ui/use-user-preferences';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Activity,

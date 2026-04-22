@@ -16,7 +16,7 @@ import { registerCleanup, registerTextCleanup, flushCleanup, flushAllCleanup } f
 
 vi.mock("../../artifacts/api-server/src/middlewares/auth", () => {
   const authMiddleware = (_opts: { required?: boolean } = {}) =>
-    (req: Record<string, unknown>, _res: unknown, next: () => void) => {
+    (_req: Record<string, unknown>, _res: unknown, next: () => void) => {
       next();
     };
 
@@ -28,7 +28,7 @@ vi.mock("../../artifacts/api-server/src/middlewares/auth", () => {
 
   const parseIdParam = (id: string) => {
     const n = parseInt(id, 10);
-    if (isNaN(n)) throw new Error("Invalid ID");
+    if (Number.isNaN(n)) throw new Error("Invalid ID");
     return n;
   };
 
@@ -149,7 +149,7 @@ function buildAuthApp(roles: string[] = ["admin", "ops", "exec", "super_admin"])
 }
 
 // Pool handle for cleanup
-let pool: { end: () => Promise<void> } | null = null;
+let _pool: { end: () => Promise<void> } | null = null;
 
 afterAll(async () => {
   // Cleanup: end the real DB pool used by routes (imported by the route modules)
@@ -161,7 +161,7 @@ afterAll(async () => {
   } catch {
     // pool may already be closed or not exported
   }
-  pool = null;
+  _pool = null;
 });
 
 // ── Domain: Vessels ──────────────────────────────────────────────────────────

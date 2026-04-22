@@ -10,29 +10,18 @@ import { useUserPreferences } from '@szl-holdings/shared-ui/use-user-preferences
 import { formatDateTime } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  AlertTriangle,
   Bell,
   BellOff,
-  Building2,
-  CheckCircle,
-  Clock,
   FileText,
-  Globe,
   Key,
-  Layers,
   Loader2,
   Lock,
-  Mail,
   Maximize2,
-  Palette,
-  PanelLeft,
   PanelLeftClose,
   PanelLeftOpen,
-  RefreshCw,
   Rows3,
   Save,
   Shield,
-  Users,
   Volume2,
   VolumeX,
   X,
@@ -413,7 +402,7 @@ function SecurityPanel() {
 // Platform Settings Panel (super_admin)
 // ─────────────────────────────────────────────────────────────────────────────
 
-function PlatformSettingsPanel() {
+function _PlatformSettingsPanel() {
   const queryClient = useQueryClient();
   const { data, isLoading } = useStandardQuery({
     queryKey: ['platform-settings'],
@@ -479,7 +468,6 @@ function PlatformSettingsPanel() {
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
                       className="flex-1 px-3 py-1.5 text-sm bg-muted rounded-lg border border-border focus:outline-none focus:border-amber-500/50"
-                      autoFocus
                     />
                     <button
                       onClick={() => saveSetting(s)}

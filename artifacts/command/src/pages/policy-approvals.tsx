@@ -13,8 +13,6 @@ import {
   Hand,
   RefreshCw,
   ShieldCheck,
-  TrendingDown,
-  TrendingUp,
   Workflow,
   XCircle,
   Zap,
@@ -161,7 +159,7 @@ function tierStyle(tier?: string) {
 function timeAgo(iso?: string): string {
   if (!iso) return '—';
   const t = new Date(iso).getTime();
-  if (isNaN(t)) return iso;
+  if (Number.isNaN(t)) return iso;
   const s = Math.max(1, Math.floor((Date.now() - t) / 1000));
   if (s < 60) return `${s}s ago`;
   const m = Math.floor(s / 60);
@@ -339,8 +337,8 @@ function PolicyEvaluationPanel({ evaluation }: { evaluation?: PolicyEvaluation }
               <div>
                 <span style={{ color: 'rgba(255,255,255,0.4)' }}>Entities</span>{' '}
                 <span style={{ color: 'rgba(255,255,255,0.65)' }}>
-                  {evaluation.projectedImpact.affectedEntityIds!.slice(0, 3).join(', ')}
-                  {evaluation.projectedImpact.affectedEntityIds!.length > 3 ? ' …' : ''}
+                  {evaluation.projectedImpact.affectedEntityIds?.slice(0, 3).join(', ')}
+                  {(evaluation.projectedImpact.affectedEntityIds?.length ?? 0) > 3 ? ' …' : ''}
                 </span>
               </div>
             )}
@@ -374,10 +372,10 @@ function PolicyEvaluationPanel({ evaluation }: { evaluation?: PolicyEvaluation }
             style={{ color: 'rgba(255,255,255,0.35)' }}
           >
             <Database className="w-2.5 h-2.5" /> Evidence Chain — Memory Sources (
-            {evaluation.memoryRefs!.length})
+            {evaluation.memoryRefs?.length})
           </div>
           <div className="flex flex-col gap-1.5">
-            {evaluation.memoryRefs!.map((ref, i) => {
+            {evaluation.memoryRefs?.map((ref, i) => {
               const tierColor = TIER_BADGE_COLORS[ref.tier] ?? '#7c8a9a';
               return (
                 <div
@@ -716,7 +714,7 @@ export default function PolicyApprovalsPage() {
               style={{
                 color: active ? ACCENT : 'rgba(255,255,255,0.5)',
                 background: active ? `${ACCENT}14` : 'transparent',
-                border: `1px solid ${active ? ACCENT + '30' : 'rgba(255,255,255,0.06)'}`,
+                border: `1px solid ${active ? `${ACCENT}30` : 'rgba(255,255,255,0.06)'}`,
               }}
             >
               {t === 'pending' ? 'Pending' : 'History'}

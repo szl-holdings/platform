@@ -18,11 +18,11 @@ router.get(
 
       const defaultSince = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-      if (since && isNaN(new Date(since).getTime())) {
+      if (since && Number.isNaN(new Date(since).getTime())) {
         sendBadRequest(res, 'since must be a valid ISO date string');
         return;
       }
-      if (until && isNaN(new Date(until).getTime())) {
+      if (until && Number.isNaN(new Date(until).getTime())) {
         sendBadRequest(res, 'until must be a valid ISO date string');
         return;
       }

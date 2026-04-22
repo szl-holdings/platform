@@ -35,7 +35,8 @@
     "tw-animate-css": "^1.4.0",
     "vite": "catalog:",
     "wouter": "^3.3.5",
-    "@workspace/aef-sdk": "workspace:*"
+    "@workspace/aef-sdk": "workspace:*",
+    "@workspace/aef-contracts": "workspace:*"
   },
   "dependencies": {
     "@szl-holdings/brand-registry": "workspace:*",

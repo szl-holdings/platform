@@ -84,7 +84,7 @@ export default function FounderPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
@@ -130,7 +130,7 @@ export default function FounderPage() {
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "clamp(2.5rem,5vw,3.5rem) 0", background: "hsla(0,0%,100%,0.015)" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1px", background: "hsla(0,0%,100%,0.06)", borderRadius: "0.75rem", overflow: "hidden", border: "1px solid hsla(0,0%,100%,0.06)" }}>
-                {METRICS.map((m, i) => (
+                {METRICS.map((m, _i) => (
                   <div key={m.label} style={{ padding: "1.5rem 1.25rem", background: "hsl(214,16%,4.5%)" }}>
                     <p style={{ fontSize: "clamp(1.5rem,3vw,2rem)", fontWeight: 700, letterSpacing: "-0.03em", color: "hsl(38,8%,96%)", marginBottom: "0.25rem", fontFamily: "var(--font-display)" }}>{m.value}</p>
                     <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--color-szl-text-secondary)", letterSpacing: "0.02em", marginBottom: "0.125rem" }}>{m.label}</p>

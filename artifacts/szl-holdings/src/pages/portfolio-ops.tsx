@@ -3,7 +3,6 @@ import {
   Activity,
   AlertCircle,
   AlertTriangle,
-  ArrowUpRight,
   BarChart3,
   Brain,
   Building,
@@ -16,7 +15,6 @@ import {
   Shield,
   Ship,
   Target,
-  TrendingUp,
   Users,
   Zap,
 } from 'lucide-react';

@@ -1,16 +1,11 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
-  Activity,
   AlertTriangle,
   ChevronRight,
-  Clock,
   Eye,
-  Lock,
   Radio,
   Shield,
   Target,
-  Wifi,
-  Zap,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -157,7 +152,7 @@ export default function SentinelDashboard() {
   });
 
   const mitreCoverage = mitreCoverageData?.data?.coverage ?? MITRE_COVERAGE;
-  const aptCampaign = threatSummaryData?.data?.aptCampaign;
+  const _aptCampaign = threatSummaryData?.data?.aptCampaign;
 
   return (
     <div className="p-4 md:p-6 space-y-5 max-w-[1400px]">

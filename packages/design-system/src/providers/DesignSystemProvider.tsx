@@ -1,4 +1,4 @@
-import React, { createContext, type ReactNode, useContext, useState } from 'react';
+import { createContext, type ReactNode, useContext, useState } from 'react';
 import type { DensityMode } from '../tokens/index.js';
 
 export type ScreenMode = 'executive' | 'operator';

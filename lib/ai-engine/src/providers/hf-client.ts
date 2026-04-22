@@ -30,9 +30,9 @@ export interface HFCompletionResult {
 const HF_API_BASE = 'https://router.huggingface.co/hf-inference/v1';
 
 function getHeaders(): Record<string, string> {
-  const token = process.env['HF_TOKEN'] || process.env['HUGGINGFACE_API_KEY'];
+  const token = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers.Authorization = `Bearer ${token}`;
   return headers;
 }
 
@@ -126,8 +126,8 @@ export async function chatCompletionWithFallback(
 ): Promise<HFCompletionResult> {
   const models = [
     route.model,
-    process.env['HF_SECONDARY_LLM'] || 'Qwen/Qwen3-8B',
-    process.env['HF_FALLBACK_LLM'] || 'Qwen/Qwen3-0.6B',
+    process.env.HF_SECONDARY_LLM || 'Qwen/Qwen3-8B',
+    process.env.HF_FALLBACK_LLM || 'Qwen/Qwen3-0.6B',
   ];
   const uniqueModels = [...new Set(models)];
 

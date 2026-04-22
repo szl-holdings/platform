@@ -1,4 +1,4 @@
-const base = import.meta.env.BASE_URL;
+const _base = import.meta.env.BASE_URL;
 
 export default function S01Title() {
   return (

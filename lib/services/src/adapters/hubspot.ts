@@ -82,7 +82,7 @@ export class HubSpotAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ['HUBSPOT_ACCESS_TOKEN'];
 
   private get accessToken(): string | undefined {
-    return process.env['HUBSPOT_ACCESS_TOKEN'];
+    return process.env.HUBSPOT_ACCESS_TOKEN;
   }
 
   private async hsRequest(path: string): Promise<unknown> {

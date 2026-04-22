@@ -2,40 +2,19 @@ import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   db,
   dosAbTestsTable,
-  dosAnalyticsEventsTable,
   dosArticlesTable,
-  dosArticleVersionsTable,
-  dosAudienceSegmentsTable,
-  dosAuthorProfilesTable,
   dosAutomationRunsTable,
-  dosCampaignLinksTable,
-  dosCampaignsTable,
-  dosCarouselProjectsTable,
-  dosCarouselSlidesTable,
-  dosContentCalendarItemsTable,
-  dosContentLifecycleTable,
-  dosCtaBlocksTable,
-  dosDistributionTargetsTable,
-  dosEditorialPillarsTable,
   dosIntegrationStatusTable,
-  dosLeadNotesTable,
   dosLeadsTable,
-  dosLinktreeConfigTable,
-  dosMonetizationRulesTable,
   dosNewslettersTable,
   dosPageViewsTable,
-  dosPublicationUrlsTable,
-  dosSeoKeywordsTable,
   dosSiteSettingsTable,
-  dosTrendSignalsTable,
-  dosViralityScoresTable,
   dosXPostsTable,
 } from '@szl-holdings/db';
-import { createHash, randomBytes } from 'crypto';
-import { and, asc, count, desc, eq, gte, sql } from 'drizzle-orm';
+import { createHash, randomBytes } from 'node:crypto';
+import { and, asc, count, desc, eq, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
-import { computeLeadScore } from '../../lib/lead-scoring';
 import { listQuerySchema, validateBody, validateQuery } from '../../lib/validation';
 import { authMiddleware } from '../../middlewares/auth';
 
@@ -307,7 +286,7 @@ router.post(
   '/webhook-subscriptions/:id/test',
   requireAuth,
   validateBody(bodyShape({})),
-  async (req: Request, res: Response): Promise<void> => {
+  async (_req: Request, res: Response): Promise<void> => {
     res.json({
       delivered: true,
       statusCode: 200,
@@ -506,7 +485,7 @@ router.get(
   '/analytics/cross-platform',
   requireAuth,
   validateQuery(listQuerySchema),
-  async (req: Request, res: Response): Promise<void> => {
+  async (_req: Request, res: Response): Promise<void> => {
     const articles = await db
       .select({
         id: dosArticlesTable.id,
@@ -1551,7 +1530,7 @@ router.get(
       const monthlyViews = seeded(s * 7, 20, 3400);
       const healthScore = seeded(s * 11, 25, 98);
       const redistributions = seeded(s * 13, 0, 8);
-      const stages = [
+      const _stages = [
         'ideation',
         'creation',
         'published',
@@ -1570,7 +1549,7 @@ router.get(
           : a.siteStatus === 'draft'
             ? 'creation'
             : 'ideation';
-      const actions = ['none', 'redistribute', 'update', 'promote', 'archive'] as const;
+      const _actions = ['none', 'redistribute', 'update', 'promote', 'archive'] as const;
       const action =
         healthScore < 35
           ? 'archive'
@@ -1676,7 +1655,7 @@ router.get(
         newslettersReady: newsletterStats[0]?.ready ?? 0,
         automationsCompletedThisWeek: automationStats[0]?.completed ?? 0,
       });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ error: 'Failed to fetch analytics dashboard' });
     }
   },

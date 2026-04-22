@@ -114,10 +114,10 @@ async function callModelForEval(
   }
 
   if (provider === 'openai' || provider.includes('openai') || modelId.startsWith('ft:')) {
-    const openaiKey = process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
+    const openaiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
     if (!openaiKey) return buildFallbackEvalResponse(category, input);
     const openaiBase =
-      process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'] ?? 'https://api.openai.com/v1';
+      process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ?? 'https://api.openai.com/v1';
 
     try {
       const response = await fetch(`${openaiBase}/chat/completions`, {

@@ -276,15 +276,15 @@ export class CompStakAdapter extends ServiceAdapter {
   ];
 
   private get apiKey(): string | undefined {
-    return process.env["COMPSTAK_API_KEY"];
+    return process.env.COMPSTAK_API_KEY;
   }
 
   private get apiSecret(): string | undefined {
-    return process.env["COMPSTAK_API_SECRET"];
+    return process.env.COMPSTAK_API_SECRET;
   }
 
   private get baseUrl(): string {
-    return process.env["COMPSTAK_BASE_URL"] ?? "https://api.compstak.com/api/v1";
+    return process.env.COMPSTAK_BASE_URL ?? "https://api.compstak.com/api/v1";
   }
 
   private get authHeader(): string {
@@ -331,7 +331,7 @@ export class CompStakAdapter extends ServiceAdapter {
     if (!this.isLive) {
       let comps = [...MOCK_LEASE_COMPS];
       if (params.propertyType) {
-        comps = comps.filter(c => c.propertyType.toLowerCase() === params.propertyType!.toLowerCase());
+        comps = comps.filter(c => c.propertyType.toLowerCase() === params.propertyType?.toLowerCase());
       }
       if (params.limit) comps = comps.slice(params.offset ?? 0, (params.offset ?? 0) + params.limit);
       return comps;
@@ -359,7 +359,7 @@ export class CompStakAdapter extends ServiceAdapter {
     if (!this.isLive) {
       let comps = [...MOCK_SALE_COMPS];
       if (params.propertyType) {
-        comps = comps.filter(c => c.propertyType.toLowerCase() === params.propertyType!.toLowerCase());
+        comps = comps.filter(c => c.propertyType.toLowerCase() === params.propertyType?.toLowerCase());
       }
       if (params.limit) comps = comps.slice(params.offset ?? 0, (params.offset ?? 0) + params.limit);
       return comps;

@@ -53,9 +53,8 @@ export const healthPool = new Pool({
   statement_timeout: 2_000,
 });
 
-healthPool.on("error", (err) => {
+healthPool.on("error", (_err) => {
   if (isDev) {
-    console.error("[db] Health pool error:", err.message);
   }
 });
 
@@ -68,7 +67,7 @@ pool.query = async function instrumentedQuery(...args: unknown[]) {
     const result = await _originalPoolQuery(...args);
     const durationMs = Date.now() - start;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
+      // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
       const obs = await (new Function('m', 'return import(m)'))("@szl-holdings/observability") as { serverTelemetry?: { recordDbQueryLatency?: (ms: number, q?: string) => void } };
       const queryText = typeof args[0] === "string" ? args[0] : (args[0] as { text?: string })?.text;
       obs.serverTelemetry?.recordDbQueryLatency?.(durationMs, queryText);
@@ -79,7 +78,7 @@ pool.query = async function instrumentedQuery(...args: unknown[]) {
   } catch (err) {
     const durationMs = Date.now() - start;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
+      // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
       const obs = await (new Function('m', 'return import(m)'))("@szl-holdings/observability") as { serverTelemetry?: { recordDbQueryLatency?: (ms: number, q?: string) => void } };
       const queryText = typeof args[0] === "string" ? args[0] : (args[0] as { text?: string })?.text;
       obs.serverTelemetry?.recordDbQueryLatency?.(durationMs, queryText);
@@ -92,13 +91,11 @@ pool.query = async function instrumentedQuery(...args: unknown[]) {
 
 pool.on("connect", () => {
   if (isDev && _env.LOG_LEVEL === "debug") {
-    console.log("[db] New connection established");
   }
 });
 
-pool.on("error", (err) => {
+pool.on("error", (_err) => {
   if (isDev) {
-    console.error("[db] Pool error:", err.message);
   }
 });
 
@@ -106,9 +103,8 @@ export const db = drizzle(pool, {
   schema,
   logger: isDev
     ? {
-        logQuery(query: string, _params: unknown[]) {
+        logQuery(_query: string, _params: unknown[]) {
           if (_env.LOG_LEVEL === "debug") {
-            console.log(`[db] Query:`, query.slice(0, 200));
           }
         },
       }
@@ -261,7 +257,7 @@ const _sweeperInterval = _sweeperEnabled ? setInterval(() => {
     if (!rec.warned && ageMs >= CHECKOUT_WARN_THRESHOLD_MS) {
       rec.warned = true;
       const waitMs = rec.acquiredAt - rec.requestedAt;
-      const payload = {
+      const _payload = {
         level: "warn",
         event: "db.pool.checkout.long",
         obsRef: "OBS-007",
@@ -276,9 +272,6 @@ const _sweeperInterval = _sweeperEnabled ? setInterval(() => {
         stack: rec.stack,
         message: `[db] Pool checkout #${rec.id} held ${ageMs}ms (> ${CHECKOUT_WARN_THRESHOLD_MS}ms threshold; waited ${waitMs}ms in pool queue before acquisition) — possible client leak or long-running transaction`,
       };
-      // Structured single-line JSON so log shippers / Pino sinks can index
-      // the event without a custom parser.
-      console.warn(JSON.stringify(payload));
     }
   }
 }, 5_000) : null;

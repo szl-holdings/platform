@@ -9,8 +9,7 @@ import {
   runLearningCalibration,
   triggerLearningJob,
 } from '@szl-holdings/outcome-graph';
-import type { Request, Response } from 'express';
-import { type IRouter, Router } from 'express';
+import { type Request, type Response, type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { logger } from '../lib/logger';
 import { authMiddleware, requireRole } from '../middlewares/auth';

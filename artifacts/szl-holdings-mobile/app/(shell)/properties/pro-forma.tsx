@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   type DimensionValue,
   Platform,
@@ -18,7 +18,7 @@ import { ProvenanceChip, type ProvenanceStatus } from '@/components/ProvenanceCh
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 const ACCENT = '#c87941';
@@ -154,7 +154,7 @@ const MODELS: ProFormaModel[] = [
 function normalizeApiModels(data: unknown): ProFormaModel[] | null {
   const envelope = data as Record<string, unknown> | null;
   const arr = Array.isArray(envelope?.projects)
-    ? (envelope!.projects as Record<string, unknown>[])
+    ? (envelope?.projects as Record<string, unknown>[])
     : Array.isArray(data)
       ? (data as Record<string, unknown>[])
       : null;
@@ -243,7 +243,7 @@ export default function ProFormaScreen() {
   const { data: apiData, isFetching: pfFetching } = useQuery({
     queryKey: ['terra-pro-forma'],
     queryFn: async () => {
-      const res = await fetch(API_BASE + '/terra/pro-forma-projects');
+      const res = await fetch(`${API_BASE}/terra/pro-forma-projects`);
       if (!res.ok) throw new Error('API error');
       return res.json();
     },
@@ -276,7 +276,7 @@ export default function ProFormaScreen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · FINANCE</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · FINANCE</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Pro Forma</Text>
         </View>
         <View style={{ marginTop: 14 }}>
@@ -300,7 +300,7 @@ export default function ProFormaScreen() {
               styles.modelTab,
               {
                 borderColor: activeModelId === m.id ? ACCENT : colors.border,
-                backgroundColor: activeModelId === m.id ? ACCENT + '12' : 'transparent',
+                backgroundColor: activeModelId === m.id ? `${ACCENT}12` : 'transparent',
               },
             ]}
           >
@@ -363,7 +363,7 @@ export default function ProFormaScreen() {
                 styles.scenarioCard,
                 {
                   backgroundColor: colors.surface,
-                  borderColor: scenario.color + '30',
+                  borderColor: `${scenario.color}30`,
                   borderLeftColor: scenario.color,
                   borderLeftWidth: 3,
                 },

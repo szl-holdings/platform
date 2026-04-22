@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -178,7 +178,7 @@ export function SpotlightModal({
 
           <View style={styles.sheetContent}>
             <View style={styles.inputRow}>
-              <Text style={[styles.searchIcon, { color: accentColor + 'aa' }]}>⌕</Text>
+              <Text style={[styles.searchIcon, { color: `${accentColor}aa` }]}>⌕</Text>
               <TextInput
                 value={query}
                 onChangeText={(t) => {
@@ -199,7 +199,7 @@ export function SpotlightModal({
                 <View
                   style={[
                     styles.appBadge,
-                    { backgroundColor: accentColor + '22', borderColor: accentColor + '44' },
+                    { backgroundColor: `${accentColor}22`, borderColor: `${accentColor}44` },
                   ]}
                 >
                   <Text style={[styles.appBadgeText, { color: accentColor }]}>{appName}</Text>
@@ -226,8 +226,8 @@ export function SpotlightModal({
                     <Text
                       style={[
                         styles.groupHeader,
-                        item.group === 'Recent' && { color: accentColor + '99' },
-                        item.group === 'Quick Actions' && { color: accentColor + 'cc' },
+                        item.group === 'Recent' && { color: `${accentColor}99` },
+                        item.group === 'Quick Actions' && { color: `${accentColor}cc` },
                       ]}
                     >
                       {item.group.toUpperCase()}
@@ -242,7 +242,7 @@ export function SpotlightModal({
                     style={[
                       styles.row,
                       isSelected
-                        ? { backgroundColor: accentColor + '18', borderLeftColor: accentColor }
+                        ? { backgroundColor: `${accentColor}18`, borderLeftColor: accentColor }
                         : { borderLeftColor: 'transparent' },
                     ]}
                     activeOpacity={0.7}
@@ -251,7 +251,7 @@ export function SpotlightModal({
                       <Text style={styles.rowIcon}>{cmd.icon}</Text>
                     ) : (
                       <View
-                        style={[styles.rowIconPlaceholder, { backgroundColor: accentColor + '18' }]}
+                        style={[styles.rowIconPlaceholder, { backgroundColor: `${accentColor}18` }]}
                       >
                         <Text style={[styles.rowIconPlaceholderText, { color: accentColor }]}>
                           {cmd.label[0]}
@@ -275,7 +275,7 @@ export function SpotlightModal({
                       <View
                         style={[
                           styles.quickBadge,
-                          { backgroundColor: accentColor + '22', borderColor: accentColor + '44' },
+                          { backgroundColor: `${accentColor}22`, borderColor: `${accentColor}44` },
                         ]}
                       >
                         <Text style={[styles.quickBadgeText, { color: accentColor }]}>Action</Text>
@@ -288,7 +288,7 @@ export function SpotlightModal({
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>tap to navigate · tap outside to close</Text>
-              <Text style={[styles.footerCount, { color: accentColor + '66' }]}>
+              <Text style={[styles.footerCount, { color: `${accentColor}66` }]}>
                 {flatFiltered.length} commands
               </Text>
             </View>
@@ -313,8 +313,8 @@ export function SpotlightFab({
         {
           bottom,
           right,
-          backgroundColor: accentColor + '22',
-          borderColor: accentColor + '55',
+          backgroundColor: `${accentColor}22`,
+          borderColor: `${accentColor}55`,
         },
       ]}
       activeOpacity={0.8}

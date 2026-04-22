@@ -7,7 +7,6 @@ import {
   Globe,
   Instagram,
   Linkedin,
-  Search,
   Twitter,
   XCircle,
 } from 'lucide-react';

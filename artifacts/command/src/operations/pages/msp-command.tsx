@@ -1,16 +1,7 @@
 import {
-  Activity,
   AlertTriangle,
-  Bell,
-  Building,
-  CheckCircle,
   ChevronRight,
   Network,
-  Shield,
-  TrendingDown,
-  TrendingUp,
-  Users,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -245,7 +236,7 @@ export default function MSPCommand() {
                 className="px-3 py-1.5 rounded text-[10px] font-medium capitalize transition-all"
                 style={{
                   background: view === v ? `${GOLD}12` : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${view === v ? GOLD + '35' : DS.border}`,
+                  border: `1px solid ${view === v ? `${GOLD}35` : DS.border}`,
                   color: view === v ? GOLD : DS.text.secondary,
                 }}
               >
@@ -312,7 +303,7 @@ export default function MSPCommand() {
                 {TENANTS.map((t) => {
                   const hColor =
                     t.healthScore >= 80 ? '#10b981' : t.healthScore >= 65 ? GOLD : '#ef4444';
-                  const slaOk = t.slaActual >= t.slaTarget;
+                  const _slaOk = t.slaActual >= t.slaTarget;
                   return (
                     <div
                       key={t.id}

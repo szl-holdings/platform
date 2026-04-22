@@ -1,5 +1,5 @@
 import { m } from 'framer-motion';
-import { ArrowUpRight, Brain, Database, Layers, Lock, TrendingUp } from 'lucide-react';
+import { Brain, Database, Lock, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const DOMAINS = [

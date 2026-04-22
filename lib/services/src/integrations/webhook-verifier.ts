@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 export type WebhookSignatureAlgorithm = 'hmac-sha256' | 'hmac-sha1' | 'slack-v0' | 'salesforce-cdc';
 
@@ -78,7 +78,7 @@ function verifySlackV0(
   try {
     const baseString = `v0:${timestamp}:${body}`;
     const expected =
-      'v0=' + crypto.createHmac('sha256', signingSecret).update(baseString).digest('hex');
+      `v0=${crypto.createHmac('sha256', signingSecret).update(baseString).digest('hex')}`;
     const sigBuffer = Buffer.from(signature.padEnd(expected.length, '\0'));
     const expBuffer = Buffer.from(expected.padEnd(signature.length, '\0'));
     const valid =

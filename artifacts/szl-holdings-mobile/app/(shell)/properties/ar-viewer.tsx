@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
@@ -281,7 +281,7 @@ function PermissionScreen({
 }
 
 export default function ARPropertyViewerScreen() {
-  const colors = useColors();
+  const _colors = useColors();
   const insets = useSafeAreaInsets();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanning, setScanning] = useState(true);

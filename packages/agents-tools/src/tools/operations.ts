@@ -24,14 +24,14 @@ export const metricsQueryTool = defineTool({
   manifest: METRICS_QUERY_TOOL_MANIFEST,
   inputSchema: MetricsQueryInputSchema,
   outputSchema: GenericOutputSchema,
-  handler: (input) => metricsQueryHandler(input) as Promise<z.infer<typeof GenericOutputSchema>>,
+  handler: (input) => metricsQueryHandler(input, METRICS_QUERY_TOOL_MANIFEST) as Promise<z.infer<typeof GenericOutputSchema>>,
 });
 
 export const workflowTriggerTool = defineTool({
   manifest: WORKFLOW_TRIGGER_TOOL_MANIFEST,
   inputSchema: WorkflowTriggerInputSchema,
   outputSchema: GenericOutputSchema,
-  handler: (input) => workflowTriggerHandler(input) as Promise<z.infer<typeof GenericOutputSchema>>,
+  handler: (input) => workflowTriggerHandler(input, WORKFLOW_TRIGGER_TOOL_MANIFEST) as Promise<z.infer<typeof GenericOutputSchema>>,
 });
 
 export const notificationSendTool = defineTool({
@@ -39,21 +39,21 @@ export const notificationSendTool = defineTool({
   inputSchema: NotificationSendInputSchema,
   outputSchema: GenericOutputSchema,
   handler: (input) =>
-    notificationSendHandler(input) as Promise<z.infer<typeof GenericOutputSchema>>,
+    notificationSendHandler(input, NOTIFICATION_SEND_TOOL_MANIFEST) as Promise<z.infer<typeof GenericOutputSchema>>,
 });
 
 export const externalWebhookTool = defineTool({
   manifest: EXTERNAL_WEBHOOK_TOOL_MANIFEST,
   inputSchema: ExternalWebhookCallInputSchema,
   outputSchema: GenericOutputSchema,
-  handler: (input) => externalWebhookHandler(input) as Promise<z.infer<typeof GenericOutputSchema>>,
+  handler: (input) => externalWebhookHandler(input, EXTERNAL_WEBHOOK_TOOL_MANIFEST) as Promise<z.infer<typeof GenericOutputSchema>>,
 });
 
 export const infraProvisionTool = defineTool({
   manifest: INFRA_PROVISION_TOOL_MANIFEST,
   inputSchema: InfraProvisionInputSchema,
   outputSchema: GenericOutputSchema,
-  handler: (input) => infraProvisionHandler(input) as Promise<z.infer<typeof GenericOutputSchema>>,
+  handler: (input) => infraProvisionHandler(input, INFRA_PROVISION_TOOL_MANIFEST) as Promise<z.infer<typeof GenericOutputSchema>>,
 });
 
 export {

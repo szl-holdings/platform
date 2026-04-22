@@ -1,4 +1,4 @@
-import * as React from 'react';
+
 import { colors, effects } from '../tokens';
 import { cn, toAlpha } from '../utils';
 

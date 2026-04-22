@@ -182,15 +182,9 @@ if (isMainModule()) {
   const violations = runChecks(ROOT);
 
   if (violations.length === 0) {
-    console.log('✓ No package boundary violations found.');
     process.exit(0);
   } else {
-    console.error(`\n✗ Found ${violations.length} package boundary violation(s):\n`);
-    for (const v of violations) {
-      console.error(`  ${v.file}:${v.line}`);
-      console.error(`    Import: "${v.importPath}"`);
-      console.error(`    Rule:   ${v.rule}`);
-      console.error();
+    for (const _v of violations) {
     }
     process.exit(1);
   }

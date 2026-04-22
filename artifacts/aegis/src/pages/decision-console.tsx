@@ -4,25 +4,16 @@ import { ProofPanel } from '@szl-holdings/shared-ui/proof-panel';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  Activity,
-  AlertTriangle,
   ArrowRight,
   BookOpen,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
   Clock,
-  Eye,
   FileText,
-  Lightbulb,
   Lock,
-  Minus,
-  RefreshCw,
   Shield,
-  UserCheck,
-  Users,
   XCircle,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import { SubstrateWorkflowPanel } from '@/components/SubstrateWorkflowPanel';
@@ -533,7 +524,7 @@ export default function DecisionConsole() {
             </p>
           </div>
 
-          {usingLive && selectedLive && selectedLive.recommendation && (
+          {usingLive && selectedLive?.recommendation && (
             <div className="bg-white/[0.025] border border-white/5 rounded-xl p-5">
               <div className="text-[10px] font-mono uppercase tracking-[0.15em] mb-2 text-white/40">
                 Recommendation
@@ -544,7 +535,7 @@ export default function DecisionConsole() {
             </div>
           )}
 
-          {usingLive && selectedLive && selectedLive.affectedAsset && (
+          {usingLive && selectedLive?.affectedAsset && (
             <div className="bg-white/[0.025] border border-white/5 rounded-xl p-5">
               <div className="text-[10px] font-mono uppercase tracking-[0.15em] mb-2 text-white/40">
                 Affected Asset
@@ -654,7 +645,7 @@ export default function DecisionConsole() {
                 requires: {usingLive ? 'soc_manager+' : selectedMock.approver}
               </span>
             </div>
-            {usingLive && selectedLive && selectedLive.remediationOwner && (
+            {usingLive && selectedLive?.remediationOwner && (
               <p className="text-[10px] text-white/40">
                 Remediation owner: {selectedLive.remediationOwner}
               </p>

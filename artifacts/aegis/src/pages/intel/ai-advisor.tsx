@@ -1,6 +1,5 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
   BarChart3,
   Brain,
   CheckCircle2,
@@ -10,7 +9,6 @@ import {
   HelpCircle,
   Sparkles,
   Star,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 

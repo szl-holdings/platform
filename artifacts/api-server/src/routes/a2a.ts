@@ -114,7 +114,7 @@ router.get('/a2a/agents/:agentId/status', (req: Request, res: Response) => {
       successRate: card.metadata.successRate,
       totalDelegations: card.metadata.totalDelegations,
     });
-  } catch (err) {
+  } catch (_err) {
     sendError(res, 'Failed to get agent status', 500);
   }
 });
@@ -126,7 +126,7 @@ router.post(
     try {
       recordHeartbeat(req.params.agentId as string);
       sendSuccess(res, { recorded: true, agentId: req.params.agentId });
-    } catch (err) {
+    } catch (_err) {
       sendError(res, 'Failed to record heartbeat', 500);
     }
   },
@@ -425,7 +425,7 @@ router.get('/a2a/delegations', (_req: Request, res: Response) => {
     const history = getDelegationHistory(20);
     const stats = getDelegationStats();
     sendSuccess(res, { active, history, stats });
-  } catch (err) {
+  } catch (_err) {
     sendError(res, 'Failed to get delegations', 500);
   }
 });

@@ -51,8 +51,7 @@ export function useDeepLinking(options: UseDeepLinkingOptions): void {
           break;
         }
       }
-    } catch (err) {
-      console.warn('[DeepLink] Error handling URL:', err);
+    } catch (_err) {
     }
   }, []);
 

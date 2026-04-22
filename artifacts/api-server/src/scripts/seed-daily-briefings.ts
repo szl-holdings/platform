@@ -143,7 +143,6 @@ function makeSignals(day: number) {
 }
 
 export async function seedDailyBriefings() {
-  console.log('[seed-daily-briefings] Starting daily briefings seed...');
 
   // Count existing rows for this org — if exactly 30 rows already exist, skip.
   // Otherwise, delete and reinsert to heal any partial seed.
@@ -152,13 +151,9 @@ export async function seedDailyBriefings() {
     .from(dailyBriefingsTable)
     .where(eq(dailyBriefingsTable.orgId, ORG_ID));
   if (existing.length >= 30) {
-    console.log('[seed-daily-briefings] Daily briefings already fully seeded, skipping.');
     return { skipped: true };
   }
   if (existing.length > 0) {
-    console.log(
-      `[seed-daily-briefings] Partial seed detected (${existing.length}/30 rows) — rebuilding.`,
-    );
     await db.delete(dailyBriefingsTable).where(eq(dailyBriefingsTable.orgId, ORG_ID));
   }
 
@@ -187,7 +182,6 @@ export async function seedDailyBriefings() {
   }
 
   await db.insert(dailyBriefingsTable).values(rows);
-  console.log(`[seed-daily-briefings] Inserted ${rows.length} daily briefings`);
 
   return { dailyBriefings: rows.length };
 }

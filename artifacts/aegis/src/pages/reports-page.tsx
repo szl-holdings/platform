@@ -18,7 +18,7 @@ import {
   Shield,
   Target,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { api } from '@/lib/api';
 
 const severityColors: Record<string, string> = {

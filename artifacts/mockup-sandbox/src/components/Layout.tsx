@@ -3,8 +3,6 @@ import {
   BarChart2,
   BookOpen,
   Brain,
-  ChevronRight,
-  Cpu,
   Database,
   Download,
   FlaskConical,
@@ -16,7 +14,6 @@ import {
   Palette,
   Shield,
   Workflow,
-  Zap,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { nexusApi } from '../lib/api';

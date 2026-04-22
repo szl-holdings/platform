@@ -1,5 +1,5 @@
 import { CookieBanner } from "@szl-holdings/shared-ui/cookie-banner";
-import { StatusBanner, type StatusBannerConfig } from "@szl-holdings/shared-ui/status-banner";
+import { StatusBanner, } from "@szl-holdings/shared-ui/status-banner";
 import { useRole } from "@szl-holdings/shared-ui/use-role";
 import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
 import { ProductionConfirmProvider, useProductionConfirm } from "@szl-holdings/shared-ui/production-confirm";
@@ -407,7 +407,7 @@ function ExternalRedirect({ to }: { to: string }) {
 }
 
 function AlloyRunDetailRoute({ params }: { params: { id: string } }) {
-  const id = parseInt(params.id ?? "0");
+  const id = parseInt(params.id ?? "0", 10);
   return <AlloyRunDetail id={id} />;
 }
 
@@ -476,8 +476,7 @@ async function handleDemoReset() {
   try {
     await apiRequest("POST", "/api/admin/seed/reset-demo");
     window.location.reload();
-  } catch (err) {
-    console.error("[demo-reset] Failed to reset demo state:", err);
+  } catch (_err) {
     alert("Demo reset failed. Please check your connection and try again.");
   }
 }

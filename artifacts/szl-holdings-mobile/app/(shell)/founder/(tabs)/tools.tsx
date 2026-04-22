@@ -1,6 +1,6 @@
 import { useEmbeddingSearch } from '@szl-holdings/mobile-shared';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -155,7 +155,7 @@ export default function ToolsScreen() {
           <Text style={styles.headerTitle}>Tools</Text>
           <Text style={styles.headerSub}>Model Context Protocol · Stephen</Text>
         </View>
-        <View style={[styles.statusBadge, { borderColor: statusColor + '30' }]}>
+        <View style={[styles.statusBadge, { borderColor: `${statusColor}30` }]}>
           <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
           <Text style={[styles.statusText, { color: statusColor }]}>
             {serverStatus === 'checking'
@@ -205,7 +205,7 @@ export default function ToolsScreen() {
           <View style={styles.callSection}>
             <Text style={styles.callTitle}>{`> ${selected.name}`}</Text>
             {hasParams &&
-              Object.entries(selected.inputSchema!.properties!).map(([key, schema]) => (
+              Object.entries(selected.inputSchema?.properties!).map(([key, schema]) => (
                 <View key={key} style={{ marginBottom: 10 }}>
                   <Text style={styles.paramLabel}>{key}</Text>
                   <TextInput

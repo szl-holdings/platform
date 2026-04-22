@@ -1,13 +1,13 @@
 import { pool } from '@szl-holdings/db';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { logger } from './logger';
 
 const MIGRATION_FILES = ['0017_push_infra_hardening.sql', '0018_push_tokens_nullable_user.sql'];
 
 function resolveMigrationPath(filename: string): string {
   const relativePath = path.join('lib', 'db', 'drizzle', filename);
-  const replHome = process.env['REPL_HOME'];
+  const replHome = process.env.REPL_HOME;
   if (replHome) {
     const candidate = path.join(replHome, relativePath);
     if (fs.existsSync(candidate)) return candidate;

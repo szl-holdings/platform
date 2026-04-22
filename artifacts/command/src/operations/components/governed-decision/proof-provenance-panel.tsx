@@ -6,7 +6,6 @@ import {
   Clock,
   Cpu,
   Eye,
-  FileText,
   FlaskConical,
   GitBranch,
   Link2,

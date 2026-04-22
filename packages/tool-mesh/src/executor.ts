@@ -40,7 +40,7 @@ export class ToolMeshExecutor {
     toolId: string,
     toolName: string,
     input: unknown,
-    callerId: string,
+    _callerId: string,
   ): Promise<{ dryRun: true; toolId: string; toolName: string; input: unknown; message: string }> {
     return {
       dryRun: true,

@@ -4,7 +4,7 @@ import {
   sceneMemoryIndexTable,
   spatialTwinSnapshotsTable,
 } from '@szl-holdings/db';
-import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import type { SceneMemoryQuery, SceneMemorySlice } from './types.js';
 
 function computeRecencyScore(snapshotAt: Date): number {

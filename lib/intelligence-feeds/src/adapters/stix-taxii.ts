@@ -141,7 +141,6 @@ export class STIXTAXIIFeedAdapter extends BaseFeedAdapter {
 
   async connect(): Promise<void> {
     if (!this.taxiiServer && !this.mispUrl && !this.otxApiKey) {
-      console.warn('[STIX/TAXII] No server configured — will use public MISP feed');
     }
     this.health.status = 'healthy';
   }
@@ -200,7 +199,7 @@ export class STIXTAXIIFeedAdapter extends BaseFeedAdapter {
         Accept: 'application/taxii+json;version=2.1',
         'Content-Type': 'application/taxii+json;version=2.1',
       };
-      if (this.apiKey) headers['Authorization'] = `Bearer ${this.apiKey}`;
+      if (this.apiKey) headers.Authorization = `Bearer ${this.apiKey}`;
 
       const response = await fetch(url, { signal: controller.signal, headers });
       if (!response.ok) throw new Error(`TAXII error: ${response.status} ${response.statusText}`);

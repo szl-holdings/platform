@@ -1,10 +1,4 @@
-import type {
-  PostureTwinState,
-  PropertyTwinState,
-  SimulationScenario,
-  VesselTwinState,
-} from '@szl-holdings/ai-engine';
-import { postureTwin, propertyTwin, twinRegistry, vesselTwin } from '@szl-holdings/ai-engine';
+import { type PostureTwinState, type PropertyTwinState, type VesselTwinState, postureTwin, propertyTwin, twinRegistry, vesselTwin } from '@szl-holdings/ai-engine';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { Router } from 'express';
 import { z } from 'zod';
@@ -58,7 +52,7 @@ router.post(
       const { entityId, state } = req.body as z.infer<typeof twinEntitySchema>;
       const twin = vesselTwin.createTwin(entityId, state as unknown as VesselTwinState);
       res.json({ success: true, twin });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ success: false, error: 'Failed to create vessel twin' });
     }
   },
@@ -73,7 +67,7 @@ router.post(
       const { entityId, state } = req.body as z.infer<typeof twinEntitySchema>;
       const twin = propertyTwin.createTwin(entityId, state as unknown as PropertyTwinState);
       res.json({ success: true, twin });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ success: false, error: 'Failed to create property twin' });
     }
   },
@@ -88,7 +82,7 @@ router.post(
       const { entityId, state } = req.body as z.infer<typeof twinEntitySchema>;
       const twin = postureTwin.createTwin(entityId, state as unknown as PostureTwinState);
       res.json({ success: true, twin });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ success: false, error: 'Failed to create posture twin' });
     }
   },
@@ -133,7 +127,7 @@ router.patch(
       const updated = twinRegistry.update(req.params.twinId as string, req.body);
       if (!updated) return sendError(res, 'Twin not found', 404);
       res.json({ success: true, twin: updated });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ success: false, error: 'Failed to update twin' });
     }
   },
@@ -205,7 +199,7 @@ router.post(
       const st = postureTwin.createTwin('demo-posture-szl', postureState);
 
       res.json({ success: true, twins: { vessel: vt, property: pt, posture: st } });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ success: false, error: 'Demo seed failed' });
     }
   },

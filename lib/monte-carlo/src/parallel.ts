@@ -1,6 +1,5 @@
-import { isMainThread, parentPort, Worker, workerData } from 'worker_threads';
+import { isMainThread, Worker, } from 'node:worker_threads';
 import { sample } from './distributions.js';
-import type { RunConfig, ScenarioDefinition } from './schema.js';
 
 export interface WorkerTask {
   iterations: number;
@@ -313,15 +312,15 @@ export function runParallelChunks(
       merged.violationCount += r.violationCount;
       for (const [k, v] of Object.entries(r.inputSamples)) {
         if (!merged.inputSamples[k]) merged.inputSamples[k] = [];
-        merged.inputSamples[k]!.push(...v);
+        merged.inputSamples[k]?.push(...v);
       }
       for (const [k, v] of Object.entries(r.validInputSamples ?? {})) {
         if (!merged.validInputSamples[k]) merged.validInputSamples[k] = [];
-        merged.validInputSamples[k]!.push(...v);
+        merged.validInputSamples[k]?.push(...v);
       }
       for (const [k, v] of Object.entries(r.outputSamples)) {
         if (!merged.outputSamples[k]) merged.outputSamples[k] = [];
-        merged.outputSamples[k]!.push(...v);
+        merged.outputSamples[k]?.push(...v);
       }
     }
 

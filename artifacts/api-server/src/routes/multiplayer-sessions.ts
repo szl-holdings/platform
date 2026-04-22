@@ -16,7 +16,7 @@
 
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { commandSessionCommentsTable, commandSessionsTable, db } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { and, desc, eq } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import {
@@ -50,7 +50,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const appId = req.query['appId'] as string | undefined;
+      const appId = req.query.appId as string | undefined;
       const conditions: ReturnType<typeof eq>[] = [eq(commandSessionsTable.isActive, true)];
       if (appId) conditions.push(eq(commandSessionsTable.appId, appId));
 
@@ -153,8 +153,8 @@ router.delete(
   authMiddleware({ required: false }),
   async (req, res) => {
     try {
-      const id = Number(req.params['id']);
-      if (isNaN(id)) {
+      const id = Number(req.params.id);
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid id');
         return;
       }
@@ -216,7 +216,7 @@ router.get(
   async (req, res) => {
     try {
       const { sessionId } = req.params as { sessionId: string };
-      const limit = Math.min(Number(req.query['limit'] ?? 50), 200);
+      const limit = Math.min(Number(req.query.limit ?? 50), 200);
 
       const comments = await db
         .select()

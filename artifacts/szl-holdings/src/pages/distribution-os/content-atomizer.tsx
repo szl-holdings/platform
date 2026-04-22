@@ -25,9 +25,9 @@ import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { DistributionOsLayout } from './admin-dashboard';
 
-const API = import.meta.env.VITE_API_URL || '';
+const _API = import.meta.env.VITE_API_URL || '';
 
-function getCsrfToken(): string {
+function _getCsrfToken(): string {
   const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
   return match ? decodeURIComponent(match[1]) : '';
 }

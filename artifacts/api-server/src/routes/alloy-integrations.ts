@@ -1,8 +1,7 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { connectorsTable, db, pool } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import { createHmac, randomBytes } from 'crypto';
-import { and, eq } from 'drizzle-orm';
+import { createHmac, randomBytes } from 'node:crypto';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -459,7 +458,7 @@ router.post(
         try {
           const eventId = `intevt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
           const body = req.body as Record<string, unknown>;
-          const eventType = (body['type'] as string) ?? (body['event'] as string) ?? 'unknown';
+          const eventType = (body.type as string) ?? (body.event as string) ?? 'unknown';
 
           await pool.query(
             `INSERT INTO alloy_integration_events (id, connection_id, integration_type, event_type, direction, payload, status, created_at)
@@ -617,8 +616,8 @@ router.get('/alloy/integrations/health', authMiddleware(), async (_req: Request,
         enabled: conn.is_enabled,
         failureCount: conn.failure_count,
         lastSuccess: conn.last_success_at,
-        recentEvents: eventStats ? parseInt(eventStats.total) : 0,
-        recentFailures: eventStats ? parseInt(eventStats.failed) : 0,
+        recentEvents: eventStats ? parseInt(eventStats.total, 10) : 0,
+        recentFailures: eventStats ? parseInt(eventStats.failed, 10) : 0,
       };
     }
 

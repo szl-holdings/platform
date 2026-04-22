@@ -612,7 +612,7 @@ router.get('/embedding-models', async (req, res) => {
   if (!scope) return;
   try {
     const providers = listEmbeddingProviders();
-    const currentModel = process.env['HF_EMBED_MODEL'] ?? 'BAAI/bge-m3';
+    const currentModel = process.env.HF_EMBED_MODEL ?? 'BAAI/bge-m3';
     return res.json({
       ok: true,
       data: {
@@ -650,7 +650,7 @@ router.post(
         data: {
           embedding,
           dimensions: embedding.length,
-          modelId: modelId ?? process.env['HF_EMBED_MODEL'] ?? 'BAAI/bge-m3',
+          modelId: modelId ?? process.env.HF_EMBED_MODEL ?? 'BAAI/bge-m3',
         },
       });
     } catch (err) {

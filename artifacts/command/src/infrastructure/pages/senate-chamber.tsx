@@ -1,6 +1,5 @@
 import { ClassificationBadge } from '@imp/components/classification-badge';
 import { getClassificationColor, SENATE_PROPOSALS } from '@imp/lib/imperium-data';
-import { cn } from '@imp/lib/utils';
 import {
   AlertTriangle,
   BookOpen,
@@ -14,8 +13,7 @@ import {
   Shield,
   X,
 } from 'lucide-react';
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 const TYPE_ICONS: Record<string, React.ElementType> = {
   SCALING: Cpu,
@@ -51,9 +49,9 @@ const STATUS_CONFIG = {
 };
 
 function VoteBar({ votes }: { votes: (typeof SENATE_PROPOSALS)[0]['votes'] }) {
-  const filled = votes.aye;
-  const empty = votes.required - votes.aye - votes.nay;
-  const nay = votes.nay;
+  const _filled = votes.aye;
+  const _empty = votes.required - votes.aye - votes.nay;
+  const _nay = votes.nay;
 
   return (
     <div className="flex items-center gap-2">

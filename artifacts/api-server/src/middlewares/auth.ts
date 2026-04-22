@@ -1,17 +1,5 @@
 import type { OrgMembership as SharedOrgMembership } from '@szl-holdings/auth-shared';
-import type { RoleName } from '@szl-holdings/db';
-import {
-  db,
-  isReadOnlyRole,
-  organizationsTable,
-  orgMembersTable,
-  ROLE_HIERARCHY,
-  rolesTable,
-  sessionsTable,
-  toCanonicalRole,
-  userRolesTable,
-  usersTable,
-} from '@szl-holdings/db';
+import { type RoleName, db, isReadOnlyRole, organizationsTable, orgMembersTable, ROLE_HIERARCHY, rolesTable, sessionsTable, toCanonicalRole, userRolesTable, usersTable } from '@szl-holdings/db';
 import { serverTelemetry } from '@szl-holdings/observability';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import type { NextFunction, Request, Response } from 'express';
@@ -82,7 +70,7 @@ function buildInternalAgentUser(ctx: InternalAgentContext): AuthenticatedUser {
   };
 }
 
-function safeEqual(a: string, b: string): boolean {
+function _safeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let diff = 0;
   for (let i = 0; i < a.length; i++) {
@@ -165,7 +153,7 @@ async function resolveUserFromToken(token: string): Promise<SessionResolution> {
 
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, session.userId));
 
-  if (!user || !user.isActive) return { kind: 'missing' };
+  if (!user?.isActive) return { kind: 'missing' };
 
   // Session-version check — bumped on role/org-membership change.
   if (typeof user.sessionVersion === 'number' && session.sessionVersion !== user.sessionVersion) {
@@ -346,7 +334,7 @@ export class InvalidIdError extends Error {
 export function parseIdParam(raw: string | string[]): number {
   const str = Array.isArray(raw) ? raw[0] : raw;
   const id = parseInt(str, 10);
-  if (isNaN(id) || id < 1) throw new InvalidIdError();
+  if (Number.isNaN(id) || id < 1) throw new InvalidIdError();
   return id;
 }
 

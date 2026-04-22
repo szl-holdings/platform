@@ -1,10 +1,10 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
-import { AlertTriangle, ArrowRight, Link2, Network } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Link2, } from 'lucide-react';
 import { matterTwins, obligationTwins } from '../data/counsel-twin';
 
 export default function DependencyGraph() {
   const blockedObligations = obligationTwins.filter((o) => o.status === 'blocked');
-  const overdueObligations = obligationTwins.filter((o) => o.status === 'overdue');
+  const _overdueObligations = obligationTwins.filter((o) => o.status === 'overdue');
 
   return (
     <div className="p-6 space-y-6">

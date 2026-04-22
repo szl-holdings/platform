@@ -106,7 +106,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function InvisibleServiceDesign() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selected = DEMO_CARDS.find((c) => c.id === selectedId);
+  const _selected = DEMO_CARDS.find((c) => c.id === selectedId);
 
   const ambientSignals: AmbientSignal[] = [
     {

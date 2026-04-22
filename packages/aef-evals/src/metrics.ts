@@ -75,7 +75,7 @@ export function ndcgAtK(retrieved: RetrievedResult[], relevant: string[], k: num
 export function mrr(retrieved: RetrievedResult[], relevant: string[]): number {
   const relevantSet = new Set(relevant);
   for (let i = 0; i < retrieved.length; i++) {
-    if (relevantSet.has(retrieved[i]!.chunkId)) {
+    if (relevantSet.has(retrieved[i]?.chunkId)) {
       return 1 / (i + 1);
     }
   }
@@ -125,7 +125,7 @@ export function aggregateMetrics(perQueryMetrics: MetricResult[][]): MetricResul
   if (perQueryMetrics.length === 0) return [];
   const template = perQueryMetrics[0]!;
   return template.map((_, idx) => {
-    const values = perQueryMetrics.map((qm) => qm[idx]!.value);
+    const values = perQueryMetrics.map((qm) => qm[idx]?.value);
     const avg = values.reduce((a, b) => a + b, 0) / values.length;
     return { ...template[idx]!, value: avg };
   });

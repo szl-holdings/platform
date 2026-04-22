@@ -1,7 +1,7 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
-import { Activity, AlertTriangle, RefreshCw, TrendingUp, Zap } from 'lucide-react';
+import { Activity, AlertTriangle, RefreshCw, Zap } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   CartesianGrid,
@@ -49,7 +49,7 @@ const METRIC_TYPE_COLORS: Record<string, string> = {
   nps: '#4ade80',
 };
 
-const UNIT_LABELS: Record<string, string> = {
+const _UNIT_LABELS: Record<string, string> = {
   latency: 'ms',
   error_rate: '%',
   throughput: 'req/s',
@@ -62,7 +62,7 @@ const UNIT_LABELS: Record<string, string> = {
   nps: 'pts',
 };
 
-function AnomalyBand({
+function _AnomalyBand({
   anomalies,
   allData,
   dataKey,

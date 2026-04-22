@@ -1,14 +1,5 @@
 import {
-  Activity,
-  AlertTriangle,
-  Eye,
-  Globe,
   Layers,
-  Network,
-  Radio,
-  Shield,
-  TrendingUp,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -437,8 +428,8 @@ function GeoRiskRow({ risk }: { risk: GeopoliticalRisk }) {
 }
 
 export default function IntelligenceFusionGrid() {
-  const [activeSignals, setActiveSignals] = useState(FUSED_SIGNALS);
-  const [sourceUpdates, setSourceUpdates] = useState(0);
+  const [activeSignals, _setActiveSignals] = useState(FUSED_SIGNALS);
+  const [_sourceUpdates, setSourceUpdates] = useState(0);
   const [tab, setTab] = useState<'fusion' | 'geo' | 'ttp'>('fusion');
 
   useEffect(() => {

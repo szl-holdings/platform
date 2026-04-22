@@ -2,8 +2,7 @@ import { and, desc, eq, type SQL, sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
 import type { PlanStore, PlanStoreQuery } from './store.js';
-import type { PlanGraph, PlanStatus, PlanStepStatus } from './types.js';
-import { PlanGraphSchema, PlanNotFoundError } from './types.js';
+import { type PlanGraph, type PlanStatus, type PlanStepStatus, PlanGraphSchema, PlanNotFoundError } from './types.js';
 
 // We accept any node-pg drizzle instance — concrete schema types are owned
 // by the caller, not this package.
@@ -317,32 +316,32 @@ function asStringArray(v: unknown): string[] | undefined {
 
 function rowToPlan(row: PlanRow, stepRows: PlanStepRow[]): PlanGraph {
   const meta = asRecord(row.metadata);
-  const planner = asRecord(meta['__planner']);
+  const planner = asRecord(meta.__planner);
   const userMeta: Record<string, unknown> = { ...meta };
-  delete userMeta['__planner'];
+  delete userMeta.__planner;
 
   const steps = stepRows.map((s) => stepRowToStep(s));
-  const executionOrder = asStringArray(planner['executionOrder']) ?? steps.map((s) => s.stepId);
-  const status = (asString(planner['originalStatus']) ?? 'draft') as PlanStatus;
-  const riskLevel = (asString(planner['riskLevel']) ?? 'low') as PlanGraph['riskLevel'];
+  const executionOrder = asStringArray(planner.executionOrder) ?? steps.map((s) => s.stepId);
+  const status = (asString(planner.originalStatus) ?? 'draft') as PlanStatus;
+  const riskLevel = (asString(planner.riskLevel) ?? 'low') as PlanGraph['riskLevel'];
 
   const candidate = {
     planId: row.planId,
     parentPlanId: row.parentPlanId ?? undefined,
-    fallbackOf: asString(planner['fallbackOf']),
-    rank: asNumber(planner['rank']) ?? 0,
+    fallbackOf: asString(planner.fallbackOf),
+    rank: asNumber(planner.rank) ?? 0,
     title: row.title,
     objective: row.description ?? row.title,
     status,
     steps,
     executionOrder,
-    estimatedCostUsd: asNumber(planner['estimatedCostUsd']) ?? 0,
-    estimatedValue: asNumber(planner['estimatedValue']) ?? 0.5,
-    estimatedRisk: asNumber(planner['estimatedRisk']) ?? 0.1,
+    estimatedCostUsd: asNumber(planner.estimatedCostUsd) ?? 0,
+    estimatedValue: asNumber(planner.estimatedValue) ?? 0.5,
+    estimatedRisk: asNumber(planner.estimatedRisk) ?? 0.1,
     riskLevel,
     confidence: asNumber(row.confidence) ?? 0.7,
-    fallbacks: asStringArray(planner['fallbacks']) ?? [],
-    context: asRecord(planner['context']),
+    fallbacks: asStringArray(planner.fallbacks) ?? [],
+    context: asRecord(planner.context),
     metadata: userMeta,
     createdAt: new Date(row.createdAt).getTime(),
     updatedAt: new Date(row.updatedAt).getTime(),
@@ -372,15 +371,15 @@ interface DecodedPlanStep {
 
 function stepRowToStep(s: PlanStepRow): DecodedPlanStep {
   const meta = asRecord(s.metadata);
-  const planner = asRecord(meta['__planner']);
+  const planner = asRecord(meta.__planner);
   const userMeta: Record<string, unknown> = { ...meta };
-  delete userMeta['__planner'];
-  const status = (asString(planner['originalStatus']) ?? s.status) as PlanStepStatus;
-  const route = asRecord(planner['route']);
+  delete userMeta.__planner;
+  const status = (asString(planner.originalStatus) ?? s.status) as PlanStepStatus;
+  const route = asRecord(planner.route);
   const hasRoute = Object.keys(route).length > 0;
   return {
-    stepId: asString(planner['stepId']) ?? s.id,
-    index: asNumber(planner['index']) ?? s.stepIndex,
+    stepId: asString(planner.stepId) ?? s.id,
+    index: asNumber(planner.index) ?? s.stepIndex,
     title: s.title,
     description: s.description ?? '',
     dependsOn: s.dependsOnStepIds ?? [],
@@ -393,13 +392,13 @@ function stepRowToStep(s: PlanStepRow): DecodedPlanStep {
           selectedBy: 'priority',
           fallbackChain: [],
         },
-    estimatedValue: asNumber(planner['estimatedValue']) ?? 0.5,
-    estimatedRisk: asNumber(planner['estimatedRisk']) ?? 0.1,
-    riskLevel: asString(planner['riskLevel']) ?? 'low',
-    requiredEvidence: asStringArray(planner['requiredEvidence']) ?? [],
+    estimatedValue: asNumber(planner.estimatedValue) ?? 0.5,
+    estimatedRisk: asNumber(planner.estimatedRisk) ?? 0.1,
+    riskLevel: asString(planner.riskLevel) ?? 'low',
+    requiredEvidence: asStringArray(planner.requiredEvidence) ?? [],
     requiredApproval: !!s.approvalRequired,
-    approvalReason: asString(planner['approvalReason']),
-    rollbackPoints: Array.isArray(planner['rollbackPoints']) ? planner['rollbackPoints'] : [],
+    approvalReason: asString(planner.approvalReason),
+    rollbackPoints: Array.isArray(planner.rollbackPoints) ? planner.rollbackPoints : [],
     inputs: s.inputs ?? {},
     metadata: userMeta,
   };

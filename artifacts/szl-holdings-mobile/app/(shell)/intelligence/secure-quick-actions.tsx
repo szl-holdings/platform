@@ -1,8 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -75,7 +74,7 @@ function ActionTemplateCard({
       onPress={() => onPress(template)}
       style={[
         styles.templateCard,
-        { borderColor: template.accentColor + '35', backgroundColor: template.accentColor + '08' },
+        { borderColor: `${template.accentColor}35`, backgroundColor: `${template.accentColor}08` },
       ]}
       activeOpacity={0.85}
     >
@@ -83,8 +82,8 @@ function ActionTemplateCard({
         style={[
           styles.templateIcon,
           {
-            backgroundColor: template.accentColor + '18',
-            borderColor: template.accentColor + '35',
+            backgroundColor: `${template.accentColor}18`,
+            borderColor: `${template.accentColor}35`,
           },
         ]}
       >
@@ -105,7 +104,7 @@ function ActionTemplateCard({
           <View
             style={[
               styles.chip,
-              { backgroundColor: prioColor + '18', borderColor: prioColor + '35' },
+              { backgroundColor: `${prioColor}18`, borderColor: `${prioColor}35` },
             ]}
           >
             <Text style={[styles.chipText, { color: prioColor }]}>{template.priority}</Text>
@@ -151,7 +150,7 @@ function ActionRecordRow({
         <View
           style={[
             styles.chip,
-            { backgroundColor: statusColor + '18', borderColor: statusColor + '35' },
+            { backgroundColor: `${statusColor}18`, borderColor: `${statusColor}35` },
           ]}
         >
           <Text style={[styles.chipText, { color: statusColor }]}>{record.status}</Text>
@@ -159,7 +158,7 @@ function ActionRecordRow({
         <View
           style={[
             styles.chip,
-            { backgroundColor: prioColor + '12', borderColor: prioColor + '25' },
+            { backgroundColor: `${prioColor}12`, borderColor: `${prioColor}25` },
           ]}
         >
           <Text style={[styles.chipText, { color: prioColor }]}>{record.priority}</Text>
@@ -214,8 +213,8 @@ function ActionModal({
                   style={[
                     styles.templateIcon,
                     {
-                      backgroundColor: template.accentColor + '18',
-                      borderColor: template.accentColor + '35',
+                      backgroundColor: `${template.accentColor}18`,
+                      borderColor: `${template.accentColor}35`,
                     },
                   ]}
                 >
@@ -288,8 +287,8 @@ function ActionModal({
                 style={[
                   styles.submitBtn,
                   {
-                    backgroundColor: template.accentColor + '18',
-                    borderColor: template.accentColor + '50',
+                    backgroundColor: `${template.accentColor}18`,
+                    borderColor: `${template.accentColor}50`,
                   },
                 ]}
               >
@@ -417,7 +416,7 @@ export default function SecureQuickActionsScreen() {
         <View
           style={[
             styles.guardianBanner,
-            { borderColor: ACCENT + '35', backgroundColor: ACCENT + '08' },
+            { borderColor: `${ACCENT}35`, backgroundColor: `${ACCENT}08` },
           ]}
         >
           <Feather name="shield" size={14} color={ACCENT} />

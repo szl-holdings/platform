@@ -16,17 +16,11 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import {
-  Bar,
-  BarChart,
   PolarAngleAxis,
   PolarGrid,
   Radar,
   RadarChart,
-  ReferenceLine,
   ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
 } from 'recharts';
 import { usePageMeta } from '@/hooks/usePageMeta';
 

@@ -164,7 +164,7 @@ export function SiteNav() {
   const [scrolled, setScrolled] = useState(false);
   const [location] = useLocation();
   const { isAuthenticated } = useAuth();
-  const { role } = useRole();
+  useRole();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 12);
@@ -202,7 +202,7 @@ export function SiteNav() {
             <span style={{ fontSize: '0.9375rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--gi-text-primary)', fontFamily: 'var(--font-display)' }}>SZL Holdings</span>
           </Link>
 
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '0.125rem' }} role="navigation" aria-label="Main navigation" className="szl-desktop-nav">
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '0.125rem' }} aria-label="Main navigation" className="szl-desktop-nav">
             {NAV_ITEMS.map(item => (
               <div
                 key={item.label}
@@ -255,7 +255,7 @@ export function SiteNav() {
                         <Link
                           key={child.href}
                           href={child.href}
-                          onClick={() => { setOpen(null); analytics.track('nav_click', { item: child.label }); }}
+                          onClick={() => { setOpen(null); analytics.navLinkClick(child.label, child.href); }}
                           style={{ display: 'block', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-md)', textDecoration: 'none', transition: 'background 0.12s' }}
                           onMouseEnter={e => (e.currentTarget.style.background = 'hsla(0,0%,100%,0.055)')}
                           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -283,7 +283,7 @@ export function SiteNav() {
                 </Link>
                 <Link
                   href="/demo"
-                  onClick={() => analytics.track('cta_click', { location: 'nav', label: 'Request Demo' })}
+                  onClick={() => analytics.ctaClick('Request Demo', '/demo', 'nav')}
                   style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#ffffff', background: '#1e6abf', padding: '0.4375rem 0.875rem', borderRadius: 'var(--radius-md)', textDecoration: 'none', transition: 'opacity 0.15s' }}
                   onMouseEnter={e => (e.currentTarget.style.opacity = '0.88')}
                   onMouseLeave={e => (e.currentTarget.style.opacity = '1')}

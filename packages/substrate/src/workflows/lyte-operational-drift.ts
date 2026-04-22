@@ -205,9 +205,9 @@ function parseDriftItems(output: unknown): DriftItem[] {
   if (
     output &&
     typeof output === 'object' &&
-    Array.isArray((output as Record<string, unknown>)['driftItems'])
+    Array.isArray((output as Record<string, unknown>).driftItems)
   ) {
-    return (output as Record<string, unknown>)['driftItems'] as DriftItem[];
+    return (output as Record<string, unknown>).driftItems as DriftItem[];
   }
   return [
     {
@@ -238,7 +238,7 @@ function parseDriftItems(output: unknown): DriftItem[] {
 function buildDriftDecision(
   runId: string,
   driftItems: DriftItem[],
-  confidence: number,
+  _confidence: number,
 ): OperationalDriftDecision {
   return {
     runId,

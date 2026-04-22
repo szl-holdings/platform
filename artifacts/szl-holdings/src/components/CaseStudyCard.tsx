@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   HelpCircle,
   Layers,
-  TrendingUp,
   Zap,
 } from 'lucide-react';
 

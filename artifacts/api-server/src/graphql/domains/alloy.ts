@@ -992,7 +992,7 @@ export const alloyResolvers = {
           throw new Error(`Invalid decision '${args.decision}' — must be 'approved' or 'rejected'`);
         }
         const reviewerUserId = parseInt(args.reviewerUserId, 10);
-        if (!reviewerUserId || isNaN(reviewerUserId))
+        if (!reviewerUserId || Number.isNaN(reviewerUserId))
           throw new Error('reviewerUserId is required and must be a valid integer');
         // Validate the linked workflow is in waiting_approval state before reviewing
         const { db } = await import('@szl-holdings/db');

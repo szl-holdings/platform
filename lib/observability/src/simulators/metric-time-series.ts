@@ -181,7 +181,7 @@ export class MetricTimeSeriesSimulator {
   }
 
   generateGoldenSignalsHistory(
-    service: string,
+    _service: string,
     points = 60,
     intervalMs = 60_000,
     nowMs = Date.now(),
@@ -245,7 +245,7 @@ export class MetricTimeSeriesSimulator {
     const rng = this.rng;
     const routes = ROUTES[service] ?? ['/api/v1/resource'];
     const route = rng.pick(routes);
-    const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] as const;
+    const _methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] as const;
     const method =
       route.includes('create') || route.includes('charge') || route.includes('init')
         ? 'POST'
@@ -362,7 +362,7 @@ export class MetricTimeSeriesSimulator {
     return results.sort((a, b) => a.timestamp - b.timestamp);
   }
 
-  generateErrorHeatmap(services = SERVICES.slice(0, 6), nowMs = Date.now()): ErrorHeatmapCell[] {
+  generateErrorHeatmap(services = SERVICES.slice(0, 6), _nowMs = Date.now()): ErrorHeatmapCell[] {
     const rng = this.rng;
     const windows = ['1m', '5m', '15m', '1h'];
     const cells: ErrorHeatmapCell[] = [];

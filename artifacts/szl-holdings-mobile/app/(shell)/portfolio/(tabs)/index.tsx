@@ -3,8 +3,7 @@ import { SkeletonLoader, useApiStatus, useSyncEngine } from '@szl-holdings/mobil
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import type React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   PanResponder,
@@ -17,13 +16,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
@@ -107,10 +99,10 @@ function usePendingApprovals() {
         }>
       ).map((r) => ({
         id: String(r.id ?? ''),
-        title: (r.title ?? r.actionClass ?? r.metadata?.['title'] ?? 'Approval required') as string,
-        platform: (r.requestedFrom ?? r.metadata?.['platform'] ?? 'Holdings') as string,
-        amount: r.metadata?.['amount'] as string | undefined,
-        priority: (r.metadata?.['priority'] ?? 'normal') as 'critical' | 'high' | 'normal',
+        title: (r.title ?? r.actionClass ?? r.metadata?.title ?? 'Approval required') as string,
+        platform: (r.requestedFrom ?? r.metadata?.platform ?? 'Holdings') as string,
+        amount: r.metadata?.amount as string | undefined,
+        priority: (r.metadata?.priority ?? 'normal') as 'critical' | 'high' | 'normal',
         requestedBy: (r.requestedFrom ?? 'System') as string,
         requestedAt: r.createdAt ?? new Date().toISOString(),
       }));
@@ -120,7 +112,7 @@ function usePendingApprovals() {
   });
 }
 
-const PLATFORM_COLORS: Record<string, string> = {
+const _PLATFORM_COLORS: Record<string, string> = {
   aegis: '#6366f1',
   terra: '#4d7c0f',
   vessels: '#3b82f6',
@@ -381,7 +373,7 @@ function useAnimatedCounter(target: number, duration = 1200) {
 
   useEffect(() => {
     if (!target) return;
-    const start = 0;
+    const _start = 0;
     const startTime = Date.now();
     const tick = () => {
       const elapsed = Date.now() - startTime;

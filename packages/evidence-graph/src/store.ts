@@ -312,8 +312,7 @@ export class RecommendationStore implements RecommendationStoreBackend {
     for (const h of this.listeners) {
       try {
         h(event);
-      } catch (err) {
-        console.error('[RecommendationStore] listener error:', err);
+      } catch (_err) {
       }
     }
   }

@@ -1,33 +1,22 @@
 import { color } from '@szl-holdings/design-system';
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
   AlertTriangle,
   Anchor,
-  ArrowUpRight,
-  BarChart3,
-  CheckCircle,
-  Clock,
-  FileText,
   Navigation,
   Plug,
-  RefreshCw,
-  Shield,
-  User,
-  Wind,
 } from 'lucide-react';
 import { useState } from 'react';
 import { BalticPill } from '@/components/baltic-pill';
-import { type VesselTwin, type VoyageTwin, vesselTwins, voyageTwins } from '@/data/fleet-twin';
+import { type VesselTwin, vesselTwins, voyageTwins } from '@/data/fleet-twin';
 
 const ACCENT = 'hsl(205 70% 50%)';
 const ACCENT_DIM = 'hsl(205 70% 38%)';
 
-function fmt(n: number) {
+function _fmt(n: number) {
   return new Intl.NumberFormat('en-US').format(n);
 }
-function fmtK(n: number) {
+function _fmtK(n: number) {
   return `$${(n / 1000).toFixed(0)}K`;
 }
 function fmtM(n: number) {

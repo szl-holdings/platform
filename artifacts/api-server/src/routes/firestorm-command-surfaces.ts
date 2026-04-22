@@ -26,7 +26,7 @@ import {
   firestormToolAuditLogTable,
   firestormWorkflowActionsTable,
 } from '@szl-holdings/db';
-import { desc, eq, inArray, sql } from 'drizzle-orm';
+import { desc, eq, inArray, } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
@@ -435,9 +435,9 @@ router.post(
   validateBody(bodyShape({})),
   async (req, res) => {
     try {
-      const rawId = Array.isArray(req.params['id']) ? req.params['id'][0] : req.params['id'];
+      const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       const id = parseInt(rawId ?? '0', 10);
-      if (!id || isNaN(id)) {
+      if (!id || Number.isNaN(id)) {
         res.status(400).json({ error: 'INVALID_ID', message: 'Valid finding ID is required.' });
         return;
       }

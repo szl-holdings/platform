@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { m } from "framer-motion";
 import {
-  ArrowRight, BarChart3, Clock,
+  ArrowRight, Clock,
   Zap, CheckCircle2, RefreshCw
 } from "lucide-react";
 import { Link } from "wouter";
@@ -9,7 +9,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
-const fadeUp = {
+const _fadeUp = {
   hidden: { opacity: 0, y: 20 },
   show: (i: number) => ({
     opacity: 1,

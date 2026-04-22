@@ -16,7 +16,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
   Anchor,
-  ArrowRight,
   CheckCircle,
   Clock,
   Filter,
@@ -29,8 +28,7 @@ import {
   Wrench,
   Zap,
 } from 'lucide-react';
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { SubstrateWorkflowPanel } from '@/components/SubstrateWorkflowPanel';
 
 const EVENT_TYPE_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> =

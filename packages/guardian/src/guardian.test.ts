@@ -4,8 +4,7 @@ import {
   defaultDecisionEngine,
   GuardianDecisionEngine,
 } from './decision-engine.js';
-import type { DecisionRequest, GuardianRule } from './schema.js';
-import { DecisionRequestSchema, GuardianRuleSchema } from './schema.js';
+import { type DecisionRequest, DecisionRequestSchema, GuardianRuleSchema } from './schema.js';
 import {
   POLICY_TIER_DESCRIPTIONS,
   PolicyTierSchema,
@@ -39,17 +38,17 @@ describe('PolicyTier — 6 autonomy tiers (T0–T5)', () => {
   });
 
   it('tier numbers match T0–T5 ordering', () => {
-    expect(TIER_NUMBER['advisory']).toBe(0);
-    expect(TIER_NUMBER['supervised']).toBe(1);
+    expect(TIER_NUMBER.advisory).toBe(0);
+    expect(TIER_NUMBER.supervised).toBe(1);
     expect(TIER_NUMBER['operator-approved']).toBe(2);
     expect(TIER_NUMBER['dual-approved']).toBe(3);
-    expect(TIER_NUMBER['regulated']).toBe(4);
-    expect(TIER_NUMBER['sovereign']).toBe(5);
+    expect(TIER_NUMBER.regulated).toBe(4);
+    expect(TIER_NUMBER.sovereign).toBe(5);
   });
 
   it('sovereign has highest risk level', () => {
-    expect(TIER_RISK_LEVEL['sovereign']).toBe(6);
-    expect(TIER_RISK_LEVEL['advisory']).toBe(1);
+    expect(TIER_RISK_LEVEL.sovereign).toBe(6);
+    expect(TIER_RISK_LEVEL.advisory).toBe(1);
   });
 
   it('all tiers have descriptions', () => {
@@ -62,7 +61,7 @@ describe('PolicyTier — 6 autonomy tiers (T0–T5)', () => {
 
 describe('Tier control sets', () => {
   it('advisory (T0) does not allow memory write or external comms', () => {
-    const controls = TIER_CONTROLS['advisory'];
+    const controls = TIER_CONTROLS.advisory;
     expect(controls.allowMemoryWrite).toBe(false);
     expect(controls.allowExternalComms).toBe(false);
     expect(controls.approvalGate).toBe('none');
@@ -70,7 +69,7 @@ describe('Tier control sets', () => {
   });
 
   it('supervised (T1) allows memory write but no external comms', () => {
-    const controls = TIER_CONTROLS['supervised'];
+    const controls = TIER_CONTROLS.supervised;
     expect(controls.allowMemoryWrite).toBe(true);
     expect(controls.allowExternalComms).toBe(false);
     expect(controls.approvalGate).toBe('none');
@@ -90,7 +89,7 @@ describe('Tier control sets', () => {
   });
 
   it('regulated (T4) has strictest controls: dual, no memory write, no external comms, long retention', () => {
-    const controls = TIER_CONTROLS['regulated'];
+    const controls = TIER_CONTROLS.regulated;
     expect(controls.approvalGate).toBe('dual');
     expect(controls.allowMemoryWrite).toBe(false);
     expect(controls.allowExternalComms).toBe(false);
@@ -99,7 +98,7 @@ describe('Tier control sets', () => {
   });
 
   it('sovereign (T5) allows external comms and memory write but requires rollback', () => {
-    const controls = TIER_CONTROLS['sovereign'];
+    const controls = TIER_CONTROLS.sovereign;
     expect(controls.allowExternalComms).toBe(true);
     expect(controls.allowMemoryWrite).toBe(true);
     expect(controls.requiresRollback).toBe(true);

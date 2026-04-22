@@ -2,7 +2,6 @@ import { m } from 'framer-motion';
 import {
   ArrowDownRight,
   ArrowUpRight,
-  BarChart3,
   ChevronDown,
   Clock,
   Eye,
@@ -11,7 +10,6 @@ import {
   RefreshCw,
   Target,
   TrendingUp,
-  Users,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -642,7 +640,7 @@ export default function CrossPlatformAnalyticsPage() {
             </span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-            {CONTENT_PERFORMANCE.map((content, idx) => (
+            {CONTENT_PERFORMANCE.map((content, _idx) => (
               <div key={content.id} style={{ borderBottom: '1px solid hsla(0,0%,100%,0.04)' }}>
                 <div
                   style={{

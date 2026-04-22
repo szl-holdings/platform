@@ -235,7 +235,7 @@ export function buildAgentCard(agentDef: (typeof AGENT_REGISTRY)[0]): AgentCard 
     agentName: agentDef.name,
     domain: agentDef.domain,
     version: '2.0.0',
-    description: agentDef.systemPrompt.slice(0, 200) + '...',
+    description: `${agentDef.systemPrompt.slice(0, 200)}...`,
     capabilities: AGENT_CAPABILITY_MAP[agentDef.id] ?? [],
     preferredModel: agentDef.preferredModel,
     preferredProvider: agentDef.preferredProvider,

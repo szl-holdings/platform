@@ -227,7 +227,7 @@ export function OwnerCargoForceGraph({
 
   const onPointerMove = (e: React.PointerEvent) => {
     if (dragRef.current) {
-      const n = simRef.current.find((s) => s.id === dragRef.current!.id);
+      const n = simRef.current.find((s) => s.id === dragRef.current?.id);
       if (n) {
         const p = toSvgCoords(e.clientX, e.clientY);
         n.x = p.x;
@@ -240,13 +240,13 @@ export function OwnerCargoForceGraph({
     } else if (panRef.current) {
       const dx = e.clientX - panRef.current.x;
       const dy = e.clientY - panRef.current.y;
-      setTransform((t) => ({ ...t, tx: panRef.current!.tx + dx, ty: panRef.current!.ty + dy }));
+      setTransform((t) => ({ ...t, tx: (panRef.current?.tx ?? 0) + dx, ty: (panRef.current?.ty ?? 0) + dy }));
     }
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
     if (dragRef.current) {
-      const n = simRef.current.find((s) => s.id === dragRef.current!.id);
+      const n = simRef.current.find((s) => s.id === dragRef.current?.id);
       if (n) n.fixed = false;
       dragRef.current = null;
       reheat();
@@ -400,7 +400,7 @@ export function OwnerCargoForceGraph({
                     fill="#e0f2fe"
                     style={{ pointerEvents: 'none', userSelect: 'none' }}
                   >
-                    {n.label.length > 22 ? n.label.slice(0, 21) + '…' : n.label}
+                    {n.label.length > 22 ? `${n.label.slice(0, 21)}…` : n.label}
                   </text>
                 )}
               </g>

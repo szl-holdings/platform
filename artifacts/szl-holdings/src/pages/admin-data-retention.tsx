@@ -477,7 +477,7 @@ export default function AdminDataRetentionPage() {
                               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem" }}>
                                 <div>
                                   <label style={labelStyle}>Retention (days)</label>
-                                  <input type="number" min={1} max={36500} value={editingPolicy.retentionDays} onChange={(e) => setEditingPolicy((p) => p ? { ...p, retentionDays: parseInt(e.target.value) || 1 } : p)} style={inputStyle} />
+                                  <input type="number" min={1} max={36500} value={editingPolicy.retentionDays} onChange={(e) => setEditingPolicy((p) => p ? { ...p, retentionDays: parseInt(e.target.value, 10) || 1 } : p)} style={inputStyle} />
                                 </div>
                                 <div>
                                   <label style={labelStyle}>Purge strategy</label>

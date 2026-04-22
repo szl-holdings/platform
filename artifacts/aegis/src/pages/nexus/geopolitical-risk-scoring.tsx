@@ -1,5 +1,4 @@
 import {
-  Activity,
   AlertTriangle,
   BarChart3,
   Globe,
@@ -7,8 +6,6 @@ import {
   Shield,
   TrendingDown,
   TrendingUp,
-  Users,
-  Zap,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -249,7 +246,7 @@ export default function GeopoliticalRiskScoringPage() {
                   <div
                     className="h-10 w-10 rounded-lg flex items-center justify-center text-lg font-bold"
                     style={{
-                      background: scoreColor(c.overallScore) + '15',
+                      background: `${scoreColor(c.overallScore)}15`,
                       color: scoreColor(c.overallScore),
                     }}
                   >
@@ -287,7 +284,7 @@ export default function GeopoliticalRiskScoringPage() {
               <span
                 className="text-[9px] font-semibold rounded-full px-2.5 py-0.5"
                 style={{
-                  background: scoreColor(selected.overallScore) + '15',
+                  background: `${scoreColor(selected.overallScore)}15`,
                   color: scoreColor(selected.overallScore),
                 }}
               >

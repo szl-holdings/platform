@@ -48,7 +48,7 @@ export class NvidiaDcgmAdapter extends ServiceAdapter {
   protected override rateLimitPerMinute = 30;
 
   private get exporterUrl(): string {
-    return (process.env["DCGM_EXPORTER_URL"] ?? "").replace(/\/$/, "");
+    return (process.env.DCGM_EXPORTER_URL ?? "").replace(/\/$/, "");
   }
 
   protected override async performHealthCheck(): Promise<void> {
@@ -74,14 +74,14 @@ export class NvidiaDcgmAdapter extends ServiceAdapter {
 
       const [, metricName, labelsStr, valueStr] = match;
       const value = parseFloat(valueStr!);
-      if (isNaN(value)) continue;
+      if (Number.isNaN(value)) continue;
 
-      const gpuMatch = labelsStr!.match(/gpu="(\d+)"/);
-      const uuidMatch = labelsStr!.match(/UUID="([^"]+)"/);
+      const gpuMatch = labelsStr?.match(/gpu="(\d+)"/);
+      const uuidMatch = labelsStr?.match(/UUID="([^"]+)"/);
       const key = gpuMatch?.[1] ?? uuidMatch?.[1] ?? "0";
 
       if (!gpuMetrics.has(key)) gpuMetrics.set(key, new Map());
-      gpuMetrics.get(key)!.set(metricName!, value);
+      gpuMetrics.get(key)?.set(metricName!, value);
     }
 
     return gpuMetrics;
@@ -107,7 +107,7 @@ export class NvidiaDcgmAdapter extends ServiceAdapter {
       if ((metrics.get("DCGM_FI_DEV_POWER_VIOLATION") ?? 0) > 0) throttleReasons.push("hw_power_brake");
 
       gpus.push({
-        gpuIndex: parseInt(key) || gpus.length,
+        gpuIndex: parseInt(key, 10) || gpus.length,
         uuid: `GPU-${key}`,
         modelName: "NVIDIA GPU",
         utilizationPct: metrics.get("DCGM_FI_DEV_GPU_UTIL") ?? 0,

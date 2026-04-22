@@ -5,18 +5,13 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
-  Check,
   ChevronDown,
   ChevronUp,
   Clock,
   Cpu,
   DollarSign,
-  Eye,
-  FileText,
-  Lock,
   Plus,
   Shield,
-  X,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';

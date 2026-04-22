@@ -1,5 +1,5 @@
 import AuthGate from '@szl-holdings/shared-ui/AuthGate';
-import { AlertCircle, Check, Copy, Eye, EyeOff, Key, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, Check, Copy, Key, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch, isAuthenticated } from '../../lib/admin-api';
 

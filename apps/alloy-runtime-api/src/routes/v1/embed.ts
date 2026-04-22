@@ -10,8 +10,7 @@
  * the contract immediately.
  */
 
-import type { Request, Response } from 'express';
-import { type IRouter, Router } from 'express';
+import { type Request, type Response, type IRouter, Router } from 'express';
 import { z } from 'zod';
 
 const router: IRouter = Router();

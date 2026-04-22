@@ -86,8 +86,6 @@ export async function runNightlyEvals(opts: NightlyRunOptions = {}): Promise<Nig
   const runAt = new Date().toISOString();
 
   if (verbose) {
-    console.log(`[Eval Forge] Nightly run starting at ${runAt}`);
-    console.log(`[Eval Forge] ${suites.length} suites | triggered by: ${triggeredBy}`);
   }
 
   const suiteReports: EvalRunReport[] = [];
@@ -96,9 +94,6 @@ export async function runNightlyEvals(opts: NightlyRunOptions = {}): Promise<Nig
 
   for (const suite of suites) {
     if (verbose) {
-      console.log(
-        `[Eval Forge]   Running: ${suite.name} (${suite.evalType}, ${suite.cases.length} cases)`,
-      );
     }
 
     const report = await runEvalSuite(suite, resolveExecutor(suite), {
@@ -132,10 +127,7 @@ export async function runNightlyEvals(opts: NightlyRunOptions = {}): Promise<Nig
     suiteReports.push(report);
 
     if (verbose) {
-      const marker = report.hasRegression ? '⚠️' : '✓';
-      console.log(
-        `[Eval Forge]   ${marker} ${suite.suiteId}: ${report.passed}/${report.totalCases} passed (${(report.passRate * 100).toFixed(1)}%)`,
-      );
+      const _marker = report.hasRegression ? '⚠️' : '✓';
     }
   }
 
@@ -174,17 +166,10 @@ export async function runNightlyEvals(opts: NightlyRunOptions = {}): Promise<Nig
   };
 
   if (verbose) {
-    console.log(`\n[Eval Forge] Run complete in ${durationMs}ms`);
-    console.log(
-      `[Eval Forge] ${totalPassed}/${totalCases} cases passed (${(overallPassRate * 100).toFixed(1)}%)`,
-    );
     if (suitesWithRegression > 0) {
-      console.log(`[Eval Forge] ⚠️  ${suitesWithRegression} suite(s) with regressions`);
     }
     if (criticalRegressions.length > 0) {
-      console.log(`[Eval Forge] 🚨 CRITICAL regressions: ${criticalRegressions.join(', ')}`);
     }
-    console.log(`[Eval Forge] Eval types covered: ${Object.keys(byEvalType).join(', ')}`);
   }
 
   return summary;
@@ -207,21 +192,18 @@ export async function scheduleNightlyRun(
 
   timeoutId = setTimeout(() => {
     if (!active) return;
-    runNightlyEvals({ ...opts, verbose: true }).catch((err) =>
-      console.error('[Eval Forge] Nightly run error:', err),
+    runNightlyEvals({ ...opts, verbose: true }).catch((_err) =>
+      {},
     );
     intervalId = setInterval(() => {
       if (!active) return;
-      runNightlyEvals({ ...opts, verbose: true }).catch((err) =>
-        console.error('[Eval Forge] Nightly run error:', err),
+      runNightlyEvals({ ...opts, verbose: true }).catch((_err) =>
+        {},
       );
     }, intervalMs);
   }, delay);
 
   if (opts.verbose) {
-    console.log(
-      `[Eval Forge] Scheduled nightly run at UTC ${cronHourUtc}:00 (first run in ${Math.round(delay / 60000)}m)`,
-    );
   }
 
   return {

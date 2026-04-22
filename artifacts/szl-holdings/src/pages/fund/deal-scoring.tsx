@@ -321,7 +321,7 @@ export default function DealScoringPage() {
   function handlePartnerUpdate(patch: { status?: Deal["status"]; notes?: string | null }) {
     setLocalPatch(prev => ({
       ...prev,
-      [deal.id]: { ...(prev[deal.id] ?? {}), ...patch },
+      [deal.id]: { ...prev[deal.id], ...patch },
     }));
   }
 

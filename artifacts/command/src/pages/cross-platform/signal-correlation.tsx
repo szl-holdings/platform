@@ -167,7 +167,7 @@ export function SignalCorrelationPage() {
               className="px-2.5 py-1 rounded text-[10px] font-semibold uppercase tracking-wide transition-all"
               style={{
                 background: active ? `${color}18` : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${active ? color + '40' : 'rgba(255,255,255,0.08)'}`,
+                border: `1px solid ${active ? `${color}40` : 'rgba(255,255,255,0.08)'}`,
                 color: active ? color : 'rgba(255,255,255,0.4)',
               }}
             >
@@ -210,7 +210,7 @@ export function SignalCorrelationPage() {
         <div className="flex flex-col gap-3">
           {correlations.map((c) => {
             const isOpen = expanded === c.correlationId;
-            const outcomeMeta = OUTCOME_META[c.outcome] ?? OUTCOME_META['informational'];
+            const outcomeMeta = OUTCOME_META[c.outcome] ?? OUTCOME_META.informational;
             const OutcomeIcon = outcomeMeta.icon;
 
             return (

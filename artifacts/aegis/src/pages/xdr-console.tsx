@@ -2,17 +2,12 @@ import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import {
   Activity,
-  AlertTriangle,
   Cloud,
   Crosshair,
   Eye,
-  FileSearch,
   Layers,
-  Lock,
   Monitor,
   Radio,
-  Server,
-  Shield,
   Users,
   Wifi,
 } from 'lucide-react';

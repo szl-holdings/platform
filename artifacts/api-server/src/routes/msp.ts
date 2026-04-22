@@ -163,7 +163,7 @@ router.get('/msp/clients', auth, validateQuery(listQuerySchema), async (req, res
 router.get('/msp/clients/:id', auth, async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
-    if (isNaN(id)) return sendBadRequest(res, 'Invalid client ID');
+    if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid client ID');
     const [client] = await db.select().from(mspClientsTable).where(eq(mspClientsTable.id, id));
     if (!client) return sendNotFound(res, 'Client');
     sendSuccess(res, { client });
@@ -230,7 +230,7 @@ router.get('/msp/tickets', auth, validateQuery(listQuerySchema), async (req, res
 router.get('/msp/tickets/:id', auth, async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
-    if (isNaN(id)) return sendBadRequest(res, 'Invalid ticket ID');
+    if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid ticket ID');
     const [ticket] = await db.select().from(mspTicketsTable).where(eq(mspTicketsTable.id, id));
     if (!ticket) return sendNotFound(res, 'Ticket');
     sendSuccess(res, { ticket });
@@ -334,7 +334,7 @@ router.patch(
   async (req, res) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid ticket ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid ticket ID');
 
       const { status, priority, assigneeId, assigneeName, slaStatus, aiTriage } = req.body;
       const updates: Record<string, unknown> = { updatedAt: new Date() };
@@ -508,7 +508,7 @@ router.get('/msp/technicians', auth, validateQuery(listQuerySchema), async (req,
 
 router.get('/msp/revenue', auth, async (_req, res) => {
   try {
-    const [clients, contractsResult] = await Promise.all([
+    const [clients, _contractsResult] = await Promise.all([
       db
         .select({
           id: mspClientsTable.id,

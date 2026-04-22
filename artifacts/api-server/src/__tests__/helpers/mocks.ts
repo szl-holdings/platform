@@ -178,7 +178,7 @@ export function createAuthMiddlewareMock(user: MockAuthUser = DEFAULT_MOCK_AUTH_
     },
     parseIdParam: (paramName: string) => (req: Request, res: Response, next: NextFunction) => {
       const val = req.params[paramName];
-      if (!val || isNaN(Number(val))) {
+      if (!val || Number.isNaN(Number(val))) {
         res.status(400).json({ error: 'Invalid ID' });
         return;
       }

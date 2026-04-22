@@ -1,4 +1,4 @@
-import { ArrowRight, Brain, Eye, FlaskConical, Network, Shield, Workflow, Zap } from 'lucide-react';
+import { ArrowRight, Brain, FlaskConical, Network, Shield, Workflow, Zap } from 'lucide-react';
 import type { Page } from '../lib/types';
 
 const PILLARS = [

@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 
-const SERVICE_API_KEY = process.env['AEF_BEARER_TOKEN'] ?? process.env['AEF_API_KEY'];
-const SERVICE_TO_SERVICE_SECRET = process.env['AEF_S2S_SECRET'];
+const SERVICE_API_KEY = process.env.AEF_BEARER_TOKEN ?? process.env.AEF_API_KEY;
+const SERVICE_TO_SERVICE_SECRET = process.env.AEF_S2S_SECRET;
 
 if (!SERVICE_API_KEY) {
   throw new Error(
@@ -10,7 +10,7 @@ if (!SERVICE_API_KEY) {
 }
 
 export function bearerAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
-  const authHeader = req.headers['authorization'];
+  const authHeader = req.headers.authorization;
 
   if (!authHeader) {
     res.status(401).json({

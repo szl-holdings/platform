@@ -11,16 +11,12 @@ let appHandler = (_req, res) => {
 const server = http.createServer((req, res) => appHandler(req, res));
 
 server.listen(port, '0.0.0.0', async () => {
-  console.log(`  ➜  Local:   http://localhost:${port}/`);
-  console.log(`  ➜  Network: http://0.0.0.0:${port}/`);
 
   try {
     const mod = await import('./dist/index.mjs');
     const handler = await mod.bootstrap(server, port);
     appHandler = handler;
-    console.log(`[api-server] Fully ready on port ${port}`);
-  } catch (err) {
-    console.error('[api-server] Fatal:', err);
+  } catch (_err) {
     process.exit(1);
   }
 });

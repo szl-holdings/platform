@@ -13,13 +13,10 @@ import {
   Layers,
   Lock,
   Menu,
-  Network,
   Radio,
-  Scale,
   Server,
   Shield,
   Target,
-  Users,
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -38,7 +35,7 @@ const workspaces = [
     href: '/soc',
     capabilities: [
       'SOC command with unified XDR correlation',
-      metricDisplay(AEGIS_MITRE_COVERAGE) + ' — adversary emulation included',
+      `${metricDisplay(AEGIS_MITRE_COVERAGE)} — adversary emulation included`,
       'Threat hunting, forensics, identity threat detection',
       'Vulnerability management and hardening controls',
       'Compliance readiness across frameworks',

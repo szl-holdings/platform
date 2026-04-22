@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   ArrowRight,
   CheckCircle,
-  Clock,
   Eye,
   FileText,
   Globe,

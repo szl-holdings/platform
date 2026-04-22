@@ -24,6 +24,7 @@ export function useRealtimeChannel(channel: string, options: RealtimeChannelOpti
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const optionsRef = useRef(options);
   optionsRef.current = options;
+  const scheduleReconnectRef = useRef<() => void>(() => {});
 
   const connect = useCallback(() => {
     if (reconnectAttempts.current >= WS_MAX_RECONNECT_ATTEMPTS) return;
@@ -60,14 +61,14 @@ export function useRealtimeChannel(channel: string, options: RealtimeChannelOpti
       ws.onclose = () => {
         setIsConnected(false);
         optionsRef.current.onDisconnect?.();
-        scheduleReconnect();
+        scheduleReconnectRef.current();
       };
 
       ws.onerror = () => {
         ws.close();
       };
     } catch {
-      scheduleReconnect();
+      scheduleReconnectRef.current();
     }
   }, [channel]);
 
@@ -80,6 +81,7 @@ export function useRealtimeChannel(channel: string, options: RealtimeChannelOpti
     reconnectAttempts.current++;
     reconnectTimer.current = setTimeout(connect, delay);
   }, [connect]);
+  scheduleReconnectRef.current = scheduleReconnect;
 
   useEffect(() => {
     connect();
@@ -149,7 +151,7 @@ export function useFeatureFlag(flagKey: string, defaultValue = false): boolean {
     return () => {
       cancelled = true;
     };
-  }, [flagKey, defaultValue]);
+  }, [flagKey]);
 
   return isEnabled;
 }

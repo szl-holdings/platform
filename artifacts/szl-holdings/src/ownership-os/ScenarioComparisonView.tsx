@@ -1,13 +1,10 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
-  AlertCircle,
   Award,
   BarChart3,
   CheckCircle2,
   CheckSquare,
   Circle,
-  Eye,
-  EyeOff,
   Loader2,
   Percent,
   Scale,
@@ -17,7 +14,7 @@ import {
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { apiFetch } from './api';
-import { DisclaimerBanner, FitBadge, ScoreBar, StatusBadge } from './components';
+import { DisclaimerBanner, FitBadge, } from './components';
 import type { OwnershipScenario, ScenarioDetail } from './types';
 
 export function ScenarioComparisonView() {
@@ -251,7 +248,7 @@ export function ScenarioComparisonView() {
                     const certs = loaded.map((d) =>
                       d.certReadiness.find((c) => c.certificationName === certName),
                     );
-                    const bestRank = Math.max(
+                    const _bestRank = Math.max(
                       ...certs.map((c) => (c ? (fitLevelRank[c.fitLevel] ?? 0) : 0)),
                     );
                     return (

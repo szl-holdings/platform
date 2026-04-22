@@ -12,7 +12,7 @@
  *  - The Outcome Graph (recommendation lifecycle)
  */
 
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 
 export type RecommendationType =
   | 'risk_assessment'
@@ -192,12 +192,7 @@ export function captureTrace(input: TraceCaptureInput): AITrace {
   }
 
   if (externalSink) {
-    externalSink(trace).catch((err) => {
-      console.error(
-        '[ai-engine/trace-capture] sink write failed for traceId=%s: %s',
-        trace.traceId,
-        err instanceof Error ? err.message : String(err),
-      );
+    externalSink(trace).catch((_err) => {
     });
   }
 
@@ -264,12 +259,7 @@ export function updateTraceStatus(
   if (evalPassed != null) trace.evalPassed = evalPassed;
 
   if (externalUpdateSink) {
-    externalUpdateSink(traceId, status, evalScore, evalPassed).catch((err) => {
-      console.error(
-        '[ai-engine/trace-capture] update sink failed for traceId=%s: %s',
-        traceId,
-        err instanceof Error ? err.message : String(err),
-      );
+    externalUpdateSink(traceId, status, evalScore, evalPassed).catch((_err) => {
     });
   }
 

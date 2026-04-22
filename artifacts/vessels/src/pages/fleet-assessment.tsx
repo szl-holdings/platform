@@ -1,24 +1,14 @@
 import { analytics } from '@szl-holdings/analytics';
-import { ContactModal } from '@szl-holdings/shared-ui/contact-modal';
 import { AnimatePresence, motion, useInView } from 'framer-motion';
 import {
-  Activity,
   AlertTriangle,
-  Anchor,
   ArrowLeft,
   BarChart3,
   CheckCircle2,
   ChevronRight,
-  DollarSign,
-  Eye,
-  Globe,
-  Layers,
-  Lock,
-  Navigation,
   ShieldAlert,
   Ship,
   TrendingUp,
-  Users,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';

@@ -30,7 +30,7 @@ function highlightText(text: string, highlights: string[]): React.ReactNode {
       <mark
         key={i}
         className="rounded-sm px-0.5"
-        style={{ background: color.accent.blue + '28', color: color.accent.blue }}
+        style={{ background: `${color.accent.blue}28`, color: color.accent.blue }}
       >
         {part}
       </mark>

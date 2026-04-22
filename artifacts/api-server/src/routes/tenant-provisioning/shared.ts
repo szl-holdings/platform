@@ -1,38 +1,9 @@
-import {
-  auditLogsTable,
-  azureTenantsTable,
-  dataverseConnectionsTable,
-  db,
-  type InsertAzureTenant,
-  type InsertDataverseConnection,
-  type InsertTenantBranding,
-  orgMembersTable,
-  scimProvisionedUsersTable,
-  scimSyncLogsTable,
-  scimTokensTable,
-  tenantBrandingTable,
-  usersTable,
-} from '@szl-holdings/db';
-import { services } from '@szl-holdings/services';
-import crypto from 'crypto';
-import { and, count, desc, eq, inArray, sql } from 'drizzle-orm';
-import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
+
+import { type IRouter, type RequestHandler, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
-import { logActivity } from '../../lib/activity-logger';
-import {
-  handleRouteError,
-  sendBadRequest,
-  sendError,
-  sendForbidden,
-  sendNotFound,
-  sendSuccess,
-} from '../../lib/api-response';
-import { decryptSecret, encryptSecret } from '../../lib/crypto';
-import { tenantCreateSchema, tenantStatusSchema, validateBody } from '../../lib/validation';
-import { authMiddleware, requireRole } from '../../middlewares/auth';
 
-const router: IRouter = Router();
+const _router: IRouter = Router();
 
 export const PBI_SETTINGS_KEY = 'powerbi-global-config';
 
@@ -50,13 +21,13 @@ export function buildAdminConsentUrl(
   clientId: string,
   redirectUri: string,
 ): string {
-  const appClientId = clientId || process.env['AZURE_AD_CLIENT_ID'] || '';
+  const appClientId = clientId || process.env.AZURE_AD_CLIENT_ID || '';
   const encodedRedirect = encodeURIComponent(redirectUri);
   return `https://login.microsoftonline.com/${azureTenantId}/adminconsent?client_id=${appClientId}&redirect_uri=${encodedRedirect}&state=tenant-${azureTenantId}`;
 }
 
 export function buildMultiTenantLoginUrl(azureTenantId: string, redirectUri: string): string {
-  const appClientId = process.env['AZURE_AD_CLIENT_ID'] || '';
+  const appClientId = process.env.AZURE_AD_CLIENT_ID || '';
   const encodedRedirect = encodeURIComponent(redirectUri);
   return `https://login.microsoftonline.com/${azureTenantId}/oauth2/v2.0/authorize?client_id=${appClientId}&response_type=code&redirect_uri=${encodedRedirect}&scope=openid+email+profile+offline_access+User.Read`;
 }

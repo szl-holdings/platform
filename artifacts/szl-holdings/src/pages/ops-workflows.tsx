@@ -15,14 +15,12 @@ import {
 } from "@szl-holdings/workflow-runtime";
 import { PolicyGuardEngine, BASELINE_POLICY_RULES } from "@szl-holdings/policy-guard";
 import { EvidenceLedger } from "@szl-holdings/evidence-ledger";
-import { Timeline, type TimelineEvent, type TimelineEventStatus } from "@szl-holdings/design-system";
-import { EvidencePanel } from "@szl-holdings/design-system";
+import { Timeline, type TimelineEvent, type TimelineEventStatus, EvidencePanel } from '@szl-holdings/design-system';
 import {
   Lock,
   Workflow as WorkflowIcon,
   Play,
   X,
-  ShieldCheck,
   ShieldAlert,
   Shield,
   CheckCircle2,
@@ -89,7 +87,7 @@ export default function OpsWorkflowsPage() {
   const [drawerRunId, setDrawerRunId] = useState<string | null>(null);
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   const pendingApprovals = useRef<Map<string, (decision: "approved" | "rejected") => void>>(new Map());
-  const [approvalNonce, setApprovalNonce] = useState(0);
+  const [_approvalNonce, setApprovalNonce] = useState(0);
 
   const selectedWorkflow = useMemo(
     () => STARTER_WORKFLOWS[selectedWorkflowId],

@@ -1,7 +1,7 @@
 import { Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-const API = import.meta.env.BASE_URL + 'api';
+const API = `${import.meta.env.BASE_URL}api`;
 const GOLD = 'var(--color-gold)';
 
 export type AdvisoryClient = { id: string; name: string; industry: string };
@@ -16,7 +16,7 @@ const FALLBACK_CLIENTS: AdvisoryClient[] = [
 export function readClientIdFromUrl(): string | null {
   if (typeof window === 'undefined') return null;
   const v = new URLSearchParams(window.location.search).get('clientId');
-  return v && v.trim() ? v : null;
+  return v?.trim() ? v : null;
 }
 
 export function writeClientIdToUrl(clientId: string | null) {

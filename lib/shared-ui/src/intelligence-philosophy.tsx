@@ -1,7 +1,5 @@
 import {
-  INTELLIGENCE_PHILOSOPHY,
   LENSES,
-  PILLARS,
   SIX_LENSES_PHILOSOPHY,
 } from '@szl-holdings/observability';
 

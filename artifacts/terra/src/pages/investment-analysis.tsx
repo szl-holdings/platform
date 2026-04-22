@@ -2,12 +2,8 @@ import { useRole } from '@szl-holdings/shared-ui/use-role';
 import {
   ArrowDown,
   ArrowUp,
-  BarChart3,
   Building2,
-  Calculator,
-  DollarSign,
   Lock,
-  PieChart,
   Target,
   TrendingUp,
 } from 'lucide-react';

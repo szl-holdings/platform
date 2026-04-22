@@ -2,7 +2,7 @@ import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Button } from '@szl-holdings/shared-ui/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
+import { Card, CardContent, } from '@szl-holdings/shared-ui/ui/card';
 import { Progress } from '@szl-holdings/shared-ui/ui/progress';
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { cn } from '@szl-holdings/shared-ui/utils';
@@ -11,7 +11,6 @@ import {
   AlertTriangle,
   ArrowRight,
   CheckCircle,
-  Clock,
   Package,
   Shield,
   User,
@@ -265,7 +264,7 @@ export default function ReadinessModulePage() {
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <Badge
                         variant="outline"
-                        className={statusInfo.bg + ' ' + statusInfo.color + ' text-[10px]'}
+                        className={`${statusInfo.bg} ${statusInfo.color} text-[10px]`}
                       >
                         {statusInfo.label}
                       </Badge>

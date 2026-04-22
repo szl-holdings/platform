@@ -48,7 +48,7 @@ export class GitHubAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ['GITHUB_TOKEN'];
 
   private get token(): string | undefined {
-    return process.env['GITHUB_TOKEN'];
+    return process.env.GITHUB_TOKEN;
   }
 
   private async ghRequest(path: string, options?: RequestInit): Promise<unknown> {
@@ -113,10 +113,10 @@ export class GitHubAdapter extends ServiceAdapter {
   async handleWebhook(payload: Record<string, unknown>): Promise<GitHubWebhookEvent> {
     return {
       id: `gh_evt_${Date.now()}`,
-      type: (payload['action'] as string) ?? 'unknown',
+      type: (payload.action as string) ?? 'unknown',
       repo:
-        ((payload['repository'] as Record<string, unknown>)?.['full_name'] as string) ?? 'unknown',
-      action: (payload['action'] as string) ?? 'unknown',
+        ((payload.repository as Record<string, unknown>)?.full_name as string) ?? 'unknown',
+      action: (payload.action as string) ?? 'unknown',
       timestamp: new Date().toISOString(),
     };
   }

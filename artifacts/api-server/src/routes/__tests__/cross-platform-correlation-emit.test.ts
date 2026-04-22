@@ -213,19 +213,19 @@ describe('cross-platform correlations: inbox + approvals emission', () => {
     );
     const breachApprovals = approvalCalls.filter(
       (p) =>
-        p['resourceType'] === 'cross-platform-correlation' &&
-        p['resourceId'] === corrBreach.correlationId,
+        p.resourceType === 'cross-platform-correlation' &&
+        p.resourceId === corrBreach.correlationId,
     );
     const highApprovals = approvalCalls.filter(
       (p) =>
-        p['resourceType'] === 'cross-platform-correlation' &&
-        p['resourceId'] === corrHigh.correlationId,
+        p.resourceType === 'cross-platform-correlation' &&
+        p.resourceId === corrHigh.correlationId,
     );
     expect(breachApprovals).toHaveLength(1);
-    expect(breachApprovals[0]['actionClass']).toBe('policy-review');
-    expect(breachApprovals[0]['priority']).toBe('critical');
-    expect(breachApprovals[0]['requiredApproverRole']).toBe('compliance');
-    expect(breachApprovals[0]['correlationId']).toBe(corrBreach.correlationId);
+    expect(breachApprovals[0].actionClass).toBe('policy-review');
+    expect(breachApprovals[0].priority).toBe('critical');
+    expect(breachApprovals[0].requiredApproverRole).toBe('compliance');
+    expect(breachApprovals[0].correlationId).toBe(corrBreach.correlationId);
     // High-strength correlation has no unresolved policy breach → no approval.
     expect(highApprovals).toHaveLength(0);
 

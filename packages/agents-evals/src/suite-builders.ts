@@ -1,5 +1,4 @@
-import type { PromptRef } from '@workspace/agents-prompts';
-import { resolvePrompt } from '@workspace/agents-prompts';
+import { type PromptRef, resolvePrompt } from '@workspace/agents-prompts';
 import type { TypedTool } from '@workspace/agents-tools';
 import type { EvalCase, EvalSuiteDef } from '@workspace/eval-forge';
 
@@ -63,10 +62,7 @@ export function createPromptEvalSuite(
   try {
     const resolved = resolvePrompt(promptRef, {});
     resolvedVersionId = resolved.versionId;
-  } catch (err) {
-    console.warn(
-      `[agents-evals:createPromptEvalSuite] Could not resolve prompt '${promptRef.id}' — using version constraint '${resolvedVersionId}' as label. Error: ${err instanceof Error ? err.message : String(err)}`,
-    );
+  } catch (_err) {
   }
 
   const evalCases: EvalCase[] = cases.map((c, idx) => ({

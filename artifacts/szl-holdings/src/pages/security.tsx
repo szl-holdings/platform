@@ -1,8 +1,7 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
 import {
-  Shield, Lock, Eye, Server, Key, AlertTriangle, ArrowRight,
-  CheckCircle, RefreshCw, GitBranch, Cpu, Users, Database
+  Shield, Eye, AlertTriangle, ArrowRight,RefreshCw, GitBranch, Cpu, Users, Database
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -155,7 +154,7 @@ export default function SecurityPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
           <section className="szl-grid-texture" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)", background: "radial-gradient(ellipse at 50% 0%, hsla(145,62%,40%,0.06) 0%, transparent 60%)" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>

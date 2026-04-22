@@ -220,9 +220,9 @@ export class MetricCollector {
 
   private getMetricSnapshot(def: MetricDefinition): MetricSnapshot {
     const history = this.metrics.get(def.id) || [];
-    const current = history.length > 0 ? history[history.length - 1]!.value : 0;
+    const current = history.length > 0 ? history[history.length - 1]?.value : 0;
     const trend = history.slice(-20).map((h) => h.value);
-    const prev = history.length > 1 ? history[history.length - 2]!.value : current;
+    const prev = history.length > 1 ? history[history.length - 2]?.value : current;
     const changePercent = prev !== 0 ? ((current - prev) / prev) * 100 : 0;
 
     let status: MetricSnapshot['status'] = 'normal';
@@ -306,7 +306,7 @@ export class MetricCollector {
     for (const metric of this.config.metrics) {
       const history = this.metrics.get(metric.id) || [];
       if (history.length === 0) continue;
-      const lastVal = history[history.length - 1]!.value;
+      const lastVal = history[history.length - 1]?.value;
       const jitter = (Math.random() - 0.5) * lastVal * 0.08;
       this.record(metric.id, Math.max(0, lastVal + jitter));
     }

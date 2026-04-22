@@ -1,7 +1,7 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Button } from '@szl-holdings/shared-ui/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
+import { Card, CardContent, } from '@szl-holdings/shared-ui/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -23,9 +23,6 @@ import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
   Loader2,
   Play,
   TrendingDown,

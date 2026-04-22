@@ -223,7 +223,7 @@ export function RunHealthPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {products.map((p) => {
-            const statusMeta = STATUS_META[p.status] ?? STATUS_META['degraded'];
+            const statusMeta = STATUS_META[p.status] ?? STATUS_META.degraded;
             const delta = p.regressionDelta;
             const DeltaIcon =
               delta === null ? Minus : delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus;

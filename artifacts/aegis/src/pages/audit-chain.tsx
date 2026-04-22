@@ -1,13 +1,10 @@
-import { DashboardShell, SidebarNav } from '@szl-holdings/shared-ui/design-system';
+import { DashboardShell, } from '@szl-holdings/shared-ui/design-system';
 import { LANE_ACCENT_HEX } from '@szl-holdings/shared-ui/lane-colors';
 import {
-  AlertTriangle,
   Brain,
   CheckCircle,
   ChevronDown,
-  Clock,
   Download,
-  Filter,
   Lock,
   Search,
   Shield,
@@ -610,7 +607,7 @@ export default function AuditChainPage() {
   const [filterTag, setFilterTag] = useState<ComplianceTag | 'all'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [entries, setEntries] = useState<AuditEntry[]>(DEMO_ENTRIES);
-  const [chainValid, setChainValid] = useState<boolean | null>(null);
+  const [_chainValid, setChainValid] = useState<boolean | null>(null);
 
   React.useEffect(() => {
     async function load() {
@@ -621,7 +618,7 @@ export default function AuditChainPage() {
             data?: { events?: AuditEntry[]; chainValid?: boolean };
           };
           if (Array.isArray(json.data?.events) && (json.data?.events?.length ?? 0) > 0) {
-            setEntries(json.data!.events!);
+            setEntries(json.data?.events!);
             setChainValid(json.data?.chainValid ?? null);
           }
         }

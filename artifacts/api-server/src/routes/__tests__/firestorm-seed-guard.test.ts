@@ -10,8 +10,7 @@
  * avoided to prevent cross-test module cache contamination.
  */
 
-import type { IRouter } from 'express';
-import express from 'express';
+import express, { type IRouter } from 'express';
 import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 

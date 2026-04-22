@@ -1,9 +1,8 @@
-import { Router, type IRouter, type RequestHandler } from "express";
-import type { Request, Response } from "express";
+import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
 import { OpenAIEmbedRequestSchema } from "@workspace/aef-contracts";
 import { embedTexts } from "@workspace/alloy-embed-worker";
 import { logger } from "../middleware/logger.js";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { errorBudgetCounter } from "../middleware/prometheus.js";
 
 export const openaiCompatRouter: IRouter = Router();
@@ -21,7 +20,7 @@ openaiCompatRouter.post("/v1/openai/embeddings", (async (req: Request, res: Resp
   const traceId = req.traceId;
   const texts = Array.isArray(body.input) ? body.input : [body.input];
 
-  const devHashMode = !process.env["SUBSTRATE_EMBED_URL"] && process.env["NODE_ENV"] !== "production";
+  const devHashMode = !process.env.SUBSTRATE_EMBED_URL && process.env.NODE_ENV !== "production";
   let vectors: number[][];
   try {
     vectors = await embedTexts(texts, {

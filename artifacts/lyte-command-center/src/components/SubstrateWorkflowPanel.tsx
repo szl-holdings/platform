@@ -98,7 +98,7 @@ function extractRetrieverSource(stages: PipelineStageResult[]): RetrieverSourceM
 }
 
 function parsePipelineRun(run: Record<string, unknown>): RunResult {
-  const rawStages = (run['stageResults'] as PipelineStageResult[]) ?? [];
+  const rawStages = (run.stageResults as PipelineStageResult[]) ?? [];
   const stages: StageTrace[] = rawStages.map((sr) => ({
     stageId: sr.stageId,
     stageName: sr.stageName ?? sr.stageId,
@@ -108,15 +108,15 @@ function parsePipelineRun(run: Record<string, unknown>): RunResult {
     durationMs: sr.durationMs,
   }));
   return {
-    runId: run['runId'] as string,
-    workflowId: run['workflowId'] as string,
-    status: run['status'] as string,
-    mode: run['mode'] as string,
-    finalConfidence: typeof run['finalConfidence'] === 'number' ? run['finalConfidence'] : 0.84,
+    runId: run.runId as string,
+    workflowId: run.workflowId as string,
+    status: run.status as string,
+    mode: run.mode as string,
+    finalConfidence: typeof run.finalConfidence === 'number' ? run.finalConfidence : 0.84,
     stageCount: stages.length,
     stages,
-    startedAt: run['startedAt'] as string,
-    durationMs: run['durationMs'] as number | undefined,
+    startedAt: run.startedAt as string,
+    durationMs: run.durationMs as number | undefined,
     retriever: extractRetrieverSource(rawStages),
   };
 }

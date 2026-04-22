@@ -120,14 +120,14 @@ export function getSkillUsageStats(): {
   for (const record of skillUsageLog) {
     if (!bySkill[record.skillId]) bySkill[record.skillId] = { invocations: 0, agents: [] };
     bySkill[record.skillId]!.invocations++;
-    if (!bySkill[record.skillId]!.agents.includes(record.agentId)) {
-      bySkill[record.skillId]!.agents.push(record.agentId);
+    if (!bySkill[record.skillId]?.agents.includes(record.agentId)) {
+      bySkill[record.skillId]?.agents.push(record.agentId);
     }
 
     if (!byAgent[record.agentId]) byAgent[record.agentId] = { invocations: 0, skills: [] };
     byAgent[record.agentId]!.invocations++;
-    if (!byAgent[record.agentId]!.skills.includes(record.skillId)) {
-      byAgent[record.agentId]!.skills.push(record.skillId);
+    if (!byAgent[record.agentId]?.skills.includes(record.skillId)) {
+      byAgent[record.agentId]?.skills.push(record.skillId);
     }
   }
 

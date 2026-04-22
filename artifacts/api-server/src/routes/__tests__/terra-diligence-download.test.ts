@@ -18,8 +18,7 @@
  *   - 200 + Content-Disposition attachment + Content-Type passthrough + body streaming
  */
 
-import express from 'express';
-import type { Express, NextFunction, Request, Response } from 'express';
+import express, { type Express, type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

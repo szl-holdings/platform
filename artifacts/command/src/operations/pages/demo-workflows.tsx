@@ -4,8 +4,6 @@ import {
   AlertTriangle,
   CheckCircle,
   ChevronDown,
-  ChevronRight,
-  Clock,
   Play,
   Workflow,
 } from 'lucide-react';

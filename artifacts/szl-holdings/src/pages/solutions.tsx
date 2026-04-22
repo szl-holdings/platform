@@ -69,7 +69,7 @@ export default function SolutionsPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
           <section
             className="szl-grid-texture szl-depth-glow-gold"

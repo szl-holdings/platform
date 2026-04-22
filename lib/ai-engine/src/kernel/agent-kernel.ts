@@ -15,7 +15,7 @@
  * This module sits between the Maker-Checker layer and actual execution.
  */
 
-import { createHash, randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'node:crypto';
 
 export interface ScopeCertificate {
   agentId: string;
@@ -140,7 +140,7 @@ function validateToolPayload(toolName: string, args: Record<string, unknown>): s
 
 function checkScopeCertificate(
   toolName: string,
-  args: Record<string, unknown>,
+  _args: Record<string, unknown>,
   cert: ScopeCertificate | undefined,
 ): { authorized: boolean; reason: string } {
   if (!cert) {
@@ -369,7 +369,7 @@ export async function executeWithKernel<T = unknown>(
     output = await executorFn(args);
     executionResult = 'success';
     idempotencyCache.set(idempotencyKey, { result: output, timestamp: Date.now() });
-  } catch (err) {
+  } catch (_err) {
     executionResult = 'failure';
     if (options.compensationFn) {
       try {

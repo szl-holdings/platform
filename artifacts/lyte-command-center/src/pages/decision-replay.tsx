@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Clock,
   Pause,
   Play,
   RotateCcw,
@@ -42,6 +41,7 @@ const INTERVENTION_ICON: Record<Intervention['type'], React.ReactNode> = {
   resolve: <CheckCircle2 className="w-3 h-3 text-emerald-300" />,
   reassign: <UserCog className="w-3 h-3 text-sky-300" />,
   address: <CheckCircle2 className="w-3 h-3 text-emerald-300" />,
+  acknowledge: <CheckCircle2 className="w-3 h-3 text-emerald-300" />,
 };
 
 const INTERVENTION_LABEL: Record<Intervention['type'], string> = {
@@ -49,6 +49,7 @@ const INTERVENTION_LABEL: Record<Intervention['type'], string> = {
   resolve: 'Resolved drift item',
   reassign: 'Reassigned owner',
   address: 'Flagged as addressed',
+  acknowledge: 'Acknowledged pressure signal',
 };
 
 const INTERVENTION_TONE: Record<Intervention['type'], string> = {
@@ -56,6 +57,7 @@ const INTERVENTION_TONE: Record<Intervention['type'], string> = {
   resolve: 'border-emerald-500/30 bg-emerald-500/5',
   reassign: 'border-sky-500/30 bg-sky-500/5',
   address: 'border-emerald-500/30 bg-emerald-500/5',
+  acknowledge: 'border-emerald-500/30 bg-emerald-500/5',
 };
 
 const EVIDENCE_ICONS: Record<ReplayEvent['evidenceType'], React.ReactNode> = {
@@ -369,7 +371,7 @@ export default function DecisionReplayPage() {
           <div key={l.type} className="flex items-center gap-1.5">
             <div
               className="w-3 h-3 rounded-full border-2"
-              style={{ borderColor: l.color, background: l.color + '30' }}
+              style={{ borderColor: l.color, background: `${l.color}30` }}
             />
             <span className="text-[10px] font-mono" style={{ color: l.color }}>
               {l.label}

@@ -28,7 +28,7 @@ import {
   vesselsAlertsTable,
   vesselsEventsTable,
 } from '@szl-holdings/db';
-import { createHash, randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { and, desc, eq, ne } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
@@ -57,26 +57,19 @@ const router: IRouter = Router();
 
 import {
   executeWorkflow,
-  getHistoryStats,
-  getRunById,
-  listRuns,
   recordRun,
   type WorkflowDefinition,
 } from '@szl-holdings/action-engine';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  type BusinessImpact,
-  computePriorityScore,
   RankingWeightsSchema,
   type Recommendation,
   rankSignalGroups,
-  type Signal,
   type SignalGroup,
 } from '@szl-holdings/decision-engine';
 import {
   checkAction,
   type EvaluationRequest,
-  evaluatePolicies,
   getRegisteredPolicies,
   type Policy,
   PolicySchema,
@@ -1190,10 +1183,10 @@ router.get(
           registeredWorkflows: workflows.length,
           total: historyStats.totalRuns,
           totalRuns: historyStats.totalRuns,
-          completed: historyStats.byStatus['completed'] ?? 0,
-          failed: historyStats.byStatus['failed'] ?? 0,
-          rolledBack: historyStats.byStatus['rolled_back'] ?? 0,
-          pendingApproval: historyStats.byStatus['pending_approval'] ?? 0,
+          completed: historyStats.byStatus.completed ?? 0,
+          failed: historyStats.byStatus.failed ?? 0,
+          rolledBack: historyStats.byStatus.rolled_back ?? 0,
+          pendingApproval: historyStats.byStatus.pending_approval ?? 0,
           byStatus: historyStats.byStatus,
           averageDurationMs: historyStats.averageDurationMs,
           lastRunAt: historyStats.lastRunAt,

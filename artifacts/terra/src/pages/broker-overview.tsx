@@ -1,6 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
-import type { ActivationStep } from '@szl-holdings/shared-ui/onboarding';
-import { ActivationBanner, useActivationState } from '@szl-holdings/shared-ui/onboarding';
+import { type ActivationStep, ActivationBanner, useActivationState } from '@szl-holdings/shared-ui/onboarding';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion } from 'framer-motion';
 import {

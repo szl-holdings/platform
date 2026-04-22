@@ -193,7 +193,7 @@ describe('evidence-graph SSE — reconnect replay (Task #2086)', () => {
       expect(ids[1]).toBeGreaterThan(ids[0]!);
 
       const lastSeenId = ids[1]!;
-      const dataA = JSON.parse(liveSignals[0]!.data) as {
+      const dataA = JSON.parse(liveSignals[0]?.data) as {
         signalId: string;
         rawPayload: { marker: string };
       };
@@ -226,9 +226,9 @@ describe('evidence-graph SSE — reconnect replay (Task #2086)', () => {
 
       const replayed = client2.events.filter((e) => e.event === 'signal');
       expect(replayed).toHaveLength(1);
-      const replayedId = Number.parseInt(replayed[0]!.id ?? '', 10);
+      const replayedId = Number.parseInt(replayed[0]?.id ?? '', 10);
       expect(replayedId).toBeGreaterThan(lastSeenId);
-      const replayedPayload = JSON.parse(replayed[0]!.data) as {
+      const replayedPayload = JSON.parse(replayed[0]?.data) as {
         rawPayload: { marker: string };
       };
       expect(replayedPayload.rawPayload.marker).toBe('C');
@@ -261,7 +261,7 @@ describe('evidence-graph SSE — reconnect replay (Task #2086)', () => {
       await client3.waitFor((evs) => evs.some((e) => e.event === 'signal'));
       const replayed3 = client3.events.filter((e) => e.event === 'signal');
       expect(replayed3).toHaveLength(1);
-      const replayed3Payload = JSON.parse(replayed3[0]!.data) as {
+      const replayed3Payload = JSON.parse(replayed3[0]?.data) as {
         rawPayload: { marker: string };
       };
       expect(replayed3Payload.rawPayload.marker).toBe('D');

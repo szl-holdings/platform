@@ -1,17 +1,4 @@
-import type { PlatformRole } from '@szl-holdings/db';
-import {
-  canWritePlatform,
-  db,
-  hasPlatformRole,
-  isPlatformAdmin,
-  organizationsTable,
-  orgMembersTable,
-  PLATFORM_ROLE_HIERARCHY,
-  rolesTable,
-  sessionsTable,
-  userRolesTable,
-  usersTable,
-} from '@szl-holdings/db';
+import { type PlatformRole, canWritePlatform, db, isPlatformAdmin, organizationsTable, orgMembersTable, PLATFORM_ROLE_HIERARCHY, sessionsTable, usersTable } from '@szl-holdings/db';
 import { and, eq, gt } from 'drizzle-orm';
 import type { NextFunction, Request, Response } from 'express';
 
@@ -47,7 +34,7 @@ async function resolveUserFromToken(token: string): Promise<{
   if (!session) return null;
 
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, session.userId));
-  if (!user || !user.isActive) return null;
+  if (!user?.isActive) return null;
 
   return {
     id: user.id,
@@ -88,7 +75,7 @@ async function resolveOrgFromRequest(
 
   if (orgIdRaw) {
     const orgId = parseInt(orgIdRaw, 10);
-    if (isNaN(orgId)) return null;
+    if (Number.isNaN(orgId)) return null;
 
     const [org] = await db
       .select()
@@ -165,8 +152,7 @@ export function platformAuth(options: { required?: boolean; minRole?: PlatformRo
       };
 
       next();
-    } catch (err) {
-      console.error('[platform-auth] error:', err);
+    } catch (_err) {
       res.status(500).json({ error: 'Authentication error' });
     }
   };

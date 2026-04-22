@@ -1,5 +1,5 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
-import { AlertTriangle, CheckCircle2, Clock, Lock } from 'lucide-react';
+import { Clock, Lock } from 'lucide-react';
 import { obligationTwins } from '../data/counsel-twin';
 
 export default function ObligationTimeline() {
@@ -9,7 +9,7 @@ export default function ObligationTimeline() {
 
   const nextDeadline = sortedObligations.find((o) => new Date(o.deadline) > new Date());
   const daysToNext = nextDeadline
-    ? Math.ceil((new Date(nextDeadline.deadline).getTime() - new Date().getTime()) / 86400000)
+    ? Math.ceil((new Date(nextDeadline.deadline).getTime() - Date.now()) / 86400000)
     : null;
 
   return (
@@ -32,7 +32,7 @@ export default function ObligationTimeline() {
       <div className="relative space-y-4">
         <div className="absolute left-6 top-0 bottom-0 w-px bg-violet-500/10" />
 
-        {sortedObligations.map((obl, i) => (
+        {sortedObligations.map((obl, _i) => (
           <div key={obl.id} className="relative pl-12">
             <div
               className={cn(

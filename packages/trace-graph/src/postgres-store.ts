@@ -91,7 +91,7 @@ interface TraceRowShape {
 
 function buildRow(trace: TraceRecord): InferInsertModel<TracesTableLike> {
   const md = trace.metadata ?? {};
-  const domain = typeof md['domain'] === 'string' ? (md['domain'] as string) : null;
+  const domain = typeof md.domain === 'string' ? (md.domain as string) : null;
   const row = {
     traceId: trace.traceId,
     requestId: trace.requestId ?? null,

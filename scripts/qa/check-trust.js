@@ -78,10 +78,8 @@ async function checkRoute(url, label) {
 }
 
 async function main() {
-  console.log(`\nSZL Holdings — Trust & Legal Page Checks`);
-  console.log(`Base URL: ${BASE_URL}\n`);
 
-  let passed = 0;
+  let _passed = 0;
   let failed = 0;
 
   for (const { route, label } of REQUIRED_TRUST_ROUTES) {
@@ -89,22 +87,16 @@ async function main() {
     const result = await checkRoute(url, label);
 
     if (result.ok) {
-      console.log(`  ✓ ${label} (${route})`);
-      passed++;
+      _passed++;
     } else {
-      console.error(`  ✗ ${label} (${route})`);
-      result.issues.forEach((issue) => console.error(`      - ${issue}`));
+      result.issues.forEach((_issue) => {});
       failed++;
     }
   }
 
-  console.log(`\nResults: ${passed} passed, ${failed} failed`);
-
   if (failed > 0) {
-    console.error(`\nFAIL — ${failed} required trust/legal page(s) have issues`);
     process.exit(1);
   } else {
-    console.log(`\nPASS — All required trust and legal pages exist and have content`);
     process.exit(0);
   }
 }

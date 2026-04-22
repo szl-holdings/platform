@@ -41,14 +41,11 @@ vi.mock('../../artifacts/api-server/src/middlewares/auth', () => ({
   denyIfReadOnly: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   parseIdParam: (id: string) => {
     const n = parseInt(id, 10);
-    if (isNaN(n)) throw Object.assign(new Error('Invalid ID'), { status: 400 });
+    if (Number.isNaN(n)) throw Object.assign(new Error('Invalid ID'), { status: 400 });
     return n;
   },
   InvalidIdError: class InvalidIdError extends Error {
     status = 400;
-    constructor(msg: string) {
-      super(msg);
-    }
   },
 }));
 
@@ -226,13 +223,13 @@ describe('Integration — GET /graph/entities/:id/subgraph/export', () => {
     seeded.edgeIds = insertedEdges.map((e) => e.id);
     seeded.edgeHubNear1 = insertedEdges.find(
       (e) => e.fromNodeId === seeded.hub && e.toNodeId === seeded.near1,
-    )!.id;
+    )?.id;
     seeded.edgeHubNear2 = insertedEdges.find(
       (e) => e.fromNodeId === seeded.hub && e.toNodeId === seeded.near2,
-    )!.id;
+    )?.id;
     seeded.edgeNear1Far = insertedEdges.find(
       (e) => e.fromNodeId === seeded.near1 && e.toNodeId === seeded.far,
-    )!.id;
+    )?.id;
 
     const insertedEvidence = await db
       .insert(cstEdgeEvidence)
@@ -289,48 +286,48 @@ describe('Integration — GET /graph/entities/:id/subgraph/export', () => {
 
       const hubNode = nodes.find((n) => n.id === seeded.hub);
       expect(hubNode).toBeTruthy();
-      expect(hubNode!.provenance).toMatchObject({
+      expect(hubNode?.provenance).toMatchObject({
         sourceId: PROVENANCE_ID,
         sourceType: PROVENANCE_TYPE,
         sourceLabel: PROVENANCE_LABEL,
       });
-      expect(typeof hubNode!.provenance.lastUpdatedAt).toBe('string');
-      expect(hubNode!.linkedEvents.actionIds).toContain(ACTION_ID);
-      expect(hubNode!.linkedEvents.documentIds).toContain(DOC_ID);
-      expect(hubNode!.linkedEvents.all).toEqual(expect.arrayContaining([ACTION_ID, DOC_ID]));
-      expect(hubNode!.distance).toBe(0);
+      expect(typeof hubNode?.provenance.lastUpdatedAt).toBe('string');
+      expect(hubNode?.linkedEvents.actionIds).toContain(ACTION_ID);
+      expect(hubNode?.linkedEvents.documentIds).toContain(DOC_ID);
+      expect(hubNode?.linkedEvents.all).toEqual(expect.arrayContaining([ACTION_ID, DOC_ID]));
+      expect(hubNode?.distance).toBe(0);
 
       const farNode = nodes.find((n) => n.id === seeded.far);
       expect(farNode).toBeTruthy();
-      expect(farNode!.distance).toBe(2);
+      expect(farNode?.distance).toBe(2);
 
       const edges = payload.edges;
       expect(edges.map((e) => e.id).sort()).toEqual([...seeded.edgeIds].sort());
 
       const hubNear1Edge = edges.find((e) => e.id === seeded.edgeHubNear1);
       expect(hubNear1Edge).toBeTruthy();
-      expect(hubNear1Edge!.source).toMatchObject({
+      expect(hubNear1Edge?.source).toMatchObject({
         sourceId: PROVENANCE_ID,
         sourceType: PROVENANCE_TYPE,
         sourceLabel: PROVENANCE_LABEL,
       });
-      expect(Array.isArray(hubNear1Edge!.evidence)).toBe(true);
-      expect(hubNear1Edge!.evidence.length).toBe(1);
-      expect(hubNear1Edge!.evidence[0]).toMatchObject({
+      expect(Array.isArray(hubNear1Edge?.evidence)).toBe(true);
+      expect(hubNear1Edge?.evidence.length).toBe(1);
+      expect(hubNear1Edge?.evidence[0]).toMatchObject({
         id: seeded.evidenceId,
         evidenceType: EVIDENCE_TYPE,
         sourceId: PROVENANCE_ID,
         sourceLabel: EVIDENCE_SOURCE_LABEL,
         recordedBy: TEST_USER.id,
       });
-      expect(hubNear1Edge!.evidence[0].payload).toMatchObject({
+      expect(hubNear1Edge?.evidence[0].payload).toMatchObject({
         note: `evidence-${RUN_TAG}`,
         level: 7,
       });
 
       const hubNear2Edge = edges.find((e) => e.id === seeded.edgeHubNear2);
       expect(hubNear2Edge).toBeTruthy();
-      expect(hubNear2Edge!.evidence).toEqual([]);
+      expect(hubNear2Edge?.evidence).toEqual([]);
 
       expect(payload.truncated).toBe(false);
     });
@@ -354,7 +351,7 @@ describe('Integration — GET /graph/entities/:id/subgraph/export', () => {
       ).toBeTruthy();
 
       const expectedSlugFragment = `${RUN_TAG}-hub`.toLowerCase();
-      expect(match![1]).toContain(expectedSlugFragment);
+      expect(match?.[1]).toContain(expectedSlugFragment);
     });
 
     it('flips truncated=true when maxNodes is too small to fit the BFS frontier', async () => {

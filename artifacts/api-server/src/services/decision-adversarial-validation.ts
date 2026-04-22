@@ -118,8 +118,8 @@ function checkContradiction(input: AdversarialValidationInput): ValidationCheckR
 }
 
 function checkStaleData(input: AdversarialValidationInput): ValidationCheckResult {
-  const freshnessOrder = ['live', 'recent', 'stale', 'expired'] as const;
-  const maxAllowed = input.freshnessMaxHours ?? 48;
+  const _freshnessOrder = ['live', 'recent', 'stale', 'expired'] as const;
+  const _maxAllowed = input.freshnessMaxHours ?? 48;
 
   const expiredItems = input.evidence.filter((e) => e.freshness === 'expired');
   const staleItems = input.evidence.filter((e) => e.freshness === 'stale');

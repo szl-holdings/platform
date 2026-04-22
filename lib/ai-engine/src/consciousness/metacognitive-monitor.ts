@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 export type CertaintyLevel = 'very_high' | 'high' | 'moderate' | 'low' | 'very_low';
 export type ReasoningQuality = 'rigorous' | 'adequate' | 'uncertain' | 'confused' | 'degraded';
@@ -76,7 +76,7 @@ const QUALITY_SCORES: Record<ReasoningQuality, number> = {
   degraded: 0.1,
 };
 
-const LOAD_SCORES: Record<CognitiveLoad, number> = {
+const _LOAD_SCORES: Record<CognitiveLoad, number> = {
   minimal: 0.1,
   light: 0.3,
   moderate: 0.5,
@@ -487,7 +487,7 @@ class MetacognitiveMonitor {
     };
   }
 
-  forkHypotheses(query: string, context: string): MultiHypothesisBranch[] {
+  forkHypotheses(query: string, _context: string): MultiHypothesisBranch[] {
     const interpretations = [
       { focus: 'literal', desc: `Direct interpretation: ${query.slice(0, 100)}` },
       {
@@ -559,7 +559,7 @@ class MetacognitiveMonitor {
   preFlightCheck(
     agentId: string,
     agentDomain: string,
-    queryComplexity: number,
+    _queryComplexity: number,
   ): {
     proceed: boolean;
     adjustments: string[];

@@ -24,8 +24,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { Recommendation, RecommendationPolicyStatus } from './evidence.js';
-import { createRecommendation, RecommendationSchema } from './evidence.js';
+import { type Recommendation, type RecommendationPolicyStatus, createRecommendation, RecommendationSchema } from './evidence.js';
 
 // Minimal evidence ID stubs — the schema validates these are strings, not DB refs
 const EV = (n: number) => `ev-test-${n.toString().padStart(3, '0')}`;
@@ -34,7 +33,7 @@ const POLICY_EVAL = { outcome: 'pending' as const, policyIds: [] };
 function assertProofChain(rec: Recommendation, label: string) {
   // 1. The 8 required Gate 3 proof-chain fields
   expect(rec.evidenceIds, `${label}: evidenceIds missing`).toBeDefined();
-  expect(rec.evidenceIds!.length, `${label}: evidenceIds must be non-empty`).toBeGreaterThan(0);
+  expect(rec.evidenceIds?.length, `${label}: evidenceIds must be non-empty`).toBeGreaterThan(0);
 
   expect(rec.confidence, `${label}: confidence missing`).toBeDefined();
   expect(rec.confidence, `${label}: confidence must be 0–1`).toBeGreaterThan(0);

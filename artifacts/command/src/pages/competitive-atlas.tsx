@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, TrendingUp, Zap, CheckCircle2, Circle, ChevronDown, ChevronRight, Target, Shield, Scale, Building2, Ship, Brain, BarChart3, Cpu, Star, XCircle, Clock, PauseCircle, Download, StickyNote, Radio, X, RefreshCw, ArrowUpRight, Plus, Trash2, Play, Pause, Settings, AlertCircle } from "lucide-react";
+import { ExternalLink, TrendingUp, Zap, CheckCircle2, ChevronDown, ChevronRight, Target, Shield, Scale, Building2, Ship, Brain, BarChart3, Cpu, Star, XCircle, Clock, PauseCircle, Download, StickyNote, Radio, X, RefreshCw, ArrowUpRight, Plus, Trash2, Play, Pause, Settings, AlertCircle } from "lucide-react";
 
 type AdoptionStatus = "adopted" | "in-progress" | "evaluating" | "rejected" | "deferred";
 

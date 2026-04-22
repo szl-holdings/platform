@@ -1,4 +1,4 @@
-import http from 'http';
+import http from 'node:http';
 import { flushSentry, initServerSentry } from './lib/sentry';
 
 initServerSentry();
@@ -38,7 +38,6 @@ import { ensurePlatformFlags } from './lib/platform-flags';
 import { runMigrations } from './lib/run-migrations';
 import { startSelfMonitoring, stopSelfMonitoring } from './lib/self-monitor';
 import './lib/terra-nyc-ingestion';
-import { scheduleNycIngestionJob } from './lib/terra-nyc-ingestion';
 import './lib/terra-nyc-extended-ingestion';
 import { isSeedDataAllowed, resolveRuntimeMode } from '@szl-holdings/config';
 import { otelReady, registerGraphQLHandler } from './app.js';
@@ -56,7 +55,6 @@ import { seedLyteActions } from './lib/seed-lyte-actions';
 import { seedLyteSurfaces } from './lib/seed-lyte-surfaces';
 import { seedMspData } from './lib/seed-msp';
 import { seedPlatformData } from './lib/seed-platform';
-import { scheduleNycExtendedIngestionJob } from './lib/terra-nyc-extended-ingestion';
 import {
   prewarmIntelligenceCache,
   scheduleIntelligenceCachePruning,
@@ -96,7 +94,7 @@ const { shutdown: shutdownCognitiveTelemetry } = initCognitiveTelemetry(
 
 // Must match the V8 --max-old-space-size flag passed in start.sh; otherwise the
 // monitor under/over-reports pressure and floods logs with false criticals.
-const HEAP_LIMIT_MB = Number(process.env['NODE_HEAP_LIMIT_MB'] ?? '1536');
+const HEAP_LIMIT_MB = Number(process.env.NODE_HEAP_LIMIT_MB ?? '1536');
 const HEAP_CRITICAL_THRESHOLD_MB = Math.round(HEAP_LIMIT_MB * 0.92);
 const HEAP_WARN_THRESHOLD_MB = Math.round(HEAP_LIMIT_MB * 0.82);
 const HEAP_GC_THRESHOLD_MB = Math.round(HEAP_LIMIT_MB * 0.7);
@@ -209,7 +207,7 @@ export async function bootstrap(
   // Schedule alert rule evaluation on a configurable interval (default: 5 minutes)
   const alertEvalIntervalMinutes = Math.max(
     1,
-    parseInt(process.env['ALERT_EVAL_INTERVAL_MINUTES'] ?? '5', 10) || 5,
+    parseInt(process.env.ALERT_EVAL_INTERVAL_MINUTES ?? '5', 10) || 5,
   );
   const alertEvalIntervalMs = alertEvalIntervalMinutes * 60 * 1000;
   logger.info(
@@ -236,7 +234,7 @@ export async function bootstrap(
   // via DRIFT_SAMPLE_INTERVAL_MINUTES (default: 15 minutes, minimum: 1).
   const driftSampleIntervalMinutes = Math.max(
     1,
-    parseInt(process.env['DRIFT_SAMPLE_INTERVAL_MINUTES'] ?? '15', 10) || 15,
+    parseInt(process.env.DRIFT_SAMPLE_INTERVAL_MINUTES ?? '15', 10) || 15,
   );
   const driftSampleIntervalMs = driftSampleIntervalMinutes * 60 * 1000;
   logger.info(
@@ -270,7 +268,7 @@ export async function bootstrap(
   // SIGNAL_FUSION_INTERVAL_MINUTES (default: 15 minutes, minimum: 1).
   const signalFusionIntervalMinutes = Math.max(
     1,
-    parseInt(process.env['SIGNAL_FUSION_INTERVAL_MINUTES'] ?? '15', 10) || 15,
+    parseInt(process.env.SIGNAL_FUSION_INTERVAL_MINUTES ?? '15', 10) || 15,
   );
   const signalFusionIntervalMs = signalFusionIntervalMinutes * 60 * 1000;
   logger.info(
@@ -444,7 +442,7 @@ export async function bootstrap(
     import('@szl-holdings/ai-engine/embedding-pipeline')
       .then(({ listEmbeddingProviders }) => {
         const providers = listEmbeddingProviders();
-        const modelId = process.env['HF_EMBED_MODEL'] ?? 'BAAI/bge-m3';
+        const modelId = process.env.HF_EMBED_MODEL ?? 'BAAI/bge-m3';
         const current = providers.find((p) => p.id === modelId) ?? providers[0];
         const status = getWorkerStatus();
         logger.info(
@@ -732,7 +730,7 @@ export async function bootstrap(
 }
 
 if (!process.env.__FAST_START_SERVER) {
-  const rawPort = process.env['PORT'];
+  const rawPort = process.env.PORT;
   if (!rawPort) {
     throw new Error('PORT environment variable is required but was not provided.');
   }

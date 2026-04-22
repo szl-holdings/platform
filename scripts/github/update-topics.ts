@@ -34,18 +34,8 @@ const REPO = process.env.GITHUB_REPO ?? 'szl-holdings-platform';
 const TOKEN = process.env.GITHUB_TOKEN;
 
 function printManualSteps(): void {
-  console.log('GITHUB_TOKEN not set. Manual steps to apply topics:\n');
-  console.log(`1. Go to: https://github.com/${OWNER}/${REPO}`);
-  console.log("2. Click the gear icon (⚙) next to 'About'");
-  console.log('3. In the Topics field, add each topic:');
-  console.log('');
-  for (const topic of TOPICS) {
-    console.log(`   ${topic}`);
+  for (const _topic of TOPICS) {
   }
-  console.log('');
-  console.log("4. Click 'Save changes'");
-  console.log('');
-  console.log('See ops/github/repo-branding-manual-steps.md for details.');
 }
 
 async function updateTopics(): Promise<void> {
@@ -68,17 +58,11 @@ async function updateTopics(): Promise<void> {
   }
 
   const data = (await response.json()) as { names: string[] };
-  console.log('✓ Topics updated successfully:');
-  for (const topic of data.names) {
-    console.log(`  - ${topic}`);
+  for (const _topic of data.names) {
   }
-  console.log(`\nVerify at: https://github.com/${OWNER}/${REPO}`);
 }
 
 async function main(): Promise<void> {
-  console.log('=== GitHub Topics Update ===\n');
-  console.log(`Repository: ${OWNER}/${REPO}`);
-  console.log(`Topics: ${TOPICS.join(', ')}\n`);
 
   if (!TOKEN) {
     printManualSteps();
@@ -88,7 +72,6 @@ async function main(): Promise<void> {
   await updateTopics();
 }
 
-main().catch((err) => {
-  console.error('Error:', err.message);
+main().catch((_err) => {
   process.exit(1);
 });

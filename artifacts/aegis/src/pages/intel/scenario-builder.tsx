@@ -1,13 +1,6 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  BarChart3,
   Boxes,
-  Brain,
-  GitBranch,
-  Play,
-  Plus,
-  Settings,
-  Trash2,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';

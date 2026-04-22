@@ -4,7 +4,6 @@ import { m } from 'framer-motion';
 import {
   AlertCircle,
   ArrowUpRight,
-  BarChart3,
   CheckCircle2,
   Eye,
   FileText,

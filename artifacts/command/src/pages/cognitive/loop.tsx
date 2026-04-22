@@ -482,8 +482,8 @@ function RunSummary({ run }: { run: RunResult }) {
           </span>
           {(run.worldModelUpdate.detectedAnomalies?.length ?? 0) > 0 && (
             <span style={{ fontSize: 10, color: '#f97316' }}>
-              {run.worldModelUpdate.detectedAnomalies!.length} anomaly
-              {run.worldModelUpdate.detectedAnomalies!.length > 1 ? 'ies' : ''}
+              {run.worldModelUpdate.detectedAnomalies?.length} anomaly
+              {(run.worldModelUpdate.detectedAnomalies?.length ?? 0) > 1 ? 'ies' : ''}
             </span>
           )}
         </div>

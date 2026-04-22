@@ -1,8 +1,8 @@
 #!/usr/bin/env npx tsx
-import { execSync } from "child_process";
-import * as fs from "fs";
-import * as path from "path";
-import { fileURLToPath } from "url";
+import { execSync } from "node:child_process";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,7 +21,7 @@ function countGit(pattern: string): number {
   return parseInt(out.trim(), 10) || 0;
 }
 
-function grepCount(pattern: string, fileGlob: string): number {
+function _grepCount(pattern: string, fileGlob: string): number {
   try {
     const out = execSync(
       `grep -rl '${pattern}' ${ROOT}/${fileGlob} --include='*.ts' 2>/dev/null | wc -l`,
@@ -84,11 +84,6 @@ function getArtifacts(): { name: string; kind: string; path: string }[] {
     return { name, kind, path: `artifacts/${d.name}` };
   });
 }
-
-console.log("╔══════════════════════════════════════════════════╗");
-console.log("║  SZL HOLDINGS — PLATFORM METRICS GENERATOR      ║");
-console.log("╚══════════════════════════════════════════════════╝\n");
-console.log("Scanning repository via git index...\n");
 
 const artifacts = getArtifacts();
 const libs = listDirs("lib");
@@ -238,19 +233,3 @@ ${metrics.platform_primitives.map((p) => `| ${p.name} | \`${p.package}\` | ${p.s
 `;
 
 fs.writeFileSync(path.join(outDir, "platform-metrics.md"), md);
-
-console.log("METRICS GENERATED:");
-console.log(`  Artifacts:        ${metrics.architecture.artifacts}`);
-console.log(`  Packages:         ${metrics.architecture.total_packages}`);
-console.log(`  TS/TSX files:     ${metrics.repository.total_ts_tsx.toLocaleString()}`);
-console.log(`  Route files:      ${metrics.api_surface.route_files_recursive}`);
-console.log(`  Route handlers:   ${metrics.api_surface.route_handlers.toLocaleString()}`);
-console.log(`  DB tables:        ${metrics.api_surface.db_tables_defined}`);
-console.log(`  Migrations:       ${metrics.api_surface.migrations}`);
-console.log(`  Test files:       ${metrics.quality.test_files}`);
-console.log(`  CI workflows:     ${metrics.quality.ci_workflows}`);
-console.log(`  Primitives:       ${metrics.primitives_implemented}/${metrics.primitives_total}`);
-console.log(`  Docs:             ${metrics.repository.markdown_docs}`);
-console.log(`\n  Output: generated/platform-metrics.json`);
-console.log(`  Output: generated/platform-metrics.md`);
-console.log("\nDONE");

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { featherIcon, VesselIcon } from '@/components/VesselIcon';
 import { useColors } from '@/hooks/useColors';
-import { api, CACHE_KEYS, cacheGetStale, cacheSet, type VesselDetail } from '@/lib/fleet/api';
+import { api, cacheGetStale, cacheSet, type VesselDetail } from '@/lib/fleet/api';
 
 const SEVERITY_COLORS: Record<string, string> = {
   critical: '#ef4444',
@@ -244,7 +244,7 @@ export default function VesselDetailScreen() {
   const highExc = exceptions.filter((e) => e.severity === 'high').length;
 
   const ofacClear = !sanctions || sanctions.ofacStatus === 'clear';
-  const euClear = !sanctions || !sanctions.euStatus || sanctions.euStatus === 'clear';
+  const euClear = !sanctions?.euStatus || sanctions.euStatus === 'clear';
   const hasCritMaint = maintenance.some((m) => m.priority === 'critical');
   const hasHighMaint = maintenance.some((m) => m.priority === 'high');
 
@@ -436,12 +436,12 @@ export default function VesselDetailScreen() {
                 <View style={styles.grid}>
                   <MetricPair
                     label="Latitude"
-                    value={parseFloat(position.latitude).toFixed(4) + '°'}
+                    value={`${parseFloat(position.latitude).toFixed(4)}°`}
                     color={colors.primary}
                   />
                   <MetricPair
                     label="Longitude"
-                    value={parseFloat(position.longitude).toFixed(4) + '°'}
+                    value={`${parseFloat(position.longitude).toFixed(4)}°`}
                     color={colors.primary}
                   />
                   <MetricPair
@@ -534,8 +534,7 @@ export default function VesselDetailScreen() {
         )}
 
         {activeTab === 'voyage' && (
-          <>
-            {activeVoyage ? (
+          activeVoyage ? (
               <View
                 style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
               >
@@ -602,13 +601,11 @@ export default function VesselDetailScreen() {
                   </Text>
                 </View>
               </View>
-            )}
-          </>
+            )
         )}
 
         {activeTab === 'exceptions' && (
-          <>
-            {exceptions.length === 0 ? (
+          exceptions.length === 0 ? (
               <View
                 style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
               >
@@ -657,8 +654,7 @@ export default function VesselDetailScreen() {
                   </View>
                 );
               })
-            )}
-          </>
+            )
         )}
 
         {activeTab === 'compliance' && (
@@ -696,7 +692,7 @@ export default function VesselDetailScreen() {
                 ))}
               </View>
 
-              {complianceChecks.map((check, i) => (
+              {complianceChecks.map((check, _i) => (
                 <RYGIndicator
                   key={check.label}
                   status={check.status}

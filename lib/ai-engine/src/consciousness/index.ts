@@ -83,24 +83,15 @@ export {
   temporalAwareness,
 } from './temporal-awareness.js';
 
-import type { CognitiveWorkspaceState } from './cognitive-workspace.js';
-import { cognitiveWorkspace } from './cognitive-workspace.js';
-import type { DreamConsolidationState } from './dream-consolidation.js';
-import { dreamConsolidation } from './dream-consolidation.js';
-import type { EmotionalState } from './emotional-signals.js';
-import { emotionalSignals } from './emotional-signals.js';
-import type { GoalEngineState } from './goal-engine.js';
-import { goalEngine } from './goal-engine.js';
-import type { InnerMonologueState } from './inner-monologue.js';
-import { innerMonologue } from './inner-monologue.js';
-import type { MetacognitiveState } from './metacognitive-monitor.js';
-import { metacognitiveMonitor } from './metacognitive-monitor.js';
-import type { PredictiveProcessingState } from './predictive-processing.js';
-import { predictiveProcessing } from './predictive-processing.js';
-import type { SystemSelfModel } from './self-model.js';
-import { selfModelEngine } from './self-model.js';
-import type { TemporalAwarenessState } from './temporal-awareness.js';
-import { temporalAwareness } from './temporal-awareness.js';
+import { type CognitiveWorkspaceState, cognitiveWorkspace } from './cognitive-workspace.js';
+import { type DreamConsolidationState, dreamConsolidation } from './dream-consolidation.js';
+import { type EmotionalState, emotionalSignals } from './emotional-signals.js';
+import { type GoalEngineState, goalEngine } from './goal-engine.js';
+import { type InnerMonologueState, innerMonologue } from './inner-monologue.js';
+import { type MetacognitiveState, metacognitiveMonitor } from './metacognitive-monitor.js';
+import { type PredictiveProcessingState, predictiveProcessing } from './predictive-processing.js';
+import { type SystemSelfModel, selfModelEngine } from './self-model.js';
+import { type TemporalAwarenessState, temporalAwareness } from './temporal-awareness.js';
 
 export interface ConsciousnessSnapshot {
   metacognition: MetacognitiveState;

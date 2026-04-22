@@ -4,7 +4,7 @@ import { AnimatedCounter } from '@szl-holdings/shared-ui/animated-counter';
 import { DoctrineLayerBadge } from '@szl-holdings/shared-ui/doctrine-layer-badge';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Button } from '@szl-holdings/shared-ui/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
+import { Card, CardContent, } from '@szl-holdings/shared-ui/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -37,7 +37,7 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 
 const statusColors: Record<string, string> = {

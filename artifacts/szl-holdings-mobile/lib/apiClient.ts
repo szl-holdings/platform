@@ -9,7 +9,7 @@ const SESSION_REVOCATION_CODES = new Set(['SESSION_REVOKED', 'REFRESH_TOKEN_REPL
 function pickRevocationCode(body: unknown): string | null {
   if (!body || typeof body !== 'object') return null;
   const record = body as Record<string, unknown>;
-  const code = record['code'];
+  const code = record.code;
   if (typeof code === 'string' && SESSION_REVOCATION_CODES.has(code)) return code;
   return null;
 }
@@ -17,9 +17,9 @@ function pickRevocationCode(body: unknown): string | null {
 function pickServerMessage(body: unknown): string | null {
   if (!body || typeof body !== 'object') return null;
   const record = body as Record<string, unknown>;
-  const error = record['error'];
+  const error = record.error;
   if (typeof error === 'string' && error.trim()) return error;
-  const message = record['message'];
+  const message = record.message;
   if (typeof message === 'string' && message.trim()) return message;
   return null;
 }
@@ -647,7 +647,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
 
 function getDemoFixture(path: string): unknown | null {
   const key = Object.keys(MOBILE_DEMO_FIXTURES).find(
-    (k) => path === k || path.startsWith(k + '/') || path.startsWith(k + '?'),
+    (k) => path === k || path.startsWith(`${k}/`) || path.startsWith(`${k}?`),
   );
   return key ? MOBILE_DEMO_FIXTURES[key] : null;
 }
@@ -704,7 +704,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     'Content-Type': 'application/json',
     ...(init?.headers as Record<string, string>),
   };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers.Authorization = `Bearer ${token}`;
   const res = await fetch(`${getApiBase()}${path}`, { ...init, headers });
   if (!res.ok) {
     await handleAuthRevocation(res);
@@ -720,7 +720,7 @@ export async function apiFetchRaw(path: string, init?: RequestInit): Promise<Res
     'Content-Type': 'application/json',
     ...(init?.headers as Record<string, string>),
   };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers.Authorization = `Bearer ${token}`;
   const res = await fetch(`${getApiBase()}${path}`, { ...init, headers });
   if (!res.ok) {
     await handleAuthRevocation(res);

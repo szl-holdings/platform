@@ -1,11 +1,9 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { db, terraPropertiesTable } from '@szl-holdings/db';
-import type { PropertySimulationParams, PropertyUsdState } from '@szl-holdings/openusd-export';
-import { exportPropertySimulation, exportPropertyTwin } from '@szl-holdings/openusd-export';
+import { type PropertySimulationParams, type PropertyUsdState, exportPropertySimulation, exportPropertyTwin } from '@szl-holdings/openusd-export';
 import { eq, or, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendNotFound } from '../lib/api-response';
 import { validateBody } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';

@@ -27,8 +27,8 @@ export const rotateProfileVersionWorkflow: WorkflowDefinition = {
           requiresApproval: ctx.approvalRequired,
           operation: 'rotate_profile_version',
           profileId: ctx.profileId,
-          newVersion: ctx.input['newVersion'],
-          affectedTenants: ctx.input['tenantIds'],
+          newVersion: ctx.input.newVersion,
+          affectedTenants: ctx.input.tenantIds,
         });
       },
     },
@@ -41,10 +41,10 @@ export const rotateProfileVersionWorkflow: WorkflowDefinition = {
         return {
           activated: true,
           profileId: ctx.profileId,
-          previousVersion: ctx.input['previousVersion'],
-          newVersion: ctx.input['newVersion'],
+          previousVersion: ctx.input.previousVersion,
+          newVersion: ctx.input.newVersion,
           activatedAt: new Date().toISOString(),
-          tenantIds: ctx.input['tenantIds'],
+          tenantIds: ctx.input.tenantIds,
         };
       },
     },

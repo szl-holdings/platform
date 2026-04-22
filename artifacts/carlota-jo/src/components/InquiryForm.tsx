@@ -3,7 +3,7 @@ import { AlertCircle, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
-const API_BASE = BASE + '/api';
+const API_BASE = `${BASE}/api`;
 export default function InquiryForm() {
   const [form, setForm] = useState({
     name: '',

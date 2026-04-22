@@ -144,13 +144,13 @@ export function GraphCanvas({
       if (node.ringColor) {
         ctx.beginPath();
         ctx.arc(x, y, r + 4, 0, Math.PI * 2);
-        ctx.fillStyle = node.ringColor + '33';
+        ctx.fillStyle = `${node.ringColor}33`;
         ctx.fill();
       }
 
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = fill + '22';
+      ctx.fillStyle = `${fill}22`;
       ctx.fill();
       ctx.strokeStyle = fill;
       ctx.lineWidth = 1.5;

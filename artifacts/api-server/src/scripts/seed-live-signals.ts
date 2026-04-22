@@ -36,7 +36,6 @@ async function ensureFirestormIncidents() {
     .from(firestormIncidentsTable)
     .where(ne(firestormIncidentsTable.status, 'closed'));
   if (count >= 4) {
-    console.log(`[seed-live-signals] firestorm_incidents: ${count} active rows, skipping`);
     return 0;
   }
 
@@ -124,8 +123,6 @@ async function ensureFirestormIncidents() {
       },
     ])
     .returning({ id: firestormIncidentsTable.id });
-
-  console.log(`[seed-live-signals] firestorm_incidents: inserted ${rows.length}`);
   return rows.length;
 }
 
@@ -144,9 +141,6 @@ async function ensureVesselsAlerts() {
       ),
     );
   if (active >= 5 && critical >= 2) {
-    console.log(
-      `[seed-live-signals] vessels_alerts: ${active} active / ${critical} high+critical, skipping`,
-    );
     return 0;
   }
 
@@ -155,9 +149,6 @@ async function ensureVesselsAlerts() {
     .from(vesselsTable)
     .limit(5);
   if (vessels.length === 0) {
-    console.warn(
-      '[seed-live-signals] vessels_alerts: no vessels rows — run seed:demo first; skipping',
-    );
     return 0;
   }
   const v = (i: number) => vessels[i % vessels.length].id;
@@ -226,8 +217,6 @@ async function ensureVesselsAlerts() {
       },
     ])
     .returning({ id: vesselsAlertsTable.id });
-
-  console.log(`[seed-live-signals] vessels_alerts: inserted ${rows.length}`);
   return rows.length;
 }
 
@@ -242,7 +231,6 @@ async function ensureVesselsDelayEvents() {
       ),
     );
   if (count >= 2) {
-    console.log(`[seed-live-signals] vessels_events delay_event: ${count} open, skipping`);
     return 0;
   }
 
@@ -251,7 +239,6 @@ async function ensureVesselsDelayEvents() {
     .from(vesselsTable)
     .limit(3);
   if (vessels.length === 0) {
-    console.warn('[seed-live-signals] vessels_events: no vessels rows; skipping');
     return 0;
   }
 
@@ -297,8 +284,6 @@ async function ensureVesselsDelayEvents() {
       },
     ])
     .returning({ id: vesselsEventsTable.id });
-
-  console.log(`[seed-live-signals] vessels_events delay_event: inserted ${rows.length}`);
   return rows.length;
 }
 
@@ -308,45 +293,31 @@ async function ensureTerraDistress() {
     .from(terraDistressPropertiesTable)
     .where(eq(terraDistressPropertiesTable.isActive, true));
   const beforeCount = before[0]?.count ?? 0;
-  console.log(`[seed-live-signals] terra_distress_properties: ${beforeCount} active before seed`);
   if (beforeCount >= 10) return 0;
-
-  console.log(
-    '[seed-live-signals] terra_distress_properties below threshold — invoking seedTerraDistress()…',
-  );
   try {
     const result = await seedTerraDistress();
-    const after = await db
+    const _after = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(terraDistressPropertiesTable)
       .where(eq(terraDistressPropertiesTable.isActive, true));
-    console.log(
-      `[seed-live-signals] terra_distress_properties: ${after[0]?.count ?? 0} active after seed`,
-    );
     return result.inserted;
-  } catch (err) {
-    console.error('[seed-live-signals] seedTerraDistress failed:', err);
+  } catch (_err) {
     return 0;
   }
 }
 
 export async function seedLiveSignals() {
-  console.log('[seed-live-signals] Starting…');
   const incidents = await ensureFirestormIncidents();
   const alerts = await ensureVesselsAlerts();
   const delays = await ensureVesselsDelayEvents();
   const distress = await ensureTerraDistress();
-  console.log(
-    `[seed-live-signals] Done. inserted: incidents=${incidents}, vessel_alerts=${alerts}, vessel_delays=${delays}, terra_distress=${distress}`,
-  );
   return { incidents, alerts, delays, distress };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   seedLiveSignals()
     .then(() => process.exit(0))
-    .catch((err) => {
-      console.error('[seed-live-signals] failed:', err);
+    .catch((_err) => {
       process.exit(1);
     });
 }

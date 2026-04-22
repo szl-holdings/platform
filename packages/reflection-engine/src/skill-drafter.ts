@@ -99,7 +99,7 @@ function deriveOutputFields(trace: TraceRecord): string[] {
   for (const tc of trace.toolCalls) {
     if (tc.outputHash) fields.add('tool_output');
   }
-  for (const c of trace.citations) {
+  for (const _c of trace.citations) {
     fields.add('citations');
   }
   if (trace.businessImpact) {

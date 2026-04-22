@@ -7,14 +7,14 @@ import { createAefRouter } from '@workspace/alloy-embedding-api';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import express, { type Express, type NextFunction, type Request, type Response } from 'express';
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import helmet from 'helmet';
-import { dirname, join } from 'path';
+import { dirname, join } from 'node:path';
 import pinoHttp from 'pino-http';
 import swaggerUi from 'swagger-ui-express';
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { sendError, sendForbidden, sendNotFound, sendUnauthorized } from './lib/api-response';
 import { assertInternalTokenPolicy } from './lib/internal-tokens';
@@ -53,7 +53,7 @@ export const otelReady = initializeOpenTelemetry({
   serviceVersion: process.env.npm_package_version ?? '0.0.0',
   otlpEndpoint: process.env.OTLP_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
   exportToConsole: process.env.OTEL_CONSOLE_EXPORT === 'true',
-}).catch((e) => console.warn('[otel] Initialization warning:', e));
+}).catch((_e) => {});
 
 app.use(correlationMiddleware);
 app.use(otelSpanMiddleware);
@@ -250,7 +250,7 @@ app.get('/', (_req: Request, res: Response) => {
         host: '127.0.0.1',
         port: mcpGatewayPort,
         method: req.method,
-        path: '/mcp' + (req.url === '/' ? '' : req.url),
+        path: `/mcp${req.url === '/' ? '' : req.url}`,
         headers: { ...req.headers, host: `127.0.0.1:${mcpGatewayPort}` },
       },
       (proxyRes) => {
@@ -324,7 +324,7 @@ app.get('/api/health', async (_req: Request, res: Response) => {
   try {
     runtimeMode = resolveRuntimeMode();
   } catch {
-    runtimeMode = process.env['NODE_ENV'] === 'production' ? 'production' : 'local-dev';
+    runtimeMode = process.env.NODE_ENV === 'production' ? 'production' : 'local-dev';
   }
 
   res.status(overallStatus === 'healthy' ? 200 : 503).json({
@@ -647,7 +647,7 @@ app.get('/api/env-registry', async (req: Request, res: Response) => {
 });
 
 app.get('/api/csrf-token', (req: Request, res: Response) => {
-  let token = req.cookies?.['csrf_token'] as string | undefined;
+  let token = req.cookies?.csrf_token as string | undefined;
   if (!token) {
     token = randomBytes(32).toString('hex');
     res.cookie('csrf_token', token, {

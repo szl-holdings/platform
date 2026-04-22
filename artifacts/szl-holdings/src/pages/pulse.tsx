@@ -12,7 +12,6 @@ import {
   Layers,
   Lock,
   Network,
-  Shield,
   Signal,
   Zap,
 } from 'lucide-react';

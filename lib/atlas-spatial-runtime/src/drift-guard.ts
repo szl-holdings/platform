@@ -2,7 +2,6 @@ import {
   db,
   driftAssessmentsTable,
   type SpatialTwinCategory,
-  spatialTwinSnapshotsTable,
 } from '@szl-holdings/db';
 import { and, desc, eq } from 'drizzle-orm';
 import type { DriftAssessment, DriftGuardInput } from './types.js';

@@ -27,7 +27,7 @@ export function estimateVarFromSignal(s: { severity: string; metadata?: unknown 
 export function parseTimeWindow(from?: string, to?: string): { fromDate: Date; toDate: Date } {
   const toDate = to ? new Date(to) : new Date();
   const fromDate = from ? new Date(from) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+  if (Number.isNaN(fromDate.getTime()) || Number.isNaN(toDate.getTime())) {
     throw new Error('Invalid from/to date format. Use ISO 8601.');
   }
   return { fromDate, toDate };

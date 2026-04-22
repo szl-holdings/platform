@@ -10,8 +10,7 @@ import {
 import { cn } from '@imp/lib/utils';
 import { Check, ChevronDown, ChevronUp, Clock, Database, TrendingDown, X } from 'lucide-react';
 import { useLocalStorage } from '@imp/lib/use-local-storage';
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 const STATUS_CONFIG: Record<ReserveStatus, { color: string; bg: string; border: string }> = {
   NOMINAL: { color: '#4ade80', bg: 'rgba(74,222,128,0.08)', border: 'rgba(74,222,128,0.25)' },
@@ -132,7 +131,7 @@ function ReserveTrendChart({
             left: tooltip.x + 10,
             top: tooltip.y - 32,
             background: '#0a0d1a',
-            borderColor: color + '55',
+            borderColor: `${color}55`,
             color,
           }}
         >

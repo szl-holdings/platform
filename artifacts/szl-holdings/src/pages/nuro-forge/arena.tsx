@@ -1,15 +1,10 @@
 import { AnimatePresence, m } from 'framer-motion';
 import {
   ArrowRight,
-  Check,
   Crown,
-  Play,
   RotateCcw,
   Swords,
-  TrendingDown,
-  TrendingUp,
   Trophy,
-  X,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -355,7 +350,7 @@ export default function TournamentArenaPage() {
                 </p>
               </div>
             ) : (
-              duels.map((d, i) => (
+              duels.map((d, _i) => (
                 <m.div
                   key={d.id}
                   initial={{ opacity: 0, y: -8 }}

@@ -1,7 +1,7 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
   type AutonomyMode,
-  type EvidenceSource,
+  type ProofEvidenceSource as EvidenceSource,
   type PolicyState,
   ProofEnvelope,
 } from '@szl-holdings/design-system';
@@ -212,7 +212,7 @@ export default function DecisionCenter() {
                         <Icon className="w-4 h-4 text-violet-400 mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-bold text-violet-100 truncate">
-                            {String(s.rawPayload['eventType'] ?? s.type)}
+                            {String(s.rawPayload.eventType ?? s.type)}
                           </div>
                           <div className="text-[11px] text-violet-400/60 mt-0.5">
                             {s.entityRefs.map((e) => e.displayName).join(', ') || '—'}

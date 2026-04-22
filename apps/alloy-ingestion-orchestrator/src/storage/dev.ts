@@ -5,7 +5,7 @@
  * These satisfy the storage interfaces without requiring external services.
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type {
   Chunk,
   ChunkStore,

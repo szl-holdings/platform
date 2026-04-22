@@ -10,7 +10,7 @@ import {
   db,
 } from '@szl-holdings/db';
 import { getEnv } from '@szl-holdings/env';
-import { and, desc, eq, gt, sql } from 'drizzle-orm';
+import { desc, eq, gt, } from 'drizzle-orm';
 import { cognitiveWorkspace } from './consciousness/cognitive-workspace.js';
 import { dreamConsolidation } from './consciousness/dream-consolidation.js';
 import { emotionalSignals } from './consciousness/emotional-signals.js';
@@ -39,7 +39,6 @@ import {
 } from './innovation/predictive-precompute.js';
 import { runRedTeamProtocol } from './innovation/red-team.js';
 import { persistTelemetry } from './innovation/telemetry-pipeline.js';
-import { issueScopeCertificate } from './kernel/agent-kernel.js';
 import { rlMemoryManager } from './memory/rl-memory.js';
 import { behavioralTracer } from './observability/behavioral-tracer.js';
 import { serializeSubgraphForPrompt } from './ontology/graph-rag.js';
@@ -58,7 +57,6 @@ import type {
   ConfidenceCalibrationEntry,
   ConflictResolution,
   CrossAgentInsight,
-  DomainRoutingRule,
   OrchestrationTelemetry,
   ProactiveActivation,
   SemanticRoutingScore,
@@ -657,22 +655,19 @@ async function getAgentLearningContext(agentId: string, query: string): Promise<
     const { getRelevantCorrections } = await import('./learning/agent-corrections.js');
     const corrections = await getRelevantCorrections(agentId, query);
     if (corrections) parts.push(corrections);
-  } catch (err) {
-    console.warn('[nuro-mesh] getRelevantCorrections failed', err);
+  } catch (_err) {
   }
   try {
     const { getRelevantOutcomes } = await import('./learning/outcome-learning.js');
     const outcomes = await getRelevantOutcomes(agentId, query);
     if (outcomes) parts.push(outcomes);
-  } catch (err) {
-    console.warn('[nuro-mesh] getRelevantOutcomes failed', err);
+  } catch (_err) {
   }
   try {
     const { buildCalibrationInstruction } = await import('./learning/outcome-learning.js');
     const calibration = await buildCalibrationInstruction(agentId);
     if (calibration) parts.push(calibration);
-  } catch (err) {
-    console.warn('[nuro-mesh] buildCalibrationInstruction failed', err);
+  } catch (_err) {
   }
   return parts.join('\n\n');
 }
@@ -794,7 +789,7 @@ Provide a focused, expert response specifically addressing the consultation ques
     }
 
     const confMatch = response.match(/CONFIDENCE:\s*(\d+)/i);
-    confidence = confMatch ? Math.min(100, parseInt(confMatch[1]!)) : 70;
+    confidence = confMatch ? Math.min(100, parseInt(confMatch[1]!, 10)) : 70;
     const cleanResponse = response.replace(/CONFIDENCE:\s*\d+/gi, '').trim();
 
     try {
@@ -995,7 +990,7 @@ export async function callAgent(
 
   const fullPrompt = `${agent.systemPrompt}${learningSection}${consciousnessDirective}${graphContextSection}\n\n${focusedContext}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
 
-  let forkId: string | undefined;
+  let _forkId: string | undefined;
 
   try {
     if (agent.preferredProvider === 'anthropic') {
@@ -1063,7 +1058,7 @@ export async function callAgent(
   const latencyMs = Date.now() - startTime;
 
   const confidenceMatch = response.match(/CONFIDENCE:\s*(\d+)/i);
-  const confidence = confidenceMatch ? Math.min(100, parseInt(confidenceMatch[1]!)) : 75;
+  const confidence = confidenceMatch ? Math.min(100, parseInt(confidenceMatch[1]!, 10)) : 75;
   const cleanResponse = response.replace(/CONFIDENCE:\s*\d+/gi, '').trim();
 
   if (options?.traceId) {
@@ -1082,7 +1077,7 @@ export async function callAgent(
       tokensUsed,
       metadata: { model: actualModel, originalModel: agent.preferredModel, success },
     });
-    forkId = fork.forkId;
+    _forkId = fork.forkId;
   }
 
   if (options?.workflowId) {
@@ -1566,8 +1561,8 @@ export class CausalReasoningEngine {
         chains.push({
           id: `causal-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
           links: chain,
-          originDomain: chain[0]!.cause.domain,
-          terminalDomain: chain[chain.length - 1]!.effect.domain,
+          originDomain: chain[0]?.cause.domain,
+          terminalDomain: chain[chain.length - 1]?.effect.domain,
           overallStrength,
           narrative,
           detectedAt: Date.now(),
@@ -2008,7 +2003,6 @@ async function rehydrateSelfModelFromDb(): Promise<void> {
       } catch {}
     }
   } catch {
-    console.warn('[consciousness] Self-model rehydration failed — proceeding with fresh state');
   }
 }
 
@@ -2043,8 +2037,7 @@ async function getRagContext(query: string): Promise<string> {
       .join('\n\n');
 
     return `## Retrieved Knowledge (RAG)\n${formatted}`;
-  } catch (err) {
-    console.warn('[nuro-mesh] RAG context retrieval failed:', err);
+  } catch (_err) {
     return '';
   }
 }
@@ -2243,7 +2236,7 @@ export class NuroMeshOrchestrator {
 
     if (options.preferredAgents && options.preferredAgents.length > 0) {
       targetAgents = AGENT_REGISTRY.filter(
-        (a) => options.preferredAgents!.includes(a.id) && a.id !== 'alloy',
+        (a) => options.preferredAgents?.includes(a.id) && a.id !== 'alloy',
       );
     } else {
       routingScores = computeRoutingScores(query);
@@ -2524,7 +2517,7 @@ export class NuroMeshOrchestrator {
 
     const hypothesisFraming =
       activeHypotheses.length >= 2
-        ? `\n\n## Active Hypothesis\nThe system is exploring the following interpretation: "${activeHypotheses[0]!.hypothesis}". Evaluate with this framing in mind.\n`
+        ? `\n\n## Active Hypothesis\nThe system is exploring the following interpretation: "${activeHypotheses[0]?.hypothesis}". Evaluate with this framing in mind.\n`
         : '';
 
     const agentResponses = await Promise.all(
@@ -2677,7 +2670,7 @@ export class NuroMeshOrchestrator {
 
       const resolved = metacognitiveMonitor.resolveHypotheses([
         {
-          branchId: activeHypotheses[0]!.branchId,
+          branchId: activeHypotheses[0]?.branchId,
           confidence: primaryAvgConfidence,
           evidenceStrength: primaryAvgConfidence / 100,
         },
@@ -2705,14 +2698,14 @@ export class NuroMeshOrchestrator {
       } else {
         innerMonologue.addThought(
           'reflection',
-          `Hypothesis branching: Primary interpretation "${activeHypotheses[0]!.hypothesis.slice(0, 80)}" retained (${primaryAvgConfidence.toFixed(0)}% vs alt ${altAvgConfidence.toFixed(0)}%).`,
+          `Hypothesis branching: Primary interpretation "${activeHypotheses[0]?.hypothesis.slice(0, 80)}" retained (${primaryAvgConfidence.toFixed(0)}% vs alt ${altAvgConfidence.toFixed(0)}%).`,
           'neutral',
           Math.round(primaryAvgConfidence),
         );
       }
 
       cognitiveWorkspace.addToWorkingMemory(
-        `[Hypothesis resolved] Winner: "${(resolved?.hypothesis ?? activeHypotheses[0]!.hypothesis).slice(0, 60)}" — Primary: ${primaryAvgConfidence.toFixed(0)}%, Alt: ${altAvgConfidence.toFixed(0)}%`,
+        `[Hypothesis resolved] Winner: "${(resolved?.hypothesis ?? activeHypotheses[0]?.hypothesis).slice(0, 60)}" — Primary: ${primaryAvgConfidence.toFixed(0)}%, Alt: ${altAvgConfidence.toFixed(0)}%`,
         'hypothesis_resolution',
         7,
         routedDomains,
@@ -2888,7 +2881,7 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       metadata: { isHighStakes, validationStatus: validation?.status },
     });
 
-    const completedTrace = behavioralTracer.endTrace(traceId, 'completed');
+    const _completedTrace = behavioralTracer.endTrace(traceId, 'completed');
 
     const totalTokens =
       agentResponses.reduce((s, r) => s + (r.tokensUsed ?? 0), 0) + synthesisTokens;
@@ -3494,7 +3487,7 @@ async function persistConsciousnessState(
     }
 
     const evolutions = temporalAwareness.getAgentEvolution();
-    const now = new Date();
+    const _now = new Date();
     for (const evo of evolutions) {
       if (evo.samples.length < 2) continue;
       const avgRate = evo.samples.reduce((s, x) => s + x.successRate, 0) / evo.samples.length;
@@ -3503,8 +3496,8 @@ async function persistConsciousnessState(
       await db.insert(consciousnessTemporalMetricsTable).values({
         agentId: evo.agentId,
         domain: evo.domain,
-        periodStart: new Date(evo.samples[0]!.timestamp),
-        periodEnd: new Date(evo.samples[evo.samples.length - 1]!.timestamp),
+        periodStart: new Date(evo.samples[0]?.timestamp),
+        periodEnd: new Date(evo.samples[evo.samples.length - 1]?.timestamp),
         avgSuccessRate: avgRate,
         avgConfidence: avgConf,
         avgLatencyMs: avgLat,
@@ -3544,11 +3537,7 @@ async function persistConsciousnessState(
           },
         });
     }
-  } catch (err) {
-    console.warn(
-      '[consciousness] persistConsciousnessState failed:',
-      err instanceof Error ? err.message : String(err),
-    );
+  } catch (_err) {
     emotionalSignals.emit('frustration', 0.4, 'persistence_failure');
   }
 }

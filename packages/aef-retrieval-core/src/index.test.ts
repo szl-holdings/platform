@@ -171,9 +171,9 @@ describe('applyExactMatchBoosts', () => {
   it('boosts only hits whose metadata contains the matched CVE ID', () => {
     const hits = [makeHit('c1', 0.4, { cveId: 'CVE-2024-12345' }), makeHit('c2', 0.4, {})];
     const result = applyExactMatchBoosts(hits, 'CVE-2024-12345');
-    expect(result.find((h) => h.chunkId === 'c1')!.boostApplied).toBe(true);
-    expect(result.find((h) => h.chunkId === 'c1')!.boostRuleId).toBe('cve-id');
-    expect(result.find((h) => h.chunkId === 'c2')!.boostApplied).toBe(false);
+    expect(result.find((h) => h.chunkId === 'c1')?.boostApplied).toBe(true);
+    expect(result.find((h) => h.chunkId === 'c1')?.boostRuleId).toBe('cve-id');
+    expect(result.find((h) => h.chunkId === 'c2')?.boostApplied).toBe(false);
   });
 
   it('does not boost any hits when query has no recognized patterns', () => {
@@ -186,8 +186,8 @@ describe('applyExactMatchBoosts', () => {
   it('does not boost hits even when query matches but hit has no matching metadata', () => {
     const hits = [makeHit('c1', 0.5, {})];
     const result = applyExactMatchBoosts(hits, 'IMO 9123456');
-    expect(result[0]!.boostApplied).toBe(false);
-    expect(result[0]!.boostedScore).toBe(0.5);
+    expect(result[0]?.boostApplied).toBe(false);
+    expect(result[0]?.boostedScore).toBe(0.5);
   });
 
   it('applies custom boost rules to hits with matching metadata', () => {
@@ -203,18 +203,18 @@ describe('applyExactMatchBoosts', () => {
       makeHit('c2', 0.3, { entityRef: 'entity-abc' }),
     ];
     const result = applyExactMatchBoosts(hits, 'entity-xyz related documents', [customRule]);
-    expect(result.find((h) => h.chunkId === 'c1')!.boostApplied).toBe(true);
-    expect(result.find((h) => h.chunkId === 'c1')!.boostRuleId).toBe('custom-entity');
-    expect(result.find((h) => h.chunkId === 'c1')!.boostedScore).toBeCloseTo(0.9, 5);
-    expect(result.find((h) => h.chunkId === 'c2')!.boostApplied).toBe(false);
+    expect(result.find((h) => h.chunkId === 'c1')?.boostApplied).toBe(true);
+    expect(result.find((h) => h.chunkId === 'c1')?.boostRuleId).toBe('custom-entity');
+    expect(result.find((h) => h.chunkId === 'c1')?.boostedScore).toBeCloseTo(0.9, 5);
+    expect(result.find((h) => h.chunkId === 'c2')?.boostApplied).toBe(false);
   });
 
   it('selects the highest-multiplier rule when multiple query patterns match a hit', () => {
     const hits = [makeHit('c1', 0.5, { imo: 'IMO 9123456', cveId: 'CVE-2024-11111' })];
     const result = applyExactMatchBoosts(hits, 'IMO 9123456 CVE-2024-11111');
-    expect(result[0]!.boostApplied).toBe(true);
+    expect(result[0]?.boostApplied).toBe(true);
     const expectedMultiplier = Math.max(2.0, 2.0);
-    expect(result[0]!.boostedScore).toBeCloseTo(0.5 * expectedMultiplier, 5);
+    expect(result[0]?.boostedScore).toBeCloseTo(0.5 * expectedMultiplier, 5);
   });
 
   it('boosts correctly when hit has metadata in a string field checked by fallback scan', () => {
@@ -229,8 +229,8 @@ describe('applyExactMatchBoosts', () => {
       makeHit('c2', 0.4, { content: 'Unrelated maritime trade route' }),
     ];
     const result = applyExactMatchBoosts(hits, 'Mukhtar Khan', [customRule]);
-    expect(result.find((h) => h.chunkId === 'c1')!.boostApplied).toBe(true);
-    expect(result.find((h) => h.chunkId === 'c2')!.boostApplied).toBe(false);
+    expect(result.find((h) => h.chunkId === 'c1')?.boostApplied).toBe(true);
+    expect(result.find((h) => h.chunkId === 'c2')?.boostApplied).toBe(false);
   });
 });
 
@@ -262,7 +262,7 @@ describe('applyMetadataFilter', () => {
     const hits = [makeHit('c1', { domain: 'maritime' }), makeHit('c2', { domain: 'legal' })];
     const result = applyMetadataFilter(hits, { domain: 'maritime' });
     expect(result).toHaveLength(1);
-    expect(result[0]!.chunkId).toBe('c1');
+    expect(result[0]?.chunkId).toBe('c1');
   });
 
   it('filters by array membership', () => {
@@ -282,7 +282,7 @@ describe('applyMetadataFilter', () => {
     ];
     const result = applyMetadataFilter(hits, { domain: 'maritime', flagState: 'Panama' });
     expect(result).toHaveLength(1);
-    expect(result[0]!.chunkId).toBe('c1');
+    expect(result[0]?.chunkId).toBe('c1');
   });
 });
 
@@ -304,14 +304,14 @@ describe('applyTenantFilter', () => {
     const hits = [makeHit('c1', 'tenant-a'), makeHit('c2', 'tenant-b')];
     const result = applyTenantFilter(hits, 'tenant-a');
     expect(result).toHaveLength(1);
-    expect(result[0]!.chunkId).toBe('c1');
+    expect(result[0]?.chunkId).toBe('c1');
   });
 
   it('rejects hits with no tenantId metadata field (fail-closed)', () => {
     const hits = [makeHit('c1'), makeHit('c2', 'tenant-a')];
     const result = applyTenantFilter(hits, 'tenant-a');
     expect(result).toHaveLength(1);
-    expect(result[0]!.chunkId).toBe('c2');
+    expect(result[0]?.chunkId).toBe('c2');
   });
 
   it('rejects all hits when none have a matching tenantId', () => {
@@ -346,7 +346,7 @@ describe('normalizeScores', () => {
 
   it('normalizes single hit to 1.0', () => {
     const result = normalizeScores([makeHit('c1', 0.6)]);
-    expect(result[0]!.normalizedScore).toBe(1.0);
+    expect(result[0]?.normalizedScore).toBe(1.0);
   });
 
   it('normalizes min to 0 and max to 1', () => {
@@ -360,8 +360,8 @@ describe('normalizeScores', () => {
   it('preserves relative ordering after normalization', () => {
     const hits = [makeHit('c1', 0.9), makeHit('c2', 0.6), makeHit('c3', 0.3)];
     const result = normalizeScores(hits);
-    expect(result[0]!.normalizedScore).toBeGreaterThan(result[1]!.normalizedScore);
-    expect(result[1]!.normalizedScore).toBeGreaterThan(result[2]!.normalizedScore);
+    expect(result[0]?.normalizedScore).toBeGreaterThan(result[1]?.normalizedScore);
+    expect(result[1]?.normalizedScore).toBeGreaterThan(result[2]?.normalizedScore);
   });
 });
 
@@ -382,9 +382,9 @@ describe('assembleCitations', () => {
   it('produces citations with ascending rank', () => {
     const hits = [makeNormHit('c1', 0.9), makeNormHit('c2', 0.7), makeNormHit('c3', 0.5)];
     const citations = assembleCitations(hits);
-    expect(citations[0]!.rank).toBe(1);
-    expect(citations[1]!.rank).toBe(2);
-    expect(citations[2]!.rank).toBe(3);
+    expect(citations[0]?.rank).toBe(1);
+    expect(citations[1]?.rank).toBe(2);
+    expect(citations[2]?.rank).toBe(3);
   });
 
   it('extracts title, page, section from metadata', () => {
@@ -397,10 +397,10 @@ describe('assembleCitations', () => {
       }),
     ];
     const citations = assembleCitations(hits);
-    expect(citations[0]!.title).toBe('MARPOL Convention');
-    expect(citations[0]!.page).toBe(12);
-    expect(citations[0]!.section).toBe('Annex IV');
-    expect(citations[0]!.sourceUri).toBe('https://imo.org/marpol');
+    expect(citations[0]?.title).toBe('MARPOL Convention');
+    expect(citations[0]?.page).toBe(12);
+    expect(citations[0]?.section).toBe('Annex IV');
+    expect(citations[0]?.sourceUri).toBe('https://imo.org/marpol');
   });
 
   it('returns empty array for empty input', () => {

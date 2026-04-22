@@ -67,7 +67,7 @@ router.get('/agent-mesh/index', async (req: Request, res: Response) => {
 
 router.get('/agent-mesh/gateway', async (req: Request, res: Response) => {
   try {
-    const limitRaw = Number(req.query['limit']);
+    const limitRaw = Number(req.query.limit);
     const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 200) : 50;
     const filters: GatewayLiveSummaryFilters = {};
     const decisionRaw = readQueryString(req, 'decision');
@@ -185,7 +185,7 @@ function buildCsv(rows: GatewayExportRow[]): string {
     lines.push(CSV_COLUMNS.map((c) => csvEscape(row[c])).join(','));
   }
   // Trailing newline — Excel and most CSV parsers expect one.
-  return lines.join('\r\n') + '\r\n';
+  return `${lines.join('\r\n')}\r\n`;
 }
 
 router.get('/agent-mesh/gateway/export.csv', async (req: Request, res: Response) => {
@@ -217,7 +217,7 @@ router.get('/agent-mesh/gateway/export.csv', async (req: Request, res: Response)
 
 router.get('/agent-mesh/gateway/latency', async (req: Request, res: Response) => {
   try {
-    const hoursRaw = Number(req.query['hours']);
+    const hoursRaw = Number(req.query.hours);
     const windowHours =
       Number.isFinite(hoursRaw) && hoursRaw > 0 && hoursRaw <= 24 * 30 ? hoursRaw : 24;
     const breakdown = await getGatewayLatencyBreakdown(windowHours);
@@ -233,7 +233,7 @@ router.post(
   authMiddleware({ required: true }),
   async (req: Request, res: Response) => {
     try {
-      const id = String(req.params['id'] ?? '').trim();
+      const id = String(req.params.id ?? '').trim();
       if (!id) {
         res.status(400).json({ error: 'drift snapshot id required' });
         return;
@@ -321,7 +321,7 @@ router.post(
   authMiddleware({ required: true }),
   async (req: Request, res: Response) => {
     try {
-      const id = String(req.params['id'] ?? '').trim();
+      const id = String(req.params.id ?? '').trim();
       if (!id) {
         res.status(400).json({ error: 'drift snapshot id required' });
         return;

@@ -13,7 +13,7 @@
  */
 
 import { submitApprovalAction } from '@workspace/approvals-inbox';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { modelAdapterRegistry, policyAdapterRegistry, toolAdapterRegistry } from './adapters.js';
 import {
   aggregatePipelineConfidence,
@@ -36,12 +36,9 @@ import type {
   EvidenceBundle,
   PipelineRun,
   RuntimeStartOptions,
-  SideEffectCategory,
   StageExecutorFn,
   StageResult,
-  StageResultStatus,
   SubstrateHooks,
-  ToolCallStage,
   WorkflowDefinition,
 } from './types.js';
 
@@ -90,7 +87,7 @@ function isNonLiveMode(mode: string): boolean {
 
 const defaultStageExecutor: StageExecutorFn = async (stage, input, ctx) => {
   const mode = ctx.mode;
-  const isDryRun = mode === 'dry-run';
+  const _isDryRun = mode === 'dry-run';
 
   switch (stage.type) {
     case 'Reason': {
@@ -601,14 +598,13 @@ export class SubstrateRuntime {
       if (confidenceFailure && run.status === 'running') {
         run.status = 'failed';
         run.error = confidenceFailure;
-        await this.fireHook(
-          'on_low_confidence',
-          run,
-          run.stageResults.at(-1)
-            ? graph.nodes.get(run.stageResults.at(-1)!.stageId)!.stage
-            : workflow.stages[0]!,
-          finalConfidence,
-        );
+        const lastResult = run.stageResults.at(-1);
+        const lastStage = lastResult
+          ? graph.nodes.get(lastResult.stageId)?.stage
+          : workflow.stages[0];
+        if (lastStage) {
+          await this.fireHook('on_low_confidence', run, lastStage, finalConfidence);
+        }
       }
 
       if (run.status === 'running') {
@@ -901,7 +897,7 @@ export class SubstrateRuntime {
     // Look up the workflow definition: first try the persisted snapshot embedded
     // in run metadata (written by start() for restart-safe durability), then fall
     // back to the in-memory registry for same-session resumes.
-    const snapshotDef = run.metadata?.['__workflowSnapshot'] as WorkflowDefinition | undefined;
+    const snapshotDef = run.metadata?.__workflowSnapshot as WorkflowDefinition | undefined;
     const workflow = snapshotDef ?? workflowRegistry.get(run.workflowId);
 
     // Mark the pending approval gate as approved in-place on the existing run
@@ -982,7 +978,7 @@ export class SubstrateRuntime {
     if (!run) return null;
     if (run.status !== 'pending-approval') return run;
 
-    const snapshotDef = run.metadata?.['__workflowSnapshot'] as WorkflowDefinition | undefined;
+    const snapshotDef = run.metadata?.__workflowSnapshot as WorkflowDefinition | undefined;
     const workflow = snapshotDef ?? workflowRegistry.get(run.workflowId);
 
     const rejector = rejectedBy ?? 'operator';

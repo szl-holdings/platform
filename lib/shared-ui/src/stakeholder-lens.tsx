@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
+import { createContext, type ReactNode, useContext, useState } from 'react';
 import { cn } from './utils';
 
 export type StakeholderView = 'executive' | 'investor' | 'operator' | 'client';

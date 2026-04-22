@@ -15,7 +15,7 @@ export interface DemoFixture {
   data: unknown;
 }
 
-const NOW = () => new Date().toISOString();
+const _NOW = () => new Date().toISOString();
 
 function buildFixtures(): Map<string, DemoFixture> {
   const m = new Map<string, DemoFixture>();
@@ -367,11 +367,11 @@ class DemoFixtureStore {
   }
 
   get isDemoMode(): boolean {
-    const raw = (process.env['APP_MODE'] ?? '').toLowerCase().trim();
+    const raw = (process.env.APP_MODE ?? '').toLowerCase().trim();
     if (raw === 'demo') return true;
-    const demoMode = process.env['DEMO_MODE'];
+    const demoMode = process.env.DEMO_MODE;
     if (demoMode === 'true' || demoMode === '1') return true;
-    const appEnv = (process.env['APP_ENV'] ?? '').toLowerCase();
+    const appEnv = (process.env.APP_ENV ?? '').toLowerCase();
     return appEnv === 'demo';
   }
 
@@ -384,7 +384,7 @@ class DemoFixtureStore {
     if (exact) return exact;
 
     for (const [prefix, fixture] of this.fixtures) {
-      if (path.startsWith(prefix + '/') || path.startsWith(prefix + '?')) {
+      if (path.startsWith(`${prefix}/`) || path.startsWith(`${prefix}?`)) {
         return fixture;
       }
     }

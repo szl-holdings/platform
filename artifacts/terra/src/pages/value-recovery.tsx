@@ -1,11 +1,10 @@
 import {
   EVENTS,
-  EXECUTION_RUNS,
   formatCurrency,
   getStateColor,
   WORKFLOWS,
 } from '@szl-holdings/shared-ui/core-observability-data';
-import { ArrowRight, CheckCircle, TrendingDown, TrendingUp } from 'lucide-react';
+import { CheckCircle, TrendingDown, } from 'lucide-react';
 
 export default function ValueRecovery() {
   const recovered = EVENTS.filter((e) => e.status === 'recovered');

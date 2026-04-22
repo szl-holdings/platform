@@ -1,4 +1,4 @@
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useSyncEngine } from '@szl-holdings/mobile-shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
-import { apiFetch, apiFetchRaw } from '@/lib/apiClient';
+import { apiFetchRaw } from '@/lib/apiClient';
 import { cacheGetStale, cacheSet } from '@/lib/cache';
 
 interface IncidentDetail {
@@ -72,7 +72,7 @@ export default function IncidentDetailScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
-  const [updating, setUpdating] = useState(false);
+  const [_updating, _setUpdating] = useState(false);
   const [biometricPassed, setBiometricPassed] = useState(Platform.OS === 'web');
   const [biometricChecking, setBiometricChecking] = useState(Platform.OS !== 'web');
   const knownETagRef = React.useRef<string | undefined>(undefined);

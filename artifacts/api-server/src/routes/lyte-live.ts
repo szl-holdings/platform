@@ -3,7 +3,7 @@ import { db } from '@szl-holdings/db';
 import { sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { LRUCache } from 'lru-cache';
-import os from 'os';
+import os from 'node:os';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { listQuerySchema, validateQuery } from '../lib/validation.js';
 import { authMiddleware } from '../middlewares/auth';
@@ -71,7 +71,7 @@ async function fetchGitHubJson(url: string, token?: string): Promise<unknown> {
       'User-Agent': 'SZL-Lyte/1.0',
       Accept: 'application/vnd.github.v3+json',
     };
-    if (token) headers['Authorization'] = `token ${token}`;
+    if (token) headers.Authorization = `token ${token}`;
     const res = await fetch(url, { signal: controller.signal, headers });
     clearTimeout(timer);
     if (!res.ok) throw new Error(`GitHub API HTTP ${res.status}`);
@@ -97,7 +97,7 @@ async function getDbTableSizes(): Promise<
     `);
     return (result.rows as any[]).map((r) => ({
       tableName: r.tablename,
-      rowCount: parseInt(r.row_count) || 0,
+      rowCount: parseInt(r.row_count, 10) || 0,
       sizeKb: parseFloat(r.size_kb) || 0,
     }));
   } catch {
@@ -116,8 +116,8 @@ async function getDbConnections(): Promise<{ active: number; idle: number; total
     const rows = result.rows as any[];
     const active = rows.find((r) => r.state === 'active')?.cnt ?? 0;
     const idle = rows.find((r) => r.state === 'idle')?.cnt ?? 0;
-    const total = rows.reduce((s, r) => s + parseInt(r.cnt), 0);
-    return { active: parseInt(active), idle: parseInt(idle), total };
+    const total = rows.reduce((s, r) => s + parseInt(r.cnt, 10), 0);
+    return { active: parseInt(active, 10), idle: parseInt(idle, 10), total };
   } catch {
     return { active: 0, idle: 0, total: 0 };
   }

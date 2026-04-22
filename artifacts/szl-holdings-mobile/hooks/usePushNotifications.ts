@@ -6,6 +6,6 @@ import {
 
 export { registerForPushNotificationsAsync, sendCriticalIncidentNotification };
 
-export function usePushNotifications(enabled?: boolean) {
+export function usePushNotifications(_enabled?: boolean) {
   return _usePushNotifications();
 }

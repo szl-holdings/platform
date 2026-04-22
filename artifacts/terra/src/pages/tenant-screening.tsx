@@ -1,29 +1,16 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   AlertTriangle,
-  ArrowRight,
-  BarChart3,
-  Building2,
   CheckCircle,
-  ChevronRight,
-  Clock,
   Database,
-  DollarSign,
-  FileText,
-  Shield,
-  Star,
-  TrendingUp,
-  User,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
   PolarAngleAxis,
   PolarGrid,
-  PolarRadiusAxis,
   Radar,
   RadarChart,
   ResponsiveContainer,
@@ -452,7 +439,7 @@ export default function TenantScreeningPage() {
           </p>
           {applicants.map((app) => {
             const r = RECOMMENDATION_CONFIG[app.recommendation];
-            const Icon = r.icon;
+            const _Icon = r.icon;
             const scoreColor =
               app.overallScore >= 75
                 ? DS.accent.green

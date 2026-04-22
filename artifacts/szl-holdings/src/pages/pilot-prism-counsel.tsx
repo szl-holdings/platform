@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Scale, ArrowRight, Mail, FileText, Activity, Shield, Download, CheckSquare, Clock, AlertTriangle, Users, Lock, XCircle } from "lucide-react";
+import { Scale, ArrowRight, Mail, Activity, Shield, Download, CheckSquare, Clock, AlertTriangle, Users, Lock, XCircle } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";

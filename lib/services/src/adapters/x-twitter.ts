@@ -14,23 +14,23 @@ export class XTwitterAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["X_BEARER_TOKEN"];
 
   private get bearerToken(): string | undefined {
-    return process.env["X_BEARER_TOKEN"];
+    return process.env.X_BEARER_TOKEN;
   }
 
   private get apiKey(): string | undefined {
-    return process.env["X_API_KEY"];
+    return process.env.X_API_KEY;
   }
 
   private get apiSecret(): string | undefined {
-    return process.env["X_API_SECRET"];
+    return process.env.X_API_SECRET;
   }
 
   private get accessToken(): string | undefined {
-    return process.env["X_ACCESS_TOKEN"];
+    return process.env.X_ACCESS_TOKEN;
   }
 
   private get accessSecret(): string | undefined {
-    return process.env["X_ACCESS_SECRET"];
+    return process.env.X_ACCESS_SECRET;
   }
 
   override get status(): ServiceStatus {

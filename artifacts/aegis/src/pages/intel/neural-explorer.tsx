@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, Brain, Cpu, Eye, GitBranch, Layers, Zap } from 'lucide-react';
+import { Activity, ArrowRight, Brain, Cpu, GitBranch, Layers, } from 'lucide-react';
 
 const architectures = [
   {

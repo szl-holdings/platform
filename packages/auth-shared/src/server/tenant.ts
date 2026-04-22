@@ -6,8 +6,7 @@
  * `artifacts/api-server/src/middlewares/tenant-scope.ts`.
  */
 
-import type { AuthenticatedUser, OrgMembership, TenantContext } from '../types.js';
-import { isElevated, isMemberOf, orgMembership, primaryOrg } from '../types.js';
+import { type AuthenticatedUser, type OrgMembership, type TenantContext, isElevated, isMemberOf, orgMembership, primaryOrg } from '../types.js';
 
 export type TenantResolutionResult =
   | { resolved: true; context: TenantContext }

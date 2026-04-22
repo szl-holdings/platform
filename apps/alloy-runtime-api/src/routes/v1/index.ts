@@ -9,8 +9,7 @@
  * contract before the ingestion service is wired.
  */
 
-import type { Request, Response } from 'express';
-import { type IRouter, Router } from 'express';
+import { type Request, type Response, type IRouter, Router } from 'express';
 import { z } from 'zod';
 
 const router: IRouter = Router();
@@ -47,7 +46,7 @@ router.post('/rebuild', (req: Request, res: Response): void => {
 
 router.get('/verify', (req: Request, res: Response): void => {
   const tenantId = req.tenantCtx?.tenantId ?? 'default';
-  const jobId = req.query['jobId'] as string | undefined;
+  const jobId = req.query.jobId as string | undefined;
 
   res.status(200).json({
     tenantId,

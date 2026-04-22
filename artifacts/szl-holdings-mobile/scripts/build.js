@@ -1,14 +1,10 @@
-const { execSync } = require('child_process');
-const path = require('path');
-
-console.log('[szl-holdings-mobile] Building web bundle…');
+const { execSync } = require('node:child_process');
+const path = require('node:path');
 try {
   execSync('pnpm exec expo export --platform web --output-dir dist', {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),
   });
-  console.log('[szl-holdings-mobile] Build complete → dist/');
-} catch (err) {
-  console.error('[szl-holdings-mobile] Build failed:', err.message);
+} catch (_err) {
   process.exit(1);
 }

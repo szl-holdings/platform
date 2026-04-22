@@ -26,14 +26,13 @@ import {
   forgeRollbackEventsTable,
   forgeToolsTable,
 } from '@szl-holdings/db';
-import { createHash, randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 
 const hash = (s: string) => createHash('sha256').update(s).digest('hex').slice(0, 16);
 const daysAgo = (n: number) => new Date(Date.now() - n * 86400000);
 
 export async function seedForge() {
-  console.log('[seed-forge] Starting Forge governance seed...');
 
   const existing = await db
     .select({ id: forgeAgentsTable.id })
@@ -41,7 +40,6 @@ export async function seedForge() {
     .where(eq(forgeAgentsTable.isSeed, true))
     .limit(1);
   if (existing.length > 0) {
-    console.log('[seed-forge] Already seeded, skipping.');
     return { skipped: true };
   }
 
@@ -131,7 +129,7 @@ export async function seedForge() {
         slug: 'dev',
         name: 'Development',
         tier: 'dev',
-        targetId: targetBySlug['replit-edge']!.id,
+        targetId: targetBySlug['replit-edge']?.id,
         observabilityHook: 'tower:dev',
         requireApproval: false,
       },
@@ -139,7 +137,7 @@ export async function seedForge() {
         slug: 'sandbox',
         name: 'Sandbox',
         tier: 'sandbox',
-        targetId: targetBySlug['replit-edge']!.id,
+        targetId: targetBySlug['replit-edge']?.id,
         observabilityHook: 'tower:sandbox',
         requireApproval: false,
       },
@@ -147,7 +145,7 @@ export async function seedForge() {
         slug: 'staging',
         name: 'Staging',
         tier: 'staging',
-        targetId: targetBySlug['vercel-prod']!.id,
+        targetId: targetBySlug['vercel-prod']?.id,
         observabilityHook: 'tower:staging',
         requireApproval: false,
       },
@@ -155,7 +153,7 @@ export async function seedForge() {
         slug: 'production',
         name: 'Production',
         tier: 'production',
-        targetId: targetBySlug['fargate-regulated']!.id,
+        targetId: targetBySlug['fargate-regulated']?.id,
         observabilityHook: 'tower:production',
         requireApproval: true,
       },
@@ -323,7 +321,7 @@ export async function seedForge() {
         evalScore: '95.5',
       })
       .returning();
-    promptVersions[p.slug] = { v1: v1!.id, v2: v2!.id };
+    promptVersions[p.slug] = { v1: v1?.id, v2: v2?.id };
   }
 
   // ─── Agents (5) with versions ───
@@ -397,20 +395,20 @@ export async function seedForge() {
         riskTier: s.riskTier,
         currentEnv: s.env,
         status: 'active',
-        policyPackId: policyBySlug[s.policy]!.id,
+        policyPackId: policyBySlug[s.policy]?.id,
         isSeed: true,
         tags: [s.domain, s.riskTier],
       })
       .returning();
 
-    const toolIds = s.tools.map((t) => toolBySlug[t]!.id);
+    const toolIds = s.tools.map((t) => toolBySlug[t]?.id);
     const [v1] = await db
       .insert(forgeAgentVersionsTable)
       .values({
-        agentId: agent!.id,
+        agentId: agent?.id,
         version: 1,
-        modelId: modelBySlug[s.model]!.id,
-        promptVersionId: promptVersions[s.prompt]!.v1,
+        modelId: modelBySlug[s.model]?.id,
+        promptVersionId: promptVersions[s.prompt]?.v1,
         toolIds,
         systemConfig: {},
         evalsPassed: true,
@@ -422,10 +420,10 @@ export async function seedForge() {
     const [v2] = await db
       .insert(forgeAgentVersionsTable)
       .values({
-        agentId: agent!.id,
+        agentId: agent?.id,
         version: 2,
-        modelId: modelBySlug[s.model]!.id,
-        promptVersionId: promptVersions[s.prompt]!.v2,
+        modelId: modelBySlug[s.model]?.id,
+        promptVersionId: promptVersions[s.prompt]?.v2,
         toolIds,
         systemConfig: {},
         evalsPassed: true,
@@ -436,13 +434,13 @@ export async function seedForge() {
       .returning();
     await db
       .update(forgeAgentsTable)
-      .set({ activeVersionId: v2!.id })
-      .where(eq(forgeAgentsTable.id, agent!.id));
+      .set({ activeVersionId: v2?.id })
+      .where(eq(forgeAgentsTable.id, agent?.id));
 
     await db.insert(forgePolicyAssignmentsTable).values(
       ['dev', 'sandbox', 'staging', 'production'].map((tier) => ({
-        policyPackId: policyBySlug[s.policy]!.id,
-        agentId: agent!.id,
+        policyPackId: policyBySlug[s.policy]?.id,
+        agentId: agent?.id,
         envTier: tier,
       })),
     );
@@ -460,9 +458,9 @@ export async function seedForge() {
         (env.tier === 'sandbox' && c.spec.slug === 'trade-executor-bot');
       const ver = useV1 ? c.v1 : c.v2;
       inv[c.agent.id] = {
-        modelId: ver!.modelId!,
-        promptVersionId: ver!.promptVersionId!,
-        toolIds: (ver!.toolIds as string[]) ?? [],
+        modelId: ver?.modelId!,
+        promptVersionId: ver?.promptVersionId!,
+        toolIds: (ver?.toolIds as string[]) ?? [],
       };
     }
     await db.insert(forgeEnvironmentSnapshotsTable).values({
@@ -471,7 +469,7 @@ export async function seedForge() {
       agentInventory: inv,
       modelInventory: {},
       toolInventory: {},
-      secretsFingerprint: hash(env.tier + ':secrets'),
+      secretsFingerprint: hash(`${env.tier}:secrets`),
       hash: hash(env.tier + JSON.stringify(inv)),
     });
   }
@@ -522,13 +520,13 @@ export async function seedForge() {
     const c = created.find((x) => x.spec.slug === d.agentSlug)!;
     await db.insert(forgeDriftEventsTable).values({
       agentId: c.agent.id,
-      envId: envByTier[d.envTier]!.id,
+      envId: envByTier[d.envTier]?.id,
       detectedAt: daysAgo(Math.floor(Math.random() * 4) + 1),
       driftScore: String(d.score),
       severity: d.severity,
       dimension: d.dimension,
-      expectedFingerprint: hash(d.agentSlug + ':expected'),
-      observedFingerprint: hash(d.agentSlug + ':observed'),
+      expectedFingerprint: hash(`${d.agentSlug}:expected`),
+      observedFingerprint: hash(`${d.agentSlug}:observed`),
       findings: { dimension: d.dimension, score: d.score },
       remediation: d.remediation,
     });
@@ -552,9 +550,9 @@ export async function seedForge() {
   // pending validated, blocked, requested
   await db.insert(forgePromotionsTable).values([
     {
-      agentId: created[1]!.agent.id,
-      fromVersionId: created[1]!.v1.id,
-      toVersionId: created[1]!.v2.id,
+      agentId: created[1]?.agent.id,
+      fromVersionId: created[1]?.v1.id,
+      toVersionId: created[1]?.v2.id,
       fromEnv: 'staging',
       toEnv: 'production',
       status: 'validated',
@@ -562,9 +560,9 @@ export async function seedForge() {
       validationReport: { ok: true },
     },
     {
-      agentId: created[2]!.agent.id,
-      fromVersionId: created[2]!.v1.id,
-      toVersionId: created[2]!.v2.id,
+      agentId: created[2]?.agent.id,
+      fromVersionId: created[2]?.v1.id,
+      toVersionId: created[2]?.v2.id,
       fromEnv: 'staging',
       toEnv: 'production',
       status: 'blocked',
@@ -577,9 +575,9 @@ export async function seedForge() {
       validationReport: { drift: { score: 88, severity: 'critical' } },
     },
     {
-      agentId: created[4]!.agent.id,
-      fromVersionId: created[4]!.v1.id,
-      toVersionId: created[4]!.v2.id,
+      agentId: created[4]?.agent.id,
+      fromVersionId: created[4]?.v1.id,
+      toVersionId: created[4]?.v2.id,
       fromEnv: 'sandbox',
       toEnv: 'staging',
       status: 'requested',
@@ -626,9 +624,9 @@ export async function seedForge() {
 
   // ─── One historical rollback ───
   await db.insert(forgeRollbackEventsTable).values({
-    agentId: created[0]!.agent.id,
-    fromVersionId: created[0]!.v2.id,
-    toVersionId: created[0]!.v1.id,
+    agentId: created[0]?.agent.id,
+    fromVersionId: created[0]?.v2.id,
+    toVersionId: created[0]?.v1.id,
     envTier: 'production',
     reason: 'Hallucination spike during weekly executive run — reverted to v1 baseline',
     triggeredBy: null,
@@ -644,9 +642,5 @@ export async function seedForge() {
       seededAt: new Date().toISOString(),
     },
   });
-
-  console.log(
-    `[seed-forge] Done. Seeded ${created.length} agents, ${execRows.length} runs, ${driftSeeds.length} drift events.`,
-  );
   return { agents: created.length, runs: execRows.length, drift: driftSeeds.length };
 }

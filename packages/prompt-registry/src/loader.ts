@@ -1,5 +1,4 @@
-import type { PromptDefinition, PromptVersion } from './registry.js';
-import { promptRegistry } from './registry.js';
+import { type PromptDefinition, type PromptVersion, promptRegistry } from './registry.js';
 
 export interface PromptLookupResult {
   prompt: PromptDefinition;

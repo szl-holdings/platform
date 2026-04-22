@@ -2,7 +2,6 @@ import {
   AlertTriangle,
   ArrowRight,
   Brain,
-  CheckCircle2,
   Clock,
   LayoutDashboard,
   Minus,

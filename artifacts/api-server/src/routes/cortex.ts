@@ -34,7 +34,7 @@ import {
   dailyBriefingsTable,
   db,
 } from '@szl-holdings/db';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { and, desc, eq, gt, gte, inArray, lte, sql } from 'drizzle-orm';
 import { captureGraphSnapshot } from '../services/cortex-graph-snapshot';
 import { type IRouter, Router } from 'express';
@@ -277,7 +277,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const limit = Math.min(parseInt(String(req.query.limit ?? '50')), 100);
+      const limit = Math.min(parseInt(String(req.query.limit ?? '50'), 10), 100);
       const domain = req.query.domain ? String(req.query.domain) : undefined;
       const severity = req.query.severity ? String(req.query.severity).split(',') : undefined;
 
@@ -326,8 +326,8 @@ router.get(
         stats: {
           total: stats.totalAlerts,
           active: stats.activeAlerts,
-          critical: stats.alertsBySeverity['critical'],
-          high: stats.alertsBySeverity['high'],
+          critical: stats.alertsBySeverity.critical,
+          high: stats.alertsBySeverity.high,
           domainsAffected: stats.topAffectedDomains,
         },
       });
@@ -345,11 +345,11 @@ router.get(
   async (req, res) => {
     try {
       const domain = req.query.domain ? String(req.query.domain) : undefined;
-      const limit = Math.min(parseInt(String(req.query.limit ?? '60')), 150);
+      const limit = Math.min(parseInt(String(req.query.limit ?? '60'), 10), 150);
       const minRisk = parseFloat(String(req.query.minRisk ?? '0'));
 
       const sinceParam = req.query.since ? String(req.query.since) : undefined;
-      const sinceHours = sinceParam ? parseInt(sinceParam) : undefined;
+      const sinceHours = sinceParam ? parseInt(sinceParam, 10) : undefined;
 
       const domainEntities = await ontologyEngine.getDomainEntities(
         domain ?? 'vessels',
@@ -475,9 +475,9 @@ router.get(
       }
 
       const overallHealth =
-        stats.alertsBySeverity['critical'] > 0
+        stats.alertsBySeverity.critical > 0
           ? 'critical'
-          : stats.alertsBySeverity['high'] > 3
+          : stats.alertsBySeverity.high > 3
             ? 'degraded'
             : stats.activeAlerts > 10
               ? 'elevated'
@@ -497,15 +497,15 @@ router.get(
         }));
 
       const headline =
-        stats.alertsBySeverity['critical'] > 0
-          ? `${stats.alertsBySeverity['critical']} critical cross-domain alert${stats.alertsBySeverity['critical'] > 1 ? 's' : ''} require immediate attention across ${stats.topAffectedDomains.length} domain${stats.topAffectedDomains.length > 1 ? 's' : ''}`
+        stats.alertsBySeverity.critical > 0
+          ? `${stats.alertsBySeverity.critical} critical cross-domain alert${stats.alertsBySeverity.critical > 1 ? 's' : ''} require immediate attention across ${stats.topAffectedDomains.length} domain${stats.topAffectedDomains.length > 1 ? 's' : ''}`
           : stats.activeAlerts > 5
             ? `${stats.activeAlerts} active intelligence signals across ${stats.topAffectedDomains.length} operating domains — ${overallHealth === 'elevated' ? 'elevated operational tempo' : 'nominal posture'}`
             : 'All operating domains nominal — no critical intelligence signals at this time';
 
       const executiveSummary =
         `CORTEX Intelligence Summary for ${today}:\n\n` +
-        `${stats.activeAlerts} active signals (${stats.alertsBySeverity['critical']} critical, ${stats.alertsBySeverity['high']} high) detected across ${stats.topAffectedDomains.length} domains. ` +
+        `${stats.activeAlerts} active signals (${stats.alertsBySeverity.critical} critical, ${stats.alertsBySeverity.high} high) detected across ${stats.topAffectedDomains.length} domains. ` +
         `Overall portfolio posture: ${overallHealth.toUpperCase()}. ` +
         (topSignals.length > 0
           ? `Top signals: ${topSignals
@@ -524,8 +524,8 @@ router.get(
           signals: topSignals,
           domainScores,
           totalAlerts: stats.activeAlerts,
-          criticalCount: stats.alertsBySeverity['critical'],
-          highCount: stats.alertsBySeverity['high'],
+          criticalCount: stats.alertsBySeverity.critical,
+          highCount: stats.alertsBySeverity.high,
           overallHealth,
           isPublished: true,
         })
@@ -1530,8 +1530,8 @@ router.post(
   ),
   async (req, res) => {
     try {
-      const approvalId = parseInt(req.params['id'] as string, 10);
-      if (isNaN(approvalId)) {
+      const approvalId = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(approvalId)) {
         sendBadRequest(res, 'Invalid quick action id');
         return;
       }
@@ -2156,7 +2156,7 @@ router.get(
         sendSuccess(res, { snapshots: [], total: 0 });
         return;
       }
-      const limit = Math.min(parseInt(String(req.query.limit ?? '20')), 100);
+      const limit = Math.min(parseInt(String(req.query.limit ?? '20'), 10), 100);
       const offset = Math.max(0, parseInt(String(req.query.offset ?? '0'), 10));
 
       const now = new Date();
@@ -2198,7 +2198,7 @@ router.get(
   perUserApiSlidingLimiter,
   async (req, res) => {
     try {
-      const uuid = req.params['uuid'] as string;
+      const uuid = req.params.uuid as string;
       const orgIds = callerOrgIds(req as any);
 
       const rows = await db
@@ -2248,7 +2248,7 @@ router.delete(
   perUserWriteSlidingLimiter,
   async (req, res) => {
     try {
-      const uuid = req.params['uuid'] as string;
+      const uuid = req.params.uuid as string;
       const orgIds = callerOrgIds(req as any);
 
       const rows = await db

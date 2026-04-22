@@ -36,9 +36,9 @@ describe('Monte Carlo scenario library — smoke coverage', () => {
         for (const output of scenario.outputs) {
           const metricResult = result.results[output.id];
           expect(metricResult, `missing result for output ${output.id}`).toBeDefined();
-          expect(metricResult!.values.length).toBeGreaterThan(0);
+          expect(metricResult?.values.length).toBeGreaterThan(0);
 
-          const stats = metricResult!.stats;
+          const stats = metricResult?.stats;
           for (const [name, value] of Object.entries({
             mean: stats.mean,
             stdDev: stats.stdDev,

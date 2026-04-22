@@ -43,7 +43,7 @@ function buildSVGPath(points: Array<{ x: number; y: number }>, smooth = true): s
     return points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
   }
 
-  const path: string[] = [`M${points[0]!.x},${points[0]!.y}`];
+  const path: string[] = [`M${points[0]?.x},${points[0]?.y}`];
   for (let i = 1; i < points.length; i++) {
     const prev = points[i - 1]!;
     const curr = points[i]!;
@@ -227,8 +227,8 @@ export function TimeSeriesChart({
 
         {primaryPoints.length > 0 && (
           <circle
-            cx={primaryPoints[primaryPoints.length - 1]!.x}
-            cy={primaryPoints[primaryPoints.length - 1]!.y}
+            cx={primaryPoints[primaryPoints.length - 1]?.x}
+            cy={primaryPoints[primaryPoints.length - 1]?.y}
             r={3}
             fill={color}
           />

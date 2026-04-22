@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { typography } from './tokens';
-import { useRealtimeChannel } from './use-realtime-channel';
 
 export interface SessionParticipant {
   userId: string;
@@ -450,7 +449,7 @@ export function EntityCommentThread({
           gap: '6px',
           padding: '5px 10px',
           borderRadius: '8px',
-          border: `1px solid ${unresolvedCount > 0 ? accentColor + '40' : 'rgba(255,255,255,0.12)'}`,
+          border: `1px solid ${unresolvedCount > 0 ? `${accentColor}40` : 'rgba(255,255,255,0.12)'}`,
           background: unresolvedCount > 0 ? `${accentColor}12` : 'rgba(255,255,255,0.04)',
           color: unresolvedCount > 0 ? accentColor : 'rgba(255,255,255,0.4)',
           fontSize: '11px',
@@ -699,7 +698,7 @@ export function MultiplayerSessionBanner({
           Array.isArray(json.data?.participants) &&
           (json.data?.participants?.length ?? 0) > 0
         ) {
-          setParticipants(json.data!.participants!);
+          setParticipants(json.data?.participants!);
         }
       } catch {}
     }

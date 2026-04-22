@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import {
   Bar,
   BarChart,
-  Cell,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -16,7 +15,7 @@ import ClientScopeSwitcher, { useClientScope } from '@/components/ClientScopeSwi
 import { usePageMeta } from '@/hooks/usePageMeta';
 
 const GOLD = 'var(--color-gold)';
-const API = import.meta.env.BASE_URL + 'api';
+const API = `${import.meta.env.BASE_URL}api`;
 
 type CaseStudy = {
   client: string;

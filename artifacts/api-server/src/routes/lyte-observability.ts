@@ -10,14 +10,13 @@ import {
   lytePrismScoresTable,
   lyteSignalsTable,
 } from '@szl-holdings/db';
-import { and, asc, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
   parsePagination,
   sendBadRequest,
-  sendError,
   sendNotFound,
   sendSuccess,
 } from '../lib/api-response';
@@ -95,7 +94,7 @@ router.get('/lyte/prism/summary', authMiddleware(), async (req, res) => {
     const composite = rows.filter(Boolean);
     const avgScore =
       composite.length > 0
-        ? Math.round(composite.reduce((s, r) => s + (r!.score ?? 0), 0) / composite.length)
+        ? Math.round(composite.reduce((s, r) => s + (r?.score ?? 0), 0) / composite.length)
         : 0;
     sendSuccess(res, { lenses: rows, compositeScore: avgScore, lensCount: composite.length });
   } catch (err) {
@@ -264,7 +263,7 @@ router.get('/lyte/alerts', authMiddleware(), validateQuery(listQuerySchema), asy
     const service = req.query.service as string | undefined;
     const severity = req.query.severity as string | undefined;
 
-    const query = db.select().from(lyteAlertsTable);
+    const _query = db.select().from(lyteAlertsTable);
     const conditions: ReturnType<typeof eq>[] = [];
     if (status) conditions.push(eq(lyteAlertsTable.status, status as any));
     if (service) conditions.push(eq(lyteAlertsTable.service, service));
@@ -381,7 +380,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const alertId = req.query.alertId ? parseInt(req.query.alertId as string) : undefined;
+      const alertId = req.query.alertId ? parseInt(req.query.alertId as string, 10) : undefined;
       const rows = await db
         .select()
         .from(lyteAlertEventsTable)
@@ -603,7 +602,7 @@ router.get('/lyte/dashboards', authMiddleware(), async (req, res) => {
         db
           .select()
           .from(lyteDashboardsTable)
-          .where(eq(lyteDashboardsTable.userId, req.user!.id))
+          .where(eq(lyteDashboardsTable.userId, req.user?.id))
           .orderBy(desc(lyteDashboardsTable.updatedAt))
           .limit(50),
       'lyte_dashboards:list',

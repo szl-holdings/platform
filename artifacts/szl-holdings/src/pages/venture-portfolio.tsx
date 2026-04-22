@@ -1,5 +1,5 @@
 import { m } from "framer-motion";
-import { ArrowRight, ArrowUpRight, TrendingUp, Activity, Globe, Shield, Building2, Briefcase } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Activity, Globe, Shield, Building2, Briefcase } from "lucide-react";
 import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -135,7 +135,7 @@ export default function VenturePortfolioPage() {
       {__pageMeta}
       <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
           <section style={{ padding: "clamp(6rem,10vw,8rem) 0 clamp(4rem,7vw,6rem)", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
               <m.div

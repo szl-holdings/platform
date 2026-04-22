@@ -258,7 +258,7 @@ export default function AutomationsPage() {
     (a) => categoryFilter === 'all' || a.category === categoryFilter,
   );
   const failed = automationRuns.filter((r) => r.status === 'failed');
-  const pending = automationRuns.filter((r) => r.status === 'retrying');
+  const _pending = automationRuns.filter((r) => r.status === 'retrying');
 
   return (
     <div className="p-6 space-y-6 overflow-auto">

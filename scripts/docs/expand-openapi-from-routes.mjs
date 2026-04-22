@@ -12,9 +12,9 @@
  * "200 OK" response) so the catalogue can advertise full surface coverage
  * while richer schemas continue to be authored by hand.
  */
-import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'fs';
-import { dirname, join, basename, relative } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync, writeFileSync, readdirSync, statSync, } from 'node:fs';
+import { dirname, join, basename, } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -120,7 +120,7 @@ function extractInnerPrefix(src) {
 function joinPath(...parts) {
   const joined = parts
     .map((p) => p || '')
-    .map((p) => (p.startsWith('/') || p === '' ? p : '/' + p))
+    .map((p) => (p.startsWith('/') || p === '' ? p : `/${p}`))
     .join('')
     .replace(/\/{2,}/g, '/');
   return joined || '/';
@@ -142,7 +142,7 @@ for (const file of routeFiles) {
       for (const prefix of prefixes) {
         // If the inner router.use prefix is already part of innerPath,
         // don't double-prepend it.
-        let basePrefix = prefix;
+        const basePrefix = prefix;
         let path;
         if (innerPrefix && innerPath.startsWith(innerPrefix)) {
           path = joinPath(basePrefix, innerPath);
@@ -170,8 +170,6 @@ for (const op of operations) {
   uniqueOps.push(op);
 }
 
-console.log(`Extracted ${uniqueOps.length} unique (method,path) operations from ${routeFiles.length} route files.`);
-
 // ─── 4. Load existing spec; figure out what's already covered
 const specRaw = readFileSync(SPEC_PATH, 'utf8');
 const spec = parse(specRaw);
@@ -183,7 +181,6 @@ for (const [p, item] of Object.entries(existingPaths)) {
     if (item[method]) existingOpKeys.add(`${method} ${p}`);
   }
 }
-console.log(`Existing spec covers ${existingOpKeys.size} (method,path) operations across ${Object.keys(existingPaths).length} paths.`);
 
 // Existing tag set
 const existingTags = new Set((spec.tags ?? []).map((t) => t.name));
@@ -203,7 +200,6 @@ const missing = uniqueOps.filter(
     !existingOpKeys.has(`${op.method} ${op.path}`) &&
     !existingPathSet.has(normalisePath(op.path)),
 );
-console.log(`Missing operations to be stubbed: ${missing.length}`);
 
 // Group missing operations by path so we emit one YAML path block per path
 const byPath = new Map();
@@ -275,7 +271,7 @@ for (const [path, ops] of [...byPath.entries()].sort((a, b) => a[0].localeCompar
   }
 }
 
-const stubYaml = yamlChunks.join('\n') + '\n';
+const stubYaml = `${yamlChunks.join('\n')}\n`;
 
 // ─── 6. Append stubs to openapi.yaml right at the end of `paths:` block.
 //        Detect the next top-level key after `paths:` and insert before it.
@@ -294,10 +290,9 @@ function insertStubs(specText, stubBlock) {
   return [...before, ...stubBlock.split('\n'), ...after].join('\n');
 }
 
-let updatedSpec = specText => specText;
+const _updatedSpec = specText => specText;
 
 if (missing.length === 0) {
-  console.log('Nothing to stub — spec already covers all extracted operations.');
 } else {
   const newSpec = insertStubs(specRaw, stubYaml);
   // Merge new tags into the spec — append entries at end of tags list
@@ -313,15 +308,14 @@ if (missing.length === 0) {
     // Find last tag entry before pathsIdx
     let lastTagIdx = -1;
     for (let i = pathsIdx - 1; i >= 0; i--) {
-      if (/^  - name:\s/.test(lines[i])) { lastTagIdx = i; break; }
+      if (/^ {2}- name:\s/.test(lines[i])) { lastTagIdx = i; break; }
     }
     // Find end of that tag entry (next line that isn't indented further or starts with `  - `)
     let insertAt = lastTagIdx + 1;
-    while (insertAt < pathsIdx && /^\s+\S/.test(lines[insertAt]) && !/^  - /.test(lines[insertAt])) {
+    while (insertAt < pathsIdx && /^\s+\S/.test(lines[insertAt]) && !/^ {2}- /.test(lines[insertAt])) {
       insertAt++;
     }
     withTags = [...lines.slice(0, insertAt), ...tagBlock.split('\n'), ...lines.slice(insertAt)].join('\n');
   }
   writeFileSync(SPEC_PATH, withTags, 'utf8');
-  console.log(`✓ openapi.yaml updated: +${missing.length} operations across ${byPath.size} paths, +${tagsToAdd.length} new tags.`);
 }

@@ -12,7 +12,7 @@ export function MergeNotification({ merges, onDismiss }: Props) {
 
   if (merges.length === 0) return null;
 
-  const actor = merges[0]!.actorId;
+  const actor = merges[0]?.actorId;
   const count = merges.length;
 
   return (

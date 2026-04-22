@@ -37,10 +37,10 @@ function assertStatus(adapter: ConnectorAdapter) {
   expect(['idle', 'polling', 'streaming', 'error', 'stopped']).toContain(status);
 }
 
-async function noopEmitSignal(input: unknown): Promise<{ signalId: string; type: string }> {
+async function _noopEmitSignal(input: unknown): Promise<{ signalId: string; type: string }> {
   return {
     signalId: `sig-${Date.now()}`,
-    type: String((input as Record<string, unknown>)['type'] ?? 'unknown'),
+    type: String((input as Record<string, unknown>).type ?? 'unknown'),
   };
 }
 

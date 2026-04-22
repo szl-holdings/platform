@@ -75,7 +75,7 @@ export function register(router: IRouter): void {
         const fromDate = from ? new Date(from) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
         const toDate = to ? new Date(to) : new Date();
 
-        if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+        if (Number.isNaN(fromDate.getTime()) || Number.isNaN(toDate.getTime())) {
           sendBadRequest(res, "Invalid date format for 'from' or 'to'");
           return;
         }

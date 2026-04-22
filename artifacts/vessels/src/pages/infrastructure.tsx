@@ -79,7 +79,7 @@ export default function InfrastructurePage() {
     vessels.length > 0
       ? Math.round(vessels.reduce((s, v) => s + (v.hullCondition ?? 0), 0) / vessels.length)
       : 0;
-  const avgMaint =
+  const _avgMaint =
     vessels.length > 0
       ? Math.round(vessels.reduce((s, v) => s + (v.maintenanceScore ?? 0), 0) / vessels.length)
       : 0;

@@ -1,5 +1,4 @@
-import type { LensBarData, LensScore } from '@szl-holdings/observability';
-import { LENSES } from '@szl-holdings/observability';
+import { type LensBarData, type LensScore, LENSES } from '@szl-holdings/observability';
 
 const LENS_ICONS: Record<string, string> = {
   signal: '◎',
@@ -46,7 +45,7 @@ function MiniSparkline({
 }
 
 function LensScoreChip({ lens }: { lens: LensScore }) {
-  const def = LENSES.find((l) => l.id === lens.lensId);
+  const _def = LENSES.find((l) => l.id === lens.lensId);
   const icon = LENS_ICONS[lens.lensId] || '◆';
   const statusColors = {
     healthy: 'text-[#6b8f71] border-[#6b8f71]/20',

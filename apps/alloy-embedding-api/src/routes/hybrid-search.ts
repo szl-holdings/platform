@@ -1,12 +1,11 @@
-import { Router, type IRouter, type RequestHandler } from "express";
-import type { Request, Response } from "express";
+import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
 import { HybridSearchRequestSchema } from "@workspace/aef-contracts";
 import { defaultLedgerStore } from "@workspace/aef-evidence-ledger";
 import { PolicyEngine } from "@workspace/aef-policy-guard";
 import { reciprocalRankFusion, applyExactMatchBoosts, normalizeScores, assembleCitations } from "@workspace/aef-retrieval-core";
 import { embedTexts } from "@workspace/alloy-embed-worker";
 import { rerankCandidates } from "@workspace/alloy-rerank-worker";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { logger } from "../middleware/logger.js";
 import { getProfile } from "../profiles/default.js";
 import { errorBudgetCounter } from "../middleware/prometheus.js";
@@ -49,7 +48,7 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
 
   const start = Date.now();
 
-  const devHashMode = !process.env["SUBSTRATE_EMBED_URL"] && process.env["NODE_ENV"] !== "production";
+  const devHashMode = !process.env.SUBSTRATE_EMBED_URL && process.env.NODE_ENV !== "production";
 
   let queryVector: number[];
   try {
@@ -109,7 +108,7 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
           query: body.query,
           candidates: finalCitations.map((c) => ({
             id: c.chunkId,
-            text: String(c.metadata["text"] ?? ""),
+            text: String(c.metadata.text ?? ""),
             score: c.score,
           })),
           topK,
@@ -161,7 +160,7 @@ hybridSearchRouter.post("/v1/hybrid-search", (async (req: Request, res: Response
 
   const hits = finalCitations.map((c, i) => {
     const evidence = evidenceEntries[i]!;
-    const textVal = c.metadata["text"];
+    const textVal = c.metadata.text;
     return {
       chunkId: c.chunkId,
       sourceId: c.sourceId,

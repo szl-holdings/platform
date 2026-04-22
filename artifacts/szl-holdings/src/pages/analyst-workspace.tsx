@@ -11,7 +11,6 @@ import {
   Network,
   Scale,
   Search,
-  Shield,
   Ship,
   User,
 } from 'lucide-react';
@@ -580,7 +579,7 @@ function EntityCard({
         borderRadius: 10,
         cursor: 'pointer',
         background: selected ? `${color}10` : 'rgba(255,255,255,0.02)',
-        border: `1px solid ${selected ? color + '35' : 'rgba(255,255,255,0.07)'}`,
+        border: `1px solid ${selected ? `${color}35` : 'rgba(255,255,255,0.07)'}`,
         transition: 'border-color 0.2s',
       }}
     >

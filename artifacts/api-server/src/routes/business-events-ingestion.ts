@@ -7,7 +7,7 @@ import type {
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { db } from '@szl-holdings/db';
 import { analyticsEventsTable } from '@szl-holdings/db/schema';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { and, desc, eq, gte, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';

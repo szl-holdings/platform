@@ -5,10 +5,8 @@ import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/reac
 import {
   AlertTriangle,
   CheckCheck,
-  CheckCircle,
   ChevronDown,
   ChevronRight,
-  Clock,
   Eye,
   FileText,
   Flag,
@@ -16,7 +14,6 @@ import {
   RefreshCw,
   ToggleRight,
   Users,
-  XCircle,
   X as XIcon,
   Zap,
 } from 'lucide-react';
@@ -25,7 +22,6 @@ import {
   type AlloyArtifact,
   type AlloySignal,
   type AlloyWorkflow,
-  type AlloyWorkflowRun,
   alloyApi,
   type FeatureFlag,
 } from '../lib/api';

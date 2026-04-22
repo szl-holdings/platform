@@ -19,8 +19,7 @@ vi.mock('../../lib/logger.js', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-import type { PlanGraph, PlanStep } from '@workspace/planner';
-import { createPlan, defaultPlanStore } from '@workspace/planner';
+import { type PlanGraph, type PlanStep, createPlan, defaultPlanStore } from '@workspace/planner';
 import plansRouter from '../plans';
 
 function buildApp() {
@@ -122,7 +121,7 @@ describe('POST /api/plans/:id/execute', () => {
 
     const res = await request(app)
       .post(`/api/plans/${plan.planId}/execute`)
-      .send({ approvedStepIds: [gated!.stepId] })
+      .send({ approvedStepIds: [gated?.stepId] })
       .expect(200);
 
     const data = res.body.data ?? res.body;

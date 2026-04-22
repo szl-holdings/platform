@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -27,8 +27,7 @@ interface MitreDetection {
 async function fetchMitreDetections(): Promise<MitreDetection[]> {
   try {
     return await apiGet<MitreDetection[]>('/api/aegis/mitre-detections');
-  } catch (err) {
-    console.warn('[MITRE] Failed to fetch detections:', err);
+  } catch (_err) {
     return [];
   }
 }
@@ -144,7 +143,7 @@ function getHeatColor(count: number, max: number): string {
   return 'rgba(245,158,11,0.25)';
 }
 
-function getHeatTextColor(count: number, max: number): string {
+function getHeatTextColor(count: number, _max: number): string {
   if (count === 0) return 'rgba(232,234,240,0.2)';
   return '#FFFFFF';
 }
@@ -191,8 +190,7 @@ async function fetchRelatedIncidents(techniqueId: string): Promise<RelatedIncide
         (techName && titleLower.includes(techName.split(' ')[0] ?? ''))
       );
     });
-  } catch (err) {
-    console.warn('[MITRE] Failed to load related incidents:', err);
+  } catch (_err) {
     return [];
   }
 }
@@ -214,7 +212,7 @@ export default function MitreScreen() {
 
   const { data: relatedIncidents = [], isLoading: loadingRelated } = useQuery<RelatedIncident[]>({
     queryKey: ['aegis-mitre-related', selectedTech?.id],
-    queryFn: () => fetchRelatedIncidents(selectedTech!.id),
+    queryFn: () => fetchRelatedIncidents(selectedTech?.id ?? ''),
     enabled: !!selectedTech,
   });
 

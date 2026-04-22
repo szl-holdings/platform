@@ -1,7 +1,7 @@
 import { activityLogTable, auditEventsTable, db } from '@szl-holdings/db';
 import { desc } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
-import { handleRouteError, sendError, sendSuccess } from '../lib/api-response';
+import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { isFlagEnabled } from '../lib/platform-flags';
 import { authMiddleware, requireRole } from '../middlewares/auth';
 

@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { type AppNotification, useNotifications } from '@szl-holdings/mobile-shared';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -64,7 +64,6 @@ function NotificationRow({ notification, onMarkRead, onDelete, colors }: Notific
       try {
         router.push(notification.actionUrl as any);
       } catch {
-        console.warn('[notification] Deep-link failed:', notification.actionUrl);
       }
     }
   }, [notification, onMarkRead]);

@@ -1,10 +1,9 @@
-import { AlertTriangle, BarChart3, Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { BarChart3, ChevronLeft, ChevronRight, } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   daysUntil,
   formatDeadline,
   getPressureColor,
-  getStatusColor,
   useMatters,
 } from '@/data/matters';
 

@@ -52,7 +52,6 @@ function minutesAgo(m: number) {
  * Call this at the start of a full reset to ensure a clean baseline.
  */
 export async function clearDemoData(): Promise<void> {
-  console.log('[demo-seed] Clearing existing demo records...');
 
   // Find all demo workflow IDs for FK-constrained deletes
   const demoWorkflows = await db
@@ -82,8 +81,6 @@ export async function clearDemoData(): Promise<void> {
   await db.delete(lyteCommandCardsTable).where(sql`metadata->>'demo' = 'true'`);
   await db.delete(lyteSignalsTable).where(sql`metadata->>'demo' = 'true'`);
   await db.delete(lyteWorkspacesTable).where(eq(lyteWorkspacesTable.name, 'SZL Holdings Demo'));
-
-  console.log('[demo-seed] ✓ Demo records cleared');
 }
 
 /**
@@ -107,7 +104,7 @@ async function ensureDemoWorkspace(): Promise<number> {
       ownerId: 'demo',
     })
     .returning({ id: lyteWorkspacesTable.id });
-  return created!.id;
+  return created?.id;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -151,7 +148,6 @@ async function upsertSignal(values: typeof alloySignals.$inferInsert) {
 // ─── Narrative 1: Business / RevOps / Lyte ───────────────────────────────────
 
 async function seedBusinessNarrative() {
-  console.log('[demo-seed] Seeding Narrative 1: Business Observability / RevOps / CFO...');
 
   const lyteWorkspaceId = await ensureDemoWorkspace();
   const owner = await upsertOwner(
@@ -369,14 +365,11 @@ async function seedBusinessNarrative() {
       })
       .onConflictDoNothing();
   }
-
-  console.log('[demo-seed] ✓ Business narrative seeded');
 }
 
 // ─── Narrative 2: Security / SOC / Aegis ─────────────────────────────────────
 
 async function seedSecurityNarrative() {
-  console.log('[demo-seed] Seeding Narrative 2: Security / SOC / Risk (Aegis)...');
 
   const lyteWorkspaceId = await ensureDemoWorkspace();
   const cisoOwner = await upsertOwner(
@@ -386,7 +379,7 @@ async function seedSecurityNarrative() {
     'aegis',
     'd.reyes@demo.szlholdings.com',
   );
-  const analystOwner = await upsertOwner(
+  const _analystOwner = await upsertOwner(
     'demo-owner-soc-analyst',
     'Priya Nair (SOC Analyst Demo)',
     'user',
@@ -590,14 +583,11 @@ async function seedSecurityNarrative() {
       resolvedAt: minutesAgo(24),
     })
     .onConflictDoNothing();
-
-  console.log('[demo-seed] ✓ Security narrative seeded');
 }
 
 // ─── Narrative 3: Maritime / Sanctions / Vessels ──────────────────────────────
 
 async function seedMaritimeNarrative() {
-  console.log('[demo-seed] Seeding Narrative 3: Maritime / Sanctions / Fleet Operations...');
 
   const fleetOwner = await upsertOwner(
     'demo-owner-fleet-ops',
@@ -781,14 +771,11 @@ async function seedMaritimeNarrative() {
       metadata: { demo: true, narrative: 'maritime', ofacResult: 'cleared', demurrage: 112000 },
     })
     .onConflictDoNothing({ target: alloyArtifacts.externalId });
-
-  console.log('[demo-seed] ✓ Maritime narrative seeded');
 }
 
 // ─── Narrative 4: Legal / Compliance / PRISM Counsel ─────────────────────────
 
 async function seedLegalNarrative() {
-  console.log('[demo-seed] Seeding Narrative 4: Legal / Compliance / Matter Command...');
 
   const legalOwner = await upsertOwner(
     'demo-owner-attorney',
@@ -988,26 +975,17 @@ async function seedLegalNarrative() {
       },
     })
     .onConflictDoNothing({ target: alloyArtifacts.externalId });
-
-  console.log('[demo-seed] ✓ Legal narrative seeded');
 }
 
 // ─── Main Runner ──────────────────────────────────────────────────────────────
 
 export async function seedAllNarratives() {
-  console.log(
-    '[demo-seed] Starting demo seed for the four database-backed narratives (Business, Security, Maritime, Legal)...',
-  );
   await clearDemoData();
   await seedBusinessNarrative();
   await seedSecurityNarrative();
   await seedMaritimeNarrative();
   await seedLegalNarrative();
   await seedCarlotaAdvisoryData();
-  console.log('[demo-seed] Four database-backed narratives seeded successfully.');
-  console.log(
-    '[demo-seed] Note: Terra distress narrative is in-app only (see TERRA_DISTRESS_NARRATIVE).',
-  );
 }
 
 export async function seedNarrative(id: 'business' | 'security' | 'maritime' | 'legal') {
@@ -1030,11 +1008,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const runner = narrative ? () => seedNarrative(narrative) : seedAllNarratives;
   runner()
     .then(() => {
-      console.log('[demo-seed] Done.');
       process.exit(0);
     })
-    .catch((err) => {
-      console.error('[demo-seed] Error:', err);
+    .catch((_err) => {
       process.exit(1);
     });
 }

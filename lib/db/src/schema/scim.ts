@@ -12,7 +12,6 @@ import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
 import { usersTable } from './auth';
 import { azureTenantsTable } from './azure_tenants';
-import { organizationsTable } from './organizations';
 
 export const scimTokensTable = pgTable('scim_tokens', {
   id: serial('id').primaryKey(),

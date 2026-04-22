@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { typography } from './tokens';
 
 export interface BriefingSignal {
@@ -489,7 +489,7 @@ export function BriefingHistory({
             style={{
               padding: '10px 12px',
               borderRadius: '10px',
-              border: `1px solid ${selected === i ? accentColor + '50' : 'rgba(255,255,255,0.07)'}`,
+              border: `1px solid ${selected === i ? `${accentColor}50` : 'rgba(255,255,255,0.07)'}`,
               background: selected === i ? `${accentColor}15` : 'rgba(255,255,255,0.03)',
               cursor: 'pointer',
               textAlign: 'left',

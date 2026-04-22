@@ -18,14 +18,7 @@
  * Idempotent: nodes are upserted by alias; re-running is safe.
  */
 
-import type { CreateCstNode } from '@szl-holdings/constellation';
-import {
-  addEdgeEvidence,
-  lookupNodeByAlias,
-  upsertEdge,
-  upsertNode,
-  upsertNodeAlias,
-} from '@szl-holdings/constellation';
+import { type CreateCstNode, lookupNodeByAlias, upsertEdge, upsertNode, upsertNodeAlias } from '@szl-holdings/constellation';
 
 const SEED_VERSION = '1.0.0';
 const SEED_SOURCE_ID = 'demo-constellation-seed';
@@ -58,7 +51,6 @@ export interface ConstellationSeedResult {
  * Idempotent — safe to call multiple times.
  */
 export async function seedConstellationDemo(): Promise<ConstellationSeedResult> {
-  console.log('[constellation-seed] Starting cross-domain Constellation seed…');
 
   // ── 1. Terra — Harbor View Tower property ─────────────────────────────────
   const TERRA_ALIAS = { type: 'demo_key', value: 'demo-terra-harbor-view-tower' };
@@ -87,9 +79,7 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
     };
     terraNode = await upsertNode(input);
     await upsertNodeAlias(terraNode.id, TERRA_ALIAS.type, TERRA_ALIAS.value, 'demo-seed', true);
-    console.log(`[constellation-seed] ✓ Terra node: ${terraNode.id}`);
   } else {
-    console.log(`[constellation-seed] ↩ Terra node exists: ${terraNode.id}`);
   }
 
   // ── 2. Vessels — MV Pacific Carrier charter ───────────────────────────────
@@ -122,9 +112,7 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
     };
     vesselsNode = await upsertNode(input);
     await upsertNodeAlias(vesselsNode.id, VESSEL_ALIAS.type, VESSEL_ALIAS.value, 'demo-seed', true);
-    console.log(`[constellation-seed] ✓ Vessels node: ${vesselsNode.id}`);
   } else {
-    console.log(`[constellation-seed] ↩ Vessels node exists: ${vesselsNode.id}`);
   }
 
   // ── 3. PRISM — Title Dispute Matter ───────────────────────────────────────
@@ -156,9 +144,7 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
     };
     prismNode = await upsertNode(input);
     await upsertNodeAlias(prismNode.id, PRISM_ALIAS.type, PRISM_ALIAS.value, 'demo-seed', true);
-    console.log(`[constellation-seed] ✓ PRISM node: ${prismNode.id}`);
   } else {
-    console.log(`[constellation-seed] ↩ PRISM node exists: ${prismNode.id}`);
   }
 
   // ── 4. Aegis — Physical Security Incident ─────────────────────────────────
@@ -189,9 +175,7 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
     };
     aegisNode = await upsertNode(input);
     await upsertNodeAlias(aegisNode.id, AEGIS_ALIAS.type, AEGIS_ALIAS.value, 'demo-seed', true);
-    console.log(`[constellation-seed] ✓ Aegis node: ${aegisNode.id}`);
   } else {
-    console.log(`[constellation-seed] ↩ Aegis node exists: ${aegisNode.id}`);
   }
 
   // ── 5. Lyte — Revenue Signal ───────────────────────────────────────────────
@@ -223,9 +207,7 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
     };
     lyteNode = await upsertNode(input);
     await upsertNodeAlias(lyteNode.id, LYTE_ALIAS.type, LYTE_ALIAS.value, 'demo-seed', true);
-    console.log(`[constellation-seed] ✓ Lyte node: ${lyteNode.id}`);
   } else {
-    console.log(`[constellation-seed] ↩ Lyte node exists: ${lyteNode.id}`);
   }
 
   // ── 6. Cross-domain edges ─────────────────────────────────────────────────
@@ -249,14 +231,7 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
         extensions: { demo: true, seedVersion: SEED_VERSION },
       });
       edgeIds.push(edge.id);
-      console.log(
-        `[constellation-seed] ✓ Edge: ${relType} (${fromId.slice(0, 8)}→${toId.slice(0, 8)})`,
-      );
-    } catch (err) {
-      console.warn(
-        `[constellation-seed] ⚠ Edge ${relType} may already exist or failed:`,
-        (err as Error).message,
-      );
+    } catch (_err) {
     }
   }
 
@@ -283,10 +258,6 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
     seedVersion: SEED_VERSION,
     seededAt: now(),
   };
-
-  console.log(
-    `[constellation-seed] ✓ Done. 5 nodes + ${edgeIds.length} cross-domain edges seeded.`,
-  );
   return result;
 }
 
@@ -295,11 +266,9 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
  * Used by the demo reset flow.
  */
 export async function clearConstellationDemo(): Promise<void> {
-  console.log('[constellation-seed] Clearing Constellation demo data…');
   const { db, cstNodes, cstEdges } = await import('@szl-holdings/db');
   const { sql } = await import('drizzle-orm');
 
   await db.delete(cstEdges).where(sql`extensions->>'demo' = 'true'`);
   await db.delete(cstNodes).where(sql`extensions->>'demo' = 'true'`);
-  console.log('[constellation-seed] ✓ Constellation demo data cleared');
 }

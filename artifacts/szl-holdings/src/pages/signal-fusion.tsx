@@ -1,20 +1,18 @@
 import { useStandardQuery } from "@szl-holdings/api-client-react";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/api";
 import {
   Radio, Shield, Ship, Building2, Briefcase, Users, Zap, Layers,
-  ArrowRight, AlertTriangle, CheckCircle2, Clock, Eye, Filter,
-  GitBranch, Activity, TrendingUp, BarChart3, ChevronRight,
-  ArrowUpRight, RefreshCw, Circle, Dot, CheckCheck, ArrowUpRightFromSquare,
-  UserPlus, PlusSquare, ChevronDown, Database,
+  ArrowRight, Filter,
+  GitBranch, ChevronRight,CheckCheck, ArrowUpRightFromSquare,
+  UserPlus, PlusSquare, 
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { ProofDrawer, SAMPLE_PROOF_RECORD } from "@/components/ProofDrawer";
-import type { ProofRecord } from "@/components/ProofDrawer";
+import { ProofDrawer, SAMPLE_PROOF_RECORD, type ProofRecord } from '@/components/ProofDrawer';
 
 const BG = "hsl(214,16%,4%)";
 const BORDER = "hsla(0,0%,100%,0.07)";
@@ -269,7 +267,7 @@ function SignalCard({ sig, active, onClick, highlight, acknowledged }: { sig: Fu
         padding: "1rem 1.125rem",
         borderRadius: "8px",
         background: active ? `${LYTE}08` : highlight ? `${sc}06` : SURFACE,
-        border: `1px solid ${active ? LYTE + "30" : highlight ? sc + "25" : BORDER}`,
+        border: `1px solid ${active ? `${LYTE}30` : highlight ? `${sc}25` : BORDER}`,
         cursor: "pointer",
         transition: "all 0.15s ease",
         opacity: acknowledged ? 0.5 : 1,
@@ -366,7 +364,7 @@ export default function SignalFusionPage() {
   const [activeSignal, setActiveSignal] = useState<string>("sf1");
   const [filterDomain, setFilterDomain] = useState<string>("all");
   const [filterSev, setFilterSev] = useState<string>("all");
-  const [tick, setTick] = useState(0);
+  const [_tick, setTick] = useState(0);
   const [acknowledged, setAcknowledged] = useState<Set<string>>(new Set());
   const [escalated, setEscalated] = useState<Set<string>>(new Set());
   const [showAcked, setShowAcked] = useState(false);
@@ -483,7 +481,7 @@ export default function SignalFusionPage() {
                         padding: "0.25rem 0.625rem",
                         borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 600,
                         textTransform: d === "all" ? "none" : "none",
-                        border: `1px solid ${filterDomain === d ? LYTE + "40" : BORDER}`,
+                        border: `1px solid ${filterDomain === d ? `${LYTE}40` : BORDER}`,
                         background: filterDomain === d ? `${LYTE}12` : "transparent",
                         color: filterDomain === d ? LYTE : TEXT_FAINT,
                         cursor: "pointer",
@@ -501,7 +499,7 @@ export default function SignalFusionPage() {
                       onClick={() => setFilterSev(s)}
                       style={{
                         padding: "0.25rem 0.625rem", borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 600,
-                        border: `1px solid ${filterSev === s ? (SEV_COLOR[s] ?? LYTE) + "40" : BORDER}`,
+                        border: `1px solid ${filterSev === s ? `${SEV_COLOR[s] ?? LYTE}40` : BORDER}`,
                         background: filterSev === s ? `${SEV_COLOR[s] ?? LYTE}12` : "transparent",
                         color: filterSev === s ? (SEV_COLOR[s] ?? LYTE) : TEXT_FAINT,
                         cursor: "pointer",
@@ -747,7 +745,7 @@ export default function SignalFusionPage() {
                         padding: "1.125rem",
                         borderRadius: "8px",
                         background: filterDomain === d.domain ? `${d.color}10` : SURFACE,
-                        border: `1px solid ${filterDomain === d.domain ? d.color + "30" : BORDER}`,
+                        border: `1px solid ${filterDomain === d.domain ? `${d.color}30` : BORDER}`,
                         cursor: "pointer",
                         textAlign: "left",
                       }}

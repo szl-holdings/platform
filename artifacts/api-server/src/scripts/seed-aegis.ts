@@ -30,14 +30,12 @@ function hoursAgo(n: number) {
 }
 
 export async function seedAegis() {
-  console.log('[seed-aegis] Starting Aegis data seed...');
 
   const existingIncidents = await db
     .select({ id: firestormIncidentsTable.id })
     .from(firestormIncidentsTable)
     .limit(1);
   if (existingIncidents.length > 5) {
-    console.log('[seed-aegis] Data already seeded, skipping.');
     return { skipped: true };
   }
 
@@ -444,8 +442,6 @@ export async function seedAegis() {
     ])
     .returning();
 
-  console.log(`[seed-aegis] Seeded ${assets.length} assets`);
-
   const findings = await db
     .insert(firestormFindingsTable)
     .values([
@@ -799,7 +795,7 @@ export async function seedAegis() {
       ...Array.from({ length: 80 }, (_, i) => ({
         assessmentId,
         title:
-          [
+          `${[
             'Insecure cookie attributes on session token',
             'Missing input validation on API endpoint',
             'Outdated TLS 1.0 configuration on legacy service',
@@ -815,7 +811,7 @@ export async function seedAegis() {
             'Cleartext password in error response body',
             'Unvalidated redirect in OAuth flow',
             'Server-side template injection via user input',
-          ][i % 15] + ` (${String.fromCharCode(65 + (i % 26))}${i})`,
+          ][i % 15]} (${String.fromCharCode(65 + (i % 26))}${i})`,
         severity: (['critical', 'high', 'high', 'medium', 'medium', 'medium', 'low'] as const)[
           i % 7
         ],
@@ -844,8 +840,6 @@ export async function seedAegis() {
       })),
     ])
     .returning();
-
-  console.log(`[seed-aegis] Seeded ${findings.length} findings`);
 
   const incidents = await db
     .insert(firestormIncidentsTable)
@@ -1294,7 +1288,7 @@ export async function seedAegis() {
 
       ...Array.from({ length: 40 }, (_, i) => ({
         title:
-          [
+          `${[
             'Suspicious PowerShell execution on endpoint',
             'Failed privilege escalation attempt detected',
             'Anomalous network scan from internal host',
@@ -1305,7 +1299,7 @@ export async function seedAegis() {
             'BGP route hijack attempt detected',
             'Cloud storage bucket misconfiguration',
             'Password spray attack on Office 365',
-          ][i % 10] + ` — Instance ${i + 1}`,
+          ][i % 10]} — Instance ${i + 1}`,
         severity: (['critical', 'high', 'high', 'medium', 'medium', 'low'] as const)[i % 6],
         status: (
           ['closed', 'closed', 'remediation', 'containment', 'triage', 'detection'] as const
@@ -1341,8 +1335,6 @@ export async function seedAegis() {
       })),
     ])
     .returning();
-
-  console.log(`[seed-aegis] Seeded ${incidents.length} incidents`);
 
   const alerts = await db
     .insert(firestormAlertsTable)
@@ -1503,8 +1495,6 @@ export async function seedAegis() {
       })),
     ])
     .returning();
-
-  console.log(`[seed-aegis] Seeded ${alerts.length} alerts`);
 
   await db.insert(firestormHardeningControlsTable).values([
     {
@@ -1828,8 +1818,6 @@ export async function seedAegis() {
       ],
     },
   ]);
-
-  console.log(`[seed-aegis] Seeded hardening controls`);
 
   await db.insert(firestormComplianceControlsTable).values([
     {
@@ -2275,8 +2263,6 @@ export async function seedAegis() {
     },
   ]);
 
-  console.log(`[seed-aegis] Seeded compliance controls`);
-
   await db.insert(firestormMitreDetectionsTable).values([
     {
       techniqueId: 'T1566.001',
@@ -2613,8 +2599,6 @@ export async function seedAegis() {
     },
   ]);
 
-  console.log(`[seed-aegis] Seeded MITRE ATT&CK detections`);
-
   const incidentIds = incidents.slice(0, 14).map((i) => i.id);
   const findingIds = findings.slice(0, 20).map((f) => f.id);
 
@@ -2889,11 +2873,6 @@ export async function seedAegis() {
       ],
     },
   ]);
-
-  console.log(`[seed-aegis] Seeded cases`);
-  console.log(
-    `[seed-aegis] ✅ Aegis seed complete! Assets: ${assets.length}, Findings: ${findings.length}, Incidents: ${incidents.length}, Alerts: ${alerts.length}`,
-  );
 
   return {
     assets: assets.length,

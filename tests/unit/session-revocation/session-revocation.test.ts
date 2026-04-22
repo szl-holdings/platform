@@ -106,7 +106,7 @@ describe('notifySessionRevoked', () => {
     notifySessionRevoked('SESSION_REVOKED', { redirect: false });
     const banner = document.getElementById('szl-session-revoked-banner');
     expect(banner).not.toBeNull();
-    expect(banner!.getAttribute('role')).toBe('status');
+    expect(banner?.getAttribute('role')).toBe('status');
   });
 });
 
@@ -162,14 +162,14 @@ describe('withReturnToQuery', () => {
   it('appends returnTo when a path is stashed', () => {
     recordSessionReturnPath('/command/queue?focus=open');
     expect(withReturnToQuery('/api/login')).toBe(
-      '/api/login?returnTo=' + encodeURIComponent('/command/queue?focus=open'),
+      `/api/login?returnTo=${encodeURIComponent('/command/queue?focus=open')}`,
     );
   });
 
   it('uses & joiner when the URL already has a query string', () => {
     recordSessionReturnPath('/pulse/dashboard');
     expect(withReturnToQuery('/api/login?prompt=1')).toBe(
-      '/api/login?prompt=1&returnTo=' + encodeURIComponent('/pulse/dashboard'),
+      `/api/login?prompt=1&returnTo=${encodeURIComponent('/pulse/dashboard')}`,
     );
   });
 

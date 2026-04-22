@@ -1,23 +1,13 @@
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import {
-  AlertTriangle,
-  ArrowUpRight,
-  BarChart3,
   CheckCircle,
-  Clock,
-  Eye,
-  FileText,
   Plug,
   RefreshCw,
   Shield,
-  Target,
-  User,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
-  type AssetTwin,
   assetTwins,
-  exposureTwins,
   type ThreatTwin,
   threatTwins,
 } from '@/data/threat-twin';

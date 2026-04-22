@@ -1,31 +1,16 @@
 import {
   auditLogsTable,
   azureTenantsTable,
-  dataverseConnectionsTable,
   db,
-  type InsertAzureTenant,
-  type InsertDataverseConnection,
-  type InsertTenantBranding,
   orgMembersTable,
-  scimProvisionedUsersTable,
-  scimSyncLogsTable,
-  scimTokensTable,
-  tenantBrandingTable,
-  usersTable,
 } from '@szl-holdings/db';
-import { services } from '@szl-holdings/services';
-import crypto from 'crypto';
-import { and, count, desc, eq, inArray, sql } from 'drizzle-orm';
-import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
-import rateLimit from 'express-rate-limit';
-import { z } from 'zod';
-import { logActivity } from '../../lib/activity-logger';
+import { and, eq, inArray, } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
 import {
   handleRouteError,
   sendBadRequest,
   sendError,
   sendForbidden,
-  sendNotFound,
   sendSuccess,
 } from '../../lib/api-response';
 import { decryptSecret, encryptSecret } from '../../lib/crypto';
@@ -33,8 +18,6 @@ import {
   powerBiConfigSchema,
   powerBiEmbedTokenSchema,
   powerBiTestConnectionSchema,
-  tenantCreateSchema,
-  tenantStatusSchema,
   validateBody,
 } from '../../lib/validation';
 import { authMiddleware, requireRole } from '../../middlewares/auth';
@@ -151,7 +134,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -189,7 +172,7 @@ router.put(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -462,8 +445,8 @@ router.post(
             )
             .limit(1);
           if (activeTenant.length > 0) {
-            resolvedTenantDbId = activeTenant[0]!.id;
-            resolvedAzureTenantId = activeTenant[0]!.azureTenantId;
+            resolvedTenantDbId = activeTenant[0]?.id;
+            resolvedAzureTenantId = activeTenant[0]?.azureTenantId;
           }
         }
       }

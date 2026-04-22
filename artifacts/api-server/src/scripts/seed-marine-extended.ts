@@ -57,15 +57,9 @@ async function detectStubTables(): Promise<string[]> {
 }
 
 export async function seedMarineExtended() {
-  console.log('[seed-marine-extended] Starting Marine Insurance, Trading & Intelligence seed...');
 
   const missing = await detectStubTables();
   if (missing.length > 0) {
-    console.error(
-      `[seed-marine-extended] SKIPPING — schema not migrated. Missing columns: ${missing.join(', ')}.\n` +
-        `[seed-marine-extended] Fix: run \`pnpm migrate\` from the repo root, then re-run this seed. ` +
-        `(Tables exist as stubs from an earlier emergency unblock; the proper schema is in lib/db/src/schema/marine_insurance.ts and related files.)`,
-    );
     return { skipped: true, reason: 'schema_not_migrated', missing };
   }
 
@@ -74,7 +68,6 @@ export async function seedMarineExtended() {
     .from(marineInsuranceQuotesTable)
     .limit(1);
   if (existing.length > 0) {
-    console.log('[seed-marine-extended] Data already seeded, skipping.');
     return { skipped: true };
   }
 
@@ -265,8 +258,6 @@ export async function seedMarineExtended() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-marine-extended] Seeded ${quotes.length} insurance quotes`);
-
   const policies = await db
     .insert(marineInsurancePoliciesTable)
     .values([
@@ -346,8 +337,6 @@ export async function seedMarineExtended() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-marine-extended] Seeded ${policies.length} insurance policies`);
-
   await db.insert(marineInsuranceClaimsTable).values([
     {
       policyId: policies[1].id,
@@ -374,8 +363,6 @@ export async function seedMarineExtended() {
       filedAt: daysAgo(10),
     },
   ]);
-
-  console.log(`[seed-marine-extended] Seeded insurance claims`);
 
   const instruments = await db
     .insert(commodityTradingInstrumentsTable)
@@ -494,9 +481,7 @@ export async function seedMarineExtended() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-marine-extended] Seeded ${instruments.length} trading instruments`);
-
-  const orders = await db
+  const _orders = await db
     .insert(commodityTradingOrdersTable)
     .values([
       {
@@ -598,8 +583,6 @@ export async function seedMarineExtended() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-marine-extended] Seeded ${orders.length} trading orders`);
-
   await db.insert(commodityTradingPositionsTable).values([
     {
       instrumentId: instruments[0].id,
@@ -638,8 +621,6 @@ export async function seedMarineExtended() {
       marginUsed: '23625',
     },
   ]);
-
-  console.log(`[seed-marine-extended] Seeded trading positions`);
 
   await db.insert(fleetExceptionsTable).values([
     {
@@ -729,8 +710,6 @@ export async function seedMarineExtended() {
       status: 'acknowledged',
     },
   ]);
-
-  console.log(`[seed-marine-extended] Seeded fleet exceptions`);
 
   await db.insert(vesselMaintenanceTable).values([
     {
@@ -824,8 +803,6 @@ export async function seedMarineExtended() {
     },
   ]);
 
-  console.log(`[seed-marine-extended] Seeded vessel maintenance records`);
-
   await db.insert(vesselSanctionsScreeningTable).values([
     {
       vesselId: 1,
@@ -888,9 +865,5 @@ export async function seedMarineExtended() {
       pscResult: 'no_inspection',
     },
   ]);
-
-  console.log(`[seed-marine-extended] Seeded sanctions screening records`);
-
-  console.log('[seed-marine-extended] Marine Insurance, Trading & Intelligence seed complete.');
   return { seeded: true };
 }

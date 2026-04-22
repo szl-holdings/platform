@@ -36,16 +36,12 @@ import cookieParser from "cookie-parser";
 // configured, or CI jobs that do not have access to the integration secret
 // store) we skip the entire suite rather than throwing a hard module-level
 // error that prevents other test files from running.
-const _RAW_LIVE_TOKEN = process.env["INTEGRATION_TEST_TOKEN"];
+const _RAW_LIVE_TOKEN = process.env.INTEGRATION_TEST_TOKEN;
 if (!_RAW_LIVE_TOKEN) {
-  console.warn(
-    "[server-live] INTEGRATION_TEST_TOKEN is not set — skipping live integration tests. " +
-      "Set it in your .env file or CI secret store (see .env.example).",
-  );
 }
 // Set BEFORE any module that reads process.env at import time
 if (_RAW_LIVE_TOKEN) {
-  process.env["ALLOY_INTERNAL_TOKEN"] = _RAW_LIVE_TOKEN;
+  process.env.ALLOY_INTERNAL_TOKEN = _RAW_LIVE_TOKEN;
 }
 // All `describe.skipIf(!LIVE_TOKEN)` blocks guarantee this is non-null at runtime.
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

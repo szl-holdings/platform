@@ -115,7 +115,7 @@ export function registerIngestRoute(router: Router): void {
             chunkIndex: i,
             ...(doc.title !== undefined ? { title: doc.title } : {}),
             ...(doc.sourceUri !== undefined ? { sourceUri: doc.sourceUri } : {}),
-            ...(doc.metadata ?? {}),
+            ...doc.metadata,
           };
 
           // Step 3: persist chunk record

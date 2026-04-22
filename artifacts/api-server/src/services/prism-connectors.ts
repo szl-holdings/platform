@@ -3,13 +3,9 @@ import {
   pcAuditEventsTable,
   pcConnectorAccountsTable,
   pcConnectorSyncRunsTable,
-  pcDocumentsTable,
-  pcEmailsTable,
   pcGraphSubscriptionStateTable,
-  pcSourceItemsTable,
-  pcWebhookSubscriptionsTable,
 } from '@szl-holdings/db';
-import { and, desc, eq, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, lte, } from 'drizzle-orm';
 import { logger } from '../lib/logger';
 import { enqueuePrismJob, PRISM_JOB_TYPES } from './prism-queue';
 

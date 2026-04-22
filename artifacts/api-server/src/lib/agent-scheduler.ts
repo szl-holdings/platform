@@ -9,11 +9,10 @@ import { db, guardianActionsTable, guardianApprovalRequestsTable } from '@szl-ho
 import {
   agentExecutionRuntime,
   agentScheduler,
-  durableScheduler,
   seedDefaultSchedules,
 } from '@szl-holdings/forge-runtime';
 import { computeApprovalExpiresAt } from '@workspace/guardian';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { runAtlasCompaction } from '../jobs/atlas-compaction';
 import { resolveDistressOwnerNames } from '../jobs/terra-owner-enrichment';
@@ -32,11 +31,11 @@ import {
  */
 const DEFAULT_COVENANT_ORG_ID = 1;
 
-const BASE_URL = `http://localhost:${process.env['PORT'] || 3000}`;
+const BASE_URL = `http://localhost:${process.env.PORT || 3000}`;
 
 function getInternalHeaders(): Record<string, string> {
   const headers: Record<string, string> = { Accept: 'application/json' };
-  const token = process.env['ALLOY_INTERNAL_TOKEN'];
+  const token = process.env.ALLOY_INTERNAL_TOKEN;
   if (token) headers['x-internal-token'] = token;
   return headers;
 }
@@ -108,7 +107,7 @@ export async function dispatchCovenantBreaches(targetOrgId?: number): Promise<{
     let approvalsCreated = 0;
     let breachCount = 0;
     let evaluatedTotal = 0;
-    const env = process.env['NODE_ENV'] === 'production' ? 'production' : 'development';
+    const env = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 
    for (const orgId of orgIds) {
     let measurements = await evaluateAllCovenants(orgId);
@@ -267,10 +266,10 @@ function safeSerialize(data: unknown, maxLen: number): string {
     if (Array.isArray(data)) {
       const limited = data.slice(0, 20);
       const s = JSON.stringify(limited);
-      return s.length > maxLen ? s.slice(0, maxLen) + '...' : s;
+      return s.length > maxLen ? `${s.slice(0, maxLen)}...` : s;
     }
     const s = JSON.stringify(data);
-    return s.length > maxLen ? s.slice(0, maxLen) + '...' : s;
+    return s.length > maxLen ? `${s.slice(0, maxLen)}...` : s;
   } catch {
     return '[unserializable]';
   }

@@ -2,12 +2,8 @@ import { LiveClock as SharedLiveClock } from '@szl-holdings/shared-ui/live-clock
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
-  AlertCircle,
   Brain,
-  CheckCircle2,
   ChevronRight,
-  Circle,
-  Clock,
   Cpu,
   Globe,
   Radio,

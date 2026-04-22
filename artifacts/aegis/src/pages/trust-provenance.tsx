@@ -1,5 +1,4 @@
 import { AdminAuditTrail, type AuditTrailEntry } from '@szl-holdings/shared-ui/admin-audit-trail';
-import { DashboardShell, SidebarNav } from '@szl-holdings/shared-ui/design-system';
 import { LANE_ACCENT_HEX } from '@szl-holdings/shared-ui/lane-colors';
 import { postPolicyAppeal } from '@szl-holdings/shared-ui/policy-appeal-client';
 import { type PolicyDecisionRecord, PolicyResult } from '@szl-holdings/shared-ui/policy-result';
@@ -10,8 +9,7 @@ import {
   type SimulationScenario,
 } from '@szl-holdings/shared-ui/simulation-cockpit';
 import { AlertCircle, CheckCircle, Clock, FileSearch, Loader2, Shield } from 'lucide-react';
-import type React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const ACCENT = LANE_ACCENT_HEX.aegis.primary;
 const DOMAIN = 'aegis';
@@ -77,8 +75,7 @@ function useApiData<T>(url: string): {
           setLoading(false);
         }
       })
-      .catch((err) => {
-        console.warn(`[trust-provenance] fetch failed: ${url}`, err);
+      .catch((_err) => {
         if (!cancelled) {
           setError(true);
           setLoading(false);
@@ -232,8 +229,7 @@ export default function TrustProvenancePage() {
                       variant={expandedProofId === proof.proofId ? 'drawer' : 'inline'}
                       accentColor={ACCENT}
                       showActions
-                      onReview={(state) => {
-                        console.log('Review state:', state, 'for proof:', proof.proofId);
+                      onReview={(_state) => {
                       }}
                     />
                   </div>

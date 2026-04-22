@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface EcosystemNode {
   id: string;
@@ -149,7 +149,7 @@ export function EcosystemMap({
   const centerRadius = compact ? 42 : 52;
 
   const getNodePos = (node: EcosystemNode) => {
-    const r = LAYER_CONFIG[node.layer]!.radius * scale;
+    const r = LAYER_CONFIG[node.layer]?.radius * scale;
     if (r === 0) return { x: cx, y: cy };
     return polarToCartesian(node.angle ?? 0, r, cx, cy);
   };
@@ -192,7 +192,7 @@ export function EcosystemMap({
         </defs>
 
         {[1, 2, 3].map((layer) => {
-          const r = LAYER_CONFIG[layer]!.radius * scale;
+          const r = LAYER_CONFIG[layer]?.radius * scale;
           return (
             <circle
               key={layer}
@@ -256,7 +256,7 @@ export function EcosystemMap({
           style={{ opacity: revealStep >= 1 ? 1 : 0, transition: 'opacity 0.6s ease' }}
         />
 
-        {ECOSYSTEM_NODES.map((node, idx) => {
+        {ECOSYSTEM_NODES.map((node, _idx) => {
           const pos = getNodePos(node);
           const isCenter = node.layer === 0;
           const isHov = hovered === node.id;
@@ -365,7 +365,7 @@ export function EcosystemMap({
 
         {showLabels &&
           [1, 2, 3].map((layer) => {
-            const r = LAYER_CONFIG[layer]!.radius * scale;
+            const r = LAYER_CONFIG[layer]?.radius * scale;
             const labelY = cy - r - 10;
             return revealStep >= layer * 2 + 1 ? (
               <text
@@ -378,7 +378,7 @@ export function EcosystemMap({
                 fontFamily="Inter, system-ui, sans-serif"
                 letterSpacing="1"
               >
-                {LAYER_CONFIG[layer]!.label.toUpperCase()}
+                {LAYER_CONFIG[layer]?.label.toUpperCase()}
               </text>
             ) : null;
           })}

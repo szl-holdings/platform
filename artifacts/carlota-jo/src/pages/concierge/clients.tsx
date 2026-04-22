@@ -10,12 +10,9 @@ import {
   Gift,
   Home,
   Lock,
-  MapPin,
   Phone,
-  Plane,
   Shield,
   Star,
-  Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import {

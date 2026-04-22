@@ -8,7 +8,7 @@
  * - production → renders nothing
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export type AppMode = 'demo' | 'sandbox' | 'production' | 'local-dev';

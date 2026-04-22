@@ -379,7 +379,7 @@ export function OperationalEvidencePanel({
   rationale,
   compact = false,
 }: EvidencePanelProps) {
-  const BG_SURFACE = '#0c1018';
+  const _BG_SURFACE = '#0c1018';
   const BORDER_MUTED = 'rgba(255,255,255,0.07)';
   const TEXT_PRIMARY = 'rgba(255,255,255,0.88)';
   const TEXT_SECONDARY = 'rgba(255,255,255,0.55)';
@@ -492,7 +492,7 @@ export function OperationalAuditTimeline({
         className="absolute left-[11px] top-2 bottom-2 w-px"
         style={{ background: BORDER_SUBTLE }}
       />
-      {displayEntries.map((entry, i) => {
+      {displayEntries.map((entry, _i) => {
         const actorColor =
           entry.actorType === 'user'
             ? '#4a90b8'
@@ -550,7 +550,7 @@ interface EscalationPanelProps {
 export function OperationalEscalationPanel({ paths, compact = false }: EscalationPanelProps) {
   const TEXT_SECONDARY = 'rgba(255,255,255,0.55)';
   const TEXT_MUTED = 'rgba(255,255,255,0.28)';
-  const BORDER_MUTED = 'rgba(255,255,255,0.07)';
+  const _BORDER_MUTED = 'rgba(255,255,255,0.07)';
 
   const active = paths.filter((p) => p.active);
   if (active.length === 0) return null;
@@ -605,8 +605,8 @@ export function OperationalDetailPane({ entity, title, children }: OperationalDe
   const BG_SURFACE = '#0c1018';
   const BG_ELEVATED = '#10141e';
   const BORDER_MUTED = 'rgba(255,255,255,0.07)';
-  const TEXT_PRIMARY = 'rgba(255,255,255,0.88)';
-  const TEXT_SECONDARY = 'rgba(255,255,255,0.55)';
+  const _TEXT_PRIMARY = 'rgba(255,255,255,0.88)';
+  const _TEXT_SECONDARY = 'rgba(255,255,255,0.55)';
   const TEXT_MUTED = 'rgba(255,255,255,0.28)';
   const ACCENT = '#d4a054';
 
@@ -717,9 +717,9 @@ interface QueueRowProps {
 
 export function OperationalQueueRow({ entity, onClick, selected = false }: QueueRowProps) {
   const BG_SURFACE = '#0c1018';
-  const BORDER_MUTED = 'rgba(255,255,255,0.07)';
+  const _BORDER_MUTED = 'rgba(255,255,255,0.07)';
   const TEXT_PRIMARY = 'rgba(255,255,255,0.88)';
-  const TEXT_SECONDARY = 'rgba(255,255,255,0.55)';
+  const _TEXT_SECONDARY = 'rgba(255,255,255,0.55)';
   const TEXT_MUTED = 'rgba(255,255,255,0.28)';
   const ACCENT = '#d4a054';
 

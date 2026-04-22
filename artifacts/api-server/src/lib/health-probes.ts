@@ -70,7 +70,7 @@ async function probeAuth(): Promise<ProbeResult> {
 
   const start = Date.now();
   try {
-    const { randomBytes } = await import('crypto');
+    const { randomBytes } = await import('node:crypto');
     const { healthPool } = await import('@szl-holdings/db');
     const probeToken = randomBytes(32).toString('hex');
     // Replaces the previous `getSessionUser()` call which executed three
@@ -131,7 +131,7 @@ async function probeAI(): Promise<ProbeResult> {
 
   try {
     const headers: Record<string, string> = {};
-    if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+    if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
 
     const resp = await fetch(probeUrl, {
       method: 'GET',

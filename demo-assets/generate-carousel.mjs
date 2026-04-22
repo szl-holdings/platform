@@ -28,9 +28,9 @@ if (!chromium) {
   );
 }
 
-import { promises as fs } from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SCREENSHOTS_DIR = path.join(__dirname, 'screenshots');
@@ -610,7 +610,6 @@ function slide10Thesis() {
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function run() {
-  console.log('Loading screenshots as base64 data URLs...');
   const [szlImg, lyteImg, vesselsImg, terraImg, aegisImg, prismImg, carlotaImg, stephenImg] =
     await Promise.all([
       loadDataUrl('szl-holdings-hero.jpg'),
@@ -622,7 +621,6 @@ async function run() {
       loadDataUrl('carlota-jo-hero.jpg'),
       loadDataUrl('stephen-site-hero.jpg'),
     ]);
-  console.log('All images loaded.');
 
   const slides = [
     { id: 'slide-01-cover', html: slide01Cover() },
@@ -639,7 +637,7 @@ async function run() {
 
   // Resolve Chromium: use PLAYWRIGHT_CHROMIUM_EXECUTABLE env var first,
   // then fall back to the system-installed Nix Chromium on Replit.
-  const { execSync } = await import('child_process');
+  const { execSync } = await import('node:child_process');
   let executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
   if (!executablePath) {
     try {
@@ -666,7 +664,6 @@ async function run() {
   const jpgPaths = [];
 
   for (const slide of slides) {
-    console.log(`Rendering ${slide.id}...`);
     const page = await context.newPage();
     await page.setContent(slide.html, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(400);
@@ -674,12 +671,8 @@ async function run() {
     const outPath = path.join(OUTPUT_DIR, `${slide.id}.jpg`);
     await page.screenshot({ path: outPath, type: 'jpeg', quality: 96, fullPage: false });
     jpgPaths.push(outPath);
-    console.log(`  -> ${outPath}`);
     await page.close();
   }
-
-  // ── PDF: one slide per page ──────────────────────────────────────────────────
-  console.log('\nBuilding PDF...');
   for (let i = 0; i < slides.length; i++) {
     const page = await context.newPage();
     await page.setContent(slides[i].html, { waitUntil: 'domcontentloaded' });
@@ -726,7 +719,6 @@ async function run() {
     margin: { top: '0', bottom: '0', left: '0', right: '0' },
   });
   await combinedPage.close();
-  console.log(`  -> ${PDF_OUT}`);
 
   // Clean up per-page PDFs
   for (let i = 1; i <= slides.length; i++) {
@@ -735,12 +727,9 @@ async function run() {
   }
 
   await browser.close();
-  console.log('\nDone! Generated:');
-  jpgPaths.forEach((p) => console.log(' ', p));
-  console.log(' ', PDF_OUT);
+  jpgPaths.forEach((_p) => {});
 }
 
-run().catch((err) => {
-  console.error(err);
+run().catch((_err) => {
   process.exit(1);
 });

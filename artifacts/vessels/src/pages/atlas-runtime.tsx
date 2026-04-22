@@ -5,19 +5,13 @@ import {
   Activity,
   AlertTriangle,
   Anchor,
-  ChevronRight,
   Clock,
   CloudRain,
   GitBranch,
   Layers,
   Lock,
-  MapPin,
   Navigation,
-  Radio,
-  RefreshCw,
-  RotateCcw,
   Shield,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 

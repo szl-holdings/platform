@@ -129,18 +129,18 @@ class InsertChain {
     const arr = Array.isArray(v) ? v : [v];
     for (const row of arr) {
       const stamped: Row = { ...row };
-      if (this.tableName === 'sessions') stamped['id'] = nextSessionId++;
-      if (this.tableName === 'audit_events') stamped['id'] = nextAuditId++;
-      stamped['createdAt'] = new Date();
+      if (this.tableName === 'sessions') stamped.id = nextSessionId++;
+      if (this.tableName === 'audit_events') stamped.id = nextAuditId++;
+      stamped.createdAt = new Date();
       // Apply schema defaults that the in-memory store doesn't auto-populate.
-      if (this.tableName === 'sessions' && stamped['sessionVersion'] === undefined) {
-        stamped['sessionVersion'] = 1;
+      if (this.tableName === 'sessions' && stamped.sessionVersion === undefined) {
+        stamped.sessionVersion = 1;
       }
-      if (this.tableName === 'sessions' && stamped['revokedAt'] === undefined) {
-        stamped['revokedAt'] = null;
+      if (this.tableName === 'sessions' && stamped.revokedAt === undefined) {
+        stamped.revokedAt = null;
       }
-      if (this.tableName === 'sessions' && stamped['refreshTokenUsedAt'] === undefined) {
-        stamped['refreshTokenUsedAt'] = null;
+      if (this.tableName === 'sessions' && stamped.refreshTokenUsedAt === undefined) {
+        stamped.refreshTokenUsedAt = null;
       }
       storeFor(this.tableName).push(stamped);
       this.rows.push(stamped);
@@ -456,11 +456,11 @@ describe('Session lifecycle hardening (Task #1914)', () => {
     expect(created.refreshToken).toMatch(/^rt_[a-f0-9]{64}$/);
     expect(created.sessionVersion).toBe(1);
 
-    const audit = auditStore.find((r) => r['action'] === 'session.create');
+    const audit = auditStore.find((r) => r.action === 'session.create');
     expect(audit).toBeDefined();
-    expect(audit?.['userId']).toBe(100);
-    expect(audit?.['ipAddress']).toBe('hash:1.2.3.4');
-    expect(audit?.['userAgent']).toBe('vitest/1');
+    expect(audit?.userId).toBe(100);
+    expect(audit?.ipAddress).toBe('hash:1.2.3.4');
+    expect(audit?.userAgent).toBe('vitest/1');
 
     const app = await buildApp();
     const res = await request(app)
@@ -506,11 +506,11 @@ describe('Session lifecycle hardening (Task #1914)', () => {
     expect(blocked.body).toMatchObject({ code: 'SESSION_REVOKED' });
 
     // Audit row was written for the invalidation, attributed to the operator.
-    const invalidation = auditStore.find((r) => r['action'] === 'session.invalidate');
+    const invalidation = auditStore.find((r) => r.action === 'session.invalidate');
     expect(invalidation).toBeDefined();
-    expect(invalidation?.['userId']).toBe(1);
-    expect((invalidation?.['newValues'] as Row)['targetUserId']).toBe(100);
-    expect((invalidation?.['newValues'] as Row)['reason']).toBe('role_demoted');
+    expect(invalidation?.userId).toBe(1);
+    expect((invalidation?.newValues as Row).targetUserId).toBe(100);
+    expect((invalidation?.newValues as Row).reason).toBe('role_demoted');
   });
 
   it('rejects concurrent refresh rotations atomically (only one wins)', async () => {
@@ -573,13 +573,13 @@ describe('Session lifecycle hardening (Task #1914)', () => {
     expect(rotated.refreshToken).not.toBe(original.refreshToken);
 
     // Audit: session.refresh
-    expect(auditStore.find((r) => r['action'] === 'session.refresh')).toBeDefined();
+    expect(auditStore.find((r) => r.action === 'session.refresh')).toBeDefined();
 
     // Old session is revoked, marked replaced_by, and refresh_token_used_at set.
-    const oldSession = sessionsStore.find((s) => s['id'] === original.sessionId);
-    expect(oldSession?.['revokedAt']).toBeInstanceOf(Date);
-    expect(oldSession?.['refreshTokenUsedAt']).toBeInstanceOf(Date);
-    expect(oldSession?.['replacedBySessionId']).toBe(rotated.sessionId);
+    const oldSession = sessionsStore.find((s) => s.id === original.sessionId);
+    expect(oldSession?.revokedAt).toBeInstanceOf(Date);
+    expect(oldSession?.refreshTokenUsedAt).toBeInstanceOf(Date);
+    expect(oldSession?.replacedBySessionId).toBe(rotated.sessionId);
 
     // Replay the *original* refresh token — must throw and revoke ALL sessions.
     await expect(
@@ -590,12 +590,12 @@ describe('Session lifecycle hardening (Task #1914)', () => {
       }),
     ).rejects.toBeInstanceOf(RefreshTokenReplayError);
 
-    expect(auditStore.find((r) => r['action'] === 'session.refresh.replay')).toBeDefined();
+    expect(auditStore.find((r) => r.action === 'session.refresh.replay')).toBeDefined();
 
     // Session_version was bumped — the rotated session should now also fail
     // the auth check on its next request.
-    const user = usersStore.find((u) => u['id'] === 100);
-    expect((user?.['sessionVersion'] as number) >= 2).toBe(true);
+    const user = usersStore.find((u) => u.id === 100);
+    expect((user?.sessionVersion as number) >= 2).toBe(true);
 
     const app = await buildApp();
     const res = await request(app)

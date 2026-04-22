@@ -3,12 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertTriangle,
-  Building2,
-  Calendar,
-  CheckCircle,
   ChevronDown,
-  ChevronRight,
-  Clock,
   Database,
   DollarSign,
   Download,
@@ -17,8 +12,7 @@ import {
   TrendingUp,
   Upload,
 } from 'lucide-react';
-import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { api } from '../lib/api';
 
 const DS = {
@@ -656,7 +650,7 @@ export default function LeaseAbstractionPage() {
     },
   });
 
-  const [localLeases, setLocalLeases] = useState<ExtractedLease[]>([]);
+  const [localLeases, _setLocalLeases] = useState<ExtractedLease[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 

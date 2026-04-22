@@ -2,14 +2,10 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
   AlertTriangle,
-  BarChart3,
   CheckCircle2,
-  Clock,
-  Target,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
-import { useState } from 'react';
 
 const driftData = [
   {
@@ -77,7 +73,7 @@ const driftData = [
   },
 ];
 
-const timeLabels = ['7d', '6d', '5d', '4d', '3d', '2d', '1d'];
+const _timeLabels = ['7d', '6d', '5d', '4d', '3d', '2d', '1d'];
 
 function MiniSparkline({ data, status }: { data: number[]; status: string }) {
   const min = Math.min(...data);

@@ -1,6 +1,5 @@
 import { Activity, ChevronDown, ChevronUp, Clock, MessageCircle, Send, Trash2 } from 'lucide-react';
-import type React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from './api-fetch';
 
 export interface Comment {

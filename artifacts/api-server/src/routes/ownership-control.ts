@@ -16,8 +16,7 @@ import {
   votingRightsTable,
 } from '@szl-holdings/db';
 import { and, asc, desc, eq, sql } from 'drizzle-orm';
-import type { NextFunction, Request, Response } from 'express';
-import { type IRouter, Router } from 'express';
+import { type NextFunction, type Request, type Response, type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, parsePagination, sendNotFound, sendSuccess } from '../lib/api-response';
 import { guardSeedInProduction } from '../lib/seed-guard';
@@ -28,7 +27,7 @@ const router: IRouter = Router();
 
 // ─── Feature Flag Guard ───────────────────────────────────────────────────────
 
-async function ownershipOsGuard(req: Request, res: Response, next: NextFunction) {
+async function ownershipOsGuard(_req: Request, res: Response, next: NextFunction) {
   try {
     const [flag] = await db
       .select()
@@ -961,7 +960,7 @@ router.delete('/ownership/decision-log/:id', validateBody(bodyShape({})), async 
 
 // ─── SEED: Mom-Led Preferred Template ────────────────────────────────────────
 
-router.post('/ownership/seed-preferred-template', validateBody(bodyShape({})), async (req, res) => {
+router.post('/ownership/seed-preferred-template', validateBody(bodyShape({})), async (_req, res) => {
   if (guardSeedInProduction(res)) return;
   try {
     const existing = await db
@@ -1645,7 +1644,7 @@ router.post('/ownership/seed-preferred-template', validateBody(bodyShape({})), a
 
 // ─── SUMMARY: next-actions queue ─────────────────────────────────────────────
 
-router.get('/ownership/next-actions', async (req, res) => {
+router.get('/ownership/next-actions', async (_req, res) => {
   try {
     const openFlags = await db
       .select()

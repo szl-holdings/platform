@@ -1,12 +1,8 @@
 import { MetricTimeSeriesSimulator, seededRng } from '@szl-holdings/observability';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
-import { AlertTriangle, CheckCircle, Clock, Flame, Target, TrendingDown, Zap } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Flame, Target, TrendingDown, Zap } from 'lucide-react';
 import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
   Line,
   LineChart,
@@ -18,7 +14,7 @@ import {
 } from 'recharts';
 
 const sim = new MetricTimeSeriesSimulator(0x5010dead);
-const NOW = Date.now();
+const _NOW = Date.now();
 
 const sloStatuses = sim.generateSloStatuses([
   'api-gateway',
@@ -89,7 +85,7 @@ export default function SLOTracking() {
 
   const burnChartData = Array.from({ length: 24 }, (_, i) => {
     const obj: Record<string, number | string> = { hour: `${i}:00` };
-    burnData.forEach(({ slo, series }, idx) => {
+    burnData.forEach(({ slo, series }, _idx) => {
       obj[slo.service] = series[i]?.budget ?? 0;
     });
     return obj;

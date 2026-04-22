@@ -1,38 +1,19 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import {
-  Activity,
   AlertTriangle,
   ArrowRight,
-  BarChart2,
   CheckCircle,
-  ChevronRight,
-  Clock,
   Database,
   Eye,
   Globe,
-  Info,
   Play,
   RefreshCw,
   Server,
-  Shield,
   Target,
-  User,
   XCircle,
   Zap,
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
-import {
-  Bar,
-  BarChart,
-  PolarAngleAxis,
-  PolarGrid,
-  Radar,
-  RadarChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
 
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
@@ -444,7 +425,7 @@ function generateSimulationSteps(apt: APTProfile, defenseLevel: number): Simulat
     });
   }
 
-  const hasDetected = steps.some((s) => s.result === 'detected');
+  const _hasDetected = steps.some((s) => s.result === 'detected');
   const hasMissed = steps.some((s) => s.result === 'missed');
 
   if (hasMissed) {
@@ -468,7 +449,7 @@ export default function APTEmulationPage() {
   const [simSteps, setSimSteps] = useState<SimulationStep[]>([]);
   const [currentPhaseIdx, setCurrentPhaseIdx] = useState(-1);
   const [simStatus, setSimStatus] = useState<'idle' | 'running' | 'complete'>('idle');
-  const [visibleStepCount, setVisibleStepCount] = useState(0);
+  const [_visibleStepCount, setVisibleStepCount] = useState(0);
 
   const runSimulation = useCallback(async () => {
     setSimStatus('running');
@@ -479,7 +460,7 @@ export default function APTEmulationPage() {
     const steps = generateSimulationSteps(selectedAPT, defenseLevel);
 
     for (let i = 0; i < steps.length; i++) {
-      await new Promise((r) => setTimeout(r, steps[i]!.timeMs));
+      await new Promise((r) => setTimeout(r, steps[i]?.timeMs));
       setSimSteps((prev) => [...prev, steps[i]!]);
       setVisibleStepCount(i + 1);
       setCurrentPhaseIdx(Math.floor((i / steps.length) * ATTACK_PHASES.length));
@@ -492,7 +473,7 @@ export default function APTEmulationPage() {
   const detectedCount = simSteps.filter((s) => s.result === 'detected').length;
   const missedCount = simSteps.filter((s) => s.result === 'missed').length;
 
-  const radarData = [
+  const _radarData = [
     { axis: 'Email', score: defenseLevel - 10 + Math.random() * 15 },
     { axis: 'Endpoint', score: defenseLevel + Math.random() * 10 },
     { axis: 'Network', score: defenseLevel - 15 + Math.random() * 20 },
@@ -581,7 +562,7 @@ export default function APTEmulationPage() {
                   }}
                   style={{
                     background: selectedAPT.id === apt.id ? `${apt.color}18` : 'transparent',
-                    border: `1px solid ${selectedAPT.id === apt.id ? apt.color + '60' : DS.border}`,
+                    border: `1px solid ${selectedAPT.id === apt.id ? `${apt.color}60` : DS.border}`,
                     borderRadius: '8px',
                     padding: '10px 12px',
                     cursor: 'pointer',
@@ -753,7 +734,7 @@ export default function APTEmulationPage() {
             style={{
               background:
                 simStatus === 'running' ? 'rgba(255,255,255,0.05)' : `${selectedAPT.color}20`,
-              border: `1px solid ${simStatus === 'running' ? DS.border : selectedAPT.color + '60'}`,
+              border: `1px solid ${simStatus === 'running' ? DS.border : `${selectedAPT.color}60`}`,
               borderRadius: '10px',
               padding: '14px',
               cursor: simStatus === 'running' ? 'not-allowed' : 'pointer',
@@ -813,7 +794,7 @@ export default function APTEmulationPage() {
                           height: 36,
                           borderRadius: '50%',
                           background: isActive ? `${selectedAPT.color}20` : DS.elevated,
-                          border: `1px solid ${isActive ? selectedAPT.color + '60' : DS.border}`,
+                          border: `1px solid ${isActive ? `${selectedAPT.color}60` : DS.border}`,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -839,7 +820,7 @@ export default function APTEmulationPage() {
                         style={{
                           width: '20px',
                           height: '1px',
-                          background: isActive ? selectedAPT.color + '60' : DS.border,
+                          background: isActive ? `${selectedAPT.color}60` : DS.border,
                           flexShrink: 0,
                         }}
                       />

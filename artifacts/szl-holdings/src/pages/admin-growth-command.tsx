@@ -133,7 +133,7 @@ function KpiCard({
 }) {
   const hasUp = typeof delta === 'number' && delta > 0;
   const hasDown = typeof delta === 'number' && delta < 0;
-  const neutral = typeof delta === 'number' && delta === 0;
+  const _neutral = typeof delta === 'number' && delta === 0;
   return (
     <div
       className={cn(
@@ -363,7 +363,7 @@ export default function AdminGrowthCommandPage() {
               <p className="text-xs text-zinc-500">No submissions this week.</p>
             ) : (
               <div className="space-y-2.5">
-                {growth!.productBreakdown.map((p) => (
+                {growth?.productBreakdown.map((p) => (
                   <div key={p.product} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-zinc-300 font-medium">{p.product}</span>
@@ -435,7 +435,7 @@ export default function AdminGrowthCommandPage() {
                   <span
                     className={cn(
                       'text-xs font-mono',
-                      telemetry.p95 !== '—' && parseInt(telemetry.p95) > 750
+                      telemetry.p95 !== '—' && parseInt(telemetry.p95, 10) > 750
                         ? 'text-amber-400'
                         : 'text-zinc-200',
                     )}
@@ -451,7 +451,7 @@ export default function AdminGrowthCommandPage() {
                   <span
                     className={cn(
                       'text-xs font-mono',
-                      parseInt(telemetry.alerts) > 0 ? 'text-amber-400' : 'text-zinc-200',
+                      parseInt(telemetry.alerts, 10) > 0 ? 'text-amber-400' : 'text-zinc-200',
                     )}
                   >
                     {telemetry.alerts}
@@ -581,7 +581,7 @@ export default function AdminGrowthCommandPage() {
               </div>
             ) : (
               <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
-                {growth!.unresponded.map((item) => (
+                {growth?.unresponded.map((item) => (
                   <div
                     key={item.id}
                     className="rounded-lg border border-red-500/20 bg-red-950/20 px-3 py-2.5 space-y-1"
@@ -644,7 +644,7 @@ export default function AdminGrowthCommandPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-800/50">
-                  {growth!.recent.map((item) => (
+                  {growth?.recent.map((item) => (
                     <tr key={item.id} className="hover:bg-zinc-800/20 transition-colors">
                       <td className="py-2.5 pr-4 text-zinc-200 font-medium">{item.fullName}</td>
                       <td className="py-2.5 pr-4 text-zinc-400">{item.company ?? '—'}</td>

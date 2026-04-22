@@ -13,7 +13,7 @@
  * forged this way.
  */
 
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from '../types.js';
 
 export const CSRF_TOKEN_BYTES = 32;

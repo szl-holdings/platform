@@ -8,7 +8,7 @@
  * Data is powered by existing Pulse briefing data + Decision Center pending decisions.
  * No new model providers. No new API keys.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from './utils';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
@@ -417,7 +417,6 @@ export function SentientLayer({
       {/* Rail */}
       <aside
         ref={railRef}
-        role="complementary"
         aria-label="Sentient Intelligence Rail"
         className={cn(
           'fixed top-0 right-0 bottom-0 z-50 flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',

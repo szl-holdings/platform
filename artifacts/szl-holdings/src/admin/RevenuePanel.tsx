@@ -1,24 +1,14 @@
 import { formatDate as formatSharedDate } from '@szl-holdings/shared-ui/utils';
 import {
   AlertCircle,
-  BarChart3,
-  Building2,
-  CheckCircle2,
-  ChevronDown,
-  ChevronRight,
-  Clock,
   DollarSign,
-  Download,
   ExternalLink,
   FileText,
-  Globe,
   LinkIcon,
   Loader2,
   RefreshCw,
-  TrendingUp,
-  Users,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { apiFetchAdmin } from './api';
 

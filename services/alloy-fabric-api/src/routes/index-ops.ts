@@ -1,12 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { IndexRebuildRequestSchema, IndexVerifyRequestSchema } from '@workspace/aef-contracts';
 import type { PolicyContext } from '@workspace/aef-policy-guard';
-import type { AuditEmitter, WorkflowContext } from '@workspace/aef-workflow-runtime';
-import {
-  createWorkflowMachine,
-  FileApprovalStore,
-  FileCheckpointStore,
-} from '@workspace/aef-workflow-runtime';
+import { type AuditEmitter, type WorkflowContext, createWorkflowMachine, FileApprovalStore, FileCheckpointStore } from '@workspace/aef-workflow-runtime';
 import type { Request, Response, Router } from 'express';
 import { defaultLedgerStore, policyEngine, tenantEnforcer } from '../context.js';
 import { logger } from '../logger.js';
@@ -14,7 +9,7 @@ import { getRequestId } from '../middleware/request-id.js';
 import { getTenantId } from '../middleware/tenant.js';
 import { recordApprovalWait, recordRebuildDuration } from './metrics.js';
 
-const DATA_DIR = process.env['AEF_DATA_DIR'] ?? '/tmp/aef-index-ops';
+const DATA_DIR = process.env.AEF_DATA_DIR ?? '/tmp/aef-index-ops';
 const checkpointStore = new FileCheckpointStore(`${DATA_DIR}/checkpoints.json`);
 const approvalStore = new FileApprovalStore(`${DATA_DIR}/approvals.json`);
 
@@ -37,7 +32,7 @@ function makeAuditEmitter(workflowId: string, reqId: string, tenantId: string): 
     // Non-blocking ledger write for step-level audit trail
     try {
       const durationMs =
-        typeof event.details['durationMs'] === 'number' ? event.details['durationMs'] : undefined;
+        typeof event.details.durationMs === 'number' ? event.details.durationMs : undefined;
       defaultLedgerStore.append({
         entryId: randomUUID(),
         requestId: reqId,

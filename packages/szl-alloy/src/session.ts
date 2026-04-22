@@ -1,6 +1,6 @@
 import { defaultTraceStore } from '@workspace/trace-graph/store';
 import { TraceWriter } from '@workspace/trace-graph/writer';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type { AlloyRunSession, AutonomyMode } from './types.js';
 
 const _sessions = new Map<string, AlloyRunSession>();
@@ -45,8 +45,7 @@ export function openSession(params: OpenSessionParams): AlloyRunSession {
       sessionId: params.sessionId,
       objective: params.objective,
     });
-  } catch (traceErr) {
-    console.warn('[alloy/session] startTrace failed (non-fatal):', traceErr);
+  } catch (_traceErr) {
   }
 
   return session;
@@ -76,8 +75,7 @@ export function recordToolCall(
       ...(latencyMs !== undefined ? { latencyMs } : {}),
       approvalRequired: false,
     });
-  } catch (traceErr) {
-    console.warn('[alloy/session] appendToolCall failed (non-fatal):', traceErr);
+  } catch (_traceErr) {
   }
 
   return updated;
@@ -107,8 +105,7 @@ export function recordHandoff(
       status: 'ok',
       attributes: { kind: 'handoff', fromAgent, toAgent, reason },
     });
-  } catch (traceErr) {
-    console.warn('[alloy/session] appendSpan(handoff) failed (non-fatal):', traceErr);
+  } catch (_traceErr) {
   }
 
   return updated;
@@ -146,8 +143,7 @@ export function recordApproval(
       status: decision === 'rejected' ? 'error' : 'ok',
       attributes: { kind: 'approval', stepId, decision },
     });
-  } catch (traceErr) {
-    console.warn('[alloy/session] appendSpan(approval) failed (non-fatal):', traceErr);
+  } catch (_traceErr) {
   }
 
   return updated;
@@ -182,8 +178,7 @@ export function closeSession(
       status: failed ? 'failed' : 'completed',
       output: outcome as Record<string, unknown> | undefined,
     });
-  } catch (traceErr) {
-    console.warn('[alloy/session] completeTrace failed (non-fatal):', traceErr);
+  } catch (_traceErr) {
   }
 
   return updated;

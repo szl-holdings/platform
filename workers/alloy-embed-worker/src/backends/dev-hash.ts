@@ -12,7 +12,7 @@
  * or ExternalHttpEmbeddingBackend (which calls any HTTP inference service).
  */
 
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import type {
   EmbeddingBackend,
   EmbeddingBackendDescriptor,

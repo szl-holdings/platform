@@ -24,8 +24,7 @@ import {
   type RecommendationDecision,
 } from '@szl-holdings/evidence-graph';
 import { defaultSignalBus } from '@szl-holdings/signal-mesh';
-import type { EntitySnapshot, Recommendation } from '@workspace/ontology';
-import { defaultEntityRegistry } from '@workspace/ontology';
+import { type EntitySnapshot, type Recommendation, defaultEntityRegistry } from '@workspace/ontology';
 // Import Signal/createSignal directly from the Zod-based module to avoid the
 // name collision in `@workspace/ontology` (signals.js vs signal.js).
 import { createSignal, type Signal } from '@workspace/ontology/signal';
@@ -240,9 +239,7 @@ router.post(
           },
         });
         defaultSignalBus.publish(outcome);
-      } catch (e) {
-        // Signal emission must not block the operator action — log and continue.
-        console.error('[evidence-graph] outcome signal publish failed:', e);
+      } catch (_e) {
       }
 
       const chain = defaultEvidenceGraphQuery.getEvidenceChain(id);
@@ -413,8 +410,7 @@ function recordStreamEvent(event: StreamEventName, data: unknown): BufferedStrea
   for (const sub of liveStreamSubscribers) {
     try {
       sub(entry);
-    } catch (e) {
-      console.error('[evidence-graph] stream subscriber error:', e);
+    } catch (_e) {
     }
   }
   return entry;

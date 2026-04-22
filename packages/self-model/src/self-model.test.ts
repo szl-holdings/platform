@@ -3,7 +3,6 @@ import {
   ConfidenceProfileSchema,
   CreateSelfModelSchema,
   RunOutcomeSchema,
-  SelfModelStateSchema,
 } from './schema.js';
 import { SelfModelStore } from './store.js';
 import type { EscalationThreshold, IdentityProfile, RunOutcome } from './types.js';

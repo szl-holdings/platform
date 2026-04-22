@@ -2,14 +2,14 @@ import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProvenanceChip, type ProvenanceStatus } from '@/components/ProvenanceChip';
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 const ACCENT = '#10b981';
@@ -91,7 +91,7 @@ function formatApiDate(raw: unknown): string {
 function normalizeApiExchanges(data: unknown): Exchange1031[] | null {
   const envelope = data as Record<string, unknown> | null;
   const arr = Array.isArray(envelope?.exchanges)
-    ? (envelope!.exchanges as Record<string, unknown>[])
+    ? (envelope?.exchanges as Record<string, unknown>[])
     : Array.isArray(data)
       ? (data as Record<string, unknown>[])
       : null;
@@ -201,7 +201,7 @@ export default function Exchange1031Screen() {
   const { data: apiData, isFetching: exchFetching } = useQuery({
     queryKey: ['terra-1031-exchange'],
     queryFn: async () => {
-      const res = await fetch(API_BASE + '/terra/exchanges-1031');
+      const res = await fetch(`${API_BASE}/terra/exchanges-1031`);
       if (!res.ok) throw new Error('API error');
       return res.json();
     },
@@ -235,7 +235,7 @@ export default function Exchange1031Screen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · TAX</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · TAX</Text>
           <Text style={[styles.title, { color: colors.cream }]}>1031 Exchange</Text>
         </View>
         <View style={styles.headerRight}>
@@ -307,7 +307,7 @@ export default function Exchange1031Screen() {
                 styles.deadlineCard,
                 {
                   backgroundColor: colors.surface,
-                  borderColor: col + '30',
+                  borderColor: `${col}30`,
                   borderLeftColor: col,
                   borderLeftWidth: 3,
                 },
@@ -315,7 +315,7 @@ export default function Exchange1031Screen() {
             >
               <View style={styles.deadlineTop}>
                 <Text style={[styles.deadlineLabel, { color: colors.cream }]}>{d.label}</Text>
-                <View style={[styles.daysBadge, { backgroundColor: col + '15' }]}>
+                <View style={[styles.daysBadge, { backgroundColor: `${col}15` }]}>
                   <Text style={[styles.daysText, { color: col }]}>{d.daysRemaining}d</Text>
                 </View>
               </View>
@@ -348,7 +348,7 @@ export default function Exchange1031Screen() {
               <View
                 style={[
                   styles.candStatus,
-                  { backgroundColor: col + '15', borderColor: col + '30' },
+                  { backgroundColor: `${col}15`, borderColor: `${col}30` },
                 ]}
               >
                 <Text style={[styles.candStatusText, { color: col }]}>{cand.status}</Text>

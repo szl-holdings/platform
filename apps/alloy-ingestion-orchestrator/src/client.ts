@@ -11,7 +11,6 @@ import { defaultRunStore } from './run-store.js';
 import type { WorkflowRun } from './types.js';
 import { buildIngestDocumentWorkflow } from './workflows/ingest-document.js';
 import { buildRebuildIndexWorkflow } from './workflows/rebuild-index.js';
-import { buildRotateProfileVersionWorkflow } from './workflows/rotate-profile-version.js';
 import { buildRunRetrievalEvalWorkflow } from './workflows/run-retrieval-eval.js';
 import { buildVerifyIndexHealthWorkflow } from './workflows/verify-index-health.js';
 

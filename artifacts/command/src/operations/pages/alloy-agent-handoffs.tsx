@@ -2,22 +2,15 @@ import { api } from '@lyte/lib/api';
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
   Activity,
-  AlertTriangle,
   ArrowRight,
   CheckCircle,
   ChevronRight,
   Clock,
-  Cpu,
-  Eye,
   FileText,
-  Lock,
   Network,
-  Plus,
   RefreshCw,
-  Send,
   Shield,
   XCircle,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -215,7 +208,7 @@ function HandoffRow({ handoff }: { handoff: AgentHandoff }) {
       >
         <div
           className="w-1.5 shrink-0 mt-1.5 h-10 rounded-full"
-          style={{ background: STATUS_CFG[handoff.status].color + '50' }}
+          style={{ background: `${STATUS_CFG[handoff.status].color}50` }}
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -508,7 +501,7 @@ export default function AlloyAgentHandoffsPage() {
             className="rounded-md p-3 text-center transition-all hover:opacity-80"
             style={{
               background: filter === m.key ? `${m.color}10` : BG.surface,
-              border: `1px solid ${filter === m.key ? m.color + '30' : BORDER.subtle}`,
+              border: `1px solid ${filter === m.key ? `${m.color}30` : BORDER.subtle}`,
             }}
           >
             <div className="text-base font-bold font-mono" style={{ color: m.color }}>

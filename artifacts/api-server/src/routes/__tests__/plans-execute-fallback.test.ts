@@ -25,8 +25,7 @@ vi.mock('@workspace/forge/plan-orchestrator', () => ({
   approvePlanStep: vi.fn(),
 }));
 
-import type { PlanGraph } from '@workspace/planner';
-import { defaultPlanStore } from '@workspace/planner';
+import { type PlanGraph, defaultPlanStore } from '@workspace/planner';
 import plansRouter from '../plans';
 
 function makePlan(): PlanGraph {

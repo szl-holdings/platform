@@ -114,7 +114,7 @@ export class NinjaOneProvider implements IRmmProvider {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        ...(options.headers ?? {}),
+        ...options.headers,
       },
       signal: AbortSignal.timeout(15_000),
     });
@@ -301,7 +301,7 @@ export class ConnectWiseAutomateProvider implements IRmmProvider {
         Authorization: `Basic ${auth}`,
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        ...(options.headers ?? {}),
+        ...options.headers,
       },
       signal: AbortSignal.timeout(15_000),
     });
@@ -472,7 +472,7 @@ export class ConnectWiseManageProvider implements IRmmProvider {
         'Content-Type': 'application/json',
         clientId: this.config.clientId ?? '',
         Accept: 'application/json',
-        ...(options.headers ?? {}),
+        ...options.headers,
       },
       signal: AbortSignal.timeout(15_000),
     });
@@ -629,7 +629,7 @@ export class HaloPsaProvider implements IRmmProvider {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        ...(options.headers ?? {}),
+        ...options.headers,
       },
       signal: AbortSignal.timeout(15_000),
     });
@@ -702,7 +702,7 @@ export class HaloPsaProvider implements IRmmProvider {
         method: 'POST',
         body: JSON.stringify([
           {
-            id: parseInt(ticketId),
+            id: parseInt(ticketId, 10),
             status_id: 9,
             ...(note ? { note_txt: note } : {}),
           },
@@ -776,7 +776,7 @@ export class DattoRmmProvider implements IRmmProvider {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
-        ...(options.headers ?? {}),
+        ...options.headers,
       },
       signal: AbortSignal.timeout(15_000),
     });
@@ -913,7 +913,7 @@ export class AutotaskPsaProvider implements IRmmProvider {
     };
     const resp = await fetch(`${this.baseUrl}${path}`, {
       ...options,
-      headers: { ...headers, ...(options.headers ?? {}) },
+      headers: { ...headers, ...options.headers },
       signal: AbortSignal.timeout(15_000),
     });
     if (!resp.ok) throw new Error(`Autotask API ${path} → ${resp.status}`);

@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import {
   defaultSkillRegistry,
   defaultSkillRunStore,
@@ -154,7 +154,7 @@ export async function runSkill(
   }
 
   const lastStepOutputs =
-    stepOutputs.size > 0 ? stepOutputs.get(skill.steps[skill.steps.length - 1]!.id) ?? {} : {};
+    stepOutputs.size > 0 ? stepOutputs.get(skill.steps[skill.steps.length - 1]?.id) ?? {} : {};
 
   run.status = 'completed';
   run.outputs = lastStepOutputs;

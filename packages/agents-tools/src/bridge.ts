@@ -27,7 +27,7 @@
  * 5. Durable trace persistence to trace-graph defaultTraceStore
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { defaultTypedToolGateway, type TypedToolInvocationContext } from './gateway.js';
 import type { TypedTool } from './typed-tool.js';
 

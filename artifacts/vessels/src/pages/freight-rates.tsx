@@ -60,7 +60,7 @@ export default function FreightRatesPage() {
     if (data?.history && data.history.length > 0 && data.upstreamLatestIndex) {
       const latest = data.upstreamLatestIndex;
       return data.history.map((p) => ({
-        month: new Date(p.date + 'T00:00:00Z').toLocaleString(undefined, {
+        month: new Date(`${p.date}T00:00:00Z`).toLocaleString(undefined, {
           month: 'short',
           year: '2-digit',
         }),

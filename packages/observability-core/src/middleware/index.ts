@@ -1,5 +1,5 @@
 import { getEnv } from '@szl-holdings/env';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { runWithContext } from '../context/index.js';
 import {
@@ -42,24 +42,14 @@ export function createOtelSpanMiddleware(options: OtelMiddlewareOptions = {}) {
 
   return function otelSpanMiddleware(req: Request, res: Response, next: NextFunction): void {
     const start = process.hrtime.bigint();
-    const spanName = spanNameFn
+    const _spanName = spanNameFn
       ? spanNameFn(req)
       : `http.${req.method.toLowerCase()}.${req.path.replace(/\/\d+/g, '/:id')}`;
 
     res.on('finish', () => {
-      const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
+      const _durationMs = Number(process.hrtime.bigint() - start) / 1e6;
 
       if (getEnv().OTEL_CONSOLE_EXPORT) {
-        console.info(
-          JSON.stringify({
-            span: spanName,
-            method: req.method,
-            path: req.path,
-            status: res.statusCode,
-            durationMs: Math.round(durationMs),
-            correlationId: res.getHeader(CORRELATION_HEADER),
-          }),
-        );
       }
     });
 

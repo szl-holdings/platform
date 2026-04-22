@@ -7,9 +7,8 @@ import {
 } from '@workspace/cognitive-runtime';
 import { defaultMemoryStore } from '@workspace/memory-fabric';
 import { defaultTraceStore } from '@workspace/trace-graph';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
-import { z } from 'zod';
 import { sendError, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';

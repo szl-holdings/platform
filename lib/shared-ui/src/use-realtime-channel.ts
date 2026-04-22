@@ -369,7 +369,7 @@ export function useRealtimeChannel<T = unknown>(
         sseRef.current = null;
       }
     };
-  }, [channel, connectWs]);
+  }, [connectWs]);
 
   return {
     messages,

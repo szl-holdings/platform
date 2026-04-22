@@ -138,47 +138,47 @@ interface ModelChain {
 
 const MODEL_REGISTRY = {
   textGeneration: {
-    primary: process.env["HF_PRIMARY_LLM"] || "Qwen/Qwen3-8B",
-    secondary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
-    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    primary: process.env.HF_PRIMARY_LLM || "Qwen/Qwen3-8B",
+    secondary: process.env.HF_SECONDARY_LLM || "Qwen/Qwen3-8B",
+    tertiary: process.env.HF_FALLBACK_LLM || "Qwen/Qwen3-0.6B",
   },
   reasoning: {
-    primary: process.env["HF_PRIMARY_LLM"] || "Qwen/Qwen3-8B",
-    secondary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
-    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    primary: process.env.HF_PRIMARY_LLM || "Qwen/Qwen3-8B",
+    secondary: process.env.HF_SECONDARY_LLM || "Qwen/Qwen3-8B",
+    tertiary: process.env.HF_FALLBACK_LLM || "Qwen/Qwen3-0.6B",
   },
   planning: {
-    primary: process.env["HF_PRIMARY_LLM"] || "Qwen/Qwen3-8B",
-    secondary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
-    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    primary: process.env.HF_PRIMARY_LLM || "Qwen/Qwen3-8B",
+    secondary: process.env.HF_SECONDARY_LLM || "Qwen/Qwen3-8B",
+    tertiary: process.env.HF_FALLBACK_LLM || "Qwen/Qwen3-0.6B",
   },
   triage: {
-    primary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
-    secondary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
-    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    primary: process.env.HF_SECONDARY_LLM || "Qwen/Qwen3-8B",
+    secondary: process.env.HF_FALLBACK_LLM || "Qwen/Qwen3-0.6B",
+    tertiary: process.env.HF_FALLBACK_LLM || "Qwen/Qwen3-0.6B",
   },
   classification: {
-    primary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
-    secondary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    primary: process.env.HF_FALLBACK_LLM || "Qwen/Qwen3-0.6B",
+    secondary: process.env.HF_FALLBACK_LLM || "Qwen/Qwen3-0.6B",
     tertiary: "facebook/bart-large-mnli",
   },
   toolCalling: {
-    primary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
-    secondary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
-    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    primary: process.env.HF_SECONDARY_LLM || "Qwen/Qwen3-8B",
+    secondary: process.env.HF_FALLBACK_LLM || "Qwen/Qwen3-0.6B",
+    tertiary: process.env.HF_FALLBACK_LLM || "Qwen/Qwen3-0.6B",
   },
   visionUnderstanding: {
-    primary: process.env["HF_VISION_MODEL"] || "Qwen/Qwen2.5-VL-7B-Instruct",
-    secondary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
-    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    primary: process.env.HF_VISION_MODEL || "Qwen/Qwen2.5-VL-7B-Instruct",
+    secondary: process.env.HF_SECONDARY_LLM || "Qwen/Qwen3-8B",
+    tertiary: process.env.HF_FALLBACK_LLM || "Qwen/Qwen3-0.6B",
   },
   backgroundBatch: {
-    primary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
-    secondary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
-    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    primary: process.env.HF_FALLBACK_LLM || "Qwen/Qwen3-0.6B",
+    secondary: process.env.HF_SECONDARY_LLM || "Qwen/Qwen3-8B",
+    tertiary: process.env.HF_FALLBACK_LLM || "Qwen/Qwen3-0.6B",
   },
   summarization: {
-    primary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
+    primary: process.env.HF_SECONDARY_LLM || "Qwen/Qwen3-8B",
     secondary: "facebook/bart-large-cnn",
     tertiary: "sshleifer/distilbart-cnn-12-6",
   },
@@ -208,12 +208,12 @@ const MODEL_REGISTRY = {
     tertiary: "runwayml/stable-diffusion-v1-5",
   },
   embedding: {
-    primary: process.env["HF_EMBED_MODEL"] || "BAAI/bge-m3",
+    primary: process.env.HF_EMBED_MODEL || "BAAI/bge-m3",
     secondary: "sentence-transformers/all-MiniLM-L6-v2",
     tertiary: "sentence-transformers/paraphrase-MiniLM-L3-v2",
   },
   reranking: {
-    primary: process.env["HF_RERANK_MODEL"] || "BAAI/bge-reranker-v2-m3",
+    primary: process.env.HF_RERANK_MODEL || "BAAI/bge-reranker-v2-m3",
     secondary: "BAAI/bge-reranker-v2-m3",
     tertiary: "BAAI/bge-reranker-v2-m3",
   },
@@ -289,7 +289,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
   private static readonly CHAT_SESSION_TTL = 30 * 60 * 1000;
 
   private get apiKey(): string | undefined {
-    return process.env["HUGGINGFACE_API_KEY"];
+    return process.env.HUGGINGFACE_API_KEY;
   }
 
   override get status(): ServiceStatus {
@@ -339,7 +339,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 5000);
         const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+        if (this.apiKey) headers.Authorization = `Bearer ${this.apiKey}`;
         try {
           const response = await fetch(
             `https://api-inference.huggingface.co/models/${chain.primary}`,
@@ -382,7 +382,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
 
   protected override async performHealthCheck(): Promise<void> {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+    if (this.apiKey) headers.Authorization = `Bearer ${this.apiKey}`;
     const response = await fetch(
       "https://api-inference.huggingface.co/models/gpt2",
       {
@@ -445,7 +445,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
   private async callHF(model: string, body: unknown): Promise<unknown> {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (this.apiKey) {
-      headers["Authorization"] = `Bearer ${this.apiKey}`;
+      headers.Authorization = `Bearer ${this.apiKey}`;
     }
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 20000);
@@ -509,7 +509,6 @@ export class HuggingFaceAdapter extends ServiceAdapter {
           continue;
         }
         if (tier === "tertiary") break;
-        continue;
       }
     }
     throw lastError ?? new Error(`All models failed for ${taskType}`);
@@ -607,7 +606,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     for (const model of models) {
       try {
         const headers: Record<string, string> = { "Content-Type": "audio/wav" };
-        if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+        if (this.apiKey) headers.Authorization = `Bearer ${this.apiKey}`;
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 60000);
         try {
@@ -630,7 +629,6 @@ export class HuggingFaceAdapter extends ServiceAdapter {
           clearTimeout(timer);
         }
       } catch {
-        continue;
       }
     }
 
@@ -793,7 +791,6 @@ export class HuggingFaceAdapter extends ServiceAdapter {
         this.setCache(cacheKey, result, CACHE_TTL.translation);
         return result;
       } catch {
-        continue;
       }
     }
 
@@ -1056,7 +1053,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     this.cleanupExpiredSessions();
 
     let session = this._chatSessions.get(sessionId);
-    if (session && session.ownerId) {
+    if (session?.ownerId) {
       if (!options?.ownerId || session.ownerId !== options.ownerId) {
         throw new Error("Session access denied: owner mismatch");
       }
@@ -1133,7 +1130,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     options?: { systemPrompt?: string; ownerId?: string },
   ): void {
     const existing = this._chatSessions.get(sessionId);
-    if (existing && existing.ownerId) {
+    if (existing?.ownerId) {
       if (!options?.ownerId || existing.ownerId !== options.ownerId) {
         throw new Error("Session access denied: owner mismatch");
       }
@@ -1189,7 +1186,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       ? [options.model, chain.secondary, chain.tertiary]
       : [chain.primary, chain.secondary, chain.tertiary];
     const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+    if (this.apiKey) headers.Authorization = `Bearer ${this.apiKey}`;
 
     for (const model of models) {
       try {
@@ -1232,7 +1229,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
               if (generated) {
                 const words = generated.split(" ");
                 for (const word of words) {
-                  yield word + " ";
+                  yield `${word} `;
                 }
               }
             } catch {
@@ -1294,14 +1291,13 @@ export class HuggingFaceAdapter extends ServiceAdapter {
           clearTimeout(timer);
         }
       } catch {
-        continue;
       }
     }
 
     const mockText = this.mockTextGen(prompt).text;
     const words = mockText.split(" ");
     for (const word of words) {
-      yield word + " ";
+      yield `${word} `;
       await new Promise((r) => setTimeout(r, 30 + Math.random() * 50));
     }
   }

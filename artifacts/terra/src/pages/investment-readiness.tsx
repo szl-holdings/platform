@@ -1,23 +1,16 @@
 import { analytics } from '@szl-holdings/analytics';
 import { AnimatePresence, motion, useInView } from 'framer-motion';
 import {
-  Activity,
   AlertTriangle,
   ArrowLeft,
-  ArrowRight,
   BarChart3,
   Building2,
   CheckCircle2,
   ChevronRight,
   Clock,
-  Database,
-  DollarSign,
-  FileSearch,
-  Layers,
   MapPin,
   ShieldCheck,
   TrendingUp,
-  Users,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';

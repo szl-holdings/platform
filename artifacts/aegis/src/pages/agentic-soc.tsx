@@ -7,18 +7,13 @@ import {
   Brain,
   CheckCircle,
   ChevronDown,
-  ChevronRight,
   Clock,
   Cpu,
   Database,
-  Eye,
   Network,
   Pause,
-  Play,
   RefreshCw,
-  Shield,
   Terminal,
-  User,
   XCircle,
   Zap,
 } from 'lucide-react';
@@ -321,12 +316,16 @@ export default function AgenticSOC() {
   const [autoMode, setAutoMode] = useState(true);
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
 
-  const { data: alertsData, isLoading, isError, refetch } = useQuery({
+  const { data: alertsData, isLoading, isError, refetch } = useQuery<
+    unknown,
+    Error,
+    Alert[]
+  >({
     queryKey: ['agentic-soc-alerts'],
-    queryFn: () => api.alerts.list(),
+    queryFn: () => api.alerts.list() as Promise<unknown>,
     refetchInterval: 30000,
-    select: (res: { data?: Record<string, unknown>[] }) => {
-      const raw = res?.data ?? [];
+    select: (res: unknown) => {
+      const raw = (res as { data?: Record<string, unknown>[] } | undefined)?.data ?? [];
       return raw.length > 0 ? raw.map(mapApiAlert) : FALLBACK_ALERTS;
     },
   });

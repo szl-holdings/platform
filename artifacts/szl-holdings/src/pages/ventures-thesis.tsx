@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
+import { Card, CardContent, } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { Lightbulb, Target, Layers, ArrowRight, CheckCircle, TrendingUp, Globe, Shield, Brain, Zap } from "lucide-react";
+import { Lightbulb, ArrowRight, CheckCircle, } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const thesis = [

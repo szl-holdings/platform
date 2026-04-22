@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, ChevronRight } from 'lucide-react';
-import { type ReactNode, useEffect, useRef } from 'react';
+import type { ReactNode, } from 'react';
 
 const BG = 'hsl(214,16%,4%)';
 const ACCENT = 'hsl(191,92%,44%)';

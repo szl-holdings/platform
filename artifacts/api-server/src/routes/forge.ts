@@ -20,7 +20,7 @@ import {
   forgeRollbackEventsTable,
   forgeToolsTable,
 } from '@szl-holdings/db';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -184,11 +184,11 @@ router.post(
         })
         .returning();
       await writeAudit({
-        agentId: agent!.id,
+        agentId: agent?.id,
         actorUserId: req.user?.id,
         action: 'create',
         resourceType: 'agent',
-        resourceId: agent!.id,
+        resourceId: agent?.id,
         after: agent,
       });
       sendCreated(res, agent);
@@ -279,7 +279,7 @@ router.post('/forge/agents/:id/versions', validateBody(createVersionSchema), asy
       actorUserId: req.user?.id,
       action: 'create_version',
       resourceType: 'agent_version',
-      resourceId: v!.id,
+      resourceId: v?.id,
       after: v,
     });
     sendCreated(res, v);
@@ -334,7 +334,7 @@ router.post('/forge/agents/:id/promote', validateBody(promoteSchema), async (req
       actorUserId: req.user?.id,
       action: 'promote_request',
       resourceType: 'promotion',
-      resourceId: promo!.id,
+      resourceId: promo?.id,
       after: promo,
     });
 
@@ -348,7 +348,7 @@ router.post('/forge/agents/:id/promote', validateBody(promoteSchema), async (req
       agent.riskTier === 'executive';
     if (validation.ok && !requiresApproval) {
       const executed = await executePromotion({
-        promotionId: promo!.id,
+        promotionId: promo?.id,
         approverUserId: req.user?.id,
       });
       return sendCreated(res, { promotion: executed, validation });
@@ -407,7 +407,7 @@ router.post('/forge/agents/:id/execute', validateBody(executeSchema), async (req
       .from(forgeAgentsTable)
       .where(eq(forgeAgentsTable.id, agentId))
       .limit(1);
-    if (!agent || !agent.activeVersionId) return sendBadRequest(res, 'Agent has no active version');
+    if (!agent?.activeVersionId) return sendBadRequest(res, 'Agent has no active version');
     const [version] = await db
       .select()
       .from(forgeAgentVersionsTable)

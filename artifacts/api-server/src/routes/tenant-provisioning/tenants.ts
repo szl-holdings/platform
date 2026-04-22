@@ -1,30 +1,19 @@
 import {
-  auditLogsTable,
   azureTenantsTable,
   dataverseConnectionsTable,
   db,
   type InsertAzureTenant,
   type InsertDataverseConnection,
-  type InsertTenantBranding,
   orgMembersTable,
-  scimProvisionedUsersTable,
-  scimSyncLogsTable,
-  scimTokensTable,
-  tenantBrandingTable,
-  usersTable,
 } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import crypto from 'crypto';
-import { and, count, desc, eq, inArray, sql } from 'drizzle-orm';
-import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
-import rateLimit from 'express-rate-limit';
-import { z } from 'zod';
+import { and, count, desc, eq, } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
 import { logActivity } from '../../lib/activity-logger';
 import {
   handleRouteError,
   sendBadRequest,
   sendError,
-  sendForbidden,
   sendNotFound,
   sendSuccess,
 } from '../../lib/api-response';
@@ -41,7 +30,6 @@ import {
   buildAdminConsentUrl,
   buildMultiTenantLoginUrl,
   createDataverseConnectionSchema,
-  linkOrganizationSchema,
   PBI_SETTINGS_KEY,
   tenantRateLimit,
   updateProvisioningConfigSchema,
@@ -148,7 +136,7 @@ router.post(
       const redirectUri = `${origin}/api/azure-ad/callback`;
       const adminConsentUrl = buildAdminConsentUrl(
         azureTenantId,
-        process.env['AZURE_AD_CLIENT_ID'] ?? '',
+        process.env.AZURE_AD_CLIENT_ID ?? '',
         redirectUri,
       );
 
@@ -178,7 +166,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -204,7 +192,7 @@ router.get(
       const redirectUri = `${origin}/api/azure-ad/callback`;
       const adminConsentUrl = buildAdminConsentUrl(
         tenant.azureTenantId,
-        process.env['AZURE_AD_CLIENT_ID'] ?? '',
+        process.env.AZURE_AD_CLIENT_ID ?? '',
         redirectUri,
       );
       const loginUrl = buildMultiTenantLoginUrl(tenant.azureTenantId, redirectUri);
@@ -239,7 +227,7 @@ router.patch(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -308,7 +296,7 @@ router.patch(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -362,7 +350,7 @@ router.delete(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -400,7 +388,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -418,7 +406,7 @@ router.get(
 
       const origin = `${req.headers['x-forwarded-proto'] ?? 'https'}://${req.headers['x-forwarded-host'] ?? req.headers.host}`;
       const redirectUri = `${origin}/api/azure-ad/callback`;
-      const clientId = process.env['AZURE_AD_CLIENT_ID'] ?? '';
+      const clientId = process.env.AZURE_AD_CLIENT_ID ?? '';
 
       const adminConsentUrl = buildAdminConsentUrl(tenant.azureTenantId, clientId, redirectUri);
 
@@ -447,7 +435,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -558,7 +546,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -616,7 +604,7 @@ router.post(
       const tenantId = parseInt(String(req.params.id), 10);
       const connectionId = parseInt(String(req.params.connectionId), 10);
 
-      if (isNaN(tenantId) || isNaN(connectionId)) {
+      if (Number.isNaN(tenantId) || Number.isNaN(connectionId)) {
         sendBadRequest(res, 'Invalid ID parameters');
         return;
       }
@@ -691,7 +679,7 @@ router.post(
       const tenantId = parseInt(String(req.params.id), 10);
       const connectionId = parseInt(String(req.params.connectionId), 10);
 
-      if (isNaN(tenantId) || isNaN(connectionId)) {
+      if (Number.isNaN(tenantId) || Number.isNaN(connectionId)) {
         sendBadRequest(res, 'Invalid ID parameters');
         return;
       }
@@ -773,7 +761,7 @@ router.get(
       const tenantId = parseInt(String(req.params.id), 10);
       const connectionId = parseInt(String(req.params.connectionId), 10);
 
-      if (isNaN(tenantId) || isNaN(connectionId)) {
+      if (Number.isNaN(tenantId) || Number.isNaN(connectionId)) {
         sendBadRequest(res, 'Invalid ID parameters');
         return;
       }

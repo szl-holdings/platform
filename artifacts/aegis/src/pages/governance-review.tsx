@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import {
-  exposureTwins,
   incidentReadiness,
   type ThreatApproval,
   threatTwins,

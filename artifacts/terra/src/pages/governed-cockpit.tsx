@@ -9,7 +9,7 @@ import {
 } from '@szl-holdings/design-system';
 import { RiskEvidenceList } from '@szl-holdings/shared-ui/risk-evidence';
 import { AlertTriangle, Building2, MapPin, TrendingUp } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const ACCENT = productAccent.terra;
 

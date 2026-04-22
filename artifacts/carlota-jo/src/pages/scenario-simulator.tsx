@@ -1,35 +1,25 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   ChevronDown,
   ChevronUp,
   Clock,
-  DollarSign,
   FlaskConical,
   Loader2,
   Minus,
   Play,
   RotateCcw,
-  Shield,
   TrendingDown,
   TrendingUp,
-  Users,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
-  Bar,
-  BarChart,
-  Cell,
   PolarAngleAxis,
   PolarGrid,
   RadarChart,
   Radar as RadarPlot,
   ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
 } from 'recharts';
 import { usePageMeta } from '@/hooks/usePageMeta';
 
@@ -176,7 +166,7 @@ export default function ScenarioSimulator() {
   const [history, setHistory] = useState<HistoricScenario[]>([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);
 
-  const BASE_URL_API = import.meta.env.BASE_URL + 'api';
+  const BASE_URL_API = `${import.meta.env.BASE_URL}api`;
 
   useEffect(() => {
     fetch(`${BASE_URL_API}/carlota/scenarios`, { credentials: 'include' })

@@ -15,7 +15,7 @@
  *   tsx src/index.ts --stdio
  */
 
-import readline from 'readline';
+import readline from 'node:readline';
 import {
   CAPABILITIES,
   SERVER_INFO,
@@ -35,7 +35,7 @@ interface JsonRpcRequest {
 }
 
 function send(obj: unknown): void {
-  process.stdout.write(JSON.stringify(obj) + '\n');
+  process.stdout.write(`${JSON.stringify(obj)}\n`);
 }
 
 function ok(id: string | number | null, result: unknown): void {
@@ -76,8 +76,8 @@ async function handle(req: JsonRpcRequest): Promise<void> {
         break;
 
       case 'tools/call': {
-        const toolName = String(params['name'] ?? '');
-        const toolArgs = (params['arguments'] ?? {}) as Record<string, unknown>;
+        const toolName = String(params.name ?? '');
+        const toolArgs = (params.arguments ?? {}) as Record<string, unknown>;
         if (!toolName) {
           err(id, -32602, 'INVALID_PARAMS', { reason: 'Missing tool name' });
           break;
@@ -97,7 +97,7 @@ async function handle(req: JsonRpcRequest): Promise<void> {
         break;
 
       case 'resources/read': {
-        const uri = String(params['uri'] ?? '');
+        const uri = String(params.uri ?? '');
         if (!uri) {
           err(id, -32602, 'INVALID_PARAMS', { reason: 'Missing URI' });
           break;
@@ -116,8 +116,8 @@ async function handle(req: JsonRpcRequest): Promise<void> {
         break;
 
       case 'prompts/get': {
-        const name = String(params['name'] ?? '');
-        const promptArgs = (params['arguments'] ?? {}) as Record<string, string>;
+        const name = String(params.name ?? '');
+        const promptArgs = (params.arguments ?? {}) as Record<string, string>;
         if (!name) {
           err(id, -32602, 'INVALID_PARAMS', { reason: 'Missing prompt name' });
           break;
@@ -136,7 +136,6 @@ async function handle(req: JsonRpcRequest): Promise<void> {
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    console.error(`[substrate-mcp-gateway:stdio] Error handling ${method}:`, e);
     err(id, -32603, 'INTERNAL_ERROR', { reason: msg });
   }
 }
@@ -144,9 +143,6 @@ async function handle(req: JsonRpcRequest): Promise<void> {
 // ─── Stdio Loop ───────────────────────────────────────────────────────────────
 
 export function startStdioTransport(): void {
-  console.error(
-    `[substrate-mcp-gateway] Starting stdio transport (${SERVER_INFO.name} v${SERVER_INFO.version})`,
-  );
 
   const rl = readline.createInterface({ input: process.stdin, terminal: false });
 
@@ -189,7 +185,6 @@ export function startStdioTransport(): void {
   });
 
   rl.on('close', () => {
-    console.error('[substrate-mcp-gateway] stdin closed — shutting down stdio transport');
     process.exit(0);
   });
 }

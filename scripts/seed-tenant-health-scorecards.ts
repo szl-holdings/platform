@@ -153,7 +153,7 @@ async function buildSignalsFor(
   };
 }
 
-async function seedOrg(orgId: number, orgName: string) {
+async function seedOrg(orgId: number, _orgName: string) {
   const [memberRow] = await db
     .select({ total: count() })
     .from(orgMembersTable)
@@ -260,22 +260,16 @@ async function seedOrg(orgId: number, orgName: string) {
       });
 
     prev = { score: healthScore, activeUsers: signals.activeUsers };
-    console.log(
-      `  org ${orgId} (${orgName}) period ${start.toISOString().slice(0, 7)} → ${healthTier} ${healthScore}`,
-    );
   }
 }
 
 async function main() {
-  console.log('=== Tenant Health Scorecard Seed ===\n');
   const orgs = await db
     .select({ id: organizationsTable.id, name: organizationsTable.name })
     .from(organizationsTable);
   if (orgs.length === 0) {
-    console.warn('[seed-tenant-health] No organizations exist — nothing to seed.');
     process.exit(0);
   }
-  console.log(`Seeding 3 months of scorecards for ${orgs.length} organization(s).\n`);
 
   for (const org of orgs) {
     await seedOrg(org.id, org.name);
@@ -291,17 +285,9 @@ async function main() {
     .groupBy(tenantHealthScorecardsTable.healthTier);
   const tally: Record<Tier, number> = { critical: 0, at_risk: 0, healthy: 0, champion: 0 };
   for (const row of persisted) tally[row.tier as Tier] = row.cnt;
-
-  console.log('\nCurrent-period tier distribution (persisted):');
-  console.log(`  champion: ${tally.champion}`);
-  console.log(`  healthy:  ${tally.healthy}`);
-  console.log(`  at_risk:  ${tally.at_risk}`);
-  console.log(`  critical: ${tally.critical}`);
-  console.log('\n=== Tenant health scorecard seed complete ===');
   process.exit(0);
 }
 
-main().catch((err) => {
-  console.error('[seed-tenant-health] Failed:', err);
+main().catch((_err) => {
   process.exit(1);
 });

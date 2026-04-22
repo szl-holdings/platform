@@ -45,7 +45,7 @@ function makeMemberUser() {
   };
 }
 
-function makePlatformAdminUser() {
+function _makePlatformAdminUser() {
   return {
     id: 10,
     displayName: 'Platform Admin',

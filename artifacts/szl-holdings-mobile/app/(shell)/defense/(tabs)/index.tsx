@@ -1,17 +1,13 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useApiStatus } from '@szl-holdings/mobile-shared';
 import { useQuery } from '@tanstack/react-query';
-import * as Haptics from 'expo-haptics';
-import type { ComponentProps } from 'react';
-import React, { useEffect, useRef, useState } from 'react';
+import { type ComponentProps, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import Animated, {
@@ -265,8 +261,7 @@ async function fetchFindings(): Promise<Finding[]> {
 async function fetchThreatSummary(): Promise<ThreatSummary> {
   try {
     return await apiGet<ThreatSummary>('/api/aegis/live/threat-summary');
-  } catch (err) {
-    console.warn('[Dashboard] Threat summary unavailable:', err);
+  } catch (_err) {
     return {};
   }
 }
@@ -274,8 +269,7 @@ async function fetchThreatSummary(): Promise<ThreatSummary> {
 async function fetchHardeningSummary(): Promise<HardeningSummary> {
   try {
     return await apiGet<HardeningSummary>('/api/aegis/hardening-summary');
-  } catch (err) {
-    console.warn('[Dashboard] Hardening summary unavailable:', err);
+  } catch (_err) {
     return {
       overallScore: 0,
       total: 0,
@@ -790,7 +784,7 @@ export default function DashboardScreen() {
                 </View>
                 <Sparkline data={dailyCounts} color={colors.amber} width={280} height={60} />
                 <View style={styles.sparkLabels}>
-                  {dayLabels.map((label, i) => (
+                  {dayLabels.map((label, _i) => (
                     <Text
                       key={label}
                       style={[

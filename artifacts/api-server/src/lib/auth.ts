@@ -1,16 +1,6 @@
 import { hashIp } from '@szl-holdings/audit';
-import type { RoleName } from '@szl-holdings/db';
-import {
-  azureTenantsTable,
-  db,
-  organizationsTable,
-  orgMembersTable,
-  rolesTable,
-  sessionsTable,
-  userRolesTable,
-  usersTable,
-} from '@szl-holdings/db';
-import crypto from 'crypto';
+import { type RoleName, azureTenantsTable, db, orgMembersTable, rolesTable, sessionsTable, userRolesTable, usersTable } from '@szl-holdings/db';
+import crypto from 'node:crypto';
 import { and, eq, gt } from 'drizzle-orm';
 import type { Request, Response } from 'express';
 import * as client from 'openid-client';
@@ -351,7 +341,7 @@ export async function getSessionUser(token: string): Promise<{
   if (!session) return null;
 
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, session.userId));
-  if (!user || !user.isActive) return null;
+  if (!user?.isActive) return null;
 
   const userRoles = await db
     .select({ roleName: rolesTable.name })
@@ -422,6 +412,6 @@ export function getSafeReturnTo(value: unknown): string {
 
 export function getOrigin(req: Request): string {
   const proto = req.headers['x-forwarded-proto'] || 'https';
-  const host = req.headers['x-forwarded-host'] || req.headers['host'] || 'localhost';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
   return `${proto}://${host}`;
 }

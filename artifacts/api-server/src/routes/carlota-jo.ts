@@ -28,8 +28,7 @@ import {
   clientUpdatesTable,
   db,
 } from '@szl-holdings/db';
-import { services } from '@szl-holdings/services';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { and, desc, eq, inArray, or, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
@@ -60,7 +59,6 @@ import {
   carlotaRadarCompetitorsBodySchema,
   carlotaRadarCompetitorsQuerySchema,
   carlotaRadarSignalsQuerySchema,
-  carlotaReservationSchema,
   listQuerySchema,
   validateBody,
   validateQuery,
@@ -293,7 +291,7 @@ router.post(
         return;
       }
 
-      const confirmationId = 'CJ-' + Date.now().toString(36).toUpperCase();
+      const confirmationId = `CJ-${Date.now().toString(36).toUpperCase()}`;
       const tierPricing: Record<string, number> = {
         'strategy-session': 4500,
         'portfolio-review': 45000,
@@ -440,7 +438,7 @@ router.post(
         'advisory-retainer': 18000,
       };
       const amount = tierPricing[tier] || 0;
-      const invoiceId = 'INV-' + Date.now().toString(36).toUpperCase();
+      const invoiceId = `INV-${Date.now().toString(36).toUpperCase()}`;
 
       res.json({
         success: true,
@@ -620,7 +618,7 @@ router.get('/portal/my-account', authMiddleware(), async (req, res) => {
     const [account] = await db
       .select()
       .from(clientAccountsTable)
-      .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
+      .where(eq(clientAccountsTable.primaryContactUserId, req.user?.id));
     if (!account) {
       sendNotFound(res, 'Client account');
       return;
@@ -636,7 +634,7 @@ router.get('/portal/documents', authMiddleware(), async (req, res) => {
     const [account] = await db
       .select({ id: clientAccountsTable.id })
       .from(clientAccountsTable)
-      .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
+      .where(eq(clientAccountsTable.primaryContactUserId, req.user?.id));
     if (!account) {
       sendNotFound(res, 'Client account');
       return;
@@ -672,7 +670,7 @@ router.post(
       const [account] = await db
         .select({ id: clientAccountsTable.id, organizationId: clientAccountsTable.organizationId })
         .from(clientAccountsTable)
-        .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
+        .where(eq(clientAccountsTable.primaryContactUserId, req.user?.id));
       if (!account) {
         sendNotFound(res, 'Client account');
         return;
@@ -717,7 +715,7 @@ router.get('/portal/updates', authMiddleware(), async (req, res) => {
     const [account] = await db
       .select({ id: clientAccountsTable.id })
       .from(clientAccountsTable)
-      .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
+      .where(eq(clientAccountsTable.primaryContactUserId, req.user?.id));
     if (!account) {
       sendNotFound(res, 'Client account');
       return;
@@ -738,7 +736,7 @@ router.get('/portal/messages', authMiddleware(), async (req, res) => {
     const [account] = await db
       .select({ id: clientAccountsTable.id })
       .from(clientAccountsTable)
-      .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
+      .where(eq(clientAccountsTable.primaryContactUserId, req.user?.id));
     if (!account) {
       sendNotFound(res, 'Client account');
       return;
@@ -769,7 +767,7 @@ router.post(
       const [account] = await db
         .select({ id: clientAccountsTable.id, organizationId: clientAccountsTable.organizationId })
         .from(clientAccountsTable)
-        .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
+        .where(eq(clientAccountsTable.primaryContactUserId, req.user?.id));
       if (!account) {
         sendNotFound(res, 'Client account');
         return;
@@ -791,7 +789,7 @@ router.post(
           subject: body.subject ?? 'Client message',
           clientAccountId: account.id,
           organizationId: account.organizationId,
-          senderUserId: req.user!.id,
+          senderUserId: req.user?.id,
         })
         .returning();
       sendSuccess(res, msg, 201);
@@ -1310,7 +1308,7 @@ const SEED_ROI_METRICS = {
 
 type ClientId = 'luminary-brands' | 'vertex-capital' | 'aurelius-pe' | 'oasis-wellness';
 
-const SEED_CLIENTS: { id: ClientId; name: string; industry: string }[] = [
+const _SEED_CLIENTS: { id: ClientId; name: string; industry: string }[] = [
   { id: 'luminary-brands', name: 'Luminary Brands', industry: 'Consumer Brand / DTC' },
   { id: 'vertex-capital', name: 'Vertex Capital Partners', industry: 'Private Equity / M&A' },
   { id: 'aurelius-pe', name: 'Aurelius Private Equity', industry: 'PE Portfolio Operations' },
@@ -1470,7 +1468,7 @@ type ResolvedAdvisoryScope =
  * - Regular users without a linked clientAccount: portfolio scope (null).
  */
 async function resolveAdvisoryClientScope(req: Request): Promise<ResolvedAdvisoryScope> {
-  const userId = req.user!.id;
+  const userId = req.user?.id;
   const isAdmin = isAdvisoryAdmin(req.user);
   const queryClientId = getClientIdFromQuery(req);
   const autoClientId = await getAutoClientIdForUser(userId);
@@ -1516,7 +1514,7 @@ router.get(
 
 router.get('/carlota/my-scope', authMiddleware(), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const isAdmin = isAdvisoryAdmin(req.user);
     const autoClientId = await getAutoClientIdForUser(userId);
     const autoClient = autoClientId
@@ -1530,7 +1528,7 @@ router.get('/carlota/my-scope', authMiddleware(), async (req, res) => {
 
 router.get('/carlota/engagements', authMiddleware(), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
     const scope = await resolveAdvisoryClientScope(req);
     if (!scope.ok) {
@@ -1704,7 +1702,7 @@ async function fetchCompetitorNews(
         event: title,
         impact,
         direction,
-        date: isNaN(dateObj.getTime())
+        date: Number.isNaN(dateObj.getTime())
           ? new Date().toLocaleDateString('en-GB', {
               day: 'numeric',
               month: 'short',
@@ -1752,7 +1750,7 @@ router.get(
   validateQuery(carlotaRadarCompetitorsQuerySchema),
   async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const orgId = req.user?.orgs[0]?.orgId ?? null;
       const scope = await resolveAdvisoryClientScope(req);
       if (!scope.ok) {
@@ -1781,7 +1779,7 @@ router.put(
   validateBody(carlotaRadarCompetitorsBodySchema),
   async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const orgId = req.user?.orgs[0]?.orgId ?? null;
       const body = req.body as { clientId?: string | null; competitors: string[] };
       let requestedClientId: ClientId | null = null;
@@ -1919,7 +1917,7 @@ async function flushPendingDigest(
 
 async function processNewHighImpactSignals(
   userId: number,
-  orgId: number | null,
+  _orgId: number | null,
   trackedCompetitors: string[],
   signals: Array<{
     competitor: string;
@@ -2088,7 +2086,7 @@ router.get(
   validateQuery(carlotaRadarSignalsQuerySchema),
   async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const orgId = req.user?.orgs[0]?.orgId ?? null;
       const scope = await resolveAdvisoryClientScope(req);
       if (!scope.ok) {
@@ -2266,7 +2264,7 @@ const DEFAULT_RADAR_PREFS = {
 
 router.get('/carlota/radar/notification-preferences', authMiddleware(), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const [row] = await db
       .select()
       .from(carlotaRadarNotifPrefsTable)
@@ -2307,7 +2305,7 @@ router.put(
   ),
   async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const orgId = req.user?.orgs[0]?.orgId ?? null;
       const body = req.body as {
         enabled?: boolean;
@@ -2393,7 +2391,7 @@ router.post(
   authMiddleware(),
   async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const [prefs] = await db
         .select()
         .from(carlotaRadarNotifPrefsTable)
@@ -2416,7 +2414,7 @@ router.post(
 
 router.get('/carlota/roi-metrics', authMiddleware(), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
     const scope = await resolveAdvisoryClientScope(req);
     if (!scope.ok) {
@@ -3043,7 +3041,7 @@ async function ensureKnowledgeSeed(): Promise<void> {
 router.get('/carlota/experts', authMiddleware(), async (req, res) => {
   try {
     await ensureExpertsSeed();
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
     const tenantFilter = orgId
       ? or(eq(carlotaExpertsTable.isSeeded, true), eq(carlotaExpertsTable.organizationId, orgId))
@@ -3094,7 +3092,7 @@ router.post(
         sendBadRequest(res, 'name and title are required');
         return;
       }
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const orgId = req.user?.orgs[0]?.orgId ?? null;
       const [expert] = await db
         .insert(carlotaExpertsTable)
@@ -3133,7 +3131,7 @@ router.put(
     try {
       const id = parseIdParam(req, res);
       if (id === null) return;
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const orgId = req.user?.orgs[0]?.orgId ?? null;
       const body = req.body as z.infer<typeof expertWriteSchema>;
       const [existing] = await db
@@ -3184,7 +3182,7 @@ router.delete('/carlota/experts/:id', authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req, res);
     if (id === null) return;
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
     const [existing] = await db
       .select()
@@ -3216,7 +3214,7 @@ router.delete('/carlota/experts/:id', authMiddleware(), async (req, res) => {
 router.get('/carlota/knowledge', authMiddleware(), async (req, res) => {
   try {
     await ensureKnowledgeSeed();
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
     const tenantFilter = orgId
       ? or(eq(carlotaKnowledgeItemsTable.isSeeded, true), eq(carlotaKnowledgeItemsTable.organizationId, orgId))
@@ -3263,7 +3261,7 @@ router.post(
         sendBadRequest(res, 'title is required');
         return;
       }
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const orgId = req.user?.orgs[0]?.orgId ?? null;
       const [item] = await db
         .insert(carlotaKnowledgeItemsTable)
@@ -3299,7 +3297,7 @@ router.put(
     try {
       const id = parseIdParam(req, res);
       if (id === null) return;
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const orgId = req.user?.orgs[0]?.orgId ?? null;
       const body = req.body as z.infer<typeof knowledgeWriteSchema>;
       const [existing] = await db
@@ -3347,7 +3345,7 @@ router.delete('/carlota/knowledge/:id', authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req, res);
     if (id === null) return;
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
     const [existing] = await db
       .select()
@@ -3449,7 +3447,7 @@ router.get(
 // GET /carlota/proposals
 router.get('/carlota/proposals', authMiddleware(), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
     const filter = orgId
       ? eq(carlotaProposalDraftsTable.organizationId, orgId)
@@ -3521,7 +3519,7 @@ router.post(
         sendBadRequest(res, 'title is required');
         return;
       }
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const orgId = req.user?.orgs[0]?.orgId ?? null;
       const [proposal] = await db
         .insert(carlotaProposalDraftsTable)
@@ -3554,7 +3552,7 @@ router.put(
     try {
       const id = parseIdParam(req, res);
       if (id === null) return;
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const orgId = req.user?.orgs[0]?.orgId ?? null;
       const body = req.body as z.infer<typeof proposalWriteSchema>;
       const [existing] = await db
@@ -3596,7 +3594,7 @@ router.delete('/carlota/proposals/:id', authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req, res);
     if (id === null) return;
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
     const [existing] = await db
       .select()
@@ -3653,11 +3651,11 @@ router.post(
         sendBadRequest(res, 'companyName and report are required');
         return;
       }
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const orgId = req.user?.orgs[0]?.orgId ?? null;
       const { organizationId, clientAccountId } = await resolveClientScope(userId, orgId);
       const externalId =
-        'dx-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
+        `dx-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
       const [row] = await db
         .insert(carlotaDiagnosticsTable)
         .values({
@@ -3680,7 +3678,7 @@ router.post(
 
 router.get('/carlota/diagnostics', authMiddleware(), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
     const filter = orgId
       ? eq(carlotaDiagnosticsTable.organizationId, orgId)
@@ -3718,11 +3716,11 @@ router.post(
         sendBadRequest(res, 'label and result are required');
         return;
       }
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const orgId = req.user?.orgs[0]?.orgId ?? null;
       const { organizationId, clientAccountId } = await resolveClientScope(userId, orgId);
       const externalId =
-        'sc-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
+        `sc-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
       const [row] = await db
         .insert(carlotaScenariosTable)
         .values({
@@ -3745,7 +3743,7 @@ router.post(
 
 router.get('/carlota/scenarios', authMiddleware(), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
     const filter = orgId
       ? eq(carlotaScenariosTable.organizationId, orgId)

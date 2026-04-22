@@ -1919,8 +1919,8 @@ export default function CarouselLabPage() {
         >
           {[
             { label: 'Total Carousels', value: carousels.length, color: '#d4a054' },
-            { label: 'Ready to Export', value: (byStatus['ready'] || []).length, color: '#5a9c5a' },
-            { label: 'Published', value: (byStatus['published'] || []).length, color: '#9c5adc' },
+            { label: 'Ready to Export', value: (byStatus.ready || []).length, color: '#5a9c5a' },
+            { label: 'Published', value: (byStatus.published || []).length, color: '#9c5adc' },
           ].map((stat) => (
             <div
               key={stat.label}

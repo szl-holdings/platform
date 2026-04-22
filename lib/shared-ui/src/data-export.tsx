@@ -1,5 +1,4 @@
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 export interface ExportColumn {
   key: string;
@@ -28,7 +27,6 @@ export function exportToCSV(data: Record<string, unknown>[], options: ExportOpti
   const { filename = 'export', columns, title, appName } = options;
 
   if (data.length === 0) {
-    console.warn('No data to export');
     return;
   }
 
@@ -82,7 +80,6 @@ export function exportToPDF(options: ExportOptions = {}): void {
 
   const printWindow = window.open('', '_blank', 'width=900,height=700');
   if (!printWindow) {
-    console.warn('Could not open print window');
     return;
   }
 

@@ -11,7 +11,7 @@ configurePushNotificationHandler();
 setupAndroidNotificationChannels().catch(() => {});
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 const AUTH_TOKEN_KEY = 'terra_auth_token';
@@ -32,7 +32,7 @@ async function registerTokenWithServer(token: string): Promise<void> {
   try {
     const authToken = await getAuthToken();
     if (!authToken) return;
-    await fetch(API_BASE + '/push-tokens', {
+    await fetch(`${API_BASE}/push-tokens`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

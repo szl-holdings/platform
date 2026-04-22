@@ -11,15 +11,7 @@ import {
 } from "@szl-holdings/evidence-graph";
 import { defaultSignalBus, PostgresSignalBusStore } from "@szl-holdings/signal-mesh";
 import { defaultEntityRegistry } from "@workspace/ontology";
-import {
-  defaultSkillRegistry,
-  defaultSkillRunStore,
-  builtinSkills,
-  setSkillLibraryLogger,
-  type SkillDefinition,
-  type SkillRun,
-} from "@workspace/skill-library";
-import type { SkillRegistryBackend, SkillRunStoreBackend } from "@workspace/skill-library";
+import { defaultSkillRegistry, defaultSkillRunStore, builtinSkills, setSkillLibraryLogger, type SkillDefinition, type SkillRun, type SkillRegistryBackend, type SkillRunStoreBackend } from '@workspace/skill-library';
 import { eq, inArray, desc } from "drizzle-orm";
 import { defaultCheckpointStore, PostgresCheckpointStore } from "@workspace/cognitive-runtime";
 import { defaultSelfModelStore } from "@workspace/self-model";
@@ -225,32 +217,32 @@ export async function initDurablePersistence(): Promise<void> {
       });
 
       const rowToSkill = (row: Record<string, unknown>): SkillDefinition => {
-        const meta = (row["metadata"] as Record<string, unknown>) ?? {};
-        const impl = (row["implementation"] as Record<string, unknown>) ?? {};
-        const inSchema = (row["inputSchema"] as Record<string, unknown>) ?? {};
-        const outSchema = (row["outputSchema"] as Record<string, unknown>) ?? {};
-        const created = row["createdAt"];
-        const updated = row["updatedAt"];
+        const meta = (row.metadata as Record<string, unknown>) ?? {};
+        const impl = (row.implementation as Record<string, unknown>) ?? {};
+        const inSchema = (row.inputSchema as Record<string, unknown>) ?? {};
+        const outSchema = (row.outputSchema as Record<string, unknown>) ?? {};
+        const created = row.createdAt;
+        const updated = row.updatedAt;
         const toIso = (v: unknown): string => (v instanceof Date ? v.toISOString() : (v as string) ?? new Date().toISOString());
         return {
-          id: row["skillId"] as string,
-          name: row["name"] as string,
-          description: (row["description"] as string) ?? "",
-          category: (row["domain"] as SkillDefinition["category"]) ?? "analysis",
-          objective: (meta["objective"] as string) ?? "",
-          inputFields: (inSchema["fields"] as string[]) ?? [],
-          steps: (impl["steps"] as SkillDefinition["steps"]) ?? [],
-          toolsUsed: (impl["toolsUsed"] as string[]) ?? [],
-          expectedOutputs: (outSchema["expectedOutputs"] as string[]) ?? [],
-          successCriteria: (meta["successCriteria"] as SkillDefinition["successCriteria"]) ?? [],
-          failureConditions: (meta["failureConditions"] as SkillDefinition["failureConditions"]) ?? [],
-          performance: (meta["performance"] as SkillDefinition["performance"]) ?? {
+          id: row.skillId as string,
+          name: row.name as string,
+          description: (row.description as string) ?? "",
+          category: (row.domain as SkillDefinition["category"]) ?? "analysis",
+          objective: (meta.objective as string) ?? "",
+          inputFields: (inSchema.fields as string[]) ?? [],
+          steps: (impl.steps as SkillDefinition["steps"]) ?? [],
+          toolsUsed: (impl.toolsUsed as string[]) ?? [],
+          expectedOutputs: (outSchema.expectedOutputs as string[]) ?? [],
+          successCriteria: (meta.successCriteria as SkillDefinition["successCriteria"]) ?? [],
+          failureConditions: (meta.failureConditions as SkillDefinition["failureConditions"]) ?? [],
+          performance: (meta.performance as SkillDefinition["performance"]) ?? {
             totalRuns: 0, successfulRuns: 0, failedRuns: 0, successRate: 0, avgLatencyMs: 0,
           },
-          isBuiltin: (row["isBuiltin"] as boolean) ?? false,
-          enabled: (row["status"] as string) !== "deprecated",
-          version: (meta["version"] as string) ?? "1.0.0",
-          tags: (row["tags"] as string[]) ?? [],
+          isBuiltin: (row.isBuiltin as boolean) ?? false,
+          enabled: (row.status as string) !== "deprecated",
+          version: (meta.version as string) ?? "1.0.0",
+          tags: (row.tags as string[]) ?? [],
           createdAt: toIso(created),
           updatedAt: toIso(updated),
         };
@@ -278,23 +270,23 @@ export async function initDurablePersistence(): Promise<void> {
       });
 
       const rowToRun = (row: Record<string, unknown>): SkillRun => {
-        const meta = (row["metadata"] as Record<string, unknown>) ?? {};
+        const meta = (row.metadata as Record<string, unknown>) ?? {};
         const toTs = (v: unknown): number | undefined => {
           if (v === null || v === undefined) return undefined;
           return v instanceof Date ? v.getTime() : Number(v);
         };
         return {
-          runId: (meta["runId"] as string) ?? (row["id"] as string),
-          skillId: row["skillId"] as string,
-          skillName: (meta["skillName"] as string) ?? "",
-          status: row["status"] as SkillRun["status"],
-          inputs: (row["inputs"] as Record<string, unknown>) ?? {},
-          outputs: (row["outputs"] as Record<string, unknown>) ?? undefined,
-          steps: (meta["steps"] as SkillRun["steps"]) ?? [],
-          error: (row["errorMessage"] as string | undefined) ?? undefined,
-          startedAt: toTs(row["startedAt"]) ?? Date.now(),
-          completedAt: toTs(row["completedAt"]),
-          latencyMs: (row["latencyMs"] as number | undefined) ?? undefined,
+          runId: (meta.runId as string) ?? (row.id as string),
+          skillId: row.skillId as string,
+          skillName: (meta.skillName as string) ?? "",
+          status: row.status as SkillRun["status"],
+          inputs: (row.inputs as Record<string, unknown>) ?? {},
+          outputs: (row.outputs as Record<string, unknown>) ?? undefined,
+          steps: (meta.steps as SkillRun["steps"]) ?? [],
+          error: (row.errorMessage as string | undefined) ?? undefined,
+          startedAt: toTs(row.startedAt) ?? Date.now(),
+          completedAt: toTs(row.completedAt),
+          latencyMs: (row.latencyMs as number | undefined) ?? undefined,
         };
       };
 
@@ -317,10 +309,10 @@ export async function initDurablePersistence(): Promise<void> {
         },
         async persistSkillUpdate(skillId, patch) {
           const updates: Record<string, unknown> = { updatedAt: new Date() };
-          if (patch.name !== undefined) updates["name"] = patch.name;
-          if (patch.description !== undefined) updates["description"] = patch.description;
-          if (patch.tags !== undefined) updates["tags"] = patch.tags;
-          if (patch.enabled !== undefined) updates["status"] = patch.enabled ? "active" : "deprecated";
+          if (patch.name !== undefined) updates.name = patch.name;
+          if (patch.description !== undefined) updates.description = patch.description;
+          if (patch.tags !== undefined) updates.tags = patch.tags;
+          if (patch.enabled !== undefined) updates.status = patch.enabled ? "active" : "deprecated";
           await db.update(skillsTable).set(updates).where(eq(skillsTable.skillId, skillId));
         },
       };
@@ -464,10 +456,10 @@ export async function initDurablePersistence(): Promise<void> {
           const stats = await dbGetHistoryStats();
           return {
             total: stats.totalRuns,
-            completed: (stats.byStatus["completed"] ?? 0) as number,
-            failed: (stats.byStatus["failed"] ?? 0) as number,
-            rolledBack: (stats.byStatus["rolled_back"] ?? 0) as number,
-            pendingApproval: (stats.byStatus["pending_approval"] ?? 0) as number,
+            completed: (stats.byStatus.completed ?? 0) as number,
+            failed: (stats.byStatus.failed ?? 0) as number,
+            rolledBack: (stats.byStatus.rolled_back ?? 0) as number,
+            pendingApproval: (stats.byStatus.pending_approval ?? 0) as number,
           };
         },
       });

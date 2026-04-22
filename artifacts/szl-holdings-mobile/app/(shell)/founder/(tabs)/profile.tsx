@@ -1,11 +1,10 @@
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   Linking,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -180,7 +179,7 @@ const styles = StyleSheet.create({
     height: 88,
     borderRadius: 44,
     borderWidth: 1.5,
-    borderColor: ACCENT + '50',
+    borderColor: `${ACCENT}50`,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -189,7 +188,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: ACCENT + '20',
+    backgroundColor: `${ACCENT}20`,
     alignItems: 'center',
     justifyContent: 'center',
   },

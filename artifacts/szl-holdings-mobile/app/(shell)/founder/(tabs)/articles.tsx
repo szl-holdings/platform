@@ -3,7 +3,6 @@ import { formatInUserTimeZone, useUserPreferences } from '@szl-holdings/mobile-s
 import { useQuery } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -203,7 +202,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: ACCENT + '50',
+    borderColor: `${ACCENT}50`,
   },
   retryText: { color: ACCENT, fontSize: 13, fontWeight: '600' },
   articleRow: {
@@ -228,7 +227,7 @@ const styles = StyleSheet.create({
   },
   metaText: { fontSize: 11, color: TEXT_DIM },
   tag: {
-    backgroundColor: ACCENT + '18',
+    backgroundColor: `${ACCENT}18`,
     borderRadius: 4,
     paddingHorizontal: 6,
     paddingVertical: 2,

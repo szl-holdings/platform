@@ -23,7 +23,7 @@ import {
   vesselsAlertsTable,
   vesselsEventsTable,
 } from '@szl-holdings/db';
-import { and, count, desc, eq, ne, sql } from 'drizzle-orm';
+import { and, desc, eq, ne, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { sendBadRequest } from '../lib/api-response';
@@ -416,8 +416,7 @@ function buildDomainResult(domain: string, query: string, live: LiveDomainData):
           ]
         : []),
     ],
-    terra: [
-      ...(live.terra.distressCount > 0
+    terra: (live.terra.distressCount > 0
         ? [
             {
               title: `${live.terra.distressCount} Distressed Propert${live.terra.distressCount === 1 ? 'y' : 'ies'} Active`,
@@ -429,7 +428,6 @@ function buildDomainResult(domain: string, query: string, live: LiveDomainData):
             },
           ]
         : []),
-    ],
     prism: [
       ...(live.prism.openMatters > 0
         ? [
@@ -437,7 +435,7 @@ function buildDomainResult(domain: string, query: string, live: LiveDomainData):
               title: live.prism.recentMatterTitle
                 ? `Active Legal Matter: ${live.prism.recentMatterTitle.slice(0, 60)}`
                 : `${live.prism.openMatters} Open Legal Matter(s)`,
-              summary: `${live.prism.openMatters} open matter(s); ${live.prism.totalActive} in active discovery/pre-trial; ${live.prism.trialReady} trial-ready${live.prism.matterTypes.length > 0 ? '; types: ' + live.prism.matterTypes.slice(0, 3).join(', ') : ''}`,
+              summary: `${live.prism.openMatters} open matter(s); ${live.prism.totalActive} in active discovery/pre-trial; ${live.prism.trialReady} trial-ready${live.prism.matterTypes.length > 0 ? `; types: ${live.prism.matterTypes.slice(0, 3).join(', ')}` : ''}`,
               severity:
                 live.prism.lowHealthMatters >= 3
                   ? ('high' as const)
@@ -476,7 +474,7 @@ function buildDomainResult(domain: string, query: string, live: LiveDomainData):
               title: `Portfolio: ${live.market.totalVentures} Venture(s) Tracked`,
               summary:
                 live.market.activeVentures > 0
-                  ? `${live.market.activeVentures} active/growth venture(s)${live.market.sectors.length > 0 ? ' across sectors: ' + live.market.sectors.join(', ') : ''}`
+                  ? `${live.market.activeVentures} active/growth venture(s)${live.market.sectors.length > 0 ? ` across sectors: ${live.market.sectors.join(', ')}` : ''}`
                   : `${live.market.totalVentures} total portfolio venture(s) on record`,
               severity: 'info' as const,
               timestamp: Date.now() - 7200000,
@@ -486,7 +484,7 @@ function buildDomainResult(domain: string, query: string, live: LiveDomainData):
       ...(live.market.latestNavCents !== null
         ? [
             {
-              title: `Latest NAV Record${live.market.latestNavDate ? ' (' + live.market.latestNavDate + ')' : ''}`,
+              title: `Latest NAV Record${live.market.latestNavDate ? ` (${live.market.latestNavDate})` : ''}`,
               summary: (() => {
                 const navStr =
                   live.market.latestNavCents !== null
@@ -677,7 +675,7 @@ function buildDomainResult(domain: string, query: string, live: LiveDomainData):
         : 'Real estate portfolio distress indicators are low based on live data.',
     prism:
       live.prism.openMatters > 0
-        ? `Legal docket is currently carrying ${live.prism.openMatters} open matter(s) — ${live.prism.totalActive} active (discovery/pre-trial), ${live.prism.trialReady} trial-ready, and ${live.prism.lowHealthMatters} below health threshold. ${live.prism.matterTypes.length > 0 ? 'Active matter types: ' + live.prism.matterTypes.slice(0, 3).join(', ') + '. ' : ''}This load intersects with security incident legal-hold demand and maritime force-majeure reviews.`
+        ? `Legal docket is currently carrying ${live.prism.openMatters} open matter(s) — ${live.prism.totalActive} active (discovery/pre-trial), ${live.prism.trialReady} trial-ready, and ${live.prism.lowHealthMatters} below health threshold. ${live.prism.matterTypes.length > 0 ? `Active matter types: ${live.prism.matterTypes.slice(0, 3).join(', ')}. ` : ''}This load intersects with security incident legal-hold demand and maritime force-majeure reviews.`
         : 'Legal team has no open matters in the live docket — capacity available for downstream cyber and maritime review work.',
     'szl-holdings': (() => {
       const nav =

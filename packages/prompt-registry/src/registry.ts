@@ -197,7 +197,7 @@ class PromptRegistry {
 
   getActiveVersion(id: string): PromptVersion | undefined {
     const prompt = this.prompts.get(id);
-    if (!prompt || !prompt.activeVersionId) return undefined;
+    if (!prompt?.activeVersionId) return undefined;
     return prompt.versions.find((v) => v.versionId === prompt.activeVersionId);
   }
 
@@ -223,7 +223,7 @@ class PromptRegistry {
     if (filters.status)
       results = results.filter((p) => this.getEffectiveStatus(p) === filters.status);
     if (filters.tags?.length)
-      results = results.filter((p) => filters.tags!.some((t) => p.tags.includes(t)));
+      results = results.filter((p) => filters.tags?.some((t) => p.tags.includes(t)));
     return results;
   }
 

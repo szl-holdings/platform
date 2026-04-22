@@ -53,14 +53,11 @@ vi.mock(
       (_req: Request, _res: Response, next: NextFunction) => next(),
     parseIdParam: (id: string) => {
       const n = parseInt(id, 10);
-      if (isNaN(n)) throw Object.assign(new Error("Invalid ID"), { status: 400 });
+      if (Number.isNaN(n)) throw Object.assign(new Error("Invalid ID"), { status: 400 });
       return n;
     },
     InvalidIdError: class InvalidIdError extends Error {
       status = 400;
-      constructor(msg: string) {
-        super(msg);
-      }
     },
   }),
 );

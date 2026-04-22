@@ -1,10 +1,8 @@
-import type { CovenantDecision, CovenantPolicy } from '@szl-holdings/covenant-policy/engine';
-import { CovenantPolicyEngine } from '@szl-holdings/covenant-policy/engine';
+import { type CovenantDecision, type CovenantPolicy, CovenantPolicyEngine } from '@szl-holdings/covenant-policy/engine';
 import { sample } from '@szl-holdings/monte-carlo/distributions';
 import { VESSELS_VOYAGE_COST } from '@szl-holdings/monte-carlo/scenarios';
 import type { ScenarioDefinition } from '@szl-holdings/monte-carlo/schema';
-import type { PrismBusEvent } from '@szl-holdings/prism-bus/bus';
-import { PrismEventBus } from '@szl-holdings/prism-bus/bus';
+import { type PrismBusEvent, PrismEventBus } from '@szl-holdings/prism-bus/bus';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface MonteCarloResult {
@@ -61,7 +59,7 @@ function runScenarioSimulation(scenario: ScenarioDefinition, iterations: number)
     for (const inp of scenario.inputs) {
       const val = sample(inp.distribution);
       inputs[inp.id] = val;
-      inputAccum[inp.id]!.push(val);
+      inputAccum[inp.id]?.push(val);
     }
     try {
       const outputs = scenario.calculate(inputs, i);
@@ -78,7 +76,7 @@ function runScenarioSimulation(scenario: ScenarioDefinition, iterations: number)
       validIterations++;
       for (const out of scenario.outputs) {
         const v = outputs[out.id];
-        if (v !== undefined && isFinite(v)) outputAccum[out.id]!.push(v);
+        if (v !== undefined && Number.isFinite(v)) outputAccum[out.id]?.push(v);
       }
     } catch {
       /* constraint violation */
@@ -334,7 +332,7 @@ export function useDecisionEngine() {
       });
 
       const busHistory = bus.getHistory({ correlationId });
-      const busStats = bus.getStats();
+      const _busStats = bus.getStats();
 
       const recommendation: Recommendation = {
         title: 'Initiate port security lockdown and divert vessel to secondary anchorage',
@@ -373,7 +371,7 @@ export function useDecisionEngine() {
         action: 'execute' as const,
         context: {
           correlationConfidence: correlationEvent.payload.confidence,
-          estimatedCost: monteCarloResult.metrics['totalVoyageCost']?.p50 ?? 0,
+          estimatedCost: monteCarloResult.metrics.totalVoyageCost?.p50 ?? 0,
           signalCount: busHistory.filter((e) => e.type === 'domain_signal').length,
           domains: ['aegis', 'vessels'],
         },
@@ -486,8 +484,8 @@ export function useDecisionEngine() {
         },
       });
 
-      const predictedCost = monteCarloResult.metrics['totalVoyageCost']?.p50 ?? 340;
-      const predictedHours = (monteCarloResult.metrics['totalDays']?.p50 ?? 1) * 24;
+      const predictedCost = monteCarloResult.metrics.totalVoyageCost?.p50 ?? 340;
+      const predictedHours = (monteCarloResult.metrics.totalDays?.p50 ?? 1) * 24;
 
       const outcomeRecord: OutcomeRecord = {
         outcomeId: `OG-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,

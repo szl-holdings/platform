@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { router } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
@@ -235,7 +235,7 @@ export function VoiceCommandModal({ visible, onClose }: VoiceCommandModalProps) 
                     : isProcessing
                       ? 'Processing across domains…'
                       : hasResult
-                        ? `Routed to ${result!.domain}`
+                        ? `Routed to ${result?.domain}`
                         : 'Type a command to get started'}
                 </Text>
               </View>
@@ -254,34 +254,34 @@ export function VoiceCommandModal({ visible, onClose }: VoiceCommandModalProps) 
             {hasResult && (
               <View style={styles.resultSection}>
                 <View style={[styles.queryBubble, { backgroundColor: 'rgba(201,168,76,0.08)' }]}>
-                  <Text style={styles.queryText}>"{result!.query}"</Text>
+                  <Text style={styles.queryText}>"{result?.query}"</Text>
                 </View>
                 <View
                   style={[
                     styles.domainChip,
                     {
-                      borderColor: `${WORKSPACES.find((w) => w.id === result!.domain)?.accent ?? ACCENT}40`,
+                      borderColor: `${WORKSPACES.find((w) => w.id === result?.domain)?.accent ?? ACCENT}40`,
                     },
                   ]}
                 >
                   <Text style={styles.domainChipText}>
-                    {WORKSPACES.find((w) => w.id === result!.domain)?.icon}{' '}
-                    {WORKSPACES.find((w) => w.id === result!.domain)?.label}
+                    {WORKSPACES.find((w) => w.id === result?.domain)?.icon}{' '}
+                    {WORKSPACES.find((w) => w.id === result?.domain)?.label}
                   </Text>
                 </View>
-                <Text style={styles.responseText}>{result!.response}</Text>
+                <Text style={styles.responseText}>{result?.response}</Text>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.cardsRow}
                 >
-                  {result!.cards.map((card) => (
+                  {result?.cards.map((card) => (
                     <ResultCard key={card.id} card={card} colors={colors} />
                   ))}
                 </ScrollView>
                 <TouchableOpacity style={styles.goBtn} onPress={handleGoToResult}>
                   <Text style={styles.goBtnText}>
-                    Open {WORKSPACES.find((w) => w.id === result!.domain)?.label}
+                    Open {WORKSPACES.find((w) => w.id === result?.domain)?.label}
                   </Text>
                   <Feather name="arrow-right" size={14} color="#090810" />
                 </TouchableOpacity>

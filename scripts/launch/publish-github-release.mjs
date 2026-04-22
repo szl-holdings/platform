@@ -10,9 +10,9 @@ const TARGET = 'main';
 async function getGithubToken() {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
-    ? 'repl ' + process.env.REPL_IDENTITY
+    ? `repl ${process.env.REPL_IDENTITY}`
     : process.env.WEB_REPL_RENEWAL
-      ? 'depl ' + process.env.WEB_REPL_RENEWAL
+      ? `depl ${process.env.WEB_REPL_RENEWAL}`
       : null;
   if (!hostname || !xReplitToken) {
     throw new Error('Missing REPLIT_CONNECTORS_HOSTNAME or identity token');
@@ -23,10 +23,10 @@ async function getGithubToken() {
   });
   if (!r.ok) throw new Error(`Connector lookup failed: ${r.status}`);
   const j = await r.json();
-  const settings = (j.items && j.items[0] && j.items[0].settings) || {};
+  const settings = (j.items?.[0]?.settings) || {};
   const token =
     settings.access_token ||
-    (settings.oauth && settings.oauth.credentials && settings.oauth.credentials.access_token);
+    (settings.oauth?.credentials?.access_token);
   if (!token) throw new Error('No GitHub access token in connector settings');
   return token;
 }
@@ -39,7 +39,7 @@ async function gh(token, path, init = {}) {
       Accept: 'application/vnd.github+json',
       'User-Agent': 'szl-holdings-launch',
       'X-GitHub-Api-Version': '2022-11-28',
-      ...(init.headers || {}),
+      ...init.headers,
       ...(init.body ? { 'Content-Type': 'application/json' } : {}),
     },
   });
@@ -99,8 +99,7 @@ async function main() {
 
   // Verify identity
   const userR = await gh(token, '/user');
-  const user = await userR.json();
-  console.log(`Authenticated as: ${user.login}`);
+  const _user = await userR.json();
 
   // Check repo
   const repoR = await gh(token, `/repos/${OWNER}/${REPO}`);
@@ -109,14 +108,12 @@ async function main() {
     throw new Error(`Repo lookup failed (${repoR.status}): ${t}`);
   }
   const repo = await repoR.json();
-  console.log(`Repo: ${repo.full_name} (default_branch: ${repo.default_branch})`);
 
   // Check if release already exists by tag
   const existingR = await gh(token, `/repos/${OWNER}/${REPO}/releases/tags/${TAG}`);
-  let release;
+  let _release;
   if (existingR.status === 200) {
     const existing = await existingR.json();
-    console.log(`Release ${TAG} already exists (id=${existing.id}). Updating body.`);
     const updateR = await gh(token, `/repos/${OWNER}/${REPO}/releases/${existing.id}`, {
       method: 'PATCH',
       body: JSON.stringify({
@@ -130,9 +127,8 @@ async function main() {
       const t = await updateR.text();
       throw new Error(`Update failed (${updateR.status}): ${t}`);
     }
-    release = await updateR.json();
+    _release = await updateR.json();
   } else {
-    console.log(`Creating release ${TAG}...`);
     const createR = await gh(token, `/repos/${OWNER}/${REPO}/releases`, {
       method: 'POST',
       body: JSON.stringify({
@@ -149,19 +145,10 @@ async function main() {
       const t = await createR.text();
       throw new Error(`Create failed (${createR.status}): ${t}`);
     }
-    release = await createR.json();
+    _release = await createR.json();
   }
-
-  console.log('\n=== RELEASE PUBLISHED ===');
-  console.log(`URL:        ${release.html_url}`);
-  console.log(`API URL:    ${release.url}`);
-  console.log(`Tag:        ${release.tag_name}`);
-  console.log(`Prerelease: ${release.prerelease}`);
-  console.log(`Created:    ${release.created_at}`);
-  console.log(`Published:  ${release.published_at}`);
 }
 
-main().catch((e) => {
-  console.error('FAILED:', e.message);
+main().catch((_e) => {
   process.exit(1);
 });

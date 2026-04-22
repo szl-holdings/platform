@@ -5,7 +5,7 @@ import { PageDataSkeleton } from '@szl-holdings/shared-ui/page-data-skeleton';
 import { formatDateTime } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { Bell, Check, CheckCheck, ExternalLink, Filter, RefreshCw, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface Notification {

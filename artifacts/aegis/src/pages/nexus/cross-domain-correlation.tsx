@@ -1,15 +1,5 @@
 import {
-  Activity,
-  AlertTriangle,
-  CheckCircle,
-  Eye,
-  Globe,
-  Layers,
   Network,
-  Radio,
-  Shield,
-  TrendingUp,
-  XCircle,
   Zap,
 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
@@ -236,8 +226,8 @@ export default function CrossDomainCorrelationPage() {
               aria-label={`Filter ${d} domain`}
               className="rounded-xl p-3 text-left transition"
               style={{
-                background: domainFilter === d ? domainColor(d) + '15' : DS.surface,
-                border: `1px solid ${domainFilter === d ? domainColor(d) + '30' : DS.border}`,
+                background: domainFilter === d ? `${domainColor(d)}15` : DS.surface,
+                border: `1px solid ${domainFilter === d ? `${domainColor(d)}30` : DS.border}`,
               }}
             >
               <div className="flex items-center gap-2 mb-1">
@@ -283,7 +273,7 @@ export default function CrossDomainCorrelationPage() {
                   </span>
                   <span
                     className="text-[8px] uppercase font-bold tracking-wider rounded px-1.5 py-0.5"
-                    style={{ background: sevColor(s.severity) + '15', color: sevColor(s.severity) }}
+                    style={{ background: `${sevColor(s.severity)}15`, color: sevColor(s.severity) }}
                   >
                     {s.severity}
                   </span>
@@ -330,7 +320,7 @@ export default function CrossDomainCorrelationPage() {
                   </span>
                   <span
                     className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5"
-                    style={{ background: sevColor(c.severity) + '15', color: sevColor(c.severity) }}
+                    style={{ background: `${sevColor(c.severity)}15`, color: sevColor(c.severity) }}
                   >
                     {c.severity}
                   </span>
@@ -342,12 +332,12 @@ export default function CrossDomainCorrelationPage() {
                     style={{
                       background:
                         c.status === 'confirmed'
-                          ? GREEN + '15'
+                          ? `${GREEN}15`
                           : c.status === 'dismissed'
                             ? 'rgba(255,255,255,0.03)'
                             : c.status === 'investigating'
-                              ? BLUE + '15'
-                              : ACCENT + '15',
+                              ? `${BLUE}15`
+                              : `${ACCENT}15`,
                       color:
                         c.status === 'confirmed'
                           ? GREEN
@@ -368,7 +358,7 @@ export default function CrossDomainCorrelationPage() {
                       key={d}
                       className="text-[8px] px-1.5 py-0.5 rounded-full"
                       style={{
-                        background: domainColor(d) + '12',
+                        background: `${domainColor(d)}12`,
                         color: domainColor(d),
                         border: `1px solid ${domainColor(d)}20`,
                       }}
@@ -434,7 +424,7 @@ export default function CrossDomainCorrelationPage() {
 
               <div
                 className="rounded-lg p-3 mb-4"
-                style={{ background: ACCENT + '08', borderLeft: `2px solid ${ACCENT}` }}
+                style={{ background: `${ACCENT}08`, borderLeft: `2px solid ${ACCENT}` }}
               >
                 <div className="flex items-center gap-1.5 mb-1">
                   <Zap className="h-3 w-3" style={{ color: ACCENT }} />
@@ -456,7 +446,7 @@ export default function CrossDomainCorrelationPage() {
                     onClick={() => handleStatusChange(selected.id, 'investigating')}
                     aria-label="Begin investigation"
                     className="text-[9px] font-semibold rounded-lg px-3 py-1.5 hover:brightness-125 transition"
-                    style={{ background: BLUE + '20', color: BLUE }}
+                    style={{ background: `${BLUE}20`, color: BLUE }}
                   >
                     Investigate
                   </button>
@@ -464,7 +454,7 @@ export default function CrossDomainCorrelationPage() {
                     onClick={() => handleStatusChange(selected.id, 'confirmed')}
                     aria-label="Confirm correlation"
                     className="text-[9px] font-semibold rounded-lg px-3 py-1.5 hover:brightness-125 transition"
-                    style={{ background: GREEN + '20', color: GREEN }}
+                    style={{ background: `${GREEN}20`, color: GREEN }}
                   >
                     Confirm
                   </button>
@@ -484,7 +474,7 @@ export default function CrossDomainCorrelationPage() {
                     onClick={() => handleStatusChange(selected.id, 'confirmed')}
                     aria-label="Confirm correlation"
                     className="text-[9px] font-semibold rounded-lg px-3 py-1.5 hover:brightness-125 transition"
-                    style={{ background: GREEN + '20', color: GREEN }}
+                    style={{ background: `${GREEN}20`, color: GREEN }}
                   >
                     Confirm
                   </button>

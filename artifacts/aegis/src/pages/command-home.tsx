@@ -1,43 +1,23 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { LiveClock } from '@szl-holdings/shared-ui/live-clock';
-import type { ActivationStep } from '@szl-holdings/shared-ui/onboarding';
-import {
-  ActivationBanner,
-  HelpTip,
-  useActivationState,
-  useOnboardingAnalytics,
-} from '@szl-holdings/shared-ui/onboarding';
+import { type ActivationStep, ActivationBanner, HelpTip, useActivationState, useOnboardingAnalytics } from '@szl-holdings/shared-ui/onboarding';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
   AlertOctagon,
-  AlertTriangle,
-  ArrowRight,
   BarChart3,
-  Bell,
-  CheckCircle2,
   ChevronRight,
-  Circle,
   ClipboardCheck,
-  Clock,
-  Eye,
-  FileText,
   Hexagon,
   Lock,
   Minus,
   Radio,
-  RefreshCw,
-  Server,
   Shield,
   ShieldCheck,
   TrendingDown,
   TrendingUp,
   UserCheck,
-  Users,
-  XCircle,
-  Zap,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, } from 'react';
 import { Link, useLocation } from 'wouter';
 import { api } from '@/lib/api';
 

@@ -11,7 +11,6 @@ import {
   Loader2,
   RefreshCw,
   Shield,
-  Target,
   XCircle,
   Zap,
 } from 'lucide-react';
@@ -149,24 +148,24 @@ function apiApprovalToRec(a: ApiApproval): ScenarioRecommendation {
   return {
     id: `apr-${a.id}`,
     numericId: a.id,
-    scenarioId: (payload['scenarioId'] as string) ?? a.correlationId ?? `SIM-${a.id}`,
+    scenarioId: (payload.scenarioId as string) ?? a.correlationId ?? `SIM-${a.id}`,
     scenarioName:
-      (payload['scenarioName'] as string) ?? (meta['scenarioName'] as string) ?? a.resourceType,
-    branch: (payload['branch'] as string) ?? (meta['branch'] as string) ?? 'Primary Response Path',
-    domain: (payload['domain'] as string) ?? a.serviceAttribution ?? 'aegis',
+      (payload.scenarioName as string) ?? (meta.scenarioName as string) ?? a.resourceType,
+    branch: (payload.branch as string) ?? (meta.branch as string) ?? 'Primary Response Path',
+    domain: (payload.domain as string) ?? a.serviceAttribution ?? 'aegis',
     recommendation: a.title,
     rationale: a.description ?? 'ATLAS Scenario Forge recommendation awaiting operator review.',
     riskLevel: PRIORITY_RISK[a.priority] ?? 'medium',
-    blastRadius: (payload['blastRadius'] as number) ?? (meta['blastRadius'] as number) ?? 0,
-    costImpact: (payload['costImpact'] as string) ?? (meta['costImpact'] as string) ?? 'TBD',
-    mttr: (payload['mttr'] as string) ?? (meta['mttr'] as string) ?? 'TBD',
-    actions: (payload['actions'] as string[]) ?? (meta['actions'] as string[]) ?? [a.title],
+    blastRadius: (payload.blastRadius as number) ?? (meta.blastRadius as number) ?? 0,
+    costImpact: (payload.costImpact as string) ?? (meta.costImpact as string) ?? 'TBD',
+    mttr: (payload.mttr as string) ?? (meta.mttr as string) ?? 'TBD',
+    actions: (payload.actions as string[]) ?? (meta.actions as string[]) ?? [a.title],
     requestedBy: a.serviceAttribution ?? 'ATLAS Spatial Runtime',
     requestedAt: timeAgo(a.createdAt),
     approvalStatus: a.status,
     requiredApprover: a.requiredApproverRole ?? 'CISO / SOC Lead',
-    evidenceLinks: (payload['evidenceLinks'] as string[]) ??
-      (meta['evidenceLinks'] as string[]) ?? [`${a.resourceType}/${a.resourceId}`],
+    evidenceLinks: (payload.evidenceLinks as string[]) ??
+      (meta.evidenceLinks as string[]) ?? [`${a.resourceType}/${a.resourceId}`],
   };
 }
 
@@ -296,7 +295,7 @@ function ApprovalCard({
   isUpdating: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const s = STATUS_CONFIG[rec.approvalStatus] ?? STATUS_CONFIG['pending'];
+  const s = STATUS_CONFIG[rec.approvalStatus] ?? STATUS_CONFIG.pending;
   const r = RISK_CONFIG[rec.riskLevel];
 
   return (

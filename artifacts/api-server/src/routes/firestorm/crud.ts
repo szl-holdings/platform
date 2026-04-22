@@ -1,50 +1,25 @@
-import { type DecisionObjectType, validateAndBuildDecision } from '@szl-holdings/ai-engine';
+
 import {
-  ingestFirestormAlert,
   ingestFirestormFinding,
   ingestFirestormScenario,
 } from '@szl-holdings/ai-engine/domain-embedding-hooks';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  alloyRuntimeAgentsTable,
-  alloyRuntimeAgentVersionsTable,
-  auditEventsTable,
   db,
-  firestormAlertsTable,
-  firestormAnalystNotebookTable,
   firestormAssessmentsTable,
-  firestormAssetsTable,
-  firestormCaseMemoryTable,
-  firestormCasesTable,
-  firestormComplianceControlsTable,
   firestormFindingsTable,
-  firestormHardeningControlsTable,
-  firestormIncidentsTable,
-  firestormMitreDetectionsTable,
   firestormRiskScoresTable,
   firestormScenariosTable,
   firestormSimulationRunsTable,
-  firestormTradecraftDecisionsTable,
-  firestormTradecraftValidationAuditTable,
   firestormWorkflowActionsTable,
-  type InsertFirestormCaseMemory,
-  insertFirestormAlertSchema,
-  insertFirestormAnalystNotebookSchema,
   insertFirestormAssessmentSchema,
-  insertFirestormAssetSchema,
-  insertFirestormCaseSchema,
   insertFirestormFindingSchema,
-  insertFirestormIncidentSchema,
   insertFirestormRiskScoreSchema,
   insertFirestormScenarioSchema,
   insertFirestormSimulationRunSchema,
-  insertFirestormTradecraftDecisionSchema,
-  insertFirestormWorkflowActionSchema,
 } from '@szl-holdings/db';
-import { and, desc, eq, inArray, or, sql } from 'drizzle-orm';
-import { type IRouter, type RequestHandler, Router } from 'express';
-import rateLimit from 'express-rate-limit';
-import { LRUCache } from 'lru-cache';
+import { desc, eq, } from 'drizzle-orm';
+import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
@@ -54,16 +29,9 @@ import {
   sendNotFound,
   sendSuccess,
 } from '../../lib/api-response';
-import { logger } from '../../lib/logger';
-import { broadcastWs, FIRESTORM_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
-import {
-  ingestDecisionToEvidenceIndex,
-  queryEvidenceIndex,
-} from '../../lib/tradecraft-evidence-store';
+import { broadcastWs, } from '../../lib/pubsub-bridge.js';
 import { listQuerySchema, validateBody, validateQuery } from '../../lib/validation';
 import { authMiddleware, parseIdParam } from '../../middlewares/auth';
-import { validateIfMatch } from '../../middlewares/optimistic-concurrency';
-import { REFERENCE_COMPLIANCE_CONTROLS } from '../readiness.js';
 import { firestormCrudLimit, getFirestormTenantId } from './shared';
 
 const router = Router();

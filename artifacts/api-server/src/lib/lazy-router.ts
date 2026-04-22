@@ -116,7 +116,7 @@ export function lazyRegister(
 function pathMatchesPrefix(reqPath: string, prefix: string): boolean {
   if (prefix === '/' || prefix === '') return true;
   if (reqPath === prefix) return true;
-  return reqPath.startsWith(prefix + '/');
+  return reqPath.startsWith(`${prefix}/`);
 }
 
 /**

@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   type ReactNode,
   useCallback,
@@ -89,8 +89,7 @@ export function NotificationProvider({
         const json = await res.json();
         setNotifications(json.data ?? json ?? []);
       }
-    } catch (err) {
-      console.warn('[NotificationProvider] Failed to fetch:', err);
+    } catch (_err) {
     } finally {
       setIsLoading(false);
     }
@@ -107,8 +106,7 @@ export function NotificationProvider({
             ),
           );
         }
-      } catch (err) {
-        console.warn('[NotificationProvider] Failed to mark read:', err);
+      } catch (_err) {
       }
     },
     [makeRequest],
@@ -122,8 +120,7 @@ export function NotificationProvider({
           prev.map((n) => ({ ...n, isRead: true, readAt: new Date().toISOString() })),
         );
       }
-    } catch (err) {
-      console.warn('[NotificationProvider] Failed to mark all read:', err);
+    } catch (_err) {
     }
   }, [makeRequest]);
 
@@ -134,8 +131,7 @@ export function NotificationProvider({
         if (res.ok) {
           setNotifications((prev) => prev.filter((n) => n.id !== id));
         }
-      } catch (err) {
-        console.warn('[NotificationProvider] Failed to delete:', err);
+      } catch (_err) {
       }
     },
     [makeRequest],

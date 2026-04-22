@@ -1,12 +1,6 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  AlertTriangle,
-  BarChart3,
-  Brain,
   GitBranch,
-  Target,
-  TrendingDown,
-  TrendingUp,
 } from 'lucide-react';
 
 const correlationMatrix = [

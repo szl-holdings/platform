@@ -9,8 +9,7 @@
     "types": ["node"]
   },
   "references": [
-    { "path": "../../lib/db" },
-    { "path": "../../packages/constellation" }
+    { "path": "../../lib/db" }
   ],
   "include": ["src/**/*"]
 }

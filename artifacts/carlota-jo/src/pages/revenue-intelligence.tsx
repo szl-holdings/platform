@@ -5,22 +5,17 @@ import {
   ArrowUp,
   BarChart3,
   Calendar,
-  CheckCircle,
   ChevronRight,
   Clock,
-  DollarSign,
   Filter,
   Loader2,
   Sparkles,
   Target,
   TrendingUp,
   Users,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
-  Bar,
-  BarChart,
   Cell,
   Line,
   LineChart,

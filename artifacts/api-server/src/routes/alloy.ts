@@ -15,17 +15,15 @@ import {
   alloySkills,
   alloySkillRuns,
 } from "@szl-holdings/db";
-import { eq, desc, and, sql, inArray, gte, lte } from "drizzle-orm";
+import { eq, desc, and, sql, inArray, } from "drizzle-orm";
 import { authMiddleware, requireRole, parseIdParam, type AuthenticatedUser } from "../middlewares/auth";
 import { withDbSpan } from "../middlewares/telemetry";
-import { isFlagEnabled } from "../lib/platform-flags";
-import { platformAuth, logPlatformEvent } from "../middlewares/platform-auth";
+import { platformAuth, } from "../middlewares/platform-auth";
 import {
   sendSuccess,
   sendCreated,
   sendNotFound,
   sendBadRequest,
-  sendError,
   sendNoContent,
   sendForbidden,
   handleRouteError,
@@ -842,7 +840,7 @@ router.get("/alloy/runs", authMiddleware(), requireRole("super_admin", "admin", 
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const stateFilter = typeof req.query.state === "string" ? req.query.state : null;
-    const workflowIdFilter = typeof req.query.workflowId === "string" ? parseInt(req.query.workflowId) : null;
+    const workflowIdFilter = typeof req.query.workflowId === "string" ? parseInt(req.query.workflowId, 10) : null;
     const validStates = ["queued", "running", "waiting_approval", "completed", "failed", "canceled"];
 
     const userOrgIds = getUserOrgIds(req.user);
@@ -1413,7 +1411,7 @@ router.post("/alloy/recommend", authMiddleware(), validateBody(recommendBodySche
       suggestedAction: req.body.suggestedAction,
       validForMs: req.body.validForMs,
       tenantOrgId,
-      metadata: { ...(req.body.metadata ?? {}), tenantOrgId },
+      metadata: { ...req.body.metadata, tenantOrgId },
     });
 
     // When autonomy gating returned "queue" or "draft", persist a pending row

@@ -13,8 +13,8 @@
  * If no input file is found, prints manual fallback instructions.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 const INPUT_FILE =
   process.argv[2] || path.join(process.cwd(), 'exports', 'github-stars', 'starred-repos.json');
@@ -258,47 +258,22 @@ function generateCategoryReport(category: string, repos: StarredRepo[]): string 
 }
 
 function printManualFallback() {
-  console.log('\n================================================================');
-  console.log('  MANUAL FALLBACK — Input File Not Found');
-  console.log('================================================================\n');
-  console.log('The category report generator needs a starred repos JSON export.\n');
-  console.log('To generate the input file:\n');
-  console.log('  1. Run the export script first:');
-  console.log('     npx tsx scripts/github/stars/export-starred-repos.ts\n');
-  console.log('  2. Then run this report generator:');
-  console.log('     npx tsx scripts/github/stars/generate-category-report.ts\n');
-  console.log(
-    '  Or provide a custom JSON path:\n' +
-      '     npx tsx scripts/github/stars/generate-category-report.ts /path/to/repos.json\n',
-  );
-  console.log('The JSON file should be an array of GitHub repo objects.');
-  console.log('Use the GitHub API format: https://api.github.com/users/{username}/starred\n');
-  console.log('================================================================\n');
 }
 
 function main() {
-  console.log('================================================================');
-  console.log('  SZL Holdings — Stars Category Report Generator');
-  console.log('================================================================\n');
 
   if (!fs.existsSync(INPUT_FILE)) {
-    console.error(`Input file not found: ${INPUT_FILE}`);
     printManualFallback();
     process.exit(1);
   }
-
-  console.log(`Reading: ${INPUT_FILE}`);
   const raw = fs.readFileSync(INPUT_FILE, 'utf-8');
   let repos: StarredRepo[];
 
   try {
     repos = JSON.parse(raw);
   } catch {
-    console.error('Failed to parse JSON. Ensure the file is valid.');
     process.exit(1);
   }
-
-  console.log(`Loaded ${repos.length} repos.\n`);
 
   // Classify
   const classified: Record<string, StarredRepo[]> = {};
@@ -321,7 +296,6 @@ function main() {
     const report = generateCategoryReport(category, categoryRepos);
     const outPath = path.join(OUTPUT_DIR, `${slug}.md`);
     fs.writeFileSync(outPath, report);
-    console.log(`  ${category}: ${categoryRepos.length} repos → ${outPath}`);
     summary.push(`| ${category} | ${categoryRepos.length} |`);
   }
 
@@ -337,9 +311,6 @@ function main() {
       .map(([cat, r]) => generateCategoryReport(cat, r))
       .join('\n---\n\n');
   fs.writeFileSync(combinedPath, allMd);
-
-  console.log(`\nCombined report: ${combinedPath}`);
-  console.log('\nDone.');
 }
 
 main();

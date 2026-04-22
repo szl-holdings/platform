@@ -3,7 +3,6 @@ import {
   index,
   integer,
   jsonb,
-  numeric,
   pgTable,
   serial,
   text,

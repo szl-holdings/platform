@@ -60,8 +60,7 @@ vi.mock('@szl-holdings/covenant-policy', () => ({
   listPendingApprovals: vi.fn(),
 }));
 
-import type { PlanGraph } from '@workspace/planner';
-import { defaultPlanStore } from '@workspace/planner';
+import { type PlanGraph, defaultPlanStore } from '@workspace/planner';
 import approvalsRouter from '../approvals';
 
 function buildApp() {
@@ -142,7 +141,7 @@ describe('approval review → plan step flip tenant guard', () => {
       .expect(200);
 
     const updated = await defaultPlanStore.get('plan-same-org');
-    const step = updated!.steps.find((s) => s.stepId === 's1')!;
+    const step = updated?.steps.find((s) => s.stepId === 's1')!;
     expect(step.status).toBe('ready');
   });
 
@@ -162,7 +161,7 @@ describe('approval review → plan step flip tenant guard', () => {
       .expect(200);
 
     const untouched = await defaultPlanStore.get('plan-other-org');
-    const step = untouched!.steps.find((s) => s.stepId === 's1')!;
+    const step = untouched?.steps.find((s) => s.stepId === 's1')!;
     // Step must remain blocked — cross-tenant flip blocked by guard.
     expect(step.status).toBe('blocked');
   });

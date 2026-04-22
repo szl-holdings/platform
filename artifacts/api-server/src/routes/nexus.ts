@@ -1,26 +1,6 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import type {
-  NexusIngestJobRow,
-  NexusIngestStatus,
-  NexusMemoryRow,
-  NexusMemoryTier,
-  NexusMemoryType,
-  NexusOrchestrationPlanRow,
-  NexusOrchestrationStatus,
-  NexusProtocolToolRow,
-  NexusSkillPrimitiveType,
-  NexusSkillRow,
-  NexusToolProtocol,
-} from '@szl-holdings/db';
-import {
-  db,
-  nexusIngestJobsTable,
-  nexusMemoryTable,
-  nexusOrchestrationPlansTable,
-  nexusProtocolToolsTable,
-  nexusSkillsTable,
-} from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { type NexusIngestJobRow, type NexusIngestStatus, type NexusMemoryRow, type NexusMemoryTier, type NexusMemoryType, type NexusOrchestrationPlanRow, type NexusOrchestrationStatus, type NexusProtocolToolRow, type NexusSkillPrimitiveType, type NexusSkillRow, type NexusToolProtocol, db, nexusIngestJobsTable, nexusMemoryTable, nexusOrchestrationPlansTable, nexusProtocolToolsTable, nexusSkillsTable } from '@szl-holdings/db';
+import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
@@ -522,7 +502,7 @@ function seedData(persist = false) {
     },
   ];
 
-  for (const pf of PATTERNS) {
+  for (const _pf of PATTERNS) {
     // Using toolStore as a side-channel isn't right; let's use a separate map
   }
 
@@ -885,8 +865,8 @@ const LOCAL_EMBEDDING_DIM = 256;
 async function fetchOpenAIEmbedding(
   text: string,
 ): Promise<{ vector: number[]; model: string } | null> {
-  const baseUrl = process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'];
-  const apiKey = process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
+  const baseUrl = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+  const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
   if (!baseUrl || !apiKey) return null;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 15_000);
@@ -1035,7 +1015,7 @@ async function persistMemoryEmbeddingToDB(
         generatedAt: new Date().toISOString(),
       },
     };
-    const currentTags = Array.isArray(existing[0]?.tags) ? (existing[0]!.tags as string[]) : [];
+    const currentTags = Array.isArray(existing[0]?.tags) ? (existing[0]?.tags as string[]) : [];
     await db
       .update(nexusMemoryTable)
       .set({ metadata: nextMeta, tags: currentTags, updatedAt: new Date() })
@@ -1517,7 +1497,7 @@ async function callLLM(
   }
 }
 
-function generateDemoResponse(prompt: string, system: string): string {
+function generateDemoResponse(_prompt: string, system: string): string {
   if (system.includes('Gatherer') || system.includes('evidence')) {
     return `Found 8 relevant sources on this topic. Key domains identified: academic research, industry reports, regulatory filings, and news coverage. Primary evidence clusters around three main themes with strong corroboration across multiple independent sources. Sources span the past 18 months with publication bias toward Q3-Q4 2024.`;
   }
@@ -1591,14 +1571,14 @@ async function runResearchSwarm(runId: string, query: string) {
   emitToClients(runId, 'update', run);
 
   function updateLane(id: string, patch: Partial<AgentLane>) {
-    const lane = run!.lanes.find((l) => l.id === id);
+    const lane = run?.lanes.find((l) => l.id === id);
     if (!lane) return;
     Object.assign(lane, patch);
     emitToClients(runId, 'update', run);
   }
 
   function addLog(laneId: string, msg: string) {
-    const lane = run!.lanes.find((l) => l.id === laneId);
+    const lane = run?.lanes.find((l) => l.id === laneId);
     if (!lane) return;
     lane.log.push(msg);
     emitToClients(runId, 'update', run);
@@ -2561,7 +2541,7 @@ const APP_CAPABILITIES: Record<string, { name: string; endpoints: string[] }> = 
   },
 };
 
-const INTERNAL_API_BASE = `http://127.0.0.1:${process.env['PORT'] ?? '8080'}`;
+const INTERNAL_API_BASE = `http://127.0.0.1:${process.env.PORT ?? '8080'}`;
 
 async function fetchAppEndpoint(
   endpoint: string,

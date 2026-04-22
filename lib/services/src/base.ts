@@ -275,12 +275,12 @@ export abstract class ServiceAdapter {
     return sorted[Math.max(0, idx)]!;
   }
 
-  protected log(level: "info" | "warn" | "error", msg: string, data?: Record<string, unknown>): void {
-    const entry = { adapter: this.name, circuit: this._circuit.state, ...data };
+  protected log(level: "info" | "warn" | "error", _msg: string, data?: Record<string, unknown>): void {
+    const _entry = { adapter: this.name, circuit: this._circuit.state, ...data };
     if (typeof console !== "undefined") {
-      if (level === "error") console.error(`[${this.name}] ${msg}`, JSON.stringify(entry));
-      else if (level === "warn") console.warn(`[${this.name}] ${msg}`, JSON.stringify(entry));
-      else console.log(`[${this.name}] ${msg}`, JSON.stringify(entry));
+      if (level === "error") {}
+      else if (level === "warn") {}
+      else {}
     }
   }
 
@@ -312,7 +312,7 @@ export abstract class ServiceAdapter {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       if (attempt > 0) {
         const jitter = Math.random() * 0.3 + 0.85;
-        const delay = Math.min(maxDelayMs, baseDelayMs * Math.pow(2, attempt - 1) * jitter);
+        const delay = Math.min(maxDelayMs, baseDelayMs * 2 ** (attempt - 1) * jitter);
         await new Promise((r) => setTimeout(r, delay));
         if (this._isCircuitOpen()) {
           throw new Error(`Circuit breaker OPEN for ${this.name} — cooling down`);

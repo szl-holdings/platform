@@ -1,7 +1,6 @@
 import { getRuntimeMode, isSeedDataAllowed } from '@szl-holdings/config';
 import {
   db,
-  featureFlagsTable,
   terraAgentsTable,
   terraBrokeragesTable,
   terraInquiriesTable,
@@ -19,7 +18,6 @@ export async function seedTerraDemo() {
         `Seed data is only permitted in local-dev, internal-preview, and demo modes.`,
     );
   }
-  console.log('[terra-seed] Starting Terra demo data seed...');
 
   // Task #2638 added a unique index on terra_properties (address, city, state)
   // so the property insert below is now genuinely idempotent via
@@ -49,15 +47,9 @@ export async function seedTerraDemo() {
     inquiryCount > 0 &&
     txCount > 0
   ) {
-    console.log(
-      `[terra-seed] All Terra tables already populated (brokerages=${brokerageCount}, agents=${agentCountExisting}, properties=${propCount}, listings=${listingCountExisting}, inquiries=${inquiryCount}, transactions=${txCount}), skipping.`,
-    );
     return;
   }
   if (propCount > 0 || agentCountExisting > 0 || brokerageCount > 0) {
-    console.warn(
-      `[terra-seed] Partial Terra seed state detected (brokerages=${brokerageCount}, agents=${agentCountExisting}, properties=${propCount}, listings=${listingCountExisting}, inquiries=${inquiryCount}, transactions=${txCount}). Aborting to surface partial-state for diagnosis; terra_properties is now protected by a unique key on (address, city, state) so reseeding the property rows is safe, but other terra_* tables (listings/inquiries/transactions) still rely on row counts to gate duplicates -- please clear terra_* tables to re-seed.`,
-    );
     return;
   }
 
@@ -70,7 +62,6 @@ export async function seedTerraDemo() {
       is_enabled = EXCLUDED.is_enabled,
       updated_at = NOW()
   `);
-  console.log('[terra-seed] Feature flags upserted.');
 
   const [insertedBrokerage] = await db
     .insert(terraBrokeragesTable)
@@ -100,7 +91,6 @@ export async function seedTerraDemo() {
       .where(eq(terraBrokeragesTable.slug, 'terra-commercial'))
       .limit(1);
     if (!existing) {
-      console.log('[terra-seed] Brokerage conflict but not found — skipping remaining seed.');
       return;
     }
     brokerageId = existing.id;
@@ -182,7 +172,6 @@ export async function seedTerraDemo() {
   agents.forEach((a) => {
     agentMap[a.email] = a.id;
   });
-  console.log('[terra-seed] Agents seeded:', agents.length);
 
   const propertyValues = [
     {
@@ -1110,17 +1099,16 @@ export async function seedTerraDemo() {
     .values(propertyValues)
     .onConflictDoNothing()
     .returning();
-  console.log('[terra-seed] Properties seeded:', properties.length);
 
   if (properties.length > 0 && agents.length > 0) {
-    const getRivera = () => agentMap['k.rivera@terra-commercial.com'] ?? agents[0]!.id;
-    const getChen = () => agentMap['m.chen@terra-commercial.com'] ?? agents[1]!.id;
-    const getTorres = () => agentMap['a.torres@terra-commercial.com'] ?? agents[2]!.id;
-    const getWilliams = () => agentMap['j.williams@terra-commercial.com'] ?? agents[3]!.id;
+    const getRivera = () => agentMap['k.rivera@terra-commercial.com'] ?? agents[0]?.id;
+    const getChen = () => agentMap['m.chen@terra-commercial.com'] ?? agents[1]?.id;
+    const getTorres = () => agentMap['a.torres@terra-commercial.com'] ?? agents[2]?.id;
+    const getWilliams = () => agentMap['j.williams@terra-commercial.com'] ?? agents[3]?.id;
 
     const listingValues = [
       {
-        propertyId: properties[0]!.id,
+        propertyId: properties[0]?.id,
         agentId: getRivera(),
         brokerageId,
         status: 'active' as const,
@@ -1138,7 +1126,7 @@ export async function seedTerraDemo() {
         isDemo: true,
       },
       {
-        propertyId: properties[1]!.id,
+        propertyId: properties[1]?.id,
         agentId: getChen(),
         brokerageId,
         status: 'active' as const,
@@ -1156,7 +1144,7 @@ export async function seedTerraDemo() {
         isDemo: true,
       },
       {
-        propertyId: properties[2]!.id,
+        propertyId: properties[2]?.id,
         agentId: getTorres(),
         brokerageId,
         status: 'active' as const,
@@ -1174,7 +1162,7 @@ export async function seedTerraDemo() {
         isDemo: true,
       },
       {
-        propertyId: properties[3]!.id,
+        propertyId: properties[3]?.id,
         agentId: getWilliams(),
         brokerageId,
         status: 'active' as const,
@@ -1192,7 +1180,7 @@ export async function seedTerraDemo() {
         isDemo: true,
       },
       {
-        propertyId: properties[4]!.id,
+        propertyId: properties[4]?.id,
         agentId: getRivera(),
         brokerageId,
         status: 'under_contract' as const,
@@ -1210,7 +1198,7 @@ export async function seedTerraDemo() {
         isDemo: true,
       },
       {
-        propertyId: properties[5]!.id,
+        propertyId: properties[5]?.id,
         agentId: getChen(),
         brokerageId,
         status: 'active' as const,
@@ -1234,12 +1222,11 @@ export async function seedTerraDemo() {
       .values(listingValues)
       .onConflictDoNothing()
       .returning();
-    console.log('[terra-seed] Listings seeded:', listings.length);
 
     if (listings.length > 0) {
       const inquiryValues = [
         {
-          listingId: listings[2]!.id,
+          listingId: listings[2]?.id,
           assignedAgentId: getTorres(),
           buyerName: 'Apex Partners LP',
           buyerEmail: 'contact@apexpartners.com',
@@ -1253,7 +1240,7 @@ export async function seedTerraDemo() {
           isDemo: true,
         },
         {
-          listingId: listings[0]!.id,
+          listingId: listings[0]?.id,
           assignedAgentId: getRivera(),
           buyerName: 'Midtown Capital Fund III',
           buyerEmail: 'acquisitions@midtowncapital.com',
@@ -1267,7 +1254,7 @@ export async function seedTerraDemo() {
           isDemo: true,
         },
         {
-          listingId: listings[5]!.id,
+          listingId: listings[5]?.id,
           assignedAgentId: getChen(),
           buyerName: 'Cerberus RE Opportunities',
           buyerEmail: 're@cerberus.com',
@@ -1281,7 +1268,7 @@ export async function seedTerraDemo() {
           isDemo: true,
         },
         {
-          listingId: listings[1]!.id,
+          listingId: listings[1]?.id,
           assignedAgentId: null,
           buyerName: 'Red Hook Development LLC',
           buyerEmail: 'info@redhookdev.com',
@@ -1295,7 +1282,7 @@ export async function seedTerraDemo() {
           isDemo: true,
         },
         {
-          listingId: listings[3]!.id,
+          listingId: listings[3]?.id,
           assignedAgentId: getWilliams(),
           buyerName: 'Atlantic Strip Partners',
           buyerEmail: 'ops@atlanticstrip.com',
@@ -1309,14 +1296,13 @@ export async function seedTerraDemo() {
           isDemo: true,
         },
       ];
-      const inquiries = await db
+      const _inquiries = await db
         .insert(terraInquiriesTable)
         .values(inquiryValues)
         .onConflictDoNothing()
         .returning();
-      console.log('[terra-seed] Inquiries seeded:', inquiries.length);
 
-      const txPropertyIds = [properties[2]!.id, properties[1]!.id, properties[4]!.id];
+      const txPropertyIds = [properties[2]?.id, properties[1]?.id, properties[4]?.id];
       const txValues = [
         {
           propertyId: txPropertyIds[0],
@@ -1370,14 +1356,11 @@ export async function seedTerraDemo() {
           isDemo: true,
         },
       ];
-      const transactions = await db
+      const _transactions = await db
         .insert(terraTransactionsTable)
         .values(txValues)
         .onConflictDoNothing()
         .returning();
-      console.log('[terra-seed] Transactions seeded:', transactions.length);
     }
   }
-
-  console.log('[terra-seed] Terra demo data seed complete.');
 }

@@ -9,8 +9,6 @@ import {
   Activity,
   AlertTriangle,
   Anchor,
-  BarChart3,
-  Bookmark,
   BookmarkCheck,
   CalendarRange,
   CheckCircle2,
@@ -18,12 +16,10 @@ import {
   ChevronRight,
   Circle,
   Clock,
-  CloudLightning,
   DollarSign,
   EyeOff,
   FileSignature,
   Flame,
-  Fuel,
   GitBranch,
   Grid2X2,
   Layers,
@@ -37,9 +33,8 @@ import {
   TrendingUp,
   Users,
   Wrench,
-  XCircle,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import { useAuth } from '@/contexts/auth-context';
 import {

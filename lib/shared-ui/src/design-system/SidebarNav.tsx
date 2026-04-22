@@ -51,7 +51,7 @@ export function SidebarNav({
   };
 
   const isActive = (item: SidebarNavItem) =>
-    item.href ? currentPath === item.href || currentPath.startsWith(item.href + '/') : false;
+    item.href ? currentPath === item.href || currentPath.startsWith(`${item.href}/`) : false;
 
   const renderItem = (item: SidebarNavItem, depth = 0) => {
     const active = isActive(item);
@@ -156,7 +156,7 @@ export function SidebarNav({
 
         {hasChildren && isExpanded && !collapsed && (
           <ul className="mt-0.5 space-y-0.5">
-            {item.children!.map((child) => renderItem(child, depth + 1))}
+            {item.children?.map((child) => renderItem(child, depth + 1))}
           </ul>
         )}
       </li>

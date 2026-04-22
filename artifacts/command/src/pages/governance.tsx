@@ -2,8 +2,6 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
   AlertTriangle,
   CheckCircle2,
-  ChevronDown,
-  ChevronRight,
   Clock,
   FileText,
   Plus,

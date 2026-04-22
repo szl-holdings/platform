@@ -530,7 +530,7 @@ router.post(
       await db.insert(fundLpActivityEventsTable).values({
         lpId: lp.id,
         action: 'messaged_gp',
-        target: text.length > 60 ? text.slice(0, 57) + '...' : text,
+        target: text.length > 60 ? `${text.slice(0, 57)}...` : text,
         isDemo,
       });
 

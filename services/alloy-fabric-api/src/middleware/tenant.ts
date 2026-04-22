@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 
 export function tenantScopingMiddleware(req: Request, res: Response, next: NextFunction): void {
   const tenantHeader = req.headers['x-tenant-id'];
-  const bodyTenantId = (req.body as Record<string, unknown> | undefined)?.['tenantId'];
+  const bodyTenantId = (req.body as Record<string, unknown> | undefined)?.tenantId;
 
   const headerTenant =
     typeof tenantHeader === 'string' && tenantHeader.length > 0 ? tenantHeader : null;
@@ -26,12 +26,12 @@ export function tenantScopingMiddleware(req: Request, res: Response, next: NextF
     return;
   }
 
-  res.locals['tenantId'] = headerTenant ?? bodyTenant!;
+  res.locals.tenantId = headerTenant ?? bodyTenant!;
   next();
 }
 
 export function getTenantId(res: Response): string {
-  const id = res.locals['tenantId'] as string | undefined;
+  const id = res.locals.tenantId as string | undefined;
   if (!id) throw new Error('tenantId not set by tenantScopingMiddleware');
   return id;
 }

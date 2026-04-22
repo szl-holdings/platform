@@ -131,13 +131,13 @@ const DOMAIN_PATTERN =
 function parseAmount(text: string): number | null {
   const dollarMatch = text.match(AMOUNT_PATTERN);
   if (dollarMatch) {
-    const num = parseFloat(dollarMatch[1]!.replace(/,/g, ''));
+    const num = parseFloat(dollarMatch[1]?.replace(/,/g, ''));
     if (text.toLowerCase().includes('k') && !text.includes('$')) return num * 1000;
     return num;
   }
   const wordMatch = text.match(AMOUNT_WORD_PATTERN);
   if (wordMatch) {
-    const num = parseFloat(wordMatch[1]!.replace(/,/g, ''));
+    const num = parseFloat(wordMatch[1]?.replace(/,/g, ''));
     const suffix = (wordMatch[2] ?? '').toLowerCase();
     if (suffix === 'thousand' || suffix === 'k') return num * 1000;
     if (suffix === 'million' || suffix === 'm') return num * 1_000_000;
@@ -149,9 +149,9 @@ function parseAmount(text: string): number | null {
 function parseApproverCount(text: string): number | null {
   const match = text.match(APPROVER_COUNT_PATTERN);
   if (!match) return null;
-  const word = match[1]!.toLowerCase();
+  const word = match[1]?.toLowerCase();
   const map: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5 };
-  return map[word] ?? parseInt(word);
+  return map[word] ?? parseInt(word, 10);
 }
 
 function extractRoles(text: string): string[] {
@@ -169,7 +169,7 @@ function extractDomains(text: string): string[] {
   return [...new Set(matches.map((d) => d.toLowerCase().replace(/s$/, '')))];
 }
 
-function parseWordCount(word: string): number | null {
+function _parseWordCount(word: string): number | null {
   const map: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5 };
   return map[word.toLowerCase()] ?? null;
 }
@@ -237,7 +237,7 @@ function sentenceToRule(sentence: string, index: number): CompiledRuleIR {
     const toMatch = sentence.match(
       /(?:escalat[e]?\s+to|route\s+to|notify)\s+([a-z\s]+?)(?:\s+and|\.|,|$)/i,
     );
-    escalateTo = toMatch ? toMatch[1]!.trim() : (roles[0] ?? 'compliance_officer');
+    escalateTo = toMatch ? toMatch[1]?.trim() : (roles[0] ?? 'compliance_officer');
     priority += 10;
   } else if (isRequireApproval || approverCount !== null) {
     effect = 'require_approval';
@@ -293,7 +293,7 @@ function sentenceToRule(sentence: string, index: number): CompiledRuleIR {
 
 function buildReason(
   sentence: string,
-  effect: PolicyEffect,
+  _effect: PolicyEffect,
   amount: number | null,
   roles: string[],
   approverCount: number | null,
@@ -310,8 +310,8 @@ function inferPolicyName(text: string): string {
   const actions = extractActions(text);
   const domains = extractDomains(text);
   const parts: string[] = [];
-  if (domains.length > 0) parts.push(domains[0]!.charAt(0).toUpperCase() + domains[0]!.slice(1));
-  if (actions.length > 0) parts.push(actions[0]!.charAt(0).toUpperCase() + actions[0]!.slice(1));
+  if (domains.length > 0) parts.push(domains[0]?.charAt(0).toUpperCase() + domains[0]?.slice(1));
+  if (actions.length > 0) parts.push(actions[0]?.charAt(0).toUpperCase() + actions[0]?.slice(1));
   parts.push('Policy');
   return parts.join(' ');
 }
@@ -470,7 +470,7 @@ function buildCompilerResult(
 
   const now = Date.now();
   const id = options.policyId ?? `pol_compiled_${now}`;
-  const version = options.existingVersion != null ? options.existingVersion + 1 : 1;
+  const _version = options.existingVersion != null ? options.existingVersion + 1 : 1;
 
   const policy: Policy = {
     id,
@@ -570,16 +570,16 @@ export function runTestCase(
   policy: Policy,
 ): TestCase & { passed: boolean; actualOutcome: TestCase['expectedOutcome']; reasoning: string } {
   const result = evaluatePolicies([policy], {
-    action: String(testCase.context['action'] ?? 'test_action'),
-    domain: String(testCase.context['domain'] ?? ''),
-    subject: { roles: (testCase.context['roles'] as string[]) ?? ['operator'] },
+    action: String(testCase.context.action ?? 'test_action'),
+    domain: String(testCase.context.domain ?? ''),
+    subject: { roles: (testCase.context.roles as string[]) ?? ['operator'] },
     resource: {
-      type: String(testCase.context['resourceType'] ?? 'test_resource'),
+      type: String(testCase.context.resourceType ?? 'test_resource'),
       attributes: testCase.context as Record<string, unknown>,
     },
     context: testCase.context,
-    estimatedCostUsd: testCase.context['estimatedCostUsd'] as number | undefined,
-    confidence: (testCase.context['confidence'] as number) ?? 0.9,
+    estimatedCostUsd: testCase.context.estimatedCostUsd as number | undefined,
+    confidence: (testCase.context.confidence as number) ?? 0.9,
   });
 
   let actualOutcome: TestCase['expectedOutcome'];
@@ -663,15 +663,15 @@ export function generatePreviewCases(policy: Policy): PolicyPreviewCase[] {
   return cases.map((c) => {
     const result = evaluatePolicies([policy], {
       action: c.actionType,
-      domain: c.context['domain'] as string,
-      subject: { roles: (c.context['roles'] as string[]) ?? ['operator'] },
+      domain: c.context.domain as string,
+      subject: { roles: (c.context.roles as string[]) ?? ['operator'] },
       resource: {
         type: c.actionType,
-        domain: c.context['domain'] as string,
+        domain: c.context.domain as string,
         attributes: c.context,
       },
       context: c.context,
-      estimatedCostUsd: c.context['estimatedCostUsd'] as number | undefined,
+      estimatedCostUsd: c.context.estimatedCostUsd as number | undefined,
       confidence: 0.9,
     });
 

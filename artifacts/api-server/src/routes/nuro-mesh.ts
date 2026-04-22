@@ -641,7 +641,7 @@ async function callAgent(
   const latencyMs = Date.now() - startTime;
 
   const confidenceMatch = response.match(/CONFIDENCE:\s*(\d+)/i);
-  const confidence = confidenceMatch ? Math.min(100, parseInt(confidenceMatch[1]!)) : 75;
+  const confidence = confidenceMatch ? Math.min(100, parseInt(confidenceMatch[1]!, 10)) : 75;
   const cleanResponse = response.replace(/CONFIDENCE:\s*\d+/gi, '').trim();
 
   try {
@@ -1009,7 +1009,7 @@ nueroMeshRouter.get('/nuro-mesh/agents', async (_req: Request, res: Response) =>
     });
 
     res.json({ agents, totalAgents: agents.length });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to fetch agents' });
   }
 });
@@ -1027,10 +1027,10 @@ nueroMeshRouter.get('/nuro-mesh/memory', async (req: Request, res: Response) => 
       .from(agentMemoryFacts)
       .where(and(...conditions))
       .orderBy(desc(agentMemoryFacts.importance), desc(agentMemoryFacts.createdAt))
-      .limit(Math.min(parseInt(limit), 100));
+      .limit(Math.min(parseInt(limit, 10), 100));
 
     res.json({ facts, total: facts.length });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to fetch memory facts' });
   }
 });
@@ -1068,7 +1068,7 @@ nueroMeshRouter.post('/nuro-mesh/memory', meshRateLimit, async (req: Request, re
       .returning();
 
     res.status(201).json(fact);
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to store memory fact' });
   }
 });
@@ -1083,10 +1083,10 @@ nueroMeshRouter.get('/nuro-mesh/tool-calls', async (req: Request, res: Response)
       .from(agentToolCalls)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(agentToolCalls.calledAt))
-      .limit(Math.min(parseInt(limit), 200));
+      .limit(Math.min(parseInt(limit, 10), 200));
 
     res.json({ toolCalls: calls, total: calls.length });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to fetch tool calls' });
   }
 });
@@ -1100,7 +1100,7 @@ nueroMeshRouter.get('/nuro-mesh/advisory', async (_req: Request, res: Response) 
       .limit(20);
 
     res.json({ findings, total: findings.length });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to fetch advisory findings' });
   }
 });
@@ -1150,7 +1150,7 @@ nueroMeshRouter.post(
         },
       };
 
-      const analysis = analysisPrompts[type] ?? analysisPrompts['security_posture']!;
+      const analysis = analysisPrompts[type] ?? analysisPrompts.security_posture!;
       const agent =
         AGENT_REGISTRY.find((a) => a.id === analysis.agent) ??
         AGENT_REGISTRY.find((a) => a.id === 'beacon')!;
@@ -1164,7 +1164,7 @@ nueroMeshRouter.post(
       const result = await callAgent(agent, analysis.prompt, context, { action: 'advisory_run' });
 
       const scoreMatch = result.response.match(/score[:\s]+(\d+)/i);
-      const score = scoreMatch ? parseInt(scoreMatch[1]!) : result.confidence;
+      const score = scoreMatch ? parseInt(scoreMatch[1]!, 10) : result.confidence;
 
       const [finding] = await db
         .insert(advisoryFindings)
@@ -1261,7 +1261,7 @@ nueroMeshRouter.get('/nuro-mesh/usage-stats', async (_req: Request, res: Respons
       agentMetrics,
       providerMetrics,
     });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to fetch usage stats' });
   }
 });
@@ -1489,7 +1489,7 @@ nueroMeshRouter.get('/nuro-mesh/telemetry', async (_req: Request, res: Response)
       crossDomainAffinities: Object.keys(CROSS_DOMAIN_AFFINITY).length,
       description: 'Meta-intelligence about agent performance — the observability of the AI itself',
     });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to fetch telemetry' });
   }
 });
@@ -1503,7 +1503,7 @@ nueroMeshRouter.get('/nuro-mesh/telemetry/history', async (req: Request, res: Re
       hasCausalChains,
       agentId,
     } = req.query as Record<string, string>;
-    const limitNum = Math.min(parseInt(limit) || 50, 200);
+    const limitNum = Math.min(parseInt(limit, 10) || 50, 200);
 
     const rows = await db
       .select()
@@ -1534,7 +1534,7 @@ nueroMeshRouter.get('/nuro-mesh/telemetry/history', async (req: Request, res: Re
     }
 
     res.json({ history: filtered, total: filtered.length });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to fetch telemetry history' });
   }
 });
@@ -1588,7 +1588,7 @@ nueroMeshRouter.get('/nuro-mesh/telemetry/summary', async (_req: Request, res: R
       avgAgentsPerRun: avgAgents,
       description: 'Aggregated orchestration telemetry across recent 100 runs',
     });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to fetch telemetry summary' });
   }
 });
@@ -1596,7 +1596,7 @@ nueroMeshRouter.get('/nuro-mesh/telemetry/summary', async (_req: Request, res: R
 nueroMeshRouter.get('/nuro-mesh/red-team/findings', async (req: Request, res: Response) => {
   try {
     const { limit = '20', orchestrationId } = req.query as Record<string, string>;
-    const limitNum = Math.min(parseInt(limit) || 20, 100);
+    const limitNum = Math.min(parseInt(limit, 10) || 20, 100);
 
     const findings = await db
       .select()
@@ -1609,7 +1609,7 @@ nueroMeshRouter.get('/nuro-mesh/red-team/findings', async (req: Request, res: Re
       : findings;
 
     res.json({ findings: filtered, total: filtered.length });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to fetch red team findings' });
   }
 });
@@ -1713,7 +1713,7 @@ Respond with JSON: { "logicalGaps": [...], "unstatedAssumptions": [...], "contra
     } catch {}
 
     res.json({ orchestrationId, findings, challengesRaised: findings.length, criticalIssues });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Red team analysis failed' });
   }
 });
@@ -1728,7 +1728,7 @@ nueroMeshRouter.get('/nuro-mesh/predictive-cache', async (req: Request, res: Res
       .from(predictivePrecomputeCacheTable)
       .where(gte(predictivePrecomputeCacheTable.expiresAt, now))
       .orderBy(desc(predictivePrecomputeCacheTable.createdAt))
-      .limit(Math.min(parseInt(limit) || 20, 100));
+      .limit(Math.min(parseInt(limit, 10) || 20, 100));
 
     res.json({
       cacheSize: entries.length,
@@ -1744,7 +1744,7 @@ nueroMeshRouter.get('/nuro-mesh/predictive-cache', async (req: Request, res: Res
         expiresAt: e.expiresAt,
       })),
     });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to fetch predictive cache' });
   }
 });
@@ -1757,7 +1757,7 @@ nueroMeshRouter.get('/nuro-mesh/prompt-evolution', async (req: Request, res: Res
       .select()
       .from(agentPromptEvolutionTable)
       .orderBy(desc(agentPromptEvolutionTable.createdAt))
-      .limit(Math.min(parseInt(limit) || 50, 200));
+      .limit(Math.min(parseInt(limit, 10) || 50, 200));
 
     let filtered = rows;
     if (agentId) filtered = filtered.filter((r) => r.agentId === agentId);
@@ -1778,7 +1778,7 @@ nueroMeshRouter.get('/nuro-mesh/prompt-evolution', async (req: Request, res: Res
     };
 
     res.json({ proposals: filtered, summary });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to fetch prompt evolution proposals' });
   }
 });
@@ -1865,7 +1865,7 @@ nueroMeshRouter.post(
         skipped: results.filter((r) => r.status === 'skipped').length,
         results,
       });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ error: 'Prompt evolution cycle failed' });
     }
   },

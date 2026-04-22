@@ -43,21 +43,15 @@ export function initSentry(config: SentryConfig) {
 
   const env = (import.meta as unknown as { env?: Record<string, string> }).env ?? {};
   const rawDsn = config.dsn || env.VITE_SENTRY_DSN;
-  const dsn = rawDsn && rawDsn.startsWith('https://') ? rawDsn : undefined;
+  const dsn = rawDsn?.startsWith('https://') ? rawDsn : undefined;
   if (!dsn) {
     if (rawDsn) {
-      console.debug('[Sentry] DSN looks like a placeholder — error tracking disabled.');
     } else {
-      console.debug('[Sentry] DSN not configured — error tracking disabled.');
     }
     setupGlobalHandlers(config.appSlug);
     return;
   }
   if (!isValidSentryDsn(dsn)) {
-    console.info(
-      '[Sentry] DSN appears to be a placeholder — error tracking disabled for',
-      config.appSlug,
-    );
     setupGlobalHandlers(config.appSlug);
     return;
   }
@@ -76,7 +70,6 @@ export function initSentry(config: SentryConfig) {
     ],
     beforeSend(event) {
       if (env.DEV) {
-        console.debug('[Sentry] Would send event:', event.event_id);
       }
       return event;
     },
@@ -100,9 +93,8 @@ function setupGlobalHandlers(appSlug: string) {
 
 export function reportError(error: Error, context?: Record<string, string>) {
   if (isSentryInitialized() && Sentry.isInitialized()) {
-    Sentry.captureException(error, { ...(context !== undefined ? { tags: context } : {}) });
+    Sentry.captureException(error, (context !== undefined ? { tags: context } : {}));
   }
-  console.error('[ErrorTracking]', error.message, context);
 }
 
 export function setUser(user: { id: string; email?: string; username?: string }) {

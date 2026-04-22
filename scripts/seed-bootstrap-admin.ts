@@ -11,14 +11,14 @@
  */
 
 import { db, rolesTable, userRolesTable, usersTable } from '@szl-holdings/db';
-import { pbkdf2Sync, randomBytes } from 'crypto';
+import { pbkdf2Sync, randomBytes } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 
 const SCRIPT = 'seed-bootstrap-admin';
 
 function log(level: 'info' | 'error', event: string, meta?: Record<string, unknown>) {
   const entry = { ts: new Date().toISOString(), level, script: SCRIPT, event, ...meta };
-  (level === 'error' ? process.stderr : process.stdout).write(JSON.stringify(entry) + '\n');
+  (level === 'error' ? process.stderr : process.stdout).write(`${JSON.stringify(entry)}\n`);
 }
 
 function hashPassword(password: string): string {
@@ -40,7 +40,7 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
-if (password!.length < 12) {
+if (password?.length < 12) {
   log('error', 'password_too_short', { minLength: 12 });
   process.exit(1);
 }

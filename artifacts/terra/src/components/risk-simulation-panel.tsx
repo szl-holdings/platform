@@ -42,7 +42,7 @@ interface SimulationProgressState {
 }
 
 function formatValue(value: number, format?: string): string {
-  if (!isFinite(value)) return '—';
+  if (!Number.isFinite(value)) return '—';
   if (format === 'currency') {
     const abs = Math.abs(value);
     if (abs >= 1000) return `$${(value / 1000).toFixed(1)}K`;
@@ -54,13 +54,13 @@ function formatValue(value: number, format?: string): string {
 }
 
 function formatSignedValue(value: number, format?: string): string {
-  if (!isFinite(value)) return '—';
+  if (!Number.isFinite(value)) return '—';
   const sign = value > 0 ? '+' : value < 0 ? '−' : '';
   return `${sign}${formatValue(Math.abs(value), format)}`;
 }
 
 function formatPctDelta(curr: number, base: number): string {
-  if (!isFinite(curr) || !isFinite(base) || base === 0) return '—';
+  if (!Number.isFinite(curr) || !Number.isFinite(base) || base === 0) return '—';
   const pct = ((curr - base) / Math.abs(base)) * 100;
   const sign = pct > 0 ? '+' : pct < 0 ? '−' : '';
   return `${sign}${Math.abs(pct).toFixed(1)}%`;
@@ -152,10 +152,8 @@ export function RiskSimulationPanel({
             setProgress(null);
             setRunning(false);
           })
-          .catch((err) => {
+          .catch((_err) => {
             if (cancelled || requestId !== requestIdRef.current) return;
-            // eslint-disable-next-line no-console
-            console.warn('[risk-simulation] worker pool error, falling back:', err);
             try {
               const r = runScenarioSimulationSync(effectiveScenario, iterCount);
               if (requestId === requestIdRef.current) setResult(r);
@@ -742,7 +740,7 @@ export function RiskSimulationPanel({
             (() => {
               const basePrimary = baseline?.result.metrics[primary.id];
               const renderDelta = (curr: number, base: number | undefined) => {
-                if (base === undefined || !isFinite(base)) return null;
+                if (base === undefined || !Number.isFinite(base)) return null;
                 return (
                   <span
                     className="ml-2 text-[9px] font-mono px-1 py-0.5 rounded"
@@ -874,7 +872,7 @@ interface DriverTweaksPanelProps {
 }
 
 function formatDriverValue(value: number, format?: string): string {
-  if (!isFinite(value)) return '—';
+  if (!Number.isFinite(value)) return '—';
   if (format === 'currency') {
     const abs = Math.abs(value);
     if (abs >= 1_000_000) return `$${(value / 1_000_000).toFixed(2)}M`;

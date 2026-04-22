@@ -275,8 +275,8 @@ describe('Exposure by type computation', () => {
       { id: 'm2', name: 'M2', status: 'escalated', pressureScore: 80, complexityScore: 70, estimatedExposure: 2_000_000, obligations: [] },
     ];
     const result = computeExposureByType(matters);
-    expect(result['Active']).toBe(1_000_000);
-    expect(result['Escalated']).toBe(2_000_000);
+    expect(result.Active).toBe(1_000_000);
+    expect(result.Escalated).toBe(2_000_000);
   });
 
   it('handles missing estimatedExposure gracefully', () => {
@@ -284,6 +284,6 @@ describe('Exposure by type computation', () => {
       { id: 'm1', name: 'M1', status: 'active', pressureScore: 50, complexityScore: 50, obligations: [] },
     ];
     const result = computeExposureByType(matters);
-    expect(result['Active']).toBe(0);
+    expect(result.Active).toBe(0);
   });
 });

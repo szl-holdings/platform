@@ -5,7 +5,6 @@ import {
   TypewriterText,
 } from '@szl-holdings/shared-ui/ai-components';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
-import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import { PageDataSkeleton } from '@szl-holdings/shared-ui/page-data-skeleton';
 import {
   Activity,

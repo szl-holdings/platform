@@ -2,13 +2,11 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
   AnimatedGauge,
   AnomalySparkline,
-  SeverityMeter,
   TypewriterText,
 } from '@szl-holdings/shared-ui/ai-components';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import {
   Activity,
-  AlertTriangle,
   Brain,
   FileText,
   Loader2,

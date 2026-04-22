@@ -1,11 +1,10 @@
 import { globalCollector } from '@workspace/cognitive-observability';
 import { defaultTraceStore, TraceWriter } from '@workspace/trace-graph';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { type ApprovalGateRequest, requestApproval } from './approval-gate.js';
 import { sendToDeadLetter } from './dead-letter.js';
-import type { RunErrorCategory } from './errors.js';
-import { AgentRunError, categorizeError } from './errors.js';
+import { type RunErrorCategory, AgentRunError, categorizeError } from './errors.js';
 import { DEFAULT_RETRY_POLICY, type RetryPolicy, withRetry } from './retry.js';
 import { saveStepIO } from './step-io-store.js';
 import { emitStepLog, makeStepLogger } from './step-log.js';
@@ -145,7 +144,7 @@ export class AgentRun {
 
   private async setStatus(status: RunStatus): Promise<void> {
     this._status = status;
-    globalCollector.recordKnown('run_status_transition', 1, {
+    globalCollector.recordKnown('run_status_transition' as any, 1, {
       runId: this.runId,
       status,
     });
@@ -172,7 +171,7 @@ export class AgentRun {
       message: `Agent run started: ${this.objective}`,
       data: { objective: this.objective, metadata: this.options.metadata },
     });
-    globalCollector.recordKnown('run_started', 1, { runId: this.runId });
+    globalCollector.recordKnown('run_started' as any, 1, { runId: this.runId });
   }
 
   async step<TInput, TOutput>(
@@ -195,7 +194,7 @@ export class AgentRun {
 
     await logger.info('Step starting', { stepId: definition.id });
 
-    globalCollector.recordKnown('step_started', 1, {
+    globalCollector.recordKnown('step_started' as any, 1, {
       runId: this.runId,
       stepId: definition.id,
       stepName: definition.name,
@@ -313,10 +312,10 @@ export class AgentRun {
       };
 
       this.stepResults.push(stepResult);
-      globalCollector.recordKnown('step_completed', durationMs, {
+      globalCollector.recordKnown('step_completed' as any, durationMs, {
         runId: this.runId,
         stepId: definition.id,
-        retries: retryResult.attempts - 1,
+        retries: String(retryResult.attempts - 1),
         spanId,
       });
 
@@ -375,7 +374,7 @@ export class AgentRun {
       };
 
       this.stepResults.push(stepResult);
-      globalCollector.recordKnown('step_failed', durationMs, {
+      globalCollector.recordKnown('step_failed' as any, durationMs, {
         runId: this.runId,
         stepId: definition.id,
         errorCategory: category,
@@ -402,8 +401,7 @@ export class AgentRun {
         status: 'completed',
         latencyMs: durationMs,
       });
-    } catch (traceErr) {
-      console.error('[agents-core] Failed to finalize trace on complete:', traceErr);
+    } catch (_traceErr) {
     }
 
     await emitStepLog({
@@ -415,9 +413,9 @@ export class AgentRun {
       data: { stepCount: this.stepResults.length },
     });
 
-    globalCollector.recordKnown('run_completed', durationMs, {
+    globalCollector.recordKnown('run_completed' as any, durationMs, {
       runId: this.runId,
-      stepCount: this.stepResults.length,
+      stepCount: String(this.stepResults.length),
     });
 
     return this.toSummary(completedAt);
@@ -437,8 +435,7 @@ export class AgentRun {
         status: 'failed',
         latencyMs: durationMs,
       });
-    } catch (traceErr) {
-      console.error('[agents-core] Failed to finalize trace on fail:', traceErr);
+    } catch (_traceErr) {
     }
 
     await emitStepLog({
@@ -450,7 +447,7 @@ export class AgentRun {
       data: { errorCategory: category },
     });
 
-    globalCollector.recordKnown('run_failed', completedAt - this.startedAt, {
+    globalCollector.recordKnown('run_failed' as any, completedAt - this.startedAt, {
       runId: this.runId,
       errorCategory: category,
     });

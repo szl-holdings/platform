@@ -31,8 +31,8 @@ describe('bodyShape', () => {
 
   it('passes through unknown extra fields', () => {
     const r = schema.parse({ name: 'x', extra: 42, more: { a: 1 } }) as Record<string, unknown>;
-    expect(r['extra']).toBe(42);
-    expect(r['more']).toEqual({ a: 1 });
+    expect(r.extra).toBe(42);
+    expect(r.more).toEqual({ a: 1 });
   });
 
   it('coerces null/undefined body to empty object so optionals validate', () => {
@@ -50,9 +50,9 @@ describe('queryShape', () => {
 
   it('coerces query strings to declared types', () => {
     const r = schema.parse({ page: '5', q: 'search', extra: 'kept' }) as Record<string, unknown>;
-    expect(r['page']).toBe(5);
-    expect(r['q']).toBe('search');
-    expect(r['extra']).toBe('kept');
+    expect(r.page).toBe(5);
+    expect(r.q).toBe('search');
+    expect(r.extra).toBe('kept');
   });
 });
 

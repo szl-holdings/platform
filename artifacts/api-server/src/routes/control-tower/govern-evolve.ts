@@ -5,7 +5,7 @@ import {
   verifyAuditChainIntegrity,
 } from '@szl-holdings/ai-engine';
 import { bodyShape } from '@szl-holdings/contracts/common';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { listDecisions } from '../../lib/alloy-decision-store';
@@ -328,7 +328,7 @@ router.get(
   },
 );
 
-router.get('/control-tower/evolve/metrics', async (req: Request, res: Response) => {
+router.get('/control-tower/evolve/metrics', async (_req: Request, res: Response) => {
   try {
     const providerStats = inferenceTelemetry.getProviderStats(3600000);
 

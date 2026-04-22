@@ -4,7 +4,6 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
-  AlertTriangle,
   Database,
   Eye,
   FileText,

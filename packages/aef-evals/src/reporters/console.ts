@@ -1,7 +1,7 @@
 import type { EvalRunResult } from '../types.js';
 
 export function printEvalResult(result: EvalRunResult): void {
-  const line = (s: string) => process.stdout.write(s + '\n');
+  const line = (s: string) => process.stdout.write(`${s}\n`);
   const sep = '─'.repeat(60);
 
   line(sep);

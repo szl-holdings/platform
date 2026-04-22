@@ -180,8 +180,8 @@ export function tenantScope(options: { required?: boolean } = {}) {
         return;
       }
 
-      const paramSlug = req.params['orgSlug'] as string | undefined;
-      const paramId = req.params['orgId'] as string | undefined;
+      const paramSlug = req.params.orgSlug as string | undefined;
+      const paramId = req.params.orgId as string | undefined;
 
       if (paramSlug) {
         const membership = user.orgs.find((o) => o.orgSlug === paramSlug);
@@ -203,7 +203,7 @@ export function tenantScope(options: { required?: boolean } = {}) {
 
       if (paramId) {
         const id = parseInt(paramId, 10);
-        if (isNaN(id)) {
+        if (Number.isNaN(id)) {
           res.status(400).json({ error: 'Invalid organization ID' });
           return;
         }
@@ -220,8 +220,8 @@ export function tenantScope(options: { required?: boolean } = {}) {
       }
 
       const primary = user.orgs[0];
-      req.tenantOrgId = primary!.orgId;
-      req.tenantOrgSlug = primary!.orgSlug;
+      req.tenantOrgId = primary?.orgId;
+      req.tenantOrgSlug = primary?.orgSlug;
       next();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Tenant scope error';

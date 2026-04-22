@@ -84,7 +84,7 @@ export function AIStatusBar({
   const [metrics, setMetrics] = useState<AIStatusBarMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [cachedAt, setCachedAt] = useState<Date | null>(null);
-  const [tick, setTick] = useState(0);
+  const [_tick, setTick] = useState(0);
   const hasEverLoaded = useRef(false);
 
   const refresh = useCallback(async () => {

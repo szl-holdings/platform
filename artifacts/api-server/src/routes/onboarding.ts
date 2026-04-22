@@ -14,15 +14,11 @@ import {
   db,
   notificationsTable,
   organizationsTable,
-  orgInvitationsTable,
   orgMembersTable,
   pool,
-  usersTable,
 } from '@szl-holdings/db';
-import crypto from 'crypto';
-import { and, eq, gt } from 'drizzle-orm';
-import type { Request, Response } from 'express';
-import { Router } from 'express';
+import { and, eq, } from 'drizzle-orm';
+import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
@@ -33,7 +29,6 @@ import {
   sendNotFound,
   sendSuccess,
 } from '../lib/api-response';
-import { buildOrgInviteEmail, sendEmail } from '../lib/email';
 import { createOrgInvitation } from '../lib/invitation-service';
 import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
@@ -64,7 +59,7 @@ const resendInviteSchema = z.object({
   role: z.enum(['admin', 'member', 'viewer']).default('member'),
 });
 
-const INVITE_TTL = 7 * 24 * 60 * 60 * 1000;
+const _INVITE_TTL = 7 * 24 * 60 * 60 * 1000;
 const ORG_ROLE_HIERARCHY: Record<string, number> = { owner: 4, admin: 3, member: 2, viewer: 1 };
 
 type WizardState = {
@@ -105,10 +100,10 @@ async function getWizardState(orgId: number): Promise<WizardState> {
   return {
     completedSteps: row.completed_steps ?? [],
     currentStep: row.current_step ?? 'profile',
-    profile: (data['profile'] as Record<string, unknown>) ?? {},
-    team: (data['team'] as Record<string, unknown>) ?? {},
-    notifications: (data['notifications'] as Record<string, unknown>) ?? {},
-    integrations: (data['integrations'] as Record<string, unknown>) ?? {},
+    profile: (data.profile as Record<string, unknown>) ?? {},
+    team: (data.team as Record<string, unknown>) ?? {},
+    notifications: (data.notifications as Record<string, unknown>) ?? {},
+    integrations: (data.integrations as Record<string, unknown>) ?? {},
     completedAt: row.completed_at ?? null,
   };
 }
@@ -140,7 +135,7 @@ router.post(
   validateBody(createOrgSchema),
   async (req: Request, res: Response) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const { name, slug, domain, orgType, plan } = req.body as z.infer<typeof createOrgSchema>;
 
       const [existing] = await db
@@ -208,7 +203,7 @@ router.post(
 
 router.get('/onboarding/wizard/:orgSlug', authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const orgSlug = req.params['orgSlug'] as string;
+    const orgSlug = req.params.orgSlug as string;
     const user = req.user!;
 
     const [org] = await db
@@ -229,7 +224,7 @@ router.get('/onboarding/wizard/:orgSlug', authMiddleware(), async (req: Request,
         .from(orgMembersTable)
         .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, user.id)))
         .limit(1);
-      if (!membership || (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']) {
+      if (!membership || (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY.admin) {
         sendForbidden(res, 'Admin access required');
         return;
       }
@@ -282,7 +277,7 @@ router.put(
   validateBody(wizardStepSchema),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
       const user = req.user!;
       const { step, data } = req.body as z.infer<typeof wizardStepSchema>;
 
@@ -306,7 +301,7 @@ router.put(
           .limit(1);
         if (
           !membership ||
-          (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']
+          (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY.admin
         ) {
           sendForbidden(res, 'Admin access required');
           return;
@@ -334,7 +329,7 @@ router.put(
         await db
           .update(organizationsTable)
           .set({
-            name: String((data as Record<string, unknown>)['name'] ?? org.name),
+            name: String((data as Record<string, unknown>).name ?? org.name),
             updatedAt: new Date(),
           })
           .where(eq(organizationsTable.id, org.id));
@@ -359,7 +354,7 @@ router.post(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
       const user = req.user!;
 
       const [org] = await db
@@ -381,7 +376,7 @@ router.post(
           .limit(1);
         if (
           !membership ||
-          (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']
+          (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY.admin
         ) {
           sendForbidden(res, 'Org admin role required');
           return;
@@ -426,7 +421,7 @@ router.post(
   validateBody(resendInviteSchema),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
       const { email, role } = req.body as z.infer<typeof resendInviteSchema>;
       const user = req.user!;
 
@@ -449,7 +444,7 @@ router.post(
           .limit(1);
         if (
           !inviteMembership ||
-          (ORG_ROLE_HIERARCHY[inviteMembership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']
+          (ORG_ROLE_HIERARCHY[inviteMembership.role] ?? 0) < ORG_ROLE_HIERARCHY.admin
         ) {
           sendForbidden(res, 'Org admin role required');
           return;

@@ -107,7 +107,7 @@ function bodyText(
   options: Record<string, unknown> = {},
 ): number {
   const [tr, tg, tb] = hexToRgb(BRAND.text);
-  const before = doc.y;
+  const _before = doc.y;
   doc
     .font('Helvetica')
     .fontSize(10)
@@ -116,7 +116,7 @@ function bodyText(
   return doc.y + 8;
 }
 
-function labelValue(doc: PDFKit.PDFDocument, label: string, value: string, y: number): number {
+function _labelValue(doc: PDFKit.PDFDocument, label: string, value: string, y: number): number {
   const [mr, mg, mb] = hexToRgb(BRAND.muted);
   const [tr, tg, tb] = hexToRgb(BRAND.text);
   doc.font('Helvetica').fontSize(8).fillColor([mr, mg, mb]).text(label, 72, y);
@@ -186,7 +186,7 @@ function ensureSpace(doc: PDFKit.PDFDocument, needed: number, currentY: number):
   return currentY;
 }
 
-export function generateStephenResume(data: Record<string, unknown>): Promise<Buffer> {
+export function generateStephenResume(_data: Record<string, unknown>): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     try {
       const doc = createBaseDoc();
@@ -499,7 +499,7 @@ export function generateSZLInvestorLetter(data: Record<string, unknown>): Promis
 
       for (const t of thesis) {
         y = ensureSpace(doc, 55, y);
-        const [br, bg, bb] = hexToRgb(BRAND.border);
+        const [_br, _bg, _bb] = hexToRgb(BRAND.border);
         doc.rect(72, y, 3, 42).fillColor([pr, pg, pb]).fillOpacity(0.6).fill();
         doc.fillOpacity(1);
         doc
@@ -531,7 +531,7 @@ export function generateSZLInvestorLetter(data: Record<string, unknown>): Promis
   });
 }
 
-export function generateSZLComplianceSummary(data: Record<string, unknown>): Promise<Buffer> {
+export function generateSZLComplianceSummary(_data: Record<string, unknown>): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     try {
       const doc = createBaseDoc();
@@ -1266,7 +1266,7 @@ export function generateSZLPortfolioReport(data: Record<string, unknown>): Promi
 
       const [tr, tg, tb] = hexToRgb(BRAND.text);
       const [mr, mg, mb] = hexToRgb(BRAND.muted);
-      const [pr, pg, pb] = hexToRgb(BRAND.primary);
+      const [_pr, _pg, _pb] = hexToRgb(BRAND.primary);
 
       y = sectionTitle(doc, 'Portfolio at a Glance', y + 12);
 

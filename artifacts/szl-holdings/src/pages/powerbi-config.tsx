@@ -10,7 +10,6 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
-  Globe,
   Info,
   Key,
   Loader2,
@@ -18,7 +17,6 @@ import {
   Monitor,
   RefreshCw,
   Save,
-  Settings,
   Shield,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -29,7 +27,7 @@ const API = '/api';
 
 async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(`${API}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(opts?.headers ?? {}) },
+    headers: { 'Content-Type': 'application/json', ...opts?.headers },
     credentials: 'include',
     ...opts,
   });

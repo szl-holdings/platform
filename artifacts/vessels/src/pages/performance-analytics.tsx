@@ -2,10 +2,8 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
-  BarChart3,
   Clock,
   Minus,
-  RefreshCw,
   Ship,
   TrendingDown,
   TrendingUp,
@@ -14,7 +12,7 @@ import { useState } from 'react';
 import { usePerformanceMetrics } from '@/hooks/use-vessels-data';
 import { api } from '@/lib/api';
 
-function SparkBar({ values, color }: { values: number[]; color: string }) {
+function _SparkBar({ values, color }: { values: number[]; color: string }) {
   const max = Math.max(...values, 1);
   return (
     <div className="flex items-end gap-0.5 h-8">

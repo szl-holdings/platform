@@ -67,8 +67,8 @@ export default function Commerce() {
     setCheckoutLoading(priceId);
     setCheckoutError(null);
     try {
-      const successUrl = window.location.origin + window.location.pathname + '?checkout=success';
-      const cancelUrl = window.location.origin + window.location.pathname + '?checkout=cancel';
+      const successUrl = `${window.location.origin + window.location.pathname}?checkout=success`;
+      const cancelUrl = `${window.location.origin + window.location.pathname}?checkout=cancel`;
       const mode = interval ? 'subscription' : 'payment';
 
       const res = await fetch('/api/billing/checkout', {

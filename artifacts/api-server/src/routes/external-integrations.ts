@@ -1,6 +1,6 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { type NormalizedSiemEvent, services } from '@szl-holdings/services';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { type IRouter, type NextFunction, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendError, sendSuccess } from '../lib/api-response';
@@ -40,7 +40,7 @@ const lastSyncTimes = new Map<string, string>();
 const lastErrorTimes = new Map<string, string>();
 
 function verifySiemToken(req: Request, res: Response, next: NextFunction): void {
-  const siemToken = process.env['SIEM_INGEST_TOKEN'];
+  const siemToken = process.env.SIEM_INGEST_TOKEN;
   if (!siemToken) {
     next();
     return;
@@ -224,7 +224,7 @@ router.post(
         (req.headers['x-hub-signature'] as string | undefined) ??
         '';
 
-      const webhookSecret = process.env['JIRA_WEBHOOK_SECRET'];
+      const webhookSecret = process.env.JIRA_WEBHOOK_SECRET;
       if (webhookSecret && !signature) {
         res
           .status(401)
@@ -271,7 +271,7 @@ router.post(
 
       const signature = (req.headers['x-pagerduty-signature'] as string | undefined) ?? '';
 
-      const webhookSecret = process.env['PAGERDUTY_WEBHOOK_SECRET'];
+      const webhookSecret = process.env.PAGERDUTY_WEBHOOK_SECRET;
       if (webhookSecret && !signature) {
         res
           .status(401)
@@ -331,7 +331,7 @@ router.post(
       const signature = (req.headers['x-slack-signature'] as string | undefined) ?? '';
       const timestamp = (req.headers['x-slack-request-timestamp'] as string | undefined) ?? '';
 
-      const signingSecret = process.env['SLACK_SIGNING_SECRET'];
+      const signingSecret = process.env.SLACK_SIGNING_SECRET;
       if (signingSecret && (!signature || !timestamp)) {
         res.status(401).json({
           error:
@@ -350,13 +350,13 @@ router.post(
 
       const payload = req.body as Record<string, unknown>;
 
-      if (payload['type'] === 'url_verification') {
-        res.status(200).json({ challenge: payload['challenge'] });
+      if (payload.type === 'url_verification') {
+        res.status(200).json({ challenge: payload.challenge });
         return;
       }
 
       lastSyncTimes.set('slack', new Date().toISOString());
-      logger.info({ eventType: payload['type'], source: 'slack' }, 'Slack event received');
+      logger.info({ eventType: payload.type, source: 'slack' }, 'Slack event received');
 
       res.status(200).json({ received: true });
     } catch (err) {
@@ -380,7 +380,7 @@ router.post(
       const signature = (req.headers['x-slack-signature'] as string | undefined) ?? '';
       const timestamp = (req.headers['x-slack-request-timestamp'] as string | undefined) ?? '';
 
-      const signingSecret = process.env['SLACK_SIGNING_SECRET'];
+      const signingSecret = process.env.SLACK_SIGNING_SECRET;
       if (signingSecret && (!signature || !timestamp)) {
         res.status(401).json({
           error:
@@ -397,7 +397,7 @@ router.post(
       }
 
       const bodyPayload = req.body as Record<string, unknown>;
-      const payloadStr = bodyPayload['payload'] as string | undefined;
+      const payloadStr = bodyPayload.payload as string | undefined;
       const interactionPayload = payloadStr
         ? (JSON.parse(
             payloadStr,
@@ -429,7 +429,7 @@ router.post(
       const signature = (req.headers['x-slack-signature'] as string | undefined) ?? '';
       const timestamp = (req.headers['x-slack-request-timestamp'] as string | undefined) ?? '';
 
-      const signingSecret = process.env['SLACK_SIGNING_SECRET'];
+      const signingSecret = process.env.SLACK_SIGNING_SECRET;
       if (signingSecret && (!signature || !timestamp)) {
         res.status(401).json({
           error:
@@ -469,7 +469,7 @@ router.post(
         (req.headers['x-sfdc-signature'] as string | undefined) ??
         '';
 
-      const webhookSecret = process.env['SALESFORCE_WEBHOOK_SECRET'];
+      const webhookSecret = process.env.SALESFORCE_WEBHOOK_SECRET;
       if (webhookSecret && !signature) {
         res
           .status(401)
@@ -563,7 +563,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const payload = req.body as Record<string, unknown>;
-      const alerts = (payload['value'] as Array<Record<string, unknown>>) ?? [payload];
+      const alerts = (payload.value as Array<Record<string, unknown>>) ?? [payload];
       const result = services.siem.ingestMicrosoftSentinel(alerts);
       lastSyncTimes.set('siem', new Date().toISOString());
 
@@ -764,7 +764,7 @@ router.post(
         sendError(res, 'title and serviceId are required', 400);
         return;
       }
-      if (!fromEmail || !fromEmail.includes('@')) {
+      if (!fromEmail?.includes('@')) {
         sendError(
           res,
           'fromEmail is required and must be a valid email address (PagerDuty From header)',

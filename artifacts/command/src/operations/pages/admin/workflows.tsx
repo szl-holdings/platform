@@ -1,5 +1,4 @@
 import {
-  AlertTriangle,
   CheckCircle,
   Clock,
   GitBranch,

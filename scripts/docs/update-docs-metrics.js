@@ -31,9 +31,9 @@
  *   node scripts/docs/check-docs-sync.js
  */
 
-import { execFileSync } from 'child_process';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { execFileSync } from 'node:child_process';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const checkScript = join(__dirname, 'check-docs-sync.js');

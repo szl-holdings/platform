@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
-import React from 'react';
 import {
   ActivityIndicator,
   RefreshControl,
@@ -171,7 +170,7 @@ export default function DigestTab() {
         <View
           style={[
             styles.postureBadge,
-            { backgroundColor: postureColor + '20', borderColor: postureColor + '40' },
+            { backgroundColor: `${postureColor}20`, borderColor: `${postureColor}40` },
           ]}
         >
           <Text style={[styles.postureText, { color: postureColor }]}>
@@ -247,7 +246,7 @@ export default function DigestTab() {
                   key={inc.id}
                   style={[
                     styles.incidentRow,
-                    { borderColor: (SEVERITY_COLORS[inc.severity] ?? '#6b7280') + '30' },
+                    { borderColor: `${SEVERITY_COLORS[inc.severity] ?? '#6b7280'}30` },
                   ]}
                 >
                   <View

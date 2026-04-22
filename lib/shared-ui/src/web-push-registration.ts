@@ -134,8 +134,7 @@ export async function registerServiceWorker(
   try {
     const registration = await navigator.serviceWorker.register(swPath, { scope: '/' });
     return registration;
-  } catch (err) {
-    console.warn('[web-push] Service worker registration failed:', err);
+  } catch (_err) {
     return null;
   }
 }

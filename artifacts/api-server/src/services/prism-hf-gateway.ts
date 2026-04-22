@@ -117,7 +117,7 @@ class HuggingFaceGateway {
   private async callEndpoint(endpoint: any, input: any, timeout: number): Promise<any> {
     const url = endpoint.endpointUrl;
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (endpoint.authToken) headers['Authorization'] = `Bearer ${endpoint.authToken}`;
+    if (endpoint.authToken) headers.Authorization = `Bearer ${endpoint.authToken}`;
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeout);
@@ -140,17 +140,17 @@ class HuggingFaceGateway {
     logger.warn({ task: req.task }, 'No HF endpoint found, using built-in fallback');
 
     const taskHandlers: Record<string, (input: any) => any> = {
-      text_embedding: (input) => ({
+      text_embedding: (_input) => ({
         embedding: Array.from({ length: 768 }, () => Math.random() * 2 - 1),
         dimensions: 768,
       }),
-      classification: (input) => ({
+      classification: (_input) => ({
         label: 'standard',
         confidence: 0.82,
         scores: { standard: 0.82, privilege: 0.1, work_product: 0.05, spam: 0.03 },
       }),
       reranking: (input) => ({
-        rankings: (input.documents ?? []).map((d: any, i: number) => ({
+        rankings: (input.documents ?? []).map((_d: any, i: number) => ({
           index: i,
           score: 1 - i * 0.1,
         })),
@@ -158,14 +158,14 @@ class HuggingFaceGateway {
       summarization: (input) => ({
         summary: `[Summary of ${typeof input === 'string' ? input.substring(0, 50) : 'input'} ...]`,
       }),
-      ner: (input) => ({
+      ner: (_input) => ({
         entities: [],
       }),
-      contradiction_detection: (input) => ({
+      contradiction_detection: (_input) => ({
         contradictions: [],
         confidence: 0.9,
       }),
-      sentence_similarity: (input) => ({
+      sentence_similarity: (_input) => ({
         score: 0.75,
       }),
       zero_shot: (input) => ({

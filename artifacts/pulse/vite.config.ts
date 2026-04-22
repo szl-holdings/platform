@@ -1,8 +1,8 @@
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { defineConfig } from 'vite';
 import { CANONICAL_FALLBACK_PORT, PROXY_ROUTES } from '../../packages/proxy-routes.js';
 
@@ -19,7 +19,7 @@ function sharedProxyPlugin() {
     name: 'shared-proxy',
     apply: 'serve' as const,
     async configureServer() {
-      const http = await import('http');
+      const http = await import('node:http');
       const proxyServer = http.createServer((req, res) => {
         const url = req.url || '/';
         if (url === '/__health') {
@@ -27,7 +27,7 @@ function sharedProxyPlugin() {
           res.end('OK');
           return;
         }
-        const normalizedUrl = url.endsWith('/') ? url : url + '/';
+        const normalizedUrl = url.endsWith('/') ? url : `${url}/`;
         const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
         const targetPort = route ? route.port : CANONICAL_FALLBACK_PORT;
         const upstream = http.request(
@@ -36,7 +36,7 @@ function sharedProxyPlugin() {
             port: targetPort,
             path: url,
             method: req.method,
-            headers: { ...req.headers, host: 'localhost:' + targetPort },
+            headers: { ...req.headers, host: `localhost:${targetPort}` },
           },
           (upRes) => {
             res.writeHead(upRes.statusCode || 200, upRes.headers);
@@ -46,7 +46,7 @@ function sharedProxyPlugin() {
         upstream.on('error', () => {
           if (!res.headersSent) {
             res.writeHead(503, { 'Content-Type': 'text/plain' });
-            res.end('Upstream not ready on port ' + targetPort);
+            res.end(`Upstream not ready on port ${targetPort}`);
           }
         });
         req.pipe(upstream, { end: true });
@@ -59,14 +59,10 @@ function sharedProxyPlugin() {
             resolve();
           }
         };
-        proxyServer.once('error', (err: NodeJS.ErrnoException) => {
-          console.warn('[shared-proxy] Bind error:', err.code);
+        proxyServer.once('error', (_err: NodeJS.ErrnoException) => {
           finish();
         });
         proxyServer.listen({ port: SHARED_PROXY_PORT, host: '::', reusePort: true }, () => {
-          console.log(
-            '[shared-proxy] Listening on port ' + SHARED_PROXY_PORT + ' (reusePort, dual-stack)',
-          );
           finish();
         });
       });

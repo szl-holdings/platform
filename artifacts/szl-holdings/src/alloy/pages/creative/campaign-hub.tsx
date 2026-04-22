@@ -182,7 +182,7 @@ export function CampaignHub() {
   );
   const totalBudget = (campaigns || []).reduce((sum, c) => {
     const b = parseFloat((c.budget || '0').replace(/[^0-9.]/g, ''));
-    return sum + (isNaN(b) ? 0 : b);
+    return sum + (Number.isNaN(b) ? 0 : b);
   }, 0);
   const budgetStr =
     totalBudget >= 1000000
@@ -260,7 +260,6 @@ export function CampaignHub() {
             className="flex items-center gap-2"
           >
             <input
-              autoFocus
               type="text"
               placeholder="Campaign name..."
               value={newTitle}

@@ -27,18 +27,15 @@
 
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
-import { like, or } from "drizzle-orm";
 
-const DATABASE_URL = process.env["DATABASE_URL"];
+const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
-  console.error("[ci-preflight] DATABASE_URL is not set — skipping cleanup");
   process.exit(0);
 }
 
 async function main() {
-  console.log("[ci-preflight] Connecting to database…");
   const pool = new pg.Pool({ connectionString: DATABASE_URL });
-  const db = drizzle(pool);
+  const _db = drizzle(pool);
 
   let totalDeleted = 0;
 
@@ -61,14 +58,12 @@ async function main() {
           [pattern],
         );
         if (result.rowCount && result.rowCount > 0) {
-          console.log(`[ci-preflight] Deleted ${result.rowCount} leftover row(s) from ${table}`);
           totalDeleted += result.rowCount;
         }
       } catch (err) {
         if ((err as { code?: string }).code === "42P01") {
           // Table does not exist yet — migration pending; skip silently.
         } else {
-          console.warn(`[ci-preflight] Warning: could not clean ${table}:`, err);
         }
       }
     }
@@ -79,13 +74,11 @@ async function main() {
         `DELETE FROM carlota_inquiries WHERE email LIKE '%@smoke.test' OR (name = 'Jane Smith' AND email = 'jane@example.com') RETURNING id`,
       );
       if (result.rowCount && result.rowCount > 0) {
-        console.log(`[ci-preflight] Deleted ${result.rowCount} leftover row(s) from carlota_inquiries`);
         totalDeleted += result.rowCount;
       }
     } catch (err) {
       if ((err as { code?: string }).code === "42P01") {
       } else {
-        console.warn(`[ci-preflight] Warning: could not clean carlota_inquiries:`, err);
       }
     }
 
@@ -95,15 +88,12 @@ async function main() {
   }
 
   if (totalDeleted === 0) {
-    console.log("[ci-preflight] No leftover smoke-test records found — environment is clean.");
   } else {
-    console.log(`[ci-preflight] Total deleted: ${totalDeleted} record(s). Environment is now clean.`);
   }
 
   process.exit(0);
 }
 
-main().catch((err) => {
-  console.error("[ci-preflight] Fatal error:", err);
+main().catch((_err) => {
   process.exit(1);
 });

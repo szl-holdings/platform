@@ -1,10 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { EmbedRequestSchema } from '@workspace/aef-contracts';
 import type { PolicyContext } from '@workspace/aef-policy-guard';
-import type { EmbedInput } from '@workspace/alloy-vector-worker';
-import { createDefaultBackend, LocalCpuBackend } from '@workspace/alloy-vector-worker';
+import { type EmbedInput, createDefaultBackend, LocalCpuBackend } from '@workspace/alloy-vector-worker';
 import type { Request, Response, Router } from 'express';
-import { defaultLedgerStore, policyEngine, storageBundle, tenantEnforcer } from '../context.js';
+import { defaultLedgerStore, policyEngine, tenantEnforcer } from '../context.js';
 import { logger } from '../logger.js';
 import { getRequestId } from '../middleware/request-id.js';
 import { getTenantId } from '../middleware/tenant.js';

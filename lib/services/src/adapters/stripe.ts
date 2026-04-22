@@ -93,11 +93,11 @@ export class StripeAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["STRIPE_SECRET_KEY"];
 
   private get secretKey(): string | undefined {
-    return process.env["STRIPE_SECRET_KEY"];
+    return process.env.STRIPE_SECRET_KEY;
   }
 
   private get webhookSecret(): string | undefined {
-    return process.env["STRIPE_WEBHOOK_SECRET"];
+    return process.env.STRIPE_WEBHOOK_SECRET;
   }
 
   private async stripeRequest(path: string, options?: RequestInit): Promise<unknown> {
@@ -130,7 +130,7 @@ export class StripeAdapter extends ServiceAdapter {
 
     try {
       const data = (await this.stripeRequest("/account")) as { id: string };
-      const isTest = this.secretKey!.startsWith("sk_test_");
+      const isTest = this.secretKey?.startsWith("sk_test_");
       return {
         connected: true,
         accountId: data.id,
@@ -182,7 +182,7 @@ export class StripeAdapter extends ServiceAdapter {
 
   async createCustomer(email: string, name?: string, metadata?: Record<string, string>): Promise<StripeCustomer> {
     if (!this.isLive) {
-      return { id: "cus_mock_" + Date.now(), email, name, metadata };
+      return { id: `cus_mock_${Date.now()}`, email, name, metadata };
     }
 
     const params = new URLSearchParams();
@@ -225,8 +225,8 @@ export class StripeAdapter extends ServiceAdapter {
   }): Promise<StripeCheckoutSession> {
     if (!this.isLive) {
       return {
-        id: "cs_mock_" + Date.now(),
-        url: options.successUrl + "?session_id=cs_mock_" + Date.now(),
+        id: `cs_mock_${Date.now()}`,
+        url: `${options.successUrl}?session_id=cs_mock_${Date.now()}`,
         status: "open",
       };
     }
@@ -274,7 +274,7 @@ export class StripeAdapter extends ServiceAdapter {
 
   async createCustomerPortalSession(customerId: string, returnUrl: string): Promise<StripePortalSession> {
     if (!this.isLive) {
-      return { id: "bps_mock_" + Date.now(), url: returnUrl };
+      return { id: `bps_mock_${Date.now()}`, url: returnUrl };
     }
 
     const params = new URLSearchParams();
@@ -439,7 +439,7 @@ export class StripeAdapter extends ServiceAdapter {
     timestamp?: number,
   ): Promise<{ id: string; quantity: number }> {
     if (!this.isLive) {
-      return { id: "usage_mock_" + Date.now(), quantity };
+      return { id: `usage_mock_${Date.now()}`, quantity };
     }
 
     const params = new URLSearchParams();
@@ -462,7 +462,7 @@ export class StripeAdapter extends ServiceAdapter {
   ): Promise<StripeInvoice> {
     if (!this.isLive) {
       return {
-        id: "inv_mock_" + Date.now(),
+        id: `inv_mock_${Date.now()}`,
         customerId,
         amount: lineItems.reduce((s, i) => s + i.amount, 0),
         currency: lineItems[0]?.currency ?? "usd",
@@ -717,7 +717,7 @@ export class StripeAdapter extends ServiceAdapter {
       return { verified: false, event: null };
     }
 
-    const crypto = await import("crypto");
+    const crypto = await import("node:crypto");
     const parts = signature.split(",");
     const timestampPart = parts.find((p: string) => p.startsWith("t="));
     const sigParts = parts.filter((p: string) => p.startsWith("v1="));
@@ -751,7 +751,7 @@ export class StripeAdapter extends ServiceAdapter {
 
     const tolerance = 300;
     const now = Math.floor(Date.now() / 1000);
-    if (Math.abs(now - parseInt(timestamp)) > tolerance) {
+    if (Math.abs(now - parseInt(timestamp, 10)) > tolerance) {
       return { verified: false, event: null };
     }
 

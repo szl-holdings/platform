@@ -46,7 +46,7 @@ function getCached<T>(
       if (stale)
         return {
           data: stale.data as T,
-          source: 'stale-' + stale.source,
+          source: `stale-${stale.source}`,
           cacheAgeSeconds: Math.floor((now - stale.fetchedAt) / 1000),
           isStale: true,
         };
@@ -565,10 +565,10 @@ router.get(
         Array.isArray(stats.recentRuns) && stats.recentRuns.length > 0 ? stats.recentRuns[0] : null;
 
       const boroughBreakdown = [
-        { borough: 'Manhattan', count: boroughMap['Manhattan'] ?? 0, icon: '🏙️' },
-        { borough: 'Brooklyn', count: boroughMap['Brooklyn'] ?? 0, icon: '🌉' },
-        { borough: 'Queens', count: boroughMap['Queens'] ?? 0, icon: '✈️' },
-        { borough: 'Bronx', count: boroughMap['Bronx'] ?? 0, icon: '🏟️' },
+        { borough: 'Manhattan', count: boroughMap.Manhattan ?? 0, icon: '🏙️' },
+        { borough: 'Brooklyn', count: boroughMap.Brooklyn ?? 0, icon: '🌉' },
+        { borough: 'Queens', count: boroughMap.Queens ?? 0, icon: '✈️' },
+        { borough: 'Bronx', count: boroughMap.Bronx ?? 0, icon: '🏟️' },
         { borough: 'Staten Island', count: boroughMap['Staten Island'] ?? 0, icon: '⛴️' },
       ].sort((a, b) => b.count - a.count);
 
@@ -625,12 +625,12 @@ router.get(
             },
             {
               signal: 'Active Foreclosures',
-              count: typeMap['foreclosure'] ?? 0,
+              count: typeMap.foreclosure ?? 0,
               urgency: 'critical',
             },
             { signal: 'Tax Liens', count: typeMap['tax-lien'] ?? 0, urgency: 'medium' },
-            { signal: 'REO / Bank-Owned', count: typeMap['reo'] ?? 0, urgency: 'high' },
-            { signal: 'Auction Scheduled', count: typeMap['auction'] ?? 0, urgency: 'critical' },
+            { signal: 'REO / Bank-Owned', count: typeMap.reo ?? 0, urgency: 'high' },
+            { signal: 'Auction Scheduled', count: typeMap.auction ?? 0, urgency: 'critical' },
           ].filter((s) => s.count > 0),
           recentIngestionRun: recentRunSummary,
           dataFreshness: lastRun
@@ -798,7 +798,7 @@ router.get(
   async (req, res) => {
     try {
       const neighborhood = (req.query.neighborhood as string) ?? 'Upper West Side';
-      const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
+      const limit = Math.min(parseInt(req.query.limit as string, 10) || 50, 200);
       const result = await getCached<any>(
         `terra-nyc-311-${neighborhood}`,
         60 * 60 * 1000,
@@ -807,7 +807,7 @@ router.get(
             const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 3600000)
               .toISOString()
               .split('T')[0];
-            const encoded = encodeURIComponent(neighborhood);
+            const _encoded = encodeURIComponent(neighborhood);
             const raw = (await fetchJson(
               `https://data.cityofnewyork.us/resource/erm2-nwe9.json?$where=upper(city)=%27${encodeURIComponent(neighborhood.toUpperCase())}%27 AND created_date > %27${thirtyDaysAgo}%27&$limit=${limit}&$order=created_date DESC&$select=unique_key,created_date,closed_date,complaint_type,descriptor,incident_address,city,borough,status,resolution_description`,
               14000,
@@ -930,7 +930,7 @@ router.get(
             const get = (field: string) => row[headers.indexOf(field)];
             const num = (field: string) => {
               const v = +get(field);
-              return isNaN(v) || v < 0 ? null : v;
+              return Number.isNaN(v) || v < 0 ? null : v;
             };
 
             const totalPop = num('B01003_001E');

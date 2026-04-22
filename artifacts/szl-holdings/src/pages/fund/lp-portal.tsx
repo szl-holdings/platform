@@ -265,7 +265,7 @@ export default function FundLpPortalPage() {
       setActivity(prev => [{
         id: `live-${Date.now()}`,
         action: "Messaged GP",
-        target: body.length > 60 ? body.slice(0, 57) + "..." : body,
+        target: body.length > 60 ? `${body.slice(0, 57)}...` : body,
         time: "Just now",
       }, ...prev]);
       setMessageDraft("");

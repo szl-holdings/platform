@@ -16,7 +16,7 @@ import {
   useOfFundsVersionsTable,
 } from '@szl-holdings/db';
 import { durableJobQueue } from '@szl-holdings/forge-runtime';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { type IRouter, type NextFunction, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, parsePagination, sendNotFound, sendSuccess } from '../lib/api-response';
@@ -465,7 +465,7 @@ router.delete(
 
 // ─── FUNDRAISING MILESTONES ───────────────────────────────────────────────────
 
-router.get('/capital/milestones', ...auth, async (req, res) => {
+router.get('/capital/milestones', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -538,7 +538,7 @@ router.delete('/capital/milestones/:id', validateBody(bodyShape({})), ...auth, a
 
 // ─── FINANCIAL MODELS ─────────────────────────────────────────────────────────
 
-router.get('/capital/financial-models', ...auth, async (req, res) => {
+router.get('/capital/financial-models', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -609,7 +609,7 @@ router.delete(
 
 // ─── USE OF FUNDS VERSIONS ────────────────────────────────────────────────────
 
-router.get('/capital/use-of-funds', ...auth, async (req, res) => {
+router.get('/capital/use-of-funds', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -680,7 +680,7 @@ router.delete(
 
 // ─── DILIGENCE CHECKLISTS ─────────────────────────────────────────────────────
 
-router.get('/capital/diligence-checklists', ...auth, async (req, res) => {
+router.get('/capital/diligence-checklists', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -844,7 +844,7 @@ router.delete(
 
 // ─── CAP TABLE ────────────────────────────────────────────────────────────────
 
-router.get('/capital/cap-table', ...auth, async (req, res) => {
+router.get('/capital/cap-table', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -974,7 +974,7 @@ router.post(
 
 // ─── DASHBOARD SUMMARY ────────────────────────────────────────────────────────
 
-router.get('/capital/dashboard', ...auth, async (req, res) => {
+router.get('/capital/dashboard', ...auth, async (_req, res) => {
   try {
     const [lenderPackets, investorPackets, milestones, models, checklists] = await Promise.all([
       db.select().from(lenderPacketsTable).orderBy(desc(lenderPacketsTable.updatedAt)),

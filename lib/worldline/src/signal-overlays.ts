@@ -5,7 +5,7 @@ import {
   type SpatialTwinCategory,
   worldlineSignalOverlaysTable,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { and, desc, eq, sql } from 'drizzle-orm';
 
 export type { OverlaySignalType, SourceTrustClass };

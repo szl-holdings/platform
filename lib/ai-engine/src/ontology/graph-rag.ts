@@ -19,15 +19,8 @@
  * 5. Synthesized response with grounded evidence
  */
 
-import type { ScoredChunk } from '../retrieval/alloy-retrieval.js';
-import { alloyRetrieval } from '../retrieval/alloy-retrieval.js';
-import type {
-  EvidenceLink,
-  OntologyEntity,
-  RelationshipType,
-  SubgraphExtraction,
-} from './ontology-engine.js';
-import { ontologyEngine } from './ontology-engine.js';
+import { type ScoredChunk, alloyRetrieval } from '../retrieval/alloy-retrieval.js';
+import { type EvidenceLink, type OntologyEntity, type SubgraphExtraction, ontologyEngine } from './ontology-engine.js';
 
 export interface GraphRAGQuery {
   query: string;

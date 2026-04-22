@@ -4,7 +4,7 @@ import { useFuzzySearch, useSSEStream } from '@szl-holdings/mobile-shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -17,7 +17,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { featherIcon, VesselIcon } from '@/components/VesselIcon';
+import { VesselIcon } from '@/components/VesselIcon';
 import { useColors } from '@/hooks/useColors';
 import { useVesselsWebSocket } from '@/hooks/useVesselsWebSocket';
 import { api, CACHE_KEYS, cacheGetStale, cacheSet, type Vessel } from '@/lib/fleet/api';
@@ -386,7 +386,7 @@ export default function FleetScreen() {
   const { wsStatus } = useVesselsWebSocket();
   const queryClient = useQueryClient();
 
-  const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
+  const [_lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
   const [livePositions, setLivePositions] = useState<
     Record<string, { speed: string; lat: number; lon: number }>
   >({});

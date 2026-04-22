@@ -113,6 +113,6 @@ describe('Fabric live aggregation — domain events → signal mesh → /api/fab
     }>;
     const liveCorr = corrs.find((c) => c.entities.some((e) => e.id === sharedEntityId));
     expect(liveCorr).toBeDefined();
-    expect(new Set(liveCorr!.products)).toEqual(new Set(['vessels', 'lyte']));
+    expect(new Set(liveCorr?.products)).toEqual(new Set(['vessels', 'lyte']));
   });
 });

@@ -1,5 +1,4 @@
-import type { PlanStep, ResolvedPlanContext, RiskLevel, RollbackPoint } from './types.js';
-import { PlanCycleError } from './types.js';
+import { type PlanStep, type ResolvedPlanContext, type RiskLevel, type RollbackPoint, PlanCycleError } from './types.js';
 
 const RISK_RANK: Record<RiskLevel, number> = { low: 0, medium: 1, high: 2, critical: 3 };
 
@@ -63,7 +62,7 @@ export function topoSort(steps: PlanStep[]): string[] {
     for (const d of s.dependsOn) {
       if (!byId.has(d)) continue;
       indeg.set(s.stepId, (indeg.get(s.stepId) ?? 0) + 1);
-      dependents.get(d)!.push(s.stepId);
+      dependents.get(d)?.push(s.stepId);
     }
   }
   const ready = steps

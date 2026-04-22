@@ -3,7 +3,7 @@ import { checkRunRegression, runEvalSuite } from '../runtime.js';
 import { promptEvalSuite } from '../suites/prompt-eval.js';
 import type { EvalExecutor, EvalRunReport } from '../types.js';
 
-const stubExecutor: EvalExecutor = async (input, caseId, domain) => {
+const stubExecutor: EvalExecutor = async (input, _caseId, _domain) => {
   const start = Date.now();
   await new Promise((r) => setTimeout(r, 5));
   return {

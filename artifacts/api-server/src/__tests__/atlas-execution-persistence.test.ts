@@ -33,9 +33,8 @@
  * Skipped if no DATABASE_URL is configured.
  */
 
-import { randomUUID } from 'crypto';
-import type { NextFunction, Request, Response } from 'express';
-import express from 'express';
+import { randomUUID } from 'node:crypto';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
@@ -262,11 +261,11 @@ d(
       }>;
       const ourSignal = signals.find((s) => s.id === signalId);
       expect(ourSignal).toBeDefined();
-      expect(ourSignal!.title).toBe(PINNED.signal.title);
-      expect(ourSignal!.severity).toBe(PINNED.signal.severity);
-      expect(ourSignal!.source).toBe(PINNED.signal.source);
-      expect(ourSignal!.tenantId).toBe(TENANT);
-      expect(ourSignal!.payload).toEqual(PINNED.signal.payload);
+      expect(ourSignal?.title).toBe(PINNED.signal.title);
+      expect(ourSignal?.severity).toBe(PINNED.signal.severity);
+      expect(ourSignal?.source).toBe(PINNED.signal.source);
+      expect(ourSignal?.tenantId).toBe(TENANT);
+      expect(ourSignal?.payload).toEqual(PINNED.signal.payload);
 
       // 2) Evidence lookup by domain + workflowId (GET /:domain/atlas/evidence)
       const evList = await request(app).get(`/${DOMAIN}/atlas/evidence?workflowId=${WORKFLOW_ID}`);
@@ -280,10 +279,10 @@ d(
       }>;
       const ourEvidence = evidence.find((e) => e.id === evidenceId);
       expect(ourEvidence).toBeDefined();
-      expect(ourEvidence!.label).toBe(PINNED.evidence.label);
-      expect(ourEvidence!.value).toBe(PINNED.evidence.value);
-      expect(ourEvidence!.workflowId).toBe(WORKFLOW_ID);
-      expect(ourEvidence!.immutable).toBe(true);
+      expect(ourEvidence?.label).toBe(PINNED.evidence.label);
+      expect(ourEvidence?.value).toBe(PINNED.evidence.value);
+      expect(ourEvidence?.workflowId).toBe(WORKFLOW_ID);
+      expect(ourEvidence?.immutable).toBe(true);
 
       // 3) Outcome lookup by domain query (GET /:domain/atlas/outcomes)
       const ocList = await request(app).get(`/${DOMAIN}/atlas/outcomes?limit=200`);
@@ -302,19 +301,19 @@ d(
       }>;
       const ourOutcome = outcomes.find((o) => o.id === outcomeId);
       expect(ourOutcome).toBeDefined();
-      expect(ourOutcome!.title).toBe(PINNED.outcome.title);
-      expect(ourOutcome!.summary).toBe(PINNED.outcome.summary);
-      expect(ourOutcome!.status).toBe('success');
-      expect(ourOutcome!.businessImpact?.financialImpactUsd).toBe(
+      expect(ourOutcome?.title).toBe(PINNED.outcome.title);
+      expect(ourOutcome?.summary).toBe(PINNED.outcome.summary);
+      expect(ourOutcome?.status).toBe('success');
+      expect(ourOutcome?.businessImpact?.financialImpactUsd).toBe(
         PINNED.outcome.businessImpact.financialImpactUsd,
       );
-      expect(ourOutcome!.businessImpact?.operationalSeverity).toBe(
+      expect(ourOutcome?.businessImpact?.operationalSeverity).toBe(
         PINNED.outcome.businessImpact.operationalSeverity,
       );
-      expect(ourOutcome!.businessImpact?.entitiesAffected).toBe(
+      expect(ourOutcome?.businessImpact?.entitiesAffected).toBe(
         PINNED.outcome.businessImpact.entitiesAffected,
       );
-      expect(ourOutcome!.metadata).toEqual(PINNED.outcome.metadata);
+      expect(ourOutcome?.metadata).toEqual(PINNED.outcome.metadata);
 
       // 4) Evaluation hook lookup — both by domain query and by id
       const hooksList = await request(app).get(`/${DOMAIN}/atlas/evaluation-hooks`);
@@ -329,22 +328,22 @@ d(
       }>;
       const ourHook = hooks.find((h) => h.id === hookId);
       expect(ourHook).toBeDefined();
-      expect(ourHook!.workflowId).toBe(PINNED.hook.workflowId);
-      expect(ourHook!.workflowName).toBe(PINNED.hook.workflowName);
-      expect(ourHook!.replayable).toBe(true);
-      expect(ourHook!.signalSnapshotCount).toBe(1);
-      expect(ourHook!.benchmarkMetrics?.latencyMs).toBe(PINNED.hook.benchmarkMetrics.latencyMs);
+      expect(ourHook?.workflowId).toBe(PINNED.hook.workflowId);
+      expect(ourHook?.workflowName).toBe(PINNED.hook.workflowName);
+      expect(ourHook?.replayable).toBe(true);
+      expect(ourHook?.signalSnapshotCount).toBe(1);
+      expect(ourHook?.benchmarkMetrics?.latencyMs).toBe(PINNED.hook.benchmarkMetrics.latencyMs);
 
       // Direct id lookup through the engine (the same path the replay
       // endpoint takes internally).
       const engine = await import('../lib/atlas-execution-engine.js');
       const fetched = await engine.getEvaluationHookById(hookId);
       expect(fetched).toBeDefined();
-      expect(fetched!.id).toBe(hookId);
-      expect(fetched!.workflowId).toBe(PINNED.hook.workflowId);
-      expect(fetched!.signalSnapshot).toHaveLength(1);
-      expect(fetched!.signalSnapshot[0].id).toBe(signalId);
-      expect(fetched!.signalSnapshot[0].title).toBe(PINNED.signal.title);
+      expect(fetched?.id).toBe(hookId);
+      expect(fetched?.workflowId).toBe(PINNED.hook.workflowId);
+      expect(fetched?.signalSnapshot).toHaveLength(1);
+      expect(fetched?.signalSnapshot[0].id).toBe(signalId);
+      expect(fetched?.signalSnapshot[0].title).toBe(PINNED.signal.title);
 
       // Direct by-ID retrieval for signal/evidence/outcome through the DB
       // layer (no public GET-by-id endpoint exists for these, so we go
@@ -362,9 +361,9 @@ d(
         .where(eq(atlasSignalsTable.id, signalId))
         .limit(1);
       expect(sigRow).toBeDefined();
-      expect(sigRow!.title).toBe(PINNED.signal.title);
-      expect(sigRow!.tenantId).toBe(TENANT);
-      expect(sigRow!.payload).toEqual(PINNED.signal.payload);
+      expect(sigRow?.title).toBe(PINNED.signal.title);
+      expect(sigRow?.tenantId).toBe(TENANT);
+      expect(sigRow?.payload).toEqual(PINNED.signal.payload);
 
       const [evRow] = await db
         .select()
@@ -372,8 +371,8 @@ d(
         .where(eq(atlasEvidenceTable.id, evidenceId))
         .limit(1);
       expect(evRow).toBeDefined();
-      expect(evRow!.label).toBe(PINNED.evidence.label);
-      expect(evRow!.workflowId).toBe(WORKFLOW_ID);
+      expect(evRow?.label).toBe(PINNED.evidence.label);
+      expect(evRow?.workflowId).toBe(WORKFLOW_ID);
 
       const [ocRow] = await db
         .select()
@@ -381,9 +380,9 @@ d(
         .where(eq(atlasOutcomesTable.id, outcomeId))
         .limit(1);
       expect(ocRow).toBeDefined();
-      expect(ocRow!.title).toBe(PINNED.outcome.title);
-      expect(ocRow!.status).toBe('success');
-      expect(ocRow!.financialImpactUsd).toBe(PINNED.outcome.businessImpact.financialImpactUsd);
+      expect(ocRow?.title).toBe(PINNED.outcome.title);
+      expect(ocRow?.status).toBe('success');
+      expect(ocRow?.financialImpactUsd).toBe(PINNED.outcome.businessImpact.financialImpactUsd);
     });
 
     it('Phase 3 — replay endpoint rehydrates from the persisted hook', async () => {
@@ -424,9 +423,9 @@ d(
       }>;
       const replayHook = hooks.find((h) => h.id === replayRes.body.replayHookId);
       expect(replayHook).toBeDefined();
-      expect(replayHook!.workflowName).toContain('[REPLAY]');
-      expect(replayHook!.workflowName).toContain(runId);
-      expect(replayHook!.replayable).toBe(false);
+      expect(replayHook?.workflowName).toContain('[REPLAY]');
+      expect(replayHook?.workflowName).toContain(runId);
+      expect(replayHook?.replayable).toBe(false);
     });
   },
 );

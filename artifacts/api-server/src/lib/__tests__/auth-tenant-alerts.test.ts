@@ -38,9 +38,9 @@ describe('tenant isolation violation tracking (OBS-005)', () => {
     expect(t.getTenantIsolationViolationCount()).toBe(1);
     const since = t.getTenantIsolationViolationsSince(before - 1);
     expect(since.length).toBe(1);
-    expect(since[0]!.userId).toBe(42);
-    expect(since[0]!.attemptedOrgId).toBe(7);
-    expect(since[0]!.reason).toBe('cross-tenant test');
+    expect(since[0]?.userId).toBe(42);
+    expect(since[0]?.attemptedOrgId).toBe(7);
+    expect(since[0]?.reason).toBe('cross-tenant test');
     // Nothing newer than now+ts.
     expect(t.getTenantIsolationViolationsSince(Date.now() + 1000).length).toBe(0);
   });

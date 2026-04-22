@@ -22,9 +22,7 @@ async function upsertFlag(key: string, name: string, description: string) {
     await db
       .insert(featureFlagsTable)
       .values({ key, name, description, isEnabled: true, rolloutPercentage: 100 });
-    console.log(`Created feature flag: ${key}`);
   } else {
-    console.log(`Feature flag already exists: ${key}`);
   }
 }
 
@@ -433,18 +431,15 @@ async function seedCertPrograms() {
       .from(certificationProgramsTable)
       .where(eq(certificationProgramsTable.slug, program.slug));
     if (existing) {
-      console.log(`Cert program already exists: ${program.slug}`);
       continue;
     }
     const [inserted] = await db.insert(certificationProgramsTable).values(program).returning();
-    console.log(`Created cert program: ${program.slug} (id: ${inserted.id})`);
 
     await db.insert(certificationStatusTable).values({
       programId: inserted.id,
       overallStatus: 'not_started',
       readinessScore: 0,
     });
-    console.log(`Created initial status for: ${program.slug}`);
 
     const reqList = CERT_REQUIREMENTS[program.slug];
     if (reqList) {
@@ -470,7 +465,6 @@ async function seedCertPrograms() {
           sortOrder: i,
         });
       }
-      console.log(`Created ${reqList.length} requirements for: ${program.slug}`);
     }
   }
 }
@@ -504,9 +498,7 @@ async function seedCapitalPackets() {
         sortOrder: d.sortOrder,
       });
     }
-    console.log(`Created lender packet with ${LENDER_DELIVERABLES.length} deliverables`);
   } else {
-    console.log('Lender packet already exists');
   }
 
   const [existingInvestor] = await db
@@ -537,9 +529,7 @@ async function seedCapitalPackets() {
         sortOrder: d.sortOrder,
       });
     }
-    console.log(`Created investor packet with ${INVESTOR_DELIVERABLES.length} deliverables`);
   } else {
-    console.log('Investor packet already exists');
   }
 }
 
@@ -646,9 +636,7 @@ async function seedDiligenceChecklists() {
         sortOrder: i,
       });
     }
-    console.log(`Created lender diligence checklist with ${lenderItems.length} items`);
   } else {
-    console.log('Lender diligence checklist already exists');
   }
 
   const [existingInv] = await db
@@ -741,14 +729,11 @@ async function seedDiligenceChecklists() {
         sortOrder: i,
       });
     }
-    console.log(`Created investor data room checklist with ${investorItems.length} items`);
   } else {
-    console.log('Investor data room checklist already exists');
   }
 }
 
 async function main() {
-  console.log('Seeding capital & certification data...');
   await upsertFlag(
     'capital_readiness_os_enabled',
     'Capital Readiness OS',
@@ -762,11 +747,9 @@ async function main() {
   await seedCertPrograms();
   await seedCapitalPackets();
   await seedDiligenceChecklists();
-  console.log('Seeding complete.');
   process.exit(0);
 }
 
-main().catch((err) => {
-  console.error('Seed failed:', err);
+main().catch((_err) => {
   process.exit(1);
 });

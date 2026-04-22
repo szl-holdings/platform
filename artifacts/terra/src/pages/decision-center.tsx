@@ -23,7 +23,7 @@ export default function DecisionCenterPage() {
   const sources = VARIANT_SOURCE_HEALTH[VARIANT] ?? [];
   const runs = VARIANT_RUNS[VARIANT] ?? [];
 
-  async function handleAction(id: string, action: RecommendationAction, justification?: string) {
+  async function handleAction(id: string, action: RecommendationAction, _justification?: string) {
     setRecs((prev) =>
       prev.map((r) => {
         if (r.id !== id) return r;

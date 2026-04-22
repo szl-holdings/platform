@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   type DimensionValue,
   Platform,
@@ -190,7 +190,7 @@ function MilestoneRow({ milestone }: { milestone: Milestone }) {
   return (
     <View style={[styles.milestoneRow, { borderBottomColor: colors.border }]}>
       <View
-        style={[styles.milestoneIcon, { backgroundColor: color + '20', borderColor: color + '40' }]}
+        style={[styles.milestoneIcon, { backgroundColor: `${color}20`, borderColor: `${color}40` }]}
       >
         <Feather
           name={isComplete ? 'check' : isDelayed ? 'alert-triangle' : 'clock'}
@@ -216,7 +216,7 @@ function MilestoneRow({ milestone }: { milestone: Milestone }) {
         </Text>
       </View>
       <View
-        style={[styles.statusPill, { backgroundColor: color + '15', borderColor: color + '30' }]}
+        style={[styles.statusPill, { backgroundColor: `${color}15`, borderColor: `${color}30` }]}
       >
         <Text style={[styles.statusPillText, { color }]}>{milestone.status}</Text>
       </View>
@@ -356,7 +356,7 @@ export default function ConstructionMonitorScreen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · CONSTRUCTION</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · CONSTRUCTION</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Project Monitor</Text>
         </View>
         {displayProjects.reduce((acc, p) => acc + p.flags.length, 0) > 0 && (
@@ -388,7 +388,7 @@ export default function ConstructionMonitorScreen() {
               styles.projectTab,
               {
                 borderColor: selectedProject === p.id ? ACCENT : colors.border,
-                backgroundColor: selectedProject === p.id ? ACCENT + '12' : 'transparent',
+                backgroundColor: selectedProject === p.id ? `${ACCENT}12` : 'transparent',
               },
             ]}
           >
@@ -421,12 +421,12 @@ export default function ConstructionMonitorScreen() {
                 <Text style={[styles.projectAddress, { color: colors.mutedForeground }]}>
                   {project.address}
                 </Text>
-                <Text style={[styles.projectType, { color: ACCENT + 'cc' }]}>{project.type}</Text>
+                <Text style={[styles.projectType, { color: `${ACCENT}cc` }]}>{project.type}</Text>
               </View>
               <View
                 style={[
                   styles.inspBadge,
-                  { backgroundColor: inspColor + '15', borderColor: inspColor + '30' },
+                  { backgroundColor: `${inspColor}15`, borderColor: `${inspColor}30` },
                 ]}
               >
                 <Feather name="shield" size={11} color={inspColor} />

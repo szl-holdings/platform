@@ -273,15 +273,15 @@ export async function addEdgeEvidence(input: AddCstEvidence): Promise<CstEdgeEvi
     .returning();
 
   return {
-    id: row!.id,
-    edgeId: row!.edgeId,
-    evidenceType: row!.evidenceType,
-    payload: (row!.payload ?? {}) as Record<string, unknown>,
-    sourceId: row!.sourceId ?? undefined,
-    sourceLabel: row!.sourceLabel ?? undefined,
-    confidence: row!.confidence ?? 1.0,
-    recordedBy: row!.recordedBy ?? undefined,
-    recordedAt: row!.recordedAt.toISOString(),
+    id: row?.id,
+    edgeId: row?.edgeId,
+    evidenceType: row?.evidenceType,
+    payload: (row?.payload ?? {}) as Record<string, unknown>,
+    sourceId: row?.sourceId ?? undefined,
+    sourceLabel: row?.sourceLabel ?? undefined,
+    confidence: row?.confidence ?? 1.0,
+    recordedBy: row?.recordedBy ?? undefined,
+    recordedAt: row?.recordedAt.toISOString(),
   };
 }
 

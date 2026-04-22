@@ -1,6 +1,22 @@
 export * from './fixtures/index.js';
-export * from './harness.js';
-export * from './metrics.js';
+export {
+  type EvalHarnessRequest,
+  type PerQueryResult,
+  type EvalHarnessResult,
+  runRetrievalEval,
+  type LatencyBenchmarkResult,
+  computeLatencyPercentiles,
+} from './harness.js';
+export {
+  type RetrievedResult,
+  recallAtK,
+  precisionAtK,
+  ndcgAtK,
+  mrr,
+  exactMatchRecoveryRate,
+  computeAllMetrics,
+  aggregateMetrics,
+} from './metrics.js';
 export { printEvalResult } from './reporters/console.js';
 export { formatEvalResultAsJson, writeEvalResultJson } from './reporters/json.js';
 export * from './runner.js';

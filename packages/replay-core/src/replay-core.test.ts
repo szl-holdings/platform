@@ -80,7 +80,7 @@ describe('replaySnapshot', () => {
       metadata: {},
     });
 
-    const result = await replaySnapshot(snapshot, async (input, context, snapshotId) => ({
+    const result = await replaySnapshot(snapshot, async (_input, _context, snapshotId) => ({
       snapshotId,
       agentOutput: { severity: 'high', actionRequired: true },
       latencyMs: 50,
@@ -120,7 +120,7 @@ describe('replaySnapshot', () => {
 
     expect(result.groundTruthMatch).toBe(false);
     expect(result.errors).toBeDefined();
-    expect(result.errors![0]).toMatch(/timed out/i);
+    expect(result.errors?.[0]).toMatch(/timed out/i);
   });
 });
 

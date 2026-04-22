@@ -29,29 +29,26 @@
  * sections degrade to a "skipped" state instead of failing the whole script.
  */
 
-const BASE = `http://localhost:${process.env['PORT'] ?? 8080}`;
-const TOKEN = process.env['ALLOY_INTERNAL_TOKEN'] ?? process.env['TERRA_DILIGENCE_TOKEN'] ?? '';
+const BASE = `http://localhost:${process.env.PORT ?? 8080}`;
+const TOKEN = process.env.ALLOY_INTERNAL_TOKEN ?? process.env.TERRA_DILIGENCE_TOKEN ?? '';
 
 export {};
 
 const errors: string[] = [];
-let passed = 0;
-let skipped = 0;
+let _passed = 0;
+let _skipped = 0;
 
 function assert(label: string, cond: boolean, detail?: string) {
   if (cond) {
-    console.log(`[terra-dil] ✓  ${label}`);
-    passed++;
+    _passed++;
   } else {
     const msg = detail ? `${label} — ${detail}` : label;
-    console.error(`[terra-dil] ✗  ${msg}`);
     errors.push(msg);
   }
 }
 
-function skip(label: string, reason: string) {
-  console.warn(`[terra-dil] ⚠  SKIP ${label} — ${reason}`);
-  skipped++;
+function skip(_label: string, _reason: string) {
+  _skipped++;
 }
 
 function authJsonHeaders(): Record<string, string> {
@@ -121,7 +118,6 @@ function tinyPdfBlob(label: string): Blob {
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 async function testFullLifecycle(): Promise<void> {
-  console.log('\n[terra-dil] === Full lifecycle (create → upload×2 → verify) ===');
 
   if (!TOKEN) {
     skip('full lifecycle', 'no ALLOY_INTERNAL_TOKEN / TERRA_DILIGENCE_TOKEN configured');
@@ -223,17 +219,16 @@ async function testFullLifecycle(): Promise<void> {
   assert('GET returns the created matter', !!got, `matters=${matters.length}`);
   assert(
     'completionPct recomputed to 50',
-    got?.['completionPct'] === 50,
-    `completionPct=${got?.['completionPct']}`,
+    got?.completionPct === 50,
+    `completionPct=${got?.completionPct}`,
   );
-  const chain = (got?.['evidenceChain'] as Array<Record<string, unknown>> | undefined) ?? [];
+  const chain = (got?.evidenceChain as Array<Record<string, unknown>> | undefined) ?? [];
   assert('evidenceChain has 2 rows', chain.length === 2, `len=${chain.length}`);
   const verifiedRow = chain.find((c) => c.id === ev1Id);
-  assert('evidenceChain row #1 reflects verified', verifiedRow?.['status'] === 'verified');
+  assert('evidenceChain row #1 reflects verified', verifiedRow?.status === 'verified');
 }
 
 async function testInvalidCategory(): Promise<void> {
-  console.log('\n[terra-dil] === Edge: invalid category ===');
   if (!TOKEN) return skip('invalid category', 'no token');
 
   // Create a throwaway matter just for the edge-case POST
@@ -260,7 +255,6 @@ async function testInvalidCategory(): Promise<void> {
 }
 
 async function testOversizeFile(): Promise<void> {
-  console.log('\n[terra-dil] === Edge: > 25 MB file rejected ===');
   if (!TOKEN) return skip('oversize file', 'no token');
 
   const create = await postJson('/api/terra/cognitive/diligence-room/matters', {
@@ -295,7 +289,6 @@ async function testOversizeFile(): Promise<void> {
 }
 
 async function testDisallowedMime(): Promise<void> {
-  console.log('\n[terra-dil] === Edge: disallowed extension silently dropped ===');
   if (!TOKEN) return skip('disallowed mime', 'no token');
 
   const create = await postJson('/api/terra/cognitive/diligence-room/matters', {
@@ -330,7 +323,6 @@ async function testDisallowedMime(): Promise<void> {
 }
 
 async function testMissingLabel(): Promise<void> {
-  console.log('\n[terra-dil] === Edge: missing label rejected ===');
   if (!TOKEN) return skip('missing label', 'no token');
 
   const create = await postJson('/api/terra/cognitive/diligence-room/matters', {
@@ -356,7 +348,6 @@ async function testMissingLabel(): Promise<void> {
 }
 
 async function testPatchInvalidStatus(): Promise<void> {
-  console.log('\n[terra-dil] === Edge: PATCH evidence with invalid status ===');
   if (!TOKEN) return skip('patch bogus status', 'no token');
 
   const create = await postJson('/api/terra/cognitive/diligence-room/matters', {
@@ -391,7 +382,6 @@ async function testPatchInvalidStatus(): Promise<void> {
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 async function run() {
-  console.log(`[terra-dil] Terra Diligence Lifecycle Smoke Tests — ${BASE}\n`);
 
   await testFullLifecycle();
   await testInvalidCategory();
@@ -400,20 +390,14 @@ async function run() {
   await testMissingLabel();
   await testPatchInvalidStatus();
 
-  console.log('\n─────────────────────────────────────────────────────────────');
-  console.log(`[terra-dil] Passed: ${passed}  Failed: ${errors.length}  Skipped: ${skipped}`);
-
   if (errors.length === 0) {
-    console.log('[terra-dil] ✓  All Terra diligence lifecycle assertions PASSED');
     process.exit(0);
   } else {
-    console.error('[terra-dil] ✗  Failures:');
-    errors.forEach((e) => console.error(`         • ${e}`));
+    errors.forEach((_e) => {});
     process.exit(1);
   }
 }
 
-run().catch((err) => {
-  console.error('[terra-dil] Unexpected error:', err);
+run().catch((_err) => {
   process.exit(1);
 });

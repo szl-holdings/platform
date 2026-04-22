@@ -23,7 +23,6 @@ import {
   type DecideApprovalResult,
   decideApproval,
 } from '@workspace/approvals-inbox';
-import { randomUUID } from 'crypto';
 
 export type { ApprovalDecision, ApprovalInterruptSpec, ApprovalRequest };
 

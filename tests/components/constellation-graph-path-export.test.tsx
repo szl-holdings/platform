@@ -6,7 +6,6 @@
  */
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   buildPathExportMarkdown,
@@ -243,7 +242,7 @@ describe('ConstellationGraph — Export path button', () => {
       const idx = downloads.length - 1;
       if (idx >= 0) downloads[idx].name = (this as HTMLAnchorElement).download;
       // Don't call origClick — happy-dom would try to follow blob: URLs.
-      return undefined as unknown as void;
+      return undefined as unknown as undefined;
     };
     // Restore on teardown via stub registry.
     (globalThis as unknown as { __origAnchorClick?: typeof origClick }).__origAnchorClick =
@@ -299,9 +298,9 @@ describe('ConstellationGraph — Export path button', () => {
     const mdDl = downloads.find((d) => d.type.startsWith('text/markdown'));
     expect(jsonDl).toBeTruthy();
     expect(mdDl).toBeTruthy();
-    expect(jsonDl!.name).toMatch(/^constellation-path-hub-property-to-target-vessel-.*\.json$/);
-    expect(mdDl!.name).toMatch(/^constellation-path-hub-property-to-target-vessel-.*\.md$/);
-    expect(jsonDl!.size).toBeGreaterThan(0);
-    expect(mdDl!.size).toBeGreaterThan(0);
+    expect(jsonDl?.name).toMatch(/^constellation-path-hub-property-to-target-vessel-.*\.json$/);
+    expect(mdDl?.name).toMatch(/^constellation-path-hub-property-to-target-vessel-.*\.md$/);
+    expect(jsonDl?.size).toBeGreaterThan(0);
+    expect(mdDl?.size).toBeGreaterThan(0);
   });
 });

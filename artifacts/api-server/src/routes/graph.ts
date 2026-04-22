@@ -1,13 +1,4 @@
-import type { CstNode } from '@szl-holdings/constellation';
-import {
-  CstQueryFiltersSchema,
-  CstRelationshipFiltersSchema,
-  CstSearchParamsSchema,
-  getNodeById,
-  queryEdges,
-  queryNodes,
-  searchNodes,
-} from '@szl-holdings/constellation';
+import { type CstNode, CstQueryFiltersSchema, CstRelationshipFiltersSchema, CstSearchParamsSchema, getNodeById, queryEdges, queryNodes, searchNodes } from '@szl-holdings/constellation';
 import { cstEdgeEvidence, cstEdges, cstNodes, db } from '@szl-holdings/db';
 import { eq, inArray, or } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
@@ -47,13 +38,13 @@ router.get(
 
       if (req.query.maxAgeSec !== undefined) {
         const v = Number(req.query.maxAgeSec);
-        if (!isFinite(v) || v <= 0)
+        if (!Number.isFinite(v) || v <= 0)
           return sendBadRequest(res, 'maxAgeSec must be a positive number');
         maxAgeSec = v;
       }
       if (req.query.minFreshnessScore !== undefined) {
         const v = Number(req.query.minFreshnessScore);
-        if (!isFinite(v) || v < 0 || v > 1)
+        if (!Number.isFinite(v) || v < 0 || v > 1)
           return sendBadRequest(res, 'minFreshnessScore must be between 0 and 1');
         minFreshnessScore = v;
       }
@@ -119,7 +110,7 @@ router.get(
     try {
       const { id } = req.params as { id: string };
       const rawLimit = parseInt((req.query.limit as string) ?? '25', 10);
-      if (isNaN(rawLimit) || rawLimit < 1 || rawLimit > 200) {
+      if (Number.isNaN(rawLimit) || rawLimit < 1 || rawLimit > 200) {
         return sendBadRequest(res, 'limit must be 1–200');
       }
 
@@ -212,15 +203,15 @@ router.get(
       const { id } = req.params as { id: string };
 
       const depth = parseInt((req.query.depth as string) ?? '2', 10);
-      if (isNaN(depth) || depth < 1 || depth > 4) {
+      if (Number.isNaN(depth) || depth < 1 || depth > 4) {
         return sendBadRequest(res, 'depth must be 1–4');
       }
       const maxNodes = parseInt((req.query.maxNodes as string) ?? '75', 10);
-      if (isNaN(maxNodes) || maxNodes < 2 || maxNodes > 300) {
+      if (Number.isNaN(maxNodes) || maxNodes < 2 || maxNodes > 300) {
         return sendBadRequest(res, 'maxNodes must be 2–300');
       }
       const perHopLimit = parseInt((req.query.perHopLimit as string) ?? '25', 10);
-      if (isNaN(perHopLimit) || perHopLimit < 1 || perHopLimit > 100) {
+      if (Number.isNaN(perHopLimit) || perHopLimit < 1 || perHopLimit > 100) {
         return sendBadRequest(res, 'perHopLimit must be 1–100');
       }
 
@@ -374,15 +365,15 @@ router.get(
         return sendBadRequest(res, "format must be 'json' or 'csv'");
       }
       const depth = parseInt((req.query.depth as string) ?? '2', 10);
-      if (isNaN(depth) || depth < 1 || depth > 4) {
+      if (Number.isNaN(depth) || depth < 1 || depth > 4) {
         return sendBadRequest(res, 'depth must be 1–4');
       }
       const maxNodes = parseInt((req.query.maxNodes as string) ?? '75', 10);
-      if (isNaN(maxNodes) || maxNodes < 2 || maxNodes > 300) {
+      if (Number.isNaN(maxNodes) || maxNodes < 2 || maxNodes > 300) {
         return sendBadRequest(res, 'maxNodes must be 2–300');
       }
       const perHopLimit = parseInt((req.query.perHopLimit as string) ?? '25', 10);
-      if (isNaN(perHopLimit) || perHopLimit < 1 || perHopLimit > 100) {
+      if (Number.isNaN(perHopLimit) || perHopLimit < 1 || perHopLimit > 100) {
         return sendBadRequest(res, 'perHopLimit must be 1–100');
       }
 
@@ -755,7 +746,7 @@ router.get(
       }
 
       const maxDepth = parseInt((req.query.maxDepth as string) ?? '4', 10);
-      if (isNaN(maxDepth) || maxDepth < 1 || maxDepth > 6) {
+      if (Number.isNaN(maxDepth) || maxDepth < 1 || maxDepth > 6) {
         return sendBadRequest(res, 'maxDepth must be 1–6');
       }
 
@@ -847,7 +838,7 @@ router.get(
       while (cur) {
         leftNodeIds.push(cur);
         const step = fromSide.get(cur);
-        if (!step || !step.parent) break;
+        if (!step?.parent) break;
         if (step.edge) leftEdges.push(step.edge);
         cur = step.parent;
       }
@@ -859,7 +850,7 @@ router.get(
       let walker: string | null = meeting;
       while (walker) {
         const step = toSide.get(walker);
-        if (!step || !step.parent) break;
+        if (!step?.parent) break;
         if (step.edge) rightEdges.push(step.edge);
         rightNodeIds.push(step.parent);
         walker = step.parent;
@@ -947,13 +938,13 @@ router.get('/graph/search', validateQuery(listQuerySchema), async (req: Request,
 
     if (req.query.minConfidence !== undefined) {
       const v = Number(req.query.minConfidence);
-      if (!isFinite(v) || v < 0 || v > 1)
+      if (!Number.isFinite(v) || v < 0 || v > 1)
         return sendBadRequest(res, 'minConfidence must be between 0 and 1');
       minConfidence = v;
     }
     if (req.query.maxAgeSec !== undefined) {
       const v = Number(req.query.maxAgeSec);
-      if (!isFinite(v) || v <= 0) return sendBadRequest(res, 'maxAgeSec must be a positive number');
+      if (!Number.isFinite(v) || v <= 0) return sendBadRequest(res, 'maxAgeSec must be a positive number');
       maxAgeSec = v;
     }
 

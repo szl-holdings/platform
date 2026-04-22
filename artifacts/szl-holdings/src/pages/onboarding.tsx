@@ -1,5 +1,4 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
-import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { markActivationEvent } from '@szl-holdings/shared-ui/onboarding';
 import { m } from 'framer-motion';
 import {
@@ -132,7 +131,7 @@ export default function OnboardingPage({ orgSlug: initialOrgSlug }: { orgSlug?: 
     setCompletedSteps(doneIdxs);
   }, [wizardStateQuery.data]);
 
-  const createOrgMutation = useStandardMutation({
+  const createOrgMutation = useStandardMutation<{ org?: { slug?: string } }, Error, void>({
     mutationFn: () =>
       apiPost('/onboarding/org', {
         name: profile.name,

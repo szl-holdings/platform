@@ -31,12 +31,7 @@ export type StepLogSinkError = (sink: StepLogSink, entry: StepLogEntry, error: u
 const sinks: StepLogSink[] = [];
 const inMemoryLog: StepLogEntry[] = [];
 
-let onSinkError: StepLogSinkError = (sink, entry, err) => {
-  console.error('[agents-core:step-log] Sink threw an error — entry will still be in-memory log', {
-    stepId: entry.stepId,
-    runId: entry.runId,
-    error: err instanceof Error ? err.message : String(err),
-  });
+let onSinkError: StepLogSinkError = (_sink, _entry, _err) => {
 };
 
 export function registerStepLogSink(sink: StepLogSink): void {

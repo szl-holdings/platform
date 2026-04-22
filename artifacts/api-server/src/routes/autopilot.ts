@@ -216,7 +216,7 @@ autopilotRouter.get('/autopilot/drift-alerts', (_req: Request, res: Response) =>
           },
         ]
       : []),
-    ...(GENOME_CONFIG.prism?.['Webhooks'] === 'stub'
+    ...(GENOME_CONFIG.prism?.Webhooks === 'stub'
       ? [
           {
             id: 'prism-webhooks-stub',
@@ -230,7 +230,7 @@ autopilotRouter.get('/autopilot/drift-alerts', (_req: Request, res: Response) =>
           },
         ]
       : []),
-    ...(GENOME_CONFIG.carlota?.['Webhooks'] === 'missing'
+    ...(GENOME_CONFIG.carlota?.Webhooks === 'missing'
       ? [
           {
             id: 'carlota-webhooks-missing',
@@ -730,7 +730,7 @@ function computeNextBestActions(
       effort: 'Low',
       impact: 'Medium',
       signals: [
-        `Genome: PRISM Webhooks = ${genome.prism?.['Webhooks'] ?? 'stub'}, Carlota Jo = ${genome.carlota?.['Webhooks'] ?? 'missing'}`,
+        `Genome: PRISM Webhooks = ${genome.prism?.Webhooks ?? 'stub'}, Carlota Jo = ${genome.carlota?.Webhooks ?? 'missing'}`,
         'Competitive: all 3 competitors support webhooks',
         `Drift: ${driftAlerts.filter((a) => a.metric === 'Webhooks').length} open drift cards`,
       ],

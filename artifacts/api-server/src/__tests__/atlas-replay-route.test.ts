@@ -14,8 +14,7 @@
  * touching the database.
  */
 
-import type { IRouter } from 'express';
-import express from 'express';
+import express, { type IRouter } from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

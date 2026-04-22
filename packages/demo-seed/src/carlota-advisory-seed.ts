@@ -474,17 +474,14 @@ export async function seedCarlotaAdvisoryData(): Promise<void> {
       if (rows.length) await tx.insert(carlotaClientMarketTrendTable).values(rows);
     }
   });
-  console.log('[demo-seed] ✓ Carlota Jo per-client advisory data seeded');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   seedCarlotaAdvisoryData()
     .then(() => {
-      console.log('[demo-seed] Done.');
       process.exit(0);
     })
-    .catch((err) => {
-      console.error('[demo-seed] Error:', err);
+    .catch((_err) => {
       process.exit(1);
     });
 }

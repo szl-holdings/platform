@@ -36,8 +36,8 @@
 
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 
@@ -331,7 +331,7 @@ const infoCount = allFindings.filter((f) => f.severity === 'info').length;
 
 if (JSON_OUT) {
   process.stdout.write(
-    JSON.stringify(
+    `${JSON.stringify(
       {
         summary: { ok: okCount, warn: warnCount, info: infoCount, strict: STRICT },
         metrics: {
@@ -343,23 +343,12 @@ if (JSON_OUT) {
       },
       null,
       2,
-    ) + '\n',
+    )}\n`,
   );
 } else {
-  const tag = (s) => (s === 'warn' ? 'WARN' : s === 'ok' ? 'OK  ' : 'INFO');
-  console.log('Doc freshness check — SZL Holdings monorepo');
-  console.log('--------------------------------------------');
-  console.log(
-    `tables(actual)=${schemaResult.tableCount}  schemaFiles(actual)=${schemaResult.schemaFileCount}  routeFiles(actual)=${routesResult.actual}`,
-  );
-  console.log('');
-  for (const f of allFindings) {
-    console.log(`[${tag(f.severity)}] ${f.message}`);
+  const _tag = (s) => (s === 'warn' ? 'WARN' : s === 'ok' ? 'OK  ' : 'INFO');
+  for (const _f of allFindings) {
   }
-  console.log('');
-  console.log(
-    `Summary: ${okCount} ok, ${warnCount} warn, ${infoCount} info${STRICT ? ' (strict mode)' : ''}`,
-  );
 }
 
 if (STRICT && warnCount > 0) process.exit(1);

@@ -20,7 +20,7 @@ servicesRouter.get('/services/health', (_req, res) => {
 });
 
 servicesRouter.get('/services/health/app/:appSlug', (req, res) => {
-  const appSlug = req.params['appSlug']!;
+  const appSlug = req.params.appSlug!;
   const mapping = APP_INTEGRATIONS[appSlug];
   if (!mapping) {
     res.status(404).json({ error: `No integration mapping found for app: ${appSlug}` });
@@ -35,7 +35,7 @@ servicesRouter.get('/services/health/app/:appSlug', (req, res) => {
 });
 
 servicesRouter.post('/services/health/app/:appSlug/test', async (req, res) => {
-  const appSlug = req.params['appSlug']!;
+  const appSlug = req.params.appSlug!;
   const mapping = APP_INTEGRATIONS[appSlug];
   if (!mapping) {
     res.status(404).json({ error: `No integration mapping found for app: ${appSlug}` });

@@ -1,42 +1,28 @@
 import {
-  auditLogsTable,
   azureTenantsTable,
-  dataverseConnectionsTable,
   db,
-  type InsertAzureTenant,
-  type InsertDataverseConnection,
   type InsertTenantBranding,
-  orgMembersTable,
   scimProvisionedUsersTable,
   scimSyncLogsTable,
   scimTokensTable,
   tenantBrandingTable,
   usersTable,
 } from '@szl-holdings/db';
-import { services } from '@szl-holdings/services';
-import crypto from 'crypto';
-import { and, count, desc, eq, inArray, sql } from 'drizzle-orm';
-import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
-import rateLimit from 'express-rate-limit';
-import { z } from 'zod';
-import { logActivity } from '../../lib/activity-logger';
+import crypto from 'node:crypto';
+import { and, desc, eq, } from 'drizzle-orm';
+import { type IRouter, type Request, type Response, Router } from 'express';
 import {
   handleRouteError,
   sendBadRequest,
-  sendError,
-  sendForbidden,
   sendNotFound,
   sendSuccess,
 } from '../../lib/api-response';
-import { decryptSecret, encryptSecret } from '../../lib/crypto';
 import {
   scimSyncSchema,
   scimTokenCreateSchema,
   scimTokenRevokeSchema,
   tenantBrandingResetSchema,
   tenantBrandingUpdateSchema,
-  tenantCreateSchema,
-  tenantStatusSchema,
   validateBody,
 } from '../../lib/validation';
 import { authMiddleware, requireRole } from '../../middlewares/auth';
@@ -55,7 +41,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -100,11 +86,11 @@ router.post(
         message:
           'SCIM bearer token created. Store the token securely — it will not be shown again.',
         token: {
-          id: token!.id,
-          label: token!.label,
+          id: token?.id,
+          label: token?.label,
           tokenPrefix,
-          expiresAt: token!.expiresAt,
-          createdAt: token!.createdAt,
+          expiresAt: token?.expiresAt,
+          createdAt: token?.createdAt,
         },
         rawToken,
         usage: {
@@ -126,7 +112,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -177,7 +163,7 @@ router.delete(
     try {
       const id = parseInt(String(req.params.id), 10);
       const tokenId = parseInt(String(req.params.tokenId), 10);
-      if (isNaN(id) || isNaN(tokenId)) {
+      if (Number.isNaN(id) || Number.isNaN(tokenId)) {
         sendBadRequest(res, 'Invalid ID');
         return;
       }
@@ -215,7 +201,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -335,7 +321,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -402,7 +388,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -439,7 +425,7 @@ router.put(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }
@@ -533,7 +519,7 @@ router.delete(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid tenant ID');
         return;
       }

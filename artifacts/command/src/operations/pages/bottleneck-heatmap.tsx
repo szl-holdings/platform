@@ -516,7 +516,7 @@ export default function BottleneckHeatmapPage() {
   const totalBlocked = HEAT_GRID.reduce((s, c) => s + c.blockedItems, 0);
   const ownerGaps = HEAT_GRID.filter((c) => c.ownerConfidence === 'gap').length;
   const contested = HEAT_GRID.filter((c) => c.ownerConfidence === 'contested').length;
-  const criticalCells = HEAT_GRID.filter((c) => c.level === 'critical').length;
+  const _criticalCells = HEAT_GRID.filter((c) => c.level === 'critical').length;
 
   return (
     <div className="p-4 md:p-5 space-y-5" style={{ background: BG.page }}>

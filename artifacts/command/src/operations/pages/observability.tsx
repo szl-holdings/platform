@@ -1,43 +1,21 @@
-import type {
-  DeploymentMarker,
-  ErrorHeatmapCell,
-  GoldenSignalsSnapshot,
-  ServiceApmTrace,
-} from '@szl-holdings/observability';
-import { MetricTimeSeriesSimulator } from '@szl-holdings/observability';
+import { type DeploymentMarker, type GoldenSignalsSnapshot, type ServiceApmTrace, MetricTimeSeriesSimulator } from '@szl-holdings/observability';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import {
   Activity,
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
   ChevronDown,
   ChevronUp,
-  Clock,
-  Gauge,
   GitCommit,
-  RefreshCw,
-  Server,
-  TrendingDown,
-  TrendingUp,
-  XCircle,
-  Zap,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
-  Cell,
   Line,
   LineChart,
   ReferenceLine,
   ResponsiveContainer,
-  Scatter,
-  ScatterChart,
   Tooltip,
   XAxis,
   YAxis,
@@ -188,7 +166,7 @@ function TraceWaterfall({ trace }: { trace: ServiceApmTrace }) {
 
 function ApdexGauge({ score, service }: { score: number; service: string }) {
   const { label, color } = apdexToLabel(score);
-  const angle = -135 + score * 270;
+  const _angle = -135 + score * 270;
 
   return (
     <div className="text-center">

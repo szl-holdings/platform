@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   Platform,
@@ -115,8 +115,7 @@ async function scheduleDigestNotification(config: DigestConfig): Promise<void> {
     });
 
     await AsyncStorage.setItem(NOTIFICATION_ID_KEY, notificationId);
-  } catch (err) {
-    console.warn('[CORTEX Digest] Notification scheduling failed:', err);
+  } catch (_err) {
   }
 }
 
@@ -214,9 +213,8 @@ export default function DigestConfigScreen() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-      } catch (apiErr) {
+      } catch (_apiErr) {
         apiOk = false;
-        console.warn('[CORTEX Digest] API sync failed (config saved locally):', apiErr);
         Alert.alert(
           'Saved locally',
           "We couldn't sync your digest schedule with the server, so push delivery may not run at your chosen time. Your phone will still fire the local reminder. Try saving again when you're online.",

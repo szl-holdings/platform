@@ -1,4 +1,4 @@
-import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import {
   SettingsCard,
@@ -10,7 +10,6 @@ import {
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  Activity,
   Bell,
   BellOff,
   ChevronRight,

@@ -24,7 +24,7 @@ export class WriteQueue {
       flushIntervalMs: options.flushIntervalMs ?? 100,
       maxBatchSize: options.maxBatchSize ?? 256,
       onFlushError:
-        options.onFlushError ?? ((err) => console.error('[trace-queue] flush error', err)),
+        options.onFlushError ?? ((_err) => {}),
     };
   }
 

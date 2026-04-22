@@ -3,7 +3,7 @@ import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { Skeleton } from '@szl-holdings/shared-ui/ui/skeleton';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion } from 'framer-motion';
-import { BarChart3, CheckCircle2, Clock, User, Wrench } from 'lucide-react';
+import { BarChart3, CheckCircle2, Clock, Wrench } from 'lucide-react';
 import { technicians as fallbackTechnicians, type Technician } from '@/data/seed-data';
 
 interface ApiTechnician {

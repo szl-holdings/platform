@@ -26,27 +26,27 @@ export class AIAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["AI_INTEGRATIONS_OPENAI_API_KEY or OPENAI_API_KEY or ANTHROPIC_API_KEY"];
 
   private get replitProxyUrl(): string | undefined {
-    return process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"];
+    return process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
   }
 
   private get replitProxyKey(): string | undefined {
-    return process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
+    return process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
   }
 
   private get anthropicKey(): string | undefined {
-    return process.env["ANTHROPIC_API_KEY"];
+    return process.env.ANTHROPIC_API_KEY;
   }
 
   private get openaiKey(): string | undefined {
-    return process.env["OPENAI_API_KEY"];
+    return process.env.OPENAI_API_KEY;
   }
 
   private get geminiKey(): string | undefined {
-    return process.env["GEMINI_API_KEY"];
+    return process.env.GEMINI_API_KEY;
   }
 
   private get huggingfaceKey(): string | undefined {
-    return process.env["HUGGINGFACE_API_KEY"];
+    return process.env.HUGGINGFACE_API_KEY;
   }
 
   private get hasReplitProxy(): boolean {
@@ -108,9 +108,9 @@ export class AIAdapter extends ServiceAdapter {
   ): Promise<ChatCompletionResult> {
     if (!this.isLive && provider !== "gemini" && provider !== "huggingface") {
       const isProduction =
-        process.env["NODE_ENV"] === "production" ||
-        process.env["APP_ENV"] === "production" ||
-        process.env["RUNTIME_MODE"] === "production";
+        process.env.NODE_ENV === "production" ||
+        process.env.APP_ENV === "production" ||
+        process.env.RUNTIME_MODE === "production";
       if (isProduction) {
         throw new Error(
           `[ai-adapter] Provider "${provider}" is not configured in production mode. ` +
@@ -157,11 +157,11 @@ export class AIAdapter extends ServiceAdapter {
     // Mock mode is opt-in only — set AI_MOCK_MODE=true to enable demo/test mode.
     // In production mode, AI_MOCK_MODE is disallowed: mock AI must never masquerade
     // as real operational behavior in a live customer-facing environment.
-    if (process.env["AI_MOCK_MODE"] === "true") {
+    if (process.env.AI_MOCK_MODE === "true") {
       const isProduction =
-        process.env["NODE_ENV"] === "production" ||
-        process.env["APP_ENV"] === "production" ||
-        process.env["RUNTIME_MODE"] === "production";
+        process.env.NODE_ENV === "production" ||
+        process.env.APP_ENV === "production" ||
+        process.env.RUNTIME_MODE === "production";
       if (isProduction) {
         throw new Error(
           "[ai-adapter] AI_MOCK_MODE=true is not permitted in production mode. " +
@@ -188,7 +188,7 @@ export class AIAdapter extends ServiceAdapter {
     if (providers.length === 0) {
       // In production mode, missing AI credentials is a hard failure — never silently mock.
       // In non-production modes, fall back to mock to keep demos and local dev functional.
-      if (process.env["NODE_ENV"] === "production" || process.env["APP_ENV"] === "production" || process.env["RUNTIME_MODE"] === "production") {
+      if (process.env.NODE_ENV === "production" || process.env.APP_ENV === "production" || process.env.RUNTIME_MODE === "production") {
         throw new Error(
           "[ai-adapter] No AI providers configured in production mode. " +
             "Set AI_INTEGRATIONS_OPENAI_API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY to enable AI features. " +
@@ -206,15 +206,14 @@ export class AIAdapter extends ServiceAdapter {
         return await tryProvider();
       } catch (err) {
         errors.push(err instanceof Error ? err.message : String(err));
-        continue;
       }
     }
 
     // All configured providers failed.
     const isProduction =
-      process.env["NODE_ENV"] === "production" ||
-      process.env["APP_ENV"] === "production" ||
-      process.env["RUNTIME_MODE"] === "production";
+      process.env.NODE_ENV === "production" ||
+      process.env.APP_ENV === "production" ||
+      process.env.RUNTIME_MODE === "production";
 
     if (isProduction) {
       throw new Error(
@@ -329,7 +328,7 @@ export class AIAdapter extends ServiceAdapter {
       messages: nonSystemMessages,
     };
     if (systemMessage) {
-      body["system"] = systemMessage.content;
+      body.system = systemMessage.content;
     }
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -382,7 +381,7 @@ export class AIAdapter extends ServiceAdapter {
       generationConfig: { maxOutputTokens: options?.maxTokens ?? 1024 },
     };
     if (systemMessage) {
-      body["systemInstruction"] = { parts: [{ text: systemMessage.content }] };
+      body.systemInstruction = { parts: [{ text: systemMessage.content }] };
     }
 
     const response = await fetch(
@@ -464,9 +463,9 @@ export class AIAdapter extends ServiceAdapter {
     options?: { model?: string; maxTokens?: number },
   ): AsyncGenerator<string, void, unknown> {
     const isProduction =
-      process.env["NODE_ENV"] === "production" ||
-      process.env["APP_ENV"] === "production" ||
-      process.env["RUNTIME_MODE"] === "production";
+      process.env.NODE_ENV === "production" ||
+      process.env.APP_ENV === "production" ||
+      process.env.RUNTIME_MODE === "production";
 
     if (!this.isLive) {
       if (isProduction) {
@@ -498,7 +497,6 @@ export class AIAdapter extends ServiceAdapter {
         return;
       } catch (err) {
         streamErrors.push(err instanceof Error ? err.message : String(err));
-        continue;
       }
     }
 
@@ -554,7 +552,7 @@ export class AIAdapter extends ServiceAdapter {
       stream: true,
     };
     if (systemMessage) {
-      body["system"] = systemMessage.content;
+      body.system = systemMessage.content;
     }
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -587,7 +585,7 @@ export class AIAdapter extends ServiceAdapter {
 
       for (const line of lines) {
         const trimmed = line.trim();
-        if (!trimmed || !trimmed.startsWith("data: ")) continue;
+        if (!trimmed?.startsWith("data: ")) continue;
         const data = trimmed.slice(6);
         if (data === "[DONE]") return;
         try {
@@ -600,7 +598,6 @@ export class AIAdapter extends ServiceAdapter {
           }
           if (parsed.type === "message_stop") return;
         } catch {
-          continue;
         }
       }
     }
@@ -647,7 +644,7 @@ export class AIAdapter extends ServiceAdapter {
 
       for (const line of lines) {
         const trimmed = line.trim();
-        if (!trimmed || !trimmed.startsWith("data: ")) continue;
+        if (!trimmed?.startsWith("data: ")) continue;
         const data = trimmed.slice(6);
         if (data === "[DONE]") return;
         try {
@@ -657,7 +654,6 @@ export class AIAdapter extends ServiceAdapter {
           const content = parsed.choices[0]?.delta?.content;
           if (content) yield content;
         } catch {
-          continue;
         }
       }
     }
@@ -667,7 +663,7 @@ export class AIAdapter extends ServiceAdapter {
     const response = MOCK_RESPONSES[Math.floor(Math.random() * MOCK_RESPONSES.length)]!;
     const words = response.split(" ");
     for (const word of words) {
-      yield word + " ";
+      yield `${word} `;
       await new Promise((r) => setTimeout(r, 50));
     }
   }

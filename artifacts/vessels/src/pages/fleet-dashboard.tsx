@@ -4,18 +4,15 @@ import { ActivityFeed } from '@szl-holdings/shared-ui/collaboration';
 import { ExportButton } from '@szl-holdings/shared-ui/data-export';
 import { ActionLoop, DataProvenance, RoleSelector } from '@szl-holdings/shared-ui/data-provenance';
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
-import type { ActivationStep } from '@szl-holdings/shared-ui/onboarding';
-import { ActivationBanner, useActivationState } from '@szl-holdings/shared-ui/onboarding';
+import { type ActivationStep, ActivationBanner, useActivationState } from '@szl-holdings/shared-ui/onboarding';
 import type { DataProvenanceInfo } from '@szl-holdings/shared-ui/ontology';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import {
   AlertTriangle,
   Anchor,
   BarChart3,
   ChevronRight,
   Clock,
-  Eye,
   EyeOff,
   Globe,
   MapPin,
@@ -26,14 +23,12 @@ import {
   TrendingUp,
   X,
 } from 'lucide-react';
-import type React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { VesselsGraphQLPanel } from '@/components/graphql-data-panel';
 import { dataProvider } from '@/data/data-provider';
 import { useFleetExceptions, useRoster, useSanctions } from '@/hooks/use-vessels-data';
-import type { RosterVessel } from '@/lib/api';
-import { api } from '@/lib/api';
+import { type RosterVessel, api } from '@/lib/api';
 
 const statusColors: Record<string, string> = {
   at_sea: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',

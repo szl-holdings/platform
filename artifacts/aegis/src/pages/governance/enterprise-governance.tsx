@@ -1,18 +1,15 @@
 import {
-  AlertTriangle,
   Archive,
   Building2,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
   Clock,
-  Database,
   FileText,
   Globe,
   Info,
   Key,
   Lock,
-  Settings,
   Shield,
   Users,
 } from 'lucide-react';

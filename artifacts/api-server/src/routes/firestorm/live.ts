@@ -1,68 +1,17 @@
-import { type DecisionObjectType, validateAndBuildDecision } from '@szl-holdings/ai-engine';
-import {
-  ingestFirestormAlert,
-  ingestFirestormFinding,
-  ingestFirestormScenario,
-} from '@szl-holdings/ai-engine/domain-embedding-hooks';
+
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  alloyRuntimeAgentsTable,
-  alloyRuntimeAgentVersionsTable,
-  auditEventsTable,
   db,
   firestormAlertsTable,
-  firestormAnalystNotebookTable,
-  firestormAssessmentsTable,
-  firestormAssetsTable,
-  firestormCaseMemoryTable,
-  firestormCasesTable,
-  firestormComplianceControlsTable,
-  firestormFindingsTable,
-  firestormHardeningControlsTable,
-  firestormIncidentsTable,
-  firestormMitreDetectionsTable,
-  firestormRiskScoresTable,
-  firestormScenariosTable,
-  firestormSimulationRunsTable,
-  firestormTradecraftDecisionsTable,
-  firestormTradecraftValidationAuditTable,
-  firestormWorkflowActionsTable,
-  type InsertFirestormCaseMemory,
-  insertFirestormAlertSchema,
-  insertFirestormAnalystNotebookSchema,
-  insertFirestormAssessmentSchema,
-  insertFirestormAssetSchema,
-  insertFirestormCaseSchema,
-  insertFirestormFindingSchema,
-  insertFirestormIncidentSchema,
-  insertFirestormRiskScoreSchema,
-  insertFirestormScenarioSchema,
-  insertFirestormSimulationRunSchema,
-  insertFirestormTradecraftDecisionSchema,
-  insertFirestormWorkflowActionSchema,
 } from '@szl-holdings/db';
-import { and, desc, eq, inArray, or, sql } from 'drizzle-orm';
-import { type IRouter, type RequestHandler, Router } from 'express';
-import rateLimit from 'express-rate-limit';
-import { LRUCache } from 'lru-cache';
-import { z } from 'zod';
+import { type IRouter, Router } from 'express';
 import {
   handleRouteError,
   sendCreated,
-  sendNoContent,
-  sendNotFound,
   sendSuccess,
 } from '../../lib/api-response';
-import { logger } from '../../lib/logger';
-import { broadcastWs, FIRESTORM_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
-import {
-  ingestDecisionToEvidenceIndex,
-  queryEvidenceIndex,
-} from '../../lib/tradecraft-evidence-store';
 import { listQuerySchema, validateBody, validateQuery } from '../../lib/validation';
-import { authMiddleware, parseIdParam } from '../../middlewares/auth';
-import { validateIfMatch } from '../../middlewares/optimistic-concurrency';
-import { REFERENCE_COMPLIANCE_CONTROLS } from '../readiness.js';
+import { authMiddleware, } from '../../middlewares/auth';
 import {
   fetchFsJson,
   fetchFsText,
@@ -149,7 +98,7 @@ router.get(
   async (req, res) => {
     try {
       const ransomwareOnly = req.query.ransomware === 'true';
-      const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+      const limit = Math.min(parseInt(req.query.limit as string, 10) || 20, 50);
       const data = await getFsCached('firestorm-cisa-kev', 3600000, async () => {
         try {
           const json = (await fetchFsJson(
@@ -205,7 +154,7 @@ router.get(
     try {
       const severity = (req.query.severity as string)?.toUpperCase();
       const keyword = req.query.keyword as string;
-      const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+      const limit = Math.min(parseInt(req.query.limit as string, 10) || 10, 20);
       const cacheKey = `firestorm-nvd-${severity ?? 'all'}-${keyword ?? ''}-${limit}`;
       const data = await getFsCached(cacheKey, 600000, async () => {
         try {

@@ -1,6 +1,5 @@
 import {
   AlertTriangle,
-  BarChart3,
   CheckCircle2,
   ChevronDown,
   ChevronUp,

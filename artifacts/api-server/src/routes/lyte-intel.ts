@@ -575,7 +575,7 @@ router.get('/lyte/governance-domains', noAuth, async (_req, res) => {
       type: r.rootCause ?? 'Policy violation',
       detail: r.description ?? r.title,
       severity: SEVERITY_TO_VIOLATION(r.severity),
-      timestamp: ageString(r.createdAt) + ' ago',
+      timestamp: `${ageString(r.createdAt)} ago`,
       status: r.status === 'resolved' || r.status === 'closed' ? 'resolved' : 'open',
     }));
     const violations = liveViolations.length > 0 ? liveViolations : VIOLATION_LOG_SEED;

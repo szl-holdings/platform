@@ -8,7 +8,6 @@ import {
   type Legion,
   type ThreatLevel,
 } from '@imp/lib/imperium-data';
-import { cn } from '@imp/lib/utils';
 import {
   Activity,
   AlertTriangle,
@@ -21,12 +20,9 @@ import {
   RefreshCw,
   Server,
   Shield,
-  TrendingDown,
-  TrendingUp,
   Wifi,
 } from 'lucide-react';
-import type React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import { useOpsBadgeCounts } from '../../hooks/use-ops-badge-counts';
 

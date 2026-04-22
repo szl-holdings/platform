@@ -19,7 +19,7 @@
  * Skipped if no DATABASE_URL is configured.
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -86,7 +86,7 @@ vi.mock('../middlewares/auth.js', () => ({
   requireOrgMembership: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   parseIdParam: (paramName: string) => (req: Request, res: Response, next: NextFunction) => {
     const val = req.params[paramName];
-    if (!val || isNaN(Number(val))) {
+    if (!val || Number.isNaN(Number(val))) {
       res.status(400).json({ error: 'Invalid ID' });
       return;
     }

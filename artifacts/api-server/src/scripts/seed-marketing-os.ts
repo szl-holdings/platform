@@ -4,10 +4,8 @@ import {
   dosContentCalendarItemsTable,
   dosEditorialPillarsTable,
 } from '@szl-holdings/db';
-import { eq } from 'drizzle-orm';
 
 async function seedMarketingOS() {
-  console.log('Seeding Marketing OS: pillars, carousel ideas, calendar items…');
 
   const existingPillars = await db.select().from(dosEditorialPillarsTable);
   if (existingPillars.length === 0) {
@@ -56,9 +54,7 @@ async function seedMarketingOS() {
         sortOrder: 5,
       },
     ]);
-    console.log('✓ Seeded 5 editorial pillars (3 favorites)');
   } else {
-    console.log(`Skipping pillars — ${existingPillars.length} already exist`);
   }
 
   const pillars = await db.select().from(dosEditorialPillarsTable);
@@ -190,9 +186,7 @@ async function seedMarketingOS() {
         visualDirectionNotes: 'Template: Trend Reaction. Forward-looking, momentum-driven design.',
       },
     ]);
-    console.log('✓ Seeded 10 carousel ideas');
   } else {
-    console.log(`Skipping carousels — ${existingCarousels.length} already exist`);
   }
 
   const existingCalendar = await db.select().from(dosContentCalendarItemsTable);
@@ -230,12 +224,8 @@ async function seedMarketingOS() {
         notes: 'Focus: AIS intelligence + supply chain risk. Include carousel teaser.',
       },
     ]);
-    console.log('✓ Seeded 3 content calendar items');
   } else {
-    console.log(`Skipping calendar — ${existingCalendar.length} already exist`);
   }
-
-  console.log('Marketing OS seed complete.');
 }
 
 seedMarketingOS().catch(console.error);

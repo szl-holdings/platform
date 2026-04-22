@@ -2,7 +2,7 @@ import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { m } from "framer-motion";
-import { Search, MessageSquare, FileText, BookOpen, ArrowRight, CheckCircle2, Clock, Shield, ChevronRight } from "lucide-react";
+import { Search, MessageSquare, BookOpen, ArrowRight, CheckCircle2, Clock, Shield, ChevronRight } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";

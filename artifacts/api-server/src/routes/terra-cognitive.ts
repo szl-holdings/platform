@@ -12,10 +12,10 @@ import {
   terraTransactionsTable,
 } from '@szl-holdings/db';
 import { computeApprovalExpiresAt } from '@workspace/guardian';
-import { createHash, randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { and, desc, eq, inArray, isNotNull, or, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import rateLimit from 'express-rate-limit';
 import multer from 'multer';
 import { z } from 'zod';
@@ -432,13 +432,11 @@ router.get(
         const combinedLtv = totalValue > 0 ? Math.min(1.0, totalDebt / totalValue) : 0;
 
         // Always provide UBO array (empty if none resolved). Add real-DB persons too.
-        const uboNodes = [
-          ...ownerNodes.nodes.filter(
+        const uboNodes = ownerNodes.nodes.filter(
             (n) =>
               n.entityType === 'person' ||
               ((n as any).meta as any | null)?.role === 'beneficial_owner',
-          ),
-        ];
+          );
         const dbPersonOwners = dbNodes
           .filter((n) => n.type === 'person' && !((n as any).meta as any | null)?.placeholder)
           .map((n) => ({
@@ -1054,7 +1052,7 @@ router.get('/terra/cognitive/lender-exposure', cogLimit, auth, async (req, res) 
         covenantBreachCount: lenders.reduce((s, l) => s + ((l as any).covenantBreaches ?? 0), 0),
         watchlistCount: lenders.reduce((s, l) => s + ((l as any).watchlistProperties ?? 0), 0),
         concentrationRisk:
-          totalExposure > 0 && ((byTypeSummary as any)['bridge'] ?? 0) / totalExposure > 0.35
+          totalExposure > 0 && ((byTypeSummary as any).bridge ?? 0) / totalExposure > 0.35
             ? 'elevated'
             : 'acceptable',
         source: dataSource,
@@ -1727,7 +1725,7 @@ router.post(
 
       // Idempotent upsert — onConflictDoNothing prevents duplicate records
       const decidedAt = new Date();
-      const env = process.env['NODE_ENV'] === 'production' ? 'production' : 'development';
+      const env = process.env.NODE_ENV === 'production' ? 'production' : 'development';
       const reason = `Covenant breach detected on property ${address ?? propertyId}: ${distressType ?? covenantType}, distress score ${score ?? 'N/A'}`;
       const [inserted] = await db
         .insert(guardianActionsTable)
@@ -1814,10 +1812,6 @@ router.post(
         outcome: 'require-approval',
       });
     } catch (err) {
-      console.error(
-        '[submit-review] handler error:',
-        err instanceof Error ? err.message : String(err),
-      );
       handleRouteError(res, err, 'Failed to submit covenant for review');
     }
   },
@@ -2580,7 +2574,7 @@ async function recomputeMatterCompletion(matterId: string): Promise<void> {
     .where(eq(terraDiligenceMattersTable.id, matterId));
 }
 
-async function loadMatterWithEvidence(matterId: string) {
+async function _loadMatterWithEvidence(matterId: string) {
   const matterRows = await db
     .select()
     .from(terraDiligenceMattersTable)
@@ -2914,7 +2908,7 @@ router.get(
       // Ownership check applies only to session users. Internal-token callers
       // (trusted services / schedulers) bypass it, as do privileged roles.
       if (!hasValidToken) {
-        const userRoles = user!.roles ?? [];
+        const userRoles = user?.roles ?? [];
         const isPrivileged = userRoles.some(
           (r) => r === 'admin' || r === 'super_admin' || r === 'editor',
         );
@@ -2930,11 +2924,11 @@ router.get(
           const isOwner =
             ownerUserId !== null &&
             ownerUserId !== undefined &&
-            String(ownerUserId) === String(user!.id);
+            String(ownerUserId) === String(user?.id);
 
           if (!isOwner) {
             logger.warn(
-              { evidenceId, userId: user!.id },
+              { evidenceId, userId: user?.id },
               'Diligence evidence download: forbidden — caller is not the matter owner',
             );
             res.status(403).json({ error: 'Forbidden: you do not have access to this document', code: 'FORBIDDEN' });
@@ -2944,7 +2938,7 @@ router.get(
       }
 
       const documentUrl = evidenceRows[0].documentUrl;
-      if (!documentUrl || !documentUrl.startsWith('/objects/')) {
+      if (!documentUrl?.startsWith('/objects/')) {
         logger.warn({ evidenceId, documentUrl }, 'Diligence evidence download: no object to stream');
         res.status(404).json({ error: 'No downloadable document attached to this evidence record' });
         return;

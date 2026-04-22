@@ -19,9 +19,8 @@
  * Skipped when DATABASE_URL is not configured (e.g. local without test DB).
  */
 
-import { randomUUID } from 'crypto';
-import type { NextFunction, Request, Response } from 'express';
-import express from 'express';
+import { randomUUID } from 'node:crypto';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
@@ -142,7 +141,7 @@ d('On-call schedule mutations write audit_logs rows (#2533)', () => {
         isActive: true,
       })
       .returning();
-    actorUserId = actor!.id;
+    actorUserId = actor?.id;
     mockAuthUser.id = actorUserId;
 
     const [memberA] = await db
@@ -154,7 +153,7 @@ d('On-call schedule mutations write audit_logs rows (#2533)', () => {
         isActive: true,
       })
       .returning();
-    memberAUserId = memberA!.id;
+    memberAUserId = memberA?.id;
 
     const [memberB] = await db
       .insert(usersTable)
@@ -165,7 +164,7 @@ d('On-call schedule mutations write audit_logs rows (#2533)', () => {
         isActive: true,
       })
       .returning();
-    memberBUserId = memberB!.id;
+    memberBUserId = memberB?.id;
   });
 
   afterAll(async () => {
@@ -235,12 +234,12 @@ d('On-call schedule mutations write audit_logs rows (#2533)', () => {
 
     const audit = await findAudit('on_call_schedule.created', 'on_call_schedule');
     expect(audit).not.toBeNull();
-    expect(audit!.actorUserId).toBe(actorUserId);
-    expect(audit!.entityType).toBe('on_call_schedule');
-    expect(audit!.entityId).toBeTruthy();
-    createdScheduleAuditEntityId = audit!.entityId!;
+    expect(audit?.actorUserId).toBe(actorUserId);
+    expect(audit?.entityType).toBe('on_call_schedule');
+    expect(audit?.entityId).toBeTruthy();
+    createdScheduleAuditEntityId = audit?.entityId!;
 
-    const payload = audit!.payloadJson as {
+    const payload = audit?.payloadJson as {
       team: string;
       _before?: unknown;
       _after?: {
@@ -255,11 +254,11 @@ d('On-call schedule mutations write audit_logs rows (#2533)', () => {
     // No "before" snapshot for a create.
     expect(payload._before === null || payload._before === undefined).toBe(true);
     expect(payload._after).toBeDefined();
-    expect(payload._after!.rotationIntervalHours).toBe(24);
-    expect(payload._after!.memberOrder).toEqual(memberOrder);
-    expect(payload._after!.timezone).toBe('UTC');
-    expect(payload._after!.warningMinutes).toBe(15);
-    expect(payload._after!.updatedBy).toBe(actorUserId);
+    expect(payload._after?.rotationIntervalHours).toBe(24);
+    expect(payload._after?.memberOrder).toEqual(memberOrder);
+    expect(payload._after?.timezone).toBe('UTC');
+    expect(payload._after?.warningMinutes).toBe(15);
+    expect(payload._after?.updatedBy).toBe(actorUserId);
   });
 
   it('PUT /teams/:team/schedule (second call) writes an `on_call_schedule.updated` audit row with before/after diff', async () => {
@@ -284,9 +283,9 @@ d('On-call schedule mutations write audit_logs rows (#2533)', () => {
       createdScheduleAuditEntityId ?? undefined,
     );
     expect(audit).not.toBeNull();
-    expect(audit!.actorUserId).toBe(actorUserId);
+    expect(audit?.actorUserId).toBe(actorUserId);
 
-    const payload = audit!.payloadJson as {
+    const payload = audit?.payloadJson as {
       team: string;
       _before: {
         rotationIntervalHours: number;
@@ -332,7 +331,7 @@ d('On-call schedule mutations write audit_logs rows (#2533)', () => {
       res.body as { overrides?: Array<{ id: number; note: string | null }> }
     ).overrides?.find((o) => o.note === note);
     expect(overrideRow, 'expected override to surface in response').toBeDefined();
-    createdOverrideId = overrideRow!.id;
+    createdOverrideId = overrideRow?.id;
 
     const audit = await findAudit(
       'on_call_override.created',
@@ -340,11 +339,11 @@ d('On-call schedule mutations write audit_logs rows (#2533)', () => {
       String(createdOverrideId),
     );
     expect(audit).not.toBeNull();
-    expect(audit!.actorUserId).toBe(actorUserId);
-    expect(audit!.entityType).toBe('on_call_override');
-    expect(audit!.entityId).toBe(String(createdOverrideId));
+    expect(audit?.actorUserId).toBe(actorUserId);
+    expect(audit?.entityType).toBe('on_call_override');
+    expect(audit?.entityId).toBe(String(createdOverrideId));
 
-    const payload = audit!.payloadJson as {
+    const payload = audit?.payloadJson as {
       team: string;
       _before?: unknown;
       _after: {
@@ -381,10 +380,10 @@ d('On-call schedule mutations write audit_logs rows (#2533)', () => {
       String(createdOverrideId),
     );
     expect(audit).not.toBeNull();
-    expect(audit!.actorUserId).toBe(actorUserId);
-    expect(audit!.entityId).toBe(String(createdOverrideId));
+    expect(audit?.actorUserId).toBe(actorUserId);
+    expect(audit?.entityId).toBe(String(createdOverrideId));
 
-    const payload = audit!.payloadJson as {
+    const payload = audit?.payloadJson as {
       team: string;
       _before: { userId: number; kind: string; note: string | null; createdBy: number };
       _after?: unknown;

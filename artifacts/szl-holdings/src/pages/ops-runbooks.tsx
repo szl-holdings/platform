@@ -1,4 +1,4 @@
-import { BookOpen, Check, ChevronRight, Edit3, Plus, Search, Tag, X } from 'lucide-react';
+import { BookOpen, Check, ChevronRight, Edit3, Plus, Search, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 const BASE = '/api';

@@ -1,19 +1,10 @@
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
   AlertTriangle,
   BarChart3,
   Bug,
-  CheckCircle,
-  ChevronDown,
-  ChevronRight,
-  Clock,
-  Filter,
   RefreshCw,
-  Shield,
-  TrendingUp,
-  User,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';

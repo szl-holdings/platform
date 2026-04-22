@@ -4,8 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as LocalAuthentication from 'expo-local-authentication';
-import type React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -238,8 +237,8 @@ export default function DocumentsScreen() {
             copyToCacheDirectory: true,
             multiple: false,
           });
-          if (!result.canceled && result.assets![0]) {
-            handleUpload(fromDocumentPickerResult(result.assets![0]));
+          if (!result.canceled && result.assets?.[0]) {
+            handleUpload(fromDocumentPickerResult(result.assets?.[0]));
           }
         })
         .catch(() => {});
@@ -252,7 +251,7 @@ export default function DocumentsScreen() {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['carlota-documents'],
     queryFn: async (): Promise<Document[]> => {
-      const res = await fetch(API_BASE + '/carlotajo/documents');
+      const res = await fetch(`${API_BASE}/carlotajo/documents`);
       if (!res.ok) throw new Error('fetch failed');
       const json = await res.json();
       return json.data ?? json.documents ?? json ?? [];

@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useInView } from "framer-motion";
 import {
   ChevronRight, ArrowLeft, ArrowRight, ShieldCheck, FileCheck, BarChart3,
   Users, Zap, Radio, Brain, Target, BookOpen, AlertTriangle, TrendingUp,
-  CheckCircle2, Building2, Layers, Lock, Activity,
+  CheckCircle2, Layers, 
 } from "lucide-react";
 import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
@@ -314,7 +314,7 @@ function AssessmentFunnel() {
   const [step, setStep] = useState<"intro" | number | "result">("intro");
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [scores, setScores] = useState<Record<string, number>>({});
-  const [submitting, setSubmitting] = useState(false);
+  const [_submitting, setSubmitting] = useState(false);
 
   const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
   const result = RESULTS.find((r) => totalScore >= r.min && totalScore <= r.max) ?? RESULTS[RESULTS.length - 1];

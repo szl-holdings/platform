@@ -91,7 +91,7 @@ class VesselsWebSocket {
     if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, new Set());
     }
-    this.eventListeners.get(event)!.add(handler);
+    this.eventListeners.get(event)?.add(handler);
   }
 
   off(event: string, handler: WsEventHandler): void {

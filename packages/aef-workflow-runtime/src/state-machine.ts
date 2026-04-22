@@ -1,7 +1,5 @@
-import type { ApprovalStore } from './approval.js';
-import { createApprovalRequest, InMemoryApprovalStore } from './approval.js';
-import type { CheckpointStore } from './checkpoint.js';
-import { InMemoryCheckpointStore } from './checkpoint.js';
+import { type ApprovalStore, createApprovalRequest, InMemoryApprovalStore } from './approval.js';
+import { type CheckpointStore, InMemoryCheckpointStore } from './checkpoint.js';
 import type {
   AuditEmitter,
   AuditEvent,
@@ -138,17 +136,17 @@ export class WorkflowStateMachine {
         // Extract the inner output for step storage and accumulation so downstream
         // steps can read fields directly from ctx.input without extra nesting.
         const flatOutput: Record<string, unknown> =
-          result['output'] !== undefined &&
-          typeof result['output'] === 'object' &&
-          result['output'] !== null
-            ? (result['output'] as Record<string, unknown>)
+          result.output !== undefined &&
+          typeof result.output === 'object' &&
+          result.output !== null
+            ? (result.output as Record<string, unknown>)
             : result;
 
-        if (result['requiresApproval'] === true && ctx.approvalRequired) {
+        if (result.requiresApproval === true && ctx.approvalRequired) {
           const approvalReq = createApprovalRequest(
             ctx.workflowId,
             `${this.definition.kind}.${stepDef.stepId}`,
-            (result['approvalContext'] as Record<string, unknown>) ?? {},
+            (result.approvalContext as Record<string, unknown>) ?? {},
           );
           approvalStore.create(approvalReq);
 

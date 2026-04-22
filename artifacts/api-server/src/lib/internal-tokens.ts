@@ -21,7 +21,7 @@
  *
  * Rotation policy: see docs/SECRETS_POLICY.md (Internal Service Tokens).
  */
-import { createHmac, timingSafeEqual } from 'crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { logger } from './logger';
 
 export type InternalScope =
@@ -116,7 +116,7 @@ function constantTimeEqual(a: string, b: string): boolean {
 }
 
 function parseScopedTokens(): InternalServiceToken[] {
-  const raw = process.env['INTERNAL_SERVICE_TOKENS'];
+  const raw = process.env.INTERNAL_SERVICE_TOKENS;
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw) as unknown;
@@ -128,11 +128,11 @@ function parseScopedTokens(): InternalServiceToken[] {
     for (const entry of parsed) {
       if (!entry || typeof entry !== 'object') continue;
       const e = entry as Record<string, unknown>;
-      const name = typeof e['name'] === 'string' ? (e['name'] as string) : '';
-      const token = typeof e['token'] === 'string' ? (e['token'] as string) : '';
-      const rawScopes = Array.isArray(e['scopes']) ? (e['scopes'] as unknown[]) : [];
-      const pathPrefixes = Array.isArray(e['pathPrefixes'])
-        ? (e['pathPrefixes'] as unknown[]).filter((p): p is string => typeof p === 'string')
+      const name = typeof e.name === 'string' ? (e.name as string) : '';
+      const token = typeof e.token === 'string' ? (e.token as string) : '';
+      const rawScopes = Array.isArray(e.scopes) ? (e.scopes as unknown[]) : [];
+      const pathPrefixes = Array.isArray(e.pathPrefixes)
+        ? (e.pathPrefixes as unknown[]).filter((p): p is string => typeof p === 'string')
         : [];
 
       if (!name || !token) {
@@ -166,7 +166,7 @@ let _legacyDeprecationWarned = false;
 
 function loadRegistry(): InternalServiceToken[] {
   const tokens = parseScopedTokens();
-  const legacy = process.env['ALLOY_INTERNAL_TOKEN'];
+  const legacy = process.env.ALLOY_INTERNAL_TOKEN;
   if (legacy) {
     tokens.push({
       name: 'alloy-internal-legacy',
@@ -180,7 +180,7 @@ function loadRegistry(): InternalServiceToken[] {
 }
 
 function currentEnvKey(): string {
-  return `${process.env['INTERNAL_SERVICE_TOKENS'] ?? ''}\u0000${process.env['ALLOY_INTERNAL_TOKEN'] ?? ''}`;
+  return `${process.env.INTERNAL_SERVICE_TOKENS ?? ''}\u0000${process.env.ALLOY_INTERNAL_TOKEN ?? ''}`;
 }
 
 export function getInternalTokenRegistry(): InternalServiceToken[] {
@@ -269,10 +269,10 @@ export function matchInternalToken(presented: string | undefined): InternalToken
 export function assertInternalTokenPolicy(opts: { isProduction: boolean }): void {
   if (!opts.isProduction) return;
   const scoped = parseScopedTokens();
-  const hasLegacy = !!process.env['ALLOY_INTERNAL_TOKEN'];
+  const hasLegacy = !!process.env.ALLOY_INTERNAL_TOKEN;
   if (scoped.length > 0) return;
   if (!hasLegacy) return;
-  if (process.env['INTERNAL_TOKENS_ALLOW_LEGACY_ONLY'] === 'true') {
+  if (process.env.INTERNAL_TOKENS_ALLOW_LEGACY_ONLY === 'true') {
     logger.warn(
       '[internal-tokens] Production startup ALLOWED with only ALLOY_INTERNAL_TOKEN configured because INTERNAL_TOKENS_ALLOW_LEGACY_ONLY=true. This is a temporary migration affordance — define INTERNAL_SERVICE_TOKENS and remove the override.',
     );

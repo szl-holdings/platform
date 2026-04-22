@@ -1,7 +1,7 @@
-import { TimeSeriesChart } from '@szl-holdings/shared-ui/analytics';
+
 import { DashboardShell } from '@szl-holdings/shared-ui/design-system';
 import { LANE_ACCENT_HEX } from '@szl-holdings/shared-ui/lane-colors';
-import { Activity, BarChart3, DollarSign, Layers, TrendingDown, TrendingUp } from 'lucide-react';
+import { DollarSign, TrendingDown, TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
 
 const ACCENT = LANE_ACCENT_HEX.szl.primary;
@@ -143,7 +143,7 @@ function RevenueStreamCard({
       onClick={onClick}
       style={{
         background: selected ? `${stream.color}12` : 'rgba(255,255,255,0.02)',
-        border: `1px solid ${selected ? stream.color + '40' : 'rgba(255,255,255,0.07)'}`,
+        border: `1px solid ${selected ? `${stream.color}40` : 'rgba(255,255,255,0.07)'}`,
         borderRadius: '14px',
         padding: '16px',
         cursor: 'pointer',
@@ -226,7 +226,7 @@ export default function RevenueFusionPage() {
         if (res.ok) {
           const json = (await res.json()) as { data?: { streams?: RevenueStream[] } };
           if (Array.isArray(json.data?.streams) && (json.data?.streams?.length ?? 0) > 0) {
-            setStreams(json.data!.streams!);
+            setStreams(json.data?.streams!);
           }
         }
       } catch {}
@@ -235,14 +235,14 @@ export default function RevenueFusionPage() {
   }, []);
 
   const total = streams.reduce((s, r) => s + (r.id === 'portfolio' ? 0 : r.totalRevenue), 0);
-  const totalWithPortfolio = streams.reduce((s, r) => s + r.totalRevenue, 0);
+  const _totalWithPortfolio = streams.reduce((s, r) => s + r.totalRevenue, 0);
   const totalQoQ = streams
     .filter((r) => r.id !== 'portfolio')
     .reduce((s, r, _i, arr) => s + r.qoqChange / arr.length, 0);
 
   const selected = streams.find((r) => r.id === selectedStream);
 
-  const chartData = MONTHS.map((month, i) => ({
+  const _chartData = MONTHS.map((month, i) => ({
     label: month,
     stripe: Math.round(generateTrend(107000, 0.06)[i] ?? 107000),
     vessels: Math.round(generateTrend(1783333, 0.09)[i] ?? 1783333),
@@ -339,7 +339,7 @@ export default function RevenueFusionPage() {
               style={{
                 padding: '7px 14px',
                 borderRadius: '8px',
-                border: `1px solid ${view === v ? ACCENT + '50' : 'rgba(255,255,255,0.1)'}`,
+                border: `1px solid ${view === v ? `${ACCENT}50` : 'rgba(255,255,255,0.1)'}`,
                 background: view === v ? `${ACCENT}15` : 'rgba(255,255,255,0.04)',
                 color: view === v ? ACCENT : 'rgba(255,255,255,0.5)',
                 fontSize: '12px',

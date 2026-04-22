@@ -5,7 +5,7 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -1192,13 +1192,13 @@ function VentureScreenshot({
     <View
       style={[
         styles.screenshotFrame,
-        { backgroundColor: '#0a0a0a', borderColor: venture.color + '30' },
+        { backgroundColor: '#0a0a0a', borderColor: `${venture.color}30` },
       ]}
     >
-      <View style={[styles.screenshotChrome, { backgroundColor: venture.color + '15' }]}>
+      <View style={[styles.screenshotChrome, { backgroundColor: `${venture.color}15` }]}>
         <View style={[styles.screenshotDot, { backgroundColor: venture.color }]} />
-        <View style={[styles.screenshotUrlBar, { backgroundColor: venture.color + '20' }]}>
-          <Text style={[styles.screenshotUrl, { color: venture.color + '99' }]}>
+        <View style={[styles.screenshotUrlBar, { backgroundColor: `${venture.color}20` }]}>
+          <Text style={[styles.screenshotUrl, { color: `${venture.color}99` }]}>
             {venture.slug}.szlholdings.com
           </Text>
         </View>
@@ -1210,7 +1210,7 @@ function VentureScreenshot({
               key={i}
               style={[
                 styles.screenshotSidebarItem,
-                { backgroundColor: i === 0 ? venture.color + '30' : venture.color + '10' },
+                { backgroundColor: i === 0 ? `${venture.color}30` : `${venture.color}10` },
               ]}
             />
           ))}
@@ -1221,7 +1221,7 @@ function VentureScreenshot({
               key={i}
               style={[
                 styles.screenshotRow,
-                { width: r.w as `${number}%`, height: r.h, backgroundColor: venture.color + '20' },
+                { width: r.w as `${number}%`, height: r.h, backgroundColor: `${venture.color}20` },
               ]}
             />
           ))}
@@ -1231,11 +1231,11 @@ function VentureScreenshot({
                 key={m.label}
                 style={[
                   styles.screenshotStat,
-                  { backgroundColor: venture.color + '15', borderColor: venture.color + '25' },
+                  { backgroundColor: `${venture.color}15`, borderColor: `${venture.color}25` },
                 ]}
               >
                 <Text style={[styles.screenshotStatVal, { color: venture.color }]}>{m.value}</Text>
-                <Text style={[styles.screenshotStatLabel, { color: venture.color + '80' }]}>
+                <Text style={[styles.screenshotStatLabel, { color: `${venture.color}80` }]}>
                   {m.label}
                 </Text>
               </View>
@@ -1452,8 +1452,8 @@ function AnimatedMilestoneItem({
             style={[
               styles.companyLogoBadge,
               {
-                backgroundColor: milestone.logoColor + '20',
-                borderColor: milestone.logoColor + '50',
+                backgroundColor: `${milestone.logoColor}20`,
+                borderColor: `${milestone.logoColor}50`,
               },
             ]}
           >

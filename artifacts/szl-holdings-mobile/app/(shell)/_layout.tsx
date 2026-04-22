@@ -1,5 +1,4 @@
 import { Redirect, Stack } from 'expo-router';
-import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { BottomTabBar } from '@/components/BottomTabBar';
 import { ScreenshotPolicyEnforcer } from '@/components/ScreenshotPolicyEnforcer';

@@ -1,16 +1,14 @@
 import { RequestUploadUrlBody, RequestUploadUrlResponse } from '@szl-holdings/api-zod';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { type IRouter, type Request, type Response, Router } from 'express';
-import { Readable } from 'stream';
-import { z } from 'zod';
+import { Readable } from 'node:stream';
 import { validateFileType } from '../lib/fileTypeAllowlist';
 import { getObjectAclPolicy, ObjectPermission } from '../lib/objectAcl';
 import { ObjectNotFoundError, ObjectStorageService } from '../lib/objectStorage';
 import { checkOrgStorageQuota } from '../lib/storageQuota';
 import { recordUploadIntent } from '../lib/uploadIntentStore';
 import { validateBody } from '../lib/validation';
-import type { AuthenticatedUser } from '../middlewares/auth';
-import { authMiddleware } from '../middlewares/auth';
+import { type AuthenticatedUser, authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -43,7 +41,7 @@ router.post(
     try {
       const { name, size, contentType, domain, orgId: requestedOrgId } = parsed.data;
       const authedReq = req as AuthRequest;
-      const userId = authedReq.user!.id;
+      const userId = authedReq.user?.id;
       const userOrgs = authedReq.user?.orgs ?? [];
 
       // Resolve org context server-side from the authenticated session.

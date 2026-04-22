@@ -148,19 +148,9 @@ describe("Route tenancy matrix — static analysis", () => {
   });
 
   it("produces a full tenancy coverage report (informational — does not fail)", () => {
-    const enforced = enforcedFiles.map(({ rel }) => rel);
+    const _enforced = enforcedFiles.map(({ rel }) => rel);
     const unenforced = unenforcedFiles.map(({ rel }) => rel);
-
-    console.info("\n── Tenancy Coverage Report ──────────────────────────────────");
-    console.info(`Total route files scanned:       ${allFiles.length}`);
-    console.info(`Files referencing tenant/org data: ${tenantDataFiles.length}`);
-    console.info(`Enforced (tenantScope/assert):   ${enforced.length}`);
-    console.info(`Not enforced (may be intentional): ${unenforced.length}`);
-    console.info(`Coverage:                        ${Math.round((enforced.length / tenantDataFiles.length) * 100)}%`);
-    console.info("──────────────────────────────────────────────────────────────\n");
-    console.info("Enforced routes:\n  " + enforced.join("\n  "));
     if (unenforced.length > 0) {
-      console.info("\nNot enforced (review manually):\n  " + unenforced.join("\n  "));
     }
 
     expect(true).toBe(true);

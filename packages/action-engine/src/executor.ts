@@ -1,6 +1,5 @@
-import type { PolicyEvaluation } from '@szl-holdings/policy-engine';
-import { PolicyEvaluationSchema } from '@szl-holdings/policy-engine';
-import { randomUUID } from 'crypto';
+import { type PolicyEvaluation, PolicyEvaluationSchema } from '@szl-holdings/policy-engine';
+import { randomUUID } from 'node:crypto';
 import type {
   ActionEngineResult,
   StepExecutionRecord,
@@ -101,7 +100,7 @@ export async function executeWorkflow(params: {
 
   const pe = policyEvaluation;
 
-  if (pe && pe.blockedReason && !isDryRun && !isSimulation) {
+  if (pe?.blockedReason && !isDryRun && !isSimulation) {
     const blockedRun: WorkflowRun = {
       runId: randomUUID(),
       workflowId: definition.id,

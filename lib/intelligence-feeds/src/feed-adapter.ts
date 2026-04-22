@@ -10,7 +10,7 @@ import type {
   OntologyEntity,
   OntologyRelationship,
 } from '@szl-holdings/ai-engine/ontology/ontology-engine';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 
 export interface FeedAdapterConfig {
   id: string;
@@ -135,7 +135,7 @@ export class DeduplicationCache {
 }
 
 export abstract class BaseFeedAdapter {
-  protected config: FeedAdapterConfig;
+  public config: FeedAdapterConfig;
   protected rateLimiter: RateLimiter;
   protected dedup: DeduplicationCache;
   protected health: FeedHealthStatus;

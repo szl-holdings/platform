@@ -37,18 +37,15 @@ async function check<T extends { id: string }>(
     const row = await insert();
     const readback = await read(row.id);
     if (!readback) throw new Error('read-after-write returned nothing');
-    console.log(`[smoke] ✓  ${label.padEnd(22)} id=${row.id}`);
     await del(row.id);
     return row;
   } catch (err) {
     errors.push(`${label}: ${(err as Error).message}`);
-    console.error(`[smoke] ✗  ${label}: ${(err as Error).message}`);
     return null;
   }
 }
 
 async function run() {
-  console.log('[smoke] Starting cognitive runtime schema smoke test...\n');
 
   // ── self_models + self_model_snapshots ───────────────────────────────────────
   const smRow = await check(
@@ -481,20 +478,14 @@ async function run() {
   if (cogActionRow) {
     await db.delete(cogActionsTable).where(eq(cogActionsTable.id, cogActionRow.id));
   }
-
-  // ── Summary ──────────────────────────────────────────────────────────────────
-  console.log('\n─────────────────────────────────────────');
   if (errors.length === 0) {
-    console.log('[smoke] ✓  All cognitive runtime tables PASSED');
   } else {
-    console.error(`[smoke] ✗  ${errors.length} table(s) FAILED:`);
-    errors.forEach((e) => console.error(`         • ${e}`));
+    errors.forEach((_e) => {});
     process.exit(1);
   }
   process.exit(0);
 }
 
-run().catch((err) => {
-  console.error('[smoke] Unexpected error:', err);
+run().catch((_err) => {
   process.exit(1);
 });

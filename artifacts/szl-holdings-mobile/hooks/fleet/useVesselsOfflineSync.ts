@@ -1,5 +1,4 @@
-import type { UseOfflineSyncResult } from '@szl-holdings/mobile-shared/hooks';
-import { useOfflineQueue, useOfflineSync } from '@szl-holdings/mobile-shared/hooks';
+import { type UseOfflineSyncResult, useOfflineQueue, useOfflineSync } from '@szl-holdings/mobile-shared/hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { Platform } from 'react-native';

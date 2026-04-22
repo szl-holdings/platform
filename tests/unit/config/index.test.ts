@@ -10,7 +10,7 @@ import {
   ROLES,
   SESSION_DURATION_MS,
 } from '@workspace/config';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 describe('@szl-holdings/config', () => {
   describe('constants', () => {
@@ -116,12 +116,12 @@ describe('@szl-holdings/config', () => {
 
   describe('APP_INTEGRATIONS', () => {
     it('has connectors for core apps', () => {
-      expect(APP_INTEGRATIONS['vessels']).toBeDefined();
-      expect(APP_INTEGRATIONS['vessels'].connectors.length).toBeGreaterThan(0);
+      expect(APP_INTEGRATIONS.vessels).toBeDefined();
+      expect(APP_INTEGRATIONS.vessels.connectors.length).toBeGreaterThan(0);
     });
 
     it('each integration has description', () => {
-      for (const [key, integration] of Object.entries(APP_INTEGRATIONS)) {
+      for (const [_key, integration] of Object.entries(APP_INTEGRATIONS)) {
         expect(integration.description).toBeTruthy();
         expect(integration.connectors).toBeInstanceOf(Array);
       }

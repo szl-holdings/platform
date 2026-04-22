@@ -114,7 +114,7 @@ describe('ingest_document workflow', () => {
 
   it('emits audit events for run lifecycle', async () => {
     const audit = new InMemoryAuditEmitter();
-    const engine = makeEngine();
+    const _engine = makeEngine();
     const engineWithAudit = new OrchestratorEngine({
       runStore: new InMemoryRunStore(),
       checkpointStore: new InMemoryCheckpointStore(),
@@ -166,10 +166,10 @@ describe('verify_index_health workflow', () => {
 
     expect(run.status).toBe('completed');
     expect(run.stepResults).toHaveLength(1);
-    expect(run.stepResults[0]!.actor).toBe('IndexVerifier');
-    expect(run.stepResults[0]!.status).toBe('completed');
+    expect(run.stepResults[0]?.actor).toBe('IndexVerifier');
+    expect(run.stepResults[0]?.status).toBe('completed');
 
-    const output = run.stepResults[0]!.output as { healthStatus: string; driftScore: number };
+    const output = run.stepResults[0]?.output as { healthStatus: string; driftScore: number };
     expect(['healthy', 'degraded', 'critical']).toContain(output.healthStatus);
     expect(typeof output.driftScore).toBe('number');
   });
@@ -203,7 +203,7 @@ describe('verify_index_health workflow', () => {
     });
 
     expect(run.status).toBe('completed');
-    const output = run.stepResults[0]!.output as { driftScore: number };
+    const output = run.stepResults[0]?.output as { driftScore: number };
     expect(output.driftScore).toBe(0);
   });
 });
@@ -246,7 +246,7 @@ describe('run_retrieval_eval workflow', () => {
     });
 
     expect(run.status).toBe('completed');
-    const output = run.stepResults[0]!.output as {
+    const output = run.stepResults[0]?.output as {
       queryCount: number;
       metrics: Array<{ metric: string; value: number }>;
     };
@@ -277,7 +277,7 @@ describe('rebuild_index workflow', () => {
 
     const gateStep = run.stepResults.find((r) => r.actor === 'HumanApprovalGate');
     expect(gateStep).toBeDefined();
-    expect(gateStep!.status).toBe('pending-approval');
+    expect(gateStep?.status).toBe('pending-approval');
   });
 
   it('resumes and completes after operator approval', async () => {
@@ -410,7 +410,7 @@ describe('retry-from-checkpoint', () => {
     });
 
     expect(run.status).toBe('completed');
-    expect(run.stepResults[0]!.attempt).toBe(1);
+    expect(run.stepResults[0]?.attempt).toBe(1);
   });
 
   it('retry: run can be cancelled after pending-approval', async () => {

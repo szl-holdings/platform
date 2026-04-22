@@ -9,13 +9,13 @@ import {
   terraMlsListingsTable,
 } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import { and, desc, eq, gte, ilike } from 'drizzle-orm';
+import { and, desc, eq, ilike } from 'drizzle-orm';
 import { logger } from './logger';
 import { completeIngestionRun, startIngestionRun } from './terra-distress-service';
 
-const MLS_ENABLED = process.env['TERRA_MLS_ENABLED'] !== 'false';
-const COSTAR_ENABLED = process.env['TERRA_COSTAR_ENABLED'] !== 'false';
-const COMPSTAK_ENABLED = process.env['TERRA_COMPSTAK_ENABLED'] !== 'false';
+const MLS_ENABLED = process.env.TERRA_MLS_ENABLED !== 'false';
+const COSTAR_ENABLED = process.env.TERRA_COSTAR_ENABLED !== 'false';
+const COMPSTAK_ENABLED = process.env.TERRA_COMPSTAK_ENABLED !== 'false';
 
 export async function runMlsListingSync(): Promise<{
   fetched: number;
@@ -156,7 +156,7 @@ async function checkDistressCrossRef(
       .limit(1);
 
     if (match.length > 0) {
-      return { matched: true, propertyId: match[0]!.id };
+      return { matched: true, propertyId: match[0]?.id };
     }
   } catch {
     // non-fatal

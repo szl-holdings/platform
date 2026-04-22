@@ -248,7 +248,7 @@ describe('ATLAS API Route Contracts — adapter-level integration', () => {
       assertExportShape(result);
       expect(result.format).toBe('openusd_manifest');
       expect(result.warnings).toBeDefined();
-      expect(result.warnings!.length).toBeGreaterThan(0);
+      expect(result.warnings?.length).toBeGreaterThan(0);
     });
 
     it('USDA text stub begins with #usda 1.0 header', () => {

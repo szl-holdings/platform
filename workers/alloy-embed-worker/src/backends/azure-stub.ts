@@ -18,8 +18,8 @@ export class AzureEmbeddingBackendStub implements EmbeddingBackend {
   };
 
   async embed(_req: RawEmbedRequest): Promise<RawEmbedResponse> {
-    const endpoint = process.env['AZURE_OPENAI_ENDPOINT'];
-    const apiKey = process.env['AZURE_OPENAI_KEY'];
+    const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
+    const apiKey = process.env.AZURE_OPENAI_KEY;
 
     if (!endpoint || !apiKey) {
       throw new Error(
@@ -35,7 +35,7 @@ export class AzureEmbeddingBackendStub implements EmbeddingBackend {
   }
 
   async health(): Promise<{ healthy: boolean; latencyMs?: number; detail?: string }> {
-    const endpoint = process.env['AZURE_OPENAI_ENDPOINT'];
+    const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
     return {
       healthy: false,
       detail: endpoint

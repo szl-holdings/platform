@@ -1,5 +1,4 @@
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { CONFIDENCE_CONFIG, type DataProvenanceInfo, FRESHNESS_CONFIG } from './ontology';
 
 interface DataProvenanceProps {

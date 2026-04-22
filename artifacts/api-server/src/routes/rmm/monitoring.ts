@@ -1,38 +1,30 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import { db, mspClientsTable, mspDevicesTable } from '@szl-holdings/db';
-import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { db, mspDevicesTable } from '@szl-holdings/db';
+import { eq, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
   sendBadRequest,
   sendCreated,
-  sendError,
   sendNotFound,
   sendSuccess,
 } from '../../lib/api-response';
 import { logger } from '../../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../../lib/validation';
-import { authMiddleware, requireRole } from '../../middlewares/auth';
 import {
-  clearProviderCache,
-  createRmmProvider,
   getCachedProvider,
-  type RmmProviderConfig,
   setCachedProvider,
 } from '../../services/rmm-provider';
 import {
   auth,
   authWrite,
   buildProviderConfig,
-  isProviderSupported,
   type PlaybookRow,
   queryConnectorById,
   queryConnectors,
   roleAdmin,
   roleOperator,
-  stripSecrets,
 } from './shared';
 
 const router: IRouter = Router();
@@ -202,7 +194,7 @@ router.post(
         const deviceRows = await db
           .select()
           .from(mspDevicesTable)
-          .where(eq(mspDevicesTable.id, parseInt(deviceId)))
+          .where(eq(mspDevicesTable.id, parseInt(deviceId, 10)))
           .limit(1);
         if (deviceRows[0]) {
           await db.execute(sql`
@@ -334,7 +326,7 @@ router.patch(
   async (req, res) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid ID');
       const { internalClientId, syncEnabled, providerOrgName, providerSiteName } = req.body;
       await db.execute(sql`
       UPDATE msp_org_site_mappings
@@ -360,7 +352,7 @@ router.delete(
   async (req, res) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid ID');
       await db.execute(sql`DELETE FROM msp_org_site_mappings WHERE id = ${id}`);
       sendSuccess(res, { deleted: true });
     } catch (err) {
@@ -403,7 +395,7 @@ router.post(
 
       for (const devId of deviceIds) {
         const deviceId = parseInt(String(devId), 10);
-        if (isNaN(deviceId)) continue;
+        if (Number.isNaN(deviceId)) continue;
 
         let connectorId: number | null = null;
         const deviceRows = await db

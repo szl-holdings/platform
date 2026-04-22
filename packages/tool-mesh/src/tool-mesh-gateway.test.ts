@@ -4,10 +4,8 @@ import { InMemoryTraceStore } from '@workspace/trace-graph/store';
 import { TraceWriter } from '@workspace/trace-graph/writer';
 import { describe, expect, it } from 'vitest';
 import { ToolMeshExecutor } from './executor.js';
-import type { ToolHandler } from './gateway.js';
-import { ToolMeshGateway } from './gateway.js';
-import type { ToolManifest } from './manifest.js';
-import { ToolManifestSchema } from './manifest.js';
+import { type ToolHandler, ToolMeshGateway } from './gateway.js';
+import { type ToolManifest, ToolManifestSchema } from './manifest.js';
 import { ToolMeshMcpBridge } from './mcp-bridge.js';
 import { ToolRateLimiter } from './rate-limiter.js';
 import { InMemoryToolRegistry } from './registry.js';
@@ -304,7 +302,7 @@ describe('Observability emission', () => {
 
     const latencyMetric = globalCollector
       .snapshot()
-      .find((m) => m.name === 'latency_ms' && m.labels['toolId'] === 'obs-tool');
+      .find((m) => m.name === 'latency_ms' && m.labels.toolId === 'obs-tool');
     expect(latencyMetric).toBeDefined();
     expect(latencyMetric?.value).toBeGreaterThanOrEqual(0);
   });
@@ -330,7 +328,7 @@ describe('Observability emission', () => {
 
     const errorMetric = globalCollector
       .snapshot()
-      .find((m) => m.name === 'tool_error_rate' && m.labels['toolId'] === 'obs-fail-tool');
+      .find((m) => m.name === 'tool_error_rate' && m.labels.toolId === 'obs-fail-tool');
     expect(errorMetric).toBeDefined();
     expect(errorMetric?.value).toBe(1);
   });
@@ -486,7 +484,7 @@ describe('ToolMeshExecutor', () => {
     executor.record({ ...base, id: 'e2', toolId: 'tool-b', toolName: 'Tool B' });
     const results = executor.getHistory({ toolId: 'tool-a' });
     expect(results).toHaveLength(1);
-    expect(results[0]!.toolId).toBe('tool-a');
+    expect(results[0]?.toolId).toBe('tool-a');
   });
 
   it('executeWithTimeout rejects when exceeded', async () => {
@@ -756,7 +754,7 @@ describe('MCP bridge — external tool execution via call()', () => {
       description: 'External calculator',
       inputSchema: { x: { type: 'number' }, y: { type: 'number' } },
       requiresApproval: false,
-      handler: async (args) => ({ sum: (args['x'] as number) + (args['y'] as number) }),
+      handler: async (args) => ({ sum: (args.x as number) + (args.y as number) }),
     });
 
     const result = await bridge.call(
@@ -838,12 +836,12 @@ describe('MCP schema — correct properties/required extraction', () => {
     const tools = bridge.listTools();
     const tool = tools.find((t) => t.name === 'mcp-schema-tool');
     expect(tool).toBeDefined();
-    expect(tool!.inputSchema.type).toBe('object');
-    expect(tool!.inputSchema.properties).toHaveProperty('query');
-    expect(tool!.inputSchema.properties).toHaveProperty('limit');
-    expect(tool!.inputSchema.required).toContain('query');
-    expect(tool!.inputSchema.properties).not.toHaveProperty('type');
-    expect(tool!.inputSchema.properties).not.toHaveProperty('required');
+    expect(tool?.inputSchema.type).toBe('object');
+    expect(tool?.inputSchema.properties).toHaveProperty('query');
+    expect(tool?.inputSchema.properties).toHaveProperty('limit');
+    expect(tool?.inputSchema.required).toContain('query');
+    expect(tool?.inputSchema.properties).not.toHaveProperty('type');
+    expect(tool?.inputSchema.properties).not.toHaveProperty('required');
   });
 
   it('handles tool with no inputSchema gracefully', () => {
@@ -861,9 +859,9 @@ describe('MCP schema — correct properties/required extraction', () => {
     const tools = bridge.listTools();
     const tool = tools.find((t) => t.name === 'no-schema-mcp-tool');
     expect(tool).toBeDefined();
-    expect(tool!.inputSchema.type).toBe('object');
-    expect(tool!.inputSchema.properties).toEqual({});
-    expect(tool!.inputSchema.required).toBeUndefined();
+    expect(tool?.inputSchema.type).toBe('object');
+    expect(tool?.inputSchema.properties).toEqual({});
+    expect(tool?.inputSchema.required).toBeUndefined();
   });
 });
 

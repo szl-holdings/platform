@@ -24,14 +24,12 @@ function daysAhead(n: number) {
 }
 
 export async function seedDistributionOS() {
-  console.log('[seed-distribution-os] Starting Distribution OS seed...');
 
   const existing = await db
     .select({ id: dosEditorialPillarsTable.id })
     .from(dosEditorialPillarsTable)
     .limit(1);
   if (existing.length > 0) {
-    console.log('[seed-distribution-os] Data already seeded, skipping.');
     return { skipped: true };
   }
 
@@ -96,8 +94,6 @@ export async function seedDistributionOS() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-distribution-os] Seeded ${pillars.length} editorial pillars`);
-
   const authors = await db
     .insert(dosAuthorProfilesTable)
     .values([
@@ -117,8 +113,6 @@ export async function seedDistributionOS() {
     ])
     .onConflictDoNothing()
     .returning();
-
-  console.log(`[seed-distribution-os] Seeded ${authors.length} author profiles`);
 
   await db
     .insert(dosSiteSettingsTable)
@@ -171,8 +165,6 @@ export async function seedDistributionOS() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-distribution-os] Seeded site settings`);
-
   const campaigns = await db
     .insert(dosCampaignsTable)
     .values([
@@ -215,8 +207,6 @@ export async function seedDistributionOS() {
     ])
     .onConflictDoNothing()
     .returning();
-
-  console.log(`[seed-distribution-os] Seeded ${campaigns.length} campaigns`);
 
   const articles = await db
     .insert(dosArticlesTable)
@@ -404,8 +394,6 @@ export async function seedDistributionOS() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-distribution-os] Seeded ${articles.length} articles`);
-
   const newsletters = await db
     .insert(dosNewslettersTable)
     .values([
@@ -448,8 +436,6 @@ export async function seedDistributionOS() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-distribution-os] Seeded ${newsletters.length} newsletters`);
-
   const carousels = await db
     .insert(dosCarouselProjectsTable)
     .values([
@@ -485,11 +471,9 @@ export async function seedDistributionOS() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-distribution-os] Seeded ${carousels.length} carousel projects`);
-
   await db.insert(dosCarouselSlidesTable).values([
     {
-      projectId: carousels[0]!.id,
+      projectId: carousels[0]?.id,
       slideNumber: 1,
       slideType: 'intro',
       tagline: 'MARITIME INTELLIGENCE',
@@ -497,7 +481,7 @@ export async function seedDistributionOS() {
       callToAction: 'Swipe to see the signals →',
     },
     {
-      projectId: carousels[0]!.id,
+      projectId: carousels[0]?.id,
       slideNumber: 2,
       slideType: 'content',
       tagline: 'Signal #1',
@@ -506,7 +490,7 @@ export async function seedDistributionOS() {
         "When a vessel goes dark on AIS tracking while deviating from its planned route, it's a red flag — not normal weather avoidance.",
     },
     {
-      projectId: carousels[0]!.id,
+      projectId: carousels[0]?.id,
       slideNumber: 3,
       slideType: 'content',
       tagline: 'Signal #2',
@@ -515,7 +499,7 @@ export async function seedDistributionOS() {
         'Excess fuel burn compounds costs and often signals mechanical issues, poor trim, or hull fouling. $470/MT bunker prices make this expensive fast.',
     },
     {
-      projectId: carousels[0]!.id,
+      projectId: carousels[0]?.id,
       slideNumber: 4,
       slideType: 'content',
       tagline: 'Signal #3',
@@ -524,7 +508,7 @@ export async function seedDistributionOS() {
         'Elevated exhaust temperatures on individual cylinders is a predictive failure signature. Ignored, it becomes an engine failure at sea.',
     },
     {
-      projectId: carousels[0]!.id,
+      projectId: carousels[0]?.id,
       slideNumber: 5,
       slideType: 'content',
       tagline: 'Signal #4',
@@ -533,7 +517,7 @@ export async function seedDistributionOS() {
         "Port congestion creates demurrage exposure. By the time your vessel arrives, you've missed the optimal anchor window.",
     },
     {
-      projectId: carousels[0]!.id,
+      projectId: carousels[0]?.id,
       slideNumber: 6,
       slideType: 'content',
       tagline: 'Signal #5',
@@ -542,7 +526,7 @@ export async function seedDistributionOS() {
         'When weather routing models diverge by more than 6 hours on predicted conditions, the vessel is flying blind on route risk.',
     },
     {
-      projectId: carousels[0]!.id,
+      projectId: carousels[0]?.id,
       slideNumber: 7,
       slideType: 'outro',
       tagline: 'THE BOTTOM LINE',
@@ -552,8 +536,6 @@ export async function seedDistributionOS() {
       callToAction: 'Learn more at vessels.szlholdings.com',
     },
   ]);
-
-  console.log(`[seed-distribution-os] Seeded carousel slides`);
 
   await db
     .insert(dosXPostsTable)
@@ -609,13 +591,11 @@ export async function seedDistributionOS() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-distribution-os] Seeded X posts`);
-
   await db
     .insert(dosCampaignLinksTable)
     .values([
       {
-        campaignId: campaigns[0]!.id,
+        campaignId: campaigns[0]?.id,
         name: 'Substack subscribe CTA',
         source: 'substack',
         medium: 'newsletter',
@@ -627,7 +607,7 @@ export async function seedDistributionOS() {
         conversions: 42,
       },
       {
-        campaignId: campaigns[0]!.id,
+        campaignId: campaigns[0]?.id,
         name: 'X bio link — AI platform article',
         source: 'x',
         medium: 'social',
@@ -639,7 +619,7 @@ export async function seedDistributionOS() {
         conversions: 48,
       },
       {
-        campaignId: campaigns[1]!.id,
+        campaignId: campaigns[1]?.id,
         name: 'Maritime article — LinkedIn share',
         source: 'linkedin',
         medium: 'social',
@@ -652,7 +632,7 @@ export async function seedDistributionOS() {
         conversions: 88,
       },
       {
-        campaignId: campaigns[1]!.id,
+        campaignId: campaigns[1]?.id,
         name: 'Vessels product demo CTA',
         source: 'newsletter',
         medium: 'email',
@@ -665,8 +645,6 @@ export async function seedDistributionOS() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-distribution-os] Seeded campaign links`);
 
   await db
     .insert(dosLeadsTable)
@@ -749,14 +727,12 @@ export async function seedDistributionOS() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-distribution-os] Seeded leads`);
-
   await db
     .insert(dosDistributionTargetsTable)
     .values([
       {
         contentType: 'article',
-        contentId: articles[0]!.id,
+        contentId: articles[0]?.id,
         channel: 'site',
         status: 'published',
         actualDate: daysAgo(14),
@@ -765,7 +741,7 @@ export async function seedDistributionOS() {
       },
       {
         contentType: 'article',
-        contentId: articles[0]!.id,
+        contentId: articles[0]?.id,
         channel: 'x',
         status: 'published',
         actualDate: daysAgo(14),
@@ -773,7 +749,7 @@ export async function seedDistributionOS() {
       },
       {
         contentType: 'article',
-        contentId: articles[0]!.id,
+        contentId: articles[0]?.id,
         channel: 'substack',
         status: 'published',
         actualDate: daysAgo(13),
@@ -782,7 +758,7 @@ export async function seedDistributionOS() {
       },
       {
         contentType: 'article',
-        contentId: articles[1]!.id,
+        contentId: articles[1]?.id,
         channel: 'site',
         status: 'published',
         actualDate: daysAgo(7),
@@ -791,7 +767,7 @@ export async function seedDistributionOS() {
       },
       {
         contentType: 'article',
-        contentId: articles[1]!.id,
+        contentId: articles[1]?.id,
         channel: 'x',
         status: 'published',
         actualDate: daysAgo(7),
@@ -799,7 +775,7 @@ export async function seedDistributionOS() {
       },
       {
         contentType: 'article',
-        contentId: articles[2]!.id,
+        contentId: articles[2]?.id,
         channel: 'site',
         status: 'planned',
         plannedDate: daysAhead(5),
@@ -807,7 +783,7 @@ export async function seedDistributionOS() {
       },
       {
         contentType: 'article',
-        contentId: articles[3]!.id,
+        contentId: articles[3]?.id,
         channel: 'site',
         status: 'planned',
         plannedDate: daysAhead(2),
@@ -815,7 +791,7 @@ export async function seedDistributionOS() {
       },
       {
         contentType: 'newsletter',
-        contentId: newsletters[0]!.id,
+        contentId: newsletters[0]?.id,
         channel: 'substack',
         status: 'published',
         actualDate: daysAgo(7),
@@ -824,7 +800,7 @@ export async function seedDistributionOS() {
       },
       {
         contentType: 'newsletter',
-        contentId: newsletters[1]!.id,
+        contentId: newsletters[1]?.id,
         channel: 'substack',
         status: 'planned',
         plannedDate: daysAhead(1),
@@ -832,7 +808,7 @@ export async function seedDistributionOS() {
       },
       {
         contentType: 'carousel',
-        contentId: carousels[0]!.id,
+        contentId: carousels[0]?.id,
         channel: 'linkedin',
         status: 'ready',
         plannedDate: daysAhead(1),
@@ -840,8 +816,6 @@ export async function seedDistributionOS() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-distribution-os] Seeded distribution targets`);
 
   await db
     .insert(dosContentCalendarItemsTable)
@@ -895,8 +869,6 @@ export async function seedDistributionOS() {
     ])
     .onConflictDoNothing();
 
-  console.log(`[seed-distribution-os] Seeded content calendar items`);
-
   await db
     .insert(dosCtaBlocksTable)
     .values([
@@ -929,9 +901,5 @@ export async function seedDistributionOS() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log(`[seed-distribution-os] Seeded CTA blocks`);
-
-  console.log('[seed-distribution-os] Distribution OS seed complete.');
   return { seeded: true };
 }

@@ -4,8 +4,6 @@ import {
   checkFreshness,
   getAllAgentIds,
   getModelCard,
-  getModelConfig,
-  type ModelCard,
 } from './model-registry';
 
 export interface AiModelEntry {
@@ -109,7 +107,7 @@ function buildAccuracyFromTelemetry(agentId: string): AiModelEntry['accuracyMetr
     baseline: olderSuccessRate !== null ? parseFloat(olderSuccessRate.toFixed(3)) : null,
     drift: parseFloat(drift.toFixed(3)),
     driftStatus: drift > 0.1 ? 'critical' : drift > 0.05 ? 'warning' : 'stable',
-    lastEvaluated: recent.length > 0 ? new Date(recent[0]!.timestamp).toISOString() : null,
+    lastEvaluated: recent.length > 0 ? new Date(recent[0]?.timestamp).toISOString() : null,
   };
 }
 

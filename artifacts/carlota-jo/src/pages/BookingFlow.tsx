@@ -111,7 +111,7 @@ export default function BookingFlow() {
         return;
       }
       const data = await res.json();
-      setConfirmationId(data.confirmationId || 'CJ-' + Date.now().toString(36).toUpperCase());
+      setConfirmationId(data.confirmationId || `CJ-${Date.now().toString(36).toUpperCase()}`);
       setBookingConfirmed(true);
     } catch {
       setBookingError('Unable to reach the booking service. Please try again shortly.');
@@ -140,8 +140,8 @@ export default function BookingFlow() {
           date: booking.date,
           time: booking.time,
           name: booking.name,
-          successUrl: window.location.origin + import.meta.env.BASE_URL + 'booking/success',
-          cancelUrl: window.location.origin + import.meta.env.BASE_URL + 'booking/cancel',
+          successUrl: `${window.location.origin + import.meta.env.BASE_URL}booking/success`,
+          cancelUrl: `${window.location.origin + import.meta.env.BASE_URL}booking/cancel`,
         }),
       });
 
@@ -187,7 +187,7 @@ export default function BookingFlow() {
   };
 
   const formatDate = (dateStr: string) => {
-    return formatSharedDate(new Date(dateStr + 'T12:00:00'), {
+    return formatSharedDate(new Date(`${dateStr}T12:00:00`), {
       intlOptions: { weekday: 'short', month: 'short', day: 'numeric' },
     });
   };

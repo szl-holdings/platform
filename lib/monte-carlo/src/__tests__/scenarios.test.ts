@@ -34,22 +34,22 @@ describe('VESSELS_VOYAGE_COST scenario', () => {
     const piracyPremium = 10 * 1_000_000 * 0.02; // 200_000
     const totalCost = fuelCost + portFees + piracyPremium; // 646_000
 
-    expect(out['totalDays']).toBe(totalDays);
-    expect(out['effectiveFuelCost']).toBeCloseTo(fuelCost / 1000, 6);
-    expect(out['totalVoyageCost']).toBeCloseTo(totalCost / 1000, 6);
-    expect(out['fuelCostShare']).toBeCloseTo(fuelCost / totalCost, 6);
-    expect(out['costPerDay']).toBeCloseTo(totalCost / totalDays / 1000, 6);
+    expect(out.totalDays).toBe(totalDays);
+    expect(out.effectiveFuelCost).toBeCloseTo(fuelCost / 1000, 6);
+    expect(out.totalVoyageCost).toBeCloseTo(totalCost / 1000, 6);
+    expect(out.fuelCostShare).toBeCloseTo(fuelCost / totalCost, 6);
+    expect(out.costPerDay).toBeCloseTo(totalCost / totalDays / 1000, 6);
   });
 
   it('produces finite, positive cost outputs across many random samples', () => {
     for (let trial = 0; trial < 50; trial++) {
       const inputs = sampleInputs(VESSELS_VOYAGE_COST);
       const out = VESSELS_VOYAGE_COST.calculate(inputs);
-      expect(Number.isFinite(out['totalVoyageCost']!)).toBe(true);
-      expect(out['totalVoyageCost']!).toBeGreaterThan(0);
-      expect(out['totalDays']!).toBeGreaterThan(0);
-      expect(out['fuelCostShare']!).toBeGreaterThanOrEqual(0);
-      expect(out['fuelCostShare']!).toBeLessThanOrEqual(1);
+      expect(Number.isFinite(out.totalVoyageCost!)).toBe(true);
+      expect(out.totalVoyageCost!).toBeGreaterThan(0);
+      expect(out.totalDays!).toBeGreaterThan(0);
+      expect(out.fuelCostShare!).toBeGreaterThanOrEqual(0);
+      expect(out.fuelCostShare!).toBeLessThanOrEqual(1);
     }
   });
 });

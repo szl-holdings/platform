@@ -1,5 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CognitiveLayout } from './cognitive-layout';
 
 const ACCENT = '#8b7ac8';

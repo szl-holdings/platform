@@ -1,11 +1,9 @@
 import { seedForge } from '../artifacts/api-server/src/scripts/seed-forge.js';
 
 seedForge()
-  .then((result) => {
-    console.log('[runner] seed-forge complete:', result);
+  .then((_result) => {
     process.exit(0);
   })
-  .catch((err) => {
-    console.error('[runner] seed-forge failed:', err);
+  .catch((_err) => {
     process.exit(1);
   });

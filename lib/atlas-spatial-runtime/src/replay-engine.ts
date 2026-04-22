@@ -5,7 +5,7 @@ import {
   spatialTwinSnapshotsTable,
   worldlineSignalOverlaysTable,
 } from '@szl-holdings/db';
-import { and, asc, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, sql } from 'drizzle-orm';
 import type { DriftStatus, ReplayFrame, ReplayTimeline } from './types.js';
 
 export interface ReplayOptions {

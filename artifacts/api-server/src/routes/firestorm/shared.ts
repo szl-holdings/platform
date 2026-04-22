@@ -1,66 +1,8 @@
-import { type DecisionObjectType, validateAndBuildDecision } from '@szl-holdings/ai-engine';
-import {
-  ingestFirestormAlert,
-  ingestFirestormFinding,
-  ingestFirestormScenario,
-} from '@szl-holdings/ai-engine/domain-embedding-hooks';
-import {
-  alloyRuntimeAgentsTable,
-  alloyRuntimeAgentVersionsTable,
-  auditEventsTable,
-  db,
-  firestormAlertsTable,
-  firestormAnalystNotebookTable,
-  firestormAssessmentsTable,
-  firestormAssetsTable,
-  firestormCaseMemoryTable,
-  firestormCasesTable,
-  firestormComplianceControlsTable,
-  firestormFindingsTable,
-  firestormHardeningControlsTable,
-  firestormIncidentsTable,
-  firestormMitreDetectionsTable,
-  firestormRiskScoresTable,
-  firestormScenariosTable,
-  firestormSimulationRunsTable,
-  firestormTradecraftDecisionsTable,
-  firestormTradecraftValidationAuditTable,
-  firestormWorkflowActionsTable,
-  type InsertFirestormCaseMemory,
-  insertFirestormAlertSchema,
-  insertFirestormAnalystNotebookSchema,
-  insertFirestormAssessmentSchema,
-  insertFirestormAssetSchema,
-  insertFirestormCaseSchema,
-  insertFirestormFindingSchema,
-  insertFirestormIncidentSchema,
-  insertFirestormRiskScoreSchema,
-  insertFirestormScenarioSchema,
-  insertFirestormSimulationRunSchema,
-  insertFirestormTradecraftDecisionSchema,
-  insertFirestormWorkflowActionSchema,
-} from '@szl-holdings/db';
-import { and, desc, eq, inArray, or, sql } from 'drizzle-orm';
-import { type IRouter, type RequestHandler, Router } from 'express';
+
+import type { RequestHandler, } from 'express';
 import rateLimit from 'express-rate-limit';
 import { LRUCache } from 'lru-cache';
 import { z } from 'zod';
-import {
-  handleRouteError,
-  sendCreated,
-  sendNoContent,
-  sendNotFound,
-  sendSuccess,
-} from '../../lib/api-response';
-import { logger } from '../../lib/logger';
-import { broadcastWs, FIRESTORM_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
-import {
-  ingestDecisionToEvidenceIndex,
-  queryEvidenceIndex,
-} from '../../lib/tradecraft-evidence-store';
-import { authMiddleware, parseIdParam } from '../../middlewares/auth';
-import { validateIfMatch } from '../../middlewares/optimistic-concurrency';
-import { REFERENCE_COMPLIANCE_CONTROLS } from '../readiness.js';
 
 export const updateVulnerabilitySchema = z
   .object({
@@ -143,7 +85,7 @@ export const updateCaseSchema = z
   })
   .strict();
 
-const createCaseMemorySchema = z
+const _createCaseMemorySchema = z
   .object({
     caseId: z.string().min(1).max(200),
     incidentId: z.string().max(200).optional().nullable(),

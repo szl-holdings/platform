@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   RefreshControl,
@@ -129,7 +129,7 @@ function SignalAlertCard({
             <View
               style={[
                 styles.pill,
-                { backgroundColor: sevColor + '18', borderColor: sevColor + '35' },
+                { backgroundColor: `${sevColor}18`, borderColor: `${sevColor}35` },
               ]}
             >
               <Text style={[styles.pillText, { color: sevColor }]}>
@@ -159,7 +159,7 @@ function SignalAlertCard({
                   key={d}
                   style={[
                     styles.domainPill,
-                    { backgroundColor: meta.color + '15', borderColor: meta.color + '30' },
+                    { backgroundColor: `${meta.color}15`, borderColor: `${meta.color}30` },
                   ]}
                 >
                   <Text style={[styles.domainPillText, { color: meta.color }]}>
@@ -256,7 +256,7 @@ function EscalationCard({
             <View
               style={[
                 styles.pill,
-                { backgroundColor: prioColor + '18', borderColor: prioColor + '35' },
+                { backgroundColor: `${prioColor}18`, borderColor: `${prioColor}35` },
               ]}
             >
               <Text style={[styles.pillText, { color: prioColor }]}>
@@ -299,8 +299,8 @@ function WorldModelAlert({
       style={[
         styles.wmAlert,
         {
-          backgroundColor: sevColor + '10',
-          borderColor: sevColor + '30',
+          backgroundColor: `${sevColor}10`,
+          borderColor: `${sevColor}30`,
           borderLeftColor: sevColor,
           borderLeftWidth: 3,
         },
@@ -311,7 +311,7 @@ function WorldModelAlert({
           {domMeta.icon} {domMeta.label}
         </Text>
         <View
-          style={[styles.pill, { backgroundColor: sevColor + '18', borderColor: sevColor + '35' }]}
+          style={[styles.pill, { backgroundColor: `${sevColor}18`, borderColor: `${sevColor}35` }]}
         >
           <Text style={[styles.pillText, { color: sevColor }]}>{a.severity.toUpperCase()}</Text>
         </View>
@@ -326,7 +326,7 @@ type TabKey = 'signals' | 'escalations' | 'world-model';
 export default function AlertCenterScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const qc = useQueryClient();
+  const _qc = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabKey>('signals');
 
   const signalsQuery = useQuery<{ signals: FusionSignal[]; stats: Record<string, number> }>({

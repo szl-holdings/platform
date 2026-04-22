@@ -1,26 +1,12 @@
 import { color } from '@szl-holdings/design-system';
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
-import { cn } from '@szl-holdings/shared-ui/utils';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertTriangle,
-  ArrowRight,
-  BarChart3,
   Building2,
-  CheckCircle,
-  ChevronDown,
-  ChevronRight,
-  Clock,
-  ExternalLink,
-  Eye,
   FileText,
   Info,
   Plug,
-  Plus,
   RefreshCw,
-  Shield,
-  TrendingUp,
-  Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
@@ -32,7 +18,7 @@ import {
 
 const ACCENT = '#40856a';
 
-function fmt(n: number, opts?: Intl.NumberFormatOptions) {
+function _fmt(n: number, opts?: Intl.NumberFormatOptions) {
   return new Intl.NumberFormat('en-US', opts).format(n);
 }
 function fmtM(n: number) {
@@ -386,7 +372,7 @@ export default function PropertyDesk() {
               {
                 label: 'Occupancy',
                 value: `${twin.occupancy}%`,
-                sub: twin.sqft.toLocaleString() + ' sqft',
+                sub: `${twin.sqft.toLocaleString()} sqft`,
               },
               {
                 label: 'Readiness',

@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { Building2, Clock, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
 
 const TERRA_ACCENT = '#c87941';

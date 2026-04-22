@@ -2,7 +2,7 @@
 
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion } from 'framer-motion';
-import { AlertTriangle, CheckCircle, Clock, FileText, Search, Upload } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, FileText, Search, } from 'lucide-react';
 import { useState } from 'react';
 import { type Document, documents } from '@/data/brokerage';
 
@@ -174,7 +174,7 @@ export default function DocumentsPage() {
 
   const missing = documents.filter((d) => d.status === 'missing' && d.required);
   const pendingSig = documents.filter((d) => d.status === 'pending-signature');
-  const underReview = documents.filter((d) => d.status === 'pending-review');
+  const _underReview = documents.filter((d) => d.status === 'pending-review');
   const complete = documents.filter((d) => d.status === 'complete');
 
   const readiness: 'green' | 'yellow' | 'red' =

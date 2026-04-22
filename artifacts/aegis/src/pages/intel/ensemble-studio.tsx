@@ -1,15 +1,9 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  AlertTriangle,
   BarChart3,
   Brain,
-  CheckCircle2,
   GitBranch,
   Layers,
-  Play,
-  Settings,
-  TrendingUp,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 

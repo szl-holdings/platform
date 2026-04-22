@@ -1,5 +1,5 @@
 import { demoPriorities } from '@lyte/lib/demo-seed';
-import { AlertTriangle, ChevronDown, Clock, Target, TrendingUp, Users } from 'lucide-react';
+import { ChevronDown, Target, } from 'lucide-react';
 import { useState } from 'react';
 
 const BG = { surface: '#0c1018', elevated: '#10141e' };

@@ -150,7 +150,6 @@ export function MicroFeedbackWidget({
             onChange={(e) => setComment(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSubmitComment()}
             placeholder="One line is enough…"
-            autoFocus
             style={{
               flex: 1,
               background: 'hsla(0,0%,100%,0.06)',

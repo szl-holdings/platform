@@ -8,18 +8,9 @@
  * for the future Eval Console (Task #1173).
  */
 
-import { defaultRuntime, lookupWorkflow, type SubstrateRuntimeOptions } from '../engine.js';
+import { lookupWorkflow, type SubstrateRuntimeOptions } from '../engine.js';
 import { defaultJournal, defaultRunStore } from '../journal.js';
-import type {
-  CounterfactualDiff,
-  PipelineRun,
-  PolicyProfile,
-  RuntimeStartOptions,
-  StageDiff,
-  StageResultStatus,
-  WorkflowDefinition,
-} from '../types.js';
-import { PolicyProfileSchema } from '../types.js';
+import { type CounterfactualDiff, type PipelineRun, type PolicyProfile, type RuntimeStartOptions, type StageDiff, type StageResultStatus, type StageType, type WorkflowDefinition, PolicyProfileSchema } from '../types.js';
 
 /**
  * Look up a policy from the policy-engine registry by ID and project it into a
@@ -99,7 +90,7 @@ export async function replay(opts: ReplayOptions): Promise<ReplayResult> {
   // embedded in the run's metadata (written by engine.start() for replay durability);
   // fall back to the in-memory registry last (present only when the process started
   // the original run in the same session).
-  const snapshotDef = sourceRun.metadata?.['__workflowSnapshot'] as WorkflowDefinition | undefined;
+  const snapshotDef = sourceRun.metadata?.__workflowSnapshot as WorkflowDefinition | undefined;
   const workflow = opts.workflow ?? snapshotDef ?? lookupWorkflow(sourceRun.workflowId);
   if (!workflow) {
     throw new Error(
@@ -181,7 +172,7 @@ function buildCounterfactualDiff(
 
     stageDiffs.push({
       stageId,
-      stageType: (baselineResult ?? cfResult)!.stageType,
+      stageType: (baselineResult ?? cfResult)?.stageType ?? ('unknown' as StageType),
       baseline: baselineResult
         ? {
             status: baselineResult.status as StageResultStatus,
@@ -257,7 +248,7 @@ export function formatDiff(diff: CounterfactualDiff): string {
 
   lines.push('-'.repeat(70));
   const delta = diff.finalConfidenceDelta;
-  const deltaStr = (delta >= 0 ? '+' : '') + (delta * 100).toFixed(1) + '%';
+  const deltaStr = `${(delta >= 0 ? '+' : '') + (delta * 100).toFixed(1)}%`;
   lines.push(`Final Confidence Delta: ${deltaStr}`);
   lines.push(`Outcome Changed:        ${diff.outcomeChanged ? 'YES ⚡' : 'no'}`);
   lines.push('='.repeat(70));

@@ -1,12 +1,7 @@
 import { motion as m } from 'framer-motion';
 import {
-  Activity,
-  AlertTriangle,
-  Anchor,
   ArrowRight,
-  ArrowUpRight,
   ChevronRight,
-  Navigation,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useFleetExceptions, useVesselsDashboard } from '@/hooks/use-vessels-data';

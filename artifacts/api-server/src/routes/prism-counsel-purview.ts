@@ -10,7 +10,7 @@ import {
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
-import { handleRouteError, sendNotFound, sendSuccess } from '../lib/api-response';
+import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';

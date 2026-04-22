@@ -422,6 +422,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../../packages/aef-contracts
       '@workspace/aef-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
@@ -943,6 +946,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../../packages/aef-contracts
       '@workspace/aef-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
@@ -1291,6 +1297,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../../packages/aef-contracts
       '@workspace/aef-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
@@ -2214,6 +2223,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../../packages/aef-contracts
       '@workspace/aef-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
@@ -2341,6 +2353,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/aef-contracts':
+        specifier: workspace:*
+        version: link:../../packages/aef-contracts
       '@workspace/aef-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk

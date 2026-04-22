@@ -18,7 +18,7 @@ import {
   type ApprovalRequest,
   ApprovalRequestSchema,
 } from '@szl-holdings/contracts/governance';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 // ─── Store ───────────────────────────────────────────────────────────────────
 

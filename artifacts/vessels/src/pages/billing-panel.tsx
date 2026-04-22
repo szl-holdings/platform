@@ -302,7 +302,7 @@ export default function BillingPanelPage() {
                     <FileText className="w-3.5 h-3.5 text-sky-400/40" />
                     <span className="text-xs text-sky-200 font-mono">
                       {inv.stripeInvoiceId
-                        ? inv.stripeInvoiceId.slice(0, 20) + '…'
+                        ? `${inv.stripeInvoiceId.slice(0, 20)}…`
                         : `INV-${String(inv.id).padStart(4, '0')}`}
                     </span>
                   </div>

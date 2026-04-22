@@ -1,10 +1,8 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
-import { BarChart3, Building2, DollarSign, Map, Percent, Target, TrendingUp } from 'lucide-react';
+import { BarChart3, Map, } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -93,7 +91,7 @@ const statusStyle: Record<string, string> = {
 
 export default function PortfolioPerformance() {
   const { token, isLoading: tokenLoading } = useMapboxToken();
-  const totalValue = 128;
+  const _totalValue = 128;
   const avgIRR = portfolio.reduce((a, p) => a + p.irr, 0) / portfolio.length;
 
   return (

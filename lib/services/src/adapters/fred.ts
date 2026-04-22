@@ -65,7 +65,7 @@ export class FredAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["FRED_API_KEY"];
 
   private get apiKey(): string | undefined {
-    return process.env["FRED_API_KEY"];
+    return process.env.FRED_API_KEY;
   }
 
   private readonly BASE_URL = "https://api.stlouisfed.org/fred";

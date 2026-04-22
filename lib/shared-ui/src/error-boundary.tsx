@@ -147,7 +147,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   override componentDidCatch(error: Error, errorInfo: { componentStack: string }) {
-    console.error('[ErrorBoundary] Caught error:', error, errorInfo);
     this.props.onError?.(error, errorInfo);
 
     try {
@@ -436,11 +435,6 @@ export class SectionErrorBoundary extends Component<
   override componentDidCatch(error: Error, errorInfo: { componentStack: string }) {
     const errorRef = `ref_${Date.now().toString(36).slice(-6)}`;
     this.setState({ errorRef });
-    console.error(
-      `[SectionErrorBoundary:${this.props.sectionName || 'unknown'}] ${errorRef}`,
-      error,
-      errorInfo,
-    );
     this.props.onError?.(error, errorInfo);
   }
 

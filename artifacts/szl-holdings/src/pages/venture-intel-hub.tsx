@@ -87,7 +87,7 @@ export default function VentureIntelHubPage() {
       {__pageMeta}
       <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
           <section style={{ padding: "clamp(6rem,10vw,8rem) 0 clamp(4rem,7vw,6rem)", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
               <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>

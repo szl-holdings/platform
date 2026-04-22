@@ -335,8 +335,8 @@ function parseAnomalyFindings(output: unknown): AnomalyFinding[] {
   }
 
   const raw = output as Record<string, unknown>;
-  if (Array.isArray(raw['findings'])) {
-    return raw['findings'] as AnomalyFinding[];
+  if (Array.isArray(raw.findings)) {
+    return raw.findings as AnomalyFinding[];
   }
   return [];
 }
@@ -347,7 +347,7 @@ function parseRemediationDecision(
   output: unknown,
   confidence: number,
 ): RemediationDecision {
-  const raw = typeof output === 'string' ? output : JSON.stringify(output);
+  const _raw = typeof output === 'string' ? output : JSON.stringify(output);
 
   return {
     runId,

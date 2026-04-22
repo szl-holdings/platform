@@ -3,10 +3,7 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
   AlertTriangle,
-  Anchor,
   BarChart3,
-  CheckCircle2,
-  ChevronRight,
   Clock,
   Cpu,
   Droplets,

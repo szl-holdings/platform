@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { getApiBaseUrl } from '@szl-holdings/api-client-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,

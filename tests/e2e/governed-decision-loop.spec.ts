@@ -69,7 +69,7 @@ async function clickStep(page: Page, label: string) {
     .first();
   await btn.click();
   // The step header updates immediately — wait for it to be visible
-  await expect(page.locator('text=' + label).first()).toBeVisible({ timeout: 10000 });
+  await expect(page.locator(`text=${label}`).first()).toBeVisible({ timeout: 10000 });
 }
 
 // ---------------------------------------------------------------------------

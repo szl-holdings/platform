@@ -1,18 +1,9 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
-import type {
-  AptCampaign,
-  FeedHealthPanel,
-  FeedSource,
-  StixIoc,
-} from '@szl-holdings/observability';
-import { ThreatFeedSimulator } from '@szl-holdings/observability';
+import { type AptCampaign, type FeedHealthPanel, type FeedSource, type StixIoc, ThreatFeedSimulator } from '@szl-holdings/observability';
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
   ChevronDown,
   ChevronUp,
   Clock,
@@ -27,7 +18,6 @@ import {
   Rss,
   Shield,
   Sparkles,
-  Target,
   Wifi,
   WifiOff,
 } from 'lucide-react';

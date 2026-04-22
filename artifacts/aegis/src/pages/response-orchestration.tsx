@@ -4,19 +4,11 @@ import {
   Activity,
   AlertOctagon,
   AlertTriangle,
-  ArrowRight,
   CheckCircle2,
-  ChevronDown,
-  ChevronRight,
   Clock,
-  Eye,
   Lock,
-  Network,
   Pause,
-  Play,
   RotateCcw,
-  Server,
-  Shield,
   ShieldOff,
   Users,
   XCircle,
@@ -398,7 +390,7 @@ function groupLiveActions(actions: LiveWorkflowAction[]): PlaybookGroup[] {
     byEntity.set(key, group);
   }
 
-  return Array.from(byEntity.entries()).map(([key, group], idx) => {
+  return Array.from(byEntity.entries()).map(([_key, group], idx) => {
     const sorted = group.sort(
       (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     );
@@ -442,7 +434,7 @@ function groupLiveActions(actions: LiveWorkflowAction[]): PlaybookGroup[] {
 export default function ResponseOrchestration() {
   const [selectedPbId, setSelectedPbId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'playbook' | 'rollback' | 'containment'>('playbook');
-  const [expandedSteps, setExpandedSteps] = useState(true);
+  const [_expandedSteps, _setExpandedSteps] = useState(true);
 
   const { data: playbooksData } = useStandardQuery<PlaybooksPayload>({
     queryKey: ['command-playbooks'],

@@ -1,16 +1,9 @@
 import { InlineFeedbackBar } from '@szl-holdings/shared-ui/outcome-feedback';
 import {
   AlertTriangle,
-  ArrowRight,
   CheckCircle,
   Clock,
-  Eye,
-  Globe,
   Shield,
-  Target,
-  TrendingUp,
-  Users,
-  Zap,
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
@@ -18,7 +11,7 @@ const ACCENT = '#f59e0b';
 const RED = '#ef4444';
 const GREEN = '#22c55e';
 const BLUE = '#3b82f6';
-const PURPLE = '#8b5cf6';
+const _PURPLE = '#8b5cf6';
 
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
@@ -239,7 +232,7 @@ export default function DecisionSupportPage() {
           aria-label="Show all stakeholders"
           className="text-[9px] font-semibold rounded-lg px-3 py-1.5 transition"
           style={{
-            background: filterStakeholder === 'all' ? ACCENT + '15' : 'transparent',
+            background: filterStakeholder === 'all' ? `${ACCENT}15` : 'transparent',
             color: filterStakeholder === 'all' ? ACCENT : DS.text.muted,
           }}
         >
@@ -252,7 +245,7 @@ export default function DecisionSupportPage() {
             aria-label={`Filter by ${s}`}
             className="text-[9px] font-semibold rounded-lg px-3 py-1.5 transition"
             style={{
-              background: filterStakeholder === s ? ACCENT + '15' : 'transparent',
+              background: filterStakeholder === s ? `${ACCENT}15` : 'transparent',
               color: filterStakeholder === s ? ACCENT : DS.text.muted,
             }}
           >
@@ -274,7 +267,7 @@ export default function DecisionSupportPage() {
               </span>
               <span
                 className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5"
-                style={{ background: urgColor(rec.urgency) + '15', color: urgColor(rec.urgency) }}
+                style={{ background: `${urgColor(rec.urgency)}15`, color: urgColor(rec.urgency) }}
               >
                 {rec.urgency}
               </span>
@@ -289,7 +282,7 @@ export default function DecisionSupportPage() {
               </span>
               <span
                 className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5 ml-auto"
-                style={{ background: statColor(rec.status) + '15', color: statColor(rec.status) }}
+                style={{ background: `${statColor(rec.status)}15`, color: statColor(rec.status) }}
               >
                 {rec.status}
               </span>
@@ -299,7 +292,7 @@ export default function DecisionSupportPage() {
             </p>
             <div
               className="rounded-lg p-3 mb-3"
-              style={{ background: ACCENT + '06', borderLeft: `2px solid ${ACCENT}` }}
+              style={{ background: `${ACCENT}06`, borderLeft: `2px solid ${ACCENT}` }}
             >
               <p className="text-[10px] leading-relaxed" style={{ color: DS.text.secondary }}>
                 {rec.action}
@@ -345,7 +338,7 @@ export default function DecisionSupportPage() {
                     onClick={() => handleAction(rec.id, 'accepted')}
                     aria-label={`Accept ${rec.id}`}
                     className="text-[8px] font-semibold rounded px-2.5 py-1 hover:brightness-125 transition"
-                    style={{ background: GREEN + '20', color: GREEN }}
+                    style={{ background: `${GREEN}20`, color: GREEN }}
                   >
                     Accept
                   </button>
@@ -353,7 +346,7 @@ export default function DecisionSupportPage() {
                     onClick={() => handleAction(rec.id, 'in-progress')}
                     aria-label={`Begin ${rec.id}`}
                     className="text-[8px] font-semibold rounded px-2.5 py-1 hover:brightness-125 transition"
-                    style={{ background: BLUE + '20', color: BLUE }}
+                    style={{ background: `${BLUE}20`, color: BLUE }}
                   >
                     Begin
                   </button>

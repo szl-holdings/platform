@@ -1,50 +1,33 @@
-import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
-import { Badge } from '@szl-holdings/shared-ui/ui/badge';
+
 import { Button } from '@szl-holdings/shared-ui/ui/button';
 import { cn } from '@szl-holdings/shared-ui/utils';
-import { useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
   AlertTriangle,
-  ArrowRight,
   Bell,
   BookOpen,
   Brain,
   CheckCircle,
   ChevronDown,
-  ChevronRight,
   Clock,
-  Cpu,
   Database,
-  Eye,
-  FileText,
-  Filter,
-  Flag,
   Globe,
   Info,
-  Link2,
   Lock,
   MessageSquare,
-  MoreHorizontal,
   Network,
-  Pause,
   Play,
   Plus,
   Search,
   Server,
   Shield,
-  Tag,
   Target,
   Terminal,
-  TrendingUp,
-  Unlock,
   User,
-  Users,
   X,
   Zap,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { api } from '@/lib/api';
+import { useState } from 'react';
 import { type MitreStageCoverage, NARRATIVE_INCIDENTS } from './adversary-narrative-engine';
 
 const SEVERITY_CONFIG = {
@@ -341,7 +324,7 @@ const NARRATIVE_OBS_CONFIG: Record<string, string> = {
 export default function XDRIncidentWorkbench() {
   const [selectedId, setSelectedId] = useState<string>(XDR_INCIDENTS[0].id);
   const [filterSeverity, setFilterSeverity] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterStatus, _setFilterStatus] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [newNote, setNewNote] = useState('');
   const [activeDetailTab, setActiveDetailTab] = useState<'overview' | 'narrative'>('overview');

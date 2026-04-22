@@ -343,7 +343,7 @@ export default function TrustCenter() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
         <section style={{
           paddingTop: "clamp(7rem,12vw,10rem)",

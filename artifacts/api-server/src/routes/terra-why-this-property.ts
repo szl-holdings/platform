@@ -4,7 +4,7 @@ import {
   terraDistressPropertiesTable,
   terraPropertiesTable,
 } from '@szl-holdings/db';
-import { and, desc, eq, or, sql } from 'drizzle-orm';
+import { eq, or, sql } from 'drizzle-orm';
 import { type IRouter, type RequestHandler, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { LRUCache } from 'lru-cache';
@@ -85,7 +85,7 @@ async function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T
 }
 
 const NYC_SODA = 'https://data.cityofnewyork.us/resource';
-const SODA_TOKEN = process.env['NYC_OPEN_DATA_TOKEN'] ?? '';
+const SODA_TOKEN = process.env.NYC_OPEN_DATA_TOKEN ?? '';
 
 function sodaUrl(dataset: string, params: Record<string, string | number> = {}): string {
   const u = new URL(`${NYC_SODA}/${dataset}.json`);
@@ -363,7 +363,7 @@ function parseAddress(full: string): { houseNo: string; street: string } {
   // as well as standard numbers ("1847 Flatbush Ave", "422E 138th St").
   const m = full.match(/^(\d[\d-]*[A-Za-z]?)\s+(.+?)(?:,|$)/);
   if (!m) return { houseNo: '', street: full.replace(/,.*/, '').trim() };
-  return { houseNo: m[1]!, street: m[2]!.trim() };
+  return { houseNo: m[1]!, street: m[2]?.trim() };
 }
 
 /**
@@ -386,7 +386,7 @@ async function geocodeAddressToBBL(address: string, borough: string): Promise<Bb
     if (!r.ok) return null;
     const data = (await r.json()) as { features?: Array<{ properties?: Record<string, unknown> }> };
     const props = data.features?.[0]?.properties;
-    const bbl = props?.['pad_bbl'];
+    const bbl = props?.pad_bbl;
     if (!bbl || typeof bbl !== 'string' || bbl.length !== 10) return null;
     const boroughDigit = bbl[0]!;
     const block = bbl.slice(1, 6).replace(/^0+/, '') || '0';
@@ -450,9 +450,9 @@ async function fetchHpdViolations(
   const raw = await sodaFetchWithRetry(url);
   const typedRecords = raw as Record<string, unknown>[];
 
-  const classC = typedRecords.filter((r) => r['class'] === 'C');
-  const classB = typedRecords.filter((r) => r['class'] === 'B');
-  const openC = classC.filter((r) => r['currentstatus'] !== 'CLOSE').length;
+  const classC = typedRecords.filter((r) => r.class === 'C');
+  const classB = typedRecords.filter((r) => r.class === 'B');
+  const openC = classC.filter((r) => r.currentstatus !== 'CLOSE').length;
 
   const score = Math.min(20, Math.round(classC.length * 2.0 + classB.length * 0.6 + openC * 2.5));
   const summary =
@@ -493,9 +493,9 @@ async function fetchEcbViolations(
   const typedRecords = raw as Record<string, unknown>[];
 
   const unpaid = typedRecords.filter(
-    (r) => r['respondent_mail_zip'] && r['penality_imposed'] && Number(r['penality_imposed']) > 0,
+    (r) => r.respondent_mail_zip && r.penality_imposed && Number(r.penality_imposed) > 0,
   );
-  const totalFines = unpaid.reduce((acc, r) => acc + Number(r['penality_imposed'] ?? 0), 0);
+  const totalFines = unpaid.reduce((acc, r) => acc + Number(r.penality_imposed ?? 0), 0);
   const score = Math.min(15, Math.round(unpaid.length * 2.5 + Math.log1p(totalFines / 5000) * 3));
   const summary =
     typedRecords.length > 0
@@ -539,7 +539,7 @@ async function fetchAcrisDeedHistory(
   const raw = await sodaFetchWithRetry(legalsUrl);
   const legals = raw as Record<string, unknown>[];
 
-  const docIds = [...new Set(legals.map((r) => r['document_id'] as string).filter(Boolean))].slice(
+  const docIds = [...new Set(legals.map((r) => r.document_id as string).filter(Boolean))].slice(
     0,
     15,
   );
@@ -556,33 +556,33 @@ async function fetchAcrisDeedHistory(
   }
 
   const deeds = masters.filter((r) =>
-    String(r['doc_type'] ?? '')
+    String(r.doc_type ?? '')
       .toUpperCase()
       .match(/^(DEED|AL&R|BARGAIN)/),
   );
   const mortgages = masters.filter((r) =>
-    String(r['doc_type'] ?? '')
+    String(r.doc_type ?? '')
       .toUpperCase()
       .match(/^(MTGE|ASSIGNMENT|SUBORDINATION)/),
   );
 
   const ownershipEdges: OwnershipEdge[] = deeds.slice(0, 5).map((d, i) => ({
-    from: d['grantor_name'] ? String(d['grantor_name']).trim() : 'Prior Owner',
-    to: d['grantee_name'] ? String(d['grantee_name']).trim() : 'Current Owner',
-    docType: String(d['doc_type'] ?? 'DEED'),
-    date: d['recorded_datetime']
-      ? String(d['recorded_datetime']).slice(0, 10)
-      : d['good_through_date']
-        ? String(d['good_through_date']).slice(0, 10)
+    from: d.grantor_name ? String(d.grantor_name).trim() : 'Prior Owner',
+    to: d.grantee_name ? String(d.grantee_name).trim() : 'Current Owner',
+    docType: String(d.doc_type ?? 'DEED'),
+    date: d.recorded_datetime
+      ? String(d.recorded_datetime).slice(0, 10)
+      : d.good_through_date
+        ? String(d.good_through_date).slice(0, 10)
         : `2024-${(i + 1).toString().padStart(2, '0')}-15`,
-    amount: d['document_amount'] ? Number(d['document_amount']) : null,
+    amount: d.document_amount ? Number(d.document_amount) : null,
     confidence: 0.85 - i * 0.06,
-    traceRef: `ACRIS-${d['document_id'] ?? `DOC-${i + 1}`}`,
+    traceRef: `ACRIS-${d.document_id ?? `DOC-${i + 1}`}`,
     source: 'NYC ACRIS Real Property Master (bnx9-e6tj)',
   }));
 
   const recentTransfers = deeds.filter((d) => {
-    const dt = d['recorded_datetime'] ? new Date(String(d['recorded_datetime'])) : null;
+    const dt = d.recorded_datetime ? new Date(String(d.recorded_datetime)) : null;
     return dt && dt.getFullYear() >= new Date().getFullYear() - 3;
   });
 
@@ -622,7 +622,7 @@ async function fetchDobPermits(
   const permits = raw as Record<string, unknown>[];
 
   const stopWork = permits.filter((p) =>
-    String(p['job_status_descrp'] ?? '').includes('STOP WORK'),
+    String(p.job_status_descrp ?? '').includes('STOP WORK'),
   );
   const score = Math.min(15, stopWork.length * 8 + permits.length);
   const summary =
@@ -677,9 +677,9 @@ async function fetchDofAssessment(
 
   if (records.length > 0) {
     const latest = records[0]!;
-    const salePrice = latest['sale_price'] ? Number(latest['sale_price']) : null;
-    const taxClass = String(latest['tax_class_at_present'] ?? '');
-    const saleDate = latest['sale_date'] ? new Date(String(latest['sale_date'])) : null;
+    const salePrice = latest.sale_price ? Number(latest.sale_price) : null;
+    const taxClass = String(latest.tax_class_at_present ?? '');
+    const saleDate = latest.sale_date ? new Date(String(latest.sale_date)) : null;
 
     if (salePrice && salePrice > 10000) {
       dofSalePrice = salePrice;
@@ -726,7 +726,7 @@ function buildOwnershipChainFromProperty(
       id: 'property',
       type: 'property',
       label: prop.address,
-      subLabel: `${prop.borough} · Est. $${prop.estimatedValue ? (prop.estimatedValue / 1e6).toFixed(1) + 'M' : 'N/A'}`,
+      subLabel: `${prop.borough} · Est. $${prop.estimatedValue ? `${(prop.estimatedValue / 1e6).toFixed(1)}M` : 'N/A'}`,
       confidence: 0.97,
       source: 'Terra Entity Registry',
     },
@@ -898,10 +898,10 @@ function buildFinancingStress(
     debtAmount: prop.debtAmount,
     estimatedValue: prop.estimatedValue,
     acrisRecords: mortgages.map((m) => ({
-      docType: String(m['doc_type'] ?? 'MTGE'),
-      amount: m['document_amount'] ? Number(m['document_amount']) : null,
-      date: m['recorded_datetime'] ? String(m['recorded_datetime']).slice(0, 10) : '',
-      traceRef: `ACRIS-${m['document_id'] ?? ''}`,
+      docType: String(m.doc_type ?? 'MTGE'),
+      amount: m.document_amount ? Number(m.document_amount) : null,
+      date: m.recorded_datetime ? String(m.recorded_datetime).slice(0, 10) : '',
+      traceRef: `ACRIS-${m.document_id ?? ''}`,
     })),
     clues: [
       ...(ltvEst !== null && ltvEst > 0.75
@@ -975,21 +975,21 @@ async function fetchNeighborhoodMotion(
 
   const recentTransactions = sales.slice(0, 8).map((s, i) => ({
     address:
-      `${s['address_number'] ?? ''} ${s['street_name'] ?? ''}`.trim() ||
+      `${s.address_number ?? ''} ${s.street_name ?? ''}`.trim() ||
       `${borough} Property ${i + 1}`,
-    date: s['document_date'] ? String(s['document_date']).slice(0, 10) : '',
-    docType: String(s['doc_type'] ?? 'DEED'),
-    traceRef: `ACRIS-${s['document_id'] ?? i}`,
+    date: s.document_date ? String(s.document_date).slice(0, 10) : '',
+    docType: String(s.doc_type ?? 'DEED'),
+    traceRef: `ACRIS-${s.document_id ?? i}`,
   }));
 
   const distressVelocity = Math.min(34, recentTransactions.length * 2 + 8);
 
   // Use actual DOB permit records for permit activity metrics
   const stopWorkOrders = dobResult.records.filter((p) =>
-    String(p['job_status_descrp'] ?? '').includes('STOP WORK'),
+    String(p.job_status_descrp ?? '').includes('STOP WORK'),
   );
   const activePermits = dobResult.records.filter((p) => {
-    const status = String(p['job_status_descrp'] ?? '');
+    const status = String(p.job_status_descrp ?? '');
     return (
       status.includes('PERMIT ISSUED') ||
       status.includes('IN PROCESS') ||
@@ -1062,7 +1062,7 @@ function buildDistressDecomposition(
       dataset: 'bnx9-e6tj',
       citation: 'ACRIS Real Property Master (SODA: bnx9-e6tj)',
       summary:
-        financing.clues.map((c) => c.clue + ': ' + c.detail).join(' · ') ||
+        financing.clues.map((c) => `${c.clue}: ${c.detail}`).join(' · ') ||
         'No significant financing stress detected',
       records: financing.acrisRecords.map((r) => ({ ...r })),
     },

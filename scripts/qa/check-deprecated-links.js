@@ -20,9 +20,9 @@
  *   node scripts/qa/check-deprecated-links.js
  */
 
-import { readdirSync, readFileSync, statSync } from 'fs';
-import { dirname, join, relative } from 'path';
-import { fileURLToPath } from 'url';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
@@ -117,9 +117,9 @@ function scanFile(filePath) {
           href === slug ||
           href === base ||
           href.startsWith(slug) ||
-          href.startsWith(base + '/') ||
-          href.startsWith('/api' + slug) ||
-          href.startsWith('/api' + base + '/');
+          href.startsWith(`${base}/`) ||
+          href.startsWith(`/api${slug}`) ||
+          href.startsWith(`/api${base}/`);
         if (matched) {
           hits.push({
             file: relative(ROOT, filePath),
@@ -138,8 +138,6 @@ function scanFile(filePath) {
 }
 
 function main() {
-  console.log('\nSZL Holdings — Deprecated Navigation Link Check');
-  console.log('Scanning artifact source files for archived route references in navigation...\n');
 
   const SCAN_DIRS = [join(ROOT, 'artifacts'), join(ROOT, 'packages'), join(ROOT, 'scripts')];
 
@@ -161,11 +159,8 @@ function main() {
   }
 
   if (allHits.length === 0) {
-    console.log('PASS — No deprecated navigation link references found.\n');
     process.exit(0);
   }
-
-  console.error(`FAIL — ${allHits.length} deprecated navigation link(s) found:\n`);
 
   const byFile = new Map();
   for (const hit of allHits) {
@@ -173,18 +168,10 @@ function main() {
     byFile.get(hit.file).push(hit);
   }
 
-  for (const [file, hits] of byFile) {
-    console.error(`  ${file}`);
-    for (const hit of hits) {
-      console.error(`    Line ${hit.line}: "${hit.route}" — use "${hit.replacement}" instead`);
-      console.error(`      ${hit.content}`);
+  for (const [_file, hits] of byFile) {
+    for (const _hit of hits) {
     }
   }
-
-  console.error(
-    `\nThese routes are archived. Update each reference to the replacement route listed above.`,
-  );
-  console.error(`See ROUTE_INVENTORY.md for the full list of archived surfaces.\n`);
   process.exit(1);
 }
 

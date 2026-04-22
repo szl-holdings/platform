@@ -7,8 +7,7 @@ import {
   mspTechniciansTable,
   mspTicketsTable,
 } from '@szl-holdings/db';
-import type { InferInsertModel } from 'drizzle-orm';
-import { sql } from 'drizzle-orm';
+import { type InferInsertModel, sql } from 'drizzle-orm';
 
 import { logger } from './logger';
 
@@ -467,7 +466,7 @@ export async function seedMspData(): Promise<void> {
       subject: 'Ransomware alert investigation',
       description:
         'CrowdStrike Falcon detected suspicious process chain on WORKSTATION-NV-22. Isolation pending review.',
-      clientId: clientMap['NovaTech'],
+      clientId: clientMap.NovaTech,
       clientName: 'NovaTech',
       priority: 'critical' as const,
       status: 'in-progress' as const,
@@ -575,7 +574,7 @@ export async function seedMspData(): Promise<void> {
       subject: 'Active Directory sync errors',
       description:
         'Azure AD Connect sync failing with error 8344. Users unable to login to cloud apps.',
-      clientId: clientMap['NovaTech'],
+      clientId: clientMap.NovaTech,
       clientName: 'NovaTech',
       priority: 'critical' as const,
       status: 'open' as const,
@@ -621,7 +620,7 @@ export async function seedMspData(): Promise<void> {
       subject: 'DDoS attack detected — mitigation active',
       description:
         '400Gbps volumetric DDoS attack detected. Cloudflare Magic Transit engaged. Traffic scrubbing active.',
-      clientId: clientMap['NovaTech'],
+      clientId: clientMap.NovaTech,
       clientName: 'NovaTech',
       priority: 'critical' as const,
       status: 'in-progress' as const,
@@ -778,7 +777,7 @@ export async function seedMspData(): Promise<void> {
       subject: 'Multi-factor authentication rollout',
       description:
         'MFA rollout for all 89 users. Microsoft Authenticator deployment via Intune conditional access.',
-      clientId: clientMap['NovaTech'],
+      clientId: clientMap.NovaTech,
       clientName: 'NovaTech',
       priority: 'high' as const,
       status: 'in-progress' as const,
@@ -1068,7 +1067,7 @@ export async function seedMspData(): Promise<void> {
       },
       {
         name: 'NovaTech — Break/Fix + Security Retainer',
-        clientId: clientMap['NovaTech'],
+        clientId: clientMap.NovaTech,
         clientName: 'NovaTech',
         type: 'break-fix',
         status: 'pending-renewal',

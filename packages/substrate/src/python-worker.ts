@@ -11,7 +11,7 @@
  * coordinates everything else.
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 export const PYTHON_WORKER_PROTOCOL_VERSION = '1.0' as const;
 
@@ -242,7 +242,7 @@ class SubstratePythonWorkerChannel implements PythonWorkerChannel {
     timeoutMs = 60_000,
   ): Promise<StageResultMessage> {
     const startMs = Date.now();
-    const workerUrl = process.env['SUBSTRATE_PYTHON_WORKER_URL'];
+    const workerUrl = process.env.SUBSTRATE_PYTHON_WORKER_URL;
     const isLive = opts.mode === 'live';
 
     // ── Fail-closed gate for live mode ───────────────────────────────────────
@@ -310,12 +310,6 @@ class SubstratePythonWorkerChannel implements PythonWorkerChannel {
               `for stage '${opts.stageId}': ${reason}`,
           );
         }
-
-        // Non-live modes: gracefully fall back to in-process simulation
-        console.warn(
-          `[substrate/python-worker] HTTP dispatch to '${workerUrl}/claim' failed (${reason}); ` +
-            `using in-process simulation fallback for stage '${opts.stageId}'`,
-        );
         // fall through to in-process simulation
       }
     }
@@ -324,10 +318,6 @@ class SubstratePythonWorkerChannel implements PythonWorkerChannel {
     // Used in non-live modes when SUBSTRATE_PYTHON_WORKER_URL is not set, or
     // when the remote worker is unreachable. Logs a debug note.
     if (!workerUrl) {
-      console.debug(
-        `[substrate/python-worker] SUBSTRATE_PYTHON_WORKER_URL not configured — ` +
-          `using in-process simulation for stage '${opts.stageId}' (mode: ${opts.mode ?? 'unset'})`,
-      );
     }
 
     const claimKey = `${opts.runId}:${opts.stageId}`;

@@ -10,10 +10,8 @@ import {
   AlertTriangle,
   ArrowDown,
   ArrowUp,
-  BarChart3,
   Bell,
   CheckCircle,
-  ChevronRight,
   Clock,
   DollarSign,
   MapPin,
@@ -22,7 +20,6 @@ import {
   Shield,
   Star,
   Ticket,
-  TrendingUp,
   Users,
   Wifi,
 } from 'lucide-react';

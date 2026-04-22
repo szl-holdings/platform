@@ -5,17 +5,14 @@ import {
   ArrowLeft,
   ArrowRight,
   BarChart3,
-  Brain,
   Briefcase,
   CheckCircle2,
   ChevronRight,
   Clock,
-  FileCheck,
   Layers,
   Lightbulb,
   Target,
   TrendingUp,
-  Users,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
@@ -260,7 +257,7 @@ function ServiceOrchestrationDemo() {
   const [active, setActive] = useState(0);
   const stage = SERVICE_ORCHESTRATION_STAGES[active];
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
+  const _inView = useInView(ref, { once: true, margin: '-60px' });
 
   return (
     <section ref={ref} style={{ background: BG }} className="py-24 px-4">

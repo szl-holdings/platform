@@ -5,12 +5,10 @@ import {
   Anchor,
   Building2,
   CheckCircle2,
-  ChevronRight,
   Eye,
   Link2,
   RefreshCw,
   Search,
-  Shield,
 } from 'lucide-react';
 import { useState } from 'react';
 

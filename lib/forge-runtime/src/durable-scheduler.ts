@@ -24,7 +24,7 @@ function parseCronField(field: string, min: number, max: number): Set<number> {
       for (let i = min; i <= max; i++) result.add(i);
     } else if (trimmed.startsWith('*/')) {
       const step = parseInt(trimmed.slice(2), 10);
-      if (!isNaN(step) && step > 0) {
+      if (!Number.isNaN(step) && step > 0) {
         for (let i = min; i <= max; i += step) result.add(i);
       }
     } else if (trimmed.includes('/')) {
@@ -45,7 +45,7 @@ function parseCronField(field: string, min: number, max: number): Set<number> {
       for (let i = rangeStart; i <= rangeEnd && i <= max; i++) result.add(i);
     } else {
       const val = parseInt(trimmed, 10);
-      if (!isNaN(val)) result.add(val);
+      if (!Number.isNaN(val)) result.add(val);
     }
   }
   return result;
@@ -232,7 +232,7 @@ export class DurableScheduler {
         await this.fireSchedule(pool, row);
       } catch (err) {
         logger.warn(
-          { err, scheduleName: row['name'] },
+          { err, scheduleName: row.name },
           'DurableScheduler: failed to fire schedule',
         );
       }
@@ -240,9 +240,9 @@ export class DurableScheduler {
   }
 
   private async fireSchedule(pool: AnyPool, row: Record<string, unknown>): Promise<void> {
-    const cronExpr = row['cron_expression'] as string;
-    const lastRunAt = row['last_run_at']
-      ? new Date(row['last_run_at'] as string)
+    const cronExpr = row.cron_expression as string;
+    const lastRunAt = row.last_run_at
+      ? new Date(row.last_run_at as string)
       : new Date(Date.now() - 60_000);
     const now = new Date();
 
@@ -252,7 +252,7 @@ export class DurableScheduler {
     const runsToFire = missedRuns.length > 0 ? missedRuns : [now];
 
     const payload =
-      typeof row['payload'] === 'string' ? JSON.parse(row['payload']) : (row['payload'] ?? {});
+      typeof row.payload === 'string' ? JSON.parse(row.payload) : (row.payload ?? {});
 
     let lastError: unknown;
     let firedCount = 0;
@@ -260,13 +260,13 @@ export class DurableScheduler {
     for (const runTime of runsToFire) {
       try {
         await durableJobQueue.enqueue(
-          row['job_type'] as string,
+          row.job_type as string,
           { ...payload, scheduledFor: runTime.toISOString(), catchUp: firedCount > 0 },
           {
-            queue: row['queue'] as string,
-            maxRetries: row['max_retries'] as number,
+            queue: row.queue as string,
+            maxRetries: row.max_retries as number,
             metadata: {
-              scheduleName: row['name'] as string,
+              scheduleName: row.name as string,
               triggeredBy: 'scheduler',
               missedRun: firedCount > 0,
             },
@@ -276,7 +276,7 @@ export class DurableScheduler {
       } catch (err) {
         lastError = err;
         logger.warn(
-          { err, scheduleName: row['name'], runTime },
+          { err, scheduleName: row.name, runTime },
           'DurableScheduler: failed to enqueue job for run time',
         );
       }
@@ -285,24 +285,24 @@ export class DurableScheduler {
     if (firedCount > 0) {
       await pool.query(
         `UPDATE job_schedules SET last_status = 'completed', last_run_at = NOW(), next_run_at = $1, updated_at = NOW() WHERE id = $2`,
-        [nextRunAt, row['id']],
+        [nextRunAt, row.id],
       );
       if (firedCount > 1) {
         logger.info(
-          { schedule: row['name'], missedCount: firedCount - 1, nextRunAt },
+          { schedule: row.name, missedCount: firedCount - 1, nextRunAt },
           'DurableScheduler: fired schedule with catch-up runs',
         );
       } else {
         logger.info(
-          { schedule: row['name'], jobType: row['job_type'], nextRunAt },
+          { schedule: row.name, jobType: row.job_type, nextRunAt },
           'DurableScheduler: schedule fired',
         );
       }
     } else {
-      const failedNextRunAt = getNextRunTime(row['cron_expression'] as string, new Date());
+      const failedNextRunAt = getNextRunTime(row.cron_expression as string, new Date());
       await pool.query(
         `UPDATE job_schedules SET last_status = 'failed', fail_count = fail_count + 1, next_run_at = $1, updated_at = NOW() WHERE id = $2`,
-        [failedNextRunAt, row['id']],
+        [failedNextRunAt, row.id],
       );
       throw lastError;
     }

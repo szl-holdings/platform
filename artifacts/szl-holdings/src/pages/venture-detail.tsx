@@ -14,8 +14,8 @@ import { getVentureById, ventures } from '@/data/ventures';
 import { analytics, initScrollDepthTracking } from '@/lib/analytics';
 
 export default function VentureDetailPage() {
-  const [match, params] = useRoute('/ventures/:id');
-  const [, navigate] = useLocation();
+  const [_match, params] = useRoute('/ventures/:id');
+  const [, _navigate] = useLocation();
   const ventureId = params?.id;
 
   const venture = ventureId ? getVentureById(ventureId) : undefined;

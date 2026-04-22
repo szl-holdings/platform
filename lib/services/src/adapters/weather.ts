@@ -44,7 +44,7 @@ export class WeatherAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["WEATHER_API_KEY"];
 
   protected override async performHealthCheck(): Promise<void> {
-    const apiKey = process.env["WEATHER_API_KEY"];
+    const apiKey = process.env.WEATHER_API_KEY;
     const response = await fetch(
       `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=London`,
     );
@@ -58,7 +58,7 @@ export class WeatherAdapter extends ServiceAdapter {
       return { ...MOCK_CONDITIONS, location, timestamp: new Date().toISOString() };
     }
 
-    const apiKey = process.env["WEATHER_API_KEY"]!;
+    const apiKey = process.env.WEATHER_API_KEY!;
     const response = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${apiKey}&units=metric`,
     );
@@ -99,7 +99,7 @@ export class WeatherAdapter extends ServiceAdapter {
       return [...MOCK_FORECAST];
     }
 
-    const apiKey = process.env["WEATHER_API_KEY"]!;
+    const apiKey = process.env.WEATHER_API_KEY!;
     const response = await fetch(
       `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(_location)}&appid=${apiKey}&units=metric&cnt=${(_days ?? 5) * 8}`,
     );

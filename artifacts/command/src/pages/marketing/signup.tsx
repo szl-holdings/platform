@@ -97,8 +97,8 @@ export function MarketingSignup() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           planId: 'command-pro-monthly',
-          successUrl: window.location.origin + '/command/marketing/signup?success=true',
-          cancelUrl: window.location.origin + '/command/marketing/signup',
+          successUrl: `${window.location.origin}/command/marketing/signup?success=true`,
+          cancelUrl: `${window.location.origin}/command/marketing/signup`,
           email: capturedEmail || undefined,
         }),
       });
@@ -117,7 +117,7 @@ export function MarketingSignup() {
 
       const data = await res.json();
       const url = data.url ?? data.data?.url;
-      if (url && url.startsWith('http')) {
+      if (url?.startsWith('http')) {
         window.location.href = url;
         return;
       } else {

@@ -1,23 +1,17 @@
-import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertTriangle,
-  ArrowRight,
-  ArrowUpRight,
-  BarChart3,
   Bell,
   Building2,
   Calendar,
   CheckCircle,
-  ChevronRight,
   Clock,
-  DollarSign,
   Download,
   Eye,
   FileText,
-  Filter,
   Flame,
   Gavel,
   Layers,
@@ -27,15 +21,13 @@ import {
   MapPin,
   RefreshCw,
   Search,
-  ShieldAlert,
-  Tag,
   Target,
   TrendingDown,
   User,
   X,
   Zap,
 } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'wouter';
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
@@ -194,7 +186,7 @@ function PropertyListCard({
   isSelected: boolean;
   onClick: () => void;
 }) {
-  const cfg = DISTRESS_TYPE_CONFIG[property.distressType];
+  const _cfg = DISTRESS_TYPE_CONFIG[property.distressType];
   const isAuctionSoon = property.distressType === 'auction' && property.auctionDate;
   const today = new Date('2026-03-31');
   const auctionDays = isAuctionSoon
@@ -399,7 +391,7 @@ function PropertyDetailPanel({
   onClose: () => void;
   onConvertToLead: (p: ApiDistressProperty) => void;
 }) {
-  const cfg = DISTRESS_TYPE_CONFIG[property.distressType];
+  const _cfg = DISTRESS_TYPE_CONFIG[property.distressType];
   const equityPercent = property.debtAmount
     ? Math.round(((property.estimatedValue - property.debtAmount) / property.estimatedValue) * 100)
     : null;

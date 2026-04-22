@@ -11,7 +11,6 @@ import {
   type SkillRegistryQuery,
 } from '@workspace/skill-library/registry';
 import { type IRouter, Router } from 'express';
-import { z } from 'zod';
 import {
   handleRouteError,
   sendBadRequest,
@@ -36,11 +35,11 @@ router.get('/skills', authMiddleware(), validateQuery(listQuerySchema), async (r
     const rawLimit = parseInt((req.query.limit as string) ?? '50', 10);
     const rawOffset = parseInt((req.query.offset as string) ?? '0', 10);
 
-    if (isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
+    if (Number.isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
       sendBadRequest(res, 'limit must be between 1 and 500');
       return;
     }
-    if (isNaN(rawOffset) || rawOffset < 0) {
+    if (Number.isNaN(rawOffset) || rawOffset < 0) {
       sendBadRequest(res, 'offset must be >= 0');
       return;
     }
@@ -113,12 +112,12 @@ router.get(
       const rawLimit = parseInt((req.query.limit as string) ?? '50', 10);
       const rawOffset = parseInt((req.query.offset as string) ?? '0', 10);
 
-      if (isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
+      if (Number.isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
         sendBadRequest(res, 'limit must be between 1 and 500');
         return;
       }
 
-      if (isNaN(rawOffset) || rawOffset < 0) {
+      if (Number.isNaN(rawOffset) || rawOffset < 0) {
         sendBadRequest(res, 'offset must be >= 0');
         return;
       }

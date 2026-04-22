@@ -1,10 +1,4 @@
-import type {
-  CascadeHorizon,
-  DomainKey,
-  FusionAlertCategory,
-  FusionAlertSeverity,
-} from '@szl-holdings/ai-engine';
-import { fusionCortex, patternLibrary, predictiveCascadeEngine } from '@szl-holdings/ai-engine';
+import { type CascadeHorizon, type DomainKey, type FusionAlertCategory, type FusionAlertSeverity, fusionCortex, patternLibrary, predictiveCascadeEngine } from '@szl-holdings/ai-engine';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { Router } from 'express';
 import { z } from 'zod';
@@ -28,7 +22,7 @@ router.get('/fusion/alerts', authMiddleware(), validateQuery(listQuerySchema), a
         'active' | 'acknowledged' | 'resolved' | 'escalated'
       >)
     : undefined;
-  const limit = Math.min(parseInt(String(req.query.limit ?? '50')), 100);
+  const limit = Math.min(parseInt(String(req.query.limit ?? '50'), 10), 100);
 
   const alerts = fusionCortex.getAlerts({ severity, categories, domains, status, limit });
   res.json({ success: true, alerts, total: alerts.length });
@@ -43,7 +37,7 @@ router.post('/fusion/scan', validateBody(bodyShape({})), authMiddleware(), async
   try {
     const result = await fusionCortex.scan();
     res.json({ success: true, result });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ success: false, error: 'Fusion scan failed' });
   }
 });
@@ -120,7 +114,7 @@ router.post(
       });
 
       res.json({ success: true, alert });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ success: false, error: 'Failed to inject alert' });
     }
   },
@@ -148,7 +142,7 @@ router.post(
   authMiddleware(),
   validateBody(bodyShape({})),
   async (req, res) => {
-    const intervalMs = parseInt(String(req.query.intervalMs ?? '300000'));
+    const intervalMs = parseInt(String(req.query.intervalMs ?? '300000'), 10);
     fusionCortex.startContinuousScan(intervalMs);
     res.json({ success: true, message: 'Fusion Cortex continuous scan started', intervalMs });
   },
@@ -164,7 +158,7 @@ router.post(
   },
 );
 
-router.get('/fusion/patterns', authMiddleware(), async (req, res) => {
+router.get('/fusion/patterns', authMiddleware(), async (_req, res) => {
   const patterns = patternLibrary.getAll();
   const stats = patternLibrary.getLibraryStats();
   res.json({ success: true, patterns, stats });
@@ -209,7 +203,7 @@ router.post(
         feedback,
         updatedPattern: patternLibrary.getById(req.params.id as string),
       });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ success: false, error: 'Failed to submit feedback' });
     }
   },
@@ -263,7 +257,7 @@ router.post(
         },
         patternUpdated: false,
       });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ success: false, error: 'Failed to submit feedback' });
     }
   },
@@ -297,7 +291,7 @@ router.post(
         tags,
       });
       res.json({ success: true, pattern });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ success: false, error: 'Failed to create pattern' });
     }
   },
@@ -317,7 +311,7 @@ router.get(
     const domains = req.query.domains
       ? (String(req.query.domains).split(',') as DomainKey[])
       : undefined;
-    const limit = Math.min(parseInt(String(req.query.limit ?? '50')), 100);
+    const limit = Math.min(parseInt(String(req.query.limit ?? '50'), 10), 100);
 
     const alerts = predictiveCascadeEngine.getAlerts({ status, severity, domains, limit });
     res.json({ success: true, alerts, total: alerts.length });
@@ -348,7 +342,7 @@ router.post(
         horizon as CascadeHorizon,
       );
       res.json({ success: true, tree });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ success: false, error: 'Cascade projection failed' });
     }
   },
@@ -392,7 +386,7 @@ router.post(
         tags,
       );
       res.json({ success: true, alert });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ success: false, error: 'Failed to generate predictive alert' });
     }
   },

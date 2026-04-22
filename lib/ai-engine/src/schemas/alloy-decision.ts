@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 export type RiskLevel = 'P0' | 'P1' | 'P2' | 'P3' | 'P4';
 export type DecisionStatus =

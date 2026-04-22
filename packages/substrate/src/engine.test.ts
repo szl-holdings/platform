@@ -45,7 +45,7 @@ const testWorkflow = defineWorkflow({
 
 const deterministicExecutor = async (
   stage: AnyStage,
-  input: unknown,
+  _input: unknown,
   _ctx: StageExecutorContext,
 ): Promise<{ output: unknown; confidence: number }> => {
   switch (stage.type) {
@@ -87,10 +87,6 @@ async function testDryRunMode(): Promise<void> {
   if (run.stageResults.length === 0) {
     throw new Error('Expected stage results in dry-run');
   }
-
-  console.log('✓ ENGINE: dry-run mode completes with dry-run-complete status');
-  console.log(`  Stages executed: ${run.stageResults.map((r) => r.stageId).join(', ')}`);
-  console.log(`  Final confidence: ${((run.finalConfidence ?? 0) * 100).toFixed(1)}%`);
 }
 
 async function testLiveMode(): Promise<void> {
@@ -102,9 +98,6 @@ async function testLiveMode(): Promise<void> {
   if (run.status !== 'pending-approval' && run.status !== 'completed') {
     throw new Error(`Expected pending-approval or completed, got ${run.status}`);
   }
-
-  console.log(`✓ ENGINE: live mode status=${run.status}`);
-  console.log(`  Stages executed: ${run.stageResults.map((r) => r.stageId).join(', ')}`);
 }
 
 async function testJournalHashStability(): Promise<void> {
@@ -128,8 +121,6 @@ async function testJournalHashStability(): Promise<void> {
     }
   }
 
-  console.log(`✓ ENGINE: Journal produces ${bundles1.length} evidence bundles with valid hashes`);
-
   // Run again with same input — hashes should be stable
   const run2 = await runtime.start(testWorkflow, { query: 'stable-test' }, { mode: 'dry-run' });
   const bundles2 = await journal.getRunBundles(run2.runId);
@@ -151,14 +142,12 @@ async function testJournalHashStability(): Promise<void> {
       );
     }
     if (
-      (b1 as Record<string, unknown>)['outputHash'] !==
-      (b2 as Record<string, unknown>)['outputHash']
+      (b1 as Record<string, unknown>).outputHash !==
+      (b2 as Record<string, unknown>).outputHash
     ) {
       throw new Error(`outputHash unstable for stage '${b1.stageId}'`);
     }
   }
-
-  console.log('✓ ENGINE: Hash stability verified for identical inputs');
 }
 
 async function testCompilerRejectsMissingGate(): Promise<void> {
@@ -192,7 +181,6 @@ async function testCompilerRejectsMissingGate(): Promise<void> {
 
   if (!threw)
     throw new Error('Compiler must reject workflow with high-risk side effect and no gate');
-  console.log('✓ ENGINE: Compiler rejects high-risk workflow without ApprovalGate');
 }
 
 async function testHookFiring(): Promise<void> {
@@ -231,8 +219,6 @@ async function testHookFiring(): Promise<void> {
 
   const stageHooks = firedHooks.filter((h) => h.startsWith('before_stage:'));
   if (stageHooks.length === 0) throw new Error('before_stage hooks not fired');
-
-  console.log(`✓ ENGINE: All hooks fired correctly [${firedHooks.slice(0, 5).join(', ')}...]`);
 }
 
 async function testOpportunityAuditDryRun(): Promise<void> {
@@ -254,22 +240,17 @@ async function testOpportunityAuditDryRun(): Promise<void> {
   if (result.run.status !== 'dry-run-complete') {
     // pending-approval is also acceptable (live approval gate)
     if (result.run.status !== 'pending-approval') {
-      console.warn(`  (status=${result.run.status}) — acceptable for opportunity audit test`);
     }
   }
 
   if (result.anomalies.length === 0) {
     throw new Error('Expected anomaly findings in opportunity audit result');
   }
-
-  console.log(`✓ ENGINE: Opportunity Audit dry-run produced ${result.anomalies.length} anomalies`);
-  console.log(`  Anomalies: ${result.anomalies.map((a) => a.anomalyType).join(', ')}`);
 }
 
 // ─── Test Runner ──────────────────────────────────────────────────────────────
 
 export async function runEngineTests(): Promise<void> {
-  console.log('\n═══ @szl/substrate Engine Tests ═══\n');
 
   await testDryRunMode();
   await testLiveMode();
@@ -277,8 +258,6 @@ export async function runEngineTests(): Promise<void> {
   await testCompilerRejectsMissingGate();
   await testHookFiring();
   await testOpportunityAuditDryRun();
-
-  console.log('\n═══ All engine tests passed ═══\n');
 }
 
 if (typeof process !== 'undefined' && process.argv[1]?.endsWith('engine.test.ts')) {

@@ -26,21 +26,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useRoute } from 'wouter';
-import type {
-  Obligation,
-  ObligationStatus,
-  Party,
-  PartyRole,
-  ProofChainEntry,
-} from '@/data/matters';
-import {
-  daysUntil,
-  findMatterById,
-  formatDeadline,
-  getObligationStatusColor,
-  getPrivilegeColor,
-  useMatters,
-} from '@/data/matters';
+import { type Obligation, type ObligationStatus, type Party, type PartyRole, type ProofChainEntry, daysUntil, findMatterById, formatDeadline, getObligationStatusColor, getPrivilegeColor, useMatters } from '@/data/matters';
 import {
   ACCENT,
   buildGraph,

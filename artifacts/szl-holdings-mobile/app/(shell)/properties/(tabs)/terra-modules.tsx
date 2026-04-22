@@ -10,7 +10,7 @@ import { ProvenanceChip, type ProvenanceStatus } from '@/components/ProvenanceCh
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 const ACCENT = '#c87941';
@@ -108,7 +108,7 @@ const MODULES: TerraModule[] = [
 
 function MetricPill({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <View style={[styles.metricPill, { borderColor: color + '25', backgroundColor: color + '10' }]}>
+    <View style={[styles.metricPill, { borderColor: `${color}25`, backgroundColor: `${color}10` }]}>
       <Text style={[styles.metricValue, { color }]}>{value}</Text>
       <Text style={styles.metricLabel}>{label}</Text>
     </View>
@@ -138,7 +138,7 @@ function ModuleCard({ module }: { module: TerraModule }) {
       <View
         style={[
           styles.moduleIconWrap,
-          { backgroundColor: ACCENT + '15', borderColor: ACCENT + '25' },
+          { backgroundColor: `${ACCENT}15`, borderColor: `${ACCENT}25` },
         ]}
       >
         <Feather name={module.icon} size={18} color={ACCENT} />
@@ -147,7 +147,7 @@ function ModuleCard({ module }: { module: TerraModule }) {
         <View style={styles.moduleHeader}>
           <Text style={[styles.moduleLabel, { color: colors.cream }]}>{module.label}</Text>
           {module.badge && (
-            <View style={[styles.badge, { backgroundColor: (module.badgeColor ?? '#888') + '20' }]}>
+            <View style={[styles.badge, { backgroundColor: `${module.badgeColor ?? '#888'}20` }]}>
               <Text style={[styles.badgeText, { color: module.badgeColor ?? '#888' }]}>
                 {module.badge}
               </Text>
@@ -184,7 +184,7 @@ export default function TerraModulesTab() {
   } = useQuery({
     queryKey: ['terra-portfolio-summary'],
     queryFn: async () => {
-      const res = await fetch(API_BASE + '/terra/portfolio?limit=5');
+      const res = await fetch(`${API_BASE}/terra/portfolio?limit=5`);
       if (!res.ok) throw new Error('API error');
       return res.json();
     },
@@ -222,7 +222,7 @@ export default function TerraModulesTab() {
       >
         <View style={[styles.header, { paddingTop: topPad + 12 }]}>
           <View>
-            <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · MODULES</Text>
+            <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · MODULES</Text>
             <Text style={[styles.title, { color: colors.cream }]}>Asset Intelligence</Text>
           </View>
           <ProvenanceChip status={provenanceStatus} />

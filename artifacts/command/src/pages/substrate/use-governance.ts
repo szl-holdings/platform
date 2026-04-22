@@ -13,7 +13,6 @@ import { apiUrl, fetchJson } from '../cognitive/shared';
 import type {
   ApprovalDecision,
   ApprovalRequest,
-  QualityGateResult,
   RunLedgerEntry,
 } from './governance-types';
 

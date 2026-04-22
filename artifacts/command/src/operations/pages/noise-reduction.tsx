@@ -1,16 +1,6 @@
 import {
-  Activity,
-  AlertTriangle,
-  Bell,
-  BellOff,
   Brain,
-  CheckCircle,
-  ChevronRight,
-  Clock,
   Filter,
-  Layers,
-  TrendingDown,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -170,7 +160,7 @@ function FatigueBar({ score }: { score: number }) {
 export default function NoiseReduction() {
   const [selected, setSelected] = useState<AlertGroup>(ALERT_GROUPS[0]);
   const [showResolved, setShowResolved] = useState(false);
-  const [ticker, setTicker] = useState(0);
+  const [_ticker, setTicker] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => setTicker((t) => t + 1), 3000);
@@ -200,7 +190,7 @@ export default function NoiseReduction() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-medium"
             style={{
               background: showResolved ? `${GOLD}10` : 'rgba(255,255,255,0.03)',
-              border: `1px solid ${showResolved ? GOLD + '30' : DS.border}`,
+              border: `1px solid ${showResolved ? `${GOLD}30` : DS.border}`,
               color: showResolved ? GOLD : DS.text.secondary,
             }}
           >
@@ -257,7 +247,7 @@ export default function NoiseReduction() {
                   className="w-full text-left p-3 rounded-lg transition-all"
                   style={{
                     background: selected.id === g.id ? `${SEV_COLOR[g.severity]}08` : DS.surface,
-                    border: `1px solid ${selected.id === g.id ? SEV_COLOR[g.severity] + '30' : DS.border}`,
+                    border: `1px solid ${selected.id === g.id ? `${SEV_COLOR[g.severity]}30` : DS.border}`,
                   }}
                 >
                   <div className="flex items-start gap-2 mb-1">

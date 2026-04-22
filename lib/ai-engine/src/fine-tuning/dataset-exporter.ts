@@ -67,7 +67,7 @@ function getSystemPrompt(agentId: string): string {
 }
 
 function generateVersion(agentId: string): string {
-  const date = new Date().toISOString().split('T')[0]!.replace(/-/g, '');
+  const date = new Date().toISOString().split('T')[0]?.replace(/-/g, '');
   return `${agentId}-${date}-v1`;
 }
 

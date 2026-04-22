@@ -1,5 +1,5 @@
 import { defaultTraceStore } from '@workspace/trace-graph/store';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type { Evidence, EvidenceKind } from './types.js';
 
 function registryTraceId(tenantOrgId: number): string {

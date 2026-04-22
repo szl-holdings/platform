@@ -20,9 +20,9 @@ describe("makeClaimResolver", () => {
 
     const result = resolveClaim("tagline-governed-decision", "fallback text");
 
-    expect(result.value).toBe(known!.claim);
-    expect(result.label).toBe(known!.displayLabel);
-    expect(result.truthValue).toBe(known!.truthValue);
+    expect(result.value).toBe(known?.claim);
+    expect(result.label).toBe(known?.displayLabel);
+    expect(result.truthValue).toBe(known?.truthValue);
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
@@ -30,23 +30,23 @@ describe("makeClaimResolver", () => {
     const resolveClaim = makeClaimResolver("test/claims");
     const labelled = getClaim("lyte-signal-detection-time");
     expect(labelled).toBeDefined();
-    expect(labelled!.displayLabel).toBe("[Demo]");
+    expect(labelled?.displayLabel).toBe("[Demo]");
 
     const result = resolveClaim("lyte-signal-detection-time", "ignored");
 
     expect(result.label).toBe("[Demo]");
-    expect(result.displayWithLabel).toBe(`${labelled!.claim} [Demo]`);
+    expect(result.displayWithLabel).toBe(`${labelled?.claim} [Demo]`);
   });
 
   it("omits the label suffix when displayLabel is null", () => {
     const resolveClaim = makeClaimResolver("test/claims");
     const noLabel = getClaim("tagline-governed-decision");
     expect(noLabel).toBeDefined();
-    expect(noLabel!.displayLabel).toBeNull();
+    expect(noLabel?.displayLabel).toBeNull();
 
     const result = resolveClaim("tagline-governed-decision", "ignored");
 
-    expect(result.displayWithLabel).toBe(noLabel!.claim);
+    expect(result.displayWithLabel).toBe(noLabel?.claim);
     expect(result.displayWithLabel).not.toContain("null");
   });
 

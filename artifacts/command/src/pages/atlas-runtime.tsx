@@ -2,10 +2,6 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
   Activity,
   AlertTriangle,
-  CheckCircle,
-  ChevronRight,
-  Clock,
-  Eye,
   GitBranch,
   Globe,
   Layers,
@@ -14,7 +10,6 @@ import {
   Network,
   Radio,
   RefreshCw,
-  Server,
   Shield,
   WifiOff,
   X,
@@ -387,7 +382,7 @@ export function AtlasRuntimePage() {
     const sync = syncMap.get(tw.id);
     let merged: CrossDomainTwin = tw;
 
-    if (sync && sync.hasLiveData) {
+    if (sync?.hasLiveData) {
       const liveDrift = sync.driftScore ?? tw.driftScore;
       const liveLastSync = sync.ageSeconds != null ? formatAge(sync.ageSeconds) : tw.lastSync;
       let liveState: TwinState = tw.state;

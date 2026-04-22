@@ -58,10 +58,10 @@ async function getJobStats(windowMs: number): Promise<{
       retryCount += Number(row.retries);
     }
     return {
-      pending: byStatus['pending'] ?? 0,
-      running: byStatus['in_progress'] ?? 0,
-      failed: byStatus['failed'] ?? 0,
-      completed: byStatus['completed'] ?? 0,
+      pending: byStatus.pending ?? 0,
+      running: byStatus.in_progress ?? 0,
+      failed: byStatus.failed ?? 0,
+      completed: byStatus.completed ?? 0,
       retryCount,
     };
   } catch {

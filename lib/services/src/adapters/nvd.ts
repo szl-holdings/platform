@@ -46,7 +46,7 @@ export class NVDAdapter extends ServiceAdapter {
   override get status(): import("../base.js").ServiceStatus { return "LIVE_CONFIGURED"; }
 
   private get apiKey(): string | undefined {
-    return process.env["NVD_API_KEY"] || undefined;
+    return process.env.NVD_API_KEY || undefined;
   }
 
   protected override async performHealthCheck(): Promise<void> {

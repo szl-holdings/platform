@@ -23,7 +23,7 @@ import {
   db,
   evalRuns,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
@@ -153,7 +153,7 @@ router.get(
         return;
       }
 
-      const agentId = req.params['agentId'] as string;
+      const agentId = req.params.agentId as string;
       const elevated = isElevatedUser(req.user);
       const userOrgIds = req.user.orgs.map((o) => o.orgId).filter((id) => id != null);
 
@@ -233,7 +233,7 @@ router.get(
         sendForbidden(res, 'Eval history requires elevated access');
         return;
       }
-      const limit = Math.min(parseInt(String(req.query['limit'] ?? '10'), 10), 50);
+      const limit = Math.min(parseInt(String(req.query.limit ?? '10'), 10), 50);
       const history = await db
         .select()
         .from(evalRuns)
@@ -345,8 +345,8 @@ router.get(
         return;
       }
 
-      const agentId = req.params['agentId'] as string;
-      const limit = Math.min(parseInt(String(req.query['limit'] ?? '20'), 10), 100);
+      const agentId = req.params.agentId as string;
+      const limit = Math.min(parseInt(String(req.query.limit ?? '20'), 10), 100);
       const elevated = isElevatedUser(req.user);
       const userOrgIds = req.user.orgs.map((o) => o.orgId).filter((id) => id != null);
 

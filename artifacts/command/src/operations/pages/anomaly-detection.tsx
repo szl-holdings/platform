@@ -1,7 +1,7 @@
 import { MicroFeedbackWidget } from '@szl-holdings/shared-ui/micro-feedback-widget';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
-import { Activity, AlertTriangle, Brain, Eye, TrendingUp, Zap } from 'lucide-react';
+import { AlertTriangle, Brain, } from 'lucide-react';
 import {
   Area,
   AreaChart,

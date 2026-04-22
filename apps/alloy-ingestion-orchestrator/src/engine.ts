@@ -11,27 +11,14 @@
  *   - Emits audit events for every state transition
  */
 
-import { randomUUID } from 'crypto';
-import type { ActorContext } from './actors/index.js';
-import {
-  EmbedDispatcher,
-  HumanApprovalGate,
-  IndexVerifier,
-  IngestionPlanner,
-  PolicyGuard,
-  RetrievalEvaluator,
-  SchemaMapper,
-} from './actors/index.js';
-import type { AuditEmitter } from './audit.js';
-import { defaultAuditEmitter } from './audit.js';
-import type { CheckpointStore } from './checkpoint-store.js';
-import { createCheckpoint, defaultCheckpointStore } from './checkpoint-store.js';
-import type { RunStore } from './run-store.js';
-import { defaultRunStore } from './run-store.js';
+import { randomUUID } from 'node:crypto';
+import { type ActorContext, EmbedDispatcher, HumanApprovalGate, IndexVerifier, IngestionPlanner, PolicyGuard, RetrievalEvaluator, SchemaMapper } from './actors/index.js';
+import { type AuditEmitter, defaultAuditEmitter } from './audit.js';
+import { type CheckpointStore, createCheckpoint, defaultCheckpointStore } from './checkpoint-store.js';
+import { type RunStore, defaultRunStore } from './run-store.js';
 import { devChunkStore, devIndexStore, devRawDocumentStore } from './storage/dev.js';
 import type { StorageAdapters } from './storage/interfaces.js';
-import type { StepResult, WorkflowDefinition, WorkflowRun } from './types.js';
-import { DEFAULT_RETRY_POLICY } from './types.js';
+import { type StepResult, type WorkflowDefinition, type WorkflowRun, DEFAULT_RETRY_POLICY } from './types.js';
 
 // ─── Default Storage ──────────────────────────────────────────────────────────
 
@@ -243,7 +230,7 @@ export class OrchestratorEngine {
 
     // Seed lastOutput from the last prior result
     if (priorResults.length > 0) {
-      lastOutput = priorResults[priorResults.length - 1]!.output ?? currentRun.input;
+      lastOutput = priorResults[priorResults.length - 1]?.output ?? currentRun.input;
     }
 
     for (let i = startIndex; i < definition.steps.length; i++) {

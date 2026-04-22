@@ -1,37 +1,25 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  contentLibraryBlocksTable,
   db,
-  documentCommentsTable,
   documentsTable,
-  documentTemplatesTable,
-  documentVersionsTable,
-  pdfBatchesTable,
-  pdfJobsTable,
   signaturesTable,
 } from '@szl-holdings/db';
-import { createHash, createHmac, createSign, randomUUID } from 'crypto';
-import { and, desc, eq, ne, or, sql } from 'drizzle-orm';
+import { createHash, randomUUID } from 'node:crypto';
+import { and, eq, } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
-  parsePagination,
   sendBadRequest,
   sendCreated,
   sendNotFound,
   sendSuccess,
 } from '../../lib/api-response';
-import { logger } from '../../lib/logger';
-import { setObjectAclPolicy } from '../../lib/objectAcl';
-import { ObjectNotFoundError, ObjectStorageService } from '../../lib/objectStorage';
-import { renderDocumentToPdfBuffer, renderEntityDataToPdfBuffer } from '../../lib/pdf-renderer';
-import type { BlockNode } from '../../lib/pdf-renderer-types';
+import { ObjectStorageService } from '../../lib/objectStorage';
 import { validateBody } from '../../lib/validation';
-import { authMiddleware, requireRole } from '../../middlewares/auth';
+import { authMiddleware, } from '../../middlewares/auth';
 import {
   canAccessDocument,
-  canMutateDocument,
   getRequestUserEmail,
   getRequestUserId,
   getUserRole,
@@ -45,7 +33,7 @@ interface AuthUser {
 }
 type ExtendedRequest = Request & { user?: AuthUser };
 const router: IRouter = Router();
-const objectStorageService = new ObjectStorageService();
+const _objectStorageService = new ObjectStorageService();
 
 // ─── E-Signatures ────────────────────────────────────────────────────────────
 
@@ -60,7 +48,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id as string, 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
 
       const [doc] = await db.select().from(documentsTable).where(eq(documentsTable.id, id));
       if (!doc) return sendNotFound(res, 'Document');
@@ -313,7 +301,7 @@ router.post(
     try {
       const docId = parseInt(req.params.id as string, 10);
       const sigId = parseInt(req.params.sigId as string, 10);
-      if (isNaN(docId) || isNaN(sigId))
+      if (Number.isNaN(docId) || Number.isNaN(sigId))
         return sendBadRequest(res, 'Invalid document or signature ID');
 
       const [sig] = await db
@@ -418,7 +406,7 @@ router.post(
     try {
       const docId = parseInt(req.params.id as string, 10);
       const sigId = parseInt(req.params.sigId as string, 10);
-      if (isNaN(docId) || isNaN(sigId)) return sendBadRequest(res, 'Invalid IDs');
+      if (Number.isNaN(docId) || Number.isNaN(sigId)) return sendBadRequest(res, 'Invalid IDs');
 
       const [sig] = await db
         .select()
@@ -496,7 +484,7 @@ router.post(
 router.get('/documents/:id/signatures', authMiddleware(), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
-    if (isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
+    if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid document ID');
 
     const [doc] = await db.select().from(documentsTable).where(eq(documentsTable.id, id));
     if (!doc) return sendNotFound(res, 'Document');

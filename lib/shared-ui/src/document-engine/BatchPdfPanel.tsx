@@ -1,13 +1,11 @@
 import {
   AlertCircle,
-  BarChart2,
   CheckCircle,
   ChevronDown,
   ChevronRight,
   Clock,
   FileDown,
   Layers,
-  Play,
   Plus,
   RefreshCw,
   XCircle,
@@ -22,7 +20,7 @@ const BASE_URL = typeof window !== 'undefined' ? (window as any).__REPLIT_BASE_U
 async function apiFetch(path: string, options?: RequestInit) {
   const res = await fetch(`${BASE_URL}/api${path}`, {
     ...options,
-    headers: { 'Content-Type': 'application/json', ...(options?.headers || {}) },
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Request failed' }));
@@ -64,7 +62,7 @@ export function BatchPdfPanel({
 }: BatchPdfPanelProps) {
   const [batches, setBatches] = useState<PdfBatch[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedBatch, setSelectedBatch] = useState<{ batch: PdfBatch; jobs: PdfJob[] } | null>(
+  const [_selectedBatch, setSelectedBatch] = useState<{ batch: PdfBatch; jobs: PdfJob[] } | null>(
     null,
   );
   const [showNewBatch, setShowNewBatch] = useState(false);
@@ -95,7 +93,7 @@ export function BatchPdfPanel({
     loadBatches();
   }, [loadBatches]);
 
-  const loadBatchDetail = async (batchId: string) => {
+  const _loadBatchDetail = async (batchId: string) => {
     try {
       const data = await apiFetch(`/documents/batch-pdf/${batchId}`);
       setSelectedBatch(data);

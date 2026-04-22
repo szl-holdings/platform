@@ -140,29 +140,29 @@ export class SlackConnector extends ToolConnector {
     const adapter = services.slack;
     switch (capabilityId) {
       case 'post_message':
-        return adapter.postMessage(String(params['channel']), String(params['text']));
+        return adapter.postMessage(String(params.channel), String(params.text));
       case 'post_interactive_alert':
-        return adapter.postInteractiveAlert(String(params['channel']), {
-          title: String(params['title']),
-          message: String(params['message']),
-          severity: (params['severity'] as 'info' | 'warning' | 'critical') ?? 'info',
-          ...(params['source'] ? { source: String(params['source']) } : {}),
+        return adapter.postInteractiveAlert(String(params.channel), {
+          title: String(params.title),
+          message: String(params.message),
+          severity: (params.severity as 'info' | 'warning' | 'critical') ?? 'info',
+          ...(params.source ? { source: String(params.source) } : {}),
         });
       case 'get_bot_info':
         return adapter.getBotInfo();
       case 'list_channels':
-        return adapter.listChannels(params['limit'] ? Number(params['limit']) : 200);
+        return adapter.listChannels(params.limit ? Number(params.limit) : 200);
       case 'route_alert_by_severity':
         return adapter.routeAlertBySeverity({
-          severity: String(params['severity']) as 'info' | 'warning' | 'critical',
-          title: String(params['title']),
-          message: String(params['message']),
-          ...(params['source'] ? { source: String(params['source']) } : {}),
+          severity: String(params.severity) as 'info' | 'warning' | 'critical',
+          title: String(params.title),
+          message: String(params.message),
+          ...(params.source ? { source: String(params.source) } : {}),
         });
       case 'send_webhook':
         return adapter.sendWebhookMessage(
-          String(params['text']),
-          params['channel'] ? { channel: String(params['channel']) } : undefined,
+          String(params.text),
+          params.channel ? { channel: String(params.channel) } : undefined,
         );
       default:
         throw new Error(`Unknown capability: ${capabilityId}`);

@@ -2,7 +2,7 @@ import type { ModelLifecycle } from '@szl-holdings/ai-engine';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { Router } from 'express';
 import { z } from 'zod';
-import { handleRouteError, sendBadRequest, sendError, sendNotFound } from '../lib/api-response';
+import { handleRouteError, sendBadRequest, sendNotFound } from '../lib/api-response';
 import {
   abTestingService,
   datasetService,
@@ -34,14 +34,14 @@ const featureVectorSchema = z.object({
   featureIds: z.array(z.string().min(1).max(200)).min(1).max(100),
 });
 
-const createDatasetSchema = z.object({
+const _createDatasetSchema = z.object({
   domain: z.string().min(1).max(100),
   name: z.string().min(1).max(300).optional(),
   entityType: z.string().min(1).max(100).optional(),
   maxRows: z.number().int().min(1).max(1000000).optional(),
 });
 
-const createTrainingRunSchema = z.object({
+const _createTrainingRunSchema = z.object({
   datasetId: z.string().min(1).max(200),
   domain: z.string().min(1).max(100),
   modelType: z.string().min(1).max(100).optional(),

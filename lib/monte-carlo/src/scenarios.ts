@@ -1,4 +1,4 @@
-import type { ScenarioDefinition, ScenarioLibraryEntry } from './schema.js';
+import type { ScenarioDefinition, } from './schema.js';
 
 export const VESSELS_VOYAGE_COST: ScenarioDefinition = {
   id: 'vessels/voyage-cost',
@@ -60,10 +60,10 @@ export const VESSELS_VOYAGE_COST: ScenarioDefinition = {
     },
   ],
   calculate: (inputs) => {
-    const totalDays = inputs['voyageDays']! + inputs['weatherDelayDays']!;
-    const fuelCost = inputs['fuelPricePerTon']! * inputs['fuelConsumptionTons']! * totalDays;
-    const portFees = inputs['portFees']! * 1000;
-    const piracyPremium = inputs['cargoValue']! * 1_000_000 * inputs['piracyRiskPremiumPct']!;
+    const totalDays = inputs.voyageDays! + inputs.weatherDelayDays!;
+    const fuelCost = inputs.fuelPricePerTon! * inputs.fuelConsumptionTons! * totalDays;
+    const portFees = inputs.portFees! * 1000;
+    const piracyPremium = inputs.cargoValue! * 1_000_000 * inputs.piracyRiskPremiumPct!;
     const totalCost = fuelCost + portFees + piracyPremium;
     const costPerDay = totalCost / totalDays;
     return {
@@ -154,30 +154,30 @@ export const TERRA_PROPERTY_RETURNS: ScenarioDefinition = {
     },
   ],
   calculate: (inputs) => {
-    const price = inputs['purchasePrice']! * 1_000_000;
-    const noi0 = price * inputs['initialCapRate']!;
-    const equity = price * (1 - inputs['ltv']!);
-    const debt = price * inputs['ltv']!;
-    const annualDebtService = debt * inputs['interestRate']!;
+    const price = inputs.purchasePrice! * 1_000_000;
+    const noi0 = price * inputs.initialCapRate!;
+    const equity = price * (1 - inputs.ltv!);
+    const debt = price * inputs.ltv!;
+    const annualDebtService = debt * inputs.interestRate!;
     const holdYears = 5;
 
-    const cumulativeCashFlow = -equity;
+    const _cumulativeCashFlow = -equity;
     let noi = noi0;
     let opex = noi0 * 0.35;
 
     const cashFlows: number[] = [-equity];
 
     for (let y = 1; y <= holdYears; y++) {
-      noi *= 1 + inputs['rentGrowthRate']!;
-      opex *= 1 + inputs['opexGrowth']!;
-      const effectiveNoi = noi * (1 - inputs['vacancyRate']!);
+      noi *= 1 + inputs.rentGrowthRate!;
+      opex *= 1 + inputs.opexGrowth!;
+      const effectiveNoi = noi * (1 - inputs.vacancyRate!);
       const cfBeforeDebt = effectiveNoi - opex;
       const cfAfterDebt = cfBeforeDebt - annualDebtService;
       cashFlows.push(cfAfterDebt);
     }
 
-    const exitNoi = noi * (1 - inputs['vacancyRate']!);
-    const exitValue = exitNoi / inputs['exitCapRate']!;
+    const exitNoi = noi * (1 - inputs.vacancyRate!);
+    const exitValue = exitNoi / inputs.exitCapRate!;
     const exitProceeds = exitValue - debt;
     cashFlows[holdYears] = (cashFlows[holdYears] ?? 0) + exitProceeds;
 
@@ -190,7 +190,7 @@ export const TERRA_PROPERTY_RETURNS: ScenarioDefinition = {
       equityMultiple,
       exitValue: exitValue / 1_000_000,
       totalReturn: totalReturn * 100,
-      noiYear5: (noi * (1 - inputs['vacancyRate']!)) / 1_000_000,
+      noiYear5: (noi * (1 - inputs.vacancyRate!)) / 1_000_000,
     };
   },
   outputs: [
@@ -267,16 +267,16 @@ export const SZL_FUND_EXIT: ScenarioDefinition = {
     },
   ],
   calculate: (inputs) => {
-    const entryValuation = inputs['baseRevenueMillion']! * inputs['entryRevenueMultiple']!;
+    const entryValuation = inputs.baseRevenueMillion! * inputs.entryRevenueMultiple!;
     const exitRevenue =
-      inputs['baseRevenueMillion']! *
-      (1 + inputs['revenueGrowthCagr']!) ** inputs['holdingPeriodYears']!;
+      inputs.baseRevenueMillion! *
+      (1 + inputs.revenueGrowthCagr!) ** inputs.holdingPeriodYears!;
     const exitValuation =
-      exitRevenue * inputs['exitRevenueMultiple']! * inputs['marketExpansionFactor']!;
-    const ownership = 1 - inputs['dilutionPct']!;
+      exitRevenue * inputs.exitRevenueMultiple! * inputs.marketExpansionFactor!;
+    const ownership = 1 - inputs.dilutionPct!;
     const proceeds = exitValuation * ownership;
     const moic = proceeds / entryValuation;
-    const irr = moic ** (1 / inputs['holdingPeriodYears']!) - 1;
+    const irr = moic ** (1 / inputs.holdingPeriodYears!) - 1;
 
     return {
       moic,
@@ -366,26 +366,26 @@ export const PRISM_LITIGATION_OUTCOME: ScenarioDefinition = {
     },
   ],
   calculate: (inputs) => {
-    const goesToTrial = Math.random() < inputs['trialProbability']!;
-    const isLiable = Math.random() < inputs['liabilityProbability']!;
+    const goesToTrial = Math.random() < inputs.trialProbability!;
+    const isLiable = Math.random() < inputs.liabilityProbability!;
 
     let directCost: number;
     if (goesToTrial) {
-      directCost = isLiable ? inputs['claimedDamages']! * inputs['damageFactor']! : 0;
+      directCost = isLiable ? inputs.claimedDamages! * inputs.damageFactor! : 0;
     } else {
-      directCost = inputs['claimedDamages']! * inputs['settlementDiscount']!;
+      directCost = inputs.claimedDamages! * inputs.settlementDiscount!;
     }
 
-    const legalFees = inputs['legalFeesMillion']!;
-    const totalCost = (directCost + legalFees) * inputs['reputationMultiplier']!;
-    const settlementProbability = 1 - inputs['trialProbability']!;
+    const legalFees = inputs.legalFeesMillion!;
+    const totalCost = (directCost + legalFees) * inputs.reputationMultiplier!;
+    const settlementProbability = 1 - inputs.trialProbability!;
 
     return {
       totalExposure: totalCost,
       directCost,
       legalFees,
       settlementProbability: settlementProbability * 100,
-      expectedLoss: inputs['liabilityProbability']! * directCost + legalFees,
+      expectedLoss: inputs.liabilityProbability! * directCost + legalFees,
     };
   },
   outputs: [
@@ -473,13 +473,13 @@ export const AEGIS_CYBER_RISK: ScenarioDefinition = {
     },
   ],
   calculate: (inputs) => {
-    const dataBreachCost = (inputs['recordsAtRisk']! * 1000 * inputs['costPerRecord']!) / 1_000_000;
-    const biLoss = inputs['businessInterruptionDays']! * inputs['dailyRevenueMillion']!;
-    const ransomCost = inputs['payRansomProbability']! * inputs['ransomDemandMillion']!;
+    const dataBreachCost = (inputs.recordsAtRisk! * 1000 * inputs.costPerRecord!) / 1_000_000;
+    const biLoss = inputs.businessInterruptionDays! * inputs.dailyRevenueMillion!;
+    const ransomCost = inputs.payRansomProbability! * inputs.ransomDemandMillion!;
     const totalGrossLoss = dataBreachCost + biLoss + ransomCost;
-    const insuranceOffset = Math.min(inputs['cyberInsuranceCoverage']!, totalGrossLoss * 0.8);
+    const insuranceOffset = Math.min(inputs.cyberInsuranceCoverage!, totalGrossLoss * 0.8);
     const netLoss = Math.max(0, totalGrossLoss - insuranceOffset);
-    const annualExpectedLoss = inputs['annualBreachProbability']! * totalGrossLoss;
+    const annualExpectedLoss = inputs.annualBreachProbability! * totalGrossLoss;
 
     return {
       annualExpectedLoss,
@@ -570,18 +570,18 @@ export const NEXUS_GEOPOLITICAL_CASCADE: ScenarioDefinition = {
     },
   ],
   calculate: (inputs) => {
-    const occurs = Math.random() < inputs['eventProbability']!;
-    const rawImpact = occurs ? inputs['initialImpactMagnitude']! * inputs['cascadeFactor']! : 0;
-    const hedgedImpact = rawImpact * (1 - inputs['hedgeEffectiveness']!);
-    const revenueAtRisk = inputs['exposedRevenueMillions']! * Math.min(hedgedImpact, 1);
-    const recoveryMonths = occurs ? inputs['recoveryTimeMonths']! : 0;
+    const occurs = Math.random() < inputs.eventProbability!;
+    const rawImpact = occurs ? inputs.initialImpactMagnitude! * inputs.cascadeFactor! : 0;
+    const hedgedImpact = rawImpact * (1 - inputs.hedgeEffectiveness!);
+    const revenueAtRisk = inputs.exposedRevenueMillions! * Math.min(hedgedImpact, 1);
+    const recoveryMonths = occurs ? inputs.recoveryTimeMonths! : 0;
 
     return {
       revenueAtRisk,
       impactMagnitude: hedgedImpact,
       recoveryMonths,
       eventOccurrence: occurs ? 1 : 0,
-      annualExpectedImpact: inputs['eventProbability']! * revenueAtRisk,
+      annualExpectedImpact: inputs.eventProbability! * revenueAtRisk,
     };
   },
   outputs: [
@@ -674,16 +674,16 @@ export const LYTE_CAPACITY_PLANNING: ScenarioDefinition = {
   calculate: (inputs) => {
     const planningHorizonYears = 3;
     const peakLoad =
-      inputs['currentLoad']! * (1 + inputs['demandGrowthCagr']!) ** planningHorizonYears;
-    const capacityGap = Math.max(0, peakLoad - inputs['scalingTriggerPct']!);
+      inputs.currentLoad! * (1 + inputs.demandGrowthCagr!) ** planningHorizonYears;
+    const capacityGap = Math.max(0, peakLoad - inputs.scalingTriggerPct!);
     const unitsRequired = Math.ceil(capacityGap / 0.1);
-    const capacityCost = unitsRequired * inputs['costPerUnitThousands']! * 1000;
+    const capacityCost = unitsRequired * inputs.costPerUnitThousands! * 1000;
     const expectedDowntimeHours =
-      inputs['failureRatePerYear']! *
+      inputs.failureRatePerYear! *
       planningHorizonYears *
-      (inputs['provisioningLeadTimeWeeks']! / 52) *
+      (inputs.provisioningLeadTimeWeeks! / 52) *
       24;
-    const downtimeCost = expectedDowntimeHours * inputs['downtimeCostPerHour']!;
+    const downtimeCost = expectedDowntimeHours * inputs.downtimeCostPerHour!;
     const totalTco = capacityCost + downtimeCost;
 
     return {

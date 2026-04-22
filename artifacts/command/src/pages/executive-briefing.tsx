@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeft, CheckCircle2, Clock, Shield, TrendingDown } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Clock, Shield, } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useEcosystemData } from '../hooks/use-ecosystem-data';
 import { getDomainColor, getSeverityColor } from '../lib/utils';
@@ -227,8 +227,8 @@ export function ExecutiveBriefing() {
                       <div
                         className="text-[10px] font-bold uppercase px-2 py-0.5 rounded border"
                         style={{
-                          color: 'var(--color-' + domain.alerts.severity + ')',
-                          borderColor: 'var(--color-' + domain.alerts.severity + ')',
+                          color: `var(--color-${domain.alerts.severity})`,
+                          borderColor: `var(--color-${domain.alerts.severity})`,
                           backgroundColor: `color-mix(in srgb, var(--color-${domain.alerts.severity}) 10%, transparent)`,
                         }}
                       >

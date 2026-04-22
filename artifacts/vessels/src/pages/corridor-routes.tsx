@@ -8,12 +8,10 @@ import {
   Minus,
   Navigation,
   RefreshCw,
-  Ship,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'wouter';
 import { api, type Corridor } from '@/lib/api';
 
 const weatherRiskColors: Record<string, string> = {
@@ -45,7 +43,7 @@ function getNum(val: string | number | undefined, def: number): number {
   if (typeof val === 'number') return val;
   if (typeof val === 'string') {
     const n = parseFloat(val);
-    return isNaN(n) ? def : n;
+    return Number.isNaN(n) ? def : n;
   }
   return def;
 }

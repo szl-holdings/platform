@@ -2,7 +2,11 @@ export type { AutonomyMode, AutonomyModeToggleProps } from './AutonomyModeToggle
 export { AutonomyModeToggle } from './AutonomyModeToggle.js';
 export type { ConfidenceMeterProps } from './ConfidenceMeter.js';
 export { ConfidenceMeter } from './ConfidenceMeter.js';
-export type { EvidenceBadgeProps, EvidenceSource as ProofEvidenceSource } from './EvidenceBadge.js';
+export type {
+  EvidenceBadgeProps,
+  EvidenceSource,
+  EvidenceSource as ProofEvidenceSource,
+} from './EvidenceBadge.js';
 export { EvidenceBadge } from './EvidenceBadge.js';
 export type { FreshnessChipProps, FreshnessLevel } from './FreshnessChip.js';
 export { FreshnessChip } from './FreshnessChip.js';

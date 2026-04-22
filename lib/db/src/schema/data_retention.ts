@@ -1,7 +1,6 @@
 import {
   boolean,
   integer,
-  interval,
   jsonb,
   pgTable,
   serial,

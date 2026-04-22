@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { fmt, pct } from './api';
+import { fmt, } from './api';
 import type { CapTableSummary } from './types';
 
 export function RoundModeling({ capTable }: { capTable: CapTableSummary }) {

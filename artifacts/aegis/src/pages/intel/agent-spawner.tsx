@@ -1,7 +1,6 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
-  AlertCircle,
   Brain,
   CheckCircle2,
   ChevronRight,
@@ -9,7 +8,6 @@ import {
   Globe,
   Plus,
   Radio,
-  Settings,
   Shield,
   Sparkles,
   TrendingUp,
@@ -326,8 +324,7 @@ export default function AgentSpawner() {
         {/* Configuration panel */}
         <div className="lg:col-span-2 space-y-4">
           {selectedTemplate ? (
-            <>
-              <div className="bg-card/60 border border-border rounded-xl p-5">
+            <div className="bg-card/60 border border-border rounded-xl p-5">
                 <div className="flex items-start gap-3 mb-4">
                   <div
                     className={cn(
@@ -452,7 +449,6 @@ export default function AgentSpawner() {
                   </button>
                 </div>
               </div>
-            </>
           ) : (
             <div className="bg-card/30 border border-border/50 rounded-xl p-8 flex flex-col items-center justify-center text-center">
               <div className="w-12 h-12 rounded-xl bg-muted/30 flex items-center justify-center mb-3">

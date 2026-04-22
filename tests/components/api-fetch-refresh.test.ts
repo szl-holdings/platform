@@ -50,8 +50,8 @@ describe('api-fetch silent refresh', () => {
 
     await apiFetch('/lyte/dashboard');
 
-    const init = fetchSpy.mock.calls[0]![1]!;
-    expect((init.headers as Record<string, string>)['Authorization']).toBe('Bearer tok-1');
+    const init = fetchSpy.mock.calls[0]?.[1]!;
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer tok-1');
   });
 
   it('preemptively refreshes when the token is within 5 minutes of expiry', async () => {
@@ -76,9 +76,9 @@ describe('api-fetch silent refresh', () => {
 
     await apiFetch('/lyte/dashboard');
 
-    expect(fetchSpy.mock.calls[0]![0]).toBe('/api/auth/refresh');
-    const headers = fetchSpy.mock.calls[1]![1]!.headers as Record<string, string>;
-    expect(headers['Authorization']).toBe('Bearer tok-new');
+    expect(fetchSpy.mock.calls[0]?.[0]).toBe('/api/auth/refresh');
+    const headers = fetchSpy.mock.calls[1]?.[1]?.headers as Record<string, string>;
+    expect(headers.Authorization).toBe('Bearer tok-new');
     expect(getAccessToken()).toBe('tok-new');
   });
 
@@ -107,9 +107,9 @@ describe('api-fetch silent refresh', () => {
 
     expect(result).toEqual({ ok: true, retried: true });
     expect(fetchSpy.mock.calls.length).toBe(3);
-    expect(fetchSpy.mock.calls[1]![0]).toBe('/api/auth/refresh');
-    const retryHeaders = fetchSpy.mock.calls[2]![1]!.headers as Record<string, string>;
-    expect(retryHeaders['Authorization']).toBe('Bearer tok-fresh');
+    expect(fetchSpy.mock.calls[1]?.[0]).toBe('/api/auth/refresh');
+    const retryHeaders = fetchSpy.mock.calls[2]?.[1]?.headers as Record<string, string>;
+    expect(retryHeaders.Authorization).toBe('Bearer tok-fresh');
     expect(getAuthTokens()?.refreshToken).toBe('rt-2');
   });
 

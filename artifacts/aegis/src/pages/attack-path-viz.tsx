@@ -1,20 +1,15 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import {
-  AlertTriangle,
   ChevronRight,
-  Cloud,
   Database,
-  DollarSign,
   Globe,
-  Layers,
   Lock,
   Monitor,
   Network,
   Server,
   Shield,
-  Users,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
@@ -215,7 +210,7 @@ function GraphNode({
   selected: boolean;
   onClick: () => void;
 }) {
-  const Icon = NODE_ICONS[node.type];
+  const _Icon = NODE_ICONS[node.type];
   const color = NODE_COLORS[node.type];
   const isCompromised = node.compromised;
   const isBlocked = node.blocked;

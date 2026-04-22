@@ -3,8 +3,7 @@ import { createCheckpoint, InMemoryCheckpointStore } from './checkpoint.js';
 import { InMemoryActionLedger, makeLedgerEntry } from './ledger.js';
 import { DefaultModelRouter } from './model-router.js';
 import { RunManager } from './run-manager.js';
-import type { StepContext, WorkflowStep } from './types.js';
-import { RunConfigSchema, RunStateSchema } from './types.js';
+import { type StepContext, type WorkflowStep, RunConfigSchema, RunStateSchema } from './types.js';
 import { ECHO_STEP, runReferenceWorkflow, VALIDATE_STEP } from './workflow.js';
 
 function makeConfig(overrides: Partial<Parameters<typeof RunConfigSchema.parse>[0]> = {}) {

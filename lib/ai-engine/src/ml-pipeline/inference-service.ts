@@ -125,7 +125,7 @@ function runModelInference(
     };
   }
   if (domain === 'prism' && modelType === 'case_outcome_classifier') {
-    const outcomes = ['win', 'settle', 'lose'] as const;
+    const _outcomes = ['win', 'settle', 'lose'] as const;
     const probs = [0.3 + avg * 0.2, 0.4, 0.3 - avg * 0.1].map((p) => Math.min(1, Math.max(0, p)));
     const total = probs.reduce((s, v) => s + v, 0);
     const [win, settle, lose] = probs.map((p) => parseFloat((p / total).toFixed(4)));

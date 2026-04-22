@@ -276,7 +276,7 @@ function scoreSanctions(params: VoyageRiskRequest, rng: () => number): RiskDimen
 function buildSanctionsSummary(
   score: number,
   params: VoyageRiskRequest,
-  isShadowOrigin: boolean,
+  _isShadowOrigin: boolean,
 ): string {
   if (score >= 80)
     return `CRITICAL: Route originates from ${params.origin}, a sanctioned cargo export terminal. High probability of embargo-restricted cargo. Beneficial control likely linked to sanctioned state entity.`;
@@ -291,7 +291,7 @@ function scoreDarkActivity(params: VoyageRiskRequest, rng: () => number): RiskDi
   const isShadowOrigin = SHADOW_FLEET_PORTS.some((p) =>
     params.origin.toLowerCase().includes(p.toLowerCase()),
   );
-  const isHighRiskFlag = HIGH_RISK_FLAGS.some((f) =>
+  const _isHighRiskFlag = HIGH_RISK_FLAGS.some((f) =>
     (params.vesselName ?? '').toLowerCase().includes(f.toLowerCase()),
   );
 
@@ -458,7 +458,7 @@ function scoreCounterparty(params: VoyageRiskRequest, rng: () => number): RiskDi
       confidence: 68,
       dataLabel: 'demo',
     });
-  } else if (params.chartererName && params.chartererName.toLowerCase().includes('shell')) {
+  } else if (params.chartererName?.toLowerCase().includes('shell')) {
     evidence.push({
       signal: `${params.chartererName} — publicly listed parent (Shell plc) — investment grade A+`,
       source: 'GLEIF / Bloomberg (demo data)',
@@ -512,7 +512,7 @@ function buildEconomics(
     (params.cargoType ?? 'crude').toLowerCase().includes('crude') ||
     (params.cargoType ?? '').toLowerCase().includes('oil');
   const transitDays = Math.round((distanceNm / (13 * 24)) * 10) / 10;
-  const dwt = isTanker ? 280_000 : 80_000;
+  const _dwt = isTanker ? 280_000 : 80_000;
   const fuelPerDay = isTanker ? 85 + rng() * 30 : 35 + rng() * 15;
   const fuelMt = Math.round(fuelPerDay * transitDays);
   const bunkerPrice = 580 + Math.floor(rng() * 60);
@@ -646,7 +646,7 @@ function buildCounterparty(params: VoyageRiskRequest, sanctionsScore: number): C
   };
 }
 
-function routeDistance(origin: string, destination: string, variant: string): number {
+function routeDistance(origin: string, _destination: string, variant: string): number {
   const hasCape = variant.toLowerCase().includes('cape');
   const fromRasTanura =
     origin.toLowerCase().includes('tanura') || origin.toLowerCase().includes('ras');
@@ -937,7 +937,7 @@ const pdfStyles = StyleSheet.create({
 });
 
 function ComplianceMemoDoc({ score }: { score: VoyageRiskScore }) {
-  const now = new Date().toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+  const now = `${new Date().toISOString().replace('T', ' ').slice(0, 16)} UTC`;
   const dims = [
     { key: 'Sanctions Exposure', dim: score.risk.sanctions },
     { key: 'Dark Activity', dim: score.risk.darkActivity },
@@ -1225,7 +1225,7 @@ router.post(
   async (req, res) => {
     try {
       const score = req.body as VoyageRiskScore;
-      if (!score || !score.scenarioId) {
+      if (!score?.scenarioId) {
         res.status(400).json({ error: 'Invalid voyage risk score payload' });
         return;
       }

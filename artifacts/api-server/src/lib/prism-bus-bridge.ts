@@ -1,5 +1,4 @@
-import type { PrismDomain } from '@szl-holdings/prism-bus';
-import { type PrismBusEvent, prismBus } from '@szl-holdings/prism-bus';
+import { type PrismDomain, type PrismBusEvent, prismBus } from '@szl-holdings/prism-bus';
 import { logger } from './logger';
 import { publishToSse } from './sse-server';
 import { publish, WS_CHANNELS } from './websocket';

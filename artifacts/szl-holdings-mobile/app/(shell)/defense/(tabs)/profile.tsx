@@ -2,8 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NotificationHub, useBiometric, useTheme } from '@szl-holdings/mobile-shared';
 import * as Haptics from 'expo-haptics';
 import { type Href, router } from 'expo-router';
-import type { ComponentProps } from 'react';
-import React, { useState } from 'react';
+import { type ComponentProps, useState } from 'react';
 import {
   Alert,
   Platform,

@@ -6,7 +6,7 @@ import {
   agentTrainingPairs,
   db,
 } from '@szl-holdings/db';
-import { and, asc, avg, count, desc, eq } from 'drizzle-orm';
+import { and, avg, count, desc, eq } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import multer from 'multer';
 import { z } from 'zod';
@@ -62,7 +62,7 @@ const ttsSchema = z.object({
 
 trainingRouter.get('/agent-training/pairs/:agentId', async (req: Request, res: Response) => {
   try {
-    const agentId = String(req.params['agentId']);
+    const agentId = String(req.params.agentId);
     const pairs = await db
       .select()
       .from(agentTrainingPairs)
@@ -96,7 +96,7 @@ trainingRouter.post(
 
 trainingRouter.delete('/agent-training/pairs/:id', async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params['id']!), 10);
+    const id = parseInt(String(req.params.id!), 10);
     await db
       .update(agentTrainingPairs)
       .set({ isActive: false })
@@ -109,7 +109,7 @@ trainingRouter.delete('/agent-training/pairs/:id', async (req: Request, res: Res
 
 trainingRouter.get('/agent-training/prefs/:agentId', async (req: Request, res: Response) => {
   try {
-    const agentId = String(req.params['agentId']);
+    const agentId = String(req.params.agentId);
     const [prefs] = await db
       .select()
       .from(agentBehaviorPrefs)
@@ -135,7 +135,7 @@ trainingRouter.post(
   validateBody(behaviorPrefSchema),
   async (req: Request, res: Response) => {
     try {
-      const agentId = String(req.params['agentId']);
+      const agentId = String(req.params.agentId);
       const { tone, detailLevel, domainJargon, responseLength, customInstructions } =
         req.body as z.infer<typeof behaviorPrefSchema>;
       const existing = await db
@@ -268,7 +268,7 @@ trainingRouter.patch(
   validateBody(advisoryAuditActionSchema),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(String(req.params['id']!), 10);
+      const id = parseInt(String(req.params.id!), 10);
       const { status } = req.body as z.infer<typeof advisoryAuditActionSchema>;
       const [updated] = await db
         .update(advisoryAudit)

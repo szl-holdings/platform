@@ -288,7 +288,7 @@ d('Governance state survives a real OS-level process restart (#1929)', () => {
         sessionVersion: 1,
       })
       .returning();
-    userId = user!.id;
+    userId = user?.id;
 
     // Grant super_admin so the user passes requireRole on every Guardian route.
     await db
@@ -307,7 +307,7 @@ d('Governance state survives a real OS-level process restart (#1929)', () => {
         sessionVersion: 1,
       })
       .returning();
-    sessionId = session!.id;
+    sessionId = session?.id;
   }, 180_000);
 
   afterAll(async () => {
@@ -401,12 +401,6 @@ d('Governance state survives a real OS-level process restart (#1929)', () => {
         }),
       });
       if (evalRes.status !== 200) {
-        // eslint-disable-next-line no-console
-        console.error(
-          '[restart-test] /api/guardian/evaluate failed:',
-          evalRes.status,
-          await evalRes.text(),
-        );
       }
       expect(evalRes.status).toBe(200);
       const evalBody = (await evalRes.json()) as { outcome: string };
@@ -423,7 +417,7 @@ d('Governance state survives a real OS-level process restart (#1929)', () => {
         .where(eqW(gtableW.requestId, PINNED.approval.requestId))
         .limit(1);
       expect(persisted).toBeDefined();
-      approvalDbId = persisted!.id;
+      approvalDbId = persisted?.id;
     } finally {
       await killChild(child1);
     }
@@ -472,10 +466,10 @@ d('Governance state survives a real OS-level process restart (#1929)', () => {
       }>;
       const supervised = tiersList.find((t) => t.tier === PINNED.tier.tier);
       expect(supervised).toBeDefined();
-      expect(supervised!.description).toBe(PINNED.tier.description);
-      expect(supervised!.riskLevel).toBe(PINNED.tier.riskLevel);
-      expect(supervised!.controls).toEqual(PINNED.tier.controls);
-      expect(supervised!.tierNumber).toBe(PINNED.tier.tierNumber);
+      expect(supervised?.description).toBe(PINNED.tier.description);
+      expect(supervised?.riskLevel).toBe(PINNED.tier.riskLevel);
+      expect(supervised?.controls).toEqual(PINNED.tier.controls);
+      expect(supervised?.tierNumber).toBe(PINNED.tier.tierNumber);
 
       // (c) Guardrail round-trip
       const guardrailRes = await api2(`/api/guardrail-configs/${guardrailDbId}`);
@@ -530,11 +524,11 @@ d('Governance state survives a real OS-level process restart (#1929)', () => {
         .where(eqVerify(gtable.requestId, PINNED.approval.requestId))
         .limit(1);
       expect(approval).toBeDefined();
-      expect(approval!.id).toBe(approvalDbId);
-      expect(approval!.action).toBe(PINNED.approval.action);
-      expect(approval!.tier).toBe(PINNED.approval.tier);
-      expect(approval!.approvalType).toBe(PINNED.approval.approvalType);
-      expect(approval!.status).toBe('pending');
+      expect(approval?.id).toBe(approvalDbId);
+      expect(approval?.action).toBe(PINNED.approval.action);
+      expect(approval?.tier).toBe(PINNED.approval.tier);
+      expect(approval?.approvalType).toBe(PINNED.approval.approvalType);
+      expect(approval?.status).toBe('pending');
     } finally {
       await killChild(child2);
     }

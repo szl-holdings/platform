@@ -858,7 +858,7 @@ router.get(
   authMiddleware({ required: false }),
   async (req, res) => {
     try {
-      const vesselImo = req.params['vesselImo'] as string;
+      const vesselImo = req.params.vesselImo as string;
       const chain = OWNERSHIP_CHAINS[vesselImo] ?? DEFAULT_CHAIN;
       const vessel = SAMPLE_VESSELS_GRAPH.find((v) => v.imo === vesselImo) ?? {
         name: 'Unknown Vessel',
@@ -1248,7 +1248,7 @@ router.get(
   authMiddleware({ required: false }),
   async (req, res) => {
     try {
-      const voyageRef = req.params['voyageRef'] as string;
+      const voyageRef = req.params.voyageRef as string;
       const normalizedRef = voyageRef === 'latest' ? 'VOY-2026-001' : voyageRef;
       const snapshots = VOYAGE_SNAPSHOTS[normalizedRef] ?? VOYAGE_SNAPSHOTS['VOY-2026-001'];
 

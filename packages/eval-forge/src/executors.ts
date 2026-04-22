@@ -49,7 +49,7 @@ export type EvalInferFn = (req: EvalInferRequest) => Promise<EvalInferResult>;
 function safeStringify(value: unknown, maxLen = 1200): string {
   try {
     const s = typeof value === 'string' ? value : JSON.stringify(value);
-    return s.length > maxLen ? s.slice(0, maxLen) + '…[truncated]' : s;
+    return s.length > maxLen ? `${s.slice(0, maxLen)}…[truncated]` : s;
   } catch {
     return String(value);
   }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const API_BASE = '/api';
 
@@ -375,7 +375,7 @@ export function AIInsightCard({
   const [isStale, setIsStale] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
-  const [tick, setTick] = useState(0);
+  const [_tick, setTick] = useState(0);
 
   const refresh = useCallback(async () => {
     const live = await fetchLiveInsights(domain);

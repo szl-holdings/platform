@@ -233,8 +233,8 @@ function PlatformBlock({
   name: string;
   icon: React.ElementType;
   accent: string;
-  metrics: { label: string; value: number | string }[];
-  href: string;
+  metrics: { label: string; value: number | string | undefined }[];
+  href: string | undefined;
   delay?: number;
 }) {
   return (
@@ -366,7 +366,7 @@ function SystemHealthStrip({
   refreshing: boolean;
   onRefresh: () => void;
 }) {
-  const [tick, setTick] = useState(0);
+  const [_tick, setTick] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setTick((n) => n + 1), 3000);
     return () => clearInterval(t);
@@ -1062,7 +1062,7 @@ export default function KpiDashboardPage() {
                       value={agg.totalWorkflowRuns}
                       sub="Alloy orchestration"
                       accent="hsl(214,80%,65%)"
-                      href={platforms?.alloy.href}
+                      href={platforms?.alloy?.href}
                       icon={Layers}
                       delay={0}
                     />
@@ -1079,7 +1079,7 @@ export default function KpiDashboardPage() {
                       value={agg.distressProperties}
                       sub="Terra engine"
                       accent="hsl(88,42%,52%)"
-                      href={platforms?.terra.href}
+                      href={platforms?.terra?.href}
                       icon={BarChart3}
                       delay={0.1}
                     />
@@ -1088,7 +1088,7 @@ export default function KpiDashboardPage() {
                       value={agg.fleetVessels}
                       sub="Vessels tracker"
                       accent="hsl(205,85%,55%)"
-                      href={platforms?.vessels.href}
+                      href={platforms?.vessels?.href}
                       icon={Ship}
                       delay={0.15}
                     />
@@ -1105,7 +1105,7 @@ export default function KpiDashboardPage() {
                       value={agg.securityFindings}
                       sub="Aegis SOC"
                       accent="hsl(232,68%,60%)"
-                      href={platforms?.aegis.href}
+                      href={platforms?.aegis?.href}
                       icon={Shield}
                       delay={0.25}
                     />
@@ -1129,65 +1129,65 @@ export default function KpiDashboardPage() {
                       name="FORGE"
                       icon={Layers}
                       accent="hsl(214,80%,65%)"
-                      href={platforms!.alloy.href}
+                      href={platforms?.alloy?.href}
                       delay={0.1}
                       metrics={[
-                        { label: 'Workflow Runs', value: platforms!.alloy.workflowRuns },
-                        { label: 'Active Workflows', value: platforms!.alloy.activeWorkflows },
+                        { label: 'Workflow Runs', value: platforms?.alloy?.workflowRuns },
+                        { label: 'Active Workflows', value: platforms?.alloy?.activeWorkflows },
                       ]}
                     />
                     <PlatformBlock
                       name="DOMAINE"
                       icon={BarChart3}
                       accent="hsl(88,42%,52%)"
-                      href={platforms!.terra.href}
+                      href={platforms?.terra?.href}
                       delay={0.15}
                       metrics={[
                         {
                           label: 'Distress Properties',
-                          value: platforms!.terra.distressProperties,
+                          value: platforms?.terra?.distressProperties,
                         },
-                        { label: 'Active Deals', value: platforms!.terra.activeDeals },
+                        { label: 'Active Deals', value: platforms?.terra?.activeDeals },
                       ]}
                     />
                     <PlatformBlock
                       name="SEXTANT"
                       icon={Ship}
                       accent="hsl(205,85%,55%)"
-                      href={platforms!.vessels.href}
+                      href={platforms?.vessels?.href}
                       delay={0.2}
                       metrics={[
-                        { label: 'Tracked Vessels', value: platforms!.vessels.trackedVessels },
-                        { label: 'Fleets', value: platforms!.vessels.fleets },
+                        { label: 'Tracked Vessels', value: platforms?.vessels?.trackedVessels },
+                        { label: 'Fleets', value: platforms?.vessels?.fleets },
                       ]}
                     />
                     <PlatformBlock
                       name="PARAGON"
                       icon={Shield}
                       accent="hsl(232,68%,60%)"
-                      href={platforms!.aegis.href}
+                      href={platforms?.aegis?.href}
                       delay={0.25}
                       metrics={[
-                        { label: 'Open Incidents', value: platforms!.aegis.incidents },
-                        { label: 'Findings', value: platforms!.aegis.findings },
+                        { label: 'Open Incidents', value: platforms?.aegis?.incidents },
+                        { label: 'Findings', value: platforms?.aegis?.findings },
                       ]}
                     />
                     <PlatformBlock
                       name="KORA"
                       icon={Eye}
                       accent="hsl(190,90%,55%)"
-                      href={platforms!.lyte.href}
+                      href={platforms?.lyte?.href}
                       delay={0.3}
-                      metrics={[{ label: 'Active Incidents', value: platforms!.lyte.incidents }]}
+                      metrics={[{ label: 'Active Incidents', value: platforms?.lyte?.incidents }]}
                     />
                     <PlatformBlock
                       name="Carlota Jo"
                       icon={Sparkles}
                       accent="hsl(38,55%,58%)"
-                      href={platforms!.carlotaJo.href}
+                      href={platforms?.carlotaJo?.href}
                       delay={0.35}
                       metrics={[
-                        { label: 'Client Inquiries', value: platforms!.carlotaJo.inquiries },
+                        { label: 'Client Inquiries', value: platforms?.carlotaJo?.inquiries },
                       ]}
                     />
                   </div>

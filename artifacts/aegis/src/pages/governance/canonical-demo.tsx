@@ -1,10 +1,7 @@
 import {
   Activity,
-  AlertTriangle,
   Brain,
   CheckCircle2,
-  ChevronRight,
-  Clock,
   Eye,
   FileText,
   Info,
@@ -326,7 +323,7 @@ export default function CanonicalDemoPage() {
           {DEMO_STEPS.map((step, idx) => {
             const isCompleted = completedSteps.includes(step.id);
             const isActive = running && currentStep === idx;
-            const isPending = !isCompleted && !isActive;
+            const _isPending = !isCompleted && !isActive;
             return (
               <div
                 key={step.id}

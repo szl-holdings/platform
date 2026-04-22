@@ -95,15 +95,15 @@ export class SlackAdapter extends ServiceAdapter {
   private alertRouting: SlackAlertRouting[] = [...DEFAULT_ALERT_ROUTING];
 
   private get webhookUrl(): string | undefined {
-    return process.env["SLACK_WEBHOOK_URL"];
+    return process.env.SLACK_WEBHOOK_URL;
   }
 
   private get botToken(): string | undefined {
-    return process.env["SLACK_BOT_TOKEN"];
+    return process.env.SLACK_BOT_TOKEN;
   }
 
   private get signingSecret(): string | undefined {
-    return process.env["SLACK_SIGNING_SECRET"];
+    return process.env.SLACK_SIGNING_SECRET;
   }
 
   override get status(): ServiceStatus {
@@ -178,10 +178,10 @@ export class SlackAdapter extends ServiceAdapter {
     }
 
     const body: Record<string, unknown> = { text };
-    if (options?.channel) body["channel"] = options.channel;
-    if (options?.username) body["username"] = options.username;
-    if (options?.iconEmoji) body["icon_emoji"] = options.iconEmoji;
-    if (options?.blocks) body["blocks"] = options.blocks;
+    if (options?.channel) body.channel = options.channel;
+    if (options?.username) body.username = options.username;
+    if (options?.iconEmoji) body.icon_emoji = options.iconEmoji;
+    if (options?.blocks) body.blocks = options.blocks;
 
     const response = await fetch(this.webhookUrl!, {
       method: "POST",
@@ -214,11 +214,11 @@ export class SlackAdapter extends ServiceAdapter {
     }
 
     const body: Record<string, unknown> = { channel, text };
-    if (options?.blocks) body["blocks"] = options.blocks;
-    if (options?.attachments) body["attachments"] = options.attachments;
-    if (options?.threadTs) body["thread_ts"] = options.threadTs;
-    if (options?.unfurlLinks !== undefined) body["unfurl_links"] = options.unfurlLinks;
-    if (options?.mrkdwn !== undefined) body["mrkdwn"] = options.mrkdwn;
+    if (options?.blocks) body.blocks = options.blocks;
+    if (options?.attachments) body.attachments = options.attachments;
+    if (options?.threadTs) body.thread_ts = options.threadTs;
+    if (options?.unfurlLinks !== undefined) body.unfurl_links = options.unfurlLinks;
+    if (options?.mrkdwn !== undefined) body.mrkdwn = options.mrkdwn;
 
     const response = await fetch("https://slack.com/api/chat.postMessage", {
       method: "POST",
@@ -504,7 +504,7 @@ export class SlackAdapter extends ServiceAdapter {
     }
 
     const body: Record<string, unknown> = { channel, ts, text };
-    if (blocks) body["blocks"] = blocks;
+    if (blocks) body.blocks = blocks;
 
     const response = await fetch("https://slack.com/api/chat.update", {
       method: "POST",

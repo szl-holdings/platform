@@ -224,7 +224,7 @@ export default function DecisionCenter() {
                         <Icon className="w-4 h-4 text-red-400 mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-bold text-slate-200 truncate">
-                            {String(s.rawPayload['eventType'] ?? s.type)}
+                            {String(s.rawPayload.eventType ?? s.type)}
                           </div>
                           <div className="text-[11px] text-slate-500 mt-0.5">
                             {s.entityRefs.map((e) => e.displayName).join(', ') || '—'}

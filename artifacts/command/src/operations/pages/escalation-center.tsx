@@ -1,5 +1,4 @@
 import {
-  APPROVALS,
   formatCurrency,
   PREDICTIONS,
 } from '@szl-holdings/shared-ui/core-observability-data';

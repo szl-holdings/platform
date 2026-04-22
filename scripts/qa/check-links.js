@@ -75,18 +75,14 @@ async function checkLink(url, timeout = 10000) {
 }
 
 async function main() {
-  console.log(`\nSZL Holdings — Broken Link Detection`);
-  console.log(`Base URL: ${BASE_URL}\n`);
 
   const checked = new Map();
   let totalBroken = 0;
 
   for (const page of PAGES_TO_CHECK) {
     const pageUrl = BASE_URL + page;
-    console.log(`Checking page: ${pageUrl}`);
     const html = await fetchPage(pageUrl);
     if (!html) {
-      console.error(`  Could not fetch page: ${pageUrl}`);
       continue;
     }
 
@@ -102,24 +98,17 @@ async function main() {
       checked.set(link, result.ok);
       if (!result.ok) {
         broken.push(link);
-        console.error(`    ✗ ${result.status} ${link}`);
       }
     }
 
     if (broken.length === 0) {
-      console.log(`  ✓ All ${links.length} links OK`);
     } else {
-      console.error(`  ✗ ${broken.length} broken link(s) found`);
       totalBroken += broken.length;
     }
   }
-
-  console.log(`\nTotal broken links: ${totalBroken}`);
   if (totalBroken > 0) {
-    console.error(`\nFAIL — ${totalBroken} broken link(s) detected`);
     process.exit(1);
   } else {
-    console.log(`\nPASS — No broken links detected`);
     process.exit(0);
   }
 }

@@ -1,20 +1,14 @@
-import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
-import { cn } from '@szl-holdings/shared-ui/utils';
+
 import {
   AlertTriangle,
-  ArrowRight,
-  BarChart3,
   Building2,
   CheckCircle,
-  ChevronRight,
   Clock,
-  FileText,
   Plug,
-  Shield,
   User,
 } from 'lucide-react';
 import { useState } from 'react';
-import { type DiligenceTask, type PropertyTwin, propertyTwins } from '@/data/property-twin';
+import { type DiligenceTask, propertyTwins } from '@/data/property-twin';
 
 const ACCENT = '#40856a';
 

@@ -16,7 +16,6 @@ import type {
   MetadataIndexStore,
   RawDocRecord,
   RawDocStore,
-  StorageBundle,
   VectorRecord,
   VectorStore,
 } from './interfaces.js';

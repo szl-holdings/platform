@@ -41,10 +41,6 @@ export function initAnalytics(config: AnalyticsConfig): void {
   const ampKey = config.amplitudeKey || env.VITE_AMPLITUDE_API_KEY;
 
   if (phKey && !isValidPostHogKey(phKey)) {
-    console.info(
-      '[PostHog] VITE_POSTHOG_KEY appears to be a placeholder — product analytics disabled for',
-      config.appSlug,
-    );
   } else if (isValidPostHogKey(phKey)) {
     posthog.init(phKey, {
       api_host: phHost,
@@ -58,17 +54,9 @@ export function initAnalytics(config: AnalyticsConfig): void {
       },
     });
   } else {
-    console.debug(
-      '[PostHog] VITE_POSTHOG_KEY not set — product analytics disabled for',
-      config.appSlug,
-    );
   }
 
   if (ampKey && !isValidAmplitudeKey(ampKey)) {
-    console.info(
-      '[Amplitude] VITE_AMPLITUDE_API_KEY appears to be a placeholder — amplitude disabled for',
-      config.appSlug,
-    );
   } else if (isValidAmplitudeKey(ampKey)) {
     amplitude.init(ampKey, {
       defaultTracking: {
@@ -81,10 +69,6 @@ export function initAnalytics(config: AnalyticsConfig): void {
     });
     amplitude.setGroup('app', config.appSlug);
   } else {
-    console.debug(
-      '[Amplitude] VITE_AMPLITUDE_API_KEY not set — amplitude disabled for',
-      config.appSlug,
-    );
   }
 }
 

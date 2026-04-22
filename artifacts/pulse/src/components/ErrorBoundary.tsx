@@ -17,8 +17,7 @@ export class ErrorBoundary extends Component<Props, State> {
     return { error };
   }
 
-  override componentDidCatch(error: Error, info: ErrorInfo): void {
-    console.error(`[ErrorBoundary:${this.props.name ?? 'unknown'}]`, error, info.componentStack);
+  override componentDidCatch(_error: Error, _info: ErrorInfo): void {
   }
 
   override render(): ReactNode {

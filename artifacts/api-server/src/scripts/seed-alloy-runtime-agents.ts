@@ -207,7 +207,6 @@ const AEGIS_AGENTS = [
 ];
 
 export async function seedAlloyRuntimeAgents() {
-  console.log('[seed-alloy-runtime-agents] Starting Aegis agent registry seed...');
 
   await ensureDemoOrgExists();
 
@@ -250,23 +249,16 @@ export async function seedAlloyRuntimeAgents() {
       skippedAgents++;
     }
   }
-
-  console.log(
-    `[seed-alloy-runtime-agents] Inserted ${inserted} agents, skipped ${skippedAgents} (already present).`,
-  );
-  console.log('[seed-alloy-runtime-agents] Seed complete.');
   return { inserted, skipped: skippedAgents };
 }
 
 async function main() {
-  const result = await seedAlloyRuntimeAgents();
-  console.log('[seed-alloy-runtime-agents] Result:', result);
+  const _result = await seedAlloyRuntimeAgents();
   process.exit(0);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((err) => {
-    console.error('[seed-alloy-runtime-agents] Failed:', err);
+  main().catch((_err) => {
     process.exit(1);
   });
 }

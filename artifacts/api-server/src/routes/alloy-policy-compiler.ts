@@ -36,13 +36,13 @@ const router: IRouter = Router();
 const DEFAULT_STUDIO = 'default';
 
 function studioIdFromQuery(req: Request): string {
-  const raw = req.query['studioId'];
+  const raw = req.query.studioId;
   if (typeof raw === 'string' && raw.trim().length > 0) return raw.trim().slice(0, 64);
   return DEFAULT_STUDIO;
 }
 
 function studioIdFromBody(body: Record<string, unknown>): string {
-  const raw = body['studioId'];
+  const raw = body.studioId;
   if (typeof raw === 'string' && raw.trim().length > 0) return raw.trim().slice(0, 64);
   return DEFAULT_STUDIO;
 }
@@ -81,12 +81,12 @@ router.post(
       const body = req.body as Record<string, unknown>;
       const studioId = studioIdFromBody(body);
 
-      const input = typeof body['input'] === 'string' ? body['input'] : null;
-      const policy = body['policy'];
-      const author = typeof body['author'] === 'string' ? body['author'] : null;
-      const authorId = typeof body['authorId'] === 'string' ? body['authorId'] : null;
-      const message = typeof body['message'] === 'string' ? body['message'] : '';
-      const signers = Array.isArray(body['signers']) ? body['signers'] : [];
+      const input = typeof body.input === 'string' ? body.input : null;
+      const policy = body.policy;
+      const author = typeof body.author === 'string' ? body.author : null;
+      const authorId = typeof body.authorId === 'string' ? body.authorId : null;
+      const message = typeof body.message === 'string' ? body.message : '';
+      const signers = Array.isArray(body.signers) ? body.signers : [];
 
       if (!input || !policy || typeof policy !== 'object' || !author || !authorId) {
         sendBadRequest(res, 'input, policy, author, and authorId are required');
@@ -100,8 +100,8 @@ router.post(
 
       const versionNumber = (maxVersion ?? 0) + 1;
       const externalId =
-        typeof body['externalId'] === 'string' && body['externalId'].length > 0
-          ? body['externalId']
+        typeof body.externalId === 'string' && body.externalId.length > 0
+          ? body.externalId
           : `polver_${uid()}`;
 
       const [row] = await db
@@ -132,14 +132,14 @@ router.post(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const externalId = req.params['externalId'];
+      const externalId = req.params.externalId;
       if (!externalId) {
         sendBadRequest(res, 'externalId is required');
         return;
       }
       const body = req.body as Record<string, unknown>;
-      const name = typeof body['name'] === 'string' ? body['name'] : null;
-      const role = typeof body['role'] === 'string' ? body['role'] : null;
+      const name = typeof body.name === 'string' ? body.name : null;
+      const role = typeof body.role === 'string' ? body.role : null;
       if (!name || !role) {
         sendBadRequest(res, 'name and role are required');
         return;
@@ -186,17 +186,17 @@ router.post(
     try {
       const body = req.body as Record<string, unknown>;
       const studioId = studioIdFromBody(body);
-      const name = typeof body['name'] === 'string' ? body['name'] : null;
-      const context = body['context'];
+      const name = typeof body.name === 'string' ? body.name : null;
+      const context = body.context;
       const expectedOutcome =
-        typeof body['expectedOutcome'] === 'string' ? body['expectedOutcome'] : null;
+        typeof body.expectedOutcome === 'string' ? body.expectedOutcome : null;
       if (!name || !expectedOutcome || !context || typeof context !== 'object') {
         sendBadRequest(res, 'name, context, and expectedOutcome are required');
         return;
       }
       const externalId =
-        typeof body['externalId'] === 'string' && body['externalId'].length > 0
-          ? body['externalId']
+        typeof body.externalId === 'string' && body.externalId.length > 0
+          ? body.externalId
           : `polte_${uid()}`;
 
       const [row] = await db
@@ -222,7 +222,7 @@ router.delete(
   requireAuth,
   async (req: Request, res: Response) => {
     try {
-      const externalId = req.params['externalId'];
+      const externalId = req.params.externalId;
       if (!externalId) {
         sendBadRequest(res, 'externalId is required');
         return;

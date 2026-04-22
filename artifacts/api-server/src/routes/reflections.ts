@@ -1,6 +1,5 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  defaultCandidateSkillLibrary,
   defaultReflectionStore,
   type ReflectionStoreQuery,
   reflect,
@@ -30,11 +29,11 @@ router.get('/reflections', authMiddleware(), validateQuery(listQuerySchema), asy
     const rawLimit = parseInt((req.query.limit as string) ?? '50', 10);
     const rawOffset = parseInt((req.query.offset as string) ?? '0', 10);
 
-    if (isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
+    if (Number.isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
       sendBadRequest(res, 'limit must be between 1 and 500');
       return;
     }
-    if (isNaN(rawOffset) || rawOffset < 0) {
+    if (Number.isNaN(rawOffset) || rawOffset < 0) {
       sendBadRequest(res, 'offset must be >= 0');
       return;
     }
@@ -170,7 +169,7 @@ function validateSkillName(res: Response, skillName: string): boolean {
 
 function validateStrategyIndex(res: Response, indexParam: string): number | null {
   const index = parseInt(indexParam, 10);
-  if (isNaN(index) || index < 0 || index > MAX_STRATEGY_INDEX) {
+  if (Number.isNaN(index) || index < 0 || index > MAX_STRATEGY_INDEX) {
     sendBadRequest(res, `strategy index must be between 0 and ${MAX_STRATEGY_INDEX}`);
     return null;
   }

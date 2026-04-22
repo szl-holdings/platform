@@ -1,7 +1,6 @@
 import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
 import { PRISM_BUILT_IN_TOOLS } from './bridge.js';
-import type { PrismBusEvent, PrismBusEventType } from './bus.js';
-import { prismBus } from './bus.js';
+import { type PrismBusEvent, type PrismBusEventType, prismBus } from './bus.js';
 import { prismConnectorRegistry } from './connectors.js';
 import type {
   DomainContext,

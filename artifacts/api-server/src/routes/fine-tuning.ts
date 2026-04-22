@@ -65,7 +65,7 @@ const lifecycleSchema = z.object({
 
 fineTuningRouter.get('/fine-tuning/jobs', async (req: Request, res: Response) => {
   try {
-    const agentId = req.query['agentId'] as string | undefined;
+    const agentId = req.query.agentId as string | undefined;
     const jobs = await listFineTuningJobs(agentId);
     res.json({ jobs, total: jobs.length });
   } catch (err) {
@@ -76,7 +76,7 @@ fineTuningRouter.get('/fine-tuning/jobs', async (req: Request, res: Response) =>
 
 fineTuningRouter.get('/fine-tuning/jobs/:jobId', async (req: Request, res: Response) => {
   try {
-    const jobId = String(req.params['jobId']);
+    const jobId = String(req.params.jobId);
     const status = await pollJobStatus(jobId);
     res.json(status);
   } catch (err) {
@@ -139,7 +139,7 @@ fineTuningRouter.post(
 
 fineTuningRouter.post('/fine-tuning/jobs/:jobId/cancel', async (req: Request, res: Response) => {
   try {
-    const jobId = String(req.params['jobId']);
+    const jobId = String(req.params.jobId);
     await cancelFineTuningJob(jobId);
     res.json({ success: true, message: `Job ${jobId} cancelled` });
   } catch (err) {
@@ -162,7 +162,7 @@ fineTuningRouter.get(
   '/fine-tuning/models/:modelId/lineage',
   async (req: Request, res: Response) => {
     try {
-      const modelId = decodeURIComponent(String(req.params['modelId']));
+      const modelId = decodeURIComponent(String(req.params.modelId));
       const lineage = await getModelLineage(modelId);
       if (!lineage.model) {
         sendNotFound(res, 'Model');
@@ -178,7 +178,7 @@ fineTuningRouter.get(
 
 fineTuningRouter.get('/fine-tuning/models/:modelId/evals', async (req: Request, res: Response) => {
   try {
-    const modelId = decodeURIComponent(String(req.params['modelId']));
+    const modelId = decodeURIComponent(String(req.params.modelId));
     const [model] = await db
       .select()
       .from(fineTunedModelRegistry)
@@ -223,7 +223,7 @@ fineTuningRouter.patch(
   validateBody(lifecycleSchema),
   async (req: Request, res: Response) => {
     try {
-      const modelId = decodeURIComponent(String(req.params['modelId']));
+      const modelId = decodeURIComponent(String(req.params.modelId));
       const { lifecycle } = req.body as z.infer<typeof lifecycleSchema>;
 
       if (lifecycle === 'deprecated') {
@@ -242,7 +242,7 @@ fineTuningRouter.patch(
 
 fineTuningRouter.get('/fine-tuning/datasets', async (req: Request, res: Response) => {
   try {
-    const agentId = req.query['agentId'] as string | undefined;
+    const agentId = req.query.agentId as string | undefined;
     const query = agentId
       ? db
           .select()
@@ -297,8 +297,8 @@ fineTuningRouter.get(
   '/fine-tuning/datasets/:agentId/export',
   async (req: Request, res: Response) => {
     try {
-      const agentId = String(req.params['agentId']);
-      const format = ((req.query['format'] as string) ?? 'openai-jsonl') as
+      const agentId = String(req.params.agentId);
+      const format = ((req.query.format as string) ?? 'openai-jsonl') as
         | 'openai-jsonl'
         | 'huggingface-json';
 
@@ -344,7 +344,7 @@ fineTuningRouter.get(
 
 fineTuningRouter.get('/fine-tuning/costs', async (req: Request, res: Response) => {
   try {
-    const agentId = req.query['agentId'] as string | undefined;
+    const agentId = req.query.agentId as string | undefined;
 
     const query = agentId
       ? db.select().from(fineTuningJobs).where(eq(fineTuningJobs.agentId, agentId))
@@ -398,10 +398,10 @@ fineTuningRouter.get('/fine-tuning/costs', async (req: Request, res: Response) =
 
 fineTuningRouter.get('/fine-tuning/router/:agentId', async (req: Request, res: Response) => {
   try {
-    const agentId = String(req.params['agentId']);
-    const baseModel = (req.query['baseModel'] as string) ?? 'gpt-5.2';
-    const preferFineTuned = req.query['preferFineTuned'] !== 'false';
-    const minLifecycle = (req.query['minLifecycle'] as 'staging' | 'canary' | 'active') ?? 'canary';
+    const agentId = String(req.params.agentId);
+    const baseModel = (req.query.baseModel as string) ?? 'gpt-5.2';
+    const preferFineTuned = req.query.preferFineTuned !== 'false';
+    const minLifecycle = (req.query.minLifecycle as 'staging' | 'canary' | 'active') ?? 'canary';
 
     const resolution = await resolveModelForAgent(agentId, baseModel, {
       preferFineTuned,

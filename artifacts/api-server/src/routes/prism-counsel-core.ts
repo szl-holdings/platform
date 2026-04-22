@@ -17,7 +17,6 @@ import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
-  sendBadRequest,
   sendForbidden,
   sendNotFound,
   sendSuccess,
@@ -48,7 +47,7 @@ const matterCreateSchema = z.object({
 
 const matterPatchSchema = matterCreateSchema.partial();
 
-const approvalActionSchema = z.object({
+const _approvalActionSchema = z.object({
   comment: z.string().max(5000).optional(),
 });
 

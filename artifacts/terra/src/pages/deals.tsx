@@ -16,7 +16,7 @@ import {
   StageBadge,
 } from '@/components/brokerage-ui';
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
+const _BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 const API = '/api';
 
 function fetchJson(path: string) {

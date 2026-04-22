@@ -1,14 +1,6 @@
 import {
-  Activity,
   AlertTriangle,
-  ChevronRight,
-  Eye,
-  Globe,
-  Network,
-  Shield,
   Target,
-  TrendingUp,
-  Users,
   Zap,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -197,7 +189,7 @@ export default function ThreatActorProfilingPage() {
             className="text-[9px] uppercase tracking-wider font-semibold rounded-lg px-3 py-1.5 transition"
             style={{
               background:
-                typeFilter === t ? (t === 'all' ? ACCENT : typeColor(t)) + '15' : 'transparent',
+                typeFilter === t ? `${t === 'all' ? ACCENT : typeColor(t)}15` : 'transparent',
               color: typeFilter === t ? (t === 'all' ? ACCENT : typeColor(t)) : DS.text.muted,
             }}
           >
@@ -226,14 +218,14 @@ export default function ThreatActorProfilingPage() {
                 />
                 <span
                   className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5"
-                  style={{ background: typeColor(a.type) + '15', color: typeColor(a.type) }}
+                  style={{ background: `${typeColor(a.type)}15`, color: typeColor(a.type) }}
                 >
                   {a.type}
                 </span>
                 <span
                   className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5"
                   style={{
-                    background: sevColor(a.threatLevel) + '15',
+                    background: `${sevColor(a.threatLevel)}15`,
                     color: sevColor(a.threatLevel),
                   }}
                 >
@@ -256,7 +248,7 @@ export default function ThreatActorProfilingPage() {
             <div className="flex items-center gap-3 mb-4">
               <div
                 className="h-10 w-10 rounded-lg flex items-center justify-center"
-                style={{ background: typeColor(selected.type) + '15' }}
+                style={{ background: `${typeColor(selected.type)}15` }}
               >
                 <Target className="h-5 w-5" style={{ color: typeColor(selected.type) }} />
               </div>
@@ -270,7 +262,7 @@ export default function ThreatActorProfilingPage() {
                 <span
                   className="text-[9px] font-semibold rounded-full px-2.5 py-0.5"
                   style={{
-                    background: sevColor(selected.threatLevel) + '15',
+                    background: `${sevColor(selected.threatLevel)}15`,
                     color: sevColor(selected.threatLevel),
                   }}
                 >
@@ -279,7 +271,7 @@ export default function ThreatActorProfilingPage() {
                 <span
                   className="text-[9px] font-semibold rounded-full px-2.5 py-0.5"
                   style={{
-                    background: selected.active ? GREEN + '15' : 'rgba(255,255,255,0.03)',
+                    background: selected.active ? `${GREEN}15` : 'rgba(255,255,255,0.03)',
                     color: selected.active ? GREEN : DS.text.muted,
                   }}
                 >
@@ -294,7 +286,7 @@ export default function ThreatActorProfilingPage() {
 
             <div
               className="rounded-lg p-3 mb-4"
-              style={{ background: RED + '06', borderLeft: `2px solid ${RED}` }}
+              style={{ background: `${RED}06`, borderLeft: `2px solid ${RED}` }}
             >
               <div className="flex items-center gap-1.5 mb-1">
                 <AlertTriangle className="h-3 w-3" style={{ color: RED }} />
@@ -405,7 +397,7 @@ export default function ThreatActorProfilingPage() {
                 <span
                   key={t}
                   className="text-[9px] font-mono px-2 py-1 rounded"
-                  style={{ background: RED + '10', color: RED, border: `1px solid ${RED}20` }}
+                  style={{ background: `${RED}10`, color: RED, border: `1px solid ${RED}20` }}
                 >
                   {t}
                 </span>

@@ -12,9 +12,9 @@
  * Alt:   ./scripts/wiki/prepare-wiki-pages.ts (if tsx is in PATH)
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,7 +98,7 @@ function checkWikiLinks(content: string, availablePages: Set<string>): string[] 
     if (pageName === '_Footer' || pageName === '_Sidebar' || pageName === 'Home') {
       continue;
     }
-    if (!availablePages.has(pageName + '.md')) {
+    if (!availablePages.has(`${pageName}.md`)) {
       broken.push(link);
     }
   }
@@ -143,17 +143,12 @@ function validatePage(pagePath: string, availablePages: Set<string>): Validation
 }
 
 function main() {
-  console.log('=== Wiki Page Validation ===\n');
 
   const missingPages = checkPagesExist();
   if (missingPages.length > 0) {
-    console.error('MISSING REQUIRED FILES:');
-    for (const page of missingPages) {
-      console.error(`  ✗ ${page}`);
+    for (const _page of missingPages) {
     }
-    console.error('');
   } else {
-    console.log('✓ All required pages exist\n');
   }
 
   const availablePages = new Set(fs.readdirSync(SEED_DIR).filter((f) => f.endsWith('.md')));
@@ -177,19 +172,13 @@ function main() {
   for (const result of results) {
     if (result.issues.length > 0) {
       hasIssues = true;
-      console.log(`ISSUES in ${result.page}:`);
-      for (const issue of result.issues) {
-        console.log(`  ✗ ${issue}`);
+      for (const _issue of result.issues) {
       }
-      console.log('');
     }
   }
 
   if (!hasIssues && missingPages.length === 0) {
-    console.log('✓ All pages validated. Ready for export.\n');
-    console.log('Next step: npx tsx scripts/wiki/export-docs-to-wiki.ts');
   } else {
-    console.error('Validation failed. Fix issues before exporting.');
     process.exit(1);
   }
 }

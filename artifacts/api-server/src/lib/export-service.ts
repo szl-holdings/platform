@@ -9,12 +9,12 @@
 
 import { Document, Page, renderToBuffer, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { db, exportJobsTable, usersTable } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
-import { and, desc, eq, gte, ilike, lte, or, sql } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
+import { desc, eq, sql } from 'drizzle-orm';
 import React from 'react';
 import { logger } from './logger';
 
-const MAX_ROWS_INLINE = 10_000;
+const _MAX_ROWS_INLINE = 10_000;
 const EXPORT_TTL_MS = 24 * 60 * 60 * 1000;
 
 // ─── In-memory buffer store (serves re-downloads within 24h) ─────────────────

@@ -9,8 +9,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import type { AccessEvent } from '@/lib/sentinel-analytics';
-import { buildBaseline, computeRiskAssessment } from '@/lib/sentinel-analytics';
+import { type AccessEvent, buildBaseline, computeRiskAssessment } from '@/lib/sentinel-analytics';
 
 const SENTINEL_ACCENT = '#8b5cf6';
 const DS = {
@@ -457,7 +456,7 @@ const USER_ACCESS_EVENTS: Record<string, AccessEvent[]> = {
       bytesTransferred: Math.floor(50_000 + Math.random() * 2_000_000),
       offHours: i < 180,
       geoKey: 'us-ca-sf',
-      deviceManaged: i > 240 ? false : true,
+      deviceManaged: !(i > 240 ),
       approvedNetwork: true,
     })),
     {
@@ -471,8 +470,7 @@ const USER_ACCESS_EVENTS: Record<string, AccessEvent[]> = {
       approvedNetwork: false,
     },
   ],
-  u002: [
-    ...Array.from({ length: 42 }, (_, i) => ({
+  u002: Array.from({ length: 42 }, (_, i) => ({
       timestamp: Date.now() - i * 1800000,
       resourceType: 'database' as const,
       sensitivity: i < 5 ? ('restricted' as const) : ('confidential' as const),
@@ -480,9 +478,8 @@ const USER_ACCESS_EVENTS: Record<string, AccessEvent[]> = {
       offHours: i < 8,
       geoKey: i < 6 ? 'ro-bucharest' : 'us-ca-sf',
       deviceManaged: true,
-      approvedNetwork: i < 6 ? false : true,
+      approvedNetwork: !(i < 6 ),
     })),
-  ],
   u003: Array.from({ length: 14 }, (_, i) => ({
     timestamp: Date.now() - i * 900000,
     resourceType: 'api' as const,

@@ -1,5 +1,5 @@
-import { ConfidenceMeter, PolicyStateChip, ProofEnvelope } from '@szl-holdings/design-system';
-import { AlertTriangle, Building2, CheckCircle, CheckCircle2, Clock, Users } from 'lucide-react';
+import { ProofEnvelope } from '@szl-holdings/design-system';
+import { AlertTriangle, Building2, CheckCircle2, Clock, Users } from 'lucide-react';
 import { useState } from 'react';
 import {
   CASTELLANO_ESTATE_TWIN,

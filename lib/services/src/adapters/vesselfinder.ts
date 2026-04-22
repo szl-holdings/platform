@@ -45,7 +45,7 @@ export class VesselFinderAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["VESSEL_FINDER_API_KEY"];
 
   private get apiKey(): string | undefined {
-    return process.env["VESSEL_FINDER_API_KEY"];
+    return process.env.VESSEL_FINDER_API_KEY;
   }
 
   private readonly BASE_URL = "https://api.vesselfinder.com";
@@ -71,16 +71,16 @@ export class VesselFinderAdapter extends ServiceAdapter {
     const data = await this.vfRequest<{ data: Array<{ AIS: Record<string, unknown> }> }>("/vessels", { mmsi });
     const ais = data.data?.[0]?.AIS;
     if (!ais) return null;
-    const statusNum = Number(ais["NAVSTAT"] ?? 0);
+    const statusNum = Number(ais.NAVSTAT ?? 0);
     return {
-      mmsi: String(ais["MMSI"] ?? ""), imo: String(ais["IMO"] ?? ""),
-      name: String(ais["NAME"] ?? ""), lat: Number(ais["LATITUDE"] ?? 0),
-      lon: Number(ais["LONGITUDE"] ?? 0), speed: Number(ais["SPEED"] ?? 0),
-      course: Number(ais["COURSE"] ?? 0), heading: Number(ais["HEADING"] ?? 511),
+      mmsi: String(ais.MMSI ?? ""), imo: String(ais.IMO ?? ""),
+      name: String(ais.NAME ?? ""), lat: Number(ais.LATITUDE ?? 0),
+      lon: Number(ais.LONGITUDE ?? 0), speed: Number(ais.SPEED ?? 0),
+      course: Number(ais.COURSE ?? 0), heading: Number(ais.HEADING ?? 511),
       status: statusNum, statusText: STATUS_TEXTS[statusNum] ?? "Unknown",
-      flag: String(ais["FLAG"] ?? ""), shipType: String(ais["TYPE"] ?? ""),
-      typeText: String(ais["TYPENAME"] ?? ""), destination: String(ais["DESTINATION"] ?? ""),
-      eta: String(ais["ETA"] ?? ""), received: String(ais["TIMESTAMP"] ?? ""),
+      flag: String(ais.FLAG ?? ""), shipType: String(ais.TYPE ?? ""),
+      typeText: String(ais.TYPENAME ?? ""), destination: String(ais.DESTINATION ?? ""),
+      eta: String(ais.ETA ?? ""), received: String(ais.TIMESTAMP ?? ""),
     };
   }
 
@@ -102,9 +102,9 @@ export class VesselFinderAdapter extends ServiceAdapter {
       mmsi, interval: "1h", hours: String(hours),
     });
     return (data.data ?? []).map(p => ({
-      lat: Number(p["LATITUDE"] ?? 0), lon: Number(p["LONGITUDE"] ?? 0),
-      timestamp: String(p["TIMESTAMP"] ?? ""), speed: Number(p["SPEED"] ?? 0),
-      course: Number(p["COURSE"] ?? 0),
+      lat: Number(p.LATITUDE ?? 0), lon: Number(p.LONGITUDE ?? 0),
+      timestamp: String(p.TIMESTAMP ?? ""), speed: Number(p.SPEED ?? 0),
+      course: Number(p.COURSE ?? 0),
     }));
   }
 

@@ -58,7 +58,7 @@ export class CommandQueue {
       const all = await this.getAll();
       const lowPriority = all.filter((c) => c.priority === 'low');
       if (lowPriority.length > 0) {
-        await this.storage.delete(this.storeName, lowPriority[0]!.id);
+        await this.storage.delete(this.storeName, lowPriority[0]?.id);
       } else {
         throw new Error('Offline command queue is full');
       }

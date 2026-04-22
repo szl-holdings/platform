@@ -174,9 +174,7 @@ router.get('/drift', async (_req: Request, res: Response) => {
     const summary = await buildDriftSummary();
     try {
       await persistSnapshot(summary);
-    } catch (persistErr) {
-      // Don't fail the request if persistence has a transient hiccup.
-      console.error('[drift] failed to persist snapshot:', persistErr);
+    } catch (_persistErr) {
     }
     return sendSuccess(res, summary);
   } catch (err) {

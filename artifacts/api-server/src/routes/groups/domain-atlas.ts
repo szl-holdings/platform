@@ -1,7 +1,7 @@
 import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { tenantScope } from "../../middlewares/tenant-scope";
-import { lazyMount, lazyMatch } from "../../lib/lazy-router";
+import { lazyMatch } from "../../lib/lazy-router";
 
 export function register(router: IRouter): void {
   router.use("/aegis/atlas", tenantScope({ required: true }));

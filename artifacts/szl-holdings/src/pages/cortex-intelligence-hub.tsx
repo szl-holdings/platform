@@ -198,15 +198,15 @@ export default function CortexIntelligenceHub() {
   const captureSnapshotMutation = useStandardMutation({
     mutationFn: () => {
       const body: Record<string, unknown> = {};
-      if (graphDomain) body['domain'] = graphDomain;
-      if (graphMinRisk > 0) body['minRisk'] = graphMinRisk / 100;
+      if (graphDomain) body.domain = graphDomain;
+      if (graphMinRisk > 0) body.minRisk = graphMinRisk / 100;
       const stamp = new Date().toLocaleString(undefined, {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
       });
-      body['label'] = `Manual capture · ${stamp}`;
+      body.label = `Manual capture · ${stamp}`;
       return apiRequest<SnapshotCaptureResponse>(
         'POST',
         '/api/cortex/entity-graph/snapshot',

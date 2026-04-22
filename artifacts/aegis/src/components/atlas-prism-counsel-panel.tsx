@@ -3,13 +3,12 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronRight,
-  FileText,
   GitBranch,
   Lock,
   RefreshCw,
   Scale,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const BG = { surface: '#0a0d14', card: '#0f131e', inset: '#080b11' };
 const BORDER = { muted: 'rgba(255,255,255,0.07)' };

@@ -1,7 +1,6 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { openai } from '@szl-holdings/ai-engine/providers/openai';
-import type { RequestHandler } from 'express';
-import { type IRouter, type Request, type Response, Router } from 'express';
+import { type RequestHandler, type IRouter, type Request, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { validateBody } from '../lib/validation';

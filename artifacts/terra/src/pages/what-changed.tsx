@@ -1,4 +1,4 @@
-import { cn } from '@szl-holdings/shared-ui/utils';
+
 import {
   Activity,
   AlertTriangle,
@@ -7,7 +7,6 @@ import {
   CheckCircle,
   Clock,
   FileText,
-  Filter,
   RefreshCw,
   Shield,
   User,

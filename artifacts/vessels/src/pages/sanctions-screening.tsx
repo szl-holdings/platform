@@ -343,7 +343,7 @@ export default function SanctionsScreeningPage() {
                     </div>
                     {(s.matchedLists?.length ?? 0) > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1.5">
-                        {s.matchedLists!.map((l) => (
+                        {s.matchedLists?.map((l) => (
                           <span
                             key={l}
                             className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20"

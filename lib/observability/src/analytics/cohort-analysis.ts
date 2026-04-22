@@ -112,7 +112,7 @@ export function computeRetentionCurve(
 export function computeLTV(
   entities: CohortEntity[],
   valueEventName: string,
-  valueField: string = 'amount',
+  _valueField: string = 'amount',
 ): {
   totalLTV: number;
   avgLTVPerEntity: number;

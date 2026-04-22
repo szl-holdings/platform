@@ -6,7 +6,6 @@
  * This repository exposes read-optimized helpers for cross-domain consumers.
  */
 import { db } from '@szl-holdings/db';
-import { and, desc, eq, inArray } from 'drizzle-orm';
 
 // raw-sql: workflow tables were added via canonical.ts; use direct db access with typed selects
 export const alloyRepo = {

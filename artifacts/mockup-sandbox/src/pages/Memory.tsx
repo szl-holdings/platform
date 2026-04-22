@@ -1,14 +1,11 @@
 import {
   AlertCircle,
   Brain,
-  ChevronDown,
-  Filter,
   FlaskConical,
   Loader,
   Pin,
   Plus,
   Search,
-  Tag,
   Trash2,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';

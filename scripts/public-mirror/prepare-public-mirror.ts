@@ -142,14 +142,14 @@ const report: StagingReport = {
 // ─── Utilities ───────────────────────────────────────────────────────────────
 
 function log(msg: string): void {
-  process.stdout.write(msg + '\n');
+  process.stdout.write(`${msg}\n`);
 }
 
 function isFileExcluded(filePath: string): boolean {
   const name = path.basename(filePath);
   return EXCLUDE_FILE_PATTERNS.some(({ re, allow }) => {
     if (!re.test(name)) return false;
-    if (allow && allow.test(name)) return false;
+    if (allow?.test(name)) return false;
     return true;
   });
 }
@@ -175,11 +175,11 @@ function copyDirRecursive(src: string, dest: string, relativeBase: string): void
 
     if (entry.isDirectory()) {
       if (isDirExcluded(entry.name)) {
-        report.excludedPaths.push(relPath + '/');
+        report.excludedPaths.push(`${relPath}/`);
         continue;
       }
       if (isPathSegmentExcluded(relPath)) {
-        report.excludedPaths.push(relPath + '/');
+        report.excludedPaths.push(`${relPath}/`);
         continue;
       }
       fs.mkdirSync(destPath, { recursive: true });
@@ -268,7 +268,7 @@ function writeExclusionReport(stagingDir: string): void {
   );
 
   fs.mkdirSync(path.dirname(reportPath), { recursive: true });
-  fs.writeFileSync(reportPath, lines.join('\n') + '\n', 'utf-8');
+  fs.writeFileSync(reportPath, `${lines.join('\n')}\n`, 'utf-8');
   log(`\nExclusion report saved to: ${path.relative(WORKSPACE_ROOT, reportPath)}`);
 }
 
@@ -346,8 +346,8 @@ function main(): void {
 
   log('');
   log('Next steps:');
-  log('  1. Review: ls ' + MIRROR_DIR);
-  log('  2. Validate: tsx scripts/public-mirror/validate-public-surface.ts ' + MIRROR_DIR);
+  log(`  1. Review: ls ${MIRROR_DIR}`);
+  log(`  2. Validate: tsx scripts/public-mirror/validate-public-surface.ts ${MIRROR_DIR}`);
   log('     → Writes docs/audit/public-mirror-report.md (pass/fail validation)');
   log('  3. Inventory: tsx scripts/public-mirror/report-public-surface.ts (no arg = workspace)');
   log('     → Writes docs/audit/public-surface-inventory.md (content classification)');

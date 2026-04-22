@@ -1,7 +1,6 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { db } from '@szl-holdings/db';
 import {
-  pcCarrierBehaviorPatternsTable,
   pcCarrierSilenceWindowsTable,
   pcInsurerPressureSnapshotsTable,
   pcMovementRecommendationsTable,
@@ -11,7 +10,6 @@ import {
   pcPortfolioTeamLagMetricsTable,
   pcQuietRiskSnapshotsTable,
   pcSettlementFrictionSnapshotsTable,
-  pcWorldlineCountyProfilesTable,
   pcWorldlineRecoveryMarkersTable,
   pcWorldlineRegulatoryEventsTable,
   pcWorldlineSignalOverlaysTable,
@@ -79,7 +77,7 @@ router.post(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const matterId = parseInt(req.params.matterId as string);
+      const matterId = parseInt(req.params.matterId as string, 10);
       const { snapshotId, analysis } = await insurerPressureEngine.compute(getOrgId(req), matterId);
       res.json({ snapshotId, analysis });
     } catch (err: any) {
@@ -91,10 +89,10 @@ router.post(
 
 router.get('/pressure/:matterId', validateParams(matterIdParamSchema), async (req: Request, res: Response) => {
   try {
-    const matterId = parseInt(req.params.matterId as string);
+    const matterId = parseInt(req.params.matterId as string, 10);
     const data = await insurerPressureEngine.getLatestSnapshot(getOrgId(req), matterId);
     res.json({ data });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to fetch pressure snapshot' });
   }
 });
@@ -103,7 +101,7 @@ router.get('/pressure/portfolio/view', async (req: Request, res: Response) => {
   try {
     const view = await insurerPressureEngine.getPortfolioPressureView(getOrgId(req));
     res.json({ view });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to fetch portfolio pressure view' });
   }
 });
@@ -116,7 +114,7 @@ router.get(
       const carrierName = req.query.carrier as string | undefined;
       const patterns = await insurerPressureEngine.getCarrierPatterns(getOrgId(req), carrierName);
       res.json({ patterns });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to fetch carrier patterns' });
     }
   },
@@ -127,10 +125,10 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
+      const matterId = req.query.matterId ? parseInt(req.query.matterId as string, 10) : undefined;
       const windows = await insurerPressureEngine.getSilenceWindows(getOrgId(req), matterId);
       res.json({ windows });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to fetch silence windows' });
     }
   },
@@ -142,14 +140,14 @@ router.post(
   validateBody(CarrierEventSchema),
   async (req: Request, res: Response) => {
     try {
-      const matterId = parseInt(req.params.matterId as string);
+      const matterId = parseInt(req.params.matterId as string, 10);
       await insurerPressureEngine.recordCarrierEvent(
         getOrgId(req),
         matterId,
         req.body as z.infer<typeof CarrierEventSchema>,
       );
       res.json({ success: true });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to record carrier event' });
     }
   },
@@ -163,7 +161,7 @@ router.post(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const matterId = parseInt(req.params.matterId as string);
+      const matterId = parseInt(req.params.matterId as string, 10);
       const { snapshotId, analysis } = await settlementFrictionEngine.compute(
         getOrgId(req),
         matterId,
@@ -178,10 +176,10 @@ router.post(
 
 router.get('/friction/:matterId', validateParams(matterIdParamSchema), async (req: Request, res: Response) => {
   try {
-    const matterId = parseInt(req.params.matterId as string);
+    const matterId = parseInt(req.params.matterId as string, 10);
     const data = await settlementFrictionEngine.getLatestSnapshot(getOrgId(req), matterId);
     res.json({ data });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to fetch friction snapshot' });
   }
 });
@@ -190,20 +188,20 @@ router.get('/friction/portfolio/view', async (req: Request, res: Response) => {
   try {
     const view = await settlementFrictionEngine.getPortfolioFrictionView(getOrgId(req));
     res.json({ view });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to fetch portfolio friction view' });
   }
 });
 
 router.get('/friction/:matterId/recommendations', validateParams(matterIdParamSchema), async (req: Request, res: Response) => {
   try {
-    const matterId = parseInt(req.params.matterId as string);
+    const matterId = parseInt(req.params.matterId as string, 10);
     const recommendations = await settlementFrictionEngine.getMovementRecommendations(
       getOrgId(req),
       matterId,
     );
     res.json({ recommendations });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to fetch movement recommendations' });
   }
 });
@@ -216,15 +214,15 @@ router.post(
     try {
       await db
         .update(pcMovementRecommendationsTable)
-        .set({ status: 'accepted', acceptedBy: req.user!.id, acceptedAt: new Date() })
+        .set({ status: 'accepted', acceptedBy: req.user?.id, acceptedAt: new Date() })
         .where(
           and(
-            eq(pcMovementRecommendationsTable.id, parseInt(req.params.id as string)),
+            eq(pcMovementRecommendationsTable.id, parseInt(req.params.id as string, 10)),
             eq(pcMovementRecommendationsTable.orgId, getOrgId(req)),
           ),
         );
       res.json({ success: true });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to accept recommendation' });
     }
   },
@@ -238,7 +236,7 @@ router.post(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const matterId = parseInt(req.params.matterId as string);
+      const matterId = parseInt(req.params.matterId as string, 10);
       const forecasts = await forecastExpanded.runForecastCycle(getOrgId(req), matterId);
       res.json({ forecasts });
     } catch (err: any) {
@@ -250,10 +248,10 @@ router.post(
 
 router.get('/forecasts/pilot-one/:matterId/diff-view', validateParams(matterIdParamSchema), async (req: Request, res: Response) => {
   try {
-    const matterId = parseInt(req.params.matterId as string);
+    const matterId = parseInt(req.params.matterId as string, 10);
     const diffView = await forecastExpanded.getForecastDiffView(getOrgId(req), matterId);
     res.json(diffView);
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to fetch forecast diff view' });
   }
 });
@@ -282,7 +280,7 @@ router.get(
       const benchmarkType = req.query.type as string | undefined;
       const benchmarks = await portfolioLearning.getBenchmarks(getOrgId(req), benchmarkType);
       res.json({ benchmarks });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to fetch benchmarks' });
     }
   },
@@ -292,7 +290,7 @@ router.get('/portfolio/action-effectiveness', async (req: Request, res: Response
   try {
     const effectiveness = await portfolioLearning.getActionEffectiveness(getOrgId(req));
     res.json({ effectiveness });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to fetch action effectiveness' });
   }
 });
@@ -305,7 +303,7 @@ router.get(
       const cohortType = req.query.type as string | undefined;
       const cohorts = await portfolioLearning.getMatterCohorts(getOrgId(req), cohortType);
       res.json({ cohorts });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to fetch matter cohorts' });
     }
   },
@@ -315,17 +313,17 @@ router.get('/portfolio/watchlist', async (req: Request, res: Response) => {
   try {
     const watchlist = await portfolioLearning.getManagerWatchlist(getOrgId(req));
     res.json({ watchlist });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to fetch manager watchlist' });
   }
 });
 
 router.get('/portfolio/best-next-30/:userId', validateParams(userIdParamSchema), async (req: Request, res: Response) => {
   try {
-    const userId = parseInt(req.params.userId as string);
+    const userId = parseInt(req.params.userId as string, 10);
     const actions = await portfolioLearning.getBestNext30Minutes(getOrgId(req), userId);
     res.json({ actions });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to fetch best next 30 minutes' });
   }
 });
@@ -336,10 +334,10 @@ router.post(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const matterId = parseInt(req.params.matterId as string);
+      const matterId = parseInt(req.params.matterId as string, 10);
       const result = await portfolioLearning.detectQuietRisk(getOrgId(req), matterId);
       res.json(result);
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to detect quiet risk' });
     }
   },
@@ -351,7 +349,7 @@ router.get('/copilot/pilot-one/cards', (_req: Request, res: Response) => {
   try {
     const cards = copilotPilotOne.getAvailableCards();
     res.json({ cards });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to list cards' });
   }
 });
@@ -384,7 +382,7 @@ router.get('/boards/pressure', async (req: Request, res: Response) => {
       silenceWindows: silenceWindows.slice(0, 10),
       asOf: new Date().toISOString(),
     });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to build pressure board' });
   }
 });
@@ -402,7 +400,7 @@ router.get('/boards/friction', async (req: Request, res: Response) => {
       topRecommendations: recommendations.slice(0, 5),
       asOf: new Date().toISOString(),
     });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to build friction board' });
   }
 });
@@ -420,7 +418,7 @@ router.get('/boards/carrier-watch', async (req: Request, res: Response) => {
       highPressureMatters: pressureView.filter((p) => p.pressure.overallScore >= 0.6).slice(0, 10),
       asOf: new Date().toISOString(),
     });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to build carrier watch board' });
   }
 });
@@ -444,7 +442,7 @@ router.get('/boards/movement', async (req: Request, res: Response) => {
         .slice(0, 5),
       asOf: new Date().toISOString(),
     });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to build movement board' });
   }
 });
@@ -455,7 +453,7 @@ router.get('/boards/today-enhanced', async (req: Request, res: Response) => {
       insurerPressureEngine.getPortfolioPressureView(getOrgId(req)),
       settlementFrictionEngine.getPortfolioFrictionView(getOrgId(req)),
       portfolioLearning.getManagerWatchlist(getOrgId(req)),
-      portfolioLearning.getBestNext30Minutes(getOrgId(req), req.user!.id),
+      portfolioLearning.getBestNext30Minutes(getOrgId(req), req.user?.id),
       insurerPressureEngine.getSilenceWindows(getOrgId(req)),
     ]);
 
@@ -504,7 +502,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
+      const matterId = req.query.matterId ? parseInt(req.query.matterId as string, 10) : undefined;
       const conditions = matterId
         ? and(
             eq(pcWorldlineSignalOverlaysTable.orgId, getOrgId(req)),
@@ -518,7 +516,7 @@ router.get(
         .orderBy(desc(pcWorldlineSignalOverlaysTable.createdAt))
         .limit(50);
       res.json({ overlays });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to fetch signal overlays' });
     }
   },
@@ -533,7 +531,7 @@ router.get('/worldline/weather', async (req: Request, res: Response) => {
       .orderBy(desc(pcWorldlineWeatherEventsTable.fetchedAt))
       .limit(20);
     res.json({ events });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to fetch weather events' });
   }
 });
@@ -547,7 +545,7 @@ router.get('/worldline/regulatory', async (req: Request, res: Response) => {
       .orderBy(desc(pcWorldlineRegulatoryEventsTable.fetchedAt))
       .limit(20);
     res.json({ events });
-  } catch (err: any) {
+  } catch (_err: any) {
     res.status(500).json({ error: 'Failed to fetch regulatory events' });
   }
 });
@@ -557,7 +555,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
+      const matterId = req.query.matterId ? parseInt(req.query.matterId as string, 10) : undefined;
       const conditions = matterId
         ? and(
             eq(pcWorldlineRecoveryMarkersTable.orgId, getOrgId(req)),
@@ -571,7 +569,7 @@ router.get(
         .orderBy(desc(pcWorldlineRecoveryMarkersTable.fetchedAt))
         .limit(20);
       res.json({ markers });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to fetch recovery markers' });
     }
   },
@@ -611,7 +609,7 @@ router.get(
         recentSnapshots: snapshots.slice(0, 20),
         activeSilenceWindows: silenceWindows.slice(0, 10),
       });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to fetch pressure admin data' });
     }
   },
@@ -650,7 +648,7 @@ router.get(
         recentSnapshots: snapshots.slice(0, 20),
         pendingRecommendations: recommendations.slice(0, 10),
       });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to fetch friction admin data' });
     }
   },
@@ -686,7 +684,7 @@ router.get(
           .limit(20),
       ]);
       res.json({ benchmarks, effectiveness, cohorts, teamLag });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to fetch portfolio learning admin data' });
     }
   },
@@ -735,7 +733,7 @@ router.get(
         regulatoryEvents: regulatory,
         recoveryMarkers: recovery,
       });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to fetch worldline admin data' });
     }
   },
@@ -765,7 +763,7 @@ router.get(
             requiresReview: r.requiresReview,
           })),
       });
-    } catch (err: any) {
+    } catch (_err: any) {
       res.status(500).json({ error: 'Failed to fetch quality admin data' });
     }
   },

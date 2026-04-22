@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, BarChart3, Clock, Cpu, Target, Trophy, Zap } from 'lucide-react';
+import { Trophy, } from 'lucide-react';
 
 interface BenchmarkResult {
   model: string;

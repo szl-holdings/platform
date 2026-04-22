@@ -2,7 +2,7 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { ActivityFeed, CommentThread } from '@szl-holdings/shared-ui/collaboration';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Button } from '@szl-holdings/shared-ui/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
+import { Card, CardContent, } from '@szl-holdings/shared-ui/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@szl-holdings/shared-ui/ui/tabs';
 import { ArrowLeft, Clock, MapPin, Navigation, Package, Ship } from 'lucide-react';
 import { Link, useRoute } from 'wouter';

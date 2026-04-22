@@ -1,5 +1,5 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
-import { Activity, AlertTriangle, Brain, Clock, Eye, Shield, TrendingUp, Zap } from 'lucide-react';
+import { Brain, Eye, Shield, } from 'lucide-react';
 
 const anomalies = [
   {
@@ -115,7 +115,7 @@ export default function AnomalyTimeline() {
       <div className="relative">
         <div className="absolute left-8 top-0 bottom-0 w-px bg-border" />
         <div className="space-y-4">
-          {anomalies.map((a, i) => {
+          {anomalies.map((a, _i) => {
             const date = new Date(a.timestamp);
             const timeStr = date.toLocaleTimeString('en-US', {
               hour: '2-digit',

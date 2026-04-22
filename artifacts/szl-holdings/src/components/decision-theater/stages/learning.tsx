@@ -28,7 +28,7 @@ export function LearningStage({ engine }: { engine: EngineState }) {
           </h4>
           <div className="space-y-2">
             {[
-              `Monte Carlo standard deviation: $${mc?.metrics['totalVoyageCost']?.stdDev.toFixed(0) ?? '—'}K — model variability within expected band`,
+              `Monte Carlo standard deviation: $${mc?.metrics.totalVoyageCost?.stdDev.toFixed(0) ?? '—'}K — model variability within expected band`,
               `Policy engine matched ${decision?.matchedPolicies.length ?? 0} policy(ies) with ${decision?.durationMs ?? 0}ms evaluation time`,
               `Proof chain tracks ${pr?.inputSources.length ?? 0} input sources with ${pr?.sourceClass ?? 'unknown'} classification`,
             ].map((p, i) => (

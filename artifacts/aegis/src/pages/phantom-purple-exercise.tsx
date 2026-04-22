@@ -1,22 +1,14 @@
 import {
   Activity,
   AlertTriangle,
-  CheckCircle,
-  ChevronRight,
-  Clock,
   Crosshair,
-  Eye,
-  Pause,
   Play,
   RotateCcw,
   Shield,
-  TrendingUp,
-  XCircle,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-const ACCENT = '#ef4444';
+const _ACCENT = '#ef4444';
 const RED_COLOR = '#ef4444';
 const BLUE_COLOR = '#3b82f6';
 const PHANTOM_ACCENT = '#a855f7';

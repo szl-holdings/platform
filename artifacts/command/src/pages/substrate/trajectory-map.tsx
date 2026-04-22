@@ -1,21 +1,15 @@
 import {
   Activity,
-  AlertTriangle,
   BarChart3,
   CheckCircle2,
   ChevronRight,
-  Clock,
   Filter,
   Loader2,
   Pause,
   RefreshCw,
-  Shield,
-  TrendingUp,
-  Users,
   Wifi,
   WifiOff,
   XCircle,
-  Zap,
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { Link } from 'wouter';
@@ -96,7 +90,7 @@ function StageProgress({ run }: { run: SubstrateRun }) {
   const total = run.stages.length;
   return (
     <div className="flex items-center gap-1">
-      {stageOrder.map((kind, i) => {
+      {stageOrder.map((kind, _i) => {
         const stage = run.stages.find((s) => s.kind === kind);
         const color = !stage
           ? 'transparent'

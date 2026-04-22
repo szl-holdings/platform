@@ -1,13 +1,10 @@
 import {
   Activity,
   AlertTriangle,
-  BarChart3,
   Brain,
-  ChevronRight,
   Clock,
   Target,
   TrendingUp,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -234,7 +231,7 @@ function SparkLine({ data, color }: { data: number[]; color: string }) {
 }
 
 export default function PredictiveIntelligence() {
-  const [signals, setSignals] = useState<PredictiveSignal[]>(SEED_SIGNALS);
+  const [signals, _setSignals] = useState<PredictiveSignal[]>(SEED_SIGNALS);
   const [capacities, setCapacities] = useState<CapacityForecast[]>(CAPACITY_FORECASTS);
   const [tab, setTab] = useState<'signals' | 'capacity' | 'whatif'>('signals');
 
@@ -256,7 +253,7 @@ export default function PredictiveIntelligence() {
   const totalImpact = signals
     .filter((s) => s.businessImpactUsd)
     .reduce((s, p) => s + (p.businessImpactUsd ?? 0), 0);
-  const avgConfidence = signals.reduce((s, p) => s + p.confidenceScore, 0) / signals.length;
+  const _avgConfidence = signals.reduce((s, p) => s + p.confidenceScore, 0) / signals.length;
   const criticalCapacity = capacities.filter((c) => c.hoursToExhaustion < 6).length;
 
   const TABS = [

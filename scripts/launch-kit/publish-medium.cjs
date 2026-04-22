@@ -19,8 +19,8 @@
 
 'use strict';
 
-const https = require('https');
-const { URL } = require('url');
+const https = require('node:https');
+const { URL } = require('node:url');
 
 const { POSTS } = require('./posts.cjs');
 
@@ -29,7 +29,6 @@ const { POSTS } = require('./posts.cjs');
 function requireEnv(key) {
   const val = process.env[key];
   if (!val) {
-    console.error(`ERROR: missing required env var ${key} — see PUBLISH.md`);
     process.exit(1);
   }
   return val;
@@ -113,13 +112,9 @@ async function main() {
   // Fetch the authenticated user to confirm token validity
   const meRes = await jsonRequest('GET', 'https://api.medium.com/v1/me', token);
   if (meRes.status !== 200) {
-    console.error(`ERROR: /v1/me returned HTTP ${meRes.status}`);
-    console.error(JSON.stringify(meRes.body, null, 2));
     process.exit(1);
   }
-  const username = meRes.body.data?.username ?? '(unknown)';
-  console.log(`\nAuthenticated as @${username}`);
-  console.log(`Target publication: ${publicationId}\n`);
+  const _username = meRes.body.data?.username ?? '(unknown)';
 
   const posts = POSTS.slice(0, 3);
 
@@ -128,9 +123,6 @@ async function main() {
     // publishes and the real permalink is known); fall back to slug derivation.
     const canonicalUrl = post.canonicalUrl || substackCanonical(substackUrl, post.title);
     const content = addCanonicalNote(post.body, canonicalUrl);
-
-    console.log(`  → [${post.id}] "${post.title}"`);
-    console.log(`       canonical: ${canonicalUrl}`);
 
     const payload = {
       title: post.title,
@@ -147,21 +139,14 @@ async function main() {
     if (result.status === 200 || result.status === 201) {
       const draft = result.body.data ?? result.body;
       const draftId = draft.id ?? '(unknown)';
-      const draftUrl = draft.url ?? `https://medium.com/p/${draftId}`;
-      console.log(`     ✓ draft created  id=${draftId}`);
-      console.log(`       ${draftUrl}`);
+      const _draftUrl = draft.url ?? `https://medium.com/p/${draftId}`;
     } else {
-      console.error(`     ✗ HTTP ${result.status}`);
-      console.error('       ' + JSON.stringify(result.body, null, 2));
     }
 
     await new Promise((r) => setTimeout(r, 600));
   }
-
-  console.log('\nDone. Review drafts at https://medium.com/me/stories/drafts');
 }
 
-main().catch((err) => {
-  console.error('Fatal:', err.message);
+main().catch((_err) => {
   process.exit(1);
 });

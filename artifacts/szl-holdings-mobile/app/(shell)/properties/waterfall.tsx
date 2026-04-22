@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   type DimensionValue,
   Platform,
@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 const ACCENT = '#0ea5e9';
@@ -167,7 +167,7 @@ export default function WaterfallScreen() {
     queryKey: ['terra-waterfall'],
     queryFn: async () => {
       try {
-        const res = await fetch(API_BASE + '/terra/waterfall');
+        const res = await fetch(`${API_BASE}/terra/waterfall`);
         if (!res.ok) return null;
         return res.json();
       } catch {
@@ -194,7 +194,7 @@ export default function WaterfallScreen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · FINANCE</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · FINANCE</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Waterfall</Text>
         </View>
       </View>
@@ -215,7 +215,7 @@ export default function WaterfallScreen() {
               styles.modelTab,
               {
                 borderColor: selectedModel === m.id ? ACCENT : colors.border,
-                backgroundColor: selectedModel === m.id ? ACCENT + '12' : 'transparent',
+                backgroundColor: selectedModel === m.id ? `${ACCENT}12` : 'transparent',
               },
             ]}
           >
@@ -301,14 +301,14 @@ export default function WaterfallScreen() {
                   styles.tierCard,
                   {
                     backgroundColor: colors.surface,
-                    borderColor: tier.color + '25',
+                    borderColor: `${tier.color}25`,
                     borderLeftColor: tier.color,
                     borderLeftWidth: 3,
                   },
                 ]}
               >
                 <View style={styles.tierTop}>
-                  <View style={[styles.tierNum, { backgroundColor: tier.color + '20' }]}>
+                  <View style={[styles.tierNum, { backgroundColor: `${tier.color}20` }]}>
                     <Text style={[styles.tierNumText, { color: tier.color }]}>{idx + 1}</Text>
                   </View>
                   <View style={{ flex: 1 }}>

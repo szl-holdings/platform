@@ -170,7 +170,6 @@ export class EvidencePipeline {
     try {
       const { db, alloyEvidenceIndex } = await import("@szl-holdings/db");
       if (!alloyEvidenceIndex?.entryTimestamp) {
-        console.warn("[evidence-pipeline] Schema missing entryTimestamp column — deferring hydration");
         if (retryCount < 3) {
           setTimeout(() => this.hydrateFromDb(retryCount + 1), 5000 * (retryCount + 1));
         }
@@ -185,11 +184,9 @@ export class EvidencePipeline {
       `);
       const exists = (tableCheck as { rows?: { table_exists?: boolean }[] }).rows?.[0]?.table_exists ?? false;
       if (!exists) {
-        console.warn(`[evidence-pipeline] alloy_evidence_index table not found (attempt ${retryCount + 1}/4) — will retry`);
         if (retryCount < 3) {
           setTimeout(() => this.hydrateFromDb(retryCount + 1), 5000 * (retryCount + 1));
         } else {
-          console.warn("[evidence-pipeline] alloy_evidence_index table not found after 4 attempts — giving up");
           this._hydrated = true;
         }
         return;
@@ -224,9 +221,7 @@ export class EvidencePipeline {
           this.index.push(entry);
         }
       }
-      console.log(`[evidence-pipeline] Hydrated ${rows.length} entries from DB`);
-    } catch (err) {
-      console.warn("[evidence-pipeline] Hydration failed:", err);
+    } catch (_err) {
     }
   }
 
@@ -667,7 +662,7 @@ export class EvidencePipeline {
       }
     }
 
-    let results = [...merged.values()]
+    const results = [...merged.values()]
       .filter(r => r.score >= minRelevance)
       .sort((a, b) => {
         const caseBias = (caseId ? (b.caseId === caseId ? 0.1 : 0) - (a.caseId === caseId ? 0.1 : 0) : 0);

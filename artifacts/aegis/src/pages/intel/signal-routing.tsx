@@ -2,14 +2,9 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
   ArrowRight,
-  ChevronDown,
-  ChevronUp,
-  Clock,
   Globe,
   Lock,
   Radio,
-  Shield,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 

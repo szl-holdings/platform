@@ -41,7 +41,7 @@ import { router, Stack, usePathname } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Platform, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -53,7 +53,7 @@ import { WorkspaceProvider } from '@/context/WorkspaceContext';
 import { useEscalatedApprovalNotifier } from '@/hooks/operations/useEscalatedApprovalNotifier';
 import { useRunFailureNotifier } from '@/hooks/operations/useRunFailureNotifier';
 import { isAnalyticsEnabled, trackEvent } from '@/lib/analytics';
-import { captureException, initSentryGlobalHandlers } from '@/lib/sentry';
+import { initSentryGlobalHandlers } from '@/lib/sentry';
 
 // Validate EXPO_PUBLIC_* env vars at startup so a misconfigured DOMAIN/API URL
 // fails fast with a clear error instead of silently falling back to defaults.
@@ -94,9 +94,6 @@ initSentryGlobalHandlers();
 if (isAnalyticsEnabled()) {
   trackEvent('app_launched', { platform: 'mobile', app: 'cortex' });
 } else {
-  console.debug(
-    '[analytics] Mobile analytics disabled — set EXPO_PUBLIC_POSTHOG_KEY and EXPO_PUBLIC_AMPLITUDE_API_KEY to enable',
-  );
 }
 
 // Maps a server `domain` (legacy per-app appIds plus unified workspace IDs) to
@@ -255,11 +252,10 @@ function AppShell() {
 
   usePushNotificationsBase({
     onTokenAcquired: async (token) => {
-      console.log('[CORTEX Push] token:', token.substring(0, 20) + '...');
       try {
         const authToken = await getCortexAuthToken();
         const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-        if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+        if (authToken) headers.Authorization = `Bearer ${authToken}`;
         await fetch(`${API_BASE}/push-tokens`, {
           method: 'POST',
           headers,
@@ -269,8 +265,7 @@ function AppShell() {
             appId: 'cortex',
           }),
         });
-      } catch (err) {
-        console.warn('[CORTEX Push] Failed to register token:', err);
+      } catch (_err) {
       }
     },
     onNotificationReceived: (notification) => {
@@ -285,8 +280,7 @@ function AppShell() {
       if (target) {
         try {
           router.navigate(target as never);
-        } catch (err) {
-          console.warn('[CORTEX Push] navigate failed:', err);
+        } catch (_err) {
         }
       }
     },

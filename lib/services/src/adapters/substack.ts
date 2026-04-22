@@ -13,11 +13,11 @@ export class SubstackAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["SUBSTACK_API_KEY"];
 
   private get apiKey(): string | undefined {
-    return process.env["SUBSTACK_API_KEY"];
+    return process.env.SUBSTACK_API_KEY;
   }
 
   private get subdomain(): string {
-    return process.env["SUBSTACK_SUBDOMAIN"] || "szlholdings";
+    return process.env.SUBSTACK_SUBDOMAIN || "szlholdings";
   }
 
   override get status(): ServiceStatus {
@@ -32,7 +32,7 @@ export class SubstackAdapter extends ServiceAdapter {
   override get presentEnvVars(): string[] {
     const present: string[] = [];
     if (this.apiKey) present.push("SUBSTACK_API_KEY");
-    if (process.env["SUBSTACK_SUBDOMAIN"]) present.push("SUBSTACK_SUBDOMAIN");
+    if (process.env.SUBSTACK_SUBDOMAIN) present.push("SUBSTACK_SUBDOMAIN");
     return present;
   }
 

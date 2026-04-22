@@ -5,16 +5,10 @@ import {
   AlertTriangle,
   BarChart3,
   Building2,
-  ChevronRight,
   Clock,
-  DollarSign,
   GitBranch,
   Layers,
   Lock,
-  MapPin,
-  Shield,
-  TrendingDown,
-  TrendingUp,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 

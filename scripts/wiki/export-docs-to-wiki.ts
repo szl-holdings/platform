@@ -12,9 +12,9 @@
  *   2. Run prepare-wiki-pages.ts first to validate
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,46 +48,28 @@ function parseArgs(): { wikiDir: string } {
 
 function ensureWikiDirExists(wikiDir: string): void {
   if (!fs.existsSync(wikiDir)) {
-    console.error(`Wiki directory not found: ${wikiDir}`);
-    console.error('');
-    console.error('Clone the wiki repo first:');
-    console.error(
-      '  git clone https://github.com/stephenlutar2-hash/szl-holdings-platform.wiki.git ../szl-holdings-platform.wiki',
-    );
     process.exit(1);
   }
 }
 
 function copyFile(src: string, dest: string): void {
   if (!fs.existsSync(src)) {
-    console.warn(`  WARNING: Source not found, skipping: ${src}`);
     return;
   }
   fs.copyFileSync(src, dest);
-  console.log(`  ✓ ${path.basename(src)}`);
 }
 
 function main() {
   const { wikiDir } = parseArgs();
 
-  console.log('=== Wiki Export ===\n');
-  console.log(`Target wiki directory: ${wikiDir}\n`);
-
   ensureWikiDirExists(wikiDir);
-
-  console.log('Copying wiki pages:');
   for (const page of WIKI_PAGES) {
     const src = path.join(SEED_DIR, page);
     const dest = path.join(wikiDir, page);
     copyFile(src, dest);
   }
-
-  console.log('\nCopying navigation files:');
   copyFile(SIDEBAR_PATH, path.join(wikiDir, '_Sidebar.md'));
   copyFile(FOOTER_PATH, path.join(wikiDir, '_Footer.md'));
-
-  console.log('\n✓ Export complete.');
-  console.log('\nNext step: bash scripts/wiki/wiki-commit.sh "<commit message>"');
 }
 
 main();

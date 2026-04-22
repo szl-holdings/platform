@@ -48,7 +48,7 @@ export function runStateToPolicyReason(state: RunState): string | undefined {
  */
 export function runStateToFreshnessLevel(state: RunState): FreshnessLevel {
   const updatedAt = new Date(state.updatedAt);
-  if (isNaN(updatedAt.getTime())) return 'unknown';
+  if (Number.isNaN(updatedAt.getTime())) return 'unknown';
   const ageMs = Date.now() - updatedAt.getTime();
   if (ageMs < 5 * 60_000) return 'fresh';
   if (ageMs < 60 * 60_000) return 'aging';

@@ -5,16 +5,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
   AlertTriangle,
-  ArrowUpRight,
-  Bell,
   Brain,
   CheckCircle,
   ChevronRight,
   Clock,
   GitBranch,
   Layers,
-  Pause,
-  Play,
   Radio,
   RefreshCw,
   Shield,
@@ -33,7 +29,7 @@ function formatRelative(ts: string | null) {
   return `${Math.floor(ms / 86400000)}d ago`;
 }
 
-function formatDuration(ms: number | null) {
+function _formatDuration(ms: number | null) {
   if (!ms) return '—';
   if (ms < 1000) return `${ms}ms`;
   if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;

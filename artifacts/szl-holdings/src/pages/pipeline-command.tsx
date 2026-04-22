@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import {
-  Building2, Target, Mail, Linkedin, FileText, Handshake, ClipboardCheck,
+  type Building2, Target, Mail, Linkedin, FileText, Handshake, ClipboardCheck,
   Plus, Trash2, ChevronDown, ChevronRight, Copy, CheckCircle2, AlertCircle,
   Briefcase, Anchor, ShieldCheck, Home, Scale, RefreshCw, History, Loader2,
 } from "lucide-react";
@@ -135,7 +135,7 @@ async function apiJson(url: string, init?: RequestInit): Promise<unknown> {
     headers: {
       "Content-Type": "application/json",
       "x-csrf-token": getCsrfToken(),
-      ...(init?.headers ?? {}),
+      ...init?.headers,
     },
     ...init,
   });
@@ -368,8 +368,8 @@ export default function PipelineCommandPage() {
   const activePipeline = deals.filter(
     (d) => d.stage !== "Researched" && d.stage !== "Signed" && d.stage !== "Lost / No Fit",
   ).length;
-  const researchedDealCount = counts["Researched"];
-  const signed = counts["Signed"];
+  const researchedDealCount = counts.Researched;
+  const signed = counts.Signed;
 
   const visibleTargets = useMemo(() => {
     return verticalFilter === "All" ? TARGETS : TARGETS.filter((t) => t.vertical === verticalFilter);

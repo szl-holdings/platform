@@ -289,7 +289,7 @@ async function send(
 
 describe('Alloy/Nuro org-gated routers reject unauthorized callers (regression for task #2635)', () => {
   beforeEach(() => {
-    process.env['NODE_ENV'] = 'test';
+    process.env.NODE_ENV = 'test';
   });
 
   for (const c of cases) {

@@ -5,7 +5,6 @@ import {
   pcReviewAuditEventsTable,
 } from '@szl-holdings/db';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
-import { logger } from '../lib/logger';
 
 export type PrivilegeType =
   | 'attorney_client'
@@ -333,7 +332,7 @@ class PrivilegeEngine {
 
     const entityIds = items
       .map((i) => (typeof i.entityId === 'number' ? i.entityId : parseInt(String(i.entityId), 10)))
-      .filter((n) => !isNaN(n));
+      .filter((n) => !Number.isNaN(n));
 
     const flags = await db
       .select({ id: pcPrivilegeFlagsTable.id, entityId: pcPrivilegeFlagsTable.entityId })
@@ -402,7 +401,7 @@ class PrivilegeEngine {
     context: { authorRole?: string; recipientRoles?: string[]; subject?: string } = {},
   ): Promise<{ suggestedType: PrivilegeType; confidence: number; reasoning: string }> {
     const lower = content.toLowerCase();
-    const subject = (context.subject ?? '').toLowerCase();
+    const _subject = (context.subject ?? '').toLowerCase();
     const authorRole = (context.authorRole ?? '').toLowerCase();
     const recipientRoles = context.recipientRoles?.map((r) => r.toLowerCase()) ?? [];
     const isAttorneyInvolved =

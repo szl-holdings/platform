@@ -112,7 +112,7 @@ export async function runDistressFinancialsBackfill(): Promise<BackfillRunResult
         now,
       );
       const nextRaw = {
-        ...(row.rawData ?? {}),
+        ...row.rawData,
         financialsEstimate: provenance,
       };
       await db

@@ -3,9 +3,6 @@ import {
   AlertCircle,
   BarChart3,
   Calendar,
-  CheckCircle,
-  Clock,
-  TrendingUp,
   Users,
   Zap,
 } from 'lucide-react';
@@ -268,7 +265,7 @@ export default function CapacityPlanner() {
               overflow: 'hidden',
             }}
           >
-            {TEAM.map((member, i) => {
+            {TEAM.map((member, _i) => {
               const statusMeta = STATUS_META[member.status];
               const isSelected = selectedMember?.id === member.id;
               return (
@@ -530,7 +527,7 @@ export default function CapacityPlanner() {
                 Forward Capacity (Days/Month)
               </h2>
             </div>
-            {FORWARD_CAPACITY.map((m, i) => (
+            {FORWARD_CAPACITY.map((m, _i) => (
               <div key={m.month} style={{ marginBottom: 12 }}>
                 <div
                   style={{

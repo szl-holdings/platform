@@ -1,14 +1,12 @@
 import {
   narrativeInsights,
-  ownershipMap,
   type SignalType,
   severityColors,
   signals,
-  signalTypeLabels,
   workflowLatencies,
 } from '@lyte/lib/business-data';
 import { cn } from '@lyte/lib/utils';
-import { AlertTriangle, BarChart3, CheckCircle2, Clock, TrendingDown, Users } from 'lucide-react';
+import { AlertTriangle, BarChart3, Clock, TrendingDown, Users } from 'lucide-react';
 import { useState } from 'react';
 
 function formatCurrency(n: number): string {

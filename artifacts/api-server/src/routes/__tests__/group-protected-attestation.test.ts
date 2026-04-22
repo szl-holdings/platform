@@ -292,7 +292,7 @@ describe('GROUP_PROTECTED_BASENAMES attestation guardrail', () => {
 
           // Extract the bound symbol(s) — default-import name, named-imports,
           // or namespace-import name.
-          const clause = importMatch![1].trim();
+          const clause = importMatch?.[1].trim();
           const bindings: string[] = [];
           const nsMatch = clause.match(/^\*\s+as\s+([A-Za-z_$][\w$]*)/);
           const namedMatch = clause.match(/\{([^}]+)\}/);

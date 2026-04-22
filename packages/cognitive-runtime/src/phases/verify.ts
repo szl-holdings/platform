@@ -1,6 +1,6 @@
 import type { VerifierContext, VerifierDecision, VerifierOutput } from '@workspace/verifier';
 import { verify } from '@workspace/verifier/engine';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type { PhaseResult } from '../types.js';
 import type { ExecutePhaseOutput } from './execute.js';
 

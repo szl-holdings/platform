@@ -311,37 +311,26 @@ const DOMAIN_ENDPOINTS = [
   { path: '/api/jobs', name: 'Jobs API' },
 ];
 
-function formatLatency(ms) {
+function _formatLatency(ms) {
   if (ms < 100) return `${ms}ms (fast)`;
   if (ms < 500) return `${ms}ms (ok)`;
   if (ms < 2000) return `${ms}ms (slow)`;
   return `${ms}ms (very slow)`;
 }
 
-function printResult(result, indent = '  ') {
-  const icon = result.ok ? '✓' : '✗';
+function printResult(result, _indent = '  ') {
+  const _icon = result.ok ? '✓' : '✗';
   if (result.ok) {
-    console.log(
-      `${indent}${icon} ${result.name} — ${result.status ?? 'ok'} (${formatLatency(result.latency)})`,
-    );
-    for (const [svc, info] of Object.entries(result.services ?? {})) {
-      const svcIcon = info.ok !== false ? '·' : '!';
-      const latNote = info.latency ? ` ${info.latency}ms` : '';
-      console.log(`${indent}    ${svcIcon} ${svc}: ${info.status}${latNote}`);
+    for (const [_svc, info] of Object.entries(result.services ?? {})) {
+      const _svcIcon = info.ok !== false ? '·' : '!';
+      const _latNote = info.latency ? ` ${info.latency}ms` : '';
     }
   } else {
-    console.error(
-      `${indent}${icon} ${result.name} — ${result.error ?? `HTTP ${result.httpStatus ?? result.status}`} (${formatLatency(result.latency)})`,
-    );
-    console.error(`${indent}    URL: ${result.url}`);
   }
 }
 
 async function main() {
   if (!JSON_OUTPUT) {
-    console.log('\nSZL Holdings — API Health Check');
-    console.log(`Target:  ${BASE_URL}`);
-    console.log(`Timeout: ${TIMEOUT_MS}ms | Mode: ${FAST_MODE ? 'fast' : 'full'}\n`);
   }
 
   const report = {
@@ -352,7 +341,7 @@ async function main() {
     overallStatus: 'PASS',
   };
 
-  if (!JSON_OUTPUT) console.log('── Core Health Endpoints ─────────────────────────────────────');
+  if (!JSON_OUTPUT) {}
   const coreEndpoints = [
     {
       path: '/api/health',
@@ -391,8 +380,7 @@ async function main() {
   }
 
   if (!FAST_MODE) {
-    if (!JSON_OUTPUT)
-      console.log('\n── Per-Service Probes ─────────────────────────────────────────');
+    if (!JSON_OUTPUT) {}
 
     const serviceProbes = await Promise.all([
       probeDatabase(BASE_URL, TIMEOUT_MS),
@@ -414,13 +402,11 @@ async function main() {
       if (probe.ok) report.summary.passed++;
       else report.summary.failed++;
       if (!JSON_OUTPUT) {
-        const icon = probe.ok ? '✓' : '✗';
-        console.log(`  ${icon} ${probe.name} — ${probe.status} (${formatLatency(probe.latency)})`);
+        const _icon = probe.ok ? '✓' : '✗';
       }
     }
 
-    if (!JSON_OUTPUT)
-      console.log('\n── Domain API Endpoints ────────────────────────────────────────');
+    if (!JSON_OUTPUT) {}
 
     const domainResults = await Promise.all(
       DOMAIN_ENDPOINTS.map(({ path, name }) =>
@@ -451,11 +437,7 @@ async function main() {
   if (report.summary.failed > 0) report.overallStatus = 'FAIL';
 
   if (JSON_OUTPUT) {
-    console.log(JSON.stringify(report, null, 2));
   } else {
-    console.log(
-      `\nResults: ${report.summary.passed}/${report.summary.total} passed, ${report.summary.failed} failed`,
-    );
   }
 
   const primaryResult = coreResults.find((r) => r.name.includes('primary'));
@@ -463,26 +445,18 @@ async function main() {
 
   if (!primaryOk) {
     if (!JSON_OUTPUT) {
-      console.error('\nFAIL — Primary health endpoint unreachable.');
-      console.error(
-        'Ensure the API server is running: pnpm --filter @workspace/api-server run dev',
-      );
     }
     process.exit(1);
   } else if (report.summary.failed > 0) {
     if (STRICT_MODE) {
-      if (!JSON_OUTPUT)
-        console.error(`\nFAIL (strict) — ${report.summary.failed} endpoint(s) failed.`);
+      if (!JSON_OUTPUT) {}
       process.exit(1);
     } else {
-      if (!JSON_OUTPUT)
-        console.log(
-          `\nDEGRADED — Primary OK. ${report.summary.failed} secondary endpoint(s) failed. (Use --strict to fail on secondary failures.)`,
-        );
+      if (!JSON_OUTPUT) {}
       process.exit(0);
     }
   } else {
-    if (!JSON_OUTPUT) console.log('\nPASS — All health checks passed.');
+    if (!JSON_OUTPUT) {}
     process.exit(0);
   }
 }

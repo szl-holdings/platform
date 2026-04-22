@@ -3,14 +3,8 @@ import {
   AlertTriangle,
   CheckCircle,
   ChevronRight,
-  Clock,
-  Monitor,
-  Smartphone,
   TrendingDown,
   TrendingUp,
-  Users,
-  Wifi,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -265,7 +259,7 @@ const PROACTIVE_ACTIONS = [
 
 export default function DEXScoring() {
   const [selected, setSelected] = useState<DEXUser>(DEX_USERS[0]);
-  const [ticker, setTicker] = useState(0);
+  const [_ticker, setTicker] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => setTicker((t) => t + 1), 4000);

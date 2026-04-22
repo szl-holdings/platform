@@ -1,16 +1,13 @@
 import { AgentRun, type RunStatus as AgentRunStatus } from '@workspace/agents-core/run';
 import { emitStepLog } from '@workspace/agents-core/step-log';
 import { globalCollector } from '@workspace/cognitive-observability';
-import type { MemoryStore } from '@workspace/memory-fabric';
-import { defaultMemoryStore } from '@workspace/memory-fabric';
+import { type MemoryStore, defaultMemoryStore } from '@workspace/memory-fabric';
 import type { PlanGraph } from '@workspace/planner';
 import { defaultRunLedgerStore, RunLedgerBuilder } from '@workspace/run-ledger';
 import { evaluateQualityGate, type QualityGateProfile } from '@workspace/run-ledger/quality-gate';
-import type { SelfModelStore } from '@workspace/self-model';
-import { defaultSelfModelStore } from '@workspace/self-model';
-import type { TraceStore } from '@workspace/trace-graph';
-import { defaultTraceStore, TraceWriter } from '@workspace/trace-graph';
-import { randomUUID } from 'crypto';
+import { type SelfModelStore, defaultSelfModelStore } from '@workspace/self-model';
+import { type TraceStore, defaultTraceStore, TraceWriter } from '@workspace/trace-graph';
+import { randomUUID } from 'node:crypto';
 import { extractApprovalInterrupt, raiseApprovalInterrupt } from './approval-interrupt.js';
 import {
   type CheckpointStore,
@@ -18,26 +15,14 @@ import {
   loadCheckpoint,
   saveCheckpoint,
 } from './checkpoint.js';
-import type { ExecutePhaseOutput } from './phases/execute.js';
-import { executePhase, GuardianDecisionEngine, type StepExecutorFn } from './phases/execute.js';
-import type { OrientOutput } from './phases/orient.js';
-import { orientPhase } from './phases/orient.js';
+import { type ExecutePhaseOutput, executePhase, GuardianDecisionEngine, type StepExecutorFn } from './phases/execute.js';
+import { type OrientOutput, orientPhase } from './phases/orient.js';
 import { perceivePhase } from './phases/perceive.js';
 import { type PlanRevisionContext, planPhase } from './phases/plan.js';
-import type { ReflectPhaseOutput } from './phases/reflect.js';
-import { reflectPhase } from './phases/reflect.js';
-import type { UpdatePhaseOptions } from './phases/update.js';
-import { updateMemoryPhase, updateSelfModelPhase } from './phases/update.js';
-import type { VerifyPhaseOutput } from './phases/verify.js';
-import { verifyPhase } from './phases/verify.js';
-import type { PerceiveInput } from './types.js';
-import {
-  type CognitiveContext,
-  CognitiveContextSchema,
-  CognitiveLoopError,
-  type CognitiveLoopRun,
-  type PhaseResult,
-} from './types.js';
+import { type ReflectPhaseOutput, reflectPhase } from './phases/reflect.js';
+import { type UpdatePhaseOptions, updateMemoryPhase, updateSelfModelPhase } from './phases/update.js';
+import { type VerifyPhaseOutput, verifyPhase } from './phases/verify.js';
+import { type PerceiveInput, type CognitiveContext, CognitiveContextSchema, CognitiveLoopError, type CognitiveLoopRun, type PhaseResult } from './types.js';
 
 export interface CognitiveRuntimeOptions {
   traceStore?: TraceStore;
@@ -162,7 +147,7 @@ export async function run(
       data: {
         phase: result.phase,
         status: result.status,
-        ...(result.metadata ?? {}),
+        ...result.metadata,
       },
       otelTraceId: traceId,
     });
@@ -312,8 +297,12 @@ export async function run(
         throw new CognitiveLoopError(planResult.error ?? 'Plan creation failed', 'plan', runId);
       }
 
-      loopRun.planId = planResult.output!.planId;
-      plan = planResult.output!.plan;
+      loopRun.planId = planResult.output?.planId;
+      plan = planResult.output?.plan;
+
+      if (!plan) {
+        throw new CognitiveLoopError('Plan not produced by planner', 'plan', runId);
+      }
 
       traceWriter.setPlanGraph(traceId, {
         nodes: plan.steps.map((s) => ({
@@ -397,7 +386,7 @@ export async function run(
             interrupt: interruptSpec,
           });
           loopRun.metadata = {
-            ...(loopRun.metadata ?? {}),
+            ...loopRun.metadata,
             pendingApproval: true,
             approvalRequestId: approvalRequest.id,
             checkpointRef,
@@ -662,7 +651,7 @@ export async function run(
 
       // Surface gate status in run metadata
       loopRun.metadata = {
-        ...(loopRun.metadata ?? {}),
+        ...loopRun.metadata,
         gateStatus: gateResult.status,
         ledgerId: finalEntry.ledgerId,
       };

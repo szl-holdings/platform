@@ -54,10 +54,11 @@ export const CARLOTA_JO_RETENTION = resolveClaim('carlota-jo-retention', '98%');
  * hardcoded string. This ensures the claim stays accurate as time passes.
  */
 export const CARLOTA_JO_YEARS_EXPERIENCE: ClaimValue = {
+  key: 'carlota-jo-years-experience',
+  namespace: 'szl-holdings',
   value: `${FOUNDER_YEARS_EXPERIENCE} years`,
-  label: null,
+  displayLabel: null,
   truthValue: 'verified',
-  displayWithLabel: `${FOUNDER_YEARS_EXPERIENCE} years`,
 };
 
 // ─── Terra metrics (cross-surface mirror) ─────────────────────────────────────

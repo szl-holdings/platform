@@ -3,10 +3,7 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
   AlertTriangle,
-  CheckCircle,
-  ChevronRight,
   DollarSign,
-  Download,
   FileText,
   RefreshCw,
   Shield,

@@ -1,7 +1,6 @@
 import { EcosystemNav } from '@szl-holdings/shared-ui/ecosystem-nav';
 import { LANE_ACCENT_HEX } from '@szl-holdings/shared-ui/lane-colors';
-import { TenantBrandProvider, useTenantBrand } from '@szl-holdings/shared-ui/use-tenant-brand';
-import { Database, Eye, Globe, Lock, Palette, Plus, Save, Settings, Users } from 'lucide-react';
+import { Database, Eye, Globe, Lock, Plus, Save, Settings, } from 'lucide-react';
 import React, { useState } from 'react';
 import AdvisoryDataEditor from '../components/AdvisoryDataEditor';
 

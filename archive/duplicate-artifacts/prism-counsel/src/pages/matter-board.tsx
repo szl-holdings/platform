@@ -13,23 +13,12 @@ import {
   Lock,
   Network,
   Plus,
-  Scale,
   Shield,
   X,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
-import type { Matter, MatterStatus, MatterType, PrivilegeLevel } from '@/data/matters';
-import {
-  daysUntil,
-  formatCurrency,
-  formatDeadline,
-  getPressureColor,
-  getPressureLabel,
-  getPrivilegeColor,
-  getStatusColor,
-  useMatters,
-} from '@/data/matters';
+import { type Matter, type MatterStatus, type MatterType, type PrivilegeLevel, daysUntil, formatCurrency, formatDeadline, getPressureColor, getPressureLabel, getPrivilegeColor, getStatusColor, useMatters } from '@/data/matters';
 import { buildGraph } from '@/lib/obligation-graph-builder';
 
 const ACCENT = '#a78bfa';
@@ -752,7 +741,7 @@ export default function MatterBoard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {filtered.map((matter) => {
           const daysLeft = daysUntil(matter.nextDeadline);
-          const pColor = getPressureColor(matter.pressureScore);
+          const _pColor = getPressureColor(matter.pressureScore);
           const sColor = getStatusColor(matter.status);
           const privColor = getPrivilegeColor(matter.privilegeLevel);
           const openObligs = matter.obligations.filter((o) => o.status !== 'complete');

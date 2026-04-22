@@ -30,8 +30,7 @@
  *   POST /prism-counsel/ny/matters/:matterId/demand-packets
  */
 
-import type { Router as ExpressRouter } from 'express';
-import express from 'express';
+import express, { type Router as ExpressRouter } from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -107,8 +106,8 @@ function buildApp() {
 function expectValidationError(body: ValidationErrorBody) {
   expect(body.error).toMatch(/Validation error/i);
   expect(body.details?.issues).toBeDefined();
-  expect(Array.isArray(body.details!.issues)).toBe(true);
-  expect(body.details!.issues.length).toBeGreaterThan(0);
+  expect(Array.isArray(body.details?.issues)).toBe(true);
+  expect(body.details?.issues.length).toBeGreaterThan(0);
 }
 
 const app = buildApp();

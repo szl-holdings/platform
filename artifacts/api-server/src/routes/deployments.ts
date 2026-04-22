@@ -297,7 +297,7 @@ async function notifyRollback(params: {
       return;
     }
 
-    const appUrl = process.env['APP_URL'] ?? process.env['VITE_APP_URL'] ?? '';
+    const appUrl = process.env.APP_URL ?? process.env.VITE_APP_URL ?? '';
     const actionUrl = `${appUrl}/command/operations/deployments`;
     const title = `Rollback: ${params.appName} (${params.environment})`;
     const message =
@@ -618,7 +618,7 @@ router.post(
         fromVersion: result.previous.version,
         toVersion: result.rolled.version,
         rolledBackBy: deployedBy,
-        rolledBackByUserId: req.user!.id,
+        rolledBackByUserId: req.user?.id,
         previousDeployedBy: result.previous.deployedBy,
       });
 

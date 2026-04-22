@@ -7,7 +7,7 @@ import {
   terraDistressPropertiesTable,
   terraIngestionRunsTable,
 } from '@szl-holdings/db';
-import { and, asc, desc, eq, gte, ilike, isNotNull, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, ilike, lte, or, sql } from 'drizzle-orm';
 import { logger } from './logger';
 
 export interface DistressSearchParams {
@@ -177,7 +177,7 @@ export async function getDistressPropertyById(idOrExternal: string) {
   if (byExternal.length > 0) return toPropertyShape(byExternal[0]!);
 
   const numericId = parseInt(idOrExternal, 10);
-  if (!isNaN(numericId)) {
+  if (!Number.isNaN(numericId)) {
     const byId = await db
       .select()
       .from(terraDistressPropertiesTable)
@@ -427,8 +427,8 @@ export async function upsertDistressProperty(
       await db
         .update(terraDistressPropertiesTable)
         .set({ ...data, updatedAt: new Date() })
-        .where(eq(terraDistressPropertiesTable.id, byExternal[0]!.id));
-      return { dbId: byExternal[0]!.id, isNew: false };
+        .where(eq(terraDistressPropertiesTable.id, byExternal[0]?.id));
+      return { dbId: byExternal[0]?.id, isNew: false };
     }
   }
 
@@ -475,7 +475,7 @@ export async function upsertDistressProperty(
     .values(data)
     .returning({ id: terraDistressPropertiesTable.id });
 
-  return { dbId: inserted!.id, isNew: true };
+  return { dbId: inserted?.id, isNew: true };
 }
 
 export async function startIngestionRun(
@@ -486,7 +486,7 @@ export async function startIngestionRun(
     .insert(terraIngestionRunsTable)
     .values({ source, status: 'running', metadata: metadata ?? {} })
     .returning({ id: terraIngestionRunsTable.id });
-  return run!.id;
+  return run?.id;
 }
 
 export async function completeIngestionRun(

@@ -1,5 +1,5 @@
 import { m } from 'framer-motion';
-import { ArrowRight, Building2, Filter, MapPin, TrendingUp } from 'lucide-react';
+import { ArrowRight, Filter, MapPin, } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Footer } from '@/components/Footer';
 import { Navbar } from '@/components/Navbar';

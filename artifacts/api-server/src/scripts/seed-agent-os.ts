@@ -18,22 +18,20 @@ import {
   fineTuningDatasets,
   fineTuningJobs,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 function daysAgo(n: number) {
   return new Date(Date.now() - n * 86400000);
 }
 
 export async function seedAgentOS() {
-  console.log('[seed-agent-os] Starting Agent OS, Skills, Training & A2A seed...');
 
   const existing = await db.select({ id: a2aAgentCards.id }).from(a2aAgentCards).limit(1);
   if (existing.length > 0) {
-    console.log('[seed-agent-os] Data already seeded, skipping.');
     return { skipped: true };
   }
 
-  const agentCards = await db
+  const _agentCards = await db
     .insert(a2aAgentCards)
     .values([
       {
@@ -224,8 +222,6 @@ export async function seedAgentOS() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-agent-os] Seeded ${agentCards.length} A2A agent cards`);
-
   await db.insert(a2aAgentHeartbeats).values([
     {
       agentId: 'lyte-signal-agent',
@@ -284,8 +280,6 @@ export async function seedAgentOS() {
       uptimeMs: 8640000,
     },
   ]);
-
-  console.log(`[seed-agent-os] Seeded A2A heartbeats`);
 
   const now = Date.now();
   await db.insert(a2aDelegationTasks).values([
@@ -361,8 +355,6 @@ export async function seedAgentOS() {
     },
   ]);
 
-  console.log(`[seed-agent-os] Seeded A2A delegation tasks`);
-
   await db.insert(a2aDiscoveryQueries).values([
     {
       queryId: `disc-${randomUUID().slice(0, 8)}`,
@@ -393,8 +385,6 @@ export async function seedAgentOS() {
       topMatchAgentId: 'document-intelligence-agent',
     },
   ]);
-
-  console.log(`[seed-agent-os] Seeded A2A discovery queries`);
 
   await db
     .insert(alloySkillRegistryTable)
@@ -543,8 +533,6 @@ export async function seedAgentOS() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-agent-os] Seeded skill registry`);
-
   await db.insert(alloyDecisionOutcomes).values([
     {
       decisionId: `dec-${randomUUID().slice(0, 8)}`,
@@ -625,8 +613,6 @@ export async function seedAgentOS() {
     },
   ]);
 
-  console.log(`[seed-agent-os] Seeded decision outcomes`);
-
   await db.insert(alloyAgentPerformanceSnapshots).values([
     {
       agentId: 'prism-forecast-agent',
@@ -702,8 +688,6 @@ export async function seedAgentOS() {
     },
   ]);
 
-  console.log(`[seed-agent-os] Seeded agent performance snapshots`);
-
   await db.insert(alloyConfidenceAlerts).values([
     {
       alertId: `alert-${randomUUID().slice(0, 8)}`,
@@ -742,8 +726,6 @@ export async function seedAgentOS() {
       metadata: { tier: 'high_confidence', minRequired: 30 },
     },
   ]);
-
-  console.log(`[seed-agent-os] Seeded confidence alerts`);
 
   await db.insert(agentKnowledgeTable).values([
     {
@@ -800,8 +782,6 @@ export async function seedAgentOS() {
     },
   ]);
 
-  console.log(`[seed-agent-os] Seeded agent knowledge`);
-
   const nowMs = Date.now();
   await db.insert(agentRunsTable).values([
     {
@@ -856,8 +836,6 @@ export async function seedAgentOS() {
     },
   ]);
 
-  console.log(`[seed-agent-os] Seeded agent runs`);
-
   await db.insert(agentTrainingPairs).values([
     {
       agentId: 'prism-forecast-agent',
@@ -895,8 +873,6 @@ export async function seedAgentOS() {
       isActive: true,
     },
   ]);
-
-  console.log(`[seed-agent-os] Seeded agent training pairs`);
 
   await db.insert(agentBehaviorPrefs).values([
     {
@@ -937,8 +913,6 @@ export async function seedAgentOS() {
     },
   ]);
 
-  console.log(`[seed-agent-os] Seeded agent behavior preferences`);
-
   await db.insert(agentFeedback).values([
     {
       agentId: 'prism-forecast-agent',
@@ -974,8 +948,6 @@ export async function seedAgentOS() {
     },
   ]);
 
-  console.log(`[seed-agent-os] Seeded agent feedback`);
-
   await db.insert(advisoryAudit).values([
     {
       agentId: 'prism-forecast-agent',
@@ -1001,8 +973,6 @@ export async function seedAgentOS() {
       status: 'pending',
     },
   ]);
-
-  console.log(`[seed-agent-os] Seeded advisory audit records`);
 
   const datasets = await db
     .insert(fineTuningDatasets)
@@ -1046,8 +1016,6 @@ export async function seedAgentOS() {
     ])
     .onConflictDoNothing()
     .returning();
-
-  console.log(`[seed-agent-os] Seeded fine-tuning datasets`);
 
   const ftJobs = await db
     .insert(fineTuningJobs)
@@ -1102,8 +1070,6 @@ export async function seedAgentOS() {
     .onConflictDoNothing()
     .returning();
 
-  console.log(`[seed-agent-os] Seeded fine-tuning jobs`);
-
   await db.insert(fineTunedModelRegistry).values([
     {
       modelId: 'ft:claude-sonnet-4-5:prism-forecast:2026q1',
@@ -1140,9 +1106,5 @@ export async function seedAgentOS() {
       promotedAt: daysAgo(32),
     },
   ]);
-
-  console.log(`[seed-agent-os] Seeded fine-tuned model registry`);
-
-  console.log('[seed-agent-os] Agent OS, Skills, Training & A2A seed complete.');
   return { seeded: true };
 }

@@ -19,24 +19,24 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const { appId, page, pageSize, since, until } = req.query as Record<
         string,
         string | undefined
       >;
 
-      if (since && isNaN(new Date(since).getTime())) {
+      if (since && Number.isNaN(new Date(since).getTime())) {
         sendBadRequest(res, 'since must be a valid ISO date string');
         return;
       }
-      if (until && isNaN(new Date(until).getTime())) {
+      if (until && Number.isNaN(new Date(until).getTime())) {
         sendBadRequest(res, 'until must be a valid ISO date string');
         return;
       }
 
       const rawPage = Math.max(Number(page ?? 1), 1);
       const rawPageSize = Number(pageSize ?? DEFAULT_PAGE_SIZE);
-      if (isNaN(rawPage) || isNaN(rawPageSize) || rawPageSize < 1) {
+      if (Number.isNaN(rawPage) || Number.isNaN(rawPageSize) || rawPageSize < 1) {
         sendBadRequest(res, 'page and pageSize must be valid positive numbers');
         return;
       }
@@ -90,11 +90,11 @@ router.get(
         string | undefined
       >;
 
-      if (since && isNaN(new Date(since).getTime())) {
+      if (since && Number.isNaN(new Date(since).getTime())) {
         sendBadRequest(res, 'since must be a valid ISO date string');
         return;
       }
-      if (until && isNaN(new Date(until).getTime())) {
+      if (until && Number.isNaN(new Date(until).getTime())) {
         sendBadRequest(res, 'until must be a valid ISO date string');
         return;
       }
@@ -102,10 +102,11 @@ router.get(
       const rawPage = Math.max(Number(page ?? 1), 1);
       const rawPageSize = Number(pageSize ?? DEFAULT_PAGE_SIZE);
       const limit =
+        Number.
         isNaN(rawPageSize) || rawPageSize < 1
           ? DEFAULT_PAGE_SIZE
           : Math.min(rawPageSize, MAX_PAGE_SIZE);
-      const offset = (isNaN(rawPage) ? 0 : rawPage - 1) * limit;
+      const offset = (Number.isNaN(rawPage) ? 0 : rawPage - 1) * limit;
 
       const conditions = [];
       if (userId) conditions.push(eq(pushNotificationHistoryTable.userId, Number(userId)));

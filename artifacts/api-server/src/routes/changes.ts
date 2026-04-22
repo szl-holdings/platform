@@ -1,6 +1,6 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { changeEventsTable, db, insertChangeEventSchema } from '@szl-holdings/db';
-import { and, desc, eq, gt, lte } from 'drizzle-orm';
+import { and, eq, gt, lte } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
@@ -21,10 +21,10 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const cursor = req.query['cursor'] ? Number(req.query['cursor']) : 0;
-      const entityType = req.query['entity'] as string | undefined;
-      const entityId = req.query['entityId'] as string | undefined;
-      const limit = Math.min(Number(req.query['limit'] ?? DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
+      const cursor = req.query.cursor ? Number(req.query.cursor) : 0;
+      const entityType = req.query.entity as string | undefined;
+      const entityId = req.query.entityId as string | undefined;
+      const limit = Math.min(Number(req.query.limit ?? DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
 
       const conditions = [gt(changeEventsTable.cursor, cursor)];
       if (entityType) conditions.push(eq(changeEventsTable.entityType, entityType));
@@ -37,7 +37,7 @@ router.get(
         .orderBy(changeEventsTable.cursor)
         .limit(limit);
 
-      const nextCursor = events.length > 0 ? events[events.length - 1]!.cursor : cursor;
+      const nextCursor = events.length > 0 ? events[events.length - 1]?.cursor : cursor;
 
       sendSuccess(res, {
         events,
@@ -66,12 +66,12 @@ router.post(
     try {
       const body = req.body as Record<string, unknown>;
       const parsed = insertChangeEventSchema.safeParse({
-        entityType: body['entityType'],
-        entityId: body['entityId'],
+        entityType: body.entityType,
+        entityId: body.entityId,
         actorId: String((req as { user?: { id?: unknown } }).user?.id ?? 'anonymous'),
-        delta: body['delta'],
-        crdtClock: body['crdtClock'] ?? {},
-        appSource: body['appSource'],
+        delta: body.delta,
+        crdtClock: body.crdtClock ?? {},
+        appSource: body.appSource,
       });
 
       if (!parsed.success) {
@@ -107,10 +107,10 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const entityType = req.query['entity'] as string | undefined;
-      const entityId = req.query['entityId'] as string | undefined;
-      const fromCursor = req.query['from'] ? Number(req.query['from']) : 0;
-      const toCursor = req.query['to'] ? Number(req.query['to']) : undefined;
+      const entityType = req.query.entity as string | undefined;
+      const entityId = req.query.entityId as string | undefined;
+      const fromCursor = req.query.from ? Number(req.query.from) : 0;
+      const toCursor = req.query.to ? Number(req.query.to) : undefined;
 
       if (!entityType || !entityId) {
         res.status(400).json({ error: 'entity and entityId are required' });

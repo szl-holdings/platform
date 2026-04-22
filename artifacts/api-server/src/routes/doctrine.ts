@@ -1,6 +1,6 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { activityLogTable, db } from '@szl-holdings/db';
-import { desc, eq } from 'drizzle-orm';
+import { desc, } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendError, sendSuccess } from '../lib/api-response';
@@ -37,7 +37,7 @@ router.post(
   async (req, res) => {
     try {
       const body = req.body;
-      if (!body || !body.type || !body.sourceApp || !body.layer || !body.title) {
+      if (!body?.type || !body.sourceApp || !body.layer || !body.title) {
         sendError(res, 'Missing required fields: type, sourceApp, layer, title', 400);
         return;
       }

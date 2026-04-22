@@ -145,7 +145,7 @@ router.post(
 router.get(
   '/analytics/summary',
   validateQuery(listQuerySchema),
-  async (req: Request, res: Response): Promise<void> => {
+  async (_req: Request, res: Response): Promise<void> => {
     const [articleCount] = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(dosArticlesTable)

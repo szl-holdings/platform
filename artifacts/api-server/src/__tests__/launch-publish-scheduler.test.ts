@@ -82,7 +82,7 @@ function makeSelectChain() {
       // We piggy-back on the most recent eqId() spec set by `eq` mock; if
       // none was set this is a scan.
       if (eqIdSpec.id != null) {
-        lastWhere.current = { ...(lastWhere.current ?? {}), byId: eqIdSpec.id };
+        lastWhere.current = { ...lastWhere.current, byId: eqIdSpec.id };
         eqIdSpec.id = null;
       }
       return resolveSelect();
@@ -104,7 +104,7 @@ const eqIdSpec: { id: number | null } = { id: null };
 
 async function resolveSelect(): Promise<unknown[]> {
   const w = lastWhere.current;
-  if (!w || !w.scan) return [];
+  if (!w?.scan) return [];
   const table = state[w.scan];
   if (table instanceof Map) {
     if (w.byId != null) {
@@ -353,7 +353,7 @@ describe('runLaunchPublishScheduler', () => {
     expect(row.mediumStatus).toBe('published');
     expect(row.externalUrlMedium).toBe('https://medium.com/p/abc');
     expect(state.automationRuns.length).toBe(1);
-    expect(state.automationRuns[0]!.itemsCreated as number).toBe(1);
+    expect(state.automationRuns[0]?.itemsCreated as number).toBe(1);
   });
 
   it('dispatches calendar items to the right channel and flips the calendar row to published', async () => {
@@ -379,9 +379,9 @@ describe('runLaunchPublishScheduler', () => {
 
     expect(result.published).toBe(1);
     expect(adapterCounters.substack.ok).toBe(1);
-    expect(state.newsletters.get(7)!.substackUrl).toBe('https://szl.substack.com/p/xyz');
-    expect(state.calendar.get(900)!.status).toBe('published');
-    expect(state.calendar.get(900)!.destinationUrl).toBe('https://szl.substack.com/p/xyz');
+    expect(state.newsletters.get(7)?.substackUrl).toBe('https://szl.substack.com/p/xyz');
+    expect(state.calendar.get(900)?.status).toBe('published');
+    expect(state.calendar.get(900)?.destinationUrl).toBe('https://szl.substack.com/p/xyz');
   });
 
   it('records failures, leaves the source row in its original status, and backs off the next sweep', async () => {
@@ -401,8 +401,8 @@ describe('runLaunchPublishScheduler', () => {
     const r1 = await runLaunchPublishScheduler({ now: nowOverride.value });
     expect(r1.failed).toBe(1);
     expect(r1.published).toBe(0);
-    expect(state.articles.get(202)!.status).toBe('approved'); // unchanged
-    expect(state.articles.get(202)!.mediumStatus).toBe('ready'); // unchanged
+    expect(state.articles.get(202)?.status).toBe('approved'); // unchanged
+    expect(state.articles.get(202)?.mediumStatus).toBe('ready'); // unchanged
     expect(adapterCounters.medium.fail).toBe(1);
 
     // Second sweep 10 seconds later: backoff should suppress a second
@@ -461,8 +461,8 @@ describe('runLaunchPublishScheduler', () => {
     const { runLaunchPublishScheduler } = await import('../jobs/launch-publish-scheduler');
     const result = await runLaunchPublishScheduler({ now: nowOverride.value });
 
-    expect(state.calendar.get(950)!.status).toBe('planned');
-    expect(state.calendar.get(951)!.status).toBe('in-progress');
+    expect(state.calendar.get(950)?.status).toBe('planned');
+    expect(state.calendar.get(951)?.status).toBe('in-progress');
     expect(adapterCounters.medium.ok).toBe(0);
     expect(result.scanned).toBe(0);
   });
@@ -482,7 +482,7 @@ describe('runLaunchPublishScheduler', () => {
     const result = await runLaunchPublishScheduler({ now: nowOverride.value });
     expect(result.scanned).toBe(0);
     expect(adapterCounters.medium.ok).toBe(0);
-    expect(state.articles.get(700)!.status).toBe('approved');
+    expect(state.articles.get(700)?.status).toBe('approved');
   });
 
   it('does NOT auto-publish an article that is still in-review (only approved)', async () => {
@@ -507,9 +507,9 @@ describe('runLaunchPublishScheduler', () => {
     const { runLaunchPublishScheduler } = await import('../jobs/launch-publish-scheduler');
     const result = await runLaunchPublishScheduler({ now: nowOverride.value });
     expect(adapterCounters.medium.ok).toBe(0);
-    expect(state.articles.get(610)!.status).toBe('in-review');
+    expect(state.articles.get(610)?.status).toBe('in-review');
     // The calendar slot must NOT flip to published.
-    expect(state.calendar.get(970)!.status).toBe('ready');
+    expect(state.calendar.get(970)?.status).toBe('ready');
     expect(result.published).toBe(0);
   });
 
@@ -537,8 +537,8 @@ describe('runLaunchPublishScheduler', () => {
     const result = await runLaunchPublishScheduler({ now: nowOverride.value });
 
     expect(adapterCounters.medium.ok).toBe(0); // never sent to Medium
-    expect(state.articles.get(501)!.status).toBe('draft'); // unchanged
-    expect(state.calendar.get(960)!.status).toBe('ready'); // unchanged
+    expect(state.articles.get(501)?.status).toBe('draft'); // unchanged
+    expect(state.calendar.get(960)?.status).toBe('ready'); // unchanged
     expect(result.published).toBe(0);
     expect(result.skipped).toBe(1);
   });
@@ -556,7 +556,7 @@ describe('runLaunchPublishScheduler', () => {
     const result = await runLaunchPublishScheduler({ now: nowOverride.value });
     expect(result.scanned).toBe(0);
     expect(adapterCounters.substack.ok).toBe(0);
-    expect(state.newsletters.get(11)!.substackUrl).toBeNull();
+    expect(state.newsletters.get(11)?.substackUrl).toBeNull();
   });
 
   it('dispatches a calendar carousel item to LinkedIn and a calendar x-post to X', async () => {
@@ -598,9 +598,9 @@ describe('runLaunchPublishScheduler', () => {
     expect(result.published).toBeGreaterThanOrEqual(2);
     expect(adapterCounters.linkedin.ok).toBe(1);
     expect(adapterCounters.x.ok).toBe(1);
-    expect(state.carousels.get(50)!.status).toBe('published');
-    expect(state.xposts.get(60)!.status).toBe('sent');
-    expect(state.calendar.get(901)!.status).toBe('published');
-    expect(state.calendar.get(902)!.status).toBe('published');
+    expect(state.carousels.get(50)?.status).toBe('published');
+    expect(state.xposts.get(60)?.status).toBe('sent');
+    expect(state.calendar.get(901)?.status).toBe('published');
+    expect(state.calendar.get(902)?.status).toBe('published');
   });
 });

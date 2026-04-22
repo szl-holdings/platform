@@ -91,7 +91,7 @@ function SimpleMarkdown({ content }: { content: string }) {
     } else if (line.startsWith('```')) {
       const codeLines: string[] = [];
       i++;
-      while (i < lines.length && !lines[i]!.startsWith('```')) {
+      while (i < lines.length && !lines[i]?.startsWith('```')) {
         codeLines.push(lines[i]!);
         i++;
       }
@@ -168,7 +168,7 @@ function processInline(text: string): React.ReactNode {
     parts.push(text.slice(lastIndex));
   }
 
-  return parts.length === 1 ? parts[0] : <>{parts}</>;
+  return parts.length === 1 ? parts[0] : parts;
 }
 
 function TypingIndicator({ accentColor }: { accentColor: string }) {
@@ -381,7 +381,7 @@ function isMobileDevice(): boolean {
   return window.innerWidth < 768 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 }
 
-function buildExplainability(content: string, agentName: string): ExplainabilityModel {
+function buildExplainability(content: string, _agentName: string): ExplainabilityModel {
   const lower = content.toLowerCase();
   const hasRecommendation = /recommend|suggest|consider|should|could/.test(lower);
   const hasAnalysis = /because|due to|based on|indicates|shows|suggests/.test(lower);
@@ -487,7 +487,7 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, streamingContent, scrollToBottom]);
+  }, [scrollToBottom]);
 
   useEffect(() => {
     if (config.conversationKey && messages.length > 0 && typeof window !== 'undefined') {
@@ -616,7 +616,7 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
 
           for (const line of lines) {
             const trimmedLine = line.trim();
-            if (!trimmedLine || !trimmedLine.startsWith('data: ')) continue;
+            if (!trimmedLine?.startsWith('data: ')) continue;
             const data = trimmedLine.slice(6);
             if (data === '[DONE]') break;
             try {
@@ -695,13 +695,13 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
       }
     },
     [
-      config.systemPrompt,
-      config.welcomeMessage,
-      streamingContent,
-      voiceMode,
-      voiceOutputEnabled,
-      speakText,
-      isRecording,
+      config.systemPrompt, 
+      config.welcomeMessage, 
+      streamingContent, 
+      voiceMode, 
+      voiceOutputEnabled, 
+      speakText, 
+      isRecording, config.agentId
     ],
   );
 

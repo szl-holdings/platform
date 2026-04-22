@@ -1,19 +1,10 @@
-import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
+
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion } from 'framer-motion';
 import {
-  ArrowRight,
-  Badge,
-  BarChart3,
   Building2,
-  ChevronRight,
-  DollarSign,
-  Filter,
-  Layers,
   MapPin,
-  RefreshCw,
   Search,
-  TrendingUp,
   Users,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';

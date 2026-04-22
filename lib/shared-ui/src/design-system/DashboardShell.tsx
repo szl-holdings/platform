@@ -144,7 +144,7 @@ export function DashboardShell({
             {topbar}
           </div>
         )}
-        <main className="flex-1 overflow-auto" role="main">
+        <main className="flex-1 overflow-auto" >
           {children}
         </main>
       </div>

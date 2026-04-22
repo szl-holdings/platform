@@ -44,7 +44,7 @@ function loadState(): WizardState {
     const raw = window.localStorage.getItem(ONBOARDING_STORAGE_KEY);
     if (!raw) return DEFAULT_STATE;
     const parsed = JSON.parse(raw) as Partial<WizardState>;
-    return { ...DEFAULT_STATE, ...parsed, org: { ...DEFAULT_STATE.org, ...(parsed.org ?? {}) } };
+    return { ...DEFAULT_STATE, ...parsed, org: { ...DEFAULT_STATE.org, ...parsed.org } };
   } catch {
     return DEFAULT_STATE;
   }

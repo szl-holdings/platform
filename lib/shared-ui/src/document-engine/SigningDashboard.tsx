@@ -4,7 +4,6 @@ import {
   CheckCircle,
   Clock,
   Eye,
-  Filter,
   Pen,
   Search,
   XCircle,
@@ -18,7 +17,7 @@ const BASE_URL = typeof window !== 'undefined' ? (window as any).__REPLIT_BASE_U
 async function apiFetch(path: string, options?: RequestInit) {
   const res = await fetch(`${BASE_URL}/api${path}`, {
     ...options,
-    headers: { 'Content-Type': 'application/json', ...(options?.headers || {}) },
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
   });
   if (!res.ok) throw new Error('Request failed');
   return res.json();

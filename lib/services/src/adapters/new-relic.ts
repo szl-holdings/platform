@@ -65,11 +65,11 @@ export class NewRelicAdapter extends ServiceAdapter {
   protected override rateLimitPerMinute = 25;
 
   private get apiKey(): string {
-    return process.env["NEW_RELIC_API_KEY"] ?? "";
+    return process.env.NEW_RELIC_API_KEY ?? "";
   }
 
   private get accountId(): string {
-    return process.env["NEW_RELIC_ACCOUNT_ID"] ?? "";
+    return process.env.NEW_RELIC_ACCOUNT_ID ?? "";
   }
 
   protected override async performHealthCheck(): Promise<void> {
@@ -87,7 +87,7 @@ export class NewRelicAdapter extends ServiceAdapter {
     });
     if (!res.ok) throw new Error(`NerdGraph HTTP ${res.status}`);
     const json: { errors?: Array<{ message: string }> } = await res.json();
-    if (json.errors?.length) throw new Error(json.errors[0]!.message);
+    if (json.errors?.length) throw new Error(json.errors[0]?.message);
   }
 
   private sanitizeNrql(input: string): string {

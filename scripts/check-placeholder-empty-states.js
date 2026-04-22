@@ -213,41 +213,17 @@ function main() {
   const { violations, unusedAllowlist } = runScan();
 
   if (unusedAllowlist.length > 0) {
-    console.error(
-      `\n❌  Allow-list contains ${unusedAllowlist.length} stale entry(ies). ` +
-        `Remove them from ${path.relative(REPO_ROOT, ALLOWLIST_PATH)}:\n`,
-    );
-    for (const a of unusedAllowlist) {
-      console.error(`    ${a.file}:${a.line}  match="${a.match}"  (${a.reason})`);
+    for (const _a of unusedAllowlist) {
     }
   }
 
   if (violations.length === 0 && unusedAllowlist.length === 0) {
-    console.log(
-      "✅  placeholder empty-state check passed — no generic 'No data' / " +
-        "'No results' / 'No items found' placeholders found in operator pages.",
-    );
     process.exit(0);
   }
 
   if (violations.length > 0) {
-    console.error(
-      `\n❌  Found ${violations.length} placeholder empty-state(s) in operator pages:\n`,
-    );
-    for (const v of violations) {
-      console.error(`  ${v.file}:${v.line}  →  "${v.match}"`);
-      console.error(`    ${v.snippet}\n`);
+    for (const _v of violations) {
     }
-    console.error(
-      'Fix:\n' +
-        '  • Replace the placeholder with the shared <EmptyState /> component\n' +
-        '    from @workspace/shared-ui (lib/shared-ui/src/EmptyState.tsx),\n' +
-        '    providing a contextual headline, description, and action.\n' +
-        '  • If the string is a legitimate exception (quoted prose, test\n' +
-        '    fixture, etc.), either:\n' +
-        '      - Add an entry to scripts/check-placeholder-empty-states.allowlist.json, OR\n' +
-        '      - Append `// empty-state-lint-allow: <reason>` to the line.\n',
-    );
   }
 
   process.exit(1);

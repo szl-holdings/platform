@@ -8,12 +8,11 @@ import {
   recommendationsTable,
   terraDistressPropertiesTable,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { sql } from 'drizzle-orm';
 import { seedVesselsData } from '../lib/seed-vessels.js';
 
 async function seedDistressProperties() {
-  console.log('Seeding distress properties…');
 
   const existing = await db
     .select({ id: terraDistressPropertiesTable.id })
@@ -21,7 +20,6 @@ async function seedDistressProperties() {
     .where(sql`external_id = 'dp-seed-001'`)
     .limit(1);
   if (existing.length > 0) {
-    console.log('  Distress seed properties already seeded, skipping.');
     return;
   }
 
@@ -409,18 +407,15 @@ async function seedDistressProperties() {
   ];
 
   await db.insert(terraDistressPropertiesTable).values(properties);
-  console.log(`  Inserted ${properties.length} distress properties.`);
 }
 
 async function seedFirestormData() {
-  console.log('Seeding Firestorm assessments and findings…');
 
   const existingAssessments = await db
     .select({ id: firestormAssessmentsTable.id })
     .from(firestormAssessmentsTable)
     .limit(1);
   if (existingAssessments.length > 0) {
-    console.log('  Firestorm data already seeded, skipping.');
     return;
   }
 
@@ -547,19 +542,16 @@ async function seedFirestormData() {
     ];
 
     await db.insert(firestormFindingsTable).values(findings);
-    console.log(`  Inserted 1 assessments, ${findings.length} findings.`);
   }
 }
 
 async function seedWorkflowRuns() {
-  console.log('Seeding platform workflow runs…');
 
   const existing = await db
     .select({ id: platformJobRunsTable.id })
     .from(platformJobRunsTable)
     .limit(1);
   if (existing.length > 0) {
-    console.log('  Workflow runs already seeded, skipping.');
     return;
   }
 
@@ -647,15 +639,12 @@ async function seedWorkflowRuns() {
   ];
 
   await db.insert(platformJobRunsTable).values(runs);
-  console.log(`  Inserted ${runs.length} workflow runs.`);
 }
 
 async function seedAuditLogs() {
-  console.log('Seeding audit log events…');
 
   const existing = await db.select({ id: auditLogsTable.id }).from(auditLogsTable).limit(1);
   if (existing.length > 0) {
-    console.log('  Audit logs already seeded, skipping.');
     return;
   }
 
@@ -723,18 +712,15 @@ async function seedAuditLogs() {
   ];
 
   await db.insert(auditLogsTable).values(events);
-  console.log(`  Inserted ${events.length} audit events.`);
 }
 
 async function seedRecommendations() {
-  console.log('Seeding Alloy recommendations…');
 
   const existing = await db
     .select({ id: recommendationsTable.id })
     .from(recommendationsTable)
     .limit(1);
   if (existing.length > 0) {
-    console.log('  Recommendations already seeded, skipping.');
     return;
   }
 
@@ -831,11 +817,9 @@ async function seedRecommendations() {
   ];
 
   await db.insert(recommendationsTable).values(recs);
-  console.log(`  Inserted ${recs.length} recommendations.`);
 }
 
 async function main() {
-  console.log('=== SZL Ecosystem Seed ===');
   try {
     await seedDistressProperties();
     await seedFirestormData();
@@ -843,10 +827,8 @@ async function main() {
     await seedAuditLogs();
     await seedRecommendations();
     await seedVesselsData();
-    console.log('=== Seed complete ===');
     process.exit(0);
-  } catch (err) {
-    console.error('Seed failed:', err);
+  } catch (_err) {
     process.exit(1);
   }
 }

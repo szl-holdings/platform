@@ -1,7 +1,7 @@
 import { color } from '@szl-holdings/design-system';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion } from 'framer-motion';
-import { Building2, List, Map } from 'lucide-react';
+import { List, Map } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'wouter';
 import PropertyMap from '@/components/property-map';

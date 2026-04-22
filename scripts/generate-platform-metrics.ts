@@ -99,22 +99,12 @@ const schema = {
   dbSchemaFileCount: countFiles(dbSchemaDir, '.ts'),
   dbSchemaDomainCount: 10,
 };
-
-console.log('=== Platform Metrics Generator ===');
-console.log('');
-console.log('Structural facts:');
-for (const [key, value] of Object.entries(structural)) {
-  console.log(`  ${key}: ${value}`);
+for (const [_key, _value] of Object.entries(structural)) {
 }
-console.log('');
-console.log('Schema facts:');
-for (const [key, value] of Object.entries(schema)) {
-  console.log(`  ${key}: ${value}`);
+for (const [_key, _value] of Object.entries(schema)) {
 }
 
 if (DRY_RUN) {
-  console.log('');
-  console.log('DRY RUN — no files written. Remove --dry-run to update registry.');
   process.exit(0);
 }
 
@@ -196,8 +186,6 @@ export const AEEP_CODENAME = PLATFORM_FACTS.curated.platformCodename;
 `;
 
 writeFileSync(registryPath, newContent, 'utf-8');
-console.log('');
-console.log(`Registry updated: ${registryPath}`);
 
 // Regenerate docs/platform-facts.md from computed values
 const today = new Date().toISOString().split('T')[0];
@@ -378,5 +366,3 @@ OpenAI · Anthropic · Google Gemini · HuggingFace Inference · NVIDIA NIM
 
 const docsPath = join(ROOT, 'docs', 'platform-facts.md');
 writeFileSync(docsPath, docsMarkdown, 'utf-8');
-console.log(`Docs updated:     ${docsPath}`);
-console.log('Run `tsx scripts/validate-platform-facts.ts` to verify.');

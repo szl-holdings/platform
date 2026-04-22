@@ -45,7 +45,7 @@ import { assertTenantAccess, recordTenantIsolationViolation } from '../middlewar
 const router: IRouter = Router();
 
 const SUPER_ADMIN_ROLES = ['super_admin'] as const;
-const ADMIN_ROLES = ['admin', 'super_admin'] as const;
+const _ADMIN_ROLES = ['admin', 'super_admin'] as const;
 
 const ORG_ADMIN_ROLES = new Set(['owner', 'admin']);
 
@@ -124,7 +124,7 @@ router.get(
       let orgId: number | null = null;
       if (req.query.orgId) {
         const requestedOrgId = parseInt(req.query.orgId as string, 10);
-        if (isNaN(requestedOrgId)) {
+        if (Number.isNaN(requestedOrgId)) {
           sendBadRequest(res, 'Invalid orgId');
           return;
         }
@@ -267,7 +267,7 @@ router.post(
         return;
       }
 
-      const actorId = req.user!.id;
+      const actorId = req.user?.id;
 
       const [existing] = await db
         .select()
@@ -330,7 +330,7 @@ router.post(
 
         await writeAudit({
           tier: 'platform',
-          settingId: created!.id,
+          settingId: created?.id,
           namespace,
           key,
           actorId,
@@ -415,7 +415,7 @@ router.post(
         return;
       }
 
-      const actorId = req.user!.id;
+      const actorId = req.user?.id;
 
       const [existing] = await db
         .select()
@@ -480,7 +480,7 @@ router.post(
 
         await writeAudit({
           tier: 'tenant',
-          settingId: created!.id,
+          settingId: created?.id,
           namespace,
           key,
           orgId,
@@ -514,7 +514,7 @@ router.get(
       let orgId: number | null = null;
       if (req.query.orgId) {
         const requestedOrgId = parseInt(req.query.orgId as string, 10);
-        if (isNaN(requestedOrgId)) {
+        if (Number.isNaN(requestedOrgId)) {
           sendBadRequest(res, 'Invalid orgId');
           return;
         }
@@ -644,7 +644,7 @@ router.post(
 
         await writeAudit({
           tier: 'user',
-          settingId: created!.id,
+          settingId: created?.id,
           namespace,
           key,
           orgId,
@@ -789,7 +789,7 @@ router.get(
       let before: Date | undefined;
       if (req.query.before) {
         before = new Date(req.query.before as string);
-        if (!isNaN(before.getTime())) {
+        if (!Number.isNaN(before.getTime())) {
           before.setUTCHours(23, 59, 59, 999);
         }
       }
@@ -798,7 +798,7 @@ router.get(
       let orgId: number | undefined;
       if (req.query.orgId) {
         const requested = parseInt(req.query.orgId as string, 10);
-        if (isNaN(requested)) {
+        if (Number.isNaN(requested)) {
           sendBadRequest(res, 'Invalid orgId');
           return;
         }
@@ -836,10 +836,10 @@ router.get(
       if (namespace) {
         conditions.push(like(settingsAuditLogTable.namespace, `${namespace}%`));
       }
-      if (after && !isNaN(after.getTime())) {
+      if (after && !Number.isNaN(after.getTime())) {
         conditions.push(gte(settingsAuditLogTable.createdAt, after));
       }
-      if (before && !isNaN(before.getTime())) {
+      if (before && !Number.isNaN(before.getTime())) {
         conditions.push(lte(settingsAuditLogTable.createdAt, before));
       }
 

@@ -192,7 +192,7 @@ router.post(
       const { approvalNote } = req.body;
       const receipt = approveReceipt({
         receiptId: req.params.receiptId as string,
-        approvedByUserId: req.user!.id,
+        approvedByUserId: req.user?.id,
         approvalNote,
       });
       res.json({ receipt });
@@ -221,7 +221,7 @@ router.post(
       const { approvalNote } = req.body;
       const receipt = rejectReceipt({
         receiptId: req.params.receiptId as string,
-        approvedByUserId: req.user!.id,
+        approvedByUserId: req.user?.id,
         approvalNote,
       });
       res.json({ receipt });
@@ -250,7 +250,7 @@ router.post(
       const { approvalNote } = req.body;
       const receipt = retractReceipt({
         receiptId: req.params.receiptId as string,
-        approvedByUserId: req.user!.id,
+        approvedByUserId: req.user?.id,
         approvalNote,
       });
       res.json({ receipt });

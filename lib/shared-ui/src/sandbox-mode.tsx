@@ -1,5 +1,4 @@
-import type React from 'react';
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 const STORAGE_KEY = 'szl-sandbox-mode';
 

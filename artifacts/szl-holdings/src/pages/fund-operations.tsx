@@ -55,9 +55,9 @@ export default function FundOperationsPage() {
       const key = f.periodStart ?? f.periodLabel;
       if (!periodMap[key]) periodMap[key] = { label: f.periodLabel, startDate: f.periodStart, data: {} };
       periodMap[key].data[f.companySlug] = parseFloat(f.revenue ?? "0");
-      periodMap[key].data["_total"] = (periodMap[key].data["_total"] ?? 0) + parseFloat(f.revenue ?? "0");
-      periodMap[key].data["_burn"] = (periodMap[key].data["_burn"] ?? 0) + parseFloat(f.burnRate ?? "0");
-      periodMap[key].data["_cash"] = (periodMap[key].data["_cash"] ?? 0) + parseFloat(f.cashAndEquivalents ?? "0");
+      periodMap[key].data._total = (periodMap[key].data._total ?? 0) + parseFloat(f.revenue ?? "0");
+      periodMap[key].data._burn = (periodMap[key].data._burn ?? 0) + parseFloat(f.burnRate ?? "0");
+      periodMap[key].data._cash = (periodMap[key].data._cash ?? 0) + parseFloat(f.cashAndEquivalents ?? "0");
     }
     return Object.values(periodMap)
       .sort((a, b) => (a.startDate ?? "").localeCompare(b.startDate ?? ""))
@@ -176,17 +176,17 @@ export default function FundOperationsPage() {
 <tr><th>Metric</th><th>Value</th></tr>
 <tr><td>Gross IRR</td><td>${report.grossIrr ? pct(parseFloat(report.grossIrr)) : "—"}</td></tr>
 <tr><td>Net IRR</td><td>${report.netIrr ? pct(parseFloat(report.netIrr)) : "—"}</td></tr>
-<tr><td>TVPI (Total Value to Paid-In)</td><td>${report.tvpi ? parseFloat(report.tvpi).toFixed(2) + "x" : "—"}</td></tr>
-<tr><td>DPI (Distributions to Paid-In)</td><td>${report.dpi ? parseFloat(report.dpi).toFixed(2) + "x" : "—"}</td></tr>
-<tr><td>RVPI (Residual Value to Paid-In)</td><td>${report.rvpi ? parseFloat(report.rvpi).toFixed(2) + "x" : "—"}</td></tr>
+<tr><td>TVPI (Total Value to Paid-In)</td><td>${report.tvpi ? `${parseFloat(report.tvpi).toFixed(2)}x` : "—"}</td></tr>
+<tr><td>DPI (Distributions to Paid-In)</td><td>${report.dpi ? `${parseFloat(report.dpi).toFixed(2)}x` : "—"}</td></tr>
+<tr><td>RVPI (Residual Value to Paid-In)</td><td>${report.rvpi ? `${parseFloat(report.rvpi).toFixed(2)}x` : "—"}</td></tr>
 </table>
 
 <h2>Fund Financials</h2>
 <table>
 <tr><th>Metric</th><th>Value</th></tr>
-<tr><td>Fund NAV</td><td>${report.fundNav ? "$" + parseFloat(report.fundNav).toLocaleString() : "—"}</td></tr>
-<tr><td>Total Commitments</td><td>${report.totalCommitments ? "$" + parseFloat(report.totalCommitments).toLocaleString() : "—"}</td></tr>
-<tr><td>Called Capital</td><td>${report.calledCapital ? "$" + parseFloat(report.calledCapital).toLocaleString() : "—"}</td></tr>
+<tr><td>Fund NAV</td><td>${report.fundNav ? `$${parseFloat(report.fundNav).toLocaleString()}` : "—"}</td></tr>
+<tr><td>Total Commitments</td><td>${report.totalCommitments ? `$${parseFloat(report.totalCommitments).toLocaleString()}` : "—"}</td></tr>
+<tr><td>Called Capital</td><td>${report.calledCapital ? `$${parseFloat(report.calledCapital).toLocaleString()}` : "—"}</td></tr>
 <tr><td>Management Fee Rate</td><td>${report.managementFeeRate ? pct(parseFloat(report.managementFeeRate)) : "—"}</td></tr>
 <tr><td>Carried Interest</td><td>${report.carryRate ? pct(parseFloat(report.carryRate)) : "—"}</td></tr>
 <tr><td>Preferred Return</td><td>${report.preferredReturnRate ? pct(parseFloat(report.preferredReturnRate)) : "—"}</td></tr>
@@ -480,7 +480,7 @@ ${report.disclaimers ? `<div class="disclaimer">${esc(report.disclaimers)}</div>
                                 </div>
                                 <div>
                                   <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">Burn Rate</p>
-                                  <p className="mt-1 text-sm font-semibold text-white">{burn > 0 ? fmt(burn) + "/mo" : "—"}</p>
+                                  <p className="mt-1 text-sm font-semibold text-white">{burn > 0 ? `${fmt(burn)}/mo` : "—"}</p>
                                 </div>
                                 <div>
                                   <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">Cash</p>
@@ -743,7 +743,7 @@ ${report.disclaimers ? `<div class="disclaimer">${esc(report.disclaimers)}</div>
                             <div className="flex flex-wrap gap-2">
                               {capTable.shareClasses.map(sc => (
                                 <span key={sc.id} className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] text-white/55">
-                                  {sc.name} · {sc.issuedShares ? parseInt(sc.issuedShares).toLocaleString() : "0"} shares · {sc.classType.replace(/_/g, " ")}
+                                  {sc.name} · {sc.issuedShares ? parseInt(sc.issuedShares, 10).toLocaleString() : "0"} shares · {sc.classType.replace(/_/g, " ")}
                                 </span>
                               ))}
                             </div>

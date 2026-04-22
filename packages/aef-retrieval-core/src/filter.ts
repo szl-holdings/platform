@@ -31,7 +31,7 @@ export function applyTenantFilter<T extends FusedHit | BoostedHit>(
   tenantId: string,
 ): T[] {
   return hits.filter((h) => {
-    const hitTenant = h.metadata['tenantId'];
+    const hitTenant = h.metadata.tenantId;
     return hitTenant === tenantId;
   });
 }

@@ -64,7 +64,7 @@ export class FilesystemLedgerStore implements LedgerStore {
     if (this.index.has(entry.entryId)) {
       throw new Error(`Ledger entry already exists: ${entry.entryId}`);
     }
-    appendFileSync(this.filePath, JSON.stringify(entry) + '\n', 'utf8');
+    appendFileSync(this.filePath, `${JSON.stringify(entry)}\n`, 'utf8');
     this.index.set(entry.entryId, this.index.size);
   }
 

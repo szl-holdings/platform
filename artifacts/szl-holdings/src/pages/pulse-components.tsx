@@ -436,7 +436,7 @@ export const ConstellationView = memo(function ConstellationView({
   useEffect(() => {
     const cleanup = setInterval(() => {
       setActiveSignals((prev) =>
-        prev.filter((s) => Date.now() - parseInt(s.id.split('-')[1]) < 3000),
+        prev.filter((s) => Date.now() - parseInt(s.id.split('-')[1], 10) < 3000),
       );
     }, 1000);
     return () => clearInterval(cleanup);

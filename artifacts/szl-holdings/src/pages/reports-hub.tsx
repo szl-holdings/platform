@@ -64,7 +64,7 @@ const DOMAIN_COLORS: Record<string, string> = {
 async function apiFetch(path: string, opts?: RequestInit) {
   const res = await fetch(`${API}${path}`, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...(opts?.headers || {}) },
+    headers: { 'Content-Type': 'application/json', ...opts?.headers },
     ...opts,
   });
   if (!res.ok) {
@@ -504,8 +504,7 @@ export default function ReportsHub() {
       });
       qc.invalidateQueries({ queryKey: ['reports'] });
       qc.invalidateQueries({ queryKey: ['report-stats'] });
-    } catch (err) {
-      console.error('Failed to request approval:', err);
+    } catch (_err) {
     }
   };
 
@@ -517,8 +516,7 @@ export default function ReportsHub() {
       });
       qc.invalidateQueries({ queryKey: ['reports'] });
       qc.invalidateQueries({ queryKey: ['report-stats'] });
-    } catch (err) {
-      console.error('Failed to approve:', err);
+    } catch (_err) {
     }
   };
 
@@ -534,7 +532,7 @@ export default function ReportsHub() {
       {showGenerate && (
         <GenerateModal
           onClose={() => setShowGenerate(false)}
-          onGenerated={(id) => {
+          onGenerated={(_id) => {
             setShowGenerate(false);
             qc.invalidateQueries({ queryKey: ['reports'] });
             qc.invalidateQueries({ queryKey: ['report-stats'] });

@@ -3,7 +3,7 @@ import { NotificationHub, useTheme } from '@szl-holdings/mobile-shared';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, router } from 'expo-router';
-import React, { type ComponentProps, useCallback, useMemo } from 'react';
+import { type ComponentProps, useCallback, useMemo } from 'react';
 import {
   Alert,
   Platform,

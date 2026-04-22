@@ -1,7 +1,7 @@
 import { activityLogTable, auditEventsTable, db } from '@szl-holdings/db';
 import { sql } from 'drizzle-orm';
 
-const ACTORS = [
+const _ACTORS = [
   { id: 1, name: 'Stephen Lutar', email: 'stephen@szlholdings.com', role: 'founder_admin' },
   { id: 2, name: 'Ops Lead', email: 'ops@szlholdings.com', role: 'operator' },
   { id: 3, name: 'Analyst', email: 'analyst@szlholdings.com', role: 'analyst' },
@@ -361,7 +361,6 @@ async function tableHasData(table: any): Promise<boolean> {
 }
 
 export async function seedAuditLogs(): Promise<void> {
-  console.log('[seed-audit] Seeding audit log data...');
 
   const activityExists = await tableHasData(activityLogTable);
   if (activityExists) {
@@ -369,7 +368,6 @@ export async function seedAuditLogs(): Promise<void> {
       .select({ count: sql<number>`count(*)::int` })
       .from(activityLogTable);
     if (count >= 10) {
-      console.log('[seed-audit] Audit data already seeded, skipping...');
       return;
     }
   }
@@ -415,8 +413,4 @@ export async function seedAuditLogs(): Promise<void> {
         .onConflictDoNothing();
     } catch {}
   }
-
-  console.log(
-    `[seed-audit] Seeded ${ACTIVITY_LOG_ENTRIES.length} activity log entries and ${AUDIT_EVENTS.length} audit events`,
-  );
 }

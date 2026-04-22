@@ -1,5 +1,4 @@
-import { ConfidenceMeter, PolicyStateChip, ProofEnvelope } from '@szl-holdings/design-system';
-import { DashboardShell } from '@szl-holdings/shared-ui/design-system';
+import { ProofEnvelope } from '@szl-holdings/design-system';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   AlertTriangle,

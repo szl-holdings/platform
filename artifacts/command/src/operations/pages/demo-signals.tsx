@@ -2,10 +2,7 @@ import { demoSignals } from '@lyte/lib/demo-seed';
 import { cn } from '@lyte/lib/utils';
 import {
   AlertTriangle,
-  CheckCircle,
-  ChevronDown,
   Clock,
-  Filter,
   Radio,
   RefreshCw,
 } from 'lucide-react';
@@ -211,7 +208,7 @@ export default function DemoSignalsPage() {
   const [selected, setSelected] = useState<(typeof demoSignals)[0] | null>(null);
   const [sevFilter, setSevFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [srcFilter, setSrcFilter] = useState('all');
+  const [srcFilter, _setSrcFilter] = useState('all');
 
   const filtered = demoSignals.filter((s) => {
     if (sevFilter !== 'all' && s.severity !== sevFilter) return false;

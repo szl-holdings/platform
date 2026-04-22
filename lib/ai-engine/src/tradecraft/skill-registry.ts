@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type { DecisionObjectType } from './decision-objects.js';
 
 export type SkillCapability =

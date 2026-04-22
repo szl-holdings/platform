@@ -19,8 +19,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import express from "express";
-import type { Router as ExpressRouter } from "express";
+import express, { type Router as ExpressRouter } from 'express';
 import request from "supertest";
 
 // ---------------------------------------------------------------------------

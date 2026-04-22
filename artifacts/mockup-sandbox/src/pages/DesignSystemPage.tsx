@@ -1,30 +1,6 @@
 /* gi-lint-ignore-file — this file intentionally renders forbidden phrases as lexicon examples */
 
-import type {
-  AutonomyMode,
-  ColumnDef,
-  EvidenceSource,
-  GraphEdge,
-  GraphNode,
-  MapMarker,
-  TimelineEvent,
-} from '@szl-holdings/design-system';
-import {
-  AutonomyModeToggle,
-  ConfidenceMeter,
-  color,
-  DenseTable,
-  EvidenceBadge,
-  FreshnessChip,
-  GraphCanvas,
-  MapSurface,
-  motion,
-  NarrativePanel,
-  PolicyStateChip,
-  ProofEnvelope,
-  productAccent,
-  TimelineLane,
-} from '@szl-holdings/design-system';
+import { type AutonomyMode, type ColumnDef, type EvidenceSource, type GraphEdge, type GraphNode, type MapMarker, type CockpitTimelineEvent as TimelineEvent, AutonomyModeToggle, ConfidenceMeter, color, DenseTable, EvidenceBadge, FreshnessChip, GraphCanvas, MapSurface, motion, NarrativePanel, PolicyStateChip, ProofEnvelope, productAccent, TimelineLane } from '@szl-holdings/design-system';
 import { useState } from 'react';
 
 const SAMPLE_EVIDENCE: EvidenceSource[] = [
@@ -284,7 +260,9 @@ export default function DesignSystemPage() {
                 Semantic Colors
               </p>
               <div className="grid grid-cols-2 gap-1.5">
-                {Object.entries(color.accent).map(([k, v]) => (
+                {(Object.entries(color.accent) as Array<[string, unknown]>)
+                  .filter((entry): entry is [string, string] => typeof entry[1] === 'string')
+                  .map(([k, v]) => (
                   <div
                     key={k}
                     className="flex items-center gap-2 rounded border border-[#1a2535] bg-[#0d1520] px-2 py-1.5"

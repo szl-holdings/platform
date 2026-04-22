@@ -24,7 +24,7 @@ import {
 } from '@szl-holdings/shared-ui/demo-persona-switcher';
 import { EcosystemNav } from '@szl-holdings/shared-ui/ecosystem-nav';
 import { MultiplayerSessionBanner } from '@szl-holdings/shared-ui/multiplayer-session';
-import { SandboxModeBanner, SandboxModeProvider } from '@szl-holdings/shared-ui/sandbox-mode';
+import { SandboxModeProvider } from '@szl-holdings/shared-ui/sandbox-mode';
 import { persistQueryClient } from '@tanstack/query-persist-client-core';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -296,7 +296,7 @@ function isSubstrateRoute(location: string): boolean {
   return location.startsWith('/substrate');
 }
 
-const OPS_ROUTES = [
+const _OPS_ROUTES = [
   '/alerts',
   '/team',
   '/costs',

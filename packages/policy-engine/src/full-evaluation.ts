@@ -13,7 +13,7 @@
  * have available. In production, the api-server wires in all three layers; in
  * unit tests, scanners can be omitted or mocked.
  */
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { evaluatePolicies } from './evaluator.js';
 import { BUILT_IN_GUARDRAILS } from './guardrails.js';
 import { PRISM_COUNSEL_POLICIES } from './prism-counsel-policies.js';

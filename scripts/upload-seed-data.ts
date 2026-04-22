@@ -1,6 +1,6 @@
 import { Storage } from '@google-cloud/storage';
-import { readdirSync, readFileSync, statSync } from 'fs';
-import { join, relative } from 'path';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { join, relative } from 'node:path';
 
 const REPLIT_SIDECAR_ENDPOINT = 'http://127.0.0.1:1106';
 
@@ -38,9 +38,8 @@ function walkDir(dir: string): string[] {
 }
 
 async function uploadSeedData() {
-  const bucketId = process.env['DEFAULT_OBJECT_STORAGE_BUCKET_ID'];
+  const bucketId = process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID;
   if (!bucketId) {
-    console.error('ERROR: DEFAULT_OBJECT_STORAGE_BUCKET_ID environment variable is not set');
     process.exit(1);
   }
 
@@ -48,14 +47,11 @@ async function uploadSeedData() {
   const files = walkDir(seedDataDir);
 
   if (files.length === 0) {
-    console.log('No JSON files found in seed-data/ directory');
     return;
   }
 
   const client = createGCSClient();
   const bucket = client.bucket(bucketId);
-
-  console.log(`Uploading ${files.length} seed data files to GCS bucket: ${bucketId}`);
 
   const results = await Promise.allSettled(
     files.map(async (filePath) => {
@@ -71,29 +67,22 @@ async function uploadSeedData() {
           cacheControl: 'no-cache',
         },
       });
-
-      console.log(`  ✓ Uploaded: ${objectKey}`);
       return objectKey;
     }),
   );
 
-  const succeeded = results.filter((r) => r.status === 'fulfilled').length;
+  const _succeeded = results.filter((r) => r.status === 'fulfilled').length;
   const failed = results.filter((r) => r.status === 'rejected');
 
-  console.log(`\nUpload complete: ${succeeded}/${files.length} files succeeded`);
-
   if (failed.length > 0) {
-    console.error(`${failed.length} file(s) failed to upload:`);
     failed.forEach((r) => {
       if (r.status === 'rejected') {
-        console.error(`  ✗ ${r.reason}`);
       }
     });
     process.exit(1);
   }
 }
 
-uploadSeedData().catch((err) => {
-  console.error('Fatal error during seed data upload:', err);
+uploadSeedData().catch((_err) => {
   process.exit(1);
 });

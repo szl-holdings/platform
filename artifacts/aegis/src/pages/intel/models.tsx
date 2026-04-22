@@ -336,7 +336,7 @@ function exportGovernanceCSV(entries: LogEntry[]) {
     escapeCSV(e.entityId),
     escapeCSV(e.actor),
     escapeCSV(e.platform),
-    escapeCSV(e.confidence !== null ? Math.round((e.confidence ?? 0) * 100) + '%' : null),
+    escapeCSV(e.confidence !== null ? `${Math.round((e.confidence ?? 0) * 100)}%` : null),
     escapeCSV(e.timestamp),
   ].join(','));
   const csv = [header.join(','), ...rows].join('\n');

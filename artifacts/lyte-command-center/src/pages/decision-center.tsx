@@ -7,10 +7,8 @@ import {
   Brain,
   CheckCircle2,
   ChevronRight,
-  Clock,
   Cpu,
   Database,
-  Eye,
   FileText,
   Globe,
   Layers,
@@ -293,7 +291,7 @@ function EvidenceTab({ evidence }: { evidence: EvidenceItem[] }) {
   return (
     <div className="space-y-3">
       {evidence.map((ev) => {
-        const freshCfg = FRESHNESS_CFG[ev.freshness] ?? {
+        const _freshCfg = FRESHNESS_CFG[ev.freshness] ?? {
           color: 'text-slate-400',
           label: ev.freshness,
         };
@@ -907,7 +905,7 @@ export default function DecisionCenter() {
   const readyCount = cards.filter((c) => c.status === 'ready-for-review').length;
   const avgConfidence =
     cards.length > 0 ? cards.reduce((s, c) => s + c.confidence, 0) / cards.length : 0;
-  const blockingFailures = cards.filter(
+  const _blockingFailures = cards.filter(
     (c) => (c.validationSummary?.blockingFailures ?? 0) > 0,
   ).length;
 

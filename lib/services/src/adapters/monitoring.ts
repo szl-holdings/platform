@@ -23,7 +23,7 @@ export class MonitoringAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ['SENTRY_DSN'];
 
   private get sentryDsn(): string | undefined {
-    return process.env['SENTRY_DSN'];
+    return process.env.SENTRY_DSN;
   }
 
   protected override async performHealthCheck(): Promise<void> {

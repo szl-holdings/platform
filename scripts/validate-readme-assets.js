@@ -197,7 +197,6 @@ function scanMarkdownFile(filePath, fromFile) {
 
 const absReadme = path.resolve(ROOT, README_PATH);
 if (!fs.existsSync(absReadme)) {
-  console.error(`ERROR: README not found at ${README_PATH}`);
   process.exit(1);
 }
 
@@ -222,17 +221,9 @@ for (const link of linkedMdFiles) {
 }
 
 if (errors.length > 0) {
-  console.error('\nREADME asset validation FAILED:\n');
-  for (const e of errors) {
-    console.error(`  x ${e}`);
+  for (const _e of errors) {
   }
-  console.error(
-    `\n${errors.length} error(s) found. Fix the issues above and re-run: pnpm readme:check\n`,
-  );
   process.exit(1);
 } else {
-  console.log(
-    `\nREADME asset validation passed (${README_PATH}). No broken images or missing badge workflows found.\n`,
-  );
   process.exit(0);
 }

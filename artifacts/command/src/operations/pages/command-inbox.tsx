@@ -1,6 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
@@ -18,7 +17,6 @@ import {
   Heart,
   Radio,
   Shield,
-  TrendingDown,
   Undo2,
   User,
   Workflow,
@@ -111,9 +109,6 @@ function CommandInboxAlerts() {
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        // Surface the failure but still revalidate so the UI doesn't lie.
-        // eslint-disable-next-line no-console
-        console.warn('alert state update failed', res.status);
       }
       await qc.invalidateQueries({ queryKey: ['command-alerts'] });
       await qc.invalidateQueries({ queryKey: ['ops-badge-counts'] });

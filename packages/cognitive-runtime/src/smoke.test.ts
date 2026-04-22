@@ -5,8 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { generateExecutiveBrief } from './brief.js';
 import { InMemoryCheckpointStore } from './checkpoint.js';
 import { run } from './orchestrator.js';
-import type { StepExecutorFn } from './phases/execute.js';
-import { GuardianDecisionEngine } from './phases/execute.js';
+import { type StepExecutorFn, GuardianDecisionEngine } from './phases/execute.js';
 
 function makeStores() {
   return {
@@ -76,7 +75,7 @@ describe('cognitive-runtime smoke tests', () => {
 
     // World model must have updated with entities from the signals
     expect(result.run.worldModelUpdate).toBeDefined();
-    expect(result.run.worldModelUpdate!.entities.length).toBeGreaterThan(0);
+    expect(result.run.worldModelUpdate?.entities.length).toBeGreaterThan(0);
 
     // A plan must have been created
     expect(result.run.planId).toBeDefined();
@@ -88,7 +87,7 @@ describe('cognitive-runtime smoke tests', () => {
     // Verify phase must have run and produced a decision
     const verifyPhaseResult = result.run.phases.find((p) => p.phase === 'verify');
     expect(verifyPhaseResult).toBeDefined();
-    const verifyOutput = verifyPhaseResult!.output as {
+    const verifyOutput = verifyPhaseResult?.output as {
       passed: boolean;
       action: string;
       overallScore: number;
@@ -162,7 +161,7 @@ describe('cognitive-runtime smoke tests', () => {
 
     const updateMemFinal = result.run.phases.find((p) => p.phase === 'update_memory');
     expect(updateMemFinal).toBeDefined();
-    const updateOut = updateMemFinal!.output as { memoryIdsWritten: string[] };
+    const updateOut = updateMemFinal?.output as { memoryIdsWritten: string[] };
     expect(Array.isArray(updateOut.memoryIdsWritten)).toBe(true);
     expect(updateOut.memoryIdsWritten.length).toBeGreaterThan(0);
   });
@@ -203,8 +202,8 @@ describe('cognitive-runtime smoke tests', () => {
 
     // Execute phase must have status "blocked"
     const execPhase = result.run.phases.find((p) => p.phase === 'execute');
-    expect(execPhase!.status).toBe('blocked');
-    const execOut = execPhase!.output as {
+    expect(execPhase?.status).toBe('blocked');
+    const execOut = execPhase?.output as {
       blockedSteps: number;
       stepResults: { status: string }[];
     };
@@ -214,12 +213,12 @@ describe('cognitive-runtime smoke tests', () => {
     // update_self_model + update_memory must ALWAYS run — even after guardian block
     const selfModelPhaseResult = result.run.phases.find((p) => p.phase === 'update_self_model');
     expect(selfModelPhaseResult).toBeDefined();
-    expect(selfModelPhaseResult!.status).toBe('ok');
+    expect(selfModelPhaseResult?.status).toBe('ok');
 
     const updateMemPhaseResult = result.run.phases.find((p) => p.phase === 'update_memory');
     expect(updateMemPhaseResult).toBeDefined();
-    expect(updateMemPhaseResult!.status).toBe('ok');
-    const updateOut = updateMemPhaseResult!.output as { memoryIdsWritten: string[] };
+    expect(updateMemPhaseResult?.status).toBe('ok');
+    const updateOut = updateMemPhaseResult?.output as { memoryIdsWritten: string[] };
     expect(updateOut.memoryIdsWritten.length).toBeGreaterThan(0);
   });
 
@@ -253,10 +252,10 @@ describe('cognitive-runtime smoke tests', () => {
     expect(checkpoints.length).toBeGreaterThan(0);
 
     // Checkpoint must record the agentId for ownership enforcement
-    expect(checkpoints[0]!.agentId).toBe('checkpoint-agent');
-    expect(checkpoints[0]!.runId).toBe(firstResult.run.runId);
-    expect(checkpoints[0]!.stepIndex).toBeDefined();
-    expect(checkpoints[0]!.snapshot.phases.some((p) => p.phase === 'plan')).toBe(true);
+    expect(checkpoints[0]?.agentId).toBe('checkpoint-agent');
+    expect(checkpoints[0]?.runId).toBe(firstResult.run.runId);
+    expect(checkpoints[0]?.stepIndex).toBeDefined();
+    expect(checkpoints[0]?.snapshot.phases.some((p) => p.phase === 'plan')).toBe(true);
 
     const firstCkpt = checkpoints[0]!;
     const stepsBeforeResume = stepCallCount;
@@ -334,29 +333,29 @@ describe('cognitive-runtime smoke tests', () => {
 
     // ── World model updated (PERCEIVE + ORIENT) ──────────────────────────────
     expect(result.run.worldModelUpdate).toBeDefined();
-    expect(result.run.worldModelUpdate!.riskScore).toBeGreaterThan(0);
-    expect(result.run.worldModelUpdate!.entities.length).toBeGreaterThan(0);
+    expect(result.run.worldModelUpdate?.riskScore).toBeGreaterThan(0);
+    expect(result.run.worldModelUpdate?.entities.length).toBeGreaterThan(0);
     // The vessel entity must appear in the world model
-    const entityIds = result.run.worldModelUpdate!.entities.map((e) => e.entityId);
+    const entityIds = result.run.worldModelUpdate?.entities.map((e) => e.entityId);
     expect(entityIds).toContain('vessel-mayday-001');
 
     // ── Plan created (PLAN) ──────────────────────────────────────────────────
     expect(result.run.planId).toBeDefined();
     const planPhase = result.run.phases.find((p) => p.phase === 'plan');
     expect(planPhase).toBeDefined();
-    expect(planPhase!.status).toBe('ok');
+    expect(planPhase?.status).toBe('ok');
 
     // ── Execute ran (EXECUTE) ────────────────────────────────────────────────
     const execPhase = result.run.phases.find((p) => p.phase === 'execute');
     expect(execPhase).toBeDefined();
-    expect(execPhase!.status).toBe('ok');
-    const execOut = execPhase!.output as { completedSteps: number };
+    expect(execPhase?.status).toBe('ok');
+    const execOut = execPhase?.output as { completedSteps: number };
     expect(execOut.completedSteps).toBeGreaterThan(0);
 
     // ── Verify phase ran and produced a structured decision (VERIFY) ──────────
     const verifyPhase = result.run.phases.find((p) => p.phase === 'verify');
     expect(verifyPhase).toBeDefined();
-    const verifyOut = verifyPhase!.output as {
+    const verifyOut = verifyPhase?.output as {
       passed: boolean;
       action: string;
       overallScore: number;
@@ -369,7 +368,7 @@ describe('cognitive-runtime smoke tests', () => {
     // ── Reflect was called (REFLECT) ─────────────────────────────────────────
     const reflectPhase = result.run.phases.find((p) => p.phase === 'reflect');
     expect(reflectPhase).toBeDefined();
-    const reflectOut = reflectPhase!.output as {
+    const reflectOut = reflectPhase?.output as {
       lesson: string;
       reflectionId: string;
       qualityScore: number;
@@ -381,15 +380,15 @@ describe('cognitive-runtime smoke tests', () => {
     // ── Self-model updated (UPDATE_SELF_MODEL — Phase 7) ────────────────────
     const selfModelPhase = result.run.phases.find((p) => p.phase === 'update_self_model');
     expect(selfModelPhase).toBeDefined();
-    expect(selfModelPhase!.status).toBe('ok');
-    const selfModelOut = selfModelPhase!.output as { selfModelUpdated: boolean };
+    expect(selfModelPhase?.status).toBe('ok');
+    const selfModelOut = selfModelPhase?.output as { selfModelUpdated: boolean };
     expect(typeof selfModelOut.selfModelUpdated).toBe('boolean');
 
     // ── Memory updated (UPDATE_MEMORY — Phase 8 — discrete from self-model) ─
     const updateMemoryPhaseResult = result.run.phases.find((p) => p.phase === 'update_memory');
     expect(updateMemoryPhaseResult).toBeDefined();
-    expect(updateMemoryPhaseResult!.status).toBe('ok');
-    const updateMemOut = updateMemoryPhaseResult!.output as {
+    expect(updateMemoryPhaseResult?.status).toBe('ok');
+    const updateMemOut = updateMemoryPhaseResult?.output as {
       memoryIdsWritten: string[];
       episodicId: string;
     };
@@ -409,7 +408,7 @@ describe('cognitive-runtime smoke tests', () => {
         (e.value as Record<string, unknown>).runId === result.run.runId,
     );
     expect(runEntry).toBeDefined();
-    expect((runEntry!.value as Record<string, unknown>).objective).toContain('maritime');
+    expect((runEntry?.value as Record<string, unknown>).objective).toContain('maritime');
 
     // ── Phase order matches spec: PERCEIVE → ORIENT → PLAN → EXECUTE → ... → UPDATE_SELF_MODEL → UPDATE_MEMORY
     const orderedPhases = result.run.phases.map((p) => p.phase);
@@ -433,8 +432,8 @@ describe('cognitive-runtime smoke tests', () => {
     // exists in the store and can be replayed via TraceReplayer.
     const traceRecord = traceStore.get(result.run.traceId!);
     expect(traceRecord).toBeDefined();
-    expect(traceRecord!.traceId).toBe(result.run.traceId);
-    expect(traceRecord!.agentId).toBe('smoke-agent');
+    expect(traceRecord?.traceId).toBe(result.run.traceId);
+    expect(traceRecord?.agentId).toBe('smoke-agent');
 
     const replayer = new TraceReplayer(traceStore);
     const visitedSpans: string[] = [];
@@ -472,7 +471,7 @@ describe('cognitive-runtime smoke tests', () => {
     expect(typeof brief.verifySummary.finalVerdict).toBe('string');
     // Lesson must be present (reflectionEnabled=true)
     expect(typeof brief.lesson).toBe('string');
-    expect(brief.lesson!.length).toBeGreaterThan(0);
+    expect(brief.lesson?.length).toBeGreaterThan(0);
     // Brief must have a generation timestamp
     expect(typeof brief.generatedAt).toBe('string');
     expect(new Date(brief.generatedAt).getTime()).toBeGreaterThan(0);

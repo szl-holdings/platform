@@ -5,15 +5,12 @@ import {
   AlertTriangle,
   ArrowRight,
   CheckCircle,
-  ChevronRight,
-  Clock,
   Cpu,
   Database,
   Eye,
   GitBranch,
   Lock,
   Play,
-  Plus,
   RefreshCw,
   RotateCcw,
   Shield,
@@ -348,7 +345,7 @@ function NodeCard({ node }: { node: DAGNode }) {
         className="w-16 h-16 rounded-xl flex flex-col items-center justify-center relative"
         style={{
           background: cfg.bg,
-          border: `2px solid ${node.state === 'blocked' ? cfg.color : node.state === 'ready' ? cfg.color + '80' : 'rgba(255,255,255,0.06)'}`,
+          border: `2px solid ${node.state === 'blocked' ? cfg.color : node.state === 'ready' ? `${cfg.color}80` : 'rgba(255,255,255,0.06)'}`,
           boxShadow: node.state === 'blocked' ? `0 0 12px ${cfg.color}22` : 'none',
         }}
       >
@@ -475,7 +472,7 @@ export default function AlloyGraphCompilerPage() {
   const [goalInput, setGoalInput] = useState('');
   const [compiledPlan, setCompiledPlan] = useState<CompiledPlan | null>(null);
   const [isCompiling, setIsCompiling] = useState(false);
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [_selectedNode, _setSelectedNode] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
 
   const { data: workflowsData } = useStandardQuery({

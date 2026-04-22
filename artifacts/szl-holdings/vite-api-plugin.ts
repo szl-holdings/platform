@@ -8,7 +8,6 @@ export function apiServerPlugin(): Plugin {
 
   function startApi() {
     if (child) return;
-    console.log('[api-plugin] Starting API server on port 9090...');
     child = spawn(
       'node',
       ['--max-old-space-size=512', '--enable-source-maps', resolve(apiRoot, 'dist/index.mjs')],
@@ -21,15 +20,14 @@ export function apiServerPlugin(): Plugin {
 
     child.stdout?.on('data', (d: Buffer) => {
       const line = d.toString().trim();
-      if (line) console.log(`[api] ${line}`);
+      if (line) {}
     });
     child.stderr?.on('data', (d: Buffer) => {
       const line = d.toString().trim();
-      if (line) console.error(`[api] ${line}`);
+      if (line) {}
     });
 
-    child.on('exit', (code, signal) => {
-      console.log(`[api-plugin] API exited (code=${code}, signal=${signal}). Restarting in 3s...`);
+    child.on('exit', (_code, _signal) => {
       child = null;
       setTimeout(startApi, 3000);
     });

@@ -1,17 +1,7 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  AlertTriangle,
-  BarChart3,
-  CheckCircle2,
-  DollarSign,
-  Droplets,
-  Flame,
-  Globe,
   Leaf,
-  RefreshCw,
-  TrendingDown,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -157,7 +147,7 @@ const fuelColor: Record<string, string> = {
   emerald: 'text-emerald-400',
   teal: 'text-teal-400',
 };
-const fuelBg: Record<string, string> = {
+const _fuelBg: Record<string, string> = {
   amber: 'bg-amber-500/5 border-amber-500/15',
   sky: 'bg-sky-500/5 border-sky-500/15',
   violet: 'bg-violet-500/5 border-violet-500/15',

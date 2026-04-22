@@ -15,7 +15,7 @@ import {
   ownershipScenariosTable,
   procurementContactsTable,
 } from '@szl-holdings/db';
-import { and, asc, desc, eq, sql } from 'drizzle-orm';
+import { asc, desc, eq, sql } from 'drizzle-orm';
 import { type IRouter, type NextFunction, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -117,7 +117,7 @@ router.use('/certification', requireCertFlag);
 
 // ─── CERTIFICATION PROGRAMS ───────────────────────────────────────────────────
 
-router.get('/certification/programs', ...auth, async (req, res) => {
+router.get('/certification/programs', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -290,7 +290,7 @@ router.delete(
 
 // ─── CERTIFICATION STATUS ─────────────────────────────────────────────────────
 
-router.get('/certification/status', ...auth, async (req, res) => {
+router.get('/certification/status', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -366,7 +366,7 @@ router.delete(
 
 // ─── CERTIFICATION TASKS ──────────────────────────────────────────────────────
 
-router.get('/certification/tasks', ...auth, async (req, res) => {
+router.get('/certification/tasks', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -444,7 +444,7 @@ router.delete(
 
 // ─── OWNERSHIP SCENARIOS ──────────────────────────────────────────────────────
 
-router.get('/certification/ownership-scenarios', ...auth, async (req, res) => {
+router.get('/certification/ownership-scenarios', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -520,7 +520,7 @@ router.delete(
 
 // ─── APPLICATION ARTIFACTS ────────────────────────────────────────────────────
 
-router.get('/certification/artifacts', ...auth, async (req, res) => {
+router.get('/certification/artifacts', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -678,7 +678,7 @@ router.delete(
 
 // ─── PROCUREMENT CONTACTS ─────────────────────────────────────────────────────
 
-router.get('/certification/procurement-contacts', ...auth, async (req, res) => {
+router.get('/certification/procurement-contacts', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -754,7 +754,7 @@ router.delete(
 
 // ─── CERTIFICATION CALENDAR ───────────────────────────────────────────────────
 
-router.get('/certification/calendar', ...auth, async (req, res) => {
+router.get('/certification/calendar', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -825,7 +825,7 @@ router.delete(
 
 // ─── LEGAL REVIEW CHECKPOINTS ─────────────────────────────────────────────────
 
-router.get('/certification/legal-reviews', ...auth, async (req, res) => {
+router.get('/certification/legal-reviews', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -901,7 +901,7 @@ router.delete(
 
 // ─── NAICS CODE MAPPING ────────────────────────────────────────────────────────
 
-router.get('/certification/naics', ...auth, async (req, res) => {
+router.get('/certification/naics', ...auth, async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -924,7 +924,7 @@ router.post('/certification/naics', ...auth, validateBody(bodyShape({})), async 
 
 // ─── SEED CERTIFICATION PROGRAMS ─────────────────────────────────────────────
 
-router.post('/certification/seed', ...auth, validateBody(bodyShape({})), async (req, res) => {
+router.post('/certification/seed', ...auth, validateBody(bodyShape({})), async (_req, res) => {
   if (guardSeedInProduction(res)) return;
   try {
     const [{ count: existing }] = await db
@@ -1758,7 +1758,7 @@ router.post('/certification/seed', ...auth, validateBody(bodyShape({})), async (
 
 // ─── MOM-LED READINESS EVALUATION ─────────────────────────────────────────────
 
-router.get('/certification/mom-led-readiness', ...auth, async (req, res) => {
+router.get('/certification/mom-led-readiness', ...auth, async (_req, res) => {
   try {
     const [programs, allRequirements, scenarios] = await Promise.all([
       db
@@ -1886,7 +1886,7 @@ router.get('/certification/mom-led-readiness', ...auth, async (req, res) => {
 
 // ─── CERTIFICATION DASHBOARD ──────────────────────────────────────────────────
 
-router.get('/certification/dashboard', ...auth, async (req, res) => {
+router.get('/certification/dashboard', ...auth, async (_req, res) => {
   try {
     const [programs, allStatus, allTasks, calendar, opportunities] = await Promise.all([
       db

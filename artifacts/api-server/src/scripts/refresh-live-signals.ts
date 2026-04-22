@@ -33,12 +33,7 @@
  * seed-live-signals: firestorm ≥4 active, vessels alerts ≥5 active w/
  * ≥2 high+critical, vessels delay events ≥2 open).
  */
-import { db } from "@szl-holdings/db";
-import {
-  firestormIncidentsTable,
-  vesselsAlertsTable,
-  vesselsEventsTable,
-} from "@szl-holdings/db";
+import { db, firestormIncidentsTable, vesselsAlertsTable, vesselsEventsTable } from '@szl-holdings/db';
 import { and, desc, eq, inArray, ne, or, sql } from "drizzle-orm";
 
 const HOUR_MS = 3600_000;
@@ -120,7 +115,6 @@ async function refreshFirestormIncidents(): Promise<RefreshResult> {
     ));
 
   if (seededOpen.length === 0) {
-    console.log("[refresh-live-signals] firestorm_incidents: no seeded open rows, skipping");
     return { shifted: 0, rotated: 0 };
   }
 
@@ -184,20 +178,18 @@ async function refreshFirestormIncidents(): Promise<RefreshResult> {
       rotated = 1;
     }
   }
-
-  console.log(`[refresh-live-signals] firestorm_incidents: shifted=${shifted} rotated=${rotated} delta_h=${(delta / HOUR_MS).toFixed(1)}`);
   return { shifted, rotated };
 }
 
 /** Build a SQL OR of `title LIKE 'prefix%'` for a list of stable seed prefixes. */
 function vesselsTitleScope(prefixes: readonly string[]) {
   // Each prefix is hard-coded above; building parameterized LIKEs.
-  const conds = prefixes.map((p) => sql`${vesselsAlertsTable.title} LIKE ${p + "%"}`);
+  const conds = prefixes.map((p) => sql`${vesselsAlertsTable.title} LIKE ${`${p}%`}`);
   return or(...conds)!;
 }
 
 function vesselsEventsTitleScope(prefixes: readonly string[]) {
-  const conds = prefixes.map((p) => sql`${vesselsEventsTable.title} LIKE ${p + "%"}`);
+  const conds = prefixes.map((p) => sql`${vesselsEventsTable.title} LIKE ${`${p}%`}`);
   return or(...conds)!;
 }
 
@@ -211,7 +203,6 @@ async function refreshVesselsAlerts(): Promise<RefreshResult> {
     ));
 
   if (seededActive.length === 0) {
-    console.log("[refresh-live-signals] vessels_alerts: no seeded active rows, skipping");
     return { shifted: 0, rotated: 0 };
   }
 
@@ -266,8 +257,6 @@ async function refreshVesselsAlerts(): Promise<RefreshResult> {
       rotated = 1;
     }
   }
-
-  console.log(`[refresh-live-signals] vessels_alerts: shifted=${shifted} rotated=${rotated} delta_h=${(delta / HOUR_MS).toFixed(1)}`);
   return { shifted, rotated };
 }
 
@@ -282,7 +271,6 @@ async function refreshVesselsDelayEvents(): Promise<RefreshResult> {
     ));
 
   if (seededOpen.length === 0) {
-    console.log("[refresh-live-signals] vessels_events delay_event: no seeded open rows, skipping");
     return { shifted: 0, rotated: 0 };
   }
 
@@ -336,8 +324,6 @@ async function refreshVesselsDelayEvents(): Promise<RefreshResult> {
       rotated = 1;
     }
   }
-
-  console.log(`[refresh-live-signals] vessels_events delay_event: shifted=${shifted} rotated=${rotated} delta_h=${(delta / HOUR_MS).toFixed(1)}`);
   return { shifted, rotated };
 }
 
@@ -348,20 +334,15 @@ export interface RefreshLiveSignalsResult {
 }
 
 export async function refreshLiveSignals(): Promise<RefreshLiveSignalsResult> {
-  console.log("[refresh-live-signals] Starting (seed-scoped refresh)…");
 
   const firestorm = await refreshFirestormIncidents();
   const vesselsAlerts = await refreshVesselsAlerts();
   const vesselsDelayEvents = await refreshVesselsDelayEvents();
-
-  console.log(
-    `[refresh-live-signals] Done. firestorm=${JSON.stringify(firestorm)} vesselsAlerts=${JSON.stringify(vesselsAlerts)} vesselsDelayEvents=${JSON.stringify(vesselsDelayEvents)}`,
-  );
   return { firestorm, vesselsAlerts, vesselsDelayEvents };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   refreshLiveSignals()
     .then(() => process.exit(0))
-    .catch((err) => { console.error("[refresh-live-signals] failed:", err); process.exit(1); });
+    .catch((_err) => { process.exit(1); });
 }

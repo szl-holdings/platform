@@ -7,9 +7,9 @@
  */
 
 import { chromium } from '@playwright/test';
-import { mkdirSync, existsSync } from 'fs';
-import { join } from 'path';
-import { execSync } from 'child_process';
+import { mkdirSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { execSync } from 'node:child_process';
 
 const [, , BASE_URL, OUT_DIR, FILTER = ''] = process.argv;
 
@@ -123,11 +123,8 @@ const targets = FILTER
   : ARTIFACTS;
 
 if (targets.length === 0) {
-  console.error(`No artifacts match filter: "${FILTER}"`);
   process.exit(1);
 }
-
-console.log(`Capturing ${targets.length} artifact(s)…`);
 
 // Prefer the system Nix chromium which has all required libs
 let executablePath;
@@ -150,8 +147,6 @@ const context = await browser.newContext({
 for (const artifact of targets) {
   const artifactDir = join(OUT_DIR, artifact.id);
   if (!existsSync(artifactDir)) mkdirSync(artifactDir, { recursive: true });
-
-  console.log(`\n  [${artifact.id}] ${artifact.label}`);
 
   for (const view of artifact.views) {
     const url = `${BASE_URL}${artifact.path}${view.suffix}`;
@@ -210,13 +205,9 @@ for (const artifact of targets) {
 
       await page.screenshot({ path: outPath, fullPage: false });
       await page.close();
-
-      console.log(`    ✓ ${view.name}.png`);
-    } catch (err) {
-      console.error(`    ✗ ${view.name}: ${err.message}`);
+    } catch (_err) {
     }
   }
 }
 
 await browser.close();
-console.log('\nAll done.');

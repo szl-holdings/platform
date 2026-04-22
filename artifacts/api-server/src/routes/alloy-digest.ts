@@ -1,6 +1,5 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  alloyActions,
   alloyApprovals,
   alloySignals,
   alloyWorkflows,
@@ -16,7 +15,7 @@ import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendCreated, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
-import { authMiddleware, requireRole } from '../middlewares/auth';
+import { authMiddleware, } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
 
 const router: IRouter = Router();
@@ -194,7 +193,7 @@ export async function gatherDigestData(roleScope: string): Promise<DigestContent
         id: d.id,
         decision: d.decision ?? 'unknown',
         action:
-          typeof newValues['action'] === 'string' ? (newValues['action'] as string) : '(unknown)',
+          typeof newValues.action === 'string' ? (newValues.action as string) : '(unknown)',
         product: d.product ?? null,
         resolvedMode: d.resolvedMode ?? null,
         confidence: typeof d.confidence === 'number' ? d.confidence : null,
@@ -379,7 +378,7 @@ router.post(
         const slackToken = process.env.SLACK_BOT_TOKEN;
         const slackChannel = process.env.ALLOY_DIGEST_SLACK_CHANNEL;
         if (!slackToken || !slackChannel) {
-          deliveryOutcomes['slack'] = {
+          deliveryOutcomes.slack = {
             sent: false,
             error: 'SLACK_BOT_TOKEN or ALLOY_DIGEST_SLACK_CHANNEL not configured',
           };
@@ -398,19 +397,19 @@ router.post(
               body: JSON.stringify({ channel: slackChannel, text: slackText, mrkdwn: true }),
             });
             if (slackRes.ok) {
-              deliveryOutcomes['slack'] = { sent: true, sentAt: new Date().toISOString() };
+              deliveryOutcomes.slack = { sent: true, sentAt: new Date().toISOString() };
             } else {
-              deliveryOutcomes['slack'] = { sent: false, error: `Slack API ${slackRes.status}` };
+              deliveryOutcomes.slack = { sent: false, error: `Slack API ${slackRes.status}` };
             }
           } catch (slackErr) {
-            deliveryOutcomes['slack'] = { sent: false, error: String(slackErr) };
+            deliveryOutcomes.slack = { sent: false, error: String(slackErr) };
             logger.warn({ err: slackErr }, 'alloy-digest: Slack delivery failed');
           }
         }
       }
 
       if (deliveryChannels.includes('in_app') || deliveryChannels.length === 0) {
-        deliveryOutcomes['in_app'] = { sent: true, sentAt: new Date().toISOString() };
+        deliveryOutcomes.in_app = { sent: true, sentAt: new Date().toISOString() };
       }
 
       try {

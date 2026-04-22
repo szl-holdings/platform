@@ -13,9 +13,8 @@
  * Skipped if no DATABASE_URL is configured.
  */
 
-import { randomUUID } from 'crypto';
-import type { NextFunction, Request, Response } from 'express';
-import express from 'express';
+import { randomUUID } from 'node:crypto';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 

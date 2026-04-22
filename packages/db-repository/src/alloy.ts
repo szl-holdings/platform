@@ -7,7 +7,7 @@ import {
   alloyWorkflowsTable,
   db,
 } from '@szl-holdings/db';
-import { and, desc, eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 
 export class AlloyRepository {
   async findWorkflowById(id: number) {
@@ -19,7 +19,7 @@ export class AlloyRepository {
     return rows[0] ?? null;
   }
 
-  async listWorkflows(orgId?: number, limit = 50) {
+  async listWorkflows(_orgId?: number, limit = 50) {
     const query = db
       .select()
       .from(alloyWorkflowsTable)

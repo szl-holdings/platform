@@ -558,7 +558,7 @@ function createDomainToolExecutor(domain: string) {
       const devDomain = process.env.REPLIT_DEV_DOMAIN;
       const baseUrl = devDomain
         ? `https://${devDomain}`
-        : `http://localhost:${process.env['PORT'] || 3000}`;
+        : `http://localhost:${process.env.PORT || 3000}`;
       const toolRoutes: Record<string, Record<string, string>> = {
         inca: {
           get_experiments: '/api/inca/experiments',
@@ -631,7 +631,7 @@ function createDomainToolExecutor(domain: string) {
         }
         const data = await resp.json();
         const str = JSON.stringify(data);
-        return str.length > 8000 ? str.slice(0, 8000) + '...' : str;
+        return str.length > 8000 ? `${str.slice(0, 8000)}...` : str;
       } finally {
         clearTimeout(timer);
       }

@@ -4,16 +4,13 @@ import {
   BookOpen,
   CheckCircle2,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   Clock,
   Database,
-  Eye,
   EyeOff,
   GitBranch,
   Layers,
   Loader2,
-  Pause,
   RotateCcw,
   Shield,
   XCircle,
@@ -202,7 +199,7 @@ function StageTimeline({
                         retrieverSource?: string;
                         retrieverAdapterId?: string | null;
                       } | null;
-                      if (!out || !out.retrieverSource) return null;
+                      if (!out?.retrieverSource) return null;
                       const src = out.retrieverSource as RetrieverSource;
                       if (!RETRIEVER_SOURCE_STYLE[src]) return null;
                       return (

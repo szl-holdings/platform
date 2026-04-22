@@ -26,7 +26,6 @@ import {
   Scale,
   Shield,
   Target,
-  TrendingUp,
   Users,
   X,
   Zap,

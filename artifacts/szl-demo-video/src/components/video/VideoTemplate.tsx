@@ -2,10 +2,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
 import { useVideoPlayer } from '@/lib/video';
 import { CaptionTrack, SCENE_CAPTIONS } from './CaptionTrack';
-import type { Chapter } from './ChapterMarkers';
-import { ChapterMarkers } from './ChapterMarkers';
-import type { SocialCut } from './SocialCutSelector';
-import { CaptionToggle, SOCIAL_CUT_CONFIGS, SocialCutSelector } from './SocialCutSelector';
+import { type Chapter, ChapterMarkers } from './ChapterMarkers';
+import { type SocialCut, CaptionToggle, SOCIAL_CUT_CONFIGS, SocialCutSelector } from './SocialCutSelector';
 import { Scene1 } from './video_scenes/Scene1';
 import { Scene2 } from './video_scenes/Scene2';
 import { Scene3 } from './video_scenes/Scene3';
@@ -143,7 +141,7 @@ export default function VideoTemplate() {
     setPlayerKey((k) => k + 1);
   }
 
-  const durations = SOCIAL_CUT_CONFIGS['full'].durations;
+  const durations = SOCIAL_CUT_CONFIGS.full.durations;
   const { currentScene } = useVideoPlayer({ durations });
 
   return (

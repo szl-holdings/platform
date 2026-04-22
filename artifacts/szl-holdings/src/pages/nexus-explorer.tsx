@@ -1,7 +1,6 @@
 import { color } from '@szl-holdings/design-system';
 import { AnimatePresence, m } from 'framer-motion';
 import {
-  Activity,
   AlertTriangle,
   BookOpen,
   Building2,
@@ -13,9 +12,7 @@ import {
   Network,
   Scale,
   Search,
-  Shield,
   Ship,
-  TrendingUp,
   User,
   X,
 } from 'lucide-react';
@@ -24,15 +21,12 @@ import { Link } from 'wouter';
 import { SiteNav } from '@/components/SiteNav';
 import { runAnomalyDetection } from '@/lib/nexus/anomaly-engine';
 import {
-  EdgeRecord,
   type EntityRecord,
   type EntityType,
   getConnectedEdges,
-  getNeighborIds,
   KNOWLEDGE_GRAPH,
   NEXUS_EDGES,
   NEXUS_ENTITIES,
-  traverseGraph,
 } from '@/lib/nexus/graph';
 import { executeQuery } from '@/lib/nexus/query-engine';
 

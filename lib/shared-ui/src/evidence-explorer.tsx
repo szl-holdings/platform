@@ -898,7 +898,6 @@ function JustificationModal({
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={4}
-          autoFocus
           placeholder="Describe why this action is warranted…"
           className="w-full rounded px-2.5 py-2 text-[12px] resize-none focus:outline-none"
           style={{
@@ -1336,10 +1335,10 @@ function EvidenceChainDrawer({
                     className="text-[10px] uppercase tracking-wider pt-1.5"
                     style={{ color: MUTED_DIM }}
                   >
-                    Decision log ({decisionsQuery.data!.decisions.length})
+                    Decision log ({decisionsQuery.data?.decisions.length})
                   </div>
                   {decisionsQuery
-                    .data!.decisions.slice()
+                    .data?.decisions.slice()
                     .reverse()
                     .map((d) => {
                       const cfg = DECISION_BTN[d.decision];

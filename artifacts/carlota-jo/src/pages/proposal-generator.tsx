@@ -17,7 +17,6 @@ import {
   Target,
   Trash2,
   Users,
-  X,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -304,7 +303,7 @@ export default function ProposalGenerator() {
   });
   const [advisoryClients, setAdvisoryClients] = useState<AdvisoryClient[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string>('');
-  const [knowledgeSuggestions, setKnowledgeSuggestions] = useState<KnowledgeSuggestion[]>([]);
+  const [_knowledgeSuggestions, setKnowledgeSuggestions] = useState<KnowledgeSuggestion[]>([]);
 
   useEffect(() => {
     void (async () => {

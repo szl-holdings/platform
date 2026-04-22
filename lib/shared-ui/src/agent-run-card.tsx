@@ -6,7 +6,7 @@
  *
  * Consumed by: Sentra, Vessels, Terra, Counsel, Command, Lyte, Pulse.
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { cn } from './utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────

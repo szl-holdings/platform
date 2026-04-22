@@ -159,7 +159,7 @@ export class CognitiveLoopError extends Error {
     message: string,
     public readonly phase: CognitivePhase,
     public readonly runId: string,
-    public readonly cause?: unknown,
+    public override readonly cause?: unknown,
   ) {
     super(message);
     this.name = 'CognitiveLoopError';

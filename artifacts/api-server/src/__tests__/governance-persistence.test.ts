@@ -33,9 +33,8 @@
  * Skipped if no DATABASE_URL is configured.
  */
 
-import { randomUUID } from 'crypto';
-import type { NextFunction, Request, Response } from 'express';
-import express from 'express';
+import { randomUUID } from 'node:crypto';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
@@ -77,7 +76,7 @@ vi.mock('../middlewares/auth.js', () => ({
   requireOrgMembership: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   parseIdParam: (paramName: string) => (req: Request, res: Response, next: NextFunction) => {
     const val = req.params[paramName];
-    if (!val || isNaN(Number(val))) {
+    if (!val || Number.isNaN(Number(val))) {
       res.status(400).json({ error: 'Invalid ID' });
       return;
     }
@@ -240,7 +239,7 @@ d('Governance state persists across an in-process server restart (#1912)', () =>
         status: 'pending',
       })
       .returning();
-    approvalDbId = approvalRow!.id;
+    approvalDbId = approvalRow?.id;
   });
 
   it('Restart in-process — resets the engine and re-runs initGuardianEngine()', async () => {
@@ -265,9 +264,9 @@ d('Governance state persists across an in-process server restart (#1912)', () =>
       .getRules()
       .find((r) => r.name === PINNED.policy.name);
     expect(ours).toBeDefined();
-    expect(ours!.tier).toBe(PINNED.policy.tier);
-    expect(ours!.priority).toBe(PINNED.policy.priority);
-    expect(ours!.action).toBe(PINNED.policy.action);
+    expect(ours?.tier).toBe(PINNED.policy.tier);
+    expect(ours?.priority).toBe(PINNED.policy.priority);
+    expect(ours?.action).toBe(PINNED.policy.action);
   });
 
   it('Phase 2 — fresh app instance reads every value back identically over HTTP', async () => {
@@ -303,10 +302,10 @@ d('Governance state persists across an in-process server restart (#1912)', () =>
       }>
     ).find((t) => t.tier === PINNED.tier.tier);
     expect(supervised).toBeDefined();
-    expect(supervised!.description).toBe(PINNED.tier.description);
-    expect(supervised!.riskLevel).toBe(PINNED.tier.riskLevel);
-    expect(supervised!.controls).toEqual(PINNED.tier.controls);
-    expect(supervised!.tierNumber).toBe(PINNED.tier.tierNumber);
+    expect(supervised?.description).toBe(PINNED.tier.description);
+    expect(supervised?.riskLevel).toBe(PINNED.tier.riskLevel);
+    expect(supervised?.controls).toEqual(PINNED.tier.controls);
+    expect(supervised?.tierNumber).toBe(PINNED.tier.tierNumber);
 
     // 3) Guardrail config round-trip
     const guardrailRes = await request(app).get(`/api/guardian/guardrail-configs/${guardrailDbId}`);
@@ -336,10 +335,10 @@ d('Governance state persists across an in-process server restart (#1912)', () =>
     }>;
     const approval = approvalsList.find((a) => a.requestId === PINNED.approval.requestId);
     expect(approval).toBeDefined();
-    expect(approval!.action).toBe(PINNED.approval.action);
-    expect(approval!.tier).toBe(PINNED.approval.tier);
-    expect(approval!.approvalType).toBe(PINNED.approval.approvalType);
-    expect(approval!.requiredApprovers).toEqual(PINNED.approval.requiredApprovers);
-    expect(approval!.status).toBe('pending');
+    expect(approval?.action).toBe(PINNED.approval.action);
+    expect(approval?.tier).toBe(PINNED.approval.tier);
+    expect(approval?.approvalType).toBe(PINNED.approval.approvalType);
+    expect(approval?.requiredApprovers).toEqual(PINNED.approval.requiredApprovers);
+    expect(approval?.status).toBe('pending');
   });
 });

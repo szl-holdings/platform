@@ -159,7 +159,7 @@ async function loadPreferences(userId: number): Promise<Preferences> {
 
 router.get('/preferences', authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const prefs = await loadPreferences(req.user!.id);
+    const prefs = await loadPreferences(req.user?.id);
     sendSuccess(res, prefs);
   } catch (err) {
     handleRouteError(res, err, 'Failed to load preferences');
@@ -176,7 +176,7 @@ router.patch(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
       const body = req.body as Record<string, unknown>;
 
       const updates: Array<{ key: string; value: PrefValue; valueType: PrefValueType }> = [];
@@ -195,7 +195,7 @@ router.patch(
       if (updates.length === 0) {
         sendBadRequest(
           res,
-          'No valid preference keys provided. Allowed: ' + [...ALLOWED_KEYS].join(', '),
+          `No valid preference keys provided. Allowed: ${[...ALLOWED_KEYS].join(', ')}`,
         );
         return;
       }

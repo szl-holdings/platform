@@ -1,5 +1,4 @@
 import type { ErrorFallbackProps } from '@szl-holdings/mobile-shared';
-import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {

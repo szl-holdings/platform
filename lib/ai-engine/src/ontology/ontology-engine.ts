@@ -343,24 +343,20 @@ export class OntologyEngine {
     // same Date instance, so they match. On an UPDATE via onConflictDoUpdate the
     // existing createdAt is preserved while updatedAt is set to a new Date, so
     // they will differ. Compare millisecond timestamps to classify the outcome.
-    const wasCreated = row!.createdAt.getTime() === row!.updatedAt.getTime();
+    const wasCreated = row?.createdAt.getTime() === row?.updatedAt.getTime();
 
     const result: OntologyEntity = {
-      id: row!.id,
+      id: row?.id,
       type: entity.type,
-      name: row!.name,
-      domain: row!.sourceApp,
-      metadata: (row!.metadata as Record<string, unknown>) ?? {},
-      tags: row!.tags ?? [],
+      name: row?.name,
+      domain: row?.sourceApp,
+      metadata: (row?.metadata as Record<string, unknown>) ?? {},
+      tags: row?.tags ?? [],
       ...(entity.riskScore !== undefined ? { riskScore: entity.riskScore } : {}),
-      lastUpdated: row!.updatedAt.toISOString(),
+      lastUpdated: row?.updatedAt.toISOString(),
     };
 
     this.setCache(result);
-
-    console.debug(
-      `[OntologyEngine] upsertEntity ${wasCreated ? 'created' : 'merged'} ${entity.domain}/${entity.type}:${entity.name} (id=${row!.id})`,
-    );
 
     return { ...result, wasCreated };
   }
@@ -385,13 +381,13 @@ export class OntologyEngine {
       .returning();
 
     return {
-      id: row!.id,
+      id: row?.id,
       fromEntityId,
       toEntityId,
       type,
       strength,
       metadata,
-      createdAt: row!.createdAt.toISOString(),
+      createdAt: row?.createdAt.toISOString(),
     };
   }
 
@@ -431,7 +427,7 @@ export class OntologyEngine {
       .from(entitiesTable)
       .where(
         sql`to_tsvector('english', ${entitiesTable.name}) @@ plainto_tsquery('english', ${query})
-            OR ${entitiesTable.name} ILIKE ${'%' + query + '%'}`,
+            OR ${entitiesTable.name} ILIKE ${`%${query}%`}`,
       )
       .limit(limit);
 
@@ -638,11 +634,7 @@ export class OntologyEngine {
           found: true,
         };
       }
-    } catch (err) {
-      console.warn(
-        '[OntologyEngine] Recursive CTE shortest path failed, falling back:',
-        err instanceof Error ? err.message : err,
-      );
+    } catch (_err) {
     }
 
     return this.shortestPathInMemory(fromEntityId, toEntityId, maxHops);
@@ -754,8 +746,8 @@ export class OntologyEngine {
     for (const rel of relRows) {
       if (!adjacency.has(rel.fromEntityId)) adjacency.set(rel.fromEntityId, []);
       if (!adjacency.has(rel.toEntityId)) adjacency.set(rel.toEntityId, []);
-      adjacency.get(rel.fromEntityId)!.push(rel.toEntityId);
-      adjacency.get(rel.toEntityId)!.push(rel.fromEntityId);
+      adjacency.get(rel.fromEntityId)?.push(rel.toEntityId);
+      adjacency.get(rel.toEntityId)?.push(rel.fromEntityId);
     }
 
     let iterations = 0;
@@ -788,7 +780,7 @@ export class OntologyEngine {
     for (const row of entityRows) {
       const communityId = labels.get(row.id) ?? row.id;
       if (!communities.has(communityId)) communities.set(communityId, []);
-      communities.get(communityId)!.push({
+      communities.get(communityId)?.push({
         entityId: row.id,
         entityName: row.name,
         entityType: mapEntityType(row.entityType),
@@ -891,7 +883,7 @@ export class OntologyEngine {
    */
   async temporalGraphAnalysis(
     entityId: string,
-    maxHops = 2,
+    _maxHops = 2,
     minTemporalWeight = 0.3,
   ): Promise<{
     entity: OntologyEntity | null;

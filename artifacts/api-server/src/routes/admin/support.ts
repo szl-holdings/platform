@@ -103,7 +103,7 @@ export function register(router: IRouter): void {
       const search = req.query.search as string | undefined;
       const statusFilter = req.query.status as string | undefined;
       const limitParam = parseInt((req.query.limit as string) ?? '100', 10);
-      const limit = format === 'csv' ? 5000 : Math.min(isNaN(limitParam) ? 100 : limitParam, 500);
+      const limit = format === 'csv' ? 5000 : Math.min(Number.isNaN(limitParam) ? 100 : limitParam, 500);
 
       const conditions = [];
       if (!includeResolved) conditions.push(eq(contactSubmissionsTable.status, 'open'));
@@ -230,7 +230,7 @@ export function register(router: IRouter): void {
     async (req, res) => {
       try {
         const id = parseInt(req.params.id as string, 10);
-        if (isNaN(id)) {
+        if (Number.isNaN(id)) {
           sendBadRequest(res, 'Invalid ticket ID');
           return;
         }
@@ -341,7 +341,7 @@ export function register(router: IRouter): void {
     async (req, res) => {
       try {
         const id = parseInt(req.params.id as string, 10);
-        if (isNaN(id)) {
+        if (Number.isNaN(id)) {
           sendBadRequest(res, 'Invalid ticket ID');
           return;
         }
@@ -371,7 +371,7 @@ export function register(router: IRouter): void {
     async (req, res) => {
       try {
         const id = parseInt(req.params.id as string, 10);
-        if (isNaN(id)) {
+        if (Number.isNaN(id)) {
           sendBadRequest(res, 'Invalid ticket ID');
           return;
         }
@@ -398,7 +398,7 @@ export function register(router: IRouter): void {
   router.post('/admin/support-queue/:id/reply', validateBody(replySchema), async (req, res) => {
     try {
       const id = parseInt(req.params.id as string, 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid ticket ID');
         return;
       }
@@ -477,7 +477,7 @@ export function register(router: IRouter): void {
   router.patch('/admin/kb-articles/:id', validateBody(kbArticleUpdateSchema), async (req, res) => {
     try {
       const id = parseInt(req.params.id as string, 10);
-      if (isNaN(id)) {
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid article ID');
         return;
       }
@@ -518,7 +518,7 @@ export function register(router: IRouter): void {
     async (req, res) => {
       try {
         const id = parseInt(req.params.id as string, 10);
-        if (isNaN(id)) {
+        if (Number.isNaN(id)) {
           sendBadRequest(res, 'Invalid article ID');
           return;
         }

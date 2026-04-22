@@ -35,7 +35,7 @@ router.use(tenantScope({ required: true }));
 function getOrgId(req: Request): number {
   if (req.user?.roles.includes('super_admin') && req.headers['x-org-id']) {
     const headerOrgId = parseInt(String(req.headers['x-org-id']), 10);
-    if (!isNaN(headerOrgId) && headerOrgId > 0) return headerOrgId;
+    if (!Number.isNaN(headerOrgId) && headerOrgId > 0) return headerOrgId;
   }
   const orgId = req.tenantOrgId ?? req.user?.orgs[0]?.orgId;
   if (!orgId) throw Object.assign(new Error('Organization context required'), { statusCode: 403 });

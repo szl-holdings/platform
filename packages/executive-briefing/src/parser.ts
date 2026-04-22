@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+
 import {
   type Citation,
   type StructuredExecutiveBrief,
@@ -40,7 +40,7 @@ export function parseBriefResponse(
   let raw = aiContent.trim();
 
   const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (fenceMatch) raw = fenceMatch[1]!.trim();
+  if (fenceMatch) raw = fenceMatch[1]?.trim();
 
   const jsonStart = raw.indexOf('{');
   const jsonEnd = raw.lastIndexOf('}');
@@ -155,16 +155,16 @@ function isValidRiskLevel(v: unknown): v is 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICA
 function sanitizeBelief(b: unknown, idx: number) {
   const obj = (b && typeof b === 'object' ? b : {}) as Record<string, unknown>;
   return {
-    id: typeof obj['id'] === 'string' ? obj['id'] : `b-${String(idx + 1).padStart(3, '0')}`,
-    claim: typeof obj['claim'] === 'string' ? obj['claim'] : 'Belief claim not specified.',
+    id: typeof obj.id === 'string' ? obj.id : `b-${String(idx + 1).padStart(3, '0')}`,
+    claim: typeof obj.claim === 'string' ? obj.claim : 'Belief claim not specified.',
     confidence:
-      typeof obj['confidence'] === 'number' ? Math.max(0, Math.min(1, obj['confidence'])) : 0.6,
-    citationIds: Array.isArray(obj['citationIds'])
-      ? (obj['citationIds'] as string[]).filter((s) => typeof s === 'string')
+      typeof obj.confidence === 'number' ? Math.max(0, Math.min(1, obj.confidence)) : 0.6,
+    citationIds: Array.isArray(obj.citationIds)
+      ? (obj.citationIds as string[]).filter((s) => typeof s === 'string')
       : [],
-    supported: obj['supported'] !== false,
-    caveats: Array.isArray(obj['caveats'])
-      ? (obj['caveats'] as string[]).filter((s) => typeof s === 'string')
+    supported: obj.supported !== false,
+    caveats: Array.isArray(obj.caveats)
+      ? (obj.caveats as string[]).filter((s) => typeof s === 'string')
       : [],
   };
 }
@@ -172,39 +172,39 @@ function sanitizeBelief(b: unknown, idx: number) {
 function sanitizeRecommendation(r: unknown, idx: number) {
   const obj = (r && typeof r === 'object' ? r : {}) as Record<string, unknown>;
   return {
-    id: typeof obj['id'] === 'string' ? obj['id'] : `r-${String(idx + 1).padStart(3, '0')}`,
-    priority: isValidPriority(obj['priority']) ? obj['priority'] : 'P2',
-    action: typeof obj['action'] === 'string' ? obj['action'] : 'Action not specified.',
-    rationale: typeof obj['rationale'] === 'string' ? obj['rationale'] : '',
-    owner: typeof obj['owner'] === 'string' ? obj['owner'] : undefined,
-    dueBy: typeof obj['dueBy'] === 'string' ? obj['dueBy'] : undefined,
-    autonomyTier: isValidAutonomyTier(obj['autonomyTier'])
-      ? obj['autonomyTier']
+    id: typeof obj.id === 'string' ? obj.id : `r-${String(idx + 1).padStart(3, '0')}`,
+    priority: isValidPriority(obj.priority) ? obj.priority : 'P2',
+    action: typeof obj.action === 'string' ? obj.action : 'Action not specified.',
+    rationale: typeof obj.rationale === 'string' ? obj.rationale : '',
+    owner: typeof obj.owner === 'string' ? obj.owner : undefined,
+    dueBy: typeof obj.dueBy === 'string' ? obj.dueBy : undefined,
+    autonomyTier: isValidAutonomyTier(obj.autonomyTier)
+      ? obj.autonomyTier
       : 'human-in-the-loop',
-    citationIds: Array.isArray(obj['citationIds'])
-      ? (obj['citationIds'] as string[]).filter((s) => typeof s === 'string')
+    citationIds: Array.isArray(obj.citationIds)
+      ? (obj.citationIds as string[]).filter((s) => typeof s === 'string')
       : [],
   };
 }
 
 function sanitizeSection(s: unknown, idx: number, defaultDomain: string) {
   const obj = (s && typeof s === 'object' ? s : {}) as Record<string, unknown>;
-  const beliefs = Array.isArray(obj['beliefs'])
-    ? (obj['beliefs'] as unknown[]).map((b, i) => sanitizeBelief(b, i))
+  const beliefs = Array.isArray(obj.beliefs)
+    ? (obj.beliefs as unknown[]).map((b, i) => sanitizeBelief(b, i))
     : [];
   return {
-    id: typeof obj['id'] === 'string' ? obj['id'] : `sec-${String(idx + 1).padStart(3, '0')}`,
-    domain: typeof obj['domain'] === 'string' ? obj['domain'] : defaultDomain,
-    title: typeof obj['title'] === 'string' ? obj['title'] : `Section ${idx + 1}`,
-    agentId: typeof obj['agentId'] === 'string' ? obj['agentId'] : 'Alloy',
-    situation: typeof obj['situation'] === 'string' ? obj['situation'] : '',
+    id: typeof obj.id === 'string' ? obj.id : `sec-${String(idx + 1).padStart(3, '0')}`,
+    domain: typeof obj.domain === 'string' ? obj.domain : defaultDomain,
+    title: typeof obj.title === 'string' ? obj.title : `Section ${idx + 1}`,
+    agentId: typeof obj.agentId === 'string' ? obj.agentId : 'Alloy',
+    situation: typeof obj.situation === 'string' ? obj.situation : '',
     beliefs,
-    gaps: Array.isArray(obj['gaps'])
-      ? (obj['gaps'] as string[]).filter((g) => typeof g === 'string')
+    gaps: Array.isArray(obj.gaps)
+      ? (obj.gaps as string[]).filter((g) => typeof g === 'string')
       : [],
     confidence:
-      typeof obj['confidence'] === 'number' ? Math.max(0, Math.min(1, obj['confidence'])) : 0.6,
-    riskLevel: isValidRiskLevel(obj['riskLevel']) ? obj['riskLevel'] : 'MEDIUM',
-    freshness: typeof obj['freshness'] === 'string' ? obj['freshness'] : 'Unknown',
+      typeof obj.confidence === 'number' ? Math.max(0, Math.min(1, obj.confidence)) : 0.6,
+    riskLevel: isValidRiskLevel(obj.riskLevel) ? obj.riskLevel : 'MEDIUM',
+    freshness: typeof obj.freshness === 'string' ? obj.freshness : 'Unknown',
   };
 }

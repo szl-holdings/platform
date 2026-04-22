@@ -3,8 +3,7 @@
  * Single source of truth for policy verdict display across every app.
  */
 import * as React from 'react';
-import type { PolicyVerdict, PolicyVerdictDetail } from './os-layer';
-import { POLICY_VERDICT_DESCRIPTIONS, POLICY_VERDICT_LABELS } from './os-layer';
+import { type PolicyVerdict, type PolicyVerdictDetail, POLICY_VERDICT_DESCRIPTIONS, POLICY_VERDICT_LABELS } from './os-layer';
 import { cn } from './utils';
 
 const VERDICT_STYLE: Record<

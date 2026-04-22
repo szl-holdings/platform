@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { EvalRunRequestSchema } from '@workspace/aef-contracts';
-import type { GoldenFixtureSet, RequestedMetric, RetrievalAdapter } from '@workspace/aef-evals';
-import { runEval } from '@workspace/aef-evals';
+import { type GoldenFixtureSet, type RequestedMetric, type RetrievalAdapter, runEval } from '@workspace/aef-evals';
 import type { PolicyContext } from '@workspace/aef-policy-guard';
 import {
   applyMetadataFilter,

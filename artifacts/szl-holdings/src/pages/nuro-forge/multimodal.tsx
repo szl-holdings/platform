@@ -1,5 +1,5 @@
 import { m } from 'framer-motion';
-import { ChevronRight, Code2, Database, FileText, Image, Mic, Upload, Zap } from 'lucide-react';
+import { ChevronRight, Code2, Database, FileText, Image, Mic, Zap } from 'lucide-react';
 import { useState } from 'react';
 
 const MODALITIES = [

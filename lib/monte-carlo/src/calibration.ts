@@ -93,13 +93,13 @@ function fitMLE(
 }
 
 function computeFittedRMSE(
-  distributionType: string,
+  _distributionType: string,
   fittedParams: Record<string, number>,
   samples: number[],
 ): number {
   const mean = samples.reduce((s, v) => s + v, 0) / samples.length;
   const fittedMean =
-    fittedParams['mean'] ?? fittedParams['value'] ?? fittedParams['lambda'] ?? mean;
+    fittedParams.mean ?? fittedParams.value ?? fittedParams.lambda ?? mean;
   return Math.sqrt(samples.reduce((s, v) => s + (v - fittedMean) ** 2, 0) / samples.length);
 }
 
@@ -132,8 +132,8 @@ export function calibrate(
   for (const dp of historicalData) {
     for (const m of scenario.outputs) {
       const val = dp.outputs[m.id];
-      if (val !== undefined && isFinite(val)) {
-        historicalOutputsRaw[m.id]!.push(val);
+      if (val !== undefined && Number.isFinite(val)) {
+        historicalOutputsRaw[m.id]?.push(val);
       }
     }
   }
@@ -146,7 +146,7 @@ export function calibrate(
     if (hist.length === 0) continue;
 
     historicalOutputs[m.id] = distributionStats(hist);
-    sampledOutputs[m.id] = simulationResult.results[m.id]!.stats;
+    sampledOutputs[m.id] = simulationResult.results[m.id]?.stats;
 
     const histStats = historicalOutputs[m.id]!;
     const simStats = sampledOutputs[m.id]!;
@@ -168,7 +168,7 @@ export function calibrate(
     const currentStats = distributionStats(inputSamples);
     const historicalInputSamples = historicalData
       .map((dp) => dp.inputs[input.id])
-      .filter((v): v is number => v !== undefined && isFinite(v));
+      .filter((v): v is number => v !== undefined && Number.isFinite(v));
     if (historicalInputSamples.length < 5) continue;
 
     const historicalStats = distributionStats(historicalInputSamples);
@@ -232,11 +232,11 @@ export function backtest(
 
   const actualValues = historicalData
     .map((dp) => dp.outputs[outputId])
-    .filter((v): v is number => v !== undefined && isFinite(v));
+    .filter((v): v is number => v !== undefined && Number.isFinite(v));
   if (actualValues.length === 0) throw new Error('No historical data for this output');
 
   const actualStats = distributionStats(actualValues);
-  const predictedStats = simulationResult.results[outputId]!.stats;
+  const predictedStats = simulationResult.results[outputId]?.stats;
 
   const coverageCount = actualValues.filter(
     (v) => v >= predictedStats.p10 && v <= predictedStats.p90,

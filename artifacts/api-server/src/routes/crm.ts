@@ -3,7 +3,6 @@ import { connectorsTable, db } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
 import { and, eq } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
-import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
 import { validateBody } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
@@ -12,7 +11,7 @@ const router: IRouter = Router();
 
 router.get('/salesforce/opportunities', authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const sfAdapter = (services as unknown as Record<string, unknown>)['salesforce'] as
+    const sfAdapter = (services as unknown as Record<string, unknown>).salesforce as
       | { getOpportunities?: () => Promise<{ records?: Record<string, unknown>[] }> }
       | undefined;
     if (sfAdapter?.getOpportunities) {
@@ -21,18 +20,18 @@ router.get('/salesforce/opportunities', authMiddleware({ required: false }), asy
         return sendSuccess(
           res,
           data.records.map((r) => ({
-            id: r['Id'],
-            name: r['Name'],
+            id: r.Id,
+            name: r.Name,
             accountName:
-              (r['Account'] as Record<string, unknown>)?.['Name'] ?? r['AccountName'] ?? null,
-            amount: r['Amount'] ?? null,
-            stageName: r['StageName'],
-            closeDate: r['CloseDate'],
-            probability: r['Probability'] ?? null,
-            forecastCategory: r['ForecastCategory'] ?? null,
-            isClosed: r['IsClosed'] ?? false,
-            isWon: r['IsWon'] ?? false,
-            type: r['Type'] ?? null,
+              (r.Account as Record<string, unknown>)?.Name ?? r.AccountName ?? null,
+            amount: r.Amount ?? null,
+            stageName: r.StageName,
+            closeDate: r.CloseDate,
+            probability: r.Probability ?? null,
+            forecastCategory: r.ForecastCategory ?? null,
+            isClosed: r.IsClosed ?? false,
+            isWon: r.IsWon ?? false,
+            type: r.Type ?? null,
           })),
         );
       }
@@ -45,7 +44,7 @@ router.get('/salesforce/opportunities', authMiddleware({ required: false }), asy
 
 router.get('/salesforce/accounts', authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const sfAdapter = (services as unknown as Record<string, unknown>)['salesforce'] as
+    const sfAdapter = (services as unknown as Record<string, unknown>).salesforce as
       | { getAccounts?: () => Promise<{ records?: unknown[] }> }
       | undefined;
     if (sfAdapter?.getAccounts) {
@@ -60,7 +59,7 @@ router.get('/salesforce/accounts', authMiddleware({ required: false }), async (_
 
 router.get('/salesforce/leads', authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const sfAdapter = (services as unknown as Record<string, unknown>)['salesforce'] as
+    const sfAdapter = (services as unknown as Record<string, unknown>).salesforce as
       | { getLeads?: () => Promise<{ records?: unknown[] }> }
       | undefined;
     if (sfAdapter?.getLeads) {
@@ -75,7 +74,7 @@ router.get('/salesforce/leads', authMiddleware({ required: false }), async (_req
 
 router.get('/hubspot/deals', authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const hubSpotAdapter = (services as unknown as Record<string, unknown>)['hubspot'] as
+    const hubSpotAdapter = (services as unknown as Record<string, unknown>).hubspot as
       | { getDeals?: () => Promise<{ results?: Record<string, unknown>[] }> }
       | undefined;
     if (hubSpotAdapter?.getDeals) {
@@ -84,12 +83,12 @@ router.get('/hubspot/deals', authMiddleware({ required: false }), async (_req, r
         return sendSuccess(
           res,
           data.results.map((d) => ({
-            id: d['id'],
-            name: (d['properties'] as Record<string, unknown>)?.['dealname'] ?? d['id'],
-            stage: (d['properties'] as Record<string, unknown>)?.['dealstage'] ?? 'unknown',
-            amount: Number((d['properties'] as Record<string, unknown>)?.['amount'] ?? 0),
+            id: d.id,
+            name: (d.properties as Record<string, unknown>)?.dealname ?? d.id,
+            stage: (d.properties as Record<string, unknown>)?.dealstage ?? 'unknown',
+            amount: Number((d.properties as Record<string, unknown>)?.amount ?? 0),
             closeDate:
-              (d['properties'] as Record<string, unknown>)?.['closedate'] ??
+              (d.properties as Record<string, unknown>)?.closedate ??
               new Date().toISOString(),
           })),
         );
@@ -103,7 +102,7 @@ router.get('/hubspot/deals', authMiddleware({ required: false }), async (_req, r
 
 router.get('/hubspot/contacts', authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const hubSpotAdapter = (services as unknown as Record<string, unknown>)['hubspot'] as
+    const hubSpotAdapter = (services as unknown as Record<string, unknown>).hubspot as
       | { getContacts?: () => Promise<{ results?: unknown[] }> }
       | undefined;
     if (hubSpotAdapter?.getContacts) {
@@ -124,7 +123,7 @@ router.get('/hubspot/contacts', authMiddleware({ required: false }), async (_req
 
 router.get('/dynamics/opportunities', authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const dynAdapter = (services as unknown as Record<string, unknown>)['dynamics365'] as
+    const dynAdapter = (services as unknown as Record<string, unknown>).dynamics365 as
       | { getOpportunities?: () => Promise<{ value?: Record<string, unknown>[] }> }
       | undefined;
     if (dynAdapter?.getOpportunities) {
@@ -133,13 +132,13 @@ router.get('/dynamics/opportunities', authMiddleware({ required: false }), async
         return sendSuccess(
           res,
           data.value.map((o) => ({
-            id: o['opportunityid'] ?? o['id'],
-            name: o['name'] ?? o['subject'],
-            accountName: (o['customerid_account'] as Record<string, unknown>)?.['name'] ?? null,
-            stage: o['stepname'] ?? o['salesstage'] ?? 'Unknown',
-            probability: o['closeprobability'] ?? 50,
-            estimatedRevenue: o['estimatedvalue'] ?? o['budgetamount'] ?? 0,
-            estimatedCloseDate: o['estimatedclosedate'] ?? new Date().toISOString(),
+            id: o.opportunityid ?? o.id,
+            name: o.name ?? o.subject,
+            accountName: (o.customerid_account as Record<string, unknown>)?.name ?? null,
+            stage: o.stepname ?? o.salesstage ?? 'Unknown',
+            probability: o.closeprobability ?? 50,
+            estimatedRevenue: o.estimatedvalue ?? o.budgetamount ?? 0,
+            estimatedCloseDate: o.estimatedclosedate ?? new Date().toISOString(),
           })),
         );
       }

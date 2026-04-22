@@ -2,9 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   FileText, ChevronRight, ChevronDown, ChevronUp, Download, Printer,
-  Building2, TrendingUp, Globe, Shield, Ship, MapPin, DollarSign,
-  Briefcase, Users, CheckSquare, Search, Filter, ArrowLeft, X,
-  BookOpen, ExternalLink, Star, Circle, CheckCircle2,
+  Building2, TrendingUp, Globe, Shield, Ship, MapPin, Users, CheckSquare, Search, ArrowLeft, X,Star, 
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -182,7 +180,7 @@ function DocumentViewer({
         .map(line => {
           if (line.startsWith("•") || line.startsWith("→") || line.startsWith("□") || line.startsWith("✓"))
             return `<div style="padding-left:1.25em;text-indent:-1em;margin:2px 0;">${line}</div>`;
-          if (line.match(/^[A-Z0-9][A-Z0-9 \/\(\)\-\.]+:$/) && line.length < 80)
+          if (line.match(/^[A-Z0-9][A-Z0-9 /()\-.]+:$/) && line.length < 80)
             return `<p style="font-size:10pt;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#333;margin-top:14px;margin-bottom:4px;">${line.replace(/:$/, "")}</p>`;
           if (line.trim() === "") return `<div style="height:6px;"></div>`;
           return `<p style="margin:2px 0;">${line}</p>`;
@@ -380,7 +378,7 @@ This document does not constitute an offer to sell securities or financial, lega
                                   </div>
                                 );
                               }
-                              if (line.match(/^[A-Z0-9][A-Z0-9 \/\(\)\-\.]+:$/) && line.length < 80) {
+                              if (line.match(/^[A-Z0-9][A-Z0-9 /()\-.]+:$/) && line.length < 80) {
                                 return (
                                   <p key={j} style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: color, marginTop: j > 0 ? "0.875rem" : 0, marginBottom: "0.35rem", opacity: 0.85 }}>
                                     {line.replace(/:$/, "")}

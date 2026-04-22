@@ -1,6 +1,5 @@
 import { z } from 'zod';
-import type { RunErrorCategory } from './errors.js';
-import { AgentRunError, categorizeError, isRetryable } from './errors.js';
+import { type RunErrorCategory, AgentRunError, categorizeError, isRetryable } from './errors.js';
 
 export const RetryPolicySchema = z.object({
   maxAttempts: z.number().int().min(1).max(10).default(3),

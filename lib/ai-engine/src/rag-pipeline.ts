@@ -77,7 +77,7 @@ export class RAGPipeline {
     for (let i = 0; i < newChunks.length; i++) {
       const res = batchResult.results[i];
       if (res && !res.error) {
-        this.setEmbedding(newChunks[i]!.id, res.embedding);
+        this.setEmbedding(newChunks[i]?.id, res.embedding);
       }
     }
     return newChunks;

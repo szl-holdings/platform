@@ -59,7 +59,6 @@ import {
   lyteRecommendationsTable,
   lyteSavedViewsTable,
   lyteSignalsTable,
-  lyteSignalTimelineTable,
   lyteWorkspacesTable,
   notificationPreferencesTable,
   notificationsTable,
@@ -96,7 +95,7 @@ import {
   voyagesTable,
   webhookEventsTable,
 } from '@szl-holdings/db';
-import { pbkdf2Sync, randomBytes } from 'crypto';
+import { pbkdf2Sync, randomBytes } from 'node:crypto';
 import { eq, sql } from 'drizzle-orm';
 
 function hashPassword(password: string): string {
@@ -110,13 +109,9 @@ const DEMO_PASSWORD_USER = 'DemoUser2026!';
 
 async function seed() {
   const seedWarnings: string[] = [];
-  console.log('Seeding database...');
-
-  console.log('  Clearing existing data...');
   await pool.query(
     `DO $$ DECLARE r RECORD; BEGIN FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP EXECUTE 'TRUNCATE TABLE ' || quote_ident(r.tablename) || ' CASCADE'; END LOOP; END $$`,
   );
-  console.log('  ✓ Tables cleared');
 
   const roles = await db
     .insert(rolesTable)
@@ -129,7 +124,6 @@ async function seed() {
       { name: 'creative_user', description: 'Creative tools access' },
     ])
     .returning();
-  console.log(`  ✓ ${roles.length} roles`);
 
   const users = await db
     .insert(usersTable)
@@ -193,7 +187,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${users.length} users (demo credentials enabled)`);
 
   const superAdminRole = roles.find((r) => r.name === 'super_admin')!;
   const operatorRole = roles.find((r) => r.name === 'operator')!;
@@ -210,7 +203,6 @@ async function seed() {
     { userId: users[4].id, roleId: creativeRole.id },
     { userId: users[5].id, roleId: clientRole.id },
   ]);
-  console.log('  ✓ user roles assigned');
 
   const [org] = await db
     .insert(organizationsTable)
@@ -218,7 +210,6 @@ async function seed() {
       { name: 'SZL Holdings', slug: 'szl-holdings', plan: 'enterprise', domain: 'szlholdings.com' },
     ])
     .returning();
-  console.log('  ✓ organization created');
 
   await db.insert(orgMembersTable).values([
     { orgId: org.id, userId: users[0].id, role: 'owner' },
@@ -228,7 +219,6 @@ async function seed() {
     { orgId: org.id, userId: users[4].id, role: 'member' },
     { orgId: org.id, userId: users[5].id, role: 'viewer' },
   ]);
-  console.log('  ✓ org members');
 
   const connectors = await db
     .insert(connectorsTable)
@@ -240,7 +230,6 @@ async function seed() {
       { orgId: org.id, name: 'Notion Docs', type: 'notion', status: 'inactive' },
     ])
     .returning();
-  console.log(`  ✓ ${connectors.length} connectors`);
 
   await db.insert(connectorLogsTable).values([
     {
@@ -268,7 +257,6 @@ async function seed() {
       metadata: { error: 'invalid_grant' },
     },
   ]);
-  console.log('  ✓ connector logs');
 
   await db.insert(notificationsTable).values([
     {
@@ -300,7 +288,6 @@ async function seed() {
       message: 'Q4 Launch campaign needs approval before going live.',
     },
   ]);
-  console.log('  ✓ notifications');
 
   await db.insert(notificationPreferencesTable).values([
     {
@@ -325,7 +312,6 @@ async function seed() {
       inAppEnabled: true,
     },
   ]);
-  console.log('  ✓ notification preferences');
 
   await db.insert(activityLogTable).values([
     { userId: users[0].id, action: 'login', resource: 'auth', description: 'User logged in' },
@@ -344,7 +330,6 @@ async function seed() {
       description: 'Updated Stripe connector configuration',
     },
   ]);
-  console.log('  ✓ activity log');
 
   await db.insert(auditEventsTable).values([
     {
@@ -369,9 +354,8 @@ async function seed() {
       newValues: { billing: 'enterprise' },
     },
   ]);
-  console.log('  ✓ audit events');
 
-  const sessions = await db
+  const _sessions = await db
     .insert(sessionsTable)
     .values([
       {
@@ -390,7 +374,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${sessions.length} sessions`);
 
   await db.insert(apiKeysTable).values([
     {
@@ -410,7 +393,6 @@ async function seed() {
       expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     },
   ]);
-  console.log('  ✓ API keys');
 
   const featureFlags = await db
     .insert(featureFlagsTable)
@@ -459,7 +441,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${featureFlags.length} feature flags`);
 
   await db.insert(featureFlagOverridesTable).values([
     {
@@ -476,7 +457,6 @@ async function seed() {
     },
     { flagId: featureFlags[2].id, entityType: 'org', entityId: String(org.id), isEnabled: true },
   ]);
-  console.log('  ✓ feature flag overrides');
 
   const plans = await db
     .insert(billingPlansTable)
@@ -515,7 +495,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${plans.length} billing plans`);
 
   const [subscription] = await db
     .insert(subscriptionsTable)
@@ -529,7 +508,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log('  ✓ subscription');
 
   await db.insert(invoicesTable).values([
     {
@@ -559,7 +537,6 @@ async function seed() {
       status: 'open',
     },
   ]);
-  console.log('  ✓ invoices');
 
   await db.insert(entitlementsTable).values([
     {
@@ -640,7 +617,6 @@ async function seed() {
       description: 'Monthly API request limit',
     },
   ]);
-  console.log('  ✓ entitlements');
 
   await db.insert(usageEventsTable).values([
     {
@@ -682,7 +658,6 @@ async function seed() {
     { orgId: org.id, featureKey: 'webhooks', quantity: 15, metadata: { source: 'stripe' } },
     { orgId: org.id, featureKey: 'webhooks', quantity: 8, metadata: { source: 'github' } },
   ]);
-  console.log('  ✓ usage events');
 
   await db.insert(appsRegistryTable).values([
     {
@@ -757,7 +732,6 @@ async function seed() {
       ownerTeam: 'Platform',
     },
   ]);
-  console.log('  ✓ apps registry');
 
   await db.insert(healthChecksTable).values([
     { service: 'database', status: 'healthy', responseTimeMs: 12 },
@@ -770,7 +744,6 @@ async function seed() {
       details: { error: 'Rate limited' },
     },
   ]);
-  console.log('  ✓ health checks');
 
   await db.insert(webhookEventsTable).values([
     {
@@ -795,7 +768,6 @@ async function seed() {
       errorMessage: 'Payment method declined',
     },
   ]);
-  console.log('  ✓ webhook events');
 
   const files = await db
     .insert(filesTable)
@@ -835,7 +807,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${files.length} files`);
 
   await db.insert(assetsTable).values([
     {
@@ -857,9 +828,8 @@ async function seed() {
       tags: ['branding', 'logo'],
     },
   ]);
-  console.log('  ✓ assets');
 
-  const projects = await db
+  const _projects = await db
     .insert(projectsTable)
     .values([
       {
@@ -899,7 +869,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${projects.length} projects`);
 
   await db.insert(stephenSiteTestimonialsTable).values([
     {
@@ -930,7 +899,6 @@ async function seed() {
       isPublished: true,
     },
   ]);
-  console.log('  ✓ testimonials');
 
   await db.insert(stephenSiteCaseStudiesTable).values([
     {
@@ -954,7 +922,6 @@ async function seed() {
       publishedAt: new Date(),
     },
   ]);
-  console.log('  ✓ case studies');
 
   await db.insert(stephenSiteContactsTable).values([
     {
@@ -973,7 +940,6 @@ async function seed() {
       status: 'new',
     },
   ]);
-  console.log('  ✓ stephen site contacts');
 
   const fleets = await db
     .insert(vesselsFleetsTable)
@@ -1001,7 +967,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${fleets.length} vessel fleets`);
 
   const vessels = await db
     .insert(vesselsTable)
@@ -1058,7 +1023,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${vessels.length} vessels`);
 
   await db.insert(vesselsPositionsTable).values([
     {
@@ -1110,7 +1074,6 @@ async function seed() {
       recordedAt: new Date(),
     },
   ]);
-  console.log('  ✓ vessel positions');
 
   await db.insert(vesselsCargoTable).values([
     {
@@ -1150,7 +1113,6 @@ async function seed() {
       status: 'in_transit',
     },
   ]);
-  console.log('  ✓ vessel cargo');
 
   const routes = await db
     .insert(vesselsRoutesTable)
@@ -1201,7 +1163,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log('  ✓ vessel routes');
 
   const alertRules = await db
     .insert(vesselsAlertRulesTable)
@@ -1243,7 +1204,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${alertRules.length} alert rules`);
 
   await db.insert(vesselsAlertsTable).values([
     {
@@ -1285,7 +1245,6 @@ async function seed() {
       resolvedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
     },
   ]);
-  console.log('  ✓ vessel alerts');
 
   await db.insert(vesselsWeatherSnapshotsTable).values([
     {
@@ -1354,7 +1313,6 @@ async function seed() {
       riskLevel: 'low',
     },
   ]);
-  console.log('  ✓ weather snapshots');
 
   await db.insert(vesselsSimulationsTable).values([
     {
@@ -1411,7 +1369,6 @@ async function seed() {
       completedAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
     },
   ]);
-  console.log('  ✓ vessel simulations');
 
   const fsScenarios = await db
     .insert(firestormScenariosTable)
@@ -1502,7 +1459,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${fsScenarios.length} firestorm scenarios`);
 
   const fsAssessments = await db
     .insert(firestormAssessmentsTable)
@@ -1557,7 +1513,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${fsAssessments.length} firestorm assessments`);
 
   const fsSimRuns = await db
     .insert(firestormSimulationRunsTable)
@@ -1631,7 +1586,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${fsSimRuns.length} firestorm simulation runs`);
 
   await db.insert(firestormFindingsTable).values([
     {
@@ -1747,7 +1701,6 @@ async function seed() {
       cvssScore: '9.10',
     },
   ]);
-  console.log('  ✓ firestorm findings');
 
   await db.insert(firestormRiskScoresTable).values([
     {
@@ -1828,7 +1781,6 @@ async function seed() {
       notes: 'IAM role sprawl needs attention',
     },
   ]);
-  console.log('  ✓ firestorm risk scores');
 
   const fsCampaigns = await db
     .insert(firestormCampaignsTable)
@@ -1863,7 +1815,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${fsCampaigns.length} firestorm campaigns`);
 
   await db.insert(firestormLeadsTable).values([
     {
@@ -1911,7 +1862,6 @@ async function seed() {
       score: 80,
     },
   ]);
-  console.log('  ✓ firestorm leads');
 
   await db.insert(firestormAnalyticsTable).values([
     {
@@ -1960,7 +1910,6 @@ async function seed() {
       revenue: '0',
     },
   ]);
-  console.log('  ✓ firestorm analytics');
 
   const [lyteWorkspace] = await db
     .insert(lyteWorkspacesTable)
@@ -1973,7 +1922,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log('  ✓ Lyte workspace');
 
   await db.insert(lyteSignalsTable).values([
     {
@@ -2047,7 +1995,6 @@ async function seed() {
       metadata: { error: 'invalid_grant' },
     },
   ]);
-  console.log('  ✓ Lyte signals');
 
   await db.insert(lyteCommandCardsTable).values([
     {
@@ -2096,7 +2043,6 @@ async function seed() {
       assignee: 'Morgan Blake',
     },
   ]);
-  console.log('  ✓ Lyte command cards');
 
   await db.insert(lyteIncidentsTable).values([
     {
@@ -2133,7 +2079,6 @@ async function seed() {
       resolvedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     },
   ]);
-  console.log('  ✓ Lyte incidents');
 
   await db.insert(lytePlaybooksTable).values([
     {
@@ -2181,7 +2126,6 @@ async function seed() {
       tags: ['daily', 'operations', 'checklist'],
     },
   ]);
-  console.log('  ✓ Lyte playbooks');
 
   await db.insert(lyteRecommendationsTable).values([
     {
@@ -2233,7 +2177,6 @@ async function seed() {
       actionItems: ['Choose survey tool', 'Design feedback forms', 'Set up automation'],
     },
   ]);
-  console.log('  ✓ Lyte recommendations');
 
   const dProjects = await db
     .insert(dreamscapeProjectsTable)
@@ -2271,7 +2214,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${dProjects.length} Dreamscape projects`);
 
   await db.insert(dreamscapeAssetsTable).values([
     { projectId: dProjects[0].id, name: 'SZL Logo Pack', type: 'image' },
@@ -2283,7 +2225,6 @@ async function seed() {
     },
     { projectId: dProjects[2].id, name: 'Firestorm UI Screenshots', type: 'image' },
   ]);
-  console.log('  ✓ Dreamscape assets');
 
   const dCampaigns = await db
     .insert(dreamscapeCampaignsTable)
@@ -2325,7 +2266,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${dCampaigns.length} Dreamscape campaigns`);
 
   const dScripts = await db
     .insert(dreamscapeScriptsTable)
@@ -2358,7 +2298,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${dScripts.length} Dreamscape scripts`);
 
   await db.insert(dreamscapeStoryboardsTable).values([
     {
@@ -2418,7 +2357,6 @@ async function seed() {
       duration: '10s',
     },
   ]);
-  console.log('  ✓ Dreamscape storyboards');
 
   await db.insert(dreamscapeVoiceAssetsTable).values([
     {
@@ -2448,7 +2386,6 @@ async function seed() {
       duration: '8s',
     },
   ]);
-  console.log('  ✓ Dreamscape voice assets');
 
   await db.insert(dreamscapeCampaignAssetsTable).values([
     {
@@ -2500,7 +2437,6 @@ async function seed() {
       tags: ['template', 'interview'],
     },
   ]);
-  console.log('  ✓ Dreamscape campaign assets');
 
   await db.insert(dreamscapeReviewsTable).values([
     {
@@ -2530,7 +2466,6 @@ async function seed() {
       status: 'changes_requested',
     },
   ]);
-  console.log('  ✓ Dreamscape reviews');
 
   const [readinessProgram] = await db
     .insert(readinessProgramsTable)
@@ -2545,7 +2480,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log('  ✓ Readiness program');
 
   const dimensions = await db
     .insert(readinessDimensionsTable)
@@ -2632,7 +2566,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${dimensions.length} readiness dimensions`);
 
   const scoreEntries = [];
   for (const dim of dimensions) {
@@ -2649,7 +2582,6 @@ async function seed() {
     }
   }
   await db.insert(readinessScoreHistoryTable).values(scoreEntries);
-  console.log(`  ✓ ${scoreEntries.length} readiness score history entries`);
 
   await db.insert(readinessMilestonesTable).values([
     {
@@ -2702,7 +2634,6 @@ async function seed() {
       owner: 'Alex Rivera',
     },
   ]);
-  console.log('  ✓ readiness milestones');
 
   await db.insert(readinessRisksTable).values([
     {
@@ -2762,7 +2693,6 @@ async function seed() {
       owner: 'Jordan Chen',
     },
   ]);
-  console.log('  ✓ readiness risks');
 
   await db.insert(readinessAlertsTable).values([
     {
@@ -2815,7 +2745,6 @@ async function seed() {
       severity: 'info',
     },
   ]);
-  console.log('  ✓ readiness alerts');
 
   const incaProjects = await db
     .insert(incaProjectsTable)
@@ -2857,9 +2786,8 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${incaProjects.length} INCA projects`);
 
-  const incaExperiments = await db
+  const _incaExperiments = await db
     .insert(incaExperimentsTable)
     .values([
       {
@@ -2904,7 +2832,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${incaExperiments.length} INCA experiments`);
 
   await db.insert(incaModelsTable).values([
     {
@@ -2950,7 +2877,6 @@ async function seed() {
       parameters: '110M',
     },
   ]);
-  console.log('  ✓ INCA models');
 
   await db.insert(incaInsightsTable).values([
     {
@@ -2989,7 +2915,6 @@ async function seed() {
       sourceExperiment: 'XGBoost Portfolio Model',
     },
   ]);
-  console.log('  ✓ INCA insights');
 
   await db.insert(incaDatasetsTable).values([
     {
@@ -3025,7 +2950,6 @@ async function seed() {
       status: 'archived',
     },
   ]);
-  console.log('  ✓ INCA datasets');
 
   await db.insert(carlotaServicesTable).values([
     {
@@ -3084,7 +3008,6 @@ async function seed() {
       metadata: { icon: 'Handshake', duration: '1-3 months' },
     },
   ]);
-  console.log('  ✓ Carlota Jo services');
 
   await db.insert(carlotaInquiriesTable).values([
     {
@@ -3116,7 +3039,6 @@ async function seed() {
       status: 'contacted',
     },
   ]);
-  console.log('  ✓ Carlota Jo inquiries');
 
   await db.insert(carlotaReservationsTable).values([
     {
@@ -3144,7 +3066,6 @@ async function seed() {
       confirmationId: 'CJ-D4E5F6',
     },
   ]);
-  console.log('  ✓ Carlota Jo reservations');
 
   await db.insert(carlotaClientProfilesTable).values([
     {
@@ -3170,7 +3091,6 @@ async function seed() {
       metadata: { industry: 'Finance', aum: '$2B' },
     },
   ]);
-  console.log('  ✓ Carlota Jo client profiles');
 
   const ventures = await db
     .insert(holdingsVenturesTable)
@@ -3261,7 +3181,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${ventures.length} Holdings ventures`);
 
   await db.insert(holdingsMilestonesTable).values([
     {
@@ -3314,7 +3233,6 @@ async function seed() {
       category: 'milestone',
     },
   ]);
-  console.log('  ✓ Holdings milestones');
 
   await db.insert(holdingsMetricsTable).values([
     {
@@ -3395,7 +3313,6 @@ async function seed() {
       period: '2026-Q1',
     },
   ]);
-  console.log('  ✓ Holdings metrics');
 
   await db.insert(holdingsLeadershipTable).values([
     {
@@ -3430,7 +3347,6 @@ async function seed() {
       sortOrder: 5,
     },
   ]);
-  console.log('  ✓ Holdings leadership');
 
   await db.insert(holdingsInquiriesTable).values([
     {
@@ -3452,9 +3368,8 @@ async function seed() {
       status: 'replied',
     },
   ]);
-  console.log('  ✓ Holdings inquiries');
 
-  const featureFlagsNew = await db
+  const _featureFlagsNew = await db
     .insert(featureFlagsTable)
     .values([
       {
@@ -3516,7 +3431,6 @@ async function seed() {
     ])
     .returning()
     .catch(() => []);
-  console.log(`  ✓ ${featureFlagsNew.length} product feature flags`);
 
   const alloyWorkflows = await db
     .insert(alloyWorkflowsTable)
@@ -3613,7 +3527,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${alloyWorkflows.length} Alloy workflows`);
 
   const alloySignals = await db
     .insert(alloySignalsTable)
@@ -3668,7 +3581,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${alloySignals.length} Alloy signals`);
 
   const alloyRuns = await db
     .insert(alloyWorkflowRunsTable)
@@ -3721,7 +3633,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${alloyRuns.length} Alloy workflow runs`);
 
   await db.insert(alloyArtifactsTable).values([
     {
@@ -3764,11 +3675,10 @@ async function seed() {
       approvalStatus: 'not_required',
     },
   ]);
-  console.log('  ✓ Alloy artifacts');
 
   const [lyteWs] = await db.select().from(lyteWorkspacesTable).limit(1);
   if (lyteWs) {
-    const lyteActions = await db
+    const _lyteActions = await db
       .insert(lyteActionsTable)
       .values([
         {
@@ -3819,7 +3729,6 @@ async function seed() {
         },
       ])
       .returning();
-    console.log(`  ✓ ${lyteActions.length} Lyte actions`);
 
     await db
       .insert(lyteSavedViewsTable)
@@ -3857,7 +3766,6 @@ async function seed() {
         },
       ])
       .returning();
-    console.log('  ✓ Lyte saved views');
 
     await db
       .insert(lyteReadinessItemsTable)
@@ -3919,7 +3827,6 @@ async function seed() {
         },
       ])
       .returning();
-    console.log('  ✓ Lyte readiness items');
   }
 
   const ports = await db
@@ -4031,7 +3938,6 @@ async function seed() {
       },
     ])
     .returning();
-  console.log(`  ✓ ${ports.length} ports`);
 
   const dbVessels = await db.select().from(vesselsTable).limit(10);
   if (dbVessels.length > 0) {
@@ -4041,7 +3947,7 @@ async function seed() {
     const v4 = dbVessels[3] ?? v1;
 
     try {
-      const voyages = await db
+      const _voyages = await db
         .insert(voyagesTable)
         .values([
           {
@@ -4141,9 +4047,8 @@ async function seed() {
           },
         ])
         .returning();
-      console.log(`  ✓ ${voyages.length} voyages`);
 
-      const exceptions = await db
+      const _exceptions = await db
         .insert(fleetExceptionsTable)
         .values([
           {
@@ -4243,7 +4148,6 @@ async function seed() {
           },
         ])
         .returning();
-      console.log(`  ✓ ${exceptions.length} fleet exceptions`);
 
       await db.insert(vesselMaintenanceTable).values([
         {
@@ -4317,12 +4221,8 @@ async function seed() {
           technician: 'T. Nakamura',
         },
       ]);
-      console.log('  ✓ vessel maintenance items');
     } catch (err: any) {
       seedWarnings.push(`Voyages/exceptions/maintenance: ${err.message?.slice(0, 120)}`);
-      console.warn(
-        `  ⚠ Voyages/exceptions/maintenance skipped (FK/schema drift): ${err.message?.slice(0, 80)}`,
-      );
     }
   }
 
@@ -4425,13 +4325,9 @@ async function seed() {
         activeAlerts: 7,
       },
     ]);
-    console.log('  ✓ corridors');
   } catch (err: any) {
     seedWarnings.push(`Corridors: ${err.message?.slice(0, 120)}`);
-    console.warn(`  ⚠ Corridors skipped (schema drift): ${err.message?.slice(0, 80)}`);
   }
-
-  console.log('\n── Post-seed verification ──────────────────────────────────');
   const verificationErrors: string[] = [];
 
   async function assertMinCount(table: any, tableName: string, min: number) {
@@ -4440,7 +4336,6 @@ async function seed() {
     if (actual < min) {
       verificationErrors.push(`${tableName}: expected ≥${min}, found ${actual}`);
     } else {
-      console.log(`  ✓ ${actual} ${tableName}`);
     }
   }
 
@@ -4461,7 +4356,6 @@ async function seed() {
   if (adminCheck.length === 0 || !adminCheck[0].passwordHash) {
     verificationErrors.push('Admin user missing or has no password hash');
   } else {
-    console.log('  ✓ admin@szlholdings.com has password hash');
   }
 
   const demoEmails = [
@@ -4477,30 +4371,20 @@ async function seed() {
     }
   }
   if (verificationErrors.filter((e) => e.includes('Demo user')).length === 0) {
-    console.log(`  ✓ all ${demoEmails.length} demo users have password hashes`);
   }
 
   if (verificationErrors.length > 0) {
-    console.error('\n❌ Post-seed verification FAILED:');
-    verificationErrors.forEach((e) => console.error(`  ✗ ${e}`));
+    verificationErrors.forEach((_e) => {});
     process.exit(1);
   }
 
   if (seedWarnings.length > 0) {
-    console.log(`\n⚠ Seed completed with ${seedWarnings.length} non-critical warning(s):`);
-    seedWarnings.forEach((w) => console.warn(`  - ${w}`));
-    console.log(
-      '  (Voyages/corridors tables have column-level schema drift from prior migrations.',
-    );
-    console.log('   Core demo flow does not depend on these tables.)\n');
+    seedWarnings.forEach((_w) => {});
   }
-
-  console.log('\n✅ Seed complete — all critical assertions passed!');
 }
 
 seed()
   .then(() => process.exit(0))
-  .catch((err) => {
-    console.error('Seed failed:', err);
+  .catch((_err) => {
     process.exit(1);
   });

@@ -1,16 +1,8 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Button } from '@szl-holdings/shared-ui/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@szl-holdings/shared-ui/ui/dialog';
+import { Card, CardContent, } from '@szl-holdings/shared-ui/ui/card';
 import { Input } from '@szl-holdings/shared-ui/ui/input';
-import { Label } from '@szl-holdings/shared-ui/ui/label';
 import {
   Select,
   SelectContent,
@@ -22,26 +14,20 @@ import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
-  ArrowUpRight,
   Box,
-  CheckCircle,
-  Clock,
   Cloud,
   Cpu,
   Database,
   Filter,
-  Flame,
   Globe,
   Layers,
   Monitor,
   Network,
-  Plus,
   RefreshCw,
   Search,
   Server,
   Shield,
   User,
-  XCircle,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -105,7 +91,7 @@ export default function AssetInventoryPage() {
   const [ownerFilter, setOwnerFilter] = useState('all');
   const [severityFilter, setSeverityFilter] = useState('all');
   const [envFilter, setEnvFilter] = useState('all');
-  const [selectedAsset, setSelectedAsset] = useState<any>(null);
+  const [_selectedAsset, _setSelectedAsset] = useState<any>(null);
 
   const { data: rawAssets, isLoading } = useStandardQuery({
     queryKey: ['aegis-assets'],

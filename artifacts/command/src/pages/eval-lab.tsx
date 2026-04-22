@@ -1,5 +1,5 @@
 import { EcosystemNav } from '@szl-holdings/shared-ui/ecosystem-nav';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ACCENT, apiUrl, fetchJson } from './cognitive/shared';
 
 interface EvalSuiteConfig {
@@ -51,7 +51,7 @@ function RegressionBadge({ severity }: { severity: EvalRunSummary['regressionSev
     major: { color: '#f97316', label: '▲ Major regression' },
     critical: { color: '#ef4444', label: '✕ Critical regression' },
   };
-  const { color, label } = map[severity] ?? map['none']!;
+  const { color, label } = map[severity] ?? map.none!;
   return (
     <span
       style={{

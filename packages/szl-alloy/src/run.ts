@@ -63,7 +63,7 @@ export function run(options: RunOptions): AlloyRunHandle {
         tenantOrgId: params.tenantOrgId,
         runId,
         traceId,
-        metadata: { ...(params.metadata ?? {}), runId, traceId },
+        metadata: { ...params.metadata, runId, traceId },
       });
     },
 

@@ -1,7 +1,6 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { artifactApprovalsTable, db, platformJobRunsTable } from '@szl-holdings/db';
-import type { WebVitalsReport } from '@szl-holdings/observability';
-import { clientTelemetry, MetricCollector, serverTelemetry } from '@szl-holdings/observability';
+import { type WebVitalsReport, clientTelemetry, MetricCollector, serverTelemetry } from '@szl-holdings/observability';
 import { ALL_CONFIGS, getConfigBySlug } from '@szl-holdings/observability/configs';
 import { services } from '@szl-holdings/services';
 import { and, eq, gt, sql } from 'drizzle-orm';
@@ -117,7 +116,7 @@ router.get('/observability/:appSlug', authMiddleware(), (req, res) => {
   res.json(response);
 });
 
-router.get('/observability', authMiddleware(), (req, res) => {
+router.get('/observability', authMiddleware(), (_req, res) => {
   res.setHeader('Cache-Control', 'private, no-store');
 
   const allApps = ALL_CONFIGS.map((config) => {
@@ -178,7 +177,7 @@ router.post(
   ),
   (req, res) => {
     const body = req.body;
-    if (!body || !body.appSlug) {
+    if (!body?.appSlug) {
       res.status(400).json({ error: 'appSlug is required' });
       return;
     }
@@ -221,7 +220,7 @@ router.post(
   ),
   (req, res) => {
     const body = req.body;
-    if (!body || !body.app) {
+    if (!body?.app) {
       res.status(400).json({ error: 'app is required' });
       return;
     }
@@ -258,7 +257,7 @@ router.post(
   ),
   (req, res) => {
     const body = req.body;
-    if (!body || !body.app) {
+    if (!body?.app) {
       res.status(400).json({ error: 'app is required' });
       return;
     }
@@ -288,7 +287,7 @@ router.get(
   requireRole('ops', 'admin'),
   validateQuery(listQuerySchema),
   (req, res) => {
-    const includeResolved = req.query['includeResolved'] === 'true';
+    const includeResolved = req.query.includeResolved === 'true';
     const alerts = includeResolved
       ? serverTelemetry.getAllAlerts()
       : serverTelemetry.getActiveAlerts();
@@ -321,7 +320,7 @@ router.get(
   '/observability/business-events',
   authMiddleware(),
   requireRole('ops', 'admin'),
-  (req, res) => {
+  (_req, res) => {
     const snapshot = serverTelemetry.getSnapshot();
     res.setHeader('Cache-Control', 'no-store');
     res.json({
@@ -491,21 +490,21 @@ router.get(
         windowHours: 24,
         lyte: {
           unresolvedActionCount:
-            typeof lyteResult?.['unresolvedActionCount'] === 'number'
-              ? lyteResult['unresolvedActionCount']
+            typeof lyteResult?.unresolvedActionCount === 'number'
+              ? lyteResult.unresolvedActionCount
               : null,
           criticalSignalCount:
-            typeof lyteResult?.['criticalCount'] === 'number' ? lyteResult['criticalCount'] : null,
+            typeof lyteResult?.criticalCount === 'number' ? lyteResult.criticalCount : null,
           totalSignalCount:
-            typeof lyteResult?.['signalCount'] === 'number' ? lyteResult['signalCount'] : null,
+            typeof lyteResult?.signalCount === 'number' ? lyteResult.signalCount : null,
         },
         readiness: {
           blockerCount:
-            typeof readinessResult?.['blockerCount'] === 'number'
-              ? readinessResult['blockerCount']
+            typeof readinessResult?.blockerCount === 'number'
+              ? readinessResult.blockerCount
               : null,
           avgScore:
-            typeof readinessResult?.['avgScore'] === 'number' ? readinessResult['avgScore'] : null,
+            typeof readinessResult?.avgScore === 'number' ? readinessResult.avgScore : null,
         },
         approvals: {
           pending: pendingApprovals,

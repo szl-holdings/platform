@@ -20,7 +20,7 @@ export class GoogleAdapter extends ServiceAdapter {
   }
 
   private get hasServiceAccount(): boolean {
-    const key = process.env["GOOGLE_SERVICE_ACCOUNT_KEY"];
+    const key = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
     if (!key) return false;
     try {
       const parsed = JSON.parse(key) as Record<string, unknown>;
@@ -38,7 +38,7 @@ export class GoogleAdapter extends ServiceAdapter {
 
   protected override async performHealthCheck(): Promise<void> {
     if (this.hasServiceAccount) {
-      const key = JSON.parse(process.env["GOOGLE_SERVICE_ACCOUNT_KEY"]!) as { client_email: string; token_uri?: string };
+      const key = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY!) as { client_email: string; token_uri?: string };
       const response = await fetch(key.token_uri || "https://oauth2.googleapis.com/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -88,7 +88,7 @@ export class GoogleAdapter extends ServiceAdapter {
   }
 
   getAuthStatus(): GoogleAuthStatus {
-    const serviceAccount = process.env["GOOGLE_SERVICE_ACCOUNT_KEY"];
+    const serviceAccount = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
     if (serviceAccount) {
       try {
         const parsed = JSON.parse(serviceAccount) as {
@@ -108,7 +108,7 @@ export class GoogleAdapter extends ServiceAdapter {
     if (this.isLive) {
       return {
         configured: true,
-        projectId: process.env["GOOGLE_PROJECT_ID"],
+        projectId: process.env.GOOGLE_PROJECT_ID,
       };
     }
 

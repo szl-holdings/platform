@@ -3,13 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-u
 import {
   AlertCircle,
   Award,
-  BarChart3,
   CheckCircle,
-  Flame,
   Globe,
-  MessageSquare,
-  Search,
-  Star,
   Target,
   TrendingUp,
   Users,
@@ -19,8 +14,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   PolarAngleAxis,
   PolarGrid,
   Radar,

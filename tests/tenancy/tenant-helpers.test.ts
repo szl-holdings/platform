@@ -10,15 +10,7 @@ import {
   resolveTenantContext,
   stampOrgId,
 } from '../../packages/auth-shared/src/server/tenant.js';
-import type { AuthenticatedUser } from '../../packages/auth-shared/src/types.js';
-import {
-  hasRole,
-  isElevated,
-  isMemberOf,
-  isReadOnly,
-  orgMembership,
-  primaryOrg,
-} from '../../packages/auth-shared/src/types.js';
+import { type AuthenticatedUser, hasRole, isElevated, isMemberOf, isReadOnly, orgMembership, primaryOrg } from '../../packages/auth-shared/src/types.js';
 
 function org(id: number, slug = `org-${id}`) {
   return { orgId: id, orgSlug: slug, orgName: slug, role: 'member' as const };

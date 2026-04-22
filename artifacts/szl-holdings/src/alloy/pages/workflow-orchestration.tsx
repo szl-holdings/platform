@@ -4,7 +4,6 @@ import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
-  AlertTriangle,
   CheckCircle,
   ChevronRight,
   Clock,

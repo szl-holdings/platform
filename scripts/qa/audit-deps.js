@@ -7,9 +7,9 @@
  *   node scripts/qa/audit-deps.js
  */
 
-import { readdirSync, readFileSync } from 'fs';
-import { dirname, join, relative } from 'path';
-import { fileURLToPath } from 'url';
+import { readdirSync, readFileSync } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
@@ -42,8 +42,6 @@ function loadPackageJson(filePath) {
 }
 
 function main() {
-  console.log('\nSZL Holdings — Dependency Audit');
-  console.log('Checking for duplicate and conflicting package versions across workspace...\n');
 
   const pkgFiles = findPackageJsonFiles(ROOT);
   const packages = [];
@@ -111,38 +109,22 @@ function main() {
     }
   }
 
-  console.log(`Scanned ${packages.length} package.json files`);
-  console.log(`Found ${depVersionMap.size} unique dependencies`);
-  console.log(`Found ${conflicts.length} version conflict(s)`);
-  console.log(`Found ${catalogViolations.length} catalog: violation(s)\n`);
-
   if (conflicts.length > 0) {
-    console.log('VERSION CONFLICTS:');
     for (const { dep, entries, versions } of conflicts) {
-      console.warn(`  [CONFLICT] ${dep}: ${versions.join(' vs ')}`);
       for (const { pkgName, version } of entries) {
-        console.warn(`    → ${pkgName}: ${version}`);
       }
     }
-    console.log('');
   }
 
   if (catalogViolations.length > 0) {
-    console.log('CATALOG: VIOLATIONS (should use catalog: for shared deps):');
     for (const { pkgName, dep, version } of catalogViolations) {
-      console.warn(`  [CATALOG] ${pkgName}: "${dep}": "${version}" — use catalog:`);
     }
-    console.log('');
   }
 
   const totalIssues = conflicts.length + catalogViolations.length;
   if (totalIssues === 0) {
-    console.log('PASS — No dependency conflicts found.');
     process.exit(0);
   } else {
-    console.log(
-      `WARN — ${totalIssues} issue(s) found. Review above and harmonize via pnpm-workspace catalog.`,
-    );
     process.exit(0); // advisory — doesn't block deployment
   }
 }

@@ -15,8 +15,7 @@
  *   GET  /atlas/export/openusd/:sceneId
  */
 
-import type { NextFunction, Request, Response } from 'express';
-import express from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 

@@ -64,7 +64,7 @@ export function createFindingsByAssessmentIdLoader() {
       for (const row of rows as any[]) {
         const key = row.assessmentId as number;
         if (!grouped.has(key)) grouped.set(key, []);
-        grouped.get(key)!.push(row);
+        grouped.get(key)?.push(row);
       }
       return assessmentIds.map((id) => grouped.get(id) ?? []);
     } catch {

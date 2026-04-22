@@ -26,7 +26,7 @@ vi.mock('../../artifacts/api-server/src/middlewares/auth', () => {
   const requireAnyAuth = (_opts?: unknown) => passthrough;
   const parseIdParam = (id: string) => {
     const n = parseInt(id, 10);
-    if (isNaN(n)) throw new Error('Invalid ID');
+    if (Number.isNaN(n)) throw new Error('Invalid ID');
     return n;
   };
   class InvalidIdError extends Error {}
@@ -172,8 +172,7 @@ beforeAll(async () => {
         .returning();
       registerCleanup({ table: 'dailyBriefingsTable', id: row.id });
     }
-  } catch (e) {
-    console.warn('[cortex-smoke] beforeAll seed failed:', e instanceof Error ? e.message : e);
+  } catch (_e) {
   }
 }, 10000);
 

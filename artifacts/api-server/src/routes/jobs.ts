@@ -1,7 +1,6 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import type { DurableJobStatus } from '@szl-holdings/forge-runtime';
 import { type IRouter, Router } from 'express';
-import { z } from 'zod';
 import { logActivity } from '../lib/activity-logger';
 import { sendBadRequest, sendError, sendSuccess } from '../lib/api-response';
 import { durableJobQueue, durableScheduler } from '../lib/durable-init';
@@ -283,7 +282,7 @@ router.post(
   validateBody(bodyShape({})),
   async (req, res) => {
     try {
-      const jobId = String(req.params['jobId'] ?? '');
+      const jobId = String(req.params.jobId ?? '');
       const job = await durableJobQueue.replayDeadLetterJob(jobId);
       await logActivity(
         req,
@@ -307,7 +306,7 @@ router.post(
   validateBody(bodyShape({})),
   async (req, res) => {
     try {
-      const jobId = String(req.params['jobId'] ?? '');
+      const jobId = String(req.params.jobId ?? '');
       const cancelled = await durableJobQueue.cancelJob(jobId);
       if (!cancelled) {
         sendBadRequest(
@@ -369,7 +368,7 @@ router.patch(
   validateBody(jobScheduleEnableSchema),
   async (req, res) => {
     try {
-      const name = String(req.params['name'] ?? '');
+      const name = String(req.params.name ?? '');
       const { enabled } = req.body;
       await durableScheduler.enableSchedule(name, enabled);
       await logActivity(
@@ -394,7 +393,7 @@ router.post(
   validateBody(bodyShape({})),
   async (req, res) => {
     try {
-      const name = String(req.params['name'] ?? '');
+      const name = String(req.params.name ?? '');
       await durableScheduler.triggerNow(name);
       await logActivity(
         req,

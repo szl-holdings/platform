@@ -4,10 +4,8 @@ import {
   Brain,
   ChevronDown,
   ChevronRight,
-  Clock,
   GitBranch,
   Info,
-  Layers,
   Shield,
   Target,
   TrendingDown,
@@ -593,7 +591,7 @@ function ConfidenceProfileSection({ profiles }: { profiles: ConfidenceProfile[] 
       <div style={{ padding: '0.75rem 1rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.625rem' }}>
           {profiles.map((p) => {
-            const accColor =
+            const _accColor =
               p.calibrationAccuracy >= 0.85
                 ? '#22c55e'
                 : p.calibrationAccuracy >= 0.75

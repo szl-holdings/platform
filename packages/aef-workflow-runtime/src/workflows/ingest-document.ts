@@ -63,7 +63,7 @@ export const ingestDocumentWorkflow: WorkflowDefinition = {
       requiresApproval: false,
       async execute(ctx: WorkflowContext, prior: WorkflowStepResult[]) {
         const chunkStep = prior.find((s) => s.stepId === 'plan-chunks');
-        const totalChunks = Number(chunkStep?.output?.['totalChunks'] ?? 0);
+        const totalChunks = Number(chunkStep?.output?.totalChunks ?? 0);
         return approvalGate.execute(ctx, {
           requiresApproval: ctx.approvalRequired && totalChunks > 1000,
         });
@@ -75,7 +75,7 @@ export const ingestDocumentWorkflow: WorkflowDefinition = {
       description: 'Dispatch chunks to the embedding worker for vector generation and index write.',
       async execute(ctx: WorkflowContext, prior: WorkflowStepResult[]) {
         const chunkStep = prior.find((s) => s.stepId === 'plan-chunks');
-        const totalChunks = Number(chunkStep?.output?.['totalChunks'] ?? 0);
+        const totalChunks = Number(chunkStep?.output?.totalChunks ?? 0);
         return vectorDispatch.execute(ctx, { totalChunks, ...ctx.input });
       },
     },
@@ -86,8 +86,8 @@ export const ingestDocumentWorkflow: WorkflowDefinition = {
       async execute(ctx: WorkflowContext, prior: WorkflowStepResult[]) {
         const chunkStep = prior.find((s) => s.stepId === 'plan-chunks');
         const dispatchStep = prior.find((s) => s.stepId === 'vector-dispatch');
-        const expected = Number(chunkStep?.output?.['totalChunks'] ?? 0);
-        const dispatched = Number(dispatchStep?.output?.['dispatchedChunks'] ?? expected);
+        const expected = Number(chunkStep?.output?.totalChunks ?? 0);
+        const dispatched = Number(dispatchStep?.output?.dispatchedChunks ?? expected);
         return indexVerifier.execute(ctx, { expectedChunks: expected, indexedChunks: dispatched });
       },
     },

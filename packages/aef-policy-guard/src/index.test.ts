@@ -3,8 +3,7 @@ import { PolicyEngine } from './engine.js';
 import { RedactionRegistry } from './redaction.js';
 import { RetentionRegistry } from './retention.js';
 import { TenantBoundaryEnforcer } from './tenant.js';
-import type { PolicyContext, PolicyRule } from './types.js';
-import { PolicyRuleSchema } from './types.js';
+import { type PolicyContext, type PolicyRule, PolicyRuleSchema } from './types.js';
 
 function makeContext(overrides: Partial<PolicyContext> = {}): PolicyContext {
   return {
@@ -224,9 +223,9 @@ describe('TenantBoundaryEnforcer', () => {
     });
     const decision = enforcer.enforce(makeContext({ tenantId: 'unknown-tenant' }));
     expect(decision).not.toBeNull();
-    expect(decision!.allow).toBe(false);
-    expect(decision!.reasons.length).toBeGreaterThan(0);
-    expect(decision!.appliedRuleIds).toContain('tenant-boundary-enforcer');
+    expect(decision?.allow).toBe(false);
+    expect(decision?.reasons.length).toBeGreaterThan(0);
+    expect(decision?.appliedRuleIds).toContain('tenant-boundary-enforcer');
   });
 
   it('registers a new tenant at runtime', () => {
@@ -289,18 +288,18 @@ describe('RedactionRegistry', () => {
       ['email'],
       't-a',
     );
-    expect(result['email']).toBe('[REDACTED]');
-    expect(result['name']).toBe('Alice');
+    expect(result.email).toBe('[REDACTED]');
+    expect(result.name).toBe('Alice');
   });
 
   it('applies a custom hook when registered', () => {
     const registry = new RedactionRegistry();
     registry.registerHook('phone', (value) => {
       const s = String(value);
-      return s.slice(0, -4) + '****';
+      return `${s.slice(0, -4)}****`;
     });
     const result = registry.applyRedactions({ phone: '555-123-4567' }, ['phone'], 't-a');
-    expect(result['phone']).toBe('555-123-****');
+    expect(result.phone).toBe('555-123-****');
   });
 
   it('skips fields not present in the record', () => {
@@ -320,7 +319,7 @@ describe('RedactionRegistry', () => {
     const registry = new RedactionRegistry();
     const original = { email: 'test@example.com' };
     registry.applyRedactions(original, ['email'], 't-a');
-    expect(original['email']).toBe('test@example.com');
+    expect(original.email).toBe('test@example.com');
   });
 
   it('hasHook returns true only for registered fields', () => {

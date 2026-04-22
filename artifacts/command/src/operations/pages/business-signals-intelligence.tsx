@@ -1,13 +1,9 @@
 import {
   Activity,
   AlertTriangle,
-  BarChart3,
-  Clock,
   DollarSign,
   TrendingDown,
-  TrendingUp,
   Users,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -265,7 +261,7 @@ function ImpactCard({ impact }: { impact: BusinessImpact }) {
 }
 
 export default function BusinessSignalsIntelligence() {
-  const [impacts, setImpacts] = useState<BusinessImpact[]>(SEED_IMPACTS);
+  const [impacts, _setImpacts] = useState<BusinessImpact[]>(SEED_IMPACTS);
   const [streams, setStreams] = useState<RevenueStream[]>(REVENUE_STREAMS);
   const [totalLoss, setTotalLoss] = useState(0);
 

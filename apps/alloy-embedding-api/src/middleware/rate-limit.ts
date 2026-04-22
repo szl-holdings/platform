@@ -5,7 +5,7 @@ interface TenantBucket {
   lastRefill: number;
 }
 
-const DEFAULT_RPM = Number(process.env['AEF_RATE_LIMIT_RPM'] ?? 300);
+const DEFAULT_RPM = Number(process.env.AEF_RATE_LIMIT_RPM ?? 300);
 const WINDOW_MS = 60_000;
 
 const buckets = new Map<string, TenantBucket>();

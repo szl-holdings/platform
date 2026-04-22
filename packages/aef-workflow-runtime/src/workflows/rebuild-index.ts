@@ -29,7 +29,7 @@ export const rebuildIndexWorkflow: WorkflowDefinition = {
       description: 'Require human approval before executing a destructive full index rebuild.',
       requiresApproval: true,
       async execute(ctx: WorkflowContext, _prior: WorkflowStepResult[]) {
-        const isFullRebuild = Boolean(ctx.input['fullRebuild']);
+        const isFullRebuild = Boolean(ctx.input.fullRebuild);
         return approvalGate.execute(ctx, {
           requiresApproval: ctx.approvalRequired && isFullRebuild,
           operation: 'rebuild_index',
@@ -42,7 +42,7 @@ export const rebuildIndexWorkflow: WorkflowDefinition = {
       actor: 'VectorDispatch',
       description: 'Re-embed and re-index all source documents in the rebuild scope.',
       async execute(ctx: WorkflowContext, _prior: WorkflowStepResult[]) {
-        const sourceIds = ctx.input['sourceIds'] as string[] | undefined;
+        const sourceIds = ctx.input.sourceIds as string[] | undefined;
         const totalChunks = sourceIds ? sourceIds.length * 10 : 100;
         return vectorDispatch.execute(ctx, { totalChunks, operation: 'rebuild' });
       },
@@ -53,7 +53,7 @@ export const rebuildIndexWorkflow: WorkflowDefinition = {
       description: 'Verify the rebuilt index is complete and consistent.',
       async execute(ctx: WorkflowContext, prior: WorkflowStepResult[]) {
         const dispatchStep = prior.find((s) => s.stepId === 'vector-dispatch');
-        const dispatched = Number(dispatchStep?.output?.['dispatchedChunks'] ?? 0);
+        const dispatched = Number(dispatchStep?.output?.dispatchedChunks ?? 0);
         return indexVerifier.execute(ctx, {
           expectedChunks: dispatched,
           indexedChunks: dispatched,

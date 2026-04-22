@@ -15,8 +15,7 @@
  */
 
 import type { FlowSnapshot, IncidentSnapshot } from './capture.js';
-import type { ReplaySnapshot } from './snapshot.js';
-import { createSnapshot } from './snapshot.js';
+import { type ReplaySnapshot, createSnapshot } from './snapshot.js';
 
 export interface IncidentConvertOptions {
   /** Override the scenario ID (defaults to the incident's scenarioId). */
@@ -47,10 +46,6 @@ export function incidentToReplaySnapshot(
   options: IncidentConvertOptions = {},
 ): ReplaySnapshot {
   if (!incident.piiRedacted) {
-    console.warn(
-      `[replay-core] incidentToReplaySnapshot: incident "${incident.id}" has piiRedacted=false. ` +
-        'Call redactIncidentPII() before converting to avoid PII exposure in replay pipelines.',
-    );
   }
 
   const {
@@ -118,10 +113,6 @@ export function flowToReplaySnapshot(
   options: FlowConvertOptions = {},
 ): ReplaySnapshot {
   if (!flow.piiRedacted) {
-    console.warn(
-      `[replay-core] flowToReplaySnapshot: flow "${flow.id}" has piiRedacted=false. ` +
-        'Call exportDataset() or manually redact flow steps before converting.',
-    );
   }
 
   const {

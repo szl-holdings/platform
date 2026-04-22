@@ -1,16 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { ConstellationAdapter } from '../adapter.ts';
 import { getAdapter, getRegisteredDomains, listAdapters, registerAdapter } from '../registry.ts';
-import type { CreateCstNode, CstNode, CstNodeTypeRegistration } from '../types.ts';
-import {
-  AddCstEvidenceSchema,
-  CreateCstNodeSchema,
-  CstEdgeSchema,
-  CstNodeSchema,
-  CstQueryFiltersSchema,
-  CstRelationshipFiltersSchema,
-  CstSearchParamsSchema,
-} from '../types.ts';
+import { type CreateCstNode, type CstNode, type CstNodeTypeRegistration, AddCstEvidenceSchema, CreateCstNodeSchema, CstEdgeSchema, CstNodeSchema, CstQueryFiltersSchema, CstRelationshipFiltersSchema, CstSearchParamsSchema } from '../types.ts';
 
 vi.mock('@szl-holdings/db', () => ({
   db: {
@@ -233,7 +224,7 @@ describe('Constellation adapter registry', () => {
   it('adapter can upsert an entity', async () => {
     const adapter = getAdapter('platform');
     expect(adapter).toBeDefined();
-    const node = await adapter!.upsertEntity({
+    const node = await adapter?.upsertEntity({
       domain: 'platform',
       entityType: 'test_type',
       name: 'Test Entity',
@@ -244,7 +235,7 @@ describe('Constellation adapter registry', () => {
 
   it('adapter lookup returns null for unknown alias', async () => {
     const adapter = getAdapter('platform');
-    const result = await adapter!.lookupByAlias('unknown_type', 'unknown_value');
+    const result = await adapter?.lookupByAlias('unknown_type', 'unknown_value');
     expect(result).toBeNull();
   });
 });

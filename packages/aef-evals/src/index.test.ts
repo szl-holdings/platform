@@ -110,7 +110,7 @@ describe('retrieval metrics — unit tests', () => {
     const q1 = [{ metric: 'recall', atK: 5, value: 0.8 }];
     const q2 = [{ metric: 'recall', atK: 5, value: 0.4 }];
     const agg = aggregateMetrics([q1, q2]);
-    expect(agg[0]!.value).toBeCloseTo(0.6);
+    expect(agg[0]?.value).toBeCloseTo(0.6);
   });
 });
 
@@ -202,7 +202,7 @@ describe('latency percentile computation — harness', () => {
 describe('retrieval harness — integration with mock corpus', () => {
   it('harness runs lyte golden queries and returns non-zero recall', async () => {
     const profile = defaultProfileRegistry.getProfileForDomain('lyte_governance_ops')!;
-    const queries = ALL_GOLDEN_QUERIES['lyte_governance_ops'];
+    const queries = ALL_GOLDEN_QUERIES.lyte_governance_ops;
 
     const adapter = {
       async retrieve(query: string, _profileId: string, topK: number) {
@@ -241,7 +241,7 @@ describe('retrieval harness — integration with mock corpus', () => {
 
   it('harness sets latency and throughput fields', async () => {
     const profile = defaultProfileRegistry.getProfileForDomain('vessels_maritime_risk')!;
-    const queries = ALL_GOLDEN_QUERIES['vessels_maritime_risk'];
+    const queries = ALL_GOLDEN_QUERIES.vessels_maritime_risk;
 
     const adapter = {
       async retrieve(query: string, _profileId: string, topK: number) {
@@ -344,7 +344,7 @@ describe('legacy runEval runner', () => {
       },
     };
 
-    const fixtures = ALL_GOLDEN_QUERIES['vessels_maritime_risk'].map((q) => ({
+    const fixtures = ALL_GOLDEN_QUERIES.vessels_maritime_risk.map((q) => ({
       queryId: q.queryId,
       query: q.query,
       relevantChunkIds: q.relevantChunkIds,

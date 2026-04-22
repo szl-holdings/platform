@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 const ALGO = 'aes-256-gcm';
 const KEY_LENGTH = 32;
@@ -6,11 +6,11 @@ const IV_LENGTH = 12;
 const TAG_LENGTH = 16;
 
 function getKey(): Buffer {
-  const raw = process.env['SECRET_ENCRYPTION_KEY'];
+  const raw = process.env.SECRET_ENCRYPTION_KEY;
   if (raw && raw.length >= KEY_LENGTH) {
     return Buffer.from(raw.slice(0, KEY_LENGTH), 'utf8');
   }
-  const sessionSecret = process.env['SESSION_SECRET'];
+  const sessionSecret = process.env.SESSION_SECRET;
   if (sessionSecret) {
     return crypto.scryptSync(sessionSecret, 'szl-dataverse-salt', KEY_LENGTH);
   }

@@ -13,17 +13,11 @@ import {
   ArrowLeft,
   ArrowUpRight,
   BarChart3,
-  Building2,
-  DollarSign,
-  Eye,
-  Info,
   Layers,
   Loader2,
-  MapPin,
   Target,
   TrendingDown,
   TrendingUp,
-  Users,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -165,7 +159,7 @@ function HeatmapCanvas({
           {markets.map((m) => {
             const meta = TRAJECTORY_META[m.trajectory];
             const { x, y } = toXY(m.lat, m.lng);
-            const r = scoreToRadius(m.momentumScore);
+            const _r = scoreToRadius(m.momentumScore);
             return (
               <radialGradient key={m.id} id={`hm-${m.id}`} cx="50%" cy="50%" r="50%">
                 <stop

@@ -5,11 +5,8 @@ import {
   db,
   terraPropertiesTable,
   terraDealsTable,
-  dealPipelinesTable,
-  propertiesTable,
-  propertyValuationsTable,
 } from "@szl-holdings/db";
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { desc, eq, } from "drizzle-orm";
 
 export class TerraRepository {
   async findPropertyById(id: number) {

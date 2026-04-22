@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useBiometric } from '../context/BiometricContext';
 
@@ -41,7 +41,7 @@ export function BiometricLockScreen({ config }: { config: BiometricLockScreenCon
         <View
           style={[
             styles.iconWrap,
-            { borderColor: accentColor + '40', backgroundColor: accentColor + '15' },
+            { borderColor: `${accentColor}40`, backgroundColor: `${accentColor}15` },
           ]}
         >
           <Text style={{ fontSize: 40 }}>🔒</Text>

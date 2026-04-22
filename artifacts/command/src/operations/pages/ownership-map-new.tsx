@@ -1,7 +1,5 @@
 import {
-  APPROVALS,
   formatCurrency,
-  getStateColor,
   WORKFLOWS,
 } from '@szl-holdings/shared-ui/core-observability-data';
 import { AlertTriangle, ArrowRight, Check, FlaskConical, User, Users, X } from 'lucide-react';

@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   LayoutAnimation,
@@ -376,7 +376,7 @@ export function FusionBar() {
             <View
               style={[
                 styles.errorState,
-                { borderColor: colors.red + '30', backgroundColor: colors.red + '10' },
+                { borderColor: `${colors.red}30`, backgroundColor: `${colors.red}10` },
               ]}
             >
               <Feather name="alert-circle" size={14} color={colors.red} />

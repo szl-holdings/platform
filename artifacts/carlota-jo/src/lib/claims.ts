@@ -27,8 +27,9 @@ export const CARLOTA_JO_RETENTION = resolveClaim('carlota-jo-retention', '98%');
  * claim auto-updates each year and never drifts from the bio source of truth.
  */
 export const CARLOTA_JO_YEARS_EXPERIENCE: ClaimValue = {
+  key: 'carlota-jo-years-experience',
+  namespace: 'carlota-jo',
   value: `${FOUNDER_YEARS_EXPERIENCE} years`,
-  label: null,
+  displayLabel: null,
   truthValue: 'verified',
-  displayWithLabel: `${FOUNDER_YEARS_EXPERIENCE} years`,
 };

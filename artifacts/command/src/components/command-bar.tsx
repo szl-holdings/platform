@@ -9,7 +9,6 @@ import {
   Building2,
   CheckSquare,
   Command,
-  Cpu,
   Crown,
   Database,
   DollarSign,

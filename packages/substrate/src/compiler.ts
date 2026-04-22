@@ -48,7 +48,7 @@ function topoSort(stages: AnyStage[]): string[] {
           `Undeclared dependency: '${stage.id}' → '${dep}'`,
         ]);
       }
-      adj.get(dep)!.push(stage.id);
+      adj.get(dep)?.push(stage.id);
       inDegree.set(stage.id, (inDegree.get(stage.id) ?? 0) + 1);
     }
   }
@@ -98,7 +98,7 @@ function computeDescendants(stageId: string, stageMap: Map<string, AnyStage>): S
   for (const stage of stageMap.values()) {
     for (const dep of stage.dependsOn) {
       if (!reverseAdj.has(dep)) reverseAdj.set(dep, []);
-      reverseAdj.get(dep)!.push(stage.id);
+      reverseAdj.get(dep)?.push(stage.id);
     }
   }
 

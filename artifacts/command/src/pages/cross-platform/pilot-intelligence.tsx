@@ -1,5 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
-import { Activity, AlertTriangle, ArrowLeft, CheckCircle, Clock, MinusCircle } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowLeft, CheckCircle, MinusCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'wouter';
 import { apiUrl, fetchJson } from '../cognitive/shared';
@@ -150,7 +150,7 @@ export function PilotIntelligencePage() {
               className="px-2.5 py-1 rounded text-[10px] font-semibold capitalize tracking-wide transition-all"
               style={{
                 background: active ? `${color}18` : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${active ? color + '40' : 'rgba(255,255,255,0.07)'}`,
+                border: `1px solid ${active ? `${color}40` : 'rgba(255,255,255,0.07)'}`,
                 color: active ? color : 'rgba(255,255,255,0.35)',
               }}
             >
@@ -182,7 +182,7 @@ export function PilotIntelligencePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {accounts.map((acct) => {
-            const sm = STATUS_META[acct.status] ?? STATUS_META['inactive'];
+            const sm = STATUS_META[acct.status] ?? STATUS_META.inactive;
             const StatusIcon = sm.icon;
             const passColor =
               acct.passRate === null

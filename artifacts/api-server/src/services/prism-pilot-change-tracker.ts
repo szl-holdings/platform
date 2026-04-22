@@ -62,7 +62,7 @@ export class PilotChangeTracker {
 
   async generateMorningBrief(orgId: number, userId: number) {
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const threeDays = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    const _threeDays = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
     const tenDays = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
 
     const recentChanges = await db
@@ -103,7 +103,7 @@ export class PilotChangeTracker {
         and(eq(pcReviewItemsTable.orgId, orgId), eq(pcReviewItemsTable.reviewState, 'pending')),
       );
 
-    const pendingSignoffs = await db
+    const _pendingSignoffs = await db
       .select()
       .from(pcSignoffQueueTable)
       .where(and(eq(pcSignoffQueueTable.orgId, orgId), eq(pcSignoffQueueTable.status, 'pending')));

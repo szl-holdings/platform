@@ -4,9 +4,7 @@ import {
   ChevronRight,
   Clock,
   Filter,
-  GitBranch,
   Globe,
-  Info,
   Layers,
   Radio,
   RefreshCw,
@@ -20,7 +18,7 @@ import { CognitiveLayout } from './cognitive-layout';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 const ACCENT = '#8b7ac8';
-const CARD = 'var(--color-surface-base)';
+const _CARD = 'var(--color-surface-base)';
 const BORDER = 'var(--color-surface-border)';
 const FG = 'var(--color-fg-primary)';
 const FG_MUT = 'var(--color-fg-muted)';
@@ -422,7 +420,7 @@ const DEMO_WORLD_MODEL: WorldModel = {
 
 function layoutNodes(
   nodes: ConstellationNode[],
-  edges: ConstellationEdge[],
+  _edges: ConstellationEdge[],
   w: number,
   h: number,
 ): ConstellationNode[] {
@@ -494,7 +492,7 @@ const TYPE_OPTIONS: Array<ConstellationNode['type'] | 'all'> = [
   'concept',
   'agent',
 ];
-const FRESHNESS_OPTIONS = ['all', 'fresh', 'aging', 'stale'] as const;
+const _FRESHNESS_OPTIONS = ['all', 'fresh', 'aging', 'stale'] as const;
 
 function freshnessColor(f: number): string {
   return f >= 0.8 ? '#22c55e' : f >= 0.5 ? '#f59e0b' : '#ef4444';
@@ -842,7 +840,7 @@ export default function WorldModelExplorer() {
             userSelect: 'none',
           }}
         >
-          {n.label.length > 9 ? n.label.slice(0, 8) + '…' : n.label}
+          {n.label.length > 9 ? `${n.label.slice(0, 8)}…` : n.label}
         </text>
         {liveF < 0.5 && (
           <circle r={4} cx={r - 2} cy={-(r - 2)} fill="#ef4444" stroke="#080c14" strokeWidth={1} />
@@ -932,7 +930,7 @@ export default function WorldModelExplorer() {
                   height: 26,
                   borderRadius: 6,
                   background: 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${debouncedQuery.length >= 2 ? ACCENT + '60' : BORDER}`,
+                  border: `1px solid ${debouncedQuery.length >= 2 ? `${ACCENT}60` : BORDER}`,
                   color: FG,
                   fontSize: 10,
                   outline: 'none',
@@ -1696,12 +1694,12 @@ export default function WorldModelExplorer() {
                     [
                       {
                         label: 'Nodes',
-                        value: filteredNodes.length + '/' + model.meta.totalNodes,
+                        value: `${filteredNodes.length}/${model.meta.totalNodes}`,
                         color: FG,
                       },
                       {
                         label: 'Edges',
-                        value: visibleEdges.length + '/' + model.meta.totalEdges,
+                        value: `${visibleEdges.length}/${model.meta.totalEdges}`,
                         color: FG,
                       },
                       { label: 'Stale', value: model.meta.staleDomains.length, color: '#ef4444' },

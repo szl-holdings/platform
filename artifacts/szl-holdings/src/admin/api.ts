@@ -152,7 +152,7 @@ export async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> 
     headers: {
       'Content-Type': 'application/json',
       ...(needsCsrf ? { 'x-csrf-token': getCsrfToken() } : {}),
-      ...(opts?.headers || {}),
+      ...opts?.headers,
     },
     ...opts,
   });

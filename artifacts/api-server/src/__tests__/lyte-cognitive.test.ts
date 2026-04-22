@@ -4,7 +4,7 @@ import {
   PlanContextSchema,
   type PlanStep,
 } from '@workspace/planner';
-import { beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
+import { describe, expect, it, } from 'vitest';
 import {
   CATEGORY_DOMAIN,
   computeAccountabilityUrgency,
@@ -314,42 +314,42 @@ describe('estimateRiskAndApprovals (planner integration)', () => {
   it('auto-gates a critical-risk intervention with approval + rollback', () => {
     const steps = [makeStep('int-critical', 0, 0.9)];
     const assessed = estimateRiskAndApprovals(steps, planCtx);
-    expect(assessed[0]!.riskLevel).toBe('critical');
-    expect(assessed[0]!.requiredApproval).toBe(true);
-    expect(assessed[0]!.rollbackPoints.length).toBeGreaterThan(0);
-    expect(assessed[0]!.approvalReason).toContain('threshold');
+    expect(assessed[0]?.riskLevel).toBe('critical');
+    expect(assessed[0]?.requiredApproval).toBe(true);
+    expect(assessed[0]?.rollbackPoints.length).toBeGreaterThan(0);
+    expect(assessed[0]?.approvalReason).toContain('threshold');
   });
 
   it('auto-gates a high-risk intervention', () => {
     const steps = [makeStep('int-high', 0, 0.6)];
     const assessed = estimateRiskAndApprovals(steps, planCtx);
-    expect(assessed[0]!.riskLevel).toBe('high');
-    expect(assessed[0]!.requiredApproval).toBe(true);
+    expect(assessed[0]?.riskLevel).toBe('high');
+    expect(assessed[0]?.requiredApproval).toBe(true);
   });
 
   it('does NOT gate a low-risk intervention (below high threshold)', () => {
     const steps = [makeStep('int-low', 0, 0.1)];
     const assessed = estimateRiskAndApprovals(steps, planCtx);
-    expect(assessed[0]!.riskLevel).toBe('low');
-    expect(assessed[0]!.requiredApproval).toBe(false);
-    expect(assessed[0]!.rollbackPoints).toHaveLength(0);
+    expect(assessed[0]?.riskLevel).toBe('low');
+    expect(assessed[0]?.requiredApproval).toBe(false);
+    expect(assessed[0]?.rollbackPoints).toHaveLength(0);
   });
 
   it('processes multiple steps independently', () => {
     const steps = [makeStep('a', 0, 0.9), makeStep('b', 1, 0.1), makeStep('c', 2, 0.6)];
     const assessed = estimateRiskAndApprovals(steps, planCtx);
     expect(assessed).toHaveLength(3);
-    expect(assessed[0]!.requiredApproval).toBe(true);
-    expect(assessed[1]!.requiredApproval).toBe(false);
-    expect(assessed[2]!.requiredApproval).toBe(true);
+    expect(assessed[0]?.requiredApproval).toBe(true);
+    expect(assessed[1]?.requiredApproval).toBe(false);
+    expect(assessed[2]?.requiredApproval).toBe(true);
   });
 
   it('does not lose original step metadata', () => {
     const steps = [makeStep('meta-test', 0, 0.3)];
     steps[0]!.metadata = { interventionId: 'x1', domain: 'operations' };
     const assessed = estimateRiskAndApprovals(steps, planCtx);
-    expect(assessed[0]!.metadata.interventionId).toBe('x1');
-    expect(assessed[0]!.metadata.domain).toBe('operations');
+    expect(assessed[0]?.metadata.interventionId).toBe('x1');
+    expect(assessed[0]?.metadata.domain).toBe('operations');
   });
 });
 
@@ -372,20 +372,20 @@ describe('intervention planner step construction (integration shape)', () => {
     expect(levelForRisk(estimatedRisk)).toBe('critical');
 
     const assessed = estimateRiskAndApprovals([step], planCtx);
-    expect(assessed[0]!.requiredApproval).toBe(true);
-    expect(assessed[0]!.rollbackPoints.length).toBeGreaterThan(0);
+    expect(assessed[0]?.requiredApproval).toBe(true);
+    expect(assessed[0]?.rollbackPoints.length).toBeGreaterThan(0);
   });
 
   it('builds a low-risk plan step for a routine moderate signal group', () => {
-    const varValue = 5_000;
+    const _varValue = 5_000;
     const urgencyRisk = 0.15;
     const varRisk = 0;
     const estimatedRisk = urgencyRisk + varRisk;
 
     const step = makeStep('grp-routine', 0, estimatedRisk);
     const assessed = estimateRiskAndApprovals([step], planCtx);
-    expect(assessed[0]!.riskLevel).toBe('low');
-    expect(assessed[0]!.requiredApproval).toBe(false);
+    expect(assessed[0]?.riskLevel).toBe('low');
+    expect(assessed[0]?.requiredApproval).toBe(false);
   });
 });
 
@@ -411,8 +411,8 @@ describe('VaR byDomain aggregation — count + items both increment', () => {
       byDomain[domain].items++;
     }
 
-    expect(byDomain.signals!.count).toBe(2);
-    expect(byDomain.signals!.items).toBe(2);
-    expect(byDomain.signals!.var).toBe(1_000_000 + 250_000);
+    expect(byDomain.signals?.count).toBe(2);
+    expect(byDomain.signals?.items).toBe(2);
+    expect(byDomain.signals?.var).toBe(1_000_000 + 250_000);
   });
 });

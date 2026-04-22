@@ -41,8 +41,8 @@ export function getDefaultEmbedWorker(): { queue: MicroBatchQueue; warmPool: War
     ];
 
     _defaultQueue = new MicroBatchQueue(backends, {
-      maxBatchSize: Number(process.env['AEF_EMBED_BATCH_SIZE'] ?? 32),
-      flushIntervalMs: Number(process.env['AEF_EMBED_FLUSH_MS'] ?? 20),
+      maxBatchSize: Number(process.env.AEF_EMBED_BATCH_SIZE ?? 32),
+      flushIntervalMs: Number(process.env.AEF_EMBED_FLUSH_MS ?? 20),
     });
 
     _defaultWarmPool = new WarmPool(backends, 30_000);

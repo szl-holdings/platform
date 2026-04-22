@@ -4,8 +4,8 @@
 //           deliverables/SZL-Medium-Launch-Plan.pdf,
 //           deliverables/SZL-Newsletter-Screenshots.zip
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const puppeteer = require('puppeteer-core');
 const archiver = require('archiver');
 
@@ -1115,7 +1115,7 @@ const REFERENCE_TARGETS = [
 // Render helpers
 // ────────────────────────────────────────────────
 function resolveChromium() {
-  const { execSync } = require('child_process');
+  const { execSync } = require('node:child_process');
   // 1. Explicit env var wins.
   if (process.env.CHROMIUM_PATH && fs.existsSync(process.env.CHROMIUM_PATH))
     return process.env.CHROMIUM_PATH;
@@ -1160,7 +1160,6 @@ function resolveChromium() {
 
 async function launchBrowser() {
   const exe = resolveChromium();
-  console.log(`Chromium: ${exe}`);
   return await puppeteer.launch({
     executablePath: exe,
     headless: true,
@@ -1228,13 +1227,13 @@ async function captureReference(browser, ref, outPath) {
   const page = await browser.newPage();
   await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
   let needFallback = false;
-  let reason = '';
+  let _reason = '';
   try {
     await page.goto(ref.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await new Promise((r) => setTimeout(r, 4000));
     // Sniff for Cloudflare / bot-challenge / blank pages
     const sniff = await page.evaluate(() => {
-      const text = ((document.body && document.body.innerText) || '').trim();
+      const text = ((document.body?.innerText) || '').trim();
       const title = document.title || '';
       const html = document.documentElement.outerHTML || '';
       return {
@@ -1242,32 +1241,30 @@ async function captureReference(browser, ref, outPath) {
         title,
         hasChallenge:
           /just a moment|cloudflare|enable javascript and cookies|attention required|verify you are human|checking your browser/i.test(
-            text + ' ' + title + ' ' + html,
+            `${text} ${title} ${html}`,
           ),
         bodyHeight: document.body ? document.body.scrollHeight : 0,
       };
     });
     if (sniff.hasChallenge) {
       needFallback = true;
-      reason = 'bot-challenge page';
+      _reason = 'bot-challenge page';
     } else if (sniff.textLen < 200) {
       needFallback = true;
-      reason = `thin content (${sniff.textLen} chars)`;
+      _reason = `thin content (${sniff.textLen} chars)`;
     } else if (sniff.bodyHeight < 400) {
       needFallback = true;
-      reason = `short body (${sniff.bodyHeight}px)`;
+      _reason = `short body (${sniff.bodyHeight}px)`;
     }
   } catch (err) {
     needFallback = true;
-    reason = err.message;
+    _reason = err.message;
   }
 
   if (needFallback) {
-    console.log(`  ↻ ${ref.url} → branded reference card (${reason})`);
     await page.setContent(referenceCardHtml(ref), { waitUntil: 'networkidle0' });
     await new Promise((r) => setTimeout(r, 800));
   } else {
-    console.log(`  ✓ captured ${ref.url}`);
   }
   await page.screenshot({ path: outPath, fullPage: false, type: 'png' });
   await page.close();
@@ -1371,22 +1368,12 @@ async function bundleZip(zipPath) {
 // Main
 // ────────────────────────────────────────────────
 async function main() {
-  console.log('=== SZL Launch Kit Generator ===');
-  console.log(`Deliverables → ${DELIVERABLES}`);
 
   const browser = await launchBrowser();
-
-  console.log('\n[1/4] Rendering Substack PDF…');
   const substackHtml = buildPdfHtml('substack');
   await renderPdf(browser, substackHtml, path.join(DELIVERABLES, 'SZL-Substack-Launch-Plan.pdf'));
-  console.log('      ✓ SZL-Substack-Launch-Plan.pdf');
-
-  console.log('\n[2/4] Rendering Medium PDF…');
   const mediumHtml = buildPdfHtml('medium');
   await renderPdf(browser, mediumHtml, path.join(DELIVERABLES, 'SZL-Medium-Launch-Plan.pdf'));
-  console.log('      ✓ SZL-Medium-Launch-Plan.pdf');
-
-  console.log('\n[3/4] Rendering mockups…');
   const mockups = [
     ['substack-home.png', mockupSubstackHome(), 1440, 900, true],
     ['substack-about.png', mockupSubstackAbout(), 1440, 900, true],
@@ -1398,34 +1385,22 @@ async function main() {
   for (const [name, html, w, h, full] of mockups) {
     const p = path.join(MOCKUPS_DIR, name);
     await renderMockup(browser, html, p, w, h, full);
-    console.log(`      ✓ ${name}`);
   }
-
-  console.log('\n[4/4] Capturing reference screenshots…');
   for (const ref of REFERENCE_TARGETS) {
     await captureReference(browser, ref, path.join(REFERENCES_DIR, ref.file));
   }
 
   await browser.close();
-
-  console.log('\n[5/5] Bundling ZIP…');
   const zipOut = path.join(DELIVERABLES, 'SZL-Newsletter-Screenshots.zip');
-  const sz = await bundleZip(zipOut);
-  console.log(`      ✓ SZL-Newsletter-Screenshots.zip (${Math.round(sz / 1024)} KB)`);
+  const _sz = await bundleZip(zipOut);
 
-  const stats = {
+  const _stats = {
     substackPdf: fs.statSync(path.join(DELIVERABLES, 'SZL-Substack-Launch-Plan.pdf')).size,
     mediumPdf: fs.statSync(path.join(DELIVERABLES, 'SZL-Medium-Launch-Plan.pdf')).size,
     zip: fs.statSync(zipOut).size,
   };
-  console.log('\n=== Complete ===');
-  console.log(`  Substack PDF: ${(stats.substackPdf / 1024).toFixed(1)} KB`);
-  console.log(`  Medium PDF:   ${(stats.mediumPdf / 1024).toFixed(1)} KB`);
-  console.log(`  Screenshots:  ${(stats.zip / 1024).toFixed(1)} KB`);
-  console.log(`  Posts drafted: ${POSTS.length}`);
 }
 
-main().catch((err) => {
-  console.error(err);
+main().catch((_err) => {
   process.exit(1);
 });

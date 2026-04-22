@@ -1,6 +1,5 @@
-import { AlertTriangle, Clock, ExternalLink, Info, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, Info, } from 'lucide-react';
 import { DataProvenance } from '@/lib/data-provenance';
-import { sentraTwin } from '@/data/sentra-twin';
 
 export default function ThreatOverview() {
   return (

@@ -1,15 +1,13 @@
 import {
   Activity,
-  CheckCircle,
   ChevronDown,
   ChevronRight,
-  Clock,
   Cpu,
   Gauge,
   Shield,
   XCircle,
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { AuditEntry } from '../lib/types';
 
 const APP_COLORS: Record<string, string> = {
@@ -448,7 +446,7 @@ function EntryRow({ entry }: { entry: AuditEntry }) {
 function AgentRateLimitPanel({ entries }: { entries: AuditEntry[] }) {
   const latest = new Map<string, AuditEntry>();
   for (const e of entries) {
-    if (!latest.has(e.agentSlug) || e.startedAt > latest.get(e.agentSlug)!.startedAt) {
+    if (!latest.has(e.agentSlug) || e.startedAt > (latest.get(e.agentSlug)?.startedAt ?? '')) {
       latest.set(e.agentSlug, e);
     }
   }
@@ -521,7 +519,7 @@ export default function AuditTrail() {
 
   const successCount = entries.filter((e) => e.status === 'success').length;
   const errorCount = entries.filter((e) => e.status === 'error').length;
-  const skippedCount = entries.filter((e) => e.status === 'skipped').length;
+  const _skippedCount = entries.filter((e) => e.status === 'skipped').length;
   const avgDuration = Math.round(entries.reduce((s, e) => s + e.durationMs, 0) / entries.length);
 
   return (

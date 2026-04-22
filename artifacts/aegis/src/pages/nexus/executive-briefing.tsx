@@ -1,16 +1,6 @@
 import {
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
   ChevronRight,
-  Clock,
-  Download,
-  Eye,
   FileText,
-  Globe,
-  Shield,
-  TrendingUp,
-  Users,
   Zap,
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
@@ -19,7 +9,7 @@ const ACCENT = '#f59e0b';
 const RED = '#ef4444';
 const GREEN = '#22c55e';
 const BLUE = '#3b82f6';
-const PURPLE = '#8b5cf6';
+const _PURPLE = '#8b5cf6';
 
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
@@ -193,7 +183,7 @@ export default function ExecutiveBriefingPage() {
           </span>
           <span
             className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium"
-            style={{ background: GREEN + '20', color: GREEN }}
+            style={{ background: `${GREEN}20`, color: GREEN }}
           >
             <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" /> Active
           </span>
@@ -222,10 +212,10 @@ export default function ExecutiveBriefingPage() {
                 style={{
                   background:
                     b.status === 'distributed'
-                      ? GREEN + '15'
+                      ? `${GREEN}15`
                       : b.status === 'reviewed'
-                        ? BLUE + '15'
-                        : ACCENT + '15',
+                        ? `${BLUE}15`
+                        : `${ACCENT}15`,
                   color:
                     b.status === 'distributed' ? GREEN : b.status === 'reviewed' ? BLUE : ACCENT,
                 }}
@@ -263,7 +253,7 @@ export default function ExecutiveBriefingPage() {
                     <span
                       className="text-[8px] uppercase font-bold tracking-wider rounded px-1.5 py-0.5"
                       style={{
-                        background: prioColor(item.priority) + '15',
+                        background: `${prioColor(item.priority)}15`,
                         color: prioColor(item.priority),
                       }}
                     >
@@ -321,7 +311,7 @@ export default function ExecutiveBriefingPage() {
                   </div>
                   <div
                     className="rounded-lg p-3"
-                    style={{ background: ACCENT + '08', borderLeft: `2px solid ${ACCENT}` }}
+                    style={{ background: `${ACCENT}08`, borderLeft: `2px solid ${ACCENT}` }}
                   >
                     <div className="flex items-center gap-1.5 mb-1">
                       <Zap className="h-3 w-3" style={{ color: ACCENT }} />
@@ -359,7 +349,7 @@ export default function ExecutiveBriefingPage() {
                   onClick={() => handleStatusChange('reviewed')}
                   aria-label="Mark briefing as reviewed"
                   className="w-full text-[10px] font-semibold rounded-lg py-2 transition hover:brightness-125"
-                  style={{ background: BLUE + '20', color: BLUE }}
+                  style={{ background: `${BLUE}20`, color: BLUE }}
                 >
                   Mark Reviewed
                 </button>
@@ -367,7 +357,7 @@ export default function ExecutiveBriefingPage() {
                   onClick={() => handleStatusChange('distributed')}
                   aria-label="Distribute briefing"
                   className="w-full text-[10px] font-semibold rounded-lg py-2 transition hover:brightness-125"
-                  style={{ background: GREEN + '20', color: GREEN }}
+                  style={{ background: `${GREEN}20`, color: GREEN }}
                 >
                   Distribute
                 </button>
@@ -378,7 +368,7 @@ export default function ExecutiveBriefingPage() {
                 onClick={() => handleStatusChange('distributed')}
                 aria-label="Distribute briefing"
                 className="w-full text-[10px] font-semibold rounded-lg py-2 transition hover:brightness-125"
-                style={{ background: GREEN + '20', color: GREEN }}
+                style={{ background: `${GREEN}20`, color: GREEN }}
               >
                 Distribute to Recipients
               </button>

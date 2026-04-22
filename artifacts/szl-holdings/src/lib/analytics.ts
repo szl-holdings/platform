@@ -91,9 +91,8 @@ function sendToFunnelStore(event: string, properties?: EventProperties): void {
       keepalive: true,
       credentials: 'include',
     }).catch(() => {});
-  } catch (err) {
+  } catch (_err) {
     if (import.meta.env.DEV) {
-      console.warn('[analytics] funnel store forward failed:', err);
     }
   }
 }
@@ -160,16 +159,14 @@ function track(event: EventName, properties?: EventProperties): void {
   }
   try {
     posthog.capture(event, properties);
-  } catch (err) {
+  } catch (_err) {
     if (import.meta.env.DEV) {
-      console.warn('[analytics] posthog.capture failed:', err);
     }
   }
   // Persist to the in-app funnel store so the founder dashboard works even
   // without a configured external analytics provider.
   sendToFunnelStore(event, properties);
   if (import.meta.env.DEV) {
-    console.debug(`[analytics] ${event}`, properties);
   }
 }
 
@@ -209,9 +206,8 @@ export function startMarketingSessionRecording(page: string): void {
     if (typeof posthog.startSessionRecording === 'function') {
       posthog.startSessionRecording();
     }
-  } catch (err) {
+  } catch (_err) {
     if (import.meta.env.DEV) {
-      console.warn('[analytics] startSessionRecording failed:', err);
     }
   }
 }

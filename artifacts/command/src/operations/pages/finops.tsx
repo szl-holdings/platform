@@ -10,7 +10,7 @@ import {
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const GOLD = '#d4a054';
 const DS = {
@@ -269,7 +269,7 @@ function SpendChart() {
   const max = Math.max(...MONTH_DATA.map((d) => Math.max(d.cost, d.budget)));
   return (
     <div className="flex items-end gap-2 h-24 w-full">
-      {MONTH_DATA.map((d, i) => {
+      {MONTH_DATA.map((d, _i) => {
         const costH = (d.cost / max) * 88;
         const budgetH = (d.budget / max) * 88;
         const overBudget = d.cost > d.budget;

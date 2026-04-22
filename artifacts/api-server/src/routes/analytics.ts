@@ -102,7 +102,7 @@ analyticsRouter.post(
   },
 );
 
-analyticsRouter.get('/analytics/summary', (req: Request, res: Response) => {
+analyticsRouter.get('/analytics/summary', (_req: Request, res: Response) => {
   try {
     const snapshot = serverTelemetry.getSnapshot();
     res.json({

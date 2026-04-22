@@ -129,7 +129,7 @@ router.get(
         sendUnauthorized(res);
         return;
       }
-      const domainParam = req.query['domain'];
+      const domainParam = req.query.domain;
       const orgIds = user.orgs.map((m) => m.orgId);
       // Visibility for the requesting user is the union of:
       //   (a) every saved view they own (regardless of visibility), and
@@ -279,7 +279,7 @@ router.patch(
         sendUnauthorized(res);
         return;
       }
-      const id = parseId(req.params['id']);
+      const id = parseId(req.params.id);
       if (id === null) {
         sendBadRequest(res, 'Invalid saved view id');
         return;
@@ -386,7 +386,7 @@ router.delete(
         sendUnauthorized(res);
         return;
       }
-      const id = parseId(req.params['id']);
+      const id = parseId(req.params.id);
       if (id === null) {
         sendBadRequest(res, 'Invalid saved view id');
         return;

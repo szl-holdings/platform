@@ -119,7 +119,7 @@ afterAll(() => {
 describe('getFiles', () => {
   it('walks .ts files but skips node_modules and dist', () => {
     const files = getFiles(join(root, 'packages/cleanpkg'));
-    const rel = files.map((f) => f.replace(root + '/', ''));
+    const rel = files.map((f) => f.replace(`${root}/`, ''));
     expect(rel).toContain('packages/cleanpkg/src/index.ts');
     expect(rel.find((p) => p.includes('node_modules'))).toBeUndefined();
     expect(rel.find((p) => p.includes('/dist/'))).toBeUndefined();

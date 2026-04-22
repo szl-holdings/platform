@@ -143,14 +143,14 @@ seedScenariosIfEmpty(SEED_SCENARIOS)
     if (seeded) {
       return Promise.all(
         SEED_RUNS.map((run) =>
-          persistRun(run).catch((err) =>
-            console.warn('[replay-seed] Failed to seed run', run.runId, err),
+          persistRun(run).catch((_err) =>
+            {},
           ),
         ),
       );
     }
   })
-  .catch((err) => console.warn('[replay-seed] Failed to seed scenarios', err));
+  .catch((_err) => {});
 
 router.get(
   '/replay/scenarios',
@@ -160,7 +160,7 @@ router.get(
   perUserApiSlidingLimiter,
   async (req, res) => {
     try {
-      const domain = req.query['domain'] as string | undefined;
+      const domain = req.query.domain as string | undefined;
       const scenarios = await listScenarios(domain ? { domain } : undefined);
       const runs = await listRuns({ limit: 200 });
 
@@ -243,7 +243,7 @@ router.get(
   perUserApiSlidingLimiter,
   async (req, res) => {
     try {
-      const scenarioId = req.query['scenarioId'] as string | undefined;
+      const scenarioId = req.query.scenarioId as string | undefined;
       const snapshots = await listSnapshots(scenarioId);
       res.json({ snapshots, total: snapshots.length });
     } catch (err) {
@@ -306,9 +306,9 @@ router.get(
   perUserApiSlidingLimiter,
   async (req, res) => {
     try {
-      const scenarioId = req.query['scenarioId'] as string | undefined;
-      const rawLimit = parseInt((req.query['limit'] as string) ?? '100', 10);
-      const limit = Math.min(isNaN(rawLimit) || rawLimit < 1 ? 100 : rawLimit, 200);
+      const scenarioId = req.query.scenarioId as string | undefined;
+      const rawLimit = parseInt((req.query.limit as string) ?? '100', 10);
+      const limit = Math.min(Number.isNaN(rawLimit) || rawLimit < 1 ? 100 : rawLimit, 200);
       const runs = await listRuns({ scenarioId, limit });
       res.json({ runs, total: runs.length });
     } catch (err) {

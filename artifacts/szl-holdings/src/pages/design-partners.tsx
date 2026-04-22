@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ArrowRight, Users, Calendar, CheckCircle2, Zap, Shield, BarChart3, MessageSquare, Clock } from "lucide-react";
+import { ArrowRight, Users, CheckCircle2, Zap, Shield, BarChart3, MessageSquare, Clock } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";

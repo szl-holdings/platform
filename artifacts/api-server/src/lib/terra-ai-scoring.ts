@@ -141,7 +141,7 @@ function computeScore(prop: TerraDistressProperty): ScoringResult {
     `${daysInDistress} days in distress — ${daysInDistress >= 90 && daysInDistress <= 180 ? 'motivated seller likely' : daysInDistress > 180 ? 'extended distress, seller pressure high' : 'early stage, window opening'}`,
   );
 
-  const reasoning = reasoningParts.join('. ') + '.';
+  const reasoning = `${reasoningParts.join('. ')}.`;
 
   // Recommended action
   let recommended_action: string;

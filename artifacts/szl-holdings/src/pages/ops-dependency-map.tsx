@@ -80,7 +80,7 @@ function computeLayout(nodes: DepNode[], edges: DepEdge[]): LayoutNode[] {
   const remaining = nodes.filter((n) => !placed.has(n.id)).map((n) => n.id);
   if (remaining.length > 0) cols.push(remaining);
 
-  const W = 180;
+  const _W = 180;
   const H = 80;
   const COL_GAP = 220;
   const ROW_GAP = 110;
@@ -449,8 +449,8 @@ export default function OpsDependencyMapPage() {
   const maxX = Math.max(...xs, 0) + canvasPad;
   const minY = Math.min(...ys, 0) - canvasPad;
   const maxY = Math.max(...ys, 0) + canvasPad;
-  const vw = maxX - minX + 180;
-  const vh = maxY - minY + 80;
+  const _vw = maxX - minX + 180;
+  const _vh = maxY - minY + 80;
 
   const deleteDep = async (id: number) => {
     await fetch(`${BASE}/ops/service-deps/${id}`, { method: 'DELETE', credentials: 'include' });
@@ -698,7 +698,7 @@ export default function OpsDependencyMapPage() {
                         {CATEGORY_ICONS[node.category] ?? '⚙'} {node.category}
                       </text>
                       <text x={10} y={38} fontSize="12.5" fill="hsl(38,12%,90%)" fontWeight="600">
-                        {node.name.length > 18 ? node.name.slice(0, 17) + '…' : node.name}
+                        {node.name.length > 18 ? `${node.name.slice(0, 17)}…` : node.name}
                       </text>
                       <text
                         x={10}

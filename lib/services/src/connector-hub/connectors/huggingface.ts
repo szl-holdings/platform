@@ -177,33 +177,29 @@ export class HuggingFaceConnector extends ToolConnector {
     const adapter = services.huggingface;
     switch (capabilityId) {
       case 'text_generation':
-        return adapter.textGeneration(String(params['prompt']), {
-          ...(params['model'] ? { model: String(params['model']) } : {}),
-          maxTokens: params['maxTokens'] ? Number(params['maxTokens']) : 512,
+        return adapter.textGeneration(String(params.prompt), {
+          ...(params.model ? { model: String(params.model) } : {}),
+          maxTokens: params.maxTokens ? Number(params.maxTokens) : 512,
         });
       case 'summarize':
-        return adapter.summarization(String(params['text']), {
-          ...(params['model'] ? { model: String(params['model']) } : {}),
-          maxLength: params['maxLength'] ? Number(params['maxLength']) : 200,
+        return adapter.summarization(String(params.text), {
+          ...(params.model ? { model: String(params.model) } : {}),
+          maxLength: params.maxLength ? Number(params.maxLength) : 200,
         });
       case 'classify_text':
-        return adapter.textClassification(String(params['text']), {
-          ...(params['model'] ? { model: String(params['model']) } : {}),
-        });
+        return adapter.textClassification(String(params.text), (params.model ? { model: String(params.model) } : {}));
       case 'zero_shot_classify':
         return adapter.zeroShotClassification(
-          String(params['text']),
-          Array.isArray(params['labels']) ? params['labels'].map(String) : [],
-          { ...(params['model'] ? { model: String(params['model']) } : {}) },
+          String(params.text),
+          Array.isArray(params.labels) ? params.labels.map(String) : [],
+          (params.model ? { model: String(params.model) } : {}),
         );
       case 'extract_entities':
-        return adapter.namedEntityRecognition(String(params['text']), {
-          ...(params['model'] ? { model: String(params['model']) } : {}),
-        });
+        return adapter.namedEntityRecognition(String(params.text), (params.model ? { model: String(params.model) } : {}));
       case 'get_embeddings':
         return adapter.embedding(
-          Array.isArray(params['texts']) ? params['texts'].map(String) : [String(params['texts'])],
-          { ...(params['model'] ? { model: String(params['model']) } : {}) },
+          Array.isArray(params.texts) ? params.texts.map(String) : [String(params.texts)],
+          (params.model ? { model: String(params.model) } : {}),
         );
       case 'get_health':
         return adapter.getHealthStatus();

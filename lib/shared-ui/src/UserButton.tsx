@@ -1,5 +1,4 @@
-import type { AuthUser } from '@szl-holdings/replit-auth-web';
-import { useAuth } from '@szl-holdings/replit-auth-web';
+import { type AuthUser, useAuth } from '@szl-holdings/replit-auth-web';
 
 export type { AuthUser };
 

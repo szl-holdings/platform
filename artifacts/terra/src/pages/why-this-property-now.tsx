@@ -9,28 +9,19 @@ import {
   ArrowLeft,
   BarChart3,
   Building2,
-  Calendar,
   CheckCircle,
   ChevronRight,
-  Clock,
   DollarSign,
   Download,
-  ExternalLink,
   FileText,
   Flame,
-  Gavel,
   GitBranch,
-  Info,
-  Layers,
   Loader2,
   MapPin,
   RefreshCw,
   Shield,
   Tag,
-  Target,
-  TrendingDown,
   User,
-  Zap,
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { Link, useRoute } from 'wouter';
@@ -339,7 +330,7 @@ function DistressTab({ distress }: { distress: DistressDecomposition | undefined
             </p>
             <div className="flex flex-col gap-1 items-end">
               {(distress?.dataSources ?? []).slice(0, 4).map((src: string) => (
-                <DataBadge key={src} label={src.split('(')[0]!.trim()} />
+                <DataBadge key={src} label={src.split('(')[0]?.trim()} />
               ))}
             </div>
           </div>
@@ -566,7 +557,7 @@ function OwnershipTab({ ownership }: { ownership: OwnershipChain | undefined }) 
                             className="text-[9px] px-1.5 py-0.5 rounded"
                             style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
                           >
-                            {node.riskFlag.split('—')[0]!.trim()}
+                            {node.riskFlag.split('—')[0]?.trim()}
                           </span>
                         )}
                         <ConfidencePill value={node.confidence} />
@@ -707,9 +698,9 @@ function FinancingTab({ financing }: { financing: FinancingStress | undefined })
                 : 'N/A',
             sub: 'Debt-to-Value',
             color:
-              financing?.ltvEstimate > 0.75
+              (financing?.ltvEstimate ?? 0) > 0.75
                 ? '#ef4444'
-                : financing?.ltvEstimate > 0.65
+                : (financing?.ltvEstimate ?? 0) > 0.65
                   ? '#f59e0b'
                   : ACCENT,
           },
@@ -863,7 +854,7 @@ function FinancingTab({ financing }: { financing: FinancingStress | undefined })
 
 function NeighborhoodTab({ neighborhood }: { neighborhood: NeighborhoodMotion | undefined }) {
   const txns: NeighborhoodTransaction[] = neighborhood?.recentTransactions ?? [];
-  const pa = neighborhood?.permitActivity ?? {};
+  const pa: { active?: number; stopWork?: number } = neighborhood?.permitActivity ?? {};
 
   return (
     <div className="space-y-4">

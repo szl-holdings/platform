@@ -1,16 +1,6 @@
 import {
-  Activity,
   AlertTriangle,
-  BarChart3,
-  Bell,
-  CheckCircle,
-  Clock,
-  Eye,
-  Globe,
-  Shield,
   TrendingUp,
-  XCircle,
-  Zap,
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
@@ -231,13 +221,13 @@ export default function EarlyWarningPage() {
                   </span>
                   <span
                     className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5"
-                    style={{ background: catColor(w.category) + '15', color: catColor(w.category) }}
+                    style={{ background: `${catColor(w.category)}15`, color: catColor(w.category) }}
                   >
                     {w.category}
                   </span>
                   <span
                     className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5"
-                    style={{ background: statColor(w.status) + '15', color: statColor(w.status) }}
+                    style={{ background: `${statColor(w.status)}15`, color: statColor(w.status) }}
                   >
                     {w.status}
                   </span>
@@ -261,7 +251,7 @@ export default function EarlyWarningPage() {
                   <span
                     className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5"
                     style={{
-                      background: sevColor(w.impactSeverity) + '15',
+                      background: `${sevColor(w.impactSeverity)}15`,
                       color: sevColor(w.impactSeverity),
                     }}
                   >
@@ -381,7 +371,7 @@ export default function EarlyWarningPage() {
                   onClick={() => handleEscalate(selected.id)}
                   aria-label="Escalate warning"
                   className="text-[9px] font-semibold rounded-lg px-3 py-1.5 hover:brightness-125 transition"
-                  style={{ background: RED + '20', color: RED }}
+                  style={{ background: `${RED}20`, color: RED }}
                 >
                   Escalate
                 </button>
@@ -389,7 +379,7 @@ export default function EarlyWarningPage() {
                   onClick={() => handleResolve(selected.id)}
                   aria-label="Resolve warning"
                   className="text-[9px] font-semibold rounded-lg px-3 py-1.5 hover:brightness-125 transition"
-                  style={{ background: GREEN + '20', color: GREEN }}
+                  style={{ background: `${GREEN}20`, color: GREEN }}
                 >
                   Resolve
                 </button>

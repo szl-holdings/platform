@@ -30,7 +30,6 @@ import {
   updateTraceStatus,
   validateActionDecision,
   validateExtractedEntities,
-  validateRiskDecision,
   validateTriageDecision,
 } from '@szl-holdings/ai-engine';
 import { bodyShape } from '@szl-holdings/contracts/common';
@@ -47,8 +46,7 @@ import {
 import { sendBadRequest, sendError, sendNotFound } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
-import type { AuthenticatedUser } from '../middlewares/auth';
-import { authMiddleware, requireRole } from '../middlewares/auth';
+import { type AuthenticatedUser, authMiddleware, requireRole } from '../middlewares/auth';
 
 function getOrgId(user?: AuthenticatedUser): number | null {
   return user?.orgs?.[0]?.orgId ?? null;
@@ -129,7 +127,7 @@ async function runAndPersistEval(trace: AITrace, ctx: DomainEvalContext): Promis
 
 router.get('/ai/health', (_req, res) => {
   const config = getRouteConfig();
-  const token = process.env['HF_TOKEN'] || process.env['HUGGINGFACE_API_KEY'];
+  const token = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
   res.json({
     status: token ? 'configured' : 'no_token',
     provider: config.config.executionMode,
@@ -153,8 +151,8 @@ router.get('/ai/models', (_req, res) => {
   res.json({
     slots,
     routes: config.routes,
-    provider: process.env['HF_PROVIDER'] || 'huggingface',
-    tokenConfigured: !!(process.env['HF_TOKEN'] || process.env['HUGGINGFACE_API_KEY']),
+    provider: process.env.HF_PROVIDER || 'huggingface',
+    tokenConfigured: !!(process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY),
   });
 });
 
@@ -169,7 +167,7 @@ router.post(
     }),
   ),
   async (req, res) => {
-    const start = Date.now();
+    const _start = Date.now();
     try {
       const { messages, model, maxTokens, routeClass } = req.body as {
         messages?: Array<{ role: string; content: string }>;
@@ -195,7 +193,7 @@ router.post(
 
       const completion = await chatCompletionWithFallback(chatMessages, route);
 
-      res.locals['aiUsage'] = {
+      res.locals.aiUsage = {
         model: completion.model,
         provider: completion.provider ?? 'unknown',
         promptTokens: completion.usage?.promptTokens,
@@ -292,7 +290,7 @@ router.post(
         validateTriageDecision,
       );
 
-      res.locals['aiUsage'] = {
+      res.locals.aiUsage = {
         model: completion.model,
         provider: completion.provider ?? 'unknown',
         promptTokens: completion.usage?.promptTokens,
@@ -385,7 +383,7 @@ router.post(
         validateExtractedEntities,
       );
 
-      res.locals['aiUsage'] = {
+      res.locals.aiUsage = {
         model: completion.model,
         provider: completion.provider ?? 'unknown',
         promptTokens: completion.usage?.promptTokens,
@@ -486,7 +484,7 @@ Consider constraints: ${constraints?.join('; ') || 'none specified'}`,
         validateActionDecision,
       );
 
-      res.locals['aiUsage'] = {
+      res.locals.aiUsage = {
         model: completion.model,
         provider: completion.provider ?? 'unknown',
         promptTokens: completion.usage?.promptTokens,
@@ -723,8 +721,8 @@ router.get('/ai/tools', (_req, res) => {
       parameters: t.function.parameters,
       policy: checkToolPolicy(t.function.name, {}),
     })),
-    executionMode: process.env['AI_EXECUTION_MODE'] || 'propose_only',
-    approvalRequired: (process.env['AI_REQUIRE_APPROVAL_FOR_HIGH_RISK'] ?? 'true') === 'true',
+    executionMode: process.env.AI_EXECUTION_MODE || 'propose_only',
+    approvalRequired: (process.env.AI_REQUIRE_APPROVAL_FOR_HIGH_RISK ?? 'true') === 'true',
   });
 });
 

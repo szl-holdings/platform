@@ -1,15 +1,8 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
-  ArrowRight,
-  Brain,
-  Cpu,
-  Eye,
   Globe,
   Radio,
-  Shield,
-  TrendingUp,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 

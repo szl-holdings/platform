@@ -1,21 +1,10 @@
 import { color } from '@szl-holdings/design-system';
-import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
-  AlertTriangle,
   ChevronRight,
-  Clock,
-  Fuel,
-  MapPin,
-  Maximize2,
   Navigation,
   Radio,
   Ship,
-  TrendingDown,
-  TrendingUp,
-  Wrench,
-  X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
@@ -100,8 +89,7 @@ function AlertStream({
 }: {
   fleetExceptions: ReturnType<typeof useFleetExceptions>['fleetExceptions'];
 }) {
-  const alerts = [
-    ...fleetExceptions
+  const alerts = fleetExceptions
       .filter((e) => e.status === 'active')
       .map((e) => ({
         id: e.id,
@@ -110,8 +98,7 @@ function AlertStream({
         vessel: e.vesselName,
         message: e.title,
         time: e.detectedAt,
-      })),
-  ]
+      }))
     .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
     .slice(0, 8);
 
@@ -334,7 +321,7 @@ export default function CommandModePage() {
 
   const defaultVessel = vessels[0] ?? null;
   const [selectedVessel, setSelectedVessel] = useState<VesselProfile | null>(null);
-  const [tick, setTick] = useState(0);
+  const [_tick, setTick] = useState(0);
 
   const activeVessel = selectedVessel ?? defaultVessel;
 

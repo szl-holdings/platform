@@ -1,4 +1,4 @@
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
+const _BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 const API = '/api/nexus';
 
 async function req<T>(path: string, options?: RequestInit): Promise<T> {

@@ -14,8 +14,6 @@ import {
   pcDenialsTable,
   pcDisclaimersTable,
   pcExternalAppealsTable,
-  pcForecastDriversTable,
-  pcForecastExplanationsTable,
   pcForecastRunsTable,
   pcInsurerProfilesTable,
   pcMatterClocksTable,
@@ -35,7 +33,6 @@ import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
-  sendBadRequest,
   sendForbidden,
   sendNotFound,
   sendSuccess,

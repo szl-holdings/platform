@@ -1,37 +1,27 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
   AlertTriangle,
   ArrowRight,
   Bug,
-  Check,
   ChevronRight,
   Clock,
-  Cpu,
   Crosshair,
-  Database,
   Download,
-  ExternalLink,
   Eye,
-  FileText,
-  Globe,
   HardDrive,
-  Key,
   Lock,
   Network,
   Pause,
   Play,
   Radio,
-  RefreshCw,
   Server,
   Shield,
   Target,
   Terminal,
   Upload,
-  User,
   Wifi,
   WifiOff,
   X,
@@ -729,7 +719,7 @@ export default function ThreatKillChain() {
               </span>
             </div>
             <div className="p-3 space-y-1.5 font-mono">
-              {PROCESS_TREE.map((proc, i) => (
+              {PROCESS_TREE.map((proc, _i) => (
                 <div
                   key={proc.id}
                   className="flex items-start gap-2 group"

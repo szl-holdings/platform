@@ -125,8 +125,8 @@ describe('ChunkPlannerActor', () => {
         chunkOverlap: 1,
       },
     );
-    expect(result.output['unit']).toBe('words');
-    expect(result.output['totalChunks']).toBeGreaterThan(0);
+    expect(result.output.unit).toBe('words');
+    expect(result.output.totalChunks).toBeGreaterThan(0);
   });
 
   it('uses token-based chunking and applies the truncation policy when a tokenizer is injected', async () => {
@@ -143,8 +143,8 @@ describe('ChunkPlannerActor', () => {
       { workflowId: 'wf', tenantId: 't', requestedBy: 'u', input: {}, approvalRequired: false },
       { content: 'a b c d e f g h i j', chunkSize: 6, chunkOverlap: 1 },
     );
-    expect(result.output['unit']).toBe('tokens');
-    const chunks = result.output['chunkPlan'] as Array<{ tokenCount: number }>;
+    expect(result.output.unit).toBe('tokens');
+    const chunks = result.output.chunkPlan as Array<{ tokenCount: number }>;
     expect(chunks.length).toBeGreaterThan(1);
     expect(chunks.every((c) => c.tokenCount <= 4)).toBe(true);
   });
@@ -199,10 +199,10 @@ describe('ChunkPlannerActor', () => {
       { workflowId: 'wf', tenantId: 't', requestedBy: 'u', input: {}, approvalRequired: false },
       { content: 'a b c d e f g h', chunkSize: 6, chunkOverlap: 1 },
     );
-    const chunks = result.output['chunkPlan'] as Array<{ tokenCount: number; truncated?: boolean }>;
+    const chunks = result.output.chunkPlan as Array<{ tokenCount: number; truncated?: boolean }>;
     expect(chunks.every((c) => c.tokenCount <= 3)).toBe(true);
     expect(chunks.some((c) => c.truncated)).toBe(true);
-    expect(result.output['anyTruncated']).toBe(true);
+    expect(result.output.anyTruncated).toBe(true);
   });
 
   it('ingestDocumentWorkflow runs the chunk-plan step in token mode end-to-end', async () => {
@@ -223,9 +223,9 @@ describe('ChunkPlannerActor', () => {
     };
     const planStep = ingestDocumentWorkflow.steps.find((s) => s.stepId === 'plan-chunks')!;
     const result = await planStep.execute(ctx, []);
-    expect(result.output['unit']).toBe('tokens');
-    expect(Number(result.output['totalChunks'])).toBeGreaterThan(0);
-    const plan = result.output['chunkPlan'] as Array<{ tokenCount: number; unit: string }>;
+    expect(result.output.unit).toBe('tokens');
+    expect(Number(result.output.totalChunks)).toBeGreaterThan(0);
+    const plan = result.output.chunkPlan as Array<{ tokenCount: number; unit: string }>;
     expect(plan.every((c) => c.unit === 'tokens')).toBe(true);
   }, 60_000);
 });

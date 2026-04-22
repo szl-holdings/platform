@@ -22,9 +22,9 @@
  *   Phase 6: Cross-domain graph — Constellation nodes and edges
  */
 
-import { spawnSync } from 'child_process';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { spawnSync } from 'node:child_process';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // Imported-function seeds (export a function; can be called directly)
 import { seedAegis } from './seed-aegis.js';
@@ -56,7 +56,7 @@ interface SeedResult {
 /** Run a seed function that exports a function — inline, same process. */
 async function runSeed(
   name: string,
-  fn: () => Promise<Record<string, unknown> | { skipped: boolean } | void>,
+  fn: () => Promise<Record<string, unknown> | { skipped: boolean } | undefined>,
 ): Promise<SeedResult> {
   const start = Date.now();
   try {
@@ -75,7 +75,6 @@ async function runSeed(
   } catch (err) {
     const durationMs = Date.now() - start;
     const error = err instanceof Error ? err.message : String(err);
-    console.error(`[seed-demo] ✗ ${name} FAILED: ${error}`);
     return { name, status: 'failed', error, durationMs };
   }
 }
@@ -109,8 +108,8 @@ function runSeedScript(name: string, scriptName: string): SeedResult {
 }
 
 function printResult(r: SeedResult) {
-  const icon = r.status === 'seeded' ? '✓' : r.status === 'skipped' ? '↷' : '✗';
-  const suffix =
+  const _icon = r.status === 'seeded' ? '✓' : r.status === 'skipped' ? '↷' : '✗';
+  const _suffix =
     r.status === 'seeded' && r.details && Object.keys(r.details).length > 0
       ? ` (${Object.entries(r.details)
           .map(([k, v]) => `${k}: ${v}`)
@@ -120,34 +119,19 @@ function printResult(r: SeedResult) {
         : r.error
           ? ` — ${r.error.slice(0, 100)}`
           : '';
-  console.log(`  ${icon} ${r.name}${suffix} [${r.durationMs}ms]`);
 }
 
 async function main() {
-  console.log('════════════════════════════════════════════════════');
-  console.log('  SZL Holdings — Demo Seed (Idempotent)');
-  console.log(`  Started: ${new Date().toISOString()}`);
-  console.log('════════════════════════════════════════════════════\n');
 
   const totalStart = Date.now();
   const results: SeedResult[] = [];
-
-  // ── Phase 1: Core Security ───────────────────────────────────────────────────
-  console.log('── Phase 1: Core Security & Baseline ──');
   results.push(runSeedScript('Ecosystem Baseline', 'seed-ecosystem.ts'));
   results.push(await runSeed('Aegis (Security)', seedAegis));
   results.push(await runSeed('Alloy Runtime Agents (Aegis Registry)', seedAlloyRuntimeAgents));
-
-  // ── Phase 2: Domain Data ─────────────────────────────────────────────────────
-  console.log('\n── Phase 2: Domain Data ──');
   results.push(await runSeed('Marine Extended (Vessels)', seedMarineExtended));
   results.push(await runSeed('Holdings & Fund Ops', seedHoldingsFundops));
   results.push(await runSeed('Governance & Compliance', seedGovernance));
   results.push(await runSeed('Carlota Jo Clients', seedCarlotaClients));
-
-  // ── Phase 3: Platform Infrastructure ─────────────────────────────────────────
-  // These scripts call process.exit() so run as child processes
-  console.log('\n── Phase 3: Platform Infrastructure ──');
   results.push(await runSeed('Agent OS', seedAgentOS));
   results.push(await runSeed('Forge', seedForge));
   results.push(runSeedScript('Capital & Certification', 'seed-capital-cert.ts'));
@@ -159,46 +143,22 @@ async function main() {
   results.push(runSeedScript('Alloy Narratives', 'seed-alloy.ts'));
   results.push(runSeedScript('Observability', 'seed-observability.ts'));
   results.push(runSeedScript('Terra Full', 'seed-terra-full.ts'));
-
-  // ── Phase 4: Intelligence & Briefings ────────────────────────────────────────
-  console.log('\n── Phase 4: Intelligence & Briefings ──');
   results.push(await runSeed('Pulse Briefings (30-day)', seedPulse));
   results.push(await runSeed('Daily Briefings (30-day)', seedDailyBriefings));
-
-  // ── Phase 5: Ownership & Decision Audit ──────────────────────────────────────
-  console.log('\n── Phase 5: Ownership & Decision Audit ──');
   results.push(await runSeed('Ownership Scenarios & Cap Table', seedOwnership));
   results.push(await runSeed('AI Decisions, Runs & Policy', seedDecisions));
-
-  // ── Phase 6: Cross-Domain Constellation Graph ─────────────────────────────────
-  console.log('\n── Phase 6: Constellation Graph ──');
   results.push(await runSeed('Constellation Nodes & Edges', seedConstellationExtended));
 
   // ── Summary ───────────────────────────────────────────────────────────────────
-  const totalMs = Date.now() - totalStart;
-  const seeded = results.filter((r) => r.status === 'seeded');
-  const skipped = results.filter((r) => r.status === 'skipped');
+  const _totalMs = Date.now() - totalStart;
+  const _seeded = results.filter((r) => r.status === 'seeded');
+  const _skipped = results.filter((r) => r.status === 'skipped');
   const failed = results.filter((r) => r.status === 'failed');
-
-  console.log('\n════════════════════════════════════════════════════');
-  console.log('  Seed Summary');
-  console.log('════════════════════════════════════════════════════');
   for (const r of results) printResult(r);
 
-  console.log('\n────────────────────────────────────────────────────');
-  console.log(`  Total:   ${results.length} modules`);
-  console.log(`  Seeded:  ${seeded.length}`);
-  console.log(`  Skipped: ${skipped.length} (already populated)`);
-  console.log(`  Failed:  ${failed.length}`);
-  console.log(`  Duration: ${(totalMs / 1000).toFixed(1)}s`);
-  console.log('════════════════════════════════════════════════════');
-
   if (failed.length > 0) {
-    console.error(`\n[seed-demo] ${failed.length} module(s) failed — see errors above`);
     process.exit(1);
   }
-
-  console.log('\n[seed-demo] All dashboards populated. Platform ready.\n');
   process.exit(0);
 }
 

@@ -2,16 +2,11 @@ import {
   AlertTriangle,
   Clock,
   Database,
-  Eye,
   Factory,
   FileText,
-  Filter,
   Globe,
   Lock,
-  Search,
-  Shield,
   Terminal,
-  Unlock,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'wouter';

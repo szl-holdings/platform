@@ -3,18 +3,14 @@ import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
-  AlertTriangle,
-  BarChart3,
   CheckCircle,
   ChevronDown,
-  ChevronRight,
   Clock,
   Copy,
   Edit,
   Globe,
   Lock,
   Mail,
-  Pause,
   Play,
   Plus,
   Server,

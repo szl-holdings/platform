@@ -293,7 +293,7 @@ export default function TimeTracking() {
       'non-billable': 0,
     };
     const payload = {
-      id: 't-' + Date.now().toString(36),
+      id: `t-${Date.now().toString(36)}`,
       date: formatToday(),
       engagement: newEntry.engagement,
       phase: newEntry.phase.trim(),
@@ -424,7 +424,7 @@ export default function TimeTracking() {
     const items =
       inv.entryIds && inv.entryIds.length > 0
         ? entries
-            .filter((e) => inv.entryIds!.includes(e.id))
+            .filter((e) => inv.entryIds?.includes(e.id))
             .map((e) => ({
               date: e.date,
               phase: e.phase,
@@ -493,8 +493,7 @@ export default function TimeTracking() {
           method: 'PATCH',
           body: JSON.stringify({ status: 'sent', sentAt: sentAtIso, sentTo: recipient }),
         });
-      } catch (patchErr) {
-        console.error('Failed to persist invoice sent status to Postgres', patchErr);
+      } catch (_patchErr) {
       }
 
       setInvoices((prev) =>
@@ -528,7 +527,7 @@ export default function TimeTracking() {
     }
   };
 
-  const sendInvoice = async (id: string) => {
+  const _sendInvoice = async (id: string) => {
     try {
       const updated = await apiJson<Invoice>(`/booking/time-invoices/${encodeURIComponent(id)}`, {
         method: 'PATCH',
@@ -544,7 +543,7 @@ export default function TimeTracking() {
   const exportInvoicePdf = (inv: Invoice) => {
     const items =
       inv.entryIds && inv.entryIds.length > 0
-        ? entries.filter((e) => inv.entryIds!.includes(e.id))
+        ? entries.filter((e) => inv.entryIds?.includes(e.id))
         : [];
 
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
@@ -892,7 +891,6 @@ export default function TimeTracking() {
                       setEmailError(null);
                     }}
                     placeholder="client@example.com"
-                    autoFocus
                     disabled={emailSending}
                     style={{
                       width: '100%',

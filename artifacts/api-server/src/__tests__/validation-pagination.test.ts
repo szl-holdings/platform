@@ -20,10 +20,9 @@
  *   GET  /admin/tenants               (list-shape contract)
  */
 
-import type { Router as ExpressRouter } from 'express';
-import express from 'express';
+import express, { type Router as ExpressRouter } from 'express';
 import request from 'supertest';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Module mocks — declared before any dynamic imports (Vitest hoists these)

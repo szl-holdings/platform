@@ -2,8 +2,6 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
   Activity,
   AlertTriangle,
-  BarChart2,
-  Cpu,
   Database,
   DollarSign,
   TrendingDown,
@@ -15,7 +13,6 @@ import {
   AreaChart,
   Bar,
   BarChart,
-  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,

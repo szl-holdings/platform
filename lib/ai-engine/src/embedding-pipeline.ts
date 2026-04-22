@@ -26,9 +26,8 @@ class HuggingFaceEmbeddingProvider implements EmbeddingProvider {
   }
 
   async embed(texts: string[]): Promise<number[][]> {
-    const token = process.env['HF_TOKEN'] ?? process.env['HUGGINGFACE_API_KEY'];
+    const token = process.env.HF_TOKEN ?? process.env.HUGGINGFACE_API_KEY;
     if (!token) {
-      console.warn('[embedding-pipeline] No HF_TOKEN — returning zero embeddings');
       return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
     }
 
@@ -45,8 +44,7 @@ class HuggingFaceEmbeddingProvider implements EmbeddingProvider {
       });
 
       if (!response.ok) {
-        const errText = await response.text().catch(() => 'unknown');
-        console.warn(`[embedding-pipeline] HF API error ${response.status}: ${errText}`);
+        const _errText = await response.text().catch(() => 'unknown');
         return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
       }
 
@@ -64,8 +62,7 @@ class HuggingFaceEmbeddingProvider implements EmbeddingProvider {
         }
         return item as number[];
       });
-    } catch (err) {
-      console.warn('[embedding-pipeline] Embedding request failed:', err);
+    } catch (_err) {
       return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
     }
   }
@@ -90,13 +87,12 @@ class OpenAIEmbeddingProvider implements EmbeddingProvider {
     this.id = modelId;
     this.name = modelId;
     this.dimensions = dimensions;
-    this.apiKey = apiKey ?? process.env['AI_INTEGRATIONS_OPENAI_API_KEY'] ?? '';
+    this.apiKey = apiKey ?? process.env.AI_INTEGRATIONS_OPENAI_API_KEY ?? '';
     this.baseUrl = baseUrl;
   }
 
   async embed(texts: string[]): Promise<number[][]> {
     if (!this.apiKey) {
-      console.warn('[embedding-pipeline] No OpenAI API key — returning zero embeddings');
       return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
     }
 
@@ -111,14 +107,12 @@ class OpenAIEmbeddingProvider implements EmbeddingProvider {
       });
 
       if (!response.ok) {
-        console.warn(`[embedding-pipeline] OpenAI API error ${response.status}`);
         return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
       }
 
       const data = (await response.json()) as { data: Array<{ embedding: number[] }> };
       return data.data.map((d) => d.embedding);
-    } catch (err) {
-      console.warn('[embedding-pipeline] OpenAI embedding failed:', err);
+    } catch (_err) {
       return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
     }
   }
@@ -139,9 +133,8 @@ class GeminiEmbeddingProvider implements EmbeddingProvider {
   }
 
   async embed(texts: string[]): Promise<number[][]> {
-    const apiKey = process.env['AI_INTEGRATIONS_GEMINI_API_KEY'] ?? process.env['GOOGLE_API_KEY'];
+    const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY;
     if (!apiKey) {
-      console.warn('[embedding-pipeline] No Gemini API key — returning zero embeddings');
       return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
     }
 
@@ -160,14 +153,12 @@ class GeminiEmbeddingProvider implements EmbeddingProvider {
           },
         );
         if (!response.ok) {
-          console.warn(`[embedding-pipeline] Gemini API error ${response.status}`);
           results.push(new Array(this.dimensions).fill(0) as number[]);
           continue;
         }
         const data = (await response.json()) as { embedding?: { values?: number[] } };
         results.push(data.embedding?.values ?? (new Array(this.dimensions).fill(0) as number[]));
-      } catch (err) {
-        console.warn('[embedding-pipeline] Gemini embedding failed:', err);
+      } catch (_err) {
         results.push(new Array(this.dimensions).fill(0) as number[]);
       }
     }
@@ -188,7 +179,7 @@ class LocalOllamaEmbeddingProvider implements EmbeddingProvider {
     this.id = modelId;
     this.name = `local:${modelId}`;
     this.dimensions = dimensions;
-    this.baseUrl = baseUrl ?? process.env['OLLAMA_BASE_URL'] ?? 'http://localhost:11434';
+    this.baseUrl = baseUrl ?? process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434';
   }
 
   async embed(texts: string[]): Promise<number[][]> {
@@ -201,14 +192,12 @@ class LocalOllamaEmbeddingProvider implements EmbeddingProvider {
           body: JSON.stringify({ model: this.id, prompt: text.slice(0, 8000) }),
         });
         if (!response.ok) {
-          console.warn(`[embedding-pipeline] Ollama API error ${response.status}`);
           results.push(new Array(this.dimensions).fill(0) as number[]);
           continue;
         }
         const data = (await response.json()) as { embedding?: number[] };
         results.push(data.embedding ?? (new Array(this.dimensions).fill(0) as number[]));
-      } catch (err) {
-        console.warn('[embedding-pipeline] Ollama embedding failed:', err);
+      } catch (_err) {
         results.push(new Array(this.dimensions).fill(0) as number[]);
       }
     }
@@ -226,7 +215,7 @@ class LocalOllamaEmbeddingProvider implements EmbeddingProvider {
 // schema uses a single shared column. Operators can change VECTOR_DIM and run a
 // new migration + full re-embed to switch canonical dimensions.
 
-export const SCHEMA_VECTOR_DIM: number = parseInt(process.env['VECTOR_DIM'] ?? '1024', 10);
+export const SCHEMA_VECTOR_DIM: number = parseInt(process.env.VECTOR_DIM ?? '1024', 10);
 
 export class EmbeddingDimensionError extends Error {
   constructor(
@@ -278,7 +267,7 @@ export function registerEmbeddingProvider(provider: EmbeddingProvider): void {
 }
 
 export function getEmbeddingProvider(modelId?: string): EmbeddingProvider {
-  const id = modelId ?? process.env['HF_EMBED_MODEL'] ?? 'BAAI/bge-m3';
+  const id = modelId ?? process.env.HF_EMBED_MODEL ?? 'BAAI/bge-m3';
   return (
     customProviders.get(id) ??
     BUILTIN_PROVIDERS[id] ??
@@ -380,7 +369,6 @@ export interface EmbeddingTaskSpec {
 }
 
 export async function scheduleEmbeddingTask(task: EmbeddingTaskSpec): Promise<void> {
-  try {
     const pool = await getPool();
     await pool.query(
       `INSERT INTO embedding_tasks (target_table, target_id, content_column, target_column, model_id, status, priority)
@@ -399,12 +387,6 @@ export async function scheduleEmbeddingTask(task: EmbeddingTaskSpec): Promise<vo
         task.priority ?? 5,
       ],
     );
-  } catch (err) {
-    console.warn('[embedding-pipeline] Failed to schedule task:', err);
-    // Re-throw so callers (especially API route handlers) can return a proper error
-    // response rather than silently reporting success on an enqueue failure.
-    throw err;
-  }
 }
 
 export async function processEmbeddingTasks(
@@ -501,17 +483,11 @@ export async function processEmbeddingTasks(
           const currentAttempts = task.attempts as number;
           const maxAttempts = task.max_attempts as number;
           if (currentAttempts >= maxAttempts) {
-            console.error(
-              `[embedding-pipeline] Task ${taskId} exhausted retries (${currentAttempts}/${maxAttempts}) on zero vector — marking failed`,
-            );
             await pool.query(
               `UPDATE embedding_tasks SET status = 'failed', error_message = 'Provider returned zero vector — retries exhausted' WHERE id = $1`,
               [taskId],
             );
           } else {
-            console.warn(
-              `[embedding-pipeline] Zero embedding returned for task ${taskId} (attempt ${currentAttempts}/${maxAttempts}) — requeueing`,
-            );
             await pool.query(
               `UPDATE embedding_tasks SET status = 'pending', error_message = 'Provider returned zero vector — will retry' WHERE id = $1`,
               [taskId],
@@ -529,7 +505,7 @@ export async function processEmbeddingTasks(
         );
 
         // Persist model provenance on tables that track it (kg_entities, rag_knowledge_chunks).
-        const effectiveModelId = modelId ?? process.env['HF_EMBED_MODEL'] ?? 'BAAI/bge-m3';
+        const effectiveModelId = modelId ?? process.env.HF_EMBED_MODEL ?? 'BAAI/bge-m3';
         if (safeTable === 'kg_entities') {
           await pool.query(
             `UPDATE kg_entities SET embedding_model = $1, embedding_at = NOW() WHERE id = $2`,
@@ -568,8 +544,7 @@ export async function processEmbeddingTasks(
         failed++;
       }
     }
-  } catch (err) {
-    console.warn('[embedding-pipeline] Task processing failed:', err);
+  } catch (_err) {
   }
 
   return { processed, failed };
@@ -616,7 +591,7 @@ function assertAllowedIdentifier(table: string, contentCol: string, targetCol: s
 
 export async function batchEmbedTable(
   tableName: string,
-  idColumn: string,
+  _idColumn: string,
   contentColumn: string,
   embeddingColumn: string,
   modelId?: string,
@@ -624,7 +599,7 @@ export async function batchEmbedTable(
 ): Promise<{ processed: number; skipped: number }> {
   assertAllowedIdentifier(tableName, contentColumn, embeddingColumn);
   const safeTable = tableName;
-  const safeId = ALLOWED_EMBED_TABLES[tableName]!.idCol;
+  const safeId = ALLOWED_EMBED_TABLES[tableName]?.idCol;
   const safeContent = contentColumn;
   const safeTarget = embeddingColumn;
 
@@ -668,8 +643,7 @@ export async function batchEmbedTable(
         );
         processed++;
       }
-    } catch (err) {
-      console.warn(`[embedding-pipeline] Batch embed failed at cursor ${lastId}:`, err);
+    } catch (_err) {
       skipped += result.rows.length;
     }
   }
@@ -697,7 +671,7 @@ export async function scheduleReembeddingOnModelChange(options: {
   priority?: number;
 }): Promise<ReembeddingStatus[]> {
   const pool = await getPool();
-  const modelId = options.targetModelId ?? process.env['HF_EMBED_MODEL'] ?? 'BAAI/bge-m3';
+  const modelId = options.targetModelId ?? process.env.HF_EMBED_MODEL ?? 'BAAI/bge-m3';
   const priority = options.priority ?? 8;
 
   const watchedTables = options.tables ?? [
@@ -710,18 +684,12 @@ export async function scheduleReembeddingOnModelChange(options: {
   for (const { table, contentColumn, targetColumn = 'embedding' } of watchedTables) {
     const entry = ALLOWED_EMBED_TABLES[table];
     if (!entry) {
-      console.warn(
-        `[embedding-pipeline] scheduleReembeddingOnModelChange: table ${table} not in allowlist, skipping`,
-      );
       continue;
     }
     if (
       !entry.allowedContent.includes(contentColumn) ||
       !entry.allowedTarget.includes(targetColumn)
     ) {
-      console.warn(
-        `[embedding-pipeline] scheduleReembeddingOnModelChange: columns not in allowlist for ${table}, skipping`,
-      );
       continue;
     }
 
@@ -779,9 +747,6 @@ export async function scheduleReembeddingOnModelChange(options: {
     });
 
     if (scheduled > 0) {
-      console.info(
-        `[embedding-pipeline] Scheduled ${scheduled} re-embedding tasks for ${safeTable} → model=${modelId}`,
-      );
     }
   }
 

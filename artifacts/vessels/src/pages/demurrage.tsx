@@ -6,9 +6,6 @@ import {
   Calculator,
   CheckCircle2,
   Clock,
-  DollarSign,
-  FileText,
-  Ship,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
@@ -184,7 +181,7 @@ function DemurrageCard({ c }: { c: DemurrageCase }) {
   const amount = isDemurrage
     ? (overage / 24) * c.demurrageRate
     : (Math.abs(overage) / 24) * c.despatchRate;
-  const pct = ((c.usedLaytime / c.allowedLaytime) * 100 - 100).toFixed(1);
+  const _pct = ((c.usedLaytime / c.allowedLaytime) * 100 - 100).toFixed(1);
 
   return (
     <div

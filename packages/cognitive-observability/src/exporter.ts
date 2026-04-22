@@ -68,12 +68,11 @@ export class ConsoleOtelExporter implements OtelMetricExporter {
   }
 
   async export(metrics: CognitiveMetric[]): Promise<void> {
-    const payload = {
+    const _payload = {
       resource: this.resource,
       metrics: toOtelFormat(metrics),
       exportedAt: new Date().toISOString(),
     };
-    console.log('[CognitiveObservability] OTel export:', JSON.stringify(payload, null, 2));
   }
 
   async shutdown(): Promise<void> {}

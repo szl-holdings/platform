@@ -1,8 +1,5 @@
 import {
-  Activity,
   AlertTriangle,
-  ChevronRight,
-  Clock,
   DollarSign,
   RefreshCw,
   Shield,

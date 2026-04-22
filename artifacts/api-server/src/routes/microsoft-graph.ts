@@ -36,12 +36,12 @@ router.get(
         tenantId: status.tenantId,
         scopes: status.scopes,
         configuration: {
-          MICROSOFT_TENANT_ID: process.env['MICROSOFT_TENANT_ID'] ? 'configured' : 'not configured',
-          MICROSOFT_CLIENT_ID: process.env['MICROSOFT_CLIENT_ID'] ? 'configured' : 'not configured',
-          MICROSOFT_CLIENT_SECRET: process.env['MICROSOFT_CLIENT_SECRET']
+          MICROSOFT_TENANT_ID: process.env.MICROSOFT_TENANT_ID ? 'configured' : 'not configured',
+          MICROSOFT_CLIENT_ID: process.env.MICROSOFT_CLIENT_ID ? 'configured' : 'not configured',
+          MICROSOFT_CLIENT_SECRET: process.env.MICROSOFT_CLIENT_SECRET
             ? 'configured'
             : 'not configured',
-          MICROSOFT_TEAMS_WEBHOOK_URL: process.env['MICROSOFT_TEAMS_WEBHOOK_URL']
+          MICROSOFT_TEAMS_WEBHOOK_URL: process.env.MICROSOFT_TEAMS_WEBHOOK_URL
             ? 'configured'
             : 'not configured',
         },

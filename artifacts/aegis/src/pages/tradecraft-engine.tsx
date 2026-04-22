@@ -13,42 +13,7 @@ import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { Textarea } from '@szl-holdings/shared-ui/ui/textarea';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
-import type { LucideIcon } from 'lucide-react';
-import {
-  Activity,
-  AlertTriangle,
-  Archive,
-  BarChart3,
-  BookOpen,
-  Brain,
-  CheckCircle,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Cpu,
-  Database,
-  Edit3,
-  Eye,
-  FileText,
-  Flame,
-  FlaskConical,
-  Globe,
-  Layers,
-  Lock,
-  Minus,
-  Network,
-  Plus,
-  Search,
-  Server,
-  Shield,
-  Star,
-  Target,
-  TrendingDown,
-  TrendingUp,
-  Users,
-  XCircle,
-  Zap,
-} from 'lucide-react';
+import { type LucideIcon, AlertTriangle, Archive, BarChart3, BookOpen, Brain, CheckCircle, ChevronDown, ChevronUp, Clock, Database, Edit3, Eye, FileText, Flame, FlaskConical, Lock, Minus, Network, Plus, Search, Server, Shield, Star, Target, TrendingDown, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { EvidenceIndexPanel } from '@/components/tradecraft-panel';
 import { api } from '@/lib/api';
@@ -191,7 +156,7 @@ const DECISION_TYPE_CONFIG: Record<
   },
 };
 
-const ANALYTIC_MODES: Array<{
+const _ANALYTIC_MODES: Array<{
   value: AnalyticMode;
   label: string;
   description: string;
@@ -757,7 +722,7 @@ function SourceTimeline({ decisions }: { decisions: TradecraftDecision[] }) {
     <div className="relative pl-4">
       <div className="absolute left-1.5 top-0 bottom-0 w-px bg-zinc-800" />
       <div className="space-y-4">
-        {sorted.map((d, idx) => {
+        {sorted.map((d, _idx) => {
           const config = DECISION_TYPE_CONFIG[d.decisionType];
           const Icon = config?.icon || FileText;
           return (

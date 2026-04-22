@@ -88,7 +88,7 @@ describe('run-review loadRunDetail — happy path', () => {
         return { data: { ...baseRun, errorMessage: 'details' } };
       if (path === runStepsPath(baseRun.id))
         return { data: { steps, workflow: { name: 'Ingest Pipeline' } } };
-      throw new Error('unexpected path: ' + path);
+      throw new Error(`unexpected path: ${path}`);
     });
 
     const detail = await loadRunDetail(baseRun, api);

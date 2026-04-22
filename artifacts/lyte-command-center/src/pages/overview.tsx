@@ -2,16 +2,13 @@ import {
   AlertTriangle,
   ArrowRight,
   Brain,
-  CheckCircle2,
   ChevronRight,
-  Clock,
   Compass,
   FileText,
   Minus,
   Shield,
   TrendingDown,
   TrendingUp,
-  Users,
   Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';

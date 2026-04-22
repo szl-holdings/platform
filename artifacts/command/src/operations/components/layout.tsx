@@ -4,7 +4,7 @@ import {
   type SidebarNavSection,
 } from '@szl-holdings/shared-ui/design-system';
 import { LANE_ACCENT_HEX } from '@szl-holdings/shared-ui/lane-colors';
-import { colors, spacing } from '@szl-holdings/shared-ui/tokens';
+import { colors, } from '@szl-holdings/shared-ui/tokens';
 import { UserButton } from '@szl-holdings/shared-ui/UserButton';
 import { toAlpha } from '@szl-holdings/shared-ui/utils';
 import { useQuery } from '@tanstack/react-query';

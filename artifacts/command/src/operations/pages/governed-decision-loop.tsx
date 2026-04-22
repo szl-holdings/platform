@@ -1,6 +1,5 @@
 import {
   Activity,
-  AlertTriangle,
   ArrowRight,
   BarChart3,
   BookOpen,
@@ -9,10 +8,7 @@ import {
   CheckSquare,
   ChevronLeft,
   ChevronRight,
-  Clock,
   Cpu,
-  Eye,
-  FileText,
   FlaskConical,
   Play,
   Radio,
@@ -21,8 +17,7 @@ import {
   Target,
   Zap,
 } from 'lucide-react';
-import type { JSX } from 'react';
-import { useState } from 'react';
+import { type JSX, useState } from 'react';
 import {
   MonteCarloSimPanel,
   type SensitivityDriver,

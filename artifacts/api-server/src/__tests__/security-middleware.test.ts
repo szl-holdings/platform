@@ -10,8 +10,7 @@
  *  3. tenantScope         — 403 for cross-tenant access / missing memberships
  */
 
-import type { NextFunction, Request, Response } from 'express';
-import express from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
@@ -58,7 +57,7 @@ const { tenantScope } = await import('../middlewares/tenant-scope.js');
 // Helper: build an Express app with optional middleware and a success handler
 // ---------------------------------------------------------------------------
 
-function buildApp(
+function _buildApp(
   ...middlewares: Array<(req: Request, res: Response, next: NextFunction) => void>
 ) {
   const app = express();
@@ -146,8 +145,8 @@ describe('globalAuthEnforcer', () => {
 
   it('passes through when a valid X-Internal-Token header is provided on a legacy-allowed prefix', async () => {
     const token = 'test-internal-token-abc123';
-    const original = process.env['ALLOY_INTERNAL_TOKEN'];
-    process.env['ALLOY_INTERNAL_TOKEN'] = token;
+    const original = process.env.ALLOY_INTERNAL_TOKEN;
+    process.env.ALLOY_INTERNAL_TOKEN = token;
 
     const app = express();
     app.use(express.json());
@@ -164,17 +163,17 @@ describe('globalAuthEnforcer', () => {
 
     // Restore original value precisely — delete if it was absent, reset if it had a value
     if (original === undefined) {
-      delete process.env['ALLOY_INTERNAL_TOKEN'];
+      delete process.env.ALLOY_INTERNAL_TOKEN;
     } else {
-      process.env['ALLOY_INTERNAL_TOKEN'] = original;
+      process.env.ALLOY_INTERNAL_TOKEN = original;
     }
 
     expect(res.status).toBe(200);
   });
 
   it("rejects X-Internal-Token that doesn't match (still 401)", async () => {
-    const original = process.env['ALLOY_INTERNAL_TOKEN'];
-    process.env['ALLOY_INTERNAL_TOKEN'] = 'correct-token';
+    const original = process.env.ALLOY_INTERNAL_TOKEN;
+    process.env.ALLOY_INTERNAL_TOKEN = 'correct-token';
 
     const app = express();
     app.use(express.json());
@@ -187,9 +186,9 @@ describe('globalAuthEnforcer', () => {
 
     // Restore original value precisely
     if (original === undefined) {
-      delete process.env['ALLOY_INTERNAL_TOKEN'];
+      delete process.env.ALLOY_INTERNAL_TOKEN;
     } else {
-      process.env['ALLOY_INTERNAL_TOKEN'] = original;
+      process.env.ALLOY_INTERNAL_TOKEN = original;
     }
 
     expect(res.status).toBe(401);

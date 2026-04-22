@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle, Clock, MessageSquare, X } from 'lucide-react';
+import { CheckCircle, MessageSquare, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSearch } from 'wouter';
 import { useDissents, useFileDissent, useResolveDissent, useTodaysBrief } from '../lib/api';

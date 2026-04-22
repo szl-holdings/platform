@@ -1,6 +1,6 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, ShieldCheck, AlertOctagon, Eye, Database, Lock, Zap, ArrowRightCircle } from "lucide-react";
+import { ArrowRight, ShieldCheck, AlertOctagon, Eye, Database, Lock, Zap, } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -112,7 +112,7 @@ export default function SolutionsAegisPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
           <section className="szl-grid-texture" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)", background: "radial-gradient(ellipse at 50% 0%, hsla(222,60%,50%,0.06) 0%, transparent 60%)" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>

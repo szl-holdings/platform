@@ -1,5 +1,4 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
   AlertTriangle,
@@ -12,7 +11,6 @@ import {
   RotateCcw,
   SkipBack,
   SkipForward,
-  TrendingDown,
   TrendingUp,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';

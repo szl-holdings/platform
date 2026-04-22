@@ -1,13 +1,5 @@
-import type React from 'react';
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import type {
-  McpConnectionState,
-  McpDomain,
-  McpServerConfig,
-  McpTool,
-  McpToolResult,
-} from './types';
-import { BUILT_IN_MCP_TOOLS, DOMAIN_TOOLS } from './types';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { type McpConnectionState, type McpDomain, type McpServerConfig, type McpTool, type McpToolResult, BUILT_IN_MCP_TOOLS, DOMAIN_TOOLS } from './types';
 
 interface McpStoreContextValue {
   servers: McpServerConfig[];
@@ -90,7 +82,7 @@ export function McpStoreProvider({
     },
   });
 
-  const [toolCatalog, setToolCatalog] = useState<McpTool[]>(BUILT_IN_MCP_TOOLS);
+  const [toolCatalog, _setToolCatalog] = useState<McpTool[]>(BUILT_IN_MCP_TOOLS);
   const pingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
-import { AlertTriangle, CheckCircle2, Clock, Plus, Target } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Plus, Target } from 'lucide-react';
 import { useState } from 'react';
 import {
   Line,

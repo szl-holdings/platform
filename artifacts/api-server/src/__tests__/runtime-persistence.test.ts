@@ -116,7 +116,6 @@ function makeMemoryEntry(id: string): MemoryEntry {
   const now = new Date().toISOString();
   return {
     id,
-    domain: 'MEMORY_DOMAIN_UNKNOWN',
     tier: 'semantic',
     key: `key-${id}`,
     value: { v: id },
@@ -359,8 +358,8 @@ describe('runtime-persistence — restart survival across all 6 subsystems', () 
       await new Promise((r) => setImmediate(r));
 
       expect(reportDb.length).toBe(1);
-      expect(reportDb[0]!.runId).toBe('eval-restart-1');
-      expect(reportDb[0]!.totalCases).toBe(1);
+      expect(reportDb[0]?.runId).toBe('eval-restart-1');
+      expect(reportDb[0]?.totalCases).toBe(1);
       expect(report.runId).toBe('eval-restart-1');
 
       // --- simulate crash: drop in-memory list, re-register sink, run again.
@@ -451,7 +450,7 @@ describe('runtime-persistence — restart survival across all 6 subsystems', () 
             values(row: Record<string, unknown>) {
               return {
                 async onConflictDoUpdate() {
-                  const ref = row['ref'] as string;
+                  const ref = row.ref as string;
                   rows.set(ref, row);
                   insertCalls.push({ ref });
                 },
@@ -498,7 +497,7 @@ describe('runtime-persistence — restart survival across all 6 subsystems', () 
 
       expect(insertCalls.length).toBeGreaterThanOrEqual(1);
       expect(rows.size).toBe(1);
-      expect(rows.get(ref)?.['ref']).toBe(ref);
+      expect(rows.get(ref)?.ref).toBe(ref);
 
       await store.stop();
     });

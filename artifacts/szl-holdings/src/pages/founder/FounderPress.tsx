@@ -320,7 +320,7 @@ export default function FounderPress() {
             Investor Signals
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-            {INVESTOR_SIGNALS.map((signal, i) => (
+            {INVESTOR_SIGNALS.map((signal, _i) => (
               <div
                 key={signal.signal}
                 style={{

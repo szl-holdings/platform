@@ -63,7 +63,7 @@ function computeRegressionAnalysis(
 }
 
 function buildPromotionNotes(
-  baselineRun: AgentEvalRunRecord,
+  _baselineRun: AgentEvalRunRecord,
   candidateRun: AgentEvalRunRecord,
   regression: RegressionAnalysis,
   delta: number,

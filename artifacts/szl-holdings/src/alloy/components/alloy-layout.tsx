@@ -12,7 +12,6 @@ import {
   type OnboardingConfig,
   OnboardingWizard,
   useOnboardingAnalytics,
-  useOnboardingState,
 } from '@szl-holdings/shared-ui/onboarding';
 import { RealtimeStatusIndicator } from '@szl-holdings/shared-ui/realtime-status-indicator';
 import { ServiceStatusRail } from '@szl-holdings/shared-ui/service-status-rail';
@@ -47,7 +46,6 @@ import {
   Package,
   Play,
   Radio,
-  Scale,
   Shield,
   Star,
   Store,
@@ -241,7 +239,7 @@ function NavItem({
   onClick?: () => void;
 }) {
   const [location] = useLocation();
-  const isActive = exact ? location === href || location === href + '/' : location.startsWith(href);
+  const isActive = exact ? location === href || location === `${href}/` : location.startsWith(href);
   const showCount = typeof count === 'number' && count > 0;
   return (
     <Link
@@ -599,7 +597,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
                     style={{
                       color: p.active ? p.color : 'rgba(255,255,255,0.25)',
                       background: p.active ? `${p.color}20` : 'transparent',
-                      border: `1px solid ${p.active ? p.color + '50' : 'transparent'}`,
+                      border: `1px solid ${p.active ? `${p.color}50` : 'transparent'}`,
                     }}
                   >
                     {p.phase}
@@ -610,7 +608,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
                     style={{
                       color: p.active ? p.color : 'rgba(255,255,255,0.25)',
                       background: p.active ? `${p.color}20` : 'transparent',
-                      border: `1px solid ${p.active ? p.color + '50' : 'transparent'}`,
+                      border: `1px solid ${p.active ? `${p.color}50` : 'transparent'}`,
                     }}
                   >
                     {p.phase}

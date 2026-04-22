@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Building2, Shield, Eye, FileCheck2, Lock, ArrowRight, CheckCircle, MapPin, BarChart3, Database } from "lucide-react";
+import { Building2, Shield, Eye, FileCheck2, Lock, ArrowRight, MapPin, Database } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";

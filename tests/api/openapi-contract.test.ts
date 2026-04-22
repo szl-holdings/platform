@@ -8,8 +8,8 @@
  * Also validates GraphQL schema coverage by reading domain type definition files.
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 
@@ -240,14 +240,14 @@ describe('OpenAPI contract — AI Engine (Alloy) domain', () => {
   it('defines AlloyDecision schema with required fields', () => {
     const schemas = spec.components?.schemas ?? {};
     expect(schemas).toHaveProperty('AlloyDecision');
-    const decision = schemas['AlloyDecision'];
+    const decision = schemas.AlloyDecision;
     expect(decision.required).toBeDefined();
     expect(decision.required).toContain('decisionId');
     expect(decision.required).toContain('recommendedAction');
   });
 
   it('AlloyDecision schema has properties for key fields', () => {
-    const decision = spec.components?.schemas?.['AlloyDecision'];
+    const decision = spec.components?.schemas?.AlloyDecision;
     expect(decision?.properties).toHaveProperty('decisionId');
     expect(decision?.properties).toHaveProperty('recommendedAction');
     expect(decision?.properties).toHaveProperty('status');
@@ -328,8 +328,8 @@ describe('OpenAPI contract — Schema component integrity', () => {
         return;
       }
       const o = obj as Record<string, unknown>;
-      if ('$ref' in o && typeof o['$ref'] === 'string') {
-        refs.push(o['$ref'] as string);
+      if ('$ref' in o && typeof o.$ref === 'string') {
+        refs.push(o.$ref as string);
       }
       Object.values(o).forEach(collectRefs);
     }
@@ -460,9 +460,6 @@ describe('OpenAPI contract — Coverage gap analysis', () => {
     }
 
     if (resolvedGaps.length > 0) {
-      console.info(
-        `[contract-gap resolved] These domains now have OpenAPI coverage and can be removed from KNOWN_GAPS: [${resolvedGaps.join(', ')}]`,
-      );
     }
 
     expect(unexpectedGaps).toHaveLength(0);

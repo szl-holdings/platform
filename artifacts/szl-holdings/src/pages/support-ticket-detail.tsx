@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "wouter";
 import { m } from "framer-motion";
-import { ArrowLeft, Send, Clock, CheckCircle2, RefreshCw, MessageSquare, AlertCircle } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle2, AlertCircle } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -124,7 +124,7 @@ export default function SupportTicketDetailPage() {
 
   const ticket = data?.ticket;
   const comments = data?.comments ?? [];
-  const statusInfo = ticket ? (STATUS_CONFIG[ticket.status] ?? STATUS_CONFIG["open"]) : null;
+  const statusInfo = ticket ? (STATUS_CONFIG[ticket.status] ?? STATUS_CONFIG.open) : null;
 
   return (
     <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>

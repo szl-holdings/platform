@@ -21,7 +21,6 @@ import {
   Clock,
   Eye,
   Filter,
-  MoreVertical,
   Radio,
   RefreshCw,
   User,

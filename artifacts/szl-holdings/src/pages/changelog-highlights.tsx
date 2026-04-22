@@ -1,6 +1,5 @@
 import { m } from "framer-motion";
-import { GitBranch, GitCommit, Zap, Shield, Bug, ArrowRight, ExternalLink } from "lucide-react";
-import { Link } from "wouter";
+import { GitBranch, GitCommit, } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -198,8 +197,8 @@ function TypeBadge({ type }: { type: ChangeType }) {
 
 const PRODUCT_COLORS: Record<string, string> = {
   Lyte: "#d4a054", Alloy: "#8b7ac8", Command: "#5b8dd4", Vessels: "#4a90b8",
-  Terra: "#c8953c", Aegis: "#c45a4a", Sentra: "#ef8c3a", Counsel: "#6aaa72",
-  "Counsel": "#70b890", "Carlota Jo": "#a0a0c0", "API Server": "#6aaa72",
+  Terra: "#c8953c", Aegis: "#c45a4a", Sentra: "#ef8c3a", Counsel: "#70b890",
+  "Carlota Jo": "#a0a0c0", "API Server": "#6aaa72",
   Infrastructure: "#808090", "Design System": "#7090a8", "SZL Holdings Mobile": "#7ecfc0",
   "All Products": "#d4a054",
 };
@@ -230,7 +229,7 @@ export default function ChangelogHighlightsPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
           <section style={{
             paddingTop: "clamp(7rem,12vw,10rem)",

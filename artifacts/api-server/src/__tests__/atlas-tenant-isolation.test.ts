@@ -6,8 +6,7 @@
  * functions so cross-tenant data is never returned.
  */
 
-import type { NextFunction, Request, Response } from 'express';
-import express from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

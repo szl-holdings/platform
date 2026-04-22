@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { PrismBusEvent, PrismBusEventType } from './bus.js';
-import { prismBus } from './bus.js';
-import type { PrismToolDescriptor } from './connectors.js';
-import { prismConnectorRegistry } from './connectors.js';
+import { type PrismBusEvent, type PrismBusEventType, prismBus } from './bus.js';
+import { type PrismToolDescriptor, prismConnectorRegistry } from './connectors.js';
 import type {
   DomainContext,
   PrismContextBundle,

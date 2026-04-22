@@ -114,7 +114,7 @@ export function DriverTweakPresets({
     const existingIdx = presets.findIndex((p) => p.name.toLowerCase() === trimmed.toLowerCase());
     const id =
       existingIdx >= 0
-        ? presets[existingIdx]!.id
+        ? presets[existingIdx]?.id
         : `pst_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
     const preset: DriverTweakPreset = {
       id,

@@ -5,8 +5,7 @@
  * for exploring the cross-domain knowledge graph.
  */
 
-import type React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -73,7 +72,7 @@ const DOMAIN_COLORS: Record<string, string> = {
   default: '#6B7280',
 };
 
-const ENTITY_TYPE_SHAPES: Record<string, string> = {
+const _ENTITY_TYPE_SHAPES: Record<string, string> = {
   person: 'circle',
   organization: 'rect',
   asset: 'diamond',
@@ -193,7 +192,7 @@ export function KnowledgeGraphViz({
     }
     const positioned = runForceSimulation(data.nodes, data.edges, width, height);
     setNodes(positioned);
-  }, [data.nodes.map((n) => n.id).join(','), data.edges.length, width, height]);
+  }, [data.edges.length, width, height, data.nodes.length, data.nodes, data.edges]);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
@@ -388,7 +387,7 @@ export function KnowledgeGraphViz({
                     fill={isHovered ? '#E5E7EB' : '#9CA3AF'}
                     style={{ pointerEvents: 'none' }}
                   >
-                    {node.name.length > 18 ? node.name.slice(0, 18) + '…' : node.name}
+                    {node.name.length > 18 ? `${node.name.slice(0, 18)}…` : node.name}
                   </text>
                 )}
               </g>
@@ -477,7 +476,7 @@ function buildHierarchicalLayout(
   for (const n of nodes) {
     const l = level.get(n.id) ?? maxLevel;
     if (!byLevel.has(l)) byLevel.set(l, []);
-    byLevel.get(l)!.push(n);
+    byLevel.get(l)?.push(n);
   }
 
   const levelCount = maxLevel + 1;
@@ -508,7 +507,7 @@ export function HierarchicalGraphViz({
 }: HierarchicalGraphVizProps) {
   const nodes = useMemo(
     () => buildHierarchicalLayout(data.nodes, data.edges, width, height),
-    [data.nodes.map((n) => n.id).join(','), data.edges.length, width, height],
+    [data.edges.length, width, height, data.nodes, data.edges],
   );
   const nodeMap = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
@@ -606,7 +605,7 @@ export function HierarchicalGraphViz({
                   fill={isHovered ? '#E5E7EB' : '#9CA3AF'}
                   style={{ pointerEvents: 'none' }}
                 >
-                  {node.name.length > 16 ? node.name.slice(0, 16) + '…' : node.name}
+                  {node.name.length > 16 ? `${node.name.slice(0, 16)}…` : node.name}
                 </text>
               )}
             </g>
@@ -642,7 +641,7 @@ function extractEdgeTimestamp(edge: GraphVizEdge): number | null {
     const val = p[key];
     if (typeof val === 'string' || typeof val === 'number') {
       const ms = typeof val === 'number' ? val : Date.parse(val);
-      if (!isNaN(ms)) return ms;
+      if (!Number.isNaN(ms)) return ms;
     }
   }
   return null;
@@ -721,7 +720,7 @@ export function TimelineGraphViz({
                 fontSize="9"
                 fill={getDomainColor(domain)}
               >
-                {domain.length > 10 ? domain.slice(0, 10) + '…' : domain}
+                {domain.length > 10 ? `${domain.slice(0, 10)}…` : domain}
               </text>
             </g>
           );

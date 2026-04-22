@@ -14,10 +14,8 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import {
-  CLIENT_DOSSIERS,
   DEMO_NOTE,
   getCategoryLabel,
-  getRequestPriorityLabel,
   getSLALabel,
   getStatusLabel,
   getTierBadgeColor,

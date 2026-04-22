@@ -2,16 +2,11 @@ import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import { useRealtimeChannel } from '@szl-holdings/shared-ui/use-realtime-channel';
 import {
-  BookOpen,
   Brain,
-  Download,
   FileText,
-  Lightbulb,
   Loader2,
-  Search,
   Send,
   Sparkles,
-  TrendingUp,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { CarlotaGraphQLPanel } from '@/components/graphql-data-panel';
@@ -262,7 +257,6 @@ export default function AIAdvisory() {
             try {
               await downloadEngagementSummary(insightCards, messages);
             } catch {
-              console.error('PDF generation failed');
             } finally {
               setDownloadingPDF(false);
             }

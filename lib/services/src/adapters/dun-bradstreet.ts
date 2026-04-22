@@ -132,15 +132,11 @@ export class DunBradstreetAdapter extends ServiceAdapter {
   readonly description =
     'Dun & Bradstreet Data Cloud — company firmographics, D-U-N-S lookups, credit scores, PAYDEX, risk ratings, and supply chain intelligence. Enterprise API. Falls back to demo mode when DNB_API_KEY is absent.';
   readonly requiredEnvVars = ['DNB_API_KEY', 'DNB_CLIENT_ID', 'DNB_CLIENT_SECRET'];
-
-  private get apiKey(): string | undefined {
-    return process.env['DNB_API_KEY'];
-  }
   private get clientId(): string | undefined {
-    return process.env['DNB_CLIENT_ID'];
+    return process.env.DNB_CLIENT_ID;
   }
   private get clientSecret(): string | undefined {
-    return process.env['DNB_CLIENT_SECRET'];
+    return process.env.DNB_CLIENT_SECRET;
   }
 
   private readonly BASE_URL = 'https://plus.dnb.com/v1';
@@ -231,10 +227,10 @@ export class DunBradstreetAdapter extends ServiceAdapter {
     const data = await this.dnbRequest<Record<string, unknown>>(`/data/duns/${duns}`, {
       blockIDs: 'paymentinsight_L1_v1,financialstrengthinsight_L1_v1',
     });
-    const org = (data['organization'] as Record<string, unknown>) ?? {};
+    const org = (data.organization as Record<string, unknown>) ?? {};
     return {
       duns,
-      companyName: String(org['primaryName'] ?? ''),
+      companyName: String(org.primaryName ?? ''),
       compositeRisk: { rating: '—', class: 0, description: 'See full report' },
       delinquencyScore: { value: 0, class: 0, description: '' },
       failureScore: { value: 0, class: 0, description: '' },
@@ -253,25 +249,25 @@ export class DunBradstreetAdapter extends ServiceAdapter {
   }
 
   private mapOrg(duns: string, org: Record<string, unknown>): DNBCompanyProfile {
-    const addr = (org['primaryAddress'] as Record<string, unknown>) ?? {};
+    const addr = (org.primaryAddress as Record<string, unknown>) ?? {};
     return {
       duns,
-      primaryName: String(org['primaryName'] ?? ''),
+      primaryName: String(org.primaryName ?? ''),
       tradeStyleName: null,
       registrationNumbers: [],
       primaryAddress: {
-        streetAddress: String((addr['streetAddress'] as Record<string, unknown>)?.['line1'] ?? ''),
-        city: String(addr['addressLocality'] ?? ''),
-        state: String(addr['addressRegion'] ?? ''),
+        streetAddress: String((addr.streetAddress as Record<string, unknown>)?.line1 ?? ''),
+        city: String(addr.addressLocality ?? ''),
+        state: String(addr.addressRegion ?? ''),
         countryCode: String(
-          (addr['addressCountry'] as Record<string, unknown>)?.['isoAlpha2Code'] ?? '',
+          (addr.addressCountry as Record<string, unknown>)?.isoAlpha2Code ?? '',
         ),
-        postalCode: String(addr['postalCode'] ?? ''),
+        postalCode: String(addr.postalCode ?? ''),
       },
       telephone: null,
       websiteAddress: null,
       email: null,
-      entityType: String(org['businessEntityType'] ?? ''),
+      entityType: String(org.businessEntityType ?? ''),
       industryCode: '',
       industryCodes: [],
       employeeCount: null,

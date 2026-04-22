@@ -1,6 +1,6 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+const http = require('node:http');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const PORT = parseInt(process.env.PORT ?? '8083', 10);
 const DIST = path.resolve(__dirname, '..', 'dist');
@@ -60,5 +60,4 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`[szl-holdings-mobile] Static server → http://0.0.0.0:${PORT}`);
 });

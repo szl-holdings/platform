@@ -1,7 +1,6 @@
-import type React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const API = import.meta.env.BASE_URL + 'api';
+const API = `${import.meta.env.BASE_URL}api`;
 
 type ClientId = string;
 
@@ -156,7 +155,7 @@ export default function AdvisoryDataEditor({ accent }: { accent: string }) {
         };
         const list = json.data?.clients ?? json.clients ?? [];
         setClients(list);
-        if (list.length > 0 && !clientId) setClientId(list[0]!.id);
+        if (list.length > 0 && !clientId) setClientId(list[0]?.id);
       } catch {}
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -194,7 +193,7 @@ export default function AdvisoryDataEditor({ accent }: { accent: string }) {
             date: r.signalDate ?? r.date ?? '',
           })),
         });
-      } catch (e) {
+      } catch (_e) {
         setError('Network error loading advisory data.');
       } finally {
         setLoading(false);
@@ -386,7 +385,7 @@ export default function AdvisoryDataEditor({ accent }: { accent: string }) {
             <SaveBar
               accent={accent}
               saving={savingSection === 'competitors'}
-              status={statusBySection['competitors'] ?? null}
+              status={statusBySection.competitors ?? null}
               onSave={() => saveSection('competitors', { items: data.competitors })}
             />
           </div>

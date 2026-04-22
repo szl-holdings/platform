@@ -409,7 +409,6 @@ export function Constellation() {
               onMouseMove={handleMouseMove}
               onMouseLeave={() => setHoveredNode(null)}
               onClick={handleClick}
-              aria-hidden="true"
             />
             <nav aria-label="Portfolio company links" className="sr-only">
               {ventures.map((venture) => (

@@ -3,13 +3,8 @@ import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import {
   Activity,
   AlertTriangle,
-  ChevronRight,
-  Cpu,
   Eye,
   Network,
-  Radio,
-  RefreshCw,
-  Zap,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -170,7 +165,7 @@ function initNodes(w: number, h: number): NodeState[] {
 function useAnimatedTopology(w: number, h: number, metricsMap: Record<string, TopologyNode>) {
   const [nodes, setNodes] = useState<NodeState[]>(() => initNodes(w, h));
   const [particles, setParticles] = useState<Particle[]>([]);
-  const frameRef = useRef(0);
+  const _frameRef = useRef(0);
   const nodesRef = useRef(nodes);
   const particlesRef = useRef(particles);
   const particleIdRef = useRef(0);
@@ -360,11 +355,11 @@ export default function LivingTopology() {
       const y = lerp(from.y, to.y, p.progress);
       ctx.beginPath();
       ctx.arc(x, y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = p.color + 'cc';
+      ctx.fillStyle = `${p.color}cc`;
       ctx.fill();
       ctx.beginPath();
       ctx.arc(x, y, p.size * 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = p.color + '22';
+      ctx.fillStyle = `${p.color}22`;
       ctx.fill();
     }
 

@@ -7,7 +7,6 @@ import {
   ChevronUp,
   Clock,
   ExternalLink,
-  FileText,
   Layers,
   Plus,
   RefreshCw,

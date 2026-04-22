@@ -2,9 +2,9 @@ import { m } from "framer-motion";
 import { Link } from "wouter";
 import {
   ArrowRight, Scale, CheckCircle2, Shield, FileText, Eye, Lock, Database,
-  Zap, AlertTriangle, Clock, Building2, Brain, Layers, Globe, Cpu,
-  MessageSquare, ChevronRight, BarChart3, Users, Server, Activity,
-  ShieldCheck, FileDown, Workflow, TrendingUp,
+  Zap, AlertTriangle, Brain, Layers, Globe, Cpu,
+  MessageSquare, ChevronRight, Users, 
+  ShieldCheck, FileDown, Workflow, 
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -193,7 +193,7 @@ function SectionHeading({ children, maxWidth = "30ch" }: { children: React.React
   );
 }
 
-function Divider() {
+function _Divider() {
   return <div style={{ borderBottom: "1px solid var(--color-szl-border)" }} />;
 }
 
@@ -209,7 +209,7 @@ export default function PrismCounselPublicPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
           {/* ─── Hero ─────────────────────────────────────────────────── */}
           <section

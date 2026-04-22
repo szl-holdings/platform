@@ -15,9 +15,8 @@
  * Skipped when DATABASE_URL is not configured.
  */
 
-import { randomUUID } from 'crypto';
-import type { NextFunction, Request, Response } from 'express';
-import express from 'express';
+import { randomUUID } from 'node:crypto';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
@@ -54,7 +53,7 @@ vi.mock('../middlewares/auth.js', () => ({
   requireOrgMembership: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   parseIdParam: (paramName: string) => (req: Request, res: Response, next: NextFunction) => {
     const val = req.params[paramName];
-    if (!val || isNaN(Number(val))) {
+    if (!val || Number.isNaN(Number(val))) {
       res.status(400).json({ error: 'Invalid ID' });
       return;
     }
@@ -100,7 +99,7 @@ d('Governance editor attribution surfaces in admin endpoints (#2102)', () => {
         displayName: EDITOR_DISPLAY_NAME,
       })
       .returning();
-    editorUserId = user!.id;
+    editorUserId = user?.id;
     mockAuthUser.id = editorUserId;
   });
 
@@ -141,11 +140,11 @@ d('Governance editor attribution surfaces in admin endpoints (#2102)', () => {
     }>;
     const supervised = rows.find((r) => r.tier === 'supervised');
     expect(supervised).toBeDefined();
-    expect(supervised!.updatedAt).toBeTruthy();
-    expect(supervised!.updatedBy).not.toBeNull();
-    expect(supervised!.updatedBy!.id).toBe(editorUserId);
-    expect(supervised!.updatedBy!.displayName).toBe(EDITOR_DISPLAY_NAME);
-    expect(supervised!.updatedBy!.email).toBe(EDITOR_EMAIL);
+    expect(supervised?.updatedAt).toBeTruthy();
+    expect(supervised?.updatedBy).not.toBeNull();
+    expect(supervised?.updatedBy?.id).toBe(editorUserId);
+    expect(supervised?.updatedBy?.displayName).toBe(EDITOR_DISPLAY_NAME);
+    expect(supervised?.updatedBy?.email).toBe(EDITOR_EMAIL);
   });
 
   it('GET /guardrail-configs reports the editor that POSTed each guardrail', async () => {
@@ -180,12 +179,12 @@ d('Governance editor attribution surfaces in admin endpoints (#2102)', () => {
     }>;
     const ours = list.find((r) => r.guardrailId === guardrailKey);
     expect(ours).toBeDefined();
-    expect(ours!.createdAt).toBeTruthy();
-    expect(ours!.updatedAt).toBeTruthy();
-    expect(ours!.createdBy).not.toBeNull();
-    expect(ours!.createdBy!.id).toBe(editorUserId);
-    expect(ours!.createdBy!.displayName).toBe(EDITOR_DISPLAY_NAME);
-    expect(ours!.createdBy!.email).toBe(EDITOR_EMAIL);
+    expect(ours?.createdAt).toBeTruthy();
+    expect(ours?.updatedAt).toBeTruthy();
+    expect(ours?.createdBy).not.toBeNull();
+    expect(ours?.createdBy?.id).toBe(editorUserId);
+    expect(ours?.createdBy?.displayName).toBe(EDITOR_DISPLAY_NAME);
+    expect(ours?.createdBy?.email).toBe(EDITOR_EMAIL);
 
     const singleRes = await request(app).get(`/api/guardian/guardrail-configs/${guardrailDbId}`);
     expect(singleRes.status).toBe(200);

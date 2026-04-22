@@ -37,34 +37,34 @@ describe('useDecisionEngine — Decision Theater simulation', () => {
     expect(mc.iterations).toBe(5000);
     expect(mc.validIterations).toBeGreaterThan(0);
 
-    const cost = mc.metrics['totalVoyageCost'];
+    const cost = mc.metrics.totalVoyageCost;
     expect(cost).toBeDefined();
     for (const v of [
-      cost!.mean,
-      cost!.p5,
-      cost!.p25,
-      cost!.p50,
-      cost!.p75,
-      cost!.p95,
-      cost!.stdDev,
+      cost?.mean,
+      cost?.p5,
+      cost?.p25,
+      cost?.p50,
+      cost?.p75,
+      cost?.p95,
+      cost?.stdDev,
     ]) {
       expect(Number.isFinite(v)).toBe(true);
     }
     // Ordering invariants for percentiles.
-    expect(cost!.p5).toBeLessThanOrEqual(cost!.p50);
-    expect(cost!.p50).toBeLessThanOrEqual(cost!.p95);
-    expect(cost!.min).toBeLessThanOrEqual(cost!.p5);
-    expect(cost!.max).toBeGreaterThanOrEqual(cost!.p95);
+    expect(cost?.p5).toBeLessThanOrEqual(cost?.p50);
+    expect(cost?.p50).toBeLessThanOrEqual(cost?.p95);
+    expect(cost?.min).toBeLessThanOrEqual(cost?.p5);
+    expect(cost?.max).toBeGreaterThanOrEqual(cost?.p95);
     // Total voyage cost is reported in $000; sanity bounds for the configured distribution.
-    expect(cost!.mean).toBeGreaterThan(50);
-    expect(cost!.mean).toBeLessThan(5000);
-    expect(cost!.p5).toBeGreaterThan(0);
+    expect(cost?.mean).toBeGreaterThan(50);
+    expect(cost?.mean).toBeLessThan(5000);
+    expect(cost?.p5).toBeGreaterThan(0);
 
-    const days = mc.metrics['totalDays'];
+    const days = mc.metrics.totalDays;
     expect(days).toBeDefined();
-    expect(Number.isFinite(days!.mean)).toBe(true);
-    expect(days!.mean).toBeGreaterThan(5);
-    expect(days!.mean).toBeLessThan(60);
+    expect(Number.isFinite(days?.mean)).toBe(true);
+    expect(days?.mean).toBeGreaterThan(5);
+    expect(days?.mean).toBeLessThan(60);
   });
 
   it('returns ALLOW for the maritime-critical-response-v2 policy with exec+ops roles', async () => {

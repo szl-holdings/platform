@@ -1,5 +1,4 @@
-import type { EvidenceQueryResult } from '@szl-holdings/ai-engine';
-import { EvidencePipeline } from '@szl-holdings/ai-engine';
+import { type EvidenceQueryResult, EvidencePipeline } from '@szl-holdings/ai-engine';
 import {
   db,
   firestormAlertsTable,
@@ -343,7 +342,7 @@ async function refreshFromDb(): Promise<void> {
     const frameworkGroups: Record<string, typeof complianceControls> = {};
     for (const cc of complianceControls) {
       if (!frameworkGroups[cc.framework]) frameworkGroups[cc.framework] = [];
-      frameworkGroups[cc.framework]!.push(cc);
+      frameworkGroups[cc.framework]?.push(cc);
     }
     for (const [framework, controls] of Object.entries(frameworkGroups)) {
       const notCompliant = controls.filter(

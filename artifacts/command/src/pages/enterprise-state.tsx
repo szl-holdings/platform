@@ -1,37 +1,28 @@
 import {
   Activity,
-  AlertTriangle,
-  ArrowLeft,
   ArrowRight,
   BellOff,
-  Brain,
   CheckCheck,
   CheckCircle2,
   ChevronRight,
   Clock,
   DollarSign,
   Eye,
-  FileText,
   GitBranch,
   Globe,
   History,
   Info,
-  Layers,
-  RefreshCw,
   Shield,
   Star,
   Target,
-  Ticket,
   TrendingDown,
   TrendingUp,
   UserCheck,
-  Users,
   X,
   XCircle,
   Zap,
 } from 'lucide-react';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Link } from 'wouter';
 import { OpsLayout } from '../components/ops-layout';
 
 // ── Shared Action Store (server-backed, localStorage cache) ──────────────────
@@ -322,7 +313,7 @@ function useToasts() {
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
-const BG = 'var(--color-bg-primary)';
+const _BG = 'var(--color-bg-primary)';
 const CARD = 'var(--color-surface-base)';
 const BORDER = 'var(--color-surface-border)';
 const ACCENT = '#8b7ac8';
@@ -816,7 +807,7 @@ function DomainBadge({ domain }: { domain: string }) {
   );
 }
 
-function SeverityIndicator({ severity }: { severity: string }) {
+function _SeverityIndicator({ severity }: { severity: string }) {
   const colors: Record<string, string> = {
     critical: '#ef4444',
     high: '#f97316',
@@ -841,7 +832,7 @@ function SeverityIndicator({ severity }: { severity: string }) {
   );
 }
 
-function SmallCard({ children, accentColor }: { children: React.ReactNode; accentColor?: string }) {
+function _SmallCard({ children, accentColor }: { children: React.ReactNode; accentColor?: string }) {
   return (
     <div
       style={{
@@ -1099,7 +1090,7 @@ function RecommendationQueueSection() {
     show(`Recommendation accepted — "${title}" queued for execution.`, 'success');
   }
 
-  function handleRejectSubmit(recId: string, title: string) {
+  function handleRejectSubmit(recId: string, _title: string) {
     if (!rejectReason.trim()) return;
     patch({
       recDecisions: {
@@ -1116,7 +1107,7 @@ function RecommendationQueueSection() {
     setRejectReason('');
   }
 
-  function handleSnoozeSubmit(recId: string, title: string) {
+  function handleSnoozeSubmit(recId: string, _title: string) {
     patch({
       recDecisions: {
         [recId]: {
@@ -1398,7 +1389,6 @@ function RecommendationQueueSection() {
                         value={snoozeInput.reason}
                         onChange={(e) => setSnoozeInput((p) => ({ ...p, reason: e.target.value }))}
                         placeholder="Reason required…"
-                        autoFocus
                         style={{
                           flex: 1,
                           minWidth: '140px',
@@ -1461,7 +1451,6 @@ function RecommendationQueueSection() {
                         value={rejectReason}
                         onChange={(e) => setRejectReason(e.target.value)}
                         placeholder="Reason for rejection…"
-                        autoFocus
                         style={{
                           flex: 1,
                           fontSize: '10px',
@@ -2021,7 +2010,7 @@ function RiskOpportunityHeatmapSection() {
               className="text-[10px] font-semibold px-3 py-1 rounded-md transition-all"
               style={{
                 background: view === v ? `${ACCENT}15` : 'transparent',
-                border: `1px solid ${view === v ? ACCENT + '35' : BORDER}`,
+                border: `1px solid ${view === v ? `${ACCENT}35` : BORDER}`,
                 color: view === v ? ACCENT : FG_MUT,
                 cursor: 'pointer',
               }}
@@ -2722,7 +2711,7 @@ function DecisionLogSection() {
                 padding: '4px 10px',
                 borderRadius: '6px',
                 background: active ? `${ACCENT}18` : 'transparent',
-                border: `1px solid ${active ? ACCENT + '40' : BORDER}`,
+                border: `1px solid ${active ? `${ACCENT}40` : BORDER}`,
                 color: active ? ACCENT : FG_MUT,
                 cursor: 'pointer',
               }}
@@ -2926,7 +2915,7 @@ export default function EnterpriseStatePage() {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0"
                   style={{
                     background: isActive ? `${ACCENT}15` : 'transparent',
-                    border: `1px solid ${isActive ? ACCENT + '35' : 'transparent'}`,
+                    border: `1px solid ${isActive ? `${ACCENT}35` : 'transparent'}`,
                     color: isActive ? ACCENT : 'var(--color-fg-muted)',
                   }}
                 >

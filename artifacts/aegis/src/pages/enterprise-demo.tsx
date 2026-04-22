@@ -49,8 +49,8 @@ export default function EnterpriseDemo() {
     setCheckoutUrl(null);
     try {
       const baseUrl = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
-      const successUrl = window.location.origin + baseUrl + '/demo?quote=success';
-      const cancelUrl = window.location.origin + baseUrl + '/demo?quote=cancel';
+      const successUrl = `${window.location.origin + baseUrl}/demo?quote=success`;
+      const cancelUrl = `${window.location.origin + baseUrl}/demo?quote=cancel`;
 
       const res = await fetch('/api/billing/aegis/enterprise-quote', {
         method: 'POST',

@@ -342,11 +342,11 @@ function countDirFiles(dirPath: string): number {
 // ─── Report Writing ──────────────────────────────────────────────────────────
 
 function log(msg: string): void {
-  process.stdout.write(msg + '\n');
+  process.stdout.write(`${msg}\n`);
 }
 
 function writeReport(inv: SurfaceInventory): void {
-  const date = new Date().toISOString().replace('T', ' ').split('.')[0] + ' UTC';
+  const date = `${new Date().toISOString().replace('T', ' ').split('.')[0]} UTC`;
 
   const lines: string[] = [
     '# Public Mirror Surface Report',
@@ -442,8 +442,8 @@ function writeReport(inv: SurfaceInventory): void {
     '',
     `| Check | Status |`,
     `|-------|--------|`,
-    `| Noisy items resolved | ${inv.noisyDirs.length + inv.noisyFiles.length === 0 ? '✅ Clean' : '⚠️ ' + (inv.noisyDirs.length + inv.noisyFiles.length) + ' item(s) to resolve'} |`,
-    `| Unknown items reviewed | ${inv.unknownDirs.length + inv.unknownFiles.length === 0 ? '✅ All classified' : '⚠️ ' + (inv.unknownDirs.length + inv.unknownFiles.length) + ' to classify'} |`,
+    `| Noisy items resolved | ${inv.noisyDirs.length + inv.noisyFiles.length === 0 ? '✅ Clean' : `⚠️ ${inv.noisyDirs.length + inv.noisyFiles.length} item(s) to resolve`} |`,
+    `| Unknown items reviewed | ${inv.unknownDirs.length + inv.unknownFiles.length === 0 ? '✅ All classified' : `⚠️ ${inv.unknownDirs.length + inv.unknownFiles.length} to classify`} |`,
     '',
     '## Actions Required Before Mirror Push',
     '',
@@ -480,7 +480,7 @@ function writeReport(inv: SurfaceInventory): void {
   );
 
   fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
-  fs.writeFileSync(REPORT_PATH, lines.join('\n') + '\n', 'utf-8');
+  fs.writeFileSync(REPORT_PATH, `${lines.join('\n')}\n`, 'utf-8');
 }
 
 // ─── Main ────────────────────────────────────────────────────────────────────

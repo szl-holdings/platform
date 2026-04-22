@@ -1,6 +1,5 @@
 import {
   AlertTriangle,
-  Globe,
   Navigation,
   Radio,
   RefreshCw,
@@ -854,20 +853,20 @@ function VesselDetail({ vessel }: { vessel: LiveVessel }) {
         <p className="text-[10px] uppercase tracking-widest mb-3" style={{ color: TEXT.muted }}>
           Position & Navigation
         </p>
-        <DetailRow label="Latitude" value={vessel.lat.toFixed(4) + '°'} />
-        <DetailRow label="Longitude" value={vessel.lng.toFixed(4) + '°'} />
+        <DetailRow label="Latitude" value={`${vessel.lat.toFixed(4)}°`} />
+        <DetailRow label="Longitude" value={`${vessel.lng.toFixed(4)}°`} />
         <DetailRow
           label="Speed"
-          value={vessel.speed.toFixed(1) + ' kn'}
+          value={`${vessel.speed.toFixed(1)} kn`}
           color={vessel.speed > 0 ? TEXT.secondary : TEXT.muted}
         />
-        <DetailRow label="Course" value={vessel.course + '°'} />
-        <DetailRow label="Heading" value={vessel.heading + '°'} />
+        <DetailRow label="Course" value={`${vessel.course}°`} />
+        <DetailRow label="Heading" value={`${vessel.heading}°`} />
         <DetailRow label="Destination" value={vessel.destination} color={ACCENT} />
         <DetailRow label="ETA" value={vessel.eta} />
         {vessel.callsign && <DetailRow label="Call Sign" value={vessel.callsign} />}
-        {vessel.length && <DetailRow label="Length" value={vessel.length + ' m'} />}
-        {vessel.draft && <DetailRow label="Draught" value={vessel.draft + ' m'} />}
+        {vessel.length && <DetailRow label="Length" value={`${vessel.length} m`} />}
+        {vessel.draft && <DetailRow label="Draught" value={`${vessel.draft} m`} />}
         <p
           className="text-[10px] uppercase tracking-widest mt-4 mb-3"
           style={{ color: TEXT.muted }}
@@ -952,7 +951,7 @@ export default function AisLiveTrackingPage() {
       if (combined.length > 0 && !combined.find((v) => v.id === selected)) {
         setSelected(combined[0].id);
       }
-    } catch (e) {
+    } catch (_e) {
       setError('Live AIS feed unavailable');
       setApiMeta({
         liveData: false,

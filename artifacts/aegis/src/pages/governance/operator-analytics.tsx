@@ -4,19 +4,14 @@ import {
   AlertOctagon,
   AlertTriangle,
   BarChart3,
-  CheckCircle2,
   Clock,
   Database,
   Eye,
   Info,
   Lock,
   Minus,
-  RefreshCw,
-  Server,
-  Shield,
   TrendingDown,
   TrendingUp,
-  Users,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -26,11 +21,8 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   Line,
   LineChart,
-  Pie,
-  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -39,7 +31,7 @@ import {
 import { Link } from 'wouter';
 import { api } from '@/lib/api';
 
-const COLORS = {
+const _COLORS = {
   critical: '#ef4444',
   high: '#f97316',
   medium: '#f59e0b',
@@ -189,7 +181,7 @@ export default function OperatorAnalyticsPage() {
         (d) => (d.approvalRequired || d.humanReviewRequired) && !d.approvedAt && !d.rejectedAt,
       ).length
     : 0;
-  const openCases =
+  const _openCases =
     cases?.filter((c) => c.status === 'open' || c.status === 'in_progress')?.length ?? 0;
 
   return (

@@ -1,8 +1,6 @@
-import { ClassificationBadge } from '@imp/components/classification-badge';
+
 import { CENTURION_PROFILES, getAquilaColor, getAquilaLabel } from '@imp/lib/imperium-data';
-import { cn } from '@imp/lib/utils';
 import {
-  Activity,
   AlertTriangle,
   CheckCircle,
   ChevronDown,
@@ -11,7 +9,7 @@ import {
   TrendingUp,
   Zap,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 function MetricBar({
   label,

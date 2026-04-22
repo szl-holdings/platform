@@ -1,4 +1,4 @@
-import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { ActivityFeed, CommentThread } from '@szl-holdings/shared-ui/collaboration';
 import { ExportButton } from '@szl-holdings/shared-ui/data-export';
@@ -15,7 +15,6 @@ import {
   Plus,
   RefreshCw,
   Sparkles,
-  Ticket,
   User,
   X,
 } from 'lucide-react';
@@ -127,7 +126,7 @@ function NewTicketModal({
 
       onCreated(data.ticket);
       onClose();
-    } catch (err) {
+    } catch (_err) {
       toast.error('Failed to create ticket');
     } finally {
       setSubmitting(false);

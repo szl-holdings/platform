@@ -29,7 +29,7 @@ function GlobalFeedStats() {
       {[
         {
           label: 'Health Findings',
-          value: knowledge?.byDomain?.['lyte'] ?? 0,
+          value: knowledge?.byDomain?.lyte ?? 0,
           icon: Activity,
           color: 'text-indigo-400',
           bg: 'bg-indigo-500/10',

@@ -30,7 +30,7 @@ export class StormGlassAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ['STORMGLASS_API_KEY'];
 
   private get apiKey(): string | undefined {
-    return process.env['STORMGLASS_API_KEY'];
+    return process.env.STORMGLASS_API_KEY;
   }
 
   protected override async performHealthCheck(): Promise<void> {

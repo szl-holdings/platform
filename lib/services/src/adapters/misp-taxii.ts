@@ -138,11 +138,11 @@ export class MispTaxiiAdapter extends ServiceAdapter {
   protected override rateLimitPerMinute = 20;
 
   private get serverUrl(): string {
-    return (process.env["TAXII_SERVER_URL"] ?? "").replace(/\/$/, "");
+    return (process.env.TAXII_SERVER_URL ?? "").replace(/\/$/, "");
   }
 
   private get apiKey(): string {
-    return process.env["TAXII_API_KEY"] ?? "";
+    return process.env.TAXII_API_KEY ?? "";
   }
 
   private get authHeaders(): Record<string, string> {
@@ -170,7 +170,7 @@ export class MispTaxiiAdapter extends ServiceAdapter {
 
     const roots: string[] = json.api_roots ?? [];
     if (roots.length > 0) {
-      const root = roots[0]!.replace(/\/$/, "");
+      const root = roots[0]?.replace(/\/$/, "");
       this._discoveredApiRoot = root.startsWith("http") ? root : `${this.serverUrl}/${root.replace(/^\//, "")}`;
     } else {
       this._discoveredApiRoot = `${this.serverUrl}/taxii2`;

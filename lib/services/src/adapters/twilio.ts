@@ -20,15 +20,15 @@ export class TwilioAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_PHONE_NUMBER'];
 
   private get accountSid(): string | undefined {
-    return process.env['TWILIO_ACCOUNT_SID'];
+    return process.env.TWILIO_ACCOUNT_SID;
   }
 
   private get authToken(): string | undefined {
-    return process.env['TWILIO_AUTH_TOKEN'];
+    return process.env.TWILIO_AUTH_TOKEN;
   }
 
   private get fromNumber(): string | undefined {
-    return process.env['TWILIO_PHONE_NUMBER'];
+    return process.env.TWILIO_PHONE_NUMBER;
   }
 
   private get authHeader(): string {

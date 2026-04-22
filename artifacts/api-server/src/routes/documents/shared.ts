@@ -1,6 +1,5 @@
-import { createHash, createHmac, createSign, randomUUID } from 'crypto';
-import { type IRouter, type Request, type Response, Router } from 'express';
-import { logger } from '../../lib/logger';
+
+import type { Request, } from 'express';
 
 interface AuthUser {
   id: number;
@@ -10,33 +9,12 @@ interface AuthUser {
 }
 type ExtendedRequest = Request & { user?: AuthUser };
 
-import {
-  contentLibraryBlocksTable,
-  db,
-  documentCommentsTable,
-  type documentsTable,
-  documentTemplatesTable,
-  documentVersionsTable,
-  pdfBatchesTable,
-  pdfJobsTable,
-  signaturesTable,
+import type {
+  documentsTable,
 } from '@szl-holdings/db';
-import { and, desc, eq, ne, or, sql } from 'drizzle-orm';
-import {
-  handleRouteError,
-  parsePagination,
-  sendBadRequest,
-  sendCreated,
-  sendNotFound,
-  sendSuccess,
-} from '../../lib/api-response';
-import { setObjectAclPolicy } from '../../lib/objectAcl';
-import { ObjectNotFoundError, ObjectStorageService } from '../../lib/objectStorage';
-import { renderDocumentToPdfBuffer, renderEntityDataToPdfBuffer } from '../../lib/pdf-renderer';
-import type { BlockNode } from '../../lib/pdf-renderer-types';
-import { authMiddleware, requireRole } from '../../middlewares/auth';
+import { ObjectStorageService } from '../../lib/objectStorage';
 
-const objectStorageService = new ObjectStorageService();
+const _objectStorageService = new ObjectStorageService();
 
 // ─── Access control helpers ───────────────────────────────────────────────────
 

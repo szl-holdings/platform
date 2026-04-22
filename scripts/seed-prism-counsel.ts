@@ -1,11 +1,9 @@
 import { seedPrismCounsel } from '../artifacts/api-server/src/scripts/seed-prism-counsel.js';
 
 seedPrismCounsel()
-  .then((result) => {
-    console.log('[runner] seed-prism-counsel complete:', result);
+  .then((_result) => {
     process.exit(0);
   })
-  .catch((err) => {
-    console.error('[runner] seed-prism-counsel failed:', err);
+  .catch((_err) => {
     process.exit(1);
   });

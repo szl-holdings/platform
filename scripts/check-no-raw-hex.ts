@@ -99,15 +99,9 @@ for (const dir of SCAN_DIRS) {
 }
 
 if (violations.length === 0) {
-  console.log('✓ No raw hex values found outside token files.');
   process.exit(0);
 } else {
-  console.error(`✗ ${violations.length} raw hex value(s) found outside token files:\n`);
-  for (const v of violations) {
-    console.error(`  ${v.file}:${v.line}:${v.col}  ${v.match}`);
+  for (const _v of violations) {
   }
-  console.error(
-    '\nMove colour values into packages/design-system/src/tokens/ and reference the token variable.',
-  );
   process.exit(1);
 }

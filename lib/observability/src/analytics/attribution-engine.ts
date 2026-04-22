@@ -28,8 +28,8 @@ export function computeAttribution(
   const total = credits.reduce((s, c) => s + c, 0);
 
   return {
-    journeyId: sorted[0]!.journeyId,
-    entityId: sorted[0]!.entityId,
+    journeyId: sorted[0]?.journeyId,
+    entityId: sorted[0]?.entityId,
     outcomeType,
     ...(outcomeValue !== undefined ? { outcomeValue } : {}),
     model,
@@ -66,7 +66,7 @@ function allocateCredit(touchpoints: AttributionTouchpoint[], model: Attribution
 
     case 'time_decay': {
       const halfLifeDays = 7;
-      const now = touchpoints[n - 1]!.occurredAt.getTime();
+      const now = touchpoints[n - 1]?.occurredAt.getTime();
       const rawWeights = touchpoints.map((tp) => {
         const ageMs = now - tp.occurredAt.getTime();
         const ageDays = ageMs / (1000 * 60 * 60 * 24);

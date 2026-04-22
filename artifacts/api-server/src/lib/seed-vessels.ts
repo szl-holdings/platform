@@ -365,7 +365,7 @@ const MAINTENANCE_PRIORITIES: Array<(typeof vesselMaintenanceTable.$inferInsert)
   'low',
 ];
 
-const MAINTENANCE_STATUSES: Array<(typeof vesselMaintenanceTable.$inferInsert)['status']> = [
+const _MAINTENANCE_STATUSES: Array<(typeof vesselMaintenanceTable.$inferInsert)['status']> = [
   'overdue',
   'due_soon',
   'scheduled',
@@ -552,7 +552,6 @@ export async function seedVesselsData(): Promise<void> {
         `Seed data is only permitted in local-dev, internal-preview, and demo modes.`,
     );
   }
-  console.log('[seed-vessels] Starting vessels comprehensive seed...');
 
   // Existence checks must fail loudly. Previously this block was wrapped in
   // an empty `catch {}` with the comment "table might be empty, continue
@@ -587,16 +586,9 @@ export async function seedVesselsData(): Promise<void> {
     maintenanceCount > 0 &&
     sanctionsCount > 0
   ) {
-    console.log(
-      `[seed-vessels] All vessel tables already populated (vessels=${existingCount}, positions=${positionCount}, voyages=${voyageCount}, portCalls=${portCallCount}, exceptions=${exceptionCount}, maintenance=${maintenanceCount}, sanctions=${sanctionsCount}), skipping...`,
-    );
     return;
   }
   if (existingCount >= 50 && positionCount < 50) {
-    // Vessels exist but positions are missing — seed positions only
-    console.log(
-      `[seed-vessels] Seeding missing positions for ${existingCount} existing vessels...`,
-    );
     const existingVessels = await db
       .select({ id: vesselsTable.id, status: vesselsTable.status })
       .from(vesselsTable)
@@ -642,7 +634,6 @@ export async function seedVesselsData(): Promise<void> {
         .values(posOnlyRows.slice(i, i + 50))
         .onConflictDoNothing();
     }
-    console.log(`[seed-vessels] Seeded ${posOnlyRows.length} positions for existing vessels`);
     // Fall through so missing voyages/port-calls/exceptions/etc. can still be
     // backfilled below if needed.
   }
@@ -682,7 +673,6 @@ export async function seedVesselsData(): Promise<void> {
     .returning();
   const fleetIds = insertedFleets.map((f) => f.id);
   const fallbackFleetId = fleetIds[0] ?? 1;
-  console.log(`[seed-vessels] Created ${insertedFleets.length} fleets`);
 
   // Create 55 vessels
   const vesselRows = VESSEL_NAMES.map((name, i) => {
@@ -735,7 +725,6 @@ export async function seedVesselsData(): Promise<void> {
     .values(vesselRows)
     .onConflictDoNothing()
     .returning();
-  console.log(`[seed-vessels] Created ${newlyInsertedVessels.length} vessels`);
 
   // If the vessels insert no-op'd because rows already exist, look them up so
   // downstream tables (voyages, port calls, exceptions, maintenance,
@@ -756,9 +745,6 @@ export async function seedVesselsData(): Promise<void> {
           .orderBy(vesselsTable.id);
 
   if (insertedVessels.length === 0) {
-    console.log(
-      '[seed-vessels] No vessels available after insert/lookup, aborting further seeding',
-    );
     return;
   }
 
@@ -808,7 +794,6 @@ export async function seedVesselsData(): Promise<void> {
       .values(positionRows.slice(i, i + 50))
       .onConflictDoNothing();
   }
-  console.log(`[seed-vessels] Created ${positionRows.length} vessel positions`);
 
   // Create voyage economics (4 per vessel = up to 220 voyages)
   const voyageRows: InsertVesselVoyageEconomics[] = [];
@@ -896,7 +881,6 @@ export async function seedVesselsData(): Promise<void> {
       .values(voyageRows.slice(i, i + 50))
       .onConflictDoNothing();
   }
-  console.log(`[seed-vessels] Created ${voyageRows.length} voyage economics records`);
 
   // Create port calls (2-3 per vessel)
   const portCallRows: InsertVesselPortCall[] = [];
@@ -939,7 +923,6 @@ export async function seedVesselsData(): Promise<void> {
       .values(portCallRows.slice(i, i + 50))
       .onConflictDoNothing();
   }
-  console.log(`[seed-vessels] Created ${portCallRows.length} port calls`);
 
   // Create fleet exceptions
   const exceptionRows: InsertFleetException[] = [];
@@ -983,7 +966,6 @@ export async function seedVesselsData(): Promise<void> {
       .values(exceptionRows.slice(i, i + 50))
       .onConflictDoNothing();
   }
-  console.log(`[seed-vessels] Created ${exceptionRows.length} fleet exceptions`);
 
   // Create maintenance records (2-4 per vessel)
   const maintenanceRows: InsertVesselMaintenance[] = [];
@@ -1059,7 +1041,6 @@ export async function seedVesselsData(): Promise<void> {
       .values(maintenanceRows.slice(i, i + 50))
       .onConflictDoNothing();
   }
-  console.log(`[seed-vessels] Created ${maintenanceRows.length} maintenance records`);
 
   // Create sanctions screening (1 per vessel)
   const screeningRows: InsertVesselSanctionsScreening[] = [];
@@ -1136,11 +1117,8 @@ export async function seedVesselsData(): Promise<void> {
       .values(screeningRows.slice(i, i + 50))
       .onConflictDoNothing();
   }
-  console.log(`[seed-vessels] Created ${screeningRows.length} sanctions screening records`);
 
   await seedPscData(insertedVessels);
-
-  console.log('[seed-vessels] Vessels seed complete.');
 }
 
 async function seedPscData(
@@ -1284,7 +1262,4 @@ async function seedPscData(
       .values(checklistRows.slice(i, i + 100))
       .onConflictDoNothing();
   }
-  console.log(
-    `[seed-vessels] Created ${inspectionRows.length} PSC inspections and ${checklistRows.length} checklist items`,
-  );
 }

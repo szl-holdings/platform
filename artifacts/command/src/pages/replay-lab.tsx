@@ -1,5 +1,5 @@
 import { EcosystemNav } from '@szl-holdings/shared-ui/ecosystem-nav';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ACCENT, apiUrl, DOMAIN_COLORS, DOMAIN_ICONS, fetchJson } from './cognitive/shared';
 
 interface Scenario {
@@ -650,7 +650,7 @@ export default function ReplayLab() {
                           width: 36,
                           height: 36,
                           borderRadius: 8,
-                          background: `${DOMAIN_COLORS[s.domain] ?? DOMAIN_COLORS['default']}20`,
+                          background: `${DOMAIN_COLORS[s.domain] ?? DOMAIN_COLORS.default}20`,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -658,7 +658,7 @@ export default function ReplayLab() {
                           flexShrink: 0,
                         }}
                       >
-                        {DOMAIN_ICONS[s.domain] ?? DOMAIN_ICONS['default']}
+                        {DOMAIN_ICONS[s.domain] ?? DOMAIN_ICONS.default}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div
@@ -690,8 +690,8 @@ export default function ReplayLab() {
                           <span
                             style={{
                               fontSize: 11,
-                              color: DOMAIN_COLORS[s.domain] ?? DOMAIN_COLORS['default'],
-                              background: `${DOMAIN_COLORS[s.domain] ?? DOMAIN_COLORS['default']}15`,
+                              color: DOMAIN_COLORS[s.domain] ?? DOMAIN_COLORS.default,
+                              background: `${DOMAIN_COLORS[s.domain] ?? DOMAIN_COLORS.default}15`,
                               padding: '2px 8px',
                               borderRadius: 4,
                             }}

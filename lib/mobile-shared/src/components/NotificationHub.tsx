@@ -1,6 +1,5 @@
 import { useQueries } from '@tanstack/react-query';
-import type React from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -203,8 +202,8 @@ export function NotificationHub({
                   style={[
                     styles.filterChip,
                     {
-                      backgroundColor: isActive ? (f?.color ?? accentColor) + '20' : surfaceColor,
-                      borderColor: isActive ? (f?.color ?? accentColor) + '50' : borderColor,
+                      backgroundColor: isActive ? `${f?.color ?? accentColor}20` : surfaceColor,
+                      borderColor: isActive ? `${f?.color ?? accentColor}50` : borderColor,
                     },
                   ]}
                 >

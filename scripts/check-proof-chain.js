@@ -594,30 +594,10 @@ if (isMain) {
   // -------------------------------------------------------------------------
 
   if (allViolations.length === 0) {
-    console.log('✅  proof-chain check passed — no violations found.');
     process.exit(0);
   } else {
-    console.error(`\n❌  proof-chain check found ${allViolations.length} violation(s):\n`);
-    for (const v of allViolations) {
-      console.error(`  ${v.file}:${v.line}`);
-      console.error(`    → ${v.issue}\n`);
+    for (const _v of allViolations) {
     }
-    console.error(
-      'Fix:\n' +
-        '  Gate 1 — executeWorkflow() must supply one of:\n' +
-        '    policyEvaluation: <PolicyEvaluation>  (production path)\n' +
-        '    policyEvaluationOverride: true        (test/demo override — must be literal true)\n' +
-        '    isDryRun: true                        (dry-run path — must be literal true)\n' +
-        '    isSimulation: true                    (simulation path — must be literal true)\n' +
-        '  Note: dynamic expressions (e.g. isDryRun: req.isDryRun ?? false) are NOT accepted.\n' +
-        '  Gate 2 — buildPolicyEvaluation() must supply all 5 proof-chain args:\n' +
-        '    evidenceChain, freshnessScore, confidence, projectedImpact, projectedRisk\n' +
-        '  Gate 3 — createRecommendation() must supply all 8 proof-chain fields:\n' +
-        '    evidenceIds, confidence, freshness, rationale, domain,\n' +
-        '    projectedImpact, projectedRisk, policyEvaluation\n' +
-        '  Gate 4 — `as Recommendation` type assertions are banned in production files.\n' +
-        '    Pass fields through createRecommendation() to ensure proof-chain validation.\n',
-    );
     process.exit(1);
   }
 }

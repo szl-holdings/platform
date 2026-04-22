@@ -1,6 +1,6 @@
 import { registry } from '@szl-holdings/brand-registry';
 import { m } from 'framer-motion';
-import { ArrowRight, ExternalLink } from 'lucide-react';
+import { ArrowRight, } from 'lucide-react';
 import { Link } from 'wouter';
 import { FounderLayout } from './FounderLayout';
 

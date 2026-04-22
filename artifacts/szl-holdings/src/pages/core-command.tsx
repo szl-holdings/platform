@@ -2,7 +2,6 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { m } from 'framer-motion';
 import {
   Activity,
-  AlertTriangle,
   ArrowUpRight,
   BarChart3,
   Bell,
@@ -10,7 +9,6 @@ import {
   Building,
   CheckCircle2,
   Cpu,
-  Database,
   DollarSign,
   ExternalLink,
   Eye,

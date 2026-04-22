@@ -1,5 +1,4 @@
-import type React from 'react';
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import { CACHE_KEYS, cacheGetStale, cacheSet } from '@/lib/cache';
 import { useAuth } from '../AuthContext';
@@ -386,7 +385,7 @@ export function LyteProvider({ children }: { children: React.ReactNode }) {
       const wsUrl = `wss://${domain}/ws`;
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
-      let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+      let _reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
       ws.onopen = () => {
         setIsConnected(true);
@@ -396,7 +395,7 @@ export function LyteProvider({ children }: { children: React.ReactNode }) {
       ws.onclose = (event: any) => {
         setIsConnected(false);
         if (event.code !== 1000) {
-          reconnectTimer = setTimeout(connectWebSocket, 5000);
+          _reconnectTimer = setTimeout(connectWebSocket, 5000);
         }
       };
       ws.onerror = () => {
@@ -409,14 +408,9 @@ export function LyteProvider({ children }: { children: React.ReactNode }) {
             fetchData();
           }
         } catch {
-          console.warn('[LyteContext] Unparseable WebSocket message received');
         }
       };
-    } catch (err) {
-      console.warn(
-        '[LyteContext] WebSocket connection failed:',
-        err instanceof Error ? err.message : err,
-      );
+    } catch (_err) {
     }
   }, [buildWsAuthMessage, fetchData]);
 

@@ -3,10 +3,7 @@ import {
   type InsertTerraDistressAlert,
   type InsertTerraDistressProperty,
   terraDistressAlertsTable,
-  terraDistressPropertiesTable,
-  terraIngestionRunsTable,
 } from '@szl-holdings/db';
-import { eq } from 'drizzle-orm';
 import {
   completeIngestionRun,
   generateAlertsForProperty,
@@ -804,7 +801,6 @@ const SEED_ALERTS: InsertTerraDistressAlert[] = [
 ];
 
 export async function seedTerraDistress() {
-  console.log('Seeding Terra distress engine database...');
 
   const runId = await startIngestionRun('seed', { description: 'Initial demo data seed' });
 
@@ -819,13 +815,10 @@ export async function seedTerraDistress() {
         inserted++;
         const alerts = await generateAlertsForProperty(property, dbId, property.externalId!);
         alertsGenerated += alerts;
-        console.log(`  + Inserted: ${property.address}`);
       } else {
         skipped++;
-        console.log(`  ~ Skipped (exists): ${property.address}`);
       }
-    } catch (err) {
-      console.error(`  ! Failed: ${property.address}`, err);
+    } catch (_err) {
     }
   }
 
@@ -835,8 +828,7 @@ export async function seedTerraDistress() {
         .insert(terraDistressAlertsTable)
         .values(alert)
         .onConflictDoNothing({ target: terraDistressAlertsTable.externalId });
-    } catch (err) {
-      console.error(`  ! Failed to insert alert: ${alert.externalId}`, err);
+    } catch (_err) {
     }
   }
 
@@ -848,18 +840,13 @@ export async function seedTerraDistress() {
     alertsGenerated: alertsGenerated + SEED_ALERTS.length,
     status: 'completed',
   });
-
-  console.log(
-    `\nSeed complete: ${inserted} inserted, ${skipped} skipped, ${alertsGenerated + SEED_ALERTS.length} alerts`,
-  );
   return { inserted, skipped, alertsGenerated: alertsGenerated + SEED_ALERTS.length };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   seedTerraDistress()
     .then(() => process.exit(0))
-    .catch((err) => {
-      console.error('Seed failed:', err);
+    .catch((_err) => {
       process.exit(1);
     });
 }

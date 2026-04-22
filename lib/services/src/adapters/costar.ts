@@ -252,15 +252,15 @@ export class CoStarAdapter extends ServiceAdapter {
   ];
 
   private get apiKey(): string | undefined {
-    return process.env["COSTAR_API_KEY"];
+    return process.env.COSTAR_API_KEY;
   }
 
   private get clientId(): string | undefined {
-    return process.env["COSTAR_CLIENT_ID"];
+    return process.env.COSTAR_CLIENT_ID;
   }
 
   private get baseUrl(): string {
-    return process.env["COSTAR_BASE_URL"] ?? "https://api.costar.com/information/v2";
+    return process.env.COSTAR_BASE_URL ?? "https://api.costar.com/information/v2";
   }
 
   private async costarRequest(path: string, params?: Record<string, string>): Promise<unknown> {
@@ -302,7 +302,7 @@ export class CoStarAdapter extends ServiceAdapter {
     if (!this.isLive) {
       let results = [...MOCK_COSTAR_PROPERTIES];
       if (params.propertyType) {
-        results = results.filter(p => p.propertyType.toLowerCase() === params.propertyType!.toLowerCase());
+        results = results.filter(p => p.propertyType.toLowerCase() === params.propertyType?.toLowerCase());
       }
       if (params.limit) results = results.slice(params.offset ?? 0, (params.offset ?? 0) + params.limit);
       return results;
@@ -346,7 +346,7 @@ export class CoStarAdapter extends ServiceAdapter {
     if (!this.isLive) {
       let comps = [...MOCK_SALE_COMPS];
       if (params.propertyType) {
-        comps = comps.filter(c => c.propertyType.toLowerCase() === params.propertyType!.toLowerCase());
+        comps = comps.filter(c => c.propertyType.toLowerCase() === params.propertyType?.toLowerCase());
       }
       if (params.limit) comps = comps.slice(0, params.limit);
       return comps;

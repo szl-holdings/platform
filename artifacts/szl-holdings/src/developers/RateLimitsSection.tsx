@@ -1,40 +1,12 @@
-import {
-  AlertCircle,
-  ArrowRight,
-  ChevronRight,
-  Code2,
-  Database,
-  ExternalLink,
-  FileCode,
-  Globe,
-  Hash,
-  Key,
-  Layers,
-  Lock,
-  PlayCircle,
-  RefreshCw,
-  Server,
-  Shield,
-  Terminal,
-  Webhook,
-  Zap,
-} from 'lucide-react';
+
 import {
   Callout,
   CodeBlock,
   InlineCode,
-  LanguageTabs,
   SectionHeader,
-  SubSectionHeader,
 } from './components';
 import {
-  API_ERROR_CODES,
-  ERROR_CODES,
-  GQL_MUTATION_SIGNAL,
-  GQL_QUERY_PROJECTS,
-  GQL_QUERY_VESSELS,
   RATE_LIMIT_TIERS,
-  WEBHOOK_EVENTS,
 } from './constants';
 
 export function RateLimitsSection() {

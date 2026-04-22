@@ -111,10 +111,10 @@ router.get(
         isLive: adapter.isLive,
         isDemoMode: adapter.isDemoMode,
         configuration: {
-          DATAVERSE_ORG_URL: process.env['DATAVERSE_ORG_URL'] ? 'configured' : 'not configured',
-          DATAVERSE_TENANT_ID: process.env['DATAVERSE_TENANT_ID'] ? 'configured' : 'not configured',
-          DATAVERSE_CLIENT_ID: process.env['DATAVERSE_CLIENT_ID'] ? 'configured' : 'not configured',
-          DATAVERSE_CLIENT_SECRET: process.env['DATAVERSE_CLIENT_SECRET']
+          DATAVERSE_ORG_URL: process.env.DATAVERSE_ORG_URL ? 'configured' : 'not configured',
+          DATAVERSE_TENANT_ID: process.env.DATAVERSE_TENANT_ID ? 'configured' : 'not configured',
+          DATAVERSE_CLIENT_ID: process.env.DATAVERSE_CLIENT_ID ? 'configured' : 'not configured',
+          DATAVERSE_CLIENT_SECRET: process.env.DATAVERSE_CLIENT_SECRET
             ? 'configured'
             : 'not configured',
         },

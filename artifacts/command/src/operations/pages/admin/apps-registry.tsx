@@ -551,7 +551,7 @@ export default function AppsRegistryAdmin() {
                               >
                                 <History className="w-3 h-3" />
                                 {(activityBySlug.get(app.slug)?.length ?? 0) > 0
-                                  ? activityBySlug.get(app.slug)!.length
+                                  ? activityBySlug.get(app.slug)?.length
                                   : ''}
                               </button>
                             </div>
@@ -574,7 +574,7 @@ export default function AppsRegistryAdmin() {
                                 </div>
                               ) : (
                                 <ul className="space-y-1.5">
-                                  {activityBySlug.get(app.slug)!.map((entry) => (
+                                  {activityBySlug.get(app.slug)?.map((entry) => (
                                     <li key={entry.id} className="flex items-start gap-2 text-xs">
                                       <span
                                         className={`inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[10px] uppercase tracking-wider border ${

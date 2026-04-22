@@ -6,8 +6,7 @@
  * or conditional rendering.
  */
 
-import type { AuthenticatedUser } from '../types.js';
-import { isElevated, isMemberOf, isReadOnly } from '../types.js';
+import { type AuthenticatedUser, isElevated, isMemberOf, isReadOnly } from '../types.js';
 
 export type GuardResult =
   | { allowed: true }

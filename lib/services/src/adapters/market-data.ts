@@ -76,22 +76,22 @@ export class MarketDataAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["ALPHA_VANTAGE_API_KEY"];
 
   override get missingEnvVars(): string[] {
-    const hasAlphaVantage = !!process.env["ALPHA_VANTAGE_API_KEY"];
-    const hasPolygon = !!process.env["POLYGON_API_KEY"];
+    const hasAlphaVantage = !!process.env.ALPHA_VANTAGE_API_KEY;
+    const hasPolygon = !!process.env.POLYGON_API_KEY;
     if (hasAlphaVantage || hasPolygon) return [];
     return ["ALPHA_VANTAGE_API_KEY"];
   }
 
   override get presentEnvVars(): string[] {
     const present: string[] = [];
-    if (process.env["ALPHA_VANTAGE_API_KEY"]) present.push("ALPHA_VANTAGE_API_KEY");
-    if (process.env["POLYGON_API_KEY"]) present.push("POLYGON_API_KEY");
+    if (process.env.ALPHA_VANTAGE_API_KEY) present.push("ALPHA_VANTAGE_API_KEY");
+    if (process.env.POLYGON_API_KEY) present.push("POLYGON_API_KEY");
     return present;
   }
 
   private get provider(): "alpha_vantage" | "polygon" | null {
-    if (process.env["POLYGON_API_KEY"]) return "polygon";
-    if (process.env["ALPHA_VANTAGE_API_KEY"]) return "alpha_vantage";
+    if (process.env.POLYGON_API_KEY) return "polygon";
+    if (process.env.ALPHA_VANTAGE_API_KEY) return "alpha_vantage";
     return null;
   }
 
@@ -105,7 +105,7 @@ export class MarketDataAdapter extends ServiceAdapter {
     this._avLastRequest = Date.now();
 
     const url = new URL("https://www.alphavantage.co/query");
-    url.searchParams.set("apikey", process.env["ALPHA_VANTAGE_API_KEY"]!);
+    url.searchParams.set("apikey", process.env.ALPHA_VANTAGE_API_KEY!);
     for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
 
     const res = await fetch(url.toString(), {
@@ -114,13 +114,13 @@ export class MarketDataAdapter extends ServiceAdapter {
     });
     if (!res.ok) throw new Error(`Alpha Vantage API error: HTTP ${res.status}`);
     const data = await res.json() as T;
-    if ((data as Record<string, unknown>)["Note"]) throw new Error("Alpha Vantage rate limit reached");
+    if ((data as Record<string, unknown>).Note) throw new Error("Alpha Vantage rate limit reached");
     return data;
   }
 
   private async polygonRequest<T>(path: string, params: Record<string, string> = {}): Promise<T> {
     const url = new URL(`https://api.polygon.io${path}`);
-    url.searchParams.set("apiKey", process.env["POLYGON_API_KEY"]!);
+    url.searchParams.set("apiKey", process.env.POLYGON_API_KEY!);
     for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
 
     const res = await fetch(url.toString(), {
@@ -199,7 +199,7 @@ export class MarketDataAdapter extends ServiceAdapter {
       high: parseFloat(q["03. high"] ?? "0"),
       low: parseFloat(q["04. low"] ?? "0"),
       previousClose: parseFloat(q["08. previous close"] ?? "0"),
-      volume: parseInt(q["06. volume"] ?? "0"),
+      volume: parseInt(q["06. volume"] ?? "0", 10),
       marketCap: null,
       timestamp: new Date().toISOString(),
       source: "alpha_vantage",
@@ -224,7 +224,7 @@ export class MarketDataAdapter extends ServiceAdapter {
       const fromDate = new Date(from);
       const toDate = new Date(to);
       let price = 200;
-      for (let d = new Date(fromDate); d <= toDate; d.setDate(d.getDate() + 1)) {
+      for (const d = new Date(fromDate); d <= toDate; d.setDate(d.getDate() + 1)) {
         price = price * (1 + (Math.random() - 0.5) * 0.03);
         bars.push({
           date: d.toISOString().slice(0, 10),
@@ -265,7 +265,7 @@ export class MarketDataAdapter extends ServiceAdapter {
         high: parseFloat(bar["2. high"] ?? "0"),
         low: parseFloat(bar["3. low"] ?? "0"),
         close: parseFloat(bar["4. close"] ?? "0"),
-        volume: parseInt(bar["5. volume"] ?? "0"),
+        volume: parseInt(bar["5. volume"] ?? "0", 10),
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
   }

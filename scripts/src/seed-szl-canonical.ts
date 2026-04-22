@@ -1,10 +1,8 @@
 import {
   db,
   organizationsTable,
-  type SzlPort,
   type SzlSignal,
   szlActionsTable,
-  szlApprovalsTable,
   szlExceptionsTable,
   szlFeatureFlagsTable,
   szlPortsTable,
@@ -14,16 +12,14 @@ import {
   szlSignalsTable,
   szlVesselsTable,
   szlVoyagesTable,
-  szlWorkflowRunsTable,
   szlWorkflowsTable,
 } from '@szl-holdings/db';
 import { eq } from 'drizzle-orm';
 
 async function seedCanonical() {
-  console.log('Seeding SZL canonical data...');
 
   // ─── PRODUCTS ─────────────────────────────────────────────────────────────
-  const productRows = await db
+  const _productRows = await db
     .insert(szlProductsTable)
     .values([
       {
@@ -87,7 +83,6 @@ async function seedCanonical() {
     ])
     .onConflictDoNothing()
     .returning();
-  console.log(`  ✓ ${productRows.length} products`);
 
   // ─── DEMO PORTS ───────────────────────────────────────────────────────────
   const portRows = await db
@@ -196,7 +191,6 @@ async function seedCanonical() {
     ])
     .onConflictDoNothing()
     .returning();
-  console.log(`  ✓ ${portRows.length} ports`);
 
   // ─── DEMO ORG (if not exists) ──────────────────────────────────────────────
   const [insertedOrg] = await db
@@ -382,94 +376,93 @@ async function seedCanonical() {
     ])
     .onConflictDoNothing()
     .returning();
-  console.log(`  ✓ ${vesselRows.length} vessels`);
 
   // ─── ROUTES ───────────────────────────────────────────────────────────────
   const portLookup = Object.fromEntries(portRows.map((p) => [p.unlocode as string, p.id]));
   const routeInserts = [];
-  if (portLookup['CNSHA'] && portLookup['NLRTM']) {
+  if (portLookup.CNSHA && portLookup.NLRTM) {
     routeInserts.push({
       orgId,
       name: 'Asia–Europe Main Line',
-      originPortId: portLookup['CNSHA'],
-      destinationPortId: portLookup['NLRTM'],
+      originPortId: portLookup.CNSHA,
+      destinationPortId: portLookup.NLRTM,
       distanceNm: '11200.00',
       avgTransitDays: '25.5',
       riskLevel: 'low' as const,
     });
   }
-  if (portLookup['SGSIN'] && portLookup['AEDXB']) {
+  if (portLookup.SGSIN && portLookup.AEDXB) {
     routeInserts.push({
       orgId,
       name: 'Singapore–Middle East',
-      originPortId: portLookup['SGSIN'],
-      destinationPortId: portLookup['AEDXB'],
+      originPortId: portLookup.SGSIN,
+      destinationPortId: portLookup.AEDXB,
       distanceNm: '3850.00',
       avgTransitDays: '9.0',
       riskLevel: 'medium' as const,
     });
   }
-  if (portLookup['USHOU'] && portLookup['NLRTM']) {
+  if (portLookup.USHOU && portLookup.NLRTM) {
     routeInserts.push({
       orgId,
       name: 'Gulf–Europe Transatlantic',
-      originPortId: portLookup['USHOU'],
-      destinationPortId: portLookup['NLRTM'],
+      originPortId: portLookup.USHOU,
+      destinationPortId: portLookup.NLRTM,
       distanceNm: '5400.00',
       avgTransitDays: '12.0',
       riskLevel: 'low' as const,
     });
   }
-  if (portLookup['JPYOK'] && portLookup['USHOU']) {
+  if (portLookup.JPYOK && portLookup.USHOU) {
     routeInserts.push({
       orgId,
       name: 'Trans-Pacific East',
-      originPortId: portLookup['JPYOK'],
-      destinationPortId: portLookup['USHOU'],
+      originPortId: portLookup.JPYOK,
+      destinationPortId: portLookup.USHOU,
       distanceNm: '9500.00',
       avgTransitDays: '21.0',
       riskLevel: 'low' as const,
     });
   }
-  if (portLookup['BRSSZ'] && portLookup['NLRTM']) {
+  if (portLookup.BRSSZ && portLookup.NLRTM) {
     routeInserts.push({
       orgId,
       name: 'South America–Europe',
-      originPortId: portLookup['BRSSZ'],
-      destinationPortId: portLookup['NLRTM'],
+      originPortId: portLookup.BRSSZ,
+      destinationPortId: portLookup.NLRTM,
       distanceNm: '5600.00',
       avgTransitDays: '13.0',
       riskLevel: 'medium' as const,
     });
   }
-  if (portLookup['ZAELS'] && portLookup['SGSIN']) {
+  if (portLookup.ZAELS && portLookup.SGSIN) {
     routeInserts.push({
       orgId,
       name: 'Cape Route – East Africa',
-      originPortId: portLookup['ZAELS'],
-      destinationPortId: portLookup['SGSIN'],
+      originPortId: portLookup.ZAELS,
+      destinationPortId: portLookup.SGSIN,
       distanceNm: '6800.00',
       avgTransitDays: '16.0',
       riskLevel: 'medium' as const,
     });
   }
-  if (portLookup['AEDXB'] && portLookup['GBFXT']) {
+  if (portLookup.AEDXB && portLookup.GBFXT) {
     routeInserts.push({
       orgId,
       name: 'Middle East–UK',
-      originPortId: portLookup['AEDXB'],
-      destinationPortId: portLookup['GBFXT'],
+      originPortId: portLookup.AEDXB,
+      destinationPortId: portLookup.GBFXT,
       distanceNm: '6200.00',
       avgTransitDays: '14.5',
       riskLevel: 'medium' as const,
     });
   }
-  if (portLookup['CNSHA'] && portLookup['USHOU']) {
+  if (portLookup.CNSHA && portLookup.USHOU) {
     routeInserts.push({
       orgId,
       name: 'China–US Gulf',
-      originPortId: portLookup['CNSHA'],
-      destinationPortId: portLookup['USHOU'],
+      originPortId: portLookup.CNSHA,
+      destinationPortId: portLookup.USHOU,
       distanceNm: '12400.00',
       avgTransitDays: '28.0',
       riskLevel: 'low' as const,
@@ -480,7 +473,6 @@ async function seedCanonical() {
     routeInserts.length > 0
       ? await db.insert(szlRoutesTable).values(routeInserts).onConflictDoNothing().returning()
       : [];
-  console.log(`  ✓ ${routeRows.length} routes`);
 
   // ─── VOYAGES ──────────────────────────────────────────────────────────────
   const now = new Date();
@@ -488,7 +480,7 @@ async function seedCanonical() {
   const routes = routeRows;
 
   if (vessels.length > 0 && routes.length > 0) {
-    const voyageRows = await db
+    const _voyageRows = await db
       .insert(szlVoyagesTable)
       .values([
         {
@@ -564,7 +556,6 @@ async function seedCanonical() {
       ])
       .onConflictDoNothing()
       .returning();
-    console.log(`  ✓ ${voyageRows.length} voyages`);
   }
 
   // ─── LYTE SIGNALS ─────────────────────────────────────────────────────────
@@ -914,7 +905,6 @@ async function seedCanonical() {
     ])
     .onConflictDoNothing()
     .returning();
-  console.log(`  ✓ ${signalRows.length} signals`);
 
   // ─── ACTIONS ──────────────────────────────────────────────────────────────
   const criticalSignal = signalRows.find((s: SzlSignal) => s.correlationId === 'db-lag-2026-03-30');
@@ -931,7 +921,7 @@ async function seedCanonical() {
     (s: SzlSignal) => s.correlationId === 'maintenance-overdue-004-2026-03-30',
   );
 
-  const actionRows = await db
+  const _actionRows = await db
     .insert(szlActionsTable)
     .values([
       {
@@ -1014,10 +1004,9 @@ async function seedCanonical() {
     ])
     .onConflictDoNothing()
     .returning();
-  console.log(`  ✓ ${actionRows.length} actions`);
 
   // ─── WORKFLOWS ────────────────────────────────────────────────────────────
-  const workflowRows = await db
+  const _workflowRows = await db
     .insert(szlWorkflowsTable)
     .values([
       {
@@ -1063,10 +1052,9 @@ async function seedCanonical() {
     ])
     .onConflictDoNothing()
     .returning();
-  console.log(`  ✓ ${workflowRows.length} workflows`);
 
   // ─── READINESS ITEMS ──────────────────────────────────────────────────────
-  const readinessRows = await db
+  const _readinessRows = await db
     .insert(szlReadinessItemsTable)
     .values([
       {
@@ -1157,7 +1145,6 @@ async function seedCanonical() {
     ])
     .onConflictDoNothing()
     .returning();
-  console.log(`  ✓ ${readinessRows.length} readiness items`);
 
   // ─── EXCEPTIONS ───────────────────────────────────────────────────────────
   const voyageDelaySignal = signalRows.find(
@@ -1208,10 +1195,9 @@ async function seedCanonical() {
       },
     ])
     .onConflictDoNothing();
-  console.log('  ✓ exceptions');
 
   // ─── FEATURE FLAGS ─────────────────────────────────────────────────────────
-  const flagRows = await db
+  const _flagRows = await db
     .insert(szlFeatureFlagsTable)
     .values([
       {
@@ -1297,17 +1283,12 @@ async function seedCanonical() {
     ])
     .onConflictDoNothing()
     .returning();
-  console.log(`  ✓ ${flagRows.length} feature flags`);
-
-  console.log('\nSZL canonical seed complete.');
 }
 
 seedCanonical()
   .then(() => {
-    console.log('[runner] seed-canonical complete');
     process.exit(0);
   })
-  .catch((err) => {
-    console.error('Seed failed:', err);
+  .catch((_err) => {
     process.exit(1);
   });

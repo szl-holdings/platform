@@ -1,26 +1,14 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
-  Activity,
-  AlertCircle,
   BarChart3,
-  CheckCircle2,
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  Clock,
-  Download,
   Globe,
   Loader2,
   MessageSquare,
-  RefreshCw,
   SmilePlus,
-  Star,
   ThumbsDown,
   ThumbsUp,
-  TrendingUp,
-  Users,
 } from 'lucide-react';
-import { useCallback, useRef, useState } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { apiFetchAdmin } from './api';
 

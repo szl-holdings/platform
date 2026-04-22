@@ -1,11 +1,5 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import type { PrismDomain } from '@szl-holdings/prism-bus';
-import {
-  PRISM_BUILT_IN_TOOLS,
-  PRISM_DOMAIN_TOOLS,
-  prismBus,
-  prismConnectorRegistry,
-} from '@szl-holdings/prism-bus';
+import { type PrismDomain, PRISM_BUILT_IN_TOOLS, PRISM_DOMAIN_TOOLS, prismBus, prismConnectorRegistry } from '@szl-holdings/prism-bus';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';

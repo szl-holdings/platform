@@ -9,13 +9,11 @@ import {
   CloudRain,
   Eye,
   MapPin,
-  Snowflake,
   Sun,
   Thermometer,
   Waves,
   Wind,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
 import { api } from '@/lib/api';
 import { LiveDataBadge } from '@/lib/live-badge';
 

@@ -10,7 +10,6 @@
 
 import {
   chatCompletion,
-  chatCompletionWithFallback,
   type HFChatMessage,
   type HFCompletionResult,
   type HFToolDef,
@@ -57,7 +56,7 @@ const COST_PER_TOKEN_USD: Record<string, number> = {
 };
 
 function estimateCost(model: string, totalTokens: number): number {
-  const ratePerToken = COST_PER_TOKEN_USD[model] ?? COST_PER_TOKEN_USD['default']!;
+  const ratePerToken = COST_PER_TOKEN_USD[model] ?? COST_PER_TOKEN_USD.default!;
   return ratePerToken * totalTokens;
 }
 
@@ -90,7 +89,7 @@ export function checkTenantPolicy(
 
   const requiresApproval =
     toggles.requireApprovalForLanes?.includes(routeClass) ||
-    (process.env['AI_REQUIRE_APPROVAL_FOR_HIGH_RISK'] === 'true' &&
+    (process.env.AI_REQUIRE_APPROVAL_FOR_HIGH_RISK === 'true' &&
       HIGH_RISK_LANES.includes(routeClass));
 
   if (requiresApproval) {
@@ -178,7 +177,7 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
     try {
       completion = await chatCompletion(messages, route, _chatOpts);
     } catch (primaryErr) {
-      const fallbackRoute = routeModel('background_batch', { ...(modelOverride !== undefined ? { model: modelOverride } : {}) });
+      const fallbackRoute = routeModel('background_batch', (modelOverride !== undefined ? { model: modelOverride } : {}));
       try {
         completion = await chatCompletion(messages, fallbackRoute, _chatOpts);
         usedFallback = true;
@@ -249,7 +248,7 @@ export function getRouterConfig(): RouterConfig {
       ).map((rc) => [rc, routeModel(rc)]),
     ),
     highRiskLanes: HIGH_RISK_LANES,
-    requireApprovalForHighRisk: process.env['AI_REQUIRE_APPROVAL_FOR_HIGH_RISK'] !== 'false',
-    executionMode: process.env['AI_EXECUTION_MODE'] ?? 'propose_only',
+    requireApprovalForHighRisk: process.env.AI_REQUIRE_APPROVAL_FOR_HIGH_RISK !== 'false',
+    executionMode: process.env.AI_EXECUTION_MODE ?? 'propose_only',
   };
 }

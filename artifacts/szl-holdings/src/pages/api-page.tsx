@@ -145,7 +145,7 @@ export default function ApiPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
           <section className="szl-grid-texture szl-depth-glow-dual" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
@@ -292,7 +292,7 @@ export default function ApiPage() {
                 </div>
                 {ERROR_CODES.map((err, i) => (
                   <div key={err.code} style={{ display: "grid", gridTemplateColumns: "4rem 10rem 1fr", padding: "0.75rem 1.25rem", borderBottom: i < ERROR_CODES.length - 1 ? "1px solid var(--color-szl-border)" : "none", alignItems: "center", gap: "1rem" }}>
-                    <code style={{ fontFamily: "var(--font-mono)", fontSize: "0.8125rem", color: parseInt(err.code) >= 500 ? "hsl(0,75%,58%)" : parseInt(err.code) >= 400 ? "hsl(40,90%,54%)" : "hsl(145,62%,46%)" }}>{err.code}</code>
+                    <code style={{ fontFamily: "var(--font-mono)", fontSize: "0.8125rem", color: parseInt(err.code, 10) >= 500 ? "hsl(0,75%,58%)" : parseInt(err.code, 10) >= 400 ? "hsl(40,90%,54%)" : "hsl(145,62%,46%)" }}>{err.code}</code>
                     <span style={{ fontSize: "0.875rem", fontWeight: 500, color: "hsl(38,8%,82%)" }}>{err.label}</span>
                     <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,55%)", lineHeight: 1.55 }}>{err.desc}</span>
                   </div>

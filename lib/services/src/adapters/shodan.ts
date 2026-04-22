@@ -68,7 +68,7 @@ export class ShodanAdapter extends ServiceAdapter {
     "Shodan — internet-wide host discovery, port scanning intelligence, vulnerability enumeration, banner grabbing, and attack surface mapping. Requires API key. Falls back to demo mode when SHODAN_API_KEY is absent.";
   readonly requiredEnvVars = ["SHODAN_API_KEY"];
 
-  private get apiKey(): string | undefined { return process.env["SHODAN_API_KEY"]; }
+  private get apiKey(): string | undefined { return process.env.SHODAN_API_KEY; }
 
   private readonly BASE_URL = "https://api.shodan.io";
 
@@ -91,24 +91,24 @@ export class ShodanAdapter extends ServiceAdapter {
   async getHostInfo(ip: string): Promise<ShodanHostInfo> {
     if (this.isDemoMode) return { ...MOCK_HOST, ip, ipStr: ip };
     const data = await this.shodanRequest<Record<string, unknown>>(`/shodan/host/${ip}`);
-    const services = (data["data"] as Array<Record<string, unknown>> ?? []).map(s => ({
-      port: Number(s["port"] ?? 0), protocol: String(s["transport"] ?? "tcp"),
-      banner: String(s["data"] ?? ""), product: s["product"] ? String(s["product"]) : null,
-      version: s["version"] ? String(s["version"]) : null,
-      cpe: Array.isArray(s["cpe"]) ? (s["cpe"] as string[]) : [],
-      vulns: s["vulns"] ? Object.keys(s["vulns"] as object) : [],
+    const services = (data.data as Array<Record<string, unknown>> ?? []).map(s => ({
+      port: Number(s.port ?? 0), protocol: String(s.transport ?? "tcp"),
+      banner: String(s.data ?? ""), product: s.product ? String(s.product) : null,
+      version: s.version ? String(s.version) : null,
+      cpe: Array.isArray(s.cpe) ? (s.cpe as string[]) : [],
+      vulns: s.vulns ? Object.keys(s.vulns as object) : [],
     }));
     return {
-      ip, ipStr: ip, org: String(data["org"] ?? ""), isp: String(data["isp"] ?? ""),
-      country: String(data["country_name"] ?? ""), city: data["city"] ? String(data["city"]) : null,
-      region: data["region_code"] ? String(data["region_code"]) : null,
-      latitude: Number(data["latitude"] ?? 0), longitude: Number(data["longitude"] ?? 0),
-      asn: String(data["asn"] ?? ""), ports: Array.isArray(data["ports"]) ? data["ports"] as number[] : [],
-      hostnames: Array.isArray(data["hostnames"]) ? data["hostnames"] as string[] : [],
-      domains: Array.isArray(data["domains"]) ? data["domains"] as string[] : [],
-      tags: Array.isArray(data["tags"]) ? data["tags"] as string[] : [],
-      vulns: data["vulns"] ? Object.keys(data["vulns"] as object) : [],
-      lastUpdate: String(data["last_update"] ?? ""), services,
+      ip, ipStr: ip, org: String(data.org ?? ""), isp: String(data.isp ?? ""),
+      country: String(data.country_name ?? ""), city: data.city ? String(data.city) : null,
+      region: data.region_code ? String(data.region_code) : null,
+      latitude: Number(data.latitude ?? 0), longitude: Number(data.longitude ?? 0),
+      asn: String(data.asn ?? ""), ports: Array.isArray(data.ports) ? data.ports as number[] : [],
+      hostnames: Array.isArray(data.hostnames) ? data.hostnames as string[] : [],
+      domains: Array.isArray(data.domains) ? data.domains as string[] : [],
+      tags: Array.isArray(data.tags) ? data.tags as string[] : [],
+      vulns: data.vulns ? Object.keys(data.vulns as object) : [],
+      lastUpdate: String(data.last_update ?? ""), services,
     };
   }
 
@@ -120,15 +120,15 @@ export class ShodanAdapter extends ServiceAdapter {
     return {
       total: data.total ?? 0, facets: {},
       matches: (data.matches ?? []).map(m => ({
-        ip: String(m["ip_str"] ?? ""), ipStr: String(m["ip_str"] ?? ""),
-        org: String(m["org"] ?? ""), isp: String(m["isp"] ?? ""),
-        country: String(m["country_name"] ?? ""), city: m["city"] ? String(m["city"]) : null,
-        region: m["region_code"] ? String(m["region_code"]) : null,
-        latitude: Number(m["latitude"] ?? 0), longitude: Number(m["longitude"] ?? 0),
-        asn: String(m["asn"] ?? ""), ports: Array.isArray(m["ports"]) ? m["ports"] as number[] : [],
-        hostnames: Array.isArray(m["hostnames"]) ? m["hostnames"] as string[] : [],
-        domains: Array.isArray(m["domains"]) ? m["domains"] as string[] : [],
-        tags: [], vulns: [], lastUpdate: String(m["timestamp"] ?? ""), services: [],
+        ip: String(m.ip_str ?? ""), ipStr: String(m.ip_str ?? ""),
+        org: String(m.org ?? ""), isp: String(m.isp ?? ""),
+        country: String(m.country_name ?? ""), city: m.city ? String(m.city) : null,
+        region: m.region_code ? String(m.region_code) : null,
+        latitude: Number(m.latitude ?? 0), longitude: Number(m.longitude ?? 0),
+        asn: String(m.asn ?? ""), ports: Array.isArray(m.ports) ? m.ports as number[] : [],
+        hostnames: Array.isArray(m.hostnames) ? m.hostnames as string[] : [],
+        domains: Array.isArray(m.domains) ? m.domains as string[] : [],
+        tags: [], vulns: [], lastUpdate: String(m.timestamp ?? ""), services: [],
       })),
     };
   }
@@ -139,11 +139,11 @@ export class ShodanAdapter extends ServiceAdapter {
     }
     const data = await this.shodanRequest<{ matches: Array<Record<string, unknown>> }>("/api/exploits/search", { query, size: String(limit) });
     return (data.matches ?? []).map(e => ({
-      id: String(e["id"] ?? ""), description: String(e["description"] ?? ""),
-      author: e["author"] ? String(e["author"]) : null, type: String(e["type"] ?? ""),
-      platform: String(e["platform"] ?? ""), datePublished: String(e["date"] ?? ""),
-      cve: Array.isArray(e["cve"]) ? e["cve"] as string[] : [],
-      cwe: e["cwe"] ? String(e["cwe"]) : null, verified: Boolean(e["verified"]),
+      id: String(e.id ?? ""), description: String(e.description ?? ""),
+      author: e.author ? String(e.author) : null, type: String(e.type ?? ""),
+      platform: String(e.platform ?? ""), datePublished: String(e.date ?? ""),
+      cve: Array.isArray(e.cve) ? e.cve as string[] : [],
+      cwe: e.cwe ? String(e.cwe) : null, verified: Boolean(e.verified),
     }));
   }
 

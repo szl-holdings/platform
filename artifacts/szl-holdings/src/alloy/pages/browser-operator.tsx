@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   Camera,
   CheckCircle,
-  ChevronRight,
   Clock,
   Code2,
   Download,
@@ -17,7 +16,6 @@ import {
   Pause,
   Play,
   Plus,
-  RotateCcw,
   Settings,
   Shield,
   Square,
@@ -110,7 +108,7 @@ export default function BrowserOperator() {
   const [newAllowPattern, setNewAllowPattern] = React.useState('');
   const [selectedAction, setSelectedAction] = React.useState<string | null>(null);
   const [simulationStep, setSimulationStep] = React.useState(0);
-  const [isSimulating, setIsSimulating] = React.useState(false);
+  const [_isSimulating, setIsSimulating] = React.useState(false);
 
   const activeTask = tasks.find((t) => t.id === activeTaskId);
 
@@ -184,13 +182,13 @@ export default function BrowserOperator() {
         setSimulationStep(i + 1);
         const action: BrowserAction = {
           id: `a-${id}-${i}`,
-          type: plannedActions[i]!.type as BrowserAction['type'],
-          target: plannedActions[i]!.target,
-          url: plannedActions[i]!.type === 'navigate' ? plannedActions[i]!.target : undefined,
+          type: plannedActions[i]?.type as BrowserAction['type'],
+          target: plannedActions[i]?.target,
+          url: plannedActions[i]?.type === 'navigate' ? plannedActions[i]?.target : undefined,
           timestamp: new Date().toISOString(),
           durationMs: Math.round(500 + Math.random() * 1000),
           status: 'done',
-          screenshotAfter: plannedActions[i]!.type === 'screenshot' ? `capture-${i}` : undefined,
+          screenshotAfter: plannedActions[i]?.type === 'screenshot' ? `capture-${i}` : undefined,
         };
         setTasks((prev) =>
           prev.map((t) => (t.id === id ? { ...t, actions: [...t.actions, action] } : t)),

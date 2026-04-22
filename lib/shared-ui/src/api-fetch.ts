@@ -108,8 +108,7 @@ function readFromLocalStorage(): AuthTokens | null {
   let raw: string | null;
   try {
     raw = window.localStorage.getItem(STORAGE_KEY);
-  } catch (err) {
-    console.warn("[auth] localStorage read failed:", err);
+  } catch (_err) {
     return null;
   }
   if (!raw) return null;
@@ -119,8 +118,7 @@ function readFromLocalStorage(): AuthTokens | null {
       return parsed;
     }
     return null;
-  } catch (err) {
-    console.warn("[auth] corrupt token blob in localStorage; discarding:", err);
+  } catch (_err) {
     try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* nothing more we can do */ }
     return null;
   }
@@ -130,8 +128,7 @@ function writeToLocalStorage(tokens: AuthTokens): void {
   if (typeof window === "undefined" || !window.localStorage) return;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tokens));
-  } catch (err) {
-    console.warn("[auth] localStorage write failed:", err);
+  } catch (_err) {
   }
 }
 
@@ -139,8 +136,7 @@ function removeFromLocalStorage(): void {
   if (typeof window === "undefined" || !window.localStorage) return;
   try {
     window.localStorage.removeItem(STORAGE_KEY);
-  } catch (err) {
-    console.warn("[auth] localStorage remove failed:", err);
+  } catch (_err) {
   }
 }
 
@@ -148,8 +144,7 @@ export function setAuthTokens(tokens: AuthTokens): void {
   memoryTokens = tokens;
   writeToLocalStorage(tokens);
   if (secureStorage) {
-    Promise.resolve(secureStorage.write(tokens)).catch((err) => {
-      console.warn("[auth] secure storage write failed:", err);
+    Promise.resolve(secureStorage.write(tokens)).catch((_err) => {
     });
   }
 }
@@ -172,12 +167,11 @@ export async function hydrateAuthTokensFromSecureStorage(): Promise<AuthTokens |
   if (!secureStorage) return getAuthTokens();
   try {
     const stored = await Promise.resolve(secureStorage.read());
-    if (stored && stored.token && stored.refreshToken) {
+    if (stored?.token && stored.refreshToken) {
       memoryTokens = stored;
       return stored;
     }
-  } catch (err) {
-    console.warn("[auth] secure storage read failed:", err);
+  } catch (_err) {
   }
   return memoryTokens;
 }
@@ -186,15 +180,13 @@ export function clearAuthTokens(reason: AuthClearedReason = "manual"): void {
   memoryTokens = null;
   removeFromLocalStorage();
   if (secureStorage) {
-    Promise.resolve(secureStorage.clear()).catch((err) => {
-      console.warn("[auth] secure storage clear failed:", err);
+    Promise.resolve(secureStorage.clear()).catch((_err) => {
     });
   }
   for (const handler of authClearedHandlers) {
     try {
       handler(reason);
-    } catch (err) {
-      console.error("[auth] onAuthCleared handler threw:", err);
+    } catch (_err) {
     }
   }
 }
@@ -218,8 +210,7 @@ export function installAuthClearedRedirect(loginUrl = "/api/login"): () => void 
       // them back after a successful sign-in instead of dumping them at /.
       recordSessionReturnPath();
       window.location.assign(withReturnToQuery(loginUrl));
-    } catch (err) {
-      console.error("[auth] redirect to login failed:", err);
+    } catch (_err) {
     }
   });
 }
@@ -325,7 +316,7 @@ export async function apiFetch<T>(path: string, options?: ApiFetchOptions): Prom
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     if (attempt > 0) {
-      const backoff = retryDelayMs * Math.pow(2, attempt - 1);
+      const backoff = retryDelayMs * 2 ** (attempt - 1);
       await sleep(backoff);
     }
     try {
@@ -335,7 +326,7 @@ export async function apiFetch<T>(path: string, options?: ApiFetchOptions): Prom
         ...(fetchOptions?.headers as Record<string, string> | undefined),
       };
       if (tokens?.token && !("Authorization" in headers) && !("authorization" in headers)) {
-        headers["Authorization"] = `Bearer ${tokens.token}`;
+        headers.Authorization = `Bearer ${tokens.token}`;
       } else if (!tokens?.token && !skipAuth) {
         // Cookie-session fallback: no bearer token means the browser will send
         // the session cookie, which requires CSRF protection.
@@ -359,7 +350,7 @@ export async function apiFetch<T>(path: string, options?: ApiFetchOptions): Prom
           const code = detectSessionRevocationCode(errBody);
           if (code) {
             const message = extractServerMessage(errBody) ?? undefined;
-            notifySessionRevoked(code, { ...(message !== undefined ? { message } : {}) });
+            notifySessionRevoked(code, (message !== undefined ? { message } : {}));
           }
         }
         const apiErr = new ApiError(
@@ -427,13 +418,13 @@ export async function graphqlRequest<T = unknown>(
   let lastErr: unknown;
   for (let attempt = 0; attempt <= retries; attempt++) {
     if (attempt > 0) {
-      const backoff = retryDelayMs * Math.pow(2, attempt - 1);
+      const backoff = retryDelayMs * 2 ** (attempt - 1);
       await sleep(backoff);
     }
     try {
       const tokens = getAuthTokens();
       const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (tokens?.token) headers["Authorization"] = `Bearer ${tokens.token}`;
+      if (tokens?.token) headers.Authorization = `Bearer ${tokens.token}`;
 
       const res = await fetch(`${API_BASE}/graphql`, {
         method: "POST",

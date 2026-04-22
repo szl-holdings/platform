@@ -221,8 +221,8 @@ router.put(
         .returning({ id: pulseBriefingsTable.id, status: pulseBriefingsTable.status });
       logger.info({ briefingId: id, by: req.user?.id ?? 'system' }, 'Briefing approved');
       return sendSuccess(res, {
-        id: updated!.id,
-        status: updated!.status,
+        id: updated?.id,
+        status: updated?.status,
         approvedAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -255,8 +255,8 @@ router.put(
         .returning({ id: pulseBriefingsTable.id, status: pulseBriefingsTable.status });
       logger.info({ briefingId: id, by: req.user?.id ?? 'system' }, 'Briefing archived');
       return sendSuccess(res, {
-        id: updated!.id,
-        status: updated!.status,
+        id: updated?.id,
+        status: updated?.status,
         archivedAt: new Date().toISOString(),
       });
     } catch (err) {

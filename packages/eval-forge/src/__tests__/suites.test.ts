@@ -15,8 +15,7 @@ import {
   toolReliabilitySuite,
   verifierSuite,
 } from '../suites/index.js';
-import type { EvalExecutor } from '../types.js';
-import { ALL_EVAL_TYPES } from '../types.js';
+import { type EvalExecutor, ALL_EVAL_TYPES } from '../types.js';
 
 const stubExecutor: EvalExecutor = async (input, _caseId, _domain) => {
   const start = Date.now();

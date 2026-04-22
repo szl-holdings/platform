@@ -50,7 +50,7 @@ async function pageViewSessionCountWhereUrlLike(
   patterns: string[],
   windowStart: Date,
 ): Promise<number> {
-  const conds = patterns.map((p) => sql`${analyticsEventsTable.url} ILIKE ${'%' + p + '%'}`);
+  const conds = patterns.map((p) => sql`${analyticsEventsTable.url} ILIKE ${`%${p}%`}`);
   const orExpr = conds.length === 1 ? conds[0] : sql.join(conds, sql` OR `);
 
   const rows = await db
@@ -162,7 +162,7 @@ export function register(router: IRouter): void {
 
       const top = stagesRaw[0]?.count ?? 0;
       const stages: FunnelStage[] = stagesRaw.map((s, i) => {
-        const prev = i === 0 ? null : stagesRaw[i - 1]!.count;
+        const prev = i === 0 ? null : stagesRaw[i - 1]?.count;
         return {
           key: s.key,
           label: s.label,

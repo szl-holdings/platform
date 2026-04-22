@@ -11,8 +11,7 @@
  * - Carlota Jo (advisory synthesis)
  */
 
-import type { CrossDomainConnection, OntologyEntity } from '../ontology/ontology-engine.js';
-import { ontologyEngine } from '../ontology/ontology-engine.js';
+import { type CrossDomainConnection, type OntologyEntity, ontologyEngine } from '../ontology/ontology-engine.js';
 import { patternLibrary } from './pattern-library.js';
 import { predictiveCascadeEngine } from './predictive-cascade.js';
 
@@ -113,7 +112,7 @@ const FUSION_PATTERNS: FusionPattern[] = [
     requiredRelationships: ['litigates', 'owns', 'invests_in'],
     severityThreshold: 'high',
     confidence: 0.85,
-    detector: (connections, entities) => {
+    detector: (connections, _entities) => {
       const legalFinancial = connections.filter(
         (c) =>
           (c.fromDomain === 'prism-counsel' || c.toDomain === 'prism-counsel') &&
@@ -177,7 +176,7 @@ const FUSION_PATTERNS: FusionPattern[] = [
     requiredRelationships: ['threatens', 'sanctioned_by', 'operates'],
     severityThreshold: 'critical',
     confidence: 0.92,
-    detector: (connections, entities) => {
+    detector: (connections, _entities) => {
       const maritimeSecurity = connections.filter(
         (c) =>
           (c.fromDomain === 'vessels' || c.toDomain === 'vessels') &&
@@ -235,7 +234,7 @@ const FUSION_PATTERNS: FusionPattern[] = [
     requiredRelationships: ['litigates', 'owns', 'located_at'],
     severityThreshold: 'high',
     confidence: 0.88,
-    detector: (connections, entities) => {
+    detector: (connections, _entities) => {
       const terraLegal = connections.filter(
         (c) =>
           (c.fromDomain === 'terra' || c.toDomain === 'terra') &&
@@ -301,7 +300,7 @@ const FUSION_PATTERNS: FusionPattern[] = [
     requiredRelationships: ['owns', 'sanctioned_by', 'connected_to'],
     severityThreshold: 'critical',
     confidence: 0.9,
-    detector: (connections, entities) => {
+    detector: (connections, _entities) => {
       const multiHop = connections.filter(
         (c) => c.connectionType === 'owns' || c.connectionType === 'connected_to',
       );
@@ -496,7 +495,7 @@ export class FusionCortex {
     if (this.scanTimer) clearInterval(this.scanTimer);
 
     const runScan = () => {
-      this.scan().catch((err) => console.warn('[fusion-cortex] Scan failed:', err));
+      this.scan().catch((_err) => {});
     };
 
     this.scanTimer = setInterval(runScan, this.scanIntervalMs);
@@ -530,12 +529,12 @@ export class FusionCortex {
     let results = this.alerts.filter((a) => new Date(a.expiresAt) > new Date());
 
     if (options.severity?.length)
-      results = results.filter((a) => options.severity!.includes(a.severity));
+      results = results.filter((a) => options.severity?.includes(a.severity));
     if (options.categories?.length)
-      results = results.filter((a) => options.categories!.includes(a.category));
+      results = results.filter((a) => options.categories?.includes(a.category));
     if (options.domains?.length)
-      results = results.filter((a) => a.affectedDomains.some((d) => options.domains!.includes(d)));
-    if (options.status?.length) results = results.filter((a) => options.status!.includes(a.status));
+      results = results.filter((a) => a.affectedDomains.some((d) => options.domains?.includes(d)));
+    if (options.status?.length) results = results.filter((a) => options.status?.includes(a.status));
 
     return results.slice(0, options.limit ?? 50);
   }

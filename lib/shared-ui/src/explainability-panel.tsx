@@ -1,7 +1,5 @@
-import type React from 'react';
-import { useState } from 'react';
-import type { DoctrineContextModel, ExplainabilityModel } from './doctrine-layer';
-import { DOCTRINE_LAYER_COLORS } from './doctrine-layer';
+import React, { useState } from 'react';
+import { type DoctrineContextModel, type ExplainabilityModel, DOCTRINE_LAYER_COLORS } from './doctrine-layer';
 import { colors } from './tokens';
 
 interface ExplainabilityPanelProps {
@@ -128,7 +126,7 @@ export function ExplainabilityPanel({
     : accentColor || colors.primary.DEFAULT;
 
   const confidence = context?.confidence;
-  const pct =
+  const _pct =
     confidence !== undefined ? Math.max(0, Math.min(100, Math.round(confidence * 100))) : null;
 
   const panelContent = (
@@ -171,7 +169,7 @@ export function ExplainabilityPanel({
             fontWeight: 700,
             padding: '2px 6px',
             borderRadius: '3px',
-            background: layerColor + '20',
+            background: `${layerColor}20`,
             color: layerColor,
             border: `1px solid ${layerColor}40`,
             textTransform: 'uppercase',
@@ -222,7 +220,7 @@ export function ExplainabilityPanel({
       <Section label="Recommended action">
         <div
           style={{
-            background: layerColor + '12',
+            background: `${layerColor}12`,
             border: `1px solid ${layerColor}30`,
             borderRadius: '6px',
             padding: '8px 10px',
@@ -314,8 +312,8 @@ export function ExplainabilityPanel({
             fontSize: '10px',
             fontWeight: 600,
             color: open ? layerColor : 'rgba(255,255,255,0.4)',
-            background: open ? layerColor + '12' : 'transparent',
-            border: `1px solid ${open ? layerColor + '30' : 'rgba(255,255,255,0.08)'}`,
+            background: open ? `${layerColor}12` : 'transparent',
+            border: `1px solid ${open ? `${layerColor}30` : 'rgba(255,255,255,0.08)'}`,
             borderRadius: '5px',
             padding: '3px 8px',
             cursor: 'pointer',

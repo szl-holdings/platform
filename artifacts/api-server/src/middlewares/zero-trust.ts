@@ -153,7 +153,7 @@ const PILOT_HOSTS = ['pilot.', 'staging.', 'uat.'];
 export function environmentLabel() {
   return (req: Request, res: Response, next: NextFunction) => {
     const host = req.hostname ?? '';
-    const envOverride = process.env['AEGIS_ENV'] as EnvironmentClass | undefined;
+    const envOverride = process.env.AEGIS_ENV as EnvironmentClass | undefined;
 
     let env: EnvironmentClass = 'production';
     if (envOverride && ['production', 'pilot', 'demo'].includes(envOverride)) {
@@ -311,7 +311,7 @@ export function requireStepUp() {
     const env = req.ztEnvironment ?? 'production';
     const stepUpToken = req.headers['x-step-up-token'] as string | undefined;
 
-    const isDev = process.env['NODE_ENV'] === 'development';
+    const isDev = process.env.NODE_ENV === 'development';
 
     if (!stepUpToken) {
       if (env === 'demo' || isDev) {
@@ -601,7 +601,7 @@ export const CONNECTOR_TRUST_SCORES: Record<
 export function resolveConnectorTrust(
   connectorId: string,
 ): (typeof CONNECTOR_TRUST_SCORES)[string] {
-  return CONNECTOR_TRUST_SCORES[connectorId] ?? CONNECTOR_TRUST_SCORES['unknown'];
+  return CONNECTOR_TRUST_SCORES[connectorId] ?? CONNECTOR_TRUST_SCORES.unknown;
 }
 
 // ─── Exported convenience ─────────────────────────────────────────────────────

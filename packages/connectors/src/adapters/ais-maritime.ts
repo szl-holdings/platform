@@ -6,7 +6,6 @@
  * for the Vessels product demo.
  */
 
-import { randomUUID } from "node:crypto";
 import type { Signal, SignalInput } from "@workspace/ontology/signal";
 import type { AISMaritimeConnector, ConnectorMetadata, ConnectorStatus } from "../interfaces.js";
 

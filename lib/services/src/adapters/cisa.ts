@@ -64,7 +64,7 @@ export class CisaAdapter extends ServiceAdapter {
 
   async getKnownExploitedVulnerabilities(limit = 20): Promise<CisaKevEntry[]> {
     if (this._isCacheValid()) {
-      return this._cache!.data.slice(-limit).reverse();
+      return this._cache?.data.slice(-limit).reverse() ?? [];
     }
 
     try {

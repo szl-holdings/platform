@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface DemoNarrativeStep {
   step: string;
@@ -41,7 +41,7 @@ export function DemoNarrativeSidebar({
       }
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [storageKey, steps.length]);
 
   useEffect(() => {
     try {
@@ -95,7 +95,7 @@ export function DemoNarrativeSidebar({
     );
   }
 
-  const current = steps[activeStep];
+  const _current = steps[activeStep];
 
   return (
     <aside

@@ -4,7 +4,7 @@ import { type DealAttachment, db, fundInboundDealsTable } from '@szl-holdings/db
 import { desc, eq } from 'drizzle-orm';
 import { type IRouter, type NextFunction, type Request, type Response, Router } from 'express';
 import multer from 'multer';
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendNotFound, sendSuccess } from '../lib/api-response';
 import { buildDealSubmissionAckEmail, sendEmail } from '../lib/email';

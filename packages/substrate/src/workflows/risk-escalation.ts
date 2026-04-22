@@ -202,9 +202,9 @@ function parseSeedSignals(output: unknown, input: RiskEscalationInput): RiskSign
   if (
     output &&
     typeof output === 'object' &&
-    Array.isArray((output as Record<string, unknown>)['signals'])
+    Array.isArray((output as Record<string, unknown>).signals)
   ) {
-    return (output as Record<string, unknown>)['signals'] as RiskSignalSummary[];
+    return (output as Record<string, unknown>).signals as RiskSignalSummary[];
   }
   return [
     {
@@ -245,7 +245,7 @@ function buildDecision(
     entityId: input.entityId,
     riskScore: confidence,
     severity: maxSeverity,
-    escalationTarget: input.domain + '-ops',
+    escalationTarget: `${input.domain}-ops`,
     signals,
     rationale: `${signals.length} risk signal(s) detected for ${input.entityType} ${input.entityId} with combined confidence ${confidence.toFixed(2)}`,
     decidedAt: new Date().toISOString(),

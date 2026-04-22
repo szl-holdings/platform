@@ -41,8 +41,8 @@ let server: http.Server;
 let baseUrl: string;
 
 const TEST_API_KEY = 'test-key-e2e-2026';
-process.env['SUBSTRATE_GATEWAY_API_KEY'] = TEST_API_KEY;
-process.env['NODE_ENV'] = 'test';
+process.env.SUBSTRATE_GATEWAY_API_KEY = TEST_API_KEY;
+process.env.NODE_ENV = 'test';
 
 before(async () => {
   const app = express();
@@ -103,7 +103,7 @@ async function rpc(
   key: string | null = TEST_API_KEY,
 ): Promise<unknown> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (key) headers['Authorization'] = `Bearer ${key}`;
+  if (key) headers.Authorization = `Bearer ${key}`;
 
   const res = await fetch(`${baseUrl}/mcp`, {
     method: 'POST',
@@ -372,8 +372,8 @@ test('9. counterfactual replay over the wire returns a decision diff', async () 
 test('10. auth: write tool rejects anonymous request when API key is set', async () => {
   // API key is set (TEST_API_KEY). A request without a key must be denied.
   // We temporarily set NODE_ENV to production to activate strict auth.
-  const savedEnv = process.env['NODE_ENV'];
-  process.env['NODE_ENV'] = 'production';
+  const savedEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
   try {
     const result = (await rpc(
       'tools/call',
@@ -388,7 +388,7 @@ test('10. auth: write tool rejects anonymous request when API key is set', async
       `Expected PERMISSION_DENIED (-32000 or -32001) but got ${result.error.code}: ${result.error.message}`,
     );
   } finally {
-    process.env['NODE_ENV'] = savedEnv;
+    process.env.NODE_ENV = savedEnv;
   }
 });
 
@@ -410,7 +410,7 @@ test('12. resources/list and resources/read work correctly', async () => {
     result?: { contents: Array<{ mimeType: string; text: string }> };
   };
   assert.ok(readResp.result?.contents?.[0]?.text, 'schema/run resource must return content');
-  const schema = JSON.parse(readResp.result!.contents[0]!.text) as { title: string };
+  const schema = JSON.parse(readResp.result?.contents[0]?.text) as { title: string };
   assert.equal(schema.title, 'PipelineRun');
 });
 
@@ -463,17 +463,17 @@ test('15. submit_run returns structured error when workflowId does not resolve',
   // is NOT empty here. The error code must reflect WORKFLOW_NOT_FOUND, and
   // the available workflow ids must be surfaced for developer feedback.
   assert.equal(
-    payload.details!.code,
+    payload.details?.code,
     'WORKFLOW_NOT_FOUND',
-    `Expected error code WORKFLOW_NOT_FOUND, got: ${payload.details!.code}`,
+    `Expected error code WORKFLOW_NOT_FOUND, got: ${payload.details?.code}`,
   );
   assert.ok(
-    (payload.details!.registeredCount ?? 0) >= 2,
+    (payload.details?.registeredCount ?? 0) >= 2,
     'registeredCount must surface the actual registry size',
   );
   assert.ok(
-    Array.isArray(payload.details!.availableWorkflowIds) &&
-      payload.details!.availableWorkflowIds!.includes(DRY_RUN_WORKFLOW_ID),
+    Array.isArray(payload.details?.availableWorkflowIds) &&
+      payload.details?.availableWorkflowIds?.includes(DRY_RUN_WORKFLOW_ID),
     'availableWorkflowIds must list registered workflows so callers can self-correct',
   );
 });
@@ -493,7 +493,7 @@ test('16. registry-empty failure path: error and list_workflows surface the empt
       'test:empty-registry',
     );
     assert.equal(submitResp.isError, true, 'Empty registry must produce an error');
-    const submitPayload = JSON.parse(submitResp.content[0]!.text) as {
+    const submitPayload = JSON.parse(submitResp.content[0]?.text) as {
       error: string;
       details?: { code?: string; registeredCount?: number };
     };
@@ -514,7 +514,7 @@ test('16. registry-empty failure path: error and list_workflows surface the empt
 
     const listResp = await handleToolCall('substrate_list_workflows', {}, 'test:empty-registry');
     assert.equal(listResp.isError, undefined, 'list_workflows must not be an error when empty');
-    const listPayload = JSON.parse(listResp.content[0]!.text) as {
+    const listPayload = JSON.parse(listResp.content[0]?.text) as {
       count: number;
       registryEmpty: boolean;
       warning?: string;
@@ -622,7 +622,7 @@ test('14. SSE stream receives run lifecycle events when a run is submitted', asy
 
   // The run event must include a runId field
   const runEventData = runEvent.data as Record<string, unknown>;
-  assert.ok(typeof runEventData['runId'] === 'string', 'Run event must include a runId');
+  assert.ok(typeof runEventData.runId === 'string', 'Run event must include a runId');
 
   void sseResolve; // ensure variable is referenced
 });
@@ -717,12 +717,12 @@ test('15. SSE stream pushes live stage:start / stage:complete / run:complete eve
   for (const evt of [...stageStartEvents, ...stageCompleteEvents, runComplete]) {
     const data = evt.data as Record<string, unknown>;
     assert.equal(
-      data['runId'],
+      data.runId,
       submitted.runId,
       `Event ${evt.type} must reference the submitted runId`,
     );
     assert.equal(
-      typeof data['timestamp'],
+      typeof data.timestamp,
       'number',
       `Event ${evt.type} must include a numeric timestamp`,
     );

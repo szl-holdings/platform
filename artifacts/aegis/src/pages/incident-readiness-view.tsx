@@ -1,8 +1,7 @@
 import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Plug, Shield } from 'lucide-react';
-import { useState } from 'react';
 import { exposureTwins, incidentReadiness, threatTwins } from '@/data/threat-twin';
 
-const ACCENT = 'hsl(220 72% 56%)';
+const _ACCENT = 'hsl(220 72% 56%)';
 
 const READINESS_COLOR: Record<string, string> = {
   ready: '#40856a',

@@ -2,23 +2,8 @@ import { color as dsColor } from '@szl-holdings/design-system';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { motion as m } from 'framer-motion';
 import {
-  AlertTriangle,
-  ArrowDownRight,
-  ArrowUpRight,
-  BarChart3,
-  Building2,
-  Calendar,
-  ChevronRight,
-  Clock,
-  DollarSign,
-  FileText,
-  Percent,
   RefreshCw,
-  Shield,
-  Star,
-  TrendingUp,
   Upload,
-  Users,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 

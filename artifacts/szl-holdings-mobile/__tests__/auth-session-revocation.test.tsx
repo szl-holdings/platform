@@ -3,7 +3,7 @@
  * sign-in screen must render the "Session ended" notice with the server's
  * message instead of silently dropping the user back to the login button.
  */
-import React, { isValidElement, type ReactElement } from 'react';
+import { isValidElement, type ReactElement } from 'react';
 
 jest.mock('@/hooks/useColors', () => ({
   useColors: () => ({

@@ -187,7 +187,7 @@ class MatterTwinService {
   private computeChanges(
     priorSnapshot: any,
     currentPressure: Record<string, any>,
-    forecasts: any[],
+    _forecasts: any[],
   ) {
     if (!priorSnapshot) return { isFirst: true, changes: [] };
 
@@ -234,7 +234,7 @@ class MatterTwinService {
 
   private identifyRisks(
     pressure: Record<string, any>,
-    products: Record<string, any>,
+    _products: Record<string, any>,
     deadlines: any[],
   ) {
     const risks: Array<{ level: string; description: string; dimension: string }> = [];
@@ -268,7 +268,7 @@ class MatterTwinService {
     });
   }
 
-  private recommendActions(risks: any[], missing: string[], pressure: Record<string, any>) {
+  private recommendActions(risks: any[], missing: string[], _pressure: Record<string, any>) {
     const actions: string[] = [];
 
     for (const m of missing.slice(0, 3)) {

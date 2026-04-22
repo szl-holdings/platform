@@ -1,8 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { adapterRegistry, projectDomain } from './adapter.js';
 import { findNeighbors, findPath, searchGraphNodes, subgraph } from './query.js';
-import type { ConstellationNode } from './schema.js';
-import { ConstellationEdgeSchema, ConstellationNodeSchema } from './schema.js';
+import { type ConstellationNode, ConstellationEdgeSchema, ConstellationNodeSchema } from './schema.js';
 import { InMemoryGraphStore } from './store.js';
 
 function makeNode(id: string, label: string, domain = 'test'): ConstellationNode {

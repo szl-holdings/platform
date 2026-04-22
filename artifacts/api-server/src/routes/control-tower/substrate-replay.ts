@@ -290,7 +290,6 @@ export function register(router: IRouter): void {
       res.json(run);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
-      console.error('[substrate-run] Error:', message);
       res.status(500).json({ error: message });
     }
   });
@@ -340,8 +339,6 @@ export function register(router: IRouter): void {
           res.status(404).json({ error: message });
           return;
         }
-
-        console.error('[substrate-replay] Error:', message);
         res.status(500).json({ error: message });
       }
     },
@@ -358,7 +355,7 @@ export function register(router: IRouter): void {
     authMiddleware(),
     requireRole('ops', 'admin'),
     async (req, res) => {
-      const runIdParsed = z.string().min(1).safeParse(req.params['runId']);
+      const runIdParsed = z.string().min(1).safeParse(req.params.runId);
       if (!runIdParsed.success) {
         res.status(400).json({ error: 'Invalid runId' });
         return;

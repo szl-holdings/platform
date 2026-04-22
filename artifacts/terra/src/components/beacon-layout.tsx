@@ -103,7 +103,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
                     style={{
                       color: p.active ? p.color : 'rgba(255,255,255,0.25)',
                       background: p.active ? `${p.color}20` : 'transparent',
-                      border: `1px solid ${p.active ? p.color + '50' : 'transparent'}`,
+                      border: `1px solid ${p.active ? `${p.color}50` : 'transparent'}`,
                     }}
                   >
                     {p.phase}
@@ -114,7 +114,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
                     style={{
                       color: p.active ? p.color : 'rgba(255,255,255,0.25)',
                       background: p.active ? `${p.color}20` : 'transparent',
-                      border: `1px solid ${p.active ? p.color + '50' : 'transparent'}`,
+                      border: `1px solid ${p.active ? `${p.color}50` : 'transparent'}`,
                     }}
                   >
                     {p.phase}

@@ -9,16 +9,14 @@ import {
 import { JOB_TYPES } from '@szl-holdings/forge-runtime';
 import {
   candidateToRecord,
-  computeNextRunAt,
   detectAnomalies,
   detectTrendChange,
   generateBuckets,
-  getBucketEnd,
   serializeAnalyticsEvents,
   serializeAnomalies,
   serializeMetricSnapshots,
 } from '@szl-holdings/observability/analytics';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import { and, asc, desc, eq, gte, lte } from 'drizzle-orm';
 import { jobQueue } from './job-queue';
 import { logger } from './logger';

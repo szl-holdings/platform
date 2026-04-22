@@ -3,10 +3,9 @@ import {
   pcAuditEventsTable,
   pcDeadlinesTable,
   pcExportsTable,
-  pcMattersTable,
   pcNotificationsTable,
 } from '@szl-holdings/db';
-import { and, eq, lte, sql } from 'drizzle-orm';
+import { and, eq, lte, } from 'drizzle-orm';
 import { logger } from '../lib/logger';
 import { completeSyncRun, failSyncRun } from './prism-connectors';
 import { completeExtraction, createExtractionJob, failExtraction } from './prism-document-pipeline';

@@ -198,7 +198,7 @@ export default function AudienceSegmentsPage() {
                   style={{
                     padding: '1.125rem 1.25rem',
                     background: isSelected ? `${color}08` : DS.surface,
-                    border: `1px solid ${isSelected ? color + '30' : DS.border}`,
+                    border: `1px solid ${isSelected ? `${color}30` : DS.border}`,
                     borderRadius: '10px',
                     cursor: 'pointer',
                     textAlign: 'left',

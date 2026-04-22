@@ -1,15 +1,11 @@
 import { LiveClock } from '@szl-holdings/shared-ui/live-clock';
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
-  AlertTriangle,
   ClipboardList,
-  Clock,
   Database,
   FileText,
-  MessageSquare,
   Pause,
   Play,
   Radio,
@@ -377,10 +373,15 @@ export default function CitadelWarRoom() {
   const commEndRef = useRef<HTMLDivElement>(null);
   const [drillActiveId, setDrillActiveId] = useState<string | null>(null);
 
-  const { data: incidentsData, isLoading: incidentsLoading } = useQuery({
+  const { data: incidentsData, isLoading: incidentsLoading } = useQuery<
+    unknown,
+    Error,
+    Record<string, unknown>[]
+  >({
     queryKey: ['war-room-incidents'],
-    queryFn: () => api.incidents.list(),
-    select: (res: { data?: Record<string, unknown>[] }) => res?.data ?? [],
+    queryFn: () => api.incidents.list() as Promise<unknown>,
+    select: (res: unknown) =>
+      (res as { data?: Record<string, unknown>[] } | undefined)?.data ?? [],
   });
 
   const { data: drillScenarios, isLoading: drillsLoading } = useQuery({

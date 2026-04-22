@@ -17,8 +17,7 @@
  */
 
 import cookieParser from 'cookie-parser';
-import type { Router as ExpressRouter } from 'express';
-import express from 'express';
+import express, { type Router as ExpressRouter } from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

@@ -424,11 +424,11 @@ router.post(
         return;
       }
 
-      const age = parseInt(vesselAge ?? '10');
+      const age = parseInt(vesselAge ?? '10', 10);
       const grt = parseFloat(vesselGrossTonnage ?? '50000');
       const chokepoints = Array.isArray(routeChokepoints) ? routeChokepoints : [];
       const limit = parseFloat(coverageLimitUsd);
-      const periodDays = parseInt(coveragePeriodDays ?? '30');
+      const periodDays = parseInt(coveragePeriodDays ?? '30', 10);
       const flag = vesselFlag ?? 'PA';
       const hazard = cargoHazardClass ?? 'Non-hazardous';
       const ct = coverageType ?? 'marine_cargo';
@@ -500,7 +500,7 @@ router.post(
   validateBody(bodyShape({})),
   (req, res) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const allQuotes = [...demoQuotes, ...sessionQuotes];
       const quote = allQuotes.find((q) => q.id === id);
       if (!quote) {
@@ -582,7 +582,7 @@ router.get(
   authMiddleware({ required: false }),
   (req, res) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const all = [...demoPolicies, ...sessionPolicies];
       const policy = all.find((p) => p.id === id);
       if (!policy) {
@@ -652,7 +652,7 @@ router.post(
         return;
       }
       const allPolicies = [...demoPolicies, ...sessionPolicies];
-      const policy = allPolicies.find((p) => p.id === parseInt(policyId));
+      const policy = allPolicies.find((p) => p.id === parseInt(policyId, 10));
       if (!policy) {
         res.status(404).json({ error: 'Policy not found' });
         return;
@@ -663,7 +663,7 @@ router.post(
       const claimRef = `CLM-MAR-${String(++claimCounter).padStart(4, '0')}`;
       const claim = {
         id: claimCounter,
-        policyId: parseInt(policyId),
+        policyId: parseInt(policyId, 10),
         claimRef,
         vesselMmsi: vesselMmsi ?? policy.vesselMmsi ?? null,
         vesselName: vesselName ?? policy.vesselName,
@@ -707,7 +707,7 @@ router.put(
   ),
   (req, res) => {
     try {
-      const id = parseInt(req.params.id as string);
+      const id = parseInt(req.params.id as string, 10);
       const { status, adjustorNotes, approvedAmountUsd, settledAmountUsd } = req.body;
       const allClaims = [...demoClaims, ...sessionClaims];
       const claim = allClaims.find((c) => c.id === id);
@@ -751,7 +751,7 @@ router.get(
         ? ((Array.isArray(routeChokepoints) ? routeChokepoints : [routeChokepoints]) as string[])
         : [];
       const result = computeRiskScore({
-        vesselAge: parseInt((vesselAge as string) ?? '10'),
+        vesselAge: parseInt((vesselAge as string) ?? '10', 10),
         vesselGrossTonnage: parseFloat((vesselGrossTonnage as string) ?? '50000'),
         cargoHazardClass: (cargoHazardClass as string) ?? 'Non-hazardous',
         routeChokepoints: chokepoints,

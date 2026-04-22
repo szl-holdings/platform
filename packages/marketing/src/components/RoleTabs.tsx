@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
-import { type ReactNode, useState } from 'react';
+import { useState } from 'react';
 
 const BG = 'hsl(214,16%,4%)';
 const SURFACE = 'hsla(0,0%,100%,0.035)';

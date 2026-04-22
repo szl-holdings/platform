@@ -1,6 +1,5 @@
 import { db } from '@szl-holdings/db';
 import {
-  pcCostTrackingTable,
   pcModelLanesTable,
   pcModelRequestsTable,
 } from '@szl-holdings/db/schema';
@@ -157,8 +156,8 @@ class ModelRouter {
     }
   }
 
-  private async executeEmbedding(input: any, provider: string, model: string, endpoint?: string) {
-    const text = typeof input === 'string' ? input : input.text;
+  private async executeEmbedding(input: any, provider: string, model: string, _endpoint?: string) {
+    const _text = typeof input === 'string' ? input : input.text;
     const dimensions = 1024;
     const embedding = Array.from({ length: dimensions }, () => Math.random() * 2 - 1);
     const norm = Math.sqrt(embedding.reduce((s, v) => s + v * v, 0));
@@ -180,9 +179,9 @@ class ModelRouter {
     input: any,
     provider: string,
     model: string,
-    endpoint?: string,
+    _endpoint?: string,
   ) {
-    const text = typeof input === 'string' ? input : input.text;
+    const _text = typeof input === 'string' ? input : input.text;
     const labels = input.labels ?? ['privilege', 'work_product', 'standard', 'spam'];
     return {
       label: labels[0],
@@ -196,7 +195,7 @@ class ModelRouter {
     };
   }
 
-  private async executeExtraction(input: any, provider: string, model: string) {
+  private async executeExtraction(_input: any, provider: string, model: string) {
     return {
       fields: {},
       tables: [],
@@ -208,7 +207,7 @@ class ModelRouter {
     };
   }
 
-  private async executeReasoning(input: any, taskType: string, provider: string, model: string) {
+  private async executeReasoning(_input: any, taskType: string, provider: string, model: string) {
     return {
       response: `[Reasoning output for task: ${taskType}]`,
       sources: [],
@@ -219,7 +218,7 @@ class ModelRouter {
     };
   }
 
-  private async executeForecast(input: any, taskType: string) {
+  private async executeForecast(_input: any, taskType: string) {
     return {
       forecastType: taskType,
       score: 0.72,
@@ -231,7 +230,7 @@ class ModelRouter {
     };
   }
 
-  private async executePolicyCheck(input: any, taskType: string) {
+  private async executePolicyCheck(_input: any, _taskType: string) {
     return {
       allowed: true,
       violations: [],
@@ -360,7 +359,7 @@ class ModelRouter {
   }
 
   async getRequestStats(orgId: number, hours = 24) {
-    const since = new Date(Date.now() - hours * 3600000);
+    const _since = new Date(Date.now() - hours * 3600000);
     const requests = await db
       .select()
       .from(pcModelRequestsTable)

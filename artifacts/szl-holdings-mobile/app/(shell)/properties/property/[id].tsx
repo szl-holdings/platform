@@ -3,14 +3,14 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { cacheGetStale, cacheSet } from '@/lib/cache';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 interface PropertyContact {
@@ -55,9 +55,9 @@ interface PropertyDetail {
 }
 
 function formatCurrency(n: number) {
-  if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + 'M';
-  if (n >= 1e3) return '$' + Math.round(n / 1e3) + 'K';
-  return '$' + n;
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
+  if (n >= 1e3) return `$${Math.round(n / 1e3)}K`;
+  return `$${n}`;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -79,11 +79,11 @@ export default function PropertyDetail() {
     queryKey: ['terra-property', id],
     queryFn: async () => {
       try {
-        const res = await fetch(API_BASE + '/terra/distress/property/' + id);
+        const res = await fetch(`${API_BASE}/terra/distress/property/${id}`);
         if (!res.ok) throw new Error('fetch failed');
         const json = await res.json();
         const raw = json.data?.property ?? json.property ?? json.data ?? json;
-        if (!raw || !raw.address) throw new Error('no data');
+        if (!raw?.address) throw new Error('no data');
         const detail: PropertyDetail = {
           id: raw.id ?? raw.externalId ?? id,
           address: raw.address,
@@ -124,7 +124,7 @@ export default function PropertyDetail() {
       const nameParts = (property.ownerName ?? 'Unknown Owner').split(' ');
       const firstName = nameParts[0] ?? 'Unknown';
       const lastName = nameParts.slice(1).join(' ') || 'Owner';
-      const res = await fetch(API_BASE + '/terra/crm/leads', {
+      const res = await fetch(`${API_BASE}/terra/crm/leads`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -135,12 +135,12 @@ export default function PropertyDetail() {
           source: 'mobile-detail',
           stage: 'new',
           score: property.opportunityScore,
-          propertyAddress: property.address + ', ' + property.borough,
+          propertyAddress: `${property.address}, ${property.borough}`,
           estimatedValue: property.estimatedValue,
-          notes: 'Added from Terra Mobile property detail. Distress type: ' + property.distressType,
+          notes: `Added from Terra Mobile property detail. Distress type: ${property.distressType}`,
         }),
       });
-      if (!res.ok) throw new Error('Failed to create lead: ' + res.status);
+      if (!res.ok) throw new Error(`Failed to create lead: ${res.status}`);
       return true;
     },
     onSuccess: () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
@@ -150,15 +150,15 @@ export default function PropertyDetail() {
     if (!property) return;
     try {
       await Share.share({
-        title: 'Terra Property Report — ' + property.address,
+        title: `Terra Property Report — ${property.address}`,
         message: [
           'Terra Field Intelligence Report',
-          'Address: ' + property.address + ', ' + property.borough,
-          'Est. Value: ' + formatCurrency(property.estimatedValue),
-          'Opportunity Score: ' + property.opportunityScore + '/100',
-          'Status: ' + property.distressType?.replace(/-/g, ' '),
-          'Days in Distress: ' + property.daysInDistress,
-          property.thesis ? 'AI Thesis: ' + property.thesis : '',
+          `Address: ${property.address}, ${property.borough}`,
+          `Est. Value: ${formatCurrency(property.estimatedValue)}`,
+          `Opportunity Score: ${property.opportunityScore}/100`,
+          `Status: ${property.distressType?.replace(/-/g, ' ')}`,
+          `Days in Distress: ${property.daysInDistress}`,
+          property.thesis ? `AI Thesis: ${property.thesis}` : '',
         ]
           .filter(Boolean)
           .join(' | '),
@@ -169,10 +169,10 @@ export default function PropertyDetail() {
   const downloadPDF = async () => {
     if (!property) return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const reportUrl = API_BASE + '/terra/reports/property/' + property.id + '?format=pdf';
+    const reportUrl = `${API_BASE}/terra/reports/property/${property.id}?format=pdf`;
     await Share.share({
       url: reportUrl,
-      message: 'Terra Property Report — ' + property.address,
+      message: `Terra Property Report — ${property.address}`,
     });
     createLeadMutation.mutate();
   };
@@ -297,7 +297,7 @@ export default function PropertyDetail() {
           <View
             style={[
               styles.typeChip,
-              { backgroundColor: typeColor + '15', borderColor: typeColor + '30' },
+              { backgroundColor: `${typeColor}15`, borderColor: `${typeColor}30` },
             ]}
           >
             <Text style={[styles.typeText, { color: typeColor }]}>
@@ -326,7 +326,7 @@ export default function PropertyDetail() {
             <View
               style={[
                 styles.heroStat,
-                { borderColor: scoreColor + '30', backgroundColor: scoreColor + '10' },
+                { borderColor: `${scoreColor}30`, backgroundColor: `${scoreColor}10` },
               ]}
             >
               <Text style={[styles.heroStatLabel, { color: scoreColor }]}>OPP SCORE</Text>
@@ -355,7 +355,7 @@ export default function PropertyDetail() {
             { label: 'Owner', value: property.ownerName },
             {
               label: 'Sq. Footage',
-              value: property.squareFeet ? property.squareFeet.toLocaleString() + ' sq ft' : 'N/A',
+              value: property.squareFeet ? `${property.squareFeet.toLocaleString()} sq ft` : 'N/A',
             },
             { label: 'Year Built', value: String(property.yearBuilt ?? 'N/A') },
             { label: 'Lot Size', value: property.lotSize ?? 'N/A' },
@@ -449,7 +449,7 @@ export default function PropertyDetail() {
                   onPress={() => Haptics.selectionAsync()}
                   style={[
                     styles.callBtn,
-                    { backgroundColor: colors.emerald + '10', borderColor: colors.emerald + '30' },
+                    { backgroundColor: `${colors.emerald}10`, borderColor: `${colors.emerald}30` },
                   ]}
                 >
                   <Feather name="phone" size={12} color={colors.emerald} />
@@ -466,14 +466,14 @@ export default function PropertyDetail() {
             <Text style={[styles.sectionTitle, { color: colors.goldSubtle }]}>
               DISTRESS TIMELINE
             </Text>
-            {property.timeline!.map((t: PropertyTimeline, i: number) => (
+            {property.timeline?.map((t: PropertyTimeline, i: number) => (
               <View key={t.date} style={styles.timelineRow}>
                 <View
                   style={[
                     styles.timelineDot,
                     {
                       backgroundColor:
-                        i === property.timeline!.length - 1 ? colors.rose : colors.gold,
+                        i === (property.timeline?.length ?? 0) - 1 ? colors.rose : colors.gold,
                     },
                   ]}
                 />
@@ -482,7 +482,7 @@ export default function PropertyDetail() {
                     styles.timelineLine,
                     {
                       backgroundColor:
-                        i < property.timeline!.length - 1 ? colors.border : 'transparent',
+                        i < (property.timeline?.length ?? 0) - 1 ? colors.border : 'transparent',
                     },
                   ]}
                 />
@@ -491,7 +491,7 @@ export default function PropertyDetail() {
                   <Text
                     style={[
                       styles.timelineEvent,
-                      { color: i === property.timeline!.length - 1 ? colors.rose : colors.cream },
+                      { color: i === (property.timeline?.length ?? 0) - 1 ? colors.rose : colors.cream },
                     ]}
                   >
                     {t.event}
@@ -579,7 +579,7 @@ export default function PropertyDetail() {
                 <View
                   style={[
                     styles.marketNote,
-                    { backgroundColor: colors.emerald + '08', borderColor: colors.emerald + '20' },
+                    { backgroundColor: `${colors.emerald}08`, borderColor: `${colors.emerald}20` },
                   ]}
                 >
                   <Feather name="trending-up" size={12} color={colors.emerald} />

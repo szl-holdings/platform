@@ -47,7 +47,7 @@ export class NotionAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["NOTION_API_KEY"];
 
   protected override async performHealthCheck(): Promise<void> {
-    const apiKey = process.env["NOTION_API_KEY"];
+    const apiKey = process.env.NOTION_API_KEY;
     const response = await fetch("https://api.notion.com/v1/users/me", {
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -58,7 +58,7 @@ export class NotionAdapter extends ServiceAdapter {
   }
 
   private get apiKey(): string | undefined {
-    return process.env["NOTION_API_KEY"];
+    return process.env.NOTION_API_KEY;
   }
 
   private async notionRequest(path: string, options?: RequestInit): Promise<unknown> {

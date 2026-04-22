@@ -14,11 +14,8 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
-  Bug,
-  Crosshair,
   Eye,
   Fingerprint,
-  Lock,
   Radar,
   Shield,
   Skull,
@@ -148,7 +145,7 @@ function ThreatRadar() {
   useEffect(() => {
     const t = setInterval(() => {
       setThreats((prev) => {
-        const next = prev.filter((t) => Date.now() - parseInt(t.id) < 8000);
+        const next = prev.filter((t) => Date.now() - parseInt(t.id, 10) < 8000);
         if (next.length < 6) {
           next.push({
             angle: Math.random() * 360,

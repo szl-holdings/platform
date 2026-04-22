@@ -1,6 +1,6 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { DataProvenance } from '@/lib/data-provenance';
-import { Activity, AlertTriangle, Clock, Database, RotateCcw, ShieldCheck } from 'lucide-react';
+import { Clock, Database, RotateCcw, } from 'lucide-react';
 import { sentraTwin } from '@/data/sentra-twin';
 
 export default function RecoveryReadiness() {

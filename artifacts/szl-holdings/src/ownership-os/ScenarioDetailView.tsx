@@ -1,6 +1,5 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { m } from 'framer-motion';
 import {
   AlertCircle,
   ArrowLeft,
@@ -19,7 +18,6 @@ import {
   Loader2,
   Percent,
   Plus,
-  RefreshCw,
   Shield,
   Star,
   Trash2,
@@ -81,7 +79,7 @@ export function ScenarioDetailView({
   const managerCrud = useEntityMutation(scenarioId, 'manager-roles');
   const signatureCrud = useEntityMutation(scenarioId, 'signature-authority');
   const certReadinessCrud = useEntityMutation(scenarioId, 'certification-readiness');
-  const legalFlagCrud = useEntityMutation(scenarioId, 'legal-flags');
+  const _legalFlagCrud = useEntityMutation(scenarioId, 'legal-flags');
   const govDocCrud = useEntityMutation(scenarioId, 'governance-documents');
   const decisionLogCrud = useEntityMutation(scenarioId, 'decision-log');
 

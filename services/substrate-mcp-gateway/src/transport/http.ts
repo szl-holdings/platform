@@ -82,8 +82,8 @@ async function handleMcpMethod(req: JsonRpcRequest, actorId: string): Promise<Js
         });
 
       case 'tools/call': {
-        const toolName = String(params['name'] ?? '');
-        const toolArgs = (params['arguments'] ?? {}) as Record<string, unknown>;
+        const toolName = String(params.name ?? '');
+        const toolArgs = (params.arguments ?? {}) as Record<string, unknown>;
 
         if (!toolName) {
           return rpcErr(id, -32602, 'INVALID_PARAMS', {
@@ -111,7 +111,7 @@ async function handleMcpMethod(req: JsonRpcRequest, actorId: string): Promise<Js
         });
 
       case 'resources/read': {
-        const uri = String(params['uri'] ?? '');
+        const uri = String(params.uri ?? '');
         if (!uri) {
           return rpcErr(id, -32602, 'INVALID_PARAMS', {
             reason: 'Missing resource URI in params.uri',
@@ -134,8 +134,8 @@ async function handleMcpMethod(req: JsonRpcRequest, actorId: string): Promise<Js
         });
 
       case 'prompts/get': {
-        const name = String(params['name'] ?? '');
-        const promptArgs = (params['arguments'] ?? {}) as Record<string, string>;
+        const name = String(params.name ?? '');
+        const promptArgs = (params.arguments ?? {}) as Record<string, string>;
         if (!name) {
           return rpcErr(id, -32602, 'INVALID_PARAMS', {
             reason: 'Missing prompt name in params.name',
@@ -153,7 +153,6 @@ async function handleMcpMethod(req: JsonRpcRequest, actorId: string): Promise<Js
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    console.error(`[substrate-mcp-gateway] Error handling ${method}:`, e);
     return rpcErr(id, -32603, 'INTERNAL_ERROR', { reason: msg });
   }
 }

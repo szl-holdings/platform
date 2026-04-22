@@ -493,10 +493,6 @@ async function generateBrief(
 async function main(): Promise<void> {
   const manifest = loadManifest();
   if (!manifest) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      `[solution-briefs] Skipping regeneration: manifest not found at ${MANIFEST_PATH}`,
-    );
     return;
   }
   mkdirSync(OUT_DIR, { recursive: true });
@@ -523,10 +519,6 @@ async function main(): Promise<void> {
       bytes: out.bytes,
       file: `/briefs/${brief.slug}-solution-brief.pdf`,
     });
-    // eslint-disable-next-line no-console
-    console.log(
-      `✓ ${brief.slug.padEnd(12)} ${out.bytes.toString().padStart(8)} bytes  ${out.capabilityCount} capabilities`,
-    );
   }
 
   const index = {
@@ -536,12 +528,8 @@ async function main(): Promise<void> {
     briefs: results,
   };
   writeFileSync(INDEX_PATH, JSON.stringify(index, null, 2));
-  // eslint-disable-next-line no-console
-  console.log(`\nWrote ${results.length} solution briefs and index.json to ${OUT_DIR}`);
 }
 
-main().catch((err) => {
-  // eslint-disable-next-line no-console
-  console.error('generate-solution-briefs failed:', err);
+main().catch((_err) => {
   process.exit(1);
 });

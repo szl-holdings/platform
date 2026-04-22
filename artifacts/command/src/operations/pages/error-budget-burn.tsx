@@ -3,33 +3,17 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { MetricTimeSeriesSimulator, seededRng } from '@szl-holdings/observability';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import {
-  Activity,
   AlertTriangle,
-  ArrowRight,
   BarChart3,
-  CheckCircle,
-  Clock,
-  Eye,
   Gauge,
-  RefreshCw,
-  Shield,
-  Target,
-  TrendingDown,
-  TrendingUp,
   Wifi,
   WifiOff,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
-  Cell,
-  Line,
-  LineChart,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -70,7 +54,7 @@ const STATUS_COLORS_MAP: Record<string, string> = {
   exhausted: '#ef4444',
   warning: '#c8953c',
 };
-const SLOS = _simSlos.map((s, i) => ({
+const SLOS = _simSlos.map((s, _i) => ({
   id: s.service,
   service: s.service.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
   slo_name: s.sloName,
@@ -242,8 +226,8 @@ export default function ErrorBudgetBurn() {
   });
 
   const signals = liveSignals?.data?.signals ?? [];
-  const apiErrorRateSignal = signals.find((s) => s.id === 'api-error-rate');
-  const apiLatencySignal = signals.find((s) => s.id === 'api-avg-latency');
+  const _apiErrorRateSignal = signals.find((s) => s.id === 'api-error-rate');
+  const _apiLatencySignal = signals.find((s) => s.id === 'api-avg-latency');
   const isLive = !isSignalsError && signals.length > 0;
 
   const totalBudgetMins = SLOS.reduce((s, x) => s + x.budget_minutes, 0);

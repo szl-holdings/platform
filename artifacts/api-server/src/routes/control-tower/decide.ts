@@ -1,5 +1,5 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -81,7 +81,7 @@ router.get(
         const domain =
           agentDef?.domain ??
           (d.workflowId?.split('-')?.[0] !== undefined
-            ? d.workflowId!.split('-')[0]!
+            ? d.workflowId?.split('-')[0]!
             : 'orchestration');
 
         return {

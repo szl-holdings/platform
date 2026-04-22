@@ -1,6 +1,6 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { EcosystemNav } from '@szl-holdings/shared-ui/ecosystem-nav';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'wouter';
 import { ACCENT, apiUrl, DOMAIN_COLORS, fetchJson } from './shared';
 
@@ -280,7 +280,7 @@ function simulate(change: PolicyChange, traces: HistoricalTrace[]): SimResult[] 
     } else if (overCostCap) {
       after = 'approval';
       reasons.push(
-        `Trace cost $${t.costUsd.toFixed(4)} exceeds new ceiling $${change.costCeilingUsd!.toFixed(2)}`,
+        `Trace cost $${t.costUsd.toFixed(4)} exceeds new ceiling $${change.costCeilingUsd?.toFixed(2)}`,
       );
     } else if (toRank < fromRank) {
       // Tightening: high-risk traces that were allowed now require approval
@@ -533,7 +533,7 @@ export default function CognitivePolicySim() {
                     style={{
                       textAlign: 'left',
                       background: isSel ? `${ACCENT}10` : 'rgba(255,255,255,0.02)',
-                      border: `1px solid ${isSel ? ACCENT + '60' : 'rgba(255,255,255,0.07)'}`,
+                      border: `1px solid ${isSel ? `${ACCENT}60` : 'rgba(255,255,255,0.07)'}`,
                       borderRadius: 8,
                       padding: '10px 12px',
                       cursor: 'pointer',

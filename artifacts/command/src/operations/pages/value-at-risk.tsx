@@ -8,7 +8,7 @@ import {
   workflowLatencies,
 } from '@lyte/lib/business-data';
 import { cn } from '@lyte/lib/utils';
-import { BarChart3, DollarSign, TrendingDown, TrendingUp } from 'lucide-react';
+import { TrendingDown, TrendingUp } from 'lucide-react';
 import {
   Area,
   AreaChart,
@@ -39,7 +39,7 @@ const categoryColors: Record<string, string> = {
 
 export default function ValueAtRiskPage() {
   const byWorkflow = workflowLatencies.map((wf) => ({
-    name: wf.name.length > 22 ? wf.name.slice(0, 22) + '…' : wf.name,
+    name: wf.name.length > 22 ? `${wf.name.slice(0, 22)}…` : wf.name,
     amount: wf.valueAtRisk / 1_000_000,
     severity: wf.severity,
   }));

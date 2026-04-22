@@ -187,7 +187,7 @@ class ApiDataProvider implements DataProvider {
           summary: { totalVessels: number; activeExceptions: number };
           statusDistribution: Array<{ status: string; count: number }>;
         }>('/vessels/dashboard');
-        if (!dashboard || !dashboard.summary)
+        if (!dashboard?.summary)
           return {
             totalVessels: 0,
             atSea: 0,

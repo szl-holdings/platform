@@ -1,19 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import type { MetadataFilter } from '@workspace/aef-contracts';
-import { HybridSearchRequestSchema, SearchHitSchema } from '@workspace/aef-contracts';
+import { type MetadataFilter, HybridSearchRequestSchema, SearchHitSchema } from '@workspace/aef-contracts';
 import type { PolicyContext } from '@workspace/aef-policy-guard';
-import type { DenseHit, KeywordHit } from '@workspace/aef-retrieval-core';
-import {
-  applyMetadataFilter,
-  applyPreFusionBoosts,
-  applyProfilePromptTransform,
-  assembleCitations,
-  normalizeQuery,
-  normalizeScores,
-  reciprocalRankFusion,
-  rerankHits,
-  wrapAsBoosted,
-} from '@workspace/aef-retrieval-core';
+import { type DenseHit, type KeywordHit, applyMetadataFilter, applyPreFusionBoosts, applyProfilePromptTransform, assembleCitations, normalizeQuery, normalizeScores, reciprocalRankFusion, rerankHits, wrapAsBoosted } from '@workspace/aef-retrieval-core';
 import type { Request, Response, Router } from 'express';
 import {
   defaultLedgerStore,
@@ -69,7 +57,7 @@ export function registerSearchRoute(router: Router): void {
     const transformedQuery = profileId
       ? applyProfilePromptTransform(normalizedQuery, profileId)
       : normalizedQuery;
-    stageMs['normalize_query'] = Date.now() - stageStart;
+    stageMs.normalize_query = Date.now() - stageStart;
     stageStart = Date.now();
 
     // 2. load_profile — resolve active version; reject unknown profileId to enforce governance
@@ -87,7 +75,7 @@ export function registerSearchRoute(router: Router): void {
         return;
       }
     }
-    stageMs['load_profile'] = Date.now() - stageStart;
+    stageMs.load_profile = Date.now() - stageStart;
     stageStart = Date.now();
 
     // 3. policy_check — tenant boundary + rule evaluation; hard stops
@@ -115,12 +103,12 @@ export function registerSearchRoute(router: Router): void {
       });
       return;
     }
-    stageMs['policy_check'] = Date.now() - stageStart;
+    stageMs.policy_check = Date.now() - stageStart;
     stageStart = Date.now();
 
     // 4. query_shaping — ANN seed vector (CPU; production delegates to alloy-vector-worker)
     const queryVector = cpuEmbedVector(transformedQuery, 768);
-    stageMs['query_shaping'] = Date.now() - stageStart;
+    stageMs.query_shaping = Date.now() - stageStart;
     stageStart = Date.now();
 
     // 5. dense_ann — tenant-scoped ANN similarity search
@@ -136,7 +124,7 @@ export function registerSearchRoute(router: Router): void {
       score: h.score,
       metadata: h.metadata,
     }));
-    stageMs['dense_ann'] = Date.now() - stageStart;
+    stageMs.dense_ann = Date.now() - stageStart;
     stageStart = Date.now();
 
     // 6. keyword_bm25 — tenant-scoped term match
@@ -152,12 +140,12 @@ export function registerSearchRoute(router: Router): void {
       highlights: h.highlights,
       metadata: h.metadata,
     }));
-    stageMs['keyword_bm25'] = Date.now() - stageStart;
+    stageMs.keyword_bm25 = Date.now() - stageStart;
     stageStart = Date.now();
 
     // 7. exact_match_boost — boost dense hits before fusion so exact-match signals influence RRF rank positions
     const preBoostedDenseHits = applyPreFusionBoosts(denseHits, transformedQuery);
-    stageMs['exact_match_boost'] = Date.now() - stageStart;
+    stageMs.exact_match_boost = Date.now() - stageStart;
     stageStart = Date.now();
 
     // 8. rrf_fusion — merge pre-boosted dense + keyword via RRF.
@@ -168,14 +156,14 @@ export function registerSearchRoute(router: Router): void {
       keywordWeight,
     }).slice(0, candidatePool);
     const boostedHits = wrapAsBoosted(fusedHits);
-    stageMs['rrf_fusion'] = Date.now() - stageStart;
+    stageMs.rrf_fusion = Date.now() - stageStart;
     stageStart = Date.now();
 
     // 9. metadata_filter — apply caller-supplied scoping predicate
     const filteredHits = rawFilter
       ? applyMetadataFilter(boostedHits, rawFilter as MetadataFilter)
       : boostedHits;
-    stageMs['metadata_filter'] = Date.now() - stageStart;
+    stageMs.metadata_filter = Date.now() - stageStart;
     stageStart = Date.now();
 
     // 10. rerank — normalizes scores to [0,1] then runs CPU cross-encoder second pass when enabled.
@@ -184,7 +172,7 @@ export function registerSearchRoute(router: Router): void {
     const rerankedHits = rerankEnabled
       ? rerankHits(normalizedHits, transformedQuery, topK)
       : normalizedHits.slice(0, topK);
-    stageMs['rerank'] = Date.now() - stageStart;
+    stageMs.rerank = Date.now() - stageStart;
     stageStart = Date.now();
 
     // Record backend attribution (local-cpu always warm for the CPU fallback embed path)
@@ -192,7 +180,7 @@ export function registerSearchRoute(router: Router): void {
 
     // 12. evidence_assemble — build citation objects with provenance fields
     const citations = assembleCitations(rerankedHits);
-    stageMs['evidence_assemble'] = Date.now() - stageStart;
+    stageMs.evidence_assemble = Date.now() - stageStart;
     stageStart = Date.now();
 
     // 13. ledger_write — governance record; UNCONDITIONAL; failure is surfaced loud
@@ -203,11 +191,11 @@ export function registerSearchRoute(router: Router): void {
         fusedScore: citation.fusedScore,
         finalScore: citation.score,
       };
-      if (citation.denseScore !== undefined) scoreBreakdown['denseScore'] = citation.denseScore;
+      if (citation.denseScore !== undefined) scoreBreakdown.denseScore = citation.denseScore;
       if (citation.keywordScore !== undefined)
-        scoreBreakdown['keywordScore'] = citation.keywordScore;
+        scoreBreakdown.keywordScore = citation.keywordScore;
       if (citation.rerankerScore !== undefined)
-        scoreBreakdown['rerankerScore'] = citation.rerankerScore;
+        scoreBreakdown.rerankerScore = citation.rerankerScore;
 
       try {
         defaultLedgerStore.append({
@@ -244,7 +232,7 @@ export function registerSearchRoute(router: Router): void {
         });
       }
     }
-    stageMs['ledger_write'] = Date.now() - stageStart;
+    stageMs.ledger_write = Date.now() - stageStart;
     stageStart = Date.now();
 
     // 14. response_normalization — build evidence-enriched hits with per-hit traceability fields
@@ -256,15 +244,15 @@ export function registerSearchRoute(router: Router): void {
     // Evidence enrichment — per-hit governance metadata aligned to the documented native shape.
     // text is required by SearchHitSchema — pulled from chunk metadata (populated during ingest).
     const enrichedHits = citations.map((c) => {
-      const textVal = typeof c.metadata?.['text'] === 'string' ? c.metadata['text'] : '';
+      const textVal = typeof c.metadata?.text === 'string' ? c.metadata.text : '';
       const hitShape = {
         chunkId: c.chunkId,
         sourceId: c.sourceId,
         sourceUri:
-          typeof c.metadata?.['sourceUri'] === 'string' ? c.metadata['sourceUri'] : undefined,
-        title: typeof c.metadata?.['title'] === 'string' ? c.metadata['title'] : undefined,
-        page: typeof c.metadata?.['page'] === 'number' ? c.metadata['page'] : undefined,
-        section: typeof c.metadata?.['section'] === 'string' ? c.metadata['section'] : undefined,
+          typeof c.metadata?.sourceUri === 'string' ? c.metadata.sourceUri : undefined,
+        title: typeof c.metadata?.title === 'string' ? c.metadata.title : undefined,
+        page: typeof c.metadata?.page === 'number' ? c.metadata.page : undefined,
+        section: typeof c.metadata?.section === 'string' ? c.metadata.section : undefined,
         text: textVal,
         denseScore: c.denseScore,
         keywordScore: c.keywordScore,
@@ -290,17 +278,17 @@ export function registerSearchRoute(router: Router): void {
         fusionScore: c.fusedScore,
         rerankScore: c.rerankerScore,
         sourceType:
-          (c.metadata?.['contentType'] as string | undefined) ??
-          (c.metadata?.['sourceType'] as string | undefined) ??
+          (c.metadata?.contentType as string | undefined) ??
+          (c.metadata?.sourceType as string | undefined) ??
           'document',
         documentTitle:
-          (c.metadata?.['title'] as string | undefined) ??
-          (c.metadata?.['documentTitle'] as string | undefined) ??
+          (c.metadata?.title as string | undefined) ??
+          (c.metadata?.documentTitle as string | undefined) ??
           c.chunkId,
         ...(profileVersion !== undefined ? { profileVersion } : {}),
         exactMatchBoosts: c.boostApplied
-          ? c.metadata?.['boostRuleId']
-            ? [String(c.metadata['boostRuleId'])]
+          ? c.metadata?.boostRuleId
+            ? [String(c.metadata.boostRuleId)]
             : ['exact_match']
           : [],
         rationale:
@@ -337,7 +325,7 @@ export function registerSearchRoute(router: Router): void {
       processingMs: Date.now() - startMs,
     });
 
-    stageMs['response_normalization'] = Date.now() - stageStart;
+    stageMs.response_normalization = Date.now() - stageStart;
 
     res.json({
       requestId: reqId,

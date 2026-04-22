@@ -11,12 +11,12 @@ import {
   db,
 } from '@szl-holdings/db';
 import { serverTelemetry } from '@szl-holdings/observability';
-import { execFileSync } from 'child_process';
-import crypto from 'crypto';
+import { execFileSync } from 'node:child_process';
+import crypto from 'node:crypto';
 import { desc, eq, sql } from 'drizzle-orm';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { logger } from '../lib/logger';
 
 export type TrustState = 'trusted' | 'unverified' | 'quarantined';
@@ -778,8 +778,8 @@ async function loadPreviousFileState(orgId: number | null): Promise<PreviousFile
     ]);
     const runtimeFiles = new Map<string, string[]>();
     for (const r of runtimes.rows as Record<string, unknown>[]) {
-      const id = String(r['id']);
-      const files = Array.isArray(r['config_files']) ? (r['config_files'] as string[]) : [];
+      const id = String(r.id);
+      const files = Array.isArray(r.config_files) ? (r.config_files as string[]) : [];
       // Only JSON config files participate in MCP-line drift; CLAUDE.md and
       // other markdown have no MCP server entries.
       runtimeFiles.set(
@@ -788,11 +788,11 @@ async function loadPreviousFileState(orgId: number | null): Promise<PreviousFile
       );
     }
     for (const m of mcps.rows as Record<string, unknown>[]) {
-      const name = String(m['name']);
-      const pkg = String(m['package_ref'] ?? name);
-      const version = String(m['version'] ?? 'unpinned');
+      const name = String(m.name);
+      const pkg = String(m.package_ref ?? name);
+      const version = String(m.version ?? 'unpinned');
       const line = canonicalMcpLine(name, pkg, version);
-      const runtimeIds = Array.isArray(m['runtime_ids']) ? (m['runtime_ids'] as string[]) : [];
+      const runtimeIds = Array.isArray(m.runtime_ids) ? (m.runtime_ids as string[]) : [];
       for (const rid of runtimeIds) {
         const files = runtimeFiles.get(rid) ?? [];
         for (const f of files) {
@@ -809,8 +809,8 @@ async function loadPreviousFileState(orgId: number | null): Promise<PreviousFile
     }
     // Replay drift history per file to recover the prior permission line set.
     for (const d of drifts.rows as Record<string, unknown>[]) {
-      const file = String(d['config_file']);
-      const diff = (d['diff'] as { added?: string[]; removed?: string[] } | null) ?? {};
+      const file = String(d.config_file);
+      const diff = (d.diff as { added?: string[]; removed?: string[] } | null) ?? {};
       let set = out.permissionLines.get(file);
       if (!set) {
         set = new Set();
@@ -1240,8 +1240,8 @@ export async function runMeshScan(
 
 // ---------- Drop detection & alerts ----------
 
-const DROP_OVERALL_THRESHOLD = Number(process.env['MESH_ALERT_DROP_THRESHOLD'] ?? '10');
-const SUBINDEX_DROP_THRESHOLD = Number(process.env['MESH_ALERT_SUBINDEX_THRESHOLD'] ?? '15');
+const DROP_OVERALL_THRESHOLD = Number(process.env.MESH_ALERT_DROP_THRESHOLD ?? '10');
+const SUBINDEX_DROP_THRESHOLD = Number(process.env.MESH_ALERT_SUBINDEX_THRESHOLD ?? '15');
 
 type SubIndexKey =
   | 'secretHygiene'
@@ -1406,7 +1406,7 @@ export interface ScheduledMeshScanReport {
  * partial-failure status.
  */
 export async function runScheduledMeshScan(): Promise<ScheduledMeshScanReport> {
-  const onlyEnv = (process.env['MESH_SCHEDULED_ONLY_ORG_IDS'] ?? '')
+  const onlyEnv = (process.env.MESH_SCHEDULED_ONLY_ORG_IDS ?? '')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
@@ -1418,7 +1418,7 @@ export async function runScheduledMeshScan(): Promise<ScheduledMeshScanReport> {
     targets = [...onlyEnv];
   } else {
     const discovered = await discoverActiveOrgIds();
-    const extraEnv = (process.env['MESH_SCHEDULED_ORG_IDS'] ?? '')
+    const extraEnv = (process.env.MESH_SCHEDULED_ORG_IDS ?? '')
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean)
@@ -1755,131 +1755,131 @@ export async function loadMeshState(orgId: number | null = null): Promise<MeshSt
 
 function rowToRuntime(r: Record<string, unknown>): RuntimeRow {
   return {
-    id: String(r['id']),
-    name: String(r['name']),
-    version: String(r['version'] ?? 'unknown'),
-    sourceRegistry: String(r['source_registry'] ?? 'unknown'),
-    trustState: (r['trust_state'] as TrustState) ?? 'unverified',
-    configFiles: (r['config_files'] as string[]) ?? [],
-    activeAgentIds: (r['active_agent_ids'] as string[]) ?? [],
+    id: String(r.id),
+    name: String(r.name),
+    version: String(r.version ?? 'unknown'),
+    sourceRegistry: String(r.source_registry ?? 'unknown'),
+    trustState: (r.trust_state as TrustState) ?? 'unverified',
+    configFiles: (r.config_files as string[]) ?? [],
+    activeAgentIds: (r.active_agent_ids as string[]) ?? [],
     lastSeen:
-      r['last_seen'] instanceof Date
-        ? (r['last_seen'] as Date).toISOString()
-        : String(r['last_seen']),
+      r.last_seen instanceof Date
+        ? (r.last_seen as Date).toISOString()
+        : String(r.last_seen),
   };
 }
 
 function rowToMcp(r: Record<string, unknown>): McpRow {
   return {
-    id: String(r['id']),
-    name: String(r['name']),
-    packageRef: String(r['package_ref'] ?? ''),
-    version: String(r['version'] ?? 'unknown'),
-    pinned: Boolean(r['pinned']),
-    sourceRegistry: String(r['source_registry'] ?? 'unknown'),
-    trustState: (r['trust_state'] as TrustState) ?? 'unverified',
-    runtimeIds: (r['runtime_ids'] as string[]) ?? [],
-    allowedEgressDomains: (r['allowed_egress_domains'] as string[]) ?? [],
-    detectedEgressDomains: (r['detected_egress_domains'] as string[]) ?? [],
+    id: String(r.id),
+    name: String(r.name),
+    packageRef: String(r.package_ref ?? ''),
+    version: String(r.version ?? 'unknown'),
+    pinned: Boolean(r.pinned),
+    sourceRegistry: String(r.source_registry ?? 'unknown'),
+    trustState: (r.trust_state as TrustState) ?? 'unverified',
+    runtimeIds: (r.runtime_ids as string[]) ?? [],
+    allowedEgressDomains: (r.allowed_egress_domains as string[]) ?? [],
+    detectedEgressDomains: (r.detected_egress_domains as string[]) ?? [],
     lastSeen:
-      r['last_seen'] instanceof Date
-        ? (r['last_seen'] as Date).toISOString()
-        : String(r['last_seen']),
+      r.last_seen instanceof Date
+        ? (r.last_seen as Date).toISOString()
+        : String(r.last_seen),
   };
 }
 
 function rowToSecret(r: Record<string, unknown>): SecretRow {
   return {
-    id: String(r['id']),
-    label: String(r['label']),
-    format: (r['format'] as SecretRow['format']) ?? 'env-var',
-    foundInFile: String(r['found_in_file'] ?? ''),
-    entropy: Number(r['entropy'] ?? 0),
-    reachableByAgentIds: (r['reachable_by_agent_ids'] as string[]) ?? [],
-    reachableByMcpIds: (r['reachable_by_mcp_ids'] as string[]) ?? [],
+    id: String(r.id),
+    label: String(r.label),
+    format: (r.format as SecretRow['format']) ?? 'env-var',
+    foundInFile: String(r.found_in_file ?? ''),
+    entropy: Number(r.entropy ?? 0),
+    reachableByAgentIds: (r.reachable_by_agent_ids as string[]) ?? [],
+    reachableByMcpIds: (r.reachable_by_mcp_ids as string[]) ?? [],
     lastDetectedAt:
-      r['last_detected_at'] instanceof Date
-        ? (r['last_detected_at'] as Date).toISOString()
-        : String(r['last_detected_at']),
+      r.last_detected_at instanceof Date
+        ? (r.last_detected_at as Date).toISOString()
+        : String(r.last_detected_at),
   };
 }
 
 function rowToEdge(r: Record<string, unknown>): EdgeRow {
   return {
-    id: String(r['id']),
-    agentId: String(r['agent_id']),
-    mcpServerId: String(r['mcp_server_id']),
-    tools: (r['tools'] as string[]) ?? [],
-    dataReadPaths: (r['data_read_paths'] as string[]) ?? [],
+    id: String(r.id),
+    agentId: String(r.agent_id),
+    mcpServerId: String(r.mcp_server_id),
+    tools: (r.tools as string[]) ?? [],
+    dataReadPaths: (r.data_read_paths as string[]) ?? [],
     detectedAt:
-      r['detected_at'] instanceof Date
-        ? (r['detected_at'] as Date).toISOString()
-        : String(r['detected_at']),
+      r.detected_at instanceof Date
+        ? (r.detected_at as Date).toISOString()
+        : String(r.detected_at),
   };
 }
 
 function rowToExposure(r: Record<string, unknown>): ExposureRow {
   return {
-    id: String(r['id']),
-    title: String(r['title']),
-    severity: (r['severity'] as ExposureRow['severity']) ?? 'medium',
-    affectedAgentIds: (r['affected_agent_ids'] as string[]) ?? [],
-    affectedSecretIds: (r['affected_secret_ids'] as string[]) ?? [],
-    affectedMcpIds: (r['affected_mcp_ids'] as string[]) ?? [],
-    explanation: String(r['explanation'] ?? ''),
-    owaspCategory: String(r['owasp_category'] ?? ''),
-    owaspRef: String(r['owasp_ref'] ?? ''),
-    cveRefs: (r['cve_refs'] as string[]) ?? [],
-    fixType: String(r['fix_type'] ?? 'scope-token'),
-    fixLabel: String(r['fix_label'] ?? ''),
-    proofHash: String(r['proof_hash'] ?? ''),
-    status: (r['status'] as ExposureRow['status']) ?? 'open',
+    id: String(r.id),
+    title: String(r.title),
+    severity: (r.severity as ExposureRow['severity']) ?? 'medium',
+    affectedAgentIds: (r.affected_agent_ids as string[]) ?? [],
+    affectedSecretIds: (r.affected_secret_ids as string[]) ?? [],
+    affectedMcpIds: (r.affected_mcp_ids as string[]) ?? [],
+    explanation: String(r.explanation ?? ''),
+    owaspCategory: String(r.owasp_category ?? ''),
+    owaspRef: String(r.owasp_ref ?? ''),
+    cveRefs: (r.cve_refs as string[]) ?? [],
+    fixType: String(r.fix_type ?? 'scope-token'),
+    fixLabel: String(r.fix_label ?? ''),
+    proofHash: String(r.proof_hash ?? ''),
+    status: (r.status as ExposureRow['status']) ?? 'open',
     detectedAt:
-      r['detected_at'] instanceof Date
-        ? (r['detected_at'] as Date).toISOString()
-        : String(r['detected_at']),
+      r.detected_at instanceof Date
+        ? (r.detected_at as Date).toISOString()
+        : String(r.detected_at),
   };
 }
 
 function rowToContainmentRule(r: Record<string, unknown>): ContainmentRuleRow {
   return {
-    id: String(r['id']),
-    name: String(r['name']),
-    agentClass: String(r['agent_class']),
-    allowedMcpServers: (r['allowed_mcp_servers'] as string[]) ?? [],
-    allowedTools: (r['allowed_tools'] as string[]) ?? [],
-    allowedReadPaths: (r['allowed_read_paths'] as string[]) ?? [],
-    allowedEgressDomains: (r['allowed_egress_domains'] as string[]) ?? [],
-    tier: (r['tier'] as ContainmentRuleRow['tier']) ?? 'standard',
-    enforcementMode: (r['enforcement_mode'] as EnforcementMode) ?? 'log-only',
-    violationCount: Number(r['violation_count'] ?? 0),
+    id: String(r.id),
+    name: String(r.name),
+    agentClass: String(r.agent_class),
+    allowedMcpServers: (r.allowed_mcp_servers as string[]) ?? [],
+    allowedTools: (r.allowed_tools as string[]) ?? [],
+    allowedReadPaths: (r.allowed_read_paths as string[]) ?? [],
+    allowedEgressDomains: (r.allowed_egress_domains as string[]) ?? [],
+    tier: (r.tier as ContainmentRuleRow['tier']) ?? 'standard',
+    enforcementMode: (r.enforcement_mode as EnforcementMode) ?? 'log-only',
+    violationCount: Number(r.violation_count ?? 0),
     lastEvaluatedAt:
-      r['last_evaluated_at'] instanceof Date
-        ? (r['last_evaluated_at'] as Date).toISOString()
-        : String(r['last_evaluated_at']),
+      r.last_evaluated_at instanceof Date
+        ? (r.last_evaluated_at as Date).toISOString()
+        : String(r.last_evaluated_at),
   };
 }
 
 function rowToDriftSnapshot(r: Record<string, unknown>): DriftSnapshotRow {
-  const diff = (r['diff'] as { removed?: string[]; added?: string[] } | null) ?? {};
+  const diff = (r.diff as { removed?: string[]; added?: string[] } | null) ?? {};
   return {
-    id: String(r['id']),
-    configFile: String(r['config_file']),
+    id: String(r.id),
+    configFile: String(r.config_file),
     changedAt:
-      r['changed_at'] instanceof Date
-        ? (r['changed_at'] as Date).toISOString()
-        : String(r['changed_at']),
-    changedBy: String(r['changed_by'] ?? 'unknown'),
-    policyApproved: Boolean(r['policy_approved']),
-    approvedBy: r['approved_by'] == null ? null : String(r['approved_by']),
-    rolledBackBy: r['rolled_back_by'] == null ? null : String(r['rolled_back_by']),
+      r.changed_at instanceof Date
+        ? (r.changed_at as Date).toISOString()
+        : String(r.changed_at),
+    changedBy: String(r.changed_by ?? 'unknown'),
+    policyApproved: Boolean(r.policy_approved),
+    approvedBy: r.approved_by == null ? null : String(r.approved_by),
+    rolledBackBy: r.rolled_back_by == null ? null : String(r.rolled_back_by),
     rolledBackAt:
-      r['rolled_back_at'] == null
+      r.rolled_back_at == null
         ? null
-        : r['rolled_back_at'] instanceof Date
-          ? (r['rolled_back_at'] as Date).toISOString()
-          : String(r['rolled_back_at']),
+        : r.rolled_back_at instanceof Date
+          ? (r.rolled_back_at as Date).toISOString()
+          : String(r.rolled_back_at),
     diff: { removed: diff.removed ?? [], added: diff.added ?? [] },
-    linkedExposureIds: (r['linked_exposure_ids'] as string[]) ?? [],
+    linkedExposureIds: (r.linked_exposure_ids as string[]) ?? [],
   };
 }

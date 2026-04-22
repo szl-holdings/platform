@@ -1,11 +1,8 @@
 import {
-  signals as businessSignals,
-  kpiCards,
   signalTrend,
   varTrend,
 } from '@lyte/lib/business-data';
 import {
-  type DemoSignal,
   demoPriorities,
   demoReadinessItems,
   demoRoleSummaries,
@@ -16,20 +13,15 @@ import { cn } from '@lyte/lib/utils';
 import {
   Activity,
   AlertTriangle,
-  ArrowUpRight,
   BarChart3,
   Brain,
-  CheckCircle2,
   ChevronRight,
-  Clock,
   Eye,
   Radio,
-  RefreshCw,
   Shield,
   Target,
   TrendingDown,
   TrendingUp,
-  Users,
   Workflow,
   Zap,
 } from 'lucide-react';

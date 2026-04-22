@@ -3,44 +3,32 @@ import {
   Activity,
   AlertTriangle,
   ArrowRight,
-  BarChart3,
   BellOff,
   Brain,
-  Briefcase,
-  Check,
   CheckCheck,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Circle,
   Clock,
   DollarSign,
   ExternalLink,
   Eye,
-  FileText,
   GitBranch,
-  Globe,
   History,
   Info,
   Layers,
-  Play,
   RefreshCw,
   Shield,
   Star,
-  Target,
   Ticket,
   TrendingDown,
   TrendingUp,
   UserCheck,
-  Users,
   X,
   XCircle,
-  Zap,
 } from 'lucide-react';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
-import { SiteNav } from '@/components/SiteNav';
-import { cn } from '@/lib/utils';
 
 const ACCENT = '#8b7ac8';
 const BG_CARD = 'hsla(0,0%,100%,0.025)';
@@ -1005,7 +993,7 @@ function SeverityDot({ level }: { level: string }) {
   );
 }
 
-function HealthBar({ value, target, breach }: { value: number; target: number; breach: boolean }) {
+function _HealthBar({ value, target, breach }: { value: number; target: number; breach: boolean }) {
   const pct = Math.min((value / Math.max(target, 1)) * 100, 150);
   const color = breach ? '#ef4444' : '#22c55e';
   return (
@@ -1030,7 +1018,7 @@ function HealthBar({ value, target, breach }: { value: number; target: number; b
   );
 }
 
-function ScorePill({ score, max = 100 }: { score: number; max?: number }) {
+function _ScorePill({ score, max = 100 }: { score: number; max?: number }) {
   const color = score >= 85 ? '#22c55e' : score >= 70 ? '#f59e0b' : '#ef4444';
   return (
     <span style={{ fontSize: '12px', fontWeight: 800, color, fontVariantNumeric: 'tabular-nums' }}>
@@ -1854,7 +1842,7 @@ function RiskRegisterModule() {
     return t ? `${t.key} · ${t.name}` : defaultTeamKey;
   })();
 
-  function handlePlaybook(riskId: string, riskTitle: string) {
+  function handlePlaybook(riskId: string, _riskTitle: string) {
     patch({
       riskActions: {
         [riskId]: {
@@ -2233,7 +2221,6 @@ function RiskRegisterModule() {
                                 }
                               }}
                               placeholder={effectiveOwner}
-                              autoFocus
                               style={{
                                 fontSize: '11px',
                                 background: 'hsla(0,0%,100%,0.06)',
@@ -3127,7 +3114,6 @@ function OpportunityModule() {
                         value={rejectReason}
                         onChange={(e) => setRejectReason(e.target.value)}
                         placeholder="Reason for rejection…"
-                        autoFocus
                         style={{
                           flex: 1,
                           fontSize: '10px',
@@ -3839,7 +3825,7 @@ function DecisionLogModule() {
                 padding: '4px 10px',
                 borderRadius: '6px',
                 background: active ? `${ACCENT}18` : 'transparent',
-                border: `1px solid ${active ? ACCENT + '40' : 'hsla(0,0%,100%,0.08)'}`,
+                border: `1px solid ${active ? `${ACCENT}40` : 'hsla(0,0%,100%,0.08)'}`,
                 color: active ? ACCENT : 'rgba(255,255,255,0.45)',
                 cursor: 'pointer',
                 textTransform: 'capitalize',
@@ -4086,7 +4072,7 @@ export default function BusinessStatePage() {
                     padding: '7px 14px',
                     borderRadius: '8px',
                     background: executiveMode ? `${ACCENT}20` : 'hsla(0,0%,100%,0.04)',
-                    border: `1px solid ${executiveMode ? ACCENT + '40' : 'hsla(0,0%,100%,0.08)'}`,
+                    border: `1px solid ${executiveMode ? `${ACCENT}40` : 'hsla(0,0%,100%,0.08)'}`,
                     color: executiveMode ? ACCENT : 'rgba(255,255,255,0.45)',
                     cursor: 'pointer',
                     fontSize: '11px',
@@ -4163,7 +4149,7 @@ export default function BusinessStatePage() {
                     padding: '6px 14px',
                     borderRadius: '8px',
                     background: isActive ? `${ACCENT}18` : 'hsla(0,0%,100%,0.025)',
-                    border: `1px solid ${isActive ? ACCENT + '40' : 'hsla(0,0%,100%,0.06)'}`,
+                    border: `1px solid ${isActive ? `${ACCENT}40` : 'hsla(0,0%,100%,0.06)'}`,
                     color: isActive ? ACCENT : 'rgba(255,255,255,0.35)',
                     cursor: 'pointer',
                     fontSize: '11px',

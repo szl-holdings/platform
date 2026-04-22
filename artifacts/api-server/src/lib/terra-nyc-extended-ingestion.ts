@@ -1,5 +1,4 @@
-import type { InsertTerraDistressProperty } from '@szl-holdings/db';
-import { auditLogsTable, db } from '@szl-holdings/db';
+import { type InsertTerraDistressProperty, auditLogsTable, db } from '@szl-holdings/db';
 import { durableJobQueue } from '@szl-holdings/forge-runtime';
 import { logger } from './logger';
 import {
@@ -26,7 +25,7 @@ async function writeAuditLog(
 }
 
 const NYC_OPEN_DATA_BASE = 'https://data.cityofnewyork.us/resource';
-const SODA_APP_TOKEN = process.env['NYC_OPEN_DATA_TOKEN'] ?? '';
+const SODA_APP_TOKEN = process.env.NYC_OPEN_DATA_TOKEN ?? '';
 const DEFAULT_LIMIT = 500;
 
 function buildSodaUrl(dataset: string, params: Record<string, string | number> = {}): string {
@@ -403,7 +402,7 @@ export async function ingestHpdComplaints(
     if (!rec.buildingnumber && !rec.streetname) continue;
     const key = `${rec.buildingnumber ?? ''}-${rec.streetname ?? ''}`.toLowerCase();
     if (!grouped.has(key)) grouped.set(key, []);
-    grouped.get(key)!.push(rec);
+    grouped.get(key)?.push(rec);
   }
 
   for (const [, recs] of grouped) {
@@ -504,7 +503,7 @@ export async function ingestDobViolations(
     if (!rec.house_number && !rec.street) continue;
     const key = `${rec.house_number ?? ''}-${rec.street ?? ''}`.toLowerCase();
     if (!grouped.has(key)) grouped.set(key, []);
-    grouped.get(key)!.push(rec);
+    grouped.get(key)?.push(rec);
   }
 
   for (const [, recs] of grouped) {
@@ -523,7 +522,7 @@ export async function ingestDobViolations(
 
     const parsedIssueDate = rec.issue_date ? new Date(rec.issue_date) : null;
     const filingDate =
-      parsedIssueDate && !isNaN(parsedIssueDate.getTime())
+      parsedIssueDate && !Number.isNaN(parsedIssueDate.getTime())
         ? parsedIssueDate.toISOString().split('T')[0]!
         : new Date().toISOString().split('T')[0]!;
     const daysInDistress = Math.ceil((Date.now() - new Date(filingDate).getTime()) / 86400000);
@@ -609,7 +608,7 @@ export async function ingestNyc311PropertyComplaints(
     if (!rec.incident_address) continue;
     const key = rec.incident_address.toLowerCase();
     if (!grouped.has(key)) grouped.set(key, []);
-    grouped.get(key)!.push(rec);
+    grouped.get(key)?.push(rec);
   }
 
   for (const [, recs] of grouped) {
@@ -983,7 +982,7 @@ export function scheduleNycExtendedIngestionJob(
   ],
 ): void {
   const intervalMs = parseInt(
-    process.env['TERRA_EXTENDED_INGESTION_INTERVAL_MS'] ?? String(8 * 60 * 60 * 1000),
+    process.env.TERRA_EXTENDED_INGESTION_INTERVAL_MS ?? String(8 * 60 * 60 * 1000),
     10,
   );
 

@@ -15,7 +15,7 @@ function log(level: string, data: Record<string, unknown>, msg?: string): void {
     ...data,
     ...(msg ? { msg } : {}),
   };
-  process.stdout.write(JSON.stringify(entry) + '\n');
+  process.stdout.write(`${JSON.stringify(entry)}\n`);
 }
 
 export const logger: StructuredLogger = {

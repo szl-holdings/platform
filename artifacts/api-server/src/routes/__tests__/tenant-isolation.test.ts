@@ -17,7 +17,7 @@
  *  - Cross-tenant attempt via :orgSlug param → 403
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, } from "vitest";
 import express, { type Request, type Response, type NextFunction } from "express";
 import request from "supertest";
 import { tenantScope } from "../../middlewares/tenant-scope";

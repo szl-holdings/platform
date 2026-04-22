@@ -71,7 +71,7 @@ export function useWebSyncStatus({
       const headers: Record<string, string> = {};
       if (getAuthToken) {
         const token = await getAuthToken();
-        if (token) headers['Authorization'] = `Bearer ${token}`;
+        if (token) headers.Authorization = `Bearer ${token}`;
       }
 
       let currentCursor: string | undefined;

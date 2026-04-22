@@ -133,7 +133,7 @@ function useAuth() {
     // deep-link them back to it instead of dumping them at /pulse/.
     const savedPath = consumeSessionReturnPath();
     const returnTo =
-      savedPath && savedPath.startsWith(base + '/') ? savedPath : base + '/';
+      savedPath?.startsWith(`${base}/`) ? savedPath : `${base}/`;
     window.location.href = `/api/login?returnTo=${encodeURIComponent(returnTo)}`;
   }, []);
 
@@ -211,7 +211,6 @@ function PinModal({ onSuccess }: { onSuccess: () => void }) {
           value={pin}
           onChange={(e) => setPin(e.target.value)}
           placeholder="Access code"
-          autoFocus
           style={{
             width: '100%',
             padding: '0.625rem 0.875rem',

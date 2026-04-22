@@ -7,7 +7,6 @@ import {
   incaExperimentsTable,
   incaModelsTable,
   incaInsightsTable,
-  incaDatasetsTable,
 } from "@szl-holdings/db";
 import { eq, desc, ilike, or, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
@@ -247,7 +246,7 @@ router.get("/inca/search", validateQuery(listQuerySchema), async (req, res) => {
   }
 });
 
-router.get("/inca/provider/models", async (req, res) => {
+router.get("/inca/provider/models", async (_req, res) => {
   try {
     const rows = await db.select().from(incaModelsTable).orderBy(desc(incaModelsTable.createdAt));
     sendSuccess(res, rows, 200, { page: 1, limit: 25, total: rows.length });
@@ -371,7 +370,7 @@ const FALLBACK_PAPERS = [
 router.get("/inca/live/arxiv", incaLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = (req.query.q as string) || "large language model";
-    const limit = Math.min(parseInt(req.query.limit as string) || 8, 15);
+    const limit = Math.min(parseInt(req.query.limit as string, 10) || 8, 15);
     const category = req.query.cat as string;
     const cacheKey = `inca-arxiv-${query}-${limit}-${category ?? ""}`;
     const papers = await getCached(cacheKey, 1800000, async () => {
@@ -394,7 +393,7 @@ router.get("/inca/live/arxiv", incaLiveLimit, authMiddleware({ required: false }
 router.get("/inca/live/semantic-scholar", incaLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = (req.query.q as string) || "transformer architecture";
-    const limit = Math.min(parseInt(req.query.limit as string) || 8, 15);
+    const limit = Math.min(parseInt(req.query.limit as string, 10) || 8, 15);
     const papers = await getCached(`inca-ss-${query}-${limit}`, 1800000, async () => {
       try {
         const raw = await fetchJson(
@@ -477,7 +476,7 @@ router.get("/inca/live/paperswithcode", incaLiveLimit, authMiddleware({ required
 router.get("/inca/live/huggingface-models", incaLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const task = (req.query.task as string) || "text-generation";
-    const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+    const limit = Math.min(parseInt(req.query.limit as string, 10) || 10, 20);
     const models = await getCached(`inca-hf-${task}-${limit}`, 1800000, async () => {
       try {
         const raw = await fetchJson(

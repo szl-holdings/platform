@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { computeConfidence } from './confidence.js';
 import { computeEvidenceFreshnessScore, createEvidence, listEvidence } from './evidence.js';
 import { attachEvidence, closeSession, openSession } from './session.js';
@@ -170,7 +170,7 @@ export async function recommend(params: RecommendParams): Promise<Recommendation
     urgency: params.urgency ?? 'routine',
     suggestedAction: params.suggestedAction,
     metadata: {
-      ...(params.metadata ?? {}),
+      ...params.metadata,
       confidenceBreakdown: confidenceResult.breakdown,
     },
   };

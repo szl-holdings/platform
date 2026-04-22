@@ -22,9 +22,9 @@
  *   node scripts/qa/check-correlation-deeplinks.js
  */
 
-import { readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
@@ -154,12 +154,7 @@ const REQUIRED_SOURCE_STRINGS = [
 ];
 const driftErrors = REQUIRED_SOURCE_STRINGS.filter((s) => !productLinksSrc.includes(s));
 if (driftErrors.length > 0) {
-  console.error('✗ Inline helper copy in this script has drifted from product-links.ts.');
-  console.error('  Source no longer contains:');
-  for (const s of driftErrors) console.error(`    ${s}`);
-  console.error(
-    '  Update scripts/qa/check-correlation-deeplinks.js to match the new helper output.',
-  );
+  for (const _s of driftErrors) 
   process.exit(1);
 }
 
@@ -238,7 +233,7 @@ function resolveUrl(url) {
   const pathOnly = url.split(/[?#]/)[0];
 
   for (const art of ARTIFACT_ROUTES) {
-    if (pathOnly === art.base || pathOnly.startsWith(art.base + '/')) {
+    if (pathOnly === art.base || pathOnly.startsWith(`${art.base}/`)) {
       // Strip artifact base. Wouter routes inside the app are relative.
       let rel = pathOnly.slice(art.base.length);
       if (rel === '') rel = '/';
@@ -277,7 +272,7 @@ const ENTITY_FIXTURES = {
 
 const VERIFIED_PRODUCTS = ['vessels', 'terra', 'carlota', 'aegis'];
 
-let failures = 0;
+let _failures = 0;
 const results = [];
 
 function check(label, url, opts = {}) {
@@ -286,16 +281,12 @@ function check(label, url, opts = {}) {
   let ok = res.ok;
   if (expectArtifact && res.artifact !== expectArtifact) ok = false;
   results.push({ label, url, ...res, ok });
-  if (!ok) failures += 1;
+  if (!ok) _failures += 1;
 }
-
-console.log('→ checking productDashboardUrl(...) targets');
 for (const product of VERIFIED_PRODUCTS) {
   const url = productDashboardUrl(product);
   check(`dashboard:${product}`, url, { expectArtifact: product });
 }
-
-console.log('→ checking productEntityUrl(...) targets');
 for (const product of VERIFIED_PRODUCTS) {
   const ids = ENTITY_FIXTURES[product] ?? [];
   for (const id of ids) {
@@ -309,14 +300,12 @@ for (const product of VERIFIED_PRODUCTS) {
         ok: false,
         matchedPattern: null,
       });
-      failures += 1;
+      _failures += 1;
       continue;
     }
     check(`entity:${product}:${id}`, url, { expectArtifact: product });
   }
 }
-
-console.log('→ checking inferProductForEntity(...) routing for mixed IDs');
 const inferenceCases = [
   { id: 'IMO9876543', expect: 'vessels' },
   { id: 'MMSI367123456', expect: 'vessels' },
@@ -344,26 +333,17 @@ for (const tc of inferenceCases) {
     ok,
     matchedPattern: null,
   });
-  if (!ok) failures += 1;
+  if (!ok) _failures += 1;
 }
-
-// ---------------------------------------------------------------------------
-// Report
-// ---------------------------------------------------------------------------
-console.log('');
-console.log('Correlation deep-link resolution report');
-console.log('═'.repeat(72));
 for (const r of results) {
-  const icon = r.ok ? '✓' : '✗';
-  const pad = r.label.padEnd(34);
-  const matchInfo = r.matchedPattern
+  const _icon = r.ok ? '✓' : '✗';
+  const _pad = r.label.padEnd(34);
+  const _matchInfo = r.matchedPattern
     ? `→ ${r.artifact}${r.matchedPattern}`
     : r.artifact
       ? `→ ${r.artifact} (no match)`
       : '(no artifact prefix)';
-  console.log(`  ${icon} ${pad} ${r.url}  ${r.ok ? matchInfo : matchInfo}`);
 }
-console.log('═'.repeat(72));
 
 // Known pre-existing failures, tracked by follow-up tasks. The check stays
 // strict (catch-all-only = failure) but does not turn CI red while the
@@ -383,36 +363,17 @@ const unexpected = results.filter((r) => !r.ok && !KNOWN_FAILURES.has(r.label));
 const expected = results.filter((r) => !r.ok && KNOWN_FAILURES.has(r.label));
 
 if (expected.length > 0) {
-  console.warn(
-    `\n⚠  ${expected.length} known pre-existing deep-link failure${expected.length === 1 ? '' : 's'} (allow-listed, tracked by follow-up):`,
-  );
-  for (const r of expected) {
-    console.warn(`    - ${r.label}  (${KNOWN_FAILURES.get(r.label)})  url=${r.url}`);
+  for (const _r of expected) {
   }
 }
 
 if (unexpected.length > 0) {
-  console.error(
-    `\n✗ ${unexpected.length} correlation deep-link${unexpected.length === 1 ? '' : 's'} fail to resolve to a registered route.`,
-  );
-  for (const r of unexpected) {
-    console.error(`    - ${r.label}  url=${r.url}  artifact=${r.artifact ?? '?'}`);
+  for (const _r of unexpected) {
   }
-  console.error('\n  Fix by updating artifacts/command/src/pages/cross-platform/product-links.ts');
-  console.error("  or the target artifact's App.tsx so the generated URL lands on a real page.");
-  console.error('  If the failure is being deferred to a follow-up task, add it to KNOWN_FAILURES');
-  console.error('  in this script with the tracking task id.');
   process.exit(1);
 }
 
-const passing = results.length - expected.length;
+const _passing = results.length - expected.length;
 if (expected.length > 0) {
-  console.log(
-    `\n✓ ${passing} / ${results.length} correlation deep-links resolve to a registered route ` +
-      `(${expected.length} known failure${expected.length === 1 ? '' : 's'} allow-listed; see KNOWN_FAILURES above).`,
-  );
 } else {
-  console.log(
-    `\n✓ All ${results.length} correlation deep-links resolve to a registered route in their target artifact.`,
-  );
 }

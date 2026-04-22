@@ -7,8 +7,7 @@ import {
   type PromptVersion,
   renderTemplate,
 } from '@szl-holdings/prompt-registry';
-import type { PromptRef } from './ref.js';
-import { PromptRefResolutionError } from './ref.js';
+import { type PromptRef, PromptRefResolutionError } from './ref.js';
 
 export type { PromptDefinition, PromptVariable, PromptVersion };
 

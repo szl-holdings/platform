@@ -14,17 +14,12 @@ import {
   Copy,
   Database,
   ExternalLink,
-  Filter,
-  Link as LinkIcon,
   Loader2,
-  MoreHorizontal,
   Palette,
   Plus,
   RefreshCw,
   Search,
-  Settings,
   Shield,
-  Trash2,
   Users,
   X,
 } from 'lucide-react';
@@ -36,7 +31,7 @@ const API = '/api';
 
 async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(`${API}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(opts?.headers ?? {}) },
+    headers: { 'Content-Type': 'application/json', ...opts?.headers },
     ...opts,
   });
   if (!res.ok) {
@@ -502,7 +497,7 @@ export default function AzureTenantDashboardPage() {
                 <div
                   className={cn(
                     'w-8 h-8 rounded-lg flex items-center justify-center mb-3',
-                    s.color.replace('text-', 'bg-') + '/10',
+                    `${s.color.replace('text-', 'bg-')}/10`,
                   )}
                 >
                   <Icon className={cn('w-4 h-4', s.color)} />
@@ -605,7 +600,7 @@ export default function AzureTenantDashboardPage() {
                         {tenant.displayName}
                       </div>
                       <div className="text-[10px] text-muted-foreground font-mono truncate">
-                        {tenant.domain ?? tenant.azureTenantId.slice(0, 20) + '…'}
+                        {tenant.domain ?? `${tenant.azureTenantId.slice(0, 20)}…`}
                       </div>
                       <div className="text-[10px] text-muted-foreground/50 mt-0.5">
                         Added {new Date(tenant.createdAt).toLocaleDateString()}

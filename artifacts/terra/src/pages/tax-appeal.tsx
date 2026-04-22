@@ -1,30 +1,20 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  AlertTriangle,
   BarChart3,
-  Building2,
   CheckCircle,
-  ChevronRight,
   Database,
-  DollarSign,
-  Download,
   FileText,
   Scale,
-  Search,
-  Target,
-  TrendingDown,
   X,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
-  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -470,7 +460,7 @@ export default function TaxAppealPage() {
         <div className="lg:col-span-2 space-y-3">
           {filtered.map((p) => {
             const statusCfg = STATUS_CONFIG[p.appealStatus];
-            const strengthCfg = STRENGTH_CONFIG[p.appealStrength];
+            const _strengthCfg = STRENGTH_CONFIG[p.appealStrength];
             return (
               <motion.div
                 key={p.id}

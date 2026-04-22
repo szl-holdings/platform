@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import type {
   ApproveReceiptParams,
   AuditPacket,
@@ -8,7 +8,6 @@ import type {
   PolicyClass,
   PostExecutionDelta,
   ReceiptClass,
-  ReceiptInputSource,
   ReceiptStatus,
   ReceiptSummary,
   RecordDeltaParams,

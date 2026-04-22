@@ -72,53 +72,53 @@ export interface EvalBaselineRow {
 
 function mapScenario(r: Record<string, unknown>): ScenarioRow {
   return {
-    scenarioId: r['scenario_id'] as string,
-    name: r['name'] as string,
-    domain: r['domain'] as string,
-    description: r['description'] as string,
-    tags: (r['tags'] as string[]) ?? [],
-    snapshotCount: r['snapshot_count'] as number,
-    lastReplayed: r['last_replayed'] ? (r['last_replayed'] as Date).toISOString() : null,
-    lastOutcome: (r['last_outcome'] as string | null) ?? null,
+    scenarioId: r.scenario_id as string,
+    name: r.name as string,
+    domain: r.domain as string,
+    description: r.description as string,
+    tags: (r.tags as string[]) ?? [],
+    snapshotCount: r.snapshot_count as number,
+    lastReplayed: r.last_replayed ? (r.last_replayed as Date).toISOString() : null,
+    lastOutcome: (r.last_outcome as string | null) ?? null,
     groundTruthMatchRate:
-      r['ground_truth_match_rate'] != null ? Number(r['ground_truth_match_rate']) : null,
-    createdAt: (r['created_at'] as Date).toISOString(),
-    updatedAt: (r['updated_at'] as Date).toISOString(),
+      r.ground_truth_match_rate != null ? Number(r.ground_truth_match_rate) : null,
+    createdAt: (r.created_at as Date).toISOString(),
+    updatedAt: (r.updated_at as Date).toISOString(),
   };
 }
 
 function mapSnapshot(r: Record<string, unknown>): SnapshotRow {
   return {
-    snapshotId: r['snapshot_id'] as string,
-    scenarioId: r['scenario_id'] as string,
-    label: r['label'] as string,
-    domain: r['domain'] as string,
-    snapshotType: r['snapshot_type'] as string,
-    historicalContext: (r['historical_context'] as Record<string, unknown>) ?? {},
-    agentInputs: (r['agent_inputs'] as Record<string, unknown>[]) ?? [],
-    groundTruth: (r['ground_truth'] as Record<string, unknown> | null) ?? null,
-    sanitized: r['sanitized'] as boolean,
-    version: r['version'] as string,
-    tags: (r['tags'] as string[]) ?? [],
-    metadata: (r['metadata'] as Record<string, unknown>) ?? {},
-    createdAt: (r['created_at'] as Date).toISOString(),
+    snapshotId: r.snapshot_id as string,
+    scenarioId: r.scenario_id as string,
+    label: r.label as string,
+    domain: r.domain as string,
+    snapshotType: r.snapshot_type as string,
+    historicalContext: (r.historical_context as Record<string, unknown>) ?? {},
+    agentInputs: (r.agent_inputs as Record<string, unknown>[]) ?? [],
+    groundTruth: (r.ground_truth as Record<string, unknown> | null) ?? null,
+    sanitized: r.sanitized as boolean,
+    version: r.version as string,
+    tags: (r.tags as string[]) ?? [],
+    metadata: (r.metadata as Record<string, unknown>) ?? {},
+    createdAt: (r.created_at as Date).toISOString(),
   };
 }
 
 function mapRun(r: Record<string, unknown>): RunRow {
   return {
-    runId: r['run_id'] as string,
-    scenarioId: r['scenario_id'] as string,
-    scenarioName: r['scenario_name'] as string,
-    startedAt: (r['started_at'] as Date).toISOString(),
-    completedAt: (r['completed_at'] as Date).toISOString(),
-    totalSnapshots: r['total_snapshots'] as number,
-    successful: r['successful'] as number,
-    failed: r['failed'] as number,
-    avgLatencyMs: Number(r['avg_latency_ms']),
-    groundTruthMatchRate: Number(r['ground_truth_match_rate']),
-    totalCostUsd: Number(r['total_cost_usd']),
-    createdAt: (r['created_at'] as Date).toISOString(),
+    runId: r.run_id as string,
+    scenarioId: r.scenario_id as string,
+    scenarioName: r.scenario_name as string,
+    startedAt: (r.started_at as Date).toISOString(),
+    completedAt: (r.completed_at as Date).toISOString(),
+    totalSnapshots: r.total_snapshots as number,
+    successful: r.successful as number,
+    failed: r.failed as number,
+    avgLatencyMs: Number(r.avg_latency_ms),
+    groundTruthMatchRate: Number(r.ground_truth_match_rate),
+    totalCostUsd: Number(r.total_cost_usd),
+    createdAt: (r.created_at as Date).toISOString(),
   };
 }
 
@@ -210,7 +210,7 @@ export async function seedScenariosIfEmpty(
   if (!(await checkDbAvailable())) return false;
   try {
     const existing = await pool.query('SELECT COUNT(*) FROM replay_scenarios');
-    const count = parseInt((existing.rows[0] as { count: string })['count'], 10);
+    const count = parseInt((existing.rows[0] as { count: string }).count, 10);
     if (count > 0) return false;
 
     const client = await pool.connect();
@@ -418,14 +418,14 @@ export async function loadEvalBaselines(): Promise<EvalBaselineRow[]> {
       `SELECT DISTINCT ON (suite_id, model) * FROM eval_baselines ORDER BY suite_id, model, recorded_at DESC`,
     );
     return result.rows.map((r: Record<string, unknown>) => ({
-      suiteId: r['suite_id'] as string,
-      model: r['model'] as string,
-      passRate: Number(r['pass_rate']),
-      avgScore: Number(r['avg_score']),
-      avgLatencyMs: Number(r['avg_latency_ms']),
-      totalCostUsd: Number(r['total_cost_usd']),
-      version: r['version'] as string,
-      recordedAt: (r['recorded_at'] as Date).toISOString(),
+      suiteId: r.suite_id as string,
+      model: r.model as string,
+      passRate: Number(r.pass_rate),
+      avgScore: Number(r.avg_score),
+      avgLatencyMs: Number(r.avg_latency_ms),
+      totalCostUsd: Number(r.total_cost_usd),
+      version: r.version as string,
+      recordedAt: (r.recorded_at as Date).toISOString(),
     }));
   } catch (err) {
     logger.warn({ err }, '[replay-store] Failed to load eval baselines');

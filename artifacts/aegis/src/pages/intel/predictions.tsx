@@ -2,14 +2,9 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
   AlertTriangle,
-  BarChart3,
   Brain,
   CheckCircle2,
-  Clock,
   Target,
-  TrendingDown,
-  TrendingUp,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 

@@ -1,5 +1,4 @@
-import type React from 'react';
-import { createContext, useCallback, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useRef, useState } from 'react';
 
 const QUEUE_KEY = 'mobile-shared:sync-queue-v2';
 const CONFLICTS_KEY = 'mobile-shared:sync-conflicts-v2';
@@ -487,7 +486,17 @@ export function SyncEngineProvider({
 
     const setupNetInfo = async () => {
       try {
-        const NetInfo = await import('@react-native-community/netinfo');
+        // optional peer dependency, resolved at runtime in mobile app
+        const NetInfo = (await import(
+          /* @vite-ignore */ '@react-native-community/netinfo' as string
+        )) as {
+          default: {
+            addEventListener: (
+              cb: (state: { isConnected: boolean | null; isInternetReachable: boolean | null }) => void,
+            ) => () => void;
+            fetch: () => Promise<{ isConnected: boolean | null; isInternetReachable: boolean | null }>;
+          };
+        };
 
         netinfoUnsubscribe = NetInfo.default.addEventListener(
           (state: { isConnected: boolean | null; isInternetReachable: boolean | null }) => {

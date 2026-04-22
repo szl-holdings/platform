@@ -45,8 +45,8 @@ export function CampaignBilling({ campaignId, campaignName }: CampaignBillingPro
         body: JSON.stringify({
           priceId,
           mode: 'payment',
-          successUrl: baseUrl + '/alloy/?billing=success',
-          cancelUrl: baseUrl + '/alloy/?billing=cancel',
+          successUrl: `${baseUrl}/alloy/?billing=success`,
+          cancelUrl: `${baseUrl}/alloy/?billing=cancel`,
           metadata: { campaignId, campaignName },
         }),
       });

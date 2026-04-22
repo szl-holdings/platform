@@ -5,7 +5,6 @@ import {
   approvalCommentsTable,
   approvalRequestsTable,
   db,
-  type InsertApprovalRequest,
 } from '@szl-holdings/db';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 

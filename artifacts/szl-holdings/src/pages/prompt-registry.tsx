@@ -19,7 +19,6 @@ import {
   TrendingDown,
   TrendingUp,
   Wand2,
-  XCircle,
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 

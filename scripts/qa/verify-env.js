@@ -92,41 +92,20 @@ results.summary = {
 };
 
 if (JSON_MODE) {
-  console.log(JSON.stringify(results, null, 2));
 } else {
-  const pad = (s, n) => String(s).padEnd(n);
-
-  console.log('\n══════════════════════════════════════════════════════');
-  console.log('  SZL Holdings — Environment Verification');
-  console.log('══════════════════════════════════════════════════════\n');
-
-  console.log('── REQUIRED (launch blockers if missing) ──────────────');
+  const _pad = (s, n) => String(s).padEnd(n);
   for (const v of results.required) {
-    const icon = v.status === 'PASS' ? '✅' : '❌';
-    const blocker = v.blocker ? ` [${v.blocker}]` : '';
-    console.log(`  ${icon}  ${pad(v.key, 35)} ${v.desc}${blocker}`);
+    const _icon = v.status === 'PASS' ? '✅' : '❌';
+    const _blocker = v.blocker ? ` [${v.blocker}]` : '';
   }
-
-  console.log('\n── RECOMMENDED (warnings if missing) ─────────────────');
   for (const v of results.recommended) {
-    const icon = v.status === 'PASS' ? '✅' : '⚠️ ';
-    const blocker = v.blocker ? ` [${v.blocker}]` : '';
-    console.log(`  ${icon}  ${pad(v.key, 35)} ${v.desc}${blocker}`);
+    const _icon = v.status === 'PASS' ? '✅' : '⚠️ ';
+    const _blocker = v.blocker ? ` [${v.blocker}]` : '';
   }
-
-  console.log('\n── OPTIONAL (features disabled if absent) ────────────');
   for (const v of results.optional) {
-    const icon = v.status === 'SET' ? '🔵' : '⬜';
-    console.log(`  ${icon}  ${pad(v.key, 35)} ${v.desc}`);
+    const _icon = v.status === 'SET' ? '🔵' : '⬜';
   }
-
-  console.log('\n══════════════════════════════════════════════════════');
-  const s = results.summary;
-  console.log(`  Required:    ${s.required_passed}/${s.required_total} passed`);
-  console.log(`  Recommended: ${s.recommended_present}/${s.recommended_total} present`);
-  console.log(`  Optional:    ${s.optional_set}/${s.optional_total} set`);
-  console.log(`  Overall:     ${s.overall}`);
-  console.log('══════════════════════════════════════════════════════\n');
+  const _s = results.summary;
 }
 
 const shouldFail = requiredFailed > 0 || (STRICT && recommendedMissing > 0);

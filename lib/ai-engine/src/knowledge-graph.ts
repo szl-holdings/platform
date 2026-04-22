@@ -168,11 +168,7 @@ async function autoLinkEntity(
         ],
       );
     }
-  } catch (err) {
-    console.error(
-      '[knowledge-graph] autoLinkEntity failed:',
-      err instanceof Error ? err.message : String(err),
-    );
+  } catch (_err) {
   }
 }
 
@@ -226,11 +222,7 @@ export async function upsertRelationship(rel: {
        ON CONFLICT DO NOTHING`,
         [id, rel.fromDomain, rel.toDomain, rel.relationshipType, rel.detectedBy ?? 'system'],
       )
-      .catch((err: unknown) => {
-        console.warn(
-          '[knowledge-graph] cross-domain link insert failed:',
-          err instanceof Error ? err.message : String(err),
-        );
+      .catch((_err: unknown) => {
       });
   }
 

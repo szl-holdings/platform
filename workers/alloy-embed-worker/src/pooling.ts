@@ -28,7 +28,7 @@ function clsPooling(tokenVectors: number[][]): number[] {
 }
 
 function meanPooling(tokenVectors: number[][]): number[] {
-  const dim = tokenVectors[0]!.length;
+  const dim = tokenVectors[0]?.length;
   const sum = new Array<number>(dim).fill(0);
 
   for (const vec of tokenVectors) {

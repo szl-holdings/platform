@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { LRUCache } from 'lru-cache';
 import { sendError } from '../lib/api-response';

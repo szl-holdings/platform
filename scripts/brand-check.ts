@@ -31,7 +31,7 @@ const verbose = process.argv.includes('--verbose');
 // ---------------------------------------------------------------------------
 // Brand constants — sourced directly from the registry (no hardcoding)
 // ---------------------------------------------------------------------------
-const REGISTRY_VERSION = registry.version;
+const _REGISTRY_VERSION = registry.version;
 const PLATFORM_COUNT = parseInt(registry.metrics.platformCount.value, 10);
 
 /**
@@ -168,7 +168,7 @@ function isIgnored(fullPath: string): boolean {
     if (IGNORE_DIR_NAMES.has(part)) return true;
   }
   for (const ignored of IGNORE_PATHS_EXACT) {
-    if (rel.startsWith(ignored + '/')) return true;
+    if (rel.startsWith(`${ignored}/`)) return true;
   }
   return false;
 }
@@ -306,30 +306,14 @@ for (const file of allFiles) {
 }
 
 if (verbose) {
-  console.log(`Scanned ${allFiles.length} files against registry v${REGISTRY_VERSION}`);
-  console.log(`Platform count: ${PLATFORM_COUNT}`);
-  console.log(
-    `Deprecated strings: ${[...DEPRECATED_STRINGS_SIMPLE, ...FRONTEND_DEPRECATED_STRINGS].join(', ')}\n`,
-  );
 }
 
 if (totalViolations === 0) {
-  console.log(
-    `\u2705  Brand check passed — ${allFiles.length} files scanned, registry v${REGISTRY_VERSION}\n`,
-  );
   process.exit(0);
 } else {
-  console.error(
-    `\u274C  Brand drift detected — ${totalViolations} violation(s) across ${fileViolations.length} file(s)\n`,
-  );
   for (const { violations } of fileViolations) {
-    for (const v of violations) {
-      console.error(`  ${v.file}:${v.line}:${v.col}  ${v.message}`);
+    for (const _v of violations) {
     }
   }
-  console.error(
-    `\nFix the violations above, or update packages/brand-registry/src/registry.ts\n` +
-      `(deprecatedStrings field) if the brand data has legitimately changed.\n`,
-  );
   process.exit(1);
 }

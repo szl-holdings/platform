@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   Clock,
   GitBranch,
-  RotateCcw,
   Terminal,
   XCircle,
 } from 'lucide-react';

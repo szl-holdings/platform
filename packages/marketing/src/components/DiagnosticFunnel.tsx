@@ -2,7 +2,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertTriangle,
   ArrowLeft,
-  CheckCircle2,
   ChevronRight,
   TrendingUp,
   Zap,

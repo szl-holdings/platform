@@ -2,7 +2,6 @@ import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import {
   ArrowRight,
-  BarChart3,
   Globe,
   Package,
   Ship,
@@ -11,8 +10,6 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,

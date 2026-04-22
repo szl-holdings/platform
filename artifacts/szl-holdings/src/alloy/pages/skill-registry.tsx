@@ -3,13 +3,10 @@ import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  AlertTriangle,
   BarChart2,
-  CheckCircle,
   ChevronDown,
   ChevronUp,
   Clock,
-  Code2,
   Filter,
   Layers,
   Pause,

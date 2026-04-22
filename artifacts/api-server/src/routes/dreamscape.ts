@@ -17,7 +17,6 @@ import { z } from 'zod';
 import {
   handleRouteError,
   parsePagination,
-  sendError,
   sendNotFound,
   sendSuccess,
 } from '../lib/api-response';

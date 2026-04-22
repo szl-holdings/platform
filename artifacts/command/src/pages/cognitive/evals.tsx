@@ -1,7 +1,7 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { EcosystemNav } from '@szl-holdings/shared-ui/ecosystem-nav';
 import { useQueryClient } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'wouter';
 import { ACCENT, apiUrl, DOMAIN_COLORS, fetchJson } from './shared';
 
@@ -673,7 +673,7 @@ export default function CognitiveEvals() {
                     onClick={() => setSelectedSuite(isSelected ? null : suite)}
                     style={{
                       background: isSelected ? `${ACCENT}10` : 'rgba(255,255,255,0.02)',
-                      border: `1px solid ${isSelected ? ACCENT + '50' : 'rgba(255,255,255,0.07)'}`,
+                      border: `1px solid ${isSelected ? `${ACCENT}50` : 'rgba(255,255,255,0.07)'}`,
                       borderRadius: 10,
                       padding: '16px 18px',
                       marginBottom: 10,

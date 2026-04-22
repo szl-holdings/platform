@@ -177,7 +177,7 @@ describe('ATLAS Export API Routes — Integration', () => {
       const result = exportOpenUSDManifest(manifest);
       expect(result.format).toBe('openusd_manifest');
       expect(result.warnings).toBeDefined();
-      expect(result.warnings!.length).toBeGreaterThan(0);
+      expect(result.warnings?.length).toBeGreaterThan(0);
 
       const payload = result.payload as { usdaText: string; integrationNotice: string };
       expect(payload.usdaText).toMatch(/^#usda 1\.0/);

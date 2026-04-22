@@ -134,5 +134,5 @@ export function useAutoCapture(sourceApp: string, domain: string, enabled = true
       document.removeEventListener('submit', handleSubmit);
       client.stop();
     };
-  }, [enabled, sourceApp, domain]);
+  }, [enabled]);
 }

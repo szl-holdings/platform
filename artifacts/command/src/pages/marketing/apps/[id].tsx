@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   Command as CmdIcon,
   Database,
-  Flame,
   Gavel,
   Globe,
   Lock,

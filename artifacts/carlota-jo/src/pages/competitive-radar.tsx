@@ -83,7 +83,7 @@ function DirectionBadge({ direction }: { direction: 'threat' | 'opportunity' | '
   );
 }
 
-const API = import.meta.env.BASE_URL + 'api';
+const API = `${import.meta.env.BASE_URL}api`;
 
 const DEFAULT_COMPETITOR_NAMES = [
   'McKinsey & Company',

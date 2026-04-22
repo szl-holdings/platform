@@ -1213,7 +1213,7 @@ export default function InvestorsDataRoomPage() {
     (extra?: Record<string, unknown>) => ({
       userEmail: user?.email ?? null,
       userId: user?.id ?? null,
-      ...(extra ?? {}),
+      ...extra,
     }),
     [user?.email, user?.id],
   );
@@ -1720,7 +1720,7 @@ export default function InvestorsDataRoomPage() {
                             style={
                               isActive
                                 ? { background: `${doc.color}18`, borderColor: `${doc.color}30`, color: doc.color }
-                                : { color: doc.color + "88" }
+                                : { color: `${doc.color}88` }
                             }
                           >
                             <Icon className="h-3.5 w-3.5" />
@@ -1757,7 +1757,7 @@ export default function InvestorsDataRoomPage() {
                     >
                       <div
                         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.08]"
-                        style={{ color: p.color + "88" }}
+                        style={{ color: `${p.color}88` }}
                       >
                         <Icon className="h-3.5 w-3.5" />
                       </div>

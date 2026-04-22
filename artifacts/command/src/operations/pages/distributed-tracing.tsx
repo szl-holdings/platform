@@ -52,7 +52,7 @@ const SERVICE_COLORS: Record<string, string> = {
 };
 
 function makeTrace(id: string, status: 'ok' | 'error' | 'slow', totalMs: number): Trace {
-  const services = Object.keys(SERVICE_COLORS);
+  const _services = Object.keys(SERVICE_COLORS);
   const spans: Span[] = [
     {
       id: `${id}-s1`,
@@ -194,7 +194,7 @@ function WaterfallView({ trace }: { trace: Trace }) {
   const [selectedSpan, setSelectedSpan] = useState<Span | null>(null);
   const total = trace.totalDurationMs;
 
-  const orderedSpans = [
+  const _orderedSpans = [
     trace.spans[0],
     ...trace.spans.filter((s) => s.parentId === trace.spans[0].id),
     ...trace.spans.filter(
@@ -417,7 +417,7 @@ export default function DistributedTracing() {
                 className="w-full text-left p-3 rounded-lg transition-all"
                 style={{
                   background: selected.id === trace.id ? `${sc.color}08` : DS.surface,
-                  border: `1px solid ${selected.id === trace.id ? sc.color + '30' : DS.border}`,
+                  border: `1px solid ${selected.id === trace.id ? `${sc.color}30` : DS.border}`,
                 }}
               >
                 <div className="flex items-center gap-2 mb-1">

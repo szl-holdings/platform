@@ -1,7 +1,7 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
+import { Card, CardContent, } from '@szl-holdings/shared-ui/ui/card';
 import { useRole } from '@szl-holdings/shared-ui/use-role';
-import { Clock, DollarSign, Download, FileText, Lock, Mail, TrendingUp, Users } from 'lucide-react';
+import { Clock, Download, FileText, Lock, Users } from 'lucide-react';
 import { useState } from 'react';
 
 const lpInvestors = [

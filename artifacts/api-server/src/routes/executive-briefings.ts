@@ -14,7 +14,6 @@
  *   GET  /pulse/executive/brief/:id           — specific brief by ID
  */
 
-import { randomUUID } from 'node:crypto';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   cstEdges,
@@ -24,25 +23,7 @@ import {
   pulseExecBriefsTable,
 } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import type {
-  MemoryEntry,
-  RecentReflection,
-  WorldModelEdge,
-  WorldModelEntity,
-} from '@workspace/executive-briefing';
-import {
-  buildBriefContext,
-  buildCitationManifest,
-  buildCitations,
-  buildSystemPrompt,
-  buildUserPrompt,
-  extractEntityProvenance,
-  gateBrief,
-  getAgentId,
-  parseBriefResponse,
-  SUPPORTED_DOMAINS,
-  type SupportedDomain,
-} from '@workspace/executive-briefing';
+import { type MemoryEntry, type RecentReflection, type WorldModelEdge, type WorldModelEntity, buildBriefContext, buildCitationManifest, buildCitations, buildSystemPrompt, buildUserPrompt, extractEntityProvenance, gateBrief, getAgentId, parseBriefResponse, type SupportedDomain } from '@workspace/executive-briefing';
 import { and, desc, eq, gte, ilike, inArray, or, sql } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
 import { gatewayInfer } from '../lib/ai-gateway';
@@ -644,9 +625,9 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const limit = Math.min(Number(req.query['limit'] ?? 20), 90);
+      const limit = Math.min(Number(req.query.limit ?? 20), 90);
       const domain =
-        typeof req.query['domain'] === 'string' ? normalizeDomain(req.query['domain']) : undefined;
+        typeof req.query.domain === 'string' ? normalizeDomain(req.query.domain) : undefined;
 
       const rows = await db
         .select()
@@ -667,7 +648,7 @@ router.get(
   perUserApiSlidingLimiter,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const id = req.params['id'] as string;
+      const id = req.params.id as string;
       const [row] = await db
         .select()
         .from(pulseExecBriefsTable)

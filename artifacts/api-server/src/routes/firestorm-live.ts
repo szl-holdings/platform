@@ -4,11 +4,10 @@ import {
   firestormAlertsTable,
   firestormAssetsTable,
   firestormComplianceControlsTable,
-  firestormFindingsTable,
   firestormIncidentsTable,
 } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import { and, count, desc, eq, gte, sql } from 'drizzle-orm';
+import { count, desc, } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
@@ -410,7 +409,7 @@ router.get('/firestorm/taxii/feeds', authMiddleware(), async (_req, res) => {
     const feeds = collections.map((c) => ({
       id: c.id,
       name: c.title,
-      url: process.env['TAXII_SERVER_URL'] ?? 'misp.threat.feeds',
+      url: process.env.TAXII_SERVER_URL ?? 'misp.threat.feeds',
       type: 'TAXII 2.1',
       status: c.canRead ? 'active' : 'inactive',
       records: indicators.objectsIngested,

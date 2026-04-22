@@ -13,7 +13,7 @@ import {
 import { getEnv } from '@szl-holdings/env';
 
 let otelInitialized = false;
-let provider: BasicTracerProvider | null = null;
+let _provider: BasicTracerProvider | null = null;
 let inMemoryExporter: InMemorySpanExporter | null = null;
 
 export interface OtelConfig {
@@ -197,7 +197,7 @@ class OtelTracer {
     const actorAttrs = buildActorAttributes(actor);
     const allAttrs: Record<string, string | number | boolean> = {
       ...actorAttrs,
-      ...(extraAttrs ?? {}),
+      ...extraAttrs,
     };
     return this.withSpan(name, fn, allAttrs);
   }
@@ -265,7 +265,6 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
     const otlpUrl = normalizedEndpoint.endsWith('/v1/traces')
       ? normalizedEndpoint
       : `${normalizedEndpoint}/v1/traces`;
-    console.info(`[otel] OTLP exporter configured: ${otlpUrl}`);
     const otlpExporter = new OTLPTraceExporter({ url: otlpUrl });
     spanProcessors.push(new BatchSpanProcessor(otlpExporter));
     activeExporters.push(`otlp:${otlpEndpoint}`);
@@ -283,7 +282,7 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
   });
 
   const tracerProvider = new BasicTracerProvider({ spanProcessors, resource });
-  provider = tracerProvider;
+  _provider = tracerProvider;
 
   api.trace.setGlobalTracerProvider(tracerProvider);
 
@@ -291,9 +290,6 @@ export async function initializeOpenTelemetry(config: OtelConfig): Promise<void>
   globalTracer.refreshTracer();
 
   otelInitialized = true;
-  console.info(
-    `[otel] OpenTelemetry SDK initialized: service=${config.serviceName}, exporters=[${activeExporters.join(', ')}], contextManager=AsyncLocalStorage, propagator=W3CTraceContext`,
-  );
 }
 
 export function isOtelInitialized(): boolean {

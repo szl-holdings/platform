@@ -189,7 +189,7 @@ function buildContextBlock(
 
   const block = lines.join('\n');
   return block.length > config.maxContextLength
-    ? block.slice(0, config.maxContextLength) + '\n[truncated]'
+    ? `${block.slice(0, config.maxContextLength)}\n[truncated]`
     : block;
 }
 

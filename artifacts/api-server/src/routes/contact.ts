@@ -1,8 +1,8 @@
 import { db, pool, supportTicketsTable } from '@szl-holdings/db';
-import { createHmac } from 'crypto';
+import { createHmac } from 'node:crypto';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
-import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
+import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { contactSubmitSchema, validateBody, validateQuery } from '../lib/validation';
 import { adminGuard } from '../middlewares/admin-guard';

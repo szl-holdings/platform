@@ -48,7 +48,6 @@ import {
   billingPlansTable,
   db,
   dosAnalyticsEventsTable,
-  invoicesTable,
   organizationsTable,
   pageViewEventsTable,
   revenueEventsTable,
@@ -96,7 +95,7 @@ function addWeeks(d: Date, n: number): Date {
   next.setUTCDate(next.getUTCDate() + n * 7);
   return next;
 }
-function weekStart(d: Date): Date {
+function _weekStart(d: Date): Date {
   const tmp = new Date(d);
   const day = tmp.getUTCDay() || 7;
   tmp.setUTCDate(tmp.getUTCDate() - (day - 1));
@@ -560,8 +559,8 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const granularity = (req.query['granularity'] as string) || 'month';
-      const periods = Math.min(parseInt((req.query['periods'] as string) ?? '6', 10), 12);
+      const granularity = (req.query.granularity as string) || 'month';
+      const periods = Math.min(parseInt((req.query.periods as string) ?? '6', 10), 12);
 
       const isWeekly = granularity === 'week';
       const now = new Date();
@@ -593,7 +592,7 @@ router.get(
               janFour.getTime() - (dayOfWeek - 1) * 86400000 + (w! - 1) * 7 * 86400000,
             );
           } else {
-            cohortDate = new Date(key + '-01T00:00:00Z');
+            cohortDate = new Date(`${key}-01T00:00:00Z`);
           }
           cohorts[key] = { userIds: [], cohortKey: key, cohortDate };
         }
@@ -606,7 +605,7 @@ router.get(
       // Step 4: Fetch audit events for ALL cohort users as activity signal.
       // Using audit events (not lastLoginAt snapshot) gives event-per-period accuracy —
       // a user can show up in any period where they had activity, not just their most-recent.
-      const allCohortUserIds = cohortKeys.flatMap((ck) => cohorts[ck]!.userIds);
+      const allCohortUserIds = cohortKeys.flatMap((ck) => cohorts[ck]?.userIds);
       const userActivityByPeriod = new Map<number, Set<string>>(); // userId → Set<periodKey>
 
       if (allCohortUserIds.length > 0) {
@@ -636,7 +635,7 @@ router.get(
             const pk = isWeekly ? weekKey(ev.createdAt) : monthKey(ev.createdAt);
             if (!userActivityByPeriod.has(ev.userId))
               userActivityByPeriod.set(ev.userId, new Set());
-            userActivityByPeriod.get(ev.userId)!.add(pk);
+            userActivityByPeriod.get(ev.userId)?.add(pk);
           }
         }
       }

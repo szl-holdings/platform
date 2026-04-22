@@ -31,15 +31,13 @@ import {
 import {
   ALL_GOLDEN_QUERIES,
   ALL_MOCK_CORPORA,
-  aggregateMetrics,
   computeAllMetrics,
   computeLatencyPercentiles,
   type GoldenQuery,
   type RetrievalAdapter,
   type RetrievedResult,
-  runRetrievalEval,
 } from '@workspace/aef-evals';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 const args = process.argv.slice(2);
 
@@ -54,9 +52,9 @@ const WARMUP = getArg('warmup', 10);
 const LIVE_MODE = args.includes('--live');
 
 const AEF_BASE_URL = (
-  process.env['AEF_API_URL'] ?? 'http://localhost:5000/alloy-embedding-api'
+  process.env.AEF_API_URL ?? 'http://localhost:5000/alloy-embedding-api'
 ).replace(/\/$/, '');
-const AEF_TENANT_ID = process.env['AEF_BENCH_TENANT_ID'] ?? 'bench-tenant';
+const AEF_TENANT_ID = process.env.AEF_BENCH_TENANT_ID ?? 'bench-tenant';
 
 function buildLiveAdapter(): RetrievalAdapter {
   return {
@@ -187,21 +185,11 @@ async function benchDomain(domain: AEFDomain): Promise<{
 }
 
 async function main(): Promise<void> {
-  const line = '─'.repeat(100);
-
-  console.log('\n' + line);
-  console.log('  AEF BENCHMARK');
-  console.log(
-    `  Mode     : ${LIVE_MODE ? `LIVE  (${AEF_BASE_URL})` : 'FIXTURE (mock corpus, no-GPU)'}`,
-  );
-  console.log(`  Platform : ${process.platform}  Node: ${process.version}`);
-  console.log(`  Iterations: ${ITERATIONS} per domain  Warmup: ${WARMUP}`);
-  console.log(`  Profiles: ${AEF_DOMAIN_PROFILE_DOMAINS.length} domains`);
-  console.log(line + '\n');
+  const _line = '─'.repeat(100);
 
   const domainW = 30;
   const numW = 10;
-  const header =
+  const _header =
     pad('Domain', domainW) +
     pad('p50 ms', numW) +
     pad('p95 ms', numW) +
@@ -211,8 +199,6 @@ async function main(): Promise<void> {
     pad('recall@k', numW) +
     pad('nDCG@k', numW) +
     'MRR';
-  console.log(header);
-  console.log('─'.repeat(header.length + 3));
 
   const allLatencies: number[] = [];
   let globalRecall = 0;
@@ -230,7 +216,7 @@ async function main(): Promise<void> {
     globalMrr += result.mrr;
 
     const l = result.latencies;
-    const row =
+    const _row =
       pad(domain, domainW) +
       pad(fmt(l.p50Ms), numW) +
       pad(fmt(l.p95Ms), numW) +
@@ -240,13 +226,11 @@ async function main(): Promise<void> {
       pad(fmt(result.recall, 3), numW) +
       pad(fmt(result.ndcg, 3), numW) +
       fmt(result.mrr, 3);
-    console.log(row);
   }
 
   const n = AEF_DOMAIN_PROFILE_DOMAINS.length;
   const overall = computeLatencyPercentiles(allLatencies);
-  console.log('─'.repeat(header.length + 3));
-  const summaryRow =
+  const _summaryRow =
     pad('OVERALL', domainW) +
     pad(fmt(overall.p50Ms), numW) +
     pad(fmt(overall.p95Ms), numW) +
@@ -256,19 +240,11 @@ async function main(): Promise<void> {
     pad(fmt(globalRecall / n, 3), numW) +
     pad(fmt(globalNdcg / n, 3), numW) +
     fmt(globalMrr / n, 3);
-  console.log(summaryRow);
-
-  console.log('\n' + line);
   if (LIVE_MODE) {
-    console.log('  Benchmark complete. Ran against live AEF hybrid-search stack.');
   } else {
-    console.log('  Benchmark complete (fixture mode). All operations ran on CPU without GPU.');
-    console.log('  Use --live to benchmark the live embed + hybrid-search + rerank stack.');
   }
-  console.log(line + '\n');
 }
 
-main().catch((err) => {
-  console.error('[aef-bench] Fatal error:', err);
+main().catch((_err) => {
   process.exit(1);
 });

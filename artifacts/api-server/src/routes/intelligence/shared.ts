@@ -1,22 +1,12 @@
-import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
-import { openai } from '@szl-holdings/ai-engine/providers/openai';
+
 import { db, intelligenceCacheTable, pool } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import crypto from 'crypto';
-import { eq, lt, sql } from 'drizzle-orm';
-import express, { type IRouter, type RequestHandler, Router } from 'express';
+import { eq, sql } from 'drizzle-orm';
+import type { RequestHandler, } from 'express';
 import rateLimit from 'express-rate-limit';
 import { LRUCache } from 'lru-cache';
-import {
-  getAiModelById,
-  getAiModels,
-  getModelObservabilitySummary,
-} from '../../lib/ai-model-observability';
-import { handleRouteError, sendError, sendSuccess } from '../../lib/api-response';
 import { logger } from '../../lib/logger';
-import { getRegistrySummary } from '../../lib/model-registry';
 import { redisGet, redisSet } from '../../lib/redis-client.js';
-import { authMiddleware } from '../../middlewares/auth';
 export type AnthropicMessageParam = {
   role: 'user' | 'assistant';
   content: string | { type: string; text: string }[];

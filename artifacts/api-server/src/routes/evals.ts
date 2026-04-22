@@ -32,7 +32,7 @@ import {
 } from '@workspace/eval-forge';
 import { defaultMemoryStore } from '@workspace/memory-fabric';
 import { defaultTraceStore } from '@workspace/trace-graph';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { buildDefaultExecutor, defaultExecutorFactory } from '../lib/eval-executors';
@@ -85,9 +85,9 @@ const aefRunStore = new Map<string, AEFRunRecord>();
  * via AEF_API_URL for external deployments.
  */
 const AEF_INTERNAL_BASE = (() => {
-  const envUrl = process.env['AEF_API_URL'];
+  const envUrl = process.env.AEF_API_URL;
   if (envUrl) return envUrl.replace(/\/$/, '');
-  const port = process.env['PORT'] ?? '5000';
+  const port = process.env.PORT ?? '5000';
   return `http://localhost:${port}/alloy-embedding-api`;
 })();
 
@@ -182,11 +182,11 @@ loadRecentRunsFromDb(200)
   })
   .catch(() => {});
 
-async function runAndPersistNightly(): Promise<void> {
+async function _runAndPersistNightly(): Promise<void> {
   try {
     const baselineStore = new Map<string, EvalRunReport>(
       Array.from(runStore.values()).reduce((acc, r) => {
-        if (!acc.has(r.suiteId) || acc.get(r.suiteId)!.runAt < r.runAt) {
+        if (!acc.has(r.suiteId) || acc.get(r.suiteId)?.runAt < r.runAt) {
           acc.set(r.suiteId, r);
         }
         return acc;
@@ -351,7 +351,7 @@ function buildVariantExecutor(
   promptId: string,
   suiteDomain?: string,
 ) {
-  const runtimeKnobs = STRATEGY_TO_RUNTIME[strategy] ?? STRATEGY_TO_RUNTIME['default']!;
+  const runtimeKnobs = STRATEGY_TO_RUNTIME[strategy] ?? STRATEGY_TO_RUNTIME.default!;
   const pricePer1K = MODEL_PRICING_PER_1K[model] ?? MODEL_PRICING_PER_1K['gpt-4o-mini']!;
   const providerMap = MODEL_TO_PROVIDER[model];
   const promptResolution = resolveVariantPrompt(promptId);
@@ -946,7 +946,7 @@ router.post(
         Array.from(runStore.values())
           .filter((r) => suitesToRun.some((s: any) => s.suiteId === r.suiteId))
           .reduce((acc: any, run: any) => {
-            if (!acc.has(run.suiteId) || (acc.get(run.suiteId) as any)!.runAt < run.runAt) {
+            if (!acc.has(run.suiteId) || (acc.get(run.suiteId) as any)?.runAt < run.runAt) {
               acc.set(run.suiteId, run);
             }
             return acc;

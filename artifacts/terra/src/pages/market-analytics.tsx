@@ -1,28 +1,16 @@
-import { cn } from '@szl-holdings/shared-ui/utils';
+
 import {
-  Activity,
-  ArrowRight,
   BarChart3,
-  Building2,
-  DollarSign,
-  Filter,
-  Globe,
-  Layers,
-  MapPin,
-  RefreshCw,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
   Line,
   LineChart,
-  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -192,7 +180,7 @@ const SCORE_COLOR = (score: number) =>
   score >= 80 ? '#34d399' : score >= 65 ? '#d4a054' : score >= 50 ? '#f97316' : '#ef4444';
 
 export default function MarketAnalyticsPage() {
-  const [propertyClass, setPropertyClass] = useState<PropertyClass>('all');
+  const [_propertyClass, _setPropertyClass] = useState<PropertyClass>('all');
   const [timeRange, setTimeRange] = useState<TimeRange>('1y');
   const [sortBy, setSortBy] = useState<'market_score' | 'cap_rate' | 'rent_chg' | 'vacancy'>(
     'market_score',

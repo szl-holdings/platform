@@ -3,22 +3,16 @@ import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
-  Activity,
-  AlertTriangle,
-  ArrowUpRight,
   BarChart3,
   Building2,
   CheckCircle2,
   ChevronRight,
-  Clock,
   DollarSign,
   Globe,
   Layers,
   Link2,
-  Plus,
   RefreshCw,
   Target,
-  TrendingUp,
   Users,
   Zap,
 } from 'lucide-react';

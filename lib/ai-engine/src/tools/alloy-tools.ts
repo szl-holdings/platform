@@ -527,7 +527,7 @@ const PROPOSE_ONLY_BLOCKED = new Set([
 ]);
 
 export function getExecutionMode(): ExecutionMode {
-  const raw = process.env['AI_EXECUTION_MODE'] ?? 'propose_only';
+  const raw = process.env.AI_EXECUTION_MODE ?? 'propose_only';
   if (
     raw === 'observe_only' ||
     raw === 'propose_only' ||
@@ -619,7 +619,7 @@ function checkTenantBoundary(
   contextTenantId: string | undefined,
 ): { violation: boolean; reason: string | null } {
   if (!contextTenantId) return { violation: false, reason: null };
-  const argTenant = typeof args['tenantId'] === 'string' ? args['tenantId'] : null;
+  const argTenant = typeof args.tenantId === 'string' ? args.tenantId : null;
   if (argTenant && argTenant !== contextTenantId) {
     return {
       violation: true,
@@ -786,15 +786,15 @@ async function executeToolInternal(
   switch (toolName) {
     case 'lookup_workflow':
       return {
-        id: args['workflowId'],
-        name: `Workflow ${args['workflowId']}`,
+        id: args.workflowId,
+        name: `Workflow ${args.workflowId}`,
         status: 'active',
         steps: 5,
         lastRunAt: new Date().toISOString(),
       };
     case 'lookup_signal':
       return {
-        id: args['signalId'],
+        id: args.signalId,
         severity: 'high',
         source: 'lyte-observability',
         timestamp: new Date().toISOString(),
@@ -802,15 +802,15 @@ async function executeToolInternal(
       };
     case 'lookup_owner':
       return {
-        id: args['ownerId'],
+        id: args.ownerId,
         name: 'Operator',
         role: 'platform-operator',
         activeAssignments: 3,
       };
     case 'lookup_case':
       return {
-        id: args['caseId'],
-        title: `Case ${args['caseId']}`,
+        id: args.caseId,
+        title: `Case ${args.caseId}`,
         status: 'open',
         severity: 'high',
         assignedTo: null,
@@ -818,19 +818,19 @@ async function executeToolInternal(
     case 'notify_team':
       return {
         notified: true,
-        channel: args['channel'],
-        message: args['message'],
+        channel: args.channel,
+        message: args.message,
         sentAt: new Date().toISOString(),
       };
     case 'create_case':
       return { id: `case-${Date.now()}`, created: true, ...args, status: 'open' };
     case 'update_case':
-      return { updated: true, caseId: args['caseId'], changes: args };
+      return { updated: true, caseId: args.caseId, changes: args };
     case 'close_case':
       return {
         closed: true,
-        caseId: args['caseId'],
-        resolution: args['resolution'],
+        caseId: args.caseId,
+        resolution: args.resolution,
         closedAt: new Date().toISOString(),
       };
     case 'create_action_item':
@@ -838,66 +838,66 @@ async function executeToolInternal(
     case 'assign_owner':
       return {
         assigned: true,
-        entityType: args['entityType'],
-        entityId: args['entityId'],
-        newOwner: args['newOwner'],
+        entityType: args.entityType,
+        entityId: args.entityId,
+        newOwner: args.newOwner,
       };
     case 'open_workflow':
-      return { opened: true, workflowId: args['workflowId'], startedAt: new Date().toISOString() };
+      return { opened: true, workflowId: args.workflowId, startedAt: new Date().toISOString() };
     case 'close_workflow':
-      return { closed: true, workflowId: args['workflowId'], resolution: args['resolution'] };
+      return { closed: true, workflowId: args.workflowId, resolution: args.resolution };
     case 'reopen_workflow':
       return {
         reopened: true,
-        workflowId: args['workflowId'],
-        reason: args['reason'],
+        workflowId: args.workflowId,
+        reason: args.reason,
         reopenedAt: new Date().toISOString(),
       };
     case 'containment_step':
       return {
         executed: true,
-        containmentType: args['containmentType'],
-        targetId: args['targetId'],
+        containmentType: args.containmentType,
+        targetId: args.targetId,
         executedAt: new Date().toISOString(),
       };
     case 'recovery_step':
       return {
         executed: true,
-        recoveryType: args['recoveryType'],
-        targetId: args['targetId'],
+        recoveryType: args.recoveryType,
+        targetId: args.targetId,
         executedAt: new Date().toISOString(),
       };
     case 'generate_executive_brief':
       return {
         generated: true,
-        subjectId: args['subjectId'],
-        subjectType: args['subjectType'],
+        subjectId: args.subjectId,
+        subjectType: args.subjectType,
         briefId: `brief-${Date.now()}`,
         generatedAt: new Date().toISOString(),
       };
     case 'route_for_approval':
       return {
         routed: true,
-        approver: `approver-${args['approvalLevel']}`,
+        approver: `approver-${args.approvalLevel}`,
         estimatedResponseTime: '15m',
       };
     case 'request_human_review':
       return {
         reviewRequested: true,
         reviewId: `review-${Date.now()}`,
-        urgency: args['urgency'] || 'standard',
+        urgency: args.urgency || 'standard',
       };
     case 'append_audit_note':
-      return { appended: true, recordId: args['recordId'], noteId: `note-${Date.now()}` };
+      return { appended: true, recordId: args.recordId, noteId: `note-${Date.now()}` };
     case 'fetch_connector_context':
       return {
-        connector: args['connectorType'],
+        connector: args.connectorType,
         results: [],
-        query: args['query'],
+        query: args.query,
         fetchedAt: new Date().toISOString(),
       };
     case 'close_action':
-      return { closed: true, actionId: args['actionId'], resolution: args['resolution'] };
+      return { closed: true, actionId: args.actionId, resolution: args.resolution };
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }

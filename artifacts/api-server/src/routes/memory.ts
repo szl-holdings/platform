@@ -7,9 +7,8 @@ import {
 } from '@workspace/memory-fabric/behaviors';
 import { applyRetentionDefaults, redactEntry } from '@workspace/memory-fabric/retention';
 import { defaultMemoryStore } from '@workspace/memory-fabric/store';
-import type { MemoryEntry, MemoryType, SensitivityLevel } from '@workspace/memory-fabric/types';
-import { MemoryEntrySchema, MemoryTypeSchema } from '@workspace/memory-fabric/types';
-import { randomUUID } from 'crypto';
+import { type MemoryEntry, type MemoryType, type SensitivityLevel, MemoryEntrySchema, MemoryTypeSchema } from '@workspace/memory-fabric/types';
+import { randomUUID } from 'node:crypto';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {

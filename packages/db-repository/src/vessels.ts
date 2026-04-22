@@ -5,9 +5,8 @@ import {
   db,
   vesselsTable,
   vesselsPositionsTable,
-  voyagesTable,
 } from "@szl-holdings/db";
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { desc, eq, } from "drizzle-orm";
 
 export class VesselsRepository {
   async findVesselById(id: number) {

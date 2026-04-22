@@ -3,8 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
@@ -159,14 +158,14 @@ const fmt = (n: number) =>
       : `$${n}`;
 
 function CheckBadge({ label, status }: { label: string; status: string }) {
-  const colors = useColors();
+  const _colors = useColors();
   const passed = status === 'clear' || status === 'verified' || status === 'checked';
   const failed = status === 'flag' || status === 'unverified' || status === 'failed';
   const color = passed ? '#34d399' : failed ? '#ef4444' : '#60a5fa';
   const icon: FeatherIconName = passed ? 'check' : failed ? 'x' : 'clock';
 
   return (
-    <View style={[styles.checkBadge, { backgroundColor: color + '12', borderColor: color + '30' }]}>
+    <View style={[styles.checkBadge, { backgroundColor: `${color}12`, borderColor: `${color}30` }]}>
       <Feather name={icon} size={9} color={color} />
       <Text style={[styles.checkLabel, { color }]}>{label}</Text>
     </View>
@@ -205,7 +204,7 @@ function ApplicationCard({
         styles.appCard,
         {
           backgroundColor: colors.surface,
-          borderColor: expanded ? statusColor + '40' : colors.border,
+          borderColor: expanded ? `${statusColor}40` : colors.border,
         },
       ]}
     >
@@ -213,7 +212,7 @@ function ApplicationCard({
         <View
           style={[
             styles.statusIconWrap,
-            { backgroundColor: statusColor + '15', borderColor: statusColor + '30' },
+            { backgroundColor: `${statusColor}15`, borderColor: `${statusColor}30` },
           ]}
         >
           <Feather name={STATUS_ICONS[app.status]} size={14} color={statusColor} />
@@ -228,7 +227,7 @@ function ApplicationCard({
           <View
             style={[
               styles.statusPill,
-              { backgroundColor: statusColor + '15', borderColor: statusColor + '30' },
+              { backgroundColor: `${statusColor}15`, borderColor: `${statusColor}30` },
             ]}
           >
             <Text style={[styles.statusPillText, { color: statusColor }]}>{app.status}</Text>
@@ -390,7 +389,7 @@ export default function TenantScreeningScreen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · SCREENING</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · SCREENING</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Tenant Screening</Text>
         </View>
         <View
@@ -400,7 +399,7 @@ export default function TenantScreeningScreen() {
           ]}
         >
           <Text style={[styles.pendingText, { color: '#60a5fa' }]}>
-            {counts['pending'] ?? 0} pending
+            {counts.pending ?? 0} pending
           </Text>
         </View>
       </View>
@@ -408,15 +407,15 @@ export default function TenantScreeningScreen() {
       <View style={styles.summaryStrip}>
         {[
           { label: 'Total', value: displayApplications.length, color: colors.cream },
-          { label: 'Approved', value: counts['approved'] ?? 0, color: '#34d399' },
+          { label: 'Approved', value: counts.approved ?? 0, color: '#34d399' },
           {
             label: 'In Review',
-            value: (counts['in-review'] ?? 0) + (counts['pending'] ?? 0),
+            value: (counts['in-review'] ?? 0) + (counts.pending ?? 0),
             color: '#60a5fa',
           },
           {
             label: 'Action Needed',
-            value: (counts['more-info'] ?? 0) + (counts['denied'] ?? 0),
+            value: (counts['more-info'] ?? 0) + (counts.denied ?? 0),
             color: '#ef4444',
           },
         ].map((stat, i) => (
@@ -443,7 +442,7 @@ export default function TenantScreeningScreen() {
               styles.filterChip,
               {
                 borderColor: statusFilter === f.key ? ACCENT : colors.border,
-                backgroundColor: statusFilter === f.key ? ACCENT + '15' : 'transparent',
+                backgroundColor: statusFilter === f.key ? `${ACCENT}15` : 'transparent',
               },
             ]}
           >

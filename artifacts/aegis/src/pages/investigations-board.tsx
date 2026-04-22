@@ -5,29 +5,18 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
   AlertTriangle,
-  ArrowRight,
   BookOpen,
   Brain,
   CheckCircle2,
-  ChevronDown,
-  ChevronRight,
   Circle,
   Clock,
-  Eye,
   FileText,
-  Layers,
   Lightbulb,
-  Link2,
   Lock,
-  Minus,
   Network,
   Plus,
   type Search,
-  Shield,
-  Tag,
   Target,
-  User,
-  XCircle,
   Zap,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -292,7 +281,7 @@ interface InvestigationsPayload {
 function formatTimeShort(dateStr: string): string {
   try {
     const d = new Date(dateStr);
-    return d.toISOString().slice(11, 16) + ' UTC';
+    return `${d.toISOString().slice(11, 16)} UTC`;
   } catch {
     return dateStr;
   }
@@ -415,7 +404,7 @@ export default function InvestigationsBoard() {
     if (!activeCaseFromLive) return FALLBACK_SIGNALS;
     const linkedIncidents = activeCaseFromLive.linkedIncidents ?? [];
     if (linkedIncidents.length === 0) return FALLBACK_SIGNALS;
-    return linkedIncidents.map((inc, i) => ({
+    return linkedIncidents.map((inc, _i) => ({
       id: `SIG-${String(inc.id).padStart(3, '0')}`,
       type: inc.sourceRef ?? 'detection',
       source: inc.source ?? 'SIEM',
@@ -570,7 +559,7 @@ export default function InvestigationsBoard() {
                   <div key={i} className="relative flex gap-4 pb-6">
                     <div
                       className="absolute left-[-16px] w-4 h-4 rounded-full border-2 border-[#070A10] flex items-center justify-center shrink-0 mt-0.5"
-                      style={{ backgroundColor: color + '22', borderColor: color + '44' }}
+                      style={{ backgroundColor: `${color}22`, borderColor: `${color}44` }}
                     >
                       <Icon className="w-2 h-2" style={{ color }} />
                     </div>
@@ -579,7 +568,7 @@ export default function InvestigationsBoard() {
                         <span className="text-[10px] font-mono text-white/40">{ev.at}</span>
                         <span
                           className="text-[9px] font-mono px-1 py-0.5 rounded capitalize"
-                          style={{ backgroundColor: color + '15', color }}
+                          style={{ backgroundColor: `${color}15`, color }}
                         >
                           {ev.type}
                         </span>
@@ -648,7 +637,7 @@ export default function InvestigationsBoard() {
               >
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: (ENTITY_COLORS[ent.type] ?? '#3b82f6') + '18' }}
+                  style={{ backgroundColor: `${ENTITY_COLORS[ent.type] ?? '#3b82f6'}18` }}
                 >
                   <Network
                     className="w-4 h-4"

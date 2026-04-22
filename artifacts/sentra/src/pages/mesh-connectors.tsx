@@ -5,13 +5,10 @@ import {
   CheckCircle2,
   Clock,
   Pin,
-  RefreshCcw,
   Server,
-  Shield,
 } from 'lucide-react';
 import { useState } from 'react';
-import type { TrustState } from '@/data/agent-mesh';
-import { agentMesh } from '@/data/agent-mesh';
+import { type TrustState, agentMesh } from '@/data/agent-mesh';
 
 const TRUST_STYLES: Record<TrustState, string> = {
   trusted: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',

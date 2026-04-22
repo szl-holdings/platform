@@ -8,7 +8,6 @@ import {
 } from '@lyte/lib/demo-mode';
 import {
   Activity,
-  AlertTriangle,
   Anchor,
   ArrowRight,
   Brain,
@@ -17,16 +16,12 @@ import {
   CheckCircle2,
   ChevronRight,
   CircleDot,
-  Clock,
-  Eye,
   Loader2,
   Play,
   Radio,
   RotateCcw,
   Shield,
   Target,
-  Waves,
-  X,
   XCircle,
   Zap,
 } from 'lucide-react';
@@ -125,7 +120,7 @@ function PhaseTrack({ currentPhase, running }: { currentPhase: PrismPhase; runni
                     : isActive
                       ? `${color}18`
                       : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${isDone ? color + '40' : isActive ? color + '60' : 'rgba(255,255,255,0.06)'}`,
+                  border: `1px solid ${isDone ? `${color}40` : isActive ? `${color}60` : 'rgba(255,255,255,0.06)'}`,
                   boxShadow: isActive && running ? `0 0 12px ${color}30` : 'none',
                 }}
               >
@@ -142,7 +137,7 @@ function PhaseTrack({ currentPhase, running }: { currentPhase: PrismPhase; runni
               </div>
               <span
                 className="text-[8px] font-mono uppercase tracking-wider"
-                style={{ color: isActive ? color : isDone ? color + '80' : TEXT.muted }}
+                style={{ color: isActive ? color : isDone ? `${color}80` : TEXT.muted }}
               >
                 {PHASE_LABELS[phase]}
               </span>
@@ -252,7 +247,7 @@ function WorkflowStepList({ steps, phase }: { steps: WorkflowStep[]; phase: Pris
             className="flex items-start gap-2.5 p-2 rounded transition-all duration-300"
             style={{
               background: isRunning ? `${phaseColor}08` : 'transparent',
-              border: `1px solid ${isRunning ? phaseColor + '20' : 'transparent'}`,
+              border: `1px solid ${isRunning ? `${phaseColor}20` : 'transparent'}`,
             }}
           >
             <div className="mt-0.5 flex-shrink-0 w-4 h-4 flex items-center justify-center">
@@ -455,7 +450,7 @@ function ApprovalGate({
             >
               {rec.executionLog.map((log, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  {i === rec.executionLog!.length - 1 ? (
+                  {i === (rec.executionLog?.length ?? 0) - 1 ? (
                     <Loader2
                       className="w-2.5 h-2.5 animate-spin shrink-0"
                       style={{ color: '#4ab87a' }}
@@ -550,7 +545,7 @@ function ScenarioSelector({
             className="flex items-center gap-2 px-3 py-2 rounded-md text-[10px] font-medium transition-all"
             style={{
               background: isActive ? `${s.color}12` : 'rgba(255,255,255,0.02)',
-              border: `1px solid ${isActive ? s.color + '40' : 'rgba(255,255,255,0.06)'}`,
+              border: `1px solid ${isActive ? `${s.color}40` : 'rgba(255,255,255,0.06)'}`,
               color: isActive ? s.color : TEXT.secondary,
               cursor: disabled ? 'not-allowed' : 'pointer',
               opacity: disabled && !isActive ? 0.5 : 1,

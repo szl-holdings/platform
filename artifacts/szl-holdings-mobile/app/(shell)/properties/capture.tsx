@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Alert,
   Image,
@@ -21,7 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 interface CapturedPhoto {
@@ -56,14 +56,14 @@ export default function CaptureScreen() {
         formData.append('lng', String(photos[0].lng));
       }
       photos.forEach((photo, i) => {
-        const filename = 'capture_' + i + '_' + Date.now() + '.jpg';
+        const filename = `capture_${i}_${Date.now()}.jpg`;
         formData.append('photos', {
           uri: photo.uri,
           name: filename,
           type: 'image/jpeg',
         } as unknown as Blob);
       });
-      await fetch(API_BASE + '/terra/captures', {
+      await fetch(`${API_BASE}/terra/captures`, {
         method: 'POST',
         body: formData,
       });
@@ -112,14 +112,15 @@ export default function CaptureScreen() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: 0.8,
       });
-      if (!result.canceled && result.assets![0]) {
+      if (!result.canceled && result.assets?.[0]) {
+        const asset = result.assets[0];
         const gps = await getLocation();
         setPhotos((prev) => [
           ...prev,
           {
-            uri: result.assets![0].uri,
-            lat: gps?.lat,
-            lng: gps?.lng,
+            uri: asset.uri,
+            lat: gps?.lat ?? 0,
+            lng: gps?.lng ?? 0,
             timestamp: new Date().toLocaleTimeString(),
           },
         ]);
@@ -135,9 +136,9 @@ export default function CaptureScreen() {
       quality: 0.8,
       exif: true,
     });
-    if (!result.canceled && result.assets![0]) {
+    if (!result.canceled && result.assets?.[0]) {
       const gps = await getLocation();
-      const asset = result.assets![0];
+      const asset = result.assets?.[0];
       setPhotos((prev) => [
         ...prev,
         {
@@ -187,7 +188,7 @@ export default function CaptureScreen() {
           <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>TERRA · FIELD CAPTURE</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Property Capture</Text>
         </View>
-        <View style={[styles.locStatus, { backgroundColor: locStatusConfig.color + '15' }]}>
+        <View style={[styles.locStatus, { backgroundColor: `${locStatusConfig.color}15` }]}>
           <Feather name={locStatusConfig.icon} size={12} color={locStatusConfig.color} />
           <Text style={[styles.locText, { color: locStatusConfig.color }]}>
             {locStatusConfig.label}

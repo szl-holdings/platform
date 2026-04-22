@@ -6,7 +6,6 @@ import {
   eventLogTable,
   maritimeExceptionsTable,
   maritimeVesselsTable,
-  platformSignalsTable,
   portsTable,
   readinessItemsTable,
   voyagesTable,
@@ -215,7 +214,7 @@ async function vesselAuditLog(
   organizationId?: number,
 ) {
   const fullPayload: Record<string, unknown> = {
-    ...(payload ?? {}),
+    ...payload,
     ...(ip ? { _ip: ip } : {}),
     ...(before !== undefined ? { _before: before } : {}),
     ...(after !== undefined ? { _after: after } : {}),

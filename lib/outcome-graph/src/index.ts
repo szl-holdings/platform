@@ -2,14 +2,13 @@ import {
   db,
   outcomeGraphTable,
   outcomeGraphLearningJobsTable,
-  type InsertOutcomeGraph,
   type OutcomeGraph,
   type OutcomeGraphLearningJob,
   type OutcomeDecisionStatus,
   type OutcomeResult,
   type OutcomeDomain,
 } from "@szl-holdings/db";
-import { eq, and, desc, sql, gte, count, avg } from "drizzle-orm";
+import { eq, and, desc, gte, count, avg } from "drizzle-orm";
 
 export type {
   OutcomeGraph,

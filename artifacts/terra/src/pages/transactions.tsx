@@ -6,11 +6,9 @@ import {
   CheckCircle,
   ChevronDown,
   ChevronUp,
-  ClipboardList,
-  Clock,
 } from 'lucide-react';
 import { useState } from 'react';
-import { AuditPanel, formatCurrency, WorkflowTraceView } from '@/components/brokerage-ui';
+import { AuditPanel, formatCurrency, } from '@/components/brokerage-ui';
 import { type Transaction, type TransactionStep, transactions } from '@/data/brokerage';
 
 const stepStatusConfig = {

@@ -173,28 +173,21 @@ function main() {
       );
     }
     if (failures.length > 0) {
-      console.error('README portfolio drift detected:');
-      for (const e of failures) console.error('  - ' + e);
+      for (const _e of failures) {}
       process.exit(1);
     }
-    console.log(
-      `OK: README portfolio table is in sync (${config.domainPacks.length} rows, ${registry.length} artifacts in registry).`,
-    );
     return;
   }
 
   // Write mode: surface drift warnings but still rewrite the table.
   if (driftErrors.length > 0) {
-    console.warn('Portfolio drift warnings (non-fatal in write mode):');
-    for (const e of driftErrors) console.warn('  - ' + e);
+    for (const _e of driftErrors) {}
   }
 
   if (updated === readme) {
-    console.log('README portfolio table already up to date.');
     return;
   }
   fs.writeFileSync(README_PATH, updated);
-  console.log(`Updated README.md portfolio table (${config.domainPacks.length} rows).`);
 }
 
 main();

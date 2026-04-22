@@ -1,9 +1,4 @@
-import type {
-  ConnectorAuthConfig,
-  ConnectorRateLimitConfig,
-  ConnectorToolDefinition,
-} from '../connector-interface.js';
-import { BaseConnectorAdapter } from '../connector-interface.js';
+import { type ConnectorAuthConfig, type ConnectorRateLimitConfig, type ConnectorToolDefinition, BaseConnectorAdapter } from '../connector-interface.js';
 
 export class HoneyHiveConnectorAdapter extends BaseConnectorAdapter {
   connectorId = 'honeyhive';

@@ -1,21 +1,5 @@
-import type {
-  EmbedRequest,
-  EmbedResponse,
-  HybridSearchRequest,
-  HybridSearchResponse,
-  IngestRequest,
-  IngestResponse,
-  RerankRequest,
-  RerankResponse,
-} from '@workspace/aef-contracts';
-import {
-  EmbedResponseSchema,
-  HybridSearchResponseSchema,
-  IngestResponseSchema,
-  RerankResponseSchema,
-} from '@workspace/aef-contracts';
-import type { AefClientConfig } from './config.js';
-import { resolveConfig } from './config.js';
+import { type EmbedRequest, type EmbedResponse, type HybridSearchRequest, type HybridSearchResponse, type IngestRequest, type IngestResponse, type RerankRequest, type RerankResponse, EmbedResponseSchema, HybridSearchResponseSchema, IngestResponseSchema, RerankResponseSchema } from '@workspace/aef-contracts';
+import { type AefClientConfig, resolveConfig } from './config.js';
 import {
   AefAuthError,
   AefError,

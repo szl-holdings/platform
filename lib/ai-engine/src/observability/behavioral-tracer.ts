@@ -12,7 +12,7 @@
  *   - Behavioral regression detection: compare new traces against baseline
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 export type DecisionForkType =
   | 'routing'
@@ -107,7 +107,7 @@ function buildDecisionTree(forks: DecisionFork[]): DecisionTreeNode | null {
   for (const fork of forks) {
     const node = nodeMap.get(fork.forkId)!;
     if (fork.parentForkId && nodeMap.has(fork.parentForkId)) {
-      nodeMap.get(fork.parentForkId)!.children.push(node);
+      nodeMap.get(fork.parentForkId)?.children.push(node);
     } else {
       root = node;
     }

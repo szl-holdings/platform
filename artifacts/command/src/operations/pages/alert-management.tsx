@@ -1,32 +1,15 @@
 import { MicroFeedbackWidget } from '@szl-holdings/shared-ui/micro-feedback-widget';
-import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  AlertTriangle,
   ArrowRight,
   Bell,
-  Calendar,
   CheckCircle,
-  ChevronRight,
-  Clock,
-  Edit,
   Globe,
   Mail,
-  Moon,
-  MoreHorizontal,
-  Pause,
   Phone,
-  Play,
   Plus,
-  RefreshCw,
-  Settings,
-  Shield,
   Slack,
-  Sun,
-  Trash2,
   User,
-  Users,
-  Zap,
 } from 'lucide-react';
 import { type ComponentType, type SVGProps, useState } from 'react';
 

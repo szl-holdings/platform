@@ -1,5 +1,4 @@
-import type React from 'react';
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 export type PrismPhase = 'detect' | 'interpret' | 'decide' | 'execute' | 'verify';
 

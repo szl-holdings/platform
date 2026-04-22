@@ -1,16 +1,14 @@
 import { GuardianDecisionEngine } from '@workspace/guardian/decision-engine';
 import type { PlanGraph, PlanStep } from '@workspace/planner';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { extractApprovalInterrupt } from '../approval-interrupt.js';
-import type { CheckpointStore } from '../checkpoint.js';
-import { saveCheckpoint } from '../checkpoint.js';
+import { type CheckpointStore, saveCheckpoint } from '../checkpoint.js';
 import type {
   CognitiveLoopRun,
   ExecuteStepResult,
   PhaseResult,
   ResolvedCognitiveContext,
 } from '../types.js';
-import { GuardianBlockError } from '../types.js';
 
 export type StepExecutorFn = (
   step: PlanStep,

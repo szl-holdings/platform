@@ -270,19 +270,19 @@ export class Dynamics365Adapter extends ServiceAdapter {
   private tokenCache: { token: string; expiresAt: number } | null = null;
 
   private get tenantId(): string | undefined {
-    return process.env['DYNAMICS_TENANT_ID'];
+    return process.env.DYNAMICS_TENANT_ID;
   }
 
   private get clientId(): string | undefined {
-    return process.env['DYNAMICS_CLIENT_ID'];
+    return process.env.DYNAMICS_CLIENT_ID;
   }
 
   private get clientSecret(): string | undefined {
-    return process.env['DYNAMICS_CLIENT_SECRET'];
+    return process.env.DYNAMICS_CLIENT_SECRET;
   }
 
   private get orgUrl(): string | undefined {
-    return process.env['DYNAMICS_ORG_URL'];
+    return process.env.DYNAMICS_ORG_URL;
   }
 
   private async acquireToken(): Promise<string> {
@@ -379,16 +379,16 @@ export class Dynamics365Adapter extends ServiceAdapter {
       '$select=accountid,name,industrycode,revenue,numberofemployees,address1_city,address1_country,modifiedon&$top=50&$orderby=modifiedon desc',
     );
     return raw.map((r) => ({
-      id: String(r['accountid'] ?? ''),
-      name: String(r['name'] ?? ''),
+      id: String(r.accountid ?? ''),
+      name: String(r.name ?? ''),
       industry: String(
-        r['industrycode@OData.Community.Display.V1.FormattedValue'] ?? r['industrycode'] ?? '',
+        r['industrycode@OData.Community.Display.V1.FormattedValue'] ?? r.industrycode ?? '',
       ),
-      revenue: r['revenue'] != null ? Number(r['revenue']) : null,
-      employees: r['numberofemployees'] != null ? Number(r['numberofemployees']) : null,
-      city: String(r['address1_city'] ?? ''),
-      country: String(r['address1_country'] ?? ''),
-      modifiedOn: String(r['modifiedon'] ?? ''),
+      revenue: r.revenue != null ? Number(r.revenue) : null,
+      employees: r.numberofemployees != null ? Number(r.numberofemployees) : null,
+      city: String(r.address1_city ?? ''),
+      country: String(r.address1_country ?? ''),
+      modifiedOn: String(r.modifiedon ?? ''),
     }));
   }
 
@@ -399,17 +399,17 @@ export class Dynamics365Adapter extends ServiceAdapter {
       '$select=contactid,firstname,lastname,emailaddress1,telephone1,jobtitle,_parentcustomerid_value&$top=50&$orderby=modifiedon desc',
     );
     return raw.map((r) => ({
-      id: String(r['contactid'] ?? ''),
-      firstName: String(r['firstname'] ?? ''),
-      lastName: String(r['lastname'] ?? ''),
-      email: String(r['emailaddress1'] ?? ''),
-      phone: r['telephone1'] ? String(r['telephone1']) : null,
-      jobTitle: r['jobtitle'] ? String(r['jobtitle']) : null,
-      accountId: r['_parentcustomerid_value'] ? String(r['_parentcustomerid_value']) : null,
+      id: String(r.contactid ?? ''),
+      firstName: String(r.firstname ?? ''),
+      lastName: String(r.lastname ?? ''),
+      email: String(r.emailaddress1 ?? ''),
+      phone: r.telephone1 ? String(r.telephone1) : null,
+      jobTitle: r.jobtitle ? String(r.jobtitle) : null,
+      accountId: r._parentcustomerid_value ? String(r._parentcustomerid_value) : null,
       accountName: r['_parentcustomerid_value@OData.Community.Display.V1.FormattedValue']
         ? String(r['_parentcustomerid_value@OData.Community.Display.V1.FormattedValue'])
         : null,
-      modifiedOn: String(r['modifiedon'] ?? ''),
+      modifiedOn: String(r.modifiedon ?? ''),
     }));
   }
 
@@ -420,21 +420,21 @@ export class Dynamics365Adapter extends ServiceAdapter {
       '$select=opportunityid,name,stepname,closeprobability,estimatedvalue,estimatedclosedate,_parentaccountid_value,_ownerid_value,modifiedon&$top=50&$orderby=modifiedon desc',
     );
     return raw.map((r) => ({
-      id: String(r['opportunityid'] ?? ''),
-      name: String(r['name'] ?? ''),
-      stage: String(r['stepname'] ?? ''),
-      probability: Number(r['closeprobability'] ?? 0),
-      estimatedRevenue: Number(r['estimatedvalue'] ?? 0),
-      estimatedCloseDate: String(r['estimatedclosedate'] ?? ''),
-      accountId: r['_parentaccountid_value'] ? String(r['_parentaccountid_value']) : null,
+      id: String(r.opportunityid ?? ''),
+      name: String(r.name ?? ''),
+      stage: String(r.stepname ?? ''),
+      probability: Number(r.closeprobability ?? 0),
+      estimatedRevenue: Number(r.estimatedvalue ?? 0),
+      estimatedCloseDate: String(r.estimatedclosedate ?? ''),
+      accountId: r._parentaccountid_value ? String(r._parentaccountid_value) : null,
       accountName: r['_parentaccountid_value@OData.Community.Display.V1.FormattedValue']
         ? String(r['_parentaccountid_value@OData.Community.Display.V1.FormattedValue'])
         : null,
-      ownerId: r['_ownerid_value'] ? String(r['_ownerid_value']) : null,
+      ownerId: r._ownerid_value ? String(r._ownerid_value) : null,
       ownerName: r['_ownerid_value@OData.Community.Display.V1.FormattedValue']
         ? String(r['_ownerid_value@OData.Community.Display.V1.FormattedValue'])
         : null,
-      modifiedOn: String(r['modifiedon'] ?? ''),
+      modifiedOn: String(r.modifiedon ?? ''),
     }));
   }
 
@@ -445,17 +445,17 @@ export class Dynamics365Adapter extends ServiceAdapter {
       '$select=leadid,subject,firstname,lastname,emailaddress1,companyname,leadsourcecode,statuscode,modifiedon&$top=50&$orderby=modifiedon desc',
     );
     return raw.map((r) => ({
-      id: String(r['leadid'] ?? ''),
-      topic: String(r['subject'] ?? ''),
-      firstName: String(r['firstname'] ?? ''),
-      lastName: String(r['lastname'] ?? ''),
-      email: String(r['emailaddress1'] ?? ''),
-      company: String(r['companyname'] ?? ''),
+      id: String(r.leadid ?? ''),
+      topic: String(r.subject ?? ''),
+      firstName: String(r.firstname ?? ''),
+      lastName: String(r.lastname ?? ''),
+      email: String(r.emailaddress1 ?? ''),
+      company: String(r.companyname ?? ''),
       leadScore: null,
       status: String(
-        r['statuscode@OData.Community.Display.V1.FormattedValue'] ?? r['statuscode'] ?? '',
+        r['statuscode@OData.Community.Display.V1.FormattedValue'] ?? r.statuscode ?? '',
       ),
-      modifiedOn: String(r['modifiedon'] ?? ''),
+      modifiedOn: String(r.modifiedon ?? ''),
     }));
   }
 
@@ -466,23 +466,23 @@ export class Dynamics365Adapter extends ServiceAdapter {
       '$select=incidentid,title,severitycode,statecode,prioritycode,_customerid_value,isescalated,modifiedon&$top=50&$orderby=modifiedon desc',
     );
     return raw.map((r) => ({
-      id: String(r['incidentid'] ?? ''),
-      title: String(r['title'] ?? ''),
+      id: String(r.incidentid ?? ''),
+      title: String(r.title ?? ''),
       severity: String(
-        r['severitycode@OData.Community.Display.V1.FormattedValue'] ?? r['severitycode'] ?? '',
+        r['severitycode@OData.Community.Display.V1.FormattedValue'] ?? r.severitycode ?? '',
       ),
       status: String(
-        r['statecode@OData.Community.Display.V1.FormattedValue'] ?? r['statecode'] ?? '',
+        r['statecode@OData.Community.Display.V1.FormattedValue'] ?? r.statecode ?? '',
       ),
       priority: String(
-        r['prioritycode@OData.Community.Display.V1.FormattedValue'] ?? r['prioritycode'] ?? '',
+        r['prioritycode@OData.Community.Display.V1.FormattedValue'] ?? r.prioritycode ?? '',
       ),
-      accountId: r['_customerid_value'] ? String(r['_customerid_value']) : null,
+      accountId: r._customerid_value ? String(r._customerid_value) : null,
       accountName: r['_customerid_value@OData.Community.Display.V1.FormattedValue']
         ? String(r['_customerid_value@OData.Community.Display.V1.FormattedValue'])
         : null,
-      modifiedOn: String(r['modifiedon'] ?? ''),
-      escalated: r['isescalated'] === true,
+      modifiedOn: String(r.modifiedon ?? ''),
+      escalated: r.isescalated === true,
     }));
   }
 
@@ -493,18 +493,18 @@ export class Dynamics365Adapter extends ServiceAdapter {
       '$select=activityid,subject,activitytypecode,statecode,scheduledend,_regardingobjectid_value,modifiedon&$top=50&$orderby=modifiedon desc',
     );
     return raw.map((r) => ({
-      id: String(r['activityid'] ?? ''),
-      subject: String(r['subject'] ?? ''),
-      activityType: String(r['activitytypecode'] ?? ''),
+      id: String(r.activityid ?? ''),
+      subject: String(r.subject ?? ''),
+      activityType: String(r.activitytypecode ?? ''),
       status: String(
-        r['statecode@OData.Community.Display.V1.FormattedValue'] ?? r['statecode'] ?? '',
+        r['statecode@OData.Community.Display.V1.FormattedValue'] ?? r.statecode ?? '',
       ),
-      scheduledEnd: r['scheduledend'] ? String(r['scheduledend']) : null,
-      regardingId: r['_regardingobjectid_value'] ? String(r['_regardingobjectid_value']) : null,
+      scheduledEnd: r.scheduledend ? String(r.scheduledend) : null,
+      regardingId: r._regardingobjectid_value ? String(r._regardingobjectid_value) : null,
       regardingType: r['_regardingobjectid_value@Microsoft.Dynamics.CRM.lookuplogicalname']
         ? String(r['_regardingobjectid_value@Microsoft.Dynamics.CRM.lookuplogicalname'])
         : null,
-      modifiedOn: String(r['modifiedon'] ?? ''),
+      modifiedOn: String(r.modifiedon ?? ''),
     }));
   }
 

@@ -4,13 +4,9 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
-  CheckCircle2,
   Navigation,
-  Thermometer,
-  TrendingDown,
   Waves,
   Wind,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 

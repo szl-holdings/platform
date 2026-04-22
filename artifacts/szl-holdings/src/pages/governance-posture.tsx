@@ -4,12 +4,9 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/api";
-import {
-  ShieldCheck, CheckCircle2, AlertTriangle, XCircle, Clock, Shield,
-  Ship, Building2, Briefcase, Users, Zap, Layers, ArrowRight,
-  ChevronRight, TrendingUp, TrendingDown, BarChart3, Activity,
-  Lock, Eye, FileCheck, ArrowUpRight, GitBranch, Filter,
-  Database, Radio, ExternalLink,
+import {Shield,
+  Ship, Building2, Briefcase, Users, Layers, ArrowRight,
+  ChevronRight, TrendingUp, TrendingDown, Activity,ArrowUpRight, ExternalLink,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -29,7 +26,7 @@ const GREEN = "hsl(142,60%,48%)";
 const YELLOW = "hsl(48,90%,52%)";
 const RED = "hsl(0,72%,54%)";
 const ORANGE = "hsl(30,90%,52%)";
-const BLUE = "hsl(215,72%,58%)";
+const _BLUE = "hsl(215,72%,58%)";
 const PURPLE = "hsl(260,60%,65%)";
 
 interface DomainHealth {
@@ -566,7 +563,7 @@ function LiveActivityTab(props: {
               </div>
 
               <div style={{ minWidth: 110, fontFamily: MONO, fontSize: "0.625rem", color: TEXT_FAINT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={row.requestId}>
-                {row.requestId.length > 14 ? row.requestId.slice(0, 14) + "…" : row.requestId}
+                {row.requestId.length > 14 ? `${row.requestId.slice(0, 14)}…` : row.requestId}
               </div>
 
               <div>
@@ -737,7 +734,7 @@ export default function GovernancePosturePage() {
                               padding: "1.25rem",
                               borderRadius: "9px",
                               background: SURFACE,
-                              border: `1px solid ${d.maturityScore >= 90 ? d.color + "25" : d.maturityScore >= 75 ? "hsla(48,90%,52%,0.15)" : "hsla(0,72%,54%,0.15)"}`,
+                              border: `1px solid ${d.maturityScore >= 90 ? `${d.color}25` : d.maturityScore >= 75 ? "hsla(48,90%,52%,0.15)" : "hsla(0,72%,54%,0.15)"}`,
                               cursor: "pointer",
                               textAlign: "left",
                             }}
@@ -838,7 +835,7 @@ export default function GovernancePosturePage() {
                       {DOMAIN_HEALTH.map(d => {
                         const Icon = d.icon;
                         return (
-                          <button key={d.domain} onClick={() => setActiveDomain(d.domain)} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 0.875rem", borderRadius: 6, background: activeDomain === d.domain ? `${d.color}10` : "transparent", border: `1px solid ${activeDomain === d.domain ? d.color + "28" : "transparent"}`, cursor: "pointer", textAlign: "left" }}>
+                          <button key={d.domain} onClick={() => setActiveDomain(d.domain)} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 0.875rem", borderRadius: 6, background: activeDomain === d.domain ? `${d.color}10` : "transparent", border: `1px solid ${activeDomain === d.domain ? `${d.color}28` : "transparent"}`, cursor: "pointer", textAlign: "left" }}>
                             <div style={{ width: 20, height: 20, borderRadius: 4, background: `${d.color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                               <Icon size={10} style={{ color: d.color }} />
                             </div>
@@ -948,7 +945,7 @@ export default function GovernancePosturePage() {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: i * 0.05 }}
-                        style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr auto", gap: "1rem", alignItems: "center", padding: "1rem 1.25rem", borderRadius: "8px", background: SURFACE, border: `1px solid ${a.status === "escalated" ? RED + "25" : BORDER}` }}
+                        style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr auto", gap: "1rem", alignItems: "center", padding: "1rem 1.25rem", borderRadius: "8px", background: SURFACE, border: `1px solid ${a.status === "escalated" ? `${RED}25` : BORDER}` }}
                       >
                         <div>
                           <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: TEXT, margin: "0 0 0.25rem", lineHeight: 1.3 }}>{a.title}</p>
@@ -995,7 +992,7 @@ export default function GovernancePosturePage() {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: i * 0.05 }}
-                        style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "1rem", alignItems: "center", padding: "1rem 1.25rem", borderRadius: "8px", background: SURFACE, border: `1px solid ${v.status === "open" ? (v.severity === "high" ? RED + "20" : YELLOW + "15") : GREEN + "12"}` }}
+                        style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "1rem", alignItems: "center", padding: "1rem 1.25rem", borderRadius: "8px", background: SURFACE, border: `1px solid ${v.status === "open" ? (v.severity === "high" ? `${RED}20` : `${YELLOW}15`) : `${GREEN}12`}` }}
                       >
                         <div>
                           <div style={{ display: "flex", gap: "0.375rem", marginBottom: "0.375rem", flexWrap: "wrap" }}>

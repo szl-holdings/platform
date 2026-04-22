@@ -55,11 +55,11 @@ function aggregateSignals(): {
   headline: string;
   executiveSummary: string;
 } {
-  const threats: any[] = [];
+  const _threats: any[] = [];
   const alerts: any[] = [];
   const vessels: any[] = [];
   const vesselEvents: any[] = [];
-  const lyteSignals: any[] = [];
+  const _lyteSignals: any[] = [];
   const lyteIncidents: any[] = [];
   const properties: any[] = [];
   const holdings: any[] = [];
@@ -174,7 +174,7 @@ function aggregateSignals(): {
   const executiveSummary = [
     `As of ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} UTC, the SZL ecosystem is operating at ${overallHealth.toUpperCase()} status.`,
     signals.length > 0
-      ? `${signals.length} intelligence signal${signals.length !== 1 ? 's' : ''} identified across ${[...new Set(signals.map((s) => s.domain))].length} domains.`
+      ? `${signals.length} intelligence signal${signals.length !== 1 ? 's' : ''} identified across ${new Set(signals.map((s) => s.domain)).size} domains.`
       : 'No critical signals detected.',
     holdingNav > 0 ? `Portfolio NAV: ${navStr}.` : '',
   ]
@@ -284,7 +284,7 @@ router.get(
   async (req, res) => {
     try {
       const orgId = (req.user?.orgs?.[0]?.orgId as number | undefined) ?? null;
-      const limit = Math.min(Number(req.query['limit'] ?? 30), 90);
+      const limit = Math.min(Number(req.query.limit ?? 30), 90);
 
       const since = new Date();
       since.setDate(since.getDate() - limit);

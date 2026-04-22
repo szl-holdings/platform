@@ -1,32 +1,19 @@
 import { m } from 'framer-motion';
 import {
-  Activity,
   AlertCircle,
   AlertTriangle,
   ArrowRight,
   Building2,
-  CheckCircle2,
-  Clock,
   Database,
-  Eye,
-  Globe,
-  Minus,
-  Radio,
   RefreshCw,
-  Server,
   Shield,
   Ship,
-  TrendingDown,
-  TrendingUp,
-  Wifi,
-  WifiOff,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'wouter';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteNav } from '@/components/SiteNav';
-import { cn } from '@/lib/utils';
 
 const BG = 'hsl(214,16%,4%)';
 const BORDER = 'hsla(0,0%,100%,0.07)';
@@ -252,7 +239,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
 function freshnessAgeLabel(fetchedAt: string, maxStaleMinutes: number): string {
   const match = fetchedAt.match(/T-(\d+)(m|h)/);
   if (!match) return fetchedAt;
-  const val = parseInt(match[1]);
+  const val = parseInt(match[1], 10);
   const unit = match[2];
   const ageMin = unit === 'h' ? val * 60 : val;
   const pct = Math.min(1, ageMin / maxStaleMinutes);
@@ -446,10 +433,10 @@ function ConnectorCard({ connector }: { connector: ConnectorHealth }) {
             }}
           >
             {[
-              { label: 'Last Success', value: connector.lastSuccessAt + ' ago' },
+              { label: 'Last Success', value: `${connector.lastSuccessAt} ago` },
               {
                 label: 'Last Error',
-                value: connector.lastErrorAt ? connector.lastErrorAt + ' ago' : 'None',
+                value: connector.lastErrorAt ? `${connector.lastErrorAt} ago` : 'None',
               },
               { label: 'Ingest Latency', element: <LatencyBar ms={connector.latencyMs} /> },
               { label: 'Record Count', value: connector.recordCount.toLocaleString() },
@@ -746,7 +733,7 @@ export default function HealthFreshnessPage() {
                   Status:
                 </span>
                 {statuses.map((s) => {
-                  const cfg =
+                  const _cfg =
                     s === 'all'
                       ? { color: TEXT_FAINT, bg: 'transparent', border: BORDER }
                       : STATUS_CONFIG[s];

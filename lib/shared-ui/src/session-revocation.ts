@@ -43,9 +43,9 @@ export function detectSessionRevocationCode(body: unknown): string | null {
   if (!body || typeof body !== 'object') return null;
   const record = body as Record<string, unknown>;
   const candidates: unknown[] = [
-    record['code'],
-    (record['error'] as Record<string, unknown> | undefined)?.['code'],
-    (record['data'] as Record<string, unknown> | undefined)?.['code'],
+    record.code,
+    (record.error as Record<string, unknown> | undefined)?.code,
+    (record.data as Record<string, unknown> | undefined)?.code,
   ];
   for (const value of candidates) {
     if (typeof value === 'string' && SESSION_REVOCATION_CODES.has(value)) {
@@ -58,13 +58,13 @@ export function detectSessionRevocationCode(body: unknown): string | null {
 export function extractServerMessage(body: unknown): string | null {
   if (!body || typeof body !== 'object') return null;
   const record = body as Record<string, unknown>;
-  const error = record['error'];
+  const error = record.error;
   if (typeof error === 'string' && error.trim()) return error;
   if (error && typeof error === 'object') {
-    const msg = (error as Record<string, unknown>)['message'];
+    const msg = (error as Record<string, unknown>).message;
     if (typeof msg === 'string' && msg.trim()) return msg;
   }
-  const message = record['message'];
+  const message = record.message;
   if (typeof message === 'string' && message.trim()) return message;
   return null;
 }
@@ -99,7 +99,7 @@ function readCurrentBrowserPath(): string | null {
 export function recordSessionReturnPath(path?: string | null): void {
   if (typeof window === 'undefined') return;
   const target = path ?? readCurrentBrowserPath();
-  if (!target || !target.startsWith('/') || target.startsWith('//')) return;
+  if (!target?.startsWith('/') || target.startsWith('//')) return;
   if (isLoginLikePath(target)) return;
   try {
     window.sessionStorage?.setItem(SESSION_RETURN_PATH_KEY, target);

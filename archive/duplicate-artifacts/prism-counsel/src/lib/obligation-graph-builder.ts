@@ -1,6 +1,5 @@
 import type { GraphEdge, GraphNode } from '@szl-holdings/design-system';
-import type { Matter, Obligation, Party, PartyRole, ProofChainEntry } from '@/data/matters';
-import { getObligationStatusColor } from '@/data/matters';
+import { type Matter, type Obligation, type Party, type PartyRole, type ProofChainEntry, getObligationStatusColor } from '@/data/matters';
 
 export const ACCENT = '#a78bfa';
 export const FILING_COLOR = '#fbbf24';
@@ -143,7 +142,7 @@ export function computeCriticalPath(obligations: Obligation[]): Set<string> {
   for (const o of obligations) {
     for (const dep of o.dependencies) {
       if (!dependents.has(dep)) dependents.set(dep, []);
-      dependents.get(dep)!.push(o.id);
+      dependents.get(dep)?.push(o.id);
     }
   }
 
@@ -292,7 +291,7 @@ export function buildGraph(matter: Matter, options: BuildGraphOptions = {}): Bui
       const color = ROLE_COLORS[p.role];
       return {
         id,
-        label: p.name.length > 22 ? p.name.slice(0, 20) + '…' : p.name,
+        label: p.name.length > 22 ? `${p.name.slice(0, 20)}…` : p.name,
         x: pos.x,
         y: pos.y,
         radius: (isSelected ? 12 : 9) * radiusScale,
@@ -306,7 +305,7 @@ export function buildGraph(matter: Matter, options: BuildGraphOptions = {}): Bui
       const ring = isCritical ? CRITICAL_COLOR : isSelected ? color : undefined;
       return {
         id,
-        label: o.title.length > 26 ? o.title.slice(0, 24) + '…' : o.title,
+        label: o.title.length > 26 ? `${o.title.slice(0, 24)}…` : o.title,
         x: pos.x,
         y: pos.y,
         radius: (isSelected ? 13 : isCritical ? 11 : 9) * radiusScale,
@@ -317,7 +316,7 @@ export function buildGraph(matter: Matter, options: BuildGraphOptions = {}): Bui
     const f = data.filing!;
     return {
       id,
-      label: f.title.length > 24 ? f.title.slice(0, 22) + '…' : f.title,
+      label: f.title.length > 24 ? `${f.title.slice(0, 22)}…` : f.title,
       x: pos.x,
       y: pos.y,
       radius: (isSelected ? 12 : 9) * radiusScale,

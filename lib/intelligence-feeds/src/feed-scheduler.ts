@@ -90,7 +90,7 @@ export class FeedScheduler {
   register(adapter: BaseFeedAdapter, overridePollIntervalMs?: number): void {
     const health = adapter.getHealth();
     const pollIntervalMs =
-      overridePollIntervalMs ?? adapter['config']?.pollIntervalMs ?? 5 * 60 * 1000;
+      overridePollIntervalMs ?? adapter.config?.pollIntervalMs ?? 5 * 60 * 1000;
 
     this.feeds.set(health.feedId, {
       adapter,
@@ -98,13 +98,9 @@ export class FeedScheduler {
       lastPollAt: 0,
       nextPollAt: Date.now() + Math.random() * 30000,
       isPolling: false,
-      enabled: adapter['config']?.enabled ?? true,
+      enabled: adapter.config?.enabled ?? true,
       totalPollResults: [],
     });
-
-    console.log(
-      `[FeedScheduler] Registered feed: ${health.feedName} (poll every ${Math.round(pollIntervalMs / 1000)}s)`,
-    );
   }
 
   async start(): Promise<void> {
@@ -114,11 +110,7 @@ export class FeedScheduler {
     for (const [, reg] of this.feeds) {
       try {
         await reg.adapter.connect();
-      } catch (err) {
-        console.warn(
-          `[FeedScheduler] Failed to connect feed ${reg.adapter.getHealth().feedId}:`,
-          err instanceof Error ? err.message : err,
-        );
+      } catch (_err) {
       }
     }
 
@@ -129,8 +121,6 @@ export class FeedScheduler {
     this.healthInterval = setInterval(() => {
       void this.runHealthChecks();
     }, this.config.healthCheckIntervalMs);
-
-    console.log(`[FeedScheduler] Started with ${this.feeds.size} registered feeds`);
   }
 
   stop(): void {
@@ -143,13 +133,11 @@ export class FeedScheduler {
       this.healthInterval = null;
     }
     this.isStarted = false;
-    console.log('[FeedScheduler] Stopped');
   }
 
   async triggerPoll(feedId: string): Promise<PollResult | null> {
     const reg = this.feeds.get(feedId);
     if (!reg) {
-      console.warn(`[FeedScheduler] Feed not found: ${feedId}`);
       return null;
     }
     return this.pollFeed(feedId, reg);
@@ -168,11 +156,8 @@ export class FeedScheduler {
     }
   }
 
-  private async pollFeed(feedId: string, reg: FeedRegistration): Promise<PollResult | null> {
+  private async pollFeed(_feedId: string, reg: FeedRegistration): Promise<PollResult | null> {
     if (reg.isPolling) {
-      console.warn(
-        `[FeedScheduler:${feedId}] Backpressure detected — skipping poll (previous still running)`,
-      );
       return null;
     }
 
@@ -199,19 +184,12 @@ export class FeedScheduler {
       if (!result.success) {
         const health = reg.adapter.getHealth();
         if (health.consecutiveFailures >= 5) {
-          console.error(
-            `[FeedScheduler:${feedId}] ${health.consecutiveFailures} consecutive failures — feed may be down`,
-          );
           reg.nextPollAt = Date.now() + Math.min(reg.pollIntervalMs * 4, 4 * 60 * 60 * 1000);
         }
       }
 
       return result;
-    } catch (err) {
-      console.error(
-        `[FeedScheduler:${feedId}] Unhandled poll error:`,
-        err instanceof Error ? err.message : err,
-      );
+    } catch (_err) {
       reg.nextPollAt = Date.now() + reg.pollIntervalMs;
       return null;
     } finally {
@@ -252,11 +230,7 @@ export class FeedScheduler {
           });
         }
       }
-    } catch (err) {
-      console.warn(
-        `[FeedScheduler] Ingestion error for feed ${payload.feedId}:`,
-        err instanceof Error ? err.message : err,
-      );
+    } catch (_err) {
     }
   }
 
@@ -351,7 +325,6 @@ export class FeedScheduler {
     const reg = this.feeds.get(feedId);
     if (!reg) return false;
     reg.enabled = enabled;
-    console.log(`[FeedScheduler] Feed ${feedId} ${enabled ? 'enabled' : 'disabled'}`);
     return true;
   }
 
@@ -371,28 +344,22 @@ export class FeedScheduler {
       }),
     );
 
-    let healthy = 0;
-    let degraded = 0;
-    let failed = 0;
+    let _healthy = 0;
+    let _degraded = 0;
+    let _failed = 0;
     for (const r of results) {
       if (r.status === 'fulfilled') {
-        if (r.value.ok) healthy++;
+        if (r.value.ok) _healthy++;
         else {
-          degraded++;
-          console.warn(
-            `[FeedScheduler:HealthCheck] Feed ${r.value.feedId} health probe failed: ${r.value.error}`,
-          );
+          _degraded++;
         }
       } else {
-        failed++;
+        _failed++;
       }
     }
 
     const all = this.getAllHealth();
-    const down = all.filter((h) => h.status === 'down').length;
-    console.log(
-      `[FeedScheduler:Health] ${all.length} feeds — probe ok: ${healthy}, probe failed: ${degraded + failed}, down: ${down} | active polls: ${this.activePolls}`,
-    );
+    const _down = all.filter((h) => h.status === 'down').length;
   }
 }
 

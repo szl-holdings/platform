@@ -100,14 +100,11 @@ vi.mock('../../artifacts/api-server/src/middlewares/auth', () => ({
   },
   parseIdParam: (id: string) => {
     const n = parseInt(id, 10);
-    if (isNaN(n)) throw Object.assign(new Error('Invalid ID'), { status: 400 });
+    if (Number.isNaN(n)) throw Object.assign(new Error('Invalid ID'), { status: 400 });
     return n;
   },
   InvalidIdError: class InvalidIdError extends Error {
     status = 400;
-    constructor(msg: string) {
-      super(msg);
-    }
   },
 }));
 
@@ -537,7 +534,7 @@ describe('Integration — /deployments', () => {
       expect(created.status).toBe(201);
       registerCleanup({ table: 'deploymentsTable', id: created.body.id as number });
       expect(created.body.deployedByUser).toMatchObject({
-        id: seeded!.id,
+        id: seeded?.id,
         displayName,
         email,
         avatarUrl,
@@ -574,19 +571,19 @@ describe('Integration — /deployments', () => {
       expect(rolled.status).toBe(200);
       registerCleanup({ table: 'deploymentsTable', id: rolled.body.current.id as number });
       expect(rolled.body.previous.deployedByUser).toMatchObject({
-        id: seeded!.id,
+        id: seeded?.id,
         displayName,
         email,
         avatarUrl,
       });
       expect(rolled.body.current.deployedByUser).toMatchObject({
-        id: seeded!.id,
+        id: seeded?.id,
         displayName,
         email,
         avatarUrl,
       });
     } finally {
-      await db.delete(usersTable).where(eq(usersTable.id, seeded!.id));
+      await db.delete(usersTable).where(eq(usersTable.id, seeded?.id));
     }
   });
 

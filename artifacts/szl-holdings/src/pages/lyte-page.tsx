@@ -4,18 +4,15 @@ import { Link } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
 import {
-  Eye, Radio, AlertTriangle, CheckCircle2, Clock, ArrowRight,
-  Shield, Ship, Building2, Briefcase, Activity, Filter,
-  ChevronRight, Zap, Lock, Database, GitBranch, Users,
-  TrendingUp, Bell, BellOff, Circle, Dot, X, Layers, Target,
-  BarChart3, ShieldCheck, FileCheck, BookOpen, RefreshCw,
-  Play, MoreHorizontal, ArrowUpRight, Workflow, Brain,
+  Eye, Radio, AlertTriangle, CheckCircle2, ArrowRight,
+  Shield, Ship, Building2, Briefcase, Zap, Lock, Users,Bell, BellOff, Circle, Layers, Target,
+  BarChart3, ShieldCheck, FileCheck, BookOpen, 
+  Play, ArrowUpRight, Brain,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { ProofDrawer, SAMPLE_PROOF_RECORD } from "@/components/ProofDrawer";
-import type { ProofRecord } from "@/components/ProofDrawer";
+import { ProofDrawer, SAMPLE_PROOF_RECORD, type ProofRecord } from '@/components/ProofDrawer';
 import { apiRequest } from "@/lib/api";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
@@ -125,7 +122,7 @@ function formatAge(dateStr: string): string {
   return `${Math.floor(ms / 86400000)}d`;
 }
 
-function mapApiSignal(s: ApiSignal, idx: number): SignalItem {
+function mapApiSignal(s: ApiSignal, _idx: number): SignalItem {
   const meta = (s.metadata ?? {}) as Record<string, unknown>;
   const domain = SOURCE_TO_DOMAIN[s.source ?? ""] ?? "IMPERIUM";
   const sevMap: Record<string, SignalSeverity> = { critical: "critical", high: "high", medium: "medium", low: "info", info: "info", warning: "medium" };
@@ -150,7 +147,7 @@ const STATUS_TO_STAGE: Record<string, string> = {
 function mapApiIncident(inc: ApiIncident): SituationItem {
   const meta = (inc.metadata ?? {}) as Record<string, unknown>;
   const stage = (meta.stage as string) ?? STATUS_TO_STAGE[inc.status] ?? "Signal";
-  const updated = inc.updatedAt ? formatAge(inc.updatedAt) + " ago" : formatAge(inc.createdAt) + " ago";
+  const updated = inc.updatedAt ? `${formatAge(inc.updatedAt)} ago` : `${formatAge(inc.createdAt)} ago`;
   const sev: SignalSeverity = (["critical", "high", "medium", "info"].includes(inc.severity ?? "") ? inc.severity : "info") as SignalSeverity;
   return {
     id: String(inc.id),
@@ -347,7 +344,7 @@ function buildSignalProof(sig: SignalItem): ProofRecord {
     sourceDomain: sig.domain,
     sourceSystem: `${sig.domain} Signal Feed`,
     metadata: {
-      ...(base.metadata ?? {}),
+      ...base.metadata,
       "Signal ID": sig.id.toUpperCase(),
       "Signal title": sig.title,
       "Severity": sig.severity,
@@ -498,7 +495,7 @@ function SituationCard({ sit, active, onClick }: { sit: SituationItem; active: b
   );
 }
 
-function ProofEntry({ label, value, color }: { label: string; value: string; color?: string }) {
+function _ProofEntry({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", padding: "0.5rem 0", borderBottom: `1px solid ${BORDER}` }}>
       <span style={{ fontSize: "0.75rem", color: TEXT_FAINT, fontFamily: MONO }}>{label}</span>
@@ -637,10 +634,7 @@ export default function LytePage() {
     queryKey: ["lyte", "signals"],
     queryFn: async () => {
       const res = await apiRequest<{ success: boolean; data: ApiSignal[] }>("GET", "/api/lyte/signals?limit=20");
-      return (
-    <>
-      {__pageMeta}res.data ?? []    </>
-  ).map((s, i) => mapApiSignal(s, i));
+      return (res.data ?? []).map((s, i) => mapApiSignal(s, i));
     },
     refetchInterval: 30000,
     staleTime: 20000,
@@ -892,7 +886,7 @@ export default function LytePage() {
                     style={{
                       padding: "0.3rem 0.625rem",
                       borderRadius: 4,
-                      border: `1px solid ${filterSev === f ? LYTE + "40" : BORDER}`,
+                      border: `1px solid ${filterSev === f ? `${LYTE}40` : BORDER}`,
                       background: filterSev === f ? `${LYTE}12` : "transparent",
                       color: filterSev === f ? LYTE : TEXT_FAINT,
                       fontSize: "0.6875rem", fontWeight: 600, fontFamily: MONO,
@@ -952,7 +946,7 @@ export default function LytePage() {
                         gap: "0.3rem",
                         padding: "0.2rem 0.45rem",
                         borderRadius: 4,
-                        border: `1px solid ${toastThreshold === "off" ? BORDER : LYTE + "30"}`,
+                        border: `1px solid ${toastThreshold === "off" ? BORDER : `${LYTE}30`}`,
                         background: toastThreshold === "off" ? "transparent" : `${LYTE}10`,
                         color: toastThreshold === "off" ? TEXT_FAINT : LYTE,
                         fontSize: "0.575rem",
@@ -1076,7 +1070,7 @@ export default function LytePage() {
                             padding: "0.3rem 0.625rem",
                             borderRadius: 4,
                             background: isActive ? `${s.color}15` : isPast ? "hsla(0,0%,100%,0.04)" : "transparent",
-                            border: `1px solid ${isActive ? s.color + "30" : isPast ? "hsla(0,0%,100%,0.06)" : "transparent"}`,
+                            border: `1px solid ${isActive ? `${s.color}30` : isPast ? "hsla(0,0%,100%,0.06)" : "transparent"}`,
                             flexShrink: 0,
                           }}>
                             {isPast ? (
@@ -1175,7 +1169,7 @@ export default function LytePage() {
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
                     {[
                       { label: "Role: ops_analyst", allowed: true },
-                      { label: "Domain: " + sit.domain, allowed: true },
+                      { label: `Domain: ${sit.domain}`, allowed: true },
                       { label: "Action: approve_execution", allowed: sit.owner !== "Unassigned" },
                       { label: "Human-in-loop: required", allowed: true },
                     ].map((check, i) => (

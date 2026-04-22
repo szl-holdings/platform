@@ -22,15 +22,11 @@ import {
   YAxis,
 } from 'recharts';
 import ClientScopeSwitcher, { useClientScope } from '@/components/ClientScopeSwitcher';
-import type { EngagementPnL } from '@/data/operationalData';
-import {
-  ENGAGEMENTS as STATIC_ENGAGEMENTS,
-  MARGIN_HISTORY as STATIC_MARGIN_HISTORY,
-} from '@/data/operationalData';
+import { type EngagementPnL, ENGAGEMENTS as STATIC_ENGAGEMENTS, MARGIN_HISTORY as STATIC_MARGIN_HISTORY } from '@/data/operationalData';
 import { usePageMeta } from '@/hooks/usePageMeta';
 
 const GOLD = 'var(--color-gold)';
-const API = import.meta.env.BASE_URL + 'api';
+const API = `${import.meta.env.BASE_URL}api`;
 
 const STATUS_META = {
   active: { label: 'Active', color: '#0284C7', bg: '#EFF6FF' },

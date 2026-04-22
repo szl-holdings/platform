@@ -9,8 +9,7 @@ import {
   type PlanStoreQuery,
   replayPlan,
 } from '@workspace/planner';
-import type { Request } from 'express';
-import { type IRouter, Router } from 'express';
+import { type Request, type IRouter, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
@@ -82,11 +81,11 @@ router.get('/plans', authMiddleware(), validateQuery(listQuerySchema), async (re
 
     const rawLimit = parseInt((req.query.limit as string) ?? '50', 10);
     const rawOffset = parseInt((req.query.offset as string) ?? '0', 10);
-    if (isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
+    if (Number.isNaN(rawLimit) || rawLimit < 1 || rawLimit > 500) {
       sendBadRequest(res, 'limit must be between 1 and 500');
       return;
     }
-    if (isNaN(rawOffset) || rawOffset < 0) {
+    if (Number.isNaN(rawOffset) || rawOffset < 0) {
       sendBadRequest(res, 'offset must be >= 0');
       return;
     }
@@ -106,7 +105,7 @@ function callerOwnsPlan(
   plan: { context: Record<string, unknown> },
 ): boolean {
   if (isElevatedUser(user)) return true;
-  const planOrg = plan.context['orgId'];
+  const planOrg = plan.context.orgId;
   if (typeof planOrg !== 'string') {
     // Plans without an orgId are treated as un-scoped and are not exposed
     // cross-tenant; only elevated users (handled above) may read them.
@@ -255,7 +254,7 @@ async function decideStep(
       ? ((req.body as { note?: string }).note ?? '').slice(0, 500)
       : '';
   const decidedAt = Date.now();
-  const decisions = (plan.metadata['stepDecisions'] as Record<string, unknown> | undefined) ?? {};
+  const decisions = (plan.metadata.stepDecisions as Record<string, unknown> | undefined) ?? {};
   const audit = {
     decision,
     actorId: user.id ?? null,

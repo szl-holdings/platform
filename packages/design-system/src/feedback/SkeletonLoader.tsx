@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { color } from '../tokens/index.js';
 import { cn } from '../utils.js';
 

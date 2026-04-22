@@ -1,6 +1,6 @@
 import { NewsletterSubscribe } from '@szl-holdings/shared-ui/newsletter-subscribe';
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle, FileText, Lock, MessageSquare, Star } from 'lucide-react';
+import { ArrowRight, CheckCircle, FileText, Lock, MessageSquare, } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { Link } from 'wouter';
 import Footer from '@/components/Footer';
@@ -8,7 +8,7 @@ import Header from '@/components/Header';
 import { CARLOTA_JO_RETENTION, CARLOTA_JO_YEARS_EXPERIENCE, metricDisplay } from '@/lib/claims';
 
 const GOLD = 'var(--color-gold)';
-const GOLD_DIM = 'var(--color-gold-dim)';
+const _GOLD_DIM = 'var(--color-gold-dim)';
 const CREAM = 'var(--color-cream-warm)';
 const INK = 'var(--color-ink-900)';
 const INK_600 = 'var(--color-ink-600)';

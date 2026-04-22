@@ -180,8 +180,8 @@ function resolveProfileId(input: DocumentRetrievalInput): string | undefined {
 export const documentRetrievalHandler: ToolHandler = async (input) => {
   const parsed = DocumentRetrievalInputSchema.parse(input);
 
-  const gatewayUrl = process.env['AEF_GATEWAY_URL'];
-  const apiKey = process.env['AEF_API_KEY'];
+  const gatewayUrl = process.env.AEF_GATEWAY_URL;
+  const apiKey = process.env.AEF_API_KEY;
 
   if (!gatewayUrl || !apiKey) {
     throw new Error(
@@ -193,7 +193,7 @@ export const documentRetrievalHandler: ToolHandler = async (input) => {
   const client = new AefClient({
     gatewayUrl,
     apiKey,
-    tenantId: parsed.tenantId ?? process.env['AEF_TENANT_ID'] ?? 'szl-holdings',
+    tenantId: parsed.tenantId ?? process.env.AEF_TENANT_ID ?? 'szl-holdings',
   });
 
   const requestId = randomUUID();

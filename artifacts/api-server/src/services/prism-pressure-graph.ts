@@ -2,7 +2,6 @@ import { db } from '@szl-holdings/db';
 import {
   pcDataProductScoresTable,
   pcPressureScoresTable,
-  pcWorldlineFeaturesTable,
 } from '@szl-holdings/db/schema';
 import { and, desc, eq } from 'drizzle-orm';
 import { logger } from '../lib/logger';
@@ -42,7 +41,7 @@ const ALL_DIMENSIONS: PressureDimension[] = [
   'communication',
   'governance',
 ];
-const ALL_PRODUCTS: DataProduct[] = [
+const _ALL_PRODUCTS: DataProduct[] = [
   'insurer_pressure_index',
   'venue_velocity_index',
   'incident_context_layer',
@@ -129,7 +128,7 @@ class PressureGraphEngine {
     return { ...raw, movement };
   }
 
-  private computeDeadlinePressure(input: PressureInput) {
+  private computeDeadlinePressure(_input: PressureInput) {
     return {
       score: 0.65,
       confidence: 0.8,
@@ -144,7 +143,7 @@ class PressureGraphEngine {
     };
   }
 
-  private computeInsurerPressure(input: PressureInput) {
+  private computeInsurerPressure(_input: PressureInput) {
     return {
       score: 0.58,
       confidence: 0.75,
@@ -156,7 +155,7 @@ class PressureGraphEngine {
     };
   }
 
-  private computeAdjusterPressure(input: PressureInput) {
+  private computeAdjusterPressure(_input: PressureInput) {
     return {
       score: 0.42,
       confidence: 0.7,
@@ -168,7 +167,7 @@ class PressureGraphEngine {
     };
   }
 
-  private computeCoveragePressure(input: PressureInput) {
+  private computeCoveragePressure(_input: PressureInput) {
     return {
       score: 0.35,
       confidence: 0.85,
@@ -180,7 +179,7 @@ class PressureGraphEngine {
     };
   }
 
-  private computeVenuePressure(input: PressureInput) {
+  private computeVenuePressure(_input: PressureInput) {
     return {
       score: 0.5,
       confidence: 0.7,
@@ -192,7 +191,7 @@ class PressureGraphEngine {
     };
   }
 
-  private computeMedicalPressure(input: PressureInput) {
+  private computeMedicalPressure(_input: PressureInput) {
     return {
       score: 0.55,
       confidence: 0.75,
@@ -204,7 +203,7 @@ class PressureGraphEngine {
     };
   }
 
-  private computeDamagesPressure(input: PressureInput) {
+  private computeDamagesPressure(_input: PressureInput) {
     return {
       score: 0.48,
       confidence: 0.8,
@@ -216,7 +215,7 @@ class PressureGraphEngine {
     };
   }
 
-  private computeSettlementPressure(input: PressureInput) {
+  private computeSettlementPressure(_input: PressureInput) {
     return {
       score: 0.62,
       confidence: 0.72,
@@ -228,7 +227,7 @@ class PressureGraphEngine {
     };
   }
 
-  private computeWeatherPressure(input: PressureInput) {
+  private computeWeatherPressure(_input: PressureInput) {
     return {
       score: 0.2,
       confidence: 0.6,
@@ -240,7 +239,7 @@ class PressureGraphEngine {
     };
   }
 
-  private computeEvidencePressure(input: PressureInput) {
+  private computeEvidencePressure(_input: PressureInput) {
     return {
       score: 0.52,
       confidence: 0.78,
@@ -252,7 +251,7 @@ class PressureGraphEngine {
     };
   }
 
-  private computeCommunicationPressure(input: PressureInput) {
+  private computeCommunicationPressure(_input: PressureInput) {
     return {
       score: 0.45,
       confidence: 0.8,
@@ -264,7 +263,7 @@ class PressureGraphEngine {
     };
   }
 
-  private computeGovernancePressure(input: PressureInput) {
+  private computeGovernancePressure(_input: PressureInput) {
     return {
       score: 0.3,
       confidence: 0.85,

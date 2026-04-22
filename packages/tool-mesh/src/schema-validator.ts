@@ -13,7 +13,7 @@ type JsonSchemaValue =
 
 function validateValue(value: unknown, schema: Record<string, unknown>, path: string): string[] {
   const errors: string[] = [];
-  const type = schema['type'] as string | undefined;
+  const type = schema.type as string | undefined;
 
   if (type) {
     const actualType = Array.isArray(value) ? 'array' : value === null ? 'null' : typeof value;
@@ -30,7 +30,7 @@ function validateValue(value: unknown, schema: Record<string, unknown>, path: st
   if (type === 'object' || (typeof value === 'object' && value !== null && !Array.isArray(value))) {
     const obj = value as Record<string, unknown>;
 
-    const required = schema['required'];
+    const required = schema.required;
     if (Array.isArray(required)) {
       for (const field of required) {
         if (typeof field === 'string' && !(field in obj)) {
@@ -39,7 +39,7 @@ function validateValue(value: unknown, schema: Record<string, unknown>, path: st
       }
     }
 
-    const properties = schema['properties'];
+    const properties = schema.properties;
     if (properties && typeof properties === 'object') {
       for (const [key, propSchema] of Object.entries(properties as Record<string, unknown>)) {
         if (key in obj && propSchema && typeof propSchema === 'object') {
@@ -55,7 +55,7 @@ function validateValue(value: unknown, schema: Record<string, unknown>, path: st
   }
 
   if (type === 'array' && Array.isArray(value)) {
-    const items = schema['items'];
+    const items = schema.items;
     if (items && typeof items === 'object') {
       value.forEach((item, i) => {
         const nested = validateValue(item, items as Record<string, unknown>, `${path}[${i}]`);
@@ -64,32 +64,32 @@ function validateValue(value: unknown, schema: Record<string, unknown>, path: st
     }
   }
 
-  const enumValues = schema['enum'];
+  const enumValues = schema.enum;
   if (Array.isArray(enumValues) && !enumValues.includes(value)) {
     errors.push(`${path}: value '${value}' not in allowed enum ${JSON.stringify(enumValues)}`);
   }
 
   if (typeof value === 'number') {
-    const minimum = schema['minimum'];
+    const minimum = schema.minimum;
     if (typeof minimum === 'number' && value < minimum) {
       errors.push(`${path}: value ${value} is less than minimum ${minimum}`);
     }
-    const maximum = schema['maximum'];
+    const maximum = schema.maximum;
     if (typeof maximum === 'number' && value > maximum) {
       errors.push(`${path}: value ${value} is greater than maximum ${maximum}`);
     }
   }
 
   if (typeof value === 'string') {
-    const minLength = schema['minLength'];
+    const minLength = schema.minLength;
     if (typeof minLength === 'number' && value.length < minLength) {
       errors.push(`${path}: string length ${value.length} is less than minLength ${minLength}`);
     }
-    const maxLength = schema['maxLength'];
+    const maxLength = schema.maxLength;
     if (typeof maxLength === 'number' && value.length > maxLength) {
       errors.push(`${path}: string length ${value.length} exceeds maxLength ${maxLength}`);
     }
-    const pattern = schema['pattern'];
+    const pattern = schema.pattern;
     if (typeof pattern === 'string' && !new RegExp(pattern).test(value)) {
       errors.push(`${path}: value does not match pattern '${pattern}'`);
     }
@@ -107,7 +107,7 @@ export function validateAgainstSchema(
     return { valid: true, errors: [] };
   }
 
-  const topType = inputSchema['type'];
+  const topType = inputSchema.type;
   if (topType && topType !== 'object') {
     return {
       valid: false,

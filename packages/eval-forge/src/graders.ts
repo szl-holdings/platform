@@ -360,9 +360,9 @@ export function computePRLabels(
   const predictions: boolean[] = [];
   const groundTruths: boolean[] = [];
   for (let i = 0; i < cases.length; i++) {
-    const isFail = (cases[i]!.expectedOutcome ?? 'pass') === 'fail';
+    const isFail = (cases[i]?.expectedOutcome ?? 'pass') === 'fail';
     groundTruths.push(!isFail);
-    predictions.push(isFail ? !results[i]!.passed : results[i]!.passed);
+    predictions.push(isFail ? !results[i]?.passed : results[i]?.passed);
   }
   return { predictions, groundTruths };
 }

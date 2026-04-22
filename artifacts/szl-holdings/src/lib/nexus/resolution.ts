@@ -178,7 +178,7 @@ export function resolveEntity(
     if (!bestMatch) {
       const qWords = qNorm.split(' ').filter((w) => w.length > 2);
       const labelNorm = normalize(entity.label);
-      const labelWords = labelNorm.split(' ');
+      const _labelWords = labelNorm.split(' ');
       const labelHits = qWords.filter((w) => labelNorm.includes(w)).length;
       const aliasHits = entity.aliases.reduce((max, alias) => {
         const hits = qWords.filter((w) => normalize(alias).includes(w)).length;

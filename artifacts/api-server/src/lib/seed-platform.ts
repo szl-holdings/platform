@@ -1,18 +1,15 @@
 import { getRuntimeMode, isSeedDataAllowed } from '@szl-holdings/config';
 import {
   actionsTable,
-  artifactsTable,
   corridorsTable,
   db,
   featureFlagsTable,
   maritimeExceptionsTable,
   maritimeVesselsTable,
   organizationsTable,
-  orgMembersTable,
   platformSignalsTable,
   portsTable,
   readinessItemsTable,
-  usersTable,
   voyagesTable,
   workflowRunsTable,
   workflowsTable,
@@ -20,26 +17,13 @@ import {
 import { productsTable } from '@szl-holdings/db/schema/canonical';
 import { eq, sql } from 'drizzle-orm';
 
-async function tableHasData(table: any, sectionName: string): Promise<boolean> {
-  try {
+async function tableHasData(table: any, _sectionName: string): Promise<boolean> {
     const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(table);
     return count > 0;
-  } catch (err) {
-    console.error(
-      `[seed-platform] ERROR while checking whether table for section "${sectionName}" has data:`,
-      err,
-    );
-    throw err;
-  }
 }
 
-async function runSection<T>(name: string, fn: () => Promise<T>): Promise<T> {
-  try {
+async function runSection<T>(_name: string, fn: () => Promise<T>): Promise<T> {
     return await fn();
-  } catch (err) {
-    console.error(`[seed-platform] ERROR in section "${name}":`, err);
-    throw err;
-  }
 }
 
 export async function seedPlatformData(): Promise<void> {
@@ -51,7 +35,6 @@ export async function seedPlatformData(): Promise<void> {
         `Set DEMO_MODE=true or ENABLE_DEMO_SEED=true to enable seeding in non-production environments.`,
     );
   }
-  console.log('[seed-platform] Starting platform seed data...');
 
   const orgsExist = await tableHasData(organizationsTable, 'organizations');
   const signalsExist = await tableHasData(platformSignalsTable, 'platform_signals');
@@ -60,7 +43,6 @@ export async function seedPlatformData(): Promise<void> {
   const exceptionsExist = await tableHasData(maritimeExceptionsTable, 'maritime_exceptions');
 
   if (orgsExist && signalsExist && vesselsExist && voyagesExist && exceptionsExist) {
-    console.log('[seed-platform] Platform data already seeded, skipping...');
     return;
   }
 
@@ -247,7 +229,7 @@ export async function seedPlatformData(): Promise<void> {
   const now = new Date();
   const hourAgo = new Date(now.getTime() - 3600000);
   const dayAgo = new Date(now.getTime() - 86400000);
-  const weekAgo = new Date(now.getTime() - 7 * 86400000);
+  const _weekAgo = new Date(now.getTime() - 7 * 86400000);
 
   if (!signalsExist) {
     await runSection('platform_signals (alloy)', () =>
@@ -1138,15 +1120,12 @@ export async function seedPlatformData(): Promise<void> {
       ])
       .onConflictDoNothing(),
   );
-
-  console.log('[seed-platform] Platform seed data complete.');
 }
 
 if (process.argv[1]?.includes('seed-platform')) {
   seedPlatformData()
     .then(() => process.exit(0))
-    .catch((err) => {
-      console.error(err);
+    .catch((_err) => {
       process.exit(1);
     });
 }

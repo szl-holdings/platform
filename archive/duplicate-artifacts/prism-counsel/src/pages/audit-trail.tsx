@@ -18,8 +18,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { SubstrateWorkflowPanel } from '@/components/SubstrateWorkflowPanel';
-import type { AuditAction, Matter } from '@/data/matters';
-import { useMatters } from '@/data/matters';
+import { type AuditAction, type Matter, useMatters } from '@/data/matters';
 
 const ACCENT = '#a78bfa';
 

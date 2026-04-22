@@ -18,7 +18,7 @@
 
 import type { OntologyEngine as OntologyEngineClass } from '@szl-holdings/ai-engine/ontology/ontology-engine';
 import type { db as DbHandle, entitiesTable as EntitiesTable } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

@@ -11,7 +11,7 @@ import {
   type GuardianRule,
   type PolicyTier,
 } from '@workspace/guardian';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { logger } from './logger';
 import { publishToSse } from './sse-server';

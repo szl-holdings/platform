@@ -35,7 +35,7 @@ vi.mock('@szl-holdings/db', () => {
     createdByUserId: 'createdByUserId', updatedAt: 'updatedAt' };
 
   let lastFromTable: unknown = null;
-  let proposalById: Record<number, Record<string, unknown>> = {
+  const proposalById: Record<number, Record<string, unknown>> = {
     42: {
       id: 42,
       organizationId: null,

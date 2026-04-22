@@ -114,7 +114,7 @@ async function fetchJson(url: string, init?: RequestInit): Promise<unknown> {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
+      ...init?.headers,
     },
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -261,12 +261,12 @@ export function useRiskRunEvidence(domain: string): SavedRiskRun[] {
 }
 
 export function useRiskRunEvidenceMulti(domains: readonly string[]): SavedRiskRun[] {
-  const key = domains.join('|');
+  const _key = domains.join('|');
   const read = useCallback((): SavedRiskRun[] => {
     const all = domains.flatMap((d) => listRiskRunEvidence(d));
     return all.sort((a, b) => (a.savedAt < b.savedAt ? 1 : -1));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [domains.flatMap]);
   const [runs, setRuns] = useState<SavedRiskRun[]>(() => read());
   useEffect(() => {
     const refresh = () => setRuns(read());
@@ -286,12 +286,12 @@ export function useRiskRunEvidenceMulti(domains: readonly string[]): SavedRiskRu
       window.removeEventListener('storage', onStorage);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, read]);
+  }, [read, domains.some, domains.includes]);
   return runs;
 }
 
 function formatValue(value: number, format?: string): string {
-  if (!isFinite(value)) return '—';
+  if (!Number.isFinite(value)) return '—';
   if (format === 'currency') {
     const abs = Math.abs(value);
     if (abs >= 1000) return `$${(value / 1000).toFixed(1)}K`;
@@ -305,22 +305,22 @@ function formatValue(value: number, format?: string): string {
 function describeDistribution(d: unknown): string {
   if (!d || typeof d !== 'object') return '—';
   const dist = d as Record<string, unknown>;
-  const type = dist['type'] as string | undefined;
+  const type = dist.type as string | undefined;
   switch (type) {
     case 'normal':
-      return `Normal(μ=${dist['mean']}, σ=${dist['stdDev']})`;
+      return `Normal(μ=${dist.mean}, σ=${dist.stdDev})`;
     case 'log_normal':
-      return `LogNormal(μ=${dist['mean']}, σ=${dist['stdDev']})`;
+      return `LogNormal(μ=${dist.mean}, σ=${dist.stdDev})`;
     case 'uniform':
-      return `Uniform(${dist['min']} – ${dist['max']})`;
+      return `Uniform(${dist.min} – ${dist.max})`;
     case 'triangular':
-      return `Triangular(${dist['min']}, mode=${dist['mode']}, ${dist['max']})`;
+      return `Triangular(${dist.min}, mode=${dist.mode}, ${dist.max})`;
     case 'beta':
-      return `Beta(α=${dist['alpha']}, β=${dist['beta']})`;
+      return `Beta(α=${dist.alpha}, β=${dist.beta})`;
     case 'poisson':
-      return `Poisson(λ=${dist['lambda']})`;
+      return `Poisson(λ=${dist.lambda})`;
     case 'constant':
-      return `Constant(${dist['value']})`;
+      return `Constant(${dist.value})`;
     case 'custom':
       return `Custom`;
     default:

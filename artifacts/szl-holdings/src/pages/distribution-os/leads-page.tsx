@@ -1,25 +1,14 @@
 import { AnimatePresence, m } from 'framer-motion';
 import {
-  AlertCircle,
-  BarChart3,
-  Building2,
   CheckCircle2,
   ChevronDown,
-  ChevronRight,
   ChevronUp,
-  Clock,
   Download,
-  Edit3,
-  ExternalLink,
   Filter,
-  Globe,
   Loader2,
-  Mail,
-  MessageSquare,
   Plus,
   Save,
   Search,
-  Star,
   Tag,
   Trash2,
   Upload,
@@ -1269,7 +1258,7 @@ export default function LeadsPage() {
     setLoading(true);
     const params = new URLSearchParams();
     if (stageFilter !== 'all') params.set('stage', stageFilter);
-    const url = `${API}/api/distribution-os/leads${params.toString() ? '?' + params.toString() : ''}`;
+    const url = `${API}/api/distribution-os/leads${params.toString() ? `?${params.toString()}` : ''}`;
     fetch(url)
       .then((r) => r.json())
       .then((d) => {

@@ -165,7 +165,7 @@ export function GovernedLoopViz() {
             />
 
             {/* Arc segments between nodes */}
-            {LOOP_STEPS.map((s, i) => {
+            {LOOP_STEPS.map((_s, i) => {
               const next = (i + 1) % STEPS;
               const from = stepXY(i);
               const to = stepXY(next);
@@ -189,7 +189,7 @@ export function GovernedLoopViz() {
             {LOOP_STEPS.map((s, i) => {
               const { x, y } = stepXY(i);
               const isActive = i === active;
-              const StepIcon = s.icon;
+              const _StepIcon = s.icon;
               return (
                 <g
                   key={s.n}
@@ -451,7 +451,7 @@ export function GovernedLoopViz() {
                       padding: '6px 8px',
                       borderRadius: '4px',
                       background: isActive ? `${s.color}18` : 'transparent',
-                      border: `1px solid ${isActive ? s.color + '40' : 'hsla(0,0%,100%,0.06)'}`,
+                      border: `1px solid ${isActive ? `${s.color}40` : 'hsla(0,0%,100%,0.06)'}`,
                       cursor: 'pointer',
                       textAlign: 'left',
                       transition: 'all 0.18s ease',
@@ -527,7 +527,7 @@ export function GovernedLoopViz() {
                 padding: '3px 9px',
                 borderRadius: '4px',
                 background: isHighlighted ? `${p.color}14` : 'transparent',
-                border: `1px solid ${isHighlighted ? p.color + '38' : 'hsla(0,0%,100%,0.07)'}`,
+                border: `1px solid ${isHighlighted ? `${p.color}38` : 'hsla(0,0%,100%,0.07)'}`,
                 fontSize: '11px',
                 fontWeight: isHighlighted ? 600 : 400,
                 color: isHighlighted ? p.color : 'hsl(210,5%,38%)',

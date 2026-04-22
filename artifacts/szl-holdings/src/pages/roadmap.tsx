@@ -1,6 +1,6 @@
-import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
+
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { Map, CheckCircle, Circle, Clock, Sparkles, Shield, Brain, Zap, Building2, Ship, Palette, Laptop, FileText, Globe } from "lucide-react";
+import { Map, CheckCircle, Circle, Clock, Shield, Brain, Zap, Building2, Ship, Palette, FileText, Globe } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const quarters = [

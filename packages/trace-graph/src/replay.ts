@@ -1,6 +1,5 @@
-import type { RunGrade, TraceRecord, TraceSpan } from './schema.js';
-import type { TraceStore } from './store.js';
-import { defaultTraceStore } from './store.js';
+import type { TraceRecord, TraceSpan } from './schema.js';
+import { type TraceStore, defaultTraceStore } from './store.js';
 
 export interface TraceTree {
   trace: TraceRecord;
@@ -19,7 +18,7 @@ function buildSpanTree(spans: TraceSpan[]): SpanTree[] {
   for (const node of byId.values()) {
     const parentId = node.span.parentSpanId;
     if (parentId && byId.has(parentId)) {
-      byId.get(parentId)!.children.push(node);
+      byId.get(parentId)?.children.push(node);
     } else {
       roots.push(node);
     }
@@ -117,8 +116,9 @@ export class TraceReplayer {
       visitor.onRollbackPoint?.(rollback, tree.trace);
     }
 
+    const traceRef = tree.trace;
     function visitSpan(node: SpanTree): void {
-      visitor.onSpan?.(node.span, tree!.trace);
+      visitor.onSpan?.(node.span, traceRef);
       for (const child of node.children) visitSpan(child);
     }
     for (const root of tree.spans) visitSpan(root);

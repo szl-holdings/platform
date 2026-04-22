@@ -63,9 +63,9 @@ async function submitOpenAIFineTuning(
   hyperparameters: FineTuningJobRequest['hyperparameters'],
   suffix: string,
 ): Promise<{ providerJobId: string }> {
-  const openaiKey = process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
+  const openaiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
   if (!openaiKey) throw new Error('AI_INTEGRATIONS_OPENAI_API_KEY not configured');
-  const openaiBase = process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'] ?? 'https://api.openai.com/v1';
+  const openaiBase = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ?? 'https://api.openai.com/v1';
 
   const fileBlob = new Blob([samples], { type: 'application/jsonl' });
   const formData = new FormData();
@@ -118,7 +118,7 @@ async function submitHuggingFaceFineTuning(
   agentId: string,
   hyperparameters: FineTuningJobRequest['hyperparameters'],
 ): Promise<{ providerJobId: string }> {
-  const hfToken = process.env['HF_TOKEN'] || process.env['HUGGINGFACE_API_KEY'];
+  const hfToken = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
   if (!hfToken) throw new Error('HF_TOKEN not configured');
 
   const jobId = `${agentId}-${baseModel.replace(/[^a-z0-9]/gi, '-')}-${Date.now()}`;
@@ -157,9 +157,9 @@ async function pollOpenAIJobStatus(providerJobId: string): Promise<{
   trainingCost?: number;
   error?: string;
 }> {
-  const openaiKey = process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
+  const openaiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
   if (!openaiKey) throw new Error('AI_INTEGRATIONS_OPENAI_API_KEY not configured');
-  const openaiBase = process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'] ?? 'https://api.openai.com/v1';
+  const openaiBase = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ?? 'https://api.openai.com/v1';
 
   const response = await fetch(`${openaiBase}/fine_tuning/jobs/${providerJobId}`, {
     headers: { Authorization: `Bearer ${openaiKey}` },
@@ -199,7 +199,7 @@ async function pollHuggingFaceJobStatus(providerJobId: string): Promise<{
     return { status: 'running' };
   }
 
-  const hfToken = process.env['HF_TOKEN'] || process.env['HUGGINGFACE_API_KEY'];
+  const hfToken = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
   if (!hfToken) throw new Error('HF_TOKEN not configured');
 
   const response = await fetch(
@@ -227,7 +227,7 @@ export async function submitFineTuningJob(
   const { agentId, provider, baseModel, hyperparameters, options } = request;
   const minSamples = options?.minSamples ?? MIN_SAMPLES_DEFAULT;
 
-  const dataset = await curateDatasetForAgent(agentId, 'openai-jsonl', { ...(options?.since !== undefined ? { since: options.since } : {}) });
+  const dataset = await curateDatasetForAgent(agentId, 'openai-jsonl', (options?.since !== undefined ? { since: options.since } : {}));
 
   if (dataset.sampleCount < minSamples) {
     throw new Error(
@@ -314,7 +314,7 @@ export async function pollJobStatus(jobId: string): Promise<FineTuningJobStatus>
   if (!job) throw new Error(`Fine-tuning job not found: ${jobId}`);
 
   const hyperparams = job.hyperparameters as Record<string, unknown>;
-  const providerJobId = hyperparams['providerJobId'] as string;
+  const providerJobId = hyperparams.providerJobId as string;
 
   if (
     !providerJobId ||
@@ -505,13 +505,13 @@ export async function cancelFineTuningJob(jobId: string): Promise<void> {
   if (!job) throw new Error(`Job not found: ${jobId}`);
 
   const hyperparams = job.hyperparameters as Record<string, unknown>;
-  const providerJobId = hyperparams['providerJobId'] as string;
+  const providerJobId = hyperparams.providerJobId as string;
 
   if (job.provider === 'openai' && providerJobId) {
-    const openaiKey = process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
+    const openaiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
     if (openaiKey) {
       const openaiBase =
-        process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'] ?? 'https://api.openai.com/v1';
+        process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ?? 'https://api.openai.com/v1';
       await fetch(`${openaiBase}/fine_tuning/jobs/${providerJobId}/cancel`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${openaiKey}` },

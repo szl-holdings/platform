@@ -31,10 +31,10 @@ const router: IRouter = Router();
  */
 router.get('/agents/runs/:runId/step-log', authMiddleware(), (req: Request, res: Response) => {
   try {
-    const runId = String(req.params['runId'] ?? '');
-    const limitRaw = Number(req.query['limit'] ?? 200);
+    const runId = String(req.params.runId ?? '');
+    const limitRaw = Number(req.query.limit ?? 200);
     const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 1000) : 200;
-    const sinceRaw = req.query['since'];
+    const sinceRaw = req.query.since;
     const since = sinceRaw ? Number(sinceRaw) : 0;
 
     let entries: readonly StepLogEntry[] = getStepLog(runId);
@@ -53,8 +53,8 @@ router.get('/agents/runs/:runId/step-log', authMiddleware(), (req: Request, res:
  */
 router.get('/agents/approvals/pending', authMiddleware(), (req: Request, res: Response) => {
   try {
-    const runId = req.query['runId'] ? String(req.query['runId']) : undefined;
-    const domain = req.query['domain'] ? String(req.query['domain']) : undefined;
+    const runId = req.query.runId ? String(req.query.runId) : undefined;
+    const domain = req.query.domain ? String(req.query.domain) : undefined;
     const filter: { runId?: string; domain?: string } = {};
     if (runId) filter.runId = runId;
     if (domain) filter.domain = domain;
@@ -74,8 +74,8 @@ router.post(
   authMiddleware(),
   (req: Request, res: Response) => {
     try {
-      const runId = String(req.params['runId'] ?? '');
-      const stepId = String(req.params['stepId'] ?? '');
+      const runId = String(req.params.runId ?? '');
+      const stepId = String(req.params.stepId ?? '');
       const { verdict, resolvedBy, note } = req.body as {
         verdict?: 'approved' | 'rejected' | 'escalated';
         resolvedBy?: string;

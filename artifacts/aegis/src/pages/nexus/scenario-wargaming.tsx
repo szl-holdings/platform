@@ -1,17 +1,6 @@
 import {
   Activity,
-  AlertTriangle,
-  BarChart3,
-  ChevronRight,
-  DollarSign,
-  Globe,
-  Layers,
   Play,
-  Shield,
-  Target,
-  TrendingUp,
-  XCircle,
-  Zap,
 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -272,7 +261,7 @@ export default function ScenarioWargamingPage() {
               </span>
               <span
                 className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5"
-                style={{ background: catColor(s.category) + '15', color: catColor(s.category) }}
+                style={{ background: `${catColor(s.category)}15`, color: catColor(s.category) }}
               >
                 {s.category}
               </span>
@@ -324,7 +313,7 @@ export default function ScenarioWargamingPage() {
                     <span
                       className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5"
                       style={{
-                        background: sevColor(c.severity) + '15',
+                        background: `${sevColor(c.severity)}15`,
                         color: sevColor(c.severity),
                       }}
                     >
@@ -362,7 +351,7 @@ export default function ScenarioWargamingPage() {
 
           <div
             className="rounded-xl p-4"
-            style={{ background: ACCENT + '08', borderLeft: `2px solid ${ACCENT}` }}
+            style={{ background: `${ACCENT}08`, borderLeft: `2px solid ${ACCENT}` }}
           >
             <div className="flex items-center gap-1.5 mb-1">
               <Activity className="h-3 w-3" style={{ color: ACCENT }} />
@@ -443,7 +432,7 @@ export default function ScenarioWargamingPage() {
                 aria-label="Run Monte Carlo simulation"
                 className="w-full flex items-center justify-center gap-2 rounded-lg py-2.5 text-[10px] font-semibold transition hover:brightness-125"
                 style={{
-                  background: simRunning ? 'rgba(255,255,255,0.04)' : ACCENT + '20',
+                  background: simRunning ? 'rgba(255,255,255,0.04)' : `${ACCENT}20`,
                   color: simRunning ? DS.text.muted : ACCENT,
                 }}
               >

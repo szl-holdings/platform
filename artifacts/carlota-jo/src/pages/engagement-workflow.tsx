@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle2, ChevronDown, ChevronUp, Clock } from 'lucide-react';
+import { CheckCircle2, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'wouter';
 import Footer from '@/components/Footer';

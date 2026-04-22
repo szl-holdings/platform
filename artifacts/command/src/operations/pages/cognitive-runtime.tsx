@@ -3,29 +3,19 @@ import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
-  AlertTriangle,
-  ArrowUpRight,
-  BarChart3,
   Brain,
-  CheckCircle,
   ChevronRight,
-  Clock,
-  DollarSign,
-  ExternalLink,
   FileText,
   GitBranch,
   Layers,
   Play,
-  Radio,
   RefreshCw,
-  Shield,
   Target,
   TrendingDown,
   Users,
   Zap,
 } from 'lucide-react';
-import type { JSX } from 'react';
-import { useState } from 'react';
+import { type JSX, useState } from 'react';
 
 const BG = { page: '#080c14', surface: '#0c1018', elevated: '#10141e', panel: '#0e1219' };
 const BORDER = {

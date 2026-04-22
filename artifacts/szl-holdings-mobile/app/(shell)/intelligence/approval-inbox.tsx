@@ -2,8 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { useSyncEngine } from '@szl-holdings/mobile-shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import type React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -333,7 +332,7 @@ function CommentThreadSection({
           disabled={submitting || draft.trim().length === 0}
           style={[
             styles.commentSendBtn,
-            { backgroundColor: ACCENT + '18', borderColor: ACCENT + '50' },
+            { backgroundColor: `${ACCENT}18`, borderColor: `${ACCENT}50` },
             (submitting || draft.trim().length === 0) && { opacity: 0.5 },
           ]}
         >
@@ -390,7 +389,7 @@ function ApprovalCard({
         <View
           style={[
             styles.iconBadge,
-            { backgroundColor: prioColor + '18', borderColor: prioColor + '35' },
+            { backgroundColor: `${prioColor}18`, borderColor: `${prioColor}35` },
           ]}
         >
           <Feather name={iconName} size={14} color={prioColor} />
@@ -400,7 +399,7 @@ function ApprovalCard({
             <View
               style={[
                 styles.pill,
-                { backgroundColor: prioColor + '18', borderColor: prioColor + '35' },
+                { backgroundColor: `${prioColor}18`, borderColor: `${prioColor}35` },
               ]}
             >
               <Text style={[styles.pillText, { color: prioColor }]}>
@@ -523,7 +522,7 @@ function ApprovalCard({
               onPress={() => onReview(approval)}
               style={[
                 styles.reviewBtn,
-                { backgroundColor: ACCENT + '18', borderColor: ACCENT + '50', flex: 2 },
+                { backgroundColor: `${ACCENT}18`, borderColor: `${ACCENT}50`, flex: 2 },
               ]}
             >
               <Feather name="check-circle" size={14} color={ACCENT} />
@@ -678,7 +677,7 @@ function QueuedDecisionCard({
         <View
           style={[
             styles.pill,
-            { backgroundColor: decisionColor + '18', borderColor: decisionColor + '35' },
+            { backgroundColor: `${decisionColor}18`, borderColor: `${decisionColor}35` },
           ]}
         >
           <Text style={[styles.pillText, { color: decisionColor }]}>
@@ -696,7 +695,7 @@ function QueuedDecisionCard({
           onPress={() => onRetry(item)}
           style={[
             styles.queuedActionBtn,
-            { backgroundColor: ACCENT + '18', borderColor: ACCENT + '40' },
+            { backgroundColor: `${ACCENT}18`, borderColor: `${ACCENT}40` },
           ]}
         >
           <Feather name="upload-cloud" size={12} color={ACCENT} />
@@ -802,7 +801,7 @@ function ReviewModal({
                     style={[
                       styles.decisionBtn,
                       { borderColor: decision === d.key ? d.color : '#1e2433' },
-                      decision === d.key && { backgroundColor: d.color + '18' },
+                      decision === d.key && { backgroundColor: `${d.color}18` },
                     ]}
                   >
                     <Feather
@@ -840,8 +839,8 @@ function ReviewModal({
                 style={[
                   styles.submitBtn,
                   {
-                    backgroundColor: decision ? ACCENT + '18' : '#1e2433',
-                    borderColor: decision ? ACCENT + '50' : '#1e2433',
+                    backgroundColor: decision ? `${ACCENT}18` : '#1e2433',
+                    borderColor: decision ? `${ACCENT}50` : '#1e2433',
                   },
                   isPending && { opacity: 0.6 },
                 ]}
@@ -1351,8 +1350,8 @@ export default function ApprovalInboxScreen() {
             style={[
               styles.filterChip,
               statusFilter === f.key && {
-                backgroundColor: ACCENT + '18',
-                borderColor: ACCENT + '50',
+                backgroundColor: `${ACCENT}18`,
+                borderColor: `${ACCENT}50`,
               },
               statusFilter !== f.key && {
                 backgroundColor: colors.card,

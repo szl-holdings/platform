@@ -43,7 +43,6 @@ import {
   type OnboardingConfig,
   OnboardingWizard,
   useOnboardingAnalytics,
-  useOnboardingState,
 } from '@szl-holdings/shared-ui/onboarding';
 import { PrivateAppGuard } from '@szl-holdings/shared-ui/PrivateAppGuard';
 import { PackBanner } from '@szl-holdings/shared-ui/pack-banner';
@@ -73,11 +72,9 @@ import {
   Brain,
   Calculator,
   ChevronDown,
-  ChevronRight,
   Cpu,
   Database,
   DollarSign,
-  EyeOff,
   FileText,
   Fuel,
   GitBranch,
@@ -154,7 +151,7 @@ export async function vesselsReplayQueue(
   token: string | null,
 ): Promise<{ replayed: number; failed: number; conflicts: number }> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers.Authorization = `Bearer ${token}`;
   return _vesselsQueue.replay(async () => headers, 'vessels');
 }
 
@@ -388,7 +385,7 @@ function DemoModeBanner() {
     refetchInterval: 60000,
   });
 
-  if (!data || !data.summary) return null;
+  if (!data?.summary) return null;
   const hasDemoMode = data.summary.mockedDemoMode > 0;
   const hasUnhealthy = data.summary.manualRequired > 0;
   if (!hasDemoMode && !hasUnhealthy) return null;
@@ -477,7 +474,7 @@ function RoleSelector({ expanded }: { expanded: boolean }) {
   );
 }
 
-const VESSELS_COLLAPSE_KEY = 'vessels-sidebar-collapsed';
+const _VESSELS_COLLAPSE_KEY = 'vessels-sidebar-collapsed';
 
 function VesselsSidebarContent({
   expanded,
@@ -1313,7 +1310,6 @@ function VesselsDashboard({
           <main
             id="main-content"
             data-szl-shell-main
-            role="main"
             className="flex-1 overflow-auto h-full"
             tabIndex={-1}
           >

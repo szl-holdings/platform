@@ -283,6 +283,18 @@ export class DomainProfileRegistry {
   }
 
   /**
+   * Resolve a profile by id (latest non-deprecated version). Throws if not found.
+   * Used by API routes that need to validate a caller-supplied profileId.
+   */
+  resolve(profileId: string, version?: string): DomainProfile {
+    const profile = this.getProfile(profileId, version);
+    if (!profile) {
+      throw new Error(`[DomainProfileRegistry] Profile not found: ${profileId}`);
+    }
+    return profile;
+  }
+
+  /**
    * Wire a durable pointer store. After calling this, future calls to
    * `rotate_profile_version` and `rollback` await `store.save(...)` before
    * returning, and `hydrate()` will repopulate the in-memory tenant pointer

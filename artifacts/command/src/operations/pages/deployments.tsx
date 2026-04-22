@@ -108,8 +108,8 @@ function TeamPill({
 function initialsFor(name: string): string {
   const parts = name.trim().split(/\s+/);
   if (parts.length === 0) return '?';
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
-  return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
+  if (parts.length === 1) return parts[0]?.slice(0, 2).toUpperCase();
+  return (parts[0]?.[0]! + parts[parts.length - 1]?.[0]!).toUpperCase();
 }
 
 function DeployerBadge({
@@ -168,7 +168,7 @@ function DeployerBadge({
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            onUserClick!(user!.id);
+            onUserClick?.(user?.id);
           }}
           className="inline-flex items-center gap-1.5 hover:brightness-125 transition-[filter] cursor-pointer"
           aria-label={`View ${name}'s paging history`}
@@ -823,7 +823,7 @@ function ScheduleEditor({
               </div>
             ) : (
               <ul className="flex flex-col gap-1">
-                {scheduleQuery.data!.overrides.map((o) => {
+                {scheduleQuery.data?.overrides.map((o) => {
                   const start = new Date(o.startAt);
                   const end = new Date(o.endAt);
                   const active = start <= now && end > now;

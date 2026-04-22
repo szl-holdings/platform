@@ -1,17 +1,10 @@
-import { cn } from '@szl-holdings/shared-ui/utils';
+
 import {
-  BarChart3,
-  Building2,
   Calendar,
-  ChevronRight,
-  Clock,
-  DollarSign,
   Download,
-  Filter,
   Layers,
   MapPin,
   Search,
-  TrendingUp,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -267,7 +260,7 @@ export default function ComparableSalesPage() {
     const matchRadius = c.distance_mi === undefined || c.distance_mi <= radiusMi;
     const compDate = new Date(c.saleDate);
     const daysSince = (Date.now() - compDate.getTime()) / (1000 * 60 * 60 * 24);
-    const matchDate = !isNaN(daysSince) && daysSince <= maxAgeDays;
+    const matchDate = !Number.isNaN(daysSince) && daysSince <= maxAgeDays;
     return matchType && matchSearch && matchRadius && matchDate;
   }).sort((a, b) => {
     if (sortBy === 'price') return b.salePrice - a.salePrice;

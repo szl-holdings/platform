@@ -12,8 +12,8 @@
  *   npx tsx scripts/media/capture-screenshots.ts --output docs/media/screenshots
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:80';
 const OUTPUT_DIR =
@@ -118,7 +118,6 @@ async function captureScreenshots() {
   try {
     playwright = await import('playwright');
   } catch {
-    console.error('Playwright not installed. Run: npx playwright install chromium');
     process.exit(1);
   }
 
@@ -132,7 +131,6 @@ async function captureScreenshots() {
   const results: { name: string; status: 'ok' | 'error'; file?: string; error?: string }[] = [];
 
   for (const target of targets) {
-    console.log(`Capturing: ${target.name}`);
 
     try {
       const context = await browser.newContext({
@@ -170,23 +168,17 @@ async function captureScreenshots() {
       await context.close();
 
       results.push({ name: target.name, status: 'ok', file: outputPath });
-      console.log(`  Saved: ${outputPath}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       results.push({ name: target.name, status: 'error', error: message });
-      console.error(`  Failed: ${message}`);
     }
   }
 
   await browser.close();
-
-  console.log('\n=== Screenshot Capture Summary ===');
-  const succeeded = results.filter((r) => r.status === 'ok');
+  const _succeeded = results.filter((r) => r.status === 'ok');
   const failed = results.filter((r) => r.status === 'error');
-  console.log(`Captured: ${succeeded.length}/${targets.length}`);
   if (failed.length > 0) {
-    console.log('Failed:');
-    failed.forEach((r) => console.log(`  - ${r.name}: ${r.error}`));
+    failed.forEach((_r) => {});
   }
 }
 

@@ -2,24 +2,17 @@ import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, m } from 'framer-motion';
 import {
-  AlertCircle,
   Check,
-  CheckCircle2,
   ChevronRight,
-  Eye,
-  EyeOff,
   Loader2,
   Plus,
-  RefreshCw,
   Shield,
   Star,
   Trash2,
-  TrendingUp,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
 import { apiFetch } from './api';
-import { DisclaimerBanner, ScoreBar, StatusBadge } from './components';
+import { DisclaimerBanner, StatusBadge } from './components';
 import type { OwnershipScenario } from './types';
 
 // ─── Scenario List ────────────────────────────────────────────────────────────

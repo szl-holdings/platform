@@ -19,7 +19,7 @@ function parseCSV(content: string): CsvRow[] {
   const lines = content.split(/\r?\n/).filter((l) => l.trim().length > 0);
   if (lines.length < 2) return [];
 
-  const header = lines[0]!.split(',').map((h) => h.trim().replace(/^"|"$/g, '').toLowerCase());
+  const header = lines[0]?.split(',').map((h) => h.trim().replace(/^"|"$/g, '').toLowerCase());
   const rows: CsvRow[] = [];
 
   for (let i = 1; i < lines.length; i++) {
@@ -71,14 +71,14 @@ function parseNumeric(val: string): number | undefined {
   if (!val) return undefined;
   const cleaned = val.replace(/[$,\s]/g, '');
   const n = parseFloat(cleaned);
-  return isNaN(n) ? undefined : n;
+  return Number.isNaN(n) ? undefined : n;
 }
 
 function parseDateStr(val: string): string | undefined {
   if (!val) return undefined;
   try {
     const d = new Date(val);
-    if (isNaN(d.getTime())) return undefined;
+    if (Number.isNaN(d.getTime())) return undefined;
     return d.toISOString().split('T')[0]!;
   } catch {
     return undefined;
@@ -266,7 +266,7 @@ export async function ingestCsvBuffer(
         parseNumeric(getField(row, 'year_built', 'yr_built', 'built_year')) ?? undefined;
 
       const oppScore = parseInt(getField(row, 'opportunity_score', 'score'), 10);
-      let score = !isNaN(oppScore) ? oppScore : 0;
+      let score = !Number.isNaN(oppScore) ? oppScore : 0;
       let rationale = getField(row, 'score_rationale', 'rationale', 'notes');
       let confidence: 'low' | 'medium' | 'high' = 'medium';
 

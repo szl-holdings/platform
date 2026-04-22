@@ -1,15 +1,12 @@
 import { MicroFeedbackWidget } from '@szl-holdings/shared-ui/micro-feedback-widget';
 import {
   Activity,
-  AlertTriangle,
-  Clock,
   DollarSign,
   FileText,
   Shield,
-  TrendingDown,
   Users,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const ACCENT = '#ef4444';
 const DS = {
@@ -245,14 +242,14 @@ function ImpactCard({ impact }: { impact: SecurityBusinessImpact }) {
 }
 
 export default function BusinessSignalIntelligence() {
-  const [impacts, setImpacts] = useState<SecurityBusinessImpact[]>(SEED_IMPACTS);
-  const [compliance, setCompliance] = useState<ComplianceCost[]>(COMPLIANCE_COSTS);
+  const [impacts, _setImpacts] = useState<SecurityBusinessImpact[]>(SEED_IMPACTS);
+  const [compliance, _setCompliance] = useState<ComplianceCost[]>(COMPLIANCE_COSTS);
 
   const activeImpacts = impacts.filter((i) => i.status === 'active');
   const totalBreachExposure = activeImpacts.reduce((s, i) => s + i.breachCostExposure, 0);
   const totalFineExposure = activeImpacts.reduce((s, i) => s + i.complianceFineExposure, 0);
   const totalMitigationSaved = impacts.reduce((s, i) => s + i.mitigationSavings, 0);
-  const atRiskClients = [...new Set(activeImpacts.flatMap((i) => i.affectedClients))].length;
+  const atRiskClients = new Set(activeImpacts.flatMap((i) => i.affectedClients)).size;
 
   return (
     <div className="max-w-7xl mx-auto space-y-5">

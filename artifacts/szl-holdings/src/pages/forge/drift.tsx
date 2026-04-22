@@ -42,7 +42,7 @@ export default function ForgeDriftPage() {
               <Card
                 key={s}
                 title={s}
-                value={summary.data!.bySeverity[s] ?? 0}
+                value={summary.data?.bySeverity[s] ?? 0}
                 accent={s === 'critical' ? '#fca5a5' : s === 'high' ? '#fbbf24' : '#93c5fd'}
               />
             ))}

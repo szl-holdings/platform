@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { logger } from '../lib/logger';
 

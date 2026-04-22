@@ -85,39 +85,32 @@ export function useIncidentSubscription() {
                 const sev = (incident.severity ?? '').toLowerCase();
                 if (sev === 'critical' || sev === 'high') {
                   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(
-                    (err) => {
-                      console.warn('[WS] Haptics failed:', err);
+                    (_err) => {
                     },
                   );
                   sendCriticalIncidentNotification(incident.title, incident.severity).catch(
-                    (err) => {
-                      console.warn('[WS] Push notification failed:', err);
+                    (_err) => {
                     },
                   );
                 }
               }
             } else if (msg.type === 'error') {
-              console.warn('[WS] aegis-incidents error:', msg.code, msg.message);
             }
-          } catch (parseErr) {
-            console.warn('[WS] Failed to parse message:', parseErr);
+          } catch (_parseErr) {
           }
         };
 
-        ws.onerror = (err) => {
-          console.warn('[WS] WebSocket error:', err);
+        ws.onerror = (_err) => {
         };
 
         ws.onclose = () => {
           if (pingInterval) clearInterval(pingInterval);
         };
-      } catch (err) {
-        console.warn('[WS] Failed to connect:', err);
+      } catch (_err) {
       }
     };
 
-    connect().catch((err) => {
-      console.warn('[WS] Async connect failed:', err);
+    connect().catch((_err) => {
     });
 
     return () => {

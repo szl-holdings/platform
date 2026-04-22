@@ -1,8 +1,7 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { db, notificationRecipientsTable } from '@szl-holdings/db';
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
-import { z } from 'zod';
 import {
   handleRouteError,
   sendBadRequest,
@@ -20,7 +19,7 @@ import { authMiddleware, parseIdParam, requireRole } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
-const E164_REGEX = /^\+[1-9]\d{7,14}$/;
+const _E164_REGEX = /^\+[1-9]\d{7,14}$/;
 
 router.get('/notification-recipients', authMiddleware(), requireRole('ops'), async (_req, res) => {
   try {
@@ -49,7 +48,7 @@ router.post(
         .from(notificationRecipientsTable)
         .where(eq(notificationRecipientsTable.phoneNumber, normalized));
 
-      if (existing.length > 0 && existing[0]!.isActive) {
+      if (existing.length > 0 && existing[0]?.isActive) {
         sendBadRequest(res, 'A recipient with this phone number already exists');
         return;
       }
@@ -58,13 +57,13 @@ router.post(
         const [updated] = await db
           .update(notificationRecipientsTable)
           .set({
-            label: label ?? existing[0]!.label,
-            smsEnabled: smsEnabled !== undefined ? smsEnabled : existing[0]!.smsEnabled,
-            voiceEnabled: voiceEnabled !== undefined ? voiceEnabled : existing[0]!.voiceEnabled,
+            label: label ?? existing[0]?.label,
+            smsEnabled: smsEnabled !== undefined ? smsEnabled : existing[0]?.smsEnabled,
+            voiceEnabled: voiceEnabled !== undefined ? voiceEnabled : existing[0]?.voiceEnabled,
             isActive: true,
             updatedAt: new Date(),
           })
-          .where(eq(notificationRecipientsTable.id, existing[0]!.id))
+          .where(eq(notificationRecipientsTable.id, existing[0]?.id))
           .returning();
         sendSuccess(res, updated);
         return;
@@ -73,7 +72,7 @@ router.post(
       const [created] = await db
         .insert(notificationRecipientsTable)
         .values({
-          userId: userId ?? req.user!.id,
+          userId: userId ?? req.user?.id,
           phoneNumber: normalized,
           label: label ?? null,
           smsEnabled: smsEnabled !== undefined ? smsEnabled : true,

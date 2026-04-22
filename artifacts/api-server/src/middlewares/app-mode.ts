@@ -49,16 +49,16 @@ const DEMO_READ_BYPASS = [
 const PRODUCTION_DESTRUCTIVE_PREFIXES = ['/api/admin'];
 
 function resolveAppMode(): AppMode {
-  const raw = (process.env['APP_MODE'] ?? '').toLowerCase().trim();
+  const raw = (process.env.APP_MODE ?? '').toLowerCase().trim();
   if (raw === 'demo') return 'demo';
   if (raw === 'sandbox') return 'sandbox';
   if (raw === 'production') return 'production';
 
-  const nodeEnv = (process.env['NODE_ENV'] ?? '').toLowerCase();
+  const nodeEnv = (process.env.NODE_ENV ?? '').toLowerCase();
   if (nodeEnv === 'production') return 'production';
 
-  const appEnv = (process.env['APP_ENV'] ?? '').toLowerCase();
-  if (appEnv === 'demo' || process.env['DEMO_MODE'] === 'true') return 'demo';
+  const appEnv = (process.env.APP_ENV ?? '').toLowerCase();
+  if (appEnv === 'demo' || process.env.DEMO_MODE === 'true') return 'demo';
   if (appEnv === 'sandbox') return 'sandbox';
   if (appEnv === 'production') return 'production';
 

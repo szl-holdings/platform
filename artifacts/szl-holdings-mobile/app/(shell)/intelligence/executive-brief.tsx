@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
@@ -110,7 +110,7 @@ function DomainCard({
         <View
           style={[
             styles.domainIcon,
-            { backgroundColor: meta.color + '18', borderColor: meta.color + '35' },
+            { backgroundColor: `${meta.color}18`, borderColor: `${meta.color}35` },
           ]}
         >
           <Text style={styles.domainIconText}>{meta.icon}</Text>
@@ -121,7 +121,7 @@ function DomainCard({
             <View
               style={[
                 styles.healthChip,
-                { backgroundColor: hColor + '18', borderColor: hColor + '35' },
+                { backgroundColor: `${hColor}18`, borderColor: `${hColor}35` },
               ]}
             >
               <Text style={[styles.healthChipText, { color: hColor }]}>
@@ -183,7 +183,7 @@ function DomainCard({
                   key={type}
                   style={[
                     styles.typePill,
-                    { backgroundColor: meta.color + '12', borderColor: meta.color + '25' },
+                    { backgroundColor: `${meta.color}12`, borderColor: `${meta.color}25` },
                   ]}
                 >
                   <Text style={[styles.typePillText, { color: meta.color }]}>
@@ -264,7 +264,7 @@ export default function ExecutiveBriefScreen() {
             style={[
               styles.modeChip,
               mode === m
-                ? { backgroundColor: ACCENT + '18', borderColor: ACCENT + '50' }
+                ? { backgroundColor: `${ACCENT}18`, borderColor: `${ACCENT}50` }
                 : { backgroundColor: colors.card, borderColor: colors.border },
             ]}
           >
@@ -303,11 +303,11 @@ export default function ExecutiveBriefScreen() {
                 <View
                   style={[
                     styles.classifBanner,
-                    { borderColor: ACCENT + '30', backgroundColor: ACCENT + '08' },
+                    { borderColor: `${ACCENT}30`, backgroundColor: `${ACCENT}08` },
                   ]}
                 >
-                  <Feather name="lock" size={10} color={ACCENT + '80'} />
-                  <Text style={[styles.classifText, { color: ACCENT + '80' }]}>
+                  <Feather name="lock" size={10} color={`${ACCENT}80`} />
+                  <Text style={[styles.classifText, { color: `${ACCENT}80` }]}>
                     {pulse.classification}
                   </Text>
                   <Text style={[styles.classifDate, { color: colors.mutedForeground }]}>
@@ -335,8 +335,8 @@ export default function ExecutiveBriefScreen() {
                     style={[
                       styles.confChip,
                       {
-                        backgroundColor: confidenceColor(pulse.overallConfidence) + '18',
-                        borderColor: confidenceColor(pulse.overallConfidence) + '35',
+                        backgroundColor: `${confidenceColor(pulse.overallConfidence)}18`,
+                        borderColor: `${confidenceColor(pulse.overallConfidence)}35`,
                       },
                     ]}
                   >
@@ -355,7 +355,7 @@ export default function ExecutiveBriefScreen() {
                 <View
                   style={[
                     styles.headlineCard,
-                    { backgroundColor: '#0a0a0a', borderColor: ACCENT + '30' },
+                    { backgroundColor: '#0a0a0a', borderColor: `${ACCENT}30` },
                   ]}
                 >
                   <Text style={styles.headlineText}>{pulse.headline}</Text>
@@ -385,7 +385,7 @@ export default function ExecutiveBriefScreen() {
                               <View
                                 style={[
                                   styles.confChip,
-                                  { backgroundColor: conf + '18', borderColor: conf + '35' },
+                                  { backgroundColor: `${conf}18`, borderColor: `${conf}35` },
                                 ]}
                               >
                                 <Text style={[styles.confChipText, { color: conf }]}>
@@ -433,7 +433,7 @@ export default function ExecutiveBriefScreen() {
                           <View
                             style={[
                               styles.prioBadge,
-                              { backgroundColor: pc + '18', borderColor: pc + '35' },
+                              { backgroundColor: `${pc}18`, borderColor: `${pc}35` },
                             ]}
                           >
                             <Text style={[styles.prioText, { color: pc }]}>{a.priority}</Text>

@@ -411,7 +411,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, async (job
   const start = Date.now();
   logger.info({ jobId: job.id }, "daily_pulse_briefing_digest: starting delivery");
   let sent = 0;
-  let skipped = 0;
+  const skipped = 0;
   let failed = 0;
   let briefingId: string | null = null;
   try {
@@ -559,7 +559,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_FEATURE_FLAG_SYNC, async (job) =>
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, async (job) => {
   const { db, documentsTable, pdfBatchesTable, pdfJobsTable } = await import("@szl-holdings/db");
   const { eq } = await import("drizzle-orm");
-  const { randomUUID } = await import("crypto");
+  const { randomUUID } = await import("node:crypto");
 
   const start = Date.now();
   logger.info({ jobId: job.id }, "daily_document_batch: starting scheduled document PDF generation");
@@ -581,7 +581,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, async (job) => {
     // Create a scheduled batch record
     const batchId = randomUUID();
     const batchDate = new Date().toISOString().split("T")[0];
-    const [batch] = await db.insert(pdfBatchesTable).values({
+    const [_batch] = await db.insert(pdfBatchesTable).values({
       batchId,
       title: `Daily PDF Batch — ${batchDate}`,
       templateId: "daily_scheduler",
@@ -1604,7 +1604,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => 
       byTeam.set(sh.team, bucket);
     }
 
-    const appUrl = process.env["APP_URL"] ?? process.env["VITE_APP_URL"] ?? "";
+    const appUrl = process.env.APP_URL ?? process.env.VITE_APP_URL ?? "";
     const actionUrl = `${appUrl}/command/operations/deployments`;
 
     for (const [team, { times, warningMs }] of byTeam) {
@@ -1726,7 +1726,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => 
             await db
               .update(onCallHandoffNotificationsTable)
               .set({ notificationId: notificationId || null, inAppDelivered: inAppOn })
-              .where(eq(onCallHandoffNotificationsTable.id, claim[0]!.id));
+              .where(eq(onCallHandoffNotificationsTable.id, claim[0]?.id));
           }
 
           // Fire external channels per the recipient's per-channel prefs.

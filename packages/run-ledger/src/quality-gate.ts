@@ -3,7 +3,6 @@ import type {
   QualityGateResult,
   RunLedgerEntry,
 } from '@szl-holdings/contracts/governance';
-import { randomUUID } from 'crypto';
 
 // ─── Profile thresholds ───────────────────────────────────────────────────────
 

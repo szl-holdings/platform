@@ -148,9 +148,9 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const limit = Math.min(Number(req.query['limit'] ?? 50), 200);
-      const offset = Number(req.query['offset'] ?? 0);
-      const product = req.query['product'] as string | undefined;
+      const limit = Math.min(Number(req.query.limit ?? 50), 200);
+      const offset = Number(req.query.offset ?? 0);
+      const product = req.query.product as string | undefined;
 
       const since30d = new Date();
       since30d.setDate(since30d.getDate() - 30);

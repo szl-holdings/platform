@@ -1,5 +1,4 @@
 import {
-  bigint,
   integer,
   jsonb,
   pgTable,

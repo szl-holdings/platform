@@ -9,7 +9,6 @@ import {
   Sun,
   Users,
 } from 'lucide-react';
-import * as React from 'react';
 import { useCreateStoryboard, useStoryboards } from '@/alloy/hooks/use-creative';
 
 export function StoryboardBoard({ campaignId }: { campaignId: string }) {
@@ -44,7 +43,7 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
           </h2>
           <p className="text-xs text-slate-500 mt-1">
             {scenes?.length || 0} scenes ·{' '}
-            {scenes?.reduce((acc, s) => acc + parseInt(s.duration || '0'), 0) || 0}s total runtime
+            {scenes?.reduce((acc, s) => acc + parseInt(s.duration || '0', 10), 0) || 0}s total runtime
           </p>
         </div>
         <button

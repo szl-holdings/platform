@@ -8,9 +8,9 @@
  *   node scripts/qa/audit-broken-links.js
  */
 
-import { existsSync, readdirSync, readFileSync } from 'fs';
-import { dirname, extname, join, dirname as pathDirname, relative, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { dirname, extname, join, dirname as pathDirname, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
@@ -32,7 +32,7 @@ const SKIP_DIRS = ['node_modules', '.git', 'dist', 'build', '.cache'];
 const SCAN_EXTENSIONS = new Set(['.ts', '.tsx']);
 
 // External links and anchors to ignore
-const ALLOWED_EXTERNAL = ['http://', 'https://', 'mailto:', 'tel:', '#', 'javascript:'];
+const _ALLOWED_EXTERNAL = ['http://', 'https://', 'mailto:', 'tel:', '#', 'javascript:'];
 
 function walkDir(dir) {
   const files = [];
@@ -53,7 +53,7 @@ function walkDir(dir) {
   return files;
 }
 
-function extractImports(content, filePath) {
+function extractImports(content, _filePath) {
   const imports = [];
   const importRegex = /(?:import|from)\s+["'](@\/[^"']+|\.\.?\/[^"']+)["']/g;
   const lazyRegex = /lazy\(\s*\(\)\s*=>\s*import\(\s*["'](@\/[^"']+|\.\.?\/[^"']+)["']\s*\)\s*\)/g;
@@ -128,35 +128,24 @@ function auditApp(config) {
 }
 
 function main() {
-  console.log('\nSZL Holdings — Broken Link & Import Audit');
-  console.log('Checking for broken imports and internal link references...\n');
 
   const allFindings = [];
 
   for (const config of APP_CONFIGS) {
-    console.log(`  Scanning ${config.name}...`);
     allFindings.push(...auditApp(config));
   }
 
   const errors = allFindings.filter((f) => f.severity === 'error');
-  const warnings = allFindings.filter((f) => f.severity === 'warning');
+  const _warnings = allFindings.filter((f) => f.severity === 'warning');
 
   if (errors.length > 0) {
-    console.log(`\nBROKEN IMPORTS (${errors.length}):`);
-    for (const f of errors) {
-      console.error(`  [${f.type.toUpperCase()}] ${f.file}`);
-      console.error(`    import: "${f.importPath}"`);
-      console.error(`    resolved: ${f.resolved} — FILE NOT FOUND`);
+    for (const _f of errors) {
     }
   }
 
-  console.log(`\nSummary: ${errors.length} broken import(s), ${warnings.length} warning(s)`);
-
   if (errors.length > 0) {
-    console.error('\nFAIL — Broken imports found. Fix before building.');
     process.exit(1);
   } else {
-    console.log('\nPASS — No broken imports detected.');
     process.exit(0);
   }
 }

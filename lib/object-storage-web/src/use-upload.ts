@@ -78,7 +78,7 @@ export function useUpload(options: UseUploadOptions = {}) {
     }
 
     return response.json();
-  }, []);
+  }, [basePath]);
 
   const uploadToPresignedUrl = useCallback(async (file: File, uploadURL: string): Promise<void> => {
     const response = await fetch(uploadURL, {
@@ -153,7 +153,7 @@ export function useUpload(options: UseUploadOptions = {}) {
         headers: { 'Content-Type': file.type || 'application/octet-stream' },
       };
     },
-    [],
+    [basePath],
   );
 
   return {

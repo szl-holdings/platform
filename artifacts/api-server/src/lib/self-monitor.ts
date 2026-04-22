@@ -135,7 +135,7 @@ async function createSignal(params: {
 
   if (params.severity === "critical" || params.severity === "high") {
     const severityLabel = params.severity === "critical" ? "🚨 CRITICAL" : "⚠️ HIGH";
-    const recommendedAction = (params.metadata["recommendedAction"] as string | undefined) ?? "Review logs and take corrective action immediately.";
+    const recommendedAction = (params.metadata.recommendedAction as string | undefined) ?? "Review logs and take corrective action immediately.";
 
     if (hasEmailProviderConfigured()) {
       const founderEmail = process.env.FOUNDER_ALERT_EMAIL ?? process.env.SZL_INTERNAL_EMAIL ?? "team@szlholdings.com";
@@ -250,7 +250,7 @@ interface RemediationTrigger {
 function detectRemediationTriggers(health: HealthDetailedResponse): RemediationTrigger[] {
   const triggers: RemediationTrigger[] = [];
 
-  const dbCheck = health.checks["database"];
+  const dbCheck = health.checks.database;
   if (dbCheck?.status === "unreachable" || dbCheck?.status === "unavailable") {
     triggers.push({
       patternKey: "p3",
@@ -266,7 +266,7 @@ function detectRemediationTriggers(health: HealthDetailedResponse): RemediationT
     });
   }
 
-  const jobQueueCheck = health.checks["job_queue"];
+  const jobQueueCheck = health.checks.job_queue;
   if (jobQueueCheck?.status === "backpressure") {
     triggers.push({
       patternKey: "p4",
@@ -302,11 +302,11 @@ function detectRemediationTriggers(health: HealthDetailedResponse): RemediationT
     }
   }
 
-  const telemetryCheck = health.checks["telemetry"];
+  const telemetryCheck = health.checks.telemetry;
   if (telemetryCheck?.status === "elevated_errors") {
     const details = telemetryCheck.details ?? "";
     const p95Match = details.match(/p95=(\d+)ms/);
-    const p95 = p95Match ? parseInt(p95Match[1]) : null;
+    const p95 = p95Match ? parseInt(p95Match[1], 10) : null;
     if (p95 != null && p95 > 1000) {
       triggers.push({
         patternKey: "p2",
@@ -403,7 +403,7 @@ async function runMonitoringCycle(): Promise<void> {
 
   const { memory, checks, uptime, status: overallStatus } = health;
 
-  const dbCheck = checks["database"];
+  const dbCheck = checks.database;
   if (dbCheck?.status === "unreachable" || dbCheck?.status === "unavailable") {
     if (shouldEmitSignal("db-unreachable")) {
       await createSignal({
@@ -438,12 +438,12 @@ async function runMonitoringCycle(): Promise<void> {
     }
   }
 
-  const telemetryCheck = checks["telemetry"];
+  const telemetryCheck = checks.telemetry;
   if (telemetryCheck?.status === "elevated_errors") {
     const details = telemetryCheck.details ?? "";
     const p95Match = details.match(/p95=(\d+)ms/);
     const errorRateMatch = details.match(/error_rate=([\d.]+)%/);
-    const p95 = p95Match ? parseInt(p95Match[1]) : null;
+    const p95 = p95Match ? parseInt(p95Match[1], 10) : null;
     const errorRate = errorRateMatch ? parseFloat(errorRateMatch[1]) : null;
 
     if (p95 != null && p95 > 500) {
@@ -484,7 +484,7 @@ async function runMonitoringCycle(): Promise<void> {
     }
   }
 
-  const jobQueueCheck = checks["job_queue"];
+  const jobQueueCheck = checks.job_queue;
   if (jobQueueCheck?.status === "backpressure") {
     const details = jobQueueCheck.details ?? "";
     if (shouldEmitSignal("job-queue-backpressure")) {

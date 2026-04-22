@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ApiError, apiFetch } from './api-fetch';
 import { cn } from './utils';
 
@@ -385,7 +385,7 @@ function serializeSvgForExport(svg: SVGSVGElement): string {
   // canvas gradient operators see on screen closely enough for evidence use.
   const w = svg.viewBox.baseVal.width || svg.clientWidth || 800;
   const h = svg.viewBox.baseVal.height || svg.clientHeight || 460;
-  const bg = clone.ownerDocument!.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  const bg = clone.ownerDocument?.createElementNS('http://www.w3.org/2000/svg', 'rect');
   bg.setAttribute('x', '0');
   bg.setAttribute('y', '0');
   bg.setAttribute('width', String(w));
@@ -694,7 +694,7 @@ export function ConstellationGraph({
     return () => {
       cancelled = true;
     };
-  }, [domain, data]);
+  }, [domain]);
 
   // Whenever filters change, clear the active saved-view marker if they no
   // longer match. This keeps the dropdown honest — selecting a view then
@@ -965,7 +965,7 @@ export function ConstellationGraph({
   // Resize observer
   useEffect(() => {
     if (!containerRef.current) return;
-    const ro = new ResizeObserver(([e]) => setWidth(e!.contentRect.width));
+    const ro = new ResizeObserver(([e]) => setWidth(e?.contentRect.width));
     ro.observe(containerRef.current);
     return () => ro.disconnect();
   }, []);
@@ -1009,7 +1009,7 @@ export function ConstellationGraph({
     return () => {
       cancelled = true;
     };
-  }, [domain, data, showCross, entityTypeFilter, activeOnly, pageSize, reload.current]);
+  }, [domain, data, showCross, entityTypeFilter, activeOnly, pageSize]);
 
   // Merge the first-page payload with any additional pages loaded via the
   // "Load more" control so the canvas keeps growing as the operator pages
@@ -1223,7 +1223,7 @@ export function ConstellationGraph({
   // Reset operator expansions whenever the host graph changes (new domain or
   // refreshed payload) so fragments from a previous view never leak into the
   // next one.
-  const graphKey = data ? '__data__' : `${domain ?? ''}#${reload.current}`;
+  const _graphKey = data ? '__data__' : `${domain ?? ''}#${reload.current}`;
   useEffect(() => {
     setExpandedNodes({});
     setExpandedEdges({});
@@ -1240,7 +1240,7 @@ export function ConstellationGraph({
     setPathHighlight(null);
     setPathStepsOpen(true);
     setPathExportError(null);
-  }, [graphKey]);
+  }, []);
 
   // Compute the cutoff time for the freshness window filter
   const sinceCutoff = useMemo(() => {
@@ -1629,7 +1629,7 @@ export function ConstellationGraph({
       const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
       downloadBlob(blob, `trace-${slug}-${ts}.csv`);
     },
-    [buildTraceBundle],
+    [buildTraceBundle, traceBundleSlug],
   );
 
   const openAttachToCase = useCallback(() => {
@@ -1889,7 +1889,7 @@ export function ConstellationGraph({
   const [pathExportBusy, setPathExportBusy] = useState(false);
   const [pathExportError, setPathExportError] = useState<string | null>(null);
   const exportPath = useCallback(async () => {
-    if (!pathHighlight || !pathHighlight.found) return;
+    if (!pathHighlight?.found) return;
     setPathExportBusy(true);
     setPathExportError(null);
     try {
@@ -1972,19 +1972,21 @@ export function ConstellationGraph({
       // Merge any nodes/edges along the path that aren't already on the
       // canvas so the highlight has something to draw against.
       if (p.path) {
+        const pathNodes = p.path.nodes;
+        const pathEdges = p.path.edges;
         setExpandedNodes((prev) => {
           const next = { ...prev };
-          for (const n of p.path!.nodes) next[n.id] = n;
+          for (const n of pathNodes) next[n.id] = n;
           return next;
         });
         setExpandedEdges((prev) => {
           const next = { ...prev };
-          for (const e of p.path!.edges) next[e.id] = e;
+          for (const e of pathEdges) next[e.id] = e;
           return next;
         });
         setExpandedIds((prev) => {
           const next = new Set(prev);
-          for (const n of p.path!.nodes) next.add(n.id);
+          for (const n of pathNodes) next.add(n.id);
           return next;
         });
       }
@@ -2075,15 +2077,15 @@ export function ConstellationGraph({
     return () => cancelAnimationFrame(raf);
   }, [edges, W, H]);
 
-  const nodeMap = useMemo(
+  const _nodeMap = useMemo(
     () => new Map(simRef.current.map((s) => [s.id, s])),
-    [simRef.current.length, nodes],
+    [],
   );
 
   const navigateToOwner = useCallback(
     (node: ConstellationGraphNode) => {
       if (!node.domain) return; // unknown owner — wait for enrichment
-      const paths = { ...DOMAIN_BASE_PATH, ...(domainBasePaths ?? {}) };
+      const paths = { ...DOMAIN_BASE_PATH, ...domainBasePaths };
       const base = paths[node.domain] ?? `/${node.domain}`;
       // Drop existing artifact base path and route to the target domain root
       window.location.href = `${base.replace(/\/$/, '')}/`;
@@ -2874,7 +2876,7 @@ export function ConstellationGraph({
                     (e.fromNodeId === selected.id && e.toNodeId === n.id) ||
                     (e.toNodeId === selected.id && e.fromNodeId === n.id),
                 );
-              const isSearchMatch = searchMatches !== null && searchMatches.has(n.id);
+              const isSearchMatch = searchMatches?.has(n.id);
               const onPath = pathHighlight?.nodeIds.includes(n.id) ?? false;
               const isPathEndpoint =
                 pathHighlight !== null &&
@@ -3135,7 +3137,7 @@ export function ConstellationGraph({
           and lets the operator read the chain as a sentence. Cross-domain
           steps are visually flagged. Clicking a step selects/centers the
           corresponding node on the canvas. */}
-      {pathHighlight && pathHighlight.found && pathHighlight.nodes.length > 0 && (
+      {pathHighlight?.found && pathHighlight.nodes.length > 0 && (
         <div
           data-testid="constellation-path-steps"
           style={{
@@ -4404,7 +4406,6 @@ export function ConstellationGraph({
               </button>
               <button
                 type="button"
-                autoFocus
                 onClick={() => void confirmDeleteSavedView()}
                 disabled={savedViewsBusy}
                 data-testid="constellation-delete-view-confirm"

@@ -49,7 +49,7 @@ function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Pr
     });
 }
 
-async function fetchJson(url: string, timeoutMs = 10000): Promise<unknown> {
+async function _fetchJson(url: string, timeoutMs = 10000): Promise<unknown> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -144,7 +144,7 @@ router.get(
   '/terra/employment-outlook',
   terraRateLimit,
   authMiddleware({ required: false }),
-  async (req, res) => {
+  async (_req, res) => {
     try {
       const data = await getCached('terra-bls', 3600000, async () => {
         return {
@@ -267,7 +267,7 @@ router.get(
       const lat = parseFloat(req.query.lat as string);
       const lng = parseFloat(req.query.lng as string);
 
-      if (isNaN(lat) || isNaN(lng)) {
+      if (Number.isNaN(lat) || Number.isNaN(lng)) {
         sendBadRequest(res, 'lat and lng query parameters are required');
         return;
       }

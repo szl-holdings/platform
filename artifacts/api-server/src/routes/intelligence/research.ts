@@ -1,13 +1,8 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { openai } from '@szl-holdings/ai-engine/providers/openai';
 import { bodyShape } from '@szl-holdings/contracts/common';
-import { db, intelligenceCacheTable, pool } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import crypto from 'crypto';
-import { eq, lt, sql } from 'drizzle-orm';
-import express, { type IRouter, type RequestHandler, Router } from 'express';
-import rateLimit from 'express-rate-limit';
-import { LRUCache } from 'lru-cache';
+import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import {
   getAiModelById,
@@ -15,9 +10,7 @@ import {
   getModelObservabilitySummary,
 } from '../../lib/ai-model-observability';
 import { handleRouteError, sendError, sendSuccess } from '../../lib/api-response';
-import { logger } from '../../lib/logger';
 import { getRegistrySummary } from '../../lib/model-registry';
-import { redisGet, redisSet } from '../../lib/redis-client.js';
 import { authMiddleware } from '../../middlewares/auth';
 
 type AnthropicMessageParam = {
@@ -28,7 +21,6 @@ type AnthropicMessageParam = {
 import { listQuerySchema, validateBody, validateQuery } from '../../lib/validation';
 import {
   aiRateLimit,
-  type CveItem,
   computeIntelligenceBriefing,
   fetchGdeltGeopolitical,
   fetchJson,
@@ -38,8 +30,6 @@ import {
   type GeoEvent,
   getCached,
   intelRateLimit,
-  type NewsItem,
-  type ThreatItem,
 } from './shared';
 
 const router = Router();
@@ -572,7 +562,7 @@ router.get(
   async (req, res) => {
     try {
       const query = (req.query.q as string) || 'artificial intelligence security';
-      const limit = Math.min(parseInt(req.query.limit as string) || 8, 15);
+      const limit = Math.min(parseInt(req.query.limit as string, 10) || 8, 15);
       const papers = await getCached(`research-${query}-${limit}`, 1800000, () =>
         services.arxiv.searchPapers(query, limit),
       );
@@ -760,7 +750,7 @@ router.get(
   async (req, res) => {
     try {
       const task = (req.query.task as string) || 'text-classification';
-      const limit = Math.min(parseInt(req.query.limit as string) || 8, 20);
+      const limit = Math.min(parseInt(req.query.limit as string, 10) || 8, 20);
       const data = await getCached(`hf-hub-${task}-${limit}`, 1800000, async () => {
         try {
           const rawHf = await fetchJson(
@@ -1173,7 +1163,7 @@ router.post(
       };
       const toneDesc = toneMap[tone] || toneMap.professional;
 
-      const systemPrompt = DOMAIN_AGENTS.creative!.systemPrompt;
+      const systemPrompt = DOMAIN_AGENTS.creative?.systemPrompt;
       const userPrompt = `Generate a complete ${format} campaign for: "${topic}"
 
 Tone: ${toneDesc}${brand ? `\nBrand: ${brand}` : ''}
@@ -1244,7 +1234,7 @@ router.post(
         dimension?: string;
       };
 
-      const systemPrompt = DOMAIN_AGENTS.compliance!.systemPrompt;
+      const systemPrompt = DOMAIN_AGENTS.compliance?.systemPrompt;
       const userPrompt = `Perform a comprehensive organizational readiness and risk assessment.
 
 ${context ? `Organization Context: ${context}` : ''}
@@ -1306,7 +1296,7 @@ router.post(
       }
 
       const systemPrompt =
-        DOMAIN_AGENTS.strategic!.systemPrompt + (context ? `\n\nClient Context: ${context}` : '');
+        DOMAIN_AGENTS.strategic?.systemPrompt + (context ? `\n\nClient Context: ${context}` : '');
 
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
@@ -1363,7 +1353,7 @@ router.post(
         return;
       }
 
-      const systemPrompt = DOMAIN_AGENTS.msp!.systemPrompt;
+      const systemPrompt = DOMAIN_AGENTS.msp?.systemPrompt;
       const userPrompt = `Triage this IT support ticket:
 
 Subject: ${subject}
@@ -1424,7 +1414,7 @@ router.post(
         topGaps?: string[];
       };
 
-      const systemPrompt = DOMAIN_AGENTS.compliance!.systemPrompt;
+      const systemPrompt = DOMAIN_AGENTS.compliance?.systemPrompt;
       const scoresText = scores
         ? Object.entries(scores)
             .map(([k, v]) => `${k}: ${v}%`)
@@ -1494,7 +1484,7 @@ router.post(
         lastKnownPosition?: string;
       };
 
-      const systemPrompt = DOMAIN_AGENTS.maritime!.systemPrompt;
+      const systemPrompt = DOMAIN_AGENTS.maritime?.systemPrompt;
       const userPrompt = `Analyze this potential dark vessel (AIS gap detected):
 
 ${vessel ? `Vessel: ${vessel}` : 'Unknown vessel'}
@@ -1557,7 +1547,7 @@ router.post(
         severity?: string;
       };
 
-      const systemPrompt = DOMAIN_AGENTS.security!.systemPrompt;
+      const systemPrompt = DOMAIN_AGENTS.security?.systemPrompt;
       const userPrompt = `Perform autonomous incident triage for this security threat:
 
 ${threat ? `Threat Description: ${threat}` : ''}

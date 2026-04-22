@@ -274,7 +274,7 @@ export default function LifecycleIntelligencePage() {
               style={{
                 padding: '0.3rem 0.75rem',
                 borderRadius: '6px',
-                border: `1px solid ${filter === f.key ? DS.accent + '40' : DS.border}`,
+                border: `1px solid ${filter === f.key ? `${DS.accent}40` : DS.border}`,
                 background: filter === f.key ? `${DS.accent}10` : 'transparent',
                 color: filter === f.key ? DS.accent : DS.text.tertiary,
                 fontSize: '0.75rem',

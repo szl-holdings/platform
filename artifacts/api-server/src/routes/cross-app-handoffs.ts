@@ -1,6 +1,5 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import type { PrismDomain } from '@szl-holdings/prism-bus';
-import { prismBus } from '@szl-holdings/prism-bus';
+import { type PrismDomain, prismBus } from '@szl-holdings/prism-bus';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendCreated, sendSuccess } from '../lib/api-response';
@@ -160,31 +159,31 @@ router.get('/cross-app/handoffs/stats', authMiddleware(), (_req: Request, res: R
       byType,
       recentHandoffs: handoffHistory.slice(0, 10),
       familyHealth: {
-        lyteForge: byType['lyte_priority_to_forge'] ?? {
+        lyteForge: byType.lyte_priority_to_forge ?? {
           total: 0,
           executed: 0,
           routed: 0,
           failed: 0,
         },
-        aegisCovenant: byType['aegis_threat_to_covenant'] ?? {
+        aegisCovenant: byType.aegis_threat_to_covenant ?? {
           total: 0,
           executed: 0,
           routed: 0,
           failed: 0,
         },
-        vesselsForge: byType['vessels_voyage_to_forge'] ?? {
+        vesselsForge: byType.vessels_voyage_to_forge ?? {
           total: 0,
           executed: 0,
           routed: 0,
           failed: 0,
         },
-        terraCarlota: byType['terra_blocker_to_carlota'] ?? {
+        terraCarlota: byType.terra_blocker_to_carlota ?? {
           total: 0,
           executed: 0,
           routed: 0,
           failed: 0,
         },
-        holdingsAtlas: byType['holdings_investor_to_atlas'] ?? {
+        holdingsAtlas: byType.holdings_investor_to_atlas ?? {
           total: 0,
           executed: 0,
           routed: 0,

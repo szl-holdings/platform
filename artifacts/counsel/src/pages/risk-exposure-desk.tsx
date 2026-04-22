@@ -1,7 +1,7 @@
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import {
   type AutonomyMode,
-  type EvidenceSource,
+  type ProofEvidenceSource as EvidenceSource,
   type PolicyState,
   ProofEnvelope,
 } from '@szl-holdings/design-system';

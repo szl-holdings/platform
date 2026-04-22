@@ -1,14 +1,12 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import { db, mspClientsTable, mspDevicesTable } from '@szl-holdings/db';
-import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { db, mspDevicesTable } from '@szl-holdings/db';
+import { desc, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
   sendBadRequest,
   sendCreated,
-  sendError,
   sendNotFound,
   sendSuccess,
 } from '../../lib/api-response';
@@ -19,12 +17,9 @@ import {
   validateBody,
   validateQuery,
 } from '../../lib/validation';
-import { authMiddleware, requireRole } from '../../middlewares/auth';
 import {
   clearProviderCache,
-  createRmmProvider,
   getCachedProvider,
-  type RmmProviderConfig,
   setCachedProvider,
 } from '../../services/rmm-provider';
 import {
@@ -65,7 +60,7 @@ router.get('/rmm/providers', auth, async (_req, res) => {
 router.get('/rmm/providers/:id', auth, async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
-    if (isNaN(id)) return sendBadRequest(res, 'Invalid ID');
+    if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid ID');
     const row = await queryConnectorById(id);
     if (!row) return sendNotFound(res, 'Provider');
     sendSuccess(res, {
@@ -123,7 +118,7 @@ router.patch(
   async (req, res) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid ID');
       const { name, mode, status, config, syncIntervalMinutes, notes } = req.body;
       const existing = await queryConnectorById(id);
       if (!existing) return sendNotFound(res, 'Provider');
@@ -166,7 +161,7 @@ router.delete(
   async (req, res) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid ID');
       clearProviderCache(id);
       await db.execute(sql`DELETE FROM msp_rmm_connectors WHERE id = ${id}`);
       sendSuccess(res, { deleted: true });
@@ -178,7 +173,7 @@ router.delete(
 
 function isPrivateIPv4(ip: string): boolean {
   const parts = ip.split('.').map(Number);
-  if (parts.length !== 4 || parts.some((p) => isNaN(p) || p < 0 || p > 255)) return false;
+  if (parts.length !== 4 || parts.some((p) => Number.isNaN(p) || p < 0 || p > 255)) return false;
   const [a, b] = parts as [number, number, number, number];
   if (a === 10) return true;
   if (a === 127) return true;
@@ -257,7 +252,7 @@ router.post(
       });
     }
 
-    const { lookup } = await import('dns/promises');
+    const { lookup } = await import('node:dns/promises');
     let resolved: Array<{ address: string; family: number }>;
     try {
       resolved = await lookup(host, { all: true });
@@ -333,7 +328,7 @@ router.post(
   async (req, res) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid ID');
       const row = await queryConnectorById(id);
       if (!row) return sendNotFound(res, 'Provider');
       let provider = getCachedProvider(id);
@@ -368,7 +363,7 @@ router.post(
   async (req, res) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid ID');
       const row = await queryConnectorById(id);
       if (!row) return sendNotFound(res, 'Provider');
       let provider = getCachedProvider(id);

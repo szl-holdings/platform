@@ -2,15 +2,11 @@ import { m } from 'framer-motion';
 import {
   BookOpen,
   Check,
-  ChevronRight,
   Code2,
   Copy,
   ExternalLink,
-  Eye,
-  FileCode,
   type Globe,
   Layers,
-  Link2,
   Rss,
   Tag,
   Zap,
@@ -22,7 +18,7 @@ import { DistributionOsLayout } from './admin-dashboard';
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 
 const BASE_URL = 'https://szlholdings.com';
-const API_BASE = 'https://szlholdings.com/api';
+const _API_BASE = 'https://szlholdings.com/api';
 
 function CopyBlock({ code, label }: { code: string; label?: string }) {
   const [copied, setCopied] = useState(false);

@@ -204,9 +204,9 @@ function parseTriagedThreats(output: unknown): TriagedThreat[] {
   if (
     output &&
     typeof output === 'object' &&
-    Array.isArray((output as Record<string, unknown>)['threats'])
+    Array.isArray((output as Record<string, unknown>).threats)
   ) {
-    return (output as Record<string, unknown>)['threats'] as TriagedThreat[];
+    return (output as Record<string, unknown>).threats as TriagedThreat[];
   }
   return [
     {

@@ -1,7 +1,6 @@
 import { agentKnowledgeTable, agentRunsTable, db } from '@szl-holdings/db';
 import { serverTelemetry } from '@szl-holdings/observability';
-import type { ChatMessage } from '@szl-holdings/services';
-import { services } from '@szl-holdings/services';
+import { type ChatMessage, services } from '@szl-holdings/services';
 import { lt } from 'drizzle-orm';
 import { type AgentEventType, agentEventBus } from './event-bus.js';
 import {
@@ -47,7 +46,7 @@ async function runAgentAnalysis(
   systemPrompt: string,
   userPrompt: string,
   maxRetries = 3,
-  baseUrl?: string,
+  _baseUrl?: string,
 ): Promise<string> {
   const ai = services.ai;
   const messages: ChatMessage[] = [

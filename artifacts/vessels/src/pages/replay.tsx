@@ -341,7 +341,7 @@ export default function VesselsReplayPage() {
     (cursor / Math.max(totalEvents - 1, 1)) * (METRICS_TIMELINE.length - 1),
   );
   const current = VOYAGE_EVENTS[Math.min(cursor, totalEvents - 1)] ?? VOYAGE_EVENTS[0];
-  const sevColor: Record<string, string> = {
+  const _sevColor: Record<string, string> = {
     info: 'text-sky-400/60',
     warn: 'text-amber-400',
     crit: 'text-red-400',

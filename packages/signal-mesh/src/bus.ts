@@ -78,8 +78,7 @@ export class SignalBus {
     if (this.store) {
       try {
         this.store.persist(signal);
-      } catch (e) {
-        console.error('[SignalBus] store persist error:', e);
+      } catch (_e) {
       }
     }
 
@@ -89,9 +88,8 @@ export class SignalBus {
         try {
           const r = h(signal);
           if (r instanceof Promise)
-            r.catch((e: unknown) => console.error('[SignalBus] handler error:', e));
-        } catch (e) {
-          console.error('[SignalBus] sync handler error:', e);
+            r.catch((_e: unknown) => {});
+        } catch (_e) {
         }
       }
     }
@@ -99,9 +97,8 @@ export class SignalBus {
       try {
         const r = h(signal);
         if (r instanceof Promise)
-          r.catch((e: unknown) => console.error('[SignalBus] wildcard handler error:', e));
-      } catch (e) {
-        console.error('[SignalBus] sync wildcard handler error:', e);
+          r.catch((_e: unknown) => {});
+      } catch (_e) {
       }
     }
   }

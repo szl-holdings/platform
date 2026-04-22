@@ -99,8 +99,8 @@ router.post(
 
 router.get('/proof-chain/:id', authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params['id'] as string, 10);
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id as string, 10);
+    if (Number.isNaN(id)) {
       sendBadRequest(res, 'Invalid proof ID');
       return;
     }
@@ -153,8 +153,8 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params['id'] as string, 10);
-      if (isNaN(id)) {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
         sendBadRequest(res, 'Invalid proof ID');
         return;
       }
@@ -209,10 +209,10 @@ router.get(
       const user = req.user;
       const isAdmin = user?.roles?.some((r) => ['super_admin', 'admin'].includes(r)) ?? false;
       const orgId = isAdmin ? undefined : (user?.orgs?.[0]?.orgId ?? undefined);
-      const reviewState = req.query['reviewState'] as string | undefined;
-      const sourceClass = req.query['sourceClass'] as string | undefined;
-      const contentType = req.query['contentType'] as string | undefined;
-      const limit = Math.min(parseInt((req.query['limit'] as string) ?? '100', 10), 500);
+      const reviewState = req.query.reviewState as string | undefined;
+      const sourceClass = req.query.sourceClass as string | undefined;
+      const contentType = req.query.contentType as string | undefined;
+      const limit = Math.min(parseInt((req.query.limit as string) ?? '100', 10), 500);
 
       const { listProofChain } = await import('@szl-holdings/proof-chain');
       const results = await listProofChain({

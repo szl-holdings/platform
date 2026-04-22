@@ -80,8 +80,8 @@ function redactBodyInPlace(body: Record<string, unknown>): string[] {
   const allTypes: string[] = [];
 
   // messages array: [{role, content}]
-  if (Array.isArray(body['messages'])) {
-    for (const m of body['messages'] as Array<{ content?: unknown }>) {
+  if (Array.isArray(body.messages)) {
+    for (const m of body.messages as Array<{ content?: unknown }>) {
       if (typeof m?.content === 'string') {
         const { redacted, types } = redactField(m.content);
         if (types.length > 0) {
@@ -110,8 +110,8 @@ function redactBodyInPlace(body: Record<string, unknown>): string[] {
 /** Collect all prompt text for injection scanning without modifying the body. */
 function collectPromptText(body: Record<string, unknown>): string {
   const parts: string[] = [];
-  if (Array.isArray(body['messages'])) {
-    for (const m of body['messages'] as Array<{ content?: unknown }>) {
+  if (Array.isArray(body.messages)) {
+    for (const m of body.messages as Array<{ content?: unknown }>) {
       if (typeof m?.content === 'string') parts.push(m.content);
     }
   }
@@ -262,7 +262,7 @@ export function aiControlPlane(
           agentTier: tier,
           promptTokenEstimate: promptText ? estimateTokens(promptText) : undefined,
         });
-        res.locals['controlPlaneRoute'] = routeResult;
+        res.locals.controlPlaneRoute = routeResult;
         res.setHeader('X-AI-Route-Class', policyRouteClass);
         res.setHeader(
           'X-AI-Resolved-Model',
@@ -304,7 +304,7 @@ export function aiControlPlane(
 
     res.on('finish', () => {
       try {
-        const usage = res.locals['aiUsage'] as
+        const usage = res.locals.aiUsage as
           | {
               promptTokens?: number;
               completionTokens?: number;
@@ -314,7 +314,7 @@ export function aiControlPlane(
             }
           | undefined;
 
-        const controlPlaneRoute = res.locals['controlPlaneRoute'] as
+        const controlPlaneRoute = res.locals.controlPlaneRoute as
           | {
               endpoint: {
                 provider: string;

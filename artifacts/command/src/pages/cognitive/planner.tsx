@@ -430,9 +430,9 @@ function StepDetailPanel({
 }) {
   const [note, setNote] = useState('');
   const decisionsRecord =
-    (plan.metadata['stepDecisions'] as Record<string, ApprovalDecision> | undefined) ?? {};
+    (plan.metadata.stepDecisions as Record<string, ApprovalDecision> | undefined) ?? {};
   const auditFromMetadata =
-    (step.metadata['approvalDecision'] as ApprovalDecision | undefined) ?? undefined;
+    (step.metadata.approvalDecision as ApprovalDecision | undefined) ?? undefined;
   const audit = auditFromMetadata ?? decisionsRecord[step.stepId];
   const dependsOn = step.dependsOn
     .map((id) => plan.steps.find((s) => s.stepId === id)?.title ?? id)
@@ -701,9 +701,9 @@ export default function PlannerStudio() {
 
   useEffect(() => {
     if (!selectedId && plans.length > 0) {
-      setSelectedId(plans[0]!.planId);
+      setSelectedId(plans[0]?.planId);
     } else if (selectedId && plans.length > 0 && !plans.find((p) => p.planId === selectedId)) {
-      setSelectedId(plans[0]!.planId);
+      setSelectedId(plans[0]?.planId);
       setSelectedStepId(null);
     }
   }, [plans, selectedId]);
@@ -727,7 +727,7 @@ export default function PlannerStudio() {
 
   useEffect(() => {
     if (fallbacks.length > 0 && !selectedFallbackId) {
-      setSelectedFallbackId(fallbacks[0]!.planId);
+      setSelectedFallbackId(fallbacks[0]?.planId);
     }
     if (fallbacks.length === 0) {
       setSelectedFallbackId(null);

@@ -31,10 +31,9 @@ loadEvalBaselines()
       });
     }
     if (rows.length > 0) {
-      console.info(`[pulse-evals] Rehydrated ${rows.length} eval baselines from DB`);
     }
   })
-  .catch((err) => console.warn('[pulse-evals] Failed to load eval baselines on startup', err));
+  .catch((_err) => {});
 
 const router: IRouter = Router();
 
@@ -92,7 +91,7 @@ router.post(
 
       const mockExecutor = async (
         input: string | Record<string, unknown>,
-        caseId: string,
+        _caseId: string,
         domain: EvalDomain,
       ) => {
         const start = Date.now();
@@ -351,7 +350,7 @@ function buildMockOutput(
       return {
         confidence: 0.7,
         status: 'processed',
-        output: 'Mock output for domain: ' + domain,
+        output: `Mock output for domain: ${domain}`,
       };
   }
 }

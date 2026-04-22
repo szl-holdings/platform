@@ -35,8 +35,7 @@ import {
   Users,
   Wrench,
 } from 'lucide-react';
-import type { ComponentType, CSSProperties } from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { type ComponentType, type CSSProperties, useCallback, useEffect, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -537,7 +536,7 @@ function DiligenceStatus({
   );
 }
 
-function ActionSeverityBadge({ severity }: { severity: string }) {
+function _ActionSeverityBadge({ severity }: { severity: string }) {
   const colors = {
     critical: { text: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
     high: { text: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
@@ -1515,8 +1514,7 @@ export default function PropertyDetailPage() {
           className="space-y-4"
         >
           {ownership ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div
                   className="rounded-xl p-5 space-y-4"
                   style={{
@@ -1697,7 +1695,6 @@ export default function PropertyDetailPage() {
                   </div>
                 </div>
               </div>
-            </>
           ) : (
             <div
               className="rounded-xl p-8 text-center"

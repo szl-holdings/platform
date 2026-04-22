@@ -1,8 +1,7 @@
 import { StatusBadge as DSStatusBadge, type StatusVariant } from '@szl-holdings/design-system';
 import { m } from 'framer-motion';
 import { ArrowDownRight, ArrowUpRight, X } from 'lucide-react';
-import type { ElementType } from 'react';
-import { useState } from 'react';
+import { type ElementType, useState } from 'react';
 import { derivePeriodDates, fmt, PORTFOLIO_COMPANIES } from './api';
 
 const FUND_STATUS_VARIANT: Record<string, StatusVariant> = {

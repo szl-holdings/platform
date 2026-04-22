@@ -1,16 +1,9 @@
 import { InMemoryCheckpointStore } from '@workspace/forge/checkpoint';
 import { defaultLedger, makeLedgerEntry } from '@workspace/forge/ledger';
 import { DefaultModelRouter } from '@workspace/forge/model-router';
-import type {
-  LedgerEntry,
-  RunConfig,
-  StepContext,
-  StepResult,
-  WorkflowStep,
-} from '@workspace/forge/types';
-import { RunConfigSchema } from '@workspace/forge/types';
+import { type LedgerEntry, type WorkflowStep, RunConfigSchema } from '@workspace/forge/types';
 import { ECHO_STEP } from '@workspace/forge/workflow';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { getAlloyRunManager } from '../lib/alloy-run-manager-singleton';
@@ -46,7 +39,7 @@ const inMemoryPrompts = new Map<string, Record<string, unknown>>();
 const inMemoryPromptVersions = new Map<string, Array<Record<string, unknown>>>();
 const inMemoryModels = new Map<string, Record<string, unknown>>();
 const inMemoryModelVersions = new Map<string, Array<Record<string, unknown>>>();
-const inMemoryModelRoutes = new Map<string, Record<string, unknown>>();
+const _inMemoryModelRoutes = new Map<string, Record<string, unknown>>();
 const inMemorySignals = new Map<string, Record<string, unknown>>();
 const inMemoryActions: LedgerEntry[] = [];
 
@@ -266,7 +259,7 @@ router.post(
         }
       ).user;
       const serverMetadata: Record<string, unknown> = {
-        ...(body.metadata ?? {}),
+        ...body.metadata,
         orgId: user?.orgs?.[0]?.orgId ?? null,
         requestedById: user?.id ?? null,
         requestedByRole: user?.roles?.[0] ?? null,
@@ -283,7 +276,7 @@ router.post(
         metadata: serverMetadata,
       });
 
-      const state = runManager.createRun(config);
+      const _state = runManager.createRun(config);
 
       const steps: WorkflowStep[] = [ECHO_STEP];
       const finalState = await runManager.executeSteps(config.runId, steps, config);
@@ -640,9 +633,9 @@ router.get(
         domain?: string;
       };
       let all = Array.from(inMemorySignals.values()) as Array<Record<string, unknown>>;
-      if (severity) all = all.filter((s) => s['severity'] === severity);
-      if (status) all = all.filter((s) => s['status'] === status);
-      if (domain) all = all.filter((s) => s['domain'] === domain);
+      if (severity) all = all.filter((s) => s.severity === severity);
+      if (status) all = all.filter((s) => s.status === status);
+      if (domain) all = all.filter((s) => s.domain === domain);
       sendSuccess(res, { data: all.slice(offset, offset + limit), total: all.length, page, limit });
     } catch (err) {
       handleRouteError(res, err, 'Failed to list signals');

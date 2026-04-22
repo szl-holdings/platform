@@ -22,7 +22,7 @@ function classifySourceTrust(sourceType: string): number {
   return trustMap[sourceType] ?? 55;
 }
 
-function detectContradictions(claims: string[]): {
+function _detectContradictions(claims: string[]): {
   hasContradiction: boolean;
   positions?: { position: string; source: string }[];
 } {
@@ -31,7 +31,7 @@ function detectContradictions(claims: string[]): {
   if (numericMatches.some((m) => m && m.length > 0)) {
     const nums = numericMatches
       .filter((m) => m && m.length > 0)
-      .map((m) => parseFloat(m![0]!.replace('%', '')));
+      .map((m) => parseFloat(m?.[0]?.replace('%', '')));
     if (nums.length >= 2) {
       const range = Math.max(...nums) - Math.min(...nums);
       if (range > 10) {
@@ -185,7 +185,7 @@ Return ONLY valid JSON.`;
             citations: f.citations.map((c, ci) => ({
               id: `c-${id}-${fi}-${ci}`,
               title: c.title,
-              url: c.url || sources[ci % sources.length]!.url,
+              url: c.url || sources[ci % sources.length]?.url,
               sourceType: c.sourceType || 'web',
               trustScore: classifySourceTrust(c.sourceType || 'web'),
               retrievedAt: new Date().toISOString(),

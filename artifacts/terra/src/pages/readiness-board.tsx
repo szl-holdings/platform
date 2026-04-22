@@ -1,15 +1,8 @@
-import { cn } from '@szl-holdings/shared-ui/utils';
+
 import {
   AlertTriangle,
-  ArrowUpRight,
-  BarChart3,
-  Building2,
-  CheckCircle,
   Clock,
   Plug,
-  RefreshCw,
-  Shield,
-  TrendingUp,
 } from 'lucide-react';
 import { useState } from 'react';
 import { type PropertyTwin, propertyTwins } from '@/data/property-twin';

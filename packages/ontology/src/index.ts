@@ -27,15 +27,27 @@
 // Canonical ontology types (interface-based)
 export * from './domains.js';
 export * from './entities.js';
-export * from './signals.js';
 export * from './entity-links.js';
 export * from './entity-snapshot.js';
 
-// Signal mesh contracts (Zod-validated) — explicit to avoid ambiguous re-exports
+// Interface-based legacy signal taxonomy — explicit to avoid ambiguity with Zod-based Signal
+export {
+  SIGNAL_SEVERITIES,
+  SIGNAL_SOURCES,
+  SIGNAL_TYPES,
+  SIGNAL_TYPE_DOMAINS,
+  isSignalType,
+} from './signals.js';
+export type { Signal as LegacySignal } from './signals.js';
+
+// Signal mesh contracts (Zod-validated) — canonical Signal type for the platform
 export {
   SignalSourceSchema,
+  type SignalSource,
   SignalTypeSchema,
+  type SignalType,
   SignalSeveritySchema,
+  type SignalSeverity,
   SignalDomainSchema,
   type SignalDomain,
   SignalStageSchema,
@@ -45,6 +57,7 @@ export {
   ProvenanceSchema,
   type Provenance,
   SignalSchema,
+  type Signal,
   type SignalInput,
   createSignal,
   fromAtlasEvent,
@@ -65,9 +78,6 @@ export {
 } from './entity.js';
 // Shared evidence & recommendation (interface-based + Zod schemas)
 export * from './evidence.js';
-// Signal mesh contracts (Zod-validated)
-export * from './signal.js';
-export * from './signals.js';
 
 export const ONTOLOGY_VERSION = '1.0.0' as const;
 

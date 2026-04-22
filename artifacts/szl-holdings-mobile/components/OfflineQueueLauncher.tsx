@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { useSyncEngine } from '@szl-holdings/mobile-shared';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Modal,
   Pressable,

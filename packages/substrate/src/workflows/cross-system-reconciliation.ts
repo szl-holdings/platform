@@ -221,9 +221,9 @@ function parseSeedDiscrepancies(output: unknown, entityType: string): Reconcilia
   if (
     output &&
     typeof output === 'object' &&
-    Array.isArray((output as Record<string, unknown>)['discrepancies'])
+    Array.isArray((output as Record<string, unknown>).discrepancies)
   ) {
-    return (output as Record<string, unknown>)['discrepancies'] as ReconciliationDiscrepancy[];
+    return (output as Record<string, unknown>).discrepancies as ReconciliationDiscrepancy[];
   }
   return [
     {

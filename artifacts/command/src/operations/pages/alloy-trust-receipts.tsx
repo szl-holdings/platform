@@ -1,21 +1,15 @@
 import { api } from '@lyte/lib/api';
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
-  Activity,
   AlertTriangle,
   ArrowRight,
   CheckCircle,
   ChevronRight,
-  Clock,
-  Cpu,
   Download,
-  Eye,
   FileText,
   Lock,
-  RefreshCw,
   Search,
   Shield,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 

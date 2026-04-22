@@ -57,8 +57,8 @@ export class ElevenLabsConnector extends ToolConnector {
     switch (capabilityId) {
       case 'text_to_speech':
         return adapter.textToSpeech(
-          String(params['text']),
-          params['voiceId'] ? String(params['voiceId']) : undefined,
+          String(params.text),
+          params.voiceId ? String(params.voiceId) : undefined,
         );
       case 'list_voices':
         return adapter.listVoices();

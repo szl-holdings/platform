@@ -676,7 +676,7 @@ router.get(
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.setHeader('Transfer-Encoding', 'chunked');
 
-      res.write(headers.join(',') + '\r\n');
+      res.write(`${headers.join(',')}\r\n`);
 
       for (const row of rows) {
         const payload = row.payloadSnapshot as
@@ -713,7 +713,7 @@ router.get(
           stepOutcomes,
         ].map(escapeCsv);
 
-        res.write(cols.join(',') + '\r\n');
+        res.write(`${cols.join(',')}\r\n`);
       }
 
       res.end();

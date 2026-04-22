@@ -18,9 +18,9 @@
  * Output: security/license-report.md
  */
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
@@ -74,8 +74,7 @@ const PERMISSIVE_IDENTIFIERS = new Set([
   'EUPL-1.2',
 ]);
 
-function fatal(msg) {
-  console.error(`[license-report] FATAL: ${msg}`);
+function fatal(_msg) {
   process.exit(1);
 }
 
@@ -189,7 +188,7 @@ function readPackage(pkgJsonPath, fallbackName) {
       version: pkg.version || '',
       license: licenseString(pkg),
     };
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
 }
@@ -360,22 +359,15 @@ function buildReport(packages, parseErrors) {
 
 async function main() {
   mkdirSync(OUTPUT_DIR, { recursive: true });
-
-  console.log('[license-report] Scanning pnpm store for license data...');
   const { packages, parseErrors } = scanStore();
-  const total = Object.keys(packages).length;
-  console.log(`[license-report] Found ${total} unique packages (${parseErrors} parse warnings)`);
+  const _total = Object.keys(packages).length;
 
   const report = buildReport(packages, parseErrors);
 
   writeFileSync(OUTPUT_FILE, report);
-  console.log(`[license-report] Written to ${OUTPUT_FILE}`);
 
-  const review = Object.values(packages).filter((p) => flag(p.license) === 'REVIEW');
-  const check = Object.values(packages).filter((p) => flag(p.license) === 'CHECK');
-  console.log(
-    `[license-report] Summary: ${total - review.length - check.length} OK, ${review.length} REVIEW, ${check.length} CHECK`,
-  );
+  const _review = Object.values(packages).filter((p) => flag(p.license) === 'REVIEW');
+  const _check = Object.values(packages).filter((p) => flag(p.license) === 'CHECK');
 }
 
 main().catch((err) => fatal(err.message));

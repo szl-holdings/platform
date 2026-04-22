@@ -126,7 +126,7 @@ export class PagerDutyConnector extends ToolConnector {
     const adapter = services.pagerduty;
     switch (capabilityId) {
       case 'list_incidents': {
-        const rawStatus = params['status'];
+        const rawStatus = params.status;
         const statusArr = rawStatus
           ? ((Array.isArray(rawStatus) ? rawStatus.map(String) : [String(rawStatus)]) as Array<
               'triggered' | 'acknowledged' | 'resolved'
@@ -134,7 +134,7 @@ export class PagerDutyConnector extends ToolConnector {
           : undefined;
         return adapter.listIncidents({
           ...(statusArr && { status: statusArr }),
-          ...(params['limit'] !== undefined && { limit: params['limit'] as number }),
+          ...(params.limit !== undefined && { limit: params.limit as number }),
         });
       }
       case 'get_incident_summary':
@@ -143,22 +143,22 @@ export class PagerDutyConnector extends ToolConnector {
         return adapter.listEscalationPolicies();
       case 'get_on_call':
         return adapter.getOnCallSchedule(
-          params['escalationPolicyId'] ? String(params['escalationPolicyId']) : undefined,
+          params.escalationPolicyId ? String(params.escalationPolicyId) : undefined,
         );
       case 'create_incident':
         return adapter.createIncident({
-          title: String(params['title']),
-          serviceId: String(params['serviceId']),
-          fromEmail: params['fromEmail']
-            ? String(params['fromEmail'])
+          title: String(params.title),
+          serviceId: String(params.serviceId),
+          fromEmail: params.fromEmail
+            ? String(params.fromEmail)
             : 'alloy-agent@szlholdings.com',
-          urgency: (params['urgency'] as 'high' | 'low') ?? 'high',
-          ...(params['body'] ? { body: String(params['body']) } : {}),
+          urgency: (params.urgency as 'high' | 'low') ?? 'high',
+          ...(params.body ? { body: String(params.body) } : {}),
         });
       case 'resolve_incident':
         return adapter.resolveIncident(
-          String(params['incidentId']),
-          String(params['resolvedByEmail']),
+          String(params.incidentId),
+          String(params.resolvedByEmail),
         );
       default:
         throw new Error(`Unknown capability: ${capabilityId}`);

@@ -1,8 +1,7 @@
-import type { FSWatcher } from 'chokidar';
-import chokidar from 'chokidar';
+import chokidar, { type FSWatcher } from 'chokidar';
 import glob from 'fast-glob';
-import { mkdirSync, writeFileSync } from 'fs';
-import path from 'path';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
 import type { Plugin } from 'vite';
 
 const MOCKUPS_DIR = 'src/components/mockups';
@@ -42,7 +41,7 @@ export function mockupPreviewPlugin(): Plugin {
     });
 
     return files.map((f) => ({
-      globKey: './' + f.slice('src/'.length),
+      globKey: `./${f.slice('src/'.length)}`,
       importPath: path.posix.relative('src/.generated', f),
     }));
   }

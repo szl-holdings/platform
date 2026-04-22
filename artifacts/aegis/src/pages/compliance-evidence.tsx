@@ -3,9 +3,7 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   AlertTriangle,
   CheckCircle,
-  ChevronRight,
   ClipboardCheck,
-  Clock,
   Download,
   FileText,
   Package,
@@ -357,7 +355,7 @@ export default function ComplianceEvidence() {
                 <div className="h-1.5 rounded-full bg-white/8 mb-1.5">
                   <div
                     className="h-full rounded-full"
-                    style={{ width: `${fw.overallScore}%`, background: fw.color + '80' }}
+                    style={{ width: `${fw.overallScore}%`, background: `${fw.color}80` }}
                   />
                 </div>
                 <div className="flex items-center gap-4 text-[10px] text-zinc-500">

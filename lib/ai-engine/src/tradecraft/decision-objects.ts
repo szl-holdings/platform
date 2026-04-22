@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 export type DecisionObjectType =
   | 'TriageDecision'
@@ -259,10 +259,10 @@ export interface ValidationResult<T> {
 }
 
 function safeFallback<T extends BaseDecisionObject>(
-  decisionType: T['decisionType'],
+  _decisionType: T['decisionType'],
   rawOutput: string | null,
-  tenantId: string,
-  policyClass: string,
+  _tenantId: string,
+  _policyClass: string,
   errors: string[],
 ): ValidationResult<T> {
   return {

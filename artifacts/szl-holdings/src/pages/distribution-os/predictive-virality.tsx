@@ -3,14 +3,10 @@ import type { DataProvenanceInfo } from '@szl-holdings/shared-ui/ontology';
 import { m } from 'framer-motion';
 import {
   AlertCircle,
-  ArrowUpRight,
   BarChart2,
-  CheckCircle2,
-  Eye,
   Flame,
   RefreshCw,
   Sparkles,
-  Target,
   TrendingUp,
   Zap,
 } from 'lucide-react';
@@ -439,7 +435,7 @@ export default function PredictiveViralityPage() {
                     style={{
                       padding: '0.875rem 1rem',
                       background: isSelected ? `${DS.accent}08` : DS.surface,
-                      border: `1px solid ${isSelected ? DS.accent + '30' : DS.border}`,
+                      border: `1px solid ${isSelected ? `${DS.accent}30` : DS.border}`,
                       borderRadius: '8px',
                       cursor: 'pointer',
                       textAlign: 'left',

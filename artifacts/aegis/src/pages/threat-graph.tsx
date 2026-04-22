@@ -1,30 +1,18 @@
-import { Badge } from '@szl-holdings/shared-ui/ui/badge';
-import { cn } from '@szl-holdings/shared-ui/utils';
+
 import {
   Activity,
   AlertTriangle,
   ArrowRight,
-  ChevronRight,
-  Clock,
-  Database,
   Eye,
-  Filter,
   Globe,
-  Maximize2,
   Network,
   Pause,
-  RefreshCw,
-  Search,
   Server,
   Shield,
-  Target,
   User,
   X,
-  Zap,
-  ZoomIn,
-  ZoomOut,
 } from 'lucide-react';
-import { type ComponentType, type SVGProps, useCallback, useEffect, useRef, useState } from 'react';
+import { type ComponentType, type SVGProps, useRef, useState } from 'react';
 
 type NodeType = 'endpoint' | 'identity' | 'cloud' | 'network' | 'malware' | 'c2';
 type EdgeType = 'lateral' | 'c2' | 'exploit' | 'credential' | 'persistence';
@@ -222,7 +210,7 @@ export default function ThreatGraph() {
   const [selectedEdge, setSelectedEdge] = useState<GraphEdge | null>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [filterEdge, setFilterEdge] = useState<string>('all');
-  const [zoom, setZoom] = useState(1);
+  const [_zoom, _setZoom] = useState(1);
   const [animate, setAnimate] = useState(true);
 
   const NODE_R = 28;
@@ -472,7 +460,7 @@ export default function ThreatGraph() {
             {/* Nodes */}
             {GRAPH_NODES.map((node) => {
               const cfg = NODE_CONFIG[node.type];
-              const Icon = cfg.icon;
+              const _Icon = cfg.icon;
               const isSelected = selectedNode?.id === node.id;
               const isHovered = hoveredNode === node.id;
               const riskColor = RISK_COLORS[node.risk];

@@ -1,23 +1,10 @@
-import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
-import { openai } from '@szl-holdings/ai-engine/providers/openai';
+
 import { bodyShape } from '@szl-holdings/contracts/common';
-import { db, intelligenceCacheTable, pool } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import crypto from 'crypto';
-import { eq, lt, sql } from 'drizzle-orm';
-import express, { type IRouter, type RequestHandler, Router } from 'express';
-import rateLimit from 'express-rate-limit';
-import { LRUCache } from 'lru-cache';
+import crypto from 'node:crypto';
+import express, { type IRouter, Router } from 'express';
 import { z } from 'zod';
-import {
-  getAiModelById,
-  getAiModels,
-  getModelObservabilitySummary,
-} from '../../lib/ai-model-observability';
 import { handleRouteError, sendError, sendSuccess } from '../../lib/api-response';
-import { logger } from '../../lib/logger';
-import { getRegistrySummary } from '../../lib/model-registry';
-import { redisGet, redisSet } from '../../lib/redis-client.js';
 import { authMiddleware } from '../../middlewares/auth';
 
 type AnthropicMessageParam = {
@@ -26,7 +13,7 @@ type AnthropicMessageParam = {
 };
 
 import { anyQuerySchema, listQuerySchema, validateBody, validateQuery } from '../../lib/validation';
-import { aiRateLimit, fetchJson, getCached, intelRateLimit, type ThreatItem } from './shared';
+import { aiRateLimit, intelRateLimit, } from './shared';
 
 const router = Router();
 
@@ -442,12 +429,12 @@ router.get(
     });
 
     try {
-      const maxTokens = parseInt(req.query.maxTokens as string) || 512;
+      const maxTokens = parseInt(req.query.maxTokens as string, 10) || 512;
       for await (const token of services.huggingface.streamTextGeneration(prompt, { maxTokens })) {
         res.write(`data: ${JSON.stringify({ token })}\n\n`);
       }
       res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-    } catch (err) {
+    } catch (_err) {
       res.write(`data: ${JSON.stringify({ error: 'Stream failed' })}\n\n`);
     }
     res.end();

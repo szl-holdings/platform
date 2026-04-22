@@ -1,21 +1,15 @@
 import { AnimatePresence, m } from 'framer-motion';
 import {
   AlertTriangle,
-  Brain,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
-  Clock,
   Copy,
-  Database,
   Download,
   ExternalLink,
   Eye,
   FileCheck,
   Fingerprint,
-  GitBranch,
-  Lock,
-  Shield,
   User,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -206,8 +200,8 @@ export function ProofDrawer({ proof, defaultOpen = false, compact = false }: Pro
     'summary',
   );
 
-  const reviewInfo = REVIEW_LABELS[proof.reviewState];
-  const exportInfo = EXPORT_LABELS[proof.exportSafety];
+  const _reviewInfo = REVIEW_LABELS[proof.reviewState];
+  const _exportInfo = EXPORT_LABELS[proof.exportSafety];
   const allPolicyPassed = proof.policyChecks.every((p) => p.passed);
   const failedPolicies = proof.policyChecks.filter((p) => !p.passed);
 
@@ -215,7 +209,7 @@ export function ProofDrawer({ proof, defaultOpen = false, compact = false }: Pro
     <div
       style={{
         borderRadius: '8px',
-        border: `1px solid ${open ? LYTE + '25' : BORDER}`,
+        border: `1px solid ${open ? `${LYTE}25` : BORDER}`,
         background: SURFACE,
         overflow: 'hidden',
         transition: 'border-color 0.15s ease',

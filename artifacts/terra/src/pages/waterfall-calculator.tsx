@@ -1,15 +1,9 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
-  ArrowRight,
-  BarChart3,
-  Calculator,
-  ChevronDown,
   Database,
-  DollarSign,
   Download,
   FolderOpen,
   Layers,
@@ -17,10 +11,8 @@ import {
   Pencil,
   Save,
   Trash2,
-  TrendingUp,
-  Users,
 } from 'lucide-react';
-import { calcWaterfall, DEFAULT_WATERFALL_INPUTS, type TierResult, type WaterfallInputs } from '../lib/waterfall-math';
+import { calcWaterfall, DEFAULT_WATERFALL_INPUTS, type WaterfallInputs } from '../lib/waterfall-math';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Bar,
@@ -172,8 +164,8 @@ function exportWaterfallCSV(
     ['', 'GP', 'LP'],
     ['Equity Invested', r.gpEquity, r.lpEquity],
     ['Total Distributions', r.gpTotal, r.lpTotal],
-    ['Equity Multiple', r.gpEM.toFixed(2) + 'x', r.lpEM.toFixed(2) + 'x'],
-    ['IRR', r.gpIRR.toFixed(2) + '%', r.lpIRR.toFixed(2) + '%'],
+    ['Equity Multiple', `${r.gpEM.toFixed(2)}x`, `${r.lpEM.toFixed(2)}x`],
+    ['IRR', `${r.gpIRR.toFixed(2)}%`, `${r.lpIRR.toFixed(2)}%`],
     [],
     ['=== WATERFALL TIERS ==='],
     ['Tier', 'Description', 'GP Amount', 'LP Amount', 'Total', 'GP %', 'LP %'],
@@ -183,8 +175,8 @@ function exportWaterfallCSV(
       t.gpAmount,
       t.lpAmount,
       t.total,
-      t.gpPct.toFixed(1) + '%',
-      t.lpPct.toFixed(1) + '%',
+      `${t.gpPct.toFixed(1)}%`,
+      `${t.lpPct.toFixed(1)}%`,
     ]),
     [],
     [
@@ -193,8 +185,8 @@ function exportWaterfallCSV(
       r.gpTotal,
       r.lpTotal,
       inputs.exitProceeds,
-      ((r.gpTotal / inputs.exitProceeds) * 100).toFixed(1) + '%',
-      ((r.lpTotal / inputs.exitProceeds) * 100).toFixed(1) + '%',
+      `${((r.gpTotal / inputs.exitProceeds) * 100).toFixed(1)}%`,
+      `${((r.lpTotal / inputs.exitProceeds) * 100).toFixed(1)}%`,
     ],
   ];
   const csv = rows.map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
@@ -381,7 +373,7 @@ export default function WaterfallCalculatorPage() {
                   }}
                 >
                   <Database className="w-2.5 h-2.5" />
-                  Live DB · {savedStructures!.structures.length}
+                  Live DB · {savedStructures?.structures.length}
                 </span>
               ) : (
                 savedStructures && (
@@ -642,7 +634,7 @@ export default function WaterfallCalculatorPage() {
                 }}
               >
                 <Database className="w-2.5 h-2.5" />
-                Live DB · {savedStructures!.structures.length}
+                Live DB · {savedStructures?.structures.length}
               </span>
             ) : (
               savedStructures && (
@@ -717,7 +709,7 @@ export default function WaterfallCalculatorPage() {
                 className="absolute right-0 top-full mt-1 w-72 rounded-xl border shadow-2xl z-50 overflow-hidden"
                 style={{ background: '#0d0f15', borderColor: DS.border }}
               >
-                {savedStructures!.structures.map((s) => (
+                {savedStructures?.structures.map((s) => (
                   <div
                     key={s.id}
                     className="flex items-center gap-1 px-3 py-2 hover:bg-white/5 transition-colors"
@@ -738,7 +730,6 @@ export default function WaterfallCalculatorPage() {
                             setRenamingId(null);
                           }
                         }}
-                        autoFocus
                       />
                     ) : (
                       <button
@@ -1066,7 +1057,7 @@ export default function WaterfallCalculatorPage() {
                 <Legend
                   iconType="circle"
                   iconSize={8}
-                  formatter={(value, entry) => (
+                  formatter={(value, _entry) => (
                     <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 10 }}>{value}</span>
                   )}
                 />

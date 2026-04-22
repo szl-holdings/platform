@@ -1,8 +1,8 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
-import { Calendar, FileText, Layers, PenTool, Target, TrendingUp } from 'lucide-react';
+import { Layers, PenTool, } from 'lucide-react';
 import { useState } from 'react';
-import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { usePageMeta } from '@/hooks/usePageMeta';
 
 const pillars = [

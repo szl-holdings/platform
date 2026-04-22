@@ -4,7 +4,7 @@
  */
 
 import { generateEmbedding, toVectorLiteral } from "./embedding-pipeline.js";
-import type { RagSourceType, SensitivityLevel } from "./types.js";
+import type { SensitivityLevel } from "./types.js";
 
 async function getPool() {
   const { pool } = await import("@szl-holdings/db");
@@ -129,14 +129,13 @@ export async function hybridSearch(options: HybridSearchOptions): Promise<Hybrid
 
   try {
     const embedding = await generateEmbedding(query);
-    modelUsed = process.env["HF_EMBED_MODEL"] ?? "BAAI/bge-m3";
+    modelUsed = process.env.HF_EMBED_MODEL ?? "BAAI/bge-m3";
 
     // A zero vector means the embedding provider failed (auth error, API down, etc.).
     // Running vector similarity on a zero query would return arbitrary low-quality
     // results rather than semantically relevant ones. Fall back to text-only mode.
     const isZeroQuery = embedding.length === 0 || embedding.every((v) => v === 0);
     if (isZeroQuery) {
-      console.warn(`[semantic-search] Zero query embedding for hybridSearch — falling back to text-only`);
       throw new Error("zero-embedding-fallback");
     }
 
@@ -172,8 +171,7 @@ export async function hybridSearch(options: HybridSearchOptions): Promise<Hybrid
       metadata: (r.metadata as Record<string, unknown>) ?? {},
       score: parseFloat(String(r.score ?? 0)),
     }));
-  } catch (err) {
-    console.warn("[semantic-search] Vector search failed:", err);
+  } catch (_err) {
   }
 
   try {
@@ -214,8 +212,7 @@ export async function hybridSearch(options: HybridSearchOptions): Promise<Hybrid
         score: parseFloat(String(r.score ?? 0)),
       }));
     }
-  } catch (err) {
-    console.warn("[semantic-search] Text search failed:", err);
+  } catch (_err) {
   }
 
   const hasVector = vectorResults.length > 0;

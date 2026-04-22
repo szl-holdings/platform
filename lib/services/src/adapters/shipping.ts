@@ -76,7 +76,7 @@ export class ShippingAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["MARINE_TRAFFIC_API_KEY"];
 
   protected override async performHealthCheck(): Promise<void> {
-    const apiKey = process.env["MARINE_TRAFFIC_API_KEY"];
+    const apiKey = process.env.MARINE_TRAFFIC_API_KEY;
     const response = await fetch(
       `https://services.marinetraffic.com/api/exportvessel/v:5/${apiKey}/protocol:json`,
     );
@@ -94,7 +94,7 @@ export class ShippingAdapter extends ServiceAdapter {
       return vessel ? { ...vessel, lastUpdated: new Date().toISOString() } : null;
     }
 
-    const apiKey = process.env["MARINE_TRAFFIC_API_KEY"]!;
+    const apiKey = process.env.MARINE_TRAFFIC_API_KEY!;
     const response = await fetch(
       `https://services.marinetraffic.com/api/exportvessel/v:5/${apiKey}/imo:${identifier}/protocol:jsono`,
     );
@@ -108,17 +108,17 @@ export class ShippingAdapter extends ServiceAdapter {
 
     const v = data[0]!;
     return {
-      vesselName: v["SHIPNAME"] ?? "",
-      imo: v["IMO"] ?? "",
-      mmsi: v["MMSI"] ?? "",
-      latitude: parseFloat(v["LAT"] ?? "0"),
-      longitude: parseFloat(v["LON"] ?? "0"),
-      speed: parseFloat(v["SPEED"] ?? "0") / 10,
-      heading: parseInt(v["HEADING"] ?? "0", 10),
-      status: v["STATUS"] ?? "",
-      destination: v["DESTINATION"] ?? "",
-      eta: v["ETA"] ?? "",
-      lastUpdated: v["TIMESTAMP"] ?? new Date().toISOString(),
+      vesselName: v.SHIPNAME ?? "",
+      imo: v.IMO ?? "",
+      mmsi: v.MMSI ?? "",
+      latitude: parseFloat(v.LAT ?? "0"),
+      longitude: parseFloat(v.LON ?? "0"),
+      speed: parseFloat(v.SPEED ?? "0") / 10,
+      heading: parseInt(v.HEADING ?? "0", 10),
+      status: v.STATUS ?? "",
+      destination: v.DESTINATION ?? "",
+      eta: v.ETA ?? "",
+      lastUpdated: v.TIMESTAMP ?? new Date().toISOString(),
     };
   }
 
@@ -130,7 +130,7 @@ export class ShippingAdapter extends ServiceAdapter {
       }));
     }
 
-    const apiKey = process.env["MARINE_TRAFFIC_API_KEY"]!;
+    const apiKey = process.env.MARINE_TRAFFIC_API_KEY!;
     const response = await fetch(
       `https://services.marinetraffic.com/api/exportvessels/v:8/${apiKey}/protocol:jsono`,
     );
@@ -141,17 +141,17 @@ export class ShippingAdapter extends ServiceAdapter {
 
     const data = await response.json() as Array<Record<string, string>>;
     return data.map((v) => ({
-      vesselName: v["SHIPNAME"] ?? "",
-      imo: v["IMO"] ?? "",
-      mmsi: v["MMSI"] ?? "",
-      latitude: parseFloat(v["LAT"] ?? "0"),
-      longitude: parseFloat(v["LON"] ?? "0"),
-      speed: parseFloat(v["SPEED"] ?? "0") / 10,
-      heading: parseInt(v["HEADING"] ?? "0", 10),
-      status: v["STATUS"] ?? "",
-      destination: v["DESTINATION"] ?? "",
-      eta: v["ETA"] ?? "",
-      lastUpdated: v["TIMESTAMP"] ?? new Date().toISOString(),
+      vesselName: v.SHIPNAME ?? "",
+      imo: v.IMO ?? "",
+      mmsi: v.MMSI ?? "",
+      latitude: parseFloat(v.LAT ?? "0"),
+      longitude: parseFloat(v.LON ?? "0"),
+      speed: parseFloat(v.SPEED ?? "0") / 10,
+      heading: parseInt(v.HEADING ?? "0", 10),
+      status: v.STATUS ?? "",
+      destination: v.DESTINATION ?? "",
+      eta: v.ETA ?? "",
+      lastUpdated: v.TIMESTAMP ?? new Date().toISOString(),
     }));
   }
 

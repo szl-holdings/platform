@@ -1,7 +1,6 @@
 import { defaultPlanStore, type PlanStore } from '@workspace/planner/store';
-import type { PlanGraph, PlanStep, PlanStepStatus } from '@workspace/planner/types';
-import { PlanNotFoundError } from '@workspace/planner/types';
-import { randomUUID } from 'crypto';
+import { type PlanGraph, type PlanStep, type PlanStepStatus, PlanNotFoundError } from '@workspace/planner/types';
+import { randomUUID } from 'node:crypto';
 import { InMemoryActionLedger, makeLedgerEntry } from './ledger.js';
 import type { ActionLedgerWriter } from './types.js';
 
@@ -193,7 +192,7 @@ async function runPlan(args: RunPlanArgs): Promise<PlanRunResult> {
       executed.push({
         stepId: step.stepId,
         status: 'completed',
-        output: step.metadata['output'],
+        output: step.metadata.output,
         durationMs: 0,
       });
       continue;

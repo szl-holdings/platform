@@ -14,7 +14,7 @@ export class MediumAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["MEDIUM_INTEGRATION_TOKEN"];
 
   private get integrationToken(): string | undefined {
-    return process.env["MEDIUM_INTEGRATION_TOKEN"];
+    return process.env.MEDIUM_INTEGRATION_TOKEN;
   }
 
   override get status(): ServiceStatus {

@@ -2,42 +2,23 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, m } from 'framer-motion';
 import {
-  Activity,
   AlertCircle,
-  BarChart3,
-  Building2,
-  Check,
   CheckCircle2,
   ChevronDown,
-  ChevronRight,
   ChevronUp,
   Cloud,
-  Copy,
-  Database,
-  Edit3,
-  ExternalLink,
-  Eye,
-  EyeOff,
-  FileText,
-  Globe,
-  HardDrive,
   Key,
   LinkIcon,
   Loader2,
-  Mail,
   Plus,
-  RefreshCw,
   Save,
-  Settings,
   Shield,
   Trash2,
   UserCheck,
-  X,
 } from 'lucide-react';
-import type React from 'react';
-import { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { apiFetch, apiFetchAdmin } from './api';
+import { apiFetch, } from './api';
 import { StatusBadge } from './CmsTablePanel';
 
 // ─── Azure Tenant Management Panel ───────────────────────────────────────────

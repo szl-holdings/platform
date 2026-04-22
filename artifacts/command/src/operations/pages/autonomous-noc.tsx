@@ -1,27 +1,14 @@
 import {
-  Activity,
-  AlertCircle,
-  AlertTriangle,
   BookOpen,
   Bot,
   Brain,
   CheckCircle,
-  ChevronDown,
-  ChevronRight,
   Clock,
-  Eye,
-  GitBranch,
-  Pause,
-  Play,
   RefreshCw,
   RotateCcw,
-  Shield,
-  Terminal,
-  TrendingDown,
   XCircle,
-  Zap,
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const GOLD = '#d4a054';
 const DS = {
@@ -612,7 +599,7 @@ function CaseCard({
       className="w-full text-left p-3 rounded-lg transition-all"
       style={{
         background: selected ? `${SEV_COLOR[c.severity]}08` : DS.surface,
-        border: `1px solid ${selected ? SEV_COLOR[c.severity] + '30' : DS.border}`,
+        border: `1px solid ${selected ? `${SEV_COLOR[c.severity]}30` : DS.border}`,
       }}
     >
       <div className="flex items-start gap-2">
@@ -650,7 +637,7 @@ export default function AutonomousNOC() {
   const [selected, setSelected] = useState<RemediationCase>(SEED_CASES[0]);
   const [tab, setTab] = useState<'runbook' | 'reasoning'>('runbook');
   const [autoMode, setAutoMode] = useState(true);
-  const [ticker, setTicker] = useState(0);
+  const [_ticker, setTicker] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => setTicker((t) => t + 1), 3000);

@@ -1,9 +1,7 @@
-import type { InsertTerraDistressProperty } from '@szl-holdings/db';
-import { auditLogsTable, db } from '@szl-holdings/db';
+import { type InsertTerraDistressProperty, auditLogsTable, db } from '@szl-holdings/db';
 import { durableJobQueue } from '@szl-holdings/forge-runtime';
 import { logger } from './logger';
 import {
-  classifyDistressType,
   completeIngestionRun,
   generateAlertsForProperty,
   mapBoroughFromCounty,
@@ -35,7 +33,7 @@ async function writeAuditLog(
 }
 
 const NYC_OPEN_DATA_BASE = 'https://data.cityofnewyork.us/resource';
-const SODA_APP_TOKEN = process.env['NYC_OPEN_DATA_TOKEN'] ?? '';
+const SODA_APP_TOKEN = process.env.NYC_OPEN_DATA_TOKEN ?? '';
 const DEFAULT_LIMIT = 500;
 
 function buildSodaUrl(dataset: string, params: Record<string, string | number> = {}): string {
@@ -484,7 +482,7 @@ async function ingestHpdViolations(
     const addr = `${rec.housenumber ?? ''} ${rec.streetname ?? ''}`.trim();
     const key = addr.toLowerCase();
     if (!grouped.has(key)) grouped.set(key, []);
-    grouped.get(key)!.push(rec);
+    grouped.get(key)?.push(rec);
   }
 
   for (const [, recs] of grouped) {
@@ -998,7 +996,7 @@ export function scheduleNycIngestionJob(
   > = ['acris', 'acris_master', 'foreclosure_filings', 'dof_liens', 'hpd_violations'],
 ): void {
   const intervalMs = parseInt(
-    process.env['TERRA_INGESTION_INTERVAL_MS'] ?? String(6 * 60 * 60 * 1000),
+    process.env.TERRA_INGESTION_INTERVAL_MS ?? String(6 * 60 * 60 * 1000),
     10,
   );
 

@@ -19,7 +19,7 @@
  */
 
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { type DocumentNode, graphql } from 'graphql';
+import { graphql } from 'graphql';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 // ── Stub factories ─────────────────────────────────────────────────────────────
@@ -564,8 +564,8 @@ describe('GraphQL Schema — Field contract enforcement', () => {
       source: `query { vessels { id nonExistentField123 } }`,
     });
     expect(result.errors).toBeDefined();
-    expect(result.errors!.length).toBeGreaterThan(0);
-    expect(result.errors![0].message).toMatch(/nonExistentField123/);
+    expect(result.errors?.length).toBeGreaterThan(0);
+    expect(result.errors?.[0].message).toMatch(/nonExistentField123/);
   });
 
   it('querying a non-existent field on HoldingsVenture produces a schema validation error', async () => {
@@ -574,7 +574,7 @@ describe('GraphQL Schema — Field contract enforcement', () => {
       source: `query { holdingsVentures { id slug ghostField999 } }`,
     });
     expect(result.errors).toBeDefined();
-    expect(result.errors![0].message).toMatch(/ghostField999/);
+    expect(result.errors?.[0].message).toMatch(/ghostField999/);
   });
 
   it('querying a non-existent root query produces a schema validation error', async () => {

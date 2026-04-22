@@ -7,11 +7,8 @@ import {
   type EscalationPath,
   type EvidenceItem,
   formatAgo,
-  OperationalAuditTimeline,
   OperationalDetailPane,
   type OperationalEntity,
-  OperationalEscalationPanel,
-  OperationalEvidencePanel,
   OperationalOwnerChip,
   OperationalRiskBadge,
   OperationalStatusBadge,
@@ -44,15 +41,12 @@ import {
   Activity,
   AlertTriangle,
   ArrowRight,
-  ChevronDown,
-  ChevronUp,
   Clock,
   FileText,
   Loader2,
   Plus,
   Shield,
   Trash2,
-  Users,
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -135,7 +129,7 @@ const statusColors: Record<string, string> = {
   closed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
 };
 
-const severityColors: Record<string, string> = {
+const _severityColors: Record<string, string> = {
   low: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',

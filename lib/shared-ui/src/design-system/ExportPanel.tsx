@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { colors, effects, zIndex } from '../tokens';
-import { cn, toAlpha } from '../utils';
+import { cn, } from '../utils';
 
 export interface ExportFormat {
   id: string;

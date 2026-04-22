@@ -5,7 +5,6 @@ import {
   pcDeadlinesTable,
   pcInsurerPressureSnapshotsTable,
   pcMattersTable,
-  pcNextActionsTable,
   pcPortfolioActionEffectivenessTable,
   pcPortfolioBenchmarkSnapshotsTable,
   pcPortfolioMatterCohortsTable,
@@ -25,7 +24,7 @@ class PortfolioLearningEngine {
     }
 
     const healthScores = matters.map((m) => m.healthScore ?? 50).sort((a, b) => a - b);
-    const bands = ['p25', 'p50', 'p75', 'p90'] as const;
+    const _bands = ['p25', 'p50', 'p75', 'p90'] as const;
     const percentileValues = {
       p25: healthScores[Math.floor(healthScores.length * 0.25)] ?? 0,
       p50: healthScores[Math.floor(healthScores.length * 0.5)] ?? 0,
@@ -267,7 +266,7 @@ class PortfolioLearningEngine {
     logger.info({ orgId }, 'Action effectiveness metrics computed');
   }
 
-  async getBestNext30Minutes(orgId: number, userId: number): Promise<any[]> {
+  async getBestNext30Minutes(orgId: number, _userId: number): Promise<any[]> {
     const pressureViews = await db
       .select()
       .from(pcInsurerPressureSnapshotsTable)

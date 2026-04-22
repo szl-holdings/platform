@@ -207,12 +207,19 @@ export function createClientAnalytics(config: ClientAnalyticsConfig) {
       domain,
       ...(properties !== undefined ? { properties } : {}),
       serverSide: false,
-      context: {
-        sessionId,
-        ...(typeof window !== 'undefined' ? { url: window.location.href } : {}),
-        ...(typeof document !== 'undefined' ? { referrer: document.referrer } : {}),
-        ...(typeof navigator !== 'undefined' ? { userAgent: navigator.userAgent } : {}),
-      },
+      context: (() => {
+        const g = globalThis as {
+          window?: { location: { href: string; pathname: string } };
+          document?: { referrer: string };
+          navigator?: { userAgent: string };
+        };
+        return {
+          sessionId,
+          ...(g.window !== undefined ? { url: g.window.location.href } : {}),
+          ...(g.document !== undefined ? { referrer: g.document.referrer } : {}),
+          ...(g.navigator !== undefined ? { userAgent: g.navigator.userAgent } : {}),
+        };
+      })(),
       ...overrides,
       queuedAt: Date.now(),
     };
@@ -224,7 +231,7 @@ export function createClientAnalytics(config: ClientAnalyticsConfig) {
   function page(pageName: string, properties?: Record<string, unknown>): void {
     track('page_viewed', {
       pageName,
-      path: typeof window !== 'undefined' ? window.location.pathname : '',
+      path: ((globalThis as { window?: { location: { pathname: string } } }).window?.location.pathname ?? ''),
       ...properties,
     });
   }

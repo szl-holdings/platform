@@ -26,15 +26,15 @@ const MAX_PAGE_SIZE = 500;
 function parseSince(since: string | undefined): Date {
   if (!since) return new Date(0);
   const ts = Number(since);
-  if (!isNaN(ts)) return new Date(ts);
+  if (!Number.isNaN(ts)) return new Date(ts);
   const d = new Date(since);
-  if (!isNaN(d.getTime())) return d;
+  if (!Number.isNaN(d.getTime())) return d;
   return new Date(0);
 }
 
 function parseLimit(limit: string | undefined): number {
   const n = Number(limit ?? DEFAULT_PAGE_SIZE);
-  return Math.min(isNaN(n) ? DEFAULT_PAGE_SIZE : n, MAX_PAGE_SIZE);
+  return Math.min(Number.isNaN(n) ? DEFAULT_PAGE_SIZE : n, MAX_PAGE_SIZE);
 }
 
 interface EntityCursorEntry {

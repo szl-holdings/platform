@@ -16,13 +16,7 @@ import {
 import { buildScheduledReportEmail, sendEmail } from '../lib/email';
 import { logger } from '../lib/logger';
 import { ObjectStorageService } from '../lib/objectStorage';
-import type { BrandTheme, ReportBlock, ReportTemplate } from '../lib/report-engine';
-import {
-  BRAND_THEMES,
-  DOMAIN_TEMPLATES,
-  listAvailableTemplates,
-  renderReportToPdf,
-} from '../lib/report-engine';
+import { type BrandTheme, type ReportBlock, type ReportTemplate, BRAND_THEMES, DOMAIN_TEMPLATES, listAvailableTemplates, renderReportToPdf } from '../lib/report-engine';
 import { generateReportNarrative } from '../lib/report-narrative';
 import {
   createApprovalRequest,
@@ -198,7 +192,7 @@ const router: IRouter = Router();
 
 // ─── Template Routes ──────────────────────────────────────────────────────────
 
-router.get('/reports/templates/built-in', authMiddleware(), async (req: Request, res: Response) => {
+router.get('/reports/templates/built-in', authMiddleware(), async (_req: Request, res: Response) => {
   try {
     const templates = listAvailableTemplates();
     sendSuccess(res, templates);
@@ -230,11 +224,11 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const domain = req.query['domain'] as string | undefined;
+      const domain = req.query.domain as string | undefined;
       const isActive =
-        req.query['isActive'] !== undefined ? req.query['isActive'] !== 'false' : undefined;
-      const limit = Math.min(parseInt((req.query['limit'] as string) ?? '50', 10), 200);
-      const offset = parseInt((req.query['offset'] as string) ?? '0', 10);
+        req.query.isActive !== undefined ? req.query.isActive !== 'false' : undefined;
+      const limit = Math.min(parseInt((req.query.limit as string) ?? '50', 10), 200);
+      const offset = parseInt((req.query.offset as string) ?? '0', 10);
 
       const result = await listReportTemplates({ domain, isActive, limit, offset });
       sendSuccess(res, result.templates, 200, { total: result.total, limit, offset });
@@ -526,16 +520,16 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const domain = req.query['domain'] as string | undefined;
-      const status = req.query['status'] as string | undefined;
-      const templateId = req.query['templateId'] as string | undefined;
-      const search = req.query['search'] as string | undefined;
-      const dateFrom = req.query['dateFrom']
-        ? new Date(req.query['dateFrom'] as string)
+      const domain = req.query.domain as string | undefined;
+      const status = req.query.status as string | undefined;
+      const templateId = req.query.templateId as string | undefined;
+      const search = req.query.search as string | undefined;
+      const dateFrom = req.query.dateFrom
+        ? new Date(req.query.dateFrom as string)
         : undefined;
-      const dateTo = req.query['dateTo'] ? new Date(req.query['dateTo'] as string) : undefined;
-      const limit = Math.min(parseInt((req.query['limit'] as string) ?? '50', 10), 200);
-      const offset = parseInt((req.query['offset'] as string) ?? '0', 10);
+      const dateTo = req.query.dateTo ? new Date(req.query.dateTo as string) : undefined;
+      const limit = Math.min(parseInt((req.query.limit as string) ?? '50', 10), 200);
+      const offset = parseInt((req.query.offset as string) ?? '0', 10);
 
       const result = await listReportGenerations({
         domain,
@@ -554,7 +548,7 @@ router.get(
   },
 );
 
-router.get('/reports/stats', authMiddleware(), async (req: Request, res: Response) => {
+router.get('/reports/stats', authMiddleware(), async (_req: Request, res: Response) => {
   try {
     const stats = await getReportStats();
     sendSuccess(res, stats);
@@ -850,9 +844,9 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const domain = req.query['domain'] as string | undefined;
+      const domain = req.query.domain as string | undefined;
       // "all" or omitted → no filter; "true"/"false" → filter by isActive flag
-      const isActiveParam = req.query['isActive'] as string | undefined;
+      const isActiveParam = req.query.isActive as string | undefined;
       const isActive =
         isActiveParam === undefined || isActiveParam === 'all'
           ? undefined
@@ -948,7 +942,7 @@ router.post(
   authMiddleware(),
   requireRole('admin'),
   validateBody(bodyShape({})),
-  async (req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     try {
       const schedules = await getSchedulesDue();
       const results: Array<{
@@ -1034,7 +1028,7 @@ router.post(
 
           const runDueDataConfig = (schedule.dataConfig as Record<string, unknown> | null) ?? {};
           const runDueDeliveryMethod =
-            (runDueDataConfig['deliveryMethod'] as string | undefined) ?? 'email';
+            (runDueDataConfig.deliveryMethod as string | undefined) ?? 'email';
           const runDueEmails = (schedule.recipientEmails as string[] | null) ?? [];
           let emailSent = 0;
           let emailFailed = 0;
@@ -1143,7 +1137,7 @@ router.patch(
   ),
   async (req: Request, res: Response) => {
     try {
-      const scheduleId = req.params['scheduleId'] as string;
+      const scheduleId = req.params.scheduleId as string;
       const { isActive } = req.body as { isActive?: boolean };
 
       if (isActive === undefined || typeof isActive !== 'boolean') {
@@ -1170,7 +1164,7 @@ router.post(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const scheduleId = req.params['scheduleId'] as string;
+      const scheduleId = req.params.scheduleId as string;
       const schedule = await getReportScheduleById(scheduleId);
       if (!schedule) return sendNotFound(res, 'Schedule');
 
@@ -1243,7 +1237,7 @@ router.post(
 
       const perRunDataConfig = (schedule.dataConfig as Record<string, unknown> | null) ?? {};
       const perRunDeliveryMethod =
-        (perRunDataConfig['deliveryMethod'] as string | undefined) ?? 'email';
+        (perRunDataConfig.deliveryMethod as string | undefined) ?? 'email';
       const perRunEmails = (schedule.recipientEmails as string[] | null) ?? [];
       let emailSent = 0;
       let emailFailed = 0;

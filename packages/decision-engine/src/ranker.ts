@@ -1,14 +1,6 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { computePriorityScore } from './scorer.js';
-import type {
-  BusinessImpact,
-  DecisionEngineResult,
-  RankingWeights,
-  Recommendation,
-  Signal,
-  SignalBatch,
-} from './types.js';
-import { RankingWeightsSchema } from './types.js';
+import { type BusinessImpact, type DecisionEngineResult, type RankingWeights, type Recommendation, type Signal, type SignalBatch, RankingWeightsSchema } from './types.js';
 
 const DEFAULT_WEIGHTS = RankingWeightsSchema.parse({});
 
@@ -105,7 +97,7 @@ function buildReasoning(group: SignalGroup, priority: number): string {
   }
   if ((group.businessImpact.crossDomainBlastRadius?.length ?? 0) > 0) {
     lines.push(
-      `Cross-domain impact detected in: ${group.businessImpact.crossDomainBlastRadius!.join(', ')}.`,
+      `Cross-domain impact detected in: ${group.businessImpact.crossDomainBlastRadius?.join(', ')}.`,
     );
   }
   if (group.signals.length > 0) {

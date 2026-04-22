@@ -1,4 +1,4 @@
-const isTest = process.env['NODE_ENV'] === 'test';
+const isTest = process.env.NODE_ENV === 'test';
 
 function emit(level: string, msg: string, fields?: Record<string, unknown>): void {
   if (isTest) return;
@@ -10,9 +10,9 @@ function emit(level: string, msg: string, fields?: Record<string, unknown>): voi
     ...fields,
   });
   if (level === 'error' || level === 'warn') {
-    process.stderr.write(line + '\n');
+    process.stderr.write(`${line}\n`);
   } else {
-    process.stdout.write(line + '\n');
+    process.stdout.write(`${line}\n`);
   }
 }
 

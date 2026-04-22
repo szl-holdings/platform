@@ -1,5 +1,5 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
-import { apiFetch, isAuthError } from '@szl-holdings/shared-ui/api-fetch';
+import { apiFetch, } from '@szl-holdings/shared-ui/api-fetch';
 import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -259,8 +259,8 @@ const RUN_STATE_COLORS: Record<string, string> = {
 
 export default function GovernanceAudit() {
   const { entries, isLoading, isError, refetch } = useAuditData();
-  const [typeFilter, setTypeFilter] = useState<'all' | 'run' | 'artifact'>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [_typeFilter, _setTypeFilter] = useState<'all' | 'run' | 'artifact'>('all');
+  const [_statusFilter, _setStatusFilter] = useState<string>('all');
   const [tab, setTab] = useState<'approvals' | 'audit'>('approvals');
   const [approvalStatus, setApprovalStatus] = useState<string | null>('pending');
   const [page, setPage] = useState(1);

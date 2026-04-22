@@ -6,27 +6,23 @@ import {
   ArrowRight,
   BarChart3,
   Building2,
-  CheckCircle,
   DollarSign,
   Eye,
-  FileText,
   Flame,
   Layers,
-  MapPin,
   Menu,
   Search,
   Shield,
-  TrendingUp,
   Users,
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-const ACCENT = '#2d6a4f';
+const _ACCENT = '#2d6a4f';
 const ACCENT_LIGHT = '#5a9e82';
-const ACCENT_LIGHT_BG = '#40856a';
+const _ACCENT_LIGHT_BG = '#40856a';
 const BTN_BG = '#1e6e52';
-const BRASS = '#9a7840';
+const _BRASS = '#9a7840';
 const BRASS_LIGHT = '#b8943c';
 const BG = '#0a0c10';
 const BG2 = '#0f1218';

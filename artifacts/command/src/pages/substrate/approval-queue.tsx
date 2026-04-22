@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   BookOpen,
   CheckCircle2,
-  CheckSquare,
   ChevronUp,
   Clock,
   Filter,

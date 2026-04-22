@@ -1524,14 +1524,14 @@ export const lyteInterventionCreateSchema = z.object({
   notes: z.string().max(5000).optional(),
   newOwner: z.string().min(1).max(200).trim().optional(),
 }).superRefine((val, ctx) => {
-  if (val.type === "reassign" && (!val.newOwner || !val.newOwner.trim())) {
+  if (val.type === "reassign" && (!val.newOwner?.trim())) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["newOwner"],
       message: "newOwner is required for reassign",
     });
   }
-  if (val.type === "address" && (!val.notes || !val.notes.trim())) {
+  if (val.type === "address" && (!val.notes?.trim())) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["notes"],

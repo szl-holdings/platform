@@ -21,7 +21,7 @@ export interface UserRoles {
   hasRole: (role: AppRole) => boolean;
 }
 
-const DEFAULT_ROLES: UserRoles = {
+const _DEFAULT_ROLES: UserRoles = {
   roles: [],
   isAdmin: false,
   isInvestor: false,
@@ -89,5 +89,5 @@ export function RoleGate({
   const required = Array.isArray(requires) ? requires : [requires];
   const allowed = required.some(hasRole);
 
-  return allowed ? <>{children}</> : <>{fallback}</>;
+  return allowed ? children : fallback;
 }

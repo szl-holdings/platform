@@ -5,7 +5,6 @@ import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
-  sendBadRequest,
   sendCreated,
   sendNoContent,
   sendNotFound,

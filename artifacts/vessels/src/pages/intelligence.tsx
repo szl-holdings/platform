@@ -2,7 +2,7 @@ import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-
 import { type AutonomyMode, ProofEnvelope } from '@szl-holdings/design-system';
 import { AnimatedGauge, NERHighlight, SeverityMeter } from '@szl-holdings/shared-ui/ai-components';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
-import { AlertTriangle, Brain, Loader2, Navigation, Radio, Shield, Ship } from 'lucide-react';
+import { AlertTriangle, Brain, Loader2, Radio, Ship } from 'lucide-react';
 import { useState } from 'react';
 
 export default function VesselsIntelligence() {

@@ -9,7 +9,6 @@ import {
   downloadsTable,
   faqsTable,
   featuresTable,
-  formsTable,
   leadStatusTable,
   mediaAssetsTable,
   navigationItemsTable,
@@ -378,7 +377,7 @@ function requireCmsWrite(req: Request, res: Response, next: NextFunction): void 
 
 // ─── Sites ───────────────────────────────────────────────────────────────────
 
-router.get('/cms/sites', async (req, res) => {
+router.get('/cms/sites', async (_req, res) => {
   try {
     const rows = await db.select().from(sitesTable).orderBy(asc(sitesTable.slug));
     sendSuccess(res, rows);
@@ -530,7 +529,7 @@ router.delete('/cms/pages/:id', validateBody(bodyShape({})), requireCmsWrite, as
 
 router.get('/cms/sections', validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const pageId = req.query.page_id ? parseInt(req.query.page_id as string) : undefined;
+    const pageId = req.query.page_id ? parseInt(req.query.page_id as string, 10) : undefined;
     let query = db.select().from(sectionsTable).$dynamic();
     if (pageId) query = query.where(eq(sectionsTable.pageId, pageId));
     const rows = await query.orderBy(asc(sectionsTable.sortOrder));
@@ -594,7 +593,7 @@ router.delete(
 
 // ─── Ventures ────────────────────────────────────────────────────────────────
 
-router.get('/cms/ventures', async (req, res) => {
+router.get('/cms/ventures', async (_req, res) => {
   try {
     const rows = await db
       .select()
@@ -689,7 +688,7 @@ router.get(
           req.user.roles.includes('super_admin') ||
           req.user.roles.includes('editor'));
       const statusParam = req.query.status as string | undefined;
-      const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+      const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
       const conditions = [];
       if (!isEditor) {
         conditions.push(eq(articlesTable.status, 'published'));
@@ -809,7 +808,7 @@ router.get(
         (req.user.roles.includes('admin') ||
           req.user.roles.includes('super_admin') ||
           req.user.roles.includes('editor'));
-      const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+      const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
       const conditions = [];
       if (!isEditor) conditions.push(eq(caseStudiesTable.status, 'published'));
       if (siteId) conditions.push(eq(caseStudiesTable.siteId, siteId));
@@ -915,7 +914,7 @@ router.delete(
 
 router.get('/cms/navigation-items', validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+    const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
     const navGroup = req.query.nav_group as string | undefined;
     const conditions = [];
     if (siteId) conditions.push(eq(navigationItemsTable.siteId, siteId));
@@ -987,7 +986,7 @@ router.delete(
 
 router.get('/cms/testimonials', validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+    const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
     let query = db.select().from(testimonialsTable).$dynamic();
     if (siteId) query = query.where(eq(testimonialsTable.siteId, siteId));
     const rows = await query.orderBy(asc(testimonialsTable.sortOrder));
@@ -1053,7 +1052,7 @@ router.delete(
 
 router.get('/cms/faqs', validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+    const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
     let query = db.select().from(faqsTable).$dynamic();
     if (siteId) query = query.where(eq(faqsTable.siteId, siteId));
     const rows = await query.orderBy(asc(faqsTable.sortOrder));
@@ -1104,7 +1103,7 @@ router.delete('/cms/faqs/:id', validateBody(bodyShape({})), requireCmsWrite, asy
 
 router.get('/cms/ctas', validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+    const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
     let query = db.select().from(ctasTable).$dynamic();
     if (siteId) query = query.where(eq(ctasTable.siteId, siteId));
     const rows = await query.orderBy(desc(ctasTable.createdAt));
@@ -1155,7 +1154,7 @@ router.delete('/cms/ctas/:id', validateBody(bodyShape({})), requireCmsWrite, asy
 
 router.get('/cms/roadmap-items', validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+    const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
     let query = db.select().from(roadmapItemsTable).$dynamic();
     if (siteId) query = query.where(eq(roadmapItemsTable.siteId, siteId));
     const rows = await query.orderBy(asc(roadmapItemsTable.sortOrder));
@@ -1221,7 +1220,7 @@ router.delete(
 
 router.get('/cms/services-items', validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+    const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
     let query = db.select().from(servicesTable).$dynamic();
     if (siteId) query = query.where(eq(servicesTable.siteId, siteId));
     const rows = await query.orderBy(asc(servicesTable.sortOrder));
@@ -1287,7 +1286,7 @@ router.delete(
 
 router.get('/cms/features-items', validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+    const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
     let query = db.select().from(featuresTable).$dynamic();
     if (siteId) query = query.where(eq(featuresTable.siteId, siteId));
     const rows = await query.orderBy(asc(featuresTable.sortOrder));
@@ -1315,7 +1314,7 @@ router.post(
 
 router.get('/cms/use-cases', validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+    const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
     let query = db.select().from(useCasesTable).$dynamic();
     if (siteId) query = query.where(eq(useCasesTable.siteId, siteId));
     const rows = await query.orderBy(asc(useCasesTable.sortOrder));
@@ -1353,7 +1352,7 @@ router.get(
         (req.user.roles.includes('admin') ||
           req.user.roles.includes('super_admin') ||
           req.user.roles.includes('editor'));
-      const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+      const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
       const conditions = [];
       if (!isEditor) conditions.push(eq(updatesTable.status, 'published'));
       if (siteId) conditions.push(eq(updatesTable.siteId, siteId));
@@ -1490,7 +1489,7 @@ router.patch(
 
 router.get('/cms/site-settings', validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+    const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
     let query = db.select().from(siteSettingsTable).$dynamic();
     if (siteId) query = query.where(eq(siteSettingsTable.siteId, siteId));
     const rows = await query.orderBy(asc(siteSettingsTable.key));
@@ -1594,7 +1593,7 @@ router.delete(
 
 router.get('/cms/media-assets', validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+    const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
     let query = db.select().from(mediaAssetsTable).$dynamic();
     if (siteId) query = query.where(eq(mediaAssetsTable.siteId, siteId));
     const rows = await query.orderBy(desc(mediaAssetsTable.createdAt)).limit(200);
@@ -1646,7 +1645,7 @@ router.get(
         (req.user.roles.includes('admin') ||
           req.user.roles.includes('super_admin') ||
           req.user.roles.includes('editor'));
-      const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+      const siteId = req.query.site_id ? parseInt(req.query.site_id as string, 10) : undefined;
       const conditions = [];
       if (!isEditor) conditions.push(eq(downloadsTable.status, 'published'));
       if (siteId) conditions.push(eq(downloadsTable.siteId, siteId));
@@ -1701,7 +1700,7 @@ router.patch(
 
 // ─── Redirects ────────────────────────────────────────────────────────────────
 
-router.get('/cms/redirects', authMiddleware({ required: false }), async (req, res) => {
+router.get('/cms/redirects', authMiddleware({ required: false }), async (_req, res) => {
   try {
     const rows = await db.select().from(redirectsTable).orderBy(asc(redirectsTable.fromPath));
     sendSuccess(res, rows);

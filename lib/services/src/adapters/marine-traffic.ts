@@ -58,7 +58,7 @@ export class MarineTrafficAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["MARINE_TRAFFIC_API_KEY"];
 
   private get apiKey(): string | undefined {
-    return process.env["MARINE_TRAFFIC_API_KEY"];
+    return process.env.MARINE_TRAFFIC_API_KEY;
   }
 
   private readonly BASE_URL = "https://services.marinetraffic.com/api";
@@ -84,25 +84,25 @@ export class MarineTrafficAdapter extends ServiceAdapter {
   async getVesselPositions(mmsiList?: string[]): Promise<MarineTrafficVessel[]> {
     if (this.isDemoMode) return MOCK_VESSELS;
     const params: Record<string, string> = { timespan: "60" };
-    if (mmsiList?.length) params["MMSI"] = mmsiList.join(",");
+    if (mmsiList?.length) params.MMSI = mmsiList.join(",");
     const data = await this.mtRequest<{ DATA: Array<Record<string, string>> }>("getvessel", params);
     return (data.DATA ?? []).map(v => ({
-      mmsi: v["MMSI"] ?? "",
-      imo: v["IMO"] ?? "",
-      shipName: v["SHIPNAME"] ?? "",
-      latitude: parseFloat(v["LAT"] ?? "0"),
-      longitude: parseFloat(v["LON"] ?? "0"),
-      speed: parseFloat(v["SPEED"] ?? "0"),
-      course: parseFloat(v["COURSE"] ?? "0"),
-      status: v["STATUS"] ?? "",
-      shipType: v["SHIPTYPE"] ?? "",
-      flag: v["FLAG"] ?? "",
-      destination: v["DESTINATION"] ?? "",
-      eta: v["ETA"] ?? "",
-      lastPosition: v["TIMESTAMP"] ?? "",
-      draught: parseFloat(v["DRAUGHT"] ?? "0"),
-      length: parseFloat(v["LENGTH"] ?? "0"),
-      width: parseFloat(v["WIDTH"] ?? "0"),
+      mmsi: v.MMSI ?? "",
+      imo: v.IMO ?? "",
+      shipName: v.SHIPNAME ?? "",
+      latitude: parseFloat(v.LAT ?? "0"),
+      longitude: parseFloat(v.LON ?? "0"),
+      speed: parseFloat(v.SPEED ?? "0"),
+      course: parseFloat(v.COURSE ?? "0"),
+      status: v.STATUS ?? "",
+      shipType: v.SHIPTYPE ?? "",
+      flag: v.FLAG ?? "",
+      destination: v.DESTINATION ?? "",
+      eta: v.ETA ?? "",
+      lastPosition: v.TIMESTAMP ?? "",
+      draught: parseFloat(v.DRAUGHT ?? "0"),
+      length: parseFloat(v.LENGTH ?? "0"),
+      width: parseFloat(v.WIDTH ?? "0"),
     }));
   }
 
@@ -114,12 +114,12 @@ export class MarineTrafficAdapter extends ServiceAdapter {
       }));
     }
     const params: Record<string, string> = { MMSI: mmsi };
-    if (eventType) params["EVENT_TYPE"] = eventType;
+    if (eventType) params.EVENT_TYPE = eventType;
     const data = await this.mtRequest<{ DATA: Array<Record<string, string>> }>("getevents", params);
     return (data.DATA ?? []).map(e => ({
-      mmsi: e["MMSI"] ?? "", shipName: e["SHIPNAME"] ?? "", eventType: e["TYPEFLAG"] ?? "",
-      eventDate: e["TIMESTAMP"] ?? "", portName: e["PORT_NAME"] ?? "",
-      portCode: e["UN_LOCODE"] ?? "", flag: e["FLAG"] ?? "",
+      mmsi: e.MMSI ?? "", shipName: e.SHIPNAME ?? "", eventType: e.TYPEFLAG ?? "",
+      eventDate: e.TIMESTAMP ?? "", portName: e.PORT_NAME ?? "",
+      portCode: e.UN_LOCODE ?? "", flag: e.FLAG ?? "",
     }));
   }
 
@@ -127,10 +127,10 @@ export class MarineTrafficAdapter extends ServiceAdapter {
     if (this.isDemoMode) return MOCK_PORT_CALLS;
     const data = await this.mtRequest<{ DATA: Array<Record<string, string>> }>("getportcalls", { port_target_id: portCode });
     return (data.DATA ?? []).map(p => ({
-      portId: p["port_target_id"] ?? "", portName: p["PORT_NAME"] ?? "",
-      country: p["COUNTRY"] ?? "", mmsi: p["MMSI"] ?? "", shipName: p["SHIPNAME"] ?? "",
-      arrivalDate: p["ARRIVAL_DATE"] ?? "", departureDate: p["DEPARTURE_DATE"] ?? null,
-      status: p["DEPARTURE_DATE"] ? "departed" : "in_port",
+      portId: p.port_target_id ?? "", portName: p.PORT_NAME ?? "",
+      country: p.COUNTRY ?? "", mmsi: p.MMSI ?? "", shipName: p.SHIPNAME ?? "",
+      arrivalDate: p.ARRIVAL_DATE ?? "", departureDate: p.DEPARTURE_DATE ?? null,
+      status: p.DEPARTURE_DATE ? "departed" : "in_port",
     }));
   }
 }

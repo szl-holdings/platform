@@ -2,7 +2,6 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { AnimatedCounter } from '@szl-holdings/shared-ui/animated-counter';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
-import { Button } from '@szl-holdings/shared-ui/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import { Input } from '@szl-holdings/shared-ui/ui/input';
 import {
@@ -24,7 +23,6 @@ import {
   Radio,
   Search,
   Shield,
-  TrendingUp,
   Zap,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -87,7 +85,7 @@ function ThreatMapCanvas({ threats }: { threats: any[] }) {
     const toX = (lon: number) => ((lon + 180) / 360) * w;
     const toY = (lat: number) => ((90 - lat) / 180) * h;
 
-    threats.forEach((t, i) => {
+    threats.forEach((t, _i) => {
       const x = toX(t.lon);
       const y = toY(t.lat);
       const isCritical = t.severity === 'critical';

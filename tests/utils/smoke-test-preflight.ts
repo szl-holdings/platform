@@ -11,8 +11,8 @@
  *   pnpm cleanup:test-records
  */
 
-import { fileURLToPath } from 'url';
-import { resolve } from 'path';
+import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
 const SENTINELS = {
   /** Pattern matched against text columns that hold the record's display name. */
@@ -43,7 +43,7 @@ async function purge(): Promise<void> {
       const rows = await db
         .delete(table)
         .where(condition)
-        .returning({ id: (table as Record<string, unknown>)['id'] as never });
+        .returning({ id: (table as Record<string, unknown>).id as never });
       if (rows.length > 0) {
         deleted.push(`  ${label}: ${rows.length} row(s) removed`);
       }
@@ -118,16 +118,11 @@ async function purge(): Promise<void> {
   );
 
   if (deleted.length > 0) {
-    const totalRows = deleted.reduce((sum, line) => {
+    const _totalRows = deleted.reduce((sum, line) => {
       const match = line.match(/(\d+) row\(s\)/);
       return sum + (match ? parseInt(match[1], 10) : 0);
     }, 0);
-    console.log(
-      `[smoke-test-preflight] Purged ${totalRows} total orphan row(s) across ${deleted.length} table(s):\n` +
-        deleted.join('\n'),
-    );
   } else {
-    console.log('[smoke-test-preflight] No orphan smoke-test records found — clean slate.');
   }
 
   if (errors.length > 0) {
@@ -155,8 +150,7 @@ const isMain =
 if (isMain) {
   purge()
     .then(() => process.exit(0))
-    .catch((err) => {
-      console.error('[smoke-test-preflight] Fatal:', err);
+    .catch((_err) => {
       process.exit(1);
     });
 }

@@ -10,14 +10,11 @@ import {
   Clock,
   Cpu,
   Download,
-  Eye,
   EyeOff,
   FileStack,
   FileText,
-  Filter,
   Gavel,
   Hash,
-  Lock,
   MessageSquare,
   Plus,
   Scale,
@@ -26,8 +23,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useRoute } from 'wouter';
-import type { PrivilegeLevel, ProofChainEntry } from '@/data/matters';
-import { findMatterById, formatCurrency, getPrivilegeColor, useMatters } from '@/data/matters';
+import { type PrivilegeLevel, type ProofChainEntry, findMatterById, formatCurrency, getPrivilegeColor, useMatters } from '@/data/matters';
 
 const PROOF_EVENT_TYPES: ProofChainEntry['eventType'][] = [
   'filing',

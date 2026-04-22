@@ -1,7 +1,6 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
-import { Progress } from '@szl-holdings/shared-ui/ui/progress';
 import {
   AlertTriangle,
   CheckCircle,

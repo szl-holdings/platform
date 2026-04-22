@@ -25,17 +25,15 @@ import {
   azureTenantsTable,
   db,
   orgMembersTable,
-  rolesTable,
   scimGroupMembersTable,
   scimGroupsTable,
   scimProvisionedUsersTable,
   scimSyncLogsTable,
   scimTokensTable,
-  userRolesTable,
   usersTable,
 } from '@szl-holdings/db';
-import crypto from 'crypto';
-import { and, count, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
+import crypto from 'node:crypto';
+import { and, desc, eq, ilike, inArray, } from 'drizzle-orm';
 import { type NextFunction, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { logger } from '../lib/logger';
@@ -249,7 +247,7 @@ function getBaseUrl(req: Request): string {
 function parseScimFilter(filter: string): { field: string; op: string; value: string } | null {
   const m = filter.trim().match(/^(\w+)\s+(eq|sw|co|ne)\s+"([^"]*)"$/i);
   if (!m) return null;
-  return { field: m[1]!, op: m[2]!.toLowerCase(), value: m[3]! };
+  return { field: m[1]!, op: m[2]?.toLowerCase(), value: m[3]! };
 }
 
 async function logScimOperation(
@@ -516,7 +514,7 @@ router.get('/scim/v2/Users/:id', scimBearerAuth, async (req: Request, res: Respo
   try {
     const ctx = req.scimContext!;
     const userId = parseInt(String(req.params.id), 10);
-    if (isNaN(userId)) return scimError(res, 400, 'invalidValue', 'Invalid user ID');
+    if (Number.isNaN(userId)) return scimError(res, 400, 'invalidValue', 'Invalid user ID');
 
     const [provisioned] = await db
       .select()
@@ -691,7 +689,7 @@ router.put(
     try {
       const ctx = req.scimContext!;
       const userId = parseInt(String(req.params.id), 10);
-      if (isNaN(userId)) return scimError(res, 400, 'invalidValue', 'Invalid user ID');
+      if (Number.isNaN(userId)) return scimError(res, 400, 'invalidValue', 'Invalid user ID');
 
       const body = req.body ?? {};
       const baseUrl = getBaseUrl(req);
@@ -776,7 +774,7 @@ router.patch(
     try {
       const ctx = req.scimContext!;
       const userId = parseInt(String(req.params.id), 10);
-      if (isNaN(userId)) return scimError(res, 400, 'invalidValue', 'Invalid user ID');
+      if (Number.isNaN(userId)) return scimError(res, 400, 'invalidValue', 'Invalid user ID');
 
       const body = req.body ?? {};
       const baseUrl = getBaseUrl(req);
@@ -826,7 +824,7 @@ router.patch(
             const activeVal =
               op.path === 'active'
                 ? Boolean(op.value)
-                : Boolean((op.value as Record<string, unknown>)['active']);
+                : Boolean((op.value as Record<string, unknown>).active);
             userUpdates.isActive = activeVal;
             provUpdates.active = activeVal;
           }
@@ -843,10 +841,10 @@ router.patch(
           }
           if (!op.path && typeof op.value === 'object' && op.value !== null) {
             const val = op.value as Record<string, unknown>;
-            if ('displayName' in val) userUpdates.displayName = String(val['displayName']);
+            if ('displayName' in val) userUpdates.displayName = String(val.displayName);
             if ('active' in val) {
-              userUpdates.isActive = Boolean(val['active']);
-              provUpdates.active = Boolean(val['active']);
+              userUpdates.isActive = Boolean(val.active);
+              provUpdates.active = Boolean(val.active);
             }
           }
         }
@@ -906,7 +904,7 @@ router.delete(
     try {
       const ctx = req.scimContext!;
       const userId = parseInt(String(req.params.id), 10);
-      if (isNaN(userId)) return scimError(res, 400, 'invalidValue', 'Invalid user ID');
+      if (Number.isNaN(userId)) return scimError(res, 400, 'invalidValue', 'Invalid user ID');
 
       const [provisioned] = await db
         .select()
@@ -989,7 +987,7 @@ router.get(
       const membersByGroup = new Map<number, typeof members>();
       for (const m of members) {
         if (!membersByGroup.has(m.groupId)) membersByGroup.set(m.groupId, []);
-        membersByGroup.get(m.groupId)!.push(m);
+        membersByGroup.get(m.groupId)?.push(m);
       }
 
       return scimResponse(res, 200, {
@@ -1021,7 +1019,7 @@ router.get('/scim/v2/Groups/:id', scimBearerAuth, async (req: Request, res: Resp
   try {
     const ctx = req.scimContext!;
     const groupId = parseInt(String(req.params.id), 10);
-    if (isNaN(groupId)) return scimError(res, 400, 'invalidValue', 'Invalid group ID');
+    if (Number.isNaN(groupId)) return scimError(res, 400, 'invalidValue', 'Invalid group ID');
 
     const [group] = await db
       .select()
@@ -1095,7 +1093,7 @@ router.post(
         .returning();
 
       const members: { value: string }[] = body.members ?? [];
-      const memberUserIds = members.map((m) => parseInt(m.value, 10)).filter((id) => !isNaN(id));
+      const memberUserIds = members.map((m) => parseInt(m.value, 10)).filter((id) => !Number.isNaN(id));
 
       if (memberUserIds.length > 0 && group) {
         const existingUsers = await db
@@ -1139,7 +1137,7 @@ router.put(
     try {
       const ctx = req.scimContext!;
       const groupId = parseInt(String(req.params.id), 10);
-      if (isNaN(groupId)) return scimError(res, 400, 'invalidValue', 'Invalid group ID');
+      if (Number.isNaN(groupId)) return scimError(res, 400, 'invalidValue', 'Invalid group ID');
 
       const body = req.body ?? {};
       const baseUrl = getBaseUrl(req);
@@ -1167,7 +1165,7 @@ router.put(
         .returning();
 
       const newMembers: { value: string }[] = body.members ?? [];
-      const newMemberIds = newMembers.map((m) => parseInt(m.value, 10)).filter((id) => !isNaN(id));
+      const newMemberIds = newMembers.map((m) => parseInt(m.value, 10)).filter((id) => !Number.isNaN(id));
 
       await db.delete(scimGroupMembersTable).where(eq(scimGroupMembersTable.groupId, groupId));
 
@@ -1238,7 +1236,7 @@ router.patch(
     try {
       const ctx = req.scimContext!;
       const groupId = parseInt(String(req.params.id), 10);
-      if (isNaN(groupId)) return scimError(res, 400, 'invalidValue', 'Invalid group ID');
+      if (Number.isNaN(groupId)) return scimError(res, 400, 'invalidValue', 'Invalid group ID');
 
       const body = req.body ?? {};
       const baseUrl = getBaseUrl(req);
@@ -1276,7 +1274,7 @@ router.patch(
           const memberValues = op.value as { value: string }[];
           const memberIds = memberValues
             .map((m) => parseInt(m.value, 10))
-            .filter((id) => !isNaN(id));
+            .filter((id) => !Number.isNaN(id));
 
           if (opName === 'add') {
             if (memberIds.length > 0) {
@@ -1412,7 +1410,7 @@ router.delete(
     try {
       const ctx = req.scimContext!;
       const groupId = parseInt(String(req.params.id), 10);
-      if (isNaN(groupId)) return scimError(res, 400, 'invalidValue', 'Invalid group ID');
+      if (Number.isNaN(groupId)) return scimError(res, 400, 'invalidValue', 'Invalid group ID');
 
       const [group] = await db
         .select()

@@ -2,9 +2,7 @@ import { aboutSzlParagraph, brand, copyrightLine } from '@szl-holdings/brand-reg
 import { motion as m } from 'framer-motion';
 import {
   Activity,
-  AlertTriangle,
   ArrowRight,
-  BarChart3,
   Brain,
   ChevronRight,
   Eye,
@@ -13,8 +11,6 @@ import {
   Lock,
   Shield,
   Target,
-  Users,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
@@ -177,7 +173,7 @@ function ThreatParticles() {
   );
 }
 
-function LiveCounter({ end, duration = 2000 }: { end: number; duration?: number }) {
+function _LiveCounter({ end, duration = 2000 }: { end: number; duration?: number }) {
   const [count, setCount] = useState(0);
   useEffect(() => {
     let start = 0;

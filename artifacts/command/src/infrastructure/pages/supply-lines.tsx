@@ -1,8 +1,8 @@
 import { ClassificationBadge } from '@imp/components/classification-badge';
-import { type Classification, getClassificationColor, SUPPLY_ROUTES } from '@imp/lib/imperium-data';
+import { getClassificationColor, SUPPLY_ROUTES } from '@imp/lib/imperium-data';
 import { cn } from '@imp/lib/utils';
-import { Activity, AlertTriangle, ArrowRight, Network, TrendingUp, Wifi, Zap } from 'lucide-react';
-import React, { useState } from 'react';
+import { Activity, AlertTriangle, ArrowRight, Network, TrendingUp, Wifi, } from 'lucide-react';
+import { useState } from 'react';
 
 function LatencyBar({ ms, max = 1500 }: { ms: number; max?: number }) {
   const pct = Math.min((ms / max) * 100, 100);

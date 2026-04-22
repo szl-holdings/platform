@@ -1,10 +1,8 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import {
-  type AuditHistoryEntry,
   OperationalAuditTimeline,
   OperationalOwnerChip,
-  OperationalStatusBadge,
 } from '@szl-holdings/shared-ui/operational-primitives';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Button } from '@szl-holdings/shared-ui/ui/button';
@@ -31,7 +29,6 @@ import {
   ExternalLink,
   FileText,
   Filter,
-  Flame,
   Plus,
   Search,
   Shield,
@@ -98,7 +95,7 @@ function TraceMiniGraph({ bundle }: { bundle: TraceBundle }) {
   const ringStep = 22;
 
   const layout = useMemo(() => {
-    const nodes = (bundle.nodes ?? []).filter((n) => n && n.id);
+    const nodes = (bundle.nodes ?? []).filter((n) => n?.id);
     if (nodes.length === 0) return null;
     const originId = bundle.origin?.id ?? nodes[0]?.id;
     const byRing = new Map<number, TraceBundleNode[]>();

@@ -26,7 +26,7 @@ export interface CompactionResult {
  * Set COMPACTION_DRY_RUN=true to count affected rows without deleting them.
  */
 export async function runAtlasCompaction(): Promise<CompactionResult> {
-  const dryRun = process.env['COMPACTION_DRY_RUN'] === 'true';
+  const dryRun = process.env.COMPACTION_DRY_RUN === 'true';
   const start = Date.now();
 
   logger.info({ dryRun }, '[atlas-compaction] Starting ATLAS snapshot compaction');

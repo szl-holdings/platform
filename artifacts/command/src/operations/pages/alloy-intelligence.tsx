@@ -1,26 +1,19 @@
 // @ts-nocheck
 
-import type { AlloyAIAuditResult, AlloyAIHealth, AlloyAIModels } from '@lyte/lib/api';
-import { api } from '@lyte/lib/api';
+import { type AlloyAIAuditResult, type AlloyAIHealth, type AlloyAIModels, api } from '@lyte/lib/api';
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
-  ActionTypeBadge,
   ApprovalBadge,
   ConfidenceBand,
   DegradedModeBanner,
   EnvironmentLabel,
   EvidencePanel,
-  HumanReviewBadge,
-  PriorityBadge,
 } from '@szl-holdings/shared-ui/alloy-decision-card';
 import {
   Activity,
   AlertTriangle,
-  BarChart3,
   Brain,
-  CheckCircle,
   ChevronRight,
-  Clock,
   Cpu,
   Crosshair,
   Database,
@@ -1180,7 +1173,7 @@ export default function AlloyIntelligence() {
                       </div>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                         {[
-                          ['Decision ID', selectedDecision.decisionId?.slice(0, 16) + '…'],
+                          ['Decision ID', `${selectedDecision.decisionId?.slice(0, 16)}…`],
                           ['Schema Version', selectedDecision.schemaVersion || 'v2.0.0'],
                           ['Model Route', selectedDecision.modelRoute || '—'],
                           ['Owner Suggestion', selectedDecision.ownerSuggestion || '—'],

@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   RefreshControl,
@@ -99,7 +99,7 @@ function WorldMapCanvas({
     const pos = livePositions.get(flyToVessel.id);
     const lat = pos ? parseFloat(pos.latitude ?? '0') : parseFloat(flyToVessel.latitude ?? '0');
     const lon = pos ? parseFloat(pos.longitude ?? '0') : parseFloat(flyToVessel.longitude ?? '0');
-    if (isNaN(lat) || isNaN(lon)) {
+    if (Number.isNaN(lat) || Number.isNaN(lon)) {
       runOnJS(onFlyToHandled)();
       return;
     }
@@ -172,7 +172,7 @@ function WorldMapCanvas({
         const pos = livePositions.get(v.id);
         const lat = pos ? parseFloat(pos.latitude ?? '0') : parseFloat(v.latitude ?? '0');
         const lon = pos ? parseFloat(pos.longitude ?? '0') : parseFloat(v.longitude ?? '0');
-        if (isNaN(lat) || isNaN(lon)) continue;
+        if (Number.isNaN(lat) || Number.isNaN(lon)) continue;
         const { x, y } = latLonToXY(lat, lon);
         const dist = Math.sqrt((x - svgX) ** 2 + (y - svgY) ** 2);
         if (dist < minDist) {
@@ -213,7 +213,7 @@ function WorldMapCanvas({
       : v.longitude
         ? parseFloat(v.longitude ?? '0')
         : null;
-    return lat !== null && lon !== null && !isNaN(lat) && !isNaN(lon);
+    return lat !== null && lon !== null && !Number.isNaN(lat) && !Number.isNaN(lon);
   });
 
   const routePoints = routeHistory
@@ -508,7 +508,7 @@ export default function FleetMapScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
   const livePositions = useRef(new Map<string, VesselPositionUpdate>()).current;
-  const [positionVersion, setPositionVersion] = useState(0);
+  const [_positionVersion, setPositionVersion] = useState(0);
   const [routeHistory, setRouteHistory] = useState<RoutePoint[]>([]);
   const [flyToVessel, setFlyToVessel] = useState<Vessel | null>(null);
   const selectedIdRef = useRef<string | null>(null);
@@ -524,7 +524,7 @@ export default function FleetMapScreen() {
         const data = await api.getVessels();
         await cacheSet(CACHE_KEYS.VESSELS, data);
         return data;
-      } catch (e) {
+      } catch (_e) {
         return (await cacheGetStale<Vessel[]>(CACHE_KEYS.VESSELS)) ?? [];
       }
     },
@@ -549,7 +549,7 @@ export default function FleetMapScreen() {
       if (upd.vesselId === selectedIdRef.current) {
         const lat = parseFloat(upd.latitude ?? '0');
         const lon = parseFloat(upd.longitude ?? '0');
-        if (!isNaN(lat) && !isNaN(lon)) {
+        if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
           setRouteHistory((prev) => {
             const next = [...prev, { lat, lon }];
             return next.length > 50 ? next.slice(-50) : next;

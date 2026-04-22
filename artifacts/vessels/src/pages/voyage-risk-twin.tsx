@@ -1652,7 +1652,7 @@ export default function VoyageRiskTwinPage() {
               <div
                 className="p-1.5 rounded-lg shrink-0"
                 style={{
-                  background: SANCTION_RISK_CFG[displayCounterparty.sanctionRisk].color + '18',
+                  background: `${SANCTION_RISK_CFG[displayCounterparty.sanctionRisk].color}18`,
                 }}
               >
                 <Building2
@@ -1669,8 +1669,8 @@ export default function VoyageRiskTwinPage() {
                     className="text-[9px] px-2 py-0.5 rounded-full border capitalize shrink-0"
                     style={{
                       color: SANCTION_RISK_CFG[displayCounterparty.sanctionRisk].color,
-                      borderColor: SANCTION_RISK_CFG[displayCounterparty.sanctionRisk].color + '40',
-                      background: SANCTION_RISK_CFG[displayCounterparty.sanctionRisk].color + '12',
+                      borderColor: `${SANCTION_RISK_CFG[displayCounterparty.sanctionRisk].color}40`,
+                      background: `${SANCTION_RISK_CFG[displayCounterparty.sanctionRisk].color}12`,
                     }}
                   >
                     {SANCTION_RISK_CFG[displayCounterparty.sanctionRisk].label}
@@ -1715,8 +1715,8 @@ export default function VoyageRiskTwinPage() {
                 <div
                   className="p-2.5 rounded-lg border"
                   style={{
-                    borderColor: SANCTION_RISK_CFG[displayCounterparty.sanctionRisk].color + '30',
-                    background: SANCTION_RISK_CFG[displayCounterparty.sanctionRisk].color + '06',
+                    borderColor: `${SANCTION_RISK_CFG[displayCounterparty.sanctionRisk].color}30`,
+                    background: `${SANCTION_RISK_CFG[displayCounterparty.sanctionRisk].color}06`,
                   }}
                 >
                   <div className="flex items-start gap-2">

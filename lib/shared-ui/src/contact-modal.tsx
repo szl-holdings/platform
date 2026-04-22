@@ -1,7 +1,5 @@
 import { CheckCircle2, Loader2, Send, X } from 'lucide-react';
-import type React from 'react';
-import { useState } from 'react';
-import { apiFetch } from './api-fetch';
+import React, { useState } from 'react';
 
 export interface ContactModalProps {
   isOpen: boolean;
@@ -65,7 +63,7 @@ export function ContactModal({
   const [submitState, setSubmitState] = useState<SubmitState>('idle');
   const [errorMsg, setErrorMsg] = useState<string>('');
 
-  const labels = (TYPE_LABELS[type] ?? TYPE_LABELS['general'])!;
+  const labels = (TYPE_LABELS[type] ?? TYPE_LABELS.general)!;
   const heading = title ?? labels.heading;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

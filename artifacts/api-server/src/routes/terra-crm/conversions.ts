@@ -1,7 +1,6 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import type { InsertTerraDeal, InsertTerraLead } from '@szl-holdings/db';
 import type { IRouter } from 'express';
-import { z } from 'zod';
 import { validateBody } from '../../lib/validation';
 import {
   auditLog,
@@ -41,7 +40,7 @@ export function register(router: IRouter): void {
 
         if (propRows.length === 0) {
           const numId = parseInt(String(propertyId), 10);
-          if (!isNaN(numId)) {
+          if (!Number.isNaN(numId)) {
             propRows = await db
               .select()
               .from(terraDistressPropertiesTable)
@@ -143,7 +142,7 @@ export function register(router: IRouter): void {
 
         if (leadRows.length === 0) {
           const numId = parseInt(String(leadId), 10);
-          if (!isNaN(numId)) {
+          if (!Number.isNaN(numId)) {
             leadRows = await db
               .select()
               .from(terraLeadsTable)

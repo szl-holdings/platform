@@ -23,11 +23,10 @@ import {
   quotaViolationsTable,
   subscriptionsTable,
   tenantHealthScorecardsTable,
-  usageAggregatesTable,
 } from '@szl-holdings/db';
 import { and, asc, avg, count, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
-import { handleRouteError, sendNotFound, sendSuccess } from '../lib/api-response';
+import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware, parseIdParam, requireRole } from '../middlewares/auth';
 import { assertTenantAccess } from '../middlewares/tenant-scope';
@@ -331,7 +330,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const tier = req.query.tier as string | undefined;
-      const sortBy = (req.query.sortBy as string) || 'healthScore';
+      const _sortBy = (req.query.sortBy as string) || 'healthScore';
       const sortDir = (req.query.sortDir as string) === 'asc' ? 'asc' : 'desc';
       const limit = Math.min(parseInt(String(req.query.limit ?? '50'), 10), 200);
 
@@ -394,7 +393,7 @@ router.get(
   '/tenant-health/benchmarks',
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  async (req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     try {
       const { start } = periodBounds();
 

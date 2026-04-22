@@ -1,4 +1,4 @@
-import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -12,19 +12,15 @@ import {
   DollarSign,
   Download,
   FileText,
-  Filter,
   Gavel,
   RefreshCw,
   Star,
   Target,
   TrendingUp,
-  Users,
-  X,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
+const _BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 const API = '/api';
 
 function fetchJson(path: string) {
@@ -257,7 +253,7 @@ export default function InvestorModePage() {
   const [borough, setBorough] = useState('all');
   const [distressType, setDistressType] = useState('all');
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
-  const [converting, setConverting] = useState<string | null>(null);
+  const [_converting, setConverting] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
   const params = new URLSearchParams({ minScore: String(minScore), limit: '200' });

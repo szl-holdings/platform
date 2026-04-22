@@ -1,7 +1,6 @@
 import type { Router as ExpressRouter, Request, Response } from 'express';
 import { embeddingAnalytics } from './analytics.js';
-import type { EmbeddingDomain } from './domain-config.js';
-import { getAllDomainConfigs, getDomainModelConfig, inferDomain } from './domain-config.js';
+import { type EmbeddingDomain, getAllDomainConfigs, getDomainModelConfig, inferDomain } from './domain-config.js';
 import { embeddingPipeline } from './provider.js';
 
 export async function createEmbeddingAnalyticsRouter(): Promise<ExpressRouter> {

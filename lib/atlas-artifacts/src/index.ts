@@ -9,11 +9,10 @@ import {
   atlasArtifactsTable,
   atlasExportJobsTable,
   db,
-  type InsertAtlasArtifact,
 } from '@szl-holdings/db';
 import { tagAIContent } from '@szl-holdings/proof-chain';
-import { randomBytes } from 'crypto';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { randomBytes } from 'node:crypto';
+import { and, desc, eq, } from 'drizzle-orm';
 
 export type {
   AtlasArtifact,

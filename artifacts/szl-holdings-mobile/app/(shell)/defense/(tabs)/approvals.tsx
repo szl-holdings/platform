@@ -2,7 +2,7 @@ import { Feather, Ionicons } from '@expo/vector-icons';
 import { useSyncEngine } from '@szl-holdings/mobile-shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -86,9 +86,9 @@ function QueuedActionCard({
             paddingHorizontal: 7,
             paddingVertical: 3,
             borderRadius: 8,
-            backgroundColor: actionColor + '18',
+            backgroundColor: `${actionColor}18`,
             borderWidth: 1,
-            borderColor: actionColor + '35',
+            borderColor: `${actionColor}35`,
           }}
         >
           <Text style={{ fontSize: 9, fontWeight: '700', color: actionColor, letterSpacing: 0.5 }}>
@@ -232,13 +232,13 @@ function ApprovalCard({
         styles.card,
         {
           backgroundColor: colors.navyLight,
-          borderColor: isPending ? impactColor + '40' : colors.border,
+          borderColor: isPending ? `${impactColor}40` : colors.border,
         },
       ]}
     >
       <View style={styles.cardHeader}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <View style={[styles.badge, { backgroundColor: impactColor + '20' }]}>
+          <View style={[styles.badge, { backgroundColor: `${impactColor}20` }]}>
             <Text style={[styles.badgeText, { color: impactColor }]}>{impact.toUpperCase()}</Text>
           </View>
           <Text style={[styles.approvalId, { color: colors.muted }]}>{objectId.slice(0, 12)}</Text>
@@ -295,7 +295,7 @@ function ApprovalCard({
         <View
           style={[
             styles.riskBox,
-            { backgroundColor: impactColor + '10', borderColor: impactColor + '30' },
+            { backgroundColor: `${impactColor}10`, borderColor: `${impactColor}30` },
           ]}
         >
           <Ionicons name="warning-outline" size={12} color={impactColor} />

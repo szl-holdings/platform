@@ -7,12 +7,11 @@ import {
   FileText,
   Play,
   RefreshCw,
-  Shield,
   SlidersHorizontal,
   XCircle,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
@@ -682,9 +681,9 @@ export default function PurpleTeam() {
                     <div className="mt-0.5">
                       {!isRevealed ? (
                         <Clock className="w-4 h-4" style={{ color: DS.text.muted }} />
-                      ) : result!.result === 'success' ? (
+                      ) : result?.result === 'success' ? (
                         <XCircle className="w-4 h-4 text-red-400" />
-                      ) : result!.result === 'partial' ? (
+                      ) : result?.result === 'partial' ? (
                         <AlertTriangle className="w-4 h-4 text-orange-400" />
                       ) : (
                         <CheckCircle className="w-4 h-4 text-emerald-400" />
@@ -706,10 +705,10 @@ export default function PurpleTeam() {
                       <p className="text-[10px] mt-0.5" style={{ color: DS.text.secondary }}>
                         {path.target}
                       </p>
-                      {isRevealed && result!.blockedBy && (
+                      {isRevealed && result?.blockedBy && (
                         <p className="text-[10px] mt-1" style={{ color: '#22c55e' }}>
-                          {result!.result === 'partial' ? 'Degraded by' : 'Blocked by'}:{' '}
-                          {result!.blockedBy} · {result!.detectionTime}s detection
+                          {result?.result === 'partial' ? 'Degraded by' : 'Blocked by'}:{' '}
+                          {result?.blockedBy} · {result?.detectionTime}s detection
                         </p>
                       )}
                     </div>
@@ -718,22 +717,22 @@ export default function PurpleTeam() {
                         <Badge
                           className="text-[9px] px-1.5 py-0"
                           style={{
-                            background: `${RESULT_COLORS[result!.result]}15`,
-                            color: RESULT_COLORS[result!.result],
-                            border: `1px solid ${RESULT_COLORS[result!.result]}25`,
+                            background: `${RESULT_COLORS[result?.result]}15`,
+                            color: RESULT_COLORS[result?.result],
+                            border: `1px solid ${RESULT_COLORS[result?.result]}25`,
                           }}
                         >
-                          {RESULT_LABELS[result!.result]}
+                          {RESULT_LABELS[result?.result]}
                         </Badge>
                       )}
                       {isRevealed && (
                         <span
                           className="text-[9px] font-mono"
                           style={{
-                            color: result!.result === 'success' ? '#ef4444' : DS.text.muted,
+                            color: result?.result === 'success' ? '#ef4444' : DS.text.muted,
                           }}
                         >
-                          {fmt(result!.remainingCost)}
+                          {fmt(result?.remainingCost)}
                         </span>
                       )}
                     </div>

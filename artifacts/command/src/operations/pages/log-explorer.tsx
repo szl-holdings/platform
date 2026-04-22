@@ -1,19 +1,12 @@
-import { Badge } from '@szl-holdings/shared-ui/ui/badge';
-import { cn } from '@szl-holdings/shared-ui/utils';
+
 import {
   Activity,
   AlertTriangle,
-  CheckCircle,
   ChevronRight,
-  Clock,
-  Database,
   Download,
-  Filter,
   Info,
-  Layers,
   Pause,
   Play,
-  RefreshCw,
   Search,
   Terminal,
   X,
@@ -49,7 +42,7 @@ const LEVEL_CONFIG: Record<
   trace: { label: 'TRACE', color: '#64748b', bg: 'rgba(100,116,139,0.05)', icon: ChevronRight },
 };
 
-const SERVICES = [
+const _SERVICES = [
   'all',
   'api-gateway',
   'auth-service',
@@ -148,7 +141,7 @@ function generateLog(id: number): LogEntry {
 
 const INITIAL_LOGS: LogEntry[] = Array.from({ length: 60 }, (_, i) => generateLog(i));
 
-const FACETS = {
+const _FACETS = {
   Level: ['error', 'warn', 'info', 'debug', 'trace'],
   Service: Object.keys(SERVICE_COLORS),
 };
@@ -377,7 +370,7 @@ export default function LogExplorer() {
 
         {/* Log Stream */}
         <div ref={listRef} className="flex-1 overflow-y-auto font-mono text-[11px]">
-          {filtered.map((log, idx) => {
+          {filtered.map((log, _idx) => {
             const cfg = LEVEL_CONFIG[log.level];
             const svcColor = SERVICE_COLORS[log.service] ?? '#94a3b8';
             const isSelected = selectedLog?.id === log.id;

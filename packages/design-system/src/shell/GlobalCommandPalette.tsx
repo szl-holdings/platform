@@ -1,6 +1,5 @@
-import React, { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { color } from '../tokens/index.js';
-import { cn } from '../utils.js';
 
 export interface CommandItem {
   id: string;
@@ -72,7 +71,6 @@ export function GlobalCommandPalette({
         >
           <span style={{ color: color.text.muted, fontSize: '16px' }}>⌘</span>
           <input
-            autoFocus
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}

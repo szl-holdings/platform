@@ -29,7 +29,7 @@ export interface SkillRunStore {
 }
 
 let persistenceLogger: { warn: (...args: unknown[]) => void } = {
-  warn: (...args) => console.warn('[skill-library]', ...args),
+  warn: (..._args) => {},
 };
 
 export function setSkillLibraryLogger(logger: { warn: (...args: unknown[]) => void }): void {

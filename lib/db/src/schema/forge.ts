@@ -13,7 +13,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 
-const uuid = (name: string) => varchar(name).notNull().default(sql`gen_random_uuid()`);
+const _uuid = (name: string) => varchar(name).notNull().default(sql`gen_random_uuid()`);
 
 // ─── Models ───────────────────────────────────────────────────────────────
 export const forgeModelsTable = pgTable('forge_models', {

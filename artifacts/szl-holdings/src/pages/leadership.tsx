@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, ExternalLink, BookOpen, Network, Activity, TrendingUp, Users, Target } from "lucide-react";
+import { ArrowRight, ExternalLink, } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -89,7 +89,7 @@ const WRITING = [
 ];
 
 export default function LeadershipPage() {
-  const [activeCase, setActiveCase] = useState(0);
+  const [_activeCase, _setActiveCase] = useState(0);
 
   const __pageMeta = usePageMeta({
     title: "Leadership — SZL Holdings",

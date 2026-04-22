@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useEmbeddingSearch } from '@szl-holdings/mobile-shared';
 import * as Haptics from 'expo-haptics';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -77,7 +77,7 @@ function MessageBubble({ msg }: { msg: Message }) {
           </Text>
         )}
         <Text style={[styles.bubbleText, isUser && { color: BG }]}>
-          {msg.streaming ? msg.content + '▍' : msg.content}
+          {msg.streaming ? `${msg.content}▍` : msg.content}
         </Text>
         <Text style={[styles.timestamp, isUser && { color: 'rgba(9,8,16,0.6)' }]}>
           {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

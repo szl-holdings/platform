@@ -11,17 +11,14 @@ import {
   organizationsTable,
   orgMembersTable,
   pool,
-  sessionsTable,
   usageEventsTable,
   usersTable,
 } from '@szl-holdings/db';
-import { and, count, desc, eq, gte, lte, sql, sum } from 'drizzle-orm';
-import type { Request, Response } from 'express';
-import { Router } from 'express';
+import { and, count, desc, eq, gte, lte, sql, } from 'drizzle-orm';
+import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
-  sendBadRequest,
   sendForbidden,
   sendNotFound,
   sendSuccess,
@@ -69,10 +66,10 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
       const { from, to } = req.query as { from?: string; to?: string };
 
-      const { org, membership } = await resolveOrgAndCheckMembership(orgSlug, req.user!.id);
+      const { org, membership } = await resolveOrgAndCheckMembership(orgSlug, req.user?.id);
 
       if (!org) {
         sendNotFound(res, 'Organization');
@@ -173,11 +170,11 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
       const { days = '30' } = req.query as { days?: string };
       const daysNum = Math.min(parseInt(days, 10) || 30, 90);
 
-      const { org, membership } = await resolveOrgAndCheckMembership(orgSlug, req.user!.id);
+      const { org, membership } = await resolveOrgAndCheckMembership(orgSlug, req.user?.id);
 
       if (!org) {
         sendNotFound(res, 'Organization');
@@ -258,7 +255,7 @@ router.post(
   validateBody(recordUsageSchema),
   async (req: Request, res: Response) => {
     try {
-      const orgSlug = req.params['orgSlug'] as string;
+      const orgSlug = req.params.orgSlug as string;
       const { featureKey, quantity, metadata } = req.body as z.infer<typeof recordUsageSchema>;
 
       // Allow trusted server-to-server callers (background jobs, collectors)
@@ -284,7 +281,7 @@ router.post(
       }
 
       if (!serviceToken) {
-        const { membership } = await resolveOrgAndCheckMembership(orgSlug, req.user!.id);
+        const { membership } = await resolveOrgAndCheckMembership(orgSlug, req.user?.id);
 
         // Restrict member-driven writes to org admins/owners (or platform
         // elevated roles). Without this, any org member could spam usage
@@ -294,7 +291,7 @@ router.post(
             sendForbidden(res, 'Not a member of this organization');
             return;
           }
-          if ((ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY['admin']) {
+          if ((ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY.admin) {
             sendForbidden(res, 'Org admin role required to record usage events');
             return;
           }

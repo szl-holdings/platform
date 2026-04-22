@@ -1,12 +1,5 @@
 import type { PrismRole } from '@szl-holdings/prism-bus';
-import type {
-  CovenantDecision,
-  CovenantPermission,
-  CovenantRequest,
-  CovenantResource,
-  CovenantSubject,
-} from './engine.js';
-import { covenantEngine } from './engine.js';
+import { type CovenantDecision, type CovenantPermission, type CovenantRequest, type CovenantResource, type CovenantSubject, covenantEngine } from './engine.js';
 
 export interface CovenantCheckResult {
   allowed: boolean;

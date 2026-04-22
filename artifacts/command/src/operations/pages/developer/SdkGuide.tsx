@@ -1,4 +1,4 @@
-import { Globe, Package, RefreshCw, Shield, Terminal, Zap } from 'lucide-react';
+import { Globe, Package, RefreshCw, Shield, Zap } from 'lucide-react';
 
 export default function SdkGuide() {
   return (

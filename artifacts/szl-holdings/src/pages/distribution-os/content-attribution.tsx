@@ -279,7 +279,7 @@ export default function ContentAttributionPage() {
               style={{
                 padding: '0.25rem 0.625rem',
                 borderRadius: '5px',
-                border: `1px solid ${sortBy === s ? DS.accent + '40' : DS.border}`,
+                border: `1px solid ${sortBy === s ? `${DS.accent}40` : DS.border}`,
                 background: sortBy === s ? `${DS.accent}10` : 'transparent',
                 color: sortBy === s ? DS.accent : DS.text.muted,
                 fontSize: '0.6875rem',
@@ -310,7 +310,7 @@ export default function ContentAttributionPage() {
                   style={{
                     padding: '0.875rem 1rem',
                     background: isSelected ? `${DS.accent}07` : DS.surface,
-                    border: `1px solid ${isSelected ? DS.accent + '25' : DS.border}`,
+                    border: `1px solid ${isSelected ? `${DS.accent}25` : DS.border}`,
                     borderRadius: '8px',
                     cursor: 'pointer',
                     textAlign: 'left',

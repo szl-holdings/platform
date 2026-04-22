@@ -1,5 +1,5 @@
 import { m, useReducedMotion } from 'framer-motion';
-import { Brain, Cpu, Database, FileText, Globe, Layers, MessageSquare, Shield } from 'lucide-react';
+import { Brain, Cpu, Globe, Layers, MessageSquare, Shield } from 'lucide-react';
 
 const PRISM_LAYERS = [
   {

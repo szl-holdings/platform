@@ -102,7 +102,7 @@ export async function flushCleanup(): Promise<void> {
       if (!table) {
         throw new Error(`[cleanup-registry] Unknown table "${tableName}" — add it to IntTableName`);
       }
-      const col = (table as Record<string, unknown>)['id'];
+      const col = (table as Record<string, unknown>).id;
       await tx.delete(table).where(eq(col, id));
     }
   });
@@ -136,7 +136,7 @@ export async function flushTextCleanup(): Promise<void> {
       if (!table) {
         throw new Error(`[cleanup-registry] Unknown table "${tableName}" — add it to TextTableName`);
       }
-      const col = (table as Record<string, unknown>)['id'];
+      const col = (table as Record<string, unknown>).id;
       await tx.delete(table).where(eq(col, id));
     }
   });

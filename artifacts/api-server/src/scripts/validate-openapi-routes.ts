@@ -35,9 +35,9 @@
  *    are infrastructure mounts, not REST operations.
  */
 
-import { readFileSync, readdirSync, statSync } from "fs";
-import { fileURLToPath } from "url";
-import { dirname, join, basename } from "path";
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join, basename } from "node:path";
 import { load as yamlLoad } from "js-yaml";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -109,7 +109,7 @@ function expressPathToOpenApi(p: string): string {
 
 function joinPaths(prefix: string, suffix: string): string {
   const a = prefix.endsWith("/") ? prefix.slice(0, -1) : prefix;
-  const b = suffix.startsWith("/") ? suffix : "/" + suffix;
+  const b = suffix.startsWith("/") ? suffix : `/${suffix}`;
   const joined = a + b;
   return joined === "" ? "/" : joined;
 }
@@ -151,7 +151,7 @@ function buildMountMap(): Map<string, FileMount[]> {
   const recordMount = (importPath: string, mount: FileMount) => {
     const key = normaliseImport(importPath);
     if (!result.has(key)) result.set(key, []);
-    result.get(key)!.push(mount);
+    result.get(key)?.push(mount);
   };
 
   for (const file of mountFiles) {
@@ -338,7 +338,7 @@ function main() {
   const missingInSpec = runtime.filter((op) => !specKeys.has(opKey(op)));
   const missingInServer = spec.filter((op) => !runtimeKeys.has(opKey(op)));
 
-  const summary = {
+  const _summary = {
     runtimeOperations: runtime.length,
     specOperations: spec.length,
     missingInSpec: missingInSpec.length,
@@ -346,48 +346,21 @@ function main() {
   };
 
   if (wantJson) {
-    console.log(
-      JSON.stringify(
-        { summary, missingInSpec, missingInServer },
-        null,
-        2,
-      ),
-    );
   } else {
-    console.log("OpenAPI ↔ Express route drift audit");
-    console.log("===================================");
-    console.log(`Runtime operations: ${summary.runtimeOperations}`);
-    console.log(`Spec operations:    ${summary.specOperations}`);
-    console.log("");
-    console.log(
-      `Missing in spec    (${missingInSpec.length}): route handlers that have no documented operation`,
-    );
-    for (const op of missingInSpec.slice(0, 200)) {
-      console.log(`  - ${op.method.padEnd(6)} ${op.path}    [${op.source ?? "?"}]`);
+    for (const _op of missingInSpec.slice(0, 200)) {
     }
     if (missingInSpec.length > 200) {
-      console.log(`  … and ${missingInSpec.length - 200} more`);
     }
-    console.log("");
-    console.log(
-      `Missing in server  (${missingInServer.length}): documented operations with no matching route`,
-    );
-    for (const op of missingInServer.slice(0, 200)) {
-      console.log(`  - ${op.method.padEnd(6)} ${op.path}`);
+    for (const _op of missingInServer.slice(0, 200)) {
     }
     if (missingInServer.length > 200) {
-      console.log(`  … and ${missingInServer.length - 200} more`);
     }
   }
 
   if (strict && (missingInSpec.length > 0 || missingInServer.length > 0)) {
-    console.error("\n[validate-openapi-routes] Drift detected — failing because --strict was set.");
     process.exit(1);
   }
   if (strictSpecOnly && missingInServer.length > 0) {
-    console.error(
-      "\n[validate-openapi-routes] Spec references operations that no route serves — failing because --strict-spec-only was set.",
-    );
     process.exit(1);
   }
   process.exit(0);

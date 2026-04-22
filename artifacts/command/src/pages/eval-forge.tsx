@@ -1,5 +1,4 @@
-import type React from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { ACCENT, apiUrl, BASE_URL, fetchJson } from './cognitive/shared';
 
@@ -319,7 +318,7 @@ function EvalForgeDashboard() {
     for (const s of visibleSuites) {
       const k = (s.evalType ?? 'prompt-eval') as string;
       if (!out[k]) out[k] = [];
-      out[k]!.push(s);
+      out[k]?.push(s);
     }
     return out;
   }, [visibleSuites]);

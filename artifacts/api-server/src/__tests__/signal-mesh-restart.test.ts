@@ -288,7 +288,7 @@ describe('signal mesh — survives a simulated API server restart (Task #1923)',
     const beforeEvidence = defaultEvidenceGraphQuery.listEvidence({ limit: 10000 });
     const beforeRecs = defaultEvidenceGraphQuery.listRecommendations({ limit: 10000 });
     const beforeEntities = defaultEntityRegistry.list();
-    const beforeRecId = beforeRecs[0]!.recommendationId;
+    const beforeRecId = beforeRecs[0]?.recommendationId;
     const beforeEntityWithSignals = beforeEntities.find((e) => e.activeSignalIds.length > 0)!;
     expect(beforeEntityWithSignals).toBeDefined();
 
@@ -366,9 +366,9 @@ describe('signal mesh — survives a simulated API server restart (Task #1923)',
     // must resolve end-to-end after hydration.
     const chain = defaultEvidenceGraphQuery.getEvidenceChain(beforeRecId);
     expect(chain).not.toBeNull();
-    expect(chain!.recommendation.recommendationId).toBe(beforeRecId);
-    expect(chain!.evidenceItems.length).toBeGreaterThan(0);
-    expect(chain!.entities.length).toBeGreaterThan(0);
+    expect(chain?.recommendation.recommendationId).toBe(beforeRecId);
+    expect(chain?.evidenceItems.length).toBeGreaterThan(0);
+    expect(chain?.entities.length).toBeGreaterThan(0);
 
     // ---- Verify the same data is reachable through the public HTTP API ----
     const app = buildApp();

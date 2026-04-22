@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   RefreshControl,

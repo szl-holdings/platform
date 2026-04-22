@@ -18,7 +18,7 @@
  */
 
 import { cstEdges, cstNodes, cstNodeTypes, db } from '@szl-holdings/db';
-import { createHash, randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'node:crypto';
 
 function daysAgo(n: number) {
   return new Date(Date.now() - n * 86400000);
@@ -31,7 +31,6 @@ function stableUuid(key: string): string {
 }
 
 export async function seedConstellationExtended() {
-  console.log('[seed-constellation-extended] Starting Constellation graph seed...');
 
   // Per-row idempotency: stable UUIDs + onConflictDoNothing() — safe to rerun without early-exit.
 
@@ -129,7 +128,6 @@ export async function seedConstellationExtended() {
       })),
     )
     .onConflictDoNothing();
-  console.log(`[seed-constellation-extended] Inserted ${nodeTypeDefs.length} node types`);
 
   // ── Stable node IDs: deterministic UUIDs from stable keys (UUID type in schema) ─
 
@@ -598,7 +596,6 @@ export async function seedConstellationExtended() {
   ];
 
   await db.insert(cstNodes).values(nodes).onConflictDoNothing();
-  console.log(`[seed-constellation-extended] Inserted ${nodes.length} nodes`);
 
   // ── Edges ────────────────────────────────────────────────────────────────────
   // cstEdges schema: fromNodeId, toNodeId, relationshipType, confidence, sourceId, sourceType, sourceLabel, active, extensions
@@ -825,7 +822,6 @@ export async function seedConstellationExtended() {
   ];
 
   await db.insert(cstEdges).values(edges).onConflictDoNothing();
-  console.log(`[seed-constellation-extended] Inserted ${edges.length} edges`);
 
   return {
     nodeTypes: nodeTypeDefs.length,

@@ -1,6 +1,6 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { CognitiveLayout } from './cognitive-layout';
 import { apiUrl, fetchJson } from './shared';
@@ -363,12 +363,12 @@ export default function ReflectionConsole() {
   const [domainFilter, setDomainFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<ReflectionType | 'all'>('all');
   const [outcomeFilter, setOutcomeFilter] = useState<OutcomeClass | 'all'>('all');
-  const [selectedId, setSelectedId] = useState<string>(SEEDED_REFLECTIONS[0]!.id);
+  const [selectedId, setSelectedId] = useState<string>(SEEDED_REFLECTIONS[0]?.id);
   const [activeTab, setActiveTab] = useState<'overview' | 'skills' | 'strategy'>('overview');
 
   useEffect(() => {
     if (reflections.length > 0 && !reflections.find((r) => r.id === selectedId)) {
-      setSelectedId(reflections[0]!.id);
+      setSelectedId(reflections[0]?.id);
     }
   }, [reflections, selectedId]);
 

@@ -3,24 +3,19 @@ import {
   AlertTriangle,
   BookMarked,
   BookOpen,
-  CheckCircle,
   ChevronDown,
   ChevronUp,
   Clock,
   Database,
   ExternalLink,
-  FileText,
   FlaskConical,
   Globe,
-  Layers,
   Loader2,
   Plus,
   RefreshCw,
   Save,
   Search,
-  Star,
   Target,
-  Trash2,
   Zap,
 } from 'lucide-react';
 import * as React from 'react';
@@ -253,7 +248,7 @@ export default function ResearchMode() {
   const [isCreating, setIsCreating] = React.useState(false);
   const [isRunning, setIsRunning] = React.useState(false);
   const [expandedFindings, setExpandedFindings] = React.useState<Set<string>>(new Set(['f1']));
-  const [selectedTemplate, setSelectedTemplate] = React.useState<string | null>(null);
+  const [_selectedTemplate, setSelectedTemplate] = React.useState<string | null>(null);
   const [showTemplates, setShowTemplates] = React.useState(false);
 
   const activeSpace = spaces.find((s) => s.id === activeSpaceId);

@@ -14,7 +14,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -376,7 +375,7 @@ interface ChartTooltipProps {
 }
 
 const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
-  if (active && payload && payload.length) {
+  if (active && payload?.length) {
     return (
       <div className="bg-[#0d1520] border border-amber-500/20 rounded px-3 py-2 text-xs shadow-xl">
         <p className="text-amber-400/60 font-mono mb-2">{label}</p>

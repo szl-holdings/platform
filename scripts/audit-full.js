@@ -30,10 +30,10 @@
  *   --artifacts-dir  extra directory whose contents are copied into evidence (optional)
  */
 
-import { spawn } from 'child_process';
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { spawn } from 'node:child_process';
+import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -174,7 +174,7 @@ const STEPS = [
 
 // ─── Streaming runner ─────────────────────────────────────────────────────────
 function log(msg) {
-  if (!JSON_OUTPUT) process.stdout.write(msg + '\n');
+  if (!JSON_OUTPUT) process.stdout.write(`${msg}\n`);
 }
 
 /**
@@ -325,7 +325,7 @@ function extractRouteTable(steps) {
   const siteStep = steps.find((r) => r.id === 'qa-site');
   if (!siteStep || siteStep.status === 'skipped') return null;
 
-  const output = siteStep.stdout + '\n' + siteStep.stderr;
+  const output = `${siteStep.stdout}\n${siteStep.stderr}`;
   const lines = output.split('\n');
   const products = [];
 
@@ -472,7 +472,7 @@ writeFileSync(
 );
 
 // ─── Terminal summary ─────────────────────────────────────────────────────────
-log('\n' + '─'.repeat(60));
+log(`\n${'─'.repeat(60)}`);
 log(`Audit complete.`);
 log(`  Steps run:    ${results.filter((r) => r.status !== 'skipped').length}`);
 log(`  P0 failures:  ${p0Failures.length}  (${p0Failures.map((r) => r.id).join(', ') || 'none'})`);
@@ -480,11 +480,11 @@ log(`  P1 advisories: ${p1Failures.length}  (${p1Failures.map((r) => r.id).join(
 log(`  Duration:     ${(totalMs / 1000).toFixed(1)}s`);
 log(`  Evidence:     ${RUN_DIR}`);
 log(`  Summary:      ${join(LATEST_DIR, 'summary.md')}`);
-log('─'.repeat(60) + '\n');
+log(`${'─'.repeat(60)}\n`);
 
 if (JSON_OUTPUT) {
   process.stdout.write(
-    JSON.stringify(
+    `${JSON.stringify(
       {
         timestamp: TIMESTAMP,
         passed: p0Failures.length === 0,
@@ -495,7 +495,7 @@ if (JSON_OUTPUT) {
       },
       null,
       2,
-    ) + '\n',
+    )}\n`,
   );
 }
 

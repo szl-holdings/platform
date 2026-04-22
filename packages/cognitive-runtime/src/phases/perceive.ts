@@ -1,6 +1,5 @@
-import type { MemoryEntry, MemoryStore } from '@workspace/memory-fabric';
-import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
-import { randomUUID } from 'crypto';
+import { type MemoryEntry, type MemoryStore, defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
+import { randomUUID } from 'node:crypto';
 import type { PerceiveInput, PhaseResult } from '../types.js';
 
 export interface PerceivePhaseOptions {
@@ -33,7 +32,7 @@ export async function perceivePhase(
   const detectedEventTypes: string[] = [];
 
   for (const signal of input.rawSignals) {
-    const eventType = (signal['type'] ?? signal['eventType'] ?? 'unknown') as string;
+    const eventType = (signal.type ?? signal.eventType ?? 'unknown') as string;
     if (!detectedEventTypes.includes(eventType)) {
       detectedEventTypes.push(eventType);
     }

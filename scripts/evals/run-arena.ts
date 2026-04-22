@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
-import * as fs from "fs";
-import * as path from "path";
-import { fileURLToPath } from "url";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -104,9 +104,6 @@ async function evaluateScenario(scenario: {
 }
 
 async function main() {
-  console.log("╔══════════════════════════════════════════════════╗");
-  console.log("║  COMMAND ARENA — Evaluation Harness              ║");
-  console.log("╚══════════════════════════════════════════════════╝\n");
 
   const scenarioDirs = [
     "evals/scenarios/smoke",
@@ -122,7 +119,6 @@ async function main() {
   }
 
   if (allScenarios.length === 0) {
-    console.log("No scenario packs found. Creating default smoke scenarios...\n");
     const smokeDir = path.join(ROOT, "evals/scenarios/smoke");
     fs.mkdirSync(smokeDir, { recursive: true });
 
@@ -226,17 +222,13 @@ async function main() {
       domain: s.domain,
       config: s,
     }));
-    console.log(`Created ${defaultScenarios.length} smoke scenarios.\n`);
   }
-
-  console.log(`Running ${allScenarios.length} scenarios...\n`);
 
   const results: ScenarioResult[] = [];
   for (const scenario of allScenarios) {
     const result = await evaluateScenario(scenario);
     results.push(result);
-    const icon = result.pass ? "PASS" : "FAIL";
-    console.log(`  [${icon}] ${result.scenario} (${result.domain}) — ${result.overall}`);
+    const _icon = result.pass ? "PASS" : "FAIL";
   }
 
   const passed = results.filter((r) => r.pass).length;
@@ -301,11 +293,6 @@ ${arenaResults.leaderboard.map((l) => `| ${l.rank} | ${l.agent} | ${l.score} |`)
 `;
 
   fs.writeFileSync(path.join(outDir, `${arenaResults.run_id}.md`), reportMd);
-
-  console.log(`\nRESULTS: ${passed}/${results.length} passed (${Math.round((passed / results.length) * 100)}%)`);
-  console.log(`\nOutput: generated/arena-results/${arenaResults.run_id}.json`);
-  console.log(`Output: generated/arena-results/${arenaResults.run_id}.md`);
-  console.log("\nDONE");
 }
 
 main().catch(console.error);

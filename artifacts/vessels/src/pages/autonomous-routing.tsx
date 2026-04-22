@@ -1,11 +1,9 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  AlertTriangle,
   Anchor,
   BarChart3,
   CheckCircle2,
-  ChevronRight,
   Clock,
   DollarSign,
   Leaf,
@@ -97,7 +95,7 @@ const ECA_ZONES = [
   { zone: 'North American ECA', type: 'NOx Tier III', status: 'active', vesselCount: 3 },
 ];
 
-function ScorePill({ score, color }: { score: number; color: string }) {
+function _ScorePill({ score, color }: { score: number; color: string }) {
   const colorMap: Record<string, string> = {
     sky: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
     red: 'bg-red-500/10 text-red-400 border-red-500/20',

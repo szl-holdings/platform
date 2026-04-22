@@ -1,10 +1,9 @@
-import type { AlloyDecisionEvidenceRef, RiskLevel } from '@szl-holdings/ai-engine';
-import { getKernelAuditTrail, verifyAuditChainIntegrity } from '@szl-holdings/ai-engine';
-import { randomUUID } from 'crypto';
-import { readFileSync } from 'fs';
+import { type AlloyDecisionEvidenceRef, type RiskLevel, getKernelAuditTrail, verifyAuditChainIntegrity } from '@szl-holdings/ai-engine';
+import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { load as yamlLoad } from 'js-yaml';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { agentEventBus } from '../../lib/event-bus';
 
 export type AgentEntry = {
@@ -269,7 +268,7 @@ export function buildSignalBusSnapshot() {
     if (!domainSignals[d]) domainSignals[d] = { count: 0, lastSeverity: 'info', lastAt: 0 };
     domainSignals[d]!.count++;
     domainSignals[d]!.lastSeverity = evt.severity;
-    domainSignals[d]!.lastAt = Math.max(domainSignals[d]!.lastAt, evt.timestamp);
+    domainSignals[d]!.lastAt = Math.max(domainSignals[d]?.lastAt, evt.timestamp);
   }
   return {
     totalSignals: stats.totalPublished,

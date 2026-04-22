@@ -3,10 +3,10 @@ import { Link } from "wouter";
 import { getProduct } from "@szl-holdings/brand-registry";
 import { m, useInView } from "framer-motion";
 import {
-  ArrowRight, Eye, Zap, Shield, CheckCircle2, Activity, Lock,
+  ArrowRight, Eye, Zap, Shield, Activity, Lock,
   Database, Layers, Users, TrendingUp, Ship, Building2, Briefcase,
-  ShieldCheck, GitBranch, BarChart3, FileCheck, Brain, Radio,
-  Target, BookOpen, ChevronRight, ArrowUpRight, Star, Handshake,
+  ShieldCheck, BarChart3, FileCheck, Brain, Radio,
+  Target, BookOpen, ChevronRight, ArrowUpRight, Handshake,
   ExternalLink, Code2,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
@@ -160,7 +160,7 @@ const EVIDENCE_STATS = [
 ];
 
 // Audit-verified platform stats (2026-04-21)
-const PROOF_STATS = [
+const _PROOF_STATS = [
   { value: "915",  label: "Database tables",   note: "Drizzle pgTable, verified" },
   { value: "122",  label: "Shared packages",    note: "81 domain + 41 lib" },
   { value: "382",  label: "API route files",    note: "268 route groups" },
@@ -642,7 +642,7 @@ export default function HomePage() {
                           padding: "0.75rem 1rem",
                           borderRadius: "7px",
                           background: activeLoopStep === i ? `${step.color}10` : "transparent",
-                          border: `1px solid ${activeLoopStep === i ? step.color + "28" : "transparent"}`,
+                          border: `1px solid ${activeLoopStep === i ? `${step.color}28` : "transparent"}`,
                           cursor: "pointer", textAlign: "left",
                           transition: "all 0.15s ease",
                         }}

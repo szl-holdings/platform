@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Alert,
   Modal,
@@ -20,7 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 interface Lead {
@@ -57,9 +57,9 @@ const PRIORITY_COLORS: Record<string, string> = {
 };
 
 function formatCurrency(n: number) {
-  if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + 'M';
-  if (n >= 1e3) return '$' + Math.round(n / 1e3) + 'K';
-  return '$' + n;
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
+  if (n >= 1e3) return `$${Math.round(n / 1e3)}K`;
+  return `$${n}`;
 }
 
 function LeadCard({ lead, onEdit }: { lead: Lead; onEdit: (lead: Lead) => void }) {
@@ -90,7 +90,7 @@ function LeadCard({ lead, onEdit }: { lead: Lead; onEdit: (lead: Lead) => void }
         <View
           style={[
             styles.leadScore,
-            { borderColor: scoreColor + '40', backgroundColor: scoreColor + '10' },
+            { borderColor: `${scoreColor}40`, backgroundColor: `${scoreColor}10` },
           ]}
         >
           <Text style={[styles.leadScoreText, { color: scoreColor }]}>{lead.score}</Text>
@@ -100,7 +100,7 @@ function LeadCard({ lead, onEdit }: { lead: Lead; onEdit: (lead: Lead) => void }
         <View
           style={[
             styles.stageChip,
-            { backgroundColor: stageColor + '15', borderColor: stageColor + '30' },
+            { backgroundColor: `${stageColor}15`, borderColor: `${stageColor}30` },
           ]}
         >
           <Text style={[styles.stageText, { color: stageColor }]}>
@@ -167,8 +167,8 @@ export default function PipelineTab() {
   } = useQuery({
     queryKey: ['terra-pipeline'],
     queryFn: async () => {
-      const res = await fetch(API_BASE + '/terra/crm/leads');
-      if (!res.ok) throw new Error('Failed to fetch leads: ' + res.status);
+      const res = await fetch(`${API_BASE}/terra/crm/leads`);
+      if (!res.ok) throw new Error(`Failed to fetch leads: ${res.status}`);
       const json = await res.json();
       return json.data ?? json;
     },
@@ -195,7 +195,7 @@ export default function PipelineTab() {
     }) => ({
       id: r.id ?? r.externalId ?? String(Math.random()),
       name:
-        (r.ownerName ?? ((r.firstName ?? '') + ' ' + (r.lastName ?? '')).trim()) || 'Unknown Owner',
+        (r.ownerName ?? (`${r.firstName ?? ''} ${r.lastName ?? ''}`).trim()) || 'Unknown Owner',
       address: r.propertyAddress ?? 'Property Address Unknown',
       stage: r.stage ?? 'new',
       value: r.estimatedValue ?? 0,
@@ -218,7 +218,7 @@ export default function PipelineTab() {
       stage: string;
       value: number;
     }) => {
-      const res = await fetch(API_BASE + '/terra/crm/leads', {
+      const res = await fetch(`${API_BASE}/terra/crm/leads`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -233,7 +233,7 @@ export default function PipelineTab() {
           lastContact: new Date().toISOString().split('T')[0],
         }),
       });
-      if (!res.ok) throw new Error('Create failed: ' + res.status);
+      if (!res.ok) throw new Error(`Create failed: ${res.status}`);
       return res.json();
     },
     onSuccess: () => {
@@ -265,7 +265,7 @@ export default function PipelineTab() {
 
   const updateLead = useMutation({
     mutationFn: async ({ id, stage, note }: { id: string; stage: string; note: string }) => {
-      const res = await fetch(API_BASE + '/terra/crm/leads/' + id, {
+      const res = await fetch(`${API_BASE}/terra/crm/leads/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -384,7 +384,7 @@ export default function PipelineTab() {
                 styles.stageChip,
                 {
                   borderColor: isSelected ? stageColor : colors.border,
-                  backgroundColor: isSelected ? stageColor + '15' : 'transparent',
+                  backgroundColor: isSelected ? `${stageColor}15` : 'transparent',
                 },
               ]}
             >
@@ -394,7 +394,7 @@ export default function PipelineTab() {
                   { color: isSelected ? stageColor : colors.mutedForeground },
                 ]}
               >
-                {s === 'All' ? 'All' : (STAGE_LABELS[s] ?? s)} {count > 0 ? '(' + count + ')' : ''}
+                {s === 'All' ? 'All' : (STAGE_LABELS[s] ?? s)} {count > 0 ? `(${count})` : ''}
               </Text>
             </Pressable>
           );
@@ -539,7 +539,7 @@ export default function PipelineTab() {
                       styles.stageOption,
                       {
                         borderColor: isActive ? sColor : colors.border,
-                        backgroundColor: isActive ? sColor + '15' : 'transparent',
+                        backgroundColor: isActive ? `${sColor}15` : 'transparent',
                       },
                     ]}
                   >
@@ -612,7 +612,7 @@ export default function PipelineTab() {
                       styles.stageOption,
                       {
                         borderColor: isActive ? sColor : colors.border,
-                        backgroundColor: isActive ? sColor + '15' : 'transparent',
+                        backgroundColor: isActive ? `${sColor}15` : 'transparent',
                       },
                     ]}
                   >

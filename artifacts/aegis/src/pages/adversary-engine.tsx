@@ -5,7 +5,7 @@ import {
   Activity,
   AlertTriangle,
   Brain,
-  CheckCircle,
+  type CheckCircle,
   Database,
   Eye,
   Pause,
@@ -550,7 +550,7 @@ export default function AdversaryEngine() {
           </h2>
           <div className="space-y-1.5">
             {SELECTED_STEPS.map((step) => {
-              const oc = outcomeConfig[step.outcome] ?? outcomeConfig['blocked']!;
+              const oc = outcomeConfig[step.outcome] ?? outcomeConfig.blocked!;
               const Icon = oc.icon;
               return (
                 <div

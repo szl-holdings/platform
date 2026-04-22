@@ -11,8 +11,7 @@ import {
   Target,
   TrendingDown,
 } from 'lucide-react';
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'wouter';
 
 const BG = { page: '#080c14', surface: '#0c1018', elevated: '#10141e', panel: '#0e1219' };

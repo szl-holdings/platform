@@ -1,4 +1,4 @@
-import React, { type SelectHTMLAttributes } from 'react';
+import type { SelectHTMLAttributes } from 'react';
 import { color } from '../tokens/index.js';
 import { cn } from '../utils.js';
 

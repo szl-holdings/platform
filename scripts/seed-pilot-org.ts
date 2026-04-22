@@ -28,7 +28,6 @@ import { eq } from 'drizzle-orm';
 const PILOT_ORG_SLUG = 'pilot-customer-1';
 
 async function seedPilotOrg() {
-  console.log('[seed-pilot] Creating pilot organization...');
 
   const [org] = await db
     .insert(organizationsTable)
@@ -51,11 +50,8 @@ async function seedPilotOrg() {
       .where(eq(organizationsTable.slug, PILOT_ORG_SLUG))
       .limit(1);
     if (!existing) throw new Error('Could not create or find pilot org');
-    console.log('[seed-pilot] Pilot org already exists, updating users...');
     return existing.id;
   }
-
-  console.log(`[seed-pilot] Created org: ${org.name} (id: ${orgId})`);
   return orgId;
 }
 
@@ -91,9 +87,8 @@ const PILOT_USER_CONFIGS = [
 ];
 
 async function seedPilotUsers(orgId: number) {
-  console.log('[seed-pilot] Creating pilot users...');
 
-  let created = 0;
+  let _created = 0;
   for (const config of PILOT_USER_CONFIGS) {
     await db
       .insert(usersTable)
@@ -112,7 +107,6 @@ async function seedPilotUsers(orgId: number) {
       .limit(1);
 
     if (!user) {
-      console.warn(`[seed-pilot] Could not find user after insert: ${config.email}`);
       continue;
     }
 
@@ -138,14 +132,11 @@ async function seedPilotUsers(orgId: number) {
       })
       .onConflictDoNothing();
 
-    created++;
+    _created++;
   }
-
-  console.log(`[seed-pilot] Upserted ${created} pilot users with roles and org membership`);
 }
 
 async function seedPilotAzureTenant(orgId: number) {
-  console.log('[seed-pilot] Creating pilot Azure tenant stub...');
 
   await db
     .insert(azureTenantsTable)
@@ -158,12 +149,9 @@ async function seedPilotAzureTenant(orgId: number) {
       organizationId: orgId,
     })
     .onConflictDoNothing();
-
-  console.log('[seed-pilot] Azure tenant stub created (status: pending — awaiting admin consent)');
 }
 
 async function seedPilotAuditBootstrap(orgId: number) {
-  console.log('[seed-pilot] Writing pilot bootstrap audit events...');
 
   type AuditInsert = typeof auditEventsTable.$inferInsert;
   const auditRows: AuditInsert[] = [
@@ -181,21 +169,16 @@ async function seedPilotAuditBootstrap(orgId: number) {
     },
   ];
   await db.insert(auditEventsTable).values(auditRows).onConflictDoNothing();
-
-  console.log('[seed-pilot] Audit events written');
 }
 
 async function main() {
-  console.log('=== Pilot Org Seed ===\n');
   try {
     const orgId = await seedPilotOrg();
     await seedPilotUsers(orgId);
     await seedPilotAzureTenant(orgId);
     await seedPilotAuditBootstrap(orgId);
-    console.log('\n=== Pilot seed complete ===');
     process.exit(0);
-  } catch (err) {
-    console.error('[seed-pilot] Failed:', err);
+  } catch (_err) {
     process.exit(1);
   }
 }

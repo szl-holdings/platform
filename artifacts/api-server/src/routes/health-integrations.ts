@@ -347,7 +347,7 @@ router.get('/health/integrations/refresh', async (_req, res) => {
     cachedHealth = null;
     const checks = await runAllChecks();
     res.json({ refreshed: true, count: checks.length, checkedAt: new Date().toISOString() });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Refresh failed' });
   }
 });
@@ -643,7 +643,7 @@ router.get('/health/external-feeds/refresh', async (_req, res) => {
       live: liveCount,
       checkedAt: new Date().toISOString(),
     });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Feed refresh failed' });
   }
 });
@@ -675,33 +675,33 @@ router.get('/health/ai', async (_req, res) => {
           }),
           new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)),
         ])) as Response;
-        providers['openai'] = {
+        providers.openai = {
           status: resp.ok ? 'healthy' : 'degraded',
           latencyMs: Date.now() - start,
         };
       } catch {
-        providers['openai'] = { status: 'unreachable', latencyMs: Date.now() - start };
+        providers.openai = { status: 'unreachable', latencyMs: Date.now() - start };
       }
     } else {
-      providers['openai'] = { status: 'unconfigured' };
+      providers.openai = { status: 'unconfigured' };
     }
 
     if (anthropicKey) {
-      providers['anthropic'] = { status: 'configured', details: { note: 'Token present' } };
+      providers.anthropic = { status: 'configured', details: { note: 'Token present' } };
     } else {
-      providers['anthropic'] = { status: 'unconfigured' };
+      providers.anthropic = { status: 'unconfigured' };
     }
 
     if (geminiKey) {
-      providers['gemini'] = { status: 'configured', details: { note: 'Token present' } };
+      providers.gemini = { status: 'configured', details: { note: 'Token present' } };
     } else {
-      providers['gemini'] = { status: 'unconfigured' };
+      providers.gemini = { status: 'unconfigured' };
     }
 
     if (hfToken) {
-      providers['huggingface'] = { status: 'configured', details: { note: 'Token present' } };
+      providers.huggingface = { status: 'configured', details: { note: 'Token present' } };
     } else {
-      providers['huggingface'] = { status: 'unconfigured' };
+      providers.huggingface = { status: 'unconfigured' };
     }
 
     const anyHealthy = Object.values(providers).some(
@@ -846,7 +846,7 @@ router.get('/integrations/health/:name', authMiddleware(), async (req, res) => {
     }
     const result = await adapter.runHealthCheck();
     res.json(result);
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Health check failed' });
   }
 });
@@ -874,7 +874,7 @@ router.get('/integrations/new-relic/hosts', authMiddleware(), async (_req, res) 
   try {
     const hosts = await services.newRelic.getInfraHosts();
     res.json({ status: services.newRelic.status, hosts });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'New Relic hosts fetch failed' });
   }
 });
@@ -883,7 +883,7 @@ router.get('/integrations/new-relic/alerts', authMiddleware(), async (_req, res)
   try {
     const alerts = await services.newRelic.getAlertConditions();
     res.json({ status: services.newRelic.status, alerts });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'New Relic alerts fetch failed' });
   }
 });
@@ -904,7 +904,7 @@ router.get('/integrations/nvidia-dcgm/cluster', authMiddleware(), async (_req, r
   try {
     const summary = await services.nvidiaDcgm.getClusterSummary();
     res.json({ status: services.nvidiaDcgm.status, summary });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'DCGM cluster summary failed' });
   }
 });
@@ -950,7 +950,7 @@ router.get(
       const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
       const vulns = await services.cisa.getKnownExploitedVulnerabilities(limit);
       res.json({ status: services.cisa.status, count: vulns.length, vulnerabilities: vulns });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ error: 'CISA KEV fetch failed' });
     }
   },
@@ -965,7 +965,7 @@ router.get(
       const q = (req.query.q as string) ?? '';
       const results = await services.cisa.searchKev(q);
       res.json({ query: q, count: results.length, vulnerabilities: results });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ error: 'CISA KEV search failed' });
     }
   },
@@ -975,7 +975,7 @@ router.get('/integrations/cisa/kev/ransomware', authMiddleware(), async (_req, r
   try {
     const vulns = await services.cisa.getHighPriorityKev();
     res.json({ count: vulns.length, vulnerabilities: vulns });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'CISA ransomware KEV fetch failed' });
   }
 });
@@ -1005,7 +1005,7 @@ router.get(
         lastModEndDate,
       });
       res.json({ status: services.nvd.status, ...result });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ error: 'NVD CVE search failed' });
     }
   },
@@ -1015,7 +1015,7 @@ router.get('/integrations/nvd/cves/critical', authMiddleware(), async (_req, res
   try {
     const result = await services.nvd.getCriticalCves();
     res.json({ status: services.nvd.status, ...result });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'NVD critical CVE fetch failed' });
   }
 });

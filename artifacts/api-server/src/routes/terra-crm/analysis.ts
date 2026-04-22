@@ -46,7 +46,7 @@ export function register(router: IRouter): void {
 
         if (propRows.length === 0) {
           const numId = parseInt(String(propertyId), 10);
-          if (!isNaN(numId)) {
+          if (!Number.isNaN(numId)) {
             propRows = await db
               .select()
               .from(terraDistressPropertiesTable)

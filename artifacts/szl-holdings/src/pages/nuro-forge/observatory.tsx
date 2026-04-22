@@ -1,11 +1,8 @@
 import { m } from 'framer-motion';
 import {
-  Activity,
   AlertTriangle,
   BarChart3,
   Clock,
-  Cpu,
-  TrendingDown,
   TrendingUp,
   Zap,
 } from 'lucide-react';

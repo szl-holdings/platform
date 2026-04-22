@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { useApiStatus } from '@szl-holdings/mobile-shared';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   RefreshControl,
@@ -119,7 +119,7 @@ function SignalRow({
   colors: ReturnType<typeof useColors>;
 }) {
   const ws = WORKSPACES.find((w) => w.id === signal.domain);
-  const accent = ws?.accent ?? ACCENT;
+  const _accent = ws?.accent ?? ACCENT;
   const sevColor = severityColor(signal.severity, colors);
 
   return (
@@ -192,7 +192,7 @@ export default function CommandFeedScreen() {
   const insets = useSafeAreaInsets();
   const { user, buildHeaders, isAuthenticated } = useAuth();
   const { setActiveWorkspace, setBadge } = useWorkspace();
-  const apiStatus = useApiStatus();
+  const _apiStatus = useApiStatus();
   const [voiceVisible, setVoiceVisible] = useState(false);
   const { unreadCount: notifUnreadCount } = useNotificationCountContext();
 
@@ -420,14 +420,14 @@ export default function CommandFeedScreen() {
         <View
           style={[
             styles.briefCard,
-            { backgroundColor: colors.card, borderColor: healthColor + '40' },
+            { backgroundColor: colors.card, borderColor: `${healthColor}40` },
           ]}
         >
           <View style={styles.briefHeader}>
             <View
               style={[
                 styles.briefHealthBadge,
-                { backgroundColor: healthColor + '20', borderColor: healthColor + '40' },
+                { backgroundColor: `${healthColor}20`, borderColor: `${healthColor}40` },
               ]}
             >
               <Text style={[styles.briefHealthText, { color: healthColor }]}>
@@ -452,7 +452,7 @@ export default function CommandFeedScreen() {
             <View
               style={[
                 styles.briefStat,
-                { backgroundColor: colors.red + '15', borderColor: colors.red + '30' },
+                { backgroundColor: `${colors.red}15`, borderColor: `${colors.red}30` },
               ]}
             >
               <Text style={[styles.briefStatNum, { color: colors.red }]}>
@@ -465,7 +465,7 @@ export default function CommandFeedScreen() {
             <View
               style={[
                 styles.briefStat,
-                { backgroundColor: colors.amber + '15', borderColor: colors.amber + '30' },
+                { backgroundColor: `${colors.amber}15`, borderColor: `${colors.amber}30` },
               ]}
             >
               <Text style={[styles.briefStatNum, { color: colors.amber }]}>

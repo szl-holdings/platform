@@ -473,7 +473,7 @@ export const ListObservabilityAppsResponse = zod.array(
 export const GetAppObservabilityParams = zod.object({
   appSlug: zod.coerce
     .string()
-    .describe('App identifier slug (e.g. \"rosie\", \"terra\", \"alloy\")'),
+    .describe('App identifier slug (e.g. "rosie", "terra", "alloy")'),
 });
 
 export const GetAppObservabilityResponse = zod.object({}).passthrough();
@@ -1695,7 +1695,7 @@ export const RequestUploadUrlBody = zod.object({
     .string()
     .optional()
     .describe(
-      'Product domain for file type allowlist enforcement\n(e.g. \"prism\", \"terra\", \"vessels\", \"aegis\", \"lyte\", \"szl\", \"carlota-jo\").\nOmit or use \"default\" for the global allowlist.\n',
+      'Product domain for file type allowlist enforcement\n(e.g. "prism", "terra", "vessels", "aegis", "lyte", "szl", "carlota-jo").\nOmit or use "default" for the global allowlist.\n',
     ),
   orgId: zod
     .number()
@@ -1710,7 +1710,7 @@ export const RequestUploadUrlResponse = zod.object({
   objectPath: zod
     .string()
     .describe(
-      'Normalized object path (e.g. \/objects\/uploads\/uuid). Store this in your database.',
+      'Normalized object path (e.g. /objects/uploads/uuid). Store this in your database.',
     ),
   metadata: zod
     .object({
@@ -1721,7 +1721,7 @@ export const RequestUploadUrlResponse = zod.object({
         .string()
         .optional()
         .describe(
-          'Product domain for file type allowlist enforcement\n(e.g. \"prism\", \"terra\", \"vessels\", \"aegis\", \"lyte\", \"szl\", \"carlota-jo\").\nOmit or use \"default\" for the global allowlist.\n',
+          'Product domain for file type allowlist enforcement\n(e.g. "prism", "terra", "vessels", "aegis", "lyte", "szl", "carlota-jo").\nOmit or use "default" for the global allowlist.\n',
         ),
       orgId: zod
         .number()
@@ -5147,7 +5147,7 @@ export const RegisterWebhookBody = zod.object({
     ])
     .optional()
     .describe(
-      'Event types to subscribe to. Use `\"\*\"` for all events, or an array of specific\nevent type strings such as `[\"decision.created\", \"decision.executed\"]`.\n',
+      'Event types to subscribe to. Use `"*"` for all events, or an array of specific\nevent type strings such as `["decision.created", "decision.executed"]`.\n',
     ),
   description: zod
     .string()
@@ -5223,7 +5223,7 @@ export const RegisterWebhookEndpointBody = zod.object({
     ])
     .optional()
     .describe(
-      'Event types to subscribe to. Use `\"\*\"` for all events, or an array of specific\nevent type strings such as `[\"decision.created\", \"decision.executed\"]`.\n',
+      'Event types to subscribe to. Use `"*"` for all events, or an array of specific\nevent type strings such as `["decision.created", "decision.executed"]`.\n',
     ),
   description: zod
     .string()
@@ -5307,7 +5307,7 @@ export const ListWebhookDeliveriesQueryParams = zod.object({
     .string()
     .optional()
     .describe(
-      'Filter by event type. Supports prefix wildcard, e.g. `decision.\*`',
+      'Filter by event type. Supports prefix wildcard, e.g. `decision.*`',
     ),
   limit: zod.coerce
     .number()

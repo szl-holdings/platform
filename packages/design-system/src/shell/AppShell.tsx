@@ -1,4 +1,4 @@
-import React, { type ReactNode, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useDensity } from '../hooks/useDensity.js';
 import { useScreenMode } from '../hooks/useScreenMode.js';
 import { color } from '../tokens/index.js';

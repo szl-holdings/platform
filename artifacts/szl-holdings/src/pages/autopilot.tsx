@@ -2,16 +2,15 @@ import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import {
-  Activity, AlertTriangle, ArrowRight, ArrowUpRight, BarChart3, BookOpen, Brain,
-  Building, CheckCircle2, ChevronDown, ChevronRight, Circle, Clock, Cpu,
-  Globe, Layers, Lightbulb, Radio, RefreshCw, Shield, Ship, Sparkles, Target,
+  Activity, AlertTriangle, ArrowRight, BarChart3, BookOpen, Brain,
+  Building, CheckCircle2, ChevronDown, ChevronRight, Circle, 
+  Globe, Layers, Lightbulb, Radio, Shield, Ship, Sparkles, Target,
   ThumbsDown, ThumbsUp, TrendingDown, TrendingUp, Users, Zap, X,
 } from "lucide-react";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { cn } from "@/lib/utils";
 import { MicroFeedbackWidget } from "@szl-holdings/shared-ui/micro-feedback-widget";
 
 async function apiFetch<T>(path: string): Promise<T> {
@@ -325,7 +324,7 @@ function GenomeTab() {
               </tr>
             </thead>
             <tbody>
-              {CAPABILITY_CATEGORIES.map((cap, ci) => (
+              {CAPABILITY_CATEGORIES.map((cap, _ci) => (
                 <tr key={cap} style={{ borderTop: "1px solid hsla(0,0%,100%,0.04)" }}>
                   <td style={{ padding: "0.5rem 0.75rem", fontSize: "11.5px", color: "hsl(210,5%,62%)", whiteSpace: "nowrap" }}>{cap}</td>
                   {liveApps.map(app => {
@@ -793,10 +792,10 @@ function RadarTab() {
   }
 
   function buildPath(values: number[]) {
-    return values.map((v, i) => {
+    return `${values.map((v, i) => {
       const { x, y } = polarToXY((360 / n) * i, (v / 100) * R);
       return `${i === 0 ? "M" : "L"}${x},${y}`;
-    }).join(" ") + " Z";
+    }).join(" ")} Z`;
   }
 
   return (

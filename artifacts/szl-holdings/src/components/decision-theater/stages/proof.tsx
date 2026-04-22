@@ -168,15 +168,11 @@ export function LiveProofStage({
                 { label: 'Total in system', value: auditTotal.toLocaleString() },
                 {
                   label: 'Event types',
-                  value: [
-                    ...new Set(auditRecords.map((r) => r.action_type)),
-                  ].length.toLocaleString(),
+                  value: new Set(auditRecords.map((r) => r.action_type)).size.toLocaleString(),
                 },
                 {
                   label: 'Entity types',
-                  value: [
-                    ...new Set(auditRecords.map((r) => r.entity_type)),
-                  ].length.toLocaleString(),
+                  value: new Set(auditRecords.map((r) => r.entity_type)).size.toLocaleString(),
                 },
               ].map((item) => (
                 <div key={item.label} className="flex items-center justify-between">

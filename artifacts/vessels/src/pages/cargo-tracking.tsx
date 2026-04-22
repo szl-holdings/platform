@@ -1,11 +1,8 @@
-import { cn } from '@szl-holdings/shared-ui/utils';
+
 import {
   Activity,
   ArrowRight,
   BarChart3,
-  ChevronRight,
-  Filter,
-  Globe,
   Layers,
   Package,
   RefreshCw,
@@ -18,8 +15,6 @@ import { useState } from 'react';
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
   Cell,
   Pie,
@@ -289,7 +284,7 @@ export default function CargoTrackingPage() {
 
   const totalVessels = TRADE_FLOWS.reduce((s, f) => s + f.vessels_active, 0);
   const totalValueBn = (TRADE_FLOWS.reduce((s, f) => s + f.value_usd_m, 0) / 1000).toFixed(1);
-  const growingFlows = TRADE_FLOWS.filter((f) => f.volume_change > 0).length;
+  const _growingFlows = TRADE_FLOWS.filter((f) => f.volume_change > 0).length;
 
   return (
     <div className="h-full flex flex-col overflow-hidden bg-[#040c1a]">

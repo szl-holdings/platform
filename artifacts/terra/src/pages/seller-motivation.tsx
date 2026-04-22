@@ -2,23 +2,12 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Activity,
   AlertTriangle,
   ArrowLeft,
-  ArrowUpRight,
-  BarChart3,
   Brain,
   CheckCircle,
   ChevronRight,
-  Clock,
-  DollarSign,
-  Info,
   Loader2,
-  Shield,
-  Sliders,
-  Target,
-  TrendingDown,
-  Users,
   X,
   Zap,
 } from 'lucide-react';

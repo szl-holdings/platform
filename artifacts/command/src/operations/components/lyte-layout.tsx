@@ -27,7 +27,6 @@ import {
   Calendar,
   CheckSquare,
   ChevronDown,
-  ChevronRight,
   Clapperboard,
   Code,
   Cpu,
@@ -58,7 +57,6 @@ import {
   Shield,
   Target,
   TrendingUp,
-  UserCheck,
   Users,
   Workflow,
   X,
@@ -514,7 +512,7 @@ export function CommandLayout({ children }: { children: ReactNode }) {
                   className="flex flex-col items-center py-1 rounded transition-all"
                   style={{
                     background: isActive ? `${p.color}12` : 'transparent',
-                    border: `1px solid ${isActive ? p.color + '30' : 'transparent'}`,
+                    border: `1px solid ${isActive ? `${p.color}30` : 'transparent'}`,
                   }}
                 >
                   <span className="text-[9px] font-black" style={{ color: p.color }}>
@@ -700,7 +698,6 @@ export function CommandLayout({ children }: { children: ReactNode }) {
         )}
         <header
           className="h-10 flex items-center justify-between px-3 md:px-4 shrink-0 z-10"
-          role="banner"
           style={{
             borderBottom: `1px solid ${isLiveDemoActive ? 'rgba(212,160,84,0.15)' : BORDER.subtle}`,
             background: isLiveDemoActive ? 'rgba(212,160,84,0.03)' : BG.header,
@@ -783,7 +780,6 @@ export function CommandLayout({ children }: { children: ReactNode }) {
         <main
           id="main-content"
           className="flex-1 overflow-auto"
-          role="main"
           style={{ background: BG.main }}
         >
           <SectionErrorBoundary sectionName="KORA">{children}</SectionErrorBoundary>

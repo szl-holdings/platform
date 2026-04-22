@@ -1,6 +1,6 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { db, vesselsBillsOfLadingTable, vesselsBolChainEventsTable } from '@szl-holdings/db';
-import { createHash, createHmac } from 'crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { asc, desc, eq, sql } from 'drizzle-orm';
 import { type IRouter, type Request, Router } from 'express';
 import { z } from 'zod';
@@ -395,7 +395,7 @@ async function refreshInProgressFromAis(v: VoyageEmissionRecord): Promise<Voyage
   if (cached && cached.expiry > now) return cached.record;
 
   const depMs = new Date(v.departedAt).getTime();
-  if (isNaN(depMs) || depMs >= now) {
+  if (Number.isNaN(depMs) || depMs >= now) {
     refreshCache.set(v.id, { record: v, expiry: now + REFRESH_TTL_MS });
     return v;
   }
@@ -512,7 +512,7 @@ router.get(
       }
       const depMs = new Date(departedAt).getTime();
       const arrMs = arrivedAt ? new Date(arrivedAt).getTime() : Date.now();
-      if (isNaN(depMs)) {
+      if (Number.isNaN(depMs)) {
         sendBadRequest(res, 'Invalid departedAt');
         return;
       }
@@ -1002,7 +1002,6 @@ function ensureBolSeed(): Promise<void> {
 }
 
 async function seedBolIfEmpty(): Promise<void> {
-  try {
     const existing = await db
       .select({ count: sql<number>`COUNT(*)::int` })
       .from(vesselsBillsOfLadingTable);
@@ -1205,12 +1204,6 @@ async function seedBolIfEmpty(): Promise<void> {
         if (code !== '23505') throw err;
       }
     }
-  } catch (err) {
-    // Surface seed errors so callers can retry (e.g. when the table does not
-    // exist yet at boot, runMigrations will create it before the next request).
-    console.error('[vessels-modules] BoL seed failed:', err);
-    throw err;
-  }
 }
 
 router.get('/vessels/modules/bills-of-lading', authMiddleware(), async (_req, res) => {

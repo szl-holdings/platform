@@ -2,8 +2,6 @@
 
 import { analytics } from '@lyte/lib/analytics';
 import { api, type CommandDashboard, type CommandRecommendation, type CommandSignal } from '@lyte/lib/api';
-import type { SignalSeverity } from '@lyte/lib/business-data';
-import { severityColors } from '@lyte/lib/business-data';
 import { cn } from '@lyte/lib/utils';
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { ActionLoop, DataProvenance, RoleSelector } from '@szl-holdings/shared-ui/data-provenance';
@@ -13,25 +11,19 @@ import {
   AlertTriangle,
   ArrowUpRight,
   CheckCircle2,
-  ChevronRight,
   Crosshair,
   Eye,
   FileText,
   Gauge,
-  GitBranch,
   Heart,
-  Minus,
   Radio,
   RefreshCw,
   Shield,
   Target,
-  TrendingDown,
-  TrendingUp,
   UserCheck,
   Zap,
 } from 'lucide-react';
-import type React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Link } from 'wouter';
 
@@ -48,7 +40,7 @@ const TEXT = {
   muted: 'rgba(255,255,255,0.14)',
 };
 
-function fmt(n: number): string {
+function _fmt(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
   return `$${n}`;
@@ -103,7 +95,7 @@ function Badge({ sev }: { sev: string }) {
 function ImpactBadge({ impact }: { impact: string }) {
   const isHigh =
     impact.startsWith('$') &&
-    (impact.includes('M') || parseInt(impact.replace(/[^0-9]/g, '')) > 100000);
+    (impact.includes('M') || parseInt(impact.replace(/[^0-9]/g, ''), 10) > 100000);
   return (
     <span
       className="text-[8px] font-mono px-1.5 py-px rounded"
@@ -378,7 +370,7 @@ export default function Dashboard() {
     (s) => s.severity === 'critical' && s.status !== 'resolved',
   );
   const highSignals = signals.filter((s) => s.severity === 'high' && s.status !== 'resolved');
-  const mediumSignals = signals.filter((s) => s.severity === 'medium' && s.status !== 'resolved');
+  const _mediumSignals = signals.filter((s) => s.severity === 'medium' && s.status !== 'resolved');
   const isLoading = dashLoading || signalsLoading;
 
   const signalTrendData = (() => {
@@ -404,7 +396,7 @@ export default function Dashboard() {
     return Object.values(buckets);
   })();
 
-  const narratives = insightsData?.narratives ?? [];
+  const _narratives = insightsData?.narratives ?? [];
   const prismComposite = Math.round(
     PRISM_DATA.reduce((s, p) => s + p.score, 0) / PRISM_DATA.length,
   );
@@ -474,7 +466,7 @@ export default function Dashboard() {
     })),
   ];
 
-  const correlations = dashboardData?.correlations ?? [];
+  const _correlations = dashboardData?.correlations ?? [];
 
   const platforms = [
     {
@@ -1334,7 +1326,7 @@ export default function Dashboard() {
                             className="w-3.5 h-3.5 rounded-full shrink-0 flex items-center justify-center z-10 mt-0.5"
                             style={{
                               background: step.done ? `${step.color}18` : 'rgba(255,255,255,0.03)',
-                              border: `1px solid ${step.done ? step.color + '40' : 'rgba(255,255,255,0.06)'}`,
+                              border: `1px solid ${step.done ? `${step.color}40` : 'rgba(255,255,255,0.06)'}`,
                             }}
                           >
                             <Icon

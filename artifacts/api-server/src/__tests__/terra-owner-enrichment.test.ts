@@ -478,10 +478,10 @@ describe('resolveOwnerForRow() — tier priority and fallback', () => {
     const result = await resolveOwnerForRow(makeRow(), tier1Hit);
 
     expect(result).not.toBeNull();
-    expect(result!.tier).toBe(1);
-    expect(result!.resolvedName).toBe('248 FLATBUSH AVE HOLDINGS LLC');
-    expect(result!.confidence).toBe(0.90);
-    expect(result!.source).toContain('constellation:');
+    expect(result?.tier).toBe(1);
+    expect(result?.resolvedName).toBe('248 FLATBUSH AVE HOLDINGS LLC');
+    expect(result?.confidence).toBe(0.90);
+    expect(result?.source).toContain('constellation:');
   });
 
   it('Tier 1: skips CONSTELLATION results whose name is itself a placeholder', async () => {
@@ -489,17 +489,17 @@ describe('resolveOwnerForRow() — tier priority and fallback', () => {
     const result = await resolveOwnerForRow(makeRow(), { ...tier1PlaceholderHit, ...tier2Miss });
 
     expect(result).not.toBeNull();
-    expect(result!.tier).toBe(3);
+    expect(result?.tier).toBe(3);
   });
 
   it('Tier 2: uses terra_properties cross-reference when CONSTELLATION finds nothing', async () => {
     const result = await resolveOwnerForRow(makeRow(), { ...tier1Miss, ...tier2Hit });
 
     expect(result).not.toBeNull();
-    expect(result!.tier).toBe(2);
-    expect(result!.resolvedName).toBe('SOME REAL OWNER LLC');
-    expect(result!.confidence).toBe(0.85);
-    expect(result!.source).toBe('terra_properties:acris_deed_party');
+    expect(result?.tier).toBe(2);
+    expect(result?.resolvedName).toBe('SOME REAL OWNER LLC');
+    expect(result?.confidence).toBe(0.85);
+    expect(result?.source).toBe('terra_properties:acris_deed_party');
   });
 
   it('Tier 2: skips canonical rows whose name is still a placeholder', async () => {
@@ -510,7 +510,7 @@ describe('resolveOwnerForRow() — tier priority and fallback', () => {
 
     // Tier-2 placeholder → falls through to tier 3
     expect(result).not.toBeNull();
-    expect(result!.tier).toBe(3);
+    expect(result?.tier).toBe(3);
   });
 
   it('Tier 3: falls back to ACRIS address inference for non-individual types', async () => {
@@ -520,10 +520,10 @@ describe('resolveOwnerForRow() — tier priority and fallback', () => {
     );
 
     expect(result).not.toBeNull();
-    expect(result!.tier).toBe(3);
-    expect(result!.resolvedName).toBe('248 FLATBUSH AVE HOLDINGS LLC');
-    expect(result!.confidence).toBe(0.68);
-    expect(result!.source).toBe('acris:address_inference');
+    expect(result?.tier).toBe(3);
+    expect(result?.resolvedName).toBe('248 FLATBUSH AVE HOLDINGS LLC');
+    expect(result?.confidence).toBe(0.68);
+    expect(result?.source).toBe('acris:address_inference');
   });
 
   it('Tier 3: skipped for individual owner type (requires deed-party lookup)', async () => {
@@ -548,8 +548,8 @@ describe('resolveOwnerForRow() — tier priority and fallback', () => {
     const result = await resolveOwnerForRow(makeRow(), { ...tier1Error, ...tier2Hit });
 
     expect(result).not.toBeNull();
-    expect(result!.tier).toBe(2);
-    expect(result!.resolvedName).toBe('SOME REAL OWNER LLC');
+    expect(result?.tier).toBe(2);
+    expect(result?.resolvedName).toBe('SOME REAL OWNER LLC');
   });
 
   it('DB error in tier 2 is swallowed and falls through to tier 3', async () => {
@@ -559,8 +559,8 @@ describe('resolveOwnerForRow() — tier priority and fallback', () => {
     );
 
     expect(result).not.toBeNull();
-    expect(result!.tier).toBe(3);
-    expect(result!.resolvedName).toBe('99 RIVER RD HOLDINGS LLC');
+    expect(result?.tier).toBe(3);
+    expect(result?.resolvedName).toBe('99 RIVER RD HOLDINGS LLC');
   });
 
   it('Tier 1 short-circuits: tier 2 and tier 3 are NOT called when tier 1 hits', async () => {
@@ -570,7 +570,7 @@ describe('resolveOwnerForRow() — tier priority and fallback', () => {
       lookupCanonical: tier2Spy,
     });
 
-    expect(result!.tier).toBe(1);
+    expect(result?.tier).toBe(1);
     expect(tier2Spy).not.toHaveBeenCalled();
   });
 });

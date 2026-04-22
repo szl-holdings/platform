@@ -126,7 +126,7 @@ export default function SupportTicketsPage() {
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
               {tickets.map((ticket, i: number) => {
-                const statusInfo = STATUS_CONFIG[ticket.status] ?? STATUS_CONFIG["open"];
+                const statusInfo = STATUS_CONFIG[ticket.status] ?? STATUS_CONFIG.open;
                 const StatusIcon = statusInfo.icon;
                 return (
                   <m.div key={ticket.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>

@@ -172,7 +172,7 @@ function DeltaBadge({ delta }: { delta: number | null }) {
 
 function HealthScoreGauge({ score, tier }: { score: number; tier: TenantScorecard['healthTier'] }) {
   const cfg = TIER_CONFIG[tier];
-  const getAccent = () => {
+  const _getAccent = () => {
     if (tier === 'champion') return 'bg-emerald-400';
     if (tier === 'healthy') return 'bg-sky-400';
     if (tier === 'at_risk') return 'bg-amber-400';

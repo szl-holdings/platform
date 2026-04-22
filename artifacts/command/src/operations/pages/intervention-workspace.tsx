@@ -1,19 +1,7 @@
+
 import {
-  APPROVALS,
-  EXECUTION_RUNS,
-  formatCurrency,
-  getStateColor,
-  WORKFLOWS,
-} from '@szl-holdings/shared-ui/core-observability-data';
-import {
-  ArrowUpRight,
-  CheckCircle,
-  Clock,
   ExternalLink,
-  MessageSquare,
-  RotateCcw,
   Wrench,
-  XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 

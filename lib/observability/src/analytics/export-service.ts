@@ -56,7 +56,7 @@ function toParquetJSON(rows: Record<string, unknown>[]): string {
   if (rows.length === 0) return JSON.stringify({ schema: [], rows: 0, columns: {} });
   const schema = Object.keys(rows[0]!).map((key) => ({
     name: key,
-    type: inferType(rows[0]![key]),
+    type: inferType(rows[0]?.[key]),
   }));
   const columns: Record<string, unknown[]> = {};
   for (const col of schema) {

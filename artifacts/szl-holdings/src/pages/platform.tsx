@@ -84,7 +84,7 @@ export default function PlatformPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
         <SiteNav />
-        <main id="main-content" role="main">
+        <main id="main-content" >
   
           <section
             aria-label="Platform overview"

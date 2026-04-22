@@ -145,9 +145,9 @@ export class MicrosoftGraphAdapter extends ServiceAdapter {
   }
 
   private async getAccessToken(): Promise<string> {
-    const tenantId = process.env['MICROSOFT_TENANT_ID']!;
-    const clientId = process.env['MICROSOFT_CLIENT_ID']!;
-    const clientSecret = process.env['MICROSOFT_CLIENT_SECRET']!;
+    const tenantId = process.env.MICROSOFT_TENANT_ID!;
+    const clientId = process.env.MICROSOFT_CLIENT_ID!;
+    const clientSecret = process.env.MICROSOFT_CLIENT_SECRET!;
 
     const tokenUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
     const body = new URLSearchParams({
@@ -303,7 +303,7 @@ export class MicrosoftGraphAdapter extends ServiceAdapter {
     notification: GraphTeamsNotification,
   ): Promise<{ sent: boolean; error?: string }> {
     if (!this.isLive) return { sent: false };
-    const webhookUrl = notification.webHookUrl ?? process.env['MICROSOFT_TEAMS_WEBHOOK_URL'];
+    const webhookUrl = notification.webHookUrl ?? process.env.MICROSOFT_TEAMS_WEBHOOK_URL;
     if (!webhookUrl) return { sent: false, error: 'No Teams webhook URL configured' };
     try {
       const body = {

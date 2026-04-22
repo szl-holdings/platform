@@ -172,7 +172,7 @@ export default function ExportHistory() {
                           {exp.filterParams && (
                             <span className="font-mono text-[9px] bg-muted px-1.5 py-0.5 rounded truncate max-w-[180px]">
                               {exp.filterParams.length > 60
-                                ? exp.filterParams.slice(0, 60) + '…'
+                                ? `${exp.filterParams.slice(0, 60)}…`
                                 : exp.filterParams}
                             </span>
                           )}

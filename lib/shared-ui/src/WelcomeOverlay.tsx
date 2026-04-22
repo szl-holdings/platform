@@ -1,6 +1,5 @@
 import { ChevronRight, Sparkles, X } from 'lucide-react';
 import * as React from 'react';
-import { cn } from './utils';
 
 export interface WelcomeFeature {
   icon: React.ComponentType<{ className?: string }>;

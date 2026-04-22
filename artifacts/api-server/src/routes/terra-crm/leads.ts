@@ -17,7 +17,6 @@ import {
   or,
   sendBadRequest,
   sendSuccess,
-  sql,
   terraDealsTable,
   terraDistressPropertiesTable,
   terraLeadsTable,
@@ -104,7 +103,7 @@ export function register(router: IRouter): void {
 
       if (rows.length === 0) {
         const numId = parseInt(id, 10);
-        if (!isNaN(numId)) {
+        if (!Number.isNaN(numId)) {
           rows = await db
             .select()
             .from(terraLeadsTable)
@@ -294,7 +293,7 @@ export function register(router: IRouter): void {
 
         if (rows.length === 0) {
           const numId = parseInt(id, 10);
-          if (!isNaN(numId)) {
+          if (!Number.isNaN(numId)) {
             rows = await db
               .select()
               .from(terraLeadsTable)

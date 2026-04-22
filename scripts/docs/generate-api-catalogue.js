@@ -17,9 +17,9 @@
  *   the gate advisory (set continue-on-error: true to keep it non-blocking).
  */
 
-import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -39,7 +39,6 @@ const STDOUT_MODE = args.includes('--stdout');
 
 // ─── load spec ───────────────────────────────────────────────────────────────
 if (!existsSync(SPEC_PATH)) {
-  console.error(`ERROR: OpenAPI spec not found at ${SPEC_PATH}`);
   process.exit(1);
 }
 
@@ -70,7 +69,7 @@ tagMap.set(UNTAGGED, []);
 let totalOps = 0;
 
 for (const [rawPath, pathItem] of Object.entries(paths)) {
-  const pathLevelParams = pathItem.parameters ?? [];
+  const _pathLevelParams = pathItem.parameters ?? [];
 
   for (const method of HTTP_METHODS) {
     const op = pathItem[method];
@@ -233,19 +232,14 @@ if (CHECK_MODE) {
     summaryLines.push(`| Total paths | ${Object.keys(paths).length} |`);
     summaryLines.push(`| Total operations | ${totalOps} |`);
     summaryLines.push('');
-    appendFileSync(GH_SUMMARY, summaryLines.join('\n') + '\n');
+    appendFileSync(GH_SUMMARY, `${summaryLines.join('\n')}\n`);
   }
 
   if (upToDate) {
-    console.log('✓ API-CATALOGUE.md is up to date.');
     process.exit(0);
   } else {
-    console.error('✗ API-CATALOGUE.md is stale. Run `pnpm docs:generate` to refresh.');
     process.exit(1);
   }
 }
 
 writeFileSync(OUT_PATH, output, 'utf8');
-console.log(
-  `✓ API-CATALOGUE.md written (${Object.keys(paths).length} paths, ${totalOps} operations)`,
-);

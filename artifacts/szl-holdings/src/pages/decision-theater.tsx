@@ -6,8 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import DecisionTheater from "@/components/decision-theater";
 import { LOOP_STAGES } from "@/components/decision-theater/scenarios";
-import { DECISION_CASES, DEFAULT_CASE_ID } from "@/data/decision-theater-cases";
-import type { DecisionCase, CaseSeverity, CaseDomain } from "@/data/decision-theater-cases";
+import { DECISION_CASES, DEFAULT_CASE_ID, type DecisionCase, type CaseSeverity, type CaseDomain } from '@/data/decision-theater-cases';
 import { cn } from "@/lib/utils";
 
 const BG = "hsl(214,16%,4%)";
@@ -19,9 +18,9 @@ const LYTE = "hsl(192,72%,48%)";
 const MONO = "var(--font-mono)";
 
 const DOMAIN_ICON: Record<CaseDomain, typeof Shield> = {
-  Aegis: Shield,
-  Vessels: Ship,
-  Terra: Building2,
+  PARAGON: Shield,
+  SEXTANT: Ship,
+  DOMAINE: Building2,
   "Counsel": Briefcase,
   "Carlota Jo": Users,
 };

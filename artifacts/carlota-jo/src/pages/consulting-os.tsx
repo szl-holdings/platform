@@ -627,7 +627,7 @@ export default function ConsultingOS() {
                       <div
                         style={{
                           background: '#fff',
-                          border: `1px solid ${isHovered ? mod.color + '40' : '#E8E2D6'}`,
+                          border: `1px solid ${isHovered ? `${mod.color}40` : '#E8E2D6'}`,
                           borderRadius: 16,
                           padding: 24,
                           cursor: 'pointer',

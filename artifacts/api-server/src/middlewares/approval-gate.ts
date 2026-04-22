@@ -55,7 +55,7 @@ export function requireApproval(options: ApprovalGateOptions) {
   } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {
-    const isDev = process.env['NODE_ENV'] === 'development' || process.env['NODE_ENV'] === 'test';
+    const isDev = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
     if (bypassInDev && isDev) {
       logger.info({
@@ -107,10 +107,10 @@ export function requireApproval(options: ApprovalGateOptions) {
     }
 
     const rawApprovalId =
-      req.headers['x-approval-id'] ?? req.body?.approvalId ?? req.query?.['approvalId'];
+      req.headers['x-approval-id'] ?? req.body?.approvalId ?? req.query?.approvalId;
     const approvalId = rawApprovalId ? parseInt(String(rawApprovalId), 10) : undefined;
 
-    if (!approvalId || isNaN(approvalId)) {
+    if (!approvalId || Number.isNaN(approvalId)) {
       logger.warn({
         msg: 'Approval gate: no approvalId provided',
         actionClass,

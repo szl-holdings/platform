@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildOpenUSDManifest,
-  exportOpenUSDManifest,
   OpenUSDManifestAdapter,
 } from '../adapters/openusd-manifest.js';
 import {
@@ -94,8 +93,8 @@ describe('Replay Engine — OpenUSDManifestAdapter (Stub)', () => {
     const adapter = new OpenUSDManifestAdapter();
     const result = adapter.toExportResult(baseManifest);
     expect(result.warnings).toBeDefined();
-    expect(result.warnings!.length).toBeGreaterThan(0);
-    expect(result.warnings!.some((w) => w.includes('stub'))).toBe(true);
+    expect(result.warnings?.length).toBeGreaterThan(0);
+    expect(result.warnings?.some((w) => w.includes('stub'))).toBe(true);
   });
 
   it('buildOpenUSDManifest produces a valid manifest from scene state', () => {
@@ -136,7 +135,7 @@ describe('Demo Serializer — canonical demo scene bundles', () => {
     expect(bundle.domain).toBe('security');
     expect(bundle.snapshot.format).toBe('json_snapshot');
     expect(bundle.branch).toBeDefined();
-    expect(bundle.branch!.format).toBe('branch_package');
+    expect(bundle.branch?.format).toBe('branch_package');
     expect(bundle.usdManifest).toBeUndefined();
   });
 
@@ -144,7 +143,7 @@ describe('Demo Serializer — canonical demo scene bundles', () => {
     const bundle = buildVesselsSanctionsDemoScene();
     expect(bundle.domain).toBe('maritime');
     expect(bundle.branch).toBeDefined();
-    expect(bundle.branch!.format).toBe('branch_package');
+    expect(bundle.branch?.format).toBe('branch_package');
   });
 
   it('buildTerraDistressDemoScene produces a valid real_estate bundle', () => {

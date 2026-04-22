@@ -28,16 +28,14 @@ export async function postPolicyAppeal(body: Record<string, unknown>): Promise<v
       },
       body: JSON.stringify(body),
     });
-  } catch (err) {
-    console.warn('[policy-appeal] network error', err);
+  } catch (_err) {
     if (typeof window !== 'undefined') {
       window.alert('Could not reach the audit log. Please try again.');
     }
     return;
   }
   if (!res.ok) {
-    const detail = await res.text().catch(() => '');
-    console.warn('[policy-appeal] request failed', res.status, detail);
+    const _detail = await res.text().catch(() => '');
     if (typeof window !== 'undefined') {
       window.alert(`Submission failed (HTTP ${res.status}). Your appeal was not recorded.`);
     }

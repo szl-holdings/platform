@@ -3,14 +3,11 @@ import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  AlertTriangle,
-  BarChart2,
   Brain,
   CheckCircle,
   ChevronDown,
   ChevronUp,
   Clock,
-  FileText,
   Filter,
   Radio,
   RefreshCw,

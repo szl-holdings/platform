@@ -10,7 +10,8 @@ export interface GraphQLDataPanelProps {
   title?: string;
   accentColor?: string;
   loading?: boolean;
-  sections: ReadonlyArray<GraphQLDataSection<unknown>>;
+  // biome-ignore lint/suspicious/noExplicitAny: variance escape hatch for heterogeneous section item types
+  sections: ReadonlyArray<GraphQLDataSection<any>>;
   className?: string;
 }
 
@@ -30,7 +31,7 @@ export function GraphQLDataPanel({
     <div
       className={
         'rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 space-y-3' +
-        (className ? ' ' + className : '')
+        (className ? ` ${className}` : '')
       }
     >
       <div className="flex items-center gap-2">

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
 const API = `${BASE}/api`;
@@ -475,7 +475,7 @@ export default function ReportBuilder() {
       setBlocks(tpl.blocks.map((b: Record<string, unknown>) => ({ ...b, id: generateId() })));
       setSelectedBlockId(null);
       setLoadedTemplate(key);
-    } catch (err) {
+    } catch (_err) {
       setMessage({ type: 'error', text: 'Failed to load template' });
     }
   };
@@ -513,7 +513,7 @@ export default function ReportBuilder() {
       setTimeout(() => {
         window.location.href = `${BASE}/reports`;
       }, 1500);
-    } catch (err) {
+    } catch (_err) {
       setMessage({ type: 'error', text: 'Failed to generate report' });
     } finally {
       setGenerating(false);
@@ -544,7 +544,7 @@ export default function ReportBuilder() {
       if (!res.ok) throw new Error('Save failed');
       const json = await res.json();
       setMessage({ type: 'success', text: `Template saved! ID: ${json.data.templateId}` });
-    } catch (err) {
+    } catch (_err) {
       setMessage({ type: 'error', text: 'Failed to save template' });
     } finally {
       setSaving(false);

@@ -33,7 +33,6 @@ export function registerServiceWorker(options: ServiceWorkerRegistrationOptions 
       })
       .catch((error: Error) => {
         options.onError?.(error);
-        console.warn('[ServiceWorker] Registration failed:', error);
       });
   });
 }

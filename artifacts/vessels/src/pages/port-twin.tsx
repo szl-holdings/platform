@@ -1,12 +1,8 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
-  AlertTriangle,
   Anchor,
-  BarChart3,
   CheckCircle2,
-  Clock,
   Map,
   Navigation,
   TrendingDown,

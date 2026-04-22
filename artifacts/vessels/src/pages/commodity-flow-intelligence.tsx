@@ -4,20 +4,16 @@ import { color } from '@szl-holdings/design-system';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
-  AlertTriangle,
   Anchor,
   ArrowRight,
   BarChart3,
   Box,
-  ChevronDown,
   Clock,
   DollarSign,
   Download,
   Droplets,
   Filter,
   Fuel,
-  Globe,
   Layers,
   MapPin,
   Navigation,
@@ -28,19 +24,12 @@ import {
   Wheat,
   Wifi,
   WifiOff,
-  Wind,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -339,7 +328,7 @@ export default function CommodityFlowIntelligence() {
   const BG = '#060e1a';
   const SURFACE = '#081018';
   const BORDER = 'rgba(14,165,233,0.1)';
-  const SKY = '#0ea5e9';
+  const _SKY = '#0ea5e9';
 
   const { data: chokepointsData, isError: isChokepointsError } =
     useStandardQuery<ChokepointsResponse>({

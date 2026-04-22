@@ -58,8 +58,8 @@ export function register(router: IRouter): void {
 
   router.get('/admin/users/:id/detail', async (req, res) => {
     try {
-      const userId = parseInt(req.params['id'] as string, 10);
-      if (isNaN(userId) || userId < 1) {
+      const userId = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(userId) || userId < 1) {
         sendBadRequest(res, 'Invalid user ID');
         return;
       }
@@ -108,8 +108,8 @@ export function register(router: IRouter): void {
 
   router.patch('/admin/users/:id/deactivate', validateBody(deactivateSchema), async (req, res) => {
     try {
-      const userId = parseInt(req.params['id'] as string, 10);
-      if (isNaN(userId) || userId < 1) {
+      const userId = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(userId) || userId < 1) {
         sendBadRequest(res, 'Invalid user ID');
         return;
       }
@@ -140,8 +140,8 @@ export function register(router: IRouter): void {
 
   router.patch('/admin/users/:id/role', validateBody(roleAssignSchema), async (req, res) => {
     try {
-      const userId = parseInt(req.params['id'] as string, 10);
-      if (isNaN(userId) || userId < 1) {
+      const userId = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(userId) || userId < 1) {
         sendBadRequest(res, 'Invalid user ID');
         return;
       }
@@ -258,21 +258,21 @@ export function register(router: IRouter): void {
       return;
     }
     try {
-      const action = req.query['action'] as string | undefined;
-      const search = req.query['search'] as string | undefined;
-      const dateFrom = req.query['dateFrom'] as string | undefined;
-      const dateTo = req.query['dateTo'] as string | undefined;
-      const userFilter = req.query['user'] as string | undefined;
-      const orgIdParam = req.query['orgId'] as string | undefined;
-      const format = req.query['format'] as string | undefined;
-      const limitParam = parseInt((req.query['limit'] as string) ?? '50', 10);
-      const limit = format === 'csv' ? 10000 : Math.min(isNaN(limitParam) ? 50 : limitParam, 200);
+      const action = req.query.action as string | undefined;
+      const search = req.query.search as string | undefined;
+      const dateFrom = req.query.dateFrom as string | undefined;
+      const dateTo = req.query.dateTo as string | undefined;
+      const userFilter = req.query.user as string | undefined;
+      const orgIdParam = req.query.orgId as string | undefined;
+      const format = req.query.format as string | undefined;
+      const limitParam = parseInt((req.query.limit as string) ?? '50', 10);
+      const limit = format === 'csv' ? 10000 : Math.min(Number.isNaN(limitParam) ? 50 : limitParam, 200);
 
       // If filtering by tenant/org, resolve the set of member user IDs first
       let orgMemberUserIds: number[] | null = null;
       if (orgIdParam) {
         const orgId = parseInt(orgIdParam, 10);
-        if (isNaN(orgId) || orgId < 1) {
+        if (Number.isNaN(orgId) || orgId < 1) {
           sendBadRequest(res, 'Invalid orgId — must be a positive integer');
           return;
         }
@@ -397,8 +397,8 @@ export function register(router: IRouter): void {
 
   router.get('/admin/export-history', validateQuery(listQuerySchema), async (req, res) => {
     try {
-      const page = Math.max(1, parseInt((req.query['page'] as string) ?? '1', 10));
-      const limit = Math.min(parseInt((req.query['limit'] as string) ?? '50', 10), 200);
+      const page = Math.max(1, parseInt((req.query.page as string) ?? '1', 10));
+      const limit = Math.min(parseInt((req.query.limit as string) ?? '50', 10), 200);
       const offset = (page - 1) * limit;
       const rows = await db
         .select({
@@ -441,14 +441,14 @@ export function register(router: IRouter): void {
     async (req, res) => {
       try {
         const { startImpersonation } = await import('../../middlewares/session-policy.js');
-        const targetUserId = parseInt(req.params['userId'] as string, 10);
-        if (isNaN(targetUserId) || targetUserId < 1) {
+        const targetUserId = parseInt(req.params.userId as string, 10);
+        if (Number.isNaN(targetUserId) || targetUserId < 1) {
           sendBadRequest(res, 'Invalid user ID');
           return;
         }
         const { reason } = req.body as z.infer<typeof reasonSchema>;
         const result = await startImpersonation({
-          impersonatorId: req.user!.id,
+          impersonatorId: req.user?.id,
           targetUserId,
           ipAddress: req.ip ?? null,
           userAgent: req.headers['user-agent'] ?? null,
@@ -475,7 +475,7 @@ export function register(router: IRouter): void {
         const { endImpersonation } = await import('../../middlewares/session-policy.js');
         const { impersonationToken } = req.body as z.infer<typeof impersonateEndSchema>;
         await endImpersonation({
-          impersonatorId: req.user!.id,
+          impersonatorId: req.user?.id,
           impersonationToken,
           ipAddress: req.ip ?? null,
           userAgent: req.headers['user-agent'] ?? null,
@@ -498,8 +498,8 @@ export function register(router: IRouter): void {
     validateBody(revokeSessionsBodySchema),
     async (req, res) => {
       try {
-        const targetUserId = parseInt(req.params['id'] as string, 10);
-        if (isNaN(targetUserId) || targetUserId < 1) {
+        const targetUserId = parseInt(req.params.id as string, 10);
+        if (Number.isNaN(targetUserId) || targetUserId < 1) {
           sendBadRequest(res, 'Invalid user ID');
           return;
         }
@@ -538,14 +538,14 @@ export function register(router: IRouter): void {
     async (req, res) => {
       try {
         const { forceTerminateUserSessions } = await import('../../middlewares/session-policy.js');
-        const targetUserId = parseInt(req.params['userId'] as string, 10);
-        if (isNaN(targetUserId) || targetUserId < 1) {
+        const targetUserId = parseInt(req.params.userId as string, 10);
+        if (Number.isNaN(targetUserId) || targetUserId < 1) {
           sendBadRequest(res, 'Invalid user ID');
           return;
         }
         const { reason } = req.body as z.infer<typeof reasonSchema>;
         const result = await forceTerminateUserSessions({
-          adminUserId: req.user!.id,
+          adminUserId: req.user?.id,
           targetUserId,
           ipAddress: req.ip ?? null,
           userAgent: req.headers['user-agent'] ?? null,
@@ -565,13 +565,13 @@ export function register(router: IRouter): void {
     validateBody(assignRolesSchema),
     async (req, res) => {
       try {
-        const targetUserId = parseInt(req.params['userId'] as string, 10);
-        if (isNaN(targetUserId) || targetUserId < 1) {
+        const targetUserId = parseInt(req.params.userId as string, 10);
+        if (Number.isNaN(targetUserId) || targetUserId < 1) {
           sendBadRequest(res, 'Invalid user ID');
           return;
         }
 
-        if (targetUserId === req.user!.id) {
+        if (targetUserId === req.user?.id) {
           sendForbidden(res, 'Cannot modify your own roles');
           return;
         }
@@ -608,7 +608,7 @@ export function register(router: IRouter): void {
               .onConflictDoNothing();
           }
           await tx.insert(auditEventsTable).values({
-            userId: req.user!.id,
+            userId: req.user?.id,
             action: 'admin_role_assignment',
             entityType: 'user',
             entityId: String(targetUserId),
@@ -618,14 +618,14 @@ export function register(router: IRouter): void {
               targetUserId,
               roles,
               reason: reason ?? 'admin_role_assignment',
-              assignedBy: req.user!.id,
+              assignedBy: req.user?.id,
             },
           });
         });
 
         const { revokedCount } = await revokeUserSessionsOnRoleChange({
           userId: targetUserId,
-          changedByUserId: req.user!.id,
+          changedByUserId: req.user?.id,
           reason: reason ?? 'admin_role_assignment',
           ipAddress: req.ip ?? null,
           userAgent: req.headers['user-agent'] ?? null,

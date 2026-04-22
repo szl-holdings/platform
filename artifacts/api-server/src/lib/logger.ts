@@ -1,7 +1,7 @@
-import { createRequire } from 'module';
-import { dirname, join } from 'path';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
 import pino from 'pino';
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'node:url';
 
 const isProduction = process.env.NODE_ENV === 'production';
 

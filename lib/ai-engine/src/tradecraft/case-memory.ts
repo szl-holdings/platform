@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type { AnyDecisionObject } from './decision-objects.js';
 import type { EvidenceIndexEntry } from './evidence-pipeline.js';
 
@@ -127,10 +127,8 @@ export class CaseMemoryStore {
         this.store.set(entry.caseId, entry);
       }
       if (entries.length > 0) {
-        console.log(`[case-memory] Hydrated ${entries.length} cases from DB`);
       }
-    } catch (err) {
-      console.warn('[case-memory] Hydration failed:', err);
+    } catch (_err) {
     }
   }
 

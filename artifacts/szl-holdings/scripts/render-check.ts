@@ -28,12 +28,10 @@ import {
 let passed = 0;
 let failed = 0;
 
-function check(desc: string, ok: boolean, detail?: string): void {
+function check(_desc: string, ok: boolean, _detail?: string): void {
   if (ok) {
-    console.log(`  ✓  ${desc}`);
     passed++;
   } else {
-    console.error(`  ✗  ${desc}${detail ? ` — ${detail}` : ''}`);
     failed++;
   }
 }
@@ -43,8 +41,6 @@ function findMetric(ventureId: string, label: string): string | undefined {
   if (!v) return undefined;
   return v.metrics?.find((m) => m.label === label)?.value;
 }
-
-console.log('\n[data-layer render assertion]\n');
 
 // ─── Lyte venture ─────────────────────────────────────────────────────────────
 
@@ -143,9 +139,6 @@ check(
 
 // ─── Summary ──────────────────────────────────────────────────────────────────
 
-const total = passed + failed;
-console.log(`\n${'─'.repeat(60)}`);
-console.log(`Render check: ${passed}/${total} passed, ${failed} failed`);
-console.log(`${'─'.repeat(60)}\n`);
+const _total = passed + failed;
 
 process.exit(failed > 0 ? 1 : 0);

@@ -1,7 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Platform,
   Pressable,
@@ -309,7 +308,7 @@ function ProofCard({
 
 const FRESH_3M = new Date(Date.now() - 3 * 60_000).toISOString();
 const FRESH_10M = new Date(Date.now() - 10 * 60_000).toISOString();
-const AGING_40M = new Date(Date.now() - 40 * 60_000).toISOString();
+const _AGING_40M = new Date(Date.now() - 40 * 60_000).toISOString();
 
 const FUND_EVIDENCE: EvidenceSource[] = [
   {

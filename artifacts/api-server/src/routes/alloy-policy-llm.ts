@@ -110,9 +110,9 @@ async function callLLM(
   sentence: string,
   deterministic?: { effect: string; confidence: number; warnings?: string[] },
 ): Promise<LLMResponse> {
-  const baseUrl = process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'];
-  const apiKey = process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
-  const model = process.env['ALLOY_POLICY_LLM_MODEL'] ?? 'gpt-5-mini';
+  const baseUrl = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+  const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+  const model = process.env.ALLOY_POLICY_LLM_MODEL ?? 'gpt-5-mini';
 
   if (!baseUrl || !apiKey) {
     return {

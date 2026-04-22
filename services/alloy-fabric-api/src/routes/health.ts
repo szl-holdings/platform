@@ -7,7 +7,7 @@ export function registerHealthRoute(router: IRouter): void {
     res.json({
       status: 'ok',
       service: 'alloy-fabric-api',
-      version: process.env['npm_package_version'] ?? '0.0.0',
+      version: process.env.npm_package_version ?? '0.0.0',
       startedAt,
       uptimeSeconds: Math.floor(process.uptime()),
     });

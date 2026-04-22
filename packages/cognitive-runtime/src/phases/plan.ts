@@ -99,7 +99,7 @@ export async function planPhase(
   // through the cognitive loop (rather than only influencing observability
   // metadata).
   if (opts.preferredProvider || opts.preferredModel || opts.promptVersionId) {
-    plan!.steps = plan!.steps.map((step) => ({
+    plan!.steps = plan?.steps.map((step) => ({
       ...step,
       route: {
         ...step.route,
@@ -116,19 +116,19 @@ export async function planPhase(
   }
 
   const output: PlanPhaseOutput = {
-    planId: plan!.planId,
-    stepCount: plan!.steps.length,
-    executionOrder: plan!.executionOrder,
-    riskLevel: plan!.riskLevel,
-    confidence: plan!.confidence,
-    estimatedCostUsd: plan!.estimatedCostUsd,
-    fallbackCount: plan!.fallbacks.length,
+    planId: plan?.planId,
+    stepCount: plan?.steps.length,
+    executionOrder: plan?.executionOrder,
+    riskLevel: plan?.riskLevel,
+    confidence: plan?.confidence,
+    estimatedCostUsd: plan?.estimatedCostUsd,
+    fallbackCount: plan?.fallbacks.length,
     plan: plan!,
     revision,
     summary:
-      `Plan '${plan!.title}' created (revision ${revision}) with ${plan!.steps.length} step(s), ` +
-      `risk=${plan!.riskLevel}, confidence=${plan!.confidence.toFixed(2)}, ` +
-      `estimated cost=$${plan!.estimatedCostUsd.toFixed(4)}.`,
+      `Plan '${plan?.title}' created (revision ${revision}) with ${plan?.steps.length} step(s), ` +
+      `risk=${plan?.riskLevel}, confidence=${plan?.confidence.toFixed(2)}, ` +
+      `estimated cost=$${plan?.estimatedCostUsd.toFixed(4)}.`,
   };
 
   const completedAt = Date.now();
@@ -140,6 +140,6 @@ export async function planPhase(
     durationMs: completedAt - startedAt,
     output,
     retryCount,
-    metadata: { planId: plan!.planId, stepCount: plan!.steps.length, revision },
+    metadata: { planId: plan?.planId, stepCount: plan?.steps.length, revision },
   };
 }

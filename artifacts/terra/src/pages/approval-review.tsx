@@ -1,19 +1,14 @@
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import { PolicyResultBanner } from '@szl-holdings/shared-ui/policy-result';
 import { RiskEvidenceList } from '@szl-holdings/shared-ui/risk-evidence';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  AlertTriangle,
   ArrowUpRight,
-  Building2,
   CheckCircle,
   ChevronRight,
-  Clock,
   Download,
   FileText,
   MessageSquare,
   Shield,
-  User,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -65,7 +60,7 @@ function ApprovalCard({
   onAction: (id: string, action: 'approve' | 'reject' | 'escalate') => void;
 }) {
   const [showComments, setShowComments] = useState(false);
-  const [comment, setComment] = useState('');
+  const [_comment, _setComment] = useState('');
   const ss = STATUS_STYLE[approval.status];
   const ps = PRIORITY_STYLE[approval.priority];
 

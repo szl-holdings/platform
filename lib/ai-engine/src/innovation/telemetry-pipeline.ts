@@ -25,8 +25,7 @@ export async function persistTelemetry(telemetry: OrchestrationTelemetry): Promi
       totalLatencyMs: telemetry.totalLatencyMs,
       tokensBurned: telemetry.tokensBurned,
     });
-  } catch (err) {
-    console.warn('[telemetry-pipeline] Failed to persist telemetry:', err);
+  } catch (_err) {
   }
 }
 
@@ -91,8 +90,7 @@ export async function queryTelemetry(options: TelemetryQueryOptions = {}) {
     }
 
     return filtered;
-  } catch (err) {
-    console.warn('[telemetry-pipeline] Query failed:', err);
+  } catch (_err) {
     return [];
   }
 }

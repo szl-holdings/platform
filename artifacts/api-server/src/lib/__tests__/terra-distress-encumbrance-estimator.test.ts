@@ -33,10 +33,10 @@ describe('estimateEncumbrance', () => {
     });
     expect(r).not.toBeNull();
     // Lien sized 4-18% of value, debt at ~55% LTV.
-    expect(r!.lienAmount).toBeGreaterThan(20_000);
-    expect(r!.lienAmount).toBeLessThanOrEqual(180_000);
-    expect(r!.debtAmount).toBe(550_000);
-    expect(r!.method).toBe('tax_lien_dof_v1');
+    expect(r?.lienAmount).toBeGreaterThan(20_000);
+    expect(r?.lienAmount).toBeLessThanOrEqual(180_000);
+    expect(r?.debtAmount).toBe(550_000);
+    expect(r?.method).toBe('tax_lien_dof_v1');
   });
 
   it('foreclosure clamps LTV between 0.65 and 0.92', () => {

@@ -1,5 +1,4 @@
 import { APPROVALS, formatCurrency } from '@szl-holdings/shared-ui/core-observability-data';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import { AlertTriangle, ArrowRight, CheckSquare, Clock, ExternalLink, User } from 'lucide-react';
 
 export default function ApprovalsCenter() {

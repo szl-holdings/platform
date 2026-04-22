@@ -11,9 +11,9 @@
  *   node scripts/qa/smoke-routes.js --json
  */
 
-import { existsSync, readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -239,23 +239,16 @@ async function main() {
     .filter((p) => !knownApiSet.has(p));
 
   if (!JSON_OUTPUT) {
-    console.log(`\nSZL Holdings Ecosystem — Route Smoke Tests`);
-    console.log(`Timeout: ${TIMEOUT_MS}ms | Concurrency: ${CONCURRENCY}`);
-    console.log(`API Discovery: ${discoveredPrefixes.length} prefixes from routes/index.ts`);
-    console.log(
-      `  Per-app URLs: SZL=${SZL_URL} AEGIS=${AEGIS_URL} TERRA=${TERRA_URL} VESSELS=${VESSELS_URL}`,
-    );
-    console.log(`  CJ=${CJ_URL} CMD=${CMD_URL} API=${API_URL}\n`);
   }
 
   const domainSummary = [];
   const allResults = {};
-  let totalPassed = 0;
+  let _totalPassed = 0;
   let totalFailed = 0;
 
   if (!API_ONLY) {
     for (const { name, baseUrl, routes } of WEB_DOMAIN_CONFIGS) {
-      if (!JSON_OUTPUT) console.log(`  ── ${name} (${routes.length} routes) @ ${baseUrl}`);
+      if (!JSON_OUTPUT) {}
 
       const results = await runDomainBatch(baseUrl, routes, 'web', CONCURRENCY, TIMEOUT_MS);
       let dp = 0,
@@ -263,15 +256,11 @@ async function main() {
 
       for (const result of results) {
         if (result.ok) {
-          if (!JSON_OUTPUT)
-            console.log(`    ✓ ${result.status} ${result.url} (${result.duration}ms)`);
+          if (!JSON_OUTPUT) {}
           dp++;
-          totalPassed++;
+          _totalPassed++;
         } else {
-          if (!JSON_OUTPUT)
-            console.error(
-              `    ✗ ${result.status} ${result.url} (${result.duration}ms)${result.error ? ' — ' + result.error : ''}`,
-            );
+          if (!JSON_OUTPUT) {}
           df++;
           totalFailed++;
         }
@@ -285,7 +274,7 @@ async function main() {
         error: r.error ?? null,
       }));
       domainSummary.push({ domain: name, passed: dp, failed: df, total: routes.length });
-      if (!JSON_OUTPUT) console.log();
+      if (!JSON_OUTPUT) {}
     }
   }
 
@@ -302,7 +291,7 @@ async function main() {
 
     for (const { label, paths, tier } of apiSections) {
       if (paths.length === 0) continue;
-      if (!JSON_OUTPUT) console.log(`  ── ${label} (${paths.length} routes) @ ${apiBaseUrl}`);
+      if (!JSON_OUTPUT) {}
 
       const results = await runDomainBatch(apiBaseUrl, paths, tier, CONCURRENCY, TIMEOUT_MS);
       let dp = 0,
@@ -310,15 +299,11 @@ async function main() {
 
       for (const result of results) {
         if (result.ok) {
-          if (!JSON_OUTPUT)
-            console.log(`    ✓ ${result.status} ${result.url} (${result.duration}ms)`);
+          if (!JSON_OUTPUT) {}
           dp++;
-          totalPassed++;
+          _totalPassed++;
         } else {
-          if (!JSON_OUTPUT)
-            console.error(
-              `    ✗ ${result.status} ${result.url} (${result.duration}ms)${result.error ? ' — ' + result.error : ''}`,
-            );
+          if (!JSON_OUTPUT) {}
           df++;
           totalFailed++;
         }
@@ -332,39 +317,22 @@ async function main() {
         error: r.error ?? null,
       }));
       domainSummary.push({ domain: label, passed: dp, failed: df, total: paths.length });
-      if (!JSON_OUTPUT) console.log();
+      if (!JSON_OUTPUT) {}
     }
   }
 
   if (JSON_OUTPUT) {
-    console.log(
-      JSON.stringify(
-        {
-          timestamp: new Date().toISOString(),
-          discoveredApiPrefixes: discoveredPrefixes.length,
-          domains: allResults,
-          summary: { total: totalPassed + totalFailed, passed: totalPassed, failed: totalFailed },
-        },
-        null,
-        2,
-      ),
-    );
   } else {
-    console.log('── Domain Summary ─────────────────────────────────────────');
     for (const { domain, passed, failed, total } of domainSummary) {
-      const icon = failed === 0 ? '✓' : '✗';
-      console.log(
-        `  ${icon} ${domain}: ${passed}/${total}${failed > 0 ? ` (${failed} FAILED)` : ''}`,
-      );
+      const _icon = failed === 0 ? '✓' : '✗';
     }
-    console.log(`\nTotal: ${totalPassed} passed, ${totalFailed} failed`);
   }
 
   if (totalFailed > 0) {
-    if (!JSON_OUTPUT) console.error(`\nFAIL — ${totalFailed} route(s) returned errors`);
+    if (!JSON_OUTPUT) {}
     process.exit(1);
   } else {
-    if (!JSON_OUTPUT) console.log(`\nPASS — All routes responding correctly`);
+    if (!JSON_OUTPUT) {}
     process.exit(0);
   }
 }

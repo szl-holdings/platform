@@ -6,7 +6,6 @@ import {
 } from '../lib/db/src/index.js';
 
 async function seed() {
-  console.log('Seeding Stephen Lutar site data...');
 
   await db
     .insert(stephenContentBlocksTable)
@@ -325,13 +324,10 @@ async function seed() {
       },
     ])
     .onConflictDoNothing();
-
-  console.log('Stephen site seed data inserted successfully!');
 }
 
 seed()
   .then(() => process.exit(0))
-  .catch((err) => {
-    console.error('Seed failed:', err);
+  .catch((_err) => {
     process.exit(1);
   });

@@ -281,7 +281,7 @@ function runSimulation(scenario, iterations) {
       validIterations++;
       for (const out of scenario.outputs) {
         const v = outputs[out.id];
-        if (v !== undefined && isFinite(v)) outputAccum[out.id].push(v);
+        if (v !== undefined && Number.isFinite(v)) outputAccum[out.id].push(v);
       }
     } catch {}
   }
@@ -370,7 +370,7 @@ function checkPrismEventBus() {
       correlationId,
       payload: { confidence: 0.87 },
     }),
-  ]).then(([aegisEvt, vesselsEvt, corrEvt]) => {
+  ]).then(([aegisEvt, _vesselsEvt, corrEvt]) => {
     const history = bus.getHistory({ correlationId });
     const stats = bus.getStats();
     const checks = [
@@ -384,7 +384,7 @@ function checkPrismEventBus() {
       { label: 'Correlation ID preserved', ok: corrEvt.correlationId === correlationId },
       {
         label: 'Stats byType populated',
-        ok: stats.byType['domain_signal'] === 2 && stats.byType['cross_domain_correlation'] === 1,
+        ok: stats.byType.domain_signal === 2 && stats.byType.cross_domain_correlation === 1,
       },
     ];
     return { section: 'PrismEventBus', checks };
@@ -432,9 +432,9 @@ async function checkCovenantPolicy() {
 async function checkMonteCarlo() {
   const ITERATIONS = 5000;
   const result = runSimulation(VESSELS_VOYAGE_COST, ITERATIONS);
-  const cost = result.metrics['totalVoyageCost'];
-  const fuelShare = result.metrics['fuelCostShare'];
-  const totalDays = result.metrics['totalDays'];
+  const cost = result.metrics.totalVoyageCost;
+  const fuelShare = result.metrics.fuelCostShare;
+  const totalDays = result.metrics.totalDays;
 
   const checks = [
     { label: `Ran ${ITERATIONS} iterations`, ok: result.iterations === ITERATIONS },
@@ -447,7 +447,7 @@ async function checkMonteCarlo() {
     { label: 'Total days mean 15–25 days', ok: totalDays.mean > 15 && totalDays.mean < 25 },
     {
       label: 'All cost values finite',
-      ok: isFinite(cost.mean) && isFinite(cost.p5) && isFinite(cost.p95),
+      ok: Number.isFinite(cost.mean) && Number.isFinite(cost.p5) && Number.isFinite(cost.p95),
     },
     { label: 'totalVoyageCost n ≈ 5000', ok: cost.n > 4900 },
   ];
@@ -470,8 +470,6 @@ async function checkMonteCarlo() {
 // MAIN
 // ---------------------------------------------------------------------------
 async function main() {
-  console.log('\nSZL Holdings — Decision Theater End-to-End Simulation Check');
-  console.log('═'.repeat(60));
 
   const results = await Promise.all([
     checkPrismEventBus(),
@@ -479,41 +477,30 @@ async function main() {
     checkMonteCarlo(),
   ]);
 
-  let totalPassed = 0;
+  let _totalPassed = 0;
   let totalFailed = 0;
 
   for (const { section, checks, summary } of results) {
-    console.log(`\n  ${section}`);
     for (const { label, ok } of checks) {
       if (ok) {
-        console.log(`    ✓ ${label}`);
-        totalPassed++;
+        _totalPassed++;
       } else {
-        console.error(`    ✗ ${label}`);
         totalFailed++;
       }
     }
     if (summary) {
-      console.log(`\n    Monte Carlo output distribution (totalVoyageCost):`);
-      for (const [k, v] of Object.entries(summary)) {
-        console.log(`      ${k}: ${v}`);
+      for (const [_k, _v] of Object.entries(summary)) {
       }
     }
   }
 
-  console.log('\n' + '═'.repeat(60));
-  console.log(`Results: ${totalPassed} passed, ${totalFailed} failed`);
-
   if (totalFailed > 0) {
-    console.error('\nFAIL — Decision Theater simulation has issues\n');
     process.exit(1);
   } else {
-    console.log('\nPASS — Decision Theater simulation verified end-to-end\n');
     process.exit(0);
   }
 }
 
-main().catch((err) => {
-  console.error('Unexpected error:', err);
+main().catch((_err) => {
   process.exit(1);
 });

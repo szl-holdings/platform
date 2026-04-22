@@ -13,9 +13,9 @@
  *   node scripts/deploy-mobile.js --all --dry-run
  */
 
-import { spawnSync } from 'child_process';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { spawnSync } from 'node:child_process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -96,59 +96,14 @@ function parseArgs(argv) {
 }
 
 function printHelp() {
-  console.log(`
-╔══════════════════════════════════════════════════════════════╗
-║           Mobile App Deployment CLI — deploy-mobile.js        ║
-╚══════════════════════════════════════════════════════════════╝
-
-USAGE:
-  node scripts/deploy-mobile.js [apps...] [options]
-
-APPS (use --all for all apps):
-${Object.entries(APPS)
-  .map(([key, app]) => `  ${key.padEnd(12)} ${app.name}`)
-  .join('\n')}
-
-OPTIONS:
-  --all              Target all 7 apps
-  --platform <p>     Platform: ios | android | both  (default: both)
-  --profile <p>      Build profile: development | preview | production  (default: production)
-  --submit           Submit to stores after building (requires credentials)
-  --update           Push EAS Update (OTA) instead of full build
-  --dry-run          Print commands without executing them
-  --help, -h         Show this help message
-
-EXAMPLES:
-  # Build all apps for production (both platforms)
-  node scripts/deploy-mobile.js --all --profile production
-
-  # Build and submit aegis + vessels for iOS only
-  node scripts/deploy-mobile.js aegis vessels --platform ios --submit
-
-  # Push an OTA update to all apps on the production channel
-  node scripts/deploy-mobile.js --all --update
-
-  # Preview build for terra on Android
-  node scripts/deploy-mobile.js terra --platform android --profile preview
-
-  # Dry run to inspect commands before running
-  node scripts/deploy-mobile.js --all --dry-run
-
-PREREQUISITES:
-  - EAS CLI installed: npm install -g eas-cli
-  - Authenticated: eas login
-  - Credentials configured (see docs/mobile-deployment-guide.md)
-`);
 }
 
 function run(cmd, cwd, dryRun) {
   const repoRoot = path.resolve(__dirname, '..');
   const fullCwd = path.resolve(repoRoot, cwd);
   if (dryRun) {
-    console.log(`  [DRY RUN] cd ${cwd} && ${cmd}`);
     return;
   }
-  console.log(`  $ ${cmd}`);
   const result = spawnSync(cmd, {
     cwd: fullCwd,
     shell: true,
@@ -159,7 +114,7 @@ function run(cmd, cwd, dryRun) {
   }
 }
 
-function buildApp(appKey, app, opts) {
+function buildApp(_appKey, app, opts) {
   const platforms = opts.platform === 'both' ? ['ios', 'android'] : [opts.platform];
 
   for (const platform of platforms) {
@@ -169,13 +124,11 @@ function buildApp(appKey, app, opts) {
       `--profile ${opts.profile}`,
       '--non-interactive',
     ].join(' ');
-
-    console.log(`\n  📦 Building ${app.name} [${platform}]...`);
     run(cmd, app.dir, opts.dryRun);
   }
 }
 
-function submitApp(appKey, app, opts) {
+function submitApp(_appKey, app, opts) {
   const platforms = opts.platform === 'both' ? ['ios', 'android'] : [opts.platform];
 
   for (const platform of platforms) {
@@ -186,13 +139,11 @@ function submitApp(appKey, app, opts) {
       '--non-interactive',
       '--latest',
     ].join(' ');
-
-    console.log(`\n  🚀 Submitting ${app.name} [${platform}]...`);
     run(cmd, app.dir, opts.dryRun);
   }
 }
 
-function updateApp(appKey, app, opts) {
+function updateApp(_appKey, app, opts) {
   const date = new Date().toISOString().split('T')[0];
   const cmd = [
     'eas update',
@@ -200,8 +151,6 @@ function updateApp(appKey, app, opts) {
     `--message "OTA update — ${date}"`,
     '--non-interactive',
   ].join(' ');
-
-  console.log(`\n  ⚡ Publishing OTA update for ${app.name}...`);
   run(cmd, app.dir, opts.dryRun);
 }
 
@@ -214,12 +163,10 @@ function main() {
   }
 
   if (!VALID_PLATFORMS.includes(opts.platform)) {
-    console.error(`❌ Invalid platform "${opts.platform}". Use: ios | android | both`);
     process.exit(1);
   }
 
   if (!VALID_PROFILES.includes(opts.profile)) {
-    console.error(`❌ Invalid profile "${opts.profile}". Use: development | preview | production`);
     process.exit(1);
   }
 
@@ -229,39 +176,21 @@ function main() {
   } else if (opts.apps.length > 0) {
     const invalid = opts.apps.filter((a) => !APPS[a]);
     if (invalid.length > 0) {
-      console.error(`❌ Unknown app(s): ${invalid.join(', ')}`);
-      console.error(`   Valid apps: ${Object.keys(APPS).join(', ')}`);
       process.exit(1);
     }
     targetKeys = opts.apps;
   } else {
-    console.error('❌ No apps specified. Use --all or list app names.');
     printHelp();
     process.exit(1);
   }
 
-  console.log('\n╔══════════════════════════════════════════════════════════════╗');
-  console.log('║              Mobile App Deployment Pipeline                   ║');
-  console.log('╚══════════════════════════════════════════════════════════════╝');
-  console.log(`\n  Apps:     ${targetKeys.join(', ')}`);
-  console.log(`  Platform: ${opts.platform}`);
-  console.log(`  Profile:  ${opts.profile}`);
-  console.log(`  Submit:   ${opts.submit}`);
-  console.log(`  OTA:      ${opts.update}`);
-  console.log(`  Dry Run:  ${opts.dryRun}`);
-
   if (opts.dryRun) {
-    console.log('\n  ⚠️  DRY RUN MODE — no commands will be executed\n');
   }
 
   const errors = [];
 
   for (const appKey of targetKeys) {
     const app = APPS[appKey];
-    console.log(`\n${'─'.repeat(64)}`);
-    console.log(`  🔵 ${app.name}`);
-    console.log(`     ${app.dir}`);
-    console.log(`${'─'.repeat(64)}`);
 
     try {
       if (opts.update) {
@@ -272,28 +201,18 @@ function main() {
           submitApp(appKey, app, opts);
         }
       }
-      console.log(`\n  ✅ ${app.name} — complete`);
     } catch (err) {
-      console.error(`\n  ❌ ${app.name} — FAILED: ${err.message}`);
       errors.push({ appKey, error: err.message });
     }
   }
 
-  console.log('\n╔══════════════════════════════════════════════════════════════╗');
-  console.log('║                       Summary                                 ║');
-  console.log('╚══════════════════════════════════════════════════════════════╝\n');
-
-  const succeeded = targetKeys.length - errors.length;
-  console.log(`  Succeeded: ${succeeded}/${targetKeys.length}`);
+  const _succeeded = targetKeys.length - errors.length;
 
   if (errors.length > 0) {
-    console.log(`  Failed:`);
     for (const { appKey, error } of errors) {
-      console.log(`    - ${appKey}: ${error}`);
     }
     process.exit(1);
   } else {
-    console.log('\n  🎉 All apps processed successfully!\n');
   }
 }
 

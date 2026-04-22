@@ -66,7 +66,7 @@ router.post(
         const [updated] = await db
           .update(webPushSubscriptionsTable)
           .set({
-            userId: userId !== null ? userId : existing[0]!.userId,
+            userId: userId !== null ? userId : existing[0]?.userId,
             p256dh: keys.p256dh,
             auth: keys.auth,
             appId: resolvedAppId,
@@ -140,7 +140,7 @@ router.delete(
 
 router.get('/web-push/subscriptions/me', authMiddleware(), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    const userId = req.user?.id;
     const subs = await db
       .select()
       .from(webPushSubscriptionsTable)
@@ -156,7 +156,7 @@ router.get('/web-push/subscriptions/me', authMiddleware(), async (req, res) => {
   }
 });
 
-router.get('/web-push/subscriptions', authMiddleware(), async (req, res) => {
+router.get('/web-push/subscriptions', authMiddleware(), async (_req, res) => {
   try {
     const subs = await db
       .select()

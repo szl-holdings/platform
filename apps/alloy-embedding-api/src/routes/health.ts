@@ -1,5 +1,4 @@
-import { Router, type IRouter, type RequestHandler } from "express";
-import type { Request, Response } from "express";
+import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
 import { getDefaultEmbedWorker } from "@workspace/alloy-embed-worker";
 import { getDefaultRerankWorker } from "@workspace/alloy-rerank-worker";
 

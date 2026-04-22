@@ -3,11 +3,9 @@ import type { DataProvenanceInfo } from '@szl-holdings/shared-ui/ontology';
 import { m } from 'framer-motion';
 import {
   AlertCircle,
-  ArrowUpRight,
   BarChart2,
   Globe,
   Search,
-  Target,
   TrendingUp,
   Zap,
 } from 'lucide-react';
@@ -275,7 +273,7 @@ export default function SeoIntelligencePage() {
               style={{
                 padding: '0.375rem 0.875rem',
                 borderRadius: '6px',
-                border: `1px solid ${activeTab === tab ? DS.accent + '40' : DS.border}`,
+                border: `1px solid ${activeTab === tab ? `${DS.accent}40` : DS.border}`,
                 background: activeTab === tab ? `${DS.accent}10` : 'transparent',
                 color: activeTab === tab ? DS.accent : DS.text.tertiary,
                 fontSize: '0.8125rem',

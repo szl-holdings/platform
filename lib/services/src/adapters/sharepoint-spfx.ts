@@ -212,23 +212,23 @@ export class SharePointSPFxAdapter extends ServiceAdapter {
   private tokenCache: { token: string; expiresAt: number } | null = null;
 
   private get tenantId(): string | undefined {
-    return process.env["SHAREPOINT_TENANT_ID"];
+    return process.env.SHAREPOINT_TENANT_ID;
   }
 
   private get clientId(): string | undefined {
-    return process.env["SHAREPOINT_CLIENT_ID"];
+    return process.env.SHAREPOINT_CLIENT_ID;
   }
 
   private get clientSecret(): string | undefined {
-    return process.env["SHAREPOINT_CLIENT_SECRET"];
+    return process.env.SHAREPOINT_CLIENT_SECRET;
   }
 
   private get tenantUrl(): string | undefined {
-    return process.env["SHAREPOINT_TENANT_URL"];
+    return process.env.SHAREPOINT_TENANT_URL;
   }
 
   private async acquireToken(scope: string): Promise<string> {
-    const cacheKey = `sp-token-${scope}`;
+    const _cacheKey = `sp-token-${scope}`;
     if (this.tokenCache && this.tokenCache.expiresAt > Date.now() + 60000) {
       return this.tokenCache.token;
     }

@@ -28,8 +28,7 @@ export function useBackgroundRefresh(options: UseBackgroundRefreshOptions): void
         lastRunRef.current[task.key] = now;
         try {
           await task.handler();
-        } catch (err) {
-          console.warn(`[BackgroundRefresh] Task ${task.key} failed:`, err);
+        } catch (_err) {
         }
       }
     }
@@ -43,8 +42,7 @@ export function useBackgroundRefresh(options: UseBackgroundRefreshOptions): void
         lastRunRef.current[task.key] = Date.now();
         try {
           await task.handler();
-        } catch (err) {
-          console.warn(`[BackgroundRefresh] Task ${task.key} failed:`, err);
+        } catch (_err) {
         }
       }, task.intervalMs);
       intervalsRef.current.push(interval);

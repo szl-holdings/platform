@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { InMemorySkillRegistry, InMemorySkillRunStore } from './registry.js';
 import {
   getSkill,
@@ -243,12 +243,12 @@ describe('runSkill', () => {
     registry.registerSkill(sampleSkill());
     registerSkillStepHandler('test:noop', async (params, inputs) => ({
       processed: true,
-      value: params['value'],
-      input1: inputs['input1'],
+      value: params.value,
+      input1: inputs.input1,
     }));
     const run = await runSkill('test:skill:001', { input1: 'world' }, { registry, runStore });
     expect(run.status).toBe('completed');
-    expect(run.outputs?.['processed']).toBe(true);
+    expect(run.outputs?.processed).toBe(true);
   });
 
   it('marks run as failed when handler throws', async () => {

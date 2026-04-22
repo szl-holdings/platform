@@ -6,7 +6,6 @@ import {
   firestormScenariosTable,
   firestormSimulationRunsTable,
   firestormFindingsTable,
-  firestormRunsTable,
 } from "@szl-holdings/db";
 import { desc, eq } from 'drizzle-orm';
 

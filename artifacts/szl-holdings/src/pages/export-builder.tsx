@@ -328,7 +328,7 @@ async function pollJobStatus(exportId: string): Promise<ExportJob | null> {
 }
 
 export default function ExportBuilder() {
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const [domain, setDomain] = useState<DataDomain>('audit_events');
   const [format, setFormat] = useState<'csv' | 'pdf'>('csv');
   const [filters, setFilters] = useState<{
@@ -490,11 +490,11 @@ export default function ExportBuilder() {
         schedule: filters.schedule || 'once',
         columns: exportColumns,
       };
-      if (filters.dateFrom) body['dateFrom'] = filters.dateFrom;
-      if (filters.dateTo) body['dateTo'] = filters.dateTo;
-      if (filters.search) body['search'] = filters.search;
-      if (filters.status && filters.status !== 'all') body['status'] = filters.status;
-      if (filters.orgId && !isNaN(parseInt(filters.orgId))) body['orgId'] = parseInt(filters.orgId);
+      if (filters.dateFrom) body.dateFrom = filters.dateFrom;
+      if (filters.dateTo) body.dateTo = filters.dateTo;
+      if (filters.search) body.search = filters.search;
+      if (filters.status && filters.status !== 'all') body.status = filters.status;
+      if (filters.orgId && !Number.isNaN(parseInt(filters.orgId, 10))) body.orgId = parseInt(filters.orgId, 10);
 
       const res = await fetch(`${API}/exports/enqueue`, {
         method: 'POST',
@@ -818,7 +818,7 @@ export default function ExportBuilder() {
                 {previewMode ? 'Hide Preview' : 'Preview Data'}
               </button>
               <button
-                onClick={handleExport}
+                onClick={() => handleExport()}
                 disabled={!!activeExport}
                 className="px-4 py-1.5 text-xs font-medium text-zinc-900 rounded-lg disabled:opacity-40 transition-colors"
                 style={{ backgroundColor: config.color }}

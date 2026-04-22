@@ -1,7 +1,6 @@
 import {
   Activity,
   ArrowRight,
-  BarChart3,
   CheckCircle,
   FileText,
   GitBranch,

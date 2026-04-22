@@ -1,5 +1,4 @@
 import { ChevronRight, CircleDot, DollarSign, User } from 'lucide-react';
-import React from 'react';
 
 export type CommandModeSignalLevel = 'critical' | 'high' | 'medium' | 'low';
 export type CommandModeStatus =
@@ -374,7 +373,7 @@ const STATUS_CONFIG: Record<CommandModeStatus, { color: string; bg: string; bord
 };
 
 export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
-  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG['Internal'];
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.Internal;
 
   return (
     <span

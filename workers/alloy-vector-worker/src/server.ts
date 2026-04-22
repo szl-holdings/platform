@@ -7,14 +7,14 @@ const app: express.Express = express();
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '20mb' }));
 
-const BEARER = process.env['AEF_S2S_SECRET'] ?? 'dev-s2s-secret';
+const BEARER = process.env.AEF_S2S_SECRET ?? 'dev-s2s-secret';
 
 function authMiddleware(
   req: express.Request,
   res: express.Response,
   next: express.NextFunction,
 ): void {
-  const header = req.headers['authorization'];
+  const header = req.headers.authorization;
   const token = header?.startsWith('Bearer ') ? header.slice(7) : null;
   if (token !== BEARER) {
     res.status(401).json({ error: 'unauthorized' });
@@ -25,10 +25,10 @@ function authMiddleware(
 
 const backend = createDefaultBackend();
 const batcher = new MicroBatcher(backend, {
-  maxBatchSize: Number(process.env['AEF_EMBED_BATCH_SIZE'] ?? 32),
-  maxWaitMs: Number(process.env['AEF_EMBED_FLUSH_MS'] ?? 20),
-  maxQueueDepth: Number(process.env['AEF_EMBED_QUEUE_DEPTH'] ?? 512),
-  oversizeTokenThreshold: Number(process.env['AEF_EMBED_OVERSIZE_TOKENS'] ?? 2048),
+  maxBatchSize: Number(process.env.AEF_EMBED_BATCH_SIZE ?? 32),
+  maxWaitMs: Number(process.env.AEF_EMBED_FLUSH_MS ?? 20),
+  maxQueueDepth: Number(process.env.AEF_EMBED_QUEUE_DEPTH ?? 512),
+  oversizeTokenThreshold: Number(process.env.AEF_EMBED_OVERSIZE_TOKENS ?? 2048),
 });
 
 const EmbedWorkerRequestSchema = z.object({
@@ -98,13 +98,9 @@ app.post('/embed', authMiddleware, async (req, res) => {
   }
 });
 
-const PORT = Number(process.env['AEF_VECTOR_WORKER_PORT'] ?? process.env['PORT'] ?? 4202);
+const PORT = Number(process.env.AEF_VECTOR_WORKER_PORT ?? process.env.PORT ?? 4202);
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[alloy-vector-worker] Listening on port ${PORT}`);
-  console.log(
-    `[alloy-vector-worker] Backend: ${backend.kind} (${backend.modelRef}, ${backend.dimensions}d)`,
-  );
 });
 
 export default app;

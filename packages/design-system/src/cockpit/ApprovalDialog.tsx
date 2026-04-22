@@ -1,7 +1,6 @@
 import { AlertTriangle, CheckCircle, Shield, X, XCircle } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { color } from '../tokens/index.js';
-import { cn } from '../utils.js';
 
 export interface ApprovalDialogProps {
   open: boolean;

@@ -1,10 +1,5 @@
 import { getEnv } from '@szl-holdings/env';
-import type {
-  ConnectorAuthConfig,
-  ConnectorRateLimitConfig,
-  ConnectorToolDefinition,
-} from '../connector-interface.js';
-import { BaseConnectorAdapter } from '../connector-interface.js';
+import { type ConnectorAuthConfig, type ConnectorRateLimitConfig, type ConnectorToolDefinition, BaseConnectorAdapter } from '../connector-interface.js';
 
 export class PagerDutyConnectorAdapter extends BaseConnectorAdapter {
   connectorId = 'pagerduty';

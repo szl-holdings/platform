@@ -34,7 +34,7 @@ export class DropboxAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ['DROPBOX_ACCESS_TOKEN'];
 
   private get token(): string | undefined {
-    return process.env['DROPBOX_ACCESS_TOKEN'];
+    return process.env.DROPBOX_ACCESS_TOKEN;
   }
 
   protected override async performHealthCheck(): Promise<void> {

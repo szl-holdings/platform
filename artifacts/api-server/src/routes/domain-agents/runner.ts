@@ -9,8 +9,7 @@ import {
   type TraceDomain,
   updateTraceStatus,
 } from '@szl-holdings/ai-engine';
-import type { ChatCompletionResult } from '@szl-holdings/services';
-import { type ChatMessage, services } from '@szl-holdings/services';
+import { type ChatCompletionResult, type ChatMessage, services } from '@szl-holdings/services';
 import type { Response } from 'express';
 import { LRUCache } from 'lru-cache';
 import { logger } from '../../lib/logger';

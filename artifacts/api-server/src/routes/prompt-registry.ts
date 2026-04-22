@@ -7,8 +7,7 @@
 
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { type PromptStatus, promptEvaluator, promptRegistry } from '@szl-holdings/prompt-registry';
-import type { IRouter, Request, Response } from 'express';
-import { Router } from 'express';
+import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
@@ -459,8 +458,8 @@ router.get('/ai/prompts/:id', authMiddleware, (req, res) => {
     if (evalledVersions.length >= 2) {
       const base = evalledVersions[1];
       const candidate = evalledVersions[0];
-      const scoreDiff = candidate.evalMetadata!.score! - base.evalMetadata!.score!;
-      const latencyDiff = candidate.evalMetadata!.avgLatencyMs! - base.evalMetadata!.avgLatencyMs!;
+      const scoreDiff = candidate.evalMetadata?.score! - base.evalMetadata?.score!;
+      const latencyDiff = candidate.evalMetadata?.avgLatencyMs! - base.evalMetadata?.avgLatencyMs!;
       comparison = {
         baseVersionId: base.versionId,
         baseVersion: base.version,
@@ -578,8 +577,8 @@ router.post(
       // Executor: keyword-match simulation against the prompt template.
       // Returns plausible latency and an output derived from template keywords so
       // the evaluator's own scoring logic (not random) determines pass/fail.
-      const report = await promptEvaluator.run(id, versionId, suite.id, async (rendered, input) => {
-        const start = Date.now();
+      const report = await promptEvaluator.run(id, versionId, suite.id, async (rendered, _input) => {
+        const _start = Date.now();
         // Simulate network latency (reproducible range based on template length)
         const simulatedLatencyMs = 800 + (rendered.length % 1200);
         await new Promise((r) => setTimeout(r, Math.min(simulatedLatencyMs, 50))); // cap wall time
@@ -588,7 +587,7 @@ router.post(
           .split(/\W+/)
           .filter((w) => w.length > 4)
           .slice(0, 8);
-        const output = words.join(', ') + '. Analysis complete.';
+        const output = `${words.join(', ')}. Analysis complete.`;
         return { output, latencyMs: simulatedLatencyMs };
       });
 

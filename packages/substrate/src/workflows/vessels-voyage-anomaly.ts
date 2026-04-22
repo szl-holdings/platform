@@ -209,9 +209,9 @@ function parseVoyageAnomalies(output: unknown): VoyageAnomaly[] {
   if (
     output &&
     typeof output === 'object' &&
-    Array.isArray((output as Record<string, unknown>)['anomalies'])
+    Array.isArray((output as Record<string, unknown>).anomalies)
   ) {
-    return (output as Record<string, unknown>)['anomalies'] as VoyageAnomaly[];
+    return (output as Record<string, unknown>).anomalies as VoyageAnomaly[];
   }
   return [
     {

@@ -9,7 +9,6 @@ import {
   levelForRisk,
   PlanContextSchema,
   PlanCycleError,
-  type PlanGraph,
   PlanNotFoundError,
   type PlanStep,
   replayPlan,
@@ -24,8 +23,8 @@ describe('decomposer', () => {
     const steps = decomposeObjective('Cut maritime fuel cost 4%', ctx());
     expect(steps).toHaveLength(5);
     expect(steps.map((s) => s.title)).toEqual(['Perceive', 'Plan', 'Act', 'Verify', 'Reflect']);
-    expect(steps[1]!.dependsOn).toEqual([steps[0]!.stepId]);
-    expect(steps[4]!.dependsOn).toEqual([steps[3]!.stepId]);
+    expect(steps[1]?.dependsOn).toEqual([steps[0]?.stepId]);
+    expect(steps[4]?.dependsOn).toEqual([steps[3]?.stepId]);
   });
 
   it('respects explicit seeds and resolves dependsOn by index AND title', () => {
@@ -36,8 +35,8 @@ describe('decomposer', () => {
     ];
     const steps = decomposeObjective('x', ctx({ seeds }));
     expect(steps).toHaveLength(3);
-    expect(steps[1]!.dependsOn).toEqual([steps[0]!.stepId]);
-    expect(steps[2]!.dependsOn).toEqual([steps[1]!.stepId]);
+    expect(steps[1]?.dependsOn).toEqual([steps[0]?.stepId]);
+    expect(steps[2]?.dependsOn).toEqual([steps[1]?.stepId]);
   });
 });
 
@@ -151,7 +150,7 @@ describe('createPlan', () => {
   it('each fallback has a distinct strategy and references the primary', async () => {
     const primary = await createPlan('Investigate alert', { fallbackCount: 3 }, { store });
     const fallbacks = await getPlanFallbacks(primary, { store });
-    const kinds = new Set(fallbacks.map((f) => f.steps[0]!.metadata.fallbackKind));
+    const kinds = new Set(fallbacks.map((f) => f.steps[0]?.metadata.fallbackKind));
     expect(kinds.size).toBe(3);
     for (const fb of fallbacks) {
       expect(fb.fallbackOf).toBe(primary.planId);
@@ -173,8 +172,8 @@ describe('fallback strategies', () => {
     const primary = await createPlan('Plan x', {}, { store: new InMemoryPlanStore() });
     const [cheap] = generateFallbackPlans(primary, { count: 1 });
     for (let i = 0; i < primary.steps.length; i++) {
-      expect(cheap!.steps[i]!.route.estimatedCostUsd).toBeCloseTo(
-        primary.steps[i]!.route.estimatedCostUsd * 0.5,
+      expect(cheap?.steps[i]?.route.estimatedCostUsd).toBeCloseTo(
+        primary.steps[i]?.route.estimatedCostUsd * 0.5,
         5,
       );
     }
@@ -187,7 +186,7 @@ describe('replayPlan', () => {
     const primary = await createPlan('Run audit', {}, { store });
     const out = await replayPlan(primary.planId, { store });
     expect(out.steps.map((s) => s.stepId)).toEqual(primary.executionOrder);
-    expect(out.steps[2]!.requiredApproval).toBe(true); // the Act step
+    expect(out.steps[2]?.requiredApproval).toBe(true); // the Act step
   });
 
   it('throws PlanNotFoundError for unknown plan ids', async () => {

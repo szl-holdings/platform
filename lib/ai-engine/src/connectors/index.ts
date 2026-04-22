@@ -23,10 +23,7 @@ export function initializeConnectors(): void {
   connectorRegistry.register(new HoneyHiveConnectorAdapter());
   connectorRegistry.register(new SalesforceConnectorAdapter());
 
-  const configured = connectorRegistry.getConfigured().map((c) => c.displayName);
-  console.log(
-    `[connectors] Initialized ${connectorRegistry.getAll().length} connectors. Configured: ${configured.join(', ') || 'none (API keys needed)'}`,
-  );
+  const _configured = connectorRegistry.getConfigured().map((c) => c.displayName);
 }
 
 export type {

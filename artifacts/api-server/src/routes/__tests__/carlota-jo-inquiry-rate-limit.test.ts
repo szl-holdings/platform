@@ -18,9 +18,9 @@ describe('Carlota Jo POST /booking/inquiries — inquiryRateLimit wiring', () =>
       /const\s+inquiryRateLimit\s*=\s*rateLimit\(\{[\s\S]*?\}\);/,
     );
     expect(block).not.toBeNull();
-    expect(block![0]).toMatch(/windowMs:\s*60\s*\*\s*60\s*\*\s*1000/);
-    expect(block![0]).toMatch(/max:\s*10/);
-    expect(block![0]).toMatch(/standardHeaders:\s*true/);
+    expect(block?.[0]).toMatch(/windowMs:\s*60\s*\*\s*60\s*\*\s*1000/);
+    expect(block?.[0]).toMatch(/max:\s*10/);
+    expect(block?.[0]).toMatch(/standardHeaders:\s*true/);
   });
 
   it('mounts inquiryRateLimit on POST /booking/inquiries before validation', () => {
@@ -28,7 +28,7 @@ describe('Carlota Jo POST /booking/inquiries — inquiryRateLimit wiring', () =>
       /router\.post\(\s*['"]\/booking\/inquiries['"],\s*([\s\S]*?)\)\s*;?/,
     );
     expect(post).not.toBeNull();
-    const args = post![1];
+    const args = post?.[1];
     const rateIdx = args.indexOf('inquiryRateLimit');
     const validateIdx = args.indexOf('validateBody');
     expect(rateIdx).toBeGreaterThanOrEqual(0);
@@ -58,8 +58,8 @@ describe('inquiryRateLimit behaviour — config parity check', () => {
       statuses.push(last.status);
     }
     expect(statuses).toContain(429);
-    expect(last!.status).toBe(429);
-    expect(last!.headers['ratelimit-reset']).toBeDefined();
-    expect((last!.body as { success: boolean; error: string }).error).toMatch(/Too many/i);
+    expect(last?.status).toBe(429);
+    expect(last?.headers['ratelimit-reset']).toBeDefined();
+    expect((last?.body as { success: boolean; error: string }).error).toMatch(/Too many/i);
   });
 });

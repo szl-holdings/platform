@@ -12,7 +12,7 @@ import {
 } from '../lib/email';
 import { logger } from '../lib/logger';
 import { validateBody, validateQuery } from '../lib/validation';
-import { authMiddleware, parseIdParam } from '../middlewares/auth';
+import { authMiddleware, } from '../middlewares/auth';
 import { publicSubmitLimiter } from '../middlewares/rate-limiters';
 
 const router: IRouter = Router();

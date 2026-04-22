@@ -1,4 +1,4 @@
-import { agentModelAssignments, agentUsageStats, aiSafetyEvents, db } from '@szl-holdings/db';
+import { agentModelAssignments, aiSafetyEvents, db } from '@szl-holdings/db';
 import { and, desc, eq, gte, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
@@ -162,7 +162,7 @@ safetyRouter.post('/ai-safety/scan-input', safetyRateLimit, async (req: Request,
       piiTypes: piiScan.types,
       sanitizedInput: piiScan.redacted,
     });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Safety scan failed' });
   }
 });
@@ -199,7 +199,7 @@ safetyRouter.post(
         piiTypes: piiScan.types,
         redactedOutput: piiScan.redacted,
       });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ error: 'Output scan failed' });
     }
   },
@@ -218,7 +218,7 @@ safetyRouter.get('/ai-safety/events', safetyRateLimit, async (req: Request, res:
       .from(aiSafetyEvents)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(aiSafetyEvents.detectedAt))
-      .limit(Math.min(parseInt(limit), 200));
+      .limit(Math.min(parseInt(limit, 10), 200));
 
     const stats = await db
       .select({
@@ -231,7 +231,7 @@ safetyRouter.get('/ai-safety/events', safetyRateLimit, async (req: Request, res:
       .groupBy(aiSafetyEvents.eventType);
 
     res.json({ events, stats, total: events.length });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to fetch safety events' });
   }
 });
@@ -267,7 +267,7 @@ safetyRouter.get(
       });
 
       res.json({ registry, totalAgents: registry.length });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ error: 'Failed to fetch model registry' });
     }
   },
@@ -278,7 +278,7 @@ safetyRouter.put(
   safetyRateLimit,
   async (req: Request, res: Response) => {
     try {
-      const agentId = String(req.params['agentId'] ?? '');
+      const agentId = String(req.params.agentId ?? '');
       const { model, provider, tokenBudget } = req.body as {
         model?: string;
         provider?: string;
@@ -320,7 +320,7 @@ safetyRouter.put(
       }
 
       res.json({ success: true, agentId, model: updateData.model, provider: updateData.provider });
-    } catch (err) {
+    } catch (_err) {
       res.status(500).json({ error: 'Failed to update model assignment' });
     }
   },
@@ -376,7 +376,7 @@ safetyRouter.get('/ai-safety/dashboard', safetyRateLimit, async (_req: Request, 
       },
       safetyScore: Math.max(0, 100 - recentEvents.length * 2 - (blockedCount[0]?.count ?? 0) * 5),
     });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'Failed to fetch safety dashboard' });
   }
 });

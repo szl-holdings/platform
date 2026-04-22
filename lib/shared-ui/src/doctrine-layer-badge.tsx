@@ -4,7 +4,6 @@ import {
   DOCTRINE_LAYER_DESCRIPTIONS,
   type DoctrineLayer,
   type DoctrineLayerConfig,
-  formatLayerLabel,
   getDoctrineConfig,
 } from './doctrine-layer';
 

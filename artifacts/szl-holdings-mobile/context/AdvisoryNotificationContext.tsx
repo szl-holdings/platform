@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   type ReactNode,
   useCallback,
@@ -84,8 +84,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         const json = await res.json();
         setNotifications(json.data ?? json ?? []);
       }
-    } catch (err) {
-      console.warn('[notifications] Failed to fetch:', err);
+    } catch (_err) {
     } finally {
       setIsLoading(false);
     }
@@ -101,8 +100,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           ),
         );
       }
-    } catch (err) {
-      console.warn('[notifications] Failed to mark read:', err);
+    } catch (_err) {
     }
   }, []);
 
@@ -114,8 +112,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           prev.map((n) => ({ ...n, isRead: true, readAt: new Date().toISOString() })),
         );
       }
-    } catch (err) {
-      console.warn('[notifications] Failed to mark all read:', err);
+    } catch (_err) {
     }
   }, []);
 
@@ -125,8 +122,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       if (res.ok) {
         setNotifications((prev) => prev.filter((n) => n.id !== id));
       }
-    } catch (err) {
-      console.warn('[notifications] Failed to delete:', err);
+    } catch (_err) {
     }
   }, []);
 

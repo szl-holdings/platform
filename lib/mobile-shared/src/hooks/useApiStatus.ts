@@ -89,7 +89,17 @@ export function useApiStatus(): ApiStatusResult {
 
     const setupNetInfo = async () => {
       try {
-        const NetInfo = await import('@react-native-community/netinfo');
+        // optional peer dependency, resolved at runtime in mobile app
+        const NetInfo = (await import(
+          /* @vite-ignore */ '@react-native-community/netinfo' as string
+        )) as {
+          default: {
+            addEventListener: (
+              cb: (state: { isConnected: boolean | null; isInternetReachable: boolean | null }) => void,
+            ) => () => void;
+            fetch: () => Promise<{ isConnected: boolean | null; isInternetReachable: boolean | null }>;
+          };
+        };
 
         netinfoUnsubRef.current = NetInfo.default.addEventListener(
           (state: { isConnected: boolean | null; isInternetReachable: boolean | null }) => {

@@ -1,11 +1,11 @@
 import { Buffer } from 'node:buffer';
 import { getEnv } from '@szl-holdings/env';
-import { spawn } from 'child_process';
-import { randomUUID } from 'crypto';
-import { readFile, unlink, writeFile } from 'fs/promises';
+import { spawn } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
+import { readFile, unlink, writeFile } from 'node:fs/promises';
 import OpenAI, { toFile } from 'openai';
-import { tmpdir } from 'os';
-import { join } from 'path';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const _env = getEnv();
 

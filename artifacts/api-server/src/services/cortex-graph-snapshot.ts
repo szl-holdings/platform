@@ -13,7 +13,7 @@ import {
   cortexGraphSnapshotsTable,
   db,
 } from '@szl-holdings/db';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { logger } from '../lib/logger';
 
 const DEFAULT_RETENTION_DAYS = parseInt(process.env.CORTEX_SNAPSHOT_RETENTION_DAYS ?? '30', 10);

@@ -33,7 +33,7 @@ describe('makeMetric', () => {
     const m = makeMetric('latency_ms', 120, { agent: 'planner' });
     expect(m.name).toBe('latency_ms');
     expect(m.value).toBe(120);
-    expect(m.labels['agent']).toBe('planner');
+    expect(m.labels.agent).toBe('planner');
     CognitiveMetricSchema.parse(m);
   });
 });
@@ -61,7 +61,7 @@ describe('InMemoryMetricCollector', () => {
   it('records metrics with labels', () => {
     collector.recordKnown('tool_error_rate', 0.02, { tool: 'search' });
     const snap = collector.snapshot();
-    expect(snap[0]?.labels['tool']).toBe('search');
+    expect(snap[0]?.labels.tool).toBe('search');
   });
 });
 

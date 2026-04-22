@@ -1,34 +1,16 @@
 import {
   BookOpen,
   Building2,
-  CheckSquare,
-  Circle,
   ClipboardList,
   FileText,
-  Globe,
   HelpCircle,
-  Layers,
   Map,
   MessageSquare,
   MousePointer,
   Navigation,
   Star,
   TrendingUp,
-  Users,
 } from 'lucide-react';
-import type {
-  Article,
-  CaseStudy,
-  CmsPage,
-  Cta,
-  Faq,
-  NavigationItem,
-  RoadmapItem,
-  Service,
-  Testimonial,
-  Update,
-  Venture,
-} from './api';
 import { CmsTablePanel, StatusBadge } from './CmsTablePanel';
 
 // ─── Ventures Panel ───────────────────────────────────────────────────────────

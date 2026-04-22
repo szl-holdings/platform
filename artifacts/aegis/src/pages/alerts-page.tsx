@@ -24,8 +24,8 @@ import {
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { Textarea } from '@szl-holdings/shared-ui/ui/textarea';
 import { useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Bell, CheckCircle, Clock, Eye, Plus, XCircle } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { AlertTriangle, Bell, CheckCircle, Eye, Plus, XCircle } from 'lucide-react';
+import { useState } from 'react';
 import { api } from '@/lib/api';
 
 const severityColors: Record<string, string> = {
@@ -35,7 +35,7 @@ const severityColors: Record<string, string> = {
   low: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
 };
 
-const statusColors: Record<string, string> = {
+const _statusColors: Record<string, string> = {
   new: 'bg-red-500/10 text-red-400 border-red-500/20',
   acknowledged: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   investigating: 'bg-blue-500/10 text-blue-400 border-blue-500/20',

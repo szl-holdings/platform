@@ -3,7 +3,7 @@
  * Converts DocumentEditorContent (block-based JSON) to a styled PDF.
  * Output is a Buffer that can be stored, served, or zipped.
  */
-import { Document, Font, Page, renderToBuffer, StyleSheet, Text, View } from '@react-pdf/renderer';
+import { Document, Page, renderToBuffer, StyleSheet, Text, View } from '@react-pdf/renderer';
 import React from 'react';
 import type { BlockNode, DocumentEditorContent, TextNode } from './pdf-renderer-types';
 
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
 
 function renderTextNode(node: TextNode, key: number): React.ReactElement {
   const text = node.text || '';
-  const textProps: Record<string, unknown> = {};
+  const _textProps: Record<string, unknown> = {};
   const styleArr: object[] = [];
   if (node.bold) styleArr.push(styles.bold);
   if (node.italic) styleArr.push(styles.italic);
@@ -119,7 +119,7 @@ function renderTextNode(node: TextNode, key: number): React.ReactElement {
   );
 }
 
-function renderInline(children: TextNode[]): React.ReactElement {
+function _renderInline(children: TextNode[]): React.ReactElement {
   if (!children || children.length === 0) {
     return React.createElement(Text, {}, '');
   }
@@ -205,8 +205,7 @@ function renderBlock(block: BlockNode, idx: number, orderNum = 1): React.ReactEl
     case 'table':
       if (!block.tableData || block.tableData.length === 0)
         return React.createElement(View, { key: idx });
-      return React.createElement(View, { key: idx }, [
-        ...block.tableData.map((row, ri) =>
+      return React.createElement(View, { key: idx }, block.tableData.map((row, ri) =>
           React.createElement(
             View,
             { key: ri, style: ri === 0 ? styles.tableHeader : styles.tableRow },
@@ -218,8 +217,7 @@ function renderBlock(block: BlockNode, idx: number, orderNum = 1): React.ReactEl
               ),
             ),
           ),
-        ),
-      ]);
+        ));
 
     case 'merge_field':
       return React.createElement(View, { key: idx }, [

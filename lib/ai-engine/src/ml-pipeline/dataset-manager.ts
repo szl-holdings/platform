@@ -79,7 +79,7 @@ function nextVersion(domain: string): string {
 // ---------------------------------------------------------------------------
 
 function runQualityValidation(dataset: ManagedDataset): DataQualityReport {
-  const seed = dataset.featureIds.length + dataset.rowCount;
+  const _seed = dataset.featureIds.length + dataset.rowCount;
   const missing = parseFloat((Math.random() * 0.15).toFixed(4));
   const duplicates = parseFloat((Math.random() * 0.02).toFixed(4));
   const outliers = Math.floor(Math.random() * (dataset.rowCount * 0.03));

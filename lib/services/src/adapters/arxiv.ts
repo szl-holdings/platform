@@ -70,14 +70,14 @@ export class ArxivAdapter extends ServiceAdapter {
       const categoryMatches = [...entry.matchAll(/<category term="([^"]+)"/g)];
       if (!idMatch) continue;
       entries.push({
-        id: idMatch[1]!.trim(),
-        title: titleMatch ? titleMatch[1]!.trim().replace(/\s+/g, " ") : "No title",
-        authors: authorMatches.map(m => m[1]!.trim()).slice(0, 4),
-        abstract: abstractMatch ? abstractMatch[1]!.trim().replace(/\s+/g, " ").slice(0, 500) : "",
+        id: idMatch[1]?.trim(),
+        title: titleMatch ? titleMatch[1]?.trim().replace(/\s+/g, " ") : "No title",
+        authors: authorMatches.map(m => m[1]?.trim()).slice(0, 4),
+        abstract: abstractMatch ? abstractMatch[1]?.trim().replace(/\s+/g, " ").slice(0, 500) : "",
         categories: categoryMatches.map(m => m[1]!).slice(0, 3),
-        published: publishedMatch ? publishedMatch[1]!.trim().slice(0, 10) : "",
-        updated: updatedMatch ? updatedMatch[1]!.trim().slice(0, 10) : "",
-        pdfUrl: `https://arxiv.org/pdf/${idMatch[1]!.trim()}`,
+        published: publishedMatch ? publishedMatch[1]?.trim().slice(0, 10) : "",
+        updated: updatedMatch ? updatedMatch[1]?.trim().slice(0, 10) : "",
+        pdfUrl: `https://arxiv.org/pdf/${idMatch[1]?.trim()}`,
       });
       if (entries.length >= maxResults) break;
     }

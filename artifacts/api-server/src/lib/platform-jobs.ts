@@ -10,14 +10,13 @@ import {
 import { durableJobQueue } from '@szl-holdings/forge-runtime';
 import { serverTelemetry } from '@szl-holdings/observability';
 import { TwilioAdapter } from '@szl-holdings/services';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { and, eq, gte, sql } from 'drizzle-orm';
 import {
   buildNotificationDigestEmail,
   buildTransactionalNotificationEmail,
   sendEmail,
 } from './email';
-import { JOB_TYPES } from './job-queue';
 import { logger } from './logger';
 
 const twilioAdapter = new TwilioAdapter();
@@ -90,13 +89,13 @@ async function startWorkflowRun(job: JobContext, domain: string): Promise<void> 
         workflowType: job.type,
         status: 'running',
         domain,
-        triggeredBy: (job.payload['triggeredBy'] as string) ?? 'scheduler',
-        triggeredByUserId: (job.payload['triggeredByUserId'] as number) ?? null,
+        triggeredBy: (job.payload.triggeredBy as string) ?? 'scheduler',
+        triggeredByUserId: (job.payload.triggeredByUserId as number) ?? null,
         payload: job.payload as Record<string, unknown>,
         correlationId: job.correlationId,
         workflowRunId: job.workflowRunId,
-        signalId: job.signalId ?? (job.payload['signalId'] as string) ?? null,
-        artifactId: job.artifactId ?? (job.payload['artifactId'] as string) ?? null,
+        signalId: job.signalId ?? (job.payload.signalId as string) ?? null,
+        artifactId: job.artifactId ?? (job.payload.artifactId as string) ?? null,
         startedAt: new Date(),
       })
       .onConflictDoNothing();
@@ -139,10 +138,10 @@ function buildJobContext(job: { id: string; type: string; payload: unknown }): J
     id: job.id,
     type: job.type,
     payload,
-    correlationId: (payload['correlationId'] as string) ?? randomUUID(),
-    workflowRunId: (payload['workflowRunId'] as string) ?? `wfr_${job.id}`,
-    signalId: (payload['signalId'] as string) ?? undefined,
-    artifactId: (payload['artifactId'] as string) ?? undefined,
+    correlationId: (payload.correlationId as string) ?? randomUUID(),
+    workflowRunId: (payload.workflowRunId as string) ?? `wfr_${job.id}`,
+    signalId: (payload.signalId as string) ?? undefined,
+    artifactId: (payload.artifactId as string) ?? undefined,
   };
 }
 
@@ -995,7 +994,7 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DISPATCH, async (job) =
       );
     } else {
       const appUrl =
-        process.env['APP_URL'] ?? process.env['VITE_APP_URL'] ?? 'https://szlholdings.com';
+        process.env.APP_URL ?? process.env.VITE_APP_URL ?? 'https://szlholdings.com';
       const actionUrl = payload.actionUrl
         ? payload.actionUrl.startsWith('http')
           ? payload.actionUrl
@@ -1192,7 +1191,7 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, async (job) => 
 
   let digestsSent = 0;
   let digestsSkipped = 0;
-  const appUrl = process.env['APP_URL'] ?? process.env['VITE_APP_URL'] ?? 'https://szlholdings.com';
+  const appUrl = process.env.APP_URL ?? process.env.VITE_APP_URL ?? 'https://szlholdings.com';
   const dateLabel = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',

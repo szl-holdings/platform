@@ -21,8 +21,7 @@
  *   POST /lyte/billing/create-invoice
  */
 
-import type { Router as ExpressRouter } from 'express';
-import express from 'express';
+import express, { type Router as ExpressRouter } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 

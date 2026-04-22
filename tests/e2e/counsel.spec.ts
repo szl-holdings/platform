@@ -63,7 +63,7 @@ test.describe('Counsel — Smoke Tests', () => {
   });
 
   test('demo mode — app shell renders without crashing', async ({ page }) => {
-    const demoUrl = (COUNSEL_BASE || '/') + '?demo=true';
+    const demoUrl = `${COUNSEL_BASE || '/'}?demo=true`;
     const resp = await page
       .goto(demoUrl, {
         waitUntil: 'domcontentloaded',

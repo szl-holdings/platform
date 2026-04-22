@@ -11,10 +11,10 @@ import {
   reportSchedulesTable,
   reportTemplatesTable,
 } from '@szl-holdings/db';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { and, asc, desc, eq, gte, ilike, lte, or, sql } from 'drizzle-orm';
 import { logger } from './logger';
-import type { BrandTheme, ReportBlock, ReportTemplate } from './report-engine';
+import type { BrandTheme, ReportBlock, } from './report-engine';
 
 // ─── Template Operations ──────────────────────────────────────────────────────
 
@@ -515,7 +515,6 @@ function computeNextRunAt(
       next.setMonth(next.getMonth() + 3);
       return next;
     }
-    case 'on_demand':
     default:
       return new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
   }

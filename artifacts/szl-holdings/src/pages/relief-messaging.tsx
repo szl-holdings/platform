@@ -1,5 +1,5 @@
 import { m } from "framer-motion";
-import { ArrowRight, Activity, AlertTriangle, Clock, CheckCircle2, Shield, GitBranch, Zap, Eye } from "lucide-react";
+import { ArrowRight, AlertTriangle, Clock, Shield, GitBranch, Zap, Eye } from "lucide-react";
 import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";

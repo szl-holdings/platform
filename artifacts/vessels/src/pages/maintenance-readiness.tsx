@@ -4,7 +4,6 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   AlertTriangle,
   Calendar,
-  CheckCircle2,
   Clock,
   RefreshCw,
   Ship,
@@ -53,7 +52,7 @@ function num(val: string | number | undefined | null, def = 0): number {
   if (val == null) return def;
   if (typeof val === 'number') return val;
   const n = parseFloat(val);
-  return isNaN(n) ? def : n;
+  return Number.isNaN(n) ? def : n;
 }
 
 function daysToDue(dueDate?: string | null): number {
@@ -294,7 +293,7 @@ export default function MaintenanceReadinessPage() {
     for (const item of allItems.filter((m) => m.status !== 'completed')) {
       const k = item.vesselName;
       if (!map.has(k)) map.set(k, { name: k, items: [] });
-      map.get(k)!.items.push(item);
+      map.get(k)?.items.push(item);
     }
     return Array.from(map.values())
       .map((v) => {

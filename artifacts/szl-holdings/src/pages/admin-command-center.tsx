@@ -7,24 +7,18 @@ import { AnimatePresence, m } from 'framer-motion';
 import {
   Activity,
   AlertCircle,
-  AlertTriangle,
   BarChart3,
   Building2,
   CheckCircle2,
-  CheckSquare,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   ChevronUp,
   Circle,
-  Clock,
   Database,
   DollarSign,
   Download,
   Edit2,
-  ExternalLink,
   Eye,
-  Filter,
   Flag,
   Globe,
   HeadphonesIcon,
@@ -39,7 +33,6 @@ import {
   Shield,
   ShieldCheck,
   Sliders,
-  Tag,
   Terminal,
   ToggleLeft,
   ToggleRight,
@@ -53,8 +46,7 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react';
-import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 
@@ -295,7 +287,7 @@ function StatCard({
       <div
         className={cn(
           'w-8 h-8 rounded-lg flex items-center justify-center',
-          color.replace('text-', 'bg-') + '/10',
+          `${color.replace('text-', 'bg-')}/10`,
         )}
       >
         <Icon className={cn('w-4 h-4', color)} />
@@ -1947,7 +1939,7 @@ function SupportPanel() {
                             <button
                               onClick={() => {
                                 const uid = parseInt(assignInputs[t.id] ?? '', 10);
-                                if (!isNaN(uid) && uid > 0)
+                                if (!Number.isNaN(uid) && uid > 0)
                                   assignMutation.mutate({ id: t.id, ownerUserId: uid });
                               }}
                               disabled={!assignInputs[t.id] || assignMutation.isPending}

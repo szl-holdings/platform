@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type {
   CitationRecord,
   GuardrailResult,
@@ -17,7 +17,7 @@ import type {
 import type { TraceStore } from './store.js';
 
 export class TraceWriter {
-  private store: TraceStore;
+  store: TraceStore;
 
   constructor(store: TraceStore) {
     this.store = store;

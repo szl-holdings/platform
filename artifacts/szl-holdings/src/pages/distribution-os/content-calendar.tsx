@@ -4,7 +4,6 @@ import {
   CalendarDays,
   ChevronDown,
   FileText,
-  Filter,
   Image,
   LayoutList,
   Link2,

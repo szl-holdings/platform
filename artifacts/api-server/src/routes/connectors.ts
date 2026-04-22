@@ -2,13 +2,10 @@ import { bodyShape } from '@szl-holdings/contracts/common';
 import { connectorLogsTable, connectorsTable, db } from '@szl-holdings/db';
 import { desc, eq } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
-import { z } from 'zod';
 import { logActivity } from '../lib/activity-logger';
 import {
   handleRouteError,
-  sendBadRequest,
   sendCreated,
-  sendError,
   sendNoContent,
   sendNotFound,
   sendSuccess,
@@ -18,7 +15,7 @@ import { authMiddleware, parseIdParam, requireRole } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
-const validConnectorTypes = [
+const _validConnectorTypes = [
   'stripe',
   'slack',
   'twilio',
@@ -30,7 +27,7 @@ const validConnectorTypes = [
   'jira',
   'custom',
 ] as const;
-const validStatuses = ['active', 'inactive', 'error', 'pending'] as const;
+const _validStatuses = ['active', 'inactive', 'error', 'pending'] as const;
 
 router.get('/connectors', authMiddleware(), async (_req, res) => {
   try {

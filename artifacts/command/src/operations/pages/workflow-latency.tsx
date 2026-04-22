@@ -1,6 +1,6 @@
 import { severityColors, type WorkflowLatency, workflowLatencies } from '@lyte/lib/business-data';
 import { cn } from '@lyte/lib/utils';
-import { AlertTriangle, ChevronDown, ChevronRight, Clock, TrendingUp } from 'lucide-react';
+import { ChevronDown, ChevronRight, } from 'lucide-react';
 import { useState } from 'react';
 
 function formatCurrency(n: number): string {

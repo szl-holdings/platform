@@ -1,12 +1,6 @@
 import {
-  Activity,
-  AlertTriangle,
   Brain,
   ChevronRight,
-  Clock,
-  Shield,
-  Target,
-  TrendingUp,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 

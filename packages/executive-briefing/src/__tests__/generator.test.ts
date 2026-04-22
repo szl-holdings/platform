@@ -1,16 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Citation, MemoryEntry, RecentReflection, WorldModelEntity } from '../index.js';
-import {
-  buildBriefContext,
-  buildCitationManifest,
-  buildCitations,
-  buildSystemPrompt,
-  buildUserPrompt,
-  extractEntityProvenance,
-  gateBrief,
-  parseBriefResponse,
-  summarizeContext,
-} from '../index.js';
+import { type Citation, type MemoryEntry, type RecentReflection, type WorldModelEntity, buildBriefContext, buildCitationManifest, buildCitations, buildSystemPrompt, extractEntityProvenance, gateBrief, parseBriefResponse, summarizeContext } from '../index.js';
 
 const mockEntities: WorldModelEntity[] = [
   {
@@ -107,9 +96,9 @@ describe('extractEntityProvenance', () => {
   it('maps entities to provenance records', () => {
     const provenance = extractEntityProvenance(mockEntities);
     expect(provenance).toHaveLength(2);
-    expect(provenance[0]!.entityType).toBe('vessel');
-    expect(provenance[0]!.domain).toBe('vessels');
-    expect(provenance[0]!.confidence).toBe(0.92);
+    expect(provenance[0]?.entityType).toBe('vessel');
+    expect(provenance[0]?.domain).toBe('vessels');
+    expect(provenance[0]?.confidence).toBe(0.92);
   });
 });
 

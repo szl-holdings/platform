@@ -7,16 +7,13 @@ import {
 import { cn } from '@imp/lib/utils';
 import {
   Activity,
-  AlertTriangle,
   ChevronRight,
-  Clock,
   DollarSign,
   Radio,
   Shield,
   TrendingUp,
 } from 'lucide-react';
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 function CostBar({ cost, max }: { cost: number; max: number }) {
   const pct = (cost / max) * 100;
@@ -42,7 +39,7 @@ function BriefSection({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(true);
-  const color = getClassificationColor(classification);
+  const _color = getClassificationColor(classification);
 
   return (
     <div className="imperial-card rounded-lg overflow-hidden">

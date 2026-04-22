@@ -6,8 +6,6 @@ import {
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import { PolicyResultBanner } from '@szl-holdings/shared-ui/policy-result';
 import {
-  AlertTriangle,
-  Anchor,
   ArrowUpRight,
   CheckCircle,
   ChevronRight,

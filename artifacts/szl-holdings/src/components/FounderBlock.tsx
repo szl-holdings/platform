@@ -3,12 +3,10 @@ import {
   Anchor,
   ArrowRight,
   BarChart3,
-  Cpu,
   Eye,
   Layers,
   Shield,
   Sparkles,
-  Users,
 } from 'lucide-react';
 import { Link } from 'wouter';
 

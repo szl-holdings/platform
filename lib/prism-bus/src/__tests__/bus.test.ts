@@ -110,7 +110,7 @@ describe('PrismEventBus', () => {
 
     const all = bus.getHistory();
     expect(all).toHaveLength(3);
-    expect(all[0]!.timestamp).toBeGreaterThanOrEqual(all[2]!.timestamp);
+    expect(all[0]?.timestamp).toBeGreaterThanOrEqual(all[2]?.timestamp);
 
     expect(bus.getHistory({ type: 'workflow_completed' })).toHaveLength(1);
     expect(bus.getHistory({ domain: 'aegis' })).toHaveLength(1);
@@ -128,8 +128,8 @@ describe('PrismEventBus', () => {
 
     const stats = bus.getStats();
     expect(stats.totalPublished).toBe(3);
-    expect(stats.byType['tool_called']).toBe(2);
-    expect(stats.byType['policy_decision']).toBe(1);
+    expect(stats.byType.tool_called).toBe(2);
+    expect(stats.byType.policy_decision).toBe(1);
     expect(stats.subscriptionCount).toBe(1);
     expect(stats.historySize).toBe(3);
   });

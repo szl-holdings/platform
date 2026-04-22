@@ -1067,7 +1067,7 @@ const SEED_MATTERS: SeedMatter[] = [
  *      see an empty matter list.
  */
 function seedingAllowed(req: Request): boolean {
-  if (process.env['PRISM_COUNSEL_SEED_DEMO'] === '1') return true;
+  if (process.env.PRISM_COUNSEL_SEED_DEMO === '1') return true;
   if (process.env.NODE_ENV !== 'production') return true;
   const roles = (req.user?.roles ?? []) as string[];
   return roles.some((r) => r === 'admin' || r === 'super_admin');
@@ -1340,11 +1340,11 @@ const matterCreateSchema = z.object({
   jurisdiction: z.string().min(1),
   estimatedExposure: z
     .union([
-      z.number().refine((n) => isFinite(n), { message: 'estimatedExposure must be a finite number' }),
+      z.number().refine((n) => Number.isFinite(n), { message: 'estimatedExposure must be a finite number' }),
       z
         .string()
         .transform((v) => (v === '' ? null : Number(v)))
-        .refine((n) => n === null || isFinite(n), { message: 'estimatedExposure must be a finite number' }),
+        .refine((n) => n === null || Number.isFinite(n), { message: 'estimatedExposure must be a finite number' }),
     ])
     .nullable()
     .optional(),
@@ -1458,7 +1458,7 @@ router.patch(
           patch[k] = (body as Record<string, unknown>)[k];
       }
       if (body.estimatedExposure !== undefined) {
-        patch['estimatedExposure'] =
+        patch.estimatedExposure =
           body.estimatedExposure != null ? String(body.estimatedExposure) : null;
       }
       const [updated] = await db
@@ -1595,10 +1595,10 @@ router.patch(
         return;
       }
       const patch: Record<string, unknown> = { updatedAt: new Date() };
-      if (body.status !== undefined) patch['status'] = body.status;
-      if (body.completedDate !== undefined) patch['completedDate'] = body.completedDate;
-      if (body.assignee !== undefined) patch['assignee'] = body.assignee;
-      if (body.dueDate !== undefined) patch['dueDate'] = body.dueDate;
+      if (body.status !== undefined) patch.status = body.status;
+      if (body.completedDate !== undefined) patch.completedDate = body.completedDate;
+      if (body.assignee !== undefined) patch.assignee = body.assignee;
+      if (body.dueDate !== undefined) patch.dueDate = body.dueDate;
       const [updated] = await db
         .update(pcGcObligationsTable)
         .set(patch as never)
@@ -1710,7 +1710,7 @@ router.get(
       const orgId = requireOrgId(req, res);
       if (!orgId) return;
       await ensureSeeded(orgId, req);
-      const matterId = typeof req.query['matterId'] === 'string' ? req.query['matterId'] : null;
+      const matterId = typeof req.query.matterId === 'string' ? req.query.matterId : null;
       const matterIds = await db
         .select({ id: pcGcMattersTable.id })
         .from(pcGcMattersTable)
@@ -1843,7 +1843,7 @@ router.get(
       const orgId = requireOrgId(req, res);
       if (!orgId) return;
       await ensureSeeded(orgId, req);
-      const matterId = typeof req.query['matterId'] === 'string' ? req.query['matterId'] : null;
+      const matterId = typeof req.query.matterId === 'string' ? req.query.matterId : null;
       if (!matterId) {
         sendBadRequest(res, 'matterId query parameter is required');
         return;

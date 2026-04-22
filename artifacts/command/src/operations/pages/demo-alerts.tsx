@@ -1,12 +1,7 @@
 import { demoAlerts } from '@lyte/lib/demo-seed';
 import {
-  AlertTriangle,
   Bell,
-  CheckCircle,
-  ChevronDown,
-  Clock,
   Plus,
-  RefreshCw,
 } from 'lucide-react';
 import { useState } from 'react';
 

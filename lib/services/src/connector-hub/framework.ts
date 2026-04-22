@@ -30,10 +30,10 @@ export abstract class ToolConnector {
   private _latencySamples: number[] = [];
   private _lastCheckedAt: string | null = null;
   private _lastSuccessAt: string | null = null;
-  private _lastError: string | null = null;
   private _circuitBreakerState: CircuitBreakerState = 'closed';
   private _circuitOpenedAt: number | null = null;
   private _consecutiveFailures: number = 0;
+  private _lastError: string | null = null;
   private _rateLimitState: RateLimitState = {
     windowStart: Date.now(),
     requestsInWindow: 0,
@@ -108,7 +108,7 @@ export abstract class ToolConnector {
     this._requestCount++;
     this._errorCount++;
     this._consecutiveFailures++;
-    this._lastError = error;
+    (this as unknown as { _lastError: string })._lastError = error;
     this._latencySamples.push(latencyMs);
     if (this._latencySamples.length > 50) this._latencySamples.shift();
     this.checkCircuitBreaker();

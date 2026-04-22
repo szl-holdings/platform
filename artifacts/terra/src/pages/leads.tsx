@@ -15,9 +15,9 @@ import {
   X,
 } from 'lucide-react';
 import { useState } from 'react';
-import { AgentAvatar, formatCurrency, ProbabilityBar, StageBadge } from '@/components/brokerage-ui';
+import { AgentAvatar, StageBadge } from '@/components/brokerage-ui';
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
+const _BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 const API = '/api';
 
 function fetchJson(path: string) {

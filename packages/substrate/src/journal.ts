@@ -7,16 +7,8 @@
  */
 
 import { EventEmitter } from 'node:events';
-import { createHash, createHmac, randomBytes, randomUUID } from 'crypto';
-import type {
-  AnyStage,
-  EvidenceBundle,
-  ExecutionMode,
-  PipelineRun,
-  StageResult,
-  StageType,
-} from './types.js';
-import { EvidenceBundleSchema } from './types.js';
+import { createHash, createHmac, randomBytes, randomUUID } from 'node:crypto';
+import { type AnyStage, type EvidenceBundle, type ExecutionMode, type PipelineRun, type StageResult, type StageType, EvidenceBundleSchema } from './types.js';
 
 // ─── Runtime Event Bus ────────────────────────────────────────────────────────
 //
@@ -119,14 +111,9 @@ export function emitStageStart(run: PipelineRun, stage: AnyStage): void {
 // should set SUBSTRATE_SIGNING_KEY (32+ byte hex) for cross-process verification.
 
 const PROCESS_RANDOM_KEY = randomBytes(32).toString('hex');
-const SIGNING_KEY = process.env['SUBSTRATE_SIGNING_KEY'] ?? PROCESS_RANDOM_KEY;
+const SIGNING_KEY = process.env.SUBSTRATE_SIGNING_KEY ?? PROCESS_RANDOM_KEY;
 
-if (!process.env['SUBSTRATE_SIGNING_KEY']) {
-  console.info(
-    '[substrate] SUBSTRATE_SIGNING_KEY is not set — using a per-process random key. ' +
-      'Bundles signed in this process are verifiable only within the same process. ' +
-      'Set SUBSTRATE_SIGNING_KEY in production for cross-process verification.',
-  );
+if (!process.env.SUBSTRATE_SIGNING_KEY) {
 }
 
 /**
@@ -323,11 +310,7 @@ export class SubstrateJournal {
 
     // Link into the proof-chain — errors are logged but not fatal so the
     // journal (primary source) is never blocked by an unavailable proof-chain.
-    await this.linkToProofChain(bundle).catch((err: unknown) => {
-      console.error(
-        `[substrate journal] proof-chain link failed for bundle ${bundle.bundleId}:`,
-        err instanceof Error ? err.message : String(err),
-      );
+    await this.linkToProofChain(bundle).catch((_err: unknown) => {
     });
 
     return bundle;
@@ -519,12 +502,12 @@ class JournalBackedRunStore implements RunStore {
     const bundles = await this.journalStore.getRunBundles(runId);
     // Find the most recent __run__snapshot bundle
     const snapshots = bundles
-      .filter((b) => b.stageId === '__run__snapshot' && b.metadata['_runSnapshot'])
+      .filter((b) => b.stageId === '__run__snapshot' && b.metadata._runSnapshot)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
     if (snapshots.length === 0) return null;
 
-    const run = snapshots[0]!.metadata['_runSnapshot'] as PipelineRun;
+    const run = snapshots[0]?.metadata._runSnapshot as PipelineRun;
     // Warm the cache for future hits
     this.cache.set(runId, run);
     return run;

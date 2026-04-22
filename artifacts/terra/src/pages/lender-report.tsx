@@ -8,7 +8,6 @@ import {
   CheckCircle,
   ChevronRight,
   Clock,
-  DollarSign,
   Download,
   Loader2,
   Printer,

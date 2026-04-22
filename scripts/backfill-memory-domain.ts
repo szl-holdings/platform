@@ -177,12 +177,10 @@ async function runStep(step: BackfillStep): Promise<{ label: string; rowsAffecte
   if (DRY_RUN) {
     const { rows } = await pool.query<{ n: number }>(step.countSql, params);
     const n = rows[0]?.n ?? 0;
-    console.log(`[dry-run] ${step.label}: would update ${n} row(s)`);
     return { label: step.label, rowsAffected: n };
   }
   const res = await pool.query(step.updateSql, params);
   const n = res.rowCount ?? 0;
-  console.log(`         ${step.label}: updated ${n} row(s)`);
   return { label: step.label, rowsAffected: n };
 }
 
@@ -411,16 +409,9 @@ async function runParityVerification(): Promise<ParityRow[]> {
 }
 
 async function reportParity(rows: ParityRow[]): Promise<void> {
-  console.log(
-    '[backfill-memory-domain] per-domain parity (old four-signal vs new metadata.domain):',
-  );
-  console.log('  domain                       old      new   old-only   new-only');
   let regressions = 0;
   for (const r of rows) {
-    const flag = r.oldOnly > 0 ? '  <-- REGRESSION' : '';
-    console.log(
-      `  ${r.domain.padEnd(24)} ${String(r.oldCount).padStart(6)} ${String(r.newCount).padStart(8)} ${String(r.oldOnly).padStart(10)} ${String(r.newOnly).padStart(10)}${flag}`,
-    );
+    const _flag = r.oldOnly > 0 ? '  <-- REGRESSION' : '';
     if (r.oldOnly > 0) regressions++;
   }
   if (regressions > 0) {
@@ -428,15 +419,9 @@ async function reportParity(rows: ParityRow[]): Promise<void> {
       `[backfill-memory-domain] parity check failed: ${regressions} domain(s) lost rows under the new query. Investigate the rows reported as old-only.`,
     );
   }
-  console.log(
-    "[backfill-memory-domain] parity check passed: every domain's new query is a superset of the old query.",
-  );
 }
 
 async function backfill(): Promise<void> {
-  console.log(
-    `[backfill-memory-domain] starting${DRY_RUN ? ' (dry-run)' : ''}${VERIFY_ONLY ? ' (verify-only)' : ''}`,
-  );
 
   if (!VERIFY_ONLY) {
     // Snapshot the universe we're trying to fix, so the final spot-check has a
@@ -445,20 +430,14 @@ async function backfill(): Promise<void> {
       `SELECT count(*)::int AS n FROM memory_records WHERE ${UNTAGGED_WHERE}`,
     );
     const untaggedTotal = untaggedBefore[0]?.n ?? 0;
-    console.log(`[backfill-memory-domain] ${untaggedTotal} row(s) currently lack metadata.domain`);
 
     if (untaggedTotal > 0) {
       const results: Array<{ label: string; rowsAffected: number }> = [];
       for (const step of buildSteps()) {
         results.push(await runStep(step));
       }
-      const totalUpdated = results.reduce((s, r) => s + r.rowsAffected, 0);
-      console.log(
-        `[backfill-memory-domain] ${DRY_RUN ? 'would update' : 'updated'} ${totalUpdated} row(s) ` +
-          `across ${results.length} step(s) (untagged baseline: ${untaggedTotal})`,
-      );
+      const _totalUpdated = results.reduce((s, r) => s + r.rowsAffected, 0);
     } else {
-      console.log('[backfill-memory-domain] nothing to do — every row already has a domain tag.');
     }
 
     // ---- Spot-check: per-domain distribution after the run ---------------
@@ -468,12 +447,10 @@ async function backfill(): Promise<void> {
         GROUP BY 1
         ORDER BY n DESC`,
     );
-    console.log('[backfill-memory-domain] post-run distribution of metadata.domain:');
     for (const row of distribution) {
-      const known = (KNOWN_MEMORY_DOMAINS as readonly string[]).includes(row.domain)
+      const _known = (KNOWN_MEMORY_DOMAINS as readonly string[]).includes(row.domain)
         ? ''
         : ' (unknown key)';
-      console.log(`  ${row.domain.padEnd(24)} ${String(row.n).padStart(8)}${known}`);
     }
 
     // Sanity check the runtime invariant: after a non-dry-run sweep, no row
@@ -488,7 +465,6 @@ async function backfill(): Promise<void> {
           `[backfill-memory-domain] invariant violated: ${remaining} row(s) still lack metadata.domain after backfill`,
         );
       }
-      console.log('[backfill-memory-domain] invariant holds: every row now has metadata.domain.');
     }
   }
 
@@ -502,8 +478,7 @@ backfill()
     await pool.end();
     process.exit(0);
   })
-  .catch(async (err) => {
-    console.error('[backfill-memory-domain] failed:', err);
+  .catch(async (_err) => {
     try {
       await pool.end();
     } catch {

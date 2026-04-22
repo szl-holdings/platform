@@ -21,7 +21,6 @@ import {
   pubsub,
   sendBadRequest,
   sendSuccess,
-  sql,
   TERRA_EVENTS,
   terraDealsTable,
   terraDistressPropertiesTable,
@@ -137,7 +136,7 @@ export function register(router: IRouter): void {
         let resolvedLeadId: number | null = null;
         if (body.leadId) {
           const numericId = parseInt(String(body.leadId), 10);
-          const conditions = isNaN(numericId)
+          const conditions = Number.isNaN(numericId)
             ? eq(terraLeadsTable.externalId, String(body.leadId))
             : or(
                 eq(terraLeadsTable.externalId, String(body.leadId)),
@@ -154,7 +153,7 @@ export function register(router: IRouter): void {
               .json({ error: `leadId "${body.leadId}" does not reference a valid lead` });
             return;
           }
-          resolvedLeadId = linkedLead[0]!.id;
+          resolvedLeadId = linkedLead[0]?.id;
         }
 
         let resolvedDistressPropertyId: number | null = null;
@@ -162,7 +161,7 @@ export function register(router: IRouter): void {
           body.distressPropertyExternalId ?? null;
         if (body.distressPropertyId) {
           const numericId = parseInt(String(body.distressPropertyId), 10);
-          const conditions = isNaN(numericId)
+          const conditions = Number.isNaN(numericId)
             ? eq(terraDistressPropertiesTable.externalId, String(body.distressPropertyId))
             : or(
                 eq(terraDistressPropertiesTable.externalId, String(body.distressPropertyId)),
@@ -182,9 +181,9 @@ export function register(router: IRouter): void {
             });
             return;
           }
-          resolvedDistressPropertyId = linkedProp[0]!.id;
+          resolvedDistressPropertyId = linkedProp[0]?.id;
           resolvedDistressPropertyExternalId =
-            linkedProp[0]!.externalId ?? resolvedDistressPropertyExternalId;
+            linkedProp[0]?.externalId ?? resolvedDistressPropertyExternalId;
         }
 
         const STAGE_ORDER = [
@@ -332,7 +331,7 @@ export function register(router: IRouter): void {
 
         if (rows.length === 0) {
           const numId = parseInt(id, 10);
-          if (!isNaN(numId)) {
+          if (!Number.isNaN(numId)) {
             rows = await db
               .select()
               .from(terraDealsTable)

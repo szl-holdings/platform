@@ -5,34 +5,24 @@ import {
   Activity,
   AlertTriangle,
   ArrowRight,
-  BarChart3,
   BookOpen,
   Brain,
   CheckCircle,
   ChevronDown,
-  ChevronRight,
-  Clock,
   Database,
   Download,
   Eye,
   FileText,
   Flag,
-  Globe,
   Info,
   Layers,
   Link2,
   Lock,
   Network,
   Play,
-  Server,
   Shield,
   ShieldCheck,
-  Target,
   Terminal,
-  ToggleLeft,
-  ToggleRight,
-  TrendingUp,
-  Unlock,
   User,
   X,
   Zap,
@@ -1741,11 +1731,11 @@ export default function AdversaryNarrativeEngine() {
                             {step.recommendedAction.requiresApproval && (
                               <button
                                 onClick={() => {
-                                  if (approvedActions.has(step.recommendedAction!.id)) {
+                                  if (approvedActions.has(step.recommendedAction?.id ?? '')) {
                                     toast.info('Action already approved');
                                     return;
                                   }
-                                  if (deniedActions.has(step.recommendedAction!.id)) {
+                                  if (deniedActions.has(step.recommendedAction?.id ?? '')) {
                                     toast.info('Action was denied — re-submit to reconsider');
                                     return;
                                   }

@@ -5,7 +5,6 @@ import { PolicyModeBadge } from '@szl-holdings/design-system/proof/policy-mode-b
 import { ActionLoop, DataProvenance, RoleSelector } from '@szl-holdings/shared-ui/data-provenance';
 import { DataStateBadge } from '@szl-holdings/shared-ui/data-state-badge';
 import type { DataProvenanceInfo } from '@szl-holdings/shared-ui/ontology';
-import { PackBanner } from '@szl-holdings/shared-ui/pack-banner';
 import { useRealtimeChannel } from '@szl-holdings/shared-ui/use-realtime-channel';
 import { formatCurrency } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
@@ -13,16 +12,11 @@ import {
   Activity,
   AlertTriangle,
   ArrowRight,
-  ArrowUpRight,
   BarChart3,
   Building2,
-  CheckCircle,
   ChevronRight,
-  Circle,
   Eye,
-  FileText,
   Globe,
-  Layers,
   Map,
   MapPin,
   Shield,
@@ -168,7 +162,7 @@ function mapAlertToSignal(alert: Record<string, unknown>) {
   };
 }
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
+const _BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 const API = '/api';
 
 export default function TerraIntelligence() {

@@ -64,8 +64,8 @@ function buildEvaluationContext(request: EvaluationRequest): Record<string, unkn
     estimatedCostUsd: request.estimatedCostUsd,
     confidence: request.confidence,
     urgency: request.urgency,
-    ...(request.context ?? {}),
-    ...(request.resource.attributes ?? {}),
+    ...request.context,
+    ...request.resource.attributes,
   };
 }
 

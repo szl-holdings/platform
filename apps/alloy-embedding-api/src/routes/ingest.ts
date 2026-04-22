@@ -1,5 +1,4 @@
-import { Router, type IRouter, type RequestHandler } from "express";
-import type { Request, Response } from "express";
+import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
 import { IngestRequestSchema } from "@workspace/aef-contracts";
 import { logger } from "../middleware/logger.js";
 import { submitIngestDocument, getRun } from "@workspace/alloy-ingestion-orchestrator/client";
@@ -27,7 +26,7 @@ ingestRouter.post("/v1/ingest", (async (req: Request, res: Response) => {
       try {
         const run = await submitIngestDocument({
           tenantId: body.tenantId as string,
-          profileId: body.metadata?.["profileId"] as string | undefined,
+          profileId: body.metadata?.profileId as string | undefined,
           sourceId: doc.sourceId,
           content: doc.content,
           contentType: doc.contentType,

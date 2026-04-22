@@ -4,7 +4,6 @@ import {
   ChevronDown,
   ChevronUp,
   DollarSign,
-  TrendingDown,
   TrendingUp,
   Users,
 } from 'lucide-react';

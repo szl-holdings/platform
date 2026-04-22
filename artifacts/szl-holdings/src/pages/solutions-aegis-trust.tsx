@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ShieldAlert, Shield, Eye, FileCheck2, Lock, ArrowRight, CheckCircle, AlertTriangle, Activity, Server } from "lucide-react";
+import { ShieldAlert, Shield, Eye, FileCheck2, Lock, ArrowRight, AlertTriangle, Activity, } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";

@@ -23,7 +23,7 @@ import { connectorHub } from '@szl-holdings/services';
 import { defaultSignalBus } from '@szl-holdings/signal-mesh';
 import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
-import { handleRouteError, sendBadRequest, sendForbidden, sendSuccess } from '../lib/api-response';
+import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
 import { getSignals as getAtlasSignals } from '../lib/atlas-execution-engine';
 import { dbListRuns } from '../lib/decisioning-store';
 import { logger } from '../lib/logger';
@@ -37,7 +37,7 @@ import { authMiddleware } from '../middlewares/auth';
  * the Command demo page works without a session.
  */
 function requireAuthInProduction(req: Request, res: Response): boolean {
-  if (process.env['NODE_ENV'] === 'production' && !req.user) {
+  if (process.env.NODE_ENV === 'production' && !req.user) {
     res.status(401).json({ error: 'Authentication required', code: 'UNAUTHENTICATED' });
     return false;
   }
@@ -80,7 +80,7 @@ function mapBusSignal(s: ReturnType<typeof defaultSignalBus.snapshot>[number], i
     id: s.signalId ?? `live-${idx}`,
     product: domainToProduct(s.domain as string),
     domain: s.domain as string,
-    title: (s.rawPayload as Record<string, string>)?.['title'] ?? `${s.type} — ${s.domain}`,
+    title: (s.rawPayload as Record<string, string>)?.title ?? `${s.type} — ${s.domain}`,
     severity: (s.severity as string) ?? 'info',
     confidence: s.confidence,
     detectedAt: s.occurredAt as string,
@@ -106,13 +106,13 @@ async function getLiveConnectors(t: number) {
     const snapshot = await connectorHub.getSnapshot();
     if (snapshot && Array.isArray(snapshot) && snapshot.length > 0) {
       return snapshot.slice(0, 10).map((c: Record<string, unknown>) => ({
-        connectorId: (c['id'] as string) ?? `conn-${c['name']}`,
-        label: (c['displayName'] as string) ?? (c['name'] as string) ?? 'Connector',
-        product: (c['app'] as string) ?? 'lyte',
-        status: ((c['status'] as string) ?? 'healthy').toLowerCase(),
-        lastSyncAt: (c['lastSyncAt'] as string) ?? new Date().toISOString(),
-        errorRate: (c['errorRate'] as number) ?? 0,
-        throughput: (c['throughput'] as number) ?? 100,
+        connectorId: (c.id as string) ?? `conn-${c.name}`,
+        label: (c.displayName as string) ?? (c.name as string) ?? 'Connector',
+        product: (c.app as string) ?? 'lyte',
+        status: ((c.status as string) ?? 'healthy').toLowerCase(),
+        lastSyncAt: (c.lastSyncAt as string) ?? new Date().toISOString(),
+        errorRate: (c.errorRate as number) ?? 0,
+        throughput: (c.throughput as number) ?? 100,
       }));
     }
   } catch {

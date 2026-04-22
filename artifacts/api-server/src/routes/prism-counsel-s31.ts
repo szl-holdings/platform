@@ -10,7 +10,6 @@ import {
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
-import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
@@ -130,7 +129,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const hours = parseInt(req.query.hours as string) || 24;
+      const hours = parseInt(req.query.hours as string, 10) || 24;
       const stats = await modelRouter.getRequestStats(getOrgId(req), hours);
       res.json({ stats, period: `${hours}h` });
     } catch (e: any) {
@@ -268,7 +267,7 @@ router.post(
     try {
       const count = await worldlineEngine.fetchSource(
         getOrgId(req),
-        parseInt(req.params.sourceId as string),
+        parseInt(req.params.sourceId as string, 10),
       );
       res.json({ fetched: count });
     } catch (e: any) {
@@ -284,7 +283,7 @@ router.get(
     try {
       const signals = await worldlineEngine.getSignals(getOrgId(req), {
         sourceClass: req.query.sourceClass as string,
-        limit: parseInt(req.query.limit as string) || 100,
+        limit: parseInt(req.query.limit as string, 10) || 100,
       });
       res.json({ signals });
     } catch (e: any) {
@@ -297,7 +296,7 @@ router.get('/worldline/features/:matterId', async (req: Request, res: Response) 
   try {
     const features = await worldlineEngine.getFeatures(
       getOrgId(req),
-      parseInt(req.params.matterId as string),
+      parseInt(req.params.matterId as string, 10),
     );
     res.json({ features });
   } catch (e: any) {
@@ -309,9 +308,9 @@ router.get('/pressure-graph/:matterId', async (req: Request, res: Response) => {
   try {
     const pressure = await pressureGraph.getMatterPressure(
       getOrgId(req),
-      parseInt(req.params.matterId as string),
+      parseInt(req.params.matterId as string, 10),
     );
-    res.json({ matterId: parseInt(req.params.matterId as string), dimensions: pressure });
+    res.json({ matterId: parseInt(req.params.matterId as string, 10), dimensions: pressure });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
@@ -322,7 +321,7 @@ router.post(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const matterId = parseInt(req.params.matterId as string);
+      const matterId = parseInt(req.params.matterId as string, 10);
       await pressureGraph.computeAllDimensions({ orgId: getOrgId(req), matterId });
       await pressureGraph.computeDataProducts(getOrgId(req), matterId);
       const pressure = await pressureGraph.getMatterPressure(getOrgId(req), matterId);
@@ -337,9 +336,9 @@ router.get('/data-products/:matterId', async (req: Request, res: Response) => {
   try {
     const products = await pressureGraph.getMatterDataProducts(
       getOrgId(req),
-      parseInt(req.params.matterId as string),
+      parseInt(req.params.matterId as string, 10),
     );
-    res.json({ matterId: parseInt(req.params.matterId as string), products });
+    res.json({ matterId: parseInt(req.params.matterId as string, 10), products });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
@@ -349,7 +348,7 @@ router.get('/proof-chain/matter/:matterId', async (req: Request, res: Response) 
   try {
     const chain = await proofChain.getMatterChain(
       getOrgId(req),
-      parseInt(req.params.matterId as string),
+      parseInt(req.params.matterId as string, 10),
     );
     res.json({ chain });
   } catch (e: any) {
@@ -359,7 +358,7 @@ router.get('/proof-chain/matter/:matterId', async (req: Request, res: Response) 
 
 router.get('/proof-chain/:id/trace', async (req: Request, res: Response) => {
   try {
-    const trace = await proofChain.getTrace(getOrgId(req), parseInt(req.params.id as string));
+    const trace = await proofChain.getTrace(getOrgId(req), parseInt(req.params.id as string, 10));
     if (!trace) {
       res.status(404).json({ error: 'Proof chain entry not found' });
       return;
@@ -374,7 +373,7 @@ router.get('/proof-chain/:id/verify', async (req: Request, res: Response) => {
   try {
     const result = await proofChain.verifyIntegrity(
       getOrgId(req),
-      parseInt(req.params.id as string),
+      parseInt(req.params.id as string, 10),
     );
     res.json(result);
   } catch (e: any) {
@@ -397,10 +396,10 @@ router.post(
         res.status(400).json({ error: 'Invalid request body', issues: parsed.error.issues });
         return;
       }
-      const actorId = req.user!.id;
+      const actorId = req.user?.id;
       await proofChain.setReviewState(
         getOrgId(req),
-        parseInt(req.params.id as string),
+        parseInt(req.params.id as string, 10),
         parsed.data.state,
         actorId,
       );
@@ -426,10 +425,10 @@ router.post(
         res.status(400).json({ error: 'Invalid request body', issues: parsed.error.issues });
         return;
       }
-      const actorId = req.user!.id;
+      const actorId = req.user?.id;
       await proofChain.setApprovalState(
         getOrgId(req),
-        parseInt(req.params.id as string),
+        parseInt(req.params.id as string, 10),
         parsed.data.state,
         actorId,
       );
@@ -453,7 +452,7 @@ router.get('/proof-chain/audit-packet/:matterId', async (req: Request, res: Resp
   try {
     const packet = await proofChain.generateAuditPacket(
       getOrgId(req),
-      parseInt(req.params.matterId as string),
+      parseInt(req.params.matterId as string, 10),
     );
     res.json(packet);
   } catch (e: any) {
@@ -465,7 +464,7 @@ router.get('/matter-twin/:matterId', async (req: Request, res: Response) => {
   try {
     const snapshot = await matterTwin.getLatestSnapshot(
       getOrgId(req),
-      parseInt(req.params.matterId as string),
+      parseInt(req.params.matterId as string, 10),
     );
     res.json({ snapshot });
   } catch (e: any) {
@@ -489,7 +488,7 @@ router.post(
       }
       const snapshot = await matterTwin.buildSnapshot(
         getOrgId(req),
-        parseInt(req.params.matterId as string),
+        parseInt(req.params.matterId as string, 10),
         parsed.data.type ?? 'manual',
       );
       res.json({ snapshot });
@@ -503,7 +502,7 @@ router.get('/matter-twin/:matterId/history', async (req: Request, res: Response)
   try {
     const history = await matterTwin.getSnapshotHistory(
       getOrgId(req),
-      parseInt(req.params.matterId as string),
+      parseInt(req.params.matterId as string, 10),
     );
     res.json({ history });
   } catch (e: any) {
@@ -519,7 +518,7 @@ router.get('/forecast-diff/:matterId', async (req: Request, res: Response) => {
       .where(
         and(
           eq(pcForecastDiffsTable.orgId, getOrgId(req)),
-          eq(pcForecastDiffsTable.matterId, parseInt(req.params.matterId as string)),
+          eq(pcForecastDiffsTable.matterId, parseInt(req.params.matterId as string, 10)),
         ),
       )
       .orderBy(desc(pcForecastDiffsTable.createdAt))
@@ -543,7 +542,7 @@ router.post(
       const { mode, matterId } = parsed.data;
       const session = await copilotWorkbench.createSession(
         getOrgId(req),
-        req.user!.id,
+        req.user?.id,
         mode,
         matterId,
       );
@@ -556,7 +555,7 @@ router.post(
 
 router.get('/copilot/sessions', async (req: Request, res: Response) => {
   try {
-    const sessions = await copilotWorkbench.getUserSessions(getOrgId(req), req.user!.id);
+    const sessions = await copilotWorkbench.getUserSessions(getOrgId(req), req.user?.id);
     res.json({ sessions });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -579,8 +578,8 @@ router.post(
       }
       const result = await copilotWorkbench.sendMessage(
         getOrgId(req),
-        req.user!.id,
-        parseInt(req.params.sessionId as string),
+        req.user?.id,
+        parseInt(req.params.sessionId as string, 10),
         parsed.data.content,
       );
       res.json(result);
@@ -594,8 +593,8 @@ router.get('/copilot/sessions/:sessionId/history', async (req: Request, res: Res
   try {
     const messages = await copilotWorkbench.getSessionHistory(
       getOrgId(req),
-      req.user!.id,
-      parseInt(req.params.sessionId as string),
+      req.user?.id,
+      parseInt(req.params.sessionId as string, 10),
     );
     res.json({ messages });
   } catch (e: any) {
@@ -603,7 +602,7 @@ router.get('/copilot/sessions/:sessionId/history', async (req: Request, res: Res
   }
 });
 
-router.get('/copilot/templates', async (req: Request, res: Response) => {
+router.get('/copilot/templates', async (_req: Request, res: Response) => {
   try {
     const templates = await copilotWorkbench.getPromptTemplates();
     res.json({ templates });
@@ -641,7 +640,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const days = parseInt(req.query.days as string) || 30;
+      const days = parseInt(req.query.days as string, 10) || 30;
       const since = new Date(Date.now() - days * 86400000);
       const costs = await db
         .select()

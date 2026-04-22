@@ -109,7 +109,7 @@ export const PLATFORM_PATHS: string[] = [
 ];
 
 export function isPlatformRoute(pathname: string): boolean {
-  return PLATFORM_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
+  return PLATFORM_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
 export const PLATFORM_SIDEBAR_WIDTH = 248;
@@ -225,7 +225,7 @@ function NavContent({
               <div style={{ display: 'flex', flexDirection: 'column', marginTop: 6, gap: 1 }}>
                 {group.items.map((item) => {
                   const Icon = item.icon;
-                  const active = location === item.href || location.startsWith(item.href + '/');
+                  const active = location === item.href || location.startsWith(`${item.href}/`);
                   return (
                     <Link
                       key={item.href}

@@ -227,7 +227,7 @@ export default function PortfolioIntelligencePage() {
                   <div className="grid grid-cols-3 gap-4">
                     {[
                       { label: "MoM Growth", company: `${company.growth}%`, benchmark: `${company.cohortBenchmark.medianGrowth}%`, better: company.growth >= company.cohortBenchmark.medianGrowth },
-                      { label: "Monthly Burn", company: `$${(parseInt(company.burnRate.replace(/\D/g, ""))).toLocaleString()}K`, benchmark: `$${company.cohortBenchmark.medianBurn}K`, better: parseInt(company.burnRate.replace(/\D/g, "")) <= company.cohortBenchmark.medianBurn },
+                      { label: "Monthly Burn", company: `$${(parseInt(company.burnRate.replace(/\D/g, ""), 10)).toLocaleString()}K`, benchmark: `$${company.cohortBenchmark.medianBurn}K`, better: parseInt(company.burnRate.replace(/\D/g, ""), 10) <= company.cohortBenchmark.medianBurn },
                       { label: "Runway", company: `${company.runway}mo`, benchmark: `${company.cohortBenchmark.medianRunway}mo`, better: company.runway >= company.cohortBenchmark.medianRunway },
                     ].map(b => (
                       <div key={b.label} className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-3">

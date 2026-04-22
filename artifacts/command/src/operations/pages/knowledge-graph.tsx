@@ -1,14 +1,10 @@
 import {
   AlertTriangle,
   Brain,
-  CheckCircle,
-  ChevronRight,
   Cpu,
   Database,
-  GitBranch,
   Globe,
   Layers,
-  Network,
   Search,
   Zap,
 } from 'lucide-react';
@@ -313,7 +309,7 @@ export default function KnowledgeGraph() {
                   nlResult.severity === 'CRITICAL'
                     ? 'rgba(239,68,68,0.06)'
                     : 'rgba(212,160,84,0.06)',
-                border: `1px solid ${nlResult.severity === 'CRITICAL' ? 'rgba(239,68,68,0.2)' : GOLD + '25'}`,
+                border: `1px solid ${nlResult.severity === 'CRITICAL' ? 'rgba(239,68,68,0.2)' : `${GOLD}25`}`,
               }}
             >
               <div className="flex items-center gap-2 mb-2">
@@ -374,7 +370,7 @@ export default function KnowledgeGraph() {
                   className="w-full text-left p-3 rounded-lg transition-all"
                   style={{
                     background: selected.id === n.id ? `${tc}08` : DS.surface,
-                    border: `1px solid ${selected.id === n.id ? tc + '30' : DS.border}`,
+                    border: `1px solid ${selected.id === n.id ? `${tc}30` : DS.border}`,
                   }}
                 >
                   <div className="flex items-center gap-2">
@@ -574,7 +570,7 @@ export default function KnowledgeGraph() {
                         impact.severity === 'CRITICAL'
                           ? 'rgba(239,68,68,0.05)'
                           : 'rgba(212,160,84,0.05)',
-                      border: `1px solid ${impact.severity === 'CRITICAL' ? 'rgba(239,68,68,0.15)' : GOLD + '20'}`,
+                      border: `1px solid ${impact.severity === 'CRITICAL' ? 'rgba(239,68,68,0.15)' : `${GOLD}20`}`,
                     }}
                   >
                     <p className="text-[10px] mb-2" style={{ color: DS.text.secondary }}>

@@ -95,8 +95,7 @@ export function useNotificationCenter(appName: string): NotificationCenterState 
           setNotifications(list.map((n) => apiToLive(n, appNameRef.current)));
         }
       })
-      .catch((err) => {
-        console.error('Failed to load notifications:', err);
+      .catch((_err) => {
       });
   }, []);
 
@@ -114,8 +113,7 @@ export function useNotificationCenter(appName: string): NotificationCenterState 
           setNotifications(list.map((n) => apiToLive(n, appName)));
         }
       })
-      .catch((err) => {
-        console.error('Failed to load notifications:', err);
+      .catch((_err) => {
         toast.error('Unable to load notifications.');
       });
     return () => {
@@ -263,12 +261,11 @@ export function useNotificationCenter(appName: string): NotificationCenterState 
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
     if (id.startsWith('api-')) {
       const numId = parseInt(id.replace('api-', ''), 10);
-      if (!isNaN(numId)) {
+      if (!Number.isNaN(numId)) {
         fetch(`/api/notifications/${numId}/read`, {
           method: 'PATCH',
           credentials: 'include',
-        }).catch((err) => {
-          console.error('Failed to mark notification as read:', err);
+        }).catch((_err) => {
           toast.error('Failed to mark notification as read.');
         });
       }
@@ -278,8 +275,7 @@ export function useNotificationCenter(appName: string): NotificationCenterState 
   const markAllRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     fetch('/api/notifications/read-all', { method: 'PATCH', credentials: 'include' }).catch(
-      (err) => {
-        console.error('Failed to mark all notifications as read:', err);
+      (_err) => {
         toast.error('Failed to mark all notifications as read.');
       },
     );

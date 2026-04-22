@@ -1,14 +1,7 @@
-import type { MemoryStore } from '@workspace/memory-fabric';
-import { defaultMemoryStore } from '@workspace/memory-fabric';
-import type { Reflection } from '@workspace/reflection-engine';
-import {
-  defaultCandidateSkillLibrary,
-  defaultReflectionStore,
-  reflect,
-} from '@workspace/reflection-engine';
-import type { TraceStore } from '@workspace/trace-graph';
-import { defaultTraceStore } from '@workspace/trace-graph';
-import { randomUUID } from 'crypto';
+import { type MemoryStore, defaultMemoryStore } from '@workspace/memory-fabric';
+import { type Reflection, defaultCandidateSkillLibrary, defaultReflectionStore, reflect } from '@workspace/reflection-engine';
+import { type TraceStore, defaultTraceStore } from '@workspace/trace-graph';
+import { randomUUID } from 'node:crypto';
 import type { PhaseResult } from '../types.js';
 
 export interface ReflectPhaseOptions {

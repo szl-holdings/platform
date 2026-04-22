@@ -6,10 +6,8 @@
 
 import {
   type Domain,
-  EdgeRecord,
   type EntityRecord,
   type EntityType,
-  getConnectedEdges,
   getEntity,
   KNOWLEDGE_GRAPH,
   type KnowledgeGraph,
@@ -59,7 +57,7 @@ const INTENT_PATTERNS: Array<{
       /\b(everything|all|connections?|network|web)\b.{0,30}\b(connected|related|linked|tied|about)\b.{0,30}(to|for|with)\b/i,
     type: 'entity_focus',
     depth: 3,
-    extract: (_, query) => ({ depth: 3 }),
+    extract: (_, _query) => ({ depth: 3 }),
   },
   // "follow the thread on X" / "trace X"
   {

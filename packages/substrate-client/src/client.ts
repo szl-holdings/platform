@@ -26,19 +26,7 @@
  * ```
  */
 
-import type {
-  ApprovalActionResponse,
-  ApprovalListResponse,
-  ApprovalVerdict,
-  CounterfactualResponse,
-  ExecutionMode,
-  PipelineRunSummary,
-  ReplayResponse,
-  SubmitRunResponse,
-  SubstrateClientOptions,
-  WorkflowListResponse,
-} from './types.js';
-import { SubstrateClientError } from './types.js';
+import { type ApprovalActionResponse, type ApprovalListResponse, type ApprovalVerdict, type CounterfactualResponse, type ExecutionMode, type PipelineRunSummary, type ReplayResponse, type SubmitRunResponse, type SubstrateClientOptions, type WorkflowListResponse, SubstrateClientError } from './types.js';
 
 // ─── JSON-RPC Helpers ─────────────────────────────────────────────────────────
 
@@ -92,7 +80,7 @@ export class SubstrateClient {
       Accept: 'application/json',
     };
     if (this.apiKey) {
-      headers['Authorization'] = `Bearer ${this.apiKey}`;
+      headers.Authorization = `Bearer ${this.apiKey}`;
     }
 
     const controller = new AbortController();

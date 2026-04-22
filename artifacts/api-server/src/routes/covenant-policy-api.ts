@@ -1,20 +1,5 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import type {
-  CovenantPermission,
-  CovenantPolicy,
-  CovenantResource,
-  CovenantSubject,
-} from '@szl-holdings/covenant-policy';
-import {
-  buildDomainScopedPolicy,
-  COVENANT_POLICY_TEMPLATES,
-  checkPermission,
-  covenantEngine,
-  formatDecisionForUI,
-  getDeniedDecisions,
-  getRecentDecisions,
-  instantiateTemplate,
-} from '@szl-holdings/covenant-policy';
+import { type CovenantPermission, type CovenantPolicy, type CovenantResource, type CovenantSubject, buildDomainScopedPolicy, COVENANT_POLICY_TEMPLATES, checkPermission, covenantEngine, formatDecisionForUI, getDeniedDecisions, getRecentDecisions, instantiateTemplate } from '@szl-holdings/covenant-policy';
 import { covenantSimulationRuns, db, policySimScenarios } from '@szl-holdings/db';
 import type { PrismDomain, PrismRole } from '@szl-holdings/prism-bus';
 import { and, desc, eq } from 'drizzle-orm';
@@ -545,7 +530,7 @@ router.post(
 
 router.get('/covenant/scenarios/:id', authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const id = parseInt(String(req.params['id'] ?? '0'), 10);
+    const id = parseInt(String(req.params.id ?? '0'), 10);
     const orgId = req.user?.orgs?.[0]?.orgId ?? null;
     const isAdmin = req.user?.roles?.includes('admin') || req.user?.roles?.includes('super_admin');
     if (!isAdmin && !orgId) {
@@ -574,7 +559,7 @@ router.post(
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(String(req.params['id'] ?? '0'), 10);
+      const id = parseInt(String(req.params.id ?? '0'), 10);
       const orgId = req.user?.orgs?.[0]?.orgId ?? null;
       const isAdmin =
         req.user?.roles?.includes('admin') || req.user?.roles?.includes('super_admin');
@@ -638,7 +623,7 @@ router.delete(
   requireRole('admin', 'super_admin'),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(String(req.params['id'] ?? '0'), 10);
+      const id = parseInt(String(req.params.id ?? '0'), 10);
       const orgId = req.user?.orgs?.[0]?.orgId ?? null;
       const isAdmin =
         req.user?.roles?.includes('admin') || req.user?.roles?.includes('super_admin');

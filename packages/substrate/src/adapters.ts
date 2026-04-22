@@ -8,7 +8,7 @@
  * wrapper, not a refactor. Phase 1 ships in-process adapters only.
  */
 
-import type { AnyStage, StageExecutorContext } from './types.js';
+import type { StageExecutorContext } from './types.js';
 
 // ─── Model Adapter ────────────────────────────────────────────────────────────
 

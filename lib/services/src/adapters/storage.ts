@@ -45,7 +45,7 @@ export class StorageAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ["DEFAULT_OBJECT_STORAGE_BUCKET_ID"];
 
   protected override async performHealthCheck(): Promise<void> {
-    const bucketId = process.env["DEFAULT_OBJECT_STORAGE_BUCKET_ID"];
+    const bucketId = process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID;
     if (!bucketId) {
       throw new Error("DEFAULT_OBJECT_STORAGE_BUCKET_ID is not set");
     }
@@ -61,7 +61,7 @@ export class StorageAdapter extends ServiceAdapter {
     data: Buffer | string,
     contentType: string,
   ): Promise<UploadResult> {
-    const bucketId = process.env["DEFAULT_OBJECT_STORAGE_BUCKET_ID"];
+    const bucketId = process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID;
     const size = typeof data === "string" ? Buffer.byteLength(data) : data.length;
 
     if (!this.isLive || !bucketId) {
@@ -86,7 +86,7 @@ export class StorageAdapter extends ServiceAdapter {
   }
 
   async listFiles(prefix?: string): Promise<StoredFile[]> {
-    const bucketId = process.env["DEFAULT_OBJECT_STORAGE_BUCKET_ID"];
+    const bucketId = process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID;
     if (!this.isLive || !bucketId) {
       return [];
     }

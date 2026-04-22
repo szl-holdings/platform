@@ -91,7 +91,7 @@ describe('Terra diligence evidence citations — wiring (task #1355)', () => {
       /const\s+createEvidenceSchema[\s\S]*?const\s+patchEvidenceSchema[\s\S]*?\}\);/,
     );
     expect(block).not.toBeNull();
-    const matches = block![0].match(/citations:\s*z\.array\(evidenceCitationSchema\)/g) ?? [];
+    const matches = block?.[0].match(/citations:\s*z\.array\(evidenceCitationSchema\)/g) ?? [];
     expect(matches.length).toBe(2);
   });
 });

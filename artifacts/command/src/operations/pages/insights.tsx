@@ -1,6 +1,6 @@
 import { narrativeInsights, severityColors } from '@lyte/lib/business-data';
 import { cn } from '@lyte/lib/utils';
-import { Activity, Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 
 function formatCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;

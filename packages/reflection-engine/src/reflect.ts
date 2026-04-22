@@ -1,9 +1,7 @@
-import type { MemoryEntry } from '@workspace/memory-fabric';
-import { defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
+import { type MemoryEntry, defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
 import { defaultTraceStore } from '@workspace/trace-graph';
-import { randomUUID } from 'crypto';
-import type { CandidateSkillLibrary } from './candidate-skill-library.js';
-import { defaultCandidateSkillLibrary } from './candidate-skill-library.js';
+import { randomUUID } from 'node:crypto';
+import { type CandidateSkillLibrary, defaultCandidateSkillLibrary } from './candidate-skill-library.js';
 import { classifyFailureMode } from './classifier.js';
 import { writeLessons } from './lesson-writer.js';
 import { extractBestRoute, scoreTrace } from './scorer.js';

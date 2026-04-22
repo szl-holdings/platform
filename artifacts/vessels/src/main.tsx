@@ -18,8 +18,7 @@ initAnalytics({ appSlug: 'vessels' });
 
 if ('serviceWorker' in navigator && !import.meta.env.DEV) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/vessels/sw.js', { scope: '/vessels/' }).catch((err) => {
-      console.warn('[Vessels SW] Registration failed:', err);
+    navigator.serviceWorker.register('/vessels/sw.js', { scope: '/vessels/' }).catch((_err) => {
     });
   });
 }

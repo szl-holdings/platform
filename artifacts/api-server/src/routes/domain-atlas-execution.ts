@@ -192,7 +192,7 @@ const OutcomeRecordSchema = z.object({
 
 // ─── Domain Middleware ────────────────────────────────────────────────────────
 
-function requireValidDomain(req: Request, res: Response, domain: string): boolean {
+function _requireValidDomain(_req: Request, res: Response, domain: string): boolean {
   if (!SUPPORTED_DOMAINS.includes(domain)) {
     res.status(404).json({ error: `Unknown domain: ${domain}. Supported: ${SUPPORTED_DOMAINS.join(", ")}` });
     return false;
@@ -222,12 +222,12 @@ function buildDomainRoutes(domain: string): void {
         isSimulationCapable: w.isSimulationCapable,
         stepCount: w.steps.length,
         steps: w.steps.map((s: Record<string, unknown>) => ({
-          id: s["id"],
-          name: s["name"],
-          description: s["description"],
-          requiresApproval: s["requiresApproval"],
-          approverRole: s["approverRole"],
-          executionMode: s["executionMode"],
+          id: s.id,
+          name: s.name,
+          description: s.description,
+          requiresApproval: s.requiresApproval,
+          approverRole: s.approverRole,
+          executionMode: s.executionMode,
         })),
       })),
       supportedSignalTypes: config.signalTypes,
@@ -315,7 +315,7 @@ function buildDomainRoutes(domain: string): void {
       "workflowKey": z.unknown().optional(),
     })), async (req: Request, res: Response) => {
     try {
-      const signalId = String(req.params["signalId"]);
+      const signalId = String(req.params.signalId);
       const { status } = req.body as { status?: AtlasSignalRecord["status"] };
       const validStatuses: AtlasSignalRecord["status"][] = ["raw", "normalized", "processed", "acknowledged", "resolved"];
       if (!status || !validStatuses.includes(status)) {
@@ -501,7 +501,7 @@ function buildDomainRoutes(domain: string): void {
     try {
       const { runId } = req.params;
       const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
-      const approvedBy = `user:${String(req.user!.id)}`;
+      const approvedBy = `user:${String(req.user?.id)}`;
 
       // Fetch the paused run to extract workflow context for continuation
       const existing = await dbGetRunById(runId as string, tenantId);
@@ -523,7 +523,7 @@ function buildDomainRoutes(domain: string): void {
       const approvalStep = (DOMAIN_WORKFLOWS[workflowKey].steps as WFStep[]).find(s => s.requiresApproval);
       const requiredRole = approvalStep?.approverRole;
       if (requiredRole) {
-        const userRoles: string[] = (req.user!.roles as string[]) ?? [];
+        const userRoles: string[] = (req.user?.roles as string[]) ?? [];
         const isSuperAdmin = userRoles.includes("super_admin") || userRoles.includes("admin");
         if (!isSuperAdmin && !userRoles.includes(requiredRole)) {
           sendForbidden(res, `Insufficient role: '${requiredRole}' required to approve this run`); return;
@@ -574,7 +574,7 @@ function buildDomainRoutes(domain: string): void {
     try {
       const { runId } = req.params;
       const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
-      const rejectedBy = `user:${String(req.user!.id)}`;
+      const rejectedBy = `user:${String(req.user?.id)}`;
       const cancelled = await dbCancelRun(runId as string, tenantId, rejectedBy);
       if (!cancelled) { sendNotFound(res, "Run not found or already completed"); return; }
       logger.info({ domain, runId, rejectedBy }, "domain-atlas:run:rejected");

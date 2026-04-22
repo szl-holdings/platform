@@ -20,7 +20,7 @@ let lastResetAt: string | null = null;
 
 function isProductionMode(): boolean {
   // Honor RUNTIME_MODE explicitly (audit P0-001) in addition to NODE_ENV/APP_ENV.
-  if ((process.env['RUNTIME_MODE'] ?? '').toLowerCase() === 'production') {
+  if ((process.env.RUNTIME_MODE ?? '').toLowerCase() === 'production') {
     return true;
   }
   return isProductionEnvironment();
@@ -30,7 +30,7 @@ export function register(router: IRouter): void {
   router.post('/admin/seed/reset-demo', validateBody(demoSeedResetSchema), (_req, res) => {
     if (isProductionMode()) {
       logger.warn(
-        { runtimeMode: process.env['RUNTIME_MODE'], nodeEnv: process.env['NODE_ENV'] },
+        { runtimeMode: process.env.RUNTIME_MODE, nodeEnv: process.env.NODE_ENV },
         '[demo-seed] Refused reset request — production guard active',
       );
       res.status(403).json({
@@ -43,7 +43,7 @@ export function register(router: IRouter): void {
     }
     if (guardSeedInProduction(res)) return;
 
-    const appMode = (process.env['APP_MODE'] ?? 'sandbox').toLowerCase();
+    const appMode = (process.env.APP_MODE ?? 'sandbox').toLowerCase();
 
     demoFixtureStore.reset();
     resetCount += 1;
@@ -62,7 +62,7 @@ export function register(router: IRouter): void {
   });
 
   router.get('/admin/seed/demo-status', (_req, res) => {
-    const appMode = (process.env['APP_MODE'] ?? 'sandbox').toLowerCase();
+    const appMode = (process.env.APP_MODE ?? 'sandbox').toLowerCase();
     res.status(200).json({
       appMode,
       demoActive: appMode === 'demo',

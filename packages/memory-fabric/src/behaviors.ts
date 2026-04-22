@@ -1,8 +1,7 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { isExpired, isLowValue, isProvenPlaybook, markStale } from './retention.js';
 import type { MemoryStore } from './store.js';
-import type { MemoryEntry } from './types.js';
-import { MEMORY_DOMAIN_UNKNOWN } from './types.js';
+import { type MemoryEntry, MEMORY_DOMAIN_UNKNOWN } from './types.js';
 
 export interface SummarizationResult {
   summary: MemoryEntry;

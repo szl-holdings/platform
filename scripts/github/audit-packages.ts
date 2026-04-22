@@ -118,7 +118,6 @@ async function fetchPackagesForRegistry(packageType: PackageType): Promise<Packa
     }
 
     if (!response.ok) {
-      console.warn(`  Warning: Could not fetch ${packageType} packages (HTTP ${response.status})`);
       return [];
     }
 
@@ -171,7 +170,6 @@ async function fetchPackagesForRegistry(packageType: PackageType): Promise<Packa
     if (error instanceof Error && error.message.includes('GITHUB_TOKEN')) {
       throw error;
     }
-    console.warn(`  Warning: Failed to fetch ${packageType} packages:`, error);
     return [];
   }
 }
@@ -184,23 +182,19 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function printTable(packages: PackageInfo[], registryType: PackageType): void {
+function printTable(packages: PackageInfo[], _registryType: PackageType): void {
   if (packages.length === 0) {
-    console.log('    No packages published yet.');
     return;
   }
 
   const maxNameLen = Math.max(...packages.map((p) => p.name.length), 10);
-  const header = `    ${'Package'.padEnd(maxNameLen)}  ${'Visibility'.padEnd(10)}  ${'Version'.padEnd(15)}  Updated`;
-  console.log(header);
-  console.log('    ' + '-'.repeat(header.length - 4));
+  const _header = `    ${'Package'.padEnd(maxNameLen)}  ${'Visibility'.padEnd(10)}  ${'Version'.padEnd(15)}  Updated`;
 
   for (const pkg of packages) {
-    const name = pkg.name.padEnd(maxNameLen);
-    const visibility = pkg.visibility.padEnd(10);
-    const version = (pkg.latest_version ?? '—').padEnd(15);
-    const updated = formatDate(pkg.updated_at);
-    console.log(`    ${name}  ${visibility}  ${version}  ${updated}`);
+    const _name = pkg.name.padEnd(maxNameLen);
+    const _visibility = pkg.visibility.padEnd(10);
+    const _version = (pkg.latest_version ?? '—').padEnd(15);
+    const _updated = formatDate(pkg.updated_at);
   }
 }
 
@@ -210,11 +204,6 @@ async function runAudit(options: { registry?: PackageType; json?: boolean }): Pr
     : ['npm', 'container', 'maven', 'nuget', 'rubygems'];
 
   if (!options.json) {
-    console.log('\n========================================');
-    console.log('  SZL Holdings — GitHub Packages Audit');
-    console.log(`  Organization: ${ORG}`);
-    console.log(`  Timestamp: ${new Date().toISOString()}`);
-    console.log('========================================\n');
   }
 
   const result: AuditResult = {
@@ -231,7 +220,6 @@ async function runAudit(options: { registry?: PackageType; json?: boolean }): Pr
 
   for (const registryType of registriesToAudit) {
     if (!options.json) {
-      console.log(`  ${registryType.toUpperCase()} — ${REGISTRY_URLS[registryType]}`);
     }
 
     const packages = await fetchPackagesForRegistry(registryType);
@@ -243,27 +231,13 @@ async function runAudit(options: { registry?: PackageType; json?: boolean }): Pr
 
     if (!options.json) {
       printTable(packages, registryType);
-      console.log();
     }
   }
 
   if (!options.json) {
-    console.log('========================================');
-    console.log('  Summary');
-    console.log('========================================');
-    console.log(`  Total packages: ${result.summary.total_packages}`);
-    console.log(`  Public: ${result.summary.public_packages}`);
-    console.log(`  Private: ${result.summary.private_packages}`);
-    console.log();
-    console.log('  By registry:');
-    for (const [reg, count] of Object.entries(result.summary.by_registry)) {
-      console.log(`    ${reg.padEnd(12)}: ${count} package${count !== 1 ? 's' : ''}`);
+    for (const [_reg, _count] of Object.entries(result.summary.by_registry)) {
     }
-    console.log();
-    console.log(`  View all: https://github.com/orgs/${ORG}/packages`);
-    console.log('========================================\n');
   } else {
-    console.log(JSON.stringify(result, null, 2));
   }
 }
 
@@ -276,11 +250,9 @@ const registryFlag = args.find((a) => a === '--registry')
 
 const validRegistries: PackageType[] = ['npm', 'container', 'maven', 'nuget', 'rubygems'];
 if (registryFlag && !validRegistries.includes(registryFlag)) {
-  console.error(`Invalid registry: ${registryFlag}. Must be one of: ${validRegistries.join(', ')}`);
   process.exit(1);
 }
 
-runAudit({ registry: registryFlag, json: jsonFlag }).catch((error) => {
-  console.error('\nAudit failed:', error instanceof Error ? error.message : error);
+runAudit({ registry: registryFlag, json: jsonFlag }).catch((_error) => {
   process.exit(1);
 });

@@ -94,20 +94,20 @@ async function recordHealthCheck(): Promise<void> {
     const [webProbe, authProbeResult] = await Promise.all(probePromises);
     const authProbe = authProbeEnabled ? authProbeResult : null;
 
-    const healthServices = (parsedHealth?.['services'] ?? {}) as Record<
+    const healthServices = (parsedHealth?.services ?? {}) as Record<
       string,
       { status?: string; latencyMs?: number }
     >;
     const aiStatus =
-      healthServices['ai']?.status === 'ok'
+      healthServices.ai?.status === 'ok'
         ? 'operational'
-        : healthServices['ai']?.status
+        : healthServices.ai?.status
           ? 'degraded'
           : 'operational';
     const storageStatus =
-      healthServices['storage']?.status === 'ok'
+      healthServices.storage?.status === 'ok'
         ? 'operational'
-        : healthServices['storage']?.status
+        : healthServices.storage?.status
           ? 'degraded'
           : 'operational';
 
@@ -144,7 +144,7 @@ async function recordHealthCheck(): Promise<void> {
       {
         service_id: 'ai',
         status: aiStatus,
-        latency_ms: healthServices['ai']?.latencyMs ?? Math.round(dbLatency * 0.8 + 50),
+        latency_ms: healthServices.ai?.latencyMs ?? Math.round(dbLatency * 0.8 + 50),
       },
     ];
 
@@ -184,8 +184,8 @@ async function getUptimeStats(serviceId: string, days: number): Promise<number> 
       [serviceId, days],
     );
     const row = result.rows[0];
-    if (!row || parseInt(row.total) === 0) return 99.9;
-    return parseFloat(((parseInt(row.operational) / parseInt(row.total)) * 100).toFixed(3));
+    if (!row || parseInt(row.total, 10) === 0) return 99.9;
+    return parseFloat(((parseInt(row.operational, 10) / parseInt(row.total, 10)) * 100).toFixed(3));
   } catch {
     return 99.9;
   }
@@ -309,7 +309,7 @@ router.get('/uptime-history', async (_req, res) => {
       if (!byService[row.service_id]) byService[row.service_id] = {};
       byService[row.service_id][row.day] = {
         uptime: parseFloat(row.uptime_fraction),
-        latency: row.avg_latency_ms !== null ? parseInt(row.avg_latency_ms) : null,
+        latency: row.avg_latency_ms !== null ? parseInt(row.avg_latency_ms, 10) : null,
       };
     }
     res.json({ history: byService });
@@ -396,7 +396,7 @@ router.patch(
     }),
   ),
   async (req, res) => {
-    const id = parseInt(req.params['id']!);
+    const id = parseInt(req.params.id!, 10);
     const { status, message } = req.body as { status?: string; message?: string };
     if (!status || !message) {
       res.status(400).json({ error: 'status and message required' });

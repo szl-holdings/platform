@@ -257,7 +257,7 @@ function WorkflowVisualizer({ pack }: { pack: Pack }) {
   );
 }
 
-const API_BASE = "/api";
+const _API_BASE = "/api";
 
 export default function DemoPage() {
   const [selectedPack, setSelectedPack] = useState(0);

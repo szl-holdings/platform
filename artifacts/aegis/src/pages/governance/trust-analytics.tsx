@@ -1,6 +1,5 @@
 import {
   AlertTriangle,
-  BarChart3,
   CheckCircle2,
   Database,
   Eye,
@@ -11,15 +10,12 @@ import {
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
-import { useState } from 'react';
 import {
   Area,
   AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,

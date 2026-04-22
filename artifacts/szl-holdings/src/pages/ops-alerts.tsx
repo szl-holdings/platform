@@ -1,11 +1,9 @@
 import { useProductionConfirm } from '@szl-holdings/shared-ui/production-confirm';
 import {
-  AlertTriangle,
   Bell,
   CheckCircle,
   PlayCircle,
   Plus,
-  RefreshCw,
   X,
   Zap,
 } from 'lucide-react';
@@ -247,7 +245,7 @@ function CreateRuleModal({ onClose, onCreated }: { onClose: () => void; onCreate
           metricName: form.metricName,
           condition: form.condition,
           threshold: parseFloat(form.threshold),
-          windowMinutes: parseInt(form.windowMinutes),
+          windowMinutes: parseInt(form.windowMinutes, 10),
           severity: form.severity,
           notifyInApp: form.notifyInApp,
           notifyEmail: form.notifyEmail,

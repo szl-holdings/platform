@@ -153,7 +153,7 @@ export function MergeNotification({
     >
       {autoMerges.length > 0 && (
         <div style={{ fontSize: 13, color: '#94a3b8' }}>
-          <span style={{ color: '#22c55e', fontWeight: 500 }}>{autoMerges[0]!.actorId}</span>{' '}
+          <span style={{ color: '#22c55e', fontWeight: 500 }}>{autoMerges[0]?.actorId}</span>{' '}
           updated {autoMerges.length} field{autoMerges.length > 1 ? 's' : ''} — merged
           automatically.
         </div>

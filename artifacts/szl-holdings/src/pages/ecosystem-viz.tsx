@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { Network, TrendingUp, DollarSign, BarChart3, ArrowUpRight, Globe } from "lucide-react";
+import { Network, Globe } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { usePageMeta } from "@/hooks/usePageMeta";
 

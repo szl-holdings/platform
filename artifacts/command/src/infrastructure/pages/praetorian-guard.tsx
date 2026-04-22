@@ -14,11 +14,9 @@ import {
   Lock,
   Network,
   RefreshCw,
-  Server,
   Shield,
-  Wifi,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const THREAT_LEVELS: ThreatLevel[] = ['CLEAR', 'ELEVATED', 'ACTIVE', 'CRITICAL'];
 const THREAT_LABELS: Record<ThreatLevel, { label: string; color: string; description: string }> = {
@@ -245,7 +243,7 @@ function AutoHardeningCard({ threat }: { threat: ThreatLevel }) {
 export default function PraetorianGuard() {
   const imperium = IMPERIUM_DATA;
   const threat = INTELLIGENCE_BRIEFS.threat;
-  const [tick, setTick] = useState(0);
+  const [_tick, setTick] = useState(0);
 
   useEffect(() => {
     const t = setInterval(() => setTick((x) => x + 1), 8000);

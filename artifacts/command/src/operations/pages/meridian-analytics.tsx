@@ -1,13 +1,8 @@
 import {
-  Activity,
   ArrowDown,
   ArrowUp,
   BarChart3,
   Clock,
-  Cpu,
-  HardDrive,
-  TrendingUp,
-  Wifi,
   Zap,
 } from 'lucide-react';
 

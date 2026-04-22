@@ -5,8 +5,7 @@
  * Supports full evidence chain traversal: recommendation → evidence items → signals → entities.
  */
 
-import type { EvidenceItem, Recommendation } from '@workspace/ontology';
-import { defaultEntityRegistry } from '@workspace/ontology';
+import { type EvidenceItem, type Recommendation, defaultEntityRegistry } from '@workspace/ontology';
 import {
   defaultEvidenceStore,
   defaultRecommendationStore,

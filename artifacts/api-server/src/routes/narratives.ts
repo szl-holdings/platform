@@ -82,7 +82,7 @@ function ensureNarrativeInMesh(narrativeId: NarrativeId): void {
  * production mesh by an anonymous caller.
  */
 function requireAuthInProduction(req: Request, res: Response): boolean {
-  if (process.env['NODE_ENV'] === 'production' && !req.user) {
+  if (process.env.NODE_ENV === 'production' && !req.user) {
     res.status(401).json({ error: 'Authentication required', code: 'UNAUTHENTICATED' });
     return false;
   }
@@ -92,7 +92,7 @@ function requireAuthInProduction(req: Request, res: Response): boolean {
 router.get('/narratives/:id', (req: Request, res: Response) => {
   if (!requireAuthInProduction(req, res)) return;
 
-  const id = req.params['id'] as NarrativeId | undefined;
+  const id = req.params.id as NarrativeId | undefined;
   if (!id || !(id in NARRATIVES)) {
     res.status(404).json({ error: 'narrative_not_found', id });
     return;
@@ -144,7 +144,7 @@ router.get('/narratives/:id', (req: Request, res: Response) => {
   const meshFreshness = {
     seededAt: entry.seededAt,
     recommendationCreatedAt: recommendation.createdAt,
-    latestSignalAt: signals.length > 0 ? signals[signals.length - 1]!.occurredAt : null,
+    latestSignalAt: signals.length > 0 ? signals[signals.length - 1]?.occurredAt : null,
     latestEvidenceAt:
       evidenceItems.length > 0
         ? evidenceItems

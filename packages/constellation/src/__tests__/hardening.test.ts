@@ -14,18 +14,14 @@
  *   • Freshness           — stale detection, confidence correlation
  */
 
-import type { EvaluationRequest, Policy } from '@szl-holdings/policy-engine';
-import { checkAction, registerPolicy, unregisterPolicy } from '@szl-holdings/policy-engine';
-import type { EvalCase, EvalSuiteDef } from '@workspace/agents-evals';
-import { runEvalSuite } from '@workspace/agents-evals';
+import { type EvaluationRequest, checkAction, registerPolicy, unregisterPolicy } from '@szl-holdings/policy-engine';
+import { type EvalCase, type EvalSuiteDef, runEvalSuite } from '@workspace/agents-evals';
 import { InMemoryToolRegistry, ToolManifestSchema } from '@workspace/tool-mesh';
 import { defaultMcpBridge, ToolMeshMcpBridge } from '@workspace/tool-mesh/mcp-bridge';
-import type { TraceRecord } from '@workspace/trace-graph';
-import { InMemoryTraceStore, TraceQueryEngine } from '@workspace/trace-graph';
+import { type TraceRecord, InMemoryTraceStore, TraceQueryEngine } from '@workspace/trace-graph';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { findNeighbors, findPath, searchNodes, subgraph } from '../graph-utils.js';
-import type { ConstellationEdge, ConstellationNode } from '../schema.js';
-import { ConstellationEdgeSchema, ConstellationNodeSchema } from '../schema.js';
+import { type ConstellationEdge, type ConstellationNode, ConstellationEdgeSchema, ConstellationNodeSchema } from '../schema.js';
 import { InMemoryGraphStore } from '../store.js';
 
 const NOW = new Date().toISOString();
@@ -111,7 +107,7 @@ describe('Graph Integrity', () => {
     store.upsertNode(node);
     store.upsertNode({ ...node, label: 'Entity A Updated' });
     expect(store.nodeCount()).toBe(1);
-    expect(store.getNode('n1')!.label).toBe('Entity A Updated');
+    expect(store.getNode('n1')?.label).toBe('Entity A Updated');
   });
 
   it('stores orphan edges referencing missing nodes', () => {
@@ -129,7 +125,7 @@ describe('Graph Integrity', () => {
 
     expect(store.listEdges({ fromNodeId: 'nA' })).toHaveLength(1);
     expect(store.listEdges({ toNodeId: 'nB' })).toHaveLength(1);
-    expect(store.listEdges({ fromNodeId: 'nA' })[0]!.toNodeId).toBe('nB');
+    expect(store.listEdges({ fromNodeId: 'nA' })[0]?.toNodeId).toBe('nB');
   });
 
   it('finds cross-domain neighbors', () => {
@@ -155,7 +151,7 @@ describe('Graph Integrity', () => {
 
     const path = findPath(store, 'n1', 'n4');
     expect(path).not.toBeNull();
-    expect(path!.map((n) => n.id)).toEqual(['n1', 'n2', 'n3', 'n4']);
+    expect(path?.map((n) => n.id)).toEqual(['n1', 'n2', 'n3', 'n4']);
   });
 
   it('extracts domain subgraph (nodes + internal edges)', () => {
@@ -202,8 +198,8 @@ describe('Trace Ingestion', () => {
     traceStore.save(trace);
     const retrieved = traceStore.get('trace-hard-1');
     expect(retrieved).toBeDefined();
-    expect(retrieved!.agentId).toBe('hardening-agent');
-    expect(retrieved!.totalTokens).toBe(100);
+    expect(retrieved?.agentId).toBe('hardening-agent');
+    expect(retrieved?.totalTokens).toBe(100);
   });
 
   it('counts stored traces correctly', () => {
@@ -250,7 +246,7 @@ describe('Trace Ingestion', () => {
     traceStore.save(makeTrace('ts-err', { status: 'failed' }));
     const errors = traceStore.list({ status: 'failed' });
     expect(errors).toHaveLength(1);
-    expect(errors[0]!.traceId).toBe('ts-err');
+    expect(errors[0]?.traceId).toBe('ts-err');
   });
 });
 
@@ -536,9 +532,9 @@ describe('MCP Tool Schema', () => {
 
     const tool = schema.find((t) => t.name === 'mcp_hardening_tool');
     expect(tool).toBeDefined();
-    expect(tool!.inputSchema.type).toBe('object');
-    expect(tool!.inputSchema.required).toContain('query');
-    expect(tool!.inputSchema.required as string[]).not.toContain('limit');
+    expect(tool?.inputSchema.type).toBe('object');
+    expect(tool?.inputSchema.required).toContain('query');
+    expect(tool?.inputSchema.required as string[]).not.toContain('limit');
   });
 
   it('disabled tools are excluded from MCP schema', () => {
@@ -584,8 +580,8 @@ describe('MCP Tool Schema', () => {
     const bridge = new ToolMeshMcpBridge(localRegistry);
     const schema = bridge.listTools();
     const tool = schema.find((t) => t.name === 'schema_req_test_tool');
-    expect(tool!.inputSchema.required).toContain('required_field');
-    expect(tool!.inputSchema.required as string[]).not.toContain('optional_field');
+    expect(tool?.inputSchema.required).toContain('required_field');
+    expect(tool?.inputSchema.required as string[]).not.toContain('optional_field');
   });
 
   it('defaultMcpBridge server info has correct protocol version', () => {
@@ -608,7 +604,7 @@ describe('MCP Tool Schema', () => {
     const info = defaultMcpBridge.getServerInfo();
     const found = info.tools.find((t) => t.name === uniqueName);
     expect(found).toBeDefined();
-    expect(found!.description).toBe('Hardening external tool');
+    expect(found?.description).toBe('Hardening external tool');
 
     defaultMcpBridge.unregisterExternalTool(uniqueName);
   });
@@ -698,8 +694,8 @@ describe('Rollback', () => {
     history.push({ version: '1.0.0', status: 'active' });
 
     const current = history.filter((d) => d.status === 'active').at(-1);
-    expect(current!.version).toBe('1.0.0');
-    expect(history.find((d) => d.status === 'rolled-back')!.version).toBe('1.1.0');
+    expect(current?.version).toBe('1.0.0');
+    expect(history.find((d) => d.status === 'rolled-back')?.version).toBe('1.1.0');
   });
 
   it('identifies the latest stable version from history', () => {
@@ -708,7 +704,7 @@ describe('Rollback', () => {
       status: i < 3 ? ('inactive' as const) : ('rolled-back' as const),
     }));
     const good = history.filter((d) => d.status === 'inactive');
-    expect(good.at(-1)!.version).toBe('1.2.0');
+    expect(good.at(-1)?.version).toBe('1.2.0');
   });
 
   it('prevents rollback when no previous version exists', () => {
@@ -765,7 +761,7 @@ describe('Entity Linking', () => {
 
     const terraNodes = store.listNodes({ domain: 'terra' });
     expect(terraNodes).toHaveLength(1);
-    expect(terraNodes[0]!.id).toBe('fd-t1');
+    expect(terraNodes[0]?.id).toBe('fd-t1');
   });
 });
 

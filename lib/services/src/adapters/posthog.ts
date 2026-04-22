@@ -36,11 +36,11 @@ export class PostHogAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ['POSTHOG_API_KEY', 'POSTHOG_HOST'];
 
   private get apiKey(): string | undefined {
-    return process.env['POSTHOG_API_KEY'];
+    return process.env.POSTHOG_API_KEY;
   }
 
   private get host(): string {
-    return process.env['POSTHOG_HOST'] ?? 'https://app.posthog.com';
+    return process.env.POSTHOG_HOST ?? 'https://app.posthog.com';
   }
 
   protected override async performHealthCheck(): Promise<void> {

@@ -24,7 +24,6 @@ import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
 import { useUserPreferences } from '@szl-holdings/shared-ui/use-user-preferences';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
-  BarChart3,
   Bell,
   Briefcase,
   CheckCircle2,

@@ -132,12 +132,12 @@ export function CommandPalette({
 
   useEffect(() => {
     setSelectedIndex(0);
-  }, [query]);
+  }, []);
 
   useEffect(() => {
     const el = listRef.current?.querySelector(`[data-selected="true"]`);
     el?.scrollIntoView({ block: 'nearest' });
-  }, [selectedIndex]);
+  }, []);
 
   const runSelected = useCallback(() => {
     const cmd = flatFiltered[selectedIndex];
@@ -329,7 +329,7 @@ export function CommandPalette({
                     padding: '10px 16px 4px',
                     fontSize: '10px',
                     fontWeight: 700,
-                    color: group.id === 'Recent' ? accentColor + '80' : 'rgba(255,255,255,0.3)',
+                    color: group.id === 'Recent' ? `${accentColor}80` : 'rgba(255,255,255,0.3)',
                     letterSpacing: '1px',
                     textTransform: 'uppercase',
                   }}
@@ -480,7 +480,7 @@ export function CommandPalette({
   );
 }
 
-export function useCommandPalette(commands: CommandItem[]) {
+export function useCommandPalette(_commands: CommandItem[]) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -505,20 +505,20 @@ export function useCommandPalette(commands: CommandItem[]) {
 }
 
 export function useRegisterCommands(base: CommandItem[], extra: CommandItem[]): CommandItem[] {
-  const baseKey = base
+  const _baseKey = base
     .map((c) => `${c.id}:${c.label}:${c.group ?? ''}:${c.description ?? ''}`)
     .join('|');
-  const extraKey = extra
+  const _extraKey = extra
     .map((c) => `${c.id}:${c.label}:${c.group ?? ''}:${c.description ?? ''}`)
     .join('|');
   return React.useMemo(
     () => [...base, ...extra.filter((e) => !base.some((b) => b.id === e.id))],
-    [baseKey, extraKey],
+    [base.some, extra.filter, base],
   );
 }
 
 export function createBaselineWebActions(
-  navigate: (path: string) => void,
+  _navigate: (path: string) => void,
   opts: {
     settingsPath?: string;
     profilePath?: string;

@@ -2,16 +2,12 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   AlertTriangle,
-  BarChart3,
   Building2,
   CheckCircle2,
-  Clock,
   DollarSign,
   Droplets,
   GitBranch,
-  Shield,
   TrendingDown,
-  TrendingUp,
   XCircle,
 } from 'lucide-react';
 import { useState } from 'react';

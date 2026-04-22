@@ -11,7 +11,6 @@ import {
   MapPin,
   Navigation,
   Ship,
-  TrendingUp,
   Wrench,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -211,7 +210,7 @@ export default function VesselsLandingPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {CORE_VIEWS.map((view, i) => (
+          {CORE_VIEWS.map((view, _i) => (
             <div
               key={view.title}
               className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-6"
@@ -235,7 +234,7 @@ export default function VesselsLandingPage() {
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {WHAT_IT_SOLVES.map((tile, i) => (
+            {WHAT_IT_SOLVES.map((tile, _i) => (
               <div key={tile} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
                 <div className="w-3 h-3 rounded-full border-2 border-sky-400/30 mb-3" />
                 <p className="text-[12px] text-sky-300/60 leading-snug">{tile}</p>

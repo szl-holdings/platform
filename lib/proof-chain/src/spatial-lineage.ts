@@ -4,7 +4,7 @@ import {
   type ProvenanceSourceClass,
 } from "@szl-holdings/db";
 import { eq, and } from "drizzle-orm";
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
 
 export interface TagSpatialContentParams {
   orgId?: number | null;
@@ -55,7 +55,7 @@ export async function tagSpatialContent(
   const exportSafety = deriveExportSafetyState(params.sourceClass, confidence);
 
   const enrichedMetadata: Record<string, unknown> = {
-    ...(params.metadata ?? {}),
+    ...params.metadata,
     ...(params.parentSnapshotId != null ? { parentSnapshotId: params.parentSnapshotId } : {}),
     ...(params.derivedSimulationBranch ? { derivedSimulationBranch: params.derivedSimulationBranch } : {}),
     ...(params.renderedArtifactHash ? { renderedArtifactHash: params.renderedArtifactHash } : {}),

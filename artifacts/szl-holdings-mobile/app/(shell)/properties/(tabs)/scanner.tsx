@@ -1,15 +1,15 @@
 import { Feather } from '@expo/vector-icons';
 import { useSyncEngine } from '@szl-holdings/mobile-shared';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, PanResponder, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 interface ScannerCard {
@@ -32,10 +32,10 @@ const DIST_TYPE_COLORS: Record<string, string> = {
   'Tax Lien': '#8b5cf6',
 };
 
-function formatCurrency(n: number) {
-  if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + 'M';
-  if (n >= 1e3) return '$' + Math.round(n / 1e3) + 'K';
-  return '$' + n;
+function _formatCurrency(n: number) {
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
+  if (n >= 1e3) return `$${Math.round(n / 1e3)}K`;
+  return `$${n}`;
 }
 
 function SwipeCard({
@@ -100,9 +100,9 @@ function SwipeCard({
           backgroundColor: colors.surfaceElevated,
           borderColor:
             action === 'right'
-              ? colors.emerald + '60'
+              ? `${colors.emerald}60`
               : action === 'left'
-                ? colors.rose + '60'
+                ? `${colors.rose}60`
                 : colors.border,
           transform: [
             { translateX: isTop ? pan.x : 0 },
@@ -119,8 +119,8 @@ function SwipeCard({
           style={[
             styles.swipeLabel,
             {
-              backgroundColor: action === 'right' ? colors.emerald + '20' : colors.rose + '20',
-              borderColor: action === 'right' ? colors.emerald + '40' : colors.rose + '40',
+              backgroundColor: action === 'right' ? `${colors.emerald}20` : `${colors.rose}20`,
+              borderColor: action === 'right' ? `${colors.emerald}40` : `${colors.rose}40`,
             },
           ]}
         >
@@ -139,7 +139,7 @@ function SwipeCard({
         <View
           style={[
             styles.distressChip,
-            { backgroundColor: typeColor + '15', borderColor: typeColor + '30' },
+            { backgroundColor: `${typeColor}15`, borderColor: `${typeColor}30` },
           ]}
         >
           <Text style={[styles.distressText, { color: typeColor }]}>{card.distressType}</Text>
@@ -147,7 +147,7 @@ function SwipeCard({
         <View
           style={[
             styles.scoreBox,
-            { borderColor: scoreColor + '40', backgroundColor: scoreColor + '10' },
+            { borderColor: `${scoreColor}40`, backgroundColor: `${scoreColor}10` },
           ]}
         >
           <Text style={[styles.scoreLarge, { color: scoreColor }]}>{card.score}</Text>
@@ -195,7 +195,7 @@ function SwipeCard({
           }}
           style={[
             styles.cardAction,
-            { backgroundColor: colors.rose + '10', borderColor: colors.rose + '30' },
+            { backgroundColor: `${colors.rose}10`, borderColor: `${colors.rose}30` },
           ]}
         >
           <Feather name="x" size={22} color={colors.rose} />
@@ -207,7 +207,7 @@ function SwipeCard({
           }}
           style={[
             styles.cardAction,
-            { backgroundColor: colors.emerald + '10', borderColor: colors.emerald + '30' },
+            { backgroundColor: `${colors.emerald}10`, borderColor: `${colors.emerald}30` },
           ]}
         >
           <Feather name="check" size={22} color={colors.emerald} />
@@ -260,7 +260,7 @@ export default function ScannerTab() {
       setIsLoadingCards(true);
       try {
         const res = await fetch(
-          API_BASE + '/terra/distress/search?limit=10&minScore=60&sort=opportunityScore',
+          `${API_BASE}/terra/distress/search?limit=10&minScore=60&sort=opportunityScore`,
         );
         if (res.ok) {
           const json = await res.json();
@@ -290,8 +290,8 @@ export default function ScannerTab() {
                   score: p.opportunityScore ?? 70,
                   price:
                     p.estimatedValue >= 1e6
-                      ? '$' + (p.estimatedValue / 1e6).toFixed(1) + 'M'
-                      : '$' + Math.round(p.estimatedValue / 1e3) + 'K',
+                      ? `$${(p.estimatedValue / 1e6).toFixed(1)}M`
+                      : `$${Math.round(p.estimatedValue / 1e3)}K`,
                   daysListed: p.daysInDistress ?? 0,
                   ownerName: p.ownerName ?? 'Owner Unknown',
                   thesis:
@@ -326,7 +326,7 @@ export default function ScannerTab() {
     setIsLoadingCards(true);
     try {
       const res = await fetch(
-        API_BASE + '/terra/distress/search?limit=10&minScore=60&sort=opportunityScore',
+        `${API_BASE}/terra/distress/search?limit=10&minScore=60&sort=opportunityScore`,
       );
       if (res.ok) {
         const json = await res.json();
@@ -356,8 +356,8 @@ export default function ScannerTab() {
                 score: p.opportunityScore ?? 70,
                 price:
                   p.estimatedValue >= 1e6
-                    ? '$' + (p.estimatedValue / 1e6).toFixed(1) + 'M'
-                    : '$' + Math.round(p.estimatedValue / 1e3) + 'K',
+                    ? `$${(p.estimatedValue / 1e6).toFixed(1)}M`
+                    : `$${Math.round(p.estimatedValue / 1e3)}K`,
                 daysListed: p.daysInDistress ?? 0,
                 ownerName: p.ownerName ?? 'Owner Unknown',
                 thesis:
@@ -388,11 +388,11 @@ export default function ScannerTab() {
           <Text style={[styles.title, { color: colors.cream }]}>Swipe to Decide</Text>
         </View>
         <View style={styles.counters}>
-          <View style={[styles.counter, { backgroundColor: colors.emerald + '15' }]}>
+          <View style={[styles.counter, { backgroundColor: `${colors.emerald}15` }]}>
             <Feather name="check" size={10} color={colors.emerald} />
             <Text style={[styles.counterText, { color: colors.emerald }]}>{addedCount}</Text>
           </View>
-          <View style={[styles.counter, { backgroundColor: colors.rose + '15' }]}>
+          <View style={[styles.counter, { backgroundColor: `${colors.rose}15` }]}>
             <Feather name="x" size={10} color={colors.rose} />
             <Text style={[styles.counterText, { color: colors.rose }]}>{dismissedCount}</Text>
           </View>
@@ -402,7 +402,7 @@ export default function ScannerTab() {
       <View
         style={[
           styles.dataSourceBadge,
-          { backgroundColor: apiLoaded ? colors.emerald + '10' : colors.gold + '10' },
+          { backgroundColor: apiLoaded ? `${colors.emerald}10` : `${colors.gold}10` },
         ]}
       >
         <View

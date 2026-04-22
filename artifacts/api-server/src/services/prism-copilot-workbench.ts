@@ -2,10 +2,8 @@ import { db } from '@szl-holdings/db';
 import {
   pcCopilotMessagesTable,
   pcCopilotSessionsTable,
-  pcProofChainEntriesTable,
 } from '@szl-holdings/db/schema';
 import { and, desc, eq } from 'drizzle-orm';
-import { logger } from '../lib/logger';
 import { modelRouter } from './prism-model-router';
 import { proofChain } from './prism-proof-chain';
 
@@ -182,7 +180,7 @@ class CopilotWorkbenchService {
     };
   }
 
-  private generateFallbackResponse(mode: CopilotMode, userMessage: string): string {
+  private generateFallbackResponse(mode: CopilotMode, _userMessage: string): string {
     const responses: Record<CopilotMode, string> = {
       matter: `## Matter Status Summary\n\n**Current Assessment**: Based on available data, here is your matter overview:\n\n- **Health Score**: Monitoring active matter signals across all pressure dimensions\n- **Key Pressures**: Deadline compliance, insurer response cadence, and evidence completeness are the primary drivers\n- **Missing Items**: Review the Matter Twin for a complete list of outstanding artifacts\n- **Recommended Actions**: Address highest-pressure dimensions first; check approval queue for pending items\n\n*Source: Pressure Graph, Matter Twin, Proof Chain | Confidence: 0.78*`,
       communications: `## Communications Analysis\n\n**Recent Activity**: Analyzing carrier and opposing counsel communication patterns.\n\n- **Response Cadence**: Monitoring for silence windows and response lag\n- **Key Extractions**: Reviewing for asks, commitments, denials, and disclaimers\n- **Follow-up Queue**: Tasks derived from communications are routed through Alloy approval\n\n*Source: Communication logs, Insurer Pressure Index | Confidence: 0.82*`,

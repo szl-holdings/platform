@@ -1,8 +1,6 @@
-import type { GatewayInvocationResult, ToolHandler } from './gateway.js';
-import { defaultGateway, type ToolMeshGateway } from './gateway.js';
+import { type GatewayInvocationResult, defaultGateway, type ToolMeshGateway } from './gateway.js';
 import type { ToolManifest } from './manifest.js';
-import type { ToolRegistry } from './registry.js';
-import { defaultToolRegistry } from './registry.js';
+import { type ToolRegistry, defaultToolRegistry } from './registry.js';
 
 export interface McpToolDefinition {
   name: string;
@@ -41,7 +39,7 @@ function manifestToMcpTool(manifest: ToolManifest): McpToolDefinition {
   let required: string[] | undefined;
 
   if (schema) {
-    const schemaProperties = schema['properties'];
+    const schemaProperties = schema.properties;
     if (
       schemaProperties &&
       typeof schemaProperties === 'object' &&
@@ -49,7 +47,7 @@ function manifestToMcpTool(manifest: ToolManifest): McpToolDefinition {
     ) {
       properties = schemaProperties as Record<string, unknown>;
     }
-    const schemaRequired = schema['required'];
+    const schemaRequired = schema.required;
     if (Array.isArray(schemaRequired) && schemaRequired.every((f) => typeof f === 'string')) {
       required = schemaRequired as string[];
     }

@@ -16,8 +16,7 @@
 
 import type { WorkflowDescriptor } from '@szl-holdings/shared-contracts';
 import { createWorkflowRun, executeWorkflowRun } from '@szl-holdings/workflow-runtime';
-import type { Request, Response } from 'express';
-import { type IRouter, Router } from 'express';
+import { type Request, type Response, type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { runStore } from '../../store.js';
 
@@ -117,9 +116,9 @@ router.get('/', (req: Request, res: Response): void => {
 
 router.get('/:runId', (req: Request, res: Response): void => {
   const tid = tenantId(req);
-  const run = runStore.get(req.params['runId'] as string, tid);
+  const run = runStore.get(req.params.runId as string, tid);
   if (!run) {
-    res.status(404).json({ error: `Run not found: ${req.params['runId']}` });
+    res.status(404).json({ error: `Run not found: ${req.params.runId}` });
     return;
   }
   res.status(200).json(run);
@@ -127,9 +126,9 @@ router.get('/:runId', (req: Request, res: Response): void => {
 
 router.post('/:runId/resume', async (req: Request, res: Response): Promise<void> => {
   const tid = tenantId(req);
-  const run = runStore.get(req.params['runId'] as string, tid);
+  const run = runStore.get(req.params.runId as string, tid);
   if (!run) {
-    res.status(404).json({ error: `Run not found: ${req.params['runId']}` });
+    res.status(404).json({ error: `Run not found: ${req.params.runId}` });
     return;
   }
 
@@ -166,9 +165,9 @@ router.post('/:runId/resume', async (req: Request, res: Response): Promise<void>
 
 router.post('/:runId/approve', async (req: Request, res: Response): Promise<void> => {
   const tid = tenantId(req);
-  const run = runStore.get(req.params['runId'] as string, tid);
+  const run = runStore.get(req.params.runId as string, tid);
   if (!run) {
-    res.status(404).json({ error: `Run not found: ${req.params['runId']}` });
+    res.status(404).json({ error: `Run not found: ${req.params.runId}` });
     return;
   }
   if (run.state !== 'approval-required') {
@@ -201,9 +200,9 @@ router.post('/:runId/approve', async (req: Request, res: Response): Promise<void
 
 router.delete('/:runId', (req: Request, res: Response): void => {
   const tid = tenantId(req);
-  const run = runStore.get(req.params['runId'] as string, tid);
+  const run = runStore.get(req.params.runId as string, tid);
   if (!run) {
-    res.status(404).json({ error: `Run not found: ${req.params['runId']}` });
+    res.status(404).json({ error: `Run not found: ${req.params.runId}` });
     return;
   }
   const cancelled = { ...run, state: 'cancelled' as const, completedAt: new Date().toISOString() };

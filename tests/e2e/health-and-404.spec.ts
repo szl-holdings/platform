@@ -20,7 +20,7 @@
 import { expect, test } from '@playwright/test';
 
 const BASE_PATH = (process.env.SZL_BASE_PATH ?? '/').replace(/\/$/, '');
-const API_BASE = process.env.API_BASE_URL ?? `${BASE_PATH}`;
+const _API_BASE = process.env.API_BASE_URL ?? `${BASE_PATH}`;
 
 // ---------------------------------------------------------------------------
 // Helpers

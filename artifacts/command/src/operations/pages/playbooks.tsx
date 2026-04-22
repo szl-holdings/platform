@@ -4,11 +4,8 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   BookOpen,
-  CheckCircle2,
   ChevronRight,
   Circle,
-  FileText,
-  Hash,
   Lock,
   Search,
 } from 'lucide-react';

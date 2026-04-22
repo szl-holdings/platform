@@ -5,28 +5,21 @@ import {
   AlertCircle,
   BookOpen,
   CheckCircle2,
-  ChevronDown,
-  Clock,
   Edit3,
-  ExternalLink,
-  Eye,
-  FileText,
-  Globe,
   Image,
   Loader2,
   Plus,
-  RefreshCw,
   Save,
   Trash2,
   X,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { apiFetch, apiFetchAdmin } from './api';
+import { apiFetchAdmin } from './api';
 import { StatusBadge } from './CmsTablePanel';
 
 const API = '/api';
-function getCsrfToken(): string {
+function _getCsrfToken(): string {
   const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
   return match ? decodeURIComponent(match[1]) : '';
 }
@@ -365,7 +358,7 @@ function CmsPostsPanel() {
       if (isNew) {
         return apiFetchAdmin('/cms/posts', { method: 'POST', body: JSON.stringify(vals) });
       } else {
-        return apiFetchAdmin(`/cms/posts/${editing!.id}`, {
+        return apiFetchAdmin(`/cms/posts/${editing?.id}`, {
           method: 'PUT',
           body: JSON.stringify(vals),
         });

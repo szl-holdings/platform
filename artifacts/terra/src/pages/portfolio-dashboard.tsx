@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   ArrowRight,
   BarChart3,
-  Building2,
   DollarSign,
   Layers,
   Percent,
@@ -15,8 +14,6 @@ import { useState } from 'react';
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
   Cell,
   Pie,

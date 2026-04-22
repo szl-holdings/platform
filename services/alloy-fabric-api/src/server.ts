@@ -41,29 +41,23 @@ registerOpenAICompatRoute(v1);
 
 app.use(v1);
 
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('[alloy-fabric-api] Unhandled error:', err.message);
+app.use((_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   res.status(500).json({
     error: 'internal_server_error',
     message: 'An unexpected error occurred. Check server logs.',
   });
 });
 
-const PORT = Number(process.env['PORT'] ?? 4200);
+const PORT = Number(process.env.PORT ?? 4200);
 
 // Seed boot data (smoke/dev tenants) before accepting traffic
 seedBootData()
   .then(() => {
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`[alloy-fabric-api] Listening on port ${PORT}`);
-      console.log(`[alloy-fabric-api] Health: http://0.0.0.0:${PORT}/health`);
-      console.log(`[alloy-fabric-api] Docs:   http://0.0.0.0:${PORT}/docs`);
     });
   })
-  .catch((err: Error) => {
-    console.error('[alloy-fabric-api] Boot seed failed — starting anyway:', err.message);
+  .catch((_err: Error) => {
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`[alloy-fabric-api] Listening on port ${PORT}`);
     });
   });
 

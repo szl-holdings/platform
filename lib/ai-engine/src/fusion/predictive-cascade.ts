@@ -263,7 +263,7 @@ const DOMAIN_ADJACENCY: Record<
   ],
 };
 
-const IMPACT_LEVELS: CascadeImpactLevel[] = [
+const _IMPACT_LEVELS: CascadeImpactLevel[] = [
   'negligible',
   'moderate',
   'significant',
@@ -351,7 +351,7 @@ export class PredictiveCascadeEngine {
     rootSignal: string,
     rootProbability: number,
     horizon: CascadeHorizon,
-    metadata?: Record<string, unknown>,
+    _metadata?: Record<string, unknown>,
   ): CascadeTree {
     const maxDays = horizonToDays(horizon);
     const nodes: CascadeNode[] = [];
@@ -536,11 +536,11 @@ export class PredictiveCascadeEngine {
     } = {},
   ): PredictiveAlert[] {
     let results = this.predictiveAlerts.filter((a) => new Date(a.expiresAt) > new Date());
-    if (options.status?.length) results = results.filter((a) => options.status!.includes(a.status));
+    if (options.status?.length) results = results.filter((a) => options.status?.includes(a.status));
     if (options.severity?.length)
-      results = results.filter((a) => options.severity!.includes(a.severity));
+      results = results.filter((a) => options.severity?.includes(a.severity));
     if (options.domains?.length)
-      results = results.filter((a) => a.affectedDomains.some((d) => options.domains!.includes(d)));
+      results = results.filter((a) => a.affectedDomains.some((d) => options.domains?.includes(d)));
     return results.slice(0, options.limit ?? 50);
   }
 

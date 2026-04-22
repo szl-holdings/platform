@@ -470,15 +470,12 @@ async function generate(brief: BriefMeta) {
         `Trim ${brief.source} to fit the leave-behind format.`,
     );
   }
-
-  console.log(`✓ Generated ${brief.output} (${range.count} page${range.count === 1 ? '' : 's'})`);
 }
 
 async function main() {
   for (const b of briefs) await generate(b);
 }
 
-main().catch((err) => {
-  console.error(err);
+main().catch((_err) => {
   process.exit(1);
 });

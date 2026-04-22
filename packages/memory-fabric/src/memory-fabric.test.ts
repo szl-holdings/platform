@@ -10,8 +10,7 @@ import {
   redactEntry,
 } from './retention.js';
 import { InMemoryStore } from './store.js';
-import type { MemoryEntry } from './types.js';
-import { MemoryEntrySchema, MemoryTypeSchema } from './types.js';
+import { type MemoryEntry, MemoryEntrySchema, MemoryTypeSchema } from './types.js';
 
 function makeEntry(
   id: string,
@@ -134,7 +133,7 @@ describe('All 10 memory types — write & read', () => {
       confidence: 0.99,
     });
     store.put(entry);
-    expect(store.get('sem1')!.confidence).toBe(0.99);
+    expect(store.get('sem1')?.confidence).toBe(0.99);
   });
 
   it('skill entry can be pinned as proven playbook', () => {
@@ -143,7 +142,7 @@ describe('All 10 memory types — write & read', () => {
       retention: { policy: 'persistent', pinned: true },
     });
     store.put(entry);
-    expect(store.get('sk1')!.retention.pinned).toBe(true);
+    expect(store.get('sk1')?.retention.pinned).toBe(true);
   });
 
   it('executive memory stores high-sensitivity insights', () => {
@@ -163,7 +162,7 @@ describe('All 10 memory types — write & read', () => {
       confidence: 0.8,
     });
     store.put(entry);
-    expect(store.get('of1')!.provenance.method).toBe('human');
+    expect(store.get('of1')?.provenance.method).toBe('human');
   });
 
   it('artifact memory links to entity and traces', () => {
@@ -374,16 +373,16 @@ describe('Retention helpers', () => {
   it('getTTLByType returns all 10 types with expected null/number values', () => {
     const ttls = getTTLByType();
     expect(Object.keys(ttls)).toHaveLength(10);
-    expect(ttls['working']).toBeCloseTo(0.042, 2);
-    expect(ttls['session']).toBe(1);
-    expect(ttls['episodic']).toBe(90);
-    expect(ttls['semantic']).toBeNull();
-    expect(ttls['workflow']).toBe(7);
-    expect(ttls['entity']).toBe(90);
-    expect(ttls['artifact']).toBe(365);
+    expect(ttls.working).toBeCloseTo(0.042, 2);
+    expect(ttls.session).toBe(1);
+    expect(ttls.episodic).toBe(90);
+    expect(ttls.semantic).toBeNull();
+    expect(ttls.workflow).toBe(7);
+    expect(ttls.entity).toBe(90);
+    expect(ttls.artifact).toBe(365);
     expect(ttls['operator-feedback']).toBe(730);
-    expect(ttls['executive']).toBe(180);
-    expect(ttls['skill']).toBeNull();
+    expect(ttls.executive).toBe(180);
+    expect(ttls.skill).toBeNull();
   });
 });
 
@@ -392,14 +391,14 @@ describe('Tier-based redaction', () => {
     const entry = makeEntry('sec1', 'session', 'safe-data', { sensitivity: 'internal' });
     const result = redactEntry(entry, 'internal');
     expect(result).not.toBeNull();
-    expect(result!.value).toBe('test-value');
+    expect(result?.value).toBe('test-value');
   });
 
   it('returns full entry when requester clearance exceeds entry sensitivity', () => {
     const entry = makeEntry('sec2', 'entity', 'customer-data', { sensitivity: 'internal' });
     const result = redactEntry(entry, 'confidential');
     expect(result).not.toBeNull();
-    expect(result!.value).toBe('test-value');
+    expect(result?.value).toBe('test-value');
   });
 
   it('redacts value and metadata when requester is one level below entry sensitivity', () => {
@@ -410,9 +409,9 @@ describe('Tier-based redaction', () => {
     });
     const result = redactEntry(entry, 'public');
     expect(result).not.toBeNull();
-    expect(result!.value).toBe('[REDACTED]');
-    expect(result!.metadata).toEqual({});
-    expect(result!.linkedEntities).toEqual([]);
+    expect(result?.value).toBe('[REDACTED]');
+    expect(result?.metadata).toEqual({});
+    expect(result?.linkedEntities).toEqual([]);
   });
 
   it('redacts confidential entry for internal requester (one level below)', () => {
@@ -422,8 +421,8 @@ describe('Tier-based redaction', () => {
     });
     const result = redactEntry(entry, 'internal');
     expect(result).not.toBeNull();
-    expect(result!.value).toBe('[REDACTED]');
-    expect(result!.metadata).toEqual({});
+    expect(result?.value).toBe('[REDACTED]');
+    expect(result?.metadata).toEqual({});
   });
 
   it('redacts restricted entry for confidential requester (one level below)', () => {
@@ -433,7 +432,7 @@ describe('Tier-based redaction', () => {
     });
     const result = redactEntry(entry, 'confidential');
     expect(result).not.toBeNull();
-    expect(result!.value).toBe('[REDACTED]');
+    expect(result?.value).toBe('[REDACTED]');
   });
 
   it('hard-denies (null) when requester is two or more levels below entry sensitivity', () => {
@@ -453,7 +452,7 @@ describe('Tier-based redaction', () => {
       summary: 'Classified summary',
     });
     const result = redactEntry(entry, 'internal');
-    expect(result!.summary).toBe('[REDACTED]');
+    expect(result?.summary).toBe('[REDACTED]');
   });
 
   it('checkSensitivity still reflects whether full access is allowed', () => {
@@ -478,8 +477,8 @@ describe('Behaviors — episodic summarization', () => {
     }
     const result = summarizeEpisodes(store, 'scope-A', { minEpisodes: 3 });
     expect(result).not.toBeNull();
-    expect(result!.summary.tier).toBe('semantic');
-    expect(result!.collapsedIds).toHaveLength(5);
+    expect(result?.summary.tier).toBe('semantic');
+    expect(result?.collapsedIds).toHaveLength(5);
   });
 
   it('returns null when episodes are insufficient', () => {
@@ -505,7 +504,7 @@ describe('Behaviors — episodic summarization', () => {
       minEpisodes: 3,
       summarizeFn: (entries) => `Custom summary of ${entries.length} events`,
     });
-    expect(result!.summary.value).toBe('Custom summary of 3 events');
+    expect(result?.summary.value).toBe('Custom summary of 3 events');
   });
 
   it('summary inherits highest sensitivity from source episodes', () => {
@@ -528,7 +527,7 @@ describe('Behaviors — episodic summarization', () => {
       }),
     );
     const result = summarizeEpisodes(store, 'scope-E', { minEpisodes: 3 });
-    expect(result!.summary.sensitivity).toBe('confidential');
+    expect(result?.summary.sensitivity).toBe('confidential');
   });
 });
 
@@ -550,9 +549,9 @@ describe('Behaviors — lesson distillation', () => {
     }
     const result = distillLessons(store, { minFeedback: 2 });
     expect(result).not.toBeNull();
-    expect(result!.lesson.tier).toBe('skill');
-    expect(result!.lesson.retention.pinned).toBe(true);
-    expect(result!.sourceIds).toHaveLength(3);
+    expect(result?.lesson.tier).toBe('skill');
+    expect(result?.lesson.retention.pinned).toBe(true);
+    expect(result?.sourceIds).toHaveLength(3);
   });
 
   it('returns null when high-quality feedback is insufficient', () => {
@@ -574,7 +573,7 @@ describe('Behaviors — lesson distillation', () => {
       minFeedback: 2,
       distillFn: (entries) => `Learned from ${entries.length} corrections`,
     });
-    expect(result!.lesson.value).toBe('Learned from 2 corrections');
+    expect(result?.lesson.value).toBe('Learned from 2 corrections');
   });
 });
 
@@ -616,7 +615,7 @@ describe('Behaviors — retention enforcement', () => {
     );
     const result = enforceRetention(store);
     expect(result.pinned).toBe(1);
-    expect(store.get('sk1')!.retention.pinned).toBe(true);
+    expect(store.get('sk1')?.retention.pinned).toBe(true);
   });
 
   it('does not evict pinned entries regardless of low confidence', () => {
@@ -677,16 +676,16 @@ describe('Memory CRUD with provenance', () => {
   it('freshness.lastUpdatedAt is updated on put', () => {
     const entry = makeEntry('e1', 'workflow', 'step-output');
     store.put(entry);
-    const before = store.get('e1')!.freshness.lastUpdatedAt;
+    const before = store.get('e1')?.freshness.lastUpdatedAt;
     store.put({ ...entry, value: 'updated' });
-    const after = store.get('e1')!.freshness.lastUpdatedAt;
+    const after = store.get('e1')?.freshness.lastUpdatedAt;
     expect(new Date(after).getTime()).toBeGreaterThanOrEqual(new Date(before).getTime());
   });
 
   it('freshness.lastAccessedAt is updated on get', () => {
     const entry = makeEntry('e2', 'session', 'ctx');
     store.put(entry);
-    expect(store.get('e2')!.freshness.lastAccessedAt).toBeDefined();
+    expect(store.get('e2')?.freshness.lastAccessedAt).toBeDefined();
   });
 
   it('linked entities, traces, and actions are preserved round-trip', () => {

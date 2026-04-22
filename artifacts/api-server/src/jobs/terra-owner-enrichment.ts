@@ -31,7 +31,7 @@ import {
   terraDistressPropertiesTable,
   terraPropertiesTable,
 } from '@szl-holdings/db';
-import { and, eq, isNotNull, ilike, or, sql } from 'drizzle-orm';
+import { and, eq, isNotNull, sql } from 'drizzle-orm';
 import { logger } from '../lib/logger';
 
 export interface EnrichmentResult {
@@ -395,7 +395,7 @@ export async function resolveDistressOwnerNames(opts?: {
 
       if (!dryRun) {
         const existingRaw = (row.rawData as Record<string, unknown> | null) ?? {};
-        const existingEnrichment = (existingRaw['enrichment'] as Record<string, unknown> | undefined) ?? {};
+        const existingEnrichment = (existingRaw.enrichment as Record<string, unknown> | undefined) ?? {};
 
         if (resolved.tier <= 2) {
           // Tier 1 / 2 — verified real-entity lookups: write canonical ownerName

@@ -6,7 +6,6 @@ import {
   AlertTriangle,
   CheckCircle,
   ChevronRight,
-  Clock,
   Database,
   Eye,
   GitBranch,
@@ -431,7 +430,7 @@ export default function AegisAtlasRuntime() {
 function AegisAtlasRuntimeContent() {
   const [selectedTwin, setSelectedTwin] = useState<DigitalTwin | null>(null);
   const [lastRefresh, setLastRefresh] = useState(new Date());
-  const [pulse, setPulse] = useState(false);
+  const [_pulse, setPulse] = useState(false);
   const safeMode = useExecutiveSafeMode();
   const [, setSafeMode] = useExecutiveSafeModeToggle();
 
@@ -876,7 +875,7 @@ function AegisAtlasRuntimeContent() {
                   twins ·{' '}
                   {allStable
                     ? 'All stable'
-                    : wlTwins.filter((t) => t.health !== 'stable').length + ' need attention'}
+                    : `${wlTwins.filter((t) => t.health !== 'stable').length} need attention`}
                 </div>
               </a>
             );

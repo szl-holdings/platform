@@ -1,5 +1,5 @@
-import { AnimatePresence, m } from 'framer-motion';
-import { BarChart3, Check, Copy, GitBranch, Play, Star, TrendingUp, Wand2 } from 'lucide-react';
+import { m } from 'framer-motion';
+import { GitBranch, Wand2 } from 'lucide-react';
 import { useState } from 'react';
 
 const PROMPTS = [

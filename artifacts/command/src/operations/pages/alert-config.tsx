@@ -2,7 +2,6 @@
 
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
-import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
@@ -597,7 +596,7 @@ export default function AlertConfig() {
   });
 
   const alerts: CommandAlert[] = Array.isArray(data) ? data : (data?.data ?? []);
-  const meta = data?.meta ?? {};
+  const _meta = data?.meta ?? {};
   const firingCount = alerts.filter((a) => a.status === 'firing').length;
   const activeCount = alerts.filter((a) => a.status === 'active').length;
 

@@ -34,15 +34,13 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
   }
 
   if (finalStatus !== 'granted') {
-    console.log('[Push] Permission not granted');
     return null;
   }
 
   try {
     const tokenData = await Notifications.getExpoPushTokenAsync();
     return tokenData.data;
-  } catch (err) {
-    console.log('[Push] Could not get push token:', err);
+  } catch (_err) {
     return null;
   }
 }

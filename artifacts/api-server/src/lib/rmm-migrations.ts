@@ -1,5 +1,5 @@
 import { db } from '@szl-holdings/db';
-import { createCipheriv, randomBytes, scryptSync } from 'crypto';
+import { createCipheriv, randomBytes, scryptSync } from 'node:crypto';
 import { sql } from 'drizzle-orm';
 import { logger } from './logger';
 

@@ -182,11 +182,11 @@ export class HoneyhiveConnector extends ToolConnector {
     capabilityId: string,
     params: Record<string, unknown>,
   ): Promise<unknown> {
-    const apiKey = process.env['HONEYHIVE_API_KEY'];
+    const apiKey = process.env.HONEYHIVE_API_KEY;
     if (!apiKey) throw new Error('HONEYHIVE_API_KEY not configured');
 
     const projectId =
-      (params['projectId'] as string | undefined) ?? process.env['HONEYHIVE_PROJECT_ID'];
+      (params.projectId as string | undefined) ?? process.env.HONEYHIVE_PROJECT_ID;
     const baseUrl = 'https://api.honeyhive.ai';
     const headers = {
       Authorization: `Bearer ${apiKey}`,
@@ -200,13 +200,13 @@ export class HoneyhiveConnector extends ToolConnector {
           headers,
           body: JSON.stringify({
             project: projectId,
-            session_id: params['sessionId'],
-            model: params['model'],
-            inputs: { prompt: params['prompt'] },
-            outputs: { completion: params['completion'] },
-            metadata: params['metadata'],
-            tags: params['tags'],
-            user_properties: params['feedback'],
+            session_id: params.sessionId,
+            model: params.model,
+            inputs: { prompt: params.prompt },
+            outputs: { completion: params.completion },
+            metadata: params.metadata,
+            tags: params.tags,
+            user_properties: params.feedback,
           }),
         });
         if (!resp.ok)
@@ -216,10 +216,10 @@ export class HoneyhiveConnector extends ToolConnector {
       case 'get_sessions': {
         const query = new URLSearchParams();
         if (projectId) query.set('project', projectId);
-        if (params['model']) query.set('model', String(params['model']));
-        if (params['limit']) query.set('limit', String(params['limit']));
-        if (params['startTime']) query.set('start_time', String(params['startTime']));
-        if (params['endTime']) query.set('end_time', String(params['endTime']));
+        if (params.model) query.set('model', String(params.model));
+        if (params.limit) query.set('limit', String(params.limit));
+        if (params.startTime) query.set('start_time', String(params.startTime));
+        if (params.endTime) query.set('end_time', String(params.endTime));
         const resp = await fetch(`${baseUrl}/sessions?${query}`, { headers });
         if (!resp.ok)
           throw new Error(`Honeyhive sessions error ${resp.status}: ${await resp.text()}`);
@@ -231,11 +231,11 @@ export class HoneyhiveConnector extends ToolConnector {
           headers,
           body: JSON.stringify({
             project: projectId,
-            name: params['evaluationName'],
-            dataset_id: params['datasetId'],
-            prompt_version: params['promptVersion'],
-            model_config: params['modelConfig'],
-            metrics: params['metrics'],
+            name: params.evaluationName,
+            dataset_id: params.datasetId,
+            prompt_version: params.promptVersion,
+            model_config: params.modelConfig,
+            metrics: params.metrics,
           }),
         });
         if (!resp.ok)
@@ -245,7 +245,7 @@ export class HoneyhiveConnector extends ToolConnector {
       case 'get_metrics': {
         const query = new URLSearchParams();
         if (projectId) query.set('project', projectId);
-        if (params['granularity']) query.set('granularity', String(params['granularity']));
+        if (params.granularity) query.set('granularity', String(params.granularity));
         const resp = await fetch(`${baseUrl}/metrics?${query}`, { headers });
         if (!resp.ok)
           throw new Error(`Honeyhive metrics error ${resp.status}: ${await resp.text()}`);
@@ -265,7 +265,7 @@ export class HoneyhiveConnector extends ToolConnector {
   }
 
   protected override async performHealthCheck(): Promise<void> {
-    const apiKey = process.env['HONEYHIVE_API_KEY'];
+    const apiKey = process.env.HONEYHIVE_API_KEY;
     if (!apiKey) throw new Error('HONEYHIVE_API_KEY not configured');
     const resp = await fetch('https://api.honeyhive.ai/projects', {
       headers: { Authorization: `Bearer ${apiKey}` },

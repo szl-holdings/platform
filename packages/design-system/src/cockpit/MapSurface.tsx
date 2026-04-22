@@ -82,7 +82,7 @@ export function MapSurface({
               width: r * 2,
               height: r * 2,
               borderColor: fill,
-              backgroundColor: fill + '33',
+              backgroundColor: `${fill}33`,
             }}
           >
             {marker.pulse && (
@@ -108,7 +108,7 @@ export function MapSurface({
         >
           <span
             className="block whitespace-nowrap rounded px-1 py-0.5 text-xs font-medium"
-            style={{ color: color.text.primary, background: color.bg.base + 'cc' }}
+            style={{ color: color.text.primary, background: `${color.bg.base}cc` }}
           >
             {marker.label}
           </span>

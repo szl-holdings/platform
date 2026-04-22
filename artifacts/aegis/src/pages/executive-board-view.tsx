@@ -1,25 +1,13 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
   AlertTriangle,
   BarChart3,
-  Building2,
   CheckCircle2,
-  ChevronRight,
-  Clock,
   Download,
-  Eye,
-  FileText,
   Lock,
   Minus,
-  Shield,
   ShieldCheck,
-  Target,
-  TrendingDown,
-  TrendingUp,
-  Users,
-  Zap,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { api } from '@/lib/api';
@@ -287,8 +275,8 @@ export default function ExecutiveBoardView() {
   const sensitivityLabel = execPosture?.ztDataLabels?.sensitivityLabel ?? 'EXECUTIVE-ONLY';
 
   const lastUpdated = execPosture?.fetchedAt
-    ? new Date(execPosture.fetchedAt).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'
-    : new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC';
+    ? `${new Date(execPosture.fetchedAt).toISOString().slice(0, 16).replace('T', ' ')} UTC`
+    : `${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC`;
 
   const activeIncidents = useMemo(() => {
     const open = liveIncidents.filter((i) => i.status !== 'closed' && i.status !== 'resolved');
@@ -407,7 +395,7 @@ export default function ExecutiveBoardView() {
   ];
 
   const usingLiveIncidents = liveIncidents.length > 0;
-  const usingLiveRisks = topRisks.length > 0;
+  const _usingLiveRisks = topRisks.length > 0;
 
   return (
     <div

@@ -8,7 +8,7 @@
  * deterministically in CI with no external dependencies.
  */
 
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { SubstrateRuntime } from '../engine.js';
 import type { AnyStage, StageExecutorContext, StageExecutorFn } from '../types.js';
 

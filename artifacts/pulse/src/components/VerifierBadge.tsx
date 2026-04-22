@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock, } from 'lucide-react';
 
 export type VerifierStatus = 'passed' | 'revision_required' | 'pending';
 

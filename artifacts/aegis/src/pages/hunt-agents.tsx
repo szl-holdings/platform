@@ -2,21 +2,12 @@ import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
-  AlertTriangle,
   Brain,
   CheckCircle,
-  ChevronRight,
   Clock,
-  Database,
-  Eye,
-  Network,
   Play,
   RefreshCw,
   Search,
-  Target,
-  TrendingUp,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -341,7 +332,7 @@ export default function HuntAgents() {
                   <div className="h-1 rounded-full bg-white/8">
                     <div
                       className="h-full rounded-full transition-all"
-                      style={{ width: `${agent.learningScore}%`, background: agent.color + '80' }}
+                      style={{ width: `${agent.learningScore}%`, background: `${agent.color}80` }}
                     />
                   </div>
                 </div>

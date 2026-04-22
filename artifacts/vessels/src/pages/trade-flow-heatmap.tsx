@@ -9,7 +9,6 @@ import {
   ChevronRight,
   Droplets,
   Eye,
-  Filter,
   Fuel,
   Globe,
   MapPin,

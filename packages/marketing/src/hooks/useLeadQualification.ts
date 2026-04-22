@@ -39,7 +39,6 @@ function emit(data: FunnelEvent): void {
     if (ph?.capture) ph.capture(event, props);
   } catch (_) {}
   if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
-    console.debug(`[lead-qualification] ${event}`, props);
   }
 }
 

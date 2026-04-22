@@ -34,7 +34,7 @@ export class ElevenLabsAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ['ELEVENLABS_API_KEY'];
 
   private get apiKey(): string | undefined {
-    return process.env['ELEVENLABS_API_KEY'];
+    return process.env.ELEVENLABS_API_KEY;
   }
 
   protected override async performHealthCheck(): Promise<void> {

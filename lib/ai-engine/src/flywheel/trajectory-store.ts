@@ -12,7 +12,7 @@
  *   4. Inject: Golden runs are used as few-shot examples in future prompts
  */
 
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 
 export type TrajectoryStatus = 'captured' | 'scored' | 'golden' | 'filtered_out';
 

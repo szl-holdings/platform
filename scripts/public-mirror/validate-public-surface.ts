@@ -97,7 +97,7 @@ let warnings = 0;
 // ─── Utilities ───────────────────────────────────────────────────────────────
 
 function log(msg: string): void {
-  process.stdout.write(msg + '\n');
+  process.stdout.write(`${msg}\n`);
 }
 
 function addResult(label: string, status: CheckResult['status'], detail?: string): void {
@@ -176,9 +176,9 @@ function checkEnvFiles(): void {
     if (name === '.env.example') return;
     if (
       name === '.env' ||
-      /^\.env\./.test(name) ||
-      /\.env$/.test(name) ||
-      /\.env\.local$/.test(name)
+      name.startsWith('.env.') ||
+      name.endsWith('.env') ||
+      name.endsWith('.env.local')
     ) {
       found.push(path.relative(TARGET, filePath));
     }
@@ -254,7 +254,7 @@ function findInternalDocsRecursive(rootDir: string): string[] {
       const childRel = rel ? `${rel}/${entry.name}` : entry.name;
       const childFull = path.join(dir, entry.name);
       if (entry.name === 'node_modules' || entry.name === '.git') continue;
-      if (internalPattern.test(childRel + '/')) {
+      if (internalPattern.test(`${childRel}/`)) {
         found.push(childRel);
       } else {
         walk(childFull, childRel);
@@ -354,7 +354,7 @@ function checkReadmeContent(): void {
 // ─── Report Generation ───────────────────────────────────────────────────────
 
 function writeReport(): void {
-  const date = new Date().toISOString().replace('T', ' ').split('.')[0] + ' UTC';
+  const date = `${new Date().toISOString().replace('T', ' ').split('.')[0]} UTC`;
   const statusLabel = errors > 0 ? 'FAILED' : 'PASSED';
 
   const lines: string[] = [
@@ -408,7 +408,7 @@ function writeReport(): void {
   );
 
   fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
-  fs.writeFileSync(REPORT_PATH, lines.join('\n') + '\n', 'utf-8');
+  fs.writeFileSync(REPORT_PATH, `${lines.join('\n')}\n`, 'utf-8');
 }
 
 // ─── Main ────────────────────────────────────────────────────────────────────

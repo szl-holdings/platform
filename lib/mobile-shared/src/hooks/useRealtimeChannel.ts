@@ -230,7 +230,7 @@ export function useRealtimeChannel<T = unknown>(
         wsRef.current = null;
       }
     };
-  }, [channel, wsUrl, connect]);
+  }, [connect]);
 
   return {
     messages,

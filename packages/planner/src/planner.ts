@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { decomposeObjective } from './decomposer.js';
 import { generateFallbackPlans } from './fallback-generator.js';
 import { rankFallbacks } from './ranker.js';
@@ -26,7 +26,7 @@ export async function createPlan(
   context: PlanContext = {},
   options: { store?: PlanStore; persist?: boolean } = {},
 ): Promise<PlanGraph> {
-  if (!objective || !objective.trim()) {
+  if (!objective?.trim()) {
     throw new Error('objective must be a non-empty string');
   }
   const ctx = PlanContextSchema.parse(context);
@@ -103,7 +103,7 @@ export async function getPlanFallbacks(
 
 function deriveTitle(objective: string): string {
   const cleaned = objective.trim().replace(/\s+/g, ' ');
-  return cleaned.length <= 80 ? cleaned : cleaned.slice(0, 77) + '…';
+  return cleaned.length <= 80 ? cleaned : `${cleaned.slice(0, 77)}…`;
 }
 
 function deriveConfidence(steps: PlanStep[]): number {

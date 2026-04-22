@@ -541,10 +541,10 @@ function defaultValueForType(type: string): string {
   if (/^(string)\b/.test(t)) return '"value"';
   if (/^(number)\b/.test(t)) return '0';
   if (/^(boolean)\b/.test(t)) return 'true';
-  if (/\[\]$/.test(t) || /^Array</.test(t)) return '[]';
-  if (/=>/.test(t) || /^\(/.test(t)) return '() => {}';
+  if (t.endsWith('[]') || t.startsWith('Array<')) return '[]';
+  if (/=>/.test(t) || t.startsWith('(')) return '() => {}';
   if (t === 'ReactNode' || t === 'React.ReactNode') return 'null';
-  if (/^Record</.test(t)) return '{}';
+  if (t.startsWith('Record<')) return '{}';
   return '/* TODO */';
 }
 
@@ -896,7 +896,7 @@ function ComponentDetail({ entry }: { entry: CatalogEntry }) {
                       {prop.required && <span className="text-[8px] text-nexus-red font-mono uppercase">*</span>}
                     </div>
                     <span className="text-[9px] font-mono text-muted-foreground/50 bg-nexus-bg border border-nexus px-1 py-0.5 rounded">
-                      {prop.type.length > 20 ? prop.type.slice(0, 20) + '…' : prop.type}
+                      {prop.type.length > 20 ? `${prop.type.slice(0, 20)}…` : prop.type}
                     </span>
                   </div>
                   <p className="text-[10px] text-muted-foreground/60 leading-relaxed">{prop.description}</p>

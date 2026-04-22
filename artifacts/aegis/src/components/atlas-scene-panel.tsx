@@ -1,8 +1,6 @@
 import {
   Activity,
   AlertTriangle,
-  CheckCircle2,
-  Clock,
   Info,
   ShieldAlert,
   XCircle,

@@ -92,10 +92,10 @@ export class PACERAdapter extends ServiceAdapter {
   readonly requiredEnvVars = ['PACER_USERNAME', 'PACER_PASSWORD'];
 
   private get username(): string | undefined {
-    return process.env['PACER_USERNAME'];
+    return process.env.PACER_USERNAME;
   }
   private get password(): string | undefined {
-    return process.env['PACER_PASSWORD'];
+    return process.env.PACER_PASSWORD;
   }
 
   private readonly BASE_URL = 'https://pcl.uscourts.gov/pcl-public-api/rest';
@@ -151,11 +151,11 @@ export class PACERAdapter extends ServiceAdapter {
       pageNumber: 1,
       pageSize: params.limit ?? 20,
     };
-    if (params.partyName) body['lastName'] = params.partyName;
-    if (params.caseTitle) body['caseTitle'] = params.caseTitle;
-    if (params.courtCode) body['courtIds'] = [params.courtCode];
-    if (params.dateFiledStart) body['dateFiledFrom'] = params.dateFiledStart;
-    if (params.dateFiledEnd) body['dateFiledTo'] = params.dateFiledEnd;
+    if (params.partyName) body.lastName = params.partyName;
+    if (params.caseTitle) body.caseTitle = params.caseTitle;
+    if (params.courtCode) body.courtIds = [params.courtCode];
+    if (params.dateFiledStart) body.dateFiledFrom = params.dateFiledStart;
+    if (params.dateFiledEnd) body.dateFiledTo = params.dateFiledEnd;
 
     const data = await this.pacerRequest<{
       content: Array<Record<string, unknown>>;
@@ -163,20 +163,20 @@ export class PACERAdapter extends ServiceAdapter {
     }>('/cases/find', body);
     return {
       cases: (data.content ?? []).map((c) => ({
-        caseId: String(c['caseId'] ?? ''),
-        caseNumber: String(c['caseNumberFull'] ?? ''),
-        title: String(c['caseTitle'] ?? ''),
-        court: String(c['courtName'] ?? ''),
-        courtCode: String(c['courtId'] ?? ''),
-        dateOpened: String(c['dateFiled'] ?? ''),
-        dateClosed: c['dateClosed'] ? String(c['dateClosed']) : null,
-        caseType: String(c['caseType'] ?? 'cv'),
+        caseId: String(c.caseId ?? ''),
+        caseNumber: String(c.caseNumberFull ?? ''),
+        title: String(c.caseTitle ?? ''),
+        court: String(c.courtName ?? ''),
+        courtCode: String(c.courtId ?? ''),
+        dateOpened: String(c.dateFiled ?? ''),
+        dateClosed: c.dateClosed ? String(c.dateClosed) : null,
+        caseType: String(c.caseType ?? 'cv'),
         causeCodes: [],
-        natureOfSuit: c['natureOfSuit'] ? String(c['natureOfSuit']) : null,
-        jurisdictionType: String(c['jurisdictionType'] ?? ''),
+        natureOfSuit: c.natureOfSuit ? String(c.natureOfSuit) : null,
+        jurisdictionType: String(c.jurisdictionType ?? ''),
         juryDemand: null,
         classAction: false,
-        status: c['dateClosed'] ? 'closed' : 'open',
+        status: c.dateClosed ? 'closed' : 'open',
         parties: [],
       })),
       totalCount: data.totalElements ?? 0,
@@ -221,13 +221,13 @@ export class PACERAdapter extends ServiceAdapter {
       { pageSize: limit },
     );
     return (data.content ?? []).map((d) => ({
-      documentNumber: String(d['documentNumber'] ?? ''),
-      dateFiled: String(d['dateFiled'] ?? ''),
-      description: String(d['docketText'] ?? ''),
-      pageCount: d['pageCount'] ? Number(d['pageCount']) : null,
-      attachments: Number(d['attachmentCount'] ?? 0),
-      documentId: d['documentId'] ? String(d['documentId']) : null,
-      isSealed: Boolean(d['sealed']),
+      documentNumber: String(d.documentNumber ?? ''),
+      dateFiled: String(d.dateFiled ?? ''),
+      description: String(d.docketText ?? ''),
+      pageCount: d.pageCount ? Number(d.pageCount) : null,
+      attachments: Number(d.attachmentCount ?? 0),
+      documentId: d.documentId ? String(d.documentId) : null,
+      isSealed: Boolean(d.sealed),
     }));
   }
 

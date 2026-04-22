@@ -5,12 +5,10 @@ import {
   Activity,
   AlertTriangle,
   BarChart2,
-  CheckCircle,
   DollarSign,
   FileText,
   Globe,
   Radio,
-  TrendingUp,
   Zap,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';

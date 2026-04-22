@@ -80,7 +80,7 @@ const HOST_IP: Record<string, string> = {
 
 const SESSION_DATE = '2026-04-17';
 
-function tsToEpochMs(ts: string): number {
+function _tsToEpochMs(ts: string): number {
   // ts format "HH:MM:SS.mmm"
   const [hms, ms = '0'] = ts.split('.');
   const [hh, mm, ss] = hms.split(':').map((n) => Number.parseInt(n, 10));

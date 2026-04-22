@@ -22,7 +22,7 @@ export const verifyIndexHealthWorkflow: WorkflowDefinition = {
       description:
         'Run index health checks: count vectors, check for missing or corrupt chunks, validate metadata alignment.',
       async execute(ctx: WorkflowContext, _prior: WorkflowStepResult[]) {
-        const expectedChunks = Number(ctx.input['expectedChunks'] ?? 0);
+        const expectedChunks = Number(ctx.input.expectedChunks ?? 0);
         return indexVerifier.execute(ctx, { expectedChunks, indexedChunks: expectedChunks });
       },
     },

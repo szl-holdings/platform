@@ -63,7 +63,7 @@ export function useCriticalAlertNotifier(
       if (seenIds.current.has(signal.id)) return;
       seenIds.current.add(signal.id);
 
-      const rank = SEVERITY_RANK[signal.severity] ?? 0;
+      const _rank = SEVERITY_RANK[signal.severity] ?? 0;
       const wantsCritical = preferences.critical && signal.severity === 'critical';
       const wantsHigh = preferences.high && signal.severity === 'high';
       const wantsMedium = preferences.medium && signal.severity === 'medium';

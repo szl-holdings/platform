@@ -15,13 +15,13 @@ import {
 } from '@szl-holdings/shared-ui/onboarding';
 import { RealtimeStatusIndicator } from '@szl-holdings/shared-ui/realtime-status-indicator';
 import { ServiceStatusRail } from '@szl-holdings/shared-ui/service-status-rail';
-import { colors, spacing } from '@szl-holdings/shared-ui/tokens';
+import { colors, } from '@szl-holdings/shared-ui/tokens';
 import { useRealtimeChannel } from '@szl-holdings/shared-ui/use-realtime-channel';
 import {
   useEffectiveAccent,
   useUserPreferences,
 } from '@szl-holdings/shared-ui/use-user-preferences';
-import { cn, toAlpha } from '@szl-holdings/shared-ui/utils';
+import { toAlpha } from '@szl-holdings/shared-ui/utils';
 import { useQuery } from '@tanstack/react-query';
 import {
   Activity,
@@ -42,24 +42,20 @@ import {
   FileSearch,
   FileText,
   GitBranch,
-  GitMerge,
   Globe,
   Hammer,
   HardHat,
   Landmark,
   Layers,
   LayoutDashboard,
-  Map,
   MapPin,
   Menu,
   Network,
   PanelLeftClose,
   PanelLeftOpen,
-  Percent,
   PieChart,
   Radio,
   RefreshCw,
-  Ruler,
   Scale,
   Search,
   Shield,
@@ -71,7 +67,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'wouter';
+import { useLocation } from 'wouter';
 
 function pathToTerraActionType(path: string): string | undefined {
   const seg = path.replace(/^\/+/, '').split('/')[0];
@@ -734,7 +730,6 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           id="main-content"
           data-szl-shell-main
           className="flex-1 overflow-auto p-4 md:p-5"
-          role="main"
           tabIndex={-1}
         >
           <SectionErrorBoundary sectionName="DOMAINE">{children}</SectionErrorBoundary>

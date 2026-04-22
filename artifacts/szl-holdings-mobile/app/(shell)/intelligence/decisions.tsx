@@ -3,9 +3,8 @@ import {
   VARIANT_RECOMMENDATIONS,
   VARIANT_SOURCE_HEALTH,
 } from '@szl-holdings/shared-ui/os-demo-data';
-import type { Recommendation, RecommendationAction } from '@szl-holdings/shared-ui/os-layer';
-import { AUTONOMY_LABELS, POLICY_VERDICT_LABELS } from '@szl-holdings/shared-ui/os-layer';
-import React, { useCallback, useState } from 'react';
+import { type Recommendation, type RecommendationAction, AUTONOMY_LABELS, POLICY_VERDICT_LABELS } from '@szl-holdings/shared-ui/os-layer';
+import { useCallback, useState } from 'react';
 import {
   Modal,
   RefreshControl,
@@ -154,7 +153,7 @@ function RecDetailModal({ rec, onClose, onAction, colors }: RecDetailModalProps)
               <View
                 style={[
                   styles.pill,
-                  { backgroundColor: vColor + '22', borderColor: vColor + '55' },
+                  { backgroundColor: `${vColor}22`, borderColor: `${vColor}55` },
                 ]}
               >
                 <Text style={{ color: vColor, fontSize: 11, fontWeight: '600' }}>
@@ -363,7 +362,7 @@ function RecCard({ rec, onPress, colors }: RecCardProps) {
         <View
           style={[
             styles.priorityBadge,
-            { backgroundColor: vColor + '18', borderColor: vColor + '35' },
+            { backgroundColor: `${vColor}18`, borderColor: `${vColor}35` },
           ]}
         >
           <Text style={{ color: vColor, fontSize: 9, fontWeight: '700' }}>{rec.priority}</Text>
@@ -379,7 +378,7 @@ function RecCard({ rec, onPress, colors }: RecCardProps) {
         >
           <Text style={{ color: colors.textMuted, fontSize: 9 }}>{timeAgo(rec.createdAt)}</Text>
           <View
-            style={[styles.pill, { backgroundColor: vColor + '22', borderColor: vColor + '55' }]}
+            style={[styles.pill, { backgroundColor: `${vColor}22`, borderColor: `${vColor}55` }]}
           >
             <Text style={{ color: vColor, fontSize: 9, fontWeight: '600' }}>
               {POLICY_VERDICT_LABELS[verdict]}
@@ -530,8 +529,8 @@ export default function DecisionsScreen() {
             style={[
               styles.tabBtn,
               {
-                backgroundColor: filterTab === tab.key ? ACCENT + '22' : 'transparent',
-                borderColor: filterTab === tab.key ? ACCENT + '66' : '#ffffff18',
+                backgroundColor: filterTab === tab.key ? `${ACCENT}22` : 'transparent',
+                borderColor: filterTab === tab.key ? `${ACCENT}66` : '#ffffff18',
               },
             ]}
           >

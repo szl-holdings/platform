@@ -1,6 +1,6 @@
 import { type File, Storage } from '@google-cloud/storage';
-import { randomUUID } from 'crypto';
-import { Readable } from 'stream';
+import { randomUUID } from 'node:crypto';
+import { Readable } from 'node:stream';
 import {
   canAccessObject,
   getObjectAclPolicy,
@@ -38,7 +38,6 @@ export class ObjectNotFoundError extends Error {
 }
 
 export class ObjectStorageService {
-  constructor() {}
 
   getPublicObjectSearchPaths(): Array<string> {
     const pathsStr = process.env.PUBLIC_OBJECT_SEARCH_PATHS || '';

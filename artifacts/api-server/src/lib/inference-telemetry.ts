@@ -194,7 +194,7 @@ class InferenceTelemetryStore {
         totalTokens: recs.reduce((s, r) => s + r.totalTokens, 0),
         totalCostUsd: parseFloat(recs.reduce((s, r) => s + r.estimatedCostUsd, 0).toFixed(6)),
         errorRate: recs.length > 0 ? parseFloat((failures / recs.length).toFixed(4)) : 0,
-        lastRequestAt: recs.length > 0 ? recs[0]!.timestamp : null,
+        lastRequestAt: recs.length > 0 ? recs[0]?.timestamp : null,
         uptimeRatio: recs.length > 0 ? parseFloat((successes / recs.length).toFixed(4)) : 1,
       });
     }

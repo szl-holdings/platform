@@ -324,7 +324,14 @@ export interface VesselsDashboard {
 
 type MutationInput = Record<
   string,
-  string | number | boolean | null | undefined | string[] | number[]
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | string[]
+  | number[]
+  | Record<string, unknown>
 >;
 
 export const api = {

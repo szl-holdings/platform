@@ -25,14 +25,14 @@ export interface RouteResult {
 }
 
 const ENV = {
-  primary: () => process.env['HF_PRIMARY_LLM'] || 'Qwen/Qwen3-8B',
-  secondary: () => process.env['HF_SECONDARY_LLM'] || 'Qwen/Qwen3-8B',
-  fallback: () => process.env['HF_FALLBACK_LLM'] || 'Qwen/Qwen3-0.6B',
-  vision: () => process.env['HF_VISION_MODEL'] || 'Qwen/Qwen2.5-VL-7B-Instruct',
-  embed: () => process.env['HF_EMBED_MODEL'] || 'BAAI/bge-m3',
-  rerank: () => process.env['HF_RERANK_MODEL'] || 'BAAI/bge-reranker-v2-m3',
-  provider: () => process.env['HF_PROVIDER'] || 'huggingface',
-  useStructured: () => (process.env['HF_USE_STRUCTURED_OUTPUTS'] ?? 'true') === 'true',
+  primary: () => process.env.HF_PRIMARY_LLM || 'Qwen/Qwen3-8B',
+  secondary: () => process.env.HF_SECONDARY_LLM || 'Qwen/Qwen3-8B',
+  fallback: () => process.env.HF_FALLBACK_LLM || 'Qwen/Qwen3-0.6B',
+  vision: () => process.env.HF_VISION_MODEL || 'Qwen/Qwen2.5-VL-7B-Instruct',
+  embed: () => process.env.HF_EMBED_MODEL || 'BAAI/bge-m3',
+  rerank: () => process.env.HF_RERANK_MODEL || 'BAAI/bge-reranker-v2-m3',
+  provider: () => process.env.HF_PROVIDER || 'huggingface',
+  useStructured: () => (process.env.HF_USE_STRUCTURED_OUTPUTS ?? 'true') === 'true',
 };
 
 const ROUTE_DEFAULTS: Record<
@@ -84,13 +84,13 @@ export function getRouteConfig() {
     models: getModelSlots(),
     config: {
       useStructuredOutputs: ENV.useStructured(),
-      useFunctionCalling: (process.env['HF_USE_FUNCTION_CALLING'] ?? 'true') === 'true',
-      enableStreaming: (process.env['HF_ENABLE_STREAMING'] ?? 'true') === 'true',
+      useFunctionCalling: (process.env.HF_USE_FUNCTION_CALLING ?? 'true') === 'true',
+      enableStreaming: (process.env.HF_ENABLE_STREAMING ?? 'true') === 'true',
       requireApprovalForHighRisk:
-        (process.env['AI_REQUIRE_APPROVAL_FOR_HIGH_RISK'] ?? 'true') === 'true',
-      executionMode: process.env['AI_EXECUTION_MODE'] || 'propose_only',
-      retrievalTopK: parseInt(process.env['AI_RETRIEVAL_TOP_K'] || '12', 10),
-      rerankTopK: parseInt(process.env['AI_RERANK_TOP_K'] || '5', 10),
+        (process.env.AI_REQUIRE_APPROVAL_FOR_HIGH_RISK ?? 'true') === 'true',
+      executionMode: process.env.AI_EXECUTION_MODE || 'propose_only',
+      retrievalTopK: parseInt(process.env.AI_RETRIEVAL_TOP_K || '12', 10),
+      rerankTopK: parseInt(process.env.AI_RERANK_TOP_K || '5', 10),
     },
   };
 }

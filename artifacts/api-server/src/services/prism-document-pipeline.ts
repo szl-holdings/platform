@@ -1,5 +1,5 @@
 import { db, pcAuditEventsTable, pcDocumentsTable, pcExtractionJobsTable } from '@szl-holdings/db';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { logger } from '../lib/logger';
 import { enqueuePrismJob, PRISM_JOB_TYPES } from './prism-queue';

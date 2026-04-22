@@ -1,14 +1,12 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import { db, mspClientsTable, mspDevicesTable } from '@szl-holdings/db';
-import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { db, mspDevicesTable } from '@szl-holdings/db';
+import { eq, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
   sendBadRequest,
   sendCreated,
-  sendError,
   sendNotFound,
   sendSuccess,
 } from '../../lib/api-response';
@@ -19,25 +17,18 @@ import {
   validateBody,
   validateQuery,
 } from '../../lib/validation';
-import { authMiddleware, requireRole } from '../../middlewares/auth';
 import {
-  clearProviderCache,
-  createRmmProvider,
   getCachedProvider,
-  type RmmProviderConfig,
   setCachedProvider,
 } from '../../services/rmm-provider';
 import {
   auth,
   authWrite,
   buildProviderConfig,
-  isProviderSupported,
   queryConnectorById,
   queryConnectors,
   type RemoteActionRow,
-  roleAdmin,
   roleOperator,
-  stripSecrets,
 } from './shared';
 
 const router: IRouter = Router();
@@ -151,7 +142,7 @@ router.post(
   async (req, res) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid ID');
       const { approvedBy } = req.body;
       await db.execute(sql`
       UPDATE msp_remote_actions SET status = 'approved', approved_by = ${approvedBy ?? 'operator'}, approved_at = NOW(), updated_at = NOW()
@@ -192,7 +183,7 @@ router.post(
   async (req, res) => {
     try {
       const id = parseInt(String(req.params.id), 10);
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid ID');
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid ID');
       await db.execute(
         sql`UPDATE msp_remote_actions SET status = 'cancelled', updated_at = NOW() WHERE id = ${id} AND status = 'pending_approval'`,
       );

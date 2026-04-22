@@ -5,7 +5,6 @@ import {
   type FleetException,
   fleetExceptionsTable,
   insertFleetExceptionSchema,
-  insertVesselMaintenanceSchema,
   portsTable,
   type VesselMaintenance,
   type VesselPortCall,
@@ -28,7 +27,6 @@ import {
   parsePagination,
   sendBadRequest,
   sendCreated,
-  sendNoContent,
   sendNotFound,
   sendSuccess,
 } from '../lib/api-response';
@@ -71,7 +69,7 @@ async function getVesselInOrg(vesselId: number, orgId: number | undefined) {
 }
 
 /** Build a `vesselId IN (...)` clause for sub-resources, or undefined for admin. Returns null when org has no vessels (caller should return empty). */
-function buildVesselScopeClause<T extends { vesselId: typeof vesselsTable.id }>(
+function _buildVesselScopeClause<T extends { vesselId: typeof vesselsTable.id }>(
   column: T['vesselId'],
   vesselIds: number[] | null,
 ): SQL | undefined | 'EMPTY' {
@@ -384,7 +382,7 @@ router.get('/vessels/roster', authMiddleware(), tenantScope(), async (req, res) 
 
 router.get('/vessels/:id/detail', authMiddleware(), tenantScope(), async (req, res) => {
   try {
-    const vesselId = parseIdParam(req.params['id']);
+    const vesselId = parseIdParam(req.params.id);
     if (!vesselId) return sendBadRequest(res, 'Invalid vessel id');
 
     // Cross-tenant guard: returns 404 if vessel belongs to a different org.
@@ -495,7 +493,7 @@ router.get('/vessels/map-payload', authMiddleware(), tenantScope(), async (req, 
 
 router.get('/vessels/track/:vesselId', authMiddleware(), tenantScope(), async (req, res) => {
   try {
-    const vesselId = parseIdParam(req.params['vesselId']!);
+    const vesselId = parseIdParam(req.params.vesselId!);
     // Cross-tenant guard
     const ownVessel = await getVesselInOrg(vesselId, req.tenantOrgId);
     if (!ownVessel) {
@@ -579,9 +577,9 @@ router.get(
   async (req, res) => {
     try {
       const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
-      const statusFilter = req.query['status'] as VesselVoyageEconomics['status'] | undefined;
-      const vesselIdFilter = req.query['vesselId']
-        ? parseInt(req.query['vesselId'] as string, 10)
+      const statusFilter = req.query.status as VesselVoyageEconomics['status'] | undefined;
+      const vesselIdFilter = req.query.vesselId
+        ? parseInt(req.query.vesselId as string, 10)
         : undefined;
 
       const orgVesselIds = await getOrgVesselIds(req.tenantOrgId);
@@ -597,7 +595,7 @@ router.get(
 
       const conditions: SQL[] = [];
       if (statusFilter) conditions.push(eq(vesselVoyageEconomicsTable.status, statusFilter));
-      if (vesselIdFilter && !isNaN(vesselIdFilter))
+      if (vesselIdFilter && !Number.isNaN(vesselIdFilter))
         conditions.push(eq(vesselVoyageEconomicsTable.vesselId, vesselIdFilter));
       else if (orgVesselIds !== null)
         conditions.push(inArray(vesselVoyageEconomicsTable.vesselId, orgVesselIds));
@@ -782,9 +780,9 @@ router.get(
   async (req, res) => {
     try {
       const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
-      const statusFilter = req.query['status'] as FleetException['status'] | undefined;
-      const severityFilter = req.query['severity'] as FleetException['severity'] | undefined;
-      const typeFilter = req.query['type'] as FleetException['exceptionType'] | undefined;
+      const statusFilter = req.query.status as FleetException['status'] | undefined;
+      const severityFilter = req.query.severity as FleetException['severity'] | undefined;
+      const typeFilter = req.query.type as FleetException['exceptionType'] | undefined;
 
       const orgVesselIds = await getOrgVesselIds(req.tenantOrgId);
       if (orgVesselIds !== null && orgVesselIds.length === 0) {
@@ -1077,9 +1075,9 @@ router.get(
   async (req, res) => {
     try {
       const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
-      const statusFilter = req.query['status'] as VesselMaintenance['status'] | undefined;
-      const vesselIdFilter = req.query['vesselId']
-        ? parseInt(req.query['vesselId'] as string, 10)
+      const statusFilter = req.query.status as VesselMaintenance['status'] | undefined;
+      const vesselIdFilter = req.query.vesselId
+        ? parseInt(req.query.vesselId as string, 10)
         : undefined;
 
       const orgVesselIds = await getOrgVesselIds(req.tenantOrgId);
@@ -1094,7 +1092,7 @@ router.get(
 
       const conditions: SQL[] = [];
       if (statusFilter) conditions.push(eq(vesselMaintenanceTable.status, statusFilter));
-      if (vesselIdFilter && !isNaN(vesselIdFilter))
+      if (vesselIdFilter && !Number.isNaN(vesselIdFilter))
         conditions.push(eq(vesselMaintenanceTable.vesselId, vesselIdFilter));
       else if (orgVesselIds !== null)
         conditions.push(inArray(vesselMaintenanceTable.vesselId, orgVesselIds));
@@ -1147,11 +1145,11 @@ router.get(
   async (req, res) => {
     try {
       const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
-      const ofacStatusFilter = req.query['ofacStatus'] as
+      const ofacStatusFilter = req.query.ofacStatus as
         | VesselSanctionsScreening['ofacStatus']
         | undefined;
-      const vesselIdFilter = req.query['vesselId']
-        ? parseInt(req.query['vesselId'] as string, 10)
+      const vesselIdFilter = req.query.vesselId
+        ? parseInt(req.query.vesselId as string, 10)
         : undefined;
 
       const orgVesselIds = await getOrgVesselIds(req.tenantOrgId);
@@ -1167,7 +1165,7 @@ router.get(
       const conditions: SQL[] = [];
       if (ofacStatusFilter)
         conditions.push(eq(vesselSanctionsScreeningTable.ofacStatus, ofacStatusFilter));
-      if (vesselIdFilter && !isNaN(vesselIdFilter))
+      if (vesselIdFilter && !Number.isNaN(vesselIdFilter))
         conditions.push(eq(vesselSanctionsScreeningTable.vesselId, vesselIdFilter));
       else if (orgVesselIds !== null)
         conditions.push(inArray(vesselSanctionsScreeningTable.vesselId, orgVesselIds));
@@ -1301,10 +1299,10 @@ router.get(
   async (req, res) => {
     try {
       const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
-      const vesselIdFilter = req.query['vesselId']
-        ? parseInt(req.query['vesselId'] as string, 10)
+      const vesselIdFilter = req.query.vesselId
+        ? parseInt(req.query.vesselId as string, 10)
         : undefined;
-      const purposeFilter = req.query['purpose'] as VesselPortCall['purpose'] | undefined;
+      const purposeFilter = req.query.purpose as VesselPortCall['purpose'] | undefined;
 
       const orgVesselIds = await getOrgVesselIds(req.tenantOrgId);
       if (orgVesselIds !== null && orgVesselIds.length === 0) {
@@ -1317,7 +1315,7 @@ router.get(
       }
 
       const conditions: SQL[] = [];
-      if (vesselIdFilter && !isNaN(vesselIdFilter))
+      if (vesselIdFilter && !Number.isNaN(vesselIdFilter))
         conditions.push(eq(vesselPortCallsTable.vesselId, vesselIdFilter));
       else if (orgVesselIds !== null)
         conditions.push(inArray(vesselPortCallsTable.vesselId, orgVesselIds));

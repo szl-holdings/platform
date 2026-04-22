@@ -1,5 +1,5 @@
-import React, { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { color, semanticColors } from '../tokens/index.js';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { color, } from '../tokens/index.js';
 import { cn } from '../utils.js';
 
 export type ToastVariant = 'success' | 'warning' | 'error' | 'info' | 'neutral';

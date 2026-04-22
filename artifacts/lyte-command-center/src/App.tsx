@@ -17,8 +17,6 @@ import { useUserPreferences } from '@szl-holdings/shared-ui/use-user-preferences
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Activity,
-  AlertTriangle,
-  BookOpen,
   Brain,
   ChevronDown,
   ChevronRight,
@@ -38,7 +36,6 @@ import {
   Thermometer,
   Users,
   Workflow,
-  X,
   Zap,
 } from 'lucide-react';
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
@@ -240,7 +237,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
             )}
             {!expanded && <div className="h-1" />}
             {group.items.map((item) => {
-              const active = location === item.href || location.startsWith(item.href + '/');
+              const active = location === item.href || location.startsWith(`${item.href}/`);
               const badgeClass = BADGE_COLOR_MAP[item.badgeColor ?? 'default'];
               return (
                 <Link
@@ -448,7 +445,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
   }, [setPreference]);
 
   const currentPage = ALL_NAV_ITEMS.find(
-    (n) => location === n.href || location.startsWith(n.href + '/'),
+    (n) => location === n.href || location.startsWith(`${n.href}/`),
   );
 
   return (

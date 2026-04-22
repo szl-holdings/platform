@@ -4,11 +4,8 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  Database,
   Info,
-  Shield,
   TrendingUp,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 

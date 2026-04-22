@@ -10,8 +10,7 @@
 
 import type { AgentRoleId, WorkflowDescriptor } from '@szl-holdings/shared-contracts';
 import { createWorkflowRun, executeWorkflowRun } from '@szl-holdings/workflow-runtime';
-import type { Request, Response } from 'express';
-import { type IRouter, Router } from 'express';
+import { type Request, type Response, type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { runStore } from '../../store.js';
 

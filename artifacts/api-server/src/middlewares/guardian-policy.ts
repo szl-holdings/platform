@@ -1,6 +1,6 @@
 import type { PolicyTier } from '@workspace/guardian';
 import { defaultTraceStore, TraceWriter } from '@workspace/trace-graph';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { getEffectiveTierOverride } from '../lib/effective-tiers';
 import {

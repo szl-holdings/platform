@@ -1,5 +1,4 @@
 import { ApprovalDialog } from '@szl-holdings/design-system/cockpit/approval-dialog';
-import type { AuditEvent } from '@szl-holdings/design-system/cockpit/audit-rail';
 import type { EvidenceItem } from '@szl-holdings/design-system/cockpit/evidence-drawer';
 import { RecommendationCard } from '@szl-holdings/design-system/cockpit/recommendation-card';
 import { type RunSpan, RunTimeline } from '@szl-holdings/design-system/cockpit/run-timeline';
@@ -1119,7 +1118,7 @@ function CorrelationCard({ corr, snap }: { corr: Correlation; snap: Snapshot | n
           return (
             <Badge
               key={sid}
-              label={sig.title.slice(0, 28) + '…'}
+              label={`${sig.title.slice(0, 28)}…`}
               color={SEVERITY_COLORS[sig.severity] ?? '#64748b'}
             />
           );

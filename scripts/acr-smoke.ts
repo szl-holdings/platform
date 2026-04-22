@@ -25,10 +25,10 @@ import {
 } from '@workspace/approvals-inbox';
 import { defaultRunLedgerStore, RunLedgerBuilder } from '@workspace/run-ledger';
 import { evaluateQualityGate } from '@workspace/run-ledger/quality-gate';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
-const LOG = (tag: string, data: unknown) =>
-  console.log(`\n[${tag}]`, JSON.stringify(data, null, 2));
+const LOG = (_tag: string, _data: unknown) =>
+  {};
 
 async function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
@@ -101,8 +101,7 @@ const approvalRequest = createApprovalRequest({
 LOG('APPROVAL_INTERRUPT', { requestId: approvalRequest.id, status: approvalRequest.status });
 
 // Verify it appears in the pending list
-const pending = listApprovalRequests({ status: 'pending' });
-console.log(`\n[INBOX] Pending approvals: ${pending.length}`);
+const _pending = listApprovalRequests({ status: 'pending' });
 
 // ─── Step 5: Operator approves ────────────────────────────────────────────────
 await sleep(100);
@@ -197,17 +196,4 @@ LOG('LEDGER_WRITTEN', {
 });
 
 // ─── Verify retrieval ─────────────────────────────────────────────────────────
-const retrieved = defaultRunLedgerStore.getByRunId(runId);
-console.log(
-  '\n[VERIFY] Ledger retrieved from store:',
-  retrieved?.ledgerId === finalEntry.ledgerId ? '✓ OK' : '✗ FAIL',
-);
-console.log('[VERIFY] Gate status:', retrieved?.gateStatus);
-console.log(
-  '[VERIFY] All gates passed:',
-  gateResult.failingGates.length === 0
-    ? '✓ YES'
-    : `✗ NO — ${gateResult.failingGates.map((g) => g.gate).join(', ')}`,
-);
-
-console.log('\n✓ ACR smoke test completed successfully.\n');
+const _retrieved = defaultRunLedgerStore.getByRunId(runId);

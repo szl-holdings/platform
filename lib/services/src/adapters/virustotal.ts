@@ -69,7 +69,7 @@ export class VirusTotalAdapter extends ServiceAdapter {
     "VirusTotal API — file hash scanning, URL reputation, IP/domain threat intelligence across 70+ antivirus engines. Requires API key. Falls back to demo mode when VIRUSTOTAL_API_KEY is absent.";
   readonly requiredEnvVars = ["VIRUSTOTAL_API_KEY"];
 
-  private get apiKey(): string | undefined { return process.env["VIRUSTOTAL_API_KEY"]; }
+  private get apiKey(): string | undefined { return process.env.VIRUSTOTAL_API_KEY; }
 
   private readonly BASE_URL = "https://www.virustotal.com/api/v3";
 
@@ -90,17 +90,17 @@ export class VirusTotalAdapter extends ServiceAdapter {
     if (this.isDemoMode) return { ...MOCK_IP_REPORT, ip };
     const data = await this.vtRequest<{ data: { attributes: Record<string, unknown> } }>(`/ip_addresses/${ip}`);
     const attrs = data.data?.attributes ?? {};
-    const stats = (attrs["last_analysis_stats"] as Record<string, number>) ?? {};
-    const results = (attrs["last_analysis_results"] as Record<string, Record<string, string>>) ?? {};
+    const stats = (attrs.last_analysis_stats as Record<string, number>) ?? {};
+    const results = (attrs.last_analysis_results as Record<string, Record<string, string>>) ?? {};
     const maliciousEngines = Object.entries(results)
-      .filter(([, v]) => v["category"] === "malicious")
+      .filter(([, v]) => v.category === "malicious")
       .map(([engine]) => engine);
     return {
-      ip, country: String(attrs["country"] ?? ""), asn: Number(attrs["asn"] ?? 0),
-      asOwner: String(attrs["as_owner"] ?? ""), reputation: Number(attrs["reputation"] ?? 0),
-      positives: stats["malicious"] ?? 0, total: Object.keys(results).length,
-      maliciousEngines, lastAnalysisDate: String(attrs["last_analysis_date"] ?? ""),
-      whois: attrs["whois"] ? String(attrs["whois"]) : null,
+      ip, country: String(attrs.country ?? ""), asn: Number(attrs.asn ?? 0),
+      asOwner: String(attrs.as_owner ?? ""), reputation: Number(attrs.reputation ?? 0),
+      positives: stats.malicious ?? 0, total: Object.keys(results).length,
+      maliciousEngines, lastAnalysisDate: String(attrs.last_analysis_date ?? ""),
+      whois: attrs.whois ? String(attrs.whois) : null,
       detectedUrls: [], detectedCommunicatingSamples: 0, network: null,
     };
   }
@@ -110,14 +110,14 @@ export class VirusTotalAdapter extends ServiceAdapter {
     const encoded = btoa(url).replace(/=/g, "");
     const data = await this.vtRequest<{ data: { attributes: Record<string, unknown> } }>(`/urls/${encoded}`);
     const attrs = data.data?.attributes ?? {};
-    const stats = (attrs["last_analysis_stats"] as Record<string, number>) ?? {};
-    const categories = Object.values((attrs["categories"] as Record<string, string>) ?? {});
+    const stats = (attrs.last_analysis_stats as Record<string, number>) ?? {};
+    const categories = Object.values((attrs.categories as Record<string, string>) ?? {});
     return {
-      url, positives: stats["malicious"] ?? 0, total: Object.values(stats).reduce((a, b) => a + b, 0),
-      scanDate: String(attrs["last_analysis_date"] ?? ""),
+      url, positives: stats.malicious ?? 0, total: Object.values(stats).reduce((a, b) => a + b, 0),
+      scanDate: String(attrs.last_analysis_date ?? ""),
       permalink: `https://www.virustotal.com/gui/url/${encoded}`,
-      categories: [...new Set(categories)], malicious: (stats["malicious"] ?? 0) > 0,
-      reputation: Number(attrs["reputation"] ?? 0),
+      categories: [...new Set(categories)], malicious: (stats.malicious ?? 0) > 0,
+      reputation: Number(attrs.reputation ?? 0),
     };
   }
 
@@ -127,18 +127,18 @@ export class VirusTotalAdapter extends ServiceAdapter {
     }
     const data = await this.vtRequest<{ data: { attributes: Record<string, unknown> } }>(`/files/${hash}`);
     const attrs = data.data?.attributes ?? {};
-    const stats = (attrs["last_analysis_stats"] as Record<string, number>) ?? {};
+    const stats = (attrs.last_analysis_stats as Record<string, number>) ?? {};
     return {
-      sha256: String(attrs["sha256"] ?? ""), sha1: String(attrs["sha1"] ?? ""),
-      md5: String(attrs["md5"] ?? ""), name: String((attrs["meaningful_name"] as string) ?? ""),
-      size: Number(attrs["size"] ?? 0), type: String(attrs["type_description"] ?? ""),
-      positives: stats["malicious"] ?? 0, total: Object.values(stats).reduce((a, b) => a + b, 0),
+      sha256: String(attrs.sha256 ?? ""), sha1: String(attrs.sha1 ?? ""),
+      md5: String(attrs.md5 ?? ""), name: String((attrs.meaningful_name as string) ?? ""),
+      size: Number(attrs.size ?? 0), type: String(attrs.type_description ?? ""),
+      positives: stats.malicious ?? 0, total: Object.values(stats).reduce((a, b) => a + b, 0),
       permalink: `https://www.virustotal.com/gui/file/${hash}`,
-      scanDate: String(attrs["last_analysis_date"] ?? ""),
-      reputation: Number(attrs["reputation"] ?? 0),
-      firstSubmission: String(attrs["first_submission_date"] ?? ""),
-      lastSubmission: String(attrs["last_submission_date"] ?? ""),
-      timesSubmitted: Number(attrs["times_submitted"] ?? 0),
+      scanDate: String(attrs.last_analysis_date ?? ""),
+      reputation: Number(attrs.reputation ?? 0),
+      firstSubmission: String(attrs.first_submission_date ?? ""),
+      lastSubmission: String(attrs.last_submission_date ?? ""),
+      timesSubmitted: Number(attrs.times_submitted ?? 0),
       detectedEngines: [],
     };
   }

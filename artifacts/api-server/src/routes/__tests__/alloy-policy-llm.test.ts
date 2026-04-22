@@ -8,8 +8,7 @@
  *     OpenAI proxy env vars are unset (no upstream call is made).
  */
 
-import type { NextFunction, Request, Response } from 'express';
-import express from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -53,8 +52,8 @@ beforeAll(async () => {
 
 beforeEach(() => {
   authUser = null;
-  delete process.env['AI_INTEGRATIONS_OPENAI_BASE_URL'];
-  delete process.env['AI_INTEGRATIONS_OPENAI_API_KEY'];
+  delete process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+  delete process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
 });
 
 describe('/alloy/policies/llm-assist', () => {

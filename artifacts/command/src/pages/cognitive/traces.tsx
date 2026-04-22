@@ -408,7 +408,7 @@ function PhaseStep({
         gap: 10,
         padding: '10px 14px',
         borderRadius: 8,
-        border: `1px solid ${isActive ? c + '80' : 'rgba(255,255,255,0.07)'}`,
+        border: `1px solid ${isActive ? `${c}80` : 'rgba(255,255,255,0.07)'}`,
         background: isActive ? `${c}10` : 'rgba(255,255,255,0.02)',
         cursor: 'pointer',
         textAlign: 'left',
@@ -784,8 +784,8 @@ function PhaseDetail({
 export default function CognitiveTraces() {
   const initialTraceId =
     typeof window !== 'undefined'
-      ? (new URLSearchParams(window.location.search).get('trace') ?? SEEDED_TRACES[0]!.id)
-      : SEEDED_TRACES[0]!.id;
+      ? (new URLSearchParams(window.location.search).get('trace') ?? SEEDED_TRACES[0]?.id)
+      : SEEDED_TRACES[0]?.id;
   const [selectedTraceId, setSelectedTraceId] = useState<string>(initialTraceId);
   const [activePhaseIndex, setActivePhaseIndex] = useState(0);
   const [filterDomain, setFilterDomain] = useState('all');
@@ -839,7 +839,7 @@ export default function CognitiveTraces() {
   const traceIdsKey = traces.map((t) => t.id).join('|');
   useEffect(() => {
     if (traces.length > 0 && !traces.find((t) => t.id === selectedTraceId)) {
-      setSelectedTraceId(traces[0]!.id);
+      setSelectedTraceId(traces[0]?.id);
       setActivePhaseIndex(0);
     }
   }, [traceIdsKey, selectedTraceId]);
@@ -931,8 +931,8 @@ export default function CognitiveTraces() {
   const selectedTrace: TraceRun = detailMatches
     ? {
         ...baseTrace,
-        totalCostUsd: traceDetail!.costUsd ?? baseTrace.totalCostUsd,
-        totalLatencyMs: traceDetail!.latencyMs ?? baseTrace.totalLatencyMs,
+        totalCostUsd: traceDetail?.costUsd ?? baseTrace.totalCostUsd,
+        totalLatencyMs: traceDetail?.latencyMs ?? baseTrace.totalLatencyMs,
       }
     : baseTrace;
   const liveCommentsForSelected = detailMatches ? operatorComments : [];
@@ -1158,7 +1158,7 @@ export default function CognitiveTraces() {
                       width: '100%',
                       textAlign: 'left',
                       background: isSelected ? `${ACCENT}10` : 'rgba(255,255,255,0.02)',
-                      border: `1px solid ${isSelected ? ACCENT + '60' : 'rgba(255,255,255,0.07)'}`,
+                      border: `1px solid ${isSelected ? `${ACCENT}60` : 'rgba(255,255,255,0.07)'}`,
                       borderRadius: 8,
                       padding: '12px 14px',
                       cursor: 'pointer',
@@ -1273,7 +1273,7 @@ export default function CognitiveTraces() {
                           gap: 5,
                           padding: '5px 10px',
                           borderRadius: 6,
-                          border: `1px solid ${activePhaseIndex === i ? c + '80' : 'rgba(255,255,255,0.08)'}`,
+                          border: `1px solid ${activePhaseIndex === i ? `${c}80` : 'rgba(255,255,255,0.08)'}`,
                           background: activePhaseIndex === i ? `${c}15` : 'rgba(255,255,255,0.03)',
                           cursor: 'pointer',
                           transition: 'all 0.15s',

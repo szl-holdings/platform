@@ -1096,7 +1096,7 @@ export default function AIQualityDashboard() {
               ) : (
                 byDomain.map((d) => {
                   const dc = domainColor(d.domain);
-                  const confColor =
+                  const _confColor =
                     d.avgConfidence >= 0.8
                       ? '#6b8f71'
                       : d.avgConfidence >= 0.6

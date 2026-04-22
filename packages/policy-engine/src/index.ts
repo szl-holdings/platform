@@ -8,7 +8,7 @@ export * from './types.js';
 
 export const POLICY_ENGINE_VERSION = '1.1.0' as const;
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { evaluatePolicies } from './evaluator.js';
 import { BUILT_IN_GUARDRAILS } from './guardrails.js';
 import { defaultPolicyModeRegistry } from './modes.js';

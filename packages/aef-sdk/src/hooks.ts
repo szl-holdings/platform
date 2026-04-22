@@ -47,7 +47,7 @@ function resolveClientConfig(opts: UseAefSearchOptions): Partial<AefClientConfig
     'szl-holdings';
 
   if (!gatewayUrl || !apiKey) return null;
-  return { ...(opts.clientConfig ?? {}), gatewayUrl, apiKey, tenantId };
+  return { ...opts.clientConfig, gatewayUrl, apiKey, tenantId };
 }
 
 function getViteEnv(key: string): string | undefined {

@@ -11,8 +11,8 @@
  *   npx tsx scripts/media/optimize-images.ts --dry-run
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const INPUT_DIR =
   process.argv.find((_, i) => process.argv[i - 1] === '--input') || 'docs/media/screenshots';
@@ -173,8 +173,6 @@ async function optimizeImages() {
   try {
     sharp = (await import('sharp')).default as unknown as typeof import('sharp');
   } catch {
-    console.log('Sharp not installed. Install with: pnpm add -Dw sharp');
-    console.log('Running in copy-only mode (no resize)...');
     await copyOnlyMode();
     return;
   }
@@ -183,15 +181,12 @@ async function optimizeImages() {
     const inputPath = path.join(INPUT_DIR, target.input);
 
     if (!fs.existsSync(inputPath)) {
-      console.log(`Skipping ${target.input} (not found at ${inputPath})`);
       continue;
     }
 
     for (const output of target.outputs) {
-      console.log(`Processing: ${target.input} → ${output.label}`);
 
       if (DRY_RUN) {
-        console.log(`  [DRY RUN] Would write: ${output.destination}`);
         continue;
       }
 
@@ -209,15 +204,11 @@ async function optimizeImages() {
           .jpeg({ quality: output.quality, progressive: true })
           .toFile(output.destination);
 
-        const stat = fs.statSync(output.destination);
-        console.log(`  Saved: ${output.destination} (${Math.round(stat.size / 1024)}KB)`);
-      } catch (err) {
-        console.error(`  Failed: ${err}`);
+        const _stat = fs.statSync(output.destination);
+      } catch (_err) {
       }
     }
   }
-
-  console.log('\nOptimization complete.');
 }
 
 async function copyOnlyMode() {
@@ -225,7 +216,6 @@ async function copyOnlyMode() {
     const inputPath = path.join(INPUT_DIR, target.input);
 
     if (!fs.existsSync(inputPath)) {
-      console.log(`Skipping ${target.input} (not found)`);
       continue;
     }
 
@@ -237,7 +227,6 @@ async function copyOnlyMode() {
 
       if (!fs.existsSync(output.destination)) {
         fs.copyFileSync(inputPath, output.destination);
-        console.log(`Copied: ${target.input} → ${output.destination}`);
       }
     }
   }

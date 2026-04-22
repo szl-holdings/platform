@@ -7,10 +7,7 @@ import {
   BellRing,
   CheckCircle2,
   Clock,
-  Filter,
   Shield,
-  Volume2,
-  VolumeX,
   XCircle,
   Zap,
 } from 'lucide-react';

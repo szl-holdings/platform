@@ -8,7 +8,7 @@ import {
   color,
 } from '@szl-holdings/design-system';
 import { AlertTriangle, BarChart3, TrendingUp, Zap } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const ACCENT = productAccent.pulse;
 

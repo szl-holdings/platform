@@ -95,8 +95,8 @@ describe('aef-evals — golden fixtures with real ONNX vectors', () => {
       const ndcg = result.metrics.find((m) => m.metric === 'ndcg');
       expect(ndcg, `nDCG missing for ${fixtureSet.profileId}`).toBeDefined();
       expect(
-        ndcg!.value,
-        `nDCG@${TOP_K} for ${fixtureSet.profileId} was ${ndcg!.value.toFixed(3)}`,
+        ndcg?.value,
+        `nDCG@${TOP_K} for ${fixtureSet.profileId} was ${ndcg?.value.toFixed(3)}`,
       ).toBeGreaterThanOrEqual(MIN_NDCG);
     }, 120_000);
   }

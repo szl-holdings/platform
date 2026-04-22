@@ -134,19 +134,19 @@ export class SqliteRawDocStore implements RawDocStore {
   }
 
   private rowToRecord(row: Record<string, unknown>): RawDocRecord {
-    const profileId = row['profile_id'] ? String(row['profile_id']) : undefined;
-    const title = row['title'] ? String(row['title']) : undefined;
-    const sourceUri = row['source_uri'] ? String(row['source_uri']) : undefined;
+    const profileId = row.profile_id ? String(row.profile_id) : undefined;
+    const title = row.title ? String(row.title) : undefined;
+    const sourceUri = row.source_uri ? String(row.source_uri) : undefined;
     return {
-      sourceId: String(row['source_id']),
-      tenantId: String(row['tenant_id']),
+      sourceId: String(row.source_id),
+      tenantId: String(row.tenant_id),
       ...(profileId !== undefined ? { profileId } : {}),
       ...(title !== undefined ? { title } : {}),
       ...(sourceUri !== undefined ? { sourceUri } : {}),
-      contentType: String(row['content_type']),
-      content: String(row['content']),
-      metadata: JSON.parse(String(row['metadata'] ?? '{}')),
-      ingestedAt: String(row['ingested_at']),
+      contentType: String(row.content_type),
+      content: String(row.content),
+      metadata: JSON.parse(String(row.metadata ?? '{}')),
+      ingestedAt: String(row.ingested_at),
     };
   }
 }
@@ -231,18 +231,18 @@ export class SqliteChunkStore implements ChunkStore {
   }
 
   private rowToRecord(row: Record<string, unknown>): ChunkRecord {
-    const profileId = row['profile_id'] ? String(row['profile_id']) : undefined;
-    const tokenCount = row['token_count'] ? Number(row['token_count']) : undefined;
+    const profileId = row.profile_id ? String(row.profile_id) : undefined;
+    const tokenCount = row.token_count ? Number(row.token_count) : undefined;
     return {
-      chunkId: String(row['chunk_id']),
-      sourceId: String(row['source_id']),
-      tenantId: String(row['tenant_id']),
+      chunkId: String(row.chunk_id),
+      sourceId: String(row.source_id),
+      tenantId: String(row.tenant_id),
       ...(profileId !== undefined ? { profileId } : {}),
-      chunkIndex: Number(row['chunk_index']),
-      text: String(row['text']),
+      chunkIndex: Number(row.chunk_index),
+      text: String(row.text),
       ...(tokenCount !== undefined ? { tokenCount } : {}),
-      metadata: JSON.parse(String(row['metadata'] ?? '{}')),
-      createdAt: String(row['created_at']),
+      metadata: JSON.parse(String(row.metadata ?? '{}')),
+      createdAt: String(row.created_at),
     };
   }
 }
@@ -346,17 +346,17 @@ export class SqliteVectorStore implements VectorStore {
   }
 
   private rowToRecord(row: Record<string, unknown>): VectorRecord {
-    const profileId = row['profile_id'] ? String(row['profile_id']) : undefined;
+    const profileId = row.profile_id ? String(row.profile_id) : undefined;
     return {
-      chunkId: String(row['chunk_id']),
-      sourceId: String(row['source_id']),
-      tenantId: String(row['tenant_id']),
+      chunkId: String(row.chunk_id),
+      sourceId: String(row.source_id),
+      tenantId: String(row.tenant_id),
       ...(profileId !== undefined ? { profileId } : {}),
-      model: String(row['model']),
-      dimensions: Number(row['dimensions']),
-      vector: JSON.parse(String(row['vector'] ?? '[]')) as number[],
-      metadata: JSON.parse(String(row['metadata'] ?? '{}')),
-      indexedAt: String(row['indexed_at']),
+      model: String(row.model),
+      dimensions: Number(row.dimensions),
+      vector: JSON.parse(String(row.vector ?? '[]')) as number[],
+      metadata: JSON.parse(String(row.metadata ?? '{}')),
+      indexedAt: String(row.indexed_at),
     };
   }
 }
@@ -477,21 +477,21 @@ export class SqliteMetadataIndexStore implements MetadataIndexStore {
   }
 
   private rowToRecord(row: Record<string, unknown>): MetadataIndexRecord {
-    const profileId = row['profile_id'] ? String(row['profile_id']) : undefined;
-    const title = row['title'] ? String(row['title']) : undefined;
+    const profileId = row.profile_id ? String(row.profile_id) : undefined;
+    const title = row.title ? String(row.title) : undefined;
     const page =
-      row['page'] !== null && row['page'] !== undefined ? Number(row['page']) : undefined;
-    const section = row['section'] ? String(row['section']) : undefined;
+      row.page !== null && row.page !== undefined ? Number(row.page) : undefined;
+    const section = row.section ? String(row.section) : undefined;
     return {
-      chunkId: String(row['chunk_id']),
-      sourceId: String(row['source_id']),
-      tenantId: String(row['tenant_id']),
+      chunkId: String(row.chunk_id),
+      sourceId: String(row.source_id),
+      tenantId: String(row.tenant_id),
       ...(profileId !== undefined ? { profileId } : {}),
       ...(title !== undefined ? { title } : {}),
       ...(page !== undefined ? { page } : {}),
       ...(section !== undefined ? { section } : {}),
-      metadata: JSON.parse(String(row['metadata'] ?? '{}')),
-      updatedAt: String(row['updated_at']),
+      metadata: JSON.parse(String(row.metadata ?? '{}')),
+      updatedAt: String(row.updated_at),
     };
   }
 }
@@ -558,13 +558,13 @@ export class SqliteEvalFixtureStore implements EvalFixtureStore {
 
   private rowToRecord(row: Record<string, unknown>): EvalFixtureRecord {
     return {
-      fixtureId: String(row['fixture_id']),
-      profileId: String(row['profile_id']),
-      tenantId: String(row['tenant_id']),
-      queryId: String(row['query_id']),
-      query: String(row['query']),
-      relevantChunkIds: JSON.parse(String(row['relevant_chunk_ids'] ?? '[]')) as string[],
-      metadata: JSON.parse(String(row['metadata'] ?? '{}')),
+      fixtureId: String(row.fixture_id),
+      profileId: String(row.profile_id),
+      tenantId: String(row.tenant_id),
+      queryId: String(row.query_id),
+      query: String(row.query),
+      relevantChunkIds: JSON.parse(String(row.relevant_chunk_ids ?? '[]')) as string[],
+      metadata: JSON.parse(String(row.metadata ?? '{}')),
     };
   }
 }

@@ -28,7 +28,7 @@ export function register(router: IRouter): void {
 
   router.put('/admin/feature-flags/:key', validateBody(enabledSchema), async (req, res) => {
     try {
-      const key = req.params['key'] as string;
+      const key = req.params.key as string;
       const { enabled } = req.body as z.infer<typeof enabledSchema>;
       const [updated] = await db
         .update(featureFlagsTable)

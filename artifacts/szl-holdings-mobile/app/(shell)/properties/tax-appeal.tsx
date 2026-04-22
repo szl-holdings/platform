@@ -2,7 +2,6 @@ import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React from 'react';
 import {
   type DimensionValue,
   Platform,
@@ -16,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? 'https://' + process.env.EXPO_PUBLIC_DOMAIN + '/api'
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
 const ACCENT = '#ef4444';
@@ -104,7 +103,7 @@ function Gauge({ assessed, market }: { assessed: number; market: number }) {
         <View
           style={[
             gaugeStyles.over,
-            { width: `${overPct}%` as DimensionValue, backgroundColor: ACCENT + '60' },
+            { width: `${overPct}%` as DimensionValue, backgroundColor: `${ACCENT}60` },
           ]}
         />
       </View>
@@ -151,7 +150,7 @@ export default function TaxAppealScreen() {
     queryKey: ['terra-tax-appeal'],
     queryFn: async () => {
       try {
-        const res = await fetch(API_BASE + '/terra/tax-appeal');
+        const res = await fetch(`${API_BASE}/terra/tax-appeal`);
         if (!res.ok) return null;
         return res.json();
       } catch {
@@ -178,7 +177,7 @@ export default function TaxAppealScreen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: ACCENT + 'cc' }]}>TERRA · TAX</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · TAX</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Tax Appeal</Text>
         </View>
       </View>
@@ -222,7 +221,7 @@ export default function TaxAppealScreen() {
                 <View
                   style={[
                     styles.statusPill,
-                    { backgroundColor: statusColor + '15', borderColor: statusColor + '30' },
+                    { backgroundColor: `${statusColor}15`, borderColor: `${statusColor}30` },
                   ]}
                 >
                   <Text style={[styles.statusPillText, { color: statusColor }]}>

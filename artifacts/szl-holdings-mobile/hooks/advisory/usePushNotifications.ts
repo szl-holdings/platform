@@ -41,10 +41,8 @@ async function registerDeviceToken(token: string, authToken: string | null): Pro
     });
 
     if (!res.ok) {
-      console.warn('[push] Failed to register token:', res.status);
     }
-  } catch (err) {
-    console.warn('[push] Token registration error:', err);
+  } catch (_err) {
   }
 }
 
@@ -88,7 +86,6 @@ export function usePushNotifications(): PushNotificationState {
         try {
           router.push(data.screen);
         } catch {
-          console.warn('[push] Deep-link navigation failed:', data.screen);
         }
       }
     },
@@ -101,7 +98,6 @@ export function usePushNotifications(): PushNotificationState {
     }
 
     if (!Device.isDevice) {
-      console.info('[push] Push notifications require a physical device');
       return false;
     }
 
@@ -158,8 +154,7 @@ export function usePushNotifications(): PushNotificationState {
       await registerDeviceToken(token, authToken);
 
       return true;
-    } catch (err) {
-      console.warn('[push] Failed to get push token:', err);
+    } catch (_err) {
       return false;
     }
   }, []);

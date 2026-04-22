@@ -7,7 +7,6 @@ import {
   BarChart2,
   Clock,
   Dna,
-  Target,
   TrendingUp,
   Users,
 } from 'lucide-react';
@@ -236,7 +235,7 @@ export default function AudienceGenomePage() {
                     style={{
                       padding: '1rem 1.125rem',
                       background: isSelected ? `${color}08` : DS.surface,
-                      border: `1px solid ${isSelected ? color + '30' : DS.border}`,
+                      border: `1px solid ${isSelected ? `${color}30` : DS.border}`,
                       borderRadius: '8px',
                       cursor: 'pointer',
                       textAlign: 'left',

@@ -45,7 +45,7 @@ export class ExternalHttpEmbeddingBackend implements EmbeddingBackend {
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (this.cfg.apiKey) {
-      headers['Authorization'] = `Bearer ${this.cfg.apiKey}`;
+      headers.Authorization = `Bearer ${this.cfg.apiKey}`;
     }
 
     let response: Response;

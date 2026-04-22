@@ -1,19 +1,15 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import {
   AlertTriangle,
-  BarChart2,
   CheckCircle,
-  ChevronRight,
   Database,
   Eye,
   Info,
-  Lock,
   Monitor,
   Network,
   Package,
   RefreshCw,
   Shield,
-  TrendingDown,
   TrendingUp,
   User,
   XCircle,
@@ -615,7 +611,7 @@ export default function ZeroTrustScorecard() {
     );
     setSelectedPillar((prev) => {
       if (prev.id !== pillarId) return prev;
-      const p = pillars.find((p) => p.id === pillarId)!;
+      const _p = pillars.find((p) => p.id === pillarId)!;
       const updated = prev.activities.map((a) => {
         if (a.id !== activityId) return a;
         const nextStatus: ZTActivity['status'] =
@@ -896,7 +892,7 @@ export default function ZeroTrustScorecard() {
                   }}
                   style={{
                     background: isSelected ? `${p.color}15` : 'transparent',
-                    border: `1px solid ${isSelected ? p.color + '50' : DS.border}`,
+                    border: `1px solid ${isSelected ? `${p.color}50` : DS.border}`,
                     borderRadius: '8px',
                     padding: '10px 12px',
                     cursor: 'pointer',

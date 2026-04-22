@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { m } from "framer-motion";
 import {
   Layers, Cpu, Eye, ShieldCheck, Target, ChevronRight,
-  GitBranch, Activity, Database, Network, BarChart3, Users,
+  GitBranch, Activity, Database, Network, BarChart3, 
   ArrowRight, Zap, Lock, Clock, CheckCircle2
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
@@ -269,7 +269,7 @@ export default function OperatingDoctrinePage() {
                       { icon: Target, label: "Milestone-gated spending", desc: "No resource deployment without a measurable milestone that justifies it." },
                       { icon: Database, label: "Single source of truth", desc: "Financial model, operating plan, and roadmap are a single document — not three." },
                       { icon: Zap, label: "Revenue-first instinct", desc: "Every initiative is evaluated against its path to revenue. Services subsidize product." },
-                    ].map((item, i) => {
+                    ].map((item, _i) => {
                       const Icon = item.icon;
                       return (
                         <div key={item.label} className="flex gap-4">

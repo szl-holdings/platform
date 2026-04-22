@@ -31,25 +31,22 @@ import {
 } from '../artifacts/api-server/src/services/forge/index.ts';
 
 let failed = 0;
-const T = (name: string, ok: boolean, extra?: string) => {
-  console.log(`  ${ok ? '✓' : '✗'} ${name}${extra ? ` — ${extra}` : ''}`);
+const T = (_name: string, ok: boolean, _extra?: string) => {
   if (!ok) failed++;
 };
 
 async function main() {
-  console.log('[smoke-forge] Starting 10-step Forge governance smoke test…');
 
   // ── 1. seed exists
   const agents = await db.select().from(forgeAgentsTable).where(eq(forgeAgentsTable.isSeed, true));
   T('1. seeded agents present', agents.length >= 5, `found ${agents.length}`);
   if (agents.length === 0) {
-    console.error('Run `pnpm seed:forge` first.');
     process.exit(2);
   }
 
   const exec = agents.find((a) => a.slug === 'trade-executor-bot')!;
   const briefer = agents.find((a) => a.slug === 'executive-briefer')!;
-  const router = agents.find((a) => a.slug === 'vessels-ops-router')!;
+  const _router = agents.find((a) => a.slug === 'vessels-ops-router')!;
 
   // ── 2. drift aggregation math
   const findings: DriftFinding[] = [
@@ -69,13 +66,13 @@ async function main() {
     .from(forgeEnvironmentProfilesTable)
     .where(eq(forgeEnvironmentProfilesTable.tier, 'staging'))
     .limit(1);
-  const [prodEnv] = await db
+  const [_prodEnv] = await db
     .select()
     .from(forgeEnvironmentProfilesTable)
     .where(eq(forgeEnvironmentProfilesTable.tier, 'production'))
     .limit(1);
   const matter = agents.find((a) => a.slug === 'matter-twin-analyst')!;
-  const driftReport = await evaluateDrift(matter.id, stagingEnv!.id);
+  const driftReport = await evaluateDrift(matter.id, stagingEnv?.id);
   T(
     '3. drift detected for matter-twin-analyst in staging',
     driftReport.driftScore > 0,
@@ -146,7 +143,7 @@ async function main() {
       .returning();
     const unapprovedRes = await validatePromotion({
       agentId: briefer.id,
-      toVersionId: newVer!.id,
+      toVersionId: newVer?.id,
       fromEnv: 'staging',
       toEnv: 'production',
       hasHumanApproval: true,
@@ -155,7 +152,7 @@ async function main() {
       '5c. UNAPPROVED_MODEL emitted',
       unapprovedRes.blockers.some((b) => b.code === PROMOTION_BLOCKER_CODES.UNAPPROVED_MODEL),
     );
-    await db.delete(forgeAgentVersionsTable).where(eq(forgeAgentVersionsTable.id, newVer!.id));
+    await db.delete(forgeAgentVersionsTable).where(eq(forgeAgentVersionsTable.id, newVer?.id));
   } else {
     T('5c. UNAPPROVED_MODEL emitted', false, 'no unapproved model in seed');
   }
@@ -173,7 +170,7 @@ async function main() {
     .returning();
   const badRes = await validatePromotion({
     agentId: briefer.id,
-    toVersionId: bad!.id,
+    toVersionId: bad?.id,
     fromEnv: 'dev',
     toEnv: 'sandbox',
     hasHumanApproval: true,
@@ -190,7 +187,7 @@ async function main() {
     '5f. MISSING_PROVENANCE emitted',
     badRes.blockers.some((b) => b.code === PROMOTION_BLOCKER_CODES.MISSING_PROVENANCE),
   );
-  await db.delete(forgeAgentVersionsTable).where(eq(forgeAgentVersionsTable.id, bad!.id));
+  await db.delete(forgeAgentVersionsTable).where(eq(forgeAgentVersionsTable.id, bad?.id));
 
   // ── 6. policy enforcement
   const policy = await enforcePolicy({
@@ -274,16 +271,9 @@ async function main() {
     if (!v?.modelId || !v?.promptVersionId || !(v.toolIds as string[])?.length) allOk = false;
   }
   T('10. every seeded agent has full registry provenance', allOk);
-
-  console.log(
-    failed === 0
-      ? `\n[smoke-forge] ✓ All checks passed.`
-      : `\n[smoke-forge] ✗ ${failed} check(s) failed.`,
-  );
   process.exit(failed === 0 ? 0 : 1);
 }
 
-main().catch((err) => {
-  console.error('[smoke-forge] fatal:', err);
+main().catch((_err) => {
   process.exit(2);
 });

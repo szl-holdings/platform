@@ -70,7 +70,7 @@ export class SubstrateStreaming {
       'Cache-Control': 'no-cache',
     };
     if (this.apiKey) {
-      headers['Authorization'] = `Bearer ${this.apiKey}`;
+      headers.Authorization = `Bearer ${this.apiKey}`;
     }
 
     let res: Response;
@@ -126,7 +126,7 @@ export class SubstrateStreaming {
                 parsed = { raw: dataStr };
               }
 
-              const parsedRunId = (parsed as Record<string, unknown>)['runId'];
+              const parsedRunId = (parsed as Record<string, unknown>).runId;
               const event: RunEvent = {
                 type: (eventType || 'ping') as RunEvent['type'],
                 timestamp: Date.now(),

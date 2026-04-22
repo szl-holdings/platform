@@ -11,7 +11,6 @@ import {
   RotateCcw,
   Search,
   Sparkles,
-  Tag,
   ToggleLeft,
   ToggleRight,
   Zap,

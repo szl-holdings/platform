@@ -326,7 +326,7 @@ export async function acknowledgePressure(
     itemKind: 'pressure',
     itemTitle: `${cell.team} · ${cell.workflow}`,
     type: 'acknowledge',
-    ...(note && note.trim() ? { notes: note.trim() } : {}),
+    ...(note?.trim() ? { notes: note.trim() } : {}),
   });
 }
 

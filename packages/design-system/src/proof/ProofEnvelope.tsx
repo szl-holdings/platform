@@ -102,7 +102,7 @@ export function ProofEnvelope({
   // Reset overlay when caller-supplied policy changes (e.g. new envelope mount).
   useEffect(() => {
     setLiveDecision(null);
-  }, [policyState, policyReason]);
+  }, []);
 
   const handleChange = useCallback(
     async (mode: AutonomyMode) => {

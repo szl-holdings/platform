@@ -392,7 +392,7 @@ export function buildLeadNotificationEmail(inquiry: {
   `);
 }
 
-export function buildWelcomeEmail(name: string, email: string): string {
+export function buildWelcomeEmail(name: string, _email: string): string {
   return szlBrand(`
     <h2>Welcome to SZL Holdings</h2>
     <p>Hello ${name},</p>
@@ -1523,8 +1523,8 @@ export function buildPulseBriefingEmail(opts: PulseBriefingEmailOptions): {
     opts.domainsFilter && opts.domainsFilter.length > 0
       ? opts.sections.filter(
           (s) =>
-            opts.domainsFilter!.includes(s.id ?? s.agentId) ||
-            opts.domainsFilter!.some((d) => s.title.toLowerCase().includes(d.replace(/_/g, ' '))),
+            opts.domainsFilter?.includes(s.id ?? s.agentId) ||
+            opts.domainsFilter?.some((d) => s.title.toLowerCase().includes(d.replace(/_/g, ' '))),
         )
       : opts.sections;
   const sectionsToRender = filtered.length > 0 ? filtered : opts.sections;

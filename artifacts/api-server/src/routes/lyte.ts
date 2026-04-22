@@ -919,7 +919,7 @@ router.delete(
   },
 );
 
-router.get('/lyte/readiness', authMiddleware(), async (req, res) => {
+router.get('/lyte/readiness', authMiddleware(), async (_req, res) => {
   try {
     const rows = await db
       .select()

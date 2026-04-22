@@ -65,7 +65,7 @@ export function useStreamingText(endpoint: string, body: Record<string, unknown>
           setIsStreaming(false);
         }
       });
-  }, [endpoint, JSON.stringify(body)]);
+  }, [endpoint, body]);
 
   const stop = useCallback(() => {
     abortRef.current?.abort();
@@ -123,7 +123,7 @@ export function TypewriterText({
       }
     }, speed);
     return () => clearInterval(timer);
-  }, [text, speed]);
+  }, [text, speed, onComplete]);
 
   return (
     <span className={className}>

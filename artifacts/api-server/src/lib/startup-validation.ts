@@ -401,7 +401,7 @@ export function validateStartupConfig(): ValidationResult {
     }
   }
 
-  const explicitMode = process.env['RUNTIME_MODE'];
+  const explicitMode = process.env.RUNTIME_MODE;
   if (
     explicitMode &&
     !['local-dev', 'internal-preview', 'demo', 'production'].includes(explicitMode)
@@ -423,7 +423,7 @@ export function validateStartupConfig(): ValidationResult {
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     errors.push(`Runtime mode resolution failed: ${msg}`);
-    isProduction = process.env['NODE_ENV'] === 'production';
+    isProduction = process.env.NODE_ENV === 'production';
   }
 
   if (isProduction && !process.env.DATABASE_URL) {
@@ -619,7 +619,7 @@ export function validateStartupConfig(): ValidationResult {
   for (const spec of ENV_SPECS) {
     const g = spec.group ?? 'other';
     if (!groupMap.has(g)) groupMap.set(g, []);
-    groupMap.get(g)!.push(spec);
+    groupMap.get(g)?.push(spec);
   }
 
   const envSummary = Array.from(groupMap.entries()).map(([group, vars]) => ({

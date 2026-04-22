@@ -1,5 +1,4 @@
 import { Feather } from '@expo/vector-icons';
-import React from 'react';
 
 type FeatherIconName =
   | 'alert-circle'

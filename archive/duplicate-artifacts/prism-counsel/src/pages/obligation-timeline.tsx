@@ -1,18 +1,11 @@
 import { analytics } from '@szl-holdings/analytics';
 import { AnimatePresence, motion, useInView } from 'framer-motion';
 import {
-  AlertCircle,
   AlertTriangle,
   ArrowLeft,
-  ArrowRight,
-  Bell,
-  Calendar,
   CheckCircle2,
   ChevronRight,
   Clock,
-  FileCheck,
-  FileText,
-  Layers,
   Scale,
   ShieldCheck,
   TrendingUp,

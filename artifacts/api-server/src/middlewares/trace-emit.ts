@@ -1,5 +1,5 @@
-import { defaultQueryEngine, defaultTraceStore, TraceWriter } from '@workspace/trace-graph';
-import { randomUUID } from 'crypto';
+import { defaultTraceStore, TraceWriter } from '@workspace/trace-graph';
+import { randomUUID } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 
 const writer = new TraceWriter(defaultTraceStore);

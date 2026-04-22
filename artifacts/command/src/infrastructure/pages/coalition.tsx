@@ -20,8 +20,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useLocalStorage } from '@imp/lib/use-local-storage';
-import type React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 const STATUS_CONFIG: Record<
   CoalitionStatus,

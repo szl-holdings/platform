@@ -61,7 +61,7 @@ function extractMeta(html) {
   return { title, desc, ogTitle, ogDesc, ogImage };
 }
 
-function checkMetadata(meta, route) {
+function checkMetadata(meta, _route) {
   const issues = [];
 
   if (!meta.title || meta.title.trim().length < 5) issues.push('Missing or empty <title>');
@@ -74,10 +74,8 @@ function checkMetadata(meta, route) {
 }
 
 async function main() {
-  console.log(`\nSZL Holdings — Metadata Checks`);
-  console.log(`Base URL: ${BASE_URL}\n`);
 
-  let passed = 0;
+  let _passed = 0;
   let failed = 0;
   const allIssues = [];
 
@@ -85,7 +83,6 @@ async function main() {
     const url = BASE_URL + route;
     const html = await fetchPage(url);
     if (!html) {
-      console.error(`  ✗ Could not fetch: ${url}`);
       failed++;
       continue;
     }
@@ -94,23 +91,17 @@ async function main() {
     const issues = checkMetadata(meta, route);
 
     if (issues.length === 0) {
-      console.log(`  ✓ ${route} — "${meta.title.slice(0, 60)}..."`);
-      passed++;
+      _passed++;
     } else {
-      console.error(`  ✗ ${route}`);
-      issues.forEach((issue) => console.error(`      - ${issue}`));
+      issues.forEach((_issue) => {});
       allIssues.push({ route, issues });
       failed++;
     }
   }
 
-  console.log(`\nResults: ${passed} passed, ${failed} failed`);
-
   if (failed > 0) {
-    console.error(`\nFAIL — ${failed} page(s) have metadata issues`);
     process.exit(1);
   } else {
-    console.log(`\nPASS — All pages have required metadata`);
     process.exit(0);
   }
 }

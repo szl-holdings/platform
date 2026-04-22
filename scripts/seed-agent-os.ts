@@ -1,11 +1,9 @@
 import { seedAgentOS } from '../artifacts/api-server/src/scripts/seed-agent-os.js';
 
 seedAgentOS()
-  .then((result) => {
-    console.log('[runner] seed-agent-os complete:', result);
+  .then((_result) => {
     process.exit(0);
   })
-  .catch((err) => {
-    console.error('[runner] seed-agent-os failed:', err);
+  .catch((_err) => {
     process.exit(1);
   });

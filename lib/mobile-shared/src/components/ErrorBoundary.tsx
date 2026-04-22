@@ -1,4 +1,4 @@
-import React, { Component, type ComponentType, type PropsWithChildren } from 'react';
+import { Component, type ComponentType, type PropsWithChildren } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export type ErrorFallbackProps = {
@@ -37,7 +37,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   override componentDidCatch(error: Error, info: { componentStack: string }): void {
-    console.error('[ErrorBoundary]', error);
     if (typeof this.props.onError === 'function') {
       this.props.onError(error, info.componentStack);
     }

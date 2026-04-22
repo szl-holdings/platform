@@ -5,11 +5,8 @@ import {
   BarChart3,
   Building2,
   CheckCircle2,
-  DollarSign,
   Eye,
   RefreshCw,
-  Shield,
-  TrendingUp,
   Users,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';

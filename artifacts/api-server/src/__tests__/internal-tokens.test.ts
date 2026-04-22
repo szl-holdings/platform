@@ -19,10 +19,10 @@ import {
 } from '../lib/internal-tokens';
 
 function setEnv(scoped: string | undefined, legacy: string | undefined): void {
-  if (scoped === undefined) delete process.env['INTERNAL_SERVICE_TOKENS'];
-  else process.env['INTERNAL_SERVICE_TOKENS'] = scoped;
-  if (legacy === undefined) delete process.env['ALLOY_INTERNAL_TOKEN'];
-  else process.env['ALLOY_INTERNAL_TOKEN'] = legacy;
+  if (scoped === undefined) delete process.env.INTERNAL_SERVICE_TOKENS;
+  else process.env.INTERNAL_SERVICE_TOKENS = scoped;
+  if (legacy === undefined) delete process.env.ALLOY_INTERNAL_TOKEN;
+  else process.env.ALLOY_INTERNAL_TOKEN = legacy;
   resetInternalTokenRegistry();
 }
 
@@ -49,12 +49,12 @@ describe('internal-tokens registry (GAP-016)', () => {
     );
     const match = matchInternalToken('secret-aaa');
     expect(match).not.toBeNull();
-    expect(match!.context.name).toBe('alloy-runner');
-    expect(match!.context.legacy).toBe(false);
-    expect(match!.context.scopes.has('alloy:write')).toBe(true);
-    expect(match!.context.scopes.has('agent:write')).toBe(true);
+    expect(match?.context.name).toBe('alloy-runner');
+    expect(match?.context.legacy).toBe(false);
+    expect(match?.context.scopes.has('alloy:write')).toBe(true);
+    expect(match?.context.scopes.has('agent:write')).toBe(true);
     // Critical: scoped tokens never auto-grant other scopes.
-    expect(match!.context.scopes.has('internal:write')).toBe(false);
+    expect(match?.context.scopes.has('internal:write')).toBe(false);
   });
 
   it('rejects unknown tokens', () => {
@@ -75,7 +75,7 @@ describe('internal-tokens registry (GAP-016)', () => {
     const match = matchInternalToken('secret-aaa');
     expect(match).not.toBeNull();
     // "super_admin" is not in the allowlist — silently dropped.
-    expect(Array.from(match!.context.scopes)).toEqual(['alloy:write']);
+    expect(Array.from(match?.context.scopes)).toEqual(['alloy:write']);
   });
 
   it('verifyInternalHeader enforces pathPrefixes', () => {
@@ -98,13 +98,13 @@ describe('internal-tokens registry (GAP-016)', () => {
     setEnv(undefined, 'legacy-secret');
     const match = matchInternalToken('legacy-secret');
     expect(match).not.toBeNull();
-    expect(match!.context.legacy).toBe(true);
+    expect(match?.context.legacy).toBe(true);
     // Constrained default set — no super_admin-equivalent scope and no
     // `internal:write` (admin-guard requires that, so legacy can't pass it).
-    expect(match!.context.scopes.has('alloy:write')).toBe(true);
-    expect(match!.context.scopes.has('internal:read')).toBe(true);
-    expect(match!.context.scopes.has('health:read')).toBe(true);
-    expect(match!.context.scopes.has('internal:write' as never)).toBe(false);
+    expect(match?.context.scopes.has('alloy:write')).toBe(true);
+    expect(match?.context.scopes.has('internal:read')).toBe(true);
+    expect(match?.context.scopes.has('health:read')).toBe(true);
+    expect(match?.context.scopes.has('internal:write' as never)).toBe(false);
     // Legacy token is restricted to its historical path allowlist; admin
     // routes (and other routes outside the allowlist) are explicitly denied.
     // See internal-tokens-legacy-allowlist.test.ts for the full matrix.

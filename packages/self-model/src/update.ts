@@ -1,5 +1,4 @@
-import type { SelfModelStore } from './store.js';
-import { defaultSelfModelStore } from './store.js';
+import { type SelfModelStore, defaultSelfModelStore } from './store.js';
 import type {
   EscalationThreshold,
   HelpRequest,

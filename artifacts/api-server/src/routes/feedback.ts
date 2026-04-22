@@ -1,10 +1,8 @@
-import { db, feedbackSurveyPrefsTable, feedbackTable, pool } from '@szl-holdings/db';
-import { and, desc, eq, gte, lt, sql } from 'drizzle-orm';
-import type { Request, Response } from 'express';
-import { type IRouter, Router } from 'express';
+import { db, feedbackSurveyPrefsTable, feedbackTable, } from '@szl-holdings/db';
+import { and, desc, eq, gte, sql } from 'drizzle-orm';
+import { type Request, type Response, type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError } from '../lib/api-response';
-import { logger } from '../lib/logger';
 import { feedbackContextualSchema, feedbackNpsSchema, validateBody } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
 
@@ -277,11 +275,11 @@ feedbackRouter.get('/admin/feedback/analytics', async (_req: Request, res: Respo
 
 feedbackRouter.get('/admin/feedback/list', async (req: Request, res: Response) => {
   try {
-    const page = Math.max(1, parseInt((req.query['page'] as string) ?? '1', 10));
-    const limit = Math.min(100, Math.max(1, parseInt((req.query['limit'] as string) ?? '25', 10)));
+    const page = Math.max(1, parseInt((req.query.page as string) ?? '1', 10));
+    const limit = Math.min(100, Math.max(1, parseInt((req.query.limit as string) ?? '25', 10)));
     const offset = (page - 1) * limit;
-    const type = req.query['type'] as string | undefined;
-    const appName = req.query['appName'] as string | undefined;
+    const type = req.query.type as string | undefined;
+    const appName = req.query.appName as string | undefined;
 
     const conditions = [];
     if (type === 'nps' || type === 'contextual') conditions.push(eq(feedbackTable.type, type));

@@ -68,61 +68,61 @@ function buildSnapshotData(model: SelfModelState): Record<string, unknown> {
 
 /** Rebuilds a SelfModelState from the DB row returned by self_models. */
 function rowToState(row: Record<string, unknown>): SelfModelState {
-  const meta = (row['metadata'] as Record<string, unknown>) ?? {};
-  const identity = (row['identity'] as Record<string, unknown>) ?? {};
-  const goals = (row['goals'] as unknown[]) ?? [];
-  const caps = (row['capabilities'] as unknown[]) ?? [];
-  const perf = (row['performance_profile'] as Record<string, unknown>) ?? {};
-  const confidence = typeof row['confidence'] === 'number' ? row['confidence'] : 1.0;
+  const meta = (row.metadata as Record<string, unknown>) ?? {};
+  const identity = (row.identity as Record<string, unknown>) ?? {};
+  const goals = (row.goals as unknown[]) ?? [];
+  const caps = (row.capabilities as unknown[]) ?? [];
+  const perf = (row.performance_profile as Record<string, unknown>) ?? {};
+  const confidence = typeof row.confidence === 'number' ? row.confidence : 1.0;
   const now = new Date().toISOString();
 
   return {
-    runtimeId: (meta['runtimeId'] as string) || (row['agent_id'] as string),
+    runtimeId: (meta.runtimeId as string) || (row.agent_id as string),
     identityProfile: identity as unknown as SelfModelState['identityProfile'],
     activeObjectives: (goals as SelfModelState['activeObjectives']) || [],
     capabilities: (caps as SelfModelState['capabilities']) || [],
-    toolAccess: (meta['toolAccess'] as SelfModelState['toolAccess']) ?? [],
-    riskTier: (meta['riskTier'] as SelfModelState['riskTier']) ?? 'internal-workflow',
-    policiesInForce: (meta['policiesInForce'] as SelfModelState['policiesInForce']) ?? [],
-    currentEnvironment: (meta['currentEnvironment'] as string) ?? 'production',
-    recentFailures: (meta['recentFailures'] as SelfModelState['recentFailures']) ?? [],
-    recentWins: (meta['recentWins'] as SelfModelState['recentWins']) ?? [],
-    learnedStrategies: (meta['learnedStrategies'] as SelfModelState['learnedStrategies']) ?? [],
-    confidenceProfile: (meta['confidenceProfile'] as SelfModelState['confidenceProfile']) ?? {
+    toolAccess: (meta.toolAccess as SelfModelState['toolAccess']) ?? [],
+    riskTier: (meta.riskTier as SelfModelState['riskTier']) ?? 'internal-workflow',
+    policiesInForce: (meta.policiesInForce as SelfModelState['policiesInForce']) ?? [],
+    currentEnvironment: (meta.currentEnvironment as string) ?? 'production',
+    recentFailures: (meta.recentFailures as SelfModelState['recentFailures']) ?? [],
+    recentWins: (meta.recentWins as SelfModelState['recentWins']) ?? [],
+    learnedStrategies: (meta.learnedStrategies as SelfModelState['learnedStrategies']) ?? [],
+    confidenceProfile: (meta.confidenceProfile as SelfModelState['confidenceProfile']) ?? {
       overall: confidence,
       byDomain: {},
       byCapability: {},
       trend: 'stable',
       lastAdjustedAt: now,
     },
-    uncertaintyProfile: (meta['uncertaintyProfile'] as SelfModelState['uncertaintyProfile']) ?? {
+    uncertaintyProfile: (meta.uncertaintyProfile as SelfModelState['uncertaintyProfile']) ?? {
       overall: 1 - confidence,
       byDomain: {},
       flaggedAreas: [],
       lastReviewedAt: now,
     },
     preferredRoutingPatterns:
-      (meta['preferredRoutingPatterns'] as SelfModelState['preferredRoutingPatterns']) ?? [],
+      (meta.preferredRoutingPatterns as SelfModelState['preferredRoutingPatterns']) ?? [],
     escalationThresholds:
-      (meta['escalationThresholds'] as SelfModelState['escalationThresholds']) ?? [],
-    humanDependencies: (meta['humanDependencies'] as SelfModelState['humanDependencies']) ?? [],
-    domainStrengths: (meta['domainStrengths'] as SelfModelState['domainStrengths']) ?? [],
-    domainWeaknesses: (meta['domainWeaknesses'] as SelfModelState['domainWeaknesses']) ?? [],
+      (meta.escalationThresholds as SelfModelState['escalationThresholds']) ?? [],
+    humanDependencies: (meta.humanDependencies as SelfModelState['humanDependencies']) ?? [],
+    domainStrengths: (meta.domainStrengths as SelfModelState['domainStrengths']) ?? [],
+    domainWeaknesses: (meta.domainWeaknesses as SelfModelState['domainWeaknesses']) ?? [],
     driftScore:
-      typeof meta['driftScore'] === 'number'
-        ? meta['driftScore']
-        : typeof perf['driftScore'] === 'number'
-          ? perf['driftScore']
+      typeof meta.driftScore === 'number'
+        ? meta.driftScore
+        : typeof perf.driftScore === 'number'
+          ? perf.driftScore
           : 0,
     failurePatternCount:
-      typeof meta['failurePatternCount'] === 'number' ? meta['failurePatternCount'] : 0,
+      typeof meta.failurePatternCount === 'number' ? meta.failurePatternCount : 0,
     consecutiveFailures:
-      typeof meta['consecutiveFailures'] === 'number' ? meta['consecutiveFailures'] : 0,
-    version: typeof row['version'] === 'number' ? row['version'] : 1,
+      typeof meta.consecutiveFailures === 'number' ? meta.consecutiveFailures : 0,
+    version: typeof row.version === 'number' ? row.version : 1,
     updatedAt:
-      row['updated_at'] instanceof Date
-        ? row['updated_at'].toISOString()
-        : String(row['updated_at'] ?? now),
+      row.updated_at instanceof Date
+        ? row.updated_at.toISOString()
+        : String(row.updated_at ?? now),
   };
 }
 
@@ -255,7 +255,7 @@ export class PoolSelfModelAdapter implements SelfModelPersistenceAdapter {
         [agentId, limit, offset],
       );
       return result.rows.map((row: Record<string, unknown>) => {
-        const data = row['snapshot_data'] as Record<string, unknown>;
+        const data = row.snapshot_data as Record<string, unknown>;
         return data as unknown as SelfModelState;
       });
     } catch (err) {

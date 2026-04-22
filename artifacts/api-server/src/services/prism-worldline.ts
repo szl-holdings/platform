@@ -230,7 +230,7 @@ class WorldlineEngine {
     };
   }
 
-  private estimateLegalUsefulness(data: any, sourceClass: string): number {
+  private estimateLegalUsefulness(_data: any, sourceClass: string): number {
     const usefulnessBase: Record<string, number> = {
       regulatory_insurance: 0.85,
       crash_incident: 0.8,

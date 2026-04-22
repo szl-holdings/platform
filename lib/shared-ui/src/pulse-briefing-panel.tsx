@@ -1,6 +1,5 @@
-import { AlertTriangle, ExternalLink, Shield, TrendingDown, TrendingUp } from 'lucide-react';
-import type React from 'react';
-import { useEffect, useState } from 'react';
+import { AlertTriangle, ExternalLink, Shield, } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 export type PulseDomain =
   | 'maritime'

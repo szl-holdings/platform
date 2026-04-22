@@ -36,7 +36,7 @@ const programCreateSchema = z
 
 const programUpdateSchema = programCreateSchema.partial();
 
-const milestoneSchema = z
+const _milestoneSchema = z
   .object({
     name: z.string().min(1, 'Name is required').max(200),
     description: z.string().optional(),
@@ -520,7 +520,7 @@ const readinessLiveRateLimit = rateLimit({
 }) as unknown as RequestHandler;
 
 const readinessCache = new LRUCache<string, { data: unknown; expiry: number }>({ max: 100 });
-function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
+function _getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
   const cached = readinessCache.get(key);
   if (cached && cached.expiry > Date.now()) return Promise.resolve(cached.data as T);
   return fetcher()

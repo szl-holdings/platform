@@ -3,24 +3,13 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import { AnimatePresence, motion as m } from 'framer-motion';
 import {
   AlertTriangle,
-  BarChart3,
-  Building2,
   Camera,
-  CheckCircle,
   ChevronRight,
-  DollarSign,
-  Eye,
-  Home,
-  Layers,
-  Maximize2,
   RefreshCw,
-  Shield,
   Star,
   TrendingUp,
   Upload,
   Wrench,
-  X,
-  XCircle,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -396,7 +385,7 @@ function GradeCircle({ grade, size = 40 }: { grade: ConditionGrade; size?: numbe
   );
 }
 
-function ScoreBar({ score, label }: { score: number; label: string }) {
+function _ScoreBar({ score, label }: { score: number; label: string }) {
   const color = score >= 80 ? '#34d399' : score >= 60 ? '#fbbf24' : '#ef4444';
   return (
     <div className="flex items-center gap-3">

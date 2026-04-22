@@ -12,8 +12,7 @@
  *   if (ok) { ... do the thing ... }
  */
 
-import type React from 'react';
-import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { useAppMode } from './app-mode-banner';
 
 export interface ConfirmOptions {
@@ -175,7 +174,6 @@ function ConfirmDialogUI({
         </p>
 
         <input
-          autoFocus
           value={inputValue}
           onChange={(e) => onInputChange(e.target.value)}
           onKeyDown={(e) => {

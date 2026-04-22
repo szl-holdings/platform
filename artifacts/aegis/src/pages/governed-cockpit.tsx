@@ -7,8 +7,8 @@ import {
   productAccent,
   color,
 } from '@szl-holdings/design-system';
-import { Activity, AlertTriangle, Eye, Shield } from 'lucide-react';
-import React, { useState } from 'react';
+import { Activity, AlertTriangle, Shield } from 'lucide-react';
+import { useState } from 'react';
 
 const ACCENT = productAccent.aegis;
 

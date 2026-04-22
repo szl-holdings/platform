@@ -6,25 +6,18 @@ import {
   AlertTriangle,
   BarChart2,
   BarChart3,
-  Building2,
   Calculator,
-  Calendar,
   CheckCircle,
-  ChevronDown,
-  ChevronUp,
   Copy,
   Database,
-  DollarSign,
   Download,
   FolderOpen,
   GitCompare,
   Grid3X3,
   Pencil,
   Plus,
-  RefreshCw,
   Save,
   Trash2,
-  TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '@szl-holdings/replit-auth-web';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -32,9 +25,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Line,
-  LineChart,
-  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -563,8 +553,8 @@ function exportComparisonCSV(scenarios: Scenario[]) {
 }
 
 function buildHeatMapHtml(baseInputs: ProFormaInputs, baseScenarioName: string): string {
-  const colCfg = SENS_AXES['hardCost'];
-  const rowCfg = SENS_AXES['capRate'];
+  const colCfg = SENS_AXES.hardCost;
+  const rowCfg = SENS_AXES.capRate;
 
   function heatColor(irr: number): { bg: string; fg: string } {
     if (irr >= 22) return { bg: '#1a3d2e', fg: '#40856a' };
@@ -1137,7 +1127,7 @@ export default function ProFormaPage() {
                 }}
               >
                 <Database className="w-2.5 h-2.5" />
-                Live DB · {savedProjects!.projects.length}
+                Live DB · {savedProjects?.projects.length}
               </span>
             ) : (
               savedProjects && (
@@ -1194,7 +1184,7 @@ export default function ProFormaPage() {
                 className="absolute right-0 top-full mt-1 w-72 rounded-xl border shadow-2xl z-50 overflow-hidden"
                 style={{ background: '#0d0f15', borderColor: DS.border }}
               >
-                {savedProjects!.projects.map((p) => (
+                {savedProjects?.projects.map((p) => (
                   <div
                     key={p.id}
                     className="flex items-center gap-1 px-3 py-2 hover:bg-white/5 transition-colors"
@@ -1215,7 +1205,6 @@ export default function ProFormaPage() {
                             setRenamingId(null);
                           }
                         }}
-                        autoFocus
                       />
                     ) : (
                       <button
@@ -1315,7 +1304,7 @@ export default function ProFormaPage() {
                       onClick={() => deleteScenario(s.id)}
                       title="Delete"
                       className="p-1 rounded"
-                      style={{ color: DS.accent.red + '99' }}
+                      style={{ color: `${DS.accent.red}99` }}
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
@@ -1346,7 +1335,7 @@ export default function ProFormaPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             className="rounded-xl border p-4 flex items-center gap-3"
-            style={{ borderColor: DS.accent.gold + '40', background: `${DS.accent.gold}08` }}
+            style={{ borderColor: `${DS.accent.gold}40`, background: `${DS.accent.gold}08` }}
           >
             <p className="text-[10px] font-semibold" style={{ color: DS.text.secondary }}>
               Scenario name:
@@ -1362,7 +1351,6 @@ export default function ProFormaPage() {
               placeholder="e.g. Stress Test, Upside, Conservative…"
               className="flex-1 bg-transparent px-2 py-1 text-xs text-white focus:outline-none rounded border"
               style={{ borderColor: DS.border }}
-              autoFocus
             />
             <button
               onClick={() => {

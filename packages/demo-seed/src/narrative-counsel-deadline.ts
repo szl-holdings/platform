@@ -8,8 +8,7 @@
  */
 
 import type { Signal } from '@workspace/ontology/signal';
-import type { EvidenceItem, Recommendation } from '@workspace/ontology';
-import { createSignal, createEvidenceItem, createRecommendation } from '@workspace/ontology';
+import { type EvidenceItem, type Recommendation, createSignal, createEvidenceItem, createRecommendation } from '@workspace/ontology';
 
 export type CounselDeadlineNarrative = typeof COUNSEL_DEADLINE_NARRATIVE;
 

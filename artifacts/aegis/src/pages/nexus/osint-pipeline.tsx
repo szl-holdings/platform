@@ -1,15 +1,7 @@
 import {
-  Activity,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
   Eye,
   FileText,
-  Globe,
   Rss,
-  Search,
-  Shield,
-  TrendingUp,
   Users,
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
@@ -313,8 +305,8 @@ export default function OsintPipelinePage() {
               className="rounded-lg p-3 text-left transition"
               style={{
                 background:
-                  sourceFilter === s.type ? typeColor(s.type) + '10' : 'rgba(255,255,255,0.015)',
-                border: `1px solid ${sourceFilter === s.type ? typeColor(s.type) + '25' : DS.border}`,
+                  sourceFilter === s.type ? `${typeColor(s.type)}10` : 'rgba(255,255,255,0.015)',
+                border: `1px solid ${sourceFilter === s.type ? `${typeColor(s.type)}25` : DS.border}`,
               }}
             >
               <div className="flex items-center gap-1.5 mb-1">
@@ -359,7 +351,7 @@ export default function OsintPipelinePage() {
                 className="text-[8px] uppercase font-bold rounded px-1.5 py-0.5"
                 style={{
                   background:
-                    typeColor(SOURCES.find((s) => s.id === item.sourceId)?.type ?? 'news') + '15',
+                    `${typeColor(SOURCES.find((s) => s.id === item.sourceId)?.type ?? 'news')}15`,
                   color: typeColor(SOURCES.find((s) => s.id === item.sourceId)?.type ?? 'news'),
                 }}
               >
@@ -406,7 +398,7 @@ export default function OsintPipelinePage() {
                     onClick={() => handleReview(item.id, true)}
                     aria-label={`Mark ${item.id} relevant`}
                     className="text-[8px] font-semibold rounded px-2 py-1 hover:brightness-125 transition"
-                    style={{ background: GREEN + '20', color: GREEN }}
+                    style={{ background: `${GREEN}20`, color: GREEN }}
                   >
                     Relevant
                   </button>

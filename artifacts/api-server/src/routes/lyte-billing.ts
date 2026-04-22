@@ -1,21 +1,18 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
-  billingPlansTable,
   db,
   invoicesTable,
-  organizationsTable,
   revenueEventsTable,
   subscriptionsTable,
 } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import { count, desc, eq, sql } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
   handleRouteError,
   sendBadRequest,
   sendError,
-  sendNotFound,
   sendSuccess,
 } from '../lib/api-response';
 import { logger } from '../lib/logger';
@@ -256,7 +253,7 @@ router.post(
         metadata: { product: 'lyte', companyName: companyName ?? '' },
       });
 
-      const totalAmount = lineItems!.reduce((sum, li) => sum + li.amount, 0);
+      const totalAmount = lineItems?.reduce((sum, li) => sum + li.amount, 0);
 
       await db
         .insert(invoicesTable)
@@ -315,7 +312,7 @@ router.get(
   '/lyte/billing/pilot-metrics',
   authMiddleware(),
   requireRole('admin', 'super_admin', 'ops', 'analyst'),
-  async (req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     try {
       const subs = await db.select().from(subscriptionsTable);
       const totalPilots = subs.length;

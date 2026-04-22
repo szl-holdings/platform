@@ -10,7 +10,6 @@
  */
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ConstellationGraph,
@@ -443,7 +442,7 @@ describe('ConstellationGraph — Expand neighbors action', () => {
     await waitFor(() => {
       const neighborCall = calls.find((c) => c.url.includes(`/graph/entities/${HUB_ID}/neighbors`));
       expect(neighborCall).toBeTruthy();
-      expect(neighborCall!.url).toContain('limit=25');
+      expect(neighborCall?.url).toContain('limit=25');
     });
   });
 });

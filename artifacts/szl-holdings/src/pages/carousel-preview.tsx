@@ -17,7 +17,7 @@ const SLIDES = [
 
 export default function CarouselPreview() {
   const [current, setCurrent] = useState(0);
-  const [preloaded, setPreloaded] = useState(false);
+  const [_preloaded, setPreloaded] = useState(false);
   const goNext = useCallback(() => {
     setCurrent((c) => Math.min(c + 1, SLIDES.length - 1));
   }, []);

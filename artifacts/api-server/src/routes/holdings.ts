@@ -2,8 +2,8 @@ import { Router, type IRouter } from "express";
 import { bodyShape } from "@szl-holdings/contracts/common";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { logger } from "../lib/logger";
 import { generateInvestorDocPdf } from "../lib/investor-doc-pdf";
 import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
@@ -24,10 +24,9 @@ import {
   firestormIncidentsTable,
   firestormFindingsTable,
   carlotaInquiriesTable,
-  carlotaReservationsTable,
   auditEventsTable,
 } from "@szl-holdings/db";
-import { eq, desc, ilike, or, sql, count, and, isNull, asc } from "drizzle-orm";
+import { eq, desc, ilike, or, sql, and, isNull, asc } from "drizzle-orm";
 import { hashIp } from "@szl-holdings/audit";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam, requireRole } from "../middlewares/auth";
@@ -760,7 +759,7 @@ function extractDocSections(content: string): Array<{ heading: string; text: str
       if (currentLines.length > 0) {
         sections.push({ heading: currentHeading, text: currentLines.join(" ").replace(/\s+/g, " ").trim() });
       }
-      currentHeading = headingMatch[1]!.trim();
+      currentHeading = headingMatch[1]?.trim();
       currentLines = [];
     } else {
       const stripped = line.replace(/[`*_~|[\]()]/g, " ").trim();
@@ -806,7 +805,7 @@ router.get("/investors/search", authMiddleware(), requireRole("admin", "exec", "
       res.status(403).json({ error: "NDA acceptance required", code: "NDA_REQUIRED" });
       return;
     }
-    const q = typeof req.query["q"] === "string" ? req.query["q"].trim() : "";
+    const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
     if (!q || q.length < 2) {
       res.json({ data: [] });
       return;
@@ -821,7 +820,7 @@ router.get("/investors/search", authMiddleware(), requireRole("admin", "exec", "
       }
       const sections = extractDocSections(content);
       for (const section of sections) {
-        const searchable = (section.heading + " " + section.text).toLowerCase();
+        const searchable = (`${section.heading} ${section.text}`).toLowerCase();
         if (searchable.includes(q.toLowerCase())) {
           results.push({
             docId,
@@ -924,7 +923,7 @@ router.get("/investors/docs/:id", authMiddleware(), requireRole("admin", "exec",
       res.status(403).json({ error: "NDA acceptance required", code: "NDA_REQUIRED" });
       return;
     }
-    const id = req.params["id"] as string;
+    const id = req.params.id as string;
     const meta = INVESTOR_DOC_MANIFEST[id];
     if (!meta) {
       res.status(404).json({ error: "Document not found" });
@@ -954,7 +953,7 @@ router.get("/investors/docs/:id/download", authMiddleware(), requireRole("admin"
       res.status(403).json({ error: "NDA acceptance required", code: "NDA_REQUIRED" });
       return;
     }
-    const id = req.params["id"] as string;
+    const id = req.params.id as string;
     const meta = INVESTOR_DOC_MANIFEST[id];
     if (!meta) {
       res.status(404).json({ error: "Document not found" });

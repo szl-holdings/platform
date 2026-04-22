@@ -28,8 +28,6 @@ import { listQuerySchema, validateBody, validateQuery } from '../lib/validation'
 import {
   type AuthenticatedUser,
   authMiddleware,
-  canAccessOrgRecord,
-  isElevatedUser,
   requireRole,
 } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
@@ -163,8 +161,8 @@ router.get(
 
 router.get('/alloy/policies/:id', authMiddleware(), async (req, res) => {
   try {
-    const id = parseInt(String(req.params.id as string));
-    if (isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
+    const id = parseInt(String(req.params.id as string), 10);
+    if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
     const user = req.user as AuthenticatedUser | undefined;
 
     const [policy] = await db
@@ -247,8 +245,8 @@ router.patch(
   validateBody(updatePolicySchema),
   async (req, res) => {
     try {
-      const id = parseInt(String(req.params.id as string));
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
+      const id = parseInt(String(req.params.id as string), 10);
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
       const user = req.user as AuthenticatedUser | undefined;
       if (!user) return sendForbidden(res, 'Authentication required');
 
@@ -303,8 +301,8 @@ router.delete(
   requireRole('admin'),
   async (req, res) => {
     try {
-      const id = parseInt(String(req.params.id as string));
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
+      const id = parseInt(String(req.params.id as string), 10);
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
       const user = req.user as AuthenticatedUser | undefined;
       if (!user) return sendForbidden(res, 'Authentication required');
 
@@ -354,10 +352,10 @@ router.post(
   ),
   async (req, res) => {
     try {
-      const id = parseInt(String(req.params.id as string));
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid template policy ID');
-      const orgId = parseInt(req.body.orgId);
-      if (isNaN(orgId)) return sendBadRequest(res, 'orgId is required');
+      const id = parseInt(String(req.params.id as string), 10);
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid template policy ID');
+      const orgId = parseInt(req.body.orgId, 10);
+      if (Number.isNaN(orgId)) return sendBadRequest(res, 'orgId is required');
       const user = req.user as AuthenticatedUser | undefined;
       if (!user) return sendForbidden(res, 'Authentication required');
 
@@ -502,8 +500,8 @@ router.patch(
   ),
   async (req, res) => {
     try {
-      const id = parseInt(String(req.params.id as string));
-      if (isNaN(id)) return sendBadRequest(res, 'Invalid incident ID');
+      const id = parseInt(String(req.params.id as string), 10);
+      if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid incident ID');
       const user = req.user as AuthenticatedUser | undefined;
       if (!user) return sendForbidden(res, 'Authentication required');
 
@@ -833,7 +831,7 @@ router.get(
       const user = req.user as AuthenticatedUser | undefined;
       const orgIds = getUserOrgIds(user);
       const { limit, offset } = parsePagination(req.query as Record<string, unknown>);
-      const orgId = req.query.orgId ? parseInt(req.query.orgId as string) : undefined;
+      const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : undefined;
 
       // Non-admins requesting a specific orgId must be members of that org
       if (orgId !== undefined && !isGlobalAdmin(user) && !orgIds.includes(orgId)) {
@@ -879,7 +877,7 @@ router.get(
   '/alloy/admin/analytics',
   authMiddleware(),
   requireRole('super_admin'),
-  async (req, res) => {
+  async (_req, res) => {
     try {
       const now = new Date();
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);

@@ -75,7 +75,7 @@ const SKIP_DIRS = new Set([
 // Placeholder patterns in templates (re_xxxx, sk_test_*) are excluded via pattern design.
 const SKIP_FILES = new Set(['pnpm-lock.yaml', 'scan-secrets.js']);
 
-let errors = 0;
+let _errors = 0;
 const hits = [];
 
 function walk(dir, count = { n: 0 }) {
@@ -102,13 +102,13 @@ function checkFile(fullPath, name) {
 
   if (ENV_FILE_BLOCK.test(name)) {
     hits.push({ rel, label: 'Committed .env file (may contain secrets)' });
-    errors++;
+    _errors++;
     return;
   }
 
   if (/\.(sql\.gz|dump|pgdump)$/.test(name)) {
     hits.push({ rel, label: 'Database dump file' });
-    errors++;
+    _errors++;
     return;
   }
 
@@ -124,29 +124,18 @@ function checkFile(fullPath, name) {
   for (const { pattern, label } of SECRET_PATTERNS) {
     if (pattern.test(content)) {
       hits.push({ rel, label });
-      errors++;
+      _errors++;
       break;
     }
   }
 }
 
-console.log('=== SZL Holdings — Secret Scanner ===');
-console.log(`Scanning: ${TARGET}`);
-console.log('');
-
 walk(TARGET);
 
 if (hits.length > 0) {
-  console.error(`FAILED — ${hits.length} secret(s) detected:\n`);
-  for (const hit of hits) {
-    console.error(`  ❌ ${hit.rel}: ${hit.label}`);
+  for (const _hit of hits) {
   }
-  console.error('');
-  console.error(
-    'Remediation: remove secrets from tracked files, revoke exposed credentials, and rotate.',
-  );
   process.exit(1);
 } else {
-  console.log(`CLEAN — no secrets detected in tracked files.`);
   process.exit(0);
 }

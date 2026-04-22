@@ -29,7 +29,7 @@ export {
   getInMemorySpans,
   getOtelConfig,
   getTracer,
-  initOtel,
+  initializeOpenTelemetry as initOtel,
   isOtelInitialized,
 } from '@szl-holdings/observability';
 export { withCorrelationSpan } from './correlation-span';

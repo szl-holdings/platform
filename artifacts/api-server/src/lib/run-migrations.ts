@@ -9,8 +9,8 @@
  */
 
 import { PgClient } from '@szl-holdings/db';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { logger } from './logger';
 
 const BENIGN_PG_CODES = new Set([
@@ -35,7 +35,7 @@ function isIdempotentError(err: unknown): boolean {
 
 function findMigrationsDir(): string {
   const candidates = [
-    process.env['REPL_HOME'] && path.join(process.env['REPL_HOME'], 'lib', 'db', 'drizzle'),
+    process.env.REPL_HOME && path.join(process.env.REPL_HOME, 'lib', 'db', 'drizzle'),
     path.resolve(process.cwd(), 'lib', 'db', 'drizzle'),
     path.resolve(process.cwd(), '..', '..', 'lib', 'db', 'drizzle'),
     path.resolve(__dirname, '..', '..', '..', '..', 'lib', 'db', 'drizzle'),
@@ -68,7 +68,7 @@ function parseSqlStatements(sql: string): string[] {
     const trimmed = line.trim();
     const dollarMatches = (trimmed.match(/\$\$/g) || []).length;
     dollarDepth += dollarMatches;
-    current += line + '\n';
+    current += `${line}\n`;
 
     if (dollarDepth % 2 === 0 && trimmed.endsWith(';')) {
       const stmt = current.trim().replace(/;$/, '').trim();
@@ -121,7 +121,7 @@ export async function runMigrations(): Promise<void> {
   // full pool capacity throughout startup and the long-checkout warnings
   // disappear.
   // ─────────────────────────────────────────────────────────────────────────
-  const connectionString = process.env['DATABASE_URL'];
+  const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error(
       '[migrations] DATABASE_URL must be set to run migrations on a dedicated connection',

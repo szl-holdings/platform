@@ -31,7 +31,6 @@ import {
   forgePolicyPacksTable,
   forgePromotionApprovalsTable,
   forgePromotionsTable,
-  forgePromptVersionsTable,
   forgeRollbackEventsTable,
   forgeToolsTable,
 } from '@szl-holdings/db';
@@ -361,7 +360,7 @@ export async function validatePromotion(params: {
       .from(forgeModelsTable)
       .where(eq(forgeModelsTable.id, version.modelId))
       .limit(1);
-    if (!model || !model.approved) {
+    if (!model?.approved) {
       blockers.push({
         code: PROMOTION_BLOCKER_CODES.UNAPPROVED_MODEL,
         message: `Model ${model?.slug ?? version.modelId} is not on the approved list`,
@@ -563,14 +562,14 @@ export async function captureRuntime(input: RuntimeCaptureInput): Promise<ForgeE
   if (artifacts.length) {
     await db
       .insert(forgeExecutionArtifactsTable)
-      .values(artifacts.map((a) => ({ executionId: run!.id, kind: a.kind, content: a.content })));
+      .values(artifacts.map((a) => ({ executionId: run?.id, kind: a.kind, content: a.content })));
   }
 
   // Pipe a Tower-compatible event (best-effort log emission)
   logger.info(
     {
       event: 'forge.execution.captured',
-      runId: run!.id,
+      runId: run?.id,
       agentId: input.agentId,
       envTier: input.envTier,
       status: input.status,
@@ -639,7 +638,7 @@ export async function rollbackAgent(params: {
     metadata: { reason: params.reason, envTier: params.envTier },
   });
 
-  return { agent: updated!, rollbackId: rollback!.id };
+  return { agent: updated!, rollbackId: rollback?.id };
 }
 
 // ─── Promotion advancement (after validation passes) ─────────────────────

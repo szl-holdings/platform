@@ -22,19 +22,17 @@
  *   pnpm --filter @workspace/api-server smoke:vessels-cognitive
  */
 
-import { EventEmitter } from 'events';
-import type { NextFunction, Request, Response } from 'express';
+import { EventEmitter } from 'node:events';
+import type { NextFunction, Request, } from 'express';
 
 const errors: string[] = [];
 
 async function check(label: string, fn: () => void | Promise<void>): Promise<void> {
   try {
     await fn();
-    console.log(`[smoke] ✓  ${label}`);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     errors.push(`${label}: ${msg}`);
-    console.error(`[smoke] ✗  ${label}: ${msg}`);
   }
 }
 
@@ -52,7 +50,7 @@ function assertProvenance(prov: Provenance | undefined, label: string): void {
     throw new Error(`${label} — verifierApproved is not true (got ${prov.verifierApproved})`);
   if (!prov.freshness?.fetchedAt) throw new Error(`${label} — freshness.fetchedAt missing`);
   const ts = new Date(prov.freshness.fetchedAt);
-  if (isNaN(ts.getTime()))
+  if (Number.isNaN(ts.getTime()))
     throw new Error(
       `${label} — freshness.fetchedAt is not a valid ISO timestamp (got "${prov.freshness.fetchedAt}")`,
     );
@@ -445,7 +443,6 @@ function buildVoyageTwin(): {
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 async function run(): Promise<void> {
-  console.log('[smoke] Vessels Cognitive Runtime — logic smoke tests starting\n');
   void mockReq();
   void mockRes();
   void noop;
@@ -573,20 +570,14 @@ async function run(): Promise<void> {
     const allIntact = result.snapshots.every((s) => s.cargoIntact);
     if (!allIntact) throw new Error('Cargo integrity lost in at least one snapshot');
   });
-
-  // ── Summary ───────────────────────────────────────────────────────────────────
-  console.log('\n─────────────────────────────────────────────────────────────');
   if (errors.length === 0) {
-    console.log('[smoke] ✓  All vessels cognitive logic tests PASSED');
   } else {
-    console.error(`[smoke] ✗  ${errors.length} test(s) FAILED:`);
-    errors.forEach((e) => console.error(`         • ${e}`));
+    errors.forEach((_e) => {});
     process.exit(1);
   }
   process.exit(0);
 }
 
-run().catch((err) => {
-  console.error('[smoke] Unexpected error:', err);
+run().catch((_err) => {
   process.exit(1);
 });

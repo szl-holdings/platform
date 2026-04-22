@@ -13,12 +13,9 @@ import { motion as m } from 'framer-motion';
 import {
   Activity,
   AlertTriangle,
-  ArrowUpRight,
   BarChart3,
-  Bell,
   CheckCircle,
   Clock,
-  Cpu,
   Eye,
   Gauge,
   Workflow,
@@ -93,7 +90,7 @@ function SignalWaterfall() {
   useEffect(() => {
     const t = setInterval(() => {
       setSignals((prev) => {
-        const next = [...prev.filter((s) => Date.now() - s.id < 6000)];
+        const next = prev.filter((s) => Date.now() - s.id < 6000);
         const colors = ['#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6'];
         const labels = ['Signal', 'Alert', 'Action', 'Blocker', 'Workflow'];
         const idx = Math.floor(Math.random() * colors.length);

@@ -157,7 +157,7 @@ function buildPrometheusText(): string {
     }
   }
 
-  return lines.join('\n') + '\n';
+  return `${lines.join('\n')}\n`;
 }
 
 export function metricsInstrumentationMiddleware(): RequestHandler {
@@ -175,7 +175,7 @@ export function metricsInstrumentationMiddleware(): RequestHandler {
 
 export function registerMetricsRoute(router: IRouter): void {
   router.get('/metrics', (_req: Request, res: Response) => {
-    const accept = _req.headers['accept'] ?? '';
+    const accept = _req.headers.accept ?? '';
     if (accept.includes('text/plain') || accept.includes('*/*') || accept === '') {
       res.setHeader('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
       res.send(buildPrometheusText());

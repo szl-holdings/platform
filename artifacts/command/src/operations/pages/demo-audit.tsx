@@ -1,5 +1,5 @@
 import { demoAuditEvents } from '@lyte/lib/demo-seed';
-import { AlertTriangle, CheckCircle, Clock, FileText, Filter, Search } from 'lucide-react';
+import { FileText, Search } from 'lucide-react';
 import { useState } from 'react';
 
 const BG = { surface: '#0c1018', elevated: '#10141e' };
@@ -42,7 +42,7 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function formatTimestamp(iso: string): string {
+function _formatTimestamp(iso: string): string {
   const d = new Date(iso);
   return (
     d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
@@ -52,11 +52,11 @@ function formatTimestamp(iso: string): string {
 }
 
 export default function DemoAuditPage() {
-  const [tagFilter, setTagFilter] = useState('all');
+  const [tagFilter, _setTagFilter] = useState('all');
   const [outcomeFilter, setOutcomeFilter] = useState('all');
   const [search, setSearch] = useState('');
 
-  const allTags = Array.from(new Set(demoAuditEvents.flatMap((e) => e.tags)));
+  const _allTags = Array.from(new Set(demoAuditEvents.flatMap((e) => e.tags)));
   const filtered = demoAuditEvents.filter((e) => {
     if (tagFilter !== 'all' && !e.tags.includes(tagFilter)) return false;
     if (outcomeFilter !== 'all' && e.outcome !== outcomeFilter) return false;
@@ -169,7 +169,7 @@ export default function DemoAuditPage() {
             style={{ background: BORDER.muted }}
           />
           <div className="divide-y" style={{ borderColor: BORDER.subtle }}>
-            {filtered.map((evt, i) => {
+            {filtered.map((evt, _i) => {
               const oc = OUTCOME[evt.outcome];
               const actorColor = ACTOR_TYPE[evt.actor] ?? TEXT.secondary;
               const isSystem = evt.actorRole === 'System';

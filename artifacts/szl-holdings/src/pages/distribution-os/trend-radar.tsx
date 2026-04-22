@@ -2,13 +2,9 @@ import { DataProvenance } from '@szl-holdings/shared-ui/data-provenance';
 import type { DataProvenanceInfo } from '@szl-holdings/shared-ui/ontology';
 import { m } from 'framer-motion';
 import {
-  AlertCircle,
-  ArrowRight,
-  CheckCircle2,
   Clock,
   Flame,
   Radio,
-  TrendingUp,
   Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -264,7 +260,7 @@ export default function TrendRadarPage() {
               style={{
                 padding: '0.3rem 0.75rem',
                 borderRadius: '6px',
-                border: `1px solid ${filter === f ? DS.accent + '40' : DS.border}`,
+                border: `1px solid ${filter === f ? `${DS.accent}40` : DS.border}`,
                 background: filter === f ? `${DS.accent}10` : 'transparent',
                 color: filter === f ? DS.accent : DS.text.tertiary,
                 fontSize: '0.75rem',
@@ -295,7 +291,7 @@ export default function TrendRadarPage() {
                   style={{
                     padding: '1rem 1.125rem',
                     background: isSelected ? `${DS.accent}07` : DS.surface,
-                    border: `1px solid ${isSelected ? DS.accent + '25' : DS.border}`,
+                    border: `1px solid ${isSelected ? `${DS.accent}25` : DS.border}`,
                     borderRadius: '8px',
                     cursor: 'pointer',
                     textAlign: 'left',

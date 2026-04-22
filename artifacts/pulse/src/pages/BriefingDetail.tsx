@@ -1,4 +1,4 @@
-import { AlertTriangle, ChevronLeft, Download } from 'lucide-react';
+import { ChevronLeft, } from 'lucide-react';
 import { Link, useParams } from 'wouter';
 import AgentBadge from '../components/AgentBadge';
 import ConfidenceChip from '../components/ConfidenceChip';

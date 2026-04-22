@@ -137,7 +137,7 @@ export function PrismLayout({ children }: { children: React.ReactNode }) {
 
   const isActive = (href: string) => {
     const clean = location.replace(/\/$/, '') || '/';
-    return clean === href || clean.startsWith(href + '/');
+    return clean === href || clean.startsWith(`${href}/`);
   };
 
   const SidebarContent = ({ onItemClick }: { onItemClick?: () => void }) => (

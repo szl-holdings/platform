@@ -1,5 +1,5 @@
 import { m } from "framer-motion";
-import { ArrowRight, ArrowUpRight, Layers, Zap, Activity, Ship, Shield, Brain, Building, Globe, Users, Sparkles } from "lucide-react";
+import { ArrowUpRight, type Layers, Zap, Activity, Ship, Shield, Building, Globe, Users, } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -204,7 +204,7 @@ export default function EcosystemPage() {
                   { label: "6 Domain Packs", desc: "Vertical intelligence", accent: "hsl(210,5%,54%)" },
                   { label: "FORGE", desc: "Execution Fabric", accent: "hsl(222,68%,67%)" },
                   { label: "2 Brands", desc: "Carlota Jo · Stephen Lutar", accent: "hsl(36,52%,54%)" },
-                ].map((item, i) => (
+                ].map((item, _i) => (
                   <div key={item.label} style={{
                     padding: "0.625rem 1rem",
                     background: "hsla(0,0%,100%,0.025)",

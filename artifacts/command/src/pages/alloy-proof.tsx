@@ -1,6 +1,6 @@
 import { EcosystemNav } from '@szl-holdings/shared-ui/ecosystem-nav';
-import React, { useCallback, useState } from 'react';
-import { ACCENT, apiUrl, BASE_URL } from './cognitive/shared';
+import { useCallback, useState } from 'react';
+import { ACCENT, apiUrl, } from './cognitive/shared';
 
 type AutonomyMode = 'observe' | 'recommend' | 'draft' | 'ask-to-act' | 'approved-act';
 type PolicyState = 'unchecked' | 'allowed' | 'requires_approval' | 'blocked';

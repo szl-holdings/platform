@@ -1,8 +1,8 @@
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { defineConfig } from 'vite';
 
 // Limit esbuild Go runtime threads to prevent OS thread exhaustion
