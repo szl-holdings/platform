@@ -10,13 +10,13 @@
 
 | Type | Examples |
 |------|---------|
-| **Command surface** | Lyte, Command Portal, Pulse |
-| **Execution fabric** | Alloy (shared backbone) |
-| **Mobile command** | CORTEX (`artifacts/szl-holdings-mobile`), cortex-mobile |
-| **Domain pack** | Aegis, Vessels, Terra, PRISM Counsel, IMPERIUM, Carlota Jo, Sentra, Counsel |
+| **Command surface** | KORA (Lyte Command Center), Command Portal, Pulse |
+| **Execution fabric** | FORGE (shared backbone, formerly Alloy) |
+| **Mobile command** | APEX (`artifacts/szl-holdings-mobile`) |
+| **Domain pack** | TENAX (Sentra), SEXTANT (Vessels), DOMAINE (Terra), Counsel, Carlota Jo, LUMINA (Pulse), PARAGON (Aegis) |
 | **Corporate platform** | SZL Holdings (web) |
-| **Internal / tooling** | API Server, mockup-sandbox |
-| **Media** | SZL Demo Video |
+| **Internal / tooling** | API Server, mockup-sandbox (NEXUS) |
+| **Media** | SZL Demo Video — see [`artifacts/szl-demo-video/deliverables/`](artifacts/szl-demo-video/deliverables/) |
 
 ---
 

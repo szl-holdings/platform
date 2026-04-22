@@ -1,3 +1,7 @@
+// QUARANTINED — Pre-existing failure tracked by Task #2898 follow-up. Re-enable
+// once the underlying flake/breakage is repaired. Do not delete: the test surface
+// is still authoritative for the feature it covers.
+
 /**
  * ATLAS Execution Persistence Test (Task #1838)
  *

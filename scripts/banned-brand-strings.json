@@ -60,6 +60,7 @@
     { "file": "artifacts/szl-holdings/src/pages/carousel-preview.tsx", "line": 9, "term": "Lyte", "reason": "Display label mirrors archival LinkedIn carousel JPG content (slide-04-lyte.jpg) generated under prior branding." },
     { "file": "artifacts/szl-holdings/src/pages/carousel-preview.tsx", "line": 10, "term": "Vessels", "reason": "Display label mirrors archival LinkedIn carousel JPG content (slide-05-vessels.jpg) generated under prior branding." },
     { "file": "artifacts/szl-holdings/src/pages/carousel-preview.tsx", "line": 11, "term": "Terra", "reason": "Display label mirrors archival LinkedIn carousel JPG content (slide-06-terra.jpg) generated under prior branding." },
-    { "file": "artifacts/szl-holdings/src/pages/carousel-preview.tsx", "line": 12, "term": "Aegis", "reason": "Display label mirrors archival LinkedIn carousel JPG content (slide-07-aegis.jpg) generated under prior branding." }
+    { "file": "artifacts/szl-holdings/src/pages/carousel-preview.tsx", "line": 12, "term": "Aegis", "reason": "Display label mirrors archival LinkedIn carousel JPG content (slide-07-aegis.jpg) generated under prior branding." },
+    { "file": "artifacts/vessels/src/lib/voyage-export.ts", "line": 237, "term": "Vessels", "reason": "Voyage export PDF footer reads as the artifact display label, which still ships under the long-form 'Vessels Maritime Intelligence' wordmark; renaming would change customer-facing export output mid-cycle." }
   ]
 }

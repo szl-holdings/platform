@@ -93,6 +93,17 @@ Domain packs extend the same governance infrastructure into domain-specific inte
 
 The FORGE Command Portal is the cross-domain real-time dashboard aggregating signals from all domain packs into a unified executive view with eight-domain SSE feeds and executive briefing.
 
+### Walkthrough Video
+
+A 60-second governed-autonomy walkthrough is rendered from `artifacts/szl-demo-video`:
+
+| Format | File | Use |
+|--------|------|-----|
+| 1920×1080 H.264 (16:9) | [`artifacts/szl-demo-video/deliverables/linkedin-4-17.mp4`](artifacts/szl-demo-video/deliverables/linkedin-4-17.mp4) | Web / desktop / LinkedIn |
+| 1080×1080 H.264 (1:1) | [`artifacts/szl-demo-video/deliverables/linkedin-4-17-square.mp4`](artifacts/szl-demo-video/deliverables/linkedin-4-17-square.mp4) | Mobile feed |
+
+Re-render with `pnpm --filter @workspace/szl-demo-video render`. Source manifest and scene definitions live in [`artifacts/szl-demo-video/src/`](artifacts/szl-demo-video/src/).
+
 ### Screens
 
 ![SZL Holdings Dashboard](docs/assets/screenshots/current/szl-holdings-dashboard.jpg)
