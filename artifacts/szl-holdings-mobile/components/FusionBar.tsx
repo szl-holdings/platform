@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { useColors } from '@/hooks/useColors';
+import { useFusionHistory } from '@/hooks/useFusionHistory';
 import { apiFetch } from '@/lib/apiClient';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -217,6 +218,7 @@ export function FusionBar() {
   const [result, setResult] = useState<FusedResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const { history, addQuery, clearHistory } = useFusionHistory();
 
   const submit = async (q?: string) => {
     const finalQuery = (q ?? query).trim();
@@ -235,6 +237,7 @@ export function FusionBar() {
       );
       if (!body.success) throw new Error('Query failed');
       setResult(body.result);
+      addQuery(finalQuery);
       if (q) setQuery(q);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Query failed');
@@ -298,26 +301,64 @@ export function FusionBar() {
       </View>
 
       {!expanded && !loading && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.suggestionsRow}
-        >
-          {SUGGESTIONS.map((s, i) => (
-            <TouchableOpacity
-              key={i}
-              onPress={() => submit(s)}
-              style={[
-                styles.suggestionChip,
-                { backgroundColor: `${ACCENT}10`, borderColor: `${ACCENT}25` },
-              ]}
-            >
-              <Text style={[styles.suggestionText, { color: ACCENT }]} numberOfLines={1}>
-                {s}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.suggestionsRow}
+          >
+            {SUGGESTIONS.map((s, i) => (
+              <TouchableOpacity
+                key={i}
+                onPress={() => submit(s)}
+                style={[
+                  styles.suggestionChip,
+                  { backgroundColor: `${ACCENT}10`, borderColor: `${ACCENT}25` },
+                ]}
+              >
+                <Text style={[styles.suggestionText, { color: ACCENT }]} numberOfLines={1}>
+                  {s}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {history.length > 0 && (
+            <View style={styles.recentRowWrap}>
+              <View style={styles.recentLabelRow}>
+                <Feather name="clock" size={10} color={colors.mutedForeground} />
+                <Text style={[styles.recentLabel, { color: colors.mutedForeground }]}>RECENT</Text>
+                <View style={{ flex: 1 }} />
+                <TouchableOpacity onPress={clearHistory} accessibilityLabel="Clear recent queries">
+                  <Text style={[styles.recentClear, { color: colors.mutedForeground }]}>Clear</Text>
+                </TouchableOpacity>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.suggestionsRow}
+              >
+                {history.map((h, i) => (
+                  <TouchableOpacity
+                    key={`${h}-${i}`}
+                    onPress={() => submit(h)}
+                    style={[
+                      styles.suggestionChip,
+                      { backgroundColor: colors.background, borderColor: colors.border },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.suggestionText, { color: colors.foreground }]}
+                      numberOfLines={1}
+                    >
+                      {h}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+        </>
       )}
 
       {expanded && (
@@ -455,6 +496,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 10,
     gap: 6,
+  },
+  recentRowWrap: {
+    paddingTop: 2,
+  },
+  recentLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingBottom: 4,
+  },
+  recentLabel: {
+    fontSize: 9,
+    fontFamily: 'Inter_600SemiBold',
+    letterSpacing: 1.2,
+  },
+  recentClear: {
+    fontSize: 10,
+    fontFamily: 'Inter_500Medium',
   },
   suggestionChip: {
     paddingHorizontal: 10,
