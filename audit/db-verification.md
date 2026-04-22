@@ -231,22 +231,51 @@ Six of six domain repository modules are present and address the primary product
 
 | Metric | Value | Command |
 |--------|-------|---------|
-| SQL files | **24** | `ls lib/db/migrations/ \| wc -l` |
-| Tracking mechanism | Separate — no Drizzle journal entry | — |
-| Apply order | Alphabetical / manual execution order | Convention |
+| SQL files | **26** | `ls lib/db/migrations/ \| wc -l` |
+| Unique prefixes | 22 (4 duplicate-prefix pairs) | `ls lib/db/migrations/ \| cut -c1-4 \| sort -u \| wc -l` |
+| Tracking mechanism | **`__manual_migrations` table** (filename PK, sha256 checksum, applied_at) | `psql -c '\d __manual_migrations'` |
+| Apply order | Alphabetical, enforced by runner | `lib/db/scripts/apply-manual-migrations.mjs` |
+| Apply command | `pnpm --filter @szl-holdings/db migrate:manual` | also runs as part of `migrate` |
 
-These 24 files extend the Drizzle schema with domain-specific operations: Carlota billing tables, signal chain executions, page view events, decision receipts, on-call schedules, constellation views, drift snapshots, atlas execution runs, and more. They are not tracked in `__drizzle_migrations` and must be applied via a separate mechanism.
+These files extend the Drizzle schema with domain-specific operations: Carlota billing tables, signal chain executions, page view events, decision receipts, on-call schedules, constellation views, drift snapshots, atlas execution runs, and more. They are tracked in `__manual_migrations` (created automatically on first apply). The runner is idempotent: re-runs detect already-applied filenames by primary key and skip them. Content drift on an applied file produces a WARN but is not auto-re-applied (write a new `NNNN_*.sql` instead).
 
-**Duplicate-prefixed files in `lib/db/migrations/`:**
+**`__manual_migrations` schema:**
 
-| Duplicate | Files |
-|-----------|-------|
-| `0004_*` | `0004_carlota_time_billing.sql`, `0004_signal_chain_executions.sql` |
-| `0008_*` | `0008_notification_preferences_digest_config.sql`, `0008_vessels_org_scope.sql` |
-| `0015_*` | `0015_on_call_schedules.sql`, `0015_team_pages.sql` |
-| `0016_*` | `0016_gateway_event_latency.sql`, `0016_team_pages_mute_duplicates.sql` |
+```sql
+CREATE TABLE IF NOT EXISTS "__manual_migrations" (
+  "filename"   TEXT PRIMARY KEY,
+  "checksum"   TEXT NOT NULL,           -- sha256 of file contents at apply time
+  "applied_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  "applied_by" TEXT                     -- user@host that ran the migration
+);
+```
 
-These duplicates within the hand-authored path indicate parallel development across branches without renaming. In the absence of a tracker, alphabetical apply order is assumed; review is needed to confirm each pair is idempotent.
+**Live verification (2026-04-21):**
+
+```
+$ node lib/db/scripts/apply-manual-migrations.mjs
+[manual-migrations] applying 0001_add_tenant_id_to_rag_knowledge_chunks.sql...
+... (26 files applied)
+[manual-migrations] done — applied=26 skipped=0 drift=0 total=26
+
+$ node lib/db/scripts/apply-manual-migrations.mjs   # second run
+[manual-migrations] done — applied=0 skipped=26 drift=0 total=26
+```
+
+Idempotency confirmed live against the Replit dev DB.
+
+**Duplicate-prefixed files in `lib/db/migrations/` — idempotency review:**
+
+| Duplicate | Files | Touches | Idempotent? | Order constraint |
+|-----------|-------|---------|-------------|------------------|
+| `0004_*` | `0004_carlota_time_billing.sql`, `0004_signal_chain_executions.sql` | `carlota_time_entries`, `carlota_invoices` vs `signal_chain_executions` | ✅ All `CREATE TABLE IF NOT EXISTS` | None (disjoint) |
+| `0008_*` | `0008_notification_preferences_digest_config.sql`, `0008_vessels_org_scope.sql` | `notification_preferences.digest_config` column vs `vessels`/`vessels_fleets`/`vessels_alert_rules.org_id` columns | ✅ All `ADD COLUMN IF NOT EXISTS` + `CREATE INDEX IF NOT EXISTS` | None (disjoint) |
+| `0015_*` | `0015_on_call_schedules.sql`, `0015_team_pages.sql` | `on_call_schedules`, `on_call_shifts` vs `team_pages` | ✅ All `CREATE TABLE/INDEX IF NOT EXISTS` | `0015_team_pages.sql` MUST precede `0016_team_pages_mute_duplicates.sql` (which ALTERs `team_pages`); alphabetical apply order satisfies this |
+| `0016_*` | `0016_gateway_event_latency.sql`, `0016_team_pages_mute_duplicates.sql` | `agent_mesh_gateway_events` (+ `latency_ms` column) vs `team_pages` (+ mute columns) | ✅ All `IF NOT EXISTS` patterns | Depends on 0015_team_pages.sql (above) |
+
+Every pair touches disjoint tables; alphabetical apply order produces the same effect regardless of which member of a pair is applied first within the pair. The single cross-pair ordering dependency (`0015_team_pages → 0016_team_pages_mute_duplicates`) is naturally satisfied by alphabetical order.
+
+**Idempotency review of the full set (26 files):** every file uses `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`, or equivalent guards. `0003_skill_library_tables.sql` previously failed against `drizzle push`-bootstrapped schemas (RR-21) because it created indexes on columns that did not yet exist; the file now ALTERs those columns into existence (`ADD COLUMN IF NOT EXISTS category|enabled|is_builtin`) immediately before the indexes, restoring full idempotency on both clean and `drizzle push`-bootstrapped DBs.
 
 ### 2.3 Rollback Scripts (`scripts/rollback/`)
 
@@ -276,7 +305,7 @@ bash scripts/audit/db/local-boot.sh
 The script performs five steps:
 1. Starts Postgres 16 via `docker-compose up -d postgres` and polls until `pg_isready` succeeds
 2. Applies all 63 Drizzle-kit journal migrations via `pnpm --filter @szl-holdings/db migrate`
-3. Applies 23 of 24 hand-authored migrations in `lib/db/migrations/` via `psql` in alphabetical order (1 quarantined: `0003_skill_library_tables.sql` — column-not-found error; RR-21)
+3. Applies all 26 hand-authored migrations in `lib/db/migrations/` via `node lib/db/scripts/apply-manual-migrations.mjs`, which records each apply in the `__manual_migrations` tracker table and skips already-applied files on re-run
 4. Runs demo seeds for all four narrative domains via `pnpm --filter @workspace/demo-seed seed:all`
 5. Starts the API server and polls `GET /api/health` until HTTP 200
 
@@ -294,7 +323,7 @@ DATABASE_URL=postgres://szl_platform_user:<PASSWORD>@localhost:5432/szl_platform
 | Step | Path | Count | Tracker |
 |------|------|-------|---------|
 | 1 | `lib/db/drizzle/` | 63 journal entries (idx 0–94) | `__drizzle_migrations` table |
-| 2 | `lib/db/migrations/` | 23 of 24 hand-authored SQL files applied (1 quarantined: `0003_skill_library_tables.sql`, RR-21) | None (apply alphabetically) |
+| 2 | `lib/db/migrations/` | 26 hand-authored SQL files applied via `apply-manual-migrations.mjs` (no quarantine — RR-21 fix lives inside `0003_skill_library_tables.sql`) | `__manual_migrations` table (filename PK + sha256) |
 | 3 | `packages/db/migrations/` | 1 supplemental file (`0021_phase_b_missing_indexes.sql`) | None (apply manually) |
 
 ### 3.4 Boot Path Status (Live Execution + Code-Path Inspection)
@@ -308,7 +337,8 @@ DATABASE_URL=postgres://szl_platform_user:<PASSWORD>@localhost:5432/szl_platform
 | `__drizzle_migrations` tracker | ⚠️ ABSENT | Schema applied via `drizzle push` — migrate journal not used (§0.2) |
 | Drizzle journal file consistency | ✅ Confirmed in code | 63 entries; orphaned files registered as idx 91–93 with `IF NOT EXISTS` guards |
 | `pnpm --filter @szl-holdings/db migrate` command | ✅ Confirmed in code | Documented in `packages/db-migrations/package.json` and `packages/db-migrations/src/index.ts` |
-| Hand-authored migrations idempotency | ⚠️ Not fully verified | Duplicate-prefix pairs (0004/0008/0015/0016) need review — see RR-13 |
+| Hand-authored migrations tracker | ✅ Live-verified | `__manual_migrations` table created and populated with 26 rows; second run reports `applied=0 skipped=26 drift=0` (§2.2) |
+| Hand-authored migrations idempotency | ✅ Verified | All 26 files use `IF NOT EXISTS`/`ADD COLUMN IF NOT EXISTS` guards; duplicate-prefix pairs reviewed and cross-pair ordering documented (§2.2) |
 | Demo seed commands | ✅ Confirmed in code | `packages/demo-seed/package.json` has `seed:all` via `tsx src/seed-runner.ts` |
 | Seed records in live DB | ✅ Executed live | vessels=5, users=7, organizations=6 (§0.3); terra_properties=0 (seed not yet run) |
 | API health endpoint existence | ✅ Confirmed in code | `GET /api/health` route exists in api-server |
@@ -409,4 +439,4 @@ All five use safe, idempotent patterns (`IF NOT EXISTS`, `IF NOT EXISTS` on inde
 - ✅ **Live execution performed** — PostgreSQL 16.10 confirmed running; 730 tables counted; 2,063 indexes; 603 FK constraints; supplemental migration applied; 2 hand-authored migrations applied; rollback script executed and reversed.
 - ✅ **Inventory script provided** — `scripts/audit/db/inventory-schema.sh` queries `information_schema` and `pg_catalog` for live table/index/FK/constraint counts; reproducible.
 - ⚠️ **Full clean-DB `drizzle migrate` apply not tested** — the live DB used `drizzle push` (no `__drizzle_migrations` table). Running `drizzle migrate` against it without a clean reset would conflict. The `local-boot.sh` script with `CLEAN=1` provides the clean-slate Docker path.
-- ⚠️ **One hand-authored migration quarantined** — `lib/db/migrations/0003_skill_library_tables.sql` produces column-not-found errors against the live schema (RR-21). It is excluded from the boot script's apply loop via the quarantine list; fix is tracked in the residual risk register.
+- ✅ **No hand-authored migrations quarantined** — RR-21 (column drift in `0003_skill_library_tables.sql`) was resolved by adding `ADD COLUMN IF NOT EXISTS category|enabled|is_builtin` ahead of the index creation. All 26 hand-authored migrations now apply cleanly through the `__manual_migrations` runner.

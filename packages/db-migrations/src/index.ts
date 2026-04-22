@@ -20,4 +20,14 @@
  * Hand-authored migrations live in lib/db/migrations/.
  */
 
-export { getMigrationStatus, MIGRATION_PATHS } from './migration-status';
+export {
+  getMigrationStatus,
+  getManualMigrationStatus,
+  getUnifiedMigrationStatus,
+  MIGRATION_PATHS,
+} from './migration-status';
+export type {
+  MigrationStatus,
+  ManualMigrationStatus,
+  UnifiedMigrationStatus,
+} from './migration-status';

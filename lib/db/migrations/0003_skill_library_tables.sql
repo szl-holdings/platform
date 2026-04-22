@@ -1,5 +1,11 @@
 -- Migration: Create skill_library tables (skills and skill_runs)
 -- These tables back the @workspace/skill-library package's durable persistence layer.
+--
+-- Drift guard (RR-21): a `skills` table may already exist from `drizzle push`
+-- without the columns this migration assumes. The ADD COLUMN IF NOT EXISTS
+-- block below brings any pre-existing `skills` row up to the shape required
+-- by the indexes that follow. This keeps the migration idempotent across both
+-- a clean DB and a `drizzle push`-bootstrapped DB.
 
 CREATE TABLE IF NOT EXISTS "skills" (
   "id"                  SERIAL PRIMARY KEY,
@@ -29,6 +35,13 @@ CREATE TABLE IF NOT EXISTS "skills" (
   "created_at"          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   "updated_at"          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Drift guard: ensure all columns required by the indexes below exist on
+-- pre-existing `skills` tables (created via drizzle push without these
+-- columns). Defaults match the CREATE TABLE definition above.
+ALTER TABLE "skills" ADD COLUMN IF NOT EXISTS "category"   TEXT NOT NULL DEFAULT 'uncategorized';
+ALTER TABLE "skills" ADD COLUMN IF NOT EXISTS "enabled"    BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE "skills" ADD COLUMN IF NOT EXISTS "is_builtin" BOOLEAN NOT NULL DEFAULT FALSE;
 
 CREATE INDEX IF NOT EXISTS "skills_category_idx"   ON "skills" ("category");
 CREATE INDEX IF NOT EXISTS "skills_enabled_idx"     ON "skills" ("enabled");

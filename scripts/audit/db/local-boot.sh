@@ -34,22 +34,13 @@ API_PID_FILE="/tmp/szl-api-server.pid"
 log()  { echo "[local-boot] $*"; }
 fail() { echo "[local-boot] ERROR: $*" >&2; exit 1; }
 
-# Known-broken hand-authored migrations — quarantined with documented reason.
-# See: audit/residual-risk-register.md RR-21
-QUARANTINED_MIGRATIONS=(
-  "lib/db/migrations/0003_skill_library_tables.sql"
-  # ^ Indexes on skills.category and skills.enabled columns do not exist in the
-  #   drizzle-push schema. Fix: add IF NOT EXISTS column guards or align migration
-  #   to live schema before removing from this list.
-)
-
-is_quarantined() {
-  local file="$1"
-  for q in "${QUARANTINED_MIGRATIONS[@]}"; do
-    [ "$file" = "$q" ] && return 0
-  done
-  return 1
-}
+# Hand-authored migrations are now applied through the
+# `__manual_migrations` tracker (see lib/db/scripts/apply-manual-migrations.mjs)
+# rather than the previous quarantine-list + raw-psql loop. RR-21 (skills
+# column drift in 0003_skill_library_tables.sql) was resolved by adding
+# ADD COLUMN IF NOT EXISTS guards inside that file. There is no longer a
+# quarantine list — every file in lib/db/migrations/ is in the apply set.
+QUARANTINED_MIGRATIONS=()
 
 # ── Step 0 (optional): Clean reset ─────────────────────────────────────────
 if [ "$CLEAN" = "1" ]; then
@@ -83,27 +74,24 @@ else
   log "  Postgres connection OK"
 fi
 
-# ── Step 2: Apply Drizzle-kit migrations ──────────────────────────────────
-log "Step 2/5 — Applying Drizzle-kit migrations (lib/db/drizzle/)..."
+# ── Step 2: Apply Drizzle-kit + hand-authored migrations ──────────────────
+# `pnpm --filter @szl-holdings/db migrate` runs three steps in order:
+#   1. backfill-migrations.mjs       — seeds __drizzle_migrations from journal
+#   2. drizzle-kit migrate           — applies Drizzle journal entries
+#   3. apply-manual-migrations.mjs   — applies lib/db/migrations/ via the
+#                                      __manual_migrations tracker
+# This boot script intentionally invokes only the unified `migrate` command
+# so manual migrations are not run twice in the same boot.
+log "Step 2/5 — Applying Drizzle-kit + hand-authored migrations..."
 pnpm --filter @szl-holdings/db migrate \
-  || fail "Drizzle migrate failed — check DATABASE_URL and lib/db/drizzle/"
-log "  Drizzle migrations applied (63 journal entries, idx 0–94)."
+  || fail "Migrate failed — check DATABASE_URL, lib/db/drizzle/, and lib/db/migrations/"
+log "  Drizzle journal applied (63 entries, idx 0–94) + hand-authored migrations tracked in __manual_migrations."
 
-# ── Step 3: Apply hand-authored + supplemental migrations ──────────────────
-log "Step 3/5 — Applying hand-authored migrations (lib/db/migrations/ + packages/db/migrations/)..."
+# ── Step 3: Apply supplemental index-only migration ───────────────────────
+log "Step 3/5 — Applying supplemental migration (packages/db/migrations/)..."
 
-for SQL_FILE in lib/db/migrations/*.sql; do
-  [ -f "$SQL_FILE" ] || continue
-  if is_quarantined "$SQL_FILE"; then
-    log "  SKIPPING (quarantined — see RR-21): $SQL_FILE"
-    continue
-  fi
-  log "  Applying $SQL_FILE..."
-  psql -v ON_ERROR_STOP=1 "$DATABASE_URL" -f "$SQL_FILE" \
-    || fail "Migration failed: $SQL_FILE — fix or add to QUARANTINED_MIGRATIONS"
-done
-
-# Apply supplemental migration (IF NOT EXISTS index-only; NOTICE for existing indexes is normal)
+# Supplemental migration (IF NOT EXISTS index-only; NOTICE for existing indexes is normal).
+# This file is not part of either tracker; it is applied directly via psql.
 SUPP_MIGRATION="packages/db/migrations/0021_phase_b_missing_indexes.sql"
 if [ -f "$SUPP_MIGRATION" ]; then
   log "  Applying supplemental migration: $SUPP_MIGRATION..."
@@ -113,7 +101,7 @@ if [ -f "$SUPP_MIGRATION" ]; then
   # they are informational only and do not indicate errors.
 fi
 
-log "  Hand-authored migrations complete (quarantined: ${#QUARANTINED_MIGRATIONS[@]})."
+log "  Supplemental migration complete."
 
 # ── Step 4: Run demo seeds ─────────────────────────────────────────────────
 log "Step 4/5 — Running demo seeds (all four narrative domains)..."
@@ -151,7 +139,7 @@ log ""
 log "=== Local DB boot complete ==="
 log "  Postgres          : running"
 log "  Drizzle migs      : applied (63 journal entries, idx 0–94)"
-log "  Hand-authored migs: applied (${#QUARANTINED_MIGRATIONS[@]} quarantined — see RR-21)"
+log "  Hand-authored migs: applied (tracked in __manual_migrations)"
 log "  Supplemental mig  : applied (packages/db/migrations/0021_phase_b_missing_indexes.sql)"
 log "  Demo seeds        : inserted (4 narrative domains)"
 log "  API server        : running (pid=$(cat "$API_PID_FILE" 2>/dev/null || echo 'unknown'))"

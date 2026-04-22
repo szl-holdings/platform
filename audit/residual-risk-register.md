@@ -32,8 +32,8 @@
 | RR-09 | Model mismatch | `simulation_sessions` model may reference v1 column names; v2 schema applied via `0025_simulation_persistence` | MEDIUM | Agent Platform | OPEN — model review required |
 | RR-10 | Naming | camelCase/snake_case mixing in schema exports; `_table` suffix inconsistency; `szl_` prefix overlap | LOW | Engineering | OPEN — low priority cosmetic |
 | RR-11 | Forward-only | Migrations idx 9–94 (58 migrations) have no rollback scripts | MEDIUM | DB Platform | ACCEPTED — forward-only is standard Drizzle practice; manual SQL required for any rollback |
-| RR-12 | Hand-authored tracker | 24 hand-authored migrations in `lib/db/migrations/` tracked separately with no unified `__drizzle_migrations` record | MEDIUM | DB Platform | OPEN — need separate tracker or registration in Drizzle journal |
-| RR-13 | Duplicate prefix | `lib/db/migrations/` has 4 pairs of duplicate-prefixed files (`0004_*`, `0008_*`, `0015_*`, `0016_*`) — apply order ambiguity | MEDIUM | DB Platform | OPEN — review idempotency of each pair |
+| RR-12 | Hand-authored tracker | 26 hand-authored migrations in `lib/db/migrations/` now tracked in dedicated `__manual_migrations` table (filename PK + sha256 checksum + applied_at + applied_by) by `lib/db/scripts/apply-manual-migrations.mjs`. Live-verified 2026-04-21: 26 applied, second run reports 0 applied / 26 skipped. | MEDIUM | DB Platform | **RESOLVED** ✓ |
+| RR-13 | Duplicate prefix | `lib/db/migrations/` has 4 pairs of duplicate-prefixed files (`0004_*`, `0008_*`, `0015_*`, `0016_*`). Each pair reviewed: all touch disjoint tables, all use `IF NOT EXISTS` / `ADD COLUMN IF NOT EXISTS` guards. Single cross-pair ordering dependency (`0015_team_pages` → `0016_team_pages_mute_duplicates`) is satisfied by alphabetical apply order enforced by the runner. See `audit/db-verification.md` §2.2 for table. | MEDIUM | DB Platform | **RESOLVED** ✓ |
 | RR-14 | Thin seed | Terra 1031 Exchange and Lease Abstraction modules have no dedicated seed data | MEDIUM | Terra Team | OPEN — surfaces may appear empty in demo |
 | RR-15 | Thin seed | PRISM Counsel `pc_approval_steps` and `pc_settlement_blockers` have no dedicated seed | LOW | Counsel | OPEN — advanced feature surfaces only |
 | RR-16 | Thin seed | `artifacts/szl-holdings/src/data/insights.ts` uses hardcoded TS data; no DB path | LOW | Platform | OPEN — low priority |
@@ -41,7 +41,7 @@
 | RR-18 | No tenant scope | `terra_covenants` has no `org_id` or tenant scope column | HIGH | Terra Team | OPEN — data isolation risk; add `org_id` + FK in next Terra migration |
 | RR-19 | Session integrity | `sessions.replaced_by_session_id` has no FK back to `sessions.id` | LOW | Auth Platform | OPEN — dangling pointer risk on session deletion |
 | RR-20 | Supplemental migration | `packages/db/migrations/0021_phase_b_missing_indexes.sql` not registered in Drizzle journal; must be applied manually | LOW | DB Platform | PARTIALLY RESOLVED — applied against live dev DB (2026-04-21); add to boot script and document as manual step |
-| RR-21 | Hand-authored migration drift | `lib/db/migrations/0003_skill_library_tables.sql` produces errors on column references (`category`, `enabled`) against live schema — confirms column mismatch between hand-authored migration and `drizzle push`-created `skills` table | MEDIUM | DB Platform | NEW (2026-04-21) — fix by adding `IF NOT EXISTS` column guards or aligning migration to live schema |
+| RR-21 | Hand-authored migration drift | `lib/db/migrations/0003_skill_library_tables.sql` previously failed on `skills.category` / `skills.enabled` index creation against `drizzle push`-bootstrapped schemas. Resolved 2026-04-21 by inserting `ALTER TABLE skills ADD COLUMN IF NOT EXISTS category|enabled|is_builtin` immediately before the index DDL. Live-verified: file now applies cleanly through the `__manual_migrations` runner; no longer in any quarantine list. | MEDIUM | DB Platform | **RESOLVED** ✓ |
 | RR-22 | Rollback script BEGIN/COMMIT | All 5 rollback scripts (`scripts/rollback/001–005`) contain embedded `BEGIN/COMMIT` blocks. This means (a) dry-run via transaction wrapper is impossible, and (b) rollback execution against a live DB is irreversible without a backup. Verified live: `001_rollback_0004_terra_broker_schema.sql` executed and committed all 36 DROP statements; tables restored via forward migration `0007_terra_broker_schema.sql`. | MEDIUM | DB Platform | NEW (2026-04-21) — remove embedded BEGIN/COMMIT from rollback scripts; ensure callers wrap in explicit transaction |
 | RR-101 | Login Rate Limiting Absent (F-01) | | HIGH | Platform | **RESOLVED** ✓ | `loginLimiter` (10 req/15 min prod, skip-success) applied to all 6 credential routes: `POST /auth/login`, `/auth/login-password`, `/auth/refresh`, `/auth/mfa/challenge`, `/auth/mfa/setup-required`, `/auth/mfa/enable-required` |
 | RR-102 | MFA Encryption Key Absent (F-02) | | HIGH | Ops | OPEN | TOTP secrets stored unencrypted at rest in dev. Set `MFA_SECRET_ENCRYPTION_KEY` in Replit Secrets. |
@@ -85,6 +85,9 @@
 | CLOSED-08 | Cookie security flags (F-03) | `__Host-sid` httpOnly+secure+sameSite+path confirmed (Track 3) |
 | CLOSED-09 | Password reset single-use (F-06) | Token cleared to NULL on confirm at `org-settings.ts:950` (Track 3) |
 | CLOSED-10 | alloy-runtime-api Express 4/Node 24 boot failure | Upgraded to express@^5; all 8 TypeScript services now boot with `/healthz`+`/readyz` (Track 3) |
+| CLOSED-11 | RR-12 hand-authored migration tracker | `__manual_migrations` table + `lib/db/scripts/apply-manual-migrations.mjs` runner; live-verified 26 applied, idempotent re-runs (Task #2879) |
+| CLOSED-12 | RR-13 duplicate-prefix idempotency | All 4 duplicate pairs reviewed; touch disjoint tables; all use IF NOT EXISTS guards; cross-pair ordering documented (Task #2879) |
+| CLOSED-13 | RR-21 0003_skill_library_tables drift | ADD COLUMN IF NOT EXISTS guards for `category`/`enabled`/`is_builtin` added inline; no longer quarantined (Task #2879) |
 
 ---
 
@@ -93,8 +96,7 @@
 1. **RR-01 (HIGH):** Assign to next DB hardening sprint. Use `NOT VALID` + `VALIDATE CONSTRAINT` pattern to avoid table locks.
 2. **RR-04 (HIGH):** Requires engineering leadership decision before any consolidation work begins.
 3. **RR-18 (HIGH):** Add `org_id` column to `terra_covenants` in next Terra migration cycle.
-4. **RR-12/RR-13 (MEDIUM):** Standardize hand-authored migration tracking — either register in Drizzle journal or maintain a separate apply log.
-5. **RR-14 (MEDIUM):** Add Terra 1031 and Lease Abstraction seeds before next investor demo.
+4. **RR-14 (MEDIUM):** Add Terra 1031 and Lease Abstraction seeds before next investor demo.
 6. **RR-102 (HIGH):** Set `MFA_SECRET_ENCRYPTION_KEY` in Replit Secrets (`openssl rand -hex 32`).
 7. **RR-108 (MEDIUM):** Deprecate `rolesTable`; make `platformRole` enum canonical.
 8. **RR-115 (LOW):** Set `AEF_BEARER_TOKEN` and `AEF_S2S_SECRET` in Replit Secrets for production deployments.
