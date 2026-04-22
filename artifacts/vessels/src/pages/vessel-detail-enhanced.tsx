@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Clock,
   DollarSign,
+  Eye,
   Fuel,
   Globe,
   History,
@@ -266,6 +267,15 @@ export default function VesselDetailEnhancedPage() {
             {vessel.yearBuilt && ` · ${vessel.yearBuilt}`}
           </p>
         </div>
+        <Link href={`/evidence?entity=${encodeURIComponent(`vessel-${vessel.id}`)}`}>
+          <button
+            data-testid="link-view-evidence"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-300 hover:bg-violet-500/15 transition-all text-xs font-semibold"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            View Evidence
+          </button>
+        </Link>
         <button
           onClick={() => refetch()}
           className="p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400/60 hover:text-sky-300 transition-all"

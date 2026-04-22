@@ -833,6 +833,20 @@ export default function PropertyDetailPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link href={`/evidence?entity=${encodeURIComponent(property.id)}`}>
+              <button
+                data-testid="link-view-evidence"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                style={{
+                  background: 'rgba(139,122,200,0.1)',
+                  border: '1px solid rgba(139,122,200,0.25)',
+                  color: '#8b7ac8',
+                }}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                View Evidence
+              </button>
+            </Link>
             <Link href="/lender-report">
               <button
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"

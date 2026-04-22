@@ -28,6 +28,7 @@ import {
   Briefcase,
   CheckCircle2,
   Clock,
+  Database,
   LayoutDashboard,
   Menu,
   Network,
@@ -56,6 +57,11 @@ const AlertsPage = lazy(() => import('./pages/alerts'));
 const ApprovalsPage = lazy(() => import('./pages/approvals'));
 const TrustProvenancePage = lazy(() => import('./pages/trust-provenance'));
 const AefKnowledgeSearchPage = lazy(() => import('./pages/aef-knowledge-search'));
+const EvidenceExplorerPage = lazy(() =>
+  import('@szl-holdings/shared-ui/evidence-explorer').then((m) => ({
+    default: () => <m.EvidenceExplorer domainFilter="legal" title="Counsel Evidence Explorer" />,
+  })),
+);
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -163,6 +169,12 @@ function CounselSidebarContent({
           label: 'AEF Knowledge Search',
           href: '/aef-search',
           icon: <Search className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/evidence',
+          label: 'Evidence Explorer',
+          href: '/evidence',
+          icon: <Database className="w-3.5 h-3.5" />,
         },
       ],
     },
@@ -287,6 +299,7 @@ function DashboardRouter() {
         <Route path="/aef-search" component={AefKnowledgeSearchPage} />
         <Route path="/pricing" component={CounselPricingPage} />
         <Route path="/account/billing" component={CounselBillingPage} />
+        <Route path="/evidence" component={EvidenceExplorerPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-violet-400/40">Page not found</p>

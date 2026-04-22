@@ -7,12 +7,14 @@ import {
   Clock,
   Database,
   DollarSign,
+  Eye,
   Plus,
   Scale,
   ShieldAlert,
   X,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { Link } from 'wouter';
 
 interface Obligation {
   id: string;
@@ -392,6 +394,9 @@ export default function MatterOverview() {
                   <th className="px-4 py-3 text-[10px] font-semibold text-violet-300/50 uppercase tracking-wider text-right">
                     Exposure
                   </th>
+                  <th className="px-4 py-3 text-[10px] font-semibold text-violet-300/50 uppercase tracking-wider text-right">
+                    Evidence
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-violet-500/5">
@@ -403,7 +408,7 @@ export default function MatterOverview() {
                   </>
                 ) : matters.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-violet-400/40 text-sm">
+                    <td colSpan={7} className="px-4 py-12 text-center text-violet-400/40 text-sm">
                       <Briefcase className="w-6 h-6 mx-auto mb-3 opacity-30" />
                       No matters found. Create your first matter to get started.
                     </td>
@@ -442,6 +447,17 @@ export default function MatterOverview() {
                         {m.estimatedExposure
                           ? `$${(m.estimatedExposure / 1_000_000).toFixed(1)}M`
                           : '—'}
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <Link href={`/evidence?entity=${encodeURIComponent(`matter-${m.id}`)}`}>
+                          <button
+                            data-testid={`link-view-evidence-${m.id}`}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold text-violet-300 bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/20 transition-colors"
+                          >
+                            <Eye className="w-3 h-3" />
+                            View Evidence
+                          </button>
+                        </Link>
                       </td>
                     </tr>
                   ))

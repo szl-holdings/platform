@@ -1680,6 +1680,17 @@ export interface EvidenceExplorerProps {
   title?: string;
 }
 
+export function readEntityFromLocation(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const value = params.get('entity');
+    return value && value.trim() !== '' ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 export function EvidenceExplorer({
   domainFilter,
   title = 'Evidence Explorer',
@@ -1687,7 +1698,17 @@ export function EvidenceExplorer({
   const [domain, setDomain] = useState<string>(domainFilter ?? '');
   const [recStatus, setRecStatus] = useState<string>('');
   const [selectedRec, setSelectedRec] = useState<string | null>(null);
-  const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
+  const [selectedEntity, setSelectedEntity] = useState<string | null>(() =>
+    readEntityFromLocation(),
+  );
+
+  // React to back/forward navigation that changes the ?entity= param.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = () => setSelectedEntity(readEntityFromLocation());
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, []);
   const queryClient = useQueryClient();
   const { connected: sseConnected } = useEvidenceGraphStream();
 
