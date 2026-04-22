@@ -169,11 +169,13 @@ Mobile auth not yet implemented. `/api/mobile-auth/token-exchange` returns 404 w
 
 ### RR-007 — Migration Ordering
 
-**Status:** OPEN | **Severity:** LOW | **Owner:** Track 4 / follow-up task #2886
+**Status:** RESOLVED | **Severity:** LOW | **Owner:** Track 4 / task #2886
 
-`0053_lp_portal_data_room.sql` and `0088_pulse_saved_briefings_unique.sql` fail non-fatally on first run.
+`0053_lp_portal_data_room.sql` and `0088_pulse_saved_briefings_unique.sql` previously failed non-fatally on first run because they referenced tables that hadn't been created yet in the migration sequence (FK targets in 0053, the index target in 0088).
 
-**Reproducer:** Boot logs: `WARN [migrations] Statement failed — continuing (non-fatal)`
+**Resolution (task #2886):** Both files now declare their referenced tables up-front with `CREATE TABLE IF NOT EXISTS`, mirroring the TS schema in `lib/db/src/schema/`. Subsequent migrations and re-runs are no-ops. Boot logs show zero `[migrations] Statement failed` WARN lines for these two files.
+
+**Reproducer (historical):** Boot logs: `WARN [migrations] Statement failed — continuing (non-fatal)`
 
 ---
 

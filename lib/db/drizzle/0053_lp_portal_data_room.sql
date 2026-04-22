@@ -1,5 +1,126 @@
 -- LP portal: data room documents, GP/LP messages, and activity audit log.
 -- Migration 0053 — connects the LP portal at /fund/lp-portal to live tables.
+--
+-- The seed block at the bottom INSERTs into fund_accredited_investors,
+-- fund_lp_capital_accounts, fund_nav_records, and fund_lp_reports — all of
+-- which are otherwise created by migration 0069 (which runs after this one in
+-- lexicographic order) or only by the TS schema. To keep this file
+-- self-contained and silence the "relation does not exist" WARN entries from
+-- the migration runner on every boot, we declare those tables here with
+-- CREATE TABLE IF NOT EXISTS. The definitions mirror the TS schema in
+-- lib/db/src/schema/fund_ops.ts and the SQL in 0069; later runs are no-ops.
+
+CREATE TABLE IF NOT EXISTS "fund_accredited_investors" (
+  "id" serial PRIMARY KEY NOT NULL,
+  "lp_name" text NOT NULL,
+  "lp_type" text NOT NULL DEFAULT 'individual',
+  "accreditation_basis" text NOT NULL DEFAULT 'net_worth_1m',
+  "verification_method" text NOT NULL DEFAULT 'self_certification',
+  "verified_at" timestamp,
+  "verification_expires_at" timestamp,
+  "verification_status" text NOT NULL DEFAULT 'pending',
+  "contact_email" text,
+  "contact_phone" text,
+  "jurisdiction" text,
+  "qualified_eligible_person" boolean NOT NULL DEFAULT false,
+  "notes_internal" text,
+  "metadata" jsonb,
+  "created_at" timestamp NOT NULL DEFAULT now(),
+  "updated_at" timestamp NOT NULL DEFAULT now()
+);
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fund_investors_name_idx" ON "fund_accredited_investors" ("lp_name");
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fund_investors_status_idx" ON "fund_accredited_investors" ("verification_status");
+--> statement-breakpoint
+
+CREATE TABLE IF NOT EXISTS "fund_lp_capital_accounts" (
+  "id" serial PRIMARY KEY NOT NULL,
+  "lp_id" integer NOT NULL REFERENCES "fund_accredited_investors"("id") ON DELETE RESTRICT,
+  "commitment_cents" integer NOT NULL DEFAULT 0,
+  "called_cents" integer NOT NULL DEFAULT 0,
+  "uncalled_cents" integer NOT NULL DEFAULT 0,
+  "distributions_cents" integer NOT NULL DEFAULT 0,
+  "current_nav_cents" integer NOT NULL DEFAULT 0,
+  "ownership_pct" numeric(8, 6),
+  "management_fees_paid_cents" integer NOT NULL DEFAULT 0,
+  "carried_interest_paid_cents" integer NOT NULL DEFAULT 0,
+  "vintage" text,
+  "notes" text,
+  "metadata" jsonb,
+  "created_at" timestamp NOT NULL DEFAULT now(),
+  "updated_at" timestamp NOT NULL DEFAULT now()
+);
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fund_lp_accounts_lp_idx" ON "fund_lp_capital_accounts" ("lp_id");
+--> statement-breakpoint
+
+CREATE TABLE IF NOT EXISTS "fund_nav_records" (
+  "id" serial PRIMARY KEY NOT NULL,
+  "nav_date" text NOT NULL,
+  "total_nav_cents" bigint NOT NULL,
+  "called_capital_cents" bigint NOT NULL,
+  "uncalled_commitments_cents" bigint DEFAULT 0 NOT NULL,
+  "distributed_cents" bigint DEFAULT 0 NOT NULL,
+  "unrealized_value_cents" bigint DEFAULT 0 NOT NULL,
+  "management_fees_paid_cents" bigint DEFAULT 0 NOT NULL,
+  "carry_accrued_cents" bigint DEFAULT 0 NOT NULL,
+  "gross_irr" numeric(8, 4),
+  "net_irr" numeric(8, 4),
+  "tvpi" numeric(8, 4),
+  "dpi" numeric(8, 4),
+  "rvpi" numeric(8, 4),
+  "notes" text,
+  "metadata" jsonb,
+  "created_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fund_nav_date_idx" ON "fund_nav_records" ("nav_date");
+--> statement-breakpoint
+
+CREATE TABLE IF NOT EXISTS "fund_lp_reports" (
+  "id" serial PRIMARY KEY NOT NULL,
+  "report_type" text DEFAULT 'quarterly' NOT NULL,
+  "reporting_period" text NOT NULL,
+  "period_start" text NOT NULL,
+  "period_end" text NOT NULL,
+  "version" integer DEFAULT 1 NOT NULL,
+  "status" text DEFAULT 'draft' NOT NULL,
+  "gross_irr" numeric(8, 4),
+  "net_irr" numeric(8, 4),
+  "tvpi" numeric(8, 4),
+  "dpi" numeric(8, 4),
+  "rvpi" numeric(8, 4),
+  "pme" numeric(8, 4),
+  "fund_nav" numeric(18, 2),
+  "total_commitments" numeric(18, 2),
+  "called_capital" numeric(18, 2),
+  "distributed_capital" numeric(18, 2),
+  "unrealized_value" numeric(18, 2),
+  "management_fees_accrued" numeric(18, 2),
+  "management_fees_paid" numeric(18, 2),
+  "carried_interest_accrued" numeric(18, 2),
+  "carried_interest_paid" numeric(18, 2),
+  "preferred_return_rate" numeric(6, 4),
+  "carry_rate" numeric(6, 4),
+  "management_fee_rate" numeric(6, 4),
+  "narrative_summary" text,
+  "disclosures" text,
+  "disclaimers" text,
+  "approved_by" text,
+  "approved_at" timestamp,
+  "distributed_at" timestamp,
+  "metadata" jsonb,
+  "created_at" timestamp DEFAULT now() NOT NULL,
+  "updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fund_lp_reports_period_idx" ON "fund_lp_reports" ("reporting_period");
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fund_lp_reports_status_idx" ON "fund_lp_reports" ("status");
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "fund_lp_reports_type_idx" ON "fund_lp_reports" ("report_type");
+--> statement-breakpoint
 
 CREATE TABLE IF NOT EXISTS "fund_lp_data_room_docs" (
   "id" serial PRIMARY KEY NOT NULL,

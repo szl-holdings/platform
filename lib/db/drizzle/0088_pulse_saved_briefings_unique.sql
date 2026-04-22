@@ -10,6 +10,20 @@
 -- index for the GET /briefings/saved query that filters by user_id.
 --
 -- Safe to re-run: CREATE UNIQUE INDEX IF NOT EXISTS is idempotent.
+--
+-- The pulse_saved_briefings table itself is only declared in the TS schema
+-- (lib/db/src/schema/pulse.ts) and has no SQL CREATE TABLE elsewhere in the
+-- migration tree, so the bare CREATE INDEX below used to WARN on every boot
+-- ("relation \"pulse_saved_briefings\" does not exist"). We declare the table
+-- here with CREATE TABLE IF NOT EXISTS — mirroring the TS schema — so the
+-- index target always resolves and the migration runner stays quiet.
 
+CREATE TABLE IF NOT EXISTS "pulse_saved_briefings" (
+  "id" serial PRIMARY KEY NOT NULL,
+  "user_id" integer NOT NULL,
+  "briefing_id" text NOT NULL,
+  "saved_at" timestamp NOT NULL DEFAULT now()
+);
+--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "pulse_saved_briefings_user_briefing_unique"
   ON "pulse_saved_briefings" ("user_id", "briefing_id");
