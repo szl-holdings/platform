@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import report from '../data/design-tokens-drift.generated.json';
+import historyJson from '../data/design-tokens-drift-history.generated.json';
 
 interface FileFinding {
   file: string;
@@ -28,6 +29,13 @@ interface DriftReport {
 }
 
 const TYPED_REPORT = report as DriftReport;
+
+interface HistoryEntry {
+  ts: string;
+  averageScore: number;
+  perArtifact: Record<string, number>;
+}
+const HISTORY = historyJson as HistoryEntry[];
 
 function scoreColor(score: number): string {
   if (score >= 80) return 'var(--gi-state-allowed)';
@@ -97,6 +105,8 @@ export default function TokensGovernance() {
         <SummaryCard label="At-risk 40–59" value={String(atRisk)} accent="var(--gi-state-requires-approval)" />
         <SummaryCard label="Non-compliant < 40" value={String(nonCompliant)} accent="var(--gi-state-blocked)" />
       </div>
+
+      <TrendPanel history={HISTORY} />
 
       <div
         style={{
@@ -235,6 +245,74 @@ export default function TokensGovernance() {
         <code style={{ color: 'var(--gi-text-link)' }}>scripts/design-tokens-drift.report.json</code>{' '}
         and the published copy here in the NEXUS bundle.
       </div>
+    </div>
+  );
+}
+
+function TrendPanel({ history }: { history: HistoryEntry[] }) {
+  if (history.length < 2) {
+    return (
+      <div
+        style={{
+          marginBottom: 24,
+          padding: '12px 16px',
+          border: '1px solid var(--gi-border-subtle)',
+          borderRadius: 6,
+          background: 'var(--gi-bg-overlay)',
+          fontSize: 12,
+          color: 'var(--gi-text-secondary)',
+        }}
+      >
+        Trend baseline established ({history.length} snapshot
+        {history.length === 1 ? '' : 's'}). Re-run the drift detector to start
+        accumulating compliance history.
+      </div>
+    );
+  }
+  const W = 720;
+  const H = 80;
+  const PAD = 8;
+  const xs = history.map((_, i) => PAD + (i * (W - PAD * 2)) / (history.length - 1));
+  const ys = history.map((h) => H - PAD - (h.averageScore * (H - PAD * 2)) / 100);
+  const path = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
+  const last = history[history.length - 1];
+  const prev = history[history.length - 2];
+  const delta = last.averageScore - prev.averageScore;
+  const deltaColor = delta > 0
+    ? 'var(--gi-state-allowed)'
+    : delta < 0
+    ? 'var(--gi-state-blocked)'
+    : 'var(--gi-text-muted)';
+
+  return (
+    <div
+      style={{
+        marginBottom: 24,
+        padding: '14px 16px',
+        border: '1px solid var(--gi-border-default)',
+        borderRadius: 6,
+        background: 'var(--gi-bg-surface)',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+        <div style={{ fontSize: 11, letterSpacing: '0.1em', color: 'var(--gi-text-muted)', textTransform: 'uppercase' }}>
+          Average score over time
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--gi-text-secondary)' }}>
+          {history.length} snapshot{history.length === 1 ? '' : 's'} ·{' '}
+          <span style={{ color: deltaColor, fontWeight: 600 }}>
+            {delta > 0 ? '+' : ''}
+            {delta} pt
+          </span>{' '}
+          vs previous
+        </div>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} preserveAspectRatio="none">
+        <path d={path} fill="none" stroke="var(--gi-accent-blue)" strokeWidth={1.5} />
+        {xs.map((x, i) => (
+          <circle key={i} cx={x} cy={ys[i]} r={2} fill="var(--gi-accent-blue)" />
+        ))}
+      </svg>
     </div>
   );
 }

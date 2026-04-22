@@ -1,0 +1,42 @@
+[
+  {
+    "ts": "2026-04-22T23:22:38.248Z",
+    "averageScore": 65,
+    "perArtifact": {
+      "sentra": 86,
+      "counsel": 80,
+      "szl-holdings-mobile": 68,
+      "szl-demo-video": 83,
+      "pulse": 52,
+      "aegis": 55,
+      "command": 28,
+      "terra": 41,
+      "carlota-jo": 48,
+      "szl-holdings": 28,
+      "vessels": 65,
+      "lyte-command-center": 89,
+      "mockup-sandbox": 85,
+      "api-server": 98
+    }
+  },
+  {
+    "ts": "2026-04-22T23:22:40.159Z",
+    "averageScore": 65,
+    "perArtifact": {
+      "sentra": 86,
+      "counsel": 80,
+      "szl-holdings-mobile": 68,
+      "szl-demo-video": 83,
+      "pulse": 52,
+      "aegis": 55,
+      "command": 28,
+      "terra": 41,
+      "carlota-jo": 48,
+      "szl-holdings": 28,
+      "vessels": 65,
+      "lyte-command-center": 89,
+      "mockup-sandbox": 85,
+      "api-server": 98
+    }
+  }
+]

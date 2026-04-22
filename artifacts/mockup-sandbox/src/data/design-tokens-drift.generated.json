@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-04-22T22:58:36.445Z",
+  "generatedAt": "2026-04-22T23:22:40.159Z",
   "threshold": 50,
-  "averageScore": 62,
-  "totalArtifacts": 13,
+  "averageScore": 65,
+  "totalArtifacts": 14,
   "artifacts": [
     {
       "id": "sentra",
@@ -106,7 +106,7 @@
       "dir": "artifacts/counsel",
       "title": "Counsel — Legal Matter Command",
       "kind": "web",
-      "lines": 4937,
+      "lines": 4966,
       "files": 19,
       "violations": 101,
       "score": 80,
@@ -685,14 +685,14 @@
       "dir": "artifacts/terra",
       "title": "Terra — Real Estate Intelligence",
       "kind": "web",
-      "lines": 67533,
+      "lines": 67547,
       "files": 122,
-      "violations": 3954,
+      "violations": 3957,
       "score": 41,
       "top": [
         {
           "file": "artifacts/terra/src/pages/property-detail.tsx",
-          "count": 220,
+          "count": 223,
           "examples": [
             "#10b981",
             "#f59e0b",
@@ -991,7 +991,7 @@
       "dir": "artifacts/vessels",
       "title": "Vessels Maritime Intelligence",
       "kind": "web",
-      "lines": 60609,
+      "lines": 60619,
       "files": 138,
       "violations": 2119,
       "score": 65,
@@ -1195,10 +1195,10 @@
       "dir": "artifacts/mockup-sandbox",
       "title": "NEXUS — Unified Agentic AI Layer",
       "kind": "design",
-      "lines": 8275,
+      "lines": 8353,
       "files": 27,
       "violations": 129,
-      "score": 84,
+      "score": 85,
       "top": [
         {
           "file": "artifacts/mockup-sandbox/src/pages/DesignSystemPage.tsx",
@@ -1285,6 +1285,108 @@
           "examples": [
             "rgb(...)",
             "hsl(...)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "api-server",
+      "dir": "artifacts/api-server",
+      "title": "API Server",
+      "kind": "web",
+      "lines": 321072,
+      "files": 618,
+      "violations": 703,
+      "score": 98,
+      "top": [
+        {
+          "file": "artifacts/api-server/src/lib/email.ts",
+          "count": 169,
+          "examples": [
+            "#f5f5f5",
+            "#ffffff",
+            "#e5e7eb"
+          ]
+        },
+        {
+          "file": "artifacts/api-server/src/lib/report-engine.ts",
+          "count": 162,
+          "examples": [
+            "#0a0c10",
+            "#111318",
+            "#1e2230"
+          ]
+        },
+        {
+          "file": "artifacts/api-server/src/routes/command.ts",
+          "count": 35,
+          "examples": [
+            "#ef4444",
+            "#0ea5e9",
+            "#f97316"
+          ]
+        },
+        {
+          "file": "artifacts/api-server/src/routes/vessels-voyage-risk.ts",
+          "count": 34,
+          "examples": [
+            "#ffffff",
+            "#0a1628",
+            "#0ea5e9"
+          ]
+        },
+        {
+          "file": "artifacts/api-server/src/routes/pulse.ts",
+          "count": 30,
+          "examples": [
+            "#0a0b0d",
+            "#fff",
+            "#0a0b0d"
+          ]
+        },
+        {
+          "file": "artifacts/api-server/src/lib/pdf-renderer.ts",
+          "count": 23,
+          "examples": [
+            "#1f2937",
+            "#ffffff",
+            "#111827"
+          ]
+        },
+        {
+          "file": "artifacts/api-server/src/lib/approval-notifications.ts",
+          "count": 20,
+          "examples": [
+            "#dc2626",
+            "#d97706",
+            "#fee2e2"
+          ]
+        },
+        {
+          "file": "artifacts/api-server/src/routes/guardian.ts",
+          "count": 18,
+          "examples": [
+            "#7c3aed",
+            "#fff",
+            "#1e1e2e"
+          ]
+        },
+        {
+          "file": "artifacts/api-server/src/services/linear-connector.ts",
+          "count": 17,
+          "examples": [
+            "#6366f1",
+            "#8b5cf6",
+            "#a855f7"
+          ]
+        },
+        {
+          "file": "artifacts/api-server/src/lib/competitive-intel-notifications.ts",
+          "count": 15,
+          "examples": [
+            "#dc2626",
+            "#0ea5e9",
+            "#f9fafb"
           ]
         }
       ]

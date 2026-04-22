@@ -23,4 +23,5 @@ export const TOKEN_GOVERNED_ARTIFACTS: readonly ArtifactDescriptor[] = [
   { id: 'vessels', dir: 'artifacts/vessels', title: 'Vessels Maritime Intelligence', kind: 'web' },
   { id: 'lyte-command-center', dir: 'artifacts/lyte-command-center', title: 'Lyte — Decision Intelligence', kind: 'web' },
   { id: 'mockup-sandbox', dir: 'artifacts/mockup-sandbox', title: 'NEXUS — Unified Agentic AI Layer', kind: 'design' },
+  { id: 'api-server', dir: 'artifacts/api-server', title: 'API Server', kind: 'web' },
 ];

@@ -658,6 +658,9 @@
   "artifacts/lyte-command-center/src/pages/aef-knowledge-search.tsx": {
     "Lyte": 1
   },
+  "artifacts/lyte-command-center/src/pages/billing-account.tsx": {
+    "Lyte": 2
+  },
   "artifacts/lyte-command-center/src/pages/board-view.tsx": {
     "Alloy": 2,
     "Lyte": 4
@@ -753,12 +756,25 @@
   "artifacts/pulse/src/pages/TodaysBrief.tsx": {
     "Alloy": 1
   },
+  "artifacts/pulse/src/pages/billing-account.tsx": {
+    "Pulse": 2
+  },
   "artifacts/pulse/src/pages/governed-cockpit.tsx": {
     "Pulse": 1,
     "Alloy": 1
   },
+  "artifacts/pulse/src/pages/pricing.tsx": {
+    "Pulse": 2
+  },
   "artifacts/sentra/src/App.tsx": {
     "Vessels": 1
+  },
+  "artifacts/sentra/src/pages/billing-account.tsx": {
+    "Sentra": 2
+  },
+  "artifacts/sentra/src/pages/pricing.tsx": {
+    "SENTRA": 1,
+    "Sentra": 1
   },
   "artifacts/sentra/src/pages/resilience-scorecard.tsx": {
     "Sentra": 1
@@ -1119,7 +1135,7 @@
     "Aegis": 2
   },
   "artifacts/szl-holdings/src/lib/nexus/anomaly-engine.ts": {
-    "NEXUS": 2
+    "NEXUS": 1
   },
   "artifacts/szl-holdings/src/lib/nexus/graph.ts": {
     "NEXUS": 2,
@@ -1199,12 +1215,6 @@
     "Terra": 1,
     "Lyte": 1,
     "Vessels": 1
-  },
-  "artifacts/szl-holdings/src/pages/carousel-preview.tsx": {
-    "Lyte": 1,
-    "Vessels": 1,
-    "Terra": 1,
-    "Aegis": 1
   },
   "artifacts/szl-holdings/src/pages/case-studies.tsx": {
     "Terra": 2,
@@ -2068,7 +2078,7 @@
     "Terra": 1
   },
   "artifacts/szl-holdings-mobile/app/(shell)/settings/digest.tsx": {
-    "CORTEX": 3
+    "CORTEX": 1
   },
   "artifacts/szl-holdings-mobile/app/(shell)/settings/security.tsx": {
     "CORTEX": 1
@@ -2077,11 +2087,11 @@
     "CORTEX": 1
   },
   "artifacts/szl-holdings-mobile/app/_layout.tsx": {
-    "CORTEX": 4,
     "Aegis": 1,
     "Terra": 1,
     "Lyte": 1,
-    "Vessels": 1
+    "Vessels": 1,
+    "CORTEX": 1
   },
   "artifacts/szl-holdings-mobile/app/auth.tsx": {
     "Alloy": 1
@@ -2155,6 +2165,9 @@
   },
   "artifacts/terra/src/pages/avm-engine.tsx": {
     "Terra": 1
+  },
+  "artifacts/terra/src/pages/billing-account.tsx": {
+    "Terra": 2
   },
   "artifacts/terra/src/pages/broker-overview.tsx": {
     "Terra": 1
@@ -2250,6 +2263,9 @@
     "Vessels": 1
   },
   "artifacts/vessels/src/main.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/account-billing.tsx": {
     "Vessels": 2
   },
   "artifacts/vessels/src/pages/aef-knowledge-search.tsx": {
@@ -2431,9 +2447,6 @@
     "Vessels": 1,
     "Terra": 3,
     "Aegis": 6
-  },
-  "lib/intelligence-feeds/src/adapters/legal-records.ts": {
-    "PRISM Counsel": 2
   },
   "lib/intelligence-feeds/src/fusion-engine.ts": {
     "PRISM Counsel": 1,
@@ -2693,18 +2706,15 @@
     "Alloy": 1
   },
   "packages/demo-seed/src/seed-constellation.ts": {
-    "Terra": 2,
-    "Vessels": 2,
-    "Aegis": 3,
-    "Lyte": 3
+    "Aegis": 1,
+    "Lyte": 1
   },
   "packages/demo-seed/src/seed-runner.ts": {
     "Lyte": 7,
     "Alloy": 2,
-    "Aegis": 6,
+    "Aegis": 5,
     "Vessels": 1,
-    "PRISM Counsel": 4,
-    "Terra": 1
+    "PRISM Counsel": 4
   },
   "packages/design-system/src/proof/ProofEnvelope.tsx": {
     "Alloy": 1
@@ -2903,9 +2913,6 @@
   "tests/unit/substrate/substrate-command-center.test.ts": {
     "Vessels": 1
   },
-  "scripts/evals/run-arena.ts": {
-    "Terra": 1
-  },
   "scripts/generate-platform-metrics.ts": {
     "Alloy": 1,
     "Lyte": 1,
@@ -2949,7 +2956,6 @@
     "Vessels": 1
   },
   "scripts/seed-demo-data.ts": {
-    "Lyte": 1,
     "Alloy": 1
   },
   "scripts/seed-deployments.ts": {
@@ -2973,9 +2979,9 @@
     "Terra": 5
   },
   "scripts/src/seed.ts": {
-    "Lyte": 27,
+    "Lyte": 18,
     "Vessels": 14,
     "Nexus": 1,
-    "Alloy": 7
+    "Alloy": 3
   }
 }

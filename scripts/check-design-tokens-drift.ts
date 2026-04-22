@@ -8,9 +8,12 @@
  *   - lines (denominator)
  *   - raw hex literals      (#abc, #aabbcc, #aabbccdd) outside test files
  *   - inline rgb()/rgba()/hsl()/hsla() literals
- *   - non-token Tailwind palette utilities (bg-*-500 etc.) where * is not a
- *     shadcn semantic token name
  *   - imports of design-system tokens from anywhere other than @workspace/tokens
+ *
+ * NOTE: Tailwind palette-utility detection (bg-red-500 etc.) is intentionally
+ * NOT performed here — the AEEP design language ships its own utility layer
+ * via the `gi-` CSS variables and adding a Tailwind audit would produce false
+ * positives across legacy shadcn imports. Track that as a separate work item.
  *
  * It then emits a compliance score in [0, 100]:
  *   score = clamp(100 - (violations / lines) * 10000, 0, 100)
@@ -29,17 +32,23 @@
  * remains the strict gate for AEEP runtime packages and is unaffected.
  */
 
-import { readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 import { TOKEN_GOVERNED_ARTIFACTS } from '../packages/tokens/src/manifest.ts';
 
 const ROOT = resolve(import.meta.dirname ?? process.cwd(), '..');
 const OUT_PATH = join(ROOT, 'scripts/design-tokens-drift.report.json');
+const HISTORY_PATH = join(ROOT, 'scripts/design-tokens-drift.history.json');
 const PUBLISH_PATH = join(
   ROOT,
   'artifacts/mockup-sandbox/src/data/design-tokens-drift.generated.json',
 );
+const HISTORY_PUBLISH_PATH = join(
+  ROOT,
+  'artifacts/mockup-sandbox/src/data/design-tokens-drift-history.generated.json',
+);
+const HISTORY_LIMIT = 60;
 
 const SCAN_EXTS = new Set(['.ts', '.tsx', '.css']);
 const SKIP_DIRS = new Set([
@@ -191,6 +200,26 @@ function main(): void {
   writeFileSync(OUT_PATH, JSON.stringify(payload, null, 2) + '\n', 'utf-8');
   mkdirSync(dirname(PUBLISH_PATH), { recursive: true });
   writeFileSync(PUBLISH_PATH, JSON.stringify(payload, null, 2) + '\n', 'utf-8');
+
+  // ---------------------------------------------------------------------------
+  // Trend / history append. Stored as a rolling window of {ts, average, perArtifact}
+  // so the governance dashboard can render a sparkline over time without
+  // needing a backend.
+  // ---------------------------------------------------------------------------
+  type HistoryEntry = {
+    ts: string;
+    averageScore: number;
+    perArtifact: Record<string, number>;
+  };
+  const history: HistoryEntry[] = existsSync(HISTORY_PATH)
+    ? (JSON.parse(readFileSync(HISTORY_PATH, 'utf-8')) as HistoryEntry[])
+    : [];
+  const perArtifact: Record<string, number> = {};
+  for (const r of reports) perArtifact[r.id] = r.score;
+  history.push({ ts: payload.generatedAt, averageScore, perArtifact });
+  while (history.length > HISTORY_LIMIT) history.shift();
+  writeFileSync(HISTORY_PATH, JSON.stringify(history, null, 2) + '\n', 'utf-8');
+  writeFileSync(HISTORY_PUBLISH_PATH, JSON.stringify(history, null, 2) + '\n', 'utf-8');
 
   console.log(
     `\nNEXUS tokens-as-code drift report — average score ${averageScore}/100 across ${reports.length} artifacts`,
