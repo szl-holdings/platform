@@ -8,7 +8,7 @@
  * guarantee no data loss on re-execution.
  */
 
-import { pool } from '@szl-holdings/db';
+import { PgClient } from '@szl-holdings/db';
 import fs from 'fs';
 import path from 'path';
 import { logger } from './logger';
@@ -102,7 +102,33 @@ export async function runMigrations(): Promise<void> {
     '[migrations] Starting consolidated migration run',
   );
 
-  const client = await pool.connect();
+  // ─────────────────────────────────────────────────────────────────────────
+  // Use a DEDICATED single connection (NOT from the shared `pool`) for the
+  // migration run.
+  //
+  // Background: the consolidated migrator runs 113+ SQL files at startup.
+  // When it checked out from the shared pool via `pool.connect()`, that one
+  // connection was held for the entire run (often tens of seconds). With
+  // `DB_POOL_MAX` as low as 10, the pool's leak detector then logged
+  // long-checkout warnings, and any request handler that fired during
+  // bootstrap competed for the remaining slots. Under contention, requests
+  // hit `connectionTimeoutMillis` (default 90s) and the server appeared to
+  // crash with "timeout exceeded when trying to connect".
+  //
+  // The fix is to bypass the shared pool entirely: open a single
+  // `pg.Client` against `DATABASE_URL`, run every migration through it, and
+  // close it. The shared pool is never touched, so request handlers retain
+  // full pool capacity throughout startup and the long-checkout warnings
+  // disappear.
+  // ─────────────────────────────────────────────────────────────────────────
+  const connectionString = process.env['DATABASE_URL'];
+  if (!connectionString) {
+    throw new Error(
+      '[migrations] DATABASE_URL must be set to run migrations on a dedicated connection',
+    );
+  }
+  const client = new PgClient({ connectionString });
+  await client.connect();
   try {
     let totalApplied = 0;
     let totalSkipped = 0;
@@ -150,7 +176,11 @@ export async function runMigrations(): Promise<void> {
       '[migrations] Consolidated migration run complete',
     );
   } finally {
-    client.release();
+    try {
+      await client.end();
+    } catch (err) {
+      logger.warn({ err }, '[migrations] Failed to close dedicated migration client (non-fatal)');
+    }
   }
 }
 

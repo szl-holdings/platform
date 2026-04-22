@@ -18,6 +18,7 @@ const SLOW_QUERY_THRESHOLD_MS = _env.SLOW_QUERY_THRESHOLD_MS;
 const CHECKOUT_WARN_THRESHOLD_MS = _env.DB_CHECKOUT_WARN_THRESHOLD_MS;
 
 export const PgPool = Pool;
+export const PgClient = pg.Client;
 export { drizzle as drizzleConnect } from "drizzle-orm/node-postgres";
 
 export const pool = new Pool({
