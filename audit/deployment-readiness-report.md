@@ -316,7 +316,7 @@ Items that are known issues without a hard blocker:
 | RES-002 | `deploy-staging.yml` / `deploy-production.yml` missing Replit secrets | DevOps | ⚠️ Tracked | Run workflow without `REPLIT_DEPLOY_TOKEN` — warns, skips |
 | RES-003 | `backup.yml` Azure secrets absent → short-retention backup only | Platform team | ⚠️ Tracked | Run backup.yml without `AZURE_STORAGE_*` secrets |
 | RES-004 | `infra/runbooks/RUNBOOK_DEPLOYMENT.md` references deprecated Azure path | DevOps | 📦 Stale | Read file — references Azure Container Apps deploy |
-| RES-005 | Lighthouse only covers szl-holdings; newer artifacts unaudited | QA | ⚠️ Tracked | Run lighthouse.yml — only one matrix entry |
+| RES-005 | Lighthouse only covers szl-holdings; newer artifacts unaudited | QA | ✅ Resolved | `.github/workflows/lighthouse.yml` matrix now audits szl-holdings, aegis, carlota-jo, command, counsel, lyte-command-center, pulse, sentra, terra, vessels against `.lighthouserc.json` thresholds (perf ≥ 0.80, a11y/best-practices/SEO ≥ 0.90) |
 | RES-006 | `uptime-monitor.yml` runs every minute but target may not be stable in dev | DevOps | ⚠️ Tracked | Monitor job pings `PUBLIC_APP_URL` |
 | RES-007 | `docker-compose.yml` missing 8 newer artifacts | Platform team | ⚠️ Tracked | Run `docker-compose up` — sentra, counsel, pulse, lyte, command, etc. not included |
 | RES-008 | `INTEGRATION_TEST_TOKEN` secret not documented in GitHub repo secrets setup | DevOps | ⚠️ Tracked | Integration tests in ci.yml skip if absent |

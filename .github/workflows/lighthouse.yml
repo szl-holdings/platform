@@ -28,43 +28,43 @@ jobs:
           - name: szl-holdings
             filter: "@workspace/szl-holdings"
             dist: artifacts/szl-holdings/dist
-            port: 4000
+            port: 3000
           - name: aegis
             filter: "@workspace/aegis"
             dist: artifacts/aegis/dist
-            port: 4001
-          - name: carlota-jo
-            filter: "@workspace/carlota-jo"
-            dist: artifacts/carlota-jo/dist
-            port: 4002
-          - name: command
-            filter: "@workspace/command"
-            dist: artifacts/command/dist
-            port: 4003
-          - name: counsel
-            filter: "@workspace/counsel"
-            dist: artifacts/counsel/dist
-            port: 4004
-          - name: lyte-command-center
-            filter: "@workspace/lyte-command-center"
-            dist: artifacts/lyte-command-center/dist
-            port: 4005
-          - name: pulse
-            filter: "@workspace/pulse"
-            dist: artifacts/pulse/dist
-            port: 4006
-          - name: sentra
-            filter: "@workspace/sentra"
-            dist: artifacts/sentra/dist
-            port: 4007
+            port: 3001
           - name: terra
             filter: "@workspace/terra"
             dist: artifacts/terra/dist
-            port: 4008
+            port: 3002
           - name: vessels
             filter: "@workspace/vessels"
             dist: artifacts/vessels/dist
-            port: 4009
+            port: 3003
+          - name: carlota-jo
+            filter: "@workspace/carlota-jo"
+            dist: artifacts/carlota-jo/dist
+            port: 3004
+          - name: command
+            filter: "@workspace/command"
+            dist: artifacts/command/dist
+            port: 3005
+          - name: lyte-command-center
+            filter: "@workspace/lyte-command-center"
+            dist: artifacts/lyte-command-center/dist
+            port: 3007
+          - name: sentra
+            filter: "@workspace/sentra"
+            dist: artifacts/sentra/dist
+            port: 3007
+          - name: counsel
+            filter: "@workspace/counsel"
+            dist: artifacts/counsel/dist
+            port: 3008
+          - name: pulse
+            filter: "@workspace/pulse"
+            dist: artifacts/pulse/dist
+            port: 3009
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
@@ -112,7 +112,7 @@ jobs:
       - name: Report Lighthouse advisory status
         run: |
           echo "Lighthouse audits completed (advisory — not a hard gate)."
-          echo "Thresholds (warn): Performance ≥ 70, Accessibility ≥ 85, Best Practices ≥ 90, SEO ≥ 85"
+          echo "Thresholds (warn): Performance ≥ 80, Accessibility ≥ 90, Best Practices ≥ 90, SEO ≥ 90"
           echo "See audit/performance/lighthouse-baseline.md for baseline scores."
           echo "To flip to hard-fail: change 'warn' → 'error' in .lighthouserc.json"
           echo "  and remove 'continue-on-error: true' from the lighthouse-gate job."
