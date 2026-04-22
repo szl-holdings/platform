@@ -223,6 +223,11 @@ function useEvidenceGraphStream(): { connected: boolean } {
   const qc = useQueryClient();
   const [connected, setConnected] = useState(false);
   const esRef = useRef<EventSource | null>(null);
+  // Track the highest event id seen across the lifetime of this component so
+  // that when we close + recreate the EventSource (browser doesn't preserve
+  // Last-Event-ID across instances) we can ask the server to replay anything
+  // that flowed through the bus during the gap.
+  const lastEventIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -231,8 +236,23 @@ function useEvidenceGraphStream(): { connected: boolean } {
     const open = () => {
       if (cancelled) return;
       esRef.current?.close();
-      const es = new EventSource('/api/evidence-graph/stream', { withCredentials: true });
+      const url =
+        lastEventIdRef.current !== null
+          ? `/api/evidence-graph/stream?lastEventId=${lastEventIdRef.current}`
+          : '/api/evidence-graph/stream';
+      const es = new EventSource(url, { withCredentials: true });
       esRef.current = es;
+
+      const recordEventId = (event: Event) => {
+        const id = (event as MessageEvent).lastEventId;
+        if (!id) return;
+        const parsed = Number.parseInt(id, 10);
+        if (Number.isFinite(parsed)) {
+          if (lastEventIdRef.current === null || parsed > lastEventIdRef.current) {
+            lastEventIdRef.current = parsed;
+          }
+        }
+      };
 
       es.addEventListener('open', () => {
         if (!cancelled) setConnected(true);
@@ -250,6 +270,7 @@ function useEvidenceGraphStream(): { connected: boolean } {
 
       es.addEventListener('signal', (event) => {
         if (cancelled) return;
+        recordEventId(event);
         try {
           const signal = JSON.parse((event as MessageEvent).data) as ApiSignal;
           mergeSignalIntoCaches(qc, signal);
@@ -260,6 +281,7 @@ function useEvidenceGraphStream(): { connected: boolean } {
 
       es.addEventListener('recommendation', (event) => {
         if (cancelled) return;
+        recordEventId(event);
         try {
           const payload = JSON.parse((event as MessageEvent).data) as {
             kind: string;

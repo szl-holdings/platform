@@ -381,16 +381,80 @@ router.get('/evidence-graph/status', auth, rateLimit, (_req, res) => {
  *
  * Heartbeat comments are sent every 25s to keep proxies from closing the
  * connection.
+ *
+ * Reconnect-aware replay
+ * ----------------------
+ * `signal` and `recommendation` events carry a monotonically increasing
+ * `id:`. On reconnect EventSource resends the last seen id back via the
+ * `Last-Event-ID` header (or, when the client closes + recreates the socket,
+ * via the `?lastEventId=` query param), and we replay any buffered events
+ * with a higher id so Evidence Explorer doesn't miss bus activity that
+ * happened during the gap. `status` snapshots are not replayed — the
+ * handler always sends a fresh one on connect.
  */
+type StreamEventName = 'signal' | 'recommendation';
+interface BufferedStreamEvent {
+  id: number;
+  event: StreamEventName;
+  data: unknown;
+}
+
+const STREAM_BUFFER_LIMIT = 1_000;
+const streamBuffer: BufferedStreamEvent[] = [];
+let nextStreamEventId = 0;
+const liveStreamSubscribers = new Set<(e: BufferedStreamEvent) => void>();
+let streamSourcesWired = false;
+
+function recordStreamEvent(event: StreamEventName, data: unknown): BufferedStreamEvent {
+  nextStreamEventId += 1;
+  const entry: BufferedStreamEvent = { id: nextStreamEventId, event, data };
+  streamBuffer.push(entry);
+  if (streamBuffer.length > STREAM_BUFFER_LIMIT) streamBuffer.shift();
+  for (const sub of liveStreamSubscribers) {
+    try {
+      sub(entry);
+    } catch (e) {
+      console.error('[evidence-graph] stream subscriber error:', e);
+    }
+  }
+  return entry;
+}
+
+/**
+ * Subscribe once (per process) to the bus + recommendation store so that
+ * events are buffered even when no SSE client is currently connected. This
+ * is what lets us replay activity that happened during a reconnect gap.
+ */
+function ensureStreamSourcesWired(): void {
+  if (streamSourcesWired) return;
+  streamSourcesWired = true;
+  defaultSignalBus.on('*', (signal) => {
+    recordStreamEvent('signal', signal);
+  });
+  defaultRecommendationStore.on(({ kind, recommendation }) => {
+    recordStreamEvent('recommendation', { kind, recommendation });
+  });
+}
+
+/** Test-only hook — clears the in-memory replay buffer between cases. */
+export function __resetEvidenceStreamBufferForTests(): void {
+  streamBuffer.length = 0;
+  nextStreamEventId = 0;
+  liveStreamSubscribers.clear();
+}
+
 router.get('/evidence-graph/stream', auth, (req: Request, res: Response) => {
+  ensureStreamSourcesWired();
+
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache, no-transform');
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders?.();
 
-  const write = (event: string, payload: unknown) => {
+  const writeEvent = (id: number | null, event: string, payload: unknown) => {
     try {
+      if (id !== null) res.write(`id: ${id}\n`);
       res.write(`event: ${event}\n`);
       res.write(`data: ${JSON.stringify(payload)}\n\n`);
     } catch {
@@ -432,19 +496,33 @@ router.get('/evidence-graph/stream', auth, (req: Request, res: Response) => {
     };
   };
 
-  // Initial status snapshot so clients reflect counts immediately.
-  write('status', buildStatus());
+  // Initial status snapshot so clients reflect counts immediately. Status
+  // events are point-in-time and intentionally carry no `id:` — they are
+  // not replayed on reconnect.
+  writeEvent(null, 'status', buildStatus());
 
-  const signalSub = defaultSignalBus.on('*', (signal) => {
-    write('signal', signal);
-  });
+  // Replay any buffered events the client missed since its last seen id.
+  // EventSource standard sends `Last-Event-ID`; when the explorer client
+  // explicitly closes + recreates the socket it falls back to the
+  // `?lastEventId=` query string (since Last-Event-ID is per-instance).
+  const headerLastId = req.header('Last-Event-ID');
+  const queryLastId =
+    typeof req.query.lastEventId === 'string' ? req.query.lastEventId : undefined;
+  const rawLastId = headerLastId ?? queryLastId;
+  const lastId = rawLastId !== undefined ? Number.parseInt(rawLastId, 10) : Number.NaN;
+  if (Number.isFinite(lastId) && lastId >= 0) {
+    for (const entry of streamBuffer) {
+      if (entry.id > lastId) writeEvent(entry.id, entry.event, entry.data);
+    }
+  }
 
-  const recSub = defaultRecommendationStore.on(({ kind, recommendation }) => {
-    write('recommendation', { kind, recommendation });
-  });
+  const handler = (entry: BufferedStreamEvent) => {
+    writeEvent(entry.id, entry.event, entry.data);
+  };
+  liveStreamSubscribers.add(handler);
 
   const statusInterval = setInterval(() => {
-    write('status', buildStatus());
+    writeEvent(null, 'status', buildStatus());
   }, 15_000);
 
   const heartbeat = setInterval(() => {
@@ -456,8 +534,7 @@ router.get('/evidence-graph/stream', auth, (req: Request, res: Response) => {
   }, 25_000);
 
   req.on('close', () => {
-    signalSub.unsubscribe();
-    recSub.unsubscribe();
+    liveStreamSubscribers.delete(handler);
     clearInterval(statusInterval);
     clearInterval(heartbeat);
     try {
