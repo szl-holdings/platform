@@ -263,9 +263,46 @@ const PRESET_PAIRS: { label: string; col: SensAxisKey; row: SensAxisKey }[] = [
   { label: 'Financing Rate × Cap Rate', col: 'financing', row: 'capRate' },
 ];
 
+const SENS_PAIR_STORAGE_KEY = 'terra.proForma.sensHeatMap.pair';
+
+function readStoredSensPair(): { col: SensAxisKey; row: SensAxisKey } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(SENS_PAIR_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { col?: string; row?: string };
+    if (
+      parsed &&
+      typeof parsed.col === 'string' &&
+      typeof parsed.row === 'string' &&
+      parsed.col in SENS_AXES &&
+      parsed.row in SENS_AXES &&
+      parsed.col !== parsed.row
+    ) {
+      return { col: parsed.col as SensAxisKey, row: parsed.row as SensAxisKey };
+    }
+  } catch {
+    // ignore malformed storage
+  }
+  return null;
+}
+
 function SensHeatMap({ inputs }: { inputs: ProFormaInputs }) {
-  const [colAxis, setColAxis] = useState<SensAxisKey>('hardCost');
-  const [rowAxis, setRowAxis] = useState<SensAxisKey>('capRate');
+  const stored = readStoredSensPair();
+  const [colAxis, setColAxis] = useState<SensAxisKey>(stored?.col ?? 'hardCost');
+  const [rowAxis, setRowAxis] = useState<SensAxisKey>(stored?.row ?? 'capRate');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(
+        SENS_PAIR_STORAGE_KEY,
+        JSON.stringify({ col: colAxis, row: rowAxis }),
+      );
+    } catch {
+      // ignore storage write failures (quota, private mode, etc.)
+    }
+  }, [colAxis, rowAxis]);
   const colCfg = SENS_AXES[colAxis];
   const rowCfg = SENS_AXES[rowAxis];
 
