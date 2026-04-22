@@ -20,9 +20,16 @@ import { publishGuardianDecisionEvent } from './guardian-engine';
 import { logger } from './logger';
 import {
   evaluateAllCovenants,
+  listOrgIdsWithCovenants,
   recordCovenantEvaluation,
   seedCovenantsFromDistress,
 } from './terra-covenant-store';
+
+/**
+ * Bootstrap demo organization id used as the default tenant for the covenant
+ * monitor when no covenant rows exist yet. Mirrors the seed in migration 0095.
+ */
+const DEFAULT_COVENANT_ORG_ID = 1;
 
 const BASE_URL = `http://localhost:${process.env['PORT'] || 3000}`;
 
@@ -55,9 +62,9 @@ async function fetchData(path: string): Promise<unknown> {
 
 export { BASE_URL, fetchData, getInternalHeaders };
 
-function covenantBreachRequestId(propertyId: string, breachType: string): string {
+function covenantBreachRequestId(orgId: number, propertyId: string, breachType: string): string {
   return createHash('sha256')
-    .update(`terra-covenant-breach:${propertyId}:${breachType}`)
+    .update(`terra-covenant-breach:${orgId}:${propertyId}:${breachType}`)
     .digest('hex')
     .slice(0, 36);
 }
@@ -72,7 +79,7 @@ function covenantBreachRequestId(propertyId: string, breachType: string): string
  * If the covenants table is empty, seed it from the distress registry first so
  * the monitor has a real working set on first run.
  */
-export async function dispatchCovenantBreaches(): Promise<{
+export async function dispatchCovenantBreaches(targetOrgId?: number): Promise<{
   evaluated: number;
   breaches: number;
   approvalsCreated: number;
@@ -80,24 +87,48 @@ export async function dispatchCovenantBreaches(): Promise<{
 }> {
   let seeded = 0;
   try {
-    let measurements = await evaluateAllCovenants();
-    if (measurements.length === 0) {
-      seeded = await seedCovenantsFromDistress(12);
-      if (seeded > 0) measurements = await evaluateAllCovenants();
+    // Determine which orgs to scan. When called without an explicit target
+    // (e.g. by the daily scheduler), iterate across every org that owns
+    // covenants so each tenant's breaches are surfaced independently. When
+    // called with a target (operator-triggered run-now), restrict to that org.
+    let orgIds: number[];
+    if (typeof targetOrgId === 'number') {
+      orgIds = [targetOrgId];
+    } else {
+      orgIds = await listOrgIdsWithCovenants();
+      if (orgIds.length === 0) {
+        // Bootstrap: no covenants exist yet — seed the demo org so the daily
+        // monitor produces a meaningful first run.
+        seeded = await seedCovenantsFromDistress(DEFAULT_COVENANT_ORG_ID, 12);
+        if (seeded > 0) orgIds = await listOrgIdsWithCovenants();
+      }
     }
 
     let approvalsCreated = 0;
     let breachCount = 0;
+    let evaluatedTotal = 0;
     const env = process.env['NODE_ENV'] === 'production' ? 'production' : 'development';
+
+   for (const orgId of orgIds) {
+    let measurements = await evaluateAllCovenants(orgId);
+    if (measurements.length === 0 && typeof targetOrgId === 'number') {
+      // Operator-targeted run with no covenants in the org — try a one-time
+      // seed for this tenant only.
+      const orgSeed = await seedCovenantsFromDistress(orgId, 12);
+      seeded += orgSeed;
+      if (orgSeed > 0) measurements = await evaluateAllCovenants(orgId);
+    }
+    evaluatedTotal += measurements.length;
 
     for (const m of measurements) {
       // Persist this evaluation on the covenant row regardless of status.
-      await recordCovenantEvaluation(m.covenant.id, m);
+      await recordCovenantEvaluation(orgId, m.covenant.id, m);
 
       if (m.status !== 'breach') continue;
       breachCount += 1;
 
       const requestId = covenantBreachRequestId(
+        orgId,
         m.covenant.propertyExternalId,
         m.covenant.covenantType,
       );
@@ -136,7 +167,7 @@ export async function dispatchCovenantBreaches(): Promise<{
           requestId,
           agentId: 'terra-covenant-monitor',
           sessionId: `sched-${Date.now()}`,
-          orgId: null,
+          orgId,
           tier: 'supervised',
           action: 'covenant_breach_review',
           toolId: 'covenant-monitor',
@@ -148,7 +179,7 @@ export async function dispatchCovenantBreaches(): Promise<{
           rollbackRequired: false,
           redactApplied: false,
           controlViolations: [],
-          payload,
+          payload: { ...payload, orgId },
           decidedAt,
         })
         .onConflictDoNothing()
@@ -161,7 +192,7 @@ export async function dispatchCovenantBreaches(): Promise<{
           agentId: 'terra-covenant-monitor',
           sessionId: inserted.sessionId,
           workflowId: null,
-          orgId: null,
+          orgId,
           tier: 'supervised',
           action: 'covenant_breach_review',
           toolId: 'covenant-monitor',
@@ -184,7 +215,7 @@ export async function dispatchCovenantBreaches(): Promise<{
             requestId,
             agentId: 'terra-covenant-monitor',
             sessionId: `sched-${Date.now()}`,
-            orgId: null,
+            orgId,
             tier: 'supervised',
             action: 'covenant_breach_review',
             toolId: 'covenant-monitor',
@@ -192,7 +223,7 @@ export async function dispatchCovenantBreaches(): Promise<{
             status: 'pending',
             requiredApprovers: m.covenant.requiredApprovers ?? ['terra-risk-officer'],
             approvals: [],
-            payload,
+            payload: { ...payload, orgId },
             expiresAt: computeApprovalExpiresAt('supervised'),
           })
           .onConflictDoNothing();
@@ -200,6 +231,7 @@ export async function dispatchCovenantBreaches(): Promise<{
         logger.info(
           {
             requestId,
+            orgId,
             propertyId: m.covenant.propertyExternalId,
             covenantType: m.covenant.covenantType,
             measured: m.measuredValue,
@@ -209,12 +241,19 @@ export async function dispatchCovenantBreaches(): Promise<{
         );
       }
     }
+   }
 
     logger.info(
-      { evaluated: measurements.length, breaches: breachCount, approvalsCreated, seeded },
+      {
+        evaluated: evaluatedTotal,
+        breaches: breachCount,
+        approvalsCreated,
+        seeded,
+        orgsScanned: orgIds.length,
+      },
       '[terra-covenant-monitor] Covenant breach scan complete',
     );
-    return { evaluated: measurements.length, breaches: breachCount, approvalsCreated, seeded };
+    return { evaluated: evaluatedTotal, breaches: breachCount, approvalsCreated, seeded };
   } catch (err) {
     logger.warn({ err }, '[terra-covenant-monitor] Guardian dispatch failed (non-fatal)');
     return { evaluated: 0, breaches: 0, approvalsCreated: 0, seeded };

@@ -71,9 +71,48 @@ function provenance(source: string, confidence: number, traceRef: string) {
 }
 
 /** Deterministic requestId for covenant breach records — prevents duplicate inserts on re-run */
-function breachRequestId(propertyId: string, breachType: string): string {
-  const raw = `terra-covenant-breach:${propertyId}:${breachType}`;
+function breachRequestId(orgId: number, propertyId: string, breachType: string): string {
+  const raw = `terra-covenant-breach:${orgId}:${propertyId}:${breachType}`;
   return createHash('sha256').update(raw).digest('hex').slice(0, 36);
+}
+
+/**
+ * Bootstrap demo organization id used as the tenant scope for covenant routes
+ * when the caller is unauthenticated (public demo) or has no resolvable org
+ * membership. Mirrors the seed in migration 0095. RR-18 tenant scope.
+ */
+const DEFAULT_COVENANT_ORG_ID = 1;
+
+/**
+ * Resolve the org id to use for covenant queries.
+ * Preference order: tenantScope-injected req.tenantOrgId → first org membership
+ * on the authenticated user → demo bootstrap org. Mutating routes additionally
+ * verify the caller actually owns the targeted row before applying changes.
+ */
+function resolveCovenantOrgId(req: { tenantOrgId?: number; user?: { orgs?: Array<{ orgId: number }> } }): number {
+  if (typeof req.tenantOrgId === 'number' && req.tenantOrgId > 0) return req.tenantOrgId;
+  const userOrgId = req.user?.orgs?.[0]?.orgId;
+  if (typeof userOrgId === 'number' && userOrgId > 0) return userOrgId;
+  return DEFAULT_COVENANT_ORG_ID;
+}
+
+/**
+ * Stricter, fail-closed variant for mutating covenant routes (CRUD, scan,
+ * seed, financials sync, submit-review). When the caller has no resolvable
+ * org membership we refuse the write rather than silently routing it into the
+ * demo bootstrap tenant. Read-only routes continue to use the lenient
+ * `resolveCovenantOrgId` so anonymous demo views still work.
+ *
+ * Returns null when org cannot be resolved; callers must respond with 400.
+ */
+function requireCovenantOrgIdForWrite(req: {
+  tenantOrgId?: number;
+  user?: { orgs?: Array<{ orgId: number }> };
+}): number | null {
+  if (typeof req.tenantOrgId === 'number' && req.tenantOrgId > 0) return req.tenantOrgId;
+  const userOrgId = req.user?.orgs?.[0]?.orgId;
+  if (typeof userOrgId === 'number' && userOrgId > 0) return userOrgId;
+  return null;
 }
 
 // ─── Ownership Graph ──────────────────────────────────────────────────────────
@@ -1151,8 +1190,9 @@ router.get('/terra/cognitive/covenants', cogLimit, auth, async (req, res) => {
     const trace = reqTraceRef(req);
 
     // Primary path: read real covenant rows from terra_covenants and evaluate
-    // them against live financial data.
-    const measurements = await evaluateAllCovenants();
+    // them against live financial data. Tenant-scoped (RR-18).
+    const orgId = resolveCovenantOrgId(req);
+    const measurements = await evaluateAllCovenants(orgId);
     const usedCovenantTable = measurements.length > 0;
 
     let covenants: Array<Record<string, unknown>> = [];
@@ -1160,7 +1200,7 @@ router.get('/terra/cognitive/covenants', cogLimit, auth, async (req, res) => {
     if (usedCovenantTable) {
       // Look up guardian actions for each covenant in one batch
       for (const m of measurements) {
-        const reqId = breachRequestId(m.covenant.propertyExternalId, m.covenant.covenantType);
+        const reqId = breachRequestId(orgId, m.covenant.propertyExternalId, m.covenant.covenantType);
         let guardianActionId: string | null = null;
         let pendingApproval = false;
         try {
@@ -1235,7 +1275,7 @@ router.get('/terra/cognitive/covenants', cogLimit, auth, async (req, res) => {
           let pendingApproval = false;
           if (isBreach) {
             try {
-              const reqId = breachRequestId(prop.id, covenantType);
+              const reqId = breachRequestId(orgId, prop.id, covenantType);
               const existing = await db
                 .select({ id: guardianActionsTable.id, outcome: guardianActionsTable.outcome })
                 .from(guardianActionsTable)
@@ -1442,9 +1482,15 @@ router.post(
   async (req, res) => {
     try {
       const trace = reqTraceRef(req);
-      const result = await dispatchCovenantBreaches();
+      const orgId = requireCovenantOrgIdForWrite(req);
+      if (orgId === null) {
+        sendBadRequest(res, 'Caller has no organization membership; cannot run covenant scan');
+        return;
+      }
+      const result = await dispatchCovenantBreaches(orgId);
       sendSuccess(res, {
         source: 'Terra Covenant Monitor — operator-triggered scan',
+        orgId,
         ...result,
         provenance: provenance('terra_covenants/Live-Financials/Guardian-Actions', 0.95, trace),
       });
@@ -1465,8 +1511,13 @@ router.post(
     if (guardSeedInProduction(res)) return;
     try {
       const limit = Math.min(Number(req.body?.limit ?? 12), 50);
-      const inserted = await seedCovenantsFromDistress(limit);
-      sendSuccess(res, { inserted, source: 'distress-registry' });
+      const orgId = requireCovenantOrgIdForWrite(req);
+      if (orgId === null) {
+        sendBadRequest(res, 'Caller has no organization membership; cannot seed covenants');
+        return;
+      }
+      const inserted = await seedCovenantsFromDistress(orgId, limit);
+      sendSuccess(res, { inserted, orgId, source: 'distress-registry' });
     } catch (err) {
       handleRouteError(res, err, 'Failed to seed covenants');
     }
@@ -1605,9 +1656,15 @@ router.post(
         return;
       }
 
-      const result = await syncLoanFinancialsFromDistress();
+      const orgId = requireCovenantOrgIdForWrite(req);
+      if (orgId === null) {
+        sendBadRequest(res, 'Caller has no organization membership; cannot sync financials');
+        return;
+      }
+      const result = await syncLoanFinancialsFromDistress(orgId);
       sendSuccess(res, {
         ...result,
+        orgId,
         message:
           result.synced > 0
             ? `Seeded ${result.synced} loan financial statement(s) from distress registry (loans with no existing statements).`
@@ -1658,7 +1715,12 @@ router.post(
         return;
       }
 
-      const requestId = breachRequestId(String(propertyId), String(covenantType));
+      const orgId = requireCovenantOrgIdForWrite(req);
+      if (orgId === null) {
+        sendBadRequest(res, 'Caller has no organization membership; cannot submit covenant review');
+        return;
+      }
+      const requestId = breachRequestId(orgId, String(propertyId), String(covenantType));
       const trace = reqTraceRef(req);
 
       // Idempotent upsert — onConflictDoNothing prevents duplicate records
@@ -1671,7 +1733,7 @@ router.post(
           requestId,
           agentId: 'terra-covenant-monitor',
           sessionId: trace,
-          orgId: null,
+          orgId,
           tier: 'supervised',
           action: 'covenant_breach_review',
           toolId: 'covenant-monitor',
@@ -1684,6 +1746,7 @@ router.post(
           redactApplied: false,
           controlViolations: [],
           payload: {
+            orgId,
             propertyId,
             address,
             distressType,
@@ -1704,7 +1767,7 @@ router.post(
           agentId: 'terra-covenant-monitor',
           sessionId: trace ?? null,
           workflowId: null,
-          orgId: null,
+          orgId,
           tier: 'supervised',
           action: 'covenant_breach_review',
           toolId: 'covenant-monitor',
@@ -1728,7 +1791,7 @@ router.post(
             requestId,
             agentId: 'terra-covenant-monitor',
             sessionId: trace,
-            orgId: null,
+            orgId,
             tier: 'supervised',
             action: 'covenant_breach_review',
             toolId: 'covenant-monitor',
@@ -1736,7 +1799,7 @@ router.post(
             status: 'pending',
             requiredApprovers: ['terra-risk-officer'],
             approvals: [],
-            payload: { propertyId, address, distressType, covenantType, score },
+            payload: { orgId, propertyId, address, distressType, covenantType, score },
             expiresAt: computeApprovalExpiresAt('supervised'),
           })
           .onConflictDoNothing();
@@ -1766,16 +1829,19 @@ router.post(
  * Resolve a covenant lookup condition from a URL parameter.
  * Accepts: bare numeric PK ("5"), "cov_<pk>" fallback format, or externalId string.
  */
-function covenantWhereClause(id: string) {
+function covenantWhereClause(id: string, orgId: number) {
+  // Always AND the org_id filter so a row owned by a different tenant can never
+  // be returned even if the URL parameter matches its primary key. RR-18.
+  const orgFilter = eq(terraCovenantsTable.orgId, orgId);
   const direct = Number(id);
   if (Number.isFinite(direct) && direct > 0) {
-    return eq(terraCovenantsTable.id, direct);
+    return and(orgFilter, eq(terraCovenantsTable.id, direct));
   }
   const covPrefix = /^cov_(\d+)$/.exec(id);
   if (covPrefix) {
-    return eq(terraCovenantsTable.id, Number(covPrefix[1]));
+    return and(orgFilter, eq(terraCovenantsTable.id, Number(covPrefix[1])));
   }
-  return eq(terraCovenantsTable.externalId, id);
+  return and(orgFilter, eq(terraCovenantsTable.externalId, id));
 }
 
 const covenantCreateSchema = z.object({
@@ -1818,11 +1884,17 @@ router.post(
         return;
       }
       const data = parsed.data;
-      const externalId = `cov-op-${randomUUID().slice(0, 8)}`;
+      const orgId = requireCovenantOrgIdForWrite(req);
+      if (orgId === null) {
+        sendBadRequest(res, 'Caller has no organization membership; cannot create covenant');
+        return;
+      }
+      const externalId = `cov-op-${orgId}-${randomUUID().slice(0, 8)}`;
 
       const [inserted] = await db
         .insert(terraCovenantsTable)
         .values({
+          orgId,
           externalId,
           propertyExternalId: data.propertyExternalId,
           propertyAddress: data.propertyAddress,
@@ -1864,11 +1936,16 @@ router.patch(
       }
 
       const data = parsed.data;
+      const orgId = requireCovenantOrgIdForWrite(req);
+      if (orgId === null) {
+        sendBadRequest(res, 'Caller has no organization membership; cannot update covenant');
+        return;
+      }
 
       const existing = await db
         .select({ id: terraCovenantsTable.id })
         .from(terraCovenantsTable)
-        .where(covenantWhereClause(id))
+        .where(covenantWhereClause(id, orgId))
         .limit(1);
 
       if (!existing[0]) {
@@ -1892,7 +1969,12 @@ router.patch(
       const [updated] = await db
         .update(terraCovenantsTable)
         .set(updates)
-        .where(eq(terraCovenantsTable.id, existing[0].id))
+        .where(
+          and(
+            eq(terraCovenantsTable.id, existing[0].id),
+            eq(terraCovenantsTable.orgId, orgId),
+          ),
+        )
         .returning();
 
       sendSuccess(res, { covenant: updated });
@@ -1909,11 +1991,16 @@ router.delete(
   async (req, res) => {
     try {
       const { id } = req.params;
+      const orgId = requireCovenantOrgIdForWrite(req);
+      if (orgId === null) {
+        sendBadRequest(res, 'Caller has no organization membership; cannot delete covenant');
+        return;
+      }
 
       const existing = await db
         .select({ id: terraCovenantsTable.id })
         .from(terraCovenantsTable)
-        .where(covenantWhereClause(id))
+        .where(covenantWhereClause(id, orgId))
         .limit(1);
 
       if (!existing[0]) {
@@ -1924,7 +2011,12 @@ router.delete(
       await db
         .update(terraCovenantsTable)
         .set({ active: false, updatedAt: new Date() })
-        .where(eq(terraCovenantsTable.id, existing[0].id));
+        .where(
+          and(
+            eq(terraCovenantsTable.id, existing[0].id),
+            eq(terraCovenantsTable.orgId, orgId),
+          ),
+        );
 
       sendSuccess(res, { deactivated: true, id: existing[0].id });
     } catch (err) {

@@ -463,6 +463,13 @@
       "when": 1745276400000,
       "tag": "0097_fund_inbound_deal_partner_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "7",
+      "when": 1777200000000,
+      "tag": "0099_terra_covenants_org_id",
+      "breakpoints": true
     }
   ]
 }

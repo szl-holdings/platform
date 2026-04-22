@@ -12,6 +12,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
+import { organizationsTable } from './organizations';
 
 export const terraBrokeragesTable = pgTable(
   'terra_brokerages',
@@ -672,6 +673,13 @@ export const terraCovenantsTable = pgTable(
   'terra_covenants',
   {
     id: serial('id').primaryKey(),
+    /**
+     * Tenant scope (RR-18). Every covenant belongs to exactly one organization;
+     * all repository and API query paths filter by this column.
+     */
+    orgId: integer('org_id')
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: 'cascade' }),
     externalId: text('external_id').unique(),
     propertyExternalId: text('property_external_id').notNull(),
     propertyAddress: text('property_address').notNull(),
@@ -706,6 +714,12 @@ export const terraCovenantsTable = pgTable(
     index('terra_covenant_lender_idx').on(t.lender),
     index('terra_covenant_type_idx').on(t.covenantType),
     index('terra_covenant_active_idx').on(t.active),
+    index('terra_covenant_org_idx').on(t.orgId),
+    uniqueIndex('terra_covenant_org_property_type_uq').on(
+      t.orgId,
+      t.propertyExternalId,
+      t.covenantType,
+    ),
   ],
 );
 

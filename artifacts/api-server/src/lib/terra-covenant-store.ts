@@ -33,22 +33,54 @@ export function defaultsForType(type: CovenantType) {
   return TYPE_DEFAULTS[type];
 }
 
-export async function listActiveCovenants(): Promise<TerraCovenant[]> {
-  return db.select().from(terraCovenantsTable).where(eq(terraCovenantsTable.active, true));
+/**
+ * Tenant-scope guard. All public functions in this module require an explicit
+ * orgId so a missing scope cannot accidentally leak rows across organizations.
+ */
+function requireOrgId(orgId: number | null | undefined): number {
+  if (typeof orgId !== 'number' || !Number.isFinite(orgId) || orgId <= 0) {
+    throw new Error('terra-covenant-store: orgId is required (RR-18 tenant scope)');
+  }
+  return orgId;
+}
+
+export async function listActiveCovenants(orgId: number): Promise<TerraCovenant[]> {
+  const scopedOrg = requireOrgId(orgId);
+  return db
+    .select()
+    .from(terraCovenantsTable)
+    .where(
+      and(eq(terraCovenantsTable.orgId, scopedOrg), eq(terraCovenantsTable.active, true)),
+    );
 }
 
 export async function listCovenantsForProperty(
+  orgId: number,
   propertyExternalId: string,
 ): Promise<TerraCovenant[]> {
+  const scopedOrg = requireOrgId(orgId);
   return db
     .select()
     .from(terraCovenantsTable)
     .where(
       and(
+        eq(terraCovenantsTable.orgId, scopedOrg),
         eq(terraCovenantsTable.propertyExternalId, propertyExternalId),
         eq(terraCovenantsTable.active, true),
       ),
     );
+}
+
+/**
+ * Distinct list of org IDs that own at least one active covenant. Used by the
+ * scheduled covenant monitor to iterate per-tenant work.
+ */
+export async function listOrgIdsWithCovenants(): Promise<number[]> {
+  const rows = await db
+    .selectDistinct({ orgId: terraCovenantsTable.orgId })
+    .from(terraCovenantsTable)
+    .where(eq(terraCovenantsTable.active, true));
+  return rows.map((r) => r.orgId);
 }
 
 /**
@@ -244,11 +276,16 @@ function derivedDebtYield(prop?: { debtAmount?: number; opportunityScore?: numbe
 /**
  * Update last_evaluated_at / last_status / last_measured_value on a covenant row.
  * Best-effort: failures are logged but never thrown.
+ *
+ * Scoped by (id, orgId) so a row owned by a different tenant can never be
+ * updated by passing the wrong orgId.
  */
 export async function recordCovenantEvaluation(
+  orgId: number,
   id: number,
   measured: CovenantMeasurement,
 ): Promise<void> {
+  const scopedOrg = requireOrgId(orgId);
   try {
     await db
       .update(terraCovenantsTable)
@@ -258,10 +295,12 @@ export async function recordCovenantEvaluation(
         lastMeasuredValue: String(measured.measuredValue),
         updatedAt: new Date(),
       })
-      .where(eq(terraCovenantsTable.id, id));
+      .where(
+        and(eq(terraCovenantsTable.id, id), eq(terraCovenantsTable.orgId, scopedOrg)),
+      );
   } catch (err) {
     logger.debug(
-      { err, covenantId: id },
+      { err, covenantId: id, orgId: scopedOrg },
       '[terra-covenant-store] Failed to record evaluation (non-fatal)',
     );
   }
@@ -360,12 +399,16 @@ export async function ingestLoanFinancials(row: {
  *
  * Called explicitly by the operator (POST /financials/sync) — never called
  * automatically inside evaluateAllCovenants() to avoid shadowing real data.
+ *
+ * Tenant-scoped: only seeds financials for loans referenced by covenants in
+ * the calling org so cross-tenant loan agreements are never touched.
  */
-export async function syncLoanFinancialsFromDistress(): Promise<{
+export async function syncLoanFinancialsFromDistress(orgId: number): Promise<{
   synced: number;
   skipped: number;
 }> {
-  const covenants = await listActiveCovenants();
+  const scopedOrg = requireOrgId(orgId);
+  const covenants = await listActiveCovenants(scopedOrg);
   if (covenants.length === 0) return { synced: 0, skipped: 0 };
 
   const allProps = await searchDistressedProperties({ limit: 200 });
@@ -378,7 +421,7 @@ export async function syncLoanFinancialsFromDistress(): Promise<{
   const currentPeriod = `Q${q}-${now.getFullYear()}`;
   const qEndMonth = q * 3;
   const qEndDate = new Date(now.getFullYear(), qEndMonth, 0);
-  const statementDate = qEndDate.toISOString().split('T')[0];
+  const statementDate = qEndDate.toISOString().split('T')[0]!;
 
   let synced = 0;
   let skipped = 0;
@@ -428,13 +471,14 @@ export async function syncLoanFinancialsFromDistress(): Promise<{
           syncedFrom: 'terra-distress-registry',
           distressType: prop?.distressType ?? null,
           opportunityScore: score,
+          orgId: scopedOrg,
           note: 'Seed data — replace with audited lender statement via /financials/ingest',
         },
       });
       synced += 1;
     } catch (err) {
       logger.debug(
-        { err, loanAgreementId: cov.loanAgreementId },
+        { err, loanAgreementId: cov.loanAgreementId, orgId: scopedOrg },
         '[terra-covenant-store] syncLoanFinancialsFromDistress: insert failed (non-fatal)',
       );
       skipped += 1;
@@ -443,7 +487,7 @@ export async function syncLoanFinancialsFromDistress(): Promise<{
 
   if (synced > 0) {
     logger.info(
-      { synced, skipped, period: currentPeriod },
+      { synced, skipped, period: currentPeriod, orgId: scopedOrg },
       '[terra-covenant-store] Seeded loan financials from distress registry',
     );
   }
@@ -452,9 +496,12 @@ export async function syncLoanFinancialsFromDistress(): Promise<{
 
 /**
  * Seed real covenant rows for the top distressed properties so the monitor has
- * meaningful data on first run. Idempotent — uses property+type uniqueness.
+ * meaningful data on first run. Idempotent — uses (orgId, propertyExternalId,
+ * covenantType) uniqueness so seeding into the same org twice is a no-op while
+ * different orgs may independently track the same external property.
  */
-export async function seedCovenantsFromDistress(limit = 12): Promise<number> {
+export async function seedCovenantsFromDistress(orgId: number, limit = 12): Promise<number> {
+  const scopedOrg = requireOrgId(orgId);
   const props = await searchDistressedProperties({ limit });
   if (props.length === 0) return 0;
 
@@ -477,6 +524,7 @@ export async function seedCovenantsFromDistress(limit = 12): Promise<number> {
         .from(terraCovenantsTable)
         .where(
           and(
+            eq(terraCovenantsTable.orgId, scopedOrg),
             eq(terraCovenantsTable.propertyExternalId, prop.id),
             eq(terraCovenantsTable.covenantType, t),
           ),
@@ -488,7 +536,8 @@ export async function seedCovenantsFromDistress(limit = 12): Promise<number> {
         await db
           .insert(terraCovenantsTable)
           .values({
-            externalId: `cov-${prop.id}-${t}`,
+            orgId: scopedOrg,
+            externalId: `cov-${scopedOrg}-${prop.id}-${t}`,
             propertyExternalId: prop.id,
             propertyAddress: prop.address ?? prop.id,
             borough: prop.borough ?? null,
@@ -512,7 +561,7 @@ export async function seedCovenantsFromDistress(limit = 12): Promise<number> {
         inserted += 1;
       } catch (err) {
         logger.debug(
-          { err, propertyId: prop.id, type: t },
+          { err, propertyId: prop.id, type: t, orgId: scopedOrg },
           '[terra-covenant-store] Seed insert failed (non-fatal)',
         );
       }
@@ -521,7 +570,7 @@ export async function seedCovenantsFromDistress(limit = 12): Promise<number> {
 
   if (inserted > 0) {
     logger.info(
-      { inserted, propertiesScanned: props.length },
+      { inserted, propertiesScanned: props.length, orgId: scopedOrg },
       '[terra-covenant-store] Seeded covenants from distress registry',
     );
   }
@@ -529,7 +578,7 @@ export async function seedCovenantsFromDistress(limit = 12): Promise<number> {
 }
 
 /**
- * Evaluate every active covenant.
+ * Evaluate every active covenant for a single org.
  *
  * Measurement reads terra_loan_financials as the primary source (no distress
  * data required). When no financial statement has been ingested for a loan,
@@ -540,10 +589,11 @@ export async function seedCovenantsFromDistress(limit = 12): Promise<number> {
  * syncLoanFinancialsFromDistress() explicitly via POST /financials/sync when
  * you want seed rows for loans with no statements.
  */
-export async function evaluateAllCovenants(): Promise<
-  Array<CovenantMeasurement & { propertyData: Record<string, unknown> | null }>
-> {
-  const covenants = await listActiveCovenants();
+export async function evaluateAllCovenants(
+  orgId: number,
+): Promise<Array<CovenantMeasurement & { propertyData: Record<string, unknown> | null }>> {
+  const scopedOrg = requireOrgId(orgId);
+  const covenants = await listActiveCovenants(scopedOrg);
   if (covenants.length === 0) return [];
 
   // Load distress properties as optional context for the in-memory fallback
@@ -562,7 +612,17 @@ export async function evaluateAllCovenants(): Promise<
     // real financials and only uses this for in-memory proxy computation when no
     // statement exists. The prop is never written to terra_loan_financials here.
     const prop = propMap.get(cov.propertyExternalId);
-    const m = await measureCovenant(cov, prop);
+    const m = await measureCovenant(
+      cov,
+      prop as
+        | {
+            debtAmount?: number;
+            estimatedValue?: number;
+            opportunityScore?: number;
+            distressType?: string;
+          }
+        | undefined,
+    );
     out.push({ ...m, propertyData: prop ? (prop as Record<string, unknown>) : null });
   }
 
