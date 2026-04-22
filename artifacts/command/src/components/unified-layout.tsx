@@ -1,4 +1,5 @@
 import { EvidenceDrawer } from '@szl-holdings/design-system/cockpit/evidence-drawer';
+import { useAuth } from '@szl-holdings/replit-auth-web';
 import { EnvironmentLabel } from '@szl-holdings/shared-ui/alloy-decision-card';
 import {
   MODE_COLORS,
@@ -236,6 +237,27 @@ const OPERATIONS_NAV: NavGroup[] = [
   },
   ECOSYSTEM_APPS_NAV,
 ];
+
+const OPERATIONS_ADMIN_NAV: NavGroup = {
+  section: 'Governance Admin',
+  items: [
+    { href: '/operations/governance-tiers', label: 'Governance Tiers', icon: ShieldCheck },
+    { href: '/operations/guardrail-configs', label: 'Guardrail Configs', icon: Lock },
+  ],
+};
+
+const ADMIN_ROLES = new Set(['admin', 'super_admin']);
+
+export function getOperationsNav(isAdmin: boolean): NavGroup[] {
+  if (!isAdmin) return OPERATIONS_NAV;
+  const ecosystemIdx = OPERATIONS_NAV.findIndex((g) => g === ECOSYSTEM_APPS_NAV);
+  const insertAt = ecosystemIdx === -1 ? OPERATIONS_NAV.length : ecosystemIdx;
+  return [
+    ...OPERATIONS_NAV.slice(0, insertAt),
+    OPERATIONS_ADMIN_NAV,
+    ...OPERATIONS_NAV.slice(insertAt),
+  ];
+}
 
 const INFRASTRUCTURE_NAV: NavGroup[] = [
   {
@@ -784,12 +806,15 @@ function UnifiedLayoutInner({
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const accent = ACCENT[mode];
+  const { user } = useAuth();
+  const userRoles: string[] = (user as { roles?: string[] } | null | undefined)?.roles ?? [];
+  const isAdmin = userRoles.some((r) => ADMIN_ROLES.has(r));
 
   const navGroups =
     mode === 'strategy'
       ? STRATEGY_NAV
       : mode === 'operations'
-        ? OPERATIONS_NAV
+        ? getOperationsNav(isAdmin)
         : INFRASTRUCTURE_NAV;
 
   const navScrollRef = useRef<HTMLElement | null>(null);
