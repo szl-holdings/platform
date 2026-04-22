@@ -10,7 +10,7 @@ import { and, desc, eq, gte, isNull, not, or, sql } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { logger } from '../lib/logger';
-import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { commonSchemas, listQuerySchema, validateBody, validateParams, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
 
@@ -483,7 +483,7 @@ router.get('/review-desk/overview', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/review-desk/items/:id', async (req: Request, res: Response) => {
+router.get('/review-desk/items/:id', validateParams(commonSchemas.idParam), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
     const [item, notes, assignments] = await Promise.all([
@@ -615,6 +615,7 @@ router.post(
 
 router.post(
   '/review-desk/items/:id/transition',
+  validateParams(commonSchemas.idParam),
   validateBody(TransitionSchema),
   async (req: Request, res: Response) => {
     try {
@@ -692,6 +693,7 @@ router.post(
 
 router.post(
   '/review-desk/items/:id/actions/approve',
+  validateParams(commonSchemas.idParam),
   validateBody(ApproveActionSchema),
   async (req: Request, res: Response) => {
     try {
@@ -757,6 +759,7 @@ router.post(
 
 router.post(
   '/review-desk/items/:id/actions/reject',
+  validateParams(commonSchemas.idParam),
   validateBody(RejectActionSchema),
   async (req: Request, res: Response) => {
     try {
@@ -816,6 +819,7 @@ router.post(
 
 router.post(
   '/review-desk/items/:id/actions/revise',
+  validateParams(commonSchemas.idParam),
   validateBody(ReviseActionSchema),
   async (req: Request, res: Response) => {
     try {
@@ -869,6 +873,7 @@ router.post(
 
 router.post(
   '/review-desk/items/:id/actions/escalate',
+  validateParams(commonSchemas.idParam),
   validateBody(EscalateActionSchema),
   async (req: Request, res: Response) => {
     try {
@@ -927,6 +932,7 @@ router.post(
 
 router.post(
   '/review-desk/items/:id/actions/assign',
+  validateParams(commonSchemas.idParam),
   validateBody(AssignActionSchema),
   async (req: Request, res: Response) => {
     try {
@@ -996,6 +1002,7 @@ router.post(
 
 router.post(
   '/review-desk/items/:id/actions/block',
+  validateParams(commonSchemas.idParam),
   validateBody(BlockActionSchema),
   async (req: Request, res: Response) => {
     try {
@@ -1040,6 +1047,7 @@ router.post(
 
 router.post(
   '/review-desk/items/:id/actions/request-support',
+  validateParams(commonSchemas.idParam),
   validateBody(SupportRequestSchema),
   async (req: Request, res: Response) => {
     try {
@@ -1091,6 +1099,7 @@ router.post(
 
 router.post(
   '/review-desk/items/:id/actions/generate-review-packet',
+  validateParams(commonSchemas.idParam),
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
@@ -1132,6 +1141,7 @@ router.post(
 
 router.post(
   '/review-desk/items/:id/actions/export-packet',
+  validateParams(commonSchemas.idParam),
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
@@ -1188,6 +1198,7 @@ router.post(
 
 router.post(
   '/review-desk/items/:id/notes',
+  validateParams(commonSchemas.idParam),
   validateBody(AddNoteSchema),
   async (req: Request, res: Response) => {
     try {

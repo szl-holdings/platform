@@ -18,7 +18,7 @@ import { and, desc, eq, gte, sql } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { logger } from '../lib/logger';
-import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { commonSchemas, listQuerySchema, validateBody, validateParams, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
 import { pilotChangeTracker } from '../services/prism-pilot-change-tracker';
@@ -30,6 +30,8 @@ const router = Router();
 
 router.use(authMiddleware());
 router.use(tenantScope({ required: true }));
+
+const matterIdParamSchema = z.object({ matterId: z.coerce.number().int().positive() });
 
 const ReviewStateSchema = z.object({
   state: z.string().min(1).max(100),
@@ -324,6 +326,7 @@ router.get(
 
 router.post(
   '/today/next-actions/:id/complete',
+  validateParams(commonSchemas.idParam),
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
@@ -338,7 +341,7 @@ router.post(
   },
 );
 
-router.get('/matter-desk/:id', async (req: Request, res: Response) => {
+router.get('/matter-desk/:id', validateParams(commonSchemas.idParam), async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.id as string);
     const yesterday = new Date(Date.now() - 48 * 60 * 60 * 1000);
@@ -612,7 +615,7 @@ router.get('/reviews', validateQuery(listQuerySchema), async (req: Request, res:
   }
 });
 
-router.get('/reviews/:id', async (req: Request, res: Response) => {
+router.get('/reviews/:id', validateParams(commonSchemas.idParam), async (req: Request, res: Response) => {
   try {
     const review = await pilotReview.getReview(getOrgId(req), parseInt(req.params.id as string));
     if (!review) return void res.status(404).json({ error: 'Review not found' });
@@ -636,6 +639,7 @@ router.post('/reviews', validateBody(ReviewCreateSchema), async (req: Request, r
 
 router.patch(
   '/reviews/:id/state',
+  validateParams(commonSchemas.idParam),
   validateBody(ReviewStateSchema),
   async (req: Request, res: Response) => {
     try {
@@ -655,6 +659,7 @@ router.patch(
 
 router.post(
   '/reviews/:id/submit-signoff',
+  validateParams(commonSchemas.idParam),
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
@@ -691,6 +696,7 @@ router.get('/signoffs/pending', async (req: Request, res: Response) => {
 
 router.post(
   '/signoffs/:id/resolve',
+  validateParams(commonSchemas.idParam),
   validateBody(SignoffResolveSchema),
   async (req: Request, res: Response) => {
     try {
@@ -730,7 +736,7 @@ router.post('/exports', validateBody(ExportCreateSchema), async (req: Request, r
   }
 });
 
-router.get('/exports/:id', async (req: Request, res: Response) => {
+router.get('/exports/:id', validateParams(commonSchemas.idParam), async (req: Request, res: Response) => {
   try {
     const exp = await pilotExport.getExport(getOrgId(req), parseInt(req.params.id as string));
     if (!exp) return void res.status(404).json({ error: 'Export not found' });
@@ -741,7 +747,7 @@ router.get('/exports/:id', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/exports/:id/content', async (req: Request, res: Response) => {
+router.get('/exports/:id/content', validateParams(commonSchemas.idParam), async (req: Request, res: Response) => {
   try {
     const content = await pilotExport.buildDocxContent(
       getOrgId(req),
@@ -868,7 +874,7 @@ router.get(
   },
 );
 
-router.get('/forecasts/:matterId', async (req: Request, res: Response) => {
+router.get('/forecasts/:matterId', validateParams(matterIdParamSchema), async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
     const [matter] = await db

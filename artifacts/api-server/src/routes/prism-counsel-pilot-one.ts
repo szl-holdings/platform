@@ -21,7 +21,7 @@ import { and, desc, eq } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { logger } from '../lib/logger';
-import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { commonSchemas, listQuerySchema, validateBody, validateParams, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
 import { copilotPilotOne } from '../services/prism-copilot-pilot-one';
@@ -34,6 +34,9 @@ const router = Router();
 
 router.use(authMiddleware());
 router.use(tenantScope({ required: true }));
+
+const matterIdParamSchema = z.object({ matterId: z.coerce.number().int().positive() });
+const userIdParamSchema = z.object({ userId: z.coerce.number().int().positive() });
 
 const CarrierEventSchema = z.object({
   carrierName: z.string().min(1).max(200),
@@ -72,6 +75,7 @@ function getOrgId(req: Request): number {
 
 router.post(
   '/pressure/:matterId/compute',
+  validateParams(matterIdParamSchema),
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
@@ -85,7 +89,7 @@ router.post(
   },
 );
 
-router.get('/pressure/:matterId', async (req: Request, res: Response) => {
+router.get('/pressure/:matterId', validateParams(matterIdParamSchema), async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
     const data = await insurerPressureEngine.getLatestSnapshot(getOrgId(req), matterId);
@@ -134,6 +138,7 @@ router.get(
 
 router.post(
   '/pressure/:matterId/events',
+  validateParams(matterIdParamSchema),
   validateBody(CarrierEventSchema),
   async (req: Request, res: Response) => {
     try {
@@ -154,6 +159,7 @@ router.post(
 
 router.post(
   '/friction/:matterId/compute',
+  validateParams(matterIdParamSchema),
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
@@ -170,7 +176,7 @@ router.post(
   },
 );
 
-router.get('/friction/:matterId', async (req: Request, res: Response) => {
+router.get('/friction/:matterId', validateParams(matterIdParamSchema), async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
     const data = await settlementFrictionEngine.getLatestSnapshot(getOrgId(req), matterId);
@@ -189,7 +195,7 @@ router.get('/friction/portfolio/view', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/friction/:matterId/recommendations', async (req: Request, res: Response) => {
+router.get('/friction/:matterId/recommendations', validateParams(matterIdParamSchema), async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
     const recommendations = await settlementFrictionEngine.getMovementRecommendations(
@@ -204,6 +210,7 @@ router.get('/friction/:matterId/recommendations', async (req: Request, res: Resp
 
 router.post(
   '/friction/recommendations/:id/accept',
+  validateParams(commonSchemas.idParam),
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
@@ -227,6 +234,7 @@ router.post(
 
 router.post(
   '/forecasts/pilot-one/:matterId/compute',
+  validateParams(matterIdParamSchema),
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
@@ -240,7 +248,7 @@ router.post(
   },
 );
 
-router.get('/forecasts/pilot-one/:matterId/diff-view', async (req: Request, res: Response) => {
+router.get('/forecasts/pilot-one/:matterId/diff-view', validateParams(matterIdParamSchema), async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
     const diffView = await forecastExpanded.getForecastDiffView(getOrgId(req), matterId);
@@ -312,7 +320,7 @@ router.get('/portfolio/watchlist', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/portfolio/best-next-30/:userId', async (req: Request, res: Response) => {
+router.get('/portfolio/best-next-30/:userId', validateParams(userIdParamSchema), async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.userId as string);
     const actions = await portfolioLearning.getBestNext30Minutes(getOrgId(req), userId);
@@ -324,6 +332,7 @@ router.get('/portfolio/best-next-30/:userId', async (req: Request, res: Response
 
 router.post(
   '/portfolio/quiet-risk/:matterId',
+  validateParams(matterIdParamSchema),
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
     try {
