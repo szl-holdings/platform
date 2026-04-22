@@ -28,6 +28,12 @@ import {
   stopHealthDegradationWatcher,
 } from './lib/health-degradation-watcher';
 import { knowledgeStore } from './lib/knowledge-store';
+import {
+  markOpsReady,
+  runBootSeedSequence,
+  type SeedTask,
+} from './lib/boot-orchestrator';
+import { runOpsMgmtBootInit } from './routes/ops-management';
 import { ensurePlatformFlags } from './lib/platform-flags';
 import { runMigrations } from './lib/run-migrations';
 import { startSelfMonitoring, stopSelfMonitoring } from './lib/self-monitor';
@@ -492,61 +498,64 @@ export async function bootstrap(
     // Step 3c: Start the scheduler AFTER all handlers are registered
     await startDurableScheduler();
 
-    // Step 4: Demo seeds — isolated from production data paths.
-    // Gate is now enforced by isSeedDataAllowed() from @szl-holdings/config (runtime mode model).
-    // Each seed function also guards itself independently for defense-in-depth.
+    // Step 4: Demo seeds + ops-mgmt init — SERIALISED behind a single
+    // background chain (OBS-007 root-cause fix).
+    //
+    // Previously these helpers fired as ~11 concurrent fire-and-forget
+    // promises plus a separate 60 s setTimeout for runOpsMgmtBootInit.
+    // With DB_POOL_MAX=10 the resulting checkout fan-out produced ~30
+    // long-checkout warnings per cold start and forced /ops endpoints to
+    // silently read pre-seed state for the first minute.
+    //
+    // The orchestrator runs every seed sequentially behind try/catch (one
+    // failed seed cannot abort the chain), then runs ops-mgmt schema
+    // init, then flips the `opsReady` gate so /ops routes stop returning
+    // 503 (see `requireOpsReady`). Synchronous `seedAiBudgetPolicies` and
+    // sync ingestion-framework init still happen inline to preserve the
+    // prior contract that they're available the moment listen() returns.
     const currentMode = resolveRuntimeMode();
+    seedAiBudgetPolicies();
+
+    const seedTasks: SeedTask[] = [];
     if (isSeedDataAllowed()) {
       logger.info(
         { mode: currentMode },
-        '[seed] Demo seed enabled — running platform/MSP/Dreamscape seeds',
+        '[seed] Demo seed enabled — sequencing platform/MSP/Dreamscape seeds',
       );
-      seedPlatformData().catch((err) => {
-        logger.warn({ err }, '[seed-platform] Seed failed (non-fatal)');
-      });
-      seedMspData().catch((err) => {
-        logger.warn({ err }, '[msp-seed] MSP demo seed failed (non-fatal)');
-      });
-      seedDreamscapeData().catch((err) => {
-        logger.warn({ err }, '[seed-dreamscape] Creative Workflows seed failed (non-fatal)');
-      });
-      seedConstellationData().catch((err) => {
-        logger.warn({ err }, '[seed-constellation] Constellation graph seed failed (non-fatal)');
-      });
-      seedLyteActions().catch((err) => {
-        logger.warn({ err }, '[seed-lyte-actions] Lyte action queue seed failed (non-fatal)');
-      });
-      seedLyteSurfaces().catch((err) => {
-        logger.warn({ err }, '[seed-lyte-surfaces] Lyte surfaces seed failed (non-fatal)');
-      });
-      seedTerraPortfolioModules().catch((err) => {
-        logger.warn(
-          { err },
-          '[seed-terra-portfolio-modules] Terra portfolio module seed failed (non-fatal)',
-        );
-      });
+      seedTasks.push(
+        { name: 'seedPlatformData', fn: seedPlatformData },
+        { name: 'seedMspData', fn: seedMspData },
+        { name: 'seedDreamscapeData', fn: seedDreamscapeData },
+        { name: 'seedConstellationData', fn: seedConstellationData },
+        { name: 'seedLyteActions', fn: seedLyteActions },
+        { name: 'seedLyteSurfaces', fn: seedLyteSurfaces },
+        { name: 'seedTerraPortfolioModules', fn: seedTerraPortfolioModules },
+      );
     } else {
       logger.info(
         { mode: currentMode },
         '[seed] Demo seeds suppressed — runtime mode does not permit seed data. Set DEMO_MODE=true or ENABLE_DEMO_SEED=true to enable in non-production environments.',
       );
     }
-    // Guardian default tier policies are operational data (not demo data) — always seed.
-    seedGuardianDefaults().catch((err) => {
-      logger.warn({ err }, '[seed-guardian] Guardian defaults seed failed (non-fatal)');
-    });
-    seedGuardianTiers().catch((err) => {
-      logger.warn({ err }, '[seed-guardian] Guardian tier seed failed (non-fatal)');
-    });
-    // Knowledge base articles are operational content — always seed if table is empty.
-    seedKnowledgeBase().catch((err) => {
-      logger.warn({ err }, '[seed-kb] Knowledge base seed failed (non-fatal)');
-    });
-    // AI budget policies are operational controls — always register on startup.
-    seedAiBudgetPolicies();
-    initIngestionFramework().catch((err) => {
-      logger.warn({ err }, '[ingestion] Framework init failed (non-fatal)');
-    });
+    // Guardian, knowledge base, and ingestion-framework tasks are
+    // operational (not demo) — always sequence them.
+    seedTasks.push(
+      { name: 'seedGuardianDefaults', fn: seedGuardianDefaults },
+      { name: 'seedGuardianTiers', fn: seedGuardianTiers },
+      { name: 'seedKnowledgeBase', fn: seedKnowledgeBase },
+      { name: 'initIngestionFramework', fn: initIngestionFramework },
+      { name: 'runOpsMgmtBootInit', fn: () => runOpsMgmtBootInit() },
+    );
+
+    void runBootSeedSequence(seedTasks)
+      .then(() => markOpsReady())
+      .catch((err) => {
+        logger.error({ err }, '[boot-seed] sequenced chain crashed unexpectedly');
+        // Fail-open: even if the chain crashed, flip the gate so admin
+        // endpoints aren't permanently 503'd. The individual seed
+        // failures will already be logged inside runBootSeedSequence.
+        markOpsReady();
+      });
 
     logger.info('[bootstrap] Bootstrap sequence complete — server fully ready');
 

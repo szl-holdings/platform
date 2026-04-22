@@ -2,6 +2,7 @@ import { bodyShape } from '@szl-holdings/contracts/common';
 import { pool } from '@szl-holdings/db';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
+import { requireOpsReady } from '../lib/boot-orchestrator';
 import { buildAlertFiredEmail, hasEmailProviderConfigured, sendEmail } from '../lib/email';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
@@ -19,6 +20,12 @@ const INCIDENT_TRANSITIONS: Record<string, string[]> = {
 const router: IRouter = Router();
 router.use('/ops', authMiddleware());
 router.use('/ops', requireRole('admin'));
+// Gate: respond 503 + Retry-After until the boot-seed chain has finished
+// running ensureSchema/seedServiceDeps/seedRunbooks/seedAlertRules/
+// ensurePlatformAlertRules. See lib/boot-orchestrator.ts. This replaces
+// the previous 60-second blanket setTimeout deferral that allowed admin
+// reads to silently see pre-seed state.
+router.use('/ops', requireOpsReady);
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Ensure new columns exist (idempotent migration)
@@ -1735,22 +1742,23 @@ router.get('/ops/uptime-history', validateQuery(listQuerySchema), async (req, re
 });
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Boot-time init (OBS-007 mitigation)
+// Boot-time init (OBS-007 root-cause mitigation)
 //
-// Previously each of these helpers fired at module-load time (one immediate,
-// three on staggered 5–8 s setTimeouts). Combined with the rest of the boot
-// fan-out (durable scheduler seeds, AI evals hydration, knowledge-store load,
-// per-route module init) this saturated the shared pg Pool (max=10) and
-// produced ~30 OBS-007 long-checkout warnings per cold start.
+// `runOpsMgmtBootInit` runs the five idempotent ensure/seed helpers in
+// strict sequence. It is no longer scheduled inside this module — instead
+// it is invoked from `src/index.ts` as the FINAL task in the serialised
+// boot-seed chain (see `lib/boot-orchestrator.ts`). That replaces the
+// previous fan-out of ~11 concurrent fire-and-forget seed promises plus a
+// stand-alone 60-second setTimeout here, which together caused ~30
+// long-checkout (>30 s) pool warnings per cold start.
 //
-// We now run all five sequentially behind a single `setTimeout`, well after
-// the main boot pressure has cleared. They are pure idempotent backfill
-// (CREATE TABLE IF NOT EXISTS / WHERE NOT EXISTS / COUNT-then-INSERT) so
-// deferring them by a few seconds has no behavioural effect — admin UI
-// reads happen far later than this delay in any realistic flow. The
-// `unref()` keeps test runs from being held open by the timer.
+// Admin `/ops/*` routes are guarded by `requireOpsReady` (mounted at the
+// top of this file) — they return 503 + Retry-After: 5 until the chain
+// completes and `markOpsReady()` is called. Previously the 60-second
+// blanket deferral allowed those routes to read pre-seed schema state
+// silently for a full minute; the gate makes that window explicit.
 // ──────────────────────────────────────────────────────────────────────────────
-async function runOpsMgmtBootInit(): Promise<void> {
+export async function runOpsMgmtBootInit(): Promise<void> {
   await ensureSchema().catch((err) =>
     logger.warn({ err }, '[ops-mgmt] Schema init failed (non-fatal)'),
   );
@@ -1766,11 +1774,6 @@ async function runOpsMgmtBootInit(): Promise<void> {
   await ensurePlatformAlertRules().catch((err) =>
     logger.warn({ err }, '[ops-mgmt] ensurePlatformAlertRules failed (non-fatal)'),
   );
-}
-if (process.env.NODE_ENV !== 'test') {
-  setTimeout(() => {
-    runOpsMgmtBootInit().catch(() => {});
-  }, 60_000).unref();
 }
 
 export default router;
