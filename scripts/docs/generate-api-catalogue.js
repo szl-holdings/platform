@@ -17,7 +17,7 @@
  *   the gate advisory (set continue-on-error: true to keep it non-blocking).
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { parse } from 'yaml';
@@ -208,10 +208,35 @@ if (STDOUT_MODE) {
 }
 
 if (CHECK_MODE) {
+  const GH_SUMMARY = process.env.GITHUB_STEP_SUMMARY || null;
+
   const existing = existsSync(OUT_PATH) ? readFileSync(OUT_PATH, 'utf8') : '';
   // Compare everything after the "Last generated:" line (date changes each run)
   const normalize = (s) => s.replace(/Last generated: \*\*[0-9-]+\*\*/, 'Last generated: **DATE**');
-  if (normalize(existing) === normalize(output)) {
+  const upToDate = normalize(existing) === normalize(output);
+
+  if (GH_SUMMARY) {
+    const summaryLines = [];
+    summaryLines.push('## API Catalogue Check');
+    summaryLines.push('');
+    if (upToDate) {
+      summaryLines.push('**Result:** ✅ `API-CATALOGUE.md` is up to date with the OpenAPI spec.');
+    } else {
+      summaryLines.push('**Result:** ⚠️ `API-CATALOGUE.md` is stale — it does not match the current OpenAPI spec.');
+      summaryLines.push('');
+      summaryLines.push('Run `pnpm docs:generate` locally and commit the updated file to fix this.');
+    }
+    summaryLines.push('');
+    summaryLines.push(`| Metric | Value |`);
+    summaryLines.push(`|--------|-------|`);
+    summaryLines.push(`| Spec version | ${specVersion} |`);
+    summaryLines.push(`| Total paths | ${Object.keys(paths).length} |`);
+    summaryLines.push(`| Total operations | ${totalOps} |`);
+    summaryLines.push('');
+    appendFileSync(GH_SUMMARY, summaryLines.join('\n') + '\n');
+  }
+
+  if (upToDate) {
     console.log('✓ API-CATALOGUE.md is up to date.');
     process.exit(0);
   } else {
