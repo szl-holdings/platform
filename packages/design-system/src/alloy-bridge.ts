@@ -1,13 +1,13 @@
 /**
  * Alloy Contract Bridge
  *
- * Maps Alloy OS runtime types (@workspace/alloy) onto
+ * Maps Alloy OS runtime types (@workspace/forge) onto
  * proof-envelope UI prop shapes so components are provably grounded
  * in the platform's canonical contract — not bespoke ad-hoc types.
  *
- * Import Alloy types from packages/alloy/src/types.ts (peer contract).
+ * Import Alloy types from packages/forge/src/types.ts (peer contract).
  */
-import type { ApprovalGate, LedgerEntry, RunState, RunStatus } from '@workspace/alloy/types';
+import type { ApprovalGate, LedgerEntry, RunState, RunStatus } from '@workspace/forge/types';
 import type { TimelineEvent, TimelineEventSeverity } from './cockpit/TimelineLane';
 import type { AutonomyMode } from './proof/AutonomyModeToggle';
 import type { EvidenceSource } from './proof/EvidenceBadge';

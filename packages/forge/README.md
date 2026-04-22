@@ -17,7 +17,7 @@ Alloy provides the run manager, checkpoint/replay hooks, model router interface,
 ### Running a Workflow
 
 ```typescript
-import { RunManager, RunConfigSchema } from '@workspace/alloy';
+import { RunManager, RunConfigSchema } from '@workspace/forge';
 
 const manager = new RunManager();
 
@@ -44,7 +44,7 @@ console.log(state.status); // 'completed' | 'failed' | ...
 ### Reference Workflow
 
 ```typescript
-import { runReferenceWorkflow } from '@workspace/alloy/workflow';
+import { runReferenceWorkflow } from '@workspace/forge/workflow';
 
 const result = await runReferenceWorkflow('hello world', {
   policyTier: 'internal-workflow',

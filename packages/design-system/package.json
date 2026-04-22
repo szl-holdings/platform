@@ -61,7 +61,7 @@
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",
     "tailwind-merge": "catalog:",
-    "@workspace/alloy": "workspace:*"
+    "@workspace/forge": "workspace:*"
   },
   "scripts": {
     "lint": "biome lint ./src",

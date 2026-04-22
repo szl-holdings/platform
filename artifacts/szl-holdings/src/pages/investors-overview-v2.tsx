@@ -72,7 +72,7 @@ const INVESTOR_CLAIMS = [
   {
     claim: "Immutable proof chain with cryptographic hash linking",
     manifestStatus: "working_demo" as const,
-    evidence: "Proof Chain (CAP-010): SHA256 hash chain implemented in packages/alloy/. Signal → inference → confirmation → outcome. Full audit trail in DB.",
+    evidence: "Proof Chain (CAP-010): SHA256 hash chain implemented in packages/forge/. Signal → inference → confirmation → outcome. Full audit trail in DB.",
     capId: "CAP-010",
   },
   {

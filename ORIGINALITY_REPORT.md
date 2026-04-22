@@ -76,7 +76,7 @@ All artifact preview paths and URL slugs were preserved to avoid breaking inboun
 - **Carlota Jo Consulting** — user's own advisory brand
 
 ### Internal Code Identifiers (Out of Scope)
-Backend package names (`packages/alloy/`, `packages/brand-registry/`), database table names (`firestormAssetsTable`, `alloyWiring`), and internal TypeScript variable names were not renamed as they are not user-facing and renaming would risk breaking working functionality.
+The Alloy backend package has since been renamed to `packages/forge/` (npm name `@workspace/forge`), and the `alloy-wiring.ts` domain-events file is now `forge-wiring.ts` exporting `initializeForgeDomainEventSubscriptions`. Other internal codenames (e.g. `packages/brand-registry/`, `firestormAssetsTable`, internal TypeScript variable names) remain unchanged as they are not user-facing and renaming would risk breaking working functionality.
 
 ---
 

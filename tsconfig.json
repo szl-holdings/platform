@@ -106,7 +106,7 @@
       "path": "./packages/tool-mesh"
     },
     {
-      "path": "./packages/alloy"
+      "path": "./packages/forge"
     },
     {
       "path": "./packages/cognitive-observability"

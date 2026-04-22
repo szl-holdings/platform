@@ -4,7 +4,7 @@ import { domainEventBus } from './index.js';
 
 let initialized = false;
 
-export function initializeAlloyDomainEventSubscriptions(): void {
+export function initializeForgeDomainEventSubscriptions(): void {
   if (initialized) return;
   initialized = true;
 

@@ -40,7 +40,7 @@
   "dependencies": {
     "@szl-holdings/decision-engine": "workspace:*",
     "@szl-holdings/policy-engine": "workspace:*",
-    "@workspace/alloy": "workspace:*",
+    "@workspace/forge": "workspace:*",
     "@workspace/memory-fabric": "workspace:*",
     "@workspace/trace-graph": "workspace:*",
     "zod": "catalog:"

@@ -20,7 +20,7 @@ vi.mock('../../lib/logger.js', () => ({
 }));
 
 const executePlanMock = vi.fn();
-vi.mock('@workspace/alloy/plan-orchestrator', () => ({
+vi.mock('@workspace/forge/plan-orchestrator', () => ({
   executePlan: (...args: unknown[]) => executePlanMock(...args),
   approvePlanStep: vi.fn(),
 }));
