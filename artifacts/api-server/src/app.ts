@@ -284,7 +284,7 @@ app.use('/alloy-embedding-api', _aefRouter);
 app.use('/api/alloy-embedding-api', _aefRouter);
 
 app.use(csrfMiddleware);
-app.use(authMiddleware);
+app.use(authMiddleware({ required: false }));
 app.use(sessionRefreshPolicy());
 
 app.get('/api/health', async (_req: Request, res: Response) => {

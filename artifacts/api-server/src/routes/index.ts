@@ -28,8 +28,9 @@ import decisionsRuntimeRouter from "./decisions-runtime";
 const router: IRouter = Router();
 
 // Carlota Jo time-tracking & invoice routes (public, unauthenticated).
-// Owns /booking/time-entries and /booking/time-invoices.
+// Owns /booking/time-entries, /booking/time-invoices, and /booking/invoices/email.
 router.use(lazyMatch("/booking", () => import("./carlota-time-tracking"), "carlota-time-tracking"));
+router.use(lazyMatch("/booking", () => import("./carlota-jo-invoice-email"), "carlota-jo-invoice-email"));
 
 // Anonymous page-view tracking — public, unauthenticated.
 router.use(lazyMatch("/track", () => import("./page-view-tracking"), "page-view-tracking"));
@@ -101,9 +102,6 @@ router.use(lazyMatch("/lyte", () => import("./lyte-intel"), "lyte-intel"));
 // Global Guardian policy check — derives category from request path.
 router.use(guardianPolicyCheck());
 
-// Carlota Jo invoice email router — mounted early.
-router.use(lazyMatch("/booking", () => import("./carlota-jo-invoice-email"), "carlota-jo-invoice-email"));
-
 // Pulse demo + briefing surfaces — owns multiple top-level prefixes.
 router.use(
   perUserApiSlidingLimiter,
@@ -155,15 +153,9 @@ router.use(lazyMatch("/lp-portal", () => import("./lp-portal"), "lp-portal"));
 
 // Decision Runtime v1 — GET /api/decisions/cards and GET /api/decisions/cards/:id
 // are public (demo workspace when unauthenticated). Mutating routes require auth.
-// Must be mounted BEFORE ai.register() because copilotRouter is mounted there
-// without a path prefix and applies tenantScope({ required: true }) globally,
-// which would block unauthenticated GET requests before the handler runs.
 router.use(decisionsRuntimeRouter);
 
-// Trace/reflection/plan/replay routers must be registered BEFORE ai.register()
-// because copilotRouter applies a global tenantScope that would terminate
-// unauthenticated requests before they reach these handlers. Note traces.ts
-// also serves /runs* paths.
+// Trace/reflection/plan/replay routers. Note traces.ts also serves /runs* paths.
 router.use(lazyMatch(["/traces", "/runs"], () => import("./traces"), "traces"));
 
 // ACR Governance — v1 approval interrupts and run ledger (auth-gated)
