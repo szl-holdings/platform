@@ -34,6 +34,7 @@ export const NAMED_JOB_TYPES = {
   DAILY_LIVE_SIGNAL_REFRESH: "daily_live_signal_refresh",
   DAILY_CORTEX_GRAPH_SNAPSHOT: "daily_cortex_graph_snapshot",
   CORTEX_GRAPH_SNAPSHOT_PRUNE: "cortex_graph_snapshot_prune",
+  TERRA_DISTRESS_FINANCIALS_BACKFILL: "terra_distress_financials_backfill",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -87,6 +88,7 @@ registerEntry({ type: NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, name: "Stuck Run Notifie
 registerEntry({ type: NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, name: "On-Call Hand-off Notifier", description: "Runs every minute. Inspects on_call_schedules + on_call_shifts for upcoming hand-off boundaries (rotation slot edges, override start/end). Notifies the next on-call user N minutes before (per schedule.warningMinutes, default 30) and at the moment of hand-off. Idempotent via on_call_handoff_notifications dedup table. Uses dispatchToExternalChannels so email/SMS/Slack work per the recipient's notification_preferences.", schedule: "minutely" as JobScheduleEntry["schedule"], enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, name: "Daily Live Signal Refresh", description: "Rolls timestamps forward on the seeded firestorm_incidents, vessels_alerts, and vessels_events delay rows so the Innovation Layer always shows fresh-looking activity (within the last 24-48h). Also rotates one row per table — closing the oldest open record and re-opening the most-recently-resolved one — to give the feed visible motion across reloads. Idempotent and safe to run repeatedly.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, name: "CORTEX Graph Snapshot Prune", description: "Deletes cortex_graph_snapshots rows whose expires_at is in the past. Each snapshot's expiry is set at insert time from CORTEX_SNAPSHOT_RETENTION_DAYS (default 30). Logs purged row count per run.", schedule: "daily", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, name: "Terra Distress Financials Backfill", description: "Walks active terra_distress_properties rows whose debt_amount + lien_amount is missing or zero and applies the heuristic encumbrance estimator (NYC-grounded ACRIS / DOF tax-lien / HPD norms keyed off distress_type, estimated_value, opportunity_score, days_in_distress) so the lender-exposure endpoint stops reporting isSyntheticExposure: true for the majority of distress rows. Estimate provenance is recorded in raw_data.financialsEstimate so later real-filing ingestion can override without losing audit history. Logs scanned / estimated / coverage % each run.", schedule: "weekly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, name: "Guardian Approval Expiry Sweeper", description: "Scans guardian_approval_requests every 5 minutes for pending entries whose expires_at is in the past and flips them to status='expired' so agents waiting on the request can detect the timeout and retry or escalate. Per-tier expiry windows are configured in TIER_CONTROLS (T2=24h, T3=48h, T4=72h; T0/T1/T5 do not auto-expire).", schedule: "hourly", enabled: true });
 
 durableJobQueue.register(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, async (job) => {
@@ -1917,6 +1919,39 @@ durableJobQueue.register(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, async (job
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE)?.failCount || 0) + 1,
     });
     logger.error({ err, jobId: job.id }, "cortex_graph_snapshot_prune: failed");
+    throw err;
+  }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, async (job) => {
+  const start = Date.now();
+  updateRegistry(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, { lastStatus: "running", lastRunAt: Date.now() });
+  try {
+    const { runDistressFinancialsBackfill } = await import("../jobs/terra-distress-financials-backfill");
+    const result = await runDistressFinancialsBackfill();
+    const coveragePct = result.totalActiveRows > 0 ? result.encumbrancesAfterCoverage / result.totalActiveRows : 0;
+    serverTelemetry.recordBusinessEvent({
+      type: "terra_distress_financials_backfill_completed",
+      domain: "terra",
+      durationMs: Date.now() - start,
+      success: result.failed === 0,
+      metadata: { ...result, coveragePct: +coveragePct.toFixed(3) },
+    });
+    updateRegistry(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, {
+      lastStatus: result.failed === 0 ? "completed" : "failed",
+      lastDurationMs: Date.now() - start,
+      ...(result.failed > 0
+        ? { failCount: (jobRegistry.get(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL)?.failCount || 0) + 1 }
+        : {}),
+    });
+    logger.info({ jobId: job.id, ...result, coveragePct: +coveragePct.toFixed(3) }, "terra_distress_financials_backfill: complete");
+  } catch (err) {
+    updateRegistry(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, {
+      lastStatus: "failed",
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL)?.failCount || 0) + 1,
+    });
+    logger.error({ err, jobId: job.id }, "terra_distress_financials_backfill: failed");
     throw err;
   }
 });
