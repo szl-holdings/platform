@@ -135,9 +135,9 @@ AEF_GATEWAY_URL = "http://localhost:4200"
 VITE_AEF_GATEWAY_URL = "http://localhost:4200"
 AEF_TENANT_ID = "szl-holdings"
 VITE_AEF_TENANT_ID = "szl-holdings"
+ALLOY_INTERNAL_TOKEN = "szl-11c811093004470be94806e360ff1b54da09aed70f6fa76d7704ad5fd1c53610"
 
 [userenv.development]
-ALLOY_INTERNAL_TOKEN = "dev-3e8122992689a527adcf8ba067ccabfae77b81f3e52aa713"
 ADMIN_PIN = "PULSE-DEMO-2026"
 
 [[ports]]
