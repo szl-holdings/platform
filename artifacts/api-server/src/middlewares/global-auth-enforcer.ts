@@ -169,6 +169,7 @@ const PUBLIC_PREFIXES = [
   // demo). Backed by Postgres so the data syncs across devices.
   "/api/booking/time-entries",
   "/api/booking/time-invoices",
+  "/api/booking/invoices/email-log/",
   "/api/booking/services",
   "/api/booking/health",
   // LP portal — read-only GET routes use authMiddleware({ required: false }) so the

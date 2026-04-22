@@ -1,4 +1,13 @@
-import { boolean, integer, jsonb, numeric, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  integer,
+  jsonb,
+  numeric,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+} from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
 
@@ -32,8 +41,20 @@ export const carlotaInvoicesTable = pgTable('carlota_invoices', {
   items: integer('items').notNull().default(0),
   entryIds: jsonb('entry_ids').$type<string[]>().notNull().default([]),
   sentAt: timestamp('sent_at'),
+  sentTo: text('sent_to'),
+  lastSendError: text('last_send_error'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const carlotaInvoiceEmailLogTable = pgTable('carlota_invoice_email_log', {
+  id: serial('id').primaryKey(),
+  invoiceId: text('invoice_id').notNull(),
+  recipient: text('recipient').notNull(),
+  sentAt: timestamp('sent_at').notNull().defaultNow(),
+  status: text('status', { enum: ['sent', 'failed'] }).notNull(),
+  error: text('error'),
+  messageId: text('message_id'),
 });
 
 export const insertCarlotaTimeEntrySchema = createInsertSchema(carlotaTimeEntriesTable).omit({
@@ -49,3 +70,9 @@ export const insertCarlotaInvoiceSchema = createInsertSchema(carlotaInvoicesTabl
 });
 export type InsertCarlotaInvoice = z.infer<typeof insertCarlotaInvoiceSchema>;
 export type CarlotaInvoice = typeof carlotaInvoicesTable.$inferSelect;
+
+export const insertCarlotaInvoiceEmailLogSchema = createInsertSchema(
+  carlotaInvoiceEmailLogTable,
+).omit({ id: true, sentAt: true });
+export type InsertCarlotaInvoiceEmailLog = z.infer<typeof insertCarlotaInvoiceEmailLogSchema>;
+export type CarlotaInvoiceEmailLog = typeof carlotaInvoiceEmailLogTable.$inferSelect;

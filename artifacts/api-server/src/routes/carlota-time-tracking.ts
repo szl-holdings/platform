@@ -53,6 +53,8 @@ function serializeInvoice(row: InvoiceRow) {
     items: row.items,
     entryIds: row.entryIds ?? [],
     sentAt: row.sentAt ? row.sentAt.toISOString() : undefined,
+    sentTo: row.sentTo ?? undefined,
+    lastSendError: row.lastSendError ?? undefined,
   };
 }
 
@@ -270,6 +272,7 @@ router.patch(
       issuedDate: z.unknown().optional(),
       items: z.unknown().optional(),
       sentAt: z.unknown().optional(),
+      sentTo: z.unknown().optional(),
       status: z.unknown().optional(),
     }),
   ),
@@ -279,6 +282,7 @@ router.patch(
       const b = req.body as Partial<InvoiceRow> & {
         amount?: number | string;
         sentAt?: string | null;
+        sentTo?: string | null;
       };
       const update: Record<string, unknown> = { updatedAt: new Date() };
       if (b.client !== undefined) update.client = b.client;
@@ -290,6 +294,7 @@ router.patch(
       if (b.items !== undefined) update.items = b.items;
       if (b.entryIds !== undefined) update.entryIds = b.entryIds;
       if (b.sentAt !== undefined) update.sentAt = b.sentAt ? new Date(b.sentAt) : null;
+      if (b.sentTo !== undefined) update.sentTo = b.sentTo ?? null;
       const [row] = await db
         .update(carlotaInvoicesTable)
         .set(update)
