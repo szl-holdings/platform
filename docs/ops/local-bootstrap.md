@@ -209,6 +209,38 @@ The migration has already been applied. This is safe — Drizzle `db:push` is id
 
 ---
 
+## Python Dependencies (Media & OG-Card Scripts)
+
+Most of the platform is TypeScript, but a handful of media/asset scripts are
+Python. Their dependencies are managed by [`uv`](https://docs.astral.sh/uv/) and
+the manifest now lives at `scripts/media/`:
+
+- `scripts/media/pyproject.toml` — declared deps (Pillow, python-docx,
+  requests, requests-oauthlib)
+- `scripts/media/uv.lock` — locked resolution; commit alongside the manifest
+
+To install or refresh the environment:
+
+```bash
+cd scripts/media
+uv sync          # installs the locked package set into a project venv
+uv lock          # regenerate the lockfile after editing pyproject.toml
+```
+
+Run the Python scripts from the repo root with `uv run` so they pick up the
+managed environment:
+
+```bash
+uv run --project scripts/media python scripts/media/build_carousel.py
+uv run --project scripts/media python scripts/generate_og_cards.py
+```
+
+`scripts/generate_og_cards.py` uses `Pillow`, which is already provided by
+`scripts/media/pyproject.toml`, so it shares the same `uv` environment — there
+is no separate manifest at the repo root anymore.
+
+---
+
 ## Environment Variable Quick Reference
 
 See `.env.example` for the full list. Each variable is annotated with its classification:
