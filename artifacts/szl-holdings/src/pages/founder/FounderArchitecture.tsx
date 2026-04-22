@@ -41,7 +41,7 @@ const CAPABILITIES: Record<string, string[]> = {
     'Built on the PRISM framework — Pulse, Risk, Intelligence, Signals, Motion',
   ],
   vessels: [
-    'Real-time AIS, satellite, and multi-source sensor fusion for global vessel tracking',
+    'AIS, satellite, and multi-source sensor fusion for global vessel tracking (live public feeds plus simulated demo data)',
     'Dark-vessel detection, route deviation alerts, and predictive risk analytics',
     'Port-call intelligence, sanctions screening, and ownership-graph traversal',
     'Operator workspace with investigation timelines and audit-grade evidence trail',

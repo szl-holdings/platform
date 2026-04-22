@@ -22,7 +22,7 @@ const capabilityGroups = [
     items: [
       {
         icon: MapPin,
-        title: 'Live AIS Fleet Map',
+        title: 'AIS Fleet Map (live + simulated)',
         desc: 'Real-time vessel positions across global shipping lanes with route line overlays and behavioral scoring.',
       },
       {

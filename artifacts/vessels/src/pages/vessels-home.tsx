@@ -276,9 +276,9 @@ function FleetCommandVisual({
           </div>
         </div>
         <div className="bg-[#060e1a]/90 border border-sky-500/15 rounded px-3 py-2 backdrop-blur-sm">
-          <div className="text-[9px] font-mono text-sky-400/40 mb-0.5">AIS FEED</div>
-          <div className="text-[10px] font-semibold text-sky-300/70">
-            LIVE · {new Date().toUTCString().slice(17, 25)} UTC
+          <div className="text-[9px] font-mono text-sky-400/40 mb-0.5">AIS FEED · SIMULATED</div>
+          <div className="text-[10px] font-semibold text-amber-300/80">
+            DEMO · {new Date().toUTCString().slice(17, 25)} UTC
           </div>
         </div>
       </div>
@@ -581,7 +581,7 @@ export default function VesselsHome() {
               </p>
               <div className="space-y-4">
                 {[
-                  'Live AIS position tracking and historical trail',
+                  'Simulated AIS position tracking and historical trail (live public-feed integrations available)',
                   'Automated deviation and anomaly alerts',
                   'Fleet cards with vessel status, cargo, and ETA',
                   'Integrated weather and routing overlays',

@@ -254,7 +254,7 @@ export default function BillingPanelPage() {
         <h2 className="text-xs font-semibold text-sky-100 mb-3">Included in your plan</h2>
         <div className="grid grid-cols-2 gap-y-2 gap-x-4">
           {[
-            'Real-time AIS fleet tracking',
+            'AIS fleet tracking (live public feeds + simulated demo data)',
             '1,200+ vessels monitored',
             'Dark vessel detection',
             'Sanctions screening',

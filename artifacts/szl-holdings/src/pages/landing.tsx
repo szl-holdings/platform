@@ -103,7 +103,7 @@ const DOMAIN_PACKS = [
     desc: "Fleet command, AIS telemetry, voyage economics, dark vessel detection, and sanctions screening for fleet operators. Same proof chain, maritime intelligence layer.",
     color: "hsl(206,72%,54%)",
     href: "/solutions/vessels",
-    capabilities: ["Real-time AIS telemetry", "Voyage P&L", "Dark vessel detection", "Sanctions screening"],
+    capabilities: ["AIS telemetry (live + simulated)", "Voyage P&L", "Dark vessel detection", "Sanctions screening"],
   },
   {
     icon: Building2,

@@ -133,7 +133,7 @@ const ROLE_VIEWS = [
     headline: 'Every exception has a governed response — not just an alert.',
     body: 'Fleet operators see correlated AIS telemetry, sanctions screening, and voyage economics in one governed surface. When an exception fires, the governed response workflow is pre-staged — not waiting for manual escalation.',
     outcomes: [
-      'Real-time AIS feed with dark vessel and deviation detection',
+      'AIS feed (live public sources + simulated demo data) with dark vessel and deviation detection',
       'Sanctions screening against OFAC, UN, and EU lists — with governed response workflow',
       'Voyage P&L integration — demurrage and freight benchmarking in every exception',
       'Cross-domain enrichment: legal flags tied to operational alerts',

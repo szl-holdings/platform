@@ -159,7 +159,7 @@ export default function VesselsIntelligence() {
               id: 'v-route-2',
               label: 'IMO Voyage Data Exchange',
               type: 'api',
-              excerpt: 'Live AIS tracking and port congestion signals included in analysis.',
+              excerpt: 'AIS tracking (live public feeds + simulated demo data) and port congestion signals included in analysis.',
             },
           ]}
         >

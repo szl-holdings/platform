@@ -1385,10 +1385,11 @@ export default function FleetDashboard() {
                 className="text-[12px] leading-relaxed"
                 style={{ color: 'rgba(255,255,255,0.7)' }}
               >
-                You're viewing Vessels — SZL's maritime intelligence platform. Real-time AIS
-                tracking, behavioral AI scoring, sanctions screening, dark vessel detection, and
-                port congestion analysis. Every vessel position and risk metric demonstrates
-                mission-grade maritime domain awareness.
+                You're viewing Vessels — SZL's maritime intelligence platform. AIS
+                tracking (live public feeds plus simulated demo data), behavioral AI scoring,
+                sanctions screening, dark vessel detection, and port congestion analysis. Every
+                vessel position and risk metric demonstrates mission-grade maritime domain
+                awareness.
               </div>
             </div>
           )}

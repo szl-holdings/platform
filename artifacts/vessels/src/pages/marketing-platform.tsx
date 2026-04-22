@@ -16,7 +16,7 @@ const modules = [
   {
     icon: MapPin,
     title: 'Fleet Command Map',
-    desc: 'Live AIS vessel positions with route overlays, port locations, and dynamic alert indicators. A premium oceanic view built for command — not a generic map widget.',
+    desc: 'AIS vessel positions (live public feeds plus simulated demo data) with route overlays, port locations, and dynamic alert indicators. A premium oceanic view built for command — not a generic map widget.',
     tag: 'Core',
   },
   {

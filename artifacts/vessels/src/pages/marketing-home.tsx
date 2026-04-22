@@ -583,8 +583,8 @@ export default function MarketingHomePage() {
                 {[
                   {
                     icon: Zap,
-                    label: 'Real-time AIS ingestion',
-                    desc: 'Sub-minute vessel positions with 90-day historical replay and anomaly detection.',
+                    label: 'Real-time AIS ingestion (live + simulated)',
+                    desc: 'Sub-minute vessel positions with 90-day historical replay and anomaly detection. Public AIS feeds (Digitraffic, BarentsWatch) where available; simulated positions used in demo dashboards and where commercial feeds are not yet contracted.',
                   },
                   {
                     icon: Lock,
@@ -631,11 +631,11 @@ export default function MarketingHomePage() {
             >
               <div className="flex items-center justify-between mb-6">
                 <span className="text-[11px] font-semibold text-sky-400/75 tracking-[0.1em] uppercase">
-                  Fleet Snapshot
+                  Fleet Snapshot · Simulated
                 </span>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[10px] text-emerald-400/85 font-medium">Live</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="text-[10px] text-amber-400/85 font-medium">Demo data</span>
                 </div>
               </div>
               <div className="space-y-0">
@@ -683,7 +683,7 @@ export default function MarketingHomePage() {
                 {
                   step: '01',
                   title: 'Connect your AIS feed',
-                  body: 'Vessels ingests real-time AIS data from your existing provider or our direct satellite feed. Historical voyage data loads automatically. Fleet roster builds from your existing records in minutes.',
+                  body: 'Vessels ingests AIS data from public feeds (Digitraffic, BarentsWatch) or your existing provider. Demo dashboards use simulated AIS data where commercial feeds are not contracted. Historical voyage data loads automatically. Fleet roster builds from your existing records in minutes.',
                   tag: 'Setup',
                 },
                 {

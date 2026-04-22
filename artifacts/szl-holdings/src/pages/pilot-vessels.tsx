@@ -24,7 +24,7 @@ const DATA_SOURCES = [
 
 const OPERATOR_PREREQS = [
   "Named fleet operations lead who will participate in the proof workflow",
-  "At least one active voyage or vessel with live AIS position data available",
+  "At least one active voyage or vessel with AIS position data available (live public feeds or simulated for the pilot)",
   "Approval for maritime data connector and AIS feed configuration",
   "Designated compliance contact for sanctions and regulatory review",
   "IT approval for cloud-hosted Voyage Twin with maritime data integration",

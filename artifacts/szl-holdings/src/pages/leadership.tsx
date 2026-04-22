@@ -29,7 +29,7 @@ const CASE_STUDIES = [
   {
     label: "Maritime Intelligence",
     product: "SEXTANT",
-    outcome: "Real-time AIS analytics, route intelligence, and fleet command for maritime operators — replacing fragmented data feeds with a single command surface.",
+    outcome: "AIS analytics (live public feeds plus simulated demo data), route intelligence, and fleet command for maritime operators — replacing fragmented data feeds with a single command surface.",
     accent: "#22d3ee",
     href: "/vessels/",
   },

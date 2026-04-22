@@ -18,7 +18,7 @@ const tiers = [
     highlight: false,
     features: [
       'Up to 50 vessels',
-      'Real-time AIS tracking',
+      'AIS tracking (live public feeds + simulated demo data)',
       'Basic route deviation alerts',
       'Port congestion feed',
       '7-day voyage history',
