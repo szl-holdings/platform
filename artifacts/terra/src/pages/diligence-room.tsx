@@ -92,6 +92,27 @@ async function updateEvidenceStatus(evidenceId: string, status: string) {
   return (await res.json()).data ?? null;
 }
 
+type EvidenceCitation = {
+  ref: string;
+  page?: number;
+  excerpt: string;
+  url?: string;
+};
+
+async function updateEvidenceCitations(evidenceId: string, citations: EvidenceCitation[]) {
+  const res = await fetch(
+    `${API}/terra/cognitive/diligence-room/evidence/${encodeURIComponent(evidenceId)}`,
+    {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ citations }),
+    },
+  );
+  if (!res.ok) throw new Error((await res.json()).error ?? 'Update failed');
+  return (await res.json()).data ?? null;
+}
+
 const STATUS_CONFIG: Record<string, { color: string; Icon: typeof CheckCircle; label: string }> = {
   verified: { color: '#40856a', Icon: CheckCircle, label: 'Verified' },
   in_review: { color: '#4a7dc8', Icon: Clock, label: 'In Review' },
@@ -124,13 +145,50 @@ function EvidenceCard({
   evidence,
   index,
   onStatusChange,
+  onAddCitation,
 }: {
   evidence: any;
   index: number;
   onStatusChange?: (status: string) => void;
+  onAddCitation?: (citation: EvidenceCitation) => Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [citationOpen, setCitationOpen] = useState(false);
+  const [citRef, setCitRef] = useState('');
+  const [citPage, setCitPage] = useState('');
+  const [citExcerpt, setCitExcerpt] = useState('');
+  const [citUrl, setCitUrl] = useState('');
+  const [citBusy, setCitBusy] = useState(false);
+  const [citErr, setCitErr] = useState<string | null>(null);
+
+  const submitCitation = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onAddCitation) return;
+    setCitErr(null);
+    setCitBusy(true);
+    try {
+      const pageNum = citPage.trim() ? Number(citPage) : undefined;
+      if (pageNum !== undefined && (!Number.isFinite(pageNum) || pageNum < 0)) {
+        throw new Error('Page must be a non-negative number');
+      }
+      await onAddCitation({
+        ref: citRef.trim(),
+        page: pageNum,
+        excerpt: citExcerpt.trim(),
+        url: citUrl.trim() || undefined,
+      });
+      setCitRef('');
+      setCitPage('');
+      setCitExcerpt('');
+      setCitUrl('');
+      setCitationOpen(false);
+    } catch (err) {
+      setCitErr((err as Error).message);
+    } finally {
+      setCitBusy(false);
+    }
+  };
   const cfg = STATUS_CONFIG[evidence.status] ?? STATUS_CONFIG.pending;
   const Icon = cfg.Icon;
   const catColor = CATEGORY_COLORS[evidence.category] ?? '#64748b';
@@ -274,18 +332,127 @@ function EvidenceCard({
         </div>
       </div>
 
-      {expanded && evidence.citations?.length > 0 && (
+      {expanded && (evidence.citations?.length > 0 || onAddCitation) && (
         <div
           className="p-4 space-y-2"
           style={{ background: 'rgba(0,0,0,0.2)', borderTop: '1px solid rgba(255,255,255,0.04)' }}
         >
           <div
-            className="text-[9px] uppercase tracking-wider font-semibold mb-2"
-            style={{ color: 'rgba(255,255,255,0.3)' }}
+            className="flex items-center justify-between mb-2"
           >
-            Citations
+            <div
+              className="text-[9px] uppercase tracking-wider font-semibold"
+              style={{ color: 'rgba(255,255,255,0.3)' }}
+            >
+              Citations
+            </div>
+            {onAddCitation && !citationOpen && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCitationOpen(true);
+                }}
+                className="text-[9px] px-2 py-0.5 rounded font-mono font-semibold inline-flex items-center gap-1"
+                style={{
+                  background: `${ACCENT}18`,
+                  border: `1px solid ${ACCENT}40`,
+                  color: ACCENT,
+                }}
+              >
+                <Plus className="w-2.5 h-2.5" /> Add citation
+              </button>
+            )}
           </div>
-          {evidence.citations.map((cit: any, i: number) => (
+          {onAddCitation && citationOpen && (
+            <div
+              data-testid="add-citation-form"
+              className="p-3 rounded-lg space-y-2"
+              style={{
+                background: 'rgba(64,133,106,0.06)',
+                border: `1px solid ${ACCENT}30`,
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="grid grid-cols-3 gap-2">
+                <input
+                  value={citRef}
+                  onChange={(e) => setCitRef(e.target.value)}
+                  placeholder="Reference (e.g. Schedule B-II §4)"
+                  className="col-span-2 px-2 py-1 text-[11px] rounded"
+                  style={{
+                    background: 'rgba(0,0,0,0.3)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: '#e8edf8',
+                  }}
+                />
+                <input
+                  value={citPage}
+                  onChange={(e) => setCitPage(e.target.value)}
+                  placeholder="Page"
+                  inputMode="numeric"
+                  className="px-2 py-1 text-[11px] rounded"
+                  style={{
+                    background: 'rgba(0,0,0,0.3)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: '#e8edf8',
+                  }}
+                />
+              </div>
+              <textarea
+                value={citExcerpt}
+                onChange={(e) => setCitExcerpt(e.target.value)}
+                placeholder="Excerpt / blockquote text"
+                rows={2}
+                className="w-full px-2 py-1 text-[11px] rounded"
+                style={{
+                  background: 'rgba(0,0,0,0.3)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#e8edf8',
+                }}
+              />
+              <input
+                value={citUrl}
+                onChange={(e) => setCitUrl(e.target.value)}
+                placeholder="Source URL (optional)"
+                className="w-full px-2 py-1 text-[11px] rounded"
+                style={{
+                  background: 'rgba(0,0,0,0.3)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#e8edf8',
+                }}
+              />
+              {citErr && (
+                <div className="text-[10px]" style={{ color: '#ef4444' }}>
+                  {citErr}
+                </div>
+              )}
+              <div className="flex gap-2">
+                <button
+                  disabled={citBusy || citRef.trim().length < 1 || citExcerpt.trim().length < 1}
+                  onClick={submitCitation}
+                  className="flex-1 py-1 text-[10px] font-semibold rounded disabled:opacity-50"
+                  style={{ background: ACCENT, color: '#0a0f0c' }}
+                >
+                  {citBusy ? 'Saving…' : 'Save citation'}
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCitationOpen(false);
+                    setCitErr(null);
+                  }}
+                  className="px-3 py-1 text-[10px] rounded"
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    color: 'rgba(255,255,255,0.6)',
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+          {(evidence.citations ?? []).map((cit: any, i: number) => (
             <div
               key={i}
               className="p-3 rounded-lg"
@@ -907,6 +1074,17 @@ export default function DiligenceRoomPage() {
                         matter.source === 'diligence-db'
                           ? async (next: string) => {
                               await updateEvidenceStatus(ev.id, next);
+                              refetch();
+                            }
+                          : undefined
+                      }
+                      onAddCitation={
+                        matter.source === 'diligence-db'
+                          ? async (citation: EvidenceCitation) => {
+                              const existing: EvidenceCitation[] = Array.isArray(ev.citations)
+                                ? ev.citations
+                                : [];
+                              await updateEvidenceCitations(ev.id, [...existing, citation]);
                               refetch();
                             }
                           : undefined

@@ -2518,6 +2518,15 @@ const createMatterSchema = z.object({
   notes: z.string().max(4000).optional(),
 });
 
+const evidenceCitationSchema = z.object({
+  ref: z.string().min(1).max(240),
+  page: z.number().int().nonnegative().optional(),
+  excerpt: z.string().min(1).max(2000),
+  url: z.string().url().max(2048).optional(),
+});
+
+export const __evidenceCitationSchema = evidenceCitationSchema;
+
 const createEvidenceSchema = z.object({
   category: z.enum(['title', 'environmental', 'financial', 'lease', 'structural', 'legal']),
   label: z.string().min(2).max(240),
@@ -2530,9 +2539,7 @@ const createEvidenceSchema = z.object({
   documentName: z.string().max(240).optional(),
   documentMimeType: z.string().max(120).optional(),
   documentSize: z.number().int().nonnegative().optional(),
-  citations: z
-    .array(z.object({ ref: z.string(), page: z.number().int().optional(), excerpt: z.string() }))
-    .optional(),
+  citations: z.array(evidenceCitationSchema).optional(),
 });
 
 const patchEvidenceSchema = z.object({
@@ -2540,9 +2547,7 @@ const patchEvidenceSchema = z.object({
   confidence: z.number().min(0).max(1).optional(),
   summary: z.string().max(4000).optional(),
   reviewedByName: z.string().max(120).optional(),
-  citations: z
-    .array(z.object({ ref: z.string(), page: z.number().int().optional(), excerpt: z.string() }))
-    .optional(),
+  citations: z.array(evidenceCitationSchema).optional(),
 });
 
 function freshnessLabel(date: Date | string | null | undefined): string {
