@@ -47,6 +47,12 @@ const NAV_ITEMS: Array<{
     description: 'Governed-Intelligence Design Language',
   },
   {
+    id: 'tokens-governance',
+    label: 'Tokens Governance',
+    icon: Palette,
+    description: '@workspace/tokens drift across artifacts',
+  },
+  {
     id: 'ai-quality',
     label: 'AI Quality',
     icon: Activity,

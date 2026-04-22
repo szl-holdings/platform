@@ -8,6 +8,7 @@ export type Page =
   | 'orchestrator'
   | 'ingest'
   | 'design-system'
+  | 'tokens-governance'
   | 'ai-quality'
   | 'prompt-registry'
   | 'eval-console'

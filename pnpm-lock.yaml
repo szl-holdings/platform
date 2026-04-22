@@ -4429,6 +4429,16 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
+  packages/tokens:
+    dependencies:
+      '@szl-holdings/design-system':
+        specifier: workspace:*
+        version: link:../design-system
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   packages/tool-mesh:
     dependencies:
       '@szl-holdings/ai-control-plane':

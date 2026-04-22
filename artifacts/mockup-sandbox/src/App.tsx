@@ -15,6 +15,7 @@ import PatternAtlas from './pages/PatternAtlas';
 import PromptRegistry from './pages/PromptRegistry';
 import Research from './pages/Research';
 import Skills from './pages/Skills';
+import TokensGovernance from './pages/TokensGovernance';
 
 const VALID_PAGES: Page[] = [
   'home',
@@ -26,6 +27,7 @@ const VALID_PAGES: Page[] = [
   'orchestrator',
   'ingest',
   'design-system',
+  'tokens-governance',
   'ai-quality',
   'prompt-registry',
   'eval-console',
@@ -65,6 +67,7 @@ function AppInner() {
       {page === 'orchestrator' && <Orchestrator />}
       {page === 'ingest' && <Ingest />}
       {page === 'design-system' && <DesignSystemPage />}
+      {page === 'tokens-governance' && <TokensGovernance />}
       {page === 'ai-quality' && <AIQuality />}
       {page === 'prompt-registry' && <PromptRegistry />}
       {page === 'eval-console' && <EvalConsole />}
