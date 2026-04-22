@@ -61,7 +61,6 @@
     "@szl-holdings/domain-claims": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
     "@szl-holdings/telemetry-standards": "workspace:*",
-    "@szl-holdings/ui-command": "workspace:*",
     "@tanstack/query-persist-client-core": "^5.99.0",
     "@tanstack/query-sync-storage-persister": "^5.99.0",
     "@types/leaflet": "^1.9.21",

@@ -165,7 +165,6 @@
 | `packages/tool-mesh` | `@workspace/tool-mesh` | Tool invocation mesh |
 | `packages/tool-registry` | `@szl-holdings/tool-registry` | Tool registry and versioning |
 | `packages/trace-graph` | `@workspace/trace-graph` | Canonical trace graph (agent runs, model calls) |
-| `packages/ui-command` | `@szl-holdings/ui-command` | Higher-level business UI components |
 | `packages/verifier` | `@workspace/verifier` | Agent verifier and policy check |
 
 ---

@@ -44,7 +44,7 @@ The monorepo contains **19 packages** under `packages/`, **40 lib packages** und
 | `packages/replay-core` | `@szl-holdings/replay-core` | Incident/flow capture → sanitized replayable datasets, replay runner | Standalone | 2ae8fec2 — feat: Replay, Eval & Trust Infrastructure | **KEEP → absorb into `@workspace/memory-fabric`** |
 | `packages/telemetry-standards` | `@szl-holdings/telemetry-standards` | Shared telemetry contracts — GenAI, business, HTTP | `artifacts/api-server` | 3eaac40c — feat: Business Observability & Telemetry Fabric | **MERGE into `@workspace/trace-graph`** |
 | `packages/tool-registry` | `@szl-holdings/tool-registry` | Unified tool registry, MCP bridging, schema validation, approval policy, execution tracking | `artifacts/api-server` | 69b5331d — feat(platform): Add AI Control Plane | **KEEP → rename to `@workspace/tool-mesh`** |
-| `packages/ui-command` | `@szl-holdings/ui-command` | Shared composable UI: causal timelines, KPI blocks, recommendation queues, risk heatmaps | `artifacts/command`, `artifacts/szl-holdings` | 93a4a764 — feat: Business State UX & Command Surfaces | **KEEP → consolidate with `lib/shared-ui` under `@workspace/ui-command`** |
+| ~~`packages/ui-command`~~ | ~~`@szl-holdings/ui-command`~~ | Removed — superseded by `@szl-holdings/design-system` (cockpit + proof primitives) | _none_ | Removed (Task #2888) | **REMOVED** |
 
 ---
 
@@ -533,7 +533,7 @@ Candidates for removal in a future cleanup task:
 | `packages/prompt-registry` | *(none — external pino only)* |
 | `packages/nvidia-adapters` | *(none — external pino only)* |
 | `packages/openusd-export` | *(none — external pino only)* |
-| `packages/ui-command` | *(none — external React/recharts only)* |
+| ~~`packages/ui-command`~~ | _Removed (Task #2888) — superseded by `@szl-holdings/design-system`_ |
 | `packages/demo-seed` | `lib/db` |
 | `lib/db` | *(none — base layer)* |
 | `lib/ai-engine` | `lib/db`, `lib/services` |

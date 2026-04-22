@@ -48,7 +48,6 @@
     "@szl-holdings/prism-bus": "workspace:*",
     "@szl-holdings/replit-auth-web": "workspace:*",
     "@szl-holdings/shared-ui": "workspace:*",
-    "@szl-holdings/ui-command": "workspace:*",
     "clsx": "catalog:",
     "date-fns": "^3.6.0",
     "i18next": "^26.0.3",

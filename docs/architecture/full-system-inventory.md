@@ -126,7 +126,6 @@ This is the canonical exhaustive inventory of the entire SZL Holdings monorepo. 
 | `packages/replay-core` | `@szl-holdings/replay-core` | Replay and time-travel debugging |
 | `packages/telemetry-standards` | `@szl-holdings/telemetry-standards` | OpenTelemetry conventions and standards |
 | `packages/tool-registry` | `@szl-holdings/tool-registry` | AI tool / function-call registry |
-| `packages/ui-command` | `@szl-holdings/ui-command` | Command palette UI primitives |
 
 ---
 

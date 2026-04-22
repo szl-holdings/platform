@@ -349,7 +349,6 @@
         "@szl-holdings/domain-claims",
         "@szl-holdings/design-system",
         "@szl-holdings/telemetry-standards",
-        "@szl-holdings/ui-command",
         "@tanstack/query-persist-client-core",
         "@tanstack/query-sync-storage-persister",
         "@types/leaflet",
@@ -784,7 +783,6 @@
         "@szl-holdings/prism-bus",
         "@szl-holdings/replit-auth-web",
         "@szl-holdings/shared-ui",
-        "@szl-holdings/ui-command",
         "clsx",
         "date-fns",
         "i18next",
@@ -2232,14 +2230,6 @@
       "dependencies": ["@workspace/replay-core", "drizzle-orm", "zod"],
       "devDependencies": ["@types/node", "vitest"],
       "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
-    },
-    {
-      "path": "packages/ui-command/package.json",
-      "name": "@szl-holdings/ui-command",
-      "version": "0.0.0",
-      "dependencies": ["clsx", "framer-motion", "lucide-react", "recharts", "tailwind-merge"],
-      "devDependencies": ["@types/react", "@types/react-dom", "typescript"],
-      "scripts": ["lint", "lint:ci", "format"]
     },
     {
       "path": "packages/verifier/package.json",
