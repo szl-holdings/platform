@@ -41,6 +41,7 @@ const ServicesPage = lazy(() => import('@/pages/Services'));
 const ApproachPage = lazy(() => import('@/pages/Approach'));
 const AboutPage = lazy(() => import('@/pages/About'));
 const InquiriesPage = lazy(() => import('@/pages/Inquiries'));
+const InquiryInboxPage = lazy(() => import('@/pages/InquiryInbox'));
 const FounderPage = lazy(() => import('@/pages/founder'));
 const WhoWeServePage = lazy(() => import('@/pages/who-we-serve'));
 const ContactPage = lazy(() => import('@/pages/contact'));
@@ -239,7 +240,8 @@ function Router() {
         <Route path="/approach" component={ApproachPage} />
         <Route path="/engage" component={EngagementIntake} />
         <Route path="/about" component={AboutPage} />
-        <Route path="/inquiries" component={InquiriesPage} />
+        <Route path="/inquiries" component={InquiryInboxPage} />
+        <Route path="/inquiry" component={InquiriesPage} />
         <Route path="/readiness" component={StrategicReadinessPage} />
         <Route path="/legal/privacy" component={LegalPrivacyPage} />
         <Route path="/legal/terms" component={LegalTermsPage} />

@@ -7,6 +7,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'wouter';
 import {
   CAPACITY_ALERTS as ALERTS,
   FORWARD_CAPACITY,
@@ -22,6 +23,7 @@ interface KpiItem {
   value: string;
   sub: string;
   live?: boolean;
+  href?: string;
 }
 
 const GOLD = 'var(--color-gold)';
@@ -148,52 +150,63 @@ export default function CapacityPlanner() {
                           value: apiData.inquiriesTotal.toString(),
                           sub: 'from live CRM',
                           live: true,
+                          href: '/inquiries',
                         },
                       ]
                     : []),
                 ] as KpiItem[]
-              ).map((kpi) => (
-                <div
-                  key={kpi.label}
-                  style={{
-                    background: kpi.live ? 'rgba(5,150,105,0.08)' : 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${kpi.live ? 'rgba(5,150,105,0.25)' : 'rgba(255,255,255,0.08)'}`,
-                    borderRadius: 12,
-                    padding: '14px 16px',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <div
-                      style={{
-                        fontSize: 22,
-                        fontWeight: 600,
-                        color: '#F5F0E8',
-                        fontFamily: "'Cormorant Garamond', serif",
-                      }}
-                    >
-                      {kpi.value}
-                    </div>
-                    {kpi.live && (
-                      <span
+              ).map((kpi) => {
+                const card = (
+                  <div
+                    key={kpi.label}
+                    style={{
+                      background: kpi.live ? 'rgba(5,150,105,0.08)' : 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${kpi.live ? 'rgba(5,150,105,0.25)' : 'rgba(255,255,255,0.08)'}`,
+                      borderRadius: 12,
+                      padding: '14px 16px',
+                      cursor: kpi.href ? 'pointer' : 'default',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div
                         style={{
-                          fontSize: 8,
-                          fontWeight: 700,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.08em',
-                          color: '#34D399',
-                          background: 'rgba(52,211,153,0.12)',
-                          padding: '2px 5px',
-                          borderRadius: 4,
+                          fontSize: 22,
+                          fontWeight: 600,
+                          color: '#F5F0E8',
+                          fontFamily: "'Cormorant Garamond', serif",
                         }}
                       >
-                        Live
-                      </span>
-                    )}
+                        {kpi.value}
+                      </div>
+                      {kpi.live && (
+                        <span
+                          style={{
+                            fontSize: 8,
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.08em',
+                            color: '#34D399',
+                            background: 'rgba(52,211,153,0.12)',
+                            padding: '2px 5px',
+                            borderRadius: 4,
+                          }}
+                        >
+                          Live
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 11, color: '#4A7A63', marginTop: 2 }}>{kpi.label}</div>
+                    <div style={{ fontSize: 10, color: '#2A5040', marginTop: 2 }}>{kpi.sub}</div>
                   </div>
-                  <div style={{ fontSize: 11, color: '#4A7A63', marginTop: 2 }}>{kpi.label}</div>
-                  <div style={{ fontSize: 10, color: '#2A5040', marginTop: 2 }}>{kpi.sub}</div>
-                </div>
-              ))}
+                );
+                return kpi.href ? (
+                  <Link key={kpi.label} href={kpi.href} style={{ textDecoration: 'none' }}>
+                    {card}
+                  </Link>
+                ) : (
+                  card
+                );
+              })}
             </div>
           </motion.div>
         </div>

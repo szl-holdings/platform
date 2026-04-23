@@ -12,6 +12,7 @@ import {
   FolderOpen,
   GraduationCap,
   Heart,
+  Inbox,
   Lightbulb,
   Menu,
   MessageSquare,
@@ -65,6 +66,7 @@ const ADVISORY: NavItem[] = [
 ];
 
 const OPERATIONS: NavItem[] = [
+  { href: '/inquiries', label: 'Inquiry Inbox', icon: Inbox },
   { href: '/time-tracking', label: 'Time Tracking & Billing', icon: Clock },
   { href: '/capacity-planner', label: 'Capacity Planner', icon: Users },
   { href: '/knowledge-vault', label: 'Knowledge Vault', icon: BookOpen },

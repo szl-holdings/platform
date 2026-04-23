@@ -337,6 +337,7 @@ export default function ConsultingOS() {
             change: 'from CRM',
             up: true,
             source: 'live' as const,
+            href: '/inquiries',
           },
           ...(apiData.servicesCount > 0
             ? [
@@ -448,43 +449,55 @@ export default function ConsultingOS() {
                 maxWidth: 900,
               }}
             >
-              {PLATFORM_METRICS.map((m) => (
-                <div
-                  key={m.label}
-                  style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: 12,
-                    padding: '14px 16px',
-                  }}
-                >
+              {PLATFORM_METRICS.map((m) => {
+                const card = (
                   <div
+                    key={m.label}
                     style={{
-                      fontSize: 22,
-                      fontWeight: 600,
-                      color: '#F5F0E8',
-                      fontFamily: "'Cormorant Garamond', serif",
-                      letterSpacing: '-0.02em',
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 12,
+                      padding: '14px 16px',
+                      cursor: (m as { href?: string }).href ? 'pointer' : 'default',
+                      transition: 'border-color 0.15s',
                     }}
                   >
-                    {m.value}
+                    <div
+                      style={{
+                        fontSize: 22,
+                        fontWeight: 600,
+                        color: '#F5F0E8',
+                        fontFamily: "'Cormorant Garamond', serif",
+                        letterSpacing: '-0.02em',
+                      }}
+                    >
+                      {m.value}
+                    </div>
+                    <div style={{ fontSize: 11, color: '#A89878', marginTop: 2, marginBottom: 4 }}>
+                      {m.label}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: '#4ADE80',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      <TrendingUp size={10} /> {m.change}
+                    </div>
                   </div>
-                  <div style={{ fontSize: 11, color: '#A89878', marginTop: 2, marginBottom: 4 }}>
-                    {m.label}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: '#4ADE80',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 4,
-                    }}
-                  >
-                    <TrendingUp size={10} /> {m.change}
-                  </div>
-                </div>
-              ))}
+                );
+                const href = (m as { href?: string }).href;
+                return href ? (
+                  <Link key={m.label} href={href} style={{ textDecoration: 'none' }}>
+                    {card}
+                  </Link>
+                ) : (
+                  card
+                );
+              })}
             </div>
           </motion.div>
         </div>

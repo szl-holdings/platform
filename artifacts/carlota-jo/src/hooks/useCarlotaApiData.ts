@@ -32,9 +32,9 @@ export function useCarlotaApiData(): CarlotaApiData {
   const { data: inquiriesCount = 0, isSuccess: inquiriesOk } = useQuery({
     queryKey: ['carlota-inquiries-count'],
     queryFn: () => fetchCount(`${API}/booking/inquiries?limit=1`),
-    staleTime: 60_000,
+    staleTime: 30_000,
     retry: 1,
-    refetchInterval: 120_000,
+    refetchInterval: 30_000,
   });
 
   const { data: reservationsCount = 0, isSuccess: reservationsOk } = useQuery({
