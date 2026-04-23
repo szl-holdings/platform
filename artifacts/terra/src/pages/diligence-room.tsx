@@ -8,10 +8,12 @@ import {
   Clock,
   ExternalLink,
   Layers,
+  Pencil,
   Plus,
   RefreshCw,
   Shield,
   Tag,
+  Trash2,
   Upload,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -145,11 +147,15 @@ function EvidenceCard({
   index,
   onStatusChange,
   onAddCitation,
+  onEditCitation,
+  onRemoveCitation,
 }: {
   evidence: any;
   index: number;
   onStatusChange?: (status: string) => void;
   onAddCitation?: (citation: EvidenceCitation) => Promise<void>;
+  onEditCitation?: (citIndex: number, updated: EvidenceCitation) => Promise<void>;
+  onRemoveCitation?: (citIndex: number) => Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -160,6 +166,15 @@ function EvidenceCard({
   const [citUrl, setCitUrl] = useState('');
   const [citBusy, setCitBusy] = useState(false);
   const [citErr, setCitErr] = useState<string | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editRef, setEditRef] = useState('');
+  const [editPage, setEditPage] = useState('');
+  const [editExcerpt, setEditExcerpt] = useState('');
+  const [editUrl, setEditUrl] = useState('');
+  const [editBusy, setEditBusy] = useState(false);
+  const [editErr, setEditErr] = useState<string | null>(null);
+  const [removeConfirm, setRemoveConfirm] = useState<number | null>(null);
+  const [removeBusy, setRemoveBusy] = useState(false);
 
   const submitCitation = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -460,26 +475,208 @@ function EvidenceCard({
                 border: '1px solid rgba(255,255,255,0.05)',
               }}
             >
-              <div className="flex items-center gap-2 flex-wrap mb-1">
-                <BookOpen className="w-3 h-3 flex-shrink-0" style={{ color: ACCENT }} />
-                <span className="text-[10px] font-medium" style={{ color: '#e8edf8' }}>
-                  {cit.ref}
-                </span>
-                {cit.page && (
-                  <span
-                    className="text-[9px] px-1 py-0.5 rounded font-mono"
-                    style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)' }}
-                  >
-                    p.{cit.page}
+              {editingIndex === i ? (
+                <div
+                  className="space-y-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="grid grid-cols-3 gap-2">
+                    <input
+                      value={editRef}
+                      onChange={(e) => setEditRef(e.target.value)}
+                      placeholder="Reference"
+                      className="col-span-2 px-2 py-1 text-[11px] rounded"
+                      style={{
+                        background: 'rgba(0,0,0,0.3)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        color: '#e8edf8',
+                      }}
+                    />
+                    <input
+                      value={editPage}
+                      onChange={(e) => setEditPage(e.target.value)}
+                      placeholder="Page"
+                      inputMode="numeric"
+                      className="px-2 py-1 text-[11px] rounded"
+                      style={{
+                        background: 'rgba(0,0,0,0.3)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        color: '#e8edf8',
+                      }}
+                    />
+                  </div>
+                  <textarea
+                    value={editExcerpt}
+                    onChange={(e) => setEditExcerpt(e.target.value)}
+                    placeholder="Excerpt / blockquote text"
+                    rows={2}
+                    className="w-full px-2 py-1 text-[11px] rounded"
+                    style={{
+                      background: 'rgba(0,0,0,0.3)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: '#e8edf8',
+                    }}
+                  />
+                  <input
+                    value={editUrl}
+                    onChange={(e) => setEditUrl(e.target.value)}
+                    placeholder="Source URL (optional)"
+                    className="w-full px-2 py-1 text-[11px] rounded"
+                    style={{
+                      background: 'rgba(0,0,0,0.3)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: '#e8edf8',
+                    }}
+                  />
+                  {editErr && (
+                    <div className="text-[10px]" style={{ color: '#ef4444' }}>
+                      {editErr}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      disabled={editBusy || editRef.trim().length < 1 || editExcerpt.trim().length < 1}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (!onEditCitation) return;
+                        setEditErr(null);
+                        setEditBusy(true);
+                        try {
+                          const pageNum = editPage.trim() ? Number(editPage) : undefined;
+                          if (pageNum !== undefined && (!Number.isFinite(pageNum) || pageNum < 0)) {
+                            throw new Error('Page must be a non-negative number');
+                          }
+                          await onEditCitation(i, {
+                            ref: editRef.trim(),
+                            page: pageNum,
+                            excerpt: editExcerpt.trim(),
+                            url: editUrl.trim() || undefined,
+                          });
+                          setEditingIndex(null);
+                        } catch (err) {
+                          setEditErr((err as Error).message);
+                        } finally {
+                          setEditBusy(false);
+                        }
+                      }}
+                      className="flex-1 py-1 text-[10px] font-semibold rounded disabled:opacity-50"
+                      style={{ background: ACCENT, color: '#0a0f0c' }}
+                    >
+                      {editBusy ? 'Saving…' : 'Save changes'}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingIndex(null);
+                        setEditErr(null);
+                      }}
+                      className="px-3 py-1 text-[10px] rounded"
+                      style={{
+                        background: 'rgba(255,255,255,0.05)',
+                        color: 'rgba(255,255,255,0.6)',
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : removeConfirm === i ? (
+                <div
+                  className="flex items-center gap-3"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                    Remove this citation?
                   </span>
-                )}
-              </div>
-              <blockquote
-                className="text-[10px] pl-2 italic"
-                style={{ color: 'rgba(255,255,255,0.5)', borderLeft: `2px solid ${catColor}40` }}
-              >
-                "{cit.excerpt}"
-              </blockquote>
+                  <button
+                    disabled={removeBusy}
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      if (!onRemoveCitation) return;
+                      setRemoveBusy(true);
+                      try {
+                        await onRemoveCitation(i);
+                        setRemoveConfirm(null);
+                      } finally {
+                        setRemoveBusy(false);
+                      }
+                    }}
+                    className="text-[10px] px-2 py-0.5 rounded font-semibold"
+                    style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444' }}
+                  >
+                    {removeBusy ? 'Removing…' : 'Confirm'}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setRemoveConfirm(null);
+                    }}
+                    className="text-[10px] px-2 py-0.5 rounded"
+                    style={{
+                      background: 'rgba(255,255,255,0.05)',
+                      color: 'rgba(255,255,255,0.6)',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <BookOpen className="w-3 h-3 flex-shrink-0" style={{ color: ACCENT }} />
+                    <span className="text-[10px] font-medium" style={{ color: '#e8edf8' }}>
+                      {cit.ref}
+                    </span>
+                    {cit.page && (
+                      <span
+                        className="text-[9px] px-1 py-0.5 rounded font-mono"
+                        style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)' }}
+                      >
+                        p.{cit.page}
+                      </span>
+                    )}
+                    {onEditCitation && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditRef(cit.ref ?? '');
+                          setEditPage(cit.page != null ? String(cit.page) : '');
+                          setEditExcerpt(cit.excerpt ?? '');
+                          setEditUrl(cit.url ?? '');
+                          setEditErr(null);
+                          setEditingIndex(i);
+                          setRemoveConfirm(null);
+                        }}
+                        className="p-0.5 rounded hover:bg-white/10 transition-colors"
+                        title="Edit citation"
+                        style={{ color: 'rgba(255,255,255,0.35)' }}
+                      >
+                        <Pencil className="w-2.5 h-2.5" />
+                      </button>
+                    )}
+                    {onRemoveCitation && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRemoveConfirm(i);
+                          setEditingIndex(null);
+                        }}
+                        className="p-0.5 rounded hover:bg-white/10 transition-colors"
+                        title="Remove citation"
+                        style={{ color: 'rgba(255,255,255,0.35)' }}
+                      >
+                        <Trash2 className="w-2.5 h-2.5" />
+                      </button>
+                    )}
+                  </div>
+                  <blockquote
+                    className="text-[10px] pl-2 italic"
+                    style={{ color: 'rgba(255,255,255,0.5)', borderLeft: `2px solid ${catColor}40` }}
+                  >
+                    "{cit.excerpt}"
+                  </blockquote>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -1084,6 +1281,30 @@ export default function DiligenceRoomPage() {
                                 ? ev.citations
                                 : [];
                               await updateEvidenceCitations(ev.id, [...existing, citation]);
+                              refetch();
+                            }
+                          : undefined
+                      }
+                      onEditCitation={
+                        matter.source === 'diligence-db'
+                          ? async (citIndex: number, updated: EvidenceCitation) => {
+                              const existing: EvidenceCitation[] = Array.isArray(ev.citations)
+                                ? [...ev.citations]
+                                : [];
+                              existing[citIndex] = updated;
+                              await updateEvidenceCitations(ev.id, existing);
+                              refetch();
+                            }
+                          : undefined
+                      }
+                      onRemoveCitation={
+                        matter.source === 'diligence-db'
+                          ? async (citIndex: number) => {
+                              const existing: EvidenceCitation[] = Array.isArray(ev.citations)
+                                ? [...ev.citations]
+                                : [];
+                              existing.splice(citIndex, 1);
+                              await updateEvidenceCitations(ev.id, existing);
                               refetch();
                             }
                           : undefined
