@@ -33,6 +33,7 @@
     "seed:bootstrap-admin": "tsx ./seed-bootstrap-admin.ts",
     "generate:demo-briefs": "tsx ./src/generate-demo-brief-pdfs.ts",
     "backfill:memory-domain": "tsx ./backfill-memory-domain.ts",
+    "migrate:ip-hashes": "tsx ./migrate-ip-hashes.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "qa:check-deprecated-links": "node ./qa/check-deprecated-links.js"
   },
