@@ -4,6 +4,7 @@ export type DealAttachmentRef = {
   size: number;
   contentType: string;
   downloadUrl: string;
+  scanStatus: 'clean' | 'infected' | 'pending';
 };
 
 export type SubmittedDeal = {
@@ -41,6 +42,7 @@ export type AttachmentUpload = {
   size: number;
   contentType: string;
   objectPath: string;
+  scanStatus: 'clean' | 'infected' | 'pending';
 };
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
@@ -92,18 +94,21 @@ export async function uploadAttachment(
     throw new Error(`Upload failed (${res.status}): ${text}`);
   }
   const json = (await res.json()) as
-    | { data?: { objectPath: string; name: string; size: number; contentType: string } }
-    | { objectPath: string; name: string; size: number; contentType: string };
+    | { data?: { objectPath: string; name: string; size: number; contentType: string; scanStatus?: string } }
+    | { objectPath: string; name: string; size: number; contentType: string; scanStatus?: string };
   const data =
     'data' in json && json.data
       ? json.data
-      : (json as { objectPath: string; name: string; size: number; contentType: string });
+      : (json as { objectPath: string; name: string; size: number; contentType: string; scanStatus?: string });
   return {
     kind,
     name: data.name,
     size: data.size,
     contentType: data.contentType,
     objectPath: data.objectPath,
+    scanStatus: (data.scanStatus === 'clean' || data.scanStatus === 'infected' || data.scanStatus === 'pending')
+      ? data.scanStatus
+      : 'pending',
   };
 }
 
@@ -131,6 +136,7 @@ export async function loadSubmittedDeals(): Promise<SubmittedDeal[]> {
       contentType: string;
       downloadPath?: string;
       downloadUrl?: string;
+      scanStatus?: 'clean' | 'infected' | 'pending';
     };
     type RawDeal = Omit<SubmittedDeal, 'attachments'> & { attachments?: RawAttachment[] };
     const json = (await res.json()) as { data?: RawDeal[] } | RawDeal[];
@@ -146,6 +152,7 @@ export async function loadSubmittedDeals(): Promise<SubmittedDeal[]> {
         size: a.size,
         contentType: a.contentType,
         downloadUrl: a.downloadPath ? `${API_BASE}${a.downloadPath}` : (a.downloadUrl ?? ''),
+        scanStatus: a.scanStatus ?? 'pending',
       })),
     })) as SubmittedDeal[];
     listeners.forEach((fn) => fn());

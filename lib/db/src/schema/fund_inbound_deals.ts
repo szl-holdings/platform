@@ -8,6 +8,7 @@ export type DealAttachment = {
   size: number;
   contentType: string;
   objectPath: string;
+  scanStatus?: 'clean' | 'infected' | 'pending';
 };
 
 export const fundInboundDealsTable = pgTable(

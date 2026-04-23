@@ -9,7 +9,7 @@ import {
   ChevronRight, Upload, AlertCircle, CheckCircle2,
   Zap, FileText, Target, Paperclip, Download, ExternalLink,
   Mail, MessageSquare, Save, Loader2, Eye, X, Image as ImageIcon,
-  Presentation,
+  Presentation, ShieldCheck, ShieldAlert, Clock,
 } from "lucide-react";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { SiteNav } from "@/components/SiteNav";
@@ -235,6 +235,28 @@ const STATUS_OPTIONS: { value: Deal["status"]; label: string }[] = [
   { value: "passed", label: "Passed" },
   { value: "invested", label: "Invested" },
 ];
+
+function ScanBadge({ status }: { status: DealAttachmentRef["scanStatus"] }) {
+  if (status === "clean") {
+    return (
+      <span className="flex items-center gap-0.5 rounded-full bg-[#6aaa72]/10 border border-[#6aaa72]/25 px-1.5 py-0.5 text-[9px] font-semibold text-[#6aaa72] flex-shrink-0">
+        <ShieldCheck className="h-2.5 w-2.5" /> Scanned clean
+      </span>
+    );
+  }
+  if (status === "infected") {
+    return (
+      <span className="flex items-center gap-0.5 rounded-full bg-[#c45a4a]/10 border border-[#c45a4a]/25 px-1.5 py-0.5 text-[9px] font-semibold text-[#c45a4a] flex-shrink-0">
+        <ShieldAlert className="h-2.5 w-2.5" /> Quarantined
+      </span>
+    );
+  }
+  return (
+    <span className="flex items-center gap-0.5 rounded-full bg-white/[0.05] border border-white/[0.1] px-1.5 py-0.5 text-[9px] font-semibold text-white/40 flex-shrink-0">
+      <Clock className="h-2.5 w-2.5" /> Pending scan
+    </span>
+  );
+}
 
 function ScoreGauge({ score, label }: { score: number; label: string }) {
   const color = score >= 80 ? "#6aaa72" : score >= 65 ? "#d4a054" : "#c45a4a";
@@ -626,35 +648,57 @@ export default function DealScoringPage() {
                             </a>
                           </div>
                         ) : null}
-                        {(deal.attachments ?? []).map((a, i) => (
-                          <div
-                            key={`${a.downloadUrl}-${i}`}
-                            className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/80"
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <AttachmentIcon contentType={a.contentType} kind={a.kind} />
-                              <span className="truncate">{a.name}</span>
-                              <span className="text-[10px] text-white/30 flex-shrink-0">{formatBytes(a.size)}</span>
+                        {(deal.attachments ?? []).map((a, i) => {
+                          const isClean = a.scanStatus === "clean";
+                          const isInfected = a.scanStatus === "infected";
+                          return isInfected ? (
+                            <div
+                              key={`${a.downloadUrl}-${i}`}
+                              className="flex flex-col gap-1.5 rounded-lg border border-[#c45a4a]/25 bg-[#c45a4a]/[0.04] px-3 py-2 text-[11px] text-white/50 cursor-not-allowed"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <ShieldAlert className="h-3 w-3 text-[#c45a4a] flex-shrink-0" />
+                                <span className="truncate line-through">{a.name}</span>
+                              </div>
+                              <ScanBadge status={a.scanStatus} />
                             </div>
-                            <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-                              <button
-                                onClick={() => setPreviewAttachment(a)}
-                                className="flex items-center gap-1 rounded-md border border-white/[0.1] px-2 py-0.5 text-[10px] text-white/50 hover:bg-white/[0.05] transition-colors"
-                                title="Preview inline"
-                              >
-                                <Eye className="h-2.5 w-2.5" /> Preview
-                              </button>
-                              <a
-                                href={a.downloadUrl}
-                                download={a.name}
-                                className="flex items-center gap-1 rounded-md border border-white/[0.1] px-2 py-0.5 text-[10px] text-white/50 hover:bg-white/[0.05] transition-colors"
-                                title="Download"
-                              >
-                                <Download className="h-2.5 w-2.5" />
-                              </a>
+                          ) : (
+                            <div
+                              key={`${a.downloadUrl}-${i}`}
+                              className={`flex flex-col gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/80 ${!isClean ? "opacity-60 cursor-not-allowed" : ""}`}
+                            >
+                              <div className="flex items-center justify-between min-w-0">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <AttachmentIcon contentType={a.contentType} kind={a.kind} />
+                                  <span className="truncate">{a.name}</span>
+                                  <span className="text-[10px] text-white/30 flex-shrink-0">{formatBytes(a.size)}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                                  {isClean && (
+                                    <button
+                                      onClick={() => setPreviewAttachment(a)}
+                                      className="flex items-center gap-1 rounded-md border border-white/[0.1] px-2 py-0.5 text-[10px] text-white/50 hover:bg-white/[0.05] transition-colors"
+                                      title="Preview inline"
+                                    >
+                                      <Eye className="h-2.5 w-2.5" /> Preview
+                                    </button>
+                                  )}
+                                  {isClean && (
+                                    <a
+                                      href={a.downloadUrl}
+                                      download={a.name}
+                                      className="flex items-center gap-1 rounded-md border border-white/[0.1] px-2 py-0.5 text-[10px] text-white/50 hover:bg-white/[0.05] transition-colors"
+                                      title="Download"
+                                    >
+                                      <Download className="h-2.5 w-2.5" />
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                              <ScanBadge status={a.scanStatus} />
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   ) : null}

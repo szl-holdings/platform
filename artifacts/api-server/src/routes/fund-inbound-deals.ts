@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendNotFound, sendSuccess } from '../lib/api-response';
 import { buildDealSubmissionAckEmail, sendEmail } from '../lib/email';
 import { logger } from '../lib/logger';
+import { scanBuffer } from '../lib/malwareScanner';
 import { ObjectNotFoundError, ObjectStorageService } from '../lib/objectStorage';
 import { validateBody } from '../lib/validation';
 import { publicSubmitLimiter, publicUploadLimiter } from '../middlewares/rate-limiters';
@@ -152,6 +153,21 @@ router.post(
         sendBadRequest(res, `Unsupported file type: ${file.mimetype}`);
         return;
       }
+      // Scan the buffer for malware BEFORE writing to object storage.
+      // This ensures infected files never land in private storage at all.
+      const scanResult = await scanBuffer(file.buffer, file.mimetype, file.originalname);
+      if (scanResult.verdict === 'infected') {
+        logger.warn(
+          { fileName: file.originalname, reason: scanResult.reason },
+          '[fund-inbound-deals] Infected file rejected at upload',
+        );
+        sendBadRequest(
+          res,
+          `File "${file.originalname}" was rejected by the security scanner: ${scanResult.reason}. Please verify your file and try again.`,
+        );
+        return;
+      }
+
       // Strict safe filename: only alphanumerics, dot, underscore, hyphen.
       // Spaces and other characters are normalized to underscores so the
       // resulting object path always matches attachmentSchema.objectPath.
@@ -163,6 +179,7 @@ router.post(
         name: file.originalname.slice(0, 260),
         size: file.size,
         contentType: file.mimetype,
+        scanStatus: 'clean' as const,
       });
     } catch (err) {
       handleRouteError(res, err, 'Failed to upload attachment');
@@ -219,6 +236,9 @@ async function verifyAndCanonicalizeAttachments(
       size: actualSize,
       contentType: actualContentType,
       objectPath: a.objectPath,
+      // Files reach this point only after passing the upload scanner.
+      // Carry the clean status through so analysts can see the indicator.
+      scanStatus: 'clean' as const,
     });
   }
   return { ok: true, attachments: verified };
@@ -393,6 +413,7 @@ router.get('/fund-inbound-deals', async (_req: Request, res: Response) => {
         name: a.name,
         size: a.size,
         contentType: a.contentType,
+        scanStatus: a.scanStatus ?? 'pending',
         // Relative path; the client prepends its API base so links work in
         // deployments where the frontend and API are on different origins.
         downloadPath: `/api/fund-inbound-deals/${encodeURIComponent(r.pipelineId)}/attachments/${idx}`,
@@ -494,6 +515,17 @@ router.get(
       const attachment = (row.attachments ?? [])[idx];
       if (!attachment) {
         sendNotFound(res, 'Attachment not found');
+        return;
+      }
+      // Quarantine gate: only serve files that passed the malware scan.
+      const scanStatus = attachment.scanStatus ?? 'pending';
+      if (scanStatus !== 'clean') {
+        res.status(451).json({
+          error:
+            scanStatus === 'infected'
+              ? 'This attachment was quarantined because it failed the security scan and cannot be downloaded.'
+              : 'This attachment has not yet been scanned and cannot be downloaded.',
+        });
         return;
       }
       const file = await objectStorage.getObjectEntityFile(attachment.objectPath);

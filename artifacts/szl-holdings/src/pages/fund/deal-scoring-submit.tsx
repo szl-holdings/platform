@@ -4,7 +4,7 @@ import { Link } from "wouter";
 import {
   ArrowLeft, ChevronRight, Upload, Send, Brain, CheckCircle2,
   AlertCircle, Building2, User, Target, Sparkles, TrendingUp,
-  GraduationCap, Briefcase, Award, FileText, Loader2, X,
+  GraduationCap, Briefcase, Award, FileText, Loader2, X, ShieldCheck,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -427,15 +427,22 @@ export default function DealScoringSubmitPage() {
                           </button>
                         </div>
                         {deck ? (
-                          <div className="flex items-center justify-between rounded-lg bg-black/30 px-2.5 py-1.5">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <FileText className="h-3 w-3 text-[#d4a054] flex-shrink-0" />
-                              <span className="truncate text-[11px] text-white/80">{deck.name}</span>
-                              <span className="text-[10px] text-white/35 flex-shrink-0">{formatBytes(deck.size)}</span>
+                          <div className="rounded-lg bg-black/30 px-2.5 py-1.5 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <FileText className="h-3 w-3 text-[#d4a054] flex-shrink-0" />
+                                <span className="truncate text-[11px] text-white/80">{deck.name}</span>
+                                <span className="text-[10px] text-white/35 flex-shrink-0">{formatBytes(deck.size)}</span>
+                              </div>
+                              <button type="button" onClick={() => setDeck(null)} className="text-white/40 hover:text-[#c45a4a] ml-1 flex-shrink-0">
+                                <X className="h-3 w-3" />
+                              </button>
                             </div>
-                            <button type="button" onClick={() => setDeck(null)} className="text-white/40 hover:text-[#c45a4a]">
-                              <X className="h-3 w-3" />
-                            </button>
+                            {deck.scanStatus === "clean" && (
+                              <span className="flex items-center gap-0.5 text-[9px] font-semibold text-[#6aaa72]">
+                                <ShieldCheck className="h-2.5 w-2.5" /> Scanned clean
+                              </span>
+                            )}
                           </div>
                         ) : (
                           <p className="text-[10px] text-white/35">PDF, PPT, or Keynote export. 25 MB max.</p>
@@ -460,19 +467,26 @@ export default function DealScoringSubmitPage() {
                         ) : (
                           <div className="space-y-1">
                             {dataRoom.map((f, i) => (
-                              <div key={`${f.objectPath}-${i}`} className="flex items-center justify-between rounded-lg bg-black/30 px-2.5 py-1.5">
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <FileText className="h-3 w-3 text-[#4a90b8] flex-shrink-0" />
-                                  <span className="truncate text-[11px] text-white/80">{f.name}</span>
-                                  <span className="text-[10px] text-white/35 flex-shrink-0">{formatBytes(f.size)}</span>
+                              <div key={`${f.objectPath}-${i}`} className="rounded-lg bg-black/30 px-2.5 py-1.5 space-y-1">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <FileText className="h-3 w-3 text-[#4a90b8] flex-shrink-0" />
+                                    <span className="truncate text-[11px] text-white/80">{f.name}</span>
+                                    <span className="text-[10px] text-white/35 flex-shrink-0">{formatBytes(f.size)}</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDataRoom(prev => prev.filter((_, idx) => idx !== i))}
+                                    className="text-white/40 hover:text-[#c45a4a] ml-1 flex-shrink-0"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
                                 </div>
-                                <button
-                                  type="button"
-                                  onClick={() => setDataRoom(prev => prev.filter((_, idx) => idx !== i))}
-                                  className="text-white/40 hover:text-[#c45a4a]"
-                                >
-                                  <X className="h-3 w-3" />
-                                </button>
+                                {f.scanStatus === "clean" && (
+                                  <span className="flex items-center gap-0.5 text-[9px] font-semibold text-[#6aaa72]">
+                                    <ShieldCheck className="h-2.5 w-2.5" /> Scanned clean
+                                  </span>
+                                )}
                               </div>
                             ))}
                           </div>
