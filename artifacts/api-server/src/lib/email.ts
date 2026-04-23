@@ -1900,6 +1900,46 @@ export function buildLpGpMessageEmail(opts: {
   return { subject, html, text };
 }
 
+// ─── LP Data Room Document Published Email ────────────────────────────────────
+
+export function buildLpDataRoomDocEmail(opts: {
+  lpName: string;
+  docName: string;
+  folder: string;
+  portalUrl: string;
+}): { subject: string; html: string; text: string } {
+  const { lpName, docName, folder, portalUrl } = opts;
+  const safeDocName = docName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const safeFolder = folder.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const subject = `New document in your data room — ${docName}`;
+  const html = szlBrand(`
+    <h2>A New Document Is Available</h2>
+    <p>Hello ${lpName},</p>
+    <p>A new document has been added to your permissioned data room.</p>
+    <div class="highlight">
+      <p class="label">Document Details</p>
+      <p><strong>${safeDocName}</strong></p>
+      <p style="margin-top:4px;font-size:13px;color:#9ca3af;">Folder: ${safeFolder}</p>
+    </div>
+    <a class="cta" href="${portalUrl}">View in Data Room</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">You are receiving this because you are a limited partner of SZL Holdings and this document is accessible at your permission tier. Contact <strong>investor-relations@szlholdings.com</strong> with questions.</p>
+  `);
+  const text = [
+    `New Document in Your Data Room — ${docName}`,
+    ``,
+    `Hello ${lpName},`,
+    ``,
+    `A new document has been added to your permissioned data room:`,
+    ``,
+    `  ${docName} (folder: ${folder})`,
+    ``,
+    `Log in to view it: ${portalUrl}`,
+    ``,
+    `SZL Holdings · investor-relations@szlholdings.com`,
+  ].join('\n');
+  return { subject, html, text };
+}
+
 // ─── Agent Ticket Reply Email ─────────────────────────────────────────────────
 
 export function buildAgentTicketReplyEmail(params: {

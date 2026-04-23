@@ -23,6 +23,7 @@ import {
   sendSuccess,
 } from '../lib/api-response';
 import {
+  buildLpDataRoomDocEmail,
   buildLpGpMessageEmail,
   buildLpReportPublishedEmail,
   generateUnsubscribeToken,
@@ -96,6 +97,25 @@ function visibleTiers(lp: FundAccreditedInvestor): Array<'public' | 'all_lp' | '
   return tierFor(lp) === 'qualified_lp'
     ? ['public', 'all_lp', 'qualified_lp']
     : ['public', 'all_lp'];
+}
+
+// ─── NOTIFICATION PREFERENCES ────────────────────────────────────────────────
+// Stored in LP.metadata.notification_prefs. Default: all channels enabled.
+
+interface LpNotificationPrefs {
+  reports: boolean;
+  documents: boolean;
+  messages: boolean;
+}
+
+function getNotificationPrefs(lp: FundAccreditedInvestor): LpNotificationPrefs {
+  const meta = lp.metadata as { notification_prefs?: Partial<LpNotificationPrefs> } | null;
+  const prefs = meta?.notification_prefs ?? {};
+  return {
+    reports: prefs.reports !== false,
+    documents: prefs.documents !== false,
+    messages: prefs.messages !== false,
+  };
 }
 
 // ─── LP ROSTER ────────────────────────────────────────────────────────────────
@@ -547,9 +567,10 @@ router.post(
       });
 
       // ── Email notification: when GP sends a message to an LP ──────────────
-      if (fromRole === 'gp' && !isDemo && lp.contactEmail) {
+      const notifPrefs = getNotificationPrefs(lp);
+      if (fromRole === 'gp' && !isDemo && lp.contactEmail && notifPrefs.messages) {
         const baseUrl = process.env.APP_URL || 'https://szlholdings.com';
-        const portalUrl = `${baseUrl}/fund/lp-portal`;
+        const portalUrl = `${baseUrl}/fund/lp-portal?tab=messages`;
         const unsubToken = generateUnsubscribeToken(lp.contactEmail);
         const { subject, html, emailText } = (() => {
           const r = buildLpGpMessageEmail({
@@ -869,7 +890,8 @@ router.post(
 
       for (const lp of lps) {
         const isDemo = (lp.metadata as { is_demo?: boolean } | null)?.is_demo === true;
-        if (isDemo || !lp.contactEmail) {
+        const lpPrefs = getNotificationPrefs(lp as FundAccreditedInvestor);
+        if (isDemo || !lp.contactEmail || !lpPrefs.reports) {
           skipped++;
           continue;
         }
@@ -919,6 +941,207 @@ router.post(
       sendSuccess(res, { report, notified, skipped }, 201);
     } catch (err) {
       handleRouteError(res, err, 'Failed to publish report');
+    }
+  },
+);
+
+// ─── NOTIFICATION PREFERENCES (per-LP opt-out) ───────────────────────────────
+
+router.get('/lp-portal/lps/:id/notification-preferences', optionalAuth, async (req, res) => {
+  try {
+    const lpId = parseIdParam(req.params.id);
+    const scope = await resolveScope(req);
+    const lp = await loadLp(lpId, scope);
+    if (!lp) {
+      sendForbidden(res, "Not authorized for this LP's notification preferences");
+      return;
+    }
+    sendSuccess(res, getNotificationPrefs(lp));
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to load notification preferences');
+  }
+});
+
+router.patch(
+  '/lp-portal/lps/:id/notification-preferences',
+  optionalAuth,
+  validateBody(
+    bodyShape({
+      reports: z.boolean().optional(),
+      documents: z.boolean().optional(),
+      messages: z.boolean().optional(),
+    }),
+  ),
+  async (req, res) => {
+    try {
+      const lpId = parseIdParam(req.params.id);
+      const scope = await resolveScope(req);
+      const lp = await loadLp(lpId, scope);
+      if (!lp) {
+        sendForbidden(res, "Not authorized to update this LP's notification preferences");
+        return;
+      }
+
+      const updates = req.body as { reports?: boolean; documents?: boolean; messages?: boolean };
+      const currentMeta = (lp.metadata as Record<string, unknown> | null) ?? {};
+      const currentPrefs = (currentMeta.notification_prefs as Partial<LpNotificationPrefs>) ?? {};
+      const mergedPrefs: LpNotificationPrefs = {
+        reports: updates.reports !== undefined ? updates.reports : (currentPrefs.reports !== false),
+        documents: updates.documents !== undefined ? updates.documents : (currentPrefs.documents !== false),
+        messages: updates.messages !== undefined ? updates.messages : (currentPrefs.messages !== false),
+      };
+
+      const [updated] = await db
+        .update(fundAccreditedInvestorsTable)
+        .set({ metadata: { ...currentMeta, notification_prefs: mergedPrefs } })
+        .where(eq(fundAccreditedInvestorsTable.id, lp.id))
+        .returning();
+
+      sendSuccess(res, getNotificationPrefs(updated));
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to update notification preferences');
+    }
+  },
+);
+
+// ─── DATA ROOM DOCUMENT PUBLISHING (GP only) ─────────────────────────────────
+// GPs publish a new data room document which inserts the doc row and fans out
+// email notifications to subscribed LPs whose permission tier can see it.
+
+router.post(
+  '/lp-portal/documents/publish',
+  authMiddleware(),
+  requireRole('admin', 'exec', 'ops', 'super_admin', 'compliance'),
+  validateBody(
+    bodyShape({
+      name: z.string().min(1).max(500),
+      folder: z.string().min(1).max(200),
+      fileType: z
+        .enum(['pdf', 'xlsx', 'pptx', 'docx', 'csv', 'other'])
+        .default('pdf'),
+      sizeLabel: z.string().max(50).optional(),
+      permissionTier: z
+        .enum(['public', 'all_lp', 'qualified_lp', 'co_investor', 'gp_only'])
+        .default('all_lp'),
+      watermarked: z.boolean().optional(),
+      sourceUri: z.string().max(2000).optional(),
+    }),
+  ),
+  async (req, res) => {
+    try {
+      const body = req.body as {
+        name: string;
+        folder: string;
+        fileType?: 'pdf' | 'xlsx' | 'pptx' | 'docx' | 'csv' | 'other';
+        sizeLabel?: string;
+        permissionTier?: 'public' | 'all_lp' | 'qualified_lp' | 'co_investor' | 'gp_only';
+        watermarked?: boolean;
+        sourceUri?: string;
+      };
+
+      const today = new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+
+      const [doc] = await db
+        .insert(fundLpDataRoomDocsTable)
+        .values({
+          name: body.name,
+          folder: body.folder,
+          fileType: body.fileType ?? 'pdf',
+          sizeLabel: body.sizeLabel ?? '—',
+          uploadedAt: today,
+          permissionTier: body.permissionTier ?? 'all_lp',
+          watermarked: body.watermarked ?? false,
+          sourceUri: body.sourceUri ?? null,
+          uploadedBy: req.user?.email ?? 'gp',
+          isDemo: false,
+        })
+        .returning();
+
+      // Fan-out email notifications to LPs whose tier can see this document
+      const eligibleTiers = (() => {
+        const tier = body.permissionTier ?? 'all_lp';
+        if (tier === 'public' || tier === 'all_lp') return ['qualified_lp', 'all_lp'];
+        if (tier === 'qualified_lp') return ['qualified_lp'];
+        return [] as string[]; // gp_only / co_investor: no LP notifications
+      })();
+
+      let notified = 0;
+      let skipped = 0;
+
+      if (eligibleTiers.length > 0) {
+        const allLps = await db
+          .select()
+          .from(fundAccreditedInvestorsTable)
+          .where(ne(fundAccreditedInvestorsTable.contactEmail, ''));
+
+        const baseUrl = process.env.APP_URL || 'https://szlholdings.com';
+        const portalUrl = `${baseUrl}/fund/lp-portal`;
+
+        for (const lp of allLps) {
+          const isDemo = (lp.metadata as { is_demo?: boolean } | null)?.is_demo === true;
+          const lpTier = lp.qualifiedEligiblePerson ? 'qualified_lp' : 'all_lp';
+          const lpPrefs = getNotificationPrefs(lp);
+          if (isDemo || !lp.contactEmail || !lpPrefs.documents || !eligibleTiers.includes(lpTier)) {
+            skipped++;
+            continue;
+          }
+          const unsubToken = generateUnsubscribeToken(lp.contactEmail);
+          const { subject, html, text } = buildLpDataRoomDocEmail({
+            lpName: lp.lpName,
+            docName: body.name,
+            folder: body.folder,
+            portalUrl,
+          });
+          sendEmail({
+            to: lp.contactEmail,
+            subject,
+            html,
+            text,
+            replyTo: 'investor-relations@szlholdings.com',
+            unsubscribeToken: unsubToken,
+          })
+            .then((result) => {
+              logNotificationAudit({
+                template: 'lp_data_room_doc',
+                recipient: lp.contactEmail!,
+                subject,
+                entityType: 'lp_document',
+                entityId: String(doc.id),
+                deliveryStatus: result.success ? 'sent' : 'failed',
+                messageId: result.messageId,
+                provider: result.provider,
+                error: result.error,
+              });
+            })
+            .catch((err) => {
+              logger.warn({ err, lpId: lp.id }, '[lp-portal] Doc publish email notification failed');
+            });
+          notified++;
+        }
+      }
+
+      logger.info({ docId: doc.id, notified, skipped }, '[lp-portal] Document published and notifications dispatched');
+      sendSuccess(
+        res,
+        {
+          doc: {
+            id: doc.id,
+            name: doc.name,
+            folder: doc.folder,
+            permissionTier: doc.permissionTier,
+            uploadedAt: doc.uploadedAt,
+          },
+          notified,
+          skipped,
+        },
+        201,
+      );
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to publish document');
     }
   },
 );

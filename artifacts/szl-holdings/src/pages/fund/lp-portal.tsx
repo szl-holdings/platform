@@ -5,7 +5,7 @@ import {
   ArrowLeft, ChevronRight, User, TrendingUp, Download,
   FileText, FolderOpen, Eye, Clock, Activity, Send, Lock, Shield,
   CheckCircle2, MessageSquare, Filter, BarChart3, ImageIcon, Loader2,
-  Upload, X, FileUp, AlertTriangle, CheckCircle,
+  Upload, X, FileUp, AlertTriangle, CheckCircle, Bell, BellOff,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -160,7 +160,13 @@ function KpiTile({ label, value, sub, color }: { label: string; value: string; s
   );
 }
 
-type Tab = "overview" | "documents" | "reports" | "activity" | "messages" | "uploads";
+type Tab = "overview" | "documents" | "reports" | "activity" | "messages" | "uploads" | "notifications";
+
+type NotificationPrefs = {
+  reports: boolean;
+  documents: boolean;
+  messages: boolean;
+};
 
 function unwrap<T>(payload: T | { data: T }): T {
   if (payload && typeof payload === "object" && "data" in (payload as Record<string, unknown>)) {
@@ -178,7 +184,12 @@ export default function FundLpPortalPage() {
 
   const [lps, setLps] = useState<LpRow[]>([]);
   const [lpId, setLpId] = useState<number | null>(null);
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<Tab>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get("tab");
+    const validTabs: Tab[] = ["overview", "documents", "reports", "activity", "messages", "uploads", "notifications"];
+    return (t && validTabs.includes(t as Tab) ? t : "overview") as Tab;
+  });
   const [folderFilter, setFolderFilter] = useState<string>("All");
 
   const [account, setAccount] = useState<CapitalAccount | null>(null);
@@ -190,6 +201,10 @@ export default function FundLpPortalPage() {
   const [messages, setMessages] = useState<MessageRow[]>([]);
   const [messageDraft, setMessageDraft] = useState<string>("");
   const [uploads, setUploads] = useState<UploadItem[]>([]);
+
+  const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>({ reports: true, documents: true, messages: true });
+  const [notifSaving, setNotifSaving] = useState(false);
+  const [notifSaved, setNotifSaved] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [lpLoading, setLpLoading] = useState(false);
@@ -233,13 +248,14 @@ export default function FundLpPortalPage() {
     (async () => {
       try {
         setLpLoading(true);
-        const [acctResp, docsResp, reportsResp, actResp, msgResp, uploadsResp] = await Promise.all([
+        const [acctResp, docsResp, reportsResp, actResp, msgResp, uploadsResp, prefsResp] = await Promise.all([
           apiRequest<CapitalAccount | { data: CapitalAccount }>("GET", `/api/lp-portal/lps/${lpId}/capital-account`),
           apiRequest<DocsResponse>("GET", `/api/lp-portal/lps/${lpId}/documents`),
           apiRequest<ReportItem[] | { data: ReportItem[] }>("GET", `/api/lp-portal/lps/${lpId}/reports`),
           apiRequest<ActivityEntry[] | { data: ActivityEntry[] }>("GET", `/api/lp-portal/lps/${lpId}/activity`),
           apiRequest<MessageRow[] | { data: MessageRow[] }>("GET", `/api/lp-portal/lps/${lpId}/messages`),
           apiRequest<UploadItem[] | { data: UploadItem[] }>("GET", `/api/lp-portal/lps/${lpId}/uploads`).catch(() => ({ data: [] as UploadItem[] })),
+          apiRequest<NotificationPrefs | { data: NotificationPrefs }>("GET", `/api/lp-portal/lps/${lpId}/notification-preferences`).catch(() => ({ data: { reports: true, documents: true, messages: true } as NotificationPrefs })),
         ]);
         if (cancelled) return;
         setAccount(unwrap(acctResp));
@@ -249,6 +265,7 @@ export default function FundLpPortalPage() {
         setActivity(unwrap(actResp));
         setMessages(unwrap(msgResp));
         setUploads(unwrap(uploadsResp as UploadItem[] | { data: UploadItem[] }));
+        setNotifPrefs(unwrap(prefsResp as NotificationPrefs | { data: NotificationPrefs }));
         setFolderFilter("All");
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load LP data");
@@ -306,6 +323,26 @@ export default function FundLpPortalPage() {
   const handleDownloadDoc = (doc: DocItem) => logActivity("downloaded", doc.name, { documentId: doc.id });
   const handleViewDoc = (doc: DocItem) => logActivity("viewed", doc.name, { documentId: doc.id });
   const handleDownloadReport = (r: ReportItem) => logActivity("downloaded", `${r.period} LP Report.pdf`, { reportId: r.id });
+
+  async function handleSaveNotifPrefs(prefs: NotificationPrefs) {
+    if (lpId == null) return;
+    setNotifSaving(true);
+    setNotifSaved(false);
+    try {
+      const resp = await apiRequest<NotificationPrefs | { data: NotificationPrefs }>(
+        "PATCH",
+        `/api/lp-portal/lps/${lpId}/notification-preferences`,
+        prefs,
+      );
+      setNotifPrefs(unwrap(resp as NotificationPrefs | { data: NotificationPrefs }));
+      setNotifSaved(true);
+      setTimeout(() => setNotifSaved(false), 3000);
+    } catch {
+      // non-fatal — prefs revert on next load
+    } finally {
+      setNotifSaving(false);
+    }
+  }
 
   async function handleSendMessage() {
     const body = messageDraft.trim();
@@ -495,6 +532,7 @@ export default function FundLpPortalPage() {
               { key: "activity", label: "Activity Log" },
               { key: "messages", label: "Messages" },
               { key: "uploads", label: "My Uploads" },
+              { key: "notifications", label: "Notifications" },
             ] as Array<{ key: Tab; label: string }>).map(t => (
               <button
                 key={t.key}
@@ -1036,6 +1074,98 @@ export default function FundLpPortalPage() {
                   <Shield className="h-4 w-4 text-[#4a90b8] flex-shrink-0 mt-0.5" />
                   <div className="text-xs text-white/65">
                     All uploaded documents are transmitted securely over TLS, virus-scanned on receipt, and stored in our encrypted document vault. Access is limited to you and the GP team. Documents are retained per your LPA data retention terms.
+                  </div>
+                </div>
+              </m.div>
+            )}
+            {tab === "notifications" && (
+              <m.div key="notifications" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6 mb-5">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Bell className="h-4 w-4 text-[#d4a054]" />
+                    <span className="text-sm font-semibold text-white">Email Notification Preferences</span>
+                  </div>
+                  <p className="text-xs text-white/45 mb-6">
+                    Control which email notifications you receive from the GP. Changes take effect immediately. You can re-enable at any time.
+                  </p>
+
+                  <div className="space-y-4">
+                    {(
+                      [
+                        {
+                          key: "reports" as keyof NotificationPrefs,
+                          label: "Quarterly Reports & Fund Updates",
+                          description: "Receive an email when the GP publishes a new quarterly report, annual report, or capital call notice.",
+                          color: "#4a90b8",
+                        },
+                        {
+                          key: "documents" as keyof NotificationPrefs,
+                          label: "New Data Room Documents",
+                          description: "Receive an email when a new document is added to your permissioned data room.",
+                          color: "#6aaa72",
+                        },
+                        {
+                          key: "messages" as keyof NotificationPrefs,
+                          label: "Messages from the GP Team",
+                          description: "Receive an email summary with a deep link when the GP sends you a new secure message.",
+                          color: "#8b7ac8",
+                        },
+                      ] as Array<{ key: keyof NotificationPrefs; label: string; description: string; color: string }>
+                    ).map(({ key, label, description, color }) => {
+                      const enabled = notifPrefs[key];
+                      return (
+                        <div
+                          key={key}
+                          className="flex items-start gap-4 rounded-xl border border-white/[0.06] bg-white/[0.015] px-5 py-4"
+                        >
+                          <div className="flex-shrink-0 mt-0.5">
+                            <div
+                              className="flex h-8 w-8 items-center justify-center rounded-lg"
+                              style={{ background: `${color}18` }}
+                            >
+                              {enabled
+                                ? <Bell className="h-4 w-4" style={{ color }} />
+                                : <BellOff className="h-4 w-4 text-white/30" />
+                              }
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-white mb-0.5">{label}</div>
+                            <div className="text-xs text-white/45">{description}</div>
+                          </div>
+                          <button
+                            data-testid={`toggle-notif-${key}`}
+                            onClick={() => handleSaveNotifPrefs({ ...notifPrefs, [key]: !enabled })}
+                            disabled={notifSaving}
+                            className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none disabled:opacity-50 ${enabled ? "bg-[#4a90b8]" : "bg-white/[0.12]"}`}
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${enabled ? "translate-x-6" : "translate-x-1"}`}
+                            />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {notifSaved && (
+                    <div className="mt-4 flex items-center gap-2 rounded-xl border border-[#6aaa72]/30 bg-[#6aaa72]/[0.07] px-4 py-3">
+                      <CheckCircle className="h-3.5 w-3.5 text-[#6aaa72] flex-shrink-0" />
+                      <span className="text-xs text-[#6aaa72]">Preferences saved.</span>
+                    </div>
+                  )}
+
+                  {notifSaving && (
+                    <div className="mt-4 flex items-center gap-2 text-xs text-white/40">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…
+                    </div>
+                  )}
+                </div>
+
+                <div className="rounded-2xl border border-[#d4a054]/20 bg-[#d4a054]/[0.04] p-4 flex items-start gap-3">
+                  <Shield className="h-4 w-4 text-[#d4a054] flex-shrink-0 mt-0.5" />
+                  <div className="text-xs text-white/65">
+                    All emails are sent from <strong>investor-relations@szlholdings.com</strong>. You can unsubscribe from individual channels above or contact your GP to be fully removed from all communications.
                   </div>
                 </div>
               </m.div>
