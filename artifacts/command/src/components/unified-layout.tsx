@@ -168,6 +168,7 @@ const OPERATIONS_NAV: NavGroup[] = [
       { href: '/operations/prism/pulse', label: 'LUMINA', icon: Heart },
       { href: '/operations/prism/signals', label: 'Signal Feed', icon: Radio },
       { href: '/operations/prism/atlas-execute', label: 'ATLAS Execute', icon: Play },
+      { href: '/operations/rules-studio', label: 'Rules Studio', icon: GitBranch },
       { href: '/operations/blocker-board', label: 'Blocker Board', icon: AlertTriangle },
       { href: '/operations/approvals', label: 'Approvals', icon: CheckSquare },
       { href: '/operations/policy-approvals', label: 'Policy Approvals', icon: ShieldCheck },

@@ -223,4 +223,6 @@ router.use(
   lazyMatch("/demo/seed-governed-scenarios", () => import("./demo-governed-scenarios"), "demo-governed-scenarios"),
 );
 
+router.use("/signal-bus", lazyMount(() => import("./signal-bus"), "signal-bus"));
+
 export default router;

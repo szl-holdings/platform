@@ -263,6 +263,7 @@ const CompetitiveAtlasPage = lazy(() =>
 const PrismAtlasExecute = lazy(() => import('./operations/pages/atlas-execute'));
 const ImperiumAtlasExecute = lazy(() => import('./infrastructure/pages/atlas-execute'));
 const DataFabric = lazy(() => import('./infrastructure/pages/data-fabric'));
+const RulesStudioPage = lazy(() => import('./pages/operations/rules-studio'));
 
 const LegatusConsole = lazy(() => import('@imp/pages/legatus-console'));
 const ImperiumMap = lazy(() => import('@imp/pages/imperium-map'));
@@ -596,6 +597,7 @@ function AppShell() {
                 path="/operations/prism/atlas-execute"
                 component={() => <PrismAtlasExecute />}
               />
+              <Route path="/operations/rules-studio" component={() => <RulesStudioPage />} />
               <Route path="/operations/blocker-board" component={() => <BlockerBoard />} />
               <Route path="/operations/board-mode" component={() => <BoardModePage />} />
               <Route path="/operations/demo-live" component={() => <DemoLivePage />} />

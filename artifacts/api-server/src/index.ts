@@ -429,6 +429,9 @@ export async function bootstrap(
     const { initSignalMeshBridge } = await import('./lib/domain-events/signal-mesh-bridge.js');
     initSignalMeshBridge();
 
+    const { initSignalBusRuleEngine } = await import('./routes/signal-bus.js');
+    initSignalBusRuleEngine();
+
     // Step 2c: Hydrate the shared Guardian decision engine from policy rows
     // and warm the Alloy RunManager singleton so any agent endpoint can
     // submit work as soon as the server starts accepting traffic.

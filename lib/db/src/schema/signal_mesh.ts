@@ -178,3 +178,83 @@ export const meshRecommendationDecisionsTable = pgTable(
 export type MeshRecommendationDecisionRow = typeof meshRecommendationDecisionsTable.$inferSelect;
 export type MeshRecommendationDecisionInsert =
   typeof meshRecommendationDecisionsTable.$inferInsert;
+
+export const signalBusRulesTable = pgTable(
+  'signal_bus_rules',
+  {
+    ruleId: uuid('rule_id').primaryKey(),
+    name: text('name').notNull(),
+    description: text('description'),
+    enabled: text('enabled').notNull().default('true'),
+    sourceDomain: text('source_domain').notNull(),
+    sourceType: text('source_type').notNull(),
+    minSeverity: text('min_severity').notNull().default('info'),
+    conditions: jsonb('conditions').$type<Record<string, unknown>>().notNull().default({}),
+    actionType: text('action_type').notNull(),
+    actionConfig: jsonb('action_config').$type<Record<string, unknown>>().notNull(),
+    targetDomain: text('target_domain'),
+    orgId: text('org_id'),
+    createdBy: text('created_by'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    lastFiredAt: timestamp('last_fired_at', { withTimezone: true }),
+    fireCount: text('fire_count').notNull().default('0'),
+  },
+  (t) => ({
+    domainTypeIdx: index('signal_bus_rules_domain_type_idx').on(t.sourceDomain, t.sourceType),
+    enabledIdx: index('signal_bus_rules_enabled_idx').on(t.enabled),
+    orgIdx: index('signal_bus_rules_org_id_idx').on(t.orgId),
+  }),
+);
+
+export const signalBusRoutedEventsTable = pgTable(
+  'signal_bus_routed_events',
+  {
+    eventId: uuid('event_id').primaryKey(),
+    ruleId: uuid('rule_id').notNull(),
+    ruleName: text('rule_name').notNull(),
+    sourceSignalId: text('source_signal_id').notNull(),
+    sourceDomain: text('source_domain').notNull(),
+    sourceType: text('source_type').notNull(),
+    actionType: text('action_type').notNull(),
+    actionResult: jsonb('action_result').$type<Record<string, unknown>>().notNull(),
+    status: text('status').notNull().default('success'),
+    errorMessage: text('error_message'),
+    orgId: text('org_id'),
+    routedAt: timestamp('routed_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    ruleIdIdx: index('signal_bus_routed_events_rule_id_idx').on(t.ruleId),
+    sourceSignalIdx: index('signal_bus_routed_events_source_signal_idx').on(t.sourceSignalId),
+    routedAtIdx: index('signal_bus_routed_events_routed_at_idx').on(t.routedAt),
+    statusIdx: index('signal_bus_routed_events_status_idx').on(t.status),
+    orgIdx: index('signal_bus_routed_events_org_id_idx').on(t.orgId),
+  }),
+);
+
+export const signalBusDeadLettersTable = pgTable(
+  'signal_bus_dead_letters',
+  {
+    deadLetterId: uuid('dead_letter_id').primaryKey(),
+    ruleId: uuid('rule_id'),
+    sourceSignalId: text('source_signal_id').notNull(),
+    sourceDomain: text('source_domain').notNull(),
+    sourceType: text('source_type').notNull(),
+    errorMessage: text('error_message').notNull(),
+    payload: jsonb('payload').$type<Record<string, unknown>>().notNull(),
+    retryCount: text('retry_count').notNull().default('0'),
+    orgId: text('org_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    ruleIdIdx: index('signal_bus_dead_letters_rule_id_idx').on(t.ruleId),
+    createdAtIdx: index('signal_bus_dead_letters_created_at_idx').on(t.createdAt),
+  }),
+);
+
+export type SignalBusRuleRow = typeof signalBusRulesTable.$inferSelect;
+export type SignalBusRuleInsert = typeof signalBusRulesTable.$inferInsert;
+export type SignalBusRoutedEventRow = typeof signalBusRoutedEventsTable.$inferSelect;
+export type SignalBusRoutedEventInsert = typeof signalBusRoutedEventsTable.$inferInsert;
+export type SignalBusDeadLetterRow = typeof signalBusDeadLettersTable.$inferSelect;
+export type SignalBusDeadLetterInsert = typeof signalBusDeadLettersTable.$inferInsert;
