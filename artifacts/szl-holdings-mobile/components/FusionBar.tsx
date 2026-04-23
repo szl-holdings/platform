@@ -47,6 +47,7 @@ interface Correlation {
 interface FusedResult {
   query: string;
   fusedAnswer: string;
+  fusedAnswerSource?: 'llm' | 'template';
   domainResults: DomainResult[];
   correlations: Correlation[];
   overallRisk: 'critical' | 'high' | 'medium' | 'low' | 'nominal';
@@ -231,12 +232,12 @@ export function FusionBar() {
       setExpanded(true);
     }
     try {
-      const body = await apiFetch<{ success: boolean; result: FusedResult }>(
+      const body = await apiFetch<{ success: boolean; result: FusedResult; fusedAnswerSource?: 'llm' | 'template' }>(
         '/api/cross-domain-query',
         { method: 'POST', body: JSON.stringify({ query: finalQuery }) },
       );
       if (!body.success) throw new Error('Query failed');
-      setResult(body.result);
+      setResult({ ...body.result, fusedAnswerSource: body.fusedAnswerSource });
       addQuery(finalQuery);
       if (q) setQuery(q);
     } catch (e: unknown) {
@@ -406,6 +407,31 @@ export function FusionBar() {
                       {result.overallRisk.toUpperCase()}
                     </Text>
                   </View>
+                  {result.fusedAnswerSource != null && (
+                    <View
+                      style={[
+                        styles.sourceBadge,
+                        result.fusedAnswerSource === 'llm'
+                          ? { backgroundColor: `${ACCENT}18`, borderColor: `${ACCENT}40` }
+                          : { backgroundColor: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.12)' },
+                      ]}
+                    >
+                      <Feather
+                        name={result.fusedAnswerSource === 'llm' ? 'cpu' : 'file-text'}
+                        size={8}
+                        color={result.fusedAnswerSource === 'llm' ? ACCENT : colors.mutedForeground}
+                        style={{ marginRight: 3 }}
+                      />
+                      <Text
+                        style={[
+                          styles.sourceText,
+                          { color: result.fusedAnswerSource === 'llm' ? ACCENT : colors.mutedForeground },
+                        ]}
+                      >
+                        {result.fusedAnswerSource === 'llm' ? 'AI SYNTHESIS' : 'TEMPLATE BRIEF'}
+                      </Text>
+                    </View>
+                  )}
                   <Text style={[styles.confidenceText, { color: colors.mutedForeground }]}>
                     {Math.round(result.confidence * 100)}% confidence ·{' '}
                     {result.domainResults.length} domains
@@ -563,7 +589,8 @@ const styles = StyleSheet.create({
   fusedAnswerHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    flexWrap: 'wrap',
+    gap: 6,
   },
   riskBadge: {
     paddingHorizontal: 7,
@@ -573,6 +600,19 @@ const styles = StyleSheet.create({
   },
   riskText: {
     fontSize: 9,
+    fontFamily: 'Inter_600SemiBold',
+    letterSpacing: 0.8,
+  },
+  sourceBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 5,
+    borderWidth: 1,
+  },
+  sourceText: {
+    fontSize: 8,
     fontFamily: 'Inter_600SemiBold',
     letterSpacing: 0.8,
   },
