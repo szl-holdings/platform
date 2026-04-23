@@ -155,6 +155,7 @@
     "@types/nodemailer": "^7.0.11",
     "@udecode/plate-core": "^49.0.0",
     "archiver": "^7.0.1",
+    "docx": "^9.6.1",
     "nodemailer": "^8.0.5",
     "posthog-js": "^1.369.1",
     "puppeteer-core": "^24.41.0",
