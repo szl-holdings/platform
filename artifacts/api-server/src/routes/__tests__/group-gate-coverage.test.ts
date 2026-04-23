@@ -36,6 +36,12 @@ const EXEMPTIONS = new Set([
   'billing.ts::/resolve-domain', // PUBLIC: custom domain → org resolution (no auth)
   'billing.ts::/orgs/:orgId/branding', // handler-level: authMiddleware + org membership check
   'billing.ts::/orgs/:orgId/custom-domains', // handler-level: authMiddleware + org membership check
+
+  // data-services.ts — data fabric connectors use required:false (soft gate)
+  // tenantScope({ required: false }) is registered so tenant context IS hydrated when
+  // available, but the route is not hard-blocked for users without an active org.
+  // The /connectors handlers themselves enforce ownership checks at the record level.
+  'data-services.ts::/connectors',
 ]);
 
 function isExempt(file: string, prefix: string): boolean {
