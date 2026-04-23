@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   LayoutAnimation,
@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { useFusionHistory } from '@/hooks/useFusionHistory';
-import { apiFetch } from '@/lib/apiClient';
+import { apiFetch, apiStreamFetch } from '@/lib/apiClient';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -216,10 +216,96 @@ export function FusionBar() {
   const colors = useColors();
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);
   const [result, setResult] = useState<FusedResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
   const { history, addQuery, clearHistory } = useFusionHistory();
+  const abortRef = useRef<AbortController | null>(null);
+
+  const submitWithStream = useCallback(
+    async (finalQuery: string, onStarted: () => void) => {
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      let meta: Omit<FusedResult, 'fusedAnswer'> | null = null;
+      let fusedAnswer = '';
+      let receivedDone = false;
+      let receivedFallback = false;
+      let streamError: Error | null = null;
+
+      const isMetaPayload = (
+        d: unknown,
+      ): d is {
+        query?: string;
+        domainResults?: DomainResult[];
+        correlations?: Correlation[];
+        overallRisk?: FusedResult['overallRisk'];
+        confidence?: number;
+      } => d !== null && typeof d === 'object';
+
+      const isTokenPayload = (d: unknown): d is { text: string } =>
+        d !== null && typeof d === 'object' && typeof (d as Record<string, unknown>).text === 'string';
+
+      const isFallbackPayload = (d: unknown): d is { fusedAnswer: string } =>
+        d !== null &&
+        typeof d === 'object' &&
+        typeof (d as Record<string, unknown>).fusedAnswer === 'string';
+
+      await apiStreamFetch(
+        '/api/cross-domain-query',
+        { query: finalQuery },
+        {
+          onEvent(event, data: unknown) {
+            if (event === 'meta' && isMetaPayload(data)) {
+              meta = {
+                query: data.query ?? finalQuery,
+                domainResults: data.domainResults ?? [],
+                correlations: data.correlations ?? [],
+                overallRisk: data.overallRisk ?? 'medium',
+                confidence: data.confidence ?? 0.85,
+              };
+              onStarted();
+              setResult({ ...meta, fusedAnswer: '' });
+              setStreaming(true);
+            } else if (event === 'token' && isTokenPayload(data) && meta) {
+              fusedAnswer += data.text;
+              setResult((prev) =>
+                prev ? { ...prev, fusedAnswer } : { ...meta!, fusedAnswer },
+              );
+            } else if (event === 'fallback' && isFallbackPayload(data) && meta) {
+              fusedAnswer = data.fusedAnswer;
+              receivedFallback = true;
+              setResult((prev) =>
+                prev ? { ...prev, fusedAnswer } : { ...meta!, fusedAnswer },
+              );
+            } else if (event === 'done') {
+              receivedDone = true;
+            }
+          },
+          onError(err) {
+            streamError = err;
+          },
+          onDone() {},
+        },
+        controller.signal,
+      );
+
+      setStreaming(false);
+      abortRef.current = null;
+
+      if (streamError) {
+        throw streamError;
+      }
+
+      if ((receivedDone || receivedFallback) && fusedAnswer) {
+        return;
+      }
+
+      throw new Error('Stream did not complete successfully');
+    },
+    [],
+  );
 
   const submit = async (q?: string) => {
     const finalQuery = (q ?? query).trim();
@@ -227,11 +313,25 @@ export function FusionBar() {
     setLoading(true);
     setResult(null);
     setError(null);
+    setStreaming(false);
     if (!expanded) {
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setExpanded(true);
     }
     try {
+      let started = false;
+      const onStarted = () => { started = true; };
+      try {
+        await submitWithStream(finalQuery, onStarted);
+        addQuery(finalQuery);
+        if (q) setQuery(q);
+        return;
+      } catch (streamErr) {
+        if (streamErr instanceof Error && streamErr.name === 'AbortError') return;
+        if (started) {
+          setResult(null);
+        }
+      }
       const body = await apiFetch<{ success: boolean; result: FusedResult; fusedAnswerSource?: 'llm' | 'template' }>(
         '/api/cross-domain-query',
         { method: 'POST', body: JSON.stringify({ query: finalQuery }) },
@@ -244,15 +344,21 @@ export function FusionBar() {
       setError(e instanceof Error ? e.message : 'Query failed');
     } finally {
       setLoading(false);
+      setStreaming(false);
     }
   };
 
   const clear = () => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setResult(null);
     setError(null);
     setExpanded(false);
     setQuery('');
+    setStreaming(false);
   };
 
   const overallRiskColor = result ? riskColor(result.overallRisk, colors) : ACCENT;
@@ -277,8 +383,12 @@ export function FusionBar() {
           blurOnSubmit={false}
           editable={!loading}
         />
-        {loading ? (
+        {loading && !streaming ? (
           <ActivityIndicator size="small" color={ACCENT} style={styles.actionBtn} />
+        ) : streaming ? (
+          <TouchableOpacity onPress={clear} style={styles.actionBtn}>
+            <Feather name="x" size={15} color={colors.mutedForeground} />
+          </TouchableOpacity>
         ) : result || error ? (
           <TouchableOpacity onPress={clear} style={styles.actionBtn}>
             <Feather name="x" size={15} color={colors.mutedForeground} />
@@ -364,7 +474,7 @@ export function FusionBar() {
 
       {expanded && (
         <View style={styles.resultsContainer}>
-          {loading && (
+          {loading && !streaming && !result && (
             <View style={styles.loadingState}>
               <ActivityIndicator color={ACCENT} />
               <Text style={[styles.loadingText, { color: colors.mutedForeground }]}>
@@ -439,6 +549,7 @@ export function FusionBar() {
                 </View>
                 <Text style={[styles.fusedAnswerText, { color: colors.foreground }]}>
                   {result.fusedAnswer}
+                  {streaming && <Text style={{ color: ACCENT }}>▍</Text>}
                 </Text>
               </View>
 

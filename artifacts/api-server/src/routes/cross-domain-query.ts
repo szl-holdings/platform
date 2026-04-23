@@ -832,6 +832,28 @@ async function generateAIFusedAnswer(
   return text;
 }
 
+async function* streamAIFusedAnswer(
+  query: string,
+  domains: string[],
+  results: DomainResult[],
+  live: LiveDomainData,
+): AsyncGenerator<string> {
+  const { system, user } = buildAIPrompt(query, domains, results, live);
+  const stream = await openai.chat.completions.create({
+    model: AI_FUSED_ANSWER_MODEL,
+    max_completion_tokens: 600,
+    stream: true,
+    messages: [
+      { role: 'system', content: system },
+      { role: 'user', content: user },
+    ],
+  });
+  for await (const chunk of stream) {
+    const delta = chunk.choices?.[0]?.delta?.content;
+    if (delta) yield delta;
+  }
+}
+
 function generateFusedAnswer(
   query: string,
   domains: string[],
@@ -916,7 +938,11 @@ router.post(
     }
 
     const trimmed = query.trim().slice(0, 500);
-    logger.info({ query: trimmed }, '[CrossDomainQuery] Processing query');
+    const wantsStream =
+      req.query.stream === '1' ||
+      (req.headers.accept ?? '').includes('text/event-stream');
+
+    logger.info({ query: trimmed, stream: wantsStream }, '[CrossDomainQuery] Processing query');
 
     let live: LiveDomainData | null = null;
     const liveDataSources: string[] = [];
@@ -962,17 +988,6 @@ router.post(
     const domains = identifyDomains(trimmed);
     const domainResults = domains.map((d) => buildDomainResult(d, trimmed, live!));
 
-    let fusedAnswer: string;
-    let fusedAnswerSource: 'llm' | 'template' = 'template';
-    try {
-      fusedAnswer = await generateAIFusedAnswer(trimmed, domains, domainResults, live);
-      fusedAnswerSource = 'llm';
-      logger.info({ chars: fusedAnswer.length }, '[CrossDomainQuery] LLM fused answer succeeded');
-    } catch (err) {
-      logger.warn({ err }, '[CrossDomainQuery] LLM fused answer failed, falling back to template');
-      fusedAnswer = generateFusedAnswer(trimmed, domains, domainResults, live);
-    }
-
     const correlations = [
       {
         title: 'Port Congestion → Property Delivery Delays',
@@ -1000,31 +1015,98 @@ router.post(
     const allCritical = domainResults.some((r) => r.signals.some((s) => s.severity === 'critical'));
     const allHigh = domainResults.some((r) => r.signals.some((s) => s.severity === 'high'));
     const overallRisk = allCritical ? 'critical' : allHigh ? 'high' : 'medium';
+    const confidence = liveDataSources.length > 0 ? 0.91 : 0.88;
+    const intent = trimmed.includes('brief')
+      ? 'executive_briefing'
+      : trimmed.includes('risk')
+        ? 'risk_assessment'
+        : 'general_query';
+    const recommendedActions = [
+      live.aegis.criticalIncidents > 0
+        ? `Escalate ${live.aegis.criticalIncidents} critical security incident(s) with full forensics team`
+        : 'Escalate APT-41 investigation with full forensics team',
+      'Fast-track force-majeure review for maritime-related contracts',
+      live.terra.distressCount > 0
+        ? `Review ${live.terra.distressCount} active distress propert${live.terra.distressCount === 1 ? 'y' : 'ies'} for contingency sourcing`
+        : 'Initiate contingency sourcing for 12 port-adjacent Terra properties',
+      'Schedule emergency portfolio committee call re: compound risk scenario',
+    ];
+
+    if (wantsStream) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no');
+      res.flushHeaders();
+
+      const sendEvent = (event: string, data: unknown) => {
+        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      };
+
+      sendEvent('meta', {
+        query: trimmed,
+        intent,
+        answeredAt: Date.now(),
+        domainsQueried: domains,
+        domainResults,
+        correlations,
+        recommendedActions,
+        overallRisk,
+        confidence,
+        liveDataSources: liveDataSources.length > 0 ? liveDataSources : undefined,
+      });
+
+      let streamed = '';
+      try {
+        const streamResult = await Promise.race([
+          (async () => {
+            const tokenStream = streamAIFusedAnswer(trimmed, domains, domainResults, live);
+            for await (const token of tokenStream) {
+              streamed += token;
+              sendEvent('token', { text: token });
+            }
+            return 'ok' as const;
+          })(),
+          new Promise<'timeout'>((_resolve) =>
+            setTimeout(() => _resolve('timeout'), AI_FUSED_ANSWER_TIMEOUT_MS),
+          ),
+        ]);
+        if (streamResult === 'timeout') throw new Error('Stream timed out');
+        if (!streamed.trim()) throw new Error('LLM returned empty content');
+        sendEvent('done', { fusedAnswerSource: 'llm' });
+        logger.info({ chars: streamed.length }, '[CrossDomainQuery] Streamed LLM answer');
+      } catch (err) {
+        logger.warn({ err, streamedChars: streamed.length }, '[CrossDomainQuery] Stream failed, sending template fallback');
+        const templateAnswer = generateFusedAnswer(trimmed, domains, domainResults, live);
+        sendEvent('fallback', { fusedAnswer: templateAnswer, fusedAnswerSource: 'template' });
+      }
+
+      res.end();
+      return;
+    }
+
+    let fusedAnswer: string;
+    let fusedAnswerSource: 'llm' | 'template' = 'template';
+    try {
+      fusedAnswer = await generateAIFusedAnswer(trimmed, domains, domainResults, live);
+      fusedAnswerSource = 'llm';
+      logger.info({ chars: fusedAnswer.length }, '[CrossDomainQuery] LLM fused answer succeeded');
+    } catch (err) {
+      logger.warn({ err }, '[CrossDomainQuery] LLM fused answer failed, falling back to template');
+      fusedAnswer = generateFusedAnswer(trimmed, domains, domainResults, live);
+    }
 
     const response: FusedQueryResponse = {
       query: trimmed,
-      intent: trimmed.includes('brief')
-        ? 'executive_briefing'
-        : trimmed.includes('risk')
-          ? 'risk_assessment'
-          : 'general_query',
+      intent,
       answeredAt: Date.now(),
       domainsQueried: domains,
       domainResults,
       fusedAnswer,
       correlations,
-      recommendedActions: [
-        live.aegis.criticalIncidents > 0
-          ? `Escalate ${live.aegis.criticalIncidents} critical security incident(s) with full forensics team`
-          : 'Escalate APT-41 investigation with full forensics team',
-        'Fast-track force-majeure review for maritime-related contracts',
-        live.terra.distressCount > 0
-          ? `Review ${live.terra.distressCount} active distress propert${live.terra.distressCount === 1 ? 'y' : 'ies'} for contingency sourcing`
-          : 'Initiate contingency sourcing for 12 port-adjacent Terra properties',
-        'Schedule emergency portfolio committee call re: compound risk scenario',
-      ],
+      recommendedActions,
       overallRisk,
-      confidence: liveDataSources.length > 0 ? 0.91 : 0.88,
+      confidence,
       liveDataSources: liveDataSources.length > 0 ? liveDataSources : undefined,
     };
 

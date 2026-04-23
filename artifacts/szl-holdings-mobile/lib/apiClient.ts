@@ -750,6 +750,93 @@ export async function apiDelete<T>(path: string): Promise<T> {
   return apiFetch<T>(path, { method: 'DELETE' });
 }
 
+export interface SSECallbacks {
+  onEvent: (event: string, data: unknown) => void;
+  onError: (error: Error) => void;
+  onDone: () => void;
+}
+
+export async function apiStreamFetch(
+  path: string,
+  body: unknown,
+  callbacks: SSECallbacks,
+  signal?: AbortSignal,
+): Promise<void> {
+  const token = await getAuthToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'text/event-stream',
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  let res: Response;
+  try {
+    res = await fetch(`${getApiBase()}${path}?stream=1`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+      signal,
+    });
+  } catch (err) {
+    callbacks.onError(err instanceof Error ? err : new Error('Stream fetch failed'));
+    return;
+  }
+
+  if (!res.ok) {
+    callbacks.onError(new Error(`API error ${res.status}: ${path}`));
+    return;
+  }
+
+  if (!res.body) {
+    callbacks.onError(new Error('Response body is not readable'));
+    return;
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let currentEvent = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const frames = buffer.split('\n\n');
+      buffer = frames.pop() ?? '';
+
+      for (const frame of frames) {
+        const lines = frame.split('\n');
+        let eventName = '';
+        let dataLine = '';
+        for (const line of lines) {
+          if (line.startsWith('event: ')) {
+            eventName = line.slice(7).trim();
+          } else if (line.startsWith('data: ')) {
+            dataLine = line.slice(6);
+          }
+        }
+        if (eventName) currentEvent = eventName;
+        if (dataLine) {
+          try {
+            const parsed = JSON.parse(dataLine);
+            callbacks.onEvent(currentEvent, parsed);
+          } catch {
+            /* skip malformed JSON */
+          }
+        }
+      }
+    }
+  } catch (err) {
+    if (signal?.aborted) return;
+    callbacks.onError(err instanceof Error ? err : new Error('Stream read failed'));
+    return;
+  }
+
+  callbacks.onDone();
+}
+
 export async function graphqlRequest<T>(
   query: string,
   variables?: Record<string, unknown>,
