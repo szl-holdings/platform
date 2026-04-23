@@ -17,14 +17,14 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { commandSessionCommentsTable, commandSessionsTable, db } from '@szl-holdings/db';
 import { randomUUID } from 'node:crypto';
-import { and, desc, eq } from 'drizzle-orm';
+import { type SQL, and, desc, eq, inArray } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import {
   handleRouteError,
   sendBadRequest,
-  sendCreated,
   sendNotFound,
   sendSuccess,
+  sendCreated,
 } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import {
@@ -36,6 +36,7 @@ import {
 } from '../lib/validation';
 import { publish } from '../lib/websocket';
 import { authMiddleware } from '../middlewares/auth';
+import { assertTenantAccess, getUserOrgIds } from '../middlewares/tenant-scope';
 import {
   perUserApiSlidingLimiter,
   perUserWriteSlidingLimiter,
@@ -45,14 +46,20 @@ const router: IRouter = Router();
 
 router.get(
   '/sessions/command',
-  authMiddleware({ required: false }),
+  authMiddleware(),
   perUserApiSlidingLimiter,
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      if (orgIds !== null && orgIds.size === 0) {
+        return sendSuccess(res, { sessions: [], count: 0 });
+      }
+      const orgFilter = orgIds !== null ? inArray(commandSessionsTable.orgId, [...orgIds]) : undefined;
       const appId = req.query.appId as string | undefined;
-      const conditions: ReturnType<typeof eq>[] = [eq(commandSessionsTable.isActive, true)];
+      const conditions: (SQL | undefined)[] = [eq(commandSessionsTable.isActive, true)];
       if (appId) conditions.push(eq(commandSessionsTable.appId, appId));
+      if (orgFilter) conditions.push(orgFilter);
 
       const sessions = await db
         .select()
@@ -70,7 +77,7 @@ router.get(
 
 router.post(
   '/sessions/command',
-  authMiddleware({ required: false }),
+  authMiddleware(),
   perUserWriteSlidingLimiter,
   validateBody(commandSessionCreateSchema),
   async (req, res) => {
@@ -88,6 +95,7 @@ router.post(
         .limit(1);
 
       if (existing.length > 0) {
+        if (!assertTenantAccess(req, res, existing[0].orgId)) return;
         sendSuccess(res, { session: existing[0], joined: true });
         return;
       }
@@ -123,7 +131,7 @@ router.post(
 
 router.get(
   '/sessions/command/:sessionId',
-  authMiddleware({ required: false }),
+  authMiddleware(),
   perUserApiSlidingLimiter,
   async (req, res) => {
     try {
@@ -140,6 +148,8 @@ router.get(
         return;
       }
 
+      if (!assertTenantAccess(req, res, session.orgId)) return;
+
       sendSuccess(res, { session });
     } catch (err) {
       handleRouteError(res, err, 'Failed to get session');
@@ -150,7 +160,7 @@ router.get(
 router.delete(
   '/sessions/command/:id',
   validateBody(bodyShape({})),
-  authMiddleware({ required: false }),
+  authMiddleware(),
   async (req, res) => {
     try {
       const id = Number(req.params.id);
@@ -159,10 +169,12 @@ router.delete(
         return;
       }
 
+      const orgIds = getUserOrgIds(req.user!);
+      const orgFilter = orgIds !== null ? inArray(commandSessionsTable.orgId, [...orgIds]) : undefined;
       await db
         .update(commandSessionsTable)
         .set({ isActive: false, endedAt: new Date() })
-        .where(eq(commandSessionsTable.id, id));
+        .where(and(eq(commandSessionsTable.id, id), orgFilter));
 
       publish('command-sessions', 'session:ended', { sessionId: id });
       sendSuccess(res, { ended: true });
@@ -174,7 +186,7 @@ router.delete(
 
 router.post(
   '/sessions/command/:sessionId/comments',
-  authMiddleware({ required: false }),
+  authMiddleware(),
   perUserWriteSlidingLimiter,
   validateBody(sessionCommentCreateSchema),
   async (req, res) => {
@@ -182,6 +194,19 @@ router.post(
     const { body, authorLabel, entityId, entityType } = req.body;
 
     try {
+      const [session] = await db
+        .select({ orgId: commandSessionsTable.orgId })
+        .from(commandSessionsTable)
+        .where(eq(commandSessionsTable.sessionId, sessionId))
+        .limit(1);
+
+      if (!session) {
+        sendNotFound(res, `Session ${sessionId} not found`);
+        return;
+      }
+
+      if (!assertTenantAccess(req, res, session.orgId)) return;
+
       const [comment] = await db
         .insert(commandSessionCommentsTable)
         .values({
@@ -210,12 +235,26 @@ router.post(
 
 router.get(
   '/sessions/command/:sessionId/comments',
-  authMiddleware({ required: false }),
+  authMiddleware(),
   perUserApiSlidingLimiter,
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const { sessionId } = req.params as { sessionId: string };
+
+      const [session] = await db
+        .select({ orgId: commandSessionsTable.orgId })
+        .from(commandSessionsTable)
+        .where(eq(commandSessionsTable.sessionId, sessionId))
+        .limit(1);
+
+      if (!session) {
+        sendNotFound(res, `Session ${sessionId} not found`);
+        return;
+      }
+
+      if (!assertTenantAccess(req, res, session.orgId)) return;
+
       const limit = Math.min(Number(req.query.limit ?? 50), 200);
 
       const comments = await db

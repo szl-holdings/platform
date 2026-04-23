@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { Router, type Request, type Response } from 'express';
 import {
   db,
@@ -10,6 +10,7 @@ import {
 import { defaultSignalBus } from '@szl-holdings/signal-mesh';
 import { createSignal, type Signal, type SignalDomain, type SignalType } from '@workspace/ontology/signal';
 import { authMiddleware } from '../middlewares/auth';
+import { getUserOrgIds } from '../middlewares/tenant-scope';
 import { handleRouteError } from '../lib/api-response.js';
 import { logger } from '../lib/logger.js';
 
@@ -194,11 +195,18 @@ export function initSignalBusRuleEngine(): void {
   logger.info('[signal-bus] Rule engine initialized — listening for all signals');
 }
 
-router.get('/rules', async (_req: Request, res: Response) => {
+router.get('/rules', async (req: Request, res: Response) => {
   try {
+    const orgIds = getUserOrgIds(req.user!);
+    if (orgIds !== null && orgIds.size === 0) {
+      res.json({ rules: [] });
+      return;
+    }
+    const orgFilter = orgIds !== null ? inArray(signalBusRulesTable.orgId, [...orgIds].map(String)) : undefined;
     const rules = await db
       .select()
       .from(signalBusRulesTable)
+      .where(orgFilter)
       .orderBy(desc(signalBusRulesTable.createdAt));
     res.json({ rules });
   } catch (err) {
@@ -237,6 +245,12 @@ router.post('/rules', async (req: Request, res: Response) => {
 router.put('/rules/:ruleId', async (req: Request, res: Response) => {
   try {
     const { ruleId } = req.params;
+    const orgIds = getUserOrgIds(req.user!);
+    if (orgIds !== null && orgIds.size === 0) {
+      res.status(404).json({ error: 'Rule not found' });
+      return;
+    }
+    const orgFilter = orgIds !== null ? inArray(signalBusRulesTable.orgId, [...orgIds].map(String)) : undefined;
     const { name, description, enabled, sourceDomain, sourceType, minSeverity, conditions, actionType, actionConfig, targetDomain } = req.body;
     const updated = await db
       .update(signalBusRulesTable)
@@ -253,7 +267,7 @@ router.put('/rules/:ruleId', async (req: Request, res: Response) => {
         ...(targetDomain !== undefined && { targetDomain }),
         updatedAt: new Date(),
       })
-      .where(eq(signalBusRulesTable.ruleId, ruleId!))
+      .where(and(eq(signalBusRulesTable.ruleId, ruleId!), orgFilter))
       .returning();
     if (updated.length === 0) {
       res.status(404).json({ error: 'Rule not found' });
@@ -268,9 +282,15 @@ router.put('/rules/:ruleId', async (req: Request, res: Response) => {
 router.delete('/rules/:ruleId', async (req: Request, res: Response) => {
   try {
     const { ruleId } = req.params;
+    const orgIds = getUserOrgIds(req.user!);
+    if (orgIds !== null && orgIds.size === 0) {
+      res.status(404).json({ error: 'Rule not found' });
+      return;
+    }
+    const orgFilter = orgIds !== null ? inArray(signalBusRulesTable.orgId, [...orgIds].map(String)) : undefined;
     const deleted = await db
       .delete(signalBusRulesTable)
-      .where(eq(signalBusRulesTable.ruleId, ruleId!))
+      .where(and(eq(signalBusRulesTable.ruleId, ruleId!), orgFilter))
       .returning();
     if (deleted.length === 0) {
       res.status(404).json({ error: 'Rule not found' });
@@ -284,10 +304,17 @@ router.delete('/rules/:ruleId', async (req: Request, res: Response) => {
 
 router.get('/events', async (req: Request, res: Response) => {
   try {
+    const orgIds = getUserOrgIds(req.user!);
+    if (orgIds !== null && orgIds.size === 0) {
+      res.json({ events: [], total: 0 });
+      return;
+    }
+    const orgFilter = orgIds !== null ? inArray(signalBusRoutedEventsTable.orgId, [...orgIds].map(String)) : undefined;
     const limit = Math.min(parseInt(String(req.query.limit ?? '100'), 10) || 100, 500);
     const events = await db
       .select()
       .from(signalBusRoutedEventsTable)
+      .where(orgFilter)
       .orderBy(desc(signalBusRoutedEventsTable.routedAt))
       .limit(limit);
     res.json({ events, total: events.length });
@@ -298,10 +325,17 @@ router.get('/events', async (req: Request, res: Response) => {
 
 router.get('/dead-letters', async (req: Request, res: Response) => {
   try {
+    const orgIds = getUserOrgIds(req.user!);
+    if (orgIds !== null && orgIds.size === 0) {
+      res.json({ deadLetters: [], total: 0 });
+      return;
+    }
+    const orgFilter = orgIds !== null ? inArray(signalBusDeadLettersTable.orgId, [...orgIds].map(String)) : undefined;
     const limit = Math.min(parseInt(String(req.query.limit ?? '50'), 10) || 50, 200);
     const letters = await db
       .select()
       .from(signalBusDeadLettersTable)
+      .where(orgFilter)
       .orderBy(desc(signalBusDeadLettersTable.createdAt))
       .limit(limit);
     res.json({ deadLetters: letters, total: letters.length });
@@ -310,18 +344,34 @@ router.get('/dead-letters', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/stats', async (_req: Request, res: Response) => {
+router.get('/stats', async (req: Request, res: Response) => {
   try {
-    const [ruleCount] = await db.select({ count: sql<number>`count(*)::int` }).from(signalBusRulesTable);
-    const [enabledCount] = await db.select({ count: sql<number>`count(*)::int` }).from(signalBusRulesTable).where(eq(signalBusRulesTable.enabled, 'true'));
-    const [eventCount] = await db.select({ count: sql<number>`count(*)::int` }).from(signalBusRoutedEventsTable);
-    const [deadLetterCount] = await db.select({ count: sql<number>`count(*)::int` }).from(signalBusDeadLettersTable);
+    const orgIds = getUserOrgIds(req.user!);
+    if (orgIds !== null && orgIds.size === 0) {
+      res.json({
+        totalRules: 0,
+        enabledRules: 0,
+        totalRoutedEvents: 0,
+        totalDeadLetters: 0,
+        eventsByAction: [],
+      });
+      return;
+    }
+    const ruleOrgFilter = orgIds !== null ? inArray(signalBusRulesTable.orgId, [...orgIds].map(String)) : undefined;
+    const eventOrgFilter = orgIds !== null ? inArray(signalBusRoutedEventsTable.orgId, [...orgIds].map(String)) : undefined;
+    const dlOrgFilter = orgIds !== null ? inArray(signalBusDeadLettersTable.orgId, [...orgIds].map(String)) : undefined;
+
+    const [ruleCount] = await db.select({ count: sql<number>`count(*)::int` }).from(signalBusRulesTable).where(ruleOrgFilter);
+    const [enabledCount] = await db.select({ count: sql<number>`count(*)::int` }).from(signalBusRulesTable).where(and(eq(signalBusRulesTable.enabled, 'true'), ruleOrgFilter));
+    const [eventCount] = await db.select({ count: sql<number>`count(*)::int` }).from(signalBusRoutedEventsTable).where(eventOrgFilter);
+    const [deadLetterCount] = await db.select({ count: sql<number>`count(*)::int` }).from(signalBusDeadLettersTable).where(dlOrgFilter);
     const recentEvents = await db
       .select({
         actionType: signalBusRoutedEventsTable.actionType,
         count: sql<number>`count(*)::int`,
       })
       .from(signalBusRoutedEventsTable)
+      .where(eventOrgFilter)
       .groupBy(signalBusRoutedEventsTable.actionType);
 
     res.json({

@@ -7,24 +7,44 @@ import {
   pcPurviewHoldAwarenessTable,
   pcPurviewScopeLinksTable,
 } from '@szl-holdings/db';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
+import { getUserOrgIds } from '../middlewares/tenant-scope';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
 
 const diagnosticsRunSchema = z.object({
-  orgId: z.number().int().positive().optional(),
   check: z.enum(['all', 'hold', 'export', 'scope', 'case_links']).optional(),
 });
 
-const exportHandoffConfirmSchema = z.object({
-  orgId: z.number().int().positive().optional(),
-});
+const exportHandoffConfirmSchema = z.object({});
 
 const router: IRouter = Router();
+
+type CallerScope =
+  | { kind: 'elevated' }
+  | { kind: 'org'; orgId: number }
+  | { kind: 'none' };
+
+function getCallerScope(req: Request): CallerScope {
+  const orgIds = getUserOrgIds(req.user!);
+  if (orgIds === null) return { kind: 'elevated' };
+  if (orgIds.size === 0) return { kind: 'none' };
+  return { kind: 'org', orgId: [...orgIds][0]! };
+}
+
+function getWriteOrgId(req: Request): number | null {
+  const scope = getCallerScope(req);
+  if (scope.kind === 'org') return scope.orgId;
+  if (scope.kind === 'elevated') {
+    const fallback = req.user?.orgs?.[0]?.orgId;
+    return typeof fallback === 'number' ? fallback : null;
+  }
+  return null;
+}
 
 const DEMO_CASE_LINKS = [
   {
@@ -270,17 +290,21 @@ router.get(
 
 router.get(
   '/purview/case-links',
-  authMiddleware({ required: false }),
+  authMiddleware(),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const orgId = Number(req.query.orgId ?? 1);
+      const scope = getCallerScope(req);
+      if (scope.kind === 'none') {
+        return sendSuccess(res, { caseLinks: [], count: 0, isDemo: true, fetchedAt: new Date().toISOString() });
+      }
+      const orgFilter = scope.kind === 'elevated' ? undefined : eq(pcPurviewCaseLinksTable.orgId, scope.orgId);
       let links: any[] = [];
       try {
         links = await db
           .select()
           .from(pcPurviewCaseLinksTable)
-          .where(eq(pcPurviewCaseLinksTable.orgId, orgId))
+          .where(orgFilter)
           .orderBy(desc(pcPurviewCaseLinksTable.createdAt));
       } catch {
         links = [];
@@ -300,17 +324,21 @@ router.get(
 
 router.get(
   '/purview/hold-awareness',
-  authMiddleware({ required: false }),
+  authMiddleware(),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const orgId = Number(req.query.orgId ?? 1);
+      const scope = getCallerScope(req);
+      if (scope.kind === 'none') {
+        return sendSuccess(res, { holds: [], count: 0, activeCount: 0, isDemo: true, fetchedAt: new Date().toISOString() });
+      }
+      const orgFilter = scope.kind === 'elevated' ? undefined : eq(pcPurviewHoldAwarenessTable.orgId, scope.orgId);
       let holds: any[] = [];
       try {
         holds = await db
           .select()
           .from(pcPurviewHoldAwarenessTable)
-          .where(eq(pcPurviewHoldAwarenessTable.orgId, orgId))
+          .where(orgFilter)
           .orderBy(desc(pcPurviewHoldAwarenessTable.createdAt));
       } catch {
         holds = [];
@@ -331,17 +359,21 @@ router.get(
 
 router.get(
   '/purview/export-handoffs',
-  authMiddleware({ required: false }),
+  authMiddleware(),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const orgId = Number(req.query.orgId ?? 1);
+      const scope = getCallerScope(req);
+      if (scope.kind === 'none') {
+        return sendSuccess(res, { handoffs: [], count: 0, pendingCount: 0, readyCount: 0, isDemo: true, fetchedAt: new Date().toISOString() });
+      }
+      const orgFilter = scope.kind === 'elevated' ? undefined : eq(pcPurviewExportHandoffsTable.orgId, scope.orgId);
       let handoffs: any[] = [];
       try {
         handoffs = await db
           .select()
           .from(pcPurviewExportHandoffsTable)
-          .where(eq(pcPurviewExportHandoffsTable.orgId, orgId))
+          .where(orgFilter)
           .orderBy(desc(pcPurviewExportHandoffsTable.createdAt));
       } catch {
         handoffs = [];
@@ -363,29 +395,24 @@ router.get(
 
 router.get(
   '/purview/scope-links',
-  authMiddleware({ required: false }),
+  authMiddleware(),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const orgId = Number(req.query.orgId ?? 1);
+      const scope = getCallerScope(req);
+      if (scope.kind === 'none') {
+        return sendSuccess(res, { scopeLinks: [], count: 0, isDemo: true, fetchedAt: new Date().toISOString() });
+      }
       const matterId = req.query.matterId ? Number(req.query.matterId) : undefined;
+      const orgFilter = scope.kind === 'elevated' ? undefined : eq(pcPurviewScopeLinksTable.orgId, scope.orgId);
+      const matterFilter = matterId ? eq(pcPurviewScopeLinksTable.matterId, matterId) : undefined;
       let scopeLinks: any[] = [];
       try {
-        const q = matterId
-          ? db
-              .select()
-              .from(pcPurviewScopeLinksTable)
-              .where(
-                and(
-                  eq(pcPurviewScopeLinksTable.orgId, orgId),
-                  eq(pcPurviewScopeLinksTable.matterId, matterId),
-                ),
-              )
-          : db
-              .select()
-              .from(pcPurviewScopeLinksTable)
-              .where(eq(pcPurviewScopeLinksTable.orgId, orgId));
-        scopeLinks = await q.orderBy(desc(pcPurviewScopeLinksTable.createdAt));
+        scopeLinks = await db
+          .select()
+          .from(pcPurviewScopeLinksTable)
+          .where(and(orgFilter, matterFilter))
+          .orderBy(desc(pcPurviewScopeLinksTable.createdAt));
       } catch {
         scopeLinks = [];
       }
@@ -407,17 +434,21 @@ router.get(
 
 router.get(
   '/purview/diagnostics',
-  authMiddleware({ required: false }),
+  authMiddleware(),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const orgId = Number(req.query.orgId ?? 1);
+      const scope = getCallerScope(req);
+      if (scope.kind === 'none') {
+        return sendSuccess(res, { diagnostics: [], summary: { pass: 0, warn: 0, fail: 0, overall: 'pass' }, isDemo: true, fetchedAt: new Date().toISOString() });
+      }
+      const orgFilter = scope.kind === 'elevated' ? undefined : eq(pcPurviewDiagnosticsTable.orgId, scope.orgId);
       let diagnostics: any[] = [];
       try {
         diagnostics = await db
           .select()
           .from(pcPurviewDiagnosticsTable)
-          .where(eq(pcPurviewDiagnosticsTable.orgId, orgId))
+          .where(orgFilter)
           .orderBy(desc(pcPurviewDiagnosticsTable.checkedAt));
       } catch {
         diagnostics = [];
@@ -441,12 +472,15 @@ router.get(
 
 router.post(
   '/purview/diagnostics/run',
-  authMiddleware({ required: false }),
+  authMiddleware(),
   validateBody(diagnosticsRunSchema),
   async (req: Request, res: Response) => {
     try {
-      const { orgId: bodyOrgId, check } = req.body as z.infer<typeof diagnosticsRunSchema>;
-      const orgId = Number(bodyOrgId ?? 1);
+      const { check } = req.body as z.infer<typeof diagnosticsRunSchema>;
+      const orgId = getWriteOrgId(req);
+      if (orgId === null) {
+        return void res.status(403).json({ error: 'No org membership — access denied' });
+      }
       logger.info({ orgId }, '[purview] Running diagnostics check');
       await db
         .insert(pcAuditEventsTable)
@@ -470,13 +504,20 @@ router.post(
 
 router.post(
   '/purview/export-handoffs/:id/confirm',
-  authMiddleware({ required: false }),
+  authMiddleware(),
   validateBody(exportHandoffConfirmSchema),
   async (req: Request, res: Response) => {
     try {
       const id = Number(req.params.id);
-      const { orgId: bodyOrgId } = req.body as z.infer<typeof exportHandoffConfirmSchema>;
-      const orgId = Number(bodyOrgId ?? 1);
+      const scope = getCallerScope(req);
+      if (scope.kind === 'none') {
+        return void res.status(403).json({ error: 'No org membership — access denied' });
+      }
+      const orgId = getWriteOrgId(req);
+      if (orgId === null) {
+        return void res.status(403).json({ error: 'No org membership — access denied' });
+      }
+      const handoffOrgFilter = scope.kind === 'elevated' ? undefined : eq(pcPurviewExportHandoffsTable.orgId, scope.orgId);
       try {
         await db
           .update(pcPurviewExportHandoffsTable)
@@ -488,7 +529,7 @@ router.post(
           .where(
             and(
               eq(pcPurviewExportHandoffsTable.id, id),
-              eq(pcPurviewExportHandoffsTable.orgId, orgId),
+              handoffOrgFilter,
             ),
           );
       } catch {
@@ -513,11 +554,25 @@ router.post(
 
 router.get(
   '/purview/bridge-summary',
-  authMiddleware({ required: false }),
+  authMiddleware(),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const orgId = Number(req.query.orgId ?? 1);
+      const scope = getCallerScope(req);
+      if (scope.kind === 'none') {
+        return sendSuccess(res, {
+          caseLinkCount: 0,
+          activeHoldCount: 0,
+          pendingExportCount: 0,
+          contentSourceCount: 0,
+          diagnosticsStatus: 'unknown',
+          fetchedAt: new Date().toISOString(),
+        });
+      }
+      const clOrgFilter = scope.kind === 'elevated' ? undefined : eq(pcPurviewCaseLinksTable.orgId, scope.orgId);
+      const hOrgFilter = scope.kind === 'elevated' ? undefined : eq(pcPurviewHoldAwarenessTable.orgId, scope.orgId);
+      const ehOrgFilter = scope.kind === 'elevated' ? undefined : eq(pcPurviewExportHandoffsTable.orgId, scope.orgId);
+      const slOrgFilter = scope.kind === 'elevated' ? undefined : eq(pcPurviewScopeLinksTable.orgId, scope.orgId);
       let caseLinkCount = DEMO_CASE_LINKS.length;
       let holdCount = DEMO_HOLDS.filter((h) => h.holdStatus === 'active').length;
       let exportPendingCount = DEMO_EXPORT_HANDOFFS.filter(
@@ -530,13 +585,13 @@ router.get(
           db
             .select({ count: sql<number>`count(*)` })
             .from(pcPurviewCaseLinksTable)
-            .where(eq(pcPurviewCaseLinksTable.orgId, orgId)),
+            .where(clOrgFilter),
           db
             .select({ count: sql<number>`count(*)` })
             .from(pcPurviewHoldAwarenessTable)
             .where(
               and(
-                eq(pcPurviewHoldAwarenessTable.orgId, orgId),
+                hOrgFilter,
                 eq(pcPurviewHoldAwarenessTable.holdStatus, 'active'),
               ),
             ),
@@ -545,14 +600,14 @@ router.get(
             .from(pcPurviewExportHandoffsTable)
             .where(
               and(
-                eq(pcPurviewExportHandoffsTable.orgId, orgId),
+                ehOrgFilter,
                 eq(pcPurviewExportHandoffsTable.exportStatus, 'pending'),
               ),
             ),
           db
             .select({ count: sql<number>`count(*)` })
             .from(pcPurviewScopeLinksTable)
-            .where(eq(pcPurviewScopeLinksTable.orgId, orgId)),
+            .where(slOrgFilter),
         ]);
         if (Number(cl[0]?.count) > 0) {
           caseLinkCount = Number(cl[0].count);

@@ -1,22 +1,20 @@
 import { approvalRequestsTable, db } from '@szl-holdings/db';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { requireAnyAuth } from '../middlewares/auth';
+import { getUserOrgIds } from '../middlewares/tenant-scope';
 
 const router = Router();
 
-/**
- * GET /api/governance/pending
- *
- * Lightweight count of pending governance approval requests scoped to
- * policy resources. Used by the Command Ops nav badge.
- */
-router.get('/pending', requireAnyAuth(), async (_req: Request, res: Response) => {
+router.get('/pending', requireAnyAuth(), async (req: Request, res: Response) => {
   try {
-    // Match the scoping used by /api/command/governance — only policy
-    // approvals contribute to the Governance nav badge.
+    const orgIds = getUserOrgIds(req.user!);
+    if (orgIds !== null && orgIds.size === 0) {
+      return sendSuccess(res, { count: 0, generatedAt: new Date().toISOString() });
+    }
+    const orgFilter = orgIds !== null ? inArray(approvalRequestsTable.orgId, [...orgIds]) : undefined;
     const [row] = await db
       .select({ count: sql<number>`COUNT(*)::int` })
       .from(approvalRequestsTable)
@@ -24,6 +22,7 @@ router.get('/pending', requireAnyAuth(), async (_req: Request, res: Response) =>
         and(
           eq(approvalRequestsTable.status, 'pending'),
           eq(approvalRequestsTable.resourceType, 'policy'),
+          orgFilter,
         ),
       );
     const count = Number(row?.count ?? 0);

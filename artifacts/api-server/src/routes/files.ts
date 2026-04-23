@@ -1,6 +1,6 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { assetsTable, db, filesTable } from '@szl-holdings/db';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, inArray } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -18,6 +18,7 @@ import { consumeUploadIntent, peekUploadIntent } from '../lib/uploadIntentStore'
 import { validateBody } from '../lib/validation';
 import { dispatchVirusScan } from '../lib/virusScan';
 import { authMiddleware, parseIdParam } from '../middlewares/auth';
+import { assertTenantAccess, getUserOrgIds } from '../middlewares/tenant-scope';
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -34,9 +35,18 @@ const PREVIEWABLE_MIME_TYPES = new Set([
   'text/plain',
 ]);
 
-router.get('/files', authMiddleware(), async (_req, res) => {
+router.get('/files', authMiddleware(), async (req, res) => {
   try {
-    const files = await db.select().from(filesTable).orderBy(desc(filesTable.createdAt));
+    const orgIds = getUserOrgIds(req.user!);
+    if (orgIds !== null && orgIds.size === 0) {
+      sendSuccess(res, []);
+      return;
+    }
+    const files = await db
+      .select()
+      .from(filesTable)
+      .where(orgIds !== null ? inArray(filesTable.orgId, [...orgIds]) : undefined)
+      .orderBy(desc(filesTable.createdAt));
     sendSuccess(res, files);
   } catch (err) {
     handleRouteError(res, err, 'Failed to list files');
@@ -51,6 +61,7 @@ router.get('/files/:id', authMiddleware(), async (req, res) => {
       sendNotFound(res, 'File');
       return;
     }
+    if (!assertTenantAccess(req, res, file.orgId)) return;
     sendSuccess(res, file);
   } catch (err) {
     handleRouteError(res, err, 'Failed to get file');
@@ -76,6 +87,8 @@ router.get('/files/:id/preview', authMiddleware(), async (req: Request, res: Res
       sendNotFound(res, 'File');
       return;
     }
+
+    if (!assertTenantAccess(req, res, file.orgId)) return;
 
     // ── ACL enforcement ──────────────────────────────────────────────────────
     const authedUser = (req as Request & { user?: { id: number; role: string } }).user;
@@ -363,6 +376,8 @@ router.delete(
         return;
       }
 
+      if (!assertTenantAccess(req, res, file.orgId)) return;
+
       if (!isPrivileged && (userId === null || file.userId !== userId)) {
         res.status(403).json({ error: 'Forbidden: you do not own this file' });
         return;
@@ -376,9 +391,19 @@ router.delete(
   },
 );
 
-router.get('/assets', authMiddleware(), async (_req, res) => {
+router.get('/assets', authMiddleware(), async (req, res) => {
   try {
-    const assets = await db.select().from(assetsTable).orderBy(desc(assetsTable.createdAt));
+    const orgIds = getUserOrgIds(req.user!);
+    if (orgIds !== null && orgIds.size === 0) {
+      sendSuccess(res, []);
+      return;
+    }
+    const assets = await db
+      .select({ ...assetsTable })
+      .from(assetsTable)
+      .leftJoin(filesTable, eq(assetsTable.fileId, filesTable.id))
+      .where(orgIds !== null ? inArray(filesTable.orgId, [...orgIds]) : undefined)
+      .orderBy(desc(assetsTable.createdAt));
     sendSuccess(res, assets);
   } catch (err) {
     handleRouteError(res, err, 'Failed to list assets');

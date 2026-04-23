@@ -18,9 +18,14 @@ import { z } from 'zod';
 import { getAtlasExportBuffer } from '../jobs/atlas-export-processor';
 import { logger } from '../lib/logger';
 import { authMiddleware } from '../middlewares/auth';
+import { assertTenantAccess } from '../middlewares/tenant-scope';
 
 const atlasRouter: IRouter = Router();
 atlasRouter.use('/atlas', authMiddleware({ required: true }));
+
+function getCallerOrgId(req: Request): number | null {
+  return (req.user?.orgs?.[0]?.orgId as number | undefined) ?? null;
+}
 
 const sectionSchema = z.object({
   id: z.string(),
@@ -63,10 +68,10 @@ atlasRouter.post('/atlas/artifacts', async (req: Request, res: Response) => {
         .json({ error: 'Validation failed', details: parsed.error.issues });
     }
 
-    const user = (req as any).user;
+    const orgId = getCallerOrgId(req);
 
     const artifact = await generateArtifact({
-      orgId: user?.orgId ?? null,
+      orgId: orgId,
       title: parsed.data.title,
       templateType: parsed.data.templateType,
       domain: parsed.data.domain,
@@ -76,7 +81,7 @@ atlasRouter.post('/atlas/artifacts', async (req: Request, res: Response) => {
       content: parsed.data.content,
       metadata: parsed.data.metadata,
       generatedBy: 'atlas-ui',
-      generatedByUserId: user?.id ?? null,
+      generatedByUserId: req.user?.id ?? null,
       correlationId: parsed.data.correlationId,
       outcomeGraphId: parsed.data.outcomeGraphId ?? null,
       attachProvenance: parsed.data.attachProvenance,
@@ -91,8 +96,7 @@ atlasRouter.post('/atlas/artifacts', async (req: Request, res: Response) => {
 
 atlasRouter.get('/atlas/artifacts', async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
-    const orgId: number | undefined = user?.orgId ?? undefined;
+    const orgId = getCallerOrgId(req) ?? undefined;
 
     const domain = req.query.domain as string | undefined;
     const templateType = req.query.templateType as string | undefined;
@@ -127,6 +131,7 @@ atlasRouter.get('/atlas/artifacts/:id', async (req: Request, res: Response) => {
 
     const artifact = await getArtifactById(id);
     if (!artifact) return void res.status(404).json({ error: 'Artifact not found' });
+    if (!assertTenantAccess(req, res, artifact.orgId)) return;
 
     return void res.json({ success: true, data: artifact });
   } catch (err) {
@@ -148,6 +153,7 @@ atlasRouter.patch('/atlas/artifacts/:id', async (req: Request, res: Response) =>
 
     const existing = await getArtifactById(id);
     if (!existing) return void res.status(404).json({ error: 'Artifact not found' });
+    if (!assertTenantAccess(req, res, existing.orgId)) return;
 
     const updated = await regenerateArtifact(id, parsed.data);
 
@@ -164,6 +170,10 @@ atlasRouter.post('/atlas/artifacts/:id/regenerate', async (req: Request, res: Re
   try {
     const id = parseInt((req.params.id as string) ?? '0', 10);
     if (!id) return void res.status(400).json({ error: 'Invalid id' });
+
+    const existing = await getArtifactById(id);
+    if (!existing) return void res.status(404).json({ error: 'Artifact not found' });
+    if (!assertTenantAccess(req, res, existing.orgId)) return;
 
     const updates = updateArtifactSchema.safeParse(req.body);
     const newVersion = await regenerateArtifact(id, updates.success ? updates.data : {});
@@ -183,6 +193,11 @@ atlasRouter.get('/atlas/artifacts/:slug/versions', async (req: Request, res: Res
     if (!slug) return void res.status(400).json({ error: 'Invalid slug' });
 
     const rows = await getArtifactVersionHistory(slug);
+    if (rows.length === 0) return void res.json({ success: true, data: [] });
+
+    const latest = await getArtifactById(rows[0].id);
+    if (latest && !assertTenantAccess(req, res, latest.orgId)) return;
+
     return void res.json({ success: true, data: rows });
   } catch (err) {
     logger.error({ err }, 'GET /atlas/artifacts/:slug/versions error:');
@@ -195,6 +210,12 @@ atlasRouter.get('/atlas/artifacts/:idA/compare/:idB', async (req: Request, res: 
     const idA = parseInt((req.params.idA as string) ?? '0', 10);
     const idB = parseInt((req.params.idB as string) ?? '0', 10);
     if (!idA || !idB) return void res.status(400).json({ error: 'Invalid ids' });
+
+    const [artifactA, artifactB] = await Promise.all([getArtifactById(idA), getArtifactById(idB)]);
+    if (!artifactA || !artifactB)
+      return void res.status(404).json({ error: 'One or both artifacts not found' });
+    if (!assertTenantAccess(req, res, artifactA.orgId)) return;
+    if (!assertTenantAccess(req, res, artifactB.orgId)) return;
 
     const diff = await compareArtifactVersions(idA, idB);
     return void res.json({ success: true, data: diff });
@@ -210,6 +231,10 @@ atlasRouter.post('/atlas/artifacts/:id/share', async (req: Request, res: Respons
   try {
     const id = parseInt((req.params.id as string) ?? '0', 10);
     if (!id) return void res.status(400).json({ error: 'Invalid id' });
+
+    const artifact = await getArtifactById(id);
+    if (!artifact) return void res.status(404).json({ error: 'Artifact not found' });
+    if (!assertTenantAccess(req, res, artifact.orgId)) return;
 
     const { expiresInHours = 72 } = req.body as { expiresInHours?: number };
     const token = await createShareLink(id, Math.min(expiresInHours, 168));
@@ -249,13 +274,17 @@ atlasRouter.post('/atlas/artifacts/:id/export', async (req: Request, res: Respon
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) return void res.status(400).json({ error: 'Invalid export format' });
 
-    const user = (req as any).user;
+    const artifact = await getArtifactById(id);
+    if (!artifact) return void res.status(404).json({ error: 'Artifact not found' });
+    if (!assertTenantAccess(req, res, artifact.orgId)) return;
+
+    const orgId = getCallerOrgId(req);
 
     const job = await createExportJob({
-      orgId: user?.orgId ?? null,
+      orgId: orgId,
       artifactId: id,
       format: parsed.data.format,
-      requestedByUserId: user?.id ?? null,
+      requestedByUserId: req.user?.id ?? null,
     });
 
     return void res.status(202).json({ success: true, data: job, message: 'Export job queued' });
@@ -277,6 +306,7 @@ atlasRouter.get('/atlas/export-jobs/:id', async (req: Request, res: Response) =>
       .from(atlasExportJobsTable)
       .where(eq(atlasExportJobsTable.id, id));
     if (!job) return void res.status(404).json({ error: 'Export job not found' });
+    if (!assertTenantAccess(req, res, job.orgId)) return;
 
     return void res.json({ success: true, data: job });
   } catch (err) {
@@ -290,19 +320,12 @@ atlasRouter.get('/atlas/export-jobs/:id/download', async (req: Request, res: Res
     const id = parseInt((req.params.id as string) ?? '0', 10);
     if (!id) return void res.status(400).json({ error: 'Invalid id' });
 
-    const user = (req as any).user;
-
     const [job] = await db
       .select()
       .from(atlasExportJobsTable)
       .where(eq(atlasExportJobsTable.id, id));
     if (!job) return void res.status(404).json({ error: 'Export job not found' });
-
-    const sameOrg = user?.orgId != null && job.orgId != null && user.orgId === job.orgId;
-    const isRequester = user?.id != null && job.requestedByUserId != null && user.id === job.requestedByUserId;
-    if (!sameOrg && !isRequester) {
-      return void res.status(403).json({ error: 'Forbidden' });
-    }
+    if (!assertTenantAccess(req, res, job.orgId)) return;
 
     if (job.status !== 'completed') {
       return void res

@@ -1,9 +1,11 @@
 import { db, vesselsTable } from '@szl-holdings/db';
+import { inArray } from 'drizzle-orm';
 import { type IRouter, type RequestHandler, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { listQuerySchema, validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
+import { getUserOrgIds } from '../middlewares/tenant-scope';
 
 const router: IRouter = Router();
 
@@ -362,12 +364,14 @@ router.get(
   '/vessels/cognitive/owner-graph',
   cogLimit,
   validateQuery(listQuerySchema),
-  authMiddleware({ required: false }),
-  async (_req, res) => {
+  authMiddleware(),
+  async (req, res) => {
     try {
       let dbVessels: DbVessel[] = [];
       try {
-        dbVessels = (await db.select().from(vesselsTable).limit(30)) as unknown as DbVessel[];
+        const orgIds = getUserOrgIds(req.user!);
+        const orgFilter = orgIds !== null ? inArray(vesselsTable.orgId, [...orgIds]) : undefined;
+        dbVessels = (await db.select().from(vesselsTable).where(orgFilter).limit(30)) as unknown as DbVessel[];
       } catch {
         dbVessels = [];
       }

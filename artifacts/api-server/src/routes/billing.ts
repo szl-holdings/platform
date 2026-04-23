@@ -10,7 +10,7 @@ import {
   subscriptionsTable,
 } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import { and, desc, eq, gt, isNull, or } from 'drizzle-orm';
+import { and, desc, eq, gt, inArray, isNull, or } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import type { z } from 'zod';
 import {
@@ -44,6 +44,7 @@ import {
   validateQuery,
 } from '../lib/validation';
 import { authMiddleware, parseIdParam, requireRole } from '../middlewares/auth';
+import { assertTenantAccess, getUserOrgIds } from '../middlewares/tenant-scope';
 
 const router: IRouter = Router();
 
@@ -77,10 +78,16 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      if (orgIds !== null && orgIds.size === 0) {
+        sendSuccess(res, [], 200, { page: 1, limit: 50, offset: 0 });
+        return;
+      }
       const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
       const subs = await db
         .select()
         .from(subscriptionsTable)
+        .where(orgIds !== null ? inArray(subscriptionsTable.orgId, [...orgIds]) : undefined)
         .orderBy(desc(subscriptionsTable.createdAt))
         .limit(limit)
         .offset(offset);
@@ -98,10 +105,16 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      if (orgIds !== null && orgIds.size === 0) {
+        sendSuccess(res, [], 200, { page: 1, limit: 50, offset: 0 });
+        return;
+      }
       const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
       const invs = await db
         .select()
         .from(invoicesTable)
+        .where(orgIds !== null ? inArray(invoicesTable.orgId, [...orgIds]) : undefined)
         .orderBy(desc(invoicesTable.createdAt))
         .limit(limit)
         .offset(offset);
@@ -1526,6 +1539,8 @@ router.get(
 
       const resolvedOrgId = orgId ?? (req.user as { orgId?: number })?.orgId ?? undefined;
 
+      if (req.user && resolvedOrgId && !assertTenantAccess(req, res, resolvedOrgId)) return;
+
       const now = new Date();
 
       if (resolvedOrgId) {
@@ -1600,10 +1615,16 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      if (orgIds !== null && orgIds.size === 0) {
+        sendSuccess(res, [], 200, { page: 1, limit: 50, offset: 0 });
+        return;
+      }
       const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
       const rows = await db
         .select()
         .from(fulfillmentsTable)
+        .where(orgIds !== null ? inArray(fulfillmentsTable.orgId, [...orgIds]) : undefined)
         .orderBy(desc(fulfillmentsTable.createdAt))
         .limit(limit)
         .offset(offset);

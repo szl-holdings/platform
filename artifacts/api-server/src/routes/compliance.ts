@@ -8,7 +8,7 @@ import {
   db,
 } from '@szl-holdings/db';
 import crypto from 'node:crypto';
-import { and, desc, eq, gte, lte, } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, lte } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -19,7 +19,8 @@ import {
   sendSuccess,
 } from '../lib/api-response';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
-import { authMiddleware, } from '../middlewares/auth';
+import { authMiddleware } from '../middlewares/auth';
+import { getUserOrgIds } from '../middlewares/tenant-scope';
 
 const router: IRouter = Router();
 
@@ -133,11 +134,30 @@ const CreateCalendarSchema = z.object({
 
 // All mock compliance data functions removed — data is sourced exclusively from PostgreSQL.
 
-router.get('/compliance/posture', authMiddleware(), async (_req, res) => {
+router.get('/compliance/posture', authMiddleware(), async (req, res) => {
   try {
+    const orgIds = getUserOrgIds(req.user!);
+    if (orgIds !== null && orgIds.size === 0) {
+      sendSuccess(res, {
+        overallRiskScore: null,
+        regBiScore: null,
+        archivalScore: null,
+        supervisionScore: null,
+        openSupervisionItems: 0,
+        criticalItems: 0,
+        overdueCalendarItems: 0,
+        pendingSuitabilityReviews: 0,
+        lastUpdated: null,
+        source: 'empty',
+        message: 'No organization membership.',
+      });
+      return;
+    }
+
     const [latestScore] = await db
       .select()
       .from(complianceRiskScoreTable)
+      .where(orgIds !== null ? inArray(complianceRiskScoreTable.orgId, [...orgIds]) : undefined)
       .orderBy(desc(complianceRiskScoreTable.scoreDate))
       .limit(1);
 
@@ -181,8 +201,15 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      if (orgIds !== null && orgIds.size === 0) {
+        sendSuccess(res, { count: 0, dataMode: 'empty', items: [] });
+        return;
+      }
+
       const { status, advisorId, limit, offset } = req.query;
       const conditions = [];
+      if (orgIds !== null) conditions.push(inArray(complianceSuitabilityTable.orgId, [...orgIds]));
       if (status) conditions.push(eq(complianceSuitabilityTable.status, status as any));
       if (advisorId) conditions.push(eq(complianceSuitabilityTable.advisorId, advisorId as any));
 
@@ -227,11 +254,13 @@ router.post(
       }
       const body = parsed.data;
       const recommendationId = generateItemId('rec');
+      const orgId = req.tenantOrgId ?? req.user?.orgs[0]?.orgId ?? null;
 
       const [inserted] = await db
         .insert(complianceSuitabilityTable)
         .values({
           ...body,
+          orgId,
           recommendationId,
           clientProfile: body.clientProfile as Record<string, unknown>,
           financialSituation: (body.financialSituation ?? {}) as Record<string, unknown>,
@@ -269,6 +298,9 @@ router.patch(
         return;
       }
 
+      const orgIds = getUserOrgIds(req.user!);
+      const orgFilter = orgIds !== null ? inArray(complianceSuitabilityTable.orgId, [...orgIds]) : undefined;
+
       const [updated] = await db
         .update(complianceSuitabilityTable)
         .set({
@@ -278,7 +310,7 @@ router.patch(
           reviewedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(complianceSuitabilityTable.recommendationId, id))
+        .where(and(eq(complianceSuitabilityTable.recommendationId, id), orgFilter))
         .returning();
 
       if (!updated) {
@@ -299,8 +331,15 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      if (orgIds !== null && orgIds.size === 0) {
+        sendSuccess(res, { count: 0, dataMode: 'empty', totalArchived: 0, items: [] });
+        return;
+      }
+
       const { type, limit, offset } = req.query;
       const conditions = [];
+      if (orgIds !== null) conditions.push(inArray(complianceArchivalTable.orgId, [...orgIds]));
       if (type) conditions.push(eq(complianceArchivalTable.communicationType, type as any));
 
       const lim = Math.min(Number(limit ?? 50), 200);
@@ -348,10 +387,13 @@ router.post(
         return;
       }
       const body = parsed.data;
+      const orgId = req.tenantOrgId ?? req.user?.orgs[0]?.orgId ?? null;
 
+      const orgIds = getUserOrgIds(req.user!);
       const lastEntry = await db
         .select({ contentHash: complianceArchivalTable.contentHash })
         .from(complianceArchivalTable)
+        .where(orgIds !== null ? inArray(complianceArchivalTable.orgId, [...orgIds]) : undefined)
         .orderBy(desc(complianceArchivalTable.archivedAt))
         .limit(1);
 
@@ -369,6 +411,7 @@ router.post(
         .insert(complianceArchivalTable)
         .values({
           entryId,
+          orgId,
           prevHash,
           contentHash,
           communicationType: body.communicationType,
@@ -396,8 +439,15 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      if (orgIds !== null && orgIds.size === 0) {
+        sendSuccess(res, { count: 0, dataMode: 'empty', items: [] });
+        return;
+      }
+
       const { status, priority, category, limit, offset } = req.query;
       const conditions = [];
+      if (orgIds !== null) conditions.push(inArray(complianceSupervisionQueueTable.orgId, [...orgIds]));
       if (status) conditions.push(eq(complianceSupervisionQueueTable.status, status as any));
       if (priority) conditions.push(eq(complianceSupervisionQueueTable.priority, priority as any));
       if (category) conditions.push(eq(complianceSupervisionQueueTable.category, category as any));
@@ -451,11 +501,13 @@ router.post(
       }
       const body = parsed.data;
       const itemId = generateItemId('sup');
+      const orgId = req.tenantOrgId ?? req.user?.orgs[0]?.orgId ?? null;
 
       const [inserted] = await db
         .insert(complianceSupervisionQueueTable)
         .values({
           itemId,
+          orgId,
           category: body.category,
           priority: body.priority ?? 'medium',
           title: body.title,
@@ -506,10 +558,13 @@ router.patch(
         assignedToName?: string;
       };
 
+      const orgIds = getUserOrgIds(req.user!);
+      const orgFilter = orgIds !== null ? inArray(complianceSupervisionQueueTable.orgId, [...orgIds]) : undefined;
+
       const [existing] = await db
         .select()
         .from(complianceSupervisionQueueTable)
-        .where(eq(complianceSupervisionQueueTable.itemId, itemId))
+        .where(and(eq(complianceSupervisionQueueTable.itemId, itemId), orgFilter))
         .limit(1);
 
       if (!existing) {
@@ -545,7 +600,7 @@ router.patch(
       const [updated] = await db
         .update(complianceSupervisionQueueTable)
         .set(updates)
-        .where(eq(complianceSupervisionQueueTable.itemId, itemId))
+        .where(and(eq(complianceSupervisionQueueTable.itemId, itemId), orgFilter))
         .returning();
 
       sendSuccess(res, updated);
@@ -561,8 +616,15 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      if (orgIds !== null && orgIds.size === 0) {
+        sendSuccess(res, { count: 0, dataMode: 'empty', events: [] });
+        return;
+      }
+
       const { status, eventType, from, to } = req.query;
       const conditions = [];
+      if (orgIds !== null) conditions.push(inArray(complianceCalendarTable.orgId, [...orgIds]));
       if (status) conditions.push(eq(complianceCalendarTable.status, status as any));
       if (eventType) conditions.push(eq(complianceCalendarTable.eventType, eventType as any));
       if (from) conditions.push(gte(complianceCalendarTable.dueAt, new Date(from as string)));
@@ -614,11 +676,13 @@ router.post(
       }
       const body = parsed.data;
       const eventId = generateItemId('cal');
+      const orgId = req.tenantOrgId ?? req.user?.orgs[0]?.orgId ?? null;
 
       const [inserted] = await db
         .insert(complianceCalendarTable)
         .values({
           eventId,
+          orgId,
           eventType: body.eventType,
           title: body.title,
           description: body.description ?? null,

@@ -1,11 +1,12 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { connectorsTable, db } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
 import { validateBody } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
+import { getUserOrgIds } from '../middlewares/tenant-scope';
 
 const router: IRouter = Router();
 
@@ -159,6 +160,8 @@ router.post(
   validateBody(bodyShape({})),
   async (req, res) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      const orgFilter = orgIds !== null ? inArray(connectorsTable.orgId, [...orgIds]) : undefined;
       const { crmType } = req.params as Record<string, string>;
       const validTypes = ['salesforce', 'hubspot', 'dynamics365', 'all'];
       if (!validTypes.includes(crmType)) {
@@ -174,7 +177,7 @@ router.post(
           const [conn] = await db
             .select()
             .from(connectorsTable)
-            .where(and(eq(connectorsTable.type, type as any), eq(connectorsTable.isEnabled, true)))
+            .where(and(eq(connectorsTable.type, type as any), eq(connectorsTable.isEnabled, true), orgFilter))
             .limit(1);
 
           if (conn) {

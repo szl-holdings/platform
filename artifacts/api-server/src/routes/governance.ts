@@ -8,7 +8,7 @@ import {
   governanceIncidentsTable,
   modelRoutingPoliciesTable,
 } from '@szl-holdings/db';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { type SQL, and, desc, eq, gte, inArray, isNotNull, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -23,6 +23,7 @@ import {
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { type AuthenticatedUser, authMiddleware, requireRole } from '../middlewares/auth';
+import { assertTenantAccess, getUserOrgIds } from '../middlewares/tenant-scope';
 
 async function writeGovernanceAuditEvent(params: {
   userId: number | null;
@@ -125,11 +126,15 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      if (orgIds !== null && orgIds.size === 0) return sendSuccess(res, [], 200, { count: 0 });
+
       const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
       const policyType = req.query.policyType as string | undefined;
       const showAll = req.query.isActive === 'all';
 
       const conditions = [];
+      if (orgIds !== null) conditions.push(inArray(alloyLegacyPoliciesTable.orgId, [...orgIds]));
       if (!showAll) {
         const isActive = req.query.isActive !== 'false';
         conditions.push(eq(alloyLegacyPoliciesTable.isActive, isActive));
@@ -160,6 +165,7 @@ router.get('/policies/:id', authMiddleware(), async (req: Request, res: Response
       .from(alloyLegacyPoliciesTable)
       .where(eq(alloyLegacyPoliciesTable.id, id));
     if (!row) return sendNotFound(res, 'Policy not found');
+    if (!assertTenantAccess(req, res, row.orgId)) return;
     return sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, 'Failed to fetch policy');
@@ -222,10 +228,12 @@ router.patch(
       if (isActive !== undefined) updates.isActive = isActive;
       if (priority !== undefined) updates.priority = priority;
       if (scope !== undefined) updates.scope = scope;
+      const orgIds = getUserOrgIds(req.user!);
+      const orgFilter = orgIds !== null ? inArray(alloyLegacyPoliciesTable.orgId, [...orgIds]) : undefined;
       const [row] = await db
         .update(alloyLegacyPoliciesTable)
         .set(updates as any)
-        .where(eq(alloyLegacyPoliciesTable.id, id))
+        .where(and(eq(alloyLegacyPoliciesTable.id, id), orgFilter))
         .returning();
       if (!row) return sendNotFound(res, 'Policy not found');
       void writeGovernanceAuditEvent({
@@ -252,9 +260,11 @@ router.delete(
     try {
       const id = parseInt(String(req.params.id), 10);
       if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid policy ID');
+      const delOrgIds = getUserOrgIds(req.user!);
+      const delOrgFilter = delOrgIds !== null ? inArray(alloyLegacyPoliciesTable.orgId, [...delOrgIds]) : undefined;
       const [row] = await db
         .delete(alloyLegacyPoliciesTable)
-        .where(eq(alloyLegacyPoliciesTable.id, id))
+        .where(and(eq(alloyLegacyPoliciesTable.id, id), delOrgFilter))
         .returning();
       if (!row) return sendNotFound(res, 'Policy not found');
       void writeGovernanceAuditEvent({
@@ -277,9 +287,13 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      if (orgIds !== null && orgIds.size === 0) return sendSuccess(res, [], 200, { count: 0 });
+
       const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
       const provider = req.query.provider as string | undefined;
       const conditions = [];
+      if (orgIds !== null) conditions.push(inArray(modelRoutingPoliciesTable.orgId, [...orgIds]));
       if (provider) conditions.push(eq(modelRoutingPoliciesTable.modelProvider, provider));
       const rows = await db
         .select()
@@ -366,10 +380,12 @@ router.patch(
       if (maxCostPerCall !== undefined) updates.maxCostPerCall = maxCostPerCall;
       if (priority !== undefined) updates.priority = priority;
       if (taskCategories !== undefined) updates.taskCategories = taskCategories;
+      const mrOrgIds = getUserOrgIds(req.user!);
+      const mrOrgFilter = mrOrgIds !== null ? inArray(modelRoutingPoliciesTable.orgId, [...mrOrgIds]) : undefined;
       const [row] = await db
         .update(modelRoutingPoliciesTable)
         .set(updates as any)
-        .where(eq(modelRoutingPoliciesTable.id, id))
+        .where(and(eq(modelRoutingPoliciesTable.id, id), mrOrgFilter))
         .returning();
       if (!row) return sendNotFound(res, 'Model routing policy not found');
       void writeGovernanceAuditEvent({
@@ -393,11 +409,16 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      if (orgIds !== null && orgIds.size === 0) return sendSuccess(res, [], 200, { count: 0 });
+
       const { limit = 20, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
+      const conditions: SQL[] = [eq(costBudgetsTable.isActive, true)];
+      if (orgIds !== null) conditions.push(inArray(costBudgetsTable.orgId, [...orgIds]));
       const rows = await db
         .select()
         .from(costBudgetsTable)
-        .where(eq(costBudgetsTable.isActive, true))
+        .where(and(...conditions))
         .orderBy(desc(costBudgetsTable.createdAt))
         .limit(limit)
         .offset(offset);
@@ -443,9 +464,13 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      if (orgIds !== null && orgIds.size === 0) return sendSuccess(res, [], 200, { count: 0 });
+
       const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
       const eventType = req.query.eventType as string | undefined;
       const conditions = [];
+      if (orgIds !== null) conditions.push(inArray(costEventsTable.orgId, [...orgIds]));
       if (eventType) conditions.push(eq(costEventsTable.eventType, eventType as any));
       const rows = await db
         .select()
@@ -497,12 +522,12 @@ router.post(
         })
         .returning();
 
-      if (budgetId) {
+      if (budgetId && orgId != null) {
         await db.execute(sql`
         UPDATE cost_budgets
         SET current_spend = current_spend + ${String(costUsd ?? 0)}::numeric,
             updated_at = NOW()
-        WHERE id = ${budgetId}
+        WHERE id = ${budgetId} AND org_id = ${orgId}
       `);
       }
 
@@ -513,44 +538,67 @@ router.post(
   },
 );
 
-router.get('/cost-summary', authMiddleware(), async (_req: Request, res: Response) => {
+router.get('/cost-summary', authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const totalSpend = await db.execute(sql`
-      SELECT
-        COALESCE(SUM(cost_usd), 0) as total_cost,
-        COUNT(*) as total_events,
-        COALESCE(SUM(tokens_in), 0) as total_tokens_in,
-        COALESCE(SUM(tokens_out), 0) as total_tokens_out
-      FROM cost_events
-      WHERE created_at >= NOW() - INTERVAL '30 days'
-    `);
+    const orgIds = getUserOrgIds(req.user!);
+    if (orgIds !== null && orgIds.size === 0) {
+      return sendSuccess(res, {
+        period: 'last_30_days',
+        summary: { total_cost: 0, total_events: 0, total_tokens_in: 0, total_tokens_out: 0 },
+        byEventType: [],
+        byModel: [],
+        activeBudgets: [],
+      });
+    }
 
-    const byType = await db.execute(sql`
-      SELECT event_type, COUNT(*) as count, COALESCE(SUM(cost_usd), 0) as cost
-      FROM cost_events
-      WHERE created_at >= NOW() - INTERVAL '30 days'
-      GROUP BY event_type
-      ORDER BY cost DESC
-    `);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const ceOrgFilter = orgIds !== null ? inArray(costEventsTable.orgId, [...orgIds]) : undefined;
+    const cbOrgFilter = orgIds !== null ? inArray(costBudgetsTable.orgId, [...orgIds]) : undefined;
 
-    const byModel = await db.execute(sql`
-      SELECT model_provider, model_id, COUNT(*) as count, COALESCE(SUM(cost_usd), 0) as cost
-      FROM cost_events
-      WHERE model_provider IS NOT NULL AND created_at >= NOW() - INTERVAL '30 days'
-      GROUP BY model_provider, model_id
-      ORDER BY cost DESC
-    `);
+    const [summary] = await db
+      .select({
+        total_cost: sql<string>`COALESCE(SUM(${costEventsTable.costUsd}), 0)`,
+        total_events: sql<number>`COUNT(*)`,
+        total_tokens_in: sql<number>`COALESCE(SUM(${costEventsTable.tokensIn}), 0)`,
+        total_tokens_out: sql<number>`COALESCE(SUM(${costEventsTable.tokensOut}), 0)`,
+      })
+      .from(costEventsTable)
+      .where(and(gte(costEventsTable.createdAt, thirtyDaysAgo), ceOrgFilter));
+
+    const byType = await db
+      .select({
+        event_type: costEventsTable.eventType,
+        count: sql<number>`COUNT(*)`,
+        cost: sql<string>`COALESCE(SUM(${costEventsTable.costUsd}), 0)`,
+      })
+      .from(costEventsTable)
+      .where(and(gte(costEventsTable.createdAt, thirtyDaysAgo), ceOrgFilter))
+      .groupBy(costEventsTable.eventType)
+      .orderBy(desc(sql`COALESCE(SUM(${costEventsTable.costUsd}), 0)`));
+
+    const byModel = await db
+      .select({
+        model_provider: costEventsTable.modelProvider,
+        model_id: costEventsTable.modelId,
+        count: sql<number>`COUNT(*)`,
+        cost: sql<string>`COALESCE(SUM(${costEventsTable.costUsd}), 0)`,
+      })
+      .from(costEventsTable)
+      .where(and(isNotNull(costEventsTable.modelProvider), gte(costEventsTable.createdAt, thirtyDaysAgo), ceOrgFilter))
+      .groupBy(costEventsTable.modelProvider, costEventsTable.modelId)
+      .orderBy(desc(sql`COALESCE(SUM(${costEventsTable.costUsd}), 0)`));
 
     const budgets = await db
       .select()
       .from(costBudgetsTable)
-      .where(eq(costBudgetsTable.isActive, true));
+      .where(and(eq(costBudgetsTable.isActive, true), cbOrgFilter));
 
     return sendSuccess(res, {
       period: 'last_30_days',
-      summary: (totalSpend as any).rows?.[0] ?? totalSpend,
-      byEventType: (byType as any).rows ?? byType,
-      byModel: (byModel as any).rows ?? byModel,
+      summary: summary ?? { total_cost: 0, total_events: 0, total_tokens_in: 0, total_tokens_out: 0 },
+      byEventType: byType,
+      byModel,
       activeBudgets: budgets,
     });
   } catch (err) {
@@ -564,10 +612,14 @@ router.get(
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
+      const orgIds = getUserOrgIds(req.user!);
+      if (orgIds !== null && orgIds.size === 0) return sendSuccess(res, [], 200, { count: 0 });
+
       const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
       const severity = req.query.severity as string | undefined;
       const incidentType = req.query.incidentType as string | undefined;
       const conditions = [];
+      if (orgIds !== null) conditions.push(inArray(governanceIncidentsTable.orgId, [...orgIds]));
       if (severity) conditions.push(eq(governanceIncidentsTable.severity, severity as any));
       if (incidentType)
         conditions.push(eq(governanceIncidentsTable.incidentType, incidentType as any));
@@ -654,6 +706,8 @@ router.patch(
       const id = parseInt(String(req.params.id), 10);
       if (Number.isNaN(id)) return sendBadRequest(res, 'Invalid incident ID');
       const { resolution } = req.body;
+      const incOrgIds = getUserOrgIds(req.user!);
+      const incOrgFilter = incOrgIds !== null ? inArray(governanceIncidentsTable.orgId, [...incOrgIds]) : undefined;
       const [row] = await db
         .update(governanceIncidentsTable)
         .set({
@@ -661,7 +715,7 @@ router.patch(
           resolvedBy: req.user?.displayName ?? 'system',
           resolvedAt: new Date(),
         })
-        .where(eq(governanceIncidentsTable.id, id))
+        .where(and(eq(governanceIncidentsTable.id, id), incOrgFilter))
         .returning();
       if (!row) return sendNotFound(res, 'Incident not found');
       return sendSuccess(res, row);
@@ -671,7 +725,7 @@ router.patch(
   },
 );
 
-router.get('/analytics', authMiddleware(), async (_req: Request, res: Response) => {
+router.get('/analytics', authMiddleware(), requireRole('admin', 'super_admin', 'ops'), async (_req: Request, res: Response) => {
   try {
     const agentRuns = await db.execute(sql`
       SELECT COUNT(*) as total_runs,
