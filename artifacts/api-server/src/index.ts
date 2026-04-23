@@ -73,6 +73,7 @@ import { initGuardianEngine } from './lib/guardian-engine';
 import { initIngestionFramework } from './lib/ingestion-framework';
 import { startIntelligenceFeeds, stopIntelligenceFeeds } from './lib/intelligence-feeds-init';
 import { initDurablePersistence, stopDurablePersistence } from './lib/persistence-init';
+import { initFusionPersistence } from './lib/fusion-persistence';
 import { providerHealth } from './lib/provider-health';
 import { registerQueuedJobHandlers } from './lib/queued-jobs';
 import { runAlertRuleEvaluation } from './routes/ops-management';
@@ -125,6 +126,7 @@ export async function bootstrap(
     });
 
   initWebSocket(server);
+  void initFusionPersistence();
   startPrismBusBridge();
   startDomainNotificationGenerators();
   registerApprovalNotificationHook();

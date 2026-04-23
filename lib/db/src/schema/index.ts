@@ -74,6 +74,7 @@ export * from './files';
 export * from './fine_tuning';
 export * from './firestorm';
 export * from './forge';
+export * from './fusion_cortex';
 export * from './fund_inbound_deals';
 export * from './fund_ops';
 export * from './governance';

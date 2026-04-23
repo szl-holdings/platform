@@ -197,6 +197,152 @@ router.post(
   },
 );
 
+const ingestBodySchema = z.object({
+  frames: z
+    .array(
+      z.object({
+        frameId: z.string().min(1).max(200),
+        observedAt: z.string().datetime({ offset: true }).optional(),
+        protocol: protocolEnum,
+        src: z.string().min(1).max(400),
+        dst: z.string().min(1).max(400),
+        assetId: z.string().min(1).max(200).optional(),
+        functionLabel: z.string().min(1).max(400),
+        summary: z.string().min(1).max(1000),
+        severity: z.enum(['info', 'low', 'medium', 'high', 'critical']).default('info'),
+        rawHex: z.string().max(10000),
+        fields: z.unknown().optional(),
+        forensicEventId: z.string().max(200).optional(),
+        conversationSessionId: z.string().max(200).optional(),
+      }),
+    )
+    .min(1)
+    .max(500),
+});
+
+router.post(
+  '/aegis/ot-ics/ingest',
+  authMiddleware({ required: true }),
+  validateBody(bodyShape({ frames: z.unknown().optional() })),
+  async (req, res) => {
+    try {
+      const parsed = ingestBodySchema.parse(req.body);
+      const rows = parsed.frames.map((f) => ({
+        frameId: f.frameId,
+        observedAt: f.observedAt ? new Date(f.observedAt) : new Date(),
+        protocol: f.protocol,
+        src: f.src,
+        dst: f.dst,
+        assetId: f.assetId,
+        functionLabel: f.functionLabel,
+        summary: f.summary,
+        severity: f.severity,
+        rawHex: f.rawHex,
+        fields: (f.fields as typeof otIcsDecodedFramesTable.$inferInsert['fields']) ?? [],
+        forensicEventId: f.forensicEventId,
+        conversationSessionId: f.conversationSessionId,
+      }));
+      const inserted = await db
+        .insert(otIcsDecodedFramesTable)
+        .values(rows)
+        .onConflictDoNothing()
+        .returning({ frameId: otIcsDecodedFramesTable.frameId });
+      sendCreated(res, { accepted: rows.length, inserted: inserted.length });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to ingest protocol frames');
+    }
+  },
+);
+
+const triageBodySchema = z.object({
+  acknowledgedBy: z.string().min(1).max(200).optional(),
+  incidentRef: z.string().min(1).max(200).optional(),
+});
+
+router.post(
+  '/aegis/ot-ics/frames/:frameId/acknowledge',
+  authMiddleware({ required: true }),
+  validateBody(bodyShape({ acknowledgedBy: z.unknown().optional() })),
+  async (req, res) => {
+    try {
+      const { acknowledgedBy } = triageBodySchema.parse(req.body);
+      const [updated] = await db
+        .update(otIcsDecodedFramesTable)
+        .set({
+          triageStatus: 'acknowledged',
+          acknowledgedAt: new Date(),
+          acknowledgedBy: acknowledgedBy ?? null,
+        })
+        .where(eq(otIcsDecodedFramesTable.frameId, req.params.frameId as string))
+        .returning();
+      if (!updated) {
+        res.status(404).json({ success: false, error: 'Frame not found' });
+        return;
+      }
+      sendSuccess(res, { frameId: updated.frameId, triageStatus: updated.triageStatus });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to acknowledge frame');
+    }
+  },
+);
+
+router.post(
+  '/aegis/ot-ics/frames/:frameId/false-positive',
+  authMiddleware({ required: true }),
+  validateBody(bodyShape({ acknowledgedBy: z.unknown().optional() })),
+  async (req, res) => {
+    try {
+      const { acknowledgedBy } = triageBodySchema.parse(req.body);
+      const [updated] = await db
+        .update(otIcsDecodedFramesTable)
+        .set({
+          triageStatus: 'false_positive',
+          acknowledgedAt: new Date(),
+          acknowledgedBy: acknowledgedBy ?? null,
+        })
+        .where(eq(otIcsDecodedFramesTable.frameId, req.params.frameId as string))
+        .returning();
+      if (!updated) {
+        res.status(404).json({ success: false, error: 'Frame not found' });
+        return;
+      }
+      sendSuccess(res, { frameId: updated.frameId, triageStatus: updated.triageStatus });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to mark frame as false positive');
+    }
+  },
+);
+
+router.post(
+  '/aegis/ot-ics/frames/:frameId/open-incident',
+  authMiddleware({ required: true }),
+  validateBody(
+    bodyShape({ acknowledgedBy: z.unknown().optional(), incidentRef: z.unknown().optional() }),
+  ),
+  async (req, res) => {
+    try {
+      const { acknowledgedBy, incidentRef } = triageBodySchema.parse(req.body);
+      const [updated] = await db
+        .update(otIcsDecodedFramesTable)
+        .set({
+          triageStatus: 'incident_opened',
+          acknowledgedAt: new Date(),
+          acknowledgedBy: acknowledgedBy ?? null,
+          incidentRef: incidentRef ?? null,
+        })
+        .where(eq(otIcsDecodedFramesTable.frameId, req.params.frameId as string))
+        .returning();
+      if (!updated) {
+        res.status(404).json({ success: false, error: 'Frame not found' });
+        return;
+      }
+      sendSuccess(res, { frameId: updated.frameId, triageStatus: updated.triageStatus, incidentRef: updated.incidentRef });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to open incident for frame');
+    }
+  },
+);
+
 router.post(
   '/aegis/ot-ics/baseline/recompute',
   validateBody(bodyShape({})),

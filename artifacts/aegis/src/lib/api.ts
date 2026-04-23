@@ -293,6 +293,21 @@ export const api = {
         updatedAssets: number;
         baselines: Array<{ assetId: string; baseline: number; sampleCount: number }>;
       }>('/aegis/ot-ics/baseline/recompute', { method: 'POST' }),
+    acknowledgeFrame: (frameId: string, body?: { acknowledgedBy?: string }) =>
+      apiFetch<{ frameId: string; triageStatus: string }>(
+        `/aegis/ot-ics/frames/${encodeURIComponent(frameId)}/acknowledge`,
+        { method: 'POST', body: JSON.stringify(body ?? {}) },
+      ),
+    markFalsePositive: (frameId: string, body?: { acknowledgedBy?: string }) =>
+      apiFetch<{ frameId: string; triageStatus: string }>(
+        `/aegis/ot-ics/frames/${encodeURIComponent(frameId)}/false-positive`,
+        { method: 'POST', body: JSON.stringify(body ?? {}) },
+      ),
+    openIncident: (frameId: string, body?: { acknowledgedBy?: string; incidentRef?: string }) =>
+      apiFetch<{ frameId: string; triageStatus: string; incidentRef?: string }>(
+        `/aegis/ot-ics/frames/${encodeURIComponent(frameId)}/open-incident`,
+        { method: 'POST', body: JSON.stringify(body ?? {}) },
+      ),
   },
   digitalTwin: {
     topology: () => apiFetch<any>('/aegis/digital-twin/topology'),

@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -15,6 +16,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
+
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 
 const ACCENT = '#c9a84c';
 
@@ -280,6 +283,59 @@ function PermissionScreen({
   );
 }
 
+interface TerraAPIProperty {
+  id: number;
+  address: string;
+  city: string;
+  state: string;
+  estimatedValue?: number | null;
+  capRate?: number | null;
+  sqft?: number | null;
+  yearBuilt?: number | null;
+  zoning?: string | null;
+  owner?: string | null;
+  distressScore?: number | null;
+}
+
+function mapTerraToARProperty(p: TerraAPIProperty, index: number): ARProperty {
+  const address = [p.address, p.city, p.state].filter(Boolean).join(', ');
+  const value = p.estimatedValue
+    ? `$${(p.estimatedValue / 1_000_000).toFixed(1)}M`
+    : MOCK_PROPERTIES[index % MOCK_PROPERTIES.length].estimatedValue;
+  const cap = p.capRate ? `${p.capRate.toFixed(1)}%` : MOCK_PROPERTIES[index % MOCK_PROPERTIES.length].capRate;
+  const distress = p.distressScore ?? MOCK_PROPERTIES[index % MOCK_PROPERTIES.length].distressScore;
+  return {
+    address: address || MOCK_PROPERTIES[index % MOCK_PROPERTIES.length].address,
+    estimatedValue: value,
+    valueChange: '+0.0%',
+    owner: p.owner ?? 'Unknown Owner',
+    zoning: p.zoning ?? 'Commercial',
+    distressScore: distress,
+    capRate: cap,
+    sqft: p.sqft ? p.sqft.toLocaleString() : MOCK_PROPERTIES[index % MOCK_PROPERTIES.length].sqft,
+    yearBuilt: p.yearBuilt ?? MOCK_PROPERTIES[index % MOCK_PROPERTIES.length].yearBuilt,
+    opportunity: distress > 50 ? 'buy' : distress > 25 ? 'watch' : 'avoid',
+    signals:
+      distress > 50
+        ? ['Distress score elevated', 'Opportunity flagged by DOMAINE AI']
+        : ['No active distress signals', 'Market activity normal'],
+  };
+}
+
+async function fetchNearbyProperties(lat: number, lng: number): Promise<ARProperty[]> {
+  try {
+    const url = `${BASE_URL}/api/terra/properties?limit=5&nearLat=${lat.toFixed(6)}&nearLng=${lng.toFixed(6)}&radiusKm=2`;
+    const res = await fetch(url, { headers: { Accept: 'application/json' } });
+    if (!res.ok) return [];
+    const json = (await res.json()) as { data?: TerraAPIProperty[]; properties?: TerraAPIProperty[] };
+    const items: TerraAPIProperty[] = json.data ?? json.properties ?? [];
+    if (items.length === 0) return [];
+    return items.map((p, i) => mapTerraToARProperty(p, i));
+  } catch {
+    return [];
+  }
+}
+
 export default function ARPropertyViewerScreen() {
   const _colors = useColors();
   const insets = useSafeAreaInsets();
@@ -287,9 +343,25 @@ export default function ARPropertyViewerScreen() {
   const [scanning, setScanning] = useState(true);
   const [propertyIndex, setPropertyIndex] = useState(0);
   const [dataVisible, setDataVisible] = useState(false);
+  const [liveProperties, setLiveProperties] = useState<ARProperty[]>([]);
   const scanTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    void (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === 'granted') {
+          const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+          const nearby = await fetchNearbyProperties(loc.coords.latitude, loc.coords.longitude);
+          if (nearby.length > 0) {
+            setLiveProperties(nearby);
+          }
+        }
+      } catch {
+        /* location unavailable — fall back to mocks */
+      }
+    })();
+
     scanTimer.current = setTimeout(() => {
       setScanning(false);
       setDataVisible(true);
@@ -299,10 +371,12 @@ export default function ARPropertyViewerScreen() {
     };
   }, []);
 
+  const properties = liveProperties.length > 0 ? liveProperties : MOCK_PROPERTIES;
+
   const handleRescan = () => {
     setDataVisible(false);
     setScanning(true);
-    const nextIndex = (propertyIndex + 1) % MOCK_PROPERTIES.length;
+    const nextIndex = (propertyIndex + 1) % properties.length;
     scanTimer.current = setTimeout(() => {
       setPropertyIndex(nextIndex);
       setScanning(false);
@@ -310,7 +384,7 @@ export default function ARPropertyViewerScreen() {
     }, 2500);
   };
 
-  const property = MOCK_PROPERTIES[propertyIndex];
+  const property = properties[propertyIndex] ?? MOCK_PROPERTIES[0];
 
   useEffect(() => {
     if (Platform.OS !== 'web' && permission && !permission.granted && permission.canAskAgain) {

@@ -72,12 +72,21 @@ export const otIcsDecodedFramesTable = pgTable(
       .default([]),
     forensicEventId: text('forensic_event_id'),
     conversationSessionId: text('conversation_session_id'),
+    triageStatus: text('triage_status', {
+      enum: ['open', 'acknowledged', 'false_positive', 'incident_opened'],
+    })
+      .notNull()
+      .default('open'),
+    acknowledgedAt: timestamp('acknowledged_at'),
+    acknowledgedBy: text('acknowledged_by'),
+    incidentRef: text('incident_ref'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (t) => ({
     observedAtIdx: index('ot_ics_frames_observed_at_idx').on(t.observedAt),
     protocolIdx: index('ot_ics_frames_protocol_idx').on(t.protocol),
     assetIdIdx: index('ot_ics_frames_asset_idx').on(t.assetId),
+    triageStatusIdx: index('ot_ics_frames_triage_idx').on(t.triageStatus),
   }),
 );
 

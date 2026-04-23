@@ -64,17 +64,53 @@ async function _fetchJson(url: string, timeoutMs = 10000): Promise<unknown> {
   }
 }
 
+const ATTOM_API_KEY = process.env.ATTOM_API_KEY;
+const COSTAR_API_KEY = process.env.COSTAR_API_KEY;
+const REAL_ESTATE_PROVIDER = process.env.REAL_ESTATE_DATA_PROVIDER ?? 'none';
+
 router.get(
   '/terra/market-intelligence',
   terraRateLimit,
   authMiddleware({ required: false }),
   async (_req, res) => {
     try {
+      const configured = Boolean(ATTOM_API_KEY || COSTAR_API_KEY);
+      if (!configured) {
+        sendSuccess(res, {
+          status: 'NOT_CONFIGURED',
+          note: 'Set ATTOM_API_KEY or COSTAR_API_KEY environment variable to enable live market intelligence. REAL_ESTATE_DATA_PROVIDER can be set to "attom" or "costar" to choose the provider.',
+          provider: REAL_ESTATE_PROVIDER,
+          count: 0,
+          markets: [],
+          fetchedAt: new Date().toISOString(),
+        });
+        return;
+      }
+
+      const cacheKey = `market-intelligence:${REAL_ESTATE_PROVIDER}`;
+      const data = await getCached(cacheKey, 15 * 60 * 1000, async () => {
+        if (REAL_ESTATE_PROVIDER === 'attom' && ATTOM_API_KEY) {
+          const r = await fetch(
+            'https://api.gateway.attomdata.com/propertyapi/v1.0.0/assessment/snapshot?postalcode=10001&pagesize=10',
+            { headers: { apikey: ATTOM_API_KEY, Accept: 'application/json' } },
+          );
+          if (!r.ok) throw new Error(`ATTOM API ${r.status}`);
+          return r.json();
+        }
+        if (COSTAR_API_KEY) {
+          const r = await fetch('https://api.costar.com/v1/market-analytics?market=nyc&limit=10', {
+            headers: { Authorization: `Bearer ${COSTAR_API_KEY}`, Accept: 'application/json' },
+          });
+          if (!r.ok) throw new Error(`CoStar API ${r.status}`);
+          return r.json();
+        }
+        throw new Error('No provider configured');
+      });
+
       sendSuccess(res, {
-        status: 'NOT_CONFIGURED',
-        note: 'Connect a real estate data provider (e.g. ATTOM, Zillow API, CoStar, RealPage) for live market intelligence.',
-        count: 0,
-        markets: [],
+        status: 'ok',
+        provider: REAL_ESTATE_PROVIDER,
+        data,
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {

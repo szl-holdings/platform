@@ -3,6 +3,7 @@ import { bodyShape } from '@szl-holdings/contracts/common';
 import { Router } from 'express';
 import { z } from 'zod';
 import { sendBadRequest, sendError } from '../lib/api-response';
+import { syncAlertStatus } from '../lib/fusion-persistence';
 import { guardSeedInProduction } from '../lib/seed-guard';
 import { anyQuerySchema, listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
@@ -49,6 +50,7 @@ router.post(
   async (req, res) => {
     const ok = fusionCortex.acknowledgeAlert(req.params.id as string);
     if (!ok) return sendError(res, 'Alert not found', 404);
+    void syncAlertStatus(req.params.id as string, 'acknowledged');
     res.json({ success: true, message: 'Alert acknowledged' });
   },
 );
@@ -60,6 +62,7 @@ router.post(
   async (req, res) => {
     const ok = fusionCortex.resolveAlert(req.params.id as string);
     if (!ok) return sendError(res, 'Alert not found', 404);
+    void syncAlertStatus(req.params.id as string, 'resolved');
     res.json({ success: true, message: 'Alert resolved' });
   },
 );

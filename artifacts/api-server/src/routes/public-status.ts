@@ -169,8 +169,64 @@ setInterval(
   },
   5 * 60 * 1000,
 );
+
+// On startup: detect gaps (server-down periods) and backfill them as 'outage'
+// so the 90-day chart shows continuous data rather than blank holes.
+async function backfillGap(): Promise<void> {
+  try {
+    const result = await pool.query<{ last_checked: Date }>(
+      `SELECT MAX(checked_at) AS last_checked FROM platform_status_checks`,
+    );
+    const lastChecked = result.rows[0]?.last_checked;
+    if (!lastChecked) return; // no data yet
+
+    const now = Date.now();
+    const gapMs = now - lastChecked.getTime();
+    const GAP_THRESHOLD_MS = 10 * 60 * 1000; // 10 min
+
+    if (gapMs <= GAP_THRESHOLD_MS) return; // server was only briefly down
+
+    const INTERVAL_MS = 5 * 60 * 1000;
+    const slots: number[] = [];
+    let t = lastChecked.getTime() + INTERVAL_MS;
+    while (t < now - INTERVAL_MS) {
+      slots.push(t);
+      t += INTERVAL_MS;
+    }
+    if (slots.length === 0) return;
+
+    const rows: Array<[string, string, number, Date]> = [];
+    for (const svcId of SERVICES.map((s) => s.id)) {
+      for (const ts of slots) {
+        rows.push([svcId, 'outage', 0, new Date(ts)]);
+      }
+    }
+
+    for (let i = 0; i < rows.length; i += 300) {
+      const batch = rows.slice(i, i + 300);
+      const values = batch
+        .map((_, idx) => `($${idx * 4 + 1}, $${idx * 4 + 2}, $${idx * 4 + 3}, $${idx * 4 + 4})`)
+        .join(',');
+      const params = batch.flatMap((r) => r);
+      await pool.query(
+        `INSERT INTO platform_status_checks (service_id, status, latency_ms, checked_at) VALUES ${values} ON CONFLICT DO NOTHING`,
+        params,
+      );
+    }
+
+    logger.info(
+      { gapMs: Math.round(gapMs / 1000), slots: slots.length, services: SERVICES.length },
+      '[public-status] Backfilled server-down gap with outage entries',
+    );
+  } catch (err) {
+    logger.warn({ err }, '[public-status] Gap backfill failed');
+  }
+}
+
 setTimeout(() => {
-  recordHealthCheck().catch(() => {});
+  backfillGap()
+    .then(() => recordHealthCheck())
+    .catch(() => {});
 }, 3000);
 
 async function getUptimeStats(serviceId: string, days: number): Promise<number> {

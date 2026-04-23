@@ -205,6 +205,32 @@ export default function OtIcsDashboard() {
     },
   });
 
+  const [frameTriageStatus, setFrameTriageStatus] = useState<Record<string, string>>({});
+
+  const acknowledgeMutation = useStandardMutation({
+    mutationFn: (frameId: string) => api.otIcs.acknowledgeFrame(frameId),
+    onSuccess: (data, frameId) => {
+      setFrameTriageStatus((prev) => ({ ...prev, [frameId]: 'acknowledged' }));
+      qc.invalidateQueries({ queryKey: ['ot-ics', 'frames'] });
+    },
+  });
+
+  const falsePositiveMutation = useStandardMutation({
+    mutationFn: (frameId: string) => api.otIcs.markFalsePositive(frameId),
+    onSuccess: (data, frameId) => {
+      setFrameTriageStatus((prev) => ({ ...prev, [frameId]: 'false_positive' }));
+      qc.invalidateQueries({ queryKey: ['ot-ics', 'frames'] });
+    },
+  });
+
+  const openIncidentMutation = useStandardMutation({
+    mutationFn: (frameId: string) => api.otIcs.openIncident(frameId),
+    onSuccess: (data, frameId) => {
+      setFrameTriageStatus((prev) => ({ ...prev, [frameId]: 'incident_opened' }));
+      qc.invalidateQueries({ queryKey: ['ot-ics', 'frames'] });
+    },
+  });
+
   const frames = framesQuery.data ?? [];
   const conversation = conversationQuery.data ?? [];
   const assets = assetsQuery.data ?? [];
@@ -587,6 +613,78 @@ export default function OtIcsDashboard() {
                     </div>
                   </div>
                 </div>
+
+                {(() => {
+                  const triageStatus =
+                    frameTriageStatus[selectedFrame.frameId] ??
+                    (selectedFrame as any).triageStatus ??
+                    'pending';
+                  const isBusy =
+                    acknowledgeMutation.isPending ||
+                    falsePositiveMutation.isPending ||
+                    openIncidentMutation.isPending;
+                  const triageLabel: Record<string, string> = {
+                    pending: 'Pending Review',
+                    acknowledged: 'Acknowledged',
+                    false_positive: 'False Positive',
+                    incident_opened: 'Incident Opened',
+                  };
+                  return (
+                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                            Triage
+                          </span>
+                          <span
+                            className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${
+                              triageStatus === 'acknowledged'
+                                ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10'
+                                : triageStatus === 'false_positive'
+                                  ? 'border-slate-500/30 text-slate-400 bg-slate-500/10'
+                                  : triageStatus === 'incident_opened'
+                                    ? 'border-red-500/30 text-red-400 bg-red-500/10'
+                                    : 'border-amber-500/30 text-amber-400 bg-amber-500/10'
+                            }`}
+                          >
+                            {triageLabel[triageStatus] ?? triageStatus}
+                          </span>
+                        </div>
+                        {triageStatus === 'pending' && (
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <button
+                              disabled={isBusy}
+                              onClick={() =>
+                                acknowledgeMutation.mutate(selectedFrame.frameId)
+                              }
+                              className="text-[11px] px-3 py-1 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/30 disabled:opacity-50 transition-colors"
+                            >
+                              Acknowledge
+                            </button>
+                            <button
+                              disabled={isBusy}
+                              onClick={() =>
+                                falsePositiveMutation.mutate(selectedFrame.frameId)
+                              }
+                              className="text-[11px] px-3 py-1 rounded-lg bg-slate-600/20 border border-slate-500/30 text-slate-400 hover:bg-slate-600/30 disabled:opacity-50 transition-colors"
+                            >
+                              False Positive
+                            </button>
+                            <button
+                              disabled={isBusy}
+                              onClick={() =>
+                                openIncidentMutation.mutate(selectedFrame.frameId)
+                              }
+                              className="text-[11px] px-3 py-1 rounded-lg bg-red-600/20 border border-red-500/30 text-red-400 hover:bg-red-600/30 disabled:opacity-50 transition-colors"
+                            >
+                              Open Incident
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
                   <div className="flex items-center justify-between mb-3">
