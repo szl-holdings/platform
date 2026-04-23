@@ -230,6 +230,7 @@ const OPERATIONS_NAV: NavGroup[] = [
 const OPERATIONS_ADMIN_NAV: NavGroup = {
   section: 'Governance Admin',
   items: [
+    { href: '/admin/command-center', label: 'Command Center', icon: LayoutDashboard },
     { href: '/operations/governance-tiers', label: 'Governance Tiers', icon: ShieldCheck },
     { href: '/operations/guardrail-configs', label: 'Guardrail Configs', icon: Lock },
   ],
@@ -428,6 +429,39 @@ function ConsolesOverviewBadge({ accent }: { accent: string }) {
       title={titleParts.join(' · ')}
     >
       {total > 99 ? '99+' : total}
+    </span>
+  );
+}
+
+function CommandCenterBadge({ accent }: { accent: string }) {
+  const base = (import.meta.env.BASE_URL ?? '/command/').replace(/\/$/, '');
+  const { data } = useQuery<{ total: number }>({
+    queryKey: ['admin', 'command-center-badge'],
+    queryFn: () =>
+      fetch(`${base}/api/admin/command-center/badge`, { credentials: 'include' }).then((r) =>
+        r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)),
+      ),
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+    retry: 0,
+  });
+  const count = data?.total ?? 0;
+  if (!count) return null;
+  return (
+    <span
+      className="text-[8px] font-mono font-bold px-1 rounded shrink-0"
+      style={{
+        color: accent,
+        background: `${accent}1a`,
+        border: `1px solid ${accent}40`,
+        minWidth: 14,
+        textAlign: 'center',
+        lineHeight: '13px',
+      }}
+      data-testid="command-center-badge"
+      title={`${count} pending item${count === 1 ? '' : 's'}`}
+    >
+      {count > 99 ? '99+' : count}
     </span>
   );
 }
@@ -903,6 +937,8 @@ function UnifiedLayoutInner({
                     <PendingApprovalsBadge accent={accent} />
                   ) : item.href === '/cognitive/overview' ? (
                     <ConsolesOverviewBadge accent={accent} />
+                  ) : item.href === '/admin/command-center' ? (
+                    <CommandCenterBadge accent={accent} />
                   ) : undefined;
                 return (
                   <NavItem

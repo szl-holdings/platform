@@ -17,7 +17,7 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { fetchJson } from './cognitive/shared';
 
@@ -460,6 +460,7 @@ function ApprovalRow({
 
   return (
     <div
+      id={`approval-row-${approval.id}`}
       className="rounded border"
       style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.015)' }}
     >
@@ -612,6 +613,10 @@ function ApprovalRow({
 export default function PolicyApprovalsPage() {
   const [tab, setTab] = useState<Tab>('pending');
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [deepLinkedRequestId] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('requestId');
+  });
   const qc = useQueryClient();
 
   const approvalsQ = useStandardQuery<ListResponse<ActionApproval>>({
@@ -662,6 +667,18 @@ export default function PolicyApprovalsPage() {
   const all = approvalsQ.data?.data ?? [];
   const pending = all.filter((a) => a.status === 'pending');
   const history = all.filter((a) => a.status !== 'pending');
+
+  useEffect(() => {
+    if (!deepLinkedRequestId || all.length === 0) return;
+    const matched = all.find((a) => a.requestId === deepLinkedRequestId || String(a.id) === deepLinkedRequestId);
+    if (!matched) return;
+    const isPending = matched.status === 'pending';
+    setTab(isPending ? 'pending' : 'history');
+    setExpandedId(matched.id);
+    requestAnimationFrame(() => {
+      document.getElementById(`approval-row-${matched.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }, [deepLinkedRequestId, all]);
 
   const visible = tab === 'pending' ? pending : history;
   const isLoading = approvalsQ.isLoading;

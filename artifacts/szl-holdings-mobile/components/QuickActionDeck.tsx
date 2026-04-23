@@ -5,6 +5,7 @@ import React, { useCallback } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
+  Linking,
   Platform,
   StyleSheet,
   Text,
@@ -255,6 +256,20 @@ function ActionCard({ action, isTop, index, onSwipeLeft, onSwipeRight, colors }:
         <Text style={[styles.swipeHint, { color: colors.mutedForeground }]}>
           ← Swipe to deny · Swipe to approve →
         </Text>
+
+        <TouchableOpacity
+          style={styles.auditTrailBtn}
+          onPress={() => {
+            const domain = process.env.EXPO_PUBLIC_DOMAIN;
+            const base = domain ? `https://${domain}` : '';
+            Linking.openURL(`${base}/command/operations/policy-approvals?requestId=${encodeURIComponent(action.id)}`).catch(() => {});
+          }}
+        >
+          <Feather name="file-text" size={10} color={colors.mutedForeground} />
+          <Text style={[styles.auditTrailText, { color: colors.mutedForeground }]}>
+            View Audit Trail
+          </Text>
+        </TouchableOpacity>
       </Animated.View>
     </GestureDetector>
   );
@@ -546,8 +561,21 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: 'Inter_400Regular',
     textAlign: 'center',
-    paddingBottom: 10,
+    paddingBottom: 6,
     letterSpacing: 0.3,
+  },
+  auditTrailBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingBottom: 10,
+  },
+  auditTrailText: {
+    fontSize: 10,
+    fontFamily: 'Inter_400Regular',
+    letterSpacing: 0.2,
+    textDecorationLine: 'underline',
   },
   emptyDeck: {
     flex: 1,

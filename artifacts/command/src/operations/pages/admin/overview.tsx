@@ -1,12 +1,16 @@
-import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
+import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import {
   Activity,
   AlertTriangle,
+  CheckCircle2,
+  Circle,
   Clock,
   Database,
   HardDrive,
   Layers,
+  RefreshCw,
   Server,
   Users,
   Zap,
@@ -47,6 +51,25 @@ function formatBytes(b: number) {
   return `${(b / 1073741824).toFixed(1)} GB`;
 }
 
+interface OrgOnboardingStatus {
+  orgId: number;
+  orgName: string;
+  orgSlug: string;
+  orgStatus: string;
+  createdAt: string;
+  onboardingStatus: 'completed' | 'in_progress' | 'not_started';
+  completedAt: string | null;
+  currentStep: string;
+  completedSteps: string[];
+  stepsTotal: number;
+  stepsCompleted: number;
+}
+interface OnboardingStatusResponse {
+  timestamp: string;
+  summary: { total: number; completed: number; inProgress: number; notStarted: number };
+  orgs: OrgOnboardingStatus[];
+}
+
 function StatusDot({ status }: { status: string }) {
   const color =
     status === 'healthy' || status === 'active'
@@ -62,6 +85,24 @@ export default function AdminOverview() {
     queryKey: ['admin-overview'],
     queryFn: () => apiFetch('/admin/overview'),
     refetchInterval: 30000,
+  });
+
+  const onboardingQuery = useStandardQuery<OnboardingStatusResponse>({
+    queryKey: ['admin-onboarding-status'],
+    queryFn: () => apiFetch('/admin/orgs/onboarding-status'),
+    refetchInterval: 60000,
+  });
+
+  const resetOnboarding = useStandardMutation({
+    mutationFn: (orgId: number) =>
+      apiFetch(`/admin/orgs/${orgId}/reset-onboarding`, { method: 'POST' }),
+    onSuccess: (_result, orgId) => {
+      toast.success(`Onboarding reset for org #${orgId}`);
+    },
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : 'Failed to reset onboarding';
+      toast.error(message);
+    },
   });
 
   if (isLoading)
@@ -234,6 +275,110 @@ export default function AdminOverview() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card">
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <h3 className="text-sm font-semibold flex items-center gap-2">
+            <Users className="w-4 h-4 text-primary" />
+            Organization Onboarding Status
+            {onboardingQuery.data && (
+              <span className="text-xs font-normal text-muted-foreground ml-1">
+                ({onboardingQuery.data.summary.completed}/{onboardingQuery.data.summary.total} completed)
+              </span>
+            )}
+          </h3>
+          {onboardingQuery.data && (
+            <div className="flex items-center gap-3 text-[10px]">
+              <span className="flex items-center gap-1 text-[#6b8f71]">
+                <CheckCircle2 className="w-3 h-3" />
+                {onboardingQuery.data.summary.completed} done
+              </span>
+              <span className="flex items-center gap-1 text-[#d4a054]">
+                <Circle className="w-3 h-3" />
+                {onboardingQuery.data.summary.inProgress} in progress
+              </span>
+              <span className="flex items-center gap-1 text-muted-foreground">
+                <Circle className="w-3 h-3" />
+                {onboardingQuery.data.summary.notStarted} not started
+              </span>
+            </div>
+          )}
+        </div>
+        {onboardingQuery.isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : onboardingQuery.isError || !onboardingQuery.data ? (
+          <div className="p-4 text-xs text-muted-foreground flex items-center gap-2">
+            <AlertTriangle className="w-3.5 h-3.5 text-[#d4a054]" />
+            Unable to load onboarding status.
+          </div>
+        ) : onboardingQuery.data.orgs.length === 0 ? (
+          <div className="p-4 text-xs text-muted-foreground text-center py-6">
+            No organizations found.
+          </div>
+        ) : (
+          <div className="divide-y divide-border">
+            {onboardingQuery.data.orgs.map((org) => {
+              const statusColor =
+                org.onboardingStatus === 'completed'
+                  ? '#6b8f71'
+                  : org.onboardingStatus === 'in_progress'
+                    ? '#d4a054'
+                    : 'rgba(255,255,255,0.3)';
+              const pct = org.stepsTotal > 0 ? Math.round((org.stepsCompleted / org.stepsTotal) * 100) : 0;
+              return (
+                <div key={org.orgId} className="px-4 py-3 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className="inline-block w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: statusColor }}
+                    />
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium truncate">{org.orgName}</div>
+                      <div className="text-[10px] text-muted-foreground font-mono">{org.orgSlug}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 shrink-0">
+                    <div className="text-right">
+                      <div className="text-[10px] text-muted-foreground capitalize">
+                        {org.onboardingStatus === 'not_started'
+                          ? 'Not started'
+                          : org.onboardingStatus === 'in_progress'
+                            ? `Step: ${org.currentStep}`
+                            : 'Completed'}
+                      </div>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <div className="w-20 h-1 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full"
+                            style={{ width: `${pct}%`, backgroundColor: statusColor }}
+                          />
+                        </div>
+                        <span className="text-[9px] text-muted-foreground font-mono">
+                          {org.stepsCompleted}/{org.stepsTotal}
+                        </span>
+                      </div>
+                    </div>
+                    {org.onboardingStatus !== 'not_started' && (
+                      <button
+                        onClick={() => resetOnboarding.mutate(org.orgId)}
+                        disabled={resetOnboarding.isPending}
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-semibold border border-border text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                        title="Reset onboarding wizard — org can restart from step 1"
+                        data-testid={`button-reset-onboarding-${org.orgId}`}
+                      >
+                        <RefreshCw className="w-2.5 h-2.5" />
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

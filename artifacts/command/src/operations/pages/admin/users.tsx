@@ -2,11 +2,26 @@ import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Clock, History, LogOut, Mail, Shield, UserPlus, Users } from 'lucide-react';
+import { AlertTriangle, Clock, History, LogOut, Mail, Shield, ShieldCheck, UserPlus, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useRoute } from 'wouter';
 
 type PageRoleFilter = 'recipient' | 'actor' | 'both';
+
+interface RoleHistoryEntry {
+  id: number;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  oldValues: unknown;
+  newValues: unknown;
+  createdAt: string;
+}
+interface RoleHistoryResponse {
+  userId: number;
+  total: number;
+  history: RoleHistoryEntry[];
+}
 
 interface PagingActor {
   id: number;
@@ -75,6 +90,7 @@ export default function AdminUsers() {
   const [, params] = useRoute<{ id: string }>('/admin/users/:id');
   const focusId = params?.id ?? null;
   const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const focusedRowRef = useRef<HTMLDivElement | null>(null);
@@ -116,18 +132,26 @@ export default function AdminUsers() {
     enabled: !!numericFocusId,
   });
 
+  const roleHistoryQuery = useStandardQuery<RoleHistoryResponse>({
+    queryKey: ['admin-user-role-history', numericFocusId],
+    queryFn: () => apiFetch(`/admin/users/${numericFocusId}/role-history`),
+    enabled: !!numericFocusId,
+  });
+
   const users = data?.users ?? [];
   const matchesFocus = (u: UserInfo): boolean => {
     if (!focusId) return false;
     return u.id === focusId || u.id === `usr_${focusId}` || u.id.replace(/^usr_/, '') === focusId;
   };
-  const filtered = search
-    ? users.filter(
-        (u) =>
-          u.name.toLowerCase().includes(search.toLowerCase()) ||
-          u.email.toLowerCase().includes(search.toLowerCase()),
-      )
-    : users;
+  const uniqueRoles = Array.from(new Set(users.map((u) => u.role).filter(Boolean))).sort();
+  const filtered = users.filter((u) => {
+    const matchesSearch =
+      !search ||
+      u.name.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase());
+    const matchesRole = !roleFilter || u.role === roleFilter;
+    return matchesSearch && matchesRole;
+  });
   const focusedUser = focusId ? (users.find(matchesFocus) ?? null) : null;
   const focusMissing = !!focusId && !isLoading && !focusedUser;
 
@@ -299,14 +323,94 @@ export default function AdminUsers() {
         </div>
       )}
 
+      {focusedUser && (
+        <div className="rounded-xl border border-border bg-card" data-testid="card-role-history">
+          <div className="px-4 py-3 border-b border-border flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-primary" />
+            <span className="text-sm font-semibold">Role change history</span>
+            <span className="text-xs font-normal text-muted-foreground">
+              — {focusedUser.name}
+              {roleHistoryQuery.data?.total != null && (
+                <span className="opacity-60"> ({roleHistoryQuery.data.total})</span>
+              )}
+            </span>
+          </div>
+          <div className="p-4">
+            {roleHistoryQuery.isLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : roleHistoryQuery.isError ? (
+              <div className="flex items-center gap-2 text-xs text-[#c45a4a]">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Failed to load role history.
+              </div>
+            ) : !roleHistoryQuery.data || roleHistoryQuery.data.history.length === 0 ? (
+              <div className="text-xs text-muted-foreground text-center py-4">
+                No role changes recorded for this user.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                {roleHistoryQuery.data.history.map((entry) => {
+                  const isAssigned = entry.action === 'user.role.assigned';
+                  const color = isAssigned ? '#6b8f71' : '#c45a4a';
+                  const newVals = entry.newValues as Record<string, unknown> | null;
+                  const oldVals = entry.oldValues as Record<string, unknown> | null;
+                  const roleLabel = (newVals?.roleName ?? oldVals?.roleName ?? newVals?.role ?? oldVals?.role ?? entry.entityId ?? '—') as string;
+                  return (
+                    <div
+                      key={entry.id}
+                      className="px-2.5 py-2 rounded-md text-[11px] bg-muted/30"
+                      style={{ borderLeft: `3px solid ${color}` }}
+                      title={new Date(entry.createdAt).toLocaleString()}
+                      data-testid={`row-role-history-${entry.id}`}
+                    >
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span
+                          className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
+                          style={{
+                            color,
+                            backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)`,
+                            border: `1px solid color-mix(in srgb, ${color} 35%, transparent)`,
+                          }}
+                        >
+                          {isAssigned ? 'assigned' : 'removed'}
+                        </span>
+                        <span className="font-semibold">{roleLabel}</span>
+                        <span className="font-mono ml-auto text-muted-foreground">
+                          {formatPageTime(entry.createdAt)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="rounded-xl border border-border bg-card">
-        <div className="p-4 border-b border-border flex items-center gap-3">
+        <div className="p-4 border-b border-border flex items-center gap-3 flex-wrap">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search users..."
-            className="flex-1 text-sm bg-muted rounded-lg px-3 py-1.5 border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+            className="flex-1 min-w-[160px] text-sm bg-muted rounded-lg px-3 py-1.5 border border-border focus:outline-none focus:ring-1 focus:ring-primary"
           />
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            data-testid="role-filter-select"
+            className="text-xs bg-muted rounded-lg px-2.5 py-1.5 border border-border focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
+          >
+            <option value="">All roles</option>
+            {uniqueRoles.map((r) => (
+              <option key={r} value={r}>
+                {r.charAt(0).toUpperCase() + r.slice(1)}
+              </option>
+            ))}
+          </select>
         </div>
         {isLoading ? (
           <div className="flex items-center justify-center py-12">

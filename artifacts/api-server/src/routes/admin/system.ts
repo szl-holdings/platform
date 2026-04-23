@@ -4,8 +4,12 @@ import {
   billingPlansTable, subscriptionsTable, invoicesTable, entitlementsTable, usageEventsTable,
   platformJobRunsTable, artifactApprovalsTable,
   lyteSignalsTable,
+  auditEventsTable,
+  organizationsTable,
+  supportTicketsTable,
 } from "@szl-holdings/db";
 import { seedLyteObservability } from "../../lib/lyte-observability-seed.js";
+import { seedQuickActions } from "../../lib/seed-quick-actions.js";
 import { desc, sql, eq, and, } from "drizzle-orm";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
@@ -410,8 +414,8 @@ export function register(router: IRouter): void {
   router.post("/admin/seed", validateBody(adminSeedSchema), async (_req, res) => {
     if (guardSeedInProduction(res)) return;
     try {
-      const results = await seedLyteObservability();
-      res.json({ success: true, seededAt: new Date().toISOString(), tables: Object.entries(results).map(([name, rows]) => ({ name, rows })) });
+      const [lyteResults, qaResults] = await Promise.all([seedLyteObservability(), seedQuickActions()]);
+      res.json({ success: true, seededAt: new Date().toISOString(), tables: Object.entries(lyteResults).map(([name, rows]) => ({ name, rows })), quickActions: qaResults });
     } catch (err: any) {
       logger.error({ err }, "[admin/seed] Error");
       sendError(res, err?.message ?? "Seed failed", 500, "SEED_ERROR");
@@ -421,8 +425,8 @@ export function register(router: IRouter): void {
   router.post("/admin/seed/reset", validateBody(adminSeedSchema), async (_req, res) => {
     if (guardSeedInProduction(res)) return;
     try {
-      const results = await seedLyteObservability();
-      res.json({ success: true, resetAt: new Date().toISOString(), message: "All observability data re-seeded", tables: Object.entries(results).map(([name, rows]) => ({ name, rows })) });
+      const [lyteResults, qaResults] = await Promise.all([seedLyteObservability(), seedQuickActions()]);
+      res.json({ success: true, resetAt: new Date().toISOString(), message: "All observability and quick-action data re-seeded", tables: Object.entries(lyteResults).map(([name, rows]) => ({ name, rows })), quickActions: qaResults });
     } catch (err: any) {
       logger.error({ err }, "[admin/seed/reset] Error");
       sendError(res, err?.message ?? "Reset failed", 500, "SEED_ERROR");
@@ -617,5 +621,142 @@ export function register(router: IRouter): void {
       warnings: result.warnings,
       envSummary: result.envSummary,
     });
+  });
+
+  router.get("/admin/command-center/badge", async (_req, res) => {
+    try {
+      const [openTickets, unresolvedAlerts] = await Promise.all([
+        db
+          .select({ count: sql<number>`COUNT(*)::int` })
+          .from(supportTicketsTable)
+          .where(sql`${supportTicketsTable.status} IN ('open', 'in_progress')`)
+          .then((rows) => rows[0]?.count ?? 0),
+        db
+          .select({ count: sql<number>`COUNT(*)::int` })
+          .from(lyteSignalsTable)
+          .where(eq(lyteSignalsTable.status, "open"))
+          .then((rows) => rows[0]?.count ?? 0),
+      ]);
+      const total = openTickets + unresolvedAlerts;
+      res.json({
+        timestamp: new Date().toISOString(),
+        total,
+        openSupportTickets: openTickets,
+        unresolvedAlerts,
+      });
+    } catch (_err) {
+      res.json({ timestamp: new Date().toISOString(), total: 0, openSupportTickets: 0, unresolvedAlerts: 0 });
+    }
+  });
+
+  router.get("/admin/users/:id/role-history", async (req, res) => {
+    const rawId = (req.params as Record<string, string>).id;
+    const userId = parseInt(rawId.replace(/^usr_/, ""), 10);
+    if (Number.isNaN(userId)) { sendBadRequest(res, "Invalid user ID"); return; }
+    try {
+      const events = await db
+        .select()
+        .from(auditEventsTable)
+        .where(
+          and(
+            eq(auditEventsTable.entityType, "user"),
+            eq(auditEventsTable.entityId, String(userId)),
+            sql`${auditEventsTable.action} IN ('user.role.assigned', 'user.role.removed')`,
+          ),
+        )
+        .orderBy(desc(auditEventsTable.createdAt))
+        .limit(100);
+
+      const history = events.map((e) => ({
+        id: e.id,
+        action: e.action,
+        entityType: e.entityType,
+        entityId: e.entityId,
+        oldValues: e.oldValues,
+        newValues: e.newValues,
+        ipAddress: e.ipAddress,
+        createdAt: e.createdAt instanceof Date ? e.createdAt.toISOString() : e.createdAt,
+      }));
+
+      res.json({ userId, total: history.length, history });
+    } catch (_err) {
+      sendError(res, "Failed to load role history", 500, "INTERNAL_ERROR");
+    }
+  });
+
+  router.get("/admin/orgs/onboarding-status", async (_req, res) => {
+    try {
+      const orgs = await db
+        .select({ id: organizationsTable.id, name: organizationsTable.name, slug: organizationsTable.slug, status: organizationsTable.status, createdAt: organizationsTable.createdAt })
+        .from(organizationsTable)
+        .orderBy(organizationsTable.name)
+        .limit(200);
+
+      const wizardRows = await pool.query<{
+        org_id: number;
+        current_step: string;
+        completed_steps: string[];
+        completed_at: string | null;
+      }>(
+        `SELECT org_id, current_step, completed_steps, completed_at FROM onboarding_wizard_state`,
+      );
+
+      const wizardByOrg = new Map(wizardRows.rows.map((r) => [r.org_id, r]));
+
+      const WIZARD_STEPS = ["profile", "team", "notifications", "integrations"];
+
+      const result = orgs.map((org) => {
+        const wizard = wizardByOrg.get(org.id);
+        const completedSteps: string[] = wizard?.completed_steps ?? [];
+        const isCompleted = !!wizard?.completed_at;
+        const currentStep = wizard?.current_step ?? "profile";
+        return {
+          orgId: org.id,
+          orgName: org.name,
+          orgSlug: org.slug,
+          orgStatus: org.status,
+          createdAt: org.createdAt instanceof Date ? org.createdAt.toISOString() : org.createdAt,
+          onboardingStatus: isCompleted ? "completed" : wizard ? "in_progress" : "not_started",
+          completedAt: wizard?.completed_at ?? null,
+          currentStep,
+          completedSteps,
+          stepsTotal: WIZARD_STEPS.length,
+          stepsCompleted: completedSteps.length,
+        };
+      });
+
+      const summary = {
+        total: result.length,
+        completed: result.filter((r) => r.onboardingStatus === "completed").length,
+        inProgress: result.filter((r) => r.onboardingStatus === "in_progress").length,
+        notStarted: result.filter((r) => r.onboardingStatus === "not_started").length,
+      };
+
+      res.json({ timestamp: new Date().toISOString(), summary, orgs: result });
+    } catch (_err) {
+      sendError(res, "Failed to load onboarding status", 500, "INTERNAL_ERROR");
+    }
+  });
+
+  router.post("/admin/orgs/:id/reset-onboarding", async (req, res) => {
+    const rawId = (req.params as Record<string, string>).id;
+    const orgId = parseInt(rawId, 10);
+    if (Number.isNaN(orgId)) { sendBadRequest(res, "Invalid org ID"); return; }
+    try {
+      const orgRows = await db
+        .select({ id: organizationsTable.id, name: organizationsTable.name })
+        .from(organizationsTable)
+        .where(eq(organizationsTable.id, orgId))
+        .limit(1);
+      if (!orgRows[0]) { sendNotFound(res, "Organization not found"); return; }
+      await pool.query(
+        `DELETE FROM onboarding_wizard_state WHERE org_id = $1`,
+        [orgId],
+      );
+      await logActivity(req, "reset_onboarding", "organization", String(orgId), `Reset onboarding wizard for org ${orgId} (${orgRows[0].name})`);
+      res.json({ success: true, orgId, orgName: orgRows[0].name, resetAt: new Date().toISOString(), message: "Onboarding wizard state cleared — org can restart from step 1" });
+    } catch (_err) {
+      sendError(res, "Failed to reset onboarding", 500, "INTERNAL_ERROR");
+    }
   });
 }
