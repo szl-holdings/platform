@@ -27,6 +27,12 @@ import { and, desc, eq, ne, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { sendBadRequest } from '../lib/api-response';
+import {
+  FusionQueryCache,
+  buildCacheKey,
+  buildSignalFingerprint,
+  normalizeQuery,
+} from '../lib/fusion-query-cache';
 import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
@@ -68,7 +74,15 @@ interface FusedQueryResponse {
   overallRisk: 'critical' | 'high' | 'medium' | 'low' | 'nominal';
   confidence: number;
   liveDataSources?: string[];
+  cacheHit?: boolean;
 }
+
+interface CachedResponse {
+  response: FusedQueryResponse;
+  fusedAnswerSource: 'llm' | 'template';
+}
+
+const fusionCache = new FusionQueryCache<CachedResponse>({ ttlSeconds: 90, maxSize: 200 });
 
 interface LiveDomainData {
   aegis: {
@@ -938,6 +952,8 @@ router.post(
     }
 
     const trimmed = query.trim().slice(0, 500);
+    const normalized = normalizeQuery(trimmed);
+    const userId = req.user?.id?.toString() ?? 'anon';
     const wantsStream =
       req.query.stream === '1' ||
       (req.headers.accept ?? '').includes('text/event-stream');
@@ -983,6 +999,16 @@ router.post(
         },
         fetchedAt: Date.now(),
       };
+    }
+
+    const fingerprint = buildSignalFingerprint(live);
+    const cacheKey = buildCacheKey(userId, normalized, fingerprint);
+
+    const cached = fusionCache.get(cacheKey);
+    if (cached) {
+      logger.info({ cacheSize: fusionCache.size }, '[CrossDomainQuery] Cache hit');
+      const hit = { ...cached.response, answeredAt: Date.now(), cacheHit: true };
+      return res.json({ success: true, result: hit, fusedAnswerSource: cached.fusedAnswerSource });
     }
 
     const domains = identifyDomains(trimmed);
@@ -1075,6 +1101,23 @@ router.post(
         if (!streamed.trim()) throw new Error('LLM returned empty content');
         sendEvent('done', { fusedAnswerSource: 'llm' });
         logger.info({ chars: streamed.length }, '[CrossDomainQuery] Streamed LLM answer');
+
+        const streamedResponse: FusedQueryResponse = {
+          query: trimmed,
+          intent,
+          answeredAt: Date.now(),
+          domainsQueried: domains,
+          domainResults,
+          fusedAnswer: streamed,
+          correlations,
+          recommendedActions,
+          overallRisk,
+          confidence,
+          liveDataSources: liveDataSources.length > 0 ? liveDataSources : undefined,
+          cacheHit: false,
+        };
+        fusionCache.set(cacheKey, { response: streamedResponse, fusedAnswerSource: 'llm' });
+        logger.info({ cacheSize: fusionCache.size }, '[CrossDomainQuery] Cached streamed LLM response');
       } catch (err) {
         logger.warn({ err, streamedChars: streamed.length }, '[CrossDomainQuery] Stream failed, sending template fallback');
         const templateAnswer = generateFusedAnswer(trimmed, domains, domainResults, live);
@@ -1108,7 +1151,13 @@ router.post(
       overallRisk,
       confidence,
       liveDataSources: liveDataSources.length > 0 ? liveDataSources : undefined,
+      cacheHit: false,
     };
+
+    if (fusedAnswerSource === 'llm') {
+      fusionCache.set(cacheKey, { response, fusedAnswerSource });
+      logger.info({ cacheSize: fusionCache.size }, '[CrossDomainQuery] Cached LLM response');
+    }
 
     res.json({ success: true, result: response, fusedAnswerSource });
   },
