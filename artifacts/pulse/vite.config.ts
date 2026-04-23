@@ -4,71 +4,12 @@ import react from '@vitejs/plugin-react';
 import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig } from 'vite';
-import { CANONICAL_FALLBACK_PORT, PROXY_ROUTES } from '../../packages/proxy-routes.js';
+import { sharedProxyPlugin } from '../../packages/proxy-routes.js';
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
 const port = Number(process.env.VITE_PORT) || 5201;
 const basePath = process.env.BASE_PATH || '/pulse/';
-
-// Shared proxy port — hardcoded; do not use a PROXY_PORT env var to override this.
-const SHARED_PROXY_PORT = 9090;
-
-function sharedProxyPlugin() {
-  return {
-    name: 'shared-proxy',
-    apply: 'serve' as const,
-    async configureServer() {
-      const http = await import('node:http');
-      const proxyServer = http.createServer((req, res) => {
-        const url = req.url || '/';
-        if (url === '/__health') {
-          res.writeHead(200, { 'Content-Type': 'text/plain' });
-          res.end('OK');
-          return;
-        }
-        const normalizedUrl = url.endsWith('/') ? url : `${url}/`;
-        const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
-        const targetPort = route ? route.port : CANONICAL_FALLBACK_PORT;
-        const upstream = http.request(
-          {
-            hostname: '127.0.0.1',
-            port: targetPort,
-            path: url,
-            method: req.method,
-            headers: { ...req.headers, host: `localhost:${targetPort}` },
-          },
-          (upRes) => {
-            res.writeHead(upRes.statusCode || 200, upRes.headers);
-            upRes.pipe(res, { end: true });
-          },
-        );
-        upstream.on('error', () => {
-          if (!res.headersSent) {
-            res.writeHead(503, { 'Content-Type': 'text/plain' });
-            res.end(`Upstream not ready on port ${targetPort}`);
-          }
-        });
-        req.pipe(upstream, { end: true });
-      });
-      await new Promise<void>((resolve) => {
-        let settled = false;
-        const finish = () => {
-          if (!settled) {
-            settled = true;
-            resolve();
-          }
-        };
-        proxyServer.once('error', (_err: NodeJS.ErrnoException) => {
-          finish();
-        });
-        proxyServer.listen({ port: SHARED_PROXY_PORT, host: '::', reusePort: true }, () => {
-          finish();
-        });
-      });
-    },
-  };
-}
 
 const libRoot = path.resolve(import.meta.dirname, '../../lib');
 const packagesRoot = path.resolve(import.meta.dirname, '../../packages');
@@ -161,14 +102,14 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    holdUntilCrawlEnd: true,
+    holdUntilCrawlEnd: false,
   },
   server: {
     port,
     strictPort: true,
     host: '0.0.0.0',
     allowedHosts: true,
-    hmr: { clientPort: 443 },
+    hmr: { clientPort: 443, path: basePath },
     fs: {
       strict: false,
       deny: ['**/.*'],

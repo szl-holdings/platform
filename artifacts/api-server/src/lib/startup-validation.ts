@@ -426,12 +426,38 @@ export function validateStartupConfig(): ValidationResult {
     isProduction = process.env.NODE_ENV === 'production';
   }
 
-  if (isProduction && !process.env.DATABASE_URL) {
-    warnings.push('DATABASE_URL not set in production — database features will be unavailable');
+  if (!process.env.DATABASE_URL) {
+    if (isProduction) {
+      errors.push(
+        'DATABASE_URL is not set — the server cannot connect to the database and will not start. ' +
+          'Set DATABASE_URL in Replit Secrets (see docs/SECRETS_POLICY.md).',
+      );
+    } else {
+      warnings.push('DATABASE_URL not set — database features will be unavailable');
+    }
   }
 
-  if (isProduction && !process.env.SESSION_SECRET) {
-    warnings.push('SESSION_SECRET not set in production — sessions will use insecure default');
+  const sessionSecret = process.env.SESSION_SECRET;
+  if (!sessionSecret) {
+    if (isProduction) {
+      errors.push(
+        'SESSION_SECRET is not set — the server will not start without a session signing secret. ' +
+          'Generate a secure 64-char random value and set it in Replit Secrets.',
+      );
+    } else {
+      warnings.push('SESSION_SECRET not set — sessions will use an insecure default (not safe for production)');
+    }
+  } else if (sessionSecret.length < 32) {
+    if (isProduction) {
+      errors.push(
+        `SESSION_SECRET is too short (${sessionSecret.length} chars, minimum 32) — replace with a ` +
+          'cryptographically random value of at least 32 characters.',
+      );
+    } else {
+      warnings.push(
+        `SESSION_SECRET is short (${sessionSecret.length} chars) — use at least 32 characters in production`,
+      );
+    }
   }
 
   if (isProduction && !process.env.CORS_ORIGINS) {

@@ -332,6 +332,55 @@
       "breakpoints": true
     },
     {
+      "idx": 47,
+      "version": "7",
+      "when": 1776403000000,
+      "tag": "0047_guardian_autonomy_tiers",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1776413000000,
+      "tag": "0048_pulse_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1776422000000,
+      "tag": "0049_constellation_saved_views",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1776432000000,
+      "tag": "0050_executive_briefing_engine",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1776441000000,
+      "tag": "0051_terra_modules",
+      "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1776451000000,
+      "tag": "0052_terra_covenants",
+      "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1776460000000,
+      "tag": "0053_fund_inbound_deals_attachments",
+      "breakpoints": true
+    },
+    {
       "idx": 54,
       "version": "7",
       "when": 1776461300000,
