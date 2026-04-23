@@ -48,6 +48,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppModeBanner } from '@/components/AppModeBanner';
 import { ErrorFallback } from '@/components/ErrorFallback';
 import { AUTH_TOKEN_KEY, AuthProvider, setLastKnownAppPath } from '@/context/AuthContext';
+import { SessionRevocationToast } from '@/components/SessionRevocationToast';
 import { ScreenshotGuardProvider } from '@/context/ScreenshotGuardContext';
 import { WorkspaceProvider } from '@/context/WorkspaceContext';
 import { useEscalatedApprovalNotifier } from '@/hooks/operations/useEscalatedApprovalNotifier';
@@ -354,6 +355,7 @@ export default function RootLayout() {
                             <View style={{ flex: 1 }}>
                               <AppModeBanner />
                               <AppShell />
+                              <SessionRevocationToast />
                               <OfflineBanner accentColor="#c9a84c" />
                               <SyncStatusBanner accentColor="#c9a84c" />
                               <ConflictResolutionModal accentColor="#c9a84c" />

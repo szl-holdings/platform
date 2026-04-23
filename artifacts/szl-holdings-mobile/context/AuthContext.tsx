@@ -128,7 +128,7 @@ export function getSessionRevocation(): SessionRevocationInfo | null {
   return _latestRevocation;
 }
 
-function subscribeSessionRevocation(
+export function subscribeSessionRevocation(
   listener: (info: SessionRevocationInfo | null) => void,
 ): () => void {
   REVOCATION_LISTENERS.add(listener);
