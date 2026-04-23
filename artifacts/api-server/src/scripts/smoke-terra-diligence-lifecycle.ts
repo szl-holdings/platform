@@ -390,14 +390,26 @@ async function run() {
   await testMissingLabel();
   await testPatchInvalidStatus();
 
-  if (errors.length === 0) {
-    process.exit(0);
-  } else {
-    errors.forEach((_e) => {});
+  const isCI = !!process.env.CI;
+
+  if (isCI && _skipped > 0) {
+    console.error(`\n❌ FAIL: ${_skipped} section(s) skipped — skips are treated as hard failures in CI.`);
+    console.error('   Ensure ALLOY_INTERNAL_TOKEN or TERRA_DILIGENCE_TOKEN is set with /api/terra/ scope.\n');
     process.exit(1);
   }
+
+  if (errors.length > 0) {
+    console.error(`\n❌ FAIL: ${errors.length} assertion(s) failed:\n`);
+    errors.forEach((e) => console.error(`  • ${e}`));
+    console.error('');
+    process.exit(1);
+  }
+
+  console.log(`\n✅ PASS: ${_passed} assertion(s) passed, ${_skipped} skipped.\n`);
+  process.exit(0);
 }
 
-run().catch((_err) => {
+run().catch((err) => {
+  console.error('\n❌ Unhandled error in smoke test runner:', err);
   process.exit(1);
 });
