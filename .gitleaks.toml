@@ -9,6 +9,12 @@
 # suppress well-understood false positives.
 #
 # Docs: https://github.com/gitleaks/gitleaks
+#
+# ── Tuning history ────────────────────────────────────────────────────────────
+# Initial config  — pre-CI baseline (known static patterns in source tree)
+# 2026-04-23 tune — post first real CI runs; added suppressions for patterns
+#                   observed as false positives and tightened custom rules
+#                   based on actual scan output (Task #1443).
 # ─────────────────────────────────────────────────────────────────────────────
 
 title = "SZL Holdings — Secret Scanning Policy"
@@ -59,6 +65,21 @@ useDefault = true
     # placeholder values. They are never real credentials.
     "\\.env\\.example$",
 
+    # Firebase config template files for the mobile app. These files only
+    # contain PLACEHOLDER_* values; real google-services.json and
+    # GoogleService-Info.plist are generated at EAS build time from secrets
+    # and are gitignored.
+    # Ref: artifacts/szl-holdings-mobile/google-services.json
+    # Ref: artifacts/szl-holdings-mobile/GoogleService-Info.plist
+    "artifacts/szl-holdings-mobile/google-services\\.json",
+    "artifacts/szl-holdings-mobile/GoogleService-Info\\.plist",
+    "artifacts/szl-holdings-mobile/google-services\\.json\\.template",
+    "artifacts/szl-holdings-mobile/GoogleService-Info\\.plist\\.template",
+    "artifacts/szl-holdings-mobile/google-services\\.example\\.json",
+    "artifacts/szl-holdings-mobile/GoogleService-Info\\.example\\.plist",
+    "artifacts/szl-holdings-mobile/google-play-service-account\\.json\\.template",
+    "artifacts/szl-holdings-mobile/google-play-service-account\\.example\\.json",
+
     # ── Specific source files with named false positives ─────────────────────
 
     # Certification readiness route: `requirementKey` is a domain data field
@@ -91,6 +112,38 @@ useDefault = true
     # INTEGRATION_TEST_TOKEN environment variable and defaults to "".
     # No hardcoded token value is present in source.
     "tests/api/server-live\\.test\\.ts",
+
+    # Vitest test bootstrap: sets ALLOY_INTERNAL_TOKEN to a clearly-labeled
+    # non-secret 'vitest-internal-token-...' constant when the env var is
+    # absent, so tests can boot without real credentials.
+    # Ref: artifacts/api-server/src/__tests__/helpers/test-env-bootstrap.ts
+    "artifacts/api-server/src/__tests__/helpers/test-env-bootstrap\\.ts",
+
+    # Stripe gate test: sets STRIPE_SECRET_KEY to 'sk_live_FAKE_LIVE_KEY_DO_NOT_USE'
+    # and 'sk_test_FAKE_TEST_KEY_DO_NOT_USE' as fixtures that exercise the
+    # live/test mode-detection branch. The key names explicitly call out their
+    # non-production nature ("FAKE", "DO_NOT_USE").
+    # Ref: artifacts/api-server/src/__tests__/stripe-gate.test.ts
+    "artifacts/api-server/src/__tests__/stripe-gate\\.test\\.ts",
+
+    # Sentra agent-mesh data file: contains a documentation example MCP server
+    # config string showing "GITHUB_TOKEN": "ghp_xxxx..." as a template value.
+    # This is display text rendered in the Sentra UI, not a credential.
+    # Ref: artifacts/sentra/src/data/agent-mesh.ts line 569
+    "artifacts/sentra/src/data/agent-mesh\\.ts",
+
+    # GitHub package/auth documentation: contains example export commands with
+    # ghp_your_token_here / ghp_your_pat_here placeholder patterns for
+    # developer reference. All values are clearly labeled as examples.
+    "docs/github/packages",
+    "docs/github/packages-security\\.md",
+
+    # ops/github shell scripts: comment blocks instruct operators to export
+    # GH_WORKFLOW_TOKEN=ghp_xxx... before running. These are instructions,
+    # not committed credentials.
+    "ops/github/push-workflows\\.sh",
+    "scripts/github/publish-npm-packages\\.sh",
+    "scripts/github/audit-packages\\.ts",
   ]
 
   # ── Regex patterns that are always safe ─────────────────────────────────────
@@ -104,19 +157,33 @@ useDefault = true
     "replace[-_]?me",
     "example[-_]?only",
 
-    # Stripe test-mode keys (not live)
+    # Stripe test-mode keys (not live).
+    # sk_test_ and pk_test_ keys are non-billable; they cannot charge real cards.
     "sk_test_[a-zA-Z0-9]+",
     "pk_test_[a-zA-Z0-9]+",
     "rk_test_[a-zA-Z0-9]+",
     "whsec_test_[a-zA-Z0-9]+",
 
+    # Stripe fixture keys used in unit tests — names contain "FAKE" and
+    # "DO_NOT_USE" to document their non-production nature.
+    # Ref: artifacts/api-server/src/__tests__/stripe-gate.test.ts
+    "sk_live_FAKE[A-Z0-9_]+DO_NOT_USE",
+    "sk_test_FAKE[A-Z0-9_]+DO_NOT_USE",
+
     # AWS example / documentation account IDs used in ARN examples
     "AKIAIOSFODNN7EXAMPLE",
     "AKIA0000000000EXAMPLE",
 
-    # GitHub token examples from documentation (26 hex chars after prefix — not
-    # a real 36-char personal token)
+    # GitHub token examples and placeholders from documentation and shell scripts.
+    # The built-in rule targets real 36-char alphanumeric tokens; these patterns
+    # are visibly not real:
+    #  - ghp_[a-f0-9]{26}: hex-only, 26 chars — not a real 36-char mixed-case PAT
+    #  - ghp_xxxx...: clearly truncated
+    #  - ghp_your_*: generic placeholder form
     "ghp_[a-f0-9]{26}",
+    "ghp_xxxx",
+    "ghp_your",
+    "ghp_abc123",
 
     # OpenAI placeholder keys that appear in docs / templates
     "sk-proj-[A-Za-z0-9_-]{20}XXXXXXXXXX",
@@ -179,6 +246,36 @@ useDefault = true
     # localStorage bucket name constants (e.g. "szl-deal-submissions-v1").
     # These are storage namespace strings, not API credentials.
     "szl-[a-z-]+-v[0-9]+",
+
+    # CI session secret: used in ci.yml and security.yml readiness-gate jobs.
+    # The string is explicitly labeled "-not-for-production" to document its
+    # non-production nature. Ref: .github/workflows/ci.yml (integration-test
+    # and readiness-gate jobs).
+    "ci-test-session-secret-not-for-production",
+
+    # Vitest test bootstrap token: 'vitest-internal-token-padding-padding-*'
+    # set in test-env-bootstrap.ts when ALLOY_INTERNAL_TOKEN is absent.
+    # Clearly non-production by its prefix and "padding" filler.
+    # Ref: artifacts/api-server/src/__tests__/helpers/test-env-bootstrap.ts
+    "vitest-internal-token",
+
+    # Slack bot token placeholder pattern used in .env.example and connector
+    # documentation. "xoxb-your-slack-bot-token" is the canonical example form.
+    "xoxb-your-",
+
+    # PostHog placeholder key format used in mobile and web .env.example files:
+    # "phc_YOUR_PROJECT_API_KEY". phc_ is the PostHog key prefix; the all-caps
+    # suffix is visibly a placeholder.
+    # Ref: artifacts/szl-holdings-mobile/.env.example
+    # Ref: artifacts/szl-holdings/.env.example
+    "phc_YOUR_PROJECT_API_KEY",
+
+    # Firebase / Google placeholder API key value used in committed mobile
+    # scaffold files (google-services.json, GoogleService-Info.plist, and
+    # their .template and .example variants). Real keys are populated at
+    # EAS build time from secrets and never committed.
+    "PLACEHOLDER_API_KEY",
+    "PLACEHOLDER_PRIVATE_KEY",
   ]
 
   # ── Commit-level stop-list ────────────────────────────────────────────────
@@ -201,6 +298,14 @@ useDefault = true
       "\\.env\\.example",
       # documentation may quote key format without real key content
       "SECRETS_SETUP\\.md",
+      # Mobile scaffold files: private_key field contains PLACEHOLDER_PRIVATE_KEY
+      "artifacts/szl-holdings-mobile/google-play-service-account\\.json\\.template",
+      "artifacts/szl-holdings-mobile/google-play-service-account\\.example\\.json",
+    ]
+    regexes = [
+      # Google service account template files use PLACEHOLDER_PRIVATE_KEY as
+      # the value for the private_key JSON field — not a real key.
+      "PLACEHOLDER_PRIVATE_KEY",
     ]
 
 # ── Custom rule: Expo / EAS token ────────────────────────────────────────────
@@ -224,6 +329,63 @@ useDefault = true
     regexes = [
       "re_[Xx]{24,}",
       "re_0000[a-zA-Z0-9]{20}",
+    ]
+
+# ── Custom rule: Stripe live key ─────────────────────────────────────────────
+# Extends / tightens detection of Stripe live-mode keys beyond the built-in
+# rule. The allowlist explicitly carves out the fixture keys used in unit tests
+# (names contain FAKE and DO_NOT_USE) and docs/ops files that reference the
+# key format without real values.
+[[rules]]
+  id          = "stripe-live-key"
+  description = "Stripe live-mode secret or restricted key"
+  regex       = '''(sk|rk)_live_[a-zA-Z0-9]{20,}'''
+  tags        = ["stripe", "credential"]
+
+  [rules.allowlist]
+    # Fixture keys in the stripe-gate test; names are self-documenting.
+    regexes = [
+      "sk_live_FAKE[A-Z0-9_]+DO_NOT_USE",
+    ]
+    # Documentation and ops files that reference the key format, not real keys.
+    paths = [
+      "docs/",
+      "ops/",
+      "audit/",
+      "launch/",
+      "BILLING\\.md",
+      "replit\\.md",
+    ]
+
+# ── Custom rule: PostHog project API key ─────────────────────────────────────
+# PostHog keys start with phc_ and are 40+ chars. The built-in gitleaks
+# default set does not include a PostHog rule, so we add one here.
+[[rules]]
+  id          = "posthog-project-key"
+  description = "PostHog project API key"
+  regex       = '''phc_[a-zA-Z0-9]{38,}'''
+  tags        = ["posthog", "analytics", "credential"]
+
+  [rules.allowlist]
+    regexes = [
+      # The canonical placeholder from all .env.example files — all-caps suffix
+      # is visibly not a real key.
+      "phc_YOUR_PROJECT_API_KEY",
+    ]
+
+# ── Custom rule: Slack bot token ─────────────────────────────────────────────
+# The built-in rule may not cover all Slack token variants. This rule
+# explicitly targets xoxb- (bot) tokens beyond the placeholder pattern.
+[[rules]]
+  id          = "slack-bot-token"
+  description = "Slack bot OAuth token"
+  regex       = '''xoxb-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24}'''
+  tags        = ["slack", "credential"]
+
+  [rules.allowlist]
+    regexes = [
+      # Placeholder form used in .env.example: "xoxb-your-slack-bot-token"
+      "xoxb-your-",
     ]
 
 # ── curl-auth-header rule: suppress documentation example endpoints ───────────
