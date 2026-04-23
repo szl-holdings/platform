@@ -443,6 +443,96 @@ for (const [tableName, citation] of Object.entries(DOCUMENTED_TABLES)) {
   }
 }
 
+// ─── CHECK 8: Key route paths ─────────────────────────────────────────────────
+// API-SPEC.md §"Key Route Paths" lists representative path strings per route
+// group. Verify each path appears as a quoted string literal in the named
+// route handler file, catching renames/removals before they silently
+// invalidate the spec document.
+
+section('Key route paths — API-SPEC.md §"Key Route Paths" vs route handler files');
+
+/**
+ * Parse the "## Key Route Paths" table from API-SPEC.md.
+ * Returns an array of { group, path, routeFile } objects, or null if the
+ * section is not found.
+ */
+function parseKeyRoutePathsTable(mdText) {
+  const sectionMarker = '## Key Route Paths';
+  const idx = mdText.indexOf(sectionMarker);
+  if (idx === -1) return null;
+  const afterHeading = mdText.slice(idx + sectionMarker.length);
+  // Stop at the next ## heading
+  const nextH2 = afterHeading.match(/\n##\s/);
+  const slice = nextH2 ? afterHeading.slice(0, nextH2.index) : afterHeading;
+
+  const rows = [];
+  for (const line of slice.split('\n')) {
+    if (!line.startsWith('|')) continue;
+    if (line.includes('---')) continue;
+    if (/^\|\s*Group\s*\|/.test(line)) continue;
+
+    const cols = line.split('|').map((c) => c.trim()).filter(Boolean);
+    if (cols.length < 3) continue;
+
+    const pathMatch = cols[1].match(/`([^`]+)`/);
+    const fileMatch = cols[2].match(/`([^`]+)`/);
+    if (!pathMatch || !fileMatch) continue;
+
+    rows.push({ group: cols[0], path: pathMatch[1], routeFile: fileMatch[1] });
+  }
+  return rows;
+}
+
+if (!apiSpec) {
+  skip('Key route paths check', 'API-SPEC.md not readable (see earlier checks)');
+} else {
+  const routePathRows = parseKeyRoutePathsTable(apiSpec);
+  if (routePathRows === null) {
+    fail(
+      'Could not find "## Key Route Paths" section in API-SPEC.md',
+      'Add the section with a table of representative paths and their route files',
+    );
+  } else if (routePathRows.length === 0) {
+    fail(
+      'No rows parsed from "## Key Route Paths" table in API-SPEC.md',
+      'Table must contain at least one data row with path and route-file columns',
+    );
+  } else {
+    const fileCache = new Map();
+
+    for (const { group, path, routeFile } of routePathRows) {
+      if (!fileCache.has(routeFile)) {
+        fileCache.set(routeFile, readFile(routeFile));
+      }
+      const src = fileCache.get(routeFile);
+
+      if (!src) {
+        fail(
+          `Route file listed in API-SPEC.md Key Route Paths not found on disk`,
+          `${routeFile} (group: ${group}, path: ${path}) — update API-SPEC.md if the file was moved or renamed`,
+        );
+        continue;
+      }
+
+      // Match the path as a quoted string literal (single or double quotes).
+      // The escaped pattern prevents partial matches — '/vessels' will not
+      // match '/vessels/:id' because the quote must follow immediately.
+      const escaped = path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const pattern = new RegExp(`['"]${escaped}['"]`);
+
+      if (pattern.test(src)) {
+        pass(`Route path present in handler: ${path}`, routeFile);
+      } else {
+        fail(
+          'Documented route path not found as a string literal in route handler',
+          `${path} (group: ${group}) — expected in ${routeFile}. ` +
+            'Update API-SPEC.md if the path was renamed or removed.',
+        );
+      }
+    }
+  }
+}
+
 if (failures > 0) {
 } else {
 }

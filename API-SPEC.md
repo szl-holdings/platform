@@ -71,6 +71,38 @@ across domain packs located in `artifacts/api-server/src/graphql/domains/`.
 
 ---
 
+## Key Route Paths
+
+Representative paths drawn from the route-group table above. `check-docs-claims.js` §"Key route paths" verifies that each path string appears as a quoted literal in the listed route handler file, catching renames and removals before they silently invalidate this document.
+
+| Group | Path | Route File |
+|-------|------|------------|
+| Auth | `/auth/login` | `artifacts/api-server/src/routes/auth.ts` |
+| Auth | `/auth/me` | `artifacts/api-server/src/routes/auth.ts` |
+| Auth | `/auth/ws-ticket` | `artifacts/api-server/src/routes/auth.ts` |
+| Auth | `/auth/login-password` | `artifacts/api-server/src/routes/auth.ts` |
+| Vessels | `/vessels/fleets` | `artifacts/api-server/src/routes/vessels.ts` |
+| Vessels | `/vessels` | `artifacts/api-server/src/routes/vessels.ts` |
+| Terra | `/terra/geocoding-status` | `artifacts/api-server/src/routes/terra.ts` |
+| Terra | `/terra/market-intelligence` | `artifacts/api-server/src/routes/terra.ts` |
+| Billing | `/billing/plans` | `artifacts/api-server/src/routes/billing.ts` |
+| Billing | `/billing/products` | `artifacts/api-server/src/routes/billing.ts` |
+| Alloy | `/alloy/workflows` | `artifacts/api-server/src/routes/alloy.ts` |
+| Alloy | `/alloy/ingest/signal` | `artifacts/api-server/src/routes/alloy.ts` |
+| Forge | `/forge/agents` | `artifacts/api-server/src/routes/forge.ts` |
+| Command | `/snapshot` | `artifacts/api-server/src/routes/command.ts` |
+| Command | `/alerts` | `artifacts/api-server/src/routes/command.ts` |
+| Pulse | `/today` | `artifacts/api-server/src/routes/pulse.ts` |
+| Pulse | `/briefings` | `artifacts/api-server/src/routes/pulse.ts` |
+| PRISM Counsel | `/prism-counsel/matters` | `artifacts/api-server/src/routes/prism-counsel-core.ts` |
+| PRISM Counsel | `/prism-counsel/health` | `artifacts/api-server/src/routes/prism-counsel-core.ts` |
+| IMPERIUM | `/imperium/cloud/resources` | `artifacts/api-server/src/routes/imperium.ts` |
+| IMPERIUM | `/imperium/senate/proposals` | `artifacts/api-server/src/routes/imperium.ts` |
+| Carlota Jo | `/booking/inquiries` | `artifacts/api-server/src/routes/carlota-jo.ts` |
+| Carlota Jo | `/booking/services` | `artifacts/api-server/src/routes/carlota-jo.ts` |
+
+---
+
 ## Notes for Due Diligence
 
 - Endpoint counts are derived from static analysis and may vary slightly from runtime counts.
