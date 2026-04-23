@@ -288,27 +288,33 @@ interface TerraAPIProperty {
   address: string;
   city: string;
   state: string;
-  estimatedValue?: number | null;
-  capRate?: number | null;
+  assessedValue?: string | number | null;
+  capRate?: string | number | null;
   sqft?: number | null;
   yearBuilt?: number | null;
   zoning?: string | null;
-  owner?: string | null;
+  ownerName?: string | null;
   distressScore?: number | null;
 }
 
 function mapTerraToARProperty(p: TerraAPIProperty, index: number): ARProperty {
   const address = [p.address, p.city, p.state].filter(Boolean).join(', ');
-  const value = p.estimatedValue
-    ? `$${(p.estimatedValue / 1_000_000).toFixed(1)}M`
-    : MOCK_PROPERTIES[index % MOCK_PROPERTIES.length].estimatedValue;
-  const cap = p.capRate ? `${p.capRate.toFixed(1)}%` : MOCK_PROPERTIES[index % MOCK_PROPERTIES.length].capRate;
+  const rawValue = p.assessedValue != null ? Number(p.assessedValue) : null;
+  const value =
+    rawValue && rawValue > 0
+      ? `$${(rawValue / 1_000_000).toFixed(1)}M`
+      : MOCK_PROPERTIES[index % MOCK_PROPERTIES.length].estimatedValue;
+  const rawCap = p.capRate != null ? Number(p.capRate) : null;
+  const cap =
+    rawCap && rawCap > 0
+      ? `${rawCap.toFixed(1)}%`
+      : MOCK_PROPERTIES[index % MOCK_PROPERTIES.length].capRate;
   const distress = p.distressScore ?? MOCK_PROPERTIES[index % MOCK_PROPERTIES.length].distressScore;
   return {
     address: address || MOCK_PROPERTIES[index % MOCK_PROPERTIES.length].address,
     estimatedValue: value,
     valueChange: '+0.0%',
-    owner: p.owner ?? 'Unknown Owner',
+    owner: p.ownerName ?? 'Unknown Owner',
     zoning: p.zoning ?? 'Commercial',
     distressScore: distress,
     capRate: cap,

@@ -1,6 +1,6 @@
 import { db, terraDistressPropertiesTable, terraPropertiesTable } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
-import { desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, isNotNull, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { LRUCache } from 'lru-cache';
@@ -481,12 +481,45 @@ router.get(
     try {
       const limit = Math.min(Number(req.query.limit) || 50, 200);
       const offset = Number(req.query.offset) || 0;
-      const properties = await db
-        .select()
-        .from(terraPropertiesTable)
-        .orderBy(desc(terraPropertiesTable.createdAt))
-        .limit(limit)
-        .offset(offset);
+      const nearLat = req.query.nearLat ? parseFloat(req.query.nearLat as string) : null;
+      const nearLng = req.query.nearLng ? parseFloat(req.query.nearLng as string) : null;
+      const radiusKmRaw = req.query.radiusKm ? parseFloat(req.query.radiusKm as string) : 2;
+
+      const nearLatValid =
+        nearLat !== null && isFinite(nearLat) && nearLat >= -90 && nearLat <= 90;
+      const nearLngValid =
+        nearLng !== null && isFinite(nearLng) && nearLng >= -180 && nearLng <= 180;
+      const radiusKm = isFinite(radiusKmRaw) && radiusKmRaw > 0 ? Math.min(radiusKmRaw, 50) : 2;
+
+      let properties;
+      if (nearLatValid && nearLngValid) {
+        // ~1 degree latitude = 111 km; longitude degrees vary by latitude but 111 km is a safe upper bound
+        const radiusDeg = radiusKm / 111.0;
+        const cosLat = Math.max(Math.cos((nearLat! * Math.PI) / 180), 0.01);
+        const lngRadiusDeg = radiusKm / (111.0 * cosLat);
+        properties = await db
+          .select()
+          .from(terraPropertiesTable)
+          .where(
+            and(
+              isNotNull(terraPropertiesTable.latitude),
+              isNotNull(terraPropertiesTable.longitude),
+              sql`CAST(${terraPropertiesTable.latitude} AS DOUBLE PRECISION) BETWEEN ${nearLat! - radiusDeg} AND ${nearLat! + radiusDeg}`,
+              sql`CAST(${terraPropertiesTable.longitude} AS DOUBLE PRECISION) BETWEEN ${nearLng! - lngRadiusDeg} AND ${nearLng! + lngRadiusDeg}`,
+            ),
+          )
+          .orderBy(
+            sql`(CAST(${terraPropertiesTable.latitude} AS DOUBLE PRECISION) - ${nearLat!})^2 + (CAST(${terraPropertiesTable.longitude} AS DOUBLE PRECISION) - ${nearLng!})^2`,
+          )
+          .limit(limit);
+      } else {
+        properties = await db
+          .select()
+          .from(terraPropertiesTable)
+          .orderBy(desc(terraPropertiesTable.createdAt))
+          .limit(limit)
+          .offset(offset);
+      }
       sendSuccess(res, { properties, count: properties.length });
     } catch (err) {
       handleRouteError(res, err, 'Failed to list properties');
