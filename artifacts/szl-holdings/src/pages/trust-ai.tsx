@@ -49,8 +49,8 @@ const MODEL_MESH_ROWS = [
 
 const DOMAIN_AGENTS = [
   { name: "FORGE", domain: "Platform", role: "Execution fabric and orchestration layer routing signals across all domain packs", color: "hsl(258,55%,68%)" },
-  { name: "Helmsman", domain: "Maritime — Vessels", role: "Voyage risk, sanctions screening, route optimization, and regulatory compliance", color: "hsl(200,65%,52%)" },
-  { name: "Sentinel", domain: "Security — Aegis", role: "Threat triage, playbook recommendation, and security incident classification", color: "hsl(145,62%,46%)" },
+  { name: "Helmsman", domain: "Maritime — SEXTANT", role: "Voyage risk, sanctions screening, route optimization, and regulatory compliance", color: "hsl(200,65%,52%)" },
+  { name: "Sentinel", domain: "Security — PARAGON", role: "Threat triage, playbook recommendation, and security incident classification", color: "hsl(145,62%,46%)" },
   { name: "Eval Engine", domain: "Evaluation", role: "Model confidence calibration, output scoring, drift detection, and adversarial resistance testing", color: "hsl(38,80%,56%)" },
 ];
 
@@ -153,7 +153,7 @@ export default function TrustAIPage() {
                   Operating boundaries. Applied to every tenant, every pack, every environment.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "60ch", marginBottom: "2.5rem" }}>
-                  These boundaries are policy commitments enforced through the Alloy execution layer
+                  These boundaries are policy commitments enforced through the FORGE execution layer
                   and Covenant Policy Engine — not user-facing toggles. Where a boundary is enforced
                   structurally (tenant scoping, source attribution) versus by approval-gated workflow
                   (external sends, financial writes), the difference is documented in the Architecture page.

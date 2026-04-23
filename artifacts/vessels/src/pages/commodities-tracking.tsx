@@ -271,7 +271,7 @@ export default function CommoditiesTracking() {
             </CardHeader>
             <CardContent className="space-y-3">
               {[
-                { label: 'Active Vessels', value: sel.vessels.toLocaleString() },
+                { label: 'Active SEXTANT', value: sel.vessels.toLocaleString() },
                 { label: 'Monthly Volume', value: sel.volume },
                 { label: 'Market Price', value: sel.price },
                 {

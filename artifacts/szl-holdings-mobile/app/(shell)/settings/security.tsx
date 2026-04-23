@@ -153,7 +153,7 @@ export default function SecuritySettingsScreen() {
                     Face ID / Touch ID
                   </Text>
                   <Text style={[styles.settingSub, { color: colors.mutedForeground }]}>
-                    Lock CORTEX on background
+                    Lock APEX on background
                   </Text>
                 </View>
               </View>

@@ -74,7 +74,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/aegis/',
-    label: 'Aegis — Investor Pitch Deck',
+    label: 'PARAGON — Investor Pitch Deck',
     description: 'Investor-facing deck and Series A narrative',
     icon: Presentation,
     color: '#c45a4a',
@@ -83,7 +83,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/pulse/',
-    label: 'Pulse — Executive Briefing',
+    label: 'LUMINA — Executive Briefing',
     description: 'AI executive briefing and morning digest',
     icon: Heart,
     color: '#d4a054',
@@ -92,7 +92,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/sentra/',
-    label: 'Sentra — Cyber Resilience',
+    label: 'TENAX — Cyber Resilience',
     description: 'Cyber resilience command and incident orchestration',
     icon: ShieldCheck,
     color: '#22c55e',
@@ -157,7 +157,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/lyte-command-center/',
-    label: 'Lyte Command Center',
+    label: 'KORA Command Center',
     description: 'AIOps observability — autonomous NOC, SLOs, self-healing',
     icon: Zap,
     color: '#22c55e',

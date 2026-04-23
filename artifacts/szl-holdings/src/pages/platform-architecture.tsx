@@ -19,7 +19,7 @@ const LOOP_STEPS = [
     id: "interpret",
     step: "02",
     label: "Interpret",
-    description: "Contextualize raw signals with domain intelligence. Score risk, rank priority, map ownership. Alloy normalizes signals across all platforms into a shared entity model.",
+    description: "Contextualize raw signals with domain intelligence. Score risk, rank priority, map ownership. FORGE normalizes signals across all platforms into a shared entity model.",
     platforms: ["FORGE", "PARAGON", "DOMAINE"],
     color: "hsl(214,80%,65%)",
     colorRgb: "92,155,228",
@@ -37,7 +37,7 @@ const LOOP_STEPS = [
     id: "execute",
     step: "04",
     label: "Execute",
-    description: "Act through structured, auditable workflows. Alloy orchestrates multi-step execution with human approval gates, assignment logic, and traceable outputs.",
+    description: "Act through structured, auditable workflows. FORGE orchestrates multi-step execution with human approval gates, assignment logic, and traceable outputs.",
     platforms: ["FORGE", "Carlota Jo"],
     color: "hsl(38,55%,58%)",
     colorRgb: "191,152,82",
@@ -66,7 +66,7 @@ const PLATFORMS = [
   {
     name: "FORGE",
     role: "Execution Fabric",
-    description: "The backbone of the SZL ecosystem. Alloy orchestrates workflows, normalizes signals, manages multi-agent execution, and provides the shared entity model that makes cross-platform intelligence possible.",
+    description: "The backbone of the SZL ecosystem. FORGE orchestrates workflows, normalizes signals, manages multi-agent execution, and provides the shared entity model that makes cross-platform intelligence possible.",
     accent: "hsl(214,80%,65%)",
     href: "/alloy/",
     icon: Layers,
@@ -397,7 +397,7 @@ export default function PlatformArchitecturePage() {
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {[
                   { title: "Unified Entity Model", body: "All platforms share a canonical entity schema — vessels, properties, incidents, workflows — so cross-domain intelligence is structurally possible, not bolt-on." },
-                  { title: "Alloy Signal Bus", body: "Every significant event in the ecosystem flows through Alloy's signal ingestion layer, normalized and enriched before routing to downstream platforms and agents." },
+                  { title: "FORGE Signal Bus", body: "Every significant event in the ecosystem flows through FORGE's signal ingestion layer, normalized and enriched before routing to downstream platforms and agents." },
                   { title: "Human Approval Gates", body: "Every consequential action — command execution, credential changes, financial commits — requires explicit human confirmation. No autonomous execution without approval." },
                   { title: "Immutable Audit Log", body: "Every action, recommendation, and agent output is logged with actor, timestamp, and outcome. The audit trail is an operational tool, not a compliance afterthought." },
                   { title: "Role-Based Access", body: "Access is granted by explicit role assignment scoped to operational need. Executives see summaries; operators see queues; compliance sees audit trails." },

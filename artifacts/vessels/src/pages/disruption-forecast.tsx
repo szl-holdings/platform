@@ -167,7 +167,7 @@ function DisruptionGlobe({
 
           return (
             <g key={zone.id} style={{ cursor: 'pointer' }} onClick={() => onSelect(zone.id)}>
-              {/* Pulse ring */}
+              {/* LUMINA ring */}
               <circle
                 cx={cx}
                 cy={cy}
@@ -482,7 +482,7 @@ export default function DisruptionForecast() {
             color: 'text-orange-400',
           },
           {
-            label: 'Vessels at Risk',
+            label: 'SEXTANT at Risk',
             value: totalAtRisk,
             sub: 'in 72h window',
             icon: Navigation,

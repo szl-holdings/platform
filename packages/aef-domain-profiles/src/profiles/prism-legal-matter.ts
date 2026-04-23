@@ -4,9 +4,9 @@ export const prismLegalMatter: DomainProfile = {
   profileId: 'prism_legal_matter',
   version: '1.0.0',
   domain: 'prism_legal_matter',
-  displayName: 'PRISM Counsel — Legal Matter Command',
+  displayName: 'Counsel — Legal Matter Command',
   description:
-    'Retrieval profile for PRISM Counsel, the governed legal matter management platform. Optimised for matter briefs, filing obligation timelines, discovery logs, contract clauses, regulatory compliance filings, and court docket entries. Docket IDs and case numbers receive a 1.9× exact-match boost. Citation codes and regulation references receive a 1.7× boost, guaranteeing that every structured legal identifier surfaces its authoritative matter record at the head of the result set. All retrieval operations are subject to attorney-client privilege handling and must not cross matter boundaries.',
+    'Retrieval profile for Counsel, the governed legal matter management platform. Optimised for matter briefs, filing obligation timelines, discovery logs, contract clauses, regulatory compliance filings, and court docket entries. Docket IDs and case numbers receive a 1.9× exact-match boost. Citation codes and regulation references receive a 1.7× boost, guaranteeing that every structured legal identifier surfaces its authoritative matter record at the head of the result set. All retrieval operations are subject to attorney-client privilege handling and must not cross matter boundaries.',
   status: 'active',
 
   chunkingStrategy: {
@@ -22,24 +22,24 @@ export const prismLegalMatter: DomainProfile = {
     templateId: 'prism_legal_query_v1',
     version: '1.0.0',
     template:
-      'You are a retrieval query encoder for PRISM Counsel, a governed legal matter management platform. ' +
+      'You are a retrieval query encoder for Counsel, a governed legal matter management platform. ' +
       'Encode the following question to retrieve matter briefs, filing obligation records, discovery documents, ' +
       'contract clauses, and regulatory compliance filings. ' +
       'Preserve docket IDs, case numbers, citation codes, court names, and regulation identifiers exactly as written.\n\nQuery: {{query}}',
     variables: ['query'],
-    description: 'Query-side prompt for PRISM Counsel legal matter corpus',
+    description: 'Query-side prompt for Counsel legal matter corpus',
   },
 
   documentPromptTemplate: {
     templateId: 'prism_legal_doc_v1',
     version: '1.0.0',
     template:
-      "You are a document encoder for PRISM Counsel's legal matter knowledge base. " +
+      "You are a document encoder for Counsel's legal matter knowledge base. " +
       'Encode the following document so it can be retrieved by queries about legal obligations, matter status, ' +
       'filing deadlines, contract risk, discovery timelines, regulatory requirements, and counsel coordination. ' +
       'Preserve all docket IDs, case numbers, citation codes, and court references exactly.\n\nDocument: {{document}}',
     variables: ['document'],
-    description: 'Document-side prompt for PRISM Counsel legal corpus',
+    description: 'Document-side prompt for Counsel legal corpus',
   },
 
   defaultMetadataFilters: {

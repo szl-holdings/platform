@@ -257,7 +257,7 @@ export function AlloyStrip() {
                     letterSpacing: '-0.003em',
                   }}
                 >
-                  View Alloy <ArrowUpRight size={12} />
+                  View FORGE <ArrowUpRight size={12} />
                 </a>
               </div>
               <FlowDiagram />

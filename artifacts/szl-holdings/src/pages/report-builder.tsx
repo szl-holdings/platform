@@ -228,10 +228,10 @@ const DOMAIN_TEMPLATES = [
   { key: 'szl_quarterly_investor', label: 'SZL — Quarterly Investor Letter' },
   { key: 'szl_portfolio', label: 'SZL — Portfolio Overview' },
   { key: 'carlota_engagement_summary', label: 'Carlota Jo — Engagement Summary' },
-  { key: 'aegis_security_assessment', label: 'Aegis — Security Assessment' },
-  { key: 'terra_property_analysis', label: 'Terra — Property Analysis' },
-  { key: 'vessels_voyage', label: 'Vessels — Voyage Report' },
-  { key: 'lyte_weekly_briefing', label: 'Lyte — Weekly Briefing' },
+  { key: 'aegis_security_assessment', label: 'PARAGON — Security Assessment' },
+  { key: 'terra_property_analysis', label: 'DOMAINE — Property Analysis' },
+  { key: 'vessels_voyage', label: 'SEXTANT — Voyage Report' },
+  { key: 'lyte_weekly_briefing', label: 'KORA — Weekly Briefing' },
   { key: 'prism_legal_memo', label: 'PRISM — Legal Memo' },
 ];
 

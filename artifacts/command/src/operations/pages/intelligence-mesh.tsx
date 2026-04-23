@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 const NODES = [
   {
     id: 'aegis',
-    name: 'Aegis Command',
+    name: 'PARAGON Command',
     role: 'Defense & Intelligence',
     agent: 'Sentinel Engine',
     color: 'text-indigo-400',
@@ -45,7 +45,7 @@ const NODES = [
   },
   {
     id: 'msp',
-    name: 'Aegis Operations',
+    name: 'PARAGON Operations',
     role: 'Managed Services Command',
     agent: 'IT Sentinel',
     color: 'text-[#c45a4a]',
@@ -152,7 +152,7 @@ const AGENT_ACTIVITY: {
   },
   {
     time: '12s',
-    app: 'SZL Cortex',
+    app: 'SZL APEX',
     agent: 'AI Engine',
     action: 'Spawning investigative sub-agent for maritime anomaly',
     type: 'intelligence',
@@ -166,7 +166,7 @@ const AGENT_ACTIVITY: {
   },
   {
     time: '45s',
-    app: 'Aegis Operations',
+    app: 'PARAGON Operations',
     agent: 'IT Sentinel',
     action: 'Auto-remediated memory leak — TKT-4821 closed',
     type: 'reflex',
@@ -180,7 +180,7 @@ const AGENT_ACTIVITY: {
   },
   {
     time: '1m 20s',
-    app: 'SZL Cortex',
+    app: 'SZL APEX',
     agent: 'AI Analyst',
     action: 'Q1 synthesis complete — 94% portfolio health, 3 risk vectors',
     type: 'intelligence',
@@ -194,7 +194,7 @@ const AGENT_ACTIVITY: {
   },
   {
     time: '2m 30s',
-    app: 'Aegis SOC',
+    app: 'PARAGON SOC',
     agent: 'Security Sentinel LLM',
     action: 'Blocked external write — agent action escalated for review',
     type: 'policy',
@@ -261,7 +261,7 @@ export default function IntelligenceMesh() {
         </div>
         <p className="text-sm text-slate-400">
           The Intelligence Network — visualizing the signal mesh connecting all ecosystem apps. Each
-          app is an organ, Command is the spinal cord, SZL Cortex is the brain.
+          app is an organ, Command is the spinal cord, SZL APEX is the brain.
         </p>
       </div>
 

@@ -64,7 +64,7 @@ function assertProofChain(rec: Recommendation, label: string) {
 // maritime — Vessels Maritime Intelligence
 // ---------------------------------------------------------------------------
 
-describe('recommendation rendering — maritime (Vessels)', () => {
+describe('recommendation rendering — maritime (SEXTANT)', () => {
   it('renders a complete vessel-reroute recommendation with all 8 proof-chain fields', () => {
     const rec = createRecommendation({
       domain: 'maritime',
@@ -165,7 +165,7 @@ describe('recommendation rendering — legal (Counsel / PRISM)', () => {
 // security — Sentra Cyber Resilience Command
 // ---------------------------------------------------------------------------
 
-describe('recommendation rendering — security (Sentra)', () => {
+describe('recommendation rendering — security (TENAX)', () => {
   it('renders a complete ransomware-isolation recommendation with all 8 proof-chain fields', () => {
     const rec = createRecommendation({
       domain: 'security',
@@ -202,7 +202,7 @@ describe('recommendation rendering — security (Sentra)', () => {
 // finance — SZL Holdings Treasury / Pulse
 // ---------------------------------------------------------------------------
 
-describe('recommendation rendering — finance (SZL Treasury / Pulse)', () => {
+describe('recommendation rendering — finance (SZL Treasury / LUMINA)', () => {
   it('renders a treasury hedge recommendation with all 8 proof-chain fields', () => {
     const rec = createRecommendation({
       domain: 'finance',
@@ -237,7 +237,7 @@ describe('recommendation rendering — finance (SZL Treasury / Pulse)', () => {
 // real-estate — Terra Real Estate Intelligence
 // ---------------------------------------------------------------------------
 
-describe('recommendation rendering — real-estate (Terra)', () => {
+describe('recommendation rendering — real-estate (DOMAINE)', () => {
   it('renders a property acquisition recommendation with all 8 proof-chain fields', () => {
     const rec = createRecommendation({
       domain: 'real-estate',

@@ -276,7 +276,7 @@ export default function ProFormaScreen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · FINANCE</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>DOMAINE · FINANCE</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Pro Forma</Text>
         </View>
         <View style={{ marginTop: 14 }}>

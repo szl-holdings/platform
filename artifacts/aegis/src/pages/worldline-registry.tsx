@@ -525,7 +525,7 @@ export default function AegisWorldlineRegistry() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#8b7ac8' }}
             >
-              Aegis · ATLAS Spatial Runtime
+              PARAGON · ATLAS Spatial Runtime
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Worldline Registry</h1>

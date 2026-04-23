@@ -255,7 +255,7 @@ export default function PortTwinPage() {
           </p>
         </div>
         <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-3">
-          <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1">Fleet Vessels</p>
+          <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1">Fleet SEXTANT</p>
           <p className="text-lg font-bold font-mono text-sky-400">{selectedPort.vessels.length}</p>
         </div>
       </div>
@@ -294,7 +294,7 @@ export default function PortTwinPage() {
             <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
               <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
                 <Navigation className="w-3.5 h-3.5 text-sky-400" />
-                Fleet Vessels — {selectedPort.name}
+                Fleet SEXTANT — {selectedPort.name}
               </p>
               <div className="space-y-2">
                 {selectedPort.vessels.map((v) => (

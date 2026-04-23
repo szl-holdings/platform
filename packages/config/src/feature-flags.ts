@@ -31,19 +31,19 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
   PULSE_FALLBACK_LABEL: {
     id: 'PULSE_FALLBACK_LABEL',
     description:
-      "Show 'Synthesized (no AI provider)' label on Pulse briefings generated via fallback drift path.",
+      "Show 'Synthesized (no AI provider)' label on LUMINA briefings generated via fallback drift path.",
     enabledFor: ['demo', 'internal-preview', 'local-dev'],
     notes: 'Required to prevent silent fallback impersonating live AI briefings.',
   },
   AEGIS_UNWIRED_MODULES: {
     id: 'AEGIS_UNWIRED_MODULES',
-    description: 'Show 8 Aegis modules that are not yet wired to live API. Hidden by default.',
+    description: 'Show 8 PARAGON modules that are not yet wired to live API. Hidden by default.',
     enabledFor: ['local-dev'],
     notes: 'These modules are stubs. Do not show in investor demos or production.',
   },
   VESSELS_COMMERCIAL_MODULES: {
     id: 'VESSELS_COMMERCIAL_MODULES',
-    description: 'Show Vessels commercial modules (insurance, trading, platform) not wired to DB.',
+    description: 'Show SEXTANT commercial modules (insurance, trading, platform) not wired to DB.',
     enabledFor: ['local-dev'],
     notes: 'Stubs only. Do not show in demos until wired.',
   },
@@ -55,7 +55,7 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
   },
   PDF_EXPORT_PULSE: {
     id: 'PDF_EXPORT_PULSE',
-    description: 'Enable PDF export button in Pulse briefing reader.',
+    description: 'Enable PDF export button in LUMINA briefing reader.',
     enabledFor: [],
     notes: 'Not implemented. Flag gates the button until implementation is complete.',
   },
@@ -67,10 +67,10 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
   },
   NEXUS_PUBLIC_ACCESS: {
     id: 'NEXUS_PUBLIC_ACCESS',
-    description: 'Allow unauthenticated access to NEXUS mockup-sandbox preview.',
+    description: 'Allow unauthenticated access to PRAXIS mockup-sandbox preview.',
     enabledFor: [],
     notes:
-      'Disabled by default. NEXUS is an internal prototype and should not be publicly accessible.',
+      'Disabled by default. PRAXIS is an internal prototype and should not be publicly accessible.',
   },
 };
 

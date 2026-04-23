@@ -61,7 +61,7 @@ const SERVICE_QUALITIES = [
   {
     icon: Zap,
     title: "Alloy-Powered Execution",
-    body: "Service workflows routed through Alloy — intake approvals, milestone confirmations, delivery authorizations — with human-in-the-loop gates and a complete audit trail behind every engagement.",
+    body: "Service workflows routed through FORGE — intake approvals, milestone confirmations, delivery authorizations — with human-in-the-loop gates and a complete audit trail behind every engagement.",
   },
 ];
 
@@ -77,7 +77,7 @@ const TRUST_CONTROLS = [
 const ALLOY_INHERITED = [
   {
     capability: "Approval Gates",
-    description: "Intake authorizations, service scope changes, and delivery confirmations require explicit human approval through Alloy's HITL gate — even in a high-trust service context.",
+    description: "Intake authorizations, service scope changes, and delivery confirmations require explicit human approval through FORGE's HITL gate — even in a high-trust service context.",
   },
   {
     capability: "Signal Normalization",
@@ -93,11 +93,11 @@ const ALLOY_INHERITED = [
   },
   {
     capability: "Access Controls",
-    description: "Alloy's role-based access infrastructure ensures client records are isolated. No cross-client data exposure. No operator sees beyond their assigned engagement scope.",
+    description: "FORGE's role-based access infrastructure ensures client records are isolated. No cross-client data exposure. No operator sees beyond their assigned engagement scope.",
   },
   {
     capability: "Export Governance",
-    description: "Deliverables exit the platform through Alloy's controlled export layer — with authorization tracking, recipient confirmation, and delivery record intact.",
+    description: "Deliverables exit the platform through FORGE's controlled export layer — with authorization tracking, recipient confirmation, and delivery record intact.",
   },
 ];
 
@@ -215,10 +215,10 @@ export default function CarlotaJoPublicPage() {
                     A consulting and services lane — not a product vertical.
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "46ch", marginBottom: "1.25rem" }}>
-                    Carlota Jo is the consulting and professional services lane within SZL Holdings. Where the product lanes (Lyte, Counsel, Terra, Vessels, Aegis) deliver software platforms, Carlota Jo delivers advisory services — with the same Alloy operating infrastructure ensuring that service delivery is governed, attributable, and auditable.
+                    Carlota Jo is the consulting and professional services lane within SZL Holdings. Where the product lanes (KORA, Counsel, DOMAINE, SEXTANT, PARAGON) deliver software platforms, Carlota Jo delivers advisory services — with the same FORGE operating infrastructure ensuring that service delivery is governed, attributable, and auditable.
                   </p>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,54%)", maxWidth: "46ch" }}>
-                    The client service context demands a different user experience — premium, discreet, personally attentive. The operational infrastructure beneath it is the same: Alloy's approval gates, workflow routing, audit trail, and access controls applied to every engagement action.
+                    The client service context demands a different user experience — premium, discreet, personally attentive. The operational infrastructure beneath it is the same: FORGE's approval gates, workflow routing, audit trail, and access controls applied to every engagement action.
                   </p>
                 </m.div>
                 <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.08 }}>
@@ -293,18 +293,18 @@ export default function CarlotaJoPublicPage() {
             </div>
           </section>
   
-          {/* Alloy inheritance */}
+          {/* FORGE inheritance */}
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(280,50%,65%)", marginBottom: "1rem" }}>
-                  What Carlota Jo Inherits from Alloy
+                  What Carlota Jo Inherits from FORGE
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "1.25rem" }}>
                   The execution fabric is inherited. Carlota Jo brings the service layer on top.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
-                  Even in a high-trust consulting context, every service action passes through Alloy's governed pipeline. The same infrastructure managing legal approvals, maritime decisions, and security remediations governs client intake, service delivery, and engagement close.
+                  Even in a high-trust consulting context, every service action passes through FORGE's governed pipeline. The same infrastructure managing legal approvals, maritime decisions, and security remediations governs client intake, service delivery, and engagement close.
                 </p>
               </m.div>
               <div style={{ display: "grid", gap: "1rem", marginBottom: "2.5rem" }} className="lg:grid-cols-3 md:grid-cols-2">

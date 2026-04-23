@@ -166,7 +166,7 @@ afterAll(async () => {
 
 // ── Domain: Vessels ──────────────────────────────────────────────────────────
 
-describe("Domain: Vessels", () => {
+describe("Domain: SEXTANT", () => {
   afterEach(async () => {
     await flushCleanup();
   });
@@ -265,7 +265,7 @@ describe("Domain: Vessels", () => {
 
 // ── Domain: Terra (Real Estate) ──────────────────────────────────────────────
 
-describe("Domain: Terra", () => {
+describe("Domain: DOMAINE", () => {
   it("GET /terra/market-intelligence returns 200 with status", async () => {
     const app = buildAuthApp();
     const router = (await import("../../artifacts/api-server/src/routes/terra")).default;
@@ -292,7 +292,7 @@ describe("Domain: Terra", () => {
     expect(res.status).toBe(200);
   });
 
-  it("Terra responses include fetchedAt timestamp field", async () => {
+  it("DOMAINE responses include fetchedAt timestamp field", async () => {
     const app = buildAuthApp();
     const router = (await import("../../artifacts/api-server/src/routes/terra")).default;
     app.use(router);
@@ -307,7 +307,7 @@ describe("Domain: Terra", () => {
 
 // ── Domain: Aegis / Firestorm ─────────────────────────────────────────────────
 
-describe("Domain: Aegis / Firestorm", () => {
+describe("Domain: PARAGON / Firestorm", () => {
   afterEach(async () => {
     await flushCleanup();
   });
@@ -389,7 +389,7 @@ describe("Domain: Aegis / Firestorm", () => {
 
 // ── Domain: Lyte ─────────────────────────────────────────────────────────────
 
-describe("Domain: Lyte", () => {
+describe("Domain: KORA", () => {
   it("GET /lyte/workspaces returns 200 with pagination envelope", async () => {
     const app = buildAuthApp();
     const router = (await import("../../artifacts/api-server/src/routes/lyte")).default;
@@ -602,7 +602,7 @@ describe("Domain: SZL Holdings", () => {
 // ── Cross-Domain: Response shape contracts ───────────────────────────────────
 
 describe("Cross-Domain: Response shape contracts", () => {
-  it("Lyte domain uses paginated envelope {data, meta} while Vessels uses plain arrays", async () => {
+  it("KORA domain uses paginated envelope {data, meta} while SEXTANT uses plain arrays", async () => {
     const lyteApp = buildAuthApp();
     const lyteRouter = (await import("../../artifacts/api-server/src/routes/lyte")).default;
     lyteApp.use(lyteRouter);
@@ -635,7 +635,7 @@ describe("Cross-Domain: Response shape contracts", () => {
     expect(holdingsRes.body.status).toBe("ok");
   });
 
-  it("Terra endpoints always include fetchedAt ISO timestamp for cache busting", async () => {
+  it("DOMAINE endpoints always include fetchedAt ISO timestamp for cache busting", async () => {
     const app = buildAuthApp();
     const terraRouter = (await import("../../artifacts/api-server/src/routes/terra")).default;
     app.use(terraRouter);
@@ -677,7 +677,7 @@ describe("Cross-Domain: Response shape contracts", () => {
 
 // ── Domain: PRISM Counsel — POST round-trip coverage ─────────────────────────
 
-describe("Domain: PRISM Counsel", () => {
+describe("Domain: Counsel", () => {
   afterEach(async () => {
     await flushAllCleanup();
   });

@@ -118,7 +118,7 @@ const RECEIPTS: TrustReceipt[] = [
     modelUsed: 'gpt-4o',
     inputs: {
       Trigger: 'Scheduled — Stephen Lutar',
-      'KPI Sources': 'PRISM, Terra, Vessels, Aegis',
+      'KPI Sources': 'PRISM, DOMAINE, SEXTANT, PARAGON',
       Period: 'Q1 2026 (Jan 1 – Mar 31)',
       'Data Completeness': '93%',
     },
@@ -599,7 +599,7 @@ export default function AlloyTrustReceiptsPage() {
             className="text-[9px] font-mono uppercase tracking-widest"
             style={{ color: ACCENT }}
           >
-            Alloy · Trust Layer
+            FORGE · Trust Layer
           </span>
         </div>
         <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>

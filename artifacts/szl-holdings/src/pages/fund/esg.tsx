@@ -403,7 +403,7 @@ export default function EsgPage() {
                             </div>
                             <div className="text-right">
                               <div className="text-sm font-semibold text-[#6aaa72]">1 company carbon-neutral</div>
-                              <div className="text-xs text-white/40 mt-0.5">Lyte — achieved Q4 2025</div>
+                              <div className="text-xs text-white/40 mt-0.5">KORA — achieved Q4 2025</div>
                             </div>
                           </div>
                         </div>

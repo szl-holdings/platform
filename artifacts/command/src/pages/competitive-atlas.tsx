@@ -88,7 +88,7 @@ const LANES: Lane[] = [
         ],
       },
       {
-        name: "Palo Alto Cortex XDR",
+        name: "Palo Alto APEX XDR",
         url: "https://paloaltonetworks.com",
         tagline: "Unified XDR across endpoint, network, cloud",
         bestAt: [
@@ -103,26 +103,26 @@ const LANES: Lane[] = [
       {
         idea: "Pattern of Life Behavioral Baseline",
         source: "Darktrace Enterprise Immune System",
-        ourVersion: "Behavioral Baseline panel on the Sentra dashboard showing current vs. normal activity profiles for assets and users, with deviation score and autonomous response status",
+        ourVersion: "Behavioral Baseline panel on the TENAX dashboard showing current vs. normal activity profiles for assets and users, with deviation score and autonomous response status",
         status: "adopted",
         location: "sentra/src/pages/dashboard.tsx",
       },
       {
         idea: "Natural Language Threat Query",
         source: "CrowdStrike Charlotte AI",
-        ourVersion: "NL threat query bar on the Sentra dashboard — operators type plain English (e.g. 'show assets with unusual outbound connections in the last 6h') to surface filtered risk views",
+        ourVersion: "NL threat query bar on the TENAX dashboard — operators type plain English (e.g. 'show assets with unusual outbound connections in the last 6h') to surface filtered risk views",
         status: "adopted",
         location: "sentra/src/pages/dashboard.tsx",
       },
       {
         idea: "Attack Chain Reconstruction",
-        source: "Palo Alto Cortex XDR",
+        source: "Palo Alto APEX XDR",
         ourVersion: "Incident Commander page shows full MITRE ATT&CK chain with root cause reconstructed step-by-step with proof sources per node",
         status: "adopted",
         location: "sentra/src/pages/incident-commander.tsx",
       },
     ],
-    oneOfOneThesis: "Sentra is the only cyber platform that wraps every detection and response decision in a Governed Autonomy proof envelope — showing not just what was detected, but which agent acted, with what confidence, approved by whom, and the full reversibility chain. Competitors show you threats. Sentra shows you the decision.",
+    oneOfOneThesis: "TENAX is the only cyber platform that wraps every detection and response decision in a Governed Autonomy proof envelope — showing not just what was detected, but which agent acted, with what confidence, approved by whom, and the full reversibility chain. Competitors show you threats. TENAX shows you the decision.",
     oneOfOneEvidence: [
       "Every incident has a reversible action log with named approver and policy tier",
       "Recovery Readiness score is calculated from agent-verified control states, not surveys",
@@ -175,7 +175,7 @@ const LANES: Lane[] = [
       {
         idea: "Matter Stage Pipeline Rail",
         source: "Clio Matter Stages",
-        ourVersion: "Visual stage progress rail at the top of the PRISM Counsel Matter Board showing matter count and value at each lifecycle stage (Intake → Discovery → Negotiation → Resolution) with drill-down filtering",
+        ourVersion: "Visual stage progress rail at the top of the Counsel Matter Board showing matter count and value at each lifecycle stage (Intake → Discovery → Negotiation → Resolution) with drill-down filtering",
         status: "adopted",
         location: "counsel/src/pages/matter-board.tsx",
       },
@@ -194,7 +194,7 @@ const LANES: Lane[] = [
         location: "counsel/src/pages/audit-trail.tsx",
       },
     ],
-    oneOfOneThesis: "PRISM Counsel is the only legal platform where every obligation is wrapped in a cryptographic proof chain — proving which agent extracted it, which human confirmed it, and what the governing policy was at decision time. Clio manages matters. PRISM Counsel proves them.",
+    oneOfOneThesis: "Counsel is the only legal platform where every obligation is wrapped in a cryptographic proof chain — proving which agent extracted it, which human confirmed it, and what the governing policy was at decision time. Clio manages matters. Counsel proves them.",
     oneOfOneEvidence: [
       "Proof Chain Export generates a verifiable audit record of every obligation classification decision",
       "Privilege Controls enforce attorney-client tagging at the agent layer, not just the UI layer",
@@ -247,7 +247,7 @@ const LANES: Lane[] = [
       {
         idea: "Opportunity Score Ranking",
         source: "CoStar ranked property results",
-        ourVersion: "Each property in Terra listings and pipeline shows an Opportunity Score (0–100) calculated from distress signals, cap rate delta, neighborhood momentum, and AI confidence — most actionable deals surface first",
+        ourVersion: "Each property in DOMAINE listings and pipeline shows an Opportunity Score (0–100) calculated from distress signals, cap rate delta, neighborhood momentum, and AI confidence — most actionable deals surface first",
         status: "adopted",
         location: "terra/src/pages/dashboard.tsx",
       },
@@ -266,7 +266,7 @@ const LANES: Lane[] = [
         location: "terra/src/pages/comparable-sales.tsx",
       },
     ],
-    oneOfOneThesis: "Terra is the only real estate platform that fuses AI distress forecasting, climate risk quantification, and governed underwriting in a single proof chain — every acquisition thesis is backed by an evidence trail from data ingestion through to the decision. CoStar shows you the market. Terra tells you what to do about it and proves why.",
+    oneOfOneThesis: "DOMAINE is the only real estate platform that fuses AI distress forecasting, climate risk quantification, and governed underwriting in a single proof chain — every acquisition thesis is backed by an evidence trail from data ingestion through to the decision. CoStar shows you the market. DOMAINE tells you what to do about it and proves why.",
     oneOfOneEvidence: [
       "Distress Engine generates a scored distress forecast per property with agent-verified signals",
       "Property Twin renders a full underwriting model with scenario branches and AI confidence weights",
@@ -338,7 +338,7 @@ const LANES: Lane[] = [
         location: "vessels/src/pages/trade-flow-heatmap.tsx",
       },
     ],
-    oneOfOneThesis: "Vessels is the only maritime platform where every dark vessel detection, sanctions match, and route anomaly generates a governed decision record — including which agent identified it, the confidence weight, and what action was taken under which policy tier. Windward shows risk. Vessels proves what was done about it.",
+    oneOfOneThesis: "SEXTANT is the only maritime platform where every dark vessel detection, sanctions match, and route anomaly generates a governed decision record — including which agent identified it, the confidence weight, and what action was taken under which policy tier. Windward shows risk. SEXTANT proves what was done about it.",
     oneOfOneEvidence: [
       "Dark Fleet Economics page quantifies the financial exposure of each dark vessel with proof-linked evidence",
       "Sanctions Chain Explorer traces the full corporate ownership chain behind each flagged entity",
@@ -380,14 +380,14 @@ const LANES: Lane[] = [
       {
         idea: "Source Provenance per Briefing Item",
         source: "Govini Ark source-cited evidence",
-        ourVersion: "Each section card in Pulse Today's Brief shows a provenance strip — which agents contributed, which products fed data, and the data freshness — so principals know the intelligence pedigree before acting",
+        ourVersion: "Each section card in LUMINA Today's Brief shows a provenance strip — which agents contributed, which products fed data, and the data freshness — so principals know the intelligence pedigree before acting",
         status: "adopted",
         location: "pulse/src/pages/TodaysBrief.tsx",
       },
       {
         idea: "Context-Aware AI Sidebar",
         source: "Palantir AIP Assist",
-        ourVersion: "Pulse Constellation page provides a cross-product intelligence assistant that surfaces connections between briefing items across Sentra, Vessels, Terra, and Lyte — one query spans the whole platform",
+        ourVersion: "LUMINA Constellation page provides a cross-product intelligence assistant that surfaces connections between briefing items across TENAX, SEXTANT, DOMAINE, and KORA — one query spans the whole platform",
         status: "adopted",
         location: "pulse/src/pages/Constellation.tsx",
       },
@@ -399,7 +399,7 @@ const LANES: Lane[] = [
         location: "pulse/src/pages/TodaysBrief.tsx",
       },
     ],
-    oneOfOneThesis: "Pulse is the only executive briefing platform that synthesizes intelligence across cyber, legal, real estate, maritime, and operations into a single daily brief with a Governed Autonomy proof envelope on every insight. Govini briefs defense programs. Pulse briefs the whole enterprise — and shows its work.",
+    oneOfOneThesis: "LUMINA is the only executive briefing platform that synthesizes intelligence across cyber, legal, real estate, maritime, and operations into a single daily brief with a Governed Autonomy proof envelope on every insight. Govini briefs defense programs. LUMINA briefs the whole enterprise — and shows its work.",
     oneOfOneEvidence: [
       "Today's Brief pulls from every SZL product via agent consensus — not a single-domain digest",
       "Dissent Channel lets any agent surface a minority view on a briefing conclusion before it reaches the principal",
@@ -471,7 +471,7 @@ const LANES: Lane[] = [
         location: "lyte-command-center/src/pages/decision-twin.tsx",
       },
     ],
-    oneOfOneThesis: "Lyte is the only decision intelligence platform that attaches a governed proof chain to every workflow signal — showing not just the insight but the policy state, ownership assignment, and confidence drift over time. ThoughtSpot answers questions. Lyte governs decisions.",
+    oneOfOneThesis: "KORA is the only decision intelligence platform that attaches a governed proof chain to every workflow signal — showing not just the insight but the policy state, ownership assignment, and confidence drift over time. ThoughtSpot answers questions. KORA governs decisions.",
     oneOfOneEvidence: [
       "Ownership Drift page tracks which decisions have gone unassigned and for how long, with financial exposure per gap",
       "Policy Center encodes guardrail rules that block or flag signals before they reach human review queues",
@@ -531,7 +531,7 @@ const LANES: Lane[] = [
       {
         idea: "Investor Update Automation",
         source: "Visible.vc automated KPI pulls",
-        ourVersion: "SZL Holdings Investors Hub auto-compiles portfolio KPIs from Sentra, Vessels, Terra, and Lyte into an investor-ready view with last-updated timestamps per metric — no manual reporting",
+        ourVersion: "SZL Holdings Investors Hub auto-compiles portfolio KPIs from TENAX, SEXTANT, DOMAINE, and KORA into an investor-ready view with last-updated timestamps per metric — no manual reporting",
         status: "adopted",
         location: "szl-holdings/src/pages/",
       },

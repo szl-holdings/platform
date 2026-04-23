@@ -83,7 +83,7 @@ export function AlloyOperatingLoopDiagram({ compact = false }: { compact?: boole
           marginBottom: '1.25rem',
         }}
       >
-        Alloy Operating Loop
+        FORGE Operating Loop
       </div>
 
       <div

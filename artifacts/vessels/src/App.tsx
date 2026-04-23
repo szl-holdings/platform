@@ -847,7 +847,7 @@ function VesselsSidebarContent({
         </div>
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-white/35">Vessels tracked</span>
+            <span className="text-[10px] text-white/35">SEXTANT tracked</span>
             <span className="text-[9px] font-mono" style={{ color: VESSELS_BRAND_ACCENT }}>
               1,247 tracked
             </span>

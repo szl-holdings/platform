@@ -111,7 +111,7 @@ const FALLBACK_FUNDAMENTALS: Fundamental[] = [
   },
   {
     label: "Wedge",
-    value: "Vessels, Aegis, Terra → platform",
+    value: "SEXTANT, PARAGON, DOMAINE → platform",
     note: "Maritime, security, and real estate entering design-partner phase",
   },
   {

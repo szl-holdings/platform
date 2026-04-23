@@ -25,7 +25,7 @@ const ecosystemNodes = [
   },
   {
     id: 'vessels',
-    name: 'Vessels · TRACK',
+    name: 'SEXTANT · TRACK',
     type: 'subsidiary',
     x: 18,
     y: 30,
@@ -33,7 +33,7 @@ const ecosystemNodes = [
   },
   {
     id: 'terra',
-    name: 'Terra · INTELLIGENCE',
+    name: 'DOMAINE · INTELLIGENCE',
     type: 'subsidiary',
     x: 15,
     y: 75,
@@ -41,7 +41,7 @@ const ecosystemNodes = [
   },
   {
     id: 'aegis',
-    name: 'Aegis · DEFEND',
+    name: 'PARAGON · DEFEND',
     type: 'subsidiary',
     x: 50,
     y: 85,
@@ -64,7 +64,7 @@ export function NexusMap() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase bg-violet-500/10 text-violet-400 border border-violet-500/20 mb-4">
-            Ecosystem Nexus
+            Ecosystem PRAXIS
           </span>
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Interconnected{' '}

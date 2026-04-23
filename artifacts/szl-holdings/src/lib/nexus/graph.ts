@@ -522,7 +522,7 @@ export const NEXUS_EDGES: EdgeRecord[] = [
     confidence: 71,
     strength: 0.65,
     inferred: true,
-    evidenceSources: ['Wire transfer pattern', 'NEXUS correlation'],
+    evidenceSources: ['Wire transfer pattern', 'PRAXIS correlation'],
     discoveredAt: '2024-06-15',
   },
   {
@@ -555,7 +555,7 @@ export const NEXUS_EDGES: EdgeRecord[] = [
     confidence: 68,
     strength: 0.68,
     inferred: true,
-    evidenceSources: ['Aegis IP correlation', 'ASN routing overlap'],
+    evidenceSources: ['PARAGON IP correlation', 'ASN routing overlap'],
     discoveredAt: '2026-04-10',
   },
   {
@@ -588,7 +588,7 @@ export const NEXUS_EDGES: EdgeRecord[] = [
     confidence: 55,
     strength: 0.4,
     inferred: true,
-    evidenceSources: ['NEXUS co-investment discovery at Ironside Lofts'],
+    evidenceSources: ['PRAXIS co-investment discovery at Ironside Lofts'],
     discoveredAt: '2026-02-28',
   },
 ];

@@ -21,7 +21,7 @@ const STATIC_LISTINGS = [
     daysOnMarket: 38,
     inquiries: 14,
     agent: 'Rivera, K.',
-    brokerage: 'Terra Commercial',
+    brokerage: 'DOMAINE Commercial',
     score: 87,
     tag: 'High Demand',
   },
@@ -37,7 +37,7 @@ const STATIC_LISTINGS = [
     daysOnMarket: 72,
     inquiries: 7,
     agent: 'Chen, M.',
-    brokerage: 'Terra Commercial',
+    brokerage: 'DOMAINE Commercial',
     score: 62,
     tag: 'Price Adjustment',
   },
@@ -53,7 +53,7 @@ const STATIC_LISTINGS = [
     daysOnMarket: 21,
     inquiries: 22,
     agent: 'Torres, A.',
-    brokerage: 'Terra Commercial',
+    brokerage: 'DOMAINE Commercial',
     score: 94,
     tag: 'Trending',
   },
@@ -69,7 +69,7 @@ const STATIC_LISTINGS = [
     daysOnMarket: 115,
     inquiries: 3,
     agent: 'Williams, J.',
-    brokerage: 'Terra Commercial',
+    brokerage: 'DOMAINE Commercial',
     score: 44,
     tag: 'Watch',
   },
@@ -85,7 +85,7 @@ const STATIC_LISTINGS = [
     daysOnMarket: 58,
     inquiries: 11,
     agent: 'Rivera, K.',
-    brokerage: 'Terra Commercial',
+    brokerage: 'DOMAINE Commercial',
     score: 79,
     tag: 'Under Contract',
   },
@@ -101,7 +101,7 @@ const STATIC_LISTINGS = [
     daysOnMarket: 189,
     inquiries: 4,
     agent: 'Chen, M.',
-    brokerage: 'Terra Commercial',
+    brokerage: 'DOMAINE Commercial',
     score: 38,
     tag: 'Distress Signal',
   },
@@ -160,7 +160,7 @@ export default function TerraListingsPage() {
   );
 
   useEffect(() => {
-    document.title = 'Terra Listings — Broker Command | SZL Holdings';
+    document.title = 'DOMAINE Listings — Broker Command | SZL Holdings';
   }, []);
 
   const filtered =
@@ -195,7 +195,7 @@ export default function TerraListingsPage() {
                   marginBottom: '0.875rem',
                 }}
               >
-                Terra · Listings Intelligence
+                DOMAINE · Listings Intelligence
               </span>
               <h1
                 style={{
@@ -220,7 +220,7 @@ export default function TerraListingsPage() {
                   marginBottom: '2rem',
                 }}
               >
-                Terra listings are not a property portal. Each card carries days on market, inquiry
+                DOMAINE listings are not a property portal. Each card carries days on market, inquiry
                 volume, agent ownership, opportunity score, and status — everything a broker needs
                 to act, not just browse.
               </p>
@@ -490,7 +490,7 @@ export default function TerraListingsPage() {
                   textDecoration: 'none',
                 }}
               >
-                Open Terra Platform <ArrowRight size={12} />
+                Open DOMAINE Platform <ArrowRight size={12} />
               </a>
             </m.div>
           </div>

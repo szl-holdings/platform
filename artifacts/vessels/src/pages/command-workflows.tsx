@@ -253,7 +253,7 @@ export default function CommandWorkflowsPage() {
             Command Workflows
           </h1>
           <p className="text-sm text-slate-400 mt-0.5">
-            Exception queue, owner assignment, route interventions — powered by Alloy
+            Exception queue, owner assignment, route interventions — powered by FORGE
           </p>
         </div>
         <Button
@@ -290,7 +290,7 @@ export default function CommandWorkflowsPage() {
         </Card>
         <Card className="bg-blue-500/5 border-blue-500/20">
           <CardContent className="p-4">
-            <div className="text-xs text-blue-400 font-medium mb-1">Monitored Vessels</div>
+            <div className="text-xs text-blue-400 font-medium mb-1">Monitored SEXTANT</div>
             <div className="text-3xl font-bold text-blue-400">{FALLBACK_VESSELS.length}</div>
           </CardContent>
         </Card>
@@ -302,7 +302,7 @@ export default function CommandWorkflowsPage() {
             <SelectValue placeholder="Vessel" />
           </SelectTrigger>
           <SelectContent className="bg-slate-900 border-slate-700">
-            <SelectItem value="all">All Vessels</SelectItem>
+            <SelectItem value="all">All SEXTANT</SelectItem>
             {FALLBACK_VESSELS.map((v) => (
               <SelectItem key={v.id} value={String(v.id)}>
                 {v.name}
@@ -464,13 +464,13 @@ export default function CommandWorkflowsPage() {
                           vesselId: event.vesselId,
                           workflowType:
                             event.severity === 'critical' ? 'escalation' : 'owner_assignment',
-                          assignedTo: 'Alloy Workflow Engine',
+                          assignedTo: 'FORGE Workflow Engine',
                         })
                       }
                       disabled={createWorkflow.isPending}
                     >
                       <Zap className="w-3 h-3 mr-1" />
-                      Alloy
+                      FORGE
                     </Button>
                     {event.eventType === 'route_deviation' ||
                     event.eventType === 'weather_pressure' ? (

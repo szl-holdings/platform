@@ -407,7 +407,7 @@ export const ANOMALY_PATTERNS: AnomalyPattern[] = [
               patternName: 'Undisclosed Cross-Network Co-Investment',
               severity,
               title: `${entityA.label} — ${entityB.label} co-investment at ${prop.label}: undisclosed relationship`,
-              description: `${prop.label} has co-investors from separate risk networks (${entityA.label} + ${entityB.label}) with no disclosed direct relationship between principals. ${directEdge ? '' : 'No direct edge in NEXUS graph. '}${distressScore >= 70 ? `Asset distress score ${distressScore}/100. ` : ''}${sharedNeighbors.length > 0 ? `${sharedNeighbors.length} indirect connection(s) identified.` : ''}`,
+              description: `${prop.label} has co-investors from separate risk networks (${entityA.label} + ${entityB.label}) with no disclosed direct relationship between principals. ${directEdge ? '' : 'No direct edge in PRAXIS graph. '}${distressScore >= 70 ? `Asset distress score ${distressScore}/100. ` : ''}${sharedNeighbors.length > 0 ? `${sharedNeighbors.length} indirect connection(s) identified.` : ''}`,
               domains: [
                 'Property',
                 'Financial',

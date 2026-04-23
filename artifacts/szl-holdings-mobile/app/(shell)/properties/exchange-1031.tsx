@@ -235,7 +235,7 @@ export default function Exchange1031Screen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · TAX</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>DOMAINE · TAX</Text>
           <Text style={[styles.title, { color: colors.cream }]}>1031 Exchange</Text>
         </View>
         <View style={styles.headerRight}>

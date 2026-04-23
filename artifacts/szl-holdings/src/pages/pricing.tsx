@@ -8,8 +8,8 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { analytics } from "@/lib/analytics";
 
 const PILOT_DELIVERABLES = [
-  { icon: BarChart3, label: "Lyte instrumented against your data", desc: "PRISM signal detection running on your actual operational surface — approval queues, workflow health, risk signals — within the first two weeks." },
-  { icon: GitBranch, label: "Alloy routing live", desc: "Action routing and audit trail configured for your org structure. Every signal gets an owner. Every action gets a record." },
+  { icon: BarChart3, label: "KORA instrumented against your data", desc: "PRISM signal detection running on your actual operational surface — approval queues, workflow health, risk signals — within the first two weeks." },
+  { icon: GitBranch, label: "FORGE routing live", desc: "Action routing and audit trail configured for your org structure. Every signal gets an owner. Every action gets a record." },
   { icon: Shield, label: "Playbook for your three highest-risk signal categories", desc: "Custom detection logic, routing rules, and escalation paths for the operational risks that matter most in your environment." },
   { icon: Zap, label: "Executive readout at week 12", desc: "Full operational summary: signals detected, actions routed, outcomes verified, and a roadmap for expansion." },
 ];
@@ -17,14 +17,14 @@ const PILOT_DELIVERABLES = [
 const QUALIFICATION = [
   { heading: "Teams running at scale", body: "50–5,000 person organizations where operational drift is a real cost — approval latency compounds, ownership gaps accumulate, and problems surface too late." },
   { heading: "Operators, not just observers", body: "You're not looking for another dashboard. You want a system that closes the loop — signal to action to audit — automatically." },
-  { heading: "Enterprise systems already in place", body: "You have Salesforce, Jira, ServiceNow, Slack, or similar. Lyte connects to your existing systems. You don't start over." },
+  { heading: "Enterprise systems already in place", body: "You have Salesforce, Jira, ServiceNow, Slack, or similar. KORA connects to your existing systems. You don't start over." },
   { heading: "Accountability as a design requirement", body: "Legal, compliance, or board-level accountability requirements that make traceable execution a business necessity, not a feature request." },
 ];
 
 const ENGAGEMENT_TIMELINE = [
-  { week: "Week 1–2", label: "Instrumentation", desc: "Connect Lyte to your existing systems. Configure PRISM signal categories for your environment." },
+  { week: "Week 1–2", label: "Instrumentation", desc: "Connect KORA to your existing systems. Configure PRISM signal categories for your environment." },
   { week: "Week 3–4", label: "Baseline", desc: "Establish signal baselines. Identify the first three high-value detection patterns." },
-  { week: "Week 5–8", label: "Routing + Audit", desc: "Alloy routing live. Human-in-the-loop gates configured. Audit trail active." },
+  { week: "Week 5–8", label: "Routing + Audit", desc: "FORGE routing live. Human-in-the-loop gates configured. Audit trail active." },
   { week: "Week 9–12", label: "Verification + Readout", desc: "Outcomes verified against baseline. Executive summary. Expansion roadmap delivered." },
 ];
 
@@ -58,7 +58,7 @@ export default function PricingPage() {
                 KORA + FORGE, live in<br />your environment.
               </h1>
               <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "38rem", marginBottom: "2rem" }}>
-                We run a focused 3-month design partner engagement. Lyte instrumented against your operational data. Alloy routing action. Real signals, real execution, real audit trail — in your environment, against your systems, for your team.
+                We run a focused 3-month design partner engagement. KORA instrumented against your operational data. FORGE routing action. Real signals, real execution, real audit trail — in your environment, against your systems, for your team.
               </p>
               <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
                 <Link
@@ -176,12 +176,12 @@ export default function PricingPage() {
                   KORA + FORGE, live in<br />your environment.
                 </h1>
                 <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "38rem", marginBottom: "2rem" }}>
-                  We run a focused 3-month design partner engagement. Lyte instrumented against your operational data. Alloy routing action. Real signals, real execution, real audit trail — in your environment, against your systems, for your team.
+                  We run a focused 3-month design partner engagement. KORA instrumented against your operational data. FORGE routing action. Real signals, real execution, real audit trail — in your environment, against your systems, for your team.
                 </p>
                 <div style={{ padding: "1.5rem", borderRadius: "12px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)", marginBottom: "1rem" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
                     <Building2 size={14} style={{ color: "hsl(210,5%,46%)" }} />
-                    <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,84%)" }}>Connected systems (Lyte)</p>
+                    <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,84%)" }}>Connected systems (KORA)</p>
                   </div>
                   {["Salesforce (CRM, pipeline, approvals)", "Jira / Linear (engineering workflows)", "Slack / Teams (communication signals)", "ServiceNow / PagerDuty (incident data)", "HubSpot, Zendesk, or similar", "Custom APIs and internal systems via webhook"].map((item) => (
                     <div key={item} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>
@@ -193,7 +193,7 @@ export default function PricingPage() {
                 <div style={{ padding: "1.5rem", borderRadius: "12px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
                     <Users size={14} style={{ color: "hsl(210,5%,46%)" }} />
-                    <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,84%)" }}>Org structure (Alloy)</p>
+                    <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,84%)" }}>Org structure (FORGE)</p>
                   </div>
                   {["Role-based routing rules", "Approval chains and escalation paths", "SLA thresholds per signal category", "Exception and override audit logging"].map((item) => (
                     <div key={item} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>
@@ -337,7 +337,7 @@ export default function PricingPage() {
                   <div style={{ padding: "1.5rem", borderRadius: "12px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)", marginBottom: "1rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
                       <Building2 size={14} style={{ color: "hsl(210,5%,46%)" }} />
-                      <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,84%)" }}>Connected systems (Lyte)</p>
+                      <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,84%)" }}>Connected systems (KORA)</p>
                     </div>
                     {["Salesforce (CRM, pipeline, approvals)", "Jira / Linear (engineering workflows)", "Slack / Teams (communication signals)", "ServiceNow / PagerDuty (incident data)", "HubSpot, Zendesk, or similar", "Custom APIs and internal systems via webhook"].map((item) => (
                       <div key={item} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>
@@ -349,7 +349,7 @@ export default function PricingPage() {
                   <div style={{ padding: "1.5rem", borderRadius: "12px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
                       <Users size={14} style={{ color: "hsl(210,5%,46%)" }} />
-                      <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,84%)" }}>Org structure (Alloy)</p>
+                      <p style={{ fontSize: "12px", fontWeight: 600, color: "hsl(38,12%,84%)" }}>Org structure (FORGE)</p>
                     </div>
                     {["Role-based routing rules", "Approval chains and escalation paths", "SLA thresholds per signal category", "Exception and override audit logging"].map((item) => (
                       <div key={item} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>

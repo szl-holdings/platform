@@ -274,7 +274,7 @@ export default function PrismCounselPublicPage() {
                       marginBottom: "2.25rem",
                     }}
                   >
-                    Built for NY insurance litigation — no-fault, bodily injury, premises liability — on top of Microsoft 365 and the Alloy Governance API. Human approval on every consequential action. Source-grounded AI. Immutable audit trail.
+                    Built for NY insurance litigation — no-fault, bodily injury, premises liability — on top of Microsoft 365 and the FORGE Governance API. Human approval on every consequential action. Source-grounded AI. Immutable audit trail.
                   </p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                     <Link href="/aegis/" className="szl-btn-primary">
@@ -531,12 +531,12 @@ export default function PrismCounselPublicPage() {
             </div>
           </section>
   
-          {/* ─── Alloy as Engine ─────────────────────────────────────── */}
+          {/* ─── FORGE as Engine ─────────────────────────────────────── */}
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-                <SectionLabel>Alloy Governance API</SectionLabel>
-                <SectionHeading maxWidth="34ch">How Alloy powers everything that moves in Counsel.</SectionHeading>
+                <SectionLabel>FORGE Governance API</SectionLabel>
+                <SectionHeading maxWidth="34ch">How FORGE powers everything that moves in Counsel.</SectionHeading>
               </m.div>
               <div style={{ display: "grid", gap: "clamp(2.5rem,5vw,4rem)" }} className="lg:grid-cols-[1fr_1.1fr]">
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -549,7 +549,7 @@ export default function PrismCounselPublicPage() {
                     {
                       icon: Cpu,
                       title: "AI governance engine",
-                      body: "Alloy classifies every AI action: auto (read-only), review (human approval required), admin-only (elevated authorization). No autonomous execution of high-risk actions. Confidence thresholds enforced at the model lane.",
+                      body: "FORGE classifies every AI action: auto (read-only), review (human approval required), admin-only (elevated authorization). No autonomous execution of high-risk actions. Confidence thresholds enforced at the model lane.",
                     },
                     {
                       icon: Shield,
@@ -559,7 +559,7 @@ export default function PrismCounselPublicPage() {
                     {
                       icon: Database,
                       title: "Connector framework",
-                      body: "Alloy connectors handle Microsoft 365 (Teams, Outlook, SharePoint, Word), case management systems, NYSCEF, court feeds, and external regulatory data. Counsel adds domain logic on top of a proven integration fabric.",
+                      body: "FORGE connectors handle Microsoft 365 (Teams, Outlook, SharePoint, Word), case management systems, NYSCEF, court feeds, and external regulatory data. Counsel adds domain logic on top of a proven integration fabric.",
                     },
                   ].map((item, i) => {
                     const Icon = item.icon;

@@ -1042,9 +1042,9 @@ export default function OpsConsole() {
                 </div>
                 {[
                   { source: 'Platform signals', freshness: 'Live', status: 'healthy' },
-                  { source: 'Terra NYC ingestion', freshness: 'Scheduled (6h)', status: 'healthy' },
+                  { source: 'DOMAINE NYC ingestion', freshness: 'Scheduled (6h)', status: 'healthy' },
                   { source: 'Vessel positions', freshness: '5m interval', status: 'healthy' },
-                  { source: 'Aegis threat feed', freshness: 'Seeded', status: 'degraded' },
+                  { source: 'PARAGON threat feed', freshness: 'Seeded', status: 'degraded' },
                 ].map((s) => (
                   <div
                     key={s.source}
@@ -2234,14 +2234,14 @@ export default function OpsConsole() {
                         <AlertTriangle style={{ width: 14, height: 14, color: '#d4a054' }} />
                         <span style={{ fontSize: '12px', color: '#d4a054' }}>
                           {rmm.healing.pendingApprovals} execution
-                          {rmm.healing.pendingApprovals > 1 ? 's' : ''} awaiting approval in Aegis
+                          {rmm.healing.pendingApprovals > 1 ? 's' : ''} awaiting approval in PARAGON
                           RMM Console
                         </span>
                       </div>
                     )}
                     {Object.keys(rmm.healing.stats).length === 0 && (
                       <div style={{ fontSize: '12px', color: TEXT.muted }}>
-                        No healing executions recorded yet. Configure playbooks in the Aegis Ops
+                        No healing executions recorded yet. Configure playbooks in the PARAGON Ops
                         Console.
                       </div>
                     )}

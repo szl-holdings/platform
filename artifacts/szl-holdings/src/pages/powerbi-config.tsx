@@ -268,7 +268,7 @@ export default function PowerBiConfigPage() {
                   </h1>
                   <p className="text-sm text-muted-foreground mt-1">
                     Connect your Microsoft Power BI workspace to embed live analytics reports across
-                    Aegis, Terra, and Lyte. Credentials are encrypted at rest using AES-256-GCM.
+                    PARAGON, DOMAINE, and Lyte. Credentials are encrypted at rest using AES-256-GCM.
                   </p>
                 </div>
               </div>

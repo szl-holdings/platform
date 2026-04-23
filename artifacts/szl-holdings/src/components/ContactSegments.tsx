@@ -13,7 +13,7 @@ const segments = [
   {
     audience: 'Clients',
     headline: 'Platform demos and pilot programs',
-    body: 'Product demonstrations, pilot programs, and enterprise deployments for Lyte and Vessels.',
+    body: 'Product demonstrations, pilot programs, and enterprise deployments for KORA and Vessels.',
     type: 'client',
     accentRgb: '14,201,224',
   },

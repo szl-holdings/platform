@@ -78,7 +78,7 @@ const WORKSPACE_TABS: {
   sublabel: string;
 }[] = [
   { mode: 'strategy', label: 'Strategy', sublabel: 'Governed Decision Loop', icon: Globe2 },
-  { mode: 'operations', label: 'Operations', sublabel: 'Lyte — AIOps', icon: Zap },
+  { mode: 'operations', label: 'Operations', sublabel: 'KORA — AIOps', icon: Zap },
   { mode: 'infrastructure', label: 'Infrastructure', sublabel: 'IMPERIUM', icon: Shield },
 ];
 
@@ -90,7 +90,7 @@ const ECOSYSTEM_APPS_NAV: NavGroup = {
   items: [
     { href: '/counsel/', label: 'Counsel — Legal', icon: Scale, external: true },
     { href: '/imperium/', label: 'IMPERIUM', icon: Crown, external: true },
-    { href: '/lyte-command-center/', label: 'Lyte Command Center', icon: Zap, external: true },
+    { href: '/lyte-command-center/', label: 'KORA Command Center', icon: Zap, external: true },
     { href: '/stephen-site/', label: 'Stephen Site', icon: Globe, external: true },
     { href: '/cortex-mobile/', label: 'APEX Mobile', icon: Cpu, external: true },
   ],
@@ -104,11 +104,11 @@ const STRATEGY_NAV: NavGroup[] = [
       { href: '/strategy/worldline-registry', label: 'Worldline Registry', icon: GitBranch },
       {
         href: '/vessels/atlas-runtime',
-        label: 'Vessels ATLAS Runtime',
+        label: 'SEXTANT ATLAS Runtime',
         icon: Satellite,
         external: true,
       },
-      { href: '/terra/atlas-runtime', label: 'Terra ATLAS Runtime', icon: Map, external: true },
+      { href: '/terra/atlas-runtime', label: 'DOMAINE ATLAS Runtime', icon: Map, external: true },
     ],
   },
   {
@@ -178,7 +178,7 @@ const OPERATIONS_NAV: NavGroup[] = [
     ],
   },
   {
-    section: 'Alloy — Execution',
+    section: 'FORGE — Execution',
     items: [
       { href: '/operations/alloy/policy-compiler', label: 'Policy Compiler', icon: Code },
       { href: '/operations/alloy/canvas', label: 'Workflow Canvas', icon: Workflow },
@@ -930,9 +930,9 @@ function UnifiedLayoutInner({
           </div>
           <div className="flex gap-1 flex-wrap">
             {[
-              { label: 'AEGIS', href: '/aegis/', color: '#ef4444' },
-              { label: 'TERRA', href: '/terra/', color: '#22c55e' },
-              { label: 'VESSELS', href: '/vessels/', color: '#0ea5e9' },
+              { label: 'PARAGON', href: '/aegis/', color: '#ef4444' },
+              { label: 'DOMAINE', href: '/terra/', color: '#22c55e' },
+              { label: 'SEXTANT', href: '/vessels/', color: '#0ea5e9' },
               { label: 'COUNSEL', href: '/counsel/', color: '#8b7ac8' },
             ].map((p) => (
               <a

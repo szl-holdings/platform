@@ -49,7 +49,7 @@ const ECOSYSTEM_APPS = [
     id: 'dreamscape',
     name: 'FORGE',
     role: 'Predictive Intelligence',
-    agent: 'Alloy Engine',
+    agent: 'FORGE Engine',
     icon: Zap,
     color: 'text-violet-400',
     bg: 'bg-violet-400/10',
@@ -279,7 +279,7 @@ function AgentNetworkDiagram({ agents }: { agents: AgentNode[] }) {
                 filter={isActive ? 'url(#glow)' : 'none'}
               />
 
-              {/* Pulse ring for active */}
+              {/* LUMINA ring for active */}
               {isActive && (
                 <circle
                   cx={x}

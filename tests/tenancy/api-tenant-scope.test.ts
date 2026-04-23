@@ -209,8 +209,8 @@ beforeEach(() => {
 
 // ── Vessels — tenant isolation ───────────────────────────────────────────────
 
-describe('HTTP tenancy — Vessels domain', () => {
-  it('Org A user accesses Vessels with their own org → 200', async () => {
+describe('HTTP tenancy — SEXTANT domain', () => {
+  it('Org A user accesses SEXTANT with their own org → 200', async () => {
     const app = buildDomainApp('vessels', orgA);
     const res = await request(app).get('/vessels/fleets');
     expect(res.status).toBe(200);
@@ -246,7 +246,7 @@ describe('HTTP tenancy — Vessels domain', () => {
     expect(res.status).toBe(200);
   });
 
-  it('No-org user cannot POST Vessels resources → 403', async () => {
+  it('No-org user cannot POST SEXTANT resources → 403', async () => {
     const app = buildDomainApp('vessels', noOrgUser);
     const res = await request(app).post('/vessels/alerts').send({ name: 'test' });
     expect(res.status).toBe(403);
@@ -255,26 +255,26 @@ describe('HTTP tenancy — Vessels domain', () => {
 
 // ── Terra — tenant isolation ─────────────────────────────────────────────────
 
-describe('HTTP tenancy — Terra domain', () => {
-  it('Org A user accesses Terra properties → 200', async () => {
+describe('HTTP tenancy — DOMAINE domain', () => {
+  it('Org A user accesses DOMAINE properties → 200', async () => {
     const app = buildDomainApp('terra', orgA);
     const res = await request(app).get('/terra/properties');
     expect(res.status).toBe(200);
   });
 
-  it("Org B user cannot access Org A's Terra data via forged orgSlug → 403", async () => {
+  it("Org B user cannot access Org A's DOMAINE data via forged orgSlug → 403", async () => {
     const app = buildOrgSlugApp('terra', orgB);
     const res = await request(app).get('/terra/org-a/properties');
     expect(res.status).toBe(403);
   });
 
-  it("Org B user accessing their own org's Terra resources → 200", async () => {
+  it("Org B user accessing their own org's DOMAINE resources → 200", async () => {
     const app = buildOrgSlugApp('terra', orgB);
     const res = await request(app).get('/terra/org-b/properties');
     expect(res.status).toBe(200);
   });
 
-  it("Admin user can access any org's Terra data → 200", async () => {
+  it("Admin user can access any org's DOMAINE data → 200", async () => {
     const app = buildOrgSlugApp('terra', adminUser);
     const res = await request(app).get('/terra/org-b/properties');
     expect(res.status).toBe(200);
@@ -283,7 +283,7 @@ describe('HTTP tenancy — Terra domain', () => {
 
 // ── PRISM Counsel — tenant isolation ─────────────────────────────────────────
 
-describe('HTTP tenancy — PRISM Counsel domain', () => {
+describe('HTTP tenancy — Counsel domain', () => {
   it('Org A user accesses own PRISM matters → 200', async () => {
     const app = buildDomainApp('prism', orgA);
     const res = await request(app).get('/prism/matters');
@@ -321,14 +321,14 @@ describe('HTTP tenancy — Firestorm domain', () => {
 
 // ── Lyte — tenant isolation ───────────────────────────────────────────────────
 
-describe('HTTP tenancy — Lyte domain', () => {
-  it('Org A user accesses Lyte scenarios → 200', async () => {
+describe('HTTP tenancy — KORA domain', () => {
+  it('Org A user accesses KORA scenarios → 200', async () => {
     const app = buildDomainApp('lyte', orgA);
     const res = await request(app).get('/lyte/scenarios');
     expect(res.status).toBe(200);
   });
 
-  it('Cross-tenant Lyte access via forged orgSlug → 403', async () => {
+  it('Cross-tenant KORA access via forged orgSlug → 403', async () => {
     const app = buildOrgSlugApp('lyte', orgA);
     const res = await request(app).get('/lyte/org-b/scenarios');
     expect(res.status).toBe(403);

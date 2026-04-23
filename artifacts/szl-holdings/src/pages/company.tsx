@@ -7,7 +7,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 const PRODUCT_HIERARCHY = [
   {
-    name: "Command + Lyte",
+    name: "Command + KORA",
     role: "Governed command surface",
     color: "hsl(192,72%,48%)",
     desc: "The operator command surface. Signal timeline, action queue, approval flow, and AI recommendations — with source citations, confidence scores, and full provenance. Where operators observe signals, review recommendations, run simulations, and make governed decisions.",
@@ -40,7 +40,7 @@ const GO_TO_MARKET = [
   {
     phase: "Phase 2",
     label: "Paid pilots",
-    desc: "Structured commercial deployments where decision accountability has measurable ROI. Command + Alloy as the entry point, with domain packs extending into specific verticals.",
+    desc: "Structured commercial deployments where decision accountability has measurable ROI. Command + FORGE as the entry point, with domain packs extending into specific verticals.",
   },
   {
     phase: "Phase 3",
@@ -102,13 +102,13 @@ export default function CompanyPage() {
                     What we build
                   </p>
                   <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.018em", lineHeight: 1.15, marginBottom: "1rem", color: "hsl(38,8%,94%)" }}>
-                    Command is the operator surface. Alloy is the execution fabric beneath it.
+                    Command is the operator surface. FORGE is the execution fabric beneath it.
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1rem" }}>
                     Most organizations have dashboards that show what happened and AI tools that generate suggestions. What they lack is the governed layer that routes signals to decisions, enforces approval gates, and tracks outcomes — with attribution at every step.
                   </p>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)" }}>
-                    Command is the operator surface — where signals arrive, recommendations are reviewed, and decisions are made. Alloy is the execution fabric beneath it — workflow orchestration, policy enforcement, and immutable audit trail. Together, they form the governed decision loop that every domain pack inherits.
+                    Command is the operator surface — where signals arrive, recommendations are reviewed, and decisions are made. FORGE is the execution fabric beneath it — workflow orchestration, policy enforcement, and immutable audit trail. Together, they form the governed decision loop that every domain pack inherits.
                   </p>
                 </div>
                 <div>

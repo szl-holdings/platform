@@ -34,12 +34,12 @@ test.beforeEach(async ({}, testInfo) => {
   if (!appAvailable) testInfo.skip();
 });
 
-test.describe('Lyte Command Center — Smoke Tests', () => {
+test.describe('KORA Command Center — Smoke Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(LYTE_PATH);
   });
 
-  test('loads Lyte without fatal errors', async ({ page }) => {
+  test('loads KORA without fatal errors', async ({ page }) => {
     const body = page.locator('body');
     await expect(body).toBeVisible();
     const errorBoundary = page.locator('text=Something went wrong').first();
@@ -64,7 +64,7 @@ test.describe('Lyte Command Center — Smoke Tests', () => {
   });
 });
 
-test.describe('Lyte Command Center — Route Smoke Tests', () => {
+test.describe('KORA Command Center — Route Smoke Tests', () => {
   const routes = [
     { path: '', label: 'lyte home' },
     { path: '/decision-theater', label: 'decision theater' },
@@ -88,7 +88,7 @@ test.describe('Lyte Command Center — Route Smoke Tests', () => {
   }
 });
 
-test.describe('Lyte Command Center — Content Validation', () => {
+test.describe('KORA Command Center — Content Validation', () => {
   test('lyte home shows decisioning platform content', async ({ page }) => {
     await page.goto(LYTE_PATH);
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
@@ -99,7 +99,7 @@ test.describe('Lyte Command Center — Content Validation', () => {
 
     const lyteContent = page
       .locator(
-        ":text('Lyte'), :text('Decision'), :text('Governed'), :text('Signal'), :text('Intelligence'), :text('AI')",
+        ":text('KORA'), :text('Decision'), :text('Governed'), :text('Signal'), :text('Intelligence'), :text('AI')",
       )
       .first();
     await expect(lyteContent).toBeVisible({ timeout: 15000 });
@@ -178,7 +178,7 @@ test.describe('Lyte Command Center — Content Validation', () => {
   });
 });
 
-test.describe('Lyte Command Center — Mobile Viewport', () => {
+test.describe('KORA Command Center — Mobile Viewport', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test('lyte home renders on mobile without crash', async ({ page }) => {

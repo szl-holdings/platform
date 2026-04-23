@@ -228,7 +228,7 @@ export default function CorridorRoutesPage() {
 
                     <div className="mt-3 grid grid-cols-5 gap-2 text-center">
                       <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                        <p className="text-[9px] text-sky-400/30">Vessels</p>
+                        <p className="text-[9px] text-sky-400/30">SEXTANT</p>
                         <p className="text-[11px] font-mono text-sky-300">{corridor.vesselCount}</p>
                       </div>
                       <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">

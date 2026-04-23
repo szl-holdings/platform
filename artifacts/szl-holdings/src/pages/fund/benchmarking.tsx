@@ -181,7 +181,7 @@ export default function BenchmarkingPage() {
                 </div>
                 <div className="rounded-xl border border-[#c8953c]/20 bg-[#c8953c]/[0.04] p-4">
                   <div className="text-xs font-semibold text-white mb-2">Attribution Insight</div>
-                  <p className="text-xs text-white/60">Lyte accounts for 32.4% of fund IRR contribution, driven by its Series B valuation mark at $148M. Counsel is the second-highest contributor despite being the newest investment — the RegulaAI strategic synergy is generating early outsized returns. Carlota Jo drag has been contained at 1.3pp through proactive intervention, compared to peer fund write-off average of 4.2pp at this stage.</p>
+                  <p className="text-xs text-white/60">KORA accounts for 32.4% of fund IRR contribution, driven by its Series B valuation mark at $148M. Counsel is the second-highest contributor despite being the newest investment — the RegulaAI strategic synergy is generating early outsized returns. Carlota Jo drag has been contained at 1.3pp through proactive intervention, compared to peer fund write-off average of 4.2pp at this stage.</p>
                 </div>
               </div>
             )}

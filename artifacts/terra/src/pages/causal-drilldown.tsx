@@ -25,7 +25,7 @@ export default function CausalDrilldown() {
       predictions: goldenFlowPredictions,
       runs: goldenFlowRuns,
       summary:
-        'Approval SLA breach triggered by legal team capacity pressure during Q1 close, predicted by Alloy, rerouted by Alloy, now on recovery path.',
+        'Approval SLA breach triggered by legal team capacity pressure during Q1 close, predicted by FORGE, rerouted by FORGE, now on recovery path.',
     },
   ];
 
@@ -46,13 +46,13 @@ export default function CausalDrilldown() {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: '#0ea5e9' }}
           >
-            Lyte · Causal Drilldown
+            KORA · Causal Drilldown
           </span>
         </div>
         <h1 className="text-2xl font-bold text-white">Causal Drilldown</h1>
         <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          Root factors traced end-to-end across Lyte detections, Lyte actions, Alloy predictions,
-          and Alloy execution runs.
+          Root factors traced end-to-end across KORA detections, KORA actions, FORGE predictions,
+          and FORGE execution runs.
         </p>
       </div>
 
@@ -79,7 +79,7 @@ export default function CausalDrilldown() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Activity className="w-3.5 h-3.5" style={{ color: '#0ea5e9' }} />
-                <span className="text-xs font-semibold text-white">Lyte Detections</span>
+                <span className="text-xs font-semibold text-white">KORA Detections</span>
                 <span
                   className="text-[9px] px-1.5 py-0.5 rounded font-bold"
                   style={{ color: '#0ea5e9', background: 'rgba(14,165,233,0.15)' }}
@@ -185,7 +185,7 @@ export default function CausalDrilldown() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="w-3.5 h-3.5" style={{ color: '#4B8BDB' }} />
-                <span className="text-xs font-semibold text-white">Alloy Execution Runs</span>
+                <span className="text-xs font-semibold text-white">FORGE Execution Runs</span>
                 <span
                   className="text-[9px] px-1.5 py-0.5 rounded font-bold"
                   style={{ color: '#4B8BDB', background: 'rgba(75,139,219,0.15)' }}

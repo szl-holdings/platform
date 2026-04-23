@@ -127,7 +127,7 @@ const SECTION_META: Record<SectionKey, { title: string; subtitle: string }> = {
     title: 'Deadline Risk Queue',
     subtitle: 'Time-sensitive filings and discovery cutoffs',
   },
-  ai: { title: 'AI Recommendations', subtitle: 'Prioritized actions surfaced by PRISM Counsel' },
+  ai: { title: 'AI Recommendations', subtitle: 'Prioritized actions surfaced by Counsel' },
 };
 
 function resolveSection(location: string): SectionKey {
@@ -291,7 +291,7 @@ export default function LegalWorkspacePage() {
             <Scale className="w-5 h-5" style={{ color: '#d4a054' }} />
             <h1 className="text-lg font-semibold text-slate-100">{meta.title}</h1>
             <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20">
-              PRISM Counsel
+              Counsel
             </span>
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-500/10 text-slate-500 border border-white/[0.06]">
               <WifiOff className="w-2.5 h-2.5" /> DEMO

@@ -405,7 +405,7 @@ export default function AlloyPolicySimPage() {
             className="text-[9px] font-mono uppercase tracking-widest"
             style={{ color: ACCENT }}
           >
-            Alloy · COVENANT
+            FORGE · COVENANT
           </span>
         </div>
         <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>
@@ -434,7 +434,7 @@ export default function AlloyPolicySimPage() {
         <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: '#4a90b8' }} />
         <div className="flex-1">
           <p className="text-[9px] leading-relaxed" style={{ color: TEXT.secondary }}>
-            COVENANT is Alloy's policy engine. Every proposed action is evaluated against active
+            COVENANT is FORGE's policy engine. Every proposed action is evaluated against active
             policy rules before execution. This console simulates those evaluations without
             triggering real workflows.
           </p>

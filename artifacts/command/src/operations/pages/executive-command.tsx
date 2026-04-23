@@ -229,7 +229,7 @@ const PENDING_APPROVALS = [
   },
   {
     id: 'A-1038',
-    title: 'Fuel surcharge rate increase — Vessels fleet',
+    title: 'Fuel surcharge rate increase — SEXTANT fleet',
     requestedBy: 'Fleet Ops',
     age: '22h',
     urgency: 'high',
@@ -242,7 +242,7 @@ const PENDING_APPROVALS = [
   },
   {
     id: 'A-1033',
-    title: 'Terra asset refinancing — Building 7A',
+    title: 'DOMAINE asset refinancing — Building 7A',
     requestedBy: 'Finance',
     age: '4d',
     urgency: 'medium',
@@ -250,7 +250,7 @@ const PENDING_APPROVALS = [
     confidence: 76,
     approvalChain: [
       {
-        actor: 'Terra Finance',
+        actor: 'DOMAINE Finance',
         role: 'Finance',
         action: 'submitted',
         time: '4d ago',
@@ -269,7 +269,7 @@ const PENDING_APPROVALS = [
     evidence: 'Vendor SOC2 report, pricing proposal',
     confidence: 84,
     approvalChain: [
-      { actor: 'Aegis Ops', role: 'Ops', action: 'submitted', time: '6d ago', status: 'done' },
+      { actor: 'PARAGON Ops', role: 'Ops', action: 'submitted', time: '6d ago', status: 'done' },
       { actor: 'Procurement', role: 'Proc', action: 'approved', time: '5d ago', status: 'done' },
       { actor: 'Stephen Lutar', role: 'CXO', action: 'pending', time: '—', status: 'pending' },
     ],
@@ -280,9 +280,9 @@ const SERVICE_HEALTH = [
   { name: 'API Gateway', status: 'healthy', latency: '34ms', uptime: '99.97%' },
   { name: 'Auth Service', status: 'healthy', latency: '12ms', uptime: '100%' },
   { name: 'PRISM Engine', status: 'warning', latency: '218ms', uptime: '98.1%' },
-  { name: 'Vessels Feed', status: 'degraded', latency: '2.1s', uptime: '91.4%' },
-  { name: 'Terra Data', status: 'healthy', latency: '67ms', uptime: '99.88%' },
-  { name: 'Aegis Intel', status: 'healthy', latency: '44ms', uptime: '99.99%' },
+  { name: 'SEXTANT Feed', status: 'degraded', latency: '2.1s', uptime: '91.4%' },
+  { name: 'DOMAINE Data', status: 'healthy', latency: '67ms', uptime: '99.88%' },
+  { name: 'PARAGON Intel', status: 'healthy', latency: '44ms', uptime: '99.99%' },
 ];
 
 const OPERATING_LOOP = [

@@ -10,8 +10,8 @@ const COLOR_TOKENS = [
   { name: "SZL Surface", value: "hsla(0,0%,100%,0.04)", label: "Card base", hex: "rgba(255,255,255,0.04)" },
   { name: "SZL Border", value: "hsla(0,0%,100%,0.08)", label: "Dividers", hex: "rgba(255,255,255,0.08)" },
   { name: "SZL Accent", value: "hsl(38,52%,58%)", label: "Brand gold", hex: "#c8953c" },
-  { name: "Lyte Core", value: "hsl(191,92%,44%)", label: "Lyte brand", hex: "#09c9de" },
-  { name: "Alloy Light", value: "hsl(246,55%,72%)", label: "Alloy brand", hex: "#9b8fd4" },
+  { name: "KORA Core", value: "hsl(191,92%,44%)", label: "KORA brand", hex: "#09c9de" },
+  { name: "FORGE Light", value: "hsl(246,55%,72%)", label: "FORGE brand", hex: "#9b8fd4" },
   { name: "Signal Green", value: "hsl(145,62%,46%)", label: "Success / Security", hex: "#28c76f" },
   { name: "Alert Amber", value: "hsl(40,90%,54%)", label: "Warning / Attention", hex: "#e8a329" },
   { name: "Risk Red", value: "hsl(0,75%,58%)", label: "Danger / Critical", hex: "#e04040" },
@@ -39,7 +39,7 @@ const UI_PRINCIPLES = [
   { title: "Density without noise", body: "Enterprise information density is a goal. Unnecessary whitespace is waste. But noise — visual clutter without semantic purpose — is the enemy." },
   { title: "Monospace as precision", body: "Monospace type signals precision, measurement, and code. Use it for overlines, badges, statuses, and counts — not for body text." },
   { title: "Border as structure", body: "Cards, tables, and sections use 1px hairline borders at hsla(0,0%,100%,0.08). Not shadows. Not gradients. Borders." },
-  { title: "Color means something", body: "Green: confirmed / secure. Amber: attention required. Red: risk or failure. Lyte teal: observability signal. Alloy purple: execution. Do not use colors decoratively." },
+  { title: "Color means something", body: "Green: confirmed / secure. Amber: attention required. Red: risk or failure. KORA teal: observability signal. FORGE purple: execution. Do not use colors decoratively." },
   { title: "State is explicit", body: "Loading states, empty states, error states, and demo/sandbox modes are always explicitly labeled. Users are never left to guess what they are looking at." },
 ];
 

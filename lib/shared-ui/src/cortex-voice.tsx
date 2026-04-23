@@ -80,7 +80,7 @@ async function defaultQueryHandler(query: string): Promise<CortexResult> {
     };
   } catch {
     return {
-      summary: `CORTEX is processing your query: "${query}". The multi-agent orchestrator is aggregating intelligence across all domains.`,
+      summary: `APEX is processing your query: "${query}". The multi-agent orchestrator is aggregating intelligence across all domains.`,
       confidence: 0.6,
       actions: [{ label: 'View Command Portal', href: '/command/' }],
     };
@@ -136,7 +136,7 @@ export function CortexVoice({
         setVoiceState('result');
       } catch {
         setResult({
-          summary: 'CORTEX encountered an error processing your request. Please try again.',
+          summary: 'APEX encountered an error processing your request. Please try again.',
           confidence: 0,
         });
         setVoiceState('result');
@@ -253,7 +253,7 @@ export function CortexVoice({
                 letterSpacing: '0.5px',
               }}
             >
-              CORTEX Voice
+              APEX Voice
             </div>
             <div
               style={{
@@ -647,7 +647,7 @@ export function CortexVoiceTrigger({
   return (
     <button
       onClick={onClick}
-      title="Ask CORTEX (Ctrl+Shift+K)"
+      title="Ask APEX (Ctrl+Shift+K)"
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -666,7 +666,7 @@ export function CortexVoiceTrigger({
       }}
     >
       <span style={{ fontSize: '14px' }}>⟁</span>
-      Ask CORTEX
+      Ask APEX
       <span
         aria-hidden="true"
         style={{

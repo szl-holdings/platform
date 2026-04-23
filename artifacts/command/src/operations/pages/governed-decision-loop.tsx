@@ -182,7 +182,7 @@ interface ScenarioPanelData {
 }
 
 const VESSELS_DATA: ScenarioPanelData = {
-  domainLabel: 'Vessels — Maritime Fleet Command',
+  domainLabel: 'SEXTANT — Maritime Fleet Command',
   signal: {
     id: 'SIG-4821',
     title: 'Fleet ETA compliance gap — 3 vessels outside SLA',
@@ -368,7 +368,7 @@ const VESSELS_DATA: ScenarioPanelData = {
         policyId: 'cov-005',
         policyName: 'Cross-domain impact → Domain lead sign-off',
         outcome: 'approved',
-        reason: 'Vessels + PRISM domains affected; both domain leads notified',
+        reason: 'SEXTANT + PRISM domains affected; both domain leads notified',
         evaluatedAt: '09:12:05',
         durationMs: 4,
       },
@@ -539,7 +539,7 @@ const VESSELS_DATA: ScenarioPanelData = {
 };
 
 const AEGIS_DATA: ScenarioPanelData = {
-  domainLabel: 'Aegis — Defense & Security',
+  domainLabel: 'PARAGON — Defense & Security',
   signal: {
     id: 'SIG-AEG-7714',
     title: 'Credential sweep on 3 admin accounts — 847 failed auth attempts in 4 minutes',
@@ -547,7 +547,7 @@ const AEGIS_DATA: ScenarioPanelData = {
     packColor: '#c45a4a',
     severity: 'critical',
     detectedAt: 'Apr 16, 2026 · 02:14 UTC',
-    source: 'Aegis Threat Intelligence · Behavioral Analytics',
+    source: 'PARAGON Threat Intelligence · Behavioral Analytics',
     entities: ['admin@szl-prod', 'ops-root@szl-prod', 'deploy-bot@szl-prod'],
     entityLabel: 'Targeted Account',
     evidence: [
@@ -581,7 +581,7 @@ const AEGIS_DATA: ScenarioPanelData = {
     historicalMatches: 9,
     patternConfidence: 94,
     enrichmentSources: [
-      'Aegis SIEM',
+      'PARAGON SIEM',
       'Threat Intel Feed (MISP)',
       'Identity Provider Logs',
       'Geo-IP Reputation DB',
@@ -858,7 +858,7 @@ const AEGIS_DATA: ScenarioPanelData = {
       reviewedAt: 'Apr 16, 02:16',
       reviewNote: 'Aligns with documented IR-PB-04 playbook',
       inputSources: [
-        { type: 'telemetry', label: 'Aegis SIEM Auth Stream' },
+        { type: 'telemetry', label: 'PARAGON SIEM Auth Stream' },
         { type: 'api', label: 'MISP Threat Intel Feed' },
         { type: 'database', label: 'Identity Provider Audit Log' },
         { type: 'historical', label: '9 prior credential-stuffing incidents' },
@@ -903,7 +903,7 @@ const AEGIS_DATA: ScenarioPanelData = {
 };
 
 const TERRA_DATA: ScenarioPanelData = {
-  domainLabel: 'Terra — Real Estate Intelligence',
+  domainLabel: 'DOMAINE — Real Estate Intelligence',
   signal: {
     id: 'SIG-TER-2207',
     title: 'Distressed acquisition window — 847 Commerce Blvd at 22% below market, 72hr exclusive',
@@ -911,7 +911,7 @@ const TERRA_DATA: ScenarioPanelData = {
     packColor: '#a07848',
     severity: 'high',
     detectedAt: 'Apr 16, 2026 · 07:32 EST',
-    source: 'Terra Market Intelligence · Proptech Feed',
+    source: 'DOMAINE Market Intelligence · Proptech Feed',
     entities: ['847 Commerce Blvd', 'Owner: Pacific Holdings LLC', 'Broker: Meridian Brokerage'],
     entityLabel: 'Property / Party',
     evidence: [
@@ -1171,7 +1171,7 @@ const TERRA_DATA: ScenarioPanelData = {
         step: 'LOI document generated',
         status: 'complete',
         time: '08:51:04',
-        detail: 'Standard template + Terra terms — counter-signed by GC',
+        detail: 'Standard template + DOMAINE terms — counter-signed by GC',
       },
       {
         step: 'LOI dispatched to broker',

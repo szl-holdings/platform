@@ -148,7 +148,7 @@ export default function AefKnowledgeSearch() {
         <div>
           <h1 className="text-sm font-semibold text-amber-100">AEF Knowledge Search</h1>
           <p className="text-[10px] font-mono text-amber-400/40">
-            Profile: {PROFILE_ID} · Lyte Governance &amp; Operations
+            Profile: {PROFILE_ID} · KORA Governance &amp; Operations
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2">

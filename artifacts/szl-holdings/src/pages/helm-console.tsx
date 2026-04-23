@@ -29,9 +29,9 @@ const ACCENT = { green: "#6b8f71", amber: "hsl(38,90%,52%)", red: "#c45a4a", blu
 // ── Cross-app data constants ─────────────────────────────────────────────────
 const APPS = [
   { key: "lyte", name: "KORA", full: "Command", domain: "lyte", desc: "AIOps & workflow observability", color: "hsl(192,72%,48%)", handoffTo: "FORGE RUNTIME", handoffType: "lyte_priority_to_forge", icon: Activity },
-  { key: "aegis", name: "PARAGON", full: "Aegis SOC", domain: "aegis", desc: "Unified defense & threat intelligence", color: "hsl(0,72%,58%)", handoffTo: "COVENANT", handoffType: "aegis_threat_to_covenant", icon: Shield },
-  { key: "vessels", name: "SEXTANT", full: "Vessels Maritime", domain: "vessels", desc: "Fleet intelligence & voyage analytics", color: "hsl(220,72%,58%)", handoffTo: "FORGE RUNTIME", handoffType: "vessels_voyage_to_forge", icon: Globe },
-  { key: "terra", name: "DOMAINE", full: "Terra Real Estate", domain: "terra", desc: "Property intelligence & deal analytics", color: "hsl(142,52%,48%)", handoffTo: "Carlota Jo", handoffType: "terra_blocker_to_carlota", icon: Layers },
+  { key: "aegis", name: "PARAGON", full: "PARAGON SOC", domain: "aegis", desc: "Unified defense & threat intelligence", color: "hsl(0,72%,58%)", handoffTo: "COVENANT", handoffType: "aegis_threat_to_covenant", icon: Shield },
+  { key: "vessels", name: "SEXTANT", full: "SEXTANT Maritime", domain: "vessels", desc: "Fleet intelligence & voyage analytics", color: "hsl(220,72%,58%)", handoffTo: "FORGE RUNTIME", handoffType: "vessels_voyage_to_forge", icon: Globe },
+  { key: "terra", name: "DOMAINE", full: "DOMAINE Real Estate", domain: "terra", desc: "Property intelligence & deal analytics", color: "hsl(142,52%,48%)", handoffTo: "Carlota Jo", handoffType: "terra_blocker_to_carlota", icon: Layers },
   { key: "szl", name: "Holdings", full: "SZL Holdings", domain: "szl", desc: "Executive command & investor relations", color: "hsl(38,90%,52%)", handoffTo: "ATLAS", handoffType: "holdings_investor_to_atlas", icon: BarChart3 },
   { key: "carlota", name: "Carlota Jo", full: "Carlota Jo Consulting", domain: "carlota", desc: "Advisory services & client delivery", color: "hsl(280,52%,62%)", handoffTo: null, handoffType: null, icon: GitBranch },
 ];
@@ -41,7 +41,7 @@ const SYSTEMS = [
   { name: "FORGE RUNTIME", desc: "Governed execution engine", status: "active" },
   { name: "COVENANT", desc: "Policy enforcement layer", status: "active" },
   { name: "RECEIPT GRAPH", desc: "Trust & audit provenance", status: "active" },
-  { name: "PULSE EVALS", desc: "Platform quality metrics", status: "active" },
+  { name: "LUMINA EVALS", desc: "Platform quality metrics", status: "active" },
   { name: "OUTCOME GRAPH", desc: "Shared memory & identity", status: "active" },
   { name: "ATLAS ARTIFACTS", desc: "Asset & document engine", status: "active" },
   { name: "HELM CONSOLE", desc: "Family-level command view", status: "active" },
@@ -418,7 +418,7 @@ export default function HelmConsolePage() {
                         </div>
                       ) : (
                         <div style={{ background: BG.surface, borderRadius: "8px", padding: "0.75rem", border: `1px solid ${BORDER.muted}` }}>
-                          <div style={{ fontSize: "11px", color: TEXT.tertiary }}>Receives signals from Terra</div>
+                          <div style={{ fontSize: "11px", color: TEXT.tertiary }}>Receives signals from DOMAINE</div>
                         </div>
                       )}
                     </m.div>

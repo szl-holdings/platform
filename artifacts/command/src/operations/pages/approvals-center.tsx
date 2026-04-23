@@ -196,7 +196,7 @@ export default function ApprovalsCenter() {
                     border: '1px solid rgba(139,92,246,0.15)',
                   }}
                 >
-                  <ExternalLink className="w-3 h-3" /> Alloy Rationale
+                  <ExternalLink className="w-3 h-3" /> FORGE Rationale
                 </a>
                 <a
                   href="/intervention"

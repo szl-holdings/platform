@@ -39,8 +39,8 @@ const FULL_SCENE_DURATIONS = {
 const CHAPTER_META: Record<string, { title: string; subtitle: string }> = {
   open: { title: 'The Governance Problem', subtitle: 'Autonomy vs. control' },
   reel: { title: 'Meet the Platform', subtitle: 'SZL portfolio surfaces' },
-  fabric: { title: 'The Alloy Fabric', subtitle: 'Agentic backbone' },
-  cortex: { title: 'Cortex Intelligence', subtitle: 'Cross-domain correlation' },
+  fabric: { title: 'The FORGE Fabric', subtitle: 'Agentic backbone' },
+  cortex: { title: 'APEX Intelligence', subtitle: 'Cross-domain correlation' },
   close: { title: 'Governed Autonomy', subtitle: 'The SZL difference' },
 };
 

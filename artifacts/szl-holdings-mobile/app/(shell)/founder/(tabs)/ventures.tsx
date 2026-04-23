@@ -30,7 +30,7 @@ const VENTURES = [
     url: 'https://vessels.szlholdings.com',
     color: '#3b82f6',
     metrics: [
-      { label: 'Vessels tracked', value: '50K+' },
+      { label: 'SEXTANT tracked', value: '50K+' },
       { label: 'Data pts/day', value: '2M+' },
       { label: 'Coverage', value: 'Global' },
     ],

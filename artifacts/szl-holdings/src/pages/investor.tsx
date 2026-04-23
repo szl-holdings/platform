@@ -28,16 +28,16 @@ const WHY_NOW = [
 
 const WEDGE_PLATFORM = [
   {
-    title: "Lyte as the command layer",
-    body: "Lyte surfaces what matters — approval latency, ownership gaps, execution risk, threshold crossings — across all connected systems. Every vertical inherits this signal layer.",
+    title: "KORA as the command layer",
+    body: "KORA surfaces what matters — approval latency, ownership gaps, execution risk, threshold crossings — across all connected systems. Every vertical inherits this signal layer.",
   },
   {
-    title: "Alloy as the action spine",
-    body: "Alloy routes signals to structured recommendations, manages the human-in-the-loop approval chain, and executes approved actions via a connector mesh. Built once. Shared across all verticals.",
+    title: "FORGE as the action spine",
+    body: "FORGE routes signals to structured recommendations, manages the human-in-the-loop approval chain, and executes approved actions via a connector mesh. Built once. Shared across all verticals.",
   },
   {
     title: "Domain packs as the expansion model",
-    body: "Each vertical — Counsel, Vessels, Aegis, Terra — is a domain pack layered on top of the shared platform. New verticals inherit signal ingestion, AI governance, workflow orchestration, and audit infrastructure without rebuilding from scratch.",
+    body: "Each vertical — Counsel, SEXTANT, PARAGON, DOMAINE — is a domain pack layered on top of the shared platform. New verticals inherit signal ingestion, AI governance, workflow orchestration, and audit infrastructure without rebuilding from scratch.",
   },
 ];
 
@@ -51,24 +51,24 @@ const VERTICALS = [
 
 const PROOF_TODAY = [
   "Live Counsel product across full workflow — signal detection, twin enrichment, approval gates, export safety, audit trail",
-  "Vessels Maritime Intelligence: voyage twin, AIS monitoring, sanctions compliance surface, port risk",
-  "Aegis Defense: threat twin, incident workflows, exposure prioritization",
-  "Terra Real Estate: property twin, distress scoring, diligence workflows",
-  "Alloy execution fabric running across all verticals — same connector mesh, same governance model",
+  "SEXTANT Maritime Intelligence: voyage twin, AIS monitoring, sanctions compliance surface, port risk",
+  "PARAGON Defense: threat twin, incident workflows, exposure prioritization",
+  "DOMAINE Real Estate: property twin, distress scoring, diligence workflows",
+  "FORGE execution fabric running across all verticals — same connector mesh, same governance model",
   "GitHub is real code, not a demonstration repository",
   "This investor surface is built on the same platform it describes",
 ];
 
 const MILESTONES = [
-  { phase: "Now", label: "Lyte proof", items: ["Counsel in active design-partner engagement", "Full workflow demo available on request", "Architecture and trust surface complete and reviewable"] },
-  { phase: "Next", label: "Alloy maturity", items: ["First paid pilot contract signed", "Vessels entering design-partner phase", "SOC 2 Type II audit preparation underway"] },
-  { phase: "Later", label: "Expansion", items: ["Aegis and Terra design-partner engagement", "Cross-vertical analytics via shared Lyte command layer", "Enterprise GTM with Microsoft 365 integration"] },
+  { phase: "Now", label: "KORA proof", items: ["Counsel in active design-partner engagement", "Full workflow demo available on request", "Architecture and trust surface complete and reviewable"] },
+  { phase: "Next", label: "FORGE maturity", items: ["First paid pilot contract signed", "SEXTANT entering design-partner phase", "SOC 2 Type II audit preparation underway"] },
+  { phase: "Later", label: "Expansion", items: ["PARAGON and DOMAINE design-partner engagement", "Cross-vertical analytics via shared KORA command layer", "Enterprise GTM with Microsoft 365 integration"] },
 ];
 
 export default function InvestorPage() {
   const __pageMeta = usePageMeta({
     title: "Investor — SZL Holdings",
-    description: "SZL Holdings investor overview — company thesis, wedge and platform logic, why Lyte first, proof today, honest milestones, contact.",
+    description: "SZL Holdings investor overview — company thesis, wedge and platform logic, why KORA first, proof today, honest milestones, contact.",
     canonical: "https://szlholdings.com/investor",
   });
 

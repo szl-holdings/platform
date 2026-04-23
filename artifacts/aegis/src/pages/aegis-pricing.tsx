@@ -65,7 +65,7 @@ const tiers = [
     cta: 'Contact Sales',
     highlight: false,
     features: [
-      'Full Aegis platform — all workspaces',
+      'Full PARAGON platform — all workspaces',
       'AI Intelligence Labs access',
       'Custom AI security models',
       'Classified threat feed integration',

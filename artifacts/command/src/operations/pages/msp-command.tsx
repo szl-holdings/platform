@@ -38,7 +38,7 @@ interface Tenant {
 const TENANTS: Tenant[] = [
   {
     id: 't1',
-    name: 'Nexus Capital',
+    name: 'PRAXIS Capital',
     industry: 'Finance',
     plan: 'enterprise',
     devices: 842,
@@ -150,7 +150,7 @@ const CROSS_TENANT_PATTERNS = [
   {
     id: 'cp1',
     title: 'Windows Defender Update Loop — 3 tenants',
-    tenants: ['Nexus Capital', 'Apex Logistics', 'Foundry Works'],
+    tenants: ['PRAXIS Capital', 'Apex Logistics', 'Foundry Works'],
     severity: 'high',
     pattern: 'Post-KB5034123 update causing boot loop on Dell Latitude 7420 fleet',
     recommendation: 'Block update via WSUS, deploy config fix',
@@ -168,7 +168,7 @@ const CROSS_TENANT_PATTERNS = [
   {
     id: 'cp3',
     title: 'Office 365 Auth Token Expiry Spike',
-    tenants: ['Nexus Capital', 'Meridian Health', 'Skyline Media'],
+    tenants: ['PRAXIS Capital', 'Meridian Health', 'Skyline Media'],
     severity: 'medium',
     pattern: 'Conditional Access policy change causing 6hr token expiry for shared devices',
     recommendation: 'Update CA policy token lifetime to 24hr',

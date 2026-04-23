@@ -115,7 +115,7 @@ const CATEGORIES: BenchmarkCategory[] = [
         median: 79,
         p75: 89,
         topDecile: 96,
-        source: 'PMI Pulse of the Profession',
+        source: 'PMI LUMINA of the Profession',
         trend: 'up',
       },
       {

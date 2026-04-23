@@ -85,7 +85,7 @@ const COMPANIES = [
       { label: "NRR", value: "112%", good: true },
       { label: "MTTR Improvement", value: "62%", good: true },
     ],
-    sentiment: "Solid market position but CAC payback trending above target. Managed SOC bundling with Vessels maritime clients is highest-priority synergy play to accelerate.",
+    sentiment: "Solid market position but CAC payback trending above target. Managed SOC bundling with SEXTANT maritime clients is highest-priority synergy play to accelerate.",
   },
   {
     id: "terra",

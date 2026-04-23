@@ -130,13 +130,13 @@ const MEETINGS: BoardMeeting[] = [
 ];
 
 const ACTION_ITEMS: ActionItem[] = [
-  { id: "a1", description: "Draft Series A extension docs — fully executed copies to SZL by Apr 25", owner: "Aegis Legal", dueDate: "Apr 25, 2026", status: "in_progress", meetingId: "m2", company: "PARAGON" },
-  { id: "a2", description: "Send CISO offer letter pending board authorization", owner: "Aegis HR", dueDate: "Apr 22, 2026", status: "open", meetingId: "m2", company: "PARAGON" },
-  { id: "a3", description: "Provide 3 additional SOC facility vendor bids for next meeting", owner: "Aegis COO", dueDate: "May 15, 2026", status: "open", meetingId: "m2", company: "PARAGON" },
-  { id: "a4", description: "Finalize ELC Realty enterprise contract — legal review complete", owner: "Terra Legal", dueDate: "Apr 30, 2026", status: "in_progress", meetingId: "m3", company: "DOMAINE" },
-  { id: "a5", description: "Prepare Draft Budget Revision FY2026 for Vessels board package", owner: "Vessels CFO", dueDate: "Apr 20, 2026", status: "overdue", meetingId: "m1", company: "SEXTANT" },
-  { id: "a6", description: "Submit Q1 financial statements to SZL for LP reporting consolidation", owner: "Terra CFO", dueDate: "Apr 18, 2026", status: "completed", meetingId: "m3", company: "DOMAINE" },
-  { id: "a7", description: "Share Port of Rotterdam LOI draft for SZL review", owner: "Vessels CEO", dueDate: "Apr 28, 2026", status: "open", meetingId: "m1", company: "SEXTANT" },
+  { id: "a1", description: "Draft Series A extension docs — fully executed copies to SZL by Apr 25", owner: "PARAGON Legal", dueDate: "Apr 25, 2026", status: "in_progress", meetingId: "m2", company: "PARAGON" },
+  { id: "a2", description: "Send CISO offer letter pending board authorization", owner: "PARAGON HR", dueDate: "Apr 22, 2026", status: "open", meetingId: "m2", company: "PARAGON" },
+  { id: "a3", description: "Provide 3 additional SOC facility vendor bids for next meeting", owner: "PARAGON COO", dueDate: "May 15, 2026", status: "open", meetingId: "m2", company: "PARAGON" },
+  { id: "a4", description: "Finalize ELC Realty enterprise contract — legal review complete", owner: "DOMAINE Legal", dueDate: "Apr 30, 2026", status: "in_progress", meetingId: "m3", company: "DOMAINE" },
+  { id: "a5", description: "Prepare Draft Budget Revision FY2026 for SEXTANT board package", owner: "SEXTANT CFO", dueDate: "Apr 20, 2026", status: "overdue", meetingId: "m1", company: "SEXTANT" },
+  { id: "a6", description: "Submit Q1 financial statements to SZL for LP reporting consolidation", owner: "DOMAINE CFO", dueDate: "Apr 18, 2026", status: "completed", meetingId: "m3", company: "DOMAINE" },
+  { id: "a7", description: "Share Port of Rotterdam LOI draft for SZL review", owner: "SEXTANT CEO", dueDate: "Apr 28, 2026", status: "open", meetingId: "m1", company: "SEXTANT" },
 ];
 
 const RESOLUTIONS_ARCHIVE = [

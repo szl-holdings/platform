@@ -612,7 +612,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'alloy',
-    name: 'Alloy',
+    name: 'FORGE',
     path: '/alloy',
     icon: '⬡',
     description: 'Execution Fabric & Orchestration Engine',
@@ -628,7 +628,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     path: '/aegis/',
     icon: '🛡',
     description: 'Unified Defense & Intelligence',
@@ -636,7 +636,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     path: '/vessels/',
     icon: '⚓',
     description: 'Maritime Command Intelligence',
@@ -644,7 +644,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     path: '/terra/',
     icon: '⬢',
     description: 'Real Estate Broker Command',
@@ -652,7 +652,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'nexus',
-    name: 'Nexus',
+    name: 'PRAXIS',
     path: '/nexus/timeline',
     icon: '🔮',
     description: 'Intelligence Fusion & Command',

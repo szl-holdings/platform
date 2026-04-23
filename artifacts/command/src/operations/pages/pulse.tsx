@@ -52,8 +52,8 @@ const EVENT_TYPES = [
   {
     type: 'action_routed',
     messages: [
-      'Action dispatched to Aegis team',
-      'Alloy workflow triggered automatically',
+      'Action dispatched to PARAGON team',
+      'FORGE workflow triggered automatically',
       'Manual approval requested',
     ],
   },
@@ -68,7 +68,7 @@ const EVENT_TYPES = [
   {
     type: 'workflow_executed',
     messages: [
-      'Alloy gate: approval auto-granted',
+      'FORGE gate: approval auto-granted',
       '5-step workflow completed in 4.2s',
       'Template instantiated: incident response',
     ],
@@ -150,7 +150,7 @@ export default function CommandPulse() {
       <ParticleField accentColor="#f59e0b" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <PulseHeader
-          title="AIOps Pulse"
+          title="AIOps LUMINA"
           subtitle={`Observability command — ${signalCount.toLocaleString()} signals processed · 6 ops agents`}
           accentColor="#f59e0b"
         />
@@ -314,7 +314,7 @@ export default function CommandPulse() {
                 {
                   from: 'Execute',
                   to: 'Verify',
-                  type: 'Alloy Workflow',
+                  type: 'FORGE Workflow',
                   color: '#8b5cf6',
                   intensity: 4,
                 },
@@ -348,7 +348,7 @@ export default function CommandPulse() {
               items={[
                 { name: 'Signal Pipeline', load: 67, color: '#f59e0b' },
                 { name: 'Action Queue', load: 45, color: '#3b82f6' },
-                { name: 'Alloy Engine', load: 52, color: '#d4a054' },
+                { name: 'FORGE Engine', load: 52, color: '#d4a054' },
                 { name: 'Event Bus', load: 38, color: '#10b981' },
                 { name: 'Priority Engine', load: 73, color: '#ef4444' },
                 { name: 'Digest Writer', load: 29, color: '#8b5cf6' },
@@ -378,7 +378,7 @@ export default function CommandPulse() {
             className="text-[9px] uppercase tracking-[0.25em]"
             style={{ color: 'rgba(255,255,255,0.08)' }}
           >
-            Command — AIOps Pulse
+            Command — AIOps LUMINA
           </p>
         </div>
       </div>

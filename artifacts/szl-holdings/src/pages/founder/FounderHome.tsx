@@ -18,7 +18,7 @@ const THESIS_POINTS = [
   {
     number: '03',
     headline: 'One fabric beneath multiple verticals compounds the advantage',
-    body: "Alloy is the shared execution spine. Every improvement to the fabric benefits every vertical simultaneously. This is not an efficiency measure — it's a strategic property. The portfolio gets stronger with every product added, not weaker.",
+    body: "FORGE is the shared execution spine. Every improvement to the fabric benefits every vertical simultaneously. This is not an efficiency measure — it's a strategic property. The portfolio gets stronger with every product added, not weaker.",
   },
   {
     number: '04',

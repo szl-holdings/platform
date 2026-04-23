@@ -482,7 +482,7 @@ export default function Dashboard() {
       ).length,
     },
     {
-      label: 'Aegis SOC',
+      label: 'PARAGON SOC',
       count: signals.filter(
         (s) =>
           (s.source.toLowerCase().includes('firestorm') ||

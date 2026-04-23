@@ -126,7 +126,7 @@ const proofObjects = [
     platform: "FORGE",
     color: "#8b7ac8",
     outcome:
-      "Designed and built the six-layer Alloy orchestration engine: signal ingestion, normalization, reasoning, routing, outputs, and governance. Human approval gates at every critical decision point. Audit trail on every execution.",
+      "Designed and built the six-layer FORGE orchestration engine: signal ingestion, normalization, reasoning, routing, outputs, and governance. Human approval gates at every critical decision point. Audit trail on every execution.",
   },
   {
     title: "Matter Twin architecture",

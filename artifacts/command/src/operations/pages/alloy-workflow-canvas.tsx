@@ -761,7 +761,7 @@ export default function AlloyWorkflowCanvas() {
           </div>
           <div>
             <h1 className="text-sm font-bold text-white flex items-center gap-2">
-              Alloy Execution Fabric
+              FORGE Execution Fabric
             </h1>
             <p className="text-[10px] mt-0.5" style={{ color: TEXT.tertiary }}>
               Governed orchestration engine — signal → decision → action → audit
@@ -1256,7 +1256,7 @@ export default function AlloyWorkflowCanvas() {
             <div>
               <h2 className="text-sm font-semibold text-white">Connector Inventory</h2>
               <p className="text-[10px] mt-0.5" style={{ color: TEXT.tertiary }}>
-                Active integrations feeding signals into the Alloy orchestration layer
+                Active integrations feeding signals into the FORGE orchestration layer
               </p>
             </div>
             <button
@@ -1353,7 +1353,7 @@ export default function AlloyWorkflowCanvas() {
             <div>
               <h2 className="text-sm font-semibold text-white">Policy Rules</h2>
               <p className="text-[10px] mt-0.5" style={{ color: TEXT.tertiary }}>
-                Routing and governance rules that control how signals flow through Alloy
+                Routing and governance rules that control how signals flow through FORGE
               </p>
             </div>
             <button

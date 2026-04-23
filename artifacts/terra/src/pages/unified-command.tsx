@@ -197,7 +197,7 @@ export default function UnifiedCommandDashboard() {
             Unified Command
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Cross-domain intelligence — highest priority items across Lyte, Vessels, and Terra
+            Cross-domain intelligence — highest priority items across KORA, SEXTANT, and DOMAINE
           </p>
         </div>
         <div className="flex items-center gap-1 text-[10px] text-slate-500">
@@ -230,7 +230,7 @@ export default function UnifiedCommandDashboard() {
         >
           <div className="flex items-center gap-2 mb-3">
             <Zap className="w-4 h-4 text-amber-400" />
-            <span className="text-sm font-semibold text-amber-400">Lyte — Business Command</span>
+            <span className="text-sm font-semibold text-amber-400">KORA — Business Command</span>
           </div>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
@@ -267,7 +267,7 @@ export default function UnifiedCommandDashboard() {
         >
           <div className="flex items-center gap-2 mb-3">
             <Ship className="w-4 h-4 text-sky-400" />
-            <span className="text-sm font-semibold text-sky-400">Vessels — Maritime Command</span>
+            <span className="text-sm font-semibold text-sky-400">SEXTANT — Maritime Command</span>
           </div>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
@@ -308,7 +308,7 @@ export default function UnifiedCommandDashboard() {
         >
           <div className="flex items-center gap-2 mb-3">
             <Navigation className="w-4 h-4 text-orange-400" />
-            <span className="text-sm font-semibold text-orange-400">Terra — Broker Platform</span>
+            <span className="text-sm font-semibold text-orange-400">DOMAINE — Broker Platform</span>
           </div>
           <div className="grid grid-cols-3 gap-2 mb-3">
             <div>
@@ -437,9 +437,9 @@ export default function UnifiedCommandDashboard() {
             </div>
             <div className="flex flex-wrap gap-1.5">
               {[
-                { label: 'View Lyte Action Queue', href: '/command/operations/action-queue' },
-                { label: 'Vessels Exceptions', href: '/vessels/exceptions' },
-                { label: 'Terra Listings', href: '/terra/listings' },
+                { label: 'View KORA Action Queue', href: '/command/operations/action-queue' },
+                { label: 'SEXTANT Exceptions', href: '/vessels/exceptions' },
+                { label: 'DOMAINE Listings', href: '/terra/listings' },
                 { label: 'FORGE Workflows', href: '/alloy/' },
               ].map(({ label, href }) => (
                 <a

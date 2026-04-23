@@ -58,7 +58,7 @@ test.describe('Ecosystem Command Portal — Dashboard Content', () => {
 
     const pulseContent = page
       .locator(
-        ":text('Ecosystem'), :text('Pulse'), :text('Score'), :text('Command'), :text('Health'), :text('Domain')",
+        ":text('Ecosystem'), :text('LUMINA'), :text('Score'), :text('Command'), :text('Health'), :text('Domain')",
       )
       .first();
     await expect(pulseContent).toBeVisible({ timeout: 15000 });
@@ -73,7 +73,7 @@ test.describe('Ecosystem Command Portal — Dashboard Content', () => {
     expect(hasError).toBe(false);
 
     const domainContent = page
-      .locator(":text('Lyte'), :text('Aegis'), :text('Vessels'), :text('Terra'), :text('PRISM')")
+      .locator(":text('KORA'), :text('PARAGON'), :text('SEXTANT'), :text('DOMAINE'), :text('PRISM')")
       .first();
     await expect(domainContent).toBeVisible({ timeout: 15000 });
   });

@@ -28,7 +28,7 @@ export const baseDomainData: DomainData[] = [
     score: 82,
     status: 'Fleet nominal',
     kpis: [
-      { label: 'Vessels at Sea', value: '23', trend: 'neutral' },
+      { label: 'SEXTANT at Sea', value: '23', trend: 'neutral' },
       { label: 'Cargo Value', value: '$847M', trend: 'up' },
       { label: 'ETA Delays', value: '2', trend: 'down' },
     ],
@@ -172,7 +172,7 @@ export const baseTimelineEvents: TimelineEvent[] = [
     severity: 'high',
     title: 'Deposition deadline: 6 days',
     detail:
-      'Nexus v. Harrington Ltd deposition scheduled — counsel requesting $2.1M settlement authority before Friday.',
+      'PRAXIS v. Harrington Ltd deposition scheduled — counsel requesting $2.1M settlement authority before Friday.',
   },
   {
     id: 3,
@@ -213,9 +213,9 @@ export const baseTimelineEvents: TimelineEvent[] = [
     time: '52m ago',
     domain: 'szl',
     severity: 'info',
-    title: 'Alloy Fund III capital call',
+    title: 'FORGE Fund III capital call',
     detail:
-      '$14.7M drawdown request received from Alloy Holdings management; requires executive approval.',
+      '$14.7M drawdown request received from FORGE Holdings management; requires executive approval.',
   },
   {
     id: 8,
@@ -223,7 +223,7 @@ export const baseTimelineEvents: TimelineEvent[] = [
     domain: 'aegis',
     severity: 'medium',
     title: 'Regulatory filing due: 4 days',
-    detail: 'SEC Form D amendment required for Nexus Capital Fund II by April 19.',
+    detail: 'SEC Form D amendment required for PRAXIS Capital Fund II by April 19.',
   },
   {
     id: 9,
@@ -247,9 +247,9 @@ export const baseTimelineEvents: TimelineEvent[] = [
     time: '2h ago',
     domain: 'szl',
     severity: 'info',
-    title: 'Alloy Holdings Q1 earnings',
+    title: 'FORGE Holdings Q1 earnings',
     detail:
-      'Portfolio company Alloy Holdings confirmed Q1 revenue +22% YoY, exceeding projections.',
+      'Portfolio company FORGE Holdings confirmed Q1 revenue +22% YoY, exceeding projections.',
   },
   {
     id: 12,
@@ -267,7 +267,7 @@ export const baseTimelineEvents: TimelineEvent[] = [
     severity: 'high',
     title: 'Litigation hold notice issued',
     detail:
-      'New preservation order for Titan Infrastructure matter — IT and Lyte notified to retain logs.',
+      'New preservation order for Titan Infrastructure matter — IT and KORA notified to retain logs.',
   },
   {
     id: 14,
@@ -310,7 +310,7 @@ export const baseIntelligenceCards: IntelligenceCard[] = [
     title: 'Threat Actor Campaign — Infrastructure Blast Radius',
     severity: 'critical',
     description:
-      'Aegis is tracking APT-29 lateral movement toward Active Directory. Lyte has flagged 2 microservices running on CORP-SRV-08 that are within the blast radius. Isolation of the affected K8s namespace would temporarily reduce Lyte monitoring coverage for Terra and Vessels.',
+      'PARAGON is tracking APT-29 lateral movement toward Active Directory. KORA has flagged 2 microservices running on CORP-SRV-08 that are within the blast radius. Isolation of the affected K8s namespace would temporarily reduce KORA monitoring coverage for DOMAINE and Vessels.',
     entities: ['PARAGON', 'KORA', 'DOMAINE', 'SEXTANT'],
     action: 'Isolate K8s namespace after backup',
   },
@@ -328,7 +328,7 @@ export const baseIntelligenceCards: IntelligenceCard[] = [
     title: 'Real Estate Downturn — Portfolio Sensitivity',
     severity: 'medium',
     description:
-      "Terra's Phoenix MSA data shows a 3.2% comp decline over 30 days. Two SZL Holdings portfolio companies — Sunstate Realty Partners and Meridian Development — have Phoenix-heavy balance sheets totaling $340M. Recommend running sensitivity analysis before next capital allocation meeting.",
+      "DOMAINE's Phoenix MSA data shows a 3.2% comp decline over 30 days. Two SZL Holdings portfolio companies — Sunstate Realty Partners and Meridian Development — have Phoenix-heavy balance sheets totaling $340M. Recommend running sensitivity analysis before next capital allocation meeting.",
     entities: ['DOMAINE', 'SZL Holdings'],
     action: 'Run sensitivity analysis',
   },
@@ -346,7 +346,7 @@ export const baseCommandActions: CommandAction[] = [
     id: 'act-legal',
     domain: 'aegis',
     priority: 'high',
-    text: 'Approve settlement authority: Nexus v. Harrington — $2.1M',
+    text: 'Approve settlement authority: PRAXIS v. Harrington — $2.1M',
     buttonText: 'Approve',
   },
   {
@@ -360,7 +360,7 @@ export const baseCommandActions: CommandAction[] = [
     id: 'act-4',
     domain: 'szl',
     priority: 'medium',
-    text: 'Approve Q1 capital call: Alloy Fund III — $14.7M drawdown',
+    text: 'Approve Q1 capital call: FORGE Fund III — $14.7M drawdown',
     buttonText: 'Approve',
   },
   {

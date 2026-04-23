@@ -120,7 +120,7 @@ export default function BillingPanelPage() {
         <div>
           <h1 className="font-display text-xl font-bold text-sky-50">Billing</h1>
           <p className="text-xs text-sky-400/50 mt-0.5">
-            Manage your Vessels subscription and payment history
+            Manage your SEXTANT subscription and payment history
           </p>
         </div>
         <div className="flex items-center gap-2">

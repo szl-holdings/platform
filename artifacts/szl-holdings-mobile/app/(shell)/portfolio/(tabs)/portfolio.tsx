@@ -43,7 +43,7 @@ const VENTURES = [
     kpi: '$8.2M ARR',
     market: '$15.4B TAM',
     metrics: [
-      { label: 'Vessels Monitored', value: '52,000+' },
+      { label: 'SEXTANT Monitored', value: '52,000+' },
       { label: 'Shipping Lanes', value: '340+' },
       { label: 'Dark Vessel Detections', value: '34d lead' },
     ],

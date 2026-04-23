@@ -32,11 +32,11 @@ export interface CortexWhatIfProps {
 }
 
 const DOMAIN_META: Record<string, { label: string; icon: string; color: string }> = {
-  vessels: { label: 'Vessels', icon: '⚓', color: '#0ea5e9' },
-  firestorm: { label: 'Aegis', icon: '⬡', color: '#ef4444' },
-  aegis: { label: 'Aegis', icon: '⬡', color: '#ef4444' },
-  terra: { label: 'Terra', icon: '⬢', color: '#22c55e' },
-  lyte: { label: 'Lyte', icon: '⚡', color: '#f59e0b' },
+  vessels: { label: 'SEXTANT', icon: '⚓', color: '#0ea5e9' },
+  firestorm: { label: 'PARAGON', icon: '⬡', color: '#ef4444' },
+  aegis: { label: 'PARAGON', icon: '⬡', color: '#ef4444' },
+  terra: { label: 'DOMAINE', icon: '⬢', color: '#22c55e' },
+  lyte: { label: 'KORA', icon: '⚡', color: '#f59e0b' },
   prism: { label: 'PRISM', icon: '⚖', color: '#a855f7' },
   szl: { label: 'Portfolio', icon: '◆', color: '#c9a84c' },
 };
@@ -411,7 +411,7 @@ export function CortexWhatIf({
         setStreamingRaw('');
       }
     } catch {
-      setError('CORTEX scenario engine is unavailable. Please try again.');
+      setError('APEX scenario engine is unavailable. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -560,7 +560,7 @@ export function CortexWhatIf({
             />
             <div>
               <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#ffffff80' }}>
-                CORTEX is tracing cascades…
+                APEX is tracing cascades…
               </p>
               {streamingChunks > 0 && (
                 <p style={{ margin: '2px 0 0', fontSize: 11, color: '#ffffff40' }}>
@@ -823,7 +823,7 @@ export function CortexWhatIf({
           >
             <span style={{ fontSize: 14 }}>◈</span>
             <span>
-              CORTEX scenario engine uses the cross-domain entity graph and historical pattern
+              APEX scenario engine uses the cross-domain entity graph and historical pattern
               library. Results are probabilistic — human judgment required for final decisions.
             </span>
           </div>

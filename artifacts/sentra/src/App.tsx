@@ -528,7 +528,7 @@ function AppShell({
       surfaceAccent: '#0ea5e9',
       label: 'Fleet asset under active threat — MV Atlantic Falcon',
       description:
-        "Vessels flagged MV Atlantic Falcon's onboard systems for a related CVE exposure.",
+        "SEXTANT flagged MV Atlantic Falcon's onboard systems for a related CVE exposure.",
       href: '/vessels/fleet',
       preservedContext: { surface: 'sentra' },
     },

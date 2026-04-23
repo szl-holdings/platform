@@ -332,7 +332,7 @@ export default function PrismScreen() {
         <View style={styles.header}>
           <Text style={styles.eyebrow}>PRISM VIEW</Text>
           <Text style={styles.headerTitle}>Operational Framework</Text>
-          <Text style={styles.headerSub}>Pulse · Risk · Intel · Signals · Motion</Text>
+          <Text style={styles.headerSub}>LUMINA · Risk · Intel · Signals · Motion</Text>
         </View>
 
         <View style={styles.overallCard}>

@@ -79,14 +79,14 @@ export default function EnterpriseDemo() {
         setCheckoutUrl(payload.url);
         setStatus('success');
         setResultMessage(
-          'Your enterprise profile is ready. Complete payment to activate your Aegis environment.',
+          'Your enterprise profile is ready. Complete payment to activate your PARAGON environment.',
         );
       } else if (payload?.hostedInvoiceUrl) {
         setCheckoutUrl(payload.hostedInvoiceUrl);
         setStatus('success');
         setResultMessage(
           payload?.message ??
-            'Your enterprise invoice has been sent. Review and pay to activate your Aegis environment.',
+            'Your enterprise invoice has been sent. Review and pay to activate your PARAGON environment.',
         );
       } else {
         setStatus('success');
@@ -131,7 +131,7 @@ export default function EnterpriseDemo() {
           </h1>
           <p className="text-gray-400 text-[15px] leading-relaxed max-w-xl">
             Our security engineers will assess your current posture and walk you through a live
-            Aegis demo tailored to your threat profile. Zero commitment.
+            PARAGON demo tailored to your threat profile. Zero commitment.
           </p>
         </div>
 

@@ -285,7 +285,7 @@ export default function AdminAnalytics() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#4B8BDB' }}
             >
-              Alloy · Admin Analytics
+              FORGE · Admin Analytics
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Admin Analytics</h1>

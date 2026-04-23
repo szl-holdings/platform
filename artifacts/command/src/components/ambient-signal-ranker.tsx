@@ -28,7 +28,7 @@ const DOMAIN_COLORS: Record<string, string> = {
 };
 
 const DOMAIN_LABELS: Record<string, string> = {
-  firestorm: "Aegis",
+  firestorm: "PARAGON",
   aegis: "PARAGON",
   vessels: "SEXTANT",
   terra: "DOMAINE",
@@ -79,7 +79,7 @@ const STATIC_SIGNALS: AmbientSignal[] = [
     id: "sig-high-1",
     domain: "vessels",
     title: "Port Delay: MV Pacific Star +32h",
-    summary: "Shanghai congestion causing 32-hour delay. 12 Terra properties and 8 PRISM contracts flagged via signal chain.",
+    summary: "Shanghai congestion causing 32-hour delay. 12 DOMAINE properties and 8 PRISM contracts flagged via signal chain.",
     severity: "high",
     score: 0.88,
     timestamp: Date.now() - 3600000,
@@ -102,7 +102,7 @@ const STATIC_SIGNALS: AmbientSignal[] = [
     id: "sig-medium-1",
     domain: "szl-holdings",
     title: "Market Volatility Index: 0.72",
-    summary: "Threshold crossed. Portfolio rebalance signal chain triggered across Terra, Vessels, and fund ops.",
+    summary: "Threshold crossed. Portfolio rebalance signal chain triggered across DOMAINE, SEXTANT, and fund ops.",
     severity: "medium",
     score: 0.71,
     timestamp: Date.now() - 3600000,
@@ -124,7 +124,7 @@ const STATIC_SIGNALS: AmbientSignal[] = [
     id: "sig-info-1",
     domain: "lyte",
     title: "Self-Healing: 94% Autonomous Resolve",
-    summary: "Highest self-healing rate on record. Lyte autonomously resolved all P1 incidents without human intervention.",
+    summary: "Highest self-healing rate on record. KORA autonomously resolved all P1 incidents without human intervention.",
     severity: "info",
     score: 0.38,
     timestamp: Date.now() - 86400000,

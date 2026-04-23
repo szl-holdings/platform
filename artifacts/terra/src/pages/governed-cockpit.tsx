@@ -129,7 +129,7 @@ export default function GovernedCockpit() {
             </div>
             <div>
               <div className="text-sm font-semibold" style={{ color: '#c8d8e8' }}>
-                Terra — Governed Real Estate Intelligence
+                DOMAINE — Governed Real Estate Intelligence
               </div>
               <div className="text-xs" style={{ color: '#4a6070' }}>
                 Every acquisition signal, valuation, and risk factor carries a full proof chain
@@ -152,7 +152,7 @@ export default function GovernedCockpit() {
             className="text-xs uppercase tracking-widest font-semibold"
             style={{ color: '#4a6070' }}
           >
-            Property Intelligence · Deterministic Fallback (Alloy integration active)
+            Property Intelligence · Deterministic Fallback (FORGE integration active)
           </span>
         </div>
 

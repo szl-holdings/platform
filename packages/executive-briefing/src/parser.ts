@@ -196,7 +196,7 @@ function sanitizeSection(s: unknown, idx: number, defaultDomain: string) {
     id: typeof obj.id === 'string' ? obj.id : `sec-${String(idx + 1).padStart(3, '0')}`,
     domain: typeof obj.domain === 'string' ? obj.domain : defaultDomain,
     title: typeof obj.title === 'string' ? obj.title : `Section ${idx + 1}`,
-    agentId: typeof obj.agentId === 'string' ? obj.agentId : 'Alloy',
+    agentId: typeof obj.agentId === 'string' ? obj.agentId : 'FORGE',
     situation: typeof obj.situation === 'string' ? obj.situation : '',
     beliefs,
     gaps: Array.isArray(obj.gaps)

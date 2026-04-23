@@ -45,9 +45,9 @@ const FALLBACK_LINKS: LinkItem[] = [
   { id: 1, label: "SZL Holdings — Enterprise Platform", destination: "/", campaignTag: null, contentTag: "website", sortOrder: 0 },
   { id: 2, label: "Latest Insights & Analysis", destination: "/insights", campaignTag: null, contentTag: "insights", sortOrder: 1 },
   { id: 3, label: "Counsel — Legal Intelligence", destination: "/counsel", campaignTag: null, contentTag: "ai", sortOrder: 2 },
-  { id: 4, label: "Vessels — Maritime Intelligence", destination: "/solutions/vessels", campaignTag: null, contentTag: "maritime", sortOrder: 3 },
-  { id: 5, label: "Terra — Real Estate Intelligence", destination: "/solutions/terra", campaignTag: null, contentTag: "real-estate", sortOrder: 4 },
-  { id: 6, label: "Aegis — Unified Defense & SOC", destination: "/solutions/aegis", campaignTag: null, contentTag: "security", sortOrder: 5 },
+  { id: 4, label: "SEXTANT — Maritime Intelligence", destination: "/solutions/vessels", campaignTag: null, contentTag: "maritime", sortOrder: 3 },
+  { id: 5, label: "DOMAINE — Real Estate Intelligence", destination: "/solutions/terra", campaignTag: null, contentTag: "real-estate", sortOrder: 4 },
+  { id: 6, label: "PARAGON — Unified Defense & SOC", destination: "/solutions/aegis", campaignTag: null, contentTag: "security", sortOrder: 5 },
   { id: 7, label: "Subscribe to Newsletter", destination: "/newsletter", campaignTag: null, contentTag: "newsletter", sortOrder: 6 },
   { id: 8, label: "Book a Consultation", destination: "/contact", campaignTag: null, contentTag: "portfolio", sortOrder: 7 },
 ];

@@ -503,7 +503,7 @@ export default function CortexIntelligenceScreen() {
       });
       setWhatIfResult(res);
     } catch {
-      Alert.alert('Error', 'CORTEX scenario engine unavailable. Please try again.');
+      Alert.alert('Error', 'APEX scenario engine unavailable. Please try again.');
     } finally {
       setWhatIfLoading(false);
     }
@@ -528,7 +528,7 @@ export default function CortexIntelligenceScreen() {
         <WorkspaceTrigger accentColor={ACCENT} size={36} />
         <View style={styles.headerCenter}>
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>
-            CORTEX Intelligence
+            APEX Intelligence
           </Text>
           <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
             Cross-domain fusion engine
@@ -604,7 +604,7 @@ export default function CortexIntelligenceScreen() {
             <View style={styles.pulseCardInner}>
               <View>
                 <Text style={styles.pulseCardLabel}>AI EXECUTIVE BRIEFING</Text>
-                <Text style={styles.pulseCardTitle}>Pulse Intelligence Brief</Text>
+                <Text style={styles.pulseCardTitle}>LUMINA Intelligence Brief</Text>
                 <Text style={[styles.pulseCardSub, { color: '#9ca3af' }]}>
                   Today's strategic summary · Agent-attributed · Confidence-scored
                 </Text>
@@ -888,7 +888,7 @@ export default function CortexIntelligenceScreen() {
             <View style={styles.scenarioLoading}>
               <ActivityIndicator color={ACCENT} size="large" />
               <Text style={[styles.scenarioLoadingText, { color: colors.mutedForeground }]}>
-                CORTEX is tracing cascades across all domains…
+                APEX is tracing cascades across all domains…
               </Text>
             </View>
           )}

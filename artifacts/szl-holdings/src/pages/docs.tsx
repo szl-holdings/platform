@@ -12,8 +12,8 @@ const PLATFORM_DOCS = [
     desc: "What KORA + FORGE is, how the signal-to-action pipeline works, and where it fits in your operating environment.",
     links: [
       { label: "Platform overview", href: "/platform" },
-      { label: "Lyte — Decision Intelligence", href: "/lyte" },
-      { label: "Alloy — Execution Fabric", href: "/alloy-fabric" },
+      { label: "KORA — Decision Intelligence", href: "/lyte" },
+      { label: "FORGE — Execution Fabric", href: "/alloy-fabric" },
     ],
     color: "var(--color-lyte)",
     colorMuted: "var(--color-lyte-muted)",
@@ -38,9 +38,9 @@ const PLATFORM_DOCS = [
     desc: "Vertical packs that extend the KORA + FORGE platform into legal operations, defense, maritime, and real estate.",
     links: [
       { label: "Solutions overview", href: "/solutions" },
-      { label: "Aegis — Defense & Intelligence", href: "/solutions/aegis" },
-      { label: "Vessels — Maritime", href: "/solutions/vessels" },
-      { label: "Terra — Real Estate", href: "/solutions/terra" },
+      { label: "PARAGON — Defense & Intelligence", href: "/solutions/aegis" },
+      { label: "SEXTANT — Maritime", href: "/solutions/vessels" },
+      { label: "DOMAINE — Real Estate", href: "/solutions/terra" },
     ],
     color: "var(--color-alloy-light)",
     colorMuted: "var(--color-alloy-muted)",
@@ -121,9 +121,9 @@ const TECHNICAL_DOCS = [
 
 const PILOT_PAGES = [
   { label: "Counsel pilot", href: "/pilot/counsel", desc: "Legal operations — matter twin, workflow, trust controls, 30/60/90 milestones" },
-  { label: "Terra pilot", href: "/pilot/terra", desc: "Real estate diligence — property twin, official data, 30/60/90 milestones" },
-  { label: "Vessels pilot", href: "/pilot/vessels", desc: "Maritime operations — voyage twin, compliance controls, 30/60/90 milestones" },
-  { label: "Aegis pilot", href: "/pilot/aegis", desc: "Security operations — threat twin, KEV/NVD, 30/60/90 milestones" },
+  { label: "DOMAINE pilot", href: "/pilot/terra", desc: "Real estate diligence — property twin, official data, 30/60/90 milestones" },
+  { label: "SEXTANT pilot", href: "/pilot/vessels", desc: "Maritime operations — voyage twin, compliance controls, 30/60/90 milestones" },
+  { label: "PARAGON pilot", href: "/pilot/aegis", desc: "Security operations — threat twin, KEV/NVD, 30/60/90 milestones" },
 ];
 
 const CAPABILITY_MATRIX = [

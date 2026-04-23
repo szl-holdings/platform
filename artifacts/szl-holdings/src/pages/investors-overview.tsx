@@ -229,8 +229,8 @@ export default function InvestorsOverviewPage() {
                   <h3 className="mt-4 text-base font-semibold text-white">Entry motion</h3>
                   <p className="mt-2 text-sm leading-6 text-white/60">
                     Design partner program — 3–6 partners per domain, co-designing the product in exchange for
-                    early access and preferred pricing. Primary domains: maritime (Vessels), security (Aegis),
-                    real estate (Terra).
+                    early access and preferred pricing. Primary domains: maritime (SEXTANT), security (PARAGON),
+                    real estate (DOMAINE).
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">

@@ -67,7 +67,7 @@ export default function WorkflowHealth() {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: '#0ea5e9' }}
           >
-            Lyte · Workflow Health
+            KORA · Workflow Health
           </span>
         </div>
         <h1 className="text-2xl font-bold text-white">Workflow Health Monitor</h1>
@@ -171,7 +171,7 @@ export default function WorkflowHealth() {
                       border: '1px solid rgba(245,158,11,0.2)',
                     }}
                   >
-                    Assign in Lyte
+                    Assign in KORA
                   </a>
                   <a
                     href="/alloy"
@@ -182,7 +182,7 @@ export default function WorkflowHealth() {
                       border: '1px solid rgba(75,139,219,0.2)',
                     }}
                   >
-                    Run in Alloy
+                    Run in FORGE
                   </a>
                 </div>
               </div>

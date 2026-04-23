@@ -188,7 +188,7 @@ afterAll(async () => {
 
 // ── Domain: INCA (Aegis Intelligence) ─────────────────────────────────────────
 
-describe('Domain: INCA (Aegis Intelligence)', () => {
+describe('Domain: INCA (PARAGON Intelligence)', () => {
   it('GET /inca/health returns 200 with status ok', async () => {
     const app = buildAuthApp();
     const router = (await import('../../artifacts/api-server/src/routes/inca')).default;
@@ -247,7 +247,7 @@ describe('Domain: INCA (Aegis Intelligence)', () => {
 
 // ── Domain: CORTEX Intelligence ───────────────────────────────────────────────
 
-describe('Domain: CORTEX Intelligence', () => {
+describe('Domain: APEX Intelligence', () => {
   it('GET /cortex/domains returns 200 with a domains array', async () => {
     const app = buildAuthApp();
     const router = (await import('../../artifacts/api-server/src/routes/cortex')).default;

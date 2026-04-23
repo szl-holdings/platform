@@ -82,7 +82,7 @@ const COMMAND_ONBOARDING_CONFIG: OnboardingConfig = {
       id: 'prism',
       title: 'The PRISM Framework',
       description:
-        "PRISM is Command's intelligence spine: Pulse (health), Risk (exposure), Intelligence (analysis), Signals (events), and Motion (action). Each dimension gives you a different lens on your business.",
+        "PRISM is Command's intelligence spine: LUMINA (health), Risk (exposure), Intelligence (analysis), Signals (events), and Motion (action). Each dimension gives you a different lens on your business.",
       placement: 'center',
       icon: Activity,
     },
@@ -595,7 +595,7 @@ export function CommandLayout({ children }: { children: ReactNode }) {
               className="text-[7px] uppercase tracking-widest font-mono mb-1.5"
               style={{ color: TEXT.muted }}
             >
-              System Pulse
+              System LUMINA
             </div>
             <div className="space-y-1">
               {[
@@ -641,9 +641,9 @@ export function CommandLayout({ children }: { children: ReactNode }) {
           </div>
           <div className="flex gap-1">
             {[
-              { label: 'TERRA', href: '/terra/', color: '#a07848' },
-              { label: 'ALLOY', href: '/alloy', color: '#4B8BDB' },
-              { label: 'VESSELS', href: '/vessels/', color: '#38bdf8' },
+              { label: 'DOMAINE', href: '/terra/', color: '#a07848' },
+              { label: 'FORGE', href: '/alloy', color: '#4B8BDB' },
+              { label: 'SEXTANT', href: '/vessels/', color: '#38bdf8' },
             ].map((p) => (
               <a
                 key={p.label}

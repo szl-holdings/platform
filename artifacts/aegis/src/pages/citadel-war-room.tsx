@@ -113,7 +113,7 @@ const STATIC_TIMELINE: CrisisEvent[] = [
     detail:
       'Neural explorer had flagged pattern 8 minutes before SIEM alert. APT29 C2 beacon on INC-2846 linked.',
     severity: 'high',
-    source: 'Aegis Labs · AI',
+    source: 'PARAGON Labs · AI',
     confirmed: true,
   },
   {
@@ -285,7 +285,7 @@ const INIT_COMMS: CommEntry[] = [
   { id: 'C006', time: '14:41', from: 'J. Chen', role: 'Incident Commander', message: 'Decision logged: Holding EDR isolation for 15 min evidence window. M. Rodriguez — begin memory dump NOW. S. Park — continue live monitoring. A. Thompson — block all SMB to DC-PROD-03 adjacent hosts.', type: 'action', priority: 'urgent' },
   { id: 'C007', time: '14:52', from: 'J. Chen', role: 'Incident Commander', message: 'EDR isolation approved and executed on DC-PROD-03 at 14:52. Memory dump complete. 3 adjacent hosts flagged. C2 beacon severed by A. Thompson 14:50. Moving to eradication phase prep.', type: 'action' },
   { id: 'C008', time: '15:02', from: 'P. Santos', role: 'Executive Liaison', message: 'CISO brief delivered. Board notification draft ready — holding pending legal review. PR statement drafted. No external disclosure. Legal hold on all logs confirmed by K. Wilson.', type: 'update' },
-  { id: 'C009', time: '15:05', from: 'INCIDENT SYSTEM', role: 'Automated Broadcast', message: 'BROADCAST: Crisis status update distributed to all connected verticals. Vessels, Terra, PRISM, SZL Holdings — crisis banner active. Cross-domain impact assessment underway.', type: 'broadcast' },
+  { id: 'C009', time: '15:05', from: 'INCIDENT SYSTEM', role: 'Automated Broadcast', message: 'BROADCAST: Crisis status update distributed to all connected verticals. SEXTANT, DOMAINE, PRISM, SZL Holdings — crisis banner active. Cross-domain impact assessment underway.', type: 'broadcast' },
 ];
 
 const COMM_COLORS: Record<string, string> = {

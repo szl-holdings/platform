@@ -45,10 +45,10 @@ const DOMAIN_CONFIG: Omit<
   | 'pendingActions'
   | 'worldline'
 >[] = [
-  { domain: 'aegis', label: 'Aegis — Defense', color: '#ef4444', appPath: '/aegis', icon: Shield },
+  { domain: 'aegis', label: 'PARAGON — Defense', color: '#ef4444', appPath: '/aegis', icon: Shield },
   {
     domain: 'terra',
-    label: 'Terra — Real Estate',
+    label: 'DOMAINE — Real Estate',
     color: '#10b981',
     appPath: '/terra',
     atlasRuntimePath: '/terra/atlas-runtime',
@@ -56,7 +56,7 @@ const DOMAIN_CONFIG: Omit<
   },
   {
     domain: 'vessels',
-    label: 'Vessels — Maritime',
+    label: 'SEXTANT — Maritime',
     color: '#06b6d4',
     appPath: '/vessels',
     atlasRuntimePath: '/vessels/atlas-runtime',
@@ -78,7 +78,7 @@ const DOMAIN_CONFIG: Omit<
   },
   {
     domain: 'lyte',
-    label: 'Lyte — AIOps',
+    label: 'KORA — AIOps',
     color: '#d4a054',
     appPath: `${BASE}/operations`,
     icon: Activity,
@@ -656,7 +656,7 @@ export function AtlasKpiSection() {
                 background: 'rgba(6,182,212,0.04)',
               }}
             >
-              <Network className="w-2.5 h-2.5" /> Vessels ATLAS
+              <Network className="w-2.5 h-2.5" /> SEXTANT ATLAS
             </a>
             <a
               href="/terra/atlas-runtime"
@@ -667,7 +667,7 @@ export function AtlasKpiSection() {
                 background: 'rgba(16,185,129,0.04)',
               }}
             >
-              <Globe className="w-2.5 h-2.5" /> Terra ATLAS
+              <Globe className="w-2.5 h-2.5" /> DOMAINE ATLAS
             </a>
           </div>
         </div>

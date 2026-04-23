@@ -22,7 +22,7 @@ const PORTFOLIO = [
 ];
 
 const CURRENT_FOCUS = [
-  "Design-partner engagements for Lyte — working directly with operators on one instrumented workflow",
+  "Design-partner engagements for KORA — working directly with operators on one instrumented workflow",
   "Investor conversations with a tight principal-only process",
   "Architecture and product refinement based on real operator feedback",
   "Disciplined company-building: no premature scale, no fake traction",
@@ -39,7 +39,7 @@ const THESIS_POINTS = [
   },
   {
     label: "Architecture before go-to-market",
-    body: "Building one shared spine (Alloy) beneath multiple vertical operating systems is a deliberate architectural bet. It creates compounding leverage: every improvement to the execution fabric benefits every pack simultaneously.",
+    body: "Building one shared spine (FORGE) beneath multiple vertical operating systems is a deliberate architectural bet. It creates compounding leverage: every improvement to the execution fabric benefits every pack simultaneously.",
   },
   {
     label: "Disciplined honesty as strategy",
@@ -178,7 +178,7 @@ export default function FounderPage() {
                   SZL Holdings was built from a clear-eyed observation: every organization of consequence runs on processes that break between systems, and no one can see it happening in real time. Dashboards show history. AI tools suggest text. But the layer that catches what's about to break — and routes the right action before the damage compounds — does not exist.
                 </p>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", marginBottom: "1rem" }}>
-                  Lyte is the answer to that problem. Alloy is the operating fabric that makes the answer durable. The vertical packs are the proof that the architecture generalizes.
+                  KORA is the answer to that problem. FORGE is the operating fabric that makes the answer durable. The vertical packs are the proof that the architecture generalizes.
                 </p>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)" }}>
                   Every design-partner conversation, every investor conversation, every product decision runs through that same lens: does this close the gap between signal and governed action?

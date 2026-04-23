@@ -252,7 +252,7 @@ curl https://[host]/api/vessels/42 \\
         ]}
       />
 
-      <SubSectionHeader id="samples-alloy" title="Alloy Signal Ingestion" />
+      <SubSectionHeader id="samples-alloy" title="FORGE Signal Ingestion" />
       <LanguageTabs
         tabs={[
           {

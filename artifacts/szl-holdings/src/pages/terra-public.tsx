@@ -27,7 +27,7 @@ const WORKFLOW_STEPS = [
   {
     step: "04",
     label: "Review & Approval",
-    body: "Deal team reviews property analysis and Alloy routes approval decisions with full context — owner, deadline, outstanding items, and recommended next action all handed off in one structured package.",
+    body: "Deal team reviews property analysis and FORGE routes approval decisions with full context — owner, deadline, outstanding items, and recommended next action all handed off in one structured package.",
   },
   {
     step: "05",
@@ -48,7 +48,7 @@ const CAPABILITIES = [
   { icon: Eye, title: "Property Twin", body: "A live structured model of each property — ownership, liens, permits, distress signals, flood risk, and market context — assembled from public and proprietary data sources." },
   { icon: AlertTriangle, title: "Distress Detection", body: "Tax delinquency, foreclosure filings, code violations, and ownership gaps surfaced before the property is widely visible as an opportunity." },
   { icon: Map, title: "Local Context Layer", body: "Zoning overlays, environmental data, FEMA flood risk, and census economics layered onto every property — friction visible before you're committed." },
-  { icon: FileText, title: "Diligence Workflow", body: "Structured due diligence checklists routed through Alloy with role-based assignment, deadline tracking, and approval gates for consequential deal decisions." },
+  { icon: FileText, title: "Diligence Workflow", body: "Structured due diligence checklists routed through FORGE with role-based assignment, deadline tracking, and approval gates for consequential deal decisions." },
   { icon: BarChart3, title: "Portfolio Intelligence", body: "Aggregate distress signals, lease expirations, deferred maintenance indicators, and occupancy drift across your portfolio — surfaced before they compound." },
   { icon: Shield, title: "LP-Ready Export", body: "Diligence packages and property analyses exported in structured format for LP review, regulatory compliance, or investor reporting." },
 ];
@@ -65,7 +65,7 @@ const TRUST_CONTROLS = [
 const ALLOY_INHERITED = [
   {
     capability: "Approval Gates",
-    description: "Acquisition decisions, diligence completions, and material portfolio actions require explicit human approval through Alloy's HITL gate before execution.",
+    description: "Acquisition decisions, diligence completions, and material portfolio actions require explicit human approval through FORGE's HITL gate before execution.",
   },
   {
     capability: "Signal Normalization",
@@ -81,7 +81,7 @@ const ALLOY_INHERITED = [
   },
   {
     capability: "Connector Mesh",
-    description: "Terra integrates with deal platforms, LP portals, and regulatory databases through Alloy's connector layer — output goes where the deal team already works.",
+    description: "DOMAINE integrates with deal platforms, LP portals, and regulatory databases through FORGE's connector layer — output goes where the deal team already works.",
   },
   {
     capability: "Explainability",
@@ -100,8 +100,8 @@ const UNIQUE_TO_TERRA = [
 
 export default function TerraPublicPage() {
   const __pageMeta = usePageMeta({
-    title: "Terra — Property Twin & Real Estate Intelligence | SZL Holdings",
-    description: "Terra turns fragmented property signals into governed deal intelligence. Property Twin, distress detection, FEMA flood risk, diligence workflow, and LP-ready export.",
+    title: "DOMAINE — Property Twin & Real Estate Intelligence | SZL Holdings",
+    description: "DOMAINE turns fragmented property signals into governed deal intelligence. Property Twin, distress detection, FEMA flood risk, diligence workflow, and LP-ready export.",
     canonical: "https://szlholdings.com/products/terra",
   });
 
@@ -122,7 +122,7 @@ export default function TerraPublicPage() {
                 </span>
               </div>
               <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,60%)", lineHeight: 1.5 }}>
-                Terra is in active design partner engagements with real estate operators and investors. Architecture and core capabilities are established. We are not in general availability. If this fits, let's talk.
+                DOMAINE is in active design partner engagements with real estate operators and investors. Architecture and core capabilities are established. We are not in general availability. If this fits, let's talk.
               </span>
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function TerraPublicPage() {
                     <Building2 size={16} color="hsl(140,50%,48%)" />
                   </div>
                   <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(140,50%,48%)" }}>
-                    Terra · Property Intelligence
+                    DOMAINE · Property Intelligence
                   </span>
                 </div>
               </m.div>
@@ -172,7 +172,7 @@ export default function TerraPublicPage() {
                       marginBottom: "0.875rem",
                     }}
                   >
-                    Terra gives real estate operators and investors a command layer above a data-rich but execution-poor industry. Property Twin tracks every asset signal. Alloy routes action through governed workflows with full audit trail.
+                    DOMAINE gives real estate operators and investors a command layer above a data-rich but execution-poor industry. Property Twin tracks every asset signal. FORGE routes action through governed workflows with full audit trail.
                   </p>
                   <p
                     style={{
@@ -202,7 +202,7 @@ export default function TerraPublicPage() {
                   style={{ borderRadius: "0.875rem", padding: "clamp(1.25rem,3vw,1.75rem)", background: "hsla(140,50%,38%,0.04)", border: "1px solid hsla(140,50%,38%,0.15)" }}
                 >
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
-                    What Terra answers
+                    What DOMAINE answers
                   </p>
                   {[
                     "Which assets in my portfolio are showing distress signals?",
@@ -237,10 +237,10 @@ export default function TerraPublicPage() {
                     Why real estate. Why this architecture.
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "46ch", marginBottom: "1.25rem" }}>
-                    Real estate is a domain rich in public data and poor in execution structure. Operators work from spreadsheets and manual data pulls while critical signals — distress, liens, flood risk — sit in disconnected systems. Terra applies Alloy's operating loop to the deal lifecycle: turning public data into a structured Property Twin, routing diligence actions through governed workflows, and producing LP-ready output with full provenance.
+                    Real estate is a domain rich in public data and poor in execution structure. Operators work from spreadsheets and manual data pulls while critical signals — distress, liens, flood risk — sit in disconnected systems. DOMAINE applies FORGE's operating loop to the deal lifecycle: turning public data into a structured Property Twin, routing diligence actions through governed workflows, and producing LP-ready output with full provenance.
                   </p>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,54%)", maxWidth: "46ch" }}>
-                    The architecture directly mirrors Counsel: a live structured object per asset (Property Twin, parallel to Matter Twin), signal enrichment from authoritative public sources, governed workflow routing through Alloy, and a diligence audit trail designed for external review.
+                    The architecture directly mirrors Counsel: a live structured object per asset (Property Twin, parallel to Matter Twin), signal enrichment from authoritative public sources, governed workflow routing through FORGE, and a diligence audit trail designed for external review.
                   </p>
                 </m.div>
                 <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.08 }}>
@@ -329,18 +329,18 @@ export default function TerraPublicPage() {
             </div>
           </section>
   
-          {/* Alloy inheritance */}
+          {/* FORGE inheritance */}
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(140,50%,48%)", marginBottom: "1rem" }}>
-                  What Terra Inherits from Alloy
+                  What DOMAINE Inherits from FORGE
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "1.25rem" }}>
-                  The execution fabric is inherited. Terra brings real estate-specific intelligence.
+                  The execution fabric is inherited. DOMAINE brings real estate-specific intelligence.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
-                  Terra does not rebuild what Alloy already provides. Every capability below comes from the shared platform — the same infrastructure governing Counsel, Vessels, Aegis, and Carlota Jo.
+                  DOMAINE does not rebuild what FORGE already provides. Every capability below comes from the shared platform — the same infrastructure governing Counsel, SEXTANT, PARAGON, and Carlota Jo.
                 </p>
               </m.div>
               <div style={{ display: "grid", gap: "1rem", marginBottom: "2.5rem" }} className="lg:grid-cols-3 md:grid-cols-2">
@@ -379,7 +379,7 @@ export default function TerraPublicPage() {
                     Public data woven into every property model.
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "46ch" }}>
-                    Terra connects to authoritative public data sources — PLUTO, FEMA, Census, and public court records — and weaves that context into each property's twin. No manual data collection. No stale spreadsheets.
+                    DOMAINE connects to authoritative public data sources — PLUTO, FEMA, Census, and public court records — and weaves that context into each property's twin. No manual data collection. No stale spreadsheets.
                   </p>
                 </m.div>
                 <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.08 }}>
@@ -404,7 +404,7 @@ export default function TerraPublicPage() {
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(140,50%,48%)", marginBottom: "1rem" }}>
-                  What's Unique to Terra
+                  What's Unique to DOMAINE
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "2.5rem" }}>
                   Real estate-specific capabilities built on the shared platform.
@@ -460,7 +460,7 @@ export default function TerraPublicPage() {
                     label: "Architecture",
                     status: "Established",
                     statusColor: "hsl(142,60%,46%)",
-                    description: "Property Twin model, PLUTO/FEMA/Census integration schema, Alloy connector design, and LP-ready export structure are defined.",
+                    description: "Property Twin model, PLUTO/FEMA/Census integration schema, FORGE connector design, and LP-ready export structure are defined.",
                   },
                   {
                     label: "Core Capabilities",
@@ -472,7 +472,7 @@ export default function TerraPublicPage() {
                     label: "General Availability",
                     status: "Not Yet",
                     statusColor: "hsl(214,7%,50%)",
-                    description: "Terra is not in general availability. We are working with a small number of real estate operators and investors in structured design partner engagements.",
+                    description: "DOMAINE is not in general availability. We are working with a small number of real estate operators and investors in structured design partner engagements.",
                   },
                 ].map((item, i) => (
                   <m.div

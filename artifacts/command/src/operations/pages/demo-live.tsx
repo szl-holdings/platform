@@ -628,7 +628,7 @@ export default function DemoLive() {
               </span>
             </div>
             <p className="text-[11px]" style={{ color: TEXT.secondary }}>
-              Watch Command detect a live signal, classify it, run the Alloy workflow engine through
+              Watch Command detect a live signal, classify it, run the FORGE workflow engine through
               PRISM phases, generate an AI recommendation, and execute — end to end.
             </p>
           </div>
@@ -783,7 +783,7 @@ export default function DemoLive() {
                     >
                       <Activity className="w-3.5 h-3.5" style={{ color: GOLD }} />
                       <span className="text-[11px] font-semibold" style={{ color: TEXT.primary }}>
-                        Alloy Workflow Engine
+                        FORGE Workflow Engine
                       </span>
                       {state.running && (
                         <Loader2
@@ -848,7 +848,7 @@ export default function DemoLive() {
                         </span>
                       </div>
                       <p className="text-[10px]" style={{ color: TEXT.secondary }}>
-                        Command detected the signal, classified it, ran the Alloy workflow engine
+                        Command detected the signal, classified it, ran the FORGE workflow engine
                         through all 5 PRISM phases (Detect → Interpret → Decide → Execute → Verify),
                         generated an AI recommendation with evidence, received your approval, and
                         executed — in real-time.

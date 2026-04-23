@@ -99,7 +99,7 @@ async function patchAutonomyMode(
   } catch (err) {
     return {
       policyState: 'blocked',
-      policyReason: `Could not reach Alloy autonomy service — mode not persisted (${(err as Error).message}).`,
+      policyReason: `Could not reach FORGE autonomy service — mode not persisted (${(err as Error).message}).`,
       disposition: 'block',
       mode,
     };
@@ -320,7 +320,7 @@ const FUND_EVIDENCE: EvidenceSource[] = [
   },
   {
     id: 'e2',
-    label: 'Portfolio Health Scores — Alloy',
+    label: 'Portfolio Health Scores — FORGE',
     type: 'model',
     timestamp: FRESH_3M,
     excerpt: 'Composite health: 7.3/10. Revenue growth YoY: +67% blended.',
@@ -344,7 +344,7 @@ const THREAT_EVIDENCE: EvidenceSource[] = [
   },
   {
     id: 'e5',
-    label: 'Alloy Risk Classifier',
+    label: 'FORGE Risk Classifier',
     type: 'model',
     timestamp: FRESH_3M,
     excerpt: 'Market regime: Late cycle / Rate stress. Drawdown base rate: 18%.',
@@ -361,7 +361,7 @@ const THREAT_EVIDENCE: EvidenceSource[] = [
 const VESSELS_EVIDENCE: EvidenceSource[] = [
   {
     id: 'e7',
-    label: 'Vessels Health Score',
+    label: 'SEXTANT Health Score',
     type: 'model',
     timestamp: FRESH_10M,
     excerpt: 'Health declining — 6.8/10 vs 7.4 prior period. 6 active alerts.',
@@ -451,7 +451,7 @@ export default function ProofEnvelopeScreen() {
 
         <ProofCard
           title="Cross-Domain Alert: 3 Critical Signals Correlated"
-          summary="Alloy has identified correlated exposure across Aegis (APT-29 threat), Vessels (counterparty sanctions), and Pulse (rate regime shift). 3 approval items pending — all within SLA."
+          summary="FORGE has identified correlated exposure across PARAGON (APT-29 threat), SEXTANT (counterparty sanctions), and LUMINA (rate regime shift). 3 approval items pending — all within SLA."
           confidence={85}
           policyState="requires-approval"
           policyReason="Multi-domain action requires CRO approval"
@@ -469,8 +469,8 @@ export default function ProofEnvelopeScreen() {
         />
 
         <ProofCard
-          title="Vessels Portfolio — Health Declining (6.8/10)"
-          summary="Vessels health score has declined from 7.4 to 6.8. One OFAC SDN match blocked. MV Horizon Star cylinder 4 anomaly: 31% failure probability before next port call."
+          title="SEXTANT Portfolio — Health Declining (6.8/10)"
+          summary="SEXTANT health score has declined from 7.4 to 6.8. One OFAC SDN match blocked. MV Horizon Star cylinder 4 anomaly: 31% failure probability before next port call."
           confidence={81}
           policyState="requires-approval"
           policyReason="Maintenance port call requires ops director approval"

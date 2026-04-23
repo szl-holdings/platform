@@ -97,7 +97,7 @@ const RISKS: BoardItem[] = [
   },
   {
     id: 'R-3',
-    title: 'Terra lease renewal legal hold',
+    title: 'DOMAINE lease renewal legal hold',
     sub: '48h past due — tenant window closing',
     urgency: 'High',
     impact: '$320K',
@@ -136,7 +136,7 @@ const ASKS: BoardItem[] = [
   },
   {
     id: 'A-3',
-    title: 'Authorize Terra property manager escalation',
+    title: 'Authorize DOMAINE property manager escalation',
     sub: 'PM unresponsive — need escalation auth',
     urgency: 'This week',
     impact: '$320K',

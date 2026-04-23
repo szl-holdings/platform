@@ -248,10 +248,10 @@ export function Hero() {
               </p>
               <div className="space-y-2">
                 {[
-                  { signal: 'Approval stuck 6 days', source: 'Lyte Signal' },
-                  { signal: 'No owner on critical path', source: 'Lyte Signal' },
-                  { signal: 'Action routed, unverified', source: 'Alloy Engine' },
-                  { signal: 'Follow-through confirmed', source: 'Alloy Engine' },
+                  { signal: 'Approval stuck 6 days', source: 'KORA Signal' },
+                  { signal: 'No owner on critical path', source: 'KORA Signal' },
+                  { signal: 'Action routed, unverified', source: 'FORGE Engine' },
+                  { signal: 'Follow-through confirmed', source: 'FORGE Engine' },
                 ].map((item, i) => (
                   <m.div
                     key={item.signal}

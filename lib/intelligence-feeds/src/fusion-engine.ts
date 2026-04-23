@@ -217,7 +217,7 @@ export class FusionEngine {
         `Escalate to Helmsman for maritime compliance review`,
         `Cross-reference vessel AIS history for dark shipping patterns`,
         `File enhanced due diligence report — potential OFAC violation`,
-        `Alert PRISM Counsel for sanctions compliance advisory`,
+        `Alert Counsel for sanctions compliance advisory`,
       ],
       recommendedAgents: ['helmsman', 'lexis', 'sentinel'],
     });
@@ -389,7 +389,7 @@ export class FusionEngine {
         significance: 'high',
       })),
       actionableInsights: [
-        'Route to Alloy for full cross-domain synthesis',
+        'Route to FORGE for full cross-domain synthesis',
         'Assign to multi-agent investigation workflow',
         'Generate comprehensive intelligence briefing',
       ],

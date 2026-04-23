@@ -2,18 +2,18 @@ import { summarizeContext } from './context-builder.js';
 import type { BriefGenerationContext } from './types.js';
 
 const DOMAIN_AGENT_MAP: Record<string, string> = {
-  terra: 'Terra',
+  terra: 'DOMAINE',
   vessels: 'Helmsman',
   aegis: 'Sentinel',
-  lyte: 'Lyte',
+  lyte: 'KORA',
   prism: 'Lexis',
   'szl-holdings': 'Atlas',
-  carlota: 'Alloy',
-  consolidated: 'Alloy',
+  carlota: 'FORGE',
+  consolidated: 'FORGE',
 };
 
 export function getAgentId(domain: string): string {
-  return DOMAIN_AGENT_MAP[domain] ?? 'Alloy';
+  return DOMAIN_AGENT_MAP[domain] ?? 'FORGE';
 }
 
 export function buildSystemPrompt(domain: string): string {

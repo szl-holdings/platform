@@ -20,7 +20,7 @@ const tiers = [
     features: [
       'Up to 5 team members',
       '3 connected data sources',
-      'PRISM dashboard — Pulse & Signals',
+      'PRISM dashboard — LUMINA & Signals',
       '7-day signal history',
       'Standard alert routing',
       'Email support (48h response)',

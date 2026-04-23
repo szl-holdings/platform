@@ -136,7 +136,7 @@ function ControlCard({
         assignedTo: control.owner,
         notes: `Control: ${control.controlId} — ${control.name}`,
       }),
-    onSuccess: () => toast.success('Workflow action triggered via Alloy'),
+    onSuccess: () => toast.success('Workflow action triggered via FORGE'),
     onError: () => toast.error('Failed to trigger workflow'),
   });
 
@@ -276,7 +276,7 @@ function ControlCard({
                 disabled={workflowMutation.isPending}
               >
                 <Zap className="w-3 h-3 mr-1" />
-                Route via Alloy
+                Route via FORGE
               </Button>
             )}
             {control.priority === 'critical' && control.status !== 'implemented' && (

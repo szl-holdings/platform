@@ -420,7 +420,7 @@ const lyteCommands: CommandItem[] = [
   },
   {
     id: 'nav-alloy-actions',
-    label: 'Alloy Action Queue',
+    label: 'FORGE Action Queue',
     icon: '⚙️',
     group: 'FORGE',
     action: () => {
@@ -429,7 +429,7 @@ const lyteCommands: CommandItem[] = [
   },
   {
     id: 'nav-alloy-templates',
-    label: 'Alloy Workflow Templates',
+    label: 'FORGE Workflow Templates',
     icon: '🔄',
     group: 'FORGE',
     action: () => {

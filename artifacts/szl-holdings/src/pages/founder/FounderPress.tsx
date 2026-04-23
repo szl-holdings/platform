@@ -58,7 +58,7 @@ const PROOF_POINTS = [
       {
         label: 'Active Platforms',
         value: platformMetric?.value ?? '6',
-        detail: 'Lyte, Alloy, Aegis, Vessels, Terra, Carlota Jo',
+        detail: 'KORA, FORGE, PARAGON, SEXTANT, DOMAINE, Carlota Jo',
       },
       ...(connectorsMetric
         ? [
@@ -70,20 +70,20 @@ const PROOF_POINTS = [
           ]
         : [
             {
-              label: 'Alloy Connectors',
+              label: 'FORGE Connectors',
               value: '35+',
               detail: 'Live integrations across the execution fabric',
             },
           ]),
       {
-        label: 'Terra Deal Pipeline',
+        label: 'DOMAINE Deal Pipeline',
         value: '$4.8B',
         detail: 'Tracked across NYC distress market',
       },
       {
         label: 'Distress Properties Tracked',
         value: '340+',
-        detail: 'Live via Terra in target markets',
+        detail: 'Live via DOMAINE in target markets',
       },
     ],
   },
@@ -140,7 +140,7 @@ const INVESTOR_SIGNALS = [
   },
   {
     signal: 'One shared execution fabric',
-    detail: `Alloy is not a feature. It is the infrastructure that compounds across every vertical. ${seriesA ? `A ${seriesA.amount} ${seriesA.round} validated the thesis.` : 'Institutional funding validated the thesis.'}`,
+    detail: `FORGE is not a feature. It is the infrastructure that compounds across every vertical. ${seriesA ? `A ${seriesA.amount} ${seriesA.round} validated the thesis.` : 'Institutional funding validated the thesis.'}`,
   },
   {
     signal: 'Disciplined cap table',
@@ -148,7 +148,7 @@ const INVESTOR_SIGNALS = [
   },
   {
     signal: `${seriesB ? seriesB.round : 'Series B'} is structured, not speculative`,
-    detail: `The ${seriesB ? seriesB.amount : '$45M'} Series B target is tied to specific product milestones: Counsel and Carlota Jo to GA, triple Aegis defense presence. The plan is real.`,
+    detail: `The ${seriesB ? seriesB.amount : '$45M'} Series B target is tied to specific product milestones: Counsel and Carlota Jo to GA, triple PARAGON defense presence. The plan is real.`,
   },
 ];
 

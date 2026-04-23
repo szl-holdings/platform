@@ -434,7 +434,7 @@ async function seedVessels() {
       status: 'in_progress',
       assignedTo: 'Fleet Operations Director',
       notes:
-        'Escalated to director due to $420K margin impact. Alloy routing intervention triggered.',
+        'Escalated to director due to $420K margin impact. FORGE routing intervention triggered.',
       alloyWorkflowRef: 'alloy-wf-vessels-001',
     },
     {

@@ -816,7 +816,7 @@ export default function NexusExplorerPage() {
   const anomalyReport = useMemo(() => runAnomalyDetection(KNOWLEDGE_GRAPH), []);
 
   useEffect(() => {
-    document.title = 'NEXUS Explorer — SZL Intelligence';
+    document.title = 'PRAXIS Explorer — SZL Intelligence';
   }, []);
 
   // Fix: deselect clears highlight
@@ -874,7 +874,7 @@ export default function NexusExplorerPage() {
     {
       date: 'Apr 14',
       time: '22:15',
-      event: `NEXUS graph refresh — ${NEXUS_EDGES.filter((e) => e.inferred).length} new inferred edges`,
+      event: `PRAXIS graph refresh — ${NEXUS_EDGES.filter((e) => e.inferred).length} new inferred edges`,
       domain: 'PRAXIS',
       accent: '#60a5fa',
     },
@@ -902,7 +902,7 @@ export default function NexusExplorerPage() {
     {
       date: 'Apr 8',
       time: '09:44',
-      event: 'OFAC SDN composite match confirmed by Aegis',
+      event: 'OFAC SDN composite match confirmed by PARAGON',
       domain: 'Threat',
       accent: '#ef4444',
     },
@@ -1024,7 +1024,7 @@ export default function NexusExplorerPage() {
                       textTransform: 'uppercase',
                     }}
                   >
-                    NEXUS Intelligence Graph · v{KNOWLEDGE_GRAPH.version}
+                    PRAXIS Intelligence Graph · v{KNOWLEDGE_GRAPH.version}
                   </span>
                 </div>
                 <h1
@@ -1407,7 +1407,7 @@ export default function NexusExplorerPage() {
                   style={{ color: '#ef4444', flexShrink: 0, marginTop: '1px' }}
                 />
                 <span style={{ fontSize: '11px', color: 'hsl(210,5%,58%)', lineHeight: 1.6 }}>
-                  {anomalyReport.totalCount} cross-domain anomalies detected by NEXUS pattern engine
+                  {anomalyReport.totalCount} cross-domain anomalies detected by PRAXIS pattern engine
                   across {Object.keys(anomalyReport.byDomain).length} domains. Patterns are computed
                   from the live knowledge graph — not static. Critical:{' '}
                   {anomalyReport.bySeverity.critical} · High: {anomalyReport.bySeverity.high} ·

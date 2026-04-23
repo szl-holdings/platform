@@ -55,7 +55,7 @@ const RECEIPTS: Receipt[] = [
     evidenceStrength: 88,
     evidence: [
       {
-        source: 'Vessels Fleet Signal',
+        source: 'SEXTANT Fleet Signal',
         type: 'signal',
         weight: 0.35,
         detail: '3 vessels outside SLA — surcharge pending 22h',

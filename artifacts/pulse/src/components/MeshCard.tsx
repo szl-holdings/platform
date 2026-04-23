@@ -146,7 +146,7 @@ export default function MeshCard() {
               color: 'var(--pulse-text-muted)',
             }}
           >
-            Sentra · Agent Mesh Status
+            TENAX · Agent Mesh Status
           </span>
           <span
             style={{
@@ -343,7 +343,7 @@ export default function MeshCard() {
             hour: '2-digit',
             minute: '2-digit',
           })}{' '}
-          UTC · Sentra Agent Mesh Engine
+          UTC · TENAX Agent Mesh Engine
         </div>
         <a
           href={sentraHref}
@@ -357,7 +357,7 @@ export default function MeshCard() {
             gap: 4,
           }}
         >
-          Review in Sentra →
+          Review in TENAX →
         </a>
       </div>
     </div>

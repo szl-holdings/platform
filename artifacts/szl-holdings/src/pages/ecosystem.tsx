@@ -230,7 +230,7 @@ export default function EcosystemPage() {
               <SectionHeader
                 label="Platform Command — Core Layer"
                 title="Flagship command surface and execution fabric"
-                description="Lyte is the flagship governed command surface — signal stream, situation board, governed action panel. Alloy is the execution fabric underneath every domain pack. Vessels is the first commercial domain pack, shown here alongside the core platform."
+                description="KORA is the flagship governed command surface — signal stream, situation board, governed action panel. FORGE is the execution fabric underneath every domain pack. SEXTANT is the first commercial domain pack, shown here alongside the core platform."
               />
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                 {FLAGSHIP.map((p, i) => <PlatformCard key={p.name} p={p} i={i} />)}
@@ -243,7 +243,7 @@ export default function EcosystemPage() {
               <SectionHeader
                 label="Tier 2 — Operations Platforms"
                 title="Domain-specific command surfaces"
-                description="Specialized platforms built on the Alloy backbone, each serving a distinct operational domain with its own data model, workflows, and audience."
+                description="Specialized platforms built on the FORGE backbone, each serving a distinct operational domain with its own data model, workflows, and audience."
               />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {OPERATIONS.map((p, i) => <PlatformCard key={p.name} p={p} i={i} />)}

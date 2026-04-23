@@ -48,8 +48,8 @@ const TRUST_CONTROLS = [
 
 export default function PilotTerraPage() {
   const __pageMeta = usePageMeta({
-    title: "Pilot — Terra — SZL Holdings",
-    description: "Terra pilot: instrument one real estate diligence workflow with official data enrichment, governance, and proof chain output. 30/60/90 day success path.",
+    title: "Pilot — DOMAINE — SZL Holdings",
+    description: "DOMAINE pilot: instrument one real estate diligence workflow with official data enrichment, governance, and proof chain output. 30/60/90 day success path.",
     canonical: "https://szlholdings.com/pilot/terra",
   });
 
@@ -65,13 +65,13 @@ export default function PilotTerraPage() {
             <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#c8953c]/20 bg-[#c8953c]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#c8953c]">
                 <Building2 className="h-3.5 w-3.5" />
-                Terra Pilot
+                DOMAINE Pilot
               </div>
               <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
                 One diligence workflow, enriched by official data, end to end.
               </h1>
               <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-                The Terra pilot takes one real estate diligence workflow — from property document arrival through
+                The DOMAINE pilot takes one real estate diligence workflow — from property document arrival through
                 twin enrichment with official data, gap detection, readiness scoring, investment committee review,
                 and defensible export — and instruments it with observability, governance, and proof. Not a demo.
                 A structured proof of diligence improvement.
@@ -124,7 +124,7 @@ export default function PilotTerraPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Integration requirements</p>
               <h2 className="mt-3 text-2xl font-semibold text-white">Official data sources used in the pilot</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">
-                Terra enriches Property Twins with authoritative government and regulatory data — not scraped,
+                DOMAINE enriches Property Twins with authoritative government and regulatory data — not scraped,
                 not estimated, not aggregated from commercial sources without source provenance.
               </p>
               <div className="mt-6 space-y-2">
@@ -271,7 +271,7 @@ export default function PilotTerraPage() {
                     Request pilot access <ArrowRight className="h-4 w-4" />
                   </Link>
                   <a href="/terra/" className="inline-flex items-center gap-2 rounded-xl border border-[#c8953c]/25 bg-[#c8953c]/08 px-5 py-2.5 text-sm font-semibold text-[#c8953c]/90 transition hover:border-[#c8953c]/40 hover:bg-[#c8953c]/12">
-                    Open live Terra app <ArrowRight className="h-4 w-4" />
+                    Open live DOMAINE app <ArrowRight className="h-4 w-4" />
                   </a>
                   <Link href="/solutions/terra" className="inline-flex items-center gap-2 rounded-xl border border-white/12 px-5 py-2.5 text-sm font-semibold text-white/75 transition hover:border-white/25 hover:bg-white/5">
                     Product overview

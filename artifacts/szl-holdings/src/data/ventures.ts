@@ -94,9 +94,9 @@ export const ventures: Venture[] = [
     status: 'Live',
     accentColor: '#f59e0b',
     description:
-      'Lyte is the observability layer that enterprises install when dashboards stop being enough. It continuously monitors operational signals across sales pipelines, delivery queues, finance, and team performance — surfacing anomalies, severity-ranked alerts, and root-cause context before issues become crises.',
+      'KORA is the observability layer that enterprises install when dashboards stop being enough. It continuously monitors operational signals across sales pipelines, delivery queues, finance, and team performance — surfacing anomalies, severity-ranked alerts, and root-cause context before issues become crises.',
     painSolved:
-      "Executives are drowning in dashboards that show data but don't show problems. Lyte bridges the gap between raw metrics and actionable intelligence, applying severity-ranked signal detection, explainability, and autonomous playbooks that close the loop from observation to resolution.",
+      "Executives are drowning in dashboards that show data but don't show problems. KORA bridges the gap between raw metrics and actionable intelligence, applying severity-ranked signal detection, explainability, and autonomous playbooks that close the loop from observation to resolution.",
     metrics: [
       {
         label: 'Avg. Signal Detection Time',
@@ -135,7 +135,7 @@ export const ventures: Venture[] = [
         problem:
           'A logistics operator had approval queues stalling at 48-72 hours, invisible to leadership.',
         solution:
-          'Lyte flagged the latency anomaly within 6 minutes and surfaced the bottleneck to the ops lead with full context.',
+          'KORA flagged the latency anomaly within 6 minutes and surfaced the bottleneck to the ops lead with full context.',
         result: 'Approval cycle reduced to 11 hours. Revenue leakage recovered: $340K/quarter.',
       },
       {
@@ -143,7 +143,7 @@ export const ventures: Venture[] = [
         problem:
           'Sales pipeline stalls were identified only at week-end reviews — too late to intervene.',
         solution:
-          "Lyte's signal engine detected deal inactivity patterns 8 days earlier than manual review.",
+          "KORA's signal engine detected deal inactivity patterns 8 days earlier than manual review.",
         result: 'Pipeline velocity improved 22%. Close rate increased 9 points.',
       },
     ],
@@ -179,11 +179,11 @@ export const ventures: Venture[] = [
     status: 'Live',
     accentColor: '#3b82f6',
     description:
-      "Vessels integrates AIS data, satellite imagery, optical sensing, port call records, and sanctions registries into a single intelligence layer. It detects dark vessel activity, flags sanctions exposure, and delivers voyage economics that traditional maritime data providers can't see.",
+      "SEXTANT integrates AIS data, satellite imagery, optical sensing, port call records, and sanctions registries into a single intelligence layer. It detects dark vessel activity, flags sanctions exposure, and delivers voyage economics that traditional maritime data providers can't see.",
     painSolved:
-      'Maritime oversight was designed for a different era. AIS alone can be spoofed, disabled, or laundered. Vessels applies multi-source signal fusion and behavioral modeling to detect what compliant-looking vessels are actually doing — and what the financial exposure is.',
+      'Maritime oversight was designed for a different era. AIS alone can be spoofed, disabled, or laundered. SEXTANT applies multi-source signal fusion and behavioral modeling to detect what compliant-looking vessels are actually doing — and what the financial exposure is.',
     metrics: [
-      { label: 'Vessels Monitored', value: metricDisplay(VESSELS_COUNT), trend: 'up' },
+      { label: 'SEXTANT Monitored', value: metricDisplay(VESSELS_COUNT), trend: 'up' },
       { label: 'Shipping Lanes', value: '340+', trend: 'neutral' },
       {
         label: 'Dark Vessel Detections (Avg Lead)',
@@ -216,7 +216,7 @@ export const ventures: Venture[] = [
         problem:
           'A commodity trader needed to identify sanctions exposure before regulatory designation, not after.',
         solution:
-          "Vessels' behavioral fingerprinting detected AIS spoofing and shadow transfer patterns 34 days ahead of formal designation.",
+          "SEXTANT' behavioral fingerprinting detected AIS spoofing and shadow transfer patterns 34 days ahead of formal designation.",
         result:
           'Client avoided $12M in exposure. Compliance team commended the intelligence lead time.',
       },
@@ -224,7 +224,7 @@ export const ventures: Venture[] = [
         title: 'Voyage Economics for Charter Decisions',
         problem: 'Charterers were making fixture decisions on incomplete cargo load data.',
         solution:
-          "Vessels' draft inference layer provided cargo weight estimates cross-referenced against manifests.",
+          "SEXTANT' draft inference layer provided cargo weight estimates cross-referenced against manifests.",
         result:
           'Charter negotiation informed by actual versus declared cargo. Rate variance captured: 8%.',
       },
@@ -323,9 +323,9 @@ export const ventures: Venture[] = [
     status: 'Live',
     accentColor: '#ef4444',
     description:
-      'Aegis replaces point-in-time penetration testing with continuous adversarial simulation across the full MITRE ATT&CK framework. The platform runs automated campaigns, adapts attack paths based on defensive responses, and delivers real-time security posture scoring with compliance-grade audit trails.',
+      'PARAGON replaces point-in-time penetration testing with continuous adversarial simulation across the full MITRE ATT&CK framework. The platform runs automated campaigns, adapts attack paths based on defensive responses, and delivers real-time security posture scoring with compliance-grade audit trails.',
     painSolved:
-      'The annual pen test is a snapshot of a system that no longer exists. Adversaries operate continuously; defenders should too. Aegis makes continuous security validation economically viable by automating the full ATT&CK matrix coverage at machine speed.',
+      'The annual pen test is a snapshot of a system that no longer exists. Adversaries operate continuously; defenders should too. PARAGON makes continuous security validation economically viable by automating the full ATT&CK matrix coverage at machine speed.',
     metrics: [
       { label: 'Simulations Executed', value: metricDisplay(AEGIS_SIMULATIONS), trend: 'up' },
       { label: 'ATT&CK Techniques Covered', value: '200+', trend: 'neutral' },
@@ -348,7 +348,7 @@ export const ventures: Venture[] = [
         problem:
           "A Fortune 500 CISO couldn't quantify their security posture improvement to the board.",
         solution:
-          'Aegis implemented continuous simulation with quarterly board-ready posture reports.',
+          'PARAGON implemented continuous simulation with quarterly board-ready posture reports.',
         result:
           'Security posture score improved from 62 to 78 over 2 quarters. Board approved expanded security budget.',
       },
@@ -375,7 +375,7 @@ export const ventures: Venture[] = [
   },
   {
     id: 'inca',
-    name: 'SZL Cortex',
+    name: 'SZL APEX',
     tagline: 'AI Research Command Center',
     oneLiner:
       'Enterprise-grade LLM evaluation, model governance, and AI research management platform.',
@@ -385,9 +385,9 @@ export const ventures: Venture[] = [
     status: 'Live',
     accentColor: '#8b5cf6',
     description:
-      'SZL Cortex provides the evaluation and governance infrastructure that enterprise AI deployments need. It tests models against proprietary data distributions, detects behavioral drift, tracks experiments, and delivers the model registry and compliance trails that regulated industries require.',
+      'SZL APEX provides the evaluation and governance infrastructure that enterprise AI deployments need. It tests models against proprietary data distributions, detects behavioral drift, tracks experiments, and delivers the model registry and compliance trails that regulated industries require.',
     painSolved:
-      "General benchmarks don't tell you how a model performs on your data, in your context, at your risk threshold. SZL Cortex closes the evaluation gap between public benchmarks and operational deployment — and maintains the governance layer that allows enterprises to deploy AI in regulated environments.",
+      "General benchmarks don't tell you how a model performs on your data, in your context, at your risk threshold. SZL APEX closes the evaluation gap between public benchmarks and operational deployment — and maintains the governance layer that allows enterprises to deploy AI in regulated environments.",
     metrics: [
       { label: 'Pilot Clients', value: '12', trend: 'up' },
       { label: 'Series A Raised', value: '$14M', trend: 'neutral' },
@@ -406,7 +406,7 @@ export const ventures: Venture[] = [
         problem:
           "An enterprise deploying LLMs for contract analysis found benchmark scores didn't correlate with accuracy on their document types.",
         solution:
-          'SZL Cortex built a custom evaluation suite against their proprietary document corpus and operational edge cases.',
+          'SZL APEX built a custom evaluation suite against their proprietary document corpus and operational edge cases.',
         result: 'Model selection improved. Production failure rate dropped 67%.',
       },
     ],
@@ -442,9 +442,9 @@ export const ventures: Venture[] = [
     status: 'Live',
     accentColor: '#0ea5e9',
     description:
-      'Terra turns Census Bureau, BLS, FEMA, and SEC EDGAR data into continuous business telemetry — detecting KPI drift, market anomalies, and value leakage before they compound. Part of the OBSERVE layer in the SZL intelligence doctrine.',
+      'DOMAINE turns Census Bureau, BLS, FEMA, and SEC EDGAR data into continuous business telemetry — detecting KPI drift, market anomalies, and value leakage before they compound. Part of the OBSERVE layer in the SZL intelligence doctrine.',
     painSolved:
-      'Enterprise teams are making billion-dollar decisions on fragmented, stale data. Terra consolidates market signals, climate exposure, and portfolio metrics so leadership has complete observability — not a patchwork of reports.',
+      'Enterprise teams are making billion-dollar decisions on fragmented, stale data. DOMAINE consolidates market signals, climate exposure, and portfolio metrics so leadership has complete observability — not a patchwork of reports.',
     metrics: [
       { label: 'Enterprise Clients', value: '34', trend: 'up' },
       { label: 'ARR', value: '$3.1M', trend: 'up' },
@@ -463,7 +463,7 @@ export const ventures: Venture[] = [
         problem:
           'An institutional manager needed to assess climate risk across a 140-asset portfolio for a regulatory disclosure.',
         solution:
-          'Lyte ran a full climate overlay across the portfolio in 48 hours — flood, heat, and transition risk scored per asset.',
+          'KORA ran a full climate overlay across the portfolio in 48 hours — flood, heat, and transition risk scored per asset.',
         result:
           'Regulatory disclosure completed on schedule. 12 assets flagged for remediation planning.',
       },
@@ -500,9 +500,9 @@ export const ventures: Venture[] = [
     status: 'Live',
     accentColor: '#6366f1',
     description:
-      'Alloy is the execution fabric of the SZL platform — orchestrating connectors, DAGs, automations, and the predictive intelligence layer into a unified engine. It is not a product sold standalone; it is the platform backbone that Lyte, Vessels, and every SZL subsidiary runs on.',
+      'FORGE is the execution fabric of the SZL platform — orchestrating connectors, DAGs, automations, and the predictive intelligence layer into a unified engine. It is not a product sold standalone; it is the platform backbone that KORA, SEXTANT, and every SZL subsidiary runs on.',
     painSolved:
-      'Enterprise workflows break at integration points. Alloy eliminates the gap between observation and execution by providing a single orchestration layer with confidence-scored scenario modeling, agent coordination, and automated decision pathways.',
+      'Enterprise workflows break at integration points. FORGE eliminates the gap between observation and execution by providing a single orchestration layer with confidence-scored scenario modeling, agent coordination, and automated decision pathways.',
     metrics: [
       { label: 'Prediction Models Deployed', value: '12,400+', trend: 'up' },
       { label: 'Automations Executed / Day', value: '48K+', trend: 'up' },
@@ -515,7 +515,7 @@ export const ventures: Venture[] = [
       { date: 'Q1 2024', event: 'Agent coordination layer shipped' },
       {
         date: 'Q3 2024',
-        event: 'Predictive intelligence unified into Alloy — full engine convergence',
+        event: 'Predictive intelligence unified into FORGE — full engine convergence',
       },
     ],
     caseStudies: [
@@ -524,7 +524,7 @@ export const ventures: Venture[] = [
         problem:
           'A logistics operator needed to evaluate 200+ supply chain scenarios across a complex network in real time.',
         solution:
-          "Alloy's predictive engine modeled each scenario with confidence bounds, assumption tracking, and automated sensitivity analysis.",
+          "FORGE's predictive engine modeled each scenario with confidence bounds, assumption tracking, and automated sensitivity analysis.",
         result: 'Decision time dropped from 3 weeks to 4 days. Confidence in selected path: 94%.',
       },
     ],
@@ -542,15 +542,15 @@ export const ventures: Venture[] = [
       'Multi-agent coordination and policy enforcement',
       'DAG execution engine with retry and escalation',
       'Performance attribution per model variant',
-      'Integration with SZL Cortex, Aegis, Lyte, and Vessels',
+      'Integration with SZL APEX, PARAGON, KORA, and SEXTANT',
     ],
-    nextMilestone: 'Alloy Scenario Model Library public launch (Q2 2026)',
+    nextMilestone: 'FORGE Scenario Model Library public launch (Q2 2026)',
     path: '/ventures/alloy',
     externalPath: '/alloy/',
   },
   {
     id: 'msp',
-    name: 'Aegis Operations',
+    name: 'PARAGON Operations',
     tagline: 'Managed Services Command — OBSERVE Layer',
     oneLiner:
       'Evidence-backed incident command delivering threat detection, anomaly visibility, and MSP-grade operational intelligence.',
@@ -560,9 +560,9 @@ export const ventures: Venture[] = [
     status: 'Live',
     accentColor: '#ef4444',
     description:
-      'Aegis Operations delivers the OBSERVE layer for threat and incident intelligence — combining endpoint monitoring, NOC operations, and FedRAMP-grade security telemetry into a unified command center. Evidence-backed incident command at enterprise scale.',
+      'PARAGON Operations delivers the OBSERVE layer for threat and incident intelligence — combining endpoint monitoring, NOC operations, and FedRAMP-grade security telemetry into a unified command center. Evidence-backed incident command at enterprise scale.',
     painSolved:
-      'Security and IT teams operate on stacks of disconnected tools: RMM, PSA, ticketing, billing, and reporting all live separately. Aegis Operations consolidates the operational layer so teams can scale clients without scaling headcount.',
+      'Security and IT teams operate on stacks of disconnected tools: RMM, PSA, ticketing, billing, and reporting all live separately. PARAGON Operations consolidates the operational layer so teams can scale clients without scaling headcount.',
     metrics: [
       { label: 'Managed Client Environments', value: '240+', trend: 'up' },
       { label: 'SLA Compliance Rate', value: '99.2%', trend: 'neutral' },
@@ -581,7 +581,7 @@ export const ventures: Venture[] = [
         problem:
           "An MSP managing 80 client environments was growing client count but couldn't scale service quality without hiring.",
         solution:
-          'Aegis Operations consolidated 6 tools into one, with AI-assisted incident triage reducing L1 ticket volume by 34%.',
+          'PARAGON Operations consolidated 6 tools into one, with AI-assisted incident triage reducing L1 ticket volume by 34%.',
         result:
           'Client base grew from 80 to 140 environments. Team headcount unchanged. SLA compliance improved.',
       },
@@ -602,7 +602,7 @@ export const ventures: Venture[] = [
       'Patch management and compliance tracking',
       'Executive reporting suite per client',
     ],
-    nextMilestone: 'Lyte integration for AIOps signal-to-ticket automation (Q3 2026)',
+    nextMilestone: 'KORA integration for AIOps signal-to-ticket automation (Q3 2026)',
     path: '/ventures/msp',
     externalPath: '/aegis/ops/dashboard',
   },

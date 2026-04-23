@@ -12,7 +12,7 @@ const doctrine = [
   {
     step: '02',
     label: 'Interpret',
-    desc: 'The Alloy engine normalizes raw signal across all platforms — classifying severity, attributing ownership, and connecting data points into consequence-aware intelligence.',
+    desc: 'The FORGE engine normalizes raw signal across all platforms — classifying severity, attributing ownership, and connecting data points into consequence-aware intelligence.',
     accent: 'hsl(214,80%,65%)',
     accentRgb: '92,155,228',
     platform: 'FORGE Engine',
@@ -28,10 +28,10 @@ const doctrine = [
   {
     step: '04',
     label: 'Execute',
-    desc: 'The Alloy engine orchestrates multi-step workflows with approval gates, routing logic, and audit trails. Vessels applies the same discipline to maritime command. Every action is traceable.',
+    desc: 'The FORGE engine orchestrates multi-step workflows with approval gates, routing logic, and audit trails. SEXTANT applies the same discipline to maritime command. Every action is traceable.',
     accent: 'hsl(205,85%,55%)',
     accentRgb: '38,164,218',
-    platform: 'Alloy + Vessels',
+    platform: 'FORGE + SEXTANT',
   },
   {
     step: '05',

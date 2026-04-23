@@ -25,7 +25,7 @@ const TEXT_DIM = 'rgba(226,244,255,0.4)';
 const AGENTS = [
   {
     id: 'beacon',
-    name: 'Terra Analytics',
+    name: 'DOMAINE Analytics',
     role: 'AIOps Analytics',
     icon: 'bar-chart-2',
     color: '#00d4ff',
@@ -55,7 +55,7 @@ export default function AgentChatScreen() {
       id: 'welcome',
       role: 'assistant',
       agentId: 'beacon',
-      agentName: 'Terra Analytics',
+      agentName: 'DOMAINE Analytics',
       content:
         'AIOps intelligence active. I analyze signals, detect anomalies, and surface operational insights across your infrastructure. What do you need?',
       timestamp: Date.now() - 60000,

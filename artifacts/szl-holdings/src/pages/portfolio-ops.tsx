@@ -123,7 +123,7 @@ const apps: AppReadiness[] = [
     confidence: 'High',
   },
   {
-    name: 'SZL Cortex',
+    name: 'SZL APEX',
     slug: 'inca',
     icon: Brain,
     accent: 'hsl(250,58%,58%)',
@@ -155,7 +155,7 @@ const apps: AppReadiness[] = [
     confidence: 'High',
   },
   {
-    name: 'Aegis Operations',
+    name: 'PARAGON Operations',
     slug: 'msp',
     icon: Activity,
     accent: 'hsl(356,70%,52%)',

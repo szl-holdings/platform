@@ -361,7 +361,7 @@ const SENTIENT_ACTIONS: SentientAction[] = [
     id: 'la2',
     label: 'Trigger portfolio-wide approval-gap audit',
     description:
-      'Lyte detected 3/14 portfolio companies showing similar void-owner patterns. Audit prevents an estimated $7.2M further crystallization in Q2.',
+      'KORA detected 3/14 portfolio companies showing similar void-owner patterns. Audit prevents an estimated $7.2M further crystallization in Q2.',
     confidence: 0.84,
     policyVerdict: 'requires_approval',
     href: '/decisions',
@@ -394,7 +394,7 @@ const SENTIENT_CROSS_LINKS: SentientCrossLink[] = [
     surfaceAccent: '#0ea5e9',
     label: 'MV Atlantic Falcon voyage tied to Vantex acquisition',
     description:
-      'Vessels has an active voyage whose financing is contingent on the Vantex deal closing in Q2.',
+      'SEXTANT has an active voyage whose financing is contingent on the Vantex deal closing in Q2.',
     href: '/vessels/fleet',
     preservedContext: { surface: 'lyte', entity: 'lyte-opp-vantex-001' },
   },

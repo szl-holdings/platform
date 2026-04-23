@@ -107,7 +107,7 @@ export const DEMO_PERSONAS: DemoPersona[] = [
     talkingPoints: [
       'Fleet position, route risk, and cargo status on one screen',
       'AIS anomaly and sanctions alert surfaced before the port call',
-      'Approves rerouting through Alloy — full audit record created',
+      'Approves rerouting through FORGE — full audit record created',
       'Voyage P&L updated in real time as route changes are confirmed',
     ],
   },

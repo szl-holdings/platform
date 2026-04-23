@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-SZL Holdings offers Alloy, a governed operational intelligence platform for regulated enterprises. It ensures human-in-the-loop governance, immutable record-keeping, and attributable outcomes for all AI recommendations and actions. The platform is a pnpm monorepo supporting web and mobile applications, an API, and a design system. Its core purpose is Governed Workflow Orchestration (Alloy + Command + Lyte) and Maritime Intelligence (Vessels), with specialized extensions like Aegis, Terra, PRISM Counsel, and Carlota Jo built upon its governed foundation. The business vision is to provide a comprehensive solution for decision intelligence and operational oversight in highly regulated environments, with strong market potential in sectors requiring stringent compliance and auditable AI applications.
+SZL Holdings offers FORGE, a governed operational intelligence platform for regulated enterprises. It ensures human-in-the-loop governance, immutable record-keeping, and attributable outcomes for all AI recommendations and actions. The platform is a pnpm monorepo supporting web and mobile applications, an API, and a design system. Its core purpose is Governed Workflow Orchestration (FORGE + Command + KORA) and Maritime Intelligence (SEXTANT), with specialized extensions like PARAGON, DOMAINE, Counsel, and Carlota Jo built upon its governed foundation. The business vision is to provide a comprehensive solution for decision intelligence and operational oversight in highly regulated environments, with strong market potential in sectors requiring stringent compliance and auditable AI applications.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -11,10 +11,10 @@ Do not make changes to the folder `Z`.
 Do not make changes to the file `Y`.
 
 ## System Architecture
-The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.js. It employs a micro-frontend architecture for web applications, managed through a shared gateway proxy. The system has evolved into the Alloy Execution and Evidence Platform (AEEP).
+The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.js. It employs a micro-frontend architecture for web applications, managed through a shared gateway proxy. The system has evolved into the FORGE Execution and Evidence Platform (AEEP).
 
 **Core Architectural Primitives:**
-- **Alloy Execution Fabric:** Provides human-in-the-loop governance, an Outcome Graph, Proof Chain for audit, and Covenant Policy for permissions.
+- **FORGE Execution Fabric:** Provides human-in-the-loop governance, an Outcome Graph, Proof Chain for audit, and Covenant Policy for permissions.
 - **Sovereign Execution Substrate (`@szl/substrate`):** A durable, governed, and replayable runtime for orchestration, planning, governance, and policy enforcement.
 - **Workflow Engine:** Orchestrates durable business processes.
 - **Event Fabric (PRISM Bus):** A cross-domain event bus.
@@ -22,7 +22,7 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 - **SZL Foundation – Trace Graph:** Canonical trace layer for agent runs and workflow steps.
 - **ATLAS Enterprise State Model:** Defines a shared entity vocabulary and event taxonomy.
 - **Living Signal Mesh & Evidence Graph:** Unifies event/signal handling with a 9-stage pipeline and `EvidenceStore`.
-- **Memory Fabric & Alloy Runtime:** Tiered memory layer with provenance, freshness, retention, and sensitivity tracking.
+- **Memory Fabric & FORGE Runtime:** Tiered memory layer with provenance, freshness, retention, and sensitivity tracking.
 
 **Monorepo Structure:** Organized into active/archived artifacts, shared infrastructure, and packages for business observability (ATLAS), AI Control Plane, and NVIDIA-Ready Modules. Drizzle ORM manages PostgreSQL schemas.
 
@@ -36,9 +36,9 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 
 **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
 
-**NEXUS – Unified Agentic AI Layer:** An internal tooling sandbox for AI agent research, memory management, skill registry, protocol bridging, and AI Control Plane features, accessible at `/nexus/`.
+**PRAXIS – Unified Agentic AI Layer:** An internal tooling sandbox for AI agent research, memory management, skill registry, protocol bridging, and AI Control Plane features, accessible at `/nexus/`.
 
-**Lyte – Decision Intelligence:** A flagship application for executive narratives, signal feeds, and decision centers, characterized by a dark amber design language.
+**KORA – Decision Intelligence:** A flagship application for executive narratives, signal feeds, and decision centers, characterized by a dark amber design language.
 
 **AEEP Core Packages:**
 - `shared-contracts/`: Agent roles, starter workflows, evidence/policy/retrieval/memory types.
@@ -48,7 +48,7 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 - `memory-core/`: In-memory store (with Redis adapter for production).
 - `evidence-ledger/`: Immutable append-only ledger, ProofEnvelope assembly.
 - `policy-guard/`: Rule evaluation engine, baseline rules.
-- `domain-profiles/`: Definitions for Lyte, Vessels, Terra, Aegis, PRISM, Carlota.
+- `domain-profiles/`: Definitions for KORA, SEXTANT, DOMAINE, PARAGON, Counsel, Carlota.
 - `platform-metrics-registry/`: Typed metric schema, registry.
 
 **AEEP Design System (`packages/design-system/src/`):** Includes tokens, providers (density + screen mode), hooks, shell components (AppShell, SideNav, TopBar, GlobalCommandPalette), layout components (SplitPane, SideInspector), data display (MetricStat, DataGrid), detail views, timeline components, EvidencePanel, form elements, and feedback components.

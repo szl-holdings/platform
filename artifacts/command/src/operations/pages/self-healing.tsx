@@ -233,7 +233,7 @@ function RunCard({ run }: { run: RemediationRun }) {
           >
             <Shield className="w-3 h-3 shrink-0" style={{ color: '#8b5cf6' }} />
             <span className="text-[10px]" style={{ color: '#8b5cf6' }}>
-              Awaiting approval from <strong>{run.approver}</strong> — Alloy governance gate active
+              Awaiting approval from <strong>{run.approver}</strong> — FORGE governance gate active
             </span>
           </div>
         )}
@@ -255,7 +255,7 @@ function RunCard({ run }: { run: RemediationRun }) {
             style={{ color: DS.text.muted, borderTop: `1px solid ${DS.border}` }}
           >
             <span>Audit ref: {run.auditRef}</span>
-            <span>Alloy Governance · Immutable log</span>
+            <span>FORGE Governance · Immutable log</span>
           </div>
         </div>
       )}
@@ -920,7 +920,7 @@ export default function SelfHealingPage() {
             </span>
           </div>
           <p className="text-[11px]" style={{ color: DS.text.muted }}>
-            Pattern-matched auto-remediation with Alloy approval gates and immutable audit trails.
+            Pattern-matched auto-remediation with FORGE approval gates and immutable audit trails.
             MTTR: hours → seconds.
           </p>
         </div>

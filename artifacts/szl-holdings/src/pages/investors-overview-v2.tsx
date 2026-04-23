@@ -78,7 +78,7 @@ const INVESTOR_CLAIMS = [
   {
     claim: "Live threat intelligence — CISA KEV, NVD CVE, MITRE ATT&CK",
     manifestStatus: "live" as const,
-    evidence: "Aegis CAP: CISA KEV and NVD CVE active with no API key required. MITRE ATT&CK v14 integrated. Real-time ingestion confirmed.",
+    evidence: "PARAGON CAP: CISA KEV and NVD CVE active with no API key required. MITRE ATT&CK v14 integrated. Real-time ingestion confirmed.",
     capId: "PARAGON",
   },
   {
@@ -90,7 +90,7 @@ const INVESTOR_CLAIMS = [
   {
     claim: "NYC distress property pipeline — live government data",
     manifestStatus: "live" as const,
-    evidence: "Terra CAP: NYC Open Data pipeline active — lis pendens, tax lien, pre-foreclosure. Census ACS, HUD, BLS, FEMA also live.",
+    evidence: "DOMAINE CAP: NYC Open Data pipeline active — lis pendens, tax lien, pre-foreclosure. Census ACS, HUD, BLS, FEMA also live.",
     capId: "DOMAINE",
   },
   {
@@ -258,8 +258,8 @@ export default function InvestorsOverviewPage() {
                   <h3 className="mt-4 text-base font-semibold text-white">Entry motion</h3>
                   <p className="mt-2 text-sm leading-6 text-white/60">
                     Design partner program — 3–6 partners per domain, co-designing the product in exchange for
-                    early access and preferred pricing. Primary domains: maritime (Vessels), security (Aegis),
-                    real estate (Terra).
+                    early access and preferred pricing. Primary domains: maritime (SEXTANT), security (PARAGON),
+                    real estate (DOMAINE).
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">

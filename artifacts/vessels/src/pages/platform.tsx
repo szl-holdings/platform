@@ -48,7 +48,7 @@ export default function Platform() {
       <section className="py-20 lg:py-32 px-6">
         <div className="max-w-5xl mx-auto text-center">
           <span className="inline-flex items-center gap-2 text-[11px] font-mono text-sky-400/60 uppercase tracking-[0.2em] mb-6 border border-sky-500/20 rounded-full px-4 py-1.5">
-            Vessels
+            SEXTANT
           </span>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-sky-50 leading-tight mb-6">
             Maritime visibility,
@@ -56,7 +56,7 @@ export default function Platform() {
             built for command.
           </h1>
           <p className="text-sky-300/60 text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-            Vessels is designed to bring fleet, route, and voyage intelligence into one modern
+            SEXTANT is designed to bring fleet, route, and voyage intelligence into one modern
             operating layer, helping teams see movement clearly, reduce uncertainty, and act with
             confidence.
           </p>
@@ -119,7 +119,7 @@ export default function Platform() {
             Designed like a real operating surface.
           </h2>
           <p className="text-sky-300/55 text-base max-w-2xl leading-relaxed mb-12">
-            From map-based visibility to structured vessel detail views, Vessels is designed to feel
+            From map-based visibility to structured vessel detail views, SEXTANT is designed to feel
             less like a concept and more like a true command environment. Every interaction should
             improve understanding, not add noise.
           </p>
@@ -142,7 +142,7 @@ export default function Platform() {
                 Product-grade architecture. Enterprise-ready direction.
               </h3>
               <p className="text-sm text-sky-300/55 leading-relaxed">
-                Vessels is being shaped as a premium operating platform with the structure required
+                SEXTANT is being shaped as a premium operating platform with the structure required
                 for modern adoption: clear permissions, strong UX, commercial readiness, and a
                 scalable product foundation.
               </p>
@@ -158,7 +158,7 @@ export default function Platform() {
           </h2>
           <p className="text-sky-300/55 text-base max-w-xl mx-auto mb-10 leading-relaxed">
             Request a private walkthrough to explore the product direction, core capabilities, and
-            how Vessels can evolve into a serious operational layer.
+            how SEXTANT can evolve into a serious operational layer.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button className="px-7 py-3.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-white font-semibold text-sm transition-colors">

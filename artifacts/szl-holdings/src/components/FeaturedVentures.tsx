@@ -125,7 +125,7 @@ export function FeaturedVentures() {
               maxWidth: '36rem',
             }}
           >
-            Lyte and Vessels lead the portfolio as full command surfaces. Carlota Jo operates as a
+            KORA and SEXTANT lead the portfolio as full command surfaces. Carlota Jo operates as a
             precision advisory practice.
           </p>
         </m.div>

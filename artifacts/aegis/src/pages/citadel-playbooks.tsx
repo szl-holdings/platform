@@ -553,7 +553,7 @@ const PLAYBOOKS: Playbook[] = [
     icon: Scale,
     color: '#f59e0b',
     description:
-      'Response framework for SEC investigations, subpoenas, regulatory examinations, and enforcement actions. PRISM Counsel integrated.',
+      'Response framework for SEC investigations, subpoenas, regulatory examinations, and enforcement actions. Counsel integrated.',
     executions: 5,
     successRate: 100,
     avgContainmentMin: 0,

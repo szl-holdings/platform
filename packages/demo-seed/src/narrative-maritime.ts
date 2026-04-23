@@ -66,7 +66,7 @@ export const MARITIME_NARRATIVE = {
       severity: 'critical',
       title: 'MV Soltana — AIS dark 134 min, sanctions corridor proximity',
       body: 'MV Soltana ceased AIS transmission at 2026-04-14T11:23:00Z. Reappeared 2026-04-14T13:37:00Z at a position inconsistent with expected route. Last known position: 26.4°N 56.8°E — within 18nm of Iranian territorial waters. Route deviation: 34nm eastward. OFAC screening triggered.',
-      source: 'Vessels Helmsman — AIS Telemetry',
+      source: 'SEXTANT Helmsman — AIS Telemetry',
       confidence: 0.89,
       detectedAt: '2026-04-14T13:43:00Z',
       reappearPosition: { lat: 26.4, lon: 56.8 },
@@ -133,27 +133,27 @@ export const MARITIME_NARRATIVE = {
         {
           step: 1,
           action: 'Master notified — hold at Karachi anchorage (18.8°N 67.1°E)',
-          via: 'Vessels Crew Comms Connector',
+          via: 'SEXTANT Crew Comms Connector',
         },
         {
           step: 2,
           action: 'Voyage incident report created — reference INC-2026-0414-001',
-          via: 'Alloy Workflow',
+          via: 'FORGE Workflow',
         },
         {
           step: 3,
           action: 'P&I Club notified — UK P&I, case ref P24-0887',
-          via: 'Alloy Email Connector',
+          via: 'FORGE Email Connector',
         },
         {
           step: 4,
           action: 'OFAC internal clearance review initiated — Compliance team assigned',
-          via: 'Alloy Workflow',
+          via: 'FORGE Workflow',
         },
         {
           step: 5,
           action: 'Charterer notified — ETA revised from 2026-04-15T18:00Z to 2026-04-16T06:00Z',
-          via: 'Alloy Email Connector',
+          via: 'FORGE Email Connector',
         },
       ],
       completedAt: '2026-04-14T14:15:00Z',
@@ -199,19 +199,19 @@ export const MARITIME_NARRATIVE = {
           timestamp: '2026-04-14T13:47:00Z',
           event: 'Action recommendation generated — hold at anchorage',
           actor: 'Helmsman Agent',
-          source: 'Vessels Recommendation Engine',
+          source: 'SEXTANT Recommendation Engine',
         },
         {
           timestamp: '2026-04-14T13:52:00Z',
           event: 'Recommendation approved — Captain James Wren',
           actor: 'James Wren',
-          source: 'Vessels Approval Gate',
+          source: 'SEXTANT Approval Gate',
         },
         {
           timestamp: '2026-04-14T14:15:00Z',
           event:
             'All execution steps confirmed — master notified, P&I notified, charterer notified',
-          actor: 'Alloy Workflow',
+          actor: 'FORGE Workflow',
           source: 'Execution Record',
         },
         {
@@ -229,7 +229,7 @@ export const MARITIME_NARRATIVE = {
       step: 'Dark Event Detection',
       duration: '2 min',
       narrative:
-        'James Wren opens the Vessels fleet dashboard. Helmsman has already surfaced a critical alert: MV Soltana went dark for 134 minutes and reappeared 34nm off the declared route near Iranian waters. OFAC screening is already running.',
+        'James Wren opens the SEXTANT fleet dashboard. Helmsman has already surfaced a critical alert: MV Soltana went dark for 134 minutes and reappeared 34nm off the declared route near Iranian waters. OFAC screening is already running.',
       showIn: ['vessels/fleet/dashboard', 'vessels/incidents/soltana'],
       roleSwitch: 'fleet-operator',
     },
@@ -253,7 +253,7 @@ export const MARITIME_NARRATIVE = {
       step: 'Operator Approval',
       duration: '2 min',
       narrative:
-        "James approves in 5 minutes — notes he's calling P&I directly. Alloy executes: master notified, incident report filed, P&I notified, charterer updated. Everything logged with attribution.",
+        "James approves in 5 minutes — notes he's calling P&I directly. FORGE executes: master notified, incident report filed, P&I notified, charterer updated. Everything logged with attribution.",
       showIn: ['vessels/approval-gate', 'vessels/execution/mar-001'],
       roleSwitch: 'fleet-operator',
     },

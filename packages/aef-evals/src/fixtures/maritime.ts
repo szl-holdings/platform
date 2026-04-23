@@ -5,7 +5,7 @@ export const maritimeFixtures: GoldenFixtureSet = {
   profileId: 'vessels_maritime_risk',
   domain: 'maritime',
   description:
-    'Golden retrieval fixtures for the Vessels Maritime Risk profile. Covers IMO number lookup, MMSI search, sanctions screening, dark vessel detection, and PSC detention queries.',
+    'Golden retrieval fixtures for the SEXTANT Maritime Risk profile. Covers IMO number lookup, MMSI search, sanctions screening, dark vessel detection, and PSC detention queries.',
   queries: [
     {
       queryId: 'mar-q001',

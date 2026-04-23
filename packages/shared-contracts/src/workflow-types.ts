@@ -296,7 +296,7 @@ export const STARTER_WORKFLOWS: Record<WorkflowId, WorkflowDescriptor> = {
     triggerTypes: ['manual', 'scheduled', 'api'],
     policyTier: 'medium',
     estimatedDurationMs: 60_000,
-    domainProfiles: ['Lyte', 'Aegis', 'Vessels', 'Terra'],
+    domainProfiles: ['KORA', 'PARAGON', 'SEXTANT', 'DOMAINE'],
     steps: [
       {
         stepId: 'gather_signals',
@@ -412,7 +412,7 @@ export const STARTER_WORKFLOWS: Record<WorkflowId, WorkflowDescriptor> = {
     triggerTypes: ['manual', 'api'],
     policyTier: 'medium',
     estimatedDurationMs: 40_000,
-    domainProfiles: ['Terra'],
+    domainProfiles: ['DOMAINE'],
     steps: [
       {
         stepId: 'load_property',

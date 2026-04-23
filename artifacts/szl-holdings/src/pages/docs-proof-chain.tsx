@@ -136,9 +136,9 @@ export default function DocsProofChainPage() {
               <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[
                   { label: "Word export (Counsel)", detail: "Legal document exports embed the proof chain as document metadata, preserving the decision record for file use." },
-                  { label: "Diligence packet (Terra)", detail: "Property diligence exports carry source citations and IC approval records in structured metadata." },
-                  { label: "Governance report (Aegis)", detail: "Security governance reports include the full threat assessment chain and response authorization record." },
-                  { label: "Voyage exception report (Vessels)", detail: "Maritime exception reports carry the Voyage Twin state, risk scoring basis, and operator decision record." },
+                  { label: "Diligence packet (DOMAINE)", detail: "Property diligence exports carry source citations and IC approval records in structured metadata." },
+                  { label: "Governance report (PARAGON)", detail: "Security governance reports include the full threat assessment chain and response authorization record." },
+                  { label: "Voyage exception report (SEXTANT)", detail: "Maritime exception reports carry the Voyage Twin state, risk scoring basis, and operator decision record." },
                   { label: "AI recommendations", detail: "Every recommendation generated includes inline source citations with confidence scores — visible before approval." },
                   { label: "Audit export", detail: "Audit trail exports generated via the governance API include full audit timeline references for independent verification." },
                 ].map((s) => (

@@ -127,7 +127,7 @@ export default function Layout({
             {expanded && (
               <div className="min-w-0 overflow-hidden">
                 <div className="text-nexus-cyan font-mono font-bold text-sm tracking-widest">
-                  NEXUS
+                  PRAXIS
                 </div>
                 <div className="text-[10px] text-muted-foreground/70 tracking-wide">ONE OF ONE</div>
               </div>

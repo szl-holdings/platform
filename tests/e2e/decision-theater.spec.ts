@@ -171,8 +171,8 @@ test.describe('Decision Theater — Stage 1: Signal', () => {
   });
 
   test('cross-domain threat scenario signals are displayed', async ({ page }) => {
-    await expect(page.locator('text=Aegis').first()).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=Vessels').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=PARAGON').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=SEXTANT').first()).toBeVisible({ timeout: 10000 });
   });
 });
 

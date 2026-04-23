@@ -313,7 +313,7 @@ export default function CortexIntelligenceHub() {
             </div>
             <div>
               <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em' }}>
-                CORTEX Intelligence Hub
+                APEX Intelligence Hub
               </h1>
               <p style={{ margin: 0, fontSize: 13, color: '#ffffff60' }}>
                 Cross-domain fusion engine · enterprise entity graph · Autonomous action layer ·
@@ -547,7 +547,7 @@ export default function CortexIntelligenceHub() {
                 <p
                   style={{ margin: '0 0 12px', fontSize: 13, color: '#ffffff80', lineHeight: 1.6 }}
                 >
-                  When CORTEX detects a cross-domain correlation, it autonomously drafts appropriate
+                  When APEX detects a cross-domain correlation, it autonomously drafts appropriate
                   responses — legal holds, LP notifications, insurance claims, route changes — and
                   queues them for your one-click approval. All approvals are persisted with a
                   governance audit trail. No action is taken without human sign-off.
@@ -568,7 +568,7 @@ export default function CortexIntelligenceHub() {
                 <p
                   style={{ margin: '0 0 12px', fontSize: 13, color: '#ffffff80', lineHeight: 1.6 }}
                 >
-                  Ask CORTEX any hypothetical scenario and it traces projected impact across all
+                  Ask APEX any hypothetical scenario and it traces projected impact across all
                   connected domains — maritime routes, legal obligations, insurance exposure, and
                   portfolio value — using the cross-domain entity graph and historical pattern
                   library.
@@ -593,7 +593,7 @@ export default function CortexIntelligenceHub() {
                     <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>
                       ⟳
                     </span>
-                    Generating CORTEX intelligence briefing...
+                    Generating APEX intelligence briefing...
                   </div>
                 ) : briefing ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

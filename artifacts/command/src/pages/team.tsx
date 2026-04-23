@@ -73,7 +73,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     name: 'James Okafor',
     email: 'j.okafor@szlholdings.com',
     role: 'Security Analyst',
-    team: 'Aegis SOC',
+    team: 'PARAGON SOC',
     status: 'active',
     lastSeen: '2h ago',
     apps: ['PARAGON', 'Command'],
@@ -139,7 +139,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
 const FALLBACK_TEAMS = [
   { name: 'Executive', count: 1, color: '#f59e0b' },
   { name: 'Maritime Ops', count: 2, color: '#0ea5e9' },
-  { name: 'Aegis SOC', count: 1, color: '#ef4444' },
+  { name: 'PARAGON SOC', count: 1, color: '#ef4444' },
   { name: 'Legal', count: 1, color: '#a855f7' },
   { name: 'DOMAINE', count: 1, color: '#22c55e' },
   { name: 'Finance', count: 1, color: '#f97316' },
@@ -150,7 +150,7 @@ const ROLES = [
   { name: 'Super Admin', description: 'Full access to all apps and settings', count: 1 },
   { name: 'Operations Lead', description: 'Manage domain operations, no billing access', count: 2 },
   { name: 'Legal Counsel', description: 'PRISM full access, read-only on others', count: 1 },
-  { name: 'Security Analyst', description: 'Aegis full access, read-only on others', count: 1 },
+  { name: 'Security Analyst', description: 'PARAGON full access, read-only on others', count: 1 },
   { name: 'Analyst', description: 'Read-only access to assigned domains', count: 3 },
   { name: 'Read Only', description: 'View-only, no actions', count: 1 },
 ];

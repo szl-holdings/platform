@@ -7,7 +7,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 const QUICK_LINKS = [
   { label: "Platform overview", href: "/platform" },
-  { label: "Lyte — Decision intelligence", href: "/lyte" },
+  { label: "KORA — Decision intelligence", href: "/lyte" },
   { label: "Request a demo", href: "/demo" },
   { label: "Trust Center", href: "/trust" },
   { label: "About the company", href: "/company" },

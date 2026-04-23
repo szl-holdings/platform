@@ -334,7 +334,7 @@ export default function MitreAttackPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[9px] font-mono text-red-400/50 uppercase tracking-widest">
-              Aegis / MITRE
+              PARAGON / MITRE
             </span>
             <span className="text-red-500/20">·</span>
             <span className="text-[9px] font-mono text-muted-foreground/40 uppercase tracking-widest">

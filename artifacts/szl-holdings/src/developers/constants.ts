@@ -221,20 +221,20 @@ export const WEBHOOK_EVENTS = [
   { event: 'project.updated', description: 'A project was updated (metadata or status).' },
   {
     event: 'workflow.run.completed',
-    description: 'An Alloy workflow run reached a terminal state.',
+    description: 'An FORGE workflow run reached a terminal state.',
   },
   {
     event: 'workflow.run.failed',
-    description: 'An Alloy workflow run encountered an unrecoverable error.',
+    description: 'An FORGE workflow run encountered an unrecoverable error.',
   },
   {
     event: 'signal.ingested',
-    description: 'An external signal was accepted by the Alloy ingest pipeline.',
+    description: 'An external signal was accepted by the FORGE ingest pipeline.',
   },
   { event: 'vessel.alert.triggered', description: 'A vessel tracking alert condition was met.' },
   {
     event: 'security.incident.created',
-    description: 'A new security incident was opened in Aegis SOC.',
+    description: 'A new security incident was opened in PARAGON SOC.',
   },
   { event: 'billing.invoice.paid', description: 'A billing invoice was successfully settled.' },
   { event: 'user.role.changed', description: "A user's role assignment was modified." },

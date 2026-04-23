@@ -57,7 +57,7 @@ export const PLATFORM_PRODUCTS: Record<string, PlatformProduct> = {
   },
   pulse: {
     id: 'pulse',
-    name: 'Pulse',
+    name: 'LUMINA',
     tagline: 'AI executive briefing, intelligence-community standard',
     description:
       'Multi-agent AI briefing system synthesizing cross-domain operational signals into executive intelligence reports.',
@@ -73,7 +73,7 @@ export const PLATFORM_PRODUCTS: Record<string, PlatformProduct> = {
   },
   aegis: {
     id: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     tagline: 'Defense and intelligence operations',
     description:
       'SOC command surface with live threat intelligence feeds and governed incident response.',
@@ -89,7 +89,7 @@ export const PLATFORM_PRODUCTS: Record<string, PlatformProduct> = {
   },
   terra: {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     tagline: 'Real estate intelligence for the governed era',
     description:
       'NYC-first property intelligence platform with live distress data, underwriting copilot, and spatial intelligence.',
@@ -108,7 +108,7 @@ export const PLATFORM_PRODUCTS: Record<string, PlatformProduct> = {
   },
   vessels: {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     tagline: 'Maritime intelligence with governance built in',
     description:
       'Fleet command, voyage economics, sanctions screening, and dark vessel detection for maritime operators.',
@@ -131,20 +131,20 @@ export const PLATFORM_PRODUCTS: Record<string, PlatformProduct> = {
     name: 'Command',
     tagline: 'Unified operational command',
     description:
-      'Merged Lyte + Imperium command surface for cross-domain real-time monitoring and governed decision execution.',
+      'Merged KORA + Imperium command surface for cross-domain real-time monitoring and governed decision execution.',
     status: 'partial',
     previewPath: '/command/',
     audience: 'Platform operators, internal command teams',
     liveDataSources: ['api-server governed decision loop'],
     seedDataModules: ['dashboard badge counts', 'business KPIs', 'cross-domain exceptions'],
     knownBlockers: [
-      'CORTEX cross-domain badge counts not wired to live API',
+      'APEX cross-domain badge counts not wired to live API',
       'Push notification deep linking not implemented',
     ],
   },
   'szl-holdings-mobile': {
     id: 'szl-holdings-mobile',
-    name: 'CORTEX Mobile',
+    name: 'APEX Mobile',
     tagline: 'Command in your pocket',
     description:
       'iOS and Android command app with biometric authentication and offline-capable sync.',
@@ -160,7 +160,7 @@ export const PLATFORM_PRODUCTS: Record<string, PlatformProduct> = {
   },
   'mockup-sandbox': {
     id: 'mockup-sandbox',
-    name: 'NEXUS',
+    name: 'PRAXIS',
     tagline: 'Internal AI research prototype',
     description:
       'Engineering and design prototype for AI-driven pattern absorption and orchestration. Not a customer-facing product.',

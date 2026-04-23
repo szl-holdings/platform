@@ -179,7 +179,7 @@ export default function VesselsPulse() {
       <ParticleField accentColor="#06b6d4" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <PulseHeader
-          title="Fleet Command Pulse"
+          title="Fleet Command LUMINA"
           subtitle={`Maritime operations — ${cargoVolume.toLocaleString()} TEU in transit · 8 vessels tracked`}
           accentColor="#06b6d4"
         />
@@ -213,7 +213,7 @@ export default function VesselsPulse() {
         </m.div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
           <PulseMetricCard
-            label="Active Vessels"
+            label="Active SEXTANT"
             value={8}
             icon={Ship}
             color="#06b6d4"
@@ -408,7 +408,7 @@ export default function VesselsPulse() {
             className="text-[9px] uppercase tracking-[0.25em]"
             style={{ color: 'rgba(255,255,255,0.08)' }}
           >
-            Vessels — Fleet Command Intelligence — Maritime Pulse
+            SEXTANT — Fleet Command Intelligence — Maritime LUMINA
           </p>
         </div>
       </div>

@@ -338,10 +338,10 @@ export function useDecisionEngine() {
         title: 'Initiate port security lockdown and divert vessel to secondary anchorage',
         confidence: 0.82,
         modelId: 'szl-threat-correlation-v3',
-        modelProvider: 'SZL CORTEX',
+        modelProvider: 'SZL APEX',
         correlationId,
         actions: [
-          `Isolate ${aegisSignal.payload.target} from OT network (Aegis automated response)`,
+          `Isolate ${aegisSignal.payload.target} from OT network (PARAGON automated response)`,
           `Issue HOLD order for ${vesselsSignal.payload.vessel} via VTS channel 14`,
           'Deploy incident response team to port control room',
           `Notify flag state authority (${vesselsSignal.payload.flag} MDA)`,
@@ -400,7 +400,7 @@ export function useDecisionEngine() {
           action: `Isolate ${aegisSignal.payload.target}`,
           status: 'completed',
           duration: '12s',
-          executor: 'Aegis Automated Response',
+          executor: 'PARAGON Automated Response',
           triggeredAt: now,
         },
         {

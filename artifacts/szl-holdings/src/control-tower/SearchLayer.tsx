@@ -165,8 +165,8 @@ export function SearchLayer() {
             Search the entire intelligence fabric
           </p>
           <p className="text-xs text-muted-foreground max-w-md mx-auto">
-            Query signals, decisions, audit trail, and artifacts from Aegis, Vessels, Terra, Lyte,
-            PRISM, and Alloy simultaneously
+            Query signals, decisions, audit trail, and artifacts from PARAGON, SEXTANT, DOMAINE, KORA,
+            PRISM, and FORGE simultaneously
           </p>
         </div>
       )}

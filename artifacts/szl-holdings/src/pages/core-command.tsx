@@ -127,7 +127,7 @@ const platformLinks = [
     color: '#f59e0b',
   },
   {
-    name: 'Alloy Creative',
+    name: 'FORGE Creative',
     role: 'CREATE',
     subtitle: 'Creative Workflows',
     href: '/alloy/creative',
@@ -572,7 +572,7 @@ export default function CoreCommandCenter() {
                 <SummaryCard
                   label="Distress Properties"
                   value={t?.total_distress_properties ?? '—'}
-                  sub="Terra — NYC + NY"
+                  sub="DOMAINE — NYC + NY"
                   icon={Building}
                   color="#0ea5e9"
                   loading={metricsLoading}
@@ -596,7 +596,7 @@ export default function CoreCommandCenter() {
                 <SummaryCard
                   label="Open Vulnerabilities"
                   value={openVulns}
-                  sub="Aegis — Active"
+                  sub="PARAGON — Active"
                   icon={Shield}
                   color="#ef4444"
                   loading={metricsLoading}
@@ -782,13 +782,13 @@ export default function CoreCommandCenter() {
                   <div className="space-y-1">
                     {[
                       {
-                        label: 'Terra — Property Intelligence',
+                        label: 'DOMAINE — Property Intelligence',
                         href: '/terra/',
                         color: '#4d7c0f',
                         icon: Building,
                       },
                       {
-                        label: 'Aegis — Defense & Intelligence',
+                        label: 'PARAGON — Defense & Intelligence',
                         href: '/aegis/',
                         color: '#6366f1',
                         icon: Shield,
@@ -800,13 +800,13 @@ export default function CoreCommandCenter() {
                         icon: Globe,
                       },
                       {
-                        label: 'Vessels — Maritime',
+                        label: 'SEXTANT — Maritime',
                         href: '/vessels/',
                         color: '#3b82f6',
                         icon: Ship,
                       },
                       {
-                        label: 'Alloy — Creative Workflows',
+                        label: 'FORGE — Creative Workflows',
                         href: '/alloy/creative',
                         color: '#ec4899',
                         icon: Eye,
@@ -855,7 +855,7 @@ export default function CoreCommandCenter() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-base font-bold font-display">
-                  Alloy Intelligence Recommendations
+                  FORGE Intelligence Recommendations
                 </h2>
                 <p className="text-[12px] text-muted-foreground mt-0.5">
                   Cross-platform · All entity types · Explainable scoring

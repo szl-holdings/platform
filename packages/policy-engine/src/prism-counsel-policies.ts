@@ -5,7 +5,7 @@ const _now = Date.now();
 export const PRISM_COUNSEL_POLICIES: Policy[] = [
   {
     id: 'prism-counsel.matter-wall',
-    name: 'PRISM Counsel — Matter Wall Access Control',
+    name: 'Counsel — Matter Wall Access Control',
     description:
       'Enforces ethical screens between matters to prevent conflict of interest. ' +
       'Aligns with ABA Rules of Professional Conduct 1.7 and 1.10.',

@@ -106,7 +106,7 @@ const AGGREGATE_KPIS = [
     accent: '#f59e0b',
   },
   {
-    label: 'Fleet Vessels',
+    label: 'Fleet SEXTANT',
     value: '847',
     change: '+5.1%',
     up: true,
@@ -145,7 +145,7 @@ const ACTIONS = [
     title: 'Resolve C2 beacon alert — APT29 infrastructure detected',
     urgency: 'immediate' as const,
     owner: 'J. Chen',
-    team: 'Aegis SOC',
+    team: 'PARAGON SOC',
     due: '30m',
     value: 2400000,
   },
@@ -154,7 +154,7 @@ const ACTIONS = [
     title: 'Approve vessel route deviation — MV Pacific Horizon sanctions zone',
     urgency: 'immediate' as const,
     owner: 'S. Park',
-    team: 'Vessels Ops',
+    team: 'SEXTANT Ops',
     due: '1h',
     value: 850000,
   },
@@ -172,16 +172,16 @@ const ACTIONS = [
     title: 'Review distress scoring model update — Brooklyn submarket',
     urgency: 'today' as const,
     owner: 'M. Thompson',
-    team: 'Terra Engine',
+    team: 'DOMAINE Engine',
     due: 'EOD',
     value: 1200000,
   },
   {
     id: 'A-5',
-    title: 'Deploy Alloy workflow v3.2 — cross-platform signal routing',
+    title: 'Deploy FORGE workflow v3.2 — cross-platform signal routing',
     urgency: 'this_week' as const,
     owner: 'K. Nguyen',
-    team: 'Alloy Core',
+    team: 'FORGE Core',
     due: 'Wed',
     value: 0,
   },
@@ -704,7 +704,7 @@ function SectionHeader({
 export default function NexusCommandPage() {
   const [now, setNow] = useState(new Date());
   useEffect(() => {
-    document.title = 'Nexus Command — SZL Holdings';
+    document.title = 'PRAXIS Command — SZL Holdings';
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
@@ -798,7 +798,7 @@ export default function NexusCommandPage() {
                         lineHeight: 1,
                       }}
                     >
-                      Nexus Command
+                      PRAXIS Command
                     </h1>
                     <p style={{ fontSize: '11px', color: 'hsl(210,5%,40%)', marginTop: '2px' }}>
                       Unified ecosystem intelligence · {now.toLocaleTimeString()}
@@ -1105,13 +1105,13 @@ export default function NexusCommandPage() {
                       {
                         insight:
                           'Sanctions risk elevated for 3 vessels transiting Red Sea corridor',
-                        source: 'Vessels + Aegis',
+                        source: 'SEXTANT + PARAGON',
                         accent: '#38bdf8',
                       },
                       {
                         insight:
                           'Brooklyn distress score up 12% — 4 new acquisition targets identified',
-                        source: 'Terra Engine',
+                        source: 'DOMAINE Engine',
                         accent: '#4ade80',
                       },
                       {
@@ -1121,8 +1121,8 @@ export default function NexusCommandPage() {
                       },
                       {
                         insight:
-                          'Cross-platform signal: insurance fraud pattern detected across Terra + PRISM',
-                        source: 'Alloy Correlation',
+                          'Cross-platform signal: insurance fraud pattern detected across DOMAINE + PRISM',
+                        source: 'FORGE Correlation',
                         accent: '#818cf8',
                       },
                     ].map((item, idx) => (

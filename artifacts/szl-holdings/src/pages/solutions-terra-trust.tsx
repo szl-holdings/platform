@@ -8,7 +8,7 @@ const GOVERNANCE_CONTROLS = [
   {
     icon: Eye,
     title: "Public data sourcing only",
-    body: "Terra ingests exclusively from public government APIs — PLUTO, FEMA, census, tax assessor, permit databases. No scraped, purchased, or user-contributed proprietary data enters the pipeline without explicit provenance tagging.",
+    body: "DOMAINE ingests exclusively from public government APIs — PLUTO, FEMA, census, tax assessor, permit databases. No scraped, purchased, or user-contributed proprietary data enters the pipeline without explicit provenance tagging.",
   },
   {
     icon: Database,
@@ -38,8 +38,8 @@ const DATA_SOURCES = [
 
 export default function SolutionsTerraTrustPage() {
   const __pageMeta = usePageMeta({
-    title: "Terra Trust & Data Governance · SZL Holdings",
-    description: "How Terra sources, processes, and governs real estate intelligence data with full provenance, public-data-only sourcing, and audit-ready pipelines.",
+    title: "DOMAINE Trust & Data Governance · SZL Holdings",
+    description: "How DOMAINE sources, processes, and governs real estate intelligence data with full provenance, public-data-only sourcing, and audit-ready pipelines.",
     canonical: "https://szlholdings.com/solutions/terra/trust",
   });
 
@@ -52,13 +52,13 @@ export default function SolutionsTerraTrustPage() {
         <section className="max-w-5xl mx-auto px-6 pt-32 pb-16">
           <div className="flex items-center gap-2 mb-4">
             <Building2 className="w-5 h-5" style={{ color: "hsl(140,50%,38%)" }} />
-            <span className="text-[11px] font-medium uppercase tracking-widest" style={{ color: "hsl(140,50%,38%)" }}>Terra · Trust</span>
+            <span className="text-[11px] font-medium uppercase tracking-widest" style={{ color: "hsl(140,50%,38%)" }}>DOMAINE · Trust</span>
           </div>
           <h1 className="text-4xl font-bold text-slate-100 leading-tight mb-4">
             Transparent data. Traceable intelligence.
           </h1>
           <p className="text-base text-slate-400 max-w-2xl leading-relaxed mb-8">
-            Terra provides real estate intelligence built entirely on public government data sources with full provenance tracking. Every signal, score, and recommendation traces back to its source — no proprietary black boxes.
+            DOMAINE provides real estate intelligence built entirely on public government data sources with full provenance tracking. Every signal, score, and recommendation traces back to its source — no proprietary black boxes.
           </p>
           <div className="flex items-center gap-3">
             <Link href="/solutions/terra">
@@ -77,7 +77,7 @@ export default function SolutionsTerraTrustPage() {
         <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.06]">
           <h2 className="text-xl font-semibold text-slate-100 mb-2">Governance Controls</h2>
           <p className="text-sm text-slate-400 max-w-2xl mb-8">
-            How Terra ensures data integrity, access isolation, and auditability across the real estate intelligence pipeline.
+            How DOMAINE ensures data integrity, access isolation, and auditability across the real estate intelligence pipeline.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {GOVERNANCE_CONTROLS.map((c) => (
@@ -95,7 +95,7 @@ export default function SolutionsTerraTrustPage() {
         <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.06]">
           <h2 className="text-xl font-semibold text-slate-100 mb-2">Verified Data Sources</h2>
           <p className="text-sm text-slate-400 max-w-2xl mb-8">
-            Terra ingests exclusively from authoritative public data sources. Every record includes source attribution and retrieval metadata.
+            DOMAINE ingests exclusively from authoritative public data sources. Every record includes source attribution and retrieval metadata.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {DATA_SOURCES.map((s) => (
@@ -119,7 +119,7 @@ export default function SolutionsTerraTrustPage() {
             </p>
             <Link href="/solutions/terra">
               <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer" style={{ borderColor: "hsla(140,50%,38%,0.2)", color: "hsl(140,50%,38%)", background: "hsla(140,50%,38%,0.08)", border: "1px solid hsla(140,50%,38%,0.2)" }}>
-                Explore Terra <ArrowRight className="w-4 h-4" />
+                Explore DOMAINE <ArrowRight className="w-4 h-4" />
               </span>
             </Link>
           </div>

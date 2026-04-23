@@ -16,7 +16,7 @@ const TEXT = {
   tertiary: 'rgba(255,255,255,0.28)',
   muted: 'rgba(255,255,255,0.14)',
 };
-const ALLOY = '#4B8BDB';
+const FORGE = '#4B8BDB';
 const ALLOY_DIM = 'rgba(75,139,219,0.12)';
 
 interface WorkflowTemplate {
@@ -173,7 +173,7 @@ const TEMPLATES: WorkflowTemplate[] = [
 function TriggerBadge({ trigger }: { trigger: string }) {
   const cfg: Record<string, { color: string; label: string }> = {
     scheduled: { color: '#8b7ac8', label: 'Scheduled' },
-    interval: { color: ALLOY, label: 'Interval' },
+    interval: { color: FORGE, label: 'Interval' },
     manual: { color: TEXT.tertiary, label: 'Manual' },
     signal: { color: '#c8953c', label: 'Signal-triggered' },
   };
@@ -204,12 +204,12 @@ export default function AlloyWorkflowTemplatesPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Workflow className="w-3.5 h-3.5" style={{ color: ALLOY }} />
+            <Workflow className="w-3.5 h-3.5" style={{ color: FORGE }} />
             <span
               className="text-[9px] font-mono uppercase tracking-widest"
-              style={{ color: ALLOY }}
+              style={{ color: FORGE }}
             >
-              Alloy
+              FORGE
             </span>
           </div>
           <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>
@@ -221,7 +221,7 @@ export default function AlloyWorkflowTemplatesPage() {
         </div>
         <button
           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[9px] font-medium shrink-0"
-          style={{ background: ALLOY_DIM, border: `1px solid ${ALLOY}30`, color: ALLOY }}
+          style={{ background: ALLOY_DIM, border: `1px solid ${FORGE}30`, color: FORGE }}
         >
           <Plus className="w-3 h-3" /> New Template
         </button>
@@ -238,7 +238,7 @@ export default function AlloyWorkflowTemplatesPage() {
           {
             label: 'Total Runs',
             value: TEMPLATES.reduce((s, t) => s + t.runCount, 0),
-            color: ALLOY,
+            color: FORGE,
           },
           {
             label: 'Approval Required',
@@ -270,7 +270,7 @@ export default function AlloyWorkflowTemplatesPage() {
             className="px-3 py-2 text-[9px] font-medium uppercase tracking-widest capitalize transition-colors"
             style={{
               color: filter === f ? TEXT.primary : TEXT.tertiary,
-              borderBottom: filter === f ? `2px solid ${ALLOY}` : '2px solid transparent',
+              borderBottom: filter === f ? `2px solid ${FORGE}` : '2px solid transparent',
               marginBottom: '-1px',
             }}
           >
@@ -365,7 +365,7 @@ export default function AlloyWorkflowTemplatesPage() {
                           <div key={i} className="flex items-center gap-2 text-[10px]">
                             <span
                               className="w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-mono font-bold shrink-0"
-                              style={{ background: ALLOY_DIM, color: ALLOY }}
+                              style={{ background: ALLOY_DIM, color: FORGE }}
                             >
                               {i + 1}
                             </span>
@@ -379,8 +379,8 @@ export default function AlloyWorkflowTemplatesPage() {
                         className="flex items-center gap-1 px-2.5 py-1 rounded text-[9px] font-medium"
                         style={{
                           background: ALLOY_DIM,
-                          border: `1px solid ${ALLOY}30`,
-                          color: ALLOY,
+                          border: `1px solid ${FORGE}30`,
+                          color: FORGE,
                         }}
                       >
                         <Play className="w-2.5 h-2.5" /> Run Now

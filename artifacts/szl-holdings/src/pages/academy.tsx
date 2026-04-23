@@ -29,7 +29,7 @@ const LEARNING_PATHS = [
   {
     id: "platform-foundations",
     title: "Platform Foundations",
-    description: "Understand the SZL architecture: signal ingestion, domain packs, Alloy execution fabric, and proof chain.",
+    description: "Understand the SZL architecture: signal ingestion, domain packs, FORGE execution fabric, and proof chain.",
     icon: Layers,
     duration: "45 min",
     modules: 6,
@@ -41,7 +41,7 @@ const LEARNING_PATHS = [
   },
   {
     id: "aegis-primer",
-    title: "Aegis Security Operations",
+    title: "PARAGON Security Operations",
     description: "SOC workflows, SOAR automation, threat intelligence feeds, and incident response playbooks.",
     icon: ShieldCheck,
     duration: "60 min",
@@ -54,7 +54,7 @@ const LEARNING_PATHS = [
   },
   {
     id: "vessels-maritime",
-    title: "Vessels Maritime Intelligence",
+    title: "SEXTANT Maritime Intelligence",
     description: "Fleet tracking, AIS anomaly detection, route risk scoring, dark vessel identification, and sanctions compliance.",
     icon: Ship,
     duration: "50 min",
@@ -67,7 +67,7 @@ const LEARNING_PATHS = [
   },
   {
     id: "terra-real-estate",
-    title: "Terra Real Estate Intelligence",
+    title: "DOMAINE Real Estate Intelligence",
     description: "Property twin model, distress detection, ownership analysis, deal pipeline management, and diligence workflows.",
     icon: Building2,
     duration: "55 min",
@@ -80,7 +80,7 @@ const LEARNING_PATHS = [
   },
   {
     id: "lyte-observability",
-    title: "Lyte Business Observability",
+    title: "KORA Business Observability",
     description: "Revenue stall detection, approval aging, ownership drift, KPI monitoring, and executive reporting.",
     icon: BarChart3,
     duration: "40 min",
@@ -93,7 +93,7 @@ const LEARNING_PATHS = [
   },
   {
     id: "alloy-execution",
-    title: "Alloy Execution Fabric",
+    title: "FORGE Execution Fabric",
     description: "Workflow orchestration, connector mesh, governance audit, human-in-the-loop gates, and decision lineage.",
     icon: Play,
     duration: "50 min",

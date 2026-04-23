@@ -76,7 +76,7 @@ const platformRegistry = [
     owner: 'Security Engineering',
   },
   {
-    name: 'SZL Cortex',
+    name: 'SZL APEX',
     slug: 'inca',
     type: 'AI Research Command',
     tier: 'Platform',
@@ -100,7 +100,7 @@ const platformRegistry = [
     owner: 'Real Estate Ops',
   },
   {
-    name: 'Aegis Operations',
+    name: 'PARAGON Operations',
     slug: 'msp',
     type: 'Incident Command',
     tier: 'Platform',
@@ -297,7 +297,7 @@ const featureFlags = [
   {
     key: 'predictive_scoring',
     label: 'Predictive Risk Scoring',
-    scope: 'Aegis, Vessels',
+    scope: 'PARAGON, SEXTANT',
     enabled: true,
     rollout: 100,
     owner: 'Platform',
@@ -313,7 +313,7 @@ const featureFlags = [
   {
     key: 'multi_agent_orchestration',
     label: 'Multi-Agent Orchestration',
-    scope: 'Alloy, SZL Cortex',
+    scope: 'FORGE, SZL APEX',
     enabled: true,
     rollout: 60,
     owner: 'AI Team',
@@ -329,7 +329,7 @@ const featureFlags = [
   {
     key: 'advanced_analytics',
     label: 'Advanced Analytics Export',
-    scope: 'Lyte, Terra',
+    scope: 'KORA, DOMAINE',
     enabled: false,
     rollout: 0,
     owner: 'Analytics',
@@ -337,7 +337,7 @@ const featureFlags = [
   {
     key: 'voice_interface',
     label: 'Voice Command Interface',
-    scope: 'Aegis Operations, Aegis',
+    scope: 'PARAGON Operations, PARAGON',
     enabled: false,
     rollout: 0,
     owner: 'AI Team',
@@ -365,7 +365,7 @@ const auditLog = [
     id: 'AUD-2840',
     actor: 'Platform CI',
     action: 'Deployment completed',
-    target: 'Vessels v3.1.2 → production',
+    target: 'SEXTANT v3.1.2 → production',
     time: '2 hr ago',
     severity: 'info',
   },
@@ -413,7 +413,7 @@ const auditLog = [
     id: 'AUD-2834',
     actor: 'Platform CI',
     action: 'Deployment completed',
-    target: 'Alloy v3.8.0 → production',
+    target: 'FORGE v3.8.0 → production',
     time: '3 days ago',
     severity: 'info',
   },

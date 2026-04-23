@@ -15,7 +15,7 @@ export class LegalMatterDemoAdapter implements LegalMatterConnector {
     connectorName: 'Legal Matter Demo Connector',
     category: 'legal-matter',
     version: '1.0.0',
-    description: 'Synthetic legal matter deadlines and retainer signals for PRISM Counsel',
+    description: 'Synthetic legal matter deadlines and retainer signals for Counsel',
     synthetic: true,
   };
 

@@ -233,14 +233,14 @@ const DOMAIN_FALLBACK_INSIGHTS: Record<InsightDomain, AIInsight[]> = {
   forge: [
     {
       id: 'forge-1',
-      title: 'Portfolio Risk Alert — Vessels Concentration',
+      title: 'Portfolio Risk Alert — SEXTANT Concentration',
       summary:
         'Maritime portfolio concentration at 42% exceeds strategic target of 35%. Recent route risk elevation compounds exposure.',
       confidence: 0.81,
       severity: 'medium',
       domain: 'forge',
       recommendedAction:
-        'Review rebalancing options with relationship manager. Consider Terra allocation increase.',
+        'Review rebalancing options with relationship manager. Consider DOMAINE allocation increase.',
       relatedEntities: ['Maritime Portfolio', 'Q2 Rebalancing Plan'],
       generatedAt: new Date(Date.now() - 45 * 60000),
       agentId: 'beacon',

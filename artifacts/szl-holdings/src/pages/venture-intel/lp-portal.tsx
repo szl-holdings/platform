@@ -42,25 +42,25 @@ const QUARTERLY_NARRATIVES = [
   {
     quarter: "Q1 2026",
     generated: "April 14, 2026",
-    headline: "Portfolio velocity accelerates across three verticals — Lyte NRR breaks 124% threshold",
-    narrative: `This quarter marked a pivotal inflection in portfolio-wide performance. Lyte crossed the 124% NRR threshold, a milestone that signals genuine product-led expansion mechanics. When NRR exceeds 120%, new customer acquisition becomes less critical to growth — the installed base compounds on its own. Atlas has upgraded Lyte's trajectory model from "growth" to "hypergrowth."
+    headline: "Portfolio velocity accelerates across three verticals — KORA NRR breaks 124% threshold",
+    narrative: `This quarter marked a pivotal inflection in portfolio-wide performance. KORA crossed the 124% NRR threshold, a milestone that signals genuine product-led expansion mechanics. When NRR exceeds 120%, new customer acquisition becomes less critical to growth — the installed base compounds on its own. Atlas has upgraded KORA's trajectory model from "growth" to "hypergrowth."
 
-Vessels posted its strongest quarterly result since inception, driven by IMO compliance deadlines pulling forward enterprise contracts. The regulatory tailwind we identified in the Q4 2024 Atlas report is materializing on schedule.
+SEXTANT posted its strongest quarterly result since inception, driven by IMO compliance deadlines pulling forward enterprise contracts. The regulatory tailwind we identified in the Q4 2024 Atlas report is materializing on schedule.
 
 PRISM matter volume grew 22% quarter-over-quarter, driven by the Governed review backlog compression engine reducing attorney hours by an average of 31%. This created a new buyer motion we're tracking as "hours-freed budget transfer" — surplus attorney capacity being redirected to new PRISM capabilities.
 
-Capital efficiency remains a portfolio-wide concern for Aegis and Terra. Both companies are in the top quartile of their cohort for market position but are burning above plan. The cross-portfolio synergy initiatives with Vessels (cyber bundle) and PRISM (distress-to-litigation) are the highest-leverage CAC reduction plays available without additional capital.
+Capital efficiency remains a portfolio-wide concern for PARAGON and Terra. Both companies are in the top quartile of their cohort for market position but are burning above plan. The cross-portfolio synergy initiatives with SEXTANT (cyber bundle) and PRISM (distress-to-litigation) are the highest-leverage CAC reduction plays available without additional capital.
 
 Carlota Jo continues to function as the portfolio's highest-return, lowest-risk anchor. At 62% margins and >95% retention, it requires minimal capital and contributes strategic UHNW relationship access to all other portfolio companies.`,
-    signals: ["Lyte NRR > 124%", "Vessels IMO tailwind", "PRISM matter volume +22%", "Aegis CAC above target"],
+    signals: ["KORA NRR > 124%", "SEXTANT IMO tailwind", "PRISM matter volume +22%", "PARAGON CAC above target"],
   },
   {
     quarter: "Q4 2025",
     generated: "January 14, 2026",
     headline: "Cross-portfolio synergy pipeline reaches $15.6M — Aegis-Vessels bundle closes first enterprise deal",
-    narrative: `The Aegis-Vessels maritime cyber bundle closed its first enterprise deal in Q4 — a $480K annual contract with a major dry bulk operator. This validates the synergy thesis that drove our Q2 capital allocation model and establishes a replicable sales motion. The technical integration (Vessels AIS feeds into Aegis threat detection engine) is now production-grade.
+    narrative: `The Aegis-Vessels maritime cyber bundle closed its first enterprise deal in Q4 — a $480K annual contract with a major dry bulk operator. This validates the synergy thesis that drove our Q2 capital allocation model and establishes a replicable sales motion. The technical integration (SEXTANT AIS feeds into PARAGON threat detection engine) is now production-grade.
 
-Portfolio NAV grew 28 index points in Q4 on a base of 218, representing the strongest absolute NAV growth quarter in the fund's history. The combination of Lyte expansion revenue, Vessels contract acceleration, and PRISM matter volume created a compounding effect that models had projected for Q2 2026 — achieved one quarter ahead.`,
+Portfolio NAV grew 28 index points in Q4 on a base of 218, representing the strongest absolute NAV growth quarter in the fund's history. The combination of KORA expansion revenue, SEXTANT contract acceleration, and PRISM matter volume created a compounding effect that models had projected for Q2 2026 — achieved one quarter ahead.`,
     signals: ["Aegis-Vessels first enterprise deal", "Portfolio NAV +28 points", "Synergy pipeline $15.6M"],
   },
 ];

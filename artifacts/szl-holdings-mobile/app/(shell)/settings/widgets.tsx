@@ -326,7 +326,7 @@ export default function WidgetConfigScreen() {
         >
           <Feather name="smartphone" size={14} color={colors.mutedForeground} />
           <Text style={[styles.noteText, { color: colors.mutedForeground }]}>
-            Add CORTEX widgets to your home screen via the long-press menu on iOS or widget library
+            Add APEX widgets to your home screen via the long-press menu on iOS or widget library
             on Android.
           </Text>
         </View>

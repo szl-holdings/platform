@@ -740,7 +740,7 @@ export default function ResilienceScorecardPage() {
       >
         <Link href="/dashboard">
           <span className="text-sm font-bold" style={{ color: TEXT }}>
-            Sentra
+            TENAX
           </span>
         </Link>
         <div className="flex items-center gap-4">

@@ -81,7 +81,7 @@ const FALLBACK_SLAS: SLADefinition[] = [
     breach: true,
     lastBreach: '1h ago',
     window: 'Rolling 24h',
-    owner: 'Lyte Eng Team',
+    owner: 'KORA Eng Team',
   },
   {
     id: 's4',

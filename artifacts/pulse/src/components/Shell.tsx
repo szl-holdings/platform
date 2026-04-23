@@ -106,7 +106,7 @@ export default function Shell({ children }: { children: ReactNode }) {
                   letterSpacing: '-0.01em',
                 }}
               >
-                Pulse
+                LUMINA
               </div>
               <div
                 style={{
@@ -248,7 +248,7 @@ export default function Shell({ children }: { children: ReactNode }) {
             </span>
           </div>
           <span style={{ fontSize: '0.62rem', color: 'var(--pulse-text-muted)' }}>
-            Alloy v3.1 · Multi-Agent Synthesis
+            FORGE v3.1 · Multi-Agent Synthesis
           </span>
         </div>
 

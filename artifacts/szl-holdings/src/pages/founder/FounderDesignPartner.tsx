@@ -35,11 +35,11 @@ const WHAT_YOU_GET = [
 ];
 
 const PRODUCTS = [
-  'Lyte — Decision Intelligence',
-  'Alloy — Execution Fabric',
-  'Vessels — Maritime Intelligence',
-  'Terra — Real Estate Intelligence',
-  'Aegis — Defense & Intelligence',
+  'KORA — Decision Intelligence',
+  'FORGE — Execution Fabric',
+  'SEXTANT — Maritime Intelligence',
+  'DOMAINE — Real Estate Intelligence',
+  'PARAGON — Defense & Intelligence',
   'Counsel — Legal Command',
   'Not sure yet',
 ];

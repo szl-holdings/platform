@@ -87,11 +87,11 @@ export const SCENE_CAPTIONS: SceneCaptions = {
     },
     { startMs: 10000, endMs: 12500, text: 'Carlota Jo — private advisory, judgment-led.' },
     { startMs: 12500, endMs: 15000, text: 'TENAX — cyber posture under guardian approval.' },
-    { startMs: 15000, endMs: 17500, text: 'Lyte — decision intelligence with confidence scores.' },
+    { startMs: 15000, endMs: 17500, text: 'KORA — decision intelligence with confidence scores.' },
     {
       startMs: 17500,
       endMs: 20000,
-      text: 'PRISM Counsel — legal exposure surfaced before crisis.',
+      text: 'Counsel — legal exposure surfaced before crisis.',
     },
     {
       startMs: 20000,

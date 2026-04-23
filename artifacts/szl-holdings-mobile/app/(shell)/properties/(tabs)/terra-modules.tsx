@@ -222,7 +222,7 @@ export default function TerraModulesTab() {
       >
         <View style={[styles.header, { paddingTop: topPad + 12 }]}>
           <View>
-            <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · MODULES</Text>
+            <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>DOMAINE · MODULES</Text>
             <Text style={[styles.title, { color: colors.cream }]}>Asset Intelligence</Text>
           </View>
           <ProvenanceChip status={provenanceStatus} />

@@ -10,7 +10,7 @@ const entries = [
     version: "v3.8.0",
     date: "March 28, 2026",
     type: "minor",
-    highlight: "Aegis XDR Console + Lyte Anomaly Detection launch",
+    highlight: "PARAGON XDR Console + KORA Anomaly Detection launch",
     changes: [
       { type: "feature", text: "Aegis: Unified XDR Console with cross-source alert correlation and entity risk scoring" },
       { type: "feature", text: "Aegis: Threat Hunting Workbench with KQL-style query builder and campaign management" },
@@ -24,13 +24,13 @@ const entries = [
     version: "v3.7.0",
     date: "March 12, 2026",
     type: "minor",
-    highlight: "Terra Portfolio Performance + Aegis Operations RMM Console launch",
+    highlight: "DOMAINE Portfolio Performance + PARAGON Operations RMM Console launch",
     changes: [
       { type: "feature", text: "Terra: Portfolio Performance module with IRR, cash-on-cash, and equity multiple tracking" },
       { type: "feature", text: "Terra: Climate Risk Overlay with flood, wildfire, and sea level exposure scoring" },
       { type: "feature", text: "Terra: Investor Relations module with LP portal and performance reporting" },
-      { type: "feature", text: "Aegis Operations: RMM Console with endpoint monitoring, patch management, and threat status" },
-      { type: "feature", text: "Aegis Operations: MRR Dashboard with cohort analysis and churn waterfall visualization" },
+      { type: "feature", text: "PARAGON Operations: RMM Console with endpoint monitoring, patch management, and threat status" },
+      { type: "feature", text: "PARAGON Operations: MRR Dashboard with cohort analysis and churn waterfall visualization" },
       { type: "improvement", text: "Vessels: Fleet map rendering performance improved 40% on large datasets" },
     ],
   },
@@ -38,7 +38,7 @@ const entries = [
     version: "v3.6.0",
     date: "February 24, 2026",
     type: "minor",
-    highlight: "SZL Cortex GPU Monitoring + LLM Evaluation launch",
+    highlight: "SZL APEX GPU Monitoring + LLM Evaluation launch",
     changes: [
       { type: "feature", text: "SZL Cortex: GPU Cluster Monitoring with thermal, utilization, and memory pressure tracking" },
       { type: "feature", text: "SZL Cortex: LLM Evaluation Studio with automated regression testing and A/B model comparison" },
@@ -64,7 +64,7 @@ const entries = [
     version: "v3.5.0",
     date: "January 28, 2026",
     type: "minor",
-    highlight: "Aegis multi-framework support + Carlota Jo AI Advisory",
+    highlight: "PARAGON multi-framework support + Carlota Jo AI Advisory",
     changes: [
       { type: "feature", text: "Aegis: Vendor Risk Assessment with 8 risk dimensions and auto-scoring" },
       { type: "feature", text: "Aegis: Risk Register with owner assignment and remediation tracking" },
@@ -103,7 +103,7 @@ const versionBadge: Record<string, string> = {
 export default function Changelog() {
   const __pageMeta = usePageMeta({
     title: "Changelog | SZL Holdings – Platform Release Notes",
-    description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from Aegis, Aegis Intelligence, Terra, Vessels, Lyte, Alloy, Aegis Operations, and Aegis.",
+    description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from PARAGON, PARAGON Intelligence, DOMAINE, SEXTANT, KORA, FORGE, PARAGON Operations, and Aegis.",
     canonical: "https://szlholdings.com/changelog",
   });
 

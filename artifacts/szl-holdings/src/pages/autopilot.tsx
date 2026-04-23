@@ -153,7 +153,7 @@ const NEXT_BEST_ACTIONS = [
   },
   {
     rank: 2,
-    title: "Code-split Aegis bundle (MITRE ATT&CK module)",
+    title: "Code-split PARAGON bundle (MITRE ATT&CK module)",
     app: "PARAGON",
     accent: "#6366f1",
     why: "Bundle at 1.34MB vs 900KB budget. MITRE module is 280KB loaded eagerly. User feedback on Adversary Wizard is negative — simplify UX simultaneously.",
@@ -163,7 +163,7 @@ const NEXT_BEST_ACTIONS = [
   },
   {
     rank: 3,
-    title: "Add Terra distress engine borough filter",
+    title: "Add DOMAINE distress engine borough filter",
     app: "DOMAINE",
     accent: "#4d7c0f",
     why: "Top user feedback request. Usage rising +21% but would accelerate with this UX improvement. Competitive gap vs CoStar on map UX.",
@@ -183,7 +183,7 @@ const NEXT_BEST_ACTIONS = [
   },
   {
     rank: 5,
-    title: "Fix Terra API latency (distress engine index)",
+    title: "Fix DOMAINE API latency (distress engine index)",
     app: "DOMAINE",
     accent: "#4d7c0f",
     why: "P95 at 2.4s vs 2s budget. Full table scan identified. Straightforward index fix. Unlocks perception of speed for rising user base.",
@@ -970,10 +970,10 @@ function NextBestActionPanel() {
 
 const FORGE_CLIENTS = [
   { name: "SZL Holdings",   app: "szl-holdings",   nps: 72, csat: 91, responseRate: 84, trend: "up"   as const },
-  { name: "Aegis Security", app: "aegis",           nps: 68, csat: 88, responseRate: 76, trend: "up"   as const },
-  { name: "Terra RE",       app: "terra",           nps: 54, csat: 79, responseRate: 61, trend: "flat" as const },
-  { name: "Vessels Fleet",  app: "vessels",         nps: 61, csat: 83, responseRate: 70, trend: "up"   as const },
-  { name: "Lyte AIOps",     app: "lyte",            nps: 44, csat: 72, responseRate: 55, trend: "down" as const },
+  { name: "PARAGON Security", app: "aegis",           nps: 68, csat: 88, responseRate: 76, trend: "up"   as const },
+  { name: "DOMAINE RE",       app: "terra",           nps: 54, csat: 79, responseRate: 61, trend: "flat" as const },
+  { name: "SEXTANT Fleet",  app: "vessels",         nps: 61, csat: 83, responseRate: 70, trend: "up"   as const },
+  { name: "KORA AIOps",     app: "lyte",            nps: 44, csat: 72, responseRate: 55, trend: "down" as const },
   { name: "Carlota Jo",     app: "carlota",         nps: 58, csat: 81, responseRate: 68, trend: "flat" as const },
   { name: "Counsel",  app: "prism",           nps: 77, csat: 93, responseRate: 88, trend: "up"   as const },
 ];
@@ -981,11 +981,11 @@ const FORGE_CLIENTS = [
 const FORGE_FEEDBACK = [
   { client: "SZL Holdings",   app: "szl-holdings",   rating: 5, comment: "The genome heatmap is a game-changer. We now know exactly what to prioritize.", date: "2026-04-10" },
   { client: "Counsel",  app: "prism",           rating: 5, comment: "AI-assisted contract review cut our turnaround from 3 days to 4 hours.",        date: "2026-04-09" },
-  { client: "Aegis Security", app: "aegis",           rating: 4, comment: "Threat feed integration is solid. Would love geofencing for alert routing.",      date: "2026-04-08" },
+  { client: "PARAGON Security", app: "aegis",           rating: 4, comment: "Threat feed integration is solid. Would love geofencing for alert routing.",      date: "2026-04-08" },
   { client: "Carlota Jo",     app: "carlota",         rating: 4, comment: "Client portal is clean but we need offline sync for field visits.",               date: "2026-04-07" },
-  { client: "Vessels Fleet",  app: "vessels",         rating: 4, comment: "AIS tracking accuracy improved a lot. Dark vessel detection is impressive.",      date: "2026-04-06" },
-  { client: "Terra RE",       app: "terra",           rating: 3, comment: "Property scoring works well but the dashboard is slow with 500+ listings.",       date: "2026-04-05" },
-  { client: "Lyte AIOps",     app: "lyte",            rating: 3, comment: "Alert volume is too high — we're experiencing fatigue. Needs smarter grouping.",  date: "2026-04-04" },
+  { client: "SEXTANT Fleet",  app: "vessels",         rating: 4, comment: "AIS tracking accuracy improved a lot. Dark vessel detection is impressive.",      date: "2026-04-06" },
+  { client: "DOMAINE RE",       app: "terra",           rating: 3, comment: "Property scoring works well but the dashboard is slow with 500+ listings.",       date: "2026-04-05" },
+  { client: "KORA AIOps",     app: "lyte",            rating: 3, comment: "Alert volume is too high — we're experiencing fatigue. Needs smarter grouping.",  date: "2026-04-04" },
 ];
 
 const NPS_PROMOTERS = 42;

@@ -452,7 +452,7 @@ const collaborativeReport = {
   authors: ['Dr. Chen', 'M. Rodriguez', 'S. Park'],
   highlights: [
     'TITAN v2 achieves 91.8 MMLU — 3.2pts above baseline',
-    'AEGIS lateral collision avoidance: 69.4 nuScenes mAP',
+    'PARAGON lateral collision avoidance: 69.4 nuScenes mAP',
     'GPU cost reduced 18% via workload consolidation',
   ],
 };
@@ -610,7 +610,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-xl font-display font-bold text-foreground tracking-tight">
-              Agentic Intelligence Cortex
+              Agentic Intelligence APEX
             </h1>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-amber-400/10 text-amber-400/80 border border-amber-400/15">
               AI Engine v2.1
@@ -627,7 +627,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* AI Cortex Summary Banner */}
+      {/* AI APEX Summary Banner */}
       <div className="relative bg-gradient-to-r from-amber-500/8 via-yellow-500/5 to-emerald-500/5 border border-amber-400/15 rounded-xl p-5 overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.03]"

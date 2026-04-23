@@ -551,7 +551,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "CortexActionDrafts": {
-    category: "Cortex AI",
+    category: "APEX AI",
     status: "stable",
     source: "lib/shared-ui/src/cortex-action-drafts.tsx",
     props: [
@@ -565,7 +565,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "CortexEntityGraph": {
-    category: "Cortex AI",
+    category: "APEX AI",
     status: "beta",
     source: "lib/shared-ui/src/cortex-entity-graph.tsx",
     props: [
@@ -594,7 +594,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "CortexIntelligenceFeed": {
-    category: "Cortex AI",
+    category: "APEX AI",
     status: "stable",
     source: "lib/shared-ui/src/cortex-intelligence-feed.tsx",
     props: [
@@ -610,7 +610,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "CortexVoice": {
-    category: "Cortex AI",
+    category: "APEX AI",
     status: "experimental",
     source: "lib/shared-ui/src/cortex-voice.tsx",
     props: [
@@ -622,7 +622,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "CortexVoiceTrigger": {
-    category: "Cortex AI",
+    category: "APEX AI",
     status: "experimental",
     source: "lib/shared-ui/src/cortex-voice.tsx",
     props: [
@@ -631,7 +631,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "CortexWhatIf": {
-    category: "Cortex AI",
+    category: "APEX AI",
     status: "beta",
     source: "lib/shared-ui/src/cortex-what-if.tsx",
     props: [
@@ -1719,7 +1719,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "ParticleField": {
-    category: "Pulse",
+    category: "LUMINA",
     status: "experimental",
     source: "lib/shared-ui/src/pulse/particle-field.tsx",
     props: [
@@ -1908,7 +1908,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "PulseEventFeed": {
-    category: "Pulse",
+    category: "LUMINA",
     status: "stable",
     source: "lib/shared-ui/src/pulse/event-feed.tsx",
     props: [
@@ -1918,14 +1918,14 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "PulseFlowDiagram": {
-    category: "Pulse",
+    category: "LUMINA",
     status: "stable",
     source: "lib/shared-ui/src/pulse/flow-diagram.tsx",
     props: [
     ],
   },
   "PulseHeader": {
-    category: "Pulse",
+    category: "LUMINA",
     status: "stable",
     source: "lib/shared-ui/src/pulse/pulse-header.tsx",
     props: [
@@ -1935,14 +1935,14 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "PulseHealthGrid": {
-    category: "Pulse",
+    category: "LUMINA",
     status: "stable",
     source: "lib/shared-ui/src/pulse/health-grid.tsx",
     props: [
     ],
   },
   "PulseMetricCard": {
-    category: "Pulse",
+    category: "LUMINA",
     status: "stable",
     source: "lib/shared-ui/src/pulse/metric-card.tsx",
     props: [
@@ -1956,7 +1956,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "PulseTechStack": {
-    category: "Pulse",
+    category: "LUMINA",
     status: "stable",
     source: "lib/shared-ui/src/pulse/tech-stack.tsx",
     props: [
@@ -1965,7 +1965,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "PulseThroughputChart": {
-    category: "Pulse",
+    category: "LUMINA",
     status: "stable",
     source: "lib/shared-ui/src/pulse/throughput-chart.tsx",
     props: [

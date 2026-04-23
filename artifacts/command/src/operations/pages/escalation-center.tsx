@@ -68,7 +68,7 @@ export default function EscalationCenter() {
         </div>
         <h1 className="text-2xl font-bold text-white">Escalation Center</h1>
         <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          What needs escalation, why, to whom — with Alloy rationale and recommended actions
+          What needs escalation, why, to whom — with FORGE rationale and recommended actions
           attached.
         </p>
       </div>
@@ -209,7 +209,7 @@ export default function EscalationCenter() {
                       className="text-[9px] font-semibold uppercase tracking-wider"
                       style={{ color: '#8b7ac8' }}
                     >
-                      Alloy Rationale
+                      FORGE Rationale
                     </span>
                     <span className="text-[9px] ml-1" style={{ color: 'rgba(139,92,246,0.6)' }}>
                       Confidence: {alloyPred.confidence}%
@@ -255,7 +255,7 @@ export default function EscalationCenter() {
                     border: '1px solid rgba(139,92,246,0.15)',
                   }}
                 >
-                  <ExternalLink className="w-3 h-3" /> Alloy Full Analysis
+                  <ExternalLink className="w-3 h-3" /> FORGE Full Analysis
                 </a>
               </div>
             </div>

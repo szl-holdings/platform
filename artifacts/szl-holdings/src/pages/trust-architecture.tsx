@@ -11,11 +11,11 @@ const PIPELINE_STAGES = [
   {
     id: "signal",
     label: "Signal",
-    sublabel: "Lyte / PRISM",
+    sublabel: "KORA / PRISM",
     color: "var(--color-lyte)",
     colorMuted: "var(--color-lyte-muted)",
     colorBorder: "var(--color-lyte-border)",
-    desc: "Lyte's PRISM engine monitors connected systems for operational signals — approval latency, ownership gaps, performance anomalies, and threshold crossings. Signals are classified by type, severity, and urgency.",
+    desc: "KORA's PRISM engine monitors connected systems for operational signals — approval latency, ownership gaps, performance anomalies, and threshold crossings. Signals are classified by type, severity, and urgency.",
     details: ["Continuous monitoring across connected integrations", "Signal classification: type, severity, velocity, blast radius", "Deduplication and correlation across signal sources", "Tenant-isolated signal namespace"],
   },
   {
@@ -35,7 +35,7 @@ const PIPELINE_STAGES = [
     color: "var(--color-alloy-light)",
     colorMuted: "var(--color-alloy-muted)",
     colorBorder: "var(--color-alloy-border)",
-    desc: "Alloy receives the interpreted signal and generates a structured action recommendation — specific action type, responsible actor, routing path, and SLA expectation. Not a generic alert.",
+    desc: "FORGE receives the interpreted signal and generates a structured action recommendation — specific action type, responsible actor, routing path, and SLA expectation. Not a generic alert.",
     details: ["Structured recommendation: action type + actor + SLA", "Routing logic applied: role, urgency, escalation path", "Evidence package assembled for approver review", "Confidence level and basis documented"],
   },
   {
@@ -51,11 +51,11 @@ const PIPELINE_STAGES = [
   {
     id: "action",
     label: "Action",
-    sublabel: "Alloy executes",
+    sublabel: "FORGE executes",
     color: "var(--color-alloy)",
     colorMuted: "var(--color-alloy-muted)",
     colorBorder: "var(--color-alloy-border)",
-    desc: "With approval confirmed, Alloy executes the action through the appropriate connector — task assignment, notification, external API call, or system update. Execution is scoped to the approved action only.",
+    desc: "With approval confirmed, FORGE executes the action through the appropriate connector — task assignment, notification, external API call, or system update. Execution is scoped to the approved action only.",
     details: ["Action scoped to approved parameters only", "Execution timestamped and attributed", "Connector logs capture before/after state", "SLA clock starts on execution"],
   },
   {
@@ -73,7 +73,7 @@ const PIPELINE_STAGES = [
 const TENANT_ARCH = [
   { label: "Tenant namespace isolation", body: "Every tenant has an isolated signal and workflow namespace. Cross-tenant data access is blocked at the query layer through organization-id guards enforced on every data path." },
   { label: "Role-scoped action model", body: "What a user can see, recommend, approve, and execute is determined by their role within their tenant. Roles are defined by the tenant admin, not the platform." },
-  { label: "Domain pack layering", body: "Vertical domain packs (Aegis, Vessels, Terra) extend the core platform with domain-specific signal vocabulary and workflow logic — they do not bypass the core governance model." },
+  { label: "Domain pack layering", body: "Vertical domain packs (PARAGON, SEXTANT, DOMAINE) extend the core platform with domain-specific signal vocabulary and workflow logic — they do not bypass the core governance model." },
   { label: "Connector permissions", body: "Each external integration has scoped permissions. A connector to a task system cannot read financial records, and vice versa, unless explicitly configured and approved." },
 ];
 

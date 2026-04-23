@@ -61,19 +61,19 @@ const PLATFORM_NODES = [
   },
   {
     id: 'alloy-engine',
-    label: 'Alloy Engine',
+    label: 'FORGE Engine',
     platform: 'FORGE',
     connects: ['signal-bus', 'workflow-exec', 'ml-inference'],
   },
   {
     id: 'firestorm-soc',
-    label: 'Aegis SOC',
+    label: 'PARAGON SOC',
     platform: 'PARAGON',
     connects: ['signal-bus', 'threat-db'],
   },
   {
     id: 'terra-lyte',
-    label: 'Terra Command',
+    label: 'DOMAINE Command',
     platform: 'DOMAINE',
     connects: ['signal-bus', 'geo-index'],
   },
@@ -690,13 +690,13 @@ export default function LivingTopology() {
               <span className="w-2 h-2 rounded-sm" style={{ background: '#d4a054' }} /> Core
             </div>
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-sm" style={{ background: '#4B8BDB' }} /> Alloy
+              <span className="w-2 h-2 rounded-sm" style={{ background: '#4B8BDB' }} /> FORGE
             </div>
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-sm" style={{ background: '#4a90b8' }} /> Terra
+              <span className="w-2 h-2 rounded-sm" style={{ background: '#4a90b8' }} /> DOMAINE
             </div>
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-sm" style={{ background: '#c45a4a' }} /> Aegis
+              <span className="w-2 h-2 rounded-sm" style={{ background: '#c45a4a' }} /> PARAGON
             </div>
           </div>
         </div>

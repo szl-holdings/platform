@@ -103,7 +103,7 @@ function formatHours(h: number) {
 export default function RoiCalculatorPage() {
   const __pageMeta = usePageMeta({
     title: "ROI Calculator — SZL Platform | SZL Holdings",
-    description: "Calculate the operational value your team recovers with the SZL intelligence platform. Based on actual PULSE EVALS benchmarks and OUTCOME GRAPH data.",
+    description: "Calculate the operational value your team recovers with the SZL intelligence platform. Based on actual LUMINA EVALS benchmarks and OUTCOME GRAPH data.",
     canonical: "https://szlholdings.com/roi",
   });
 
@@ -179,7 +179,7 @@ export default function RoiCalculatorPage() {
                   What does operational<br />drift cost your team?
                 </h1>
                 <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "42rem" }}>
-                  Benchmarks from PULSE EVALS and OUTCOME GRAPH across the SZL platform. Adjust the inputs for your team to see what you'd recover in year one.
+                  Benchmarks from LUMINA EVALS and OUTCOME GRAPH across the SZL platform. Adjust the inputs for your team to see what you'd recover in year one.
                 </p>
               </m.div>
             </div>
@@ -345,7 +345,7 @@ export default function RoiCalculatorPage() {
   
                   <div style={{ background: "hsl(210,12%,8%)", border: "1px solid hsl(210,12%,14%)", borderRadius: "12px", padding: "1.25rem" }}>
                     <div style={{ fontSize: "11px", color: "hsl(210,5%,42%)", marginBottom: "0.75rem", textTransform: "uppercase", fontWeight: 600, letterSpacing: "0.06em" }}>
-                      Platform benchmarks (PULSE EVALS)
+                      Platform benchmarks (LUMINA EVALS)
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
                       {[
@@ -373,7 +373,7 @@ export default function RoiCalculatorPage() {
                   </div>
   
                   <p style={{ fontSize: "11px", color: "hsl(210,5%,36%)", lineHeight: 1.5, textAlign: "center" }}>
-                    Estimates based on PULSE EVALS platform benchmarks and OUTCOME GRAPH outcome data. 
+                    Estimates based on LUMINA EVALS platform benchmarks and OUTCOME GRAPH outcome data. 
                     Individual results vary. Not a financial guarantee.
                   </p>
                 </div>

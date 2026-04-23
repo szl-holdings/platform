@@ -33,8 +33,8 @@ const QUICK_LINKS = [
 const STATUS_ITEMS = [
   { name: "API & Platform", status: "operational" },
   { name: "Authentication", status: "operational" },
-  { name: "Lyte — Business Observability", status: "operational" },
-  { name: "Alloy — Execution Fabric", status: "operational" },
+  { name: "KORA — Business Observability", status: "operational" },
+  { name: "FORGE — Execution Fabric", status: "operational" },
   { name: "Data Pipelines", status: "operational" },
 ];
 

@@ -458,7 +458,7 @@ function GovernanceLog({ entries, isLoading }: { entries: LogEntry[]; isLoading:
         <EmptyState
           icon={InboxIcon}
           title="No inference events yet"
-          detail="Events will appear here as Alloy agents run inference calls"
+          detail="Events will appear here as FORGE agents run inference calls"
         />
       ) : filtered.length === 0 ? (
         <EmptyState

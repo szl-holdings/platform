@@ -53,7 +53,7 @@ const RELIEF_TIERS = [
     includes: [
       "Everything in Clarity",
       "Cross-domain signal correlation (PRISM BUS)",
-      "Automated owner routing (Alloy)",
+      "Automated owner routing (FORGE)",
       "Priority inbox per role",
       "Escalation path configuration",
       "COVENANT policy enforcement for routing rules",
@@ -77,7 +77,7 @@ const RELIEF_TIERS = [
       "Explainability panel on every signal",
       "Intervention workspace (what-if modeling)",
       "Readiness module (threshold tracking)",
-      "PULSE EVALS integration for model quality",
+      "LUMINA EVALS integration for model quality",
     ],
     highlight: true,
   },

@@ -136,7 +136,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
       {
         id: 'N001',
         type: 'alert',
-        title: 'CORTEX demo mode active',
+        title: 'APEX demo mode active',
         read: false,
         createdAt: '2026-04-18T00:00:00Z',
       },
@@ -179,7 +179,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         domain: 'defense',
         severity: 'high',
         title: 'Credential spray attempt — 3 accounts',
-        source: 'Aegis SOC',
+        source: 'PARAGON SOC',
         time: '14m ago',
       },
       {
@@ -282,7 +282,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         type: 'cyber_threat',
         title: 'Credential spray campaign targeting executive accounts — 3 blocked attempts',
         summary:
-          'Aegis SOC detected a coordinated credential spray from AS15169 (Google Cloud) originating in Romania. Three executive accounts targeted. All attempts blocked. MFA enforcement confirmed.',
+          'PARAGON SOC detected a coordinated credential spray from AS15169 (Google Cloud) originating in Romania. Three executive accounts targeted. All attempts blocked. MFA enforcement confirmed.',
         severity: 'high',
         category: 'cybersecurity',
         confidence: 0.94,
@@ -299,9 +299,9 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
       {
         id: 'I003',
         type: 'real_estate',
-        title: 'NYC distressed portfolio — 2 new acquisition targets identified by Terra AI',
+        title: 'NYC distressed portfolio — 2 new acquisition targets identified by DOMAINE AI',
         summary:
-          'Terra scanner identified two Midtown properties with 40%+ LTV distress indicators. Estimated acquisition opportunity: $12M combined. Loan maturity within 90 days.',
+          'DOMAINE scanner identified two Midtown properties with 40%+ LTV distress indicators. Estimated acquisition opportunity: $12M combined. Loan maturity within 90 days.',
         severity: 'medium',
         category: 'real_estate_intelligence',
         confidence: 0.79,
@@ -490,7 +490,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         domain: 'aegis',
         title: 'Force credential rotation for 3 executive accounts targeted by spray campaign',
         summary:
-          'Aegis SOC blocked a credential spray from a Romanian Google Cloud ASN against three exec accounts. MFA held, but reuse risk on related SaaS tenants warrants immediate rotation.',
+          'PARAGON SOC blocked a credential spray from a Romanian Google Cloud ASN against three exec accounts. MFA held, but reuse risk on related SaaS tenants warrants immediate rotation.',
         urgency: 'urgent',
         confidence: 0.94,
         valueAtRisk: 540000,
@@ -507,7 +507,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         domain: 'terra',
         title: 'Open diligence on 34 W 47th St — 90-day loan maturity, 42% LTV distress',
         summary:
-          'Terra surfaced a Midtown asset with a hard 90-day maturity and 42% LTV distress. Comparable trades suggest a $7.2M acquisition window before the lender forces sale.',
+          'DOMAINE surfaced a Midtown asset with a hard 90-day maturity and 42% LTV distress. Comparable trades suggest a $7.2M acquisition window before the lender forces sale.',
         urgency: 'moderate',
         confidence: 0.78,
         valueAtRisk: 720000,
@@ -528,7 +528,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         domain: 'lyte',
         title: 'Hedge crude exposure with 30-day forward — covers maritime delay scenario',
         summary:
-          'Lyte models a 0.62 correlation between Rotterdam dwell and crude futures. A $2.1M 30-day forward closes the hedging gap surfaced by the cross-domain risk fusion.',
+          'KORA models a 0.62 correlation between Rotterdam dwell and crude futures. A $2.1M 30-day forward closes the hedging gap surfaced by the cross-domain risk fusion.',
         urgency: 'moderate',
         confidence: 0.82,
         valueAtRisk: 480000,
@@ -579,13 +579,13 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
     result: {
       query: 'Brief me on compound risks this week',
       fusedAnswer:
-        'Three compound risk vectors are active this week. Maritime throughput pressure at Rotterdam is correlated with crude futures exposure in the SZL portfolio. Simultaneously, Aegis SOC is tracking a credential spray campaign that targeted executive accounts — all blocked, but attribution is ongoing. Terra has flagged two NYC acquisition opportunities with 90-day loan maturity windows. Combined P&L exposure: ~$340K downside on maritime delays; ~$12M upside on real estate if executed within the window.',
+        'Three compound risk vectors are active this week. Maritime throughput pressure at Rotterdam is correlated with crude futures exposure in the SZL portfolio. Simultaneously, PARAGON SOC is tracking a credential spray campaign that targeted executive accounts — all blocked, but attribution is ongoing. DOMAINE has flagged two NYC acquisition opportunities with 90-day loan maturity windows. Combined P&L exposure: ~$340K downside on maritime delays; ~$12M upside on real estate if executed within the window.',
       overallRisk: 'high',
       confidence: 0.86,
       domainResults: [
         {
           domain: 'vessels',
-          domainLabel: 'Fleet (Vessels)',
+          domainLabel: 'Fleet (SEXTANT)',
           relevanceScore: 0.91,
           insight:
             'Port congestion affecting two chartered vessels. Delay exposure $340K if >5 days.',
@@ -600,7 +600,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         },
         {
           domain: 'firestorm',
-          domainLabel: 'Defense (Aegis)',
+          domainLabel: 'Defense (PARAGON)',
           relevanceScore: 0.88,
           insight:
             'Credential spray blocked. Attribution analysis in progress. No breach confirmed.',
@@ -616,7 +616,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         },
         {
           domain: 'terra',
-          domainLabel: 'Properties (Terra)',
+          domainLabel: 'Properties (DOMAINE)',
           relevanceScore: 0.74,
           insight:
             'Two NYC distressed targets surfaced. Combined opportunity $12M. 90-day maturity window.',

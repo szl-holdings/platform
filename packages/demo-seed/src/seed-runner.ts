@@ -160,7 +160,7 @@ async function seedBusinessNarrative() {
 
   const signal = await upsertSignal({
     externalId: 'demo-signal-biz-001',
-    source: 'Lyte PRISM — Motion',
+    source: 'KORA PRISM — Motion',
     sourceType: 'demo',
     domain: 'lyte',
     title: 'Pipeline stall — $4.2M deal stalled 47 days without owner action',
@@ -199,7 +199,7 @@ async function seedBusinessNarrative() {
           { step: 4, name: 'Velocity monitoring restart', status: 'completed' },
         ],
         environment: 'production',
-        metadata: { demo: true, narrative: 'business-revops', agent: 'Lyte' },
+        metadata: { demo: true, narrative: 'business-revops', agent: 'KORA' },
         startedAt: hoursAgo(26),
         completedAt: hoursAgo(24),
       })
@@ -252,7 +252,7 @@ async function seedBusinessNarrative() {
         type: 'assign',
         title: 'Ownership reassigned to Sarah Kim (VP BD)',
         description:
-          'Deal ownership transferred via Alloy workflow — velocity monitoring reactivated',
+          'Deal ownership transferred via FORGE workflow — velocity monitoring reactivated',
         status: 'completed',
         priority: 'critical',
         payload: { demo: true, assignee: 'Sarah Kim', role: 'VP Business Development' },
@@ -265,10 +265,10 @@ async function seedBusinessNarrative() {
         signalId: signal.id,
         type: 'notify',
         title: 'Buyer re-engagement email queued for review',
-        description: "Lyte drafted buyer re-engagement email — pending Sophia's review before send",
+        description: "KORA drafted buyer re-engagement email — pending Sophia's review before send",
         status: 'completed',
         priority: 'high',
-        payload: { demo: true, recipient: 'Buyer contact', draftedBy: 'Lyte' },
+        payload: { demo: true, recipient: 'Buyer contact', draftedBy: 'KORA' },
         completedAt: hoursAgo(24),
         metadata: { demo: true, narrative: 'business-revops' },
       },
@@ -313,7 +313,7 @@ async function seedBusinessNarrative() {
     .insert(lyteSignalsTable)
     .values({
       workspaceId: lyteWorkspaceId,
-      source: 'PRISM Motion — Lyte',
+      source: 'PRISM Motion — KORA',
       sourceType: 'monitoring',
       severity: 'high',
       title: 'Pipeline stall — Vantex Acquisition — 47 days — $4.2M at risk',
@@ -330,7 +330,7 @@ async function seedBusinessNarrative() {
         workspaceId: lyteWorkspaceId,
         title: 'Escalate Vantex Acquisition — CFO Approval Required',
         description:
-          'Deal stalled 47 days. Approval owner departed without handoff. Revenue at risk: $4.2M. Lyte recommends emergency escalation to CFO with VP BD reassignment.',
+          'Deal stalled 47 days. Approval owner departed without handoff. Revenue at risk: $4.2M. KORA recommends emergency escalation to CFO with VP BD reassignment.',
         category: 'risk',
         priority: 'critical',
         status: 'completed',
@@ -351,7 +351,7 @@ async function seedBusinessNarrative() {
         signalId: lyteSignal.id,
         title: 'Escalate deal — CFO sponsorship + VP BD reassignment + buyer re-engagement',
         description:
-          'Escalate immediately. Reassign deal ownership to VP BD (Sarah Kim). CFO to sponsor buyer call. Deal has 78% historical close rate with this intervention pattern at this stage. Lyte confidence: 87%. Historical close rate with comparable intervention: 78%.',
+          'Escalate immediately. Reassign deal ownership to VP BD (Sarah Kim). CFO to sponsor buyer call. Deal has 78% historical close rate with this intervention pattern at this stage. KORA confidence: 87%. Historical close rate with comparable intervention: 78%.',
         category: 'risk_mitigation',
         impact: 'high',
         effort: 'low',
@@ -389,7 +389,7 @@ async function seedSecurityNarrative() {
 
   const signal = await upsertSignal({
     externalId: 'demo-signal-sec-001',
-    source: 'Aegis Sentinel — Identity Telemetry',
+    source: 'PARAGON Sentinel — Identity Telemetry',
     sourceType: 'demo',
     domain: 'aegis',
     title: 'Credential stuffing — 2,400 failed auth attempts in 3 min from 14 IPs',
@@ -494,10 +494,10 @@ async function seedSecurityNarrative() {
         type: 'remediate',
         title: '14 IPs blocked at perimeter firewall',
         description:
-          'All 14 identified botnet IPs blocked via Aegis Firewall Connector — confirmed at perimeter',
+          'All 14 identified botnet IPs blocked via PARAGON Firewall Connector — confirmed at perimeter',
         status: 'completed',
         priority: 'critical',
-        payload: { demo: true, ipCount: 14, tool: 'Aegis Firewall Connector' },
+        payload: { demo: true, ipCount: 14, tool: 'PARAGON Firewall Connector' },
         completedAt: minutesAgo(43),
         metadata: { demo: true, narrative: 'security-soc' },
       },
@@ -510,7 +510,7 @@ async function seedSecurityNarrative() {
         description: 'Rate limiting activated on Auth Service Cluster during patch window',
         status: 'completed',
         priority: 'critical',
-        payload: { demo: true, threshold: '5 req/min', tool: 'Aegis Auth Connector' },
+        payload: { demo: true, threshold: '5 req/min', tool: 'PARAGON Auth Connector' },
         completedAt: minutesAgo(40),
         metadata: { demo: true, narrative: 'security-soc' },
       },
@@ -524,7 +524,7 @@ async function seedSecurityNarrative() {
           'Precautionary rotation of 3 privileged session tokens; affected users emailed',
         status: 'completed',
         priority: 'high',
-        payload: { demo: true, tokenCount: 3, tool: 'Aegis Identity Connector' },
+        payload: { demo: true, tokenCount: 3, tool: 'PARAGON Identity Connector' },
         completedAt: minutesAgo(35),
         metadata: { demo: true, narrative: 'security-soc' },
       },
@@ -599,7 +599,7 @@ async function seedMaritimeNarrative() {
 
   const signal = await upsertSignal({
     externalId: 'demo-signal-mar-001',
-    source: 'Vessels Helmsman — AIS Telemetry',
+    source: 'SEXTANT Helmsman — AIS Telemetry',
     sourceType: 'demo',
     domain: 'vessels',
     title: 'MV Soltana — AIS dark 134 min, sanctions corridor proximity detected',
@@ -720,7 +720,7 @@ async function seedMaritimeNarrative() {
         signalId: signal.id,
         type: 'report',
         title: 'Voyage incident report filed — INC-2026-0414-001',
-        description: 'Formal incident report created via Alloy Workflow',
+        description: 'Formal incident report created via FORGE Workflow',
         status: 'completed',
         priority: 'high',
         payload: { demo: true, ref: 'INC-2026-0414-001' },
@@ -787,7 +787,7 @@ async function seedLegalNarrative() {
 
   const signal = await upsertSignal({
     externalId: 'demo-signal-leg-001',
-    source: 'PRISM Counsel — Deadline Compliance Engine',
+    source: 'Counsel — Deadline Compliance Engine',
     sourceType: 'demo',
     domain: 'prism-counsel',
     title: 'Rivera v. Apex — NY DFS Reg 68 insurer acknowledgement window exceeded by 12 days',
@@ -850,7 +850,7 @@ async function seedLegalNarrative() {
           demo: true,
           narrative: 'legal-compliance',
           ref: 'RIV-2026-0130',
-          agent: 'PRISM Counsel AI',
+          agent: 'Counsel AI',
         },
         startedAt: hoursAgo(72),
         completedAt: hoursAgo(70),
@@ -905,7 +905,7 @@ async function seedLegalNarrative() {
         type: 'report',
         title: 'Reg 68 violation notice drafted — insurer profile attached',
         description:
-          'PRISM Counsel drafted violation notice citing 3 prior Continental General violations in this jurisdiction',
+          'Counsel drafted violation notice citing 3 prior Continental General violations in this jurisdiction',
         status: 'completed',
         priority: 'high',
         payload: { demo: true, regulation: 'NY DFS Reg 68 §216.6', priorViolations: 3 },
@@ -965,7 +965,7 @@ async function seedLegalNarrative() {
       type: 'summary',
       title: 'Rivera v. Apex — Reg 68 Clock Violation Triggered Settlement Response in 5 Days',
       content:
-        'PRISM Counsel detected a 12-day Reg 68 clock violation (§216.6), scored demand readiness at 91%, and generated a violation notice recommendation. Managing Attorney approved in 44 minutes. Notice issued same day. Continental General responded in 5 days with a settlement conference request — offer $395,000 against band median $418,000. Proof chain complete for every step. Attorney work product protected.',
+        'Counsel detected a 12-day Reg 68 clock violation (§216.6), scored demand readiness at 91%, and generated a violation notice recommendation. Managing Attorney approved in 44 minutes. Notice issued same day. Continental General responded in 5 days with a settlement conference request — offer $395,000 against band median $418,000. Proof chain complete for every step. Attorney work product protected.',
       domain: 'prism-counsel',
       metadata: {
         demo: true,

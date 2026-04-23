@@ -231,7 +231,7 @@ const HEAT_GRID: HeatCell[] = [
 const CHAINS: BottleneckChain[] = [
   {
     id: 'CHN-001',
-    title: 'Vessels fleet ETA compliance failure chain',
+    title: 'SEXTANT fleet ETA compliance failure chain',
     steps: [
       { label: 'Fuel pricing submitted', status: 'clear' },
       { label: 'Finance VP approval', status: 'blocked', age: '22h' },
@@ -261,7 +261,7 @@ const CHAINS: BottleneckChain[] = [
   },
   {
     id: 'CHN-003',
-    title: 'Terra lease renewal legal hold chain',
+    title: 'DOMAINE lease renewal legal hold chain',
     steps: [
       { label: 'Tenant signature received', status: 'clear' },
       { label: 'Exhibit B required', status: 'blocked', age: '48h' },

@@ -38,7 +38,7 @@ const ENDPOINTS: Endpoint[] = [
   {
     method: 'GET',
     path: '/api/aegis/health',
-    summary: 'Aegis platform health — all modules',
+    summary: 'PARAGON platform health — all modules',
     tag: 'Security',
     auth: false,
   },
@@ -124,7 +124,7 @@ const ENDPOINTS: Endpoint[] = [
   {
     method: 'GET',
     path: '/api/vessels/health',
-    summary: 'Vessels maritime platform health',
+    summary: 'SEXTANT maritime platform health',
     tag: 'Maritime',
     auth: false,
   },
@@ -146,14 +146,14 @@ const ENDPOINTS: Endpoint[] = [
   {
     method: 'GET',
     path: '/api/alloy/health',
-    summary: 'Alloy orchestration layer health',
+    summary: 'FORGE orchestration layer health',
     tag: 'AI',
     auth: false,
   },
   {
     method: 'GET',
     path: '/api/alloy/signals',
-    summary: 'Active signal queue from Alloy engine',
+    summary: 'Active signal queue from FORGE engine',
     tag: 'AI',
     auth: true,
   },
@@ -175,14 +175,14 @@ const ENDPOINTS: Endpoint[] = [
   {
     method: 'GET',
     path: '/api/alloy/agents',
-    summary: 'Alloy agent registry and status',
+    summary: 'FORGE agent registry and status',
     tag: 'Infrastructure',
     auth: false,
   },
   {
     method: 'GET',
     path: '/api/alloy/workflow-templates',
-    summary: 'Alloy workflow pattern templates',
+    summary: 'FORGE workflow pattern templates',
     tag: 'Infrastructure',
     auth: true,
   },

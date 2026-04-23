@@ -173,7 +173,7 @@ export default function ExecutiveOverview() {
               className="text-xs font-medium uppercase tracking-widest"
               style={{ color: '#0ea5e9' }}
             >
-              Lyte · Executive Overview
+              KORA · Executive Overview
             </span>
           </div>
           <h1 className="text-2xl font-bold text-white">Business Observability Command</h1>
@@ -290,7 +290,7 @@ export default function ExecutiveOverview() {
               className="text-xs hover:text-white transition-colors"
               style={{ color: '#f59e0b' }}
             >
-              Open in Lyte →
+              Open in KORA →
             </a>
           </div>
           <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
@@ -390,17 +390,17 @@ export default function ExecutiveOverview() {
           </span>
         </div>
         <p className="text-xs leading-relaxed mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          Lyte detected approval SLA breach on Northgate contract → Lyte routed accountability to
-          Revenue Operations → Alloy predicted Q1 revenue miss → Alloy rerouted workflow to CFO
-          backup → Lyte verifying recovery.
+          KORA detected approval SLA breach on Northgate contract → KORA routed accountability to
+          Revenue Operations → FORGE predicted Q1 revenue miss → FORGE rerouted workflow to CFO
+          backup → KORA verifying recovery.
         </p>
         <div className="flex gap-2">
           {[
-            { label: 'DETECT', desc: 'Lyte saw it', color: '#0ea5e9', active: true },
-            { label: 'INTERPRET', desc: 'Lyte routed it', color: '#f59e0b', active: true },
+            { label: 'DETECT', desc: 'KORA saw it', color: '#0ea5e9', active: true },
+            { label: 'INTERPRET', desc: 'KORA routed it', color: '#f59e0b', active: true },
             { label: 'DECIDE', desc: 'FORGE modeled it', color: '#8b5cf6', active: true },
             { label: 'EXECUTE', desc: 'FORGE ran it', color: '#4B8BDB', active: true },
-            { label: 'VERIFY', desc: 'Lyte confirms', color: '#10b981', active: false },
+            { label: 'VERIFY', desc: 'KORA confirms', color: '#10b981', active: false },
           ].map((p) => (
             <div
               key={p.label}

@@ -75,14 +75,14 @@ const DOMAIN_TEMPLATES = [
   },
   {
     id: 'creative-dir',
-    name: 'Alloy Engine',
+    name: 'FORGE Engine',
     icon: Zap,
     color: 'text-violet-400',
     bg: 'bg-violet-400/10',
     description:
-      "Surfaces prediction scenarios, models confidence distributions, and generates forecast briefs via Alloy's predictive intelligence engine.",
+      "Surfaces prediction scenarios, models confidence distributions, and generates forecast briefs via FORGE's predictive intelligence engine.",
     defaultInstruction:
-      "Analyze signal data, model forward-looking scenarios, and generate confidence-weighted recommendations based on Alloy's predictive models.",
+      "Analyze signal data, model forward-looking scenarios, and generate confidence-weighted recommendations based on FORGE's predictive models.",
     domain: 'FORGE',
     systemType: 'fast' as const,
     capabilities: [
@@ -191,7 +191,7 @@ const LIVE_AGENTS = [
     lastAction: '5m ago',
   },
   {
-    name: 'Alloy Engine',
+    name: 'FORGE Engine',
     domain: 'FORGE',
     status: 'active',
     uptime: '3d 18h',

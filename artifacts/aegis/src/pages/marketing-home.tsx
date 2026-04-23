@@ -550,7 +550,7 @@ export default function AegisMarketingHome() {
               </span>
             </h2>
             <p className="text-gray-500 text-[15px] mb-10 max-w-xl mx-auto leading-relaxed">
-              Schedule a private threat briefing with the Aegis team. We'll assess your current
+              Schedule a private threat briefing with the PARAGON team. We'll assess your current
               posture and show you what you're missing.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

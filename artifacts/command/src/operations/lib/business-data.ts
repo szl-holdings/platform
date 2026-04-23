@@ -161,7 +161,7 @@ export const signals: BusinessSignal[] = [
       'Handoff queue volume up 67% vs. prior 30-day average. Capacity bottleneck traced to 2 senior IMs on leave simultaneously.',
     sourceData: 'Project management system + CS platform',
     timeline: [
-      { time: daysAgo(11), event: 'Oldest stalled project: Nexus Group implementation' },
+      { time: daysAgo(11), event: 'Oldest stalled project: PRAXIS Group implementation' },
       { time: daysAgo(8), event: 'Handoff queue SLA breach threshold crossed' },
       { time: daysAgo(5), event: 'Auto-escalation attempted — no owner resolved' },
       { time: minsAgo(35), event: 'Signal detected by Command' },

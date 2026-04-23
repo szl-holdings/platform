@@ -147,7 +147,7 @@ export default function AefKnowledgeSearch() {
         <div>
           <h1 className="text-sm font-semibold text-slate-100">AEF Threat Intelligence Search</h1>
           <p className="text-[10px] font-mono text-red-400/40">
-            Profile: {PROFILE_ID} · Aegis Security Incident
+            Profile: {PROFILE_ID} · PARAGON Security Incident
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2">

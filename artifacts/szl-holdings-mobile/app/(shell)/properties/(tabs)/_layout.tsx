@@ -52,7 +52,7 @@ const propertiesCommands: SpotlightCommand[] = [
   },
   {
     id: 'nav-terra',
-    label: 'Terra Modules',
+    label: 'DOMAINE Modules',
     description: 'Rent Roll, Construction, Tenant Screening & more',
     icon: '🏗',
     group: 'Navigate',
@@ -63,7 +63,7 @@ const propertiesCommands: SpotlightCommand[] = [
     label: 'Rent Roll',
     description: 'Live tenant rent roll & lease status',
     icon: '📄',
-    group: 'Terra',
+    group: 'DOMAINE',
     action: () => router.push('/(shell)/properties/rent-roll'),
   },
   {
@@ -71,7 +71,7 @@ const propertiesCommands: SpotlightCommand[] = [
     label: 'Construction Monitor',
     description: 'Track active construction & renovation projects',
     icon: '🏗',
-    group: 'Terra',
+    group: 'DOMAINE',
     action: () => router.push('/(shell)/properties/construction-monitor'),
   },
   {
@@ -79,7 +79,7 @@ const propertiesCommands: SpotlightCommand[] = [
     label: 'Tenant Screening',
     description: 'AI-powered applicant screening & scoring',
     icon: '🔍',
-    group: 'Terra',
+    group: 'DOMAINE',
     action: () => router.push('/(shell)/properties/tenant-screening'),
   },
   {
@@ -117,7 +117,7 @@ function NativeTabLayout() {
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="terra-modules">
         <Icon sf={{ default: 'building.columns', selected: 'building.columns.fill' }} />
-        <Label>Terra</Label>
+        <Label>DOMAINE</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="agent-chat">
         <Icon

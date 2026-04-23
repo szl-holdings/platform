@@ -171,7 +171,7 @@ const TRUST_METRICS: TrustMetric[] = [
 
 const DOMAIN_ROWS: DomainTrustRow[] = [
   {
-    domain: 'Aegis Security',
+    domain: 'PARAGON Security',
     icon: '⚔',
     color: '#ef4444',
     acceptanceRate: 0.81,
@@ -188,7 +188,7 @@ const DOMAIN_ROWS: DomainTrustRow[] = [
     trend: 'stable',
   },
   {
-    domain: 'Vessels Maritime',
+    domain: 'SEXTANT Maritime',
     icon: '⚓',
     color: '#0ea5e9',
     acceptanceRate: 0.88,
@@ -205,7 +205,7 @@ const DOMAIN_ROWS: DomainTrustRow[] = [
     trend: 'improving',
   },
   {
-    domain: 'Terra Real Estate',
+    domain: 'DOMAINE Real Estate',
     icon: '⬢',
     color: '#22c55e',
     acceptanceRate: 0.86,

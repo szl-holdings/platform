@@ -348,7 +348,7 @@ const EDGES: Edge[] = [
 
 const ALERT_LABELS: Record<string, { title: string; href: string }> = {
   'demo-f1': {
-    title: 'AURORA Owner Filed PRISM Litigation — Terra Brooklyn Property −18%',
+    title: 'AURORA Owner Filed PRISM Litigation — DOMAINE Brooklyn Property −18%',
     href: '/intelligence/fabric',
   },
   'demo-f2': {

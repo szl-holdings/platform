@@ -201,7 +201,7 @@ const RUNS: ReplayRun[] = [
         offsetMs: 112,
         event: 'tool_call',
         title: 'aggregate_portfolio_kpis()',
-        detail: 'Fetching KPIs from PRISM, Terra, Vessels, Aegis',
+        detail: 'Fetching KPIs from PRISM, DOMAINE, SEXTANT, PARAGON',
         tool: 'data_aggregator',
         evidence: ['Q1 revenue: $14.2M', 'Asset NAV: $127M', 'Fleet utilization: 87%'],
       },
@@ -614,7 +614,7 @@ export default function AlloyReplayTimelinePage() {
             className="text-[9px] font-mono uppercase tracking-widest"
             style={{ color: ACCENT }}
           >
-            Alloy · Execution Replay
+            FORGE · Execution Replay
           </span>
         </div>
         <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>

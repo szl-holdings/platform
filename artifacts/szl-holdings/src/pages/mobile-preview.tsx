@@ -41,7 +41,7 @@ type ScreenId = "dashboard" | "portfolio" | "command";
 const SCREENS: Array<{ id: ScreenId; label: string; sublabel: string; icon: typeof Activity }> = [
   { id: "dashboard", label: "Command Dashboard", sublabel: "Cross-domain signal feed", icon: Activity },
   { id: "portfolio", label: "Portfolio", sublabel: "Ecosystem health & KPIs", icon: Briefcase },
-  { id: "command", label: "Operations Command", sublabel: "Lyte signal-to-action inbox", icon: Radio },
+  { id: "command", label: "Operations Command", sublabel: "KORA signal-to-action inbox", icon: Radio },
 ];
 
 function StatusBar() {
@@ -279,7 +279,7 @@ function DashboardScreen() {
           <Mic size={16} color={ACCENT} />
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 11, color: TEXT, fontWeight: 600 }}>Hold to ask Command</div>
-            <div style={{ fontSize: 9, color: MUTED }}>"Brief me on the Aegis incident"</div>
+            <div style={{ fontSize: 9, color: MUTED }}>"Brief me on the PARAGON incident"</div>
           </div>
         </div>
       </div>
@@ -303,7 +303,7 @@ function PortfolioScreen() {
     { name: "DOMAINE", role: "Real Estate", status: "degraded", latency: 248 },
     { name: "KORA", role: "Operations", status: "online", latency: 67 },
     { name: "Counsel", role: "Advisory", status: "online", latency: 91 },
-    { name: "Cortex", role: "Intelligence", status: "online", latency: 103 },
+    { name: "APEX", role: "Intelligence", status: "online", latency: 103 },
   ];
   const kpis = [
     { label: "Workflow runs", value: "12,408", trend: "+8.2%", color: "hsl(140,50%,55%)" },
@@ -415,7 +415,7 @@ function CommandScreen() {
     {
       sev: "critical",
       title: "Revenue stall — North America segment",
-      source: "Lyte · Pipeline",
+      source: "KORA · Pipeline",
       detail: "MoM bookings down 18%. Top 3 deals stalled at procurement gate.",
       action: "Approve outreach playbook",
       color: "hsl(0,80%,62%)",
@@ -424,7 +424,7 @@ function CommandScreen() {
     {
       sev: "high",
       title: "Approval aging — Series B SAFE conversion",
-      source: "Lyte · Ownership",
+      source: "KORA · Ownership",
       detail: "8 days in pending state. Counsel review complete, awaiting CFO sign.",
       action: "Route to CFO",
       color: "hsl(28,90%,58%)",
@@ -432,8 +432,8 @@ function CommandScreen() {
     },
     {
       sev: "high",
-      title: "Ownership drift detected — Aegis cap table",
-      source: "Lyte · Governance",
+      title: "Ownership drift detected — PARAGON cap table",
+      source: "KORA · Governance",
       detail: "Founder common dropped below 51% threshold after pool refresh.",
       action: "Open proof envelope",
       color: "hsl(28,90%,58%)",
@@ -441,8 +441,8 @@ function CommandScreen() {
     },
     {
       sev: "medium",
-      title: "KPI anomaly — Vessels utilization",
-      source: "Lyte · Fleet",
+      title: "KPI anomaly — SEXTANT utilization",
+      source: "KORA · Fleet",
       detail: "Atlantic fleet utilization down 6.4% week-over-week. Above tolerance.",
       action: "Review dashboard",
       color: "hsl(48,80%,58%)",
@@ -674,12 +674,12 @@ export default function MobilePreviewPage() {
                 {
                   icon: Briefcase,
                   title: "Live portfolio health",
-                  body: "Real-time KPIs and ecosystem status across Aegis, Vessels, Terra, Lyte, Counsel, and Cortex.",
+                  body: "Real-time KPIs and ecosystem status across PARAGON, SEXTANT, DOMAINE, KORA, Counsel, and Cortex.",
                 },
                 {
                   icon: Radio,
-                  title: "Lyte command inbox",
-                  body: "Approvals, action drafts, and decision-ready cards governed end-to-end through the Alloy execution fabric.",
+                  title: "KORA command inbox",
+                  body: "Approvals, action drafts, and decision-ready cards governed end-to-end through the FORGE execution fabric.",
                 },
                 {
                   icon: Mic,

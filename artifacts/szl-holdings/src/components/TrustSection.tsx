@@ -5,7 +5,7 @@ const credibilityBlocks = [
     label: 'Architecture philosophy',
     value: 'Signal-first',
     description:
-      'Lyte and Alloy are designed around the signal-to-action pipeline — not dashboards bolted onto existing workflow tools.',
+      'KORA and FORGE are designed around the signal-to-action pipeline — not dashboards bolted onto existing workflow tools.',
   },
   {
     label: 'Execution model',
@@ -78,7 +78,7 @@ export function TrustSection() {
               maxWidth: '36rem',
             }}
           >
-            Lyte and Alloy are not built for the demo — they are built for the operator. The
+            KORA and FORGE are not built for the demo — they are built for the operator. The
             architecture reflects that.
           </p>
         </m.div>

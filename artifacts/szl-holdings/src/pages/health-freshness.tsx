@@ -584,7 +584,7 @@ export default function HealthFreshnessPage() {
                     textDecoration: 'none',
                   }}
                 >
-                  Lyte
+                  KORA
                 </Link>
                 <span style={{ color: TEXT_FAINT, fontSize: '0.75rem' }}>›</span>
                 <span

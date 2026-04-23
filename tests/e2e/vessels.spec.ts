@@ -18,12 +18,12 @@ test.beforeEach(async ({}, testInfo) => {
   if (!appAvailable) testInfo.skip();
 });
 
-test.describe('Vessels — Smoke Tests', () => {
+test.describe('SEXTANT — Smoke Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${VESSELS_PATH}/`);
   });
 
-  test('loads Vessels app without fatal errors', async ({ page }) => {
+  test('loads SEXTANT app without fatal errors', async ({ page }) => {
     const body = page.locator('body');
     await expect(body).toBeVisible();
     const errorBoundary = page.locator('text=Something went wrong').first();
@@ -54,7 +54,7 @@ test.describe('Vessels — Smoke Tests', () => {
   });
 });
 
-test.describe('Vessels — Route Smoke Tests', () => {
+test.describe('SEXTANT — Route Smoke Tests', () => {
   const routes = [
     { path: '/', label: 'home' },
     { path: '/fleet-dashboard', label: 'fleet dashboard' },
@@ -84,7 +84,7 @@ test.describe('Vessels — Route Smoke Tests', () => {
   }
 });
 
-test.describe('Vessels — User Journey: View Fleet → Open Exception → Review Alert', () => {
+test.describe('SEXTANT — User Journey: View Fleet → Open Exception → Review Alert', () => {
   test('user navigates to fleet dashboard via nav and Fleet Command KPI is visible', async ({
     page,
   }) => {
@@ -154,7 +154,7 @@ test.describe('Vessels — User Journey: View Fleet → Open Exception → Revie
   });
 });
 
-test.describe('Vessels — Write Path: Alert Rules', () => {
+test.describe('SEXTANT — Write Path: Alert Rules', () => {
   test('alert center renders Rules tab with New Rule button', async ({ page }) => {
     await page.goto(`${VESSELS_PATH}/dashboard/alerts`);
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
@@ -230,7 +230,7 @@ test.describe('Vessels — Write Path: Alert Rules', () => {
   });
 });
 
-test.describe('Vessels — Write Path: Trading Desk', () => {
+test.describe('SEXTANT — Write Path: Trading Desk', () => {
   test('trading desk renders order entry panel', async ({ page }) => {
     await page.goto(`${VESSELS_PATH}/trading-desk`);
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
@@ -266,7 +266,7 @@ test.describe('Vessels — Write Path: Trading Desk', () => {
   });
 });
 
-test.describe('Vessels — Write Path: Voyage Economics', () => {
+test.describe('SEXTANT — Write Path: Voyage Economics', () => {
   test('voyage economics page loads with live or seeded data', async ({ page }) => {
     await page.goto(`${VESSELS_PATH}/economics`);
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
@@ -315,7 +315,7 @@ test.describe('Vessels — Write Path: Voyage Economics', () => {
   });
 });
 
-test.describe('Vessels — Mobile Viewport', () => {
+test.describe('SEXTANT — Mobile Viewport', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test('home renders on mobile without crash', async ({ page }) => {
@@ -341,7 +341,7 @@ test.describe('Vessels — Mobile Viewport', () => {
   });
 });
 
-test.describe('Vessels — Accessibility (axe-core)', () => {
+test.describe('SEXTANT — Accessibility (axe-core)', () => {
   const axeRoutes = [
     { path: '/', label: 'home' },
     { path: '/fleet-dashboard', label: 'fleet dashboard' },

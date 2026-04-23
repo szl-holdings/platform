@@ -8,7 +8,7 @@ import { GovernedLoopViz } from "@/components/GovernedLoopViz";
 
 const LAYERS = [
   {
-    name: "Lyte + Command",
+    name: "KORA + Command",
     tagline: "Governed Command Surface",
     accent: "hsl(190,90%,55%)",
     accentRgb: "14,201,224",
@@ -27,7 +27,7 @@ const LAYERS = [
     accent: "hsl(214,80%,65%)",
     accentRgb: "92,155,228",
     icon: Zap,
-    description: "The governance backbone beneath every surface. Alloy orchestrates multi-step workflows, enforces approval gates, records immutable audit trails, and coordinates agent execution — with durable state and checkpoint recovery.",
+    description: "The governance backbone beneath every surface. FORGE orchestrates multi-step workflows, enforces approval gates, records immutable audit trails, and coordinates agent execution — with durable state and checkpoint recovery.",
     capabilities: [
       "Workflow orchestration with durable state and recovery",
       "Policy-gated approval enforcement at the platform layer",
@@ -74,7 +74,7 @@ const EXPANSION_VERTICALS = [
 export default function PlatformPage() {
   const __pageMeta = usePageMeta({
     title: "Platform — SZL Holdings",
-    description: "Governed decision operating system: Command operator surface, Alloy execution fabric, and six domain packs — Aegis, Vessels, Terra, Counsel, Carlota Jo, IMPERIUM. One governance loop. Every high-consequence domain.",
+    description: "Governed decision operating system: Command operator surface, FORGE execution fabric, and six domain packs — PARAGON, SEXTANT, DOMAINE, Counsel, Carlota Jo, IMPERIUM. One governance loop. Every high-consequence domain.",
     canonical: "https://szlholdings.com/platform",
     ogImage: "https://szlholdings.com/og/og-platform.jpg",
   });
@@ -119,7 +119,7 @@ export default function PlatformPage() {
                   fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: 1.65,
                   maxWidth: "44rem", marginBottom: "1rem",
                 }}>
-                  The SZL Holdings governed operational intelligence platform has three structural tiers. The <strong style={{ color: "hsl(38,12%,80%)" }}>Platform</strong> provides the foundation. The <strong style={{ color: "hsl(38,12%,80%)" }}>Primitives</strong> layer — six shared components: Covenant Policy, Proof Chain, Outcome Graph, Alloy, Simulation Engine, and Event Fabric — governs every consequential action. <strong style={{ color: "hsl(38,12%,80%)" }}>Domain Packs</strong> extend the Primitives with purpose-built intelligence for each industry.
+                  The SZL Holdings governed operational intelligence platform has three structural tiers. The <strong style={{ color: "hsl(38,12%,80%)" }}>Platform</strong> provides the foundation. The <strong style={{ color: "hsl(38,12%,80%)" }}>Primitives</strong> layer — six shared components: Covenant Policy, Proof Chain, Outcome Graph, FORGE, Simulation Engine, and Event Fabric — governs every consequential action. <strong style={{ color: "hsl(38,12%,80%)" }}>Domain Packs</strong> extend the Primitives with purpose-built intelligence for each industry.
                 </p>
                 <p style={{
                   fontSize: "0.9375rem", color: "hsl(210,5%,50%)", lineHeight: 1.65,
@@ -266,7 +266,7 @@ export default function PlatformPage() {
                   Domain packs — governed extensions
                 </p>
                 <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,58%)", lineHeight: 1.65, maxWidth: "36rem" }}>
-                  Domain packs are not standalone products. They are governed extensions of the same platform — same Alloy execution fabric, same Proof Chain, same Covenant Policy, same RBAC model. Only the domain intelligence layer changes.
+                  Domain packs are not standalone products. They are governed extensions of the same platform — same FORGE execution fabric, same Proof Chain, same Covenant Policy, same RBAC model. Only the domain intelligence layer changes.
                 </p>
               </m.div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">

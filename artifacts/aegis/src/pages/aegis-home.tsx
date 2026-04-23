@@ -346,7 +346,7 @@ export default function AegisHomePage() {
 
         <Reveal delay={300}>
           <p className="text-[17px] sm:text-[19px] leading-[1.75] text-white/65 max-w-[640px] mb-12">
-            Aegis unifies security operations, managed services, and AI-driven intelligence into a
+            PARAGON unifies security operations, managed services, and AI-driven intelligence into a
             single console. Defense detects. Legal protects. Command operates. Labs reasons. All
             four share one data context, one correlation engine, one operating model.
           </p>
@@ -495,7 +495,7 @@ export default function AegisHomePage() {
               Cross-module intelligence in action
             </h2>
             <p className="text-[16px] leading-[1.8] text-white/65 mb-16 max-w-[560px]">
-              The real power of Aegis is convergence. When Defense, Legal, Command, and Labs share
+              The real power of PARAGON is convergence. When Defense, Legal, Command, and Labs share
               one data layer, correlations emerge that siloed tools miss entirely.
             </p>
 
@@ -632,7 +632,7 @@ export default function AegisHomePage() {
               Platform Walkthrough
             </p>
             <h2 className="text-[clamp(1.6rem,3vw,2.1rem)] font-bold text-white mb-3 tracking-tight">
-              How Aegis works in practice
+              How PARAGON works in practice
             </h2>
             <p className="text-[14px] max-w-xl mx-auto text-white/65">
               From deployment to full command in under an hour. Four workspaces, one unified
@@ -646,7 +646,7 @@ export default function AegisHomePage() {
                 {
                   step: '01',
                   title: 'Provision your workspace',
-                  body: 'Choose your deployment model — cloud, on-premises, or air-gapped. Ingest your first data sources: endpoint telemetry, network flows, identity events. Aegis normalizes everything into a unified event schema.',
+                  body: 'Choose your deployment model — cloud, on-premises, or air-gapped. Ingest your first data sources: endpoint telemetry, network flows, identity events. PARAGON normalizes everything into a unified event schema.',
                   tag: 'Setup',
                 },
                 {
@@ -728,7 +728,7 @@ export default function AegisHomePage() {
             utmSource="aegis"
             variant="banner"
             heading="Intelligence from the front line"
-            subheading="SZL Command essays on governed AI, defense operations, and the decision infrastructure behind Aegis — delivered weekly."
+            subheading="SZL Command essays on governed AI, defense operations, and the decision infrastructure behind PARAGON — delivered weekly."
           />
         </div>
       </section>
@@ -749,7 +749,7 @@ export default function AegisHomePage() {
         onClose={() => setDemoOpen(false)}
         type="demo"
         app="aegis"
-        subtitle="Aegis — Unified Defense & Intelligence Command"
+        subtitle="PARAGON — Unified Defense & Intelligence Command"
       />
     </div>
   );

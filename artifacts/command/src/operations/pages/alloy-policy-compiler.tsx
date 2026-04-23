@@ -1191,7 +1191,7 @@ export default function AlloyPolicyCompilerPage() {
                     border: `1px solid ${ACCENT}30`,
                   }}
                 >
-                  Alloy Compiler v1.0
+                  FORGE Compiler v1.0
                 </span>
               </div>
               <div className="text-[10px] font-mono mt-0.5" style={{ color: TEXT.secondary }}>

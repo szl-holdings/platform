@@ -35,7 +35,7 @@ const AGENT_DEFS = [
   },
   {
     id: 'beacon',
-    name: 'Terra Analytics',
+    name: 'DOMAINE Analytics',
     domain: 'Analytics',
     color: GREEN,
     icon: 'bar-chart-2',
@@ -147,7 +147,7 @@ export default function AgentsScreen() {
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Alloy Agents</Text>
+          <Text style={styles.title}>FORGE Agents</Text>
           <Text style={styles.subtitle}>
             Autonomous operations · {AGENT_DEFS.length} agents active
           </Text>

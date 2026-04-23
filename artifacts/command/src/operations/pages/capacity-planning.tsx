@@ -126,7 +126,7 @@ const RESOURCES: Resource[] = [
 ];
 
 const FINOPS_DATA = [
-  { tenant: 'Nexus Capital', cost: 14200, forecast30: 15100, savingsOpportunity: 2400 },
+  { tenant: 'PRAXIS Capital', cost: 14200, forecast30: 15100, savingsOpportunity: 2400 },
   { tenant: 'Meridian Health', cost: 21800, forecast30: 23400, savingsOpportunity: 5200 },
   { tenant: 'Apex Logistics', cost: 6400, forecast30: 6800, savingsOpportunity: 800 },
   { tenant: 'Skyline Media', cost: 5100, forecast30: 5600, savingsOpportunity: 1100 },

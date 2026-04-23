@@ -479,7 +479,7 @@ export const MOCK_RUNS: SubstrateRun[] = [
     policyProfile: 'alloy-orchestrator-v3',
     agentId: 'alloy-orchestrator',
     objectiveText:
-      'Correlate cross-domain risk signals from Vessels, Terra, and PRISM to produce unified executive risk posture report.',
+      'Correlate cross-domain risk signals from SEXTANT, DOMAINE, and PRISM to produce unified executive risk posture report.',
     retriever: { source: 'synthetic', adapterId: null },
     stages: [
       {
@@ -526,7 +526,7 @@ export const MOCK_RUNS: SubstrateRun[] = [
         input: null,
         output: {
           recommendation:
-            'Moderate overall risk posture; Vessels exposure elevated by 12% vs baseline',
+            'Moderate overall risk posture; SEXTANT exposure elevated by 12% vs baseline',
         },
         redacted: false,
         policyResult: null,

@@ -28,12 +28,12 @@ export default function DriftDetection() {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: '#0ea5e9' }}
           >
-            Lyte · Drift Detection
+            KORA · Drift Detection
           </span>
         </div>
         <h1 className="text-2xl font-bold text-white">Drift Detection</h1>
         <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          Unexpected changes, timing anomalies, contributing factors, and affected workflows. Lyte
+          Unexpected changes, timing anomalies, contributing factors, and affected workflows. KORA
           surfaces drift before it becomes a crisis.
         </p>
       </div>
@@ -171,7 +171,7 @@ export default function DriftDetection() {
                   border: '1px solid rgba(245,158,11,0.2)',
                 }}
               >
-                <ArrowRight className="w-3 h-3" /> Route in Lyte
+                <ArrowRight className="w-3 h-3" /> Route in KORA
               </a>
               <a
                 href="/alloy"

@@ -136,7 +136,7 @@ const DEMO_CHAINS: SignalChain[] = [
           action: 'Flag logistics-dependent properties',
           status: 'executed',
           executedAt: Date.now() - 3420000,
-          explainability: 'Identified 12 Terra properties with active port logistics dependencies',
+          explainability: 'Identified 12 DOMAINE properties with active port logistics dependencies',
           resultSummary: '12 assets flagged for delivery timeline review',
         },
         {
@@ -155,7 +155,7 @@ const DEMO_CHAINS: SignalChain[] = [
     id: 'sc-cyber-escalate',
     name: 'Perimeter Breach → Legal Hold',
     description:
-      'When Aegis detects a confirmed intrusion exceeding critical threshold, automatically trigger legal hold across affected subsidiaries and notify CISO.',
+      'When PARAGON detects a confirmed intrusion exceeding critical threshold, automatically trigger legal hold across affected subsidiaries and notify CISO.',
     triggerDomain: 'aegis',
     triggerSignal: 'intrusion_confidence_score',
     triggerThreshold: 0.85,
@@ -208,7 +208,7 @@ const DEMO_CHAINS: SignalChain[] = [
     id: 'sc-market-vol',
     name: 'Market Volatility → Portfolio Rebalance',
     description:
-      'When Holdings volatility index exceeds 0.70, trigger asset review across Terra and Vessels, and queue rebalancing recommendation for the investment committee.',
+      'When Holdings volatility index exceeds 0.70, trigger asset review across DOMAINE and SEXTANT, and queue rebalancing recommendation for the investment committee.',
     triggerDomain: 'szl-holdings',
     triggerSignal: 'market_volatility_index',
     triggerThreshold: 0.7,
@@ -223,7 +223,7 @@ const DEMO_CHAINS: SignalChain[] = [
     id: 'sc-slo-breach',
     name: 'SLO Breach → On-Call Escalation',
     description:
-      'When Lyte platform error budget drops below 10%, automatically page the on-call team and pause non-critical deployments.',
+      'When KORA platform error budget drops below 10%, automatically page the on-call team and pause non-critical deployments.',
     triggerDomain: 'lyte',
     triggerSignal: 'error_budget_remaining',
     triggerThreshold: 0.1,

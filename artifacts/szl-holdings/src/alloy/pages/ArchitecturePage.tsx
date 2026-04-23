@@ -104,7 +104,7 @@ const PRODUCT_INTEGRATIONS = [
     icon: '⚡',
     accent: '#f59e0b',
     description:
-      'Command feeds service health streams, alert data, and operational metrics into Alloy. Alloy returns structured insights, prioritised incidents, and recommended actions.',
+      'Command feeds service health streams, alert data, and operational metrics into Alloy. FORGE returns structured insights, prioritised incidents, and recommended actions.',
     dataIn: ['Service health metrics', 'Alert feeds', 'Performance data', 'Incident history'],
     dataOut: [
       'Structured insight briefs',
@@ -118,7 +118,7 @@ const PRODUCT_INTEGRATIONS = [
     icon: '🚢',
     accent: '#3b82f6',
     description:
-      'Vessels provides AIS signal data, fleet status, and voyage information. Alloy interprets signals, detects deviations, and generates fleet intelligence briefings.',
+      'SEXTANT provides AIS signal data, fleet status, and voyage information. FORGE interprets signals, detects deviations, and generates fleet intelligence briefings.',
     dataIn: ['AIS position signals', 'Vessel status', 'Voyage data', 'Weather conditions'],
     dataOut: [
       'Fleet intelligence briefs',
@@ -132,7 +132,7 @@ const PRODUCT_INTEGRATIONS = [
     icon: '✨',
     accent: '#f472b6',
     description:
-      'Carlota Jo passes client requests, engagement data, and document requirements to Alloy. Alloy generates documents, manages approval flows, and routes operational tasks.',
+      'Carlota Jo passes client requests, engagement data, and document requirements to Alloy. FORGE generates documents, manages approval flows, and routes operational tasks.',
     dataIn: ['Client requests', 'Engagement history', 'Document requirements', 'Templates'],
     dataOut: ['Draft documents', 'Approval-ready outputs', 'Workflow routing', 'Task assignments'],
   },
@@ -151,7 +151,7 @@ export default function ArchitecturePage({ onNavigate }: NavProps) {
         </div>
         <h1 className="text-3xl md:text-4xl font-bold mb-4">Six-layer intelligence system</h1>
         <p className="text-white/50 max-w-2xl leading-relaxed">
-          Every input enters Alloy at the top and passes through normalisation, reasoning,
+          Every input enters FORGE at the top and passes through normalisation, reasoning,
           orchestration, and output layers before reaching the governance layer that wraps the
           entire pipeline in accountability controls.
         </p>
@@ -278,7 +278,7 @@ export default function ArchitecturePage({ onNavigate }: NavProps) {
           </h2>
           <p className="text-white/50 max-w-xl">
             Each product integrates at specific layers, providing inputs and receiving structured
-            outputs from Alloy's pipeline.
+            outputs from FORGE's pipeline.
           </p>
         </div>
 
@@ -320,7 +320,7 @@ export default function ArchitecturePage({ onNavigate }: NavProps) {
                 <div className="flex-1 grid md:grid-cols-2 gap-5">
                   <div>
                     <div className="text-[10px] uppercase tracking-widest text-white/30 mb-2.5">
-                      Data Into Alloy
+                      Data Into FORGE
                     </div>
                     <div className="space-y-1.5">
                       {prod.dataIn.map((d) => (
@@ -336,7 +336,7 @@ export default function ArchitecturePage({ onNavigate }: NavProps) {
                   </div>
                   <div>
                     <div className="text-[10px] uppercase tracking-widest text-white/30 mb-2.5">
-                      Alloy Outputs Back
+                      FORGE Outputs Back
                     </div>
                     <div className="space-y-1.5">
                       {prod.dataOut.map((d) => (

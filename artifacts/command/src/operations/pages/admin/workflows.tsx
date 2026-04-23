@@ -97,7 +97,7 @@ const changeLog = [
   {
     id: 'CHG-040',
     type: 'deploy',
-    description: 'Deployed v2.4.1 to Aegis',
+    description: 'Deployed v2.4.1 to PARAGON',
     author: 'CI/CD',
     timestamp: '13:45',
     status: 'completed',

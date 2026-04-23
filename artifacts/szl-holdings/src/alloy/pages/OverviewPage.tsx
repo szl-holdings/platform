@@ -219,7 +219,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
             className="text-lg leading-relaxed mb-4 max-w-2xl"
             style={{ color: 'rgba(255,255,255,0.55)' }}
           >
-            Alloy is the orchestration, workflow, and output engine powering every platform in the
+            FORGE is the orchestration, workflow, and output engine powering every platform in the
             SZL ecosystem. It sequences processes, routes actions, generates structured outputs, and
             keeps humans in the loop on consequential decisions.
           </p>
@@ -228,7 +228,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
             className="text-sm leading-relaxed mb-10 max-w-xl"
             style={{ color: 'rgba(255,255,255,0.35)' }}
           >
-            Alloy is not a chatbot. It is an execution fabric — built for precision, governance, and
+            FORGE is not a chatbot. It is an execution fabric — built for precision, governance, and
             scale.
           </p>
 
@@ -257,14 +257,14 @@ export default function OverviewPage({ onNavigate }: NavProps) {
         </div>
       </section>
 
-      {/* What Alloy Is */}
+      {/* What FORGE Is */}
       <section ref={whatRef} className="px-6 py-16 max-w-6xl mx-auto">
         <div className="mb-10">
           <div
             className="text-xs font-medium uppercase tracking-widest mb-3"
             style={{ color: '#6e9ef5' }}
           >
-            What Alloy Is
+            What FORGE Is
           </div>
           <h2 className="text-2xl md:text-3xl font-bold mb-3">
             An orchestration and output engine — not a chatbot.
@@ -273,7 +273,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
             className="max-w-xl text-sm leading-relaxed"
             style={{ color: 'rgba(255,255,255,0.45)' }}
           >
-            Alloy manages structured workflows, processes operational signals, routes actions to the
+            FORGE manages structured workflows, processes operational signals, routes actions to the
             right people, and generates explainable outputs. Every step is governed, logged, and
             attributable.
           </p>
@@ -303,14 +303,14 @@ export default function OverviewPage({ onNavigate }: NavProps) {
         </div>
       </section>
 
-      {/* What Alloy Powers */}
+      {/* What FORGE Powers */}
       <section ref={powersRef} className="px-6 py-16 max-w-6xl mx-auto">
         <div className="mb-10">
           <div
             className="text-xs font-medium uppercase tracking-widest mb-3"
             style={{ color: '#6e9ef5' }}
           >
-            What Alloy Powers
+            What FORGE Powers
           </div>
           <h2 className="text-2xl md:text-3xl font-bold mb-3">
             Every platform in the SZL ecosystem runs on Alloy.
@@ -319,8 +319,8 @@ export default function OverviewPage({ onNavigate }: NavProps) {
             className="max-w-xl text-sm leading-relaxed"
             style={{ color: 'rgba(255,255,255,0.45)' }}
           >
-            Alloy is the shared intelligence backbone. Signal processing, workflow orchestration,
-            and output generation are Alloy capabilities — surfaced through each platform's command
+            FORGE is the shared intelligence backbone. Signal processing, workflow orchestration,
+            and output generation are FORGE capabilities — surfaced through each platform's command
             interface.
           </p>
         </div>
@@ -359,21 +359,21 @@ export default function OverviewPage({ onNavigate }: NavProps) {
         </div>
       </section>
 
-      {/* How Alloy Works */}
+      {/* How FORGE Works */}
       <section ref={worksRef} className="px-6 py-16 max-w-6xl mx-auto">
         <div className="mb-10">
           <div
             className="text-xs font-medium uppercase tracking-widest mb-3"
             style={{ color: '#6e9ef5' }}
           >
-            How Alloy Works
+            How FORGE Works
           </div>
           <h2 className="text-2xl md:text-3xl font-bold mb-3">A seven-step execution sequence.</h2>
           <p
             className="max-w-xl text-sm leading-relaxed"
             style={{ color: 'rgba(255,255,255,0.45)' }}
           >
-            Every input that enters Alloy follows a structured path from ingestion to execution.
+            Every input that enters FORGE follows a structured path from ingestion to execution.
             Nothing acts without classification. Nothing executes without approval where required.
           </p>
         </div>
@@ -435,7 +435,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
                 className="leading-relaxed mb-6 text-sm"
                 style={{ color: 'rgba(255,255,255,0.5)' }}
               >
-                Alloy workflows are defined, versioned, and explainable. Every step has a clear
+                FORGE workflows are defined, versioned, and explainable. Every step has a clear
                 trigger, owner, and output. Multi-step sequences handle branching logic, timeout
                 escalation, and human approval gates without losing traceability.
               </p>
@@ -515,7 +515,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
             className="max-w-xl text-sm leading-relaxed"
             style={{ color: 'rgba(255,255,255,0.45)' }}
           >
-            Alloy's agent layer is composed of purpose-built agents, each with a defined scope and
+            FORGE's agent layer is composed of purpose-built agents, each with a defined scope and
             output contract. No agent acts outside its role. Every action is attributable.
           </p>
         </div>
@@ -560,7 +560,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
             className="max-w-xl text-sm leading-relaxed"
             style={{ color: 'rgba(255,255,255,0.45)' }}
           >
-            Alloy produces outputs that operators can act on immediately — without interpretation,
+            FORGE produces outputs that operators can act on immediately — without interpretation,
             without decoding, without additional analysis required.
           </p>
         </div>
@@ -611,7 +611,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
                 className="leading-relaxed mb-6 text-sm"
                 style={{ color: 'rgba(255,255,255,0.55)' }}
               >
-                Alloy never acts unilaterally on consequential decisions. Every high-stakes output
+                FORGE never acts unilaterally on consequential decisions. Every high-stakes output
                 passes through configurable approval flows. Every decision is logged. Every
                 rejection is recorded with reason and attribution.
               </p>
@@ -672,7 +672,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
           </div>
           <h2 className="text-2xl font-bold text-white">Results from Alloy-powered deployments</h2>
           <p className="text-white/45 text-sm mt-2 max-w-xl leading-relaxed">
-            Specific operational outcomes achieved through Alloy's orchestration layer. Documented
+            Specific operational outcomes achieved through FORGE's orchestration layer. Documented
             with constraints, timelines, and measured impact.
           </p>
         </div>
@@ -743,7 +743,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
       <section className="px-6 py-20 max-w-6xl mx-auto text-center">
         <h2 className="text-3xl font-bold mb-4">Ready to explore the architecture?</h2>
         <p className="mb-8 max-w-md mx-auto text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
-          See how Alloy's execution fabric turns operational inputs into structured, explainable
+          See how FORGE's execution fabric turns operational inputs into structured, explainable
           actions.
         </p>
         <div className="flex flex-wrap justify-center gap-3">

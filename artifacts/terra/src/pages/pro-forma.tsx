@@ -677,7 +677,7 @@ function exportComparisonCSV(scenarios: Scenario[]) {
     ['Exit Cap Rate', ...results.map((s) => `${s.inputs.exitCapRate}%`)],
   ];
   const csv = [
-    ['Terra — Scenario Comparison'],
+    ['DOMAINE — Scenario Comparison'],
     [`Export Date: ${new Date().toLocaleDateString()}`],
     [],
     header,
@@ -820,7 +820,7 @@ function exportComparisonPDF(scenarios: Scenario[]) {
   const html = `<!DOCTYPE html>
 <html>
 <head>
-  <title>Terra — Scenario Comparison Report</title>
+  <title>DOMAINE — Scenario Comparison Report</title>
   <style>
     body{background:#0a0c10;color:#ddd;font-family:sans-serif;padding:32px;font-size:13px}
     h1{color:#b8943c;font-size:20px;margin-bottom:4px}
@@ -837,7 +837,7 @@ function exportComparisonPDF(scenarios: Scenario[]) {
   </style>
 </head>
 <body>
-  <h1>Terra — Scenario Comparison Report</h1>
+  <h1>DOMAINE — Scenario Comparison Report</h1>
   <p>Exported ${new Date().toLocaleString()} &nbsp;·&nbsp; ${results.length} scenarios &nbsp;·&nbsp; ▲ = best value</p>
 
   <h2>Key Metrics</h2>

@@ -138,7 +138,7 @@ function MockDigestCard({
       <View style={styles.mockCardHeader}>
         <View style={styles.mockLogoRow}>
           <Text style={styles.mockLogo}>⬡</Text>
-          <Text style={styles.mockAppName}>CORTEX</Text>
+          <Text style={styles.mockAppName}>APEX</Text>
         </View>
         <Text style={styles.mockTime}>
           {formatTime(config.deliveryHour, config.deliveryMinute)}

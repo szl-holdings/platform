@@ -451,7 +451,7 @@ const CATEGORIES = [
   { id: 'Auth', label: 'Auth', icon: Shield },
   { id: 'Controls', label: 'Controls', icon: ToggleLeft },
   { id: 'AI Controls', label: 'AI Controls', icon: Brain },
-  { id: 'Cortex AI', label: 'Cortex AI', icon: Brain },
+  { id: 'APEX AI', label: 'APEX AI', icon: Brain },
   { id: 'Analytics', label: 'Analytics', icon: BarChart2 },
   { id: 'Data Display', label: 'Data Display', icon: Table },
   { id: 'Design System', label: 'Design System', icon: Palette },
@@ -463,7 +463,7 @@ const CATEGORIES = [
   { id: 'Visualization', label: 'Visualization', icon: Network },
   { id: 'Monitoring', label: 'Monitoring', icon: Eye },
   { id: 'Identity', label: 'Identity', icon: Layers },
-  { id: 'Pulse', label: 'Pulse', icon: Zap },
+  { id: 'LUMINA', label: 'LUMINA', icon: Zap },
   { id: 'Document Engine', label: 'Document Engine', icon: BookOpen },
   { id: 'Onboarding', label: 'Onboarding', icon: Workflow },
   { id: 'Receipt Graph', label: 'Receipt Graph', icon: Database },
@@ -550,12 +550,12 @@ function defaultValueForType(type: string): string {
 
 function descriptionFor(name: string, category: string): string {
   const map: Record<string, string> = {
-    'Pulse': `${name} — Pulse module surface from lib/shared-ui/src/pulse. See source for full behavior.`,
+    'LUMINA': `${name} — LUMINA module surface from lib/shared-ui/src/pulse. See source for full behavior.`,
     'Document Engine': `${name} — Document engine surface (templates, signing, batch PDF) from lib/shared-ui/src/document-engine.`,
     'Onboarding': `${name} — Onboarding flow primitive from lib/shared-ui/src/onboarding.`,
     'Receipt Graph': `${name} — Provenance / receipt-graph component used to surface evidence and trust signals.`,
-    'Operational Primitives': `${name} — Standardized operational primitive shared across Alloy, Lyte, Terra, Aegis, and Vessels.`,
-    'Cortex AI': `${name} — Cortex AI conversational/agent surface.`,
+    'Operational Primitives': `${name} — Standardized operational primitive shared across FORGE, KORA, DOMAINE, PARAGON, and Vessels.`,
+    'APEX AI': `${name} — APEX AI conversational/agent surface.`,
     'AI Controls': `${name} — Operator control for AI-driven decisions and simulations.`,
     'Visualization': `${name} — Data visualization component (graphs, distributions, diagrams).`,
     'Monitoring': `${name} — Monitoring widget showing live status, freshness, or health signals.`,

@@ -17,7 +17,7 @@ const SURFACE = "hsla(0,0%,100%,0.035)";
 const TEXT = "hsl(38,8%,94%)";
 const TEXT_SEC = "hsl(214,7%,60%)";
 const TEXT_FAINT = "hsl(214,7%,38%)";
-const LYTE = "hsl(192,72%,48%)";
+const KORA = "hsl(192,72%,48%)";
 const MONO = "var(--font-mono)";
 
 interface SchemaStep {
@@ -75,12 +75,12 @@ const SCHEMAS_FALLBACK: DecisionSchema[] = [
       "Critical vulnerability + active threat actor correlation",
     ],
     actionSequence: [
-      { stage: "Signal", action: "Ingest threat signal from Aegis SOC feed", owner: "SOC Analyst", timeout: "5m" },
+      { stage: "Signal", action: "Ingest threat signal from PARAGON SOC feed", owner: "SOC Analyst", timeout: "5m" },
       { stage: "Context", action: "Enrich via MITRE ATT&CK and asset ownership graph", owner: "System", timeout: "2m" },
       { stage: "Recommendation", action: "AI generates containment options with evidence lineage", owner: "AI Agent", gate: "Confidence ≥ 0.80" },
       { stage: "Simulation", action: "Model impact of containment on service availability", owner: "System", timeout: "3m" },
       { stage: "Policy", action: "Covenant Policy checks approver eligibility for isolation action", owner: "System" },
-      { stage: "Execution", action: "Alloy orchestrates isolation workflow with checkpoint recovery", owner: "SOC Lead", gate: "Approver: security_lead" },
+      { stage: "Execution", action: "FORGE orchestrates isolation workflow with checkpoint recovery", owner: "SOC Lead", gate: "Approver: security_lead" },
       { stage: "Proof", action: "Proof Chain records full chain: detection → action → isolation", owner: "System" },
       { stage: "Outcome", action: "Outcome Graph measures time-to-containment vs simulation", owner: "System", timeout: "24h" },
     ],
@@ -108,7 +108,7 @@ const SCHEMAS_FALLBACK: DecisionSchema[] = [
       "Sanctions list match score exceeds 0.75",
     ],
     actionSequence: [
-      { stage: "Signal", action: "Ingest AIS gap signal from Vessels telemetry feed", owner: "System" },
+      { stage: "Signal", action: "Ingest AIS gap signal from SEXTANT telemetry feed", owner: "System" },
       { stage: "Context", action: "Correlate last known position, cargo manifest, port schedule", owner: "System", timeout: "5m" },
       { stage: "Recommendation", action: "AI risk assessment with OFAC screening results", owner: "AI Agent", gate: "OFAC API response received" },
       { stage: "Simulation", action: "Model cargo and voyage P&L impact scenarios", owner: "System" },
@@ -141,7 +141,7 @@ const SCHEMAS_FALLBACK: DecisionSchema[] = [
       "Broker network signal: off-market interest confirmed",
     ],
     actionSequence: [
-      { stage: "Signal", action: "Ingest distress signal composite from Terra intelligence feed", owner: "System" },
+      { stage: "Signal", action: "Ingest distress signal composite from DOMAINE intelligence feed", owner: "System" },
       { stage: "Context", action: "Build ownership entity graph, debt stack, lien history", owner: "System" },
       { stage: "Recommendation", action: "AI generates acquisition thesis with comparable analysis", owner: "AI Agent", gate: "Diligence checklist ≥60% complete" },
       { stage: "Simulation", action: "Model IRR scenarios: base/bull/bear with sensitivity analysis", owner: "System" },
@@ -264,7 +264,7 @@ const ICON_MAP: Record<string, typeof Shield> = { Shield, Ship, Building2, Brief
 
 function ComplexityBadge({ complexity }: { complexity: string }) {
   const colors: Record<string, string> = { low: "hsl(142,60%,48%)", medium: "hsl(48,90%,52%)", high: "hsl(0,72%,54%)" };
-  const c = colors[complexity] ?? LYTE;
+  const c = colors[complexity] ?? KORA;
   return (
     <span style={{
       fontSize: "0.575rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: MONO,
@@ -276,7 +276,7 @@ function ComplexityBadge({ complexity }: { complexity: string }) {
 }
 
 function StepRow({ step, index }: { step: SchemaStep; index: number }) {
-  const sc = STAGE_COLORS[step.stage] ?? LYTE;
+  const sc = STAGE_COLORS[step.stage] ?? KORA;
   return (
     <div style={{ display: "grid", gridTemplateColumns: "28px 1fr 1fr", gap: "0.75rem", alignItems: "start", padding: "0.625rem 0", borderBottom: `1px solid ${BORDER}` }}>
       <div style={{ width: 22, height: 22, borderRadius: "50%", background: `${sc}18`, border: `1px solid ${sc}30`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px" }}>
@@ -305,7 +305,7 @@ function StepRow({ step, index }: { step: SchemaStep; index: number }) {
 
 export default function DecisionSchemaLibraryPage() {
   const __pageMeta = usePageMeta({
-    title: "Decision Schema Library — Lyte | SZL Holdings",
+    title: "Decision Schema Library — KORA | SZL Holdings",
     description: "Reusable decision templates that encode institutional knowledge — trigger patterns, action sequences, policy gates, and expected outcomes. Inspired by DARPA KAIROS schema-based event reasoning.",
     canonical: "https://szlholdings.com/lyte/decision-schemas",
   });
@@ -357,14 +357,14 @@ export default function DecisionSchemaLibraryPage() {
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
-                  <Link href="/lyte" style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, textDecoration: "none" }}>Lyte</Link>
+                  <Link href="/lyte" style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, textDecoration: "none" }}>KORA</Link>
                   <ChevronRight size={10} style={{ color: TEXT_FAINT }} />
-                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>Decision Schema Library</span>
+                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA }}>Decision Schema Library</span>
                 </div>
                 <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 700, letterSpacing: "-0.028em", lineHeight: 1.08, maxWidth: "28ch", marginBottom: "1rem", color: TEXT }}>
                   Institutional knowledge encoded as executable decision schemas.
                 </h1>
-                <p style={{ fontSize: "0.6875rem", fontFamily: MONO, letterSpacing: "0.04em", color: LYTE, marginBottom: "0.875rem" }}>
+                <p style={{ fontSize: "0.6875rem", fontFamily: MONO, letterSpacing: "0.04em", color: KORA, marginBottom: "0.875rem" }}>
                   Trigger patterns → Action sequence → Policy gates → Expected outcome
                 </p>
                 <p style={{ fontSize: "clamp(0.9375rem,1.6vw,1.0625rem)", lineHeight: 1.72, color: TEXT_SEC, maxWidth: "54ch", marginBottom: "2rem" }}>
@@ -374,7 +374,7 @@ export default function DecisionSchemaLibraryPage() {
                 {/* Stats */}
                 <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
                   {[
-                    { label: "Schemas", value: SCHEMAS.length.toString(), color: LYTE },
+                    { label: "Schemas", value: SCHEMAS.length.toString(), color: KORA },
                     { label: "Total executions", value: totalUses.toString(), color: "hsl(260,60%,65%)" },
                     { label: "Avg success rate", value: `${(avgSuccess * 100).toFixed(0)}%`, color: "hsl(142,60%,48%)" },
                     { label: "Domains covered", value: new Set(SCHEMAS.map(s => s.domain)).size.toString(), color: "hsl(206,72%,54%)" },
@@ -398,7 +398,7 @@ export default function DecisionSchemaLibraryPage() {
                 <div style={{ display: "flex", gap: "0.375rem", alignItems: "center" }}>
                   <span style={{ fontSize: "0.6875rem", color: TEXT_FAINT }}>Category:</span>
                   {["all", ...CATEGORIES].map(c => (
-                    <button key={c} onClick={() => setFilterCat(c)} style={{ padding: "0.25rem 0.625rem", borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 500, border: `1px solid ${filterCat === c ? `${LYTE}40` : BORDER}`, background: filterCat === c ? `${LYTE}12` : "transparent", color: filterCat === c ? LYTE : TEXT_FAINT, cursor: "pointer" }}>
+                    <button key={c} onClick={() => setFilterCat(c)} style={{ padding: "0.25rem 0.625rem", borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 500, border: `1px solid ${filterCat === c ? `${KORA}40` : BORDER}`, background: filterCat === c ? `${KORA}12` : "transparent", color: filterCat === c ? KORA : TEXT_FAINT, cursor: "pointer" }}>
                       {c === "all" ? "All" : c}
                     </button>
                   ))}
@@ -407,7 +407,7 @@ export default function DecisionSchemaLibraryPage() {
                   <span style={{ fontSize: "0.6875rem", color: TEXT_FAINT }}>Complexity:</span>
                   {["all", "low", "medium", "high"].map(c => {
                     const colors: Record<string, string> = { low: "hsl(142,60%,48%)", medium: "hsl(48,90%,52%)", high: "hsl(0,72%,54%)" };
-                    const cc = filterComp === c ? (colors[c] ?? LYTE) : TEXT_FAINT;
+                    const cc = filterComp === c ? (colors[c] ?? KORA) : TEXT_FAINT;
                     return (
                       <button key={c} onClick={() => setFilterComp(c)} style={{ padding: "0.25rem 0.625rem", borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 500, border: `1px solid ${filterComp === c ? `${cc}40` : BORDER}`, background: filterComp === c ? `${cc}12` : "transparent", color: cc, cursor: "pointer" }}>
                         {c === "all" ? "All" : c}
@@ -490,7 +490,7 @@ export default function DecisionSchemaLibraryPage() {
                       <div style={{ display: "flex", gap: "2rem" }}>
                         <div>
                           <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Used</p>
-                          <p style={{ fontSize: "0.9375rem", fontWeight: 700, fontFamily: MONO, color: LYTE, margin: 0 }}>{schema.timesUsed}×</p>
+                          <p style={{ fontSize: "0.9375rem", fontWeight: 700, fontFamily: MONO, color: KORA, margin: 0 }}>{schema.timesUsed}×</p>
                         </div>
                         <div>
                           <p style={{ fontSize: "0.6rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: "0 0 0.2rem" }}>Success rate</p>
@@ -566,7 +566,7 @@ export default function DecisionSchemaLibraryPage() {
   
                     {/* Actions */}
                     <div style={{ background: BG, padding: "1rem 1.5rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                      <button style={{ padding: "0.5rem 1rem", borderRadius: 6, background: `${LYTE}15`, border: `1px solid ${LYTE}30`, cursor: "pointer", fontSize: "0.8125rem", fontWeight: 600, color: LYTE, display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                      <button style={{ padding: "0.5rem 1rem", borderRadius: 6, background: `${KORA}15`, border: `1px solid ${KORA}30`, cursor: "pointer", fontSize: "0.8125rem", fontWeight: 600, color: KORA, display: "flex", alignItems: "center", gap: "0.375rem" }}>
                         <Play size={12} /> Activate schema
                       </button>
                       <button style={{ padding: "0.5rem 1rem", borderRadius: 6, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.8125rem", color: TEXT_SEC, display: "flex", alignItems: "center", gap: "0.375rem" }}>
@@ -593,7 +593,7 @@ export default function DecisionSchemaLibraryPage() {
                 style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}
               >
                 <div>
-                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.75rem" }}>
+                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA, marginBottom: "0.75rem" }}>
                     Architectural Inspiration
                   </p>
                   <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.125rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, marginBottom: "1rem" }}>
@@ -603,8 +603,8 @@ export default function DecisionSchemaLibraryPage() {
                     DARPA KAIROS developed schema-based AI for recognizing complex events from disparate signals — matching temporal patterns to institutional schemas. The SZL Decision Schema Library applies this to enterprise operations: recognizing when a known situation is developing, activating the matching governance-aware response, and measuring whether the outcome matched the prediction.
                   </p>
                   <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
-                    <Link href="/lyte" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: LYTE, color: "hsl(214,18%,4%)", borderRadius: 6, fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }}>
-                      Back to Lyte <ArrowRight size={13} />
+                    <Link href="/lyte" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: KORA, color: "hsl(214,18%,4%)", borderRadius: 6, fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }}>
+                      Back to KORA <ArrowRight size={13} />
                     </Link>
                     <Link href="/lyte/governance-posture" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: "transparent", color: TEXT_SEC, border: `1px solid ${BORDER}`, borderRadius: 6, fontSize: "0.8125rem", fontWeight: 500, textDecoration: "none" }}>
                       Governance Posture <ArrowUpRight size={13} />
@@ -627,7 +627,7 @@ export default function DecisionSchemaLibraryPage() {
                       style={{ padding: "0.875rem 1.125rem", borderRadius: "7px", background: SURFACE, border: `1px solid ${BORDER}` }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
-                        <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: LYTE }}>{item.src}</span>
+                        <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: KORA }}>{item.src}</span>
                         <span style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT }}>{item.principle}</span>
                       </div>
                       <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: 0, lineHeight: 1.5 }}>{item.map}</p>

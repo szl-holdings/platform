@@ -17,12 +17,12 @@ test.beforeEach(async ({}, testInfo) => {
   if (!appAvailable) testInfo.skip();
 });
 
-test.describe('Aegis — Smoke Tests', () => {
+test.describe('PARAGON — Smoke Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${AEGIS_PATH}/`);
   });
 
-  test('loads the Aegis app without fatal errors', async ({ page }) => {
+  test('loads the PARAGON app without fatal errors', async ({ page }) => {
     const body = page.locator('body');
     await expect(body).toBeVisible();
     const errorBoundary = page.locator('text=Something went wrong').first();
@@ -53,7 +53,7 @@ test.describe('Aegis — Smoke Tests', () => {
   });
 });
 
-test.describe('Aegis — Route Smoke Tests', () => {
+test.describe('PARAGON — Route Smoke Tests', () => {
   const routes = [
     { path: '/', label: 'home' },
     { path: '/incidents', label: 'incidents' },
@@ -85,7 +85,7 @@ test.describe('Aegis — Route Smoke Tests', () => {
   }
 });
 
-test.describe('Aegis — User Journey: View Queue → Open Incident → Navigate to Findings', () => {
+test.describe('PARAGON — User Journey: View Queue → Open Incident → Navigate to Findings', () => {
   test('user opens incidents page and Incident Response heading is visible', async ({ page }) => {
     await page.goto(`${AEGIS_PATH}/`);
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
@@ -202,7 +202,7 @@ test.describe('PARAGON Home — Convergence section: Labs → Legal card', () =>
   });
 });
 
-test.describe('Aegis — Mobile Viewport', () => {
+test.describe('PARAGON — Mobile Viewport', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test('SOC home renders on mobile without crash', async ({ page }) => {

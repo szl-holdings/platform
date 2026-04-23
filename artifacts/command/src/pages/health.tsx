@@ -28,7 +28,7 @@ const CONNECTOR_FRESHNESS = [
   },
   {
     id: 'alloy-kb',
-    label: 'Alloy Knowledge Base',
+    label: 'FORGE Knowledge Base',
     source: 'Internal',
     status: 'live' as const,
     lastPoll: '1m ago',
@@ -39,7 +39,7 @@ const CONNECTOR_FRESHNESS = [
   },
   {
     id: 'lyte-signals',
-    label: 'Lyte Signal Bus',
+    label: 'KORA Signal Bus',
     source: 'Internal',
     status: 'fresh' as const,
     lastPoll: '4m ago',
@@ -50,7 +50,7 @@ const CONNECTOR_FRESHNESS = [
   },
   {
     id: 'terra-propertydata',
-    label: 'Terra Property Records',
+    label: 'DOMAINE Property Records',
     source: 'CoreLogic / MLS',
     status: 'fresh' as const,
     lastPoll: '18m ago',
@@ -328,7 +328,7 @@ const FALLBACK_DIMENSIONS: DimensionScore[] = [
     score: 74,
     weight: 0.3,
     signals: [
-      { label: 'SLA compliance', value: '81.5% (Lyte breach)', status: 'bad' },
+      { label: 'SLA compliance', value: '81.5% (KORA breach)', status: 'bad' },
       { label: 'Fleet uptime', value: '99.8%', status: 'good' },
       { label: 'API latency P95', value: '2.4s', status: 'bad' },
       { label: 'Active incidents', value: '2 high', status: 'warn' },

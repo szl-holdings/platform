@@ -4,9 +4,9 @@ export const vesselsMartitimeRisk: DomainProfile = {
   profileId: 'vessels_maritime_risk',
   version: '1.0.0',
   domain: 'vessels_maritime_risk',
-  displayName: 'Vessels — Maritime Risk Intelligence',
+  displayName: 'SEXTANT — Maritime Risk Intelligence',
   description:
-    'Retrieval profile for Vessels, the full-spectrum maritime domain awareness platform. Optimised for vessel incident reports, voyage risk assessments, AIS anomaly logs, dark-vessel detection advisories, sanctions screening records, and port-state control findings. IMO numbers receive a 2× score boost and MMSI identifiers a 1.8× boost, ensuring that structured maritime identifiers deterministically surface the correct vessel record regardless of query phrasing.',
+    'Retrieval profile for SEXTANT, the full-spectrum maritime domain awareness platform. Optimised for vessel incident reports, voyage risk assessments, AIS anomaly logs, dark-vessel detection advisories, sanctions screening records, and port-state control findings. IMO numbers receive a 2× score boost and MMSI identifiers a 1.8× boost, ensuring that structured maritime identifiers deterministically surface the correct vessel record regardless of query phrasing.',
   status: 'active',
 
   chunkingStrategy: {
@@ -22,7 +22,7 @@ export const vesselsMartitimeRisk: DomainProfile = {
     templateId: 'vessels_risk_query_v1',
     version: '1.0.0',
     template:
-      'You are a retrieval query encoder for Vessels, a maritime domain awareness platform. ' +
+      'You are a retrieval query encoder for SEXTANT, a maritime domain awareness platform. ' +
       'Encode the following user question to retrieve maritime risk assessments, vessel profiles, voyage records, ' +
       'AIS anomaly reports, and sanctions screening data. ' +
       'Preserve IMO numbers, MMSI codes, port names, and flag-state references exactly as written.\n\nQuery: {{query}}',
@@ -34,7 +34,7 @@ export const vesselsMartitimeRisk: DomainProfile = {
     templateId: 'vessels_risk_doc_v1',
     version: '1.0.0',
     template:
-      'You are a document encoder for the Vessels maritime intelligence corpus. ' +
+      'You are a document encoder for the SEXTANT maritime intelligence corpus. ' +
       'Encode the following document so it can be retrieved by queries about vessel risk, voyage anomalies, ' +
       'AIS status changes, port-state control outcomes, sanctions flags, and maritime regulatory compliance. ' +
       'Preserve all IMO numbers, MMSI codes, and flag-state references exactly.\n\nDocument: {{document}}',

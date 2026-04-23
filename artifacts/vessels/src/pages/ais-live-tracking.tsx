@@ -348,7 +348,7 @@ const GLOBAL_SUPPLEMENT: LiveVessel[] = [
     id: 's-8',
     mmsi: '767890123',
     imo: '9890123',
-    name: 'NEXUS FORTUNE',
+    name: 'PRAXIS FORTUNE',
     vesselType: 'container',
     flag: 'BS',
     flagEmoji: '🇧🇸',
@@ -1079,7 +1079,7 @@ export default function AisLiveTrackingPage() {
 
       <div className="grid grid-cols-5 gap-px shrink-0" style={{ background: BORDER.subtle }}>
         {[
-          { label: 'Vessels tracked', value: String(stats.total), color: ACCENT },
+          { label: 'SEXTANT tracked', value: String(stats.total), color: ACCENT },
           { label: 'Underway', value: String(stats.underway), color: '#22c55e' },
           {
             label: 'Active alerts',

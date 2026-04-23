@@ -38,7 +38,7 @@ const PRODUCT_ONELINERS = [
 
 const BRAND_GUIDELINES = [
   "Use the full company name 'SZL Holdings' on first reference. Subsequent references may use 'SZL'.",
-  "Product names are capitalized: Lyte, Alloy, Counsel, Vessels, Aegis, Terra.",
+  "Product names are capitalized: KORA, FORGE, Counsel, SEXTANT, PARAGON, Terra.",
   "Do not use 'SZL Holdings Inc.' — the legal entity name is not for press use.",
   "Do not modify logo colors, proportions, or add elements to the logo.",
   "Dark background logos are preferred on dark or colored backgrounds. Light background logos on white.",
@@ -88,7 +88,7 @@ export default function PressPage() {
                 </p>
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Full (3 sentences)</p>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(38,8%,78%)" }}>
-                  SZL Holdings builds governed decision infrastructure — the structural layer between signal detection and action execution. The platform enforces a nine-step governance loop (Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning) across every domain pack: Vessels for maritime intelligence, Aegis for security and defense, Terra for real estate, Counsel for legal operations, and Carlota Jo for premium advisory. SZL is led by founder Stephen Lutar and is in active design-partner engagement with enterprise teams ahead of a Series A raise in 2026.
+                  SZL Holdings builds governed decision infrastructure — the structural layer between signal detection and action execution. The platform enforces a nine-step governance loop (Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning) across every domain pack: SEXTANT for maritime intelligence, PARAGON for security and defense, DOMAINE for real estate, Counsel for legal operations, and Carlota Jo for premium advisory. SZL is led by founder Stephen Lutar and is in active design-partner engagement with enterprise teams ahead of a Series A raise in 2026.
                 </p>
               </div>
             </div>

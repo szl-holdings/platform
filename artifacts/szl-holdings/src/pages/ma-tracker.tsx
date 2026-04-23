@@ -5,10 +5,10 @@ import { Target, CheckCircle } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const deals = [
-  { id: "MA-001", target: "NovaSec Intelligence", sector: "Cybersecurity AI", stage: "LOI Signed", valuation: "$28M", multiple: "8.2x ARR", arr: "$3.4M", strategic: "Enhances Aegis threat intel capabilities", status: "Active", dd: 65, lead: "K. Wilson" },
-  { id: "MA-002", target: "MarineData Co.", sector: "Maritime Analytics", stage: "Due Diligence", valuation: "$14M", multiple: "6.5x ARR", arr: "$2.1M", strategic: "Strengthens Vessels AIS data coverage in APAC", status: "Active", dd: 40, lead: "S. Martinez" },
-  { id: "MA-003", target: "PropAnalytics Ltd.", sector: "Real Estate AI", stage: "Closed", valuation: "$7.2M", multiple: "5.1x ARR", arr: "$1.4M", strategic: "Integrated into Terra analytics module — Q4 2025", status: "Closed", dd: 100, lead: "L. Park" },
-  { id: "MA-004", target: "CloudMetrics Inc.", sector: "DevOps SaaS", stage: "Initial Outreach", valuation: "$42M", multiple: "9.4x ARR", arr: "$4.5M", strategic: "Potential Lyte AIOps feature expansion", status: "Early", dd: 0, lead: "K. Wilson" },
+  { id: "MA-001", target: "NovaSec Intelligence", sector: "Cybersecurity AI", stage: "LOI Signed", valuation: "$28M", multiple: "8.2x ARR", arr: "$3.4M", strategic: "Enhances PARAGON threat intel capabilities", status: "Active", dd: 65, lead: "K. Wilson" },
+  { id: "MA-002", target: "MarineData Co.", sector: "Maritime Analytics", stage: "Due Diligence", valuation: "$14M", multiple: "6.5x ARR", arr: "$2.1M", strategic: "Strengthens SEXTANT AIS data coverage in APAC", status: "Active", dd: 40, lead: "S. Martinez" },
+  { id: "MA-003", target: "PropAnalytics Ltd.", sector: "Real Estate AI", stage: "Closed", valuation: "$7.2M", multiple: "5.1x ARR", arr: "$1.4M", strategic: "Integrated into DOMAINE analytics module — Q4 2025", status: "Closed", dd: 100, lead: "L. Park" },
+  { id: "MA-004", target: "CloudMetrics Inc.", sector: "DevOps SaaS", stage: "Initial Outreach", valuation: "$42M", multiple: "9.4x ARR", arr: "$4.5M", strategic: "Potential KORA AIOps feature expansion", status: "Early", dd: 0, lead: "K. Wilson" },
 ];
 
 const ddChecklistItems = [

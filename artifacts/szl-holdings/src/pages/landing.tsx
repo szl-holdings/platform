@@ -21,7 +21,7 @@ const SURFACE = "hsla(0,0%,100%,0.035)";
 const TEXT = "hsl(38,8%,94%)";
 const TEXT_SEC = "hsl(214,7%,60%)";
 const TEXT_FAINT = "hsl(214,7%,57%)";
-const LYTE = "hsl(192,72%,48%)";
+const KORA = "hsl(192,72%,48%)";
 const MONO = "var(--font-mono)";
 
 const fadeUp = {
@@ -48,7 +48,7 @@ const PLATFORM_TIERS = [
   {
     tier: "Layer 01",
     title: "Platform Command",
-    color: LYTE,
+    color: KORA,
     note: "Operator-facing command surfaces",
     items: [
       { name: getProduct("lyte")?.name ?? "KORA", note: "Operational nerve center — signal stream, situation board, governed action panel" },
@@ -172,7 +172,7 @@ const ONE_SHELL_PRIMITIVES = [
     key: "DashboardShell",
     label: "Unified Shell",
     note: "Collapsible sidebar, top-bar, mobile drawer — shared chrome across all 13 surfaces.",
-    color: LYTE,
+    color: KORA,
   },
   {
     key: "EcosystemNav",
@@ -373,7 +373,7 @@ export default function HomePage() {
                     SZL Holdings
                   </span>
                   <span style={{ width: 1, height: 12, background: BORDER }} />
-                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>
+                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA }}>
                     Governed Decision Operating System
                   </span>
                 </div>
@@ -404,7 +404,7 @@ export default function HomePage() {
                   fontSize: "0.6875rem",
                   fontFamily: MONO,
                   letterSpacing: "0.04em",
-                  color: LYTE,
+                  color: KORA,
                   marginBottom: "1.5rem",
                 }}>
                   Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning
@@ -443,7 +443,7 @@ export default function HomePage() {
                     style={{
                       display: "inline-flex", alignItems: "center", gap: "0.5rem",
                       padding: "0.875rem 1.75rem",
-                      background: LYTE,
+                      background: KORA,
                       color: "hsl(214,18%,4%)",
                       borderRadius: "0.375rem",
                       fontSize: "0.9375rem", fontWeight: 700,
@@ -512,7 +512,7 @@ export default function HomePage() {
               >
                 {EVIDENCE_STATS.map((s, i) => (
                   <div key={i} style={{ flex: 1, background: BG, padding: "1rem 0.875rem", textAlign: "center" }}>
-                    <p style={{ fontSize: "1.25rem", fontWeight: 700, fontFamily: MONO, color: LYTE, margin: 0 }}>{s.value}</p>
+                    <p style={{ fontSize: "1.25rem", fontWeight: 700, fontFamily: MONO, color: KORA, margin: 0 }}>{s.value}</p>
                     <p style={{ fontSize: "0.625rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: 0 }}>{s.label}</p>
                   </div>
                 ))}
@@ -597,7 +597,7 @@ export default function HomePage() {
           <section ref={loopRef} style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(4rem,8vw,5.5rem) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} style={{ marginBottom: "3rem" }}>
-                <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.75rem" }}>
+                <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA, marginBottom: "0.75rem" }}>
                   The Decision Loop
                 </p>
                 <h2 style={{ fontSize: "clamp(1.75rem,3.5vw,2.625rem)", fontWeight: 700, letterSpacing: "-0.026em", color: TEXT, maxWidth: "28ch", marginBottom: "1rem" }}>
@@ -802,7 +802,7 @@ export default function HomePage() {
                     Vertical intelligence built on shared governance.
                   </h2>
                 </div>
-                <Link href="/solutions" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", fontSize: "0.875rem", fontWeight: 600, color: LYTE, textDecoration: "none" }}>
+                <Link href="/solutions" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", fontSize: "0.875rem", fontWeight: 600, color: KORA, textDecoration: "none" }}>
                   All domain packs <ArrowRight size={13} />
                 </Link>
               </m.div>
@@ -969,7 +969,7 @@ export default function HomePage() {
                       onClick={() => analytics.trustCenterView("trust-section", "/")}
                       style={{
                         display: "inline-flex", alignItems: "center", gap: "0.375rem",
-                        fontSize: "0.875rem", fontWeight: 600, color: LYTE,
+                        fontSize: "0.875rem", fontWeight: 600, color: KORA,
                         textDecoration: "none", padding: "0.5rem 1rem",
                         border: "1px solid hsla(192,72%,48%,0.3)", borderRadius: "0.375rem",
                       }}
@@ -1034,11 +1034,11 @@ export default function HomePage() {
                   padding: "3rem 3.5rem",
                   borderRadius: "12px",
                   background: `linear-gradient(135deg, hsla(192,72%,48%,0.07) 0%, hsla(215,72%,58%,0.04) 100%)`,
-                  border: `1px solid ${LYTE}20`,
+                  border: `1px solid ${KORA}20`,
                 }}
               >
                 <div>
-                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.75rem" }}>
+                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA, marginBottom: "0.75rem" }}>
                     KORA — Operational Nerve Center
                   </p>
                   <h3 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, marginBottom: "1rem", maxWidth: "30ch" }}>
@@ -1054,7 +1054,7 @@ export default function HomePage() {
                     style={{
                       display: "inline-flex", alignItems: "center", gap: "0.5rem",
                       padding: "0.875rem 1.75rem",
-                      background: LYTE, color: "hsl(214,18%,4%)",
+                      background: KORA, color: "hsl(214,18%,4%)",
                       borderRadius: "0.375rem",
                       fontSize: "0.9375rem", fontWeight: 700,
                       textDecoration: "none", whiteSpace: "nowrap",
@@ -1105,7 +1105,7 @@ export default function HomePage() {
                     style={{
                       display: "inline-flex", alignItems: "center", gap: "0.5rem",
                       padding: "0.875rem 1.75rem",
-                      background: LYTE, color: "hsl(214,18%,4%)",
+                      background: KORA, color: "hsl(214,18%,4%)",
                       borderRadius: "0.375rem",
                       fontSize: "0.9375rem", fontWeight: 700,
                       textDecoration: "none",

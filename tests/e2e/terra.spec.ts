@@ -18,12 +18,12 @@ test.beforeEach(async ({}, testInfo) => {
   if (!appAvailable) testInfo.skip();
 });
 
-test.describe('Terra — Smoke Tests', () => {
+test.describe('DOMAINE — Smoke Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${TERRA_PATH}/`);
   });
 
-  test('loads Terra app successfully', async ({ page }) => {
+  test('loads DOMAINE app successfully', async ({ page }) => {
     const body = page.locator('body');
     await expect(body).toBeVisible();
     const errorBoundary = page.locator('text=Something went wrong').first();
@@ -55,7 +55,7 @@ test.describe('Terra — Smoke Tests', () => {
   });
 });
 
-test.describe('Terra — Route Smoke Tests', () => {
+test.describe('DOMAINE — Route Smoke Tests', () => {
   const routes = [
     { path: '/', label: 'home' },
     { path: '/dashboard', label: 'dashboard' },
@@ -86,7 +86,7 @@ test.describe('Terra — Route Smoke Tests', () => {
   }
 });
 
-test.describe('Terra — User Journey: Browse Portfolio → View Asset → Create Action', () => {
+test.describe('DOMAINE — User Journey: Browse Portfolio → View Asset → Create Action', () => {
   test('user navigates from dashboard to deals via nav and Deal Pipeline heading is visible', async ({
     page,
   }) => {
@@ -176,7 +176,7 @@ test.describe('Terra — User Journey: Browse Portfolio → View Asset → Creat
 
 const API_BASE = process.env.API_BASE_URL ?? 'http://localhost:80/api';
 
-test.describe('Terra — Pro Forma API Round-Trip', () => {
+test.describe('DOMAINE — Pro Forma API Round-Trip', () => {
   test('proforma CRUD: create → list → update name → delete', async ({ request }) => {
     const payload = {
       projectName: `E2E Test Project — ${Date.now()}`,
@@ -243,7 +243,7 @@ test.describe('Terra — Pro Forma API Round-Trip', () => {
   });
 });
 
-test.describe('Terra — Waterfall API Round-Trip', () => {
+test.describe('DOMAINE — Waterfall API Round-Trip', () => {
   test('waterfall CRUD: create → list → rename → delete', async ({ request }) => {
     const payload = {
       name: `E2E Waterfall — ${Date.now()}`,
@@ -294,7 +294,7 @@ test.describe('Terra — Waterfall API Round-Trip', () => {
   });
 });
 
-test.describe('Terra — Pro Forma Page', () => {
+test.describe('DOMAINE — Pro Forma Page', () => {
   test('pro-forma route serves non-empty HTML without 5xx', async ({ page }) => {
     const res = await page.goto(`${TERRA_PATH}/pro-forma`);
     expect(res?.status()).toBeLessThan(500);
@@ -313,7 +313,7 @@ test.describe('Terra — Pro Forma Page', () => {
   });
 });
 
-test.describe('Terra — Waterfall Calculator Page', () => {
+test.describe('DOMAINE — Waterfall Calculator Page', () => {
   test('waterfall-calculator route serves non-empty HTML without 5xx', async ({ page }) => {
     const res = await page.goto(`${TERRA_PATH}/waterfall-calculator`);
     expect(res?.status()).toBeLessThan(500);
@@ -332,7 +332,7 @@ test.describe('Terra — Waterfall Calculator Page', () => {
   });
 });
 
-test.describe('Terra — Module Routes', () => {
+test.describe('DOMAINE — Module Routes', () => {
   const moduleRoutes = [
     { path: '/pro-forma', label: 'pro forma' },
     { path: '/waterfall-calculator', label: 'waterfall calculator' },
@@ -352,7 +352,7 @@ test.describe('Terra — Module Routes', () => {
   }
 });
 
-test.describe('Terra — Mobile Viewport', () => {
+test.describe('DOMAINE — Mobile Viewport', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test('homepage renders correctly on mobile', async ({ page }) => {
@@ -389,7 +389,7 @@ test.describe('Terra — Mobile Viewport', () => {
   });
 });
 
-test.describe('Terra — Accessibility (axe-core)', () => {
+test.describe('DOMAINE — Accessibility (axe-core)', () => {
   const axeRoutes = [
     { path: '/', label: 'home' },
     { path: '/deals', label: 'deals' },

@@ -159,7 +159,7 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
     },
     {
       id: 'int-2',
-      title: 'Terra asset appreciation signal',
+      title: 'DOMAINE asset appreciation signal',
       severity: 'low',
       description:
         'Dallas-Fort Worth industrial corridor showing 8% YoY appreciation — above portfolio average.',
@@ -171,7 +171,7 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
       title: 'Cross-domain correlation',
       severity: 'info',
       description:
-        'PRISM detected correlation between Aegis perimeter events and Vessels port congestion in Singapore.',
+        'PRISM detected correlation between PARAGON perimeter events and SEXTANT port congestion in Singapore.',
       entities: ['Aegis-Zone-4', 'SG-Port-Authority'],
       action: 'Investigate pattern',
     },

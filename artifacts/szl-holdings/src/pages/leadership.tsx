@@ -17,7 +17,7 @@ const THESIS_POINTS = [
   },
   {
     label: "Architecture before go-to-market",
-    body: "Building one shared spine (Alloy) beneath multiple vertical operating systems is a deliberate architectural bet. It creates compounding leverage: every improvement to the execution fabric benefits every platform simultaneously.",
+    body: "Building one shared spine (FORGE) beneath multiple vertical operating systems is a deliberate architectural bet. It creates compounding leverage: every improvement to the execution fabric benefits every platform simultaneously.",
   },
   {
     label: "Disciplined honesty as strategy",
@@ -64,9 +64,9 @@ const ECOSYSTEM_HEALTH = [
 ];
 
 const CURRENT_FOCUS = [
-  "Design-partner engagements for Lyte — working directly with operators on one instrumented workflow",
+  "Design-partner engagements for KORA — working directly with operators on one instrumented workflow",
   "Investor conversations with a tight principal-only process — no intermediaries",
-  "Architecture refinement across the Alloy execution fabric based on real operator feedback",
+  "Architecture refinement across the FORGE execution fabric based on real operator feedback",
   "Disciplined company-building: no premature scale, no artificial traction signals",
 ];
 
@@ -339,7 +339,7 @@ export default function LeadershipPage() {
                   { cx: 660, cy: 200, label: "KORA", sub: "AIOps", color: "#818cf8" },
                   { cx: 400, cy: 20, label: "IMPERIUM", sub: "Cloud", color: "#a78bfa" },
                   { cx: 260, cy: 250, label: "Carlota Jo", sub: "Advisory", color: "#f472b6" },
-                  { cx: 540, cy: 250, label: "PRAXIS", sub: "→ Aegis Legal", color: "#fbbf24" },
+                  { cx: 540, cy: 250, label: "PRAXIS", sub: "→ PARAGON Legal", color: "#fbbf24" },
                 ].map((node) => (
                   <g key={node.label}>
                     <line x1={node.cx} y1={node.cy} x2="400" y2="140" stroke={`${node.color}25`} strokeWidth="1" strokeDasharray="4 4" />

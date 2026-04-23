@@ -66,9 +66,9 @@ const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
   steps: [
     {
       id: 'welcome',
-      title: 'Welcome to Alloy',
+      title: 'Welcome to FORGE',
       description:
-        'Alloy is the execution fabric of SZL Holdings — automate workflows, orchestrate connectors, and govern every decision with full auditability.',
+        'FORGE is the execution fabric of SZL Holdings — automate workflows, orchestrate connectors, and govern every decision with full auditability.',
       placement: 'center',
       icon: Zap,
     },
@@ -112,7 +112,7 @@ const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
       id: 'ecosystem',
       title: 'Cross-Domain Navigation',
       description:
-        'Switch between domain packs (Terra, Vessels, Aegis) using the ecosystem links at the bottom of the sidebar — all sharing the same data layer.',
+        'Switch between domain packs (DOMAINE, SEXTANT, PARAGON) using the ecosystem links at the bottom of the sidebar — all sharing the same data layer.',
       placement: 'center',
       icon: Globe,
     },
@@ -141,7 +141,7 @@ const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
     {
       id: 'visit-domain',
       label: 'Visit a Domain Pack',
-      description: 'Navigate to Terra, Vessels, or Aegis',
+      description: 'Navigate to DOMAINE, SEXTANT, or PARAGON',
     },
   ],
 };
@@ -567,7 +567,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-sm tracking-wide text-white leading-none">
-                  ALLOY
+                  FORGE
                 </span>
                 <span
                   className="text-[9px] uppercase tracking-widest leading-none mt-0.5"
@@ -825,7 +825,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
                 border: '1px solid rgba(77,124,15,0.2)',
               }}
             >
-              TERRA
+              DOMAINE
             </a>
             <a
               href="/command/operations/"
@@ -836,7 +836,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
                 border: '1px solid rgba(245,158,11,0.2)',
               }}
             >
-              LYTE
+              KORA
             </a>
             <a
               href="/vessels/"
@@ -847,7 +847,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
                 border: '1px solid rgba(56,189,248,0.2)',
               }}
             >
-              VESSELS
+              SEXTANT
             </a>
           </div>
         </div>

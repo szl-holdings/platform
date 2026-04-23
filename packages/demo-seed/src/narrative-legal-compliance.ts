@@ -20,7 +20,7 @@ export const LEGAL_COMPLIANCE_NARRATIVE = {
   scenario: {
     name: 'Matter: Rivera v. Apex Mobility Group — Insurer Clock Violation & Demand Readiness',
     summary:
-      "NY DFS Insurance Regulation 68 requires insurers to acknowledge and respond to demands within defined windows. Apex Mobility Group's insurer has failed to respond within the 30-day acknowledgement window. PRISM Counsel detected the clock violation, scored demand readiness at 91%, and surfaced a recommendation to issue formal demand and trigger the bad faith clock.",
+      "NY DFS Insurance Regulation 68 requires insurers to acknowledge and respond to demands within defined windows. Apex Mobility Group's insurer has failed to respond within the 30-day acknowledgement window. Counsel detected the clock violation, scored demand readiness at 91%, and surfaced a recommendation to issue formal demand and trigger the bad faith clock.",
     matter: 'Rivera v. Apex Mobility Group',
     jurisdiction: 'New York State Supreme Court — Kings County',
     regulatoryFramework: 'NY DFS Insurance Regulation 68',
@@ -62,7 +62,7 @@ export const LEGAL_COMPLIANCE_NARRATIVE = {
       severity: 'high',
       title: 'Rivera v. Apex — Insurer acknowledgement window exceeded by 12 days',
       body: 'Continental General Insurance has not acknowledged the Rivera demand within the 30-day window required under NY DFS Reg 68 (§216.6). Demand submitted 2025-12-19. Acknowledgement deadline: 2026-01-18. Current date: 2026-01-30. Violation: 12 days. Demand readiness score: 91%. Bad faith clock trigger available.',
-      source: 'PRISM Counsel — Deadline Compliance Engine',
+      source: 'Counsel — Deadline Compliance Engine',
       confidence: 0.97,
       regulatoryReference: 'NY DFS Insurance Regulation 68 §216.6',
       detectedAt: '2026-01-30T09:15:00Z',
@@ -114,7 +114,7 @@ export const LEGAL_COMPLIANCE_NARRATIVE = {
     },
     recommendation: {
       id: 'demo-rec-leg-001',
-      agent: 'PRISM Counsel AI',
+      agent: 'Counsel AI',
       action:
         'Issue formal Regulation 68 violation notice to Continental General. Attach demand packet at 91% readiness. Request acknowledgement response within 7 days or formal complaint to NY DFS will be filed.',
       rationale:
@@ -140,34 +140,34 @@ export const LEGAL_COMPLIANCE_NARRATIVE = {
         {
           step: 1,
           action: 'Reg 68 violation notice drafted with insurer profile attached',
-          tool: 'PRISM Counsel Document Engine',
+          tool: 'Counsel Document Engine',
         },
         {
           step: 2,
           action: 'Demand packet exported to Word with source citations and metadata',
-          tool: 'PRISM Counsel Export',
+          tool: 'Counsel Export',
         },
         {
           step: 3,
           action:
             'Letter transmitted to Continental General (certified mail + email) — ref RIV-2026-0130',
-          tool: 'Alloy Communication Connector',
+          tool: 'FORGE Communication Connector',
         },
         {
           step: 4,
           action: 'Client (Elena Rivera) notified — plain-language summary sent',
-          tool: 'Alloy Email Connector',
+          tool: 'FORGE Email Connector',
         },
         {
           step: 5,
           action:
             '7-day response deadline calendar event created — escalation if no response by 2026-02-06',
-          tool: 'PRISM Counsel Deadline Engine',
+          tool: 'Counsel Deadline Engine',
         },
         {
           step: 6,
           action: 'NY DFS complaint draft staged — ready for submission if no response',
-          tool: 'PRISM Counsel Compliance Module',
+          tool: 'Counsel Compliance Module',
         },
       ],
       completedAt: '2026-01-30T11:30:00Z',
@@ -186,7 +186,7 @@ export const LEGAL_COMPLIANCE_NARRATIVE = {
     executiveSummary: {
       id: 'demo-exsummary-leg-001',
       headline: 'Rivera v. Apex — Insurer clock violation triggered settlement response in 5 days',
-      body: 'PRISM Counsel detected a 12-day Reg 68 clock violation, scored demand readiness at 91%, and surfaced a recommendation. Managing Attorney approved in 44 minutes. Formal notice issued same day. Insurer responded in 5 days with a settlement conference request — an offer of $395,000 against a band median of $418,000. Proof chain complete for every step.',
+      body: 'Counsel detected a 12-day Reg 68 clock violation, scored demand readiness at 91%, and surfaced a recommendation. Managing Attorney approved in 44 minutes. Formal notice issued same day. Insurer responded in 5 days with a settlement conference request — an offer of $395,000 against a band median of $418,000. Proof chain complete for every step.',
       generatedAt: '2026-02-04T15:00:00Z',
     },
     proofChain: {
@@ -195,13 +195,13 @@ export const LEGAL_COMPLIANCE_NARRATIVE = {
         {
           timestamp: '2026-01-30T09:15:00Z',
           event: 'Clock violation detected — Reg 68 §216.6',
-          actor: 'PRISM Counsel AI',
+          actor: 'Counsel AI',
           sourceDoc: 'Demand submission record 2025-12-19',
         },
         {
           timestamp: '2026-01-30T09:18:00Z',
           event: 'Action recommendation generated',
-          actor: 'PRISM Counsel AI',
+          actor: 'Counsel AI',
           aiModel: 'PRISM-v3',
           confidence: 0.93,
         },
@@ -209,12 +209,12 @@ export const LEGAL_COMPLIANCE_NARRATIVE = {
           timestamp: '2026-01-30T10:02:00Z',
           event: 'Recommendation approved — Sophia Marchetti',
           actor: 'Sophia Marchetti',
-          tool: 'PRISM Counsel Approval Gate',
+          tool: 'Counsel Approval Gate',
         },
         {
           timestamp: '2026-01-30T11:30:00Z',
           event: 'All execution steps confirmed — letter sent, client notified',
-          actor: 'PRISM Counsel',
+          actor: 'Counsel',
           reference: 'RIV-2026-0130',
         },
         {
@@ -234,7 +234,7 @@ export const LEGAL_COMPLIANCE_NARRATIVE = {
       step: 'Matter Signal',
       duration: '2 min',
       narrative:
-        'Sophia opens the PRISM Counsel dashboard. A high-priority matter event is surfaced: the insurer on Rivera v. Apex has violated the 30-day Reg 68 acknowledgement window by 12 days. PRISM detected this automatically — not from a calendar entry, but from tracking the statutory clock.',
+        'Sophia opens the Counsel dashboard. A high-priority matter event is surfaced: the insurer on Rivera v. Apex has violated the 30-day Reg 68 acknowledgement window by 12 days. PRISM detected this automatically — not from a calendar entry, but from tracking the statutory clock.',
       showIn: ['prism-counsel/matter-twin/RIV-001', 'prism-counsel/deadlines'],
     },
     {
@@ -248,14 +248,14 @@ export const LEGAL_COMPLIANCE_NARRATIVE = {
       step: 'Legal Recommendation',
       duration: '2 min',
       narrative:
-        "PRISM Counsel recommends issuing a formal Reg 68 violation notice. Rationale: documented clock violation, insurer's prior pattern, strong demand readiness, clear bad faith trigger. Confidence 93%. Marked as attorney work product.",
+        "Counsel recommends issuing a formal Reg 68 violation notice. Rationale: documented clock violation, insurer's prior pattern, strong demand readiness, clear bad faith trigger. Confidence 93%. Marked as attorney work product.",
       showIn: ['prism-counsel/recommendation', 'prism-counsel/evidence'],
     },
     {
       step: 'Partner Approval',
       duration: '2 min',
       narrative:
-        'Sophia reviews the recommendation, adds her note about citing prior violations, and approves. PRISM Counsel generates the demand packet and routes execution through Alloy. No manual document assembly.',
+        'Sophia reviews the recommendation, adds her note about citing prior violations, and approves. Counsel generates the demand packet and routes execution through Alloy. No manual document assembly.',
       showIn: ['prism-counsel/approval-gate', 'prism-counsel/export'],
     },
     {

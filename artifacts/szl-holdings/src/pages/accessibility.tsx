@@ -167,7 +167,7 @@ export default function AccessibilityPage() {
                 components.
               </li>
               <li>
-                Some legacy pages in the Alloy execution fabric interface are undergoing
+                Some legacy pages in the FORGE execution fabric interface are undergoing
                 accessibility remediation as part of our ongoing development cycle.
               </li>
               <li>

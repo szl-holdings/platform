@@ -806,7 +806,7 @@ export default function CommodityFlowIntelligence() {
               <div className="flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5 text-amber-400" />
                 <span className="text-[11px] font-semibold text-white">
-                  Anchorage Queue — Waiting Vessels
+                  Anchorage Queue — Waiting SEXTANT
                 </span>
               </div>
               <span className="text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.3)' }}>

@@ -14,7 +14,7 @@ const GOVERNANCE_PRINCIPLES = [
   {
     icon: CheckSquare,
     title: "Human-in-the-Loop Gates Are Configurable, Not Optional",
-    body: "HITL approval gates are built into the Alloy execution model at the action-type level. Which actions require approval, who can approve them, and what information they receive are all configurable — but bypassing a gate requires an explicit, attributed override record. There is no silent skip path.",
+    body: "HITL approval gates are built into the FORGE execution model at the action-type level. Which actions require approval, who can approve them, and what information they receive are all configurable — but bypassing a gate requires an explicit, attributed override record. There is no silent skip path.",
   },
   {
     icon: FileText,
@@ -29,7 +29,7 @@ const GOVERNANCE_PRINCIPLES = [
   {
     icon: Eye,
     title: "Model Behavior Is Observable, Not Opaque",
-    body: "Operators can understand why Lyte surfaced a signal or Alloy proposed an action. Signal classification criteria, confidence levels, and routing logic are documented and surfaceable. No black boxes on consequential decisions.",
+    body: "Operators can understand why KORA surfaced a signal or FORGE proposed an action. Signal classification criteria, confidence levels, and routing logic are documented and surfaceable. No black boxes on consequential decisions.",
   },
   {
     icon: GitBranch,
@@ -49,7 +49,7 @@ const SIX_PRIMITIVES = [
 
 const HITL_MODEL = [
   { action: "Signal classification", gate: "Automated (configurable review threshold)", note: "High-confidence classifications routed without approval; low-confidence queued for review." },
-  { action: "Action recommendation", gate: "Human review required", note: "All Alloy action recommendations are reviewed before dispatch." },
+  { action: "Action recommendation", gate: "Human review required", note: "All FORGE action recommendations are reviewed before dispatch." },
   { action: "Low-impact action", gate: "Single approver", note: "Routine workflow tasks with defined scope." },
   { action: "High-impact action", gate: "Dual approval + rationale", note: "Actions affecting external systems, financials, or customer records." },
   { action: "Emergency override", gate: "Post-hoc review required", note: "Override is permitted; immediately logged and flagged for mandatory review." },

@@ -63,7 +63,7 @@ const modules = [
 
 export default function TerraPage() {
   useEffect(() => {
-    document.title = 'Terra — Broker Command Platform | SZL Holdings';
+    document.title = 'DOMAINE — Broker Command Platform | SZL Holdings';
   }, []);
 
   return (
@@ -115,7 +115,7 @@ export default function TerraPage() {
                     color: TERRA_ACCENT,
                   }}
                 >
-                  Terra · Broker Command Platform
+                  DOMAINE · Broker Command Platform
                 </span>
               </div>
 
@@ -144,7 +144,7 @@ export default function TerraPage() {
                   marginBottom: '2.5rem',
                 }}
               >
-                Terra turns listings, inquiry routing, agent coordination, and market visibility
+                DOMAINE turns listings, inquiry routing, agent coordination, and market visibility
                 into command. Not a consumer portal — a precision tool for how brokers actually
                 operate.
               </p>
@@ -321,7 +321,7 @@ export default function TerraPage() {
                     maxWidth: '28rem',
                   }}
                 >
-                  Terra isn't a CRM with a listings tab. It's a command surface built specifically
+                  DOMAINE isn't a CRM with a listings tab. It's a command surface built specifically
                   for how commercial brokers move deals, route inquiries, and manage agent
                   workloads.
                 </p>
@@ -447,8 +447,8 @@ export default function TerraPage() {
                   margin: '0 auto 2rem',
                 }}
               >
-                Terra runs on the Alloy intelligence engine. Every signal it surfaces follows the
-                same doctrine as Lyte and Vessels — observed, understood, decided, executed.
+                DOMAINE runs on the FORGE intelligence engine. Every signal it surfaces follows the
+                same doctrine as KORA and SEXTANT — observed, understood, decided, executed.
               </p>
               <div
                 style={{

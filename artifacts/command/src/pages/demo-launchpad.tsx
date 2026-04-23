@@ -158,7 +158,7 @@ const ALL_STOPS: DemoStop[] = [
   },
   {
     id: 'alloy-audit',
-    label: 'Alloy Audit Trail',
+    label: 'FORGE Audit Trail',
     domain: 'FORGE',
     domainColor: '#d4a054',
     description: 'Every decision, every agent action, every approval — immutable proof chain.',
@@ -280,7 +280,7 @@ const DEMO_PATHS: Record<DemoLength, { label: string; description: string; stopI
   },
   20: {
     label: '20-Minute',
-    description: 'Full wedge. Lyte + Alloy + Terra as the live-data proof.',
+    description: 'Full wedge. KORA + FORGE + DOMAINE as the live-data proof.',
     stopIds: [
       'command-overview',
       'lyte-signals',
@@ -947,31 +947,31 @@ export function DemoLaunchpad() {
               </p>
               {[
                 {
-                  label: 'Lyte — Decision Intelligence',
+                  label: 'KORA — Decision Intelligence',
                   color: '#4ade80',
                   href: '/lyte/',
                   status: 'LIVE',
                 },
                 {
-                  label: 'Alloy — Policy Compiler',
+                  label: 'FORGE — Policy Compiler',
                   color: '#4ade80',
                   href: `${BASE}/operations/alloy/policy-compiler`,
                   status: 'LIVE',
                 },
                 {
-                  label: 'Terra — Real Estate Intelligence',
+                  label: 'DOMAINE — Real Estate Intelligence',
                   color: '#4ade80',
                   href: '/terra/',
                   status: 'LIVE',
                 },
                 {
-                  label: 'Aegis — Cyber Resilience',
+                  label: 'PARAGON — Cyber Resilience',
                   color: '#4ade80',
                   href: '/aegis/',
                   status: 'LIVE',
                 },
                 {
-                  label: 'Vessels — Maritime Intelligence',
+                  label: 'SEXTANT — Maritime Intelligence',
                   color: '#4ade80',
                   href: '/vessels/',
                   status: 'LIVE',
@@ -1175,8 +1175,8 @@ export function DemoLaunchpad() {
                   'Open this page, then launch each stop — mark complete as you go.',
                   'Decision Twin runs in full simulation mode — no live write-back.',
                   'Policy Compiler shows real compilation with sandbox validation.',
-                  'Terra data is NYC Open Data (city-provided, CC0 licensed).',
-                  'Aegis incidents are labeled SCENARIO throughout all views.',
+                  'DOMAINE data is NYC Open Data (city-provided, CC0 licensed).',
+                  'PARAGON incidents are labeled SCENARIO throughout all views.',
                   'Use Reset to restore clean state before a fresh audience.',
                 ].map((note, i) => (
                   <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>

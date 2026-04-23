@@ -128,7 +128,7 @@ export default function GovernedCockpit() {
             </div>
             <div>
               <div className="text-sm font-semibold" style={{ color: '#c8d8e8' }}>
-                Pulse — Governed Executive Briefing
+                LUMINA — Governed Executive Briefing
               </div>
               <div className="text-xs" style={{ color: '#4a6070' }}>
                 Every briefing signal, dissent, and decision carries a full proof chain
@@ -151,7 +151,7 @@ export default function GovernedCockpit() {
             className="text-xs uppercase tracking-widest font-semibold"
             style={{ color: '#4a6070' }}
           >
-            Executive Intelligence · Deterministic Fallback (Alloy integration active)
+            Executive Intelligence · Deterministic Fallback (FORGE integration active)
           </span>
         </div>
 

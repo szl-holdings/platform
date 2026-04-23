@@ -27,7 +27,7 @@ import type { PipelineRun, RuntimeStartOptions } from '../types.js';
 
 export const prismCounselEvidencePackagingWorkflow = defineWorkflow({
   id: 'prism-counsel-evidence-packaging',
-  name: 'PRISM Counsel — Matter Evidence Packaging and Deadline Escalation',
+  name: 'Counsel — Matter Evidence Packaging and Deadline Escalation',
   description:
     'Retrieves active matter records, documents, and deadline schedules. ' +
     'Packages structured evidence bundles for attorney review. ' +
@@ -38,7 +38,7 @@ export const prismCounselEvidencePackagingWorkflow = defineWorkflow({
 
   policy: definePolicy({
     id: 'prism-counsel-evidence-policy',
-    name: 'PRISM Counsel Evidence Packaging Policy',
+    name: 'Counsel Evidence Packaging Policy',
     highRiskCategories: ['write-external', 'escalation', 'notification', 'deletion'],
     policyIds: ['pol-001', 'pol-002', 'pol-counsel-evidence'],
     minimumApprovalTier: 'operator',

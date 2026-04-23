@@ -154,7 +154,7 @@ export default function IncidentReporting() {
         {[
           { label: 'Active Critical Zones', value: '2', color: 'text-red-400' },
           { label: 'Incidents (30 days)', value: '61', color: 'text-orange-400' },
-          { label: 'Vessels in High Risk', value: '18', color: 'text-amber-400' },
+          { label: 'SEXTANT in High Risk', value: '18', color: 'text-amber-400' },
           { label: 'Avg Response Time', value: '3.6h', color: 'text-sky-400' },
         ].map(({ label, value, color }) => (
           <Card key={label}>

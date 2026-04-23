@@ -112,7 +112,7 @@ const apps = [
   },
   {
     id: 'alloy-predictive',
-    name: 'Alloy — Predictive',
+    name: 'FORGE — Predictive',
     subtitle: 'Execution Fabric — ENGINE',
     category: 'ai',
     status: 'live',
@@ -121,7 +121,7 @@ const apps = [
     path: '/alloy/creative',
     obsSlug: 'alloy',
     description:
-      "Alloy's predictive intelligence layer — scenario modeling, confidence scoring, and decision intelligence powering the UNDERSTAND layer across the SZL ecosystem.",
+      "FORGE's predictive intelligence layer — scenario modeling, confidence scoring, and decision intelligence powering the UNDERSTAND layer across the SZL ecosystem.",
     features: ['Scenario Modeling', 'Confidence Scoring', 'Prediction Studio', 'Risk Analysis'],
     kpi: '$5.1M ARR',
     market: '$14.8B TAM',
@@ -157,7 +157,7 @@ const kpiStrip = [
   { label: 'Portfolio ARR', value: '$35M+', trend: '+142% YoY', up: true },
   { label: 'Addressable Market', value: '$2.4B+', trend: '6 verticals', up: true },
   { label: 'Platforms Live', value: '7', trend: '1 beta', up: true },
-  { label: 'Daily AI Inferences', value: '18M+', trend: 'Lyte AI fabric', up: true },
+  { label: 'Daily AI Inferences', value: '18M+', trend: 'KORA AI fabric', up: true },
   { label: 'Deployed Capital', value: '$180M+', trend: 'Since 2021', up: true },
   { label: 'Continents Active', value: '3', trend: 'DC · London · Singapore', up: true },
 ];
@@ -188,7 +188,7 @@ const WATCHLIST_DELTAS = [
     icon: Building,
   },
   {
-    entity: 'Alloy Approval Queue',
+    entity: 'FORGE Approval Queue',
     domain: 'Platform',
     change: '14 pending, 6 exceed 72h SLA',
     severity: 'high',
@@ -273,9 +273,9 @@ const POSTURE_TREND = [71, 74, 73, 76, 74, 72, 75, 76, 75, 78, 76, 78];
 
 const AI_BRIEF_PARAGRAPHS = [
   'The SZL ecosystem is operating at a composite posture of 76/100 — moderately elevated risk across security and operational dimensions. Two critical items require executive attention within the next two hours.',
-  'Aegis has confirmed active exploitation of CVE-2025-1337 across three internal hosts (auth-svc, api-gw, reporting). Correlated IMPERIUM drift confirms the attack vector was the unrestricted egress rule on sg-0xf823b1a. Isolation and remediation are the immediate priority.',
-  "Vessels flags MV Adriatic Star with a 6h20m AIS dark gap last fixed at Strait of Messina. OFAC screening is in progress. The temporal correlation with Terra's NYC portfolio distress cluster warrants monitoring but does not indicate direct causation.",
-  'Platform operations: 14 Alloy workflows are queued, six exceeding the 72-hour SLA threshold, which is compounding response latency in the Aegis incident stream. Escalation required.',
+  'PARAGON has confirmed active exploitation of CVE-2025-1337 across three internal hosts (auth-svc, api-gw, reporting). Correlated IMPERIUM drift confirms the attack vector was the unrestricted egress rule on sg-0xf823b1a. Isolation and remediation are the immediate priority.',
+  "SEXTANT flags MV Adriatic Star with a 6h20m AIS dark gap last fixed at Strait of Messina. OFAC screening is in progress. The temporal correlation with DOMAINE's NYC portfolio distress cluster warrants monitoring but does not indicate direct causation.",
+  'Platform operations: 14 FORGE workflows are queued, six exceeding the 72-hour SLA threshold, which is compounding response latency in the PARAGON incident stream. Escalation required.',
 ];
 
 const SEV_COLORS: Record<string, string> = {
@@ -463,7 +463,7 @@ function AIBriefPanel() {
           <Sparkles className="w-3.5 h-3.5 text-primary" />
           AI Executive Brief
         </h3>
-        <span className="text-[10px] text-muted-foreground font-mono">Alloy · 4m ago</span>
+        <span className="text-[10px] text-muted-foreground font-mono">FORGE · 4m ago</span>
       </div>
       <div className="space-y-2">
         {AI_BRIEF_PARAGRAPHS.slice(0, expanded ? undefined : 2).map((para, i) => (
@@ -484,7 +484,7 @@ function AIBriefPanel() {
           href="/pulse/"
           className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 ml-auto"
         >
-          Open Pulse <ArrowUpRight className="w-2.5 h-2.5" />
+          Open LUMINA <ArrowUpRight className="w-2.5 h-2.5" />
         </Link>
       </div>
       <div className="mt-3 pt-3 border-t border-border/30">
@@ -492,7 +492,7 @@ function AIBriefPanel() {
           Evidence sources
         </p>
         <div className="flex flex-wrap gap-1">
-          {['Aegis SOC', 'Vessels AIS', 'OFAC SDN', 'PRISM Calendar', 'IMPERIUM Drift'].map(
+          {['PARAGON SOC', 'SEXTANT AIS', 'OFAC SDN', 'PRISM Calendar', 'IMPERIUM Drift'].map(
             (src) => (
               <span
                 key={src}
@@ -702,7 +702,7 @@ function TerraIntelPanel() {
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
           <Building className="w-3.5 h-3.5" style={{ color: '#4d7c0f' }} />
-          Terra Intel
+          DOMAINE Intel
         </h3>
         <a
           href="/terra/"
@@ -1364,7 +1364,7 @@ export default function CommandCenter() {
                 <Target className="w-3.5 h-3.5 text-primary" />
                 <h3 className="text-xs font-semibold">Recommendations</h3>
                 <span className="ml-auto text-[10px] text-muted-foreground font-mono">
-                  Alloy v2.4.1
+                  FORGE v2.4.1
                 </span>
               </div>
               <div className="space-y-2">
@@ -1383,7 +1383,7 @@ export default function CommandCenter() {
             {/* Stale source warnings */}
             <StaleSourcesWarning />
 
-            {/* Terra Intel — live portfolio data from DOMAINE */}
+            {/* DOMAINE Intel — live portfolio data from DOMAINE */}
             <TerraIntelPanel />
 
             {/* Watchlist Deltas */}

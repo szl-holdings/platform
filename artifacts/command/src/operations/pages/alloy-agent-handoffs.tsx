@@ -71,8 +71,8 @@ const STATUS_CFG: Record<
 const HANDOFFS: AgentHandoff[] = [
   {
     id: 'A2A-0041',
-    fromAgent: 'Alloy Orchestrator',
-    toAgent: 'Vessels Route Optimizer',
+    fromAgent: 'FORGE Orchestrator',
+    toAgent: 'SEXTANT Route Optimizer',
     toAgentType: 'internal',
     subtask: 'Calculate alternate routes for 3 vessels affected by Pacific storm',
     context: 'Storm impact radius: 450nm · Fleet: Pacific cluster · SLA: 6h deadline',
@@ -93,8 +93,8 @@ const HANDOFFS: AgentHandoff[] = [
   },
   {
     id: 'A2A-0040',
-    fromAgent: 'Alloy Orchestrator',
-    toAgent: 'Terra Valuation Agent',
+    fromAgent: 'FORGE Orchestrator',
+    toAgent: 'DOMAINE Valuation Agent',
     toAgentType: 'internal',
     subtask: 'Run DCF valuation on 2 assets flagged by ownership conflict detector',
     context:
@@ -116,8 +116,8 @@ const HANDOFFS: AgentHandoff[] = [
   },
   {
     id: 'A2A-0039',
-    fromAgent: 'Alloy Orchestrator',
-    toAgent: 'Aegis Compliance Agent',
+    fromAgent: 'FORGE Orchestrator',
+    toAgent: 'PARAGON Compliance Agent',
     toAgentType: 'internal',
     subtask: 'Verify security controls for Q1 compliance certification',
     context: 'Framework: NIST CSF · Scope: 47 controls · Deadline: Q1 close',
@@ -130,7 +130,7 @@ const HANDOFFS: AgentHandoff[] = [
   },
   {
     id: 'A2A-0038',
-    fromAgent: 'Alloy Orchestrator',
+    fromAgent: 'FORGE Orchestrator',
     toAgent: 'PRISM Legal Research Agent',
     toAgentType: 'internal',
     subtask: 'Research jurisdiction-specific charter compliance requirements for Vessel MV-009',
@@ -142,7 +142,7 @@ const HANDOFFS: AgentHandoff[] = [
   },
   {
     id: 'A2A-0037',
-    fromAgent: 'Alloy Orchestrator',
+    fromAgent: 'FORGE Orchestrator',
     toAgent: 'ext:weather-forecast-api',
     toAgentType: 'remote',
     subtask: 'Fetch 72h weather forecast for Pacific shipping corridor (lat 30-45N, lon 140-165E)',
@@ -164,7 +164,7 @@ const HANDOFFS: AgentHandoff[] = [
   },
   {
     id: 'A2A-0036',
-    fromAgent: 'Alloy Orchestrator',
+    fromAgent: 'FORGE Orchestrator',
     toAgent: 'ext:credit-rating-service',
     toAgentType: 'remote',
     subtask: 'Fetch current credit rating for charter counterparty: Maritime Holdings Ltd',
@@ -386,7 +386,7 @@ function mapApiHandoff(h: Record<string, unknown>): AgentHandoff {
   const respSchema = (h.responseSchema as Record<string, unknown>) ?? {};
   return {
     id: String(h.id ?? h.contractId ?? `A2A-${Date.now()}`),
-    fromAgent: String(h.sourcePackId ?? 'Alloy Orchestrator'),
+    fromAgent: String(h.sourcePackId ?? 'FORGE Orchestrator'),
     toAgent: String(h.targetPackId ?? h.targetEndpoint ?? 'External Agent'),
     toAgentType: h.targetPackId ? 'internal' : 'remote',
     subtask: String(h.description ?? h.name ?? 'Delegated subtask'),
@@ -404,7 +404,7 @@ function mapApiHandoff(h: Record<string, unknown>): AgentHandoff {
 function mapApiHandoffHistory(h: Record<string, unknown>): AgentHandoff {
   return {
     id: String(h.id ?? `A2A-HIS-${Date.now()}`),
-    fromAgent: String(h.sourcePackId ?? 'Alloy Orchestrator'),
+    fromAgent: String(h.sourcePackId ?? 'FORGE Orchestrator'),
     toAgent: String(h.targetPackId ?? 'External Agent'),
     toAgentType: h.targetPackId ? 'internal' : 'remote',
     subtask: String(h.taskDescription ?? h.requestSummary ?? 'Delegated subtask'),
@@ -461,7 +461,7 @@ export default function AlloyAgentHandoffsPage() {
             className="text-[9px] font-mono uppercase tracking-widest"
             style={{ color: ACCENT }}
           >
-            Alloy · A2A Protocol
+            FORGE · A2A Protocol
           </span>
         </div>
         <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>
@@ -479,7 +479,7 @@ export default function AlloyAgentHandoffsPage() {
       >
         <Network className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: '#4a90b8' }} />
         <p className="text-[9px] leading-relaxed" style={{ color: TEXT.secondary }}>
-          Alloy implements the A2A (Agent-to-Agent) delegation protocol. When the orchestrator
+          FORGE implements the A2A (Agent-to-Agent) delegation protocol. When the orchestrator
           delegates a subtask, it sends a structured handoff with full context, receives a
           delegation receipt, and tracks status until completion. Internal agents and remote APIs
           are treated uniformly.

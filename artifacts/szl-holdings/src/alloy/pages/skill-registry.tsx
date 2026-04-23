@@ -571,7 +571,7 @@ export default function SkillRegistry() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#4B8BDB' }}
             >
-              Alloy · Skill Registry
+              FORGE · Skill Registry
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Skill Registry</h1>
@@ -601,7 +601,7 @@ export default function SkillRegistry() {
           }}
         >
           <Radio className="w-3 h-3 shrink-0 animate-pulse" />
-          Demo Environment — Showing registered skills. Connect the Alloy API for live data.
+          Demo Environment — Showing registered skills. Connect the FORGE API for live data.
         </div>
       )}
 

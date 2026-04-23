@@ -304,7 +304,7 @@ const DEMO_ACTIONS: DemoAction[] = [
       {
         id: 'e4a',
         label: 'Stalled Vendors',
-        value: 'Nexus Corp, Dataplex, Orion Supply',
+        value: 'PRAXIS Corp, Dataplex, Orion Supply',
         source: 'vendor-pipeline-tracker',
       },
       {

@@ -154,7 +154,7 @@ export default function SimulationPanelPage() {
       assignedTo?: string;
     }) =>
       api.workflowActions.create({ entityType: 'simulation', entityId, actionType, assignedTo }),
-    onSuccess: () => toast.success('Workflow action triggered via Alloy'),
+    onSuccess: () => toast.success('Workflow action triggered via FORGE'),
     onError: () => toast.error('Failed to trigger workflow'),
   });
 
@@ -542,7 +542,7 @@ export default function SimulationPanelPage() {
                           disabled={workflowMutation.isPending}
                         >
                           <AlertTriangle className="w-3 h-3 mr-1" />
-                          Route Gaps via Alloy
+                          Route Gaps via FORGE
                         </Button>
                       )}
                       <Button

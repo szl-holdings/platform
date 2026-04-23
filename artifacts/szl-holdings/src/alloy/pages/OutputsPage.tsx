@@ -21,9 +21,9 @@ export default function OutputsPage() {
         >
           Outputs
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">What Alloy produces</h1>
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">What FORGE produces</h1>
         <p className="text-white/50 max-w-2xl leading-relaxed">
-          Alloy outputs are structured, contextualised, and traceable. Every output type has a
+          FORGE outputs are structured, contextualised, and traceable. Every output type has a
           defined format, approval requirements, and connection to the products that use it.
         </p>
       </div>

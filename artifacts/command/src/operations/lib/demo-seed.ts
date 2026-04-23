@@ -1686,7 +1686,7 @@ export const demoAuditEvents: DemoAuditEvent[] = [
     resource: 'Priority',
     resourceId: 'PRI-004',
     context:
-      "Sarah Donovan escalated renewal assignment priority from 'today' to 'immediate'. Comment: 'Nexus Group health score dropped to 42 overnight — immediate AE assignment critical.'",
+      "Sarah Donovan escalated renewal assignment priority from 'today' to 'immediate'. Comment: 'PRAXIS Group health score dropped to 42 overnight — immediate AE assignment critical.'",
     outcome: 'success',
     ipAddress: '192.168.1.98',
     tags: ['priority', 'escalation', 'manual', 'renewals'],

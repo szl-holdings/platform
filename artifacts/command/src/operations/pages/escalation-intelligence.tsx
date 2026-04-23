@@ -429,7 +429,7 @@ function EscalationCard({ esc }: { esc: EscalationRoute }) {
                 <div className="flex items-center gap-1.5 mb-1.5">
                   <Brain className="w-3 h-3" style={{ color: '#8b5cf6' }} />
                   <span className="text-[9px] font-medium" style={{ color: '#8b5cf6' }}>
-                    Alloy Routing Reasoning
+                    FORGE Routing Reasoning
                   </span>
                 </div>
                 <p className="text-[10px] leading-relaxed" style={{ color: DS.text.secondary }}>

@@ -138,7 +138,7 @@ const SEED_POSTS: TrackingRow[] = [
     post_id: "szl-007",
     publish_date: "2025-03-25",
     pillar: "Portfolio Deep-Dives",
-    title: "Vessels Deep-Dive: The Intelligence Layer No One Talks About",
+    title: "SEXTANT Deep-Dive: The Intelligence Layer No One Talks About",
     substack_opens: 491, substack_open_rate: 41.1, substack_clicks: 55, substack_new_subs: 72,
     medium_views_7d: 1230, medium_views_30d: 1540, medium_reads: 620, medium_fans: 40, medium_read_ratio: 0.50,
     linkedin_impressions: 8400, linkedin_clicks: 230, linkedin_comments: 16,

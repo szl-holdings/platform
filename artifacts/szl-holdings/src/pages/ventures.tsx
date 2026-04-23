@@ -56,7 +56,7 @@ export default function VenturesPage() {
   const __pageMeta = usePageMeta({
     title: "Platform Map \u2014 SZL Holdings",
     description:
-      "The focused platform map for SZL Holdings: Lyte and Alloy as the commercial wedge, with additional lanes staged as expansion value.",
+      "The focused platform map for SZL Holdings: KORA and FORGE as the commercial wedge, with additional lanes staged as expansion value.",
     canonical: "https://szlholdings.com/ventures",
   });
 

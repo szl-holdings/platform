@@ -323,7 +323,7 @@ export default function Settings() {
           Settings
         </h1>
         <p style={{ fontSize: '0.85rem', color: 'var(--pulse-text-muted)' }}>
-          Configure Pulse briefing preferences, notification settings, and classification defaults.
+          Configure LUMINA briefing preferences, notification settings, and classification defaults.
         </p>
         {loadError && (
           <div
@@ -701,7 +701,7 @@ export default function Settings() {
             lineHeight: 1.5,
           }}
         >
-          Receive the formatted Pulse briefing in your inbox every morning at 5:30 AM UTC. Choose
+          Receive the formatted LUMINA briefing in your inbox every morning at 5:30 AM UTC. Choose
           specific domains or leave empty to receive all sections.
         </p>
 
@@ -968,12 +968,12 @@ export default function Settings() {
         </form>
       </div>
 
-      {/* Alloy agents info */}
+      {/* FORGE agents info */}
       <div className="section-card" style={{ padding: '18px 20px', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
           <Zap size={15} color="var(--pulse-text-muted)" />
           <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--pulse-text)' }}>
-            Alloy Agents
+            FORGE Agents
           </h3>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
@@ -1020,7 +1020,7 @@ export default function Settings() {
           </h3>
         </div>
         <p style={{ fontSize: '0.78rem', color: 'var(--pulse-text-muted)', marginBottom: 14 }}>
-          Pulse is included in your SZL Holdings Executive plan. Upgrade for additional briefing
+          LUMINA is included in your SZL Holdings Executive plan. Upgrade for additional briefing
           capacity, custom domains, and dedicated support.
         </p>
         <div style={{ display: 'flex', gap: 8 }}>

@@ -780,7 +780,7 @@ function RequestDemoPanel() {
       <p className="text-sm leading-7 text-white/60 mb-8">
         The SZL Holdings demo covers the full decision workflow — from signal detection through
         recommendation, approval, execution, and audit trail. We'll walk through a live vertical
-        (Counsel, Vessels, or Aegis) and show the shared Alloy execution layer.
+        (Counsel, SEXTANT, or PARAGON) and show the shared FORGE execution layer.
         Sessions are 30–45 minutes.
       </p>
 

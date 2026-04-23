@@ -355,7 +355,7 @@ export default function DecisionReplayPage() {
           </span>
         </div>
         <p className="text-sm text-amber-100/50">
-          Reconstruct who knew what, when — with the full proof chain anchored to the Alloy ledger.
+          Reconstruct who knew what, when — with the full proof chain anchored to the FORGE ledger.
           Use Replay mode to step through events sequentially.
         </p>
       </div>

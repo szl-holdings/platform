@@ -39,21 +39,21 @@ export const CAPITAL_DOCUMENTS: CapitalDocument[] = [
     sections: [
       {
         title: 'Who We Are',
-        content: `SZL Holdings is a technology holding company building command-layer intelligence platforms across five high-consequence verticals: business operations, maritime logistics, cybersecurity, real estate, and premium advisory. Each platform is purpose-built, operationally deployed, and commercially distinct — all running on Alloy, a shared intelligence and automation backbone.
+        content: `SZL Holdings is a technology holding company building command-layer intelligence platforms across five high-consequence verticals: business operations, maritime logistics, cybersecurity, real estate, and premium advisory. Each platform is purpose-built, operationally deployed, and commercially distinct — all running on FORGE, a shared intelligence and automation backbone.
 
 Founded and operated by Stephen Lutar, SZL is a single-founder, capital-efficient company with six live platforms, a unified technical architecture, and a clear path to institutional revenue across government, enterprise, and mid-market segments.`,
       },
       {
         title: 'The Platform Portfolio',
-        content: `• Alloy — Shared AI and automation engine powering all SZL platforms. Workflow orchestration, signal intelligence, document automation, and connector mesh. Internal infrastructure that creates competitive moat across every product line.
+        content: `• FORGE — Shared AI and automation engine powering all SZL platforms. Workflow orchestration, signal intelligence, document automation, and connector mesh. Internal infrastructure that creates competitive moat across every product line.
 
-• Lyte — Business observability SaaS. Surfaces approval bottlenecks, ownership gaps, and workflow friction before they compound into operational failure. Serves operations teams, COOs, and process owners who have outgrown spreadsheets but can't justify enterprise BI stacks. Target market: $12B+ business observability / operational intelligence.
+• KORA — Business observability SaaS. Surfaces approval bottlenecks, ownership gaps, and workflow friction before they compound into operational failure. Serves operations teams, COOs, and process owners who have outgrown spreadsheets but can't justify enterprise BI stacks. Target market: $12B+ business observability / operational intelligence.
 
-• Vessels — Maritime command intelligence platform. Fleet tracking, port intelligence, cargo visibility, and risk monitoring for shipping operators, port authorities, maritime insurers, and commodity traders. First purpose-built maritime command surface outside legacy AIS tools. Target market: $8B+ maritime intelligence and fleet management.
+• SEXTANT — Maritime command intelligence platform. Fleet tracking, port intelligence, cargo visibility, and risk monitoring for shipping operators, port authorities, maritime insurers, and commodity traders. First purpose-built maritime command surface outside legacy AIS tools. Target market: $8B+ maritime intelligence and fleet management.
 
-• Aegis — Unified defense and intelligence command platform for security operations. SOC automation, XDR correlation, managed operations, and AI threat intelligence. Purpose-built for MSPs, enterprise security teams, and government agencies. Target market: $35B+ SIEM/SOAR/XDR and managed security.
+• PARAGON — Unified defense and intelligence command platform for security operations. SOC automation, XDR correlation, managed operations, and AI threat intelligence. Purpose-built for MSPs, enterprise security teams, and government agencies. Target market: $35B+ SIEM/SOAR/XDR and managed security.
 
-• Terra — NYC/NYS real estate intelligence platform. Distressed property signals, ownership intelligence, deal pipeline management, and broker command tools. Converts fragmented public data into structured broker and investor workflow. Target market: NYC distressed real estate ($3B+ proptech TAM in metro).
+• DOMAINE — NYC/NYS real estate intelligence platform. Distressed property signals, ownership intelligence, deal pipeline management, and broker command tools. Converts fragmented public data into structured broker and investor workflow. Target market: NYC distressed real estate ($3B+ proptech TAM in metro).
 
 • Carlota Jo Consulting — Premium private advisory serving high-net-worth clients, family offices, and executives. Immediate cash flow, high-margin retainer model, low capital intensity.`,
       },
@@ -63,9 +63,9 @@ Founded and operated by Stephen Lutar, SZL is a single-founder, capital-efficien
 
 1. Services (Immediate) — Carlota Jo generates cash flow from day one via premium retainer engagements. No product risk, high margin.
 
-2. SaaS (Growth) — Lyte, Vessels, Terra, and Aegis all operate subscription or per-seat models. Recurring revenue with high expansion potential.
+2. SaaS (Growth) — KORA, SEXTANT, DOMAINE, and PARAGON all operate subscription or per-seat models. Recurring revenue with high expansion potential.
 
-3. Government / Enterprise (Strategic) — Aegis and Vessels target federal and enterprise contracts with high ACV and long retention cycles.`,
+3. Government / Enterprise (Strategic) — PARAGON and SEXTANT target federal and enterprise contracts with high ACV and long retention cycles.`,
       },
       {
         title: 'Traction',
@@ -87,7 +87,7 @@ Founded and operated by Stephen Lutar, SZL is a single-founder, capital-efficien
         content: `SZL is pursuing a combination of non-dilutive capital (SBA/bank lending, government grants, NY state programs) and strategic angel investment to accelerate go-to-market across the three revenue tracks.
 
 Primary near-term ask: $500K–$1.5M (non-dilutive preferred) to fund:
-• Engineering velocity on Lyte and Vessels revenue features
+• Engineering velocity on KORA and SEXTANT revenue features
 • Sales and GTM infrastructure for enterprise outreach
 • Federal market access preparation (SAM registration, 8(a) eligibility, SBIR applications)
 • Operating runway through first institutional revenue close`,
@@ -121,27 +121,27 @@ Note: All financial figures are projections and assumptions. This document is fo
 
 Six platforms. One architecture. Three revenue tracks. One founder with full ownership and zero co-founder dilution.
 
-We are raising a combination of non-dilutive capital (SBA, bank, government grants, NY state programs) and strategic angel investment to fund the first institutional revenue close across Lyte, Vessels, and Carlota Jo while positioning Aegis for government contract access.`,
+We are raising a combination of non-dilutive capital (SBA, bank, government grants, NY state programs) and strategic angel investment to fund the first institutional revenue close across KORA, SEXTANT, and Carlota Jo while positioning PARAGON for government contract access.`,
       },
       {
         title: 'Market Opportunity',
         content: `The SZL portfolio addresses five distinct markets, each with compelling structural dynamics:
 
-OPERATIONAL DECISION INTELLIGENCE (Lyte)
+OPERATIONAL DECISION INTELLIGENCE (KORA)
 TAM: $12B+ | SAM: $2.1B | SOM (3yr): $45M
-The market for governed operational decision intelligence — making organizational decisions legible, traceable, and policy-gated in real time — is nascent but rapidly forming. Existing tools (Datadog, ServiceNow, PagerDuty) address IT and infrastructure observability. Lyte addresses decision layer intelligence: approval latency, ownership gaps, handoff failures, and workflow friction that compound into organizational breakdown. No incumbent owns this category at the SMB-to-mid-market layer.
+The market for governed operational decision intelligence — making organizational decisions legible, traceable, and policy-gated in real time — is nascent but rapidly forming. Existing tools (Datadog, ServiceNow, PagerDuty) address IT and infrastructure observability. KORA addresses decision layer intelligence: approval latency, ownership gaps, handoff failures, and workflow friction that compound into organizational breakdown. No incumbent owns this category at the SMB-to-mid-market layer.
 
-MARITIME INTELLIGENCE (Vessels)
+MARITIME INTELLIGENCE (SEXTANT)
 TAM: $8B+ | SAM: $1.4B | SOM (3yr): $30M
-Maritime logistics is systematically underserved by modern software. Legacy tools (Fleet Management Systems, AIS platforms) provide position data without intelligence. Vessels provides command-layer intelligence: risk signals, cargo visibility, port congestion analysis, and vessel performance correlation. MARAD, DoD, and DHS alignment creates a government market overlay with sole-source opportunity.
+Maritime logistics is systematically underserved by modern software. Legacy tools (Fleet Management Systems, AIS platforms) provide position data without intelligence. SEXTANT provides command-layer intelligence: risk signals, cargo visibility, port congestion analysis, and vessel performance correlation. MARAD, DoD, and DHS alignment creates a government market overlay with sole-source opportunity.
 
-SECURITY OPERATIONS (Aegis)
+SECURITY OPERATIONS (PARAGON)
 TAM: $35B+ | SAM: $6B | SOM (3yr): $80M
-Enterprise security is consolidating from point products to command platforms. The SIEM/SOAR/XDR convergence creates a vendor consolidation opportunity. Aegis serves MSPs and enterprise security teams with a unified SOC surface that replaces 3–4 fragmented vendor relationships. Government alignment (CISA, DoD, DHS) creates a parallel federal track.
+Enterprise security is consolidating from point products to command platforms. The SIEM/SOAR/XDR convergence creates a vendor consolidation opportunity. PARAGON serves MSPs and enterprise security teams with a unified SOC surface that replaces 3–4 fragmented vendor relationships. Government alignment (CISA, DoD, DHS) creates a parallel federal track.
 
-REAL ESTATE INTELLIGENCE (Terra)
+REAL ESTATE INTELLIGENCE (DOMAINE)
 TAM: $4.5B (NYC/NYS proptech) | SAM: $800M | SOM (3yr): $18M
-NYC is the deepest, most data-rich distressed real estate market in the world. Terra converts fragmented public data (foreclosure filings, tax lien data, ownership records, court judgments) into structured broker and investor workflow. First-mover in NYC distress intelligence as a SaaS product.
+NYC is the deepest, most data-rich distressed real estate market in the world. DOMAINE converts fragmented public data (foreclosure filings, tax lien data, ownership records, court judgments) into structured broker and investor workflow. First-mover in NYC distress intelligence as a SaaS product.
 
 PREMIUM ADVISORY (Carlota Jo)
 TAM: $12B (US HNW advisory) | SAM: $400M | SOM (3yr): $8M
@@ -149,7 +149,7 @@ High-margin, immediate cash flow, zero product risk. Carlota Jo serves as the co
       },
       {
         title: 'Product Portfolio & Architecture',
-        content: `The Alloy backbone is the core competitive moat. It is not a product sold to external customers — it is the shared intelligence and automation infrastructure that powers all six SZL platforms. This architecture means:
+        content: `The FORGE backbone is the core competitive moat. It is not a product sold to external customers — it is the shared intelligence and automation infrastructure that powers all six SZL platforms. This architecture means:
 
 1. Each new platform costs less to build (shared infrastructure)
 2. Each platform's data enriches all others (network intelligence)
@@ -158,7 +158,7 @@ High-margin, immediate cash flow, zero product risk. Carlota Jo serves as the co
 
 This is a structurally different approach from single-product companies. The value of the portfolio is multiplicative, not additive.
 
-Alloy capabilities powering the portfolio:
+FORGE capabilities powering the portfolio:
 • Workflow orchestration and automation engine
 • Signal intelligence and anomaly detection
 • Document generation and template system
@@ -175,43 +175,43 @@ Revenue potential: $250K–$750K ARR at 4–6 active client relationships
 Margin: 80%+ (low overhead, high expertise premium)
 Payback: Immediate
 
-TRACK 2: SaaS (Lyte, Vessels, Terra)
+TRACK 2: SaaS (KORA, SEXTANT, DOMAINE)
 Model: Per-seat or per-unit subscription with enterprise tiers
 Lyte: $150–$400/seat/mo, targeting 10–100 seat deployments
 Vessels: $5,000–$25,000/vessel/year for fleet operators
 Terra: $299–$799/mo broker, $1,500–$5,000/mo investor/fund tier
 Revenue potential (Yr2): $1.2M ARR combined at conservative adoption
 
-TRACK 3: GOVERNMENT / ENTERPRISE (Aegis + Vessels Federal)
+TRACK 3: GOVERNMENT / ENTERPRISE (PARAGON + SEXTANT Federal)
 Model: Annual contract, per-seat enterprise, MSSP reseller
 ACV target: $50K–$500K per enterprise/government relationship
-Vessels DoD/MARAD: program-based contracts via SBIR/STTR path
-Aegis federal: sole-source via 8(a) or WOSB set-aside post-certification
+SEXTANT DoD/MARAD: program-based contracts via SBIR/STTR path
+PARAGON federal: sole-source via 8(a) or WOSB set-aside post-certification
 Revenue potential (Yr3): $2M+ from government vertical`,
       },
       {
         title: 'Competitive Positioning',
         content: `SZL competes differently at each product layer:
 
-Lyte vs. Datadog/ServiceNow/PagerDuty: These tools serve IT and infrastructure teams. Lyte serves operations and business process teams. Different buyer, different problem, different category.
+KORA vs. Datadog/ServiceNow/PagerDuty: These tools serve IT and infrastructure teams. KORA serves operations and business process teams. Different buyer, different problem, different category.
 
-Vessels vs. Windward/MarineTraffic/VesselFinder: Legacy AIS tools provide position data. Vessels provides intelligence — risk signals, port correlation, cargo visibility, and command workflow. Not a map product; a command product.
+SEXTANT vs. Windward/MarineTraffic/VesselFinder: Legacy AIS tools provide position data. SEXTANT provides intelligence — risk signals, port correlation, cargo visibility, and command workflow. Not a map product; a command product.
 
-Aegis vs. CrowdStrike/Splunk/Palo Alto: Large incumbents serve Fortune 500 at $1M+ ACV. Aegis serves MSPs and mid-enterprise at $50K–$250K ACV with a unified surface designed for defensive operations, not endpoint protection.
+PARAGON vs. CrowdStrike/Splunk/Palo Alto: Large incumbents serve Fortune 500 at $1M+ ACV. PARAGON serves MSPs and mid-enterprise at $50K–$250K ACV with a unified surface designed for defensive operations, not endpoint protection.
 
-Terra vs. CoStar/Reonomy/ATTOM: Data providers without workflow. Terra converts data into broker and investor action — distress signals into deal pipeline, ownership records into outreach sequences.`,
+DOMAINE vs. CoStar/Reonomy/ATTOM: Data providers without workflow. DOMAINE converts data into broker and investor action — distress signals into deal pipeline, ownership records into outreach sequences.`,
       },
       {
         title: 'Use of Proceeds',
         content: `12-Month Deployment ($500K round):
-• Engineering (40% / $200K): Lyte revenue feature completion, Vessels enterprise tier, Aegis compliance controls
+• Engineering (40% / $200K): KORA revenue feature completion, SEXTANT enterprise tier, PARAGON compliance controls
 • Sales & GTM (25% / $125K): Outbound infrastructure, CRM, first enterprise sales motion
 • Operations (20% / $100K): Legal structure, IP protection, federal market access preparation
 • Reserve / Working Capital (15% / $75K): Cash buffer through first institutional revenue
 
 24-Month Milestone Unlock ($1.5M round):
-• Months 1–6: Lyte first paying customers ($15K ARR), Carlota Jo to $120K ARR, SAM.gov registration complete
-• Months 7–12: Vessels first fleet operator ($30K ARR), Aegis first MSP customer ($40K ARR), 8(a) application submitted
+• Months 1–6: KORA first paying customers ($15K ARR), Carlota Jo to $120K ARR, SAM.gov registration complete
+• Months 7–12: SEXTANT first fleet operator ($30K ARR), PARAGON first MSP customer ($40K ARR), 8(a) application submitted
 • Months 13–18: $250K ARR combined SaaS, first government contract awarded
 • Months 19–24: $600K+ ARR, Series A trigger metrics hit`,
       },
@@ -234,7 +234,7 @@ Scaling plan: First hires will be sales (months 3–6), then engineering (months
 
 Market adoption timing: Mitigated by three parallel revenue tracks — if SaaS adoption is slow, services revenue covers operations. If government timeline extends, commercial SaaS covers.
 
-Competitive entry: Mitigated by Alloy architecture — competitors cannot replicate the interconnected platform without years of infrastructure investment.
+Competitive entry: Mitigated by FORGE architecture — competitors cannot replicate the interconnected platform without years of infrastructure investment.
 
 Regulatory/certification risk: Mitigated by early MWBE, 8(a), and SAM.gov preparation. Not dependent on any single certification for core revenue.
 
@@ -300,10 +300,10 @@ Combined addressable opportunity: $72B+
 First-mover position in three categories with no direct incumbent.`,
       },
       {
-        title: 'Slide 5: The Alloy Architecture',
+        title: 'Slide 5: The FORGE Architecture',
         content: `Why this is hard to replicate:
 
-Alloy is not a product — it's the operating system for all six platforms. Every platform benefits from:
+FORGE is not a product — it's the operating system for all six platforms. Every platform benefits from:
 • Shared workflow orchestration
 • Shared AI intelligence and signal processing
 • Shared document engine and template system
@@ -315,11 +315,11 @@ A competitor building one platform starts from zero. We started from the archite
       {
         title: 'Slide 6: Product Status',
         content: `Built and operational:
-✓ Alloy backbone (orchestration, AI, connectors)
-✓ Lyte platform (business observability, core monitoring)
-✓ Vessels platform (AIS integration, fleet intelligence)
-✓ Aegis platform (SOC, XDR, managed operations layer)
-✓ Terra platform (distress data, broker workflow)
+✓ FORGE backbone (orchestration, AI, connectors)
+✓ KORA platform (business observability, core monitoring)
+✓ SEXTANT platform (AIS integration, fleet intelligence)
+✓ PARAGON platform (SOC, XDR, managed operations layer)
+✓ DOMAINE platform (distress data, broker workflow)
 ✓ Carlota Jo (active advisory practice)
 ✓ Capital Readiness OS (bank/angel/government document infrastructure)
 
@@ -337,10 +337,10 @@ Track 1: Services (Cash Flow Now)
 Carlota Jo advisory — $250K–$750K ARR potential at 4–6 client relationships. High margin, no product risk, pays operations while SaaS scales.
 
 Track 2: SaaS (Recurring Revenue)
-Lyte, Vessels, Terra — subscription and per-unit pricing. $1.2M ARR target in 24 months. Enterprise tiers available on all three.
+KORA, SEXTANT, DOMAINE — subscription and per-unit pricing. $1.2M ARR target in 24 months. Enterprise tiers available on all three.
 
 Track 3: Government / Enterprise (Strategic Revenue)
-Aegis + Vessels federal — contract-based, annual, $50K–$500K ACV. Supported by MWBE, 8(a), WOSB, SBIR/STTR strategy.`,
+PARAGON + SEXTANT federal — contract-based, annual, $50K–$500K ACV. Supported by MWBE, 8(a), WOSB, SBIR/STTR strategy.`,
       },
       {
         title: 'Slide 8: Traction',
@@ -411,7 +411,7 @@ Year 3 (2028) — Series A Ready:
 Non-dilutive sources being pursued in parallel:
 • SBA 7(a) or CDFI loan: $200K–$500K
 • NY MWBE certification → state contract set-asides
-• SBIR Phase I (NSF for Lyte, DoD for Vessels/Aegis): $275K each
+• SBIR Phase I (NSF for KORA, DoD for Vessels/Aegis): $275K each
 • NY Excelsior Jobs Program: tax credits on qualifying jobs
 
 Angel equity structure:
@@ -509,20 +509,20 @@ MARKET DOCUMENTS
 
   {
     id: 'lyte-one-pager',
-    title: 'Lyte — Investor Product One-Pager',
+    title: 'KORA — Investor Product One-Pager',
     lane: 'KORA',
     channel: 'investor',
     type: 'one_pager',
     description:
-      'Product one-pager for investors: what Lyte does, who it serves, why now, competitive landscape.',
+      'Product one-pager for investors: what KORA does, who it serves, why now, competitive landscape.',
     status: 'ready',
     printable: true,
     sections: [
       {
-        title: 'What Lyte Does',
-        content: `Lyte is a business observability platform that makes organizational operations legible in real time. It surfaces approval bottlenecks, ownership gaps, process latency, and workflow friction — before they compound into operational failure.
+        title: 'What KORA Does',
+        content: `KORA is a business observability platform that makes organizational operations legible in real time. It surfaces approval bottlenecks, ownership gaps, process latency, and workflow friction — before they compound into operational failure.
 
-Think of it as Datadog for business operations, not IT infrastructure. Where Datadog tells you when a server goes down, Lyte tells you when an approval has been waiting 14 days, who owns the decision, and what's blocked downstream because of it.`,
+Think of it as Datadog for business operations, not IT infrastructure. Where Datadog tells you when a server goes down, KORA tells you when an approval has been waiting 14 days, who owns the decision, and what's blocked downstream because of it.`,
       },
       {
         title: 'The Problem',
@@ -536,10 +536,10 @@ Current tools don't solve this:
 • Enterprise BPM (ServiceNow, SAP): six-figure implementations that SMBs can't afford
 • BI dashboards: historical, not operational
 
-Lyte addresses the observability gap between "we have process documentation" and "we can see our processes operating in real time."`,
+KORA addresses the observability gap between "we have process documentation" and "we can see our processes operating in real time."`,
       },
       {
-        title: 'Who Buys Lyte',
+        title: 'Who Buys KORA',
         content: `Primary buyer: Operations directors, COOs, and process owners at 50–500 person organizations who have outgrown spreadsheets but can't justify enterprise BPM stacks.
 
 Verticals with highest urgency:
@@ -571,14 +571,14 @@ SOM (Year 3): $45M — Achievable through direct outbound to ops-heavy verticals
       },
       {
         title: 'Competitive Positioning',
-        content: `Lyte is NOT competing with Datadog, ServiceNow, or PagerDuty. These tools serve IT teams. Lyte serves business operations teams — a different buyer, different problem, different category.
+        content: `KORA is NOT competing with Datadog, ServiceNow, or PagerDuty. These tools serve IT teams. KORA serves business operations teams — a different buyer, different problem, different category.
 
-Actual alternatives Lyte replaces:
+Actual alternatives KORA replaces:
 • Spreadsheet-based process tracking (most common)
 • General project management tools used for process tracking (Asana, Monday, Notion)
 • Expensive BPM consultants who build custom reporting
 
-Lyte's differentiation:
+KORA's differentiation:
 • Designed for operations buyers, not IT buyers
 • Real-time process visibility, not project task tracking
 • No implementation required — connects to existing tools via FORGE
@@ -593,7 +593,7 @@ Professional ($250/seat/mo): Unlimited workflows, governed bottleneck detection,
 Enterprise ($400/seat/mo, custom): Full platform, custom SLA, dedicated support, audit compliance reporting
 
 Typical deployment: 10–50 seats. $18K–$240K ACV per customer.
-Expansion revenue: Lyte is naturally sticky — once process visibility is established, teams expand scope, add workflows, and add seats as the platform proves value.`,
+Expansion revenue: KORA is naturally sticky — once process visibility is established, teams expand scope, add workflows, and add seats as the platform proves value.`,
       },
       {
         title: 'Pilot Customer Strategy',
@@ -609,7 +609,7 @@ Phase 2 (Months 4–6): Expand verticals and seed product-led growth
 
 Phase 3 (Months 7–12): Enterprise motion
 • Target 3–5 enterprise accounts in government contracting / compliance-heavy verticals
-• Partner with ops consulting firms who can resell Lyte as part of their engagements`,
+• Partner with ops consulting firms who can resell KORA as part of their engagements`,
       },
     ],
   },
@@ -618,7 +618,7 @@ Phase 3 (Months 7–12): Enterprise motion
 
   {
     id: 'vessels-one-pager',
-    title: 'Vessels — Investor Product One-Pager',
+    title: 'SEXTANT — Investor Product One-Pager',
     lane: 'SEXTANT',
     channel: 'investor',
     type: 'one_pager',
@@ -628,10 +628,10 @@ Phase 3 (Months 7–12): Enterprise motion
     printable: true,
     sections: [
       {
-        title: 'What Vessels Does',
-        content: `Vessels is a maritime command intelligence platform that converts raw AIS position data and fragmented maritime data sources into operational intelligence for fleet operators, shipping companies, port authorities, maritime insurers, and commodity traders.
+        title: 'What SEXTANT Does',
+        content: `SEXTANT is a maritime command intelligence platform that converts raw AIS position data and fragmented maritime data sources into operational intelligence for fleet operators, shipping companies, port authorities, maritime insurers, and commodity traders.
 
-Where legacy AIS tools answer "where is the vessel?", Vessels answers "what is the operational risk, what are the cargo implications, and what does the port situation mean for my schedule?"`,
+Where legacy AIS tools answer "where is the vessel?", SEXTANT answers "what is the operational risk, what are the cargo implications, and what does the port situation mean for my schedule?"`,
       },
       {
         title: 'The Problem',
@@ -647,7 +647,7 @@ The result: real-time operational decisions made on 12–48 hour old data, leadi
 Nobody has built a command layer that integrates all these signals into a unified operational view — until Vessels.`,
       },
       {
-        title: 'Who Buys Vessels',
+        title: 'Who Buys SEXTANT',
         content: `Primary buyers:
 • Ship operators and fleet managers (20–500 vessel fleets)
 • Commodity traders with exposure to shipping delays and demurrage
@@ -709,25 +709,25 @@ Port authority partners:
       },
       {
         title: 'MARAD / DoD / DHS Relevance Brief',
-        content: `Vessels aligns with three federal priorities:
+        content: `SEXTANT aligns with three federal priorities:
 
 MARAD (Maritime Administration):
 • US-flagged vessel tracking and support
 • Maritime workforce intelligence
 • Maritime infrastructure security
-• Alignment: Vessels provides US-flag operator tools + MARAD data integration
+• Alignment: SEXTANT provides US-flag operator tools + MARAD data integration
 
 DoD / Military Sealift Command:
 • Commercial vessel availability for defense logistics
 • Port security and harbor defense
 • Supply chain resilience
-• Alignment: Vessels provides commercial vessel intelligence relevant to defense logistics planning
+• Alignment: SEXTANT provides commercial vessel intelligence relevant to defense logistics planning
 
 DHS / CISA:
 • Port security and critical maritime infrastructure
 • Maritime domain awareness
 • Supply chain security
-• Alignment: Vessels provides real-time vessel risk scoring and cargo visibility for port security contexts
+• Alignment: SEXTANT provides real-time vessel risk scoring and cargo visibility for port security contexts
 
 SBIR/STTR Target Agencies:
 • DoD SBIR: Maritime domain awareness, autonomous logistics
@@ -741,7 +741,7 @@ SBIR/STTR Target Agencies:
 
   {
     id: 'aegis-one-pager',
-    title: 'Aegis — Investor Product One-Pager',
+    title: 'PARAGON — Investor Product One-Pager',
     lane: 'PARAGON',
     channel: 'investor',
     type: 'one_pager',
@@ -751,10 +751,10 @@ SBIR/STTR Target Agencies:
     printable: true,
     sections: [
       {
-        title: 'What Aegis Does',
-        content: `Aegis is a unified defense and intelligence command platform for security operations centers. It consolidates SIEM, SOAR, XDR, and managed threat intelligence into a single command surface — replacing the fragmented 5–8 tool SOC that MSPs and enterprise security teams currently manage.
+        title: 'What PARAGON Does',
+        content: `PARAGON is a unified defense and intelligence command platform for security operations centers. It consolidates SIEM, SOAR, XDR, and managed threat intelligence into a single command surface — replacing the fragmented 5–8 tool SOC that MSPs and enterprise security teams currently manage.
 
-Aegis is designed for the security operator — the analyst sitting in a SOC managing 200 alerts, running incident investigations, and writing compliance reports simultaneously. Not the CISO's boardroom dashboard. The operator's command surface.`,
+PARAGON is designed for the security operator — the analyst sitting in a SOC managing 200 alerts, running incident investigations, and writing compliance reports simultaneously. Not the CISO's boardroom dashboard. The operator's command surface.`,
       },
       {
         title: 'The Problem',
@@ -770,7 +770,7 @@ Total: $250K+/year in tools that don't talk to each other, generating alert nois
 The result: alert fatigue, missed threats, slow incident response, and compliance reports assembled from 5 different dashboards. And this is the MSP's problem for every client they manage.`,
       },
       {
-        title: 'Who Buys Aegis',
+        title: 'Who Buys PARAGON',
         content: `Primary buyer: MSPs (Managed Service Providers) who sell security services to 10–500 client environments. MSPs are the highest-leverage distribution channel — one MSP sale brings 20–100 environments.
 
 Secondary buyer: Enterprise security teams (50–500 employees) who have outgrown their current SIEM but can't afford Splunk at enterprise pricing.
@@ -801,10 +801,10 @@ Typical MSSP ACV: $100K–$500K (covers 20–100 client environments)`,
       },
       {
         title: 'Federal Market Relevance',
-        content: `Aegis is designed from the ground up for federal market alignment:
+        content: `PARAGON is designed from the ground up for federal market alignment:
 
 DoD / CMMC alignment:
-• Aegis controls map to CMMC Level 2 requirements
+• PARAGON controls map to CMMC Level 2 requirements
 • SIEM and audit logging capabilities align with NIST 800-171
 • Multi-factor authentication and privileged access management built in
 
@@ -814,7 +814,7 @@ CISA guidance alignment:
 • Incident response playbooks aligned with CISA IRPs
 
 FedRAMP path:
-• Aegis cloud infrastructure designed for FedRAMP Low/Moderate designation
+• PARAGON cloud infrastructure designed for FedRAMP Low/Moderate designation
 • Current readiness: Low impact baseline achievable in 12–18 months
 • Moderate impact: 18–24 months with additional investment
 
@@ -826,15 +826,15 @@ Government contract paths:
       },
       {
         title: 'Competitive Positioning',
-        content: `Aegis vs. CrowdStrike: CrowdStrike is endpoint protection, not SOC command. $1M+ ACV for enterprise. Aegis is defensive operations at $50K–$250K ACV, positioned as the command layer above the endpoint tool.
+        content: `PARAGON vs. CrowdStrike: CrowdStrike is endpoint protection, not SOC command. $1M+ ACV for enterprise. PARAGON is defensive operations at $50K–$250K ACV, positioned as the command layer above the endpoint tool.
 
-Aegis vs. Splunk: Splunk is a data platform that requires specialized engineers to configure and maintain. Aegis is a purpose-built SOC command surface that analysts can use on day one.
+PARAGON vs. Splunk: Splunk is a data platform that requires specialized engineers to configure and maintain. PARAGON is a purpose-built SOC command surface that analysts can use on day one.
 
-Aegis vs. Palo Alto Networks: Palo Alto competes at the network perimeter. Aegis competes at the operations center — after the perimeter has been breached or is under threat.
+PARAGON vs. Palo Alto Networks: Palo Alto competes at the network perimeter. PARAGON competes at the operations center — after the perimeter has been breached or is under threat.
 
-Aegis vs. Microsoft Sentinel: Sentinel is a capable SIEM but requires significant Azure ecosystem investment. Aegis is cloud-agnostic and designed for MSPs who manage multi-cloud, multi-vendor client environments.
+PARAGON vs. Microsoft Sentinel: Sentinel is a capable SIEM but requires significant Azure ecosystem investment. PARAGON is cloud-agnostic and designed for MSPs who manage multi-cloud, multi-vendor client environments.
 
-The Aegis position: Unified SOC command for the operator, not the vendor. Designed around the analyst's workflow, not the vendor's product roadmap.`,
+The PARAGON position: Unified SOC command for the operator, not the vendor. Designed around the analyst's workflow, not the vendor's product roadmap.`,
       },
     ],
   },
@@ -843,7 +843,7 @@ The Aegis position: Unified SOC command for the operator, not the vendor. Design
 
   {
     id: 'terra-one-pager',
-    title: 'Terra — Investor Product One-Pager',
+    title: 'DOMAINE — Investor Product One-Pager',
     lane: 'DOMAINE',
     channel: 'investor',
     type: 'one_pager',
@@ -853,10 +853,10 @@ The Aegis position: Unified SOC command for the operator, not the vendor. Design
     printable: true,
     sections: [
       {
-        title: 'What Terra Does',
-        content: `Terra is a NYC/NYS real estate intelligence platform that converts fragmented public data into structured deal workflow. It surfaces distressed property signals, maps ownership, tracks legal proceedings, and converts raw data into actionable broker and investor pipeline.
+        title: 'What DOMAINE Does',
+        content: `DOMAINE is a NYC/NYS real estate intelligence platform that converts fragmented public data into structured deal workflow. It surfaces distressed property signals, maps ownership, tracks legal proceedings, and converts raw data into actionable broker and investor pipeline.
 
-Terra answers: "Which properties are in distress right now, who owns them, what is the legal situation, and how do I get in front of them first?"`,
+DOMAINE answers: "Which properties are in distress right now, who owns them, what is the legal situation, and how do I get in front of them first?"`,
       },
       {
         title: 'The Problem',
@@ -868,7 +868,7 @@ Brokers and investors currently:
 • Hire researchers to compile distress reports manually
 • Miss opportunities because they can't monitor continuously
 
-Terra automates the signal collection, normalizes the data, and delivers it as workflow — not a database to query, but a pipeline to act on.`,
+DOMAINE automates the signal collection, normalizes the data, and delivers it as workflow — not a database to query, but a pipeline to act on.`,
       },
       {
         title: 'Market Sizing',
@@ -900,13 +900,13 @@ Data licensing: Normalized NYC distress data licensed to lenders, attorneys, and
 
 Foreclosure volume: NYC commercial and residential foreclosure filings hit multi-year highs in 2023–2025, driven by COVID-era loan modifications expiring, office distress, and rising interest rates. The distress cycle is active and expected to continue through 2027.
 
-Tax lien sales: NYC conducts periodic tax lien sales that create time-sensitive distress opportunities for brokers and investors. Terra monitors and alerts on lien sale eligibility.
+Tax lien sales: NYC conducts periodic tax lien sales that create time-sensitive distress opportunities for brokers and investors. DOMAINE monitors and alerts on lien sale eligibility.
 
-Court proceedings: NYC courts process thousands of foreclosure proceedings through SSCEF. Terra normalizes this data into searchable, monitorable signals.
+Court proceedings: NYC courts process thousands of foreclosure proceedings through SSCEF. DOMAINE normalizes this data into searchable, monitorable signals.
 
-Ownership complexity: NYC has the most complex property ownership structure in the US — LLCs, trusts, partnerships, and offshore entities. Terra's ownership mapping layer navigates this complexity.
+Ownership complexity: NYC has the most complex property ownership structure in the US — LLCs, trusts, partnerships, and offshore entities. DOMAINE's ownership mapping layer navigates this complexity.
 
-Regulatory density: NYC's regulatory environment (HPD violations, DOB orders, SCA compliance) creates additional distress signals that Terra monitors.`,
+Regulatory density: NYC's regulatory environment (HPD violations, DOB orders, SCA compliance) creates additional distress signals that DOMAINE monitors.`,
       },
     ],
   },
@@ -968,7 +968,7 @@ Margin: 80%+ (practice is expertise-intensive, low overhead)`,
 
 3. Legal and financial professional referrals: Attorneys, CPAs, and wealth managers who encounter clients needing operational advisory.
 
-4. SZL Holdings platform network: Clients of other SZL platforms (Carlota Jo target clients often intersect with Vessels, Terra, and Aegis enterprise clients).
+4. SZL Holdings platform network: Clients of other SZL platforms (Carlota Jo target clients often intersect with SEXTANT, DOMAINE, and PARAGON enterprise clients).
 
 Note: Carlota Jo does not engage in public marketing or social media advertising. All acquisition is through confidential, relationship-based channels.`,
       },
@@ -1001,13 +1001,13 @@ Historical retention: Advisory relationships in this market segment typically re
     sections: [
       {
         title: 'Executive Summary',
-        content: `SZL Holdings, Inc. is a technology holding company headquartered in New York, New York. The company designs, builds, and operates a portfolio of six command-layer intelligence platforms: Alloy (automation backbone), Lyte (business observability), Vessels (maritime intelligence), Aegis (cybersecurity operations), Terra (real estate intelligence), and Carlota Jo Consulting (premium advisory).
+        content: `SZL Holdings, Inc. is a technology holding company headquartered in New York, New York. The company designs, builds, and operates a portfolio of six command-layer intelligence platforms: FORGE (automation backbone), KORA (business observability), SEXTANT (maritime intelligence), PARAGON (cybersecurity operations), DOMAINE (real estate intelligence), and Carlota Jo Consulting (premium advisory).
 
 Loan Request: $[AMOUNT — TO BE DETERMINED BASED ON LENDER PROGRAM] for working capital and operating expense support during the company's commercial scaling phase.
 
 Use of Proceeds: Engineering personnel, sales and marketing activation, operational infrastructure, and working capital to support the first institutional revenue close.
 
-Repayment Source: Operating revenue from Carlota Jo (immediate), combined with SaaS subscription revenue from Lyte, Vessels, and Terra scaling to cover full debt service within [12–24 months].
+Repayment Source: Operating revenue from Carlota Jo (immediate), combined with SaaS subscription revenue from KORA, SEXTANT, and DOMAINE scaling to cover full debt service within [12–24 months].
 
 Owner: Stephen Lutar, 100% ownership. [Personal financial information to be provided as part of application package.]
 
@@ -1033,25 +1033,25 @@ The company was founded on the principle that most enterprise software solves pr
         title: 'Market Analysis',
         content: `SZL operates across five distinct markets:
 
-1. BUSINESS OBSERVABILITY (Lyte)
+1. BUSINESS OBSERVABILITY (KORA)
 Market size: $12B+ globally, $2.1B US SAM
 Current state: No dominant platform at mid-market ($18K–$240K ACV)
 Growth driver: Remote work has created invisible process debt; organizations are investing in operational visibility
 Competitive gap: Existing tools are either IT-focused (Datadog) or enterprise-priced (ServiceNow)
 
-2. MARITIME INTELLIGENCE (Vessels)
+2. MARITIME INTELLIGENCE (SEXTANT)
 Market size: $8B+ globally, $1.4B US/European SAM
 Current state: Legacy AIS tools provide position data without intelligence
 Growth driver: Supply chain disruption, IMO regulatory requirements, government maritime funding
 Competitive gap: No command-layer platform exists between raw AIS data and enterprise fleet management suites
 
-3. CYBERSECURITY OPERATIONS (Aegis)
+3. CYBERSECURITY OPERATIONS (PARAGON)
 Market size: $35B+ globally, $6B US MSP/mid-enterprise SAM
 Current state: SOC teams managing 5–8 fragmented tools
 Growth driver: Security consolidation, CMMC/FedRAMP requirements, MSP market growth
 Competitive gap: Unified SOC command surface below the Fortune 500 price point
 
-4. REAL ESTATE INTELLIGENCE (Terra)
+4. REAL ESTATE INTELLIGENCE (DOMAINE)
 Market size: $4.5B NYC/NYS proptech, $800M SAM
 Current state: Brokers and investors manually tracking fragmented public records
 Growth driver: NYC distress cycle active, regulatory complexity increasing
@@ -1081,33 +1081,33 @@ PLANNED HIRES (funded by loan proceeds):
       },
       {
         title: 'Products & Services',
-        content: `ALLOY (Internal Infrastructure — Not Sold Externally)
+        content: `FORGE (Internal Infrastructure — Not Sold Externally)
 Description: Shared AI and automation backbone powering all SZL platforms
 Function: Workflow orchestration, signal intelligence, document automation, connector mesh
 Business value: Creates structural moat — competitors cannot replicate the interconnected architecture
 
-LYTE (SaaS Product)
+KORA (SaaS Product)
 Description: Business observability platform
 Target customers: Operations directors, COOs, process owners at 50–500 person organizations
 Revenue model: Per-seat subscription, $150–$400/seat/month
 Estimated Year 1 revenue: $60K (pilot customers)
 Estimated Year 2 revenue: $350K (15–20 accounts)
 
-VESSELS (SaaS Product)
+SEXTANT (SaaS Product)
 Description: Maritime command intelligence platform
 Target customers: Fleet operators, maritime insurers, government agencies
 Revenue model: Per-vessel annual subscription, $5,000–$15,000/vessel/year
 Estimated Year 1 revenue: $30K (pilot program)
 Estimated Year 2 revenue: $300K (3–5 fleet clients)
 
-AEGIS (SaaS + Services Product)
+PARAGON (SaaS + Services Product)
 Description: Unified security operations command platform
 Target customers: MSPs, enterprise security teams, government contractors
 Revenue model: Per-seat subscription + MSSP licensing, $150–$400/seat/month
 Estimated Year 1 revenue: $40K (first MSP)
 Estimated Year 2 revenue: $250K (3–5 MSP relationships)
 
-TERRA (SaaS Product)
+DOMAINE (SaaS Product)
 Description: NYC real estate intelligence platform
 Target customers: Commercial brokers, distressed property investors, real estate attorneys
 Revenue model: Subscription, $299–$5,000/month based on tier
@@ -1132,7 +1132,7 @@ Lyte: Direct outbound to operations leaders at 50–500 person professional serv
 
 Vessels: Direct outbound to fleet operators and maritime logistics companies. Partnership channel: maritime insurance brokers and port consulting firms who recommend operational tools to clients. Government channel: MARAD, Coast Guard, and DHS SBIR solicitations.
 
-Aegis: MSP partner channel (primary) — recruit 3–5 MSP partners in Year 1 who resell Aegis to their managed client environments. Direct enterprise channel: CISOs and security directors at 200–1,000 person organizations. Government channel: CMMC consultants and defense contractors.
+Aegis: MSP partner channel (primary) — recruit 3–5 MSP partners in Year 1 who resell PARAGON to their managed client environments. Direct enterprise channel: CISOs and security directors at 200–1,000 person organizations. Government channel: CMMC consultants and defense contractors.
 
 Terra: Direct outbound to NYC commercial brokers and distressed property investors. Distribution through NYC real estate associations (REBNY, commercial broker networks) and real estate attorney referrals.
 
@@ -1146,10 +1146,10 @@ YEAR 1 MARKETING BUDGET: $25K–$35K (primarily outbound tooling, content, and e
 
 YEAR 1 (2026) REVENUE PROJECTION
 Carlota Jo: $120,000
-Lyte (pilot): $60,000
-Vessels (pilot): $30,000
-Terra (launch): $50,000
-Aegis (first MSP): $40,000
+KORA (pilot): $60,000
+SEXTANT (pilot): $30,000
+DOMAINE (launch): $50,000
+PARAGON (first MSP): $40,000
 Total Revenue: $300,000
 
 YEAR 1 OPERATING EXPENSES (projected)
@@ -1219,10 +1219,10 @@ Debt service coverage: Projected DSCR of 1.3x by Month 18, 2.5x+ by Month 24`,
         content: `Total Funds (assuming $500K raise): $500,000
 
 ENGINEERING & PRODUCT DEVELOPMENT (35% / $175,000)
-Month 1–3: Lyte revenue tier completion and first paying customer onboarding infrastructure
-Month 1–3: Vessels enterprise tier feature set (API, custom alerts, compliance reporting)
-Month 4–6: Aegis MSSP multi-tenant management layer
-Month 4–9: Terra broker workflow features (deal tracking, outreach automation)
+Month 1–3: KORA revenue tier completion and first paying customer onboarding infrastructure
+Month 1–3: SEXTANT enterprise tier feature set (API, custom alerts, compliance reporting)
+Month 4–6: PARAGON MSSP multi-tenant management layer
+Month 4–9: DOMAINE broker workflow features (deal tracking, outreach automation)
 Month 7–12: Platform stability, security hardening, and compliance controls across all products
 Contractor support: $40,000 (supplemental engineering resources for specific deliverables)
 
@@ -1230,9 +1230,9 @@ SALES & GO-TO-MARKET (25% / $125,000)
 Month 1–3: Sales hire #1 onboarding and ramp ($30K for Q1 including ramp time)
 Month 1–12: CRM and outbound tooling (HubSpot, Apollo, Outreach): $12,000
 Month 1–12: Content and thought leadership: $15,000
-Month 3–6: Lyte pilot outreach campaign: $10,000
-Month 6–12: Vessels fleet operator outreach: $10,000
-Month 3–12: Aegis MSP partner recruitment: $8,000
+Month 3–6: KORA pilot outreach campaign: $10,000
+Month 6–12: SEXTANT fleet operator outreach: $10,000
+Month 3–12: PARAGON MSP partner recruitment: $8,000
 Event participation and trade shows: $20,000
 Government market access preparation (SAM registration, 8(a) prep): $20,000
 
@@ -1257,9 +1257,9 @@ Three months of operating expenses held in reserve to provide buffer against rev
         content: `Projected Additional Capital (from revenue or second raise): $[TO BE DETERMINED]
 
 Month 13–18 priorities:
-• Hire #2 — Senior Software Engineer: Focus on Aegis government compliance and Vessels data pipeline
+• Hire #2 — Senior Software Engineer: Focus on PARAGON government compliance and SEXTANT data pipeline
 • First government contract pursuit: SBIR Phase I proposals submitted (Aegis/DHS, Vessels/DoD)
-• Enterprise sales motion activation: Dedicated enterprise outreach for Lyte and Aegis
+• Enterprise sales motion activation: Dedicated enterprise outreach for KORA and PARAGON
 • MWBE certification completion: NY state procurement access
 
 Month 19–24 priorities:
@@ -1305,27 +1305,27 @@ Month 6: $25,000/month (2 clients)
 Month 9+: $37,500/month (3 clients)
 12-Month total: ~$100,000
 
-LYTE
+KORA
 Month 1–3: $0 (pilot phase)
 Month 4: $5,000/month (1 paying pilot at $5K MRR)
 Month 6: $12,000/month (3 accounts at avg $4K MRR)
 Month 9+: $22,000/month (7 accounts)
 12-Month total: ~$60,000
 
-VESSELS
+SEXTANT
 Month 1–6: $0 (partnership development)
 Month 7: $12,000 one-time pilot
 Month 9+: $5,000/month recurring
 12-Month total: ~$30,000
 
-TERRA
+DOMAINE
 Month 1–2: $0 (beta)
 Month 3: $3,000/month (10 broker accounts at $299)
 Month 6: $8,000/month (20 accounts + investor tier)
 Month 9+: $14,000/month (35+ accounts)
 12-Month total: ~$50,000
 
-AEGIS
+PARAGON
 Month 1–5: $0 (MSP recruitment)
 Month 6: $15,000 first MSP contract
 Month 9+: $8,000/month recurring
@@ -1508,15 +1508,15 @@ Founder handles all product, engineering, BD, and operations.
 
 MONTH 4–6: 2 (+ Sales/BD hire)
 Sales/Business Development Associate: $80K–$100K base + commission
-Focus: Lyte and Carlota Jo commercial activation
+Focus: KORA and Carlota Jo commercial activation
 
 MONTH 7–9: 2–3 (+ part-time contractor or intern)
 Engineering contractor: $40K–$60K annual equivalent (part-time)
-Focus: Vessels enterprise features, Terra broker tools
+Focus: SEXTANT enterprise features, DOMAINE broker tools
 
 MONTH 10–12: 3 (+ Senior Engineer OR full-time contractor)
 Full-time Senior Software Engineer: $120K–$150K
-Focus: Aegis compliance, platform stability, scaling infrastructure
+Focus: PARAGON compliance, platform stability, scaling infrastructure
 
 MONTH 13–18: 4 (+ Government BD hire)
 Government BD / Proposal Writer: $90K–$120K
@@ -1580,10 +1580,10 @@ Note: Year 1 DSCR is below 1.0x due to startup ramp, consistent with the 12-mont
         title: 'Key Assumptions & Sensitivity',
         content: `BASE CASE ASSUMPTIONS:
 • Carlota Jo ramp: 1 client by Month 3, 2 by Month 6, 3 by Month 9 (steady state)
-• Lyte ramp: First paying customer Month 4, growing $3K–$5K MRR per month
-• Vessels ramp: First pilot Month 6, growing $2K–$3K MRR per month
-• Terra ramp: Broker launch Month 3, growing $2K/month
-• Aegis ramp: First MSP Month 9, growing $2K–$4K MRR per month
+• KORA ramp: First paying customer Month 4, growing $3K–$5K MRR per month
+• SEXTANT ramp: First pilot Month 6, growing $2K–$3K MRR per month
+• DOMAINE ramp: Broker launch Month 3, growing $2K/month
+• PARAGON ramp: First MSP Month 9, growing $2K–$4K MRR per month
 • No government contract revenue assumed in base case (upside only)
 
 DOWNSIDE CASE (30% revenue reduction across all SaaS lines):
@@ -1616,7 +1616,7 @@ All projections require CPA review before submission. Actual results will vary.`
         title: 'Professional Background',
         content: `Stephen Lutar is the founder and sole owner of SZL Holdings, Inc. He is a systems architect, builder, and operator with a background spanning workflow design, command systems, multi-domain intelligence, and technology platform development.
 
-Stephen conceived, designed, and built all six SZL platforms from architecture through deployment — including the shared Alloy backbone that powers the entire portfolio. This is not a management background; it is an operational and technical background demonstrated through shipped product.
+Stephen conceived, designed, and built all six SZL platforms from architecture through deployment — including the shared FORGE backbone that powers the entire portfolio. This is not a management background; it is an operational and technical background demonstrated through shipped product.
 
 Key areas of expertise:
 • Systems architecture and platform design
@@ -1686,7 +1686,7 @@ RISK 3: Market Competition
 Description: A well-funded competitor enters one or more of SZL's target markets.
 Probability: Medium | Impact: Medium
 Mitigation:
-• Alloy architecture creates a structural moat — competitors cannot replicate the interconnected system
+• FORGE architecture creates a structural moat — competitors cannot replicate the interconnected system
 • Each platform has first-mover advantage in its specific category
 • Government market positioning is not accessible to most competitors without certifications
 • Customer relationships are deep and system-integrated (high switching cost)
@@ -1696,7 +1696,7 @@ Description: Platform stability, security incidents, or technical failures.
 Probability: Low | Impact: High
 Mitigation:
 • All platforms built with enterprise-grade security practices from ground up
-• Aegis platform provides internal security monitoring
+• PARAGON platform provides internal security monitoring
 • Cloud infrastructure with automatic failover and backup
 • Security audits planned quarterly; penetration testing annually
 • No single-vendor dependency in technical stack
@@ -1734,7 +1734,7 @@ Mitigation:
 IDENTITY DOCUMENTS
 ☐ EIN Verification Letter from IRS (CP-575 or 147C)
 ☐ Business License(s) — all active licenses
-☐ DBA / Fictitious Business Name filings (Alloy, Lyte, Vessels, Aegis, Terra, Carlota Jo)
+☐ DBA / Fictitious Business Name filings (FORGE, KORA, SEXTANT, PARAGON, DOMAINE, Carlota Jo)
 ☐ State registration certificate (Certificate of Good Standing — most recent)
 ☐ Any regulatory licenses specific to business operations
 
@@ -1940,10 +1940,10 @@ APPLICATION: Through ESD's Business Incentives program`,
         content: `STRATEGIC INDUSTRY ALIGNMENT:
 Excelsior Jobs Program targets "strategic industries" — SZL qualifies under multiple:
 
-✓ Scientific Research and Development (R&D for Lyte, Vessels, Aegis)
+✓ Scientific Research and Development (R&D for KORA, SEXTANT, PARAGON)
 ✓ Software Development (all six platforms)
-✓ Financial Services Technology (Terra, Lyte)
-✓ Cybersecurity (Aegis)
+✓ Financial Services Technology (DOMAINE, KORA)
+✓ Cybersecurity (PARAGON)
 
 JOB CREATION REQUIREMENT:
 • Tech companies: Must create at least 5 net new full-time jobs in NYS
@@ -1955,7 +1955,7 @@ WAGE REQUIREMENTS:
 • SZL's planned engineering and sales hires at $80K–$160K easily qualify
 
 R&D CREDIT OPPORTUNITY:
-SZL's Alloy backbone development, Lyte AI algorithms, Vessels maritime intelligence layer, and Aegis threat detection represent qualifying R&D activities. R&D credit could be 50% of the federal R&D credit on qualifying expenses.
+SZL's FORGE backbone development, KORA AI algorithms, SEXTANT maritime intelligence layer, and PARAGON threat detection represent qualifying R&D activities. R&D credit could be 50% of the federal R&D credit on qualifying expenses.
 
 ESTIMATED CREDIT VALUE (projections only):
 Based on 4 new hires at average $100K salary in Year 2:
@@ -2004,13 +2004,13 @@ SZL qualifies as a technology company developing innovative software platforms. 
 • Columbia University Innovation Enterprise Zone
 • NYU Tandon technology partnerships
 
-SZL's Alloy platform and AI-native architecture align with NYSTAR's focus on:
+SZL's FORGE platform and AI-native architecture align with NYSTAR's focus on:
 • Software and data science innovation
-• Cybersecurity technology (Aegis)
-• Maritime technology (Vessels — aligns with NY maritime industry)
+• Cybersecurity technology (PARAGON)
+• Maritime technology (SEXTANT — aligns with NY maritime industry)
 
 SBRA SBIR ASSISTANCE:
-NYSTAR's SBRA program can provide direct assistance navigating federal SBIR applications. This is highly relevant for SZL's SBIR strategy (NSF for Lyte, DoD for Vessels/Aegis, DHS for Aegis).
+NYSTAR's SBRA program can provide direct assistance navigating federal SBIR applications. This is highly relevant for SZL's SBIR strategy (NSF for KORA, DoD for Vessels/Aegis, DHS for PARAGON).
 
 RECOMMENDED ACTION:
 1. Contact NYSTAR (nystar.suny.edu) to identify the closest aligned Innovation Hot Spot
@@ -2048,13 +2048,13 @@ NYC CERTIFICATION TYPES:
         content: `NYC agencies relevant to SZL's platforms:
 
 DOITT / DoITT (Department of Information Technology & Telecommunications):
-NYC's technology procurement agency. Software, cybersecurity, data analytics, and IT services contracts. Aegis (cybersecurity) and Lyte (operational intelligence) align with DOITT's needs.
+NYC's technology procurement agency. Software, cybersecurity, data analytics, and IT services contracts. PARAGON (cybersecurity) and KORA (operational intelligence) align with DOITT's needs.
 
 NYC Department of Finance:
-Tax lien data and property intelligence. Terra's distressed property intelligence is directly relevant to DOF's property data management ecosystem.
+Tax lien data and property intelligence. DOMAINE's distressed property intelligence is directly relevant to DOF's property data management ecosystem.
 
 NYC Office of Management and Budget:
-Operations and efficiency tools. Lyte's operational observability aligns with OMB's focus on government efficiency.
+Operations and efficiency tools. KORA's operational observability aligns with OMB's focus on government efficiency.
 
 NYC Economic Development Corporation:
 Technology and innovation partnership. SZL's platform portfolio and capital readiness infrastructure align with NYCEDC's portfolio approach to economic development.
@@ -2062,7 +2062,7 @@ Technology and innovation partnership. SZL's platform portfolio and capital read
 RECOMMENDED ACTION:
 1. Register on NYC's PASSPort vendor portal (vendor.cityofnewyork.us)
 2. Review NYC SBS certification eligibility (nyc.gov/sbs)
-3. Monitor NYC agency RFPs through PASSPort for Aegis and Lyte opportunities`,
+3. Monitor NYC agency RFPs through PASSPort for PARAGON and KORA opportunities`,
       },
     ],
   },
@@ -2284,7 +2284,7 @@ Most agencies release solicitations 2–4 times per year. NSF releases continuou
 NYSTAR SBRA ASSISTANCE: NY State provides free SBIR application assistance through NYSTAR's SBRA program. Highly recommended for first-time applicants.`,
       },
       {
-        title: 'Lyte — NSF SBIR Alignment',
+        title: 'KORA — NSF SBIR Alignment',
         content: `TARGET AGENCY: National Science Foundation (NSF)
 SBIR PROGRAM OFFICE: NSF SBIR/STTR America's Seed Fund
 
@@ -2294,16 +2294,16 @@ RELEVANT TOPIC AREAS:
 • Phase I Topic: "Enterprise Software and Information Systems" — Business observability platforms for SMB market
 
 WHY NSF:
-NSF funds fundamental technology innovation. Lyte's governed operational intelligence layer — the algorithm that identifies approval bottlenecks from organizational signal data — qualifies as "fundamental R&D" in applied AI/ML for organizational systems.
+NSF funds fundamental technology innovation. KORA's governed operational intelligence layer — the algorithm that identifies approval bottlenecks from organizational signal data — qualifies as "fundamental R&D" in applied AI/ML for organizational systems.
 
 PHASE I PITCH (NSF format):
-Technical Innovation: Alloy-based ML model that learns organizational approval patterns and predicts bottleneck risk before failures occur. Current state of the art cannot do this without large proprietary training datasets. Lyte's approach uses federated learning across anonymized organizational signal data.
+Technical Innovation: Alloy-based ML model that learns organizational approval patterns and predicts bottleneck risk before failures occur. Current state of the art cannot do this without large proprietary training datasets. KORA's approach uses federated learning across anonymized organizational signal data.
 
 Commercial Potential: 500K+ US companies in the target market (50–500 employees, ops-intensive). $12B+ TAM with no dominant solution at the SMB-mid-market layer.
 
 SBIR R&D ACTIVITIES THAT QUALIFY:
 • Developing the federated ML model for approval latency prediction
-• Building the organizational signal normalization layer in Alloy
+• Building the organizational signal normalization layer in FORGE
 • Validating the model against diverse organizational types
 • Developing privacy-preserving anonymization for cross-organizational learning
 
@@ -2316,7 +2316,7 @@ PHASE I BUDGET STRUCTURE (sample):
 Total: ~$275,000`,
       },
       {
-        title: 'Vessels — DoD and DHS/MARAD SBIR Alignment',
+        title: 'SEXTANT — DoD and DHS/MARAD SBIR Alignment',
         content: `TARGET AGENCIES:
 • DoD SBIR (Naval/Maritime topics)
 • DHS Science & Technology Directorate
@@ -2333,42 +2333,42 @@ DHS RELEVANT TOPICS:
 • CISA: "Critical Infrastructure Protection" — Maritime infrastructure security monitoring
 
 DOT/MARAD RELEVANT TOPICS:
-• MARAD: "Maritime Digital Twin Technologies" — Vessels' data integration layer creates foundation for maritime digital twin
-• MARAD: "US-Flag Vessel Support Tools" — Vessels platform can add US-flag tracking features for MARAD-specific deployment
+• MARAD: "Maritime Digital Twin Technologies" — SEXTANT' data integration layer creates foundation for maritime digital twin
+• MARAD: "US-Flag Vessel Support Tools" — SEXTANT platform can add US-flag tracking features for MARAD-specific deployment
 
 WHY NOW FOR GOVERNMENT:
 The global shipping disruptions of 2020–2024 made maritime domain awareness a national security priority. MARAD, DoD, and DHS have increased technology spending on commercial maritime intelligence. SBIR Phase I awards in this space are being made regularly.
 
 PHASE I PITCH (DoD format):
-Technical Innovation: Vessels' multi-source maritime intelligence fusion engine — combining AIS, satellite imagery, port call data, and vessel specification data into a unified risk-scored intelligence feed. DoD need: identifying commercially-available vessels for defense logistics without full military-grade tracking cost.
+Technical Innovation: SEXTANT' multi-source maritime intelligence fusion engine — combining AIS, satellite imagery, port call data, and vessel specification data into a unified risk-scored intelligence feed. DoD need: identifying commercially-available vessels for defense logistics without full military-grade tracking cost.
 
 Commercial Potential: $8B+ global maritime intelligence market. Immediate commercial customers in fleet management, maritime insurance, and port operations.`,
       },
       {
-        title: 'Aegis — DoD and DHS SBIR Alignment',
+        title: 'PARAGON — DoD and DHS SBIR Alignment',
         content: `TARGET AGENCIES:
 • DoD SBIR (CYBERCOM, DIA, NSA-adjacent programs)
 • DHS Science & Technology Directorate (Cybersecurity Division)
 • CISA (limited direct SBIR, but influence on DHS priorities)
 
 DOD RELEVANT TOPICS:
-• CYBERCOM SBIR: "Automated Cyber Defense Operations" — Aegis SOC automation capabilities align with DoD's need for scalable defensive cyber operations
-• DIA/NSA-adjacent: "Threat Intelligence Fusion" — Aegis multi-source threat intelligence correlation
-• DARPA: "AI-Powered Cyber Defense" — Aegis ML threat detection and automated playbook execution
+• CYBERCOM SBIR: "Automated Cyber Defense Operations" — PARAGON SOC automation capabilities align with DoD's need for scalable defensive cyber operations
+• DIA/NSA-adjacent: "Threat Intelligence Fusion" — PARAGON multi-source threat intelligence correlation
+• DARPA: "AI-Powered Cyber Defense" — PARAGON ML threat detection and automated playbook execution
 
 DHS RELEVANT TOPICS:
-• DHS S&T Cybersecurity: "Critical Infrastructure Security Operations" — Aegis SOC platform for securing critical infrastructure operators (energy, water, transportation)
-• DHS S&T: "Federal Civilian Cyber Defense Tools" — Aegis FedRAMP-aligned SOC for civilian agency deployment
-• CISA-adjacent: "Zero Trust Architecture Tools" — Aegis identity and access management layer
+• DHS S&T Cybersecurity: "Critical Infrastructure Security Operations" — PARAGON SOC platform for securing critical infrastructure operators (energy, water, transportation)
+• DHS S&T: "Federal Civilian Cyber Defense Tools" — PARAGON FedRAMP-aligned SOC for civilian agency deployment
+• CISA-adjacent: "Zero Trust Architecture Tools" — PARAGON identity and access management layer
 
 CISA ALIGNMENT:
-While CISA does not directly run SBIR programs, Aegis aligns with CISA's Joint Cyber Defense Collaborative (JCDC) priorities:
+While CISA does not directly run SBIR programs, PARAGON aligns with CISA's Joint Cyber Defense Collaborative (JCDC) priorities:
 • Ransomware prevention and response
 • Election security infrastructure
 • Critical infrastructure cyber resilience
 
 PHASE I PITCH (DHS format):
-Technical Innovation: governed SOC command platform that reduces analyst-to-alert ratio by 10x through automated triage and context enrichment. Current federal SOC platforms require 5–8 analysts for 200-alert environments. Aegis reduces to 1–2 analysts with equivalent coverage.
+Technical Innovation: governed SOC command platform that reduces analyst-to-alert ratio by 10x through automated triage and context enrichment. Current federal SOC platforms require 5–8 analysts for 200-alert environments. PARAGON reduces to 1–2 analysts with equivalent coverage.
 
 Commercial Potential: $35B+ global SIEM/SOAR/XDR market. Immediate commercial customers in MSP market (20,000+ US MSPs managing security for small businesses).`,
       },
@@ -2395,13 +2395,13 @@ SAM REGISTRATION PROCESS
 
 NAICS CODE SELECTION FOR SZL HOLDINGS
 Primary NAICS (select most applicable based on primary revenue):
-• 541511 — Custom Computer Programming Services (Alloy, all platforms)
-• 511210 — Software Publishers (Lyte, Vessels, Aegis, Terra)
+• 541511 — Custom Computer Programming Services (FORGE, all platforms)
+• 511210 — Software Publishers (KORA, SEXTANT, PARAGON, DOMAINE)
 • 518210 — Data Processing, Hosting, and Related Services
 
 Secondary NAICS (add all applicable):
-• 541512 — Computer Systems Design Services (Aegis, Alloy)
-• 541519 — Other Computer Related Services (Vessels, Terra)
+• 541512 — Computer Systems Design Services (PARAGON, FORGE)
+• 541519 — Other Computer Related Services (SEXTANT, DOMAINE)
 • 541990 — All Other Professional Services (Carlota Jo)
 • 561499 — All Other Business Support Services (Carlota Jo)
 
@@ -2419,10 +2419,10 @@ SAM registration expires annually. Lapses disqualify from all federal bidding an
         content: `Federal Risk and Authorization Management Program (FedRAMP) is the federal government's authorization process for cloud services used by federal agencies. FedRAMP authorization is required for cloud products sold to federal agencies.
 
 RELEVANCE TO SZL:
-• Aegis (cloud SOC platform) — FedRAMP required for direct federal agency sales
-• Vessels (cloud maritime intelligence) — FedRAMP required for MARAD/Coast Guard direct contracts
-• Lyte (cloud observability) — FedRAMP required for federal civilian agency contracts
-• Terra — Less relevant (limited federal market)
+• PARAGON (cloud SOC platform) — FedRAMP required for direct federal agency sales
+• SEXTANT (cloud maritime intelligence) — FedRAMP required for MARAD/Coast Guard direct contracts
+• KORA (cloud observability) — FedRAMP required for federal civilian agency contracts
+• DOMAINE — Less relevant (limited federal market)
 
 IMPACT LEVELS:
 • Low: Systems where the loss of confidentiality, integrity, or availability would have limited adverse effect on agency operations
@@ -2450,7 +2450,7 @@ RECOMMENDED STRATEGY:
 Phase 1: Pursue Agency-Sponsored Provisional Authority (P-ATO) pathway
 • Find a federal agency partner (via SBIR relationship) willing to sponsor FedRAMP authorization
 • Agency sponsorship significantly reduces cost and time
-• Aegis SBIR Phase I → Phase II → P-ATO pathway is the most viable federal route
+• PARAGON SBIR Phase I → Phase II → P-ATO pathway is the most viable federal route
 
 Phase 2: FedRAMP Ready designation
 • Achieve "FedRAMP Ready" status without full authorization
@@ -2494,9 +2494,9 @@ This is the SZL thesis. Not because it's intellectually interesting (though it i
 
 3. Government and enterprise are actively funding domain-specific intelligence platforms. SBIR, DoD contracts, DHS grants — the government is funding maritime intelligence, cybersecurity automation, and operational AI. The timing of SZL's platform development matches the timing of federal funding availability.
 
-4. The vertical SaaS market is experiencing a second wave. After the first wave of vertical SaaS (construction, healthcare, retail), a second wave is forming around intelligence-layered verticals — platforms that don't just manage data but derive and act on intelligence from it. Vessels, Aegis, and Terra are second-wave plays.
+4. The vertical SaaS market is experiencing a second wave. After the first wave of vertical SaaS (construction, healthcare, retail), a second wave is forming around intelligence-layered verticals — platforms that don't just manage data but derive and act on intelligence from it. SEXTANT, PARAGON, and DOMAINE are second-wave plays.
 
-We built the platform engine first (Alloy). Now we're deploying it across five verticals simultaneously, with each deployment funding the next.`,
+We built the platform engine first (FORGE). Now we're deploying it across five verticals simultaneously, with each deployment funding the next.`,
       },
       {
         title: 'The Commercial Wedge Strategy',
@@ -2504,27 +2504,27 @@ We built the platform engine first (Alloy). Now we're deploying it across five v
 
 The wedge architecture works like this:
 
-ALLOY = THE ENGINE
-Alloy is the shared intelligence and automation backbone. It handles workflow orchestration, AI processing, signal collection, document generation, and API connectivity. It is not sold externally. It is the infrastructure that makes every platform faster to build and more valuable to customers.
+FORGE = THE ENGINE
+FORGE is the shared intelligence and automation backbone. It handles workflow orchestration, AI processing, signal collection, document generation, and API connectivity. It is not sold externally. It is the infrastructure that makes every platform faster to build and more valuable to customers.
 
 Why this matters for investors: A single-product company with $1M in ARR has one moat. SZL with $1M in ARR across six platforms has six moats — and each moat feeds the engine that strengthens all others. This is structurally different from a portfolio of unrelated businesses.
 
-LYTE = THE HORIZONTAL WEDGE
-Lyte's horizontal position — applicable to any organization with operational complexity — establishes SZL in the mid-market SaaS tier. Success with Lyte proves the engine works across diverse customers and validates the observability thesis in the market where it's easiest to test.
+KORA = THE HORIZONTAL WEDGE
+KORA's horizontal position — applicable to any organization with operational complexity — establishes SZL in the mid-market SaaS tier. Success with KORA proves the engine works across diverse customers and validates the observability thesis in the market where it's easiest to test.
 
-VESSELS = THE VERTICAL WEDGE
-Vessels' maritime focus creates a deep technical moat in a specific domain. Deep verticals are hard to replicate. Once a fleet operator has integrated Vessels into their operations, switching is expensive (data history, operational workflow integration, personnel training). Vessels also opens the government channel — MARAD, DoD, DHS are all maritime domain awareness buyers.
+SEXTANT = THE VERTICAL WEDGE
+SEXTANT' maritime focus creates a deep technical moat in a specific domain. Deep verticals are hard to replicate. Once a fleet operator has integrated SEXTANT into their operations, switching is expensive (data history, operational workflow integration, personnel training). SEXTANT also opens the government channel — MARAD, DoD, DHS are all maritime domain awareness buyers.
 
-AEGIS = THE GOVERNMENT WEDGE
-Aegis is the platform designed to open federal government revenue. Government cybersecurity contracts are large (>$1M ACV), long (5+ years), and sticky (switching costs measured in years). Aegis, positioned with 8(a) or WOSB set-aside access, creates a government revenue stream that is structurally different from commercial SaaS. This is the highest-multiple acquisition or partnership target in the portfolio.
+PARAGON = THE GOVERNMENT WEDGE
+PARAGON is the platform designed to open federal government revenue. Government cybersecurity contracts are large (>$1M ACV), long (5+ years), and sticky (switching costs measured in years). PARAGON, positioned with 8(a) or WOSB set-aside access, creates a government revenue stream that is structurally different from commercial SaaS. This is the highest-multiple acquisition or partnership target in the portfolio.
 
-TERRA = THE GEOGRAPHIC WEDGE
-Terra establishes SZL in the NYC real estate market — the deepest, most data-rich property market in the US. Geographic focus creates data density that makes the platform increasingly valuable as coverage deepens. NYC success validates the model for expansion to other high-distress, high-data markets.`,
+DOMAINE = THE GEOGRAPHIC WEDGE
+DOMAINE establishes SZL in the NYC real estate market — the deepest, most data-rich property market in the US. Geographic focus creates data density that makes the platform increasingly valuable as coverage deepens. NYC success validates the model for expansion to other high-distress, high-data markets.`,
       },
       {
         title: 'Traction & Roadmap Narrative',
         content: `WHAT'S BUILT:
-The SZL portfolio was built in reverse order from most companies: we built the infrastructure first, then the products. The Alloy backbone — workflow orchestration, AI intelligence, signal processing, document automation — was designed and built before the first product was deployed. This is why six production platforms can exist with one founding team.
+The SZL portfolio was built in reverse order from most companies: we built the infrastructure first, then the products. The FORGE backbone — workflow orchestration, AI intelligence, signal processing, document automation — was designed and built before the first product was deployed. This is why six production platforms can exist with one founding team.
 
 What's live and operational:
 • Alloy: Full workflow orchestration, automation engine, connector mesh, document system
@@ -2542,7 +2542,7 @@ WHAT'S NEXT (90-Day Milestones):
 □ Aegis: First MSP partner letter of intent signed
 □ SAM.gov: Registration completed
 □ MWBE: Application submitted (if eligible)
-□ SBIR: Phase I proposal submitted to NSF (Lyte) or DHS (Aegis)
+□ SBIR: Phase I proposal submitted to NSF (KORA) or DHS (PARAGON)
 
 WHAT'S NEXT (12-Month Milestones):
 □ $300K+ ARR across all platforms
@@ -2563,7 +2563,7 @@ Milestones funded:
 • Sales hire #1 onboarded and ramping
 • Operating model validated (unit economics visible)
 
-Trigger for next round: $25K+ MRR validated on Lyte or Vessels
+Trigger for next round: $25K+ MRR validated on KORA or SEXTANT
 
 SEED TRANCHE (12–18 Months)
 Target: $2M–$4M
@@ -2577,7 +2577,7 @@ Trigger for next round: $600K+ ARR, government contract award, clear path to $3M
 
 SERIES A (24–36 Months)
 Target: $8M–$15M
-Use: Geographic expansion (Vessels: international markets), Aegis federal scale, Lyte enterprise tier
+Use: Geographic expansion (Vessels: international markets), PARAGON federal scale, KORA enterprise tier
 Trigger: $3M+ ARR, $1M+ government revenue, 2+ validated enterprise verticals`,
       },
       {
@@ -2585,10 +2585,10 @@ Trigger: $3M+ ARR, $1M+ government revenue, 2+ validated enterprise verticals`,
         content: `$500K ANGEL ROUND DEPLOYMENT (illustrative)
 
 Engineering (40% / $200,000):
-• Lyte revenue feature completion: $60,000
-• Vessels enterprise tier: $50,000
-• Aegis MSSP multi-tenant layer: $45,000
-• Terra broker workflow: $30,000
+• KORA revenue feature completion: $60,000
+• SEXTANT enterprise tier: $50,000
+• PARAGON MSSP multi-tenant layer: $45,000
+• DOMAINE broker workflow: $30,000
 • Shared infrastructure and security: $15,000
 
 Sales & GTM (30% / $150,000):
@@ -2609,7 +2609,7 @@ Reserve (10% / $50,000):
 
 EXPECTED MILESTONES FROM THIS DEPLOYMENT:
 Month 3: First Carlota Jo retainer client ($12.5K MRR)
-Month 6: 3 Lyte paying customers ($12K MRR), 1 Vessels pilot ($5K MRR)
+Month 6: 3 KORA paying customers ($12K MRR), 1 SEXTANT pilot ($5K MRR)
 Month 9: $50K MRR total, SAM.gov registered, SBIR Phase I submitted
 Month 12: $75K MRR total, government program in hand or awarded
 Series A: Initiated at $600K ARR with government contract in view

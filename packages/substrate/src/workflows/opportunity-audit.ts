@@ -76,7 +76,7 @@ export const opportunityAuditWorkflow: WorkflowDefinition = {
 
   policy: {
     id: 'lyte-ops-policy',
-    name: 'Lyte Operations Policy',
+    name: 'KORA Operations Policy',
     highRiskCategories: [
       'financial',
       'deletion',
@@ -107,7 +107,7 @@ export const opportunityAuditWorkflow: WorkflowDefinition = {
     {
       id: 'retrieve-lyte-data',
       type: 'Retrieve',
-      name: 'Retrieve Lyte Service Data',
+      name: 'Retrieve KORA Service Data',
       description:
         'Retrieves service performance metrics, SLO compliance data, and anomaly signals from Lyte. ' +
         'Tagged runtime:python for heavy-retrieval execution via the Python worker channel (Phase 1 pilot). ' +
@@ -134,7 +134,7 @@ export const opportunityAuditWorkflow: WorkflowDefinition = {
       type: 'Reason',
       name: 'Reason: Identify Anomalies',
       description:
-        'Applies reasoning over retrieved Lyte data to identify service anomalies, ' +
+        'Applies reasoning over retrieved KORA data to identify service anomalies, ' +
         'SLO breaches, and opportunity gaps. Produces structured findings with confidence scores.',
       runtime: 'typescript',
       modelAdapterId: 'default',

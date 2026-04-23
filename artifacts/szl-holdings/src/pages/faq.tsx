@@ -13,7 +13,7 @@ const FAQ_GROUPS = [
     questions: [
       {
         q: "What is SZL Holdings?",
-        a: "SZL Holdings is building governed decision infrastructure — the structural layer between signal detection and action execution. The core platform — KORA + FORGE — is a shared execution fabric deployed across multiple domain-specific packs: Counsel (legal operations), Vessels (maritime), Aegis (security and defense), and Terra (real estate).",
+        a: "SZL Holdings is building governed decision infrastructure — the structural layer between signal detection and action execution. The core platform — KORA + FORGE — is a shared execution fabric deployed across multiple domain-specific packs: Counsel (legal operations), SEXTANT (maritime), PARAGON (security and defense), and DOMAINE (real estate).",
       },
       {
         q: "What is business observability?",
@@ -25,7 +25,7 @@ const FAQ_GROUPS = [
       },
       {
         q: "What is KORA + FORGE?",
-        a: "Lyte is the command layer — it surfaces signals from connected systems and presents them in a structured, prioritized format for operator action. Alloy is the execution fabric — it routes signals to recommendations, manages the human-in-the-loop approval chain, and executes approved actions through a connector mesh.",
+        a: "KORA is the command layer — it surfaces signals from connected systems and presents them in a structured, prioritized format for operator action. FORGE is the execution fabric — it routes signals to recommendations, manages the human-in-the-loop approval chain, and executes approved actions through a connector mesh.",
       },
     ],
   },
@@ -35,11 +35,11 @@ const FAQ_GROUPS = [
     questions: [
       {
         q: "How does the signal-to-action pipeline work?",
-        a: "Signals are ingested from connected systems and classified by type, severity, and urgency. They are enriched with context (owner attribution, historical pattern, risk scoring) and passed to Alloy, which generates a structured recommendation. That recommendation is reviewed and approved by a human before any execution takes place. The full pipeline — signal, interpretation, recommendation, approval decision, execution, outcome — is written to an immutable audit trail.",
+        a: "Signals are ingested from connected systems and classified by type, severity, and urgency. They are enriched with context (owner attribution, historical pattern, risk scoring) and passed to FORGE, which generates a structured recommendation. That recommendation is reviewed and approved by a human before any execution takes place. The full pipeline — signal, interpretation, recommendation, approval decision, execution, outcome — is written to an immutable audit trail.",
       },
       {
         q: "Does the AI make decisions autonomously?",
-        a: "No. AI in KORA + FORGE is advisory. Every consequential action requires explicit human approval before execution. Human-in-the-loop gates are built into the Alloy execution model at the action-type level. They cannot be bypassed without creating an explicit override record — which is itself logged and flagged for mandatory review.",
+        a: "No. AI in KORA + FORGE is advisory. Every consequential action requires explicit human approval before execution. Human-in-the-loop gates are built into the FORGE execution model at the action-type level. They cannot be bypassed without creating an explicit override record — which is itself logged and flagged for mandatory review.",
       },
       {
         q: "What is multi-tenant isolation?",

@@ -25,7 +25,7 @@ export const ALLOY_WORKFLOWS: WorkflowDefinition[] = [
   {
     id: 'signal-to-insight',
     name: 'Signal to Insight',
-    trigger: 'Inbound signal from Lyte monitoring or Vessels AIS',
+    trigger: 'Inbound signal from KORA monitoring or SEXTANT AIS',
     description:
       'Turns raw operational signals into structured, explainable insights with recommended actions. The standard intelligence pipeline.',
     steps: [

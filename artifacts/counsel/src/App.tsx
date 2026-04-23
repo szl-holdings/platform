@@ -430,7 +430,7 @@ function AppShell() {
     },
     {
       id: 'u4',
-      headline: 'New dependency: Vessels sanctions matter linked to Apex case',
+      headline: 'New dependency: SEXTANT sanctions matter linked to Apex case',
       surface: 'Counsel',
       severity: 'info',
       timestamp: new Date(Date.now() - 3 * 3600000).toISOString(),
@@ -485,7 +485,7 @@ function AppShell() {
       surfaceAccent: '#0ea5e9',
       label: 'Vessels: MV Atlantic Falcon sanctions linkage',
       description:
-        'Vessels flagged Apex Group as beneficiary of a sanctioned vessel voyage — linked to 2024-SEC-441.',
+        'SEXTANT flagged Apex Group as beneficiary of a sanctioned vessel voyage — linked to 2024-SEC-441.',
       href: '/vessels/sanctions',
       preservedContext: { surface: 'counsel' },
     },
@@ -495,7 +495,7 @@ function AppShell() {
       surfaceAccent: '#0ea5e9',
       label: 'Lyte: 2 legal decisions pending executive approval',
       description:
-        "Lyte's Decision Center has 2 Counsel-sourced recommendations queued for executive sign-off.",
+        "KORA's Decision Center has 2 Counsel-sourced recommendations queued for executive sign-off.",
       href: '/lyte/decision-center',
       preservedContext: { surface: 'counsel' },
     },

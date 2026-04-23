@@ -23,7 +23,7 @@ const problemFrames = [
 const differentiators = [
   {
     title: "One wedge, one engine",
-    body: "Lyte is the product narrative. Alloy is the execution and audit layer underneath. That separation makes the software easier to understand and harder to dismiss as surface-level UI.",
+    body: "KORA is the product narrative. FORGE is the execution and audit layer underneath. That separation makes the software easier to understand and harder to dismiss as surface-level UI.",
   },
   {
     title: "Category clarity",
@@ -84,7 +84,7 @@ export default function InvestorStoryPage() {
   const __pageMeta = usePageMeta({
     title: "Investor Story — SZL Holdings",
     description:
-      "The focused capital narrative for SZL Holdings: Lyte as the product, Alloy as the engine, and the rest of the ecosystem as expansion value.",
+      "The focused capital narrative for SZL Holdings: KORA as the product, FORGE as the engine, and the rest of the ecosystem as expansion value.",
     canonical: "https://szlholdings.com/investor-story",
   });
 
@@ -107,7 +107,7 @@ export default function InvestorStoryPage() {
               </h1>
               <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
                 SZL Holdings should be financed as a governed decision infrastructure company with a
-                clear domain-pack expansion logic. Lyte is the command surface. Alloy is the governance
+                clear domain-pack expansion logic. KORA is the command surface. FORGE is the governance
                 execution fabric. The 9-step loop is the architecture. Domain packs are the expansion
                 model — not the pitch.
               </p>
@@ -154,7 +154,7 @@ export default function InvestorStoryPage() {
                   <div className="mb-4 inline-flex rounded-xl border border-[#d4a054]/20 bg-black/20 p-3">
                     <Radar className="h-5 w-5 text-[#d4a054]" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white">Lyte</h3>
+                  <h3 className="text-xl font-semibold text-white">KORA</h3>
                   <p className="mt-3 text-sm leading-7 text-white/78">
                     The governed command surface — surfaces execution risk, approval latency, ownership gaps, and next-best action across the 9-step decision loop in one place.
                   </p>
@@ -256,7 +256,7 @@ export default function InvestorStoryPage() {
                 <ul className="mt-6 space-y-3">
                   {[
                     "Lead with KORA + FORGE in every investor and lender conversation.",
-                    "Describe Vessels, Aegis, Terra, and Carlota Jo as expansion lanes and option value.",
+                    "Describe SEXTANT, PARAGON, DOMAINE, and Carlota Jo as expansion lanes and option value.",
                     "Make proof, pilot readiness, and buyer clarity the standard for what becomes a first-class surface.",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-3 text-sm leading-6 text-white/80">

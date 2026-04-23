@@ -154,7 +154,7 @@ export async function loadAllQueued(): Promise<UnifiedQueuedItem[]> {
     items.push({
       id: `cortex:${c.approvalId}`,
       source: 'cortex',
-      sourceLabel: 'CORTEX Approval',
+      sourceLabel: 'APEX Approval',
       actionType:
         c.decision === 'approved' ? 'Approve' : c.decision === 'rejected' ? 'Reject' : 'Revise',
       targetId: `#${c.approvalId} · ${c.approvalTitle.slice(0, 32)}`,
@@ -166,7 +166,7 @@ export async function loadAllQueued(): Promise<UnifiedQueuedItem[]> {
     items.push({
       id: `cortex-comment:${c.id}`,
       source: 'cortex-comment',
-      sourceLabel: 'CORTEX Comment',
+      sourceLabel: 'APEX Comment',
       actionType: 'Comment',
       targetId: `#${c.approvalId} · ${c.body.slice(0, 32)}`,
       timestamp: new Date(c.queuedAt).getTime() || Date.now(),
@@ -177,7 +177,7 @@ export async function loadAllQueued(): Promise<UnifiedQueuedItem[]> {
     items.push({
       id: `cortex-escalation:${e.id}`,
       source: 'cortex-escalation',
-      sourceLabel: 'CORTEX Escalation',
+      sourceLabel: 'APEX Escalation',
       actionType: 'Escalate',
       targetId: `#${e.approvalId} · ${e.reason.slice(0, 32)}`,
       timestamp: new Date(e.queuedAt).getTime() || Date.now(),

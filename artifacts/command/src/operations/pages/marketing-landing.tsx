@@ -40,7 +40,7 @@ const prism = [
     icon: Activity,
     meaning: 'Business health, operating heartbeat, trend status',
     detail:
-      'Pulse monitors the continuous rhythm of your operations — revenue velocity, delivery cadence, customer health, operational tempo. Not infrastructure uptime. Business uptime.',
+      'LUMINA monitors the continuous rhythm of your operations — revenue velocity, delivery cadence, customer health, operational tempo. Not infrastructure uptime. Business uptime.',
   },
   {
     key: 'R',
@@ -149,8 +149,8 @@ const useCases = [
   {
     title: 'An ops lead prevents a delivery failure',
     scenario:
-      'Pulse detected 3x spike in Jira cycle time. Signals correlated it with a silent Slack channel — the lead engineer was on unplanned leave. Intelligence recommended redistributing the sprint. The CTO approved before the SLA breach.',
-    lens: 'Pulse + Signals + Intelligence',
+      'LUMINA detected 3x spike in Jira cycle time. Signals correlated it with a silent Slack channel — the lead engineer was on unplanned leave. Intelligence recommended redistributing the sprint. The CTO approved before the SLA breach.',
+    lens: 'LUMINA + Signals + Intelligence',
     impact: 'SLA saved',
   },
   {
@@ -1104,7 +1104,7 @@ export default function CommandMarketingLanding({ onSignIn }: { onSignIn?: () =>
                 {
                   step: '02',
                   title: 'PRISM surfaces your first signals',
-                  body: 'Within minutes, the PRISM engine begins building your operational picture. Pulse shows business health. Signals flags anomalies. Risk scores every process gap by financial exposure. No configuration required.',
+                  body: 'Within minutes, the PRISM engine begins building your operational picture. LUMINA shows business health. Signals flags anomalies. Risk scores every process gap by financial exposure. No configuration required.',
                   tag: 'Intelligence',
                 },
                 {

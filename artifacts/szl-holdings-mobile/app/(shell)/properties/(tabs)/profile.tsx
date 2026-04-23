@@ -38,7 +38,7 @@ function MarketPulseCard() {
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.cardHeader}>
-        <Text style={[styles.cardTitle, { color: colors.goldSubtle }]}>NYC MARKET PULSE</Text>
+        <Text style={[styles.cardTitle, { color: colors.goldSubtle }]}>NYC MARKET LUMINA</Text>
         <View
           style={[
             styles.liveBadge,
@@ -145,7 +145,7 @@ export default function ProfileTab() {
             justifyContent: 'space-between',
           }}
         >
-          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>TERRA · PROFILE</Text>
+          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>DOMAINE · PROFILE</Text>
           <NotificationHub
             fetchers={[
               {
@@ -331,7 +331,7 @@ export default function ProfileTab() {
       </View>
 
       <Text style={[styles.version, { color: colors.mutedForeground }]}>
-        Terra Mobile v1.0.0 · NYC Market Intelligence
+        DOMAINE Mobile v1.0.0 · NYC Market Intelligence
       </Text>
     </ScrollView>
   );

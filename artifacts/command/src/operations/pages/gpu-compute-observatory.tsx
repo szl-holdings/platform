@@ -282,7 +282,7 @@ function ModelCard({ model }: { model: ModelState }) {
 const MODELS_SEED = [
   {
     id: 'alloy-gpt4',
-    name: 'Alloy GPT-4o',
+    name: 'FORGE GPT-4o',
     provider: 'OpenAI / Azure',
     baseLatency: 850,
     baseDrift: 4,
@@ -317,7 +317,7 @@ const MODELS_SEED = [
   },
   {
     id: 'alloy-embed',
-    name: 'Alloy Embedder v3',
+    name: 'FORGE Embedder v3',
     provider: 'SZL Custom',
     baseLatency: 70,
     baseDrift: 5,
@@ -325,7 +325,7 @@ const MODELS_SEED = [
 ];
 
 const GPU_SEED = [
-  { id: 'gpu-0', name: 'GPU-0 · NVIDIA A100', workload: 'Alloy GPT-4o Inference' },
+  { id: 'gpu-0', name: 'GPU-0 · NVIDIA A100', workload: 'FORGE GPT-4o Inference' },
   { id: 'gpu-1', name: 'GPU-1 · NVIDIA A100', workload: 'RAG Pipeline + Embeddings' },
   { id: 'gpu-2', name: 'GPU-2 · NVIDIA H100', workload: 'Claude Proxy Cache' },
   { id: 'gpu-3', name: 'GPU-3 · NVIDIA H100', workload: 'Drift Detection + Fine-tune' },
@@ -615,7 +615,7 @@ export default function GpuComputeObservatory() {
             {[
               {
                 label: 'Optimization Opportunity',
-                desc: 'Alloy GPT-4o handles 40% of requests that could be routed to smaller models. Estimated savings: $120/day',
+                desc: 'FORGE GPT-4o handles 40% of requests that could be routed to smaller models. Estimated savings: $120/day',
                 color: '#6b8f71',
               },
               {

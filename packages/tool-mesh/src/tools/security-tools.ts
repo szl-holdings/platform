@@ -52,7 +52,7 @@ export const threatScanHandler: ToolHandler = async (input) => {
     depth: parsed.depth,
     threats: [],
     riskScore: 0,
-    message: `Threat scan initiated for ${parsed.targetType}:${parsed.targetId} (stub — wire Aegis backend for live results)`,
+    message: `Threat scan initiated for ${parsed.targetType}:${parsed.targetId} (stub — wire PARAGON backend for live results)`,
   };
 };
 
@@ -210,7 +210,7 @@ export const incidentContainmentHandler: ToolHandler = async (input) => {
     incidentId: parsed.incidentId,
     action: parsed.containmentAction,
     applied: false,
-    message: `Containment action queued for approval (stub — wire Aegis response platform)`,
+    message: `Containment action queued for approval (stub — wire PARAGON response platform)`,
   };
 };
 

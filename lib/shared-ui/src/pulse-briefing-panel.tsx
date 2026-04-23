@@ -218,7 +218,7 @@ export function PulseBriefingPanel({
               color: '#c8a84b',
             }}
           >
-            Pulse ·{' '}
+            LUMINA ·{' '}
             {new Date(data.briefingDate).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',
@@ -257,7 +257,7 @@ export function PulseBriefingPanel({
           onMouseLeave={(e) => (e.currentTarget.style.color = '#546078')}
         >
           <ExternalLink size={10} />
-          Open in Pulse
+          Open in LUMINA
         </a>
       </div>
 
@@ -403,7 +403,7 @@ export function PulseBriefingPanel({
         }}
       >
         <span style={{ fontSize: '0.62rem', color: '#394560' }}>
-          Alloy · {section?.agentName ?? 'Alloy'} ·{' '}
+          FORGE · {section?.agentName ?? 'FORGE'} ·{' '}
           {new Date(section?.lastUpdated ?? data.briefingDate).toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',

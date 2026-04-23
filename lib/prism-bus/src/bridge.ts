@@ -70,7 +70,7 @@ export const PRISM_DOMAIN_TOOLS: Record<PrismDomain, string[]> = {
 export const PRISM_BUILT_IN_TOOLS: PrismToolDescriptor[] = [
   {
     name: 'alloy_research',
-    description: "Perform deep research using Alloy's PRISM intelligence engine",
+    description: "Perform deep research using FORGE's PRISM intelligence engine",
     inputSchema: {
       type: 'object',
       properties: {

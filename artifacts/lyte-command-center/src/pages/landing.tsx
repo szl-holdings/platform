@@ -77,7 +77,7 @@ const SURFACES = [
     icon: Activity,
     tagline: 'Reconstruct any decision',
     description:
-      'Step-by-step reconstruction of who knew what, when — surfacing every signal, memo, and actor confirmation anchored to the Alloy ledger.',
+      'Step-by-step reconstruction of who knew what, when — surfacing every signal, memo, and actor confirmation anchored to the FORGE ledger.',
   },
   {
     href: '/board',
@@ -98,7 +98,7 @@ const ROI_POINTS = [
 ];
 
 export default function LandingPage() {
-  const pilotEmail = `mailto:${registry.company.email}?subject=Lyte Pilot Programme`;
+  const pilotEmail = `mailto:${registry.company.email}?subject=KORA Pilot Programme`;
   const governanceLine = registry.boilerplate.governancePhilosophy;
   const footerTagline = registry.boilerplate.footerTagline;
 
@@ -115,7 +115,7 @@ export default function LandingPage() {
               <Zap className="w-3.5 h-3.5 text-amber-400" />
             </div>
             <span className="text-xs font-mono text-amber-400/60">
-              {lyteProduct?.name ?? 'LYTE'} · {lyteTagline.toUpperCase()}
+              {lyteProduct?.name ?? 'KORA'} · {lyteTagline.toUpperCase()}
             </span>
             <span className="ml-2 text-[10px] font-mono px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/8 text-emerald-400">
               LIVE
@@ -165,7 +165,7 @@ export default function LandingPage() {
       <section className="px-6 py-12 border-t border-amber-500/10">
         <div className="max-w-4xl mx-auto">
           <p className="text-xs font-mono text-amber-400/40 uppercase tracking-widest mb-6">
-            The problems Lyte solves
+            The problems KORA solves
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {PAIN_POINTS.map(({ icon: Icon, label, surface }) => (
@@ -222,13 +222,13 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
               <p className="text-xs font-mono text-amber-400/40 uppercase tracking-widest mb-4">
-                Why Lyte wins
+                Why KORA wins
               </p>
               <h2 className="text-2xl font-display font-semibold text-amber-50 mb-4">
                 Operational risk is invisible until it isn't.
               </h2>
               <p className="text-sm text-amber-100/55 leading-relaxed mb-6">
-                Most enterprises discover ownership failures in the post-mortem. Lyte surfaces them
+                Most enterprises discover ownership failures in the post-mortem. KORA surfaces them
                 while you can still act — with evidence your board can trust and interventions your
                 operators can execute.
               </p>
@@ -291,7 +291,7 @@ export default function LandingPage() {
             Ready to see your operational blind spots?
           </h2>
           <p className="text-sm text-amber-100/55 mb-8 leading-relaxed">
-            Lyte onboards in 2 weeks with no integration required beyond a read-only Alloy
+            KORA onboards in 2 weeks with no integration required beyond a read-only FORGE
             connector. Pilot customers see their first Ownership Drift report within 48 hours of
             activation.
           </p>

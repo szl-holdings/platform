@@ -420,12 +420,12 @@ export default function FactoryFloor() {
             compact
             provenance={
               {
-                source: 'Alloy Orchestration Engine',
+                source: 'FORGE Orchestration Engine',
                 lastUpdated: data?.fetchedAt || new Date().toISOString(),
                 freshness: data ? 'minutes' : 'unknown',
                 confidence: 'high',
                 dataState: error ? 'demo' : 'live',
-                owner: 'Alloy Operations',
+                owner: 'FORGE Operations',
               } as DataProvenanceInfo
             }
           />
@@ -459,12 +459,12 @@ export default function FactoryFloor() {
               className="text-[10px] uppercase tracking-wider font-semibold mb-2"
               style={{ color: 'rgba(75,139,219,0.5)' }}
             >
-              Alloy Execution Fabric
+              FORGE Execution Fabric
             </div>
             <div className="text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
-              You're viewing Alloy's orchestration engine — the invisible execution layer behind
+              You're viewing FORGE's orchestration engine — the invisible execution layer behind
               every SZL platform. Each workflow represents an automated pipeline: data ingestion,
-              threat aggregation, compliance generation, signal routing, and more. Alloy connects
+              threat aggregation, compliance generation, signal routing, and more. FORGE connects
               every platform into one unified operating surface.
             </div>
           </div>
@@ -754,7 +754,7 @@ export default function FactoryFloor() {
             },
             {
               id: '2',
-              label: 'Investigate failing Vessels AIS sync',
+              label: 'Investigate failing SEXTANT AIS sync',
               type: 'investigate',
               severity: 'critical',
             },
@@ -762,7 +762,7 @@ export default function FactoryFloor() {
             { id: '4', label: 'Retry failed ETL pipeline runs', type: 'remediate' },
             {
               id: '5',
-              label: 'Escalate Lyte routing decision failures',
+              label: 'Escalate KORA routing decision failures',
               type: 'escalate',
               severity: 'high',
             },

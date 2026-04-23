@@ -1060,7 +1060,7 @@ export default function KpiDashboardPage() {
                     <StatCard
                       label="Workflow Runs"
                       value={agg.totalWorkflowRuns}
-                      sub="Alloy orchestration"
+                      sub="FORGE orchestration"
                       accent="hsl(214,80%,65%)"
                       href={platforms?.alloy?.href}
                       icon={Layers}
@@ -1069,7 +1069,7 @@ export default function KpiDashboardPage() {
                     <StatCard
                       label="Active Incidents"
                       value={agg.activeIncidents}
-                      sub="Lyte + Aegis"
+                      sub="KORA + PARAGON"
                       accent="hsl(38,72%,58%)"
                       icon={TrendingUp}
                       delay={0.05}
@@ -1077,16 +1077,16 @@ export default function KpiDashboardPage() {
                     <StatCard
                       label="Distress Properties"
                       value={agg.distressProperties}
-                      sub="Terra engine"
+                      sub="DOMAINE engine"
                       accent="hsl(88,42%,52%)"
                       href={platforms?.terra?.href}
                       icon={BarChart3}
                       delay={0.1}
                     />
                     <StatCard
-                      label="Fleet Vessels"
+                      label="Fleet SEXTANT"
                       value={agg.fleetVessels}
-                      sub="Vessels tracker"
+                      sub="SEXTANT tracker"
                       accent="hsl(205,85%,55%)"
                       href={platforms?.vessels?.href}
                       icon={Ship}
@@ -1095,7 +1095,7 @@ export default function KpiDashboardPage() {
                     <StatCard
                       label="Active Deals"
                       value={agg.activeDeals}
-                      sub="Terra pipeline"
+                      sub="DOMAINE pipeline"
                       accent="hsl(142,62%,48%)"
                       icon={TrendingUp}
                       delay={0.2}
@@ -1103,7 +1103,7 @@ export default function KpiDashboardPage() {
                     <StatCard
                       label="Security Findings"
                       value={agg.securityFindings}
-                      sub="Aegis SOC"
+                      sub="PARAGON SOC"
                       accent="hsl(232,68%,60%)"
                       href={platforms?.aegis?.href}
                       icon={Shield}
@@ -1157,7 +1157,7 @@ export default function KpiDashboardPage() {
                       href={platforms?.vessels?.href}
                       delay={0.2}
                       metrics={[
-                        { label: 'Tracked Vessels', value: platforms?.vessels?.trackedVessels },
+                        { label: 'Tracked SEXTANT', value: platforms?.vessels?.trackedVessels },
                         { label: 'Fleets', value: platforms?.vessels?.fleets },
                       ]}
                     />

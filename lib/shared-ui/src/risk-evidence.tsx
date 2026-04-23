@@ -762,8 +762,8 @@ export function ScenarioCitedRiskRuns({
         <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
           {emptyHint ??
             (scenarioId
-              ? `No simulation runs cited for scenario ${scenarioId}. Save a run from the Terra or Vessels Risk Simulation page to attach percentile bands and sensitivities to this proof envelope.`
-              : 'No simulation runs cited yet across Terra or Vessels.')}
+              ? `No simulation runs cited for scenario ${scenarioId}. Save a run from the DOMAINE or SEXTANT Risk Simulation page to attach percentile bands and sensitivities to this proof envelope.`
+              : 'No simulation runs cited yet across DOMAINE or Vessels.')}
         </p>
       ) : (
         <ul className="space-y-2">

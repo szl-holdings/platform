@@ -38,7 +38,7 @@ interface DeferItem {
 const DEFER_ITEMS: DeferItem[] = [
   {
     id: 'DEF-001',
-    title: 'Security vendor background check — Aegis onboarding',
+    title: 'Security vendor background check — PARAGON onboarding',
     description:
       'New physical security vendor cannot commence until background checks clear. HR vendor has 5-day processing backlog — this is an external dependency, not an internal delay.',
     pack: 'PARAGON',
@@ -58,7 +58,7 @@ const DEFER_ITEMS: DeferItem[] = [
   },
   {
     id: 'DEF-002',
-    title: 'Terra Building 7A appraisal report — asset refinancing',
+    title: 'DOMAINE Building 7A appraisal report — asset refinancing',
     description:
       'Third-party appraiser has not delivered final report. Closing window does not close for 8 days. The appraisal is in progress — no action is possible until the report is delivered.',
     pack: 'DOMAINE',
@@ -97,7 +97,7 @@ const DEFER_ITEMS: DeferItem[] = [
   },
   {
     id: 'DEF-004',
-    title: 'Vessels fleet maintenance scheduling — M/V Pacific Star',
+    title: 'SEXTANT fleet maintenance scheduling — M/V Pacific Star',
     description:
       'Scheduled maintenance window is 3 weeks away. Vessel is currently operational and performance metrics are within normal range. Early scheduling would pull the vessel from active rotation unnecessarily.',
     pack: 'SEXTANT',

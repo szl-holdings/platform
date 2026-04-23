@@ -86,9 +86,9 @@ const TERRA_ONBOARDING_CONFIG: OnboardingConfig = {
   steps: [
     {
       id: 'welcome',
-      title: 'Welcome to Terra',
+      title: 'Welcome to DOMAINE',
       description:
-        'Terra is your real estate intelligence platform — distress detection, deal pipeline, market analytics, and ownership intelligence for institutional-grade property operations.',
+        'DOMAINE is your real estate intelligence platform — distress detection, deal pipeline, market analytics, and ownership intelligence for institutional-grade property operations.',
       placement: 'center',
       icon: Building2,
     },
@@ -649,7 +649,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           className="hidden sm:block font-mono text-[10px]"
           style={{ color: colors.text.muted }}
         >
-          Terra · Property Intelligence
+          DOMAINE · Property Intelligence
         </span>
       </div>
       <div className="flex items-center gap-3">

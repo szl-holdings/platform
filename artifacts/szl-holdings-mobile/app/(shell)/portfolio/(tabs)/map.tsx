@@ -58,7 +58,7 @@ const PORTFOLIO_PROPERTIES: PropertyPin[] = [
   },
   {
     id: 'p4',
-    name: 'Singapore Nexus',
+    name: 'Singapore PRAXIS',
     address: '1 Raffles Place, Singapore',
     lat: 1.284,
     lng: 103.851,

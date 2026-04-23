@@ -221,7 +221,7 @@ describe('Phase 2: Evidence-Based Recommendation', () => {
 
 // ─── Vertical Workflow Packs ──────────────────────────────────────────────────
 
-describe('Vertical: Lyte — Operational Drift Review', () => {
+describe('Vertical: KORA — Operational Drift Review', () => {
   it('dry-run completes', async () => {
     const { lyteOperationalDriftWorkflow } = await import('./lyte-operational-drift.js');
     const rt = makeSyntheticRuntime();
@@ -258,7 +258,7 @@ describe('Vertical: Lyte — Operational Drift Review', () => {
   });
 });
 
-describe('Vertical: Aegis — Threat Triage', () => {
+describe('Vertical: PARAGON — Threat Triage', () => {
   it('dry-run produces triage stage results', async () => {
     const { aegisThreatTriageWorkflow } = await import('./aegis-threat-triage.js');
     const rt = makeSyntheticRuntime();
@@ -284,7 +284,7 @@ describe('Vertical: Aegis — Threat Triage', () => {
   });
 });
 
-describe('Vertical: Vessels — Voyage Anomaly Review', () => {
+describe('Vertical: SEXTANT — Voyage Anomaly Review', () => {
   it('dry-run completes voyage anomaly pipeline', async () => {
     const { vesselsVoyageAnomalyWorkflow } = await import('./vessels-voyage-anomaly.js');
     const rt = makeSyntheticRuntime();
@@ -315,7 +315,7 @@ describe('Vertical: Vessels — Voyage Anomaly Review', () => {
   });
 });
 
-describe('Vertical: Terra — Portfolio Anomaly', () => {
+describe('Vertical: DOMAINE — Portfolio Anomaly', () => {
   it('dry-run identifies portfolio anomaly stages', async () => {
     const { terraPortfolioAnomalyWorkflow } = await import('./terra-portfolio-anomaly.js');
     const rt = makeSyntheticRuntime();
@@ -329,7 +329,7 @@ describe('Vertical: Terra — Portfolio Anomaly', () => {
   });
 });
 
-describe('Vertical: PRISM Counsel — Evidence Packaging', () => {
+describe('Vertical: Counsel — Evidence Packaging', () => {
   it('dry-run completes matter evidence pipeline', async () => {
     const { prismCounselEvidencePackagingWorkflow } = await import(
       './prism-counsel-evidence-packaging.js'

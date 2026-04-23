@@ -32,7 +32,7 @@ const AGENTS = [
   { id: 'alloy', name: 'FORGE', role: 'Orchestration', icon: 'git-merge', color: '#c9a84c' },
   {
     id: 'beacon',
-    name: 'Terra Analytics',
+    name: 'DOMAINE Analytics',
     role: 'Analytics',
     icon: 'bar-chart-2',
     color: '#22c55e',
@@ -97,7 +97,7 @@ export default function AgentChatScreen() {
       id: 'welcome',
       role: 'assistant',
       content:
-        'Alloy orchestration active. I coordinate all domain agents across the SZL Holdings platform. Ask me anything about your portfolio, operations, or intelligence.',
+        'FORGE orchestration active. I coordinate all domain agents across the SZL Holdings platform. Ask me anything about your portfolio, operations, or intelligence.',
       agentId: 'alloy',
       agentName: 'FORGE',
       timestamp: Date.now() - 60000,

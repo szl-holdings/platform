@@ -40,7 +40,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
     description:
       'Critical vulnerability in transponder authentication. All vessel OT systems updated. No data compromise detected. CVE-2026-0441.',
     version: 'v4.2.1',
-    author: 'Aegis SOC',
+    author: 'PARAGON SOC',
     timestamp: '14:23',
     date: 'Apr 15',
     tags: ['security', 'critical', 'patch'],
@@ -56,7 +56,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
     description:
       'New ML model for predictive driver-route matching. Expected 18% improvement in on-time deliveries. Rolled out to 30% of traffic.',
     version: 'v3.8.0',
-    author: 'Lyte Eng Team',
+    author: 'KORA Eng Team',
     timestamp: '09:41',
     date: 'Apr 15',
     tags: ['ml', 'optimization', 'feature'],
@@ -72,7 +72,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
     description:
       'Refreshed comparable transaction database with 1,240 new Q1 2026 transactions. Affects all portfolio valuations.',
     version: 'v2.11.4',
-    author: 'Terra Data Team',
+    author: 'DOMAINE Data Team',
     timestamp: '08:00',
     date: 'Apr 15',
     tags: ['data', 'valuation'],
@@ -136,7 +136,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
     description:
       'Deprecated /api/v1/schedule/* endpoints removed. All integrations must use v2 API. Migration guide published.',
     version: 'v3.7.0',
-    author: 'Lyte Platform Team',
+    author: 'KORA Platform Team',
     timestamp: '10:00',
     date: 'Apr 13',
     tags: ['breaking', 'api', 'deprecation'],
@@ -166,9 +166,9 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
     severity: 'minor',
     title: 'Legal workspace — case management integration',
     description:
-      'New Legal workspace added to Aegis sidebar. Case file management, compliance tracking, and legal hold workflows.',
+      'New Legal workspace added to PARAGON sidebar. Case file management, compliance tracking, and legal hold workflows.',
     version: 'v5.1.0',
-    author: 'Aegis Dev Team',
+    author: 'PARAGON Dev Team',
     timestamp: '15:00',
     date: 'Apr 12',
     tags: ['feature', 'legal'],
@@ -184,7 +184,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
     description:
       'Fixed property boundary rendering artifacts on Retina displays. Coordinate precision improved to 7 decimal places.',
     version: 'v2.11.3',
-    author: 'Terra Frontend',
+    author: 'DOMAINE Frontend',
     timestamp: '11:20',
     date: 'Apr 12',
     tags: ['fix', 'ui', 'maps'],
@@ -214,7 +214,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
     severity: 'patch',
     title: 'Route watchlist expanded to 12 straits',
     description:
-      'Added monitoring coverage for Lombok Strait, Torres Strait, and 2 additional high-risk zones per updated Aegis threat assessment.',
+      'Added monitoring coverage for Lombok Strait, Torres Strait, and 2 additional high-risk zones per updated PARAGON threat assessment.',
     version: 'v4.1.9',
     author: 'Maritime Ops',
     timestamp: '09:30',

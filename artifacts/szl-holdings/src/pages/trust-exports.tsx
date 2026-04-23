@@ -49,7 +49,7 @@ const EXPORT_FLOW = [
 
 const WRITE_BACK_CONTROLS = [
   { label: "Scoped write permissions", body: "Write-back connectors operate under the minimum permissions required for the specific action. No connector has blanket write access." },
-  { label: "Action-scoped execution", body: "When Alloy executes a write-back, it operates only within the parameters approved by the human review. The scope cannot expand post-approval." },
+  { label: "Action-scoped execution", body: "When FORGE executes a write-back, it operates only within the parameters approved by the human review. The scope cannot expand post-approval." },
   { label: "Before/after state capture", body: "Connector logs capture the state of the external system before and after write-back execution, providing a complete change record." },
   { label: "Rollback documentation", body: "For reversible write-back operations, the rollback procedure is documented in the audit record before execution begins." },
 ];

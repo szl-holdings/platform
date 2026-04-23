@@ -486,7 +486,7 @@ export default function ThreatGraph() {
                   onMouseEnter={() => setHoveredNode(node.id)}
                   onMouseLeave={() => setHoveredNode(null)}
                 >
-                  {/* Pulse ring for compromised nodes */}
+                  {/* LUMINA ring for compromised nodes */}
                   {node.compromised && animate && (
                     <circle
                       cx={node.x}

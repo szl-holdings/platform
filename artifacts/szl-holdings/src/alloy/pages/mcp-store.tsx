@@ -212,7 +212,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 const CONNECTED_SERVERS: ConnectedServer[] = [
   {
     id: 'alloy-native',
-    name: 'Alloy MCP Server',
+    name: 'FORGE MCP Server',
     url: '/api/mcp',
     isNative: true,
     status: 'healthy',
@@ -547,7 +547,7 @@ export default function McpStore() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#4B8BDB' }}
             >
-              Alloy · MCP Store
+              FORGE · MCP Store
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">MCP Server Marketplace</h1>

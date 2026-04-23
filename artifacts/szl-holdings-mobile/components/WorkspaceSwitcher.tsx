@@ -81,7 +81,7 @@ export function WorkspaceSwitcher() {
               <Text style={[styles.logoText, { color: colors.gold }]}>C</Text>
             </View>
             <View>
-              <Text style={[styles.appName, { color: colors.foreground }]}>CORTEX</Text>
+              <Text style={[styles.appName, { color: colors.foreground }]}>APEX</Text>
               <Text style={[styles.appSub, { color: colors.mutedForeground }]}>
                 Unified Command
               </Text>

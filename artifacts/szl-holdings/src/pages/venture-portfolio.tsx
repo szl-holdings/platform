@@ -27,7 +27,7 @@ const VENTURES = [
     tagline: "AI Orchestration Engine",
     category: "AI Infrastructure",
     stage: "Growth",
-    description: "The execution layer beneath Lyte. Alloy routes decisions to the right actor, confirms completion, and maintains an auditable record of every workflow outcome. LangSmith-tier traceability with enterprise-tier operational depth.",
+    description: "The execution layer beneath Lyte. FORGE routes decisions to the right actor, confirms completion, and maintains an auditable record of every workflow outcome. LangSmith-tier traceability with enterprise-tier operational depth.",
     metrics: [
       { label: "Workflow Templates", value: "12 live" },
       { label: "Completion Rate", value: ">94%" },
@@ -45,7 +45,7 @@ const VENTURES = [
     stage: "Growth",
     description: "Fleet intelligence, voyage performance, commodity flow analysis, and autonomous risk monitoring across global shipping lanes. MarineTraffic-tier vessel tracking combined with Kpler-tier commodity intelligence.",
     metrics: [
-      { label: "Vessels Tracked", value: "2,400+" },
+      { label: "SEXTANT Tracked", value: "2,400+" },
       { label: "Chokepoints", value: "8 monitored" },
       { label: "Risk Checks", value: "Autonomous" },
     ],
@@ -107,7 +107,7 @@ const VENTURES = [
 const ARCHITECTURE_DIFFERENTIATORS = [
   {
     title: "One data backbone",
-    body: "All ventures share a unified API server, knowledge store, and agent infrastructure. Data from Vessels can inform Lyte signals. Terra distress can trigger Aegis watchlist checks. The compounds.",
+    body: "All ventures share a unified API server, knowledge store, and agent infrastructure. Data from SEXTANT can inform KORA signals. DOMAINE distress can trigger PARAGON watchlist checks. The compounds.",
   },
   {
     title: "Autonomous agents, not dashboards",
@@ -119,7 +119,7 @@ const ARCHITECTURE_DIFFERENTIATORS = [
   },
   {
     title: "Category-defining, not category-average",
-    body: "Each venture is benchmarked against the market leader in its vertical. Vessels vs MarineTraffic. Aegis vs CrowdStrike. Terra vs CoStar. The standard is clear.",
+    body: "Each venture is benchmarked against the market leader in its vertical. SEXTANT vs MarineTraffic. PARAGON vs CrowdStrike. DOMAINE vs CoStar. The standard is clear.",
   },
 ];
 

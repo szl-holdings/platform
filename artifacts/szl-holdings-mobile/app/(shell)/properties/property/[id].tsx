@@ -137,7 +137,7 @@ export default function PropertyDetail() {
           score: property.opportunityScore,
           propertyAddress: `${property.address}, ${property.borough}`,
           estimatedValue: property.estimatedValue,
-          notes: `Added from Terra Mobile property detail. Distress type: ${property.distressType}`,
+          notes: `Added from DOMAINE Mobile property detail. Distress type: ${property.distressType}`,
         }),
       });
       if (!res.ok) throw new Error(`Failed to create lead: ${res.status}`);
@@ -150,9 +150,9 @@ export default function PropertyDetail() {
     if (!property) return;
     try {
       await Share.share({
-        title: `Terra Property Report — ${property.address}`,
+        title: `DOMAINE Property Report — ${property.address}`,
         message: [
-          'Terra Field Intelligence Report',
+          'DOMAINE Field Intelligence Report',
           `Address: ${property.address}, ${property.borough}`,
           `Est. Value: ${formatCurrency(property.estimatedValue)}`,
           `Opportunity Score: ${property.opportunityScore}/100`,
@@ -172,7 +172,7 @@ export default function PropertyDetail() {
     const reportUrl = `${API_BASE}/terra/reports/property/${property.id}?format=pdf`;
     await Share.share({
       url: reportUrl,
-      message: `Terra Property Report — ${property.address}`,
+      message: `DOMAINE Property Report — ${property.address}`,
     });
     createLeadMutation.mutate();
   };

@@ -16,17 +16,17 @@ export const ALLOY_USE_CASES: UseCase[] = [
   {
     id: 'lyte-observability',
     title: 'Operational Signal Intelligence',
-    audience: 'IT operators and engineering leads using Lyte',
+    audience: 'IT operators and engineering leads using KORA',
     problem:
       'High signal volumes produce alert fatigue. Teams struggle to differentiate critical incidents from noise.',
     inputs: [
-      'Lyte service health streams',
+      'KORA service health streams',
       'alert feeds',
       'performance metrics',
       'historical incident data',
     ],
     alloyRole:
-      'Alloy normalises incoming signals, applies reasoning to distinguish noise from genuine incidents, generates structured insight briefs, and routes actionable alerts to the right operators — removing manual triage.',
+      'FORGE normalises incoming signals, applies reasoning to distinguish noise from genuine incidents, generates structured insight briefs, and routes actionable alerts to the right operators — removing manual triage.',
     outputs: [
       'Prioritised incident brief',
       'Recommended response',
@@ -52,7 +52,7 @@ export const ALLOY_USE_CASES: UseCase[] = [
       'resource states',
     ],
     alloyRole:
-      'Alloy runs continuous readiness assessments against defined criteria, generates scored readiness reports, identifies gaps with specific remediation steps, and produces audit-ready evidence records.',
+      'FORGE runs continuous readiness assessments against defined criteria, generates scored readiness reports, identifies gaps with specific remediation steps, and produces audit-ready evidence records.',
     outputs: ['Readiness score', 'Gap analysis', 'Improvement roadmap', 'Audit-ready evidence'],
     businessImpact: 'Consistent assessments, faster audit preparation, proactive gap closure',
     relatedProduct: 'Command',
@@ -67,7 +67,7 @@ export const ALLOY_USE_CASES: UseCase[] = [
       'Producing accurate, on-brand documents from fragmented operational data takes significant manual effort.',
     inputs: ['Client data', 'engagement history', 'templates', 'workflow outputs'],
     alloyRole:
-      'Alloy assembles context from multiple sources, generates structured document drafts using templates, routes drafts through human review workflows, and delivers approved documents.',
+      'FORGE assembles context from multiple sources, generates structured document drafts using templates, routes drafts through human review workflows, and delivers approved documents.',
     outputs: [
       'Draft documents',
       'Approval-ready outputs',
@@ -88,7 +88,7 @@ export const ALLOY_USE_CASES: UseCase[] = [
       'Tasks and requests arrive through multiple channels, leading to misrouting, duplication, and missed priorities.',
     inputs: ['Inbound requests', 'task queues', 'operator availability', 'priority rules'],
     alloyRole:
-      'Alloy classifies and prioritises inbound requests, applies routing rules with contextual reasoning, assigns tasks to the correct workflow or operator, and produces triage summaries.',
+      'FORGE classifies and prioritises inbound requests, applies routing rules with contextual reasoning, assigns tasks to the correct workflow or operator, and produces triage summaries.',
     outputs: [
       'Routed task with priority',
       'Triage brief',
@@ -104,12 +104,12 @@ export const ALLOY_USE_CASES: UseCase[] = [
   {
     id: 'exception-handling',
     title: 'Exception Detection and Response',
-    audience: 'Operations and engineering teams on Lyte and Vessels',
+    audience: 'Operations and engineering teams on KORA and SEXTANT',
     problem:
       'Edge cases and operational exceptions require significant manual investigation before appropriate responses can be formed.',
     inputs: ['System anomalies', 'threshold breaches', 'unclassified events', 'outlier signals'],
     alloyRole:
-      'Alloy detects anomalous conditions, assesses scope and impact, retrieves relevant remediation context, produces structured action plans, and routes high-stakes decisions to human review.',
+      'FORGE detects anomalous conditions, assesses scope and impact, retrieves relevant remediation context, produces structured action plans, and routes high-stakes decisions to human review.',
     outputs: [
       'Exception classification',
       'Impact assessment',
@@ -125,7 +125,7 @@ export const ALLOY_USE_CASES: UseCase[] = [
   {
     id: 'maritime-signal',
     title: 'Maritime Signal Interpretation',
-    audience: 'Fleet operators and maritime intelligence teams using Vessels',
+    audience: 'Fleet operators and maritime intelligence teams using SEXTANT',
     problem:
       'Raw AIS signals and vessel status data require domain expertise to interpret meaningfully.',
     inputs: [
@@ -135,7 +135,7 @@ export const ALLOY_USE_CASES: UseCase[] = [
       'port status',
     ],
     alloyRole:
-      'Alloy interprets maritime signals against operational context, identifies deviations from expected routing or behaviour, generates structured fleet intelligence briefings, and flags anomalies for operator review.',
+      'FORGE interprets maritime signals against operational context, identifies deviations from expected routing or behaviour, generates structured fleet intelligence briefings, and flags anomalies for operator review.',
     outputs: [
       'Fleet intelligence brief',
       'Deviation alerts',
@@ -144,7 +144,7 @@ export const ALLOY_USE_CASES: UseCase[] = [
     ],
     businessImpact:
       'Reduced manual signal analysis, proactive deviation detection, structured fleet intelligence',
-    relatedProduct: 'Vessels Maritime Intelligence',
+    relatedProduct: 'SEXTANT Maritime Intelligence',
     icon: '🚢',
     category: 'Maritime',
   },
@@ -182,7 +182,7 @@ export const ALLOY_USE_CASES: UseCase[] = [
       'performance summaries',
     ],
     alloyRole:
-      'Alloy produces cross-product operational digests, surfaces pending decisions requiring attention, provides explainable status summaries, and routes founder-level decisions through appropriate approval flows.',
+      'FORGE produces cross-product operational digests, surfaces pending decisions requiring attention, provides explainable status summaries, and routes founder-level decisions through appropriate approval flows.',
     outputs: [
       'Cross-product digest',
       'Pending decision queue',

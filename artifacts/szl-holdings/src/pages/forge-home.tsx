@@ -344,19 +344,19 @@ export default function ForgeHomePage() {
             {[
               {
                 action: 'Portfolio health review',
-                detail: 'Vessels Q1 metrics updated',
+                detail: 'SEXTANT Q1 metrics updated',
                 time: '2h ago',
                 color: '#22d3ee',
               },
               {
                 action: 'New design partner onboarded',
-                detail: 'Lyte — TechCorp engagement activated',
+                detail: 'KORA — TechCorp engagement activated',
                 time: '5h ago',
                 color: '#d4a054',
               },
               {
                 action: 'Proposal approved',
-                detail: 'Aegis enterprise tier — Northgate Capital',
+                detail: 'PARAGON enterprise tier — Northgate Capital',
                 time: '1d ago',
                 color: '#ef4444',
               },

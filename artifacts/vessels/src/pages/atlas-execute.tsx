@@ -21,7 +21,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 const DOMAIN = 'vessels';
 const ACCENT = '#3b82f6';
-const DOMAIN_LABEL = 'Vessels — Maritime Intelligence';
+const DOMAIN_LABEL = 'SEXTANT — Maritime Intelligence';
 const WORKFLOW_KEY = 'vessels-voyage-risk';
 
 const SIGNAL_TYPES = [

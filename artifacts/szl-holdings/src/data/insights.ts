@@ -74,23 +74,23 @@ These numbers are real. They are also, frankly, the least interesting part of th
 
 ## The Portfolio in Detail
 
-### Lyte Command Center — AIOps
-$4.2M ARR. 93% year-over-year growth. The AIOps market is consolidating around platforms that can close the loop from signal detection to autonomous remediation, and Lyte has staked out the most defensible position in that transition. We expect Lyte to cross $10M ARR by Q4 2026 and are evaluating a growth equity raise to accelerate enterprise sales.
+### KORA Command Center — AIOps
+$4.2M ARR. 93% year-over-year growth. The AIOps market is consolidating around platforms that can close the loop from signal detection to autonomous remediation, and KORA has staked out the most defensible position in that transition. We expect KORA to cross $10M ARR by Q4 2026 and are evaluating a growth equity raise to accelerate enterprise sales.
 
-### Aegis Security Simulation — Cybersecurity
-Three Fortune 500 clients. MITRE ATT&CK integration certified. The enterprise security simulation market was built on expensive, infrequent red team engagements. Aegis is making continuous adversarial simulation the new baseline — and the market is responding. 2026 focus: federal sector expansion.
+### PARAGON Security Simulation — Cybersecurity
+Three Fortune 500 clients. MITRE ATT&CK integration certified. The enterprise security simulation market was built on expensive, infrequent red team engagements. PARAGON is making continuous adversarial simulation the new baseline — and the market is responding. 2026 focus: federal sector expansion.
 
 ### AI Research — AI/ML
-$14M Series A closed February 2026. The LLM evaluation market is nascent and will be enormous. Every enterprise deploying AI at scale needs a rigorous way to measure model behavior, drift, and risk. SZL Cortex is building the standard. The Series A funds GPU infrastructure expansion and the launch of three new evaluation workflow modules.
+$14M Series A closed February 2026. The LLM evaluation market is nascent and will be enormous. Every enterprise deploying AI at scale needs a rigorous way to measure model behavior, drift, and risk. SZL APEX is building the standard. The Series A funds GPU infrastructure expansion and the launch of three new evaluation workflow modules.
 
-### Vessels Maritime Intelligence — Maritime
-Vessels has the most patient capital profile in our portfolio and the largest long-term opportunity. AIS anomaly detection, dark vessel tracking, sanctions compliance, and climate routing overlays are each significant markets. Combined, with the geopolitical volatility of 2024–2026 driving maritime intelligence demand, we see Vessels as the eventual flagship platform of the ecosystem.
+### SEXTANT Maritime Intelligence — Maritime
+SEXTANT has the most patient capital profile in our portfolio and the largest long-term opportunity. AIS anomaly detection, dark vessel tracking, sanctions compliance, and climate routing overlays are each significant markets. Combined, with the geopolitical volatility of 2024–2026 driving maritime intelligence demand, we see SEXTANT as the eventual flagship platform of the ecosystem.
 
-### Lyte — Business Telemetry · OBSERVE
-$3.1M ARR. 34 enterprise clients. The business observability market is undergoing its most significant technology adoption cycle since Splunk. Lyte's operational intelligence and anomaly detection suite are genuinely differentiated. The pipeline for 2026 includes a Business Telemetry API public launch and two potential platform license deals with institutional operators.
+### KORA — Business Telemetry · OBSERVE
+$3.1M ARR. 34 enterprise clients. The business observability market is undergoing its most significant technology adoption cycle since Splunk. KORA's operational intelligence and anomaly detection suite are genuinely differentiated. The pipeline for 2026 includes a Business Telemetry API public launch and two potential platform license deals with institutional operators.
 
-### Alloy — Execution Fabric · ENGINE
-Alloy is the platform backbone powering Lyte, Vessels, and every SZL subsidiary — orchestrating connectors, DAGs, automations, and the predictive intelligence layer. Scenario modeling, confidence scoring, and agent coordination are core capabilities embedded directly into the execution layer.
+### FORGE — Execution Fabric · ENGINE
+FORGE is the platform backbone powering KORA, SEXTANT, and every SZL subsidiary — orchestrating connectors, DAGs, automations, and the predictive intelligence layer. Scenario modeling, confidence scoring, and agent coordination are core capabilities embedded directly into the execution layer.
 
 ## The Forward Thesis
 
@@ -156,7 +156,7 @@ The breakthrough in maritime AI is not simply processing more AIS data faster. I
 
 ## The Intelligence Gap Is Closing
 
-The Vessels Maritime Intelligence platform integrates all of these signals — AIS, satellite, optical, radar, port call databases, ownership registries, flag state records, and sanctions lists — into a unified inference layer. The system does not wait for a human analyst to ask a question. It continuously monitors the fleet, surfaces anomalies in ranked order by risk severity, and provides the evidentiary chain an analyst needs to escalate with confidence.
+The SEXTANT Maritime Intelligence platform integrates all of these signals — AIS, satellite, optical, radar, port call databases, ownership registries, flag state records, and sanctions lists — into a unified inference layer. The system does not wait for a human analyst to ask a question. It continuously monitors the fleet, surfaces anomalies in ranked order by risk severity, and provides the evidentiary chain an analyst needs to escalate with confidence.
 
 This is not theoretical capability. It is operating against real fleets, in real time. The platform has identified shadow transfer events that preceded formal sanctions designations by an average of 34 days. It has flagged identity spoofing scenarios that manual AIS review missed for months.
 
@@ -193,7 +193,7 @@ The attacker does not have this problem. An adversary who has decided to target 
 
 ## What Changes With AI-Native Simulation
 
-The Aegis Security Simulation platform is built on three architectural principles that make continuous operation viable at scale.
+The PARAGON Security Simulation platform is built on three architectural principles that make continuous operation viable at scale.
 
 **Automated MITRE ATT&CK coverage.** The MITRE ATT&CK framework catalogs over 200 distinct adversary techniques across the full attack lifecycle — from initial access through lateral movement to impact. Manual red teams can cover a meaningful subset of these techniques in a typical engagement. Aegis runs automated campaigns covering the complete ATT&CK matrix against live infrastructure, on a continuous schedule, with no additional human cost per test cycle.
 
@@ -292,7 +292,7 @@ Model governance becomes a continuous function rather than a one-time gate. Rath
 
 ## The Timing Is Right
 
-The enterprise AI deployment wave is happening. It is not a future event. Fortune 500 companies are in production with LLMs across customer service, document processing, code generation, research synthesis, and decision support. The evaluation infrastructure to govern those deployments is running 18 to 24 months behind. That gap is where SZL Cortex operates.
+The enterprise AI deployment wave is happening. It is not a future event. Fortune 500 companies are in production with LLMs across customer service, document processing, code generation, research synthesis, and decision support. The evaluation infrastructure to govern those deployments is running 18 to 24 months behind. That gap is where SZL APEX operates.
 
 *The companies that build rigorous evaluation infrastructure now will be the ones who can deploy AI confidently, compliantly, and quickly when their competitors are still stuck in risk-committee limbo.*`,
   },
@@ -329,7 +329,7 @@ The commercial real estate market is not ignoring climate risk. Every major CRE 
 
 ## What AI-Native Intelligence Changes
 
-Lyte integrates physical climate risk data — flood maps, sea level projections, wildfire risk modeling, heat stress analysis, storm surge scenarios — with the operational and financial data that fund managers actually use to make decisions.
+KORA integrates physical climate risk data — flood maps, sea level projections, wildfire risk modeling, heat stress analysis, storm surge scenarios — with the operational and financial data that fund managers actually use to make decisions.
 
 This is not climate reporting bolted onto a separate data source. It is a unified intelligence layer where every financial metric has a climate-adjusted variant: climate-adjusted NOI, climate-adjusted cap rate, climate-adjusted LTV, insurance-adjusted free cash flow. When a portfolio manager is reviewing an acquisition model, the climate risk variables are embedded in the same interface, the same workflow, the same financial model — not in a separate PDF report from a third-party consultant.
 
@@ -378,7 +378,7 @@ What those platforms did not anticipate was the degree to which creative product
 
 ## The AI-Native Creative Architecture
 
-Alloy is built for the execution environment that actually exists in 2026, not the one that enterprise analytics was designed for in 2015.
+FORGE is built for the execution environment that actually exists in 2026, not the one that enterprise analytics was designed for in 2015.
 
 **Intelligence is embedded in the workflow, not adjacent to it.** Rather than exporting performance data from one system, analyzing it in another, and manually applying insights back into a third system, Alloy maintains a connected intelligence layer across the full decision lifecycle. The scenario that goes into the system is informed by confidence scores from similar past scenarios. The predictions generated are ranked by modeled confidence and assumption sensitivity against the target outcome. The review and approval workflow surfaces model drift and assumption risk before the decision-maker sees the final recommendation, not after.
 
@@ -439,11 +439,11 @@ Building AIOps systems that can autonomously remediate, rather than just detect 
 
 **Auditability.** In regulated environments and for post-incident review purposes, autonomous remediation actions must be auditable. The system must log what it did, why it concluded that action was appropriate, what data it used to make that conclusion, and what the outcome was. This is not just a compliance requirement — it is the feedback loop that makes the system more reliable over time.
 
-## The Lyte Architecture
+## The KORA Architecture
 
-Lyte Command Center is built on the premise that AIOps without autonomous remediation is an incomplete solution — valuable, but incomplete. The platform integrates the signal intelligence capabilities of first-generation AIOps (alert correlation, noise reduction, incident prioritization) with an autonomous remediation engine that executes against a library of validated playbooks, calibrated by confidence scoring and blast radius assessment.
+KORA Command Center is built on the premise that AIOps without autonomous remediation is an incomplete solution — valuable, but incomplete. The platform integrates the signal intelligence capabilities of first-generation AIOps (alert correlation, noise reduction, incident prioritization) with an autonomous remediation engine that executes against a library of validated playbooks, calibrated by confidence scoring and blast radius assessment.
 
-The operational result is that 68% of incidents handled by the Lyte platform are fully resolved without human intervention. Human operators see the remaining 32% with full remediation context — what was tried automatically, what the system's diagnosis is, what the recommended human actions are — rather than starting from a raw alert. Mean time to resolution across Lyte deployments is 74% lower than the baseline established at deployment. Alert fatigue, measured by operator survey, drops significantly in the first 90 days.
+The operational result is that 68% of incidents handled by the KORA platform are fully resolved without human intervention. Human operators see the remaining 32% with full remediation context — what was tried automatically, what the system's diagnosis is, what the recommended human actions are — rather than starting from a raw alert. Mean time to resolution across KORA deployments is 74% lower than the baseline established at deployment. Alert fatigue, measured by operator survey, drops significantly in the first 90 days.
 
 ## The Market Consequence
 

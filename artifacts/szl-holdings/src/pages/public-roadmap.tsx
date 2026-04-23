@@ -7,7 +7,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 const NOW = [
   {
-    area: "Lyte proof",
+    area: "KORA proof",
     color: "hsl(145,62%,46%)",
     items: [
       { label: "Counsel live product across full workflow", done: true },
@@ -19,10 +19,10 @@ const NOW = [
     ],
   },
   {
-    area: "Alloy maturity",
+    area: "FORGE maturity",
     color: "var(--color-alloy-light)",
     items: [
-      { label: "Alloy execution fabric operational across all verticals", done: true },
+      { label: "FORGE execution fabric operational across all verticals", done: true },
       { label: "Connector mesh — task, notification, API, document connectors live", done: true },
       { label: "Human-in-the-loop approval chain enforced at action-type level", done: true },
       { label: "Governance audit trail — immutable, queryable, exportable", done: true },
@@ -48,7 +48,7 @@ const NEXT = [
       { label: "First paid pilot contract signed", done: false },
       { label: "Design-partner proof objects published — real data, real outcomes", done: false },
       { label: "3–5 design-partner agreements targeting paid pilot", done: false },
-      { label: "Vessels entering design-partner engagement", done: false },
+      { label: "SEXTANT entering design-partner engagement", done: false },
     ],
   },
   {
@@ -77,10 +77,10 @@ const LATER = [
     area: "Expansion",
     color: "hsl(210,80%,60%)",
     items: [
-      { label: "Aegis and Terra entering commercial-stage design-partner engagement" },
-      { label: "Cross-vertical analytics via shared Lyte command layer" },
+      { label: "PARAGON and DOMAINE entering commercial-stage design-partner engagement" },
+      { label: "Cross-vertical analytics via shared KORA command layer" },
       { label: "Enterprise GTM — Microsoft 365 integration as distribution lever" },
-      { label: "First operating proof from Vessels maritime domain" },
+      { label: "First operating proof from SEXTANT maritime domain" },
     ],
   },
   {
@@ -141,7 +141,7 @@ function RoadmapLane({ area, color, items, phase }: { area: string; color: strin
 export default function PublicRoadmapPage() {
   const __pageMeta = usePageMeta({
     title: "Roadmap — SZL Holdings",
-    description: "SZL Holdings public roadmap — Now, Next, Later. Lyte proof, Alloy maturity, trust posture, docs, and staged expansion.",
+    description: "SZL Holdings public roadmap — Now, Next, Later. KORA proof, FORGE maturity, trust posture, docs, and staged expansion.",
     canonical: "https://szlholdings.com/roadmap",
   });
 

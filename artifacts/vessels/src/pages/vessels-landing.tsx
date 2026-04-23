@@ -82,7 +82,7 @@ export default function VesselsLandingPage() {
               <Ship className="w-5 h-5 text-sky-400" />
             </div>
             <span className="text-sm font-medium text-sky-400/60">
-              Vessels Maritime Command · Powered by Alloy
+              SEXTANT Maritime Command · Powered by FORGE
             </span>
           </div>
 
@@ -93,7 +93,7 @@ export default function VesselsLandingPage() {
           </h1>
 
           <p className="text-lg text-sky-300/60 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Vessels is a maritime command platform for operators who need more than a position feed.
+            SEXTANT is a maritime command platform for operators who need more than a position feed.
             See the exceptions that matter, understand voyage economics, and act before disruptions
             escalate.
           </p>
@@ -131,13 +131,13 @@ export default function VesselsLandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-[10px] font-mono text-sky-400/40 uppercase tracking-widest mb-3">
-              What Vessels Does
+              What SEXTANT Does
             </p>
             <h2 className="font-display text-3xl font-bold text-sky-50 mb-3">
               Fleet command. Not fleet tracking.
             </h2>
             <p className="text-sky-400/50 mt-3 max-w-xl mx-auto text-sm">
-              Most fleet tools stop at position. Vessels is built for the complete operational
+              Most fleet tools stop at position. SEXTANT is built for the complete operational
               picture — from where a vessel is, to what it earns, to what needs to happen now. Every
               view is a command surface, not a status display.
             </p>
@@ -255,7 +255,7 @@ export default function VesselsLandingPage() {
           <p className="text-sky-400/40 text-sm max-w-2xl mx-auto leading-relaxed">
             Every maritime operator knows where their vessels are. Very few know what the exceptions
             mean, which voyages are profitable, which vessels are at maintenance risk, and what
-            needs to happen in the next four hours. That is the gap Vessels closes.
+            needs to happen in the next four hours. That is the gap SEXTANT closes.
           </p>
         </div>
 
@@ -289,7 +289,7 @@ export default function VesselsLandingPage() {
             utmSource="vessels"
             variant="banner"
             heading="Maritime intelligence, straight to your inbox"
-            subheading="SZL Command essays on fleet operations, maritime AI, and the decision infrastructure behind Vessels — delivered weekly."
+            subheading="SZL Command essays on fleet operations, maritime AI, and the decision infrastructure behind SEXTANT — delivered weekly."
           />
         </div>
       </section>
@@ -297,11 +297,11 @@ export default function VesselsLandingPage() {
       <section className="px-6 py-20 bg-[#040c18] border-t border-sky-500/5">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-[10px] font-mono text-sky-400/40 uppercase tracking-widest mb-3">
-            Powered by Alloy · SZL Holdings
+            Powered by FORGE · SZL Holdings
           </p>
           <h2 className="font-display text-3xl font-bold text-sky-50 mb-4">Request a Demo</h2>
           <p className="text-sky-400/50 mb-8 text-sm leading-relaxed max-w-xl mx-auto">
-            Vessels is built for maritime operators who need more than a position feed. Request a
+            SEXTANT is built for maritime operators who need more than a position feed. Request a
             demo — we will walk through the full command center with your fleet data in mind.
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
@@ -325,7 +325,7 @@ export default function VesselsLandingPage() {
         onClose={() => setDemoOpen(false)}
         type="demo"
         app="vessels"
-        subtitle="Vessels Maritime Intelligence Platform"
+        subtitle="SEXTANT Maritime Intelligence Platform"
       />
     </div>
   );

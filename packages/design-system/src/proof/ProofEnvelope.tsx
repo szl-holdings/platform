@@ -71,7 +71,7 @@ async function patchAutonomyMode(
   } catch (err) {
     return {
       policyState: 'blocked',
-      policyReason: `Could not reach Alloy autonomy service — mode not persisted (${(err as Error).message}).`,
+      policyReason: `Could not reach FORGE autonomy service — mode not persisted (${(err as Error).message}).`,
       disposition: 'block',
       mode,
     };

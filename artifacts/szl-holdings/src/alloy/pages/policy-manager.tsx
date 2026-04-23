@@ -692,7 +692,7 @@ export default function PolicyManager() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#8b5cf6' }}
             >
-              Alloy · Policy Manager
+              FORGE · Policy Manager
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Policy Manager</h1>
@@ -729,7 +729,7 @@ export default function PolicyManager() {
           }}
         >
           <Shield className="w-3 h-3 shrink-0" />
-          Demo Mode — Illustrative policies shown. Connect the Alloy API for live tenant policy
+          Demo Mode — Illustrative policies shown. Connect the FORGE API for live tenant policy
           data.
         </div>
       )}

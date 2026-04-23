@@ -220,7 +220,7 @@ export default function RouteAnomalyEnginePage() {
             { label: 'Critical', value: data.summary.bySeverity.critical ?? 0, color: '#ef4444' },
             { label: 'High', value: data.summary.bySeverity.high ?? 0, color: '#f87171' },
             {
-              label: 'Vessels Affected',
+              label: 'SEXTANT Affected',
               value: data.summary.uniqueVesselsAffected,
               color: '#a78bfa',
             },

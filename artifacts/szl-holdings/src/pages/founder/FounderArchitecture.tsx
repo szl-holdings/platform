@@ -38,7 +38,7 @@ const CAPABILITIES: Record<string, string[]> = {
     'Cross-system signal detection — converts raw operational data into actionable signals',
     'Ownership-gap detection across teams, systems, and contracts',
     'Routes signals to the right operator with the right context, with built-in approval surfaces',
-    'Built on the PRISM framework — Pulse, Risk, Intelligence, Signals, Motion',
+    'Built on the PRISM framework — LUMINA, Risk, Intelligence, Signals, Motion',
   ],
   vessels: [
     'AIS, satellite, and multi-source sensor fusion for global vessel tracking (live public feeds plus simulated demo data)',
@@ -140,7 +140,7 @@ const NODES: GraphNode[] = [
     r: 38,
     kind: 'core',
     link: alloyProduct.link ?? '/alloy',
-    linkLabel: 'Open Alloy',
+    linkLabel: 'Open FORGE',
     description: alloyProduct.description,
     capabilities: CAPABILITIES.alloy,
     secondaryLinks: SECONDARY_LINKS.alloy,
@@ -293,7 +293,7 @@ export default function FounderArchitecture() {
               maxWidth: '60ch',
             }}
           >
-            Alloy is the shared execution fabric beneath every SZL vertical. Every product routes
+            FORGE is the shared execution fabric beneath every SZL vertical. Every product routes
             consequential actions through the same governance layer, the same approval surface, and
             the same proof chain.{' '}
             <strong style={{ color: 'hsl(38, 8%, 95%)', fontWeight: 500 }}>

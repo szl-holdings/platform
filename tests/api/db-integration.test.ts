@@ -122,7 +122,7 @@ function buildApp() {
 }
 
 // ── Domain: Vessels ───────────────────────────────────────────────────────────
-describe("DB Integration — Vessels domain", () => {
+describe("DB Integration — SEXTANT domain", () => {
   let app: express.Express;
 
   beforeAll(async () => {
@@ -230,7 +230,7 @@ describe("DB Integration — Vessels domain", () => {
 // NOTE: Trading orders are stored in-memory (sessionOrders) — there is no DB
 // table for them. Tests validate the route's validation and success response
 // shapes; no afterAll cleanup is required.
-describe("DB Integration — Vessels Trading domain", () => {
+describe("DB Integration — SEXTANT Trading domain", () => {
   let app: express.Express;
 
   beforeAll(async () => {
@@ -395,7 +395,7 @@ describe("DB Integration — Carlota Jo domain", () => {
 });
 
 // ── Domain: Lyte (AIOps) ─────────────────────────────────────────────────────
-describe("DB Integration — Lyte domain", () => {
+describe("DB Integration — KORA domain", () => {
   let app: express.Express;
 
   beforeAll(async () => {
@@ -453,7 +453,7 @@ describe("DB Integration — Lyte domain", () => {
 });
 
 // ── Domain: Aegis / Firestorm ─────────────────────────────────────────────────
-describe("DB Integration — Aegis / Firestorm domain", () => {
+describe("DB Integration — PARAGON / Firestorm domain", () => {
   let app: express.Express;
   let tempAssessmentId: number | undefined;
 
@@ -587,7 +587,7 @@ describe("DB Integration — Aegis / Firestorm domain", () => {
 // ── Domain: PRISM Counsel — REMOVED (Task #2696, routes archived) ────────────
 
 // ── Domain: Terra ─────────────────────────────────────────────────────────────
-describe("DB Integration — Terra (Real Estate) domain", () => {
+describe("DB Integration — DOMAINE (Real Estate) domain", () => {
   let app: express.Express;
 
   beforeAll(async () => {

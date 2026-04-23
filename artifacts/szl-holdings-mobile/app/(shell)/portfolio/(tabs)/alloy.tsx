@@ -350,7 +350,7 @@ export default function AlloyScreen() {
         <View style={styles.header}>
           <View>
             <Text style={[styles.eyebrow, { color: 'rgba(139,92,246,0.6)' }]}>
-              ALLOY · EXECUTION FABRIC
+              FORGE · EXECUTION FABRIC
             </Text>
             <Text style={[styles.title, { color: colors.cream }]}>Workflow Monitor</Text>
           </View>
@@ -445,7 +445,7 @@ export default function AlloyScreen() {
                   style={{ opacity: 0.4 }}
                 />
                 <Text style={[styles.emptyTitle, { color: colors.creamDim }]}>
-                  Cannot reach Alloy
+                  Cannot reach FORGE
                 </Text>
                 <Text style={[styles.emptyBody, { color: colors.mutedForeground }]}>
                   Server appears to be offline. Pull to retry.

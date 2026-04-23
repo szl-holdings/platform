@@ -80,7 +80,7 @@ const PORTFOLIO_COLUMNS = [
     color: ACCENT,
     items: [
       { name: "KORA", desc: "Governed decision command layer" },
-      { name: "Alloy Engine", desc: "Execution and orchestration fabric" },
+      { name: "FORGE Engine", desc: "Execution and orchestration fabric" },
     ],
   },
   {
@@ -316,7 +316,7 @@ export default function OperatingDoctrinePage() {
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <a href="/command/operations/" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-80" style={{ background: ACCENT, color: "#070a10" }}>
-                    Explore Lyte <ArrowRight className="h-4 w-4" />
+                    Explore KORA <ArrowRight className="h-4 w-4" />
                   </a>
                   <Link href="/ventures" className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:border-white/30">
                     Platform Map <ChevronRight className="h-4 w-4" />

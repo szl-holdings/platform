@@ -231,9 +231,9 @@ export function Layout({ children }: { children: ReactNode }) {
         href="/alloy"
         className="flex items-center gap-1.5 px-2 py-1 rounded-lg w-full transition-colors"
         style={{ color: toAlpha(COMMAND_ACCENT, 0.45) }}
-        title="Alloy Execution Fabric"
+        title="FORGE Execution Fabric"
       >
-        <span className="text-[10px] font-medium">⬡ Powered by Alloy</span>
+        <span className="text-[10px] font-medium">⬡ Powered by FORGE</span>
       </a>
     </div>
   );

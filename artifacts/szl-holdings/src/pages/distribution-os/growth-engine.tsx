@@ -124,7 +124,7 @@ const SEGMENT_META: Record<string, { color: string; bg: string; label: string }>
 };
 
 const CROSS_PROMO_PARTNERS = [
-  { name: 'Lyte Intelligence', desc: 'AI-native ops for SMBs', subscribers: '2,400', match: 78 },
+  { name: 'KORA Intelligence', desc: 'AI-native ops for SMBs', subscribers: '2,400', match: 78 },
   {
     name: 'Maritime Insider',
     desc: 'Weekly fleet & freight intelligence',

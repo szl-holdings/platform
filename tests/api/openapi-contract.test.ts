@@ -127,7 +127,7 @@ describe('OpenAPI contract — Health endpoints', () => {
 
 // ── Domain: Vessels ───────────────────────────────────────────────────────────
 
-describe('OpenAPI contract — Vessels domain', () => {
+describe('OpenAPI contract — SEXTANT domain', () => {
   it('defines GET /vessels fleet list endpoint', () => {
     expect(spec.paths).toHaveProperty('/vessels');
     expect(spec.paths['/vessels']).toHaveProperty('get');
@@ -154,7 +154,7 @@ describe('OpenAPI contract — Vessels domain', () => {
 
 // ── Domain: Aegis / Firestorm (SOC) ──────────────────────────────────────────
 
-describe('OpenAPI contract — Aegis / Firestorm domain', () => {
+describe('OpenAPI contract — PARAGON / Firestorm domain', () => {
   it('defines GET /firestorm/campaigns campaigns list endpoint', () => {
     expect(spec.paths).toHaveProperty('/firestorm/campaigns');
     expect(spec.paths['/firestorm/campaigns']).toHaveProperty('get');
@@ -181,7 +181,7 @@ describe('OpenAPI contract — Aegis / Firestorm domain', () => {
 
 // ── Domain: Lyte (AIOps) ──────────────────────────────────────────────────────
 
-describe('OpenAPI contract — Lyte domain', () => {
+describe('OpenAPI contract — KORA domain', () => {
   it('defines GET /lyte/products products list endpoint', () => {
     expect(spec.paths).toHaveProperty('/lyte/products');
     expect(spec.paths['/lyte/products']).toHaveProperty('get');
@@ -203,7 +203,7 @@ describe('OpenAPI contract — Lyte domain', () => {
 
 // ── Domain: AI Engine (Alloy) ─────────────────────────────────────────────────
 
-describe('OpenAPI contract — AI Engine (Alloy) domain', () => {
+describe('OpenAPI contract — AI Engine (FORGE) domain', () => {
   it('defines AI decision list endpoint GET /ai/decision', () => {
     expect(spec.paths).toHaveProperty('/ai/decision');
     expect(spec.paths['/ai/decision']).toHaveProperty('get');
@@ -504,7 +504,7 @@ describe('GraphQL schema — domain type coverage (static analysis)', () => {
     expect(src).toContain('extend type Query');
   });
 
-  it('PRISM Counsel GraphQL domain defines matter-related types', () => {
+  it('Counsel GraphQL domain defines matter-related types', () => {
     const src = readDomainTypeDefs('prism-counsel.ts');
     expect(src).toContain('Matter');
   });
@@ -514,9 +514,9 @@ describe('GraphQL schema — domain type coverage (static analysis)', () => {
     expect(src).toContain('extend type Query');
   });
 
-  it('Terra GraphQL domain defines terra-related types', () => {
+  it('DOMAINE GraphQL domain defines terra-related types', () => {
     const src = readDomainTypeDefs('terra.ts');
-    expect(src).toContain('Terra');
+    expect(src).toContain('DOMAINE');
   });
 
   it('schema.ts imports all 7 major domain type definitions', () => {

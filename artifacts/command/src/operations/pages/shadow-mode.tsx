@@ -87,7 +87,7 @@ const COMPARISONS: ShadowComparison[] = [
   },
   {
     id: 'SHD-037',
-    title: 'Terra lease renewal — auto-approve low risk',
+    title: 'DOMAINE lease renewal — auto-approve low risk',
     pack: 'DOMAINE',
     packColor: '#a07848',
     timestamp: 'Apr 1, 9:00 AM',
@@ -102,7 +102,7 @@ const COMPARISONS: ShadowComparison[] = [
   },
   {
     id: 'SHD-035',
-    title: 'Aegis vendor onboarding — defer or expedite?',
+    title: 'PARAGON vendor onboarding — defer or expedite?',
     pack: 'PARAGON',
     packColor: '#4f6ef7',
     timestamp: 'Apr 1, 11:00 AM',

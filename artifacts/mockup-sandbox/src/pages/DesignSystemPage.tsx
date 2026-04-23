@@ -41,7 +41,7 @@ const SAMPLE_EVENTS: TimelineEvent[] = [
     id: 't2',
     timestamp: new Date(Date.now() - 3_600_000 * 5),
     label: 'Recommendation Generated',
-    description: 'Alloy synthesized 3 countermeasures from 7 evidence signals',
+    description: 'FORGE synthesized 3 countermeasures from 7 evidence signals',
     severity: 'info',
     actor: 'FORGE',
     meta: { confidence: '82%', model: 'gpt-4o' },
@@ -451,7 +451,7 @@ export default function DesignSystemPage() {
               <NarrativePanel
                 headline="Action Debt threshold breach — three compounding delays identified."
                 paragraphs={NARRATIVE_PARAGRAPHS}
-                attribution="Synthesized by Alloy · 7 signals · 91% evidence coverage · Traceable to audit log #2026-04-18-0047"
+                attribution="Synthesized by FORGE · 7 signals · 91% evidence coverage · Traceable to audit log #2026-04-18-0047"
                 collapseAfter={2}
                 accentColor="var(--gi-accent-blue)"
               />

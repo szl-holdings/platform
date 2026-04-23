@@ -32,7 +32,7 @@ export default function WorkflowsPage({ onNavigate }: NavProps) {
         </div>
         <h1 className="text-3xl md:text-4xl font-bold mb-4">Real workflow patterns</h1>
         <p className="text-white/50 max-w-2xl leading-relaxed">
-          These are the structured patterns Alloy executes across the ecosystem — not abstract
+          These are the structured patterns FORGE executes across the ecosystem — not abstract
           templates, but the actual sequences that move operational data from signal to action.
         </p>
       </div>

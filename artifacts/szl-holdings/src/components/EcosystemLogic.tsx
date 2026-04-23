@@ -10,7 +10,7 @@ const stages = [
     rgb: '14,201,224',
     number: '01',
     platform: 'KORA',
-    desc: "Lyte ingests operational data — approvals, ownership, workflow state — and surfaces anomalies, latency events, and risk before they compound. You see what's actually happening across your business.",
+    desc: "KORA ingests operational data — approvals, ownership, workflow state — and surfaces anomalies, latency events, and risk before they compound. You see what's actually happening across your business.",
   },
   {
     id: 'understand',
@@ -20,7 +20,7 @@ const stages = [
     rgb: '92,155,228',
     number: '02',
     platform: 'KORA + FORGE Engine',
-    desc: 'The Alloy execution engine normalizes raw signal across platforms and applies reasoning to classify, contextualize, and connect events. Pattern recognition separates noise from consequence.',
+    desc: 'The FORGE execution engine normalizes raw signal across platforms and applies reasoning to classify, contextualize, and connect events. Pattern recognition separates noise from consequence.',
   },
   {
     id: 'execute',
@@ -30,7 +30,7 @@ const stages = [
     rgb: '38,164,218',
     number: '03',
     platform: 'SEXTANT + FORGE Engine',
-    desc: 'The Alloy engine orchestrates multi-step workflows — routing tasks, triggering actions, escalating decisions — while Vessels commands maritime execution with the same precision applied to fleet operations.',
+    desc: 'The FORGE engine orchestrates multi-step workflows — routing tasks, triggering actions, escalating decisions — while SEXTANT commands maritime execution with the same precision applied to fleet operations.',
   },
   {
     id: 'advise',

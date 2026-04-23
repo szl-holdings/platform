@@ -26,13 +26,13 @@ const highlights = [
   {
     icon: Anchor,
     label: 'Maritime Intelligence',
-    desc: 'Developed Vessels — a real-time fleet command platform tracking voyage economics and operational exceptions.',
+    desc: 'Developed SEXTANT — a real-time fleet command platform tracking voyage economics and operational exceptions.',
     color: 'hsl(205,85%,55%)',
   },
   {
     icon: Shield,
     label: 'Cyber Defense Systems',
-    desc: 'Shipped Aegis — a unified defense and intelligence command platform for enterprise threat response.',
+    desc: 'Shipped PARAGON — a unified defense and intelligence command platform for enterprise threat response.',
     color: 'hsl(232,68%,60%)',
   },
 ];

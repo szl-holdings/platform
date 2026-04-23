@@ -298,7 +298,7 @@ export default function LeaseAbstractionScreen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · AI</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>DOMAINE · AI</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Lease Abstraction</Text>
         </View>
         <View style={styles.headerRight}>

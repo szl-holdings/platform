@@ -478,7 +478,7 @@ export default function OnboardingPage() {
           </h2>
           <p className="text-xs text-amber-300/60 mb-5">
             Based on your use case, your starting surface is the{' '}
-            <span className="text-amber-300">Lyte Overview</span> — the live cockpit for signals,
+            <span className="text-amber-300">KORA Overview</span> — the live cockpit for signals,
             decisions, and workflow health.
           </p>
           <div className="grid sm:grid-cols-3 gap-3 mb-5">

@@ -389,7 +389,7 @@ export default function TenantScreeningScreen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>TERRA · SCREENING</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>DOMAINE · SCREENING</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Tenant Screening</Text>
         </View>
         <View

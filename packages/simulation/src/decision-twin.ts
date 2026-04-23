@@ -261,35 +261,35 @@ function buildDimensionEvidence(
     base.push({
       label: 'Financial exposure',
       value: `$${(profile.financialExposureUsd / 1_000_000).toFixed(1)}M at risk`,
-      source: 'Lyte — Revenue Monitor',
+      source: 'KORA — Revenue Monitor',
     });
   }
   if (dimension === 'staffing' && profile.hasOwnershipGap) {
     base.push({
       label: 'Ownership gap detected',
       value: 'No valid authority holder in approval chain',
-      source: 'Lyte — Approval Chain Monitor',
+      source: 'KORA — Approval Chain Monitor',
     });
   }
   if (dimension === 'market_timing' && profile.stalledDays) {
     base.push({
       label: 'Days stalled',
       value: `${profile.stalledDays} days (threshold: 21)`,
-      source: 'Lyte — Signal Monitor',
+      source: 'KORA — Signal Monitor',
     });
   }
   if (dimension === 'security' && profile.isPolicyBlocked) {
     base.push({
       label: 'Policy block active',
       value: '3 escalation attempts blocked by policy engine',
-      source: 'Lyte — Policy Engine',
+      source: 'KORA — Policy Engine',
     });
   }
 
   base.push({
     label: 'Historical pattern match',
     value: `${Math.round(profile.confidence * 100)}% confidence based on comparable scenarios`,
-    source: 'Lyte — Evidence Graph',
+    source: 'KORA — Evidence Graph',
   });
 
   if (action === 'approve') {
@@ -308,7 +308,7 @@ function buildDimensionEvidence(
     base.push({
       label: 'Escalation precedent',
       value: '78% close rate with executive sponsorship at this stage',
-      source: 'Lyte — Evidence Graph',
+      source: 'KORA — Evidence Graph',
     });
   } else if (action === 'reroute') {
     base.push({
@@ -375,7 +375,7 @@ export function runDecisionTwin(
       {
         label: 'Signal severity',
         value: profile.severity.toUpperCase(),
-        source: 'Lyte — Signal Monitor',
+        source: 'KORA — Signal Monitor',
       },
       {
         label: 'Simulation type',
@@ -385,7 +385,7 @@ export function runDecisionTwin(
       {
         label: 'Data source',
         value: profile.confidence >= 0.85 ? 'Live signal history' : 'Demo scenario (scripted)',
-        source: 'Lyte Data Policy',
+        source: 'KORA Data Policy',
       },
     ],
     isDemo: profile.confidence < 0.85,

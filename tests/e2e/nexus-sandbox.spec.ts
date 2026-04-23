@@ -30,8 +30,8 @@ test.beforeEach(async ({}, testInfo) => {
   if (!appAvailable) testInfo.skip();
 });
 
-test.describe('NEXUS Sandbox — Smoke Tests', () => {
-  test('loads NEXUS sandbox without fatal error', async ({ page }) => {
+test.describe('PRAXIS Sandbox — Smoke Tests', () => {
+  test('loads PRAXIS sandbox without fatal error', async ({ page }) => {
     await page.goto(NEXUS_BASE || '/', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
     const body = page.locator('body');

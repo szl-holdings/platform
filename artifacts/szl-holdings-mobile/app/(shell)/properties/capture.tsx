@@ -185,7 +185,7 @@ export default function CaptureScreen() {
           <Feather name="x" size={16} color={colors.cream} />
         </Pressable>
         <View>
-          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>TERRA · FIELD CAPTURE</Text>
+          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>DOMAINE · FIELD CAPTURE</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Property Capture</Text>
         </View>
         <View style={[styles.locStatus, { backgroundColor: `${locStatusConfig.color}15` }]}>

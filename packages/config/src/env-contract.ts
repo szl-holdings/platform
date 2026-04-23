@@ -63,7 +63,7 @@ export const ENV_CONTRACT: EnvVarSpec[] = [
     classification: 'recommended',
     description: 'OpenAI API key via Replit AI Integrations proxy.',
     risksIfMissing:
-      'Pulse briefings fall back to synthetic drift mode. AI triage/plan/retrieve endpoints degrade.',
+      'LUMINA briefings fall back to synthetic drift mode. AI triage/plan/retrieve endpoints degrade.',
   },
   {
     key: 'AI_INTEGRATIONS_ANTHROPIC_API_KEY',
@@ -89,7 +89,7 @@ export const ENV_CONTRACT: EnvVarSpec[] = [
     key: 'ALLOY_INTERNAL_TOKEN',
     classification: 'required',
     description: 'Privileged agent access token for M2M communication. Minimum 32 characters.',
-    risksIfMissing: 'Agent-to-agent calls fail; Alloy execution fabric is broken.',
+    risksIfMissing: 'Agent-to-agent calls fail; FORGE execution fabric is broken.',
   },
   {
     key: 'CONNECTOR_ENCRYPTION_KEY',
@@ -108,8 +108,8 @@ export const ENV_CONTRACT: EnvVarSpec[] = [
   {
     key: 'MAPBOX_TOKEN',
     classification: 'recommended',
-    description: 'Mapbox API token for Terra map views.',
-    risksIfMissing: 'All Terra map views render blank. Demo-killer for Terra presentations.',
+    description: 'Mapbox API token for DOMAINE map views.',
+    risksIfMissing: 'All DOMAINE map views render blank. Demo-killer for DOMAINE presentations.',
   },
 
   // Monitoring

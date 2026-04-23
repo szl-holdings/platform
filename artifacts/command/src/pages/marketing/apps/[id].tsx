@@ -33,7 +33,7 @@ const appData = {
     description:
       'Evidence-backed property analytics, market forecasting, and deal pipeline management for institutional real estate investors.',
     longDescription:
-      'Terra aggregates geospatial signals, public record data, and proprietary market feeds to give institutional investors a comprehensive picture of any asset—before they commit capital. From underwriting to asset management, the entire real estate lifecycle lives in a single command interface.',
+      'DOMAINE aggregates geospatial signals, public record data, and proprietary market feeds to give institutional investors a comprehensive picture of any asset—before they commit capital. From underwriting to asset management, the entire real estate lifecycle lives in a single command interface.',
     features: [
       {
         title: 'Market Forecasting',
@@ -79,7 +79,7 @@ const appData = {
     description:
       'Real-time AIS tracking, predictive maintenance, and route optimization for modern maritime operations.',
     longDescription:
-      'Vessels unifies global AIS feeds, IoT sensor streams, and weather routing algorithms into a single operational picture for fleet operators. Whether you run 3 vessels or 300, Vessels scales to your operational tempo.',
+      'SEXTANT unifies global AIS feeds, IoT sensor streams, and weather routing algorithms into a single operational picture for fleet operators. Whether you run 3 vessels or 300, SEXTANT scales to your operational tempo.',
     features: [
       {
         title: 'Real-time AIS Tracking',
@@ -117,7 +117,7 @@ const appData = {
       },
     ],
     stats: [
-      { v: '180K+', l: 'Vessels tracked globally' },
+      { v: '180K+', l: 'SEXTANT tracked globally' },
       { v: '<1s', l: 'AIS update latency' },
       { v: '60%', l: 'Downtime reduction' },
     ],
@@ -132,7 +132,7 @@ const appData = {
     description:
       'Autonomous incident detection, ML-driven root cause analysis, and SRE automation for complex distributed systems.',
     longDescription:
-      "Lyte eliminates the MTTD/MTTR grind by continuously learning your system's normal operating envelope and triggering enriched alerts the instant something deviates—with root cause and suggested remediation already attached.",
+      "KORA eliminates the MTTD/MTTR grind by continuously learning your system's normal operating envelope and triggering enriched alerts the instant something deviates—with root cause and suggested remediation already attached.",
     features: [
       {
         title: 'Autonomous Detection',
@@ -178,7 +178,7 @@ const appData = {
     description:
       'Unified threat intelligence, SOC command, and incident response orchestration for national security and enterprise defense.',
     longDescription:
-      'Aegis ingests threat intelligence from 900+ OSINT, dark web, and ISACs feeds and correlates them with your internal telemetry to give SOC analysts a real-time, ranked picture of active threats—with enriched context and one-click response workflows.',
+      'PARAGON ingests threat intelligence from 900+ OSINT, dark web, and ISACs feeds and correlates them with your internal telemetry to give SOC analysts a real-time, ranked picture of active threats—with enriched context and one-click response workflows.',
     features: [
       {
         title: 'Threat Intelligence Fusion',
@@ -196,7 +196,7 @@ const appData = {
     integrations: [
       'Splunk',
       'CrowdStrike',
-      'Palo Alto Cortex',
+      'Palo Alto APEX',
       'Microsoft Sentinel',
       'MISP',
       'VirusTotal',
@@ -231,7 +231,7 @@ const appData = {
     description:
       'Matter lifecycle management, contract analysis, and risk assessment powered by legal-specific large language models.',
     longDescription:
-      'PRISM Counsel is built for legal and compliance teams that need to move at the speed of the business. From NDA review to M&A due diligence, PRISM reduces legal cycle times by 70% while improving risk identification accuracy.',
+      'Counsel is built for legal and compliance teams that need to move at the speed of the business. From NDA review to M&A due diligence, PRISM reduces legal cycle times by 70% while improving risk identification accuracy.',
     features: [
       {
         title: 'Contract Analysis',
@@ -436,7 +436,7 @@ const appData = {
         desc: 'Single pane of glass across all 9 platforms. Surface correlated signals, drill into any domain, and execute actions without switching context.',
       },
       {
-        title: 'Real-time Ecosystem Pulse',
+        title: 'Real-time Ecosystem LUMINA',
         desc: "Live health, activity streams, and key metrics from every platform flow into the Command Portal's situational awareness layer, updated in sub-second intervals.",
       },
       {

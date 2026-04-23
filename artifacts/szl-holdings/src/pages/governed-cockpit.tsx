@@ -27,11 +27,11 @@ const FUND_EVIDENCE: EvidenceSource[] = [
   },
   {
     id: 'ev-szl2',
-    label: 'Portfolio Company Health Scores — Alloy',
+    label: 'Portfolio Company Health Scores — FORGE',
     type: 'model',
     timestamp: FRESH_3M,
     excerpt:
-      'PRISM: 8.4. Lyte: 7.1. Vessels: 6.8. Terra (fund stake): 7.4. Aegis: 6.9. Composite: 7.3/10. Revenue growth YoY: +67% blended.',
+      'PRISM: 8.4. Lyte: 7.1. Vessels: 6.8. DOMAINE (fund stake): 7.4. Aegis: 6.9. Composite: 7.3/10. Revenue growth YoY: +67% blended.',
   },
   {
     id: 'ev-szl3',
@@ -152,7 +152,7 @@ export default function GovernedCockpit() {
             className="text-xs uppercase tracking-widest font-semibold"
             style={{ color: '#4a6070' }}
           >
-            Portfolio Intelligence · Deterministic Fallback (Alloy integration active)
+            Portfolio Intelligence · Deterministic Fallback (FORGE integration active)
           </span>
         </div>
 

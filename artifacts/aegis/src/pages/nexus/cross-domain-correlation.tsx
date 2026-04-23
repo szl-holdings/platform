@@ -47,7 +47,7 @@ const SIGNALS: DomainSignal[] = [
   {
     id: 'SIG-001',
     domain: 'maritime',
-    source: 'Vessels AIS Feed',
+    source: 'SEXTANT AIS Feed',
     timestamp: '2024-03-15T14:22:00Z',
     signal: '3 LNG carriers diverted from Red Sea corridor — unusual rerouting pattern',
     severity: 'high',
@@ -83,7 +83,7 @@ const SIGNALS: DomainSignal[] = [
   {
     id: 'SIG-005',
     domain: 'real-estate',
-    source: 'Terra Intel',
+    source: 'DOMAINE Intel',
     timestamp: '2024-03-15T13:30:00Z',
     signal: 'Port-adjacent warehouse vacancy rates dropping in Rotterdam & Singapore',
     severity: 'medium',
@@ -92,7 +92,7 @@ const SIGNALS: DomainSignal[] = [
   {
     id: 'SIG-006',
     domain: 'infrastructure',
-    source: 'Lyte AIOps',
+    source: 'KORA AIOps',
     timestamp: '2024-03-15T13:15:00Z',
     signal: 'CDN edge node latency spike in MENA region — possible infrastructure targeting',
     severity: 'high',
@@ -101,7 +101,7 @@ const SIGNALS: DomainSignal[] = [
   {
     id: 'SIG-007',
     domain: 'maritime',
-    source: 'Vessels Fleet',
+    source: 'SEXTANT Fleet',
     timestamp: '2024-03-15T12:55:00Z',
     signal: 'Dark vessel activity increase near Bab al-Mandab strait — 4 AIS gaps detected',
     severity: 'critical',
@@ -135,7 +135,7 @@ const INITIAL_CORRELATIONS: Correlation[] = [
   },
   {
     id: 'COR-002',
-    title: 'MENA Infrastructure + Cyber Attack Nexus',
+    title: 'MENA Infrastructure + Cyber Attack PRAXIS',
     signals: ['SIG-006', 'SIG-008', 'SIG-002'],
     domains: ['infrastructure', 'cyber'],
     confidence: 78,
@@ -157,7 +157,7 @@ const INITIAL_CORRELATIONS: Correlation[] = [
     description:
       'Vessel rerouting patterns predict increased demand at alternative ports (Rotterdam, Singapore). Warehouse vacancy rates already declining — early mover advantage window of 2-3 weeks.',
     recommendation:
-      'Accelerate Rotterdam warehouse acquisition pipeline. Lock in Singapore logistics space before pricing adjusts. Flag for Terra portfolio committee review.',
+      'Accelerate Rotterdam warehouse acquisition pipeline. Lock in Singapore logistics space before pricing adjusts. Flag for DOMAINE portfolio committee review.',
     status: 'new',
     detectedAt: '2024-03-15T14:35:00Z',
   },

@@ -51,17 +51,17 @@ const agentRoles = [
 const powers = [
   {
     name: 'KORA',
-    desc: 'Decision intelligence and command. Alloy drives signal ingestion, anomaly classification, and workflow routing.',
+    desc: 'Decision intelligence and command. FORGE drives signal ingestion, anomaly classification, and workflow routing.',
     accent: '#f59e0b',
   },
   {
     name: 'SEXTANT',
-    desc: 'Maritime intelligence. Alloy processes voyage data, fleet exceptions, and regulatory signals into command-ready output.',
+    desc: 'Maritime intelligence. FORGE processes voyage data, fleet exceptions, and regulatory signals into command-ready output.',
     accent: '#3b82f6',
   },
   {
     name: 'Creative Workflows',
-    desc: 'Governed creative orchestration. Alloy sequences campaign production — scripts, storyboards, voice assets, and approvals — from brief to final delivery.',
+    desc: 'Governed creative orchestration. FORGE sequences campaign production — scripts, storyboards, voice assets, and approvals — from brief to final delivery.',
     accent: '#4B8BDB',
   },
 ];
@@ -182,7 +182,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 color: '#e2e8f0',
               }}
             >
-              Alloy
+              FORGE
             </span>
             <span
               style={{
@@ -356,7 +356,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               margin: '0 auto 2.5rem',
             }}
           >
-            Alloy is not a chatbot. It is the orchestration engine that acquires signals, applies
+            FORGE is not a chatbot. It is the orchestration engine that acquires signals, applies
             reasoning, sequences workflows, and routes actions — across every SZL platform.
           </p>
 
@@ -416,7 +416,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
         </div>
       </section>
 
-      {/* What Alloy Is */}
+      {/* What FORGE Is */}
       <section
         id="platform"
         style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '5rem 0' }}
@@ -442,7 +442,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                   marginBottom: '0.75rem',
                 }}
               >
-                What Alloy Is
+                What FORGE Is
               </p>
               <h2
                 style={{
@@ -464,15 +464,15 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                   marginBottom: '1rem',
                 }}
               >
-                Alloy operates as the intelligence backbone of SZL Holdings. It processes signals
+                FORGE operates as the intelligence backbone of SZL Holdings. It processes signals
                 from across operational systems, applies reasoning to classify and contextualize
                 them, and then sequences the right actions — without humans manually routing every
                 decision.
               </p>
               <p style={{ fontSize: '0.9375rem', lineHeight: 1.72, color: '#64748b' }}>
-                Every platform in the SZL ecosystem — Lyte for decision intelligence, Vessels for
+                Every platform in the SZL ecosystem — KORA for decision intelligence, SEXTANT for
                 maritime command, and Creative Workflows for governed campaign production — is
-                powered by Alloy's orchestration layer. The platforms are the interface. Alloy is
+                powered by FORGE's orchestration layer. The platforms are the interface. FORGE is
                 the engine.
               </p>
             </div>
@@ -585,7 +585,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               maxWidth: '32rem',
             }}
           >
-            Alloy underpins every intelligent operation within the SZL ecosystem.
+            FORGE underpins every intelligent operation within the SZL ecosystem.
           </p>
           <div
             style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}
@@ -860,7 +860,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 Not raw data.
               </h2>
               <p style={{ fontSize: '0.9375rem', lineHeight: 1.72, color: '#64748b' }}>
-                Every Alloy workflow produces a clean, traceable output — structured enough to act
+                Every FORGE workflow produces a clean, traceable output — structured enough to act
                 on, explainable enough to audit, and precise enough to route automatically.
               </p>
             </div>
@@ -932,7 +932,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 Humans stay in the loop.
               </h2>
               <p style={{ fontSize: '0.9375rem', lineHeight: 1.72, color: '#64748b' }}>
-                Alloy's governance layer is not a bolt-on. It's built into every workflow.
+                FORGE's governance layer is not a bolt-on. It's built into every workflow.
                 High-consequence decisions pause for human review. Every approval is logged. Every
                 action is attributable. The audit trail is immutable.
               </p>
@@ -1075,7 +1075,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               maxWidth: '32rem',
             }}
           >
-            Alloy connects to the systems your business already runs on — acquiring signals from any
+            FORGE connects to the systems your business already runs on — acquiring signals from any
             source and routing outputs to any downstream target.
           </p>
           <div
@@ -1179,7 +1179,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               marginBottom: '2rem',
             }}
           >
-            Alloy is available to authenticated SZL Holdings operators. Sign in to access the
+            FORGE is available to authenticated SZL Holdings operators. Sign in to access the
             platform, or request a demonstration.
           </p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -1206,7 +1206,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 (e.currentTarget as HTMLButtonElement).style.background = '#4B8BDB';
               }}
             >
-              Sign in to Alloy
+              Sign in to FORGE
               <ArrowRight size={14} />
             </button>
             <a

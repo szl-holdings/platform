@@ -192,7 +192,7 @@ const DEMO_EDGES: GraphEdge[] = [
     label: 'monitors',
     strength: 0.82,
     type: 'dependency',
-    description: 'Aegis monitors Singapore port authority access',
+    description: 'PARAGON monitors Singapore port authority access',
     lastActive: Date.now() - 7200000,
   },
   {
@@ -232,7 +232,7 @@ const DEMO_EDGES: GraphEdge[] = [
     label: 'informs',
     strength: 0.67,
     type: 'correlative',
-    description: 'Pattern detection informs Aegis threat posture',
+    description: 'Pattern detection informs PARAGON threat posture',
     lastActive: Date.now() - 2700000,
   },
   {
@@ -252,7 +252,7 @@ const DEMO_EDGES: GraphEdge[] = [
     label: 'belongs',
     strength: 0.9,
     type: 'dependency',
-    description: 'DFW-Industrial-7 is part of the Terra portfolio',
+    description: 'DFW-Industrial-7 is part of the DOMAINE portfolio',
     lastActive: Date.now() - 86400000,
   },
 ];

@@ -3,19 +3,19 @@ import { m } from 'framer-motion';
 const PROOF_ITEMS = [
   {
     label: 'Approval latency detection',
-    sublabel: 'Lyte · Operational decision intelligence',
+    sublabel: 'KORA · Operational decision intelligence',
     accent: 'hsl(192,80%,48%)',
     accentRgb: '6,182,212',
   },
   {
     label: 'Dark vessel pre-detection',
-    sublabel: 'Vessels · Before formal designation',
+    sublabel: 'SEXTANT · Before formal designation',
     accent: 'hsl(210,78%,44%)',
     accentRgb: '34,104,175',
   },
   {
     label: 'Decision velocity',
-    sublabel: 'Alloy · Workflow orchestration',
+    sublabel: 'FORGE · Workflow orchestration',
     accent: 'hsl(222,68%,58%)',
     accentRgb: '86,122,214',
   },
@@ -57,8 +57,8 @@ const proofs = [
   },
   {
     platform: 'KORA',
-    view: 'Lyte Readiness',
-    desc: 'Lyte Readiness is a first-class module within Lyte for execution tracking and maturity scoring.',
+    view: 'KORA Readiness',
+    desc: 'KORA Readiness is a first-class module within KORA for execution tracking and maturity scoring.',
     accent: 'hsl(192, 80%, 48%)',
     accentRgb: '6, 182, 212',
     href: '/command/operations/',

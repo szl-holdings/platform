@@ -328,7 +328,7 @@ describe('Integration Routes', () => {
 
     it('creates issue successfully', async () => {
       const res = await request(app).post('/integrations/jira/push/issue').send({
-        projectKey: 'LYTE',
+        projectKey: 'KORA',
         summary: 'Test Issue',
         description: 'A test issue',
       });

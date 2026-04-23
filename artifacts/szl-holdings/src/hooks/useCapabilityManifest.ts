@@ -93,25 +93,25 @@ export const PRODUCT_DISPLAY: Record<
   string,
   { label: string; color: string; href: string; appStatus: string }
 > = {
-  'Lyte (Business Observability)': {
+  'KORA (Business Observability)': {
     label: 'KORA',
     color: '#d4a054',
     href: '/lyte',
     appStatus: 'Beta',
   },
-  'Aegis (Defense & Intelligence)': {
+  'PARAGON (Defense & Intelligence)': {
     label: 'PARAGON',
     color: '#c45a4a',
     href: '/solutions/aegis',
     appStatus: 'Beta',
   },
-  'Vessels (Maritime Intelligence)': {
+  'SEXTANT (Maritime Intelligence)': {
     label: 'SEXTANT',
     color: '#4a90b8',
     href: '/solutions/vessels',
     appStatus: 'Partial',
   },
-  'Terra (Real Estate Intelligence)': {
+  'DOMAINE (Real Estate Intelligence)': {
     label: 'DOMAINE',
     color: '#c8953c',
     href: '/solutions/terra',
@@ -125,7 +125,7 @@ export const PRODUCT_DISPLAY: Record<
   },
   'API Server': { label: 'API Server', color: '#6aaa72', href: '/developers', appStatus: 'GA' },
   'SZL Holdings Corporate': { label: 'Corporate', color: '#8b7ac8', href: '/', appStatus: 'Beta' },
-  'Sentra (Cyber Resilience)': {
+  'TENAX (Cyber Resilience)': {
     label: 'TENAX',
     color: '#ef8c3a',
     href: '/solutions/aegis',
@@ -137,7 +137,7 @@ export const PRODUCT_DISPLAY: Record<
     href: '/command',
     appStatus: 'Partial',
   },
-  'Pulse (AI Executive Briefing)': {
+  'LUMINA (AI Executive Briefing)': {
     label: 'LUMINA',
     color: '#e0709a',
     href: '/pulse',

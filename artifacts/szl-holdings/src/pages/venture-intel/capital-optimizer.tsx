@@ -53,7 +53,7 @@ const SCENARIOS = [
       { name: "SEXTANT", value: 28, color: "#3aa4dc", rationale: "PARAGON + SEXTANT bundle anchor" },
       { name: "PARAGON", value: 24, color: "#6366f1", rationale: "Maritime cyber cross-sell" },
       { name: "DOMAINE", value: 20, color: "#6b9c30", rationale: "Counsel litigation data feed" },
-      { name: "PRAXIS", value: 16, color: "#a855f7", rationale: "Terra distress data consumer" },
+      { name: "PRAXIS", value: 16, color: "#a855f7", rationale: "DOMAINE distress data consumer" },
       { name: "KORA", value: 8, color: "#38bee0", rationale: "Platform observability layer" },
       { name: "Carlota Jo", value: 4, color: "#c4924a", rationale: "UHNW relationship gateway" },
     ],

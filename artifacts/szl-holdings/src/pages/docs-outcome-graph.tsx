@@ -33,7 +33,7 @@ const GRAPH_PROPERTIES = [
   {
     icon: RefreshCw,
     name: "Cross-domain aggregation",
-    desc: "A single Outcome Graph spans all active Domain Packs within a tenant. Signals from Aegis, Vessels, Terra, and Counsel resolve into a unified graph — surfacing relationships that siloed systems cannot see.",
+    desc: "A single Outcome Graph spans all active Domain Packs within a tenant. Signals from PARAGON, SEXTANT, DOMAINE, and Counsel resolve into a unified graph — surfacing relationships that siloed systems cannot see.",
   },
 ];
 

@@ -65,10 +65,10 @@ const FOLDERS: Folder[] = [
     lastUpdated: "Apr 13, 2026", description: "Quarterly updates, KPI reports, and board materials from portfolio companies",
     color: "#6aaa72",
     docs: [
-      { id: "d9", name: "Vessels — Q1 2026 Board Update.pdf", type: "pdf", size: "2.8 MB", uploaded: "Apr 13, 2026", uploadedBy: "Vessels Team", permission: "all_lp", status: "current", views: 71, downloads: 18, watermarked: true },
-      { id: "d10", name: "Aegis — Q1 2026 Operational Report.pdf", type: "pdf", size: "3.2 MB", uploaded: "Apr 11, 2026", uploadedBy: "Aegis Team", permission: "all_lp", status: "current", views: 88, downloads: 24, watermarked: true },
-      { id: "d11", name: "Terra — Q1 2026 KPI Dashboard.xlsx", type: "xlsx", size: "1.4 MB", uploaded: "Apr 10, 2026", uploadedBy: "Terra Team", permission: "all_lp", status: "current", views: 54, downloads: 16, watermarked: true },
-      { id: "d12", name: "Lyte — Q1 2026 Product Roadmap Update.pptx", type: "pptx", size: "6.4 MB", uploaded: "Apr 9, 2026", uploadedBy: "Lyte Team", permission: "all_lp", status: "current", views: 42, downloads: 11, watermarked: false },
+      { id: "d9", name: "SEXTANT — Q1 2026 Board Update.pdf", type: "pdf", size: "2.8 MB", uploaded: "Apr 13, 2026", uploadedBy: "SEXTANT Team", permission: "all_lp", status: "current", views: 71, downloads: 18, watermarked: true },
+      { id: "d10", name: "PARAGON — Q1 2026 Operational Report.pdf", type: "pdf", size: "3.2 MB", uploaded: "Apr 11, 2026", uploadedBy: "PARAGON Team", permission: "all_lp", status: "current", views: 88, downloads: 24, watermarked: true },
+      { id: "d11", name: "DOMAINE — Q1 2026 KPI Dashboard.xlsx", type: "xlsx", size: "1.4 MB", uploaded: "Apr 10, 2026", uploadedBy: "DOMAINE Team", permission: "all_lp", status: "current", views: 54, downloads: 16, watermarked: true },
+      { id: "d12", name: "KORA — Q1 2026 Product Roadmap Update.pptx", type: "pptx", size: "6.4 MB", uploaded: "Apr 9, 2026", uploadedBy: "KORA Team", permission: "all_lp", status: "current", views: 42, downloads: 11, watermarked: false },
     ],
   },
   {
@@ -109,7 +109,7 @@ const AUDIT_LOG = [
   { id: "a2", user: "Astor Family Office (LP)", action: "Viewed", doc: "SZL Fund II — Investment Memorandum.pdf", time: "4 hours ago", ip: "104.18.x.x" },
   { id: "a3", user: "Blackrock Endowment (LP)", action: "Downloaded", doc: "2025 Audited Financial Statements.pdf", time: "6 hours ago", ip: "8.8.x.x" },
   { id: "a4", user: "NovaStar Co-Investor (CI)", action: "Viewed", doc: "NovaStar AI — Technical Architecture Review.pdf", time: "8 hours ago", ip: "172.16.x.x" },
-  { id: "a5", user: "Internal — S. Lutar", action: "Uploaded", doc: "Vessels — Q1 2026 Board Update.pdf", time: "Yesterday 3:42 PM", ip: "10.0.x.x" },
+  { id: "a5", user: "Internal — S. Lutar", action: "Uploaded", doc: "SEXTANT — Q1 2026 Board Update.pdf", time: "Yesterday 3:42 PM", ip: "10.0.x.x" },
   { id: "a6", user: "Greenway Ventures (CI)", action: "Downloaded", doc: "NovaStar AI — Cap Table & 409A.xlsx", time: "Yesterday 11:22 AM", ip: "34.120.x.x" },
 ];
 

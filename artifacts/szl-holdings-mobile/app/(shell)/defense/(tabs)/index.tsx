@@ -625,7 +625,7 @@ export default function DashboardScreen() {
               { color: colors.mutedForeground, fontFamily: 'Inter_500Medium' },
             ]}
           >
-            AEGIS SOC
+            PARAGON SOC
           </Text>
           <Text
             style={[

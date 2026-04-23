@@ -75,7 +75,7 @@ export function AlloyMatterFlowDiagram() {
           marginBottom: '1rem',
         }}
       >
-        Alloy — Matter Signal to Governed Action
+        FORGE — Matter Signal to Governed Action
       </div>
 
       <div

@@ -217,7 +217,7 @@ function ModuleTile({
 export default function PortfolioPage() {
   const __pageMeta = usePageMeta({
     title: "Portfolio Dashboard — SZL Holdings",
-    description: "Live portfolio summary for SZL Holdings — Terra, Vessels, Lyte, Aegis, Alloy, and Carlota Jo module health and signal counts.",
+    description: "Live portfolio summary for SZL Holdings — DOMAINE, SEXTANT, KORA, PARAGON, FORGE, and Carlota Jo module health and signal counts.",
     canonical: "https://szlholdings.com/portfolio",
   });
 

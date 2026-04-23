@@ -226,7 +226,7 @@ export default function AlloyIntelligence() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-[13px] font-semibold tracking-tight" style={{ color: TEXT.primary }}>
-            Alloy Intelligence Fabric
+            FORGE Intelligence Fabric
           </h1>
           <EnvironmentLabel environment="demo" />
           <span
@@ -499,7 +499,7 @@ export default function AlloyIntelligence() {
                 <textarea
                   value={planInput}
                   onChange={(e) => setPlanInput(e.target.value)}
-                  placeholder="Describe an objective for Alloy to plan..."
+                  placeholder="Describe an objective for FORGE to plan..."
                   className="w-full h-20 rounded px-2.5 py-2 text-[10px] resize-none outline-none"
                   style={{
                     background: BG.elevated,
@@ -669,7 +669,7 @@ export default function AlloyIntelligence() {
         <Panel accent="#c8953c">
           <PanelHead
             icon={Zap}
-            title="Alloy Tool Layer"
+            title="FORGE Tool Layer"
             accent="#c8953c"
             right={
               <div className="flex items-center gap-2">

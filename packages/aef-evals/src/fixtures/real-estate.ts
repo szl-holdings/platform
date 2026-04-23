@@ -5,7 +5,7 @@ export const realEstateFixtures: GoldenFixtureSet = {
   profileId: 'terra_real_estate_intel',
   domain: 'real-estate',
   description:
-    'Golden retrieval fixtures for the Terra Real Estate Intelligence profile. Covers parcel ID lookup, APN search, comparable transaction retrieval, zoning, and lease analysis.',
+    'Golden retrieval fixtures for the DOMAINE Real Estate Intelligence profile. Covers parcel ID lookup, APN search, comparable transaction retrieval, zoning, and lease analysis.',
   queries: [
     {
       queryId: 're-q001',

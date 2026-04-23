@@ -37,7 +37,7 @@ const DEFAULT_AGENTS: AgentDef[] = [
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',
     systemPrompt:
-      "You are Alloy, the central orchestration intelligence of the Alloy — SZL Holdings' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform.",
+      "You are FORGE, the central orchestration intelligence of the FORGE — SZL Holdings' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform.",
     tools: ['system_health', 'admin_overview'],
     highStakesDomains: [],
     confidenceThreshold: 0.7,
@@ -71,12 +71,12 @@ const DEFAULT_AGENTS: AgentDef[] = [
   },
   {
     id: 'szl-cortex',
-    name: 'SZL Cortex',
+    name: 'SZL APEX',
     domain: 'research',
     preferredModel: 'gemini-3.1-pro-preview',
     preferredProvider: 'gemini',
     systemPrompt:
-      'You are SZL Cortex, the AI research intelligence agent within the platform. You specialize in AI/ML research, model evaluation, academic literature analysis, and technology trend assessment.',
+      'You are SZL APEX, the AI research intelligence agent within the platform. You specialize in AI/ML research, model evaluation, academic literature analysis, and technology trend assessment.',
     tools: ['huggingface_search', 'arxiv_search', 'model_registry'],
     highStakesDomains: [],
     confidenceThreshold: 0.75,
@@ -84,12 +84,12 @@ const DEFAULT_AGENTS: AgentDef[] = [
   },
   {
     id: 'beacon',
-    name: 'Terra Analytics',
+    name: 'DOMAINE Analytics',
     domain: 'analytics',
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',
     systemPrompt:
-      'You are Terra Analytics, the analytics and operations intelligence agent within the Alloy. You specialize in signal analysis, anomaly detection, platform performance, and operational intelligence.',
+      'You are DOMAINE Analytics, the analytics and operations intelligence agent within the Alloy. You specialize in signal analysis, anomaly detection, platform performance, and operational intelligence.',
     tools: ['system_health', 'platform_stats', 'ecosystem_health'],
     highStakesDomains: ['financial_alert', 'ops_critical'],
     confidenceThreshold: 0.75,
@@ -425,7 +425,7 @@ export default function AgentConfigPage() {
             </div>
             <p className="text-xs text-[#8b9ab0] font-mono">
               Edit system prompts, model routing, confidence thresholds, tool permissions, and
-              governance escalation rules for all Alloy agents
+              governance escalation rules for all FORGE agents
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -433,7 +433,7 @@ export default function AgentConfigPage() {
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono ${isLoading ? 'bg-amber-400/10 text-amber-400' : 'bg-green-500/10 text-green-400'} border ${isLoading ? 'border-amber-400/20' : 'border-green-500/20'}`}
             >
               <Cpu size={12} />
-              {isLoading ? 'Connecting…' : 'Alloy Connected'}
+              {isLoading ? 'Connecting…' : 'FORGE Connected'}
             </div>
           </div>
         </div>

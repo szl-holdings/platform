@@ -86,7 +86,7 @@ export const SZL_RECOMMENDATIONS: Recommendation[] = [
         'e-szl-1',
         'Pipeline CRM',
         'database',
-        'Three anchor deals (Nexus Group, Mira Ventures, Atlas Capital) have slipped 14 days each with no updated close probability. Combined ARR impact: $4.1M.',
+        'Three anchor deals (PRAXIS Group, Mira Ventures, Atlas Capital) have slipped 14 days each with no updated close probability. Combined ARR impact: $4.1M.',
         180,
         0.93,
         ['CRM sync', 'delta-extract', 'pipeline-model'],
@@ -104,7 +104,7 @@ export const SZL_RECOMMENDATIONS: Recommendation[] = [
         'e-szl-3',
         'Deal Desk Activity Log',
         'database',
-        'No inbound deal-desk activity logged for Nexus Group in 9 days. Last contact: April 9, status: term-sheet review.',
+        'No inbound deal-desk activity logged for PRAXIS Group in 9 days. Last contact: April 9, status: term-sheet review.',
         300,
         0.95,
         ['deal-desk-log'],
@@ -129,11 +129,11 @@ export const SZL_RECOMMENDATIONS: Recommendation[] = [
     id: 'szl-002',
     variant: 'szl-holdings',
     priority: 'P1',
-    title: 'Opportunity approval delay: Nexus Group (18 days open)',
+    title: 'Opportunity approval delay: PRAXIS Group (18 days open)',
     summary:
-      'The Nexus Group opportunity has been in internal approval for 18 days — 12 days past the 6-day SLA. No blocking conditions detected in compliance or legal reviews.',
+      'The PRAXIS Group opportunity has been in internal approval for 18 days — 12 days past the 6-day SLA. No blocking conditions detected in compliance or legal reviews.',
     rationale:
-      "Approval SLA breach increases deal loss probability by 23% per 7-day increment (internal benchmark). Competitor activity detected in Nexus Group's domain from AIS signal cluster.",
+      "Approval SLA breach increases deal loss probability by 23% per 7-day increment (internal benchmark). Competitor activity detected in PRAXIS Group's domain from AIS signal cluster.",
     proposedAction:
       'Escalate to deal committee chair. Auto-assign to next available approver. Set 48-hour hard deadline with CFO visibility.',
     confidence: 0.91,
@@ -152,7 +152,7 @@ export const SZL_RECOMMENDATIONS: Recommendation[] = [
         'e-szl-5',
         'Approval Workflow Engine',
         'database',
-        'Nexus Group opportunity entered approval queue on April 1. SLA: 6 days. Days elapsed: 18. No approver action logged since April 4.',
+        'PRAXIS Group opportunity entered approval queue on April 1. SLA: 6 days. Days elapsed: 18. No approver action logged since April 4.',
         60,
         0.99,
         ['workflow-engine'],
@@ -161,7 +161,7 @@ export const SZL_RECOMMENDATIONS: Recommendation[] = [
         'e-szl-6',
         'Competitive Intelligence Feed',
         'external_api',
-        "3 competitor RFP signals detected in Nexus Group's domain over past 10 days. Two signals correlate with known competitor onboarding patterns.",
+        "3 competitor RFP signals detected in PRAXIS Group's domain over past 10 days. Two signals correlate with known competitor onboarding patterns.",
         1800,
         0.74,
         ['competitive-feed', 'signal-correlation'],
@@ -819,11 +819,11 @@ export const PULSE_RECOMMENDATIONS: Recommendation[] = [
     priority: 'P0',
     title: 'Cross-variant alert: 3 P0 recommendations require executive attention',
     summary:
-      'Three P0 recommendations are open across the platform: Aegis (active threat containment), Vessels (OFAC sanctions proximity), and SZL Holdings (Q2 pipeline at risk). Combined value at risk: $50.6M.',
+      'Three P0 recommendations are open across the platform: PARAGON (active threat containment), SEXTANT (OFAC sanctions proximity), and SZL Holdings (Q2 pipeline at risk). Combined value at risk: $50.6M.',
     rationale:
       'No P0 recommendation has been actioned in the past 90 minutes. Escalation policy requires executive awareness when P0s remain open beyond 60 minutes without assigned approver.',
     proposedAction:
-      'Review each P0 and assign approver or escalate to the appropriate decision owner. Aegis requires SOC lead action within the next 30 minutes.',
+      'Review each P0 and assign approver or escalate to the appropriate decision owner. PARAGON requires SOC lead action within the next 30 minutes.',
     confidence: 0.98,
     valueAtRisk: 50600000,
     autonomyMode: 'approve_each',
@@ -839,7 +839,7 @@ export const PULSE_RECOMMENDATIONS: Recommendation[] = [
     evidence: [
       ev(
         'e-pls-1',
-        'Decision Center — Aegis',
+        'Decision Center — PARAGON',
         'derived',
         'aeg-001: Active threat lateral movement, 14 endpoints without EDR. Open 25 minutes. Approver: unassigned.',
         1500,
@@ -847,7 +847,7 @@ export const PULSE_RECOMMENDATIONS: Recommendation[] = [
       ),
       ev(
         'e-pls-2',
-        'Decision Center — Vessels',
+        'Decision Center — SEXTANT',
         'derived',
         'ves-001: OFAC sanctions proximity alert, MV Meridian Star. Open 15 minutes. Approver: unassigned.',
         900,
@@ -882,7 +882,7 @@ export const PULSE_SOURCE_HEALTH: SourceHealthRecord[] = [
   },
   {
     sourceId: 'pls-aegis',
-    sourceName: 'Aegis Feed',
+    sourceName: 'PARAGON Feed',
     connector: 'internal',
     status: 'healthy',
     lastSeenAt: new Date(Date.now() - 30000).toISOString(),
@@ -891,7 +891,7 @@ export const PULSE_SOURCE_HEALTH: SourceHealthRecord[] = [
   },
   {
     sourceId: 'pls-vessels',
-    sourceName: 'Vessels Feed',
+    sourceName: 'SEXTANT Feed',
     connector: 'internal',
     status: 'healthy',
     lastSeenAt: new Date(Date.now() - 60000).toISOString(),
@@ -928,7 +928,7 @@ export const COMMAND_SOURCE_HEALTH: SourceHealthRecord[] = [
   },
   {
     sourceId: 'cmd-vessels',
-    sourceName: 'Vessels',
+    sourceName: 'SEXTANT',
     connector: 'internal',
     status: 'healthy',
     lastSeenAt: new Date(Date.now() - 60000).toISOString(),
@@ -937,7 +937,7 @@ export const COMMAND_SOURCE_HEALTH: SourceHealthRecord[] = [
   },
   {
     sourceId: 'cmd-aegis',
-    sourceName: 'Aegis',
+    sourceName: 'PARAGON',
     connector: 'internal',
     status: 'healthy',
     lastSeenAt: new Date(Date.now() - 30000).toISOString(),
@@ -946,7 +946,7 @@ export const COMMAND_SOURCE_HEALTH: SourceHealthRecord[] = [
   },
   {
     sourceId: 'cmd-terra',
-    sourceName: 'Terra',
+    sourceName: 'DOMAINE',
     connector: 'internal',
     status: 'healthy',
     lastSeenAt: new Date(Date.now() - 120000).toISOString(),

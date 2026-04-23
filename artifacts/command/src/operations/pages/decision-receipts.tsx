@@ -67,7 +67,7 @@ const RECEIPTS: DecisionReceipt[] = [
     },
     evidence: [
       {
-        source: 'Vessels Fleet Signal',
+        source: 'SEXTANT Fleet Signal',
         type: 'signal',
         weight: 0.35,
         detail: '3 vessels outside SLA — fuel surcharge pending 22h',
@@ -155,7 +155,7 @@ const RECEIPTS: DecisionReceipt[] = [
       {
         option: 'Rank #1 ahead of vessels',
         score: 82,
-        whyRejected: 'Vessels fuel surcharge has imminent SLA breach (4h) — pricing has 17h window',
+        whyRejected: 'SEXTANT fuel surcharge has imminent SLA breach (4h) — pricing has 17h window',
       },
       {
         option: 'Rank #3 behind AR conflict',

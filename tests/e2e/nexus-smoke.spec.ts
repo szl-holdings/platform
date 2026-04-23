@@ -1,14 +1,14 @@
 import { expect, test } from '@playwright/test';
 
-const NEXUS = '/nexus/';
+const PRAXIS = '/nexus/';
 
-test.describe('NEXUS auth gate', () => {
+test.describe('PRAXIS auth gate', () => {
   test('shows restricted login wall when unauthenticated', async ({ page }) => {
     await page.route('**/api/nexus/status', (route) =>
       route.fulfill({ status: 401, body: JSON.stringify({ error: 'Unauthorized' }) }),
     );
 
-    await page.goto(NEXUS);
+    await page.goto(PRAXIS);
     await expect(page.getByText('Internal Tooling — Restricted')).toBeVisible();
     await expect(page.getByText('Sign In Required')).toBeVisible();
     await expect(page.getByRole('link', { name: /Go to Platform Login/ })).toBeVisible();
@@ -19,13 +19,13 @@ test.describe('NEXUS auth gate', () => {
       route.fulfill({ status: 401, body: JSON.stringify({ error: 'Unauthorized' }) }),
     );
 
-    await page.goto(NEXUS);
+    await page.goto(PRAXIS);
     const link = page.getByRole('link', { name: /Go to Platform Login/ });
     await expect(link).toHaveAttribute('href', '/');
   });
 });
 
-test.describe('NEXUS pattern atlas', () => {
+test.describe('PRAXIS pattern atlas', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/api/nexus/status', (route) =>
       route.fulfill({
@@ -43,13 +43,13 @@ test.describe('NEXUS pattern atlas', () => {
   });
 
   test('renders component catalog with component count', async ({ page }) => {
-    await page.goto(`${NEXUS}#patterns`);
+    await page.goto(`${PRAXIS}#patterns`);
     await expect(page.getByText('Pattern Atlas')).toBeVisible();
     await expect(page.getByText(/\d+ components/)).toBeVisible();
   });
 
   test('shows component categories in left rail', async ({ page }) => {
-    await page.goto(`${NEXUS}#patterns`);
+    await page.goto(`${PRAXIS}#patterns`);
     // Category buttons render as "<Label> <count>" (e.g. "Auth 2").
     // Use anchored regexes so we don't collide with sidebar nav, the
     // component list (e.g. "AuthGate"), or props rows.
@@ -61,7 +61,7 @@ test.describe('NEXUS pattern atlas', () => {
   });
 
   test('clicking a component shows its props and code snippet', async ({ page }) => {
-    await page.goto(`${NEXUS}#patterns`);
+    await page.goto(`${PRAXIS}#patterns`);
     await page.getByRole('button', { name: /AuthGate/ }).first().click();
     await expect(page.getByText('Usage')).toBeVisible();
     await expect(page.getByText('Props')).toBeVisible();
@@ -69,7 +69,7 @@ test.describe('NEXUS pattern atlas', () => {
   });
 
   test('filtering by category shows only matching components', async ({ page }) => {
-    await page.goto(`${NEXUS}#patterns`);
+    await page.goto(`${PRAXIS}#patterns`);
     // Click the "Auth N" category button (left rail) — the regex anchors avoid
     // colliding with sidebar nav and component-list buttons like "AuthGate".
     await page.getByRole('button', { name: /^Auth\s+\d+$/ }).click();
@@ -78,14 +78,14 @@ test.describe('NEXUS pattern atlas', () => {
   });
 
   test('search filters component list', async ({ page }) => {
-    await page.goto(`${NEXUS}#patterns`);
+    await page.goto(`${PRAXIS}#patterns`);
     await page.getByPlaceholder('Search components…').fill('Autonomy');
     await expect(page.getByText('AutonomyDial')).toBeVisible();
     await expect(page.getByText('AuthGate')).not.toBeVisible();
   });
 
   test('boolean prop control updates code snippet', async ({ page }) => {
-    await page.goto(`${NEXUS}#patterns`);
+    await page.goto(`${PRAXIS}#patterns`);
     await page.getByRole('button', { name: /AutonomyDial/ }).first().click();
     const disabledControl = page.locator('label').filter({ hasText: /false|true/ }).first();
     await expect(disabledControl).toBeVisible();
@@ -94,7 +94,7 @@ test.describe('NEXUS pattern atlas', () => {
   test('type-alias exports are excluded from catalog (AuthGateProps not listed as component)', async ({
     page,
   }) => {
-    await page.goto(`${NEXUS}#patterns`);
+    await page.goto(`${PRAXIS}#patterns`);
     await expect(page.getByText('Pattern Atlas')).toBeVisible();
     // Filter to the Auth category so the AuthGate button is in view (the
     // catalog has hundreds of entries; the unfiltered list virtualises).
@@ -107,7 +107,7 @@ test.describe('NEXUS pattern atlas', () => {
   });
 });
 
-test.describe('NEXUS eval console', () => {
+test.describe('PRAXIS eval console', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/api/nexus/status', (route) =>
       route.fulfill({
@@ -149,12 +149,12 @@ test.describe('NEXUS eval console', () => {
   });
 
   test('renders EVAL CONSOLE heading', async ({ page }) => {
-    await page.goto(`${NEXUS}#eval-console`);
+    await page.goto(`${PRAXIS}#eval-console`);
     await expect(page.getByText('EVAL CONSOLE')).toBeVisible();
   });
 
   test('shows RUN EVALS section with domain chips', async ({ page }) => {
-    await page.goto(`${NEXUS}#eval-console`);
+    await page.goto(`${PRAXIS}#eval-console`);
     // 'RUN EVALS' appears as both the section heading and its label badge —
     // pin to the heading to avoid a strict-mode violation.
     await expect(page.getByRole('heading', { name: 'RUN EVALS' })).toBeVisible();
@@ -186,7 +186,7 @@ test.describe('NEXUS eval console', () => {
       }),
     );
 
-    await page.goto(`${NEXUS}#eval-console`);
+    await page.goto(`${PRAXIS}#eval-console`);
     const runButton = page.getByRole('button', { name: /Run Evals/ });
     await expect(runButton).toBeVisible();
     await runButton.click();
@@ -195,7 +195,7 @@ test.describe('NEXUS eval console', () => {
   });
 });
 
-test.describe('NEXUS prompt registry', () => {
+test.describe('PRAXIS prompt registry', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/api/nexus/status', (route) =>
       route.fulfill({
@@ -239,12 +239,12 @@ test.describe('NEXUS prompt registry', () => {
   });
 
   test('renders PROMPT REGISTRY heading', async ({ page }) => {
-    await page.goto(`${NEXUS}#prompt-registry`);
+    await page.goto(`${PRAXIS}#prompt-registry`);
     await expect(page.getByRole('heading', { name: 'PROMPT REGISTRY' })).toBeVisible();
   });
 
   test('shows prompt count metric card', async ({ page }) => {
-    await page.goto(`${NEXUS}#prompt-registry`);
+    await page.goto(`${PRAXIS}#prompt-registry`);
     // 'Prompts' appears in the sidebar nav and on the metric card. Pin to
     // the metric label by scoping to its sibling counter.
     await expect(page.getByText('Prompts').first()).toBeVisible();
@@ -252,19 +252,19 @@ test.describe('NEXUS prompt registry', () => {
   });
 
   test('lists prompts with name and status', async ({ page }) => {
-    await page.goto(`${NEXUS}#prompt-registry`);
+    await page.goto(`${PRAXIS}#prompt-registry`);
     await expect(page.getByText('Research Summarizer')).toBeVisible();
     await expect(page.getByText('active').first()).toBeVisible();
   });
 
   test('search filters prompts by name', async ({ page }) => {
-    await page.goto(`${NEXUS}#prompt-registry`);
+    await page.goto(`${PRAXIS}#prompt-registry`);
     await page.getByPlaceholder('Search prompts…').fill('Research');
     await expect(page.getByText('Research Summarizer')).toBeVisible();
   });
 });
 
-test.describe('NEXUS prompt save flow', () => {
+test.describe('PRAXIS prompt save flow', () => {
   const V1_TIMESTAMP = new Date().toISOString();
   const V2_TIMESTAMP = new Date().toISOString();
 
@@ -352,7 +352,7 @@ test.describe('NEXUS prompt save flow', () => {
   });
 
   test('expanding a prompt shows its version history with active badge', async ({ page }) => {
-    await page.goto(`${NEXUS}#prompt-registry`);
+    await page.goto(`${PRAXIS}#prompt-registry`);
     await page.getByRole('button', { name: /Research Summarizer/ }).click();
     // The version rows render multiple "v1"-style strings (label + count
     // metric). First() is sufficient to confirm the panel expanded.
@@ -363,7 +363,7 @@ test.describe('NEXUS prompt save flow', () => {
   });
 
   test('version 2 shows Promote button since it is not the active version', async ({ page }) => {
-    await page.goto(`${NEXUS}#prompt-registry`);
+    await page.goto(`${PRAXIS}#prompt-registry`);
     await page.getByRole('button', { name: /Research Summarizer/ }).click();
     await expect(page.getByText(/^v2\b/).first()).toBeVisible({ timeout: 5000 });
     // Only inactive versions render a Promote button. .first() guards against
@@ -383,7 +383,7 @@ test.describe('NEXUS prompt save flow', () => {
       });
     });
 
-    await page.goto(`${NEXUS}#prompt-registry`);
+    await page.goto(`${PRAXIS}#prompt-registry`);
     await page.getByRole('button', { name: /Research Summarizer/ }).click();
     const promote = page.getByRole('button', { name: /^Promote$/ }).first();
     await expect(promote).toBeVisible({ timeout: 5000 });
@@ -406,7 +406,7 @@ test.describe('NEXUS prompt save flow', () => {
       });
     });
 
-    await page.goto(`${NEXUS}#prompt-registry`);
+    await page.goto(`${PRAXIS}#prompt-registry`);
     await page.getByRole('button', { name: /Research Summarizer/ }).click();
     // Scope to the per-version Eval button (exact match) so we don't pick up
     // the "Evals" sidebar nav entry which would just route away from the
@@ -419,7 +419,7 @@ test.describe('NEXUS prompt save flow', () => {
   });
 });
 
-test.describe('NEXUS internal tooling labels', () => {
+test.describe('PRAXIS internal tooling labels', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/api/nexus/status', (route) =>
       route.fulfill({
@@ -453,12 +453,12 @@ test.describe('NEXUS internal tooling labels', () => {
   });
 
   test('memory page shows internal tooling banner', async ({ page }) => {
-    await page.goto(`${NEXUS}#memory`);
+    await page.goto(`${PRAXIS}#memory`);
     await expect(page.getByText('Internal Tooling — Not Production')).toBeVisible();
   });
 
   test('skills page shows internal tooling banner', async ({ page }) => {
-    await page.goto(`${NEXUS}#skills`);
+    await page.goto(`${PRAXIS}#skills`);
     await expect(page.getByText('Internal Tooling — Not Production')).toBeVisible();
   });
 });

@@ -333,7 +333,7 @@ export default function OperatorControlCenter() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#4B8BDB' }}
             >
-              Alloy · Operator Control
+              FORGE · Operator Control
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Operator Control Center</h1>

@@ -62,7 +62,7 @@ export interface OracleBrief {
 
 // Domain color mapping
 const _DOMAIN_COLORS: Record<string, string> = {
-  'Vessels + Threat': '#ef4444',
+  'SEXTANT + Threat': '#ef4444',
   'Threat + Legal': '#f97316',
   'Property + Financial': '#4ade80',
   Financial: '#f59e0b',
@@ -194,7 +194,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
       sectionNumber: 1,
       title: `Escalating Sanctions Exposure — ${sanctionsEntities.map((e) => e.label).join(', ')}`,
       severity: deriveSeverity(entityIdArr, ofacAnomalies, graph),
-      domain: 'Vessels + Threat + Financial',
+      domain: 'SEXTANT + Threat + Financial',
       domainColor: '#ef4444',
       analystConfidence: Math.round(ofacConf * 0.95),
       analystNote: `High confidence. Composite signal across AIS routing, OFAC name match, and financial flow anomaly. ${ofacConf >= 85 ? 'Recommend immediate legal review before any new transactions with linked entities.' : 'Further corroborating evidence recommended before formal action.'}`,
@@ -265,7 +265,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
           priority: 'immediate',
           action:
             'Notify CISO — initiate threat hunt on any SZL systems with implicated entity API connections',
-          owner: 'Aegis SOC',
+          owner: 'PARAGON SOC',
           entityIds: entityIdArr,
         },
         {
@@ -319,21 +319,21 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
     sections.push({
       id: `S${sectionNum++}`,
       sectionNumber: 3,
-      title: `Cross-Network Co-Investment Anomaly — NEXUS Graph Discovery`,
+      title: `Cross-Network Co-Investment Anomaly — PRAXIS Graph Discovery`,
       severity: deriveSeverity(entityIdArr, coInvestAnomalies, graph),
       domain: 'Property + Financial + Legal',
       domainColor: '#4ade80',
       analystConfidence: topConf,
       analystNote:
-        'Moderate confidence. Ownership link is confirmed via title records. Cross-entity principal relationship is inferred by NEXUS — no publicly disclosed association exists. Structure warrants due diligence but is not inherently improper without further evidence.',
-      summary: `NEXUS identified previously unknown co-investment structure(s) linking entities from separate risk networks with no disclosed relationship. ${coInvestAnomalies.length} pattern(s) detected. These connections were invisible within any single vertical and required cross-domain graph traversal to surface.`,
+        'Moderate confidence. Ownership link is confirmed via title records. Cross-entity principal relationship is inferred by PRAXIS — no publicly disclosed association exists. Structure warrants due diligence but is not inherently improper without further evidence.',
+      summary: `PRAXIS identified previously unknown co-investment structure(s) linking entities from separate risk networks with no disclosed relationship. ${coInvestAnomalies.length} pattern(s) detected. These connections were invisible within any single vertical and required cross-domain graph traversal to surface.`,
       findings,
       recommendedActions: [
         {
           priority: 'today',
           action:
             'Commission independent appraisal and lender covenant review on affected distressed assets',
-          owner: 'Terra Engine',
+          owner: 'DOMAINE Engine',
           entityIds: entityIdArr,
         },
         {
@@ -346,8 +346,8 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
         {
           priority: 'this-week',
           action:
-            'Update NEXUS graph with confirmed co-investment edges · Raise combined entity risk scores',
-          owner: 'NEXUS Ops',
+            'Update PRAXIS graph with confirmed co-investment edges · Raise combined entity risk scores',
+          owner: 'PRAXIS Ops',
           entityIds: [],
         },
       ],
@@ -373,7 +373,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
         entityIds: a.involvedEntityIds.slice(0, 4),
       },
       {
-        label: 'NEXUS Amplification Factor',
+        label: 'PRAXIS Amplification Factor',
         detail: `Combined cross-domain risk score exceeds any single-vertical assessment by ~1.4x`,
         severity: 'medium' as BriefSeverity,
         entityIds: a.involvedEntityIds.slice(0, 2),
@@ -392,7 +392,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
       ),
       analystNote:
         'High confidence on trend identification. Causal linkage between verticals is probabilistic. Pattern is consistent with credit cycle stress in overlapping counterparty networks.',
-      summary: `NEXUS cross-domain analysis reveals ${stressAnomalies.length} counterparty network(s) under simultaneous stress across ${new Set(stressAnomalies.flatMap((a) => a.domains)).size} domains. This risk concentration is invisible within individual vertical dashboards.`,
+      summary: `PRAXIS cross-domain analysis reveals ${stressAnomalies.length} counterparty network(s) under simultaneous stress across ${new Set(stressAnomalies.flatMap((a) => a.domains)).size} domains. This risk concentration is invisible within individual vertical dashboards.`,
       findings,
       recommendedActions: [
         {
@@ -496,7 +496,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
       analystConfidence: 91,
       analystNote:
         'High confidence. All findings sourced directly from PRISM case management system with no inference required.',
-      summary: `${legalEntities.length} entities with active PRISM matters totaling $${(totalExposure / 1e6).toFixed(1)}M aggregate exposure across ${totalArbitrations} active arbitration(s). NEXUS cross-domain discoveries may affect case strategy for multiple active matters.`,
+      summary: `${legalEntities.length} entities with active PRISM matters totaling $${(totalExposure / 1e6).toFixed(1)}M aggregate exposure across ${totalArbitrations} active arbitration(s). PRAXIS cross-domain discoveries may affect case strategy for multiple active matters.`,
       findings,
       recommendedActions: actions,
       entityIds: entityIdArr,
@@ -518,16 +518,16 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
     domainColor: '#10b981',
     analystConfidence: 99,
     analystNote: 'System-computed metrics. No analyst adjustment required.',
-    summary: `All SZL platform verticals operational. NEXUS graph v${graph.version} contains ${totalEntities} entities and ${totalEdges} relationships (${inferredEdges} inferred). ORACLE pipeline generated ${sections.length + 1} intelligence sections.`,
+    summary: `All SZL platform verticals operational. PRAXIS graph v${graph.version} contains ${totalEntities} entities and ${totalEdges} relationships (${inferredEdges} inferred). ORACLE pipeline generated ${sections.length + 1} intelligence sections.`,
     findings: [
       {
         label: 'Platform Status',
-        detail: 'Vessels, PRISM, Terra, Aegis, Alloy — all operational · Zero incidents',
+        detail: 'SEXTANT, PRISM, DOMAINE, PARAGON, FORGE — all operational · Zero incidents',
         severity: 'info',
         entityIds: [],
       },
       {
-        label: 'NEXUS Graph',
+        label: 'PRAXIS Graph',
         detail: `${totalEntities} entities · ${totalEdges} edges (${inferredEdges} inferred) · Version ${graph.version} · Last refreshed ${graph.lastRefreshed}`,
         severity: 'info',
         entityIds: [],
@@ -549,8 +549,8 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
       {
         priority: 'this-week',
         action:
-          'NEXUS analyst review of all inferred edges — validate or retract low-confidence connections',
-        owner: 'NEXUS Ops',
+          'PRAXIS analyst review of all inferred edges — validate or retract low-confidence connections',
+        owner: 'PRAXIS Ops',
         entityIds: [],
       },
     ],
@@ -580,7 +580,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
       trendShift:
         anomalyReport.anomalies.find((a) => a.patternId === 'P004')?.description?.slice(0, 180) ??
         'Cross-domain analysis complete — review individual sections for trend details.',
-      oracleAssessment: `${immediateActions.length > 0 ? `${immediateActions.length} immediate executive decision(s) required. ` : ''}${anomalyReport.anomalies.length} cross-domain anomalies surfaced — ${anomalyReport.anomalies.filter((a) => a.severity === 'critical' || a.severity === 'high').length} require escalation. NEXUS graph traversal has connected signals that were previously invisible within individual vertical dashboards.`,
+      oracleAssessment: `${immediateActions.length > 0 ? `${immediateActions.length} immediate executive decision(s) required. ` : ''}${anomalyReport.anomalies.length} cross-domain anomalies surfaced — ${anomalyReport.anomalies.filter((a) => a.severity === 'critical' || a.severity === 'high').length} require escalation. PRAXIS graph traversal has connected signals that were previously invisible within individual vertical dashboards.`,
       immediateActionCount: immediateActions.length,
       criticalCount: sections.filter((s) => s.severity === 'critical').length,
       highCount: sections.filter((s) => s.severity === 'high').length,

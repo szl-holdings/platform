@@ -375,7 +375,7 @@ export const LYTE_STALLED_APPROVAL_NARRATIVE: LyteStalledApprovalNarrative = {
         severity: 'critical',
         title: 'Approval chain void — Vantex deal blocked at step 1 for 47 days',
         body: 'The BD Qualification Sign-off step has no valid owner. The original approver (Chris Wade) departed 2026-02-28 with no recorded handoff. Three automated escalation attempts were blocked by policy. The entire chain is frozen.',
-        source: 'Lyte — Approval Chain Monitor',
+        source: 'KORA — Approval Chain Monitor',
         confidence: 0.96,
         detectedAt: '2026-04-14T08:22:00Z',
         linkedEntityId: 'lyte-chain-vantex-001',
@@ -387,7 +387,7 @@ export const LYTE_STALLED_APPROVAL_NARRATIVE: LyteStalledApprovalNarrative = {
         severity: 'critical',
         title: '$4.2M Q2 deal — close probability collapsed from 84% to 31%',
         body: 'Vantex Acquisition close probability has declined 53 percentage points over 47 days of inactivity. At current trajectory, deal will fall out of Q2 and require full restart in Q3 with estimated 60% probability of loss.',
-        source: 'Lyte — Revenue Risk Monitor',
+        source: 'KORA — Revenue Risk Monitor',
         confidence: 0.91,
         detectedAt: '2026-04-14T08:22:00Z',
         linkedEntityId: 'lyte-opp-vantex-001',
@@ -399,7 +399,7 @@ export const LYTE_STALLED_APPROVAL_NARRATIVE: LyteStalledApprovalNarrative = {
         severity: 'high',
         title: 'Buyer proposal stalled 22 days past revision target',
         body: 'Vantex Buyer Proposal v3 has not been advanced in 22 days. Original revision target was 2026-04-10. Proposal cannot be updated without re-establishing approval authority.',
-        source: 'Lyte — Deliverable Monitor',
+        source: 'KORA — Deliverable Monitor',
         confidence: 0.88,
         detectedAt: '2026-04-14T08:25:00Z',
         linkedEntityId: 'lyte-del-proposal-001',
@@ -411,7 +411,7 @@ export const LYTE_STALLED_APPROVAL_NARRATIVE: LyteStalledApprovalNarrative = {
         severity: 'high',
         title: 'Procurement Lead (Tyler Raines) has sent 3 internal reminders — no response',
         body: 'Tyler Raines escalated internally on 2026-03-15, 2026-03-25, and 2026-04-03. All escalations landed in a void because the authority chain above him (Chris Wade) has no successor. The workflow is deadlocked.',
-        source: 'Lyte — Workflow Pattern Detector',
+        source: 'KORA — Workflow Pattern Detector',
         confidence: 0.83,
         detectedAt: '2026-04-14T08:27:00Z',
         linkedEntityId: 'lyte-chain-vantex-001',
@@ -423,7 +423,7 @@ export const LYTE_STALLED_APPROVAL_NARRATIVE: LyteStalledApprovalNarrative = {
         severity: 'medium',
         title: 'Buyer contact engagement decaying — last meaningful reply 28 days ago',
         body: "Vantex's primary contact (David Chen, Head of Corp Dev) last replied substantively on 2026-03-17. He opened the proposal on 2026-03-31 but did not respond. Silence exceeding 21 days is a strong churn predictor in comparable deals.",
-        source: 'Lyte — Buyer Engagement Monitor',
+        source: 'KORA — Buyer Engagement Monitor',
         confidence: 0.78,
         detectedAt: '2026-04-14T08:30:00Z',
         linkedEntityId: 'lyte-opp-vantex-001',
@@ -457,7 +457,7 @@ export const LYTE_STALLED_APPROVAL_NARRATIVE: LyteStalledApprovalNarrative = {
           {
             label: 'Days stalled',
             value: '47 days (threshold: 21 days for auto-escalation)',
-            source: 'Lyte Signal Monitor',
+            source: 'KORA Signal Monitor',
           },
           {
             label: 'Close probability',
@@ -472,7 +472,7 @@ export const LYTE_STALLED_APPROVAL_NARRATIVE: LyteStalledApprovalNarrative = {
           {
             label: 'Historical precedent',
             value: '78% close rate with CFO-direct sponsorship at this stage',
-            source: 'Lyte Evidence Graph',
+            source: 'KORA Evidence Graph',
           },
           {
             label: 'Approval chain status',
@@ -482,7 +482,7 @@ export const LYTE_STALLED_APPROVAL_NARRATIVE: LyteStalledApprovalNarrative = {
           {
             label: 'Escalation attempts',
             value: '3 attempts blocked by policy (no authority holder)',
-            source: 'Lyte Audit Log',
+            source: 'KORA Audit Log',
           },
         ],
         projectedImpact: {
@@ -516,7 +516,7 @@ export const LYTE_STALLED_APPROVAL_NARRATIVE: LyteStalledApprovalNarrative = {
           regulatoryExposure: false,
         },
         suggestedAction:
-          'Deploy Lyte approval-chain audit across all active workflows. Auto-void steps with departed owners. Require hand-off attestation as part of offboarding.',
+          'Deploy KORA approval-chain audit across all active workflows. Auto-void steps with departed owners. Require hand-off attestation as part of offboarding.',
         suggestedOwner: 'Sarah Kim (VP BD) + HR Operations',
         policyState: 'cleared',
         approvalState: 'none',
@@ -524,7 +524,7 @@ export const LYTE_STALLED_APPROVAL_NARRATIVE: LyteStalledApprovalNarrative = {
           {
             label: 'Companies with similar gaps',
             value: '3 of 14 portfolio companies',
-            source: 'Lyte Portfolio Scan',
+            source: 'KORA Portfolio Scan',
           },
           {
             label: 'Additional value at risk',

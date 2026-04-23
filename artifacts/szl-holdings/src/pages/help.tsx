@@ -30,7 +30,7 @@ const HELP_CATEGORIES = [
   },
   {
     icon: Zap,
-    title: "Alloy & Workflows",
+    title: "FORGE & Workflows",
     description: "Workflow orchestration, connector setup, approval gates, and execution history.",
     links: [
       { label: "Workflow docs", href: "/docs/control-plane" },

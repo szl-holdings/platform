@@ -94,7 +94,7 @@ export const overviewMetrics: OverviewMetric[] = [
 
 export const overviewSummary: OverviewSummary = {
   headline: 'Revenue exposure elevated — approval chain failure is the root cause',
-  body: 'Lyte has detected a compound risk cluster centered on the Vantex Acquisition approval chain failure. The $4.2M deal has been stalled 47 days due to a departed VP with no recorded handoff. Three automated escalation attempts were blocked by policy. The approval chain is self-locked. Simultaneously, Workflow Health has declined 11pp this month — 38% of tracked workflows carry at least one bottleneck. The Decision Center holds 6 critical-urgency recommendations awaiting executive action.',
+  body: 'KORA has detected a compound risk cluster centered on the Vantex Acquisition approval chain failure. The $4.2M deal has been stalled 47 days due to a departed VP with no recorded handoff. Three automated escalation attempts were blocked by policy. The approval chain is self-locked. Simultaneously, Workflow Health has declined 11pp this month — 38% of tracked workflows carry at least one bottleneck. The Decision Center holds 6 critical-urgency recommendations awaiting executive action.',
   generatedAt: '2026-04-18T07:00:00Z',
   confidence: 0.91,
   freshness: 'live',
@@ -140,7 +140,7 @@ export const signalItems: SignalItem[] = [
     severity: 'critical',
     title: 'Approval chain void — Vantex deal blocked at step 1 for 47 days',
     body: 'The BD Qualification Sign-off step has no valid owner. The original approver (Chris Wade) departed 2026-02-28 with no recorded handoff. Three automated escalation attempts were blocked by policy. The entire chain is frozen.',
-    source: 'Lyte — Approval Chain Monitor',
+    source: 'KORA — Approval Chain Monitor',
     confidence: 0.96,
     freshness: 'live',
     detectedAt: '2026-04-14T08:22:00Z',
@@ -157,7 +157,7 @@ export const signalItems: SignalItem[] = [
     severity: 'critical',
     title: '$4.2M Q2 deal — close probability collapsed from 84% to 31%',
     body: 'Vantex Acquisition close probability has declined 53 percentage points over 47 days of inactivity. At current trajectory, deal will fall out of Q2 and require full restart in Q3 with estimated 60% probability of permanent loss.',
-    source: 'Lyte — Revenue Risk Monitor',
+    source: 'KORA — Revenue Risk Monitor',
     confidence: 0.91,
     freshness: 'live',
     detectedAt: '2026-04-14T08:22:00Z',
@@ -174,7 +174,7 @@ export const signalItems: SignalItem[] = [
     severity: 'high',
     title: 'Buyer proposal stalled 22 days past revision target',
     body: 'Vantex Buyer Proposal v3 has not been advanced in 22 days. Original revision target was 2026-04-10. Proposal cannot be updated without re-establishing approval authority.',
-    source: 'Lyte — Deliverable Monitor',
+    source: 'KORA — Deliverable Monitor',
     confidence: 0.88,
     freshness: 'live',
     detectedAt: '2026-04-14T08:25:00Z',
@@ -191,7 +191,7 @@ export const signalItems: SignalItem[] = [
     severity: 'high',
     title: 'Procurement Lead sent 3 internal reminders — all landed in void',
     body: 'Tyler Raines escalated internally on 2026-03-15, 2026-03-25, and 2026-04-03. All escalations landed in a void because the authority chain above him (Chris Wade) has no successor. Workflow is deadlocked.',
-    source: 'Lyte — Workflow Pattern Detector',
+    source: 'KORA — Workflow Pattern Detector',
     confidence: 0.83,
     freshness: 'recent',
     detectedAt: '2026-04-14T08:27:00Z',
@@ -208,7 +208,7 @@ export const signalItems: SignalItem[] = [
     severity: 'medium',
     title: 'Buyer contact engagement decaying — last meaningful reply 28 days ago',
     body: "Vantex's primary contact (David Chen, Head of Corp Dev) last replied substantively on 2026-03-17. He opened the proposal on 2026-03-31 but did not respond. Silence exceeding 21 days is a strong churn predictor.",
-    source: 'Lyte — Buyer Engagement Monitor',
+    source: 'KORA — Buyer Engagement Monitor',
     confidence: 0.78,
     freshness: 'recent',
     detectedAt: '2026-04-14T08:30:00Z',
@@ -225,7 +225,7 @@ export const signalItems: SignalItem[] = [
     severity: 'high',
     title: 'Q2 Pipeline Execution project: 3 concurrent blockers detected',
     body: 'The Q2 Pipeline Execution project has 3 simultaneous blockers: approval chain freeze, deliverable overdue, and legal review blocked. Combined value at risk: $7.8M.',
-    source: 'Lyte — Workflow Health',
+    source: 'KORA — Workflow Health',
     confidence: 0.89,
     freshness: 'live',
     detectedAt: '2026-04-15T09:00:00Z',
@@ -241,8 +241,8 @@ export const signalItems: SignalItem[] = [
     type: 'escalation_blocked',
     severity: 'critical',
     title: 'Automated escalation policy blocked — no authority holder in chain',
-    body: 'Lyte attempted to auto-escalate the Vantex approval chain 3 times. Each attempt was blocked by policy because no valid authority holder exists at the target escalation node. Manual executive override required.',
-    source: 'Lyte — Policy Engine',
+    body: 'KORA attempted to auto-escalate the Vantex approval chain 3 times. Each attempt was blocked by policy because no valid authority holder exists at the target escalation node. Manual executive override required.',
+    source: 'KORA — Policy Engine',
     confidence: 0.97,
     freshness: 'live',
     detectedAt: '2026-04-14T08:35:00Z',
@@ -259,7 +259,7 @@ export const signalItems: SignalItem[] = [
     severity: 'high',
     title: 'Meridian Portfolio Co #7 — approval gap mirrors Vantex pattern',
     body: 'Portfolio Company 7 (Stratford Partners) shows identical pattern: departed approval owner, stalled chain, 28 days without advancement. $1.8M opportunity at risk.',
-    source: 'Lyte — Portfolio Scan',
+    source: 'KORA — Portfolio Scan',
     confidence: 0.81,
     freshness: 'recent',
     detectedAt: '2026-04-15T10:00:00Z',
@@ -276,7 +276,7 @@ export const signalItems: SignalItem[] = [
     severity: 'medium',
     title: 'Q2 marketing budget: 23% unallocated with 6 weeks remaining',
     body: 'Marketing Operations has not allocated $340K of the Q2 budget. Approval for reallocation has been pending 19 days. Budget expires end of quarter with no carryover policy.',
-    source: 'Lyte — Finance Monitor',
+    source: 'KORA — Finance Monitor',
     confidence: 0.74,
     freshness: 'recent',
     detectedAt: '2026-04-16T08:00:00Z',
@@ -293,7 +293,7 @@ export const signalItems: SignalItem[] = [
     severity: 'medium',
     title: '3 approval chains referencing departed employees — policy audit required',
     body: 'Platform-wide scan found 3 additional approval chains that reference staff who departed in the last 90 days. None have been updated since departure. Combined exposure: $3.4M.',
-    source: 'Lyte — Policy Compliance Scanner',
+    source: 'KORA — Policy Compliance Scanner',
     confidence: 0.86,
     freshness: 'live',
     detectedAt: '2026-04-16T07:30:00Z',
@@ -648,7 +648,7 @@ export const decisionRecommendations: DecisionRecommendation[] = [
       {
         label: 'Days stalled',
         value: '47 days (threshold: 21 days for auto-escalation)',
-        source: 'Lyte Signal Monitor',
+        source: 'KORA Signal Monitor',
       },
       {
         label: 'Close probability',
@@ -663,7 +663,7 @@ export const decisionRecommendations: DecisionRecommendation[] = [
       {
         label: 'Historical precedent',
         value: '78% close rate with CFO-direct sponsorship at this stage',
-        source: 'Lyte Evidence Graph',
+        source: 'KORA Evidence Graph',
       },
       {
         label: 'Approval chain status',
@@ -673,7 +673,7 @@ export const decisionRecommendations: DecisionRecommendation[] = [
       {
         label: 'Escalation attempts',
         value: '3 attempts blocked by policy (no authority holder)',
-        source: 'Lyte Audit Log',
+        source: 'KORA Audit Log',
       },
     ],
     projectedImpact: {
@@ -718,13 +718,13 @@ export const decisionRecommendations: DecisionRecommendation[] = [
       regulatoryExposure: false,
     },
     suggestedAction:
-      'Deploy Lyte approval-chain audit across all active workflows. Auto-void steps with departed owners. Require hand-off attestation as part of offboarding.',
+      'Deploy KORA approval-chain audit across all active workflows. Auto-void steps with departed owners. Require hand-off attestation as part of offboarding.',
     suggestedOwner: 'Sarah Kim (VP BD) + HR Operations',
     evidence: [
       {
         label: 'Companies with similar gaps',
         value: '3 of 14 portfolio companies',
-        source: 'Lyte Portfolio Scan',
+        source: 'KORA Portfolio Scan',
       },
       {
         label: 'Additional value at risk',
@@ -798,7 +798,7 @@ export const decisionRecommendations: DecisionRecommendation[] = [
       {
         label: 'Historical ROI',
         value: '2.3x average ROI on comparable reallocations',
-        source: 'Lyte Evidence Graph',
+        source: 'KORA Evidence Graph',
       },
     ],
     projectedImpact: {
@@ -1137,7 +1137,7 @@ export const runItems: RunItem[] = [
   {
     id: 'run-001',
     agentId: 'lyte-agent-01',
-    agentName: 'Lyte Signal Scanner',
+    agentName: 'KORA Signal Scanner',
     type: 'signal_scan',
     status: 'completed',
     trigger: 'scheduled',
@@ -1257,7 +1257,7 @@ export const runItems: RunItem[] = [
   {
     id: 'run-008',
     agentId: 'lyte-agent-01',
-    agentName: 'Lyte Signal Scanner',
+    agentName: 'KORA Signal Scanner',
     type: 'signal_scan',
     status: 'running',
     trigger: 'scheduled',
@@ -1293,7 +1293,7 @@ export const evidenceItems: EvidenceItem[] = [
     id: 'ev-001',
     label: 'Approval chain status — void at step 1',
     type: 'system',
-    source: 'Lyte Workflow Monitor',
+    source: 'KORA Workflow Monitor',
     value: 'Frozen at step 1 of 4 — void owner for 47 days',
     detail:
       "System confirmed that step 1 ('BD Qualification Sign-off') has had no valid owner since 2026-02-28. The approver record references Chris Wade (emp_id: CW-4421) whose employment status is 'terminated' as of 2026-02-28.",
@@ -1314,7 +1314,7 @@ export const evidenceItems: EvidenceItem[] = [
     source: 'Pipeline Analytics',
     value: '31% (was 84% — 53pp decline over 47 days)',
     detail:
-      "Lyte's motion model computed close probability decline from 84% at deal entry (2026-02-28) to 31% at detection (2026-04-14). Decline rate: 1.13pp/day. Comparable deals at <35% probability after 45d stall have a 60% historical loss rate.",
+      "KORA's motion model computed close probability decline from 84% at deal entry (2026-02-28) to 31% at detection (2026-04-14). Decline rate: 1.13pp/day. Comparable deals at <35% probability after 45d stall have a 60% historical loss rate.",
     linkedEntityId: 'lyte-opp-vantex-001',
     linkedEntityType: 'opportunity',
     linkedEntityLabel: 'Vantex Acquisition — Q2 Close',
@@ -1347,7 +1347,7 @@ export const evidenceItems: EvidenceItem[] = [
     id: 'ev-004',
     label: '3 escalation attempts blocked by policy',
     type: 'audit_log',
-    source: 'Lyte Audit Log',
+    source: 'KORA Audit Log',
     value: '3 escalation attempts blocked by policy engine',
     detail:
       "Attempts on 2026-03-15, 2026-03-25, and 2026-04-03. Each blocked with effect 'block' — Policy: LYTE-POL-004 (require valid authority holder for approval escalation). No human review triggered because policy auto-block halted chain before notification.",
@@ -1365,7 +1365,7 @@ export const evidenceItems: EvidenceItem[] = [
     id: 'ev-005',
     label: 'Historical pattern — 78% close rate with CFO sponsorship',
     type: 'alloy',
-    source: 'Lyte Evidence Graph (pattern match)',
+    source: 'KORA Evidence Graph (pattern match)',
     value: '78% close rate with CFO-direct sponsorship at comparable stage',
     detail:
       'Pattern match across 23 comparable scenarios (deal stalled >35 days, buyer silence >14 days, approval chain frozen). Of 23 cases: CFO-direct: 78% close; VP-level escalation: 51% close; no action: 12% close. Current deal matches 4 of 5 pattern criteria.',
@@ -1395,7 +1395,7 @@ export const evidenceItems: EvidenceItem[] = [
     id: 'ev-007',
     label: 'Portfolio scan — 3 additional chains with departed owners',
     type: 'system',
-    source: 'Lyte Portfolio Scanner',
+    source: 'KORA Portfolio Scanner',
     value: '3 additional approval chains with departed owners',
     detail:
       'Scan of all 14 portfolio companies on 2026-04-15 identified: Stratford Partners (28d stall, $1.8M), Harbour Point Ltd (19d stall, $2.1M), Kestral Dynamics (14d stall, $3.3M). Combined additional exposure: $7.2M.',
@@ -1409,7 +1409,7 @@ export const evidenceItems: EvidenceItem[] = [
     id: 'ev-008',
     label: 'Buyer proposal — 22 days past revision target',
     type: 'system',
-    source: 'Lyte Deliverable Monitor',
+    source: 'KORA Deliverable Monitor',
     value: 'Vantex Buyer Proposal v3 — 22 days past revision target (target: 2026-04-10)',
     detail:
       "Deliverable 'Vantex Buyer Proposal v3' was originally targeted for revision by 2026-04-10. The proposal cannot be advanced because the approval chain controlling it is frozen. No revision has been made since 2026-03-12.",
@@ -1550,7 +1550,7 @@ export const policyRules: PolicyRule[] = [
     id: 'lyte-pol-007',
     name: 'Simulation — Required Before High-Impact Action',
     description:
-      'Any action with estimated financial impact >$500K must be preceded by a Lyte simulation run.',
+      'Any action with estimated financial impact >$500K must be preceded by a KORA simulation run.',
     scope: 'action',
     effect: 'require_approval',
     conditions: ['action.estimatedImpactUsd > 500000', 'action.simulationRunId == null'],
@@ -1902,7 +1902,7 @@ export const driftItems: DriftItem[] = [
     evidence: [
       "Last edit: Apr 7 by Sarah Lim — marked 'awaiting Strategy sign-off'",
       'David Osei opened doc Apr 8 — no changes made',
-      "Alloy workflow paused at 'strategy-review' node for 9 days",
+      "FORGE workflow paused at 'strategy-review' node for 9 days",
       'Board deck assembly blocked on this output since Apr 12',
     ],
     status: 'critical',
@@ -2068,7 +2068,7 @@ export const debtItems: DebtItem[] = [
     ageDays: 11,
     escalations: 1,
     program: 'Finance Planning',
-    evidence: ['Last activity: Apr 8', 'Board deck blocked', 'Alloy workflow paused'],
+    evidence: ['Last activity: Apr 8', 'Board deck blocked', 'FORGE workflow paused'],
     proofRef: 'ALLOY-W-0221',
     status: 'critical',
   },
@@ -2113,7 +2113,7 @@ export const replayScenarios: ReplayScenario[] = [
       {
         id: 're-01',
         timestamp: '2026-04-14T08:22:00Z',
-        actor: 'Lyte Signal Scanner',
+        actor: 'KORA Signal Scanner',
         role: 'System',
         action: 'Signal detected',
         signal: 'approval_chain_stall',
@@ -2125,7 +2125,7 @@ export const replayScenarios: ReplayScenario[] = [
       {
         id: 're-02',
         timestamp: '2026-04-14T08:24:00Z',
-        actor: 'Lyte Decision Engine',
+        actor: 'KORA Decision Engine',
         role: 'AI Agent',
         action: 'Recommendation generated',
         detail:
@@ -2136,7 +2136,7 @@ export const replayScenarios: ReplayScenario[] = [
       {
         id: 're-03',
         timestamp: '2026-04-14T08:30:00Z',
-        actor: 'Lyte Simulation Engine',
+        actor: 'KORA Simulation Engine',
         role: 'AI Agent',
         action: 'Simulation run',
         detail:
@@ -2169,7 +2169,7 @@ export const replayScenarios: ReplayScenario[] = [
       {
         id: 're-06',
         timestamp: '2026-04-14T09:14:00Z',
-        actor: 'Lyte Alloy',
+        actor: 'KORA FORGE',
         role: 'System',
         action: 'Approval chain updated',
         detail:
@@ -2180,7 +2180,7 @@ export const replayScenarios: ReplayScenario[] = [
       {
         id: 're-07',
         timestamp: '2026-04-14T09:58:00Z',
-        actor: 'Lyte Alloy',
+        actor: 'KORA FORGE',
         role: 'System',
         action: 'Downstream actions executed',
         detail:

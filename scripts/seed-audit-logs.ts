@@ -5,7 +5,7 @@ const _ACTORS = [
   { id: 1, name: 'Stephen Lutar', email: 'stephen@szlholdings.com', role: 'founder_admin' },
   { id: 2, name: 'Ops Lead', email: 'ops@szlholdings.com', role: 'operator' },
   { id: 3, name: 'Analyst', email: 'analyst@szlholdings.com', role: 'analyst' },
-  { id: 4, name: 'System (Alloy)', email: 'alloy@system.internal', role: 'system' },
+  { id: 4, name: 'System (FORGE)', email: 'alloy@system.internal', role: 'system' },
 ];
 
 const ACTIVITY_LOG_ENTRIES = [
@@ -194,7 +194,7 @@ const ACTIVITY_LOG_ENTRIES = [
       routedTo: 'ops@szlholdings.com',
       signal: 'sig-005',
       priority: 'high',
-      context: 'Vessels fleet exception',
+      context: 'SEXTANT fleet exception',
     },
     actorId: 4,
     actorEmail: 'alloy@system.internal',

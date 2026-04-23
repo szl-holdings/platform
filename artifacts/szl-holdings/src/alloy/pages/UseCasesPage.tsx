@@ -34,8 +34,8 @@ export default function UseCasesPage() {
           Practical applications across the ecosystem
         </h1>
         <p className="text-white/50 max-w-2xl leading-relaxed">
-          These are the specific operational problems Alloy solves across the SZL ecosystem —
-          concrete use cases with defined inputs, Alloy's role, and measurable business impact.
+          These are the specific operational problems FORGE solves across the SZL ecosystem —
+          concrete use cases with defined inputs, FORGE's role, and measurable business impact.
         </p>
       </div>
 
@@ -149,7 +149,7 @@ function UseCaseDetail({ useCase }: { useCase: (typeof ALLOY_USE_CASES)[number] 
 
       <div className="mb-4">
         <div className="text-[10px] uppercase tracking-widest text-white/30 mb-2">
-          Inputs to Alloy
+          Inputs to FORGE
         </div>
         <div className="space-y-1">
           {useCase.inputs.map((i) => (
@@ -172,7 +172,7 @@ function UseCaseDetail({ useCase }: { useCase: (typeof ALLOY_USE_CASES)[number] 
           className="text-[10px] uppercase tracking-widest mb-1.5"
           style={{ color: `${accent}80` }}
         >
-          Alloy's Role
+          FORGE's Role
         </div>
         <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
           {useCase.alloyRole}

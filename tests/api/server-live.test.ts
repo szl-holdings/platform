@@ -258,7 +258,7 @@ describe.skipIf(!LIVE_TOKEN)("Live Server — REST endpoints through real CSRF +
     expect(Array.isArray(res.body.data)).toBe(true);
   });
 
-  it("GET /api/firestorm/scenarios returns 200 (Aegis domain, real middleware chain)", async () => {
+  it("GET /api/firestorm/scenarios returns 200 (PARAGON domain, real middleware chain)", async () => {
     const router = (await import("../../artifacts/api-server/src/routes/firestorm")).default;
     const app = await buildLiveApp([router]);
     const res = await request(app)
@@ -591,7 +591,7 @@ describe.skipIf(!LIVE_TOKEN)("Live Server — GraphQL contract suite over HTTP (
     }
   });
 
-  it("terraProperties query resolves over HTTP from real DB (Terra domain)", async () => {
+  it("terraProperties query resolves over HTTP from real DB (DOMAINE domain)", async () => {
     const res = await request(gqlApp!)
       .post("/api/graphql")
       .set("Content-Type", "application/json")
@@ -607,7 +607,7 @@ describe.skipIf(!LIVE_TOKEN)("Live Server — GraphQL contract suite over HTTP (
     }
   });
 
-  it("pcMatters query resolves over HTTP from real DB (PRISM Counsel domain)", async () => {
+  it("pcMatters query resolves over HTTP from real DB (Counsel domain)", async () => {
     const res = await request(gqlApp!)
       .post("/api/graphql")
       .set("Content-Type", "application/json")

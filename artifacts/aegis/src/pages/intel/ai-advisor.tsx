@@ -168,14 +168,14 @@ const COMPARISON_RESULTS: ComparisonResult[] = [
   {
     oracle: 'Primary AI Model',
     answer:
-      'Deploy automated cross-domain anomaly correlation — connecting Vessels, MSP, and Terra signals into a unified early warning system would reduce MTTD by an estimated 60%.',
+      'Deploy automated cross-domain anomaly correlation — connecting SEXTANT, MSP, and DOMAINE signals into a unified early warning system would reduce MTTD by an estimated 60%.',
     confidence: 91,
     reasoning: [
       'Each app currently operates in isolation',
       'Cross-domain signals show 3 unrealized correlations',
-      'MSP ticket data predicts Terra market disruptions with 2-week lead time',
+      'MSP ticket data predicts DOMAINE market disruptions with 2-week lead time',
     ],
-    caveats: 'Requires API bridge between Vessels and MSP data layers.',
+    caveats: 'Requires API bridge between SEXTANT and MSP data layers.',
   },
   {
     oracle: 'Financial Oracle',

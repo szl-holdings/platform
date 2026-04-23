@@ -57,7 +57,7 @@ const DOMAIN_CONSIDERATIONS = [
     ],
   },
   {
-    domain: "Maritime (Vessels)",
+    domain: "Maritime (SEXTANT)",
     items: [
       "OFAC sanctions screening on all counterparties and destinations",
       "SOLAS and ISM compliance context integrated into risk scoring",
@@ -66,7 +66,7 @@ const DOMAIN_CONSIDERATIONS = [
     ],
   },
   {
-    domain: "Security (Aegis)",
+    domain: "Security (PARAGON)",
     items: [
       "NIST and SOC 2 framework alignment in all governance report outputs",
       "Authorized security team approval for all remediation recommendations",
@@ -75,7 +75,7 @@ const DOMAIN_CONSIDERATIONS = [
     ],
   },
   {
-    domain: "Real estate (Terra)",
+    domain: "Real estate (DOMAINE)",
     items: [
       "Official data provenance — all enrichment traces to PLUTO, FEMA, Census, or county records",
       "Investment committee approval required for all diligence export packets",

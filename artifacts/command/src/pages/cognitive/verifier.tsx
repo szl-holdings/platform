@@ -91,7 +91,7 @@ const SEEDED_VERIFIER_RESULTS: VerifierResult[] = [
         score: 0.97,
         severity: 'blocker',
         description:
-          'Action must comply with Aegis Incident Response Policy v3.2 and SOC SLA thresholds.',
+          'Action must comply with PARAGON Incident Response Policy v3.2 and SOC SLA thresholds.',
         evidence:
           'Proposed containment actions align with IR Policy §4.2 (Critical — isolate within 15 min). Current elapsed: 2m 17s. SLA: compliant.',
         rule: 'POL-AEGIS-003',

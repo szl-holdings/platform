@@ -89,7 +89,7 @@ export function LiveRecommendationStage({
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
         <span className="font-semibold text-foreground">{recommendations.length}</span> active
-        AI-generated recommendations pulled from the live Alloy recommendation engine.
+        AI-generated recommendations pulled from the live FORGE recommendation engine.
       </p>
       <div className="space-y-3">
         {recommendations.slice(0, 5).map((rec, i) => (

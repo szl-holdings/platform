@@ -155,8 +155,8 @@ describe('Graph Integrity', () => {
   });
 
   it('extracts domain subgraph (nodes + internal edges)', () => {
-    store.upsertNode(makeNode('t1', 'Terra 1', 'terra'));
-    store.upsertNode(makeNode('t2', 'Terra 2', 'terra'));
+    store.upsertNode(makeNode('t1', 'DOMAINE 1', 'terra'));
+    store.upsertNode(makeNode('t2', 'DOMAINE 2', 'terra'));
     store.upsertNode(makeNode('p1', 'Prism 1', 'prism'));
     store.upsertEdge(makeEdge('e-t1t2', 't1', 't2'));
     store.upsertEdge(makeEdge('e-t1p1', 't1', 'p1'));
@@ -755,9 +755,9 @@ describe('Entity Linking', () => {
   });
 
   it('filters nodes by domain', () => {
-    store.upsertNode(makeNode('fd-t1', 'Terra Node', 'terra'));
+    store.upsertNode(makeNode('fd-t1', 'DOMAINE Node', 'terra'));
     store.upsertNode(makeNode('fd-p1', 'Prism Node', 'prism'));
-    store.upsertNode(makeNode('fd-a1', 'Aegis Node', 'aegis'));
+    store.upsertNode(makeNode('fd-a1', 'PARAGON Node', 'aegis'));
 
     const terraNodes = store.listNodes({ domain: 'terra' });
     expect(terraNodes).toHaveLength(1);

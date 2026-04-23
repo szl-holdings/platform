@@ -80,8 +80,8 @@ const ctaEvents = [
   { label: 'Investor Relations', clicks: 620, conversions: 88, rate: 14 },
   { label: 'Read Insights', clicks: 980, conversions: 180, rate: 18 },
   { label: 'Contact / Inquire', clicks: 410, conversions: 76, rate: 19 },
-  { label: 'Enter Aegis', clicks: 720, conversions: 540, rate: 75 },
-  { label: 'Enter Vessels', clicks: 380, conversions: 280, rate: 74 },
+  { label: 'Enter PARAGON', clicks: 720, conversions: 540, rate: 75 },
+  { label: 'Enter SEXTANT', clicks: 380, conversions: 280, rate: 74 },
 ];
 
 const referrers = [

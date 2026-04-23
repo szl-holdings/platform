@@ -25,7 +25,7 @@ export function ContextStage({ engine }: { engine: EngineState }) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        The platform correlates the Aegis and Vessels signals, identifying a coordinated threat
+        The platform correlates the PARAGON and SEXTANT signals, identifying a coordinated threat
         pattern across domains.
       </p>
       <div className="rounded-xl border border-border/40 bg-card/60 p-5">

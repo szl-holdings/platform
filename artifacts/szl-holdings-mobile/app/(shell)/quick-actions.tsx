@@ -9,7 +9,7 @@ import { useColors } from '@/hooks/useColors';
 
 const ACCENT = '#c9a84c';
 const PURPLE = '#8b7ac8';
-const TERRA = '#c87941';
+const DOMAINE = '#c87941';
 
 // ── Terra module shortcuts ─────────────────────────────────────────────────────
 
@@ -74,8 +74,8 @@ function TerraShortcutsStrip() {
   return (
     <View style={terraStyles.wrapper}>
       <View style={terraStyles.headerRow}>
-        <Feather name="home" size={10} color={TERRA} />
-        <Text style={terraStyles.sectionLabel}>TERRA SHORTCUTS</Text>
+        <Feather name="home" size={10} color={DOMAINE} />
+        <Text style={terraStyles.sectionLabel}>DOMAINE SHORTCUTS</Text>
       </View>
       <ScrollView
         horizontal
@@ -91,17 +91,17 @@ function TerraShortcutsStrip() {
             }}
             style={[
               terraStyles.shortcutBtn,
-              { backgroundColor: `${TERRA}10`, borderColor: `${TERRA}30` },
+              { backgroundColor: `${DOMAINE}10`, borderColor: `${DOMAINE}30` },
             ]}
             activeOpacity={0.75}
             accessibilityLabel={item.label}
             accessibilityRole="button"
           >
-            <Feather name={item.icon} size={14} color={TERRA} />
+            <Feather name={item.icon} size={14} color={DOMAINE} />
             <Text style={terraStyles.shortcutLabel}>{item.label}</Text>
             {item.badge && (
-              <View style={[terraStyles.shortcutBadge, { backgroundColor: `${TERRA}25` }]}>
-                <Text style={[terraStyles.shortcutBadgeText, { color: TERRA }]}>{item.badge}</Text>
+              <View style={[terraStyles.shortcutBadge, { backgroundColor: `${DOMAINE}25` }]}>
+                <Text style={[terraStyles.shortcutBadgeText, { color: DOMAINE }]}>{item.badge}</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -123,7 +123,7 @@ const terraStyles = StyleSheet.create({
   sectionLabel: {
     fontSize: 9,
     fontFamily: 'Inter_600SemiBold',
-    color: TERRA,
+    color: DOMAINE,
     letterSpacing: 1.5,
   },
   scrollContent: { paddingHorizontal: 16, gap: 8 },
@@ -139,7 +139,7 @@ const terraStyles = StyleSheet.create({
   shortcutLabel: {
     fontSize: 11,
     fontFamily: 'Inter_500Medium',
-    color: TERRA,
+    color: DOMAINE,
   },
   shortcutBadge: {
     paddingHorizontal: 5,
@@ -200,7 +200,7 @@ const AWAITING_APPROVAL = [
     domain: 'PARAGON',
     domainColor: '#6366f1',
     title: 'Critical CVE Patch Deploy',
-    requester: 'Aegis SOC',
+    requester: 'PARAGON SOC',
     due: 'Within 2 hours',
     urgency: 'critical' as const,
   },
@@ -631,7 +631,7 @@ export default function QuickActionsScreen() {
         <BusinessHealthStrip colors={colors} />
       </View>
 
-      {/* Terra shortcuts */}
+      {/* DOMAINE shortcuts */}
       <TerraShortcutsStrip />
 
       {/* Tab bar */}

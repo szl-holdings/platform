@@ -22,7 +22,7 @@ async function seed() {
       },
       {
         type: 'achievement',
-        title: 'Launched Vessels Platform',
+        title: 'Launched SEXTANT Platform',
         content:
           'Deployed a maritime fleet tracking and logistics platform serving 200+ vessels across three continents with real-time AIS integration.',
         icon: 'Ship',
@@ -52,9 +52,9 @@ async function seed() {
       },
       {
         type: 'achievement',
-        title: 'Lyte Smart Energy Launch',
+        title: 'KORA Smart Energy Launch',
         content:
-          'Launched Lyte — an IoT-driven energy management platform reducing commercial building energy consumption by an average of 32%.',
+          'Launched KORA — an IoT-driven energy management platform reducing commercial building energy consumption by an average of 32%.',
         icon: 'Lightbulb',
         date: '2023-02',
         sortOrder: 5,
@@ -234,7 +234,7 @@ async function seed() {
         summary:
           'Built a real-time maritime tracking platform integrating AIS data, weather overlays, and predictive analytics for a fleet of 200+ commercial vessels.',
         content:
-          'The Vessels platform was designed to provide comprehensive maritime domain awareness for commercial shipping operators. Key challenges included processing high-frequency AIS position reports, integrating multiple weather data providers, and building a predictive ETA model that accounted for currents, weather, and port congestion.\n\nThe solution leverages a microservices architecture with dedicated services for data ingestion, geospatial processing, and real-time client updates via WebSocket connections. The frontend provides an interactive map with vessel tracks, weather overlays, and fleet analytics dashboards.\n\nKey technologies: React, Node.js, PostgreSQL with PostGIS, Redis, Kubernetes, MapboxGL.',
+          'The SEXTANT platform was designed to provide comprehensive maritime domain awareness for commercial shipping operators. Key challenges included processing high-frequency AIS position reports, integrating multiple weather data providers, and building a predictive ETA model that accounted for currents, weather, and port congestion.\n\nThe solution leverages a microservices architecture with dedicated services for data ingestion, geospatial processing, and real-time client updates via WebSocket connections. The frontend provides an interactive map with vessel tracks, weather overlays, and fleet analytics dashboards.\n\nKey technologies: React, Node.js, PostgreSQL with PostGIS, Redis, Kubernetes, MapboxGL.',
         tags: ['Maritime', 'Real-Time', 'IoT', 'Geospatial'],
         featured: true,
         client: 'Global Shipping Corp',
@@ -276,7 +276,7 @@ async function seed() {
         summary:
           'Built an IoT-driven energy management system that reduced commercial building energy consumption by an average of 32% through intelligent automation.',
         content:
-          'Lyte integrates with building management systems, smart meters, and IoT sensors to provide real-time energy monitoring and automated optimization. The platform uses machine learning models to predict energy demand and automatically adjust HVAC, lighting, and equipment schedules.\n\nThe IoT gateway handles thousands of sensor readings per second, with edge computing for latency-sensitive control decisions. The cloud platform provides analytics, benchmarking, and ROI tracking across building portfolios.\n\nKey technologies: TypeScript, React, Python, MQTT, TimescaleDB, TensorFlow, Kubernetes.',
+          'KORA integrates with building management systems, smart meters, and IoT sensors to provide real-time energy monitoring and automated optimization. The platform uses machine learning models to predict energy demand and automatically adjust HVAC, lighting, and equipment schedules.\n\nThe IoT gateway handles thousands of sensor readings per second, with edge computing for latency-sensitive control decisions. The cloud platform provides analytics, benchmarking, and ROI tracking across building portfolios.\n\nKey technologies: TypeScript, React, Python, MQTT, TimescaleDB, TensorFlow, Kubernetes.',
         tags: ['IoT', 'Energy', 'ML', 'Sustainability'],
         featured: false,
         client: 'National Property Group',

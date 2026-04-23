@@ -61,7 +61,7 @@ const DEMO_RECENT_RUNS: ApiEvalRun[] = [
   {
     runId: 'run-eval-841',
     suiteId: 'aegis-threat-classify',
-    suiteName: 'Aegis Threat Classification',
+    suiteName: 'PARAGON Threat Classification',
     domain: 'aegis',
     passRate: 0.821,
     totalCases: 124,
@@ -72,7 +72,7 @@ const DEMO_RECENT_RUNS: ApiEvalRun[] = [
   {
     runId: 'run-eval-839',
     suiteId: 'vessels-piracy-risk',
-    suiteName: 'Vessels Piracy Risk',
+    suiteName: 'SEXTANT Piracy Risk',
     domain: 'vessels',
     passRate: 0.864,
     totalCases: 96,
@@ -83,7 +83,7 @@ const DEMO_RECENT_RUNS: ApiEvalRun[] = [
   {
     runId: 'run-eval-836',
     suiteId: 'terra-portfolio-rollup',
-    suiteName: 'Terra Portfolio Rollup',
+    suiteName: 'DOMAINE Portfolio Rollup',
     domain: 'terra',
     passRate: 0.933,
     totalCases: 78,
@@ -107,7 +107,7 @@ const DEMO_RECENT_RUNS: ApiEvalRun[] = [
 const DEMO_PENDING_APPROVALS: ApiApproval[] = [
   {
     id: 'ap-101',
-    title: 'Promote Aegis threat-classify v2.4 to production',
+    title: 'Promote PARAGON threat-classify v2.4 to production',
     domain: 'aegis',
     requestedAt: '13:50',
     riskLevel: 'high',
@@ -123,7 +123,7 @@ const DEMO_PENDING_APPROVALS: ApiApproval[] = [
   },
   {
     id: 'ap-097',
-    title: 'Allowlist new tool: data_export for Terra',
+    title: 'Allowlist new tool: data_export for DOMAINE',
     domain: 'terra',
     requestedAt: '11:48',
     riskLevel: 'high',
