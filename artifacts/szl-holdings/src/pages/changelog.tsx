@@ -12,10 +12,10 @@ const entries = [
     type: "minor",
     highlight: "PARAGON XDR Console + KORA Anomaly Detection launch",
     changes: [
-      { type: "feature", text: "Aegis: Unified XDR Console with cross-source alert correlation and entity risk scoring" },
-      { type: "feature", text: "Aegis: Threat Hunting Workbench with KQL-style query builder and campaign management" },
-      { type: "feature", text: "Lyte: Watchdog AI Anomaly Detection with 98.2% noise reduction" },
-      { type: "feature", text: "Lyte: SLO Tracking with burn rate alerts and error budget visualization" },
+      { type: "feature", text: "PARAGON: Unified XDR Console with cross-source alert correlation and entity risk scoring" },
+      { type: "feature", text: "PARAGON: Threat Hunting Workbench with KQL-style query builder and campaign management" },
+      { type: "feature", text: "KORA: Watchdog AI Anomaly Detection with 98.2% noise reduction" },
+      { type: "feature", text: "KORA: SLO Tracking with burn rate alerts and error budget visualization" },
       { type: "improvement", text: "Admin Panel: Connector Health grid with latency heatmaps and failure analytics" },
       { type: "fix", text: "SZL Cortex: GPU monitoring panel chart rendering on mobile viewports" },
     ],
@@ -26,25 +26,25 @@ const entries = [
     type: "minor",
     highlight: "DOMAINE Portfolio Performance + PARAGON Operations RMM Console launch",
     changes: [
-      { type: "feature", text: "Terra: Portfolio Performance module with IRR, cash-on-cash, and equity multiple tracking" },
-      { type: "feature", text: "Terra: Climate Risk Overlay with flood, wildfire, and sea level exposure scoring" },
-      { type: "feature", text: "Terra: Investor Relations module with LP portal and performance reporting" },
+      { type: "feature", text: "DOMAINE: Portfolio Performance module with IRR, cash-on-cash, and equity multiple tracking" },
+      { type: "feature", text: "DOMAINE: Climate Risk Overlay with flood, wildfire, and sea level exposure scoring" },
+      { type: "feature", text: "DOMAINE: Investor Relations module with LP portal and performance reporting" },
       { type: "feature", text: "PARAGON Operations: RMM Console with endpoint monitoring, patch management, and threat status" },
       { type: "feature", text: "PARAGON Operations: MRR Dashboard with cohort analysis and churn waterfall visualization" },
-      { type: "improvement", text: "Vessels: Fleet map rendering performance improved 40% on large datasets" },
+      { type: "improvement", text: "SEXTANT: Fleet map rendering performance improved 40% on large datasets" },
     ],
   },
   {
     version: "v3.6.0",
     date: "February 24, 2026",
     type: "minor",
-    highlight: "SZL APEX GPU Monitoring + LLM Evaluation launch",
+    highlight: "SZL Cortex GPU Monitoring + LLM Evaluation launch",
     changes: [
       { type: "feature", text: "SZL Cortex: GPU Cluster Monitoring with thermal, utilization, and memory pressure tracking" },
       { type: "feature", text: "SZL Cortex: LLM Evaluation Studio with automated regression testing and A/B model comparison" },
-      { type: "feature", text: "Alloy: Prediction Studio with multi-channel scenario modeling" },
-      { type: "feature", text: "Alloy: Confidence Scoring with probabilistic output and assumption tracking" },
-      { type: "improvement", text: "Aegis: Risk Register redesign with dynamic filtering and bulk status updates" },
+      { type: "feature", text: "FORGE: Prediction Studio with multi-channel scenario modeling" },
+      { type: "feature", text: "FORGE: Confidence Scoring with probabilistic output and assumption tracking" },
+      { type: "improvement", text: "PARAGON: Risk Register redesign with dynamic filtering and bulk status updates" },
     ],
   },
   {
@@ -53,9 +53,9 @@ const entries = [
     type: "patch",
     highlight: "Performance fixes and accessibility improvements",
     changes: [
-      { type: "fix", text: "Lyte: Command Center dashboard infinite scroll on Firefox fixed" },
-      { type: "fix", text: "Lyte: Property detail map failing to load on slow connections" },
-      { type: "fix", text: "Vessels: Port analytics chart tooltip overlap on dense datasets" },
+      { type: "fix", text: "KORA: Command Center dashboard infinite scroll on Firefox fixed" },
+      { type: "fix", text: "KORA: Property detail map failing to load on slow connections" },
+      { type: "fix", text: "SEXTANT: Port analytics chart tooltip overlap on dense datasets" },
       { type: "improvement", text: "All apps: ARIA labels and keyboard navigation improvements across navigation" },
       { type: "improvement", text: "All apps: Dark mode contrast ratio improved to meet WCAG AA standards" },
     ],
@@ -66,8 +66,8 @@ const entries = [
     type: "minor",
     highlight: "PARAGON multi-framework support + Carlota Jo AI Advisory",
     changes: [
-      { type: "feature", text: "Aegis: Vendor Risk Assessment with 8 risk dimensions and auto-scoring" },
-      { type: "feature", text: "Aegis: Risk Register with owner assignment and remediation tracking" },
+      { type: "feature", text: "PARAGON: Vendor Risk Assessment with 8 risk dimensions and auto-scoring" },
+      { type: "feature", text: "PARAGON: Risk Register with owner assignment and remediation tracking" },
       { type: "feature", text: "Carlota Jo: AI Brand Advisory with real-time competitive positioning analysis" },
       { type: "feature", text: "Carlota Jo: Engagement Workflow tracker with milestone management" },
       { type: "security", text: "Auth token refresh logic hardened against replay attacks" },
@@ -103,7 +103,7 @@ const versionBadge: Record<string, string> = {
 export default function Changelog() {
   const __pageMeta = usePageMeta({
     title: "Changelog | SZL Holdings – Platform Release Notes",
-    description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from PARAGON, PARAGON Intelligence, DOMAINE, SEXTANT, KORA, FORGE, PARAGON Operations, and Aegis.",
+    description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from PARAGON, PARAGON Intelligence, DOMAINE, SEXTANT, KORA, FORGE, PARAGON Operations, and PARAGON.",
     canonical: "https://szlholdings.com/changelog",
   });
 

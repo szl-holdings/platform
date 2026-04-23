@@ -11,11 +11,11 @@ const PIPELINE_STAGES = [
   {
     id: "signal",
     label: "Signal",
-    sublabel: "KORA / PRISM",
+    sublabel: "KORA / PRAXIS",
     color: "var(--color-lyte)",
     colorMuted: "var(--color-lyte-muted)",
     colorBorder: "var(--color-lyte-border)",
-    desc: "KORA's PRISM engine monitors connected systems for operational signals — approval latency, ownership gaps, performance anomalies, and threshold crossings. Signals are classified by type, severity, and urgency.",
+    desc: "KORA's PRAXIS engine monitors connected systems for operational signals — approval latency, ownership gaps, performance anomalies, and threshold crossings. Signals are classified by type, severity, and urgency.",
     details: ["Continuous monitoring across connected integrations", "Signal classification: type, severity, velocity, blast radius", "Deduplication and correlation across signal sources", "Tenant-isolated signal namespace"],
   },
   {

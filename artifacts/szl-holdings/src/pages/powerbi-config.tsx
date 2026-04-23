@@ -145,7 +145,7 @@ const REPORTS: Array<{
     app: 'KORA',
     appPath: '/command/operations/powerbi',
     description:
-      'Business observability KPIs including SLA performance, escalation rates, and PRISM health scores.',
+      'Business observability KPIs including SLA performance, escalation rates, and PRAXIS health scores.',
     color: '#f59e0b',
     icon: '⚡',
   },
@@ -268,7 +268,7 @@ export default function PowerBiConfigPage() {
                   </h1>
                   <p className="text-sm text-muted-foreground mt-1">
                     Connect your Microsoft Power BI workspace to embed live analytics reports across
-                    PARAGON, DOMAINE, and Lyte. Credentials are encrypted at rest using AES-256-GCM.
+                    PARAGON, DOMAINE, and KORA. Credentials are encrypted at rest using AES-256-GCM.
                   </p>
                 </div>
               </div>

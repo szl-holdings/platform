@@ -411,7 +411,7 @@ export default function AegisPublicPage() {
                     label: "Core Capabilities",
                     status: "In Development",
                     statusColor: "hsl(40,85%,55%)",
-                    description: "CISA KEV integration, NIST NVD enrichment, XDR normalization, and Alloy-gated analyst workflow are in active development.",
+                    description: "CISA KEV integration, NIST NVD enrichment, XDR normalization, and FORGE-gated analyst workflow are in active development.",
                   },
                   {
                     label: "General Availability",

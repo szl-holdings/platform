@@ -19,7 +19,7 @@ const FLAGSHIP: Platform[] = [
   {
     name: "FORGE",
     role: "Intelligence & Orchestration Engine",
-    description: "The systems backbone. Workflow orchestration, signal processing, multi-agent execution, and Creative Workflows. Every platform in the ecosystem runs through Alloy.",
+    description: "The systems backbone. Workflow orchestration, signal processing, multi-agent execution, and Creative Workflows. Every platform in the ecosystem runs through FORGE.",
     accent: "hsl(222,68%,67%)",
     href: "/alloy/",
     icon: Zap,

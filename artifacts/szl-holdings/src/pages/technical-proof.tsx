@@ -143,7 +143,7 @@ const ARCHITECTURE_LAYERS = [
     name: "Infer",
     color: "#8b7ac8",
     description: "AI agents synthesize signals into typed inferences with confidence scores — never autonomous execution",
-    examples: ["Sentinel maritime agent", "PRISM framework synthesis", "RAG knowledge retrieval (tenant-isolated)", "Model mesh routing"],
+    examples: ["Sentinel maritime agent", "PRAXIS framework synthesis", "RAG knowledge retrieval (tenant-isolated)", "Model mesh routing"],
   },
   {
     name: "Govern",

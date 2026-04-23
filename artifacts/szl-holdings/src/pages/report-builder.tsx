@@ -232,7 +232,7 @@ const DOMAIN_TEMPLATES = [
   { key: 'terra_property_analysis', label: 'DOMAINE — Property Analysis' },
   { key: 'vessels_voyage', label: 'SEXTANT — Voyage Report' },
   { key: 'lyte_weekly_briefing', label: 'KORA — Weekly Briefing' },
-  { key: 'prism_legal_memo', label: 'PRISM — Legal Memo' },
+  { key: 'prism_legal_memo', label: 'PRAXIS — Legal Memo' },
 ];
 
 function generateId() {

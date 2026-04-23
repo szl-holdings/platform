@@ -31,7 +31,7 @@ type OverviewContent = {
 };
 
 const platformMap = [
-  { name: "KORA", role: "Flagship command surface — PRISM framework, signal-to-action loop, five-pillar intelligence", color: "#d4a054", href: "/lyte" },
+  { name: "KORA", role: "Flagship command surface — PRAXIS framework, signal-to-action loop, five-pillar intelligence", color: "#d4a054", href: "/lyte" },
   { name: "FORGE", role: "Execution fabric — workflow orchestration, approval gates, immutable audit trail", color: "#8b7ac8", href: "/alloy-fabric" },
   { name: "APEX", role: "Unified mobile command — all domain workspaces, biometric auth, offline sync", color: "#4a90b8", href: "/cortex" },
   { name: "PARAGON", role: "Domain pack — Security & defense intelligence, SOC command, threat governance", color: "#c45a4a", href: "/solutions/aegis" },

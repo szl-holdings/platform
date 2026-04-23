@@ -403,7 +403,7 @@ const EXEC_HEALTH = {
       exposure: '$180M LP portfolio',
     },
     {
-      title: 'PRISM Webhook Deploy',
+      title: 'PRAXIS Webhook Deploy',
       reason: 'Code review queue depth 12',
       exposure: 'Enterprise blocker',
     },
@@ -417,7 +417,7 @@ const EXEC_HEALTH = {
     'SEXTANT fleet uptime maintained 99.8% for 7th consecutive day',
     'DOMAINE distress engine usage +21% — no borough filter yet deployed',
     'PARAGON bundle grew 1.34MB vs 900KB budget — MITRE module root cause',
-    'PRISM matter intake completion 88.3% — up 2.1% this week',
+    'PRAXIS matter intake completion 88.3% — up 2.1% this week',
   ],
   changesLastWeek: [
     'Portfolio Health Score improved from 73 → 76 (+3 pts)',
@@ -592,7 +592,7 @@ const OPP_REGISTER = [
   },
   {
     id: 'o3',
-    title: 'PRISM & Carlota Jo webhook enterprise unlock',
+    title: 'PRAXIS & Carlota Jo webhook enterprise unlock',
     domain: 'prism' as DomainId,
     probability: 0.7,
     value: 'Unblocks 3 enterprise deals',
@@ -762,7 +762,7 @@ const WORKFLOW_PERF = [
   },
   {
     id: 'w5',
-    name: 'PRISM Matter Intake',
+    name: 'PRAXIS Matter Intake',
     domain: 'prism' as DomainId,
     steps: 7,
     completion: 88,
@@ -825,7 +825,7 @@ const AGENT_TRUST = [
   },
   {
     id: 'a5',
-    agent: 'PRISM Conflict Checker',
+    agent: 'PRAXIS Conflict Checker',
     domain: 'prism' as DomainId,
     trustScore: 78,
     accuracy: 81,

@@ -163,7 +163,7 @@ const ACTIONS = [
     title: 'Finalize demand package — Rodriguez v. National General',
     urgency: 'today' as const,
     owner: 'L. Martinez',
-    team: 'PRISM Legal',
+    team: 'PRAXIS Legal',
     due: '5h',
     value: 320000,
   },
@@ -704,7 +704,7 @@ function SectionHeader({
 export default function NexusCommandPage() {
   const [now, setNow] = useState(new Date());
   useEffect(() => {
-    document.title = 'PRAXIS Command — SZL Holdings';
+    document.title = 'Nexus Command — SZL Holdings';
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
@@ -798,7 +798,7 @@ export default function NexusCommandPage() {
                         lineHeight: 1,
                       }}
                     >
-                      PRAXIS Command
+                      Nexus Command
                     </h1>
                     <p style={{ fontSize: '11px', color: 'hsl(210,5%,40%)', marginTop: '2px' }}>
                       Unified ecosystem intelligence · {now.toLocaleTimeString()}
@@ -1121,7 +1121,7 @@ export default function NexusCommandPage() {
                       },
                       {
                         insight:
-                          'Cross-platform signal: insurance fraud pattern detected across DOMAINE + PRISM',
+                          'Cross-platform signal: insurance fraud pattern detected across DOMAINE + PRAXIS',
                         source: 'FORGE Correlation',
                         accent: '#818cf8',
                       },

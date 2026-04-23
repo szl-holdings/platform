@@ -40,7 +40,7 @@ const CASE_STUDIES = [
     sectorColor: 'hsl(38, 52%, 58%)',
     duration: '10 weeks',
     headline: 'Closing the loop between payment anomaly detection and operational response',
-    summary: `A fintech platform processing millions in daily transactions had robust monitoring but no structured operational response layer. Anomalies surfaced in dashboards; response happened through Slack and email. We instrumented their payment processing signals through ${productName('lyte')}'s PRISM engine, built approval-gated response workflows in ${productName('alloy')}, and gave their operations team a governed command surface. Incident response time dropped from 4.2 hours average to 38 minutes.`,
+    summary: `A fintech platform processing millions in daily transactions had robust monitoring but no structured operational response layer. Anomalies surfaced in dashboards; response happened through Slack and email. We instrumented their payment processing signals through ${productName('lyte')}'s PRAXIS engine, built approval-gated response workflows in ${productName('alloy')}, and gave their operations team a governed command surface. Incident response time dropped from 4.2 hours average to 38 minutes.`,
     outcome:
       '89% reduction in mean time to resolution. Every incident response now has a complete proof chain. Zero unauthorized autonomous actions in production.',
     tags: [productName('lyte'), productName('alloy'), 'Fintech', 'Operational Risk'],

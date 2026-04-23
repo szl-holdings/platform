@@ -31,7 +31,7 @@ const FUND_EVIDENCE: EvidenceSource[] = [
     type: 'model',
     timestamp: FRESH_3M,
     excerpt:
-      'PRISM: 8.4. Lyte: 7.1. Vessels: 6.8. DOMAINE (fund stake): 7.4. Aegis: 6.9. Composite: 7.3/10. Revenue growth YoY: +67% blended.',
+      'PRAXIS: 8.4. KORA: 7.1. SEXTANT: 6.8. DOMAINE (fund stake): 7.4. PARAGON: 6.9. Composite: 7.3/10. Revenue growth YoY: +67% blended.',
   },
   {
     id: 'ev-szl3',
@@ -54,7 +54,7 @@ const FUND_EVIDENCE: EvidenceSource[] = [
 const PRISM_EVIDENCE: EvidenceSource[] = [
   {
     id: 'ev-szlp1',
-    label: 'PRISM Matter Volume — Q1 2026',
+    label: 'PRAXIS Matter Volume — Q1 2026',
     type: 'api',
     timestamp: FRESH_3M,
     excerpt:
@@ -74,7 +74,7 @@ const PRISM_EVIDENCE: EvidenceSource[] = [
     type: 'document',
     timestamp: AGING_40M,
     excerpt:
-      "Harvey AI raised $300M at $3B val. Contract comparison only. PRISM's workflow automation (matter intake to close) is structurally differentiated — adjacent, not competing.",
+      "Harvey AI raised $300M at $3B val. Contract comparison only. PRAXIS's workflow automation (matter intake to close) is structurally differentiated — adjacent, not competing.",
   },
 ];
 
@@ -101,7 +101,7 @@ const DEPLOYMENT_EVIDENCE: EvidenceSource[] = [
     type: 'model',
     timestamp: AGING_40M,
     excerpt:
-      'LegalTech exposure (PRISM): 22% of portfolio. Adding proposed deal raises to 26% (limit: 30%). Within policy bounds. Geographic diversification maintained.',
+      'LegalTech exposure (PRAXIS): 22% of portfolio. Adding proposed deal raises to 26% (limit: 30%). Within policy bounds. Geographic diversification maintained.',
   },
 ];
 
@@ -226,7 +226,7 @@ export default function GovernedCockpit() {
         </ProofEnvelope>
 
         <ProofEnvelope
-          title="Venture Intelligence: PRISM — Series A Window Opening"
+          title="Venture Intelligence: PRAXIS — Series A Window Opening"
           accentColor={ACCENT}
           evidence={PRISM_EVIDENCE}
           timestamp={FRESH_3M}
@@ -235,14 +235,14 @@ export default function GovernedCockpit() {
           autonomyMode={autonomyMode}
           onAutonomyChange={setAutonomyMode}
           domain="holdings.venture-intelligence"
-          actionLabel="Issue PRISM Series A readiness brief to IC"
+          actionLabel="Issue PRAXIS Series A readiness brief to IC"
         >
           <div className="space-y-2">
             <p className="text-sm" style={{ color: '#c8d8e8' }}>
-              PRISM's Q1 matter volume grew 22% QoQ, with attorney hours saved averaging 31% per
+              PRAXIS's Q1 matter volume grew 22% QoQ, with attorney hours saved averaging 31% per
               matter across 3 AmLaw 100 pilot clients. ARR at $2.4M is approaching the $3–5M Series
               A benchmark at current growth trajectory (18 months). Harvey AI's $300M raise
-              validates the market but targets a narrower feature set — PRISM's full workflow
+              validates the market but targets a narrower feature set — PRAXIS's full workflow
               automation is structurally differentiated.
             </p>
             <div

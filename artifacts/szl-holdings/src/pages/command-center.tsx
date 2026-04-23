@@ -492,7 +492,7 @@ function AIBriefPanel() {
           Evidence sources
         </p>
         <div className="flex flex-wrap gap-1">
-          {['PARAGON SOC', 'SEXTANT AIS', 'OFAC SDN', 'PRISM Calendar', 'IMPERIUM Drift'].map(
+          {['PARAGON SOC', 'SEXTANT AIS', 'OFAC SDN', 'PRAXIS Calendar', 'IMPERIUM Drift'].map(
             (src) => (
               <span
                 key={src}

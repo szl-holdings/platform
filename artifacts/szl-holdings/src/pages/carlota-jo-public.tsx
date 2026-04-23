@@ -60,7 +60,7 @@ const SERVICE_QUALITIES = [
   },
   {
     icon: Zap,
-    title: "Alloy-Powered Execution",
+    title: "FORGE-Powered Execution",
     body: "Service workflows routed through FORGE — intake approvals, milestone confirmations, delivery authorizations — with human-in-the-loop gates and a complete audit trail behind every engagement.",
   },
 ];

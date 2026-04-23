@@ -153,7 +153,7 @@ const COMPANIES = [
         valuation: { bear: "$130M", base: "$190M", bull: "$280M" },
         multiple: "24–52× ARR",
         acquirerProfile: "LegalTech platform (Clio, Thomson Reuters, LexisNexis, Relativity)",
-        rationale: "LegalTech M&A is active and PRISM's AI-native matter intelligence layer is what legacy legal platforms lack. Thomson Reuters and LexisNexis have multi-billion acquisition capacity and active LegalTech acquisition mandates.",
+        rationale: "LegalTech M&A is active and PRAXIS's AI-native matter intelligence layer is what legacy legal platforms lack. Thomson Reuters and LexisNexis have multi-billion acquisition capacity and active LegalTech acquisition mandates.",
         comparables: ["Thomson Reuters acquired CoCounsel", "Clio acquisition strategy at 15–25× ARR"],
         keyDrivers: ["Matter volume growth >20% QoQ", "Governed review automation", "Enterprise law firm penetration"],
       },
@@ -186,7 +186,7 @@ const COMPANIES = [
     ],
     optimalTiming: "Acquisition — 40 months",
     optimalValue: "$140M base case",
-    recommendation: "PRISM synergy pipeline is the fastest path to CAC reduction and valuation improvement. Accelerate Terra-PRISM distress-to-litigation data feed. CoStar partnership is also a potential precursor to acquisition.",
+    recommendation: "PRAXIS synergy pipeline is the fastest path to CAC reduction and valuation improvement. Accelerate DOMAINE-PRAXIS distress-to-litigation data feed. CoStar partnership is also a potential precursor to acquisition.",
   },
   {
     id: "carlota",

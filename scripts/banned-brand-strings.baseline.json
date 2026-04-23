@@ -1,1 +1,35 @@
-{}
+{
+  "artifacts/szl-holdings/src/pages/changelog.tsx": {
+    "Cortex": 1
+  },
+  "artifacts/szl-holdings/src/pages/commercial-packaging.tsx": {
+    "PULSE": 1
+  },
+  "artifacts/szl-holdings/src/pages/control-plane.tsx": {
+    "Cortex": 2
+  },
+  "artifacts/szl-holdings/src/pages/decision-schema-library.tsx": {
+    "LYTE": 17
+  },
+  "artifacts/szl-holdings/src/pages/governance-posture.tsx": {
+    "LYTE": 20
+  },
+  "artifacts/szl-holdings/src/pages/lyte-page.tsx": {
+    "LYTE": 43
+  },
+  "artifacts/szl-holdings/src/pages/nexus-command.tsx": {
+    "Nexus": 2
+  },
+  "artifacts/szl-holdings/src/pages/pulse-components.tsx": {
+    "Nexus": 4
+  },
+  "artifacts/szl-holdings/src/pages/roadmap.tsx": {
+    "Cortex": 4
+  },
+  "artifacts/szl-holdings/src/pages/signal-fusion.tsx": {
+    "LYTE": 31
+  },
+  "artifacts/szl-holdings/src/pages/updates.tsx": {
+    "Cortex": 3
+  }
+}

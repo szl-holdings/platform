@@ -674,7 +674,7 @@ export default function MobilePreviewPage() {
                 {
                   icon: Briefcase,
                   title: "Live portfolio health",
-                  body: "Real-time KPIs and ecosystem status across PARAGON, SEXTANT, DOMAINE, KORA, Counsel, and Cortex.",
+                  body: "Real-time KPIs and ecosystem status across PARAGON, SEXTANT, DOMAINE, KORA, Counsel, and APEX.",
                 },
                 {
                   icon: Radio,

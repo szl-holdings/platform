@@ -38,7 +38,7 @@ const PRODUCT_ONELINERS = [
 
 const BRAND_GUIDELINES = [
   "Use the full company name 'SZL Holdings' on first reference. Subsequent references may use 'SZL'.",
-  "Product names are capitalized: KORA, FORGE, Counsel, SEXTANT, PARAGON, Terra.",
+  "Product names are capitalized: KORA, FORGE, Counsel, SEXTANT, PARAGON, DOMAINE.",
   "Do not use 'SZL Holdings Inc.' — the legal entity name is not for press use.",
   "Do not modify logo colors, proportions, or add elements to the logo.",
   "Dark background logos are preferred on dark or colored backgrounds. Light background logos on white.",

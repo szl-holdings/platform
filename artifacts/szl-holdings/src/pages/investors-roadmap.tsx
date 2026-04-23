@@ -58,7 +58,7 @@ const FALLBACK_CONTENT: RoadmapContent = {
       "Pre-commercial priorities only — the work required to take the platform from Functional Alpha to first commercial deployment and initial design partner engagement. Every item is scoped, estimated, and dependency-mapped.",
   },
   statusBaseline: [
-    { platform: "KORA (Command)", status: "Functional Alpha", note: "Full PRISM framework, signal-to-action loop" },
+    { platform: "KORA (Command)", status: "Functional Alpha", note: "Full PRAXIS framework, signal-to-action loop" },
     { platform: "FORGE", status: "Functional Alpha", note: "Workflow engine, approval gates, audit trail" },
     { platform: "APEX (Mobile)", status: "Alpha Prep", note: "All workspaces functional, pre-release hardening" },
     { platform: "PARAGON", status: "Functional Alpha", note: "SOC command, 8 security modules" },

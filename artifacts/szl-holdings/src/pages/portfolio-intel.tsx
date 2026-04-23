@@ -7,7 +7,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 const companies = [
   { name: "FORGE", vertical: "Execution Fabric · ENGINE", stage: "Core Platform", arr: "$5.1M", growth: "+148%", employees: 22, valuation: "$42M", status: "Outperforming", icon: Brain, color: "#6366f1" },
-  { name: "KORA", vertical: "Business Observability · PRISM", stage: "Growth", arr: "$4.2M", growth: "+93%", employees: 41, valuation: "$35M", status: "Outperforming", icon: Zap, color: "#f59e0b" },
+  { name: "KORA", vertical: "Business Observability · PRAXIS", stage: "Growth", arr: "$4.2M", growth: "+93%", employees: 41, valuation: "$35M", status: "Outperforming", icon: Zap, color: "#f59e0b" },
   { name: "SEXTANT", vertical: "Maritime Intelligence", stage: "Series A", arr: "$1.2M", growth: "+48%", employees: 22, valuation: "$14M", status: "Performing", icon: Globe, color: "#3b82f6" },
   { name: "PARAGON", vertical: "Defense & Intelligence", stage: "Growth", arr: "$2.4M", growth: "+84%", employees: 28, valuation: "$18M", status: "Performing", icon: Shield, color: "#6366f1" },
   { name: "SZL APEX", vertical: "AI / ML Research", stage: "Series A", arr: "$1.8M", growth: "+112%", employees: 19, valuation: "$22M", status: "Outperforming", icon: Brain, color: "#8b5cf6" },

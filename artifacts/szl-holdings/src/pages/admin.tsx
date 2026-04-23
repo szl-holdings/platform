@@ -530,7 +530,7 @@ export default function AdminPage() {
                       app: 'KORA',
                       path: '/command/operations/powerbi',
                       color: '#f59e0b',
-                      desc: 'Decision intelligence KPIs including SLA performance and PRISM health scores.',
+                      desc: 'Decision intelligence KPIs including SLA performance and PRAXIS health scores.',
                     },
                   ].map((r) => (
                     <div

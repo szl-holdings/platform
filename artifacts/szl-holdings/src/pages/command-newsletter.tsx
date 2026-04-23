@@ -94,7 +94,7 @@ const SEED_POSTS: TrackingRow[] = [
     post_id: "szl-003",
     publish_date: "2025-03-11",
     pillar: "Defense & Intelligence",
-    title: "Inside Aegis: Building a Command Surface for Modern Defense",
+    title: "Inside PARAGON: Building a Command Surface for Modern Defense",
     substack_opens: 539, substack_open_rate: 45.2, substack_clicks: 61, substack_new_subs: 98,
     medium_views_7d: 1340, medium_views_30d: 1710, medium_reads: 680, medium_fans: 44, medium_read_ratio: 0.51,
     linkedin_impressions: 9200, linkedin_clicks: 270, linkedin_comments: 18,

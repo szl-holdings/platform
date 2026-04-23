@@ -269,7 +269,7 @@ function GenerateModal({
     },
     {
       key: 'prism_legal_memo',
-      label: 'PRISM — Legal Memo',
+      label: 'PRAXIS — Legal Memo',
       domain: 'prism',
       reportType: 'legal_memo',
     },

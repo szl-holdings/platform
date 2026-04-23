@@ -68,7 +68,7 @@ export const sanctionsConnector: Connector<SanctionedEntity> = {
   name: 'Consolidated Sanctions',
   kind: 'sanctions',
   description:
-    'Consolidated sanctions list (OFAC SDN, EU, UK OFSI, UN 1267). Used by Vessels and Counsel for screening.',
+    'Consolidated sanctions list (OFAC SDN, EU, UK OFSI, UN 1267). Used by SEXTANT and Counsel for screening.',
   source: 'sanctions://consolidated',
   schedule: { intervalSec: 86_400, maxRetries: 3, timeoutMs: 30_000 },
   recordSchema: SanctionedEntitySchema,

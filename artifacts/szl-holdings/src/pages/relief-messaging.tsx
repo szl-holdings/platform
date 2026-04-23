@@ -57,7 +57,7 @@ const RELIEFS = [
     relief: "Stop operating in silos.",
     body: "Cross-app handoff contracts route signals across KORA, PARAGON, SEXTANT, DOMAINE, and Carlota Jo automatically. A threat in PARAGON triggers a COVENANT response. A priority in KORA creates a FORGE workflow. Intelligence compounds instead of fragmenting.",
     color: "hsl(280,52%,62%)",
-    product: "PRISM BUS + HELM CONSOLE",
+    product: "PRAXIS BUS + HELM CONSOLE",
     cta: "/helm",
   },
   {

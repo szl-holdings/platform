@@ -146,7 +146,7 @@ const EXPANSION_LANES = [
   { name: "DOMAINE", desc: "Acquisition decisions, diligence approvals, and LP-ready exports governed through FORGE action chains." },
   { name: "SEXTANT", desc: "Rerouting decisions, port notifications, and regulatory filings routed with human approval and full audit record." },
   { name: "PARAGON", desc: "Security incident response, remediation actions, and compliance evidence governed through analyst-gated workflows." },
-  { name: "Carlota Jo", desc: "Intake authorizations, service milestone confirmations, and delivery approvals structured through Alloy." },
+  { name: "Carlota Jo", desc: "Intake authorizations, service milestone confirmations, and delivery approvals structured through FORGE." },
 ];
 
 export default function AlloyPage() {

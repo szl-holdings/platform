@@ -38,7 +38,7 @@ const CAPABILITIES: Record<string, string[]> = {
     'Cross-system signal detection — converts raw operational data into actionable signals',
     'Ownership-gap detection across teams, systems, and contracts',
     'Routes signals to the right operator with the right context, with built-in approval surfaces',
-    'Built on the PRISM framework — LUMINA, Risk, Intelligence, Signals, Motion',
+    'Built on the PRAXIS framework — LUMINA, Risk, Intelligence, Signals, Motion',
   ],
   vessels: [
     'AIS, satellite, and multi-source sensor fusion for global vessel tracking (live public feeds plus simulated demo data)',

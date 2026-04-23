@@ -69,7 +69,7 @@ const MATURITY_META: Record<MaturityLevel, { label: string; color: string; bg: s
 const DRIFT_ALERTS = [
   { id: "d1", severity: "critical" as DriftSeverity, app: "Carlota Jo", metric: "Data Freshness", detail: "Real-time feed last updated 3h 42m ago — exceeds 1hr threshold.", recommendation: "Reconnect the CRM sync pipeline and add a freshness watchdog to alert at >30m stale.", timestamp: "4 min ago" },
   { id: "d2", severity: "warning" as DriftSeverity, app: "DOMAINE", metric: "API Latency", detail: "/api/terra/distress-engine P95 at 2.4s — 20% above 2s threshold.", recommendation: "Add a DB index on distress_score + borough. Current query does a full table scan.", timestamp: "11 min ago" },
-  { id: "d3", severity: "warning" as DriftSeverity, app: "PRAXIS", metric: "Webhooks", detail: "Webhooks capability rated Stub — no production delivery confirmed in 7 days.", recommendation: "Implement PRISM outbound webhook dispatch using the existing webhook-engine lib.", timestamp: "2 hr ago" },
+  { id: "d3", severity: "warning" as DriftSeverity, app: "PRAXIS", metric: "Webhooks", detail: "Webhooks capability rated Stub — no production delivery confirmed in 7 days.", recommendation: "Implement PRAXIS outbound webhook dispatch using the existing webhook-engine lib.", timestamp: "2 hr ago" },
   { id: "d4", severity: "info" as DriftSeverity, app: "PARAGON", metric: "Bundle Size", detail: "Main bundle grew 8.3% this week (1.24MB → 1.34MB). Approaching 10% threshold.", recommendation: "Code-split the MITRE ATT&CK matrix — it's 280KB and loaded eagerly on all routes.", timestamp: "6 hr ago" },
   { id: "d5", severity: "info" as DriftSeverity, app: "Carlota Jo", metric: "Webhooks", detail: "Webhooks capability listed as Missing — no implementation found.", recommendation: "Use the shared webhook-engine to add outbound hooks for client milestone events.", timestamp: "1 day ago" },
 ];
@@ -173,8 +173,8 @@ const NEXT_BEST_ACTIONS = [
   },
   {
     rank: 4,
-    title: "Implement PRISM & Carlota Jo webhooks",
-    app: "PRISM + Carlota Jo",
+    title: "Implement PRAXIS & Carlota Jo webhooks",
+    app: "PRAXIS + Carlota Jo",
     accent: "#a855f7",
     why: "Both rated Stub/Missing in Genome. Competitors all support webhook delivery. Blocks enterprise integrations.",
     effort: "Low",

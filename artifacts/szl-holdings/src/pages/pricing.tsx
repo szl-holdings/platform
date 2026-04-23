@@ -8,7 +8,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { analytics } from "@/lib/analytics";
 
 const PILOT_DELIVERABLES = [
-  { icon: BarChart3, label: "KORA instrumented against your data", desc: "PRISM signal detection running on your actual operational surface — approval queues, workflow health, risk signals — within the first two weeks." },
+  { icon: BarChart3, label: "KORA instrumented against your data", desc: "PRAXIS signal detection running on your actual operational surface — approval queues, workflow health, risk signals — within the first two weeks." },
   { icon: GitBranch, label: "FORGE routing live", desc: "Action routing and audit trail configured for your org structure. Every signal gets an owner. Every action gets a record." },
   { icon: Shield, label: "Playbook for your three highest-risk signal categories", desc: "Custom detection logic, routing rules, and escalation paths for the operational risks that matter most in your environment." },
   { icon: Zap, label: "Executive readout at week 12", desc: "Full operational summary: signals detected, actions routed, outcomes verified, and a roadmap for expansion." },
@@ -22,7 +22,7 @@ const QUALIFICATION = [
 ];
 
 const ENGAGEMENT_TIMELINE = [
-  { week: "Week 1–2", label: "Instrumentation", desc: "Connect KORA to your existing systems. Configure PRISM signal categories for your environment." },
+  { week: "Week 1–2", label: "Instrumentation", desc: "Connect KORA to your existing systems. Configure PRAXIS signal categories for your environment." },
   { week: "Week 3–4", label: "Baseline", desc: "Establish signal baselines. Identify the first three high-value detection patterns." },
   { week: "Week 5–8", label: "Routing + Audit", desc: "FORGE routing live. Human-in-the-loop gates configured. Audit trail active." },
   { week: "Week 9–12", label: "Verification + Readout", desc: "Outcomes verified against baseline. Executive summary. Expansion roadmap delivered." },

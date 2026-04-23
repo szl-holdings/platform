@@ -625,7 +625,7 @@ const DOMAIN_LABELS: Record<DomainKey, string> = {
   vessels: 'SEXTANT',
   terra: 'DOMAINE Properties',
   aegis: 'PARAGON Threats',
-  prism: 'PRISM Legal',
+  prism: 'PRAXIS Legal',
   personnel: 'Personnel',
 };
 

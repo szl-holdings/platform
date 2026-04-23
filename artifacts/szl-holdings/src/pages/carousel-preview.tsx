@@ -10,7 +10,7 @@ const SLIDES = [
   { id: "slide-05-vessels", label: "SEXTANT" },
   { id: "slide-06-terra", label: "DOMAINE" },
   { id: "slide-07-aegis", label: "PARAGON" },
-  { id: "slide-08-prism-imperium", label: "PRISM & IMPERIUM" },
+  { id: "slide-08-prism-imperium", label: "PRAXIS & IMPERIUM" },
   { id: "slide-09-carlota-stephen", label: "Carlota Jo & Founder" },
   { id: "slide-10-thesis", label: "Investment Thesis" },
 ];

@@ -23,7 +23,7 @@ const SURFACE_HOVER = "hsla(0,0%,100%,0.055)";
 const TEXT = "hsl(38,8%,94%)";
 const TEXT_SEC = "hsl(214,7%,60%)";
 const TEXT_FAINT = "hsl(214,7%,40%)";
-const KORA = "hsl(192,72%,48%)";
+const LYTE = "hsl(192,72%,48%)";
 const MONO = "var(--font-mono)";
 
 type SignalSeverity = "critical" | "high" | "medium" | "info";
@@ -55,22 +55,22 @@ const SEV_BG: Record<SignalSeverity, string> = {
 };
 
 const DOMAIN_COLOR: Record<string, string> = {
-  Aegis: "hsl(222,60%,60%)",
-  Vessels: "hsl(206,72%,54%)",
-  Terra: "hsl(142,52%,48%)",
+  PARAGON: "hsl(222,60%,60%)",
+  SEXTANT: "hsl(206,72%,54%)",
+  DOMAINE: "hsl(142,52%,48%)",
   "Counsel": "hsl(260,60%,65%)",
   "Carlota Jo": "hsl(340,52%,60%)",
-  Alloy: "hsl(192,72%,48%)",
+  FORGE: "hsl(192,72%,48%)",
   IMPERIUM: "hsl(25,72%,54%)",
 };
 
 const DOMAIN_ICON: Record<string, typeof Shield> = {
-  Aegis: Shield,
-  Vessels: Ship,
-  Terra: Building2,
+  PARAGON: Shield,
+  SEXTANT: Ship,
+  DOMAINE: Building2,
   "Counsel": Briefcase,
   "Carlota Jo": Users,
-  Alloy: Zap,
+  FORGE: Zap,
   IMPERIUM: Layers,
 };
 
@@ -266,7 +266,7 @@ function SevBadge({ sev }: { sev: SignalSeverity }) {
 
 function StageChip({ stage }: { stage: string }) {
   const stg = STAGE_FLOW.find(s => s.id === stage);
-  const color = stg?.color ?? KORA;
+  const color = stg?.color ?? LYTE;
   return (
     <span style={{
       fontSize: "0.6rem",
@@ -286,7 +286,7 @@ function StageChip({ stage }: { stage: string }) {
 }
 
 function DomainChip({ domain }: { domain: string }) {
-  const color = DOMAIN_COLOR[domain] ?? KORA;
+  const color = DOMAIN_COLOR[domain] ?? LYTE;
   return (
     <span style={{
       fontSize: "0.6rem",
@@ -356,7 +356,7 @@ function buildSignalProof(sig: SignalItem): ProofRecord {
 
 function SignalRow({ sig, active, onClick }: { sig: SignalItem; active: boolean; onClick: () => void }) {
   const DIcon = DOMAIN_ICON[sig.domain] ?? Radio;
-  const dc = DOMAIN_COLOR[sig.domain] ?? KORA;
+  const dc = DOMAIN_COLOR[sig.domain] ?? LYTE;
   const [proofOpen, setProofOpen] = useState(false);
   return (
     <div
@@ -366,8 +366,8 @@ function SignalRow({ sig, active, onClick }: { sig: SignalItem; active: boolean;
         gap: "0.375rem",
         padding: "0.75rem 0.875rem",
         borderRadius: "6px",
-        background: active ? `${KORA}0a` : "transparent",
-        border: active ? `1px solid ${KORA}25` : "1px solid transparent",
+        background: active ? `${LYTE}0a` : "transparent",
+        border: active ? `1px solid ${LYTE}25` : "1px solid transparent",
         transition: "background 0.15s ease",
       }}
       onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = SURFACE_HOVER; }}
@@ -409,8 +409,8 @@ function SignalRow({ sig, active, onClick }: { sig: SignalItem; active: boolean;
           onClick={(e) => { e.stopPropagation(); setProofOpen(p => !p); }}
           style={{
             fontSize: "0.575rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em",
-            textTransform: "uppercase", color: KORA,
-            background: `${KORA}10`, border: `1px solid ${KORA}25`,
+            textTransform: "uppercase", color: LYTE,
+            background: `${LYTE}10`, border: `1px solid ${LYTE}25`,
             padding: "1px 6px", borderRadius: 3, cursor: "pointer",
             display: "flex", alignItems: "center", gap: 3,
           }}
@@ -438,8 +438,8 @@ function SituationCard({ sit, active, onClick }: { sit: SituationItem; active: b
         width: "100%",
         padding: "0.875rem",
         borderRadius: "8px",
-        background: active ? `${KORA}08` : SURFACE,
-        border: active ? `1px solid ${KORA}30` : `1px solid ${BORDER}`,
+        background: active ? `${LYTE}08` : SURFACE,
+        border: active ? `1px solid ${LYTE}30` : `1px solid ${BORDER}`,
         transition: "all 0.15s ease",
       }}
       onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = SURFACE_HOVER; }}
@@ -463,7 +463,7 @@ function SituationCard({ sit, active, onClick }: { sit: SituationItem; active: b
           <span>Pending: <span style={{ color: TEXT_SEC }}>{sit.pending}</span></span>
         </div>
         <div style={{ height: 3, borderRadius: 2, background: "hsla(0,0%,100%,0.06)", overflow: "hidden" }}>
-          <div style={{ height: "100%", width: `${progress}%`, background: `linear-gradient(90deg, ${KORA}, hsl(215,72%,60%))`, borderRadius: 2 }} />
+          <div style={{ height: "100%", width: `${progress}%`, background: `linear-gradient(90deg, ${LYTE}, hsl(215,72%,60%))`, borderRadius: 2 }} />
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.3rem" }}>
           {STAGE_FLOW.map((s, i) => (
@@ -476,8 +476,8 @@ function SituationCard({ sit, active, onClick }: { sit: SituationItem; active: b
           onClick={(e) => { e.stopPropagation(); setProofOpen(p => !p); }}
           style={{
             fontSize: "0.575rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em",
-            textTransform: "uppercase", color: KORA,
-            background: `${KORA}10`, border: `1px solid ${KORA}25`,
+            textTransform: "uppercase", color: LYTE,
+            background: `${LYTE}10`, border: `1px solid ${LYTE}25`,
             padding: "1px 6px", borderRadius: 3, cursor: "pointer",
             display: "flex", alignItems: "center", gap: 3,
           }}
@@ -522,7 +522,7 @@ const SIT_PROOF_RECORDS: Record<string, ProofRecord> = {
       { label: "Review state: must be human_reviewed before export", passed: false, note: "Export blocked until review complete" },
     ],
     chainLinks: [
-      { id: "c1", event: "Signal ingested — KEV CVE-2025-1337", actor: "System / Prism Bus", timestamp: "16 Apr 2026 08:14:22", hash: "sha256:a3f7b2c1d..." },
+      { id: "c1", event: "Signal ingested — KEV CVE-2025-1337", actor: "System / PRAXIS Bus", timestamp: "16 Apr 2026 08:14:22", hash: "sha256:a3f7b2c1d..." },
       { id: "c2", event: "Correlated with IMPERIUM drift event sf6", actor: "System / Signal Fusion", timestamp: "16 Apr 2026 08:14:24", hash: "sha256:9e1d4f2a8..." },
       { id: "c3", event: "AI recommendation generated — isolate affected hosts", actor: "Model: gpt-4o-mini", timestamp: "16 Apr 2026 08:14:27", hash: "sha256:b4e8f3c6d..." },
       { id: "c4", event: "Policy check: escalated to SOC Lead (owner unassigned)", actor: "System / Covenant Policy", timestamp: "16 Apr 2026 08:14:29", hash: "sha256:c2a9d1f7e..." },
@@ -797,7 +797,7 @@ export default function LytePage() {
                   SZL Holdings / Platform
                 </span>
                 <span style={{ width: 1, height: 12, background: BORDER }} />
-                <span style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA }}>
+                <span style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>
                   KORA · Operational Nerve Center
                 </span>
                 <span style={{ width: 1, height: 12, background: BORDER }} />
@@ -816,7 +816,7 @@ export default function LytePage() {
                 The operational nerve center for governed decisions.
               </h1>
 
-              <p style={{ fontSize: "0.6875rem", fontFamily: MONO, letterSpacing: "0.04em", color: KORA, marginBottom: "1rem" }}>
+              <p style={{ fontSize: "0.6875rem", fontFamily: MONO, letterSpacing: "0.04em", color: LYTE, marginBottom: "1rem" }}>
                 Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome
               </p>
 
@@ -834,7 +834,7 @@ export default function LytePage() {
                 <Link href="/demo" style={{
                   display: "inline-flex", alignItems: "center", gap: "0.5rem",
                   padding: "0.75rem 1.5rem",
-                  background: KORA,
+                  background: LYTE,
                   color: "hsl(214,18%,4%)",
                   borderRadius: "0.375rem",
                   fontSize: "0.875rem", fontWeight: 600,
@@ -870,7 +870,7 @@ export default function LytePage() {
               style={{ marginBottom: "1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}
             >
               <div>
-                <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA, marginBottom: "0.375rem" }}>
+                <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.375rem" }}>
                   KORA Command Surface
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3vw,2rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, margin: 0 }}>
@@ -886,9 +886,9 @@ export default function LytePage() {
                     style={{
                       padding: "0.3rem 0.625rem",
                       borderRadius: 4,
-                      border: `1px solid ${filterSev === f ? `${KORA}40` : BORDER}`,
-                      background: filterSev === f ? `${KORA}12` : "transparent",
-                      color: filterSev === f ? KORA : TEXT_FAINT,
+                      border: `1px solid ${filterSev === f ? `${LYTE}40` : BORDER}`,
+                      background: filterSev === f ? `${LYTE}12` : "transparent",
+                      color: filterSev === f ? LYTE : TEXT_FAINT,
                       fontSize: "0.6875rem", fontWeight: 600, fontFamily: MONO,
                       cursor: "pointer",
                       textTransform: "uppercase", letterSpacing: "0.06em",
@@ -922,7 +922,7 @@ export default function LytePage() {
               <div style={{ background: BG, display: "flex", flexDirection: "column", overflow: "hidden" }}>
                 <div style={{ padding: "0.875rem", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", minWidth: 0 }}>
-                    <Radio size={12} style={{ color: KORA }} />
+                    <Radio size={12} style={{ color: LYTE }} />
                     <span style={{ fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT }}>
                       Signal Stream
                     </span>
@@ -946,9 +946,9 @@ export default function LytePage() {
                         gap: "0.3rem",
                         padding: "0.2rem 0.45rem",
                         borderRadius: 4,
-                        border: `1px solid ${toastThreshold === "off" ? BORDER : `${KORA}30`}`,
-                        background: toastThreshold === "off" ? "transparent" : `${KORA}10`,
-                        color: toastThreshold === "off" ? TEXT_FAINT : KORA,
+                        border: `1px solid ${toastThreshold === "off" ? BORDER : `${LYTE}30`}`,
+                        background: toastThreshold === "off" ? "transparent" : `${LYTE}10`,
+                        color: toastThreshold === "off" ? TEXT_FAINT : LYTE,
                         fontSize: "0.575rem",
                         fontFamily: MONO,
                         fontWeight: 700,
@@ -989,7 +989,7 @@ export default function LytePage() {
                           gap: "0.4rem",
                           padding: "0.35rem 0.75rem",
                           borderRadius: 999,
-                          background: KORA,
+                          background: LYTE,
                           color: "hsl(214,18%,4%)",
                           border: "none",
                           fontSize: "0.6875rem",
@@ -998,7 +998,7 @@ export default function LytePage() {
                           letterSpacing: "0.06em",
                           textTransform: "uppercase",
                           cursor: "pointer",
-                          boxShadow: `0 6px 18px ${KORA}40, 0 0 0 1px ${KORA}60`,
+                          boxShadow: `0 6px 18px ${LYTE}40, 0 0 0 1px ${LYTE}60`,
                         }}
                       >
                         <ArrowRight size={11} style={{ transform: "rotate(-90deg)" }} />
@@ -1040,7 +1040,7 @@ export default function LytePage() {
               <div style={{ background: "hsla(214,16%,5%,0.98)", display: "flex", flexDirection: "column" }}>
                 {/* Center header */}
                 <div style={{ padding: "0.875rem 1.25rem", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                  <Eye size={12} style={{ color: KORA }} />
+                  <Eye size={12} style={{ color: LYTE }} />
                   <span style={{ fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT }}>
                     Active Situation
                   </span>
@@ -1146,7 +1146,7 @@ export default function LytePage() {
               <div style={{ background: BG, display: "flex", flexDirection: "column" }}>
                 {/* Context header */}
                 <div style={{ padding: "0.875rem", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <FileCheck size={12} style={{ color: KORA }} />
+                  <FileCheck size={12} style={{ color: LYTE }} />
                   <span style={{ fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT }}>
                     Proof & Context
                   </span>
@@ -1208,12 +1208,12 @@ export default function LytePage() {
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                     <button style={{
                       width: "100%", padding: "0.625rem 0.875rem",
-                      background: `${KORA}15`, border: `1px solid ${KORA}30`,
+                      background: `${LYTE}15`, border: `1px solid ${LYTE}30`,
                       borderRadius: 6, cursor: "pointer",
                       display: "flex", alignItems: "center", gap: "0.5rem",
                     }}>
-                      <Play size={11} style={{ color: KORA }} />
-                      <span style={{ fontSize: "0.75rem", fontWeight: 600, color: KORA }}>Route to FORGE workflow</span>
+                      <Play size={11} style={{ color: LYTE }} />
+                      <span style={{ fontSize: "0.75rem", fontWeight: 600, color: LYTE }}>Route to FORGE workflow</span>
                     </button>
                     <button style={{
                       width: "100%", padding: "0.625rem 0.875rem",
@@ -1258,7 +1258,7 @@ export default function LytePage() {
         <section style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(4rem,8vw,5rem) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} style={{ marginBottom: "3rem" }}>
-              <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA, marginBottom: "0.75rem" }}>
+              <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.75rem" }}>
                 Architecture
               </p>
               <h2 style={{ fontSize: "clamp(1.75rem,3.5vw,2.5rem)", fontWeight: 700, letterSpacing: "-0.025em", color: TEXT, maxWidth: "32ch", marginBottom: "1rem" }}>
@@ -1321,11 +1321,11 @@ export default function LytePage() {
                 padding: "2.5rem 3rem",
                 borderRadius: "12px",
                 background: `linear-gradient(135deg, hsla(192,72%,48%,0.06) 0%, hsla(215,72%,58%,0.04) 100%)`,
-                border: `1px solid ${KORA}20`,
+                border: `1px solid ${LYTE}20`,
               }}
             >
               <div>
-                <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA, marginBottom: "0.625rem" }}>
+                <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.625rem" }}>
                   Decision Theater — Flagship View
                 </p>
                 <h3 style={{ fontSize: "clamp(1.5rem,2.8vw,2rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, marginBottom: "0.875rem" }}>
@@ -1339,7 +1339,7 @@ export default function LytePage() {
                 <Link href="/lyte/decision-theater" style={{
                   display: "inline-flex", alignItems: "center", gap: "0.5rem",
                   padding: "0.75rem 1.5rem",
-                  background: KORA,
+                  background: LYTE,
                   color: "hsl(214,18%,4%)",
                   borderRadius: "0.375rem",
                   fontSize: "0.875rem", fontWeight: 600,
@@ -1381,7 +1381,7 @@ export default function LytePage() {
                 {
                   layer: "01",
                   title: "Platform Command",
-                  color: KORA,
+                  color: LYTE,
                   items: ["KORA — Operational nerve center", "APEX — Mobile command", "Command Portal — Ecosystem hub"],
                   note: "Operator-facing command surfaces",
                 },
@@ -1437,7 +1437,7 @@ export default function LytePage() {
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1rem" }}>
               {[
-                { href: "/lyte/decision-theater", label: "Decision Theater", note: "Flagship governed decision flow", color: KORA, icon: Play },
+                { href: "/lyte/decision-theater", label: "Decision Theater", note: "Flagship governed decision flow", color: LYTE, icon: Play },
                 { href: "/lyte/signal-fusion", label: "Signal Fusion Panel", note: "Cross-domain signal aggregation", color: "hsl(206,72%,54%)", icon: Radio },
                 { href: "/lyte/decision-schemas", label: "Decision Schema Library", note: "Reusable decision templates", color: "hsl(260,60%,65%)", icon: BookOpen },
                 { href: "/lyte/governance-posture", label: "Governance Posture", note: "CISO-grade policy dashboard", color: "hsl(142,60%,48%)", icon: ShieldCheck },
@@ -1479,7 +1479,7 @@ export default function LytePage() {
         <section style={{ padding: "clamp(5rem,10vw,7rem) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)", textAlign: "center" }}>
             <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-              <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA, marginBottom: "1rem" }}>
+              <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "1rem" }}>
                 Design partner stage · 2026
               </p>
               <h2 style={{ fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 700, letterSpacing: "-0.028em", color: TEXT, marginBottom: "1.25rem", maxWidth: "24ch", margin: "0 auto 1.25rem" }}>
@@ -1492,7 +1492,7 @@ export default function LytePage() {
                 <Link href="/demo" style={{
                   display: "inline-flex", alignItems: "center", gap: "0.5rem",
                   padding: "0.875rem 1.75rem",
-                  background: KORA,
+                  background: LYTE,
                   color: "hsl(214,18%,4%)",
                   borderRadius: "0.375rem",
                   fontSize: "0.9375rem", fontWeight: 600,

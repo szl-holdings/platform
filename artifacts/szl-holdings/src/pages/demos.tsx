@@ -93,7 +93,7 @@ const DEMOS = [
 ];
 
 export default function DemosPage() {
-  const __pageMeta = usePageMeta({ title: "Live Demos — SZL Holdings", description: "Explore live demos of every SZL platform product. KORA, PARAGON, SEXTANT, DOMAINE, Counsel, and Alloy." });
+  const __pageMeta = usePageMeta({ title: "Live Demos — SZL Holdings", description: "Explore live demos of every SZL platform product. KORA, PARAGON, SEXTANT, DOMAINE, Counsel, and FORGE." });
 
   return (
     <>

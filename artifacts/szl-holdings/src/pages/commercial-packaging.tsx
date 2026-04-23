@@ -31,7 +31,7 @@ const RELIEF_TIERS = [
     what: "Your ops surface — instrumented and legible.",
     apps: ["Command"],
     includes: [
-      "PRISM signal ingestion on your live systems",
+      "PRAXIS signal ingestion on your live systems",
       "Approval latency tracking & owner attribution",
       "Workflow friction feed — stuck items ranked by risk",
       "Executive readout dashboard",
@@ -52,7 +52,7 @@ const RELIEF_TIERS = [
     apps: ["KORA", "PARAGON", "SEXTANT"],
     includes: [
       "Everything in Clarity",
-      "Cross-domain signal correlation (PRISM BUS)",
+      "Cross-domain signal correlation (PRAXIS BUS)",
       "Automated owner routing (FORGE)",
       "Priority inbox per role",
       "Escalation path configuration",
@@ -73,11 +73,11 @@ const RELIEF_TIERS = [
     apps: ["KORA", "DOMAINE", "SEXTANT", "PARAGON"],
     includes: [
       "Everything in Triage",
-      "PRISM risk scoring with source attribution",
+      "PRAXIS risk scoring with source attribution",
       "Explainability panel on every signal",
       "Intervention workspace (what-if modeling)",
       "Readiness module (threshold tracking)",
-      "LUMINA EVALS integration for model quality",
+      "PULSE EVALS integration for model quality",
     ],
     highlight: true,
   },
@@ -145,7 +145,7 @@ const ADD_ONS = [
   {
     name: "Integration & API",
     icon: Globe,
-    desc: "Full REST + GraphQL access, webhook delivery, PRISM BUS API, custom connector authoring, MCP endpoint.",
+    desc: "Full REST + GraphQL access, webhook delivery, PRAXIS BUS API, custom connector authoring, MCP endpoint.",
     tag: "Engineering teams",
     color: "hsl(142,52%,48%)",
   },

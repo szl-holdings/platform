@@ -89,7 +89,7 @@ const DEALS: Deal[] = [
     scores: { team: 92, market: 88, product: 86, traction: 82, competitive: 84, financials: 76 },
     status: "invested",
     summary: "AI-native regulatory compliance platform. $850K ARR, 22% MoM growth. Won SEC Innovation Lab grant. Complements Counsel vertical.",
-    strengths: ["Regulatory network moat", "Gov't validation", "Cross-sell into PRISM"],
+    strengths: ["Regulatory network moat", "Gov't validation", "Cross-sell into PRAXIS"],
     risks: ["Niche market initially", "Gov't procurement cycles"],
   },
   {

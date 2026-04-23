@@ -182,7 +182,7 @@ const RECOMMENDED_LINKTREE = [
     tag: 'insights',
   },
   {
-    label: 'Prism Counsel — AI-Native Legal',
+    label: 'Counsel — AI-Native Legal',
     destination: 'https://szlholdings.com/products/prism-counsel',
     tag: 'prism-counsel',
   },

@@ -35,7 +35,7 @@ const ARCH_SECTIONS = [
     colorMuted: "var(--color-lyte-muted)",
     colorBorder: "var(--color-lyte-border)",
     business: "KORA is the intelligence and command layer of the platform. It monitors connected systems for operational signals — approval latency, ownership gaps, performance anomalies, threshold crossings — and translates them into structured recommendations that operators can act on immediately.",
-    product: "The PRISM signal engine runs continuously across tenant-configured integrations. Signals are classified by type, severity, velocity, and blast radius. The Copilot surface turns classified signals into actionable briefings. The Today view gives operators a prioritized, contextualized command surface for their operating environment.",
+    product: "The PRAXIS signal engine runs continuously across tenant-configured integrations. Signals are classified by type, severity, velocity, and blast radius. The Copilot surface turns classified signals into actionable briefings. The Today view gives operators a prioritized, contextualized command surface for their operating environment.",
     trust: "All signal classification includes confidence scoring and source attribution. Signals cannot be acted upon without going through the FORGE approval layer. KORA surfaces intelligence — FORGE controls execution. The separation is architectural, not configurable away.",
     operational: "KORA's signal namespace is tenant-isolated. Signals from one tenant cannot surface in another tenant's command layer. Signal deduplication, correlation, and freshness management are handled at the platform level, not per-implementation.",
   },

@@ -20,7 +20,7 @@ const USE_CASES = [
     role: "Paralegal → Associate Attorney → Partner",
     steps: [
       { signal: true, text: "Compliance clock fires — demand deadline 14 days out on Ramirez v. Empire Transit, matter readiness score 61/100" },
-      { text: "Attorney opens matter command surface: PRISM scoring surfaces two critical gaps — incomplete medical chronology and missing lost wage documentation" },
+      { text: "Attorney opens matter command surface: PRAXIS scoring surfaces two critical gaps — incomplete medical chronology and missing lost wage documentation" },
       { text: "FORGE routes gap remediation tasks to paralegal: medical records request to Dr. Okonkwo's office, W-2 documentation workflow initiated" },
       { text: "Partner reviews completed demand package — readiness score rises to 94/100, approves filing via the governed approval gate" },
       { proof: true, text: "Proof Chain records the readiness state at filing: which records were reviewed, who approved the package, and when the decision was made" },
@@ -233,7 +233,7 @@ export default function SolutionsPrismCounselPage() {
             <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
               <h3 className="text-sm font-semibold text-slate-200 mb-2">KORA — Command Surface</h3>
               <ul className="space-y-1.5 text-[11px] text-slate-400">
-                <li>PRISM scoring framework applied to legal matter health</li>
+                <li>PRAXIS scoring framework applied to legal matter health</li>
                 <li>Dashboard, watchlist, and forecast surfaces</li>
                 <li>Role-based views for partners, attorneys, and paralegals</li>
                 <li>Real-time signal aggregation and visualization</li>

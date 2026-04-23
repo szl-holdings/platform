@@ -17,7 +17,7 @@ const PRODUCT_HIERARCHY = [
     name: "FORGE",
     role: "Execution fabric",
     color: "hsl(215,35%,65%)",
-    desc: "The governance backbone beneath every surface. Workflow orchestration, approval gates, immutable Proof Chain audit trail, and Monte Carlo risk simulation. Every domain pack runs on Alloy. Every decision is governed, attributed, and traceable.",
+    desc: "The governance backbone beneath every surface. Workflow orchestration, approval gates, immutable Proof Chain audit trail, and Monte Carlo risk simulation. Every domain pack runs on FORGE. Every decision is governed, attributed, and traceable.",
     href: "/platform",
   },
 ];

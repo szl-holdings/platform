@@ -20,16 +20,16 @@ const SURFACE = "hsla(0,0%,100%,0.035)";
 const TEXT = "hsl(38,8%,94%)";
 const TEXT_SEC = "hsl(214,7%,60%)";
 const TEXT_FAINT = "hsl(214,7%,38%)";
-const KORA = "hsl(192,72%,48%)";
+const LYTE = "hsl(192,72%,48%)";
 const MONO = "var(--font-mono)";
 
 const DOMAIN_CONFIG: Record<string, { color: string; icon: typeof Shield; shortName: string }> = {
-  Aegis:        { color: "hsl(222,60%,60%)", icon: Shield, shortName: "PARAGON" },
-  Vessels:      { color: "hsl(206,72%,54%)", icon: Ship, shortName: "SEXTANT" },
-  Terra:        { color: "hsl(142,52%,48%)", icon: Building2, shortName: "DOMAINE" },
+  PARAGON:        { color: "hsl(222,60%,60%)", icon: Shield, shortName: "PARAGON" },
+  SEXTANT:      { color: "hsl(206,72%,54%)", icon: Ship, shortName: "SEXTANT" },
+  DOMAINE:        { color: "hsl(142,52%,48%)", icon: Building2, shortName: "DOMAINE" },
   "Counsel": { color: "hsl(260,60%,65%)", icon: Briefcase, shortName: "Prism" },
   "Carlota Jo": { color: "hsl(340,52%,60%)", icon: Users, shortName: "CJ" },
-  Alloy:        { color: "hsl(192,72%,48%)", icon: Zap, shortName: "FORGE" },
+  FORGE:        { color: "hsl(192,72%,48%)", icon: Zap, shortName: "FORGE" },
   IMPERIUM:     { color: "hsl(25,72%,54%)", icon: Layers, shortName: "Imp." },
 };
 
@@ -201,7 +201,7 @@ function ConfidenceBar({ value, color }: { value: number; color: string }) {
 }
 
 function SevBadge({ sev }: { sev: string }) {
-  const c = SEV_COLOR[sev] ?? KORA;
+  const c = SEV_COLOR[sev] ?? LYTE;
   return (
     <span style={{
       fontSize: "0.575rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: MONO,
@@ -252,7 +252,7 @@ function SourceBadge({ sourceType }: { sourceType: string }) {
 function SignalCard({ sig, active, onClick, highlight, acknowledged }: { sig: FusionSignal; active: boolean; onClick: () => void; highlight?: boolean; acknowledged?: boolean }) {
   const cfg = DOMAIN_CONFIG[sig.domain];
   const Icon = cfg?.icon ?? Radio;
-  const dc = cfg?.color ?? KORA;
+  const dc = cfg?.color ?? LYTE;
   const sc = SEV_COLOR[sig.severity];
 
   return (
@@ -266,8 +266,8 @@ function SignalCard({ sig, active, onClick, highlight, acknowledged }: { sig: Fu
         textAlign: "left",
         padding: "1rem 1.125rem",
         borderRadius: "8px",
-        background: active ? `${KORA}08` : highlight ? `${sc}06` : SURFACE,
-        border: `1px solid ${active ? `${KORA}30` : highlight ? `${sc}25` : BORDER}`,
+        background: active ? `${LYTE}08` : highlight ? `${sc}06` : SURFACE,
+        border: `1px solid ${active ? `${LYTE}30` : highlight ? `${sc}25` : BORDER}`,
         cursor: "pointer",
         transition: "all 0.15s ease",
         opacity: acknowledged ? 0.5 : 1,
@@ -324,7 +324,7 @@ const SIG_PROOF_RECORDS: Record<string, ProofRecord> = {
       { label: "Review state: must be human_reviewed before export", passed: false, note: "Export blocked until review complete" },
     ],
     chainLinks: [
-      { id: "c1", event: "Signal ingested — KEV CVE-2025-1337 active exploitation", actor: "System / Prism Bus", timestamp: "16 Apr 2026 08:14:22", hash: "sha256:a3f7b2c1d..." },
+      { id: "c1", event: "Signal ingested — KEV CVE-2025-1337 active exploitation", actor: "System / PRAXIS Bus", timestamp: "16 Apr 2026 08:14:22", hash: "sha256:a3f7b2c1d..." },
       { id: "c2", event: "Correlated with IMPERIUM drift event (sf6) and SEXTANT anomaly (sf4)", actor: "System / Signal Fusion", timestamp: "16 Apr 2026 08:14:24", hash: "sha256:9e1d4f2a8..." },
       { id: "c3", event: "AI recommendation generated — isolate affected hosts", actor: "Model: gpt-4o-mini", timestamp: "16 Apr 2026 08:14:27", hash: "sha256:b4e8f3c6d..." },
     ],
@@ -393,7 +393,7 @@ export default function SignalFusionPage() {
   const sig = FUSION_SIGNALS.find(s => s.id === activeSignal) ?? FUSION_SIGNALS[0]!;
   const cfg = DOMAIN_CONFIG[sig.domain];
   const Icon = cfg?.icon ?? Radio;
-  const dc = cfg?.color ?? KORA;
+  const dc = cfg?.color ?? LYTE;
 
   const filteredSignals = FUSION_SIGNALS.filter(s =>
     (filterDomain === "all" || s.domain === filterDomain) &&
@@ -425,14 +425,14 @@ export default function SignalFusionPage() {
                     KORA
                   </Link>
                   <ChevronRight size={10} style={{ color: TEXT_FAINT }} />
-                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA }}>
+                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>
                     Signal Fusion Panel
                   </span>
                 </div>
                 <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 700, letterSpacing: "-0.028em", lineHeight: 1.08, maxWidth: "26ch", marginBottom: "1rem", color: TEXT }}>
                   Every signal. Every domain. One fusion layer.
                 </h1>
-                <p style={{ fontSize: "0.6875rem", fontFamily: MONO, letterSpacing: "0.04em", color: KORA, marginBottom: "0.875rem" }}>
+                <p style={{ fontSize: "0.6875rem", fontFamily: MONO, letterSpacing: "0.04em", color: LYTE, marginBottom: "0.875rem" }}>
                   PARAGON · SEXTANT · DOMAINE · Counsel · Carlota Jo · FORGE · IMPERIUM
                 </p>
                 <p style={{ fontSize: "clamp(0.9375rem,1.6vw,1.0625rem)", lineHeight: 1.72, color: TEXT_SEC, maxWidth: "54ch", marginBottom: "2rem" }}>
@@ -451,7 +451,7 @@ export default function SignalFusionPage() {
                   { label: "Total signals", value: FUSION_SIGNALS.length.toString(), color: TEXT },
                   { label: "Critical", value: criticalCount.toString(), color: "hsl(0,72%,54%)" },
                   { label: "High", value: highCount.toString(), color: "hsl(30,90%,52%)" },
-                  { label: "Correlated", value: `${correlatedCount}/${FUSION_SIGNALS.length}`, color: KORA },
+                  { label: "Correlated", value: `${correlatedCount}/${FUSION_SIGNALS.length}`, color: LYTE },
                   { label: "Avg confidence", value: `${(avgConfidence * 100).toFixed(0)}%`, color: "hsl(142,60%,48%)" },
                   { label: "Active domains", value: DOMAIN_STATS.length.toString(), color: "hsl(260,60%,65%)" },
                 ].map((stat, i) => (
@@ -481,9 +481,9 @@ export default function SignalFusionPage() {
                         padding: "0.25rem 0.625rem",
                         borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 600,
                         textTransform: d === "all" ? "none" : "none",
-                        border: `1px solid ${filterDomain === d ? `${KORA}40` : BORDER}`,
-                        background: filterDomain === d ? `${KORA}12` : "transparent",
-                        color: filterDomain === d ? KORA : TEXT_FAINT,
+                        border: `1px solid ${filterDomain === d ? `${LYTE}40` : BORDER}`,
+                        background: filterDomain === d ? `${LYTE}12` : "transparent",
+                        color: filterDomain === d ? LYTE : TEXT_FAINT,
                         cursor: "pointer",
                       }}
                     >
@@ -499,9 +499,9 @@ export default function SignalFusionPage() {
                       onClick={() => setFilterSev(s)}
                       style={{
                         padding: "0.25rem 0.625rem", borderRadius: 4, fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 600,
-                        border: `1px solid ${filterSev === s ? `${SEV_COLOR[s] ?? KORA}40` : BORDER}`,
-                        background: filterSev === s ? `${SEV_COLOR[s] ?? KORA}12` : "transparent",
-                        color: filterSev === s ? (SEV_COLOR[s] ?? KORA) : TEXT_FAINT,
+                        border: `1px solid ${filterSev === s ? `${SEV_COLOR[s] ?? LYTE}40` : BORDER}`,
+                        background: filterSev === s ? `${SEV_COLOR[s] ?? LYTE}12` : "transparent",
+                        color: filterSev === s ? (SEV_COLOR[s] ?? LYTE) : TEXT_FAINT,
                         cursor: "pointer",
                         textTransform: "capitalize",
                       }}
@@ -585,12 +585,12 @@ export default function SignalFusionPage() {
                             padding: "0.5rem 0.75rem",
                             background: "transparent",
                             border: "none",
-                            borderBottom: `2px solid ${detailTab === tab ? KORA : "transparent"}`,
+                            borderBottom: `2px solid ${detailTab === tab ? LYTE : "transparent"}`,
                             cursor: "pointer",
                             fontSize: "0.6875rem",
                             fontFamily: MONO,
                             fontWeight: detailTab === tab ? 700 : 500,
-                            color: detailTab === tab ? KORA : TEXT_FAINT,
+                            color: detailTab === tab ? LYTE : TEXT_FAINT,
                             textTransform: "uppercase",
                             letterSpacing: "0.08em",
                           }}
@@ -624,7 +624,7 @@ export default function SignalFusionPage() {
                           {allCorrelated.map(cs => {
                             const ccfg = DOMAIN_CONFIG[cs.domain];
                             const CIcon = ccfg?.icon ?? Radio;
-                            const cdc = ccfg?.color ?? KORA;
+                            const cdc = ccfg?.color ?? LYTE;
                             const pair = CORRELATION_PAIRS.find(p => (p.from === sig.id && p.to === cs.id) || (p.from === cs.id && p.to === sig.id));
                             return (
                               <button
@@ -703,7 +703,7 @@ export default function SignalFusionPage() {
                           <ArrowUpRightFromSquare size={13} />
                           {escalated.has(sig.id) ? "Escalated — undo" : "Escalate signal"}
                         </button>
-                        <button style={{ width: "100%", padding: "0.5rem 0.875rem", borderRadius: 5, background: `${KORA}12`, border: `1px solid ${KORA}28`, cursor: "pointer", fontSize: "0.75rem", fontWeight: 600, color: KORA, textAlign: "left", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <button style={{ width: "100%", padding: "0.5rem 0.875rem", borderRadius: 5, background: `${LYTE}12`, border: `1px solid ${LYTE}28`, cursor: "pointer", fontSize: "0.75rem", fontWeight: 600, color: LYTE, textAlign: "left", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                           <ArrowRight size={13} />
                           Route to Decision Theater
                         </button>
@@ -797,7 +797,7 @@ export default function SignalFusionPage() {
                   const FIcon = fcfg?.icon ?? Radio;
                   const TIcon = tcfg?.icon ?? Radio;
                   const colors: Record<string, string> = { causal: "hsl(0,72%,54%)", temporal: "hsl(48,90%,52%)", semantic: "hsl(260,60%,65%)" };
-                  const pairColor = colors[pair.type] ?? KORA;
+                  const pairColor = colors[pair.type] ?? LYTE;
   
                   return (
                     <m.div
@@ -818,11 +818,11 @@ export default function SignalFusionPage() {
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-                        <div style={{ width: 24, height: 24, borderRadius: 5, background: `${fcfg?.color ?? KORA}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <FIcon size={11} style={{ color: fcfg?.color ?? KORA }} />
+                        <div style={{ width: 24, height: 24, borderRadius: 5, background: `${fcfg?.color ?? LYTE}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <FIcon size={11} style={{ color: fcfg?.color ?? LYTE }} />
                         </div>
                         <div>
-                          <p style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: fcfg?.color ?? KORA, margin: 0 }}>{fromSig.domain}</p>
+                          <p style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: fcfg?.color ?? LYTE, margin: 0 }}>{fromSig.domain}</p>
                           <p style={{ fontSize: "0.75rem", color: TEXT_SEC, margin: 0, lineHeight: 1.3 }}>{fromSig.title.slice(0, 45)}{fromSig.title.length > 45 ? "…" : ""}</p>
                         </div>
                       </div>
@@ -842,11 +842,11 @@ export default function SignalFusionPage() {
   
                       <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", justifyContent: "flex-end" }}>
                         <div style={{ textAlign: "right" }}>
-                          <p style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: tcfg?.color ?? KORA, margin: 0 }}>{toSig.domain}</p>
+                          <p style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: tcfg?.color ?? LYTE, margin: 0 }}>{toSig.domain}</p>
                           <p style={{ fontSize: "0.75rem", color: TEXT_SEC, margin: 0, lineHeight: 1.3 }}>{toSig.title.slice(0, 45)}{toSig.title.length > 45 ? "…" : ""}</p>
                         </div>
-                        <div style={{ width: 24, height: 24, borderRadius: 5, background: `${tcfg?.color ?? KORA}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <TIcon size={11} style={{ color: tcfg?.color ?? KORA }} />
+                        <div style={{ width: 24, height: 24, borderRadius: 5, background: `${tcfg?.color ?? LYTE}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <TIcon size={11} style={{ color: tcfg?.color ?? LYTE }} />
                         </div>
                       </div>
                     </m.div>
@@ -867,7 +867,7 @@ export default function SignalFusionPage() {
                 style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}
               >
                 <div>
-                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA, marginBottom: "0.75rem" }}>
+                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.75rem" }}>
                     Architecture Lineage
                   </p>
                   <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.125rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, marginBottom: "1rem" }}>
@@ -877,7 +877,7 @@ export default function SignalFusionPage() {
                     The Signal Fusion Panel draws from STONE GHOST's multinational fusion database, NSA's signals correlation architecture, and Russia's SORM-generation ingestion completeness model — and adapts these patterns for governed enterprise signal management.
                   </p>
                   <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
-                    <Link href="/lyte/decision-theater" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: KORA, color: "hsl(214,18%,4%)", borderRadius: 6, fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }}>
+                    <Link href="/lyte/decision-theater" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: LYTE, color: "hsl(214,18%,4%)", borderRadius: 6, fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }}>
                       Open Decision Theater <ArrowRight size={13} />
                     </Link>
                     <Link href="/lyte" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: "transparent", color: TEXT_SEC, border: `1px solid ${BORDER}`, borderRadius: 6, fontSize: "0.8125rem", fontWeight: 500, textDecoration: "none" }}>
@@ -887,7 +887,7 @@ export default function SignalFusionPage() {
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
                   {[
-                    { src: "Five Eyes STONE GHOST", map: "Multinational fusion DB → Cross-domain Prism Bus signal correlation" },
+                    { src: "Five Eyes STONE GHOST", map: "Multinational fusion DB → Cross-domain PRAXIS Bus signal correlation" },
                     { src: "NSA SIGINT architecture", map: "Multi-source correlation → Confidence-weighted signal scoring" },
                     { src: "Russia SORM-III", map: "Signal coverage breadth by source → Domain coverage completeness per pack" },
                     { src: "Anduril Lattice ingestion", map: "Sensor fusion layer → Normalized domain signal schema" },
@@ -900,7 +900,7 @@ export default function SignalFusionPage() {
                       transition={{ duration: 0.35, delay: i * 0.07 }}
                       style={{ padding: "0.875rem 1.125rem", borderRadius: "7px", background: SURFACE, border: `1px solid ${BORDER}` }}
                     >
-                      <p style={{ fontSize: "0.6875rem", fontWeight: 700, color: KORA, marginBottom: "0.25rem" }}>{item.src}</p>
+                      <p style={{ fontSize: "0.6875rem", fontWeight: 700, color: LYTE, marginBottom: "0.25rem" }}>{item.src}</p>
                       <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: 0, lineHeight: 1.5 }}>{item.map}</p>
                     </m.div>
                   ))}

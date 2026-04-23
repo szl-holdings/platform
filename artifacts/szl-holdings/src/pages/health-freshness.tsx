@@ -225,7 +225,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
     domain: 'FORGE',
     domainIcon: Zap,
     domainColor: 'hsl(192,72%,48%)',
-    source: 'Prism Bus',
+    source: 'PRAXIS Bus',
     status: 'live',
     fetchedAt: 'T-00m',
     lastSuccessAt: 'T-00m',

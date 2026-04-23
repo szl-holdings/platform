@@ -38,7 +38,7 @@ const COMMITS: CommitGroup[] = [
     date: "2026-04-19",
     sha: "7b83d29",
     title: "Fabric: feed live signal/run data from real product sources",
-    body: "Global Fabric now pulls signal data from live API endpoints across KORA, SEXTANT, DOMAINE, and Aegis. Replaced seeded mock data on the Command surface.",
+    body: "Global Fabric now pulls signal data from live API endpoints across KORA, SEXTANT, DOMAINE, and PARAGON. Replaced seeded mock data on the Command surface.",
     type: "feature",
     products: ["Command", "KORA", "SEXTANT", "DOMAINE", "PARAGON"],
     taskRef: "#1948",
@@ -55,8 +55,8 @@ const COMMITS: CommitGroup[] = [
   {
     date: "2026-04-18",
     sha: "5542230",
-    title: "Decision Twin — causal what-if simulation with PRISM impact and audit",
-    body: "KORA operators can now fork a pending decision, adjust parameters, and run causal simulation against the PRISM model before confirming. All simulation runs record to the decision ledger.",
+    title: "Decision Twin — causal what-if simulation with PRAXIS impact and audit",
+    body: "KORA operators can now fork a pending decision, adjust parameters, and run causal simulation against the PRAXIS model before confirming. All simulation runs record to the decision ledger.",
     type: "feature",
     products: ["KORA"],
   },
@@ -100,7 +100,7 @@ const COMMITS: CommitGroup[] = [
     date: "2026-04-15",
     sha: "c7f0a58",
     title: "PolicyModeBadge consolidated into shared design-system package",
-    body: "Policy mode badge (Advisory / Enforced / Locked) is now a single canonical component in the design-system package, used consistently across SEXTANT, DOMAINE, Carlota Jo, and Lyte.",
+    body: "Policy mode badge (Advisory / Enforced / Locked) is now a single canonical component in the design-system package, used consistently across SEXTANT, DOMAINE, Carlota Jo, and KORA.",
     type: "infra",
     products: ["Design System"],
   },
@@ -131,7 +131,7 @@ const COMMITS: CommitGroup[] = [
   {
     date: "2026-04-11",
     sha: "ab00755",
-    title: "Sentra/Counsel demo narratives wired to live signal mesh",
+    title: "TENAX/Counsel demo narratives wired to live signal mesh",
     body: "TENAX and Counsel demo flows now pull from the live signal mesh via WebSocket. Incident and matter timelines update in real time during demos.",
     type: "feature",
     products: ["TENAX", "Counsel"],
@@ -175,7 +175,7 @@ const COMMITS: CommitGroup[] = [
     date: "2026-04-02",
     sha: "5e8f739",
     title: "KORA surfaces wired to live API data",
-    body: "PRISM dashboard, Command Inbox, and Watchdog surfaces in KORA now pull from live API endpoints. BLS, GitHub Trending, and RSS feeds are active. Demo seed fallback retained for offline mode.",
+    body: "PRAXIS dashboard, Command Inbox, and Watchdog surfaces in KORA now pull from live API endpoints. BLS, GitHub Trending, and RSS feeds are active. Demo seed fallback retained for offline mode.",
     type: "feature",
     products: ["KORA"],
     taskRef: "#1893",
@@ -196,8 +196,8 @@ function TypeBadge({ type }: { type: ChangeType }) {
 }
 
 const PRODUCT_COLORS: Record<string, string> = {
-  Lyte: "#d4a054", Alloy: "#8b7ac8", Command: "#5b8dd4", Vessels: "#4a90b8",
-  Terra: "#c8953c", Aegis: "#c45a4a", Sentra: "#ef8c3a", Counsel: "#70b890",
+  KORA: "#d4a054", FORGE: "#8b7ac8", Command: "#5b8dd4", SEXTANT: "#4a90b8",
+  DOMAINE: "#c8953c", PARAGON: "#c45a4a", TENAX: "#ef8c3a", Counsel: "#70b890",
   "Carlota Jo": "#a0a0c0", "API Server": "#6aaa72",
   Infrastructure: "#808090", "Design System": "#7090a8", "SZL Holdings Mobile": "#7ecfc0",
   "All Products": "#d4a054",

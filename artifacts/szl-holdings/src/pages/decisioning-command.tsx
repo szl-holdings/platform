@@ -151,7 +151,7 @@ const DEMO_SIGNAL_GROUPS = [
       crossDomainBlastRadius: ["terra", "prism"],
     },
     customTitle: "Vessel Delay at Shanghai Exceeds 24h Threshold",
-    customSummary: "MV Pacific Star reported a 32h delay at Port of Shanghai. 12 DOMAINE properties flagged, 8 PRISM contracts may require force-majeure review.",
+    customSummary: "MV Pacific Star reported a 32h delay at Port of Shanghai. 12 DOMAINE properties flagged, 8 PRAXIS contracts may require force-majeure review.",
     customReasoning: "Priority score: 58/100. Financial exposure: $890,000. Cross-domain impact detected in: terra, prism. Confidence: 76%.",
     signals: [
       { id: "s6", domain: "vessels", type: "port_delay_hours", value: 32, source: "AIS Tracking", timestamp: Date.now() - 14400000 },

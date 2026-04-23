@@ -6,7 +6,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 const portfolio = [
   { name: "FORGE", sector: "Execution Fabric · ENGINE", stage: "Core", ownership: 100, arr: "$5.1M", growth: "+148%", headcount: 22, color: "#6366f1", status: "Hypergrowth" },
-  { name: "KORA", sector: "Decision Intelligence · PRISM", stage: "Growth", ownership: 100, arr: "$3.1M", growth: "+28%", headcount: 21, color: "#f59e0b", status: "Scaling" },
+  { name: "KORA", sector: "Decision Intelligence · PRAXIS", stage: "Growth", ownership: 100, arr: "$3.1M", growth: "+28%", headcount: 21, color: "#f59e0b", status: "Scaling" },
   { name: "SEXTANT", sector: "Maritime Intelligence", stage: "Growth", ownership: 100, arr: "$1.8M", growth: "+51%", headcount: 12, color: "#06b6d4", status: "Scaling" },
   { name: "DOMAINE", sector: "Property Intelligence · OBSERVE", stage: "Growth", ownership: 100, arr: "$2.4M", growth: "+34%", headcount: 18, color: "#4d7c0f", status: "Scaling" },
   { name: "PARAGON", sector: "Defense & Intelligence", stage: "Growth", ownership: 100, arr: "$2.4M", growth: "+84%", headcount: 28, color: "#6366f1", status: "Hypergrowth" },

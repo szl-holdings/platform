@@ -27,7 +27,7 @@ const VENTURES = [
     tagline: "AI Orchestration Engine",
     category: "AI Infrastructure",
     stage: "Growth",
-    description: "The execution layer beneath Lyte. FORGE routes decisions to the right actor, confirms completion, and maintains an auditable record of every workflow outcome. LangSmith-tier traceability with enterprise-tier operational depth.",
+    description: "The execution layer beneath KORA. FORGE routes decisions to the right actor, confirms completion, and maintains an auditable record of every workflow outcome. LangSmith-tier traceability with enterprise-tier operational depth.",
     metrics: [
       { label: "Workflow Templates", value: "12 live" },
       { label: "Completion Rate", value: ">94%" },

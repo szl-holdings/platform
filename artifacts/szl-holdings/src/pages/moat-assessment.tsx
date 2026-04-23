@@ -20,7 +20,7 @@ const ACCENT = "hsl(191,92%,44%)";
 
 const LOOP_STEPS = [
   { n: "01", label: "Signal", icon: Radio, color: "#0ea5e9", body: "Risk indicators, anomalies, and threshold breaches are detected, normalized, and routed by the Event Fabric — cross-domain context and correlation ID attached." },
-  { n: "02", label: "Context", icon: Layers, color: "#8b5cf6", body: "Cross-domain enrichment via Prism Bus. A sanctions alert in SEXTANT triggers a legal flag in Counsel, a risk entry in Lyte." },
+  { n: "02", label: "Context", icon: Layers, color: "#8b5cf6", body: "Cross-domain enrichment via PRAXIS Bus. A sanctions alert in SEXTANT triggers a legal flag in Counsel, a risk entry in KORA." },
   { n: "03", label: "Recommendation", icon: Brain, color: "#ec4899", body: "An AI agent proposes an action with source citations, confidence score, and full provenance. No opaque verdicts. Every output traceable." },
   { n: "04", label: "Simulation", icon: BarChart3, color: "#f59e0b", body: "Decision Simulation models risk before action. Operators see expected outcomes, confidence intervals, and the variables that matter most." },
   { n: "05", label: "Policy", icon: ShieldCheck, color: "#10b981", body: "Covenant Policy enforces who can approve and what conditions apply — at the platform layer, not the UI. Non-delegatable." },

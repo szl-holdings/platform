@@ -19,7 +19,7 @@ const SURFACE = "hsla(0,0%,100%,0.035)";
 const TEXT = "hsl(38,8%,94%)";
 const TEXT_SEC = "hsl(214,7%,60%)";
 const TEXT_FAINT = "hsl(214,7%,38%)";
-const KORA = "hsl(192,72%,48%)";
+const LYTE = "hsl(192,72%,48%)";
 const MONO = "var(--font-mono)";
 
 const GREEN = "hsl(142,60%,48%)";
@@ -466,8 +466,8 @@ function LiveActivityTab(props: {
                 style={{
                   padding: "0.4rem 0.625rem",
                   border: "none",
-                  background: ledgerWindow === w ? `${KORA}25` : BG,
-                  color: ledgerWindow === w ? KORA : TEXT_SEC,
+                  background: ledgerWindow === w ? `${LYTE}25` : BG,
+                  color: ledgerWindow === w ? LYTE : TEXT_SEC,
                   fontSize: "0.6875rem",
                   fontFamily: MONO,
                   fontWeight: 700,
@@ -570,7 +570,7 @@ function LiveActivityTab(props: {
                 {row.traceId ? (
                   <Link
                     href={`/intelligence/fabric?trace=${encodeURIComponent(row.traceId)}`}
-                    style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.625rem", borderRadius: 5, background: `${KORA}15`, border: `1px solid ${KORA}25`, fontSize: "0.6875rem", fontWeight: 600, color: KORA, textDecoration: "none" }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.625rem", borderRadius: 5, background: `${LYTE}15`, border: `1px solid ${LYTE}25`, fontSize: "0.6875rem", fontWeight: 600, color: LYTE, textDecoration: "none" }}
                   >
                     Trace <ExternalLink size={11} />
                   </Link>
@@ -643,7 +643,7 @@ export default function GovernancePosturePage() {
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem" }}>
                   <Link href="/lyte" style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, textDecoration: "none" }}>KORA</Link>
                   <ChevronRight size={10} style={{ color: TEXT_FAINT }} />
-                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA }}>Governance Posture</span>
+                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>Governance Posture</span>
                   <HelpTip
                     tipId="szl.governance-posture.overview"
                     platform="szl"
@@ -694,12 +694,12 @@ export default function GovernancePosturePage() {
                   style={{
                     padding: "0.875rem 1.25rem",
                     border: "none",
-                    borderBottom: `2px solid ${activeTab === tab ? KORA : "transparent"}`,
+                    borderBottom: `2px solid ${activeTab === tab ? LYTE : "transparent"}`,
                     background: "transparent",
                     cursor: "pointer",
                     fontSize: "0.8125rem",
                     fontWeight: activeTab === tab ? 700 : 500,
-                    color: activeTab === tab ? KORA : TEXT_FAINT,
+                    color: activeTab === tab ? LYTE : TEXT_FAINT,
                     textTransform: "capitalize",
                     transition: "all 0.15s ease",
                   }}
@@ -917,7 +917,7 @@ export default function GovernancePosturePage() {
                         </div>
   
                         <div style={{ background: BG, padding: "1rem 1.5rem", display: "flex", gap: "0.5rem" }}>
-                          <button style={{ padding: "0.5rem 1rem", borderRadius: 5, background: `${KORA}15`, border: `1px solid ${KORA}30`, cursor: "pointer", fontSize: "0.75rem", fontWeight: 600, color: KORA }}>
+                          <button style={{ padding: "0.5rem 1rem", borderRadius: 5, background: `${LYTE}15`, border: `1px solid ${LYTE}30`, cursor: "pointer", fontSize: "0.75rem", fontWeight: 600, color: LYTE }}>
                             Export compliance report
                           </button>
                           <button style={{ padding: "0.5rem 1rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.75rem", color: TEXT_SEC }}>
@@ -952,7 +952,7 @@ export default function GovernancePosturePage() {
                           <p style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT, margin: 0 }}>Requested by: {a.requestedBy}</p>
                         </div>
                         <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
-                          <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DOMAIN_HEALTH.find(d => d.domain === a.domain)?.color ?? KORA }}>
+                          <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DOMAIN_HEALTH.find(d => d.domain === a.domain)?.color ?? LYTE }}>
                             {a.domain}
                           </span>
                           <PriorityBadge priority={a.priority} />
@@ -996,7 +996,7 @@ export default function GovernancePosturePage() {
                       >
                         <div>
                           <div style={{ display: "flex", gap: "0.375rem", marginBottom: "0.375rem", flexWrap: "wrap" }}>
-                            <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DOMAIN_HEALTH.find(d => d.domain === v.domain)?.color ?? KORA }}>
+                            <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DOMAIN_HEALTH.find(d => d.domain === v.domain)?.color ?? LYTE }}>
                               {v.domain}
                             </span>
                             <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.06em", color: TEXT_FAINT, background: "hsla(0,0%,100%,0.05)", border: `1px solid ${BORDER}`, padding: "1px 5px", borderRadius: 3 }}>
@@ -1012,7 +1012,7 @@ export default function GovernancePosturePage() {
                         </div>
                         <div style={{ display: "flex", gap: "0.375rem" }}>
                           {v.status === "open" && (
-                            <button style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: `${KORA}15`, border: `1px solid ${KORA}25`, cursor: "pointer", fontSize: "0.6875rem", fontWeight: 600, color: KORA }}>
+                            <button style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: `${LYTE}15`, border: `1px solid ${LYTE}25`, cursor: "pointer", fontSize: "0.6875rem", fontWeight: 600, color: LYTE }}>
                               Remediate
                             </button>
                           )}
@@ -1051,7 +1051,7 @@ export default function GovernancePosturePage() {
                 style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}
               >
                 <div>
-                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA, marginBottom: "0.75rem" }}>
+                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.75rem" }}>
                     Architectural Inspiration
                   </p>
                   <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.125rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, marginBottom: "1rem" }}>
@@ -1061,7 +1061,7 @@ export default function GovernancePosturePage() {
                     The Governance Posture Dashboard draws from Germany's BSI IT-Grundschutz baseline protection model, Romania's CYBERINT 24/7 operational posture, and the IC's security posture reporting architecture — and applies these patterns to enterprise-grade governance visibility.
                   </p>
                   <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
-                    <Link href="/lyte" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: KORA, color: "hsl(214,18%,4%)", borderRadius: 6, fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }}>
+                    <Link href="/lyte" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: LYTE, color: "hsl(214,18%,4%)", borderRadius: 6, fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }}>
                       Back to KORA <ArrowRight size={13} />
                     </Link>
                     <Link href="/trust/governance" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: "transparent", color: TEXT_SEC, border: `1px solid ${BORDER}`, borderRadius: 6, fontSize: "0.8125rem", fontWeight: 500, textDecoration: "none" }}>
@@ -1084,7 +1084,7 @@ export default function GovernancePosturePage() {
                       transition={{ duration: 0.35, delay: i * 0.07 }}
                       style={{ padding: "0.875rem 1.125rem", borderRadius: "7px", background: SURFACE, border: `1px solid ${BORDER}` }}
                     >
-                      <p style={{ fontSize: "0.6875rem", fontWeight: 700, color: KORA, marginBottom: "0.25rem" }}>{item.src}</p>
+                      <p style={{ fontSize: "0.6875rem", fontWeight: 700, color: LYTE, marginBottom: "0.25rem" }}>{item.src}</p>
                       <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: 0, lineHeight: 1.5 }}>{item.map}</p>
                     </m.div>
                   ))}

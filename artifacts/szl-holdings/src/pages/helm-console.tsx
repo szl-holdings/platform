@@ -37,7 +37,7 @@ const APPS = [
 ];
 
 const SYSTEMS = [
-  { name: "PRISM BUS", desc: "Cross-domain event fabric", status: "active" },
+  { name: "PRAXIS BUS", desc: "Cross-domain event fabric", status: "active" },
   { name: "FORGE RUNTIME", desc: "Governed execution engine", status: "active" },
   { name: "COVENANT", desc: "Policy enforcement layer", status: "active" },
   { name: "RECEIPT GRAPH", desc: "Trust & audit provenance", status: "active" },
@@ -314,7 +314,7 @@ export default function HelmConsolePage() {
                   { label: "Cross-App Handoffs", value: totalHandoffs.toLocaleString(), icon: Link2, color: "hsl(192,72%,48%)" },
                   { label: "Handoff Success Rate", value: `${successRate}%`, icon: CheckCircle2, color: "hsl(142,52%,48%)" },
                   { label: "Active Contracts", value: String(activeContracts), icon: GitBranch, color: ACCENT.amber },
-                  { label: "PRISM BUS Events", value: prismEvents.toLocaleString(), icon: Zap, color: "hsl(280,52%,62%)" },
+                  { label: "PRAXIS BUS Events", value: prismEvents.toLocaleString(), icon: Zap, color: "hsl(280,52%,62%)" },
                 ].map((stat, i) => (
                   <m.div
                     key={stat.label}
@@ -444,7 +444,7 @@ export default function HelmConsolePage() {
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem" }}>
                         <ArrowRight size={20} style={{ color: contract.color }} />
-                        <span style={{ fontSize: "10px", color: TEXT.tertiary, fontWeight: 600, textTransform: "uppercase" }}>PRISM BUS</span>
+                        <span style={{ fontSize: "10px", color: TEXT.tertiary, fontWeight: 600, textTransform: "uppercase" }}>PRAXIS BUS</span>
                       </div>
                       <div>
                         <div style={{ fontSize: "11px", color: TEXT.tertiary, marginBottom: "0.25rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Target</div>
@@ -470,7 +470,7 @@ export default function HelmConsolePage() {
                     <Activity size={28} style={{ color: TEXT.tertiary }} />
                     <div style={{ fontSize: "13px", color: TEXT.secondary, fontWeight: 600 }}>No signals yet</div>
                     <div style={{ fontSize: "11px", color: TEXT.tertiary, textAlign: "center", maxWidth: "320px" }}>
-                      Cross-app signals will appear here as the PRISM BUS routes events between domain apps. Connect domain apps to begin receiving live signals.
+                      Cross-app signals will appear here as the PRAXIS BUS routes events between domain apps. Connect domain apps to begin receiving live signals.
                     </div>
                   </div>
                 </div>

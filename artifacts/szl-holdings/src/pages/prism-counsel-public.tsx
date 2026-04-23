@@ -59,7 +59,7 @@ const MODULES = [
     tagline: "Your complete matter command surface",
     description: "All active matters in a single operational view. Health scores, settlement forecasts, deadline pressure, and insurer behavior — organized by priority, not docket order.",
     capabilities: [
-      "PRISM six-pillar health scoring (Posture, Readiness, Integrity, Strategy, Money, Governance)",
+      "PRAXIS six-pillar health scoring (Posture, Readiness, Integrity, Strategy, Money, Governance)",
       "Settlement band forecast with contributing signal breakdown",
       "Offer / reserve movement tracking and trajectory analysis",
       "Assignment tracking and workflow handoff visibility",
@@ -114,7 +114,7 @@ const COMPETITIVE_DIFF = [
   {
     dimension: "Intelligence",
     generic: "General legal research and drafting assistance",
-    prism: "Matter-specific intelligence: PRISM pillar scoring, settlement forecasting, insurer behavior tracking, deadline breach prediction",
+    prism: "Matter-specific intelligence: PRAXIS pillar scoring, settlement forecasting, insurer behavior tracking, deadline breach prediction",
   },
   {
     dimension: "Workflow",
@@ -338,7 +338,7 @@ export default function PrismCounselPublicPage() {
                   <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                     {[
                       { icon: Layers, title: "Litigation command, not case management", body: "A command layer above the systems you already use — not a replacement for them." },
-                      { icon: Brain, title: "Matter intelligence, not general AI", body: "Matter-specific context: PRISM scoring, insurer behavior, settlement forecasting, deadline breach risk." },
+                      { icon: Brain, title: "Matter intelligence, not general AI", body: "Matter-specific context: PRAXIS scoring, insurer behavior, settlement forecasting, deadline breach risk." },
                       { icon: Shield, title: "Proofable workflows, not autonomous AI", body: "Human approval required on every consequential action. Every AI output source-grounded and proof-chained." },
                       { icon: Scale, title: "Insurance defense wedge", body: "Built specifically for NY insurance litigation — Regulation 68, no-fault clocks, arbitration readiness, insurer intel." },
                     ].map((item, i) => {
@@ -420,7 +420,7 @@ export default function PrismCounselPublicPage() {
               <div style={{ display: "grid", gap: "1.25rem" }} className="lg:grid-cols-2">
                 {[
                   { src: "/prism-counsel/screenshot-dashboard.jpg", label: "Dashboard", caption: "Matter health, AI recommendations, deadline risk queue, and settlement forecast across all active matters" },
-                  { src: "/prism-counsel/screenshot-matters-list.jpg", label: "Matter Desk", caption: "All active matters with PRISM pillar scores, settlement forecasts, and status — organized by operational priority" },
+                  { src: "/prism-counsel/screenshot-matters-list.jpg", label: "Matter Desk", caption: "All active matters with PRAXIS pillar scores, settlement forecasts, and status — organized by operational priority" },
                   { src: "/prism-counsel/screenshot-ny-dashboard.jpg", label: "NY Practice", caption: "New York Insurance Regulation 68 clocks, no-fault claim tracking, insurer silence windows, and carrier intelligence" },
                   { src: "/prism-counsel/screenshot-review-desk.jpg", label: "Review Desk", caption: "Managed review operations: AI contradiction detection, low-confidence extractions, attorney review queues, and export safety" },
                   { src: "/prism-counsel/screenshot-matter-twin.jpg", label: "Matter Twin", caption: "14-domain digital twin with real-time change tracking, risk factors, missing artifacts, and recommended actions" },
@@ -544,7 +544,7 @@ export default function PrismCounselPublicPage() {
                     {
                       icon: Workflow,
                       title: "Workflow orchestration",
-                      body: "Every named workflow in Counsel — Prep a Demand, Review Before Send, Sign-Off Queue, Clear Review Queue — is orchestrated by Alloy. Steps are sequenced, approvals enforced, and blockers surfaced.",
+                      body: "Every named workflow in Counsel — Prep a Demand, Review Before Send, Sign-Off Queue, Clear Review Queue — is orchestrated by FORGE. Steps are sequenced, approvals enforced, and blockers surfaced.",
                     },
                     {
                       icon: Cpu,
@@ -554,7 +554,7 @@ export default function PrismCounselPublicPage() {
                     {
                       icon: Shield,
                       title: "Audit trail infrastructure",
-                      body: "Every action — data access, AI output, approval decision, export — is recorded with actor identity, timestamp, and SHA-256 hash. The proof chain is structurally Alloy-native, not a log file bolted on later.",
+                      body: "Every action — data access, AI output, approval decision, export — is recorded with actor identity, timestamp, and SHA-256 hash. The proof chain is structurally FORGE-native, not a log file bolted on later.",
                     },
                     {
                       icon: Database,
