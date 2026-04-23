@@ -21,6 +21,25 @@ import { useState } from 'react';
 const ACCENT = '#40856a';
 const API = '/api';
 
+type FieldErrors = Record<string, string[]>;
+
+class ValidationError extends Error {
+  fieldErrors: FieldErrors;
+  constructor(message: string, fieldErrors: FieldErrors) {
+    super(message);
+    this.fieldErrors = fieldErrors;
+  }
+}
+
+async function parseApiError(res: Response): Promise<Error> {
+  const body = await res.json().catch(() => null);
+  const msg = body?.error ?? 'Request failed';
+  if (body?.code === 'VALIDATION_ERROR' && body?.details?.fieldErrors) {
+    return new ValidationError(msg, body.details.fieldErrors as FieldErrors);
+  }
+  return new Error(msg);
+}
+
 function fetchDiligenceRoom(matterId?: string) {
   const url = matterId
     ? `${API}/terra/cognitive/diligence-room?matterId=${encodeURIComponent(matterId)}`
@@ -43,7 +62,7 @@ async function createMatter(payload: {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error((await res.json()).error ?? 'Failed to create matter');
+  if (!res.ok) throw await parseApiError(res);
   return (await res.json()).data ?? null;
 }
 
@@ -75,7 +94,7 @@ async function uploadEvidence(
       body: fd,
     },
   );
-  if (!res.ok) throw new Error((await res.json()).error ?? 'Upload failed');
+  if (!res.ok) throw await parseApiError(res);
   return (await res.json()).data ?? null;
 }
 
@@ -89,7 +108,7 @@ async function updateEvidenceStatus(evidenceId: string, status: string) {
       body: JSON.stringify({ status }),
     },
   );
-  if (!res.ok) throw new Error((await res.json()).error ?? 'Update failed');
+  if (!res.ok) throw await parseApiError(res);
   return (await res.json()).data ?? null;
 }
 
@@ -112,7 +131,7 @@ async function updateEvidenceCitations(evidenceId: string, citations: EvidenceCi
       body: JSON.stringify({ citations }),
     },
   );
-  if (!res.ok) throw new Error((await res.json()).error ?? 'Update failed');
+  if (!res.ok) throw await parseApiError(res);
   return (await res.json()).data ?? null;
 }
 
@@ -156,6 +175,15 @@ function ConfidencePill({ value }: { value: number }) {
   );
 }
 
+function FieldErrorInline({ errors }: { errors?: string[] }) {
+  if (!errors || errors.length === 0) return null;
+  return (
+    <div className="text-[9px] mt-0.5" style={{ color: '#ef4444' }}>
+      {errors.join(', ')}
+    </div>
+  );
+}
+
 function EvidenceCard({
   evidence,
   index,
@@ -189,11 +217,14 @@ function EvidenceCard({
   const [editErr, setEditErr] = useState<string | null>(null);
   const [removeConfirm, setRemoveConfirm] = useState<number | null>(null);
   const [removeBusy, setRemoveBusy] = useState(false);
+  const [citFieldErrors, setCitFieldErrors] = useState<FieldErrors>({});
+  const [statusErr, setStatusErr] = useState<string | null>(null);
 
   const submitCitation = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!onAddCitation) return;
     setCitErr(null);
+    setCitFieldErrors({});
     setCitBusy(true);
     try {
       const pageNum = citPage.trim() ? Number(citPage) : undefined;
@@ -212,7 +243,12 @@ function EvidenceCard({
       setCitUrl('');
       setCitationOpen(false);
     } catch (err) {
-      setCitErr((err as Error).message);
+      if (err instanceof ValidationError) {
+        setCitErr("Couldn't save — see field errors");
+        setCitFieldErrors(err.fieldErrors);
+      } else {
+        setCitErr((err as Error).message);
+      }
     } finally {
       setCitBusy(false);
     }
@@ -225,8 +261,18 @@ function EvidenceCard({
     e.stopPropagation();
     if (!onStatusChange) return;
     setUpdating(true);
+    setStatusErr(null);
     try {
       await onStatusChange(next);
+    } catch (err) {
+      if (err instanceof ValidationError) {
+        const msgs = Object.entries(err.fieldErrors)
+          .map(([field, errs]) => `${field}: ${errs.join(', ')}`)
+          .join('; ');
+        setStatusErr(msgs || err.message);
+      } else {
+        setStatusErr((err as Error).message);
+      }
     } finally {
       setUpdating(false);
     }
@@ -322,6 +368,11 @@ function EvidenceCard({
                     </button>
                   </>
                 )}
+                {statusErr && (
+                  <span className="text-[9px]" style={{ color: '#ef4444' }}>
+                    {statusErr}
+                  </span>
+                )}
                 {evidence.document?.url && (
                   <a
                     href={
@@ -402,53 +453,66 @@ function EvidenceCard({
               onClick={(e) => e.stopPropagation()}
             >
               <div className="grid grid-cols-3 gap-2">
-                <input
-                  value={citRef}
-                  onChange={(e) => setCitRef(e.target.value)}
-                  placeholder="Reference (e.g. Schedule B-II §4)"
-                  className="col-span-2 px-2 py-1 text-[11px] rounded"
-                  style={{
-                    background: 'rgba(0,0,0,0.3)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: '#e8edf8',
-                  }}
-                />
-                <input
-                  value={citPage}
-                  onChange={(e) => setCitPage(e.target.value)}
-                  placeholder="Page"
-                  inputMode="numeric"
-                  className="px-2 py-1 text-[11px] rounded"
-                  style={{
-                    background: 'rgba(0,0,0,0.3)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: '#e8edf8',
-                  }}
-                />
+                <div className="col-span-2">
+                  <input
+                    value={citRef}
+                    onChange={(e) => setCitRef(e.target.value)}
+                    placeholder="Reference (e.g. Schedule B-II §4)"
+                    className="w-full px-2 py-1 text-[11px] rounded"
+                    style={{
+                      background: 'rgba(0,0,0,0.3)',
+                      border: `1px solid ${citFieldErrors.ref || citFieldErrors.citations ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                      color: '#e8edf8',
+                    }}
+                  />
+                  <FieldErrorInline errors={citFieldErrors.ref} />
+                </div>
+                <div>
+                  <input
+                    value={citPage}
+                    onChange={(e) => setCitPage(e.target.value)}
+                    placeholder="Page"
+                    inputMode="numeric"
+                    className="w-full px-2 py-1 text-[11px] rounded"
+                    style={{
+                      background: 'rgba(0,0,0,0.3)',
+                      border: `1px solid ${citFieldErrors.page ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                      color: '#e8edf8',
+                    }}
+                  />
+                  <FieldErrorInline errors={citFieldErrors.page} />
+                </div>
               </div>
-              <textarea
-                value={citExcerpt}
-                onChange={(e) => setCitExcerpt(e.target.value)}
-                placeholder="Excerpt / blockquote text"
-                rows={2}
-                className="w-full px-2 py-1 text-[11px] rounded"
-                style={{
-                  background: 'rgba(0,0,0,0.3)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  color: '#e8edf8',
-                }}
-              />
-              <input
-                value={citUrl}
-                onChange={(e) => setCitUrl(e.target.value)}
-                placeholder="Source URL (optional)"
-                className="w-full px-2 py-1 text-[11px] rounded"
-                style={{
-                  background: 'rgba(0,0,0,0.3)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  color: '#e8edf8',
-                }}
-              />
+              <div>
+                <textarea
+                  value={citExcerpt}
+                  onChange={(e) => setCitExcerpt(e.target.value)}
+                  placeholder="Excerpt / blockquote text"
+                  rows={2}
+                  className="w-full px-2 py-1 text-[11px] rounded"
+                  style={{
+                    background: 'rgba(0,0,0,0.3)',
+                    border: `1px solid ${citFieldErrors.excerpt ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                    color: '#e8edf8',
+                  }}
+                />
+                <FieldErrorInline errors={citFieldErrors.excerpt} />
+              </div>
+              <div>
+                <input
+                  value={citUrl}
+                  onChange={(e) => setCitUrl(e.target.value)}
+                  placeholder="Source URL (optional)"
+                  className="w-full px-2 py-1 text-[11px] rounded"
+                  style={{
+                    background: 'rgba(0,0,0,0.3)',
+                    border: `1px solid ${citFieldErrors.url ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                    color: '#e8edf8',
+                  }}
+                />
+                <FieldErrorInline errors={citFieldErrors.url} />
+              </div>
+              <FieldErrorInline errors={citFieldErrors.citations} />
               {citErr && (
                 <div className="text-[10px]" style={{ color: '#ef4444' }}>
                   {citErr}
@@ -862,9 +926,11 @@ function AddEvidenceForm({ matterId, onAdded }: { matterId: string; onAdded: () 
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const submit = async () => {
     setErr(null);
+    setFieldErrors({});
     setBusy(true);
     try {
       await uploadEvidence(matterId, {
@@ -883,7 +949,12 @@ function AddEvidenceForm({ matterId, onAdded }: { matterId: string; onAdded: () 
       setFile(null);
       onAdded();
     } catch (e) {
-      setErr((e as Error).message);
+      if (e instanceof ValidationError) {
+        setErr("Couldn't save — see field errors");
+        setFieldErrors(e.fieldErrors);
+      } else {
+        setErr((e as Error).message);
+      }
     } finally {
       setBusy(false);
     }
@@ -906,57 +977,69 @@ function AddEvidenceForm({ matterId, onAdded }: { matterId: string; onAdded: () 
       style={{ background: 'rgba(64,133,106,0.06)', border: `1px solid ${ACCENT}30` }}
     >
       <div className="grid grid-cols-2 gap-2">
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="px-2 py-1 text-[11px] rounded"
-          style={{
-            background: 'rgba(0,0,0,0.3)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: '#e8edf8',
-          }}
-        >
-          {Object.keys(CATEGORY_COLORS).map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+        <div>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full px-2 py-1 text-[11px] rounded"
+            style={{
+              background: 'rgba(0,0,0,0.3)',
+              border: `1px solid ${fieldErrors.category ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)'}`,
+              color: '#e8edf8',
+            }}
+          >
+            {Object.keys(CATEGORY_COLORS).map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+          <FieldErrorInline errors={fieldErrors.category} />
+        </div>
+        <div>
+          <input
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="Label (e.g. Title Commitment)"
+            className="w-full px-2 py-1 text-[11px] rounded"
+            style={{
+              background: 'rgba(0,0,0,0.3)',
+              border: `1px solid ${fieldErrors.label ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)'}`,
+              color: '#e8edf8',
+            }}
+          />
+          <FieldErrorInline errors={fieldErrors.label} />
+        </div>
+      </div>
+      <div>
         <input
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder="Label (e.g. Title Commitment)"
-          className="px-2 py-1 text-[11px] rounded"
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
+          placeholder="Source (e.g. Chicago Title Insurance)"
+          className="w-full px-2 py-1 text-[11px] rounded"
           style={{
             background: 'rgba(0,0,0,0.3)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            border: `1px solid ${fieldErrors.source ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)'}`,
             color: '#e8edf8',
           }}
         />
+        <FieldErrorInline errors={fieldErrors.source} />
       </div>
-      <input
-        value={source}
-        onChange={(e) => setSource(e.target.value)}
-        placeholder="Source (e.g. Chicago Title Insurance)"
-        className="w-full px-2 py-1 text-[11px] rounded"
-        style={{
-          background: 'rgba(0,0,0,0.3)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          color: '#e8edf8',
-        }}
-      />
-      <textarea
-        value={summary}
-        onChange={(e) => setSummary(e.target.value)}
-        placeholder="Summary / findings"
-        rows={2}
-        className="w-full px-2 py-1 text-[11px] rounded"
-        style={{
-          background: 'rgba(0,0,0,0.3)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          color: '#e8edf8',
-        }}
-      />
+      <div>
+        <textarea
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
+          placeholder="Summary / findings"
+          rows={2}
+          className="w-full px-2 py-1 text-[11px] rounded"
+          style={{
+            background: 'rgba(0,0,0,0.3)',
+            border: `1px solid ${fieldErrors.summary ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)'}`,
+            color: '#e8edf8',
+          }}
+        />
+        <FieldErrorInline errors={fieldErrors.summary} />
+      </div>
       <input
         type="file"
         onChange={(e) => setFile(e.target.files?.[0] ?? null)}
