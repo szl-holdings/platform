@@ -91,6 +91,11 @@ function isExempt(path: string): boolean {
   if (path === '/api/alloy/channels/slack/interactive') return true;
   if (path === '/api/alloy/email/ingest') return true;
   if (path.startsWith('/api/alloy/integrations/webhooks/receive/')) return true;
+  // Email provider bounce/complaint webhooks — server-to-server; validated via
+  // provider-specific secret headers (SENDGRID_WEBHOOK_SECRET / RESEND_WEBHOOK_SECRET).
+  if (path.startsWith('/api/email-webhooks/')) return true;
+  // Self-service email unsubscribe — public GET link embedded in transactional emails.
+  if (path === '/api/email/unsubscribe') return true;
   if (path === '/api/mcp' || path.startsWith('/api/mcp/')) return true;
   if (path.match(/^\/api\/distribution-os\/linktree\/\d+\/click$/)) return true;
   // Non-production demo PIN verification — stateless read-only PIN check;

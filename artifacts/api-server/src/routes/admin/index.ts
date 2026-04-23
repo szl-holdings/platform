@@ -1,6 +1,7 @@
 import { type IRouter, Router } from 'express';
 import { authMiddleware, requireRole } from '../../middlewares/auth.js';
 import { register as registerAppsRegistry } from './apps-registry.js';
+import { register as registerEmail } from './email.js';
 import { register as registerFlags } from './flags.js';
 import { register as registerFunnel } from './funnel.js';
 import { register as registerGrowth } from './growth.js';
@@ -34,6 +35,7 @@ registerFunnel(adminRouter);
 registerPipelineDeals(adminRouter);
 registerAppsRegistry(adminRouter);
 registerObservability(adminRouter);
+registerEmail(adminRouter);
 
 export { type IntegrationActivity, integrationActivityLog };
 export default adminRouter;

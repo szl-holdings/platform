@@ -477,6 +477,13 @@
       "when": 1777795200000,
       "tag": "0100_recommendation_decisions",
       "breakpoints": true
+    },
+    {
+      "idx": 101,
+      "version": "7",
+      "when": 1745366400000,
+      "tag": "0101_email_suppressions",
+      "breakpoints": true
     }
   ]
 }

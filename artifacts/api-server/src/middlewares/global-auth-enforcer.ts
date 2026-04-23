@@ -187,6 +187,12 @@ const PUBLIC_PREFIXES = [
   // Newsletter subscribe proxy — public, unauthenticated. Visitors on any
   // portfolio marketing page can subscribe to SZL Command without logging in.
   "/api/newsletter/",
+  // Email provider bounce/complaint webhooks — server-to-server POST calls from
+  // SendGrid and Resend. Authenticated via provider-specific secret headers.
+  "/api/email-webhooks/",
+  // Self-service email unsubscribe — public GET link embedded in every transactional
+  // email. Validates HMAC token and writes to the email_suppressions table.
+  "/api/email/unsubscribe",
   // Self-healing orchestrator — only /runs and /runs/:id GET requests are
   // whitelisted here as a prefix (covers the list endpoint and per-run detail).
   // /stats and /policies use PUBLIC_EXACT_PATHS above so the path-prefix match

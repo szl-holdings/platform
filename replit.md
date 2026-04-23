@@ -86,6 +86,18 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 
 **Already closed:** Tenant scoping (all Vessels routes), SSRF protection (webhooks), seed-overwrite protection, session store in PostgreSQL, Zod validation at 84%, route auth CI enforcement.
 
+## Email Deliverability
+
+All outbound transactional email goes through `artifacts/api-server/src/lib/email.ts`. Key features added:
+
+- **Suppression list:** `email_suppressions` table in PostgreSQL. `sendEmail` checks this before every delivery and skips suppressed addresses.
+- **Bounce/complaint webhooks:** `POST /api/email-webhooks/sendgrid` and `POST /api/email-webhooks/resend` auto-add bounced/complained addresses to the suppression list. Both routes are public and exempt from CSRF + auth.
+- **Unsubscribe:** `GET /api/email/unsubscribe?e=<email>&t=<hmac>` validates a per-recipient HMAC token and adds the address to the suppression list.
+- **Admin routes** (require `admin` role): `POST /admin/email/test-send`, `GET/POST/DELETE /admin/email/suppressions`, `GET /admin/email/suppressed/:email`.
+- **DB:** Uses a dedicated `pg.Pool` instance (`PgPool` from `@szl-holdings/db`) for suppression queries — separate from the main instrumented pool to avoid the async observability import hang on the monkey-patched `pool.query`.
+- **DKIM/SPF/DMARC:** DNS setup instructions documented in `docs/email-deliverability.md`.
+- **Migration:** `lib/db/drizzle/0101_email_suppressions.sql` creates the table idempotently.
+
 ## External Dependencies
 -   **Database:** PostgreSQL 16
 -   **Authentication:** Replit Auth

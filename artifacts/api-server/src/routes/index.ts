@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { guardianPolicyCheck } from "../middlewares/guardian-policy";
 import { lazyMount, lazyMatch } from "../lib/lazy-router";
+import emailWebhooksRouter from "./email-webhooks";
 import * as core from "./groups/core";
 import * as vessels from "./groups/vessels";
 import * as security from "./groups/security";
@@ -40,6 +41,9 @@ router.use(lazyMatch("/analytics-engine", () => import("./analytics-engine-publi
 
 // Newsletter subscribe proxy — public, unauthenticated.
 router.use(lazyMatch("/newsletter", () => import("./newsletter"), "newsletter"));
+
+// Email provider webhooks (bounces, complaints) + unsubscribe handler — public, unauthenticated.
+router.use(emailWebhooksRouter);
 
 // Self-healing orchestrator — public GETs.
 router.use(lazyMatch("/self-healing", () => import("./self-healing"), "self-healing"));

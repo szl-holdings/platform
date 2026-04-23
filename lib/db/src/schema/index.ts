@@ -63,6 +63,7 @@ export * from './distribution-os';
 export * from './documents';
 export * from './dreamscape';
 export * from './drift_snapshots';
+export * from './email_suppressions';
 export * from './entities';
 export * from './eval_forge';
 export * from './eval_os';

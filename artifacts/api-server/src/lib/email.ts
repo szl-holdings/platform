@@ -1,6 +1,16 @@
+import { createHmac, timingSafeEqual } from 'crypto';
 import nodemailer from 'nodemailer';
+import { PgPool } from '@szl-holdings/db';
 import { logger } from './logger';
 import { isFlagEnabled } from './platform-flags';
+
+const suppressionPool = new PgPool({
+  connectionString: process.env.DATABASE_URL,
+  max: 3,
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 5_000,
+  statement_timeout: 10_000,
+});
 
 interface EmailAttachment {
   filename: string;
@@ -15,6 +25,8 @@ export interface EmailOptions {
   text?: string;
   replyTo?: string;
   attachments?: EmailAttachment[];
+  unsubscribeToken?: string;
+  headers?: Record<string, string>;
 }
 
 interface SendResult {
@@ -56,6 +68,9 @@ async function sendViaSendGrid(options: EmailOptions): Promise<SendResult> {
         ...(options.text ? [{ type: 'text/plain', value: options.text }] : []),
       ],
       ...(sgAttachments?.length ? { attachments: sgAttachments } : {}),
+      ...(options.headers && Object.keys(options.headers).length > 0
+        ? { headers: options.headers }
+        : {}),
     }),
   });
 
@@ -91,6 +106,9 @@ async function sendViaResend(options: EmailOptions): Promise<SendResult> {
       text: options.text,
       reply_to: options.replyTo,
       ...(resendAttachments?.length ? { attachments: resendAttachments } : {}),
+      ...(options.headers && Object.keys(options.headers).length > 0
+        ? { headers: options.headers }
+        : {}),
     }),
   });
 
@@ -134,6 +152,7 @@ async function sendViaSMTP(options: EmailOptions): Promise<SendResult> {
     text: options.text,
     replyTo: options.replyTo,
     attachments: smtpAttachments,
+    headers: options.headers,
   });
 
   return { success: true, messageId: info.messageId, provider: 'smtp' };
@@ -170,6 +189,15 @@ export async function sendEmail(options: EmailOptions): Promise<SendResult> {
     };
   }
 
+  const suppressed = await isEmailSuppressed(options.to);
+  if (suppressed) {
+    logger.info(
+      { to: options.to, subject: options.subject },
+      '[email] Delivery skipped — address is on suppression list',
+    );
+    return { success: false, error: 'Address is on the suppression list' };
+  }
+
   if (!hasEmailProviderConfigured()) {
     if (!_emailProviderWarningLogged) {
       logger.warn(
@@ -180,12 +208,26 @@ export async function sendEmail(options: EmailOptions): Promise<SendResult> {
     return { success: false, error: 'No email provider configured' };
   }
 
+  const enriched: EmailOptions = { ...options };
+
+  if (options.unsubscribeToken) {
+    const appUrl = process.env.APP_URL || 'https://szlholdings.com';
+    const unsubscribeUrl = `${appUrl}/api/email/unsubscribe?e=${encodeURIComponent(options.to)}&t=${encodeURIComponent(options.unsubscribeToken)}`;
+    const listUnsubscribeHeader = `<${unsubscribeUrl}>, <mailto:unsubscribe@szlholdings.com?subject=unsubscribe>`;
+    enriched.headers = {
+      ...options.headers,
+      'List-Unsubscribe': listUnsubscribeHeader,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    };
+    enriched.html = injectUnsubscribeLink(options.html, unsubscribeUrl);
+  }
+
   const primary = getPrimaryProvider();
 
   const providers: Array<() => Promise<SendResult>> =
     primary === 'sendgrid'
-      ? [() => sendViaSendGrid(options), () => sendViaResend(options), () => sendViaSMTP(options)]
-      : [() => sendViaResend(options), () => sendViaSendGrid(options), () => sendViaSMTP(options)];
+      ? [() => sendViaSendGrid(enriched), () => sendViaResend(enriched), () => sendViaSMTP(enriched)]
+      : [() => sendViaResend(enriched), () => sendViaSendGrid(enriched), () => sendViaSMTP(enriched)];
 
   let lastError: Error | undefined;
   for (const send of providers) {
@@ -205,6 +247,68 @@ export function getEmailProviderStatus(): { primary: string; available: string[]
   if (process.env.RESEND_API_KEY) available.push('resend');
   if (process.env.SMTP_HOST && process.env.SMTP_USER) available.push('smtp');
   return { primary: getPrimaryProvider(), available };
+}
+
+// ─── Suppression List ─────────────────────────────────────────────────────────
+
+const UNSUBSCRIBE_SECRET = process.env.UNSUBSCRIBE_SECRET || 'szl-unsubscribe-default-secret';
+
+export function generateUnsubscribeToken(email: string): string {
+  return createHmac('sha256', UNSUBSCRIBE_SECRET).update(email.toLowerCase().trim()).digest('hex');
+}
+
+export function verifyUnsubscribeToken(email: string, token: string): boolean {
+  const expected = generateUnsubscribeToken(email);
+  try {
+    return timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(token, 'hex'));
+  } catch {
+    return false;
+  }
+}
+
+export async function isEmailSuppressed(email: string): Promise<boolean> {
+  try {
+    const result = await suppressionPool.query<{ id: number }>(
+      'SELECT id FROM email_suppressions WHERE email = $1 LIMIT 1',
+      [email.toLowerCase().trim()],
+    );
+    return result.rows.length > 0;
+  } catch (err) {
+    logger.warn({ email, err }, '[email] Suppression check failed — allowing send');
+    return false;
+  }
+}
+
+export async function addEmailSuppression(
+  email: string,
+  reason: 'bounce' | 'complaint' | 'unsubscribe' | 'manual',
+  opts?: { providerEventId?: string; provider?: string; detail?: string },
+): Promise<void> {
+  try {
+    await suppressionPool.query(
+      `INSERT INTO email_suppressions (email, reason, provider_event_id, provider, detail)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT DO NOTHING`,
+      [
+        email.toLowerCase().trim(),
+        reason,
+        opts?.providerEventId ?? null,
+        opts?.provider ?? null,
+        opts?.detail ?? null,
+      ],
+    );
+    logger.info({ email, reason }, '[email] Address added to suppression list');
+  } catch (err) {
+    logger.error({ email, reason, err }, '[email] Failed to add address to suppression list');
+  }
+}
+
+function injectUnsubscribeLink(html: string, unsubscribeUrl: string): string {
+  const link = `<p style="margin:8px 0 0;font-size:11px;"><a href="${unsubscribeUrl}" style="color:#9ca3af;text-decoration:underline;">Unsubscribe from these emails</a></p>`;
+  const insertBefore = '</div>\n</div>\n</body>';
+  const idx = html.lastIndexOf('</div>');
+  if (idx === -1) return html + link;
+  return html.slice(0, idx) + link + html.slice(idx);
 }
 
 function szlBrand(content: string): string {
