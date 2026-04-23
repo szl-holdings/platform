@@ -12,6 +12,7 @@
  * POST /cortex/whatif              — What-if scenario engine: traces projected impact across domains
  * GET  /cortex/briefing/today      — CORTEX executive briefing (today's cross-domain summary)
  * GET  /cortex/quick-actions       — Pending approval requests formatted for the mobile QuickActionDeck
+ * GET  /cortex/quick-actions/history — Recently resolved (approved/rejected) approvals for the audit-trail history view
  * POST /cortex/quick-actions/:id/action — Approve or deny a quick action (delegates to approvals system)
  * GET  /cortex/action-drafts       — List persistent autonomous action drafts awaiting approval
  * GET  /cortex/action-drafts/export — Export action drafts as CSV/PDF (audit/compliance reports)
@@ -1514,6 +1515,73 @@ router.get(
       sendSuccess(res, { items: quickActions, total: quickActions.length });
     } catch (err) {
       handleRouteError(res, err, 'CORTEX quick-actions fetch failed');
+    }
+  },
+);
+
+router.get(
+  '/cortex/quick-actions/history',
+  authMiddleware({ required: true }),
+  perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
+  async (req, res) => {
+    try {
+      const user = req.user;
+      const isAdmin = user?.roles?.some((r) => ['super_admin', 'admin'].includes(r)) ?? false;
+      const orgId = isAdmin ? undefined : user?.orgs?.[0]?.orgId;
+
+      // Deny-by-default: a non-admin caller with no org membership has no
+      // scope and must not see other tenants' resolved approvals.
+      if (!isAdmin && orgId == null) {
+        sendSuccess(res, { items: [], total: 0 });
+        return;
+      }
+
+      const requestedLimit = parseInt(String(req.query.limit ?? '50'), 10);
+      const limit = Math.min(
+        Number.isFinite(requestedLimit) && requestedLimit > 0 ? requestedLimit : 50,
+        100,
+      );
+
+      const { listApprovals } = await import('@szl-holdings/covenant-policy');
+      const resolved = await listApprovals({
+        orgId,
+        statuses: ['approved', 'rejected'],
+        limit,
+        // History view must surface the *most recently actioned* approvals
+        // first. Default `createdAt` ordering would surface old approvals that
+        // happened to be submitted late ahead of fresh decisions.
+        orderBy: 'decidedAt',
+      });
+
+      const items = resolved.map((approval) => {
+        const domain = inferDomain(approval.resourceType ?? '', approval.actionClass ?? '');
+        const isApproved = approval.status === 'approved';
+        const decidedAtRaw = isApproved ? approval.approvedAt : approval.rejectedAt;
+        const decidedAt = decidedAtRaw ? new Date(decidedAtRaw) : null;
+        const decidedById = isApproved ? approval.approvedById : approval.rejectedById;
+
+        return {
+          id: String(approval.id),
+          domain,
+          title: approval.title,
+          description: approval.description ?? '',
+          decision: isApproved ? ('approved' as const) : ('rejected' as const),
+          decidedAt: decidedAt ? decidedAt.toISOString() : null,
+          decidedAtRelative: decidedAt ? formatRelativeTime(decidedAt) : null,
+          decidedById,
+          requester:
+            approval.requestedByRole ??
+            (approval.requestedById != null ? `User #${approval.requestedById}` : undefined),
+          priority: (approval.priority ?? 'medium') as 'low' | 'medium' | 'high' | 'critical',
+          resourceType: approval.resourceType,
+          resourceId: approval.resourceId,
+        };
+      });
+
+      sendSuccess(res, { items, total: items.length });
+    } catch (err) {
+      handleRouteError(res, err, 'CORTEX quick-actions history fetch failed');
     }
   },
 );

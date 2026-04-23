@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
 import React, { useCallback } from 'react';
 import {
   ActivityIndicator,
@@ -392,12 +393,27 @@ export function QuickActionDeck() {
             </View>
           </View>
         )}
-        <TouchableOpacity
-          style={[styles.resetBtn, { borderColor: 'rgba(201,168,76,0.3)' }]}
-          onPress={handleReset}
-        >
-          <Text style={styles.resetBtnText}>Refresh</Text>
-        </TouchableOpacity>
+        <View style={styles.emptyActionsRow}>
+          <TouchableOpacity
+            style={[styles.resetBtn, { borderColor: 'rgba(201,168,76,0.3)' }]}
+            onPress={handleReset}
+            accessibilityRole="button"
+            accessibilityLabel="Refresh pending decisions"
+          >
+            <Text style={styles.resetBtnText}>Refresh</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.historyBtn, { borderColor: colors.border }]}
+            onPress={() => router.push('/(shell)/quick-actions-history')}
+            accessibilityRole="button"
+            accessibilityLabel="View decision history"
+          >
+            <Feather name="clock" size={12} color={colors.mutedForeground} />
+            <Text style={[styles.historyBtnText, { color: colors.mutedForeground }]}>
+              View Decision History
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -608,5 +624,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
     color: '#c9a84c',
+  },
+  emptyActionsRow: {
+    marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  historyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  historyBtnText: {
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+    letterSpacing: 0.2,
   },
 });

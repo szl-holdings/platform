@@ -6,7 +6,7 @@ import {
   approvalRequestsTable,
   db,
 } from '@szl-holdings/db';
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 
 export type { ApprovalRequest, ApprovalStatus };
 
@@ -376,6 +376,14 @@ export async function listApprovals(
       'pending' | 'approved' | 'rejected' | 'revised' | 'escalated' | 'expired' | 'withdrawn'
     >;
     limit?: number;
+    /**
+     * Result ordering. Defaults to `createdAt` (most-recently-submitted first).
+     * Use `decidedAt` to sort by effective decision time
+     * (`COALESCE(approved_at, rejected_at) DESC`) — required for the mobile
+     * Quick Action decision-history view, where users need the *most recently
+     * actioned* requests at the top regardless of when they were submitted.
+     */
+    orderBy?: 'createdAt' | 'decidedAt';
   } = {},
 ): Promise<ApprovalRequest[]> {
   const conditions = [] as Array<ReturnType<typeof eq>>;
@@ -388,10 +396,15 @@ export async function listApprovals(
     conditions.push(eq(approvalRequestsTable.orgId, options.orgId));
   }
 
+  const orderClause =
+    options.orderBy === 'decidedAt'
+      ? sql`COALESCE(${approvalRequestsTable.approvedAt}, ${approvalRequestsTable.rejectedAt}, ${approvalRequestsTable.createdAt}) DESC`
+      : desc(approvalRequestsTable.createdAt);
+
   const query = db
     .select()
     .from(approvalRequestsTable)
-    .orderBy(desc(approvalRequestsTable.createdAt))
+    .orderBy(orderClause)
     .limit(options.limit ?? 200);
 
   if (conditions.length === 0) return query;
