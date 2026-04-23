@@ -41,7 +41,7 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 **KORA – Decision Intelligence:** A flagship application for executive narratives, signal feeds, and decision centers, characterized by a dark amber design language.
 
 **AI Provenance & Explainability Contract:**
-Every AI-generated output carries a `ProvenanceEnvelope` (`packages/shared-contracts/src/evidence-types.ts`) with: `runId`, `model`, `provider`, `promptHash`, `tokens`, `costEstimateUsd`, `confidence`, `sources[]`, `toolCalls[]`, `governanceVerdict`. The `callAgentWithProvenance` wrapper in `lib/ai-engine/src/provenance.ts` auto-captures this envelope for every agent call. API endpoint: `GET /api/provenance/:runId`. UI: `ProvenanceBadge` + `ProvenanceDrawer` in `lib/shared-ui`. CI check: `scripts/check-provenance-contract.ts`.
+Every AI-generated output carries a `ProvenanceEnvelope` (`packages/shared-contracts/src/evidence-types.ts`) with: `runId`, `model`, `provider`, `promptHash`, `tokens`, `costEstimateUsd`, `confidence`, `sources[]`, `toolCalls[]`, `governanceVerdict`. The `buildEnvelope()` + `storeProvenance()` helpers in `lib/ai-engine/src/provenance.ts` construct and persist envelopes at each AI call site (nuro-mesh orchestrate, cross-domain-query). API endpoints: `GET /api/provenance/:runId`, `/recent`, `/stats` (authenticated). UI: `AIProvenanceBadge` + `AIProvenanceDrawer` in `lib/shared-ui`. CI check: `scripts/check-provenance-contract.ts`.
 
 **AEEP Core Packages:**
 - `shared-contracts/`: Agent roles, starter workflows, evidence/policy/retrieval/memory/provenance types.

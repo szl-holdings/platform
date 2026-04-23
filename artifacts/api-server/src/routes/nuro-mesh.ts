@@ -884,6 +884,7 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
         `data: ${JSON.stringify({ type: 'synthesis_start', message: 'Alloy synthesizing domain intelligence...' })}\n\n`,
       );
 
+      const synthStartTime = Date.now();
       let synthesisContent = '';
       let synthStream;
       try {
@@ -977,7 +978,7 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
         prompt: aggregationPrompt,
         totalTokens: Math.round(synthesisContent.length / 4),
         confidence: avgConf,
-        latencyMs: Date.now() - Date.now(),
+        latencyMs: Date.now() - synthStartTime,
         governanceVerdict: 'allowed',
       });
 

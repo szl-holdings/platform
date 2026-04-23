@@ -1167,7 +1167,7 @@ router.post(
         model: 'gpt-4o-mini',
         provider: 'openai',
         prompt: trimmed,
-        totalTokens: Math.round((response.answer?.length ?? 0) / 4),
+        totalTokens: Math.round((response.fusedAnswer?.length ?? 0) / 4),
         confidence,
         latencyMs: 0,
         governanceVerdict: 'allowed',
