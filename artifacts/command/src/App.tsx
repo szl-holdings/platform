@@ -262,6 +262,7 @@ const CompetitiveAtlasPage = lazy(() =>
 
 const PrismAtlasExecute = lazy(() => import('./operations/pages/atlas-execute'));
 const ImperiumAtlasExecute = lazy(() => import('./infrastructure/pages/atlas-execute'));
+const DataFabric = lazy(() => import('./infrastructure/pages/data-fabric'));
 
 const LegatusConsole = lazy(() => import('@imp/pages/legatus-console'));
 const ImperiumMap = lazy(() => import('@imp/pages/imperium-map'));
@@ -435,6 +436,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/infrastructure/directives', label: 'Directive Cascade', group: 'Infrastructure' },
   { href: '/infrastructure/coalition', label: 'Coalition', group: 'Infrastructure' },
   { href: '/infrastructure/reserves', label: 'Strategic Reserves', group: 'Infrastructure' },
+  { href: '/infrastructure/data-fabric', label: 'Data Fabric', group: 'Infrastructure' },
 ];
 
 function AppShell() {
@@ -755,6 +757,7 @@ function AppShell() {
               <Route path="/infrastructure/directives" component={() => <DirectiveCascade />} />
               <Route path="/infrastructure/coalition" component={() => <Coalition />} />
               <Route path="/infrastructure/reserves" component={() => <StrategicReserves />} />
+              <Route path="/infrastructure/data-fabric" component={() => <DataFabric />} />
               <Route
                 path="/infrastructure/imperium/atlas-execute"
                 component={() => <ImperiumAtlasExecute />}

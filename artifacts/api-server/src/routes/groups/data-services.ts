@@ -82,4 +82,9 @@ export function register(router: IRouter): void {
       'revenue-intelligence',
     ),
   );
+
+  // Data fabric — typed external-data connectors with drift detection.
+  router.use('/connectors', tenantScope({ required: false }));
+  router.use('/connectors', _writeLimiter);
+  router.use(lazyMatch('/connectors', () => import('../connectors'), 'connectors'));
 }

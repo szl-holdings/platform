@@ -1,100 +1,43 @@
 /**
- * Connector Registry
- *
- * Manages all active connector adapters.
- * Wires each adapter to the signal pipeline so every connector
- * event automatically flows through the 9-stage mesh.
+ * Built-in connector registry. Adding a new connector is a one-liner here.
  */
 
-import type { Signal, SignalInput } from "@workspace/ontology/signal";
-import type { ConnectorAdapter, ConnectorCategory } from "./interfaces.js";
+import { maritimeAisConnector } from './connectors/maritime-ais';
+import { realEstateConnector } from './connectors/real-estate';
+import { sanctionsConnector } from './connectors/sanctions';
+import type { Connector } from './types';
 
-export interface ConnectorRegistryEntry {
-  adapter: ConnectorAdapter;
-  startedAt?: string;
-  signalsEmitted: number;
-  lastSignalAt?: string;
+export const BUILT_IN_CONNECTORS: ReadonlyArray<Connector<unknown>> = [
+  realEstateConnector as unknown as Connector<unknown>,
+  maritimeAisConnector as unknown as Connector<unknown>,
+  sanctionsConnector as unknown as Connector<unknown>,
+];
+
+export function findConnector(id: string): Connector<unknown> | undefined {
+  return BUILT_IN_CONNECTORS.find((c) => c.id === id);
 }
 
-export class ConnectorRegistry {
-  private readonly adapters = new Map<string, ConnectorRegistryEntry>();
-  private _emitSignal?: (input: SignalInput) => Promise<Signal>;
+/**
+ * Mutable in-process registry for runtime-registered connectors and demo
+ * adapters. Consumed by the demo-seed package for signal-mesh seeding.
+ */
+class ConnectorRegistry {
+  private readonly entries = new Map<string, unknown>();
 
-  register(adapter: ConnectorAdapter): void {
-    this.adapters.set(adapter.metadata.connectorId, {
-      adapter,
-      signalsEmitted: 0,
-    });
+  register(id: string, instance: unknown): void {
+    this.entries.set(id, instance);
   }
 
-  setEmitSignal(fn: (input: SignalInput) => Promise<Signal>): void {
-    this._emitSignal = fn;
+  get(id: string): unknown {
+    return this.entries.get(id);
   }
 
-  async startAll(): Promise<void> {
-    if (!this._emitSignal) throw new Error('Call setEmitSignal() before startAll()');
-    const emitter = this._emitSignal;
-
-    for (const [_id, entry] of this.adapters) {
-      const wrapped = async (input: SignalInput): Promise<Signal> => {
-        const signal = await emitter(input);
-        entry.signalsEmitted++;
-        entry.lastSignalAt = new Date().toISOString();
-        return signal;
-      };
-
-      try {
-        await entry.adapter.start(wrapped);
-        entry.startedAt = new Date().toISOString();
-      } catch (_err) {
-      }
-    }
+  list(): ReadonlyArray<{ id: string; instance: unknown }> {
+    return Array.from(this.entries.entries()).map(([id, instance]) => ({ id, instance }));
   }
 
-  async stopAll(): Promise<void> {
-    for (const [_id, entry] of this.adapters) {
-      try {
-        await entry.adapter.stop();
-      } catch (_err) {
-      }
-    }
-  }
-
-  async pollAll(): Promise<Signal[]> {
-    if (!this._emitSignal) return [];
-    const all: Signal[] = [];
-    for (const entry of this.adapters.values()) {
-      try {
-        const signals = await entry.adapter.poll();
-        all.push(...signals);
-      } catch (_err) {
-      }
-    }
-    return all;
-  }
-
-  list(): Array<{
-    connectorId: string;
-    name: string;
-    category: ConnectorCategory;
-    status: string;
-    signalsEmitted: number;
-    startedAt?: string;
-    lastSignalAt?: string;
-  }> {
-    return Array.from(this.adapters.entries()).map(([id, entry]) => ({
-      connectorId: id,
-      name: entry.adapter.metadata.connectorName,
-      category: entry.adapter.metadata.category,
-      status: entry.adapter.status(),
-      signalsEmitted: entry.signalsEmitted,
-      ...(entry.startedAt !== undefined ? { startedAt: entry.startedAt } : {}),
-      ...(entry.lastSignalAt !== undefined ? { lastSignalAt: entry.lastSignalAt } : {}),
-    }));
-  }
-
-  get(connectorId: string): ConnectorRegistryEntry | undefined {
-    return this.adapters.get(connectorId);
+  clear(): void {
+    this.entries.clear();
   }
 }
 
