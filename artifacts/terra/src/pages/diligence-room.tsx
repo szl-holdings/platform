@@ -98,6 +98,8 @@ type EvidenceCitation = {
   page?: number;
   excerpt: string;
   url?: string;
+  addedByName?: string;
+  addedAt?: string;
 };
 
 async function updateEvidenceCitations(evidenceId: string, citations: EvidenceCitation[]) {
@@ -119,6 +121,18 @@ const STATUS_CONFIG: Record<string, { color: string; Icon: typeof CheckCircle; l
   in_review: { color: '#4a7dc8', Icon: Clock, label: 'In Review' },
   pending: { color: '#c8a060', Icon: AlertCircle, label: 'Pending' },
 };
+
+function relativeTime(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  const seconds = Math.max(0, Math.floor(ms / 1000));
+  if (seconds < 60) return 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
 
 const CATEGORY_COLORS: Record<string, string> = {
   title: '#4a7dc8',
@@ -675,7 +689,17 @@ function EvidenceCard({
                   >
                     "{cit.excerpt}"
                   </blockquote>
+                  {cit.addedByName && (
+                    <div
+                      className="text-[9px] mt-1 pl-2"
+                      style={{ color: 'rgba(255,255,255,0.25)' }}
+                    >
+                      added by {cit.addedByName}
+                      {cit.addedAt ? ` \u00B7 ${relativeTime(cit.addedAt)}` : ''}
+                    </div>
+                  )}
                 </>
+
               )}
             </div>
           ))}

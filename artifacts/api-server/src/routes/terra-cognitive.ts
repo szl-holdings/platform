@@ -2519,9 +2519,26 @@ const evidenceCitationSchema = z.object({
   page: z.number().int().nonnegative().optional(),
   excerpt: z.string().min(1).max(2000),
   url: z.string().url().max(2048).optional(),
+  addedByName: z.string().max(120).optional(),
+  addedAt: z.string().optional(),
 });
 
 export const __evidenceCitationSchema = evidenceCitationSchema;
+
+type CitationInput = z.infer<typeof evidenceCitationSchema>;
+
+function stampCitations(
+  citations: CitationInput[],
+  userName: string | undefined,
+): CitationInput[] {
+  const now = new Date().toISOString();
+  const name = userName || 'Unknown';
+  return citations.map((c) => ({
+    ...c,
+    addedByName: c.addedByName || name,
+    addedAt: c.addedAt || now,
+  }));
+}
 
 const createEvidenceSchema = z.object({
   category: z.enum(['title', 'environmental', 'financial', 'lease', 'structural', 'legal']),
@@ -2768,6 +2785,9 @@ router.post(
       }
 
       const id = `ev_${randomUUID().slice(0, 10)}`;
+      const evUser = (req as Request & { user?: { id?: string | number; name?: string } }).user;
+      const rawCitations = parsed.data.citations ?? [];
+      const stampedCitations = rawCitations.length > 0 ? stampCitations(rawCitations, evUser?.name) : [];
       const inserted = await db
         .insert(terraDiligenceEvidenceTable)
         .values({
@@ -2785,7 +2805,7 @@ router.post(
           documentMimeType,
           documentSize,
           documentSha256,
-          citations: parsed.data.citations ?? [],
+          citations: stampedCitations,
         })
         .returning();
 
@@ -2843,7 +2863,7 @@ router.patch(
       }
       if (parsed.data.confidence !== undefined) updates.confidence = String(parsed.data.confidence);
       if (parsed.data.summary !== undefined) updates.summary = parsed.data.summary;
-      if (parsed.data.citations !== undefined) updates.citations = parsed.data.citations;
+      if (parsed.data.citations !== undefined) updates.citations = stampCitations(parsed.data.citations, user?.name);
 
       const updated = await db
         .update(terraDiligenceEvidenceTable)
