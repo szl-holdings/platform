@@ -22,7 +22,7 @@
 | "Platform facts auto-generated" | README | **Yes** | `scripts/generate-platform-metrics.ts` + `packages/platform-metrics-registry` |
 | "Covenant Policy enforces approval gates" | Trust Center | **Yes** | `lib/covenant-policy` + Guardian engine |
 | Screenshot: SZL Holdings Dashboard | README | **Check** | `docs/assets/screenshots/current/szl-holdings-dashboard.jpg` |
-| Screenshot: KORA PRAXIS Command | README | **Check** | `docs/assets/screenshots/current/lyte-prism-command.jpg` |
+| Screenshot: KORA PRAXIS Command | README | **Check** | `docs/assets/screenshots/current/kora-praxis-command.jpg` |
 
 ### Contradictions Found
 
@@ -86,7 +86,7 @@
 | Asset | Path | Exists? | Current? |
 |-------|------|---------|----------|
 | SZL Holdings Dashboard | `docs/assets/screenshots/current/szl-holdings-dashboard.jpg` | Check | Unknown |
-| KORA PRAXIS Command | `docs/assets/screenshots/current/lyte-prism-command.jpg` | Check | Unknown |
+| KORA PRAXIS Command | `docs/assets/screenshots/current/kora-praxis-command.jpg` | Check | Unknown |
 | Total screenshots in `docs/screenshots/` | — | 20 files | Age unknown |
 
 ---

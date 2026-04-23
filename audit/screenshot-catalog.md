@@ -1,5 +1,6 @@
 # Screenshot Catalog — SZL Holdings Platform
 **Track 6 — 2026-04-21**
+**Updated — 2026-04-22 (Task #3103, README screenshot block refresh)**
 **Status:** Complete disposition ledger. Per-file keep/archive executed.
 
 ---
@@ -8,11 +9,40 @@
 
 | Location | File Count | Disposition |
 |----------|-----------|-------------|
+| `docs/assets/screenshots/current/` | 7 | **REFRESHED 2026-04-22 (Task #3103)** — README screenshot block. Files renamed from product slugs to in-app codenames so captions match chrome (KORA, SEXTANT, DOMAINE, TENAX, FORGE). See Section 0 below. |
 | `screenshots/approved/` | 3 committed (13 catalogued) | **KEPT** — 3 post-DB authenticated-surface captures from 2026-04-22 (Task #2890) are the only files currently committed to this directory. The 10 entries dated 2026-04-21 in Section 1 below were captured live from dev servers but were never committed to the repository; they are documented for reference only. See "Repository state" note in Section 1. |
 | `screenshots/archive/` | 280 | **ARCHIVED** — legacy/pre-redesign/iteration/superseded |
 | `demo-assets/screenshots/` | 9 | **KEPT in place** — actively linked from LinkedIn carousel |
 | `docs/screenshots/` | 19 | **KEPT in place** — actively linked from docs/ |
 | `artifacts/*/public/` | N/A | **KEPT in place** — static OpenGraph and product assets embedded in artifacts |
+
+---
+
+## Section 0: `docs/assets/screenshots/current/` — README Screenshot Block (Task #3103)
+
+Refreshed 2026-04-22 to align filenames and visuals with the new in-app codenames referenced in `README.md` (KORA, SEXTANT, DOMAINE, TENAX, FORGE Command Portal). Files were renamed from product slugs to codenames; new captures were taken from the running dev servers so the surface chrome matches the README captions.
+
+| Filename | Caption (README) | Source artifact | Codename in chrome | Capture date | Notes |
+|----------|------------------|-----------------|--------------------|--------------|-------|
+| `szl-holdings-dashboard.jpg` | SZL Holdings Dashboard | `artifacts/szl-holdings` `/` | SZL · FORGE · KORA · PARAGON · SEXTANT · DOMAINE · IMPERIUM (ecosystem ribbon) | 2026-04-22 | Refreshed. |
+| `kora-praxis-command.jpg` | KORA — PRAXIS Command | `artifacts/lyte-command-center` `/` | `KORA-PROOF · LIVE` chip; `KORA DECISION INTELLIGENCE` rail; `KORA` row labels | 2026-04-22 | Renamed from `lyte-prism-command.jpg`. New capture shows KORA-branded chrome and live KPI tiles. |
+| `sextant-fleet-command.jpg` | SEXTANT — Fleet Command | `artifacts/vessels` `/` | Vessels marketing landing with live fleet ribbon (SEXTANT-class capture; codename rollout to chrome in progress) | 2026-04-22 | Renamed from `vessels-fleet-command.jpg`. |
+| `domaine-deal-pipeline.jpg` | DOMAINE — Deal Pipeline | `artifacts/terra` `/` | `DOMAINE PROPERTY INTELLIGENCE` lockup in nav | 2026-04-22 | Renamed from `terra-deal-pipeline.jpg`. |
+| `carlota-jo-client-portal.jpg` | Carlota Jo — Client Portal | `artifacts/carlota-jo` `/` | `Carlota Jo · PREMIUM SERVICE BRAND` (codename: Carlota Jo, no rebrand) | 2026-04-22 | Refreshed. |
+| `forge-command-portal-executive.jpg` | FORGE Command Portal — Executive View | `artifacts/command` `/` | FORGE Command Portal (executive view) | 2026-04-21 | Renamed from `command-portal-executive.jpg`. Re-capture deferred — `artifacts/command: web` workflow currently fails to bind its port; previous live capture retained until workflow is fixed. |
+| `tenax-soc-command.jpg` | TENAX — SOC Command | `artifacts/sentra` `/` | `TENAX Cyber Resilience` chip; `TENAX Cyber Resilience Command · Powered by FORGE` lockup | 2026-04-22 | Renamed from `sentra-soc-command.jpg`. |
+
+**Slug-to-codename mapping (canonical):**
+
+| Artifact slug | In-app codename |
+|---------------|-----------------|
+| `lyte-command-center` | KORA (PRAXIS Command) |
+| `vessels` | SEXTANT |
+| `terra` | DOMAINE |
+| `sentra` | TENAX |
+| `command` | FORGE Command Portal |
+| `szl-holdings` | SZL Holdings (parent) |
+| `carlota-jo` | Carlota Jo (no rebrand) |
 
 **Disposition actions executed 2026-04-21:**
 - Created `screenshots/archive/` with mirror of original directory structure.

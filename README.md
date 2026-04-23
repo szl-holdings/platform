@@ -108,17 +108,17 @@ Re-render with `pnpm --filter @workspace/szl-demo-video render`. Source manifest
 
 ![SZL Holdings Dashboard](docs/assets/screenshots/current/szl-holdings-dashboard.jpg)
 
-![KORA — PRAXIS Command](docs/assets/screenshots/current/lyte-prism-command.jpg)
+![KORA — PRAXIS Command](docs/assets/screenshots/current/kora-praxis-command.jpg)
 
-![SEXTANT — Fleet Command](docs/assets/screenshots/current/vessels-fleet-command.jpg)
+![SEXTANT — Fleet Command](docs/assets/screenshots/current/sextant-fleet-command.jpg)
 
-![DOMAINE — Deal Pipeline](docs/assets/screenshots/current/terra-deal-pipeline.jpg)
+![DOMAINE — Deal Pipeline](docs/assets/screenshots/current/domaine-deal-pipeline.jpg)
 
 ![Carlota Jo — Client Portal](docs/assets/screenshots/current/carlota-jo-client-portal.jpg)
 
-![FORGE Command Portal — Executive View](docs/assets/screenshots/current/command-portal-executive.jpg)
+![FORGE Command Portal — Executive View](docs/assets/screenshots/current/forge-command-portal-executive.jpg)
 
-![TENAX — SOC Command](docs/assets/screenshots/current/sentra-soc-command.jpg)
+![TENAX — SOC Command](docs/assets/screenshots/current/tenax-soc-command.jpg)
 
 > **Note on these images:** The images above (`assets/readme/products/`) are pre-v2 design generation assets and are candidates for replacement. For verified, post-redesign screenshots captured live on 2026-04-21, see `screenshots/approved/` (10 current screenshots) and `audit/screenshot-catalog.md` for full metadata. Authenticated dashboard surfaces require `DATABASE_URL` to be provisioned — see `audit/deployment-proof.md`.
 
