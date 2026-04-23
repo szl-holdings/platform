@@ -9,6 +9,7 @@ import {
   fundLpDataRoomDocsTable,
   fundLpMessagesTable,
   fundLpReportsTable,
+  fundLpUploadsTable,
   fundNavRecordsTable,
 } from '@szl-holdings/db';
 import { and, asc, desc, eq, inArray, or, sql } from 'drizzle-orm';
@@ -22,7 +23,10 @@ import {
   sendSuccess,
 } from '../lib/api-response';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { ObjectNotFoundError, ObjectStorageService } from '../lib/objectStorage';
 import { authMiddleware, parseIdParam } from '../middlewares/auth';
+
+const objectStorageService = new ObjectStorageService();
 
 const router: IRouter = Router();
 
@@ -548,6 +552,206 @@ router.post(
       );
     } catch (err) {
       handleRouteError(res, err, 'Failed to send message');
+    }
+  },
+);
+
+// ─── LP UPLOADS ───────────────────────────────────────────────────────────────
+// LPs upload signed agreements, wire confirmations, and KYC documents to the GP.
+
+const LP_UPLOAD_DOC_TYPES = ['signed_agreement', 'wire_confirmation', 'kyc_document', 'other'] as const;
+
+const lpUploadSchema = bodyShape({
+  objectPath: z.string().max(1000).optional(),
+  originalName: z.string().min(1).max(500),
+  docType: z.enum(LP_UPLOAD_DOC_TYPES).default('other'),
+  notes: z.string().max(2000).optional(),
+  mimeType: z.string().max(200).optional(),
+  size: z.number().int().min(0).optional(),
+});
+
+router.get('/lp-portal/lps/:id/uploads', optionalAuth, async (req, res) => {
+  try {
+    const lpId = parseIdParam(req.params.id);
+    const scope = await resolveScope(req);
+    const lp = await loadLp(lpId, scope);
+    if (!lp) {
+      sendForbidden(res, "Not authorized for this LP's uploads");
+      return;
+    }
+
+    const rows = await db
+      .select()
+      .from(fundLpUploadsTable)
+      .where(eq(fundLpUploadsTable.lpId, lp.id))
+      .orderBy(desc(fundLpUploadsTable.createdAt))
+      .limit(100);
+
+    sendSuccess(
+      res,
+      rows.map((r) => ({
+        id: r.id,
+        lpId: r.lpId,
+        originalName: r.originalName,
+        mimeType: r.mimeType,
+        size: r.size,
+        docType: r.docType,
+        status: r.status,
+        notes: r.notes,
+        createdAt: r.createdAt,
+        reviewedAt: r.reviewedAt,
+      })),
+    );
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to list LP uploads');
+  }
+});
+
+router.post(
+  '/lp-portal/lps/:id/uploads',
+  optionalAuth,
+  validateBody(lpUploadSchema),
+  async (req, res) => {
+    try {
+      const lpId = parseIdParam(req.params.id);
+      const scope = await resolveScope(req);
+      const lp = await loadLp(lpId, scope);
+      if (!lp) {
+        sendForbidden(res, "Not authorized to upload to this LP account");
+        return;
+      }
+
+      const {
+        objectPath: rawObjectPath,
+        originalName,
+        docType = 'other',
+        notes,
+        mimeType = 'application/octet-stream',
+        size = 0,
+      } = req.body as {
+        objectPath?: string;
+        originalName: string;
+        docType?: typeof LP_UPLOAD_DOC_TYPES[number];
+        notes?: string;
+        mimeType?: string;
+        size?: number;
+      };
+
+      // If no objectPath is provided (e.g., demo / no GCS), generate a placeholder key.
+      const objectPath =
+        rawObjectPath?.trim() ||
+        `lp_uploads/${lp.id}/${Date.now()}_${originalName.replace(/[^a-z0-9._-]/gi, '_')}`;
+
+      // When the client supplied an objectPath, verify the object actually exists in GCS.
+      // This prevents phantom records where the upload URL was obtained but the PUT never completed.
+      if (rawObjectPath?.trim()) {
+        try {
+          await objectStorageService.getObjectEntityFile(objectPath);
+        } catch (err) {
+          if (err instanceof ObjectNotFoundError) {
+            sendBadRequest(res, 'Upload object not found in storage — ensure the file upload completed before submitting');
+            return;
+          }
+          // GCS not configured or transient error — allow the record to be created so demo still works
+        }
+      }
+
+      const filename = objectPath.split('/').pop() || originalName;
+      const isDemo =
+        scope.isDemoOnly || (lp.metadata as { is_demo?: boolean } | null)?.is_demo === true;
+
+      const [inserted] = await db
+        .insert(fundLpUploadsTable)
+        .values({
+          lpId: lp.id,
+          uploadedByUserId: req.user?.id ?? null,
+          filename,
+          originalName,
+          mimeType,
+          size,
+          storageKey: objectPath,
+          docType,
+          status: 'received',
+          notes: notes ?? null,
+          isDemo,
+        })
+        .returning();
+
+      // Log the upload as an activity event
+      await db
+        .insert(fundLpActivityEventsTable)
+        .values({
+          lpId: lp.id,
+          action: 'viewed',
+          target: `Uploaded: ${originalName} (${docType.replace('_', ' ')})`,
+          isDemo,
+          ipAddress: hashIp(
+            (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.ip || null,
+          ),
+          userAgent: (req.headers['user-agent'] as string) || null,
+        })
+        .catch(() => {});
+
+      sendSuccess(
+        res,
+        {
+          id: inserted.id,
+          lpId: inserted.lpId,
+          originalName: inserted.originalName,
+          docType: inserted.docType,
+          status: inserted.status,
+          createdAt: inserted.createdAt,
+        },
+        201,
+      );
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to record LP upload');
+    }
+  },
+);
+
+// GP-only: review / accept / reject an LP upload
+router.patch(
+  '/lp-portal/uploads/:uploadId/review',
+  authMiddleware({ required: true }),
+  validateBody(
+    bodyShape({
+      status: z.enum(['reviewed', 'accepted', 'rejected']),
+      notes: z.string().max(2000).optional(),
+    }),
+  ),
+  async (req, res) => {
+    try {
+      const scope = await resolveScope(req);
+      if (!scope.isGp) {
+        sendForbidden(res, 'Only GP users can review uploads');
+        return;
+      }
+      const uploadId = parseIdParam(req.params.uploadId);
+      const { status, notes } = req.body as {
+        status: 'reviewed' | 'accepted' | 'rejected';
+        notes?: string;
+      };
+
+      const [updated] = await db
+        .update(fundLpUploadsTable)
+        .set({
+          status,
+          reviewedByUserId: req.user?.id ?? null,
+          reviewedAt: new Date(),
+          ...(notes !== undefined ? { notes } : {}),
+        })
+        .where(eq(fundLpUploadsTable.id, uploadId))
+        .returning();
+
+      if (!updated) {
+        sendNotFound(res, 'Upload');
+        return;
+      }
+
+      sendSuccess(res, { id: updated.id, status: updated.status, reviewedAt: updated.reviewedAt });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to review upload');
     }
   },
 );

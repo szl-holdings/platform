@@ -1,10 +1,11 @@
 /**
- * Export Service — Generates CSV and PDF exports for any tabular dataset.
+ * Export Service — Generates CSV, XLSX, and PDF exports for any tabular dataset.
  * Compliance-grade patterns: SOC 2 audit export, GDPR data portability.
  * - Streams large datasets in pages (max 10k rows per chunk)
  * - Records every export in the export_jobs table for audit trail
  * - Download tokens expire after 24 hours
- * - Async queue with in-memory buffer store (24h TTL) for progress tracking
+ * - Buffers are persisted to GCS for durability across restarts
+ * - Async queue with in-memory buffer store (24h TTL) for fast re-downloads
  */
 
 import { Document, Page, renderToBuffer, StyleSheet, Text, View } from '@react-pdf/renderer';
@@ -12,10 +13,14 @@ import { db, exportJobsTable, usersTable } from '@szl-holdings/db';
 import { randomUUID } from 'node:crypto';
 import { desc, eq, sql } from 'drizzle-orm';
 import React from 'react';
+import * as XLSX from 'xlsx';
 import { logger } from './logger';
+import { ObjectStorageService } from './objectStorage';
 
 const _MAX_ROWS_INLINE = 10_000;
 const EXPORT_TTL_MS = 24 * 60 * 60 * 1000;
+
+const objectStorageService = new ObjectStorageService();
 
 // ─── In-memory buffer store (serves re-downloads within 24h) ─────────────────
 interface StoredBuffer {
@@ -57,6 +62,19 @@ export function getExportBuffer(exportId: string): StoredBuffer | null {
   return entry;
 }
 
+/**
+ * Try to fetch an export buffer from GCS when the in-memory store doesn't have it.
+ * Returns null if GCS is not configured or the object doesn't exist.
+ */
+export async function fetchExportBufferFromStorage(storageKey: string | null | undefined): Promise<Buffer | null> {
+  if (!storageKey) return null;
+  try {
+    return await objectStorageService.downloadObjectToBuffer(storageKey);
+  } catch {
+    return null;
+  }
+}
+
 export async function getExportJobStatus(exportId: string) {
   const [job] = await db
     .select()
@@ -74,7 +92,7 @@ export interface ExportColumn {
 export interface ExportOptions {
   name: string;
   dataSource: string;
-  format: 'csv' | 'pdf';
+  format: 'csv' | 'pdf' | 'xlsx';
   columns: ExportColumn[];
   rows: Record<string, unknown>[];
   triggeredByUserId?: number | null;
@@ -85,12 +103,13 @@ export interface ExportOptions {
 
 export interface ExportResult {
   exportId: string;
-  format: 'csv' | 'pdf';
+  format: 'csv' | 'pdf' | 'xlsx';
   buffer: Buffer;
   rowCount: number;
   fileSizeBytes: number;
   downloadToken: string;
   expiresAt: Date;
+  storageKey: string | null;
 }
 
 const pdfStyles = StyleSheet.create({
@@ -98,55 +117,67 @@ const pdfStyles = StyleSheet.create({
     padding: 36,
     fontFamily: 'Helvetica',
     fontSize: 9,
-    color: '#1f2937',
-    backgroundColor: '#ffffff',
+    color: '#1a1a1a',
   },
   header: {
-    marginBottom: 16,
-    paddingBottom: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: '#1e3a5f',
-    borderBottomStyle: 'solid',
+    marginBottom: 12,
+    borderBottom: '1px solid #e0e0e0',
+    paddingBottom: 8,
   },
-  title: { fontSize: 16, fontFamily: 'Helvetica-Bold', color: '#111827', marginBottom: 3 },
-  subtitle: { fontSize: 8, color: '#6b7280' },
+  title: {
+    fontSize: 14,
+    fontFamily: 'Helvetica-Bold',
+    marginBottom: 4,
+    color: '#111',
+  },
+  subtitle: {
+    fontSize: 8,
+    color: '#666',
+  },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#f3f4f6',
-    borderBottomWidth: 1,
-    borderBottomColor: '#d1d5db',
-    paddingVertical: 4,
+    backgroundColor: '#f5f5f5',
+    padding: '4 6',
+    borderBottom: '1px solid #ddd',
   },
   tableRow: {
     flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-    paddingVertical: 3,
+    padding: '3 6',
+    borderBottom: '0.5px solid #eee',
   },
   tableRowAlt: {
     flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-    paddingVertical: 3,
-    backgroundColor: '#f9fafb',
+    padding: '3 6',
+    borderBottom: '0.5px solid #eee',
+    backgroundColor: '#fafafa',
   },
-  cell: { flex: 1, paddingHorizontal: 6, fontSize: 8 },
-  cellHeader: { flex: 1, paddingHorizontal: 6, fontSize: 8, fontFamily: 'Helvetica-Bold' },
+  cellHeader: {
+    flex: 1,
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 8,
+    color: '#333',
+  },
+  cell: {
+    flex: 1,
+    fontSize: 8,
+    color: '#444',
+  },
   footer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 18,
     left: 36,
     right: 36,
-    textAlign: 'center',
     fontSize: 7,
-    color: '#9ca3af',
+    color: '#999',
+    textAlign: 'center',
   },
-  badge: { fontSize: 7, color: '#6b7280', marginTop: 2 },
 });
 
 function formatCellValue(val: unknown): string {
   if (val === null || val === undefined) return '';
   if (val instanceof Date) return val.toISOString();
+  if (typeof val === 'boolean') return val ? 'true' : 'false';
+  if (typeof val === 'number') return String(val);
   if (typeof val === 'object') return JSON.stringify(val).slice(0, 200);
   return String(val);
 }
@@ -163,6 +194,37 @@ export function generateCsv(columns: ExportColumn[], rows: Record<string, unknow
   );
   const csv = [header, ...dataRows].join('\r\n');
   return Buffer.from(csv, 'utf-8');
+}
+
+export function generateXlsx(
+  name: string,
+  columns: ExportColumn[],
+  rows: Record<string, unknown>[],
+): Buffer {
+  const wb = XLSX.utils.book_new();
+  const headerRow = columns.map((c) => c.label);
+  const dataRows = rows.map((row) => columns.map((c) => {
+    const v = row[c.key];
+    if (v === null || v === undefined) return '';
+    if (v instanceof Date) return v.toISOString();
+    if (typeof v === 'object') return JSON.stringify(v).slice(0, 500);
+    return v;
+  }));
+  const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows]);
+
+  // Auto-width for readability
+  const colWidths = columns.map((c, i) => {
+    const maxLen = Math.max(
+      c.label.length,
+      ...dataRows.slice(0, 100).map((r) => String(r[i] ?? '').length),
+    );
+    return { wch: Math.min(maxLen + 2, 50) };
+  });
+  ws['!cols'] = colWidths;
+
+  XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
+  const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
+  return buffer;
 }
 
 export async function generatePdf(
@@ -226,6 +288,32 @@ export async function generatePdf(
   return renderToBuffer(doc);
 }
 
+/**
+ * Persist an export buffer to GCS for durable download across server restarts.
+ * Returns the normalized storageKey or null if GCS is not configured.
+ */
+async function persistExportToStorage(
+  exportId: string,
+  buffer: Buffer,
+  format: 'csv' | 'pdf' | 'xlsx',
+): Promise<string | null> {
+  const ext = format === 'pdf' ? 'pdf' : format === 'xlsx' ? 'xlsx' : 'csv';
+  const contentType =
+    format === 'pdf'
+      ? 'application/pdf'
+      : format === 'xlsx'
+        ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        : 'text/csv';
+  const subPath = `exports/${exportId}.${ext}`;
+  try {
+    const storageKey = await objectStorageService.uploadBuffer(buffer, subPath, contentType);
+    return storageKey;
+  } catch {
+    // GCS not configured or upload failed — in-memory buffer will serve instead.
+    return null;
+  }
+}
+
 export async function runExport(options: ExportOptions): Promise<ExportResult> {
   const exportId = randomUUID();
   const downloadToken = randomUUID();
@@ -250,12 +338,18 @@ export async function runExport(options: ExportOptions): Promise<ExportResult> {
     let buffer: Buffer;
     if (options.format === 'csv') {
       buffer = generateCsv(options.columns, options.rows);
+    } else if (options.format === 'xlsx') {
+      buffer = generateXlsx(options.name, options.columns, options.rows);
     } else {
       buffer = await generatePdf(options.name, options.columns, options.rows, now);
     }
 
     const fileSizeBytes = buffer.length;
     const rowCount = options.rows.length;
+
+    // Persist to GCS for durability — buffer survives server restarts.
+    const storageKey = await persistExportToStorage(exportId, buffer, options.format);
+    const downloadUrl = `/api/exports/jobs/${exportId}/download?token=${downloadToken}`;
 
     await db
       .update(exportJobsTable)
@@ -264,13 +358,22 @@ export async function runExport(options: ExportOptions): Promise<ExportResult> {
         rowCount,
         fileSizeBytes,
         completedAt: new Date(),
+        downloadUrl,
+        storageKey,
       })
       .where(eq(exportJobsTable.exportId, exportId));
 
     storeExportBuffer(exportId, buffer, expiresAt, options.format, options.name);
 
     logger.info(
-      { exportId, dataSource: options.dataSource, format: options.format, rowCount, fileSizeBytes },
+      {
+        exportId,
+        dataSource: options.dataSource,
+        format: options.format,
+        rowCount,
+        fileSizeBytes,
+        storageKey,
+      },
       'Export completed',
     );
 
@@ -282,6 +385,7 @@ export async function runExport(options: ExportOptions): Promise<ExportResult> {
       fileSizeBytes,
       downloadToken,
       expiresAt,
+      storageKey,
     };
   } catch (err) {
     await db

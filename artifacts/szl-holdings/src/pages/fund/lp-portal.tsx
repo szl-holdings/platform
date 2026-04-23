@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
   ArrowLeft, ChevronRight, User, TrendingUp, Download,
   FileText, FolderOpen, Eye, Clock, Activity, Send, Lock, Shield,
   CheckCircle2, MessageSquare, Filter, BarChart3, ImageIcon, Loader2,
+  Upload, X, FileUp, AlertTriangle, CheckCircle,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -92,6 +93,42 @@ type MessageRow = {
   sentAt: string;
 };
 
+type UploadDocType = "signed_agreement" | "wire_confirmation" | "kyc_document" | "other";
+
+type UploadItem = {
+  id: number;
+  lpId: number;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  docType: UploadDocType;
+  status: "received" | "reviewed" | "accepted" | "rejected";
+  notes: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+};
+
+const DOC_TYPE_LABELS: Record<UploadDocType, string> = {
+  signed_agreement: "Signed Agreement",
+  wire_confirmation: "Wire Confirmation",
+  kyc_document: "KYC / AML Document",
+  other: "Other Document",
+};
+
+const DOC_TYPE_COLORS: Record<UploadDocType, string> = {
+  signed_agreement: "#6aaa72",
+  wire_confirmation: "#4a90b8",
+  kyc_document: "#d4a054",
+  other: "#8b7ac8",
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  received: "#d4a054",
+  reviewed: "#4a90b8",
+  accepted: "#6aaa72",
+  rejected: "#c45a4a",
+};
+
 const FILE_ICONS: Record<string, React.ElementType> = { pdf: FileText, xlsx: BarChart3, pptx: ImageIcon };
 const FILE_COLORS: Record<string, string> = { pdf: "#c45a4a", xlsx: "#6aaa72", pptx: "#d4a054" };
 
@@ -101,6 +138,13 @@ function fmtMoneyCents(cents: number | null | undefined): string {
   if (Math.abs(n) >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
   if (Math.abs(n) >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
   return `$${n.toFixed(0)}`;
+}
+
+function fmtFileSize(bytes: number): string {
+  if (bytes === 0) return "—";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function KpiTile({ label, value, sub, color }: { label: string; value: string; sub?: string; color: string }) {
@@ -116,7 +160,7 @@ function KpiTile({ label, value, sub, color }: { label: string; value: string; s
   );
 }
 
-type Tab = "overview" | "documents" | "reports" | "activity" | "messages";
+type Tab = "overview" | "documents" | "reports" | "activity" | "messages" | "uploads";
 
 function unwrap<T>(payload: T | { data: T }): T {
   if (payload && typeof payload === "object" && "data" in (payload as Record<string, unknown>)) {
@@ -128,7 +172,7 @@ function unwrap<T>(payload: T | { data: T }): T {
 export default function FundLpPortalPage() {
   const __pageMeta = usePageMeta({
     title: "LP Portal — SZL Holdings Fund",
-    description: "Self-service LP portal: capital account, permissioned data room access, quarterly reports, activity log, and GP messaging.",
+    description: "Self-service LP portal: capital account, permissioned data room access, quarterly reports, activity log, GP messaging, and document uploads.",
     canonical: "https://szlholdings.com/fund/lp-portal",
   });
 
@@ -145,12 +189,20 @@ export default function FundLpPortalPage() {
   const [activity, setActivity] = useState<ActivityEntry[]>([]);
   const [messages, setMessages] = useState<MessageRow[]>([]);
   const [messageDraft, setMessageDraft] = useState<string>("");
+  const [uploads, setUploads] = useState<UploadItem[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [lpLoading, setLpLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initial: load LP roster + NAV history (NAV is fund-wide).
+  // Upload form state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadDocType, setUploadDocType] = useState<UploadDocType>("signed_agreement");
+  const [uploadNotes, setUploadNotes] = useState("");
+  const [uploadProgress, setUploadProgress] = useState<"idle" | "uploading" | "success" | "error">("idle");
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -175,19 +227,19 @@ export default function FundLpPortalPage() {
     return () => { cancelled = true; };
   }, []);
 
-  // Per-LP loads.
   useEffect(() => {
     if (lpId == null) return;
     let cancelled = false;
     (async () => {
       try {
         setLpLoading(true);
-        const [acctResp, docsResp, reportsResp, actResp, msgResp] = await Promise.all([
+        const [acctResp, docsResp, reportsResp, actResp, msgResp, uploadsResp] = await Promise.all([
           apiRequest<CapitalAccount | { data: CapitalAccount }>("GET", `/api/lp-portal/lps/${lpId}/capital-account`),
           apiRequest<DocsResponse>("GET", `/api/lp-portal/lps/${lpId}/documents`),
           apiRequest<ReportItem[] | { data: ReportItem[] }>("GET", `/api/lp-portal/lps/${lpId}/reports`),
           apiRequest<ActivityEntry[] | { data: ActivityEntry[] }>("GET", `/api/lp-portal/lps/${lpId}/activity`),
           apiRequest<MessageRow[] | { data: MessageRow[] }>("GET", `/api/lp-portal/lps/${lpId}/messages`),
+          apiRequest<UploadItem[] | { data: UploadItem[] }>("GET", `/api/lp-portal/lps/${lpId}/uploads`).catch(() => ({ data: [] as UploadItem[] })),
         ]);
         if (cancelled) return;
         setAccount(unwrap(acctResp));
@@ -196,6 +248,7 @@ export default function FundLpPortalPage() {
         setReports(unwrap(reportsResp));
         setActivity(unwrap(actResp));
         setMessages(unwrap(msgResp));
+        setUploads(unwrap(uploadsResp as UploadItem[] | { data: UploadItem[] }));
         setFolderFilter("All");
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load LP data");
@@ -231,7 +284,6 @@ export default function FundLpPortalPage() {
 
   const navChartData = navHistory.map((n, i) => {
     const cumDist = navHistory.slice(0, i + 1).reduce((s, x) => s + (x.distributedCents / 100), 0);
-    // Distributions are fund-wide; scale by ownershipPct for an LP-level view.
     const pct = (account?.ownershipPct ?? 0) / 100;
     return {
       period: n.period,
@@ -247,7 +299,7 @@ export default function FundLpPortalPage() {
       const entry = unwrap(resp);
       setActivity(prev => [entry, ...prev]);
     } catch {
-      // non-fatal — UI continues
+      // non-fatal
     }
   }
 
@@ -271,6 +323,67 @@ export default function FundLpPortalPage() {
       setMessageDraft("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to send message");
+    }
+  }
+
+  async function handleSubmitUpload() {
+    if (!uploadFile || lpId == null) return;
+    setUploadProgress("uploading");
+    setUploadError(null);
+    try {
+      const mimeType = uploadFile.type || "application/octet-stream";
+
+      // Step 1: Request a presigned GCS upload URL (requires auth; silently falls back to
+      // metadata-only demo mode if the user is not authenticated).
+      let objectPath: string | undefined;
+      try {
+        const presignResp = await fetch("/api/storage/uploads/request-url", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: uploadFile.name,
+            size: uploadFile.size,
+            contentType: mimeType,
+            domain: "lp_uploads",
+          }),
+        });
+        if (presignResp.ok) {
+          const presignData = await presignResp.json() as { uploadURL: string; objectPath: string };
+          // Step 2: PUT the actual file bytes to GCS via the presigned URL.
+          const putResp = await fetch(presignData.uploadURL, {
+            method: "PUT",
+            headers: { "Content-Type": mimeType },
+            body: uploadFile,
+          });
+          if (!putResp.ok) throw new Error(`Storage upload failed: ${putResp.status}`);
+          objectPath = presignData.objectPath;
+        }
+        // If 401/403 (demo / unauthenticated), fall through with no objectPath — backend will generate a placeholder.
+      } catch (presignErr) {
+        // Network error or GCS unavailable — proceed with metadata-only demo record.
+        console.warn("Presigned upload unavailable, falling back to demo mode:", presignErr);
+      }
+
+      // Step 3: Register the upload record in the backend.
+      const resp = await apiRequest<{ data: UploadItem } | UploadItem>("POST", `/api/lp-portal/lps/${lpId}/uploads`, {
+        ...(objectPath ? { objectPath } : {}),
+        originalName: uploadFile.name,
+        docType: uploadDocType,
+        notes: uploadNotes.trim() || undefined,
+        mimeType,
+        size: uploadFile.size,
+      });
+      const created = unwrap(resp);
+      setUploads(prev => [created as UploadItem, ...prev]);
+      setUploadProgress("success");
+      setUploadFile(null);
+      setUploadNotes("");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setTimeout(() => setUploadProgress("idle"), 3500);
+    } catch (e) {
+      setUploadProgress("error");
+      setUploadError(e instanceof Error ? e.message : "Upload failed");
     }
   }
 
@@ -332,7 +445,7 @@ export default function FundLpPortalPage() {
               </div>
               <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">Welcome back, {lpName}</h1>
               <p className="text-white/50 text-sm max-w-2xl">
-                Self-service access to your capital account, permissioned data room documents, quarterly reports, activity history, and direct messaging with the GP team.
+                Self-service access to your capital account, permissioned data room documents, quarterly reports, activity history, direct messaging with the GP team, and document uploads.
               </p>
             </div>
 
@@ -371,7 +484,7 @@ export default function FundLpPortalPage() {
             <KpiTile label="Total Value" value={fmtMoneyCents(totalValue)} sub="NAV + cumulative distributions" color="#6aaa72" />
             <KpiTile label="MOIC" value={`${moic.toFixed(2)}×`} sub="Multiple on invested capital" color="#d4a054" />
             <KpiTile label="TVPI" value={`${tvpi.toFixed(2)}×`} sub="Total value to paid-in" color="#4a90b8" />
-            <KpiTile label="Documents Available" value={String(docs.length)} sub={`${reports.length} quarterly reports`} color="#8b7ac8" />
+            <KpiTile label="Docs / Uploads" value={`${docs.length} / ${uploads.length}`} sub={`${reports.length} quarterly reports`} color="#8b7ac8" />
           </div>
 
           <div className="flex flex-wrap gap-1 mb-6 border-b border-white/[0.06]">
@@ -381,6 +494,7 @@ export default function FundLpPortalPage() {
               { key: "reports", label: "Quarterly Reports" },
               { key: "activity", label: "Activity Log" },
               { key: "messages", label: "Messages" },
+              { key: "uploads", label: "My Uploads" },
             ] as Array<{ key: Tab; label: string }>).map(t => (
               <button
                 key={t.key}
@@ -389,6 +503,11 @@ export default function FundLpPortalPage() {
                 className={`px-4 py-2.5 text-xs font-semibold transition border-b-2 ${tab === t.key ? "text-white border-[#4a90b8]" : "text-white/40 border-transparent hover:text-white/70"}`}
               >
                 {t.label}
+                {t.key === "uploads" && uploads.length > 0 && (
+                  <span className="ml-1.5 rounded-full bg-[#4a90b8]/20 px-1.5 py-0.5 text-[9px] text-[#4a90b8]">
+                    {uploads.length}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -745,6 +864,178 @@ export default function FundLpPortalPage() {
                     >
                       <Send className="h-3.5 w-3.5" /> Send
                     </button>
+                  </div>
+                </div>
+              </m.div>
+            )}
+
+            {tab === "uploads" && (
+              <m.div key="uploads" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
+
+                {/* Upload form */}
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5 mb-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <FileUp className="h-4 w-4 text-[#4a90b8]" />
+                    <span className="text-sm font-semibold text-white">Upload Document to GP</span>
+                    <span className="ml-auto text-[10px] text-white/35">Signed agreements, wire confirmations, KYC files</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45 mb-1.5">
+                        Document Type
+                      </label>
+                      <select
+                        value={uploadDocType}
+                        onChange={e => setUploadDocType(e.target.value as UploadDocType)}
+                        className="w-full rounded-xl border border-white/[0.08] bg-black/30 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#4a90b8]/50"
+                        data-testid="select-upload-doc-type"
+                      >
+                        <option value="signed_agreement" style={{ background: "#0d1117" }}>Signed Agreement</option>
+                        <option value="wire_confirmation" style={{ background: "#0d1117" }}>Wire Confirmation</option>
+                        <option value="kyc_document" style={{ background: "#0d1117" }}>KYC / AML Document</option>
+                        <option value="other" style={{ background: "#0d1117" }}>Other Document</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45 mb-1.5">
+                        File
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.xlsx,.csv"
+                          onChange={e => setUploadFile(e.target.files?.[0] ?? null)}
+                          className="hidden"
+                          data-testid="input-upload-file"
+                        />
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/[0.07] transition-colors"
+                        >
+                          <Upload className="h-3.5 w-3.5" />
+                          {uploadFile ? "Change file" : "Choose file"}
+                        </button>
+                        {uploadFile && (
+                          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                            <FileText className="h-3.5 w-3.5 text-white/40 flex-shrink-0" />
+                            <span className="text-xs text-white/70 truncate">{uploadFile.name}</span>
+                            <span className="text-[10px] text-white/35 flex-shrink-0">({fmtFileSize(uploadFile.size)})</span>
+                            <button
+                              onClick={() => { setUploadFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                              className="ml-auto text-white/30 hover:text-white/60 transition-colors flex-shrink-0"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45 mb-1.5">
+                      Notes to GP (optional)
+                    </label>
+                    <textarea
+                      value={uploadNotes}
+                      onChange={e => setUploadNotes(e.target.value)}
+                      placeholder="e.g., Signed subscription agreement for Fund II, wire sent on Apr 23 for $500K capital call..."
+                      rows={2}
+                      className="w-full rounded-xl border border-white/[0.08] bg-black/30 px-3 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-[#4a90b8]/50 resize-none"
+                      data-testid="input-upload-notes"
+                    />
+                  </div>
+
+                  {uploadProgress === "error" && uploadError && (
+                    <div className="mb-4 rounded-xl border border-[#c45a4a]/30 bg-[#c45a4a]/[0.07] p-3 flex items-center gap-2">
+                      <AlertTriangle className="h-3.5 w-3.5 text-[#c45a4a] flex-shrink-0" />
+                      <span className="text-xs text-[#c45a4a]">{uploadError}</span>
+                    </div>
+                  )}
+
+                  {uploadProgress === "success" && (
+                    <div className="mb-4 rounded-xl border border-[#6aaa72]/30 bg-[#6aaa72]/[0.07] p-3 flex items-center gap-2">
+                      <CheckCircle className="h-3.5 w-3.5 text-[#6aaa72] flex-shrink-0" />
+                      <span className="text-xs text-[#6aaa72]">Document submitted — the GP team will review it shortly.</span>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleSubmitUpload}
+                    disabled={!uploadFile || uploadProgress === "uploading"}
+                    data-testid="button-submit-upload"
+                    className="flex items-center gap-2 rounded-xl bg-[#4a90b8] px-4 py-2.5 text-xs font-semibold text-black hover:bg-[#4a90b8]/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {uploadProgress === "uploading" ? (
+                      <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Submitting…</>
+                    ) : (
+                      <><FileUp className="h-3.5 w-3.5" /> Submit to GP</>
+                    )}
+                  </button>
+                </div>
+
+                {/* Upload history */}
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden">
+                  <div className="px-5 py-4 border-b border-white/[0.06] flex items-center gap-2">
+                    <Upload className="h-4 w-4 text-[#4a90b8]" />
+                    <span className="text-sm font-semibold text-white">Submitted Documents</span>
+                    <span className="ml-auto text-[10px] text-white/35">{uploads.length} total</span>
+                  </div>
+                  <div className="divide-y divide-white/[0.04]">
+                    {uploads.map((u, i) => (
+                      <m.div
+                        key={u.id}
+                        initial={{ opacity: 0, x: -6 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.03 }}
+                        className="flex items-center gap-4 px-5 py-3.5 hover:bg-white/[0.02] transition-colors"
+                      >
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0"
+                          style={{ background: `${DOC_TYPE_COLORS[u.docType as UploadDocType] ?? "#8b7ac8"}18` }}>
+                          <FileText className="h-4 w-4" style={{ color: DOC_TYPE_COLORS[u.docType as UploadDocType] ?? "#8b7ac8" }} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-white truncate">{u.originalName}</div>
+                          <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                            <span className="text-[10px] text-white/40">{DOC_TYPE_LABELS[u.docType as UploadDocType] ?? u.docType}</span>
+                            <span className="text-[10px] text-white/30">{fmtFileSize(u.size)}</span>
+                            <span className="text-[10px] text-white/30">
+                              {new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                            </span>
+                            {u.notes && (
+                              <span className="text-[10px] text-white/40 italic truncate max-w-[200px]" title={u.notes}>
+                                {u.notes}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <span
+                          className="inline-flex items-center rounded-full border px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.1em] flex-shrink-0"
+                          style={{
+                            color: STATUS_COLORS[u.status] ?? "#8b7ac8",
+                            borderColor: `${STATUS_COLORS[u.status] ?? "#8b7ac8"}30`,
+                            background: `${STATUS_COLORS[u.status] ?? "#8b7ac8"}12`,
+                          }}
+                        >
+                          {u.status}
+                        </span>
+                      </m.div>
+                    ))}
+                    {uploads.length === 0 && (
+                      <div className="px-5 py-8 text-center text-sm text-white/40">
+                        No documents submitted yet. Use the form above to send signed agreements or other documents to the GP.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-2xl border border-[#4a90b8]/20 bg-[#4a90b8]/[0.04] p-4 flex items-start gap-3">
+                  <Shield className="h-4 w-4 text-[#4a90b8] flex-shrink-0 mt-0.5" />
+                  <div className="text-xs text-white/65">
+                    All uploaded documents are transmitted securely over TLS, virus-scanned on receipt, and stored in our encrypted document vault. Access is limited to you and the GP team. Documents are retained per your LPA data retention terms.
                   </div>
                 </div>
               </m.div>

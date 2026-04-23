@@ -17,6 +17,12 @@ export const filesTable = pgTable('files', {
   category: text('category', { enum: ['document', 'image', 'video', 'audio', 'archive', 'other'] })
     .notNull()
     .default('other'),
+  scanStatus: text('scan_status', {
+    enum: ['pending', 'scanning', 'clean', 'infected', 'error', 'skipped'],
+  })
+    .notNull()
+    .default('pending'),
+  quarantinedAt: timestamp('quarantined_at', { withTimezone: true }),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 

@@ -22,6 +22,18 @@ import { authMiddleware, parseIdParam } from '../middlewares/auth';
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
 
+// MIME types allowed for inline preview (no download forced)
+const PREVIEWABLE_MIME_TYPES = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/svg+xml',
+  'image/avif',
+  'text/plain',
+]);
+
 router.get('/files', authMiddleware(), async (_req, res) => {
   try {
     const files = await db.select().from(filesTable).orderBy(desc(filesTable.createdAt));
@@ -42,6 +54,118 @@ router.get('/files/:id', authMiddleware(), async (req, res) => {
     sendSuccess(res, file);
   } catch (err) {
     handleRouteError(res, err, 'Failed to get file');
+  }
+});
+
+/**
+ * GET /files/:id/preview
+ * Serves the file inline in the browser (Content-Disposition: inline).
+ *
+ * Security:
+ * - Requires authentication.
+ * - ACL: only the file owner or a privileged role (admin / ops / compliance) may preview.
+ * - Scan gating: only scanStatus='clean' files are served.
+ *   infected → 403, pending/scanning → 202, error/skipped → 503.
+ * - Only PDF and common image formats are rendered inline; others are rejected (415).
+ */
+router.get('/files/:id/preview', authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [file] = await db.select().from(filesTable).where(eq(filesTable.id, id));
+    if (!file) {
+      sendNotFound(res, 'File');
+      return;
+    }
+
+    // ── ACL enforcement ──────────────────────────────────────────────────────
+    const authedUser = (req as Request & { user?: { id: number; role: string } }).user;
+    const userId = authedUser?.id ?? null;
+    const role = authedUser?.role ?? 'viewer';
+    const isPrivileged = role === 'admin' || role === 'ops' || role === 'compliance';
+
+    if (!isPrivileged && (userId === null || file.userId !== userId)) {
+      res.status(403).json({
+        error: 'Forbidden',
+        code: 'FORBIDDEN',
+        message: 'You do not have permission to preview this file.',
+      });
+      return;
+    }
+
+    // ── Scan-status gating ───────────────────────────────────────────────────
+    if (file.scanStatus === 'infected') {
+      res.status(403).json({
+        error: 'File is quarantined',
+        code: 'FILE_QUARANTINED',
+        message: 'This file has been flagged as malicious and cannot be previewed or downloaded.',
+        quarantinedAt: file.quarantinedAt,
+      });
+      return;
+    }
+
+    if (file.scanStatus === 'pending' || file.scanStatus === 'scanning') {
+      res.status(202).json({
+        error: 'Scan pending',
+        code: 'SCAN_PENDING',
+        message: 'This file is awaiting virus scan. Please try again shortly.',
+        scanStatus: file.scanStatus,
+      });
+      return;
+    }
+
+    if (file.scanStatus === 'error' || file.scanStatus === 'skipped') {
+      res.status(503).json({
+        error: 'Scan incomplete',
+        code: 'SCAN_INCOMPLETE',
+        message: 'This file could not be scanned and will not be served until scanning completes successfully.',
+        scanStatus: file.scanStatus,
+      });
+      return;
+    }
+
+    // At this point only scanStatus='clean' passes through.
+    if (file.scanStatus !== 'clean') {
+      res.status(503).json({
+        error: 'File not available',
+        code: 'NOT_CLEAN',
+        message: 'This file is not available for preview.',
+        scanStatus: file.scanStatus,
+      });
+      return;
+    }
+
+    if (!PREVIEWABLE_MIME_TYPES.has(file.mimeType)) {
+      res.status(415).json({
+        error: 'Preview not supported',
+        code: 'NOT_PREVIEWABLE',
+        message: `Inline preview is not supported for ${file.mimeType}. Download the file instead.`,
+        mimeType: file.mimeType,
+      });
+      return;
+    }
+
+    let objectFile;
+    try {
+      objectFile = await objectStorageService.getObjectEntityFile(file.storageKey);
+    } catch (err) {
+      if (err instanceof ObjectNotFoundError) {
+        res.status(404).json({ error: 'File content not found in storage' });
+        return;
+      }
+      throw err;
+    }
+
+    const [content] = await objectFile.download();
+    const fileBuffer = content as Buffer;
+
+    res.setHeader('Content-Type', file.mimeType);
+    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(file.originalName)}"`);
+    res.setHeader('Content-Length', String(fileBuffer.length));
+    res.setHeader('Cache-Control', 'private, max-age=300');
+    res.setHeader('X-Scan-Status', file.scanStatus);
+    res.send(fileBuffer);
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to preview file');
   }
 });
 
@@ -181,6 +305,7 @@ router.post(
           storageUrl: `/api/storage${objectPath}`,
           storageKey: objectPath,
           category: resolvedCategory,
+          scanStatus: 'pending',
         })
         .returning();
 
@@ -197,17 +322,19 @@ router.post(
         );
       }
 
-      // Dispatch virus scan stub (noop until AV integration is configured).
+      // Run the virus scan (updates the DB record on completion).
       let scanStatus = 'pending';
+      let scanThreat: string | undefined;
       try {
-        const scanResult = await dispatchVirusScan(file.id, objectPath);
+        const scanResult = await dispatchVirusScan(file.id, objectPath, authoritativeContentType);
         scanStatus = scanResult.status;
+        scanThreat = scanResult.threat;
       } catch (scanErr) {
         req.log.warn({ err: scanErr, fileId: file.id, objectPath }, 'Virus scan dispatch failed');
         scanStatus = 'error';
       }
 
-      sendCreated(res, { ...file, scanStatus });
+      sendCreated(res, { ...file, scanStatus, scanThreat: scanThreat ?? null });
     } catch (err) {
       handleRouteError(res, err, 'Failed to register file');
     }

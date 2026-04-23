@@ -4,8 +4,8 @@ import {
   listRecentProvenance,
   getProvenanceStats,
 } from '@szl-holdings/ai-engine/provenance';
+import { handleRouteError } from '../lib/api-response';
 import { authMiddleware } from '../middlewares/auth';
-import { handleRouteError } from '../utils/error-handler.js';
 
 const router = Router();
 

@@ -24,7 +24,7 @@ import {
   sendNotFound,
   sendSuccess,
 } from '../lib/api-response';
-import { type ExportColumn, generateCsv, generatePdf, getExportBuffer, getExportByToken, getExportJobStatus, listExportHistory, runExport, storeExportBuffer } from '../lib/export-service';
+import { type ExportColumn, fetchExportBufferFromStorage, generateCsv, generatePdf, generateXlsx, getExportBuffer, getExportByToken, getExportJobStatus, listExportHistory, runExport, storeExportBuffer } from '../lib/export-service';
 import { isFlagEnabled } from '../lib/platform-flags';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
@@ -42,11 +42,13 @@ const router: IRouter = Router();
 const CONTENT_TYPES: Record<string, string> = {
   csv: 'text/csv',
   pdf: 'application/pdf',
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 };
 
 const FILE_EXTENSIONS: Record<string, string> = {
   csv: 'csv',
   pdf: 'pdf',
+  xlsx: 'xlsx',
 };
 
 function getUserId(req: Request): number | null {
@@ -104,7 +106,7 @@ router.post(
         schedule = 'once',
         columns: selectedColumns,
       } = req.body as {
-        format?: 'csv' | 'pdf';
+        format?: 'csv' | 'pdf' | 'xlsx';
         dateFrom?: string;
         dateTo?: string;
         search?: string;
@@ -113,8 +115,8 @@ router.post(
         columns?: string[];
       };
 
-      if (!['csv', 'pdf'].includes(format))
-        return sendBadRequest(res, 'Invalid format — must be csv or pdf');
+      if (!['csv', 'pdf', 'xlsx'].includes(format))
+        return sendBadRequest(res, 'Invalid format — must be csv, pdf, or xlsx');
       if (!['once', 'daily', 'weekly', 'monthly'].includes(schedule))
         return sendBadRequest(res, 'Invalid schedule');
 
@@ -223,7 +225,7 @@ router.post(
         dateTo,
         columns: selectedColumns,
       } = req.body as {
-        format?: 'csv' | 'pdf';
+        format?: 'csv' | 'pdf' | 'xlsx';
         schedule?: 'once' | 'daily' | 'weekly' | 'monthly';
         status?: string;
         search?: string;
@@ -231,7 +233,7 @@ router.post(
         dateTo?: string;
         columns?: string[];
       };
-      if (!['csv', 'pdf'].includes(format)) return sendBadRequest(res, 'Invalid format');
+      if (!['csv', 'pdf', 'xlsx'].includes(format)) return sendBadRequest(res, 'Invalid format');
       if (!['once', 'daily', 'weekly', 'monthly'].includes(schedule))
         return sendBadRequest(res, 'Invalid schedule');
 
@@ -321,7 +323,7 @@ router.post(
         dateTo,
         columns: selectedColumns,
       } = req.body as {
-        format?: 'csv' | 'pdf';
+        format?: 'csv' | 'pdf' | 'xlsx';
         schedule?: 'once' | 'daily' | 'weekly' | 'monthly';
         status?: string;
         search?: string;
@@ -329,7 +331,7 @@ router.post(
         dateTo?: string;
         columns?: string[];
       };
-      if (!['csv', 'pdf'].includes(format)) return sendBadRequest(res, 'Invalid format');
+      if (!['csv', 'pdf', 'xlsx'].includes(format)) return sendBadRequest(res, 'Invalid format');
       if (!['once', 'daily', 'weekly', 'monthly'].includes(schedule))
         return sendBadRequest(res, 'Invalid schedule');
 
@@ -422,7 +424,7 @@ router.post(
         dateTo,
         columns: selectedColumns,
       } = req.body as {
-        format?: 'csv' | 'pdf';
+        format?: 'csv' | 'pdf' | 'xlsx';
         schedule?: 'once' | 'daily' | 'weekly' | 'monthly';
         status?: string;
         search?: string;
@@ -430,7 +432,7 @@ router.post(
         dateTo?: string;
         columns?: string[];
       };
-      if (!['csv', 'pdf'].includes(format)) return sendBadRequest(res, 'Invalid format');
+      if (!['csv', 'pdf', 'xlsx'].includes(format)) return sendBadRequest(res, 'Invalid format');
       if (!['once', 'daily', 'weekly', 'monthly'].includes(schedule))
         return sendBadRequest(res, 'Invalid schedule');
 
@@ -524,7 +526,7 @@ router.post(
         dateTo,
         columns: selectedColumns,
       } = req.body as {
-        format?: 'csv' | 'pdf';
+        format?: 'csv' | 'pdf' | 'xlsx';
         schedule?: 'once' | 'daily' | 'weekly' | 'monthly';
         status?: string;
         search?: string;
@@ -532,7 +534,7 @@ router.post(
         dateTo?: string;
         columns?: string[];
       };
-      if (!['csv', 'pdf'].includes(format)) return sendBadRequest(res, 'Invalid format');
+      if (!['csv', 'pdf', 'xlsx'].includes(format)) return sendBadRequest(res, 'Invalid format');
       if (!['once', 'daily', 'weekly', 'monthly'].includes(schedule))
         return sendBadRequest(res, 'Invalid schedule');
 
@@ -621,7 +623,7 @@ router.post(
         dateTo,
         columns: selectedColumns,
       } = req.body as {
-        format?: 'csv' | 'pdf';
+        format?: 'csv' | 'pdf' | 'xlsx';
         schedule?: 'once' | 'daily' | 'weekly' | 'monthly';
         status?: string;
         search?: string;
@@ -629,7 +631,7 @@ router.post(
         dateTo?: string;
         columns?: string[];
       };
-      if (!['csv', 'pdf'].includes(format)) return sendBadRequest(res, 'Invalid format');
+      if (!['csv', 'pdf', 'xlsx'].includes(format)) return sendBadRequest(res, 'Invalid format');
       if (!['once', 'daily', 'weekly', 'monthly'].includes(schedule))
         return sendBadRequest(res, 'Invalid schedule');
 
@@ -719,7 +721,7 @@ router.post(
         orgId,
         columns: selectedColumns,
       } = req.body as {
-        format?: 'csv' | 'pdf';
+        format?: 'csv' | 'pdf' | 'xlsx';
         schedule?: 'once' | 'daily' | 'weekly' | 'monthly';
         dateFrom?: string;
         dateTo?: string;
@@ -727,8 +729,8 @@ router.post(
         columns?: string[];
       };
 
-      if (!['csv', 'pdf'].includes(format))
-        return sendBadRequest(res, 'Invalid format — must be csv or pdf');
+      if (!['csv', 'pdf', 'xlsx'].includes(format))
+        return sendBadRequest(res, 'Invalid format — must be csv, pdf, or xlsx');
       if (!['once', 'daily', 'weekly', 'monthly'].includes(schedule))
         return sendBadRequest(res, 'Invalid schedule');
 
@@ -820,7 +822,7 @@ router.post(
         orgId,
         columns: selectedColumns,
       } = req.body as {
-        format?: 'csv' | 'pdf';
+        format?: 'csv' | 'pdf' | 'xlsx';
         schedule?: 'once' | 'daily' | 'weekly' | 'monthly';
         dateFrom?: string;
         dateTo?: string;
@@ -829,8 +831,8 @@ router.post(
         columns?: string[];
       };
 
-      if (!['csv', 'pdf'].includes(format))
-        return sendBadRequest(res, 'Invalid format — must be csv or pdf');
+      if (!['csv', 'pdf', 'xlsx'].includes(format))
+        return sendBadRequest(res, 'Invalid format — must be csv, pdf, or xlsx');
       if (!['once', 'daily', 'weekly', 'monthly'].includes(schedule))
         return sendBadRequest(res, 'Invalid schedule');
 
@@ -938,7 +940,7 @@ router.post(
         action,
       } = req.body as {
         domain: string;
-        format?: 'csv' | 'pdf';
+        format?: 'csv' | 'pdf' | 'xlsx';
         schedule?: 'once' | 'daily' | 'weekly' | 'monthly';
         columns?: string[];
         dateFrom?: string;
@@ -961,8 +963,8 @@ router.post(
       ];
       if (!domain || !VALID_DOMAINS.includes(domain))
         return sendBadRequest(res, `Invalid domain. Must be one of: ${VALID_DOMAINS.join(', ')}`);
-      if (!['csv', 'pdf'].includes(format))
-        return sendBadRequest(res, 'Invalid format — must be csv or pdf');
+      if (!['csv', 'pdf', 'xlsx'].includes(format))
+        return sendBadRequest(res, 'Invalid format — must be csv, pdf, or xlsx');
       if (!['once', 'daily', 'weekly', 'monthly'].includes(schedule))
         return sendBadRequest(res, 'Invalid schedule');
 
@@ -1315,12 +1317,35 @@ router.post(
           let buffer: Buffer;
           if (format === 'csv') {
             buffer = generateCsv(columns, rows);
+          } else if (format === 'xlsx') {
+            buffer = generateXlsx(name, columns, rows);
           } else {
             buffer = await generatePdf(name, columns, rows, now);
           }
 
           const fileSizeBytes = buffer.length;
           const rowCount = rows.length;
+
+          // Persist to GCS for durable re-downloads after server restarts.
+          const ext = format === 'pdf' ? 'pdf' : format === 'xlsx' ? 'xlsx' : 'csv';
+          const exportContentType =
+            format === 'pdf'
+              ? 'application/pdf'
+              : format === 'xlsx'
+                ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                : 'text/csv';
+          let storageKey: string | null = null;
+          try {
+            const { ObjectStorageService: OSS } = await import('../lib/objectStorage');
+            const oss = new OSS();
+            storageKey = await oss.uploadBuffer(buffer, `exports/${exportId}.${ext}`, exportContentType);
+          } catch {
+            // GCS not configured — in-memory buffer will serve
+          }
+
+          // Build a durable download URL stored in the DB so clients can
+          // retrieve it even after a server restart (via the job status endpoint).
+          const downloadUrl = `/api/exports/jobs/${exportId}/download?token=${downloadToken}`;
 
           await db
             .update(exportJobsTable)
@@ -1329,6 +1354,8 @@ router.post(
               rowCount,
               fileSizeBytes,
               completedAt: new Date(),
+              downloadUrl,
+              storageKey,
             })
             .where(eq(exportJobsTable.exportId, exportId));
 
@@ -1395,7 +1422,8 @@ router.get(
         errorMessage: job.errorMessage,
         triggeredByEmail: job.triggeredByEmail,
         filterParams: job.filterParams,
-        downloadAvailable: hasBuffer && job.status === 'completed',
+        downloadAvailable: job.status === 'completed' && (hasBuffer || !!job.storageKey),
+        downloadUrl: job.status === 'completed' ? (job.downloadUrl ?? null) : null,
         createdAt: job.createdAt,
       });
     } catch (err) {
@@ -1426,13 +1454,38 @@ router.get(
       if (job.expiresAt && job.expiresAt < new Date()) {
         return sendError(res, 'Export download link has expired', 410, 'EXPORT_EXPIRED');
       }
+      // Try in-memory buffer first (fast path for recent exports), then GCS fallback.
+      let fileBuffer: Buffer | null = null;
+      let fileFormat = job.format ?? 'csv';
+      let fileName = job.name ?? 'export';
+
       const stored = getExportBuffer(exportId);
-      if (!stored) {
-        return sendError(res, 'File is no longer cached — please re-export', 410, 'BUFFER_EXPIRED');
+      if (stored) {
+        fileBuffer = stored.buffer;
+        fileFormat = stored.format;
+        fileName = stored.name;
+      } else if (job.storageKey) {
+        // In-memory buffer evicted — fetch from durable GCS storage.
+        fileBuffer = await fetchExportBufferFromStorage(job.storageKey);
       }
-      const ext = stored.format === 'pdf' ? 'pdf' : 'csv';
-      const contentType = stored.format === 'pdf' ? 'application/pdf' : 'text/csv';
-      const safeName = stored.name.replace(/[^a-z0-9\-_.]/gi, '-').toLowerCase();
+
+      if (!fileBuffer) {
+        return sendError(
+          res,
+          'Export file is no longer available. The download link may have expired or storage is unavailable. Please re-export.',
+          410,
+          'BUFFER_EXPIRED',
+        );
+      }
+
+      const ext = fileFormat === 'pdf' ? 'pdf' : fileFormat === 'xlsx' ? 'xlsx' : 'csv';
+      const contentType =
+        fileFormat === 'pdf'
+          ? 'application/pdf'
+          : fileFormat === 'xlsx'
+            ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            : 'text/csv';
+      const safeName = fileName.replace(/[^a-z0-9\-_.]/gi, '-').toLowerCase();
       res.setHeader('Content-Type', contentType);
       res.setHeader(
         'Content-Disposition',
@@ -1441,7 +1494,7 @@ router.get(
       res.setHeader('X-Export-Id', exportId);
       res.setHeader('X-Row-Count', String(job.rowCount ?? 0));
       res.setHeader('X-Export-Expires', job.expiresAt?.toISOString() ?? '');
-      res.send(stored.buffer);
+      res.send(fileBuffer);
     } catch (err) {
       handleRouteError(res, err, 'Failed to download export');
     }
@@ -1730,7 +1783,7 @@ router.get(
         downloadAvailable:
           job.status === 'completed' &&
           (job.expiresAt == null || job.expiresAt > now) &&
-          !!getExportBuffer(job.exportId),
+          (!!getExportBuffer(job.exportId) || !!job.storageKey),
         expired: job.expiresAt != null && job.expiresAt <= now,
       }));
       sendSuccess(res, enriched, 200, { page, limit, total: result.total });

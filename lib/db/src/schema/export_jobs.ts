@@ -8,7 +8,7 @@ export const exportJobsTable = pgTable('export_jobs', {
   exportId: text('export_id').notNull().unique(),
   name: text('name').notNull(),
   dataSource: text('data_source').notNull(),
-  format: text('format', { enum: ['csv', 'pdf'] })
+  format: text('format', { enum: ['csv', 'pdf', 'xlsx'] })
     .notNull()
     .default('csv'),
   status: text('status', { enum: ['pending', 'processing', 'completed', 'failed'] })
@@ -29,6 +29,8 @@ export const exportJobsTable = pgTable('export_jobs', {
     .default('once'),
   nextRunAt: timestamp('next_run_at'),
   completedAt: timestamp('completed_at'),
+  downloadUrl: text('download_url'),
+  storageKey: text('storage_key'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 

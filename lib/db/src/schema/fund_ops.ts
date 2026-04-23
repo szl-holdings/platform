@@ -12,6 +12,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
+import { usersTable } from './auth';
 
 // ─── PORTFOLIO COMPANY FINANCIAL REPORTING ────────────────────────────────────
 
@@ -835,3 +836,54 @@ export const insertFundLpActivityEventSchema = createInsertSchema(fundLpActivity
 });
 export type InsertFundLpActivityEvent = z.infer<typeof insertFundLpActivityEventSchema>;
 export type FundLpActivityEvent = typeof fundLpActivityEventsTable.$inferSelect;
+
+// ─── LP Uploads ───────────────────────────────────────────────────────────────
+// LPs can upload signed agreements, wire confirmations, and KYC documents back to the GP.
+
+export const fundLpUploadsTable = pgTable(
+  'fund_lp_uploads',
+  {
+    id: serial('id').primaryKey(),
+    lpId: integer('lp_id')
+      .notNull()
+      .references(() => fundAccreditedInvestorsTable.id, { onDelete: 'cascade' }),
+    uploadedByUserId: integer('uploaded_by_user_id').references(() => usersTable.id, {
+      onDelete: 'set null',
+    }),
+    filename: text('filename').notNull(),
+    originalName: text('original_name').notNull(),
+    mimeType: text('mime_type').notNull().default('application/octet-stream'),
+    size: bigint('size', { mode: 'number' }).notNull().default(0),
+    storageKey: text('storage_key').notNull(),
+    docType: text('doc_type', {
+      enum: ['signed_agreement', 'wire_confirmation', 'kyc_document', 'other'],
+    })
+      .notNull()
+      .default('other'),
+    status: text('status', {
+      enum: ['received', 'reviewed', 'accepted', 'rejected'],
+    })
+      .notNull()
+      .default('received'),
+    notes: text('notes'),
+    reviewedByUserId: integer('reviewed_by_user_id').references(() => usersTable.id, {
+      onDelete: 'set null',
+    }),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+    isDemo: boolean('is_demo').notNull().default(false),
+    metadata: jsonb('metadata'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('fund_lp_uploads_lp_id_idx').on(t.lpId),
+    index('fund_lp_uploads_status_idx').on(t.status),
+    index('fund_lp_uploads_doc_type_idx').on(t.docType),
+  ],
+);
+
+export const insertFundLpUploadSchema = createInsertSchema(fundLpUploadsTable).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertFundLpUpload = z.infer<typeof insertFundLpUploadSchema>;
+export type FundLpUpload = typeof fundLpUploadsTable.$inferSelect;

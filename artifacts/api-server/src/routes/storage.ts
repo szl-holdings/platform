@@ -1,5 +1,7 @@
 import { RequestUploadUrlBody, RequestUploadUrlResponse } from '@szl-holdings/api-zod';
 import { bodyShape } from '@szl-holdings/contracts/common';
+import { db, filesTable } from '@szl-holdings/db';
+import { eq } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { Readable } from 'node:stream';
 import { validateFileType } from '../lib/fileTypeAllowlist';
@@ -44,8 +46,6 @@ router.post(
       const userId = authedReq.user?.id;
       const userOrgs = authedReq.user?.orgs ?? [];
 
-      // Resolve org context server-side from the authenticated session.
-      // Client-supplied orgId is validated against verified membership — prevents quota bypass.
       let resolvedOrgId: number | null = null;
 
       if (requestedOrgId !== undefined && requestedOrgId !== null) {
@@ -88,8 +88,6 @@ router.post(
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
 
-      // Bind resolvedOrgId and domain to the intent — POST /files reads these at finalization
-      // to enforce the same org context without trusting any further client input.
       recordUploadIntent(objectPath, userId, resolvedOrgId, domain ?? null);
 
       res.json(
@@ -142,6 +140,13 @@ router.get('/storage/public-objects/*filePath', async (req: Request, res: Respon
  * - No ACL on object: only admin/super_admin/editor may access.
  * - ACL visibility "public": any authenticated user may read.
  * - ACL visibility "private": owner (by userId) or privileged role; group rules checked if neither.
+ *
+ * Virus scan gating:
+ * - Files are only served when their scan_status = 'clean'.
+ * - Infected files return 403 Quarantined.
+ * - Pending / scanning files return 202 with retry guidance.
+ * - Error / skipped scan status returns 503 — file cannot be served until rescanned.
+ * - Untracked objects (no filesTable record) are passed through (system-uploaded assets).
  */
 router.get('/storage/objects/*path', authMiddleware(), async (req: Request, res: Response) => {
   const authedReq = req as AuthRequest;
@@ -178,6 +183,62 @@ router.get('/storage/objects/*path', authMiddleware(), async (req: Request, res:
           return;
         }
       }
+    }
+
+    // ─── Virus scan gating ────────────────────────────────────────────────────
+    // Only files with scanStatus = 'clean' are served. All other statuses block
+    // the download to prevent distribution of unscanned or malicious content.
+    // Untracked objects (no DB record) are passed through — these are system
+    // assets uploaded directly to GCS that do not go through the file upload pipeline.
+    const [fileRecord] = await db
+      .select({
+        scanStatus: filesTable.scanStatus,
+        quarantinedAt: filesTable.quarantinedAt,
+      })
+      .from(filesTable)
+      .where(eq(filesTable.storageKey, objectPath))
+      .limit(1);
+
+    if (fileRecord) {
+      if (fileRecord.scanStatus === 'infected') {
+        res.status(403).json({
+          error: 'File quarantined',
+          code: 'FILE_QUARANTINED',
+          message:
+            'This file has been flagged as malicious and is not available for download. Contact your administrator.',
+          quarantinedAt: fileRecord.quarantinedAt,
+        });
+        return;
+      }
+      if (fileRecord.scanStatus === 'pending' || fileRecord.scanStatus === 'scanning') {
+        res.status(202).json({
+          error: 'Scan in progress',
+          code: 'SCAN_PENDING',
+          message: 'This file is awaiting virus scan. Please try again in a few seconds.',
+          scanStatus: fileRecord.scanStatus,
+          retryAfterSeconds: 10,
+        });
+        return;
+      }
+      if (fileRecord.scanStatus === 'error') {
+        res.status(503).json({
+          error: 'Scan failed',
+          code: 'SCAN_ERROR',
+          message:
+            'Virus scan failed for this file. It cannot be served until a successful scan completes. Contact your administrator.',
+        });
+        return;
+      }
+      if (fileRecord.scanStatus === 'skipped') {
+        res.status(503).json({
+          error: 'Scan unavailable',
+          code: 'SCAN_SKIPPED',
+          message:
+            'This file could not be scanned and cannot be served. Contact your administrator.',
+        });
+        return;
+      }
+      // scanStatus === 'clean' — proceed to serve.
     }
 
     const response = await objectStorageService.downloadObject(objectFile);
