@@ -1159,7 +1159,16 @@ router.post(
       logger.info({ cacheSize: fusionCache.size }, '[CrossDomainQuery] Cached LLM response');
     }
 
-    res.json({ success: true, result: response, fusedAnswerSource });
+    const provenance = fusedAnswerSource === 'llm' ? {
+      runId: `cdq_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+      source: 'llm',
+      model: 'gpt-4o-mini',
+      provider: 'openai',
+      confidence,
+      generatedAt: new Date().toISOString(),
+    } : null;
+
+    res.json({ success: true, result: response, fusedAnswerSource, provenance });
   },
 );
 

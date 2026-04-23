@@ -1,6 +1,7 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { ai as geminiAi } from '@szl-holdings/ai-engine/providers/gemini';
 import { openai } from '@szl-holdings/ai-engine/providers/openai';
+import { callAgentWithProvenance } from '@szl-holdings/ai-engine/provenance';
 import {
   advisoryFindings,
   agentMemoryFacts,
@@ -931,15 +932,34 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
         }
       } catch {}
 
+      const avgConf = Math.round(
+        agentResponses.reduce((sum, r) => sum + r.confidence, 0) / agentResponses.length,
+      );
+      const provenance = {
+        runId: `orch_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+        agents: agentResponses.map((r) => ({
+          agentId: r.agentId,
+          agentName: r.agentName,
+          domain: r.domain,
+          confidence: r.confidence,
+        })),
+        synthesizer: 'alloy',
+        model: alloyAgent.preferredModel,
+        provider: 'openai',
+        averageConfidence: avgConf,
+        isHighStakes,
+        validated: validationResult?.validated ?? null,
+        generatedAt: new Date().toISOString(),
+      };
+
       res.write(
         `data: ${JSON.stringify({
           type: 'done',
           agentCount: agentResponses.length,
-          averageConfidence: Math.round(
-            agentResponses.reduce((sum, r) => sum + r.confidence, 0) / agentResponses.length,
-          ),
+          averageConfidence: avgConf,
           isHighStakes,
           validated: validationResult?.validated ?? null,
+          provenance,
         })}\n\n`,
       );
 

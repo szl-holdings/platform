@@ -194,6 +194,8 @@ selfModel.register(router);
 verifier.register(router);
 skillLibrary.register(router);
 
+router.use("/provenance", lazyMount(() => import("./provenance"), "provenance"));
+
 router.use("/nexus", lazyMount(() => import("./nexus"), "nexus"));
 
 // NEXUS Ontology Fabric — unified entity registry + adjacency graph

@@ -233,6 +233,7 @@ export {
   type RecommendationCardProps,
 } from './DecisionCenter';
 export { ActionLoop, DataProvenance, RoleSelector } from './data-provenance';
+export { ProvenanceBadge, ProvenanceDrawer, type ProvenanceDrawerEnvelope, type ProvenanceDrawerProps } from './provenance-drawer';
 export { type DataState, DataStateBadge, DataStateBanner } from './data-state-badge';
 export {
   type AiRecommendation as DecisionAiRecommendation,

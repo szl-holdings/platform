@@ -54,6 +54,52 @@ export const llmStructuredOutputSchema = <T extends z.ZodTypeAny>(schema: T) =>
     completionTokens: z.number().int().min(0).optional(),
   });
 
+export const sourceCitationSchema = z.object({
+  sourceId: z.string().min(1),
+  sourceUri: z.string().optional(),
+  chunkId: z.string().optional(),
+  title: z.string().optional(),
+  score: z.number().min(0).max(1).optional(),
+  retrievedAt: z.string(),
+});
+
+export const toolCallRecordSchema = z.object({
+  toolId: z.string().min(1),
+  inputSummary: z.string().optional(),
+  outputSummary: z.string().optional(),
+  durationMs: z.number().min(0).optional(),
+  status: z.enum(['success', 'error', 'skipped']),
+  error: z.string().optional(),
+  timestamp: z.string(),
+});
+
+export const provenanceEnvelopeSchema = z.object({
+  runId: z.string().min(1),
+  agentId: z.string().min(1),
+  domain: z.string(),
+  model: z.string(),
+  provider: z.string(),
+  promptHash: z.string(),
+  promptTokens: z.number().int().min(0),
+  completionTokens: z.number().int().min(0),
+  totalTokens: z.number().int().min(0),
+  costEstimateUsd: z.number().min(0),
+  confidence: z.number().min(0).max(100),
+  latencyMs: z.number().min(0),
+  sources: z.array(sourceCitationSchema),
+  toolCalls: z.array(toolCallRecordSchema),
+  governanceVerdict: z.enum(['allowed', 'blocked']),
+  generatedAt: z.string(),
+});
+export type ProvenanceEnvelopeZ = z.infer<typeof provenanceEnvelopeSchema>;
+
+export const provenanceLineageSchema = z.object({
+  runId: z.string().min(1),
+  envelope: provenanceEnvelopeSchema,
+  parentRunIds: z.array(z.string()),
+  consultations: z.array(provenanceEnvelopeSchema),
+});
+
 export const aiOpsMetricSchema = z.object({
   totalTraces: z.number().int().min(0),
   reviewRequired: z.number().int().min(0),

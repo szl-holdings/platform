@@ -59,6 +59,32 @@ export interface LedgerEntry {
   timestamp: string;
 }
 
+export interface ProvenanceEnvelope {
+  runId: string;
+  agentId: string;
+  domain: string;
+  model: string;
+  provider: string;
+  promptHash: string;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  costEstimateUsd: number;
+  confidence: number;
+  latencyMs: number;
+  sources: SourceCitation[];
+  toolCalls: ToolCallRecord[];
+  governanceVerdict: 'allowed' | 'blocked';
+  generatedAt: string;
+}
+
+export interface ProvenanceLineage {
+  runId: string;
+  envelope: ProvenanceEnvelope;
+  parentRunIds: string[];
+  consultations: ProvenanceEnvelope[];
+}
+
 export interface EvidencePackage {
   packageId: string;
   title?: string;
