@@ -42,9 +42,9 @@ Columns: Path · Action · Risk · Reason · Owner Approval Needed
 | `build_video.sh` | Move to `scripts/media/build_video.sh` | Low | Shell video builder at root; belongs in `scripts/media/` | **Yes — confirm no active reference** |
 | `pyproject.toml` | Move to `scripts/media/` or delete if unused | Low | Only serves Python media scripts | **Yes — confirm scope** |
 | `GITHUB_SETTINGS_APPLIED.json` | Move to `docs/github/GITHUB_SETTINGS_APPLIED.json` | None | Metadata JSON; not product code | **Yes — confirm no tooling reads root path** |
-| `elite-layer/` | Investigate, then archive or document | Unknown | Unknown purpose — no README found | **Yes — owner must identify purpose** |
-| `content/` | Investigate, then archive or document | Low | Content assets — scope unclear | **Yes — owner must identify scope** |
-| `audit/` (root-level) | Merge into `docs/audit/` | Low | Root-level audit directory duplicates `docs/audit/` | **Yes — verify no external references** |
+| `elite-layer/` | ✅ Documented in place (Task #2900) | None | Holds release-governance contracts (`release-governance/`) and feedback schemas (`feedback/`) referenced by stable path from `docs/RELEASE_GATES.md` and elite reports — see `elite-layer/README.md` | **No — resolved** |
+| `content/` | ✅ Documented in place (Task #2900) | None | Source markdown for public-facing surfaces (Academy, help, demos, integrations catalog, trust center, changelog, launch series) consumed by in-product viewers and the launch publishing pipeline — see `content/README.md` | **No — resolved** |
+| `audit/` (root-level) | ✅ Documented in place (Task #2900) | None | Frozen Zero-Gap audit artifact referenced by automation in `scripts/audit/`, `scripts/public-mirror/`, `audit/verify.sh`, and `audit/source-of-truth.json`; intentionally distinct from the Series A rehaul narrative under `docs/audit/` — see updated `audit/README.md` | **No — resolved** |
 | `01-thursday-intro.zip` | Remove from tracking (if tracked) | None | Large binary archive; already in `.gitignore` | **No — safe; `git rm --cached` if tracked** |
 | `02-sunday-deep-dive.zip` | Remove from tracking (if tracked) | None | Large binary archive; already in `.gitignore` | **No — safe; `git rm --cached` if tracked** |
 | `03-monday-operator-lens.zip` | Remove from tracking (if tracked) | None | Large binary archive; already in `.gitignore` | **No — safe; `git rm --cached` if tracked** |

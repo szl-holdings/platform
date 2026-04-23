@@ -729,6 +729,9 @@
   "artifacts/mockup-sandbox/src/pages/Skills.tsx": {
     "NEXUS": 2
   },
+  "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx": {
+    "NEXUS": 2
+  },
   "artifacts/mockup-sandbox/src/pages/patternAtlasMetadata.generated.ts": {
     "Cortex": 6,
     "Pulse": 8
@@ -2791,6 +2794,14 @@
   },
   "packages/substrate/src/workflows/vessels-voyage-anomaly.ts": {
     "Vessels": 2
+  },
+  "packages/tokens/src/manifest.ts": {
+    "Sentra": 1,
+    "Pulse": 1,
+    "Terra": 1,
+    "Vessels": 1,
+    "Lyte": 1,
+    "NEXUS": 1
   },
   "packages/tool-mesh/src/tools/security-tools.ts": {
     "Aegis": 2

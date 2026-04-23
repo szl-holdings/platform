@@ -3,6 +3,12 @@
 **Completed:** 2026-04-21  
 **Track:** Zero-Gap Track 1 — Audit, Truth Map & Root Cleanup
 
+> **Why this lives at the repo root (not under `docs/audit/`)**
+>
+> This directory is a frozen, machine-consumable artifact of the Zero-Gap audit pass — not narrative documentation. It is referenced by name from automation in `scripts/audit/`, `scripts/public-mirror/`, and CI scorecards (e.g. `ops/market/market-readiness-scorecard.md`, `audit/inventory/*.json`, `audit/source-of-truth.json`, `audit/verify.sh`). Moving it would break those references and invalidate the historical "as of 2026-04-21" snapshot.
+>
+> `docs/audit/` is the home for the **Series A GitHub Rehaul** narrative audit (April 2026). The two are intentionally separate: `audit/` = data + scripts produced by the audit, `docs/audit/` = curated reports for investors and contributors.
+
 This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Downstream tracks (Design System v2, Backend Hardening, Database, Infra/CI) should consume these documents as their baseline.
 
 ---
