@@ -18,10 +18,10 @@ Categories:
 
 | Secret | Category | Auth Flow | Local | Production | Notes |
 |--------|----------|-----------|-------|-----------|-------|
-| `SESSION_SECRET` | **required-prod** | All session-based auth | Optional (demo key used) | **MUST SET** | Signs session tokens; startup warns if missing in prod |
+| `SESSION_SECRET` | **required-prod** | All session-based auth | Optional (demo key used) | **SET** ✓ (2026-04-23, task #3121) | Signs session tokens; startup warns if missing in prod |
 | `REPL_ID` | **required-prod** | Replit OIDC sign-in | Optional (OIDC disabled) | **MUST SET** | OIDC client ID; without it `/api/login` returns 404 |
 | `ISSUER_URL` | optional | Replit OIDC | Defaults to `https://replit.com/oidc` | Set explicitly | OIDC discovery URL |
-| `OAUTH_STATE_SECRET` | **required-prod** | OIDC state param CSRF | Auto-generated at boot | **MUST SET** | Prevents OIDC state forgery; auto-gen is dev-safe only |
+| `OAUTH_STATE_SECRET` | **required-prod** | OIDC state param CSRF | Auto-generated at boot | **SET** ✓ (64 hex, 2026-04-23, task #3121) | Prevents OIDC state forgery; auto-gen is dev-safe only |
 | `MFA_SECRET_ENCRYPTION_KEY` | **required-prod** | TOTP/MFA | **SET** ✓ (64 hex, 2026-04-22, task #2885) | **SET** ✓ | 64 hex chars; AES-256-GCM encryption of TOTP secrets at rest active |
 | `AZURE_AD_TENANT_ID` | optional | Azure AD SSO | Not required | Set for AAD tenants | Multi-tenant SSO |
 | `AZURE_AD_CLIENT_ID` | optional | Azure AD SSO | Not required | Set for AAD tenants | |
@@ -35,8 +35,8 @@ Categories:
 
 | Secret | Category | Flow | Local | Production | Notes |
 |--------|----------|------|-------|-----------|-------|
-| `ALLOY_INTERNAL_TOKEN` | **required-prod** | Internal service auth (`x-internal-token`) | **Auto-generated** (96-char hex) at boot | **MUST SET** (32+ chars) | Production boot fails if not set or < 32 chars |
-| `CONNECTOR_ENCRYPTION_KEY` | **required-prod** | RMM credential encryption (AES-256-GCM) | Optional (derived dev key) | **MUST SET** (64 hex chars) | Production boot fails if not set |
+| `ALLOY_INTERNAL_TOKEN` | **required-prod** | Internal service auth (`x-internal-token`) | **Auto-generated** (96-char hex) at boot | **SET** ✓ (64+ chars, 2026-04-23, task #3121) | Production boot fails if not set or < 32 chars |
+| `CONNECTOR_ENCRYPTION_KEY` | **required-prod** | RMM credential encryption (AES-256-GCM) | Optional (derived dev key) | **SET** ✓ (64 hex, 2026-04-23, task #3121) | Production boot fails if not set |
 | `USAGE_EVENT_SERVICE_TOKEN` | optional | `POST /api/orgs/:slug/usage/events` internal collector | Not required | Set for usage tracking | Scoped to single endpoint |
 | `SUBSTRATE_GATEWAY_API_KEY` | optional | Substrate MCP gateway proxy (`/mcp/*`) | Not required | Set for substrate | Bearer auth for gateway sidecar |
 
@@ -100,8 +100,8 @@ Without any AI key, the server reports `aiMode: "mock"` in `/api/health`. Pulse 
 |--------|----------|-------|
 | `DEMO_MODE=true` | demo-fallback | Enables mock external services; disables destructive ops |
 | `ENABLE_DEMO_SEED=true` | demo-fallback | Seeds demo data at boot |
-| `ALLOY_INTERNAL_TOKEN` (auto-generated) | demo-fallback | 96-char hex auto-gen in dev; replace with permanent secret for prod |
-| `OAUTH_STATE_SECRET` (auto-generated) | demo-fallback | 64-char hex auto-gen in dev; MUST set explicitly in prod |
+| `ALLOY_INTERNAL_TOKEN` (auto-generated) | demo-fallback | 96-char hex auto-gen in dev; permanent secret SET ✓ (task #3121) |
+| `OAUTH_STATE_SECRET` (auto-generated) | demo-fallback | 64-char hex auto-gen in dev; permanent secret SET ✓ (task #3121) |
 
 ---
 
@@ -117,11 +117,11 @@ The following secrets are referenced exclusively via `process.env.*`. No hardcod
 
 | Priority | Action | Credential | Command |
 |----------|--------|-----------|---------|
-| P0 | Set `MFA_SECRET_ENCRYPTION_KEY` | F-02 | `openssl rand -hex 32` → Replit Secrets |
-| P0 | Set `SESSION_SECRET` (if not already) | Auth | `openssl rand -hex 32` → Replit Secrets |
-| P0 | Set `CONNECTOR_ENCRYPTION_KEY` | RMM encryption | `openssl rand -hex 32` → Replit Secrets |
-| P0 | Set `ALLOY_INTERNAL_TOKEN` (permanent) | Internal auth | `openssl rand -hex 48` → Replit Secrets |
-| P0 | Set `OAUTH_STATE_SECRET` (permanent) | OIDC state | `openssl rand -hex 32` → Replit Secrets |
+| P0 | ~~Set `MFA_SECRET_ENCRYPTION_KEY`~~ | F-02 | **DONE** ✓ (task #2885, 2026-04-22) |
+| P0 | ~~Set `SESSION_SECRET`~~ | Auth | **DONE** ✓ (task #3121, 2026-04-23) |
+| P0 | ~~Set `CONNECTOR_ENCRYPTION_KEY`~~ | RMM encryption | **DONE** ✓ (task #3121, 2026-04-23) |
+| P0 | ~~Set `ALLOY_INTERNAL_TOKEN` (permanent)~~ | Internal auth | **DONE** ✓ (task #3121, 2026-04-23) |
+| P0 | ~~Set `OAUTH_STATE_SECRET` (permanent)~~ | OIDC state | **DONE** ✓ (task #3121, 2026-04-23) |
 | P1 | Set `DATABASE_URL` (live DB) | DB | Replit PostgreSQL or external |
 | P1 | Set `REPL_ID` | OIDC | Replit project settings |
 | P2 | Set `SENTRY_DSN` | Observability | Sentry dashboard |
