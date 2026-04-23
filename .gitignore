@@ -150,3 +150,6 @@ artifacts/szl-holdings/public/briefs/index.json
 
 # Investor-facing PDFs (tracked in repo for version history)
 # demo-assets/szl-holdings-investor-carousel.pdf
+
+# Local gitleaks binary (installed on-demand for scanning; not committed to source)
+gitleaks
