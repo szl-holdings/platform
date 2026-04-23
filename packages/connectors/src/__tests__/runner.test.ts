@@ -171,6 +171,22 @@ describe('ConnectorRunner', () => {
     expect(state.escalated).toHaveLength(1);
   });
 
+  it('dead-letters when all records fail schema validation', async () => {
+    const conn = makeConnector({
+      fetch: async () => [
+        { id: 123 as unknown as string, v: 'bad' as unknown as number },
+        { id: null as unknown as string, v: 'also bad' as unknown as number },
+      ],
+    });
+    const state: RecorderState = { audits: [], registered: [], baseline: null, escalated: [] };
+    const runner = new ConnectorRunner(makeHooks(state));
+    const result = await runner.run(conn);
+    expect(result.status).toBe('dead-letter');
+    expect(result.entitiesRegistered).toBe(0);
+    expect(result.recordsRejected).toBe(2);
+    expect(state.escalated).toHaveLength(1);
+  });
+
   it('passes custom thresholds to drift detection', async () => {
     const state: RecorderState = {
       audits: [],

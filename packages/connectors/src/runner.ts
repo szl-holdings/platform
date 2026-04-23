@@ -186,7 +186,7 @@ export class ConnectorRunner {
     }
 
     let status: SyncStatus;
-    if (registered === 0 && validRecords.length > 0) {
+    if (rejected > 0 && registered === 0 && records.length > 0) {
       status = 'dead-letter';
     } else if (rejected > 0 && registered > 0) {
       status = 'partial';
