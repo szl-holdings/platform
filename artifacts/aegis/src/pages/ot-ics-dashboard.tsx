@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
   AlertTriangle,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Cpu,
@@ -19,6 +20,7 @@ import {
   Shield,
   SkipBack,
   SkipForward,
+  XCircle,
   Zap,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -36,6 +38,8 @@ interface DecodedField {
   flag?: 'info' | 'warn' | 'anomaly';
 }
 
+type TriageStatus = 'open' | 'acknowledged' | 'false_positive' | 'incident_opened';
+
 interface DecodedFrame {
   id: number;
   frameId: string;
@@ -51,6 +55,10 @@ interface DecodedFrame {
   fields: DecodedField[];
   forensicEventId: string | null;
   conversationSessionId: string | null;
+  triageStatus: TriageStatus;
+  acknowledgedAt: string | null;
+  acknowledgedBy: string | null;
+  incidentRef: string | null;
 }
 
 interface ConversationFrame {
@@ -574,11 +582,18 @@ export default function OtIcsDashboard() {
                         <span className="text-[10px] font-mono text-muted-foreground">
                           {frame.frameId}
                         </span>
-                        <span
-                          className={`text-[10px] uppercase px-1.5 py-0.5 rounded border ${sevColor[frame.severity]}`}
-                        >
-                          {frame.severity}
-                        </span>
+                        <div className="flex items-center gap-1">
+                          {(frameTriageStatus[frame.frameId] ?? frame.triageStatus) !== 'open' && (
+                            <TriageBadge
+                              status={(frameTriageStatus[frame.frameId] as TriageStatus | undefined) ?? frame.triageStatus}
+                            />
+                          )}
+                          <span
+                            className={`text-[10px] uppercase px-1.5 py-0.5 rounded border ${sevColor[frame.severity]}`}
+                          >
+                            {frame.severity}
+                          </span>
+                        </div>
                       </div>
                     </button>
                   );
@@ -614,77 +629,15 @@ export default function OtIcsDashboard() {
                   </div>
                 </div>
 
-                {(() => {
-                  const triageStatus =
-                    frameTriageStatus[selectedFrame.frameId] ??
-                    (selectedFrame as any).triageStatus ??
-                    'pending';
-                  const isBusy =
-                    acknowledgeMutation.isPending ||
-                    falsePositiveMutation.isPending ||
-                    openIncidentMutation.isPending;
-                  const triageLabel: Record<string, string> = {
-                    pending: 'Pending Review',
-                    acknowledged: 'Acknowledged',
-                    false_positive: 'False Positive',
-                    incident_opened: 'Incident Opened',
-                  };
-                  return (
-                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
-                      <div className="flex items-center justify-between flex-wrap gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                            Triage
-                          </span>
-                          <span
-                            className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${
-                              triageStatus === 'acknowledged'
-                                ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10'
-                                : triageStatus === 'false_positive'
-                                  ? 'border-slate-500/30 text-slate-400 bg-slate-500/10'
-                                  : triageStatus === 'incident_opened'
-                                    ? 'border-red-500/30 text-red-400 bg-red-500/10'
-                                    : 'border-amber-500/30 text-amber-400 bg-amber-500/10'
-                            }`}
-                          >
-                            {triageLabel[triageStatus] ?? triageStatus}
-                          </span>
-                        </div>
-                        {triageStatus === 'pending' && (
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <button
-                              disabled={isBusy}
-                              onClick={() =>
-                                acknowledgeMutation.mutate(selectedFrame.frameId)
-                              }
-                              className="text-[11px] px-3 py-1 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/30 disabled:opacity-50 transition-colors"
-                            >
-                              Acknowledge
-                            </button>
-                            <button
-                              disabled={isBusy}
-                              onClick={() =>
-                                falsePositiveMutation.mutate(selectedFrame.frameId)
-                              }
-                              className="text-[11px] px-3 py-1 rounded-lg bg-slate-600/20 border border-slate-500/30 text-slate-400 hover:bg-slate-600/30 disabled:opacity-50 transition-colors"
-                            >
-                              False Positive
-                            </button>
-                            <button
-                              disabled={isBusy}
-                              onClick={() =>
-                                openIncidentMutation.mutate(selectedFrame.frameId)
-                              }
-                              className="text-[11px] px-3 py-1 rounded-lg bg-red-600/20 border border-red-500/30 text-red-400 hover:bg-red-600/30 disabled:opacity-50 transition-colors"
-                            >
-                              Open Incident
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
+                <TriagePanel
+                  frameId={selectedFrame.frameId}
+                  dbStatus={selectedFrame.triageStatus}
+                  incidentRef={selectedFrame.incidentRef}
+                  overrideStatus={frameTriageStatus[selectedFrame.frameId] as TriageStatus | undefined}
+                  acknowledgeMutation={acknowledgeMutation}
+                  falsePositiveMutation={falsePositiveMutation}
+                  openIncidentMutation={openIncidentMutation}
+                />
 
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
                   <div className="flex items-center justify-between mb-3">
@@ -934,6 +887,23 @@ export default function OtIcsDashboard() {
                     )}
                     {replayFrame.summary}
                   </p>
+                  {replayFrame.anomalous && replayFrame.frameId && (() => {
+                    const linkedFrame = frames.find((f) => f.frameId === replayFrame.frameId);
+                    if (!linkedFrame) return null;
+                    return (
+                      <div className="mt-3 pt-3 border-t border-red-500/20">
+                        <TriagePanel
+                          frameId={linkedFrame.frameId}
+                          dbStatus={linkedFrame.triageStatus}
+                          incidentRef={linkedFrame.incidentRef}
+                          overrideStatus={frameTriageStatus[linkedFrame.frameId] as TriageStatus | undefined}
+                          acknowledgeMutation={acknowledgeMutation}
+                          falsePositiveMutation={falsePositiveMutation}
+                          openIncidentMutation={openIncidentMutation}
+                        />
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>
@@ -949,13 +919,14 @@ export default function OtIcsDashboard() {
                     <th className="text-left px-3 py-2">Dst</th>
                     <th className="text-left px-3 py-2">Proto</th>
                     <th className="text-left px-3 py-2">Summary</th>
+                    <th className="text-left px-3 py-2">Triage</th>
                     <th className="text-right px-3 py-2">Bytes</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredConversation.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
+                      <td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">
                         No frames match the selected protocol filter and time range.
                       </td>
                     </tr>
@@ -992,6 +963,35 @@ export default function OtIcsDashboard() {
                             <AlertTriangle className="inline w-3 h-3 mr-1 text-red-400" />
                           )}
                           {f.summary}
+                        </td>
+                        <td className="px-3 py-1.5" onClick={(e) => e.stopPropagation()}>
+                          {f.anomalous && f.frameId && (() => {
+                            const linked = frames.find((fr) => fr.frameId === f.frameId);
+                            if (!linked) return null;
+                            const status = (frameTriageStatus[linked.frameId] as TriageStatus | undefined) ?? linked.triageStatus;
+                            if (status === 'open') {
+                              const isBusy = acknowledgeMutation.isPending || openIncidentMutation.isPending;
+                              return (
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    disabled={isBusy}
+                                    onClick={() => acknowledgeMutation.mutate(linked.frameId)}
+                                    className="text-[10px] px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50 transition-colors"
+                                  >
+                                    Ack
+                                  </button>
+                                  <button
+                                    disabled={isBusy}
+                                    onClick={() => openIncidentMutation.mutate(linked.frameId)}
+                                    className="text-[10px] px-1.5 py-0.5 rounded border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 disabled:opacity-50 transition-colors"
+                                  >
+                                    Incident
+                                  </button>
+                                </div>
+                              );
+                            }
+                            return <TriageBadge status={status} />;
+                          })()}
                         </td>
                         <td className="px-3 py-1.5 font-mono text-right text-muted-foreground">
                           {f.bytes}
@@ -1168,6 +1168,60 @@ export default function OtIcsDashboard() {
                       {new Date(selectedAssetData.baselineLastComputedAt).toLocaleString()}
                     </p>
                   )}
+                  {(() => {
+                    const assetFrames = frames
+                      .filter((f) => f.assetId === selectedAsset && f.severity !== 'info' && f.severity !== 'low')
+                      .slice(0, 4);
+                    if (assetFrames.length === 0) return null;
+                    const isBusy = acknowledgeMutation.isPending || falsePositiveMutation.isPending || openIncidentMutation.isPending;
+                    return (
+                      <div className="pt-2 border-t border-white/10 space-y-2">
+                        <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3 text-amber-400" /> Anomalous frames — triage
+                        </p>
+                        {assetFrames.map((f) => {
+                          const status = (frameTriageStatus[f.frameId] as TriageStatus | undefined) ?? f.triageStatus;
+                          return (
+                            <div key={f.frameId} className="rounded-lg border border-white/10 bg-white/[0.02] p-2 space-y-1.5">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-[10px] font-mono text-muted-foreground truncate">{f.frameId}</span>
+                                <span className={`text-[10px] uppercase px-1.5 py-0.5 rounded border ${sevColor[f.severity]}`}>{f.severity}</span>
+                              </div>
+                              <p className="text-[11px] text-slate-300 line-clamp-2">{f.summary}</p>
+                              {status === 'open' ? (
+                                <div className="flex items-center gap-1 flex-wrap">
+                                  <button
+                                    disabled={isBusy}
+                                    onClick={() => acknowledgeMutation.mutate(f.frameId)}
+                                    className="text-[10px] px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50 transition-colors"
+                                  >
+                                    Acknowledge
+                                  </button>
+                                  <button
+                                    disabled={isBusy}
+                                    onClick={() => falsePositiveMutation.mutate(f.frameId)}
+                                    className="text-[10px] px-2 py-0.5 rounded border border-slate-500/30 bg-slate-500/10 text-slate-400 hover:bg-slate-500/20 disabled:opacity-50 transition-colors"
+                                  >
+                                    False Positive
+                                  </button>
+                                  <button
+                                    disabled={isBusy}
+                                    onClick={() => openIncidentMutation.mutate(f.frameId)}
+                                    className="text-[10px] px-2 py-0.5 rounded border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 disabled:opacity-50 transition-colors"
+                                  >
+                                    Open Incident
+                                  </button>
+                                </div>
+                              ) : (
+                                <TriageBadge status={status} incidentRef={f.incidentRef ?? undefined} />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+
                   <div className="flex flex-col gap-2 pt-2">
                     <Link
                       href="/forensics"
@@ -1336,6 +1390,104 @@ function DeviationRow({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between text-[11px] gap-2">
       <span className="text-muted-foreground">{label}</span>
       <span className="font-mono text-amber-300 truncate max-w-[60%] text-right">{value}</span>
+    </div>
+  );
+}
+
+const TRIAGE_LABEL: Record<TriageStatus, string> = {
+  open: 'Open',
+  acknowledged: 'Acknowledged',
+  false_positive: 'False Positive',
+  incident_opened: 'Incident Opened',
+};
+
+function TriageBadge({
+  status,
+  incidentRef,
+}: {
+  status: TriageStatus;
+  incidentRef?: string;
+}) {
+  const cls =
+    status === 'acknowledged'
+      ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10'
+      : status === 'false_positive'
+        ? 'border-slate-500/30 text-slate-400 bg-slate-500/10'
+        : status === 'incident_opened'
+          ? 'border-red-500/30 text-red-400 bg-red-500/10'
+          : 'border-amber-500/30 text-amber-400 bg-amber-500/10';
+  const Icon =
+    status === 'acknowledged'
+      ? CheckCircle2
+      : status === 'false_positive'
+        ? XCircle
+        : status === 'incident_opened'
+          ? AlertTriangle
+          : null;
+  return (
+    <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${cls}`}>
+      {Icon && <Icon className="w-3 h-3" />}
+      {TRIAGE_LABEL[status]}
+      {incidentRef && <span className="font-mono ml-0.5 opacity-80">· {incidentRef}</span>}
+    </span>
+  );
+}
+
+function TriagePanel({
+  frameId,
+  dbStatus,
+  incidentRef,
+  overrideStatus,
+  acknowledgeMutation,
+  falsePositiveMutation,
+  openIncidentMutation,
+}: {
+  frameId: string;
+  dbStatus: TriageStatus;
+  incidentRef: string | null;
+  overrideStatus?: TriageStatus;
+  acknowledgeMutation: { mutate: (id: string) => void; isPending: boolean };
+  falsePositiveMutation: { mutate: (id: string) => void; isPending: boolean };
+  openIncidentMutation: { mutate: (id: string) => void; isPending: boolean };
+}) {
+  const status = overrideStatus ?? dbStatus;
+  const isBusy =
+    acknowledgeMutation.isPending ||
+    falsePositiveMutation.isPending ||
+    openIncidentMutation.isPending;
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Triage</span>
+          <TriageBadge status={status} incidentRef={incidentRef ?? undefined} />
+        </div>
+        {status === 'open' && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              disabled={isBusy}
+              onClick={() => acknowledgeMutation.mutate(frameId)}
+              className="text-[11px] px-3 py-1 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/30 disabled:opacity-50 transition-colors"
+            >
+              Acknowledge
+            </button>
+            <button
+              disabled={isBusy}
+              onClick={() => falsePositiveMutation.mutate(frameId)}
+              className="text-[11px] px-3 py-1 rounded-lg bg-slate-600/20 border border-slate-500/30 text-slate-400 hover:bg-slate-600/30 disabled:opacity-50 transition-colors"
+            >
+              False Positive
+            </button>
+            <button
+              disabled={isBusy}
+              onClick={() => openIncidentMutation.mutate(frameId)}
+              className="text-[11px] px-3 py-1 rounded-lg bg-red-600/20 border border-red-500/30 text-red-400 hover:bg-red-600/30 disabled:opacity-50 transition-colors"
+            >
+              Open Incident
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   db,
+  firestormIncidentsTable,
   insertOtIcsAnomalyScoreSchema,
   insertOtIcsAssetSchema,
   insertOtIcsConversationSchema,
@@ -321,22 +322,68 @@ router.post(
   ),
   async (req, res) => {
     try {
-      const { acknowledgedBy, incidentRef } = triageBodySchema.parse(req.body);
-      const [updated] = await db
-        .update(otIcsDecodedFramesTable)
-        .set({
-          triageStatus: 'incident_opened',
-          acknowledgedAt: new Date(),
-          acknowledgedBy: acknowledgedBy ?? null,
-          incidentRef: incidentRef ?? null,
-        })
-        .where(eq(otIcsDecodedFramesTable.frameId, req.params.frameId as string))
-        .returning();
-      if (!updated) {
+      const { acknowledgedBy, incidentRef: providedRef } = triageBodySchema.parse(req.body);
+      const fid = req.params.frameId as string;
+
+      const [frame] = await db
+        .select()
+        .from(otIcsDecodedFramesTable)
+        .where(eq(otIcsDecodedFramesTable.frameId, fid))
+        .limit(1);
+      if (!frame) {
         res.status(404).json({ success: false, error: 'Frame not found' });
         return;
       }
-      sendSuccess(res, { frameId: updated.frameId, triageStatus: updated.triageStatus, incidentRef: updated.incidentRef });
+
+      const sevMap: Record<string, 'low' | 'medium' | 'high' | 'critical'> = {
+        critical: 'critical',
+        high: 'high',
+        medium: 'medium',
+        low: 'low',
+        info: 'low',
+      };
+
+      const txResult = await db.transaction(async (tx) => {
+        const [socIncident] = await tx
+          .insert(firestormIncidentsTable)
+          .values({
+            title: `OT/ICS Anomaly: ${frame.functionLabel} on ${frame.assetId ?? frame.dst}`,
+            description: `Protocol anomaly detected on frame ${frame.frameId}. ${frame.summary}`,
+            severity: sevMap[frame.severity] ?? 'medium',
+            status: 'triage',
+            affectedAssets: frame.assetId ? [frame.assetId] : [frame.dst],
+            notes: `Source: ${frame.src} → Dest: ${frame.dst} | Protocol: ${frame.protocol} | Frame: ${frame.frameId}${frame.conversationSessionId ? ` | Session: ${frame.conversationSessionId}` : ''}${frame.forensicEventId ? ` | Forensic: ${frame.forensicEventId}` : ''}`,
+            attackTechnique: frame.protocol,
+          })
+          .returning({ id: firestormIncidentsTable.id });
+
+        const resolvedRef = providedRef ?? `INC-OT-${socIncident.id}`;
+
+        const [updated] = await tx
+          .update(otIcsDecodedFramesTable)
+          .set({
+            triageStatus: 'incident_opened',
+            acknowledgedAt: new Date(),
+            acknowledgedBy: acknowledgedBy ?? null,
+            incidentRef: resolvedRef,
+          })
+          .where(eq(otIcsDecodedFramesTable.frameId, fid))
+          .returning();
+
+        return { updated, socIncidentId: socIncident.id, resolvedRef };
+      });
+
+      logger.info(
+        { frameId: fid, socIncidentId: txResult.socIncidentId, incidentRef: txResult.resolvedRef },
+        '[ot-ics] SOC incident created from OT/ICS frame',
+      );
+
+      sendSuccess(res, {
+        frameId: txResult.updated.frameId,
+        triageStatus: txResult.updated.triageStatus,
+        incidentRef: txResult.updated.incidentRef,
+        socIncidentId: txResult.socIncidentId,
+      });
     } catch (err) {
       handleRouteError(res, err, 'Failed to open incident for frame');
     }
