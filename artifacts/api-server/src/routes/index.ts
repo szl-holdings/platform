@@ -33,6 +33,10 @@ const router: IRouter = Router();
 router.use(lazyMatch("/booking", () => import("./carlota-time-tracking"), "carlota-time-tracking"));
 router.use(lazyMatch("/booking", () => import("./carlota-jo-invoice-email"), "carlota-jo-invoice-email"));
 
+// Carlota Jo metrics routes (public, unauthenticated).
+// Owns /booking/team and /booking/engagements-summary for dashboard KPIs.
+router.use(lazyMatch("/booking", () => import("./carlota-metrics"), "carlota-metrics"));
+
 // Anonymous page-view tracking — public, unauthenticated.
 router.use(lazyMatch("/track", () => import("./page-view-tracking"), "page-view-tracking"));
 

@@ -176,6 +176,10 @@ const PUBLIC_PREFIXES = [
   "/api/booking/invoices/email-log/",
   "/api/booking/services",
   "/api/booking/health",
+  // Carlota Jo dashboard KPI metrics — team capacity and engagements summary.
+  // Public so the dashboard can show live DB-backed numbers without a session.
+  "/api/booking/team",
+  "/api/booking/engagements-summary",
   // LP portal — read-only GET routes use authMiddleware({ required: false }) so the
   // marketing demo at /fund/lp-portal can showcase seeded data, while authenticated
   // LPs see only their own real records (matched by contact email).

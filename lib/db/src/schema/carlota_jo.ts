@@ -343,3 +343,40 @@ export const insertCarlotaProposalDraftSchema = createInsertSchema(
 ).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertCarlotaProposalDraft = z.infer<typeof insertCarlotaProposalDraftSchema>;
 export type CarlotaProposalDraft = typeof carlotaProposalDraftsTable.$inferSelect;
+
+// ── Team Members (capacity planning) ──────────────────────────────────────────
+
+export type TeamMemberAllocation = {
+  engagement: string;
+  client: string;
+  pct: number;
+  weeks: string;
+  color: string;
+};
+
+export const carlotaTeamMembersTable = pgTable('carlota_team_members', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  title: text('title').notNull(),
+  skills: jsonb('skills').$type<string[]>().notNull().default([]),
+  allocations: jsonb('allocations')
+    .$type<TeamMemberAllocation[]>()
+    .notNull()
+    .default([]),
+  utilisation: integer('utilisation').notNull().default(0),
+  capacity: integer('capacity').notNull().default(100),
+  status: text('status', { enum: ['optimal', 'over', 'under', 'bench'] })
+    .notNull()
+    .default('optimal'),
+  dayRate: integer('day_rate').notNull().default(0),
+  isSeeded: boolean('is_seeded').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const insertCarlotaTeamMemberSchema = createInsertSchema(carlotaTeamMembersTable).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCarlotaTeamMember = z.infer<typeof insertCarlotaTeamMemberSchema>;
+export type CarlotaTeamMember = typeof carlotaTeamMembersTable.$inferSelect;
