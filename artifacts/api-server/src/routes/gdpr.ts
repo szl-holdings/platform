@@ -1,13 +1,20 @@
-import { apiKeysTable, db, sessionsTable, usersTable } from '@szl-holdings/db';
-import { eq, sql } from 'drizzle-orm';
+import { db, exportJobsTable, usersTable } from '@szl-holdings/db';
+import { and, eq, gt, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
+import { randomBytes } from 'node:crypto';
 import { z } from 'zod';
-import { handleRouteError, sendNoContent, sendSuccess } from '../lib/api-response';
+import { handleRouteError, sendNoContent, sendNotFound, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
+import { registerAllPrivacyContributors } from '../services/privacy-contributors/index';
+import { composeExportForUser } from '../services/privacy-registry';
 import { validateBody } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
 import { gdprLimiter } from '../middlewares/rate-limiters';
 import { hashEmail } from './contact';
+
+const EXPORT_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
+
+registerAllPrivacyContributors();
 
 const router: IRouter = Router();
 
@@ -69,62 +76,26 @@ router.post(
   },
 );
 
+/**
+ * GDPR Right-to-Access / Data Portability — initiate export (Article 15 / 20)
+ *
+ * Collects all personal data for the authenticated user via the privacy registry
+ * and stores the bundle under a signed download token that expires in 24 hours.
+ * Returns a signed URL rather than streaming the bundle directly, avoiding
+ * memory pressure for large exports and enabling link sharing with support staff.
+ */
 router.get('/gdpr/export', authMiddleware(), gdprLimiter, async (req, res) => {
   try {
     const userId = req.user?.id;
+    const userEmail = req.user?.email ?? null;
 
-    const [user] = await db
-      .select({
-        id: usersTable.id,
-        displayName: usersTable.displayName,
-        email: usersTable.email,
-        avatarUrl: usersTable.avatarUrl,
-        bio: usersTable.bio,
-        platformRole: usersTable.platformRole,
-        isActive: usersTable.isActive,
-        createdAt: usersTable.createdAt,
-        lastLoginAt: usersTable.lastLoginAt,
-      })
-      .from(usersTable)
-      .where(eq(usersTable.id, userId))
-      .limit(1);
-
-    const sessions = await db
-      .select({
-        id: sessionsTable.id,
-        createdAt: sessionsTable.createdAt,
-        expiresAt: sessionsTable.expiresAt,
-        ipAddress: sessionsTable.ipAddress,
-        userAgent: sessionsTable.userAgent,
-      })
-      .from(sessionsTable)
-      .where(eq(sessionsTable.userId, userId));
-
-    const apiKeys = await db
-      .select({
-        id: apiKeysTable.id,
-        name: apiKeysTable.name,
-        createdAt: apiKeysTable.createdAt,
-      })
-      .from(apiKeysTable)
-      .where(eq(apiKeysTable.userId, userId));
-
-    let activityLogs: unknown[] = [];
-    try {
-      const { queryAuditEvents } = await import('@szl-holdings/audit');
-      const events = await queryAuditEvents({ userId, limit: 1000 });
-      activityLogs = events ?? [];
-    } catch (_err) {
-      logger.warn({ userId }, '[gdpr] Could not load audit events for export (non-fatal)');
-    }
+    const domainData = await composeExportForUser(userId, userEmail);
 
     const exportPayload = {
       exportedAt: new Date().toISOString(),
       requestedBy: userId,
-      dataSubject: user ?? null,
-      sessions,
-      apiKeys,
-      activityLogs,
+      dataSubjectId: userId,
+      data: domainData,
       dataProcessingBasis: {
         legalBasis: 'legitimate_interest',
         purpose: 'Platform service delivery and security',
@@ -140,6 +111,23 @@ router.get('/gdpr/export', authMiddleware(), gdprLimiter, async (req, res) => {
       },
     };
 
+    const downloadToken = randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + EXPORT_TOKEN_TTL_MS);
+
+    await db.insert(exportJobsTable).values({
+      exportId: `gdpr-self-${userId}-${Date.now()}`,
+      name: `GDPR self-service export for user ${userId}`,
+      dataSource: 'gdpr_self_export',
+      format: 'csv',
+      status: 'completed',
+      triggeredByUserId: userId ?? null,
+      triggeredByEmail: userEmail,
+      filterParams: JSON.stringify(exportPayload),
+      downloadToken,
+      expiresAt,
+      completedAt: new Date(),
+    });
+
     try {
       const { logActivity } = await import('../lib/activity-logger');
       await logActivity(req, 'read', 'user_export', String(userId));
@@ -147,15 +135,71 @@ router.get('/gdpr/export', authMiddleware(), gdprLimiter, async (req, res) => {
       logger.warn({ userId }, '[gdpr] Export audit log failed (non-fatal)');
     }
 
+    logger.info({ userId }, '[gdpr] Self-service GDPR export bundle prepared');
+
+    res.status(202).json({
+      message: 'Export bundle ready',
+      downloadUrl: `/api/gdpr/export/${downloadToken}`,
+      expiresAt: expiresAt.toISOString(),
+    });
+  } catch (err) {
+    logger.error({ err }, '[gdpr] Export failed');
+    handleRouteError(res, err, 'Data export failed');
+  }
+});
+
+/**
+ * GDPR export download — redeem a signed URL (Article 15 / 20)
+ *
+ * Users may only redeem tokens they themselves created (triggeredByUserId check).
+ */
+router.get('/gdpr/export/:token', authMiddleware(), gdprLimiter, async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const token = req.params.token as string;
+
+    if (!token || token.length < 32) {
+      handleRouteError(res, new Error('Invalid token'), 'Invalid export token');
+      return;
+    }
+
+    const [job] = await db
+      .select({
+        id: exportJobsTable.id,
+        triggeredByUserId: exportJobsTable.triggeredByUserId,
+        expiresAt: exportJobsTable.expiresAt,
+        filterParams: exportJobsTable.filterParams,
+      })
+      .from(exportJobsTable)
+      .where(
+        and(
+          eq(exportJobsTable.downloadToken, token),
+          gt(exportJobsTable.expiresAt, new Date()),
+        ),
+      )
+      .limit(1);
+
+    if (!job) {
+      sendNotFound(res, 'Export token not found or expired');
+      return;
+    }
+
+    if (job.triggeredByUserId !== userId) {
+      sendNotFound(res, 'Export token not found or expired');
+      return;
+    }
+
+    const payload = job.filterParams ? JSON.parse(job.filterParams as string) : {};
+
     res.setHeader('Content-Type', 'application/json');
     res.setHeader(
       'Content-Disposition',
       `attachment; filename="user-data-export-${userId}-${Date.now()}.json"`,
     );
-    res.status(200).json(exportPayload);
+    res.status(200).json(payload);
   } catch (err) {
-    logger.error({ err }, '[gdpr] Export failed');
-    handleRouteError(res, err, 'Data export failed');
+    logger.error({ err }, '[gdpr] Export download failed');
+    handleRouteError(res, err, 'Export download failed');
   }
 });
 

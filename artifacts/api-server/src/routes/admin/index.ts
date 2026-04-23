@@ -12,6 +12,7 @@ import {
 } from './integrations.js';
 import { register as registerObservability } from './observability.js';
 import { register as registerPipelineDeals } from './pipeline-deals.js';
+import { register as registerPrivacy } from './privacy.js';
 import { register as registerSeed } from './seed.js';
 import { register as registerSupport } from './support.js';
 import { register as registerSystem } from './system.js';
@@ -36,6 +37,7 @@ registerPipelineDeals(adminRouter);
 registerAppsRegistry(adminRouter);
 registerObservability(adminRouter);
 registerEmail(adminRouter);
+registerPrivacy(adminRouter);
 
 export { type IntegrationActivity, integrationActivityLog };
 export default adminRouter;
