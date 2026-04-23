@@ -509,6 +509,7 @@ export default defineConfig({
     include: [
       'tests/**/*.test.ts',
       'tests/**/*.spec.ts',
+      'lib/audit/src/**/*.test.ts',
       'lib/scene-export/src/__tests__/**/*.test.ts',
       'lib/shared-ui/src/**/*.test.ts',
       'lib/shared-ui/src/**/*.test.tsx',
