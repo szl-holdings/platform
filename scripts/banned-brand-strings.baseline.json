@@ -1,35 +1,3004 @@
 {
-  "artifacts/szl-holdings/src/pages/changelog.tsx": {
-    "Cortex": 1
+  "apps/alloy-embedding-api/src/index.ts": {
+    "Alloy": 1
   },
-  "artifacts/szl-holdings/src/pages/commercial-packaging.tsx": {
-    "PULSE": 1
+  "apps/alloy-embedding-api/src/openapi/spec.ts": {
+    "Alloy": 1
   },
-  "artifacts/szl-holdings/src/pages/control-plane.tsx": {
+  "apps/alloy-runtime-api/src/router.ts": {
+    "Alloy": 1
+  },
+  "artifacts/aegis/src/components/atlas-prism-counsel-panel.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/aegis/src/pages/adaptive-defense-shield.tsx": {
+    "Terra": 3,
+    "Alloy": 3,
+    "Aegis": 2
+  },
+  "artifacts/aegis/src/pages/aef-knowledge-search.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/aegis-home.tsx": {
+    "Aegis": 6
+  },
+  "artifacts/aegis/src/pages/aegis-pricing.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/agent-insights.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/alerts-page.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/asset-inventory.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/aegis/src/pages/atlas-correlation.tsx": {
+    "Aegis": 2,
+    "Vessels": 2,
+    "Terra": 2
+  },
+  "artifacts/aegis/src/pages/atlas-execute.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/atlas-runtime.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/audit-chain.tsx": {
+    "Terra": 1,
+    "Alloy": 1,
+    "Nexus": 1,
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/autonomous-threat-engine.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/business-signal-intelligence.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/cases-page.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/citadel-after-action.tsx": {
+    "Aegis": 2,
+    "ALLOY": 1,
+    "Alloy": 2
+  },
+  "artifacts/aegis/src/pages/citadel-playbooks.tsx": {
+    "PRISM Counsel": 1
+  },
+  "artifacts/aegis/src/pages/citadel-war-room.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1
+  },
+  "artifacts/aegis/src/pages/command-home.tsx": {
+    "Aegis": 2
+  },
+  "artifacts/aegis/src/pages/constellation.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/enterprise-demo.tsx": {
+    "Aegis": 3
+  },
+  "artifacts/aegis/src/pages/governance/agent-config.tsx": {
+    "Alloy": 4,
+    "Cortex": 2,
+    "Terra": 2
+  },
+  "artifacts/aegis/src/pages/governed-cockpit.tsx": {
+    "Aegis": 1,
+    "Alloy": 1
+  },
+  "artifacts/aegis/src/pages/hardening-controls.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/aegis/src/pages/incidents-page.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/intel/agent-spawner.tsx": {
+    "Alloy": 4
+  },
+  "artifacts/aegis/src/pages/intel/ai-advisor.tsx": {
+    "Terra": 2,
+    "Vessels": 2
+  },
+  "artifacts/aegis/src/pages/intel/ai-command-center.tsx": {
+    "Alloy": 1,
+    "Pulse": 1
+  },
+  "artifacts/aegis/src/pages/intel/dashboard.tsx": {
+    "AEGIS": 1,
     "Cortex": 2
   },
+  "artifacts/aegis/src/pages/intel/models.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/aegis/src/pages/intel/neural-explorer.tsx": {
+    "Cortex": 1
+  },
+  "artifacts/aegis/src/pages/intel/signal-routing.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/aegis/src/pages/intelligence-fusion-grid.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/legal-workspace.tsx": {
+    "PRISM Counsel": 2
+  },
+  "artifacts/aegis/src/pages/marketing-home.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/mitre-attack-page.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/nexus/cross-domain-correlation.tsx": {
+    "Vessels": 2,
+    "Terra": 2,
+    "Lyte": 1,
+    "Nexus": 1
+  },
+  "artifacts/aegis/src/pages/nexus/executive-briefing.tsx": {
+    "Vessels": 2,
+    "Terra": 2,
+    "Nexus": 1
+  },
+  "artifacts/aegis/src/pages/predictive-intelligence.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/pulse.tsx": {
+    "Aegis": 2,
+    "Pulse": 2
+  },
+  "artifacts/aegis/src/pages/replay.tsx": {
+    "Aegis": 2
+  },
+  "artifacts/aegis/src/pages/scenario-branches.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/simulation-panel.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/aegis/src/pages/simulation-runner.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/soc-dashboard.tsx": {
+    "Aegis": 3
+  },
+  "artifacts/aegis/src/pages/stix-taxii.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/threat-graph.tsx": {
+    "Pulse": 1
+  },
+  "artifacts/aegis/src/pages/threat-kill-chain.tsx": {
+    "Aegis": 4
+  },
+  "artifacts/aegis/src/pages/threat-sim-report.tsx": {
+    "AEGIS": 2,
+    "Aegis": 2
+  },
+  "artifacts/aegis/src/pages/trust-provenance.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/vulnerability-dashboard.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/aegis/src/pages/worldline-registry.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/aegis/src/pages/xdr-incident-workbench.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/carlota-jo/src/data/property-twin.ts": {
+    "Sentra": 1
+  },
+  "artifacts/carlota-jo/src/pages/benchmark-database.tsx": {
+    "Pulse": 1
+  },
+  "artifacts/carlota-jo/src/pages/consulting-os.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/carlota-jo/src/pages/governed-cockpit.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/carlota-jo/src/pages/pulse.tsx": {
+    "Pulse": 2
+  },
+  "artifacts/command/src/App.tsx": {
+    "Alloy": 15
+  },
+  "artifacts/command/src/components/ambient-signal-ranker.tsx": {
+    "Aegis": 1,
+    "Terra": 2,
+    "Vessels": 1,
+    "Lyte": 1
+  },
+  "artifacts/command/src/components/atlas-kpi-section.tsx": {
+    "Aegis": 1,
+    "Terra": 2,
+    "Vessels": 2,
+    "Lyte": 1
+  },
+  "artifacts/command/src/components/command-bar.tsx": {
+    "Aegis": 1,
+    "Pulse": 1,
+    "Sentra": 1,
+    "Lyte": 1
+  },
+  "artifacts/command/src/components/correlation-map-viz.tsx": {
+    "Aegis": 2,
+    "Terra": 1
+  },
+  "artifacts/command/src/components/ecosystem-apps-grid.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/command/src/components/marketing/MarketingFooter.tsx": {
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Lyte": 1,
+    "PRISM Counsel": 1
+  },
+  "artifacts/command/src/components/marketing/MarketingNav.tsx": {
+    "Terra": 1,
+    "Vessels": 1,
+    "Lyte": 1,
+    "Aegis": 2,
+    "PRISM Counsel": 1
+  },
+  "artifacts/command/src/components/signal-chains-panel.tsx": {
+    "Terra": 2,
+    "Aegis": 1,
+    "Vessels": 1,
+    "Lyte": 1
+  },
+  "artifacts/command/src/components/unified-layout.tsx": {
+    "Lyte": 2,
+    "Vessels": 1,
+    "Terra": 1,
+    "Alloy": 1,
+    "AEGIS": 1,
+    "TERRA": 1,
+    "VESSELS": 1
+  },
+  "artifacts/command/src/data/mock-data.ts": {
+    "Vessels": 1,
+    "Nexus": 3,
+    "Alloy": 5,
+    "Lyte": 3,
+    "Aegis": 1,
+    "Terra": 2
+  },
+  "artifacts/command/src/hooks/use-ecosystem-data.ts": {
+    "Terra": 1,
+    "Aegis": 1,
+    "Vessels": 1
+  },
+  "artifacts/command/src/infrastructure/lib/imperium-data.ts": {
+    "Aegis": 5,
+    "Vessels": 1
+  },
+  "artifacts/command/src/infrastructure/pages/praetorian-guard.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/command/src/operations/App.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/command/src/operations/components/layout.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/command/src/operations/components/lyte-layout.tsx": {
+    "Pulse": 2,
+    "TERRA": 1,
+    "ALLOY": 1,
+    "VESSELS": 1
+  },
+  "artifacts/command/src/operations/lib/business-data.ts": {
+    "Nexus": 1
+  },
+  "artifacts/command/src/operations/lib/demo-mode.tsx": {
+    "Aegis": 5,
+    "Vessels": 5,
+    "Nexus": 1,
+    "Terra": 5
+  },
+  "artifacts/command/src/operations/lib/demo-seed.ts": {
+    "Nexus": 1
+  },
+  "artifacts/command/src/operations/pages/action-queue.tsx": {
+    "Nexus": 1
+  },
+  "artifacts/command/src/operations/pages/admin/approval-queue.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/admin/diagnostics.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/admin/export-history.tsx": {
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1
+  },
+  "artifacts/command/src/operations/pages/admin/ops-console.tsx": {
+    "Terra": 1,
+    "Aegis": 3
+  },
+  "artifacts/command/src/operations/pages/admin/run-viewer.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/admin/workflows.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/command/src/operations/pages/alloy-action-console.tsx": {
+    "ALLOY": 7,
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/alloy-agent-handoffs.tsx": {
+    "Alloy": 10,
+    "Vessels": 1,
+    "Terra": 1,
+    "Aegis": 1
+  },
+  "artifacts/command/src/operations/pages/alloy-graph-compiler.tsx": {
+    "Terra": 1,
+    "Vessels": 3,
+    "Alloy": 3
+  },
+  "artifacts/command/src/operations/pages/alloy-integration-health.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/alloy-intelligence.tsx": {
+    "Alloy": 3
+  },
+  "artifacts/command/src/operations/pages/alloy-policy-compiler.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/alloy-policy-sim.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/command/src/operations/pages/alloy-replay-timeline.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/alloy-trust-receipts.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/alloy-workflow-canvas.tsx": {
+    "Alloy": 3
+  },
+  "artifacts/command/src/operations/pages/alloy-workflow-templates.tsx": {
+    "ALLOY": 11,
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/alloy-write-back.tsx": {
+    "ALLOY": 7,
+    "Aegis": 1,
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/approvals-center.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/board-mode.tsx": {
+    "Terra": 2
+  },
+  "artifacts/command/src/operations/pages/bottleneck-heatmap.tsx": {
+    "Vessels": 1,
+    "Terra": 1
+  },
+  "artifacts/command/src/operations/pages/capacity-planning.tsx": {
+    "Nexus": 1
+  },
+  "artifacts/command/src/operations/pages/command-inbox.tsx": {
+    "Alloy": 6,
+    "Terra": 1
+  },
+  "artifacts/command/src/operations/pages/dashboard.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/command/src/operations/pages/decision-receipts.tsx": {
+    "Vessels": 2
+  },
+  "artifacts/command/src/operations/pages/defer-lane.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1
+  },
+  "artifacts/command/src/operations/pages/demo-live.tsx": {
+    "Alloy": 3
+  },
+  "artifacts/command/src/operations/pages/developer/ApiExplorer.tsx": {
+    "Aegis": 1,
+    "Vessels": 1,
+    "Alloy": 4
+  },
+  "artifacts/command/src/operations/pages/developer/GettingStarted.tsx": {
+    "Aegis": 1,
+    "Vessels": 1,
+    "Cortex": 1,
+    "Alloy": 1,
+    "Terra": 1
+  },
+  "artifacts/command/src/operations/pages/developer/SdkGuide.tsx": {
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/digest-center.tsx": {
+    "Aegis": 2,
+    "Terra": 2,
+    "Vessels": 3
+  },
+  "artifacts/command/src/operations/pages/escalation-center.tsx": {
+    "Alloy": 3
+  },
+  "artifacts/command/src/operations/pages/escalation-intelligence.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/executive-command.tsx": {
+    "Vessels": 2,
+    "Terra": 3,
+    "Aegis": 2
+  },
+  "artifacts/command/src/operations/pages/governed-decision-loop.tsx": {
+    "Vessels": 2,
+    "Aegis": 4,
+    "Terra": 3
+  },
+  "artifacts/command/src/operations/pages/gpu-compute-observatory.tsx": {
+    "Alloy": 4
+  },
+  "artifacts/command/src/operations/pages/intelligence-mesh.tsx": {
+    "Aegis": 4,
+    "Cortex": 3
+  },
+  "artifacts/command/src/operations/pages/intervention-workspace.tsx": {
+    "Alloy": 4
+  },
+  "artifacts/command/src/operations/pages/landing.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/command/src/operations/pages/living-topology.tsx": {
+    "Alloy": 2,
+    "Aegis": 2,
+    "Terra": 2
+  },
+  "artifacts/command/src/operations/pages/marketing-landing.tsx": {
+    "Pulse": 4
+  },
+  "artifacts/command/src/operations/pages/msp-command.tsx": {
+    "Nexus": 3
+  },
+  "artifacts/command/src/operations/pages/ops-savings.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/command/src/operations/pages/pricing.tsx": {
+    "Pulse": 1
+  },
+  "artifacts/command/src/operations/pages/prism-dashboard.tsx": {
+    "Alloy": 3
+  },
+  "artifacts/command/src/operations/pages/pulse.tsx": {
+    "Aegis": 1,
+    "Alloy": 4,
+    "Pulse": 2
+  },
+  "artifacts/command/src/operations/pages/self-healing.tsx": {
+    "Alloy": 3
+  },
+  "artifacts/command/src/operations/pages/service-topology.tsx": {
+    "Alloy": 1,
+    "Terra": 1,
+    "Vessels": 1,
+    "Aegis": 1
+  },
+  "artifacts/command/src/operations/pages/shadow-mode.tsx": {
+    "Terra": 1,
+    "Aegis": 1
+  },
+  "artifacts/command/src/operations/pages/slo-management.tsx": {
+    "Alloy": 3
+  },
+  "artifacts/command/src/operations/pages/what-changed.tsx": {
+    "Alloy": 4,
+    "Vessels": 3,
+    "Terra": 2,
+    "Aegis": 1
+  },
+  "artifacts/command/src/pages/alloy-proof.tsx": {
+    "Alloy": 9
+  },
+  "artifacts/command/src/pages/atlas-runtime.tsx": {
+    "Aegis": 4,
+    "Terra": 2,
+    "Vessels": 3,
+    "Lyte": 2,
+    "Alloy": 1
+  },
+  "artifacts/command/src/pages/changelog.tsx": {
+    "Aegis": 4,
+    "Lyte": 2,
+    "Terra": 2
+  },
+  "artifacts/command/src/pages/cognitive/index.tsx": {
+    "Aegis": 2,
+    "Vessels": 2,
+    "Lyte": 2
+  },
+  "artifacts/command/src/pages/cognitive/overview.tsx": {
+    "Aegis": 2,
+    "Vessels": 1,
+    "Terra": 2
+  },
+  "artifacts/command/src/pages/cognitive/policy-sim.tsx": {
+    "AEGIS": 4,
+    "VESSELS": 4,
+    "TERRA": 3
+  },
+  "artifacts/command/src/pages/cognitive/self-model.tsx": {
+    "Aegis": 1,
+    "Terra": 2,
+    "Vessels": 5
+  },
+  "artifacts/command/src/pages/cognitive/traces.tsx": {
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1
+  },
+  "artifacts/command/src/pages/cognitive/verifier.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/command/src/pages/competitive-atlas.tsx": {
+    "Cortex": 2,
+    "Sentra": 6,
+    "PRISM Counsel": 3,
+    "Terra": 5,
+    "Vessels": 4,
+    "Pulse": 4,
+    "Lyte": 4
+  },
+  "artifacts/command/src/pages/cross-platform/index.tsx": {
+    "Aegis": 1,
+    "Lyte": 1,
+    "Vessels": 1,
+    "Terra": 1
+  },
+  "artifacts/command/src/pages/dashboard.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/command/src/pages/demo-launchpad.tsx": {
+    "Alloy": 3,
+    "Terra": 3,
+    "Lyte": 2,
+    "Aegis": 2,
+    "Vessels": 1
+  },
+  "artifacts/command/src/pages/digest.tsx": {
+    "Lyte": 7,
+    "Aegis": 4,
+    "Vessels": 5
+  },
+  "artifacts/command/src/pages/enterprise-state.tsx": {
+    "Lyte": 11,
+    "Aegis": 4,
+    "Terra": 5,
+    "Vessels": 3
+  },
+  "artifacts/command/src/pages/governed-cockpit.tsx": {
+    "Alloy": 4,
+    "Aegis": 8,
+    "Vessels": 10,
+    "Pulse": 4,
+    "Terra": 6
+  },
+  "artifacts/command/src/pages/health.tsx": {
+    "Alloy": 1,
+    "Lyte": 2,
+    "Terra": 1
+  },
+  "artifacts/command/src/pages/marketing/apps/[id].tsx": {
+    "Terra": 1,
+    "Vessels": 3,
+    "Lyte": 1,
+    "Aegis": 1,
+    "Cortex": 1,
+    "PRISM Counsel": 1,
+    "Pulse": 1
+  },
+  "artifacts/command/src/pages/marketing/ops/data.ts": {
+    "Aegis": 2,
+    "Lyte": 2,
+    "Vessels": 1
+  },
+  "artifacts/command/src/pages/marketing/status.tsx": {
+    "Aegis": 2,
+    "Vessels": 2,
+    "Terra": 2,
+    "Lyte": 2
+  },
+  "artifacts/command/src/pages/sla.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/command/src/pages/substrate/mock-data.ts": {
+    "Terra": 1,
+    "Vessels": 2
+  },
+  "artifacts/command/src/pages/team.tsx": {
+    "Aegis": 3
+  },
+  "artifacts/command/src/pages/trust-console.tsx": {
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1
+  },
+  "artifacts/command/src/pages/worldline-registry.tsx": {
+    "Aegis": 3,
+    "Terra": 4,
+    "Vessels": 3,
+    "Lyte": 2,
+    "Alloy": 1
+  },
+  "artifacts/counsel/src/App.tsx": {
+    "Vessels": 2,
+    "Lyte": 1
+  },
+  "artifacts/lyte-command-center/src/App.tsx": {
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "artifacts/lyte-command-center/src/data/seed.ts": {
+    "Lyte": 32,
+    "Alloy": 4
+  },
+  "artifacts/lyte-command-center/src/pages/aef-knowledge-search.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/lyte-command-center/src/pages/billing-account.tsx": {
+    "Lyte": 2
+  },
+  "artifacts/lyte-command-center/src/pages/board-view.tsx": {
+    "Alloy": 2,
+    "Lyte": 4
+  },
+  "artifacts/lyte-command-center/src/pages/brief.tsx": {
+    "Lyte": 6
+  },
+  "artifacts/lyte-command-center/src/pages/briefing.tsx": {
+    "Lyte": 2
+  },
+  "artifacts/lyte-command-center/src/pages/decision-replay.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/lyte-command-center/src/pages/decision-twin.tsx": {
+    "LYTE": 1,
+    "Lyte": 1
+  },
+  "artifacts/lyte-command-center/src/pages/landing.tsx": {
+    "Alloy": 2,
+    "Lyte": 5,
+    "LYTE": 1
+  },
+  "artifacts/lyte-command-center/src/pages/onboarding.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/lyte-command-center/src/pages/overview.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/lyte-command-center/src/pages/policy-center.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/mockup-sandbox/src/components/Layout.tsx": {
+    "NEXUS": 1
+  },
+  "artifacts/mockup-sandbox/src/pages/AuditTrail.tsx": {
+    "Aegis": 10,
+    "Vessels": 9,
+    "Terra": 4,
+    "Pulse": 3
+  },
+  "artifacts/mockup-sandbox/src/pages/DesignSystemPage.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/mockup-sandbox/src/pages/Home.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Pulse": 1,
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "artifacts/mockup-sandbox/src/pages/Orchestrator.tsx": {
+    "Aegis": 6,
+    "Pulse": 7,
+    "Vessels": 6,
+    "Terra": 2,
+    "Alloy": 1
+  },
+  "artifacts/mockup-sandbox/src/pages/PatternAtlas.tsx": {
+    "Cortex": 4,
+    "Pulse": 4,
+    "Aegis": 1,
+    "Terra": 1,
+    "Lyte": 1,
+    "Alloy": 1
+  },
+  "artifacts/mockup-sandbox/src/pages/Skills.tsx": {
+    "NEXUS": 2
+  },
+  "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx": {
+    "NEXUS": 2
+  },
+  "artifacts/mockup-sandbox/src/pages/patternAtlasMetadata.generated.ts": {
+    "Cortex": 6,
+    "Pulse": 8
+  },
+  "artifacts/pulse/src/components/MeshCard.tsx": {
+    "Sentra": 3
+  },
+  "artifacts/pulse/src/components/Shell.tsx": {
+    "Pulse": 1,
+    "Alloy": 1
+  },
+  "artifacts/pulse/src/pages/BriefingEngine.tsx": {
+    "Vessels": 1,
+    "Aegis": 1,
+    "Terra": 1,
+    "Lyte": 1
+  },
+  "artifacts/pulse/src/pages/CustomBrief.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/pulse/src/pages/Settings.tsx": {
+    "Pulse": 3,
+    "Alloy": 2
+  },
+  "artifacts/pulse/src/pages/TodaysBrief.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/pulse/src/pages/billing-account.tsx": {
+    "Pulse": 2
+  },
+  "artifacts/pulse/src/pages/governed-cockpit.tsx": {
+    "Pulse": 1,
+    "Alloy": 1
+  },
+  "artifacts/pulse/src/pages/pricing.tsx": {
+    "Pulse": 2
+  },
+  "artifacts/sentra/src/App.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/sentra/src/pages/billing-account.tsx": {
+    "Sentra": 2
+  },
+  "artifacts/sentra/src/pages/pricing.tsx": {
+    "SENTRA": 1,
+    "Sentra": 1
+  },
+  "artifacts/sentra/src/pages/resilience-scorecard.tsx": {
+    "Sentra": 1
+  },
+  "artifacts/sentra/src/pages/sentra-landing.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-demo-video/src/components/video/CaptionTrack.tsx": {
+    "Lyte": 1,
+    "PRISM Counsel": 1
+  },
+  "artifacts/szl-demo-video/src/components/video/VideoTemplate.tsx": {
+    "Alloy": 1,
+    "Cortex": 1
+  },
+  "artifacts/szl-demo-video/src/components/video/video_scenes/Scene2.tsx": {
+    "Pulse": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Aegis": 1,
+    "Sentra": 1,
+    "Lyte": 1,
+    "PRISM Counsel": 1,
+    "AEGIS": 1,
+    "VESSELS": 1,
+    "LYTE": 1
+  },
+  "artifacts/szl-demo-video/src/components/video/video_scenes/Scene4.tsx": {
+    "VESSELS": 1,
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings/scripts/render-check.ts": {
+    "Lyte": 3,
+    "Vessels": 4,
+    "Aegis": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings/src/App.tsx": {
+    "Lyte": 1,
+    "Alloy": 2,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/admin/CmsTablePanel.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/alloy/components/alloy-layout.tsx": {
+    "Alloy": 2,
+    "Aegis": 2,
+    "Terra": 2,
+    "Vessels": 2,
+    "ALLOY": 1,
+    "TERRA": 1,
+    "LYTE": 1,
+    "VESSELS": 1
+  },
+  "artifacts/szl-holdings/src/alloy/data/agents.ts": {
+    "Cortex": 2,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/alloy/data/governance.ts": {
+    "Alloy": 6
+  },
+  "artifacts/szl-holdings/src/alloy/data/usecases.ts": {
+    "Lyte": 3,
+    "Alloy": 7,
+    "Vessels": 3
+  },
+  "artifacts/szl-holdings/src/alloy/data/workflows.ts": {
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/alloy/pages/AgentsPage.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/alloy/pages/ArchitecturePage.tsx": {
+    "Alloy": 7,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/alloy/pages/GovernancePage.tsx": {
+    "Alloy": 4
+  },
+  "artifacts/szl-holdings/src/alloy/pages/OutputsPage.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/alloy/pages/OverviewPage.tsx": {
+    "Alloy": 18
+  },
+  "artifacts/szl-holdings/src/alloy/pages/UseCasesPage.tsx": {
+    "Alloy": 4
+  },
+  "artifacts/szl-holdings/src/alloy/pages/WorkflowsPage.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/alloy/pages/admin-analytics.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/alloy/pages/atlas-approvals.tsx": {
+    "Aegis": 2,
+    "Alloy": 3
+  },
+  "artifacts/szl-holdings/src/alloy/pages/automation-analytics.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/alloy/pages/canonical-demos.tsx": {
+    "Lyte": 5,
+    "Alloy": 7,
+    "Cortex": 1
+  },
+  "artifacts/szl-holdings/src/alloy/pages/connector-mesh.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/alloy/pages/decision-objects.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/alloy/pages/execution-runs.tsx": {
+    "Terra": 1,
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/alloy/pages/factory-floor.tsx": {
+    "Alloy": 5,
+    "Vessels": 1,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/alloy/pages/marketing-landing.tsx": {
+    "Alloy": 16,
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/alloy/pages/mcp-store.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/alloy/pages/mcp-tool-creator.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/alloy/pages/operator-approvals.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/alloy/pages/operator-control-center.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/alloy/pages/pilot-onboarding.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/alloy/pages/policy-manager.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/alloy/pages/signal-feed.tsx": {
+    "TERRA": 1,
+    "Aegis": 1,
+    "Terra": 1,
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/alloy/pages/skill-registry.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/alloy/pages/usage-metering.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/alloy/pages/workflow-orchestration.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/alloy/pages/workspace-home.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/components/AlloyStrip.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/components/ContactSegments.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/components/EcosystemLogic.tsx": {
+    "Lyte": 1,
+    "Alloy": 2,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/components/FeaturedPlatforms.tsx": {
+    "Vessels": 2,
+    "Aegis": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings/src/components/FeaturedVentures.tsx": {
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/components/FounderBlock.tsx": {
+    "Vessels": 1,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/components/GovernedLoopViz.tsx": {
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/components/Hero.tsx": {
+    "Lyte": 2,
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/components/InquiryForm.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/components/InvestorThesis.tsx": {
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/components/LatestDevelopments.tsx": {
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/components/Milestones.tsx": {
+    "Vessels": 2,
+    "Lyte": 2
+  },
+  "artifacts/szl-holdings/src/components/NexusMap.tsx": {
+    "Vessels": 1,
+    "Terra": 1,
+    "Aegis": 1,
+    "Nexus": 1
+  },
+  "artifacts/szl-holdings/src/components/OperatingDoctrine.tsx": {
+    "Alloy": 3,
+    "Vessels": 2
+  },
+  "artifacts/szl-holdings/src/components/ProofDrawer.tsx": {
+    "LYTE": 12,
+    "Aegis": 3
+  },
+  "artifacts/szl-holdings/src/components/ProofGrid.tsx": {
+    "Lyte": 4,
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/components/RecommendationExplainer.tsx": {
+    "Alloy": 2,
+    "Terra": 2
+  },
+  "artifacts/szl-holdings/src/components/SiteFooter.tsx": {
+    "Lyte": 1,
+    "Alloy": 1,
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings/src/components/SiteNav.tsx": {
+    "Lyte": 9
+  },
+  "artifacts/szl-holdings/src/components/TrustSection.tsx": {
+    "Lyte": 2,
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/components/VentureNetwork.tsx": {
+    "Lyte": 5,
+    "Vessels": 4,
+    "Aegis": 1,
+    "Alloy": 5,
+    "Terra": 2
+  },
+  "artifacts/szl-holdings/src/components/decision-theater/scenarios.ts": {
+    "Aegis": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/components/decision-theater/stages/context.tsx": {
+    "Aegis": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/components/decision-theater/stages/proof.tsx": {
+    "Terra": 3,
+    "Vessels": 2
+  },
+  "artifacts/szl-holdings/src/components/decision-theater/stages/recommendation.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/components/decision-theater/stages/signal.tsx": {
+    "Terra": 1,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/components/diagrams/AlloyMatterFlowDiagram.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/components/diagrams/AlloyOperatingLoopDiagram.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/components/diagrams/ControlPlaneDiagram.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/components/diagrams/PackToPlatformDiagram.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/content/essays/index.ts": {
+    "Alloy": 7,
+    "Terra": 2,
+    "Lyte": 2,
+    "Vessels": 2,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/control-tower/SearchLayer.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Lyte": 1,
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/data/capital-arsenal.ts": {
+    "Alloy": 20,
+    "Lyte": 56,
+    "Vessels": 54,
+    "Aegis": 70,
+    "Terra": 35,
+    "ALLOY": 2,
+    "LYTE": 3,
+    "VESSELS": 3,
+    "AEGIS": 3,
+    "TERRA": 3
+  },
+  "artifacts/szl-holdings/src/data/case-studies.ts": {
+    "Lyte": 15,
+    "Alloy": 9,
+    "Vessels": 12,
+    "Aegis": 10,
+    "Terra": 11
+  },
+  "artifacts/szl-holdings/src/data/decision-theater-cases.ts": {
+    "Aegis": 7,
+    "Vessels": 5,
+    "Terra": 4
+  },
+  "artifacts/szl-holdings/src/data/insights.ts": {
+    "Lyte": 11,
+    "Aegis": 3,
+    "Cortex": 2,
+    "Vessels": 5,
+    "Alloy": 3
+  },
+  "artifacts/szl-holdings/src/data/ventures.ts": {
+    "Lyte": 8,
+    "Vessels": 7,
+    "Aegis": 8,
+    "Cortex": 5,
+    "Terra": 2,
+    "Alloy": 5
+  },
+  "artifacts/szl-holdings/src/developers/CodeSamplesSection.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/developers/constants.ts": {
+    "Alloy": 3,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/hooks/useCapabilityManifest.ts": {
+    "Lyte": 1,
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Sentra": 1,
+    "Pulse": 1
+  },
+  "artifacts/szl-holdings/src/hooks/useDecisionEngine.ts": {
+    "CORTEX": 1,
+    "Aegis": 2
+  },
+  "artifacts/szl-holdings/src/lib/nexus/anomaly-engine.ts": {
+    "NEXUS": 1
+  },
+  "artifacts/szl-holdings/src/lib/nexus/graph.ts": {
+    "NEXUS": 2,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/lib/nexus/oracle-pipeline.ts": {
+    "Vessels": 3,
+    "Aegis": 2,
+    "NEXUS": 13,
+    "Terra": 2,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/academy.tsx": {
+    "Alloy": 2,
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/accessibility.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/admin-command-center.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/aeep-command.tsx": {
+    "Vessels": 3,
+    "Terra": 1,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/pages/aegis-public.tsx": {
+    "Alloy": 11,
+    "Aegis": 16,
+    "Terra": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/alloy-page.tsx": {
+    "Aegis": 2,
+    "Terra": 2,
+    "Vessels": 2,
+    "Alloy": 32,
+    "Lyte": 4
+  },
+  "artifacts/szl-holdings/src/pages/analyst-workspace.tsx": {
+    "Terra": 1
+  },
+  "artifacts/szl-holdings/src/pages/analytics.tsx": {
+    "Aegis": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/architecture-page.tsx": {
+    "Lyte": 8,
+    "Alloy": 12,
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/autopilot.tsx": {
+    "Aegis": 3,
+    "Terra": 4,
+    "Vessels": 2,
+    "Lyte": 2
+  },
+  "artifacts/szl-holdings/src/pages/brand.tsx": {
+    "Lyte": 3,
+    "Alloy": 3
+  },
+  "artifacts/szl-holdings/src/pages/business-state.tsx": {
+    "Lyte": 8,
+    "Vessels": 5,
+    "Terra": 9,
+    "Aegis": 6
+  },
+  "artifacts/szl-holdings/src/pages/carlota-jo-public.tsx": {
+    "Alloy": 9,
+    "Aegis": 1,
+    "Terra": 1,
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/case-studies.tsx": {
+    "Terra": 2,
+    "Lyte": 3,
+    "Vessels": 3,
+    "Alloy": 3,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/pages/changelog-highlights.tsx": {
+    "Alloy": 2,
+    "Terra": 3,
+    "Lyte": 4,
+    "Vessels": 3,
+    "Sentra": 3
+  },
+  "artifacts/szl-holdings/src/pages/changelog.tsx": {
+    "Aegis": 8,
+    "Lyte": 2,
+    "Terra": 2,
+    "Cortex": 1,
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/command-center.tsx": {
+    "Alloy": 6,
+    "Lyte": 1,
+    "Aegis": 3,
+    "Terra": 3,
+    "Vessels": 2,
+    "Pulse": 1
+  },
+  "artifacts/szl-holdings/src/pages/command-newsletter.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/commercial-packaging.tsx": {
+    "Alloy": 1,
+    "PULSE": 1
+  },
+  "artifacts/szl-holdings/src/pages/company.tsx": {
+    "Lyte": 1,
+    "Alloy": 3
+  },
+  "artifacts/szl-holdings/src/pages/control-plane.tsx": {
+    "Cortex": 2,
+    "Aegis": 4,
+    "Vessels": 2,
+    "Alloy": 2,
+    "Terra": 1,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/core-command.tsx": {
+    "Alloy": 3,
+    "Terra": 2,
+    "Aegis": 2,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/cortex-intelligence-hub.tsx": {
+    "CORTEX": 4
+  },
+  "artifacts/szl-holdings/src/pages/crm-intelligence.tsx": {
+    "Terra": 1
+  },
   "artifacts/szl-holdings/src/pages/decision-schema-library.tsx": {
-    "LYTE": 17
+    "LYTE": 17,
+    "Aegis": 1,
+    "Alloy": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Lyte": 3
+  },
+  "artifacts/szl-holdings/src/pages/decision-theater.tsx": {
+    "LYTE": 2,
+    "Lyte": 2
+  },
+  "artifacts/szl-holdings/src/pages/decisioning-command.tsx": {
+    "Aegis": 5,
+    "Terra": 3,
+    "Vessels": 1,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/demo.tsx": {
+    "Alloy": 7,
+    "Terra": 2,
+    "Vessels": 2,
+    "Aegis": 2,
+    "Lyte": 3
+  },
+  "artifacts/szl-holdings/src/pages/demos.tsx": {
+    "Lyte": 4,
+    "Aegis": 3,
+    "Vessels": 3,
+    "Terra": 3,
+    "Alloy": 3
+  },
+  "artifacts/szl-holdings/src/pages/developers.tsx": {
+    "Terra": 1,
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/distribution-os/growth-engine.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/distribution-os/settings-page.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/docs-architecture.tsx": {
+    "Alloy": 1,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/docs-outcome-graph.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/docs-proof-chain.tsx": {
+    "Terra": 1,
+    "Aegis": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/docs-trust.tsx": {
+    "Vessels": 1,
+    "Aegis": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings/src/pages/docs-worldline.tsx": {
+    "Lyte": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/docs.tsx": {
+    "Lyte": 1,
+    "Alloy": 1,
+    "Aegis": 2,
+    "Vessels": 2,
+    "Terra": 2
+  },
+  "artifacts/szl-holdings/src/pages/ecosystem-viz.tsx": {
+    "Cortex": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/ecosystem.tsx": {
+    "Lyte": 1,
+    "Vessels": 1,
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/pages/export-builder.tsx": {
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/faq.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1,
+    "Lyte": 1,
+    "Alloy": 3
+  },
+  "artifacts/szl-holdings/src/pages/forge-home.tsx": {
+    "Vessels": 1,
+    "Lyte": 1,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/pages/founder/FounderArchitecture.tsx": {
+    "Pulse": 1,
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/pages/founder/FounderDesignPartner.tsx": {
+    "Lyte": 1,
+    "Alloy": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/pages/founder/FounderDoctrine.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/founder/FounderHome.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/founder/FounderPress.tsx": {
+    "Aegis": 2,
+    "Terra": 3,
+    "Lyte": 1,
+    "Vessels": 1,
+    "Alloy": 3
+  },
+  "artifacts/szl-holdings/src/pages/founder.tsx": {
+    "Lyte": 2,
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/pages/fund/benchmarking.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/fund/board-meetings.tsx": {
+    "Aegis": 3,
+    "Terra": 2,
+    "Vessels": 3
+  },
+  "artifacts/szl-holdings/src/pages/fund/data-room.tsx": {
+    "Vessels": 3,
+    "Aegis": 2,
+    "Terra": 2,
+    "Lyte": 2
+  },
+  "artifacts/szl-holdings/src/pages/fund/deal-scoring.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/fund/esg.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/fund/index.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/fund/lp-crm.tsx": {
+    "Lyte": 2,
+    "Aegis": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/fund/lp-reports.tsx": {
+    "Vessels": 1,
+    "Aegis": 1,
+    "Lyte": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings/src/pages/fund/treasury.tsx": {
+    "Cortex": 1
   },
   "artifacts/szl-holdings/src/pages/governance-posture.tsx": {
-    "LYTE": 20
+    "LYTE": 20,
+    "Lyte": 3
+  },
+  "artifacts/szl-holdings/src/pages/governed-cockpit.tsx": {
+    "Alloy": 2,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings/src/pages/health-freshness.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/helm-console.tsx": {
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 2,
+    "PULSE": 1
+  },
+  "artifacts/szl-holdings/src/pages/help.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/how-it-works.tsx": {
+    "Lyte": 2,
+    "Alloy": 5
+  },
+  "artifacts/szl-holdings/src/pages/integrations-marketplace.tsx": {
+    "Alloy": 7
+  },
+  "artifacts/szl-holdings/src/pages/investor-story.tsx": {
+    "Lyte": 4,
+    "Alloy": 3,
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/investor.tsx": {
+    "Lyte": 5,
+    "Alloy": 4,
+    "Aegis": 3,
+    "Terra": 3,
+    "Vessels": 3
+  },
+  "artifacts/szl-holdings/src/pages/investors-data-room.tsx": {
+    "Aegis": 1,
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/investors-founder-v2.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/investors-founder.tsx": {
+    "Lyte": 1,
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/investors-hub.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/investors-moat.tsx": {
+    "Lyte": 1,
+    "Vessels": 2,
+    "Aegis": 1,
+    "Terra": 1,
+    "CORTEX": 1
+  },
+  "artifacts/szl-holdings/src/pages/investors-overview-v2.tsx": {
+    "Aegis": 2,
+    "Terra": 2,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/investors-overview.tsx": {
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings/src/pages/investors-roadmap.tsx": {
+    "Lyte": 2,
+    "CORTEX": 2,
+    "Aegis": 4,
+    "Terra": 2,
+    "Vessels": 2
+  },
+  "artifacts/szl-holdings/src/pages/kpi-dashboard.tsx": {
+    "Alloy": 1,
+    "Aegis": 2,
+    "Lyte": 1,
+    "Terra": 2,
+    "Vessels": 3
+  },
+  "artifacts/szl-holdings/src/pages/landing.tsx": {
+    "LYTE": 14
+  },
+  "artifacts/szl-holdings/src/pages/leadership.tsx": {
+    "Alloy": 2,
+    "Lyte": 1,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/pages/legal-acceptable-use.tsx": {
+    "Lyte": 2,
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/pages/legal-privacy.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Lyte": 1,
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/legal-security-disclosure.tsx": {
+    "Lyte": 1,
+    "Alloy": 1,
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/legal-terms.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Lyte": 1,
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/link-in-bio.tsx": {
+    "Vessels": 1,
+    "Terra": 1,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/pages/lp-sentiment-pulse.tsx": {
+    "Pulse": 1
   },
   "artifacts/szl-holdings/src/pages/lyte-page.tsx": {
-    "LYTE": 43
+    "LYTE": 43,
+    "Aegis": 4,
+    "Vessels": 5,
+    "Terra": 5,
+    "Lyte": 11,
+    "Alloy": 4
+  },
+  "artifacts/szl-holdings/src/pages/ma-tracker.tsx": {
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/meridian.tsx": {
+    "Terra": 1,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/pages/moat-assessment.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/mobile-preview.tsx": {
+    "Lyte": 7,
+    "Aegis": 3,
+    "Cortex": 1,
+    "Vessels": 2,
+    "Terra": 1,
+    "Alloy": 1
   },
   "artifacts/szl-holdings/src/pages/nexus-command.tsx": {
+    "Vessels": 3,
+    "Aegis": 2,
+    "Terra": 3,
+    "Alloy": 3,
     "Nexus": 2
   },
+  "artifacts/szl-holdings/src/pages/nexus-explorer.tsx": {
+    "NEXUS": 4,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/pages/not-found.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/operating-doctrine.tsx": {
+    "Alloy": 1,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/oracle-briefing.tsx": {
+    "NEXUS": 9
+  },
+  "artifacts/szl-holdings/src/pages/pilot-aegis.tsx": {
+    "Aegis": 6,
+    "Sentra": 1
+  },
+  "artifacts/szl-holdings/src/pages/pilot-terra.tsx": {
+    "Terra": 6
+  },
+  "artifacts/szl-holdings/src/pages/pilot-vessels.tsx": {
+    "Vessels": 6
+  },
+  "artifacts/szl-holdings/src/pages/pipeline-command.tsx": {
+    "Aegis": 6,
+    "Vessels": 5,
+    "Terra": 5
+  },
+  "artifacts/szl-holdings/src/pages/platform-architecture.tsx": {
+    "Alloy": 5
+  },
+  "artifacts/szl-holdings/src/pages/platform.tsx": {
+    "Lyte": 1,
+    "Alloy": 4,
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/portfolio-intel.tsx": {
+    "Cortex": 3
+  },
+  "artifacts/szl-holdings/src/pages/portfolio-ops.tsx": {
+    "Cortex": 1,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/pages/portfolio.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Lyte": 1,
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/powerbi-config.tsx": {
+    "Aegis": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings/src/pages/press.tsx": {
+    "Aegis": 2,
+    "Lyte": 1,
+    "Vessels": 2,
+    "Alloy": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings/src/pages/pricing.tsx": {
+    "Lyte": 7,
+    "Alloy": 6
+  },
+  "artifacts/szl-holdings/src/pages/prism-counsel-public.tsx": {
+    "Alloy": 6
+  },
+  "artifacts/szl-holdings/src/pages/product-readiness.tsx": {
+    "Lyte": 3,
+    "Aegis": 3,
+    "Vessels": 3,
+    "Terra": 3,
+    "Sentra": 1
+  },
+  "artifacts/szl-holdings/src/pages/public-roadmap.tsx": {
+    "Lyte": 3,
+    "Alloy": 3,
+    "Vessels": 2,
+    "Aegis": 1,
+    "Terra": 1
+  },
   "artifacts/szl-holdings/src/pages/pulse-components.tsx": {
-    "Nexus": 4
+    "Nexus": 4,
+    "Lyte": 3,
+    "Aegis": 3,
+    "Vessels": 3,
+    "Terra": 3,
+    "Pulse": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/pulse.tsx": {
+    "Pulse": 2
+  },
+  "artifacts/szl-holdings/src/pages/relief-messaging.tsx": {
+    "Lyte": 3,
+    "Aegis": 4,
+    "Terra": 1,
+    "Vessels": 1,
+    "PULSE": 2
+  },
+  "artifacts/szl-holdings/src/pages/report-builder.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/reports-hub.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1,
+    "Lyte": 1
   },
   "artifacts/szl-holdings/src/pages/roadmap.tsx": {
-    "Cortex": 4
+    "Cortex": 4,
+    "Aegis": 1,
+    "Terra": 1,
+    "Lyte": 1,
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/roi-calculator.tsx": {
+    "PULSE": 4
   },
   "artifacts/szl-holdings/src/pages/signal-fusion.tsx": {
-    "LYTE": 31
+    "LYTE": 31,
+    "Aegis": 3,
+    "Vessels": 5,
+    "Lyte": 3,
+    "Terra": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/solutions-aegis-trust.tsx": {
+    "Aegis": 9
+  },
+  "artifacts/szl-holdings/src/pages/solutions-aegis.tsx": {
+    "Alloy": 4,
+    "Aegis": 8
+  },
+  "artifacts/szl-holdings/src/pages/solutions-lyte-trust.tsx": {
+    "Lyte": 7,
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/pages/solutions-prism-counsel.tsx": {
+    "Alloy": 3,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/solutions-terra-trust.tsx": {
+    "Terra": 8
+  },
+  "artifacts/szl-holdings/src/pages/solutions-terra.tsx": {
+    "Lyte": 1,
+    "Terra": 7,
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/pages/solutions-vessels-trust.tsx": {
+    "Vessels": 8
+  },
+  "artifacts/szl-holdings/src/pages/solutions-vessels.tsx": {
+    "Vessels": 7,
+    "Alloy": 3
+  },
+  "artifacts/szl-holdings/src/pages/solutions.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings/src/pages/support-portal.tsx": {
+    "Lyte": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/terra-listings.tsx": {
+    "Terra": 10
+  },
+  "artifacts/szl-holdings/src/pages/terra-platform.tsx": {
+    "Terra": 3
+  },
+  "artifacts/szl-holdings/src/pages/terra-public.tsx": {
+    "Alloy": 11,
+    "Terra": 14,
+    "Aegis": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/terra.tsx": {
+    "Terra": 5,
+    "Alloy": 1,
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/trust-ai.tsx": {
+    "Vessels": 1,
+    "Aegis": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/trust-approvals.tsx": {
+    "Alloy": 3
+  },
+  "artifacts/szl-holdings/src/pages/trust-architecture.tsx": {
+    "Lyte": 2,
+    "Alloy": 3,
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/trust-center.tsx": {
+    "Lyte": 2,
+    "Aegis": 3,
+    "Vessels": 3,
+    "Terra": 3
+  },
+  "artifacts/szl-holdings/src/pages/trust-diligence-technical.tsx": {
+    "Lyte": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/trust-exports.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/trust-governance.tsx": {
+    "Alloy": 3,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/trust-operations.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/trust.tsx": {
+    "Lyte": 2,
+    "Alloy": 5,
+    "Aegis": 1
   },
   "artifacts/szl-holdings/src/pages/updates.tsx": {
-    "Cortex": 3
+    "Vessels": 2,
+    "Cortex": 3,
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings/src/pages/venture-intel/capital-optimizer.tsx": {
+    "Terra": 1
+  },
+  "artifacts/szl-holdings/src/pages/venture-intel/exit-modeler.tsx": {
+    "Lyte": 3,
+    "Vessels": 4,
+    "Aegis": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings/src/pages/venture-intel/health-radar.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/venture-intel/lp-portal.tsx": {
+    "Lyte": 5,
+    "Vessels": 5,
+    "Aegis": 3
+  },
+  "artifacts/szl-holdings/src/pages/venture-intel/market-signals.tsx": {
+    "Vessels": 4,
+    "Aegis": 3,
+    "Lyte": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings/src/pages/venture-intel/synergy-map.tsx": {
+    "Aegis": 10,
+    "Vessels": 7,
+    "Terra": 6,
+    "Alloy": 2,
+    "Lyte": 3
+  },
+  "artifacts/szl-holdings/src/pages/venture-intel-hub.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings/src/pages/venture-portfolio.tsx": {
+    "Alloy": 1,
+    "Vessels": 3,
+    "Aegis": 2,
+    "Terra": 2,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings/src/pages/ventures.tsx": {
+    "Lyte": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings/src/pages/vessels-public.tsx": {
+    "Alloy": 11,
+    "Vessels": 17,
+    "Aegis": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/defense/(tabs)/agents.tsx": {
+    "Terra": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/defense/(tabs)/index.tsx": {
+    "AEGIS": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/defense/(tabs)/mcp-tools.tsx": {
+    "Aegis": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/fleet/(tabs)/profile.tsx": {
+    "Vessels": 4
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/founder/(tabs)/index.tsx": {
+    "Vessels": 7,
+    "Lyte": 4,
+    "Aegis": 8,
+    "Terra": 4,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/founder/(tabs)/ventures.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/founder/venture/[slug].tsx": {
+    "Vessels": 2,
+    "Aegis": 1,
+    "Terra": 1,
+    "Lyte": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/index.tsx": {
+    "Terra": 2,
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/intelligence/index.tsx": {
+    "CORTEX": 3,
+    "Pulse": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/intelligence/proof-envelope.tsx": {
+    "Alloy": 4,
+    "Vessels": 4,
+    "Aegis": 1,
+    "Pulse": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/intelligence/pulse.tsx": {
+    "Pulse": 2,
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/intelligence/run-review.tsx": {
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/operations/(tabs)/_layout.tsx": {
+    "Lyte": 3
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/operations/(tabs)/agent-chat.tsx": {
+    "Terra": 2
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/operations/(tabs)/board-mode.tsx": {
+    "Terra": 2
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/operations/(tabs)/index.tsx": {
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/operations/(tabs)/prism.tsx": {
+    "Pulse": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/operations/(tabs)/profile.tsx": {
+    "Lyte": 2
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/operations/(tabs)/receipts.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/portfolio/(tabs)/agent-chat.tsx": {
+    "Terra": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/portfolio/(tabs)/agents.tsx": {
+    "Terra": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/portfolio/(tabs)/alloy.tsx": {
+    "ALLOY": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/portfolio/(tabs)/index.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/portfolio/(tabs)/investor.tsx": {
+    "Aegis": 3,
+    "Vessels": 3,
+    "Lyte": 1,
+    "Alloy": 3,
+    "Terra": 2
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/portfolio/(tabs)/map.tsx": {
+    "Nexus": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/portfolio/(tabs)/portfolio.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/portfolio/agents.tsx": {
+    "Terra": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/portfolio/alloy.tsx": {
+    "ALLOY": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/portfolio/portfolio/[id].tsx": {
+    "Aegis": 1,
+    "Vessels": 2,
+    "Terra": 1,
+    "Lyte": 1,
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/(tabs)/_layout.tsx": {
+    "Terra": 5
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/(tabs)/agent-chat.tsx": {
+    "Terra": 3,
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/(tabs)/index.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/(tabs)/pipeline.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/(tabs)/profile.tsx": {
+    "PULSE": 1,
+    "TERRA": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/(tabs)/properties.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/(tabs)/scanner.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/(tabs)/terra-modules.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/ar-viewer.tsx": {
+    "CORTEX": 1,
+    "Terra": 3
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/capture.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/construction-monitor.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/exchange-1031.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/lease-abstraction.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/pro-forma.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/property/[id].tsx": {
+    "Terra": 4
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/rent-roll.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/tax-appeal.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/tenant-screening.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/properties/waterfall.tsx": {
+    "TERRA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/quick-actions.tsx": {
+    "TERRA": 10,
+    "Aegis": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/settings/digest.tsx": {
+    "CORTEX": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/settings/security.tsx": {
+    "CORTEX": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/settings/widgets.tsx": {
+    "CORTEX": 1
+  },
+  "artifacts/szl-holdings-mobile/app/_layout.tsx": {
+    "Aegis": 1,
+    "Terra": 1,
+    "Lyte": 1,
+    "Vessels": 1,
+    "CORTEX": 1
+  },
+  "artifacts/szl-holdings-mobile/app/auth.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/szl-holdings-mobile/components/OfflineQueuePanel.tsx": {
+    "CORTEX": 3
+  },
+  "artifacts/szl-holdings-mobile/components/WorkspaceSwitcher.tsx": {
+    "CORTEX": 1
+  },
+  "artifacts/szl-holdings-mobile/components/defense/BiometricLockScreen.tsx": {
+    "AEGIS": 2
+  },
+  "artifacts/szl-holdings-mobile/context/LyteContext.tsx": {
+    "Lyte": 1,
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings-mobile/context/WorkspaceContext.tsx": {
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Lyte": 1
+  },
+  "artifacts/szl-holdings-mobile/context/operations/LyteContext.tsx": {
+    "Lyte": 1,
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1
+  },
+  "artifacts/szl-holdings-mobile/hooks/useVoiceCommand.ts": {
+    "Vessels": 1,
+    "Lyte": 1,
+    "Alloy": 2
+  },
+  "artifacts/szl-holdings-mobile/lib/apiClient.ts": {
+    "CORTEX": 1,
+    "Aegis": 5,
+    "Terra": 5,
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "artifacts/terra/src/components/beacon-layout.tsx": {
+    "LYTE": 1,
+    "ALLOY": 1
+  },
+  "artifacts/terra/src/components/terra-layout.tsx": {
+    "Terra": 3
+  },
+  "artifacts/terra/src/data/demo-narrative.ts": {
+    "Terra": 2
+  },
+  "artifacts/terra/src/main.tsx": {
+    "Terra": 1
+  },
+  "artifacts/terra/src/pages/aef-knowledge-search.tsx": {
+    "Terra": 1
+  },
+  "artifacts/terra/src/pages/agent-insights.tsx": {
+    "Terra": 1
+  },
+  "artifacts/terra/src/pages/agents-command.tsx": {
+    "Terra": 4
+  },
+  "artifacts/terra/src/pages/atlas-execute.tsx": {
+    "Terra": 1
+  },
+  "artifacts/terra/src/pages/automations.tsx": {
+    "Alloy": 1
+  },
+  "artifacts/terra/src/pages/avm-engine.tsx": {
+    "Terra": 1
+  },
+  "artifacts/terra/src/pages/billing-account.tsx": {
+    "Terra": 2
+  },
+  "artifacts/terra/src/pages/broker-overview.tsx": {
+    "Terra": 1
+  },
+  "artifacts/terra/src/pages/case-study.tsx": {
+    "Terra": 6
+  },
+  "artifacts/terra/src/pages/causal-drilldown.tsx": {
+    "Alloy": 5,
+    "Lyte": 4
+  },
+  "artifacts/terra/src/pages/constellation.tsx": {
+    "Terra": 1
+  },
+  "artifacts/terra/src/pages/dashboard.tsx": {
+    "Terra": 5
+  },
+  "artifacts/terra/src/pages/drift-detection.tsx": {
+    "Lyte": 3
+  },
+  "artifacts/terra/src/pages/evidence.tsx": {
+    "Terra": 1
+  },
+  "artifacts/terra/src/pages/executive-overview.tsx": {
+    "Lyte": 8,
+    "Alloy": 2
+  },
+  "artifacts/terra/src/pages/governed-cockpit.tsx": {
+    "Terra": 1,
+    "Alloy": 1
+  },
+  "artifacts/terra/src/pages/investment-readiness.tsx": {
+    "Terra": 11
+  },
+  "artifacts/terra/src/pages/lease-abstraction.tsx": {
+    "Terra": 1
+  },
+  "artifacts/terra/src/pages/lender-exposure-map.tsx": {
+    "Terra": 2
+  },
+  "artifacts/terra/src/pages/market-intelligence.tsx": {
+    "Terra": 2
+  },
+  "artifacts/terra/src/pages/market.tsx": {
+    "Terra": 1
+  },
+  "artifacts/terra/src/pages/marketing-landing.tsx": {
+    "Terra": 10,
+    "TERRA": 1
+  },
+  "artifacts/terra/src/pages/neighborhood-momentum.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/terra/src/pages/pricing.tsx": {
+    "Terra": 2
+  },
+  "artifacts/terra/src/pages/pro-forma.tsx": {
+    "Terra": 3
+  },
+  "artifacts/terra/src/pages/pulse.tsx": {
+    "Terra": 2,
+    "Pulse": 2
+  },
+  "artifacts/terra/src/pages/spatial-walkthrough.tsx": {
+    "Terra": 1
+  },
+  "artifacts/terra/src/pages/trust-provenance.tsx": {
+    "Terra": 1
+  },
+  "artifacts/terra/src/pages/unified-command.tsx": {
+    "Terra": 3,
+    "Lyte": 3,
+    "Vessels": 3
+  },
+  "artifacts/terra/src/pages/value-recovery.tsx": {
+    "Alloy": 2,
+    "Lyte": 1
+  },
+  "artifacts/terra/src/pages/waterfall-calculator.tsx": {
+    "Terra": 1
+  },
+  "artifacts/terra/src/pages/workflow-health.tsx": {
+    "Lyte": 2,
+    "Alloy": 1
+  },
+  "artifacts/vessels/src/App.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/components/MarketingFooter.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/components/MarketingNav.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/main.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/account-billing.tsx": {
+    "Vessels": 2
+  },
+  "artifacts/vessels/src/pages/aef-knowledge-search.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/agent-insights.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/ais-live-tracking.tsx": {
+    "NEXUS": 1,
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/atlas-execute.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/billing-panel.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/cargo-tracking.tsx": {
+    "Vessels": 2
+  },
+  "artifacts/vessels/src/pages/co2-emissions.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/command-overview.tsx": {
+    "Vessels": 4,
+    "Alloy": 1
+  },
+  "artifacts/vessels/src/pages/command-workflows.tsx": {
+    "Alloy": 3,
+    "Vessels": 2
+  },
+  "artifacts/vessels/src/pages/commodities-tracking.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/commodity-flow-intelligence.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/constellation.tsx": {
+    "Terra": 1,
+    "Vessels": 2,
+    "Aegis": 1,
+    "Lyte": 1
+  },
+  "artifacts/vessels/src/pages/corridor-routes.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/crew-tracker.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/dark-fleet-economics.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/dark-vessel-detection.tsx": {
+    "Vessels": 2
+  },
+  "artifacts/vessels/src/pages/digital-twin.tsx": {
+    "VESSELS": 2
+  },
+  "artifacts/vessels/src/pages/disruption-forecast.tsx": {
+    "Pulse": 1,
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/evidence.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/fleet-apm.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/fleet-assessment.tsx": {
+    "Vessels": 4
+  },
+  "artifacts/vessels/src/pages/fleet-dashboard.tsx": {
+    "Vessels": 2
+  },
+  "artifacts/vessels/src/pages/geo-decision-center.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/governed-cockpit.tsx": {
+    "Vessels": 2,
+    "Alloy": 1
+  },
+  "artifacts/vessels/src/pages/incident-reporting.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/intelligence-briefs.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/legal-privacy.tsx": {
+    "Vessels": 2
+  },
+  "artifacts/vessels/src/pages/legal-terms.tsx": {
+    "Vessels": 3
+  },
+  "artifacts/vessels/src/pages/maritime-intelligence.tsx": {
+    "Vessels": 1,
+    "VESSELS": 1
+  },
+  "artifacts/vessels/src/pages/marketing-capabilities.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/marketing-demo.tsx": {
+    "Vessels": 2
+  },
+  "artifacts/vessels/src/pages/marketing-home.tsx": {
+    "Vessels": 6
+  },
+  "artifacts/vessels/src/pages/marketing-platform.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/marketing-security.tsx": {
+    "Vessels": 2
+  },
+  "artifacts/vessels/src/pages/marketing-sign-in.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/marketing-use-cases.tsx": {
+    "Vessels": 4
+  },
+  "artifacts/vessels/src/pages/performance-analytics.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/piracy-sanctions.tsx": {
+    "Vessels": 2
+  },
+  "artifacts/vessels/src/pages/platform.tsx": {
+    "Vessels": 5
+  },
+  "artifacts/vessels/src/pages/port-analytics.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/port-congestion.tsx": {
+    "Vessels": 3
+  },
+  "artifacts/vessels/src/pages/port-twin.tsx": {
+    "Vessels": 2
+  },
+  "artifacts/vessels/src/pages/psc-inspector.tsx": {
+    "Vessels": 2
+  },
+  "artifacts/vessels/src/pages/pulse.tsx": {
+    "Pulse": 2,
+    "Vessels": 2
+  },
+  "artifacts/vessels/src/pages/risk-scoring.tsx": {
+    "Vessels": 2
+  },
+  "artifacts/vessels/src/pages/route-anomaly-engine.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/settings.tsx": {
+    "Vessels": 5
+  },
+  "artifacts/vessels/src/pages/sts-detection.tsx": {
+    "Aegis": 3
+  },
+  "artifacts/vessels/src/pages/trade-flow-heatmap.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/trust-provenance.tsx": {
+    "Vessels": 1
+  },
+  "artifacts/vessels/src/pages/vessels-home.tsx": {
+    "Vessels": 10
+  },
+  "artifacts/vessels/src/pages/vessels-landing.tsx": {
+    "Vessels": 8,
+    "Alloy": 2
+  },
+  "artifacts/vessels/src/pages/voyage-risk-twin.tsx": {
+    "Vessels": 3
+  },
+  "lib/api-zod/src/generated/api.ts": {
+    "Alloy": 6
+  },
+  "lib/config/src/index.ts": {
+    "Alloy": 3,
+    "Lyte": 1,
+    "Vessels": 1,
+    "Terra": 3,
+    "Aegis": 6
+  },
+  "lib/intelligence-feeds/src/fusion-engine.ts": {
+    "PRISM Counsel": 1,
+    "Alloy": 1
+  },
+  "lib/mcp-client/src/McpStoreProvider.tsx": {
+    "Alloy": 3
+  },
+  "lib/mcp-client/src/types.ts": {
+    "Alloy": 4,
+    "Lyte": 1
+  },
+  "lib/prism-bus/src/bridge.ts": {
+    "Alloy": 1
+  },
+  "lib/pulse-evals/src/runner.ts": {
+    "PULSE": 3
+  },
+  "lib/scene-export/src/__tests__/atlas-adapter-integration.test.ts": {
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1
+  },
+  "lib/shared-ui/src/ai-insight-card.tsx": {
+    "Vessels": 1,
+    "Terra": 1
+  },
+  "lib/shared-ui/src/command-mode.tsx": {
+    "Alloy": 2,
+    "Lyte": 2,
+    "Vessels": 2,
+    "Terra": 2
+  },
+  "lib/shared-ui/src/command-palette.tsx": {
+    "Alloy": 1,
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Nexus": 1
+  },
+  "lib/shared-ui/src/company-kpi-dashboard.tsx": {
+    "Alloy": 1,
+    "Lyte": 1,
+    "Aegis": 1
+  },
+  "lib/shared-ui/src/constellation-graph.tsx": {
+    "Aegis": 4,
+    "Terra": 1,
+    "Vessels": 1,
+    "Lyte": 1
+  },
+  "lib/shared-ui/src/copilot-configs.ts": {
+    "Vessels": 7,
+    "Alloy": 20,
+    "Aegis": 5,
+    "Terra": 5,
+    "Lyte": 6,
+    "Nexus": 2,
+    "PRISM Counsel": 2
+  },
+  "lib/shared-ui/src/core-observability-data.ts": {
+    "Alloy": 3,
+    "Lyte": 7,
+    "Terra": 1
+  },
+  "lib/shared-ui/src/cortex-action-drafts.tsx": {
+    "Vessels": 1,
+    "Aegis": 1,
+    "Terra": 1,
+    "Lyte": 1,
+    "CORTEX": 1
+  },
+  "lib/shared-ui/src/cortex-entity-graph.tsx": {
+    "Aegis": 2
+  },
+  "lib/shared-ui/src/cortex-intelligence-feed.tsx": {
+    "Vessels": 2,
+    "Aegis": 3,
+    "Terra": 2,
+    "Lyte": 2,
+    "CORTEX": 1
+  },
+  "lib/shared-ui/src/cortex-voice.tsx": {
+    "CORTEX": 5
+  },
+  "lib/shared-ui/src/cortex-what-if.tsx": {
+    "Vessels": 1,
+    "Aegis": 2,
+    "Terra": 1,
+    "Lyte": 1,
+    "CORTEX": 3
+  },
+  "lib/shared-ui/src/cross-domain-correlation.tsx": {
+    "Aegis": 2,
+    "Vessels": 1,
+    "Terra": 1,
+    "Lyte": 1
+  },
+  "lib/shared-ui/src/demo-persona-switcher.tsx": {
+    "Alloy": 1
+  },
+  "lib/shared-ui/src/doctrine-layer.ts": {
+    "Alloy": 2,
+    "Vessels": 1,
+    "Terra": 1,
+    "Aegis": 2
+  },
+  "lib/shared-ui/src/document-engine/BatchPdfPanel.tsx": {
+    "Aegis": 1
+  },
+  "lib/shared-ui/src/ecosystem-map.tsx": {
+    "Terra": 1,
+    "Alloy": 1,
+    "Aegis": 1,
+    "Vessels": 1
+  },
+  "lib/shared-ui/src/ecosystem-nav.tsx": {
+    "Alloy": 2,
+    "Aegis": 1,
+    "Vessels": 2,
+    "Terra": 1,
+    "PRISM Counsel": 1
+  },
+  "lib/shared-ui/src/morning-briefing.tsx": {
+    "Vessels": 3,
+    "Terra": 3,
+    "Aegis": 1,
+    "Lyte": 1,
+    "CORTEX": 2,
+    "PRISM Counsel": 1
+  },
+  "lib/shared-ui/src/os-demo-data.ts": {
+    "Nexus": 7,
+    "Aegis": 5,
+    "Vessels": 4,
+    "Terra": 1
+  },
+  "lib/shared-ui/src/pack-banner.tsx": {
+    "Lyte": 2,
+    "Alloy": 2
+  },
+  "lib/shared-ui/src/pulse-briefing-panel.tsx": {
+    "Pulse": 2,
+    "Alloy": 2
+  },
+  "lib/shared-ui/src/risk-evidence.tsx": {
+    "Terra": 2,
+    "Vessels": 1
+  },
+  "lib/shared-ui/src/themes.ts": {
+    "Vessels": 1,
+    "Alloy": 2,
+    "Terra": 1,
+    "Lyte": 1,
+    "Aegis": 1
+  },
+  "packages/aef-domain-profiles/src/profiles/aegis-security-incident.ts": {
+    "Aegis": 6
+  },
+  "packages/aef-domain-profiles/src/profiles/lyte-governance-ops.ts": {
+    "Lyte": 6
+  },
+  "packages/aef-domain-profiles/src/profiles/prism-legal-matter.ts": {
+    "PRISM Counsel": 6
+  },
+  "packages/aef-domain-profiles/src/profiles/terra-real-estate-intel.ts": {
+    "Terra": 6
+  },
+  "packages/aef-domain-profiles/src/profiles/vessels-maritime-risk.ts": {
+    "Vessels": 4
+  },
+  "packages/aef-evals/src/fixtures/compliance.ts": {
+    "Lyte": 1
+  },
+  "packages/aef-evals/src/fixtures/cyber.ts": {
+    "Aegis": 1
+  },
+  "packages/aef-evals/src/fixtures/maritime.ts": {
+    "Vessels": 1
+  },
+  "packages/aef-evals/src/fixtures/real-estate.ts": {
+    "Terra": 1
+  },
+  "packages/config/src/env-contract.ts": {
+    "Pulse": 1,
+    "Alloy": 1,
+    "Terra": 3
+  },
+  "packages/config/src/feature-flags.ts": {
+    "Pulse": 2,
+    "Aegis": 1,
+    "Vessels": 1,
+    "NEXUS": 2
+  },
+  "packages/config/src/index.ts": {
+    "Alloy": 3,
+    "Lyte": 1,
+    "Vessels": 1,
+    "Terra": 3,
+    "Aegis": 6
+  },
+  "packages/config/src/platform-registry.ts": {
+    "Pulse": 1,
+    "Aegis": 1,
+    "Terra": 1,
+    "Vessels": 1,
+    "Lyte": 1,
+    "CORTEX": 2,
+    "NEXUS": 1
+  },
+  "packages/connectors/src/adapters/legal-matter.ts": {
+    "PRISM Counsel": 1
+  },
+  "packages/connectors/src/connectors/maritime-ais.ts": {
+    "Vessels": 1
+  },
+  "packages/connectors/src/connectors/sanctions.ts": {
+    "Vessels": 1
+  },
+  "packages/constellation/src/__tests__/hardening.test.ts": {
+    "Terra": 3,
+    "Aegis": 1
+  },
+  "packages/constellation/src/adapters/lyte.ts": {
+    "Lyte": 3
+  },
+  "packages/demo-seed/src/index.ts": {
+    "Alloy": 1,
+    "Vessels": 1,
+    "Sentra": 1
+  },
+  "packages/demo-seed/src/narrative-business-revops.ts": {
+    "Lyte": 6,
+    "Pulse": 2,
+    "Alloy": 2
+  },
+  "packages/demo-seed/src/narrative-legal-compliance.ts": {
+    "PRISM Counsel": 15,
+    "Alloy": 2
+  },
+  "packages/demo-seed/src/narrative-lyte-stalled-approval.ts": {
+    "Lyte": 10
+  },
+  "packages/demo-seed/src/narrative-maritime.ts": {
+    "Vessels": 5,
+    "Alloy": 6
+  },
+  "packages/demo-seed/src/narrative-security-soc.ts": {
+    "Aegis": 6,
+    "Alloy": 1
+  },
+  "packages/demo-seed/src/narrative-sentra-ransomware.ts": {
+    "Sentra": 1
+  },
+  "packages/demo-seed/src/narrative-terra-distress.ts": {
+    "Terra": 21,
+    "Alloy": 1
+  },
+  "packages/demo-seed/src/narrative-vessels-port-congestion.ts": {
+    "Vessels": 1
+  },
+  "packages/demo-seed/src/personas.ts": {
+    "Alloy": 1
+  },
+  "packages/demo-seed/src/seed-constellation.ts": {
+    "Aegis": 1,
+    "Lyte": 1
+  },
+  "packages/demo-seed/src/seed-runner.ts": {
+    "Lyte": 7,
+    "Alloy": 2,
+    "Aegis": 5,
+    "Vessels": 1,
+    "PRISM Counsel": 4
+  },
+  "packages/design-system/src/proof/ProofEnvelope.tsx": {
+    "Alloy": 1
+  },
+  "packages/domain-profiles/src/profiles.ts": {
+    "Lyte": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Aegis": 1
+  },
+  "packages/executive-briefing/src/__tests__/generator.test.ts": {
+    "Alloy": 2
+  },
+  "packages/executive-briefing/src/parser.ts": {
+    "Alloy": 1
+  },
+  "packages/executive-briefing/src/prompts.ts": {
+    "Terra": 1,
+    "Lyte": 1,
+    "Alloy": 3
+  },
+  "packages/ontology/src/domains.ts": {
+    "Aegis": 1
+  },
+  "packages/ontology/src/recommendation-rendering.test.ts": {
+    "Vessels": 1,
+    "Sentra": 1,
+    "Pulse": 1,
+    "Terra": 1
+  },
+  "packages/policy-engine/src/prism-counsel-policies.ts": {
+    "PRISM Counsel": 1
+  },
+  "packages/replay-core/src/scenarios.ts": {
+    "Aegis": 1,
+    "Vessels": 2,
+    "Terra": 2
+  },
+  "packages/shared-contracts/src/workflow-types.ts": {
+    "Aegis": 1,
+    "Terra": 2,
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "packages/simulation/src/decision-twin.ts": {
+    "Lyte": 8
+  },
+  "packages/substrate/src/workflows/aegis-threat-triage.ts": {
+    "Aegis": 4
+  },
+  "packages/substrate/src/workflows/executive-brief.ts": {
+    "Aegis": 2,
+    "Terra": 2,
+    "Lyte": 2
+  },
+  "packages/substrate/src/workflows/lyte-operational-drift.ts": {
+    "Lyte": 4
+  },
+  "packages/substrate/src/workflows/opportunity-audit.ts": {
+    "Lyte": 3
+  },
+  "packages/substrate/src/workflows/phase2.test.ts": {
+    "Lyte": 1,
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "PRISM Counsel": 1
+  },
+  "packages/substrate/src/workflows/prism-counsel-evidence-packaging.ts": {
+    "PRISM Counsel": 2
+  },
+  "packages/substrate/src/workflows/terra-portfolio-anomaly.ts": {
+    "Terra": 2
+  },
+  "packages/substrate/src/workflows/vessels-voyage-anomaly.ts": {
+    "Vessels": 2
+  },
+  "packages/tokens/src/manifest.ts": {
+    "Sentra": 1,
+    "Pulse": 1,
+    "Terra": 1,
+    "Vessels": 1,
+    "Lyte": 1,
+    "NEXUS": 1
+  },
+  "packages/tool-mesh/src/tools/security-tools.ts": {
+    "Aegis": 2
+  },
+  "services/alloy-fabric-api/src/routes/docs.ts": {
+    "Alloy": 1
+  },
+  "tests/api/cortex-inca-smoke.test.ts": {
+    "Aegis": 1,
+    "CORTEX": 1
+  },
+  "tests/api/cross-app-smoke.test.ts": {
+    "Vessels": 2,
+    "Terra": 3,
+    "Aegis": 1,
+    "Lyte": 2,
+    "PRISM Counsel": 1
+  },
+  "tests/api/csrf-roundtrip.test.ts": {
+    "Vessels": 3,
+    "Terra": 3,
+    "PRISM Counsel": 3,
+    "Lyte": 2,
+    "Alloy": 2,
+    "Aegis": 1
+  },
+  "tests/api/db-integration.test.ts": {
+    "Vessels": 2,
+    "Lyte": 1,
+    "Aegis": 1,
+    "Terra": 1
+  },
+  "tests/api/graphql-schema.test.ts": {
+    "Vessels": 1,
+    "Lyte": 1
+  },
+  "tests/api/integrations.test.ts": {
+    "LYTE": 1
+  },
+  "tests/api/openapi-contract.test.ts": {
+    "Vessels": 1,
+    "Aegis": 1,
+    "Lyte": 1,
+    "Alloy": 1,
+    "PRISM Counsel": 1,
+    "Terra": 2
+  },
+  "tests/api/server-live.test.ts": {
+    "Aegis": 1,
+    "Terra": 1,
+    "PRISM Counsel": 1
+  },
+  "tests/api/vessels-mutations.test.ts": {
+    "Vessels": 4
+  },
+  "tests/e2e/aegis.spec.ts": {
+    "Aegis": 5
+  },
+  "tests/e2e/command.spec.ts": {
+    "Pulse": 1,
+    "Aegis": 1,
+    "Terra": 1,
+    "Lyte": 1,
+    "Vessels": 1
+  },
+  "tests/e2e/decision-theater.spec.ts": {
+    "Aegis": 1,
+    "Vessels": 1
+  },
+  "tests/e2e/governed-decision-loop.spec.ts": {
+    "Lyte": 2,
+    "Aegis": 2
+  },
+  "tests/e2e/lyte-onboarding.spec.ts": {
+    "Lyte": 1
+  },
+  "tests/e2e/lyte.spec.ts": {
+    "Lyte": 6
+  },
+  "tests/e2e/nexus-sandbox.spec.ts": {
+    "NEXUS": 2
+  },
+  "tests/e2e/nexus-smoke.spec.ts": {
+    "NEXUS": 29
+  },
+  "tests/e2e/portfolio-academy-investors.spec.ts": {
+    "Sentra": 1,
+    "Terra": 1,
+    "Lyte": 2,
+    "Vessels": 1,
+    "Alloy": 1
+  },
+  "tests/e2e/pulse.spec.ts": {
+    "Pulse": 10
+  },
+  "tests/e2e/sentra.spec.ts": {
+    "Sentra": 9
+  },
+  "tests/e2e/szl-holdings.spec.ts": {
+    "Aegis": 1,
+    "Terra": 2,
+    "Lyte": 4,
+    "Vessels": 2,
+    "Nexus": 3,
+    "Sentra": 1,
+    "Alloy": 1
+  },
+  "tests/e2e/terra.spec.ts": {
+    "Terra": 11
+  },
+  "tests/e2e/vessels.spec.ts": {
+    "Vessels": 9
+  },
+  "tests/tenancy/api-tenant-scope.test.ts": {
+    "Vessels": 3,
+    "Terra": 5,
+    "PRISM Counsel": 1,
+    "Lyte": 3
+  },
+  "tests/unit/substrate/substrate-command-center.test.ts": {
+    "Vessels": 1
+  },
+  "scripts/generate-platform-metrics.ts": {
+    "Alloy": 1,
+    "Lyte": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Aegis": 1
+  },
+  "scripts/media/capture-screenshots.ts": {
+    "Lyte": 2,
+    "Aegis": 2,
+    "Vessels": 2,
+    "Terra": 1
+  },
+  "scripts/media/generate-diagrams.ts": {
+    "Lyte": 4,
+    "Alloy": 4,
+    "LYTE": 3,
+    "ALLOY": 3,
+    "Aegis": 2,
+    "AEGIS": 1,
+    "Vessels": 2,
+    "VESSELS": 1,
+    "Terra": 2,
+    "TERRA": 1
+  },
+  "scripts/media/generate-wiki-gallery.ts": {
+    "Lyte": 8,
+    "Aegis": 4,
+    "Vessels": 4,
+    "Terra": 4,
+    "Alloy": 2
+  },
+  "scripts/media/optimize-images.ts": {
+    "Lyte": 3,
+    "Aegis": 2,
+    "Vessels": 2,
+    "Terra": 2
+  },
+  "scripts/seed-audit-logs.ts": {
+    "Alloy": 1,
+    "Vessels": 1
+  },
+  "scripts/seed-demo-data.ts": {
+    "Alloy": 1
+  },
+  "scripts/seed-deployments.ts": {
+    "CORTEX": 1,
+    "Pulse": 1,
+    "Aegis": 1,
+    "Vessels": 1,
+    "Terra": 1,
+    "Sentra": 1,
+    "PRISM Counsel": 1,
+    "Lyte": 1
+  },
+  "scripts/seed-stephen.ts": {
+    "Vessels": 2,
+    "Lyte": 3
+  },
+  "scripts/src/seed-szl-canonical.ts": {
+    "Alloy": 7,
+    "Lyte": 12,
+    "Vessels": 7,
+    "Terra": 5
+  },
+  "scripts/src/seed.ts": {
+    "Lyte": 18,
+    "Vessels": 14,
+    "Nexus": 1,
+    "Alloy": 3
   }
 }

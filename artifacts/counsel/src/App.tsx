@@ -21,6 +21,7 @@ import {
   useSentientLayer,
 } from '@szl-holdings/shared-ui/sentient-layer';
 import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
+import { useSessionRevocationToast } from '@szl-holdings/shared-ui/use-session-revocation-toast';
 import { useUserPreferences } from '@szl-holdings/shared-ui/use-user-preferences';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -585,6 +586,7 @@ function AppShell() {
 }
 
 export default function App() {
+  useSessionRevocationToast();
   return (
     <AppModeProvider>
       <AppModeBanner />

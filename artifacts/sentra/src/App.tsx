@@ -21,6 +21,7 @@ import {
   useSentientLayer,
 } from '@szl-holdings/shared-ui/sentient-layer';
 import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
+import { useSessionRevocationToast } from '@szl-holdings/shared-ui/use-session-revocation-toast';
 import {
   useEffectiveAccent,
   useUserPreferences,
@@ -626,6 +627,7 @@ function AppShell({
 }
 
 export default function App() {
+  useSessionRevocationToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { prefs, setPreference, isLoaded } = useUserPreferences();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => prefs.sidebar_collapsed);
