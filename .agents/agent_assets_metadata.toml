@@ -317,3 +317,75 @@ id = "M6168ZjPA6qO8RNYwDe59"
 uri = "file://test-results/nexus-smoke-NEXUS-auth-gat-de130-n-wall-when-unauthenticated-chromium/test-failed-1.png"
 type = "image"
 title = "auth-gate failure screenshot"
+
+[[outputs]]
+id = "VQ2LUbwb_LTR7DshL29tc"
+uri = "file://STANDBY-WALKTHROUGH.md"
+type = "text"
+title = "Standby Walkthrough — read this first when you return"
+
+[[outputs]]
+id = "_OT5iUAtce6Wti1fX0oGE"
+uri = "file://screenshots/14-szl-portfolio.jpg"
+type = "image"
+title = "SZL Holdings — Portfolio Dashboard (KORA / DOMAINE / SEXTANT / TENAX / FORGE / Carlota Jo)"
+
+[[outputs]]
+id = "idwmDNLJeQS-kViukCt4P"
+uri = "file://screenshots/15-lyte.jpg"
+type = "image"
+title = "KORA — Decision Intelligence (Vantex Acquisition incident, $4.2M Q2 risk)"
+
+[[outputs]]
+id = "370vR6A16M42Hzhg0CUVH"
+uri = "file://screenshots/02-command.jpg"
+type = "image"
+title = "Unified Command — cross-artifact governance surface"
+
+[[outputs]]
+id = "qu9E6Qip3NJavJH1aMlGc"
+uri = "file://screenshots/19-sentra.jpg"
+type = "image"
+title = "TENAX — Cyber Resilience Command landing"
+
+[[outputs]]
+id = "LYbbuABqr7vZxIW0sOghu"
+uri = "file://screenshots/16-counsel.jpg"
+type = "image"
+title = "Counsel / FORGE — Legal Matter Command landing"
+
+[[outputs]]
+id = "kyFIRiJcFvIn4WUYQHn4J"
+uri = "file://screenshots/06-terra.jpg"
+type = "image"
+title = "DOMAINE — Real Estate Intelligence landing"
+
+[[outputs]]
+id = "jOwZ9Ebps0ocS4y8U2M5E"
+uri = "file://screenshots/05-vessels.jpg"
+type = "image"
+title = "SEXTANT — Maritime Intelligence landing"
+
+[[outputs]]
+id = "kDYMEgga_7ROvQ-uJU8u9"
+uri = "file://screenshots/17-carlota-jo.jpg"
+type = "image"
+title = "Carlota Jo — Premium Private Advisory"
+
+[[outputs]]
+id = "eIm6azkaxZugaij15YO4o"
+uri = "file://screenshots/09-aegis.jpg"
+type = "image"
+title = "PARAGON — Investor Pitch (aegis)"
+
+[[outputs]]
+id = "-uAh6-Vo8rx3p9Hz98EY-"
+uri = "file://screenshots/18-demo-video.jpg"
+type = "image"
+title = "Governed Autonomy Demo Video — Full / 60s / 30s / 15s cuts"
+
+[[outputs]]
+id = "lUtYQPqpgTCns3QI8SpEM"
+uri = "file://screenshots/07-pulse.jpg"
+type = "image"
+title = "LUMINA / Pulse — auth-gated executive briefing"
