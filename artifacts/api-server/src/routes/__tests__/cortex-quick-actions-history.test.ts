@@ -238,7 +238,7 @@ describe('GET /cortex/quick-actions/history', () => {
     }
   });
 
-  it('does not pass an orgId or per-user filter for admin callers (cross-tenant audit)', async () => {
+  it('drops org scoping for super_admin callers but still scopes to their own decisions', async () => {
     const previousUser = _currentUser;
     _currentUser = {
       ...previousUser,
@@ -258,9 +258,37 @@ describe('GET /cortex/quick-actions/history', () => {
       };
       expect(callArg.orgId).toBeUndefined();
       expect(callArg.statuses).toEqual(['approved', 'rejected']);
-      // Admins/super-admins intentionally see all decisions for audit review,
-      // not just their own — so the per-user filter must NOT be set.
-      expect(callArg.decidedByUserId).toBeUndefined();
+      // This endpoint is the personal "decisions THEY made" history. Even
+      // for super_admins we still scope to their own decisions — the
+      // cross-user audit log lives in a separate governance endpoint.
+      expect(callArg.decidedByUserId).toBe(1);
+    } finally {
+      _currentUser = previousUser;
+    }
+  });
+
+  it('keeps org scoping for tenant-level admin callers (admin is not global)', async () => {
+    const previousUser = _currentUser;
+    _currentUser = {
+      ...previousUser,
+      roles: ['admin'],
+      orgs: [{ orgId: 42, orgSlug: 'org42', orgName: 'Org 42', role: 'admin' }],
+    };
+    listApprovalsMock.mockResolvedValueOnce([]);
+    try {
+      const app = await getApp();
+      const res = await request(app).get('/cortex/quick-actions/history');
+      expect(res.status).toBe(200);
+      expect(listApprovalsMock).toHaveBeenCalledTimes(1);
+      const callArg = listApprovalsMock.mock.calls[0]?.[0] as {
+        orgId?: number;
+        decidedByUserId?: number;
+      };
+      // `admin` is a tenant-level role — it must NOT bypass org scoping or
+      // the personal-history filter. Otherwise an org admin would see every
+      // member's decisions through this mobile endpoint.
+      expect(callArg.orgId).toBe(42);
+      expect(callArg.decidedByUserId).toBe(1);
     } finally {
       _currentUser = previousUser;
     }

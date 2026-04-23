@@ -1527,15 +1527,18 @@ router.get(
   async (req, res) => {
     try {
       const user = req.user;
-      const isAdmin = user?.roles?.some((r) => ['super_admin', 'admin'].includes(r)) ?? false;
-      const orgId = isAdmin ? undefined : user?.orgs?.[0]?.orgId;
+      const isSuperAdmin = user?.roles?.includes('super_admin') ?? false;
+      // Tenant scoping: super_admins (global platform role) may bypass org
+      // scoping for cross-tenant audit; everyone else — INCLUDING `admin`,
+      // which is a tenant-level role — must be scoped to their own org.
+      const orgId = isSuperAdmin ? undefined : user?.orgs?.[0]?.orgId;
       const userId = user?.id;
 
-      // Deny-by-default: a non-admin caller with no org membership has no
-      // scope and must not see other tenants' resolved approvals. Likewise an
-      // unauthenticated/unidentified non-admin caller cannot have a personal
-      // decision history.
-      if (!isAdmin && (orgId == null || userId == null)) {
+      // This endpoint is "decisions THEY made" for the authenticated user.
+      // Without a user id we have nothing to filter against, so deny by
+      // default. Likewise a non-super-admin with no org membership has no
+      // tenant scope and must not see other tenants' resolved approvals.
+      if (userId == null || (!isSuperAdmin && orgId == null)) {
         sendSuccess(res, { items: [], total: 0 });
         return;
       }
@@ -1555,9 +1558,10 @@ router.get(
         // first. Default `createdAt` ordering would surface old approvals that
         // happened to be submitted late ahead of fresh decisions.
         orderBy: 'decidedAt',
-        // Scope to the authenticated user's own decisions. Admins/super-admins
-        // intentionally see the full org/cross-org history for audit review.
-        decidedByUserId: isAdmin ? undefined : userId,
+        // Always scope to the authenticated user's own decisions — this is a
+        // personal decision-history view, not an org-wide audit log. A
+        // separate cross-user audit endpoint exists in governance-counts.
+        decidedByUserId: userId,
       });
 
       const items = resolved.map((approval) => {
