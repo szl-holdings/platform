@@ -19,6 +19,7 @@ import { logger } from '../lib/logger';
 import { guardSeedInProduction } from '../lib/seed-guard';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
+import { getOtIcsFeedStats, isOtIcsFeedRunning } from '../jobs/ot-ics-stream-feed';
 
 const router: IRouter = Router();
 
@@ -834,6 +835,14 @@ router.post(
     }
   },
 );
+
+router.get('/aegis/ot-ics/feed/status', authMiddleware(), (_req, res) => {
+  try {
+    sendSuccess(res, { running: isOtIcsFeedRunning(), stats: getOtIcsFeedStats() });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to retrieve OT/ICS feed status');
+  }
+});
 
 // Eagerly trigger demo seeding on first import so dev/demo environments get
 // realistic data without a manual call. Safe: idempotent and a no-op once data exists.

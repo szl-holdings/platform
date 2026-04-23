@@ -39,6 +39,7 @@ import { runMigrations } from './lib/run-migrations';
 import { startSelfMonitoring, stopSelfMonitoring } from './lib/self-monitor';
 import './lib/terra-nyc-ingestion';
 import './lib/terra-nyc-extended-ingestion';
+import { startOtIcsStreamFeed } from './jobs/ot-ics-stream-feed';
 import { isSeedDataAllowed, resolveRuntimeMode } from '@szl-holdings/config';
 import { otelReady, registerGraphQLHandler } from './app.js';
 import { buildGraphQLMiddleware } from './graphql/index.js';
@@ -347,6 +348,16 @@ export async function bootstrap(
     }
     if (migrationsComplete) {
       logger.info('[bootstrap] All migrations complete');
+      // Start the live OT/ICS protocol stream feed (synthetic mode) only when
+      // explicitly enabled — this prevents simulated data from polluting
+      // production telemetry if the feed is not yet connected to a real source.
+      if (process.env.OT_ICS_FEED_ENABLED === 'true') {
+        startOtIcsStreamFeed();
+      } else {
+        logger.info(
+          '[ot-ics-feed] Synthetic stream feed disabled (OT_ICS_FEED_ENABLED != "true"). Set OT_ICS_FEED_ENABLED=true to enable.',
+        );
+      }
     }
 
     // Schema is durable — open the live handler IMMEDIATELY so the server can

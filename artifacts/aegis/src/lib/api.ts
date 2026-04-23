@@ -303,6 +303,18 @@ export const api = {
         `/aegis/ot-ics/frames/${encodeURIComponent(frameId)}/false-positive`,
         { method: 'POST', body: JSON.stringify(body ?? {}) },
       ),
+    feedStatus: () =>
+      apiFetch<{
+        running: boolean;
+        stats: {
+          tickCount: number;
+          framesInserted: number;
+          conversationRowsInserted: number;
+          scoreUpdates: number;
+          lastTickAt: string | null;
+          startedAt: string;
+        };
+      }>('/aegis/ot-ics/feed/status'),
     openIncident: (frameId: string, body?: { acknowledgedBy?: string; incidentRef?: string }) =>
       apiFetch<{ frameId: string; triageStatus: string; incidentRef?: string }>(
         `/aegis/ot-ics/frames/${encodeURIComponent(frameId)}/open-incident`,

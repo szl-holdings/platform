@@ -139,6 +139,7 @@ ALLOY_INTERNAL_TOKEN = "szl-11c811093004470be94806e360ff1b54da09aed70f6fa76d7704
 
 [userenv.development]
 ADMIN_PIN = "PULSE-DEMO-2026"
+OT_ICS_FEED_ENABLED = "true"
 
 [[ports]]
 localPort = 8080
