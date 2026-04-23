@@ -213,17 +213,13 @@ function makeRunner(orgId: number, connectorId: string): ConnectorRunner {
   const hooks: RunnerHooks = {
     appendAudit: (event) => appendAudit(orgId, event),
     registerEntity: async (write) => {
-      try {
-        await registerEntity({
-          kind: write.kind as never,
-          namespace: write.namespace,
-          identifier: String(write.identifier),
-          properties: write.properties,
-          orgId,
-        } as never);
-      } catch (err) {
-        logger.debug({ err, write }, '[connectors] registerEntity failed (non-fatal)');
-      }
+      await registerEntity({
+        kind: write.kind as never,
+        namespace: write.namespace,
+        identifier: String(write.identifier),
+        properties: write.properties,
+        orgId,
+      } as never);
     },
     loadBaseline: async () => getState(orgId, connectorId).baseline,
     saveBaseline: async (baseline) => {
