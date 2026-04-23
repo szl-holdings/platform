@@ -14,6 +14,7 @@ import {
 } from '@szl-holdings/db';
 import { and, eq, inArray } from 'drizzle-orm';
 import { hasEmailProviderConfigured, sendEmail } from './email';
+import { isAlertCategoryAllowedForUser, sendPushToUser } from './expo-push';
 import { logger } from './logger';
 
 const APPROVALS_URL = '/alloy/operator/approvals';
@@ -380,6 +381,46 @@ async function dispatchSlack(
   }
 }
 
+async function dispatchPush(
+  recipients: RecipientUser[],
+  approval: ApprovalRequest,
+): Promise<number> {
+  let sent = 0;
+  await Promise.allSettled(
+    recipients.map(async (r) => {
+      try {
+        const allowed = await isAlertCategoryAllowedForUser(r.id, 'approvals', {
+          severity: approval.priority,
+        });
+        if (!allowed) return;
+        await sendPushToUser(
+          r.id,
+          {
+            title: 'Approval Required',
+            body: approval.title,
+            sound: 'default',
+            channelId: 'approvals',
+            data: {
+              type: 'approval_request',
+              approvalId: String(approval.id),
+              resourceType: approval.resourceType ?? '',
+              resourceId: approval.resourceId ?? '',
+            },
+          },
+          { appId: 'szl-holdings-mobile' },
+        );
+        sent++;
+      } catch (err) {
+        logger.warn(
+          { err, userId: r.id },
+          '[approval-notifications] Failed to send push to approver',
+        );
+      }
+    }),
+  );
+  return sent;
+}
+
 async function persistInAppNotifications(
   recipients: RecipientUser[],
   approval: ApprovalRequest,
@@ -437,10 +478,11 @@ const approvalCreatedHook: ApprovalCreatedHook = async (approval) => {
     const recipients = await loadRecipients(userIds);
     if (recipients.length === 0) return;
 
-    const [persistedIds, emailsSent, slackSent] = await Promise.all([
+    const [persistedIds, emailsSent, slackSent, pushSent] = await Promise.all([
       persistInAppNotifications(recipients, approval, severity),
       dispatchEmails(recipients, approval, severity),
       dispatchSlack(recipients, approval, severity),
+      dispatchPush(recipients, approval),
     ]);
 
     // No websocket broadcast: approval metadata (IDs, recipient user IDs,
@@ -461,6 +503,7 @@ const approvalCreatedHook: ApprovalCreatedHook = async (approval) => {
         inAppPersisted: persistedIds.length,
         emailsSent,
         slackSent,
+        pushSent,
       },
       '[approval-notifications] On-call operators notified of new approval request',
     );

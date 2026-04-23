@@ -184,6 +184,10 @@ router.patch(
         })
         .where(eq(notificationsTable.id, id))
         .returning();
+      publish(WS_CHANNELS.NOTIFICATIONS, 'notifications_read', {
+        userId: req.user?.id,
+        notificationId: id,
+      });
       sendSuccess(res, notification);
     } catch (err) {
       req.log?.error({ err }, 'Failed to mark notification as read');
@@ -206,6 +210,7 @@ router.patch(
           readAt: new Date(),
         })
         .where(and(eq(notificationsTable.userId, userId), eq(notificationsTable.isRead, false)));
+      publish(WS_CHANNELS.NOTIFICATIONS, 'notifications_read', { userId });
       sendNoContent(res);
     } catch (err) {
       req.log?.error({ err }, 'Failed to mark all notifications as read');

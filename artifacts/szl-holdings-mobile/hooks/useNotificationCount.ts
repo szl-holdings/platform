@@ -52,7 +52,11 @@ export function useNotificationCount(): NotificationCountResult {
 
       ws.onmessage = (ev) => {
         try {
-          const msg = JSON.parse(ev.data as string) as { type: string; channel?: string };
+          const msg = JSON.parse(ev.data as string) as {
+            type: string;
+            channel?: string;
+            event?: string;
+          };
           if (msg.type === 'message' && msg.channel === 'notifications') {
             void fetchCount();
           }

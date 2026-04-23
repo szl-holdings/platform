@@ -78,7 +78,11 @@ export function NotificationBell() {
       };
       ws.onmessage = (ev) => {
         try {
-          const msg = JSON.parse(ev.data as string) as { type: string; channel?: string };
+          const msg = JSON.parse(ev.data as string) as {
+            type: string;
+            channel?: string;
+            event?: string;
+          };
           if (msg.type === 'message' && msg.channel === 'notifications') {
             void queryClient.invalidateQueries({ queryKey: ['navbar-notifications'] });
           }
@@ -117,6 +121,16 @@ export function NotificationBell() {
     mutationFn: async (id: number) => {
       const res = await fetch(`/api/notifications/${id}/read`, { method: 'PATCH' });
       if (!res.ok) throw new Error('Failed to mark as read');
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['navbar-notifications'] });
+    },
+  });
+
+  const markAllReadMutation = useStandardMutation({
+    mutationFn: async () => {
+      const res = await fetch('/api/notifications/read-all', { method: 'PATCH' });
+      if (!res.ok) throw new Error('Failed to mark all as read');
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['navbar-notifications'] });
@@ -216,11 +230,47 @@ export function NotificationBell() {
               <span style={{ color: 'hsl(38,12%,88%)', fontSize: '13px', fontWeight: 600 }}>
                 Notifications
               </span>
-              {unreadCount > 0 && (
-                <span style={{ fontSize: '11px', color: 'hsl(210,5%,48%)' }}>
-                  {unreadCount} unread
-                </span>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {unreadCount > 0 && (
+                  <>
+                    <span style={{ fontSize: '11px', color: 'hsl(210,5%,48%)' }}>
+                      {unreadCount} unread
+                    </span>
+                    <button
+                      onClick={() => markAllReadMutation.mutate()}
+                      disabled={markAllReadMutation.isPending}
+                      title="Mark all as read"
+                      style={{
+                        background: 'transparent',
+                        border: '1px solid hsla(0,0%,100%,0.10)',
+                        borderRadius: '4px',
+                        color: 'hsl(210,5%,50%)',
+                        fontSize: '10px',
+                        fontWeight: 500,
+                        padding: '2px 7px',
+                        cursor: markAllReadMutation.isPending ? 'default' : 'pointer',
+                        opacity: markAllReadMutation.isPending ? 0.5 : 1,
+                        transition: 'color 0.15s, border-color 0.15s',
+                        whiteSpace: 'nowrap',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!markAllReadMutation.isPending) {
+                          (e.currentTarget as HTMLButtonElement).style.color = '#10b981';
+                          (e.currentTarget as HTMLButtonElement).style.borderColor =
+                            'rgba(16,185,129,0.3)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.color = 'hsl(210,5%,50%)';
+                        (e.currentTarget as HTMLButtonElement).style.borderColor =
+                          'hsla(0,0%,100%,0.10)';
+                      }}
+                    >
+                      Mark all read
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
 
             {notifications.length === 0 ? (
