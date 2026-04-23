@@ -326,6 +326,8 @@ export const contactSubmissionsTable = pgTable('contact_submissions', {
     .default('open'),
   resolvedAt: timestamp('resolved_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
+  emailOptOut: boolean('email_opt_out').notNull().default(false),
+  emailOptOutAt: timestamp('email_opt_out_at'),
 });
 
 export const leadStatusTable = pgTable('lead_status', {
@@ -339,6 +341,7 @@ export const leadStatusTable = pgTable('lead_status', {
   ownerUserId: integer('owner_user_id'),
   notes: text('notes'),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  notificationSentAt: timestamp('notification_sent_at'),
 });
 
 export const redirectsTable = pgTable('redirects', {

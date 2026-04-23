@@ -334,12 +334,27 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
 
     logger.info({ jobId: job.id, recipientCount: emailRecipients.length }, "daily_lyte_digest: found email-enabled users");
 
+    const { pool: pgPool } = await import("@szl-holdings/db");
+    const { generateUnsubscribeToken, logNotificationAudit } = await import("./email");
+
     for (const recipient of emailRecipients) {
       if (!recipient.email) {
         skipped++;
         continue;
       }
       try {
+        const digestKey = date;
+
+        // ── Dedup guard: check if already sent before doing DB work ───────
+        const existingCheck = await pgPool.query(
+          `SELECT 1 FROM digest_emails_sent WHERE digest_type = $1 AND recipient = $2 AND digest_key = $3 LIMIT 1`,
+          ["daily_lyte_digest", recipient.email, digestKey],
+        );
+        if (existingCheck.rows.length > 0) {
+          skipped++;
+          continue;
+        }
+
         const notifications = await db
           .select({
             id: notificationsTable.id,
@@ -366,6 +381,8 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
         }
 
         const dateLabel = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+        const unsubToken = generateUnsubscribeToken(recipient.email);
+        const emailSubject = `Your Daily Digest — ${dateLabel}`;
 
         // GAP-017: enqueue durably. The digest job touches up to thousands
         // of recipients on a single tick — if the API server restarts mid-
@@ -374,7 +391,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
         // retried with exponential backoff and survives a restart.
         await queueEmail({
           to: recipient.email,
-          subject: `Your Daily Digest — ${dateLabel}`,
+          subject: emailSubject,
           html: buildNotificationDigestEmail({
             userName: recipient.displayName || recipient.email,
             date: dateLabel,
@@ -387,7 +404,26 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
             })),
           }),
           text: `Your Daily Digest (${dateLabel}) — ${notifications.length} unread notification(s). Log in to review them at ${process.env.APP_URL || "https://szlholdings.com"}.`,
+          unsubscribeToken: unsubToken,
         });
+
+        // ── Mark sent AFTER successful queue (dedup for reruns) ───────────
+        await pgPool
+          .query(
+            `INSERT INTO digest_emails_sent (digest_type, recipient, digest_key) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`,
+            ["daily_lyte_digest", recipient.email, digestKey],
+          )
+          .catch(() => {});
+
+        logNotificationAudit({
+          template: "daily_lyte_digest",
+          recipient: recipient.email,
+          subject: emailSubject,
+          entityType: "digest",
+          entityId: digestKey,
+          deliveryStatus: "sent",
+        }).catch(() => {});
+
         sent++;
       } catch (err) {
         failed++;

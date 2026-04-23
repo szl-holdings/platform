@@ -4,7 +4,13 @@ import { desc } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { requireOpsReady } from '../lib/boot-orchestrator';
-import { buildAlertFiredEmail, hasEmailProviderConfigured, sendEmail } from '../lib/email';
+import {
+  buildAlertFiredEmail,
+  generateUnsubscribeToken,
+  hasEmailProviderConfigured,
+  logNotificationAudit,
+  sendEmail,
+} from '../lib/email';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
@@ -37,6 +43,8 @@ async function ensureSchema(): Promise<void> {
     `ALTER TABLE platform_incidents ADD COLUMN IF NOT EXISTS postmortem TEXT`,
     `ALTER TABLE platform_incident_updates ADD COLUMN IF NOT EXISTS author TEXT`,
     `ALTER TABLE platform_runbooks ADD COLUMN IF NOT EXISTS affected_services TEXT[] NOT NULL DEFAULT '{}'`,
+    `ALTER TABLE platform_alert_rules ADD COLUMN IF NOT EXISTS cooldown_minutes INTEGER NOT NULL DEFAULT 60`,
+    `ALTER TABLE platform_alert_rules ADD COLUMN IF NOT EXISTS last_email_sent_at TIMESTAMPTZ`,
     `CREATE TABLE IF NOT EXISTS platform_alert_rules (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
@@ -51,8 +59,10 @@ async function ensureSchema(): Promise<void> {
       notify_email BOOLEAN NOT NULL DEFAULT false,
       email_recipients TEXT[] NOT NULL DEFAULT '{}',
       runbook_id INTEGER,
+      cooldown_minutes INTEGER NOT NULL DEFAULT 60,
       last_evaluated_at TIMESTAMPTZ,
       last_fired_at TIMESTAMPTZ,
+      last_email_sent_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )`,
@@ -906,14 +916,15 @@ const alertRuleSchema = z.object({
   notifyEmail: z.boolean().default(false),
   emailRecipients: z.array(z.string().email()).default([]),
   runbookId: z.number().int().optional(),
+  cooldownMinutes: z.number().int().min(1).max(10080).default(60),
 });
 
 router.post('/ops/alert-rules', validateBody(alertRuleSchema), async (req, res) => {
   const b = req.body as z.infer<typeof alertRuleSchema>;
   try {
     const result = await pool.query<{ id: number }>(
-      `INSERT INTO platform_alert_rules (name, description, metric_name, condition, threshold, window_minutes, severity, enabled, notify_in_app, notify_email, email_recipients, runbook_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
+      `INSERT INTO platform_alert_rules (name, description, metric_name, condition, threshold, window_minutes, severity, enabled, notify_in_app, notify_email, email_recipients, runbook_id, cooldown_minutes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id`,
       [
         b.name,
         b.description ?? null,
@@ -927,6 +938,7 @@ router.post('/ops/alert-rules', validateBody(alertRuleSchema), async (req, res) 
         b.notifyEmail,
         b.emailRecipients,
         b.runbookId ?? null,
+        b.cooldownMinutes ?? 60,
       ],
     );
     res.json({ ok: true, id: result.rows[0]?.id });
@@ -934,6 +946,78 @@ router.post('/ops/alert-rules', validateBody(alertRuleSchema), async (req, res) 
     res.status(500).json({ error: 'Failed to create alert rule' });
   }
 });
+
+// Test-send endpoint — sends a sample alert email without firing a real alert
+router.post(
+  '/ops/alert-rules/:id/test-send',
+  validateBody(bodyShape({ recipientEmail: z.string().email().optional() })),
+  async (req, res) => {
+    const id = parseInt(req.params.id as string, 10);
+    const body = req.body as { recipientEmail?: string };
+    try {
+      const ruleResult = await pool.query(`SELECT * FROM platform_alert_rules WHERE id = $1`, [id]);
+      const rule = ruleResult.rows[0] as
+        | {
+            id: number;
+            name: string;
+            metric_name: string;
+            condition: string;
+            threshold: number;
+            severity: string;
+            email_recipients: string[];
+          }
+        | undefined;
+      if (!rule) {
+        res.status(404).json({ error: 'Alert rule not found' });
+        return;
+      }
+      if (!hasEmailProviderConfigured()) {
+        res.status(503).json({ error: 'No email provider configured' });
+        return;
+      }
+      const recipients = body.recipientEmail
+        ? [body.recipientEmail]
+        : rule.email_recipients.length > 0
+          ? rule.email_recipients
+          : [];
+      if (recipients.length === 0) {
+        res.status(400).json({ error: 'No recipient address — provide recipientEmail or configure email_recipients on the rule' });
+        return;
+      }
+      const alertsUrl =
+        process.env.ALERTS_PAGE_URL ??
+        `${process.env.APP_BASE_URL ?? 'https://szlholdings.com'}/command/ops/alerts`;
+      const { subject, html, text } = buildAlertFiredEmail({
+        ruleName: `[TEST] ${rule.name}`,
+        severity: rule.severity,
+        metricName: rule.metric_name,
+        metricValue: rule.threshold * 1.1,
+        condition: rule.condition,
+        threshold: rule.threshold,
+        alertsUrl,
+      });
+      const results: Array<{ recipient: string; success: boolean; messageId?: string; error?: string }> = [];
+      for (const recipient of recipients) {
+        const result = await sendEmail({ to: recipient, subject, html, text, unsubscribeToken: generateUnsubscribeToken(recipient) });
+        results.push({ recipient, success: result.success, messageId: result.messageId, error: result.error });
+        logNotificationAudit({
+          template: 'alert_rule_test_send',
+          recipient,
+          subject,
+          entityType: 'alert_rule',
+          entityId: String(rule.id),
+          deliveryStatus: result.success ? 'sent' : 'failed',
+          messageId: result.messageId,
+          provider: result.provider,
+          error: result.error,
+        });
+      }
+      res.json({ ok: true, results });
+    } catch (_err) {
+      res.status(500).json({ error: 'Failed to send test alert email' });
+    }
+  },
+);
 
 router.patch('/ops/alert-rules/:id', validateBody(bodyShape({})), async (req, res) => {
   const id = parseInt(req.params.id as string, 10);
@@ -954,6 +1038,7 @@ router.patch('/ops/alert-rules/:id', validateBody(bodyShape({})), async (req, re
       notifyEmail: 'notify_email',
       emailRecipients: 'email_recipients',
       runbookId: 'runbook_id',
+      cooldownMinutes: 'cooldown_minutes',
     };
     const bRecord = b as Record<string, unknown>;
     for (const [jsKey, dbCol] of Object.entries(fieldMap)) {
@@ -1035,6 +1120,8 @@ export async function runAlertRuleEvaluation(triggeredBy: 'scheduled' | 'manual'
     severity: string;
     notify_email: boolean;
     email_recipients: string[];
+    cooldown_minutes: number;
+    last_email_sent_at: string | null;
   }>;
 
   // Get current metrics from observability snapshot
@@ -1124,7 +1211,7 @@ export async function runAlertRuleEvaluation(triggeredBy: 'scheduled' | 'manual'
       ]);
       firedCount.count++;
 
-      // Dispatch email notifications if configured for this rule
+      // Dispatch email notifications if configured for this rule (with cooldown)
       if (rule.notify_email && rule.email_recipients.length > 0) {
         if (!hasEmailProviderConfigured()) {
           logger.warn(
@@ -1132,39 +1219,65 @@ export async function runAlertRuleEvaluation(triggeredBy: 'scheduled' | 'manual'
             '[ops] Alert has notify_email=true but no email provider is configured (set SENDGRID_API_KEY, RESEND_API_KEY, or SMTP credentials)',
           );
         } else {
-          const alertsUrl =
-            process.env.ALERTS_PAGE_URL ??
-            `${process.env.APP_BASE_URL ?? 'https://szlholdings.com'}/command/ops/alerts`;
-          const { subject, html, text } = buildAlertFiredEmail({
-            ruleName: rule.name,
-            severity: rule.severity,
-            metricName: rule.metric_name,
-            metricValue: metricVal,
-            condition: rule.condition,
-            threshold: rule.threshold,
-            alertsUrl,
-          });
-          for (const recipient of rule.email_recipients) {
-            sendEmail({ to: recipient, subject, html, text })
-              .then((result) => {
-                if (result.success) {
-                  logger.info(
-                    { rule: rule.name, recipient, provider: result.provider },
-                    '[ops] Alert email dispatched',
-                  );
-                } else {
+          // Enforce cooldown: skip if last_email_sent_at is within cooldown_minutes
+          const cooldownMs = (rule.cooldown_minutes ?? 60) * 60 * 1000;
+          const lastSent = rule.last_email_sent_at ? new Date(rule.last_email_sent_at).getTime() : 0;
+          const withinCooldown = lastSent > 0 && (Date.now() - lastSent) < cooldownMs;
+          if (withinCooldown) {
+            logger.info(
+              { rule: rule.name, cooldownMinutes: rule.cooldown_minutes ?? 60, lastSent: rule.last_email_sent_at },
+              '[ops] Alert email skipped — within cooldown window',
+            );
+          } else {
+            const alertsUrl =
+              process.env.ALERTS_PAGE_URL ??
+              `${process.env.APP_BASE_URL ?? 'https://szlholdings.com'}/command/ops/alerts`;
+            const { subject, html, text } = buildAlertFiredEmail({
+              ruleName: rule.name,
+              severity: rule.severity,
+              metricName: rule.metric_name,
+              metricValue: metricVal,
+              condition: rule.condition,
+              threshold: rule.threshold,
+              alertsUrl,
+            });
+            // Update last_email_sent_at before sending (optimistic) to prevent burst sends
+            await pool
+              .query(`UPDATE platform_alert_rules SET last_email_sent_at = NOW() WHERE id = $1`, [rule.id])
+              .catch(() => {});
+            for (const recipient of rule.email_recipients) {
+              sendEmail({ to: recipient, subject, html, text, unsubscribeToken: generateUnsubscribeToken(recipient) })
+                .then((result) => {
+                  if (result.success) {
+                    logger.info(
+                      { rule: rule.name, recipient, provider: result.provider },
+                      '[ops] Alert email dispatched',
+                    );
+                  } else {
+                    logger.warn(
+                      { rule: rule.name, recipient, error: result.error },
+                      '[ops] Alert email dispatch failed (non-fatal)',
+                    );
+                  }
+                  logNotificationAudit({
+                    template: 'alert_rule_fired',
+                    recipient,
+                    subject,
+                    entityType: 'alert_rule',
+                    entityId: String(rule.id),
+                    deliveryStatus: result.success ? 'sent' : 'failed',
+                    messageId: result.messageId,
+                    provider: result.provider,
+                    error: result.error,
+                  });
+                })
+                .catch((emailErr) => {
                   logger.warn(
-                    { rule: rule.name, recipient, error: result.error },
-                    '[ops] Alert email dispatch failed (non-fatal)',
+                    { emailErr, recipient, rule: rule.name },
+                    '[ops] Alert email dispatch threw (non-fatal)',
                   );
-                }
-              })
-              .catch((emailErr) => {
-                logger.warn(
-                  { emailErr, recipient, rule: rule.name },
-                  '[ops] Alert email dispatch threw (non-fatal)',
-                );
-              });
+                });
+            }
           }
         }
       }

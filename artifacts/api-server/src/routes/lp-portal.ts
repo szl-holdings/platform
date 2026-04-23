@@ -12,7 +12,7 @@ import {
   fundLpUploadsTable,
   fundNavRecordsTable,
 } from '@szl-holdings/db';
-import { and, asc, desc, eq, inArray, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, ne, or, sql } from 'drizzle-orm';
 import { type IRouter, type Request, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -22,9 +22,17 @@ import {
   sendNotFound,
   sendSuccess,
 } from '../lib/api-response';
+import {
+  buildLpGpMessageEmail,
+  buildLpReportPublishedEmail,
+  generateUnsubscribeToken,
+  logNotificationAudit,
+  sendEmail,
+} from '../lib/email';
+import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { ObjectNotFoundError, ObjectStorageService } from '../lib/objectStorage';
-import { authMiddleware, parseIdParam } from '../middlewares/auth';
+import { authMiddleware, parseIdParam, requireRole } from '../middlewares/auth';
 
 const objectStorageService = new ObjectStorageService();
 
@@ -538,6 +546,45 @@ router.post(
         isDemo,
       });
 
+      // ── Email notification: when GP sends a message to an LP ──────────────
+      if (fromRole === 'gp' && !isDemo && lp.contactEmail) {
+        const baseUrl = process.env.APP_URL || 'https://szlholdings.com';
+        const portalUrl = `${baseUrl}/fund/lp-portal`;
+        const unsubToken = generateUnsubscribeToken(lp.contactEmail);
+        const { subject, html, emailText } = (() => {
+          const r = buildLpGpMessageEmail({
+            lpName: lp.lpName,
+            messagePreview: text,
+            portalUrl,
+          });
+          return { ...r, emailText: r.text };
+        })();
+        sendEmail({
+          to: lp.contactEmail,
+          subject,
+          html,
+          text: emailText,
+          replyTo: 'investor-relations@szlholdings.com',
+          unsubscribeToken: unsubToken,
+        })
+          .then((result) => {
+            logNotificationAudit({
+              template: 'lp_gp_message',
+              recipient: lp.contactEmail!,
+              subject,
+              entityType: 'lp_message',
+              entityId: String(inserted.id),
+              deliveryStatus: result.success ? 'sent' : 'failed',
+              messageId: result.messageId,
+              provider: result.provider,
+              error: result.error,
+            });
+          })
+          .catch((err) => {
+            logger.warn({ err, lpId: lp.id }, '[lp-portal] GP message email notification failed');
+          });
+      }
+
       sendSuccess(
         res,
         {
@@ -752,6 +799,126 @@ router.patch(
       sendSuccess(res, { id: updated.id, status: updated.status, reviewedAt: updated.reviewedAt });
     } catch (err) {
       handleRouteError(res, err, 'Failed to review upload');
+    }
+  },
+);
+
+// ─── REPORT PUBLISHING (GP only) ─────────────────────────────────────────────
+// GPs can publish a new quarterly report, which inserts the report row and
+// fans out an email notification to all non-demo LPs with email addresses.
+
+router.post(
+  '/lp-portal/reports/publish',
+  authMiddleware(),
+  requireRole('admin', 'exec', 'ops', 'super_admin', 'compliance'),
+  validateBody(
+    bodyShape({
+      reportingPeriod: z.string().min(1).max(50),
+      reportType: z
+        .enum(['quarterly', 'annual', 'capital_call_notice', 'distribution_notice', 'special'])
+        .default('quarterly'),
+      netIrr: z.number().optional(),
+      tvpi: z.number().optional(),
+      dpi: z.number().optional(),
+      metadata: z.unknown().optional(),
+    }),
+  ),
+  async (req, res) => {
+    try {
+      const body = req.body as {
+        reportingPeriod: string;
+        reportType?: 'quarterly' | 'annual' | 'capital_call_notice' | 'distribution_notice' | 'special';
+        netIrr?: number;
+        tvpi?: number;
+        dpi?: number;
+        metadata?: Record<string, unknown>;
+      };
+
+      const today = new Date().toISOString().slice(0, 10);
+      const [report] = await db
+        .insert(fundLpReportsTable)
+        .values({
+          reportingPeriod: body.reportingPeriod,
+          reportType: body.reportType ?? 'quarterly',
+          status: 'distributed',
+          distributedAt: new Date(),
+          periodStart: today,
+          periodEnd: today,
+          netIrr: body.netIrr ? String(body.netIrr) : null,
+          tvpi: body.tvpi ? String(body.tvpi) : null,
+          dpi: body.dpi ? String(body.dpi) : null,
+          metadata: body.metadata ?? {},
+        })
+        .returning();
+
+      // Fan-out email notifications to all non-demo LPs with an email address
+      const lps = await db
+        .select({
+          id: fundAccreditedInvestorsTable.id,
+          lpName: fundAccreditedInvestorsTable.lpName,
+          contactEmail: fundAccreditedInvestorsTable.contactEmail,
+          metadata: fundAccreditedInvestorsTable.metadata,
+        })
+        .from(fundAccreditedInvestorsTable)
+        .where(ne(fundAccreditedInvestorsTable.contactEmail, ''));
+
+      const baseUrl = process.env.APP_URL || 'https://szlholdings.com';
+      const portalUrl = `${baseUrl}/fund/lp-portal`;
+      let notified = 0;
+      let skipped = 0;
+
+      for (const lp of lps) {
+        const isDemo = (lp.metadata as { is_demo?: boolean } | null)?.is_demo === true;
+        if (isDemo || !lp.contactEmail) {
+          skipped++;
+          continue;
+        }
+        const unsubToken = generateUnsubscribeToken(lp.contactEmail);
+        const reportTypeLabels: Record<string, string> = {
+          quarterly: 'Quarterly Report',
+          annual: 'Annual Report',
+          capital_call_notice: 'Capital Call Notice',
+          distribution_notice: 'Distribution Notice',
+          special: 'Special Update',
+        };
+        const reportTypeLabel = reportTypeLabels[body.reportType ?? 'quarterly'] ?? 'Report';
+        const { subject, html, text } = buildLpReportPublishedEmail({
+          lpName: lp.lpName,
+          period: body.reportingPeriod,
+          reportType: reportTypeLabel,
+          portalUrl,
+        });
+        sendEmail({
+          to: lp.contactEmail,
+          subject,
+          html,
+          text,
+          replyTo: 'investor-relations@szlholdings.com',
+          unsubscribeToken: unsubToken,
+        })
+          .then((result) => {
+            logNotificationAudit({
+              template: 'lp_report_published',
+              recipient: lp.contactEmail!,
+              subject,
+              entityType: 'lp_report',
+              entityId: String(report.id),
+              deliveryStatus: result.success ? 'sent' : 'failed',
+              messageId: result.messageId,
+              provider: result.provider,
+              error: result.error,
+            });
+          })
+          .catch((err) => {
+            logger.warn({ err, lpId: lp.id }, '[lp-portal] Report publish email notification failed');
+          });
+        notified++;
+      }
+
+      logger.info({ reportId: report.id, notified, skipped }, '[lp-portal] Report published and notifications dispatched');
+      sendSuccess(res, { report, notified, skipped }, 201);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to publish report');
     }
   },
 );

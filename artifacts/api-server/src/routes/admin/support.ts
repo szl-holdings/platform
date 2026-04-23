@@ -8,8 +8,14 @@ import {
 import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import type { IRouter } from 'express';
 import { z } from 'zod';
-import { sendBadRequest, sendError, sendNotFound } from '../../lib/api-response.js';
-import { buildTicketStatusEmail, sendEmail } from '../../lib/email.js';
+import { sendBadRequest, sendError, sendNotFound, sendSuccess } from '../../lib/api-response.js';
+import {
+  buildAgentTicketReplyEmail,
+  buildTicketStatusEmail,
+  generateUnsubscribeToken,
+  logNotificationAudit,
+  sendEmail,
+} from '../../lib/email.js';
 import { logger } from '../../lib/logger.js';
 import {
   kbArticleArchiveSchema,
@@ -18,8 +24,22 @@ import {
   validateBody,
   validateQuery,
 } from '../../lib/validation.js';
+import { pool } from '@szl-holdings/db';
 
 const SUPPORT_NOTIFICATIONS_ENABLED = process.env.SUPPORT_EMAIL_NOTIFICATIONS !== 'false';
+
+/** Resolve the configured support notification reply-to email from DB, falling back to env var. */
+async function getSupportReplyEmail(): Promise<string> {
+  try {
+    const result = await pool.query(
+      `SELECT notification_email FROM support_notification_settings ORDER BY updated_at DESC LIMIT 1`,
+    );
+    if (result.rows[0]?.notification_email) return result.rows[0].notification_email as string;
+  } catch {
+    // Non-fatal — fall back to env var
+  }
+  return process.env.SZL_INTERNAL_EMAIL || 'inquiries@szlholdings.com';
+}
 
 const updateStatusSchema = z.object({
   status: z.enum(['new', 'contacted', 'qualified', 'closed', 'lost']).optional(),
@@ -153,22 +173,50 @@ export function register(router: IRouter): void {
         .orderBy(desc(contactSubmissionsTable.createdAt))
         .limit(limit);
 
-      const tickets = rows.map((r) => ({
-        id: r.id,
-        formKey: r.formKey,
-        fullName: r.fullName,
-        email: r.email,
-        company: r.company,
-        message: r.message,
-        preferredTimeline: r.preferredTimeline,
-        submissionStatus: r.submissionStatus,
-        resolvedAt: r.resolvedAt,
-        createdAt: r.createdAt,
-        leadStatusId: r.leadStatusId,
-        status: r.status ?? 'new',
-        notes: r.notes,
-        ownerUserId: r.ownerUserId,
-      }));
+      // Fetch extra columns added by migration (not yet in Drizzle schema)
+      const ids = rows.map((r) => r.id);
+      const extraRows: Map<number, { emailOptOut: boolean; notificationSentAt: string | null }> = new Map();
+      if (ids.length > 0) {
+        try {
+          const extraResult = await pool.query(
+            `SELECT cs.id, COALESCE(cs.email_opt_out, false) as email_opt_out, ls.notification_sent_at
+             FROM contact_submissions cs
+             LEFT JOIN lead_status ls ON ls.contact_submission_id = cs.id
+             WHERE cs.id = ANY($1)`,
+            [ids],
+          );
+          for (const row of extraResult.rows) {
+            extraRows.set(row.id, {
+              emailOptOut: row.email_opt_out === true,
+              notificationSentAt: row.notification_sent_at ?? null,
+            });
+          }
+        } catch {
+          // columns may not exist yet on older DBs — gracefully degrade
+        }
+      }
+
+      const tickets = rows.map((r) => {
+        const extra = extraRows.get(r.id);
+        return {
+          id: r.id,
+          formKey: r.formKey,
+          fullName: r.fullName,
+          email: r.email,
+          company: r.company,
+          message: r.message,
+          preferredTimeline: r.preferredTimeline,
+          submissionStatus: r.submissionStatus,
+          resolvedAt: r.resolvedAt,
+          createdAt: r.createdAt,
+          leadStatusId: r.leadStatusId,
+          status: r.status ?? 'new',
+          notes: r.notes,
+          ownerUserId: r.ownerUserId,
+          emailOptOut: extra?.emailOptOut ?? false,
+          notificationSentAt: extra?.notificationSentAt ?? null,
+        };
+      });
 
       if (format === 'csv') {
         const header = buildCsvRow([
@@ -286,8 +334,11 @@ export function register(router: IRouter): void {
         const shouldNotify = notify !== undefined ? notify : SUPPORT_NOTIFICATIONS_ENABLED;
         const statusChanged = status !== undefined && status !== previousStatus;
         const notesAdded = notes !== undefined && notes !== (existingLead?.notes ?? null);
+        const emailOptOut = submission.emailOptOut === true;
 
-        if (shouldNotify && (statusChanged || notesAdded) && leadRow) {
+        const willNotify = shouldNotify && (statusChanged || notesAdded) && leadRow && !emailOptOut;
+
+        if (willNotify && leadRow) {
           const emailPayload = buildTicketStatusEmail({
             name: submission.fullName,
             previousStatus: previousStatus ?? undefined,
@@ -295,26 +346,46 @@ export function register(router: IRouter): void {
             notes: notesAdded ? notes : null,
             ticketId: id,
           });
+          const unsubToken = generateUnsubscribeToken(submission.email);
+          const replyToAddr = await getSupportReplyEmail();
 
           sendEmail({
             to: submission.email,
             subject: emailPayload.subject,
             html: emailPayload.html,
             text: emailPayload.text,
-            replyTo: 'inquiries@szlholdings.com',
+            replyTo: replyToAddr,
+            unsubscribeToken: unsubToken,
           })
-            .then((result) => {
+            .then(async (result) => {
               if (result.success) {
                 logger.info(
                   { id, provider: result.provider },
                   '[admin/support-queue] Status notification email sent',
                 );
+                // Mark notification_sent_at on lead_status
+                await db
+                  .update(leadStatusTable)
+                  .set({ notificationSentAt: new Date() })
+                  .where(eq(leadStatusTable.id, leadRow!.id))
+                  .catch(() => {});
               } else {
                 logger.warn(
                   { id, error: result.error },
                   '[admin/support-queue] Status notification email failed',
                 );
               }
+              logNotificationAudit({
+                template: 'support_status_change',
+                recipient: submission.email,
+                subject: emailPayload.subject,
+                entityType: 'support_ticket',
+                entityId: String(id),
+                deliveryStatus: result.success ? 'sent' : 'failed',
+                messageId: result.messageId,
+                provider: result.provider,
+                error: result.error,
+              });
             })
             .catch((err) => {
               logger.error(
@@ -327,7 +398,8 @@ export function register(router: IRouter): void {
         res.json({
           success: true,
           leadStatus: leadRow,
-          notificationQueued: shouldNotify && (statusChanged || notesAdded),
+          notificationQueued: !!willNotify,
+          emailOptOut,
         });
       } catch (err) {
         logger.error({ err }, '[admin/support-queue] POST status failed');
@@ -416,13 +488,41 @@ export function register(router: IRouter): void {
 
       const { subject, body } = req.body as { subject: string; body: string };
       const sentBy = (req as any).user?.displayName ?? (req as any).user?.email ?? 'Admin';
+      const emailOptOut = submission.emailOptOut === true;
+
+      if (emailOptOut) {
+        res.json({ success: false, sent: false, error: 'Contact has opted out of email notifications' });
+        return;
+      }
+
+      const unsubToken = generateUnsubscribeToken(submission.email);
+      const { subject: emailSubject, html: emailHtml, text: emailText } = buildAgentTicketReplyEmail({
+        name: submission.fullName,
+        agentReply: body,
+        ticketId: id,
+        originalSubject: subject,
+      });
+      const replyToAddr = await getSupportReplyEmail();
 
       const emailResult = await sendEmail({
         to: submission.email,
-        subject,
-        html: buildSupportReplyEmail(submission.fullName, body),
-        text: body,
-        replyTo: 'inquiries@szlholdings.com',
+        subject: emailSubject,
+        html: emailHtml,
+        text: emailText,
+        replyTo: replyToAddr,
+        unsubscribeToken: unsubToken,
+      });
+
+      logNotificationAudit({
+        template: 'support_agent_reply',
+        recipient: submission.email,
+        subject: emailSubject,
+        entityType: 'support_ticket',
+        entityId: String(id),
+        deliveryStatus: emailResult.success ? 'sent' : 'failed',
+        messageId: emailResult.messageId,
+        provider: emailResult.provider,
+        error: emailResult.error,
       });
 
       const [savedReply] = await db
@@ -484,6 +584,81 @@ export function register(router: IRouter): void {
     } catch (err) {
       logger.error({ err }, '[admin/support-queue] GET replies failed');
       sendError(res, 'Failed to fetch replies', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  // ── Per-contact email opt-out management ──────────────────────────────────
+  router.post('/admin/support-queue/:id/opt-out', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) { sendBadRequest(res, 'Invalid ticket ID'); return; }
+      const body = req.body as { optOut?: boolean };
+      const optOut = body.optOut !== false;
+      await pool.query(
+        `UPDATE contact_submissions SET email_opt_out = $1, email_opt_out_at = $2 WHERE id = $3`,
+        [optOut, optOut ? new Date() : null, id],
+      );
+      sendSuccess(res, { id, emailOptOut: optOut });
+    } catch (err) {
+      logger.error({ err }, '[admin/support-queue] POST opt-out failed');
+      sendError(res, 'Failed to update opt-out', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  // ── Admin notification email address settings ─────────────────────────────
+  router.get('/admin/notification-settings', async (_req, res) => {
+    try {
+      const result = await pool.query(
+        `SELECT * FROM support_notification_settings ORDER BY updated_at DESC LIMIT 1`,
+      );
+      sendSuccess(res, result.rows[0] ?? { notification_email: process.env.SZL_INTERNAL_EMAIL || 'team@szlholdings.com' });
+    } catch (err) {
+      logger.error({ err }, '[admin/notification-settings] GET failed');
+      sendError(res, 'Failed to fetch notification settings', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  router.put('/admin/notification-settings', async (req, res) => {
+    try {
+      const body = req.body as { notificationEmail?: string; updatedBy?: string };
+      if (!body.notificationEmail) { sendBadRequest(res, 'notificationEmail is required'); return; }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(body.notificationEmail)) { sendBadRequest(res, 'Invalid email address'); return; }
+      // Singleton upsert: the migration seeds id=1; always update that row.
+      // If the seed somehow didn't run, insert a new row.
+      await pool.query(
+        `INSERT INTO support_notification_settings (id, notification_email, updated_at, updated_by)
+         VALUES (1, $1, NOW(), $2)
+         ON CONFLICT (id) DO UPDATE SET notification_email = EXCLUDED.notification_email,
+           updated_at = NOW(), updated_by = EXCLUDED.updated_by`,
+        [body.notificationEmail, body.updatedBy ?? null],
+      );
+      sendSuccess(res, { notificationEmail: body.notificationEmail });
+    } catch (err) {
+      logger.error({ err }, '[admin/notification-settings] PUT failed');
+      sendError(res, 'Failed to update notification settings', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  // ── Notification audit log endpoint ───────────────────────────────────────
+  router.get('/admin/notification-audit-log', async (req, res) => {
+    try {
+      const limitParam = parseInt((req.query.limit as string) ?? '100', 10);
+      const limit = Math.min(Number.isNaN(limitParam) ? 100 : limitParam, 500);
+      const template = req.query.template as string | undefined;
+      const recipient = req.query.recipient as string | undefined;
+      let q = `SELECT * FROM notification_audit_log WHERE 1=1`;
+      const params: unknown[] = [];
+      if (template) { params.push(template); q += ` AND template = $${params.length}`; }
+      if (recipient) { params.push(`%${recipient}%`); q += ` AND recipient ILIKE $${params.length}`; }
+      params.push(limit);
+      q += ` ORDER BY sent_at DESC LIMIT $${params.length}`;
+      const result = await pool.query(q, params);
+      const [{ total }] = (await pool.query(`SELECT COUNT(*)::int as total FROM notification_audit_log`)).rows;
+      sendSuccess(res, { logs: result.rows, total });
+    } catch (err) {
+      logger.error({ err }, '[admin/notification-audit-log] GET failed');
+      sendError(res, 'Failed to fetch audit log', 500, 'INTERNAL_ERROR');
     }
   });
 

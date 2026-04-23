@@ -765,8 +765,8 @@ export { RealtimeStatusIndicator } from './realtime-status-indicator';
 export {
   ExecutiveTrustSummaryPanel,
   type ExecutiveTrustSummaryPanelProps,
-  ProvenanceBadge,
-  type ProvenanceBadgeProps,
+  ProvenanceBadge as ReceiptProvenanceBadge,
+  type ProvenanceBadgeProps as ReceiptProvenanceBadgeProps,
   ProvenanceViewer,
   type ProvenanceViewerProps,
   ReceiptDrawer,

@@ -185,6 +185,8 @@ interface SupportTicket {
   leadStatusId?: number | null;
   submissionStatus?: 'open' | 'resolved';
   resolvedAt?: string | null;
+  notificationSentAt?: string | null;
+  emailOptOut?: boolean;
 }
 interface OverviewData {
   counts: {
@@ -1502,6 +1504,10 @@ function SupportPanel() {
     null,
   );
 
+  const [notifEmail, setNotifEmail] = useState('');
+  const [notifSaving, setNotifSaving] = useState(false);
+  const [notifResult, setNotifResult] = useState<{ ok: boolean; msg: string } | null>(null);
+
   const { data, isLoading, refetch } = useStandardQuery<{
     tickets: SupportTicket[];
     total: number;
@@ -1511,6 +1517,17 @@ function SupportPanel() {
     queryFn: () => adminFetch(`/admin/support-queue${showResolved ? '?includeResolved=true' : ''}`),
     refetchInterval: 60000,
   });
+
+  const { data: notifSettings } = useStandardQuery<{ notification_email?: string }>({
+    queryKey: ['admin-notification-settings'],
+    queryFn: () => adminFetch<{ notification_email?: string }>('/admin/notification-settings'),
+  });
+
+  useEffect(() => {
+    if (notifSettings?.notification_email) {
+      setNotifEmail(notifSettings.notification_email);
+    }
+  }, [notifSettings?.notification_email]);
 
   const statusMutation = useStandardMutation({
     mutationFn: ({
@@ -1570,6 +1587,15 @@ function SupportPanel() {
   const reopenMutation = useStandardMutation({
     mutationFn: ({ id }: { id: number }) =>
       adminFetch(`/admin/support-queue/${id}/reopen`, { method: 'POST' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-support'] }),
+  });
+
+  const optOutMutation = useStandardMutation({
+    mutationFn: ({ id, optOut }: { id: number; optOut: boolean }) =>
+      adminFetch(`/admin/support-queue/${id}/opt-out`, {
+        method: 'POST',
+        body: JSON.stringify({ optOut }),
+      }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-support'] }),
   });
 
@@ -1871,6 +1897,22 @@ function SupportPanel() {
                     {t.submissionStatus === 'resolved' && (
                       <Badge label="Resolved" variant="green" />
                     )}
+                    {t.notificationSentAt && (
+                      <span
+                        title={`Notification sent ${new Date(t.notificationSentAt).toLocaleString()}`}
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20"
+                      >
+                        <Mail className="w-2.5 h-2.5" /> Notified
+                      </span>
+                    )}
+                    {t.emailOptOut && (
+                      <span
+                        title="Contact has opted out of email notifications"
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                      >
+                        No email
+                      </span>
+                    )}
                     <Badge label={sc.label} variant={sc.variant} />
                     <Badge label={fk.label} variant={fk.variant} />
                     <span className="text-[10px] text-muted-foreground">
@@ -1951,6 +1993,26 @@ function SupportPanel() {
                               {resolveMutation.isPending ? 'Resolving…' : 'Resolve'}
                             </button>
                           )}
+                          <button
+                            onClick={() =>
+                              optOutMutation.mutate({ id: t.id, optOut: !t.emailOptOut })
+                            }
+                            disabled={optOutMutation.isPending}
+                            title={
+                              t.emailOptOut
+                                ? 'Re-enable email notifications for this contact'
+                                : 'Opt this contact out of email notifications'
+                            }
+                            className={cn(
+                              'flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-md font-semibold border transition-colors disabled:opacity-40',
+                              t.emailOptOut
+                                ? 'border-sky-500/30 text-sky-500 hover:bg-sky-500/10'
+                                : 'border-rose-500/30 text-rose-500 hover:bg-rose-500/10',
+                            )}
+                          >
+                            <Mail className="w-3 h-3" />
+                            {t.emailOptOut ? 'Re-enable emails' : 'Opt out emails'}
+                          </button>
                         </div>
 
                         <div className="flex items-center gap-1.5 flex-wrap pt-1">
@@ -2068,6 +2130,56 @@ function SupportPanel() {
           })}
         </div>
       )}
+
+      {/* ── Notification email settings ──────────────────────────────── */}
+      <div className="mt-6 bg-card border border-border rounded-xl p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Mail className="w-4 h-4 text-muted-foreground" />
+          <h3 className="text-sm font-semibold text-foreground">Notification Email Settings</h3>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Configure the reply-to address used in support notification emails sent to contacts.
+          Currently set to:{' '}
+          <span className="font-medium text-foreground">
+            {notifSettings?.notification_email ?? '—'}
+          </span>
+        </p>
+        <div className="flex gap-2">
+          <input
+            type="email"
+            value={notifEmail}
+            onChange={(e) => { setNotifEmail(e.target.value); setNotifResult(null); }}
+            placeholder="support@yourcompany.com"
+            className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
+          />
+          <button
+            disabled={notifSaving || !notifEmail}
+            onClick={async () => {
+              setNotifSaving(true);
+              setNotifResult(null);
+              try {
+                await adminFetch('/admin/notification-settings', {
+                  method: 'PUT',
+                  body: JSON.stringify({ notificationEmail: notifEmail }),
+                });
+                setNotifResult({ ok: true, msg: 'Notification email updated.' });
+              } catch {
+                setNotifResult({ ok: false, msg: 'Failed to update notification email.' });
+              } finally {
+                setNotifSaving(false);
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20 border border-primary/30 transition-colors disabled:opacity-40"
+          >
+            {notifSaving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+        {notifResult && (
+          <p className={`text-xs font-medium ${notifResult.ok ? 'text-emerald-500' : 'text-rose-500'}`}>
+            {notifResult.msg}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

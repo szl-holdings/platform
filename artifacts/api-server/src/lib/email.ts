@@ -4,6 +4,15 @@ import { PgPool } from '@szl-holdings/db';
 import { logger } from './logger';
 import { isFlagEnabled } from './platform-flags';
 
+// Audit pool is module-level so it's reused across calls
+const auditPool = new PgPool({
+  connectionString: process.env.DATABASE_URL,
+  max: 3,
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 5_000,
+  statement_timeout: 10_000,
+});
+
 const suppressionPool = new PgPool({
   connectionString: process.env.DATABASE_URL,
   max: 3,
@@ -1785,5 +1794,146 @@ export function buildDealSubmissionAckEmail(params: {
     `SZL Holdings · Washington, D.C. · London · Singapore`,
   ].join('\n');
 
+  return { subject, html, text };
+}
+
+// ─── Notification Audit Log ────────────────────────────────────────────────────
+
+export async function logNotificationAudit(opts: {
+  template: string;
+  recipient: string;
+  subject?: string;
+  entityType?: string;
+  entityId?: string;
+  deliveryStatus: 'sent' | 'failed' | 'skipped';
+  messageId?: string;
+  provider?: string;
+  error?: string;
+}): Promise<void> {
+  try {
+    await auditPool.query(
+      `INSERT INTO notification_audit_log (template, recipient, subject, entity_type, entity_id, delivery_status, message_id, provider, error)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+      [
+        opts.template,
+        opts.recipient,
+        opts.subject ?? null,
+        opts.entityType ?? null,
+        opts.entityId ?? null,
+        opts.deliveryStatus,
+        opts.messageId ?? null,
+        opts.provider ?? null,
+        opts.error ?? null,
+      ],
+    );
+  } catch (err) {
+    logger.warn({ err, template: opts.template, recipient: opts.recipient }, '[email-audit] Failed to write audit log');
+  }
+}
+
+// ─── LP Portal Email Templates ────────────────────────────────────────────────
+
+export function buildLpReportPublishedEmail(opts: {
+  lpName: string;
+  period: string;
+  reportType: string;
+  portalUrl: string;
+}): { subject: string; html: string; text: string } {
+  const { lpName, period, reportType, portalUrl } = opts;
+  const subject = `New report available: ${reportType} — ${period}`;
+  const html = szlBrand(`
+    <h2>A New Report is Available</h2>
+    <p>Hello ${lpName},</p>
+    <p>A new <strong>${reportType}</strong> report for the period <strong>${period}</strong> has been posted to your LP portal.</p>
+    <div class="highlight">
+      <p class="label">Action Required</p>
+      <p>Log in to your LP portal to review the report and any accompanying documents.</p>
+    </div>
+    <a class="cta" href="${portalUrl}">View in LP Portal</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">You are receiving this because you are a limited partner of SZL Holdings. If you believe this was sent in error, please contact <strong>investor-relations@szlholdings.com</strong>.</p>
+  `);
+  const text = [
+    `New Report Available: ${reportType} — ${period}`,
+    ``,
+    `Hello ${lpName},`,
+    ``,
+    `A new ${reportType} report for the period ${period} has been posted to your LP portal.`,
+    ``,
+    `Log in to review it: ${portalUrl}`,
+    ``,
+    `SZL Holdings · investor-relations@szlholdings.com`,
+  ].join('\n');
+  return { subject, html, text };
+}
+
+export function buildLpGpMessageEmail(opts: {
+  lpName: string;
+  messagePreview: string;
+  portalUrl: string;
+}): { subject: string; html: string; text: string } {
+  const { lpName, messagePreview, portalUrl } = opts;
+  const subject = 'New message from your GP — SZL Holdings';
+  const html = szlBrand(`
+    <h2>Message from the GP Team</h2>
+    <p>Hello ${lpName},</p>
+    <p>Your General Partner has sent you a message via the LP portal.</p>
+    <div class="highlight">
+      <p class="label">Message Preview</p>
+      <p>${messagePreview.slice(0, 200).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}${messagePreview.length > 200 ? '…' : ''}</p>
+    </div>
+    <a class="cta" href="${portalUrl}">View Full Message</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">You are receiving this because you are a limited partner of SZL Holdings. Reply to this email or visit your portal to respond.</p>
+  `);
+  const text = [
+    `New Message from Your GP — SZL Holdings`,
+    ``,
+    `Hello ${lpName},`,
+    ``,
+    `Your General Partner has sent you a message:`,
+    ``,
+    messagePreview.slice(0, 300),
+    ``,
+    `View the full message: ${portalUrl}`,
+    ``,
+    `SZL Holdings · investor-relations@szlholdings.com`,
+  ].join('\n');
+  return { subject, html, text };
+}
+
+// ─── Agent Ticket Reply Email ─────────────────────────────────────────────────
+
+export function buildAgentTicketReplyEmail(params: {
+  name: string;
+  agentReply: string;
+  ticketId: number;
+  originalSubject: string;
+}): { subject: string; html: string; text: string } {
+  const { name, agentReply, ticketId, originalSubject } = params;
+  const subject = `Re: ${originalSubject} [Ticket #${ticketId}]`;
+  const html = szlBrand(`
+    <h2>Our Team Has Replied to Your Inquiry</h2>
+    <p>Hello ${name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')},</p>
+    <p>A member of our support team has posted a reply to your inquiry.</p>
+    <div class="highlight">
+      <p class="label">Reply from our team</p>
+      <p>${agentReply.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br />')}</p>
+    </div>
+    <p>If you have further questions, reply directly to this email and your message will reach the same team member.</p>
+    <a class="cta" href="mailto:inquiries@szlholdings.com">Reply to Support</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">Inquiry reference: #${ticketId}</p>
+  `);
+  const text = [
+    `Re: ${originalSubject} [Ticket #${ticketId}]`,
+    ``,
+    `Hello ${name},`,
+    ``,
+    `A member of our support team has replied:`,
+    ``,
+    agentReply,
+    ``,
+    `Reply to inquiries@szlholdings.com with any follow-up questions.`,
+    ``,
+    `Inquiry reference: #${ticketId}`,
+  ].join('\n');
   return { subject, html, text };
 }
