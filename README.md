@@ -8,9 +8,9 @@
 ![Node](https://img.shields.io/badge/Node-20.x-green)
 ![React](https://img.shields.io/badge/React-19-61DAFB)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)
-![Apps](https://img.shields.io/badge/apps-25-gold)
-![API_Endpoints](https://img.shields.io/badge/API_endpoints-2%2C331-orange)
-![DB_Tables](https://img.shields.io/badge/DB_tables-644-purple)
+![Apps](https://img.shields.io/badge/apps-14-gold)
+![API_Endpoints](https://img.shields.io/badge/API_endpoints-2%2C816-orange)
+![DB_Tables](https://img.shields.io/badge/DB_tables-798-purple)
 
 > Lyte is the command surface. Alloy is the execution fabric. CORTEX is the unified mobile command center. Domain packs extend the same system into security, maritime, real estate, legal, and consulting.
 
@@ -24,12 +24,12 @@
 
 | Metric | Count |
 |--------|-------|
-| Production Web Applications | 10 |
+| Production Web Applications | 11 |
 | Native Mobile Apps (Expo) | 2 unified command centers |
-| Shared Libraries | 37 packages |
+| Shared Libraries | 40 packages |
 | API Route Files | 167 backend services |
-| API Endpoints | 2,331 |
-| Database Tables | 644 |
+| API Endpoints | 2,816 |
+| Database Tables | 798 |
 | Source Files | 1,620 TypeScript files |
 | Lines of Code | 450,000+ |
 | UI Components | 252 web + 116 mobile screens |
