@@ -7,7 +7,9 @@ import { AnimatePresence, m } from 'framer-motion';
 import {
   Activity,
   AlertCircle,
+  Archive,
   BarChart3,
+  BookOpen,
   Building2,
   CheckCircle2,
   ChevronDown,
@@ -26,6 +28,7 @@ import {
   Loader2,
   Lock,
   Mail,
+  MessageSquare,
   Plus,
   RefreshCw,
   Search,
@@ -33,6 +36,7 @@ import {
   Shield,
   ShieldCheck,
   Sliders,
+  Tag,
   Terminal,
   ToggleLeft,
   ToggleRight,
@@ -228,6 +232,7 @@ const NAV_ITEMS = [
   { id: 'tenants', label: 'Tenants', icon: Building2 },
   { id: 'users', label: 'Users', icon: Users },
   { id: 'support', label: 'Support Queue', icon: HeadphonesIcon },
+  { id: 'knowledge', label: 'Knowledge Base', icon: BookOpen },
   { id: 'audit', label: 'Audit Log', icon: Shield },
   { id: 'flags', label: 'Feature Flags', icon: Flag },
   { id: 'health', label: 'System Health', icon: Activity },
@@ -1422,6 +1427,67 @@ interface ReplyModal {
   body: string;
 }
 
+interface SupportReply {
+  id: number;
+  contactSubmissionId: number;
+  subject: string;
+  body: string;
+  sentByUserId: number | null;
+  sentByName: string | null;
+  sentAt: string;
+}
+
+function TicketReplyHistory({ ticketId }: { ticketId: number }) {
+  const { data, isLoading } = useStandardQuery<{ replies: SupportReply[] }>({
+    queryKey: ['ticket-replies', ticketId],
+    queryFn: () => adminFetch(`/admin/support-queue/${ticketId}/replies`),
+    refetchInterval: 30000,
+  });
+
+  const replies = data?.replies ?? [];
+
+  if (isLoading)
+    return (
+      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground py-1">
+        <Loader2 className="w-3 h-3 animate-spin" /> Loading reply history…
+      </div>
+    );
+
+  if (replies.length === 0)
+    return (
+      <p className="text-[10px] text-muted-foreground/60 italic">No replies sent yet.</p>
+    );
+
+  return (
+    <div className="flex flex-col gap-2">
+      {replies.map((r) => (
+        <div
+          key={r.id}
+          className="bg-primary/5 border border-primary/15 rounded-lg px-3 py-2 space-y-0.5"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[10px] font-semibold text-primary/80">{r.subject}</span>
+            <span className="text-[9px] text-muted-foreground shrink-0">
+              {new Date(r.sentAt).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </span>
+          </div>
+          <p className="text-[11px] text-foreground/80 whitespace-pre-wrap leading-relaxed">
+            {r.body}
+          </p>
+          {r.sentByName && (
+            <p className="text-[9px] text-muted-foreground">Sent by {r.sentByName}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function SupportPanel() {
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
@@ -1951,8 +2017,15 @@ function SupportPanel() {
                         </div>
 
                         <div className="pt-2 space-y-1.5" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground">
+                            <MessageSquare className="w-3 h-3" /> Reply History
+                          </div>
+                          <TicketReplyHistory ticketId={t.id} />
+                        </div>
+
+                        <div className="pt-2 space-y-1.5" onClick={(e) => e.stopPropagation()}>
                           <div className="text-[10px] font-semibold text-muted-foreground">
-                            Internal Notes (reply thread)
+                            Internal Notes
                           </div>
                           <textarea
                             rows={3}
@@ -2696,7 +2769,327 @@ function AccessDenied() {
   );
 }
 
-// ─── Main Layout ──────────────────────────────────────────────────────────────
+// ─── Knowledge Base Panel ─────────────────────────────────────────────────────
+
+interface KbArticle {
+  id: number;
+  slug: string;
+  title: string;
+  category: string;
+  summary: string;
+  body: string;
+  tags: string[];
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const EMPTY_KB_FORM = {
+  slug: '',
+  title: '',
+  category: '',
+  summary: '',
+  body: '',
+  tags: '',
+  isPublished: true,
+};
+
+function KnowledgePanel() {
+  const qc = useQueryClient();
+  const [editingArticle, setEditingArticle] = useState<KbArticle | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(EMPTY_KB_FORM);
+  const [search, setSearch] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [archiving, setArchiving] = useState<number | null>(null);
+
+  const { data, isLoading, refetch } = useStandardQuery<{ articles: KbArticle[]; total: number }>({
+    queryKey: ['admin-kb-articles'],
+    queryFn: () => adminFetch('/admin/kb-articles'),
+  });
+
+  const articles = (data?.articles ?? []).filter((a) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      a.title.toLowerCase().includes(q) ||
+      a.category.toLowerCase().includes(q) ||
+      a.slug.toLowerCase().includes(q)
+    );
+  });
+
+  const openCreate = () => {
+    setEditingArticle(null);
+    setForm(EMPTY_KB_FORM);
+    setShowForm(true);
+  };
+
+  const openEdit = (a: KbArticle) => {
+    setEditingArticle(a);
+    setForm({
+      slug: a.slug,
+      title: a.title,
+      category: a.category,
+      summary: a.summary,
+      body: a.body,
+      tags: a.tags.join(', '),
+      isPublished: a.isPublished,
+    });
+    setShowForm(true);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const payload = {
+        slug: form.slug,
+        title: form.title,
+        category: form.category,
+        summary: form.summary,
+        body: form.body,
+        tags: form.tags
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean),
+        isPublished: form.isPublished,
+      };
+
+      const url = editingArticle ? `/admin/kb-articles/${editingArticle.id}` : '/admin/kb-articles';
+      const method = editingArticle ? 'PATCH' : 'POST';
+      await adminFetch(url, { method, body: JSON.stringify(payload) });
+      await qc.invalidateQueries({ queryKey: ['admin-kb-articles'] });
+      setShowForm(false);
+      setEditingArticle(null);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleArchive = async (id: number) => {
+    if (!confirm('Archive this article? It will be unpublished and hidden from the public KB.'))
+      return;
+    setArchiving(id);
+    try {
+      await adminFetch(`/admin/kb-articles/${id}`, { method: 'DELETE' });
+      await qc.invalidateQueries({ queryKey: ['admin-kb-articles'] });
+    } finally {
+      setArchiving(null);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {showForm ? (
+        <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold">
+              {editingArticle ? 'Edit Article' : 'New KB Article'}
+            </h3>
+            <button
+              onClick={() => setShowForm(false)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                Title *
+              </label>
+              <input
+                type="text"
+                value={form.title}
+                onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+                placeholder="How to reset your password"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                Slug *
+              </label>
+              <input
+                type="text"
+                value={form.slug}
+                onChange={(e) => setForm((p) => ({ ...p, slug: e.target.value }))}
+                placeholder="how-to-reset-password"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                Category *
+              </label>
+              <input
+                type="text"
+                value={form.category}
+                onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
+                placeholder="Account &amp; Billing"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                Tags (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={form.tags}
+                onChange={(e) => setForm((p) => ({ ...p, tags: e.target.value }))}
+                placeholder="billing, account, password"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+              Summary *
+            </label>
+            <textarea
+              rows={2}
+              value={form.summary}
+              onChange={(e) => setForm((p) => ({ ...p, summary: e.target.value }))}
+              placeholder="A brief description shown in search results…"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+              Body (Markdown) *
+            </label>
+            <textarea
+              rows={10}
+              value={form.body}
+              onChange={(e) => setForm((p) => ({ ...p, body: e.target.value }))}
+              placeholder="## Introduction&#10;&#10;Write your article content here in Markdown…"
+              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 resize-y"
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.isPublished}
+                onChange={(e) => setForm((p) => ({ ...p, isPublished: e.target.checked }))}
+                className="w-3.5 h-3.5 rounded"
+              />
+              <span className="text-xs text-muted-foreground">Published (visible in public KB)</span>
+            </label>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowForm(false)}
+                className="px-4 py-1.5 rounded-lg text-xs border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !form.slug || !form.title || !form.category || !form.summary || !form.body}
+                className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
+              >
+                {saving ? 'Saving…' : editingArticle ? 'Update Article' : 'Create Article'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          <SectionHeader
+            title="Knowledge Base"
+            subtitle={`${data?.total ?? 0} articles`}
+            onRefresh={() => refetch()}
+            loading={isLoading}
+          />
+
+          <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <SearchInput
+                value={search}
+                onChange={setSearch}
+                placeholder="Search articles by title, category, or slug…"
+              />
+            </div>
+            <button
+              onClick={openCreate}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary/90 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" /> New Article
+            </button>
+          </div>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : articles.length === 0 ? (
+            <EmptyState
+              message={search ? 'No articles match your search.' : 'No KB articles yet. Create your first article.'}
+            />
+          ) : (
+            <div className="bg-card border border-border rounded-xl divide-y divide-border/50">
+              {articles.map((a) => (
+                <div key={a.id} className="px-4 py-3 flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <span className="text-sm font-medium text-foreground truncate">{a.title}</span>
+                      {!a.isPublished && (
+                        <Badge label="Draft" variant="amber" />
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] font-mono text-muted-foreground">{a.slug}</span>
+                      <span className="text-muted-foreground/40 text-[10px]">·</span>
+                      <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                        <BookOpen className="w-3 h-3" /> {a.category}
+                      </span>
+                      {a.tags.length > 0 && (
+                        <>
+                          <span className="text-muted-foreground/40 text-[10px]">·</span>
+                          <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                            <Tag className="w-2.5 h-2.5" />
+                            {a.tags.slice(0, 3).join(', ')}
+                            {a.tags.length > 3 && ` +${a.tags.length - 3}`}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/70 mt-1 line-clamp-1">
+                      {a.summary}
+                    </p>
+                    <p className="text-[9px] text-muted-foreground/40 mt-0.5">
+                      Updated {new Date(a.updatedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      onClick={() => openEdit(a)}
+                      className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    >
+                      <Edit2 className="w-3 h-3" /> Edit
+                    </button>
+                    <button
+                      onClick={() => handleArchive(a.id)}
+                      disabled={archiving === a.id}
+                      className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-md border border-red-500/20 text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-colors disabled:opacity-40"
+                    >
+                      <Archive className="w-3 h-3" />
+                      {archiving === a.id ? 'Archiving…' : 'Archive'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function AdminCommandCenter() {
   const [section, setSection] = useState<Section>('overview');
@@ -2738,6 +3131,8 @@ export default function AdminCommandCenter() {
         return <UsersPanel />;
       case 'support':
         return <SupportPanel />;
+      case 'knowledge':
+        return <KnowledgePanel />;
       case 'audit':
         return <AuditPanel />;
       case 'flags':

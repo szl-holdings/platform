@@ -1,4 +1,5 @@
 import {
+  contactSubmissionRepliesTable,
   contactSubmissionsTable,
   db,
   leadStatusTable,
@@ -414,6 +415,7 @@ export function register(router: IRouter): void {
       }
 
       const { subject, body } = req.body as { subject: string; body: string };
+      const sentBy = (req as any).user?.displayName ?? (req as any).user?.email ?? 'Admin';
 
       const emailResult = await sendEmail({
         to: submission.email,
@@ -423,9 +425,21 @@ export function register(router: IRouter): void {
         replyTo: 'inquiries@szlholdings.com',
       });
 
+      const [savedReply] = await db
+        .insert(contactSubmissionRepliesTable)
+        .values({
+          contactSubmissionId: id,
+          subject,
+          body,
+          sentBy,
+          emailSuccess: emailResult.success,
+          messageId: emailResult.messageId ?? null,
+        })
+        .returning();
+
       if (!emailResult.success) {
         logger.warn({ id, error: emailResult.error }, '[admin/support-queue] Reply email failed');
-        res.json({ success: false, sent: false, error: emailResult.error });
+        res.json({ success: false, sent: false, error: emailResult.error, reply: savedReply });
         return;
       }
 
@@ -434,10 +448,42 @@ export function register(router: IRouter): void {
         sent: true,
         messageId: emailResult.messageId,
         provider: emailResult.provider,
+        reply: savedReply,
       });
     } catch (err) {
       logger.error({ err }, '[admin/support-queue] POST reply failed');
       sendError(res, 'Failed to send reply', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  router.get('/admin/support-queue/:id/replies', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
+        sendBadRequest(res, 'Invalid ticket ID');
+        return;
+      }
+
+      const [submission] = await db
+        .select({ id: contactSubmissionsTable.id })
+        .from(contactSubmissionsTable)
+        .where(eq(contactSubmissionsTable.id, id));
+
+      if (!submission) {
+        sendNotFound(res, 'Ticket');
+        return;
+      }
+
+      const replies = await db
+        .select()
+        .from(contactSubmissionRepliesTable)
+        .where(eq(contactSubmissionRepliesTable.contactSubmissionId, id))
+        .orderBy(desc(contactSubmissionRepliesTable.sentAt));
+
+      res.json({ replies });
+    } catch (err) {
+      logger.error({ err }, '[admin/support-queue] GET replies failed');
+      sendError(res, 'Failed to fetch replies', 500, 'INTERNAL_ERROR');
     }
   });
 

@@ -540,6 +540,57 @@ router.get('/data-retention/sweep-status', async (req: Request, res: Response) =
   }
 });
 
+const sweepScheduleSchema = z.object({
+  cronExpression: z.string().min(1).max(100),
+  enabled: z.boolean().optional(),
+});
+
+router.put(
+  '/data-retention/sweep-schedule',
+  validateBody(sweepScheduleSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const user = req.user as AuthenticatedUser;
+      if (!isSuperAdmin(user)) {
+        res.status(403).json({ error: 'Only super admins can update the sweep schedule' });
+        return;
+      }
+
+      const { cronExpression, enabled } = req.body as z.infer<typeof sweepScheduleSchema>;
+
+      const VALID_PRESETS = ['0 2 * * 0', '0 2 * * *', '0 2 1 * *'];
+      const CRON_REGEX = /^(\S+\s+){4}\S+$/;
+      if (!VALID_PRESETS.includes(cronExpression) && !CRON_REGEX.test(cronExpression)) {
+        res.status(400).json({ error: 'Invalid cron expression' });
+        return;
+      }
+
+      try {
+        await durableScheduler.upsertSchedule({
+          name: 'data_retention_sweep_weekly',
+          jobType: PLATFORM_JOB_TYPES.DATA_RETENTION_SWEEP,
+          cronExpression,
+          enabled: enabled ?? true,
+          payload: { triggeredBy: 'scheduler' },
+          maxRetries: 2,
+        });
+      } catch (schedErr) {
+        logger.warn({ schedErr }, 'data-retention: durable scheduler update failed (non-fatal)');
+      }
+
+      logger.info(
+        { cronExpression, enabled, actorId: user.id, actorName: user.displayName ?? user.email },
+        'Sweep schedule updated',
+      );
+
+      res.json({ success: true, cronExpression, enabled: enabled ?? true });
+    } catch (err) {
+      logger.error({ err }, 'Failed to update sweep schedule');
+      res.status(500).json({ error: 'Failed to update sweep schedule' });
+    }
+  },
+);
+
 router.post(
   '/data-retention/sweep',
   validateBody(bodyShape({})),

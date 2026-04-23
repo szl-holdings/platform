@@ -2,6 +2,8 @@ import { useProductionConfirm } from '@szl-holdings/shared-ui/production-confirm
 import {
   Bell,
   CheckCircle,
+  Clock,
+  History,
   PlayCircle,
   Plus,
   X,
@@ -45,6 +47,17 @@ interface AlertEvent {
   acknowledged_at: string | null;
   acknowledged_by: string | null;
   created_at: string;
+}
+
+interface EvalRun {
+  id: number;
+  triggered_by: string;
+  started_at: string;
+  completed_at: string | null;
+  rules_evaluated: number;
+  rules_fired: number;
+  duration_ms: number | null;
+  error: string | null;
 }
 
 const severityColor = (s: string) =>
@@ -160,6 +173,23 @@ function RuleCard({
             )}
             {rule.notify_email && rule.email_recipients.length > 0 && (
               <span style={{ fontSize: 11, color: 'hsl(210,5%,44%)' }}>✉️ Email</span>
+            )}
+            {rule.last_evaluated_at ? (
+              <span style={{ fontSize: 11, color: 'hsl(210,5%,44%)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Clock size={10} style={{ flexShrink: 0 }} />
+                Last run:{' '}
+                {new Date(rule.last_evaluated_at).toLocaleString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </span>
+            ) : (
+              <span style={{ fontSize: 10, color: 'hsl(210,5%,38%)', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Clock size={10} style={{ flexShrink: 0 }} />
+                Never evaluated
+              </span>
             )}
             {rule.last_fired_at && (
               <span style={{ fontSize: 11, color: '#f59e0b' }}>
@@ -523,16 +553,19 @@ export default function OpsAlertsPage() {
     fired: number;
     metrics: Record<string, number>;
   } | null>(null);
-  const [activeTab, setActiveTab] = useState<'rules' | 'events'>('rules');
+  const [activeTab, setActiveTab] = useState<'rules' | 'events' | 'history'>('rules');
+  const [evalHistory, setEvalHistory] = useState<EvalRun[]>([]);
   const { confirm: productionConfirm } = useProductionConfirm();
 
   const load = useCallback(async () => {
-    const [rRes, eRes] = await Promise.all([
+    const [rRes, eRes, hRes] = await Promise.all([
       fetch(`${BASE}/ops/alert-rules`, { credentials: 'include' }),
       fetch(`${BASE}/ops/alert-events?limit=50`, { credentials: 'include' }),
+      fetch(`${BASE}/ops/alert-rules/evaluation-history?limit=50`, { credentials: 'include' }),
     ]);
     setRules(((await rRes.json()) as { rules: AlertRule[] }).rules ?? []);
     setEvents(((await eRes.json()) as { events: AlertEvent[] }).events ?? []);
+    if (hRes.ok) setEvalHistory(((await hRes.json()) as { runs: EvalRun[] }).runs ?? []);
     setLoading(false);
   }, []);
 
@@ -713,7 +746,11 @@ export default function OpsAlertsPage() {
         )}
 
         <div style={{ display: 'flex', gap: 6, marginBottom: '1.5rem' }}>
-          {(['rules', 'events'] as const).map((t) => (
+          {([
+            { id: 'rules', label: `Rules (${rules.length})`, icon: Bell },
+            { id: 'events', label: `Events (${events.length})`, icon: Zap },
+            { id: 'history', label: `Eval History (${evalHistory.length})`, icon: History },
+          ] as const).map(({ id: t, label, icon: Icon }) => (
             <button
               key={t}
               onClick={() => setActiveTab(t)}
@@ -724,12 +761,16 @@ export default function OpsAlertsPage() {
                 fontWeight: 500,
                 cursor: 'pointer',
                 border: '1px solid',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
                 background: activeTab === t ? 'hsla(210,55%,52%,0.12)' : 'transparent',
                 borderColor: activeTab === t ? 'hsla(210,55%,52%,0.3)' : 'hsla(0,0%,100%,0.08)',
                 color: activeTab === t ? 'hsl(210,55%,70%)' : 'hsl(210,5%,50%)',
               }}
             >
-              {t === 'rules' ? `Rules (${rules.length})` : `Events (${events.length})`}
+              <Icon size={11} />
+              {label}
             </button>
           ))}
         </div>
@@ -747,6 +788,98 @@ export default function OpsAlertsPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
               {rules.map((r) => (
                 <RuleCard key={r.id} rule={r} onToggle={toggleRule} onDelete={deleteRule} />
+              ))}
+            </div>
+          )
+        ) : activeTab === 'history' ? (
+          evalHistory.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '4rem 0', color: 'hsl(210,5%,48%)' }}>
+              No evaluation runs recorded yet.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {evalHistory.map((run) => (
+                <div
+                  key={run.id}
+                  style={{
+                    background: 'hsla(0,0%,100%,0.025)',
+                    border: `1px solid ${run.error ? 'hsla(0,72%,51%,0.2)' : 'hsla(0,0%,100%,0.07)'}`,
+                    borderRadius: 8,
+                    padding: '0.75rem 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Clock size={13} style={{ color: run.error ? '#f87171' : '#34d399', flexShrink: 0 }} />
+                    <div>
+                      <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'hsl(38,12%,82%)' }}>
+                        {new Date(run.started_at).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        })}
+                      </span>
+                      {run.error && (
+                        <span style={{ display: 'block', fontSize: 11, color: '#f87171', marginTop: 2 }}>
+                          {run.error}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 11, color: 'hsl(210,5%,50%)' }}>
+                      Triggered by:{' '}
+                      <strong style={{ color: 'hsl(210,5%,68%)', fontFamily: 'monospace' }}>
+                        {run.triggered_by}
+                      </strong>
+                    </span>
+                    <span style={{ fontSize: 11, color: 'hsl(210,5%,50%)' }}>
+                      Evaluated:{' '}
+                      <strong style={{ color: 'hsl(38,12%,78%)' }}>{run.rules_evaluated}</strong>
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: run.rules_fired > 0 ? '#f59e0b' : 'hsl(210,5%,50%)',
+                      }}
+                    >
+                      Fired:{' '}
+                      <strong style={{ color: run.rules_fired > 0 ? '#f59e0b' : 'hsl(38,12%,78%)' }}>
+                        {run.rules_fired}
+                      </strong>
+                    </span>
+                    {run.duration_ms !== null && (
+                      <span style={{ fontSize: 11, color: 'hsl(210,5%,42%)' }}>
+                        {run.duration_ms}ms
+                      </span>
+                    )}
+                    <span
+                      style={{
+                        fontSize: 9,
+                        fontWeight: 700,
+                        padding: '1px 6px',
+                        borderRadius: 4,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        background: run.error
+                          ? 'hsla(0,72%,51%,0.12)'
+                          : run.completed_at
+                            ? 'hsla(152,50%,42%,0.1)'
+                            : 'hsla(210,55%,52%,0.12)',
+                        color: run.error ? '#f87171' : run.completed_at ? '#34d399' : '#93c5fd',
+                        border: `1px solid ${run.error ? 'hsla(0,72%,51%,0.25)' : run.completed_at ? 'hsla(152,50%,42%,0.2)' : 'hsla(210,55%,52%,0.3)'}`,
+                      }}
+                    >
+                      {run.error ? 'failed' : run.completed_at ? 'completed' : 'running'}
+                    </span>
+                  </div>
+                </div>
               ))}
             </div>
           )

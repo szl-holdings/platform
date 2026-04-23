@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { m } from "framer-motion";
-import { Shield, Clock, Trash2, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Database, Play, Activity } from "lucide-react";
+import { Shield, Clock, Trash2, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Database, Play, Activity, Settings2, Save } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useRole } from "@szl-holdings/shared-ui/use-role";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = `${BASE}/api`;
@@ -103,11 +104,17 @@ export default function AdminDataRetentionPage() {
   const __pageMeta = usePageMeta({ title: "Data Retention — Admin" });
 
   const queryClient = useQueryClient();
+  const { roles } = useRole();
+  const isSuperAdmin = roles.includes("super_admin");
   const [expandedTable, setExpandedTable] = useState<string | null>(null);
   const [editingPolicy, setEditingPolicy] = useState<{ tableName: string; retentionDays: number; purgeStrategy: "archive" | "delete" | "anonymize"; isActive: boolean; description: string } | null>(null);
   const [runningTable, setRunningTable] = useState<string | null>(null);
   const [orgIdInput, setOrgIdInput] = useState<string>("");
   const [signalMeshSweepResult, setSignalMeshSweepResult] = useState<SignalMeshSweepResult | null>(null);
+  const [editingSchedule, setEditingSchedule] = useState(false);
+  const [scheduleCron, setScheduleCron] = useState("");
+  const [scheduleEnabled, setScheduleEnabled] = useState(true);
+  const [savingSchedule, setSavingSchedule] = useState(false);
   const selectedOrgId = orgIdInput.trim() !== "" ? Number(orgIdInput.trim()) || null : null;
 
   const { data: tablesData } = useStandardQuery({
@@ -353,9 +360,16 @@ export default function AdminDataRetentionPage() {
                     hint: null,
                   },
                   {
+                    label: "Next scheduled sweep",
+                    value: sweepStatusData?.schedule?.nextRunAt
+                      ? new Date(sweepStatusData.schedule.nextRunAt).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
+                      : sweepStatusData?.schedule?.enabled === false ? "Disabled" : "—",
+                    hint: null,
+                  },
+                  {
                     label: "Active policies",
                     value: sweepStatusData?.activePolicies !== undefined ? String(sweepStatusData.activePolicies) : "—",
-                    hint: "policies that will run on next sweep",
+                    hint: "policies queued for next sweep",
                   },
                 ].map((item) => (
                   <div key={item.label}>
@@ -365,6 +379,86 @@ export default function AdminDataRetentionPage() {
                   </div>
                 ))}
               </div>
+
+              {isSuperAdmin && !editingSchedule && (
+                <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid hsla(0,0%,100%,0.06)" }}>
+                  <button
+                    onClick={() => {
+                      setScheduleCron(sweepStatusData?.schedule?.cronExpression ?? "0 2 * * 0");
+                      setScheduleEnabled(sweepStatusData?.schedule?.enabled !== false);
+                      setEditingSchedule(true);
+                    }}
+                    style={{ display: "flex", alignItems: "center", gap: "5px", padding: "0.375rem 0.75rem", borderRadius: "6px", fontSize: "11px", fontWeight: 600, background: "transparent", border: "1px solid hsla(0,0%,100%,0.08)", color: "hsl(210,5%,50%)", cursor: "pointer" }}
+                  >
+                    <Settings2 size={11} /> Configure schedule
+                  </button>
+                </div>
+              )}
+
+              {isSuperAdmin && editingSchedule && (
+                <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid hsla(0,0%,100%,0.06)", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "hsl(210,5%,42%)" }}>Configure Sweep Schedule</span>
+                  <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", alignItems: "flex-end" }}>
+                    <div>
+                      <label style={labelStyle}>Cron expression</label>
+                      <input
+                        type="text"
+                        value={scheduleCron}
+                        onChange={(e) => setScheduleCron(e.target.value)}
+                        placeholder="0 2 * * 0"
+                        style={{ ...inputStyle, width: "200px", fontFamily: "var(--font-mono)" }}
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Status</label>
+                      <select
+                        value={scheduleEnabled ? "enabled" : "disabled"}
+                        onChange={(e) => setScheduleEnabled(e.target.value === "enabled")}
+                        style={{ ...inputStyle, width: "140px", appearance: "none" }}
+                      >
+                        <option value="enabled">Enabled</option>
+                        <option value="disabled">Disabled</option>
+                      </select>
+                    </div>
+                    <div style={{ display: "flex", gap: "0.5rem", paddingBottom: "1px" }}>
+                      <button
+                        onClick={async () => {
+                          setSavingSchedule(true);
+                          try {
+                            const res = await fetch(`${API}/data-retention/sweep-schedule`, {
+                              method: "PUT",
+                              credentials: "include",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ cronExpression: scheduleCron, enabled: scheduleEnabled }),
+                            });
+                            if (!res.ok) {
+                              const e = await res.json().catch(() => ({})) as { error?: string };
+                              throw new Error(e.error ?? "Failed to save schedule");
+                            }
+                            toast.success("Sweep schedule updated");
+                            setEditingSchedule(false);
+                            await refetchSweepStatus();
+                          } catch (err) {
+                            toast.error(err instanceof Error ? err.message : "Failed to save schedule");
+                          } finally {
+                            setSavingSchedule(false);
+                          }
+                        }}
+                        disabled={savingSchedule || !scheduleCron.trim()}
+                        style={{ display: "flex", alignItems: "center", gap: "5px", padding: "0.4rem 0.75rem", borderRadius: "6px", fontSize: "12px", fontWeight: 600, background: "hsl(192,72%,48%)", color: "hsl(210,12%,5%)", border: "none", cursor: "pointer", opacity: savingSchedule ? 0.7 : 1 }}
+                      >
+                        <Save size={11} /> {savingSchedule ? "Saving…" : "Save"}
+                      </button>
+                      <button
+                        onClick={() => setEditingSchedule(false)}
+                        style={{ padding: "0.4rem 0.75rem", borderRadius: "6px", fontSize: "12px", background: "transparent", border: "1px solid hsla(0,0%,100%,0.09)", color: "hsl(210,5%,50%)", cursor: "pointer" }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
   
             <div style={{ ...cardStyle, marginBottom: "2rem" }}>
@@ -448,9 +542,16 @@ export default function AdminDataRetentionPage() {
                           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
                             <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,88%)", fontFamily: "var(--font-mono)" }}>{table.name}</span>
                             {policy ? (
-                              <span style={{ fontSize: "11px", padding: "0.2rem 0.6rem", borderRadius: "20px", background: policy.isActive ? "hsla(142,60%,50%,0.1)" : "hsla(0,0%,100%,0.05)", color: policy.isActive ? "hsl(142,60%,52%)" : "hsl(210,5%,45%)", border: `1px solid ${policy.isActive ? "hsla(142,60%,50%,0.2)" : "hsla(0,0%,100%,0.08)"}` }}>
-                                {policy.isActive ? `${policy.retentionDays}d · ${PURGE_STRATEGY_LABELS[policy.purgeStrategy] ?? policy.purgeStrategy}` : "Inactive"}
-                              </span>
+                              <>
+                                <span style={{ fontSize: "11px", padding: "0.2rem 0.6rem", borderRadius: "20px", background: policy.isActive ? "hsla(142,60%,50%,0.1)" : "hsla(0,0%,100%,0.05)", color: policy.isActive ? "hsl(142,60%,52%)" : "hsl(210,5%,45%)", border: `1px solid ${policy.isActive ? "hsla(142,60%,50%,0.2)" : "hsla(0,0%,100%,0.08)"}` }}>
+                                  {policy.isActive ? `${policy.retentionDays}d · ${PURGE_STRATEGY_LABELS[policy.purgeStrategy] ?? policy.purgeStrategy}` : "Inactive"}
+                                </span>
+                                {policy.isActive && policy.lastRunAt === null && (
+                                  <span style={{ fontSize: "10px", padding: "0.15rem 0.5rem", borderRadius: "20px", background: "hsla(45,80%,50%,0.08)", color: "hsl(45,80%,52%)", border: "1px solid hsla(45,80%,50%,0.2)" }}>
+                                    Never run
+                                  </span>
+                                )}
+                              </>
                             ) : (
                               <span style={{ fontSize: "11px", color: "hsl(210,5%,38%)" }}>No policy</span>
                             )}

@@ -136,3 +136,14 @@ export const platformServiceDeps = pgTable('platform_service_deps', {
   description: text('description'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
+
+export const alertEvaluationRunsTable = pgTable('alert_evaluation_runs', {
+  id: serial('id').primaryKey(),
+  evaluatedAt: timestamp('evaluated_at').notNull().defaultNow(),
+  rulesChecked: integer('rules_checked').notNull().default(0),
+  rulesFired: integer('rules_fired').notNull().default(0),
+  durationMs: integer('duration_ms').notNull().default(0),
+  errors: text('errors'),
+  metrics: jsonb('metrics'),
+  triggeredBy: text('triggered_by').notNull().default('scheduled'),
+});

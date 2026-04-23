@@ -547,3 +547,18 @@ export const insertCmsPostSchema = createInsertSchema(cmsPostsTable).omit({
 });
 export type InsertCmsPost = z.infer<typeof insertCmsPostSchema>;
 export type CmsPost = typeof cmsPostsTable.$inferSelect;
+
+export const contactSubmissionRepliesTable = pgTable('contact_submission_replies', {
+  id: serial('id').primaryKey(),
+  contactSubmissionId: integer('contact_submission_id')
+    .notNull()
+    .references(() => contactSubmissionsTable.id, { onDelete: 'cascade' }),
+  subject: text('subject').notNull(),
+  body: text('body').notNull(),
+  sentBy: text('sent_by').notNull().default('Admin'),
+  emailSuccess: boolean('email_success').notNull().default(true),
+  messageId: text('message_id'),
+  sentAt: timestamp('sent_at').notNull().defaultNow(),
+});
+
+export type ContactSubmissionReply = typeof contactSubmissionRepliesTable.$inferSelect;

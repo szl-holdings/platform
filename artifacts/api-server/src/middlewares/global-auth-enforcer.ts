@@ -263,6 +263,13 @@ const PUBLIC_PREFIXES = [
   // unauthenticated callers. POST mutating routes at /decisions/cards/:id/approve
   // etc. enforce auth via requireAuth in the route handler (not here).
   "/api/decisions/cards/",
+  // Knowledge base public GET endpoints — /support/knowledge (list) and
+  // /support/knowledge/:slug (article detail). These are read-only and
+  // intentionally accessible without a session so the support portal and
+  // any marketing page can surface KB articles without requiring login.
+  // Mutating routes (create/edit/archive KB articles) are under
+  // /admin/kb-articles and remain protected by admin auth.
+  "/api/support/knowledge",
 ];
 
 /**

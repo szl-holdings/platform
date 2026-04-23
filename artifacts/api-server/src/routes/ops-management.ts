@@ -1,5 +1,6 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import { pool } from '@szl-holdings/db';
+import { alertEvaluationRunsTable, db, pool } from '@szl-holdings/db';
+import { desc } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { requireOpsReady } from '../lib/boot-orchestrator';
@@ -1017,11 +1018,12 @@ router.post('/ops/alert-events/:id/acknowledge', validateBody(bodyShape({})), as
 // ---------------------------------------------------------------------------
 // Shared alert rule evaluation logic — called by the route and the scheduler
 // ---------------------------------------------------------------------------
-export async function runAlertRuleEvaluation(): Promise<{
+export async function runAlertRuleEvaluation(triggeredBy: 'scheduled' | 'manual' = 'scheduled'): Promise<{
   evaluated: number;
   fired: number;
   metrics: Record<string, number>;
 }> {
+  const evalStart = Date.now();
   const rulesResult = await pool.query(`SELECT * FROM platform_alert_rules WHERE enabled = true`);
   const rules = rulesResult.rows as Array<{
     id: number;
@@ -1169,17 +1171,47 @@ export async function runAlertRuleEvaluation(): Promise<{
     }
   }
 
+  const durationMs = Date.now() - evalStart;
+
+  try {
+    await db.insert(alertEvaluationRunsTable).values({
+      rulesChecked: rules.length,
+      rulesFired: firedCount.count,
+      durationMs,
+      metrics: metricValues as Record<string, unknown>,
+      triggeredBy,
+    });
+  } catch (logErr) {
+    logger.warn({ logErr }, '[ops] Failed to persist alert evaluation run (non-fatal)');
+  }
+
   return { evaluated: rules.length, fired: firedCount.count, metrics: metricValues };
 }
 
 // Alert rule evaluation against current metrics
 router.post('/ops/alert-rules/evaluate', validateBody(bodyShape({})), async (_req, res) => {
   try {
-    const result = await runAlertRuleEvaluation();
+    const result = await runAlertRuleEvaluation('manual');
     res.json({ ok: true, ...result });
   } catch (err) {
     logger.error({ err }, '[ops] Alert evaluation failed');
     res.status(500).json({ error: 'Alert evaluation failed' });
+  }
+});
+
+router.get('/ops/alert-rules/evaluation-history', validateQuery(listQuerySchema), async (req, res) => {
+  try {
+    const limit = Math.min(parseInt((req.query.limit as string) ?? '50', 10), 200);
+    const runs = await db
+      .select()
+      .from(alertEvaluationRunsTable)
+      .orderBy(desc(alertEvaluationRunsTable.evaluatedAt))
+      .limit(limit);
+    const lastRun = runs[0] ?? null;
+    res.json({ runs, lastRun });
+  } catch (err) {
+    logger.error({ err }, '[ops] Failed to fetch evaluation history');
+    res.status(500).json({ error: 'Failed to fetch evaluation history' });
   }
 });
 
