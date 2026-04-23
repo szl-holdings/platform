@@ -65,6 +65,14 @@
     { "file": "artifacts/szl-holdings/src/pages/carousel-preview.tsx", "line": 10, "term": "Vessels", "reason": "Display label mirrors archival LinkedIn carousel JPG content (slide-05-vessels.jpg) generated under prior branding." },
     { "file": "artifacts/szl-holdings/src/pages/carousel-preview.tsx", "line": 11, "term": "Terra", "reason": "Display label mirrors archival LinkedIn carousel JPG content (slide-06-terra.jpg) generated under prior branding." },
     { "file": "artifacts/szl-holdings/src/pages/carousel-preview.tsx", "line": 12, "term": "Aegis", "reason": "Display label mirrors archival LinkedIn carousel JPG content (slide-07-aegis.jpg) generated under prior branding." },
-    { "file": "artifacts/vessels/src/lib/voyage-export.ts", "line": 237, "term": "Vessels", "reason": "Voyage export PDF footer reads as the artifact display label, which still ships under the long-form 'Vessels Maritime Intelligence' wordmark; renaming would change customer-facing export output mid-cycle." }
+    { "file": "artifacts/vessels/src/lib/voyage-export.ts", "line": 237, "term": "Vessels", "reason": "Voyage export PDF footer reads as the artifact display label, which still ships under the long-form 'Vessels Maritime Intelligence' wordmark; renaming would change customer-facing export output mid-cycle." },
+    { "file": "packages/tokens/src/manifest.ts", "line": 13, "term": "Sentra", "reason": "Canonical registered artifact title used by tokens-governance dashboard; matches the platform-level artifact registry display name." },
+    { "file": "packages/tokens/src/manifest.ts", "line": 17, "term": "Pulse", "reason": "Canonical registered artifact title used by tokens-governance dashboard; matches the platform-level artifact registry display name." },
+    { "file": "packages/tokens/src/manifest.ts", "line": 20, "term": "Terra", "reason": "Canonical registered artifact title used by tokens-governance dashboard; matches the platform-level artifact registry display name." },
+    { "file": "packages/tokens/src/manifest.ts", "line": 23, "term": "Vessels", "reason": "Canonical registered artifact title used by tokens-governance dashboard; matches the platform-level artifact registry display name." },
+    { "file": "packages/tokens/src/manifest.ts", "line": 24, "term": "Lyte", "reason": "Canonical registered artifact title used by tokens-governance dashboard; matches the platform-level artifact registry display name." },
+    { "file": "packages/tokens/src/manifest.ts", "line": 25, "term": "NEXUS", "reason": "Canonical registered artifact title used by tokens-governance dashboard; matches the platform-level artifact registry display name." },
+    { "file": "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx", "line": 68, "term": "NEXUS", "reason": "Page header for the NEXUS governance dashboard; matches the registered artifact display name (NEXUS — Unified Agentic AI Layer)." },
+    { "file": "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx", "line": 236, "term": "NEXUS", "reason": "Reference to the NEXUS bundle in user-facing copy; matches the registered artifact display name." }
   ]
 }

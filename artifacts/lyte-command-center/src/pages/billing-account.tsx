@@ -8,13 +8,13 @@ export default function LyteBillingPage() {
       <div className="mb-6">
         <h1 className="text-xl font-bold text-white">Billing & Subscription</h1>
         <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          Manage your Lyte subscription and payment details.
+          Manage your KORA subscription and payment details.
         </p>
       </div>
       <BillingAccount
         accentColor={ACCENT}
         pricingUrl="/pricing"
-        productName="Lyte"
+        productName="KORA"
       />
     </div>
   );

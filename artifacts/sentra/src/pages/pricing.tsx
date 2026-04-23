@@ -43,7 +43,7 @@ const tiers: PricingTier[] = [
     highlight: true,
     features: [
       'Unlimited team members',
-      'Full SENTRA surface — all modules',
+      'Full TENAX surface — all modules',
       'Mesh map, exposures, containment & drift',
       'Trust provenance & evidence chain',
       'Unlimited signal history',
@@ -74,7 +74,7 @@ export default function SentraPricingPage() {
       />
       <PricingPage
         productKey="sentra"
-        productName="Sentra"
+        productName="TENAX"
         accentColor={ACCENT}
         tiers={tiers}
         headline="Cyber Resilience at Enterprise Scale"

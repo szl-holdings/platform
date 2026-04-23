@@ -57,6 +57,35 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 
 **Substrate Command Center:** A cross-vertical operator UI for the governed decision substrate, integrated into the `command` artifact at `/command/substrate/`.
 
+## Production Readiness & Audit Status
+
+**Last audited:** April 22, 2026  
+**Status:** Demo-ready. Pre-commercial. No critical gaps; 5 HIGH gaps block first paying tenant.
+
+**Key audit documents:**
+- `docs/audit/inventory.md` — Per-artifact route inventory (route → data source → status → disposition)
+- `docs/audit/report.md` — Consolidated audit report (what's real, fixed, removed, behind DEMO_MODE)
+- `docs/audit/GAP_MATRIX.md` — Open gap register with severity and acceptance tests
+- `docs/ops/gap-register.md` — P0–P2 gap register with per-gap details
+- `docs/demos/` — Per-artifact demo scripts (one per artifact, includes avoidance guide)
+
+**HIGH gaps — full list in `docs/audit/report.md` and `docs/audit/GAP_MATRIX.md`:**
+
+*Credential-only (feature-flagged OFF; zero code change needed to activate):*
+1. `STRIPE_SECRET_KEY` (sk_live_) — live billing
+2. `RESEND_API_KEY` — email delivery
+3. `OTEL_EXPORTER_OTLP_ENDPOINT` + `SENTRY_DSN` — production observability
+4. `MAPBOX_ACCESS_TOKEN` / `VITE_MAPBOX_TOKEN` — map tile rendering
+5. `AIS_API_KEY` — live vessel positions
+
+*Code/infrastructure changes required:*
+6. MFA on investor data room (P1-007)
+7. Firebase credential rotation in mobile build (P0-001)
+8. `ALLOY_INTERNAL_TOKEN` scope restriction (GAP-016)
+9. Persistent message queue for background jobs (GAP-017)
+
+**Already closed:** Tenant scoping (all Vessels routes), SSRF protection (webhooks), seed-overwrite protection, session store in PostgreSQL, Zod validation at 84%, route auth CI enforcement.
+
 ## External Dependencies
 -   **Database:** PostgreSQL 16
 -   **Authentication:** Replit Auth
