@@ -15,6 +15,7 @@ import { atlasExportJobsTable, db } from '@szl-holdings/db';
 import { eq } from 'drizzle-orm';
 import { type Request, type Response, type IRouter, Router } from 'express';
 import { z } from 'zod';
+import { getAtlasExportBuffer } from '../jobs/atlas-export-processor';
 import { logger } from '../lib/logger';
 import { authMiddleware } from '../middlewares/auth';
 
@@ -281,6 +282,46 @@ atlasRouter.get('/atlas/export-jobs/:id', async (req: Request, res: Response) =>
   } catch (err) {
     logger.error({ err }, 'GET /atlas/export-jobs/:id error:');
     return void res.status(500).json({ error: 'Failed to get export job' });
+  }
+});
+
+atlasRouter.get('/atlas/export-jobs/:id/download', async (req: Request, res: Response) => {
+  try {
+    const id = parseInt((req.params.id as string) ?? '0', 10);
+    if (!id) return void res.status(400).json({ error: 'Invalid id' });
+
+    const user = (req as any).user;
+
+    const [job] = await db
+      .select()
+      .from(atlasExportJobsTable)
+      .where(eq(atlasExportJobsTable.id, id));
+    if (!job) return void res.status(404).json({ error: 'Export job not found' });
+
+    const sameOrg = user?.orgId != null && job.orgId != null && user.orgId === job.orgId;
+    const isRequester = user?.id != null && job.requestedByUserId != null && user.id === job.requestedByUserId;
+    if (!sameOrg && !isRequester) {
+      return void res.status(403).json({ error: 'Forbidden' });
+    }
+
+    if (job.status !== 'completed') {
+      return void res
+        .status(202)
+        .json({ error: 'Export not yet complete', status: job.status });
+    }
+
+    const entry = getAtlasExportBuffer(id);
+    if (!entry) {
+      return void res.status(410).json({ error: 'Export file has expired or is unavailable' });
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${entry.filename}"`);
+    res.setHeader('Content-Length', entry.buffer.length);
+    return void res.send(entry.buffer);
+  } catch (err) {
+    logger.error({ err }, 'GET /atlas/export-jobs/:id/download error:');
+    return void res.status(500).json({ error: 'Failed to download export file' });
   }
 });
 

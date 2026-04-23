@@ -76,6 +76,7 @@ import { initDurablePersistence, stopDurablePersistence } from './lib/persistenc
 import { initFusionPersistence } from './lib/fusion-persistence';
 import { providerHealth } from './lib/provider-health';
 import { registerQueuedJobHandlers } from './lib/queued-jobs';
+import { startAtlasExportProcessor, stopAtlasExportProcessor } from './jobs/atlas-export-processor';
 import { runAlertRuleEvaluation } from './routes/ops-management';
 import { bootstrapChainState } from './routes/signal-chains';
 
@@ -138,6 +139,7 @@ export async function bootstrap(
   registerAnalyticsJobHandlers();
   registerQueuedJobHandlers();
   const prismPoller = startPrismJobPoller(5000);
+  startAtlasExportProcessor();
 
   const memoryMonitor = setInterval(() => {
     const { heapUsed, heapTotal } = process.memoryUsage();
@@ -672,6 +674,7 @@ export async function bootstrap(
     stopSelfMonitoring();
     stopHealthDegradationWatcher();
     stopPrismBusBridge();
+    stopAtlasExportProcessor();
     stopEmbeddingWorker();
     await stopIntelligenceFeeds();
     providerHealth.stopActiveProbes();
