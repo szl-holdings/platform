@@ -19,6 +19,7 @@ import { resolveDistressOwnerNames } from '../jobs/terra-owner-enrichment';
 import { runBackupRestoreDrill } from '../jobs/backup-restore-drill';
 import { publishGuardianDecisionEvent } from './guardian-engine';
 import { logger } from './logger';
+import { triggerLearningJob, runLearningCalibration, getActiveDomains } from '@szl-holdings/outcome-graph';
 import {
   evaluateAllCovenants,
   listOrgIdsWithCovenants,
@@ -284,6 +285,38 @@ function intervalToCron(intervalMs: number): string {
   return `0 0 * * *`;
 }
 
+export async function runScheduledCalibration(): Promise<{
+  domainResults: Record<string, string>;
+  skipped?: boolean;
+}> {
+  const domains = await getActiveDomains();
+  if (domains.length === 0) {
+    logger.info('[outcome-graph-calibration] No active domains found, skipping calibration');
+    return { domainResults: {}, skipped: true };
+  }
+  const domainResults: Record<string, string> = {};
+  for (const domain of domains) {
+    try {
+      const job = await triggerLearningJob({
+        domain,
+        jobType: 'confidence_calibration',
+        triggeredBy: 'scheduler',
+      });
+      const completed = await runLearningCalibration(job.id);
+      domainResults[domain] = completed.status;
+      logger.info(
+        { domain, jobId: job.id, status: completed.status },
+        '[outcome-graph-calibration] Domain calibration complete',
+      );
+    } catch (err) {
+      domainResults[domain] = 'failed';
+      logger.warn({ err, domain }, '[outcome-graph-calibration] Domain calibration failed');
+    }
+  }
+  logger.info({ domainResults }, '[outcome-graph-calibration] Weekly calibration run complete');
+  return { domainResults };
+}
+
 export async function registerDefaultSchedules(): Promise<void> {
   const schedules = [
     {
@@ -546,6 +579,34 @@ export async function registerDefaultSchedules(): Promise<void> {
     payload: {},
     queue: 'maintenance',
     maxRetries: 0,
+  });
+
+  agentExecutionRuntime.registerAgent(
+    {
+      agentId: 'outcome-graph-calibration',
+      name: 'Outcome Graph Learning Calibration',
+      domain: 'system',
+      jobType: 'outcome_graph_calibration',
+      queue: 'maintenance',
+      maxRetries: 1,
+    },
+    async (_job, ctx) => {
+      const result = await runScheduledCalibration();
+      await ctx.saveState({
+        lastRunAt: new Date().toISOString(),
+        runCount: ctx.runCount + 1,
+        ...result,
+      });
+    },
+  );
+
+  durableScheduleEntries.push({
+    name: 'outcome_graph_calibration',
+    jobType: 'outcome_graph_calibration',
+    cronExpression: '0 1 * * 0',
+    payload: {},
+    queue: 'maintenance',
+    maxRetries: 1,
   });
 
   agentScheduler.startDurableMode();

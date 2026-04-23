@@ -8,7 +8,7 @@ import {
   type OutcomeResult,
   type OutcomeDomain,
 } from "@szl-holdings/db";
-import { eq, and, desc, gte, count, avg } from "drizzle-orm";
+import { eq, and, or, desc, gte, count, avg, isNull } from "drizzle-orm";
 
 export type {
   OutcomeGraph,
@@ -296,12 +296,24 @@ export async function runLearningCalibration(jobId: number): Promise<OutcomeGrap
 
 export async function listLearningJobs(options: {
   orgId?: number;
+  includeSystemJobs?: boolean;
   domain?: OutcomeDomain;
   status?: "pending" | "running" | "completed" | "failed";
   limit?: number;
 }): Promise<OutcomeGraphLearningJob[]> {
   const conditions = [];
-  if (options.orgId != null) conditions.push(eq(outcomeGraphLearningJobsTable.orgId, options.orgId));
+  if (options.orgId != null) {
+    if (options.includeSystemJobs) {
+      conditions.push(
+        or(
+          eq(outcomeGraphLearningJobsTable.orgId, options.orgId),
+          isNull(outcomeGraphLearningJobsTable.orgId),
+        ),
+      );
+    } else {
+      conditions.push(eq(outcomeGraphLearningJobsTable.orgId, options.orgId));
+    }
+  }
   if (options.domain) conditions.push(eq(outcomeGraphLearningJobsTable.domain, options.domain));
   if (options.status) conditions.push(eq(outcomeGraphLearningJobsTable.status, options.status));
 
@@ -313,4 +325,11 @@ export async function listLearningJobs(options: {
 
   if (conditions.length > 0) return q.where(and(...conditions));
   return q;
+}
+
+export async function getActiveDomains(): Promise<OutcomeDomain[]> {
+  const rows = await db
+    .selectDistinct({ domain: outcomeGraphTable.domain })
+    .from(outcomeGraphTable);
+  return rows.map(r => r.domain);
 }

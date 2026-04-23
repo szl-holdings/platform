@@ -303,6 +303,7 @@ outcomeGraphRouter.get(
 
       const rows = await listLearningJobs({
         orgId,
+        includeSystemJobs: true,
         domain: domain as any,
         status: status as any,
         limit,
