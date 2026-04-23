@@ -39,10 +39,12 @@ function makeOrg1User() {
 // Results queues: each call pops the next result from the front
 let _selectQueue: unknown[][] = [];
 let _updateQueue: unknown[][] = [];
+let _deleteQueue: unknown[][] = [];
 
 // WHERE clause capture for assertions
 const _capturedUpdateWheres: unknown[] = [];
 const _capturedSelectWheres: unknown[] = [];
+const _capturedDeleteWheres: unknown[] = [];
 
 // ---------------------------------------------------------------------------
 // Module mocks (hoisted to top by vitest)
@@ -62,7 +64,8 @@ vi.mock('@szl-holdings/db', () => {
             return chain;
           },
           orderBy: () => chain,
-          limit: () => Promise.resolve(result),
+          limit: () => chain,
+          offset: () => chain,
           then: (resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) =>
             Promise.resolve(result).then(resolve, reject),
         };
@@ -86,6 +89,15 @@ vi.mock('@szl-holdings/db', () => {
           }),
         };
       },
+      delete() {
+        const chain: Record<string, unknown> = {
+          where: (w: unknown) => {
+            _capturedDeleteWheres.push(w);
+            return Promise.resolve(_deleteQueue.shift() ?? []);
+          },
+        };
+        return chain;
+      },
     },
     cortexActionDraftsTable: {
       draftUuid: col('draft_uuid'),
@@ -104,7 +116,18 @@ vi.mock('@szl-holdings/db', () => {
       dismissedAt: col('dismissed_at'),
       dismissedBy: col('dismissed_by'),
     },
-    cortexGraphSnapshotsTable: {},
+    cortexGraphSnapshotsTable: {
+      id: col('id'),
+      orgId: col('org_id'),
+      snapshotUuid: col('snapshot_uuid'),
+      snapshotAt: col('snapshot_at'),
+      expiresAt: col('expires_at'),
+      retentionDays: col('retention_days'),
+      label: col('label'),
+      meta: col('meta'),
+      nodes: col('nodes'),
+      edges: col('edges'),
+    },
     dailyBriefingsTable: {
       briefingDate: col('briefing_date'),
       generatedAt: col('generated_at'),
@@ -184,6 +207,11 @@ vi.mock('../../lib/multi-agent-orchestrator', () => ({
 
 vi.mock('@szl-holdings/observability', () => ({
   serverTelemetry: { recordAuthFailure: vi.fn(), recordRequest: vi.fn() },
+}));
+
+const captureGraphSnapshotMock = vi.fn();
+vi.mock('../../services/cortex-graph-snapshot', () => ({
+  captureGraphSnapshot: (...args: unknown[]) => captureGraphSnapshotMock(...args),
 }));
 
 const _runExportCalls: unknown[] = [];
@@ -275,8 +303,11 @@ describe('CORTEX action-drafts — multi-tenant security', () => {
   beforeEach(() => {
     _selectQueue = [];
     _updateQueue = [];
+    _deleteQueue = [];
     _capturedUpdateWheres.length = 0;
     _capturedSelectWheres.length = 0;
+    _capturedDeleteWheres.length = 0;
+    captureGraphSnapshotMock.mockReset();
     _currentUser = makeOrg1User();
   });
 
@@ -739,6 +770,325 @@ describe('CORTEX action-drafts — multi-tenant security', () => {
           'generatedAt',
         ]),
       );
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Shared snapshot fixtures
+// ---------------------------------------------------------------------------
+
+const FUTURE_DATE = new Date('2099-12-31T00:00:00Z');
+
+const ORG1_SNAPSHOT = {
+  id: 1,
+  snapshotUuid: 'snap-org1-uuid-1111',
+  orgId: 1,
+  label: 'Org 1 snapshot',
+  nodes: [],
+  edges: [],
+  meta: { domain: 'all', totalNodes: 0, totalEdges: 0, minRisk: 0, graphStats: {} },
+  retentionDays: 30,
+  snapshotAt: new Date('2026-04-20T00:00:00Z'),
+  expiresAt: FUTURE_DATE,
+};
+
+const ORG2_SNAPSHOT = {
+  ...ORG1_SNAPSHOT,
+  id: 2,
+  snapshotUuid: 'snap-org2-uuid-2222',
+  orgId: 2,
+};
+
+// ---------------------------------------------------------------------------
+// Graph snapshot security tests
+// ---------------------------------------------------------------------------
+
+describe('CORTEX entity-graph snapshots — multi-tenant security', () => {
+  beforeEach(() => {
+    _selectQueue = [];
+    _updateQueue = [];
+    _deleteQueue = [];
+    _capturedUpdateWheres.length = 0;
+    _capturedSelectWheres.length = 0;
+    _capturedDeleteWheres.length = 0;
+    captureGraphSnapshotMock.mockReset();
+    _currentUser = makeOrg1User();
+  });
+
+  // =========================================================================
+  // POST /cortex/entity-graph/snapshot
+  // =========================================================================
+
+  describe('POST /cortex/entity-graph/snapshot', () => {
+    it('returns 400 when the caller has no org memberships (deny-by-default)', async () => {
+      _currentUser = { ..._currentUser, orgs: [] };
+
+      const app = await getApp();
+      const res = await request(app)
+        .post('/cortex/entity-graph/snapshot')
+        .send({ label: 'Test snapshot' });
+
+      expect(res.status).toBe(400);
+      expect(captureGraphSnapshotMock).not.toHaveBeenCalled();
+    });
+
+    it('calls captureGraphSnapshot with the caller orgId for an org-1 user', async () => {
+      const fakeUuid = 'snap-test-uuid';
+      captureGraphSnapshotMock.mockResolvedValueOnce({
+        snapshotUuid: fakeUuid,
+        orgId: 1,
+        label: 'Test',
+        snapshotAt: new Date(),
+        expiresAt: FUTURE_DATE,
+        nodeCount: 0,
+        edgeCount: 0,
+      });
+      _selectQueue = [[{ ...ORG1_SNAPSHOT, snapshotUuid: fakeUuid }]];
+
+      const app = await getApp();
+      const res = await request(app)
+        .post('/cortex/entity-graph/snapshot')
+        .send({ label: 'Test' });
+
+      expect(res.status).toBe(200);
+      expect(captureGraphSnapshotMock).toHaveBeenCalledTimes(1);
+      expect(captureGraphSnapshotMock.mock.calls[0]?.[0]).toMatchObject({ orgId: 1 });
+    });
+  });
+
+  // =========================================================================
+  // GET /cortex/entity-graph/snapshots
+  // =========================================================================
+
+  describe('GET /cortex/entity-graph/snapshots', () => {
+    it('deny-by-default: returns empty list without issuing a DB query when user has no orgs', async () => {
+      _currentUser = { ..._currentUser, orgs: [] };
+      _selectQueue = [[ORG1_SNAPSHOT, ORG2_SNAPSHOT]];
+
+      const app = await getApp();
+      const res = await request(app).get('/cortex/entity-graph/snapshots');
+
+      expect(res.status).toBe(200);
+      expect(res.body.snapshots).toHaveLength(0);
+      expect(res.body.total).toBe(0);
+      expect(_capturedSelectWheres).toHaveLength(0);
+    });
+
+    it('applies an inArray orgId filter in the DB WHERE clause for an org-1 user', async () => {
+      _selectQueue = [[{ count: 1 }], [ORG1_SNAPSHOT]];
+
+      const app = await getApp();
+      await request(app).get('/cortex/entity-graph/snapshots');
+
+      expect(_capturedSelectWheres.length).toBeGreaterThanOrEqual(1);
+      expect(containsInArray(_capturedSelectWheres[0])).toBe(true);
+      expect(containsOrgId(_capturedSelectWheres[0], 1)).toBe(true);
+    });
+
+    it('multi-org user: WHERE clause contains both orgIds', async () => {
+      _currentUser = {
+        ..._currentUser,
+        orgs: [
+          { orgId: 1, orgSlug: 'org1', orgName: 'Org One', role: 'admin' },
+          { orgId: 3, orgSlug: 'org3', orgName: 'Org Three', role: 'member' },
+        ],
+      };
+      _selectQueue = [[{ count: 1 }], [ORG1_SNAPSHOT]];
+
+      const app = await getApp();
+      await request(app).get('/cortex/entity-graph/snapshots');
+
+      const where = _capturedSelectWheres[0] as { op: string; conds: Array<{ op: string; vals?: number[] }> };
+      expect(where.op).toBe('and');
+      const inArrayClause = where.conds?.find((c) => c.op === 'inArray');
+      expect(inArrayClause).toBeDefined();
+      expect(inArrayClause?.vals).toEqual([1, 3]);
+    });
+  });
+
+  // =========================================================================
+  // GET /cortex/entity-graph/snapshot/:id
+  // =========================================================================
+
+  describe('GET /cortex/entity-graph/snapshot/:id', () => {
+    it("returns 200 for a snapshot owned by the caller's org", async () => {
+      _selectQueue = [[ORG1_SNAPSHOT]];
+
+      const app = await getApp();
+      const res = await request(app).get(
+        `/cortex/entity-graph/snapshot/${ORG1_SNAPSHOT.snapshotUuid}`,
+      );
+
+      expect(res.status).toBe(200);
+      expect(res.body.snapshot.id).toBe(ORG1_SNAPSHOT.snapshotUuid);
+    });
+
+    it('uses inArray orgId in the DB WHERE clause (org-scoped query)', async () => {
+      _selectQueue = [[ORG1_SNAPSHOT]];
+
+      const app = await getApp();
+      await request(app).get(`/cortex/entity-graph/snapshot/${ORG1_SNAPSHOT.snapshotUuid}`);
+
+      expect(_capturedSelectWheres.length).toBeGreaterThanOrEqual(1);
+      expect(containsInArray(_capturedSelectWheres[0])).toBe(true);
+      expect(containsOrgId(_capturedSelectWheres[0], 1)).toBe(true);
+    });
+
+    it('returns 404 when the snapshot belongs to a different org (cross-tenant attempt)', async () => {
+      _selectQueue = [[ORG2_SNAPSHOT]];
+
+      const app = await getApp();
+      const res = await request(app).get(
+        `/cortex/entity-graph/snapshot/${ORG2_SNAPSHOT.snapshotUuid}`,
+      );
+
+      expect(res.status).toBe(404);
+    });
+
+    it('returns 404, not 403, so snapshot existence is never leaked to foreign orgs', async () => {
+      _selectQueue = [[ORG2_SNAPSHOT]];
+
+      const app = await getApp();
+      const res = await request(app).get(
+        `/cortex/entity-graph/snapshot/${ORG2_SNAPSHOT.snapshotUuid}`,
+      );
+
+      expect(res.status).toBe(404);
+      expect(res.status).not.toBe(403);
+    });
+
+    it('deny-by-default: returns 404 without issuing a DB query when caller has no org memberships', async () => {
+      _currentUser = { ..._currentUser, orgs: [] };
+      _selectQueue = [[ORG1_SNAPSHOT]];
+
+      const app = await getApp();
+      const res = await request(app).get(
+        `/cortex/entity-graph/snapshot/${ORG1_SNAPSHOT.snapshotUuid}`,
+      );
+
+      expect(res.status).toBe(404);
+      expect(_capturedSelectWheres).toHaveLength(0);
+    });
+
+    it('returns 404 when the snapshot has expired', async () => {
+      const staleSnapshot = {
+        ...ORG1_SNAPSHOT,
+        expiresAt: new Date('2020-01-01T00:00:00Z'),
+      };
+      _selectQueue = [[staleSnapshot]];
+
+      const app = await getApp();
+      const res = await request(app).get(
+        `/cortex/entity-graph/snapshot/${staleSnapshot.snapshotUuid}`,
+      );
+
+      expect(res.status).toBe(404);
+    });
+
+    it('returns 404 when no snapshot exists with the given UUID', async () => {
+      _selectQueue = [[/* empty — not found */]];
+
+      const app = await getApp();
+      const res = await request(app).get('/cortex/entity-graph/snapshot/nonexistent-uuid');
+
+      expect(res.status).toBe(404);
+    });
+  });
+
+  // =========================================================================
+  // DELETE /cortex/entity-graph/snapshot/:id
+  // =========================================================================
+
+  describe('DELETE /cortex/entity-graph/snapshot/:id', () => {
+    it("returns 200 when the caller deletes their own org's snapshot", async () => {
+      _selectQueue = [[{ id: ORG1_SNAPSHOT.id, orgId: ORG1_SNAPSHOT.orgId }]];
+
+      const app = await getApp();
+      const res = await request(app).delete(
+        `/cortex/entity-graph/snapshot/${ORG1_SNAPSHOT.snapshotUuid}`,
+      );
+
+      expect(res.status).toBe(200);
+      expect(res.body.message).toBe('Snapshot deleted');
+    });
+
+    it('uses inArray orgId in the prefetch DB WHERE clause (org-scoped query)', async () => {
+      _selectQueue = [[{ id: ORG1_SNAPSHOT.id, orgId: ORG1_SNAPSHOT.orgId }]];
+
+      const app = await getApp();
+      await request(app).delete(`/cortex/entity-graph/snapshot/${ORG1_SNAPSHOT.snapshotUuid}`);
+
+      expect(_capturedSelectWheres.length).toBeGreaterThanOrEqual(1);
+      expect(containsInArray(_capturedSelectWheres[0])).toBe(true);
+      expect(containsOrgId(_capturedSelectWheres[0], 1)).toBe(true);
+    });
+
+    it('includes orgId in the final DELETE WHERE clause (no unbounded delete)', async () => {
+      _selectQueue = [[{ id: ORG1_SNAPSHOT.id, orgId: ORG1_SNAPSHOT.orgId }]];
+
+      const app = await getApp();
+      await request(app).delete(`/cortex/entity-graph/snapshot/${ORG1_SNAPSHOT.snapshotUuid}`);
+
+      expect(_capturedDeleteWheres.length).toBeGreaterThanOrEqual(1);
+      expect(containsOrgId(_capturedDeleteWheres[0], 1)).toBe(true);
+    });
+
+    it('returns 404 when the snapshot belongs to a different org (cross-tenant attempt)', async () => {
+      _selectQueue = [[{ id: ORG2_SNAPSHOT.id, orgId: ORG2_SNAPSHOT.orgId }]];
+
+      const app = await getApp();
+      const res = await request(app).delete(
+        `/cortex/entity-graph/snapshot/${ORG2_SNAPSHOT.snapshotUuid}`,
+      );
+
+      expect(res.status).toBe(404);
+      expect(_capturedDeleteWheres).toHaveLength(0);
+    });
+
+    it('returns 404, not 403, so snapshot existence is never leaked to foreign orgs', async () => {
+      _selectQueue = [[{ id: ORG2_SNAPSHOT.id, orgId: ORG2_SNAPSHOT.orgId }]];
+
+      const app = await getApp();
+      const res = await request(app).delete(
+        `/cortex/entity-graph/snapshot/${ORG2_SNAPSHOT.snapshotUuid}`,
+      );
+
+      expect(res.status).toBe(404);
+      expect(res.status).not.toBe(403);
+    });
+
+    it('deny-by-default: returns 404 without issuing a DB query when caller has no org memberships', async () => {
+      _currentUser = { ..._currentUser, orgs: [] };
+      _selectQueue = [[{ id: ORG1_SNAPSHOT.id, orgId: ORG1_SNAPSHOT.orgId }]];
+
+      const app = await getApp();
+      const res = await request(app).delete(
+        `/cortex/entity-graph/snapshot/${ORG1_SNAPSHOT.snapshotUuid}`,
+      );
+
+      expect(res.status).toBe(404);
+      expect(_capturedSelectWheres).toHaveLength(0);
+      expect(_capturedDeleteWheres).toHaveLength(0);
+    });
+
+    it('returns 404 when no snapshot exists with the given UUID', async () => {
+      _selectQueue = [[/* empty — not found */]];
+
+      const app = await getApp();
+      const res = await request(app).delete('/cortex/entity-graph/snapshot/nonexistent-uuid');
+
+      expect(res.status).toBe(404);
+      expect(_capturedDeleteWheres).toHaveLength(0);
+    });
+
+    it('does not issue a DB delete when the org check fails (cross-tenant guard)', async () => {
+      _selectQueue = [[{ id: ORG2_SNAPSHOT.id, orgId: ORG2_SNAPSHOT.orgId }]];
+
+      const app = await getApp();
+      await request(app).delete(`/cortex/entity-graph/snapshot/${ORG2_SNAPSHOT.snapshotUuid}`);
+
+      expect(_capturedDeleteWheres).toHaveLength(0);
     });
   });
 });

@@ -2124,7 +2124,12 @@ router.post(
       const [created] = await db
         .select()
         .from(cortexGraphSnapshotsTable)
-        .where(eq(cortexGraphSnapshotsTable.snapshotUuid, result.snapshotUuid))
+        .where(
+          and(
+            eq(cortexGraphSnapshotsTable.snapshotUuid, result.snapshotUuid),
+            eq(cortexGraphSnapshotsTable.orgId, orgId),
+          ),
+        )
         .limit(1);
 
       sendSuccess(res, {
@@ -2201,19 +2206,24 @@ router.get(
       const uuid = req.params.uuid as string;
       const orgIds = callerOrgIds(req as any);
 
-      const rows = await db
-        .select()
-        .from(cortexGraphSnapshotsTable)
-        .where(eq(cortexGraphSnapshotsTable.snapshotUuid, uuid))
-        .limit(1);
-
-      const row = rows[0];
-      if (!row) {
+      if (orgIds.length === 0) {
         sendNotFound(res, 'Snapshot not found');
         return;
       }
 
-      if (orgIds.length === 0 || row.orgId === null || !orgIds.includes(row.orgId)) {
+      const rows = await db
+        .select()
+        .from(cortexGraphSnapshotsTable)
+        .where(
+          and(
+            eq(cortexGraphSnapshotsTable.snapshotUuid, uuid),
+            inArray(cortexGraphSnapshotsTable.orgId, orgIds),
+          ),
+        )
+        .limit(1);
+
+      const row = rows[0];
+      if (!row || row.orgId === null || !orgIds.includes(row.orgId)) {
         sendNotFound(res, 'Snapshot not found');
         return;
       }
@@ -2251,26 +2261,36 @@ router.delete(
       const uuid = req.params.uuid as string;
       const orgIds = callerOrgIds(req as any);
 
-      const rows = await db
-        .select({ id: cortexGraphSnapshotsTable.id, orgId: cortexGraphSnapshotsTable.orgId })
-        .from(cortexGraphSnapshotsTable)
-        .where(eq(cortexGraphSnapshotsTable.snapshotUuid, uuid))
-        .limit(1);
-
-      const row = rows[0];
-      if (!row) {
+      if (orgIds.length === 0) {
         sendNotFound(res, 'Snapshot not found');
         return;
       }
 
-      if (orgIds.length === 0 || row.orgId === null || !orgIds.includes(row.orgId)) {
+      const rows = await db
+        .select({ id: cortexGraphSnapshotsTable.id, orgId: cortexGraphSnapshotsTable.orgId })
+        .from(cortexGraphSnapshotsTable)
+        .where(
+          and(
+            eq(cortexGraphSnapshotsTable.snapshotUuid, uuid),
+            inArray(cortexGraphSnapshotsTable.orgId, orgIds),
+          ),
+        )
+        .limit(1);
+
+      const row = rows[0];
+      if (!row || row.orgId === null || !orgIds.includes(row.orgId)) {
         sendNotFound(res, 'Snapshot not found');
         return;
       }
 
       await db
         .delete(cortexGraphSnapshotsTable)
-        .where(eq(cortexGraphSnapshotsTable.snapshotUuid, uuid));
+        .where(
+          and(
+            eq(cortexGraphSnapshotsTable.snapshotUuid, uuid),
+            eq(cortexGraphSnapshotsTable.orgId, row.orgId),
+          ),
+        );
 
       logger.info({ snapshotUuid: uuid }, '[CORTEX] Graph snapshot deleted');
       sendSuccess(res, { message: 'Snapshot deleted' });
