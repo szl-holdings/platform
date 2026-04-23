@@ -141,6 +141,10 @@ ALLOY_INTERNAL_TOKEN = "szl-11c811093004470be94806e360ff1b54da09aed70f6fa76d7704
 ADMIN_PIN = "PULSE-DEMO-2026"
 
 [[ports]]
+localPort = 3010
+externalPort = 3002
+
+[[ports]]
 localPort = 8080
 externalPort = 80
 

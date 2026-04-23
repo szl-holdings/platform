@@ -16,6 +16,7 @@ import { createHash } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { runAtlasCompaction } from '../jobs/atlas-compaction';
 import { resolveDistressOwnerNames } from '../jobs/terra-owner-enrichment';
+import { runBackupRestoreDrill } from '../jobs/backup-restore-drill';
 import { publishGuardianDecisionEvent } from './guardian-engine';
 import { logger } from './logger';
 import {
@@ -517,6 +518,34 @@ export async function registerDefaultSchedules(): Promise<void> {
     payload: {},
     queue: 'maintenance',
     maxRetries: 1,
+  });
+
+  agentExecutionRuntime.registerAgent(
+    {
+      agentId: 'backup-restore-drill',
+      name: 'Backup Restore Drill',
+      domain: 'system',
+      jobType: 'backup_restore_drill',
+      queue: 'maintenance',
+      maxRetries: 0,
+    },
+    async (_job, ctx) => {
+      const result = await runBackupRestoreDrill();
+      await ctx.saveState({
+        lastRunAt: new Date().toISOString(),
+        runCount: ctx.runCount + 1,
+        lastStatus: result.status,
+      });
+    },
+  );
+
+  durableScheduleEntries.push({
+    name: 'backup_restore_drill',
+    jobType: 'backup_restore_drill',
+    cronExpression: '0 3 * * 0',
+    payload: {},
+    queue: 'maintenance',
+    maxRetries: 0,
   });
 
   agentScheduler.startDurableMode();

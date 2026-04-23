@@ -8,6 +8,7 @@ import {
   runBackup,
   exportTenantData,
 } from "../lib/backup-service";
+import { getLastDrillRuns, runBackupRestoreDrill } from "../jobs/backup-restore-drill";
 import { logger } from "../lib/logger";
 
 const backupRouter: IRouter = Router();
@@ -114,6 +115,52 @@ backupRouter.post("/admin/backup/export-tenant", async (req, res) => {
     if (!res.headersSent) {
       res.status(500).json({ error: message });
     }
+  }
+});
+
+backupRouter.get("/admin/backup/drill/status", async (_req, res) => {
+  try {
+    const { runs, lastSuccessAt } = await getLastDrillRuns(20);
+    const lastRun = runs[0] ?? null;
+    const health = getBackupHealthStatus();
+    res.json({
+      timestamp: new Date().toISOString(),
+      lastSuccessAt,
+      lastRun,
+      schedule: "Weekly on Sunday at 03:00 UTC (cron: 0 3 * * 0)",
+      totalRuns: runs.length,
+      passedRuns: runs.filter(r => r.status === "completed").length,
+      failedRuns: runs.filter(r => r.status === "failed").length,
+      backupHealth: health,
+      runs,
+    });
+  } catch (err) {
+    logger.error({ err }, "[backup-drill] Failed to load drill status");
+    res.status(500).json({ error: "Failed to load drill status" });
+  }
+});
+
+backupRouter.post("/admin/backup/drill/run", async (_req, res) => {
+  try {
+    logger.info("[backup-drill] Manual drill triggered via admin API");
+    const result = await runBackupRestoreDrill();
+    res.json({
+      success: true,
+      triggeredAt: new Date().toISOString(),
+      drillRunId: result.runId,
+      status: result.status,
+      durationMs: result.durationMs,
+      backupFile: result.backupFile,
+      gzipIntegrityOk: result.gzipIntegrityOk,
+      smokeChecksPassed: result.smokeChecksPassed,
+      smokeChecksFailed: result.smokeChecksFailed,
+      smokeChecks: result.smokeChecks,
+      error: result.error,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Drill failed";
+    logger.error({ err }, "[backup-drill] Manual drill failed");
+    res.status(500).json({ success: false, error: message });
   }
 });
 

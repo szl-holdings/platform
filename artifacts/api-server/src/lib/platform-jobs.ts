@@ -46,6 +46,7 @@ export const PLATFORM_JOB_TYPES = {
   NOTIFICATION_DISPATCH: 'notification_dispatch',
   NOTIFICATION_DIGEST: 'notification_email_digest',
   DATA_RETENTION_SWEEP: 'data_retention_sweep',
+  BACKUP_RESTORE_DRILL: 'backup_restore_drill',
 } as const;
 
 export type PlatformJobType = (typeof PLATFORM_JOB_TYPES)[keyof typeof PLATFORM_JOB_TYPES];
@@ -53,6 +54,7 @@ export type PlatformJobType = (typeof PLATFORM_JOB_TYPES)[keyof typeof PLATFORM_
 const DOMAIN_MAP: Record<string, string> = {
   notification_dispatch: 'platform',
   notification_email_digest: 'platform',
+  backup_restore_drill: 'platform',
   lyte_digest: 'lyte',
   readiness_digest: 'lyte',
   readiness_score_recompute: 'lyte',
@@ -1280,4 +1282,70 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, async (job) => 
     { digestsSent, digestsSkipped, periodHours: hours },
     '[notification-digest] Digest complete',
   );
+});
+
+durableJobQueue.register(PLATFORM_JOB_TYPES.BACKUP_RESTORE_DRILL, async (job) => {
+  const ctx = buildJobContext(job);
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId }, 'backup_restore_drill: starting');
+  await startWorkflowRun(ctx, domain);
+
+  try {
+    const { runBackupRestoreDrill } = await import('../jobs/backup-restore-drill');
+    const drillResult = await runBackupRestoreDrill();
+    const success = drillResult.status === 'pass';
+
+    serverTelemetry.recordBusinessEvent({
+      type: 'backup_restore_drill_completed',
+      domain,
+      success,
+      metadata: {
+        runId: drillResult.runId,
+        status: drillResult.status,
+        durationMs: drillResult.durationMs,
+        smokeChecksPassed: drillResult.smokeChecksPassed,
+        smokeChecksFailed: drillResult.smokeChecksFailed,
+        gzipIntegrityOk: drillResult.gzipIntegrityOk,
+        correlationId: ctx.correlationId,
+        workflowRunId: ctx.workflowRunId,
+      },
+    });
+
+    if (!success) {
+      serverTelemetry.raiseAlert({
+        type: 'backup_restore_drill_failed',
+        message: `Weekly backup restore drill FAILED: ${drillResult.error ?? `${drillResult.smokeChecksFailed} smoke check(s) failed`}`,
+        severity: 'critical',
+        metadata: {
+          runId: drillResult.runId,
+          backupFile: drillResult.backupFile,
+          smokeChecksFailed: drillResult.smokeChecksFailed,
+          correlationId: ctx.correlationId,
+        },
+      });
+    }
+
+    await completeWorkflowRun(
+      ctx.workflowRunId,
+      {
+        drillRunId: drillResult.runId,
+        status: drillResult.status,
+        durationMs: drillResult.durationMs,
+        smokeChecksPassed: drillResult.smokeChecksPassed,
+        smokeChecksFailed: drillResult.smokeChecksFailed,
+      },
+      success ? undefined : drillResult.error ?? 'Drill failed',
+      success ? undefined : 'failed',
+    );
+
+    logger.info(
+      { jobId: job.id, correlationId: ctx.correlationId, drillStatus: drillResult.status },
+      'backup_restore_drill: complete',
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error({ err, jobId: job.id }, 'backup_restore_drill: unexpected error');
+    await completeWorkflowRun(ctx.workflowRunId, {}, message, 'failed');
+    throw err;
+  }
 });

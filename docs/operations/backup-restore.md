@@ -142,6 +142,7 @@ The Proof Chain is append-only. Corruption — by definition — implies tamperi
 | Test | Frequency | Owner | Last verified |
 |------|-----------|-------|---------------|
 | Backup script execution (`backup-db.sh`) | Nightly automated via `.github/workflows/backup.yml` | DevOps | 2026-04-20 (first DR drill) |
+| **Automated backup restore drill** | **Weekly (Sunday 03:00 UTC)** via `backup_restore_drill` platform job | Automated / on-call | 2026-04-23 (drill scheduler wired) |
 | Database restore to scratch schema | Quarterly (manual drill) | DBA | 2026-04-20 (first DR drill — see `docs/operations/dr-drill-2026-04-20.md`) |
 | **Object-storage restore-from-cloud drill** | **Quarterly** (recurring item; see drill template §3 Step 7) | DevOps | 2026-04-20 (first execution against `local-fs` transport pipeline; **first execution against real Azure Blob scheduled 2026-07-01**) |
 | Point-in-time recovery (Pro) | Quarterly | DBA | TBD per cohort — requires Azure PostgreSQL Flexible Server |
@@ -274,6 +275,7 @@ These gaps are documented honestly. They do not represent silent risk.
 | Document | Path |
 |----------|------|
 | DR drill record (2026-04-20) | [docs/operations/dr-drill-2026-04-20.md](dr-drill-2026-04-20.md) |
+| **Manual restore runbook** | **[docs/operations/runbook-manual-restore.md](runbook-manual-restore.md)** |
 | Ops readiness summary | [docs/operations/ops-readiness.md](ops-readiness.md) |
 | Observability audit | [audit/operations/observability-audit.md](../../audit/operations/observability-audit.md) |
 | Backup CI workflow | [.github/workflows/backup.yml](.github/workflows/backup.yml) |
