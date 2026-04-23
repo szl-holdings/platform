@@ -27,8 +27,7 @@ import {
   RATE_CARDS,
 } from '@/data/operationalData';
 import { usePageMeta } from '@/hooks/usePageMeta';
-
-const API_BASE = '/api';
+import { apiJson } from '@/lib/api';
 
 const GOLD = 'var(--color-gold)';
 const GOLD_HEX: [number, number, number] = [201, 169, 97];
@@ -97,38 +96,6 @@ function saveClientEmails(map: Record<string, string>) {
   } catch {
     /* ignore */
   }
-}
-
-let csrfTokenCache: string | null = null;
-async function getCsrfToken(): Promise<string> {
-  if (csrfTokenCache) return csrfTokenCache;
-  const res = await fetch(`${API_BASE}/csrf-token`, { credentials: 'include' });
-  const body = await res.json();
-  csrfTokenCache = String(body.csrfToken ?? '');
-  return csrfTokenCache;
-}
-
-async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const method = (init?.method ?? 'GET').toUpperCase();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...((init?.headers as Record<string, string>) ?? {}),
-  };
-  if (method !== 'GET' && method !== 'HEAD') {
-    headers['X-CSRF-Token'] = await getCsrfToken();
-  }
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers,
-    credentials: 'include',
-  });
-  if (!res.ok) {
-    // If CSRF expired, invalidate cache so next write refetches.
-    if (res.status === 403) csrfTokenCache = null;
-    throw new Error(`HTTP ${res.status}`);
-  }
-  const body = await res.json();
-  return (body?.data ?? body) as T;
 }
 
 function formatToday(): string {
