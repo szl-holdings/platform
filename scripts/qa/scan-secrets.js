@@ -70,10 +70,11 @@ const SKIP_DIRS = new Set([
   'attached_assets',
   'playwright-report',
   'test-results',
+  'backups',
 ]);
 // .env.example is intentionally IN scope so accidental real secrets are caught.
 // Placeholder patterns in templates (re_xxxx, sk_test_*) are excluded via pattern design.
-const SKIP_FILES = new Set(['pnpm-lock.yaml', 'scan-secrets.js']);
+const SKIP_FILES = new Set(['pnpm-lock.yaml', 'scan-secrets.js', '.gitleaks.toml']);
 
 let _errors = 0;
 const hits = [];
@@ -133,9 +134,13 @@ function checkFile(fullPath, name) {
 walk(TARGET);
 
 if (hits.length > 0) {
-  for (const _hit of hits) {
+  console.error(`\nFAILED — ${hits.length} secret(s) detected:\n`);
+  for (const hit of hits) {
+    console.error(`  ❌  ${hit.rel}: ${hit.label}`);
   }
+  console.error('');
   process.exit(1);
 } else {
+  console.log('CLEAN — no secrets found.');
   process.exit(0);
 }

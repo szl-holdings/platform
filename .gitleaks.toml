@@ -144,6 +144,21 @@ useDefault = true
     "ops/github/push-workflows\\.sh",
     "scripts/github/publish-npm-packages\\.sh",
     "scripts/github/audit-packages\\.ts",
+
+    # Audit and security report documents reference credential-shaped example
+    # values (e.g. AKIAIOSFODNN7EXAMPLE) for documentation purposes only.
+    # All values in these specific files were confirmed false positives in prior
+    # audits (see KNOWN-GAPS.md Finding 1).
+    "audit/FINAL_DETAILED_REPORT\\.md",
+    "audit/FINAL_EXEC_SUMMARY\\.md",
+    "audit/phase-a-report\\.md",
+    "audit/security/auth-review\\.md",
+    "security/secret-audit\\.md",
+
+    # Benchmark API design docs contain HTTP request examples with synthetic
+    # idempotency key values (e.g. idem_20260416_abc123) and example Bearer
+    # tokens. None are real credentials (see KNOWN-GAPS.md Finding 3).
+    "ops/benchmark/api-idempotency-and-events\\.md",
   ]
 
   # ── Regex patterns that are always safe ─────────────────────────────────────
@@ -276,6 +291,11 @@ useDefault = true
     # EAS build time from secrets and never committed.
     "PLACEHOLDER_API_KEY",
     "PLACEHOLDER_PRIVATE_KEY",
+
+    # Synthetic idempotency key values used in HTTP request examples in
+    # benchmark/API design documentation (e.g. idem_20260416_abc123).
+    # Pattern: idem_ + date digits + underscore + short alphanumeric label.
+    "idem_[0-9]{8}_[a-z0-9]+",
   ]
 
   # ── Commit-level stop-list ────────────────────────────────────────────────
