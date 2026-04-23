@@ -67,18 +67,8 @@ const HISTORY_LIMIT = 50;
 const DEFAULT_ORG_ID = 0;
 
 function resolveOrgId(req: Request): number {
-  const candidates: unknown[] = [
-    (req as unknown as { tenant?: { orgId?: unknown } }).tenant?.orgId,
-    (req as unknown as { user?: { orgId?: unknown } }).user?.orgId,
-    (req as unknown as { user?: { organizationId?: unknown } }).user?.organizationId,
-  ];
-  for (const c of candidates) {
-    if (typeof c === 'number' && Number.isFinite(c)) return c;
-    if (typeof c === 'string' && c.length > 0) {
-      const n = Number(c);
-      if (Number.isFinite(n)) return n;
-    }
-  }
+  const id = (req as unknown as { tenantOrgId?: number }).tenantOrgId;
+  if (typeof id === 'number' && Number.isFinite(id)) return id;
   return DEFAULT_ORG_ID;
 }
 
@@ -283,7 +273,7 @@ router.get('/list', async (_req, res) => {
     }));
     sendSuccess(res, { connectors });
   } catch (err) {
-    handleRouteError(res, err);
+    handleRouteError(res, err, 'Failed to list connectors');
   }
 });
 
@@ -295,7 +285,7 @@ router.get('/health', async (req, res) => {
     );
     sendSuccess(res, { health, generatedAt: new Date().toISOString() });
   } catch (err) {
-    handleRouteError(res, err);
+    handleRouteError(res, err, 'Failed to fetch connector health');
   }
 });
 
@@ -315,7 +305,7 @@ router.get('/drift', async (req, res) => {
     });
     sendSuccess(res, { reports });
   } catch (err) {
-    handleRouteError(res, err);
+    handleRouteError(res, err, 'Failed to fetch drift reports');
   }
 });
 
@@ -331,7 +321,7 @@ router.get('/runs', async (req, res) => {
       .slice(0, 50);
     sendSuccess(res, { runs });
   } catch (err) {
-    handleRouteError(res, err);
+    handleRouteError(res, err, 'Failed to fetch sync runs');
   }
 });
 
@@ -356,7 +346,7 @@ router.get('/:id', async (req, res) => {
       escalations: s.escalations.slice(0, 10),
     });
   } catch (err) {
-    handleRouteError(res, err);
+    handleRouteError(res, err, 'Failed to fetch connector detail');
   }
 });
 
@@ -388,7 +378,7 @@ router.post('/sync/:id', requireRole(...OPS_ROLES), async (req, res) => {
     }
     sendCreated(res, { result });
   } catch (err) {
-    handleRouteError(res, err);
+    handleRouteError(res, err, 'Connector sync failed');
   }
 });
 
@@ -400,7 +390,7 @@ router.post('/pause/:id', requireRole(...OPS_ROLES), async (req, res) => {
     getState(orgId, conn.id).enabled = false;
     sendSuccess(res, { connectorId: conn.id, enabled: false });
   } catch (err) {
-    handleRouteError(res, err);
+    handleRouteError(res, err, 'Failed to pause connector');
   }
 });
 
@@ -412,7 +402,7 @@ router.post('/resume/:id', requireRole(...OPS_ROLES), async (req, res) => {
     getState(orgId, conn.id).enabled = true;
     sendSuccess(res, { connectorId: conn.id, enabled: true });
   } catch (err) {
-    handleRouteError(res, err);
+    handleRouteError(res, err, 'Failed to resume connector');
   }
 });
 

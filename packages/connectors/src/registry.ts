@@ -5,6 +5,7 @@
 import { maritimeAisConnector } from './connectors/maritime-ais';
 import { realEstateConnector } from './connectors/real-estate';
 import { sanctionsConnector } from './connectors/sanctions';
+import type { DemoAdapter, DemoAdapterEvent } from './demo-adapters';
 import type { Connector } from './types';
 
 export const BUILT_IN_CONNECTORS: ReadonlyArray<Connector<unknown>> = [
@@ -18,26 +19,51 @@ export function findConnector(id: string): Connector<unknown> | undefined {
 }
 
 /**
- * Mutable in-process registry for runtime-registered connectors and demo
- * adapters. Consumed by the demo-seed package for signal-mesh seeding.
+ * Mutable in-process registry for demo adapters. Consumed by
+ * `@szl-holdings/demo-seed` for signal-mesh seeding.
+ *
+ * API contract (consumed by seed-signal-mesh.ts):
+ *   setEmitSignal(cb)  — wire a callback that processes each emitted event
+ *   register(adapter)  — add a DemoAdapter instance
+ *   startAll()         — emit from every registered adapter, routing through
+ *                        the signal callback
  */
+export type EmitSignalFn = (input: DemoAdapterEvent) => Promise<unknown>;
+
 class ConnectorRegistry {
-  private readonly entries = new Map<string, unknown>();
+  private readonly adapters: DemoAdapter[] = [];
+  private emitSignal: EmitSignalFn | null = null;
 
-  register(id: string, instance: unknown): void {
-    this.entries.set(id, instance);
+  setEmitSignal(fn: EmitSignalFn): void {
+    this.emitSignal = fn;
   }
 
-  get(id: string): unknown {
-    return this.entries.get(id);
+  register(adapter: DemoAdapter): void {
+    this.adapters.push(adapter);
   }
 
-  list(): ReadonlyArray<{ id: string; instance: unknown }> {
-    return Array.from(this.entries.entries()).map(([id, instance]) => ({ id, instance }));
+  async startAll(): Promise<void> {
+    for (const adapter of this.adapters) {
+      const events = await adapter.emit();
+      for (const event of events) {
+        if (this.emitSignal) {
+          await this.emitSignal(event);
+        }
+      }
+    }
+  }
+
+  get(id: string): DemoAdapter | undefined {
+    return this.adapters.find((a) => a.id === id);
+  }
+
+  list(): ReadonlyArray<DemoAdapter> {
+    return this.adapters;
   }
 
   clear(): void {
-    this.entries.clear();
+    this.adapters.length = 0;
+    this.emitSignal = null;
   }
 }
 
