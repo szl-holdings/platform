@@ -389,3 +389,15 @@ id = "lUtYQPqpgTCns3QI8SpEM"
 uri = "file://screenshots/07-pulse.jpg"
 type = "image"
 title = "LUMINA / Pulse — auth-gated executive briefing"
+
+[[outputs]]
+id = "fPlHZ2KRUGRM3roxFLcxF"
+uri = "file://SZL-Standby-Content-Calendar.docx"
+type = "word_document"
+title = "Content Calendar — 6 posts × 4 platforms (Medium, Substack, LinkedIn, X) with embedded screenshots"
+
+[[outputs]]
+id = "TozltnnxYgoNRwv7zEfsW"
+uri = "file://OPERATIONAL-AUDIT.md"
+type = "text"
+title = "Operational Audit — status of every artifact, security floor, GitHub cleanup, Series A scoring"
