@@ -33,6 +33,7 @@ import {
   validateTriageDecision,
 } from '@szl-holdings/ai-engine';
 import { bodyShape } from '@szl-holdings/contracts/common';
+import { recordRecommendation } from '@szl-holdings/outcome-graph';
 import { Router } from 'express';
 import { z } from 'zod';
 import {
@@ -230,6 +231,24 @@ router.post(
       logGuardrailIfTriggered(respondTrace, 'auto_capture');
       runAndPersistEval(respondTrace, respondCtx);
 
+      let outcomeGraphId: number | null = null;
+      try {
+        const outcomeRow = await recordRecommendation({
+          orgId: getOrgId(req.user),
+          domain: 'general',
+          entityType: 'chat_response',
+          recommendationText: completion.content.slice(0, 1000),
+          agentId: 'alloy',
+          modelId: completion.model,
+          modelProvider: completion.provider ?? 'unknown',
+          correlationId: respondTrace.traceId,
+          metadata: { endpoint: 'respond', routeClass: routeClass ?? 'reasoning' },
+        });
+        outcomeGraphId = outcomeRow.id;
+      } catch (ogErr) {
+        logger.warn({ err: ogErr }, 'outcome-graph recordRecommendation failed for /ai/respond');
+      }
+
       res.json({
         content: completion.content,
         model: completion.model,
@@ -237,6 +256,7 @@ router.post(
         usage: completion.usage,
         latencyMs: completion.latencyMs,
         finishReason: completion.finishReason,
+        outcomeGraphId,
       });
     } catch (err) {
       logger.error({ err }, 'AI respond error');
@@ -327,7 +347,32 @@ router.post(
       logGuardrailIfTriggered(trace, 'auto_capture');
       runAndPersistEval(trace, triageCtx);
 
-      res.json({ decision: result, model: completion.model, latencyMs: completion.latencyMs });
+      let outcomeGraphId: number | null = null;
+      try {
+        const outcomeRow = await recordRecommendation({
+          orgId: getOrgId(req.user),
+          domain: 'general',
+          entityType: 'triage_decision',
+          recommendationText: result.summary ?? `Triage: ${result.priority} → ${result.routeTo}`,
+          recommendationAction: result.routeTo,
+          agentId: 'alloy',
+          modelId: completion.model,
+          modelProvider: completion.provider ?? 'unknown',
+          confidence: result.confidence,
+          correlationId: trace.traceId,
+          metadata: {
+            endpoint: 'triage',
+            priority: result.priority,
+            urgency: result.urgency,
+            category: result.category,
+          },
+        });
+        outcomeGraphId = outcomeRow.id;
+      } catch (ogErr) {
+        logger.warn({ err: ogErr }, 'outcome-graph recordRecommendation failed for /ai/triage');
+      }
+
+      res.json({ decision: result, model: completion.model, latencyMs: completion.latencyMs, outcomeGraphId });
     } catch (err) {
       logger.error({ err }, 'AI triage error');
       res.status(500).json({
@@ -521,7 +566,32 @@ Consider constraints: ${constraints?.join('; ') || 'none specified'}`,
       logGuardrailIfTriggered(planTrace, 'auto_capture');
       runAndPersistEval(planTrace, planCtx);
 
-      res.json({ plan: result, model: completion.model, latencyMs: completion.latencyMs });
+      let outcomeGraphId: number | null = null;
+      try {
+        const outcomeRow = await recordRecommendation({
+          orgId: getOrgId(req.user),
+          domain: 'general',
+          entityType: 'action_plan',
+          recommendationText: (result.reasoning ?? result.action).slice(0, 1000),
+          recommendationAction: result.actionType,
+          agentId: 'alloy',
+          modelId: completion.model,
+          modelProvider: completion.provider ?? 'unknown',
+          confidence: result.confidence,
+          correlationId: planTrace.traceId,
+          metadata: {
+            endpoint: 'plan',
+            actionType: result.actionType,
+            approvalRequired: result.approvalRequired,
+            approvalLevel: result.approvalLevel,
+          },
+        });
+        outcomeGraphId = outcomeRow.id;
+      } catch (ogErr) {
+        logger.warn({ err: ogErr }, 'outcome-graph recordRecommendation failed for /ai/plan');
+      }
+
+      res.json({ plan: result, model: completion.model, latencyMs: completion.latencyMs, outcomeGraphId });
     } catch (err) {
       logger.error({ err }, 'AI plan error');
       res.status(500).json({
