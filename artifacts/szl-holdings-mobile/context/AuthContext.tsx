@@ -580,6 +580,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             code,
             redirect_uri: redirectUri,
             code_verifier: request.codeVerifier,
+            nonce: request.nonce ?? null,
             state: state ?? '',
           }),
         });
