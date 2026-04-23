@@ -284,11 +284,6 @@ export const APP_INTEGRATIONS: Record<
     ],
     doctrineRole: 'DECIDE',
   },
-  'stephen-site': {
-    connectors: ['ai', 'github', 'google', 'storage'],
-    description: 'Legacy slug for Career — Founder Identity site',
-    doctrineRole: 'EXECUTE',
-  },
   terra: {
     connectors: ['ai', 'monitoring', 'storage'],
     description: 'Legacy slug for DOMAINE (beacon) — Business Telemetry',
