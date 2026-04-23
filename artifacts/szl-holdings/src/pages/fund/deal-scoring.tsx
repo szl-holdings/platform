@@ -8,7 +8,8 @@ import {
   Brain, ArrowLeft, Star,
   ChevronRight, Upload, AlertCircle, CheckCircle2,
   Zap, FileText, Target, Paperclip, Download, ExternalLink,
-  Mail, MessageSquare, Save, Loader2,
+  Mail, MessageSquare, Save, Loader2, Eye, X, Image as ImageIcon,
+  Presentation,
 } from "lucide-react";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { SiteNav } from "@/components/SiteNav";
@@ -53,6 +54,124 @@ function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
   return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function isPdf(contentType: string) {
+  return contentType === "application/pdf";
+}
+function isImage(contentType: string) {
+  return contentType.startsWith("image/");
+}
+function previewUrl(downloadUrl: string) {
+  return `${downloadUrl}?preview=1`;
+}
+
+function AttachmentIcon({ contentType, kind }: { contentType: string; kind: string }) {
+  if (isPdf(contentType)) return <FileText className="h-3 w-3 flex-shrink-0 text-[#d4a054]" />;
+  if (isImage(contentType)) return <ImageIcon className="h-3 w-3 flex-shrink-0 text-[#6aaa72]" />;
+  if (kind === "deck") return <Presentation className="h-3 w-3 flex-shrink-0 text-[#8b7ac8]" />;
+  return <FileText className="h-3 w-3 flex-shrink-0 text-[#4a90b8]" />;
+}
+
+function AttachmentThumbnail({ attachment }: { attachment: DealAttachmentRef }) {
+  const { contentType, name, downloadUrl: dl } = attachment;
+  if (isImage(contentType)) {
+    return (
+      <img
+        src={previewUrl(dl)}
+        alt={name}
+        className="w-full h-full object-cover rounded"
+        loading="lazy"
+      />
+    );
+  }
+  const bg = isPdf(contentType) ? "#d4a054" : attachment.kind === "deck" ? "#8b7ac8" : "#4a90b8";
+  const Icon = isPdf(contentType) ? FileText : attachment.kind === "deck" ? Presentation : FileText;
+  const label = isPdf(contentType) ? "PDF" : attachment.kind === "deck" ? "DECK" : "FILE";
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center gap-1 rounded"
+      style={{ background: `${bg}18`, border: `1px solid ${bg}30` }}>
+      <Icon className="h-6 w-6" style={{ color: bg }} />
+      <span className="text-[8px] font-bold tracking-widest" style={{ color: bg }}>{label}</span>
+    </div>
+  );
+}
+
+function AttachmentPreviewModal({ attachment, onClose }: { attachment: DealAttachmentRef; onClose: () => void }) {
+  const { contentType, name, downloadUrl: dl, size } = attachment;
+  const pUrl = previewUrl(dl);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+      style={{ background: "rgba(0,0,0,0.82)", backdropFilter: "blur(4px)" }}
+    >
+      <div
+        className="relative w-full max-w-4xl rounded-2xl border border-white/[0.1] bg-[#0c1018] flex flex-col overflow-hidden"
+        style={{ maxHeight: "90vh" }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.07] flex-shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <AttachmentIcon contentType={contentType} kind={attachment.kind} />
+            <span className="text-sm font-medium text-white truncate">{name}</span>
+            <span className="text-[10px] text-white/35 flex-shrink-0">{formatBytes(size)}</span>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+            <a
+              href={dl}
+              download={name}
+              className="flex items-center gap-1.5 rounded-lg border border-white/[0.1] px-3 py-1.5 text-[11px] font-semibold text-white/70 hover:bg-white/[0.06] transition-colors"
+            >
+              <Download className="h-3 w-3" /> Download
+            </a>
+            <button
+              onClick={onClose}
+              className="flex items-center justify-center h-7 w-7 rounded-lg border border-white/[0.1] text-white/50 hover:bg-white/[0.06] transition-colors"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-auto min-h-0 bg-[#080b10]" style={{ minHeight: 400 }}>
+          {isPdf(contentType) ? (
+            <iframe
+              src={pUrl}
+              title={name}
+              className="w-full h-full border-0"
+              style={{ minHeight: 560 }}
+            />
+          ) : isImage(contentType) ? (
+            <div className="flex items-center justify-center p-6 h-full">
+              <img
+                src={pUrl}
+                alt={name}
+                className="max-w-full max-h-full object-contain rounded-lg"
+                style={{ maxHeight: "70vh" }}
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-4 p-12 text-center">
+              <AttachmentIcon contentType={contentType} kind={attachment.kind} />
+              <div>
+                <p className="text-sm text-white/60 mb-1">Inline preview is not available for this file type.</p>
+                <p className="text-[11px] text-white/35">{contentType}</p>
+              </div>
+              <a
+                href={dl}
+                download={name}
+                className="flex items-center gap-1.5 rounded-xl bg-[#d4a054] px-4 py-2 text-xs font-semibold text-black hover:bg-[#d4a054]/90"
+              >
+                <Download className="h-3 w-3" /> Download to view
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const DEALS: Deal[] = [
@@ -301,6 +420,7 @@ export default function DealScoringPage() {
   const allDeals = useMemo<Deal[]>(() => [...submissions.map(toDeal), ...DEALS], [submissions]);
   const [selectedId, setSelectedId] = useState<string>(allDeals[0]?.id ?? "d1");
   const [localPatch, setLocalPatch] = useState<Record<string, Partial<Deal>>>({});
+  const [previewAttachment, setPreviewAttachment] = useState<DealAttachmentRef | null>(null);
 
   const deal: Deal = useMemo(() => {
     const base = allDeals.find(d => d.id === selectedId) ?? allDeals[0];
@@ -464,37 +584,76 @@ export default function DealScoringPage() {
                           {deal.deckUrl ? " · 1 link" : ""}
                         </span>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+
+                      {/* Thumbnail row — deck and image attachments */}
+                      {(deal.attachments ?? []).filter(a => a.kind === "deck" || isImage(a.contentType)).length > 0 ? (
+                        <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
+                          {(deal.attachments ?? [])
+                            .map((a, i) => ({ a, i }))
+                            .filter(({ a }) => a.kind === "deck" || isImage(a.contentType))
+                            .map(({ a, i }) => (
+                              <button
+                                key={`thumb-${i}`}
+                                onClick={() => setPreviewAttachment(a)}
+                                className="relative flex-shrink-0 h-20 w-28 rounded-lg overflow-hidden border border-white/[0.08] hover:border-[#d4a054]/40 transition-colors group"
+                                title={`Preview: ${a.name}`}
+                              >
+                                <AttachmentThumbnail attachment={a} />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                  style={{ background: "rgba(0,0,0,0.5)" }}>
+                                  <Eye className="h-4 w-4 text-white" />
+                                </div>
+                              </button>
+                            ))}
+                        </div>
+                      ) : null}
+
+                      {/* File list */}
+                      <div className="space-y-1.5">
                         {deal.deckUrl ? (
-                          <a
-                            href={deal.deckUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/80 hover:bg-white/[0.05]"
-                          >
+                          <div className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/80">
                             <div className="flex items-center gap-2 min-w-0">
                               <ExternalLink className="h-3 w-3 text-[#4a90b8] flex-shrink-0" />
                               <span className="truncate">Founder-supplied deck link</span>
                             </div>
-                          </a>
+                            <a
+                              href={deal.deckUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 flex-shrink-0 ml-2 rounded-md border border-white/[0.1] px-2 py-0.5 text-[10px] text-white/50 hover:bg-white/[0.05]"
+                            >
+                              <ExternalLink className="h-2.5 w-2.5" /> Open
+                            </a>
+                          </div>
                         ) : null}
                         {(deal.attachments ?? []).map((a, i) => (
-                          <a
+                          <div
                             key={`${a.downloadUrl}-${i}`}
-                            href={a.downloadUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/80 hover:bg-white/[0.05]"
+                            className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[11px] text-white/80"
                           >
                             <div className="flex items-center gap-2 min-w-0">
-                              <FileText className={`h-3 w-3 flex-shrink-0 ${a.kind === "deck" ? "text-[#d4a054]" : "text-[#4a90b8]"}`} />
+                              <AttachmentIcon contentType={a.contentType} kind={a.kind} />
                               <span className="truncate">{a.name}</span>
+                              <span className="text-[10px] text-white/30 flex-shrink-0">{formatBytes(a.size)}</span>
                             </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <span className="text-[10px] text-white/35">{formatBytes(a.size)}</span>
-                              <Download className="h-3 w-3 text-white/40" />
+                            <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                              <button
+                                onClick={() => setPreviewAttachment(a)}
+                                className="flex items-center gap-1 rounded-md border border-white/[0.1] px-2 py-0.5 text-[10px] text-white/50 hover:bg-white/[0.05] transition-colors"
+                                title="Preview inline"
+                              >
+                                <Eye className="h-2.5 w-2.5" /> Preview
+                              </button>
+                              <a
+                                href={a.downloadUrl}
+                                download={a.name}
+                                className="flex items-center gap-1 rounded-md border border-white/[0.1] px-2 py-0.5 text-[10px] text-white/50 hover:bg-white/[0.05] transition-colors"
+                                title="Download"
+                              >
+                                <Download className="h-2.5 w-2.5" />
+                              </a>
                             </div>
-                          </a>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -549,6 +708,12 @@ export default function DealScoringPage() {
         </main>
         <SiteFooter />
       </div>
+      {previewAttachment ? (
+        <AttachmentPreviewModal
+          attachment={previewAttachment}
+          onClose={() => setPreviewAttachment(null)}
+        />
+      ) : null}
     </>
   );
 }

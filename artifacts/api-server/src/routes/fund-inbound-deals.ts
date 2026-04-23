@@ -500,9 +500,20 @@ router.get(
       const response = await objectStorage.downloadObject(file);
       res.status(response.status);
       response.headers.forEach((value, key) => res.setHeader(key, value));
-      // Force the browser to use the original filename when downloading.
       const safeName = attachment.name.replace(/[^A-Za-z0-9._\- ]/g, '_');
-      res.setHeader('Content-Disposition', `attachment; filename="${safeName}"`);
+      // ?preview=1 lets the browser render the file inline (PDF viewer, image)
+      // rather than forcing a download.  All other requests keep the default
+      // attachment disposition so analysts can still save the file locally.
+      const isPreview = req.query['preview'] === '1';
+      if (isPreview) {
+        res.setHeader('Content-Disposition', `inline; filename="${safeName}"`);
+        // Allow the browser to cache preview responses briefly so repeated
+        // opens of the same attachment don't re-download the full object.
+        res.setHeader('Cache-Control', 'private, max-age=300');
+      } else {
+        res.setHeader('Content-Disposition', `attachment; filename="${safeName}"`);
+        res.setHeader('Cache-Control', 'no-store');
+      }
       if (response.body) {
         Readable.fromWeb(response.body as ReadableStream<Uint8Array>).pipe(res);
       } else {
