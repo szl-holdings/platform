@@ -3657,6 +3657,9 @@ importers:
 
   packages/connectors:
     dependencies:
+      '@workspace/ontology':
+        specifier: workspace:*
+        version: link:../ontology
       zod:
         specifier: 'catalog:'
         version: 3.25.76

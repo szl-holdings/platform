@@ -31,6 +31,7 @@
     "format": "biome format --write ./src"
   },
   "dependencies": {
+    "@workspace/ontology": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
