@@ -45,6 +45,9 @@ cat > "$HOOKS_DIR/pre-push" << 'HOOK'
 echo "Running brand:check before push..."
 pnpm brand:check
 
+echo "Running brand:strings before push..."
+pnpm brand:strings
+
 # OG card freshness — flags committed cards that no longer match the generator.
 # Skipped automatically if python3 / Pillow are unavailable on the machine.
 if command -v python3 >/dev/null 2>&1 && python3 -c "import PIL" >/dev/null 2>&1; then
