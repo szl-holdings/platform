@@ -35,7 +35,7 @@ export const PLATFORM_APPS = [
   { slug: 'lyte', name: 'KORA Command Center', icon: 'ShoppingBag', color: '#a855f7' },
   { slug: 'vessels', name: 'SEXTANT Maritime Intelligence', icon: 'Ship', color: '#06b6d4' },
   { slug: 'firestorm', name: 'Firestorm Security Simulation', icon: 'Flame', color: '#f97316' },
-  { slug: 'inca', name: 'INCA AI Research', icon: 'Brain', color: '#14b8a6' },
+  { slug: 'inca', name: 'AI Research Lab', icon: 'Brain', color: '#14b8a6' },
   { slug: 'beacon', name: 'DOMAINE', icon: 'BarChart3', color: '#0ea5e9' },
   { slug: 'rosie', name: 'PARAGON Operations', icon: 'AlertTriangle', color: '#ef4444' },
   { slug: 'carlota-jo', name: 'Carlota Jo Advisory', icon: 'Crown', color: '#f43f5e' },

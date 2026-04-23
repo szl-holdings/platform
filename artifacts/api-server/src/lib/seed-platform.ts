@@ -159,7 +159,7 @@ export async function seedPlatformData(): Promise<void> {
         },
         {
           key: 'inca',
-          name: 'INCA AI Research Command',
+          name: 'AI Research Lab Command',
           description: 'AI research orchestration and knowledge management',
           category: 'intelligence' as const,
           isActive: true,

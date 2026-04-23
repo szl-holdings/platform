@@ -2,7 +2,7 @@ import type { DomainConfig } from '../types.js';
 
 export const incaConfig: DomainConfig = {
   appSlug: 'inca',
-  appName: 'INCA AI Research Command Center',
+  appName: 'AI Research Lab Command Center',
   domain: 'ai-research',
   description: 'Experiment tracking, model performance, and research pipeline observability',
   connectors: ['ai', 'huggingface', 'storage'],

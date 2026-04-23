@@ -223,7 +223,7 @@ The platform includes these registered applications:
 - Vessel Tracker — maritime fleet tracking with real-time AIS data
 - Firestorm Security — red team simulation and security assessment platform
 - Stephen Lutar — personal portfolio and case study site
-- INCA AI Research — AI research command center with publication tracking
+- AI Research Lab — AI research command center with publication tracking
 - Terra Real Estate — real estate portfolio intelligence and analytics
 - MSP Command Center — managed service provider operations dashboard
 - SZL Holdings — family office investment management

@@ -30,7 +30,7 @@ const SEED_DATA: HoldingsVenture[] = [
   },
   {
     id: 'h-002',
-    name: 'INCA AI Research',
+    name: 'AI Research Lab',
     sector: 'Artificial Intelligence',
     stage: 'seed',
     investmentDate: '2025-09-01',

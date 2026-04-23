@@ -177,7 +177,7 @@ const AEGIS_AGENTS = [
   },
   {
     agentId: 'aegis-inca-lab',
-    name: 'INCA Lab',
+    name: 'AI Research Lab',
     description:
       'Experimental research and red-team simulation agent. Runs adversarial simulations, tabletop exercises, and novel technique evaluations in a sandboxed environment to stress-test Aegis defences.',
     domain: 'research',

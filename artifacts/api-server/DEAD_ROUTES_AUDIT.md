@@ -4,7 +4,7 @@
 **Method:** Static import analysis — all flat route `.ts` files cross-referenced against every `import` statement in `src/routes/groups/*.ts` and `src/index.ts`.
 
 **Cleaned up:** 2026-04-18 — Category A files deleted (see below).  
-**Updated:** 2026-04-23 — Category B rename completed; INCA brand decision documented (Task #3149).
+**Updated:** 2026-04-23 — Category B rename completed; INCA brand decision documented (Task #1439).
 
 ---
 
@@ -35,7 +35,7 @@
 
 **Status: DONE — renamed `inca.ts` → `aegis-intel.ts` on 2026-04-23.**
 
-**INCA AI Research brand decision (Task #3149):** The brand name "INCA AI Research" is **retained as-is**. INCA is an active domain agent used across nuro-mesh, domain-agent configs, multi-agent-orchestrator, and seed data. Renaming the brand would require broad changes across configs and would surface incorrectly to end users. Only the internal route file was renamed for code hygiene; the route mount path (`/inca`) and the agent brand name remain unchanged.
+**AI Research Lab brand decision (Task #1439):** The brand name "INCA AI Research" has been **renamed to "AI Research Lab"** (Task #1439, 2026-04-23). "INCA" appears in the brand registry's `deprecatedStrings` list, confirming the Series A rebrand intended to retire it. The slug (`inca`), route mount path (`/inca`), and `appSlug` values are unchanged — only the display name is updated across `lib/config`, `lib/services`, `lib/shared-ui`, `lib/observability`, `packages/config`, and `artifacts/api-server`.
 
 ---
 
