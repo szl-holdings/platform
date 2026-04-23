@@ -1,6 +1,7 @@
 import { getRuntimeMode, isSeedDataAllowed } from '@szl-holdings/config';
 import {
   actionsTable,
+  approvalRequestsTable,
   corridorsTable,
   db,
   featureFlagsTable,
@@ -15,7 +16,7 @@ import {
   workflowsTable,
 } from '@szl-holdings/db';
 import { productsTable } from '@szl-holdings/db/schema/canonical';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 
 async function tableHasData(table: any, _sectionName: string): Promise<boolean> {
     const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(table);
@@ -35,6 +36,15 @@ export async function seedPlatformData(): Promise<void> {
         `Set DEMO_MODE=true or ENABLE_DEMO_SEED=true to enable seeding in non-production environments.`,
     );
   }
+
+  const [existingDemoOrg] = await db
+    .select({ id: organizationsTable.id })
+    .from(organizationsTable)
+    .where(eq(organizationsTable.slug, 'alloy-demo'));
+  const preSeedOrgId: number | null = existingDemoOrg?.id ?? null;
+
+  const { seedQuickActions } = await import('./seed-quick-actions.js');
+  await seedQuickActions(preSeedOrgId);
 
   const orgsExist = await tableHasData(organizationsTable, 'organizations');
   const signalsExist = await tableHasData(platformSignalsTable, 'platform_signals');
@@ -101,6 +111,18 @@ export async function seedPlatformData(): Promise<void> {
   const seedOrgId = await resolveOrgId(alloyOrg, 'alloy-demo');
   const seedLyteOrgId = await resolveOrgId(lyteOrg, 'lyte-demo');
   const seedVesselsOrgId = await resolveOrgId(vesselsOrg, 'vessels-demo');
+
+  await runSection('demo_approvals_org_backfill', async () => {
+    await db
+      .update(approvalRequestsTable)
+      .set({ orgId: seedOrgId })
+      .where(
+        and(
+          eq(approvalRequestsTable.serviceAttribution, 'demo-seed'),
+          isNull(approvalRequestsTable.orgId),
+        ),
+      );
+  });
 
   await runSection('products', () =>
     db

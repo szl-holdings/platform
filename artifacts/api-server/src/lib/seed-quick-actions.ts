@@ -61,22 +61,38 @@ const DEMO_APPROVALS = [
     metadata: { seeded: true, domain: 'properties' },
   },
   {
-    resourceType: 'lp_capital_call',
-    resourceId: 'capital-demo-005',
-    title: 'LP Capital Call — Q2 2026 Draw',
-    description: 'Scheduled Q2 capital call to 14 limited partners. Total draw: $8.2M across Fund III.',
+    resourceType: 'client_engagement',
+    resourceId: 'advisory-demo-005',
+    title: 'Client Onboarding — Meridian Capital Partners (AUM $2.1B)',
+    description: 'New family office seeking advisory mandate. KYC/AML clearance received. Engagement letter and fee schedule require partner sign-off before services commence.',
     actionClass: 'authorize',
     priority: 'medium' as const,
-    requestedByRole: 'ir-ops',
-    requiredApproverRole: 'gp',
-    correlationId: 'demo-capital-005',
+    requestedByRole: 'business-development',
+    requiredApproverRole: 'partner',
+    correlationId: 'demo-advisory-005',
     serviceAttribution: 'demo-seed',
-    payload: { fund: 'Fund III', totalDraw: '$8,200,000', lpCount: 14, drawDate: '2026-04-30' },
-    metadata: { seeded: true, domain: 'portfolio' },
+    payload: { client: 'Meridian Capital Partners', aum: '$2.1B', engagementType: 'Family Office Advisory', kycStatus: 'cleared' },
+    metadata: { seeded: true, domain: 'advisory' },
+  },
+  {
+    resourceType: 'ops_latency_alert',
+    resourceId: 'ops-demo-006',
+    title: 'SLO Breach — Production API P99 Latency > 8s (23% of Requests)',
+    description: 'API gateway P99 response time has exceeded SLO threshold for 18 consecutive minutes. Auto-remediation paused pending operator acknowledgment. Rollback or scale-out approval needed.',
+    actionClass: 'acknowledge',
+    priority: 'critical' as const,
+    requestedByRole: 'platform-engineering',
+    requiredApproverRole: 'engineer',
+    correlationId: 'demo-ops-006',
+    serviceAttribution: 'demo-seed',
+    payload: { metric: 'P99 Latency', value: '8.4s', sloThreshold: '2s', affectedRequests: '23%' },
+    metadata: { seeded: true, domain: 'operations' },
   },
 ];
 
-export async function seedQuickActions(): Promise<{ inserted: number; skipped: number }> {
+export async function seedQuickActions(
+  demoOrgId?: number | null,
+): Promise<{ inserted: number; skipped: number }> {
   let inserted = 0;
   let skipped = 0;
 
@@ -95,7 +111,7 @@ export async function seedQuickActions(): Promise<{ inserted: number; skipped: n
 
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       await db.insert(approvalRequestsTable).values({
-        orgId: null,
+        orgId: demoOrgId ?? null,
         resourceType: approval.resourceType,
         resourceId: approval.resourceId,
         title: approval.title,
