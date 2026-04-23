@@ -55,6 +55,158 @@ updates:
         patterns:
           - "@tanstack/*"
 
+  # Python workers (substrate-python, substrate-py-workers, lyte-metrics-store)
+  - package-ecosystem: pip
+    directory: /workers/substrate-python
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - python
+      - automated
+    commit-message:
+      prefix: "chore(deps-py)"
+
+  - package-ecosystem: pip
+    directory: /services/substrate-py-workers
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - python
+      - automated
+    commit-message:
+      prefix: "chore(deps-py)"
+
+  - package-ecosystem: pip
+    directory: /services/lyte-metrics-store
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - python
+      - automated
+    commit-message:
+      prefix: "chore(deps-py)"
+
+  - package-ecosystem: pip
+    directory: /scripts/media
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - python
+      - automated
+    commit-message:
+      prefix: "chore(deps-py)"
+
+  # Docker base images (api-server and artifact Dockerfiles)
+  - package-ecosystem: docker
+    directory: /artifacts/api-server
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - docker
+      - automated
+    commit-message:
+      prefix: "chore(deps-docker)"
+
+  - package-ecosystem: docker
+    directory: /artifacts/szl-holdings
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - docker
+      - automated
+    commit-message:
+      prefix: "chore(deps-docker)"
+
+  - package-ecosystem: docker
+    directory: /artifacts/vessels
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - docker
+      - automated
+    commit-message:
+      prefix: "chore(deps-docker)"
+
+  - package-ecosystem: docker
+    directory: /artifacts/terra
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - docker
+      - automated
+    commit-message:
+      prefix: "chore(deps-docker)"
+
+  - package-ecosystem: docker
+    directory: /artifacts/aegis
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - docker
+      - automated
+    commit-message:
+      prefix: "chore(deps-docker)"
+
+  - package-ecosystem: docker
+    directory: /artifacts/carlota-jo
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - docker
+      - automated
+    commit-message:
+      prefix: "chore(deps-docker)"
+
   # GitHub Actions
   - package-ecosystem: github-actions
     directory: /

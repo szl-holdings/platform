@@ -12,7 +12,7 @@ assignees: stephenlutar2-hash
 >
 > Report vulnerabilities via email: **security@szlholdings.com**
 >
-> See [SECURITY.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/SECURITY.md) for the responsible disclosure process, expected response timelines, and what to include in your report.
+> See [SECURITY.md](https://github.com/szl-holdings/szl-holdings-platform/blob/main/SECURITY.md) for the responsible disclosure process, expected response timelines, and what to include in your report.
 
 ---
 

@@ -200,6 +200,7 @@ for (const f of allFiles) {
 }
 
 if (VERBOSE) {
+  console.error(`[brand-strings] scanned ${allFiles.length} files; raw matches: ${allViolations.length}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -250,9 +251,11 @@ for (const v of allViolations) {
 }
 
 if (VERBOSE) {
+  console.error(`[brand-strings] new violations beyond baseline: ${newViolations.length}`);
 }
 
 if (newViolations.length === 0) {
+  console.log(`✓  Banned brand-string check passed — scanned ${allFiles.length} files, no new violations beyond the audit baseline.`);
   // Warn about stale baseline entries (file/term in baseline but no current matches).
   let stale = 0;
   for (const [file, terms] of Object.entries(baseline)) {
@@ -262,6 +265,7 @@ if (newViolations.length === 0) {
     }
   }
   if (stale > 0) {
+    console.log(`   (note: ${stale} stale baseline entr${stale === 1 ? 'y' : 'ies'} — consider running with --update-baseline to refresh)`);
   }
   process.exit(0);
 }
@@ -273,9 +277,20 @@ for (const v of newViolations) {
   byFile.set(v.file, arr);
 }
 
-for (const [_file, vs] of byFile) {
-  for (const _v of vs) {
+console.error(`\n❌  Banned brand-string check FAILED — ${newViolations.length} NEW violation(s) introduced beyond the audit baseline.\n`);
+
+for (const [file, vs] of byFile) {
+  console.error(`  ${file}`);
+  for (const v of vs) {
+    console.error(`    ${v.line}:${v.col}  "${v.term}" → use "${v.replacement}"  (${v.reason})`);
+    console.error(`      ${v.snippet}`);
   }
 }
+
+console.error(`\nFix by replacing the banned term with its canonical replacement.`);
+console.error(`Legitimate occurrences (e.g. external entity name, citation) can be added to`);
+console.error(`scripts/banned-brand-strings.json under "lineAllowlist" or "fileAllowlist".`);
+console.error(`If a deliberate refactor introduced these and they are intentional, regenerate`);
+console.error(`the baseline with: tsx scripts/check-banned-brand-strings.ts --update-baseline\n`);
 
 process.exit(1);

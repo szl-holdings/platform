@@ -28,15 +28,16 @@ Enable **"Require status checks to pass before merging"** and add the following 
 | `CI Gate` | `.github/workflows/ci.yml` | Aggregate gate — lint, typecheck, test, build, smoke, proof-chain |
 | `Readiness Gate (smoke:product-mode)` | `.github/workflows/ci.yml` | Product-mode smoke test — surfaces readiness directly on PRs |
 | `E2E Gate` | `.github/workflows/e2e.yml` | Aggregate E2E gate |
-| `Lighthouse Gate` | `.github/workflows/lighthouse.yml` | Performance score thresholds |
 | `dependency-review` | `.github/workflows/dependency-review.yml` | Vulnerability scan on dependency changes |
 | `analyze` | `.github/workflows/codeql.yml` | CodeQL security analysis |
 | `Security Gate (blocking)` | `.github/workflows/security.yml` | Aggregate gate — dependency scan, secret scan, lockfile integrity, license report, **and the api-server `security-tests` vitest suite** |
 | `Security Tests (api-server vitest)` | `.github/workflows/security.yml` | Runs `pnpm --filter @workspace/api-server test` on every push/PR — covers `security-middleware.test.ts`, `security-routes.test.ts`, `security-hardening.test.ts` and the rest of the api-server suite |
 
-> **Tip:** `CI Gate` and `E2E Gate` are aggregate jobs — requiring these two (plus `Lighthouse Gate` and `dependency-review`) gives clean PR feedback while covering all required checks underneath.
+> **Tip:** `CI Gate` and `E2E Gate` are aggregate jobs — requiring these two (plus `dependency-review` and `analyze`) gives clean PR feedback while covering all required checks underneath.
 >
 > **Decision — surface `Readiness Gate (smoke:product-mode)` as its own required check:** the readiness smoke job is already aggregated inside `CI Gate` (see `.github/workflows/ci.yml` — the `ci-gate` job lists `readiness-gate` in its `needs`). However, we additionally require it as a named status check so reviewers can see at a glance on the PR whether the product-mode smoke test passed without drilling into the `CI Gate` logs. The job name in branch protection must match the workflow job's `name:` exactly: `Readiness Gate (smoke:product-mode)`.
+>
+> **Note on Lighthouse:** The `lighthouse.yml` workflow job is named `Lighthouse Gate (advisory)` and runs with `continue-on-error: true` — it cannot serve as a blocking required check. Lighthouse scores are tracked as advisory signal only. Do **not** add this check to the required status checks list; it will never block a PR.
 
 ### Lighthouse Score Thresholds
 
@@ -130,12 +131,14 @@ Navigate to **Settings → Code security and analysis** and enable:
 
 ## 6. Dependabot
 
-Dependabot is configured in `.github/dependabot.yml` to:
+Dependabot is configured in `.github/dependabot.yml` to update four package ecosystems weekly (Monday, 09:00 ET):
 
-- Update npm packages weekly (Monday, 09:00 ET)
-- Update GitHub Actions weekly (Monday, 09:00 ET)
-- Group related packages (React, Vite, testing, TypeScript, UI, database, TanStack)
-- Cap at 10 open npm PRs and 5 Actions PRs at a time
+| Ecosystem | Directories | PR Limit | Grouping |
+|-----------|------------|----------|---------|
+| `npm` | Root (all pnpm workspaces) | 10 | React, Vite, testing, TypeScript, UI, database, TanStack |
+| `pip` | `workers/substrate-python`, `services/substrate-py-workers`, `services/lyte-metrics-store`, `scripts/media` | 3 per dir | None |
+| `docker` | `artifacts/api-server`, `artifacts/szl-holdings`, `artifacts/vessels`, `artifacts/terra`, `artifacts/aegis`, `artifacts/carlota-jo` | 3 per dir | None |
+| `github-actions` | Root | 5 | `actions/*`, `github/*`, CI tooling |
 
 To enable **Dependabot auto-merge** for patch-level updates (optional):
 

@@ -7,13 +7,13 @@
 </p>
 
 <p align="center">
-  <a href="https://szlholdings.com">Website</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://github.com/szl-holdings/szl-holdings-platform">Platform Repository</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/investor/platform-thesis.md">Investor Thesis</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://szlholdings.com/stephen/investor">Investor Dashboard</a>
+  <a href="https://szlholdings.com">Website</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://github.com/szl-holdings/szl-holdings-platform">Platform Repository</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://github.com/szl-holdings/szl-holdings-platform/blob/main/docs/investor/platform-thesis.md">Investor Thesis</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="https://szlholdings.com/stephen/investor">Investor Dashboard</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml"><img src="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI" /></a>
-  <a href="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml"><img src="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg?branch=master" alt="CodeQL" /></a>
-  <a href="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml"><img src="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg?branch=master" alt="Security Audit" /></a>
+  <a href="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml"><img src="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" /></a>
+  <a href="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml"><img src="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg?branch=main" alt="CodeQL" /></a>
+  <a href="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml"><img src="https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg?branch=main" alt="Security Audit" /></a>
 </p>
 
 <p align="center">
@@ -30,7 +30,7 @@
 
 SZL Holdings builds the **governed decision infrastructure layer** — the platform that connects what's observable to what's executable, under governance, with full attribution.
 
-**Lyte** is the command surface. **Alloy** is the execution fabric. **CORTEX** is the unified mobile command center. Domain intelligence packs extend the same system into cybersecurity, maritime, real estate, executive briefing, and private advisory.
+**KORA** is the command surface. **FORGE** is the execution fabric. **APEX** is the unified mobile command center. Domain intelligence packs extend the same system into cybersecurity, maritime, real estate, executive briefing, and private advisory.
 
 ---
 
@@ -38,13 +38,13 @@ SZL Holdings builds the **governed decision infrastructure layer** — the platf
 
 | Product | What it does | Live |
 |---------|--------------|------|
-| **[Pulse](https://szlholdings.com/pulse)** | AI executive briefing — daily intelligence digest across every domain, source-cited and decision-ready | [pulse →](https://szlholdings.com/pulse) |
-| **[Terra](https://szlholdings.com/terra)** | Real estate intelligence — distress signals, ownership graph, covenant monitoring, deal pipeline | [terra →](https://szlholdings.com/terra) |
-| **[Vessels](https://szlholdings.com/vessels)** | Maritime fleet command — AIS tracking, sanctions screening, voyage economics | [vessels →](https://szlholdings.com/vessels) |
-| **[Aegis](https://szlholdings.com/aegis)** | Cyber resilience command — SOC + SOAR + threat intel under one governance layer | [aegis →](https://szlholdings.com/aegis) |
+| **[LUMINA](https://szlholdings.com/pulse)** | AI executive briefing — daily intelligence digest across every domain, source-cited and decision-ready | [lumina →](https://szlholdings.com/pulse) |
+| **[DOMAINE](https://szlholdings.com/terra)** | Real estate intelligence — distress signals, ownership graph, covenant monitoring, deal pipeline | [domaine →](https://szlholdings.com/terra) |
+| **[SEXTANT](https://szlholdings.com/vessels)** | Maritime fleet command — AIS tracking, sanctions screening, voyage economics | [sextant →](https://szlholdings.com/vessels) |
+| **[TENAX](https://szlholdings.com/sentra)** | Cyber resilience command — exposure mapping, recovery readiness, incident command | [tenax →](https://szlholdings.com/sentra) |
 | **[Counsel](https://szlholdings.com/counsel)** | Legal matter command — diligence, evidence, and AI-assisted contract risk | [counsel →](https://szlholdings.com/counsel) |
 | **[Carlota Jo](https://szlholdings.com/carlota-jo)** | Premium advisory operations for UHNW clients | [carlota-jo →](https://szlholdings.com/carlota-jo) |
-| **CORTEX** | Unified mobile command — all domain workspaces in one Expo/React Native app | iOS / Android |
+| **APEX** | Unified mobile command — all domain workspaces in one Expo/React Native app | iOS / Android |
 
 ---
 
@@ -52,21 +52,21 @@ SZL Holdings builds the **governed decision infrastructure layer** — the platf
 
 ```
 SZL Holdings Platform
-├── Lyte         Business observability — PRISM framework surfaces risk, drift, and friction before they compound
-├── Alloy        Execution fabric — signal normalization, workflow orchestration, human-in-the-loop gates
+├── KORA         Flagship command surface — PRAXIS framework surfaces risk, drift, and friction before they compound
+├── FORGE        Execution fabric — signal normalization, workflow orchestration, human-in-the-loop gates
 │
-├── Pulse        AI executive briefing — daily cross-domain intelligence digest
-├── Aegis        Security intelligence command (SOC + SOAR + threat intel)
-├── Vessels      Maritime fleet command, AIS tracking, sanctions screening, voyage economics
-├── Terra        Real estate intelligence — distress signals, ownership graph, deal pipeline
+├── LUMINA       AI executive briefing — daily cross-domain intelligence digest
+├── TENAX        Cyber resilience command (exposure mapping, recovery readiness, incident command)
+├── SEXTANT      Maritime fleet command, AIS tracking, sanctions screening, voyage economics
+├── DOMAINE      Real estate intelligence — distress signals, ownership graph, deal pipeline
 ├── Counsel      Legal matter command — diligence and evidence under governance
 ├── Carlota Jo   Premium advisory operations for UHNW clients
 │
-├── CORTEX       Unified mobile command — all domain workspaces in one native app
-└── Command Portal Cross-domain ecosystem hub — real-time SSE, executive briefing, global search
+├── APEX         Unified mobile command — all domain workspaces in one native app
+└── FORGE Command Portal  Cross-domain ecosystem hub — real-time SSE, executive briefing, global search
 ```
 
-**Lyte + Alloy** form the core platform. The active vertical products (Pulse, Aegis, Vessels, Terra, Counsel, Carlota Jo) run on this shared foundation and share intelligence through the PRISM Bus — a cross-domain event system that makes every new vertical make the whole platform smarter.
+**KORA + FORGE** form the core platform. The active vertical products (LUMINA, TENAX, SEXTANT, DOMAINE, Counsel, Carlota Jo) run on this shared foundation and share intelligence through the Event Fabric — a cross-domain signal backbone that makes every new vertical make the whole platform smarter.
 
 ---
 
@@ -86,7 +86,7 @@ Every action, approval, and AI recommendation generates an append-only audit eve
 ### Signal-to-Outcome Traceability
 From the raw signal that triggered an alert, through the routing logic that assigned it, through the human approval that authorized action, to the executed outcome — every step is logged, linked, and replayable. Zero black-box decisions.
 
-### Unified Mobile Command (CORTEX)
+### Unified Mobile Command (APEX)
 All active domain workspaces in a single Expo/React Native app. Biometric auth, cross-domain badge counts, workspace-adaptive AI copilot, and a unified command feed. Operators in the field have full platform coverage from one authenticated session on iOS or Android.
 
 ---
@@ -158,13 +158,13 @@ The canonical platform monorepo. TypeScript throughout. See the repository READM
 | Resource | Link |
 |----------|------|
 | Investor Dashboard | [Live Dashboard](https://szlholdings.com/stephen/investor) |
-| Platform Thesis | [platform-thesis.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/investor/platform-thesis.md) |
-| Product Readiness | [product-readiness.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/investor/product-readiness.md) |
-| Go-to-Market | [go-to-market.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/investor/go-to-market.md) |
-| Architecture | [architecture.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/architecture/architecture.md) |
-| Trust & Security | [trust-center.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/docs/trust/trust-center.md) |
-| Security Policy | [SECURITY.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/SECURITY.md) |
-| Code of Conduct | [CODE_OF_CONDUCT.md](https://github.com/szl-holdings/szl-holdings-platform/blob/master/CODE_OF_CONDUCT.md) |
+| Platform Thesis | [platform-thesis.md](https://github.com/szl-holdings/szl-holdings-platform/blob/main/docs/investor/platform-thesis.md) |
+| Product Readiness | [product-readiness.md](https://github.com/szl-holdings/szl-holdings-platform/blob/main/docs/investor/product-readiness.md) |
+| Go-to-Market | [go-to-market.md](https://github.com/szl-holdings/szl-holdings-platform/blob/main/docs/investor/go-to-market.md) |
+| Architecture | [architecture.md](https://github.com/szl-holdings/szl-holdings-platform/blob/main/docs/architecture/architecture.md) |
+| Trust & Security | [trust-center.md](https://github.com/szl-holdings/szl-holdings-platform/blob/main/docs/trust/trust-center.md) |
+| Security Policy | [SECURITY.md](https://github.com/szl-holdings/szl-holdings-platform/blob/main/SECURITY.md) |
+| Code of Conduct | [CODE_OF_CONDUCT.md](https://github.com/szl-holdings/szl-holdings-platform/blob/main/CODE_OF_CONDUCT.md) |
 
 ---
 

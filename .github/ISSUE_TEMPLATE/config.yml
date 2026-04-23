@@ -10,5 +10,5 @@ contact_links:
     url: https://github.com/szl-holdings/szl-holdings-platform/wiki
     about: "Architecture, trust, buyer use cases, investor overview, FAQ, and glossary."
   - name: In-Repo Documentation
-    url: https://github.com/szl-holdings/szl-holdings-platform/tree/master/docs
+    url: https://github.com/szl-holdings/szl-holdings-platform/tree/main/docs
     about: "Full documentation for architecture, trust, investor materials, and deployment."

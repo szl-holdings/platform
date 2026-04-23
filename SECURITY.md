@@ -1,6 +1,6 @@
 # Security Policy
 
-→ [Platform Repo](https://github.com/szl-holdings/szl-holdings-platform) | [Architecture](./docs/architecture/system-overview.md) | [Trust Center](./docs/trust/trust-center.md) | [Contact](https://szlholdings.com)
+→ [Platform Repo](https://github.com/szl-holdings/szl-holdings-platform) | [Architecture](./docs/architecture/architecture.md) | [Trust Center](./docs/trust/trust-center.md) | [Contact](https://szlholdings.com)
 
 ## Supported Versions
 
@@ -8,7 +8,7 @@ The SZL Holdings platform is currently in active pre-commercial development. Sec
 
 | Version | Supported |
 |---------|-----------|
-| Latest (main/master) | ✅ Active |
+| Latest (`main`) | ✅ Active |
 | Previous releases | Reviewed case by case |
 
 ---
@@ -22,7 +22,7 @@ The SZL Holdings platform is currently in active pre-commercial development. Sec
 1. **Email:** Send a detailed report to [security@szlholdings.com](mailto:security@szlholdings.com)
 2. **Subject line:** `[SECURITY] Brief description of the vulnerability`
 3. **Include in your report:**
-   - Platform / component affected (Lyte, Aegis, Vessels, Terra, API server, etc.)
+   - Platform / component affected (KORA, FORGE, TENAX, Counsel, SEXTANT, DOMAINE, LUMINA, Carlota Jo, API server, etc.)
    - Description of the vulnerability and potential impact
    - Steps to reproduce
    - Any proof-of-concept code (please do not exploit further than necessary to demonstrate)
@@ -52,8 +52,8 @@ The SZL Holdings platform is currently in active pre-commercial development. Sec
 
 ### In Scope
 
-- All active platform web applications (Lyte, Aegis, Terra, Vessels, Carlota Jo, Command Portal, SZL Holdings)
-- CORTEX unified mobile application (iOS/Android) (Expo / React Native)
+- All active platform web applications (SZL Holdings Dashboard, FORGE Command Portal, TENAX, Counsel, DOMAINE, SEXTANT, Carlota Jo, LUMINA, PARAGON/Aegis)
+- APEX unified mobile command application (iOS/Android) (Expo / React Native)
 - The centralized API server
 - Authentication and session management (OIDC/PKCE, RBAC, SCIM 2.0)
 - WebSocket and SSE connection security
