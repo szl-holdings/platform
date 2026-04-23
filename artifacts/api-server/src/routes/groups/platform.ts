@@ -24,6 +24,16 @@ export function register(router: IRouter): void {
   router.use('/worldline', tenantScope({ required: true }));
   router.use('/dataverse', tenantScope({ required: true }));
 
+  // required: false — pre-membership bootstrap flows that must be reachable before
+  // an org context exists.  Each prefix has a specific reason:
+  //   /orgs       — org look-up for invitation acceptance and org discovery; the
+  //                 user may not yet be a member of any org.
+  //   /user       — password-reset and email-verification are public/pre-auth flows
+  //                 that arrive via a signed token, not a session.
+  //   /onboarding — the onboarding wizard runs before the user has completed org
+  //                 creation, so no orgSlug is available yet.
+  // Handler-level auth guards (authMiddleware + membership checks) are applied
+  // inside each mounted router to prevent unauthenticated data access.
   router.use('/orgs', tenantScope({ required: false }));
   router.use('/user', tenantScope({ required: false }));
   router.use('/onboarding', tenantScope({ required: false }));

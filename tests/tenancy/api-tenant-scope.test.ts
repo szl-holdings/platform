@@ -387,6 +387,108 @@ describe('HTTP tenancy — elevated admin bypass matrix', () => {
   }
 });
 
+// ── AI background-job and stream routes (required: true) ─────────────────────
+
+describe('HTTP tenancy — AI /jobs route enforces required tenant scope', () => {
+  it('no-org user is blocked from /jobs → 403', async () => {
+    const app = buildDomainApp('jobs', noOrgUser);
+    const res = await request(app).get('/jobs/status');
+    expect(res.status).toBe(403);
+  });
+
+  it('org member can access /jobs → 200', async () => {
+    const app = buildDomainApp('jobs', orgA);
+    const res = await request(app).get('/jobs/status');
+    expect(res.status).toBe(200);
+  });
+
+  it('cross-tenant forged orgSlug is blocked on /jobs → 403', async () => {
+    const app = buildOrgSlugApp('jobs', orgA);
+    const res = await request(app).get('/jobs/org-b/tasks');
+    expect(res.status).toBe(403);
+  });
+});
+
+describe('HTTP tenancy — AI /stream route enforces required tenant scope', () => {
+  it('no-org user is blocked from /stream → 403', async () => {
+    const app = buildDomainApp('stream', noOrgUser);
+    const res = await request(app).get('/stream/events');
+    expect(res.status).toBe(403);
+  });
+
+  it('org member can access /stream → 200', async () => {
+    const app = buildDomainApp('stream', orgA);
+    const res = await request(app).get('/stream/events');
+    expect(res.status).toBe(200);
+  });
+});
+
+// ── Optional-scope exemptions — documented bootstrap and callback routes ───────
+
+/**
+ * Builds an app that uses tenantScope({ required: false }).
+ * Verifies that routes intentionally exempt from hard enforcement still pass
+ * through (200) when no org context is present, while still hydrating context
+ * when a valid org membership is available.
+ */
+function buildOptionalScopeApp(prefix: string, userFactory: () => TestUser) {
+  const app = express();
+  app.use(express.json());
+
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    (req as Record<string, unknown>).user = userFactory();
+    (req as Record<string, unknown>).isInternalAgent = false;
+    next();
+  });
+
+  const router = express.Router({ mergeParams: true });
+  router.use(tenantScope({ required: false }) as express.RequestHandler);
+  router.use((_req: Request, res: Response) => res.status(200).json({ ok: true }));
+
+  app.use(`/${prefix}`, router as express.RequestHandler);
+  return app;
+}
+
+describe('HTTP tenancy — /connectors optional scope (data-services)', () => {
+  it('no-org user is NOT blocked — required:false allows pre-auth connector callbacks → 200', async () => {
+    const app = buildOptionalScopeApp('connectors', noOrgUser);
+    const res = await request(app).get('/connectors/oauth/callback');
+    expect(res.status).toBe(200);
+  });
+
+  it('org member still passes through /connectors → 200', async () => {
+    const app = buildOptionalScopeApp('connectors', orgA);
+    const res = await request(app).get('/connectors/list');
+    expect(res.status).toBe(200);
+  });
+});
+
+describe('HTTP tenancy — platform bootstrap routes optional scope', () => {
+  it('/orgs: no-org user passes through for invitation/discovery flows → 200', async () => {
+    const app = buildOptionalScopeApp('orgs', noOrgUser);
+    const res = await request(app).get('/orgs/invite/accept');
+    expect(res.status).toBe(200);
+  });
+
+  it('/user: no-org user passes through for password-reset/pre-auth flows → 200', async () => {
+    const app = buildOptionalScopeApp('user', noOrgUser);
+    const res = await request(app).get('/user/reset-password');
+    expect(res.status).toBe(200);
+  });
+
+  it('/onboarding: no-org user passes through before org creation → 200', async () => {
+    const app = buildOptionalScopeApp('onboarding', noOrgUser);
+    const res = await request(app).get('/onboarding/step/1');
+    expect(res.status).toBe(200);
+  });
+
+  it('/orgs: authenticated org member also passes through → 200', async () => {
+    const app = buildOptionalScopeApp('orgs', orgA);
+    const res = await request(app).get('/orgs/list');
+    expect(res.status).toBe(200);
+  });
+});
+
 // ── Internal agent token bypass ───────────────────────────────────────────────
 
 describe('HTTP tenancy — internal agent has no orgs but should bypass', () => {

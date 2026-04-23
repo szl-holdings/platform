@@ -84,6 +84,11 @@ export function register(router: IRouter): void {
   );
 
   // Data fabric — typed external-data connectors with drift detection.
+  // required: false — tenant context is hydrated when present but not enforced at
+  // the middleware level, because external connector callbacks (e.g. OAuth redirects
+  // and webhook deliveries) arrive without an active org session.  All CRUD paths
+  // inside the handler module enforce record-level ownership (orgId checks) directly,
+  // so unauthenticated callers cannot read or mutate another tenant's connector state.
   router.use('/connectors', tenantScope({ required: false }));
   router.use('/connectors', _writeLimiter);
   router.use(lazyMatch('/connectors', () => import('../connectors'), 'connectors'));
