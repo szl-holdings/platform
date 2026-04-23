@@ -11,31 +11,38 @@ import { tenantScope } from '../../middlewares/tenant-scope';
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
 
+const AI_ROUTE_PREFIXES = [
+  '/ai',
+  '/copilot',
+  '/mcp',
+  '/nuro-mesh',
+  '/control-tower',
+  '/domain-agents',
+  '/agent-os',
+  '/agent-training',
+  '/agent-autonomy',
+  '/federation',
+  '/fine-tuning',
+  '/ml',
+  '/ontology',
+  '/digital-twins',
+  '/fusion',
+  '/knowledge',
+  '/ai-safety',
+  '/forge',
+  '/rag',
+  '/stream',
+  '/connector-hub',
+  '/a2a',
+  '/jobs',
+  '/atlas/spatial',
+] as const;
+
 export function register(router: IRouter): void {
-  router.use('/ai', tenantScope({ required: true }));
-  router.use('/copilot', tenantScope({ required: true }));
-  router.use('/mcp', tenantScope({ required: true }));
-  router.use('/nuro-mesh', tenantScope({ required: true }));
-  router.use('/control-tower', tenantScope({ required: true }));
-  router.use('/domain-agents', tenantScope({ required: true }));
-  router.use('/agent-os', tenantScope({ required: true }));
-  router.use('/agent-training', tenantScope({ required: true }));
-  router.use('/agent-autonomy', tenantScope({ required: true }));
-  router.use('/federation', tenantScope({ required: true }));
-  router.use('/fine-tuning', tenantScope({ required: true }));
-  router.use('/ml', tenantScope({ required: true }));
-  router.use('/ontology', tenantScope({ required: true }));
-  router.use('/digital-twins', tenantScope({ required: true }));
-  router.use('/fusion', tenantScope({ required: true }));
-  router.use('/knowledge', tenantScope({ required: true }));
-  router.use('/ai-safety', tenantScope({ required: true }));
-  router.use('/forge', tenantScope({ required: true }));
-  router.use('/rag', tenantScope({ required: true }));
-  router.use('/stream', tenantScope({ required: true }));
-  router.use('/connector-hub', tenantScope({ required: true }));
-  router.use('/a2a', tenantScope({ required: true }));
-  router.use('/jobs', tenantScope({ required: true }));
-  router.use('/atlas/spatial', tenantScope({ required: true }));
+  const scope = tenantScope({ required: true });
+  for (const prefix of AI_ROUTE_PREFIXES) {
+    router.use(prefix, scope);
+  }
 
   router.use('/ai', _readLimiter);
   router.use('/ai/tools/execute', idempotencyMiddleware);
