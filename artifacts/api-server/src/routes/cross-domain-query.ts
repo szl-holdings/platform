@@ -11,6 +11,7 @@
  */
 
 import { openai } from '@szl-holdings/ai-engine/providers/openai';
+import { buildEnvelope, storeProvenance } from '@szl-holdings/ai-engine/provenance';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   db,
@@ -1159,14 +1160,21 @@ router.post(
       logger.info({ cacheSize: fusionCache.size }, '[CrossDomainQuery] Cached LLM response');
     }
 
-    const provenance = fusedAnswerSource === 'llm' ? {
-      runId: `cdq_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
-      source: 'llm',
-      model: 'gpt-4o-mini',
-      provider: 'openai',
-      confidence,
-      generatedAt: new Date().toISOString(),
-    } : null;
+    const provenance = fusedAnswerSource === 'llm' ? (() => {
+      const envelope = buildEnvelope({
+        agentId: 'cross-domain-resolver',
+        domain: 'orchestration',
+        model: 'gpt-4o-mini',
+        provider: 'openai',
+        prompt: trimmed,
+        totalTokens: Math.round((response.answer?.length ?? 0) / 4),
+        confidence,
+        latencyMs: 0,
+        governanceVerdict: 'allowed',
+      });
+      storeProvenance({ runId: envelope.runId, envelope, parentRunIds: [], consultations: [] });
+      return envelope;
+    })() : null;
 
     res.json({ success: true, result: response, fusedAnswerSource, provenance });
   },

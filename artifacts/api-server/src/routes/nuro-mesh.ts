@@ -1,7 +1,7 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { ai as geminiAi } from '@szl-holdings/ai-engine/providers/gemini';
 import { openai } from '@szl-holdings/ai-engine/providers/openai';
-import { callAgentWithProvenance } from '@szl-holdings/ai-engine/provenance';
+import { buildEnvelope, storeProvenance } from '@szl-holdings/ai-engine/provenance';
 import {
   advisoryFindings,
   agentMemoryFacts,
@@ -557,6 +557,12 @@ async function callAgent(
   response: string;
   confidence: number;
   domain: string;
+  model: string;
+  provider: string;
+  totalTokens: number;
+  latencyMs: number;
+  governanceVerdict: 'allowed' | 'blocked';
+  prompt: string;
 }> {
   const startTime = Date.now();
 
@@ -576,6 +582,12 @@ async function callAgent(
         response: `[Blocked by governance policy: ${enforcement.reason ?? 'Policy enforcement active'}]`,
         confidence: 0,
         domain: agent.domain,
+        model: agent.preferredModel,
+        provider: agent.preferredProvider,
+        totalTokens: 0,
+        latencyMs: Date.now() - startTime,
+        governanceVerdict: 'blocked' as const,
+        prompt: '',
       };
     }
   }
@@ -667,6 +679,12 @@ async function callAgent(
     response: cleanResponse,
     confidence,
     domain: agent.domain,
+    model: agent.preferredModel,
+    provider: agent.preferredProvider,
+    totalTokens: tokensUsed,
+    latencyMs,
+    governanceVerdict: 'allowed' as const,
+    prompt: fullPrompt,
   };
 }
 
@@ -813,7 +831,8 @@ nueroMeshRouter.post(
       );
 
       for (const response of agentResponses) {
-        res.write(`data: ${JSON.stringify({ type: 'agent_response', ...response })}\n\n`);
+        const { prompt: _p, ...safeResponse } = response;
+        res.write(`data: ${JSON.stringify({ type: 'agent_response', ...safeResponse })}\n\n`);
       }
 
       const isHighStakes =
@@ -935,22 +954,44 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       const avgConf = Math.round(
         agentResponses.reduce((sum, r) => sum + r.confidence, 0) / agentResponses.length,
       );
-      const provenance = {
-        runId: `orch_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
-        agents: agentResponses.map((r) => ({
+
+      const agentEnvelopes = agentResponses.map((r) =>
+        buildEnvelope({
           agentId: r.agentId,
-          agentName: r.agentName,
           domain: r.domain,
+          model: r.model,
+          provider: r.provider,
+          prompt: r.prompt,
+          totalTokens: r.totalTokens,
           confidence: r.confidence,
-        })),
-        synthesizer: 'alloy',
+          latencyMs: r.latencyMs,
+          governanceVerdict: r.governanceVerdict,
+        }),
+      );
+
+      const synthEnvelope = buildEnvelope({
+        agentId: 'alloy',
+        domain: 'orchestration',
         model: alloyAgent.preferredModel,
         provider: 'openai',
-        averageConfidence: avgConf,
-        isHighStakes,
-        validated: validationResult?.validated ?? null,
-        generatedAt: new Date().toISOString(),
+        prompt: aggregationPrompt,
+        totalTokens: Math.round(synthesisContent.length / 4),
+        confidence: avgConf,
+        latencyMs: Date.now() - Date.now(),
+        governanceVerdict: 'allowed',
+      });
+
+      for (const env of [...agentEnvelopes, synthEnvelope]) {
+        storeProvenance({ runId: env.runId, envelope: env, parentRunIds: [], consultations: [] });
+      }
+
+      const orchestrationLineage = {
+        runId: synthEnvelope.runId,
+        envelope: synthEnvelope,
+        parentRunIds: agentEnvelopes.map((e) => e.runId),
+        consultations: agentEnvelopes,
       };
+      storeProvenance(orchestrationLineage);
 
       res.write(
         `data: ${JSON.stringify({
@@ -959,7 +1000,12 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
           averageConfidence: avgConf,
           isHighStakes,
           validated: validationResult?.validated ?? null,
-          provenance,
+          provenance: {
+            orchestrationRunId: synthEnvelope.runId,
+            agentRunIds: agentEnvelopes.map((e) => e.runId),
+            synthesizer: synthEnvelope,
+            agents: agentEnvelopes,
+          },
         })}\n\n`,
       );
 
