@@ -59,7 +59,15 @@ export const envSchema = z.object({
   // ── Database ────────────────────────────────────────────────────────────
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required").optional(),
   DB_POOL_MIN: optionalInt("1"),
-  DB_POOL_MAX: optionalInt("100"),
+  // DB_POOL_MAX default reduced from 100 → 12 (Phase 4 hardening, 2026-04-23).
+  // Rationale: Replit's shared Postgres has a finite per-instance connection
+  // budget (typically ~25–30). With the previous default of 100, two concurrent
+  // boots during a post-merge storm (api-server + drizzle-kit + worker fan-out)
+  // exhausted the budget and produced "sorry, too many clients already"
+  // crashes. 12 leaves headroom for the dedicated healthPool (max 2) plus
+  // peer services and migrations. Production deployments with a dedicated
+  // Postgres should override via the environment variable.
+  DB_POOL_MAX: optionalInt("12"),
   DB_CONNECT_TIMEOUT_MS: optionalInt("90000"),
   DB_IDLE_TIMEOUT_MS: optionalInt("60000"),
   DB_STATEMENT_TIMEOUT_MS: optionalInt("60000"),
