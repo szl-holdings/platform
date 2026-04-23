@@ -62,6 +62,10 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/openapi.json",
   "/api/version",
   "/api/ready",
+  // Carlota Jo invoice email — public, unauthenticated (same model as
+  // /api/booking/time-entries and /api/booking/services). The route handler
+  // applies its own validation (400 for missing fields) and rate limiting.
+  "/api/booking/invoices/email",
   "/api/stream/webhook-siem",
   "/api/stream/ais-nmea",
   "/api/stream/siem-events",

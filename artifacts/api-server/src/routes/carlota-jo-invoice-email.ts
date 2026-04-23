@@ -29,7 +29,7 @@ const invoiceEmailLimit = rateLimit({
 router.post(
   '/booking/invoices/email',
   invoiceEmailLimit,
-  authMiddleware(),
+  authMiddleware({ required: false }),
   validateBody(
     bodyShape({
       amount: z.unknown().optional(),
