@@ -81,7 +81,7 @@ router.post(
         title: incident.title,
       });
       void pubsub.publish(FIRESTORM_EVENTS.INCIDENT_UPDATED, {
-        firestormIncidentUpdated: incident,
+        aegisIncidentUpdated: incident,
       });
       sendCreated(res, incident);
     } catch (err) {
@@ -173,7 +173,7 @@ router.put(
         title: incident.title,
       });
       void pubsub.publish(FIRESTORM_EVENTS.INCIDENT_UPDATED, {
-        firestormIncidentUpdated: incident,
+        aegisIncidentUpdated: incident,
       });
       sendSuccess(res, incident);
     } catch (err) {

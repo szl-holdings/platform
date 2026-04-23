@@ -306,7 +306,7 @@ export async function registerDefaultSchedules(): Promise<void> {
     },
     {
       agentId: 'firestorm-autonomous',
-      name: 'Firestorm Threat Scanner',
+      name: 'Aegis Threat Scanner',
       domain: 'firestorm' as const,
       intervalMs: 30 * 60 * 1000,
       enabled: true,

@@ -2,7 +2,7 @@ import type { DomainConfig } from '../types.js';
 
 export const firestormConfig: DomainConfig = {
   appSlug: 'firestorm',
-  appName: 'Firestorm Security Simulation',
+  appName: 'Aegis Cyber Resilience Command',
   domain: 'cybersecurity',
   description: 'Threat detection, incident response, and security posture observability',
   connectors: ['ai', 'slack'],

@@ -8,7 +8,7 @@ export const PLATFORM_APPS = [
   { slug: 'alloy', name: 'FORGE — Execution Fabric', icon: 'Workflow', color: '#6366f1' },
   { slug: 'lyte', name: 'KORA Command Center', icon: 'ShoppingBag', color: '#a855f7' },
   { slug: 'vessels', name: 'SEXTANT Maritime Intelligence', icon: 'Ship', color: '#06b6d4' },
-  { slug: 'firestorm', name: 'Firestorm Security Simulation', icon: 'Flame', color: '#f97316' },
+  { slug: 'firestorm', name: 'Aegis Cyber Resilience Command', icon: 'Flame', color: '#f97316' },
   { slug: 'inca', name: 'INCA AI Research', icon: 'Brain', color: '#14b8a6' },
   { slug: 'beacon', name: 'DOMAINE', icon: 'BarChart3', color: '#0ea5e9' },
   { slug: 'rosie', name: 'PARAGON Operations', icon: 'AlertTriangle', color: '#ef4444' },

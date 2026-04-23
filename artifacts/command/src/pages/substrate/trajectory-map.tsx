@@ -21,7 +21,7 @@ const ACCENT = '#22d3ee';
 const SUB = '/substrate';
 
 const VERTICAL_LABELS: Record<Vertical, string> = {
-  firestorm: 'Firestorm',
+  firestorm: 'Aegis',
   vessels: 'SEXTANT',
   terra: 'DOMAINE',
   lyte: 'KORA',

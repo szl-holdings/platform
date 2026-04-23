@@ -119,10 +119,10 @@ export async function seedDreamscapeData(): Promise<void> {
         },
       },
       {
-        name: 'Firestorm Cyber Defense Series',
+        name: 'Aegis Cyber Defense Series',
         description:
           'High-tension social media series demonstrating live-fire cybersecurity simulations — targeting CISO decision makers across LinkedIn and YouTube.',
-        clientName: 'Firestorm Security',
+        clientName: 'Aegis Security',
         status: 'concept',
         category: 'social_media',
         targetAudience: 'CISOs, Security Directors, DoD procurement officers',
@@ -131,7 +131,7 @@ export async function seedDreamscapeData(): Promise<void> {
           progress: 15,
           budget: '$95,000',
           director: 'James Park',
-          client: 'Firestorm Security',
+          client: 'Aegis Security',
           kpis: [
             { label: 'Impressions', value: '500K', trend: '+0%' },
             { label: 'Leads', value: '85', trend: '+0%' },

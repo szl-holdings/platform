@@ -169,7 +169,7 @@ export const firestormCrudLimit = rateLimit({
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Firestorm rate limit exceeded.' },
+  message: { error: 'Aegis rate limit exceeded.' },
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
@@ -185,7 +185,7 @@ export const firestormLiveLimit = rateLimit({
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Firestorm rate limit exceeded.' },
+  message: { error: 'Aegis rate limit exceeded.' },
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
@@ -210,7 +210,7 @@ export async function fetchFsText(url: string, timeoutMs = 10000): Promise<strin
   try {
     const res = await fetch(url, {
       signal: controller.signal,
-      headers: { 'User-Agent': 'SZL-Firestorm/1.0', Accept: 'text/plain,application/json,*/*' },
+      headers: { 'User-Agent': 'SZL-Aegis/1.0', Accept: 'text/plain,application/json,*/*' },
     });
     clearTimeout(timer);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -225,7 +225,7 @@ export async function fetchFsJson(url: string, timeoutMs = 10000): Promise<unkno
   try {
     const res = await fetch(url, {
       signal: controller.signal,
-      headers: { 'User-Agent': 'SZL-Firestorm/1.0', Accept: 'application/json' },
+      headers: { 'User-Agent': 'SZL-Aegis/1.0', Accept: 'application/json' },
     });
     clearTimeout(timer);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

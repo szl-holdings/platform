@@ -165,7 +165,7 @@ const SEVERITY_COLORS_MITRE: Record<string, string> = {
 
 const GQL_RELATED_INCIDENTS = `
   query RelatedIncidents($limit: Int) {
-    firestormIncidents(limit: $limit) {
+    aegisIncidents(limit: $limit) {
       id
       title
       severity
@@ -177,11 +177,11 @@ const GQL_RELATED_INCIDENTS = `
 
 async function fetchRelatedIncidents(techniqueId: string): Promise<RelatedIncident[]> {
   try {
-    const data = await graphqlRequest<{ firestormIncidents: RelatedIncident[] }>(
+    const data = await graphqlRequest<{ aegisIncidents: RelatedIncident[] }>(
       GQL_RELATED_INCIDENTS,
       { limit: 50 },
     );
-    return (data.firestormIncidents ?? []).filter((inc) => {
+    return (data.aegisIncidents ?? []).filter((inc) => {
       const titleLower = (inc.title ?? '').toLowerCase();
       const techLower = techniqueId.toLowerCase();
       const techName = (TECH_NAMES[techniqueId] ?? '').toLowerCase();

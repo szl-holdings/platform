@@ -104,7 +104,7 @@ const PIPELINES: PipelineConfig[] = [
   },
   {
     id: 'firestorm-threat-assessment',
-    name: 'Firestorm Threat Assessment Pipeline',
+    name: 'Aegis Threat Assessment Pipeline',
     description:
       'Multi-step pipeline for threat analysis: ingest indicators, classify threat type, score severity, recommend response',
     domain: 'firestorm',

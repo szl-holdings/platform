@@ -1,8 +1,8 @@
 import { gql, useQuery, useMutation, useSubscription } from "@apollo/client";
 
-export const GET_FIRESTORM_INCIDENTS = gql`
-  query GetFirestormIncidents($status: String, $severity: String, $limit: Int, $offset: Int) {
-    firestormIncidents(status: $status, severity: $severity, limit: $limit, offset: $offset) {
+export const GET_AEGIS_INCIDENTS = gql`
+  query GetAegisIncidents($status: String, $severity: String, $limit: Int, $offset: Int) {
+    aegisIncidents(status: $status, severity: $severity, limit: $limit, offset: $offset) {
       id
       title
       severity
@@ -13,9 +13,9 @@ export const GET_FIRESTORM_INCIDENTS = gql`
   }
 `;
 
-export const GET_FIRESTORM_ASSESSMENTS = gql`
-  query GetFirestormAssessments($limit: Int, $offset: Int) {
-    firestormAssessments(limit: $limit, offset: $offset) {
+export const GET_AEGIS_ASSESSMENTS = gql`
+  query GetAegisAssessments($limit: Int, $offset: Int) {
+    aegisAssessments(limit: $limit, offset: $offset) {
       id
       name
       assessmentType
@@ -26,9 +26,9 @@ export const GET_FIRESTORM_ASSESSMENTS = gql`
   }
 `;
 
-export const GET_FIRESTORM_FINDINGS = gql`
-  query GetFirestormFindings($assessmentId: ID, $severity: String, $limit: Int, $offset: Int) {
-    firestormFindings(assessmentId: $assessmentId, severity: $severity, limit: $limit, offset: $offset) {
+export const GET_AEGIS_FINDINGS = gql`
+  query GetAegisFindings($assessmentId: ID, $severity: String, $limit: Int, $offset: Int) {
+    aegisFindings(assessmentId: $assessmentId, severity: $severity, limit: $limit, offset: $offset) {
       id
       assessmentId
       severity
@@ -40,9 +40,9 @@ export const GET_FIRESTORM_FINDINGS = gql`
   }
 `;
 
-export const GET_FIRESTORM_ASSETS = gql`
-  query GetFirestormAssets($limit: Int, $offset: Int) {
-    firestormAssets(limit: $limit, offset: $offset) {
+export const GET_AEGIS_ASSETS = gql`
+  query GetAegisAssets($limit: Int, $offset: Int) {
+    aegisAssets(limit: $limit, offset: $offset) {
       id
       name
       assetType
@@ -53,9 +53,9 @@ export const GET_FIRESTORM_ASSETS = gql`
   }
 `;
 
-export const UPDATE_FIRESTORM_INCIDENT = gql`
-  mutation UpdateFirestormIncident($id: ID!, $status: String!) {
-    updateFirestormIncident(id: $id, status: $status) {
+export const UPDATE_AEGIS_INCIDENT = gql`
+  mutation UpdateAegisIncident($id: ID!, $status: String!) {
+    updateAegisIncident(id: $id, status: $status) {
       id
       title
       severity
@@ -66,9 +66,9 @@ export const UPDATE_FIRESTORM_INCIDENT = gql`
   }
 `;
 
-export const FIRESTORM_INCIDENT_UPDATED = gql`
-  subscription FirestormIncidentUpdated {
-    firestormIncidentUpdated {
+export const AEGIS_INCIDENT_UPDATED = gql`
+  subscription AegisIncidentUpdated {
+    aegisIncidentUpdated {
       id
       title
       severity
@@ -79,26 +79,39 @@ export const FIRESTORM_INCIDENT_UPDATED = gql`
   }
 `;
 
-export function useFirestormIncidents(variables?: { status?: string; severity?: string; limit?: number; offset?: number }) {
-  return useQuery(GET_FIRESTORM_INCIDENTS, variables !== undefined ? { variables } : {});
+export function useAegisIncidents(variables?: { status?: string; severity?: string; limit?: number; offset?: number }) {
+  return useQuery(GET_AEGIS_INCIDENTS, variables !== undefined ? { variables } : {});
 }
 
-export function useFirestormAssessments(variables?: { limit?: number; offset?: number }) {
-  return useQuery(GET_FIRESTORM_ASSESSMENTS, variables !== undefined ? { variables } : {});
+export function useAegisAssessments(variables?: { limit?: number; offset?: number }) {
+  return useQuery(GET_AEGIS_ASSESSMENTS, variables !== undefined ? { variables } : {});
 }
 
-export function useFirestormFindings(variables?: { assessmentId?: string; severity?: string; limit?: number; offset?: number }) {
-  return useQuery(GET_FIRESTORM_FINDINGS, variables !== undefined ? { variables } : {});
+export function useAegisFindings(variables?: { assessmentId?: string; severity?: string; limit?: number; offset?: number }) {
+  return useQuery(GET_AEGIS_FINDINGS, variables !== undefined ? { variables } : {});
 }
 
-export function useFirestormAssets(variables?: { limit?: number; offset?: number }) {
-  return useQuery(GET_FIRESTORM_ASSETS, variables !== undefined ? { variables } : {});
+export function useAegisAssets(variables?: { limit?: number; offset?: number }) {
+  return useQuery(GET_AEGIS_ASSETS, variables !== undefined ? { variables } : {});
 }
 
-export function useUpdateFirestormIncident() {
-  return useMutation(UPDATE_FIRESTORM_INCIDENT);
+export function useUpdateAegisIncident() {
+  return useMutation(UPDATE_AEGIS_INCIDENT);
 }
 
-export function useFirestormIncidentUpdated() {
-  return useSubscription(FIRESTORM_INCIDENT_UPDATED);
+export function useAegisIncidentUpdated() {
+  return useSubscription(AEGIS_INCIDENT_UPDATED);
 }
+
+/** @deprecated Use useAegisIncidents */
+export const useFirestormIncidents = useAegisIncidents;
+/** @deprecated Use useAegisAssessments */
+export const useFirestormAssessments = useAegisAssessments;
+/** @deprecated Use useAegisFindings */
+export const useFirestormFindings = useAegisFindings;
+/** @deprecated Use useAegisAssets */
+export const useFirestormAssets = useAegisAssets;
+/** @deprecated Use useUpdateAegisIncident */
+export const useUpdateFirestormIncident = useUpdateAegisIncident;
+/** @deprecated Use useAegisIncidentUpdated */
+export const useFirestormIncidentUpdated = useAegisIncidentUpdated;

@@ -65,7 +65,7 @@ router.get('/firestorm/live/threat-summary', authMiddleware(), async (_req, res)
     const totalAlerts = alertStats[0]?.count ?? 0;
 
     sendSuccess(res, {
-      source: 'Firestorm Threat Intelligence',
+      source: 'Aegis Threat Intelligence',
       status: 'active',
       activeThreats: totalIncidents,
       totalAlerts,
@@ -92,7 +92,7 @@ router.get('/firestorm/live/threat-summary', authMiddleware(), async (_req, res)
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) {
-    handleRouteError(res, err, 'Failed to fetch Firestorm threat summary');
+    handleRouteError(res, err, 'Failed to fetch Aegis threat summary');
   }
 });
 

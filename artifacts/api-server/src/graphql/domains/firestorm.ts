@@ -12,18 +12,18 @@ import { FIRESTORM_EVENTS, pubsub } from '../../lib/pubsub-bridge.js';
 import { publish, WS_CHANNELS } from '../../lib/websocket.js';
 import type { GraphQLContext } from '../index.js';
 
-export const firestormTypeDefs = `#graphql
-  type FirestormAssessment {
+export const aegisTypeDefs = `#graphql
+  type AegisAssessment {
     id: ID!
     name: String!
     assessmentType: String
     status: String
     overallRiskScore: Float
     createdAt: String
-    findings: [FirestormFinding!]!
+    findings: [AegisFinding!]!
   }
 
-  type FirestormFinding {
+  type AegisFinding {
     id: ID!
     assessmentId: ID
     severity: String
@@ -33,7 +33,7 @@ export const firestormTypeDefs = `#graphql
     createdAt: String
   }
 
-  type FirestormIncident {
+  type AegisIncident {
     id: ID!
     title: String!
     severity: String
@@ -42,7 +42,7 @@ export const firestormTypeDefs = `#graphql
     createdAt: String
   }
 
-  type FirestormAsset {
+  type AegisAsset {
     id: ID!
     name: String!
     assetType: String
@@ -52,22 +52,25 @@ export const firestormTypeDefs = `#graphql
   }
 
   extend type Query {
-    firestormAssessments(limit: Int, offset: Int): [FirestormAssessment!]!
-    firestormAssessment(id: ID!): FirestormAssessment
-    firestormFindings(assessmentId: ID, severity: String, limit: Int, offset: Int): [FirestormFinding!]!
-    firestormIncidents(status: String, severity: String, limit: Int, offset: Int): [FirestormIncident!]!
-    firestormIncident(id: ID!): FirestormIncident
-    firestormAssets(limit: Int, offset: Int): [FirestormAsset!]!
+    aegisAssessments(limit: Int, offset: Int): [AegisAssessment!]!
+    aegisAssessment(id: ID!): AegisAssessment
+    aegisFindings(assessmentId: ID, severity: String, limit: Int, offset: Int): [AegisFinding!]!
+    aegisIncidents(status: String, severity: String, limit: Int, offset: Int): [AegisIncident!]!
+    aegisIncident(id: ID!): AegisIncident
+    aegisAssets(limit: Int, offset: Int): [AegisAsset!]!
   }
 
   extend type Mutation {
-    updateFirestormIncident(id: ID!, status: String!): FirestormIncident!
+    updateAegisIncident(id: ID!, status: String!): AegisIncident!
   }
 
   extend type Subscription {
-    firestormIncidentUpdated: FirestormIncident!
+    aegisIncidentUpdated: AegisIncident!
   }
 `;
+
+/** @deprecated Use aegisTypeDefs */
+export const firestormTypeDefs = aegisTypeDefs;
 
 async function buildFirestormStorage(): Promise<FirestormStoragePort> {
   const { db } = await import('@szl-holdings/db');
@@ -160,7 +163,7 @@ async function buildFirestormStorage(): Promise<FirestormStoragePort> {
         .where(eq(firestormIncidentsTable.id, id))
         .returning();
       const incident = rows[0];
-      pubsub.publish(FIRESTORM_EVENTS.INCIDENT_UPDATED, { firestormIncidentUpdated: incident });
+      pubsub.publish(FIRESTORM_EVENTS.INCIDENT_UPDATED, { aegisIncidentUpdated: incident });
       publish(WS_CHANNELS.AEGIS_INCIDENTS, 'incident-updated', {
         id: incident.id,
         status: incident.status,
@@ -183,19 +186,19 @@ async function buildFirestormStorage(): Promise<FirestormStoragePort> {
   };
 }
 
-export const firestormResolvers = {
+export const aegisResolvers = {
   Query: {
-    firestormAssessments: async (_: unknown, args: { limit?: number; offset?: number }) => {
+    aegisAssessments: async (_: unknown, args: { limit?: number; offset?: number }) => {
       return listFirestormAssessments(await buildFirestormStorage(), args);
     },
-    firestormAssessment: async (_: unknown, args: { id: string }, context: GraphQLContext) => {
+    aegisAssessment: async (_: unknown, args: { id: string }, context: GraphQLContext) => {
       const numId = parseInt(args.id, 10);
-      if (context?.loaders?.firestormAssessmentById) {
-        return context.loaders.firestormAssessmentById.load(numId);
+      if (context?.loaders?.aegisAssessmentById) {
+        return context.loaders.aegisAssessmentById.load(numId);
       }
       return getFirestormAssessment(await buildFirestormStorage(), numId);
     },
-    firestormFindings: async (
+    aegisFindings: async (
       _: unknown,
       args: { assessmentId?: string; severity?: string; limit?: number; offset?: number },
     ) => {
@@ -206,24 +209,24 @@ export const firestormResolvers = {
         offset: args.offset,
       });
     },
-    firestormIncidents: async (
+    aegisIncidents: async (
       _: unknown,
       args: { status?: string; severity?: string; limit?: number; offset?: number },
     ) => {
       return listFirestormIncidents(await buildFirestormStorage(), args);
     },
-    firestormIncident: async (_: unknown, args: { id: string }, context: GraphQLContext) => {
+    aegisIncident: async (_: unknown, args: { id: string }, context: GraphQLContext) => {
       const numId = parseInt(args.id, 10);
-      if (context?.loaders?.firestormIncidentById) {
-        return context.loaders.firestormIncidentById.load(numId);
+      if (context?.loaders?.aegisIncidentById) {
+        return context.loaders.aegisIncidentById.load(numId);
       }
       return getFirestormIncident(await buildFirestormStorage(), numId);
     },
-    firestormAssets: async (_: unknown, args: { limit?: number; offset?: number }) => {
+    aegisAssets: async (_: unknown, args: { limit?: number; offset?: number }) => {
       return listFirestormAssets(await buildFirestormStorage(), args);
     },
   },
-  FirestormAssessment: {
+  AegisAssessment: {
     findings: async (assessment: { id: number }, _: unknown, context: GraphQLContext) => {
       if (context?.loaders?.findingsByAssessmentId) {
         return context.loaders.findingsByAssessmentId.load(assessment.id);
@@ -232,7 +235,7 @@ export const firestormResolvers = {
     },
   },
   Mutation: {
-    updateFirestormIncident: async (_: unknown, args: { id: string; status: string }) => {
+    updateAegisIncident: async (_: unknown, args: { id: string; status: string }) => {
       try {
         return await updateFirestormIncident(
           await buildFirestormStorage(),
@@ -245,8 +248,11 @@ export const firestormResolvers = {
     },
   },
   Subscription: {
-    firestormIncidentUpdated: {
+    aegisIncidentUpdated: {
       subscribe: () => pubsub.asyncIterableIterator(FIRESTORM_EVENTS.INCIDENT_UPDATED),
     },
   },
 };
+
+/** @deprecated Use aegisResolvers */
+export const firestormResolvers = aegisResolvers;

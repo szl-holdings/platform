@@ -149,7 +149,7 @@ router.get(
           compromised: inc.status !== 'closed',
           technique: ((inc as any).mitreTag as string) ?? 'T1059',
           evidence: [`case:${inc.id}`, `alert:linked`],
-          provenance: makeProvenance('Firestorm SIEM'),
+          provenance: makeProvenance('Aegis SIEM'),
         });
         edges.push({
           from: 'actor-apt29',
@@ -444,7 +444,7 @@ router.get(
           type: 'finding-link',
           description: `Finding ${f.id} linked to identity permissions: ${f.title ?? 'Untitled'}`,
           collectedAt: (f.createdAt as Date | null)?.toISOString() ?? new Date().toISOString(),
-          source: 'Firestorm Findings Engine',
+          source: 'Aegis Findings Engine',
         })),
       ];
 
@@ -672,7 +672,7 @@ router.get(
               ? [
                   {
                     id: 'CIT-005',
-                    source: 'Firestorm Alert',
+                    source: 'Aegis Alert',
                     ref: `alert:${alerts[0].id}`,
                     confidence: 89,
                   },
@@ -909,7 +909,7 @@ router.get(
               severity === 'critical' ? 92 - i * 3 : severity === 'high' ? 75 - i * 4 : 45 - i * 3,
           })),
           citations: [
-            { source: 'Firestorm Incident Record', ref: `inc:${inc.id}`, confidence: 95 },
+            { source: 'Aegis Incident Record', ref: `inc:${inc.id}`, confidence: 95 },
             {
               source: 'Risk Quantification Model (FAIR)',
               ref: `risk:${inc.id}:fair-model`,
@@ -934,7 +934,7 @@ router.get(
           complianceExposure: ['SOC 2 CC6.1', 'NIST AC-2', 'ISO 27001 A.9.4'][i % 3],
           estimatedFineExposure:
             severity === 'critical' ? 2_500_000 : severity === 'high' ? 500_000 : 50_000,
-          citations: [{ source: 'Firestorm Finding', ref: `finding:${f.id}`, confidence: 90 }],
+          citations: [{ source: 'Aegis Finding', ref: `finding:${f.id}`, confidence: 90 }],
           provenance: makeProvenance('Compliance Risk Quantification Engine'),
         };
       });

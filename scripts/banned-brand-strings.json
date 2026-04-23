@@ -73,6 +73,8 @@
     { "file": "packages/tokens/src/manifest.ts", "line": 24, "term": "Lyte", "reason": "Canonical registered artifact title used by tokens-governance dashboard; matches the platform-level artifact registry display name." },
     { "file": "packages/tokens/src/manifest.ts", "line": 25, "term": "NEXUS", "reason": "Canonical registered artifact title used by tokens-governance dashboard; matches the platform-level artifact registry display name." },
     { "file": "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx", "line": 68, "term": "NEXUS", "reason": "Page header for the NEXUS governance dashboard; matches the registered artifact display name (NEXUS — Unified Agentic AI Layer)." },
-    { "file": "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx", "line": 236, "term": "NEXUS", "reason": "Reference to the NEXUS bundle in user-facing copy; matches the registered artifact display name." }
+    { "file": "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx", "line": 236, "term": "NEXUS", "reason": "Reference to the NEXUS bundle in user-facing copy; matches the registered artifact display name." },
+    { "file": "artifacts/command/src/pages/substrate/approval-queue.tsx", "line": 27, "term": "Aegis", "reason": "Intentional branding rename (Task #3149): firestorm vertical label updated from 'Firestorm' to 'Aegis' — product-internal display label, not a public trademark claim." },
+    { "file": "artifacts/command/src/pages/substrate/trajectory-map.tsx", "line": 24, "term": "Aegis", "reason": "Intentional branding rename (Task #3149): firestorm vertical label updated from 'Firestorm' to 'Aegis' — product-internal display label, not a public trademark claim." }
   ]
 }

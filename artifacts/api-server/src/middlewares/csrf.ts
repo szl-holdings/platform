@@ -40,7 +40,7 @@ const EXEMPT_PATHS = new Set([
   '/api/stripe/checkout',
   '/api/billing/checkout',
   '/api/billing/terra/subscribe',
-  '/api/billing/firestorm/enterprise-quote',
+  '/api/billing/aegis/enterprise-quote',
   '/api/billing/customer-portal',
   '/api/documents/generate',
   '/api/observability/vitals',

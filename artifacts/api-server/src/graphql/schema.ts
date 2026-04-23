@@ -3,7 +3,7 @@ import { alloyResolvers, alloyTypeDefs, pubsub } from './domains/alloy.js';
 import { approvalsResolvers, approvalsTypeDefs } from './domains/approvals.js';
 import { authResolvers, authTypeDefs } from './domains/auth.js';
 import { carlotaJoResolvers, carlotaJoTypeDefs } from './domains/carlota-jo.js';
-import { firestormResolvers, firestormTypeDefs } from './domains/firestorm.js';
+import { aegisResolvers, aegisTypeDefs } from './domains/firestorm.js';
 import { holdingsResolvers, holdingsTypeDefs } from './domains/holdings.js';
 import { lyteResolvers, lyteTypeDefs } from './domains/lyte.js';
 import { prismCounselResolvers, prismCounselTypeDefs } from './domains/prism-counsel.js';
@@ -35,7 +35,7 @@ export const typeDefs = [
   baseTypeDefs,
   authTypeDefs,
   alloyTypeDefs,
-  firestormTypeDefs,
+  aegisTypeDefs,
   vesselsTypeDefs,
   terraTypeDefs,
   lyteTypeDefs,
@@ -77,7 +77,7 @@ export const resolvers = mergeResolversSimple(
   },
   authResolvers as Record<string, Record<string, unknown>>,
   alloyResolvers as Record<string, Record<string, unknown>>,
-  firestormResolvers as Record<string, Record<string, unknown>>,
+  aegisResolvers as Record<string, Record<string, unknown>>,
   vesselsResolvers as Record<string, Record<string, unknown>>,
   terraResolvers as Record<string, Record<string, unknown>>,
   lyteResolvers as Record<string, Record<string, unknown>>,

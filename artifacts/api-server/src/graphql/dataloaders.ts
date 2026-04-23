@@ -31,7 +31,7 @@ export function createVesselByIdLoader() {
   });
 }
 
-export function createFirestormAssessmentByIdLoader() {
+export function createAegisAssessmentByIdLoader() {
   return new DataLoader<number, unknown | null>(async (ids) => {
     try {
       const db = await getDb();
@@ -73,7 +73,7 @@ export function createFindingsByAssessmentIdLoader() {
   });
 }
 
-export function createFirestormIncidentByIdLoader() {
+export function createAegisIncidentByIdLoader() {
   return new DataLoader<number, unknown | null>(async (ids) => {
     try {
       const db = await getDb();
@@ -93,16 +93,16 @@ export function createFirestormIncidentByIdLoader() {
 
 export interface AppDataLoaders {
   vesselById: ReturnType<typeof createVesselByIdLoader>;
-  firestormAssessmentById: ReturnType<typeof createFirestormAssessmentByIdLoader>;
+  aegisAssessmentById: ReturnType<typeof createAegisAssessmentByIdLoader>;
   findingsByAssessmentId: ReturnType<typeof createFindingsByAssessmentIdLoader>;
-  firestormIncidentById: ReturnType<typeof createFirestormIncidentByIdLoader>;
+  aegisIncidentById: ReturnType<typeof createAegisIncidentByIdLoader>;
 }
 
 export function createDataLoaders(): AppDataLoaders {
   return {
     vesselById: createVesselByIdLoader(),
-    firestormAssessmentById: createFirestormAssessmentByIdLoader(),
+    aegisAssessmentById: createAegisAssessmentByIdLoader(),
     findingsByAssessmentId: createFindingsByAssessmentIdLoader(),
-    firestormIncidentById: createFirestormIncidentByIdLoader(),
+    aegisIncidentById: createAegisIncidentByIdLoader(),
   };
 }

@@ -2483,7 +2483,7 @@ const APP_CAPABILITIES: Record<string, { name: string; endpoints: string[] }> = 
     ],
   },
   firestorm: {
-    name: 'Firestorm — Threat Intelligence',
+    name: 'Aegis — Threat Intelligence',
     endpoints: [
       '/api/firestorm/live/threat-summary',
       '/api/firestorm/live/compliance-summary',

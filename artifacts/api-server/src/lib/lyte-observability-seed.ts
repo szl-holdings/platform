@@ -480,7 +480,7 @@ function buildAlertDefs() {
       lastFiredAt: new Date(Date.now() - 21600000),
     },
     {
-      name: 'Firestorm SOC Error Rate',
+      name: 'Aegis SOC Error Rate',
       description: 'Elevated error rate in security operations',
       alertType: 'threshold' as const,
       service: 'firestorm-soc',

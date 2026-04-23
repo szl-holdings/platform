@@ -429,7 +429,7 @@ async function seedFirestormData() {
       status: 'in_progress',
       scope: 'SZL Platform API, Database Layer, Frontend Applications',
       targetEnvironment: 'Production-Mirror',
-      assessorName: 'Firestorm Security Team',
+      assessorName: 'Aegis Security Team',
       startDate: new Date('2026-03-01'),
       overallRiskScore: '67.4',
       executiveSummary:

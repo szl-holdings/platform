@@ -43,7 +43,7 @@ const SEED_DATA: HoldingsVenture[] = [
   },
   {
     id: 'h-003',
-    name: 'Firestorm Security',
+    name: 'Aegis Security',
     sector: 'Cybersecurity',
     stage: 'series_a',
     investmentDate: '2025-01-10',

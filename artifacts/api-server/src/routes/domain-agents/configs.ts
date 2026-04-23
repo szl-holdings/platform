@@ -338,7 +338,7 @@ export const AGENT_CONFIGS: Record<AgentType, AgentConfig> = {
     executeTool: createDomainToolExecutor('carlota-jo'),
   },
   firestorm: {
-    name: 'Firestorm Incident Response Strategist',
+    name: 'Aegis Incident Response Strategist',
     systemPrompt: FIRESTORM_SYSTEM_PROMPT,
     tools: [
       {

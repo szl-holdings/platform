@@ -3,7 +3,8 @@
 **Audited:** 2026-04-16  
 **Method:** Static import analysis — all flat route `.ts` files cross-referenced against every `import` statement in `src/routes/groups/*.ts` and `src/index.ts`.
 
-**Cleaned up:** 2026-04-18 — Category A files deleted (see below).
+**Cleaned up:** 2026-04-18 — Category A files deleted (see below).  
+**Updated:** 2026-04-23 — Category B rename completed; INCA brand decision documented (Task #3149).
 
 ---
 
@@ -30,9 +31,11 @@
 
 | File | Issue |
 |---|---|
-| `inca.ts` | File header comment: _"legacy filename, module now known as Aegis Intelligence"_. The module is actively imported as `aegisIntelRouter` in `groups/security.ts`. The filename is misleading but the routes are live. |
+| ~~`inca.ts`~~ | File header comment: _"legacy filename, module now known as Aegis Intelligence"_. The module is actively imported as `aegisIntelRouter` in `groups/security.ts`. The filename is misleading but the routes are live. |
 
-**Recommendation:** Rename `inca.ts` → `aegis-intel.ts` and update the import in `groups/security.ts`. No route changes needed.
+**Status: DONE — renamed `inca.ts` → `aegis-intel.ts` on 2026-04-23.**
+
+**INCA AI Research brand decision (Task #3149):** The brand name "INCA AI Research" is **retained as-is**. INCA is an active domain agent used across nuro-mesh, domain-agent configs, multi-agent-orchestrator, and seed data. Renaming the brand would require broad changes across configs and would surface incorrectly to end users. Only the internal route file was renamed for code hygiene; the route mount path (`/inca`) and the agent brand name remain unchanged.
 
 ---
 
@@ -61,7 +64,7 @@
 | Category | Count | Action | Status |
 |---|---|---|---|
 | Completely unregistered files | 4 | Delete | **Done — deleted 2026-04-18** |
-| Legacy-named but active | 1 | Rename | Open |
+| Legacy-named but active | 1 | Rename | **Done — renamed 2026-04-23** |
 | Legacy section in active file | 1 | Review & prune | Open |
 | Dev-only route exposed in prod | 1 | Guard or remove | Open |
 

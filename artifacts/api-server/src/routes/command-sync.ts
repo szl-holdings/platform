@@ -153,7 +153,7 @@ const PARTNER_SEEDS: PartnerSeed[] = [
   },
   {
     id: 'cp-003',
-    name: 'Firestorm — Risk Engine',
+    name: 'Aegis — Risk Engine',
     role: 'Real-Time Risk Scoring',
     domain: 'Finance',
     trustScore: 87,
