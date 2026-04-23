@@ -203,6 +203,11 @@ describe('GET /cortex/quick-actions/history', () => {
     // ordering from the lib so old-but-late-actioned approvals do not bury
     // fresh decisions.
     expect((callArg as unknown as { orderBy?: string }).orderBy).toBe('decidedAt');
+    // Per-user scoping: an executive sees only the decisions THEY made, not
+    // every resolved approval in the org. The route must pass the caller's
+    // user id through to the lib so the SQL adds `WHERE approved_by = $uid OR
+    // rejected_by = $uid`.
+    expect((callArg as unknown as { decidedByUserId?: number }).decidedByUserId).toBe(1);
 
     const [first, second] = res.body.items as Array<Record<string, unknown>>;
     expect(first.id).toBe('101');
@@ -233,7 +238,7 @@ describe('GET /cortex/quick-actions/history', () => {
     }
   });
 
-  it('does not pass an orgId for admin callers (cross-tenant audit)', async () => {
+  it('does not pass an orgId or per-user filter for admin callers (cross-tenant audit)', async () => {
     const previousUser = _currentUser;
     _currentUser = {
       ...previousUser,
@@ -249,9 +254,13 @@ describe('GET /cortex/quick-actions/history', () => {
       const callArg = listApprovalsMock.mock.calls[0]?.[0] as {
         orgId?: number;
         statuses: string[];
+        decidedByUserId?: number;
       };
       expect(callArg.orgId).toBeUndefined();
       expect(callArg.statuses).toEqual(['approved', 'rejected']);
+      // Admins/super-admins intentionally see all decisions for audit review,
+      // not just their own — so the per-user filter must NOT be set.
+      expect(callArg.decidedByUserId).toBeUndefined();
     } finally {
       _currentUser = previousUser;
     }

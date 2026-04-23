@@ -1529,10 +1529,13 @@ router.get(
       const user = req.user;
       const isAdmin = user?.roles?.some((r) => ['super_admin', 'admin'].includes(r)) ?? false;
       const orgId = isAdmin ? undefined : user?.orgs?.[0]?.orgId;
+      const userId = user?.id;
 
       // Deny-by-default: a non-admin caller with no org membership has no
-      // scope and must not see other tenants' resolved approvals.
-      if (!isAdmin && orgId == null) {
+      // scope and must not see other tenants' resolved approvals. Likewise an
+      // unauthenticated/unidentified non-admin caller cannot have a personal
+      // decision history.
+      if (!isAdmin && (orgId == null || userId == null)) {
         sendSuccess(res, { items: [], total: 0 });
         return;
       }
@@ -1552,6 +1555,9 @@ router.get(
         // first. Default `createdAt` ordering would surface old approvals that
         // happened to be submitted late ahead of fresh decisions.
         orderBy: 'decidedAt',
+        // Scope to the authenticated user's own decisions. Admins/super-admins
+        // intentionally see the full org/cross-org history for audit review.
+        decidedByUserId: isAdmin ? undefined : userId,
       });
 
       const items = resolved.map((approval) => {

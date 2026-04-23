@@ -6,7 +6,7 @@ import {
   approvalRequestsTable,
   db,
 } from '@szl-holdings/db';
-import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, or, sql } from 'drizzle-orm';
 
 export type { ApprovalRequest, ApprovalStatus };
 
@@ -384,6 +384,13 @@ export async function listApprovals(
      * actioned* requests at the top regardless of when they were submitted.
      */
     orderBy?: 'createdAt' | 'decidedAt';
+    /**
+     * Restrict the result to approvals where the given user id was the actual
+     * decision-maker (matches `approvedById` or `rejectedById`). Used by the
+     * mobile decision-history view so that each executive sees only the
+     * decisions *they* made, not every resolved approval in their org.
+     */
+    decidedByUserId?: number;
   } = {},
 ): Promise<ApprovalRequest[]> {
   const conditions = [] as Array<ReturnType<typeof eq>>;
@@ -394,6 +401,13 @@ export async function listApprovals(
   }
   if (options.orgId != null) {
     conditions.push(eq(approvalRequestsTable.orgId, options.orgId));
+  }
+  if (options.decidedByUserId != null) {
+    const decidedByClause = or(
+      eq(approvalRequestsTable.approvedById, options.decidedByUserId),
+      eq(approvalRequestsTable.rejectedById, options.decidedByUserId),
+    );
+    if (decidedByClause) conditions.push(decidedByClause as ReturnType<typeof eq>);
   }
 
   const orderClause =
