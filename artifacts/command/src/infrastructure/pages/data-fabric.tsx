@@ -27,7 +27,7 @@ const BASE_URL = (import.meta.env.BASE_URL ?? '/imperium/').replace(/\/$/, '');
 const API_BASE = `${BASE_URL}/api/connectors`;
 
 type ConnectorKind = 'real-estate' | 'maritime' | 'sanctions' | 'finance' | 'security' | 'other';
-type SyncStatus = 'ok' | 'retried' | 'dead-letter' | 'skipped';
+type SyncStatus = 'ok' | 'retried' | 'partial' | 'dead-letter' | 'skipped';
 type DriftSeverity = 'none' | 'info' | 'warn' | 'critical';
 
 interface DriftReport {
@@ -94,6 +94,7 @@ const SEVERITY_COLOR: Record<DriftSeverity, string> = {
 const STATUS_BADGE: Record<SyncStatus, { label: string; cls: string }> = {
   ok: { label: 'OK', cls: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' },
   retried: { label: 'RETRIED', cls: 'text-amber-300 bg-amber-500/10 border-amber-500/30' },
+  'partial': { label: 'PARTIAL', cls: 'text-amber-300 bg-amber-500/10 border-amber-500/30' },
   'dead-letter': { label: 'DEAD-LETTER', cls: 'text-rose-300 bg-rose-500/10 border-rose-500/30' },
   skipped: { label: 'SKIPPED', cls: 'text-slate-300 bg-slate-500/10 border-slate-500/30' },
 };

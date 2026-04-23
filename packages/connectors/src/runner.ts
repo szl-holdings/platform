@@ -163,7 +163,7 @@ export class ConnectorRunner {
     // Drift detection — uses the *raw* field shape, not the parsed shape, so
     // upstream additions are surfaced even if the schema rejects them.
     const baseline = await this.hooks.loadBaseline(connector.id);
-    const drift = detectDrift(connector.id, records as unknown[], baseline);
+    const drift = detectDrift(connector.id, records as unknown[], baseline, options.thresholds);
     if (!baseline && validRecords.length > 0) {
       await this.hooks.saveBaseline({
         connectorId: connector.id,
@@ -185,7 +185,17 @@ export class ConnectorRunner {
       }
     }
 
-    const status: SyncStatus = attempts > 1 ? 'retried' : 'ok';
+    let status: SyncStatus;
+    if (registered === 0 && validRecords.length > 0) {
+      status = 'dead-letter';
+    } else if (rejected > 0 && registered > 0) {
+      status = 'partial';
+    } else if (attempts > 1) {
+      status = 'retried';
+    } else {
+      status = 'ok';
+    }
+
     const result: SyncResult = {
       connectorId: connector.id,
       status,
@@ -199,7 +209,7 @@ export class ConnectorRunner {
       entitiesRegistered: registered,
       ledgerEventId: null,
       drift,
-      errorMessage: null,
+      errorMessage: status === 'dead-letter' ? 'All entity registrations failed' : null,
     };
     result.ledgerEventId = await this.hooks.appendAudit({
       connectorId: connector.id,
@@ -213,7 +223,12 @@ export class ConnectorRunner {
         driftSeverity: drift.severity,
       },
     });
-    if (drift.severity === 'critical' || drift.severity === 'warn') {
+    if (
+      status === 'dead-letter' ||
+      status === 'partial' ||
+      drift.severity === 'critical' ||
+      drift.severity === 'warn'
+    ) {
       await this.hooks.escalate(result);
     }
     return result;

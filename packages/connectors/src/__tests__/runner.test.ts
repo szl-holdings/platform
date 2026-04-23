@@ -140,6 +140,52 @@ describe('ConnectorRunner', () => {
     expect(result.drift?.severity).toBe('critical');
   });
 
+  it('reports partial status when some entity registrations fail', async () => {
+    let callCount = 0;
+    const state: RecorderState = { audits: [], registered: [], baseline: null, escalated: [] };
+    const hooks = makeHooks(state);
+    hooks.registerEntity = async (write: OntologyWrite) => {
+      callCount += 1;
+      if (callCount === 1) throw new Error('ontology write failed');
+      state.registered.push(write);
+    };
+    const runner = new ConnectorRunner(hooks);
+    const result = await runner.run(makeConnector());
+    expect(result.status).toBe('partial');
+    expect(result.entitiesRegistered).toBe(1);
+    expect(result.recordsRejected).toBe(1);
+    expect(state.escalated).toHaveLength(1);
+  });
+
+  it('dead-letters when all entity registrations fail', async () => {
+    const state: RecorderState = { audits: [], registered: [], baseline: null, escalated: [] };
+    const hooks = makeHooks(state);
+    hooks.registerEntity = async () => {
+      throw new Error('ontology down');
+    };
+    const runner = new ConnectorRunner(hooks);
+    const result = await runner.run(makeConnector());
+    expect(result.status).toBe('dead-letter');
+    expect(result.entitiesRegistered).toBe(0);
+    expect(result.errorMessage).toBe('All entity registrations failed');
+    expect(state.escalated).toHaveLength(1);
+  });
+
+  it('passes custom thresholds to drift detection', async () => {
+    const state: RecorderState = {
+      audits: [],
+      registered: [],
+      baseline: { connectorId: 'ping', recordCount: 3, fieldNames: ['id', 'v'], capturedAt: 'x' },
+      escalated: [],
+    };
+    const runner = new ConnectorRunner(makeHooks(state));
+    const result = await runner.run(makeConnector(), {
+      thresholds: { volumeWarn: 0.01, volumeCritical: 0.1 },
+    });
+    expect(result.drift?.threshold.volumeWarn).toBe(0.01);
+    expect(result.drift?.threshold.volumeCritical).toBe(0.1);
+  });
+
   it('skips fetch on dryRun and writes a skipped audit event', async () => {
     const state: RecorderState = { audits: [], registered: [], baseline: null, escalated: [] };
     const runner = new ConnectorRunner(makeHooks(state));

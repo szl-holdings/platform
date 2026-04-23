@@ -83,7 +83,7 @@ export interface OntologyWrite {
 // Sync results, drift reports, health snapshots
 // ---------------------------------------------------------------------------
 
-export const syncStatusSchema = z.enum(['ok', 'retried', 'dead-letter', 'skipped']);
+export const syncStatusSchema = z.enum(['ok', 'retried', 'partial', 'dead-letter', 'skipped']);
 export type SyncStatus = z.infer<typeof syncStatusSchema>;
 
 export interface SyncResult {
