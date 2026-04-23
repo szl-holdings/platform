@@ -8,7 +8,7 @@ import { initTelemetry } from './telemetry';
 
 initSentry({ appSlug: 'command', tracesSampleRate: 0.2 });
 initAnalytics({ appSlug: 'command' });
-initTelemetry({ serviceName: 'command-web' });
+try { initTelemetry({ serviceName: 'command-web' }); } catch { /* telemetry is non-critical */ }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

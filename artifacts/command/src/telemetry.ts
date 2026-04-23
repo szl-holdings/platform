@@ -59,36 +59,31 @@ export function initTelemetry(opts: TelemetryInitOptions = {}): Tracer {
 
   const processors: SpanProcessor[] = [];
   if (endpoint) {
-    const trimmed = endpoint.replace(/\/+$/, '');
-    // Append `/v1/traces` only when the operator gave us a base URL (no path
-    // beyond the host). If the URL already includes any path segment (e.g.
-    // Datadog's `/api/v0.2/traces`, Grafana's `/otlp/v1/traces`, or a
-    // collector route prefix), respect it verbatim — appending blindly would
-    // produce a 404 like `/api/v0.2/traces/v1/traces`.
-    let url: string;
     try {
-      const parsed = new URL(trimmed);
-      const hasPath = parsed.pathname && parsed.pathname !== '/';
-      url = hasPath ? trimmed : `${trimmed}/v1/traces`;
+      const trimmed = endpoint.replace(/\/+$/, '');
+      let url: string;
+      try {
+        const parsed = new URL(trimmed);
+        const hasPath = parsed.pathname && parsed.pathname !== '/';
+        url = hasPath ? trimmed : `${trimmed}/v1/traces`;
+      } catch {
+        url = trimmed.endsWith('/v1/traces') ? trimmed : `${trimmed}/v1/traces`;
+      }
+      const exporter = new OTLPTraceExporter({
+        url,
+        ...(Object.keys(headers).length > 0 ? { headers } : {}),
+      });
+      processors.push(
+        new BatchSpanProcessor(exporter, {
+          maxExportBatchSize: 64,
+          scheduledDelayMillis: 1500,
+        }),
+      );
     } catch {
-      // Not a parseable URL — fall back to the simple suffix check.
-      url = trimmed.endsWith('/v1/traces') ? trimmed : `${trimmed}/v1/traces`;
-    }
-    const exporter = new OTLPTraceExporter({
-      url,
-      ...(Object.keys(headers).length > 0 ? { headers } : {}),
-    });
-    processors.push(
-      new BatchSpanProcessor(exporter, {
-        maxExportBatchSize: 64,
-        scheduledDelayMillis: 1500,
-      }),
-    );
-    if (typeof console !== 'undefined') {
+      // Invalid OTEL endpoint — skip trace export silently in dev.
     }
   } else if (environment !== 'production') {
     processors.push(new BatchSpanProcessor(new ConsoleSpanExporter()));
-  } else if (typeof console !== 'undefined') {
   }
 
   const provider = new WebTracerProvider({ resource, spanProcessors: processors });

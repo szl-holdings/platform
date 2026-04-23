@@ -104,6 +104,11 @@ All outbound transactional email goes through `artifacts/api-server/src/lib/emai
 - **DKIM/SPF/DMARC:** DNS setup instructions documented in `docs/email-deliverability.md`.
 - **Migration:** `lib/db/drizzle/0101_email_suppressions.sql` creates the table idempotently.
 
+## Known Platform Issues
+- **Command workflow port detection:** Replit workflow system intermittently fails to detect port 5000 opening within timeout. Vite starts correctly (confirmed by logs). The telemetry initialization was fixed to gracefully handle invalid OTEL endpoint placeholders (see `artifacts/command/src/telemetry.ts`).
+- **Expo CORS:** szl-holdings-mobile has "Unauthorized request" errors from Expo CLI CORS middleware in Replit's proxy environment. Not a code bug.
+- **Vite WebSocket HMR:** All artifacts show WS connection refused to `ws://localhost:443`. Expected behavior in Replit iframe proxy environment; does not affect functionality.
+
 ## External Dependencies
 -   **Database:** PostgreSQL 16
 -   **Authentication:** Replit Auth
