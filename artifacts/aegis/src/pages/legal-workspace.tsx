@@ -15,27 +15,27 @@ const DEMO_MATTERS = [
   {
     id: 1,
     title: 'Chen v. Northgate Capital LLC',
-    caseNumber: 'CV-2024-08821',
+    caseNumber: 'CV-2025-08821',
     jurisdiction: 'S.D.N.Y.',
     status: 'discovery',
     healthScore: 82,
-    settlementLow: 250000,
-    settlementMid: 420000,
-    settlementHigh: 680000,
+    settlementLow: 180000,
+    settlementMid: 310000,
+    settlementHigh: 480000,
     deadlines: [
-      { title: 'Expert disclosure deadline', date: '2025-05-15', priority: 'high' },
-      { title: 'Discovery cutoff', date: '2025-06-30', priority: 'medium' },
+      { title: 'Expert disclosure deadline', date: '2026-04-29', priority: 'critical' },
+      { title: 'Discovery cutoff', date: '2026-06-18', priority: 'medium' },
     ],
     recommendations: [
       {
         priority: 'high',
         title: 'Accelerate document review',
-        description: 'Current pace risks missing discovery deadline',
+        description: 'Current pace risks missing expert disclosure deadline in 6 days',
       },
       {
         priority: 'critical',
         title: 'Privilege review needed',
-        description: '14 documents flagged for attorney review',
+        description: '14 documents flagged for attorney review before disclosure',
       },
     ],
     readinessScores: {
@@ -50,22 +50,22 @@ const DEMO_MATTERS = [
   {
     id: 2,
     title: 'Walsh Industries v. Meridian Tech',
-    caseNumber: 'CV-2024-11042',
+    caseNumber: 'CV-2025-11042',
     jurisdiction: 'N.D. Cal.',
     status: 'pre_trial',
     healthScore: 65,
-    settlementLow: 800000,
-    settlementMid: 1200000,
-    settlementHigh: 1900000,
+    settlementLow: 280000,
+    settlementMid: 450000,
+    settlementHigh: 720000,
     deadlines: [
-      { title: 'Pre-trial brief filing', date: '2025-04-28', priority: 'critical' },
-      { title: 'Motions in limine', date: '2025-05-05', priority: 'high' },
+      { title: 'Pre-trial brief filing', date: '2026-05-02', priority: 'critical' },
+      { title: 'Motions in limine', date: '2026-05-19', priority: 'high' },
     ],
     recommendations: [
       {
         priority: 'critical',
         title: 'Complete witness list',
-        description: 'Trial date set — witness list incomplete',
+        description: 'Trial date set — witness list still incomplete with 9 days to brief',
       },
     ],
     readinessScores: {
@@ -80,19 +80,19 @@ const DEMO_MATTERS = [
   {
     id: 3,
     title: 'Meridian RE v. Solaris Group',
-    caseNumber: 'CV-2024-05519',
+    caseNumber: 'CV-2025-05519',
     jurisdiction: 'S.D. Fla.',
     status: 'discovery',
     healthScore: 74,
-    settlementLow: 150000,
-    settlementMid: 310000,
-    settlementHigh: 500000,
-    deadlines: [{ title: 'Interrogatories response', date: '2025-05-22', priority: 'medium' }],
+    settlementLow: 95000,
+    settlementMid: 185000,
+    settlementHigh: 310000,
+    deadlines: [{ title: 'Interrogatories response', date: '2026-05-06', priority: 'high' }],
     recommendations: [
       {
         priority: 'high',
         title: 'Document production review',
-        description: "Opposing counsel's production needs analysis",
+        description: "Opposing counsel's production needs analysis before May 6 response",
       },
     ],
     readinessScores: {
@@ -102,6 +102,213 @@ const DEMO_MATTERS = [
       evidence: 65,
       strategy: 75,
       budget: 91,
+    },
+  },
+  {
+    id: 4,
+    title: 'Okafor Pharmaceuticals v. Vexar Bio',
+    caseNumber: 'CV-2025-14308',
+    jurisdiction: 'D. Del.',
+    status: 'discovery',
+    healthScore: 71,
+    settlementLow: 120000,
+    settlementMid: 230000,
+    settlementHigh: 390000,
+    deadlines: [
+      { title: 'Claim construction brief', date: '2026-06-04', priority: 'high' },
+      { title: 'Protective order deadline', date: '2026-07-11', priority: 'medium' },
+    ],
+    recommendations: [
+      {
+        priority: 'high',
+        title: 'Finalize prior art search',
+        description: 'Three patent families uncharted — needed for claim construction',
+      },
+    ],
+    readinessScores: {
+      discovery: 62,
+      privilege: 79,
+      witnesses: 70,
+      evidence: 58,
+      strategy: 66,
+      budget: 83,
+    },
+  },
+  {
+    id: 5,
+    title: 'Calloway Logistics v. Harbor Freight Co.',
+    caseNumber: 'CV-2025-09917',
+    jurisdiction: 'S.D. Tex.',
+    status: 'mediation',
+    healthScore: 88,
+    settlementLow: 60000,
+    settlementMid: 120000,
+    settlementHigh: 200000,
+    deadlines: [
+      { title: 'Mediation statement submission', date: '2026-05-14', priority: 'medium' },
+    ],
+    recommendations: [
+      {
+        priority: 'medium',
+        title: 'Prepare damages model for mediator',
+        description: 'Mediator requested detailed freight loss calculations',
+      },
+    ],
+    readinessScores: {
+      discovery: 91,
+      privilege: 94,
+      witnesses: 88,
+      evidence: 90,
+      strategy: 85,
+      budget: 96,
+    },
+  },
+  {
+    id: 6,
+    title: 'Reyes & Partners v. Fortress Insurance',
+    caseNumber: 'CV-2025-07244',
+    jurisdiction: 'C.D. Cal.',
+    status: 'discovery',
+    healthScore: 58,
+    settlementLow: 75000,
+    settlementMid: 160000,
+    settlementHigh: 280000,
+    deadlines: [
+      { title: 'Deposition of corporate designee', date: '2026-05-28', priority: 'high' },
+      { title: 'ESI production complete', date: '2026-06-20', priority: 'medium' },
+    ],
+    recommendations: [
+      {
+        priority: 'critical',
+        title: 'ESI custodian list overdue',
+        description: 'Opposing counsel sent meet-and-confer notice — respond within 5 days',
+      },
+    ],
+    readinessScores: {
+      discovery: 44,
+      privilege: 68,
+      witnesses: 60,
+      evidence: 51,
+      strategy: 55,
+      budget: 77,
+    },
+  },
+  {
+    id: 7,
+    title: 'Dumont Capital v. Blackthorn Advisory',
+    caseNumber: 'CV-2025-16731',
+    jurisdiction: 'S.D.N.Y.',
+    status: 'pre_trial',
+    healthScore: 76,
+    settlementLow: 140000,
+    settlementMid: 260000,
+    settlementHigh: 420000,
+    deadlines: [
+      { title: 'Summary judgment opposition', date: '2026-06-10', priority: 'high' },
+    ],
+    recommendations: [
+      {
+        priority: 'high',
+        title: 'Engage financial expert witness',
+        description: 'Damages analysis must be expert-supported for summary judgment opposition',
+      },
+    ],
+    readinessScores: {
+      discovery: 87,
+      privilege: 91,
+      witnesses: 63,
+      evidence: 80,
+      strategy: 72,
+      budget: 68,
+    },
+  },
+  {
+    id: 8,
+    title: 'Sentinel HealthTech v. NovaMed Systems',
+    caseNumber: 'CV-2026-00412',
+    jurisdiction: 'N.D. Ill.',
+    status: 'discovery',
+    healthScore: 69,
+    settlementLow: 55000,
+    settlementMid: 115000,
+    settlementHigh: 195000,
+    deadlines: [
+      { title: 'Initial disclosures due', date: '2026-05-08', priority: 'high' },
+      { title: 'Scheduling conference', date: '2026-05-22', priority: 'medium' },
+    ],
+    recommendations: [
+      {
+        priority: 'high',
+        title: 'Identify key custodians for ESI',
+        description: 'HIPAA-covered records require special handling protocol',
+      },
+    ],
+    readinessScores: {
+      discovery: 55,
+      privilege: 72,
+      witnesses: 65,
+      evidence: 60,
+      strategy: 58,
+      budget: 85,
+    },
+  },
+  {
+    id: 9,
+    title: 'Arroyo Construction v. Paragon Surety',
+    caseNumber: 'CV-2025-13084',
+    jurisdiction: 'D. Ariz.',
+    status: 'mediation',
+    healthScore: 83,
+    settlementLow: 40000,
+    settlementMid: 90000,
+    settlementHigh: 155000,
+    deadlines: [
+      { title: 'Joint mediation brief', date: '2026-05-31', priority: 'medium' },
+    ],
+    recommendations: [
+      {
+        priority: 'medium',
+        title: 'Consolidate subcontractor affidavits',
+        description: 'Four declarations still outstanding for bond claim support',
+      },
+    ],
+    readinessScores: {
+      discovery: 89,
+      privilege: 92,
+      witnesses: 84,
+      evidence: 87,
+      strategy: 80,
+      budget: 93,
+    },
+  },
+  {
+    id: 10,
+    title: 'Vantage Logistics v. Pacific Rim Shipping',
+    caseNumber: 'CV-2025-10628',
+    jurisdiction: 'C.D. Cal.',
+    status: 'discovery',
+    healthScore: 62,
+    settlementLow: 85000,
+    settlementMid: 175000,
+    settlementHigh: 300000,
+    deadlines: [
+      { title: 'Foreign language document translation', date: '2026-07-02', priority: 'medium' },
+      { title: 'Expert witness designation', date: '2026-08-14', priority: 'high' },
+    ],
+    recommendations: [
+      {
+        priority: 'high',
+        title: 'Retain maritime law expert',
+        description: 'Bill of lading dispute requires specialized admiralty expertise',
+      },
+    ],
+    readinessScores: {
+      discovery: 61,
+      privilege: 75,
+      witnesses: 48,
+      evidence: 66,
+      strategy: 59,
+      budget: 80,
     },
   },
 ];
@@ -316,7 +523,7 @@ export default function LegalWorkspacePage() {
             <KpiCard
               label="Active Matters"
               value={String(DEMO_MATTERS.length)}
-              sub="2 in discovery · 1 pre-trial"
+              sub={`${DEMO_MATTERS.filter((m) => m.status === 'discovery').length} discovery · ${DEMO_MATTERS.filter((m) => m.status === 'pre_trial').length} pre-trial · ${DEMO_MATTERS.filter((m) => m.status === 'mediation').length} mediation`}
               icon={FileText}
               accent="#d4a054"
             />
@@ -336,8 +543,8 @@ export default function LegalWorkspacePage() {
             />
             <KpiCard
               label="Pending Approvals"
-              value="3"
-              sub="1 demand send · 2 filings"
+              value="2"
+              sub="1 settlement demand · 1 filing"
               icon={ShieldCheck}
               accent="#4a90b8"
             />
@@ -413,6 +620,73 @@ export default function LegalWorkspacePage() {
                       {item.count.toLocaleString()}
                     </span>
                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pending Approvals */}
+          <div
+            className="rounded-lg border border-white/[0.06] p-4"
+            style={{ background: '#0c1220' }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <ShieldCheck className="w-4 h-4" style={{ color: '#4a90b8' }} />
+              <h2 className="text-sm font-semibold text-slate-200">Pending Approvals</h2>
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#4a90b8]/10 text-[#4a90b8] border border-[#4a90b8]/20">
+                2 awaiting
+              </span>
+            </div>
+            <div className="space-y-2">
+              {[
+                {
+                  id: 'APV-2026-0041',
+                  type: 'Settlement Demand',
+                  matter: 'Walsh Industries v. Meridian Tech',
+                  description: 'Authorize $450K settlement demand letter to opposing counsel',
+                  requestedBy: 'J. Harmon, Lead Counsel',
+                  age: '18h ago',
+                  urgency: '#c45a4a',
+                },
+                {
+                  id: 'APV-2026-0039',
+                  type: 'Court Filing',
+                  matter: 'Chen v. Northgate Capital LLC',
+                  description: 'Sign off on expert witness disclosure filing (due Apr 29)',
+                  requestedBy: 'M. Adeyemi, Litigation',
+                  age: '2d ago',
+                  urgency: '#d4a054',
+                },
+              ].map((apv) => (
+                <div
+                  key={apv.id}
+                  className="flex items-start gap-3 rounded border border-white/[0.04] px-3 py-2.5"
+                  style={{ background: '#080c14' }}
+                >
+                  <div
+                    className="mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0"
+                    style={{ background: apv.urgency }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-[10px] font-mono text-slate-500">{apv.id}</span>
+                      <span
+                        className="px-1.5 py-0.5 rounded text-[9px] font-medium"
+                        style={{
+                          background: `${apv.urgency}15`,
+                          color: apv.urgency,
+                          border: `1px solid ${apv.urgency}30`,
+                        }}
+                      >
+                        {apv.type}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-200">{apv.description}</div>
+                    <div className="text-[10px] text-slate-500 mt-0.5">
+                      {apv.matter} · {apv.requestedBy}
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-slate-600 flex-shrink-0">{apv.age}</span>
                 </div>
               ))}
             </div>
