@@ -1283,6 +1283,7 @@ function ChangeRoleModal({
 function UsersPanel() {
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string>('');
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [changeRoleUser, setChangeRoleUser] = useState<{ id: number; name: string } | null>(null);
 
@@ -1302,12 +1303,22 @@ function UsersPanel() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-users'] }),
   });
 
-  const users = (data?.users ?? []).filter(
-    (u) =>
+  const allUsers = data?.users ?? [];
+
+  const availableRoles = Array.from(
+    new Set(allUsers.flatMap((u) => u.roles)),
+  ).sort();
+
+  const users = allUsers.filter((u) => {
+    const matchesSearch =
       !search ||
       u.email?.toLowerCase().includes(search.toLowerCase()) ||
-      u.name?.toLowerCase().includes(search.toLowerCase()),
-  );
+      u.name?.toLowerCase().includes(search.toLowerCase());
+    const matchesRole =
+      !roleFilter ||
+      (roleFilter === '__none__' ? u.roles.length === 0 : u.roles.includes(roleFilter));
+    return matchesSearch && matchesRole;
+  });
 
   return (
     <div className="space-y-5">
@@ -1317,14 +1328,40 @@ function UsersPanel() {
         onRefresh={() => refetch()}
         loading={isLoading}
       />
-      <SearchInput value={search} onChange={setSearch} placeholder="Search by email or name..." />
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <SearchInput value={search} onChange={setSearch} placeholder="Search by email or name..." />
+        </div>
+        <div className="relative">
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="h-full pl-3 pr-8 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 appearance-none cursor-pointer"
+          >
+            <option value="">All roles</option>
+            <option value="__none__">No role</option>
+            {availableRoles.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+        </div>
+      </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
       ) : users.length === 0 ? (
-        <EmptyState message={search ? 'No users match your search.' : 'No users found.'} />
+        <EmptyState
+          message={
+            search || roleFilter
+              ? 'No users match your filters.'
+              : 'No users found.'
+          }
+        />
       ) : (
         <div className="bg-card border border-border rounded-xl divide-y divide-border/50">
           {users.map((u) => {
