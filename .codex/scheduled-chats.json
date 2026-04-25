@@ -1,0 +1,124 @@
+{
+  "version": "1.0.0",
+  "description": "SZL Holdings — Codex Scheduled Chat Automation Catalog",
+  "updated": "2026-04-25",
+  "chats": [
+    {
+      "id": "daily-standup",
+      "title": "Daily Standup Summary",
+      "category": "status",
+      "cadence": "daily",
+      "cron": "0 9 * * 1-5",
+      "prompt": "Summarize all GitHub activity from the past 24 hours across the SZL Holdings monorepo: PRs opened, merged, and closed; issues filed and resolved; CI run outcomes; and any deployment events. Group by artifact (szl-holdings, api-server, command, pulse, aegis, vessels, terra, counsel, sentra, lyte-command-center, a11oy, carlota-jo). Format as a concise standup report suitable for async consumption. Flag any blockers or items needing immediate attention."
+    },
+    {
+      "id": "weekly-pr-synthesis",
+      "title": "Weekly PR Synthesis",
+      "category": "status",
+      "cadence": "weekly",
+      "cron": "0 8 * * 1",
+      "prompt": "Generate a weekly pull request synthesis for the SZL Holdings monorepo. Include: total PRs merged this week, top contributors by PR count, the three most impactful merges (by files changed or description), any PRs that have been open for more than 5 days and may need attention, and a one-sentence theme for the week's engineering effort. Output as a formatted team update."
+    },
+    {
+      "id": "team-pr-summary",
+      "title": "Team PR Summary",
+      "category": "status",
+      "cadence": "weekly",
+      "cron": "0 17 * * 5",
+      "prompt": "Compile a Friday team PR summary for the SZL Holdings platform. For each open PR: author, title, description, days open, and review status. Highlight PRs awaiting review, stale PRs (>3 days without activity), and any PRs touching shared libraries (lib/, packages/) that need extra scrutiny. Suggest a review priority order."
+    },
+    {
+      "id": "release-notes",
+      "title": "Release Notes Drafting",
+      "category": "release",
+      "cadence": "on-demand",
+      "prompt": "Draft release notes for the latest SZL Holdings platform version. Read CHANGELOG.md for the most recent unreleased section. Expand each entry into a user-facing sentence. Group changes by: New Features, Improvements, Bug Fixes, and Under the Hood. Write in a clear, non-technical tone suitable for stakeholders. Include a one-paragraph executive summary at the top."
+    },
+    {
+      "id": "pre-tag-verification",
+      "title": "Pre-Tag Release Verification",
+      "category": "release",
+      "cadence": "on-demand",
+      "prompt": "Run the SZL Holdings pre-release verification checklist before tagging a release. Confirm: (1) all CI workflows are green on main, (2) CHANGELOG.md has an unreleased section with entries, (3) package versions are consistent across artifacts, (4) no known critical issues are open in GitHub Issues, (5) pnpm audit:mocks and pnpm audit:routes both pass, (6) brand strings check passes. Report any failures with specific remediation steps."
+    },
+    {
+      "id": "changelog-update",
+      "title": "Changelog Update",
+      "category": "release",
+      "cadence": "weekly",
+      "cron": "0 16 * * 5",
+      "prompt": "Update the SZL Holdings CHANGELOG.md Unreleased section based on the week's merged PRs. Group entries under Added, Changed, Fixed, and Removed headers following Keep a Changelog conventions. Write concise present-tense entries. Do not create a new version tag — only update the Unreleased section."
+    },
+    {
+      "id": "ci-failure-triage",
+      "title": "CI Failure Triage",
+      "category": "incidents",
+      "cadence": "on-demand",
+      "prompt": "Triage all failing GitHub Actions workflows in the SZL Holdings monorepo. For each failure: identify the workflow name, failing job, error message, and the commit that introduced the failure. Classify each failure as: flaky test, legitimate regression, dependency issue, or config error. Suggest a fix or workaround for each. Prioritize by severity: CI failures blocking deployment > blocking PR merges > informational."
+    },
+    {
+      "id": "new-issue-triage",
+      "title": "New Issue Triage",
+      "category": "incidents",
+      "cadence": "daily",
+      "cron": "0 10 * * 1-5",
+      "prompt": "Triage new GitHub Issues filed against the SZL Holdings monorepo in the past 24 hours. For each issue: assign a severity (P0-P3), suggest the relevant artifact or package, recommend labels, propose whether it's a bug, feature request, or question, and draft a brief initial response. Flag any P0/P1 issues for immediate escalation."
+    },
+    {
+      "id": "bug-scan",
+      "title": "Bug Scan",
+      "category": "quality",
+      "cadence": "weekly",
+      "cron": "0 7 * * 3",
+      "prompt": "Scan the SZL Holdings monorepo codebase for potential bugs. Look for: unhandled promise rejections, missing error boundaries in React components, unsafe type casts (any, unknown without guard), API routes missing input validation, database queries without error handling, and hardcoded values that should be environment variables. Report findings by file with line numbers and suggested fixes."
+    },
+    {
+      "id": "test-gap-identification",
+      "title": "Test Gap Identification",
+      "category": "quality",
+      "cadence": "weekly",
+      "cron": "0 8 * * 3",
+      "prompt": "Identify test gaps in the SZL Holdings monorepo. Compare source files against their test counterparts. Flag: files with no tests, API routes without integration tests, React components missing render tests, critical utility functions without unit coverage, and any new code added in the past week without corresponding tests. Output a prioritized list of 'write tests for these first'."
+    },
+    {
+      "id": "regression-detection",
+      "title": "Performance Regression Audit",
+      "category": "quality",
+      "cadence": "weekly",
+      "cron": "0 9 * * 2",
+      "prompt": "Audit the SZL Holdings platform for performance regressions. Review: recent bundle size changes (artifact build outputs), any new heavy dependencies added in the past 2 weeks, API response time patterns from server logs, and React component re-render patterns in recently modified components. Identify the top 3 performance concerns and suggest optimization steps."
+    },
+    {
+      "id": "dependency-drift",
+      "title": "Dependency Drift Detection",
+      "category": "maintenance",
+      "cadence": "weekly",
+      "cron": "0 8 * * 4",
+      "prompt": "Audit dependency drift across the SZL Holdings pnpm monorepo. Check: packages that have new major versions available, packages with known security advisories (cross-reference pnpm audit output), packages that appear in multiple workspaces at different versions (catalog drift), and any packages marked as deprecated by npm. Output a prioritized upgrade plan with estimated risk per package."
+    },
+    {
+      "id": "outdated-deps",
+      "title": "Outdated Dependencies Report",
+      "category": "maintenance",
+      "cadence": "monthly",
+      "cron": "0 9 1 * *",
+      "prompt": "Generate a full outdated dependencies report for the SZL Holdings monorepo. Run pnpm outdated across all workspaces, categorize packages as: safe to upgrade (patch/minor, no breaking changes), needs review (minor with changelog concerns), risky (major version bumps), and ignore list (pinned for good reason). Produce an actionable upgrade sprint plan."
+    },
+    {
+      "id": "agents-md-update",
+      "title": "AGENTS.md Auto-Update",
+      "category": "maintenance",
+      "cadence": "weekly",
+      "cron": "0 10 * * 5",
+      "prompt": "Review the SZL Holdings AGENTS.md for accuracy against the current codebase state. Check: artifact list matches registered artifacts, all commands in the command reference still exist in package.json, the route manifest reflects ops/audit/routes.json, CI workflow names match .github/workflows/ directory, and the Alloy commands section reflects alloy.commands.md. Report any discrepancies and suggest specific text edits to bring AGENTS.md up to date."
+    },
+    {
+      "id": "skill-suggestions",
+      "title": "Skill Growth Suggestions",
+      "category": "growth",
+      "cadence": "monthly",
+      "cron": "0 9 15 * *",
+      "prompt": "Analyze the SZL Holdings monorepo and suggest engineering skill investments that would most benefit the team. Consider: gaps in test coverage that suggest missing QA skills, repeated manual processes that could be automated, new technologies appearing in dependencies that the team may need to learn, and architectural patterns that appear inconsistently and suggest a need for shared standards. Output 5 concrete skill or tooling investments with rationale."
+    }
+  ]
+}

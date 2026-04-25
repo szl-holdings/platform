@@ -278,3 +278,166 @@ See `.env.example` for all required and optional environment variables.
 ### Demo Mode
 
 Phase 1 operates in Demo Mode by default. All data is in-memory and deterministic. No external calls are made. Mutating operations are blocked with a `not_implemented` error envelope.
+
+---
+
+## Ecosystem Operations — Operational Harness
+
+This section documents the SZL Holdings operational harness: audit scripts, CI workflows, scheduled chats, and Alloy command prompts. It is the ops layer that makes the platform self-auditing and repeatably deployable.
+
+### Install, Dev, and Build
+
+```bash
+# Install (pnpm required; Node ≥ 24)
+pnpm install
+
+# Start all apps in development mode
+pnpm dev
+
+# Production build (all artifacts via Turbo)
+pnpm build
+
+# Type-check all packages
+pnpm typecheck
+```
+
+### Audit Commands
+
+Operational audit scripts live in `ops/audit/`. They are dependency-light (Node built-ins + fetch only).
+
+```bash
+# Smoke test every route in ops/audit/routes.json
+pnpm audit:smoke
+
+# Crawl pages up to MAX_PAGES, check links & structure
+pnpm audit:crawl
+
+# Concurrent load test with p95 latency threshold
+pnpm audit:stress
+
+# Run all three operational harness scripts in sequence
+pnpm audit:operational
+
+# Run all audits (existing static checks + smoke + crawl + stress)
+pnpm audit:all
+```
+
+**Environment variables for audit scripts:**
+
+| Variable | Default | Description |
+|---|---|---|
+| `TARGET_URL` | `http://localhost:3000` | Base URL to audit |
+| `EXPECTED_TEXT` | *(empty)* | Text that must appear in every response |
+| `MAX_PAGES` | `50` | Max pages for URL crawl |
+| `STRESS_REQUESTS` | `50` | Total requests for stress test |
+| `STRESS_CONCURRENCY` | `5` | Concurrent requests per batch |
+| `MAX_P95_MS` | `3000` | p95 latency threshold (ms) |
+| `REPORT_DIR` | `ops/reports/` | Output dir for JSON reports |
+
+Reports are written to `ops/reports/` as JSON files and uploaded as GitHub Actions artifacts.
+
+### Known App Routes
+
+The canonical route manifest lives at **`ops/audit/routes.json`**. Key routes:
+
+| App | Preview Path | Key Routes |
+|---|---|---|
+| SZL Holdings Dashboard | `/` | `/`, `/admin`, `/analytics`, `/settings`, `/support` |
+| API Server | `/api` | `/api/health`, `/api/tenants`, `/api/users`, `/api/alerts` |
+| Unified Command | `/command` | `/command/`, `/command/map`, `/command/status` |
+| LUMINA | `/pulse` | `/pulse/`, `/pulse/briefing` |
+| PARAGON | `/aegis` | `/aegis/`, `/aegis/intel`, `/aegis/threats` |
+| SEXTANT | `/vessels` | `/vessels/`, `/vessels/map`, `/vessels/fleet` |
+| DOMAINE | `/terra` | `/terra/`, `/terra/portfolio`, `/terra/map` |
+| Counsel | `/counsel` | `/counsel/`, `/counsel/matters`, `/counsel/contracts` |
+| TENAX | `/sentra` | `/sentra/`, `/sentra/threats`, `/sentra/posture` |
+| KORA | `/lyte` | `/lyte/`, `/lyte/decisions` |
+| A11oy | `/a11oy` | `/a11oy/`, `/a11oy/brand` |
+| Carlota Jo | `/carlota-jo` | `/carlota-jo/` |
+
+### CI Expectations
+
+CI workflows live in `.github/workflows/`. Key workflows:
+
+| Workflow | Trigger | Description |
+|---|---|---|
+| `ci.yml` | Push / PR | Lint, typecheck, unit tests |
+| `build.yml` | Push to main | Full artifact build |
+| `e2e.yml` | Push to main / manual | Playwright E2E |
+| `audit-full.yml` | Scheduled / manual | Full audit suite |
+| `nightly-smoke.yml` | Nightly | Route smoke test |
+| `operational-audit.yml` | Manual dispatch only | Smoke + crawl + stress (configurable inputs; requires a real TARGET_URL) |
+| `security.yml` | Push / PR | Security scanning |
+| `dependency-review.yml` | PR | Dependency review |
+| `release.yml` | Tag push | Release build and publish |
+| `uptime-monitor.yml` | Scheduled | Uptime checks |
+
+The **`operational-audit.yml`** workflow accepts manual dispatch inputs: `target_url`, `expected_text`, `max_pages`, `stress_requests`, `stress_concurrency`, `max_p95_ms`. Reports are uploaded as artifacts with 30-day retention.
+
+### Release Checklist
+
+1. Ensure `main` branch CI is fully green
+2. Run `pnpm release:check` — all gates must pass
+3. Update `CHANGELOG.md` — move Unreleased entries to a new version section
+4. Run `pnpm brand:check` and `pnpm verify:claims:strict`
+5. Run `pnpm build` — confirm all artifacts build cleanly
+6. Run `pnpm audit:operational` against staging if available
+7. Draft release notes (use the Alloy "Draft Release Notes" command in `alloy.commands.md`)
+8. Tag the release: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
+9. Push the tag to trigger `.github/workflows/release.yml`
+10. Verify the deployment completes and run a final smoke test
+
+### Scheduled Chat Catalog
+
+Scheduled chats are defined in **`.codex/scheduled-chats.json`** and automate recurring engineering tasks via AI-assisted analysis.
+
+| ID | Title | Cadence |
+|---|---|---|
+| `daily-standup` | Daily Standup Summary | Daily (weekdays 9am) |
+| `weekly-pr-synthesis` | Weekly PR Synthesis | Monday 8am |
+| `team-pr-summary` | Team PR Summary | Friday 5pm |
+| `release-notes` | Release Notes Drafting | On demand |
+| `pre-tag-verification` | Pre-Tag Release Verification | On demand |
+| `changelog-update` | Changelog Update | Friday 4pm |
+| `ci-failure-triage` | CI Failure Triage | On demand |
+| `new-issue-triage` | New Issue Triage | Daily (weekdays 10am) |
+| `bug-scan` | Bug Scan | Wednesday 7am |
+| `test-gap-identification` | Test Gap Identification | Wednesday 8am |
+| `regression-detection` | Performance Regression Audit | Tuesday 9am |
+| `dependency-drift` | Dependency Drift Detection | Thursday 8am |
+| `outdated-deps` | Outdated Dependencies Report | 1st of month, 9am |
+| `agents-md-update` | AGENTS.md Auto-Update | Friday 10am |
+| `skill-suggestions` | Skill Growth Suggestions | 15th of month, 9am |
+
+### Using Alloy Command Prompts
+
+Copy-paste prompts organized by category live in **`alloy.commands.md`**:
+
+| Category | Prompts |
+|---|---|
+| **Status** | Platform Health Check, Daily Standup Digest, Artifact Route Status |
+| **Release** | Draft Release Notes, Release Readiness Gate, Pre-Tag Checklist, Changelog Update |
+| **Triage** | CI Failure Investigation, Issue Triage Sweep, Incident Postmortem Template |
+| **Quality** | Bug Scan, Test Gap Analysis, Code Review Sweep, Dead Code Detection |
+| **Repo** | Dependency Drift Audit, Package Boundary Check, AGENTS.md Accuracy Check, Stale Branch Cleanup |
+| **Growth** | Skill Investment Recommendations, Automation Opportunity Scan, Architecture Review |
+
+Open `alloy.commands.md`, find the relevant category, and paste the prompt into Alloy. Each prompt is self-contained and context-aware for this monorepo.
+
+### Draft PRs with `$yeet`
+
+`$yeet` creates a draft PR from the current branch after all tests pass. Use it when a feature is complete and ready for review but not yet production-ready.
+
+**Protocol:**
+1. Ensure your branch is up to date with `main`
+2. Run `pnpm release:check` — all gates must pass
+3. Run `pnpm audit:smoke` against local dev server
+4. Invoke `$yeet` in Alloy or your shell integration
+5. `$yeet` will: run the test suite, verify the branch is clean, push the branch, and open a draft PR with a generated description
+6. The draft PR triggers CI automatically; promote to "ready for review" once CI is green
+
+**Requirements before `$yeet`:**
+- `pnpm test` passes
+- `pnpm brand:check` passes
+- `pnpm typecheck` passes
+- No uncommitted changes

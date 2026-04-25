@@ -1,0 +1,143 @@
+name: Operational Audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Base URL to audit (e.g. https://staging.szlholdings.com or https://szlholdings.com)"
+        required: true
+      expected_text:
+        description: "Text that must appear in every response body (optional)"
+        required: false
+        default: ""
+      max_pages:
+        description: "Max pages to crawl in URL audit"
+        required: false
+        default: "50"
+      stress_requests:
+        description: "Total requests for stress test"
+        required: false
+        default: "50"
+      stress_concurrency:
+        description: "Concurrent requests per batch for stress test"
+        required: false
+        default: "5"
+      max_p95_ms:
+        description: "p95 latency threshold in ms (fail if exceeded)"
+        required: false
+        default: "3000"
+
+env:
+  TARGET_URL: ${{ github.event.inputs.target_url }}
+  EXPECTED_TEXT: ${{ github.event.inputs.expected_text || '' }}
+  MAX_PAGES: ${{ github.event.inputs.max_pages || '50' }}
+  STRESS_REQUESTS: ${{ github.event.inputs.stress_requests || '50' }}
+  STRESS_CONCURRENCY: ${{ github.event.inputs.stress_concurrency || '5' }}
+  MAX_P95_MS: ${{ github.event.inputs.max_p95_ms || '3000' }}
+  REPORT_DIR: ops/reports
+
+jobs:
+  smoke:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Run smoke test
+        run: node ops/audit/smoke.mjs
+        env:
+          TARGET_URL: ${{ env.TARGET_URL }}
+          EXPECTED_TEXT: ${{ env.EXPECTED_TEXT }}
+          REPORT_DIR: ${{ env.REPORT_DIR }}
+
+      - name: Upload smoke report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-report-${{ github.run_number }}
+          path: ops/reports/smoke-report.json
+          retention-days: 30
+
+  crawl:
+    name: URL Audit (Crawl)
+    runs-on: ubuntu-latest
+    needs: smoke
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Run URL audit
+        run: node ops/audit/url-audit.mjs
+        env:
+          TARGET_URL: ${{ env.TARGET_URL }}
+          MAX_PAGES: ${{ env.MAX_PAGES }}
+          REPORT_DIR: ${{ env.REPORT_DIR }}
+
+      - name: Upload URL audit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: url-audit-report-${{ github.run_number }}
+          path: ops/reports/url-audit-report.json
+          retention-days: 30
+
+  stress:
+    name: Stress Test
+    runs-on: ubuntu-latest
+    needs: smoke
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Run stress test
+        run: node ops/audit/stress.mjs
+        env:
+          TARGET_URL: ${{ env.TARGET_URL }}
+          STRESS_REQUESTS: ${{ env.STRESS_REQUESTS }}
+          STRESS_CONCURRENCY: ${{ env.STRESS_CONCURRENCY }}
+          MAX_P95_MS: ${{ env.MAX_P95_MS }}
+          REPORT_DIR: ${{ env.REPORT_DIR }}
+
+      - name: Upload stress report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stress-report-${{ github.run_number }}
+          path: ops/reports/stress-report.json
+          retention-days: 30
+
+  report:
+    name: Aggregate Reports
+    runs-on: ubuntu-latest
+    needs: [smoke, crawl, stress]
+    if: always()
+    steps:
+      - name: Download all reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-report-${{ github.run_number }}"
+          path: ops/reports/
+          merge-multiple: true
+
+      - name: Upload combined reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: operational-audit-reports-${{ github.run_number }}
+          path: ops/reports/
+          retention-days: 90
