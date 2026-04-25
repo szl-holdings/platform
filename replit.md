@@ -81,6 +81,68 @@ The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and N
 
 **Email Deliverability:** All outbound transactional email uses `artifacts/api-server/src/lib/email.ts`. Features include a suppression list in `email_suppressions` table, automatic suppression via bounce/complaint webhooks (SendGrid, Resend), unsubscribe links, and admin routes for management.
 
+## A11oy Agent Runtime (Phase 2)
+
+**Location:** `artifacts/api-server/src/a11oy/`
+
+The Phase 2 A11oy runtime layers a fully governed, agentic execution fabric on top of the Phase 1 signal/fabric foundation. All mutating and read endpoints are live under `/api/a11oy/*`.
+
+### Runtime Modules
+
+| Module | Path | Description |
+|---|---|---|
+| Types | `runtime/types.ts` | Shared type vocabulary for all runtime modules |
+| Tracing | `runtime/tracing/store.ts` | Execution trace store; exports trace bundles |
+| Memory | `runtime/memory/store.ts` | Tiered memory with redaction of sensitive fields |
+| Model Router | `runtime/router/model-router.ts` | 5 providers (OpenAI, DeepSeek, NVIDIA, local, mock); auto-fallback |
+| MirrorEval | `runtime/evals/mirror-eval.ts` | 11 score dimensions, 5 dispositions |
+| Deep Context | `runtime/context/deep-context.ts` | Source ranking, evidence budgeting, coverage computation |
+| Tool Registry | `runtime/tools/registry.ts` | 23 tools with full metadata; demo-mode gating |
+| Approved Runner | `runtime/tools/approved-runner.ts` | Only valid path to tool execution; enforces PCE gate |
+| PCE Gate | `runtime/governance/pce-gate.ts` | Proof-Carrying Execution; Covenant Guard; 9 risk classes; approval tiers |
+| Operators | `runtime/agents/` | 10 operators: Planner, Analyst, Risk, Proof, Action, Verification, Board-Packet, Connector, Evaluator, Code |
+| Workcells | `runtime/workcells/engine.ts` | 14-phase state machine with enforced valid transitions |
+| Skills | `skills/index.ts` | 17 skills definitions |
+
+### API Endpoints
+
+**Read endpoints (no auth required in demo mode):**
+- `GET /api/a11oy/agents` — 10 operators + model router status
+- `GET /api/a11oy/tools` — 23-tool catalogue
+- `GET /api/a11oy/skills` — 17 skills
+- `GET /api/a11oy/evals` — MirrorEval score dimensions + dispositions
+- `GET /api/a11oy/memory` — memory entries
+- `GET /api/a11oy/pce` — approval records + PCE contracts
+- `GET /api/a11oy/boardroom` — board packet summaries
+- `GET /api/a11oy/terminal/catalog` — tool + skill combined catalog
+- `GET /api/a11oy/traces` — execution traces
+- `GET /api/a11oy/approvals` — pending/all approvals
+- `GET /api/a11oy/proofs` — issued proof packets
+
+**Mutating endpoints:**
+- `POST /api/a11oy/signals` — submit signal, run operators, eval
+- `POST /api/a11oy/approve` — approve an action brief
+- `POST /api/a11oy/execute` — execute approved action (via PCE gate)
+- `POST /api/a11oy/verify` — verify execution outcome
+- `POST /api/a11oy/workcells` — create workcell / advance phase
+- `POST /api/a11oy/tools/simulate` — simulate tool in demo mode
+- `POST /api/a11oy/tools/run` — run tool through PCE gate
+- `POST /api/a11oy/evals/run` — run MirrorEval against a brief
+- `POST /api/a11oy/pce` — submit PCE gate request
+- `POST /api/a11oy/pce/validate` — validate an existing PCE contract
+
+### Governance Invariants
+- **No execution without PCE gate approval** — `runApprovedTool` is the ONLY path to tool execution
+- **Demo mode blocks all destructive tools** — `A11OY_DEMO_MODE !== 'false'` activates demo mode
+- **MirrorEval gates all action briefs** — disposition `blocked` halts the pipeline
+- **Proof packets generated for every material contract** — cryptographic proof chain
+- **Memory layer redacts sensitive fields** — `ssn`, `password`, `token`, `secret`, `key`, `credit_card`
+
+### Tests
+`artifacts/api-server/src/a11oy/__tests__/runtime.test.ts` — 34 tests, all passing. Covers MirrorEval (5), PCE Gate (5), Tool Registry (6), Workcell State Machine (5), Skills (3), Model Router (3), Memory Layer (3), Execution Tracing (1), Deep Context Layer (3).
+
+## Production Readiness & Audit Status
+
 **Last audited:** April 22, 2026  
 **Status:** Demo-ready. Pre-commercial. No critical gaps; 5 HIGH gaps block first paying tenant.
 

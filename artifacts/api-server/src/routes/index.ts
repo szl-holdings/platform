@@ -26,6 +26,7 @@ import * as skillLibrary from "./groups/skill-library";
 import * as crossPlatform from "./groups/cross-platform";
 import decisionsRuntimeRouter from "./decisions-runtime";
 import a11oyFabricRouter from "./a11oy-fabric-api";
+import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
 
 const router: IRouter = Router();
 
@@ -116,9 +117,12 @@ router.use(lazyMatch("/crisis-arena", () => import("./crisis-arena"), "crisis-ar
 router.use(lazyMatch("/lyte", () => import("./lyte-surfaces"), "lyte-surfaces"));
 router.use(lazyMatch("/lyte", () => import("./lyte-intel"), "lyte-intel"));
 
+// A11oy Runtime API (Phase 2) — mutating endpoints, operators, MirrorEval, PCE gate, Workcells, Skills.
+// Mounted BEFORE the Phase 1 fabric router so runtime routes take precedence when paths overlap.
+router.use(a11oyRuntimeRouter);
+
 // A11oy Fabric API — public read-side endpoints for the Live Enterprise Execution Fabric.
 // GET /a11oy/now, /signals, /outcomes, /actions, /proof, /governance, /verticals, /fabric, /workcells.
-// Mutating endpoints (approve, execute, run) are stub-only in Phase 1.
 router.use(a11oyFabricRouter);
 
 // Lyte market indicators — delayed/EOD macro feed backed by Alpha Vantage.
