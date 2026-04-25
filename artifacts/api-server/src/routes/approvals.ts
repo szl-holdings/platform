@@ -219,6 +219,9 @@ router.post(
       const user = req.user;
       const orgId = user?.orgs?.[0]?.orgId ?? null;
 
+      const resolvedPriority =
+        (priority as 'low' | 'medium' | 'high' | 'critical') ?? 'medium';
+
       const approval = await createApprovalRequest({
         orgId,
         resourceType,
@@ -226,7 +229,7 @@ router.post(
         title,
         description,
         actionClass: actionClass ?? 'general',
-        priority: (priority as 'low' | 'medium' | 'high' | 'critical') ?? 'medium',
+        priority: resolvedPriority,
         requestedById: user?.id ?? null,
         requestedByRole: user?.roles?.[0] ?? undefined,
         requiredApproverRole,
@@ -237,6 +240,52 @@ router.post(
         serviceAttribution: 'api-server',
         payload,
       });
+
+      // Best-effort: wake mobile approvers when a high- or critical-priority
+      // approval is created so they can act from the Quick Actions screen.
+      // Honors per-user alert prefs + quiet hours via sendPushToOrgApprovers.
+      // Fire-and-forget so push failures never block approval creation.
+      if (
+        typeof orgId === 'number' &&
+        (resolvedPriority === 'high' || resolvedPriority === 'critical')
+      ) {
+        const approvalId = (approval as { id?: number } | null | undefined)?.id ?? null;
+        const approvalTitle =
+          (approval as { title?: string } | null | undefined)?.title ?? title;
+        void import('../lib/expo-push.js')
+          .then(({ sendPushToOrgApprovers }) =>
+            sendPushToOrgApprovers(
+              orgId,
+              {
+                title:
+                  resolvedPriority === 'critical'
+                    ? 'Critical Approval Pending'
+                    : 'High-Priority Approval Pending',
+                body: `${approvalTitle} requires your review.`,
+                data: {
+                  kind: 'approval_pending',
+                  approvalId,
+                  severity: resolvedPriority,
+                  // Both keys included for backward-compat with existing
+                  // mobile hooks: defense/* reads `screen`, the prior
+                  // escalation flow reads `deepLink`. Routes to the
+                  // Quick Actions screen on the mobile shell.
+                  screen: '/(shell)/quick-actions',
+                  deepLink: '/(shell)/quick-actions',
+                },
+                sound: 'default',
+                channelId: 'critical-alerts',
+              },
+              { appId: 'cortex', severity: resolvedPriority },
+            ),
+          )
+          .catch((err) => {
+            logger.warn(
+              { err, orgId, approvalId, priority: resolvedPriority },
+              '[approvals] Org approver push failed (non-fatal)',
+            );
+          });
+      }
 
       sendCreated(res, approval);
     } catch (err) {

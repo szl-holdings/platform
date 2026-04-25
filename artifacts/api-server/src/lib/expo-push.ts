@@ -1,14 +1,17 @@
 import {
   db,
+  orgMembersTable,
   pool,
   pushNotificationHistoryTable,
   pushNotificationPreferencesTable,
   pushReceiptsTable,
   pushTokensTable,
+  rolesTable,
   scheduledNotificationsTable,
+  userRolesTable,
   userSettingsTable,
 } from '@szl-holdings/db';
-import { and, eq, inArray, isNull, lt, } from 'drizzle-orm';
+import { and, eq, inArray, isNull, lt, sql, } from 'drizzle-orm';
 import {
   Expo,
   type ExpoPushMessage,
@@ -347,6 +350,113 @@ export async function sendPushToUser(
     templateId: opts?.templateId,
     tokenUserMap,
   });
+}
+
+/**
+ * Approver role names (from `roles.name`) that should be notified about
+ * org-scoped approval requests. Mirrors the role gate on
+ * `requireRole(...)` for the approval review endpoints.
+ */
+const APPROVER_ROLE_NAMES = ['super_admin', 'admin', 'ops', 'compliance'] as const;
+
+/**
+ * Resolve the set of user IDs in `orgId` that hold any of
+ * `APPROVER_ROLE_NAMES` and have at least one active mobile push token
+ * registered for `appId`. Returns an empty array on any lookup failure
+ * so callers can stay best-effort.
+ */
+async function getApproverUserIdsForOrg(orgId: number, appId: string): Promise<number[]> {
+  try {
+    const rows = await db
+      .selectDistinct({ userId: orgMembersTable.userId })
+      .from(orgMembersTable)
+      .innerJoin(userRolesTable, eq(userRolesTable.userId, orgMembersTable.userId))
+      .innerJoin(rolesTable, eq(rolesTable.id, userRolesTable.roleId))
+      .innerJoin(pushTokensTable, eq(pushTokensTable.userId, orgMembersTable.userId))
+      .where(
+        and(
+          eq(orgMembersTable.orgId, orgId),
+          inArray(rolesTable.name, APPROVER_ROLE_NAMES as unknown as string[]),
+          eq(pushTokensTable.appId, appId),
+          eq(pushTokensTable.isActive, true),
+        ),
+      );
+    return rows.map((r) => r.userId).filter((id): id is number => typeof id === 'number');
+  } catch (err) {
+    logger.warn(
+      { err, orgId, appId },
+      '[expo-push] Failed to resolve org approver user ids; skipping push',
+    );
+    return [];
+  }
+}
+
+/**
+ * Best-effort: fan-out a push payload to every user in `orgId` that holds
+ * an approver role (super_admin / admin / ops / compliance) and has an
+ * active push token registered for `appId`. Each delivery still respects
+ * the recipient's per-user rate limit, alert-category preference, and
+ * quiet hours via `sendPushToUser` + `isAlertCategoryAllowedForUser`.
+ *
+ * Used by POST /approvals to wake mobile approvers when a high- or
+ * critical-priority approval is created. Failures are swallowed so push
+ * delivery can never block approval creation.
+ */
+/**
+ * Indirection seam used by `sendPushToOrgApprovers` so unit tests can
+ * substitute the per-user delivery + preference gate without having to
+ * stand up the full DB + Expo stack. Production code never reassigns
+ * these fields.
+ */
+export const __orgApproverInternals = {
+  resolveUserIds: getApproverUserIdsForOrg,
+  isAllowed: isAlertCategoryAllowedForUser,
+  sendToUser: sendPushToUser,
+};
+
+export async function sendPushToOrgApprovers(
+  orgId: number,
+  payload: PushMessagePayload,
+  opts: {
+    appId: string;
+    severity?: 'low' | 'medium' | 'high' | 'critical';
+    templateId?: string;
+  },
+): Promise<{ targeted: number; sent: number; failed: number }> {
+  const userIds = await __orgApproverInternals.resolveUserIds(orgId, opts.appId);
+  if (userIds.length === 0) {
+    return { targeted: 0, sent: 0, failed: 0 };
+  }
+
+  let sent = 0;
+  let failed = 0;
+  await Promise.all(
+    userIds.map(async (userId) => {
+      try {
+        const allowed = await __orgApproverInternals.isAllowed(userId, 'approvals', {
+          severity: opts.severity,
+        });
+        if (!allowed) return;
+        const result = await __orgApproverInternals.sendToUser(userId, payload, {
+          appId: opts.appId,
+          templateId: opts.templateId,
+        });
+        sent += result.sent;
+        failed += result.failed;
+      } catch (err) {
+        logger.warn(
+          { err, userId, orgId, appId: opts.appId },
+          '[expo-push] Org-approver push failed for user',
+        );
+      }
+    }),
+  );
+
+  logger.info(
+    { orgId, appId: opts.appId, targeted: userIds.length, sent, failed },
+    '[expo-push] Org approvers push complete',
+  );
+  return { targeted: userIds.length, sent, failed };
 }
 
 export async function sendPushToApp(
