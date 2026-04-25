@@ -472,7 +472,24 @@ export function CortexEntityGraph({
               letterSpacing: '0.04em',
             }}
           >
-            {snapshotLoading ? 'Capturing…' : '⊕ Capture Snapshot'}
+            {snapshotLoading ? (
+              <>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    width: 10,
+                    height: 10,
+                    border: '1.5px solid #ffffff30',
+                    borderTopColor: '#ffffff80',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite',
+                    verticalAlign: 'middle',
+                    marginRight: 4,
+                  }}
+                />
+                Capturing…
+              </>
+            ) : '⊕ Capture Snapshot'}
           </button>
         )}
 

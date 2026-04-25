@@ -12,6 +12,7 @@ import {
   type IntelligenceSignal,
 } from '@szl-holdings/shared-ui/cortex-intelligence-feed';
 import { CortexWhatIf, type WhatIfResult } from '@szl-holdings/shared-ui/cortex-what-if';
+import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, m } from 'framer-motion';
 import {
@@ -220,6 +221,13 @@ export default function CortexIntelligenceHub() {
         setActiveSnapshotId(newId);
         setGraphViewMode('snapshot');
       }
+      const label = res?.snapshot?.label ?? 'Untitled';
+      toast.success(`Snapshot saved · ${label}`);
+    },
+    onError: (err: unknown) => {
+      const message =
+        err instanceof Error ? err.message : 'An unexpected error occurred';
+      toast.error(`Snapshot capture failed: ${message}`);
     },
   });
 
