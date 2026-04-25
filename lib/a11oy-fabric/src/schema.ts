@@ -108,16 +108,27 @@ export interface ProofPacket {
 export interface Workcell {
   id: string;
   name: string;
-  description: string;
   vertical: Vertical;
   status: WorkcellStatus;
-  operatorId: string;
-  tools: string[];
-  approvalTier: 'auto' | 'operator' | 'executive';
-  maxRunDurationMs: number;
-  lastRunAt?: string;
-  lastRunStatus?: WorkcellStatus;
-  proofPacketIds: string[];
+  objective: string;
+  signals: string[];
+  contextPack: Record<string, unknown>;
+  agentSequence: Array<{
+    agentId: string;
+    role: string;
+    action: string;
+  }>;
+  actionBrief: ActionBrief;
+  mirrorEvalResult: MirrorEvalResult;
+  pceContractId: string;
+  requiresApproval: boolean;
+  mockExecutionResult: Record<string, unknown>;
+  verificationResult: {
+    status: 'passed' | 'failed';
+    checksum: string;
+  };
+  proofPacketId: string;
+  executionTraceId: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -185,6 +196,45 @@ export interface BusinessTwin {
   activeOutcomes: number;
   pendingActions: number;
   coverageScore: number;
+  updatedAt: string;
+}
+
+export interface Tool {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  vertical: Vertical | 'global';
+  inputSchema: Record<string, unknown>;
+  outputSchema: Record<string, unknown>;
+  governanceFlags: string[];
+}
+
+export interface Workcell {
+  id: string;
+  name: string;
+  vertical: Vertical;
+  status: WorkcellStatus;
+  objective: string;
+  signals: string[];
+  contextPack: Record<string, unknown>;
+  agentSequence: Array<{
+    agentId: string;
+    role: string;
+    action: string;
+  }>;
+  actionBrief: ActionBrief;
+  mirrorEvalResult: MirrorEvalResult;
+  pceContractId: string;
+  requiresApproval: boolean;
+  mockExecutionResult: Record<string, unknown>;
+  verificationResult: {
+    status: 'passed' | 'failed';
+    checksum: string;
+  };
+  proofPacketId: string;
+  executionTraceId: string;
+  createdAt: string;
   updatedAt: string;
 }
 

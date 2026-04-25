@@ -1,124 +1,149 @@
+import { useState } from 'react';
+import { Link } from 'wouter';
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard, DemoBadge, StatusPill, ApprovalGate } from '../components/ui';
+import { PageHeader, Card, SectionTitle, KpiCard, ApprovalGate, VerdictBadge, VerticalBadge } from '../components/ui';
+import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
 
-const WORKCELLS = [
-  {
-    id: 'wc-maritime-001', name: 'Maritime Ops Cell', domain: 'Maritime', status: 'running',
-    operator: 'Cascade Navigator', tools: ['Port API (demo)', 'ETA Calculator', 'Demurrage Model', 'Vessel Tracker'],
-    steps: 7, completedSteps: 5, currentStep: 'Awaiting VP approval for standby authorization',
-    proofRef: 'pce-c9f2e5b8', outcome: 'pending',
-  },
-  {
-    id: 'wc-legal-001', name: 'Talbot Matter Cell', domain: 'Legal', status: 'running',
-    operator: 'Counsel Sentinel', tools: ['Matter Tracker', 'Deadline Engine', 'Document Status'],
-    steps: 5, completedSteps: 3, currentStep: 'Escalation package assembled — awaiting GC approval',
-    proofRef: 'pce-a2d7e1f4', outcome: 'pending',
-  },
-  {
-    id: 'wc-revenue-001', name: 'Q2 Pipeline Cell', domain: 'Revenue', status: 'running',
-    operator: 'Pipeline Oracle', tools: ['CRM Monitor (demo)', 'Forecast Model', 'Deal Scorer'],
-    steps: 4, completedSteps: 2, currentStep: 'Deal flag report ready — VP review scheduled',
-    proofRef: null, outcome: 'pending',
-  },
-  {
-    id: 'wc-defense-001', name: 'TG-Ember Response Cell', domain: 'Defense', status: 'completed',
-    operator: 'Guardian', tools: ['Threat Intel (demo)', 'Posture Engine', 'SIGINT Correlator'],
-    steps: 6, completedSteps: 6, currentStep: 'Complete — all steps verified',
-    proofRef: 'pce-b8c3f9e2', outcome: 'success',
-  },
-  {
-    id: 'wc-fabric-001', name: 'Fabric Health Monitor', domain: 'Alloy Core', status: 'running',
-    operator: 'Fabric Watchdog', tools: ['Mesh Monitor', 'Proof Verifier', 'Latency Tracker'],
-    steps: 0, completedSteps: 0, currentStep: 'Continuous monitoring — no intervention needed',
-    proofRef: null, outcome: 'nominal',
-  },
-];
-
-const DOMAIN_COLORS: Record<string, string> = {
-  Maritime: '#3b82f6', Legal: '#6366f1', Revenue: '#f59e0b',
-  Defense: '#8b5cf6', 'Alloy Core': '#b08d52',
+const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const VERTICAL_COLORS: Record<string, string> = {
+  'lyte-revenue': '#3b82f6', 'vessels-maritime': '#06b6d4', 'terra-real-estate': '#10b981',
+  'aegis-defense': '#ef4444', 'prism-counsel': '#8b5cf6', 'carlota-jo': '#f59e0b', 'alloy-core': '#6366f1',
 };
-
+const VERTICAL_LABELS: Record<string, string> = {
+  'lyte-revenue': 'Lyte Revenue', 'vessels-maritime': 'Vessels Maritime', 'terra-real-estate': 'Terra Real Estate',
+  'aegis-defense': 'Aegis Defense', 'prism-counsel': 'PRISM Counsel', 'carlota-jo': 'Carlota Jo', 'alloy-core': 'Alloy Core',
+};
 const STATUS_COLORS: Record<string, string> = {
-  running: '#f59e0b', completed: '#10b981', paused: '#9bacc4', error: '#ef4444',
+  running: '#f59e0b', completed: '#10b981', paused: '#9bacc4', error: '#ef4444', idle: '#9bacc4',
 };
 
 export function Workcells() {
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterVertical, setFilterVertical] = useState<string>('all');
+
+  const filtered = SEED_WORKCELLS.filter(w =>
+    (filterStatus === 'all' || w.status === filterStatus) &&
+    (filterVertical === 'all' || w.vertical === filterVertical)
+  );
+
+  const running = SEED_WORKCELLS.filter(w => w.status === 'running');
+  const completed = SEED_WORKCELLS.filter(w => w.status === 'completed');
+  const pendingApproval = SEED_WORKCELLS.filter(w => w.requiresApproval && w.status === 'running');
+
   return (
     <Layout>
       <PageHeader
         label="WORKCELLS"
-        title="Active Execution Workcells"
-        subtitle="Workcells are governed, traceable execution contexts. Each cell binds an operator, a set of tools, a policy, and a proof trail."
+        title="Execution Workcell Engine"
+        subtitle="Every workcell is a governed, traceable execution context. Inspect signal inputs, agent sequences, PCE contracts, and proof packets."
         status="DEMO"
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <KpiCard label="ACTIVE CELLS" value="4" sub="Running" accent="#f59e0b" />
-        <KpiCard label="COMPLETED TODAY" value="1" sub="With proof" accent="#10b981" />
-        <KpiCard label="TOTAL STEPS" value="22" sub="Across all cells" accent="#3b82f6" />
-        <KpiCard label="HUMAN GATES" value="2" sub="Currently open" accent="#8b5cf6" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <KpiCard label="RUNNING" value={running.length} sub="active cells" accent="#f59e0b" />
+        <KpiCard label="COMPLETED" value={completed.length} sub="with proof" accent="#10b981" />
+        <KpiCard label="APPROVAL GATES" value={pendingApproval.length} sub="awaiting human" accent="#8b5cf6" />
+        <KpiCard label="TOTAL CELLS" value={SEED_WORKCELLS.length} sub="in registry" accent="#3b82f6" />
       </div>
 
-      <div className="flex flex-col gap-4">
-        {WORKCELLS.map(wc => {
-          const pct = wc.steps > 0 ? Math.round((wc.completedSteps / wc.steps) * 100) : 100;
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex gap-1">
+          {['all', 'running', 'completed', 'idle', 'paused', 'error'].map(s => (
+            <button
+              key={s}
+              onClick={() => setFilterStatus(s)}
+              className="text-xs px-2.5 py-1 rounded font-mono transition-colors"
+              style={{
+                backgroundColor: filterStatus === s ? 'rgba(59,130,246,0.15)' : 'var(--color-a11oy-muted)',
+                color: filterStatus === s ? '#3b82f6' : 'var(--color-a11oy-text-ghost)',
+                border: filterStatus === s ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
+                cursor: 'pointer',
+              }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+        <select
+          value={filterVertical}
+          onChange={e => setFilterVertical(e.target.value)}
+          className="text-xs rounded px-2 py-1 border"
+          style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)', color: 'var(--color-a11oy-text)' }}
+        >
+          <option value="all">All verticals</option>
+          {Object.entries(VERTICAL_LABELS).map(([id, label]) => (
+            <option key={id} value={id}>{label}</option>
+          ))}
+        </select>
+        <span className="text-xs self-center" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{filtered.length} workcells</span>
+      </div>
+
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {filtered.map(wc => {
+          const color = VERTICAL_COLORS[wc.vertical] ?? '#9bacc4';
+          const statusColor = STATUS_COLORS[wc.status] ?? '#9bacc4';
           return (
-            <Card key={wc.id}>
-              <div className="flex items-start justify-between gap-4 mb-3">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{wc.name}</span>
-                    <span
-                      className="text-xs font-mono px-1.5 py-0.5 rounded"
-                      style={{ backgroundColor: `${STATUS_COLORS[wc.status]}18`, color: STATUS_COLORS[wc.status] }}
-                    >
-                      {wc.status}
-                    </span>
+            <Card key={wc.id} className="flex flex-col gap-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="font-mono text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: `${statusColor}18`, color: statusColor }}>{wc.status}</span>
+                    <VerticalBadge vertical={VERTICAL_LABELS[wc.vertical] ?? wc.vertical} color={color} />
                   </div>
-                  <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                    {wc.domain} · Operator: {wc.operator}
-                  </div>
+                  <div className="font-semibold text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{wc.name}</div>
                 </div>
-                <div className="text-right flex-shrink-0">
-                  <div className="text-xs font-mono" style={{ color: DOMAIN_COLORS[wc.domain] ?? '#9bacc4' }}>{pct}%</div>
-                  <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{wc.completedSteps}/{wc.steps > 0 ? wc.steps : '∞'} steps</div>
-                </div>
+                <VerdictBadge verdict={wc.mirrorEvalResult.verdict} />
               </div>
 
-              {wc.steps > 0 && (
-                <div className="h-1.5 rounded-full mb-3" style={{ backgroundColor: 'var(--color-a11oy-muted)' }}>
-                  <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: DOMAIN_COLORS[wc.domain] ?? '#9bacc4' }} />
-                </div>
-              )}
+              <p className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>{wc.objective}</p>
 
-              <div className="flex flex-wrap gap-1.5 mb-3">
-                {wc.tools.map(t => (
-                  <span key={t} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-ghost)' }}>
-                    {t}
+              <div className="flex flex-wrap gap-1">
+                {wc.agentSequence.map((a, i) => (
+                  <span key={i} className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-ghost)' }}>
+                    {a.role}
                   </span>
                 ))}
               </div>
 
-              <div className="text-xs px-3 py-2 rounded mb-2" style={{ backgroundColor: 'var(--color-a11oy-deep)', border: '1px solid var(--color-a11oy-border)', color: 'var(--color-a11oy-text-sub)' }}>
-                Current: {wc.currentStep}
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{wc.id}</span>
+                <div className="flex items-center gap-2">
+                  {wc.requiresApproval && <span className="font-mono" style={{ color: '#8b5cf6' }}>⚬ approval</span>}
+                </div>
               </div>
 
-              {wc.proofRef && (
-                <div className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                  Proof: {wc.proofRef}
-                </div>
+              {wc.requiresApproval && wc.status === 'running' && (
+                <ApprovalGate label={`Approval tier: ${wc.actionBrief.approvalTier}`} />
               )}
 
-              {wc.outcome === 'pending' && <ApprovalGate label="Cell paused — awaiting human approval to proceed" />}
+              <div className="flex gap-2 mt-auto">
+                <Link
+                  href={`${BASE}/workcells/${wc.id}`}
+                  className="text-xs px-3 py-1.5 rounded font-medium"
+                  style={{ backgroundColor: 'var(--color-a11oy-blue)', color: 'white', textDecoration: 'none' }}
+                >
+                  View Detail
+                </Link>
+                <Link
+                  href={`${BASE}/workcells/${wc.id}/replay`}
+                  className="text-xs px-3 py-1.5 rounded font-medium border"
+                  style={{ backgroundColor: 'transparent', color: 'var(--color-a11oy-text-sub)', borderColor: 'var(--color-a11oy-border)', textDecoration: 'none' }}
+                >
+                  Replay
+                </Link>
+              </div>
             </Card>
           );
         })}
       </div>
 
-      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-        <DemoBadge /> Workcell tool integrations are demo adapters. Real workcells require configured connectors.
-      </div>
+      {filtered.length === 0 && (
+        <div className="text-center py-16">
+          <div className="text-2xl mb-2" style={{ color: 'var(--color-a11oy-border)' }}>△</div>
+          <div className="text-sm" style={{ color: 'var(--color-a11oy-text-ghost)' }}>No workcells match the current filter.</div>
+        </div>
+      )}
     </Layout>
   );
 }

@@ -12,36 +12,42 @@ const NAV_GROUPS = [
   {
     label: 'NOW',
     items: [
-      { href: '/',      label: 'Hero',          icon: '◈' },
-      { href: '/now',   label: 'Now Board',     icon: '⬡' },
-      { href: '/command', label: 'Command',     icon: '▸' },
+      { href: '/',        label: 'Home',          icon: '◈' },
+      { href: '/now',     label: 'Now Board',     icon: '⬡' },
+      { href: '/command', label: 'Command',        icon: '▸' },
     ],
   },
   {
     label: 'FABRIC',
     items: [
-      { href: '/signals',    label: 'Signal Mesh',    icon: '∿' },
-      { href: '/actions',    label: 'Action Rail',    icon: '→' },
-      { href: '/proof',      label: 'Proof Ledger',   icon: '◇' },
-      { href: '/governance', label: 'Governance',     icon: '⚖' },
+      { href: '/fabric',     label: 'Fabric',       icon: '◫' },
+      { href: '/verticals',  label: 'Verticals',    icon: '▤' },
+      { href: '/signals',    label: 'Signal Mesh',  icon: '∿' },
+      { href: '/outcomes',   label: 'Outcomes',     icon: '◎' },
+      { href: '/actions',    label: 'Action Rail',  icon: '→' },
+      { href: '/proof',      label: 'Proof Ledger', icon: '◇' },
+      { href: '/governance', label: 'Governance',   icon: '⚖' },
     ],
   },
   {
     label: 'RUNTIME',
     items: [
-      { href: '/agents',    label: 'Operators',       icon: '◎' },
-      { href: '/workcells', label: 'Workcells',       icon: '△' },
-      { href: '/evals',     label: 'MirrorEval',      icon: '⟺' },
-      { href: '/replay',    label: 'Replay',          icon: '⟲' },
+      { href: '/agents',    label: 'Operators',    icon: '⊙' },
+      { href: '/workcells', label: 'Workcells',    icon: '△' },
+      { href: '/evals',     label: 'MirrorEval',   icon: '⟺' },
+      { href: '/memory',    label: 'Memory',       icon: '⊛' },
+      { href: '/pce',       label: 'PCE',          icon: '⊡' },
     ],
   },
   {
     label: 'PLATFORM',
     items: [
-      { href: '/connectors',   label: 'Connectors',   icon: '⬟' },
-      { href: '/twins',        label: 'Twin Foundry', icon: '⊕' },
-      { href: '/model-router', label: 'Model Router', icon: '⊞' },
+      { href: '/tools',        label: 'Tools',        icon: '⊕' },
       { href: '/skills',       label: 'Skills',       icon: '⊗' },
+      { href: '/model-router', label: 'Model Router', icon: '⊞' },
+      { href: '/connectors',   label: 'Connectors',   icon: '⬟' },
+      { href: '/twins',        label: 'Twin Foundry', icon: '⊘' },
+      { href: '/terminal',     label: 'Terminal',     icon: '▷' },
     ],
   },
   {
@@ -51,6 +57,8 @@ const NAV_GROUPS = [
       { href: '/sovereign',     label: 'Sovereign',     icon: '⬛' },
       { href: '/boardroom',     label: 'Boardroom',     icon: '▣' },
       { href: '/investor-demo', label: 'Investor Demo', icon: '▶' },
+      { href: '/demo',          label: 'Demo Mode',     icon: '⬚' },
+      { href: '/about',         label: 'About',         icon: '◻' },
     ],
   },
 ];
@@ -94,12 +102,13 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
         >
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#f59e0b' }} />
-            Active prototype — demo data unless connectors are configured
+            DEMO MODE — All data is synthetic. Connect enterprise sources to activate Live Mode.
           </div>
           <button
             onClick={dismissBanner}
             className="opacity-60 hover:opacity-100 transition-opacity"
             style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer' }}
+            aria-label="Dismiss banner"
           >
             ✕
           </button>
@@ -114,14 +123,11 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
             onClick={() => setSidebarOpen(o => !o)}
             className="w-7 h-7 flex items-center justify-center rounded text-sm transition-colors"
             style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}
+            aria-label="Toggle sidebar"
           >
             ☰
           </button>
-          <Link
-            href={b('/')}
-            className="flex items-center gap-2"
-            style={{ textDecoration: 'none' }}
-          >
+          <Link href={b('/')} className="flex items-center gap-2" style={{ textDecoration: 'none' }}>
             <div
               className="w-5 h-5 rounded flex items-center justify-center font-mono text-xs font-bold"
               style={{ backgroundColor: 'var(--color-a11oy-blue)', color: 'white' }}
@@ -131,19 +137,26 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
             <span className="font-display font-semibold text-sm tracking-tight" style={{ color: 'var(--color-a11oy-text)' }}>
               A11oy
             </span>
-            <span className="font-mono px-1 py-0.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-ghost)', fontSize: '9px' }}>
-              DEMO
+            <span className="font-mono px-1 py-0.5 rounded hidden sm:inline-block" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-ghost)', fontSize: '9px' }}>
+              v2.0 · DEMO
             </span>
           </Link>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-1.5 text-xs" style={{ color: '#10b981' }}>
             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#10b981' }} />
             <span className="font-mono">Fabric operational</span>
           </div>
           <Link
+            href={b('/boardroom')}
+            className="text-xs px-2.5 py-1 rounded font-medium hidden sm:inline-block"
+            style={{ backgroundColor: 'rgba(245,158,11,0.12)', color: '#f59e0b', textDecoration: 'none', border: '1px solid rgba(245,158,11,0.25)' }}
+          >
+            Boardroom
+          </Link>
+          <Link
             href={b('/investor-demo')}
-            className="text-xs px-3 py-1.5 rounded font-medium"
+            className="text-xs px-2.5 py-1 rounded font-medium"
             style={{ backgroundColor: 'var(--color-a11oy-blue)', color: 'white', textDecoration: 'none' }}
           >
             Investor Demo
@@ -153,13 +166,13 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
       <div className="flex flex-1" style={{ minHeight: 0 }}>
         {sidebarOpen && (
           <aside
-            className="w-52 border-r flex-shrink-0 overflow-y-auto py-4"
+            className="w-48 border-r flex-shrink-0 overflow-y-auto py-4"
             style={{ backgroundColor: 'var(--color-a11oy-deep)', borderColor: 'var(--color-a11oy-border)', position: 'sticky', top: 48, height: 'calc(100vh - 48px)' }}
           >
             {NAV_GROUPS.map(group => (
-              <div key={group.label} className="mb-5">
+              <div key={group.label} className="mb-4">
                 <div
-                  className="px-4 mb-1.5 text-xs font-mono font-medium tracking-widest"
+                  className="px-4 mb-1 text-xs font-mono font-medium tracking-widest"
                   style={{ color: 'var(--color-a11oy-text-ghost)' }}
                 >
                   {group.label}
@@ -174,7 +187,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
                     <Link
                       key={item.href}
                       href={fullHref}
-                      className="flex items-center gap-2.5 px-4 py-1.5 text-sm transition-colors"
+                      className="flex items-center gap-2 px-4 py-1.5 text-xs transition-colors"
                       style={{
                         textDecoration: 'none',
                         color: isActive ? 'var(--color-a11oy-text)' : 'var(--color-a11oy-text-sub)',

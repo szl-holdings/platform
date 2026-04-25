@@ -1,12 +1,5 @@
-import { Route, Switch, Redirect } from 'wouter';
-import { OrgProvider } from './context/OrgContext';
-import { AppShell } from './components/shell/AppShell';
-import { AtlasSection } from './pages/AtlasSection';
-import { TokensSection } from './pages/TokensSection';
-import { VoiceSection } from './pages/VoiceSection';
-import { LibrarySection } from './pages/LibrarySection';
-import { ReleasesSection } from './pages/ReleasesSection';
-import { AuditSection } from './pages/AuditSection';
+import { lazy, Suspense } from 'react';
+import { Route, Switch } from 'wouter';
 
 function stripTrailingSlash(path: string) {
   return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
@@ -14,29 +7,93 @@ function stripTrailingSlash(path: string) {
 
 const base = stripTrailingSlash((import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '') || '/a11oy');
 
+function Loader() {
+  return (
+    <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)' }}>
+      <div
+        className="w-6 h-6 border-2 rounded-full animate-spin"
+        style={{ borderColor: 'rgba(59,130,246,0.2)', borderTopColor: '#3b82f6' }}
+      />
+    </div>
+  );
+}
+
+const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
+const NowBoard = lazy(() => import('./pages/NowBoard').then(m => ({ default: m.NowBoard })));
+const CommandSurface = lazy(() => import('./pages/CommandSurface').then(m => ({ default: m.CommandSurface })));
+const SignalMesh = lazy(() => import('./pages/SignalMesh').then(m => ({ default: m.SignalMesh })));
+const ActionRail = lazy(() => import('./pages/ActionRail').then(m => ({ default: m.ActionRail })));
+const ProofLedger = lazy(() => import('./pages/ProofLedger').then(m => ({ default: m.ProofLedger })));
+const Governance = lazy(() => import('./pages/Governance').then(m => ({ default: m.Governance })));
+const Agents = lazy(() => import('./pages/Agents').then(m => ({ default: m.Agents })));
+const Workcells = lazy(() => import('./pages/Workcells').then(m => ({ default: m.Workcells })));
+const WorkcellDetail = lazy(() => import('./pages/WorkcellDetail').then(m => ({ default: m.WorkcellDetail })));
+const WorkcellReplayDetail = lazy(() => import('./pages/WorkcellReplayDetail').then(m => ({ default: m.WorkcellReplayDetail })));
+const MirrorEval = lazy(() => import('./pages/MirrorEval').then(m => ({ default: m.MirrorEval })));
+const ConnectorFirewall = lazy(() => import('./pages/ConnectorFirewall').then(m => ({ default: m.ConnectorFirewall })));
+const TwinFoundry = lazy(() => import('./pages/TwinFoundry').then(m => ({ default: m.TwinFoundry })));
+const TrustCenter = lazy(() => import('./pages/TrustCenter').then(m => ({ default: m.TrustCenter })));
+const ModelRouter = lazy(() => import('./pages/ModelRouter').then(m => ({ default: m.ModelRouter })));
+const SkillsLibrary = lazy(() => import('./pages/SkillsLibrary').then(m => ({ default: m.SkillsLibrary })));
+const WorkcellReplay = lazy(() => import('./pages/WorkcellReplay').then(m => ({ default: m.WorkcellReplay })));
+const Sovereign = lazy(() => import('./pages/Sovereign').then(m => ({ default: m.Sovereign })));
+const BoardroomMode = lazy(() => import('./pages/BoardroomMode').then(m => ({ default: m.BoardroomMode })));
+const InvestorDemo = lazy(() => import('./pages/InvestorDemo').then(m => ({ default: m.InvestorDemo })));
+const Terminal = lazy(() => import('./pages/Terminal').then(m => ({ default: m.Terminal })));
+const Fabric = lazy(() => import('./pages/Fabric').then(m => ({ default: m.Fabric })));
+const Verticals = lazy(() => import('./pages/Verticals').then(m => ({ default: m.Verticals })));
+const Outcomes = lazy(() => import('./pages/Outcomes').then(m => ({ default: m.Outcomes })));
+const Memory = lazy(() => import('./pages/Memory').then(m => ({ default: m.Memory })));
+const Tools = lazy(() => import('./pages/Tools').then(m => ({ default: m.Tools })));
+const Pce = lazy(() => import('./pages/Pce').then(m => ({ default: m.Pce })));
+const Demo = lazy(() => import('./pages/Demo').then(m => ({ default: m.Demo })));
+const About = lazy(() => import('./pages/About').then(m => ({ default: m.About })));
+
 export default function App() {
   return (
-    <OrgProvider>
-      <AppShell>
-        <Switch>
-          <Route path={`${base}/`} component={() => <Redirect to={`${base}/atlas`} />} />
-          <Route path={`${base}`} component={() => <Redirect to={`${base}/atlas`} />} />
-          <Route path={`${base}/atlas`} component={AtlasSection} />
-          <Route path={`${base}/tokens`} component={TokensSection} />
-          <Route path={`${base}/voice`} component={VoiceSection} />
-          <Route path={`${base}/library`} component={LibrarySection} />
-          <Route path={`${base}/releases`} component={ReleasesSection} />
-          <Route path={`${base}/audit`} component={AuditSection} />
-          <Route>
-            <div className="p-8 h-full flex items-center justify-center">
-              <div className="text-center">
-                <h2 className="text-2xl font-display text-[var(--color-a11oy-text)] mb-2">Section Not Found</h2>
-                <p className="text-[var(--color-a11oy-text-sub)]">The requested orchestration module does not exist.</p>
-              </div>
+    <Suspense fallback={<Loader />}>
+      <Switch>
+        <Route path={`${base}/`} component={HomePage} />
+        <Route path={`${base}`} component={HomePage} />
+        <Route path={`${base}/now`} component={NowBoard} />
+        <Route path={`${base}/command`} component={CommandSurface} />
+        <Route path={`${base}/signals`} component={SignalMesh} />
+        <Route path={`${base}/actions`} component={ActionRail} />
+        <Route path={`${base}/proof`} component={ProofLedger} />
+        <Route path={`${base}/governance`} component={Governance} />
+        <Route path={`${base}/agents`} component={Agents} />
+        <Route path={`${base}/workcells/:id/replay`} component={WorkcellReplayDetail} />
+        <Route path={`${base}/workcells/:id`} component={WorkcellDetail} />
+        <Route path={`${base}/workcells`} component={Workcells} />
+        <Route path={`${base}/evals`} component={MirrorEval} />
+        <Route path={`${base}/connectors`} component={ConnectorFirewall} />
+        <Route path={`${base}/twins`} component={TwinFoundry} />
+        <Route path={`${base}/model-router`} component={ModelRouter} />
+        <Route path={`${base}/skills`} component={SkillsLibrary} />
+        <Route path={`${base}/replay`} component={WorkcellReplay} />
+        <Route path={`${base}/trust`} component={TrustCenter} />
+        <Route path={`${base}/sovereign`} component={Sovereign} />
+        <Route path={`${base}/boardroom`} component={BoardroomMode} />
+        <Route path={`${base}/investor-demo`} component={InvestorDemo} />
+        <Route path={`${base}/terminal`} component={Terminal} />
+        <Route path={`${base}/fabric`} component={Fabric} />
+        <Route path={`${base}/verticals`} component={Verticals} />
+        <Route path={`${base}/outcomes`} component={Outcomes} />
+        <Route path={`${base}/memory`} component={Memory} />
+        <Route path={`${base}/tools`} component={Tools} />
+        <Route path={`${base}/pce`} component={Pce} />
+        <Route path={`${base}/demo`} component={Demo} />
+        <Route path={`${base}/about`} component={About} />
+        <Route>
+          <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
+            <div className="text-center">
+              <div className="text-6xl font-display font-bold mb-4" style={{ color: 'var(--color-a11oy-border)' }}>404</div>
+              <div className="text-sm" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Page not found</div>
+              <a href={`${base}/`} className="mt-4 inline-block text-sm" style={{ color: '#3b82f6' }}>← Back to A11oy</a>
             </div>
-          </Route>
-        </Switch>
-      </AppShell>
-    </OrgProvider>
+          </div>
+        </Route>
+      </Switch>
+    </Suspense>
   );
 }
