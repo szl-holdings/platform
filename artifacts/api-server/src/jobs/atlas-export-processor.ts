@@ -360,10 +360,14 @@ let pollTimer: ReturnType<typeof setInterval> | null = null;
 export function startAtlasExportProcessor(): void {
   if (pollTimer) return;
 
-  void processPendingJobs();
+  processPendingJobs().catch((err) =>
+    logger.error({ err }, '[atlas-export] processPendingJobs initial run error'),
+  );
 
   pollTimer = setInterval(() => {
-    void processPendingJobs();
+    processPendingJobs().catch((err) =>
+      logger.error({ err }, '[atlas-export] processPendingJobs poll error'),
+    );
   }, POLL_INTERVAL_MS);
 
   if (pollTimer.unref) pollTimer.unref();

@@ -115,6 +115,32 @@ export async function bootstrap(
   port: number,
   onMigrationsReady?: (handler: http.RequestListener) => void,
 ): Promise<http.RequestListener> {
+  // Register process-level error handlers FIRST, before any await, so that
+  // unhandled rejections from fire-and-forget background tasks started during
+  // bootstrap are always intercepted regardless of which await suspended us.
+  process.on('uncaughtException', (err) => {
+    logger.fatal({ err }, 'Uncaught exception — shutting down');
+    shutdown('uncaughtException');
+  });
+
+  process.on('unhandledRejection', (reason) => {
+    // In development, DB pool pressure from background tasks can produce
+    // connection-timeout rejections that aren't consistently caught.
+    // Only hard-crash in production where an uncaught rejection genuinely
+    // indicates a serious bug that warrants a restart.
+    const errMsg = reason instanceof Error ? reason.message : String(reason);
+    const errStack = reason instanceof Error ? reason.stack : undefined;
+    if (process.env.NODE_ENV === 'production') {
+      logger.fatal({ err: reason, errMsg }, 'Unhandled promise rejection — shutting down');
+      shutdown('unhandledRejection');
+    } else {
+      logger.error(
+        { errMsg, errStack },
+        'Unhandled promise rejection (development — not crashing; investigate if repeated)',
+      );
+    }
+  });
+
   await otelReady;
 
   buildGraphQLMiddleware(server)
@@ -128,7 +154,9 @@ export async function bootstrap(
     });
 
   initWebSocket(server);
-  void initFusionPersistence();
+  initFusionPersistence().catch((err) =>
+    logger.warn({ err }, '[fusion-persistence] initFusionPersistence startup error (non-fatal)'),
+  );
   startPrismBusBridge();
   startDomainNotificationGenerators();
   registerApprovalNotificationHook();
@@ -380,9 +408,18 @@ export async function bootstrap(
     // can never re-block the bootstrap sequence. The very first
     // /signal-chains request may see hardcoded defaults for a few hundred ms
     // until this resolves; that is far better than a permanent 503.
+    //
+    // IMPORTANT: bootstrapChainState() is attached its own .catch() BEFORE
+    // being raced. This is critical — Promise.race() settling does NOT cancel
+    // the original promise; if it later rejects (e.g. after DB statement_timeout
+    // fires ~60 s), the rejection must already be handled to prevent an
+    // unhandledRejection that would trigger process shutdown.
     const CHAIN_STATE_HYDRATE_TIMEOUT_MS = 10_000;
+    const _chainStatePromise = bootstrapChainState().catch((err) => {
+      logger.warn({ err }, '[bootstrap] chainState background hydration error (non-fatal)');
+    });
     void Promise.race([
-      bootstrapChainState(),
+      _chainStatePromise,
       new Promise<void>((_, reject) =>
         setTimeout(
           () => reject(new Error(`bootstrapChainState exceeded ${CHAIN_STATE_HYDRATE_TIMEOUT_MS}ms`)),
@@ -396,21 +433,49 @@ export async function bootstrap(
       );
     });
 
+    // Per-step bootstrap timeout helper — ensures no single awaited init can
+    // block the bootstrap sequence indefinitely (e.g. zombie DB connections,
+    // slow migrations, or missing relations). Each step gets at most 20 s
+    // before it is logged as timed-out and the chain continues regardless.
+    const bootstrapStep = async (name: string, fn: () => Promise<unknown>, timeoutMs = 20_000) => {
+      const t = Date.now();
+      // Capture the fn() promise BEFORE racing so we can attach a .catch()
+      // to prevent unhandled rejections if the timeout wins. When Promise.race()
+      // settles on the timeout side, the original fn() promise is orphaned — it
+      // keeps running in background and if it later rejects (e.g. pool timeout),
+      // that rejection must already be caught or it surfaces as an unhandled
+      // rejection and (in production) would crash the process.
+      const fnPromise = fn();
+      fnPromise.catch((err) => {
+        logger.warn({ err }, `[bootstrap] ${name} background completion error (step already timed out — non-fatal)`);
+      });
+      try {
+        await Promise.race([
+          fnPromise,
+          new Promise<void>((_, rej) =>
+            setTimeout(() => rej(new Error(`${name} timed out after ${timeoutMs}ms`)), timeoutMs),
+          ),
+        ]);
+        logger.info({ durationMs: Date.now() - t }, `[bootstrap] ${name} OK`);
+      } catch (err) {
+        logger.warn({ err, durationMs: Date.now() - t }, `[bootstrap] ${name} failed or timed out — continuing`);
+      }
+    };
+
     // Step 2: Platform flags and knowledge store depend on schema being ready
-    await ensurePlatformFlags();
-    await knowledgeStore.loadFromDb();
-    logger.info('[bootstrap] Platform flags and knowledge store loaded');
+    await bootstrapStep('ensurePlatformFlags', ensurePlatformFlags);
+    await bootstrapStep('knowledgeStore.loadFromDb', () => knowledgeStore.loadFromDb());
 
     // Step 2b: Wire Trace Graph and Memory Fabric to Postgres so traces,
     // approvals, audit trails, and agent memory survive restarts.
-    await initDurablePersistence();
+    await bootstrapStep('initDurablePersistence', initDurablePersistence);
 
     // Step 2b-1: Wire the durable Postgres-backed evidence ledger so AUDIT
     // entries (the canonical chain INGEST→…→AUDIT→DELIVER) survive restarts
     // and are queryable by trace-id, entity, and workflow-run-id. Without
     // this swap, defaultEvidenceLedgerStore stays in-memory and AUDIT durability
     // collapses on every redeploy.
-    try {
+    await bootstrapStep('evidenceLedger.ensureTable', async () => {
       const { pool } = await import('@szl-holdings/db');
       const { defaultEvidenceLedgerStore, PostgresEvidenceLedgerStore } = await import(
         '@szl-holdings/evidence-ledger'
@@ -419,41 +484,45 @@ export async function bootstrap(
       await pgEvidenceStore.ensureTable();
       defaultEvidenceLedgerStore.setBackend(pgEvidenceStore);
       logger.info('[bootstrap] Evidence ledger backend swapped to Postgres (durable)');
-    } catch (err) {
-      logger.warn(
-        { err },
-        '[bootstrap] Evidence ledger Postgres backend wiring failed — falling back to in-memory store. AUDIT entries will not survive restart.',
-      );
-    }
+    });
 
     // Step 2b-2: Wire AI evaluation traces and review queue to Postgres so
     // all AI ops data survives server restarts.
-    const { initAiEvalsPersistence } = await import('./lib/ai-evals-persistence.js');
-    await initAiEvalsPersistence();
+    await bootstrapStep('initAiEvalsPersistence', async () => {
+      const { initAiEvalsPersistence } = await import('./lib/ai-evals-persistence.js');
+      await initAiEvalsPersistence();
+    });
 
     // Step 2b-2b: Wire the AEF DomainProfileRegistry to Postgres so that
     // tenant-scoped profile rotations (rotate_profile_version / rollback)
     // survive API server restarts instead of silently resetting to defaults.
-    const { initAefProfileRegistryPersistence } = await import('./lib/aef-profile-store.js');
-    await initAefProfileRegistryPersistence();
+    await bootstrapStep('initAefProfileRegistryPersistence', async () => {
+      const { initAefProfileRegistryPersistence } = await import('./lib/aef-profile-store.js');
+      await initAefProfileRegistryPersistence();
+    });
 
     // Step 2b-3: Bridge per-product domain events into the global signal
     // mesh so the Fabric page reflects live product activity.
-    const { initSignalMeshBridge } = await import('./lib/domain-events/signal-mesh-bridge.js');
-    initSignalMeshBridge();
-
-    const { initSignalBusRuleEngine } = await import('./routes/signal-bus.js');
-    initSignalBusRuleEngine();
+    await bootstrapStep('initSignalMeshBridge', async () => {
+      const { initSignalMeshBridge } = await import('./lib/domain-events/signal-mesh-bridge.js');
+      initSignalMeshBridge();
+    });
+    await bootstrapStep('initSignalBusRuleEngine', async () => {
+      const { initSignalBusRuleEngine } = await import('./routes/signal-bus.js');
+      initSignalBusRuleEngine();
+    });
 
     // Step 2c: Hydrate the shared Guardian decision engine from policy rows
     // and warm the Alloy RunManager singleton so any agent endpoint can
     // submit work as soon as the server starts accepting traffic.
-    await initGuardianEngine();
-    getAlloyRunManager();
-    logger.info('[bootstrap] Guardian engine and Alloy RunManager ready');
+    await bootstrapStep('initGuardianEngine', async () => {
+      await initGuardianEngine();
+      getAlloyRunManager();
+      logger.info('[bootstrap] Guardian engine and Alloy RunManager ready');
+    });
 
     // Step 3: Start durable (PostgreSQL-backed) job queue
-    await startDurableQueue();
+    await bootstrapStep('startDurableQueue', startDurableQueue);
 
     startEmbeddingWorker();
     // Non-fatal health check: log embedding model/schema compatibility at startup.
@@ -509,10 +578,10 @@ export async function bootstrap(
     // Step 3b: Register all job handlers and agent schedules BEFORE starting the scheduler.
     // This ensures no durable job is dequeued before its handler exists (prevents dead-lettering
     // on startup when the scheduler fires previously-due agent cron schedules from the DB).
-    await registerDefaultSchedules();
+    await bootstrapStep('registerDefaultSchedules', registerDefaultSchedules, 30_000);
 
     // Step 3c: Start the scheduler AFTER all handlers are registered
-    await startDurableScheduler();
+    await bootstrapStep('startDurableScheduler', startDurableScheduler, 30_000);
 
     // Step 4: Demo seeds + ops-mgmt init — SERIALISED behind a single
     // background chain (OBS-007 root-cause fix).
@@ -734,16 +803,6 @@ export async function bootstrap(
 
   process.on('SIGTERM', () => shutdown('SIGTERM'));
   process.on('SIGINT', () => shutdown('SIGINT'));
-
-  process.on('uncaughtException', (err) => {
-    logger.fatal({ err }, 'Uncaught exception — shutting down');
-    shutdown('uncaughtException');
-  });
-
-  process.on('unhandledRejection', (reason) => {
-    logger.fatal({ reason }, 'Unhandled promise rejection — shutting down');
-    shutdown('unhandledRejection');
-  });
 
   return app as unknown as http.RequestListener;
 }

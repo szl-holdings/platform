@@ -24,6 +24,11 @@ vi.mock("@szl-holdings/observability", () => ({
 
 vi.mock("@szl-holdings/db", () => ({
   pool: { query: vi.fn().mockResolvedValue({ rows: [] }) },
+  PgPool: class MockPgPool {
+    query() { return Promise.resolve({ rows: [] }); }
+    end() { return Promise.resolve(); }
+    on() { return this; }
+  },
   db: {},
   usersTable: {},
   sessionsTable: {},

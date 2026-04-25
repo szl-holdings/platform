@@ -110,7 +110,7 @@ describe('POST /cross-domain-query — LLM fused answer', () => {
 
     const res = await request(buildApp())
       .post('/cross-domain-query')
-      .send({ query: 'Brief me on compound risks this week' });
+      .send({ query: 'Brief me on compound risk accumulation this week' });
 
     expect(res.status).toBe(200);
     const body = res.body as ResponseBody;

@@ -9,8 +9,14 @@ vi.mock('@szl-holdings/db', () => {
     id: { _col: 'id' },
     expiresAt: { _col: 'expires_at' },
   };
+  const terraDistressPropertiesTable = {
+    id: { _col: 'id' },
+    financialsLastBackfilledAt: { _col: 'financials_last_backfilled_at' },
+    isActive: { _col: 'is_active' },
+  };
   return {
     cortexGraphSnapshotsTable,
+    terraDistressPropertiesTable,
     db: {
       delete() {
         return {
@@ -25,12 +31,30 @@ vi.mock('@szl-holdings/db', () => {
           },
         };
       },
+      select() { return { from: () => ({ where: () => Promise.resolve([]) }) }; },
+      update() { return { set: () => ({ where: () => Promise.resolve([]) }) }; },
     },
   };
 });
 
 vi.mock('drizzle-orm', () => ({
   lt: (col: unknown, val: unknown) => ({ op: 'lt', col, val }),
+  lte: (col: unknown, val: unknown) => ({ op: 'lte', col, val }),
+  gt: (col: unknown, val: unknown) => ({ op: 'gt', col, val }),
+  gte: (col: unknown, val: unknown) => ({ op: 'gte', col, val }),
+  eq: (col: unknown, val: unknown) => ({ op: 'eq', col, val }),
+  ne: (col: unknown, val: unknown) => ({ op: 'ne', col, val }),
+  and: (...conds: unknown[]) => ({ op: 'and', conds }),
+  or: (...conds: unknown[]) => ({ op: 'or', conds }),
+  isNull: (col: unknown) => ({ op: 'isNull', col }),
+  isNotNull: (col: unknown) => ({ op: 'isNotNull', col }),
+  not: (expr: unknown) => ({ op: 'not', expr }),
+  desc: (col: unknown) => ({ op: 'desc', col }),
+  asc: (col: unknown) => ({ op: 'asc', col }),
+  inArray: (col: unknown, vals: unknown) => ({ op: 'inArray', col, vals }),
+  sql: Object.assign((strings: TemplateStringsArray, ...values: unknown[]) => ({
+    op: 'sql', strings, values,
+  }), { raw: (s: string) => ({ op: 'sqlRaw', s }) }),
 }));
 
 vi.mock('@szl-holdings/forge-runtime', () => ({
@@ -56,18 +80,17 @@ beforeEach(async () => {
   loggerSpy.error.mockClear();
   _deletedQueue.length = 0;
 
-  const captured: Array<(job: { id: string; payload: Record<string, unknown> }) => Promise<void>> = [];
+  const capturedByType = new Map<string, (job: { id: string; payload: Record<string, unknown> }) => Promise<void>>();
   const forge = await import('@szl-holdings/forge-runtime');
   (forge.durableJobQueue.register as ReturnType<typeof vi.fn>).mockImplementation(
-    (_type: string, fn: (job: { id: string; payload: Record<string, unknown> }) => Promise<void>) => {
-      captured.push(fn);
+    (type: string, fn: (job: { id: string; payload: Record<string, unknown> }) => Promise<void>) => {
+      capturedByType.set(type, fn);
     },
   );
 
   await import('../scheduled-jobs');
 
-  // The prune handler is the last register() call in scheduled-jobs.ts
-  runHandler = captured[captured.length - 1]!;
+  runHandler = capturedByType.get('cortex_graph_snapshot_prune')!;
 });
 
 afterEach(() => {
@@ -111,25 +134,28 @@ describe('cortex_graph_snapshot_prune', () => {
 
     vi.doMock('@szl-holdings/db', () => ({
       cortexGraphSnapshotsTable: { id: {}, expiresAt: {} },
+      terraDistressPropertiesTable: { id: {}, status: {}, updatedAt: {} },
       db: {
         delete: () => ({
           where: () => ({
             returning: () => Promise.reject(new Error('boom')),
           }),
         }),
+        select: () => ({ from: () => ({ where: () => Promise.resolve([]) }) }),
+        update: () => ({ set: () => ({ where: () => Promise.resolve() }) }),
       },
     }));
 
     vi.resetModules();
-    const captured: Array<(job: { id: string; payload: Record<string, unknown> }) => Promise<void>> = [];
+    const capturedByType2 = new Map<string, (job: { id: string; payload: Record<string, unknown> }) => Promise<void>>();
     const forge2 = await import('@szl-holdings/forge-runtime');
     (forge2.durableJobQueue.register as ReturnType<typeof vi.fn>).mockImplementation(
-      (_type: string, fn: (job: { id: string; payload: Record<string, unknown> }) => Promise<void>) => {
-        captured.push(fn);
+      (type: string, fn: (job: { id: string; payload: Record<string, unknown> }) => Promise<void>) => {
+        capturedByType2.set(type, fn);
       },
     );
     await import('../scheduled-jobs');
-    const handler = captured[captured.length - 1]!;
+    const handler = capturedByType2.get('cortex_graph_snapshot_prune')!;
 
     await expect(handler({ id: 'job-3', payload: {} })).rejects.toThrow('boom');
     expect(loggerSpy.error).toHaveBeenCalled();

@@ -13,11 +13,11 @@ import { cortexSnapshotCronExpression } from "../services/cortex-snapshot-config
 
 durableJobQueue.setPublishFn(publish);
 
-durableJobQueue.configureQueue("critical", { concurrency: 10, pollIntervalMs: 500 });
-durableJobQueue.configureQueue("high", { concurrency: 8, pollIntervalMs: 1000 });
-durableJobQueue.configureQueue("default", { concurrency: 5, pollIntervalMs: 2000 });
-durableJobQueue.configureQueue("low", { concurrency: 2, pollIntervalMs: 5000 });
-durableJobQueue.configureQueue("agents", { concurrency: 3, pollIntervalMs: 2000 });
+durableJobQueue.configureQueue("critical", { concurrency: 2, pollIntervalMs: 1_000 });
+durableJobQueue.configureQueue("high", { concurrency: 2, pollIntervalMs: 2_000 });
+durableJobQueue.configureQueue("default", { concurrency: 2, pollIntervalMs: 3_000 });
+durableJobQueue.configureQueue("low", { concurrency: 1, pollIntervalMs: 8_000 });
+durableJobQueue.configureQueue("agents", { concurrency: 1, pollIntervalMs: 5_000 });
 
 durableJobQueue.register(JOB_TYPES.WEBHOOK_DELIVERY, async (job) => {
   const { url, payload, headers } = job.payload as { url: string; payload: unknown; headers?: Record<string, string> };

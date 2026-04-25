@@ -28,6 +28,8 @@ export const pool = new Pool({
   idleTimeoutMillis: _env.DB_IDLE_TIMEOUT_MS,
   connectionTimeoutMillis: _env.DB_CONNECT_TIMEOUT_MS,
   statement_timeout: _env.DB_STATEMENT_TIMEOUT_MS,
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10_000,
 });
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -203,42 +205,61 @@ export function getCheckoutWarnThresholdMs(): number {
 }
 
 const _originalPoolConnect = pool.connect.bind(pool);
-// Override the overloaded pool.connect (callback + promise variants) with a
-// promise-only wrapper that records the checkout. Internal callers in this
-// codebase always use the await form, so collapsing overloads is safe.
-(pool as unknown as { connect: () => Promise<pg.PoolClient> }).connect = async function instrumentedConnect(): Promise<pg.PoolClient> {
-  // ── OBS-007 fix: capture the originating stack synchronously, BEFORE the
-  // await crosses an async boundary. If we capture after the await, V8 has
-  // unwound the synchronous call chain and Error.captureStackTrace can only
-  // see internal Node frames (the warnings used to read just
-  // "process.processTicksAndRejections"), giving zero signal about who held
-  // the connection. Capturing here pins the actual route/initialiser frame.
-  const stack = captureStack();
-  const requestedAt = Date.now();
-  const client = (await _originalPoolConnect()) as pg.PoolClient;
-  // The OBS-007 "held" semantics intentionally measure time AFTER pg
-  // handed us a usable client — pool-queue wait time (caller blocked
-  // because all max=10 slots were busy) is reported separately as
-  // waitMs and must not contribute to the leak threshold, otherwise
-  // brief contention bursts under boot fan-out produce false alerts
-  // for callers that release their client immediately.
+
+// ── OBS-007 / pool-query fix:
+//
+// pg-pool 3.x uses the CALLBACK form of pool.connect() inside pool.query().
+// The original implementation was `async function instrumentedConnect()` which
+// always returns a Promise and IGNORES any callback argument. When pg-pool's
+// pool.query() calls `pool.connect(cb)` and the callback is never invoked,
+// pool.query() hangs forever and the acquired connection is never released.
+// This caused silent pool exhaustion (all max slots held by leaked connections)
+// and then unhandled promise rejections (timeout errors from instrumentedConnect's
+// own _originalPoolConnect() call whose Promise had no rejection handler).
+//
+// Fix: detect the callback form and call cb(null, client) / cb(err) ourselves,
+// returning void (which pg-pool expects). The Promise form (used by drizzle and
+// explicit `await pool.connect()` callers) is handled by returning a Promise.
+type PoolConnectCb = (err: Error | null, client?: pg.PoolClient, release?: (err?: Error | boolean) => void) => void;
+
+function _wrapClient(rawClient: pg.PoolClient, requestedAt: number, stack: string): pg.PoolClient {
   const acquiredAt = Date.now();
   const id = nextCheckoutId++;
-  const record: CheckoutRecord = {
-    id,
-    requestedAt,
-    acquiredAt,
-    stack,
-    warned: false,
-  };
+  // The OBS-007 "held" semantics measure time AFTER pg handed us a usable
+  // client — pool-queue wait time is reported separately as waitMs.
+  const record: CheckoutRecord = { id, requestedAt, acquiredAt, stack, warned: false };
   activeCheckouts.set(id, record);
-
-  const _originalRelease = client.release.bind(client);
-  client.release = ((err?: Error | boolean) => {
+  const _originalRelease = rawClient.release.bind(rawClient);
+  rawClient.release = ((err?: Error | boolean) => {
     activeCheckouts.delete(id);
     return _originalRelease(err);
-  }) as typeof client.release;
-  return client;
+  }) as typeof rawClient.release;
+  return rawClient;
+}
+
+(pool as unknown as { connect: ((cb?: PoolConnectCb) => Promise<pg.PoolClient> | void) }).connect = function instrumentedConnect(cb?: PoolConnectCb): Promise<pg.PoolClient> | void {
+  // OBS-007: capture originating stack synchronously before any async boundary.
+  const stack = captureStack();
+  const requestedAt = Date.now();
+
+  if (cb) {
+    // ── Callback form: called by pg-pool's pool.query() internally.
+    // We must invoke cb(null, client, release) on success and cb(err) on failure.
+    // Returning void (not a Promise) matches pg-pool's callback-form expectations.
+    (_originalPoolConnect() as Promise<pg.PoolClient>)
+      .then((rawClient) => {
+        const wrapped = _wrapClient(rawClient, requestedAt, stack);
+        cb(null, wrapped, wrapped.release);
+      })
+      .catch((err: Error) => {
+        cb(err);
+      });
+    return;
+  }
+
+  // ── Promise form: called by drizzle-orm and explicit `await pool.connect()`.
+  return (_originalPoolConnect() as Promise<pg.PoolClient>)
+    .then((rawClient) => _wrapClient(rawClient, requestedAt, stack));
 };
 
 // Background sweeper — every 5s, log a structured warning for any

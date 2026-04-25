@@ -1,4 +1,5 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { PageDataSkeleton } from '@szl-holdings/shared-ui/page-data-skeleton';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
@@ -7,7 +8,6 @@ import {
   Download,
   FolderOpen,
   Layers,
-  Loader2,
   Pencil,
   Save,
   Trash2,
@@ -417,13 +417,10 @@ export default function WaterfallCalculatorPage() {
 
           {propertyLoading || !propInputs ? (
             <div
-              className="flex items-center gap-3 p-8 rounded-xl"
+              className="rounded-xl p-6"
               style={{ background: DS.surface, border: `1px solid ${DS.border}` }}
             >
-              <Loader2 className="w-5 h-5 animate-spin" style={{ color: DS.accent.purple }} />
-              <p className="text-sm" style={{ color: DS.text.secondary }}>
-                Generating waterfall model…
-              </p>
+              <PageDataSkeleton variant="dashboard" rows={4} showHeader showStats />
             </div>
           ) : (
             <>

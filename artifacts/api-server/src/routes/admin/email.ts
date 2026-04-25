@@ -1,6 +1,5 @@
 import type { IRouter } from 'express';
 import { z } from 'zod';
-import { PgPool } from '@szl-holdings/db';
 import {
   addEmailSuppression,
   buildAlertFiredEmail,
@@ -17,13 +16,20 @@ import { sendBadRequest, sendError } from '../../lib/api-response.js';
 import { logger } from '../../lib/logger.js';
 import { validateBody, validateQuery } from '../../lib/validation.js';
 
-const suppressionPool = new PgPool({
-  connectionString: process.env.DATABASE_URL,
-  max: 3,
-  idleTimeoutMillis: 30_000,
-  connectionTimeoutMillis: 5_000,
-  statement_timeout: 10_000,
-});
+let _suppressionPool: import('pg').Pool | null = null;
+function suppressionPool(): import('pg').Pool {
+  if (!_suppressionPool) {
+    const { PgPool } = require('@szl-holdings/db') as typeof import('@szl-holdings/db');
+    _suppressionPool = new PgPool({
+      connectionString: process.env.DATABASE_URL,
+      max: 3,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 5_000,
+      statement_timeout: 10_000,
+    }) as unknown as import('pg').Pool;
+  }
+  return _suppressionPool;
+}
 
 const testSendSchema = z.object({
   to: z.string().email(),
@@ -152,7 +158,7 @@ export function register(router: IRouter) {
       const { limit, offset } = req.query as unknown as z.infer<typeof listQuerySchema>;
       try {
         const [rowsResult, countResult] = await Promise.all([
-          suppressionPool.query<{
+          suppressionPool().query<{
             id: number;
             email: string;
             reason: string;
@@ -167,7 +173,7 @@ export function register(router: IRouter) {
              LIMIT $1 OFFSET $2`,
             [limit, offset],
           ),
-          suppressionPool.query<{ count: number }>(
+          suppressionPool().query<{ count: number }>(
             'SELECT COUNT(*)::int AS count FROM email_suppressions',
           ),
         ]);
@@ -195,7 +201,7 @@ export function register(router: IRouter) {
   router.delete('/admin/email/suppressions/:email', async (req, res) => {
     const email = decodeURIComponent(req.params.email).toLowerCase().trim();
     try {
-      await suppressionPool.query(
+      await suppressionPool().query(
         'DELETE FROM email_suppressions WHERE email = $1',
         [email],
       );

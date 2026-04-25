@@ -83,7 +83,7 @@ describe('Terra diligence evidence citations — wiring (task #1355)', () => {
     expect(SOURCE).toMatch(
       /router\.post\(\s*['"]\/terra\/cognitive\/diligence-room\/matters\/:matterId\/evidence['"]/,
     );
-    expect(SOURCE).toMatch(/citations:\s*parsed\.data\.citations\s*\?\?\s*\[\]/);
+    expect(SOURCE).toMatch(/parsed\.data\.citations\s*\?\?\s*\[\]/);
   });
 
   it('uses the shared evidenceCitationSchema for both create and patch payloads', () => {

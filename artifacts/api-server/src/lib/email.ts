@@ -1,25 +1,39 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import nodemailer from 'nodemailer';
-import { PgPool } from '@szl-holdings/db';
 import { logger } from './logger';
 import { isFlagEnabled } from './platform-flags';
 
-// Audit pool is module-level so it's reused across calls
-const auditPool = new PgPool({
-  connectionString: process.env.DATABASE_URL,
-  max: 3,
-  idleTimeoutMillis: 30_000,
-  connectionTimeoutMillis: 5_000,
-  statement_timeout: 10_000,
-});
+// Lazy pool initialization — avoids module-level PgPool construction in tests
+let _auditPool: import('pg').Pool | null = null;
+let _suppressionPool: import('pg').Pool | null = null;
 
-const suppressionPool = new PgPool({
-  connectionString: process.env.DATABASE_URL,
-  max: 3,
-  idleTimeoutMillis: 30_000,
-  connectionTimeoutMillis: 5_000,
-  statement_timeout: 10_000,
-});
+function getAuditPool(): import('pg').Pool {
+  if (!_auditPool) {
+    const { PgPool } = require('@szl-holdings/db') as typeof import('@szl-holdings/db');
+    _auditPool = new PgPool({
+      connectionString: process.env.DATABASE_URL,
+      max: 3,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 5_000,
+      statement_timeout: 10_000,
+    }) as unknown as import('pg').Pool;
+  }
+  return _auditPool;
+}
+
+function getSuppressionPool(): import('pg').Pool {
+  if (!_suppressionPool) {
+    const { PgPool } = require('@szl-holdings/db') as typeof import('@szl-holdings/db');
+    _suppressionPool = new PgPool({
+      connectionString: process.env.DATABASE_URL,
+      max: 3,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 5_000,
+      statement_timeout: 10_000,
+    }) as unknown as import('pg').Pool;
+  }
+  return _suppressionPool;
+}
 
 interface EmailAttachment {
   filename: string;
@@ -277,7 +291,7 @@ export function verifyUnsubscribeToken(email: string, token: string): boolean {
 
 export async function isEmailSuppressed(email: string): Promise<boolean> {
   try {
-    const result = await suppressionPool.query<{ id: number }>(
+    const result = await getSuppressionPool().query<{ id: number }>(
       'SELECT id FROM email_suppressions WHERE email = $1 LIMIT 1',
       [email.toLowerCase().trim()],
     );
@@ -294,7 +308,7 @@ export async function addEmailSuppression(
   opts?: { providerEventId?: string; provider?: string; detail?: string },
 ): Promise<void> {
   try {
-    await suppressionPool.query(
+    await getSuppressionPool().query(
       `INSERT INTO email_suppressions (email, reason, provider_event_id, provider, detail)
        VALUES ($1, $2, $3, $4, $5)
        ON CONFLICT DO NOTHING`,
@@ -1840,7 +1854,7 @@ export async function logNotificationAudit(opts: {
   error?: string;
 }): Promise<void> {
   try {
-    await auditPool.query(
+    await getAuditPool().query(
       `INSERT INTO notification_audit_log (template, recipient, subject, entity_type, entity_id, delivery_status, message_id, provider, error)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
       [

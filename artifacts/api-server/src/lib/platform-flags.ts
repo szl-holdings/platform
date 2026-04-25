@@ -348,18 +348,18 @@ export async function isFlagEnabled(
 
 export async function ensurePlatformFlags(): Promise<void> {
   try {
-    for (const flag of PLATFORM_FLAGS) {
-      await db
-        .insert(featureFlagsTable)
-        .values({
+    await db
+      .insert(featureFlagsTable)
+      .values(
+        PLATFORM_FLAGS.map((flag) => ({
           key: flag.key,
           name: flag.name,
           description: flag.description,
           isEnabled: flag.isEnabled,
           rolloutPercentage: flag.rolloutPercentage,
-        })
-        .onConflictDoNothing();
-    }
+        })),
+      )
+      .onConflictDoNothing();
     logger.info({ count: PLATFORM_FLAGS.length }, 'Platform feature flags ensured');
   } catch (err) {
     logger.warn({ err }, 'Failed to ensure platform feature flags — flags may be missing from DB');

@@ -46,7 +46,7 @@ import {
   type ToolManifest,
   ToolManifestSchema,
 } from '@workspace/tool-mesh';
-import { and, desc, eq, isNull, or, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, or, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -3658,7 +3658,7 @@ async function loadCreatedByForGuardrails(
   const rows = await db
     .select({ id: usersTable.id, displayName: usersTable.displayName, email: usersTable.email })
     .from(usersTable)
-    .where(sql`${usersTable.id} = ANY(${uniqueIds})`);
+    .where(inArray(usersTable.id, uniqueIds));
   for (const r of rows) {
     out.set(r.id, { id: r.id, displayName: r.displayName ?? 'Unknown', email: r.email ?? null });
   }

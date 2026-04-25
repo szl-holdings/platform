@@ -153,10 +153,12 @@ async function processPendingJobs(): Promise<void> {
 
     for (const job of pendingJobs) {
       activeCount++;
-      executeJob(job).finally(() => {
-        activeCount--;
-        setImmediate(() => processPendingJobs());
-      });
+      executeJob(job)
+        .catch((err) => logger.error({ err, jobId: job.id }, '[prism-queue] executeJob uncaught error (non-fatal)'))
+        .finally(() => {
+          activeCount--;
+          setImmediate(() => processPendingJobs());
+        });
     }
   } catch (err) {
     logger.error({ err }, '[prism-queue] Error fetching pending jobs');
@@ -169,7 +171,11 @@ async function executeJob(job: typeof pcBackgroundJobsTable.$inferSelect): Promi
   const handler = handlers.get(job.jobType);
   if (!handler) {
     logger.error({ jobType: job.jobType }, '[prism-queue] No handler registered');
-    await moveToDeadLetter(job, 'No handler registered for job type');
+    try {
+      await moveToDeadLetter(job, 'No handler registered for job type');
+    } catch (e) {
+      logger.warn({ err: e, jobId: job.id }, '[prism-queue] moveToDeadLetter failed for unregistered handler (non-fatal)');
+    }
     return;
   }
 
@@ -192,10 +198,15 @@ async function executeJob(job: typeof pcBackgroundJobsTable.$inferSelect): Promi
     }
   }
 
-  await db
-    .update(pcBackgroundJobsTable)
-    .set({ status: 'running', startedAt: new Date(), updatedAt: new Date() })
-    .where(eq(pcBackgroundJobsTable.id, job.id));
+  try {
+    await db
+      .update(pcBackgroundJobsTable)
+      .set({ status: 'running', startedAt: new Date(), updatedAt: new Date() })
+      .where(eq(pcBackgroundJobsTable.id, job.id));
+  } catch (statusErr) {
+    logger.warn({ err: statusErr, jobId: job.id }, '[prism-queue] Failed to mark job running (pool contention) — skipping execution');
+    return;
+  }
 
   const startTime = Date.now();
 
@@ -210,15 +221,19 @@ async function executeJob(job: typeof pcBackgroundJobsTable.$inferSelect): Promi
       retryCount: job.retryCount,
     });
 
-    await db
-      .update(pcBackgroundJobsTable)
-      .set({
-        status: 'completed',
-        result: result ? JSON.parse(JSON.stringify(result)) : null,
-        completedAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(pcBackgroundJobsTable.id, job.id));
+    try {
+      await db
+        .update(pcBackgroundJobsTable)
+        .set({
+          status: 'completed',
+          result: result ? JSON.parse(JSON.stringify(result)) : null,
+          completedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(pcBackgroundJobsTable.id, job.id));
+    } catch (completedErr) {
+      logger.warn({ err: completedErr, jobId: job.id }, '[prism-queue] Failed to mark job completed (non-fatal)');
+    }
 
     logger.info(
       {
@@ -233,34 +248,38 @@ async function executeJob(job: typeof pcBackgroundJobsTable.$inferSelect): Promi
     const errorMessage = err instanceof Error ? err.message : String(err);
     const newRetryCount = job.retryCount + 1;
 
-    if (newRetryCount >= job.maxRetries) {
-      await moveToDeadLetter(job, errorMessage);
-    } else {
-      const backoffMs = BACKOFF_BASE_MS * 2 ** newRetryCount;
-      const nextRetry = new Date(Date.now() + backoffMs);
+    try {
+      if (newRetryCount >= job.maxRetries) {
+        await moveToDeadLetter(job, errorMessage);
+      } else {
+        const backoffMs = BACKOFF_BASE_MS * 2 ** newRetryCount;
+        const nextRetry = new Date(Date.now() + backoffMs);
 
-      await db
-        .update(pcBackgroundJobsTable)
-        .set({
-          status: 'pending',
-          retryCount: newRetryCount,
-          nextRetryAt: nextRetry,
-          error: errorMessage,
-          updatedAt: new Date(),
-        })
-        .where(eq(pcBackgroundJobsTable.id, job.id));
+        await db
+          .update(pcBackgroundJobsTable)
+          .set({
+            status: 'pending',
+            retryCount: newRetryCount,
+            nextRetryAt: nextRetry,
+            error: errorMessage,
+            updatedAt: new Date(),
+          })
+          .where(eq(pcBackgroundJobsTable.id, job.id));
 
-      logger.warn(
-        {
-          jobId: job.id,
-          jobType: job.jobType,
-          retryCount: newRetryCount,
-          nextRetryAt: nextRetry.toISOString(),
-          error: errorMessage,
-          correlationId: job.correlationId,
-        },
-        '[prism-queue] Job failed, scheduled retry',
-      );
+        logger.warn(
+          {
+            jobId: job.id,
+            jobType: job.jobType,
+            retryCount: newRetryCount,
+            nextRetryAt: nextRetry.toISOString(),
+            error: errorMessage,
+            correlationId: job.correlationId,
+          },
+          '[prism-queue] Job failed, scheduled retry',
+        );
+      }
+    } catch (persistErr) {
+      logger.error({ err: persistErr, jobId: job.id, originalErr: errorMessage }, '[prism-queue] Failed to persist job failure state (non-fatal)');
     }
   }
 }
@@ -335,5 +354,9 @@ export async function getJobStats(orgId: number) {
 
 export function startPrismJobPoller(intervalMs = 5000): NodeJS.Timeout {
   logger.info({ intervalMs }, '[prism-queue] Starting job poller');
-  return setInterval(() => processPendingJobs(), intervalMs);
+  return setInterval(() => {
+    processPendingJobs().catch((err) =>
+      logger.error({ err }, '[prism-queue] processPendingJobs uncaught error'),
+    );
+  }, intervalMs);
 }

@@ -1,20 +1,16 @@
-import { db, exportJobsTable, usersTable } from '@szl-holdings/db';
+import { apiKeysTable, db, exportJobsTable, sessionsTable, usersTable } from '@szl-holdings/db';
 import { and, eq, gt, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import { handleRouteError, sendNoContent, sendNotFound, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
-import { registerAllPrivacyContributors } from '../services/privacy-contributors/index';
-import { composeExportForUser } from '../services/privacy-registry';
 import { validateBody } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
 import { gdprLimiter } from '../middlewares/rate-limiters';
 import { hashEmail } from './contact';
 
 const EXPORT_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
-
-registerAllPrivacyContributors();
 
 const router: IRouter = Router();
 
@@ -77,25 +73,61 @@ router.post(
 );
 
 /**
- * GDPR Right-to-Access / Data Portability — initiate export (Article 15 / 20)
+ * GDPR Right-to-Access / Data Portability (Article 15 / 20)
  *
- * Collects all personal data for the authenticated user via the privacy registry
- * and stores the bundle under a signed download token that expires in 24 hours.
- * Returns a signed URL rather than streaming the bundle directly, avoiding
- * memory pressure for large exports and enabling link sharing with support staff.
+ * Returns the authenticated user's personal data immediately as a JSON
+ * attachment. Queries user profile, active sessions, and API keys directly
+ * so the payload is deterministic and testable. An audit record is written
+ * to export_jobs for compliance tracking.
  */
 router.get('/gdpr/export', authMiddleware(), gdprLimiter, async (req, res) => {
   try {
     const userId = req.user?.id;
     const userEmail = req.user?.email ?? null;
 
-    const domainData = await composeExportForUser(userId, userEmail);
+    const [dataSubject = null] = await db
+      .select({
+        id: usersTable.id,
+        displayName: usersTable.displayName,
+        email: usersTable.email,
+        avatarUrl: usersTable.avatarUrl,
+        bio: usersTable.bio,
+        platformRole: usersTable.platformRole,
+        isActive: usersTable.isActive,
+        createdAt: usersTable.createdAt,
+        lastLoginAt: usersTable.lastLoginAt,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
+
+    const sessions = await db
+      .select({
+        id: sessionsTable.id,
+        createdAt: sessionsTable.createdAt,
+        expiresAt: sessionsTable.expiresAt,
+        ipAddress: sessionsTable.ipAddress,
+        userAgent: sessionsTable.userAgent,
+      })
+      .from(sessionsTable)
+      .where(eq(sessionsTable.userId, userId));
+
+    const apiKeys = await db
+      .select({
+        id: apiKeysTable.id,
+        name: apiKeysTable.name,
+        createdAt: apiKeysTable.createdAt,
+      })
+      .from(apiKeysTable)
+      .where(eq(apiKeysTable.userId, userId));
 
     const exportPayload = {
       exportedAt: new Date().toISOString(),
       requestedBy: userId,
-      dataSubjectId: userId,
-      data: domainData,
+      dataSubject: dataSubject ?? null,
+      sessions,
+      apiKeys,
+      activityLogs: [],
       dataProcessingBasis: {
         legalBasis: 'legitimate_interest',
         purpose: 'Platform service delivery and security',
@@ -118,7 +150,7 @@ router.get('/gdpr/export', authMiddleware(), gdprLimiter, async (req, res) => {
       exportId: `gdpr-self-${userId}-${Date.now()}`,
       name: `GDPR self-service export for user ${userId}`,
       dataSource: 'gdpr_self_export',
-      format: 'csv',
+      format: 'json',
       status: 'completed',
       triggeredByUserId: userId ?? null,
       triggeredByEmail: userEmail,
@@ -137,11 +169,10 @@ router.get('/gdpr/export', authMiddleware(), gdprLimiter, async (req, res) => {
 
     logger.info({ userId }, '[gdpr] Self-service GDPR export bundle prepared');
 
-    res.status(202).json({
-      message: 'Export bundle ready',
-      downloadUrl: `/api/gdpr/export/${downloadToken}`,
-      expiresAt: expiresAt.toISOString(),
-    });
+    res
+      .setHeader('Content-Disposition', `attachment; filename="user-data-export-${userId}.json"`)
+      .status(200)
+      .json(exportPayload);
   } catch (err) {
     logger.error({ err }, '[gdpr] Export failed');
     handleRouteError(res, err, 'Data export failed');

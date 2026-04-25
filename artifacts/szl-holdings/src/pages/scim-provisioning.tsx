@@ -1,4 +1,5 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
+import { PageDataSkeleton } from '@szl-holdings/shared-ui/page-data-skeleton';
 import { useQueryClient } from '@tanstack/react-query';
 import { m } from 'framer-motion';
 import {
@@ -820,9 +821,7 @@ export default function ScimProvisioningPage() {
             </div>
 
             {isLoading ? (
-              <div className="flex items-center justify-center py-20 text-muted-foreground">
-                <Loader2 className="w-6 h-6 animate-spin" />
-              </div>
+              <PageDataSkeleton variant="list" rows={5} showHeader={false} />
             ) : !tenants.length ? (
               <div className="text-center py-20 text-muted-foreground">
                 <Database className="w-10 h-10 mx-auto mb-3 opacity-20" />

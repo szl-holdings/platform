@@ -94,9 +94,11 @@ function useAuth() {
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8_000);
     // Always check real auth first. If the server confirms a real session,
     // clear any lingering demo token so live endpoints are always used.
-    fetch('/api/auth/user', { credentials: 'include' })
+    fetch('/api/auth/user', { credentials: 'include', signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json() as Promise<{ user: AuthUser | null }>;
@@ -117,15 +119,18 @@ function useAuth() {
       })
       .catch(() => {
         if (!cancelled) {
-          // Network or server error — we cannot confirm auth status.
-          // Never route an unconfirmed user into demo endpoints; show the auth
-          // gate so they can sign in explicitly.
-          setUser(null);
+          // Network or server error (including timeout) — we cannot confirm auth
+          // status. If a stored demo session exists, honour it; otherwise show the
+          // auth gate so they can sign in explicitly.
+          setUser(isDemoActive() ? DEMO_USER : null);
           setIsLoading(false);
         }
-      });
+      })
+      .finally(() => clearTimeout(timeout));
     return () => {
       cancelled = true;
+      controller.abort();
+      clearTimeout(timeout);
     };
   }, []);
 

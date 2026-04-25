@@ -41,6 +41,7 @@ const dealRow = {
       size: 204800,
       contentType: ATTACHMENT_CONTENT_TYPE,
       objectPath: '/objects/uploads/uuid/pitch-deck.pdf',
+      scanStatus: 'clean' as const,
     },
   ],
 };
@@ -317,6 +318,7 @@ describe('GET /fund-inbound-deals/:pipelineId/attachments/:idx', () => {
               size: 1024,
               contentType: 'application/pdf',
               objectPath: '/objects/not-found',
+              scanStatus: 'clean' as const,
             },
           ],
         },

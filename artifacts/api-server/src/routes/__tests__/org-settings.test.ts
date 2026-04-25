@@ -200,6 +200,20 @@ vi.mock('@szl-holdings/db', () => {
       createdAt: col('created_at'),
       updatedAt: col('updated_at'),
     },
+    exportJobsTable: {
+      id: col('id'),
+      exportId: col('export_id'),
+      name: col('name'),
+      dataSource: col('data_source'),
+      format: col('format'),
+      status: col('status'),
+      triggeredByUserId: col('triggered_by_user_id'),
+      triggeredByEmail: col('triggered_by_email'),
+      filterParams: col('filter_params'),
+      downloadToken: col('download_token'),
+      expiresAt: col('expires_at'),
+      completedAt: col('completed_at'),
+    },
   };
 });
 

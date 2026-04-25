@@ -27,7 +27,6 @@ import {
   decisionsRuntimeTable,
   decisionValidationsTable,
   drizzleConnect,
-  PgPool,
 } from '@szl-holdings/db';
 import { randomUUID } from 'node:crypto';
 import { and, asc, desc, eq, } from 'drizzle-orm';
@@ -42,15 +41,31 @@ import { seedDecisionsIfEmpty } from '../services/decision-seed';
 // ─── Dedicated pool for decision-runtime routes ────────────────────────────────
 // Separate from the main pool so autonomous agents saturating the primary pool
 // never block the Decision Center UI. Short timeouts ensure fast failure.
-const decisionsPool = new PgPool({
-  connectionString: process.env.DATABASE_URL,
-  max: 4,
-  min: 0,
-  connectionTimeoutMillis: 5000,
-  idleTimeoutMillis: 30000,
-  statement_timeout: 8000,
-});
-const ddb = drizzleConnect(decisionsPool);
+// Lazy-initialized to avoid module-level PgPool construction in tests.
+let _decisionsPool: import('pg').Pool | null = null;
+let _ddb: ReturnType<typeof drizzleConnect> | null = null;
+
+function decisionsPool(): import('pg').Pool {
+  if (!_decisionsPool) {
+    const { PgPool } = require('@szl-holdings/db') as typeof import('@szl-holdings/db');
+    _decisionsPool = new PgPool({
+      connectionString: process.env.DATABASE_URL,
+      max: 4,
+      min: 0,
+      connectionTimeoutMillis: 5000,
+      idleTimeoutMillis: 30000,
+      statement_timeout: 8000,
+    }) as unknown as import('pg').Pool;
+  }
+  return _decisionsPool;
+}
+
+function ddb(): ReturnType<typeof drizzleConnect> {
+  if (!_ddb) {
+    _ddb = drizzleConnect(decisionsPool() as Parameters<typeof drizzleConnect>[0]);
+  }
+  return _ddb;
+}
 
 const router: IRouter = Router();
 const noAuth = authMiddleware({ required: false });
@@ -203,7 +218,7 @@ router.get('/decisions/cards', noAuth, async (req: Request, res: Response) => {
       LIMIT ${limit}
     `;
 
-    const result = await withQueryTimeout(decisionsPool.query(rawSql, params));
+    const result = await withQueryTimeout(decisionsPool().query(rawSql, params));
     const rows: Record<string, unknown>[] = result.rows;
 
     const data = rows.map((r) => ({
@@ -471,7 +486,7 @@ async function transitionCard(
 
     // Both mutation and audit event must succeed or both must roll back — no silent mutations.
     await withQueryTimeout(
-      ddb.transaction(async (tx) => {
+      ddb().transaction(async (tx) => {
         await tx
           .update(decisionsRuntimeTable)
           .set({
@@ -596,7 +611,7 @@ router.post(
       const eventId = `audit-${card.cardId}-card.delegated-${Date.now()}`;
 
       await withQueryTimeout(
-        ddb.transaction(async (tx) => {
+        ddb().transaction(async (tx) => {
           await tx
             .update(decisionsRuntimeTable)
             .set({ owner: delegateTo, updatedAt: new Date() })
@@ -730,7 +745,7 @@ router.post(
       // All checks passed — atomically persist validations + transition + audit event
       const eventId = `audit-${card.cardId}-card.promoted-${Date.now()}`;
       await withQueryTimeout(
-        ddb.transaction(async (tx) => {
+        ddb().transaction(async (tx) => {
           // Delete old validation results and reinsert fresh ones — simpler than upsert
           // since there's no unique(cardId, checkType) constraint on the table.
           await tx

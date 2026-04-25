@@ -119,6 +119,7 @@ LOG_LEVEL = "info"
 CORS_ORIGINS = "https://*.replit.app,https://*.replit.dev,https://*.repl.co"
 PUBLIC_APP_URL = "https://szlholdings.replit.app"
 GUARDIAN_ENFORCE = "true"
+DB_CONNECT_TIMEOUT_MS = "90000"
 
 [userenv.shared]
 VAPID_PUBLIC_KEY = "BIe1uJr8KS1Ilhz9KWTwRwfV_BC6C2FDdo6gbn-KDt1QS14KaOIMHuWVhzzJFUYIP0iKiWZOLh4xbcUiay2ZrEc"
@@ -136,10 +137,16 @@ VITE_AEF_GATEWAY_URL = "http://localhost:4200"
 AEF_TENANT_ID = "szl-holdings"
 VITE_AEF_TENANT_ID = "szl-holdings"
 ALLOY_INTERNAL_TOKEN = "szl-11c811093004470be94806e360ff1b54da09aed70f6fa76d7704ad5fd1c53610"
+ENABLE_DEMO_SEED = "true"
+DB_POOL_MAX = "40"
+TRACE_HYDRATE_LIMIT = "50"
+MEMORY_HYDRATE_LIMIT = "100"
+PERSISTENCE_FLUSH_INTERVAL_MS = "60000"
 
 [userenv.development]
 ADMIN_PIN = "PULSE-DEMO-2026"
 OT_ICS_FEED_ENABLED = "true"
+DB_CONNECT_TIMEOUT_MS = "30000"
 
 [[ports]]
 localPort = 8080

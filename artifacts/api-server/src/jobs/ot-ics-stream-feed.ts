@@ -26,15 +26,30 @@ import { logger } from '../lib/logger';
  * Dedicated connection pool for the OT/ICS feed worker.
  * Isolated from the main `db` pool so that boot-time pool pressure
  * (e.g. bootstrapChainState holding connections) never stalls the feed.
+ * Lazy-initialized to avoid module-level PgPool construction in tests.
  */
-const _feedPool = new PgPool({
-  connectionString: process.env.DATABASE_URL,
-  max: 3,
-  idleTimeoutMillis: 30_000,
-  connectionTimeoutMillis: 5_000,
-  statement_timeout: 15_000,
-});
-const feedDb = drizzleConnect(_feedPool);
+let _feedPool: import('pg').Pool | null = null;
+let _feedDb: ReturnType<typeof drizzleConnect> | null = null;
+
+function getFeedPool(): import('pg').Pool {
+  if (!_feedPool) {
+    _feedPool = new PgPool({
+      connectionString: process.env.DATABASE_URL,
+      max: 3,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 5_000,
+      statement_timeout: 15_000,
+    }) as unknown as import('pg').Pool;
+  }
+  return _feedPool;
+}
+
+function getFeedDb(): ReturnType<typeof drizzleConnect> {
+  if (!_feedDb) {
+    _feedDb = drizzleConnect(getFeedPool() as Parameters<typeof drizzleConnect>[0]);
+  }
+  return _feedDb;
+}
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
@@ -151,7 +166,7 @@ async function getCachedAssets(): Promise<AssetRow[]> {
   const now = Date.now();
   if (_assetCache.length > 0 && now - _assetCacheRefreshedAt < 60_000) return _assetCache;
   try {
-    const rows = await feedDb
+    const rows = await getFeedDb()
       .select({
         assetId: otIcsAssetsTable.assetId,
         protocol: otIcsAssetsTable.protocol,
@@ -282,7 +297,7 @@ async function updateRollingAnomalyScores(assets: AssetRow[]): Promise<void> {
 
       // Fetch the previous bucket score for continuity
       const since = new Date(bucket.getTime() - 2 * 3600_000);
-      const recent = await feedDb
+      const recent = await getFeedDb()
         .select({ score: otIcsAnomalyScoresTable.score })
         .from(otIcsAnomalyScoresTable)
         .where(
@@ -304,7 +319,7 @@ async function updateRollingAnomalyScores(assets: AssetRow[]): Promise<void> {
       const isAnomalous = score > baseline * 2.5;
       const reason = isAnomalous ? 'Elevated frame rate + unusual function-code mix' : null;
 
-      await feedDb
+      await getFeedDb()
         .insert(otIcsAnomalyScoresTable)
         .values({
           assetId: asset.assetId,
@@ -333,7 +348,7 @@ async function appendConversationFrame(
   sessionId: string,
 ): Promise<void> {
   try {
-    const [{ maxSeq }] = await feedDb
+    const [{ maxSeq }] = await getFeedDb()
       .execute(
         sql`SELECT COALESCE(MAX(seq), 0) AS "maxSeq" FROM ot_ics_conversations WHERE session_id = ${sessionId}`,
       )
@@ -346,7 +361,7 @@ async function appendConversationFrame(
     const srcName = srcLabel.trim();
     const dstName = dstLabel.trim();
 
-    await feedDb
+    await getFeedDb()
       .insert(otIcsConversationsTable)
       .values({
         sessionId,
@@ -409,7 +424,7 @@ async function tick(): Promise<void> {
     const frame = generateLiveFrame(asset, template);
 
     try {
-      const result = await feedDb
+      const result = await getFeedDb()
         .insert(otIcsDecodedFramesTable)
         .values(frame)
         .onConflictDoNothing()

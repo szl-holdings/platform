@@ -6,22 +6,11 @@ import { defineConfig } from 'vite';
 import { sharedProxyPlugin } from '../../packages/proxy-routes.js';
 
 const rawPort = process.env.VITE_PORT;
+const port = rawPort && !Number.isNaN(Number(rawPort)) && Number(rawPort) > 0
+  ? Number(rawPort)
+  : 5175;
 
-if (!rawPort) {
-  throw new Error('VITE_PORT environment variable is required but was not provided.');
-}
-
-const port = Number(rawPort);
-
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid VITE_PORT value: "${rawPort}"`);
-}
-
-const basePath = process.env.BASE_PATH;
-
-if (!basePath) {
-  throw new Error('BASE_PATH environment variable is required but was not provided.');
-}
+const basePath = process.env.BASE_PATH || '/szl-demo-video/';
 
 export default defineConfig({
   base: basePath,
