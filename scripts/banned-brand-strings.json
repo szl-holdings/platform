@@ -57,6 +57,14 @@
   "$lineAllowlistComment": "Per-line exemptions. Each entry: { file, line, term, reason }. The check matches by exact file path + line number + matched term.",
   "lineAllowlist": [
     { "file": "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx", "line": 68, "term": "NEXUS", "reason": "Page header for the NEXUS governance dashboard; matches the registered artifact display name (NEXUS — Unified Agentic AI Layer)." },
-    { "file": "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx", "line": 236, "term": "NEXUS", "reason": "Reference to the NEXUS bundle in user-facing copy; matches the registered artifact display name." }
+    { "file": "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx", "line": 236, "term": "NEXUS", "reason": "Reference to the NEXUS bundle in user-facing copy; matches the registered artifact display name." },
+    { "file": "artifacts/a11oy/src/data/brands.ts", "line": 40, "term": "TENAX", "reason": "Seed data: tagline string mirrors the registered artifact title 'TENAX — Cyber Resilience Command'; internal-codename use is intentional here for demo fidelity." },
+    { "file": "artifacts/a11oy/src/data/brands.ts", "line": 42, "term": "LUMINA", "reason": "Seed data: tagline string mirrors the registered artifact title 'LUMINA — AI Executive Briefing'; internal-codename use is intentional here for demo fidelity." },
+    { "file": "artifacts/a11oy/src/data/brands.ts", "line": 43, "term": "DOMAINE", "reason": "Seed data: tagline string mirrors the registered artifact title 'DOMAINE — Real Estate Intelligence'; internal-codename use is intentional here for demo fidelity." },
+    { "file": "artifacts/a11oy/src/data/brands.ts", "line": 44, "term": "SEXTANT", "reason": "Seed data: tagline string mirrors the registered artifact title 'SEXTANT — Maritime Intelligence'; internal-codename use is intentional here for demo fidelity." },
+    { "file": "artifacts/a11oy/src/data/brands.ts", "line": 45, "term": "PARAGON", "reason": "Seed data: tagline string mirrors the registered artifact title 'PARAGON — Defense & Intelligence Command'; internal-codename use is intentional here for demo fidelity." },
+    { "file": "artifacts/a11oy/src/data/brands.ts", "line": 52, "term": "Nexus", "reason": "Seed data: third-party demo brand entry named 'Acme Nexus'; not a SZL Holdings product name." },
+    { "file": "artifacts/a11oy/src/data/tokens.ts", "line": 22, "term": "DOMAINE", "reason": "Seed data: driftSurfaces label 'Terra (DOMAINE)' uses codename parenthetically; pre-existing demo fidelity reference." },
+    { "file": "artifacts/a11oy/src/data/tokens.ts", "line": 29, "term": "DOMAINE", "reason": "Seed data: driftSurfaces label 'Terra (DOMAINE)' uses codename parenthetically; pre-existing demo fidelity reference." }
   ]
 }

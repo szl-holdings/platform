@@ -43,9 +43,9 @@
 /artifacts/vessels/  @stephenlutar2-hash
 /artifacts/carlota-jo/  @stephenlutar2-hash
 
-# ── Mobile (CORTEX) ─────────────────────────────────────────────────────────
+# ── Mobile (APEX) ───────────────────────────────────────────────────────────
 /artifacts/szl-holdings-mobile/  @stephenlutar2-hash
-/artifacts/cortex-mobile/  @stephenlutar2-hash
+# /artifacts/cortex-mobile/  — archived; superseded by szl-holdings-mobile
 
 # ── Internal tooling ──────────────────────────────────────────────────────────
 /artifacts/mockup-sandbox/  @stephenlutar2-hash

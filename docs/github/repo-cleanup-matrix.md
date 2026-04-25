@@ -1,8 +1,9 @@
 # SZL Holdings — Repository Cleanup Matrix
 
 **Date:** April 2026  
-**Inventory source:** GitHub API — `GET /user/repos` authenticated as `stephenlutar2-hash` (April 2, 2026)  
-**Status:** Complete enumeration — all 4 confirmed repos classified
+**Last updated:** April 25, 2026 (post-transfer audit)  
+**Inventory source:** GitHub API — `GET /user/repos` authenticated as `stephenlutar2-hash` (April 2, 2026); confirmed via `GET /orgs/szl-holdings/repos` (April 25, 2026)  
+**Status:** Complete enumeration — all repos classified. Transfer complete.
 
 ---
 
@@ -18,14 +19,15 @@ This table contains every repository found on the account. No repos are deferred
 
 | # | Repository | Visibility | Archived | Fork | Disposition | Action | Priority |
 |---|------------|-----------|----------|------|-------------|--------|----------|
-| 1 | `stephenlutar2-hash/szl-holdings-platform` | Public | No | No | **Keep — Transfer to org** | Transfer to `szl-holdings/szl-holdings-platform`, pin as slot 1 | **Immediate** |
+| 1 | `szl-holdings/szl-holdings-platform` | Public | No | No | **Active — transferred ✅** | Transfer complete. Live at `szl-holdings/szl-holdings-platform`. Org profile links confirmed. | **Done** |
 | 2 | `stephenlutar2-hash/szl-holdings` | Public | Yes | No | **Archive confirmed** | Already archived. Verify description says "consolidated into platform." No further action needed. | Done |
 | 3 | `stephenlutar2-hash/stephenlutar2-hash` | Public | Yes | No | **Archive confirmed** | Already archived. Personal profile README repo. No further action needed. | Done |
 | 4 | `stephenlutar2-hash/inca-intelligence-platform` | Public | Yes | No | **Archive confirmed** | Already archived. Previous project, absorbed into platform. No further action needed. | Done |
+| 5 | `szl-holdings/.github` | Public | No | No | **Active — org profile ✅** | Org profile README live. Updated April 25, 2026. | Done |
 
-**Total repos:** 4  
-**Active (not archived):** 1 (`szl-holdings-platform`)  
-**Already archived:** 3  
+**Total repos (under `szl-holdings` org):** 2 (`szl-holdings-platform`, `.github`)  
+**Active (not archived):** 2  
+**Archived:** 3 (under `stephenlutar2-hash/` personal account — retained as permanent redirect)  
 **Forks:** 0  
 **Private repos:** 0
 
@@ -33,23 +35,18 @@ This table contains every repository found on the account. No repos are deferred
 
 ## Detailed Disposition — Repo by Repo
 
-### Repo 1: `stephenlutar2-hash/szl-holdings-platform` — Transfer to Org
+### Repo 1: `szl-holdings/szl-holdings-platform` — Transfer Complete ✅
 
-**Current state:** Public, active, not archived. Contains the full SZL Holdings monorepo (16 artifacts, 120+ tables, full CI/CD, CodeQL, release pipeline).
+**Current state:** Public, active, not archived. Now live at `szl-holdings/szl-holdings-platform`. Contains the full SZL Holdings monorepo (15 registered artifacts, 798 tables, full CI/CD, CodeQL, release pipeline).
 
-**Disposition:** Transfer to `szl-holdings/szl-holdings-platform`
+**Disposition:** ✅ Transfer complete. No further action required.
 
-**Actions at execution:**
-1. Ensure `szl-holdings` GitHub org exists (see org-setup-package.md)
-2. Navigate to: `github.com/stephenlutar2-hash/szl-holdings-platform` → Settings → Danger Zone → Transfer
-3. Target: `szl-holdings`
-4. After transfer: update any local git remotes to `git@github.com:szl-holdings/szl-holdings-platform.git`
-5. After transfer: pin as slot 1 on `szl-holdings` org profile
-6. Verify `.github/profile/README.md` links all resolve under `szl-holdings/`
-
-**Branches / PRs / Issues:** Review open items before transfer. GitHub automatically redirects the old URL for 1 year.
-
-**Secrets:** `AZURE_CREDENTIALS`, `REGISTRY_USERNAME`, `REGISTRY_PASSWORD` — re-add under the new org repo after transfer (secrets do not transfer automatically).
+**Post-transfer checklist:**
+- [x] Repo lives at `szl-holdings/szl-holdings-platform`
+- [x] Org profile README links resolve correctly under `szl-holdings/`
+- [x] Description updated to reflect 15 artifacts (was 14; A11oy added)
+- [ ] Secrets (`AZURE_CREDENTIALS`, `REGISTRY_USERNAME`, `REGISTRY_PASSWORD`) — verify these have been re-added in Settings → Secrets (secrets do not transfer automatically)
+- [ ] Pin as slot 1 on `szl-holdings` org profile (requires org admin access in GitHub UI)
 
 ---
 
@@ -120,6 +117,6 @@ When a repo needs to be archived:
 
 | Status | Count | Repos |
 |--------|-------|-------|
-| Active — transfer to org | 1 | `szl-holdings-platform` |
-| Already archived — no action | 3 | `szl-holdings`, `stephenlutar2-hash`, `inca-intelligence-platform` |
-| **Total classified** | **4** | **All repos enumerated** |
+| Active under `szl-holdings` org | 2 | `szl-holdings-platform`, `.github` |
+| Archived — no action | 3 | `szl-holdings`, `stephenlutar2-hash`, `inca-intelligence-platform` |
+| **Total classified** | **5** | **All repos enumerated (updated April 25, 2026)** |

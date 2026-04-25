@@ -65,6 +65,10 @@ jobs:
             filter: "@workspace/vessels"
             dist: artifacts/vessels/dist
             port: 4109
+          - name: a11oy
+            filter: "@workspace/a11oy"
+            dist: artifacts/a11oy/dist
+            port: 4110
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 

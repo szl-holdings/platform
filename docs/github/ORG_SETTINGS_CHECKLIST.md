@@ -11,8 +11,8 @@ All items in this checklist require manual action in the GitHub UI at `https://g
 Navigate to **Settings → Profile**:
 
 - [ ] Organization display name: `SZL Holdings`
-- [ ] Organization email: `inquiries@szlholdings.com`
-- [ ] Description: `Governed decision infrastructure — connecting what is observable to what is executable, with full attribution.`
+- [x] Organization email: `inquiries@szlholdings.com` *(updated April 25, 2026 — was `stephenlutar2@gmail.com`)*
+- [x] Description: `Governed Business Observability — connecting what is observable to what is executable, with full attribution.` *(updated April 25, 2026)*
 - [ ] URL: `https://szlholdings.com`
 - [ ] Twitter/X handle: (set if applicable)
 - [ ] Location: (set if applicable)
