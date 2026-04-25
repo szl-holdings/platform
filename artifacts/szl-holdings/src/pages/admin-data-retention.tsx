@@ -100,6 +100,16 @@ const STATUS_COLORS: Record<string, string> = {
   partial: "hsl(45,80%,52%)",
 };
 
+function describeCronSchedule(expr: string): { label: string; hint: string } {
+  const parts = expr.trim().split(/\s+/);
+  if (parts.length !== 5) return { label: "custom", hint: expr };
+  const [, , dom, , dow] = parts;
+  if (dow !== "*" && dom === "*") return { label: "weekly", hint: `Weekly (${expr})` };
+  if (dow === "*" && dom !== "*" && dom !== "*/1") return { label: "monthly", hint: `Monthly (${expr})` };
+  if (dow === "*" && (dom === "*" || dom === "*/1")) return { label: "daily", hint: `Daily (${expr})` };
+  return { label: "custom", hint: expr };
+}
+
 export default function AdminDataRetentionPage() {
   const __pageMeta = usePageMeta({ title: "Data Retention — Admin" });
 
@@ -327,7 +337,9 @@ export default function AdminDataRetentionPage() {
                   <Clock size={14} style={{ color: "hsl(192,72%,48%)" }} />
                   <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,82%)" }}>Automated Sweep Schedule</span>
                   <span style={{ fontSize: "11px", padding: "0.15rem 0.5rem", borderRadius: "20px", background: "hsla(142,60%,50%,0.1)", color: "hsl(142,60%,52%)", border: "1px solid hsla(142,60%,50%,0.2)" }}>
-                    {sweepStatusData?.schedule?.enabled !== false ? "Active · weekly" : "Disabled"}
+                    {sweepStatusData?.schedule?.enabled !== false
+                      ? `Active · ${describeCronSchedule(sweepStatusData?.schedule?.cronExpression ?? "0 2 * * 0").label}`
+                      : "Disabled"}
                   </span>
                 </div>
                 {sweepStatusData?.canTriggerSweep && (
@@ -350,7 +362,7 @@ export default function AdminDataRetentionPage() {
                   {
                     label: "Cron schedule",
                     value: sweepStatusData?.schedule?.cronExpression ?? "0 2 * * 0",
-                    hint: "Every Sunday at 02:00 UTC",
+                    hint: describeCronSchedule(sweepStatusData?.schedule?.cronExpression ?? "0 2 * * 0").hint,
                   },
                   {
                     label: "Last automated sweep",

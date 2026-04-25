@@ -121,46 +121,68 @@ export class DurableScheduler {
     this.pollIntervalMs = pollIntervalMs;
   }
 
-  async upsertSchedule(def: ScheduleDefinition): Promise<void> {
+  async upsertSchedule(def: ScheduleDefinition, overwrite = true): Promise<void> {
     const pool = await this.getPool();
     const nextRunAt = getNextRunTime(def.cronExpression);
+    const priority =
+      def.priority === 'critical'
+        ? 10
+        : def.priority === 'high'
+          ? 30
+          : def.priority === 'low'
+            ? 80
+            : 50;
 
-    await pool.query(
-      `INSERT INTO job_schedules
-         (name, job_type, queue, priority, cron_expression, payload, max_retries, enabled, next_run_at, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
-       ON CONFLICT (name) DO UPDATE
-         SET job_type = EXCLUDED.job_type,
-             queue = EXCLUDED.queue,
-             priority = EXCLUDED.priority,
-             cron_expression = EXCLUDED.cron_expression,
-             payload = EXCLUDED.payload,
-             max_retries = EXCLUDED.max_retries,
-             enabled = EXCLUDED.enabled,
-             next_run_at = CASE
-               WHEN job_schedules.enabled = false AND EXCLUDED.enabled = true
-               THEN EXCLUDED.next_run_at
-               ELSE COALESCE(job_schedules.next_run_at, EXCLUDED.next_run_at)
-             END,
-             updated_at = NOW()`,
-      [
-        def.name,
-        def.jobType,
-        def.queue ?? 'default',
-        def.priority === 'critical'
-          ? 10
-          : def.priority === 'high'
-            ? 30
-            : def.priority === 'low'
-              ? 80
-              : 50,
-        def.cronExpression,
-        JSON.stringify(def.payload ?? {}),
-        def.maxRetries ?? 3,
-        def.enabled !== false,
-        nextRunAt,
-      ],
-    );
+    if (overwrite) {
+      await pool.query(
+        `INSERT INTO job_schedules
+           (name, job_type, queue, priority, cron_expression, payload, max_retries, enabled, next_run_at, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
+         ON CONFLICT (name) DO UPDATE
+           SET job_type = EXCLUDED.job_type,
+               queue = EXCLUDED.queue,
+               priority = EXCLUDED.priority,
+               cron_expression = EXCLUDED.cron_expression,
+               payload = EXCLUDED.payload,
+               max_retries = EXCLUDED.max_retries,
+               enabled = EXCLUDED.enabled,
+               next_run_at = CASE
+                 WHEN job_schedules.enabled = false AND EXCLUDED.enabled = true
+                 THEN EXCLUDED.next_run_at
+                 ELSE COALESCE(job_schedules.next_run_at, EXCLUDED.next_run_at)
+               END,
+               updated_at = NOW()`,
+        [
+          def.name,
+          def.jobType,
+          def.queue ?? 'default',
+          priority,
+          def.cronExpression,
+          JSON.stringify(def.payload ?? {}),
+          def.maxRetries ?? 3,
+          def.enabled !== false,
+          nextRunAt,
+        ],
+      );
+    } else {
+      await pool.query(
+        `INSERT INTO job_schedules
+           (name, job_type, queue, priority, cron_expression, payload, max_retries, enabled, next_run_at, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
+         ON CONFLICT (name) DO NOTHING`,
+        [
+          def.name,
+          def.jobType,
+          def.queue ?? 'default',
+          priority,
+          def.cronExpression,
+          JSON.stringify(def.payload ?? {}),
+          def.maxRetries ?? 3,
+          def.enabled !== false,
+          nextRunAt,
+        ],
+      );
+    }
   }
 
   async start(): Promise<void> {
@@ -340,7 +362,7 @@ export const durableScheduler = new DurableScheduler();
 export async function seedDefaultSchedules(schedules: ScheduleDefinition[]): Promise<void> {
   for (const s of schedules) {
     try {
-      await durableScheduler.upsertSchedule(s);
+      await durableScheduler.upsertSchedule(s, false);
     } catch (err) {
       logger.warn({ err, schedule: s.name }, 'DurableScheduler: failed to seed schedule');
     }
