@@ -332,7 +332,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   borderRadius: '8px',
                   border: 'none',
                   background: accentColor,
-                  color: '#fff',
+                  color: '#1a0a2e',
                   fontSize: '0.875rem',
                   fontWeight: 500,
                   cursor: 'pointer',

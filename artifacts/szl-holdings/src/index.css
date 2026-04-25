@@ -36,7 +36,7 @@
   --color-szl-text:          var(--gi-text-primary);
   --color-szl-text-secondary:var(--gi-text-secondary);
   --color-szl-text-muted:    var(--gi-text-muted);
-  --color-szl-text-faint:    var(--gi-text-muted);
+  --color-szl-text-faint:    hsl(214, 7%, 57%);
 
   /* Parent brand accent — amber */
   --color-szl-accent:        var(--gi-accent-amber);

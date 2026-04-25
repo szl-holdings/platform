@@ -213,7 +213,7 @@ const TICKER_ITEMS = [
   { label: "→", color: "hsla(0,0%,100%,0.2)" },
   { label: "Policy", color: "#10b981" },
   { label: "→", color: "hsla(0,0%,100%,0.2)" },
-  { label: "Execution", color: "#6366f1" },
+  { label: "Execution", color: "#818cf8" },
   { label: "→", color: "hsla(0,0%,100%,0.2)" },
   { label: "Proof", color: "#14b8a6" },
   { label: "→", color: "hsla(0,0%,100%,0.2)" },
@@ -221,11 +221,11 @@ const TICKER_ITEMS = [
   { label: "→", color: "hsla(0,0%,100%,0.2)" },
   { label: "Learning", color: "#f97316" },
   { label: "·", color: "hsla(0,0%,100%,0.15)" },
-  { label: "Nine stages", color: "hsla(0,0%,100%,0.35)", mono: true },
+  { label: "Nine stages", color: "hsla(0,0%,100%,0.50)", mono: true },
   { label: "·", color: "hsla(0,0%,100%,0.15)" },
-  { label: "Every decision", color: "hsla(0,0%,100%,0.35)", mono: true },
+  { label: "Every decision", color: "hsla(0,0%,100%,0.50)", mono: true },
   { label: "·", color: "hsla(0,0%,100%,0.15)" },
-  { label: "Fully traced", color: "hsla(0,0%,100%,0.35)", mono: true },
+  { label: "Fully traced", color: "hsla(0,0%,100%,0.50)", mono: true },
   { label: "·", color: "hsla(0,0%,100%,0.15)" },
 ];
 
