@@ -575,27 +575,53 @@ test.describe('SZL Holdings — Admin Sidebar Shortcut', () => {
     expect(body.length).toBeGreaterThan(200);
   });
 
-  test('admin page JS bundle includes Command Center sidebar shortcut', async ({ page }) => {
+  test('admin sidebar shows Command Center shortcut after PIN unlock', async ({ page }) => {
     await page.goto(`${BASE_PATH}admin`.replace('//', '/'));
     await page.waitForLoadState('domcontentloaded');
 
-    const hasCommandCenterInBundle = await page.evaluate(() => {
-      const scripts = document.querySelectorAll('script[src]');
-      for (const s of scripts) {
-        const src = s.getAttribute('src');
-        if (src && /index.*\.js/i.test(src)) return true;
-      }
-      return document.documentElement.innerHTML.includes('command-center') ||
-             document.documentElement.innerHTML.includes('Command Center');
-    });
-
-    const hasAuthGate = await page
-      .locator(":text('Authentication'), :text('Sign in'), :text('Admin Access'), :text('Enter access PIN')")
+    const isAuthBlocked = await page
+      .locator(":text('Authentication Required'), :text('Sign in to access')")
       .first()
-      .isVisible({ timeout: 5000 })
+      .isVisible({ timeout: 3000 })
       .catch(() => false);
 
-    expect(hasAuthGate || hasCommandCenterInBundle).toBeTruthy();
+    if (isAuthBlocked) {
+      test.skip(true, 'Clerk auth blocks admin — cannot test sidebar without authenticated session');
+      return;
+    }
+
+    await page.evaluate(() => localStorage.setItem('szl_admin_unlocked', 'true'));
+    await page.goto(`${BASE_PATH}admin`.replace('//', '/'));
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => null);
+
+    const sidebar = page.locator('aside nav').first();
+    await expect(sidebar).toBeVisible({ timeout: 10000 });
+
+    const commandCenterLink = sidebar.locator("a[href='/admin/command-center']");
+    await expect(commandCenterLink).toBeVisible({ timeout: 5000 });
+    await expect(commandCenterLink).toContainText('Command Center');
+
+    await commandCenterLink.click();
+    await page.waitForLoadState('domcontentloaded');
+    expect(page.url()).toContain('/admin/command-center');
+  });
+
+  test('admin.tsx source contains Command Center sidebar link in nav section', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const adminPath = path.resolve('artifacts/szl-holdings/src/pages/admin.tsx');
+    const source = fs.readFileSync(adminPath, 'utf-8');
+
+    expect(source).toContain('href="/admin/command-center"');
+    expect(source).toContain('<Terminal');
+    expect(source).toContain('Command Center');
+
+    const sidebarMatch = source.match(/ADMIN_SECTIONS\.map[\s\S]*?<\/nav>/);
+    expect(sidebarMatch).toBeTruthy();
+    const sidebarBlock = sidebarMatch![0];
+    expect(sidebarBlock).toContain('href="/admin/command-center"');
+    expect(sidebarBlock).toContain('Command Center');
+    expect(sidebarBlock).toContain('border-t');
   });
 });
 
