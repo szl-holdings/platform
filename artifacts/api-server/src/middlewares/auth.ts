@@ -107,7 +107,7 @@ function checkInternalToken(req: Request): InternalAgentContext | null {
   return match.context;
 }
 
-type SessionResolution =
+export type SessionResolution =
   | { kind: 'ok'; user: AuthenticatedUser }
   | {
       kind: 'revoked';
@@ -115,7 +115,7 @@ type SessionResolution =
     }
   | { kind: 'missing' };
 
-async function resolveUserFromToken(token: string): Promise<SessionResolution> {
+export async function resolveUserFromToken(token: string): Promise<SessionResolution> {
   const [session] = await db
     .select()
     .from(sessionsTable)

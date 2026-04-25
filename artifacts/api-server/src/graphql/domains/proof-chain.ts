@@ -1,3 +1,4 @@
+import { requireRole } from '../directives.js';
 import { parseIntId } from '../utils.js';
 
 export const proofChainTypeDefs = `#graphql
@@ -88,33 +89,36 @@ export const proofChainResolvers = {
       return getProofByContent(args.contentId, args.contentType) ?? null;
     },
 
-    proofChainList: async (
-      _: unknown,
-      args: {
-        orgId?: number;
-        reviewState?: string;
-        sourceClass?: string;
-        contentType?: string;
-        limit?: number;
+    proofChainList: requireRole(
+      ['super_admin', 'admin', 'ops', 'analyst', 'compliance'],
+      async (
+        _: unknown,
+        args: {
+          orgId?: number;
+          reviewState?: string;
+          sourceClass?: string;
+          contentType?: string;
+          limit?: number;
+        },
+        ctx: GQLContext,
+      ) => {
+        const { listProofChain } = await import('@szl-holdings/proof-chain');
+        const user = ctx?.req?.user;
+        const isAdminUser = user?.roles?.some((r) => ['super_admin', 'admin'].includes(r)) ?? false;
+        const orgId = args.orgId ?? (isAdminUser ? undefined : (user?.orgs?.[0]?.orgId ?? undefined));
+        return listProofChain({
+          orgId,
+          reviewState: args.reviewState as
+            | import('@szl-holdings/proof-chain').ProofReviewState
+            | undefined,
+          sourceClass: args.sourceClass as
+            | import('@szl-holdings/proof-chain').ProvenanceSourceClass
+            | undefined,
+          contentType: args.contentType,
+          limit: args.limit ?? 100,
+        });
       },
-      ctx: GQLContext,
-    ) => {
-      const { listProofChain } = await import('@szl-holdings/proof-chain');
-      const user = ctx?.req?.user;
-      const isAdminUser = user?.roles?.some((r) => ['super_admin', 'admin'].includes(r)) ?? false;
-      const orgId = args.orgId ?? (isAdminUser ? undefined : (user?.orgs?.[0]?.orgId ?? undefined));
-      return listProofChain({
-        orgId,
-        reviewState: args.reviewState as
-          | import('@szl-holdings/proof-chain').ProofReviewState
-          | undefined,
-        sourceClass: args.sourceClass as
-          | import('@szl-holdings/proof-chain').ProvenanceSourceClass
-          | undefined,
-        contentType: args.contentType,
-        limit: args.limit ?? 100,
-      });
-    },
+    ),
   },
 
   Mutation: {
@@ -154,23 +158,26 @@ export const proofChainResolvers = {
       });
     },
 
-    reviewProofChain: async (
-      _: unknown,
-      args: { id: string; reviewState: string; reviewNote?: string; exportSafetyState?: string },
-      ctx: GQLContext,
-    ) => {
-      const { reviewProof } = await import('@szl-holdings/proof-chain');
-      const user = ctx?.req?.user;
-      if (!user?.id) throw new Error('AUTHENTICATION_REQUIRED');
-      return reviewProof({
-        proofId: parseIntId(args.id),
-        reviewedBy: user.id,
-        reviewState: args.reviewState as import('@szl-holdings/proof-chain').ProofReviewState,
-        reviewNote: args.reviewNote,
-        exportSafetyState: args.exportSafetyState as
-          | import('@szl-holdings/proof-chain').ProofExportSafetyState
-          | undefined,
-      });
-    },
+    reviewProofChain: requireRole(
+      ['super_admin', 'admin', 'ops', 'compliance'],
+      async (
+        _: unknown,
+        args: { id: string; reviewState: string; reviewNote?: string; exportSafetyState?: string },
+        ctx: GQLContext,
+      ) => {
+        const { reviewProof } = await import('@szl-holdings/proof-chain');
+        const user = ctx?.req?.user;
+        if (!user?.id) throw new Error('AUTHENTICATION_REQUIRED');
+        return reviewProof({
+          proofId: parseIntId(args.id),
+          reviewedBy: user.id,
+          reviewState: args.reviewState as import('@szl-holdings/proof-chain').ProofReviewState,
+          reviewNote: args.reviewNote,
+          exportSafetyState: args.exportSafetyState as
+            | import('@szl-holdings/proof-chain').ProofExportSafetyState
+            | undefined,
+        });
+      },
+    ),
   },
 };

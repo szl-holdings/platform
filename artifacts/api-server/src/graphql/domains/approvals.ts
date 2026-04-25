@@ -1,3 +1,4 @@
+import { requireRole } from '../directives.js';
 import { parseIntId } from '../utils.js';
 
 export const approvalsTypeDefs = `#graphql
@@ -109,27 +110,33 @@ export const approvalsResolvers = {
       return getApprovalById(parseIntId(args.id));
     },
 
-    approvalRequests: async (
-      _: unknown,
-      args: { status?: string; orgId?: number; limit?: number },
-      ctx: GQLContext,
-    ) => {
-      const { listPendingApprovals } = await import('@szl-holdings/covenant-policy');
-      const user = ctx?.req?.user;
-      const isAdminUser = user?.roles?.some((r) => ['super_admin', 'admin'].includes(r)) ?? false;
-      const orgId = args.orgId ?? (isAdminUser ? undefined : (user?.orgs?.[0]?.orgId ?? undefined));
-      return listPendingApprovals({ orgId, limit: args.limit ?? 100 });
-    },
+    approvalRequests: requireRole(
+      ['super_admin', 'admin', 'ops', 'compliance', 'analyst'],
+      async (
+        _: unknown,
+        args: { status?: string; orgId?: number; limit?: number },
+        ctx: GQLContext,
+      ) => {
+        const { listPendingApprovals } = await import('@szl-holdings/covenant-policy');
+        const user = ctx?.req?.user;
+        const isAdminUser = user?.roles?.some((r) => ['super_admin', 'admin'].includes(r)) ?? false;
+        const orgId = args.orgId ?? (isAdminUser ? undefined : (user?.orgs?.[0]?.orgId ?? undefined));
+        return listPendingApprovals({ orgId, limit: args.limit ?? 100 });
+      },
+    ),
 
     approvalsByResource: async (_: unknown, args: { resourceType: string; resourceId: string }) => {
       const { listApprovalsByResource } = await import('@szl-holdings/covenant-policy');
       return listApprovalsByResource(args.resourceType, args.resourceId);
     },
 
-    approvalAuditTrail: async (_: unknown, args: { approvalId: string }) => {
-      const { getApprovalAuditTrail } = await import('@szl-holdings/covenant-policy');
-      return getApprovalAuditTrail(parseIntId(args.approvalId));
-    },
+    approvalAuditTrail: requireRole(
+      ['super_admin', 'admin', 'ops', 'compliance'],
+      async (_: unknown, args: { approvalId: string }) => {
+        const { getApprovalAuditTrail } = await import('@szl-holdings/covenant-policy');
+        return getApprovalAuditTrail(parseIntId(args.approvalId));
+      },
+    ),
 
     approvalComments: async (_: unknown, args: { approvalId: string }) => {
       const { getApprovalComments } = await import('@szl-holdings/covenant-policy');
@@ -175,41 +182,47 @@ export const approvalsResolvers = {
       });
     },
 
-    reviewApproval: async (
-      _: unknown,
-      args: { id: string; decision: string; note?: string },
-      ctx: GQLContext,
-    ) => {
-      const { reviewApproval } = await import('@szl-holdings/covenant-policy');
-      const user = ctx?.req?.user;
-      return reviewApproval({
-        approvalId: parseIntId(args.id),
-        actorId: user?.id ?? null,
-        actorRole: user?.roles?.[0],
-        decision: args.decision as 'approved' | 'rejected' | 'revised',
-        note: args.note,
-        correlationId: ctx?.req?.correlationId,
-        serviceAttribution: 'graphql',
-      });
-    },
+    reviewApproval: requireRole(
+      ['super_admin', 'admin', 'ops', 'compliance'],
+      async (
+        _: unknown,
+        args: { id: string; decision: string; note?: string },
+        ctx: GQLContext,
+      ) => {
+        const { reviewApproval } = await import('@szl-holdings/covenant-policy');
+        const user = ctx?.req?.user;
+        return reviewApproval({
+          approvalId: parseIntId(args.id),
+          actorId: user?.id ?? null,
+          actorRole: user?.roles?.[0],
+          decision: args.decision as 'approved' | 'rejected' | 'revised',
+          note: args.note,
+          correlationId: ctx?.req?.correlationId,
+          serviceAttribution: 'graphql',
+        });
+      },
+    ),
 
-    escalateApproval: async (
-      _: unknown,
-      args: { id: string; reason: string; escalatedToId?: number },
-      ctx: GQLContext,
-    ) => {
-      const { escalateApproval } = await import('@szl-holdings/covenant-policy');
-      const user = ctx?.req?.user;
-      return escalateApproval({
-        approvalId: parseIntId(args.id),
-        actorId: user?.id ?? null,
-        actorRole: user?.roles?.[0],
-        escalatedToId: args.escalatedToId,
-        reason: args.reason,
-        correlationId: ctx?.req?.correlationId,
-        serviceAttribution: 'graphql',
-      });
-    },
+    escalateApproval: requireRole(
+      ['super_admin', 'admin', 'ops'],
+      async (
+        _: unknown,
+        args: { id: string; reason: string; escalatedToId?: number },
+        ctx: GQLContext,
+      ) => {
+        const { escalateApproval } = await import('@szl-holdings/covenant-policy');
+        const user = ctx?.req?.user;
+        return escalateApproval({
+          approvalId: parseIntId(args.id),
+          actorId: user?.id ?? null,
+          actorRole: user?.roles?.[0],
+          escalatedToId: args.escalatedToId,
+          reason: args.reason,
+          correlationId: ctx?.req?.correlationId,
+          serviceAttribution: 'graphql',
+        });
+      },
+    ),
 
     addApprovalComment: async (
       _: unknown,
