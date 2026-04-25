@@ -2,8 +2,35 @@
  * Mobile test: when the AuthContext exposes a `sessionRevocation` value, the
  * sign-in screen must render the "Session ended" notice with the server's
  * message instead of silently dropping the user back to the login button.
+ *
+ * The component is invoked as a plain function (no React renderer) so we get a
+ * raw JSX tree to traverse.  Every hook the component calls must therefore be
+ * replaced with a simple non-hook implementation via jest.mock.
  */
 import { isValidElement, type ReactElement } from 'react';
+
+jest.mock('react', () => {
+  const actual: typeof import('react') = jest.requireActual('react');
+  return {
+    ...actual,
+    useState: (init: unknown) => [init, jest.fn()],
+    useRef: (init: unknown) => ({ current: init }),
+    useCallback: (fn: unknown) => fn,
+  };
+});
+
+jest.mock('@/context/BiometricSignInContext', () => ({
+  useBiometricSignIn: () => ({
+    status: { isEnrolled: false, enrolledAt: null, deviceId: null, platform: null },
+    isAvailable: false,
+    checkEnrollment: jest.fn(),
+    enroll: jest.fn(),
+    signIn: jest.fn(),
+    revoke: jest.fn(),
+    revokeLocal: jest.fn(),
+    performStepUp: jest.fn(),
+  }),
+}));
 
 jest.mock('@/hooks/useColors', () => ({
   useColors: () => ({
@@ -79,10 +106,6 @@ function collectText(node: unknown): string[] {
 }
 
 function renderAuthScreen(): AnyElement {
-  // AuthScreen is a plain function component with no real React hook state
-  // (useAuth/useColors/useSafeAreaInsets are all mocked), so calling it as a
-  // function returns the JSX tree we need to traverse.
-  // Cast to any because tsx component invocation requires a renderer otherwise.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tree = (AuthScreen as unknown as () => AnyElement)();
   return tree;

@@ -11,7 +11,7 @@ module.exports = {
           module: 'commonjs',
           esModuleInterop: true,
           strict: false,
-          jsx: 'react',
+          jsx: 'react-jsx',
         },
       },
     ],
