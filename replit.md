@@ -52,12 +52,22 @@ The signal bus is a when/then automation engine that routes signals across produ
 - `shared-contracts/`: Agent roles, starter workflows, evidence/policy/retrieval/memory/provenance types.
 - `agent-core/`: RunContext factory, capability resolver.
 - `workflow-runtime/`: Run engine, step executor, approval gate state machine.
-- `retrieval-core/`: Query planner, RRF reranker.
+- `retrieval-core/`: Query planner, RRF reranker, **RetrievalSpecialist** (Phase 4: two-stage embedding + reranker pipeline with provider-adapter slots).
+- `aef-retrieval-core/`: AEF retrieval adapters, fusion, boost, citations, normalize, rerank, **multimodal** (Phase 4: per-modality meta builders, score weights, text extraction for screenshots/diagrams/audio).
 - `memory-core/`: In-memory store (with Redis adapter for production).
+- `memory-fabric/`: Tiered memory with provenance/freshness/retention. **ScopedMemoryManager** (Phase 4: four governed scopes — session, domain, executive, compliance — with explicit read/write contracts and retention semantics).
 - `evidence-ledger/`: Immutable append-only ledger, ProofEnvelope assembly.
 - `policy-guard/`: Rule evaluation engine, baseline rules.
 - `domain-profiles/`: Definitions for KORA, SEXTANT, DOMAINE, PARAGON, Counsel, Carlota.
 - `platform-metrics-registry/`: Typed metric schema, registry.
+
+**Phase 4 — Retrieval & Memory:**
+- **Two-stage retrieval pipeline:** `packages/retrieval-core/src/retrieval-specialist.ts` — `RetrievalSpecialist` class with Stage 1 (embedding + optional keyword, RRF fusion) and Stage 2 (cross-encoder adapter slot with CPU term-overlap fallback). Emits a `RetrievalProofChain` capturing all provenance.
+- **Multimodal retrieval:** `packages/aef-retrieval-core/src/multimodal.ts` — text, screenshot, diagram, audio_transcript modalities with metadata builders (`buildScreenshotMeta`, `buildDiagramMeta`, `buildAudioTranscriptMeta`), per-modality rerank weights, and `extractEmbeddingText` for embedding-input extraction.
+- **Scoped memory:** `packages/memory-fabric/src/scoped-memory.ts` — `ScopedMemoryManager` with `SessionScopedStore` (ephemeral, clears on session end), `DomainScopedStore` (domain-tagged, 90-day TTL), `ExecutiveScopedStore` (consolidated domain, 90-day TTL), `ComplianceScopedStore` (append-only, 7-year retention, immutable).
+- **Shared contracts extensions:** `packages/shared-contracts/src/retrieval-types.ts` — added `RetrievalModality`, `ModalityMeta` union, modality-specific meta interfaces, `RankedEvidenceItem`, `RetrievalProofChain`; `packages/shared-contracts/src/memory-types.ts` — added `GoverningMemoryScope`, `GOVERNED_SCOPE_RETENTION`, `GOVERNED_SCOPE_READ_ROLES`, `GOVERNED_SCOPE_WRITE_ROLES`.
+- **Proof-chain viewer:** `packages/design-system/src/proof/ProofChainViewer.tsx` — functional component showing query, strategy, modality badges, model provenance pills, ranked evidence rows with embedding/reranker score bars and confidence deltas. Exported from `@szl-holdings/design-system/proof`.
+- **Operator surface:** `artifacts/command/src/pages/retrieval-proof-chain.tsx` — live retrieval explorer at `/command/operations/retrieval/proof-chain`. Registered in Command's nav under Counsel group.
 
 **AEEP Design System (`packages/design-system/src/`):** Includes tokens, providers (density + screen mode), hooks, shell components (AppShell, SideNav, TopBar, GlobalCommandPalette), layout components (SplitPane, SideInspector), data display (MetricStat, DataGrid), detail views, timeline components, EvidencePanel, form elements, and feedback components.
 

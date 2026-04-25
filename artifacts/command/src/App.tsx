@@ -188,6 +188,9 @@ const CognitiveLoopPage = lazy(() => import('./pages/cognitive/loop'));
 const AlloyProofPage = lazy(() =>
   import('./pages/alloy-proof').then((m) => ({ default: m.AlloyProofPage })),
 );
+const RetrievalProofChainPage = lazy(() =>
+  import('./pages/retrieval-proof-chain').then((m) => ({ default: m.RetrievalProofChainPage })),
+);
 const GovernedCockpitPage = lazy(() => import('./pages/governed-cockpit'));
 const DemoLaunchpadPage = lazy(() =>
   import('./pages/demo-launchpad').then((m) => ({ default: m.DemoLaunchpad })),
@@ -412,6 +415,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/operations/alloy/compiler', label: 'Counsel Graph Compiler', group: 'Counsel' },
   { href: '/operations/alloy/policy-compiler', label: 'Counsel Policy Compiler', group: 'Counsel' },
   { href: '/operations/alloy/proof', label: 'Counsel Proof', group: 'Counsel' },
+  { href: '/operations/retrieval/proof-chain', label: 'Retrieval Proof Chain', group: 'Counsel' },
   { href: '/operations/runs', label: 'Run Console', group: 'Operations' },
   { href: '/operations/evidence-explorer', label: 'Evidence Explorer', group: 'Operations' },
   { href: '/operations/eval-studio', label: 'Eval Studio', group: 'Operations' },
@@ -738,6 +742,7 @@ function AppShell() {
               <Route path="/evolution/diagnostics" component={() => <PERDiagnostics />} />
               <Route path="/operations/alloy/trust-console" component={() => <TrustConsole />} />
               <Route path="/operations/alloy/proof" component={() => <AlloyProofPage />} />
+              <Route path="/operations/retrieval/proof-chain" component={() => <RetrievalProofChainPage />} />
               <Route path="/governed-cockpit" component={() => <GovernedCockpitPage />} />
               <Route path="/demo" component={() => <DemoLaunchpadPage />} />
               <Route path="/demo-launchpad" component={() => <DemoLaunchpadPage />} />

@@ -16,3 +16,11 @@ export type { PolicyState, PolicyStateChipProps } from './PolicyStateChip.js';
 export { PolicyStateChip } from './PolicyStateChip.js';
 export type { AutonomyDecision, ProofEnvelopeProps } from './ProofEnvelope.js';
 export { ProofEnvelope } from './ProofEnvelope.js';
+export type {
+  ProofChainViewerProps,
+  RankedEvidenceItem,
+  RetrievalModality,
+  RetrievalProofChain,
+  RetrievalStrategy,
+} from './ProofChainViewer.js';
+export { ProofChainViewer } from './ProofChainViewer.js';

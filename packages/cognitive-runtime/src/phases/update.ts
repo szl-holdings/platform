@@ -1,4 +1,10 @@
-import { type MemoryEntry, type MemoryStore, defaultMemoryStore, MEMORY_DOMAIN_UNKNOWN } from '@workspace/memory-fabric';
+import {
+  type MemoryEntry,
+  type MemoryStore,
+  defaultMemoryStore,
+  defaultScopedMemoryManager,
+  MEMORY_DOMAIN_UNKNOWN,
+} from '@workspace/memory-fabric';
 import { type SelfModelStore, defaultSelfModelStore, updateAfterRun } from '@workspace/self-model';
 import { randomUUID } from 'node:crypto';
 import type { PhaseResult } from '../types.js';
@@ -15,6 +21,7 @@ export interface UpdatePhaseOptions {
   memoryStore?: MemoryStore;
   durationMs: number;
   objective: string;
+  sessionId?: string;
 }
 
 export interface UpdateSelfModelPhaseOutput {
@@ -177,6 +184,23 @@ export async function updateMemoryPhase(
   memoryStore.put(episodicEntry);
   memoryIdsWritten.push(episodicId);
 
+  // Mirror episodic entry to the governed domain scope (90-day TTL, domain-tagged).
+  // If no domain is available, skip the domain-scope write since domain is required.
+  if (opts.domain) {
+    try {
+      defaultScopedMemoryManager.domain.write({
+        key: `cognitive:run:${opts.runId}`,
+        value: episodicEntry.value as Record<string, unknown>,
+        domain: opts.domain,
+        sensitivity: 'internal',
+        traceId: opts.traceId,
+        metadata: { agentId: opts.agentId, runId: opts.runId },
+      });
+    } catch {
+      // best-effort: governed write failure must not break the cognitive loop
+    }
+  }
+
   // Semantic lesson entry — extracted learning for future reference
   let lessonId: string | undefined;
   if (reflectOutput?.lesson) {
@@ -217,6 +241,22 @@ export async function updateMemoryPhase(
     };
     memoryStore.put(lessonEntry);
     memoryIdsWritten.push(lessonId);
+
+    // Mirror lesson to the governed domain scope.
+    if (opts.domain) {
+      try {
+        defaultScopedMemoryManager.domain.write({
+          key: `cognitive:lesson:${opts.traceId}`,
+          value: lessonEntry.value as Record<string, unknown>,
+          domain: opts.domain,
+          sensitivity: 'internal',
+          traceId: opts.traceId,
+          metadata: { agentId: opts.agentId, runId: opts.runId },
+        });
+      } catch {
+        // best-effort
+      }
+    }
   }
 
   const output: UpdateMemoryPhaseOutput = {

@@ -122,6 +122,7 @@
     "@workspace/forge": "workspace:*",
     "@workspace/guardian": "workspace:*",
     "@workspace/memory-fabric": "workspace:*",
+    "@szl-holdings/retrieval-core": "workspace:*",
     "@workspace/ontology": "workspace:*",
     "@workspace/planner": "workspace:*",
     "@workspace/reflection-engine": "workspace:*",

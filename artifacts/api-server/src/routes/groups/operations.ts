@@ -52,4 +52,11 @@ export function register(router: IRouter): void {
   router.use('/linear', tenantScope({ required: true }));
   router.use('/linear', _writeLimiter);
   router.use(lazyMatch('/linear', () => import('../linear'), 'linear'));
+
+  router.use('/retrieval/proof-chain', tenantScope({ required: true }));
+  router.use('/retrieval/proof-chain', _writeLimiter);
+  router.use(
+    '/retrieval/proof-chain',
+    lazyMount(() => import('../retrieval-proof-chain'), 'retrieval-proof-chain'),
+  );
 }

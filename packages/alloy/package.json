@@ -17,6 +17,7 @@
     "@workspace/planner": "workspace:*",
     "@workspace/run-ledger": "workspace:*",
     "@szl-holdings/policy-guard": "workspace:*",
+    "@szl-holdings/retrieval-core": "workspace:*",
     "@szl-holdings/shared-contracts": "workspace:*",
     "zod": "catalog:"
   },

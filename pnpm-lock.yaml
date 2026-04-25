@@ -675,6 +675,9 @@ importers:
       '@szl-holdings/receipt-graph':
         specifier: workspace:*
         version: link:../../lib/receipt-graph
+      '@szl-holdings/retrieval-core':
+        specifier: workspace:*
+        version: link:../../packages/retrieval-core
       '@szl-holdings/scene-export':
         specifier: workspace:*
         version: link:../../lib/scene-export
@@ -3662,6 +3665,9 @@ importers:
       '@szl-holdings/policy-guard':
         specifier: workspace:*
         version: link:../policy-guard
+      '@szl-holdings/retrieval-core':
+        specifier: workspace:*
+        version: link:../retrieval-core
       '@szl-holdings/shared-contracts':
         specifier: workspace:*
         version: link:../shared-contracts

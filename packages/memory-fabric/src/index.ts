@@ -1,6 +1,7 @@
 export * from './behaviors.js';
 export * from './postgres-store.js';
 export * from './retention.js';
+export * from './scoped-memory.js';
 export * from './store.js';
 export * from './types.js';
 

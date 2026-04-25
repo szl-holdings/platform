@@ -16,6 +16,10 @@
  *   - ApprovalRouterSpecialist  → @workspace/approvals-inbox
  */
 import { randomUUID } from 'node:crypto';
+import {
+  InMemoryEmbeddingAdapter,
+  RetrievalSpecialist as CoreRetrievalSpecialist,
+} from '@szl-holdings/retrieval-core';
 import type { PolicyRule } from '@szl-holdings/shared-contracts';
 import type { AgentRequest, EnvelopeToolCall } from './envelope.js';
 
@@ -309,21 +313,107 @@ export class ApprovalRouterSpecialist implements Specialist {
   }
 }
 
-// ─── 4. Retrieval Specialist (Phase 4 stub) ───────────────────────────────────
+// ─── 4. Retrieval Specialist (Phase 4 — backed by retrieval-core) ─────────────
+
+const _alloyKbCorpus = [
+  {
+    chunkId: 'alloy-kb-workflows',
+    sourceId: 'alloy/kb/workflows',
+    content:
+      'Alloy governed workflow engine. Approval gates. Policy evaluation. Step executor. Run context. Tool call ledger. Autonomous semi-auto manual execution modes.',
+  },
+  {
+    chunkId: 'alloy-kb-proof-chain',
+    sourceId: 'alloy/kb/proof-chain',
+    content:
+      'Alloy proof chain immutable audit trail. Every agent action generates a proof envelope with model provenance, confidence, policy verdict, and approval record.',
+  },
+  {
+    chunkId: 'alloy-kb-memory-scopes',
+    sourceId: 'alloy/kb/memory-scopes',
+    content:
+      'Governed memory scopes: session ephemeral, domain 90-day TTL, executive consolidated cross-domain, compliance append-only 7-year retention immutable.',
+  },
+  {
+    chunkId: 'alloy-kb-retrieval-pipeline',
+    sourceId: 'alloy/kb/retrieval',
+    content:
+      'Two-stage retrieval pipeline. Stage 1: dense embedding query with optional keyword pass, RRF fusion. Stage 2: cross-encoder reranker or CPU term-overlap fallback.',
+  },
+  {
+    chunkId: 'alloy-kb-policy',
+    sourceId: 'alloy/kb/policy',
+    content:
+      'Policy guard rule evaluation. Baseline policy rules. Risk level. Requires review flag. Blocked reason. Policy tier: internal-workflow operator-human-approved fully-autonomous.',
+  },
+  {
+    chunkId: 'alloy-kb-approvals',
+    sourceId: 'alloy/kb/approvals',
+    content:
+      'Approval inbox routing. Approval gate state machine. Human-in-the-loop review. Approval request lifecycle: pending approved rejected escalated timed-out.',
+  },
+];
+
+const _alloyEmbeddingAdapter = new InMemoryEmbeddingAdapter(_alloyKbCorpus, 'alloy-tfidf-v1');
+
+const _alloyRetrievalSpecialist = new CoreRetrievalSpecialist({
+  embeddingAdapter: _alloyEmbeddingAdapter,
+  defaultTopK: 4,
+  defaultMinScore: 0,
+});
 
 export class RetrievalSpecialist implements Specialist {
   readonly id = 'retrieval';
   readonly displayName = 'Retrieval Strategist';
 
-  async handle(_request: AgentRequest): Promise<SpecialistResult> {
-    return {
-      specialistId: this.id,
-      success: true,
-      output: { sources: [], note: 'Retrieval upgrade lands in Phase 4.' },
-      toolCalls: [],
-      warnings: ['RetrievalSpecialist is a Phase 4 stub — no retrieval performed.'],
-      durationMs: 0,
-    };
+  async handle(request: AgentRequest): Promise<SpecialistResult> {
+    const t0 = Date.now();
+    const queryText = request.objective ?? 'general query';
+    try {
+      const result = await _alloyRetrievalSpecialist.retrieve({
+        queryId: randomUUID(),
+        text: queryText,
+        strategy: 'hybrid',
+        modalities: ['text'],
+        topK: 4,
+      });
+      return {
+        specialistId: this.id,
+        success: true,
+        output: {
+          proofChain: result.proofChain,
+          chunks: result.chunks,
+          overallConfidence: result.proofChain.overallConfidence,
+        },
+        toolCalls: [
+          makeToolCall(
+            'retrieval.two-stage',
+            'Two-Stage Retrieval',
+            this.id,
+            true,
+            Date.now() - t0,
+            {
+              strategy: 'hybrid',
+              hits: result.chunks.length,
+              embeddingModel: result.embeddingModel,
+              rerankerModel: result.rerankerModel,
+            },
+          ),
+        ],
+        warnings: [],
+        durationMs: Date.now() - t0,
+      };
+    } catch (err) {
+      return {
+        specialistId: this.id,
+        success: false,
+        output: { chunks: [], proofChain: null },
+        toolCalls: [],
+        warnings: [],
+        error: err instanceof Error ? err.message : String(err),
+        durationMs: Date.now() - t0,
+      };
+    }
   }
 }
 
