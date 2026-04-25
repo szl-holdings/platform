@@ -1,4 +1,4 @@
-import { getKernel } from '@szl/alloy/prompts';
+import { getKernel } from '../lib/alloy-prompts';
 import { BookOpen, Brain, Sparkles, Zap } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -44,7 +44,7 @@ export function AlloyKernelPanel() {
 
       <div className="flex items-center justify-between">
         <div className="flex flex-wrap gap-1">
-          {kernel.inspirations.map((i) => (
+          {(kernel.inspirations ?? []).map((i) => (
             <span
               key={i}
               className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[9px] text-slate-400 font-mono"

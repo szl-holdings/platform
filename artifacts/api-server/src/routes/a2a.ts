@@ -1,26 +1,4 @@
-/**
- * A2A v0.3 Agent Cards & Interoperability Routes
- *
- * Standard A2A Protocol:
- *   GET  /.well-known/agent-card.json  — Mesh index of all agent cards
- *   GET  /a2a/agents                   — List all agent cards
- *   GET  /a2a/agents/:agentId          — Individual agent card
- *   GET  /a2a/agents/:agentId/health   — Agent health check
- *   GET  /a2a/agents/:agentId/status   — Agent availability & trust status
- *   POST /a2a/agents/:agentId/heartbeat — Record agent heartbeat
- *   POST /a2a/agents/:agentId/tasks    — Create a new A2A task
- *   GET  /a2a/agents/:agentId/tasks    — List agent tasks
- *   GET  /a2a/agents/:agentId/tasks/:taskId — Get task status/output
- *   GET  /a2a/agents/:agentId/stream   — SSE streaming for task results
- *   POST /a2a/agents/:agentId/rpc      — JSON-RPC 2.0 endpoint
- *
- * Agentic Discovery & Delegation:
- *   GET  /a2a/discover                 — Discover agents by capability/domain/task
- *   POST /a2a/delegate                 — Delegate a task from one agent to another
- *   POST /a2a/multi-delegate           — Delegate to multiple agents and merge results
- *   GET  /a2a/delegations              — Active + historical delegations
- *   GET  /a2a/delegations/stats        — Delegation statistics by agent
- */
+/** A2A v0.3 — Agent Cards, Discovery, Task Delegation, and JSON-RPC interoperability routes. */
 
 import {
   type A2AJsonRpcRequest,
@@ -70,6 +48,34 @@ router.get('/.well-known/agent-card.json', (_req: Request, res: Response) => {
   res.setHeader('Cache-Control', 'public, max-age=300');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.json(buildMeshAgentIndex());
+});
+
+// RFC 9116 — security.txt (VD1 closure)
+// Mirrors the static file at artifacts/szl-holdings/public/.well-known/security.txt
+// so external scanners that probe the API origin also receive a valid response.
+//
+// Mounting chain (how this route becomes reachable at GET /api/.well-known/security.txt):
+//   app.ts:675        app.use('/api', router)              → main router mounted at /api
+//   routes/index.ts:231  ai.register(router)               → AI group registered
+//   groups/ai.ts:150  lazyMatch(['/.well-known', '/a2a']) → a2a module matched on path prefix
+//   a2a.ts            router.get('/.well-known/security.txt') → this handler
+//
+// lazyMatch does NOT strip prefixes (see lib/lazy-router.ts) — the full path is preserved
+// and matched against route patterns, which is why '/.well-known/security.txt' works.
+router.get('/.well-known/security.txt', (_req: Request, res: Response) => {
+  const expires = new Date('2027-04-25T00:00:00.000Z').toISOString();
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.send(
+    [
+      'Contact: mailto:security@szlholdings.com',
+      `Expires: ${expires}`,
+      'Preferred-Languages: en',
+      'Canonical: https://szlholdings.com/.well-known/security.txt',
+      'Policy: https://szlholdings.com/security',
+      'Acknowledgments: https://szlholdings.com/security#acknowledgements',
+    ].join('\n') + '\n',
+  );
 });
 
 router.get('/a2a/agents', (_req: Request, res: Response) => {

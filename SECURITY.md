@@ -17,6 +17,9 @@ The SZL Holdings platform is currently in active pre-commercial development. Sec
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
+A machine-readable disclosure policy is published at:  
+**[`/.well-known/security.txt`](https://szlholdings.com/.well-known/security.txt)** (RFC 9116)
+
 ### Responsible Disclosure Process
 
 1. **Email:** Send a detailed report to [security@szlholdings.com](mailto:security@szlholdings.com)

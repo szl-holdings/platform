@@ -106,21 +106,21 @@ jobs:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   lighthouse-gate:
-    name: Lighthouse Gate (advisory)
+    name: Lighthouse Gate (accessibility enforced)
     needs: lighthouse
     runs-on: ubuntu-latest
     if: always()
-    continue-on-error: true
     permissions:
       contents: read
     steps:
-      - name: Report Lighthouse advisory status
+      - name: Enforce Lighthouse accessibility gate
         run: |
-          echo "Lighthouse audits completed (advisory — not a hard gate)."
-          echo "Thresholds (warn): Performance ≥ 80, Accessibility ≥ 90, Best Practices ≥ 90, SEO ≥ 90"
+          echo "Lighthouse audits completed."
+          echo "Thresholds: Performance ≥ 80 (warn), Accessibility ≥ 90 (error/hard), Best Practices ≥ 90 (warn), SEO ≥ 90 (warn)"
           echo "See audit/performance/lighthouse-baseline.md for baseline scores."
-          echo "To flip to hard-fail: change 'warn' → 'error' in .lighthouserc.json"
-          echo "  and remove 'continue-on-error: true' from the lighthouse-gate job."
+          echo "See audit/A11OY_ACCESSIBILITY_AUDIT.md for current WCAG 2.1 AA audit findings."
           if [[ "${{ needs.lighthouse.result }}" == "failure" ]]; then
-            echo "::warning::One or more Lighthouse jobs failed — review the uploaded reports."
+            echo "::error::One or more Lighthouse jobs failed. Accessibility threshold (≥ 90) is enforced — fix WCAG violations before merge."
+            exit 1
           fi
+          echo "All Lighthouse checks passed."

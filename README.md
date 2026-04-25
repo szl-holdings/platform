@@ -168,6 +168,42 @@ This repository is proprietary. Source code, architecture, and implementation de
 
 **For all other inquiries:** Please reach out via the contact information below.
 
+## Directory Structure
+
+| Path | Contents |
+|------|----------|
+| `artifacts/` | All deployable web and mobile applications |
+| `artifacts/a11oy/` | A11oy — Live Enterprise Execution Fabric |
+| `lib/` | Shared libraries: database client, auth, AI, event bus, UI components |
+| `apps/` | Background applications: embedding API, ingestion orchestrator, runtime API |
+| `services/` | Platform services: FORGE fabric, KORA metrics, Substrate MCP gateway |
+| `workers/` | Background workers: embedding, ranking, reranking, vector, Python substrate |
+| `packages/` | Domain packages: design system, substrate, agent core, evidence ledger, policy guard |
+| `scripts/` | Seed scripts, QA scripts, screenshot capture, deployment utilities |
+| `docs/` | Architecture, trust, investor, and operational documentation |
+| `docs/assets/screenshots/current/` | Verified current screenshots — only source for README images |
+| `audit/` | Audit reports, QA reports, asset reports |
+| `ops/` | Infrastructure configuration, environment matrix, runbooks |
+| `.github/workflows/` | CI, CodeQL, security, deploy, and README QA pipelines |
+
+**Artifact inventory:**
+
+| Artifact | Kind | Preview | Status (active prototype) |
+|----------|------|---------|--------------------------|
+| SZL Holdings Dashboard | web | `/` | Active prototype |
+| A11oy — Live Enterprise Execution Fabric | web | `/a11oy/` | Active prototype — Phase 1 complete |
+| API Server | web | `/api/` | Active prototype — backend API |
+| FORGE Command Portal | web | `/command/` | Active prototype — cross-domain command surface |
+| TENAX — Cyber Resilience Command | web | `/sentra/` | Active prototype — domain pack |
+| Counsel — Legal Matter Command | web | `/counsel/` | Active prototype — domain pack |
+| DOMAINE — Real Estate Intelligence | web | `/terra/` | Active prototype — domain pack |
+| SEXTANT Maritime Intelligence | web | `/vessels/` | Active prototype — domain pack |
+| Carlota Jo Consulting | web | `/carlota-jo/` | Active prototype — domain pack |
+| LUMINA — AI Executive Briefing | web | `/pulse/` | Active prototype — cross-domain briefing |
+| PARAGON (Investor Pitch Deck) | web | `/aegis/` | Active prototype — investor slides and ATLAS runtime |
+| SZL Holdings — Governed Autonomy Demo | video | `/szl-demo-video/` | Active prototype — 60-second demo video |
+| SZL Holdings — Mobile Command (APEX) | mobile | `/szl-holdings-mobile/` | Deferred — after APEX ships |
+
 ---
 
 ## Contact

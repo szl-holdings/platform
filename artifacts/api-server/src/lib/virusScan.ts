@@ -1,11 +1,25 @@
 /**
  * Virus Scanner — signature-based malware detection for uploaded files.
  *
- * Implements a lightweight YARA-style byte-signature scanner covering:
+ * Implements a two-tier scanning strategy:
+ *
+ * Tier 1 (always active): Lightweight YARA-style byte-signature scanner covering:
  *   - EICAR standard test virus (canonical AV test file)
  *   - Common malware file-type smuggling patterns (PE/EXE headers in non-exe files)
  *   - Obfuscated script launchers embedded in documents
  *   - Macro-enabled Office format magic bytes
+ *   - Reverse shell signatures
+ *
+ * Tier 2 (when VIRUS_SCAN_PROVIDER is set): External AV cloud API call, one of:
+ *   - "clamav-rest"   — ClamAV REST API (e.g., clamav-rest Docker image or ClamAV-as-a-Service)
+ *                       Requires: CLAMAV_REST_URL (e.g., http://clamav:9000)
+ *   - "cloudmersive" — Cloudmersive Virus Scan API
+ *                       Requires: CLOUDMERSIVE_API_KEY
+ *
+ * Environment contract:
+ *   VIRUS_SCAN_PROVIDER   = "" | "clamav-rest" | "cloudmersive"   (optional, default: "" = tier-1 only)
+ *   CLAMAV_REST_URL       = URL of ClamAV REST service              (required when provider=clamav-rest)
+ *   CLOUDMERSIVE_API_KEY  = Cloudmersive API key                    (required when provider=cloudmersive)
  *
  * Scan states:
  *   - "pending"  — queued, not yet started (initial DB state at upload)
@@ -15,9 +29,9 @@
  *   - "error"    — scan failed (e.g., storage read error)
  *   - "skipped"  — object storage not configured
  *
- * When a real AV cloud API (e.g., VirusTotal, ClamAV-REST, Cloudmersive) is
- * provisioned, replace `performSignatureScan` with that API call and keep the
- * DB update logic intact.
+ * Safety invariant: If the external AV API call fails (network error, timeout, invalid response),
+ * the scan falls back to the tier-1 signature result rather than silently clearing the file.
+ * A failed external scan is logged as a warning; it does NOT produce a "clean" result without evidence.
  */
 
 import { eq } from 'drizzle-orm';
@@ -33,6 +47,7 @@ export interface VirusScanResult {
   status: VirusScanStatus;
   threat?: string;
   scannedAt: string;
+  provider?: string;
 }
 
 // ─── Signature database ───────────────────────────────────────────────────────
@@ -130,35 +145,175 @@ async function readFileBytes(objectPath: string): Promise<Buffer | null> {
   }
 }
 
+// ─── External AV: ClamAV REST ─────────────────────────────────────────────────
+// Calls the ClamAV REST API (e.g., https://github.com/benzino77/clamav-rest).
+// POST /scan with multipart form-data containing the file bytes.
+// Returns: { success: boolean, data: { result: 'OK' | 'FOUND' } }
+
+async function callClamavRest(
+  bytes: Buffer,
+  fileName = 'upload',
+): Promise<{ infected: boolean; threat?: string } | null> {
+  const clamavUrl = process.env.CLAMAV_REST_URL;
+  if (!clamavUrl) {
+    logger.warn('[virus-scan] CLAMAV_REST_URL not set; skipping ClamAV REST scan');
+    return null;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('FILES', new Blob([bytes]), fileName);
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30_000);
+
+    let response: Response;
+    try {
+      response = await fetch(`${clamavUrl}/scan`, {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+
+    if (!response.ok) {
+      logger.warn({ status: response.status }, '[virus-scan] ClamAV REST returned non-OK status');
+      return null;
+    }
+
+    const json = (await response.json()) as {
+      success?: boolean;
+      data?: { result?: string };
+    };
+
+    const result = json?.data?.result ?? '';
+    if (result === 'OK') {
+      return { infected: false };
+    } else if (result === 'FOUND') {
+      return { infected: true, threat: 'ClamAV-detected-threat' };
+    } else {
+      logger.warn({ result }, '[virus-scan] ClamAV REST returned unexpected result');
+      return null;
+    }
+  } catch (err) {
+    logger.warn({ err }, '[virus-scan] ClamAV REST scan failed');
+    return null;
+  }
+}
+
+// ─── External AV: Cloudmersive ────────────────────────────────────────────────
+// Calls the Cloudmersive Virus Scan API.
+// See: https://cloudmersive.com/virus-api
+// POST https://api.cloudmersive.com/virus/scan/file with file bytes.
+// Returns: { CleanResult: boolean, FoundViruses: Array<{ FileName: string, VirusName: string }> }
+
+async function callCloudmersive(
+  bytes: Buffer,
+): Promise<{ infected: boolean; threat?: string } | null> {
+  const apiKey = process.env.CLOUDMERSIVE_API_KEY;
+  if (!apiKey) {
+    logger.warn('[virus-scan] CLOUDMERSIVE_API_KEY not set; skipping Cloudmersive scan');
+    return null;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('inputFile', new Blob([bytes]), 'upload');
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30_000);
+
+    let response: Response;
+    try {
+      response = await fetch('https://api.cloudmersive.com/virus/scan/file', {
+        method: 'POST',
+        headers: { Apikey: apiKey },
+        body: formData,
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+
+    if (!response.ok) {
+      logger.warn({ status: response.status }, '[virus-scan] Cloudmersive returned non-OK status');
+      return null;
+    }
+
+    const json = (await response.json()) as {
+      CleanResult?: boolean;
+      FoundViruses?: Array<{ FileName?: string; VirusName?: string }>;
+    };
+
+    if (json.CleanResult === true) {
+      return { infected: false };
+    } else if (json.CleanResult === false) {
+      const threatName = json.FoundViruses?.[0]?.VirusName ?? 'Unknown-threat';
+      return { infected: true, threat: threatName };
+    } else {
+      logger.warn({ json }, '[virus-scan] Cloudmersive returned unexpected response shape');
+      return null;
+    }
+  } catch (err) {
+    logger.warn({ err }, '[virus-scan] Cloudmersive scan failed');
+    return null;
+  }
+}
+
 // ─── Main scanner ─────────────────────────────────────────────────────────────
 
 async function performSignatureScan(
   fileId: number,
   objectPath: string,
   mimeType: string,
-): Promise<{ status: VirusScanStatus; threat?: string }> {
+): Promise<{ status: VirusScanStatus; threat?: string; provider: string }> {
+  const provider = process.env.VIRUS_SCAN_PROVIDER ?? '';
+
   // Skip deep scan for known-safe MIME types (still checks header bytes).
   if (isSafeMimeType(mimeType)) {
     // Even for safe MIME types, check the file header for smuggled executables.
     const bytes = await readFileBytes(objectPath);
-    if (!bytes) return { status: 'skipped' };
+    if (!bytes) return { status: 'skipped', provider: 'none' };
     const headerCheck = scanBuffer(bytes.subarray(0, 8));
-    if (headerCheck.infected) return { status: 'infected', threat: headerCheck.threat };
-    return { status: 'clean' };
+    if (headerCheck.infected) return { status: 'infected', threat: headerCheck.threat, provider: 'signature' };
+    return { status: 'clean', provider: 'signature' };
   }
 
   const bytes = await readFileBytes(objectPath);
   if (!bytes) {
     logger.warn({ fileId, objectPath }, '[virus-scan] Cannot read file — marking skipped');
-    return { status: 'skipped' };
+    return { status: 'skipped', provider: 'none' };
   }
 
-  const result = scanBuffer(bytes);
-  if (result.infected) {
-    return { status: 'infected', threat: result.threat };
+  // Tier 1: signature scan (always runs)
+  const signatureResult = scanBuffer(bytes);
+  if (signatureResult.infected) {
+    return { status: 'infected', threat: signatureResult.threat, provider: 'signature' };
   }
 
-  return { status: 'clean' };
+  // Tier 2: external AV provider (when configured)
+  if (provider === 'clamav-rest') {
+    const clamResult = await callClamavRest(bytes, objectPath.split('/').pop());
+    if (clamResult !== null) {
+      return clamResult.infected
+        ? { status: 'infected', threat: clamResult.threat, provider: 'clamav-rest' }
+        : { status: 'clean', provider: 'clamav-rest' };
+    }
+    // If ClamAV REST failed, fall through to signature result (already clean at this point)
+    logger.warn({ fileId, objectPath }, '[virus-scan] ClamAV REST unavailable — using signature result');
+  } else if (provider === 'cloudmersive') {
+    const cloudResult = await callCloudmersive(bytes);
+    if (cloudResult !== null) {
+      return cloudResult.infected
+        ? { status: 'infected', threat: cloudResult.threat, provider: 'cloudmersive' }
+        : { status: 'clean', provider: 'cloudmersive' };
+    }
+    logger.warn({ fileId, objectPath }, '[virus-scan] Cloudmersive unavailable — using signature result');
+  }
+
+  return { status: 'clean', provider: provider || 'signature' };
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -188,12 +343,12 @@ export async function dispatchVirusScan(
     logger.warn({ err: dbErr, fileId }, '[virus-scan] Failed to mark file as scanning');
   }
 
-  let result: { status: VirusScanStatus; threat?: string };
+  let result: { status: VirusScanStatus; threat?: string; provider: string };
   try {
     result = await performSignatureScan(fileId, objectPath, mimeType);
   } catch (scanErr) {
     logger.error({ err: scanErr, fileId, objectPath }, '[virus-scan] Scan failed');
-    result = { status: 'error' };
+    result = { status: 'error', provider: 'unknown' };
   }
 
   // Persist the final scan result
@@ -210,7 +365,7 @@ export async function dispatchVirusScan(
   }
 
   logger.info(
-    { fileId, objectPath, status: result.status, threat: result.threat ?? null, scannedAt },
+    { fileId, objectPath, status: result.status, threat: result.threat ?? null, scannedAt, provider: result.provider },
     '[virus-scan] Scan complete',
   );
 
@@ -220,5 +375,6 @@ export async function dispatchVirusScan(
     status: result.status,
     threat: result.threat,
     scannedAt,
+    provider: result.provider,
   };
 }

@@ -140,6 +140,13 @@ vi.mock('@szl-holdings/contracts/common', () => ({
   bodyShape: () => ({ parse: (v: unknown) => v }),
 }));
 
+vi.mock('../../middlewares/auth', () => ({
+  authMiddleware: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+  requireRole: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+  parseIdParam: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+  denyIfReadOnly: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
+
 const { default: dealRouter } = await import('../fund-inbound-deals.js');
 
 function buildApp() {

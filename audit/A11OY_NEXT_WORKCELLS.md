@@ -1,8 +1,11 @@
-# A11OY_NEXT_WORKCELLS.md — Top 10 Recommended Next Workcells
+# A11OY_NEXT_WORKCELLS.md — Recommended Workcells
 
-**Date:** 2026-04-25  
-**Produced by:** ProofSmith (doctrine install)  
-**Context:** Post-doctrine-installation recommendations
+**Original date:** 2026-04-25  
+**Updated:** 2026-04-25 (Operationalization Sweep Task #3489)  
+**Produced by:** ProofSmith (doctrine install) → Updated by Operationalization Sweep Agent  
+**Context:** Post-doctrine-installation recommendations + post-operationalization-sweep updates
+
+**Status key:** ✅ Done · ⚠️ Partial · 🔵 Next priority
 
 These are the ten highest-priority Workcells recommended following the doctrine installation. The Pathfinder Scan Workcell (WC-01) is first — it produces the full repo Context Pack and Release Readiness Score that all subsequent Workcells depend on.
 
@@ -168,3 +171,86 @@ These are the ten highest-priority Workcells recommended following the doctrine 
 - Updated top 10 Workcell backlog based on audit findings
 
 **Why tenth:** AuditTitan is the final gate before any investor demo or public release. It orchestrates all other agents and produces the definitive Release Readiness Score.
+
+---
+
+## Post-Operationalization Sweep: Status Update & New Workcells
+
+**Date:** 2026-04-25 — Operationalization Sweep Task #3489 complete.
+
+### Completed in Operationalization Sweep:
+- **WC-01 (Pathfinder Full Scan)** ✅ Done — Context Pack, Release Readiness Score (77.2/100), Screenshot Freshness Score (65/100), Public Claim Safety Score (82/100) all produced.
+- **WC-05 (Known Gaps Audit and Triage)** ✅ Done — VD1, KG019, KG020c, KG020d, KG023, KG025, KG031 all closed or enhanced. known-gaps.md updated to rev 10.
+
+---
+
+## WC-NEW-01: Screenshot Freshness Remediation (PixelProof)
+
+**Priority:** High  
+**Status:** 🔵 Next priority — current score 65/100, doctrine requires ≥ 90%  
+**Agent:** PixelProof  
+**Objective:** Capture fresh screenshots of all 7+ primary surfaces with ISO-date naming (`YYYY-MM-DD-surface-name.png`). Store in `docs/assets/screenshots/current/`. Update screenshot catalog.  
+**Risk Level:** Low  
+**Expected Deliverables:**
+- 7+ screenshots: SZL Holdings Dashboard, KORA, TENAX, SEXTANT, DOMAINE, Counsel, A11oy Now Board
+- ISO-date filenames for all captures
+- Screenshot Freshness Score ≥ 90%
+- Updated `audit/A11OY_SCREENSHOT_FRESHNESS_SCORE.md`
+
+---
+
+## WC-NEW-02: PII Encryption Column Migration (ForgeMind)
+
+**Priority:** High  
+**Agent:** ForgeMind  
+**Objective:** Wire `artifacts/api-server/src/lib/encryption.ts` to the PII columns in the database (email, full_name, phone, address in users/contacts tables). Create migration script `scripts/reencrypt-pii.ts` for existing rows. Set `ENCRYPTION_KEY` in production secrets.  
+**Risk Level:** High (DB migration — requires careful rollback plan)  
+**Expected Deliverables:**
+- Updated DB write/read paths in affected routes to encrypt on write and decrypt on read
+- `scripts/reencrypt-pii.ts` migration script with batched processing and key rotation support
+- ENCRYPTION_KEY set in production environment
+- Regression tests verifying encrypt → store → retrieve → decrypt cycle
+- KG020d marked fully resolved (column-level, not just helper-level)
+
+---
+
+## WC-NEW-03: ClamAV REST Deployment (Platform/DevOps)
+
+**Priority:** Medium  
+**Agent:** Platform/DevOps  
+**Objective:** Deploy a ClamAV REST service (e.g., `benzino77/clamav-rest` Docker image) and set `CLAMAV_REST_URL` in the API server environment. Verify tier-2 virus scanning activates correctly.  
+**Risk Level:** Low (additive only — signature scanner continues working if ClamAV is unavailable)  
+**Expected Deliverables:**
+- ClamAV REST service deployed and health-checked
+- `VIRUS_SCAN_PROVIDER=clamav-rest` and `CLAMAV_REST_URL` set in production environment
+- End-to-end test: upload EICAR test file → confirm `infected` status returned
+- KG020c marked fully production-grade
+
+---
+
+## WC-NEW-04: Lighthouse Accessibility Hard-Fail Gate (ForgeMind)
+
+**Priority:** Medium  
+**Agent:** ForgeMind  
+**Objective:** Flip `.lighthouserc.json` accessibility threshold from `warn` to `error` (hard-fail CI) and resolve the highest-priority WCAG findings from the accessibility audit (F007 skip navigation, F001 aria-labels, F004 focus management).  
+**Risk Level:** Low (primarily CSS/HTML changes)  
+**Expected Deliverables:**
+- `.lighthouserc.json` accessibility threshold changed to `error` ≥ 0.90
+- F007 skip navigation links added to all 11 web surfaces
+- F001 `aria-label` added to all icon-only controls (audit-driven surface list)
+- F004 focus management wired for modal/dialog patterns
+- Lighthouse CI passes all surfaces at ≥ 90 accessibility score
+
+---
+
+## WC-NEW-05: Port Conflict Resolution for A11oy and Mobile (Platform)
+
+**Priority:** Critical — blocks A11oy demo  
+**Agent:** Platform team (requires Replit artifact configuration — not resolvable in code)  
+**Objective:** Reassign one of `artifacts/a11oy` or `artifacts/szl-holdings-mobile` from port 9090 to a distinct port. The REUSEPORT kernel socket on port 9090 prevents both from binding when running concurrently.  
+**Risk Level:** Low (port reassignment only — no business logic change)  
+**Expected Deliverables:**
+- One artifact reassigned to a new unique port via Replit artifact configuration UI
+- Both workflows running successfully
+- A11oy artifact accessible at its preview path
+- A11oy Now Board verified responding at `/a11oy/`

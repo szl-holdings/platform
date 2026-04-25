@@ -28,6 +28,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc, ilike, or, sql, and, isNull, asc } from "drizzle-orm";
 import { hashIp } from "@szl-holdings/audit";
+import { encrypt, decrypt, isEncrypted } from '../lib/encryption';
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam, requireRole } from "../middlewares/auth";
 import { sendEmail, buildInquiryAckEmail, buildLeadNotificationEmail, INTERNAL_EMAIL } from "../lib/email";
@@ -561,7 +562,12 @@ router.get("/holdings/inquiries", authMiddleware(), validateQuery(listQuerySchem
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(holdingsInquiriesTable).orderBy(desc(holdingsInquiriesTable.createdAt)).limit(limit).offset(offset);
     const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(holdingsInquiriesTable);
-    sendSuccess(res, rows, 200, { page, limit, total: count });
+    const decryptedRows = rows.map((row) => ({
+      ...row,
+      name: isEncrypted(row.name) ? (decrypt(row.name) ?? row.name) : row.name,
+      email: isEncrypted(row.email) ? (decrypt(row.email) ?? row.email) : row.email,
+    }));
+    sendSuccess(res, decryptedRows, 200, { page, limit, total: count });
   } catch (err) {
     handleRouteError(res, err, "Failed to list inquiries");
   }
@@ -587,7 +593,8 @@ router.post("/holdings/inquiries", inquiryRateLimit, validateBody(createInquiryS
   if (source) metadata.source = source;
 
   db.insert(holdingsInquiriesTable).values({
-    name, email,
+    name: encrypt(name) ?? name,
+    email: encrypt(email) ?? email,
     company: company ?? null,
     subject, message,
     utmSource: utm_source ?? null,
@@ -596,7 +603,9 @@ router.post("/holdings/inquiries", inquiryRateLimit, validateBody(createInquiryS
     utmContent: utm_content ?? null,
     ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
   }).returning().then(([row]) => {
-    res.status(201).json({ success: true, data: row });
+    const respName = isEncrypted(row.name) ? (decrypt(row.name) ?? row.name) : row.name;
+    const respEmail = isEncrypted(row.email) ? (decrypt(row.email) ?? row.email) : row.email;
+    res.status(201).json({ success: true, data: { ...row, name: respName, email: respEmail } });
     setImmediate(async () => {
       try {
         await sendEmail({
