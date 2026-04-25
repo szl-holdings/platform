@@ -299,6 +299,7 @@ const CompetitiveAtlasPage = lazy(() =>
 
 const PrismAtlasExecute = lazy(() => import('./operations/pages/atlas-execute'));
 const ImperiumAtlasExecute = lazy(() => import('./infrastructure/pages/atlas-execute'));
+const ImperiumForecastPage = lazy(() => import('./infrastructure/pages/imperium-forecast'));
 const DataFabric = lazy(() => import('./infrastructure/pages/data-fabric'));
 const RulesStudioPage = lazy(() => import('./pages/operations/rules-studio'));
 
@@ -472,6 +473,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/cognitive/policy-sim', label: 'Policy Simulation', group: 'Cognitive' },
   { href: '/infrastructure', label: 'Legatus Console', group: 'Infrastructure' },
   { href: '/infrastructure/imperium-map', label: 'Imperium Map', group: 'Infrastructure' },
+  { href: '/infrastructure/imperium/forecast', label: 'Imperium Forecast Fabric', group: 'Infrastructure' },
   { href: '/infrastructure/praetorian', label: 'Praetorian Guard', group: 'Infrastructure' },
   { href: '/infrastructure/senate', label: 'Senate Chamber', group: 'Infrastructure' },
   { href: '/infrastructure/supply-lines', label: 'Supply Lines', group: 'Infrastructure' },
@@ -809,6 +811,7 @@ function AppShell() {
               <Route path="/infrastructure" component={() => <LegatusConsole />} />
               <Route path="/infrastructure/legatus" component={() => <LegatusConsole />} />
               <Route path="/infrastructure/imperium-map" component={() => <ImperiumMap />} />
+              <Route path="/infrastructure/imperium/forecast" component={() => <ImperiumForecastPage />} />
               <Route path="/infrastructure/praetorian" component={() => <PraetorianGuard />} />
               <Route path="/infrastructure/senate" component={() => <SenateChamber />} />
               <Route path="/infrastructure/supply-lines" component={() => <SupplyLines />} />

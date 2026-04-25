@@ -197,6 +197,30 @@
   "artifacts/szl-holdings/src/pages/updates.tsx": {
     "Cortex": 1
   },
+  "artifacts/szl-holdings-mobile/app/(shell)/advisory/(tabs)/agent-chat.tsx": {
+    "FORGE": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/advisory/(tabs)/profile.tsx": {
+    "DOMAINE": 1,
+    "KORA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/defense/(tabs)/agent-chat.tsx": {
+    "FORGE": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/defense/(tabs)/mcp-tools.tsx": {
+    "PARAGON": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/defense/(tabs)/profile.tsx": {
+    "KORA": 1,
+    "SEXTANT": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/fleet/(tabs)/agent-chat.tsx": {
+    "FORGE": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/fleet/(tabs)/profile.tsx": {
+    "PARAGON": 1,
+    "KORA": 1
+  },
   "artifacts/szl-holdings-mobile/app/(shell)/intelligence/index.tsx": {
     "LUMINA": 1
   },
@@ -211,6 +235,11 @@
   },
   "artifacts/szl-holdings-mobile/app/(shell)/properties/(tabs)/profile.tsx": {
     "LUMINA": 1
+  },
+  "artifacts/szl-holdings-mobile/app/(shell)/quick-actions.tsx": {
+    "DOMAINE": 3,
+    "KORA": 1,
+    "PARAGON": 2
   },
   "artifacts/terra/src/pages/pulse.tsx": {
     "LUMINA": 2

@@ -71,6 +71,12 @@ The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and N
 
 **Cognitive Consoles:** Read-only inspection surfaces within the Command app: Cognitive Command Center, Self Model Console, and World Model Graph Explorer.
 
+**Forecast & Anomaly Fabric (Phase 5):**
+- `packages/forecast-fabric` — Unified forecasting service with 27 named heads across 7 lanes (lyte, aegis, vessels, terra, counsel, carlota-jo, imperium). Provides calibrated interval outputs (point + lower/upper + confidence), provider-adapter slots (swap-ready; ships with SafeDefaultAdapter), head registry, and per-lane batch invocation. Entry point: `createForecastService()`.
+- `packages/anomaly-fabric` — Unified streaming and batch anomaly detection service with a single shared contract. Streaming uses rolling-window z-score analysis; batch uses per-metric outlier + KL-divergence distribution-shift detection. Entry point: `globalAnomalyService`.
+- `packages/drift-eval` — Drift detection (performance drift against baseline snapshots) and champion-vs-challenger evaluation jobs. Persists results to `InMemoryEvalRegistry` (swap-ready for DB-backed registry). Includes `startDriftEvalScheduler()` for scheduled execution. Entry point: `globalEvalRegistry`, `detectDrift()`, `runChampionChallenger()`.
+- Each lane surface (lyte-command-center, sentra, vessels, terra, counsel, carlota-jo) has a `ForecastPanel` component wired to a `/forecast` route showing calibrated interval bars with confidence, threshold indicators, anomaly flags, and full provenance metadata. Phase 6 will handle the visual overhaul.
+
 **Substrate Command Center:** A cross-vertical operator UI for the governed decision substrate, integrated into the `command` artifact at `/command/substrate/`.
 
 **Email Deliverability:** All outbound transactional email uses `artifacts/api-server/src/lib/email.ts`. Features include a suppression list in `email_suppressions` table, automatic suppression via bounce/complaint webhooks (SendGrid, Resend), unsubscribe links, and admin routes for management.

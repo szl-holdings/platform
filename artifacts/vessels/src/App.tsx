@@ -237,6 +237,7 @@ const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
 const VesselsPulse = lazy(() => import('@/pages/pulse'));
 const VesselsAtlasArtifactsPage = lazy(() => import('@/pages/atlas-artifacts'));
 const AefKnowledgeSearchPage = lazy(() => import('@/pages/aef-knowledge-search'));
+const ForecastPage = lazy(() => import('@/pages/forecast'));
 const MarketingPlatformPage = lazy(() => import('@/pages/marketing-platform'));
 const MarketingCapabilitiesPage = lazy(() => import('@/pages/marketing-capabilities'));
 const MarketingUseCasesPage = lazy(() => import('@/pages/marketing-use-cases'));
@@ -1061,6 +1062,7 @@ function DashboardRouter() {
         <Route path="/trust-provenance" component={TrustProvenancePage} />
         <Route path="/evidence" component={VesselsEvidencePage} />
         <Route path="/aef-search" component={AefKnowledgeSearchPage} />
+        <Route path="/forecast" component={ForecastPage} />
         <Route path="/disruption-forecast" component={DisruptionForecastPage} />
         <Route path="/dark-fleet-economics" component={DarkFleetEconomicsPage} />
         <Route path="/voyage-pnl" component={VoyagePnLPage} />

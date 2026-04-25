@@ -75,6 +75,7 @@ const CrisisArenaLeaderboardPage = lazy(() => import('@/pages/crisis-arena-leade
 const CrisisArenaEngagementsPage = lazy(() => import('@/pages/crisis-arena-engagements'));
 const CrisisArenaArchitectPage = lazy(() => import('@/pages/crisis-arena-architect'));
 const CrisisArenaArchitectProfilePage = lazy(() => import('@/pages/crisis-arena-architect-profile'));
+const ForecastPage = lazy(() => import('@/pages/forecast'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -371,6 +372,7 @@ function DashboardRouter() {
         <Route path="/crisis-arena/engagements" component={CrisisArenaEngagementsPage} />
         <Route path="/crisis-arena/architect/:id" component={CrisisArenaArchitectProfilePage} />
         <Route path="/crisis-arena/architect" component={CrisisArenaArchitectPage} />
+        <Route path="/forecast" component={ForecastPage} />
         <Route path="/pricing" component={SentraPricingPage} />
         <Route path="/account/billing" component={SentraBillingPage} />
         <Route path="/" component={SentraLandingPage} />

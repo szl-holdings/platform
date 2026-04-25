@@ -58,6 +58,7 @@ const AlertsPage = lazy(() => import('./pages/alerts'));
 const ApprovalsPage = lazy(() => import('./pages/approvals'));
 const TrustProvenancePage = lazy(() => import('./pages/trust-provenance'));
 const AefKnowledgeSearchPage = lazy(() => import('./pages/aef-knowledge-search'));
+const ForecastPage = lazy(() => import('./pages/forecast'));
 const EvidenceExplorerPage = lazy(() =>
   import('@szl-holdings/shared-ui/evidence-explorer').then((m) => ({
     default: () => <m.EvidenceExplorer domainFilter="legal" title="Counsel Evidence Explorer" />,
@@ -298,6 +299,7 @@ function DashboardRouter() {
         <Route path="/approvals" component={ApprovalsPage} />
         <Route path="/trust" component={TrustProvenancePage} />
         <Route path="/aef-search" component={AefKnowledgeSearchPage} />
+        <Route path="/forecast" component={ForecastPage} />
         <Route path="/pricing" component={CounselPricingPage} />
         <Route path="/account/billing" component={CounselBillingPage} />
         <Route path="/evidence" component={EvidenceExplorerPage} />

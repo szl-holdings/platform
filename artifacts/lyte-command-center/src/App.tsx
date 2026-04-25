@@ -34,6 +34,7 @@ import {
   Shield,
   Terminal,
   Thermometer,
+  TrendingUp,
   Users,
   Workflow,
   Zap,
@@ -65,6 +66,7 @@ const ActionDebtPage = lazy(() => import('@/pages/action-debt'));
 const DecisionReplayPage = lazy(() => import('@/pages/decision-replay'));
 const BoardViewPage = lazy(() => import('@/pages/board-view'));
 const AefKnowledgeSearchPage = lazy(() => import('@/pages/aef-knowledge-search'));
+const ForecastPage = lazy(() => import('@/pages/forecast'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -159,6 +161,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Policy Center', href: '/policies', icon: <Lock className="w-3.5 h-3.5" /> },
       { label: 'Eval Studio', href: '/eval', icon: <FlaskConical className="w-3.5 h-3.5" /> },
+      { label: 'Forecast Fabric', href: '/forecast', icon: <TrendingUp className="w-3.5 h-3.5" /> },
     ],
   },
   {
@@ -562,6 +565,7 @@ function DashboardRoutes() {
         <Route path="/decision-replay" component={DecisionReplayPage} />
         <Route path="/decision-replay/:id" component={DecisionReplayPage} />
         <Route path="/aef-search" component={AefKnowledgeSearchPage} />
+        <Route path="/forecast" component={ForecastPage} />
         {/* Default: redirect to overview */}
         <Route component={OverviewPage} />
       </Switch>
